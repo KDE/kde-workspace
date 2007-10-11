@@ -1,6 +1,3 @@
-
-find_package(Plasma REQUIRED)
-
 # Kickoff Shared
 set( Kickoff_SRCS
        core/applicationmodel.cpp
@@ -24,7 +21,6 @@ set( Kickoff_SRCS
 set ( Kickoff_LIBS
         ${KDE4_KIO_LIBS} 
         ${KDE4_SOLID_LIBS}
-        konq 
         kworkspace 
         strigiqtdbusclient )
 
@@ -43,8 +39,8 @@ set ( Applet_SRCS
         ${Kickoff_SRCS}
         plasma-applet/applet.cpp )
 
-kde4_add_plugin(plasma_applet_launcher ${Applet_SRCS})
-target_link_libraries(plasma_applet_launcher ${Kickoff_LIBS} ${PLASMA_LIBS}) 
-install(TARGETS plasma_applet_launcher DESTINATION ${PLUGIN_INSTALL_DIR})
+kde4_add_plugin(kickoff_plasma_applet_launcher ${Applet_SRCS})
+target_link_libraries(kickoff_plasma_applet_launcher ${Kickoff_LIBS} plasma)
+install(TARGETS kickoff_plasma_applet_launcher DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-applet/plasma-launcher-applet.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 

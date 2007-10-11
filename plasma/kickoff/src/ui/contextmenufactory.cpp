@@ -33,7 +33,10 @@
 #include <kbookmarkmanager.h>
 
 // Konqueror
-#include <konq_popupmenu.h>
+//#include <konq_popupmenu.h>
+#include <kactioncollection.h>
+#include <kfileitem.h>
+#include <kparts/browserextension.h>
 
 // Local
 #include "core/favoritesmodel.h"
@@ -56,6 +59,8 @@ public:
            browserFlags |= KParts::BrowserExtension::ShowProperties;
        }
        KParts::BrowserExtension::ActionGroupMap actionGroupMap;
+       return 0;
+#if 0
        KonqPopupMenu *menu = new KonqPopupMenu(items, kUrl,actionCollection,
                                                0, 0, browserFlags,
                                                0, KBookmarkManager::userBookmarksManager(), actionGroupMap);
@@ -69,6 +74,7 @@ public:
             delete menu;
             return 0;
        }
+#endif
     }
 
     QMap<QAbstractItemView*,QList<QAction*> > viewActions;
