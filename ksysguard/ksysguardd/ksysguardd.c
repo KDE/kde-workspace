@@ -420,28 +420,6 @@ static void checkModules()
       entry->checkCommand();
 }
 
-static void handleTimerEvent( struct timeval* tv, struct timeval* last )
-{
-  struct timeval now;
-  gettimeofday( &now, NULL );
-  /* Check if the last event was really TIMERINTERVAL seconds ago */
-  if ( now.tv_sec - last->tv_sec >= TIMERINTERVAL ) {
-    /* If so, update all sensors and save current time to last. */
-    checkModules();
-    *last = now;
-  }
-  /**
-    Set tv so that the next timer event will be generated in
-    TIMERINTERVAL seconds.
-   */
-  tv->tv_usec = last->tv_usec - now.tv_usec;
-  if ( tv->tv_usec < 0 ) {
-    tv->tv_usec += 1000000;
-    tv->tv_sec = last->tv_sec + TIMERINTERVAL - 1 - now.tv_sec;
-  } else
-    tv->tv_sec = last->tv_sec + TIMERINTERVAL - now.tv_sec;
-}
-
 static void handleSocketTraffic( int socketNo, const fd_set* fds )
 {
   char cmdBuf[ CMDBUFSIZE ];
@@ -574,8 +552,6 @@ char* escapeString( char* string ) {
 int main( int argc, char* argv[] )
 {
   fd_set fds;
-  struct timeval tv;
-  struct timeval last;
 
 #ifdef OSTYPE_FreeBSD
 	/**
@@ -624,15 +600,12 @@ int main( int argc, char* argv[] )
     ServerSocket = 0;
   }
 
-  tv.tv_sec = TIMERINTERVAL;
-  tv.tv_usec = 0;
-  gettimeofday( &last, NULL );
-
   while ( !QuitApp ) {
     int highestFD = setupSelect( &fds );
     /* wait for communication or timeouts */
-    if ( select( highestFD + 1, &fds, NULL, NULL, &tv ) >= 0 ) {
-      handleTimerEvent( &tv, &last );
+    if ( select( highestFD + 1, &fds, NULL, NULL, NULL ) >= 0 ) {
+/* TODO - reenable checkModules using inotify */
+/*      checkModules();*/
       handleSocketTraffic( ServerSocket, &fds );
     }
   }
