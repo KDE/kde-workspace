@@ -636,7 +636,6 @@ int main( int argc, char* argv[] )
     if(ret >= 0) {
 #ifdef USE_INOTIFY
       if(mtabfd >= 0 && FD_ISSET(mtabfd, &fds)) {
-	printf("Checking modules\n");
 	close(mtabfd);
 	setupInotify(&mtabfd);
         checkModules();
