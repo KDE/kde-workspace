@@ -117,9 +117,9 @@ void exitDiskStat( void )
 void checkDiskStat( void )
 {
   updateDiskStat();
-
   DiskInfo* disk_info_new;
   DiskInfo* disk_info_old;
+  int changed = 0;
   for ( disk_info_new = first_ctnr( DiskStatList ); disk_info_new; disk_info_new = next_ctnr( DiskStatList ) ) {
     int found = 0;
     for ( disk_info_old = first_ctnr( OldDiskStatList ); disk_info_old; disk_info_old = next_ctnr( OldDiskStatList ) ) {
@@ -132,15 +132,19 @@ void checkDiskStat( void )
     if(!found) {
       /* register all the devices that did not exist before*/
       registerMonitors(disk_info_new->mntpnt);
+      changed++;
     }
   }
   /*Now remove all the devices that do not exist anymore*/
   for ( disk_info_old = first_ctnr( OldDiskStatList ); disk_info_old; disk_info_old = next_ctnr( OldDiskStatList ) ) {
     removeMonitors(disk_info_old->mntpnt);
+    changed++;
   }
   destr_ctnr( OldDiskStatList, free );
   OldDiskStatList = NULL;
   updateDiskStat();
+  if(changed)
+      print_error( "RECONFIGURE\n" ); /*Let ksysguard know that we've added a sensor*/
 }
 
 int updateDiskStat( void )
