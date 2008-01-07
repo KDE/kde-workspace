@@ -36,7 +36,7 @@ class AppletHandle : public QObject, public QGraphicsItem
         Q_OBJECT
     public:
         enum FadeType { FadeIn, FadeOut };
-        enum ButtonType { NoButton, MoveButton, RotateButton, ConfigureButton, RemoveButton };
+        enum ButtonType { NoButton, MoveButton, RotateButton, ConfigureButton, RemoveButton, ResizeButton };
 
         AppletHandle(Containment *parent, Applet *applet);
         virtual ~AppletHandle();
@@ -81,7 +81,8 @@ class AppletHandle : public QObject, public QGraphicsItem
         FadeType m_anim;
         Phase::AnimId m_animId;
         qreal m_angle;
-        qreal m_scale;
+        qreal m_scaleWidth;
+        qreal m_scaleHeight;
         qreal m_originalAngle;
         QColor m_gradientColor;
 };

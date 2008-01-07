@@ -110,12 +110,9 @@ QSize DefaultDesktop::resolution() const
 
 void DefaultDesktop::constraintsUpdated(Plasma::Constraints constraints)
 {
-    Q_UNUSED(constraints);
-
     if (constraints & ScreenConstraint) {
         if (screen() == 0 && !s_icons) {
             s_icons = new IconLoader(this);
-            s_icons->init(this);
         }
     }
 
@@ -128,7 +125,6 @@ void DefaultDesktop::constraintsUpdated(Plasma::Constraints constraints)
         // we need to update the menu items that have already been created
         bool locked = isImmutable();
         m_appletBrowserAction->setVisible(!locked);
-        m_setupDesktopAction->setVisible(!locked);
         if (locked) {
             m_lockDesktopAction->setIcon(KIcon("object-unlocked"));
             m_lockDesktopAction->setText(i18n("Unlock Widgets"));
@@ -162,8 +158,8 @@ void DefaultDesktop::applyConfig()
 {
     Q_ASSERT(m_configDialog);
     m_configDialog->saveConfig(config());
-    config().config()->sync();
-    
+    emit configNeedsSaving();
+
     reloadConfig();
 }
 
@@ -173,12 +169,13 @@ void DefaultDesktop::reloadConfig()
 
     KConfigGroup cg = config();
 
-    m_wallpaperPath = cg.readEntry("wallpaper",
-            KStandardDirs::locate("wallpaper", "EOS/contents/images/1920x1200.jpg"));
+    // If no wallpaper is set, a default will be set in updateBackground()
+    // which is called as soon as constraints are updated.
+    m_wallpaperPath = cg.readEntry("wallpaper", "");
+    if (!m_wallpaperPath.isEmpty()) {
+        kDebug() << "Using configured wallpaper" << m_wallpaperPath;
+    }
 
-    kDebug() << "Default would be" << KStandardDirs::locate("wallpaper", "EOS/contents/images/1920x1200.jpg");
-    kDebug() << "but we're loading" << m_wallpaperPath << "instead";
-    
     m_backgroundMode = cg.readEntry("backgroundmode", 
         (int) BackgroundDialog::kStaticBackground);
 
@@ -187,11 +184,12 @@ void DefaultDesktop::reloadConfig()
     m_wallpaperColor = cg.readEntry("wallpapercolor", QColor(Qt::black));
 
     if (m_backgroundMode == BackgroundDialog::kStaticBackground) {
-
         m_slideshowTimer.stop();
-        updateBackground();
-    }
-    else {
+        // Only set the wallpaper if constraints have been loaded
+        if (screen() != -1) {
+            updateBackground();
+        }
+    } else {
         QStringList dirs = cg.readEntry("slidepaths", QStringList());
         QStringList filters;
         filters << "*.png" << "*.jpeg" << "*.jpg" << "*.svg" << "*.svgz";
@@ -228,7 +226,7 @@ void DefaultDesktop::reloadConfig()
         nextSlide();
     }
 
-    if(s_icons) {
+    if (s_icons) {
         s_icons->setShowIcons(cg.readEntry("showIcons",true));
         s_icons->setGridAligned(cg.readEntry("alignToGrid",true));
     }
@@ -236,6 +234,21 @@ void DefaultDesktop::reloadConfig()
 
 void DefaultDesktop::updateBackground()
 {
+    if (m_wallpaperPath.isEmpty()) {
+        QString defaultPath = QString("EOS/contents/images/%1x%2.jpg");
+
+        QString testPath = defaultPath.arg(geometry().width()).arg(geometry().height());
+        m_wallpaperPath = KStandardDirs::locate("wallpaper", testPath);
+
+        if (m_wallpaperPath.isEmpty()) {
+            kDebug() << "Trying" << defaultPath.arg(1920).arg(1200);
+            m_wallpaperPath = KStandardDirs::locate("wallpaper", defaultPath.arg(1920).arg(1200));
+        }
+
+        kDebug() << "Setting wallpaper to default" << m_wallpaperPath;
+        emit configNeedsSaving();
+    }
+
     m_current_renderer_token = 
         m_renderer.render(m_wallpaperPath,
                           m_wallpaperColor,
@@ -313,6 +326,9 @@ QList<QAction*> DefaultDesktop::contextActions()
 
         m_separator = new QAction(this);
         m_separator->setSeparator(true);
+
+        m_separator2 = new QAction(this);
+        m_separator2->setSeparator(true);
     }
 
     QList<QAction*> actions;
@@ -326,10 +342,12 @@ QList<QAction*> DefaultDesktop::contextActions()
 
     actions.append(m_separator);
 
-    //icon actions
-    actions << s_icons->contextActions();
+    if (s_icons && s_icons->showIcons()) {
+        //icon actions
+        actions << s_icons->contextActions();
+        actions.append(m_separator2);
+    }
 
-    actions.append(m_separator);
     actions.append(m_lockDesktopAction);
 
     if (KAuthorized::authorizeKAction("lock_screen")) {

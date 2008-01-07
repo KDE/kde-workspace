@@ -31,30 +31,23 @@
 #include <KToggleAction>
 #include <KConfigGroup>
 
-IconLoader::IconLoader(QObject *parent)
+IconLoader::IconLoader(DefaultDesktop *parent)
     : QObject(parent),
-      m_desktop(0),
+      m_desktop(parent),
       m_verticalOrientation(true),
       m_iconShow(true),
       m_gridAlign(true),
       m_enableMedia(false)
 {
+    QTimer::singleShot(0, this, SLOT(init()));
 }
 
 IconLoader::~IconLoader()
 {
 }
 
-void IconLoader::init(DefaultDesktop *desktop)
+void IconLoader::init()
 {
-    if (!desktop) {
-        return;
-    }
-    //multiple initiation guard
-    if (desktop == m_desktop) {
-        return;
-    }
-    m_desktop = desktop;
     m_iconMap.clear();
 
     //load stored settings
@@ -81,7 +74,6 @@ void IconLoader::init(DefaultDesktop *desktop)
     connect(&m_desktopDir, SIGNAL(newItems(KFileItemList)), this, SLOT(newItems(KFileItemList)) );
     connect(&m_desktopDir, SIGNAL(deleteItem(KFileItem)), this, SLOT(deleteItem(KFileItem)));
     
-    createMenu();
     setShowIcons(m_iconShow);
 }
 
@@ -101,6 +93,11 @@ QList<QAction*> IconLoader::contextActions()
     if (!m_iconShow) {
         return QList<QAction*>();
     }
+
+    if (actions.isEmpty()) {
+        createMenu();
+    }
+
     return actions;
 }
 
@@ -228,13 +225,13 @@ void IconLoader::alignHorizontal(const QList<Plasma::Applet*> &items)
     QPointF pos;
     for(pos.ry() = gridHeight/2; pos.y() < desktopHeight; pos.ry() += gridHeight) {
         for(pos.rx() = gridWidth/2; pos.x() < desktopWidth; pos.rx() += gridWidth) {
-            QGraphicsItem *existing = m_desktop->scene()->itemAt(pos);
+            Plasma::Applet *existing = dynamic_cast<Plasma::Applet*>(m_desktop->scene()->itemAt(pos));
             // If the existing index is in the items list with an index
             // greater than icon index current we will have to move it.
             // So ignore it
             // If its equal then existing == icon
-            int existingIndex = items.indexOf((Plasma::Applet*)existing);
-            if (!existing || (existing == m_desktop) || (existingIndex>=index)) {
+            int existingIndex = items.indexOf(existing);
+            if (!existing || existing ==m_desktop || existingIndex >= index) {
                 alignToGrid(icon, mapToGrid(pos));
                 // get next
                 if (++index < itemCount) {
@@ -268,14 +265,14 @@ void IconLoader::alignVertical(const QList<Plasma::Applet*> &items)
     QPointF pos;
     for(pos.rx() = gridWidth/2; pos.x() < desktopWidth; pos.rx() += gridWidth) {
         for(pos.ry() = gridHeight/2; pos.y() < desktopHeight; pos.ry() += gridHeight) {
-            QGraphicsItem *existing = m_desktop->scene()->itemAt(pos);
+            Plasma::Applet *existing = dynamic_cast<Plasma::Applet*>(m_desktop->scene()->itemAt(pos));
             // If *existing is in items list with an index
             // greater than current icon index, then we will have to move
             // existing after.
             // So ignore it
             // If its equal then existing == icon then... we ignore it too
-            int existingIndex = items.indexOf((Plasma::Applet*)existing);
-            if (!existing || (existing == m_desktop) || (existingIndex>=index)) {
+            int existingIndex = items.indexOf(existing);
+            if (!existing || existing == m_desktop || existingIndex >= index) {
                 alignToGrid(icon, mapToGrid(pos));
                 // get next
                 if (++index < itemCount) {

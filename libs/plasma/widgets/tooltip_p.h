@@ -43,7 +43,7 @@ public:
     ToolTip();
     ~ToolTip();
 
-    static ToolTip *instance();
+    static ToolTip *self();
     void show(const QPoint &location, Plasma::Widget *widget);
     void hide();
 
@@ -52,7 +52,7 @@ public:
 protected:
     virtual void showEvent( QShowEvent* );
 
-    void resizeEvent(QResizeEvent */*event*/);
+    void paintEvent(QPaintEvent */*event*/);
 
 private Q_SLOTS:
     void slotResetTimer();

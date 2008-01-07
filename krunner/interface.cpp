@@ -289,14 +289,13 @@ Interface::Interface(QWidget* parent)
     m_searchTerm->setLineEdit(lineEdit);
     m_header->setBuddy(m_searchTerm);
     m_layout->addWidget(m_searchTerm);
-    connect(m_searchTerm, SIGNAL(textChanged(QString)),
+    connect(m_searchTerm, SIGNAL(editTextChanged(QString)),
             this, SLOT(queueMatch()));
     connect(m_searchTerm, SIGNAL(returnPressed()),
             this, SLOT(exec()));
 
     KConfigGroup cg(KGlobal::config(), "General");
     QStringList executions = cg.readEntry("pastqueries", QStringList());
-    executions << QString();
     //Handle updates to the completion object as well
     m_searchTerm->setHistoryItems(executions, true);
 
@@ -465,8 +464,7 @@ void Interface::resetInterface()
     m_header->setPixmap("system-search");
     m_defaultMatch = 0;
     m_context.setSearchTerm(QString());
-    m_searchTerm->addItem(QString());
-    m_searchTerm->setCurrentIndex(m_searchTerm->count() - 1);
+    m_searchTerm->setCurrentItem(QString(), true, 0);
     m_matchList->clear();
     m_runButton->setEnabled( false );
     m_optionsButton->setEnabled( false );

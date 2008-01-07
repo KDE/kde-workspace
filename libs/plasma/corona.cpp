@@ -90,6 +90,15 @@ public:
         }
     }
 
+    void updateContainmentImmutability()
+    {
+        foreach (Containment *c, containments) {
+            // we need to tell each containment that immutability has been altered
+            // TODO: should we tell the applets too?
+            c->updateConstraints(ImmutableConstraint);
+        }
+    }
+
     bool immutable;
     bool kioskImmutable;
     QString mimetype;
@@ -212,6 +221,7 @@ void Corona::loadApplets(const QString& configName)
         addItem(c);
         c->init();
         c->loadConstraints(&containmentConfig);
+        c->flushUpdatedConstraints();
         //kDebug() << "Containment" << c->id() << "geometry is" << c->geometry().toRect() << "config'd with" << appletConfig.name();
         KConfigGroup applets(&containmentConfig, "Applets");
 
@@ -235,7 +245,7 @@ void Corona::loadApplets(const QString& configName)
             }
 
             Applet *applet = c->addApplet(plugin, QVariantList(), appId, appletConfig.readEntry("geometry", QRectF()), true);
-            
+
             QList<qreal> m = appletConfig.readEntry("transform", QList<qreal>());
             if (m.count() == 9) {
                 QTransform t(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
@@ -250,12 +260,12 @@ void Corona::loadApplets(const QString& configName)
         foreach (Containment* containment, d->containments) {
             QString cid = QString::number(containment->id());
             KConfigGroup containmentConfig(&containments, cid);
-            containment->setImmutable(containmentConfig.isImmutable());
 
             foreach(Applet* applet, containment->applets()) {
                 applet->init();
             }
 
+            containment->updateConstraints(Plasma::StartupCompletedConstraint);
             containment->flushUpdatedConstraints();
         }
 
@@ -267,11 +277,16 @@ void Corona::loadApplets(const QString& configName)
                 Containment* c = addContainment("desktop");
                 c->setScreen(i);
                 c->setFormFactor(Plasma::Planar);
+                c->flushUpdatedConstraints();
             }
         }
     }
 
     d->kioskImmutable = config()->isImmutable();
+    if (d->kioskImmutable) {
+        d->updateContainmentImmutability();
+    }
+
     KConfigGroup coronaConfig(config(), "General");
     setImmutable(coronaConfig.readEntry("locked", false));
 }
@@ -297,6 +312,7 @@ void Corona::loadDefaultSetup()
         Containment* c = addContainment("desktop");
         c->setScreen(i);
         c->setFormFactor(Plasma::Planar);
+        c->flushUpdatedConstraints();
 
         if (g.x() <= topLeftCorner.x() && g.y() >= topLeftCorner.y()) {
             topLeftCorner = g.topLeft();
@@ -403,6 +419,7 @@ Containment* Corona::addContainment(const QString& name, const QVariantList& arg
     if (!delayedInit) {
         addItem(containment);
         containment->init();
+        containment->updateConstraints(Plasma::StartupCompletedConstraint);
     }
 
     d->containments.append(containment);
@@ -410,6 +427,8 @@ Containment* Corona::addContainment(const QString& name, const QVariantList& arg
             this, SLOT(containmentDestroyed(QObject*)));
     connect(containment, SIGNAL(launchActivated()),
             SIGNAL(launchActivated()));
+    connect(containment, SIGNAL(configNeedsSaving()),
+            SLOT(scheduleConfigSync()));
 
     return containment;
 }
@@ -515,17 +534,14 @@ bool Corona::isKioskImmutable() const
 
 void Corona::setImmutable(bool immutable)
 {
-    if (d->immutable == immutable) {
+    if (d->immutable == immutable ||
+        (!immutable && d->kioskImmutable)) {
         return;
     }
 
     kDebug() << "setting immutability to" << immutable;
     d->immutable = immutable;
-    foreach (Containment *c, d->containments) {
-        // we need to tell each containment that immutability has been altered
-        // TODO: should we tell the applets too?
-        c->updateConstraints(ImmutableConstraint);
-    }
+    d->updateContainmentImmutability();
 }
 
 } // namespace Plasma

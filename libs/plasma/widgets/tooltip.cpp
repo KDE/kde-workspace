@@ -68,7 +68,7 @@ class ToolTipSingleton
 };
 K_GLOBAL_STATIC( ToolTipSingleton, privateInstance )
 
-ToolTip *ToolTip::instance()
+ToolTip *ToolTip::self()
 {
     return &privateInstance->self;
 }
@@ -83,9 +83,12 @@ void ToolTip::show(const QPoint &location, Plasma::Widget *widget)
         // Qt doesn't seem to like visible tooltips moving though, so hide it and then
         // immediately show it again
         setVisible(false);
-        d->showTimer->start(0);
+
+        // small delay to prevent unecessary showing when the mouse is moving quickly across items
+        // which can be too much for less powerful CPUs to keep up with
+        d->showTimer->start(150);
     } else {
-        d->showTimer->start(1000);  //Shown after a one second delay.
+        d->showTimer->start(500);
     }
 }
 
@@ -93,11 +96,8 @@ void ToolTip::hide()
 {
     d->currentWidget = 0;
     d->showTimer->stop();  //Mouse out, stop the timer to show the tooltip
-    if (!isVisible()) {
-        d->isShown = false;
-    }
     setVisible(false);
-    d->hideTimer->start(500);  //500 ms delay before we are officially "gone" to allow for the time to move between widgets
+    d->hideTimer->start(250);  //500 ms delay before we are officially "gone" to allow for the time to move between widgets
 }
 
 Plasma::Widget *ToolTip::currentWidget() const
@@ -252,20 +252,26 @@ void WindowPreview::setInfo()
         reinterpret_cast< unsigned char* >( data ), sizeof( data ) / sizeof( data[ 0 ] ));
 }
 
-//Patterned after KickerTip
-//TODO: Do something to antialias edges
-//Reimplement paintEvent perhaps?
-void ToolTip::resizeEvent(QResizeEvent *)
+
+void ToolTip::paintEvent(QPaintEvent *)
 {
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    // draw items
     QBitmap mask(width(), height());
-    QPainter painter(&mask);
+    QPainter maskPainter(&mask);
 
     mask.fill(Qt::white);
 
-    painter.setBrush(Qt::black);
-    painter.setPen(Qt::black);
-    painter.drawPath(Plasma::roundedRectangle(mask.rect(), 10));
+    maskPainter.setBrush(Qt::black);
+    maskPainter.setPen(Qt::black);
+
+    maskPainter.drawPath(roundedRectangle(mask.rect(), 10));
     setMask(mask);
+
+    painter.setPen(Qt::black);
+    painter.drawPath(roundedRectangle(mask.rect(), 10));
 }
 
 }
