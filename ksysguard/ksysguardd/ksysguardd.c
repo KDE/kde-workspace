@@ -640,9 +640,8 @@ int main( int argc, char* argv[] )
 	setupInotify(&mtabfd);
         checkModules();
       }
-      else
 #endif
-        handleSocketTraffic( ServerSocket, &fds );
+      handleSocketTraffic( ServerSocket, &fds );
     }
   }
 
