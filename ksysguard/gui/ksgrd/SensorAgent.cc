@@ -41,12 +41,10 @@ SensorAgent::SensorAgent( SensorManager *sm ) : QObject(sm)
 {
   mSensorManager = sm;
   mDaemonOnLine = false;
-  mFoundError = false;
 }
 
 SensorAgent::~SensorAgent()
 {
-  kDebug() << "Deleting agent";
 }
 
 void SensorAgent::sendRequest( const QString &req, SensorClient *client, int id )
@@ -82,7 +80,6 @@ void SensorAgent::processAnswer( const char *buf, int buflen )
   //We have to keep track of the state we are in.  Any characters that we have not parsed yet we put in
   //mLeftOverBuffer
   QByteArray buffer = QByteArray::fromRawData(buf, buflen);
-  
   if(!mLeftOverBuffer.isEmpty()) {
 	buffer = mLeftOverBuffer + buffer; //If we have data left over from a previous processAnswer, then we have to prepend this on
 	mLeftOverBuffer.clear();
@@ -92,33 +89,45 @@ void SensorAgent::processAnswer( const char *buf, int buflen )
   kDebug(1215) << "<- " << QString::fromUtf8(buffer, buffer.size());
 #endif
   int startOfAnswer = 0;  //This can become >= buffer.size(), so check before using!
-  for ( int i = 0; i < buffer.size(); i++ ) {
+  for ( int i = 0; i < buffer.size(); ++i ) {
     if ( buffer.at(i) == '\033' ) {  // 033 in octal is the escape character.  The signifies the start of an error
-      //The first time we see 033 we simply set mFoundError to true
-      //Then the error message will come, and then we will receive another escape character.
-      
-      mFoundError = !mFoundError;
-      if ( !mFoundError ) {  //We found the end of the error
-	//Piece together the error from what we read now, and what we read last time processAnswer was called
-	QString error = QString::fromUtf8(buffer.constData() + startOfAnswer, i-startOfAnswer);
-        if ( error == "RECONFIGURE" )
-          emit reconfigure( this );
-        else {
-          /* We just received the end of an error message, so we
-           * can display it. */
-          SensorMgr->notify( i18n( "Message from %1:\n%2" ,
-                             mHostName ,
-                             error ) );
-        }
+      int startOfError = i;
+      bool found = false;
+      while(++i < buffer.size()) {
+        if(buffer.at(i) == '\033') {
+	  QString error = QString::fromUtf8(buffer.constData() + startOfError+1, i-startOfError-1);
+	  if ( error.startsWith("RECONFIGURE") ) {
+            emit reconfigure( this );
+ 	  }
+          else {
+            /* We just received the end of an error message, so we
+             * can display it. */
+            SensorMgr->notify( i18n( "Message from %1:\n%2" ,
+                               mHostName ,
+                               error ) );
+          }
+          found = true;
+	  break;
+	}
       }
-      mAnswerBuffer.clear();
-      startOfAnswer = i+1;
-      continue;
+      if(found) {
+        buffer.remove(startOfError, i-startOfError+1);
+	i = startOfAnswer;
+	if(i > 0 && buffer.constData()[i-1]== '\n') {
+		i--;
+		startOfAnswer--;
+	}
+        continue;
+      } else {
+        //We have not found the end of the escape string.  Try checking in the next packet
+        mLeftOverBuffer = QByteArray(buffer.constData()+startOfAnswer, buffer.size()-startOfAnswer);
+        return;
+      }
     }
 
     //The spec was supposed to be that it returned "\nksysguardd> " but some seem to forget the space, so we have to compensate.  Sigh 
-    if( (i==0 && buffer.size() >= (signed)(sizeof("ksysguardd>"))-1 && qstrncmp(buffer.constData(), "ksysguardd>", sizeof("ksysguardd>")-1) == 0) ||
-	(buffer.size() -i >= (signed)(sizeof("\nksysguardd>")) -1 && qstrncmp(buffer.constData()+i, "\nksysguardd>", sizeof("\nksysguardd>")-1) == 0)) {
+    if( (i==0 && buffer.size() -i >= (signed)(sizeof("ksysguardd>"  ))-1 && qstrncmp(buffer.constData()+i, "ksysguardd>",   sizeof("ksysguardd>"  )-1) == 0) ||
+	(buffer.size() -i >= (signed)(sizeof("\nksysguardd>"))-1 && qstrncmp(buffer.constData()+i, "\nksysguardd>", sizeof("\nksysguardd>")-1) == 0)) {
 
 	QByteArray answer(buffer.constData()+startOfAnswer, i-startOfAnswer);
 	if(!answer.isEmpty())
@@ -168,7 +177,7 @@ void SensorAgent::processAnswer( const char *buf, int buflen )
 		
 	if(!mAnswerBuffer.isEmpty() && mAnswerBuffer[0] == "UNKNOWN COMMAND") {
 		/* Notify client that the sensor seems to be no longer available. */
-        kDebug() << "Received UNKNOWN COMMAND for: " << req->request(); 
+        kDebug(1215) << "Received UNKNOWN COMMAND for: " << req->request(); 
 		req->client()->sensorLost( req->id() );
 	} else {
 		// Notify client of newly arrived answer.
