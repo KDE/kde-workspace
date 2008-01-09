@@ -46,8 +46,7 @@ SystemTrayContainer::SystemTrayContainer(WId clientId, QWidget *parent)
     // Qt's regular quasi-transparent background doesn't work so set it to the
     // theme's background color instead.
     QPalette p = palette();
-    //p.setBrush(QPalette::Window, Plasma::Theme::self()->backgroundColor());
-    p.setBrush(QPalette::Window, Qt::black);
+    p.setBrush(QPalette::Window, Plasma::Theme::self()->backgroundColor());
     setPalette(p);
     setBackgroundRole(QPalette::Window);
 
