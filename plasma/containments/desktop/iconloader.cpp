@@ -53,8 +53,8 @@ void IconLoader::init()
     //load stored settings
     KConfigGroup cg = m_desktop->config();
     m_iconShow = cg.readEntry("showIcons",m_iconShow);
-    m_gridAlign = cg.readEntry(i18n("alignToGrid"),m_gridAlign);
-    m_enableMedia = cg.readEntry(i18n("EnableMedia"),m_enableMedia);
+    m_gridAlign = cg.readEntry("alignToGrid",m_gridAlign);
+    m_enableMedia = cg.readEntry("EnableMedia",m_enableMedia);
 
     
     setGridSize(QSizeF(150, 150));
