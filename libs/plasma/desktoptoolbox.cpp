@@ -33,12 +33,51 @@
 namespace Plasma
 {
 
+class EmptyGraphicsItem : public QGraphicsItem
+{
+    public:
+        EmptyGraphicsItem(QGraphicsItem *parent)
+            : QGraphicsItem(parent)
+        {
+            setAcceptsHoverEvents(true);
+        }
+
+        QRectF boundingRect() const
+        {
+            return QRectF(QPointF(0, 0), m_rect.size());
+        }
+
+        QRectF rect() const
+        {
+            return m_rect;
+        }
+
+        void setRect(const QRectF &rect)
+        {
+            //kDebug() << "setting rect to" << rect;
+            prepareGeometryChange();
+            m_rect = rect;
+            setPos(rect.topLeft());
+        }
+
+        void paint(QPainter * p, const QStyleOptionGraphicsItem*, QWidget*)
+        {
+            Q_UNUSED(p)
+            //p->setPen(Qt::red);
+            //p->drawRect(boundingRect());
+        }
+
+    private:
+        QRectF m_rect;
+};
+
 // used with QGrahphicsItem::setData
 static const int ToolName = 7001;
 
 DesktopToolbox::DesktopToolbox(QGraphicsItem *parent)
     : QGraphicsItem(parent),
       m_icon("plasma"),
+      m_toolBacker(0),
       m_size(50),
       m_showing(false),
       m_animId(0),
@@ -81,20 +120,33 @@ void DesktopToolbox::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     gradient.setColorAt(0, color1);
     gradient.setColorAt(.87, color1);
     gradient.setColorAt(.97, color2);
-    gradient.setColorAt(1, QColor(255, 255, 255, 0));
+    color2.setAlpha(0);
+    gradient.setColorAt(1, color2);
     painter->save();
     painter->setPen(Qt::NoPen);
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setBrush(gradient);
     painter->drawPath(p);
     painter->restore();
-    m_icon.paint(painter, QRect(m_size*2 - 34, 2, 32, 32));
+
+    const qreal progress = m_animFrame / m_size;
+
+    if (progress > 0.1) {
+        m_icon.paint(painter, QRect(m_size*2 - 34, 2, 32, 32));
+    }
+
+    if (progress <= 0.9) {
+        painter->save();
+        painter->setOpacity(1 - progress);
+        m_icon.paint(painter, QRect(m_size*2 - 34, 2, 32, 32), Qt::AlignCenter, QIcon::Disabled, QIcon::Off);
+        painter->restore();
+    }
 }
 
 QPainterPath DesktopToolbox::shape() const
 {
     QPainterPath path;
-    int size = m_size + m_animFrame;
+    int size = m_size + (int)m_animFrame;
     path.moveTo(m_size*2, 0);
     path.arcTo(QRectF(m_size*2 - size, -size, size*2, size*2), 180, 90);
     return path;
@@ -102,21 +154,26 @@ QPainterPath DesktopToolbox::shape() const
 
 void DesktopToolbox::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-//    Plasma::Phase::self()->moveItem(this, Phase::SlideIn, QPoint(-25, -25));
+    if (m_showing) {
+        QGraphicsItem::hoverEnterEvent(event);
+        return;
+    }
+
     int maxwidth = 0;
     foreach (QGraphicsItem* tool, QGraphicsItem::children()) {
         if (!tool->isEnabled()) {
             continue;
         }
-        maxwidth = qMax(static_cast<int>(tool->boundingRect().width()),
-                        maxwidth);
+        maxwidth = qMax(static_cast<int>(tool->boundingRect().width()), maxwidth);
     }
-    // put tools 5px from screen edge
-    int x = m_size*2 - maxwidth - 5; // pos().x();
+
+    // put tools 5px from icon edge
+    const int iconWidth = 32;
+    int x = m_size*2 - maxwidth - iconWidth - 5;
     int y = 5; // pos().y();
     Plasma::Phase* phase = Plasma::Phase::self();
     foreach (QGraphicsItem* tool, QGraphicsItem::children()) {
-        if (!tool->isEnabled()) {
+        if (!tool->isEnabled() || tool == m_toolBacker) {
             continue;
         }
 
@@ -127,6 +184,12 @@ void DesktopToolbox::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
         y += static_cast<int>(tool->boundingRect().height()) + 5;
     }
 
+    if (!m_toolBacker) {
+        m_toolBacker = new EmptyGraphicsItem(this);
+    }
+    m_toolBacker->setRect(QRectF(QPointF(x, 0), QSizeF(maxwidth, y - 10)));
+    m_toolBacker->show();
+
     if (m_animId) {
         phase->stopCustomAnimation(m_animId);
     }
@@ -134,19 +197,28 @@ void DesktopToolbox::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
     m_showing = true;
     // TODO: 10 and 200 shouldn't be hardcoded here. There needs to be a way to
     // match whatever the time is that moveItem() takes. Same in hoverLeaveEvent().
-    m_animId = phase->customAnimation(10, 250, Plasma::Phase::EaseInCurve, this, "animate");
+    m_animId = phase->customAnimation(10, 240, Plasma::Phase::EaseInCurve, this, "animate");
     QGraphicsItem::hoverEnterEvent(event);
 }
 
 void DesktopToolbox::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-//    Plasma::Phase::self->moveItem(this, Phase::SlideOut, boundingRect()QPoint(-50, -50));
+    //kDebug() << event->pos() << event->scenePos() << m_toolBacker->rect().contains(event->scenePos().toPoint());
+    if (!m_toolBacker && m_toolBacker->rect().contains(event->scenePos().toPoint())) {
+        QGraphicsItem::hoverLeaveEvent(event);
+        return;
+    }
+
     int x = m_size*2;
     int y = 0;
     Plasma::Phase* phase = Plasma::Phase::self();
     foreach (QGraphicsItem* tool, QGraphicsItem::children()) {
-         const int height = static_cast<int>(tool->boundingRect().height());
-         phase->moveItem(tool, Plasma::Phase::SlideOut, QPoint(x, y-height)); // FIXME: make me faster (~150-200 ms)
+        if (tool == m_toolBacker) {
+            continue;
+        }
+
+        const int height = static_cast<int>(tool->boundingRect().height());
+        phase->moveItem(tool, Plasma::Phase::SlideOut, QPoint(x, y-height)); // FIXME: make me faster (~150-200 ms)
     }
 
     if (m_animId) {
@@ -154,16 +226,20 @@ void DesktopToolbox::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     }
 
     m_showing = false;
-    m_animId = phase->customAnimation(10, 150, Plasma::Phase::EaseOutCurve, this, "animate");
+    m_animId = phase->customAnimation(10, 240, Plasma::Phase::EaseOutCurve, this, "animate");
+
+    if (m_toolBacker) {
+        m_toolBacker->hide();
+    }
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
 void DesktopToolbox::animate(qreal progress)
 {
     if (m_showing) {
-        m_animFrame = static_cast<int>(m_size * progress);
+        m_animFrame = m_size * progress;
     } else {
-        m_animFrame = static_cast<int>(m_size * (1.0 - progress));
+        m_animFrame = m_size * (1.0 - progress);
     }
 
     //kDebug() << "animating at" << progress << "for" << m_animFrame;

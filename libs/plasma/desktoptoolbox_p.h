@@ -31,6 +31,7 @@ namespace Plasma
 {
 
 class Widget;
+class EmptyGraphicsItem;
 
 class DesktopToolbox : public QObject, public QGraphicsItem
 {
@@ -57,11 +58,12 @@ protected slots:
 
 private:
     KIcon m_icon;
-    int m_size;
+    EmptyGraphicsItem *m_toolBacker;
+    const int m_size;
     bool m_hidden;
     bool m_showing;
     Plasma::Phase::AnimId m_animId;
-    int m_animFrame;
+    qreal m_animFrame;
 };
 
 } // Plasma namespace
