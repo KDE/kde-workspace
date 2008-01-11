@@ -548,6 +548,7 @@ void AppletHandle::startFading(FadeType anim)
     }
 
     qreal time = 250;
+    m_hoverTimer->stop();
 
     if (m_applet) {
         m_applet->removeSceneEventFilter(this);
