@@ -22,6 +22,7 @@
 
 #include <QtCore/QObject>
 #include <QtGui/QGraphicsItem>
+#include <QTimer>
 
 #include "phase.h"
 #include "svg.h"
@@ -33,7 +34,7 @@ class Containment;
 
 class AppletHandle : public QObject, public QGraphicsItem
 {
-        Q_OBJECT
+    Q_OBJECT
     public:
         enum FadeType { FadeIn, FadeOut };
         enum ButtonType { NoButton, MoveButton, RotateButton, ConfigureButton, RemoveButton, ResizeButton };
@@ -45,6 +46,7 @@ class AppletHandle : public QObject, public QGraphicsItem
 
         QRectF boundingRect() const;
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+        void startFading(FadeType anim);
 
     protected:
         void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -53,6 +55,7 @@ class AppletHandle : public QObject, public QGraphicsItem
         void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
         void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
         QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+        bool sceneEventFilter(QGraphicsItem *watched, QEvent *event);
 
     Q_SIGNALS:
        void disappearDone(AppletHandle *self);
@@ -61,19 +64,18 @@ class AppletHandle : public QObject, public QGraphicsItem
         void fadeAnimation(qreal progress);
         void appletDestroyed();
         void appletResized();
+        void fadeIn();
 
     private:
         static const int HANDLE_WIDTH = 5;
         static const int ICON_SIZE = 16;
         static const int ICON_MARGIN = 8;
 
-        void startFading(FadeType anim);
-        void forceDisappear();
         void calculateSize();
         ButtonType mapToButton(const QPointF &point) const;
+        void forceDisappear();
 
         QRectF m_rect;
-        bool m_buttonsOnRight;
         ButtonType m_pressedButton;
         Containment *m_containment;
         Applet *m_applet;
@@ -85,6 +87,9 @@ class AppletHandle : public QObject, public QGraphicsItem
         qreal m_scaleWidth;
         qreal m_scaleHeight;
         QColor m_gradientColor;
+        QTimer *m_hoverTimer;
+        bool m_buttonsOnRight;
+        bool m_pendingFade;
 };
 
 }

@@ -780,7 +780,6 @@ void Containment::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 bool Containment::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
 {
     Applet *applet = qgraphicsitem_cast<Applet*>(watched);
-    //QEvent::GraphicsSceneHoverEnter
 
     // Otherwise we're watching something we shouldn't be...
     //kDebug() << "got sceneEvent";
@@ -791,19 +790,31 @@ bool Containment::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
 
     switch (event->type()) {
     case QEvent::GraphicsSceneHoverEnter:
-        //kDebug() << "got hoverenterEvent" << isImmutable << " " << applet->isImmutable();
-        if (!isImmutable() && !applet->isImmutable() && !d->handles.contains(applet)) {
-            //kDebug() << "generated applet handle";
-            //TODO: there should be a small delay on showing these. they pop up too quickly/easily
-            //      right now
-            AppletHandle *handle = new AppletHandle(this, applet);
-            d->handles[applet] = handle;
-            connect(handle, SIGNAL(disappearDone(AppletHandle*)),
-                    this, SLOT(handleDisappeared(AppletHandle*)));
-            connect(applet, SIGNAL(geometryChanged()),
-                    handle, SLOT(appletResized()));
+        //kDebug() << "got hoverenterEvent" << isImmutable() << " " << applet->isImmutable();
+        if (!isImmutable() && !applet->isImmutable()) {
+            if (d->handles.contains(applet)) {
+                d->handles[applet]->startFading(AppletHandle::FadeIn);
+            } else {
+                //kDebug() << "generated applet handle";
+                //TODO: there should be a small delay on showing these. they pop up too quickly/easily
+                //      right now
+                AppletHandle *handle = new AppletHandle(this, applet);
+                d->handles[applet] = handle;
+                connect(handle, SIGNAL(disappearDone(AppletHandle*)),
+                        this, SLOT(handleDisappeared(AppletHandle*)));
+                connect(applet, SIGNAL(geometryChanged()),
+                        handle, SLOT(appletResized()));
+            }
         }
         break;
+    case QEvent::GraphicsSceneHoverLeave:
+        //kDebug() << "got hoverLeaveEvent";
+        if (d->handles.contains(applet)) {
+            QGraphicsSceneHoverEvent *he = static_cast<QGraphicsSceneHoverEvent *>(event);
+            if (!d->handles[applet]->boundingRect().contains(d->handles[applet]->mapFromScene(he->scenePos()))) {
+                d->handles[applet]->startFading(AppletHandle::FadeOut);
+            }
+        }
     default:
         break;
     }

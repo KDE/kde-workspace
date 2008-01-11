@@ -45,7 +45,6 @@ qreal _k_angleForPoints(const QPointF &center, const QPointF &pt1, const QPointF
 AppletHandle::AppletHandle(Containment *parent, Applet *applet)
     : QObject(),
       QGraphicsItem(parent),
-      m_buttonsOnRight(false),
       m_pressedButton(NoButton),
       m_containment(parent),
       m_applet(applet),
@@ -55,7 +54,9 @@ AppletHandle::AppletHandle(Containment *parent, Applet *applet)
       m_angle(0.0),
       m_tempAngle(0.0),
       m_scaleWidth(1.0),
-      m_scaleHeight(1.0)
+      m_scaleHeight(1.0),
+      m_buttonsOnRight(false),
+      m_pendingFade(false)
 {
     KColorScheme colors(QPalette::Active, KColorScheme::View, Theme::self()->colors());
     m_gradientColor = colors.background(KColorScheme::NormalBackground).color();
@@ -85,14 +86,22 @@ AppletHandle::AppletHandle(Containment *parent, Applet *applet)
     matrix.translate(-center.x(), -center.y());
     setTransform(matrix);
 
+    m_hoverTimer = new QTimer(this);
+    m_hoverTimer->setSingleShot(true);
+    m_hoverTimer->setInterval(300);
+
+    connect(m_hoverTimer, SIGNAL(timeout()), this, SLOT(fadeIn()));
     connect(m_applet, SIGNAL(destroyed(QObject*)), this, SLOT(appletDestroyed()));
+
     setAcceptsHoverEvents(true);
-    startFading(FadeIn);
+    m_hoverTimer->start();
 }
 
 AppletHandle::~AppletHandle()
 {
     if (m_applet) {
+        m_applet->removeSceneEventFilter(this);
+
         QRectF rect = QRectF(m_applet->pos(), m_applet->size());
         QPointF center = m_applet->mapFromParent(rect.center());
 
@@ -225,8 +234,17 @@ AppletHandle::ButtonType AppletHandle::mapToButton(const QPointF &point) const
 
 void AppletHandle::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    if (m_pendingFade) {
+        //m_pendingFade = false;
+        return;
+    }
+
     if (event->button() == Qt::LeftButton) {
         m_pressedButton = mapToButton(event->pos());
+        //kDebug() << "button pressed:" << m_pressedButton;
+        if (m_pressedButton != NoButton) {
+            m_applet->installSceneEventFilter(this);
+        }
         event->accept();
         update();
         return;
@@ -237,6 +255,17 @@ void AppletHandle::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void AppletHandle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    //kDebug() << "button pressed:" << m_pressedButton << ", fade pending?" << m_pendingFade;
+    if (m_applet) {
+        m_applet->removeSceneEventFilter(this);
+    }
+
+    if (m_pendingFade) {
+        startFading(FadeOut);
+        m_pendingFade = false;
+        return;
+    }
+
     ButtonType releasedAtButton = mapToButton(event->pos());
 
     if (m_applet && event->button() == Qt::LeftButton) {
@@ -332,8 +361,8 @@ void AppletHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                         // add the applet to the new containment
                         // and take it from the old one
                         QPointF scenePosition = scenePos();
-                        kDebug() << "moving to other containment with position" << pos() << event->scenePos();
-                        kDebug() << "position before reparenting" << pos() << scenePos();
+                        //kDebug() << "moving to other containment with position" << pos() << event->scenePos();
+                        //kDebug() << "position before reparenting" << pos() << scenePos();
                         m_containment = containments[i];
                         //m_containment->addChild(m_applet);
                         //setParentItem(containments[i]);
@@ -452,14 +481,30 @@ void AppletHandle::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     Q_UNUSED(event);
     //kDebug() << "hover enter";
-    startFading(FadeIn);
+    m_hoverTimer->start();
 }
 
 void AppletHandle::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     Q_UNUSED(event);
-    //kDebug() << "hover leave";
-    startFading(FadeOut);
+    //kDebug() << "hover leave" << m_pressedButton;
+    m_hoverTimer->stop();
+
+    if (m_pressedButton != NoButton) {
+        m_pendingFade = true;
+    } else {
+        startFading(FadeOut);
+    }
+}
+
+bool AppletHandle::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
+{
+    if (watched == m_applet && event->type() == QEvent::GraphicsSceneHoverLeave) {
+        hoverLeaveEvent(static_cast<QGraphicsSceneHoverEvent*>(event));
+        return true;
+    }
+
+    return false;
 }
 
 void AppletHandle::fadeAnimation(qreal progress)
@@ -478,6 +523,11 @@ void AppletHandle::fadeAnimation(qreal progress)
     update();
 }
 
+void AppletHandle::fadeIn()
+{
+    startFading(FadeIn);
+}
+
 void AppletHandle::appletDestroyed()
 {
     m_applet = 0;
@@ -493,15 +543,20 @@ void AppletHandle::appletResized()
 
 void AppletHandle::startFading(FadeType anim)
 {
-    if (m_animId!=0) {
+    if (m_animId != 0) {
         Phase::self()->stopCustomAnimation(m_animId);
     }
 
     qreal time = 250;
 
-    if (anim==FadeIn) {
+    if (m_applet) {
+        m_applet->removeSceneEventFilter(this);
+    }
+
+    if (anim == FadeIn) {
         time *= 1.0-m_opacity;
     } else {
+        m_hoverTimer->stop();
         time *= m_opacity;
     }
 
