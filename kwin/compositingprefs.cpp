@@ -129,7 +129,7 @@ void CompositingPrefs::detect()
         }
     int glxmajor, glxminor;
     glXQueryVersion( display(), &glxmajor, &glxminor );
-    kDebug() << "glx version is " << glxmajor << "." << glxminor;
+    kDebug( 1212 ) << "glx version is " << glxmajor << "." << glxminor;
     bool hasglx13 = ( glxmajor > 1 || ( glxmajor == 1 && glxminor >= 3 ));
 
     // remember and later restore active context
@@ -222,10 +222,10 @@ void CompositingPrefs::detectDriverAndVersion()
     mGLRenderer = QString((const char*)glGetString( GL_RENDERER ));
     mGLVersion = QString((const char*)glGetString( GL_VERSION ));
     mXgl = detectXgl();
-    kDebug() << "GL vendor is" << mGLVendor;
-    kDebug() << "GL renderer is" << mGLRenderer;
-    kDebug() << "GL version is" << mGLVersion;
-    kDebug() << "XGL:" << ( mXgl ? "yes" : "no" );
+    kDebug( 1212 ) << "GL vendor is" << mGLVendor;
+    kDebug( 1212 ) << "GL renderer is" << mGLRenderer;
+    kDebug( 1212 ) << "GL version is" << mGLVersion;
+    kDebug( 1212 ) << "XGL:" << ( mXgl ? "yes" : "no" );
 
     if( mGLRenderer.contains( "Intel" ))
         {
@@ -244,7 +244,7 @@ void CompositingPrefs::detectDriverAndVersion()
         mDriver = "unknown";
         }
 
-    kDebug() << "Detected driver" << mDriver << ", version" << mVersion.join(".");
+    kDebug( 1212 ) << "Detected driver" << mDriver << ", version" << mVersion.join(".");
 #endif
     }
 
@@ -252,19 +252,19 @@ void CompositingPrefs::applyDriverSpecificOptions()
     {
     if( mXgl )
         {
-        kDebug() << "xgl, enabling";
+        kDebug( 1212 ) << "xgl, enabling";
         mEnableCompositing = true;
         mStrictBinding = false;
         }
     else if( mDriver == "intel" )
         {
-        kDebug() << "intel driver, disabling vsync, enabling direct";
+        kDebug( 1212 ) << "intel driver, disabling vsync, enabling direct";
         mEnableVSync = false;
         mEnableDirectRendering = true;
         // Enable compositing by default only on 900-series cards
         if( mVersion >= Version( "20061017" ) && mGLRenderer.contains( "Intel(R) 9" ))
             {
-            kDebug() << "intel >= 20061017 and 900-series card, enabling compositing";
+            kDebug( 1212 ) << "intel >= 20061017 and 900-series card, enabling compositing";
             mEnableCompositing = true;
             }
         }
@@ -273,12 +273,12 @@ void CompositingPrefs::applyDriverSpecificOptions()
         mStrictBinding = false;
         if( mVersion <= Version( "100.14.23" ))
             {
-            kDebug() << "nvidia <= 100.14.23, disabling vsync";
+            kDebug( 1212 ) << "nvidia <= 100.14.23, disabling vsync";
             mEnableVSync = false;
             }
         if( mVersion >= Version( "96.39" ))
             {
-            kDebug() << "nvidia >= 96.39, enabling compositing";
+            kDebug( 1212 ) << "nvidia >= 96.39, enabling compositing";
             mEnableCompositing = true;
             }
         }
