@@ -78,7 +78,7 @@ void MakeTransparentEffectConfig::load()
     KCModule::load();
 
     KConfigGroup conf = EffectsHandler::effectConfig("MakeTransparent");
-    mDecoration->setValue( (int)( conf.readEntry( "Decoration", 0.7 ) * 100 ) );
+    mDecoration->setValue( (int)( conf.readEntry( "Decoration", 1.0 ) * 100 ) );
     mMoveResize->setValue( (int)( conf.readEntry( "MoveResize", 0.8 ) * 100 ) );
     mDialogs->setValue( (int)( conf.readEntry( "Dialogs", 1.0 ) * 100 ) );
 
@@ -103,7 +103,7 @@ void MakeTransparentEffectConfig::save()
 void MakeTransparentEffectConfig::defaults()
     {
     kDebug() ;
-    mDecoration->setValue( 70 );
+    mDecoration->setValue( 100 );
     mMoveResize->setValue( 80 );
     mDialogs->setValue( 100 );
     emit changed(true);
