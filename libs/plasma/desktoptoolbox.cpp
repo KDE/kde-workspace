@@ -204,7 +204,7 @@ void DesktopToolbox::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 void DesktopToolbox::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     //kDebug() << event->pos() << event->scenePos() << m_toolBacker->rect().contains(event->scenePos().toPoint());
-    if (!m_toolBacker && m_toolBacker->rect().contains(event->scenePos().toPoint())) {
+    if (m_toolBacker && m_toolBacker->rect().contains(event->scenePos().toPoint())) {
         QGraphicsItem::hoverLeaveEvent(event);
         return;
     }
