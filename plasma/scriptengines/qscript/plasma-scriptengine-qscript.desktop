@@ -2,6 +2,7 @@
 Name=JavaScript Engine
 Name[bg]=JavaScript
 Name[ca]=Motor JavaScript
+Name[da]=JavaScript-motor
 Name[de]=JavaScript-Treiber
 Name[el]=Μηχανή JavaScript
 Name[eo]=Ĝavaskripta motoro
@@ -40,6 +41,7 @@ Name[zh_TW]=JavaScript 引擎
 Comment=JavaScript Plasmoids Using QScript
 Comment[bg]=JavaScript Plasmoids с QScript
 Comment[ca]=Plasmoides JavaScript que usen el QScript
+Comment[da]=JavaScript plasmoids med brug af QScript
 Comment[de]=JavaScript-Plasmoide die QScript verwenden
 Comment[el]=Πλασμοειδή JavaScript που χρησιμοποιούν QScript
 Comment[eo]=Ĝavaskriptaj-Plasmoidoj kiuj uzas QScript

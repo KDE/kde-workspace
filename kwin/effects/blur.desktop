@@ -2,6 +2,7 @@
 Name=Blur
 Name[bg]=Замъгляване
 Name[ca]=Desdibuixa
+Name[da]=Tvær ud
 Name[de]=Verwischen
 Name[el]=Θόλωμα
 Name[eo]=Malklarigi
@@ -45,6 +46,7 @@ Icon=preferences-system-windows-effect-blur
 Comment=Blurs background of semi-transparent windows
 Comment[bg]=Замъгляване на фона на полупрозрачни прозорци
 Comment[ca]=Desdibuixa el fons de les finestres semitransparents
+Comment[da]=Tværer baggrunden på halvgennemsigtige vinduer ud
 Comment[de]=Verwischt den Hintergrund halbtransparenter Fenster
 Comment[el]=Θόλωμα φόντου των ημιδιαφανών παραθύρων
 Comment[eo]=Malklarigas la fonon de duon-travideblaj fenestroj

@@ -2,6 +2,7 @@
 Name=Locations runner
 Name[bg]=Местоположения
 Name[ca]=Execució d'ubicacions
+Name[da]=Sted-Runner
 Name[de]=Orte anzeigen
 Name[el]=Άνοιγμα τοποθεσιών
 Name[eo]=Lanĉilo de aplikaĵoj
@@ -34,6 +35,7 @@ Name[zh_TW]=位置執行者
 Comment=File and URL opener
 Comment[bg]=Отваряне на файлове и адреси
 Comment[ca]=Obre fitxers i URL
+Comment[da]=Fil- og URL-åbner
 Comment[de]=Öffnet Dateien und Adressen
 Comment[el]=Άνοιγμα αρχείων και URL
 Comment[eo]=Malfermas dosierojn kaj adresojn

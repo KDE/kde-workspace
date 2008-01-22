@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Package metadata test file
 Name[ca]=Fitxer de proves de metadades de paquet
+Name[da]=Testfil med pakkemetadata
 Name[de]=Paket-Metadaten Testdatei
 Name[el]=Δοκιμαστικό αρχείο μεταδεδομένων του πακέτου
 Name[eo]=Testa dosiero por pakaĵaj metadatumoj
@@ -37,6 +38,7 @@ Name[zh_CN]=打包元数据测试文件
 Name[zh_TW]=套件中繼資料測試檔
 Comment=A test desktop file to test the PackageMetaData class.
 Comment[ca]=Un fitxer d'escriptori de proves per provar la classe PackageMetaData.
+Comment[da]=En test-desktopfil til at teste PackageMetaData-klassen.
 Comment[de]=Eine Test-Desktop-Datei zum Testen der Klasse PackageMetaData.
 Comment[el]=Ένα δοκιμαστικό αρχείο desktop για τον έλεγχο τς κλάσης PackageMetaData.
 Comment[eo]=Testa labortabla dosiero por testi la PackageMetaData-klason.
@@ -77,6 +79,7 @@ X-KDE-ServiceTypes=Plasma/Applet
 
 Description=Some fancy test description
 Description[ca]=Alguna descripció de proves imaginativa
+Description[da]=En eller anden fin testbeskrivelse
 Description[de]=Eine lustige Test-Beschreibung
 Description[el]=Μια δοκιμαστική περιγραφή
 Description[eo]=Komplika testa priskribo

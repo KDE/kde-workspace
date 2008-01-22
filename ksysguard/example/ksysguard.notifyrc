@@ -64,6 +64,7 @@ Comment[zh_TW]=KDE 系統守衛
 [Event/pattern_match]
 Name=Pattern Matched
 Name[ca]=S'ha trobat el patró
+Name[da]=Mønster matchet
 Name[de]=Muster gefunden
 Name[el]=Ταίριασμα μοτίβου
 Name[eo]=Ŝablono kongruis

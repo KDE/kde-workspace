@@ -2,6 +2,7 @@
 Name=Dim Inactive
 Name[bg]=Замъгляване на неактивния
 Name[ca]=Apaga les inactives
+Name[da]=Gør inaktiv mat
 Name[de]=Inaktive abdunkeln
 Name[el]=Θαμπάδα ανενεργού
 Name[eo]=Malheligi neaktivajn
@@ -46,6 +47,7 @@ Comment=Darkens inactive windows
 Comment[bg]=Потъмнява неактивните прозорци
 Comment[ca]=Enfosqueix les finestres inactives
 Comment[cs]=Ztmavuje neaktivní okna
+Comment[da]=Gør inaktive vinduer mørkere
 Comment[de]=Dunkelt inaktive Fenster ab
 Comment[el]=Σκίαση μη ενεργών παραθύρων
 Comment[eo]=Malheligas neaktivajn fenestrojn

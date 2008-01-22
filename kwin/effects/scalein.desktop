@@ -2,6 +2,7 @@
 Name=Scale In
 Name[bg]=Увеличаване
 Name[ca]=Escalat
+Name[da]=Skalér ind
 Name[de]=Hineinzoomen
 Name[el]=Εστίαση
 Name[eo]=Enskali
@@ -47,6 +48,7 @@ Icon=preferences-system-windows-effect-scale-in
 Comment=Animates appearing of windows
 Comment[bg]=Анимирано показване на прозорците
 Comment[ca]=Anima l'aparició de finestres
+Comment[da]=Animerer vinduers fremkomst
 Comment[de]=Animiert das Erscheinen von Fenstern
 Comment[el]=Κίνηση στα παράθυρα που εμφανίζονται
 Comment[eo]=Animigas la aperon de fenestroj

@@ -2,6 +2,7 @@
 Name=Thumbnail Aside
 Name[bg]=Манипулатор на мини изображения
 Name[ca]=Miniatures de costat
+Name[da]=Væk med miniature
 Name[de]=Seitliche Vorschaubilder
 Name[el]=Εικόνα επισκόπησης στο πλάι
 Name[eo]=Miniaturojn flanke
@@ -43,6 +44,7 @@ Name[zh_CN]=旁边缩略图
 Icon=preferences-system-windows-effect-thumbnailaside
 Comment=Shows window's thumbnail at the edge of the screen
 Comment[ca]=Mostra les miniatures de les finestres a la vora de la pantalla
+Comment[da]=Viser miniaturer af vinduer ved kanten af skærmen
 Comment[de]=Zeigt Vorschaubilder von Fenstern in einer Bildschirmecke an
 Comment[el]=Εμφανίζει στην άκρη της οθόνης την εικόνα επισκόπησης του παραθύρου
 Comment[eo]=Montras la fenestrajn miniaturojn ĉe la rando de la ekrano
