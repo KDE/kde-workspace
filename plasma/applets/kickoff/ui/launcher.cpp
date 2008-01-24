@@ -486,5 +486,10 @@ void Launcher::paintEvent(QPaintEvent*)
     p.drawRect(rect().adjusted(0, 0, -1, -1));
 }
 
+void Launcher::doFocusFavoritesView()
+{
+    focusFavoritesView();
+}
+
 #include "launcher.moc"
 

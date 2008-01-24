@@ -62,6 +62,11 @@ public:
     virtual bool eventFilter(QObject *object, QEvent *event);
     virtual QSize sizeHint() const;
 
+    /** This calls the \a focusFavoritesView() below and is only here to keep binary
+    compatibility. In KDE 4.1 the \a focusFavoritesView() below got just changed to
+    a public slot. */
+    void doFocusFavoritesView();
+
 signals:
     void aboutToHide();
 
