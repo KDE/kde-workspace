@@ -29,6 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <netwm_def.h>
 #include <qevent.h>
 
+#ifdef KWIN_HAVE_OPENGL_COMPOSITING
+#include <GL/gl.h>
+#endif
+
 namespace KWin
 {
 
@@ -132,13 +136,28 @@ void DesktopGridEffect::paintScreen( int mask, QRegion region, ScreenPaintData& 
     if( window_move != NULL )
         desktop_with_move = window_move->isOnAllDesktops()
             ? posToDesktop( window_move_pos - window_move_diff ) : window_move->desktop();
+#ifdef KWIN_HAVE_OPENGL_COMPOSITING
+    glPushAttrib( GL_SCISSOR_BIT );
+    glEnable( GL_SCISSOR_TEST );
+#endif
     for( int desktop = 1;
          desktop <= effects->numberOfDesktops();
          ++desktop )
         {
         if( desktop != desktop_with_move )
+            {
+#ifdef KWIN_HAVE_OPENGL_COMPOSITING
+            QRect area = desktopRect( desktop, true );
+            int dh = displayHeight();
+            // Scissor rect has to be given in OpenGL coords
+            glScissor( area.x(), dh - area.y() - area.height(), area.width(), area.height());
+#endif
             paintScreenDesktop( desktop, mask, region, data );
+            }
         }
+#ifdef KWIN_HAVE_OPENGL_COMPOSITING
+    glPopAttrib();
+#endif
     // paint the desktop with the window being moved as the last one, i.e. on top of others
     if( desktop_with_move != -1 )
         paintScreenDesktop( desktop_with_move, mask, region, data );
