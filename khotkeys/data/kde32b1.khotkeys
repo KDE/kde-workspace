@@ -830,6 +830,7 @@ Name[fr]=Effectue l'appel D-Bus « kdesktop KDesktopIface popupExecuteCommand()
 Name[hu]=Végrehajtja a 'kdesktop KDesktopIface popupExecuteCommand()' D-Bus függvényhívást
 Name[is]=Framkvæma D-Bus kallið 'kdesktop KDesktopIface popupExecuteCommand()'
 Name[it]=Esegue la chiamata D-Bus «kdesktop KDesktopIface popupExecuteCommand()»
+Name[ko]=D-Bus 호출 'kdesktop KDesktopIface popupExecuteCommand()'를 실행하기
 Name[lv]=Veikt D-Bus izsaukumu 'kdesktop KDesktopIface popupExecuteCommand()'
 Name[nb]=Utfør DBus-kallet 'kdesktop KDesktopIface popupExecuteCommand()'
 Name[nds]=D-Bus-Oproop "kdesktop KDesktopIface popupExecuteCommand()" utföhren
