@@ -36,7 +36,8 @@ Panel::Panel(QObject *parent, const QVariantList &args)
       m_drawTop(true),
       m_drawLeft(true),
       m_drawRight(true),
-      m_drawBottom(true)
+      m_drawBottom(true),
+      m_size(48)
 {
     m_background = new Plasma::Svg("widgets/panel-background", this);
     setZValue(150);
@@ -46,6 +47,14 @@ Panel::Panel(QObject *parent, const QVariantList &args)
 Panel::~Panel()
 {
     delete m_background;
+}
+
+void Panel::init()
+{
+    KConfigGroup cg = config();
+    m_size = qMax(16, cg.readEntry("size", m_size));
+
+    Containment::init();
 }
 
 void Panel::constraintsUpdated(Plasma::Constraints constraints)
@@ -79,8 +88,7 @@ void Panel::constraintsUpdated(Plasma::Constraints constraints)
         if (loc == BottomEdge || loc == TopEdge) {
             setFormFactor(Plasma::Horizontal);
 
-            //FIXME: don't hardcode 48px
-            height = 48;
+            height = m_size;
             //FIXME: don't hardcode full width
             width = r.width();
 
@@ -108,8 +116,7 @@ void Panel::constraintsUpdated(Plasma::Constraints constraints)
         } else if (loc == LeftEdge || loc == RightEdge) {
             setFormFactor(Plasma::Vertical);
 
-            //FIXME: don't hardcode 48px
-            width = 48;
+            width = m_size;
             //FIXME: don't hardcode full height
             height = r.height();
 

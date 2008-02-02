@@ -32,6 +32,7 @@ class Panel : public Plasma::Containment
 public:
     Panel(QObject *parent, const QVariantList &args);
     ~Panel();
+    void init();
 
     void constraintsUpdated(Plasma::Constraints constraints);
     Qt::Orientations expandingDirections() const;
@@ -47,6 +48,7 @@ private:
     bool m_drawLeft : 1;
     bool m_drawRight : 1;
     bool m_drawBottom : 1;
+    int m_size;
 };
 
 
