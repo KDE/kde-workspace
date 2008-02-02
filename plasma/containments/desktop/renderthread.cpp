@@ -10,6 +10,7 @@
 #include "renderthread.h"
 
 #include <QPainter>
+#include <QFile>
 #include <KDebug>
 #include <KSvgRenderer>
 
@@ -97,6 +98,14 @@ void RenderThread::run()
             mode = m_mode;
         }
         
+        QImage result(size, QImage::Format_ARGB32_Premultiplied);
+        result.fill(color.rgb());
+
+        if (file.isEmpty() || !QFile::exists(file)) {
+            emit done(token, result);
+            continue;
+        }
+        
         QPoint pos(0, 0);
         bool tiled = false;
         bool scalable = file.endsWith("svg") || file.endsWith("svgz");
@@ -120,6 +129,10 @@ void RenderThread::run()
         }
         imgSize *= ratio;
         
+        // if any of them is zero we may run into a div-by-zero below.
+        Q_ASSERT(imgSize.width() > 0);
+        Q_ASSERT(imgSize.height() > 0);
+
         // set render parameters according to resize mode
         switch (method)
         {
@@ -162,9 +175,6 @@ void RenderThread::run()
             tiled = true;
             break;
         }
-        
-        QImage result(size, QImage::Format_ARGB32_Premultiplied);
-        result.fill(color.rgb());
         
         QPainter p(&result);
         if (scalable) {
