@@ -173,6 +173,8 @@ void KCMultiWidget::slotOk()
 void KCMultiWidget::slotHelp()
 {
 	QString docPath = currentModule()->moduleInfo().docPath();
+        if(docPath.isEmpty())
+           return;
 
 	KUrl url( KUrl("help:/"), docPath );
 
