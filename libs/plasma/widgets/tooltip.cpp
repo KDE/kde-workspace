@@ -25,13 +25,17 @@
 #include <QPixmap>
 #include <QTimer>
 #include <QGraphicsView>
+#ifdef Q_WS_X11
 #include <QX11Info>
+#endif
 
 #include <kglobal.h>
 #include <kwindowsystem.h>
 
+#ifdef Q_WS_X11
 #include <X11/Xlib.h>
 #include <fixx11h.h>
+#endif
 
 #include "plasma/plasma.h"
 
@@ -196,6 +200,7 @@ bool WindowPreview::previewsAvailable() const
 {
     if( !KWindowSystem::compositingActive())
         return false;
+#ifdef Q_WS_X11
     // hackish way to find out if KWin has the effect enabled,
     // TODO provide proper support
     Display* dpy = QX11Info::display();
@@ -207,6 +212,7 @@ bool WindowPreview::previewsAvailable() const
         XFree( list );
         return ret;
     }
+#endif
     return false;
 }
 
@@ -223,17 +229,20 @@ QSize WindowPreview::sizeHint() const
 
 void WindowPreview::readWindowSize() const
 {
+#ifdef Q_WS_X11
     Window r;
     int x, y;
     unsigned int w, h, b, d;
     if( XGetGeometry( QX11Info::display(), id, &r, &x, &y, &w, &h, &b, &d ))
         windowSize = QSize( w, h );
     else
+#endif
         windowSize = QSize();
 }
 
 void WindowPreview::setInfo()
 {
+#ifdef Q_WS_X11
     Display* dpy = QX11Info::display();
     Atom atom = XInternAtom( dpy, "_KDE_WINDOW_PREVIEW", False );
     if( id == 0 ) {
@@ -250,6 +259,7 @@ void WindowPreview::setInfo()
     long data[] = { 1, 5, id, x(), y(), width(), height() };
     XChangeProperty( dpy, parentWidget()->winId(), atom, atom, 32, PropModeReplace,
         reinterpret_cast< unsigned char* >( data ), sizeof( data ) / sizeof( data[ 0 ] ));
+#endif
 }
 
 

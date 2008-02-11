@@ -52,7 +52,7 @@ public:
 protected:
     virtual void showEvent( QShowEvent* );
 
-    void paintEvent(QPaintEvent */*event*/);
+    void paintEvent(QPaintEvent * /*event*/);
 
 private Q_SLOTS:
     void slotResetTimer();
