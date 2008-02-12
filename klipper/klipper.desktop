@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Klipper
 Name[bn]=ক্লিপার
+Name[eo]=Poŝilo
 Name[hi]=क्लिपर
 Name[kk]=Алмасу буфері
 Name[mk]=Клипер
@@ -28,6 +29,7 @@ GenericName[cy]=Offeryn Gludfwrdd
 GenericName[da]=Klippebordsværktøj
 GenericName[de]=Verwaltung der Zwischenablage
 GenericName[el]=Εργαλείο πρόχειρου
+GenericName[eo]=Ilo por la poŝo
 GenericName[es]=Portapapeles
 GenericName[et]=Lõikepuhvri haldamine
 GenericName[eu]=Arbela
@@ -106,6 +108,7 @@ Comment[csb]=Nôrzãdze trzëmôjące historëjã tacnika
 Comment[da]=Et værktøj med historik til at klippe ud og indsætte
 Comment[de]=Programm zur Verwaltung der Zwischenablage
 Comment[el]=Ένα εργαλείο ιστορικού αποκοπής & επικόλλησης
+Comment[eo]=Ilo por la eltonda kaj alglua historio
 Comment[es]=Una utilidad de cortar y pegar historial
 Comment[et]=Lõikamiste ja asetamiste ajaloo rakendus
 Comment[eu]=Ebaki eta itsasi-ren historian ibiltzeko tresna
