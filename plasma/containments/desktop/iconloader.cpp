@@ -155,7 +155,7 @@ void IconLoader::addIcon(const KUrl& url)
 void IconLoader::addIcon(Plasma::Applet *applet)
 {
     KConfigGroup cg = applet->config();
-    KUrl url = cg.readEntry(i18n("Url"), KUrl());
+    KUrl url = cg.readEntry("Url", KUrl());
     if (url != KUrl()) {
         m_iconMap[url.path()] = applet;
     }
