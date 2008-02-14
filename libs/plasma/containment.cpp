@@ -221,33 +221,24 @@ void Containment::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             break;
         }
 
+        // applet may have a value due to finding a containment!
+        applet = 0;
         item = item->parentItem();
     }
 
     KMenu desktopMenu;
     //kDebug() << "context menu event " << (QObject*)applet;
-    if (!applet) {
-        if (!scene() || (static_cast<Corona*>(scene())->isImmutable() && !KAuthorized::authorizeKAction("unlock_desktop"))) {
-            //kDebug() << "immutability";
-            Applet::contextMenuEvent(event);
-            return;
-        }
-
-        //FIXME: change this to show this only in debug mode (or not at all?)
-        //       before final release
-        QList<QAction*> actions = contextActions();
-
-        if (actions.count() < 1) {
-            //kDebug() << "no applet, but no actions";
-            Applet::contextMenuEvent(event);
-            return;
-        }
-
-        foreach(QAction* action, actions) {
-            desktopMenu.addAction(action);
-        }
-    } else {
+    if (applet) {
         bool hasEntries = false;
+
+        QList<QAction*> actions = applet->contextActions();
+        if (!actions.isEmpty()) {
+            foreach(QAction* action, actions) {
+                desktopMenu.addAction(action);
+            }
+            hasEntries = true;
+        }
+
         if (applet->hasConfigurationInterface()) {
             QAction* configureApplet = new QAction(i18n("%1 Settings", applet->name()), &desktopMenu);
             configureApplet->setIcon(KIcon("configure"));
@@ -257,7 +248,26 @@ void Containment::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             hasEntries = true;
         }
 
+        actions = contextActions();
+        if (actions.count() > 0) {
+            hasEntries = true;
+            QMenu *containmentActionMenu = &desktopMenu;
+
+            if (actions.count() > 2) {
+                containmentActionMenu = new KMenu(i18n("%1 Options", name()), &desktopMenu);
+                desktopMenu.addMenu(containmentActionMenu);
+            }
+
+            foreach(QAction* action, actions) {
+                containmentActionMenu->addAction(action);
+            }
+        }
+
         if (scene() && !static_cast<Corona*>(scene())->isImmutable()) {
+            if (hasEntries) {
+                desktopMenu.addSeparator();
+            }
+
             QAction* closeApplet = new QAction(i18n("Remove this %1", applet->name()), &desktopMenu);
             QVariant appletV;
             appletV.setValue((QObject*)applet);
@@ -269,19 +279,28 @@ void Containment::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             hasEntries = true;
         }
 
-        QList<QAction*> actions = applet->contextActions();
-        if (!actions.isEmpty()) {
-            desktopMenu.addSeparator();
-            foreach(QAction* action, actions) {
-                desktopMenu.addAction(action);
-            }
-            hasEntries = true;
-        }
-
         if (!hasEntries) {
             Applet::contextMenuEvent(event);
             kDebug() << "no entries";
             return;
+        }
+    } else {
+        if (!scene() || (static_cast<Corona*>(scene())->isImmutable() && !KAuthorized::authorizeKAction("unlock_desktop"))) {
+            //kDebug() << "immutability";
+            Applet::contextMenuEvent(event);
+            return;
+        }
+
+        QList<QAction*> actions = contextActions();
+
+        if (actions.count() < 1) {
+            //kDebug() << "no applet, but no actions";
+            Applet::contextMenuEvent(event);
+            return;
+        }
+
+        foreach(QAction* action, actions) {
+            desktopMenu.addAction(action);
         }
     }
 
