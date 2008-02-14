@@ -38,6 +38,7 @@ static const qreal MIN_TICK_RATE = 40;
 struct AnimationState
 {
     QGraphicsItem* item;
+    QObject *qobj;
     Phase::Animation animation;
     Phase::CurveShape curve;
     int interval;
@@ -63,6 +64,7 @@ struct ElementAnimationState
 struct MovementState
 {
     QGraphicsItem* item;
+    QObject *qobj;
     Phase::CurveShape curve;
     Phase::Movement movement;
     int interval;
