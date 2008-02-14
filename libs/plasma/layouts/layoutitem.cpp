@@ -87,10 +87,10 @@ qreal LayoutItem::widthForHeight(qreal h) const
 
 void LayoutItem::setLayout(Layout* layout)
 {
-    if (d->layout && layout) {
-        kDebug() << "already have a layout.";
+    if (d->layout == layout) {
         return;
     }
+    delete d->layout;
 
     if (layout) {
         layout->setParent(this);
