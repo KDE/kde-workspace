@@ -478,9 +478,11 @@ void Containment::addApplet(Applet *applet, const QPointF &pos, bool dontInit)
         currentContainment->d->applets.removeAll(applet);
         addChild(applet);
 
+        //FIXME: we will lose parts of the existing configuration that aren't
+        //       resaved. but KConfigGroup::reparent does not exist in 4.0.x
         // now move the old config to the new location
-        KConfigGroup c = config().group("Applets").group(QString::number(applet->id()));
-        oldConfig.reparent(&c);
+        // KConfigGroup c = config().group("Applets").group(QString::number(applet->id()));
+        // oldConfig.reparent(&c);
     } else {
         addChild(applet);
     }
