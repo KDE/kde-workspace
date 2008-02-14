@@ -48,7 +48,8 @@ struct AnimationState
 
 struct ElementAnimationState
 {
-    QGraphicsItem* item;
+    QGraphicsItem *item;
+    QObject *qobj;
     Phase::CurveShape curve;
     Phase::ElementAnimation animation;
     int interval;
@@ -164,7 +165,7 @@ class Phase::Private
         //      and really making the code fun ;)
         QMap<QGraphicsItem*, AnimationState*> animatedItems;
         QMap<QGraphicsItem*, MovementState*> movingItems;
-        QMap<Phase::AnimId, ElementAnimationState*> animatedElements;
+        QMap<AnimId, ElementAnimationState*> animatedElements;
         QMap<AnimId, CustomAnimationState*> customAnims;
 };
 
@@ -194,25 +195,36 @@ Phase::~Phase()
     delete d;
 }
 
-void Phase::appletDestroyed(QObject* o)
+void Phase::animatedItemDestroyed(QObject* o)
 {
     QGraphicsItem* item = dynamic_cast<QGraphicsItem*>(o);
 
     if (!item) {
         return;
     }
+}
 
-    QMap<QGraphicsItem*, AnimationState*>::iterator it = d->animatedItems.find(item);
-    if (it != d->animatedItems.end()) {
-        delete it.value();
-        d->animatedItems.erase(it);
-        return;
+void Phase::movingItemDestroyed(QObject* o)
+{
+    QMutableMapIterator<QGraphicsItem*, MovementState*> it(d->movingItems);
+    while (it.hasNext()) {
+        it.next();
+        if (it.value()->qobj == o) {
+            delete it.value();
+            it.remove();
+        }
     }
+}
 
-    QMap<QGraphicsItem*, MovementState*>::iterator it2 = d->movingItems.find(item);
-    if (it2 != d->movingItems.end()) {
-        delete it2.value();
-        d->movingItems.erase(it2);
+void Phase::animatedElementDestroyed(QObject* o)
+{
+    QMutableMapIterator<AnimId, ElementAnimationState*> it(d->animatedElements);
+    while (it.hasNext()) {
+        it.next();
+        if (it.value()->qobj == o) {
+            delete it.value();
+            it.remove();
+        }
     }
 }
 
@@ -257,6 +269,13 @@ void Phase::animateItem(QGraphicsItem* item, Animation animation)
     state->interval = 333 / state->frames;
     state->interval = (state->interval / MIN_TICK_RATE) * MIN_TICK_RATE;
     state->currentInterval = state->interval;
+    state->qobj = dynamic_cast<QObject*>(item);
+
+     if (state->qobj) {
+         //kDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!! got us an object!";
+         disconnect(state->qobj, SIGNAL(destroyed(QObject*)), this, SLOT(animatedItemDestroyed(QObject*)));
+         connect(state->qobj, SIGNAL(destroyed(QObject*)), this, SLOT(animatedItemDestroyed(QObject*)));
+     }
 
     d->animatedItems[item] = state;
     d->performAnimation(0, state);
@@ -295,6 +314,12 @@ void Phase::moveItem(QGraphicsItem* item, Movement movement, const QPoint &desti
      state->interval = 250 / state->frames;
      state->interval = (state->interval / MIN_TICK_RATE) * MIN_TICK_RATE;
      state->currentInterval = state->interval;
+     state->qobj = dynamic_cast<QObject*>(item);
+
+     if (state->qobj) {
+        disconnect(state->qobj, SIGNAL(destroyed(QObject*)), this, SLOT(movingItemDestroyed(QObject*)));
+        connect(state->qobj, SIGNAL(destroyed(QObject*)), this, SLOT(movingItemDestroyed(QObject*)));
+     }
 
      d->movingItems[item] = state;
      d->performMovement(0, state);
@@ -326,6 +351,8 @@ Phase::AnimId Phase::customAnimation(int frames, int duration, Phase::CurveShape
 
     d->customAnims[state->id] = state;
 
+    disconnect(receiver, SIGNAL(destroyed(QObject*)),
+               this, SLOT(customAnimReceiverDestroyed(QObject*)));
     connect(receiver, SIGNAL(destroyed(QObject*)),
             this, SLOT(customAnimReceiverDestroyed(QObject*)));
 
@@ -364,6 +391,12 @@ Phase::AnimId Phase::animateElement(QGraphicsItem *item, ElementAnimation animat
     state->interval = (state->interval / MIN_TICK_RATE) * MIN_TICK_RATE;
     state->currentInterval = state->interval;
     state->id = ++d->animId;
+    state->qobj = dynamic_cast<QObject*>(item);
+
+     if (state->qobj) {
+         disconnect(state->qobj, SIGNAL(destroyed(QObject*)), this, SLOT(animatedElementDestroyed(QObject*)));
+         connect(state->qobj, SIGNAL(destroyed(QObject*)), this, SLOT(animatedElementDestroyed(QObject*)));
+     }
 
     //kDebug() << "animateElement " << animation << ", interval: " << state->interval << ", frames: " << state->frames;
     bool needTimer = true;
@@ -524,14 +557,15 @@ void Phase::timerEvent(QTimerEvent *event)
             } else {
                 state->item->update();
             }
-            
+
             if (state->currentFrame < state->frames) {
                 state->currentInterval = state->interval;
                 //TODO: calculate a proper interval based on the curve
                 state->interval *= 1 - d->calculateProgress(state->frames, state->currentFrame);
                 animationsRemain = true;
             } else {
-                d->animatedElements.remove( state->id );
+                d->animatedElements.remove(state->id);
+                emit elementAnimationComplete(state->id);
                 delete state;
             }
         } else {
@@ -559,6 +593,7 @@ void Phase::timerEvent(QTimerEvent *event)
             } else {
                 QMetaObject::invokeMethod(state->receiver, state->slot, Q_ARG(qreal, 1));
                 d->customAnims.erase(d->customAnims.find(state->id));
+                emit customAnimationComplete(state->id);
                 delete [] state->slot;
                 delete state;
             }
