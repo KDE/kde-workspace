@@ -32,6 +32,7 @@
 #include <QStyleOptionGraphicsItem>
 
 // Plasma
+#include "plasma/layouts/boxlayout.h"
 #include "plasma/theme.h"
 
 TaskGroupItem::TaskGroupItem(QGraphicsItem *parent, QObject *parentObject)
