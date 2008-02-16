@@ -46,10 +46,10 @@ TaskGroupItem::TaskGroupItem(QGraphicsItem *parent, QObject *parentObject)
 {
    //setAcceptDrops(true);
 
-   Plasma::BoxLayout *layout = new Plasma::BoxLayout(Plasma::BoxLayout::LeftToRight, this);
-   layout->setMargin(0);
-   layout->setSpacing(5);
-   layout->setMultiRow(true);
+   m_layout = new Plasma::BoxLayout(Plasma::BoxLayout::LeftToRight, this);
+   m_layout->setMargin(0);
+   m_layout->setSpacing(5);
+   m_layout->setMultiRow(true);
 }
 
 QSizeF TaskGroupItem::maximumSize() const
@@ -201,6 +201,18 @@ void TaskGroupItem::setBorderStyle(BorderStyle style)
 TaskGroupItem::BorderStyle TaskGroupItem::borderStyle() const
 {
     return _borderStyle;
+}
+
+void TaskGroupItem::setDirection(Plasma::BoxLayout::Direction dir)
+{
+    m_layout->setDirection(dir);
+
+    m_layout->setMultiRow(dir != Plasma::BoxLayout::TopToBottom);
+}
+
+Plasma::BoxLayout::Direction TaskGroupItem::direction()
+{
+    m_layout->direction();
 }
 
 void TaskGroupItem::paint(QPainter *painter,
