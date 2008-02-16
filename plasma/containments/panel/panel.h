@@ -21,6 +21,10 @@
 
 #include <plasma/containment.h>
 
+class KDialog;
+class QComboBox;
+class QAction;
+
 namespace Plasma
 {
     class Svg;
@@ -33,6 +37,7 @@ public:
     Panel(QObject *parent, const QVariantList &args);
     ~Panel();
     void init();
+    QList<QAction*> contextActions();
 
     void constraintsUpdated(Plasma::Constraints constraints);
     Qt::Orientations expandingDirections() const;
@@ -41,9 +46,15 @@ public:
                         const QStyleOptionGraphicsItem *option,
                         const QRect &contentsRect);
     void paintBackground(QPainter *painter, const QRect &contentsRect);
+private slots:
+    void configure();
+    void applyConfig();
 private:
     Plasma::Svg *m_background;
     QPixmap* m_cachedBackground;
+    KDialog* m_dialog;
+    QComboBox* m_sizeCombo;
+    QAction* m_configureAction;
     bool m_drawTop : 1;
     bool m_drawLeft : 1;
     bool m_drawRight : 1;
