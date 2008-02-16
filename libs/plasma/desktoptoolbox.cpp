@@ -176,8 +176,7 @@ void DesktopToolbox::showToolbox()
         }
         maxwidth = qMax(static_cast<int>(tool->boundingRect().width()), maxwidth);
     }
-
-    // put tools 5px from icon edge
+    // put tools 5px from screen edge
     const int iconWidth = 32;
     int x = m_size*2 - maxwidth - iconWidth - 5;
     int y = 5; // pos().y();
