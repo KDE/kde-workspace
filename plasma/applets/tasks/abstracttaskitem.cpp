@@ -375,7 +375,6 @@ QTextOption AbstractTaskItem::textOption() const
     QTextOption option;
     option.setTextDirection(direction);
     option.setAlignment(alignment);
-    option.setWrapMode(QTextOption::WordWrap);
 
     return option;
 }
