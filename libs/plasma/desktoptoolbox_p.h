@@ -64,7 +64,6 @@ private:
     KIcon m_icon;
     EmptyGraphicsItem *m_toolBacker;
     QTime m_stopwatch;
-    const int m_size;
     KIcon m_iconSelected;
     int m_size;
     bool m_hidden;
