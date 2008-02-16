@@ -78,6 +78,7 @@ DesktopToolbox::DesktopToolbox(QGraphicsItem *parent)
     : QGraphicsItem(parent),
       m_icon("plasma"),
       m_toolBacker(0),
+      m_iconSelected("plasma"),
       m_size(50),
       m_showing(false),
       m_animId(0),
@@ -132,13 +133,13 @@ void DesktopToolbox::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     const qreal progress = m_animFrame / m_size;
 
     if (progress > 0.1) {
-        m_icon.paint(painter, QRect(m_size*2 - 34, 2, 32, 32));
+        m_iconSelected.paint(painter, QRect(m_size*2 - 34, 2, 32, 32), Qt::AlignCenter, QIcon::Disabled, QIcon::Off);
     }
-
-    if (progress <= 0.9) {
+  
+    if (progress < 0.95) {
         painter->save();
-        painter->setOpacity(1 - progress);
-        m_icon.paint(painter, QRect(m_size*2 - 34, 2, 32, 32), Qt::AlignCenter, QIcon::Disabled, QIcon::Off);
+        painter->setOpacity(1.0 - m_animFrame / m_size);
+        m_icon.paint(painter, QRect(m_size*2 - 34, 2, 32, 32));
         painter->restore();
     }
 }

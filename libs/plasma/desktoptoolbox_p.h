@@ -65,6 +65,8 @@ private:
     EmptyGraphicsItem *m_toolBacker;
     QTime m_stopwatch;
     const int m_size;
+    KIcon m_iconSelected;
+    int m_size;
     bool m_hidden;
     bool m_showing;
     Plasma::Phase::AnimId m_animId;
