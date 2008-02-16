@@ -158,6 +158,15 @@ void DesktopToolbox::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
         QGraphicsItem::hoverEnterEvent(event);
         return;
     }
+    showToolbox();
+    QGraphicsItem::hoverEnterEvent(event);
+}
+
+void DesktopToolbox::showToolbox()
+{
+    if (m_showing) {
+        return;
+    }
 
     int maxwidth = 0;
     foreach (QGraphicsItem* tool, QGraphicsItem::children()) {
@@ -215,6 +224,15 @@ void DesktopToolbox::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     if ((m_toolBacker && m_toolBacker->rect().contains(event->scenePos().toPoint())) ||
         m_stopwatch.elapsed() < 100) {
         QGraphicsItem::hoverLeaveEvent(event);
+        return;
+    }
+    hideToolbox();
+    QGraphicsItem::hoverLeaveEvent(event);
+}
+
+void DesktopToolbox::hideToolbox()
+{
+    if (!m_showing) {
         return;
     }
 

@@ -48,6 +48,9 @@ public:
     bool isToolEnabled(const QString &tool) const;
     QGraphicsItem* tool(const QString &tool) const;
 
+    void showToolbox();
+    void hideToolbox();
+
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
