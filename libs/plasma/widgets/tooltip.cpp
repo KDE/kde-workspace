@@ -277,7 +277,13 @@ void ToolTip::paintEvent(QPaintEvent *)
     maskPainter.setBrush(Qt::black);
     maskPainter.setPen(Qt::black);
 
+
+#if QT_VERSION < 0x040400
+    maskPainter.drawPath(roundedRectangle(mask.rect(), 10));
+#else
     maskPainter.drawPath(roundedRectangle(mask.rect().adjusted(-1,-1,-1,-1), 10));
+#endif
+
     setMask(mask);
 
     painter.setPen(Qt::black);
