@@ -25,7 +25,9 @@
 #include <QCheckBox>
 #include <QVBoxLayout>
 #include <QGraphicsView>
-#include <QtDebug>
+#include <QMetaObject>
+#include <QMetaEnum>
+#include <QPointer>
 
 // KDE
 #include <KIcon>
