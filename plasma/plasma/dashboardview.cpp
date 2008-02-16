@@ -133,7 +133,6 @@ void DashboardView::toggleVisibility()
         containment()->showToolbox();
     } else {
         hideView();
-        containment()->hideToolbox();
     }
 }
 
@@ -143,6 +142,7 @@ void DashboardView::hideView()
         m_appletBrowserWidget->hide();
     }
 
+    containment()->hideToolbox();
     containment()->enableToolBoxTool("zoomOut", m_zoomOut);
     containment()->enableToolBoxTool("zoomIn", m_zoomIn);
     containment()->enableToolBoxTool("hideDashboard", false);
