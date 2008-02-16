@@ -64,7 +64,9 @@ class Widget::Private
 
         // Replace with CacheMode in 4.4
 #if QT_VERSION >= 0x040400
+#ifdef __GNUC__ 
 #warning Replace Plasma::Widget::CachePaintMode with QGraphicsItem::CacheMode
+#endif
 #endif
         Widget::CachePaintMode cachePaintMode;
         QSize cacheSize;
