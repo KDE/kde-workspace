@@ -22,6 +22,7 @@
 
 #include <QGraphicsItem>
 #include <QObject>
+#include <QTime>
 
 #include <KIcon>
 
@@ -59,6 +60,7 @@ protected slots:
 private:
     KIcon m_icon;
     EmptyGraphicsItem *m_toolBacker;
+    QTime m_stopwatch;
     const int m_size;
     bool m_hidden;
     bool m_showing;
