@@ -277,7 +277,7 @@ void ToolTip::paintEvent(QPaintEvent *)
     maskPainter.setBrush(Qt::black);
     maskPainter.setPen(Qt::black);
 
-    maskPainter.drawPath(roundedRectangle(mask.rect(), 10));
+    maskPainter.drawPath(roundedRectangle(mask.rect().adjusted(-1,-1,-1,-1), 10));
     setMask(mask);
 
     painter.setPen(Qt::black);
