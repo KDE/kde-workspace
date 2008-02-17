@@ -132,7 +132,7 @@ void DefaultDesktop::constraintsUpdated(Plasma::Constraints constraints)
     }
 
     if (constraints & Plasma::SizeConstraint) {
-        m_renderer.setSize(resolution()); 
+        m_renderer.setSize(resolution());
         updateBackground();
     }
 
@@ -154,12 +154,12 @@ void DefaultDesktop::configure()
 {
     KConfigGroup cg = config();
     if (m_configDialog == 0) {
-        const QSize resolution = 
+        const QSize resolution =
             QApplication::desktop()->screenGeometry(screen()).size();
         m_configDialog = new BackgroundDialog(resolution, cg, 0);
-        connect(m_configDialog, SIGNAL(okClicked()), 
+        connect(m_configDialog, SIGNAL(okClicked()),
                 this, SLOT(applyConfig()));
-        connect(m_configDialog, SIGNAL(applyClicked()), 
+        connect(m_configDialog, SIGNAL(applyClicked()),
                 this, SLOT(applyConfig()));
     }
     else {
@@ -186,12 +186,13 @@ void DefaultDesktop::reloadConfig(bool skipUpdates)
 
     // If no wallpaper is set, a default will be set in updateBackground()
     // which is called as soon as constraints are updated.
+    QString oldWallpaperPath(m_wallpaperPath);
     m_wallpaperPath = cg.readEntry("wallpaper", "");
     if (!m_wallpaperPath.isEmpty()) {
         kDebug() << "Using configured wallpaper" << m_wallpaperPath;
     }
 
-    m_backgroundMode = cg.readEntry("backgroundmode", 
+    m_backgroundMode = cg.readEntry("backgroundmode",
         (int) BackgroundDialog::kStaticBackground);
 
     // used in both modes, so read it no matter which mode we are in
@@ -209,7 +210,7 @@ void DefaultDesktop::reloadConfig(bool skipUpdates)
         QStringList dirs = cg.readEntry("slidepaths", QStringList());
         QStringList filters;
         filters << "*.png" << "*.jpeg" << "*.jpg" << "*.svg" << "*.svgz";
-        
+
         m_slideFiles.clear();
 
         for (int i = 0; i < dirs.size(); ++i) {
@@ -265,11 +266,11 @@ void DefaultDesktop::updateBackground()
         emit configNeedsSaving();
     }
 
-    m_current_renderer_token = 
+    m_current_renderer_token =
         m_renderer.render(m_wallpaperPath,
                           m_wallpaperColor,
                           (Background::ResizeMethod)m_wallpaperPosition,
-                          Qt::SmoothTransformation);                       
+                          Qt::SmoothTransformation);
 }
 
 void DefaultDesktop::updateBackground(int token, const QImage &img)
