@@ -38,6 +38,7 @@
 
 #include <ksmserver_interface.h>
 
+#include "plasma/appletbrowser.h"
 #include <plasma/corona.h>
 #include <plasma/containment.h>
 
@@ -101,7 +102,8 @@ PlasmaApp* PlasmaApp::self()
 PlasmaApp::PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap)
     : KUniqueApplication(display, visual, colormap),
       m_root(0),
-      m_corona(0)
+      m_corona(0),
+      m_appletBrowser(0)
 {
     KGlobal::locale()->insertCatalog("libplasma");
 
@@ -163,7 +165,7 @@ PlasmaApp::PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap)
 
 PlasmaApp::~PlasmaApp()
 {
-
+    delete m_appletBrowser;
 }
 
 void PlasmaApp::cleanup()
@@ -218,6 +220,33 @@ Plasma::Corona* PlasmaApp::corona()
     }
 
     return m_corona;
+}
+
+void PlasmaApp::showAppletBrowser(Plasma::Containment *containment)
+{
+    if (!containment) {
+        return;
+    }
+
+    if (!m_appletBrowser) {
+        m_appletBrowser = new Plasma::AppletBrowser(containment);
+        m_appletBrowser->setApplication();
+        m_appletBrowser->setAttribute(Qt::WA_DeleteOnClose);
+        m_appletBrowser->setWindowTitle(i18n("Add Widgets"));
+        m_appletBrowser->setWindowIcon(KIcon("plasmagik"));
+        connect(m_appletBrowser, SIGNAL(destroyed()), this, SLOT(appletBrowserDestroyed()));
+    } else {
+        m_appletBrowser->setContainment(containment);
+    }
+
+    KWindowSystem::setOnDesktop(m_appletBrowser->winId(), KWindowSystem::currentDesktop());
+    m_appletBrowser->show();
+    KWindowSystem::activateWindow(m_appletBrowser->winId());
+}
+
+void PlasmaApp::appletBrowserDestroyed()
+{
+    m_appletBrowser = 0;
 }
 
 bool PlasmaApp::hasComposite()

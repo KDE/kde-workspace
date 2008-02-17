@@ -26,6 +26,8 @@
 
 namespace Plasma
 {
+    class AppletBrowser;
+    class Containment;
     class Corona;
     class Containment;
 } // namespace Plasma
@@ -44,6 +46,7 @@ public:
 
     void notifyStartup(bool completed);
     Plasma::Corona* corona();
+    void showAppletBrowser(Plasma::Containment* containment);
 
 public Q_SLOTS:
     // DBUS interface. if you change these methods, you MUST run:
@@ -54,6 +57,7 @@ public Q_SLOTS:
 private Q_SLOTS:
     void setCrashHandler();
     void cleanup();
+    void appletBrowserDestroyed();
 
 private:
     PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap);
@@ -63,6 +67,7 @@ private:
     RootWidget *m_root;
     Plasma::Corona *m_corona;
     QList<PanelView*> m_panels;
+    Plasma::AppletBrowser *m_appletBrowser;
 };
 
 #endif // multiple inclusion guard
