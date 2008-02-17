@@ -138,9 +138,15 @@ void IconApplet::constraintsUpdated(Plasma::Constraints constraints)
             formFactor() == Plasma::MediaCenter) {
             m_icon->setText(m_text);
             setMinimumContentSize(m_icon->sizeFromIconSize(IconSize(KIconLoader::Desktop)));
+            m_icon->setToolTip(Plasma::ToolTipData());
         } else {
             m_icon->setText(0);
             setMinimumContentSize(m_icon->sizeFromIconSize(IconSize(KIconLoader::Panel)));
+            Plasma::ToolTipData data;
+            data.mainText = m_text;
+            data.subText = m_genericName;
+            data.image = m_icon->icon().pixmap(IconSize(KIconLoader::Desktop));
+            m_icon->setToolTip(data);
         }
     }
 
