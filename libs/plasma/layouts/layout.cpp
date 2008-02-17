@@ -149,7 +149,7 @@ void Layout::setAnimator(LayoutAnimator *animator)
     d->animator = animator;
 }
 
-qreal Layout::margin(MarginEdge edge) const
+qreal Layout::margin(Plasma::MarginEdge edge) const
 {
     switch (edge) {
         case LeftMargin:
@@ -169,7 +169,7 @@ qreal Layout::margin(MarginEdge edge) const
     return 0;
 }
 
-void Layout::setMargin(MarginEdge edge, qreal m)
+void Layout::setMargin(Plasma::MarginEdge edge, qreal m)
 {
     switch (edge) {
         case LeftMargin:
