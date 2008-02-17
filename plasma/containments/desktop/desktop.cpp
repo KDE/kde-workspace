@@ -89,11 +89,11 @@ DefaultDesktop::~DefaultDesktop()
 
 void DefaultDesktop::init()
 {
-    reloadConfig();
+    reloadConfig(true);
     Containment::init();
 }
 
-void DefaultDesktop::nextSlide()
+void DefaultDesktop::nextSlide(bool skipUpdates)
 {
     if (++m_currentSlide >= m_slideFiles.size()) {
         m_currentSlide = 0;
@@ -112,7 +112,9 @@ void DefaultDesktop::nextSlide()
         }
 
         m_wallpaperPath = m_slideFiles[m_currentSlide];
-        updateBackground();
+        if (!skipUpdates) {
+            updateBackground();
+        }
     }
 }
 
@@ -176,7 +178,7 @@ void DefaultDesktop::applyConfig()
     reloadConfig();
 }
 
-void DefaultDesktop::reloadConfig()
+void DefaultDesktop::reloadConfig(bool skipUpdates)
 {
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
 
@@ -237,7 +239,7 @@ void DefaultDesktop::reloadConfig()
             m_slideshowTimer.start();
         }
         m_currentSlide = -1;
-        nextSlide();
+        nextSlide(true);
     }
 
     if (s_icons) {
