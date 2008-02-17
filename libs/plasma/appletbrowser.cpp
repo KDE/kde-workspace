@@ -87,7 +87,7 @@ void AppletBrowserWidget::Private::initFilters()
         QString icon    = configGroup.readEntry("recommended." + id + ".icon");
         QString plugins = configGroup.readEntry("recommended." + id + ".plugins");
 
-        appletList->addEmblem(i18n("Recommended by %1", caption), new KIcon(icon), 
+        appletList->addEmblem(i18n("Recommended by %1", caption), new KIcon(icon),
                               KCategorizedItemsViewModels::Filter("recommended." + id, true));
         filterModel.addFilter(i18n("Recommended by %1", caption),
                               KCategorizedItemsViewModels::Filter("recommended." + id, true), new KIcon(icon));
@@ -161,16 +161,16 @@ void AppletBrowserWidget::init()
         connect(addButton, SIGNAL(clicked()), this, SLOT(addApplet()));
         buttonLayout->addWidget( addButton );
 
-        QPushButton *newButton = new QPushButton(i18n("Get New Widgets"), this ); //TODO: not overly happy with this text
+/*        QPushButton *newButton = new QPushButton(i18n("Get New Widgets"), this ); //TODO: not overly happy with this text
         newButton->setEnabled( false ); //TODO: enable when GHNS integration is implemented
         connect(newButton, SIGNAL(clicked()), this, SLOT(downloadApplets()));
-        buttonLayout->addWidget( newButton );
+        buttonLayout->addWidget( newButton );*/
 
         layout->addItem( buttonLayout );
     }
 
     // Other Emblems
-    d->appletList->addEmblem(i18n("Widgets I Have Used Before"), new KIcon("view-history"), 
+    d->appletList->addEmblem(i18n("Widgets I Have Used Before"), new KIcon("view-history"),
                                 KCategorizedItemsViewModels::Filter("used", true));
 
     d->initFilters();
@@ -313,13 +313,13 @@ void AppletBrowser::init()
 
     setWindowTitle(i18n("Widgets"));
 
-    setButtons(KDialog::Apply | KDialog::Close | KDialog::User1);
+    setButtons(KDialog::Apply | KDialog::Close /*| KDialog::User1*/);
     setButtonText(KDialog::Apply, i18n("Add Widget"));
-    setButtonText(KDialog::User1, i18n("Get New Widgets")); //TODO: not overly happy with this text
-    enableButton(KDialog::User1, false); //TODO: enable when GHNS integration is implemented
+//    setButtonText(KDialog::User1, i18n("Get New Widgets")); //TODO: not overly happy with this text
+//    enableButton(KDialog::User1, false); //TODO: enable when GHNS integration is implemented
 
     connect(this, SIGNAL(applyClicked()), m_widget, SLOT(addApplet()));
-    connect(this, SIGNAL(user1Clicked()), m_widget, SLOT(downloadApplets()));
+//    connect(this, SIGNAL(user1Clicked()), m_widget, SLOT(downloadApplets()));
 
     QAction* quit = KStandardAction::quit(qApp, SLOT(quit()), this);
     addAction(quit);
