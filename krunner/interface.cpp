@@ -59,6 +59,7 @@
 #include "runners/shell/shellrunner.h"
 #include "collapsiblewidget.h"
 #include "interfaceadaptor.h"
+#include "krunnersettings.h"
 
 using ThreadWeaver::Weaver;
 using ThreadWeaver::Job;
@@ -138,6 +139,34 @@ class SearchMatch : public QListWidgetItem
             } else {
                 setText( text().mid( 9 ) );
             }
+        }
+
+        bool operator<(const QListWidgetItem & other) const
+        {
+            // Rules:
+            //      0. Default wins. Always.
+            //      1. Exact trumps informational
+            //      2. Informational trumps possible
+            //      3. Higher relevance wins
+
+            const SearchMatch *otherMatch = dynamic_cast<const SearchMatch*>(&other);
+
+            if (!otherMatch) {
+                return QListWidgetItem::operator<(other);
+            }
+
+            if (otherMatch->m_default) {
+                return true;
+            }
+
+            Plasma::SearchMatch::Type myType = m_action->type();
+            Plasma::SearchMatch::Type otherType = otherMatch->m_action->type();
+
+            if (myType != otherType) {
+                return myType < otherType;
+            }
+
+            return m_action->relevance() < otherMatch->m_action->relevance();
         }
 
     private:
@@ -277,7 +306,7 @@ Interface::Interface(QWidget* parent)
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateMatches()));
 
     const int numProcs = Solid::Device::listFromType(Solid::DeviceInterface::Processor).count();
-    const int numThreads = qMin(12, 2 + ((numProcs - 1) * 2));
+    const int numThreads = qMin(KRunnerSettings::maxThreads(), 2 + ((numProcs - 1) * 2));
     //kDebug() << "setting up" << numThreads << "threads for" << numProcs << "processors";
     Weaver::instance()->setMaximumNumberOfThreads(numThreads);
 
@@ -302,13 +331,14 @@ Interface::Interface(QWidget* parent)
     connect(m_searchTerm, SIGNAL(returnPressed()),
             this, SLOT(exec()));
 
-    KConfigGroup cg(KGlobal::config(), "General");
-    QStringList executions = cg.readEntry("pastqueries", QStringList());
+    QStringList executions = KRunnerSettings::pastQueries();
     //Handle updates to the completion object as well
     m_searchTerm->setHistoryItems(executions, true);
 
     //TODO: temporary feedback, change later with the "icon parade" :)
     m_matchList = new QListWidget(w);
+    //m_matchList->setSortingEnabled(true);
+
     connect( m_matchList, SIGNAL(itemActivated(QListWidgetItem*)),
              SLOT(matchActivated(QListWidgetItem*)) );
     connect( m_matchList, SIGNAL(itemClicked(QListWidgetItem*)),
@@ -361,11 +391,8 @@ Interface::Interface(QWidget* parent)
     //        SLOT(setWidgetPalettes()));
 
     //TODO: how should we order runners, particularly ones loaded from plugins?
-    m_runners.append( new ShellRunner( this ) );
-    m_runners.append( new ServiceRunner( this ) );
-    m_runners.append( new SessionRunner( this ) );
-    QStringList whitelist = cg.readEntry( "runners",QStringList() );
-    m_runners += Plasma::AbstractRunner::loadRunners( this, whitelist );
+    QStringList whitelist = KRunnerSettings::runners();
+    m_runners += Plasma::AbstractRunner::loadRunners(this, whitelist);
 
     connect(&m_context, SIGNAL(matchesChanged()), this, SLOT(queueUpdates()));
 
@@ -376,16 +403,14 @@ Interface::Interface(QWidget* parent)
 
 Interface::~Interface()
 {
-    KConfigGroup cg(KGlobal::config(), "General");
-    cg.writeEntry("pastqueries", m_searchTerm->historyItems());
+    KRunnerSettings::setPastQueries(m_searchTerm->historyItems());
     m_context.clearMatches();
 }
 
 void Interface::clearHistory()
 {
     m_searchTerm->clearHistory();
-    KConfigGroup cg(KGlobal::config(), "General");
-    cg.writeEntry("pastqueries", m_searchTerm->historyItems());
+    KRunnerSettings::setPastQueries(m_searchTerm->historyItems());
 }
 
 void Interface::display(const QString& term)
@@ -435,7 +460,7 @@ void Interface::switchUser()
     sessionrunner->match(&m_context);
 
     foreach (Plasma::SearchMatch *action, m_context.exactMatches()) {
-        bool makeDefault = action->type() != Plasma::SearchMatch::InformationalMatch;
+        bool makeDefault = !m_defaultMatch && action->type() != Plasma::SearchMatch::InformationalMatch;
 
         SearchMatch *match = new SearchMatch(action, m_matchList);
 
@@ -449,6 +474,8 @@ void Interface::switchUser()
 
     if (!m_defaultMatch) {
         m_matchList->addItem(i18n("No desktop sessions available"));
+    } else {
+        m_matchList->sortItems(Qt::DescendingOrder);
     }
 }
 
@@ -558,7 +585,6 @@ void Interface::updateMatches()
 {
     m_matchList->clear();
 
-    int matchCount = 0;
     m_defaultMatch = 0;
     QList<QList<Plasma::SearchMatch *> > matchLists;
     matchLists << m_context.informationalMatches()
@@ -569,8 +595,7 @@ void Interface::updateMatches()
         foreach (Plasma::SearchMatch *action, matchList) {
             bool makeDefault = !m_defaultMatch && action->isEnabled();
 
-            SearchMatch *match = new SearchMatch(action, 0);
-            m_matchList->insertItem(matchCount, match);
+            SearchMatch *match = new SearchMatch(action, m_matchList);
 
             if (makeDefault &&
                 action->relevance() > 0 &&
@@ -581,10 +606,10 @@ void Interface::updateMatches()
                 m_optionsButton->setEnabled(action->runner()->hasMatchOptions());
                 m_runButton->setEnabled(true);
             }
-
-            ++matchCount;
         }
     }
+
+    m_matchList->sortItems(Qt::DescendingOrder);
 
     if (!m_defaultMatch) {
         if (m_execQueued && Weaver::instance()->isIdle() ) {
