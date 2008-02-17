@@ -49,6 +49,7 @@ set(plasma_LIB_SRCS
     searchcontext.cpp
     shadowitem.cpp
     svg.cpp
+    svgpanel.cpp
     theme.cpp
     desktoptoolbox.cpp
     uiloader.cpp
