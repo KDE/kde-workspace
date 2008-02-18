@@ -2,7 +2,9 @@
 macro_bool_to_01(X11_Xscreensaver_FOUND HAVE_XSCREENSAVER)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard
-${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processcore/)
+${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processcore/
+${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processui/
+)
 
 configure_file(config-xautolock.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-xautolock.h)
 
