@@ -545,8 +545,8 @@ void Pager::paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *op
     drawingColor.setAlpha(238);
     QBrush activeWindowBrush(drawingColor);
 
-    kDebug() << "InActive (brush, pen): " << windowBrush.color() << windowPen.color();
-    kDebug() << "Active (brush, pen)  : " << activeWindowBrush.color() << activeWindowPen.color();
+    //kDebug() << "InActive (brush, pen): " << windowBrush.color() << windowPen.color();
+    //kDebug() << "Active (brush, pen)  : " << activeWindowBrush.color() << activeWindowPen.color();
 
     painter->setPen(Qt::NoPen);
     for (int i = 0; i < m_desktopCount; i++) {
