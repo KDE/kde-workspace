@@ -393,6 +393,10 @@ Interface::Interface(QWidget* parent)
     //TODO: how should we order runners, particularly ones loaded from plugins?
     QStringList whitelist = KRunnerSettings::runners();
     m_runners += Plasma::AbstractRunner::loadRunners(this, whitelist);
+    // Load Integrated Runners
+    m_runners.prepend( new ShellRunner(this) );
+    m_runners.prepend( new ServiceRunner(this) );
+    m_runners.prepend( new SessionRunner(this) );
 
     connect(&m_context, SIGNAL(matchesChanged()), this, SLOT(queueUpdates()));
 
