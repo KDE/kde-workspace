@@ -154,6 +154,5 @@ void KBlankSaver::blank()
 	QPalette palette;
 	palette.setColor( backgroundRole(), color );
 	setPalette(palette);
-	update();
 }
 
