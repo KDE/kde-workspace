@@ -72,6 +72,15 @@ public:
     }
 
 protected:
+    virtual bool eventFilter( QObject *, QEvent *e )
+    {
+        if (e->type() == QEvent::KeyPress) {
+            keyPressEvent( (QKeyEvent *)e );
+            return true;
+        }
+        return false;
+    }
+
     virtual void keyPressEvent(QKeyEvent *e)
     {
         if (e->text() == QLatin1String("q"))
@@ -172,6 +181,11 @@ int kScreenSaverMain( int argc, char** argv, KScreenSaverInterface& screenSaverI
 
     target = screenSaverInterface.create( saveWin );
     target->show();
+
+    if (demoWidget)
+    {
+        target->installEventFilter( demoWidget );
+    }
 
     args->clear();
     app.exec();
