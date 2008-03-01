@@ -807,7 +807,7 @@ Type=SHORTCUT
 [Data_1_5]
 Comment=By pressing Alt+Ctrl+W a D-Bus call will be performed that will show the minicli. You can use any kind of D-Bus call, just like using the command line 'qdbus' tool.
 Comment[bg]=Чрез натискане на Alt+Ctrl+W ще бъде изпълнена заявка към D-Bus.
-Comment[ca]=Prement Alt+Ctrl+W s'executarà una crida D-Bus que mostrarà el «minicli». Podeu usar qualsvol classe de crida D-Bus, com si estiguéssiu usant l'eina 'qdbus' de la línia d'ordres.
+Comment[ca]=Prement Alt+Ctrl+W s'executarà una crida D-Bus que mostrarà el «minicli». Podeu usar qualsevol classe de crida D-Bus, com si estiguéssiu usant l'eina 'qdbus' de la línia d'ordres.
 Comment[da]=Ved at trykke Alt+Ctrl+W vil et D-Bus-kald blive udført som vil vise minicli. Du kan bruge ethvert D-Bus-kald, ligesom at bruge kommandolinjeværktøjet 'qdbus'.
 Comment[de]=Durch Drücken von Strg+Alt+W wird ein D-Bus--Aufruf getätigt, der das Fenster "Befehl ausführen" anzeigt. Natürlich können Sie jede Art von D-Bus-Aufruf verwenden, genauso als würden Sie das Kommandozeilenprogramm "qdbus" verwenden.
 Comment[el]=Πατώντας το Alt+Ctrl+W θα εκτελεστεί μια κλήση D-Bus η οποία θα εμφανίσει το minicli. Μπορείτε να χρησιμοποιήσετε οποιαδήποτε κλήση D-Bus, όπως ακριβώς και με το εργαλείο της γραμμής εντολών 'qdbus'.
