@@ -47,6 +47,7 @@
 #include <KMimeType>
 #include <KDebug>
 #include <KColorScheme>
+#include <KGlobalSettings>
 
 #include <plasma/theme.h>
 
@@ -1021,6 +1022,14 @@ void Icon::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     }
 
     update();
+}
+
+void Icon::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    Q_UNUSED(event)
+    if (!KGlobalSettings::singleClick()) {
+        emit doubleClicked();
+    }
 }
 
 void Icon::hoverEnterEvent(QGraphicsSceneHoverEvent *event)

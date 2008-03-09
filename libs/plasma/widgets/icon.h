@@ -218,11 +218,17 @@ Q_SIGNALS:
     */
     void clicked();
 
+    /**
+    * Indicates when the icon has been double clicked.
+    */
+    void doubleClicked();
+
 protected:
     bool isDown();
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
