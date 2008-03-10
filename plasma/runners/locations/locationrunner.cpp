@@ -52,7 +52,7 @@ LocationsRunner::~LocationsRunner()
 
 void LocationsRunner::match(Plasma::SearchContext *search)
 {
-    QString term = search->searchTerm().toLower();
+    QString term = search->searchTerm();
     m_type = search->type();
 
     if (m_type == Plasma::SearchContext::Directory ||
