@@ -124,6 +124,7 @@ LockProcess::LockProcess(bool child, bool useBlankOnly)
     QX11Info info;
     XGetWindowAttributes(QX11Info::display(), RootWindow(QX11Info::display(),
                                                          info.screen()), &rootAttr);
+    kapp->desktop(); // make Qt set its event mask on the root window first
     XSelectInput( QX11Info::display(), QX11Info::appRootWindow(),
                   SubstructureNotifyMask | rootAttr.your_event_mask );
     setGeometry(0, 0, rootAttr.width, rootAttr.height);
