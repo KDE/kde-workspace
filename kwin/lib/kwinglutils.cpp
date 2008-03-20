@@ -425,6 +425,11 @@ bool GLTexture::isNull() const
     return mTexture == None;
     }
 
+QSize GLTexture::size() const
+    {
+    return mSize;
+    }
+
 bool GLTexture::load( const QImage& image, GLenum target )
     {
     if( image.isNull())
