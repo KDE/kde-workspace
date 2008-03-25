@@ -53,8 +53,9 @@ public:
     KDialog *dialog;
     QCheckBox *switchOnHoverCheckBox;
     KIntNumInput *visibleCountEdit;
+    QAction* switcher;
 
-    Private() : launcher(0), dialog(0) {}
+    Private() : launcher(0), dialog(0), switcher(0) {}
     ~Private() { delete dialog; delete launcher; }
 };
 
@@ -81,11 +82,9 @@ LauncherApplet::~LauncherApplet()
 
 void LauncherApplet::init()
 {
-    KConfigGroup cg = config();
-    d->switchTabsOnHover = cg.readEntry("SwitchTabsOnHover",d->switchTabsOnHover);
-    d->visibleItemsCount = cg.readEntry("VisibleItemsCount",d->visibleItemsCount);
-}
-
+    QAction* switcher = new QAction(i18n("Switch to Classic Menu Style"), this);
+    d->actions.append(switcher);
+    connect(switcher, SIGNAL(triggered(bool)), this, SLOT(switchMenuStyle()));
 Qt::Orientations LauncherApplet::expandingDirections() const
 {
     return 0;
@@ -113,6 +112,10 @@ void LauncherApplet::constraintsUpdated(Plasma::Constraints constraints)
     }
 }
 
+    if (containment()) {
+        containment()->addApplet("simplelauncher", QVariantList(), 0, geometry());
+        destroy();
+    }
 void LauncherApplet::showConfigurationInterface()
 {
     if (! d->dialog) {
