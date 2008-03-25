@@ -25,6 +25,7 @@
 #include <QtCore/QStringList>
 
 #include <KDE/KConfigGroup>
+#include <KDE/KService>
 
 #include <plasma/plasma_export.h>
 #include <plasma/searchmatch.h>
@@ -148,7 +149,9 @@ class PLASMA_EXPORT AbstractRunner : public QObject
         void setSpeed(Speed newSpeed);
 
 
+        KService::List serviceQuery(const QString &serviceType, const QString &constraint) const;
         const QMutex& bigLock() const;
+
     private:
         class Private;
         Private* const d;

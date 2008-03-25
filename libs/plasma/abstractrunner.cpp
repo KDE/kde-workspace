@@ -39,6 +39,8 @@ class AbstractRunner::Private
 };
 
 QMutex AbstractRunner::Private::bigLock;
+
+AbstractRunner::AbstractRunner(QObject *parent)
     : QObject(parent),
       d(new Private())
 {
@@ -60,7 +62,7 @@ KConfigGroup AbstractRunner::config() const
     return KConfigGroup(&runners, group);
 }
 
-void AbstractRunner::performMatch( Plasma::SearchContext &globalContext )
+void AbstractRunner::performMatch(Plasma::SearchContext &globalContext)
 {
     Plasma::SearchContext localContext( 0, globalContext );
     //Keep track of global context list sizes so we know which pointers are our responsibility to delete
@@ -122,12 +124,17 @@ void AbstractRunner::setSpeed(Speed speed)
     d->speed = speed;
 }
 
+KService::List AbstractRunner::serviceQuery(const QString &serviceType, const QString &constraint) const
+{
     QMutexLocker lock(&Private::bigLock);
+    return KServiceTypeTrader::self()->query(serviceType, constraint);
 }
 
 const QMutex& AbstractRunner::bigLock() const
 {
     return Private::bigLock;
+}
+
 void AbstractRunner::exec(Plasma::SearchMatch *action)
 {
     Q_UNUSED(action)
