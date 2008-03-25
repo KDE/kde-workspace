@@ -108,12 +108,21 @@ void DashboardView::appletBrowserDestroyed()
     m_appletBrowserWidget = 0;
 }
 
+bool DashboardView::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched != m_appletBrowserWidget) {
         if (event->type() == QEvent::MouseButtonPress) {
             QMouseEvent *me = static_cast<QMouseEvent *>(event);
             if (me->button() == Qt::LeftButton) {
                 hideView();
             }
         }
+        return false;
+    }
+
+    return false;
+}
+
 void DashboardView::toggleVisibility()
 {
     if (isHidden()) {
