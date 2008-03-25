@@ -63,6 +63,7 @@ public:
 
     Private(Launcher *launcher)
         : q(launcher)
+        , applet(0)
         , urlLauncher(new UrlItemLauncher(launcher))
         , resizeHandle(0)
         , searchBar(0)
@@ -236,6 +237,7 @@ public:
     }
 
     Launcher * const q;
+    Plasma::Applet *applet;
     UrlItemLauncher *urlLauncher;
     ResizeHandle *resizeHandle;
     SearchBar *searchBar;
@@ -278,6 +280,19 @@ protected:
 Launcher::Launcher(QWidget *parent)
     : QWidget(parent, Qt::Window)
     , d(new Private(this))
+{
+    init();
+}
+
+Launcher::Launcher(Plasma::Applet *applet)
+    : QWidget(0, Qt::Window)
+    , d(new Private(this))
+{
+    init();
+    setApplet(applet);
+}
+
+void Launcher::init()
 {
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setSpacing(0);
@@ -375,7 +390,12 @@ int Launcher::visibleItemCount() const
 
 void Launcher::setApplet(Plasma::Applet *applet)
 {
+    d->applet = applet;
     d->contextMenuFactory->setApplet(applet);
+
+    KConfigGroup cg = applet->config();
+    setSwitchTabsOnHover(cg.readEntry("SwitchTabsOnHover", switchTabsOnHover()));
+    setVisibleItemCount(cg.readEntry("VisibleItemsCount", visibleItemCount()));
 }
 
 void Launcher::reset()
@@ -548,8 +568,6 @@ void Launcher::paintEvent(QPaintEvent*)
     p.drawRect(rect().adjusted(0, 0, -1, -1));
 }
 
-}
-
 void Launcher::resizeEvent(QResizeEvent *e)
 {
     d->resizeHandle->move(width()-d->resizeHandle->width() - 1, 1);
@@ -591,5 +609,7 @@ void Launcher::mouseMoveEvent(QMouseEvent *e)
        setGeometry( x(), newY, newWidth, newHeight);
     }
     QWidget::mouseMoveEvent(e);
+}
+
 #include "launcher.moc"
 

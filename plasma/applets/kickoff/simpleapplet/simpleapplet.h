@@ -57,8 +57,6 @@ public:
         void constraintsUpdated(Plasma::Constraints constraints);
         Qt::Orientations expandingDirections() const;
 
-        virtual QList<QAction*> contextActions();
-
 public slots:
         void showConfigurationInterface();
         void switchMenuStyle();

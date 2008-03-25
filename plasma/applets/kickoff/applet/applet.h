@@ -44,13 +44,9 @@ public:
         LauncherApplet(QObject *parent, const QVariantList &args);
         virtual ~LauncherApplet();
 
-        void init();
-
         virtual QSizeF sizeHint() const;
         void constraintsUpdated(Plasma::Constraints constraints);
         Qt::Orientations expandingDirections() const;
-
-        virtual QList<QAction*> contextActions();
 
 public slots:
         void showConfigurationInterface();

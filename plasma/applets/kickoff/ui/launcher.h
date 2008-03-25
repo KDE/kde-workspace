@@ -40,7 +40,8 @@ Q_OBJECT
 
 public:
     /** Construct a new Launcher with the specified parent. */
-    Launcher(QWidget *parent = 0);
+    explicit Launcher(QWidget *parent = 0);
+    explicit Launcher(Plasma::Applet *applet);
     ~Launcher();
 
     /** Specifies whether the launcher should hide itself when an item is activated. */
@@ -88,6 +89,8 @@ private Q_SLOTS:
     void focusFavoritesView();
 
 private:
+    void init();
+
     class Private;
     Private * const d;
 };

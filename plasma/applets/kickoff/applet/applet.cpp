@@ -60,11 +60,9 @@ public:
     ~Private() { delete dialog; delete launcher; }
 };
 
-    QObject::connect(launcher, SIGNAL(configNeedsSaving()), q, SIGNAL(configNeedsSaving()));
 LauncherApplet::LauncherApplet(QObject *parent, const QVariantList &args)
     : Plasma::Applet(parent,args),
       d(new Private)
-      
 {
     setHasConfigurationInterface(true);
 
@@ -81,11 +79,6 @@ LauncherApplet::~LauncherApplet()
     delete d;
 }
 
-void LauncherApplet::init()
-{
-    QAction* switcher = new QAction(i18n("Switch to Classic Menu Style"), this);
-    d->actions.append(switcher);
-    connect(switcher, SIGNAL(triggered(bool)), this, SLOT(switchMenuStyle()));
 Qt::Orientations LauncherApplet::expandingDirections() const
 {
     return 0;
@@ -176,7 +169,7 @@ void LauncherApplet::toggleMenu(bool pressed)
 
     //kDebug() << "Launcher button clicked";
     if (!d->launcher) {
-        d->launcher = new Kickoff::Launcher(0);
+        d->launcher = new Kickoff::Launcher(this);
         d->launcher->setWindowFlags(d->launcher->windowFlags()|Qt::WindowStaysOnTopHint|Qt::Popup);
         d->launcher->setAutoHide(true);
         d->launcher->setSwitchTabsOnHover(d->switchTabsOnHover);
@@ -184,6 +177,7 @@ void LauncherApplet::toggleMenu(bool pressed)
         d->launcher->adjustSize();
         d->launcher->setApplet(this);
         connect(d->launcher, SIGNAL(aboutToHide()), d->icon, SLOT(setUnpressed()));
+        connect(d->launcher, SIGNAL(configNeedsSaving()), this, SIGNAL(configNeedsSaving()));
     }
     d->launcher->reset();
 
@@ -216,11 +210,6 @@ void LauncherApplet::toggleMenu(bool pressed)
 
     d->launcher->setVisible(!d->launcher->isVisible());
     d->icon->setPressed();
-}
-
-QList<QAction*> LauncherApplet::contextActions()
-{
-  return d->actions;
 }
 
 #include "applet.moc"
