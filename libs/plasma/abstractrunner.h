@@ -21,6 +21,7 @@
 #define RUNNER_H
 
 #include <QtCore/QObject>
+#include <QtCore/QMutex>
 #include <QtCore/QStringList>
 
 #include <KDE/KConfigGroup>
@@ -146,6 +147,8 @@ class PLASMA_EXPORT AbstractRunner : public QObject
          */
         void setSpeed(Speed newSpeed);
 
+
+        const QMutex& bigLock() const;
     private:
         class Private;
         Private* const d;

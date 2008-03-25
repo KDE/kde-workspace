@@ -35,9 +35,10 @@ class AbstractRunner::Private
     Private()
       : speed(NormalSpeed)
     {}
+    static QMutex bigLock;
 };
 
-AbstractRunner::AbstractRunner(QObject* parent)
+QMutex AbstractRunner::Private::bigLock;
     : QObject(parent),
       d(new Private())
 {
@@ -121,6 +122,12 @@ void AbstractRunner::setSpeed(Speed speed)
     d->speed = speed;
 }
 
+    QMutexLocker lock(&Private::bigLock);
+}
+
+const QMutex& AbstractRunner::bigLock() const
+{
+    return Private::bigLock;
 void AbstractRunner::exec(Plasma::SearchMatch *action)
 {
     Q_UNUSED(action)
