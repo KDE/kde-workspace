@@ -130,9 +130,9 @@ KService::List AbstractRunner::serviceQuery(const QString &serviceType, const QS
     return KServiceTypeTrader::self()->query(serviceType, constraint);
 }
 
-const QMutex& AbstractRunner::bigLock() const
+QMutex* AbstractRunner::bigLock() const
 {
-    return Private::bigLock;
+    return &Private::bigLock;
 }
 
 void AbstractRunner::exec(Plasma::SearchMatch *action)

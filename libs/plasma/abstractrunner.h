@@ -150,7 +150,7 @@ class PLASMA_EXPORT AbstractRunner : public QObject
 
 
         KService::List serviceQuery(const QString &serviceType, const QString &constraint) const;
-        const QMutex& bigLock() const;
+        QMutex* bigLock() const;
 
     private:
         class Private;
