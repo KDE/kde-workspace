@@ -21,6 +21,7 @@
 #include "applet/applet.h"
 
 // Qt
+#include <QAction>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QGraphicsView>
@@ -112,10 +113,14 @@ void LauncherApplet::constraintsUpdated(Plasma::Constraints constraints)
     }
 }
 
+void LauncherApplet::switchMenuStyle()
+{
     if (containment()) {
         containment()->addApplet("simplelauncher", QVariantList(), 0, geometry());
         destroy();
     }
+}
+
 void LauncherApplet::showConfigurationInterface()
 {
     if (! d->dialog) {
@@ -211,6 +216,11 @@ void LauncherApplet::toggleMenu(bool pressed)
 
     d->launcher->setVisible(!d->launcher->isVisible());
     d->icon->setPressed();
+}
+
+QList<QAction*> LauncherApplet::contextActions()
+{
+  return d->actions;
 }
 
 #include "applet.moc"

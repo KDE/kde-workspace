@@ -148,11 +148,12 @@ void MenuLauncherApplet::init()
 
     Kickoff::UrlItemLauncher::addGlobalHandler(Kickoff::UrlItemLauncher::ExtensionHandler,"desktop",new Kickoff::ServiceItemHandler);
     Kickoff::UrlItemLauncher::addGlobalHandler(Kickoff::UrlItemLauncher::ProtocolHandler, "leave", new Kickoff::LeaveItemHandler);
-}
+
     QAction* switcher = new QAction(i18n("Switch to Kickoff Menu Style"), this);
     d->actions.append(switcher);
     connect(switcher, SIGNAL(triggered(bool)), this, SLOT(switchMenuStyle()));
-
+}
+    
 QSizeF MenuLauncherApplet::sizeHint() const
 {
     //ensure a square size in the panel
@@ -173,9 +174,13 @@ void MenuLauncherApplet::constraintsUpdated(Plasma::Constraints constraints)
     if (constraints & Plasma::SizeConstraint) {
         d->icon->resize(contentSize());
     }
+}
 
-    if (constraints & Plasma::ImmutableConstraint) {
-        d->switcher->setVisible(! isImmutable());
+void MenuLauncherApplet::switchMenuStyle()
+{
+    if (containment()) {
+        containment()->addApplet("launcher", QVariantList(), 0, geometry());
+        destroy();
     }
 }
 
@@ -341,6 +346,11 @@ void MenuLauncherApplet::actionTriggered(QAction *action)
             }
         }
     }
+}
+
+QList<QAction*> MenuLauncherApplet::contextActions()
+{
+  return d->actions;
 }
 
 #include "simpleapplet.moc"
