@@ -30,6 +30,7 @@
 #include <QStackedWidget>
 #include <QTabBar>
 #include <QVBoxLayout>
+#include <QStyleOptionSizeGrip>
 
 // KDE
 #include <KLocalizedString>
@@ -58,6 +59,8 @@ using namespace Kickoff;
 class Launcher::Private
 {
 public:
+    class ResizeHandle;
+
     Private(Launcher *launcher)
         : q(launcher)
         , urlLauncher(new UrlItemLauncher(launcher))
@@ -234,7 +237,7 @@ public:
 
     Launcher * const q;
     UrlItemLauncher *urlLauncher;
-    QLabel *resizeHandle;
+    ResizeHandle *resizeHandle;
     SearchBar *searchBar;
     QStackedWidget *contentArea;
     TabBar *contentSwitcher;
@@ -245,6 +248,31 @@ public:
     bool autoHide;
     int visibleItemCount;
     bool isResizing;
+};
+
+class Launcher::Private::ResizeHandle
+    : public QWidget
+{
+public:
+    ResizeHandle(QWidget *parent = 0)
+        : QWidget(parent)
+    {
+    }
+
+    ~ResizeHandle()
+    {
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event)
+    {
+        QPainter p(this);
+        QStyleOptionSizeGrip opt;
+        opt.initFrom(this);
+        opt.corner = Qt::TopRightCorner;
+        style()->drawControl(QStyle::CE_SizeGrip, &opt, &p);
+        p.end();
+    }
 };
 
 Launcher::Launcher(QWidget *parent)
@@ -269,9 +297,7 @@ Launcher::Launcher(QWidget *parent)
     d->initTabs();
     d->registerUrlHandlers();
 
-    d->resizeHandle = new QLabel(this);
-    d->resizeHandle->setBackgroundRole(QPalette::Window);
-    d->resizeHandle->setAutoFillBackground(true);
+    d->resizeHandle = new Private::ResizeHandle(this);
     d->resizeHandle->setFixedSize(16, 16);
     d->resizeHandle->setCursor(Qt::SizeBDiagCursor);
     setMouseTracking(true);
