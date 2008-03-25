@@ -58,6 +58,7 @@ void WebshortcutRunner::match(Plasma::SearchContext *search)
     QString term = search->searchTerm().toLower();
     m_type = search->type();
 
+    QMutexLocker lock(bigLock());
     foreach (KService::Ptr service, m_offers) {
         //TODO: how about getting the keys for the localized sites?
         foreach (QString key, service->property("Keys").toStringList()) {

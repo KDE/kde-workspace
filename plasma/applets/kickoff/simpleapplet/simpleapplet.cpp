@@ -250,6 +250,11 @@ void MenuLauncherApplet::configAccepted()
     }
 }
 
+Qt::Orientations MenuLauncherApplet::expandingDirections() const
+{
+    return 0;
+}
+
 void MenuLauncherApplet::toggleMenu(bool pressed)
 {
     if (!pressed) {

@@ -41,6 +41,7 @@ Panel::Panel(QObject *parent, const QVariantList &args)
     : Containment(parent, args),
       m_cachedBackground(0),
       m_dialog(0),
+      m_appletBrowserAction(0),
       m_drawTop(true),
       m_drawLeft(true),
       m_drawRight(true),
@@ -81,7 +82,6 @@ QList<QAction*> Panel::contextActions()
         connect(configureAction, SIGNAL(triggered()), this, SLOT(configure()));
 
         m_actions << configureAction << addWidgetsAction;
-        m_removeAction->setVisible(!locked);
     }
 
     return m_actions;
@@ -215,8 +215,13 @@ void Panel::constraintsUpdated(Plasma::Constraints constraints)
                 }
                 kDebug() << "panel containment with geometry of" << c->geometry() << "but really" << c->transform().map(geometry());
             }
-        m_removeAction->setVisible(!locked);
         }
+    }
+
+    if (constraints & Plasma::ImmutableConstraint && m_appletBrowserAction) {
+        // we need to update the menu items that have already been created
+        bool locked = isImmutable();
+        m_appletBrowserAction->setVisible(!locked);
     }
 }
 
