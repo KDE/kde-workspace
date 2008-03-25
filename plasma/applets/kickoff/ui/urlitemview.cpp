@@ -130,7 +130,11 @@ public:
         font.setBold(true);
         font.setPointSize(font.pointSize()+1);
         painter->setFont(font);
-        painter->setPen(QPen(option.palette.text(),0));
+            gradient.setColorAt(0.0, Qt::transparent);
+            gradient.setColorAt(0.1, option.palette.midlight().color());
+            gradient.setColorAt(0.5, option.palette.mid().color());
+            gradient.setColorAt(0.9, option.palette.midlight().color());
+            gradient.setColorAt(1.0, Qt::transparent);
         QString text = index.data(Qt::DisplayRole).value<QString>();
         int dy = (int)(index.row() > 0 ? ItemDelegate::HEADER_HEIGHT / 4.0 : 0);
         painter->drawText(option.rect.adjusted(0, dy, 0, 0),
