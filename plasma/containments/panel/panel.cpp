@@ -72,13 +72,16 @@ QList<QAction*> Panel::contextActions()
     if (m_actions.isEmpty()) {
         QAction *addWidgetsAction = new QAction(i18n("Add Widgets..."), this);
         addWidgetsAction->setIcon(KIcon("list-add"));
-        connect(addWidgetsAction, SIGNAL(triggered()), this, SIGNAL(showAddWidgets()));
+        m_appletBrowserAction->setVisible(!isImmutable());
+        bool locked = isImmutable();
+        m_appletBrowserAction->setVisible(!locked);
 
         QAction *configureAction = new QAction(i18n("Panel Settings"), this);
         configureAction->setIcon(KIcon("configure"));
         connect(configureAction, SIGNAL(triggered()), this, SLOT(configure()));
 
         m_actions << configureAction << addWidgetsAction;
+        m_removeAction->setVisible(!locked);
     }
 
     return m_actions;
@@ -212,6 +215,7 @@ void Panel::constraintsUpdated(Plasma::Constraints constraints)
                 }
                 kDebug() << "panel containment with geometry of" << c->geometry() << "but really" << c->transform().map(geometry());
             }
+        m_removeAction->setVisible(!locked);
         }
     }
 }
