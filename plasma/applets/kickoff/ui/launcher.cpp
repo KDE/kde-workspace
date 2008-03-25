@@ -61,6 +61,7 @@ public:
     Private(Launcher *launcher)
         : q(launcher)
         , urlLauncher(new UrlItemLauncher(launcher))
+        , resizeHandle(0)
         , searchBar(0)
         , contentArea(0)
         , contentSwitcher(0)
@@ -69,6 +70,7 @@ public:
         , contextMenuFactory(0)
         , autoHide(false)
         , visibleItemCount(10)
+        , isResizing(false)
     {
     }
     ~Private()
@@ -232,6 +234,7 @@ public:
 
     Launcher * const q;
     UrlItemLauncher *urlLauncher;
+    QLabel *resizeHandle;
     SearchBar *searchBar;
     QStackedWidget *contentArea;
     TabBar *contentSwitcher;
@@ -241,6 +244,7 @@ public:
     ContextMenuFactory *contextMenuFactory;
     bool autoHide;
     int visibleItemCount;
+    bool isResizing;
 };
 
 Launcher::Launcher(QWidget *parent)
@@ -265,6 +269,13 @@ Launcher::Launcher(QWidget *parent)
     d->initTabs();
     d->registerUrlHandlers();
 
+    d->resizeHandle = new QLabel(this);
+    d->resizeHandle->setBackgroundRole(QPalette::Window);
+    d->resizeHandle->setAutoFillBackground(true);
+    d->resizeHandle->setFixedSize(16, 16);
+    d->resizeHandle->setCursor(Qt::SizeBDiagCursor);
+    setMouseTracking(true);
+
     layout->addWidget(d->searchBar);
     layout->addWidget(d->contentArea);
     layout->addWidget(d->contentSwitcher);
@@ -272,23 +283,38 @@ Launcher::Launcher(QWidget *parent)
     setLayout(layout);
 }
 
-QSize Launcher::sizeHint() const
+QSize Launcher::minimumSizeHint() const
 {
-    // TODO This is essentially an arbitrarily chosen height which works
-    // reasonably well.  It would probably be better to choose the
-    // height to allow X number of items to be visible in the Favorites
-    // view (which shows initially on startup)
     QSize size = QWidget::sizeHint();
 
     // the extra 2 pixels are to make room for the content margins; see moveEvent
     size.rwidth() += 2;
 
-    //size.rheight() += 102;
     size.rheight() = d->searchBar->sizeHint().height() +
                      d->contentSwitcher->sizeHint().height() +
-                     ItemDelegate::ITEM_HEIGHT * d->visibleItemCount;
+                     ItemDelegate::ITEM_HEIGHT * 3;
 
     return size;
+}
+
+QSize Launcher::sizeHint() const
+{
+    KConfigGroup sizeGroup;
+    if (d->applet) {
+       sizeGroup = d->applet->config();
+    } else {
+       sizeGroup = componentData().config()->group("Size");
+    }
+    const int width = qMin(sizeGroup.readEntry("Width", 0), QApplication::desktop()->screen()->width()-50);
+    const int height = qMin(sizeGroup.readEntry("Height", 0), QApplication::desktop()->screen()->height()-50);
+    QSize wanted(width, height);
+    bool isDefault = wanted.isNull();
+    wanted = wanted.expandedTo(minimumSizeHint());
+    if (isDefault) {
+       wanted.setHeight( wanted.height() + ( ItemDelegate::ITEM_HEIGHT * (d->visibleItemCount - 3) ) );
+    }
+
+    return wanted;
 }
 
 void Launcher::setAutoHide(bool hide)
@@ -477,6 +503,8 @@ void Launcher::moveEvent(QMoveEvent *e)
 void Launcher::showEvent(QShowEvent *e)
 {
     d->searchBar->setFocus();
+    d->resizeHandle->move(width()-d->resizeHandle->width() - 1, 1);
+    d->resizeHandle->raise();
     QWidget::showEvent(e);
 }
 
@@ -494,5 +522,48 @@ void Launcher::paintEvent(QPaintEvent*)
     p.drawRect(rect().adjusted(0, 0, -1, -1));
 }
 
+}
+
+void Launcher::resizeEvent(QResizeEvent *e)
+{
+    d->resizeHandle->move(width()-d->resizeHandle->width() - 1, 1);
+    QWidget::resizeEvent(e);
+}
+
+void Launcher::mousePressEvent(QMouseEvent *e)
+{
+    if (e->x() > width() - d->resizeHandle->width() &&
+        e->y() < d->resizeHandle->height() ) {
+        d->isResizing = true;
+    }
+    QWidget::mousePressEvent(e);
+}
+
+void Launcher::mouseReleaseEvent(QMouseEvent *e)
+{
+    if (d->isResizing) {
+       d->isResizing = false;
+       KConfigGroup sizeGroup;
+       if (d->applet) {
+          sizeGroup = d->applet->config();
+       } else {
+          sizeGroup = componentData().config()->group("Size");
+       }
+       sizeGroup.writeEntry("Height", height());
+       sizeGroup.writeEntry("Width", width());
+       emit configNeedsSaving();
+    }
+    QWidget::mouseReleaseEvent(e);
+}
+
+void Launcher::mouseMoveEvent(QMouseEvent *e)
+{
+    if ( hasMouseTracking() && d->isResizing ) {
+       const int newWidth = qMax( e->x() - x(), minimumSizeHint().width() );
+       const int newHeight = qMax( height() - e->y(), minimumSizeHint().height() + 10 );
+       const int newY = y() + height() - newHeight;
+       setGeometry( x(), newY, newWidth, newHeight);
+    }
+    QWidget::mouseMoveEvent(e);
 #include "launcher.moc"
 

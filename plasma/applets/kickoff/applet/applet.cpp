@@ -58,6 +58,7 @@ public:
     ~Private() { delete dialog; delete launcher; }
 };
 
+    QObject::connect(launcher, SIGNAL(configNeedsSaving()), q, SIGNAL(configNeedsSaving()));
 LauncherApplet::LauncherApplet(QObject *parent, const QVariantList &args)
     : Plasma::Applet(parent,args),
       d(new Private)
@@ -128,7 +129,7 @@ void LauncherApplet::showConfigurationInterface()
         layout->addLayout(vl);
         vl->addWidget(new QLabel(i18n("Number of visible items:"), d->dialog->mainWidget()));
         d->visibleCountEdit = new KIntNumInput(d->dialog->mainWidget());
-        d->visibleCountEdit->setMinimum(1);
+        d->visibleCountEdit->setMinimum(3);
         d->visibleCountEdit->setSliderEnabled(false);
         vl->addWidget(d->visibleCountEdit);
 

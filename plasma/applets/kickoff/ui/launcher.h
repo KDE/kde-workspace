@@ -60,6 +60,7 @@ public:
 
     // reimplemented
     virtual bool eventFilter(QObject *object, QEvent *event);
+    virtual QSize minimumSizeHint() const;
     virtual QSize sizeHint() const;
 
     /** Reset the launcher. This is called e.g. by the Kickoff-applet before shown to be sure
@@ -68,6 +69,7 @@ public:
 
 signals:
     void aboutToHide();
+    void configNeedsSaving();
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -75,6 +77,10 @@ protected:
     virtual void hideEvent(QHideEvent *event);
     virtual void moveEvent(QMoveEvent *event);
     virtual void paintEvent(QPaintEvent *event);
+    virtual void resizeEvent(QResizeEvent *e);
+    virtual void mousePressEvent(QMouseEvent *e);
+    virtual void mouseReleaseEvent(QMouseEvent *e);
+    virtual void mouseMoveEvent(QMouseEvent *e);
 
 private Q_SLOTS:
     void focusSearchView(const QString& query);
