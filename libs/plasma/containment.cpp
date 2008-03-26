@@ -385,13 +385,31 @@ void Containment::setLocation(Location location)
         return;
     }
 
+
+    bool emitGeomChange = false;
+
+    if ((location == TopEdge || location == BottomEdge) &&
+        (d->location == TopEdge || d->location == BottomEdge)) {
+        emitGeomChange = true;
+    }
+
+    if ((location == RightEdge || location == LeftEdge) &&
+        (d->location == RightEdge || d->location == LeftEdge)) {
+        emitGeomChange = true;
+    }
+
     d->location = location;
 
     foreach (Applet* applet, d->applets) {
         applet->updateConstraints(Plasma::LocationConstraint);
     }
 
-    setScreen(screen());
+    if (emitGeomChange) {
+        // our geometry on the scene will not actually change,
+        // but for the purposes of views it has
+        emit geometryChanged();
+    }
+
     updateConstraints(Plasma::LocationConstraint);
 }
 
