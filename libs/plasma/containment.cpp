@@ -248,17 +248,20 @@ void Containment::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             hasEntries = true;
         }
 
-        actions = contextActions();
-        if (actions.count() > 0) {
+        QList<QAction*> containmentActions = contextActions();
+        if (containmentActions.count() > 0) {
+            if (hasEntries) {
+                desktopMenu.addSeparator();
+            }
             hasEntries = true;
             QMenu *containmentActionMenu = &desktopMenu;
 
-            if (actions.count() > 2) {
+            if (actions.count() > 0 && containmentActions.count() > 2) {
                 containmentActionMenu = new KMenu(i18n("%1 Options", name()), &desktopMenu);
                 desktopMenu.addMenu(containmentActionMenu);
             }
 
-            foreach(QAction* action, actions) {
+            foreach(QAction* action, containmentActions) {
                 containmentActionMenu->addAction(action);
             }
         }
