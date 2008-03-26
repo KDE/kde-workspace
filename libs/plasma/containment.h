@@ -299,6 +299,11 @@ class PLASMA_EXPORT Containment : public Applet
          */
         void showAddWidgets();
 
+        /**
+         * Emitted when there is a change in screens
+         */
+        void screenChanged(int oldScreen, int newScreen, Containment *containment);
+
     public Q_SLOTS:
         /**
          * Informs the Corona as to what position it is in. This is informational
