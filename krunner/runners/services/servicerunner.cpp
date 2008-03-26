@@ -58,6 +58,7 @@ void ServiceRunner::match(Plasma::SearchContext *search)
         return;
     }
 
+    QMutexLocker lock(bigLock());
     KService::Ptr service = KService::serviceByName(term);
 
     if (service && !service->exec().isEmpty()) {
