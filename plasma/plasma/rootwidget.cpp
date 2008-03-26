@@ -28,7 +28,6 @@
 #include <KShortcut>
 
 #include "plasma/containment.h"
-#include "plasma/corona.h"
 #include "plasma/plasma.h"
 #include "plasma/svg.h"
 #include "plasma/theme.h"
@@ -43,11 +42,8 @@ RootWidget::RootWidget()
 {
     setFocusPolicy(Qt::NoFocus);
 
-    // this line also initializes the corona.
     KConfigGroup cg(KGlobal::config(), "General");
     Plasma::Theme::self()->setFont(cg.readEntry("desktopFont", font()));
-
-    Plasma::Corona *corona = PlasmaApp::self()->corona();
 
     //TODO: Make the shortcut configurable
     KAction *showAction = new KAction( this );
