@@ -404,6 +404,8 @@ void Containment::setLocation(Location location)
         applet->updateConstraints(Plasma::LocationConstraint);
     }
 
+    setScreen(screen());
+
     if (emitGeomChange) {
         // our geometry on the scene will not actually change,
         // but for the purposes of views it has
