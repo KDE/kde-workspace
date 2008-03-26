@@ -714,8 +714,12 @@ void Containment::setScreen(int screen)
         }
     }
 
+    int oldScreen = d->screen;
     d->screen = screen;
     updateConstraints(Plasma::ScreenConstraint);
+    if (oldScreen != screen) {
+        emit screenChanged(oldScreen, screen, this);
+    }
 }
 
 int Containment::screen() const
