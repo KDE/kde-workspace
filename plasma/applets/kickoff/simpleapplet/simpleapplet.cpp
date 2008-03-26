@@ -61,7 +61,7 @@ public:
         MenuLauncherApplet::FormatType formattype;
 
         KDialog *dialog;
-        QComboBox *viewComboBox, *formatComboBox;
+        QComboBox *viewComboBox;
 
         QAction* switcher;
         Private() : menuview(0), launcher(0), dialog(0), switcher(0) {}
@@ -203,19 +203,10 @@ void MenuLauncherApplet::showConfigurationInterface()
         d->addItem(d->viewComboBox, i18n("Leave"), MenuLauncherApplet::Leave);
         l->addWidget(d->viewComboBox, 0, 1);
 
-        l->addWidget(new QLabel(i18n("Format:"), p), 1, 0);
-        d->formatComboBox = new QComboBox(p);
-        d->addItem(d->formatComboBox, i18n("Name only"), MenuLauncherApplet::Name);
-        d->addItem(d->formatComboBox, i18n("Description only"), MenuLauncherApplet::Description);
-        d->addItem(d->formatComboBox, i18n("Name Description"), MenuLauncherApplet::NameDescription);
-        d->addItem(d->formatComboBox, i18n("Description (Name)"), MenuLauncherApplet::DescriptionName);
-        l->addWidget(d->formatComboBox, 1, 1);
-
         l->setColumnStretch(1,1);
     }
 
     d->setCurrentItem(d->viewComboBox, d->viewtype);
-    d->setCurrentItem(d->formatComboBox, d->formattype);
     d->dialog->show();
 }
 
@@ -231,15 +222,6 @@ void MenuLauncherApplet::configAccepted()
 
         QMetaEnum e = metaObject()->enumerator(metaObject()->indexOfEnumerator("ViewType"));
         cg.writeEntry("view", QByteArray(e.valueToKey(d->viewtype)));
-    }
-
-    int ft = d->formatComboBox->itemData(d->formatComboBox->currentIndex()).toInt();
-    if( ft != d->formattype ) {
-        d->formattype = (MenuLauncherApplet::FormatType) ft;
-        needssaving = true;
-
-        QMetaEnum e = metaObject()->enumerator(metaObject()->indexOfEnumerator("FormatType"));
-        cg.writeEntry("format", QByteArray(e.valueToKey(d->formattype)));
     }
 
     if( needssaving ) {
