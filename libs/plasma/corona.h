@@ -167,6 +167,12 @@ Q_SIGNALS:
     void launchActivated();
 
     /**
+     * This signal indicates a new containment has been added to
+     * the Corona
+     */
+    void containmentAdded(Plasma::Containment *containment);
+
+    /**
      * This signal indicates that a new screen is being handled
      * at runtime (e.g. after first creation)
      *
