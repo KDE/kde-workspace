@@ -18,6 +18,8 @@
 
 #include "panel.h"
 
+#include <limits>
+
 #include <QApplication>
 #include <QPainter>
 #include <QDesktopWidget>
@@ -182,13 +184,17 @@ void Panel::constraintsUpdated(Plasma::Constraints constraints)
         // Lock the size so that stray applets don't cause the panel to grow
         // or the removal of applets to cause the panel to shrink
         // TODO: Update this when user-resizing is implemented
-        setMinimumSize(QSizeF(width, height));
-        setMaximumSize(QSizeF(width, height));
+        setMinimumSize(QSizeF(0, 0));
+        setMaximumSize(QSizeF(std::numeric_limits<qreal>::infinity(),
+                              std::numeric_limits<qreal>::infinity()));
 
         QRectF geo = QRectF(x, y, width, height);
 
         //kDebug() << "Setting geometry to" << geo << "with margins" << leftWidth << topHeight << rightWidth << bottomHeight;
         setGeometry(geo);
+
+        setMinimumSize(QSizeF(width, height));
+        setMaximumSize(QSizeF(width, height));
 
         if (layout()) {
             layout()->setMargin(Plasma::TopMargin, topHeight);
