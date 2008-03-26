@@ -153,7 +153,7 @@ void RootWidget::screenOwnerChanged(int wasScreen, int isScreen, Plasma::Contain
         }
     }
 
-    if (isScreen > -1) {
+    if (isScreen > -1 && isScreen <  QApplication::desktop()->numScreens()) {
         DesktopView *view = viewForScreen(isScreen);
         if (view) {
             view->setContainment(containment);
