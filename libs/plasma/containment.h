@@ -302,7 +302,7 @@ class PLASMA_EXPORT Containment : public Applet
         /**
          * Emitted when there is a change in screens
          */
-        void screenChanged(int oldScreen, int newScreen, Containment *containment);
+        void screenChanged(int oldScreen, int newScreen, Plasma::Containment *containment);
 
     public Q_SLOTS:
         /**
