@@ -325,6 +325,7 @@ void Corona::loadDefaultSetup()
     Containment* panel = addContainment("panel");
     panel->setScreen(topLeftScreen);
     panel->setLocation(Plasma::BottomEdge);
+    panel->flushUpdatedConstraints();
 
     // some default applets to get a usable UI
     panel->addApplet("launcher");
