@@ -135,7 +135,9 @@ bool View::drawWallpaper() const
 
 void View::updateSceneRect()
 {
+    emit sceneRectAboutToChange();
     setSceneRect(d->containment->sceneBoundingRect());
+    emit sceneRectChanged();
 }
 
 } // namespace Plasma
