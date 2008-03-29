@@ -324,7 +324,7 @@ void BasicTab::setFolderInfo(MenuFolderInfo *folderInfo)
     _systrayCB->setChecked(false);
     _terminalCB->setChecked(false);
     _uidCB->setChecked(false);
-    //_keyEdit->setShortcut(KShortcut());
+    _keyEdit->clearKeySequence();
 
     enableWidgets(false, folderInfo->hidden);
     blockSignals(false);
@@ -344,7 +344,7 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
        _iconButton->setIcon(QString());
 
        // key binding part
-       //_keyEdit->setShortcut( KShortcut() );
+       _keyEdit->clearKeySequence();
        _execEdit->lineEdit()->setText(QString());
        _systrayCB->setChecked(false);
 
@@ -372,7 +372,10 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
     // key binding part
     if( KHotKeys::present())
     {
-        //_keyEdit->setShortcut( entryInfo->shortcut() );
+        if ( !entryInfo->shortcut().isEmpty() )
+            _keyEdit->setKeySequence( entryInfo->shortcut().primary() );
+        else
+            _keyEdit->clearKeySequence();
     }
 
     QString temp = df->desktopGroup().readPathEntry("Exec", QString());
@@ -521,7 +524,6 @@ void BasicTab::slotCapturedKeySequence(const QKeySequence& seq)
        }
        _menuEntryInfo->setShortcut( cut );
     }
-    //_keyEdit->setShortcut(cut);
     if (_menuEntryInfo)
        emit changed( _menuEntryInfo );
 }
