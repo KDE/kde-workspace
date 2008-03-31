@@ -41,6 +41,12 @@ class KRunnerDialog : public KDialog
         void resizeEvent( QResizeEvent *e );
         void mousePressEvent( QMouseEvent *e );
 
+    private Q_SLOTS:
+        /**
+         * React to theme changes 
+         */
+        void themeUpdated();
+
     private:
         void paintBackground(QPainter* painter, const QRect &exposedRect);
         Plasma::Svg *m_background;
