@@ -65,6 +65,7 @@ DefaultDesktop::DefaultDesktop(QObject *parent, const QVariantList &args)
       m_logoutAction(0),
       m_configDialog(0),
       m_wallpaperPath(0),
+      m_wallpaperPosition(0),
       m_renderer(resolution(), 1.0)
 {
     qRegisterMetaType<QImage>("QImage");
@@ -195,14 +196,20 @@ void DefaultDesktop::reloadConfig(bool skipUpdates)
         (int) BackgroundDialog::kStaticBackground);
 
     // used in both modes, so read it no matter which mode we are in
+    int old_wallPaperPosition = m_wallpaperPosition;
     m_wallpaperPosition = cg.readEntry("wallpaperposition", 0);
+    QColor old_wallpaperColor = m_wallpaperColor;
     m_wallpaperColor = cg.readEntry("wallpapercolor", QColor(Qt::black));
 
     if (m_backgroundMode == BackgroundDialog::kStaticBackground) {
         m_slideshowTimer.stop();
         // Only set the wallpaper if constraints have been loaded
         // and background image has changed
-        if (!skipUpdates && screen() != -1 && oldWallpaperPath != m_wallpaperPath) {
+        if (!skipUpdates && screen() != -1 && (
+            oldWallpaperPath != m_wallpaperPath
+            || m_wallpaperPosition != old_wallPaperPosition
+            || m_wallpaperColor != old_wallpaperColor
+            )) {
             updateBackground();
         }
     } else {
