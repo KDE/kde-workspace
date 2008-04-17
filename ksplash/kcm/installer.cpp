@@ -129,6 +129,7 @@ SplashInstaller::SplashInstaller (QWidget *aParent, const char *aName, bool aIni
   connect(mBtnAdd, SIGNAL(clicked()), SLOT(slotAdd()));
 
   mBtnRemove = new KPushButton( i18n("Remove"), this );
+  mBtnRemove->setEnabled(false);
   leftbox->addWidget( mBtnRemove );
   connect(mBtnRemove, SIGNAL(clicked()), SLOT(slotRemove()));
 
