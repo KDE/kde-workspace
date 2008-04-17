@@ -125,11 +125,11 @@ SplashInstaller::SplashInstaller (QWidget *aParent, const char *aName, bool aIni
   leftbox->addWidget(mThemesList);
 
   mBtnAdd = new KPushButton( i18n("Add..."), this );
+  mBtnAdd->setEnabled(false);
   leftbox->addWidget( mBtnAdd );
   connect(mBtnAdd, SIGNAL(clicked()), SLOT(slotAdd()));
 
   mBtnRemove = new KPushButton( i18n("Remove"), this );
-  mBtnRemove->setEnabled(false);
   leftbox->addWidget( mBtnRemove );
   connect(mBtnRemove, SIGNAL(clicked()), SLOT(slotRemove()));
 
