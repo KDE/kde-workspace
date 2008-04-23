@@ -15,7 +15,6 @@
 #include <kconfig.h>
 #include <ksystemtrayicon.h>
 #include <kconfiggroup.h>
-#include <kaboutdata.h>
 
 #include <netwm.h>
 
@@ -142,7 +141,7 @@ void KSysTrayCmd::refresh()
   if ( win ) {
     if (ownIcon)
     {
-      setIcon( KIcon( KGlobal::activeComponent().aboutData()->programIconName() ) );
+      setIcon( KIcon( qApp->applicationName() ) );
     }
     else
     {
