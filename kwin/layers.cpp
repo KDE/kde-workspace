@@ -730,7 +730,7 @@ void Workspace::restackUnmanaged( Unmanaged* c, Window above )
         if( unmanaged_stacking_order.at( i )->window() == above )
             {
             if( i + 1 < unmanaged_stacking_order.size()
-                && unmanaged_stacking_order.at( i ) == c )
+                && unmanaged_stacking_order.at( i + 1 ) == c )
                 {
                 // it is already there, do nothing
                 return;
@@ -738,7 +738,7 @@ void Workspace::restackUnmanaged( Unmanaged* c, Window above )
             unmanaged_stacking_order.removeAll( c );
             if( was_below )
                 --i;
-            unmanaged_stacking_order.insert( i, c );
+            unmanaged_stacking_order.insert( i + 1, c );
             addRepaint( c->geometry());
             return;
             }
