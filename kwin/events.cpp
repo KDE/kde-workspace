@@ -1713,7 +1713,6 @@ void Unmanaged::configureNotifyEvent( XConfigureEvent* e )
         if( effects != NULL )
             static_cast<EffectsHandlerImpl*>(effects)->windowGeometryShapeChanged( effectWindow(), old );
         }
-    workspace()->restackUnmanaged( this, e->above );
     }
 
 // ****************************************
