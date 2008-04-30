@@ -760,7 +760,7 @@ void runSplash( const char* them, bool t, int p )
     window = None;
     splash_image = QImage();
     splash_pixmap = None;
-    final_time = time( NULL ) + 60;
+    final_time = time( NULL ) + 300;
     int desc_w, desc_h;
     FILE* datafile = fopen( findFile( "description.txt", &desc_w, &desc_h ), "r" );
     struct stat stat_buf;
