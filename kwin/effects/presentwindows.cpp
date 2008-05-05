@@ -300,8 +300,6 @@ void PresentWindowsEffect::setActive(bool active)
     if( mActivated )
         {
         mWindowData.clear();
-        effectActivated();
-        mActiveness = 0;
         windowFilter.clear();
         mWindowsToPresent.clear();
         const EffectWindowList& originalwindowlist = effects->stackingOrder();
@@ -316,6 +314,13 @@ void PresentWindowsEffect::setActive(bool active)
                 continue;
             mWindowsToPresent.append(window);
             }
+        if( mWindowsToPresent.isEmpty())
+            {
+            mActivated = false; // don't activate with nothing to show
+            return;
+            }
+        mActiveness = 0;
+        effectActivated();
         rearrangeWindows();
         setHighlightedWindow( effects->activeWindow());
         }
