@@ -312,6 +312,7 @@ void SceneXrender::windowClosed( Toplevel* c, Deleted* deleted )
         delete windows.take( c );
         c->effectWindow()->setSceneWindow( NULL );
         }
+    XFixesSetPictureClipRegion( display(), pic, 0, 0, None );
     }
 
 void SceneXrender::windowDeleted( Deleted* c )
@@ -524,6 +525,13 @@ void SceneXrender::Window::performPaint( int mask, QRegion region, WindowPaintDa
         }
     if( x != toplevel->x() || y != toplevel->y())
         transformed_shape.translate( x, y );
+    QRegion sh = shape();
+    if( sh != rect()) // is shaped, need additional clipping
+        {
+        XserverRegion clip = toXserverRegion( sh );
+        XFixesSetPictureClipRegion( display(), pic, 0, 0, clip );
+        XFixesDestroyRegion( display(), clip );
+        }
     if( opaque )
         {
         XRenderComposite( display(), PictOpSrc, pic, None, buffer, 0, 0, 0, 0,
