@@ -67,10 +67,6 @@ PresentWindowsEffect::PresentWindowsEffect()
 
     effects->reserveElectricBorder( borderActivate );
     effects->reserveElectricBorder( borderActivateAll );
-
-#ifdef KWIN_HAVE_XRENDER_COMPOSITING
-    alphaFormat = XRenderFindStandardFormat( display(), PictStandardARGB32 );
-#endif
     }
 
 PresentWindowsEffect::~PresentWindowsEffect()
@@ -1041,10 +1037,7 @@ void PresentWindowsEffect::paintWindowIcon( EffectWindow* w, WindowPaintData& pa
 #endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
         if( effects->compositingType() == XRenderCompositing )
-            {
-            data.iconPicture = XRenderCreatePicture( display(),
-                data.icon.handle(), alphaFormat, 0, NULL );
-            }
+            data.iconPicture = XRenderPicture( data.icon );
 #endif
         }
     int icon_margin = 8;

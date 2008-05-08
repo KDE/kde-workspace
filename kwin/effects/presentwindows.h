@@ -28,10 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QPixmap>
 
-#ifdef KWIN_HAVE_XRENDER_COMPOSITING
-#include <X11/extensions/Xrender.h>
-#endif
-
 namespace KWin
 {
 
@@ -138,10 +134,6 @@ class PresentWindowsEffect
 
         ElectricBorder borderActivate;
         ElectricBorder borderActivateAll;
-
-#ifdef KWIN_HAVE_XRENDER_COMPOSITING
-        XRenderPictFormat* alphaFormat;
-#endif
     };
 
 } // namespace
