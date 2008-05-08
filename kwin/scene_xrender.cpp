@@ -312,7 +312,6 @@ void SceneXrender::windowClosed( Toplevel* c, Deleted* deleted )
         delete windows.take( c );
         c->effectWindow()->setSceneWindow( NULL );
         }
-    XFixesSetPictureClipRegion( display(), pic, 0, 0, None );
     }
 
 void SceneXrender::windowDeleted( Deleted* c )
@@ -454,12 +453,6 @@ void SceneXrender::Window::performPaint( int mask, QRegion region, WindowPaintDa
         if( opaque )
             return;
         }
-    if( region != infiniteRegion())
-        {
-        XserverRegion clip_region = toXserverRegion( region );
-        XFixesSetPictureClipRegion( display(), buffer, 0, 0, clip_region );
-        XFixesDestroyRegion( display(), clip_region );
-        }
     Picture pic = picture(); // get XRender picture
     if( pic == None ) // The render format can be null for GL and/or Xv visuals
         return;
@@ -523,15 +516,13 @@ void SceneXrender::Window::performPaint( int mask, QRegion region, WindowPaintDa
             }
         transformed_shape.setRects( rects.constData(), rects.count());
         }
-    if( x != toplevel->x() || y != toplevel->y())
-        transformed_shape.translate( x, y );
-    QRegion sh = shape();
-    if( sh != rect()) // is shaped, need additional clipping
-        {
-        XserverRegion clip = toXserverRegion( sh );
-        XFixesSetPictureClipRegion( display(), pic, 0, 0, clip );
-        XFixesDestroyRegion( display(), clip );
-        }
+    transformed_shape.translate( x, y );
+    QRegion clipregion = transformed_shape;
+    if( region != infiniteRegion())
+        clipregion &= region;
+    XserverRegion clip = toXserverRegion( clipregion );
+    XFixesSetPictureClipRegion( display(), buffer, 0, 0, clip );
+    XFixesDestroyRegion( display(), clip );
     if( opaque )
         {
         XRenderComposite( display(), PictOpSrc, pic, None, buffer, 0, 0, 0, 0,
