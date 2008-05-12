@@ -430,7 +430,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     topLayout->addWidget(versionLabel, 0, Qt::AlignTop); // correct possition if logoutMessageLabel has multiple lines
     topLayout->addWidget(logoutMessageLabel, 1, Qt::AlignBottom);
 
-    KSMPushButton* btnLogout = new KSMPushButton( i18n("Logout"), this );
+    KSMPushButton* btnLogout = new KSMPushButton( i18n("&Logout"), this );
     btnLogout->setPixmap(KIconLoader::global()->loadIcon("system-log-out", KIconLoader::NoGroup, 32));
     btnLogout->setFocus();
     connect(btnLogout, SIGNAL(clicked()), SLOT(slotLogout()));
@@ -439,7 +439,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
 
     if (maysd) {
         // Shutdown
-        KSMPushButton* btnHalt = new KSMPushButton( i18n("Turn Off Computer"), this );
+        KSMPushButton* btnHalt = new KSMPushButton( i18n("&Turn Off Computer"), this );
         btnHalt->setPixmap(KIconLoader::global()->loadIcon("system-shutdown", KIconLoader::NoGroup, 32));
         buttonLayout->addWidget(btnHalt);
         buttonLayout->addStretch();
@@ -453,21 +453,21 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
         btnHalt->setPopupMenu( shutdownMenu );
         Solid::Control::PowerManager::SuspendMethods spdMethods = Solid::Control::PowerManager::supportedSuspendMethods();
         if( spdMethods & Solid::Control::PowerManager::Standby ) {
-            QAction* action = new QAction(i18n("Standby"), spdActionGroup);
+            QAction* action = new QAction(i18n("&Standby"), spdActionGroup);
             action->setData(QVariant::fromValue(Solid::Control::PowerManager::Standby));
         }
         if( spdMethods & Solid::Control::PowerManager::ToRam ) {
-            QAction* action = new QAction(i18n("Suspend to RAM"), spdActionGroup);
+            QAction* action = new QAction(i18n("Suspend to &RAM"), spdActionGroup);
             action->setData(QVariant::fromValue(Solid::Control::PowerManager::ToRam));
         }
         if( spdMethods & Solid::Control::PowerManager::ToDisk ) {
-            QAction* action = new QAction(i18n("Suspend to Disk"), spdActionGroup);
+            QAction* action = new QAction(i18n("Suspend to &Disk"), spdActionGroup);
             action->setData(QVariant::fromValue(Solid::Control::PowerManager::ToDisk));
         }
         shutdownMenu->addActions(spdActionGroup->actions());
 
         // Reboot
-        KSMPushButton* btnReboot = new KSMPushButton( i18n("Restart Computer"), this );
+        KSMPushButton* btnReboot = new KSMPushButton( i18n("&Restart Computer"), this );
         btnReboot->setPixmap(KIconLoader::global()->loadIcon("system-restart", KIconLoader::NoGroup, 32));
         connect(btnReboot, SIGNAL(clicked()), SLOT(slotReboot()));
         buttonLayout->addWidget(btnReboot);
@@ -499,7 +499,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
         }
     }
 
-    KSMPushButton* btnBack = new KSMPushButton(i18n("Cancel"), this, true);
+    KSMPushButton* btnBack = new KSMPushButton(i18n("&Cancel"), this, true);
     btnBack->setPixmap(KIconLoader::global()->loadIcon( "dialog-cancel", KIconLoader::NoGroup, 16));
     bottomLayout->addStretch();
     bottomLayout->addWidget(btnBack);
