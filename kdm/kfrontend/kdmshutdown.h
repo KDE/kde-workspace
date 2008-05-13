@@ -140,15 +140,9 @@ class KDMDelayedPushButton : public KPushButton {
 
   public:
 	KDMDelayedPushButton( const KGuiItem &item, QWidget *parent );
-	void setPopup( QMenu *pop );
-
-  private Q_SLOTS:
-	void slotTimeout();
-	void slotPressed();
-	void slotReleased();
+	void setDelayedMenu( QMenu *pop );
 
   private:
-	QMenu *pop;
 	QTimer popt;
 };
 

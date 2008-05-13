@@ -437,37 +437,21 @@ KDMRadioButton::mouseDoubleClickEvent( QMouseEvent * )
 KDMDelayedPushButton::KDMDelayedPushButton( const KGuiItem &item,
                                             QWidget *parent )
 	: inherited( item, parent )
-	, pop( 0 )
 {
-	connect( this, SIGNAL(pressed()), SLOT(slotPressed()) );
-	connect( this, SIGNAL(released()), SLOT(slotReleased()) );
-	connect( &popt, SIGNAL(timeout()), SLOT(slotTimeout()) );
+	popt.setSingleShot( true );
+	popt.setInterval( style()->styleHint( QStyle::SH_ToolButton_PopupDelay, 0, this ) );
 }
 
-void KDMDelayedPushButton::setPopup( QMenu *p )
+void KDMDelayedPushButton::setDelayedMenu( QMenu *p )
 {
-	pop = p;
 	setMenu( p );
+	disconnect( this, 0, this, 0 ); // Internal button -> popup connection
+	if (p) {
+		connect( this, SIGNAL(pressed()), &popt, SLOT(start()) );
+		connect( this, SIGNAL(released()), &popt, SLOT(stop()) );
+		connect( &popt, SIGNAL(timeout()), SLOT(showMenu()) );
+	}
 }
-
-void KDMDelayedPushButton::slotPressed()
-{
-	if (pop)
-		popt.start( QApplication::startDragTime() );
-}
-
-void KDMDelayedPushButton::slotReleased()
-{
-	popt.stop();
-}
-
-void KDMDelayedPushButton::slotTimeout()
-{
-	popt.stop();
-	pop->popup( mapToGlobal( rect().bottomLeft() ) );
-	setDown( false );
-}
-
 
 KDMSlimShutdown::KDMSlimShutdown( QWidget *_parent )
 	: inherited( _parent )
@@ -515,7 +499,7 @@ KDMSlimShutdown::KDMSlimShutdown( QWidget *_parent )
 			                            "%1 (current)", t ) :
 			                     t ))->setData( i );
 		}
-		btnReboot->setPopup( targets );
+		btnReboot->setDelayedMenu( targets );
 		connect( targets, SIGNAL(triggered( QAction * )),
 		         SLOT(slotReboot( QAction * )) );
 	}
