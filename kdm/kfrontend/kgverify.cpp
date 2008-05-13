@@ -108,14 +108,16 @@ KGVerify::getPlugMenu()
 		uint np = pluginList.count();
 		if (np > 1) {
 			plugMenu = new QMenu( parent );
+			QActionGroup *plugGroup = new QActionGroup( parent );
 			connect( plugMenu, SIGNAL(triggered( QAction * )),
 			         SLOT(slotPluginSelected( QAction * )) );
 			for (uint i = 0; i < np; i++) {
 				int pid = pluginList[i];
-				greetPlugins[pid].action = plugMenu->addAction( i18n(greetPlugins[pid].info->name) );
+				greetPlugins[pid].action = plugGroup->addAction( i18n(greetPlugins[pid].info->name) );
 				greetPlugins[pid].action->setData( i );
 				greetPlugins[pid].action->setCheckable( true );
 			}
+			plugMenu->addActions( plugGroup->actions() );
 		}
 	}
 	return plugMenu;
@@ -194,7 +196,6 @@ KGVerify::slotPluginSelected( QAction *action )
 		return;
 	int id = action->data().toInt();
 	if (id != curPlugin) {
-		greetPlugins[pluginList[curPlugin]].action->setChecked( false );
 		parent->setUpdatesEnabled( false );
 		debug( "delete %s\n", pName.data() );
 		delete greet;
