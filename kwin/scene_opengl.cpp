@@ -727,11 +727,16 @@ void SceneOpenGL::paintBackground( QRegion region )
     {
     if( region == infiniteRegion())
         {
+        glPushAttrib( GL_COLOR_BUFFER_BIT );
         glClearColor( 0, 0, 0, 1 ); // black
         glClear( GL_COLOR_BUFFER_BIT );
+        glPopAttrib();
         }
     else
         {
+        if( region.isEmpty())
+            return;
+        glPushAttrib( GL_CURRENT_BIT );
         glColor4f( 0, 0, 0, 1 ); // black
         glBegin( GL_QUADS );
         foreach( QRect r, region.rects())
@@ -742,6 +747,7 @@ void SceneOpenGL::paintBackground( QRegion region )
             glVertex2i( r.x(), r.y() + r.height());
             }
         glEnd();
+        glPopAttrib();
         }
     }
 
