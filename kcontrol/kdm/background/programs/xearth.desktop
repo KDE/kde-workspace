@@ -22,6 +22,7 @@ Comment[sk]=XEarth od Kirka Johnsona
 Comment[uz]=XEarth (Кирик Жонсон томонидан)
 Comment[vi]=Trái Đất X bởi Kirk Johnson
 Comment[xh]=XEarth ngu Kirk Johnson
+Comment[zh_TW]=X 地球（by Kirk Johnson）
 Executable=xearth
 Command=xearth -size %x,%y -ppm > %f
 PreviewCommand=xearth -size %x,%y -nomarkers -ppm > %f

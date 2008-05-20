@@ -22,6 +22,7 @@ Comment[sk]=XGlobe od Thorstena Scheuermanna
 Comment[uz]=XGlobe (Торстен Шойерман томонидан)
 Comment[vi]=Qủa cầu X bởi Thorsten Scheuermann
 Comment[xh]=XGlobe ngu Thorsten Scheuermann
+Comment[zh_TW]=X 地球儀（by Thorsten Scheuermann）
 Executable=xglobe
 Command=xglobe -dump -once -size %x,%y -nomarkers && mv xglobe-dump.bmp %f
 PreviewCommand=xglobe -nomarkers -nolabel -dump -once -size %x,%y && mv xglobe-dump.bmp %f

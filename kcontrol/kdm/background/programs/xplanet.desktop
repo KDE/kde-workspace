@@ -23,6 +23,7 @@ Comment[sk]=XPlanet od Hari Nair
 Comment[uz]=XPlanet (Хари Нейр томонидан)
 Comment[vi]=Hành tinh X bởi Hari Nair
 Comment[xh]=XPlanet ngu Hari Nair
+Comment[zh_TW]=行星（by Hari Nair）
 Executable=xplanet
 PreviewCommand=xplanet --geometry %xx%y --num_times 1 --output %f.jpg && mv %f.jpg %f
 Refresh=10
