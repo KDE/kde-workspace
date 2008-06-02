@@ -1692,6 +1692,7 @@ void Client::setGeometry( int x, int y, int w, int h, ForceGeometry_t force )
     if( force == NormalGeometrySet && geom == g && pending_geometry_update == PendingGeometryNone )
         return;
     geom = g;
+    updateWorkareaDiffs();
     if( block_geometry_updates != 0 )
         {
         if( pending_geometry_update == PendingGeometryForced )
@@ -1719,7 +1720,6 @@ void Client::setGeometry( int x, int y, int w, int h, ForceGeometry_t force )
     else
         XMoveWindow( display(), frameId(), x, y );
     // SELI TODO won't this be too expensive?
-    updateWorkareaDiffs();
     sendSyntheticConfigureNotify();
     updateWindowRules();
     checkMaximizeGeometry();
@@ -1770,6 +1770,7 @@ void Client::plainResize( int w, int h, ForceGeometry_t force )
     if( force == NormalGeometrySet && geom.size() == s )
         return;
     geom.setSize( s );
+    updateWorkareaDiffs();
     if( block_geometry_updates != 0 )
         {
         if( pending_geometry_update == PendingGeometryForced )
@@ -1791,7 +1792,6 @@ void Client::plainResize( int w, int h, ForceGeometry_t force )
         XMoveResizeWindow( display(), window(), 0, 0, cs.width(), cs.height());
         }
     updateShape();
-    updateWorkareaDiffs();
     sendSyntheticConfigureNotify();
     updateWindowRules();
     checkMaximizeGeometry();
@@ -1822,6 +1822,7 @@ void Client::move( int x, int y, ForceGeometry_t force )
     if( force == NormalGeometrySet && geom.topLeft() == p )
         return;
     geom.moveTopLeft( p );
+    updateWorkareaDiffs();
     if( block_geometry_updates != 0 )
         {
         if( pending_geometry_update == PendingGeometryForced )
@@ -1833,7 +1834,6 @@ void Client::move( int x, int y, ForceGeometry_t force )
         return;
         }
     XMoveWindow( display(), frameId(), x, y );
-    updateWorkareaDiffs();
     sendSyntheticConfigureNotify();
     updateWindowRules();
     checkMaximizeGeometry();
