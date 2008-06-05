@@ -313,7 +313,7 @@ void Workspace::performCompositing()
     ToplevelList tmp = windows;
     windows.clear();
     foreach( Toplevel* c, tmp )
-        if( c->readyForPainting())
+//        if( c->readyForPainting())
             windows.append( c );
     QRegion repaints = repaints_region;
     // clear all repaints, so that post-pass can add repaints for the next repaint
