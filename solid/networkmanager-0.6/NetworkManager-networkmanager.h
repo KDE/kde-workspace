@@ -62,6 +62,7 @@ Q_OBJECT
         void noLongerActive(QDBusObjectPath);
         void activating(QDBusObjectPath);
         void activationFailed(QDBusObjectPath);
+        void nameOwnerChanged(QString, QString, QString);
     private:
         NMNetworkManagerPrivate * d;
 };
