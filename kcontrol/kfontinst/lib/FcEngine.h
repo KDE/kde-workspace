@@ -77,7 +77,7 @@ class KDE_EXPORT CFcEngine
     void                  writeConfig(KConfig &cfg);
 
     void                  setDirty() { itsFcDirty=true; }
-    bool                  drawPreview(const QString &item, QPixmap &pix, int h,
+    bool                  drawPreview(const QString &item, QPixmap &pix, const QColor &col, int h,
                                       quint32 style=KFI_NO_STYLE_INFO, int face=0);
     bool                  draw(const KUrl &url, int w, int h, QPixmap &pix, int faceNo, bool thumb,
                                const QList<TRange> &range=QList<TRange>(), QList<TChar> *chars=NULL,
@@ -100,8 +100,6 @@ class KDE_EXPORT CFcEngine
     static QString        getLowercaseLetters();
     static QString        getPunctuation();
 
-    static void           setBgndCol(const QColor &col) { theirBgndCol=col; }
-    static const QColor & bgndCol()                     { return theirBgndCol; }
     static void           setTextCol(const QColor &col) { theirTextCol=col; }
     static const QColor & textCol()                     { return theirTextCol; }
 
@@ -116,7 +114,7 @@ class KDE_EXPORT CFcEngine
     XftFont *             getFont(int size);
     bool                  isCorrect(XftFont *f, bool checkFamily);
     void                  getSizes();
-    void                  drawName(QPainter &painter, int x, int &y, int w, int offset);
+    void                  drawName(QPainter &painter, int x, int &y, int w);
     void                  addFontFile(const QString &file);
     void                  reinit();
 
@@ -139,7 +137,6 @@ class KDE_EXPORT CFcEngine
     QStringList   itsAddedFiles;
     QString       itsPreviewString;
 
-    static QColor theirBgndCol;
     static QColor theirTextCol;
 };
 
