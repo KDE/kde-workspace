@@ -257,6 +257,8 @@ KdmItem::eventFilter( QObject *o, QEvent *e )
 	    e->type() == QEvent::EnabledChange)
 	{
 		updatePalette( (QWidget *)o );
+	} else if (e->type() == QEvent::ChildAdded) {
+		::setWidgetAttribs( myWidget, style, style.frame );
 	}
 	return false;
 }
