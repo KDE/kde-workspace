@@ -90,6 +90,7 @@ FDialog::adjustGeometry()
 		setFixedSize( scr.size() );
 	else {
 		setMaximumSize( scr.size() * .9 );
+		setMinimumSize( 0, 0 );
 		adjustSize();
 	}
 
