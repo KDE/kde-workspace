@@ -207,6 +207,8 @@ void KDMConvenienceWidget::slotPresChanged()
 {
 	bool en = spRadio->isChecked();
 	pu_label->setEnabled( en );
+	if (!alGroup->isEnabled()) // read-only
+		return;
 	puserlb->setEnabled( en );
 	cbjumppw->setEnabled( !npRadio->isChecked() );
 }

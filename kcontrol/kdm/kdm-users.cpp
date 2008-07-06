@@ -60,7 +60,7 @@
 extern KConfig *config;
 
 KDMUsersWidget::KDMUsersWidget( QWidget *parent )
-	: QWidget( parent )
+	: QWidget( parent ), m_readOnly( false )
 {
 #ifdef __linux__
 	struct stat st;
@@ -256,6 +256,7 @@ KDMUsersWidget::KDMUsersWidget( QWidget *parent )
 
 void KDMUsersWidget::makeReadOnly()
 {
+	m_readOnly = true;
 	leminuid->setReadOnly( true );
 	lemaxuid->setReadOnly( true );
 	cbshowlist->setEnabled( false );
@@ -274,7 +275,7 @@ void KDMUsersWidget::makeReadOnly()
 
 void KDMUsersWidget::slotShowOpts()
 {
-	bool en = cbshowlist->isChecked() || cbcomplete->isChecked();
+	bool en = !m_readOnly && (cbshowlist->isChecked() || cbcomplete->isChecked());
 	cbinverted->setEnabled( en );
 	cbusrsrt->setEnabled( en );
 	wstack->setEnabled( en );
@@ -291,7 +292,7 @@ void KDMUsersWidget::slotShowOpts()
 
 void KDMUsersWidget::slotFaceOpts()
 {
-	bool en = !rbusronly->isChecked();
+	bool en = !m_readOnly && !rbusronly->isChecked();
 	usercombo->setEnabled( en );
 	userbutton->setEnabled( en );
 	if (en)

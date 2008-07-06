@@ -65,7 +65,7 @@
 #define NR_PREDEF_PATTERNS 6
 
 BGDialog::BGDialog(QWidget* parent, const KSharedConfigPtr &_config, bool _kdmMode)
-  : BGDialog_UI(parent, "BGDialog")
+    : BGDialog_UI(parent), m_readOnly( false )
 {
    m_pGlobals = new KGlobalBackgroundSettings(_config);
    m_pDirs = KGlobal::dirs();
@@ -266,6 +266,7 @@ void BGDialog::getEScreen()
 
 void BGDialog::makeReadOnly()
 {
+    m_readOnly = true;
     m_pMonitorArrangement->setEnabled( false );
     m_comboScreen->setEnabled( false );
     m_comboDesktop->setEnabled( false );
@@ -706,11 +707,13 @@ void BGDialog::updateUI()
       // No wallpaper
       if (wallpaperMode == KBackgroundSettings::NoWallpaper )
       {
+         if (!m_readOnly) {
          m_urlWallpaperBox->setEnabled(false);
          m_urlWallpaperButton->setEnabled(false);
          m_buttonSetupWallpapers->setEnabled(false);
          m_comboWallpaperPos->setEnabled(false);
          m_lblWallpaperPos->setEnabled(false);
+         }
          m_buttonGroupBackground->setButton(
          m_buttonGroupBackground->id(m_radioNoPicture) );
       }
@@ -718,11 +721,13 @@ void BGDialog::updateUI()
       // 1 Picture
       else
       {
+         if (!m_readOnly) {
          m_urlWallpaperBox->setEnabled(true);
          m_urlWallpaperButton->setEnabled(true);
          m_buttonSetupWallpapers->setEnabled(false);
          m_comboWallpaperPos->setEnabled(true);
          m_lblWallpaperPos->setEnabled(true);
+         }
          setWallpaper(r->wallpaper());
          m_buttonGroupBackground->setButton(
          m_buttonGroupBackground->id(m_radioPicture) );
@@ -732,11 +737,13 @@ void BGDialog::updateUI()
    // Slide show
    else
    {
+      if (!m_readOnly) {
       m_urlWallpaperBox->setEnabled(false);
       m_urlWallpaperButton->setEnabled(false);
       m_buttonSetupWallpapers->setEnabled(true);
       m_comboWallpaperPos->setEnabled(true);
       m_lblWallpaperPos->setEnabled(true);
+      }
       m_buttonGroupBackground->setButton(
       m_buttonGroupBackground->id(m_radioSlideShow) );
    }
@@ -773,7 +780,7 @@ void BGDialog::updateUI()
     }
     m_comboPattern->blockSignals(false);
 
-    m_colorSecondary->setEnabled(bSecondaryEnabled);
+    m_colorSecondary->setEnabled(bSecondaryEnabled && !m_readOnly);
 
     int mode = r->blendMode();
 
@@ -969,6 +976,8 @@ void BGDialog::slotWallpaper(int)
 
 void BGDialog::setBlendingEnabled(bool enable)
 {
+   if (m_readOnly)
+        return;
    int mode = eRenderer()->blendMode();
 
    bool b = !(mode == KBackgroundSettings::NoBlending);

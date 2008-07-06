@@ -103,6 +103,7 @@ protected:
    bool m_previewUpdates;
    bool m_copyAllDesktops;
    bool m_copyAllScreens;
+   bool m_readOnly;
 };
 
 #endif
