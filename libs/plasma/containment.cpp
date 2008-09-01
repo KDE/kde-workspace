@@ -1144,6 +1144,7 @@ void ContainmentPrivate::handleDisappeared(AppletHandle *handle)
 {
     if (handles.contains(handle->applet())) {
         handles.remove(handle->applet());
+        handle->detachApplet();
         handle->deleteLater();
     }
 }
@@ -1276,6 +1277,13 @@ void ContainmentPrivate::appletDestroyed(QObject* object)
     if (focusedApplet == applet) {
         focusedApplet = 0;
     }
+
+    if (handles.contains(applet)) {
+        AppletHandle *handle = handles.value(applet);
+        handles.remove(applet);
+        handle->deleteLater();
+    }
+
     emit q->appletRemoved(applet);
     emit q->configNeedsSaving();
 }

@@ -27,6 +27,11 @@
 #include <plasma/plasma.h>
 #include <plasma/view.h>
 
+#ifdef Q_WS_WIN
+#include <windows.h>
+#include <shellapi.h>
+#endif
+
 class QWidget;
 
 namespace Plasma
@@ -120,6 +125,14 @@ private Q_SLOTS:
 private:
     Qt::Alignment alignmentFilter(Qt::Alignment align) const;
     bool isHorizontal() const;
+#ifdef Q_WS_WIN
+    bool registerAccessBar(HWND hwndAccessBar, bool fRegister);
+    void appBarQuerySetPos(uint uEdge, LPRECT lprc, PAPPBARDATA pabd);
+    void appBarCallback(MSG *message, long *result);
+    void appBarPosChanged(PAPPBARDATA pabd);
+    bool winEvent(MSG *message, long *result);
+    bool m_barRegistered;
+#endif
 
     Plasma::Svg *m_background;
     PanelController *m_panelController;

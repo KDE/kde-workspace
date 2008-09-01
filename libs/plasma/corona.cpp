@@ -183,6 +183,11 @@ Corona::Corona(QObject *parent)
 
 Corona::~Corona()
 {
+    // FIXME: Same fix as in Plasma::View - make sure that when the focused widget is
+    //        destroyed we don't try to transfer it to something that's already been
+    //        deleted.
+    clearFocus();
+
     KConfigGroup cg(config(), "General");
 
     // we call the dptr member directly for locked since isImmutable()
@@ -286,6 +291,8 @@ void Corona::loadLayout(const QString& configName)
 
         foreach(Applet* applet, containment->applets()) {
             applet->init();
+            // We have to flush the applet constraints manually
+            applet->flushPendingConstraintsEvents();
         }
 
         containment->updateConstraints(Plasma::StartupCompletedConstraint);

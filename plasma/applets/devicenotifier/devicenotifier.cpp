@@ -92,8 +92,7 @@ void DeviceNotifier::init()
     m_solidDeviceEngine = dataEngine("soliddevice");
     m_widget = new Dialog();
     m_widget->setFocusPolicy(Qt::NoFocus);
-    m_widget->setWindowFlags(Qt::Popup);   
-
+    
     QVBoxLayout *l_layout = new QVBoxLayout(m_widget);
     l_layout->setSpacing(0);
     l_layout->setMargin(0);
@@ -156,7 +155,8 @@ void DeviceNotifier::initSysTray()
     if (m_icon) {
         return;
     }
-
+    QStringList overlays;
+    overlays << "emblem-mounted";
     //we display the icon corresponding to the computer
     QList<Solid::Device> list = Solid::Device::allDevices();
 
@@ -166,16 +166,18 @@ void DeviceNotifier::initSysTray()
         while (device.parent().isValid()) {
             device = device.parent();
         }
-        m_icon = new Plasma::Icon(KIcon(device.icon()), QString(), this);
+        m_icon = new Plasma::Icon(KIcon(device.icon(),NULL,overlays), QString(), this);
     } else {
         //default icon if problem
-        m_icon = new Plasma::Icon(KIcon("computer"), QString(), this);
+        m_icon = new Plasma::Icon(KIcon("computer",NULL,overlays), QString(), this);
     }
     connect(m_icon, SIGNAL(clicked()), this, SLOT(onClickNotifier()));
 
     setAspectRatioMode(Plasma::ConstrainedSquare);
 
     m_layout->addItem(m_icon);
+
+    m_widget->setWindowFlags(Qt::Popup);  
 }
 
 DeviceNotifier::~DeviceNotifier()
