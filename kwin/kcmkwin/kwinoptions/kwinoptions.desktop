@@ -3,7 +3,7 @@ Exec=kcmshell4 kwinoptions
 Icon=preferences-system-windows-behaviour
 Type=Service
 X-KDE-ServiceTypes=KCModule
-X-DocPath=kcontrol/windowmanagement/index.html
+X-DocPath=kcontrol/windowbehaviour/index.html
 
 X-KDE-Library=kcm_kwinoptions
 X-KDE-PluginKeyword=kwinoptions
@@ -34,7 +34,7 @@ Name[et]=Akende käitumine
 Name[eu]=Leihoen portaera
 Name[fa]=رفتار پنجره
 Name[fi]=Ikkunoiden käyttäytyminen
-Name[fr]=Comportement
+Name[fr]=Comportement des fenêtres
 Name[fy]=Finstergedrach
 Name[ga]=Oibriú na bhFuinneog
 Name[gl]=Comportamento das fiestras

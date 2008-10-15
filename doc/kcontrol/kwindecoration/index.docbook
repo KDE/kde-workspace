@@ -65,10 +65,9 @@ positioned title element.</para>
 <para>You are encouraged to experiment with the different styles until
 you find one which best suits your pattern of work.</para>
 
-<para>If there are any configurable options for the theme you chose on
-the first page, they will become available below the preview.</para>
+<para>If there are any configurable options for the theme you chose in
+the drop down box, they will become available above the preview.</para>
 
-<para>&kde; 4.1 default window decoration is called "Ozone".</para>
 <!-- 
 <para>In particular, if you chose to use the IceWM theme, you can choose
 here which of the many IceWM themes to use.  The IceWM theme has
