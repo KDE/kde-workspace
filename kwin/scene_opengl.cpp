@@ -184,6 +184,8 @@ SceneOpenGL::~SceneOpenGL()
     foreach( Window* w, windows )
         delete w;
     // do cleanup after initBuffer()
+    glXMakeCurrent( display(), None, NULL );
+    glXDestroyContext( display(), ctxbuffer );
     if( wspace->overlayWindow())
         {
         if( hasGLXVersion( 1, 3 ))
@@ -205,8 +207,6 @@ SceneOpenGL::~SceneOpenGL()
             glXDestroyPixmap( display(), last_pixmap );
         glXDestroyContext( display(), ctxdrawable );
         }
-    glXMakeCurrent( display(), None, NULL );
-    glXDestroyContext( display(), ctxbuffer );
     checkGLError( "Cleanup" );
     }
 
