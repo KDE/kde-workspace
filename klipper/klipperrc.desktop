@@ -1290,6 +1290,7 @@ Enabled=true
 [Action_5]
 Description=Gopher URL
 Description[af]=Gopher Url
+Description[ar]=محدد موقع غوفر
 Description[bg]=Адрес Gopher
 Description[br]=URL Gopher
 Description[ca]=URL de Gopher

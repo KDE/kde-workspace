@@ -3,6 +3,7 @@ Type=XSession
 Exec=metacity
 TryExec=metacity
 Name=Metacity
+Name[ar]=ميتاسيتيتي
 Name[bn]=মেটাসিটি
 Name[gu]=મેટાસિટી
 Name[hi]=मेटासिटी

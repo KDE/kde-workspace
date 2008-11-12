@@ -870,6 +870,7 @@ Type=ACTIVE_WINDOW
 [Data_1_4Conditions0Window]
 Comment=Qt Designer
 Comment[af]=Qt Ontwerper
+Comment[ar]=مصمم Qt
 Comment[ca]=Dissenyador Qt
 Comment[cs]=Qt designer
 Comment[el]=Σχεδιαστής Qt
