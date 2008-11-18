@@ -3,6 +3,7 @@ Type=XSession
 Exec=sapphire
 TryExec=sapphire
 Name=Sapphire
+Name[ar]=ياقوت
 Name[bn]=স্যাফায়ার
 Name[fa]=ياقوت كبود
 Name[gu]=સેફાયર

@@ -4,6 +4,7 @@ Icon=preferences-desktop-display-randr
 Type=Service
 X-KDE-ServiceTypes=KCModule
 X-KDE-Library=kcm_randr
+X-KDE-ParentApp=kcontrol
 #This is always false when kbuildsycoca runs, probably because it is now a QCoreApplication
 #Hidden[$e]=$(if xdpyinfo|grep RANDR > /dev/null; then echo "false"; else echo "true"; fi)
 
@@ -86,6 +87,7 @@ Name[zh_TW]=尺寸及定位
 
 Comment=Resize and Rotate your display
 Comment[af]=Hervergroot en Roteer jou skerm
+Comment[ar]=غيّر حجم العرض وأدِره
 Comment[be]=Змяняе памеры і перагортвае ваш экран
 Comment[bg]=Настройване на размера и завъртането на екрана
 Comment[bn]=আপনার ডিসপ্লের আকৃতি এবং দিশা পরিবর্তন করুন

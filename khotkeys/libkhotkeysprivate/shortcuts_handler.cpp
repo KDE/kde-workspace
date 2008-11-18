@@ -41,15 +41,23 @@ ShortcutsHandler::ShortcutsHandler( HandlerType type, QObject *parent )
          ,_type(type)
          ,_actions(new KActionCollection(this))
     {
-    _actions->setComponentData(KComponentData("khotkeys"));
+    kDebug() << "Initializing shortcuts_handler";
+    Q_ASSERT( keyboard_handler == 0 );
+    keyboard_handler = this;
     }
+
 
 ShortcutsHandler::~ShortcutsHandler()
     {
-    kDebug() << "Destroying ShortcutsHandler";
-    delete _actions;
+    kDebug() << "Goodbye from shortcuts_handler";
     }
 
+
+static
+inline QString idConv( const QString& id )
+    { // khotkeys keeps track of the shortcuts, not kdedglobalaccel
+    return "_k_session:" + id;
+    }
 
 KAction *ShortcutsHandler::addAction(
         const QString &id,
@@ -58,13 +66,20 @@ KAction *ShortcutsHandler::addAction(
     {
     kDebug() << "Creating action for " << id << " - " << text << ":" << shortcut.primary();
     // Create the action
-    KAction *newAction = _actions->addAction(id);
+    KAction *newAction = _actions->addAction( idConv( id ) );
     if (!newAction)
         {
         return 0;
         }
     newAction->setText(text);
+// It is important that this does not do any shortcut grabbing or even talk to kded,
+// as this is also used by the update tool called from kconf_update, and that can lead to a deadlock.
+// Other usage such as from kmenuedit should not need to do this either., if it for some reason does,
+// it needs to be an extra mode.
+    if (_type==Configuration)
+        return newAction;
     newAction->setGlobalShortcut( shortcut, KAction::DefaultShortcut | KAction::ActiveShortcut );
+#if 0
     // If our HandlerType is configuration we have to tell kdedglobalaccel
     // that this action is only for configuration purposes.
     // see KAction::~KAction
@@ -73,6 +88,7 @@ KAction *ShortcutsHandler::addAction(
         kDebug() << "Making it a configuration action";
         newAction->setProperty("isConfigurationAction", QVariant(true));
         }
+#endif
     // Enable global shortcut. If that fails there is no sense in proceeding
     if (!newAction->isGlobalShortcutEnabled())
         {
@@ -91,7 +107,7 @@ KAction *ShortcutsHandler::addAction(
 
 QAction *ShortcutsHandler::getAction( const QString &id )
     {
-    return _actions->action(id);
+    return _actions->action( idConv( id )) ;
     }
 
 
@@ -135,8 +151,7 @@ static bool xtest()
 bool ShortcutsHandler::send_macro_key( const QString& key, Window window_P )
     {
     kError() << "ShortcutsHandler::send_macro_key not implemented!!!";
-    Q_UNUSED( key );
-    Q_UNUSED( window_P );
+    Q_UNUSED( key )
     return false;
 
 #if 0

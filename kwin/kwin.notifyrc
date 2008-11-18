@@ -2875,6 +2875,7 @@ Comment[zh_TW]=已選擇虛擬桌面 20 號
 
 [Event/activate]
 Name=Activate Window
+Name[ar]=نشّط نافذة
 Name[be]=Актывізаваць акно
 Name[bg]=Активиране на прозорец
 Name[bn_IN]=উইন্ডো সক্রিয় করুন
@@ -3154,6 +3155,7 @@ Sound=KDE-Sys-App-Message.ogg
 [Event/delete]
 Name=Delete Window
 Name[af]=Vee venster uit
+Name[ar]=احذف نافذة
 Name[be]=Выдаліць акно
 Name[bg]=Изтриване на прозореца
 Name[bn_IN]=উইন্ডো মুছে ফেলুন
@@ -3426,7 +3428,7 @@ Sound=KDE-Window-Close.ogg
 [Event/shadeup]
 Name=Window Shade Up
 Name[af]=Venster Skadu Aan
-Name[ar]=تم تضليل نافذة للاعلى
+Name[ar]=ظلّل النافذة للأعلى
 Name[bn]=উইণ্ডো উপরে গুটিয়ে নাও
 Name[bn_IN]=উইণ্ডো উপরে গুটিয়ে নাও
 Name[br]=Rollañ ar prenestr
@@ -3554,6 +3556,7 @@ Sound=KDE-Window-Shade-Up.ogg
 [Event/shadedown]
 Name=Window Shade Down
 Name[af]=Venster Skadu Af
+Name[ar]=ظلّل نافذة للأسفل
 Name[bn]=উইণ্ডো নামাও
 Name[bn_IN]=উইণ্ডো নামাও
 Name[br]=Dirollañ ar Prenestr
@@ -3615,7 +3618,7 @@ Name[zh_CN]=窗口展开
 Name[zh_TW]=視窗層級往下
 Comment=A window is shaded down
 Comment[af]='n Venster se skaduwee is gedeaktiveer
-Comment[ar]=تم تظليل نافذة للاسفل
+Comment[ar]=ظُلّلت نافذة للاسفل
 Comment[bn]=একটি উইণ্ডো নামানো হয়েছে
 Comment[bn_IN]=একটি উইণ্ডো নামানো হয়েছে
 Comment[br]=Dirollet eo ur prenestr
@@ -3678,6 +3681,7 @@ Sound=KDE-Window-Shade-Down.ogg
 [Event/minimize]
 Name=Window Minimize
 Name[af]=Minimeer Venster
+Name[ar]=صغّر النافذة
 Name[bg]=Минимизиране на прозореца
 Name[bn]=উইণ্ডো মিনিমাইজ
 Name[bn_IN]=উইণ্ডো মিনিমাইজ
@@ -4595,6 +4599,7 @@ Sound=KDE-Sys-App-Message.ogg
 [Event/transdelete]
 Name=Delete Dialog
 Name[af]=Vee dialoog uit
+Name[ar]=احذف نافذة الحوار
 Name[be]=Выдаліць дыялог
 Name[bg]=Изтриване на диалогов прозорец
 Name[bn]=ডায়ালগ মুছে ফেল

@@ -3,6 +3,7 @@ Type=XSession
 Exec=matchbox
 TryExec=matchbox
 Name=Matchbox
+Name[ar]=علبة الثقاب
 Name[bn]=ম্যাচবক্স
 Name[bn_IN]=ম্যাচবক্স
 Name[gu]=મેચબોક્સ

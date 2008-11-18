@@ -3,7 +3,7 @@ Exec=kcmshell4 keyboard_layout
 Icon=preferences-desktop-keyboard-layout
 Type=Service
 X-KDE-ServiceTypes=KCModule,KCModuleInit
-X-DocPath=kcontrol/kxkb/index.html
+X-DocPath=kxkb/index.html
 
 X-KDE-Library=kcm_keyboard_layout
 X-KDE-PluginKeyword=keyboard_layout
@@ -158,7 +158,7 @@ Comment[te]=కీబోర్డ్ కూర్పు
 Comment[tg]=Тугмабандии клавиатура
 Comment[th]=ผังแป้นพิมพ์
 Comment[tr]=Klavye Düzeni
-Comment[uk]=Розклад клавіатури
+Comment[uk]=Розкладка клавіатури
 Comment[uz]=Tugmalar tartibi
 Comment[uz@cyrillic]=Тугмалар тартиби
 Comment[vi]=Bố trí bàn phím

@@ -186,7 +186,7 @@ void khotkeys_send_reread_config()
         }
     else
         {
-        org::kde::khotkeys iface("org.kde.khotkeys", "/modules/KHotKeys", bus);
+        org::kde::khotkeys iface("org.kde.khotkeys", "/KHotKeys", bus);
         iface.reread_configuration();
         kDebug( 1217 ) << "telling khotkeys daemon to reread configuration";
         }
@@ -284,7 +284,7 @@ QString khotkeys_change_menu_entry_shortcut( const QString& entry_P,
         return "";
         }
     entry->reparent( khotkeys_get_menu_root( settings.actions() ));
-    settings.disableDaemon(); // #91782
+    settings.enableDaemon(); // #91782
     settings.write_settings();
     khotkeys_send_reread_config();
     return shortcut;

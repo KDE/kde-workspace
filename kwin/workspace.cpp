@@ -579,7 +579,10 @@ void Workspace::removeClient( Client* c, allowed_t )
     if( client_keys_client == c )
         setupWindowShortcutDone( false );
     if( !c->shortcut().isEmpty())
+        {
         c->setShortcut( QString() ); // remove from client_keys
+        clientShortcutUpdated( c ); // needed, since this is otherwise delayed by setShortcut() and wouldn't run
+        }
 
     if( c->isDialog())
         Notify::raise( Notify::TransDelete );
@@ -1145,7 +1148,10 @@ QStringList Workspace::configModules(bool controlCenter)
 
 void Workspace::configureWM()
     {
-	KToolInvocation::kdeinitExec( "kcmshell4", configModules(false) );
+        QStringList args;
+        args << "--icon" << "preferences-system-windows"
+             << configModules(false) ;
+        KToolInvocation::kdeinitExec( "kcmshell4", args );
     }
 
 /*!

@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Invert
 Name[af]=Keer om
+Name[ar]=اعكس
 Name[be]=Інвертаваць
 Name[bg]=Инвертиране
 Name[ca]=Inverteix
@@ -21,6 +22,7 @@ Name[gl]=Inverter
 Name[gu]=ઉલ્ટું
 Name[he]=הפוך צבעים
 Name[hi]=उलटें
+Name[hr]=Invertiraj
 Name[hu]=Invertálás
 Name[is]=Umhverfa
 Name[it]=Inverti
@@ -82,6 +84,7 @@ Comment[ga]=Inbhéartaigh dathanna na deisce
 Comment[gl]=Inverte (nega) as cores do escritorio
 Comment[gu]=ડેસ્કટોપ રંગને ઉલ્ટો (ઋણ) કરે છે
 Comment[hu]=Invertálja az asztal színeit
+Comment[is]=Umhverfir (andstætt) litum skjáborðsins
 Comment[it]=Inverte (nega) i colori del desktop
 Comment[ja]=デスクトップの色を反転させます
 Comment[kk]=Үстелдің түстерін терістеу (кері қылу)

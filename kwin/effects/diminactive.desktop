@@ -20,6 +20,7 @@ Name[gu]=અસક્રિય ઝાંખી
 Name[he]=עמעם חלונות לא פעילים
 Name[hi]=असक्रिय मंद करें
 Name[hu]=Inaktív ablakok kiszürkítése
+Name[is]=Dimma óvirkt
 Name[it]=Oscura inattive
 Name[ja]=非アクティブを暗く
 Name[kk]=Белсенді еместі күңгірттеу
@@ -39,6 +40,7 @@ Name[pl]=Przyciemnienie nieaktywnych
 Name[pt]=Escurecer as Inactivas
 Name[pt_BR]=Escurecer Inativa
 Name[ro]=Împăienjenire inactive
+Name[ru]=Затемнение отключено
 Name[se]=Sevnjodahte ii-aktiivalaš lasiid
 Name[sl]=Potemnitev neaktivnega
 Name[sr]=Пригушени неактивни
@@ -74,6 +76,7 @@ Comment[gu]=અસક્રિય વિન્ડોને ઘાટી બન�
 Comment[he]=עימעום חלונות לא פעילים
 Comment[hi]=असक्रिय विंडो को गाढ़ा करता है
 Comment[hu]=Elsötétíti az inaktív ablakokat
+Comment[is]=Gerir óvirka glugga dimmari
 Comment[it]=Oscura le finestre inattive
 Comment[ja]=非アクティブなウィンドウを暗くします
 Comment[kk]=Белсенді емес терезелерді күңгірттеп көрсету

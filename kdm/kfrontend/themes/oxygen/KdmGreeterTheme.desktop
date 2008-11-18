@@ -4,6 +4,7 @@
 [KdmGreeterTheme]
 Greeter=oxygen.xml
 Name=Oxygen
+Name[ar]=أكسجين
 Name[csb]=Krziseń
 Name[es]=Oxígeno
 Name[gu]=ઓક્સિજન
@@ -41,6 +42,7 @@ Description[gl]=Tema Oxygen
 Description[gu]=ઓક્સિજન થીમ
 Description[hr]=Oxygen tema
 Description[hu]=Oxygen téma
+Description[is]=Oxygen þema
 Description[it]=Tema Oxygen
 Description[ja]=Oxygen テーマ
 Description[kk]=Oxygen нақышы
@@ -58,6 +60,7 @@ Description[nn]=Oksygen-tema
 Description[pl]=Motyw Oxygen
 Description[pt]=Tema do Oxygen
 Description[pt_BR]=Tema do Oxygen
+Description[ru]=Тема Oxygen
 Description[sl]=Tema Oxygen
 Description[sr]=Кисеоникова тема
 Description[sr@latin]=Kiseonikova tema
