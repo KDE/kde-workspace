@@ -514,6 +514,7 @@ void KSMShutdownDlg::paintEvent(QPaintEvent *e)
     if (m_svg->hasElement("picture")) {
         QRect r = m_svg->elementRect("picture").toRect();
         r.moveTop(m_btnLogout->geometry().top());
+        p.setCompositionMode( QPainter::CompositionMode_SourceOver );
         m_svg->paint(&p, r, "picture");
     }
 }
