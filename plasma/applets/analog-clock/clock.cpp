@@ -131,8 +131,6 @@ void Clock::dataUpdated(const QString& source, const Plasma::DataEngine::Data &d
     Q_UNUSED(source);
     m_time = data["Time"].toTime();
 
-    kDebug() << m_time;
-
     if (m_time.minute() == m_lastTimeSeen.minute() &&
         m_time.second() == m_lastTimeSeen.second()) {
         // avoid unnecessary repaints
