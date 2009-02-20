@@ -165,7 +165,7 @@ void PowerDevilRunner::match( Plasma::RunnerContext &context )
                     match.setText( i18n( "Set Profile to '%1'", profile ) );
                     match.setData( profile );
                     match.setRelevance( 1 );
-                    match.setId( "ProfileChange" );
+                    match.setId( "ProfileChange "+profile );
                     context.addMatch( term, match );
                 }
             } else if ( word == i18nc( "Note this is a KRunner keyword", "power governor" ) ) {
@@ -202,7 +202,7 @@ void PowerDevilRunner::match( Plasma::RunnerContext &context )
                     match.setText( i18n( "Set CPU Governor to '%1'", ent ) );
                     match.setData( m_governorData[ent] );
                     match.setRelevance( 1 );
-                    match.setId( "GovernorChange" );
+                    match.setId( "GovernorChange "+ent );
                     context.addMatch( term, match );
                 }
             } else if ( word == i18nc( "Note this is a KRunner keyword", "power scheme" ) ) {
@@ -222,7 +222,7 @@ void PowerDevilRunner::match( Plasma::RunnerContext &context )
                     match.setData( ent );
 
                     match.setRelevance( 1 );
-                    match.setId( "SchemeChange" );
+                    match.setId( "SchemeChange "+ent );
                     context.addMatch( term, match );
                 }
             } else if ( word == i18nc( "Note this is a KRunner keyword", "screen brightness" ) ) {
@@ -286,7 +286,7 @@ void PowerDevilRunner::match( Plasma::RunnerContext &context )
                     match.setText( ent );
                     match.setData( m_suspendData[ent] );
                     match.setRelevance( 1 );
-                    match.setId( "Suspend" );
+                    match.setId( "Suspend "+ent );
                     context.addMatch( term, match );
                 }
             }
