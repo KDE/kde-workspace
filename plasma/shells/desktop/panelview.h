@@ -170,8 +170,10 @@ public Q_SLOTS:
      */
     void recreateUnhideTrigger();
 
-protected:
+protected Q_SLOTS:
     void updateStruts();
+
+protected:
     void moveEvent(QMoveEvent *event);
     void resizeEvent(QResizeEvent *event);
     void leaveEvent(QEvent *event);
@@ -225,6 +227,7 @@ private:
     QList<PanelAppletOverlay*> m_moveOverlays;
     GlowBar *m_glowBar;
     QTimer *m_mousePollTimer;
+    QTimer *m_strutsTimer;
     QTimeLine *m_timeLine;
     QGraphicsWidget *m_spacer;
     int m_spacerIndex;
@@ -247,6 +250,7 @@ private:
     bool m_editting : 1;
     bool m_firstPaint : 1;
     bool m_triggerEntered : 1;
+    static const int STRUTSTIMERDELAY = 200;
 };
 
 #endif
