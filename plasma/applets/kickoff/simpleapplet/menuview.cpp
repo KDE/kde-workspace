@@ -220,8 +220,9 @@ bool MenuView::eventFilter(QObject *watched, QEvent *event)
         if (watchedMenu) {
             d->mousePressPos = QPoint();
         }
+    } else if (event->type() == QEvent::Hide) {
+        emit afterBeingHidden();
     }
-
     return KMenu::eventFilter(watched, event);
 }
 
@@ -256,7 +257,6 @@ QModelIndex MenuView::indexForAction(QAction *action) const
     Q_ASSERT(d->model);
     Q_ASSERT(action != 0);
     QPersistentModelIndex index = action->data().value<QPersistentModelIndex>();
-    Q_ASSERT(index.isValid());
     return index;
 }
 
@@ -386,8 +386,9 @@ void MenuView::actionTriggered(QAction *action)
 {
     Q_ASSERT(d->model);
     QModelIndex index = indexForAction(action);
-    Q_ASSERT(index.isValid());
-    d->launcher->openItem(index);
+    if(index.isValid()) {
+        d->launcher->openItem(index);
+    }
 }
 
 #include "menuview.moc"
