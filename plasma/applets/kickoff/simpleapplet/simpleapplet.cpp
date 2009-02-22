@@ -382,6 +382,8 @@ void MenuLauncherApplet::toggleMenu()
         case Combined: {
             Kickoff::ApplicationModel *appModel = new Kickoff::ApplicationModel(d->menuview);
             appModel->setDuplicatePolicy(Kickoff::ApplicationModel::ShowLatestOnlyPolicy);
+            if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription)
+                appModel->setPrimaryNamePolicy(Kickoff::ApplicationModel::AppNamePrimary);
             appModel->setSystemApplicationPolicy(Kickoff::ApplicationModel::ShowApplicationAndSystemPolicy);
             Kickoff::MenuView *appview = d->createMenuView(appModel);
             d->addMenu(appview, false);
@@ -407,6 +409,8 @@ void MenuLauncherApplet::toggleMenu()
         case Applications: {
             Kickoff::ApplicationModel *appModel = new Kickoff::ApplicationModel(d->menuview);
             appModel->setDuplicatePolicy(Kickoff::ApplicationModel::ShowLatestOnlyPolicy);
+            if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription)
+                appModel->setPrimaryNamePolicy(Kickoff::ApplicationModel::AppNamePrimary);
             Kickoff::MenuView *appview = d->createMenuView(appModel);
             d->addMenu(appview, false);
         }
