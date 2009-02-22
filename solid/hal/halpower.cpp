@@ -553,7 +553,7 @@ void HalPower::slotButtonPressed(Solid::Button::ButtonType type)
         }
         break;
     default:
-        kWarning() << "Unknown button type" ;
+        //kWarning() << "Unknown button type";
         break;
     }
 }
