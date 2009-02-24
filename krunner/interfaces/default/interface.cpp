@@ -437,7 +437,7 @@ void Interface::queryTextEdited(const QString &query)
         resetInterface();
         m_queryRunning = false;
     } else {
-        m_queryRunning = m_resultsScene->launchQuery(query);
+        m_queryRunning = m_resultsScene->launchQuery(query) || m_queryRunning; //lazy OR?
     }
 }
 
