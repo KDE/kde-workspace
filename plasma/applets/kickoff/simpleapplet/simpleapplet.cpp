@@ -437,7 +437,6 @@ void MenuLauncherApplet::toggleMenu()
         break;
         case Leave: {
             Kickoff::MenuView *leaveview = d->createMenuView(new Kickoff::LeaveModel(d->menuview));
-            leaveview->updateModel();
             d->addMenu(leaveview, true);
         }
         break;
