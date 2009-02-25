@@ -42,7 +42,7 @@ HalSuspendJob::HalSuspendJob(QDBusInterface &powermanagement, QDBusInterface &co
                 bool can_hybrid = reply;
                 if (can_hybrid)
                 {
-                    m_dbusMethod = "SuspendHybrid";
+                    m_dbusMethod = "Suspend";
                 }
                 else
                 {
