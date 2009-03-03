@@ -261,20 +261,20 @@ void PresentWindowsEffect::windowAdded( EffectWindow *w )
 
 void PresentWindowsEffect::windowClosed( EffectWindow *w )
     {
-    if( !m_activated )
-        return;
     if( m_highlightedWindow == w )
         setHighlightedWindow( findFirstWindow() );
+    if( !m_activated )
+        return;
     m_windowData[w].visible = false; // TODO: Fix this so they do actually fade out
-    rearrangeWindows();
     }
 
 void PresentWindowsEffect::windowDeleted( EffectWindow *w )
     {
-    if( !m_activated )
+    if( !m_windowData.contains( w ))
         return;
     m_windowData.remove( w );
     m_motionManager.unmanage( w );
+    rearrangeWindows();
     }
 
 bool PresentWindowsEffect::borderActivated( ElectricBorder border )
@@ -1107,6 +1107,8 @@ void PresentWindowsEffect::setActive( bool active, bool closingTab )
         // Add every single window to m_windowData (Just calling [w] creates it)
         foreach( EffectWindow *w, effects->stackingOrder() )
             {
+            if( m_windowData.contains( w )) // Happens if we reactivate before the ending animation finishes
+                continue;
             m_windowData[w].visible = isVisibleWindow( w );
             m_windowData[w].opacity = 0.0;
             if( w->isOnCurrentDesktop() && !w->isMinimized() )
