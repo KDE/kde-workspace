@@ -250,10 +250,11 @@ void MenuLauncherApplet::init()
         connect(menueditor, SIGNAL(triggered(bool)), this, SLOT(startMenuEditor()));
     }
 
-    Q_ASSERT(! d->switcher);
-    d->switcher = new QAction(i18n("Switch to Kickoff Menu Style"), this);
-    d->actions.append(d->switcher);
-    connect(d->switcher, SIGNAL(triggered(bool)), this, SLOT(switchMenuStyle()));
+    if (! d->switcher) {
+        d->switcher = new QAction(i18n("Switch to Kickoff Menu Style"), this);
+        d->actions.append(d->switcher);
+        connect(d->switcher, SIGNAL(triggered(bool)), this, SLOT(switchMenuStyle()));
+    }
 
     constraintsEvent(Plasma::ImmutableConstraint);
 }
