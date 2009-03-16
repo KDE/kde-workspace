@@ -52,16 +52,18 @@ Name[km]=កម្មវិធី​គ្រប់គ្រង​សម័យ
 Name[kn]=ಅಧಿವೇಶನ (ಸೆಶನ್) ವ್ಯವಸ್ಥಾಪಕ
 Name[ko]=세션 관리자
 Name[ku]=Gerînendeyê Danişînê
-Name[lt]=Sesijos valdyklė
+Name[lt]=Sesijos tvarkytuvė
 Name[lv]=Sesiju pārvaldnieks
 Name[mai]=सत्र प्रबंधक
 Name[mk]=Менаџер на сесии
 Name[ml]=സെഷന്‍ പാലകന്‍
 Name[mr]=सत्र प्रबंधक
 Name[ms]=Pengurus Sesi
+Name[nb]=Øktbehandler
 Name[nds]=Törnpleger
 Name[ne]=सत्र प्रबन्धक
 Name[nl]=Sessiebeheer
+Name[nn]=Økthandsamar
 Name[pa]=ਸ਼ੈਸ਼ਨ ਮੈਨੇਜਰ
 Name[pl]=Menedżer sesji
 Name[pt]=Gestor de Sessões
@@ -131,16 +133,18 @@ Comment[kk]=Сеанс менеджерді және жүйеден шығу п�
 Comment[km]=កំណត់​រចនា​សម្ព័ន្ធ​កម្មវិធី​គ្រប់គ្រង​សម័យ និង​​កំណត់​ការ​ចេញ
 Comment[kn]=ಅಧಿವೇಶನ (ಸೆಶನ್) ವ್ಯವಸ್ಥಾಪಕ ಹಾಗೂ ನಿರ್ಗಮನ (ಲಾಗೌಟ್) ಸಂಯೋಜನೆಗಳನ್ನು ಸಂರಚಿಸು
 Comment[ko]=세션 관리자와 로그아웃 설정 관리
-Comment[lt]=Čia galite konfigūruoti sesijos tvarkyklę ir išsiregistravimo nustatymus
+Comment[lt]=Čia galite konfigūruoti sesijos tvarkytuvę ir išsiregistravimo nustatymus
 Comment[lv]=Šeit jūs varat konfigurēt sesiju pārvaldnieku un pieslēgšanās parametrus
 Comment[mai]=सत्र प्रबंधक आओर लागआउट सेटिंग बिन्यस्त करू
 Comment[mk]=Конфигурирајте го менаџерот на сесии и поставувањата за одјавување
 Comment[ml]=സെഷനുകളുടെ നടത്തിപ്പുകാരനെയും പുറത്തിറങ്ങുന്നതിനുള്ള സജ്ജീകരണങ്ങളും ക്രമീകരിയ്ക്കുക
 Comment[mr]=सत्र प्रबंधक व लॉगआउट संयोजना संयोजीत करा
 Comment[ms]=Konfigur seting pengurus sesi dan bentangan
+Comment[nb]=Tilpass øktbehandleren og utlogginga
 Comment[nds]=Dat Afmellen un den Törnpleger instellen
 Comment[ne]=सत्र प्रबन्धक र लगआउट सेटिङ कन्फिगर गर्नुहोस्
 Comment[nl]=Hier kunt u het sessiebeheer en de afmeld-instellingen bepalen
+Comment[nn]=Oppsett av økthandsamar og utlogging
 Comment[pa]=ਸ਼ੈਸ਼ਨ ਮੈਨੇਜਰ ਅਤੇ ਲਾਗਆਉਟ ਸੈਟਿੰਗ ਦੀ ਸੰਰਚਨਾ
 Comment[pl]=Konfiguracja menedżera sesji i ustawień wylogowania
 Comment[pt]=Configuração do gestor de sessões e das opções de encerramento
