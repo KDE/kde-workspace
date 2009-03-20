@@ -41,6 +41,7 @@
 #include <KDebug>
 #include <KLocale>
 #include <KIcon>
+#include <KIconLoader>
 #include <KSharedConfig>
 #include <KTimeZoneWidget>
 #include <KDialog>
@@ -221,6 +222,8 @@ void Clock::drawHand(QPainter *p, const QRect &rect, const qreal verticalTransla
         p->save();
 
         elementRect = m_theme->elementRect(name);
+        if( rect.height() < KIconLoader::SizeEnormous )
+            elementRect.setWidth( elementRect.width() * 2.5 );
         static const QPoint offset = QPoint(2, 3);
 
         p->translate(rect.width()/2+offset.x(), rect.height()/2+offset.y());
@@ -235,6 +238,8 @@ void Clock::drawHand(QPainter *p, const QRect &rect, const qreal verticalTransla
 
     name = handName + "Hand";
     elementRect = m_theme->elementRect(name);
+    if( rect.height() < KIconLoader::SizeEnormous )
+        elementRect.setWidth( elementRect.width() * 2.5 );
 
     p->translate(rect.width()/2, rect.height()/2);
     p->rotate(rotation);
