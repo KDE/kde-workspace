@@ -53,7 +53,7 @@
 #include "interfaces/default/resultscene.h"
 #include "interfaces/default/resultitem.h"
 
-static const int MIN_WIDTH = 400;
+static const int MIN_WIDTH = 420;
 
 Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     : KRunnerDialog(runnerManager, parent),
@@ -190,7 +190,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
 
     m_layout->addWidget(m_resultsView);
 
-    connect(m_searchTerm, SIGNAL(editTextChanged(QString)), this, SLOT(queryTextEdited(QString)));
+    connect(lineEdit, SIGNAL(userTextChanged(QString)), this, SLOT(queryTextEdited(QString)));
     connect(m_searchTerm, SIGNAL(returnPressed()), this, SLOT(runDefaultResultItem()));
 
     themeUpdated();
@@ -354,9 +354,8 @@ void Interface::resetInterface()
     m_resultsView->hide();
     m_dividerLine->hide();
     setMinimumSize(QSize(MIN_WIDTH, 0));
-    adjustSize();
     //kDebug() << size() << minimumSizeHint();
-    resize(minimumSizeHint());
+    resize(qMax(minimumSizeHint().width(), MIN_WIDTH), minimumSizeHint().height()+1);
 }
 
 void Interface::setStaticQueryMode(bool staticQuery)
