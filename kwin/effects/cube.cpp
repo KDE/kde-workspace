@@ -378,10 +378,9 @@ void CubeEffect::paintScreen( int mask, QRegion region, ScreenPaintData& data )
             text_font.setPointSize( 14 );
             glPushAttrib( GL_CURRENT_BIT );
             glColor4f( color_frame.redF(), color_frame.greenF(), color_frame.blueF(), color_frame.alphaF());
-            QRect frameRect = QRect( rect.width()*0.33f + rect.x(),
-                rect.height() + rect.y() - QFontMetrics( text_font ).height() * 1.2f,
-                rect.width()*0.33f,
-                QFontMetrics( text_font ).height() * 1.2f );
+            QRect screenRect = effects->clientArea( ScreenArea, activeScreen, frontDesktop );
+            QRect frameRect = QRect( screenRect.width() * 0.33f + screenRect.x(), screenRect.height() * 0.95f + screenRect.y(),
+                screenRect.width() * 0.34f, QFontMetrics( text_font ).height() * 1.2f );
             renderRoundBoxWithEdge( frameRect );
             effects->paintText( effects->desktopName( frontDesktop ),
                 frameRect.center(),
