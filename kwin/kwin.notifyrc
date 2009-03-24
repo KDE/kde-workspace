@@ -5997,6 +5997,7 @@ Comment=The compositing performance was too slow and compositing has been suspen
 Comment[ar]=أداء التكوين بطيء جدا و تم تعليقه.
 Comment[be@latin]=Chutkaść kampazycyi była zamałoj, i tamu jana była vyklučanaja.
 Comment[ca]=El rendiment de la composició era massa lent i s'ha suspès
+Comment[cs]=Výkon kompozice byl příliš nízký, proto byla vypnuta
 Comment[da]=Compositing-ydelsen var for langsom, og compositing er blevet suspenderet
 Comment[de]=Die Composit-Geschwindigkeit ist niedrig, daher wurde die Compositing ausgesetzt.
 Comment[el]=Οι επιδόσεις σύνθεσης της εικόνας ήταν πολύ χαμηλές και η σύνθεση εικόνας αναστάλθηκε
