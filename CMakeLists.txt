@@ -16,7 +16,7 @@ endif(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 
 
 #search packages used by KDE
-find_package(KDE4 REQUIRED)
+find_package(KDE4 4.2.2 REQUIRED)
 find_package(Strigi REQUIRED)
 find_package(QImageBlitz REQUIRED)
 find_package(ZLIB REQUIRED)
