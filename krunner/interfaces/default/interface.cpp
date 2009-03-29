@@ -400,7 +400,6 @@ void Interface::run(ResultItem *item)
 
     kDebug() << item->name() << item->id();
     m_delayedRun = false;
-    m_searchTerm->addToHistory(m_searchTerm->currentText());
 
     if (item->group() == Plasma::QueryMatch::InformationalMatch) {
         QString info = item->data();
@@ -416,6 +415,9 @@ void Interface::run(ResultItem *item)
     close();
     m_resultsScene->run(item);
     m_running = false;
+
+    //TODO: check if run succesful before adding the term to history
+    m_searchTerm->addToHistory(m_searchTerm->currentText());
     resetInterface();
 }
 
