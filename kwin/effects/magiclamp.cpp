@@ -26,12 +26,17 @@ namespace KWin
 {
 
 KWIN_EFFECT( magiclamp, MagicLampEffect )
+KWIN_EFFECT_SUPPORTED( magiclamp, MagicLampEffect::supported() )
 
 MagicLampEffect::MagicLampEffect()
     {
     mActiveAnimations = 0;
     }
 
+bool MagicLampEffect::supported()
+    {
+    return effects->compositingType() == OpenGLCompositing;
+    }
 
 void MagicLampEffect::prePaintScreen( ScreenPrePaintData& data, int time )
     {
