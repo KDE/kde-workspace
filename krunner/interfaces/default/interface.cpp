@@ -417,7 +417,7 @@ void Interface::run(ResultItem *item)
     m_running = false;
 
     //TODO: check if run succesful before adding the term to history
-    m_searchTerm->addToHistory(m_searchTerm->currentText());
+    m_searchTerm->addToHistory(m_searchTerm->currentText().trimmed());
     resetInterface();
 }
 
