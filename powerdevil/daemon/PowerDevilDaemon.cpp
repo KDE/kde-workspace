@@ -63,8 +63,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
-extern "C"
-{
+extern "C" {
 #include <X11/extensions/dpms.h>
     int __kde_do_not_unload = 1;
 
@@ -102,7 +101,8 @@ public:
             : notifier(Solid::Control::PowerManager::notifier())
             , battery(0)
             , currentConfig(0)
-            , status(PowerDevilDaemon::NoAction) {};
+            , status(PowerDevilDaemon::NoAction)
+            , ckSessionInterface(0) {};
 
     Solid::Control::PowerManager::Notifier * notifier;
     QPointer<Solid::Battery> battery;
@@ -128,6 +128,10 @@ public:
 
     int batteryPercent;
     bool isPlugged;
+
+    // ConsoleKit stuff
+    QDBusInterface *ckSessionInterface;
+    bool ckAvailable;
 };
 
 PowerDevilDaemon::PowerDevilDaemon(QObject *parent, const QList<QVariant>&)
@@ -165,6 +169,9 @@ PowerDevilDaemon::PowerDevilDaemon(QObject *parent, const QList<QVariant>&)
         return;
     }
 
+    // First things first: let's set up PowerDevil to be aware of active session
+    setUpConsoleKit();
+
     d->profilesConfig = KSharedConfig::openConfig("powerdevilprofilesrc", KConfig::SimpleConfig);
     setAvailableProfiles(d->profilesConfig->groupList());
 
@@ -176,7 +183,7 @@ PowerDevilDaemon::PowerDevilDaemon(QObject *parent, const QList<QVariant>&)
     d->ksmServerIface = new OrgKdeKSMServerInterfaceInterface("org.kde.ksmserver", "/KSMServer",
             QDBusConnection::sessionBus(), this);
 
-    /*  Not needed anymore; I am not sure if we will need that in a future, so I leave it here 
+    /*  Not needed anymore; I am not sure if we will need that in a future, so I leave it here
      *  just in case.
      *
      *   d->kscreenSaverIface = new OrgKdeScreensaverInterface("org.freedesktop.ScreenSaver", "/ScreenSaver",
@@ -224,6 +231,7 @@ PowerDevilDaemon::PowerDevilDaemon(QObject *parent, const QList<QVariant>&)
 
 PowerDevilDaemon::~PowerDevilDaemon()
 {
+    delete d->ckSessionInterface;
     delete d;
 }
 
@@ -364,10 +372,14 @@ void PowerDevilDaemon::resumeFromIdle()
 {
     KConfigGroup * settings = getCurrentProfile();
 
-    Solid::Control::PowerManager::setBrightness(settings->readEntry("brightness").toInt());
-
     POLLER_CALL(d->pollLoader->poller(), stopCatchingIdleEvents());
     POLLER_CALL(d->pollLoader->poller(), forcePollRequest());
+
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
+    Solid::Control::PowerManager::setBrightness(settings->readEntry("brightness").toInt());
 }
 
 void PowerDevilDaemon::refreshStatus()
@@ -404,15 +416,15 @@ void PowerDevilDaemon::acAdapterStateChanged(int state, bool forced)
         emitNotification("unplugged", i18n("The power adaptor has been unplugged"));
     }
 
-    if (!forced)
+    if (!forced) {
         reloadProfile(state);
+    }
 
     applyProfile();
 }
 
 #ifdef HAVE_DPMS
-extern "C"
-{
+extern "C" {
     int dropError(Display *, XErrorEvent *);
     typedef int (*XErrFunc)(Display *, XErrorEvent *);
 }
@@ -425,10 +437,15 @@ int dropError(Display *, XErrorEvent *)
 
 void PowerDevilDaemon::applyProfile()
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     KConfigGroup * settings = getCurrentProfile();
 
-    if (!settings)
+    if (!settings) {
         return;
+    }
 
     Solid::Control::PowerManager::setBrightness(settings->readEntry("brightness").toInt());
     Solid::Control::PowerManager::setCpuFreqPolicy((Solid::Control::PowerManager::CpuFreqPolicy)
@@ -459,10 +476,15 @@ void PowerDevilDaemon::applyProfile()
 
 void PowerDevilDaemon::setUpDPMS()
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     KConfigGroup * settings = getCurrentProfile();
 
-    if (!settings)
+    if (!settings) {
         return;
+    }
 
 #ifdef HAVE_DPMS
 
@@ -535,8 +557,13 @@ void PowerDevilDaemon::batteryChargePercentChanged(int percent, const QString &u
 
     setBatteryPercent(charge);
 
-    if (Solid::Control::PowerManager::acAdapterState() == Solid::Control::PowerManager::Plugged)
+    if (Solid::Control::PowerManager::acAdapterState() == Solid::Control::PowerManager::Plugged) {
         return;
+    }
+
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
 
     if (charge <= PowerDevilSettings::batteryCriticalLevel()) {
         switch (PowerDevilSettings::batLowAction()) {
@@ -600,6 +627,10 @@ void PowerDevilDaemon::batteryChargePercentChanged(int percent, const QString &u
 
 void PowerDevilDaemon::buttonPressed(int but)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     KConfigGroup * settings = getCurrentProfile();
 
     if (!settings)
@@ -681,18 +712,30 @@ void PowerDevilDaemon::buttonPressed(int but)
 
 void PowerDevilDaemon::decreaseBrightness()
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     int currentBrightness = qMax(0, (int)(Solid::Control::PowerManager::brightness() - 10));
     Solid::Control::PowerManager::setBrightness(currentBrightness);
 }
 
 void PowerDevilDaemon::increaseBrightness()
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     int currentBrightness = qMin(100, (int)(Solid::Control::PowerManager::brightness() + 10));
     Solid::Control::PowerManager::setBrightness(currentBrightness);
 }
 
 void PowerDevilDaemon::shutdownNotification(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setNotificationLock(automated)) {
         return;
     }
@@ -709,6 +752,10 @@ void PowerDevilDaemon::shutdownNotification(bool automated)
 
 void PowerDevilDaemon::suspendToDiskNotification(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setNotificationLock(automated)) {
         return;
     }
@@ -725,6 +772,10 @@ void PowerDevilDaemon::suspendToDiskNotification(bool automated)
 
 void PowerDevilDaemon::suspendToRamNotification(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setNotificationLock(automated)) {
         return;
     }
@@ -741,6 +792,10 @@ void PowerDevilDaemon::suspendToRamNotification(bool automated)
 
 void PowerDevilDaemon::standbyNotification(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setNotificationLock(automated)) {
         return;
     }
@@ -757,6 +812,10 @@ void PowerDevilDaemon::standbyNotification(bool automated)
 
 void PowerDevilDaemon::shutdown(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setJobLock(automated)) {
         return;
     }
@@ -775,6 +834,10 @@ void PowerDevilDaemon::shutdownDialog()
 
 void PowerDevilDaemon::suspendToDisk(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setJobLock(automated)) {
         return;
     }
@@ -795,6 +858,10 @@ void PowerDevilDaemon::suspendToDisk(bool automated)
 
 void PowerDevilDaemon::suspendToRam(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setJobLock(automated)) {
         return;
     }
@@ -814,6 +881,10 @@ void PowerDevilDaemon::suspendToRam(bool automated)
 
 void PowerDevilDaemon::standby(bool automated)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!d->lockHandler->setJobLock(automated)) {
         return;
     }
@@ -856,7 +927,11 @@ void PowerDevilDaemon::poll(int idle)
      * We make an intensive use of qMin/qMax here to determine the minimum time.
      */
 
-   // kDebug() << "Polling started, idle time is" << idle << "seconds";
+    // kDebug() << "Polling started, idle time is" << idle << "seconds";
+
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
 
     KConfigGroup * settings = getCurrentProfile();
 
@@ -866,7 +941,7 @@ void PowerDevilDaemon::poll(int idle)
 
     if (!settings->readEntry("dimOnIdle", false) && !settings->readEntry("turnOffIdle", false) &&
             settings->readEntry("idleAction").toInt() == None) {
-     //   kDebug() << "Stopping timer";
+        //   kDebug() << "Stopping timer";
         POLLER_CALL(d->pollLoader->poller(), stopCatchingTimeouts());
         return;
     }
@@ -891,13 +966,13 @@ void PowerDevilDaemon::poll(int idle)
         minTime = qMin(minTime, minDimTime);
     }
 
-   // kDebug() << "Minimum time is" << minTime << "seconds";
+    // kDebug() << "Minimum time is" << minTime << "seconds";
 
     if (idle < minTime) {
         d->status = NoAction;
         int remaining = minTime - idle;
         POLLER_CALL(d->pollLoader->poller(), setNextTimeout(remaining * 1000));
-     //   kDebug() << "Nothing to do, next event in" << remaining << "seconds";
+        //   kDebug() << "Nothing to do, next event in" << remaining << "seconds";
         return;
     }
 
@@ -1009,6 +1084,10 @@ void PowerDevilDaemon::setUpNextTimeout(int idle, int minDimEvent)
 
 void PowerDevilDaemon::lockScreen()
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     emitNotification("doingjob", i18n("The screen is being locked"));
     d->screenSaverIface->Lock();
 }
@@ -1136,6 +1215,10 @@ KConfigGroup * PowerDevilDaemon::getCurrentProfile(bool forcereload)
 
 void PowerDevilDaemon::reloadProfile(int state)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (!recacheBatteryPointer()) {
         setCurrentProfile(PowerDevilSettings::aCProfile());
     } else {
@@ -1186,6 +1269,10 @@ void PowerDevilDaemon::reloadProfile(int state)
 
 void PowerDevilDaemon::setProfile(const QString & profile)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     setCurrentProfile(profile);
 
     /* Don't call refreshStatus() here, since we don't want the predefined profile
@@ -1202,6 +1289,10 @@ void PowerDevilDaemon::setProfile(const QString & profile)
 
 void PowerDevilDaemon::reloadAndStream()
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     reloadProfile();
 
     setAvailableProfiles(d->profilesConfig->groupList());
@@ -1274,16 +1365,28 @@ QStringList PowerDevilDaemon::getSupportedSchemes()
 
 void PowerDevilDaemon::setPowersavingScheme(const QString &scheme)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     Solid::Control::PowerManager::setScheme(scheme);
 }
 
 void PowerDevilDaemon::setGovernor(int governor)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     Solid::Control::PowerManager::setCpuFreqPolicy((Solid::Control::PowerManager::CpuFreqPolicy) governor);
 }
 
 void PowerDevilDaemon::suspend(int method)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     switch ((IdleAction) method) {
     case S2Disk:
         QTimer::singleShot(100, this, SLOT(suspendToDisk()));
@@ -1301,6 +1404,10 @@ void PowerDevilDaemon::suspend(int method)
 
 void PowerDevilDaemon::setBrightness(int value)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (value == -2) {
         // Then set brightness to half the current brightness.
 
@@ -1332,6 +1439,10 @@ void PowerDevilDaemon::turnOffScreen()
 
 void PowerDevilDaemon::profileFirstLoad()
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     KConfigGroup * settings = getCurrentProfile();
 
     if (!settings)
@@ -1411,6 +1522,10 @@ void PowerDevilDaemon::setACPlugged(bool newplugged)
 
 void PowerDevilDaemon::setCurrentProfile(const QString &profile)
 {
+    if (!checkIfCurrentSessionActive()) {
+        return;
+    }
+
     if (profile != d->currentProfile) {
         d->currentProfile = profile;
         profileFirstLoad();
@@ -1422,6 +1537,49 @@ void PowerDevilDaemon::setAvailableProfiles(const QStringList &aProfiles)
 {
     d->availableProfiles = aProfiles;
     emit profileChanged(d->currentProfile, d->availableProfiles);
+}
+
+bool PowerDevilDaemon::checkIfCurrentSessionActive()
+{
+    if (!d->ckAvailable) {
+        // No way to determine if we are on the current session, simply suppose we are
+        kDebug() << "Can't contact ck";
+        return true;
+    }
+
+    QDBusReply<bool> rp = d->ckSessionInterface->call("IsActive");
+
+    return rp.value();
+}
+
+void PowerDevilDaemon::setUpConsoleKit()
+{
+    // Let's cache the needed information to check if our session is actually active
+
+    if (!QDBusConnection::systemBus().interface()->isServiceRegistered("org.freedesktop.ConsoleKit")) {
+        // No way to determine if we are on the current session, simply suppose we are
+        kDebug() << "Can't contact ck";
+        d->ckAvailable = false;
+        return;
+    } else {
+        d->ckAvailable = true;
+    }
+
+    // Otherwise, let's ask ConsoleKit
+    QDBusInterface ckiface("org.freedesktop.ConsoleKit", "/org/freedesktop/ConsoleKit/Manager",
+                           "org.freedesktop.ConsoleKit.Manager", QDBusConnection::systemBus());
+
+    QDBusReply<QDBusObjectPath> sessionPath = ckiface.call("GetCurrentSession");
+
+    d->ckSessionInterface = new QDBusInterface("org.freedesktop.ConsoleKit", sessionPath.value().path(),
+            "org.freedesktop.ConsoleKit.Session", QDBusConnection::systemBus());
+
+    if (!d->ckSessionInterface->isValid()) {
+        // As above
+        kDebug() << "Can't contact iface";
+        d->ckAvailable = false;
+        return;
+    }
 }
 
 #include "PowerDevilDaemon.moc"
