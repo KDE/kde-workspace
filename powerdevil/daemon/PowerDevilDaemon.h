@@ -34,9 +34,6 @@ class QTimer;
 class PollSystemLoader;
 class SuspensionLockHandler;
 class KNotification;
-class OrgFreedesktopScreenSaverInterface;
-class OrgKdeKSMServerInterfaceInterface;
-class OrgKdeScreensaverInterface;
 
 class KDE_EXPORT PowerDevilDaemon : public KDEDModule
 {
@@ -128,8 +125,8 @@ Q_SIGNALS:
 private:
     void lockScreen();
 
-    void setUpDPMS();	
-    
+    void setUpDPMS();
+
     KConfigGroup *getCurrentProfile(bool forcereload = false);
     void applyProfile();
 
@@ -143,6 +140,10 @@ private:
 
     bool recacheBatteryPointer(bool force = false);
 
+    void setUpConsoleKit();
+
+    bool checkIfCurrentSessionActive();
+
 public:
     enum IdleAction {
         None = 0,
@@ -151,7 +152,8 @@ public:
         S2Disk = 4,
         Shutdown = 8,
         Lock = 16,
-        ShutdownDialog = 32
+        ShutdownDialog = 32,
+        TurnOffScreen = 64
     };
 
     enum IdleStatus {
