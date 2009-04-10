@@ -35,7 +35,7 @@ CalendarTest::CalendarTest(QObject *parent, const QVariantList &args)
     : Plasma::PopupApplet(parent, args),
     m_calendarDialog(0),
     m_theme(0),
-    m_date(0),
+    m_date(0)
 {
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setCacheMode(DeviceCoordinateCache);
