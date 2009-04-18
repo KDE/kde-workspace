@@ -89,7 +89,7 @@ bool SM::Net::addMeter(const QString& source)
     plotter->addPlot(QColor(((color.red() - 128) * 0.90) + 128, 0, 0, color.alpha()));
     plotter->setUseAutoRange(true);
     plotter->setThinFrame(false);
-    plotter->setShowLabels(false);
+    plotter->setShowLabels(true);
     plotter->setShowTopBar(false);
     plotter->setShowVerticalLines(false);
     plotter->setShowHorizontalLines(false);
