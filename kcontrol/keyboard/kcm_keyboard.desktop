@@ -7,13 +7,11 @@ X-DocPath=kcontrol/keyboard/index.html
 
 X-KDE-Library=kcm_keyboard
 X-KDE-PluginKeyword=keyboard
+X-KDE-Init-Symbol=keyboard
 X-KDE-ParentApp=kcontrol
 
-# This desktop file is just for backwards compatibility so that `kcmshell4 keyboard` still works,
-# but other than it's superseded by kcm_keyboard.desktop
-#X-KDE-Init-Symbol=keyboard
-#X-KDE-System-Settings-Parent-Category=keyboard-and-mouse
-#X-KDE-Weight=50
+X-KDE-System-Settings-Parent-Category=keyboard-and-mouse
+X-KDE-Weight=50
 
 Name=Keyboard
 Name[af]=Sleutelbord
