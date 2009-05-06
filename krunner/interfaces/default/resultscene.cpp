@@ -41,15 +41,14 @@
 
 #include "resultitem.h"
 
-ResultScene::ResultScene(Plasma::RunnerManager *manager, QWidget * focusBase, QObject *parent)
+ResultScene::ResultScene(Plasma::RunnerManager *manager, QObject *parent)
     : QGraphicsScene(parent),
       m_runnerManager(manager),
       m_cIndex(0),
       m_rowStride(0),
       m_pageStride(0),
       m_pageCount(0),
-      m_currentPage(0),
-      m_focusBase(focusBase)
+      m_currentPage(0)
 {
     setItemIndexMethod(NoIndex);
 
@@ -123,15 +122,6 @@ void ResultScene::clearMatches()
     emit matchCountChanged(0);
 }
 
-bool ResultScene::canMoveItemFocus() const
-{
-    // We prevent a late query result from stealing the item focus from the user
-    // The item focus can be moved only if the focusBase widget (the khistorycombobox)
-    // has focus (i.e. the user is still typing or waiting) or if there is no item currently focused
-
-    return m_focusBase->hasFocus() || (!focusItem());
-}
-
 void ResultScene::setQueryMatches(const QList<Plasma::QueryMatch> &m)
 {
     // kDebug() << "============================" << endl << "matches retrieved: " << m.count();
@@ -194,15 +184,15 @@ void ResultScene::setQueryMatches(const QList<Plasma::QueryMatch> &m)
         item->setIndex(i);
 
         // it is vital that focus is set *after* the index
-        if (i == 0 && canMoveItemFocus()) {
+        if (i == 0) {
             setFocusItem(item);
-            emit itemHoverEnter(item);
         }
 
         ++i;
         tab = item;
     }
 
+    emit itemHoverEnter(m_items.at(0));
 }
 
 ResultItem* ResultScene::addQueryMatch(const Plasma::QueryMatch &match, bool useAnyId)
