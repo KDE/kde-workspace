@@ -1,6 +1,0 @@
-#ifndef __CONFIG_FONTINST_H__
-#define __CONFIG_FONTINST_H__
-
-#define USE_POLICYKIT @USE_POLICYKIT@
-
-#endif

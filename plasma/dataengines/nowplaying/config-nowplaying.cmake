@@ -1,1 +1,0 @@
-#cmakedefine XMMS_FOUND

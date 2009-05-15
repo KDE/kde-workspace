@@ -1,5 +1,0 @@
-[KNewStuff2]
-ProvidersUrl=http://download.kde.org/khotnewstuff/splashscreens-providers.xml
-#StandardResource=data
-Uncompress=archive
-TargetDir=ksplash/Themes

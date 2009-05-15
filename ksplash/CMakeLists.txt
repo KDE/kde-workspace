@@ -1,4 +1,0 @@
-add_subdirectory( ksplashx )
-add_subdirectory( simple )
-add_subdirectory( none )
-add_subdirectory( kcm )

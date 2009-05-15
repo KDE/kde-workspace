@@ -1,6 +1,0 @@
-PROJECT (kephal)
-KDE4_NO_ENABLE_FINAL(kephal)
-ADD_SUBDIRECTORY (kded_kephal)
-#ADD_SUBDIRECTORY (kephald)
-ADD_SUBDIRECTORY (libkephal)
-#ADD_SUBDIRECTORY (kephalapp)

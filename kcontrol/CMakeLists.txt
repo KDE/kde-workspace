@@ -1,49 +1,13 @@
-macro_optional_find_package(Freetype)
-macro_log_feature(FREETYPE_FOUND "FreeType" "A font rendering engine" "http://www.freetype.org" FALSE "" "Needed to build kfontinst, a simple font installer.")
-
-
-set(libkxftconfig_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/fonts/kxftconfig.cpp )
-
-
-if( X11_Xrandr_FOUND )
-   add_subdirectory( randr )
-endif(X11_Xrandr_FOUND )
-
-if(X11_Xkb_FOUND)
-    add_subdirectory( kxkb )
-    add_subdirectory( keyboard )
-endif(X11_Xkb_FOUND)
-
-if(NOT WIN32)
-add_subdirectory( bell )
-add_subdirectory( input )
-add_subdirectory( kdm )
-add_subdirectory( energy )
-add_subdirectory( access )
-add_subdirectory( screensaver )
-add_subdirectory( dateandtime )
-add_subdirectory( autostart )
-endif(NOT WIN32)
-
-add_subdirectory( launch )
 add_subdirectory( colors )
 add_subdirectory( krdb )
 add_subdirectory( style )
 add_subdirectory( standard_actions )
 add_subdirectory( keys )
-if(X11_Xinerama_FOUND)
-	add_subdirectory( xinerama )
-endif(X11_Xinerama_FOUND)
 
 #TODO needs porting to what changed in KDE4 + please also rethink if it's really needed/useful to provide a duplicated nav-hierachy for colors, fonts, etc. - thx :)
 #add_subdirectory( kthememanager )
 
 add_subdirectory( hardware )
-
-if(FONTCONFIG_FOUND AND FREETYPE_FOUND AND NOT WIN32)
-    add_subdirectory( fonts )
-    add_subdirectory( kfontinst )
-endif(FONTCONFIG_FOUND AND FREETYPE_FOUND AND NOT WIN32)
 
 message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}: skipped subdir $(KSMCARD_SUBDIR)")
 
