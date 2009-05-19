@@ -332,7 +332,7 @@ void MainWindow::selectionChanged( const QModelIndex& selected )
             groupWidget->addModule( mItem->item );
         } else {
             foreach ( MenuItem * i, mItem->children ) {
-                kDebug() << "adding " , i->item.fileName();
+                kDebug() << "adding " << i->item.fileName();
                 groupWidget->addModule( i->item );
             }
         }
