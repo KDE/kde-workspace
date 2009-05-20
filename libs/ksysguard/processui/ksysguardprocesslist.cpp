@@ -259,9 +259,7 @@ KSysGuardProcessList::KSysGuardProcessList(QWidget* parent, const QString &hostN
 	d->mUi->txtFilter->installEventFilter(this);
 	d->mUi->treeView->installEventFilter(this);
 
-	//Logical column 0 will always be the tree bit with the process name.  We expand this automatically in code,
-	//so don't let the user change it
-	d->mUi->treeView->header()->setResizeMode(0, QHeaderView::ResizeToContents);
+	d->mUi->treeView->header()->setResizeMode(0, QHeaderView::Interactive);
 	d->mUi->treeView->header()->setStretchLastSection(true);
 	d->mUi->treeView->setDragEnabled(true);
 	d->mUi->treeView->setDragDropMode(QAbstractItemView::DragOnly);
@@ -297,8 +295,7 @@ KSysGuardProcessList::KSysGuardProcessList(QWidget* parent, const QString &hostN
 	d->mUi->btnKillProcess->setIcon(KIcon("process-stop"));
 
 	//If the view resorts continually, then it can be hard to keep track of processes.  By doing it only every few seconds it reduces the 'jumping around'
-	QTimer *mTimer = new QTimer(this);
-	connect(mTimer, SIGNAL(timeout()), &d->mFilterModel, SLOT(invalidate()));
+//	QTimer *mTimer = new QTimer(this);
 //	mTimer->start(4000);
 // QT BUG?  We have to disable the sorting for now because there seems to be a bug in Qt introduced in Qt 4.4beta which makes the view scroll back to the top
         d->mModel.update(d->mUpdateIntervalMSecs);
@@ -1111,6 +1108,7 @@ void KSysGuardProcessList::loadSettings(const KConfigGroup &cg) {
 void KSysGuardProcessList::restoreHeaderState(const QByteArray & state) {
 	d->mUi->treeView->header()->restoreState(state);
 	d->mFilterModel.sort( d->mUi->treeView->header()->sortIndicatorSection(), d->mUi->treeView->header()->sortIndicatorOrder() );
+	d->mUi->treeView->header()->setResizeMode(0, QHeaderView::Interactive);
 }
 
 bool KSysGuardProcessList::eventFilter(QObject *obj, QEvent *event) {
