@@ -153,7 +153,8 @@ void URLGrabber::actionMenu( bool wm_class_check )
     if ( m_myClipData.isEmpty() )
         return;
 
-    ActionListIterator it( matchingActions( m_myClipData ) );
+    ActionList matchingActionsList = matchingActions( m_myClipData );
+    ActionListIterator it( matchingActionsList );
     ClipAction *action = 0L;
     ClipCommand *command = 0L;
 
