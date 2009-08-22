@@ -61,6 +61,7 @@ class JobWidget : public QGraphicsWidget
 
     private Q_SLOTS:
         void detailsClicked();
+        void destroyExtenderItem();
 
     private:
         void updateLabels();
@@ -85,6 +86,8 @@ class JobWidget : public QGraphicsWidget
         QString labelName1;
         QString label0;
         QString label1;
+
+        bool m_extenderItemDestroyed;
 };
 
 #endif

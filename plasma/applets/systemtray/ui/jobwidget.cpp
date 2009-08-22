@@ -39,7 +39,8 @@
 JobWidget::JobWidget(SystemTray::Job *job, Plasma::ExtenderItem *parent)
     : QGraphicsWidget(parent),
     m_extenderItem(parent),
-    m_job(job)
+    m_job(job),
+    m_extenderItemDestroyed(false)
 {
     Q_ASSERT(m_extenderItem);
 
@@ -95,7 +96,7 @@ JobWidget::JobWidget(SystemTray::Job *job, Plasma::ExtenderItem *parent)
         m_details->setText(i18n("More"));
 
         connect(m_job, SIGNAL(changed(SystemTray::Job*)), this, SLOT(updateJob()));
-        connect(m_job, SIGNAL(destroyed(SystemTray::Job*)), m_extenderItem, SLOT(destroy()));
+        connect(m_job, SIGNAL(destroyed(SystemTray::Job*)), this, SLOT(destroyExtenderItem()));
         connect(m_details, SIGNAL(clicked()),
                 this, SLOT(detailsClicked()));
 
@@ -146,8 +147,18 @@ JobWidget::~JobWidget()
 {
 }
 
+void JobWidget::destroyExtenderItem()
+{
+    m_extenderItem->destroy();
+    m_extenderItemDestroyed = true;
+}
+
 void JobWidget::updateJob()
 {
+    if (m_extenderItemDestroyed) {
+        return;
+    }
+
     m_meter->setValue(m_job->percentage());
 
     Plasma::ExtenderItem *item = m_extenderItem;
