@@ -141,9 +141,13 @@ void ResultsView::paintEvent(QPaintEvent *event)
 
     if (m_previousFadeout.isNull() || m_previousFadeout.width() != width()) {
         QLinearGradient g(0, 0, 0, m_previousPage->height());
-        g.setColorAt(1, Qt::white );
-        g.setColorAt(0, Qt::transparent );
-        m_previousFadeout = QPixmap(width(), m_previousPage->height());
+        QColor col=Qt::white;
+        g.setColorAt(1, col);
+        col.setAlphaF(0.25);
+        g.setColorAt(0.5, col);
+        col.setAlphaF(0);
+        g.setColorAt(0, col);
+        m_previousFadeout = QPixmap(width(), m_previousPage->height()*1.5);
         m_previousFadeout.fill(Qt::transparent);
         QPainter p(&m_previousFadeout);
         p.setCompositionMode(QPainter::CompositionMode_Source);
@@ -152,9 +156,13 @@ void ResultsView::paintEvent(QPaintEvent *event)
 
     if (m_nextFadeout.isNull() || m_nextFadeout.width() != width()) {
         QLinearGradient g(0, 0, 0, m_nextPage->height());
-        g.setColorAt(0, Qt::white );
-        g.setColorAt(1, Qt::transparent );
-        m_nextFadeout = QPixmap(width(), m_nextPage->height());
+        QColor col=Qt::white;
+        g.setColorAt(0, col);
+        col.setAlphaF(0.25);
+        g.setColorAt(0.5, col);
+        col.setAlphaF(0);
+        g.setColorAt(1, col);
+        m_nextFadeout = QPixmap(width(), m_nextPage->height()*1.5);
         m_nextFadeout.fill(Qt::transparent);
         QPainter p(&m_nextFadeout);
         p.setCompositionMode(QPainter::CompositionMode_Source);
