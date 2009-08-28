@@ -89,7 +89,7 @@ DesktopView::DesktopView(Plasma::Containment *containment, int id, QWidget *pare
     if (containment) {
         containment->enableAction("zoom in", false);
         containment->enableAction("add sibling containment", false);
-        connect(containment->corona(), SIGNAL(containmentAdded(Plasma::Containment *)), this, SLOT(containmentAdded(Plasma::Containment *)));
+        connect(PlasmaApp::self()->corona(), SIGNAL(containmentAdded(Plasma::Containment *)), this, SLOT(containmentAdded(Plasma::Containment *)));
     }
 
     m_actions->addAssociatedWidget(this);
@@ -202,7 +202,7 @@ Plasma::Containment *DesktopView::dashboardContainment() const
     int containmentId = cg.readEntry("DashboardContainment", 0);
 
     if (containmentId > 0) {
-        foreach (Plasma::Containment *c, containment()->corona()->containments()) {
+        foreach (Plasma::Containment *c, PlasmaApp::self()->corona()->containments()) {
             if ((int)c->id() == containmentId) {
                 dc = c;
                 break;
@@ -418,7 +418,7 @@ void DesktopView::zoomIn(Plasma::ZoomLevel zoomLevel)
         scale(factor, factor);
         if (containment()) {
             //disconnect from other containments
-            Plasma::Corona *corona = containment()->corona();
+            Plasma::Corona *corona = PlasmaApp::self()->corona();
             if (corona) {
                 QList<Plasma::Containment*> containments = corona->containments();
                 foreach (Plasma::Containment *c, containments) {
@@ -540,7 +540,7 @@ void DesktopView::screenOwnerChanged(int wasScreen, int isScreen, Plasma::Contai
 
 void DesktopView::nextContainment()
 {
-    QList<Plasma::Containment*> containments = containment()->corona()->containments();
+    QList<Plasma::Containment*> containments = PlasmaApp::self()->corona()->containments();
     int start = containments.indexOf(containment());
     int i = (start + 1) % containments.size();
     //FIXME this is a *horrible* way of choosing a "next" containment.
@@ -559,7 +559,7 @@ void DesktopView::nextContainment()
 
 void DesktopView::previousContainment()
 {
-    QList<Plasma::Containment*> containments = containment()->corona()->containments();
+    QList<Plasma::Containment*> containments = PlasmaApp::self()->corona()->containments();
     int start = containments.indexOf(containment());
     //fun fact: in c++, (-1 % foo) == -1
     int i = start - 1;
