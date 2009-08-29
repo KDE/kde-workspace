@@ -128,6 +128,7 @@ public:
     PowerDevilDaemon::IdleStatus status;
 
     int batteryPercent;
+    int brightness;
     bool isPlugged;
 
     // ConsoleKit stuff
@@ -370,8 +371,6 @@ QVariantMap PowerDevilDaemon::getSupportedPollingSystems()
 
 void PowerDevilDaemon::resumeFromIdle()
 {
-    KConfigGroup * settings = getCurrentProfile();
-
     POLLER_CALL(d->pollLoader->poller(), stopCatchingIdleEvents());
     POLLER_CALL(d->pollLoader->poller(), forcePollRequest());
 
@@ -379,7 +378,7 @@ void PowerDevilDaemon::resumeFromIdle()
         return;
     }
 
-    Solid::Control::PowerManager::setBrightness(settings->readEntry("brightness").toInt());
+    Solid::Control::PowerManager::setBrightness(d->brightness);
 }
 
 void PowerDevilDaemon::refreshStatus()
@@ -457,6 +456,7 @@ void PowerDevilDaemon::applyProfile()
     }
 
     Solid::Control::PowerManager::setBrightness(settings->readEntry("brightness").toInt());
+    d->brightness = settings->readEntry("brightness").toInt();
     Solid::Control::PowerManager::setCpuFreqPolicy((Solid::Control::PowerManager::CpuFreqPolicy)
             settings->readEntry("cpuPolicy").toInt());
 
@@ -1059,6 +1059,7 @@ void PowerDevilDaemon::poll(int idle)
     } else if (settings->readEntry("dimOnIdle", false) &&
                (idle >= (dimOnIdleTime * 1 / 2))) {
         if (d->status != DimHalf) {
+            d->brightness = Solid::Control::PowerManager::brightness();
             d->status = DimHalf;
             POLLER_CALL(d->pollLoader->poller(), catchIdleEvent());
             float newBrightness = Solid::Control::PowerManager::brightness() / 2;
