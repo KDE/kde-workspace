@@ -283,7 +283,8 @@ void AbstractTaskItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     Q_UNUSED(event)
     fadeBackground("hover", 175, true);
-    if (parentGroup()) {
+    QGraphicsWidget *w = parentWidget();
+    if (w && w != m_applet->rootGroupItem()) {
         if (m_hoverEffectTimerId) {
             killTimer(m_hoverEffectTimerId);
         }
@@ -436,7 +437,6 @@ void AbstractTaskItem::timerEvent(QTimerEvent *event)
         } else {
             WindowTaskItem *windowTaskItem = qobject_cast<WindowTaskItem *>(this);
             if (windowTaskItem && windowTaskItem->parent()) {
-                TaskGroupItem *groupItem = qobject_cast<TaskGroupItem *>(windowTaskItem->parent());
                 if (groupItem && groupItem->popupDialog()) {
                     windows.append(groupItem->popupDialog()->winId());
                 }
@@ -462,9 +462,10 @@ void AbstractTaskItem::timerEvent(QTimerEvent *event)
             data.resize(actualCount);
         }
 
-        if (!data.isEmpty() && m_applet->view()) {
+        QGraphicsView *view = m_applet->view();
+        if (!data.isEmpty() && view) {
             Display *dpy = QX11Info::display();
-            const WId winId = m_applet->view()->winId();
+            const WId winId = view->winId();
             Atom atom = XInternAtom(dpy, "_KDE_WINDOW_HIGHLIGHT", False);
             XChangeProperty(dpy, winId, atom, atom, 32, PropModeReplace,
                             reinterpret_cast<unsigned char *>(data.data()), data.size());
