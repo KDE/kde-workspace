@@ -437,6 +437,7 @@ void AbstractTaskItem::timerEvent(QTimerEvent *event)
         } else {
             WindowTaskItem *windowTaskItem = qobject_cast<WindowTaskItem *>(this);
             if (windowTaskItem && windowTaskItem->parent()) {
+                TaskGroupItem *groupItem = qobject_cast<TaskGroupItem *>(windowTaskItem->parent());
                 if (groupItem && groupItem->popupDialog()) {
                     windows.append(groupItem->popupDialog()->winId());
                 }
