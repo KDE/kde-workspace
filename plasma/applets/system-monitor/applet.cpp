@@ -301,6 +301,13 @@ KConfigGroup Applet::config()
     return Plasma::Applet::config();
 }
 
+void Applet::save(KConfigGroup &config) const
+{
+    if (m_mode != Monitor) {
+        Plasma::Applet::save(config);
+    }
+}
+
 void Applet::saveConfig(KConfigGroup &config)
 {
     // work around for saveState being protected
