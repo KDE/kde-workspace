@@ -220,7 +220,8 @@ void Job::setState(State state)
 {
     if (d->state != state) {
         d->state = state;
-        scheduleChangedSignal();
+        show();
+        emit stateChanged(this);
     }
 }
 
@@ -294,7 +295,7 @@ void Job::stop()
 
 void Job::show()
 {
-    if (state() == Job::Running) {
+    if (state() == Job::Running && !d->shown) {
         d->shown = true;
         emit ready(this);
     }
