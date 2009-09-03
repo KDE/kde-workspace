@@ -165,6 +165,8 @@ Applet::~Applet()
         delete task->widget(this, false);
     }
 
+    clearAllCompletedJobs();
+
     delete d;
 }
 
