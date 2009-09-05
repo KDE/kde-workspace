@@ -3,6 +3,7 @@ Type=XSession
 Exec=xfwm
 TryExec=xfwm
 Name=XFce
+Name[de]=Xfce
 Name[hi]=एक्सएफसीई
 Name[hne]=एक्सएफसीई
 Name[mai]=एक्सएफसीई
