@@ -30,7 +30,7 @@
 #include <KLocale>
 
 K_PLUGIN_FACTORY(StandardActionsModuleFactory, registerPlugin<StandardActionsModule>();)
-K_EXPORT_PLUGIN(StandardActionsModuleFactory("kcmstandard_actions"))
+K_EXPORT_PLUGIN(StandardActionsModuleFactory("kcm_standard_actions"))
 
 
 StandardActionsModule::StandardActionsModule(
