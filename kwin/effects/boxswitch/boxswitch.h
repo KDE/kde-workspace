@@ -90,6 +90,7 @@ class BoxSwitchEffect
 
         QHash< EffectWindow*, ItemInfo* > windows;
         EffectWindowList original_windows;
+        EffectWindowList referrencedWindows;
         EffectWindow* selected_window;
         QHash< int, ItemInfo* > desktops;
         QList< int > original_desktops;
