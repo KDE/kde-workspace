@@ -295,7 +295,7 @@ void Autostart::slotRemoveCMD() {
     DesktopStartItem *startItem = dynamic_cast<DesktopStartItem*>( item );
     if ( startItem )
     {
-        m_programItem->takeChild( m_programItem->indexOfChild( startItem ) );
+        delete m_programItem->takeChild( m_programItem->indexOfChild( startItem ) );
         KIO::del(startItem->fileName().path() );
     }
     else
@@ -303,7 +303,7 @@ void Autostart::slotRemoveCMD() {
         ScriptStartItem * scriptItem = dynamic_cast<ScriptStartItem*>( item );
         if ( scriptItem )
         {
-            m_scriptItem->takeChild( m_scriptItem->indexOfChild( scriptItem ) );
+            delete m_scriptItem->takeChild( m_scriptItem->indexOfChild( scriptItem ) );
             KIO::del(scriptItem->fileName().path() );
         }
     }
