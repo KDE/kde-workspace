@@ -70,6 +70,7 @@ RandRConfig::RandRConfig(QWidget *parent, RandRDisplay *display)
 RandRConfig::~RandRConfig()
 {
 	clearIndicators();
+	delete m_scene;
 }
 
 void RandRConfig::load(void)
@@ -100,6 +101,7 @@ void RandRConfig::load(void)
 	foreach(RandROutput *output, outputs)
 	{
 		o = new OutputGraphicsItem(output);
+		o->setParent(m_scene);
 		m_scene->addItem(o);
 		
 		connect(o,    SIGNAL(itemChanged(OutputGraphicsItem*)), 
