@@ -50,14 +50,16 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
         return;
     }
 
-    // KServiceTypeTrader::query() is not thread-safe in 4.3, welcome back bigLock
-    QMutexLocker lock(bigLock());
 
     // Search for applications which are executable and case-insensitively match the search term
     // See http://techbase.kde.org/Development/Tutorials/Services/Traders#The_KTrader_Query_Language
     // if the following is unclear to you.
     QString query = QString("exist Exec and ('%1' =~ Name)").arg(term);
+
+    // KServiceTypeTrader::query() is not thread-safe in 4.3, welcome back bigLock
+    bigLock()->lock();
     KService::List services = KServiceTypeTrader::self()->query("Application", query);
+    bigLock()->unlock();
 
     QList<Plasma::QueryMatch> matches;
 
@@ -88,8 +90,10 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
     // Note that before asking for the content of e.g. Keywords and GenericName we need to ask if
     // they exist to prevent a tree evaluation error if they are not defined.
     query = QString("exist Exec and ( (exist Keywords and '%1' ~subin Keywords) or (exist GenericName and '%1' ~~ GenericName) or (exist Name and '%1' ~~ Name) )").arg(term);
+    bigLock()->lock();
     services = KServiceTypeTrader::self()->query("Application", query);
     services += KServiceTypeTrader::self()->query("KCModule", query);
+    bigLock()->unlock();
 
     //kDebug() << "got " << services.count() << " services from " << query;
     foreach (const KService::Ptr &service, services) {
