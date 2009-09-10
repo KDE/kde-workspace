@@ -19,8 +19,9 @@
 #include "servicerunner.h"
 
 #include <QWidget>
-#include <KIcon>
+#include <QMutexLocker>
 
+#include <KIcon>
 #include <KDebug>
 #include <KLocale>
 #include <KRun>
@@ -48,6 +49,9 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
     if (term.length() <  3) {
         return;
     }
+
+    // KServiceTypeTrader::query() is not thread-safe in 4.3, welcome back bigLock
+    QMutexLocker lock(bigLock());
 
     // Search for applications which are executable and case-insensitively match the search term
     // See http://techbase.kde.org/Development/Tutorials/Services/Traders#The_KTrader_Query_Language
