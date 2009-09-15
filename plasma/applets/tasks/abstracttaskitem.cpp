@@ -59,7 +59,7 @@
 #include "tasks.h"
 #include "taskgroupitem.h"
 
-static const int HOVER_EFFECT_TIMEOUT = 800;
+static const int HOVER_EFFECT_TIMEOUT = 900;
 
 AbstractTaskItem::AbstractTaskItem(QGraphicsWidget *parent, Tasks *applet)
     : QGraphicsWidget(parent),
@@ -285,7 +285,7 @@ void AbstractTaskItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
     Q_UNUSED(event)
     fadeBackground("hover", 175, true);
     QGraphicsWidget *w = parentWidget();
-    if (w && w != m_applet->rootGroupItem()) {
+    if (w) {
         if (m_hoverEffectTimerId) {
             killTimer(m_hoverEffectTimerId);
         }
