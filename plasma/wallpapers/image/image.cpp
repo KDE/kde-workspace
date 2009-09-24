@@ -53,6 +53,8 @@ Image::~Image()
 
 void Image::init(const KConfigGroup &config)
 {
+    suspendStartup(true); // during KDE startup, make ksmserver until the wallpaper is ready  
+    
     m_timer.stop();
     m_mode = renderingMode().name();
     calculateGeometry();
@@ -575,7 +577,6 @@ void Image::renderWallpaper(const QString& image)
     }
 
     render(m_img, m_size, m_resizeMethod, m_color);
-    suspendStartup(true); // during KDE startup, make ksmserver until the wallpaper is ready
 }
 
 QString Image::cacheId() const
@@ -590,9 +591,12 @@ void Image::updateBackground(const QImage &img)
     m_oldFadedPixmap = m_oldPixmap;
     m_pixmap = QPixmap::fromImage(img);
 
+    if(!img.isNull()){
+        suspendStartup(false);
+    }
+    
     if (!m_oldPixmap.isNull()) {
         Plasma::Animator::self()->customAnimation(254, 1000, Plasma::Animator::EaseInCurve, this, "updateFadedImage");
-        suspendStartup(false);
     } else {
         emit update(boundingRect());
     }
