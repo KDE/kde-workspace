@@ -188,7 +188,7 @@ void DeviceNotifier::dataUpdated(const QString &source, Plasma::DataEngine::Data
                     m_dialog->setDeviceData(source, KIcon(m_dialog->getDeviceData(source,NotifierDialog::IconNameRole).toString(), NULL, overlays), Qt::DecorationRole);
                 } else if (data["Device Types"].toStringList().contains("OpticalDisc")) {
                     //Unmounted optical drive
-                    m_dialog->setDeviceData(source, KIcon("media-eject"), Qt::DecorationRole);
+
                     //set icon to unmounted device
                     m_dialog->setUnMount(true,source);
                     m_dialog->setDeviceData(source, KIcon(m_dialog->getDeviceData(source,NotifierDialog::IconNameRole).toString()), Qt::DecorationRole);
@@ -200,8 +200,13 @@ void DeviceNotifier::dataUpdated(const QString &source, Plasma::DataEngine::Data
                 }
             }
             // actions specific for other types of devices will go here
+            if (data["Device Types"].toStringList().contains("Storage Volume")) {
+                if (data["Device Types"].toStringList().contains("OpticalDisc")) {
+                    m_dialog->setUnMount(true, source);
+                }
+            }
         }
-   }
+    }
 }
 
 void DeviceNotifier::notifyDevice(const QString &name)
