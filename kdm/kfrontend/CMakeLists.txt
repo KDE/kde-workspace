@@ -84,6 +84,7 @@ set(kdm_config_SRCS kdm_config.c)
 macro_add_file_dependencies(kdm_config.c ${confci})
 kde4_add_executable(kdm_config NOGUI ${kdm_config_SRCS})
 macro_add_compile_flags(kdm_config -U_REENTRANT)
+add_dependencies(kdm_config ConfigCi)
 target_link_libraries(kdm_config ${SOCKET_LIBRARIES} ${RESOLV_LIBRARIES} ${POSIX4_LIBRARIES})
 install(TARGETS kdm_config DESTINATION ${LIBEXEC_INSTALL_DIR})
 
@@ -96,16 +97,16 @@ set(genkdmconf_SRCS genkdmconf.c)
 macro_add_file_dependencies(genkdmconf.c ${confci})
 kde4_add_executable(genkdmconf NOGUI RUN_UNINSTALLED ${genkdmconf_SRCS})
 macro_add_compile_flags(genkdmconf -U_REENTRANT)
+add_dependencies(genkdmconf ConfigCi)
 target_link_libraries(genkdmconf ${X11_LIBRARIES})
 install(TARGETS genkdmconf ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 set(kdmctl_SRCS kdmctl.c)
 kde4_add_executable(kdmctl ${kdmctl_SRCS})
 macro_add_compile_flags(kdmctl -U_REENTRANT)
+add_dependencies(kdmctl ConfigCi)
 target_link_libraries(kdmctl ${SOCKET_LIBRARIES})
 install(TARGETS kdmctl ${INSTALL_TARGETS_DEFAULT_ARGS})
-
-build_confci()
 
 ## use 'GENKDMCONF_FLAGS=... make install' to add flags to the config generation (try genkdmconf -h)
 install(CODE "
