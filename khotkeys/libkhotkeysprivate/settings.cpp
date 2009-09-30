@@ -265,8 +265,8 @@ bool Settings::importFrom(ActionDataGroup *element, KConfigBase const &config, b
             return true;
         }
 
-    // Include Disabled, Disable the imported actions
-    return read_settings(element, config, true, true);
+    // Include Disabled, do not disable the imported actions
+    return read_settings(element, config, true, false);
     }
 
 
