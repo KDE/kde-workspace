@@ -3095,7 +3095,7 @@ void Client::handleMoveResize( int x, int y, int x_root, int y_root )
 void Client::performMoveResize()
     {
 #ifdef HAVE_XSYNC
-    if( isResize() && sync_counter != None )
+    if( isResize() && sync_counter != None && !sync_resize_pending )
         {
         sync_timeout = new QTimer( this );
         connect( sync_timeout, SIGNAL( timeout()), SLOT( syncTimeout()));
