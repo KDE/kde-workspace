@@ -220,9 +220,9 @@ void SolidActionEdit::setPrettyNames(QTreeWidgetItem *parent)
             if (child->text(1) == "IS") { // First it could "IS <DeviceType>"
                 child->setText(0, i18n("The device must be of the type %1", child->text(2)));
             } else if (child->text(2) == "==") { // maybe "<DeviceType>.<DeviceProperty> == <value>?
-                child->setText(0, i18n("The devices property %1 must equal %2", child->text(1), child->text(3)));
+                child->setText(0, i18n("The device's property %1 must equal %2", child->text(1), child->text(3)));
             } else if (child->text(2) == "!=") { // Also might be "<DeviceType>.<DeviceProperty> != <value>
-                child->setText(0, i18n("The devices property %1 must not equal %2", child->text(1), child->text(3)));
+                child->setText(0, i18n("The device's property %1 must not equal %2", child->text(1), child->text(3)));
             }
         }
     }
