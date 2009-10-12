@@ -107,6 +107,7 @@ void ScreenPreviewWidget::setPreview(const QPixmap &preview)
         disconnect(d->wallpaper, 0, this, 0);
         d->wallpaper = 0;
     }
+    update();
 }
 
 const QPixmap ScreenPreviewWidget::preview() const
