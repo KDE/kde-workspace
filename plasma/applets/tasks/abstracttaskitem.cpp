@@ -138,6 +138,8 @@ void AbstractTaskItem::setPreferredOnscreenSize()
 
 AbstractTaskItem::~AbstractTaskItem()
 {
+    emit destroyed(this);
+
     if (m_animId) {
         Plasma::Animator::self()->stopCustomAnimation(m_animId);
     }
