@@ -30,6 +30,7 @@
 #include <KDialog>
 #include <KAboutData>
 #include <KCModuleInfo>
+#include <KGlobalSettings>
 
 #include "MenuItem.h"
 #include "MenuModel.h"
@@ -83,7 +84,7 @@ void ClassicMode::initEvent()
     d->model = new MenuModel( rootItem(), this );
     foreach( MenuItem * child, rootItem()->children() ) {
         d->model->addException( child );
-	}
+    }
     // Create the model
     d->proxyModel = new MenuProxyModel( this );
     d->proxyModel->setSourceModel( d->model );
@@ -198,6 +199,11 @@ void ClassicMode::initWidget()
     connect( d->classicTree, SIGNAL(collapsed(QModelIndex)), this, SLOT(expandColumns()));
     connect( d->classicTree, SIGNAL(expanded(QModelIndex)), this, SLOT(expandColumns()));
     connect( d->moduleView, SIGNAL( moduleChanged(bool) ), this, SLOT( moduleLoaded() ) );
+
+    if( !KGlobalSettings::singleClick() ) {
+        // Needed because otherwise activated() is not fired with single click, which is apparently expected for tree views
+        connect( d->classicTree, SIGNAL(clicked(const QModelIndex&)), this, SLOT(changeModule(const QModelIndex&)) );
+    }
 
     expandColumns();
     QList<int> defaultSizes;
