@@ -208,6 +208,16 @@ void JobWidget::updateJob()
     m_meter->setValue(m_job->percentage());
 
     if (m_job) {
+        if (m_job->state() == SystemTray::Job::Running) {
+            //Update the ETA and job speed
+            if (m_job->eta()) {
+                m_eta->setText(i18n("%1 (%2 remaining)", m_job->speed(),
+                                 KGlobal::locale()->formatDuration(m_job->eta())));
+            } else {
+                m_eta->setText(QString());
+            }
+        }
+
         if (m_job->labels().count() > 0) {
             labelName0 = m_job->labels().value(0).first;
             label0 = m_job->labels().value(0).second;
