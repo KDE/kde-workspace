@@ -77,9 +77,9 @@ void LogoutEffect::reconfigure( ReconfigureFlags )
 void LogoutEffect::prePaintScreen( ScreenPrePaintData& data, int time )
     {
 #ifdef KWIN_HAVE_OPENGL_COMPOSITING
-    if ( !logoutWindow )
+    if( !logoutWindow && progress = 0.0 )
         {
-        if (blurTexture)
+        if( blurTexture )
             {
             delete blurTexture;
             blurTexture = NULL;
@@ -88,7 +88,7 @@ void LogoutEffect::prePaintScreen( ScreenPrePaintData& data, int time )
             blurSupported = false;
             }
         }
-    else if ( !blurTexture )
+    else if( !blurTexture )
         {
         blurSupported = false;
         delete blurTarget; // catch as we just tested the texture ;-P
