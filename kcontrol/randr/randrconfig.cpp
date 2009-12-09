@@ -101,7 +101,6 @@ void RandRConfig::load(void)
 	foreach(RandROutput *output, outputs)
 	{
 		o = new OutputGraphicsItem(output);
-		o->setParent(m_scene);
 		m_scene->addItem(o);
 		
 		connect(o,    SIGNAL(itemChanged(OutputGraphicsItem*)), 
