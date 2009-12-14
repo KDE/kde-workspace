@@ -205,7 +205,7 @@ void Effect::paintScreen( int mask, QRegion region, ScreenPaintData& data )
     {
     effects->paintScreen( mask, region, data );
     }
-
+    
 void Effect::postPaintScreen()
     {
     effects->postPaintScreen();
@@ -1518,7 +1518,7 @@ void EffectFrame::render( QRegion region, double opacity, double frameOpacity )
             }
 
         XRenderPicture fill = xRenderBlendPicture(opacity);
-
+        
         // Render icon
         if( !m_icon.isNull() && !m_iconSize.isEmpty() )
             {
@@ -1798,14 +1798,6 @@ void EffectFrame::updateTextPicture()
     p.drawText( rect, m_alignment, text );
     p.end();
     m_textPicture = new XRenderPicture( pixmap );
-#endif
-    }
-
-void EffectFrame::cleanup()
-    {
-#ifdef KWIN_HAVE_OPENGL_COMPOSITING
-    delete m_unstyledTexture;
-    m_unstyledTexture = NULL;
 #endif
     }
 

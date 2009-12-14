@@ -1663,12 +1663,6 @@ class KWIN_EXPORT EffectFrame : public QObject
          */
         static QColor styledTextColor();
 
-        /**
-         * Clean up all static texture data. Called when compositing is being disabled.
-         * @internal
-         */
-        static void cleanup();
-
     private Q_SLOTS:
         void plasmaThemeChanged();
 
