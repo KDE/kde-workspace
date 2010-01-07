@@ -456,7 +456,7 @@ QList<QAction *> ClockApplet::contextualActions()
         if (!offers.isEmpty()) {
             d->adjustSystemTimeAction = new QAction(this);
             d->adjustSystemTimeAction->setText(i18n("Adjust Date and Time"));
-            d->adjustSystemTimeAction->setIcon(KIcon(icon()));
+            d->adjustSystemTimeAction->setIcon(KIcon("preferences-system-time"));
             connect(d->adjustSystemTimeAction, SIGNAL(triggered()), this, SLOT(launchTimeControlPanel()));
         }
     }
