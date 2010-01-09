@@ -1,5 +1,10 @@
 [Desktop Entry]
 Name=Minimal Menu
+Name[en_GB]=Minimal Menu
+Name[nl]=Minimaal menu
+Name[pt]=Menu Mínimo
+Name[sv]=Minimal meny
+Name[uk]=Мінімальне меню
 Type=Service
 Icon=help-contextual
 ServiceTypes=Plasma/ContainmentActions
