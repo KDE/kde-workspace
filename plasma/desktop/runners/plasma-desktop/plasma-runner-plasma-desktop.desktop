@@ -1,12 +1,14 @@
 [Desktop Entry]
 Name=Plasma Desktop Shell
 Name[ca]=Intèrpret d'ordres de l'escriptori Plasma
+Name[ca@valencia]=Intèrpret d'ordes de l'escriptori Plasma
 Name[da]=Plasma Desktop Shell
 Name[de]=Plasma-Umgebung
 Name[en_GB]=Plasma Desktop Shell
 Name[eo]=Plasma Labortabla ŝelo
 Name[es]=Shell de escritorio Plasma
 Name[et]=Plasma töölauakest
+Name[eu]=Plasma mahaigain maskorra
 Name[fy]=Plasma buroblêdflues
 Name[gl]=Shell de escritorio Plasma
 Name[gu]=પ્લાઝમા ડેસ્કટોપ શેલ
@@ -42,6 +44,7 @@ Name[zh_CN]=Plasma 桌面外壳
 Name[zh_TW]=Plasma 桌面 shell
 Comment=Interact with the Plasma desktop shell
 Comment[ca]=Interactua amb l'intèrpret d'ordres de l'escriptori Plasma
+Comment[ca@valencia]=Interactua amb l'intèrpret d'ordes de l'escriptori Plasma
 Comment[da]=Interaktion med Plasma-skrivebordsskal
 Comment[de]=Interaktion mit der Plasma-Shell
 Comment[en_GB]=Interact with the Plasma desktop shell

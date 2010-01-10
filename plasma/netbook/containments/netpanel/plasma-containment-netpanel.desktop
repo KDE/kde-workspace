@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Panel for Netbooks
 Name[ca]=Plafó per a Netbooks
+Name[ca@valencia]=Plafó per a Netbooks
 Name[cs]=Panel pro Netbooky
 Name[csb]=Panel dlô Netbooków
 Name[da]=Panel til netbooks
@@ -9,6 +10,7 @@ Name[en_GB]=Panel for Netbooks
 Name[eo]=Panelo por malgrandaj komputiloj
 Name[es]=Panel para netbooks
 Name[et]=Väikesülearvuti paneel
+Name[eu]=Netbookentzako panela
 Name[fy]=Paniel foar Netbooks
 Name[gl]=Panel para ultraportátiles
 Name[he]=לוח עבור נטבוקים
@@ -54,6 +56,7 @@ Comment[en_GB]=A containment for a panel
 Comment[eo]=Panelujo
 Comment[es]=Un contenedor para un panel
 Comment[et]=Paneeli konteiner
+Comment[eu]=Panel batentzako edukiontzi bat
 Comment[fi]=Sisällyttäjä paneelille
 Comment[fr]=Un conteneur pour un tableau de bord
 Comment[fy]=In ynslúter foar in paniel

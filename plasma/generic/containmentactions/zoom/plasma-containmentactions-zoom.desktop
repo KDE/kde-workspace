@@ -85,6 +85,7 @@ Type=Service
 Icon=page-zoom
 Comment=Zoom activities in and out
 Comment[ca]=Apropa i allunya les activitats
+Comment[ca@valencia]=Apropa i allunya les activitats
 Comment[da]=Zoom aktiviteter ind og ud
 Comment[de]=Aktivitäten vergrößern/verkleinern
 Comment[en_GB]=Zoom activities in and out

@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Current Application Control
 Name[ca]=Control d'aplicació actual
+Name[ca@valencia]=Control d'aplicació actual
 Name[da]=Styring af aktuelt program
 Name[en_GB]=Current Application Control
 Name[es]=Control de la aplicación actual
@@ -40,6 +41,7 @@ Name[zh_CN]=当前程序控制
 Name[zh_TW]=目前應用程式控制
 Comment=Controls for the active window
 Comment[ca]=Controls per a la finestra activa
+Comment[ca@valencia]=Controls per a la finestra activa
 Comment[da]=Styring af det aktive vindue
 Comment[de]=Kontrollen für das aktuelle Fenster
 Comment[en_GB]=Controls for the active window

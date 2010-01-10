@@ -3,6 +3,7 @@
 Name=Windows
 Name[bg]=Прозорци
 Name[ca]=Finestres
+Name[ca@valencia]=Finestres
 Name[csb]=Òkna
 Name[da]=Vinduer
 Name[de]=Fenster
@@ -47,6 +48,7 @@ Name[zh_CN]=窗口
 Name[zh_TW]=視窗
 Comment=List windows and desktops and switch them
 Comment[ca]=Llista finestres i escriptoris i canvia entre ells
+Comment[ca@valencia]=Llista finestres i escriptoris i canvia entre ells
 Comment[da]=Oplist vinduer og skriveborde og skift mellem dem
 Comment[de]=Listet Fenster und Arbeitsflächen auf und wechselt zwischen ihnen.
 Comment[en_GB]=List windows and desktops and switch them

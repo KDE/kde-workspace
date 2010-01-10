@@ -1,12 +1,14 @@
 [Desktop Entry]
 Name=Switch Window
 Name[ca]=Canvi de finestra
+Name[ca@valencia]=Canvi de finestra
 Name[da]=Skift vindue
 Name[de]=Fenster wechseln
 Name[en_GB]=Switch Window
 Name[eo]=Ŝalti fenestron
 Name[es]=Cambiar ventana
 Name[et]=Akna vahetamine
+Name[eu]=Aldatu leihoa
 Name[fy]=Finster wikselje
 Name[gl]=Tocar de fiestra
 Name[he]=החלף חלון
@@ -45,6 +47,7 @@ Type=Service
 Icon=preferences-system-windows
 Comment=Show a list of windows to switch to
 Comment[ca]=Mostra una llista de les finestres per a canviar
+Comment[ca@valencia]=Mostra una llista de les finestres per a canviar
 Comment[da]=Vis en liste over åbne vinduer at skifte til
 Comment[de]=Eine Liste aller Fenster anzeigen
 Comment[en_GB]=Show a list of windows to switch to

@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Slide Tabs
 Name[ca]=Pestanyes desplaçant-se
+Name[ca@valencia]=Pestanyes desplaçant-se
 Name[da]=Glidende faneblade
 Name[el]=Κυλιόμενες καρτέλες
 Name[en_GB]=Slide Tabs
@@ -39,6 +40,7 @@ Icon=preferences-system-windows-effect-slidetabs
 Type=Service
 Comment=Slide windows when switching or grouping tabs.
 Comment[ca]=Desplaça les finestres quan es canviïn o s'agrupin pestanyes.
+Comment[ca@valencia]=Desplaça les finestres quan es canvien o s'agrupen pestanyes.
 Comment[da]=Glidende vinduer ved skift eller gruppering af faneblade.
 Comment[el]=Κύλιση παραθύρων όταν γίνεται εναλλαγή ή ομαδοποίηση καρτέλων
 Comment[en_GB]=Slide windows when switching or grouping tabs.
@@ -46,6 +48,7 @@ Comment[es]=Desliza las ventanas al cambiar o agrupar pestañas.
 Comment[et]=Akende liuglemine kaartide lülitamisel või rühmitamisel.
 Comment[fy]=Glydet finsters as der wiksele of groepearre wurdt fan ljeppers
 Comment[he]=גרום לחלונות לגלוש במסך מעבר או קיבוץ לשוניות.
+Comment[hr]=Kliži prozore kada se prebacuju između ili grupiraju u kartice.
 Comment[id]=Geser jendela ketika memindahkan atau mengelompokkan tab.
 Comment[kk]=Қойындыларды ауыстыру не топтастыр кезде терезелерді сырғанату.
 Comment[ko]=탭 사이를 전환하거나 탭으로 묶을 때 미끄러짐 효과를 사용합니다.

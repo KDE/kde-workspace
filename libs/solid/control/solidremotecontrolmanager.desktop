@@ -3,6 +3,7 @@ Type=ServiceType
 X-KDE-ServiceType=SolidRemoteControlManager
 Comment=Remote Control Management Backend
 Comment[ca]=Dorsal de gestió de control remot
+Comment[ca@valencia]=Dorsal de gestió de control remot
 Comment[da]=Motor til håndtering af fjernbetjening
 Comment[de]=Treiber für Fernbedienungen
 Comment[en_GB]=Remote Control Management Backend

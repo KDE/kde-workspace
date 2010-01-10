@@ -8,6 +8,7 @@ X-KDE-PluginKeyword=kcm_krunner_kill
 
 Name=Kill Applications
 Name[ca]=Mata aplicacions
+Name[ca@valencia]=Mata aplicacions
 Name[csb]=Zamkni apliakcëjã
 Name[da]=Dræb programmer
 Name[de]=Programme abschießen
