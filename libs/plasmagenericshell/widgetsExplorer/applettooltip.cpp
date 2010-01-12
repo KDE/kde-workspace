@@ -44,6 +44,16 @@ AppletToolTipWidget::AppletToolTipWidget(QWidget *parent, AppletIconWidget *appl
 
 AppletToolTipWidget::~AppletToolTipWidget()
 {
+    if (m_widget->scene()) {
+        Plasma::Corona *corona = qobject_cast<Plasma::Corona *>(m_widget->scene());
+        if (corona) {
+            corona->removeOffscreenWidget(m_widget);
+        }
+
+        m_widget->scene()->removeItem(m_widget);
+    }
+
+    delete m_widget;
 }
 
 void AppletToolTipWidget::setScene(QGraphicsScene *scene)
