@@ -49,6 +49,7 @@ Description[da]=Ændring af systemomfattende konfiguration af skrifttyper kræve
 Description[de]=Zum Ändern der systemweiten Schrift-Einstellungen sind besondere Berechtigungen nötig.
 Description[el]=Για την μορφοποίηση ρυθμίσεων των γραμματοσειρών του συστήματος χρειάζονται προνόμια.
 Description[en_GB]=Modifying the system-wide font configuration requires privileges.
+Description[es]=Se necesitan privilegios para modificar la configuración global del sistema de tipos de letra.
 Description[et]=Süsteemsete fontide seadistuste muutmine nõuab vastavaid õigusi.
 Description[eu]=Sistema-osoko tipografia konfiguraketa aldaketak pribilegioak eskatzen ditu.
 Description[fy]=It oanpassen fan systeem wide lettertypen fereasket root-rjochten.
