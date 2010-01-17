@@ -202,9 +202,13 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
                     relevance = 0.5;
                 }
 
-                if (service->isApplication()) {
+                //HACK: we need this to demote kcm in the plasma-netbook menus
+                //      as it was too late (string freeze) to add a new syntax
+                //      However the bias should be added only if in single runner mode
+                if (service->isApplication() && context.singleRunnerQueryMode()) {
                     relevance += .4;
                 }
+                kDebug() << match.text() << relevance;
                 match.setRelevance(relevance);
 
                 matches << match;
