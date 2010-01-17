@@ -208,7 +208,6 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
                 if (service->isApplication() && context.singleRunnerQueryMode()) {
                     relevance += .4;
                 }
-                kDebug() << match.text() << relevance;
                 match.setRelevance(relevance);
 
                 matches << match;
