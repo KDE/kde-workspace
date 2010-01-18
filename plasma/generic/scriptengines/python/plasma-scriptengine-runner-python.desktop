@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Python Runner
-Name[ca]=Executador en Python
+Name[ca]=Executor en Python
 Name[ca@valencia]=Executador en Python
 Name[da]=Python Runner
 Name[de]=Python-Starter
@@ -24,7 +24,7 @@ Name[x-test]=xxPython Runnerxx
 Name[zh_CN]=Python 运行器
 Name[zh_TW]=Python 執行器
 Comment=Plasma Runner support for Python
-Comment[ca]=Implementació de l'executador del Plasma per al Python
+Comment[ca]=Implementació de l'executor del Plasma per al Python
 Comment[ca@valencia]=Implementació de l'executador del Plasma per al Python
 Comment[da]=Understøttelse af Plasma Runner til Python
 Comment[de]=Plasma-Starter-Unterstützung für Python
