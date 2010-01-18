@@ -31,18 +31,14 @@ PlacesRunner::PlacesRunner(QObject* parent, const QVariantList &args)
     setObjectName("Places");
     addSyntax(Plasma::RunnerSyntax(":q:", i18n("Finds file manager locations that match :q:")));
     addSyntax(Plasma::RunnerSyntax(i18n("places"), i18n("Lists all file manager locations")));
-    connect(this, SIGNAL(prepare()), this, SLOT(prepPlacesModel()));
+
+    // makes sure we have the bookmarks and what not that the places
+    // model uses set up in the main thread, otherwise crashes ensue
+    KFilePlacesModel places;
 }
 
 PlacesRunner::~PlacesRunner()
 {
-}
-
-void PlacesRunner::prepPlacesModel()
-{
-    // this may look odd, but this makes sure we have the bookmarks and what not that the places
-    // model uses set up so we can get instant matches once we get to that point
-    KFilePlacesModel places;
 }
 
 void PlacesRunner::match(Plasma::RunnerContext &context)
