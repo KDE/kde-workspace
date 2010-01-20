@@ -494,7 +494,7 @@ void AppletsListWidget::onLeftArrowPress()
 
 void AppletsListWidget::scroll(ScrollPolicy side, ScrollPolicy how)
 {
-    int step = (how == AppletsListWidget::Wheel) ? wheelStep : arrowClickStep;
+    const int step = (how == AppletsListWidget::Wheel) ? wheelStep : arrowClickStep;
 
     m_toolTip->setVisible(false);
 
@@ -516,6 +516,7 @@ void AppletsListWidget::scrollDownRight(int step)
     if (nextFirstItemIndex > m_currentAppearingAppletsOnList.count() - 1) {
         nextFirstItemIndex = m_currentAppearingAppletsOnList.count() - 1;
     }
+
     if (nextFirstItemIndex < 0) {
         return;
     }
@@ -538,16 +539,16 @@ void AppletsListWidget::scrollDownRight(int step)
         }
     }
 
-    qreal move = startPosition - visibleStartPosition();
-
+    const qreal move = startPosition - visibleStartPosition();
     m_firstItemIndex = nextFirstItemIndex;
 
     m_slide->stop();
     if (m_orientation == Qt::Horizontal) {
-        m_slide->setProperty("movementDirection", Plasma::Animation::Left);
+        m_slide->setProperty("movementDirection", Plasma::Animation::MoveLeft);
     } else {
-        m_slide->setProperty("movementDirection", Plasma::Animation::Up);
+        m_slide->setProperty("movementDirection", Plasma::Animation::MoveUp);
     }
+
     m_slide->setProperty("distance", move);
     m_slide->start();
 
@@ -571,9 +572,9 @@ void AppletsListWidget::scrollUpLeft(int step)
 
     m_slide->stop();
     if (m_orientation == Qt::Horizontal) {
-        m_slide->setProperty("movementDirection", Plasma::Animation::Left);
+        m_slide->setProperty("movementDirection", Plasma::Animation::MoveLeft);
     } else {
-        m_slide->setProperty("movementDirection", Plasma::Animation::Up);
+        m_slide->setProperty("movementDirection", Plasma::Animation::MoveUp);
     }
     m_slide->setProperty("distance", move);
     m_slide->start();
