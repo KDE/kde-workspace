@@ -600,6 +600,19 @@ void AppletsListWidget::toolTipMoveTimeLineFrameChanged(int frame)
     m_toolTip->move(newPos);
 }
 
+void AppletsListWidget::scrollStepFinished()
+{
+    manageArrows();
+    bool movingLeftUp = m_slide->property("distance").value<qreal>() < 0;
+    if (movingLeftUp) {
+        if (m_upLeftArrow->isEnabled() && m_upLeftArrow->isDown()) {
+            onLeftArrowPress();
+        }
+    } else if (m_downRightArrow->isEnabled() && m_downRightArrow->isDown()) {
+        onRightArrowPress();
+    }
+}
+
 void AppletsListWidget::resetScroll()
 {
     m_appletsListWidget->setPos(0,0);
