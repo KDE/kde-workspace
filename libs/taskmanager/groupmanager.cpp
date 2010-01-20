@@ -78,6 +78,7 @@ public:
     void taskItemDestroyed(AbstractGroupableItem *);
     void startupItemDestroyed(AbstractGroupableItem *);
     void checkIfFull();
+    void actuallyCheckIfFull();
     bool addTask(TaskPtr);
     void removeTask(TaskPtr);
     void addStartup(StartupPtr);
@@ -95,6 +96,7 @@ public:
     int currentScreen;
     QTimer screenTimer;
     QTimer reloadTimer;
+    QTimer checkIfFullTimer;
     QSet<TaskPtr> geometryTasks;
     int groupIsFullLimit;
     bool showOnlyCurrentDesktop : 1;
@@ -126,6 +128,11 @@ GroupManager::GroupManager(QObject *parent)
     d->screenTimer.setSingleShot(true);
     d->screenTimer.setInterval(100);
     connect(&d->screenTimer, SIGNAL(timeout()), this, SLOT(checkScreenChange()));
+
+    d->checkIfFullTimer.setSingleShot(true);
+    d->checkIfFullTimer.setInterval(0);
+    connect(&d->checkIfFullTimer, SIGNAL(timeout()), this, SLOT(actuallyCheckIfFull()));
+
 }
 
 GroupManager::~GroupManager()
@@ -529,6 +536,14 @@ void GroupManager::setFullLimit(int limit)
 }
 
 void GroupManagerPrivate::checkIfFull()
+{
+    // Start a timer so that if we have been triggered by a layouting
+    // we give time for it to finish up instead of starting a new one
+    // right away.
+    checkIfFullTimer.start();
+}
+
+void GroupManagerPrivate::actuallyCheckIfFull()
 {
     //kDebug();
     if (!onlyGroupWhenFull ||

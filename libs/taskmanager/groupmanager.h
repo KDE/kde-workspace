@@ -140,6 +140,7 @@ private:
     Q_PRIVATE_SLOT(d, void taskItemDestroyed(AbstractGroupableItem *))
     Q_PRIVATE_SLOT(d, void startupItemDestroyed(AbstractGroupableItem *))
     Q_PRIVATE_SLOT(d, void checkIfFull())
+    Q_PRIVATE_SLOT(d, void actuallyCheckIfFull())
     Q_PRIVATE_SLOT(d, bool addTask(TaskPtr))
     Q_PRIVATE_SLOT(d, void removeTask(TaskPtr))
     Q_PRIVATE_SLOT(d, void addStartup(StartupPtr))
