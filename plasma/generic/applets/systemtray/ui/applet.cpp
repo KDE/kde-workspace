@@ -177,6 +177,10 @@ void Applet::init()
 
 void Applet::configChanged()
 {
+    if (m_autoHideInterface) {
+        configAccepted();
+    }
+
     KConfigGroup cg = config();
 
     const QStringList hiddenTypes = cg.readEntry("hidden", QStringList());
@@ -241,7 +245,10 @@ void Applet::configChanged()
     }
 
 
-    s_manager->loadApplets(cg, this);
+    if (!m_autoHideInterface) {
+        s_manager->loadApplets(cg, this);
+    }
+
     m_taskArea->syncTasks(s_manager->tasks());
     initExtenderTask(createExtenderTask);
     checkSizes();
@@ -583,9 +590,6 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
         m_plasmoidTasksUi.setupUi(m_plasmoidTasksInterface.data());
 
 
-        connect(parent, SIGNAL(applyClicked()), this, SLOT(configAccepted()));
-        connect(parent, SIGNAL(okClicked()), this, SLOT(configAccepted()));
-
         parent->addPage(m_notificationInterface.data(), i18n("Information"),
                         "preferences-desktop-notification",
                         i18n("Choose which information to show"));
@@ -685,13 +689,12 @@ void Applet::configAccepted()
     QStringList applets = s_manager->applets(this);
     for (int i = 0; i < m_plasmoidTasksUi.applets->count(); ++i) {
         QListWidgetItem * item = m_plasmoidTasksUi.applets->item(i);
-        QString appletName = item->data(Qt::UserRole).toString();
 
-        if (item->checkState() != Qt::Unchecked && !applets.contains(appletName)) {
-            s_manager->addApplet(appletName, this);
-        }
-
-        if (item->checkState() == Qt::Checked) {
+        if (item->checkState() != Qt::Unchecked) {
+            QString appletName = item->data(Qt::UserRole).toString();
+            if (!applets.contains(appletName)) {
+                s_manager->addApplet(appletName, this);
+            }
             applets.removeAll(appletName);
         }
     }
