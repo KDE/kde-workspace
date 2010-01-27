@@ -54,6 +54,7 @@ public Q_SLOTS:
     bool coronaLocked() const;
     void lockCorona(bool locked);
     void sleep(int ms);
+    bool hasBattery();
 
 Q_SIGNALS:
     void print(const QString &string);
