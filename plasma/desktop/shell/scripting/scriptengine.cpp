@@ -317,19 +317,14 @@ void ScriptEngine::sleep(int ms)
     loop.exec();
 }
 
-bool ScriptEngine::hasBattery()
+bool ScriptEngine::hasBattery() const
 {
   Plasma::DataEngineManager *engines = Plasma::DataEngineManager::self();
   Plasma::DataEngine *power = engines->loadEngine("powermanagement");
 
-  if (power) {
-    const QStringList &batteries = power->query("Battery")["sources"].toStringList() ;
-    if (!batteries.isEmpty()) {
-      return true ;
-  }
-
-  return false ;
-  }
+  const QStringList batteries = power->query("Battery")["sources"].toStringList();
+  engines->unloadEngine("powermangement");
+  return !batteries.isEmpty();
 }
 
 #include "scriptengine.moc"

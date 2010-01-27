@@ -36,6 +36,7 @@ class ScriptEngine : public QScriptEngine
 {
     Q_OBJECT
     Q_PROPERTY(bool locked READ coronaLocked WRITE lockCorona)
+    Q_PROPERTY(bool hasBattery READ hasBattery)
 
 public:
     ScriptEngine(Plasma::Corona *corona, QObject *parent = 0);
@@ -46,6 +47,8 @@ public:
     static QScriptValue wrap(Plasma::Applet *w, QScriptEngine *engine);
     static QScriptValue wrap(Plasma::Containment *c, QScriptEngine *engine);
 
+    bool hasBattery() const;
+
 public Q_SLOTS:
     int screenCount() const;
     QRectF screenGeometry(int screen) const;
@@ -54,7 +57,6 @@ public Q_SLOTS:
     bool coronaLocked() const;
     void lockCorona(bool locked);
     void sleep(int ms);
-    bool hasBattery();
 
 Q_SIGNALS:
     void print(const QString &string);
