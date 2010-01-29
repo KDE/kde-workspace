@@ -27,6 +27,7 @@ Name[kn]=ಫಲಕ ಸ್ಪೇಸರ್
 Name[ko]=패널 공백
 Name[lt]=Pulto skirtukas
 Name[lv]=Paneļa atdalītājs
+Name[mai]=पटल स्पेसर
 Name[ml]=പാളിയില്‍ ഒഴിഞ്ഞസ്ഥലമിടാന്‍
 Name[nb]=Avstandsholder for panel
 Name[nds]=Paneel-Platzmaker
@@ -80,6 +81,7 @@ Comment[kn]=ಫಲಕದ ಒಳಗೆ ಖಾಲಿ ಜಾಗಗಳನ್ನು �
 Comment[ko]=패널의 빈 공간을 채웁니다.
 Comment[lt]=Skirtukas tuščios vietos sukūrimui pulte.
 Comment[lv]=Aizpilda pieejamo tukšo vietu uz paneļa.
+Comment[mai]=पटलक अंदर रिक्त स्थान खाली राखू.
 Comment[ml]=പാനലിലെ ഒഴിഞ്ഞ ഇടങ്ങള്‍ കരുതിവെയ്ക്കുക.
 Comment[nb]=Reserver tomme rom inni panelet.
 Comment[nds]=Ruum op't Paneel freehollen
