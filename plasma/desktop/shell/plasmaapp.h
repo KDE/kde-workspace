@@ -162,6 +162,7 @@ private:
     QSignalMapper *m_mapper;
     QHash<int, QWeakPointer<ControllerWindow> > m_widgetExplorers;
     int m_startupSuspendWaitCount;
+    bool m_ignoreDashboardClosures;
 };
 
 #endif // multiple inclusion guard
