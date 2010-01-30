@@ -123,7 +123,7 @@ void Battery::init()
     KConfigGroup cg = config();
     m_showBatteryString = cg.readEntry("showBatteryString", false);
     m_showRemainingTime = cg.readEntry("showRemainingTime", false);
-    m_showMultipleBatteries = cg.readEntry("showMultipleBatteries", !m_isEmbedded);
+    m_showMultipleBatteries = cg.readEntry("showMultipleBatteries", false);
 
     m_theme->resize(contentsRect().size());
     m_font = QApplication::font();
@@ -230,6 +230,7 @@ void Battery::dataUpdated(const QString& source, const Plasma::DataEngine::Data 
 {
     if (source.startsWith(QLatin1String("Battery"))) {
         m_batteries_data[source] = data;
+        kDebug() << "new battery source" << source;
     } else if (source == "AC Adapter") {
         m_acAdapterPlugged = data["Plugged in"].toBool();
         showAcAdapter(m_acAdapterPlugged);
@@ -242,7 +243,7 @@ void Battery::dataUpdated(const QString& source, const Plasma::DataEngine::Data 
     }
     if (source == "Battery0") {
         m_remainingMSecs  = data["Remaining msec"].toInt();
-        // kDebug() << "Remaining msecs on battery:" << m_remainingMSecs;
+        kDebug() << "Remaining msecs on battery:" << m_remainingMSecs;
     }
 
     if (m_numOfBattery == 0) {
@@ -596,13 +597,13 @@ void Battery::updateStatus()
                     batteriesLabel.append("<br />");
                     batteriesInfo.append("<br />");
                 }
-                batteriesLabel.append(i18nc("Placeholder is the battery ID", "<b>Battery %1:</b>", bnum));
+                batteriesLabel.append(i18nc("Placeholder is the battery ID", "Battery %1:", bnum));
                 if (state == "NoCharge") {
-                    batteriesInfo.append(i18nc("state of battery", "%1% (charged)", battery_data.value()["Percent"].toString()));
+                    batteriesInfo.append(i18n("%1% (charged)", battery_data.value()["Percent"].toString()));
                 } else if (state == "Discharging") {
-                    batteriesInfo.append(i18nc("state of battery", "%1% (discharging)", battery_data.value()["Percent"].toString()));
+                    batteriesInfo.append(i18n("%1% (discharging)", battery_data.value()["Percent"].toString()));
                 } else {
-                    batteriesInfo.append(i18nc("state of battery", "%1% (charging)", battery_data.value()["Percent"].toString()));
+                    batteriesInfo.append(i18n("%1% (charging)", battery_data.value()["Percent"].toString()));
                 }
             }
         }
@@ -612,8 +613,6 @@ void Battery::updateStatus()
         } else {
             m_acInfoLabel->setText(i18n("Not plugged in"));
         }
-        m_remainingMSecs = battery_data.value()["Remaining msec"].toInt();
-        //kDebug() << "time left:" << m_remainingMSecs;
         if ((state == "Discharging" || state == "Charging") && m_remainingMSecs > 0 && m_showRemainingTime) {
             m_remainingTimeLabel->show();
             m_remainingInfoLabel->show();
