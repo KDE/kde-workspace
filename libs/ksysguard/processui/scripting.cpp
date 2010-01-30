@@ -204,6 +204,12 @@ void Scripting::runScript(KSysGuard::Process *process, const QString &path, cons
     scriptFile.close();
 
     mScriptEngine->evaluate(contents, fileName);
+    if(mScriptEngine->hasUncaughtException()) {
+        KMessageBox::sorry(this, QString("<qt>%1: %2<br>%3")
+                    .arg(mScriptEngine->uncaughtExceptionLineNumber())
+                    .arg(mScriptEngine->uncaughtException().toString())
+                    .arg(mScriptEngine->uncaughtExceptionBacktrace().join("<br>")));
+    }
 }
 
 void Scripting::stopAllScripts()
