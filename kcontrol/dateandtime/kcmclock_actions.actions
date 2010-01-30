@@ -27,6 +27,7 @@ Name[kn]=ದಿನಾಂಕ ಮತ್ತು ಸಮಯ ನಿಯಂತ್ರಣ �
 Name[ko]=날짜와 시간 제어 모듈
 Name[lt]=Datos ir laiko valdymo modulis
 Name[lv]=Datuma un laika kontroles modulis
+Name[mk]=Контролен модул за датум и време
 Name[ml]=തീയതിയും സമയവും നിയന്ത്രിയ്ക്കുന്ന ഭാഗം
 Name[nb]=Styremodul for dato og tid
 Name[nds]=Datum- un Tiet-Kuntrullmoduul
@@ -82,6 +83,7 @@ Name[kn]=ದಿನಾಂಕ/ಸಮಯ ಸಂಯೋಜನೆಗಳನ್ನು �
 Name[ko]=날짜와 시간 설정 저장
 Name[lt]=Duomenų ir laiko nustatymai
 Name[lv]=Saglabāt datuma/laika iestatījumus
+Name[mk]=Зачувување на поставувања за датум и време
 Name[ml]=തീയതിയുടെ/സമയത്തിന്റെ സജ്ജീകരണങ്ങള്‍ സൂക്ഷിയ്ക്കുക
 Name[nb]=Lagre dato og klokkeslett-innstillinger
 Name[nds]=Instellen vun Datum un Tiet sekern
@@ -130,6 +132,7 @@ Description[kn]=ವ್ಯವಸ್ಥೆಯ ಕಾರ್ಯನೀತಿ ನಿ�
 Description[ko]=시스템 정책 때문에 날짜와 시간 설정을 저장할 수 없습니다.
 Description[lt]=Sistemos taisyklės neleidžia jums įrašyti datos/laiko.
 Description[lv]=Sistēmas politikas neļauj jums saglabāt datuma/laika iestatījumus.
+Description[mk]=Политиката на системот Ве спречува да ги зачувате поставувањата за датум и време.
 Description[ml]=സിസ്റ്റത്തിലെ നയങ്ങള്‍ തിയ്യതി/സമയം ക്രമീകരിയ്ക്കുന്നതില്‍ നിന്നും നിങ്ങളെ തടയുന്നു.
 Description[nb]=Systembestemmelser gjør at du ikke kan lagre dato/tid-innstillingene
 Description[nds]=De Systeemregeln verlöövt nich, dat Du de Instellen för Datum un Tiet sekerst.

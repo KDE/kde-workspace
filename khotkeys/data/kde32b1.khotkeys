@@ -1304,6 +1304,7 @@ Comment[kn]=Alt+Ctrl+W ಒತ್ತುವುದರ ಮೂಲಕ ಒಂದು D-B
 Comment[ko]=Alt+Ctrl+W 키를 누르면 minicli를 표시하는 D-Bus 호출을 실행합니다. 'qdbus' 명령행 도구를 실행하는 것처럼 임의의 D-Bus 호출을 할 수 있습니다.
 Comment[lt]=Nuspaudus Alt+Vald(Ctrl)+W bus įvykdytas D-Bus iškvietimas, iššaukiantis komandų įvedimo sąsają. Galite naudoti bet kokį D-Bus iškvietimą lygiai taip pat, kaip, pvz., naudojant „qdbus“ įrankį.
 Comment[lv]=Nospiešžot Alt+Ctrl+W tiks veikts D-Bus izsaukums, kas parādīs minicli. Jūs varan lietot jebkuru D-Bus izsaukumu, tāpat kā lietojot komandrindas 'qdbus' rīku.
+Comment[mk]=Со притискање на Alt+Ctrl+W ќе се изврши D-Bus-повик што ќе го покаже minicli. Може да употребите кој било D-Bus-повик, исто како со команднолиниската наредба „qdbus“.
 Comment[ml]=Alt+Ctrl+W അമര്‍ത്തിയാല്‍ ഡി-ബസിനെ വിളിയ്ക്കുകയും മിനിസിഎല്‍ഐ കാണിയ്ക്കുകയും ചെയ്യും. 'qdbus' പണിയായുധം ഉപയോഗിയ്ക്കുന്നതു് പോലെ നിങ്ങള്‍ക്കു് ഏതു് തരത്തിലുള്ള ഡി-ബസ് വിളിയും നടത്താം.
 Comment[nb]=Om Ctrl+Alt+W trykkes blir det utført et D-BUS-kall som viser mini-kommandolinja. Alle slags D-BUS-kall kan brukes akkurat som i kommandolinjeverktøyet «qdbus».
 Comment[nds]=Dat Drücken vun Strg+Alt+W föhrt en D-Bus-Oproop ut, de den Dialoog "Befehl utföhren" opröppt. Du kannst all D-Bus-Oprööp bruken, jüst as mit dat Konsool-Programm "qdbus".
@@ -1365,6 +1366,7 @@ Name[kn]=D-Bus ಕರೆ  'kdesktop KDesktopIface popupExecuteCommand()' ಯನ�
 Name[ko]=D-Bus 호출 'kdesktop KDesktopIface popupExecuteCommand()'를 실행하기
 Name[lt]=Atlikti D-Bus užklausą 'kdesktop KDesktopIface popupExecuteCommand()'
 Name[lv]=Veikt D-Bus izsaukumu 'kdesktop KDesktopIface popupExecuteCommand()'
+Name[mk]=Го извршува D-Bus-повикот „kdesktop KDesktopIface popupExecuteCommand()“
 Name[ml]='kdesktop KDesktopIface popupExecuteCommand()' എന്ന ഡി-ബസ് വിളി നടത്തുക
 Name[mr]=D-Bus कॉल 'kdesktop KDesktopIface popupExecuteCommand()' वापरा
 Name[nb]=Utfør DBus-kallet 'kdesktop KDesktopIface popupExecuteCommand()'
@@ -1970,6 +1972,7 @@ Name[ku]=Konqi Gestures
 Name[lt]=Konqi gestai
 Name[lv]=Konqueror žesti
 Name[mai]=कान्क्वी गेस्चर्स
+Name[mk]=Гестикулации за Konqi
 Name[ml]=കോങ്ക്വി ആംഗ്യങ്ങള്‍
 Name[mr]=कॉन्क्वी हावभाव
 Name[nb]=Konqi musebevegelser
@@ -3032,6 +3035,7 @@ Comment[kn]=Win+E (Tux+E) ಅನ್ನು ಒತ್ತಿದ ನಂತರ, WWW �
 Comment[ko]=Win+E(Tux+E) 키를 누르면 웹 브라우저가 실행되고 'http://www.kde.org'를 표시합니다. minicli(Alt+F2)에서 실행할 수 있는 모든 명령을 실행할 수 있습니다.
 Comment[lt]=Paspaudus Win+E (Tux+E) bus paleista žiniatinklio naršyklė, kuri atvers puslapį http://www.kde.org . Galite vykdyti visas komandas, kurias galite vykdyti mini komandų eilutėje (Alt+F2).
 Comment[lv]=Pēc Win+E (Tux+E) nospiešanas, tiks palaists tīmekļa pārlūks un tiks atvērts http://www.kde.org . Jūs varat palaist jekkuru komandu, ko var palaist ar minicli (Alt+F2).
+Comment[mk]=По притискањето на Win+E (Tux+E) ќе се отвори веб-прелистувач и во него ќе се отвори адресата http://www.kde.org . Може да ги извршувате сите наредби што може да се извршуваат во minicli (Alt+F2).
 Comment[ml]=Win+E (Tux+E) അമര്‍ത്തിയശേഷം ഒരു ഡബ്ല്യൂഡബ്ല്യൂഡബ്ല്യൂ ബ്രൌസറില്‍ http://www.kde.org പ്രത്യക്ഷപെടും.നിങ്ങള്‍ക്ക് മിനിസിഎല്‍ഐ (Alt+F2) ഉപയോഗിച്ച് പ്രവര്‍ത്തിപ്പിയ്ക്കാവുന്ന എല്ലാ തരം ആജ്ഞകളും പ്രവര്‍ത്തിപ്പിയ്ക്കാവുന്നതാണു്.
 Comment[nb]=Når Win+E (Tux+E) trykkes, starter en WWW-leser og åpner http://www.kde.org. Alle kommandoer som kan kjøres i mini-kommandolinja (Alt+F2) kan kjøres her.
 Comment[nds]=Dat Drücken vun Win+E (Tux+E) maakt den Nettkieker op, de denn "http://www.kde.org" laadt. Du kannst so all Befehlen utföhren, de Du ok över den Dialoog "Befehl utföhren" (Alt+F2) opropen kannst.

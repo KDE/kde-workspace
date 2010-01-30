@@ -25,6 +25,7 @@ Name[kn]=ವ್ಯವಸ್ಥೆಯಾದ್ಯಂತ ಅಕ್ಷರ ಶೈಲ
 Name[ko]=시스템 전역 글꼴을 관리합니다.
 Name[lt]=Tvarkyti visos sistemos šriftus.
 Name[lv]=Pārvaldīt sistēmas fontus.
+Name[mk]=Менаџирање на системските фонтови.
 Name[ml]=സിസ്റ്റത്തിനു് മുഴുവനായുള്ള അക്ഷരസഞ്ചയങ്ങളുടെ നോക്കിനടത്തല്‍
 Name[nb]=Håndter skrifter for hele systemet.
 Name[nds]=Systeemschriftoorden plegen
@@ -73,6 +74,7 @@ Description[kn]=ವ್ಯವಸ್ಥೆಯಾದ್ಯಂತ ಅಕ್ಷರ �
 Description[ko]=시스템 전역 글꼴 설정을 수정하려면 권한이 필요합니다.
 Description[lt]=Norint modifikuoti visos sistemos konfigūraciją reikia privilegijų.
 Description[lv]=Sistēmas fontu konfigurācijas maiņai nepieciešamas privilēģijas.
+Description[mk]=За менувањето на системската конфигурација на фонтови се потребни посебни дозволи.
 Description[ml]=സിസ്റ്റത്തിനു് മുഴുവനായുള്ള അക്ഷരസഞ്ചയങ്ങളുടെ ക്രമീകരിണം മാറ്റാന്‍ അനുവാദം ആവശ്യമാണ്.
 Description[nb]=Privileger trengs for å endre systemoppsettet for skrifter.
 Description[nds]=För't Ännern vun de Systeemschriftoorden bruukst Du besünner Verlöven.
