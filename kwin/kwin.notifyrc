@@ -6781,6 +6781,7 @@ Comment[el]=Μερικά εφέ δεν υποστηρίζονται από το 
 Comment[en_GB]=Some effects are not supported by backend or hardware.
 Comment[es]=Algunos efectos no están soportados por le motor o el hardware.
 Comment[et]=Taustaprogramm või riistvara ei toeta teatavaid efekte.
+Comment[eu]=Backend edo harwareak ez ditu efektu batzuk onartzen.
 Comment[fi]=Taustaosa tai laitteisto ei tue joitain tehosteita.
 Comment[fr]=Certains effets ne sont pas pris en charge par le moteur logiciel ou le matériel.
 Comment[fy]=guon effekten wurde net stipe troch efterein of hardware.
