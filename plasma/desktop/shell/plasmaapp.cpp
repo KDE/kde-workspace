@@ -1110,7 +1110,7 @@ void PlasmaApp::checkVirtualDesktopViews(int numDesktops)
         QMutableListIterator<DesktopView *> it(m_desktops);
         while (it.hasNext()) {
             DesktopView *view = it.next();
-            if (!view->containment() || view->desktop() >= numDesktops)  {
+            if (!view->containment() || view->desktop() < 0 || view->desktop() >= numDesktops)  {
                 delete view;
                 it.remove();
             }
