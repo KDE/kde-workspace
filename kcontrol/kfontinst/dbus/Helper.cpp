@@ -224,7 +224,7 @@ int Helper::move(const QVariantMap &args)
                                 fromGid=toSystem ? gid : getgid();
 
         // Move fonts!
-        for(it=files.begin(); it!=end && FontInst::STATUS_OK==result; ++it)
+        for(it=files.constBegin(); it!=end && FontInst::STATUS_OK==result; ++it)
         {
             QString name(Utils::modifyName(Misc::getFile(*it))),
                     destFolder(Utils::getDestFolder(dest, name));
@@ -321,11 +321,12 @@ int Helper::toggle(const QVariantMap &args)
                             QString(enable ? Misc::unhide(Misc::getFile(*ait))
                                            : Misc::hide(Misc::getFile(*ait)));
 
-                    if(to!=*ait)
+                    if(to!=*ait) {
                         if(renameFontFile(*ait, to))
                             movedAssoc[*ait]=to;
                         else
                             result=KIO::ERR_WRITE_ACCESS_DENIED;
+                    }
                 }
             }
             else
