@@ -230,7 +230,7 @@ void Battery::dataUpdated(const QString& source, const Plasma::DataEngine::Data 
 {
     if (source.startsWith(QLatin1String("Battery"))) {
         m_batteries_data[source] = data;
-        kDebug() << "new battery source" << source;
+        //kDebug() << "new battery source" << source;
     } else if (source == "AC Adapter") {
         m_acAdapterPlugged = data["Plugged in"].toBool();
         showAcAdapter(m_acAdapterPlugged);
@@ -243,7 +243,7 @@ void Battery::dataUpdated(const QString& source, const Plasma::DataEngine::Data 
     }
     if (source == "Battery0") {
         m_remainingMSecs  = data["Remaining msec"].toInt();
-        kDebug() << "Remaining msecs on battery:" << m_remainingMSecs;
+        //kDebug() << "Remaining msecs on battery:" << m_remainingMSecs;
     }
 
     if (m_numOfBattery == 0) {
@@ -910,14 +910,12 @@ void Battery::paintInterface(QPainter *p, const QStyleOptionGraphicsItem *option
         }
         // paint battery with appropriate charge level
         paintBattery(p, contentsRect,  battery_charge, has_battery);
-        if (m_showBatteryString) {
-            // Show the charge percentage with a box on top of the battery
-            QString batteryLabel;
-            if (has_battery) {
-                batteryLabel = QString::number(battery_charge);
-                batteryLabel.append("%");
-                paintLabel(p, contentsRect, batteryLabel);
-            }
+        // Show the charge percentage with a box on top of the battery
+        QString batteryLabel;
+        if (has_battery) {
+            batteryLabel = QString::number(battery_charge);
+            batteryLabel.append("%");
+            paintLabel(p, contentsRect, batteryLabel);
         }
     }
 }
