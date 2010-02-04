@@ -339,7 +339,7 @@ void ItemContainer::itemRemoved(QObject *object)
     while (i.hasNext()) {
         i.next();
         if (i.value() == icon) {
-            m_items.remove(i.key());
+            m_items.remove(i.key(), i.value());
             break;
         }
     }
