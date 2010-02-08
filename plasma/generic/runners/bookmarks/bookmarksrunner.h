@@ -27,6 +27,7 @@
 
 class KBookmark;
 class KBookmarkManager;
+class KJob;
 
 /** This runner searchs for bookmarks in browsers like Konqueror and Firefox */
 class BookmarksRunner : public Plasma::AbstractRunner
@@ -82,6 +83,7 @@ class BookmarksRunner : public Plasma::AbstractRunner
     private Q_SLOTS:
         void prep();
         void down();
+        void dbCopied(KJob *);
 };
 
 K_EXPORT_PLASMA_RUNNER(bookmarksrunner, BookmarksRunner)
