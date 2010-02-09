@@ -97,7 +97,8 @@ bell.  The default value is 500ms, or half a second.
 <sect3 id="access-modifier-keys">
 <title><guilabel>Modifier keys</guilabel></title>
 
-<para>There are two sections to this panel.</para>
+<para>There are the two sections <guilabel>Sticky Keys</guilabel>
+and <guilabel>Locking Keys</guilabel> to this panel.</para>
 
 <variablelist>
 <varlistentry>
