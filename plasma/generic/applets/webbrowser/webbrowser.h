@@ -90,7 +90,8 @@ protected Q_SLOTS:
     void loadProgress(int progress);
     void bookmarksModelInit();
     void configAccepted();
-
+    void configChanged();
+    
 private:
     void fillGroup(BookmarkItem *parentItem, const KBookmarkGroup &group);
 
