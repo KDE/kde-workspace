@@ -68,6 +68,7 @@ public:
 
     QSet<QString> hiddenTypes;
     QSet<QString> alwaysShownTypes;
+    QSet<SystemTray::Task*> hiddenTasks;
     bool showingHidden : 1;
     bool hasHiddenTasks : 1;
     bool hasTasksThatCanHide : 1;
@@ -199,9 +200,20 @@ void TaskArea::addWidgetForTask(SystemTray::Task *task)
         }
         return;
     }
-
-    d->hasTasksThatCanHide = d->hasTasksThatCanHide || (task->hidden() != Task::NotHidden);
-
+    
+    // keep track of the hidden tasks
+    // needs to be done because if a tasks is added multiple times (like when coming out of sleep)
+    // it may be autohidden for a while until the final one which will not be hidden
+    // therefore we need a way to track the hidden tasks
+    // if the task appears in the hidden list, then we know there are hidden tasks
+    if (task->hidden() != Task::NotHidden) {
+        d->hiddenTasks << task;
+    } else {
+        d->hiddenTasks.remove(task);
+    }
+    
+    d->hasTasksThatCanHide = !d->hiddenTasks.isEmpty();
+    
     if (!d->showingHidden && task->hidden() != Task::NotHidden && !d->alwaysShownTypes.contains(task->typeId())) {
         kDebug() << "is a hidden type";
         d->hasHiddenTasks = true;
@@ -248,6 +260,9 @@ void TaskArea::addWidgetForTask(SystemTray::Task *task)
 
 void TaskArea::removeTask(Task *task)
 {
+    d->hiddenTasks.remove(task);
+    d->hasTasksThatCanHide = !d->hiddenTasks.isEmpty();
+    
     QGraphicsWidget *widget = task->widget(d->host, false);
 
     if (widget) {
@@ -257,6 +272,7 @@ void TaskArea::removeTask(Task *task)
         d->lastTasksLayout->removeItem(widget);
         relayout();
     } else {
+        //this is not a typo
         relayout();relayout();
         QTimer::singleShot(200, this, SLOT(relayout()));
     }
