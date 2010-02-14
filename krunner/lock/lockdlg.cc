@@ -321,7 +321,11 @@ void PasswordDlg::reapVerify()
     sNot = 0;
     ::close( sFd );
     int status;
-    ::waitpid( sPid, &status, 0 );
+    while (::waitpid( sPid, &status, 0 ) < 0)
+        if (errno != EINTR) { // This should not happen ...
+            cantCheck();
+            return;
+        }
     if (WIFEXITED(status))
         switch (WEXITSTATUS(status)) {
         case AuthOk:
