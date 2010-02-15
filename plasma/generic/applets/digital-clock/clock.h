@@ -47,6 +47,7 @@ class Clock : public ClockApplet
 
     protected slots:
         void clockConfigAccepted();
+        void clockConfigChanged();
         void constraintsEvent(Plasma::Constraints constraints);
         void resetSize();
 
