@@ -80,7 +80,7 @@ void Clock::init()
 {
     ClockApplet::init();
 
-    configChanged();
+    clockConfigChanged();
     
     invalidateCache();
 }
@@ -108,7 +108,7 @@ void Clock::clockConfigChanged()
     
     if (m_showSecondHand) {
         //We don't need to cache the applet if it update every seconds
-                        setCacheMode(QGraphicsItem::NoCache);
+        setCacheMode(QGraphicsItem::NoCache);
     } else {
         setCacheMode(QGraphicsItem::DeviceCoordinateCache);
     }
