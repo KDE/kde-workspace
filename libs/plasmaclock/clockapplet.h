@@ -62,13 +62,11 @@ class PLASMACLOCK_EXPORT ClockApplet : public Plasma::PopupApplet
         const KCalendarSystem *calendar () const;
 
     public Q_SLOTS:
-        void configChanged();
         void toolTipAboutToShow();
         void toolTipHidden();
 
     protected:
         virtual void createClockConfigurationInterface(KConfigDialog *parent);
-        virtual void clockConfigChanged();
         virtual void clockConfigAccepted();
         virtual void changeEngineTimezone(const QString &oldTimezone, const QString &newTimezone);
         virtual Plasma::ToolTipContent toolTipContent();
