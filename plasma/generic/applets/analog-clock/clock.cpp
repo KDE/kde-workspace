@@ -79,17 +79,8 @@ Clock::~Clock()
 void Clock::init()
 {
     ClockApplet::init();
-
+    m_oldTimezone = currentTimezone();
     configChanged();
-    
-    if (m_showSecondHand) {
-        //We don't need to cache the applet if it update every seconds
-        setCacheMode(QGraphicsItem::NoCache);
-    } else {
-        setCacheMode(QGraphicsItem::DeviceCoordinateCache);
-    }
-    
-    connectToEngine();
     
     invalidateCache();
 }
@@ -97,8 +88,11 @@ void Clock::init()
 void Clock::connectToEngine()
 {
     m_lastTimeSeen = QTime();
-
+    
     Plasma::DataEngine* timeEngine = dataEngine("time");
+    timeEngine->disconnectSource(m_oldTimezone, this);
+    m_oldTimezone = currentTimezone();
+    
     if (m_showSecondHand) {
         timeEngine->connectSource(currentTimezone(), this, 500);
     } else {
