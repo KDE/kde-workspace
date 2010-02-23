@@ -159,6 +159,7 @@ struct KSysGuardProcessListPrivate {
     {
         mScripting = NULL;
         mNumItemsSelected = -1;
+        mResortCountDown = 2; //The items added initially will be already sorted, but without CPU info.  On the second refresh we will have CPU usage, so /then/ we can resort
         renice = new KAction(i18np("Renice Process...", "Renice Processes...", 1), q);
         renice->setShortcut(Qt::Key_F8);
         selectParent = new KAction(i18n("Jump to Parent Process"), q);
@@ -226,6 +227,9 @@ struct KSysGuardProcessListPrivate {
 
     /** Class to deal with the scripting. NULL if scripting is disabled */
     Scripting *mScripting;
+
+    /** A counter to mark when to resort, so that we do not resort on every update */
+    int mResortCountDown;
 
     KAction *renice;
     KAction *kill;
@@ -333,15 +337,7 @@ KSysGuardProcessList::KSysGuardProcessList(QWidget* parent, const QString &hostN
 
     retranslateUi();
 
-    d->mFilterModel.setDynamicSortFilter(true);
-
     d->mUi->btnKillProcess->setIcon(KIcon("process-stop"));
-
-    //If the view resorts continually, then it can be hard to keep track of processes.  By doing it only every few seconds it reduces the 'jumping around'
-    //	QTimer *mTimer = new QTimer(this);
-    //	mTimer->start(4000);
-    // QT BUG?  We have to disable the sorting for now because there seems to be a bug in Qt introduced in Qt 4.4beta which makes the view scroll back to the top
-    //    updateList();
 }
 
 KSysGuardProcessList::~KSysGuardProcessList()
@@ -939,6 +935,13 @@ void KSysGuardProcessList::updateList()
                 QHelpEvent event(QEvent::ToolTip, w->mapFromGlobal( QCursor::pos() ), QCursor::pos());
                 qApp->notify(w, &event);
             }
+        }
+        if(--d->mResortCountDown <= 0) {
+            d->mResortCountDown = 2;  //resort every second time
+            //resort now
+            QHeaderView *header= d->mUi->treeView->header();
+            d->mUi->treeView->sortByColumn(header->sortIndicatorSection(), header->sortIndicatorOrder());
+
         }
     }
 }
