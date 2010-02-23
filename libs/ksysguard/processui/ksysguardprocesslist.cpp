@@ -342,7 +342,6 @@ KSysGuardProcessList::KSysGuardProcessList(QWidget* parent, const QString &hostN
     //	mTimer->start(4000);
     // QT BUG?  We have to disable the sorting for now because there seems to be a bug in Qt introduced in Qt 4.4beta which makes the view scroll back to the top
     //    updateList();
-    d->mModel.update(d->mUpdateIntervalMSecs);
 }
 
 KSysGuardProcessList::~KSysGuardProcessList()
@@ -901,10 +900,7 @@ void KSysGuardProcessList::hideEvent ( QHideEvent * event )  //virtual protected
 void KSysGuardProcessList::showEvent ( QShowEvent * event )  //virtual protected from QWidget
 {
     //Start updating the process list again if we are shown again
-    if(d->mUpdateTimer && !d->mUpdateTimer->isActive()) {
-        d->mUpdateTimer->start(d->mUpdateIntervalMSecs);
-    }
-
+    updateList();
     QWidget::showEvent(event);
 }
 
@@ -917,7 +913,6 @@ void KSysGuardProcessList::changeEvent( QEvent * event )
     }
     QWidget::changeEvent(event);
 }
-
 void KSysGuardProcessList::retranslateUi()
 {
     d->mUi->cmbFilter->setItemIcon(ProcessFilter::AllProcesses, KIcon("view-process-all"));
@@ -964,6 +959,8 @@ void KSysGuardProcessList::setUpdateIntervalMSecs(int intervalMSecs)
         d->mUpdateTimer = NULL;
         return;
     }
+    if(!isVisible())
+        return;
 
     if(!d->mUpdateTimer) {
         //intervalMSecs is a valid time, so set up a timer
