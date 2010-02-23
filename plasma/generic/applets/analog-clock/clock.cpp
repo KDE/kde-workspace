@@ -208,6 +208,7 @@ void Clock::clockConfigAccepted()
     update();
 
     dataEngine("time")->disconnectSource(currentTimezone(), this);
+    m_oldTimezone = currentTimezone();
     connectToEngine();
 
     constraintsEvent(Plasma::AllConstraints);
@@ -216,6 +217,7 @@ void Clock::clockConfigAccepted()
 
 void Clock::changeEngineTimezone(const QString &oldTimezone, const QString &newTimezone)
 {
+    kDebug();
     dataEngine("time")->disconnectSource(oldTimezone, this);
     Plasma::DataEngine* timeEngine = dataEngine("time");
 
