@@ -192,16 +192,22 @@ void ExtenderTaskBusyWidget::updateTask()
     //make a nice plasma tooltip
     QString tooltipContent;
     if (runningJobs > 0) {
-        tooltipContent += i18np("%1 running job", "%1 running jobs", runningJobs) + "<br>";
+        tooltipContent += i18np("%1 running job", "%1 running jobs", runningJobs);
+        if (pausedJobs > 0 || !m_manager->notifications().isEmpty()) {
+            tooltipContent += "<br>";
+        }
     }
 
     if (pausedJobs > 0) {
-        tooltipContent += i18np("%1 suspended job", "%1 suspended jobs", pausedJobs) + "<br>";
+        tooltipContent += i18np("%1 suspended job", "%1 suspended jobs", pausedJobs);
+        if (!m_manager->notifications().isEmpty()) {
+            tooltipContent += "<br>";
+        }
     }
 
     if (!m_manager->notifications().isEmpty()) {
         tooltipContent += i18np("%1 notification", "%1 notifications",
-                                m_manager->notifications().count()) + "<br>";
+                                m_manager->notifications().count()) ;
     }
 
     if (tooltipContent.isEmpty()) {
