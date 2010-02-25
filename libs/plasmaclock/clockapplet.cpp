@@ -418,6 +418,7 @@ void ClockApplet::configAccepted()
                       d->ui.clockDefaultsTo->itemData(d->ui.clockDefaultsTo->currentIndex()).toString());
     }
 
+    configChanged();
     QString cur = currentTimezone();
     setCurrentTimezone(d->defaultTimezone);
     changeEngineTimezone(cur, d->defaultTimezone);
