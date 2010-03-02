@@ -787,12 +787,37 @@ NotificationWidget *Applet::addNotification(Notification *notification)
     connect(notification, SIGNAL(notificationDestroyed(SystemTray::Notification *)), this, SLOT(notificationDestroyed(SystemTray::Notification *)));
 
     connect(notification, SIGNAL(expired(SystemTray::Notification *)), this, SLOT(notificationExpired(SystemTray::Notification *)));
+    connect(notification, SIGNAL(changed(SystemTray::Notification *)), this, SLOT(notificationChanged(SystemTray::Notification *)));
 
     if (notification->isRead()) {
         extenderItem->setCollapsed(true);
     }
 
     return notificationWidget;
+}
+
+void Applet::notificationChanged(SystemTray::Notification *notification)
+{
+    //temporary bug solutiononly for 4.4
+    notification->show();
+
+    if (m_notificationBar) {
+        int tab = 0;
+        for (int i = 0; i < m_notificationBar.data()->count(); ++i) {
+            if (m_notificationBar.data()->tabText(i) == notification->applicationName()) {
+                tab = i;
+                break;
+            }
+        }
+        m_notificationBar.data()->setCurrentIndex(tab);
+    }
+
+    emit activate();
+    if (notification->timeout() > 0) {
+        showPopup(qMin(m_autoHideTimeout, notification->timeout()));
+    } else {
+        showPopup(m_autoHideTimeout);
+    }
 }
 
 void Applet::addJob(Job *job)

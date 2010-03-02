@@ -90,6 +90,7 @@ private slots:
     void syncNotificationBarNeeded();
     void notificationDestroyed(SystemTray::Notification *notification);
     void notificationExpired(SystemTray::Notification *notification);
+    void notificationChanged(SystemTray::Notification *notification);
 
 private:
     void createJobGroups();

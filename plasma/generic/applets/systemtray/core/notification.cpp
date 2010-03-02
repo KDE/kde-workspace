@@ -200,6 +200,12 @@ void Notification::hide()
     emit expired(this);
 }
 
+//temporary bug fix only for 4.4
+void Notification::show()
+{
+    d->expired = false;
+}
+
 bool Notification::isExpired() const
 {
     return d->expired;

@@ -61,6 +61,7 @@ public:
 public slots:
     virtual void triggerAction(const QString &actionId);
     virtual void remove();
+    void show();
     void hide();
 
 signals:
