@@ -123,19 +123,18 @@ void KRunnerDialog::screenChanged(Kephal::Screen* screen)
 void KRunnerDialog::resetScreenPos()
 {
     if (!m_floating) {
-        QHashIterator<int, QPoint> it(m_screenPos);
+        QMutableHashIterator<int, QPoint> it(m_screenPos);
         QRect r = KWindowSystem::workArea();
         while (it.hasNext()) {
-            QPoint p = it.next().value();
-            if (r.left() < p.x()) {
+            QPoint &p = it.next().value();
+
+            if (r.left() > p.x()) {
                 p.setX(r.left());
-            } else if (r.right() > p.x() + width() - 1) {
+            } else if (r.right() < p.x() + width() - 1) {
                 p.setX(r.right() - width());
             }
 
-            if (r.top() > p.y()) {
-                p.setY(r.top());
-            }
+            p.setY(r.top());
         }
 
         m_oldScreen = -1;
