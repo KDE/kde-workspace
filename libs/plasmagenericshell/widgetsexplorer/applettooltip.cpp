@@ -31,15 +31,12 @@
 //AppletToolTipWidget
 
 AppletToolTipWidget::AppletToolTipWidget(QWidget *parent, AppletIconWidget *applet)
-        : Plasma::Dialog(parent)
+        : Plasma::Dialog(parent),
+          m_widget(new AppletInfoWidget())
 {
     setAcceptDrops(true);
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
-    m_applet = applet;
-    m_widget = new AppletInfoWidget();
-    if (m_applet) {
-        m_widget->setAppletItem(m_applet->appletItem());
-    }
+    m_widget->setApplet(applet);
 }
 
 AppletToolTipWidget::~AppletToolTipWidget()
@@ -72,20 +69,17 @@ void AppletToolTipWidget::setScene(QGraphicsScene *scene)
 
 void AppletToolTipWidget::setAppletIconWidget(AppletIconWidget *applet)
 {
-    m_applet = applet;
-    m_widget->setAppletItem(m_applet->appletItem());
+    m_widget->setApplet(applet);
 }
 
 void AppletToolTipWidget::updateContent()
 {
-    if(m_widget != 0) {
-        m_widget->updateInfo();
-    }
+    m_widget->updateInfo();
 }
 
-AppletIconWidget *AppletToolTipWidget::appletIconWidget()
+AppletIconWidget *AppletToolTipWidget::appletIconWidget() const
 {
-    return m_applet;
+    return m_widget->applet();
 }
 
 void AppletToolTipWidget::enterEvent(QEvent *event)
@@ -108,10 +102,10 @@ void AppletToolTipWidget::dragEnterEvent(QDragEnterEvent *event)
 
 //AppletInfoWidget
 
-AppletInfoWidget::AppletInfoWidget(QGraphicsItem *parent, PlasmaAppletItem *appletItem)
-        : QGraphicsWidget(parent)
+AppletInfoWidget::AppletInfoWidget(QGraphicsWidget *parent)
+        : QGraphicsWidget(parent),
+          m_applet(0)
 {
-    m_appletItem = appletItem;
     init();
 }
 
@@ -173,42 +167,49 @@ void AppletInfoWidget::init()
     setLayout(m_mainVerticalLayout);
 }
 
-void AppletInfoWidget::setAppletItem(PlasmaAppletItem *appletItem)
+void AppletInfoWidget::setApplet(AppletIconWidget *applet)
 {
-    m_appletItem = appletItem;
+    m_applet = applet;
+    updateInfo();
+}
+
+AppletIconWidget *AppletInfoWidget::applet() const
+{
+    return m_applet;
 }
 
 void AppletInfoWidget::updateInfo()
 {
-    if (m_appletItem) {
-        m_iconWidget->setIcon(m_appletItem->icon());
-        m_nameLabel->setText(m_appletItem->name());
-        m_versionLabel->setText(i18n("Version %1", m_appletItem->version()));
+    PlasmaAppletItem *appletItem = m_applet ? m_applet->appletItem() : 0;
+    if (appletItem) {
+        m_iconWidget->setIcon(appletItem->icon());
+        m_nameLabel->setText(appletItem->name());
+        m_versionLabel->setText(i18n("Version %1", appletItem->version()));
         QString description = "<html><body>";
-        if (!m_appletItem->description().isEmpty()) {
-            description += m_appletItem->description() + "<br/><br/>";
+        if (!appletItem->description().isEmpty()) {
+            description += appletItem->description() + "<br/><br/>";
         }
-        if (!m_appletItem->author().isEmpty()) {
+        if (!appletItem->author().isEmpty()) {
             description += i18n("<font color=\"%1\">Author:</font>") + "<div style=\"margin-left: 15px; color:%1\">" +
-                           m_appletItem->author();
-            if (!m_appletItem->email().isEmpty()) {
-                 description += " <a href=\"mailto:" + m_appletItem->email() + "\">" +
-                                m_appletItem->email() + "</a>";
+                           appletItem->author();
+            if (!appletItem->email().isEmpty()) {
+                 description += " <a href=\"mailto:" + appletItem->email() + "\">" +
+                                appletItem->email() + "</a>";
             }
             description += "</div>";
         }
-        if (!m_appletItem->website().isEmpty()) {
+        if (!appletItem->website().isEmpty()) {
             description += i18n("<font color=\"%1\">Website:</font>") + "<div style=\"margin-left: 15px; color:%1\">" + "<a href=\"" +
-                           m_appletItem->website() + "\">" + m_appletItem->website() +
+                           appletItem->website() + "\">" + appletItem->website() +
                            "</a></div>";
         }
         description += i18n("<font color=\"%1\">License:</font>") + "<div style=\"margin-left: 15px; color:%1\">" +
-                       m_appletItem->license() + "</div>";
+                       appletItem->license() + "</div>";
         description += "</body></html>";
         description = description.arg(Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor).name());
 
         m_aboutLabel->setText(description);
-        m_uninstallButton->setVisible(m_appletItem->isLocal());
+        m_uninstallButton->setVisible(appletItem->isLocal());
     } else {
         m_iconWidget->setIcon("plasma");
         m_nameLabel->setText(i18n("Unknown Applet"));
@@ -218,16 +219,19 @@ void AppletInfoWidget::updateInfo()
 
 void AppletInfoWidget::uninstall()
 {
-    if (!m_appletItem) {
+    if (!m_applet) {
+        return;
+    }
+
+    PlasmaAppletItem *appletItem = m_applet->appletItem();
+    if (!appletItem) {
         return;
     }
 
     Plasma::PackageStructure installer;
-    installer.uninstallPackage(m_appletItem->pluginName(),
+    installer.uninstallPackage(appletItem->pluginName(),
                                KStandardDirs::locateLocal("data", "plasma/plasmoids/"));
-    PlasmaAppletItemModel *model = m_appletItem->appletItemModel();
-    model->takeRow(model->indexFromItem(m_appletItem).row());
-    delete m_appletItem;
-    m_appletItem = 0;
+    PlasmaAppletItemModel *model = appletItem->appletItemModel();
+    model->takeRow(model->indexFromItem(appletItem).row());
 }
 
