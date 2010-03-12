@@ -57,8 +57,6 @@ public:
     {
         setAttribute(Qt::WA_TranslucentBackground);
         KWindowSystem::setOnAllDesktops(winId(), true);
-        unsigned long state = NET::Sticky;
-        KWindowSystem::setState(winId(), state);
         KWindowSystem::setType(winId(), NET::Dock);
         m_svg->setImagePath("widgets/glowbar");
 
@@ -414,44 +412,30 @@ Plasma::Location PanelView::location() const
 
 void PanelView::setVisibilityMode(PanelView::VisibilityMode mode)
 {
-    unsigned long state = NET::Sticky;
-
-    delete m_mousePollTimer;
-    m_mousePollTimer = 0;
-    delete m_glowBar;
-    m_glowBar = 0;
+    m_visibilityMode = mode;
 
     if (mode == LetWindowsCover) {
-        createUnhideTrigger();
-        state |= NET::KeepBelow;
+        KWindowSystem::setState(winId(), NET::KeepBelow);
     } else {
-        //kDebug() << "panel shouldn't let windows cover it!";
         KWindowSystem::clearState(winId(), NET::KeepBelow);
     }
+    //life is vastly simpler if we ensure we're visible now
+    unhide();
 
+    disconnect(containment(), SIGNAL(activate()), this, SLOT(unhide()));
     if (mode == NormalPanel || mode == WindowsGoBelow) {
-        // we need to kill the input window if it exists!
-        destroyUnhideTrigger();
-        disconnect(containment(), SIGNAL(activate()), this, SLOT(unhide()));
+        //remove the last remnants of hide/unhide
+        delete m_mousePollTimer;
+        m_mousePollTimer = 0;
     } else {
         connect(containment(), SIGNAL(activate()), this, SLOT(unhide()));
     }
 
-    if (mode == AutoHide) {
-        hideMousePoll();
-    } else {
-        updatePanelGeometry();
-        show();
-    }
-
-    //kDebug() << "panel state set to" << state << NET::Sticky;
-    KWindowSystem::setState(winId(), state);
-    KWindowSystem::setOnAllDesktops(winId(), true);
-
-    m_visibilityMode = mode;
     config().writeEntry("panelVisibility", (int)mode);
 
+    //if the user didn't cause this, hide again in a bit
     if ((mode == AutoHide || mode == LetWindowsCover) && !m_editting) {
+        m_mousePollTimer->stop();
         QTimer::singleShot(2000, this, SLOT(startAutoHide()));
     }
 }
@@ -890,6 +874,7 @@ void PanelView::togglePanelController()
     }
 }
 
+//FIXME "editing"
 void PanelView::edittingComplete()
 {
     //kDebug();
@@ -904,10 +889,10 @@ void PanelView::edittingComplete()
 
     containment()->closeToolBox();
     updateStruts();
-    m_firstPaint = true; // triggers autohide
+    m_firstPaint = true; // triggers autohide FIXME does not! delete this var.
 
-    if (m_visibilityMode == LetWindowsCover) {
-         startAutoHide();
+    if (m_visibilityMode == LetWindowsCover || m_visibilityMode == AutoHide) {
+         hideMousePoll();
     }
 }
 
@@ -1104,6 +1089,7 @@ void PanelView::resizeEvent(QResizeEvent *event)
     }
 }
 
+//FIXME that's a confusing function name
 void PanelView::hideMousePoll()
 {
     QPoint mousePos = QCursor::pos();
@@ -1113,6 +1099,7 @@ void PanelView::hideMousePoll()
     }
 }
 
+//FIXME that's a confusing function name
 void PanelView::unhideHintMousePoll()
 {
 #ifdef Q_WS_X11
@@ -1180,6 +1167,7 @@ bool PanelView::hintOrUnhide(const QPoint &point, bool dueToDnd)
 #endif
 }
 
+//FIXME that's a confusing function name
 void PanelView::unhintHide()
 {
     //kDebug() << "hide the glow";
@@ -1211,34 +1199,36 @@ bool PanelView::hasPopup()
 
 void PanelView::unhide(bool destroyTrigger)
 {
-    //kDebug() << destroyTrigger;
+    //kill the unhide stuff
     unhintHide();
     if (destroyTrigger) {
         destroyUnhideTrigger();
     }
 
+    //ensure it's visible
+    if (! isVisible()) {
+        Plasma::WindowEffects::slideWindow(this, location());
+        show();
+        KWindowSystem::setOnAllDesktops(winId(), true);
+    }
+
+    //non-hiding panels stop here
+    if (m_visibilityMode == NormalPanel || m_visibilityMode == WindowsGoBelow) {
+        return;
+    }
+
+    //set up the re-hiding stuff
     if (!m_mousePollTimer) {
         m_mousePollTimer = new QTimer(this);
     }
-
+    //FIXME investigate whether the mouse poll is really needed all the time or if leave events are
+    //good enough
+    //welll, if we didn't create it here something would have to when a popup dies
     disconnect(m_mousePollTimer, SIGNAL(timeout()), this, SLOT(hideMousePoll()));
     connect(m_mousePollTimer, SIGNAL(timeout()), this, SLOT(hideMousePoll()));
     m_mousePollTimer->start(200);
 
-    QRect screenRect = Kephal::ScreenUtils::screenGeometry(screen());
-
-
-    if (m_visibilityMode == AutoHide || m_visibilityMode == LetWindowsCover) {
-        // LetWindowsCover panels are always shown, so don't bother and prevent
-        // some unsightly flickers
-        Plasma::WindowEffects::slideWindow(this, location());
-        show();
-    }
-
-    KWindowSystem::setOnAllDesktops(winId(), true);
-    unsigned long state = NET::Sticky;
-    KWindowSystem::setState(winId(), state);
-
+    //avoid hide-show loops
     if (m_visibilityMode == LetWindowsCover) {
         m_triggerEntered = true;
         KWindowSystem::raiseWindow(winId());
@@ -1276,7 +1266,7 @@ void PanelView::startAutoHide()
 void PanelView::leaveEvent(QEvent *event)
 {
     if (m_visibilityMode == LetWindowsCover && m_triggerEntered) {
-        //kDebug() << "not creating!";
+        //this prevents crazy hide-unhide loops that can happen at times
         m_triggerEntered = false;
     } else if (containment() &&
                (m_visibilityMode == AutoHide || m_visibilityMode == LetWindowsCover) && !m_editting) {
