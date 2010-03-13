@@ -53,6 +53,8 @@ public:
 
     QString GetServerInformation(QString& vendor, QString& version, QString& specVersion);
 
+    void userClosedNotification(uint id);
+
 signals:
     void NotificationClosed( uint id, uint reason );
     void ActionInvoked( uint id, const QString& actionKey );

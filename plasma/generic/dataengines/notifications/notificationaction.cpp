@@ -48,7 +48,7 @@ void NotificationAction::start()
         //kDebug() << "invoking action on " << id;
         emit m_engine->ActionInvoked(id, parameters()["actionId"].toString());
     } else if (operationName() == "userClosed") {
-        m_engine->CloseNotification(id);
+        m_engine->userClosedNotification(id);
     }
 
     emitResult();
