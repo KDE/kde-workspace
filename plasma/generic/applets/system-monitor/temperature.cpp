@@ -261,7 +261,7 @@ void Temperature::dataUpdated(const QString& source,
         }
     }
     if (plotter) {
-        plotter->addSample(QList<double>() << doubleValue);
+        plotter->addSample(QList<double>() << value.number());
         setPlotterOverlayText(plotter, temp);
     }
 
