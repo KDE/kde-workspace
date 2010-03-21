@@ -102,7 +102,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
 
     updateSystemActivityToolTip();
     connect(showSystemActivityAction, SIGNAL(globalShortcutChanged(const QKeySequence &)), this, SLOT(updateSystemActivityToolTip()));
-    connect(showSystemActivityAction, SIGNAL(triggered(bool)), this, SLOT(close()));
+    connect(showSystemActivityAction, SIGNAL(triggered(bool)), this, SLOT(resetAndClose()));
     bottomLayout->addWidget(m_activityButton);
     //bottomLayout->addStretch(10);
 
@@ -129,7 +129,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     m_closeButton->setIcon(m_iconSvg->pixmap("close"));
 //    m_closeButton->setDefault(false);
 //    m_closeButton->setAutoDefault(false);
-    connect(m_closeButton, SIGNAL(clicked(bool)), SLOT(close()));
+    connect(m_closeButton, SIGNAL(clicked(bool)), SLOT(resetAndClose()));
     bottomLayout->addWidget(m_closeButton);
 
     m_layout->addWidget(m_buttonContainer);
@@ -189,7 +189,6 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     connect(m_resultsScene, SIGNAL(matchCountChanged(int)), this, SLOT(matchCountChanged(int)));
     connect(m_resultsScene, SIGNAL(itemActivated(ResultItem *)), this, SLOT(run(ResultItem *)));
     connect(m_resultsScene, SIGNAL(ensureVisibility(QGraphicsItem *)), this, SLOT(ensureVisibility(QGraphicsItem *)));
-    connect(m_resultsScene, SIGNAL(actionTriggered()), this, SLOT(actionTriggered()));
 
     resultsLayout->addWidget(m_resultsView);
 
@@ -206,7 +205,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     themeUpdated();
     connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()), this, SLOT(themeUpdated()));
 
-    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(close()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(resetAndClose()));
 
     m_layout->setAlignment(Qt::AlignTop);
 
@@ -529,7 +528,7 @@ void Interface::run(ResultItem *item)
     resetInterface();
 }
 
-void Interface::actionTriggered()
+void Interface::resetAndClose()
 {
     close();
     resetInterface();
