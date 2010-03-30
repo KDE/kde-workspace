@@ -852,7 +852,7 @@ kWarning()<<event;
         }
     } else if (watched == m_widgetExplorerView && event->type() == QEvent::Resize) {
          m_widgetExplorer->resize(m_widgetExplorerView->contentsRect().size());
-    } else if (watched == m_mainView && event->type() == QEvent::Close) {
+    } else if (!m_isDesktop && watched == m_mainView && event->type() == QEvent::Close) {
         exit();
     }
     return false;
