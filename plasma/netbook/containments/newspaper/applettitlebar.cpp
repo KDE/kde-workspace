@@ -242,7 +242,7 @@ void AppletTitleBar::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             m_applet->showConfigurationInterface();
         }
     } else if (m_pressedButton == CloseButton && m_closeButtonRect.contains(event->pos())) {
-        if (m_applet->immutability() == Plasma::Mutable) {
+        if (m_applet->containment()->immutability() == Plasma::Mutable) {
             m_applet->destroy();
         }
     } else {
@@ -304,7 +304,7 @@ void AppletTitleBar::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
                 m_icons->paint(painter, m_configureButtonRect, "configure");
             }
         }
-        if (m_applet->immutability() == Plasma::Mutable) {
+        if (m_applet->containment()->immutability() == Plasma::Mutable) {
             if (m_maximizeButtonAnimationId) {
                 QPixmap animPixmap = Plasma::Animator::self()->currentPixmap(m_closeButtonAnimationId);
                 painter->drawPixmap(m_closeButtonRect, animPixmap, animPixmap.rect());
