@@ -148,6 +148,7 @@ void Dtime::findNTPutility(){
       kDebug() << "ntpUtility = " << ntpUtility;
       return;
     }
+  }
   ///privateLayoutWidget->hide();
   kDebug() << "ntpUtility not found!";
 }
