@@ -50,6 +50,7 @@
 #include <kconfig.h>
 #include <kcolorscheme.h>
 #include <ksystemtimezone.h>
+#include <KTreeWidgetSearchLine>
 
 #include <Plasma/Svg>
 
@@ -60,6 +61,7 @@
 Dtime::Dtime(QWidget * parent)
   : QWidget(parent)
 {
+  KGlobal::locale()->insertCatalog( "timezones4" );
   setupUi(this);
 
   connect(setDateTimeAuto, SIGNAL(toggled(bool)), this, SLOT(serverTimeCheck()));
@@ -109,7 +111,8 @@ Dtime::Dtime(QWidget * parent)
   
   
   //Timezone
-  connect( tzonelist, SIGNAL(itemSelectionChanged()), SLOT(handleZoneChange()) );
+  connect( tzonelist, SIGNAL(itemSelectionChanged()), SLOT(configChanged()) );
+  tzonesearch->setTreeWidget(tzonelist);
 }
 
 void Dtime::currentZone()
@@ -140,16 +143,11 @@ void Dtime::findNTPutility(){
     path += QString::fromLocal8Bit(envpath);
   else
     path += QLatin1String("/bin:/usr/bin");
-  if(!KStandardDirs::findExe("ntpdate", path).isEmpty()) {
-    ntpUtility = "ntpdate";
-    kDebug() << "ntpUtility = " << ntpUtility;
-    return;
-  }
-  if(!KStandardDirs::findExe("rdate").isEmpty()) {
-    ntpUtility = "rdate";
-    kDebug() << "ntpUtility = " << ntpUtility;
-    return;
-  }
+  foreach(QString possible_ntputility, QStringList() << "ntpdate" << "rdate" ) {
+    if( !((ntpUtility = KStandardDirs::findExe(possible_ntputility, path)).isEmpty()) ) {
+      kDebug() << "ntpUtility = " << ntpUtility;
+      return;
+    }
   ///privateLayoutWidget->hide();
   kDebug() << "ntpUtility not found!";
 }
@@ -227,6 +225,7 @@ void Dtime::save( QVariantMap& helperargs )
   helperargs["ntp"] = true;
   helperargs["ntpServers"] = list;
   helperargs["ntpEnabled"] = setDateTimeAuto->isChecked();
+  helperargs["ntpUtility"] = ntpUtility;
 
   if(setDateTimeAuto->isChecked() && !ntpUtility.isEmpty()){
     // NTP Time setting - done in helper

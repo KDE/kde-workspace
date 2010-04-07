@@ -147,6 +147,13 @@
         </widget>
        </item>
        <item>
+        <widget class="KTreeWidgetSearchLine" name="tzonesearch">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="KTimeZoneWidget" name="tzonelist">
          <column>
           <property name="text">
@@ -176,6 +183,16 @@
    <class>KTimeZoneWidget</class>
    <extends>QTreeWidget</extends>
    <header>ktimezonewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KTreeWidgetSearchLine</class>
+   <extends>KLineEdit</extends>
+   <header>ktreewidgetsearchline.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>klineedit.h</header>
   </customwidget>
   <customwidget>
    <class>KSeparator</class>

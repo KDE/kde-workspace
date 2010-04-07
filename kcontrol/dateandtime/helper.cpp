@@ -36,7 +36,6 @@
 #include <kcomponentdata.h>
 #include <kconfig.h>
 #include <kconfiggroup.h>
-#include <kdebug.h>
 #include <kstandarddirs.h>
 #include <kprocess.h>
 #include <QFile>
@@ -49,23 +48,23 @@
 #include <sys/stat.h>
 #endif
 
-int ClockHelper::ntp( const QStringList& ntpServers, bool ntpEnabled )
-{    
+int ClockHelper::ntp( const QStringList& ntpServers, bool ntpEnabled,
+                      const QString& ntpUtility )
+{
   int ret = 0;
   // write to the system config file
-  KConfig _config( KDE_CONFDIR "/kcmclockrc", KConfig::SimpleConfig);
+  QFile config_file(KDE_CONFDIR "/kcmclockrc");
+  if(!config_file.exists()) {
+    config_file.open(QIODevice::WriteOnly);
+    config_file.close();
+    config_file.setPermissions(QFile::ReadOther);
+  }
+  KConfig _config(config_file.fileName(), KConfig::SimpleConfig);
   KConfigGroup config(&_config, "NTP");
   config.writeEntry("servers", ntpServers );
   config.writeEntry("enabled", ntpEnabled );
 
-  QString ntpUtility;
-  if(!KStandardDirs::findExe("ntpdate").isEmpty()) {
-    ntpUtility = "ntpdate";
-  } else if(!KStandardDirs::findExe("rdate").isEmpty()) {
-    ntpUtility = "rdate";
-  }
-
-  if(ntpEnabled && !ntpUtility.isEmpty()){
+  if ( ntpEnabled && !ntpUtility.isEmpty() ) {
     // NTP Time setting
     QString timeServer = ntpServers.first();
     if( timeServer.indexOf( QRegExp(".*\\(.*\\)$") ) != -1 ) {
@@ -163,8 +162,6 @@ int ClockHelper::tz( const QString& selectedzone )
 #else
         QString tz = "/usr/share/zoneinfo/" + selectedzone;
 
-        kDebug() << "Set time zone " << tz;
-
         if( !KStandardDirs::findExe( "zic" ).isEmpty())
         {
             KProcess::execute("zic", QStringList() << "-l" << selectedzone);
@@ -222,7 +219,7 @@ ActionReply ClockHelper::save(const QVariantMap &args)
   int ret = 0; // error code
 //  The order here is important
   if( _ntp )
-    ret |= ntp( args.value("ntpServers").toStringList(), args.value("ntpEnabled").toBool() );
+    ret |= ntp( args.value("ntpServers").toStringList(), args.value("ntpEnabled").toBool(), args.value("ntpUtility").toString() );
   if( _date )
     ret |= date( args.value("newdate").toString(), args.value("olddate").toString() );
   if( _tz )
