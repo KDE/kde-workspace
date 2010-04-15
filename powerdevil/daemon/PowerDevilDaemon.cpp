@@ -280,6 +280,8 @@ void PowerDevilDaemon::resumeFromIdle()
     }
 
     Solid::Control::PowerManager::setBrightness(d->brightness);
+
+    d->status = NoAction;
 }
 
 void PowerDevilDaemon::refreshStatus()
