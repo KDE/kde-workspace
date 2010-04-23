@@ -74,7 +74,7 @@ PlasmoidTask::PlasmoidTask(QString appletname, int id, QObject *parent, Plasma::
 
 PlasmoidTask::~PlasmoidTask()
 {
-    emit taskDeleted(d->typeId);
+    emit taskDeleted(d->host, d->typeId);
     delete d;
 }
 
@@ -175,7 +175,7 @@ void PlasmoidTask::Private::setupApplet()
 void PlasmoidTask::appletDestroyed(QObject *object)
 {
     if (object == d->applet) {
-        emit taskDeleted(d->typeId);
+        d->applet = 0;
         deleteLater();
     }
 }

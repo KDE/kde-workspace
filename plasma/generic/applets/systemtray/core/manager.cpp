@@ -256,7 +256,7 @@ void Manager::loadApplets(const KConfigGroup &cg, Plasma::Applet *parent)
 
 void Manager::addApplet(const QString appletName, Plasma::Applet *parent)
 {
-    d->plasmoidProtocol->addApplet(appletName, parent);
+    d->plasmoidProtocol->addApplet(appletName, 0, parent);
 }
 
 void Manager::removeApplet(const QString appletName, Plasma::Applet *parent)
