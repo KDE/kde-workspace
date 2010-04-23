@@ -244,9 +244,9 @@ QList<Job*> Manager::jobs() const
     return d->jobs;
 }
 
-void Manager::forwardConstraintsEvent(Plasma::Constraints constraints)
+void Manager::forwardConstraintsEvent(Plasma::Constraints constraints, Plasma::Applet *host)
 {
-    d->plasmoidProtocol->forwardConstraintsEvent(constraints);
+    d->plasmoidProtocol->forwardConstraintsEvent(constraints, host);
 }
 
 void Manager::loadApplets(const KConfigGroup &cg, Plasma::Applet *parent)

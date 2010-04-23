@@ -103,7 +103,7 @@ public:
      **/
     void unregisterNotificationProtocol();
 
-    void forwardConstraintsEvent(Plasma::Constraints constraints);
+    void forwardConstraintsEvent(Plasma::Constraints constraints, Plasma::Applet *host);
 
     void loadApplets(const KConfigGroup &cg, Plasma::Applet *parent);
 
