@@ -66,6 +66,7 @@ Comment[he]=שמור דיווח על יישומים שמעוניינים להש�
 Comment[hr]=Nadzirite aplikacije koje žele koristiti protokol za obavještavanje temeljen na D-Busu.
 Comment[hu]=Az alkalmazások követésének meghagyása, melyek a D-Bus alapú állapot értesítő protokolt szeretnék használni.
 Comment[id]=Pantau aplikasi yang ingin menggunakan protokol notifikasi status berbasis D-Bus.
+Comment[is]=Fylgist með forritum sem vilja nota tilkynningaþjónustu D-Bus.
 Comment[it]=Tiene traccia delle applicazioni che vogliono usare il protocollo di notifica dello stato basato su D-Bus.
 Comment[kk]=D-Bus негіздеген күй-жайы туралы құлақтандыру протоколын пайдаланбақ қолданбаларды бақылау.
 Comment[km]=តាមដាន​កម្មវិធី​ដែល​ចង់​ឲ្យ​ប្រើធាតុ​​ជូនដំណឹង​ដែល​មាន​មូលដ្ឋាន​លើ D-Bus
