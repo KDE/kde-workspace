@@ -198,6 +198,9 @@ class ProcessModelPrivate : public QObject
         /** The hostname */
         QString mHostName;
 
+        bool mMovingRow;
+        bool mRemovingRow;
+        bool mInsertingRow;
         ProcessModel* q;
 };
 
