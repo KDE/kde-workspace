@@ -741,8 +741,6 @@ NotificationWidget *Applet::addNotification(Notification *notification)
         extenderItem->setGroup(extender()->group("oldNotificationsGroup"));
     }
 
-    emit activate();
-
     //notification->timeout() = 0 actually means eternal life
     if (notification->timeout() > 0) {
         showPopup(qMin(m_autoHideTimeout, notification->timeout()));
@@ -801,7 +799,6 @@ void Applet::addJob(Job *job)
     extenderItem->config().writeEntry("type", "job");
     extenderItem->setWidget(new JobWidget(job, extenderItem));
 
-    emit activate();
     showPopup(m_autoHideTimeout);
 
     extenderItem->setGroup(extender()->group("jobGroup"));
