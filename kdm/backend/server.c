@@ -64,6 +64,8 @@ prepareServerArgv( struct display *d, const char *args )
 	                        sprintf( vtstr, "vt%d", d->serverVT ) )))
 		exit( 47 );
 #endif
+	if (!(argv = parseArgs( argv, args )))
+		exit( 47 );
 	return argv;
 }
 
@@ -209,8 +211,6 @@ abortOpen( int n ATTR_UNUSED )
 #ifdef STREAMSCONN
 # include <tiuser.h>
 #endif
-	if (!(argv = parseArgs( argv, args )))
-		exit( 47 );
 
 static void
 getRemoteAddress( struct display *d, int fd )
