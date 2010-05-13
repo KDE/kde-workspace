@@ -225,7 +225,7 @@ void PanelAppletOverlay::mousePressEvent(QMouseEvent *event)
 
 void PanelAppletOverlay::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!m_layout) {
+    if (!m_layout && !m_applet) {
         //kDebug() << "no layout";
         return;
     }
