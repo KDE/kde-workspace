@@ -300,7 +300,12 @@ void KxkbCore::initTray()
 
         m_kxkbWidget->setShowFlag(m_kxkbConfig.m_showFlag);
         m_kxkbWidget->initLayoutList(m_kxkbConfig.m_layouts, *m_rules);
-        m_kxkbWidget->setCurrentLayout(m_kxkbConfig.m_layouts[m_currentLayout]);
+        if( m_currentLayout >= m_kxkbConfig.m_layouts.size() ) {
+    	    m_currentLayout = 0;
+    	}
+    	if( m_kxkbConfig.m_layouts.size() > 0 ) {
+    	    m_kxkbWidget->setCurrentLayout(m_kxkbConfig.m_layouts[m_currentLayout]);
+        }
         m_kxkbWidget->setVisible( visible );
     }
 }
