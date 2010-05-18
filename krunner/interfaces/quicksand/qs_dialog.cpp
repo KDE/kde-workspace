@@ -24,6 +24,7 @@
 #include <QDesktopWidget>
 #include <QLabel>
 #include <QTimer>
+#include <QShortcut>
 #include <QToolButton>
 
 #include <KAction>
@@ -116,6 +117,8 @@ QsDialog::QsDialog(Plasma::RunnerManager *runnerManager, QWidget *parent)
     m_matchView->setFocus();
 
     m_newQuery = true;
+    
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(close()));
 }
 
 QsDialog::~QsDialog()
