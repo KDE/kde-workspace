@@ -177,8 +177,11 @@ QString XKBExtension::getLayoutGroupsCommand(const QString& model, const QString
     cmd += layouts.join(SETXKBMAP_SEPARATOR);
 
     if( ! variants.empty() ) {
-        cmd += " -variant ";
-        cmd += variants.join(SETXKBMAP_SEPARATOR);
+	QString variantsStr = variants.join(SETXKBMAP_SEPARATOR);
+	if( ! variantsStr.trimmed().isEmpty() ) {
+    	    cmd += " -variant ";
+    	    cmd += variantsStr;
+        }
     }
     return cmd;
 }
