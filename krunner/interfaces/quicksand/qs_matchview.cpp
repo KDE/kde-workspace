@@ -574,7 +574,6 @@ void QsMatchView::resizeEvent(QResizeEvent *e)
 void QsMatchView::focusInEvent(QFocusEvent *event)
 {
     Q_UNUSED(event)
-    qDebug() << "ASLDLASDLASALSDLA";
     if (!d->m_hasFocus) {
         d->m_hasFocus = true;
         showList();
