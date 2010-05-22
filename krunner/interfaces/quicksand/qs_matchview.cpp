@@ -36,6 +36,7 @@
 #include <KIcon>
 #include <KLineEdit>
 #include <KLocale>
+#include <KWindowSystem>
 
 #include <Plasma/Theme>
 
@@ -190,8 +191,6 @@ void QsMatchView::setItems(const QList<MatchItem*> &items, bool popup, bool appe
     int spacing = MatchItem::ITEM_SIZE/2;
 
     int pos = spacing;
-
-    d->m_currentItem = -1;
 
     if (!append) {
         clear(true);
@@ -575,6 +574,7 @@ void QsMatchView::resizeEvent(QResizeEvent *e)
 void QsMatchView::focusInEvent(QFocusEvent *event)
 {
     Q_UNUSED(event)
+    qDebug() << "ASLDLASDLASALSDLA";
     if (!d->m_hasFocus) {
         d->m_hasFocus = true;
         showList();
@@ -658,6 +658,19 @@ void QsMatchView::keyPressEvent(QKeyEvent *e)
         d->m_lineEdit->setText(d->m_searchTerm);
     }
     QWidget::keyPressEvent(e);
+}
+
+bool QsMatchView::eventFilter(QObject *obj, QEvent *event)
+{
+    qDebug() << "Event Filter !!!";
+    if (event->type() == QEvent::MouseButtonPress) {
+        if (KWindowSystem::activeWindow() != winId()) {
+            // this overcomes problems with click-to-focus and being a Dock window
+            KWindowSystem::forceActiveWindow(winId());
+        }
+    }
+
+    return QWidget::eventFilter(obj, event);
 }
 
 } // namespace QuickSand
