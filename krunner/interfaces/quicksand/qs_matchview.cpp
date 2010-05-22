@@ -661,7 +661,6 @@ void QsMatchView::keyPressEvent(QKeyEvent *e)
 
 bool QsMatchView::eventFilter(QObject *obj, QEvent *event)
 {
-    qDebug() << "Event Filter !!!";
     if (event->type() == QEvent::MouseButtonPress) {
         if (KWindowSystem::activeWindow() != winId()) {
             // this overcomes problems with click-to-focus and being a Dock window
