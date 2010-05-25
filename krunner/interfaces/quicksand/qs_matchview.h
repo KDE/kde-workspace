@@ -146,6 +146,7 @@ namespace QuickSand {
             void focusInEvent(QFocusEvent *event);
             void focusOutEvent(QFocusEvent *event);
             void keyPressEvent(QKeyEvent *event);
+            bool eventFilter(QObject *obj, QEvent *event);
 
             class Private;
             Private* const d;
