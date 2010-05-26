@@ -486,7 +486,7 @@ void NotifierDialog::buildDialog()
     QGraphicsWidget *devicesWidget = new QGraphicsWidget(m_devicesScrollWidget);
     m_devicesScrollWidget->setWidget(devicesWidget);
     m_devicesScrollWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_devicesScrollWidget->setMinimumWidth(240);
+    m_devicesScrollWidget->setMinimumSize(240,250);
     m_deviceLayout = new QGraphicsLinearLayout(Qt::Vertical, devicesWidget);
     m_deviceLayout->setContentsMargins(0, 0, 0, 8);
     devicesWidget->setLayout(m_deviceLayout);
@@ -505,7 +505,6 @@ void NotifierDialog::buildDialog()
     updateMainLabelText();
 
     m_widget->setLayout(l_layout);
-    m_widget->setMinimumHeight(300);
 }
 
 void NotifierDialog::storageTeardownDone(Solid::ErrorType error, QVariant errorData, const QString & udi)
