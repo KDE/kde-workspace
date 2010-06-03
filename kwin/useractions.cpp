@@ -964,22 +964,28 @@ bool Client::performMouseCommand( Options::MouseCommand command, const QPoint &g
             break;
         case Options::MouseLeftGroupWindow:
             {
-            int c_id = clientGroup()->indexOfClient( this );
-            int size = clientGroup()->clients().count();
-            if( c_id > 0 )
-                clientGroup()->setVisible( c_id - 1 );
-            else
-                clientGroup()->setVisible( size - 1 );
+            if( clientGroup() ) 
+                {
+                int c_id = clientGroup()->indexOfClient( this );
+                int size = clientGroup()->clients().count();
+                if( c_id > 0 )
+                    clientGroup()->setVisible( c_id - 1 );
+                else
+                    clientGroup()->setVisible( size - 1 );
+	        }
             }
             break;
         case Options::MouseRightGroupWindow:
-            {
-            int c_id = clientGroup()->indexOfClient( this );
-            int size = clientGroup()->clients().count();
-            if( c_id < size - 1 )
-                clientGroup()->setVisible( c_id + 1 );
-            else
-                clientGroup()->setVisible( 0 );
+	    {
+            if( clientGroup() ) 
+                {
+                int c_id = clientGroup()->indexOfClient( this );
+                int size = clientGroup()->clients().count();
+                if( c_id < size - 1 )
+                    clientGroup()->setVisible( c_id + 1 );
+                else
+                    clientGroup()->setVisible( 0 );
+	        }
             }
             break;
         case Options::MouseClose:
