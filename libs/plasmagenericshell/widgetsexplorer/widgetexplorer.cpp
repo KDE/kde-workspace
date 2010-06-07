@@ -392,7 +392,7 @@ void WidgetExplorer::addApplet()
 
 void WidgetExplorer::addApplet(PlasmaAppletItem *appletItem)
 {
-    if (!d->containment) {
+    if (!d->containment || !appletItem) {
         return;
     }
 
