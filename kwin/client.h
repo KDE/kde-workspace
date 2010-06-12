@@ -134,7 +134,10 @@ class Client
         QSize adjustedSize() const;
 
         QPixmap icon() const;
+        QPixmap icon( const QSize& size ) const;
         QPixmap miniIcon() const;
+        QPixmap bigIcon() const;
+        QPixmap hugeIcon() const;
 
         bool isActive() const;
         void setActive( bool );
@@ -290,7 +293,7 @@ class Client
 
         static bool belongToSameApplication( const Client* c1, const Client* c2, bool active_hack = false );
         static bool sameAppWindowRoleMatch( const Client* c1, const Client* c2, bool active_hack );
-        static void readIcons( Window win, QPixmap* icon, QPixmap* miniicon );
+        static void readIcons( Window win, QPixmap* icon, QPixmap* miniicon, QPixmap* bigicon, QPixmap* hugeicon );
 
         void minimize( bool avoid_animation = false );
         void unminimize( bool avoid_animation = false );
@@ -575,6 +578,8 @@ class Client
         void getWindowProtocols();
         QPixmap icon_pix;
         QPixmap miniicon_pix;
+        QPixmap bigicon_pix;
+        QPixmap hugeicon_pix;
         QCursor cursor;
         // DON'T reorder - Saved to config files !!!
         enum FullScreenMode
@@ -778,6 +783,16 @@ inline QPixmap Client::icon() const
 inline QPixmap Client::miniIcon() const
     {
     return miniicon_pix;
+    }
+
+inline QPixmap Client::bigIcon() const
+    {
+    return bigicon_pix;
+    }
+
+inline QPixmap Client::hugeIcon() const
+    {
+    return hugeicon_pix;
     }
 
 inline QRect Client::geometryRestore() const
