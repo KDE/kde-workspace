@@ -22,6 +22,8 @@
 
 #include "applet.h"
 
+#include <QtCore/QProcess>
+#include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QGraphicsLayout>
 #include <QtGui/QGraphicsLinearLayout>
@@ -33,7 +35,6 @@
 #include <QtGui/QCheckBox>
 #include <QtGui/QPainter>
 #include <QtGui/QX11Info>
-#include <QtCore/QProcess>
 
 
 #include <KConfigDialog>
@@ -106,9 +107,6 @@ Applet::Applet(QObject *parent, const QVariantList &arguments)
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setBackgroundHints(NoBackground);
     setHasConfigurationInterface(true);
-    QAction *addDefaultApplets = new QAction(i18n("add default applets"), this);
-    connect(addDefaultApplets, SIGNAL(triggered()), this, SLOT(addDefaultApplets()));
-    addAction("add default applets", addDefaultApplets);
 }
 
 Applet::~Applet()
@@ -172,6 +170,7 @@ void Applet::init()
         }
     }
 
+    QTimer::singleShot(0, this, SLOT(checkDefaultApplets()));
     configChanged();
 }
 
@@ -706,12 +705,18 @@ void Applet::configAccepted()
     emit configNeedsSaving();
 }
 
-void Applet::addDefaultApplets()
+void Applet::checkDefaultApplets()
 {
+    if (config().readEntry("DefaultAppletsAdded", false)) {
+        return;
+    }
+
+
     QStringList applets = s_manager->applets(this);
     if (!applets.contains("notifier")) {
         s_manager->addApplet("notifier", this);
     }
+
     if (!applets.contains("battery")) {
         Plasma::DataEngineManager *engines = Plasma::DataEngineManager::self();
         Plasma::DataEngine *power = engines->loadEngine("powermanagement");
@@ -723,6 +728,9 @@ void Applet::addDefaultApplets()
         }
         engines->unloadEngine("powermanagement");
     }
+
+    config().writeEntry("DefaultAppletsAdded", true);
+    configChanged();
 }
 
 NotificationWidget *Applet::addNotification(Notification *notification)

@@ -85,7 +85,7 @@ private slots:
     void clearOldNotifications();
     void finishJob(SystemTray::Job *job);
     void open(const QString &url);
-    void addDefaultApplets();
+    void checkDefaultApplets();
     void showTaskNotifications(int barIndex);
     void syncNotificationBarNeeded();
     void notificationDestroyed(SystemTray::Notification *notification);
