@@ -183,11 +183,6 @@ class DeviceItem : public QGraphicsWidget
         void setBusy();
 
         /**
-        * Gets the state of the device
-        **/
-        State state() const;
-
-        /**
         * Update colors on a theme change
         **/
         void updateColors();

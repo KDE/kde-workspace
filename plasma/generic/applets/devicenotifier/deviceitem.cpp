@@ -415,11 +415,6 @@ void DeviceItem::setReady()
     }
 }
 
-DeviceItem::State DeviceItem::state() const
-{
-    return m_state;
-}
-
 void DeviceItem::triggerBusyWidget()
 {
     m_mainLayout->removeItem(m_leftActionIcon);
