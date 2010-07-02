@@ -77,7 +77,7 @@ Name[tr]=Web biçimi
 Name[uk]=Веб-стиль
 Name[wa]=Stîle waibe
 Name[x-test]=xxWeb stylexx
-Name[zh_CN]=网页风格
+Name[zh_CN]=Web 风格
 Name[zh_TW]=網頁樣式
 Comment=Web widget style
 Comment[ar]=أسلوب ودجات الإنترنت
@@ -155,7 +155,7 @@ Comment[tr]=Web parçacık biçimi
 Comment[uk]=Стиль веб-віджетів
 Comment[wa]=Stîle des ahesses waibe
 Comment[x-test]=xxWeb widget stylexx
-Comment[zh_CN]=网页窗口部件风格
+Comment[zh_CN]=Web 部件风格
 Comment[zh_TW]=網頁元件樣式
 [KDE]
 widgetStyle=webstyle.la
