@@ -164,7 +164,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     connect(m_resultsScene, SIGNAL(matchCountChanged(int)), this, SLOT(matchCountChanged(int)));
     connect(m_resultsScene, SIGNAL(itemActivated(ResultItem *)), this, SLOT(run(ResultItem *)));
 
-    connect(lineEdit, SIGNAL(userTextChanged(QString)), this, SLOT(queryTextEdited(QString)));
+    connect(lineEdit, SIGNAL(textEdited(QString)), this, SLOT(queryTextEdited(QString)));
     connect(m_searchTerm, SIGNAL(returnPressed()), this, SLOT(runDefaultResultItem()));
     connect(m_singleRunnerSearchTerm, SIGNAL(textChanged(QString)), this, SLOT(queryTextEdited(QString)));
     connect(m_singleRunnerSearchTerm, SIGNAL(returnPressed()),  this, SLOT(runDefaultResultItem()));
