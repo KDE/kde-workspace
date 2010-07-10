@@ -98,18 +98,20 @@ void EventDataContainer::updateTodoData()
 
             populateIncidenceData(todo, todoData);
 
+            QVariant var;
             // Todo specific fields
             todoData["TodoHasStartDate"] = todo->hasStartDate();
             todoData["TodoIsOpenEnded"] = todo->isOpenEnded();
             todoData["TodoHasDueDate"] = todo->hasDueDate();
-            todoData["TodoDueDate"] = todo->dtDue().toUtc().dateTime();
+            var.setValue(todo->dtDue());
+            todoData["TodoDueDate"] = var;
             todoData["TodoIsCompleted"] = todo->isCompleted();
             todoData["TodoIsInProgress"] = todo->isInProgress(false); // ???
             todoData["TodoIsNotStarted"] = todo->isNotStarted(false); // ???
             todoData["TodoPercentComplete"] = todo->percentComplete();
             todoData["TodoHasCompletedDate"] = todo->hasCompletedDate();
-            todoData["TodoCompletedDate"] = todo->completed().toUtc().dateTime();
-            //TODO Recurrences
+            var.setValue(todo->completed());
+            todoData["TodoCompletedDate"] = var;
 
             setData(todo->uid(), todoData);
         }
@@ -143,6 +145,7 @@ void EventDataContainer::updateJournalData()
 
 void EventDataContainer::populateIncidenceData(KCal::Incidence::Ptr incidence, Plasma::DataEngine::Data &incidenceData)
 {
+    QVariant var;
     incidenceData["UID"] = incidence->uid();
     incidenceData["Type"] = incidence->type();
     incidenceData["Summary"] = incidence->summary();
@@ -151,18 +154,40 @@ void EventDataContainer::populateIncidenceData(KCal::Incidence::Ptr incidence, P
     incidenceData["OrganizerName"] = incidence->organizer().name();
     incidenceData["OrganizerEmail"] = incidence->organizer().email();
     incidenceData["Priority"] = incidence->priority();
-    incidenceData["StartDate"] = incidence->dtStart().toUtc().dateTime();
-    incidenceData["EndDate"] = incidence->dtEnd().toUtc().dateTime();
-    if ( incidence->recurs() ) {
-        QList<QVariant> recurData;
+    var.setValue(incidence->dtStart());
+    incidenceData["StartDate"] = var;
+    var.setValue(incidence->dtEnd());
+    incidenceData["EndDate"] = var;
+    // Build the Occurance Index, this lists all occurences of the Incidence in the required range
+    // Single occurance events just repeat the standard start/end dates
+    // Recurring Events use each recurrence start/end date
+    // The OccurenceUid is redundant, but it makes it easy for clients to just take() the data structure intact as a separate index
+    QList<QVariant> occurences;
+    // Build the recurrence list of start dates only for recurring incidences only
+    QList<QVariant> recurrences;
+    if (incidence->recurs()) {
         KCal::DateTimeList recurList = incidence->recurrence()->timesInInterval(m_startDate, m_endDate);
         foreach(const KDateTime &recurDateTime, recurList) {
-            recurData.append(recurDateTime.toUtc().dateTime());
+            var.setValue(recurDateTime);
+            recurrences.append(var);
+            Plasma::DataEngine::Data occurence;
+            occurence.insert("OccurrenceUid", incidence->uid());
+            occurence.insert("OccurrenceStartDate", var);
+            var.setValue(incidence->endDateForStart(recurDateTime));
+            occurence.insert("OccurrenceEndDate", var);
+            occurences.append(QVariant(occurence));
         }
-        incidenceData["RecurrenceDates"] = QVariant(recurData);
     } else {
-        incidenceData["RecurrenceDates"] = "";
+        Plasma::DataEngine::Data occurence;
+        occurence.insert("OccurrenceUid", incidence->uid());
+        var.setValue(incidence->dtStart());
+        occurence.insert("OccurrenceStartDate", var);
+        var.setValue(incidence->dtEnd());
+        occurence.insert("OccurrenceEndDate", var);
+        occurences.append(QVariant(occurence));
     }
+    incidenceData["RecurrenceDates"] = QVariant(recurrences);
+    incidenceData["Occurrences"] = QVariant(occurences);
     if (incidence->status() == KCal::Incidence::StatusNone) {
         incidenceData["Status"] = "None";
     } else if (incidence->status() == KCal::Incidence::StatusTentative) {
@@ -204,6 +229,7 @@ void EventDataContainer::populateIncidenceData(KCal::Incidence::Ptr incidence, P
     incidenceData["Resources"] = incidence->resources();
     incidenceData["DurationDays"] = incidence->duration().asDays();
     incidenceData["DurationSeconds"] = incidence->duration().asSeconds();
+
     //TODO Attendees
     //TODO Attachments
     //TODO Relations
