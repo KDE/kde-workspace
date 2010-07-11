@@ -1,5 +1,5 @@
 /*
- *   Copyright 2008 Davide Bettio <davide.bettio@kdemail.net>
+ *   Copyright 2008,2010 Davide Bettio <davide.bettio@kdemail.net>
  *   Copyright 2009 John Layt <john@layt.net>
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -81,6 +81,12 @@ public:
     bool dateHasDetails(const QDate &date) const;
     QString dateDetails(const QDate &date) const;
 
+    void setAutomaticUpdateEnabled(bool enabled);
+    bool isAutomaticUpdateEnabled() const;
+    
+    void setCurrentDate(const QDate &date);
+    const QDate& currentDate() const;
+    
     void applyConfiguration(KConfigGroup cg);
     void writeConfiguration(KConfigGroup cg);
     void createConfigurationInterface(KConfigDialog *parent);

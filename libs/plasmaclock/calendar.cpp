@@ -1,5 +1,5 @@
 /*
- *   Copyright 2008 Davide Bettio <davide.bettio@kdemail.net>
+ *   Copyright 2008,2010 Davide Bettio <davide.bettio@kdemail.net>
  *   Copyright 2009 John Layt <john@layt.net>
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -281,6 +281,26 @@ bool Calendar::dateHasDetails(const QDate &date) const
 QString Calendar::dateDetails(const QDate &date) const
 {
     return calendarTable()->dateDetails(date);
+}
+
+void Calendar::setAutomaticUpdateEnabled(bool automatic)
+{
+    calendarTable()->setAutomaticUpdateEnabled(automatic);
+}
+
+bool Calendar::isAutomaticUpdateEnabled() const
+{
+    return calendarTable()->isAutomaticUpdateEnabled();
+}
+
+void Calendar::setCurrentDate(const QDate &date)
+{
+    calendarTable()->setCurrentDate(date);  
+}
+
+const QDate& Calendar::currentDate() const
+{
+    return calendarTable()->currentDate();
 }
 
 void Calendar::applyConfiguration(KConfigGroup cg)

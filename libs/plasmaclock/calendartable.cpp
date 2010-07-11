@@ -1,5 +1,5 @@
 /*
- *   Copyright 2008 Davide Bettio <davide.bettio@kdemail.net>
+ *   Copyright 2008,2010 Davide Bettio <davide.bettio@kdemail.net>
  *   Copyright 2009 John Layt <john@layt.net>
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -79,6 +79,7 @@ class CalendarTablePrivate
               displayEvents(true),
               displayHolidays(true),
               dataEngine(0),
+              automaticUpdates(true),
               opacity(0.5)
         {
             svg = new Svg();
@@ -304,6 +305,7 @@ class CalendarTablePrivate
         const KCalendarSystem *calendar;
 
         QDate selectedDate;
+        QDate currentDate;
         int selectedMonth;
         int selectedYear;
         int weekDayFirstOfSelectedMonth;
@@ -328,6 +330,8 @@ class CalendarTablePrivate
         // Hask key: QString = Akonadi UID of event/todo/journal, Data = details of event/todo/journal
         QHash<QString, Plasma::DataEngine::Data> pimEvents;
         QString eventsQuery;
+
+        bool automaticUpdates;
 
         QPointF lastSeenMousePos;
 
@@ -633,6 +637,26 @@ QString CalendarTable::dateDetails(const QDate &date) const
     return details;
 }
 
+void CalendarTable::setAutomaticUpdateEnabled(bool enabled)
+{
+    d->automaticUpdates = enabled;
+}
+
+bool CalendarTable::isAutomaticUpdateEnabled() const
+{
+    return d->automaticUpdates;
+}
+    
+void CalendarTable::setCurrentDate(const QDate &date)
+{
+    d->currentDate = date; 
+}
+
+const QDate& CalendarTable::currentDate() const
+{
+    return d->currentDate;
+}
+
 void CalendarTable::populateHolidays()
 {
     clearHolidays();
@@ -914,7 +938,9 @@ void CalendarTable::paint(QPainter *p, const QStyleOptionGraphicsItem *option, Q
 
     QList<CalendarCellBorder> borders;
     QList<CalendarCellBorder> hovers;
-    QDate currentDate = QDate::currentDate(); //FIXME: calendar timezone
+    if (d->automaticUpdates){
+        d->currentDate = QDate::currentDate();
+    }
 
     //weekRow and weekDaycolumn of table are 0 indexed and are not equivalent to weekday or week
     //numbers.  In LTR mode we count/paint row and column from top-left corner, in RTL mode we
@@ -946,7 +972,7 @@ void CalendarTable::paint(QPainter *p, const QStyleOptionGraphicsItem *option, Q
                 type |= CalendarTable::InvalidDate;
             }
 
-            if (cellDate == currentDate) {
+            if (cellDate == d->currentDate) {
                 type |= CalendarTable::Today;
             }
 
