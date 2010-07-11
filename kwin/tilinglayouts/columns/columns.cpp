@@ -82,9 +82,10 @@ KDecorationDefines::Position Columns::resizeMode( Client *c, KDecorationDefines:
     return KDecorationDefines::PositionCenter;
     }
 
-void Columns::clientResized( Client *c, const QRect &moveResizeGeom, const QRect &orig )
+bool Columns::clientResized( Client *c, const QRect &moveResizeGeom, const QRect &orig )
     {
-    TilingLayout::clientResized( c, moveResizeGeom, orig );
+    if( TilingLayout::clientResized( c, moveResizeGeom, orig ) )
+        return true;
 
     Tile *t = findTile( c );
 
@@ -108,6 +109,7 @@ void Columns::clientResized( Client *c, const QRect &moveResizeGeom, const QRect
         }
 
     arrange( layoutArea( t ) );
+    return true;
     }
 
 void Columns::arrange( QRect wgeom )
