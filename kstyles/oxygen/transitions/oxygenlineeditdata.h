@@ -69,13 +69,13 @@ namespace Oxygen
         protected slots:
 
         //! text edited
-        virtual void textEdited( const QString& );
+        virtual void textEdited( void );
 
         //! selection changed
         virtual void selectionChanged( void );
 
         //! text changed
-        virtual void textChanged( const QString& );
+        virtual void textChanged( void );
 
         //! initialize animation
         virtual bool initializeAnimation( void );
