@@ -103,9 +103,11 @@ public:
     void itemTransformed(QGraphicsWidget *item, ItemTransformType type);
 
     /**
-     * Adjusts the items' on-screen positions to match calculations.
-     **/
-    void adjustPhysicalPositions();
+    * Adjusts the items' on-screen positions to match calculations.
+    *
+    * @param the item to be adjusted. If 0 all the items will be checked.
+    **/
+    void adjustPhysicalPositions(QGraphicsWidget *item = 0);
 
     /**
      * Returns the count of items in the layout.
