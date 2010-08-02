@@ -54,6 +54,12 @@ bool KrunnerTabFilter::eventFilter(QObject *obj, QEvent *event)
         }
     }
 
+    //WORKAROUND: KHistoryComboBox does not emit any signal when rotating with the mouse wheel,
+    //            work around this fact here.
+    if (event->type() == QEvent::Wheel) {
+        QTimer::singleShot(0, this, SLOT(delayedHistoryRotated()));
+    }
+
     if ((event->type() == QEvent::FocusOut) || enterPressed) {
         //FIXME: find a reliable way to see if the scene is empty; now defaults to
         //       never complete
