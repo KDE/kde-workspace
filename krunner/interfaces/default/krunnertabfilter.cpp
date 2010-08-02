@@ -20,8 +20,10 @@
 #include <KDebug>
 
 #include <QKeyEvent>
+#include <QTimer>
 
 #include <KLineEdit>
+#include <kstandardshortcut.h>
 
 #include "krunnertabfilter.h"
 #include "resultscene.h"
@@ -43,6 +45,13 @@ bool KrunnerTabFilter::eventFilter(QObject *obj, QEvent *event)
     if ( event->type() == QEvent::KeyPress ) {
         QKeyEvent *e = static_cast<QKeyEvent *>( event );
         enterPressed = ( e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter );
+
+        //WORKAROUND: KHistoryComboBox does not emit any signal when rotating with the standard
+        //            shortcuts, work around this fact here.
+        int event_key = e->key() | e->modifiers();
+        if (KStandardShortcut::rotateUp().contains(event_key) || KStandardShortcut::rotateDown().contains(event_key)) {
+            QTimer::singleShot(0, this, SLOT(delayedHistoryRotated()));
+        }
     }
 
     if ((event->type() == QEvent::FocusOut) || enterPressed) {
@@ -64,6 +73,11 @@ bool KrunnerTabFilter::eventFilter(QObject *obj, QEvent *event)
    }
 
     return QObject::eventFilter(obj, event);
+}
+
+void KrunnerTabFilter::delayedHistoryRotated()
+{
+    emit historyRotated(m_lineEdit->text());
 }
 
 #include "krunnertabfilter.moc"

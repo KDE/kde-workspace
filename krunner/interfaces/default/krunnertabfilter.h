@@ -36,8 +36,14 @@ class KrunnerTabFilter : public QObject
         explicit KrunnerTabFilter(ResultScene *scene, KLineEdit *edit, QWidget *parent = 0);
         ~KrunnerTabFilter();
 
+    signals:
+        void historyRotated(const QString);
+
     protected:
         bool eventFilter(QObject *obj, QEvent *event);
+
+    private slots:
+        void delayedHistoryRotated();
 
     private:
         ResultScene *m_resultScene;

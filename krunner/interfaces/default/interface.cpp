@@ -165,6 +165,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     connect(m_resultsScene, SIGNAL(itemActivated(ResultItem *)), this, SLOT(run(ResultItem *)));
 
     connect(lineEdit, SIGNAL(textEdited(QString)), this, SLOT(queryTextEdited(QString)));
+    connect(m_searchTerm, SIGNAL(currentIndexChanged(QString)), this, SLOT(queryTextEdited(QString)));
     connect(m_searchTerm, SIGNAL(returnPressed()), this, SLOT(runDefaultResultItem()));
     connect(m_singleRunnerSearchTerm, SIGNAL(textChanged(QString)), this, SLOT(queryTextEdited(QString)));
     connect(m_singleRunnerSearchTerm, SIGNAL(returnPressed()),  this, SLOT(runDefaultResultItem()));
@@ -172,6 +173,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     KrunnerTabFilter *krunnerTabFilter = new KrunnerTabFilter(m_resultsScene, lineEdit, this);
     m_searchTerm->installEventFilter(krunnerTabFilter);
     m_singleRunnerSearchTerm->installEventFilter(krunnerTabFilter);
+    connect(krunnerTabFilter, SIGNAL(historyRotated(QString)), this, SLOT(queryTextEdited(QString)));
     lineEdit->installEventFilter(this);
 
     themeUpdated();
