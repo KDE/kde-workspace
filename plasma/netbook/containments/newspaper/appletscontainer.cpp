@@ -51,6 +51,7 @@ AppletsContainer::AppletsContainer(AppletsView *parent)
    m_automaticAppletLayout(true),
    m_expandAll(false)
 {
+    setFlag(QGraphicsItem::ItemHasNoContents);
     m_mainLayout = new QGraphicsLinearLayout(this);
     m_mainLayout->setContentsMargins(0,0,0,0);
 
