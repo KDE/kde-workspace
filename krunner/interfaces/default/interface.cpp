@@ -172,9 +172,9 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
 
     KrunnerTabFilter *krunnerTabFilter = new KrunnerTabFilter(m_resultsScene, lineEdit, this);
     m_searchTerm->installEventFilter(krunnerTabFilter);
-    m_singleRunnerSearchTerm->installEventFilter(krunnerTabFilter);
     connect(krunnerTabFilter, SIGNAL(historyRotated(QString)), this, SLOT(queryTextEdited(QString)));
     lineEdit->installEventFilter(this);
+    m_singleRunnerSearchTerm->installEventFilter(this);
 
     themeUpdated();
     connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()), this, SLOT(themeUpdated()));
