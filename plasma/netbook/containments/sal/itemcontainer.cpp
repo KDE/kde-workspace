@@ -228,6 +228,7 @@ void ItemContainer::setOrientation(Qt::Orientation orientation)
     } else {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     }
+    askRelayout();
 }
 
 Qt::Orientation ItemContainer::orientation() const
