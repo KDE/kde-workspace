@@ -473,6 +473,10 @@ void Interface::run(ResultItem *item)
         return;
     }
 
+    // We need to keep a copy of the query text before calling close(),
+    // in order to add it to history later on.
+    QString currentQuery = m_searchTerm->currentText().trimmed();
+
     m_running = true;
     // must run the result first before clearing the interface
     // in a way that will cause the results scene to be cleared and
@@ -484,7 +488,7 @@ void Interface::run(ResultItem *item)
     //TODO: check if run is succesful before adding the term to history
     // Notice that we must add items to history after calling m_resultScene->run()
     // otherwise the query result could be reset to QString() too early.
-    m_searchTerm->addToHistory(m_searchTerm->currentText().trimmed());
+    m_searchTerm->addToHistory(currentQuery);
 
     resetInterface();
 }
