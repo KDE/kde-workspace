@@ -505,6 +505,19 @@ void Battery::initExtenderItem(Plasma::ExtenderItem *item)
         m_extenderApplet->updateConstraints(Plasma::StartupCompletedConstraint);
         m_controlsLayout->addItem(m_extenderApplet, 1, 2, 2, 1);
 
+        m_profileLabel = createBuddyLabel(m_controls);
+        m_profileLabel->setText(i18n("Power Profile:"));
+        m_controlsLayout->addItem(m_profileLabel, row, 0);
+
+        m_profileCombo = new Plasma::ComboBox(m_controls);
+        // This is necessary until Qt task #217874 is fixed
+        m_profileCombo->setZValue(110);
+        connect(m_profileCombo, SIGNAL(activated(QString)),
+                this, SLOT(setProfile(QString)));
+
+        m_controlsLayout->addItem(m_profileCombo, row, 1, 1, 2);
+        row++;
+
         m_brightnessLabel = createBuddyLabel(m_controls);
 #if KDE_IS_VERSION(4, 5, 60)
         m_brightnessLabel->setText(i18n("Screen Brightness:"));
@@ -523,21 +536,6 @@ void Battery::initExtenderItem(Plasma::ExtenderItem *item)
                 this, SLOT(brightnessChanged(int)));
 
         m_controlsLayout->addItem(m_brightnessSlider, row, 1, 1, 2);
-        row++;
-
-        m_profileLabel = createBuddyLabel(m_controls);
-        m_profileLabel->setText(i18n("Power Profile:"));
-        m_controlsLayout->addItem(m_profileLabel, row, 0);
-
-
-        m_profileCombo = new Plasma::ComboBox(m_controls);
-        // This is necessary until Qt task #217874 is fixed
-        m_profileCombo->setZValue(110);
-        connect(m_profileCombo, SIGNAL(activated(QString)),
-                this, SLOT(setProfile(QString)));
-
-        m_controlsLayout->addItem(m_profileCombo, row, 1, 1, 2);
-
         row++;
 
         QGraphicsLinearLayout *buttonLayout = new QGraphicsLinearLayout;
