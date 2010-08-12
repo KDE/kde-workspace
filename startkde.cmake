@@ -36,18 +36,6 @@ fi
 # we have to unset this for Darwin since it will screw up KDE's dynamic-loading
 unset DYLD_FORCE_FLAT_NAMESPACE
 
-# Enable lightweight memory corruption checker if not already set
-# -- this is for trunk only, we remove it for releases
-if [ "x$MALLOC_CHECK_" = "x" ] && [ -x /lib/libc.so.6 ]; then
-    # Extract the first two components of the version from the output.
-    glibc_version=$(LC_ALL=C /lib/libc.so.6 | sed -e 's/[^0-9]*\([0-9]\.[0-9]\+\).*/\1/;s/\.\([0-9]\)$/.0\1/;q')
-
-    MALLOC_CHECK_=2 # Default to 2 unless glibc 2.9 or higher.
-    test $glibc_version \> 2.08 && MALLOC_CHECK_=3
-
-    export MALLOC_CHECK_
-fi
-
 # in case we have been started with full pathname spec without being in PATH
 bindir=`echo "$0" | sed -n 's,^\(/.*\)/[^/][^/]*$,\1,p'`
 if [ -n "$bindir" ]; then
@@ -405,11 +393,11 @@ fi
 # if KDEWM is not set, ksmserver will ensure kwin is started.
 # kwrapper4 is used to reduce startup time and memory usage
 # kwrapper4 does not return useful error codes such as the exit code of ksmserver.
-# We only check for 255 which means that the ksmserver process could not be 
-# started, any problems thereafter, e.g. ksmserver failing to initialize, 
+# We only check for 255 which means that the ksmserver process could not be
+# started, any problems thereafter, e.g. ksmserver failing to initialize,
 # will remain undetected.
 test -n "$KDEWM" && KDEWM="--windowmanager $KDEWM"
-kwrapper4 ksmserver $KDEWM 
+kwrapper4 ksmserver $KDEWM
 if test $? -eq 255; then
   # Startup error
   echo 'startkde: Could not start ksmserver. Check your installation.'  1>&2
