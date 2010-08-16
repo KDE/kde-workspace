@@ -19,6 +19,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
+#include "config-workspace.h"
+
 #include "statusnotifieritemsource.h"
 #include "systemtraytypes.h"
 #include "statusnotifieritemservice.h"
@@ -41,6 +43,7 @@
 
 #include <netinet/in.h>
 
+#ifdef HAVE_DBUSMENUQT
 #include <dbusmenuimporter.h>
 #ifndef DBUSMENUQT_VERSION
 // DBUSMENUQT_VERSION was introduced in DBusMenuQt 0.4.0
@@ -64,6 +67,7 @@ protected:
 private:
     KIconLoader *m_iconLoader;
 };
+#endif // HAVE_DBUSMENUQT
 
 StatusNotifierItemSource::StatusNotifierItemSource(const QString &notifierItemId, QObject *parent)
     : Plasma::DataContainer(parent),
@@ -328,6 +332,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
             }
         }
 
+#ifdef HAVE_DBUSMENUQT
         //Menu
         if (!m_menuImporter) {
             QString menuObjectPath = properties["Menu"].value<QDBusObjectPath>().path();
@@ -345,6 +350,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
                 }
             }
         }
+#endif // HAVE_DBUSMENUQT
     }
 
     checkForUpdate();
@@ -353,6 +359,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
 
 void StatusNotifierItemSource::contextMenuReady()
 {
+#ifdef HAVE_DBUSMENUQT
 #if DBUSMENUQT_VERSION < 0x000400
     // Work around to avoid infinite recursion because menuReadyToBeShown() is emitted
     // by DBusMenuImporter at the end of its slot connected to aboutToShow()
@@ -360,6 +367,7 @@ void StatusNotifierItemSource::contextMenuReady()
     disconnect(m_menuImporter, SIGNAL(menuReadyToBeShown()), this, SLOT(contextMenuReady()));
 #endif
     emit contextMenuReady(m_menuImporter->menu());
+#endif // HAVE_DBUSMENUQT
 }
 
 QPixmap StatusNotifierItemSource::KDbusImageStructToPixmap(const KDbusImageStruct &image) const
@@ -461,6 +469,7 @@ void StatusNotifierItemSource::scroll(int delta, const QString &direction)
 void StatusNotifierItemSource::contextMenu(int x, int y)
 {
     if (m_menuImporter) {
+#ifdef HAVE_DBUSMENUQT
     #if DBUSMENUQT_VERSION >= 0x000400
         m_menuImporter->updateMenu();
     #else
@@ -471,6 +480,7 @@ void StatusNotifierItemSource::contextMenu(int x, int y)
         connect(m_menuImporter, SIGNAL(menuReadyToBeShown()), this, SLOT(contextMenuReady()));
         QMetaObject::invokeMethod(menu, "aboutToShow");
     #endif
+#endif // HAVE_DBUSMENUQT
     } else {
         kWarning() << "Could not find DBusMenu interface, falling back to calling ContextMenu()";
         if (m_statusNotifierItemInterface && m_statusNotifierItemInterface->isValid()) {

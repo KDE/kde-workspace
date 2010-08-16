@@ -147,3 +147,6 @@
 
 /* type to use in place of socklen_t if not defined */
 #define kde_socklen_t socklen_t
+
+/* Defined to 1 if you have the dbusmenuqt library */
+#cmakedefine HAVE_DBUSMENUQT 1

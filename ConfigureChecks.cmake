@@ -64,6 +64,7 @@ check_function_exists(statfs HAVE_STATFS)
 macro_bool_to_01(FONTCONFIG_FOUND HAVE_FONTCONFIG) # kcontrol/{fonts,kfontinst}
 macro_bool_to_01(FREETYPE_FOUND HAVE_FREETYPE) # kcontrol/fonts
 macro_bool_to_01(OPENGL_FOUND HAVE_OPENGL) # kwin
+macro_bool_to_01(DBUSMENUQT_FOUND HAVE_DBUSMENUQT) # plasma/dataengine/statusnotifieritem
 macro_bool_to_01(X11_XShm_FOUND HAVE_XSHM) # kwin, ksplash
 macro_bool_to_01(X11_XTest_FOUND HAVE_XTEST) # khotkeys, kxkb, kdm
 macro_bool_to_01(X11_Xcomposite_FOUND HAVE_XCOMPOSITE) # kicker, kwin
