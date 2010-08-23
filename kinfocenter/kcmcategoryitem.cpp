@@ -24,7 +24,6 @@
 
 KcmCategoryItem::KcmCategoryItem(const KService::Ptr module, KcmTreeItem *parent) : 
   KcmTreeItem(module, parent), 
-  m_category(NULL) 
 {
 }
 
