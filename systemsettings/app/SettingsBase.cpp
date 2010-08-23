@@ -193,6 +193,7 @@ void SettingsBase::initMenuList(MenuItem * parent)
     // look for any categories inside this level, and recurse into them
     for (int i = 0; i < categories.size(); ++i) {
         const KService::Ptr entry = categories.at(i);
+        const QString parentCategory = entry->property("X-KDE-System-Settings-Parent-Category").toString();
         const QString parentCategory2 = entry->property("X-KDE-System-Settings-Parent-Category-V2").toString();
         if ( parentCategory == parent->category() ||
              // V2 entries must not be empty if they want to become a proper category.
