@@ -23,7 +23,7 @@
 #include "kcmcategoryitem.h"
 
 KcmCategoryItem::KcmCategoryItem(const KService::Ptr module, KcmTreeItem *parent) : 
-  KcmTreeItem(module, parent), 
+  KcmTreeItem(module, parent)
 {
 }
 
