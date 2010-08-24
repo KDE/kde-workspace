@@ -5,7 +5,11 @@ X-KDE-KInfoCenter-Category=graphical_information
 Icon=folder-documents
 
 Name=Graphical Information
+Name[da]=Grafikinformation
 Name[it]=Informazioni grafiche
+Name[nds]=Graafsche Informatschonen
+Name[nl]=Grafische informatie
 Name[sv]=Grafisk information
 Name[uk]=Графічна інформація
 Name[x-test]=xxGraphical Informationxx
+Name[zh_TW]=圖形資訊

@@ -2,10 +2,14 @@
 Type=ServiceType
 X-KDE-ServiceType=KInfoCenterCategory
 Name=KInfoCenter Category
+Name[da]=KInfoCenter-kategori
 Name[it]=Categoria del centro d'informazione
+Name[nds]=Kategorie binnen dat KDE-Infozentrum
+Name[nl]=Categorie KInfoCenter
 Name[sv]=Kategori i informationscentralen
 Name[uk]=Категорія KInfoCenter
 Name[x-test]=xxKInfoCenter Categoryxx
+Name[zh_TW]=KInfoCenter 類別
 
 # Cat Ident
 [PropertyDef::X-KDE-KInfoCenter-Category]
