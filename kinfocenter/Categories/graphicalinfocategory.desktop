@@ -6,9 +6,11 @@ Icon=folder-documents
 
 Name=Graphical Information
 Name[da]=Grafikinformation
+Name[et]=Monitoriteave
+Name[ga]=Faisnéis Ghrafach
 Name[it]=Informazioni grafiche
-Name[nds]=Graafsche Informatschonen
 Name[nl]=Grafische informatie
+Name[pt]=Informação Gráfica
 Name[sv]=Grafisk information
 Name[uk]=Графічна інформація
 Name[x-test]=xxGraphical Informationxx
