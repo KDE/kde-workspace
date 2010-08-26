@@ -1350,15 +1350,19 @@ namespace Oxygen
         {
 
             TileSet *tileSet( 0 );
-            QColor background( backgroundPalette( widget(), palette ).window().color() );
             ShadowCache::Key key( this->key() );
             if( configuration().useOxygenShadows() && glowIsAnimated() && !isForcedActive() )
             {
 
-                //tileSet = shadowCache().tileSet( this, glowIntensity() );
+                QColor background( backgroundPalette( widget(), palette ).window().color() );
                 tileSet = shadowCache().tileSet( background, key, glowIntensity() );
 
-            } else tileSet = shadowCache().tileSet( background, key );
+            } else {
+
+                QColor background( backgroundColor( widget(), palette ) );
+                tileSet = shadowCache().tileSet( background, key );
+
+            }
 
             if( !isMaximized() ) tileSet->render( frame.adjusted( 4, 4, -4, -4), &painter, TileSet::Ring);
             else if( isShade() ) tileSet->render( frame.adjusted( 0, 4, 0, -4), &painter, TileSet::Bottom);
