@@ -5,7 +5,9 @@ X-KDE-KInfoCenter-Category=network_information
 Icon=folder-documents
 
 Name=Network Information
+Name[ca]=Informació de la xarxa
 Name[da]=Netværksinformation
+Name[de]=Netzwerkinformationen
 Name[es]=Información de la red
 Name[et]=Võrguteave
 Name[ga]=Faisnéis Líonra
