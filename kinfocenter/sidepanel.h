@@ -64,7 +64,7 @@ class SidePanel : public QTreeView
     /** 
     * Map a QAbstractItemModel index to a QSortFilterProxyModel index
     */
-    QModelIndex mapToProxySource(QModelIndex);
+    QModelIndex mapToProxySource(const QModelIndex&);
 
     // void filterSideMenu(QString);
 
