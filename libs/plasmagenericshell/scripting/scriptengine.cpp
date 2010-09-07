@@ -336,6 +336,10 @@ void ScriptEngine::setupEngine()
 
 bool ScriptEngine::isPanel(const Plasma::Containment *c)
 {
+    if (!c) {
+        return false;
+    }
+
     return c->containmentType() == Plasma::Containment::PanelContainment ||
            c->containmentType() == Plasma::Containment::CustomPanelContainment;
 }
