@@ -4467,7 +4467,7 @@ namespace Oxygen
         Q_UNUSED( opt );
         Q_UNUSED( kOpt );
 
-        if( const QAbstractItemView *aiv = qobject_cast<const QAbstractItemView*>(widget) )
+        if( qobject_cast<const QAbstractItemView*>(widget) )
         {
             if( OxygenStyleConfigData::viewDrawFocusIndicator() )
             {
