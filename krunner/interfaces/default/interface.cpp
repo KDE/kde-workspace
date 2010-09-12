@@ -530,8 +530,13 @@ void Interface::delayedQueryLaunch()
     if (m_runnerManager->singleMode()) {
         runnerId = m_runnerManager->singleModeRunnerId();
     }
+
     if (!query.isEmpty() || m_runnerManager->singleMode()) {
         m_queryRunning = m_resultsScene->launchQuery(query, runnerId) || m_queryRunning; //lazy OR?
+    }
+
+    if (!m_queryRunning && m_delayedRun) {
+        runDefaultResultItem();
     }
 }
 
