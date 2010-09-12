@@ -87,7 +87,7 @@ namespace Oxygen
 
         //! animation opacity
         virtual void setOpacity( qreal value )
-        { opacity_ = value; }
+        { opacity_ = digitize( value ); }
 
         //! animation progress
         virtual qreal progress( void ) const
@@ -95,7 +95,7 @@ namespace Oxygen
 
         //! animation progress
         virtual void setProgress( qreal value )
-        { progress_ = value; }
+        { progress_ = digitize( value ); }
 
         protected slots:
 

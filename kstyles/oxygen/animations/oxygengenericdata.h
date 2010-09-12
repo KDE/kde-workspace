@@ -68,7 +68,7 @@ namespace Oxygen
 
         //! opacity
         virtual void setOpacity( qreal value )
-        { opacity_ = value; }
+        { opacity_ = digitize( value ); }
 
         private:
 

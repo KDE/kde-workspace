@@ -70,7 +70,7 @@ namespace Oxygen
 
         //! current opacity
         virtual void setCurrentOpacity( qreal value )
-        { current_.opacity_ = value; }
+        { current_.opacity_ = digitize( value ); }
 
         //! current index
         virtual int currentIndex( void ) const
@@ -95,7 +95,7 @@ namespace Oxygen
 
         //! previous opacity
         virtual void setPreviousOpacity( qreal value )
-        { previous_.opacity_ = value; }
+        { previous_.opacity_ = digitize( value ); }
 
         //! previous index
         virtual int previousIndex( void ) const

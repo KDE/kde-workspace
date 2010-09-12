@@ -7,11 +7,14 @@
   <group name="Style"> 
     
     <!-- cache size -->
-    <entry name="MaxCacheSize" type = "Int" >
-       <default>100</default>
+    <entry name="MaxCacheSize" type = "Int">
+       <default>512</default>
+    </entry>
+    <entry name="AnimationSteps" type = "Int">
+       <default>10</default>
     </entry>
 
-    <entry name="ToolTipTransparent" type = "Bool" >
+    <entry name="ToolTipTransparent" type = "Bool">
        <default>true</default>
     </entry>
     <entry name="ToolTipDrawStyledFrames" type = "Bool">

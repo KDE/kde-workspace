@@ -93,7 +93,7 @@ namespace Oxygen
 
         //! opacity
         void setUpArrowOpacity( qreal value )
-        { upArrowData_.opacity_ = value; }
+        { upArrowData_.opacity_ = digitize( value ); }
 
         //! animation
         Animation::Pointer upArrowAnimation( void ) const
@@ -110,7 +110,7 @@ namespace Oxygen
 
         //! opacity
         void setDownArrowOpacity( qreal value )
-        { downArrowData_.opacity_ = value; }
+        { downArrowData_.opacity_ = digitize( value ); }
 
         //! animation
         Animation::Pointer downArrowAnimation( void ) const

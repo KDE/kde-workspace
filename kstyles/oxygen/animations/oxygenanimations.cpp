@@ -66,6 +66,9 @@ namespace Oxygen
     void Animations::setupEngines( void )
     {
 
+        // animation steps
+        AnimationData::setSteps( OxygenStyleConfigData::animationSteps() );
+
         {
             // default enability, duration and maxFrame
             bool animationsEnabled( OxygenStyleConfigData::animationsEnabled() );

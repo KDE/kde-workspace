@@ -121,7 +121,7 @@ namespace Oxygen
 
         //! current opacity
         virtual void setCurrentOpacity( qreal value )
-        { current_.opacity_ = value; }
+        { current_.opacity_ = digitize( value ); }
 
         //! current rect
         virtual const QRect& currentRect( void ) const
@@ -133,7 +133,7 @@ namespace Oxygen
 
         //! previous opacity
         virtual void setPreviousOpacity( qreal value )
-        { previous_.opacity_ = value; }
+        { previous_.opacity_ = digitize( value ); }
 
         //! previous rect
         virtual const QRect& previousRect( void ) const
@@ -293,7 +293,7 @@ namespace Oxygen
 
         //! animation opacity
         virtual void setOpacity( qreal value )
-        { opacity_ = value; }
+        { opacity_ = digitize( value ); }
 
         //! animation progress
         virtual qreal progress( void ) const
@@ -301,7 +301,7 @@ namespace Oxygen
 
         //! animation progress
         virtual void setProgress( qreal value )
-        { progress_ = value; }
+        { progress_ = digitize( value ); }
 
         protected slots:
 

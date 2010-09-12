@@ -88,7 +88,7 @@ namespace Oxygen
 
         //! opacity
         void setCurrentOpacity( qreal value )
-        { currentData_.opacity_ = value; }
+        { currentData_.opacity_ = digitize( value ); }
 
         //! animation
         Animation::Pointer currentAnimation( void ) const
@@ -104,7 +104,7 @@ namespace Oxygen
 
         //! opacity
         void setPreviousOpacity( qreal value )
-        { previousData_.opacity_ = value; }
+        { previousData_.opacity_ = digitize( value ); }
 
         //! animation
         Animation::Pointer previousAnimation( void ) const

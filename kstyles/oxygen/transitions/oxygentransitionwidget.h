@@ -31,6 +31,8 @@
 #include <QtCore/QWeakPointer>
 #include <QtGui/QWidget>
 
+#include <cmath>
+
 namespace Oxygen
 {
 
@@ -92,6 +94,10 @@ namespace Oxygen
         int duration( void ) const
         { return ( animation_ ) ? animation_.data()->duration() : 0; }
 
+        //! steps
+        static void setSteps( int value )
+        { steps_ = value; }
+
         //!@name opacity
         //@{
 
@@ -99,7 +105,7 @@ namespace Oxygen
         { return opacity_; }
 
         virtual void setOpacity( qreal value )
-        { opacity_ = value; }
+        { opacity_ = digitize( value ); }
 
         //@}
 
@@ -190,6 +196,13 @@ namespace Oxygen
         //! fade pixmap
         virtual void fade( const QPixmap& source, QPixmap& target, qreal opacity, const QRect& ) const;
 
+        //! apply step
+        virtual qreal digitize( const qreal& value ) const
+        {
+            if( steps_ > 0 ) return std::floor( value*steps_ )/steps_;
+            else return value;
+        }
+
         private:
 
         //! Flags
@@ -218,6 +231,9 @@ namespace Oxygen
 
         //! current state opacity
         qreal opacity_;
+
+        //! steps
+        static int steps_;
 
     };
 

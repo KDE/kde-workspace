@@ -91,7 +91,7 @@ namespace Oxygen
         { return horizontalData_.opacity_; }
 
         void setHorizontalOpacity( qreal value )
-        { horizontalData_.opacity_ = value; }
+        { horizontalData_.opacity_ = digitize( value ); }
 
         //@}
 
@@ -112,7 +112,7 @@ namespace Oxygen
         { return verticalData_.opacity_; }
 
         void setVerticalOpacity( qreal value )
-        { verticalData_.opacity_ = value; }
+        { verticalData_.opacity_ = digitize( value ); }
 
         //@}
 
