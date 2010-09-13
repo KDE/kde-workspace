@@ -101,7 +101,6 @@ Pager::Pager(QObject *parent, const QVariantList &args)
       m_colorScheme(0),
       m_verticalFormFactor(false),
       m_dragId(0),
-      m_dirtyDesktop(-1),
       m_dragStartDesktop(-1),
       m_dragHighlightedDesktop(-1),
       m_dragSwitchDesktop(-1),
@@ -642,7 +641,6 @@ void Pager::currentDesktopChanged(int desktop)
     }
 
     m_currentDesktop = desktop;
-    m_dirtyDesktop = -1;
     m_desktopDown = false;
 
     if (!m_timer->isActive()) {
@@ -652,11 +650,6 @@ void Pager::currentDesktopChanged(int desktop)
 
 void Pager::windowAdded(WId id)
 {
-    Q_UNUSED(id)
-
-    KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMGeometry | NET::WMFrameExtents | NET::WMWindowType | NET::WMDesktop | NET::WMState | NET::XAWMState);
-    m_dirtyDesktop = info.desktop() - 1;
-
     if (!m_timer->isActive()) {
         m_timer->start(FAST_UPDATE_DELAY);
     }
@@ -667,7 +660,6 @@ void Pager::windowRemoved(WId id)
     Q_UNUSED(id)
 
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMGeometry | NET::WMFrameExtents | NET::WMWindowType | NET::WMDesktop | NET::WMState | NET::XAWMState);
-    m_dirtyDesktop = info.desktop() - 1;
 
     if (!m_timer->isActive()) {
         m_timer->start(FAST_UPDATE_DELAY);
@@ -679,7 +671,6 @@ void Pager::activeWindowChanged(WId id)
     Q_UNUSED(id)
 
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMGeometry | NET::WMFrameExtents | NET::WMWindowType | NET::WMDesktop | NET::WMState | NET::XAWMState);
-    m_dirtyDesktop = info.desktop() - 1;
 
     if (!m_timer->isActive()) {
         m_timer->start(FAST_UPDATE_DELAY);
@@ -697,7 +688,6 @@ void Pager::numberOfDesktopsChanged(int num)
     m_addDesktopAction->setEnabled(num < MAXDESKTOPS);
 #endif
 
-    m_dirtyDesktop = -1;
     m_desktopCount = num;
 
     m_rects.clear();
@@ -707,8 +697,6 @@ void Pager::numberOfDesktopsChanged(int num)
 
 void Pager::desktopNamesChanged()
 {
-    m_dirtyDesktop = -1;
-
     m_rects.clear();
     recalculateGeometry();
 
@@ -719,8 +707,6 @@ void Pager::desktopNamesChanged()
 
 void Pager::stackingOrderChanged()
 {
-    m_dirtyDesktop = -1;
-
     if (!m_timer->isActive()) {
         m_timer->start(FAST_UPDATE_DELAY);
     }
@@ -729,13 +715,6 @@ void Pager::stackingOrderChanged()
 void Pager::windowChanged(WId id, unsigned int properties)
 {
     Q_UNUSED(id)
-
-    if (properties & NET::WMGeometry) {
-        KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMGeometry | NET::WMFrameExtents | NET::WMWindowType | NET::WMDesktop | NET::WMState | NET::XAWMState);
-        m_dirtyDesktop = info.desktop() - 1;
-    } else {
-        m_dirtyDesktop = -1;
-    }
 
     if (properties & NET::WMGeometry ||
         properties & NET::WMDesktop) {
@@ -747,8 +726,6 @@ void Pager::windowChanged(WId id, unsigned int properties)
 
 void Pager::showingDesktopChanged(bool showing)
 {
-    m_dirtyDesktop = -1;
-
     Q_UNUSED(showing)
     if (!m_timer->isActive()) {
         m_timer->start(UPDATE_DELAY);
@@ -757,8 +734,6 @@ void Pager::showingDesktopChanged(bool showing)
 
 void Pager::desktopsSizeChanged()
 {
-    m_dirtyDesktop = -1;
-
     m_rects.clear();
     recalculateGeometry();
 
