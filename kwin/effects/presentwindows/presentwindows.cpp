@@ -325,7 +325,11 @@ void PresentWindowsEffect::paintWindow( EffectWindow *w, int mask, QRegion regio
             {
             m_motionManager.apply( w, data );
 
-            effects->paintWindow( w, mask | PAINT_WINDOW_LANCZOS, region, data );
+            if( !m_motionManager.areWindowsMoving() )
+                {
+                mask |= PAINT_WINDOW_LANCZOS;
+                }
+            effects->paintWindow( w, mask, region, data );
 
             QRect rect = m_motionManager.transformedGeometry( w ).toRect();
             if( m_showIcons )
