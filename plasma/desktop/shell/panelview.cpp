@@ -1421,6 +1421,7 @@ void PanelView::unhide(bool destroyTrigger)
     //avoid hide-show loops
     if (m_visibilityMode == LetWindowsCover) {
         m_triggerEntered = true;
+        KWindowSystem::clearState(winId(), NET::KeepBelow);
         KWindowSystem::raiseWindow(winId());
         QTimer::singleShot(0, this, SLOT(resetTriggerEnteredSuppression()));
     }
@@ -1472,6 +1473,7 @@ void PanelView::startAutoHide()
     }
 
     if (m_visibilityMode == LetWindowsCover) {
+        KWindowSystem::setState(winId(), NET::KeepBelow);
         KWindowSystem::lowerWindow(winId());
         createUnhideTrigger();
     } else {
