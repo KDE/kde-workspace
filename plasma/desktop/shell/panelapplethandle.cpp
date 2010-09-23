@@ -92,6 +92,10 @@ void PanelAppletHandle::setApplet(Plasma::Applet *applet)
         moveToApplet();
         return;
     }
+    Plasma::Applet *oldApplet = m_applet.data();
+    if (oldApplet) {
+        disconnect(oldApplet, SIGNAL(destroyed()), this, SLOT(appletDestroyed()));
+    }
 
     m_applet = applet;
     m_hideTimer->stop();
@@ -111,6 +115,8 @@ void PanelAppletHandle::setApplet(Plasma::Applet *applet)
 
         QAction *configAction = applet->action("configure");
         m_configureButton->setVisible(configAction && configAction->isEnabled());
+
+        connect(applet, SIGNAL(destroyed()), this, SLOT(appletDestroyed()));
 
         moveToApplet();
     }
@@ -138,23 +144,36 @@ void PanelAppletHandle::moveToApplet()
 void PanelAppletHandle::startHideTimeout()
 {
     m_hideTimer->start(800);
-    if (m_applet) {
-        Plasma::WindowEffects::slideWindow(this, m_applet.data()->location());
+    Plasma::Applet *applet = m_applet.data();
+    if (applet) {
+        Plasma::WindowEffects::slideWindow(this, applet->location());
     }
 }
 
 void PanelAppletHandle::configureApplet()
 {
-    if (m_applet) {
-        m_applet.data()->showConfigurationInterface();
+    Plasma::Applet *applet = m_applet.data();
+    if (applet) {
+        applet->showConfigurationInterface();
     }
 }
 
 void PanelAppletHandle::closeApplet()
 {
-    if (m_applet) {
-        m_applet.data()->destroy();
+    Plasma::Applet *applet = m_applet.data();
+    if (applet) {
+        applet->destroy();
     }
+}
+
+void PanelAppletHandle::appletDestroyed()
+{
+    Plasma::Applet *applet = m_applet.data();
+    if (applet) {
+        disconnect(applet, SIGNAL(destroyed()), this, SLOT(appletDestroyed()));
+        m_applet.clear();
+    }
+    hide();
 }
 
 void PanelAppletHandle::enterEvent(QEvent *event)
@@ -173,17 +192,26 @@ void PanelAppletHandle::leaveEvent(QEvent *event)
 
 void PanelAppletHandle::mousePressEvent(QMouseEvent *event)
 {
-    emit mousePressed(m_applet.data(), event);
+    Plasma::Applet *applet = m_applet.data();
+    if (applet) {
+        emit mousePressed(applet, event);
+    }
 }
 
 void PanelAppletHandle::mouseMoveEvent(QMouseEvent *event)
 {
-    emit mouseMoved(m_applet.data(), event);
+    Plasma::Applet *applet = m_applet.data();
+    if (applet) {
+        emit mouseMoved(applet, event);
+    }
 }
 
 void PanelAppletHandle::mouseReleaseEvent(QMouseEvent *event)
 {
-    emit mouseReleased(m_applet.data(), event);
+    Plasma::Applet *applet = m_applet.data();
+    if (applet) {
+        emit mouseReleased(applet, event);
+    }
 }
 
 
