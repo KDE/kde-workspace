@@ -167,7 +167,7 @@ void Pager::init()
 
     connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()), this, SLOT(themeRefresh()));
 
-    recalculateGeometry();
+    recalculateGridSizes(m_rows);
 
     m_currentDesktop = KWindowSystem::currentDesktop();
 }
@@ -179,42 +179,38 @@ Pager::~Pager()
 
 void Pager::constraintsEvent(Plasma::Constraints constraints)
 {
-    // whenever we switch to/from vertical form factor, swap the rows and columns around
-    if (constraints & Plasma::FormFactorConstraint) {
-        if (m_verticalFormFactor != (formFactor() == Plasma::Vertical) && m_columns != m_rows) {
-            int temp = m_columns;
-            m_columns = m_rows;
-            m_rows = temp;
-
-            // save this new value in the global config
-            KConfigGroup globalcg = globalConfig();
-            if (m_rows > m_desktopCount) {
-              m_rows = m_desktopCount;
-            }
-            globalcg.writeEntry("rows", m_rows);
-            configNeedsSaving();
-            m_columns = 0;
-            m_size = QSizeF(-1, -1);
-            // no need to recalculate everything twice
-            if (!(constraints & Plasma::SizeConstraint)) {
-                recalculateGeometry();
-                recalculateWindowRects();
-                update();
-            }
-        }
-        m_verticalFormFactor = (formFactor() == Plasma::Vertical);
-    }
-
     if (constraints & Plasma::SizeConstraint) {
-        recalculateGeometry();
-        recalculateWindowRects();
+        // no need to update everything twice (if we are going to flip rows and columns later)
+        if (!(constraints & Plasma::FormFactorConstraint) ||
+             m_verticalFormFactor == (formFactor() == Plasma::Vertical) ||
+             m_columns == m_rows) {
+            // use m_ignoreNextSizeConstraint to decide whether to try to resize the plasmoid again
+            updateSizes(!m_ignoreNextSizeConstraint);
+            m_ignoreNextSizeConstraint = !m_ignoreNextSizeConstraint;
+
+            recalculateWindowRects();
+        }
+
         if (m_background->hasElementPrefix(QString())) {
             m_background->setElementPrefix(QString());
             m_background->resizeFrame(size());
         }
+        update();
     }
 
     if (constraints & Plasma::FormFactorConstraint) {
+
+        if (m_verticalFormFactor != (formFactor() == Plasma::Vertical)) {
+            m_verticalFormFactor = (formFactor() == Plasma::Vertical);
+            // whenever we switch to/from vertical form factor, swap the rows and columns around
+            if (m_columns != m_rows) {
+                // pass in columns as the new rows
+                recalculateGridSizes(m_columns);
+                recalculateWindowRects();
+                update();
+            }
+        }
+
         if (formFactor() == Plasma::Horizontal) {
             setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
             setMinimumSize(preferredSize().width(), 0);
@@ -327,36 +323,71 @@ void Pager::createConfigurationInterface(KConfigDialog *parent)
     }
 }
 
-void Pager::recalculateGeometry()
+void Pager::recalculateGridSizes(int rows)
 {
-    int padding = 2; // Space between miniatures of desktops
-    int textMargin = 3; // Space between name of desktop and border
-    int rows = qMax(qMin(m_rows, m_desktopCount), 1);
+    // recalculate the number of rows and columns in the grid
+    rows = qBound(1, rows, m_desktopCount);
+    // avoid weird cases like having 3 rows for 4 desktops, where the last row is unused
     int columns = m_desktopCount / rows;
     if (m_desktopCount % rows > 0) {
         columns++;
     }
+    rows = m_desktopCount / columns;
+    if (m_desktopCount % columns > 0) {
+        rows++;
+    }
+
+    // update the grid size
+    if (m_rows != rows || m_columns != columns) {
+        m_rows = rows;
+        m_columns = columns;
+
+        // write the new number of rows to the config
+        globalConfig().writeEntry("rows", m_rows);
+        emit configNeedsSaving();
+
+        if (m_desktopLayoutOwner) {
+            // must own manager selection before setting global desktop layout
+            NET::Orientation orient = NET::OrientationHorizontal;
+            NETRootInfo info(QX11Info::display(), 0);
+            info.setDesktopLayout(orient, columns, rows, NET::DesktopLayoutCornerTopLeft);
+        }
+    }
+
+    updateSizes(true);
+}
+
+void Pager::updateSizes(bool allowResize)
+{
+    int padding = 2; // Space between miniatures of desktops
+    int textMargin = 3; // Space between name of desktop and border
 
     qreal leftMargin = 0;
     qreal topMargin = 0;
     qreal rightMargin = 0;
     qreal bottomMargin = 0;
 
-    qreal ratio = (qreal)Kephal::ScreenUtils::desktopGeometry().width() / (qreal)Kephal::ScreenUtils::desktopGeometry().height();
+    qreal ratio = (qreal) Kephal::ScreenUtils::desktopGeometry().width() /
+                  (qreal) Kephal::ScreenUtils::desktopGeometry().height();
 
+    // calculate the margins
     if (formFactor() == Plasma::Vertical || formFactor() == Plasma::Horizontal) {
         m_background->setElementPrefix(QString());
         m_background->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
 
         if (formFactor() == Plasma::Vertical) {
-            qreal optimalSize = (geometry().width() - KIconLoader::SizeSmall*ratio * columns - padding*(columns-1)) / 2;
+            qreal optimalSize = (geometry().width() -
+                                 KIconLoader::SizeSmall * ratio * m_columns -
+                                 padding * (m_columns - 1)) / 2;
 
             if (optimalSize < leftMargin || optimalSize < rightMargin) {
                 leftMargin = rightMargin = qMax(qreal(0), optimalSize);
                 m_showOwnBackground = false;
             }
         } else if (formFactor() == Plasma::Horizontal) {
-            qreal optimalSize = (geometry().height() - KIconLoader::SizeSmall*rows - padding*(rows-1)) / 2;
+            qreal optimalSize = (geometry().height() -
+                                 KIconLoader::SizeSmall * m_rows -
+                                 padding * (m_rows - 1)) / 2;
 
             if (optimalSize < topMargin || optimalSize < bottomMargin) {
                 topMargin = bottomMargin = qMax(qreal(0), optimalSize);
@@ -375,10 +406,12 @@ void Pager::recalculateGeometry()
 
     if (formFactor() == Plasma::Vertical) {
         // work out the preferred size based on the width of the contentsRect
-        preferredItemWidth = (contentsRect().width() - leftMargin - rightMargin - padding * (columns - 1)) / columns;
+        preferredItemWidth = (contentsRect().width() - leftMargin - rightMargin -
+                              padding * (m_columns - 1)) / m_columns;
         preferredItemHeight = preferredItemWidth / ratio;
         // make sure items of the new size actually fit in the current contentsRect
-        itemHeight = (contentsRect().height() - topMargin - bottomMargin - padding * (rows - 1)) / rows;
+        itemHeight = (contentsRect().height() - topMargin - bottomMargin -
+                      padding * (m_rows - 1)) / m_rows;
         if (itemHeight > preferredItemHeight) {
             itemHeight = preferredItemHeight;
         }
@@ -389,9 +422,10 @@ void Pager::recalculateGeometry()
     } else {
         // work out the preferred size based on the height of the contentsRect
         if (formFactor() == Plasma::Horizontal) {
-            preferredItemHeight = (contentsRect().height() - topMargin - bottomMargin - padding * (rows - 1)) / rows;
+            preferredItemHeight = (contentsRect().height() - topMargin - bottomMargin -
+                                   padding * (m_rows - 1)) / m_rows;
         } else {
-            preferredItemHeight = (contentsRect().height() - padding * (rows - 1)) / rows;
+            preferredItemHeight = (contentsRect().height() - padding * (m_rows - 1)) / m_rows;
         }
         preferredItemWidth = preferredItemHeight * ratio;
 
@@ -409,9 +443,10 @@ void Pager::recalculateGeometry()
 
         // make sure items of the new size actually fit in the current contentsRect
         if (formFactor() == Plasma::Horizontal) {
-            itemWidth = (contentsRect().width() - leftMargin - rightMargin - padding * (columns - 1)) / columns;
+            itemWidth = (contentsRect().width() - leftMargin - rightMargin -
+                         padding * (m_columns - 1)) / m_columns;
         } else {
-            itemWidth = (contentsRect().width() - padding * (columns - 1)) / columns;
+            itemWidth = (contentsRect().width() - padding * (m_columns - 1)) / m_columns;
         }
         if (itemWidth > preferredItemWidth) {
             itemWidth = preferredItemWidth;
@@ -432,8 +467,8 @@ void Pager::recalculateGeometry()
 
     QRectF itemRect(QPoint(leftMargin, topMargin) , QSize(floor(itemWidth), floor(itemHeight)));
     for (int i = 0; i < m_desktopCount; i++) {
-        itemRect.moveLeft(leftMargin + floor(i % columns  * (itemWidth + padding)));
-        itemRect.moveTop(topMargin + floor(i / columns * (itemHeight + padding)));
+        itemRect.moveLeft(leftMargin + floor((i % m_columns)  * (itemWidth + padding)));
+        itemRect.moveTop(topMargin + floor((i / m_columns) * (itemHeight + padding)));
         m_rects.append(itemRect);
         m_animations.append(new DesktopRectangle(this));
     }
@@ -458,13 +493,17 @@ void Pager::recalculateGeometry()
         m_background->resizeFrame(itemRect.size());
     }
 
-    // allow ignored resizes only if the height has changed (or if the width has changed if we are in a vertical panel)
-    if (!m_ignoreNextSizeConstraint || (formFactor() != Plasma::Vertical && contentsRect().height() != m_size.height())
-                                    || (formFactor() == Plasma::Vertical && contentsRect().width()  != m_size.width())) {
+    // do not try to resize unless the caller has allowed it,
+    // or the height has changed (or the width has changed in a vertical panel)
+    if (allowResize ||
+        (formFactor() != Plasma::Vertical && contentsRect().height() != m_size.height()) ||
+        (formFactor() == Plasma::Vertical && contentsRect().width()  != m_size.width())) {
 
         // this new size will have the same height/width as the horizontal/vertical panel has given it
-        QSizeF preferred = QSizeF(ceil(columns * preferredItemWidth + padding * (columns - 1) + leftMargin + rightMargin),
-                                  ceil(rows * preferredItemHeight + padding * (rows - 1) + topMargin + bottomMargin));
+        QSizeF preferred = QSizeF(ceil(m_columns * preferredItemWidth + padding * (m_columns - 1) +
+                                       leftMargin + rightMargin),
+                                  ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) +
+                                       topMargin + bottomMargin));
 
         //kDebug() << "current size:" << contentsRect() << " new preferred size: " << preferred << " form factor:" << formFactor() << " grid:" << m_rows << "x" << m_columns <<
         //            " actual grid:" << rows << "x" << columns << " item size:" << itemWidth << "x" << itemHeight << " preferred item size:" << preferredItemWidth << "x" << preferredItemHeight;
@@ -472,27 +511,10 @@ void Pager::recalculateGeometry()
         // make sure the minimum size is smaller than preferred
         setMinimumSize(qMin(preferred.width(),  minimumSize().width()),
                        qMin(preferred.height(), minimumSize().height()));
-        //resize(m_size);
         setPreferredSize(preferred);
-
-        m_ignoreNextSizeConstraint = true;
-    } else {
-        m_ignoreNextSizeConstraint = false;
-        //kDebug() << "ignoring event - current size:" << contentsRect() << " form factor:" << formFactor() << " grid:" << m_rows << "x" << m_columns <<
-        //            " actual grid:" << rows << "x" << columns << " item size:" << itemWidth << "x" << itemHeight << " preferred item size:" << preferredItemWidth << "x" << preferredItemHeight;
     }
 
     m_size = contentsRect().size();
-
-    if (columns != m_columns) {
-        m_columns = columns;
-        if (m_desktopLayoutOwner) {
-            // must own manager selection before setting global desktop layout
-            NET::Orientation orient = NET::OrientationHorizontal;
-            NETRootInfo i( QX11Info::display(), 0 );
-            i.setDesktopLayout( orient, columns, rows, NET::DesktopLayoutCornerTopLeft );
-        }
-    }
 }
 
 void Pager::recalculateWindowRects()
@@ -624,11 +646,11 @@ void Pager::configAccepted()
     }
 
     if (changed) {
-        configNeedsSaving();
+        emit configNeedsSaving();
         // force an update
         m_columns = 0;
         m_size = QSizeF(-1, -1);
-        recalculateGeometry();
+        recalculateGridSizes(m_rows);
         recalculateWindowRects();
         update();
     }
@@ -687,14 +709,14 @@ void Pager::numberOfDesktopsChanged(int num)
     m_desktopCount = num;
 
     m_rects.clear();
-    recalculateGeometry();
+    recalculateGridSizes(m_rows);
     recalculateWindowRects();
 }
 
 void Pager::desktopNamesChanged()
 {
     m_rects.clear();
-    recalculateGeometry();
+    updateSizes(true);
 
     if (!m_timer->isActive()) {
         m_timer->start(UPDATE_DELAY);
@@ -731,7 +753,7 @@ void Pager::showingDesktopChanged(bool showing)
 void Pager::desktopsSizeChanged()
 {
     m_rects.clear();
-    recalculateGeometry();
+    updateSizes(true);
 
     if (!m_timer->isActive()) {
         m_timer->start(UPDATE_DELAY);
