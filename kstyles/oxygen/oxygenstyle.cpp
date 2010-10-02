@@ -1450,7 +1450,9 @@ namespace Oxygen
             case ProgressBar::BusyIndicator:
             {
 
-                if( r.width() < 4 || r.height() < 4 ) return true;
+                if( orientation == Qt::Horizontal && r.width() < 4 ) return true;
+                else if( orientation == Qt::Vertical && r.height() < 4 ) return true;
+
                 QPixmap pixmap( _helper.progressBarIndicator( pal, rect ) );
                 p->drawPixmap( rect.adjusted(-1, -2, 0, 0).topLeft(), pixmap );
                 return true;
