@@ -4520,6 +4520,9 @@ namespace Oxygen
 
         // draw bar
         sub_opt.rect = subElementRect( QStyle::SE_ProgressBarContents, cbOption, widget);
+        if (sub_opt.rect.height() < 3) {
+            sub_opt.rect.adjust(0, 0, 0, 2);
+        }
         drawControl( QStyle::CE_ProgressBarContents, &sub_opt, p, widget);
 
         // draw label
