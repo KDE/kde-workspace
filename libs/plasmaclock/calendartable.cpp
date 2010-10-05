@@ -731,8 +731,12 @@ void CalendarTable::dataUpdated(const QString &source, const Plasma::DataEngine:
 void CalendarTable::applyConfiguration(KConfigGroup cg)
 {
     setCalendar(cg.readEntry("calendarType", "locale"));
-    setHolidaysRegion(cg.readEntry("holidaysRegion", d->defaultHolidaysRegion()));
     setDisplayHolidays(cg.readEntry("displayHolidays", true));
+    if (displayHolidays()) {
+        setHolidaysRegion(cg.readEntry("holidaysRegion", d->defaultHolidaysRegion()));
+    } else {
+        setHolidaysRegion(cg.readEntry("holidaysRegion", QString()));
+    }
 }
 
 void CalendarTable::writeConfiguration(KConfigGroup cg)
@@ -780,7 +784,11 @@ void CalendarTable::createConfigurationInterface(KConfigDialog *parent)
         j.next();
         d->calendarConfigUi.regionComboBox->addItem(j.key(), QVariant(j.value()));
     }
-    d->calendarConfigUi.regionComboBox->setCurrentIndex( d->calendarConfigUi.regionComboBox->findData( QVariant( d->holidaysRegion ) ) );
+    if (d->displayHolidays) {
+        d->calendarConfigUi.regionComboBox->setCurrentIndex( d->calendarConfigUi.regionComboBox->findData( QVariant( d->holidaysRegion ) ) );
+    } else {
+        d->calendarConfigUi.regionComboBox->setCurrentIndex( 0 );
+    }
 }
 
 void CalendarTable::applyConfigurationInterface()
