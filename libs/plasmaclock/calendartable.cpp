@@ -524,9 +524,11 @@ void CalendarTable::setDisplayEvents(bool display)
 
 void CalendarTable::setHolidaysRegion(const QString &region)
 {
-    QString queryString = "holidaysIsValidRegion:" + region;
-    if (!dataEngine()->query(queryString).value(queryString).toBool()) {
-        return;
+    if (!region.isEmpty()) {
+        QString queryString = "holidaysIsValidRegion:" + region;
+        if (!dataEngine()->query(queryString).value(queryString).toBool()) {
+            return;
+        }
     }
 
     if (d->holidaysRegion != region) {
@@ -732,10 +734,10 @@ void CalendarTable::applyConfiguration(KConfigGroup cg)
 {
     setCalendar(cg.readEntry("calendarType", "locale"));
     setDisplayHolidays(cg.readEntry("displayHolidays", true));
-    if (displayHolidays()) {
+    if (d->displayHolidays) {
         setHolidaysRegion(cg.readEntry("holidaysRegion", d->defaultHolidaysRegion()));
     } else {
-        setHolidaysRegion(cg.readEntry("holidaysRegion", QString()));
+        setHolidaysRegion(QString());
     }
 }
 
