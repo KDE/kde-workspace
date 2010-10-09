@@ -4520,9 +4520,6 @@ namespace Oxygen
 
         // draw bar
         sub_opt.rect = subElementRect( QStyle::SE_ProgressBarContents, cbOption, widget);
-        if (sub_opt.rect.height() < 3) {
-            sub_opt.rect.adjust(0, 0, 0, 2);
-        }
         drawControl( QStyle::CE_ProgressBarContents, &sub_opt, p, widget);
 
         // draw label
@@ -5364,9 +5361,9 @@ namespace Oxygen
 
         // draw the slider itself
         QRectF rect( horizontal ? r.adjusted(3, 2, -3, -3):r.adjusted(3, 4, -3, -3) );
-        
-        if( !rect.isValid()) 
-        { 
+
+        if( !rect.isValid())
+        {
             // e.g. not enough height
             p->restore();
             return;
@@ -5412,7 +5409,7 @@ namespace Oxygen
         // slider gradient
         {
             QLinearGradient sliderGradient( rect.topLeft(), horizontal ? rect.bottomLeft() : rect.topRight());
-            if( !OxygenStyleConfigData::scrollBarColored()) 
+            if( !OxygenStyleConfigData::scrollBarColored())
             {
                 sliderGradient.setColorAt(0.0, color);
                 sliderGradient.setColorAt(1.0, mid);
@@ -5430,10 +5427,10 @@ namespace Oxygen
         if( OxygenStyleConfigData::scrollBarBevel() )
         {
             // don't let the pattern move
-            QPoint offset = horizontal ? QPoint(-rect.left(), 0) : QPoint(0, -rect.top()); 
+            QPoint offset = horizontal ? QPoint(-rect.left(), 0) : QPoint(0, -rect.top());
             QPoint periodEnd = offset + (horizontal ? QPoint(30, 0) : QPoint(0, 30));
             QLinearGradient patternGradient(rect.topLeft()+offset, rect.topLeft()+periodEnd);
-            if( !OxygenStyleConfigData::scrollBarColored()) 
+            if( !OxygenStyleConfigData::scrollBarColored())
             {
                 patternGradient.setColorAt(0.0, _helper.alphaColor(shadow, 0.1));
                 patternGradient.setColorAt(1.0, _helper.alphaColor(light, 0.1));
