@@ -19,6 +19,8 @@
 #include "keyboard_applet.h"
 
 #include <kglobalsettings.h>
+#include <KIconLoader>
+#include <plasma/theme.h>
 #include <plasma/tooltipmanager.h>
 
 #include <QtGui/QPainter>
@@ -51,11 +53,10 @@ KeyboardApplet::KeyboardApplet(QObject *parent, const QVariantList &args):
 
 	setHasConfigurationInterface(false);
 
-//	resize(32, 32);
-	setMinimumSize(16, 16);
+	resize(48,48);
 
 	setAspectRatioMode(Plasma::KeepAspectRatio);
-	setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+	//setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
 	setBackgroundHints(DefaultBackground);
 
 	rules = Rules::readRules();
@@ -153,12 +154,12 @@ void KeyboardApplet::paintInterface(QPainter *p, const QStyleOptionGraphicsItem 
 		kDebug() << "applet: LayoutChanged" << layoutUnit.toString() << shortText;
 
 		p->save();
-//		p->setPen(Qt::black);
-		QFont font = p->font();
-		int height = contentsRect.height();
+		p->setPen(Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor));
+		QFont font = Plasma::Theme::defaultTheme()->font(Plasma::Theme::DesktopFont);
+		int height = qMin(contentsRect.height(), contentsRect.width());
 		int fontSize = shortText.length() == 2
-				? height * 7 / 10
-				: height * 5 / 10;
+				? height * 7 / 15
+				: height * 5 / 15;
 
 		int smallestReadableSize = KGlobalSettings::smallestReadableFont().pixelSize();
 		if( fontSize < smallestReadableSize ) {
@@ -202,6 +203,20 @@ QList<QAction*> KeyboardApplet::contextualActions()
 	}
 	connect(actionGroup, SIGNAL(triggered(QAction*)), this, SLOT(actionTriggered(QAction*)));
 	return actionGroup->actions();
+}
+
+void KeyboardApplet::constraintsEvent(Plasma::Constraints constraints)
+{
+    if (constraints & Plasma::FormFactorConstraint) {
+	int iconSize;
+        if (formFactor() == Plasma::Planar ||
+            formFactor() == Plasma::MediaCenter) {
+            iconSize = IconSize(KIconLoader::Desktop);
+        } else {
+            iconSize = IconSize(KIconLoader::Small);
+        }
+	setMinimumSize(iconSize, iconSize);
+    }
 }
 
 //void KeyboardApplet::createConfigurationInterface(KConfigDialog *parent)
