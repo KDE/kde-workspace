@@ -115,6 +115,11 @@ QString WicdNetworkInterface::uni() const
     return d->name;
 }
 
+QString WicdNetworkInterface::udi() const
+{
+    return d->name;
+}
+
 int WicdNetworkInterface::designSpeed() const
 {
     return 0;
