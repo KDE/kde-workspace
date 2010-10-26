@@ -65,7 +65,7 @@ namespace Oxygen
                 // then implement transition
                 object->event( event );
                 enterEvent( object );
-                return true;
+                break;
             }
 
             case QEvent::Leave:
@@ -74,7 +74,7 @@ namespace Oxygen
                 // then implement transition
                 object->event( event );
                 leaveEvent( object );
-                return true;
+                break;
             }
 
             case QEvent::MouseMove:
@@ -83,7 +83,7 @@ namespace Oxygen
                 // then implement transition
                 object->event( event );
                 mouseMoveEvent( object );
-                return true;
+                break;
             }
 
             case QEvent::MouseButtonPress:
@@ -153,7 +153,7 @@ namespace Oxygen
             {
                 object->event( event );
                 enterEvent( object );
-                return true;
+                break;
             }
 
             case QEvent::Hide:
@@ -162,14 +162,14 @@ namespace Oxygen
                 object->event( event );
                 if( timer_.isActive() ) timer_.stop();
                 timer_.start( 100, this );
-                return true;
+                break;
             }
 
             case QEvent::MouseMove:
             {
                 object->event( event );
                 mouseMoveEvent( object );
-                return true;
+                break;
             }
 
             default: break;
