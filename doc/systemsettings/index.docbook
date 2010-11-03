@@ -225,6 +225,9 @@ Sharing (Windows Shares, Samba)
 <listitem>
 <para><itemizedlist>
 <listitem><para>
+Printer Configuration
+</para></listitem>
+<listitem><para>
 Device Actions
 </para></listitem>
 <listitem><para>
@@ -257,9 +260,6 @@ Multimedia (Audio CDs, CDDB Retrieval, Phonon)
 <term>System Administration</term>
 <listitem>
 <para><itemizedlist>
-<listitem><para>
-Printer Configuration
-</para></listitem>
 <listitem><para>
 Date &amp; Time
 </para></listitem>
