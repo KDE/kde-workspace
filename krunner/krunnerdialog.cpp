@@ -59,7 +59,8 @@ KRunnerDialog::KRunnerDialog(Plasma::RunnerManager *runnerManager, QWidget *pare
       m_floating(!KRunnerSettings::freeFloating()),
       m_resizing(false),
       m_rightResize(false),
-      m_vertResize(false)
+      m_vertResize(false),
+      m_runningTimer(false)
 {
     setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
@@ -555,7 +556,10 @@ void KRunnerDialog::timerEvent(QTimerEvent *event)
 {
     killTimer(event->timerId());
     if (checkCursor(mapFromGlobal(QCursor::pos()))) {
+        m_runningTimer = true;
         startTimer(100);
+    } else {
+        m_runningTimer = false;
     }
 }
 
@@ -566,7 +570,10 @@ bool KRunnerDialog::checkCursor(const QPoint &pos)
         (m_rightBorderWidth > 0 && pos.x() > width() - qMax(5, m_rightBorderWidth))) {
         if (cursor().shape() != Qt::SizeHorCursor) {
             setCursor(Qt::SizeHorCursor);
-            startTimer(100);
+            if (!m_runningTimer) {
+                m_runningTimer = true;
+                startTimer(100);
+            }
             return false;
         }
 
@@ -574,7 +581,10 @@ bool KRunnerDialog::checkCursor(const QPoint &pos)
     } else if ((pos.y() > height() - qMax(5, m_bottomBorderHeight)) && (pos.y() < height())) {
         if (cursor().shape() != Qt::SizeVerCursor) {
             setCursor(Qt::SizeVerCursor);
-            startTimer(100);
+            if (!m_runningTimer) {
+                m_runningTimer = true;
+                startTimer(100);
+            }
             return false;
         }
 
