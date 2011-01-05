@@ -87,6 +87,7 @@ Comment=Input Actions service performing configured actions on key presses
 Comment[ar]=خدمة إجراءات الإدخال تقوم بضبط الإجراءات عند ضغط المفتاح
 Comment[ca]=Servei d'accions d'entrada que porta a terme accions configurades en prémer tecles
 Comment[ca@valencia]=Servei d'accions d'entrada que porta a terme accions configurades en prémer tecles
+Comment[cs]=Služba vstupních akcí jenž po stisknutí klávesy vykoná nakonfigurovanou akci
 Comment[da]=Input-handlinger-tjeneste som udfører konfigurerede handlinger ved tastetryk
 Comment[de]=„Tastenkombinationen“ führt benutzerdefinierte Aktionen auf Tastendruck aus.
 Comment[el]=Υπηρεσία ενεργειών εισόδου εκτελεί ρυθμισμένες ενέργειες με το πάτημα πλήκτρων
