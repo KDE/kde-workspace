@@ -159,7 +159,7 @@ void Clock::dataUpdated(const QString& source, const Plasma::DataEngine::Data &d
         return;
     }
 
-    if (m_time.minute() != m_lastTimeSeen.minute()) {
+    if (m_time.minute() != m_lastTimeSeen.minute() && m_repaintCache == RepaintNone) {
         m_repaintCache = RepaintHands;
     }
 
