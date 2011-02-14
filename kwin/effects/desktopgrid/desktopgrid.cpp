@@ -53,6 +53,7 @@ DesktopGridEffect::DesktopGridEffect()
     , keyboardGrab( false )
     , wasWindowMove( false )
     , wasDesktopMove( false )
+    , isValidMove( false )
     , windowMove( NULL )
     , windowMoveDiff()
     , gridSize()
@@ -610,7 +611,7 @@ void DesktopGridEffect::windowInputMouseEvent( Window, QEvent* e )
             }
         if( d != highlightedDesktop ) // Highlight desktop
             {
-            if ( (me->buttons() & Qt::LeftButton) && !wasWindowMove && d <= effects->numberOfDesktops() )
+            if ( (me->buttons() & Qt::LeftButton) && isValidMove && !wasWindowMove && d <= effects->numberOfDesktops() )
                 {
                 EffectWindowList windows = effects->stackingOrder();
                 EffectWindowList stack;
@@ -658,6 +659,7 @@ void DesktopGridEffect::windowInputMouseEvent( Window, QEvent* e )
         {
         if( me->buttons() == Qt::LeftButton )
             {
+            isValidMove = true;
 //             QRect rect;
             dragStartPos = me->pos();
             bool isDesktop = (me->modifiers() & Qt::ControlModifier);
@@ -716,6 +718,7 @@ void DesktopGridEffect::windowInputMouseEvent( Window, QEvent* e )
         }
     if( e->type() == QEvent::MouseButtonRelease && me->button() == Qt::LeftButton )
         {
+        isValidMove = false;
         if( !wasWindowMove && !wasDesktopMove )
             {
             setCurrentDesktop( posToDesktop( me->pos() ));
