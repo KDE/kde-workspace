@@ -20,6 +20,8 @@ set(calendar_engine_srcs
     akonadi/calendarmodel.cpp
     akonadi/calfilterproxymodel.cpp
     akonadi/utils.cpp
+    akonadi/blockalarmsattribute.cpp
+    akonadi/collectionselection.cpp
 )
 
 kde4_add_plugin(plasma_engine_calendar ${calendar_engine_srcs})
