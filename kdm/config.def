@@ -37,7 +37,7 @@
 #ifdef _AIX
 # define HALT_CMD	"/usr/sbin/shutdown -h now"
 # define REBOOT_CMD	"/usr/sbin/shutdown -r now"
-#elif defined(BSD)
+#elif defined(BSD) || defined(__linux__)
 # define HALT_CMD	"/sbin/shutdown -p now"
 # define REBOOT_CMD	"/sbin/shutdown -r now"
 #elif defined(__SVR4)
