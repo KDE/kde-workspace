@@ -3,6 +3,7 @@
  This file is part of the KDE project.
 
 Copyright (C) 2006 Rivo Laks <rivolaks@hot.ee>
+Copyright (C) 2011 Thomas Lübking <thomas.luebking@web.de>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,8 +53,8 @@ class DialogParentEffect
         bool hasModalWindow( EffectWindow* t );
     private:
         // The progress of the fading.
-        QHash<EffectWindow*, double> effectStrength;
-        double changeTime;
+        QMap<EffectWindow*, float> effectStrength;
+        float changeTime;
     };
 
 } // namespace
