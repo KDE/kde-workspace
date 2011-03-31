@@ -23,7 +23,6 @@
 
 #include <QApplication>
 #include <QBoxLayout>
-#include <QDesktopWidget>
 #include <QPainter>
 
 #include <kwindowsystem.h>
@@ -267,10 +266,8 @@ void ControllerWindow::syncToGraphicsWidget()
             m_graphicsWidget->resize(windowSize.width(), m_graphicsWidget->size().height());
         }
 
-        resize(windowSize);
-
         setMinimumSize(windowSize);
-
+        resize(windowSize);
 
         updateGeometry();
 
@@ -428,6 +425,11 @@ void ControllerWindow::showWidgetExplorer()
     m_widgetExplorer->setFocus();
 }
 
+bool ControllerWindow::showingWidgetExplorer() const
+{
+    return m_widgetExplorer;
+}
+
 void ControllerWindow::showActivityManager()
 {
     if (!m_activityManager) {
@@ -455,6 +457,13 @@ void ControllerWindow::showActivityManager()
         m_activityManager->show();
         setGraphicsWidget(m_activityManager);
     }
+    m_activityManager->setFlag(QGraphicsItem::ItemIsFocusable);
+    m_activityManager->setFocus();
+}
+
+bool ControllerWindow::showingActivityManager() const
+{
+    return m_activityManager;
 }
 
 bool ControllerWindow::isControllerViewVisible() const
