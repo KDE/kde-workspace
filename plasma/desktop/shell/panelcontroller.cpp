@@ -23,7 +23,6 @@
 #include <QApplication>
 #include <QBoxLayout>
 #include <QVBoxLayout>
-#include <QDesktopWidget>
 #include <QFrame>
 #include <QLabel>
 #include <QMouseEvent>
@@ -189,11 +188,13 @@ PanelController::PanelController(QWidget* parent)
     m_moveTool->setIcon(m_iconSvg->pixmap("move"));
     m_moveTool->installEventFilter(this);
     m_moveTool->setCursor(Qt::SizeAllCursor);
+    m_moveTool->setToolTip(i18n("Press left mouse button and drag to a screen edge to change panel edge"));
     m_layout->addWidget(m_moveTool);
 
     m_sizeTool = addTool(QString(), i18n("Height"), m_configWidget);
     m_sizeTool->installEventFilter(this);
     m_sizeTool->setCursor(Qt::SizeVerCursor);
+    m_sizeTool->setToolTip(i18n("Press left mouse button and drag vertically to change panel height"));
     m_layout->addWidget(m_sizeTool);
     m_layout->addStretch();
 
@@ -202,6 +203,7 @@ PanelController::PanelController(QWidget* parent)
 
     //Settings popup menu
     m_settingsTool = addTool("configure", i18n("More Settings"), m_configWidget);
+    m_settingsTool->setToolTip(i18n("Show more options about panel alignment, visibility and other settings"));
     m_layout->addWidget(m_settingsTool);
     connect(m_settingsTool, SIGNAL(pressed()), this, SLOT(settingsPopup()));
     m_optionsDialog = new Plasma::Dialog(0); // don't pass in a parent; breaks with some lesser WMs
@@ -270,6 +272,7 @@ void PanelController::setContainment(Plasma::Containment *c)
 
     action = new QAction(i18n("Add Spacer"), this);
     ToolButton *addSpaceTool = addTool(action, this);
+    addSpaceTool->setToolTip(i18n("Add a spacer to the panel useful to add some space between two widgets"));
     m_layout->insertWidget(insertIndex, addSpaceTool);
     ++insertIndex;
     connect(action, SIGNAL(triggered()), this, SLOT(addSpace()));
@@ -313,7 +316,12 @@ void PanelController::setLocation(const Plasma::Location &loc)
     }
 
     ControllerWindow::setLocation(loc);
+    syncToLocation();
+}
 
+void PanelController::syncToLocation()
+{
+    const Plasma::Location loc = location();
     m_ruler->setLocation(loc);
 
     //The external layout gwts auto flipped when QApplication::layoutDirection() changes
@@ -399,6 +407,8 @@ void PanelController::setLocation(const Plasma::Location &loc)
     m_ruler->show();
     updateGeometry();
 
+    setMinimumSize(QSize(0, 0));
+    setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
     resize(sizeHint());
 }
 
@@ -488,6 +498,13 @@ void PanelController::switchToWidgetExplorer()
 {
     m_configWidget->hide();
     showWidgetExplorer();
+}
+
+void PanelController::switchToController()
+{
+    setGraphicsWidget(0);
+    m_configWidget->show();
+    syncToLocation();
 }
 
 bool PanelController::eventFilter(QObject *watched, QEvent *event)
@@ -709,16 +726,16 @@ void PanelController::resizeFrameHeight(const int newHeight)
     switch (location()) {
         case Plasma::LeftEdge:
         case Plasma::RightEdge:
-            containment()->resize(QSize(newHeight, (int)containment()->size().height()));
             containment()->setMinimumSize(QSize(newHeight, (int)containment()->minimumSize().height()));
             containment()->setMaximumSize(QSize(newHeight, (int)containment()->maximumSize().height()));
+            containment()->resize(QSize(newHeight, (int)containment()->size().height()));
             break;
         case Plasma::TopEdge:
         case Plasma::BottomEdge:
         default:
-            containment()->resize(QSize((int)containment()->size().width(), newHeight));
             containment()->setMinimumSize(QSize((int)containment()->minimumSize().width(), newHeight));
             containment()->setMaximumSize(QSize((int)containment()->maximumSize().width(), newHeight));
+            containment()->resize(QSize((int)containment()->size().width(), newHeight));
             break;
     }
 }
