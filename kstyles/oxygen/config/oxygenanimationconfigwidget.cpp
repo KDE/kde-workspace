@@ -69,10 +69,6 @@ namespace Oxygen
             i18n( "Progress bar animation" ),
             i18n( "Configure progress bars' steps animation" ) ) );
 
-        setupItem( layout, progressBarBusyAnimations_ = new GenericAnimationConfigItem( this,
-            i18n( "Busy indicator steps" ),
-            i18n( "Configure progress bars' busy indicator animation" ) ) );
-
         setupItem( layout, stackedWidgetAnimations_ = new GenericAnimationConfigItem( this,
             i18n( "Tab transitions" ), i18n( "Configure fading transition between tabs" ) ) );
 
@@ -85,6 +81,18 @@ namespace Oxygen
         setupItem( layout, comboBoxAnimations_ = new GenericAnimationConfigItem( this,
             i18n( "Combo box transitions" ), i18n( "Configure fading transition when a combo box's selected choice is changed" ) ) );
 
+        // add a separator
+        QFrame* frame = new QFrame( this );
+        frame->setFrameStyle( QFrame::HLine|QFrame::Sunken );
+        layout->addWidget( frame, row_, 0, 1, 2 );
+        ++row_;
+
+        // progress bar busy animation
+        setupItem( layout, progressBarBusyAnimations_ = new GenericAnimationConfigItem( this,
+            i18n( "Busy indicator steps" ),
+            i18n( "Configure progress bars' busy indicator animation" ) ) );
+
+
         // add spacers to the first column, previous row to finalize layout
         layout->addItem( new QSpacerItem( 25, 0 ), row_-1, 0, 1, 1 );
 
@@ -95,8 +103,11 @@ namespace Oxygen
         connect( ui.animationsEnabled_, SIGNAL( toggled( bool ) ), SLOT( updateChanged() ) );
         foreach( AnimationConfigItem* item, findChildren<AnimationConfigItem*>() )
         {
-            item->QWidget::setEnabled( false );
-            connect( ui.animationsEnabled_, SIGNAL( toggled( bool ) ), item, SLOT( setEnabled( bool ) ) );
+            if( item != progressBarBusyAnimations_ )
+            {
+                item->QWidget::setEnabled( false );
+                connect( ui.animationsEnabled_, SIGNAL( toggled( bool ) ), item, SLOT( setEnabled( bool ) ) );
+            }
         }
 
     }
