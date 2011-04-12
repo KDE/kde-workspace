@@ -106,7 +106,7 @@ namespace Oxygen
             mdiWindowEngine_->setEnabled( animationsEnabled &&  StyleConfigData::genericAnimationsEnabled() );
 
             progressBarEngine_->setEnabled( animationsEnabled &&  StyleConfigData::progressBarAnimationsEnabled() );
-            progressBarEngine_->setBusyIndicatorEnabled( animationsEnabled &&  StyleConfigData::progressBarAnimated() );
+            progressBarEngine_->setBusyIndicatorEnabled( StyleConfigData::progressBarAnimated() );
 
             // menubar engine
             int menuBarAnimationType( StyleConfigData::menuBarAnimationType() );
