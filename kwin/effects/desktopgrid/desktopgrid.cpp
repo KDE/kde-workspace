@@ -474,6 +474,8 @@ void DesktopGridEffect::windowClosed( EffectWindow* w )
 
 void DesktopGridEffect::windowDeleted( EffectWindow* w )
     {
+    if( w == windowMove )
+        windowMove = 0;
     for( QHash< DesktopButtonsView*, EffectWindow*>::iterator it = m_desktopButtonsViews.begin();
          it != m_desktopButtonsViews.end(); ++it )
         {
