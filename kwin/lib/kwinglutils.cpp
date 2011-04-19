@@ -744,7 +744,7 @@ bool GLShader::load(const QString& vertexsource, const QString& fragmentsource)
     GLuint vertexshader;
     GLuint fragmentshader;
 
-    GLsizei logsize, logarraysize;
+    GLsizei logsize = 0, logarraysize = 0;
     char* log = 0;
 
     // Create program object
@@ -760,30 +760,44 @@ bool GLShader::load(const QString& vertexsource, const QString& fragmentsource)
         // Compile the shader
         glCompileShader(vertexshader);
         // Make sure it compiled correctly
-        int compiled;
+        int compiled = 0;
         glGetShaderiv(vertexshader, GL_COMPILE_STATUS, &compiled);
         // Get info log
         glGetShaderiv(vertexshader, GL_INFO_LOG_LENGTH, &logarraysize);
-        log = new char[logarraysize];
-        glGetShaderInfoLog(vertexshader, logarraysize, &logsize, log);
-        if(!compiled)
+        if (logarraysize)
             {
-            kError(1212) << "Couldn't compile vertex shader! Log:" << endl << log << endl;
-            delete[] log;
-            return false;
+            log = new char[logarraysize];
+            glGetShaderInfoLog(vertexshader, logarraysize, &logsize, log);
+            if(!compiled)
+                {
+                kError(1212) << "Couldn't compile vertex shader! Log:" << endl << log << endl;
+                delete[] log;
+                return false;
+                }
+            else if(logsize > 0)
+                kDebug(1212) << "Vertex shader compilation log:"<< log;
             }
-        else if(logsize > 0)
-            kDebug(1212) << "Vertex shader compilation log:"<< log;
+        else
+            {
+            GLenum err = glGetError();
+            if( err != GL_NO_ERROR )
+                kError(1212) << "Error status when creating vertex shader info log: " << formatGLError( err );
+            }
         // Attach the shader to the program
         glAttachShader(mProgram, vertexshader);
         // Delete shader
         glDeleteShader(vertexshader);
-        delete[] log;
+        if (log)
+            delete[] log;
         }
 
 
     if(!fragmentsource.isEmpty())
         {
+        logsize = 0;
+        logarraysize = 0;
+        log = 0;
+
         fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
         // Load it
         const QByteArray& srcba = fragmentsource.toLatin1();
@@ -797,21 +811,31 @@ bool GLShader::load(const QString& vertexsource, const QString& fragmentsource)
         glGetShaderiv(fragmentshader, GL_COMPILE_STATUS, &compiled);
         // Get info log
         glGetShaderiv(fragmentshader, GL_INFO_LOG_LENGTH, &logarraysize);
-        log = new char[logarraysize];
-        glGetShaderInfoLog(fragmentshader, logarraysize, &logsize, log);
-        if(!compiled)
+        if (logarraysize)
             {
-            kError(1212) << "Couldn't compile fragment shader! Log:" << endl << log << endl;
-            delete[] log;
-            return false;
+            log = new char[logarraysize];
+            glGetShaderInfoLog(fragmentshader, logarraysize, &logsize, log);
+            if(!compiled)
+                {
+                kError(1212) << "Couldn't compile fragment shader! Log:" << endl << log << endl;
+                delete[] log;
+                return false;
+                }
+            else if(logsize > 0)
+                kDebug(1212) << "Fragment shader compilation log:"<< log;
             }
-        else if(logsize > 0)
-            kDebug(1212) << "Fragment shader compilation log:"<< log;
+        else
+            {
+            GLenum err = glGetError();
+            if( err != GL_NO_ERROR )
+                kError(1212) << "Error status when creating fragment shader info log: " << formatGLError( err );
+            }
         // Attach the shader to the program
         glAttachShader(mProgram, fragmentshader);
         // Delete shader
         glDeleteShader(fragmentshader);
-        delete[] log;
+        if (log)
+            delete[] log;
         }
 
 
@@ -819,20 +843,32 @@ bool GLShader::load(const QString& vertexsource, const QString& fragmentsource)
     glLinkProgram(mProgram);
     // Make sure it linked correctly
     int linked;
+    logsize = 0;
+    logarraysize = 0;
+    log = 0;
     glGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
     // Get info log
     glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &logarraysize);
-    log = new char[logarraysize];
-    glGetProgramInfoLog(mProgram, logarraysize, &logsize, log);
-    if(!linked)
+    if (logarraysize)
         {
-        kError(1212) << "Couldn't link the program! Log" << endl << log << endl;
+        log = new char[logarraysize];
+        glGetProgramInfoLog(mProgram, logarraysize, &logsize, log);
+        if(!linked)
+            {
+            kError(1212) << "Couldn't link the program! Log" << endl << log << endl;
+            delete[] log;
+            return false;
+            }
+        else if(logsize > 0)
+            kDebug(1212) << "Shader linking log:"<< log;
         delete[] log;
-        return false;
         }
-    else if(logsize > 0)
-        kDebug(1212) << "Shader linking log:"<< log;
-    delete[] log;
+    else
+        {
+        GLenum err = glGetError();
+        if( err != GL_NO_ERROR )
+            kError(1212) << "Error status when creating fragment shader info log: " << formatGLError( err );
+        }
 
     mValid = true;
     return true;
