@@ -1731,7 +1731,6 @@ void Workspace::setNumberOfDesktops( int n )
     if( currentDesktop() > numberOfDesktops() )
         setCurrentDesktop( numberOfDesktops() );
 
-    bool clientAreaNeedsUpdate = true;
     // move all windows that would be hidden to the last visible desktop
     if( old_number_of_desktops > numberOfDesktops() )
         {
@@ -1739,13 +1738,12 @@ void Workspace::setNumberOfDesktops( int n )
             if( !(*it)->isOnAllDesktops() && (*it)->desktop() > numberOfDesktops() )
                 sendClientToDesktop( *it, numberOfDesktops(), true );
         // TODO: Tile should have a method allClients, push them into other tiles
-
-        rootInfo->setNumberOfDesktops( numberOfDesktops() );
-        NETPoint* viewports = new NETPoint[numberOfDesktops()];
-        rootInfo->setDesktopViewport( numberOfDesktops(), *viewports );
-        delete[] viewports;
-        clientAreaNeedsUpdate = true;
         }
+
+    rootInfo->setNumberOfDesktops( numberOfDesktops() );
+    NETPoint* viewports = new NETPoint[numberOfDesktops()];
+    rootInfo->setDesktopViewport( numberOfDesktops(), *viewports );
+    delete[] viewports;
 
     // Make it +1, so that it can be accessed as [1..numberofdesktops]
     focus_chain.resize(n + 1);
@@ -1758,8 +1756,7 @@ void Workspace::setNumberOfDesktops( int n )
     oldrestrictedmovearea.resize(n + 1);
     screenarea.clear();
 
-    if (clientAreaNeedsUpdate)
-        updateClientArea( true );
+    updateClientArea( true );
 
     // Resize and reset the desktop focus chain.
     desktop_focus_chain.resize( n );
