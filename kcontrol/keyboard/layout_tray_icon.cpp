@@ -39,7 +39,7 @@
 LayoutTrayIcon::LayoutTrayIcon():
 	xEventNotifier(),
 	keyboardConfig(new KeyboardConfig()),
-	rules(Rules::readRules()),
+	rules(Rules::readRules(Rules::READ_EXTRAS)),
 	flags(new Flags()),
 	layoutsMenu(new LayoutsMenu(*keyboardConfig, *rules, *flags))
 {
