@@ -17,6 +17,7 @@ set(solidcontrol_LIB_SRCS
    networkcdmainterface.cpp
    networkgsminterface.cpp
    networkserialinterface.cpp
+   networkbtinterface.cpp
    networkipv4config.cpp
    wirednetworkinterface.cpp
    wirelessaccesspoint.cpp
@@ -52,7 +53,7 @@ install( FILES solidnetworkmanager.desktop solidremotecontrolmanager.desktop sol
 install( FILES networkmanager.h networkinterface.h remotecontrolmanager.h
     remotecontrol.h remotecontrolbutton.h wirednetworkinterface.h wirelessnetworkinterface.h
     wirelessaccesspoint.h singletondefs.h networking.h networkipv4config.h solid_control_export.h 
-    networkcdmainterface.h networkgsminterface.h networkserialinterface.h
+    networkcdmainterface.h networkgsminterface.h networkserialinterface.h networkbtinterface.h
     modemmanager.h modemmanagerinterface.h
     modeminterface.h modemlocationinterface.h modemcdmainterface.h
     modemgsmcardinterface.h modemgsmcontactsinterface.h

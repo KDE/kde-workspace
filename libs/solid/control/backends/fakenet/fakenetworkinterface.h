@@ -42,6 +42,8 @@ public:
         QString uni() const;
         QString udi() const;
         QString interfaceName() const;
+        QString ipInterfaceName() const;
+        bool firmwareMissing() const;
         QString driver() const;
         bool isActive() const;
         Solid::Control::IPv4Config ipV4Config() const;
