@@ -36,13 +36,11 @@ Q_INTERFACES(Solid::Control::Ifaces::NetworkInterface)
 
 Q_PROPERTY(QString uni READ uni WRITE setUni)
 Q_PROPERTY(QString interfaceName READ interfaceName WRITE setInterfaceName)
-Q_PROPERTY(QString ipInterfaceName READ ipInterfaceName)
 Q_PROPERTY(QString driver READ driver WRITE setDriver)
 Q_PROPERTY(QVariant genericCapabilities READ capabilitiesV WRITE setCapabilitiesV)
 Q_PROPERTY(int ipV4Address READ ipV4Address)
 Q_PROPERTY(bool managed READ managed WRITE setManaged)
 Q_PROPERTY(QString udi READ udi)
-Q_PROPERTY(bool firmwareMissing READ firmwareMissing)
 
 //Q_PROPERTY(Solid::Control::IPv4Config ipV4Config READ ipV4Config WRITE setIpV4Config)
 Q_PROPERTY(Solid::Control::NetworkInterface::ConnectionState connectionState READ connectionState WRITE setConnectionState)
@@ -56,12 +54,10 @@ public:
     void setUni(const QVariant&);
     QString interfaceName() const;
     void setInterfaceName(const QVariant&);
-    QString ipInterfaceName() const;
     QString driver() const;
     void setDriver(const QVariant&);
     int ipV4Address() const;
     Solid::Control::IPv4Config ipV4Config() const;
-    // TODO: implement IPv6Config.
     bool isActive() const;
     Solid::Control::NetworkInterface::ConnectionState connectionState() const;
     void setConnectionState(const QVariant&);
@@ -74,7 +70,6 @@ public:
     bool managed() const;
     void setManaged(const QVariant&);
     QString udi() const;
-    bool firmwareMissing() const;
 
 Q_SIGNALS:
     void ipDetailsChanged();

@@ -37,7 +37,6 @@ Q_DECLARE_PRIVATE(NMGsmNetworkInterface)
 Q_INTERFACES(Solid::Control::Ifaces::GsmNetworkInterface)
 public:
     NMGsmNetworkInterface(const QString & path, NMNetworkManager * manager, QObject * parent);
-    NMGsmNetworkInterface(NMGsmNetworkInterfacePrivate &dd, NMNetworkManager * manager, QObject * parent);
     virtual ~NMGsmNetworkInterface();
     Solid::Control::ModemGsmCardInterface * getModemCardIface();
     void setModemCardIface(Solid::Control::ModemGsmCardInterface * iface);
@@ -46,7 +45,7 @@ public:
 public Q_SLOTS:
     void gsmPropertiesChanged(const QVariantMap & changedProperties);
     void modemRemoved(const QString & modemUdi);
-protected:
+private:
     Solid::Control::ModemGsmCardInterface *modemGsmCardIface;
     Solid::Control::ModemGsmNetworkInterface *modemGsmNetworkIface;
 };

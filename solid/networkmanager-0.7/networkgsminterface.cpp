@@ -41,14 +41,6 @@ NMGsmNetworkInterface::NMGsmNetworkInterface(const QString & path, NMNetworkMana
                 this, SLOT(gsmPropertiesChanged(const QVariantMap &)));
 }
 
-NMGsmNetworkInterface::NMGsmNetworkInterface(NMGsmNetworkInterfacePrivate & dd, NMNetworkManager * manager, QObject * parent) : NMSerialNetworkInterface(dd, manager, parent),
-      modemGsmCardIface(0), modemGsmNetworkIface(0)
-{
-    Q_D(NMGsmNetworkInterface);
-    connect( &d->gsmIface, SIGNAL(PropertiesChanged(const QVariantMap &)),
-                this, SLOT(gsmPropertiesChanged(const QVariantMap &)));
-}
-
 NMGsmNetworkInterface::~NMGsmNetworkInterface()
 {
 

@@ -25,7 +25,6 @@ set(solid_networkmanager_PART_SRCS
    networkserialinterface.cpp
    networkcdmainterface.cpp
    networkgsminterface.cpp
-   networkbtinterface.cpp
    nmpropertyhelper.cpp
 )
 
@@ -39,7 +38,6 @@ set( DBUS_INTERFACES_FILES
    dbus/nm-device-serialinterface.cpp
    dbus/nm-device-cdmainterface.cpp
    dbus/nm-device-gsminterface.cpp
-   dbus/nm-device-btinterface.cpp
    dbus/nm-ip4-configinterface.cpp
    dbus/nm-dhcp4-configinterface.cpp
 )
