@@ -47,23 +47,23 @@ namespace Oxygen
             shadowSize_ = 40;
             horizontalOffset_ = 0;
             verticalOffset_ = 0.1;
+            useOuterColor_ = true;
 
             innerColor_ = QColor( "#70EFFF" );
             outerColor_ = QColor( "#54A7F0" );
             outerColor2_ = calcOuterColor();
             midColor_ = calcMidColor();
-            useOuterColor_ = true;
 
         } else {
 
             shadowSize_ = 40;
             horizontalOffset_ = 0;
             verticalOffset_ = 0.2;
+            useOuterColor_ = false;
 
             innerColor_ = QColor( Qt::black );
             outerColor_ = outerColor2_ = calcOuterColor();
             midColor_ = calcMidColor();
-            useOuterColor_ = false;
 
         }
 
@@ -73,7 +73,7 @@ namespace Oxygen
     ShadowConfiguration::ShadowConfiguration( QPalette::ColorGroup colorGroup, KConfigGroup group ):
         colorGroup_( colorGroup ),
         enabled_( true )
-    {
+   {
 
         // get default configuration
         ShadowConfiguration defaultConfiguration( ShadowConfiguration::colorGroup() );
@@ -81,9 +81,10 @@ namespace Oxygen
         setShadowSize( group.readEntry( OxygenConfig::SHADOW_SIZE, defaultConfiguration.shadowSize() ) );
         setHorizontalOffset( group.readEntry( OxygenConfig::SHADOW_HOFFSET, defaultConfiguration.horizontalOffset() ) );
         setVerticalOffset( group.readEntry( OxygenConfig::SHADOW_VOFFSET, defaultConfiguration.verticalOffset() ) );
+        setUseOuterColor( group.readEntry( OxygenConfig::SHADOW_USE_OUTER_COLOR, defaultConfiguration.useOuterColor() ) );
+
         setInnerColor( group.readEntry( OxygenConfig::SHADOW_INNER_COLOR, defaultConfiguration.innerColor() ) );
         setOuterColor( group.readEntry( OxygenConfig::SHADOW_OUTER_COLOR, defaultConfiguration.outerColor() ) );
-        setUseOuterColor( group.readEntry( OxygenConfig::SHADOW_USE_OUTER_COLOR, defaultConfiguration.useOuterColor() ) );
         setOuterColor2( calcOuterColor() );
         setMidColor( calcMidColor() );
 
