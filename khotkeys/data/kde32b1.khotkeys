@@ -1422,6 +1422,7 @@ Name[sr@ijekavian]=Изврши д‑бус позив <icode>qdbus org.kde.krun
 Name[sr@ijekavianlatin]=Izvrši D‑Bus poziv <icode>qdbus org.kde.krunner /App display</icode>
 Name[sr@latin]=Izvrši D‑Bus poziv <icode>qdbus org.kde.krunner /App display</icode>
 Name[sv]=Utför D-Bus-anropet 'qdbus org.kde.krunner /App display'
+Name[tr]='qdbus org.kde.krunner /App display' D-Bus çağrısını gerçekleştir
 Name[uk]=Виконання виклику D-Bus «qdbus org.kde.krunner /App display»
 Name[x-test]=xxPerform D-Bus call 'qdbus org.kde.krunner /App display'xx
 Name[zh_TW]=執行 D-Bus 呼叫 'qdbus org.kde.krunner /App display'
