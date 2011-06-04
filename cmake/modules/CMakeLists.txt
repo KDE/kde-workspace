@@ -9,6 +9,7 @@ set(cmakeFiles FindCkConnector.cmake
                FindOpenGLES.cmake
                FindPAM.cmake
                FindSensors.cmake
+               FindWayland.cmake
                PkgConfigGetVar.cmake
                UnixAuth.cmake )
 

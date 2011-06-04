@@ -50,6 +50,8 @@ macro_optional_find_package(OpenGLES)
 macro_log_feature(OPENGLES_FOUND "OpenGL ES" "OpenGL ES 2.0" "http://www.khronos.org/opengles/" FALSE "" "Needed to build KWin for mobile devices")
 OPTION(KWIN_BUILD_WITH_OPENGLES "Enable OpenGL ES backend. Disables OpenGL desktop." OFF)
 
+macro_optional_find_package(Wayland)
+
 #### Python support ####
 macro_optional_find_package(PythonLibrary)
 
