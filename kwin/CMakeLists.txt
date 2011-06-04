@@ -20,6 +20,10 @@ if( KWIN_HAVE_COMPOSITING AND OPENGLES_FOUND AND KWIN_BUILD_WITH_OPENGLES)
     set( KWIN_HAVE_OPENGL_COMPOSITING 1)
     set( KWIN_HAVE_OPENGLES_COMPOSITING 1 )
     message("Compiling KWin for mobile.")
+    if( WAYLAND_SERVER_FOUND )
+        set( KWIN_HAVE_WAYLAND 1 )
+        message("Compiling KWin with Wayland support")
+    endif( WAYLAND_SERVER_FOUND )
 endif( KWIN_HAVE_COMPOSITING AND OPENGLES_FOUND AND KWIN_BUILD_WITH_OPENGLES )
 
 # safety
@@ -41,6 +45,10 @@ endif(OPENGL_FOUND)
 if(OPENGLES_FOUND AND KWIN_HAVE_OPENGLES_COMPOSITING)
   include_directories(${OPENGLES_INCLUDE_DIR})
 endif(OPENGLES_FOUND AND KWIN_HAVE_OPENGLES_COMPOSITING)
+
+if(KWIN_HAVE_WAYLAND)
+    include_directories(${WAYLAND_SERVER_INCLUDE_DIR})
+endif(KWIN_HAVE_WAYLAND)
 
 OPTION(KWIN_BUILD_DECORATIONS "Enable building of KWin decorations." ON)
 OPTION(KWIN_BUILD_KCMS "Enable building of KWin configuration modules." ON)
@@ -187,6 +195,10 @@ endif(OPENGL_FOUND AND NOT KWIN_HAVE_OPENGLES_COMPOSITING)
 if(KWIN_HAVE_OPENGLES_COMPOSITING)
   target_link_libraries(kdeinit_kwin ${OPENGLES_LIBRARIES} ${OPENGLES_EGL_LIBRARIES})
 endif(KWIN_HAVE_OPENGLES_COMPOSITING)
+
+if(KWIN_HAVE_WAYLAND)
+    target_link_libraries(kdeinit_kwin ${WAYLAND_SERVER_LIBRARIES})
+endif(KWIN_HAVE_WAYLAND)
 
 if (X11_Xrandr_FOUND)
   target_link_libraries(kdeinit_kwin ${X11_Xrandr_LIB})
