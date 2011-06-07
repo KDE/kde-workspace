@@ -134,6 +134,11 @@ void Unmanaged::debug(QDebug& stream) const
     stream << "\'ID:" << window() << "\'";
 }
 
+bool Unmanaged::isXWindow() const
+{
+    return true;
+}
+
 } // namespace
 
 #include "unmanaged.moc"

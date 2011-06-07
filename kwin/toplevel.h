@@ -158,6 +158,8 @@ public:
      **/
     void getShadow();
 
+    virtual bool isXWindow() const;
+
 signals:
     void opacityChanged(KWin::Toplevel* toplevel, qreal oldOpacity);
     void damaged(KWin::Toplevel* toplevel, const QRect& damage);

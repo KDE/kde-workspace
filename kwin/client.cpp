@@ -2327,6 +2327,11 @@ QRect Client::decorationRect() const
     }
 }
 
+bool Client::isXWindow() const
+{
+    return true;
+}
+
 } // namespace
 
 #include "client.moc"

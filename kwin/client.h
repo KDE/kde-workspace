@@ -421,6 +421,8 @@ public:
     //sets whether the client should be treated as a SessionInteract window
     void setSessionInteract(bool needed);
 
+    virtual bool isXWindow() const;
+
 private slots:
     void autoRaise();
     void shadeHover();

@@ -388,6 +388,11 @@ const Shadow *Toplevel::shadow() const
     }
 }
 
+bool Toplevel::isXWindow() const
+{
+    return false;
+}
+
 } // namespace
 
 #include "toplevel.moc"
