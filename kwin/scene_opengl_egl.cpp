@@ -272,3 +272,23 @@ void SceneOpenGL::Texture::unbind()
 {
     GLTexture::unbind();
 }
+
+//****************************************
+// SceneOpenGL::Window
+//****************************************
+
+// Bind the window pixmap to an OpenGL texture.
+bool SceneOpenGL::Window::bindTexture()
+{
+    // Get the pixmap with the window contents
+    Pixmap pix = toplevel->windowPixmap();
+    if (pix == None)
+        return false;
+    bool success = texture.load(pix, toplevel->size(), toplevel->depth(),
+                                toplevel->damage());
+    if (success)
+        toplevel->resetDamage(QRect(toplevel->clientPos(), toplevel->clientSize()));
+    else
+        kDebug(1212) << "Failed to bind window";
+    return success;
+}
