@@ -159,6 +159,7 @@ public:
     void getShadow();
 
     virtual bool isXWindow() const;
+    virtual bool isWayland() const;
 
 signals:
     void opacityChanged(KWin::Toplevel* toplevel, qreal oldOpacity);

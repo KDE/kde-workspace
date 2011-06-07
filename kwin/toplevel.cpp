@@ -393,6 +393,11 @@ bool Toplevel::isXWindow() const
     return false;
 }
 
+bool Toplevel::isWayland() const
+{
+    return false;
+}
+
 } // namespace
 
 #include "toplevel.moc"
