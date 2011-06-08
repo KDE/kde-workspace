@@ -197,6 +197,7 @@ strApp(char **dst, ...)
         len = strlen(*dst);
         memcpy(dp, *dst, len);
         dp += len;
+        /* coverity[-freed_arg] */
         free(*dst);
     }
     va_start(va, dst);
