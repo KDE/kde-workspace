@@ -2087,7 +2087,8 @@ namespace Oxygen
                 space -= sliderSize;
                 if( space <= 0 ) return groove;
 
-                const int pos = qRound( qreal( slOpt->sliderPosition - slOpt->minimum )/ ( slOpt->maximum - slOpt->minimum )*space );
+                int pos = qRound( qreal( slOpt->sliderPosition - slOpt->minimum )/ ( slOpt->maximum - slOpt->minimum )*space );
+                if( slOpt->upsideDown ) pos = space - pos;
                 if( horizontal ) return handleRTL( option, QRect( groove.x() + pos, groove.y(), sliderSize, groove.height() ) );
                 else return handleRTL( option, QRect( groove.x(), groove.y() + pos, groove.width(), sliderSize ) );
             }
