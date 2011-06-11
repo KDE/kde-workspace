@@ -519,6 +519,11 @@ WindowQuadList Scene::Window::makeQuads(WindowQuadType type, const QRegion& reg)
     return ret;
 }
 
+void Scene::Window::frameRendered(int timeStamp)
+{
+    toplevel->frameRendered(timeStamp);
+}
+
 //****************************************
 // Scene::EffectFrame
 //****************************************

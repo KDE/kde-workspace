@@ -214,6 +214,8 @@ public:
     void updateShadow(Shadow* shadow);
     const Shadow* shadow() const;
     Shadow* shadow();
+    // informs Toplevel about rendered frames, can be called by the Scene Implementation
+    void frameRendered(int timeStamp);
 protected:
     WindowQuadList makeQuads(WindowQuadType type, const QRegion& reg) const;
     Toplevel* toplevel;

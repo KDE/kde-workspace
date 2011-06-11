@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-server.h>
 #endif
 
+#include <sys/time.h>
+
 namespace KWin
 {
 
@@ -204,6 +206,13 @@ void SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
         wspace->showOverlay();   // that pass may take long
     lastRenderTime = t.elapsed();
     flushBuffer(mask, damage);
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    const int timeStamp = (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+    foreach (Scene::Window *w, stacking_order) {
+        // inform all windows about the rendered frame
+        w->frameRendered(timeStamp);
+    }
     // do cleanup
     stacking_order.clear();
     checkGLError("PostPaint");

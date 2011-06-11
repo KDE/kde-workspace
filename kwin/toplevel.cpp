@@ -398,6 +398,11 @@ bool Toplevel::isWayland() const
     return false;
 }
 
+void Toplevel::frameRendered(int timeStamp)
+{
+    Q_UNUSED(timeStamp);
+}
+
 } // namespace
 
 #include "toplevel.moc"

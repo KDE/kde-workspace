@@ -160,6 +160,15 @@ public:
 
     virtual bool isXWindow() const;
     virtual bool isWayland() const;
+    /**
+     * This method can be used by the Compositing backend to inform the Toplevel
+     * that a frame was rendered. The Compositing backend should call this method
+     * after the final rendering, e.g. the buffer swapping.
+     *
+     * The default implementation does nothing.
+     * @param timeStamp A timestamp when the frame was rendered
+     **/
+    virtual void frameRendered(int timeStamp);
 
 signals:
     void opacityChanged(KWin::Toplevel* toplevel, qreal oldOpacity);
