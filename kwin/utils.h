@@ -98,6 +98,15 @@ typedef QList< const Deleted* > ConstDeletedList;
 typedef QList< Group* > GroupList;
 typedef QList< const Group* > ConstGroupList;
 
+#ifdef KWIN_HAVE_WAYLAND
+namespace Wayland
+{
+class Client;
+}
+typedef QList< Wayland::Client* > WaylandClientList;
+typedef QList< const Wayland::Client* > ConstWaylandClientList;
+#endif
+
 extern Options* options;
 extern bool initting; // whether kwin is starting up
 

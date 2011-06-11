@@ -218,8 +218,12 @@ void SceneOpenGL::windowAdded(Toplevel* c)
     assert(!windows.contains(c));
     windows[ c ] = new Window(c);
     c->effectWindow()->setSceneWindow(windows[ c ]);
-    c->getShadow();
-    windows[ c ]->updateShadow(c->shadow());
+    if (c->isXWindow()) {
+        c->getShadow();
+        windows[ c ]->updateShadow(c->shadow());
+    } else if (c->isWayland()) {
+        kDebug(1212) << "Adding Scene Window for Wayland Client";
+    }
 }
 
 void SceneOpenGL::windowClosed(Toplevel* c, Deleted* deleted)

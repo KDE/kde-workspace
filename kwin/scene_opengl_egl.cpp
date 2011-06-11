@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef KWIN_HAVE_WAYLAND
 #include <wayland-server.h>
+#include "wayland/wayland_client.h"
 #endif
 
 #include <sys/time.h>
@@ -356,17 +357,33 @@ void SceneOpenGL::Texture::unbind()
 // Bind the window pixmap to an OpenGL texture.
 bool SceneOpenGL::Window::bindTexture()
 {
-    // Get the pixmap with the window contents
-    Pixmap pix = toplevel->windowPixmap();
-    if (pix == None)
+    if (toplevel->isXWindow()) {
+        // Get the pixmap with the window contents
+        Pixmap pix = toplevel->windowPixmap();
+        if (pix == None)
+            return false;
+        bool success = texture.load(pix, toplevel->size(), toplevel->depth(),
+                                    toplevel->damage());
+        if (success)
+            toplevel->resetDamage(QRect(toplevel->clientPos(), toplevel->clientSize()));
+        else
+            kDebug(1212) << "Failed to bind window";
+        return success;
+    } else if (toplevel->isWayland()) {
+#ifdef KWIN_HAVE_WAYLAND
+        bool success = texture.load(qobject_cast<Wayland::Client*>(toplevel)->buffer());
+        if (success) {
+            toplevel->resetDamage(QRect(toplevel->clientPos(), toplevel->clientSize()));
+        } else {
+            kDebug(1212) << "Failed to bind Wayland window";
+        }
+        return success;
+#else
         return false;
-    bool success = texture.load(pix, toplevel->size(), toplevel->depth(),
-                                toplevel->damage());
-    if (success)
-        toplevel->resetDamage(QRect(toplevel->clientPos(), toplevel->clientSize()));
-    else
-        kDebug(1212) << "Failed to bind window";
-    return success;
+#endif
+    } else {
+        return false;
+    }
 }
 
 } // namespace

@@ -85,6 +85,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unmanaged.h"
 #include "deleted.h"
 #include "effects.h"
+#ifdef KWIN_HAVE_WAYLAND
+#include "wayland/wayland_client.h"
+#endif
 #include <QX11Info>
 
 namespace KWin
@@ -728,6 +731,13 @@ ToplevelList Workspace::xStackingOrder() const
     }
     foreach (Deleted * c, deleted)
     x_stacking.append(c);
+
+#ifdef KWIN_HAVE_WAYLAND
+    // TODO: properly integrate the Wayland Clients into the stacking order
+    foreach (Wayland::Client *c, m_waylandClients) {
+        x_stacking.append(c);
+    }
+#endif
     if (windows != NULL)
         XFree(windows);
     const_cast< Workspace* >(this)->checkUnredirect();

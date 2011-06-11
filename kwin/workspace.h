@@ -58,10 +58,24 @@ class QPushButton;
 namespace KWin
 {
 
+namespace Wayland {
+class Surface;
+class Client;
+}
+
+
 namespace TabBox
 {
 class TabBox;
 }
+
+#ifdef KWIN_HAVE_WAYLAND
+namespace Wayland
+{
+class Client;
+class Server;
+}
+#endif
 
 class Client;
 class Tile;
@@ -194,6 +208,15 @@ public:
     const UnmanagedList &unmanagedList() const {
         return unmanaged;
     }
+
+#ifdef KWIN_HAVE_WAYLAND
+    /**
+     * @return List of Wayland clients currently managed by Workspace
+     **/
+    const WaylandClientList &waylandClientList() const {
+        return m_waylandClients;
+    }
+#endif
 
     //-------------------------------------------------
     // Tiling
@@ -489,6 +512,9 @@ public:
     void removeUnmanaged(Unmanaged*, allowed_t);   // Only called from Unmanaged::release()
     void removeDeleted(Deleted*, allowed_t);
     void addDeleted(Deleted*, allowed_t);
+#ifdef KWIN_HAVE_WAYLAND
+    void removeWaylandClient(Wayland::Client *client);
+#endif
 
     bool checkStartupNotification(Window w, KStartupInfoId& id, KStartupInfoData& data);
 
@@ -555,6 +581,13 @@ public:
     void stopMousePolling();
 
     void raiseElectricBorderWindows();
+
+#ifdef KWIN_HAVE_WAYLAND
+    Wayland::Client *createWaylandClient(Wayland::Surface *surface);
+    Wayland::Server *wayland() {
+        return m_wayland;
+    }
+#endif
 
 public slots:
     void addRepaintFull();
@@ -747,6 +780,7 @@ signals:
     void groupAdded(KWin::Group*);
     void unmanagedAdded(KWin::Unmanaged*);
     void deletedRemoved(KWin::Deleted*);
+    void waylandClientAdded(KWin::Toplevel*);
     void mouseChanged(const QPoint& pos, const QPoint& oldpos,
                       Qt::MouseButtons buttons, Qt::MouseButtons oldbuttons,
                       Qt::KeyboardModifiers modifiers, Qt::KeyboardModifiers oldmodifiers);
@@ -803,6 +837,9 @@ private:
     void addClient(Client* c, allowed_t);
     Unmanaged* createUnmanaged(Window w);
     void addUnmanaged(Unmanaged* c, allowed_t);
+#ifdef KWIN_HAVE_WAYLAND
+    void addWaylandClient(Wayland::Client *c);
+#endif
 
     Window findSpecialEventWindow(XEvent* e);
 
@@ -887,6 +924,9 @@ private:
     ClientList desktops;
     UnmanagedList unmanaged;
     DeletedList deleted;
+#ifdef KWIN_HAVE_WAYLAND
+    WaylandClientList m_waylandClients;
+#endif
 
     ClientList unconstrained_stacking_order; // Topmost last
     ClientList stacking_order; // Topmost last
@@ -1039,6 +1079,11 @@ private:
     QList< int > composite_paint_times;
     QTimer compositeResetTimer; // for compressing composite resets
     bool m_finishingCompositing; // finishCompositing() sets this variable while shutting down
+
+#ifdef KWIN_HAVE_WAYLAND
+    // Wayland
+    Wayland::Server *m_wayland;
+#endif
 
 private:
     friend bool performTransiencyCheck();

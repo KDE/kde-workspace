@@ -54,6 +54,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "shadow.h"
 #include "compositingprefs.h"
 #include "notifications.h"
+#ifdef KWIN_HAVE_WAYLAND
+#include "wayland/wayland.h"
+#endif
 
 #include <stdio.h>
 
@@ -131,8 +134,20 @@ void Workspace::setupCompositing()
             unsafeConfig.writeEntry("OpenGLIsUnsafe", false);
             unsafeConfig.sync();
 
-            if (!scene->initFailed())
+            if (!scene->initFailed()) {
+#ifdef KWIN_HAVE_WAYLAND
+                kDebug(1212) << "Starting Wayland Server";
+                m_wayland = new Wayland::Server();
+                if (m_wayland->initFailed()) {
+                    kDebug(1212) << "Starting Wayland Server Failed";
+                    delete m_wayland;
+                    m_wayland = NULL;
+                } else {
+                    static_cast<SceneOpenGL*>(scene)->initWaylandEGL(m_wayland->display());
+                }
+#endif
                 break; // -->
+            }
             delete scene;
             scene = NULL;
         }
@@ -223,6 +238,14 @@ void Workspace::finishCompositing()
     XCompositeUnredirectSubwindows(display(), rootWindow(), CompositeRedirectManual);
     delete effects;
     effects = NULL;
+#ifdef KWIN_HAVE_WAYLAND
+    if (m_wayland) {
+        kDebug(1212) << "Stopping Wayland Server";
+        static_cast<SceneOpenGL*>(scene)->releaseWaylandEGL(m_wayland->display());
+        delete m_wayland;
+        m_wayland = NULL;
+    }
+#endif
     delete scene;
     scene = NULL;
     compositeTimer.stop();
@@ -692,9 +715,11 @@ void Toplevel::setupCompositing()
 #ifdef KWIN_HAVE_COMPOSITING
     if (!compositing())
         return;
-    if (damage_handle != None)
-        return;
-    damage_handle = XDamageCreate(display(), frameId(), XDamageReportRawRectangles);
+    if (isXWindow()) {
+        if (damage_handle != None)
+            return;
+        damage_handle = XDamageCreate(display(), frameId(), XDamageReportRawRectangles);
+    }
     damage_region = QRegion(0, 0, width(), height());
     effect_window = new EffectWindowImpl();
     effect_window->setWindow(this);
@@ -706,15 +731,17 @@ void Toplevel::setupCompositing()
 void Toplevel::finishCompositing()
 {
 #ifdef KWIN_HAVE_COMPOSITING
-    if (damage_handle == None)
+    if (isXWindow() && damage_handle == None)
         return;
     workspace()->checkUnredirect(true);
     if (effect_window->window() == this) { // otherwise it's already passed to Deleted, don't free data
         discardWindowPixmap();
         delete effect_window;
     }
-    XDamageDestroy(display(), damage_handle);
-    damage_handle = None;
+    if (isXWindow()) {
+        XDamageDestroy(display(), damage_handle);
+        damage_handle = None;
+    }
     damage_region = QRegion();
     repaints_region = QRegion();
     effect_window = NULL;
@@ -723,13 +750,15 @@ void Toplevel::finishCompositing()
 
 void Toplevel::discardWindowPixmap()
 {
-    addDamageFull();
-    if (window_pix == None)
-        return;
-    XFreePixmap(display(), window_pix);
-    window_pix = None;
-    if (effectWindow() != NULL && effectWindow()->sceneWindow() != NULL)
-        effectWindow()->sceneWindow()->pixmapDiscarded();
+    if (isXWindow()) {
+        addDamageFull();
+        if (window_pix == None)
+            return;
+        XFreePixmap(display(), window_pix);
+        window_pix = None;
+        if (effectWindow() != NULL && effectWindow()->sceneWindow() != NULL)
+            effectWindow()->sceneWindow()->pixmapDiscarded();
+    }
 }
 
 Pixmap Toplevel::createWindowPixmap()

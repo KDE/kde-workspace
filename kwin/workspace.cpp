@@ -60,6 +60,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "effects.h"
 #include "tilinglayout.h"
 
+#ifdef KWIN_HAVE_WAYLAND
+#include "wayland/wayland_client.h"
+#include "wayland/surface.h"
+#endif
+
 #include "scripting/scripting.h"
 
 #include <X11/extensions/shape.h>
@@ -161,6 +166,9 @@ Workspace::Workspace(bool restore)
     , transButton(NULL)
     , forceUnredirectCheck(true)
     , m_finishingCompositing(false)
+#ifdef KWIN_HAVE_WAYLAND
+    , m_wayland(NULL)
+#endif
 {
     (void) new KWinAdaptor(this);
 
@@ -574,6 +582,20 @@ Unmanaged* Workspace::createUnmanaged(Window w)
     return c;
 }
 
+#ifdef KWIN_HAVE_WAYLAND
+Wayland::Client *Workspace::createWaylandClient(Wayland::Surface *surface)
+{
+    Wayland::Client *c = new Wayland::Client(this, surface);
+    addWaylandClient(c);
+
+    if (scene) {
+        scene->windowAdded(c);
+    }
+    emit waylandClientAdded(c);
+    return c;
+}
+#endif
+
 void Workspace::addClient(Client* c, allowed_t)
 {
     Group* grp = findGroup(c->window());
@@ -631,6 +653,14 @@ void Workspace::addUnmanaged(Unmanaged* c, allowed_t)
     unmanaged.append(c);
     x_stacking_dirty = true;
 }
+
+#ifdef KWIN_HAVE_WAYLAND
+void Workspace::addWaylandClient(Wayland::Client *c)
+{
+    m_waylandClients.append(c);
+    x_stacking_dirty = true;
+}
+#endif
 
 /**
  * Destroys the client \a c
@@ -722,6 +752,16 @@ void Workspace::removeDeleted(Deleted* c, allowed_t)
     deleted.removeAll(c);
     x_stacking_dirty = true;
 }
+
+#ifdef KWIN_HAVE_WAYLAND
+void Workspace::removeWaylandClient(Wayland::Client *client)
+{
+    assert(m_waylandClients.contains(client));
+    addRepaint(client->visibleRect());
+    m_waylandClients.removeAll(client);
+    x_stacking_dirty = true;
+}
+#endif
 
 void Workspace::updateFocusChains(Client* c, FocusChainChange change)
 {
