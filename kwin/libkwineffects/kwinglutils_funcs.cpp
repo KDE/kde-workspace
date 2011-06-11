@@ -291,6 +291,9 @@ namespace KWin
 // EGL
 eglCreateImageKHR_func eglCreateImageKHR;
 eglDestroyImageKHR_func eglDestroyImageKHR;
+// Wayland
+eglBindWaylandDisplayWL_func eglBindWaylandDisplayWL;
+eglUnbindWaylandDisplayWL_func eglUnbindWaylandDisplayWL;
 // GLES
 glEGLImageTargetTexture2DOES_func glEGLImageTargetTexture2DOES;
 
@@ -302,6 +305,13 @@ void eglResolveFunctions()
     } else {
         eglCreateImageKHR = NULL;
         eglDestroyImageKHR = NULL;
+    }
+    if (hasGLExtension("EGL_WL_bind_wayland_display")) {
+        eglBindWaylandDisplayWL = (eglBindWaylandDisplayWL_func)eglGetProcAddress("eglBindWaylandDisplayWL");
+        eglUnbindWaylandDisplayWL = (eglUnbindWaylandDisplayWL_func)eglGetProcAddress("eglUnbindWaylandDisplayWL");
+    } else {
+        eglBindWaylandDisplayWL = NULL;
+        eglUnbindWaylandDisplayWL = NULL;
     }
 }
 

@@ -81,6 +81,22 @@ SceneOpenGL::~SceneOpenGL()
     }
 }
 
+#ifdef KWIN_HAVE_WAYLAND
+void SceneOpenGL::initWaylandEGL(wl_display *display)
+{
+    if (eglBindWaylandDisplayWL) {
+        eglBindWaylandDisplayWL(dpy, display);
+    }
+}
+
+void SceneOpenGL::releaseWaylandEGL(wl_display *display)
+{
+    if (eglUnbindWaylandDisplayWL) {
+        eglUnbindWaylandDisplayWL(dpy, display);
+    }
+}
+#endif
+
 bool SceneOpenGL::initTfp()
 {
     return false;

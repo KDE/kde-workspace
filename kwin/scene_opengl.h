@@ -33,6 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/extensions/XShm.h>
 #endif
 
+
+#ifdef KWIN_HAVE_WAYLAND
+// forward declare
+struct wl_display;
+#endif
+
 namespace KWin
 {
 
@@ -55,6 +61,11 @@ public:
     virtual void windowAdded(Toplevel*);
     virtual void windowClosed(Toplevel*, Deleted*);
     virtual void windowDeleted(Deleted*);
+
+#ifdef KWIN_HAVE_WAYLAND
+    void initWaylandEGL(wl_display *display);
+    void releaseWaylandEGL(wl_display *display);
+#endif
 
 protected:
     virtual void paintGenericScreen(int mask, ScreenPaintData data);

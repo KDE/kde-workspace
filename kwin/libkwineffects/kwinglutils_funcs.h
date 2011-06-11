@@ -395,6 +395,12 @@ typedef EGLBoolean(*eglDestroyImageKHR_func)(EGLDisplay, EGLImageKHR);
 extern KWIN_EXPORT eglCreateImageKHR_func eglCreateImageKHR;
 extern KWIN_EXPORT eglDestroyImageKHR_func eglDestroyImageKHR;
 
+// Wayland
+typedef EGLBoolean(*eglBindWaylandDisplayWL_func)(EGLDisplay dpy, struct wl_display *display);
+typedef EGLBoolean(*eglUnbindWaylandDisplayWL_func)(EGLDisplay dpy, struct wl_display *display);
+extern KWIN_EXPORT eglBindWaylandDisplayWL_func eglBindWaylandDisplayWL;
+extern KWIN_EXPORT eglUnbindWaylandDisplayWL_func eglUnbindWaylandDisplayWL;
+
 // GLES
 typedef GLvoid(*glEGLImageTargetTexture2DOES_func)(GLenum, GLeglImageOES);
 extern KWIN_EXPORT glEGLImageTargetTexture2DOES_func glEGLImageTargetTexture2DOES;
