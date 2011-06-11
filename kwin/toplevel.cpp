@@ -151,6 +151,9 @@ QRect Toplevel::visibleRect() const
 
 NET::WindowType Toplevel::windowType(bool direct, int supported_types) const
 {
+    if (!info) {
+        return NET::Normal;
+    }
     if (supported_types == 0)
         supported_types = dynamic_cast< const Client* >(this) != NULL
                           ? SUPPORTED_MANAGED_WINDOW_TYPES_MASK : SUPPORTED_UNMANAGED_WINDOW_TYPES_MASK;
