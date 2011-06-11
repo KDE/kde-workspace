@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef KWIN_HAVE_WAYLAND
 // forward declare
+struct wl_buffer;
 struct wl_display;
 #endif
 
@@ -123,6 +124,9 @@ public:
     using GLTexture::load;
     virtual bool load(const QImage& image, GLenum target = GL_TEXTURE_2D);
     virtual bool load(const QPixmap& pixmap, GLenum target = GL_TEXTURE_2D);
+#ifdef KWIN_HAVE_WAYLAND
+    virtual bool load(wl_buffer *buffer);
+#endif
     virtual void discard();
     virtual void release(); // undo the tfp_mode binding
     virtual void bind();
@@ -149,6 +153,9 @@ private:
 
 #ifndef KWIN_HAVE_OPENGLES
     GLXPixmap glxpixmap; // the glx pixmap the texture is bound to, only for tfp_mode
+#endif
+#ifdef KWIN_HAVE_OPENGLES
+    EGLImageKHR m_image;
 #endif
 
     friend class SceneOpenGL::Window;

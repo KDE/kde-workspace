@@ -22,6 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include "scene_opengl.h"
 #include <QX11Info>
 
+#ifdef KWIN_HAVE_WAYLAND
+#include <wayland-server.h>
+#endif
+
+namespace KWin
+{
+
 EGLDisplay dpy;
 EGLConfig config;
 EGLSurface surface;
@@ -228,11 +235,15 @@ void SceneOpenGL::flushBuffer(int mask, QRegion damage)
 
 void SceneOpenGL::Texture::init()
 {
+    m_image = EGL_NO_IMAGE_KHR;
     findTarget();
 }
 
 void SceneOpenGL::Texture::release()
 {
+    if (m_image != EGL_NO_IMAGE_KHR) {
+        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)m_image);
+    }
     mTexture = None;
 }
 
@@ -279,6 +290,46 @@ bool SceneOpenGL::Texture::load(const Pixmap& pix, const QSize& size,
     return true;
 }
 
+#ifdef KWIN_HAVE_WAYLAND
+bool SceneOpenGL::Texture::load(wl_buffer *buffer)
+{
+    if (!buffer) {
+        return false;
+    }
+    if (mTexture == None) {
+        createTexture();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+    bind();
+    if (wl_buffer_is_shm(buffer)) {
+        // create the image from shared memory
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+                        0, 0, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+        int pitch = wl_shm_buffer_get_stride(buffer) / 4;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+                        pitch, buffer->height, 0,
+                        GL_BGRA_EXT, GL_UNSIGNED_BYTE,
+                        wl_shm_buffer_get_data(buffer));
+    } else {
+        m_image = eglCreateImageKHR(dpy, NULL, EGL_WAYLAND_BUFFER_WL, buffer, NULL);
+
+        if (m_image == EGL_NO_IMAGE_KHR) {
+            kDebug(1212) << "failed to create Wayland egl image";
+            unbind();
+            return false;
+        }
+        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)m_image);
+    }
+    unbind();
+    checkGLError("load texture");
+    setYInverted(true);
+    return true;
+}
+#endif
+
 void SceneOpenGL::Texture::bind()
 {
     GLTexture::bind();
@@ -308,3 +359,5 @@ bool SceneOpenGL::Window::bindTexture()
         kDebug(1212) << "Failed to bind window";
     return success;
 }
+
+} // namespace

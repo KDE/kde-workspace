@@ -106,7 +106,10 @@ extern int currentRefreshRate();
 bool SceneOpenGL::db; // destination drawable is double-buffered
 
 #ifdef KWIN_HAVE_OPENGLES
+} // end namespace
 #include "scene_opengl_egl.cpp"
+namespace KWin
+{
 #else
 #include "scene_opengl_glx.cpp"
 #endif
