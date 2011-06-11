@@ -236,10 +236,11 @@ void Workspace::finishCompositing()
     c->finishCompositing();
     foreach (Deleted * c, deleted)
     c->finishCompositing();
-    XCompositeUnredirectSubwindows(display(), rootWindow(), CompositeRedirectManual);
-    delete effects;
-    effects = NULL;
 #ifdef KWIN_HAVE_WAYLAND
+    foreach (Wayland::Client *c, m_waylandClients) {
+        scene->windowClosed(c, NULL);
+        c->finishCompositing();
+    }
     if (m_wayland) {
         kDebug(1212) << "Stopping Wayland Server";
         static_cast<SceneOpenGL*>(scene)->releaseWaylandEGL(m_wayland->display());
@@ -247,6 +248,9 @@ void Workspace::finishCompositing()
         m_wayland = NULL;
     }
 #endif
+    XCompositeUnredirectSubwindows(display(), rootWindow(), CompositeRedirectManual);
+    delete effects;
+    effects = NULL;
     delete scene;
     scene = NULL;
     compositeTimer.stop();
