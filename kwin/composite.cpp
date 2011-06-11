@@ -56,6 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "notifications.h"
 #ifdef KWIN_HAVE_WAYLAND
 #include "wayland/wayland.h"
+#include "wayland/wayland_client.h"
 #endif
 
 #include <stdio.h>
@@ -484,6 +485,13 @@ bool Workspace::windowRepaintsPending() const
     foreach (Toplevel * c, deleted)
     if (!c->repaints().isEmpty())
         return true;
+#ifdef KWIN_HAVE_WAYLAND
+    foreach (Toplevel *c, m_waylandClients) {
+        if (!c->repaints().isEmpty()) {
+            return true;
+        }
+    }
+#endif
     return false;
 }
 
