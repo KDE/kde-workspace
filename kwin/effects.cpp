@@ -1493,8 +1493,12 @@ bool EffectWindowImpl::isSpecialWindow() const
 {
     if (Client* c = dynamic_cast<Client*>(toplevel))
         return c->isSpecialWindow();
-    else
+    else if (toplevel->isWayland()) {
+        // TODO: this has to become a proper check
+        return false;
+    } else {
         return true;
+    }
 }
 
 bool EffectWindowImpl::isDialog() const
