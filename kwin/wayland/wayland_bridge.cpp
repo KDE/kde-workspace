@@ -105,8 +105,10 @@ long int Bridge::itemId(int index)
 
 QList< ClientGroupItem > Bridge::clientGroupItems() const
 {
-    kDebug(1212) << "Client Group Items not yet implemented";
-    return QList<ClientGroupItem>();
+    // TODO: implement real client group support
+    QList< ClientGroupItem > items;
+    items.append(ClientGroupItem(caption(), icon()));
+    return items;
 }
 
 bool Bridge::isClientGroupActive()
