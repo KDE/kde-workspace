@@ -510,7 +510,13 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
     // decorations
     Client *client = dynamic_cast<Client*>(toplevel);
     Deleted *deleted = dynamic_cast<Deleted*>(toplevel);
+#ifdef KWIN_HAVE_WAYLAND
+    // TODO: remove the Wayland difference again when we have a shared base class for X11 and Wayland client
+    Wayland::Client *waylandClient = qobject_cast<Wayland::Client*>(toplevel);
+    if (client || deleted || waylandClient) {
+#else
     if (client || deleted) {
+#endif
         bool noBorder = true;
         bool updateDeco = false;
         const QPixmap *left = NULL;
@@ -538,6 +544,20 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
             bottom = deleted->bottomDecoPixmap();
             deleted->layoutDecorationRects(leftRect, topRect, rightRect, bottomRect);
         }
+#ifdef KWIN_HAVE_WAYLAND
+        if (waylandClient) {
+            noBorder = false;
+            updateDeco = waylandClient->decorationPixmapRequiresRepaint();
+            waylandClient->ensureDecorationPixmapsPainted();
+
+            waylandClient->layoutDecorationRects(leftRect, topRect, rightRect, bottomRect, Wayland::Client::WindowRelative);
+
+            left   = waylandClient->leftDecoPixmap();
+            top    = waylandClient->topDecoPixmap();
+            right  = waylandClient->rightDecoPixmap();
+            bottom = waylandClient->bottomDecoPixmap();
+        }
+#endif
         if (!noBorder) {
             WindowQuadList topList, leftList, rightList, bottomList;
 

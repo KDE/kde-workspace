@@ -483,6 +483,10 @@ WindowQuadList Scene::Window::buildQuads(bool force) const
         QRegion center = toplevel->transparentRect();
         QRegion decoration = (client && Workspace::self()->decorationHasAlpha() ?
                               QRegion(client->decorationRect()) : shape()) - center;
+        if (toplevel->isWayland()) {
+            // TODO: remerge with KWin::Client
+            decoration = QRegion(toplevel->decorationRect()) - center;
+        }
         ret = makeQuads(WindowQuadContents, contents);
         if (!client || !(center.isEmpty() || client->isShade()))
             ret += makeQuads(WindowQuadDecoration, decoration);

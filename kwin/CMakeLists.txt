@@ -177,7 +177,7 @@ qt4_add_dbus_interface( kwin_KDEINIT_SRCS
 qt4_add_resources( kwin_KDEINIT_SRCS resources.qrc )
 
 if(KWIN_HAVE_WAYLAND)
-    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} wayland/wayland.cpp wayland/surface.cpp wayland/wayland_client.cpp)
+    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} wayland/wayland.cpp wayland/surface.cpp wayland/wayland_client.cpp wayland/wayland_bridge.cpp)
 endif(KWIN_HAVE_WAYLAND)
 
 kde4_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
