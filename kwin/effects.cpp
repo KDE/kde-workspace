@@ -1631,7 +1631,8 @@ bool EffectWindowImpl::visibleInClientGroup() const
             return true;
         return c == c->clientGroup()->visible();
     }
-    return false;
+    // everything that is not a client is always visible
+    return true;
 }
 
 void EffectWindowImpl::setData(int role, const QVariant &data)
