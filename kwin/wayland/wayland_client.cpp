@@ -63,7 +63,7 @@ QStringList Client::activities() const
 
 int Client::desktop() const
 {
-    return -1;
+    return NET::OnAllDesktops;
 }
 
 QRect Client::transparentRect() const
