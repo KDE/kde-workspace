@@ -47,6 +47,7 @@ Client::Client(Workspace* ws, Surface* surface)
     , m_paddingRight(0)
     , m_paddingTop(0)
     , m_paddingBottom(0)
+    , m_desktop(ws->currentDesktop()) // TODO: apply window rules
 {
     geom = surface->geometry();
     // all Wayland Clients have alpha
@@ -55,6 +56,7 @@ Client::Client(Workspace* ws, Surface* surface)
     updateDecoration(true, true);
     connect(m_surface, SIGNAL(geometryChanged(QRect)), SLOT(setGeometry(QRect)));
     connect(m_surface, SIGNAL(damaged(QRect)), SLOT(surfaceDamaged(QRect)));
+    connect(ws, SIGNAL(currentDesktopChanged(int)), SLOT(updateDecorationVisibility()));
 }
 
 Client::~Client()
@@ -252,7 +254,7 @@ QStringList Client::activities() const
 
 int Client::desktop() const
 {
-    return NET::OnAllDesktops;
+    return m_desktop;
 }
 
 QRect Client::transparentRect() const
@@ -317,6 +319,35 @@ void Client::move(const QPoint &p, ForceGeometry_t force)
         return;
     geom.moveTopLeft(p);
     // TODO: there is more in KWin::Client::move
+}
+
+void Client::updateDecorationVisibility()
+{
+    if (!m_decoration) {
+        return;
+    }
+    if (isOnCurrentDesktop()) {
+        m_decoration->widget()->show();
+    } else {
+        m_decoration->widget()->hide();
+    }
+}
+
+void Client::setDesktop(int newDesktop)
+{
+    if (newDesktop != NET::OnAllDesktops)   // Do range check
+        newDesktop = qMax(1, qMin(workspace()->numberOfDesktops(), newDesktop));
+    // TODO: integrate window rules
+    if (m_desktop == newDesktop) {
+        return;
+    }
+    m_desktop = newDesktop;
+    if (!m_decoration) {
+        m_decoration->desktopChange();
+    }
+    updateDecorationVisibility();
+    workspace()->addRepaint(geometry());
+    // TODO: KWin::Client does a little bit more  like handling of transient and modal windows
 }
 
 } // namespace Wayland

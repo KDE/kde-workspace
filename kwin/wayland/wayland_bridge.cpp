@@ -181,8 +181,7 @@ void Bridge::titlebarDblClickOperation()
 
 void Bridge::setDesktop(int desktop)
 {
-    Q_UNUSED(desktop)
-    kDebug(1212) << "set desktop not yet implemented";
+    m_client->setDesktop(desktop);
 }
 
 void Bridge::showContextHelp()
@@ -327,7 +326,7 @@ bool Bridge::isModal() const
 
 int Bridge::desktop() const
 {
-    return NET::OnAllDesktops;
+    return m_client->desktop();
 }
 
 bool Bridge::providesContextHelp() const

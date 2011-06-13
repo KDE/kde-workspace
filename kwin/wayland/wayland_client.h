@@ -92,9 +92,15 @@ public:
     virtual bool decorationPixmapRequiresRepaint() const;
     virtual void ensureDecorationPixmapsPainted();
 
+    virtual void setDesktop(int newDesktop);
+
 public Q_SLOTS:
     void setGeometry(const QRect &geometry);
     void surfaceDamaged(const QRect &damage);
+    /**
+     * Shows/Hide decoration when desktop changes.
+     **/
+    void updateDecorationVisibility();
     // TODO: slots to inherit together with KWin::Client
     void repaintDecorationPending();
 
@@ -120,6 +126,8 @@ private:
     QPixmap m_decorationPixmapLeft, m_decorationPixmapRight, m_decorationPixmapTop, m_decorationPixmapBottom;
     // size of the client inside the decoration
     QSize m_clientSize;
+
+    int m_desktop;
 };
 
 } // namespace Wayland
