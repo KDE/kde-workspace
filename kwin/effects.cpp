@@ -31,6 +31,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "workspace.h"
 #include "kwinglutils.h"
 
+#ifdef KWIN_HAVE_WAYLAND
+#include "wayland/wayland_client.h"
+#endif
+
 #include <QFile>
 
 #include "kdebug.h"
@@ -594,6 +598,14 @@ void EffectsHandlerImpl::windowToDesktop(EffectWindow* w, int desktop)
     Client* cl = dynamic_cast< Client* >(static_cast<EffectWindowImpl*>(w)->window());
     if (cl && !cl->isDesktop() && !cl->isDock() && !cl->isTopMenu())
         Workspace::self()->sendClientToDesktop(cl, desktop, true);
+
+#ifdef KWIN_HAVE_WAYLAND
+    // TODO: re-merge with X11 Client
+    Wayland::Client *wayland = qobject_cast<Wayland::Client*>(static_cast<EffectWindowImpl*>(w)->window());
+    if (wayland) {
+        wayland->setDesktop(desktop);
+    }
+#endif
 }
 
 void EffectsHandlerImpl::windowToScreen(EffectWindow* w, int screen)
