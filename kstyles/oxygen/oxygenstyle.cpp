@@ -7885,14 +7885,14 @@ namespace Oxygen
     void Style::oxygenConfigurationChanged( void )
     {
 
+        // reset config
+        StyleConfigData::self()->readConfig();
+
         // reset helper configuration
         helper().reloadConfig();
 
         // background pixmap
         helper().setBackgroundPixmap( StyleConfigData::backgroundPixmap() );
-
-        // reset config
-        StyleConfigData::self()->readConfig();
 
         // update caches size
         int cacheSize( StyleConfigData::cacheEnabled() ?
