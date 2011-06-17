@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include "oxygenstyleconfigdata.h"
 
 #include <QtCore/QTextStream>
+#include <QtGui/QFileDialog>
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusConnection>
 
@@ -84,6 +85,7 @@ namespace Oxygen
         // load setup from configData
         load();
 
+        connect( _backgroundPixmap, SIGNAL( textChanged( const QString& ) ), SLOT( updateChanged() ) );
         connect( _toolBarDrawItemSeparator, SIGNAL( toggled(bool) ), SLOT( updateChanged() ) );
         connect( _checkDrawX, SIGNAL( toggled(bool) ), SLOT( updateChanged() ) );
         connect( _showMnemonics, SIGNAL( toggled(bool) ), SLOT( updateChanged() ) );
@@ -109,6 +111,7 @@ namespace Oxygen
     //__________________________________________________________________
     void StyleConfig::save( void )
     {
+        StyleConfigData::setBackgroundPixmap( _backgroundPixmap->text() );
         StyleConfigData::setToolBarDrawItemSeparator( _toolBarDrawItemSeparator->isChecked() );
         StyleConfigData::setCheckBoxStyle( ( _checkDrawX->isChecked() ? StyleConfigData::CS_X : StyleConfigData::CS_CHECK ) );
         StyleConfigData::setShowMnemonics( _showMnemonics->isChecked() );
@@ -173,6 +176,9 @@ namespace Oxygen
     //__________________________________________________________________
     void StyleConfig::loadBackgroundPixmap( void )
     {
+        const QString oldFile( _backgroundPixmap->text() );
+        const QString file( QFileDialog::getOpenFileName( this, i18n( "Choose overlay image" ), oldFile, i18n("Images (*.png *.xpm *.jpg)") ) );
+        _backgroundPixmap->setText( file );
     }
 
     //__________________________________________________________________
@@ -248,7 +254,8 @@ namespace Oxygen
 
         // check if any value was modified
         if ( _toolBarDrawItemSeparator->isChecked() != StyleConfigData::toolBarDrawItemSeparator() ) modified = true;
-        else if ( _showMnemonics->isChecked() != StyleConfigData::showMnemonics() ) modified = true;
+        else if( QFileInfo( _backgroundPixmap->text() ) != QFileInfo( StyleConfigData::backgroundPixmap() ) ) modified = true;
+        else if( _showMnemonics->isChecked() != StyleConfigData::showMnemonics() ) modified = true;
         else if( _viewDrawTriangularExpander->isChecked() != StyleConfigData::viewDrawTriangularExpander() ) modified = true;
         else if( _viewDrawFocusIndicator->isChecked() != StyleConfigData::viewDrawFocusIndicator() ) modified = true;
         else if( _viewDrawTreeBranchLines->isChecked() != StyleConfigData::viewDrawTreeBranchLines() ) modified = true;
@@ -294,6 +301,7 @@ namespace Oxygen
     void StyleConfig::load( void )
     {
 
+        _backgroundPixmap->setText( StyleConfigData::backgroundPixmap() );
         _toolBarDrawItemSeparator->setChecked( StyleConfigData::toolBarDrawItemSeparator() );
         _showMnemonics->setChecked( StyleConfigData::showMnemonics() );
         _checkDrawX->setChecked( StyleConfigData::checkBoxStyle() == StyleConfigData::CS_X );
