@@ -83,6 +83,9 @@ namespace Oxygen
         //! update options enable state based on selected drag mode
         void windowDragModeChanged( int );
 
+        //! load background pixmap
+        void loadBackgroundPixmap( void );
+
         protected:
 
         //! load setup from config data

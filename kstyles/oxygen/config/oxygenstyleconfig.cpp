@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <QtDBus/QDBusConnection>
 
 #include <KGlobal>
+#include <KIcon>
 #include <KLocale>
 #include <KSharedConfig>
 #include <KConfigGroup>
@@ -68,6 +69,10 @@ namespace Oxygen
         KGlobal::locale()->insertCatalog("kstyle_config");
 
         setupUi(this);
+
+        // background pixmap
+        _backgroundPixmapButton->setIcon( KIcon( "document-open" ) );
+        connect( _backgroundPixmapButton, SIGNAL( clicked( void ) ), SLOT( loadBackgroundPixmap( void ) ) );
 
         // connections
         connect( _windowDragMode, SIGNAL( currentIndexChanged( int ) ), SLOT( windowDragModeChanged( int ) ) );
@@ -163,6 +168,11 @@ namespace Oxygen
     {
         StyleConfigData::self()->readConfig();
         load();
+    }
+
+    //__________________________________________________________________
+    void StyleConfig::loadBackgroundPixmap( void )
+    {
     }
 
     //__________________________________________________________________
