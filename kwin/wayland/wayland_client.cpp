@@ -61,8 +61,8 @@ Client::Client(Workspace* ws, Surface* surface)
 
 Client::~Client()
 {
-    destroyDecoration();
     workspace()->removeWaylandClient(this);
+    destroyDecoration();
     delete m_decorationBridge;
 }
 
