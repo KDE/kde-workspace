@@ -95,6 +95,9 @@ public:
     virtual void setDesktop(int newDesktop);
 
     virtual void closeWindow();
+    virtual QRect visibleRect() const {
+        return Toplevel::visibleRect().adjusted(-m_paddingLeft, -m_paddingTop, m_paddingRight, m_paddingBottom);
+    }
 
 public Q_SLOTS:
     void setGeometry(const QRect &geometry);
