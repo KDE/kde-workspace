@@ -1638,6 +1638,13 @@ void EffectWindowImpl::closeWindow() const
     if (Client* c = dynamic_cast< Client* >(toplevel)) {
         c->closeWindow();
     }
+#ifdef KWIN_HAVE_WAYLAND
+    // TODO: re-merge with X11 Client
+    Wayland::Client *wayland = qobject_cast<Wayland::Client*>(toplevel);
+    if (wayland) {
+        wayland->closeWindow();
+    }
+#endif
 }
 
 bool EffectWindowImpl::visibleInClientGroup() const
