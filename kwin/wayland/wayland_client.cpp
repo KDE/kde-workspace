@@ -350,5 +350,15 @@ void Client::setDesktop(int newDesktop)
     // TODO: KWin::Client does a little bit more  like handling of transient and modal windows
 }
 
+void Client::closeWindow()
+{
+    // TODO: only close if window is closeable
+    wl_client *c = m_surface->nativeClient();
+    if (c) {
+        wl_client_destroy(c);
+    }
+    // TODO: in X we ping the window, we need something like this in Wayland, too
+}
+
 } // namespace Wayland
 } // namespace KWin

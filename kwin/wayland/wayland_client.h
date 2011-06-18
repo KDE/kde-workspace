@@ -94,6 +94,8 @@ public:
 
     virtual void setDesktop(int newDesktop);
 
+    virtual void closeWindow();
+
 public Q_SLOTS:
     void setGeometry(const QRect &geometry);
     void surfaceDamaged(const QRect &damage);

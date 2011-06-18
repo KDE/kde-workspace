@@ -82,6 +82,9 @@ public:
     wl_surface *surface() {
         return m_surface;
     }
+    wl_client *nativeClient() {
+        return m_nativeClient;
+    }
 
     void damage(const QRect &rect);
 
@@ -96,6 +99,7 @@ private:
     QRect m_geometry;
     wl_buffer *m_buffer;
     Client *m_client;
+    wl_client *m_nativeClient;
 };
 
 } // namespace Wayland

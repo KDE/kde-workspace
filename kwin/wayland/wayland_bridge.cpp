@@ -202,7 +202,7 @@ void Bridge::maximize(KDecorationDefines::MaximizeMode mode)
 
 void Bridge::closeWindow()
 {
-    kDebug(1212) << "Close Window not yet implemented";
+    m_client->closeWindow();
 }
 
 WId Bridge::windowId() const
@@ -351,7 +351,7 @@ bool Bridge::isMaximizable() const
 
 bool Bridge::isCloseable() const
 {
-    return false;
+    return true;
 }
 
 bool Bridge::isActive() const

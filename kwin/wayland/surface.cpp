@@ -108,6 +108,7 @@ Surface::Surface(Server *parent, struct wl_client *client, uint32_t id)
     , m_surface(NULL)
     , m_buffer(NULL)
     , m_client(NULL)
+    , m_nativeClient(client)
 {
     m_resource.object.id = id;
     m_resource.object.interface = &wl_surface_interface;
