@@ -97,6 +97,9 @@ public:
     wl_display *display() const {
         return m_display;
     }
+    wl_input_device *input() {
+        return &m_input;
+    }
 
     /**
      * Creates a @link Surface for the Wayland @p client with @p id.

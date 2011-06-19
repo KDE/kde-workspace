@@ -64,6 +64,14 @@ public:
     virtual QRect decorationRect() const;
 
     wl_buffer *buffer();
+    /**
+     * @returns The position inside the decoration respecting optional padding.
+     **/
+    QPoint decorationPos() const;
+
+    void mouseMove(const QPoint &client, const QPoint &global);
+    void mouseButtonPress(Qt::MouseButton button);
+    void mouseButtonRelease(Qt::MouseButton button);
 
     // TODO: methods to inherit together with KWin::Client
     enum CoordinateMode {
@@ -120,6 +128,8 @@ protected:
     virtual void repaintDecorationPixmap(QPixmap& pix, const QRect& r, const QPixmap& src, QRegion reg);
 
 private:
+    // TODO: maybe move to a Wayland util class?
+    int qtMouseButtonToWaylandButton(Qt::MouseButton button) const;
     Surface *m_surface;
     Bridge *m_decorationBridge;
 

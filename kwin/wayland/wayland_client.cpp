@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "wayland_client.h"
+#include "decorationeventfilter.h"
 #include "wayland.h"
 #include "surface.h"
 #include "wayland_bridge.h"
@@ -28,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGui/QPainter>
 // wayland
 #include <wayland-server.h>
+// linux
+#include <linux/input.h>
 
 namespace KWin
 {
@@ -75,7 +78,7 @@ void Client::updateDecoration(bool checkWorkspacePos, bool force)
     }
     m_decoration = workspace()->createDecoration(m_decorationBridge);
     m_decoration->init();
-    // TODO: install an event filter
+    m_decoration->widget()->installEventFilter(new DecorationEventFilter(m_decoration, this));
     m_decoration->borders(m_borderLeft, m_borderRight, m_borderTop, m_borderBottom);
     m_paddingLeft = m_paddingRight = m_paddingTop = m_paddingBottom = 0;
     if (KDecorationUnstable *deco2 = dynamic_cast<KDecorationUnstable*>(m_decoration))
@@ -272,6 +275,11 @@ QPoint Client::clientPos() const
     return QPoint(m_borderLeft, m_borderTop);
 }
 
+QPoint Client::decorationPos() const
+{
+    return clientPos() + QPoint(m_paddingLeft, m_paddingTop);
+}
+
 double Client::opacity() const
 {
     return 1.0;
@@ -359,6 +367,68 @@ void Client::closeWindow()
     }
     // TODO: in X we ping the window, we need something like this in Wayland, too
 }
+
+void Client::mouseMove(const QPoint& client, const QPoint& global)
+{
+    if (!m_surface->nativeClient()) {
+        return;
+    }
+    uint time = QDateTime::currentDateTime().toTime_t();
+    wl_input_device_set_pointer_focus(workspace()->wayland()->input(), m_surface->surface(),
+                                      time, global.x(), global.y(), client.x(), client.y());
+    wl_client_post_event(m_surface->nativeClient(), &workspace()->wayland()->input()->object,
+                         WL_INPUT_DEVICE_MOTION, time,
+                         global.x(), global.y(),
+                         client.x(), client.y());
+}
+
+void Client::mouseButtonPress(Qt::MouseButton button)
+{
+    if (!m_surface->nativeClient()) {
+        return;
+    }
+    if (button == Qt::NoButton) {
+        return;
+    }
+    wl_client_post_event(m_surface->nativeClient(), &workspace()->wayland()->input()->object,
+                         WL_INPUT_DEVICE_BUTTON, QDateTime::currentDateTime().toTime_t(),
+                         qtMouseButtonToWaylandButton(button), 1);
+}
+
+void Client::mouseButtonRelease(Qt::MouseButton button)
+{
+    if (!m_surface->nativeClient()) {
+        return;
+    }
+    if (button == Qt::NoButton) {
+        return;
+    }
+    wl_client_post_event(m_surface->nativeClient(), &workspace()->wayland()->input()->object,
+                         WL_INPUT_DEVICE_BUTTON, QDateTime::currentDateTime().toTime_t(),
+                         qtMouseButtonToWaylandButton(button), 0);
+}
+
+int Client::qtMouseButtonToWaylandButton(Qt::MouseButton button) const
+{
+    // TODO: what about non-Linux? Is this realistic in Wayland at all?
+    switch (button) {
+    case Qt::LeftButton:
+        return BTN_LEFT;
+    case Qt::RightButton:
+        return BTN_RIGHT;
+    case Qt::MiddleButton:
+        return BTN_MIDDLE;
+    case Qt::XButton1:
+        // is this the right mapping?
+        return BTN_FORWARD;
+    case Qt::XButton2:
+        // is this the right mapping
+        return BTN_BACK;
+    default:
+        return BTN_MOUSE;
+    }
+}
+
 
 } // namespace Wayland
 } // namespace KWin
