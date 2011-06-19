@@ -58,6 +58,7 @@ void surfaceAttach(struct wl_client *client, struct wl_surface *surface, struct 
     Surface *s = Workspace::self()->wayland()->client(surface->resource.object.id);
     s->setGeometry(QRect(x, y, buffer->width, buffer->height));
     s->setBuffer(buffer);
+    surface->client = client;
     s->setSurface(surface);
 }
 
