@@ -136,6 +136,8 @@ private:
     struct wl_compositor m_compositor;
 
     struct wl_object m_output;
+    // TODO: in future we might need more than one input device
+    struct wl_input_device m_input;
 
     QList<KWin::Wayland::Surface*> m_surfaces;
 };

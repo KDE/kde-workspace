@@ -86,6 +86,23 @@ const static struct wl_shm_callbacks shm_callbacks = {
 };
 
 /********************************************************************
+ * Callbacks for the wl_input_device_callbacks interface
+ *******************************************************************/
+void inputDeviceAttach(struct wl_client *client, struct wl_input_device *device_base, uint32_t time, struct wl_buffer *buffer, int32_t x, int32_t y) {
+    Q_UNUSED(client)
+    Q_UNUSED(device_base)
+    Q_UNUSED(time)
+    Q_UNUSED(buffer)
+    Q_UNUSED(x)
+    Q_UNUSED(y)
+    kDebug(1212) << "Input Device Attach not yet implemented";
+}
+
+const static struct wl_input_device_interface inputDeviceCallbacks = {
+    inputDeviceAttach
+};
+
+/********************************************************************
  * Callback for the Wayland output
  *******************************************************************/
 
@@ -145,6 +162,15 @@ bool Server::init()
     if (wl_display_add_socket(m_display, QLatin1String("wayland-0").latin1())) {
             kDebug(1212) << "Failed to create Wayland Socket";
             return false;
+    }
+
+    wl_input_device_init(&m_input, &m_compositor);
+    m_input.object.interface = &wl_input_device_interface;
+    m_input.object.implementation = (void (**)())(&inputDeviceCallbacks);
+    wl_display_add_object(m_display, &m_input.object);
+    if (wl_display_add_global(m_display, &m_input.object, NULL)) {
+        kDebug(1212) << "Failed to add global Input Device Wayland object";
+        return false;
     }
 
     wl_event_loop *loop = wl_display_get_event_loop(m_display);
