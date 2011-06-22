@@ -429,6 +429,36 @@ int Client::qtMouseButtonToWaylandButton(Qt::MouseButton button) const
     }
 }
 
+void Client::keyPress(quint32 key)
+{
+    if (!m_surface->nativeClient()) {
+        return;
+    }
+    const uint time = QDateTime::currentDateTime().toTime_t();
+    ensureKeyboardFocus(time);
+    wl_client_post_event(m_surface->nativeClient(), &workspace()->wayland()->input()->object,
+                            WL_INPUT_DEVICE_KEY, time, key - 8, 1);
+}
+
+void Client::keyRelease(quint32 key)
+{
+    if (!m_surface->nativeClient()) {
+        return;
+    }
+    const uint time = QDateTime::currentDateTime().toTime_t();
+    ensureKeyboardFocus(time);
+    wl_client_post_event(m_surface->nativeClient(), &workspace()->wayland()->input()->object,
+                            WL_INPUT_DEVICE_KEY, time, key - 8, 0);
+}
+
+void Client::ensureKeyboardFocus(uint time)
+{
+    wl_input_device *input = workspace()->wayland()->input();
+    if (!input->keyboard_focus || input->keyboard_focus->client != m_surface->nativeClient()) {
+        wl_input_device_set_keyboard_focus(input, m_surface->surface(), time);
+    }
+}
+
 
 } // namespace Wayland
 } // namespace KWin

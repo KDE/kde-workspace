@@ -65,6 +65,14 @@ bool DecorationEventFilter::eventFilter(QObject *object, QEvent *event)
             return true;
         }
     }
+    if (QKeyEvent *key = dynamic_cast<QKeyEvent*>(event)) {
+        if (key->type() == QEvent::KeyPress) {
+            m_client->keyPress(key->nativeScanCode());
+        } else if (key->type() == QEvent::KeyRelease) {
+            m_client->keyRelease(key->nativeScanCode());
+        }
+        return true;
+    }
     return false;
 }
 

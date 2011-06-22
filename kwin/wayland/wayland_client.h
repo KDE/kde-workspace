@@ -72,6 +72,8 @@ public:
     void mouseMove(const QPoint &client, const QPoint &global);
     void mouseButtonPress(Qt::MouseButton button);
     void mouseButtonRelease(Qt::MouseButton button);
+    void keyPress(quint32 key);
+    void keyRelease(quint32 key);
 
     // TODO: methods to inherit together with KWin::Client
     enum CoordinateMode {
@@ -130,6 +132,17 @@ protected:
 private:
     // TODO: maybe move to a Wayland util class?
     int qtMouseButtonToWaylandButton(Qt::MouseButton button) const;
+
+    /**
+     * Internal method to ensure that the current client has the keyboard focus.
+     * If there is no client which has keyboard focus or a different client has
+     * keyboard focus, this method will set this client as the one which has
+     * keyboard focus.
+     *
+     * This method is primarily used by @link keyPress and @link keyRelease.
+     **/
+    void ensureKeyboardFocus(uint time);
+
     Surface *m_surface;
     Bridge *m_decorationBridge;
 
