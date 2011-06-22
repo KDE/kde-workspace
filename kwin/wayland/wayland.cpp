@@ -164,6 +164,7 @@ bool Server::init()
             return false;
     }
 
+    memset(&m_input, 0, sizeof(m_input));
     wl_input_device_init(&m_input, &m_compositor);
     m_input.object.interface = &wl_input_device_interface;
     m_input.object.implementation = (void (**)())(&inputDeviceCallbacks);
