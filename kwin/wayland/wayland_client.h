@@ -142,6 +142,17 @@ private:
      * This method is primarily used by @link keyPress and @link keyRelease.
      **/
     void ensureKeyboardFocus(uint time);
+    /**
+     * Internal method to ensure that the current client has the mouse focus.
+     * If there is no client which has mouse focus or a different client has
+     * mouse focus, this method will set the client as the one with focus.
+     *
+     * This method is primarily used by @link mouseMove.
+     * @param global The global mouse pointer position
+     * @param client The mouse pointer position relative to client's topleft corner
+     * @param time The current time in msec.
+     **/
+    void ensurePointerFocus(const QPoint &global, const QPoint &client, uint time);
 
     Surface *m_surface;
     Bridge *m_decorationBridge;

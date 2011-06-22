@@ -373,9 +373,8 @@ void Client::mouseMove(const QPoint& client, const QPoint& global)
     if (!m_surface->nativeClient()) {
         return;
     }
-    uint time = QDateTime::currentDateTime().toTime_t();
-    wl_input_device_set_pointer_focus(workspace()->wayland()->input(), m_surface->surface(),
-                                      time, global.x(), global.y(), client.x(), client.y());
+    const uint time = QDateTime::currentDateTime().toTime_t();
+    ensurePointerFocus(global, client, time);
     wl_client_post_event(m_surface->nativeClient(), &workspace()->wayland()->input()->object,
                          WL_INPUT_DEVICE_MOTION, time,
                          global.x(), global.y(),
@@ -459,6 +458,14 @@ void Client::ensureKeyboardFocus(uint time)
     }
 }
 
+void Client::ensurePointerFocus(const QPoint &global, const QPoint &client, uint time)
+{
+    wl_input_device *input = workspace()->wayland()->input();
+    if (!input->pointer_focus || input->pointer_focus->client != m_surface->nativeClient()) {
+        wl_input_device_set_pointer_focus(input, m_surface->surface(), time, global.x(), global.y(), client.x(), client.y());
+    }
+
+}
 
 } // namespace Wayland
 } // namespace KWin
