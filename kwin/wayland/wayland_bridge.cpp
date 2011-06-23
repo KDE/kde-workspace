@@ -356,7 +356,7 @@ bool Bridge::isCloseable() const
 
 bool Bridge::isActive() const
 {
-    return false;
+    return m_client->isActive();
 }
 
 } // namespace Wayland

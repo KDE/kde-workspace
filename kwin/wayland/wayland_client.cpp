@@ -51,6 +51,7 @@ Client::Client(Workspace* ws, Surface* surface)
     , m_paddingTop(0)
     , m_paddingBottom(0)
     , m_desktop(ws->currentDesktop()) // TODO: apply window rules
+    , m_active(false)
 {
     geom = surface->geometry();
     // all Wayland Clients have alpha
@@ -60,6 +61,8 @@ Client::Client(Workspace* ws, Surface* surface)
     connect(m_surface, SIGNAL(geometryChanged(QRect)), SLOT(setGeometry(QRect)));
     connect(m_surface, SIGNAL(damaged(QRect)), SLOT(surfaceDamaged(QRect)));
     connect(ws, SIGNAL(currentDesktopChanged(int)), SLOT(updateDecorationVisibility()));
+    // TODO: clients should only be activated from Workspace
+    setActive(true);
 }
 
 Client::~Client()
@@ -366,6 +369,22 @@ void Client::closeWindow()
         wl_client_destroy(c);
     }
     // TODO: in X we ping the window, we need something like this in Wayland, too
+}
+
+void Client::setActive(bool active)
+{
+    if (m_active == active) {
+        return;
+    }
+    m_active = active;
+    if (m_decoration) {
+        m_decoration->activeChange();
+
+        // TODO: this does not belong here - in X11 Client it is in takeFocus and the X code really doesn't belong here
+        XSetInputFocus(display(), m_decoration->widget()->winId(), RevertToPointerRoot, xTime());
+        ensureKeyboardFocus(QDateTime::currentDateTime().toTime_t());
+    }
+    // TODO: lots of stuff also in Client - needs to merge
 }
 
 void Client::mouseMove(const QPoint& client, const QPoint& global)

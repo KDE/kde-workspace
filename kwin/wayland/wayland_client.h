@@ -103,6 +103,10 @@ public:
     virtual void ensureDecorationPixmapsPainted();
 
     virtual void setDesktop(int newDesktop);
+    virtual bool isActive() const {
+        return m_active;
+    }
+    virtual void setActive(bool active);
 
     virtual void closeWindow();
     virtual QRect visibleRect() const {
@@ -167,6 +171,7 @@ private:
     QSize m_clientSize;
 
     int m_desktop;
+    bool m_active;
 };
 
 } // namespace Wayland
