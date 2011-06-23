@@ -144,6 +144,7 @@ bool Server::init()
         return false;
     }
 
+    memset(&m_compositor, 0, sizeof(m_compositor));
     if (wl_compositor_init(&m_compositor, &compositorInterface, m_display)) {
         kDebug(1212) << "Failed to init Wayland Compositor";
         return false;
@@ -151,6 +152,7 @@ bool Server::init()
     m_shm = wl_shm_init(m_display, &shm_callbacks);
 
     // create the output
+    memset(&m_output, 0, sizeof(m_output));
     m_output.interface = &wl_output_interface;
     wl_display_add_object(m_display, &m_output);
     if (wl_display_add_global(m_display, &m_output, outputPostGeometry)) {
