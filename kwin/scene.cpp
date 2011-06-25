@@ -78,6 +78,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "effects.h"
 #include "lanczosfilter.h"
 #include "shadow.h"
+#ifdef KWIN_HAVE_WAYLAND
+#include "wayland/wayland_client.h"
+#endif
 
 #include <kephal/screens.h>
 
@@ -489,12 +492,21 @@ WindowQuadList Scene::Window::buildQuads(bool force) const
             contents = QRegion(QRect(toplevel->clientPos(), toplevel->clientSize()));
         }
         ret = makeQuads(WindowQuadContents, contents);
-        if (!client || !(center.isEmpty() || client->isShade()))
+        // TODO: remove wayland check
+        if ((!client || !(center.isEmpty() || client->isShade())) && !toplevel->isWayland())
             ret += makeQuads(WindowQuadDecoration, decoration);
         else {
             // this is a shaded client, we have to create four decoartion quads
             QRect left, top, right, bottom;
-            client->layoutDecorationRects(left, top, right, bottom, Client::WindowRelative);
+            if (client) {
+                client->layoutDecorationRects(left, top, right, bottom, Client::WindowRelative);
+            } else if (toplevel->isWayland()) {
+#ifdef KWIN_HAVE_WAYLAND
+                // TODO: remerge with KWin::Client
+                Wayland::Client *waylandClient = qobject_cast<Wayland::Client*>(toplevel);
+                waylandClient->layoutDecorationRects(left, top, right, bottom, Wayland::Client::WindowRelative);
+#endif
+            }
             ret += makeQuads(WindowQuadDecoration, top);
             ret += makeQuads(WindowQuadDecoration, bottom);
             ret += makeQuads(WindowQuadDecoration, left);
