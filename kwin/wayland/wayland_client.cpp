@@ -168,7 +168,15 @@ void Client::layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect 
     if (mode == WindowRelative)
         r.translate(-m_paddingLeft, -m_paddingTop);
 
-    // TODO: needs strut support
+    // TODO: needs full support for transparent rect
+    if (transparentRect().isNull()) {
+        top = QRect(r.x(), r.y(), r.width(), r.height() / 3);
+        left = QRect(r.x(), r.y() + top.height(), width() / 2, r.height() / 3);
+        right = QRect(r.x() + left.width(), r.y() + top.height(), r.width() - left.width(), left.height());
+        bottom = QRect(r.x(), r.y() + top.height() + left.height(), r.width(), r.height() - left.height() - top.height());
+        return;
+    }
+
     top = QRect(r.x(), r.y(), r.width(), m_paddingTop + m_borderTop);
     bottom = QRect(r.x(), r.y() + r.height() - m_paddingBottom - m_borderBottom,
                    r.width(), m_paddingBottom + m_borderBottom );
@@ -264,7 +272,7 @@ int Client::desktop() const
 
 QRect Client::transparentRect() const
 {
-    return QRect(clientPos(), clientSize());
+    return QRect();
 }
 
 QSize Client::clientSize() const
