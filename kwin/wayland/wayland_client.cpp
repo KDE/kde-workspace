@@ -87,7 +87,6 @@ void Client::updateDecoration(bool checkWorkspacePos, bool force)
     if (KDecorationUnstable *deco2 = dynamic_cast<KDecorationUnstable*>(m_decoration))
         deco2->padding(m_paddingLeft, m_paddingRight, m_paddingTop, m_paddingBottom);
     XMoveWindow(display(), m_decoration->widget()->winId(), -m_paddingLeft, -m_paddingTop);
-    move(QPoint(m_borderLeft, m_borderTop));
     resizeDecoration(geom.size());
     m_paintRedirector = new PaintRedirector(m_decoration->widget());
     connect(m_paintRedirector, SIGNAL(paintPending()), SLOT(repaintDecorationPending()));
@@ -300,12 +299,13 @@ wl_buffer *Client::buffer()
 
 void Client::setGeometry(const QRect &geometry)
 {
-    if (geom == geometry) {
+    const QRect newGeom(geom.topLeft(), geometry.size() + QSize(m_borderLeft + m_borderRight, m_borderTop + m_borderBottom));
+    if (newGeom == geom) {
         return;
     }
     addRepaint(geom);
-    geom = geometry;
-    m_clientSize = geometry.size() - QSize(m_borderLeft + m_borderRight, m_borderTop + m_borderBottom);
+    geom = newGeom;
+    m_clientSize = geometry.size();
     resizeDecoration(geom.size());
     addRepaint(geom);
 }
