@@ -839,6 +839,11 @@ void SceneOpenGL::Window::prepareShaderRenderStates(TextureType type, double opa
     // only set if it is set by an effect that is not negative
     shader->setUniform(GLShader::TextureWidth, texw >= 0.0 ? texw : toplevel->width());
     shader->setUniform(GLShader::TextureHeight, texh >= 0.0 ? texh : toplevel->height());
+
+    if (toplevel->isWayland() && type == Content) {
+        shader->setUniform(GLShader::TextureWidth, texw >= 0.0 ? texw : toplevel->clientSize().width());
+        shader->setUniform(GLShader::TextureHeight, texh >= 0.0 ? texh : toplevel->clientSize().height());
+    }
 }
 
 void SceneOpenGL::Window::prepareRenderStates(TextureType type, double opacity, double brightness, double saturation, Texture *tex)

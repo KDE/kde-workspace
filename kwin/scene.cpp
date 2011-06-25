@@ -486,6 +486,7 @@ WindowQuadList Scene::Window::buildQuads(bool force) const
         if (toplevel->isWayland()) {
             // TODO: remerge with KWin::Client
             decoration = QRegion(toplevel->decorationRect()) - center;
+            contents = QRegion(QRect(toplevel->clientPos(), toplevel->clientSize()));
         }
         ret = makeQuads(WindowQuadContents, contents);
         if (!client || !(center.isEmpty() || client->isShade()))
@@ -518,6 +519,14 @@ WindowQuadList Scene::Window::makeQuads(WindowQuadType type, const QRegion& reg)
         quad[ 1 ] = WindowVertex(r.x() + r.width(), r.y(), r.x() + r.width(), r.y());
         quad[ 2 ] = WindowVertex(r.x() + r.width(), r.y() + r.height(), r.x() + r.width(), r.y() + r.height());
         quad[ 3 ] = WindowVertex(r.x(), r.y() + r.height(), r.x(), r.y() + r.height());
+        if (toplevel->isWayland()) {
+            const int tx = toplevel->clientPos().x();
+            const int ty = toplevel->clientPos().y();
+            quad[ 0 ] = WindowVertex(r.x(), r.y(), r.x() - tx, r.y() - ty);
+            quad[ 1 ] = WindowVertex(r.x() + r.width(), r.y(), r.x() + r.width() - tx, r.y() - ty);
+            quad[ 2 ] = WindowVertex(r.x() + r.width(), r.y() + r.height(), r.x() + r.width() - tx, r.y() + r.height() - ty);
+            quad[ 3 ] = WindowVertex(r.x(), r.y() + r.height(), r.x() - tx, r.y() + r.height() - ty);
+        }
         ret.append(quad);
     }
     return ret;
