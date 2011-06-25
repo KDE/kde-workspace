@@ -119,8 +119,7 @@ bool Bridge::isClientGroupActive()
 
 QRect Bridge::transparentRect() const
 {
-    kDebug(1212) << "Transparent Rect not yet implemented";
-    return QRect();
+    return m_client->transparentRect();
 }
 
 bool Bridge::compositingActive() const
