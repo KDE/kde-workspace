@@ -248,9 +248,9 @@ void CFontViewPart::timeout()
 
             if(pathList.count()==1)
             {
-                found=KIO::NetAccess::stat("fonts:/"+i18n(KFI_KIO_FONTS_SYS)+'/'+pathList[0], udsEntry, NULL);
+                found=KIO::NetAccess::stat(QString("fonts:/"+i18n(KFI_KIO_FONTS_SYS)+'/'+pathList[0]), udsEntry, NULL);
                 if(!found)
-                    found=KIO::NetAccess::stat("fonts:/"+i18n(KFI_KIO_FONTS_USER)+'/'+pathList[0], udsEntry, NULL);
+                    found=KIO::NetAccess::stat(QString("fonts:/"+i18n(KFI_KIO_FONTS_USER)+'/'+pathList[0]), udsEntry, NULL);
             }
         }
         
@@ -362,6 +362,8 @@ void CFontViewPart::previewStatus(bool st)
             checkInstallable();
             if(KFI_KIO_FONTS_PROTOCOL==url().protocol())
                 printable=!Misc::isHidden(url());
+            else if(!FC::decode(url()).family.isEmpty())
+                printable=!Misc::isHidden(FC::getFile(url()));
 #ifdef KFI_PRINT_APP_FONTS
             else
             {
