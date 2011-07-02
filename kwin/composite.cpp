@@ -984,9 +984,6 @@ bool Client::shouldUnredirect() const
 void Client::addRepaintFull()
 {
     repaints_region = decorationRect();
-    if (hasShadow()) {
-        repaints_region = repaints_region.united(shadow()->shadowRegion());
-    }
     workspace()->checkCompositeTimer();
 }
 
@@ -1030,9 +1027,6 @@ bool Deleted::shouldUnredirect() const
 void Deleted::addRepaintFull()
 {
     repaints_region = decorationRect();
-    if (hasShadow()) {
-        repaints_region = repaints_region.united(shadow()->shadowRegion());
-    }
     workspace()->checkCompositeTimer();
 }
 
