@@ -389,7 +389,6 @@ namespace Oxygen
         } else if( qobject_cast<QDockWidget*>( widget ) ) {
 
             widget->setBackgroundRole( QPalette::NoRole );
-            widget->setAttribute( Qt::WA_TranslucentBackground );
             widget->setContentsMargins( 3,3,3,3 );
             addEventFilter( widget );
 
@@ -1271,10 +1270,19 @@ namespace Oxygen
             case QEvent::Resize:
             {
                 // make sure mask is appropriate
-                if( dockWidget->isFloating() && !helper().hasAlphaChannel( dockWidget ) )
+                if( dockWidget->isFloating() )
                 {
+                    if( helper().compositingActive() )
+                    {
 
-                    dockWidget->setMask( helper().roundedMask( dockWidget->rect() ) );
+                        // TODO: should not be needed
+                        dockWidget->setMask( helper().roundedMask( dockWidget->rect().adjusted( 1, 1, -1, -1 ) ) );
+
+                    } else {
+
+                        dockWidget->setMask( helper().roundedMask( dockWidget->rect() ) );
+
+                    }
 
                 } else dockWidget->clearMask();
 
@@ -1292,26 +1300,10 @@ namespace Oxygen
                 if( dockWidget->isWindow() )
                 {
 
-                    #ifndef Q_WS_WIN
-                    bool hasAlpha( helper().hasAlphaChannel( dockWidget ) );
-                    if( hasAlpha )
-                    {
-                        painter.setCompositionMode( QPainter::CompositionMode_Source );
-                        TileSet *tileSet( helper().roundCorner( color ) );
-                        tileSet->render( r, &painter );
-
-                        // set clip region
-                        painter.setCompositionMode( QPainter::CompositionMode_SourceOver );
-                        painter.setClipRegion( helper().roundedMask( r.adjusted( 1, 1, -1, -1 ) ), Qt::IntersectClip );
-                    }
-                    #endif
-
                     helper().renderWindowBackground( &painter, r, dockWidget, color );
 
                     #ifndef Q_WS_WIN
-                    if( hasAlpha ) painter.setClipping( false );
-
-                    helper().drawFloatFrame( &painter, r, color, !hasAlpha );
+                    helper().drawFloatFrame( &painter, r, color, !helper().compositingActive() );
                     #endif
 
                 } else {
