@@ -38,6 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 #include "kdecoration.h"
 #include "kdecorationfactory.h"
+#include "screenedge.h"
 #include "sm.h"
 
 #include <X11/Xlib.h>
@@ -58,10 +59,12 @@ class QPushButton;
 namespace KWin
 {
 
+#ifdef KWIN_BUILD_TABBOX
 namespace TabBox
 {
 class TabBox;
 }
+#endif
 
 class Client;
 class Tile;
@@ -140,8 +143,6 @@ public:
     void restoreFocus();
     void gotFocusIn(const Client*);
     void setShouldGetFocus(Client*);
-    bool fakeRequestedActivity(Client* c);
-    void unfakeActivity(Client* c);
     bool activateNextClient(Client* c);
     bool focusChangeEnabled() {
         return block_focus == 0;
@@ -174,13 +175,6 @@ public:
 
     void clientHidden(Client*);
     void clientAttentionChanged(Client* c, bool set);
-
-    void checkElectricBorder(const QPoint& pos, Time time);
-    void restoreElectricBorderSize(ElectricBorder border);
-    void reserveElectricBorder(ElectricBorder border);
-    void unreserveElectricBorder(ElectricBorder border);
-    void reserveElectricBorderActions(bool reserve);
-    void reserveElectricBorderSwitching(bool reserve);
 
     /**
      * @return List of clients currently managed by Workspace
@@ -222,6 +216,7 @@ public:
     Position supportedTilingResizeMode(Client *c, Position currentMode);
 
     Outline* outline();
+    ScreenEdge* screenEdge();
 
     //-------------------------------------------------
     // Desktop layout
@@ -332,6 +327,7 @@ private:
     QVector<TilingLayout *> tilingLayouts;
 
     Outline* m_outline;
+    ScreenEdge m_screenEdge;
 
     //-------------------------------------------------
     // Unsorted
@@ -354,25 +350,25 @@ public:
     }
 
     // Tab box
-    Client* currentTabBoxClient() const;
-    ClientList currentTabBoxClientList() const;
-    int currentTabBoxDesktop() const;
-    QList<int> currentTabBoxDesktopList() const;
-    void setTabBoxClient(Client*);
-    void setTabBoxDesktop(int);
-    Client* nextClientFocusChain(Client*) const;
-    Client* previousClientFocusChain(Client*) const;
-    Client* nextClientStatic(Client*) const;
-    Client* previousClientStatic(Client*) const;
-    int nextDesktopFocusChain(int iDesktop) const;
-    int previousDesktopFocusChain(int iDesktop) const;
-    int nextDesktopStatic(int iDesktop) const;
-    int previousDesktopStatic(int iDesktop) const;
-    void refTabBox();
-    void unrefTabBox();
-    void closeTabBox(bool abort = false);
-    TabBox::TabBox *tabBox() const {
-        return tab_box;
+#ifdef KWIN_BUILD_TABBOX
+    TabBox::TabBox *tabBox() const;
+#endif
+    bool hasTabBox() const;
+
+    const QVector<int> &desktopFocusChain() const {
+        return desktop_focus_chain;
+    }
+    const ClientList &globalFocusChain() const {
+        return global_focus_chain;
+    }
+    KActionCollection* actionCollection() const {
+        return keys;
+    }
+    KActionCollection* disableShortcutsKeys() const {
+        return disable_shortcuts_keys;
+    }
+    KActionCollection* clientKeys() const {
+        return client_keys;
     }
 
     // Tabbing
@@ -514,10 +510,6 @@ public:
     bool wasUserInteraction() const;
     bool sessionSaving() const;
 
-    bool managingTopMenus() const;
-    int topMenuHeight() const;
-    void updateCurrentTopMenu();
-
     int packPositionLeft(const Client* cl, int oldx, bool left_edge) const;
     int packPositionRight(const Client* cl, int oldx, bool right_edge) const;
     int packPositionUp(const Client* cl, int oldy, bool top_edge) const;
@@ -554,7 +546,9 @@ public:
     void startMousePolling();
     void stopMousePolling();
 
-    void raiseElectricBorderWindows();
+    Client* getMovingClient() {
+        return movingClient;
+    }
 
 public slots:
     void addRepaintFull();
@@ -603,26 +597,6 @@ public slots:
     void slotWindowQuickTileBottomLeft();
     void slotWindowQuickTileBottomRight();
 
-    void slotWalkThroughDesktops();
-    void slotWalkBackThroughDesktops();
-    void slotWalkThroughDesktopList();
-    void slotWalkBackThroughDesktopList();
-    void slotWalkThroughWindows();
-    void slotWalkBackThroughWindows();
-    void slotWalkThroughWindowsAlternative();
-    void slotWalkBackThroughWindowsAlternative();
-
-    void slotWalkThroughDesktopsKeyChanged(const QKeySequence& seq);
-    void slotWalkBackThroughDesktopsKeyChanged(const QKeySequence& seq);
-    void slotWalkThroughDesktopListKeyChanged(const QKeySequence& seq);
-    void slotWalkBackThroughDesktopListKeyChanged(const QKeySequence& seq);
-    void slotWalkThroughWindowsKeyChanged(const QKeySequence& seq);
-    void slotWalkBackThroughWindowsKeyChanged(const QKeySequence& seq);
-    void slotMoveToTabLeftKeyChanged(const QKeySequence& seq);
-    void slotMoveToTabRightKeyChanged(const QKeySequence& seq);
-    void slotWalkThroughWindowsAlternativeKeyChanged(const QKeySequence& seq);
-    void slotWalkBackThroughWindowsAlternativeKeyChanged(const QKeySequence& seq);
-
     void slotSwitchWindowUp();
     void slotSwitchWindowDown();
     void slotSwitchWindowRight();
@@ -645,7 +619,6 @@ public slots:
     void slotWindowToDesktopUp();
     void slotWindowToDesktopDown();
 
-    void slotMouseEmulation();
     void slotDisableGlobalShortcuts();
 
     void slotSettingsChanged(int category);
@@ -705,8 +678,6 @@ private slots:
     void configureWM();
     void desktopResized();
     void slotUpdateToolWindows();
-    void lostTopMenuSelection();
-    void lostTopMenuOwner();
     void delayFocus();
     void gotTemporaryRulesMessage(const QString&);
     void cleanupTemporaryRules();
@@ -720,7 +691,6 @@ private slots:
     void performCompositing();
     void performMousePoll();
     void lostCMSelection();
-    void updateElectricBorders();
     void resetCursorPosTime();
     void delayedCheckUnredirect();
 
@@ -730,7 +700,6 @@ private slots:
     void reallyStopActivity(const QString &id);   //dbus deadlocks suck
 
 protected:
-    bool keyPressMouseEmulation(XKeyEvent& ev);
     void timerEvent(QTimerEvent *te);
 
 Q_SIGNALS:
@@ -755,7 +724,6 @@ signals:
 private:
     void init();
     void initShortcuts();
-    void readShortcuts();
     void initDesktopPopup();
     void initActivityPopup();
     void discardPopup();
@@ -769,20 +737,6 @@ private:
         DirectionWest
     };
     void switchWindow(Direction direction);
-    bool startKDEWalkThroughWindows(TabBoxMode mode);   // TabBoxWindowsMode | TabBoxWindowsAlternativeMode
-    bool startWalkThroughDesktops(TabBoxMode mode);   // TabBoxDesktopMode | TabBoxDesktopListMode
-    bool startWalkThroughDesktops();
-    bool startWalkThroughDesktopList();
-    void navigatingThroughWindows(bool forward, const KShortcut& shortcut, TabBoxMode mode);   // TabBoxWindowsMode | TabBoxWindowsAlternativeMode
-    void KDEWalkThroughWindows(bool forward);
-    void CDEWalkThroughWindows(bool forward);
-    void walkThroughDesktops(bool forward);
-    void KDEOneStepThroughWindows(bool forward, TabBoxMode mode);   // TabBoxWindowsMode | TabBoxWindowsAlternativeMode
-    void oneStepThroughDesktops(bool forward, TabBoxMode mode);   // TabBoxDesktopMode | TabBoxDesktopListMode
-    void oneStepThroughDesktops(bool forward);
-    void oneStepThroughDesktopList(bool forward);
-    bool establishTabBoxGrab();
-    void removeTabBoxGrab();
 
     void propagateClients(bool propagate_new_clients);   // Called only from updateStackingOrder
     ClientList constrainedStackingOrder();
@@ -791,10 +745,6 @@ private:
     bool allowFullClientRaising(const Client* c, Time timestamp);
     bool keepTransientAbove(const Client* mainwindow, const Client* transient);
     void blockStackingUpdates(bool block);
-    void addTopMenu(Client* c);
-    void removeTopMenu(Client* c);
-    void setupTopMenuHandling();
-    void updateTopMenuGeometry(Client* c = NULL);
     void updateToolWindows(bool also_hide);
     void fixPositionAfterCrash(Window w, const XWindowAttributes& attr);
 
@@ -814,19 +764,6 @@ private:
     void loadDesktopSettings();
     void saveDesktopSettings();
 
-    // Mouse emulation
-    WId getMouseEmulationWindow();
-    enum MouseEmulation { EmuPress, EmuRelease, EmuMove };
-    unsigned int sendFakedMouseEvent(const QPoint& pos, WId win, MouseEmulation type, int button, unsigned int state);   // returns the new state
-
-    void tabBoxKeyPress(int key);
-    void tabBoxKeyRelease(const XKeyEvent& ev);
-
-    // Electric borders
-    void destroyElectricBorders();
-    bool electricBorderEvent(XEvent * e);
-    void electricBorderSwitchDesktop(ElectricBorder border, const QPoint& pos);
-
     //---------------------------------------------------------------------
 
     void helperDialog(const QString& message, const Client* c);
@@ -838,7 +775,6 @@ private:
 
     bool windowRepaintsPending() const;
     void setCompositeTimer();
-    void checkCompositePaintTime(int msec);
 
     QVector<int> desktop_focus_chain;
 
@@ -909,22 +845,11 @@ private:
     int session_active_client;
     int session_desktop;
 
-    bool control_grab;
-    bool tab_grab;
-    //KKeyNative walkThroughDesktopsKeycode, walkBackThroughDesktopsKeycode;
-    //KKeyNative walkThroughDesktopListKeycode, walkBackThroughDesktopListKeycode;
-    //KKeyNative walkThroughWindowsKeycode, walkBackThroughWindowsKeycode;
-    KShortcut cutWalkThroughDesktops, cutWalkThroughDesktopsReverse;
-    KShortcut cutWalkThroughDesktopList, cutWalkThroughDesktopListReverse;
-    KShortcut cutWalkThroughWindows, cutWalkThroughWindowsReverse;
-    KShortcut cutWalkThroughGroupWindows, cutWalkThroughGroupWindowsReverse;
-    KShortcut cutWalkThroughWindowsAlternative, cutWalkThroughWindowsAlternativeReverse;
-    bool mouse_emulation;
-    unsigned int mouse_emulation_state;
-    WId mouse_emulation_window;
     int block_focus;
 
+#ifdef KWIN_BUILD_TABBOX
     TabBox::TabBox* tab_box;
+#endif
     DesktopChangeOSD* desktop_change_osd;
 
     QMenu* popup;
@@ -940,6 +865,7 @@ private:
 
     KActionCollection* keys;
     KActionCollection* client_keys;
+    KActionCollection* disable_shortcuts_keys;
     QAction* mResizeOpAction;
     QAction* mMoveOpAction;
     QAction* mMaximizeOpAction;
@@ -955,7 +881,6 @@ private:
     QAction* mCloseGroup; // Close all clients in the group
     ShortcutDialog* client_keys_dialog;
     Client* client_keys_client;
-    KActionCollection* disable_shortcuts_keys;
     bool global_shortcuts_disabled;
     bool global_shortcuts_disabled_for_client;
 
@@ -985,18 +910,6 @@ private:
 
     KStartupInfo* startup;
 
-    ElectricBorder electric_current_border;
-    Window electric_windows[ELECTRIC_COUNT];
-    int electricLeft;
-    int electricRight;
-    int electricTop;
-    int electricBottom;
-    Time electric_time_first;
-    Time electric_time_last;
-    Time electric_time_last_trigger;
-    QPoint electric_push_point;
-    int electric_reserved[ELECTRIC_COUNT]; // Corners/edges used by something
-
     Placement* initPositioning;
 
     QVector<QRect> workarea; // Array of workareas for virtual desktops
@@ -1005,13 +918,6 @@ private:
     // Array of the previous restricted areas that window cannot be moved into
     QVector<StrutRects> oldrestrictedmovearea;
     QVector< QVector<QRect> > screenarea; // Array of workareas per xinerama screen for all virtual desktops
-
-    bool managing_topmenus;
-    KSelectionOwner* topmenu_selection;
-    KSelectionWatcher* topmenu_watcher;
-    ClientList topmenus; // Doesn't own them
-    mutable int topmenu_height;
-    QWidget* topmenu_space;
 
     int set_active_client_recursion;
     int block_stacking_updates; // When > 0, stacking updates are temporarily disabled
@@ -1036,7 +942,6 @@ private:
     QPushButton* transButton;
     QTimer unredirectTimer;
     bool forceUnredirectCheck;
-    QList< int > composite_paint_times;
     QTimer compositeResetTimer; // for compressing composite resets
     bool m_finishingCompositing; // finishCompositing() sets this variable while shutting down
 
@@ -1186,11 +1091,6 @@ inline void Workspace::setWasUserInteraction()
 inline bool Workspace::wasUserInteraction() const
 {
     return was_user_interaction;
-}
-
-inline bool Workspace::managingTopMenus() const
-{
-    return managing_topmenus;
 }
 
 inline void Workspace::sessionSaveStarted()

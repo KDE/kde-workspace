@@ -59,17 +59,9 @@ a->setText(i18n("System"));
 
 a = actionCollection->addAction("Group:Navigation");
 a->setText(i18n("Navigation"));
-DEF(I18N_NOOP("Walk Through Windows"),                 Qt::ALT + Qt::Key_Tab, slotWalkThroughWindows());
-DEF(I18N_NOOP("Walk Through Windows (Reverse)"),       Qt::ALT + Qt::SHIFT + Qt::Key_Backtab, slotWalkBackThroughWindows());
 DEF(I18N_NOOP("Walk Through Window Tabs"),             0, slotSwitchToTabRight());
 DEF(I18N_NOOP("Walk Through Window Tabs (Reverse)"),   0, slotSwitchToTabLeft());
 DEF(I18N_NOOP("Remove Window From Group"),             0, slotRemoveFromGroup());
-DEF(I18N_NOOP("Walk Through Windows Alternative"),     0, slotWalkThroughWindowsAlternative());
-DEF(I18N_NOOP("Walk Through Windows Alternative (Reverse)"), 0, slotWalkBackThroughWindowsAlternative());
-DEF(I18N_NOOP("Walk Through Desktops"),                0, slotWalkThroughDesktops());
-DEF(I18N_NOOP("Walk Through Desktops (Reverse)"),      0, slotWalkBackThroughDesktops());
-DEF(I18N_NOOP("Walk Through Desktop List"),            0, slotWalkThroughDesktopList());
-DEF(I18N_NOOP("Walk Through Desktop List (Reverse)"),  0, slotWalkBackThroughDesktopList());
 
 a = actionCollection->addAction("Group:Windows");
 a->setText(i18n("Windows"));
@@ -192,7 +184,6 @@ DEF(I18N_NOOP("Switch to Next Screen"),            0, slotSwitchToNextScreen());
 
 a = actionCollection->addAction("Group:Miscellaneous");
 a->setText(i18n("Miscellaneous"));
-DEF(I18N_NOOP("Mouse Emulation"),                  Qt::ALT + Qt::Key_F12, slotMouseEmulation());
 DEF(I18N_NOOP("Kill Window"),                      Qt::CTRL + Qt::ALT + Qt::Key_Escape, slotKillWindow());
 DEF(I18N_NOOP("Block Global Shortcuts"),           0, slotDisableGlobalShortcuts());
 DEF(I18N_NOOP("Suspend Compositing"),              Qt::SHIFT + Qt::ALT + Qt::Key_F12, slotToggleCompositing());

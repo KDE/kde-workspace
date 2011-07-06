@@ -439,11 +439,6 @@ private:
     Position mousePosition(const QPoint&) const;
     void updateCursor();
 
-    // Transparent stuff
-    void drawbound(const QRect& geom);
-    void clearbound();
-    void doDrawbound(const QRect& geom, bool clear);
-
     // Handlers for X11 events
     bool mapRequestEvent(XMapRequestEvent* e);
     void unmapNotifyEvent(XUnmapEvent* e);
@@ -491,11 +486,9 @@ signals:
     void maximizeSet(QPair<bool, bool>);
     void s_activated();
     void s_fullScreenSet(bool, bool);
-    void clientClosed(KWin::Client*);
     void clientMaximizedStateChanged(KWin::Client*, KDecorationDefines::MaximizeMode);
     void clientMinimized(KWin::Client* client, bool animate);
     void clientUnminimized(KWin::Client* client, bool animate);
-    void clientGeometryShapeChanged(KWin::Client* client, const QRect& old);
     void clientStartUserMovedResized(KWin::Client*);
     void clientStepUserMovedResized(KWin::Client *, const QRect&);
     void clientFinishUserMovedResized(KWin::Client*);
@@ -581,7 +574,6 @@ private:
     QStringList activityList;
     bool buttonDown;
     bool moveResizeMode;
-    bool move_faked_activity;
     Window move_resize_grab_window;
     bool move_resize_has_keyboard_grab;
     bool unrestrictedMoveResize;

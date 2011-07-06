@@ -68,6 +68,7 @@
 #include <KDE/KPluginLoader>
 #include <KDE/KStandardAction>
 #include <KDE/KZip>
+#include <KDE/KNS3/DownloadDialog>
 
 #define CFG_GROUP                  "Main Settings"
 #define CFG_PREVIEW_SPLITTER_SIZES "PreviewSplitterSizes"
@@ -178,7 +179,8 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
               itsProgress(NULL),
               itsUpdateDialog(NULL),
               itsTempDir(NULL),
-              itsPrintProc(NULL)
+              itsPrintProc(NULL),
+              itsDownloadFontsAct(NULL)
 {
     setButtons(Help);
 
@@ -186,7 +188,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     KIconLoader::global()->addAppDir(KFI_NAME);
     KIconLoader::global()->reconfigure(KFI_NAME, KGlobal::dirs());
 
-    KAboutData *about = new KAboutData("fontinst", 0, ki18n("KDE Font Installer"), 0, KLocalizedString(),
+    KAboutData *about = new KAboutData("fontinst", 0, ki18n("KDE Font Manager"), 0, KLocalizedString(),
                                        KAboutData::License_GPL, ki18n("(C) Craig Drummond, 2000 - 2009"));
     about->addAuthor(ki18n("Craig Drummond"), ki18n("Developer and maintainer"), "craig@kde.org");
     setAboutData(about);
@@ -224,12 +226,14 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     // Toolbar...
     KAction     *duplicateFontsAct=new KAction(KIcon("system-search"), i18n("Scan for Duplicate Fonts..."), this);
                 //*validateFontsAct=new KAction(KIcon("checkmark"), i18n("Validate Fonts..."), this);
-                //*downloadFontsAct=new KAction(KIcon("go-down"), i18n("Download Fonts..."), this);
 
+    if(!Misc::root())
+        itsDownloadFontsAct=new KAction(KIcon("get-hot-new-stuff"), i18n("Get New Fonts..."), this);
     itsToolsMenu=new KActionMenu(KIcon("system-run"), i18n("Tools"), this);
     itsToolsMenu->addAction(duplicateFontsAct);
     //itsToolsMenu->addAction(validateFontsAct);
-    //itsToolsMenu->addAction(downloadFontsAct);
+    if(itsDownloadFontsAct)
+        itsToolsMenu->addAction(itsDownloadFontsAct);
     itsToolsMenu->setDelayed(false);
     toolbar->addAction(itsToolsMenu);
     itsFilter=new CFontFilter(toolbarWidget);
@@ -262,13 +266,13 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     groupsLayout->addItem(new QSpacerItem(itsDisableGroupControl->width(), KDialog::spacingHint(),
                           QSizePolicy::Expanding, QSizePolicy::Fixed), 1, 4);
 
-    QWidget    *previewWidget = new QWidget(this);
-    QBoxLayout *previewWidgetLayout = new QBoxLayout(QBoxLayout::TopToBottom, previewWidget);
+    itsPreviewWidget = new QWidget(this);
+    QBoxLayout *previewWidgetLayout = new QBoxLayout(QBoxLayout::TopToBottom, itsPreviewWidget);
     previewWidgetLayout->setMargin(0);
     previewWidgetLayout->setSpacing(0);
     
     // Preview
-    QFrame     *previewFrame=new QFrame(previewWidget);
+    QFrame     *previewFrame=new QFrame(itsPreviewWidget);
     QBoxLayout *previewFrameLayout=new QBoxLayout(QBoxLayout::LeftToRight, previewFrame);
 
     previewFrameLayout->setMargin(0);
@@ -285,7 +289,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     itsPreview->engine()->readConfig(itsConfig);
 
     // List-style preview...
-    itsPreviewList = new CPreviewListView(itsPreview->engine(), previewWidget);
+    itsPreviewList = new CPreviewListView(itsPreview->engine(), itsPreviewWidget);
     previewWidgetLayout->addWidget(itsPreviewList);
     itsPreviewList->setVisible(false);
 
@@ -302,7 +306,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
                                                   i18n("Delete all selected fonts")),
                                          fontControlWidget);
 
-    itsPreviewSplitter->addWidget(previewWidget);
+    itsPreviewSplitter->addWidget(itsPreviewWidget);
     itsPreviewSplitter->setCollapsible(1, true);
 
     itsStatusLabel = new QLabel(fontControlWidget);
@@ -340,6 +344,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     defaultSizes+=300;
     defaultSizes+=220;
     itsPreviewSplitter->setSizes(cg.readEntry(CFG_PREVIEW_SPLITTER_SIZES, defaultSizes));
+    itsPreviewHidden=itsPreviewSplitter->sizes().at(1)<8;
 
     defaultSizes.clear();
     defaultSizes+=110;
@@ -369,7 +374,8 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
             itsPreview, SLOT(setUnicodeRange(const QList<CFcEngine::TRange> &)));
     connect(changeTextAct, SIGNAL(triggered(bool)), SLOT(changeText()));
     connect(itsFilter, SIGNAL(textChanged(const QString &)), itsFontListView, SLOT(filterText(const QString &)));
-    connect(itsFilter, SIGNAL(criteriaChanged(int, qulonglong)), itsFontListView, SLOT(filterCriteria(int, qulonglong)));
+    connect(itsFilter, SIGNAL(criteriaChanged(int, qulonglong, const QStringList &)), 
+            itsFontListView, SLOT(filterCriteria(int, qulonglong, const QStringList &)));
     connect(itsGroupListView, SIGNAL(del()), SLOT(removeGroup()));
     connect(itsGroupListView, SIGNAL(print()), SLOT(printGroup()));
     connect(itsGroupListView, SIGNAL(enable()), SLOT(enableGroup()));
@@ -400,9 +406,11 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     connect(itsDeleteFontControl, SIGNAL(clicked()), SLOT(deleteFonts()));
     connect(duplicateFontsAct, SIGNAL(triggered(bool)), SLOT(duplicateFonts()));
     //connect(validateFontsAct, SIGNAL(triggered(bool)), SLOT(validateFonts()));
-    //connect(downloadFontsAct, SIGNAL(triggered(bool)), SLOT(downloadFonts()));
+    if(itsDownloadFontsAct)
+        connect(itsDownloadFontsAct, SIGNAL(triggered(bool)), SLOT(downloadFonts()));
     connect(itsPreview, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(previewMenu(const QPoint &)));
     connect(itsPreviewList, SIGNAL(showMenu(const QPoint &)), SLOT(previewMenu(const QPoint &)));
+    connect(itsPreviewSplitter, SIGNAL(splitterMoved(int, int)), SLOT(splitterMoved()));
 
     selectMainGroup();
     itsFontList->load();
@@ -446,41 +454,47 @@ void CKCmFontInst::previewMenu(const QPoint &pos)
         itsPreviewListMenu->popup(itsPreviewList->mapToGlobal(pos));
 }
 
+void CKCmFontInst::splitterMoved()
+{
+    if(itsPreviewWidget->width()>8 && itsPreviewHidden)
+    {
+        itsPreviewHidden=false;
+        fontsSelected(itsFontListView->getSelectedItems());
+    }
+    else if(!itsPreviewHidden && itsPreviewWidget->width()<8)
+        itsPreviewHidden=true;
+}
+
 void CKCmFontInst::fontsSelected(const QModelIndexList &list)
 {
-    itsDeleteFontControl->setEnabled(false);
-
-    if(list.count())
+    if(!itsPreviewHidden)
     {
-        if(list.count()<2)
+        if(list.count())
         {
-            CFontModelItem *mi=static_cast<CFontModelItem *>(list.last().internalPointer());
-            CFontItem      *font=mi->parent()
-                                    ? static_cast<CFontItem *>(mi)
-                                    : (static_cast<CFamilyItem *>(mi))->regularFont();
+            if(list.count()<2)
+            {
+                CFontModelItem *mi=static_cast<CFontModelItem *>(list.last().internalPointer());
+                CFontItem      *font=mi->parent()
+                                        ? static_cast<CFontItem *>(mi)
+                                        : (static_cast<CFamilyItem *>(mi))->regularFont();
 
-            if(font)
-                itsPreview->showFont(font->isEnabled() ? font->family() : font->fileName(),
-                                     font->styleInfo(), font->index());
+                if(font)
+                    itsPreview->showFont(font->isEnabled() ? font->family() : font->fileName(),
+                                         font->styleInfo(), font->index());
+            }
+            else
+                itsPreviewList->showFonts(list);
         }
-        else
-            itsPreviewList->showFonts(list);
+        itsPreviewList->setVisible(list.count()>1);
+        itsPreview->parentWidget()->setVisible(list.count()<2);
     }
+
     itsDeleteFontControl->setEnabled(list.count());
-    itsPreviewList->setVisible(list.count()>1);
-    itsPreview->parentWidget()->setVisible(list.count()<2);
 }
 
 void CKCmFontInst::addFonts()
 {
-    QString filter("application/x-font-ttf "
-                   "application/x-font-otf "
-                   "application/x-font-type1 "
-                   "application/x-font-pcf "
-                   "application/x-font-bdf "
-                   "application/vnd.kde.fontspackage");
-
-    KUrl::List list=KFileDialog::getOpenUrls(KUrl(), filter, this, i18n("Add Fonts"));
+    KUrl::List list=KFileDialog::getOpenUrls(KUrl(), CFontList::fontMimeTypes.join(" "), this, i18n("Add Fonts"));
 
     if(list.count())
     {
@@ -541,6 +555,9 @@ void CKCmFontInst::groupSelected(const QModelIndex &index)
             itsGroupList->removeFromGroup(grp, *it);
         grp->setValidated();
     }
+
+    if(itsDownloadFontsAct)
+        itsDownloadFontsAct->setEnabled(grp->isPersonal() || grp->isAll());
 }
 
 void CKCmFontInst::print(bool all)
@@ -710,14 +727,19 @@ void CKCmFontInst::moveFonts()
             case 1:
                 doIt = KMessageBox::Yes==KMessageBox::warningYesNo(this,
                         i18n("<p>Do you really want to "
-                                "move</p><p>\'<b>%1</b>\'?</p>", fontNames.first()),
+                             "move</p><p>\'<b>%1</b>\'</p><p>from <i>%2</i> to <i>%3</i>?</p>",
+                             fontNames.first(),
+                             itsGroupListView->isSystem() ? i18n(KFI_KIO_FONTS_SYS) : i18n(KFI_KIO_FONTS_USER),
+                             itsGroupListView->isSystem() ? i18n(KFI_KIO_FONTS_USER) : i18n(KFI_KIO_FONTS_SYS)),
                         i18n("Move Font"), KGuiItem(i18n("Move")));
             break;
             default:
                 doIt = KMessageBox::Yes==KMessageBox::warningYesNoList(this,
                         i18np("Do you really want to move this font?",
-                                "Do you really want to move these %1 fonts?",
-                                fontNames.count()),
+                              "<p>Do you really want to move these %1 fonts from <i>%2</i> to <i>%3</i>?",
+                              fontNames.count(),
+                              itsGroupListView->isSystem() ? i18n(KFI_KIO_FONTS_SYS) : i18n(KFI_KIO_FONTS_USER),
+                              itsGroupListView->isSystem() ? i18n(KFI_KIO_FONTS_USER) : i18n(KFI_KIO_FONTS_SYS)),
                         fontNames, i18n("Move Fonts"), KGuiItem(i18n("Move")));
         }
 
@@ -822,8 +844,7 @@ void CKCmFontInst::changeText()
     {
         itsPreview->engine()->setPreviewString(newStr);
 
-        if(itsPreview->width()>6)
-            itsPreview->showFont();
+        itsPreview->showFont();
         itsPreviewList->refreshPreviews();
     }
 }
@@ -837,9 +858,30 @@ void CKCmFontInst::duplicateFonts()
 //{
 //}
 
-//void CKCmFontInst::downloadFonts()
-//{
-//}
+void CKCmFontInst::downloadFonts()
+{
+    KNS3::DownloadDialog *newStuff = new KNS3::DownloadDialog("kfontinst.knsrc", this);
+    newStuff->exec();
+
+    if(newStuff->changedEntries().count())  // We have new fonts, so need to reconfigure fontconfig...
+    {
+        // Ask dbus helper for the current fonts folder name...
+        // We then sym-link our knewstuff3 download folder into the fonts folder...
+        QString destFolder=CJobRunner::folderName(false);
+                
+        if(!destFolder.isEmpty())
+        {
+            destFolder+="kfontinst";
+    
+            if(!QFile::exists(destFolder))
+                QFile::link(KStandardDirs::locateLocal("data", "kfontinst"), destFolder);
+        }
+
+        doCmd(CJobRunner::CMD_UPDATE, CJobRunner::ItemList());
+    }
+    
+    delete newStuff;
+}
 
 void CKCmFontInst::print()
 {
@@ -931,19 +973,23 @@ void CKCmFontInst::setStatusBar()
 
         if(disabled||partial)
         {
-            text+=i18n(" (<img src=\"%1\" />%2 <img src=\"%3\" />%4 <img src=\"%5\" />%6)",
-                       KIconLoader::global()->iconPath("dialog-ok", -KIconLoader::SizeSmall),
-                       enabled,
-                       KIconLoader::global()->iconPath("dialog-cancel", -KIconLoader::SizeSmall),
-                       disabled,
-                       partialIcon(),
-                       partial);
-            itsStatusLabel->setToolTip(i18n("<table>"
-                                            "<tr><td>Enabled fonts:</td><td>%1</td></tr>"
-                                            "<tr><td>Disabled fonts:</td><td>%2</td></tr>"
-                                            "<tr><td>Partially enabled fonts:</td><td>%3</td></tr>"
-                                            "<tr><td>Total fonts:</td><td>%4</td></tr>"
-                                            "</table>", enabled, disabled, partial, enabled+disabled+partial));
+            text+=QString(" (<img src=\"%1\" />%2").arg(KIconLoader::global()->iconPath("dialog-ok", -KIconLoader::SizeSmall)).arg(enabled)
+                 +QString(" <img src=\"%1\" />%2").arg(KIconLoader::global()->iconPath("dialog-cancel", -KIconLoader::SizeSmall)).arg(disabled);
+            if(partial)
+                text+=QString(" <img src=\"%1\" />%2").arg(partialIcon()).arg(partial);
+            text+=QLatin1Char(')');
+            itsStatusLabel->setToolTip(partial
+                                        ? i18n("<table>"
+                                               "<tr><td align=\"right\">Enabled:</td><td>%1</td></tr>"
+                                               "<tr><td align=\"right\">Disabled:</td><td>%2</td></tr>"
+                                               "<tr><td align=\"right\">Partially enabled:</td><td>%3</td></tr>"
+                                               "<tr><td align=\"right\">Total:</td><td>%4</td></tr>"
+                                               "</table>", enabled, disabled, partial, enabled+disabled+partial)
+                                        : i18n("<table>"
+                                               "<tr><td align=\"right\">Enabled:</td><td>%1</td></tr>"
+                                               "<tr><td align=\"right\">Disabled:</td><td>%2</td></tr>"
+                                               "<tr><td align=\"right\">Total:</td><td>%3</td></tr>"
+                                               "</table>", enabled, disabled, enabled+disabled));
         }
 
         itsStatusLabel->setText(disabled||partial ? "<p>"+text+"</p>" : text);
@@ -1215,13 +1261,15 @@ void CKCmFontInst::doCmd(CJobRunner::ECommand cmd, const CJobRunner::ItemList &u
     connect(&runner, SIGNAL(configuring()), itsFontList, SLOT(unsetSlowUpdates()));
     runner.exec(cmd, urls, system);
     itsFontList->setSlowUpdates(false);
+    refreshFontList();
+    if(CJobRunner::CMD_DELETE==cmd)
+        itsFontListView->clearSelection();
     CFcEngine::setDirty();
     setStatusBar();
     delete itsTempDir;
     itsTempDir=NULL;
     itsFontListView->repaint();
     removeDeletedFontsFromGroups();
-    refreshFamilies();
 }
 
 }

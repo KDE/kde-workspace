@@ -44,11 +44,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "atoms.h"
 #include "notifications.h"
 #include "rules.h"
-#include "scene.h"
 #include "shadow.h"
 #include "deleted.h"
 #include "paintredirector.h"
+#ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
+#endif
 
 #include <X11/extensions/shape.h>
 #include <QX11Info>
@@ -91,7 +92,6 @@ Client::Client(Workspace* ws)
     , wrapper(None)
     , decoration(NULL)
     , bridge(new Bridge(this))
-    , move_faked_activity(false)
     , move_resize_grab_window(None)
     , move_resize_has_keyboard_grab(false)
     , transient_for (NULL)
@@ -188,9 +188,11 @@ Client::Client(Workspace* ws)
     //Client to workspace connections require that each
     //client constructed be connected to the workspace wrapper
 
+#ifdef KWIN_BUILD_TABBOX
     // TabBoxClient
     m_tabBoxClient = new TabBox::TabBoxClientImpl();
     m_tabBoxClient->setClient(this);
+#endif
 
     geom = QRect(0, 0, 100, 100);   // So that decorations don't start with size being (0,0)
     client_size = QSize(100, 100);
@@ -198,7 +200,7 @@ Client::Client(Workspace* ws)
     ready_for_painting = false; // wait for first damage or sync reply
 #endif
 
-    connect(this, SIGNAL(clientGeometryShapeChanged(KWin::Client*,QRect)), SIGNAL(geometryChanged()));
+    connect(this, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), SIGNAL(geometryChanged()));
     connect(this, SIGNAL(clientMaximizedStateChanged(KWin::Client*,KDecorationDefines::MaximizeMode)), SIGNAL(geometryChanged()));
     connect(this, SIGNAL(clientStepUserMovedResized(KWin::Client*,QRect)), SIGNAL(geometryChanged()));
 
@@ -223,7 +225,9 @@ Client::~Client()
     assert(block_geometry_updates == 0);
     assert(!check_active_modal);
     delete bridge;
+#ifdef KWIN_BUILD_TABBOX
     delete m_tabBoxClient;
+#endif
     delete scriptCache;
 }
 
@@ -241,10 +245,7 @@ void Client::releaseWindow(bool on_shutdown)
     assert(!deleting);
     deleting = true;
     Deleted* del = Deleted::create(this);
-    emit clientClosed(this);
-    if (scene) {
-        scene->windowClosed(this, del);
-    }
+    emit windowClosed(this, del);
     finishCompositing();
     workspace()->discardUsedWindowRules(this, true);   // Remove ForceTemporarily rules
     StackingUpdatesBlocker blocker(workspace());
@@ -309,10 +310,7 @@ void Client::destroyClient()
     assert(!deleting);
     deleting = true;
     Deleted* del = Deleted::create(this);
-    emit clientClosed(this);
-    if (scene) {
-        scene->windowClosed(this, del);
-    }
+    emit windowClosed(this, del);
     finishCompositing();
     workspace()->discardUsedWindowRules(this, true);   // Remove ForceTemporarily rules
     StackingUpdatesBlocker blocker(workspace());
@@ -371,9 +369,7 @@ void Client::updateDecoration(bool check_workspace_pos, bool force)
         resizeDecorationPixmaps();
         if (compositing())
             discardWindowPixmap();
-        if (scene != NULL)
-            scene->windowGeometryShapeChanged(this);
-        emit clientGeometryShapeChanged(this, oldgeom);
+        emit geometryShapeChanged(this, oldgeom);
     } else
         destroyDecoration();
     if (check_workspace_pos)
@@ -407,10 +403,8 @@ void Client::destroyDecoration()
         decorationPixmapLeft = decorationPixmapRight = decorationPixmapTop = decorationPixmapBottom = QPixmap();
         if (compositing())
             discardWindowPixmap();
-        if (scene != NULL && !deleting)
-            scene->windowGeometryShapeChanged(this);
         if (!deleting) {
-            emit clientGeometryShapeChanged(this, oldgeom);
+            emit geometryShapeChanged(this, oldgeom);
         }
     }
 }
@@ -501,8 +495,7 @@ void Client::repaintDecorationPending()
         const QRegion r = paintRedirector->scheduledRepaintRegion();
         if (!r.isEmpty())
             Workspace::self()->addRepaint(r.translated(x() - padding_left, y() - padding_top));
-    } else
-        ensureDecorationPixmapsPainted();
+    }
 }
 
 bool Client::decorationPixmapRequiresRepaint()
@@ -515,7 +508,7 @@ bool Client::decorationPixmapRequiresRepaint()
 
 void Client::ensureDecorationPixmapsPainted()
 {
-    if (!paintRedirector)
+    if (!paintRedirector || !compositing())
         return;
 
     QRegion r = paintRedirector->pendingRegion();
@@ -532,42 +525,7 @@ void Client::ensureDecorationPixmapsPainted()
     repaintDecorationPixmap(decorationPixmapTop, tr, p, r);
     repaintDecorationPixmap(decorationPixmapBottom, br, p, r);
 
-    if (!compositing()) {
-        // Blit the pixmaps to the frame window
-        layoutDecorationRects(lr, tr, rr, br, WindowRelative);
-#ifdef HAVE_XRENDER
-        if (Extensions::renderAvailable()) {
-            XRenderPictFormat* format = XRenderFindVisualFormat(display(), visual());
-            XRenderPictureAttributes pa;
-            pa.subwindow_mode = IncludeInferiors;
-            Picture pic = XRenderCreatePicture(display(), frameId(), format, CPSubwindowMode, &pa);
-            XRenderComposite(display(), PictOpSrc, decorationPixmapLeft.x11PictureHandle(), None, pic,
-                             0, 0, 0, 0, lr.x(), lr.y(), lr.width(), lr.height());
-            XRenderComposite(display(), PictOpSrc, decorationPixmapRight.x11PictureHandle(), None, pic,
-                             0, 0, 0, 0, rr.x(), rr.y(), rr.width(), rr.height());
-            XRenderComposite(display(), PictOpSrc, decorationPixmapTop.x11PictureHandle(), None, pic,
-                             0, 0, 0, 0, tr.x(), tr.y(), tr.width(), tr.height());
-            XRenderComposite(display(), PictOpSrc, decorationPixmapBottom.x11PictureHandle(), None, pic,
-                             0, 0, 0, 0, br.x(), br.y(), br.width(), br.height());
-            XRenderFreePicture(display(), pic);   // TODO don't recreate pictures all the time?
-        } else
-#endif
-        {
-            XGCValues values;
-            values.subwindow_mode = IncludeInferiors;
-            GC gc = XCreateGC(display(), rootWindow(), GCSubwindowMode, &values);
-            XCopyArea(display(), decorationPixmapLeft.handle(), frameId(), gc, 0, 0,
-                      lr.width(), lr.height(), lr.x(), lr.y());
-            XCopyArea(display(), decorationPixmapRight.handle(), frameId(), gc, 0, 0,
-                      rr.width(), rr.height(), rr.x(), rr.y());
-            XCopyArea(display(), decorationPixmapTop.handle(), frameId(), gc, 0, 0,
-                      tr.width(), tr.height(), tr.x(), tr.y());
-            XCopyArea(display(), decorationPixmapBottom.handle(), frameId(), gc, 0, 0,
-                      br.width(), br.height(), br.x(), br.y());
-            XFreeGC(display(), gc);
-        }
-    } else
-        XSync(display(), false);
+    XSync(display(), false);
 }
 
 void Client::repaintDecorationPixmap(QPixmap& pix, const QRect& r, const QPixmap& src, QRegion reg)
@@ -588,6 +546,11 @@ void Client::repaintDecorationPixmap(QPixmap& pix, const QRect& r, const QPixmap
 
 void Client::resizeDecorationPixmaps()
 {
+    if (!compositing()) {
+        // compositing disabled - we render directly on screen
+        triggerDecorationRepaint();
+        return;
+    }
     QRect lr, rr, tr, br;
     layoutDecorationRects(lr, tr, rr, br, DecorationRelative);
 
@@ -815,9 +778,7 @@ void Client::updateShape()
         addRepaintFull();
         addWorkspaceRepaint(visibleRect());   // In case shape change removes part of this window
     }
-    if (scene != NULL)
-        scene->windowGeometryShapeChanged(this);
-    emit clientGeometryShapeChanged(this, geometry());
+    emit geometryShapeChanged(this, geometry());
 }
 
 static Window shape_helper_window = None;
@@ -893,9 +854,7 @@ void Client::setMask(const QRegion& reg, int mode)
         XShapeCombineShape(display(), frameId(), ShapeBounding, 0, 0,
                            shape_helper_window, ShapeBounding, ShapeSet);
     }
-    if (scene != NULL)
-        scene->windowGeometryShapeChanged(this);
-    emit clientGeometryShapeChanged(this, geometry());
+    emit geometryShapeChanged(this, geometry());
     updateShape();
 }
 
@@ -2141,7 +2100,7 @@ bool Client::wantsInput() const
 bool Client::isSpecialWindow() const
 {
     // TODO
-    return isDesktop() || isDock() || isSplash() || isTopMenu() || isToolbar();
+    return isDesktop() || isDock() || isSplash() || isToolbar();
 }
 
 /**

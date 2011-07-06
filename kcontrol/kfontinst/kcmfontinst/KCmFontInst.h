@@ -69,6 +69,7 @@ class CKCmFontInst : public KCModule
 
     QString quickHelp() const;
     void    previewMenu(const QPoint &pos);
+    void    splitterMoved();
     void    fontsSelected(const QModelIndexList &list);
     void    groupSelected(const QModelIndex &index);
     void    addFonts();
@@ -83,6 +84,7 @@ class CKCmFontInst : public KCModule
     void    disableGroup();
     void    changeText();
     void    duplicateFonts();
+    void    downloadFonts();
     void    print();
     void    printGroup();
     void    listingPercent(int p);
@@ -134,6 +136,9 @@ class CKCmFontInst : public KCModule
     CJobRunner       *itsRunner;
     QMenu            *itsPreviewMenu,
                      *itsPreviewListMenu;
+    KAction          *itsDownloadFontsAct;
+    QWidget          *itsPreviewWidget;
+    bool             itsPreviewHidden;
 };
 
 }

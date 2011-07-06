@@ -151,7 +151,7 @@ namespace Oxygen
 
         // create tileSet otherwise
         qreal size( shadowSize() + overlap );
-        TileSet* tileSet = new TileSet( shadowPixmap( key, key.active ), size, size, size, size, size, size, 1, 1);
+        TileSet* tileSet = new TileSet( pixmap( key, key.active ), size, size, size, size, size, size, 1, 1);
         _shadowCache.insert( hash, tileSet );
 
         return tileSet;
@@ -180,7 +180,7 @@ namespace Oxygen
         QPainter p( &shadow );
         p.setRenderHint( QPainter::Antialiasing );
 
-        QPixmap inactiveShadow( shadowPixmap( key, false ) );
+        QPixmap inactiveShadow( pixmap( key, false ) );
         {
             QPainter pp( &inactiveShadow );
             pp.setRenderHint( QPainter::Antialiasing );
@@ -188,7 +188,7 @@ namespace Oxygen
             pp.fillRect( inactiveShadow.rect(), QColor( 0, 0, 0, 255*(1.0-opacity ) ) );
         }
 
-        QPixmap activeShadow( shadowPixmap( key, true ) );
+        QPixmap activeShadow( pixmap( key, true ) );
         {
             QPainter pp( &activeShadow );
             pp.setRenderHint( QPainter::Antialiasing );
@@ -207,7 +207,7 @@ namespace Oxygen
     }
 
     //_______________________________________________________
-    QPixmap ShadowCache::shadowPixmap( const Key& key, bool active ) const
+    QPixmap ShadowCache::pixmap( const Key& key, bool active ) const
     {
 
         // local reference to relevant shadow configuration
@@ -242,7 +242,7 @@ namespace Oxygen
                 // inner (sharp) gradient
                 const qreal gradientSize = qMin( shadowSize, (shadowSize+fixedSize)/2 );
                 const qreal hoffset( 0 );
-                const qreal voffset( 0.2 );
+                const qreal voffset = shadowConfiguration.verticalOffset()*gradientSize/fixedSize;
 
                 QRadialGradient rg = QRadialGradient( size+12.0*hoffset, size+12.0*voffset, gradientSize );
                 rg.setColorAt(1, Qt::transparent );

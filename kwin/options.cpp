@@ -114,8 +114,6 @@ unsigned long Options::updateSettings()
     changed |= KDecorationOptions::updateSettings(_config.data());   // read decoration settings
 
     KConfigGroup config(_config, "Windows");
-    moveMode = stringToMoveResizeMode(config.readEntry("MoveMode", "Opaque"));
-    resizeMode = stringToMoveResizeMode(config.readEntry("ResizeMode", "Opaque"));
     show_geometry_tip = config.readEntry("GeometryTip", false);
 
     QString val;
@@ -256,15 +254,6 @@ unsigned long Options::updateSettings()
     // and not kstyle tooltips and vise-versa, we don't read the
     // "EffectNoTooltip" setting from kdeglobals.
 
-#if 0
-FIXME: we have no mac style menu implementation in kwin anymore, so this just breaks
-    things for people!
-    KConfig _globalConfig("kdeglobals");
-    KConfigGroup globalConfig(&_globalConfig, "KDE");
-    topmenus = globalConfig.readEntry("macStyle", false);
-#else
-    topmenus = false;
-#endif
 
 //    QToolTip::setGloballyEnabled( d->show_tooltips );
 // KDE4 this probably needs to be done manually in clients
@@ -331,7 +320,6 @@ void Options::reloadCompositingSettings(bool force)
     prefs.detect();
 
     useCompositing = config.readEntry("Enabled" , prefs.recommendCompositing());
-    disableCompositingChecks = config.readEntry("DisableChecks", false);
     glDirect = config.readEntry("GLDirect", prefs.enableDirectRendering());
     glVSync = config.readEntry("GLVSync", prefs.enableVSync());
     glSmoothScale = qBound(-1, config.readEntry("GLTextureFilter", 2), 2);
@@ -509,16 +497,6 @@ Options::MouseCommand Options::wheelToMouseCommand(MouseWheelCommand com, int de
     }
 }
 #endif
-
-Options::MoveResizeMode Options::stringToMoveResizeMode(const QString& s)
-{
-    return s == "Opaque" ? Opaque : Transparent;
-}
-
-const char* Options::moveResizeModeToString(MoveResizeMode mode)
-{
-    return mode == Opaque ? "Opaque" : "Transparent";
-}
 
 double Options::animationTimeFactor() const
 {

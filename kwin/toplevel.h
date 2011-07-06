@@ -79,7 +79,6 @@ public:
     bool isDesktop() const;
     bool isDock() const;
     bool isToolbar() const;
-    bool isTopMenu() const;
     bool isMenu() const;
     bool isNormalWindow() const; // normal as in 'NET::Normal or NET::Unknown non-transient'
     bool isDialog() const;
@@ -163,6 +162,8 @@ signals:
     void damaged(KWin::Toplevel* toplevel, const QRect& damage);
     void propertyNotify(KWin::Toplevel* toplevel, long a);
     void geometryChanged();
+    void geometryShapeChanged(KWin::Toplevel* toplevel, const QRect& old);
+    void windowClosed(KWin::Toplevel* toplevel, KWin::Deleted* deleted);
 
 protected:
     virtual ~Toplevel();
@@ -313,14 +314,9 @@ inline bool Toplevel::isDock() const
     return windowType() == NET::Dock;
 }
 
-inline bool Toplevel::isTopMenu() const
-{
-    return windowType() == NET::TopMenu;
-}
-
 inline bool Toplevel::isMenu() const
 {
-    return windowType() == NET::Menu && !isTopMenu(); // because of backwards comp.
+    return windowType() == NET::Menu;
 }
 
 inline bool Toplevel::isToolbar() const
