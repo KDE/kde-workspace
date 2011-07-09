@@ -160,7 +160,7 @@ X-KDE-ServiceTypes=Plasma/Applet
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/tasks.qml
-X-Plasma-DefulatSize=300,200
+X-Plasma-DefaultSize=500,58
 
 X-KDE-PluginInfo-Author=Viranch Mehta
 X-KDE-PluginInfo-Email=viranch.mehta@gmail.com

@@ -44,7 +44,7 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QCheckBox" name="fillRows">
+    <widget class="QCheckBox" name="kcfg_fillRows">
      <property name="text">
       <string/>
      </property>
@@ -64,7 +64,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QCheckBox" name="showTooltip">
+    <widget class="QCheckBox" name="kcfg_showTooltip">
      <property name="text">
       <string/>
      </property>
@@ -84,7 +84,7 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QCheckBox" name="highlightWindows">
+    <widget class="QCheckBox" name="kcfg_highlightWindows">
      <property name="text">
       <string/>
      </property>
@@ -106,7 +106,7 @@
    <item row="4" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="KIntSpinBox" name="maxRows">
+      <widget class="KIntSpinBox" name="kcfg_maxRows">
        <property name="minimum">
         <number>1</number>
        </property>
@@ -165,13 +165,28 @@
    <item row="6" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QComboBox" name="groupingStrategy">
+      <widget class="QComboBox" name="kcfg_groupingStrategy">
        <property name="minimumSize">
         <size>
          <width>200</width>
          <height>0</height>
         </size>
        </property>
+       <item>
+        <property name="text">
+         <string>Do Not Group</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Manually</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>By Program Name</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -203,7 +218,7 @@
     </widget>
    </item>
    <item row="7" column="1">
-    <widget class="QCheckBox" name="groupWhenFull">
+    <widget class="QCheckBox" name="kcfg_groupWhenFull">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -231,13 +246,33 @@
    <item row="8" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QComboBox" name="sortingStrategy">
+      <widget class="QComboBox" name="kcfg_sortingStrategy">
        <property name="minimumSize">
         <size>
          <width>200</width>
          <height>0</height>
         </size>
        </property>
+       <item>
+        <property name="text">
+         <string>Do Not Sort</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Manually</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Alphabetically</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>By Desktop</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -288,7 +323,7 @@
     </widget>
    </item>
    <item row="10" column="1">
-    <widget class="QCheckBox" name="showOnlyCurrentScreen">
+    <widget class="QCheckBox" name="kcfg_showOnlyCurrentScreen">
      <property name="text">
       <string/>
      </property>
@@ -308,7 +343,7 @@
     </widget>
    </item>
    <item row="11" column="1">
-    <widget class="QCheckBox" name="showOnlyCurrentDesktop">
+    <widget class="QCheckBox" name="kcfg_showOnlyCurrentDesktop">
      <property name="text">
       <string/>
      </property>
@@ -328,7 +363,7 @@
     </widget>
    </item>
    <item row="12" column="1">
-    <widget class="QCheckBox" name="showOnlyCurrentActivity">
+    <widget class="QCheckBox" name="kcfg_showOnlyCurrentActivity">
      <property name="text">
       <string/>
      </property>
@@ -348,7 +383,7 @@
     </widget>
    </item>
    <item row="13" column="1">
-    <widget class="QCheckBox" name="showOnlyMinimized">
+    <widget class="QCheckBox" name="kcfg_showOnlyMinimized">
      <property name="text">
       <string/>
      </property>
