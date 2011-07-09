@@ -44,6 +44,7 @@
 #include <QtGui/QStyle>
 #include <QtGui/QCloseEvent>
 #include <QtCore/QTimer>
+#include <QtDBus/QDBusServiceWatcher>
 #include <X11/Xlib.h>
 #include <fixx11h.h>
 #include <fontconfig/fontconfig.h>
@@ -65,6 +66,17 @@ FontInstInterface * CJobRunner::dbus()
     return theInterface;
 }
 
+QString CJobRunner::folderName(bool sys)
+{
+    if(!theInterface)
+        return QString();
+
+    QDBusPendingReply<QString> reply=theInterface->folderName(sys);
+
+    reply.waitForFinished();
+    return reply.isError() ? QString() : reply.argumentAt<0>();
+}
+            
 void CJobRunner::startDbusService()
 {
     if (!QDBusConnection::sessionBus().interface()->isServiceRegistered(OrgKdeFontinstInterface::staticInterfaceName()))
@@ -203,8 +215,11 @@ CJobRunner::CJobRunner(QWidget *parent, int xid)
         itsStack->insertWidget(PAGE_COMPLETE, page);
     }
     
-    connect(dbus()->connection().interface(), SIGNAL(serviceOwnerChanged(QString, QString, QString)),
-           SLOT(dbusServiceOwnerChanged(QString, QString, QString)));
+    QDBusServiceWatcher *watcher = new QDBusServiceWatcher(QLatin1String(OrgKdeFontinstInterface::staticInterfaceName()),
+                                                           QDBusConnection::sessionBus(),
+                                                           QDBusServiceWatcher::WatchForOwnerChange, this);
+
+    connect(watcher, SIGNAL(serviceOwnerChanged(QString, QString, QString)), SLOT(dbusServiceOwnerChanged(QString, QString, QString)));
     connect(dbus(), SIGNAL(status(int, int)), SLOT(dbusStatus(int, int)));
     setMinimumSize(420, 160);
 }
@@ -404,7 +419,7 @@ void CJobRunner::checkInterface()
 
 void CJobRunner::dbusServiceOwnerChanged(const QString &name, const QString &from, const QString &to)
 {
-    if(to.isEmpty() && !from.isEmpty() && name==OrgKdeFontinstInterface::staticInterfaceName() && itsIt!=itsEnd)
+    if(to.isEmpty() && !from.isEmpty() && name==QLatin1String(OrgKdeFontinstInterface::staticInterfaceName()) && itsIt!=itsEnd)
     {
         setPage(PAGE_ERROR, i18n("Backend died, but has been restarted. Please try again."));
         itsActionLabel->stopAnimation();
@@ -663,7 +678,11 @@ QString CJobRunner::errorString(int value) const
         case FontInst::STATUS_NO_SYS_CONNECTION:
             return i18n("Failed to start the system daemon.<br><i>%1</i>", urlStr);
         case KIO::ERR_FILE_ALREADY_EXIST:
-            return i18n("<i>%1</i> already exists.", urlStr);
+        {
+            QString name(Misc::modifyName(Misc::getFile((*itsIt).fileName))),
+                    destFolder(Misc::getDestFolder(folderName(itsDestIsSystem), name));
+            return i18n("<i>%1</i> already exists.", destFolder+name);
+        }
         case KIO::ERR_DOES_NOT_EXIST:
             return i18n("<i>%1</i> does not exist.", urlStr);
         case KIO::ERR_WRITE_ACCESS_DENIED:

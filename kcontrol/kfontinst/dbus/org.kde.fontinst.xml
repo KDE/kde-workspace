@@ -103,5 +103,9 @@
       <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
     </method>
     <method name="saveDisabled" />
+    <method name="folderName">
+      <arg name="sys" type="b" direction="in"/>
+      <arg type="s" direction="out"/>
+    </method>
   </interface>
 </node>

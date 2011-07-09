@@ -51,6 +51,13 @@ public Q_SLOTS: // METHODS
         callWithArgumentList(QDBus::NoBlock, QLatin1String("enable"), argumentList);
     }
 
+    inline QDBusPendingReply<QString> folderName(bool sys)
+    {
+        QList<QVariant> argumentList;
+        argumentList << qVariantFromValue(sys);
+        return asyncCallWithArgumentList(QLatin1String("folderName"), argumentList);
+    }
+
     inline Q_NOREPLY void install(const QString &file, bool createAfm, bool toSystem, int pid, bool checkConfig)
     {
         QList<QVariant> argumentList;

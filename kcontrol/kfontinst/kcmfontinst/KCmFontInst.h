@@ -24,7 +24,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <config-workspace.h>
 #include "GroupList.h"
 #include "JobRunner.h"
 #include <QtCore/QSet>
@@ -69,6 +68,7 @@ class CKCmFontInst : public KCModule
 
     QString quickHelp() const;
     void    previewMenu(const QPoint &pos);
+    void    splitterMoved();
     void    fontsSelected(const QModelIndexList &list);
     void    groupSelected(const QModelIndex &index);
     void    addFonts();
@@ -134,6 +134,8 @@ class CKCmFontInst : public KCModule
     CJobRunner       *itsRunner;
     QMenu            *itsPreviewMenu,
                      *itsPreviewListMenu;
+    QWidget          *itsPreviewWidget;
+    bool             itsPreviewHidden;
 };
 
 }

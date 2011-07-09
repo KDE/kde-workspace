@@ -1,4 +1,5 @@
 if (X11_Xft_FOUND)
+    check_include_files(locale.h HAVE_LOCALE_H)
     configure_file(config-fontinst.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-fontinst.h)
     include_directories(
         ${KDE4_INCLUDES}
@@ -19,8 +20,9 @@ if (X11_Xft_FOUND)
     set(libkfontinstview_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/viewpart/FontPreview.cpp
                               ${CMAKE_CURRENT_SOURCE_DIR}/viewpart/PreviewSelectAction.cpp
                               ${CMAKE_CURRENT_SOURCE_DIR}/viewpart/CharTip.cpp )
+    set(libkfontinstactionlabel_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/kcmfontinst/ActionLabel.cpp)
     set(libkfontinstjobrunner_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/kcmfontinst/JobRunner.cpp
-                                   ${CMAKE_CURRENT_SOURCE_DIR}/kcmfontinst/ActionLabel.cpp
+                                   ${libkfontinstactionlabel_SRCS}
                                    ${CMAKE_CURRENT_SOURCE_DIR}/kcmfontinst/FontsPackage.cpp)
 
     add_subdirectory( lib ) 

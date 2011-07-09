@@ -44,13 +44,13 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDir>
 #include <QtCore/QEvent>
+#include <QtCore/QTimer>
 #include <stdlib.h>
 #include <unistd.h>
 #include <utime.h>
 #include "FcEngine.h"
 #include "Misc.h"
 #include "KfiConstants.h"
-#include <config-workspace.h>
 
 namespace KFI
 {
@@ -829,23 +829,26 @@ CGroupListView::CGroupListView(QWidget *parent, CGroupList *model)
 
     itsDeleteAct=itsMenu->addAction(KIcon("list-remove"), i18n("Remove"),
                                     this, SIGNAL(del()));
+    itsMenu->addSeparator();
     itsEnableAct=itsMenu->addAction(KIcon("enablefont"), i18n("Enable"),
                                     this, SIGNAL(enable()));
     itsDisableAct=itsMenu->addAction(KIcon("disablefont"), i18n("Disable"),
                                      this, SIGNAL(disable()));
     itsMenu->addSeparator();
-    itsRenameAct=itsMenu->addAction(i18n("Rename..."), this, SLOT(rename()));
-    itsMenu->addSeparator();
-    itsPrintAct=itsMenu->addAction(KIcon("document-print"), i18n("Print..."),
-                                   this, SIGNAL(print()));
+    itsRenameAct=itsMenu->addAction(KIcon("edit-rename"), i18n("Rename..."),
+                                    this, SLOT(rename()));
+    
+    if(!Misc::app(KFI_PRINTER).isEmpty())
+    {
+        itsMenu->addSeparator();
+        itsPrintAct=itsMenu->addAction(KIcon("document-print"), i18n("Print..."),
+                                       this, SIGNAL(print()));
+    }
+    else
+        itsPrintAct=0L;
     itsMenu->addSeparator();
     itsExportAct=itsMenu->addAction(KIcon("document-export"), i18n("Export..."),
                                     this, SIGNAL(zip()));
-
-    itsActionMenu=new QMenu(this);
-    itsActionMenu->addAction(KIcon("go-jump"), i18n("Move Here"), this, SIGNAL(moveFonts()));
-    itsActionMenu->addSeparator();
-    itsActionMenu->addAction(KIcon("process-stop"), i18n("Cancel"));
 
     setWhatsThis(model->whatsThis());
     header()->setWhatsThis(whatsThis());
@@ -875,7 +878,8 @@ void CGroupListView::controlMenu(bool del, bool en, bool dis, bool p, bool exp)
     itsRenameAct->setEnabled(del);
     itsEnableAct->setEnabled(en);
     itsDisableAct->setEnabled(dis);
-    itsPrintAct->setEnabled(p);
+    if(itsPrintAct)
+        itsPrintAct->setEnabled(p);
     itsExportAct->setEnabled(exp);
 }
 
@@ -902,6 +906,11 @@ void CGroupListView::rename()
 
     if(index.isValid())
         edit(index);
+}
+
+void CGroupListView::emitMoveFonts()
+{
+    emit moveFonts();
 }
 
 void CGroupListView::contextMenuEvent(QContextMenuEvent *ev)
@@ -988,7 +997,7 @@ void CGroupListView::dropEvent(QDropEvent *event)
                  (static_cast<CGroupListItem *>(to.internalPointer()))->isPersonal()) ||
                 ((static_cast<CGroupListItem *>(from.internalPointer()))->isPersonal() &&
                  (static_cast<CGroupListItem *>(to.internalPointer()))->isSystem()))
-                itsActionMenu->popup(QCursor::pos());
+                QTimer::singleShot(0, this, SLOT(emitMoveFonts()));
             else if((static_cast<CGroupListItem *>(from.internalPointer()))->isCustom() &&
                     !(static_cast<CGroupListItem *>(to.internalPointer()))->isCustom())
                 emit removeFamilies(from, families);

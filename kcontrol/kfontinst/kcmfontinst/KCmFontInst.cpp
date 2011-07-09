@@ -262,13 +262,13 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     groupsLayout->addItem(new QSpacerItem(itsDisableGroupControl->width(), KDialog::spacingHint(),
                           QSizePolicy::Expanding, QSizePolicy::Fixed), 1, 4);
 
-    QWidget    *previewWidget = new QWidget(this);
-    QBoxLayout *previewWidgetLayout = new QBoxLayout(QBoxLayout::TopToBottom, previewWidget);
+    itsPreviewWidget = new QWidget(this);
+    QBoxLayout *previewWidgetLayout = new QBoxLayout(QBoxLayout::TopToBottom, itsPreviewWidget);
     previewWidgetLayout->setMargin(0);
     previewWidgetLayout->setSpacing(0);
     
     // Preview
-    QFrame     *previewFrame=new QFrame(previewWidget);
+    QFrame     *previewFrame=new QFrame(itsPreviewWidget);
     QBoxLayout *previewFrameLayout=new QBoxLayout(QBoxLayout::LeftToRight, previewFrame);
 
     previewFrameLayout->setMargin(0);
@@ -285,7 +285,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     itsPreview->engine()->readConfig(itsConfig);
 
     // List-style preview...
-    itsPreviewList = new CPreviewListView(itsPreview->engine(), previewWidget);
+    itsPreviewList = new CPreviewListView(itsPreview->engine(), itsPreviewWidget);
     previewWidgetLayout->addWidget(itsPreviewList);
     itsPreviewList->setVisible(false);
 
@@ -302,7 +302,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
                                                   i18n("Delete all selected fonts")),
                                          fontControlWidget);
 
-    itsPreviewSplitter->addWidget(previewWidget);
+    itsPreviewSplitter->addWidget(itsPreviewWidget);
     itsPreviewSplitter->setCollapsible(1, true);
 
     itsStatusLabel = new QLabel(fontControlWidget);
@@ -340,6 +340,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     defaultSizes+=300;
     defaultSizes+=220;
     itsPreviewSplitter->setSizes(cg.readEntry(CFG_PREVIEW_SPLITTER_SIZES, defaultSizes));
+    itsPreviewHidden=itsPreviewSplitter->sizes().at(1)<8;
 
     defaultSizes.clear();
     defaultSizes+=110;
@@ -369,7 +370,8 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
             itsPreview, SLOT(setUnicodeRange(const QList<CFcEngine::TRange> &)));
     connect(changeTextAct, SIGNAL(triggered(bool)), SLOT(changeText()));
     connect(itsFilter, SIGNAL(textChanged(const QString &)), itsFontListView, SLOT(filterText(const QString &)));
-    connect(itsFilter, SIGNAL(criteriaChanged(int, qulonglong)), itsFontListView, SLOT(filterCriteria(int, qulonglong)));
+    connect(itsFilter, SIGNAL(criteriaChanged(int, qulonglong, const QStringList &)), 
+            itsFontListView, SLOT(filterCriteria(int, qulonglong, const QStringList &)));
     connect(itsGroupListView, SIGNAL(del()), SLOT(removeGroup()));
     connect(itsGroupListView, SIGNAL(print()), SLOT(printGroup()));
     connect(itsGroupListView, SIGNAL(enable()), SLOT(enableGroup()));
@@ -403,6 +405,7 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     //connect(downloadFontsAct, SIGNAL(triggered(bool)), SLOT(downloadFonts()));
     connect(itsPreview, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(previewMenu(const QPoint &)));
     connect(itsPreviewList, SIGNAL(showMenu(const QPoint &)), SLOT(previewMenu(const QPoint &)));
+    connect(itsPreviewSplitter, SIGNAL(splitterMoved(int, int)), SLOT(splitterMoved()));
 
     selectMainGroup();
     itsFontList->load();
@@ -446,41 +449,47 @@ void CKCmFontInst::previewMenu(const QPoint &pos)
         itsPreviewListMenu->popup(itsPreviewList->mapToGlobal(pos));
 }
 
+void CKCmFontInst::splitterMoved()
+{
+    if(itsPreviewWidget->width()>8 && itsPreviewHidden)
+    {
+        itsPreviewHidden=false;
+        fontsSelected(itsFontListView->getSelectedItems());
+    }
+    else if(!itsPreviewHidden && itsPreviewWidget->width()<8)
+        itsPreviewHidden=true;
+}
+
 void CKCmFontInst::fontsSelected(const QModelIndexList &list)
 {
-    itsDeleteFontControl->setEnabled(false);
-
-    if(list.count())
+    if(!itsPreviewHidden)
     {
-        if(list.count()<2)
+        if(list.count())
         {
-            CFontModelItem *mi=static_cast<CFontModelItem *>(list.last().internalPointer());
-            CFontItem      *font=mi->parent()
-                                    ? static_cast<CFontItem *>(mi)
-                                    : (static_cast<CFamilyItem *>(mi))->regularFont();
+            if(list.count()<2)
+            {
+                CFontModelItem *mi=static_cast<CFontModelItem *>(list.last().internalPointer());
+                CFontItem      *font=mi->parent()
+                                        ? static_cast<CFontItem *>(mi)
+                                        : (static_cast<CFamilyItem *>(mi))->regularFont();
 
-            if(font)
-                itsPreview->showFont(font->isEnabled() ? font->family() : font->fileName(),
-                                     font->styleInfo(), font->index());
+                if(font)
+                    itsPreview->showFont(font->isEnabled() ? font->family() : font->fileName(),
+                                         font->styleInfo(), font->index());
+            }
+            else
+                itsPreviewList->showFonts(list);
         }
-        else
-            itsPreviewList->showFonts(list);
+        itsPreviewList->setVisible(list.count()>1);
+        itsPreview->parentWidget()->setVisible(list.count()<2);
     }
+
     itsDeleteFontControl->setEnabled(list.count());
-    itsPreviewList->setVisible(list.count()>1);
-    itsPreview->parentWidget()->setVisible(list.count()<2);
 }
 
 void CKCmFontInst::addFonts()
 {
-    QString filter("application/x-font-ttf "
-                   "application/x-font-otf "
-                   "application/x-font-type1 "
-                   "application/x-font-pcf "
-                   "application/x-font-bdf "
-                   "application/vnd.kde.fontspackage");
-
-    KUrl::List list=KFileDialog::getOpenUrls(KUrl(), filter, this, i18n("Add Fonts"));
+    KUrl::List list=KFileDialog::getOpenUrls(KUrl(), CFontList::fontMimeTypes.join(" "), this, i18n("Add Fonts"));
 
     if(list.count())
     {
@@ -549,95 +558,88 @@ void CKCmFontInst::print(bool all)
     // In order to support printing of newly installed/enabled fonts, the actual printing
     // is carried out by the kfontinst helper app. This way we know Qt's font list will be
     // up to date.
-    if(!itsPrintProc || QProcess::NotRunning==itsPrintProc->state())
+    if((!itsPrintProc || QProcess::NotRunning==itsPrintProc->state()) && !Misc::app(KFI_PRINTER).isEmpty())
     {
-        QString exe(KStandardDirs::findExe(QLatin1String(KFI_PRINTER), KStandardDirs::installPath("libexec")));
+        QSet<Misc::TFont> fonts;
 
-        if(exe.isEmpty())
-            KMessageBox::error(this, i18n("Failed to locate font printer."));
-        else
+        itsFontListView->getPrintableFonts(fonts, !all);
+
+        if(fonts.count())
         {
-            QSet<Misc::TFont> fonts;
+            CPrintDialog dlg(this);
+            KConfigGroup cg(&itsConfig, CFG_GROUP);
 
-            itsFontListView->getPrintableFonts(fonts, !all);
-
-            if(fonts.count())
+            if(dlg.exec(cg.readEntry(CFG_FONT_SIZE, 1)))
             {
-                CPrintDialog dlg(this);
-                KConfigGroup cg(&itsConfig, CFG_GROUP);
+                static const int constSizes[]={0, 12, 18, 24, 36, 48};
+                QSet<Misc::TFont>::ConstIterator it(fonts.begin()),
+                                                 end(fonts.end());
+                KTemporaryFile                   tmpFile;
+                bool                             useFile(fonts.count()>16),
+                                                 startProc(true);
+                QStringList                      args;
 
-                if(dlg.exec(cg.readEntry(CFG_FONT_SIZE, 1)))
+                if(!itsPrintProc)
+                    itsPrintProc=new QProcess(this);
+                else
+                    itsPrintProc->kill();
+
+                //
+                // If we have lots of fonts to print, pass kfontinst a tempory groups file to print
+                // instead of passing font by font...
+                if(useFile)
                 {
-                    static const int constSizes[]={0, 12, 18, 24, 36, 48};
-                    QSet<Misc::TFont>::ConstIterator it(fonts.begin()),
-                                                    end(fonts.end());
-                    KTemporaryFile                   tmpFile;
-                    bool                             useFile(fonts.count()>16),
-                                                    startProc(true);
-                    QStringList                      args;
-
-                    if(!itsPrintProc)
-                        itsPrintProc=new QProcess(this);
-                    else
-                        itsPrintProc->kill();
-
-                    //
-                    // If we have lots of fonts to print, pass kfontinst a tempory groups file to print
-                    // instead of passing font by font...
-                    if(useFile)
+                    if(tmpFile.open())
                     {
-                        if(tmpFile.open())
-                        {
-                            QTextStream str(&tmpFile);
-
-                            for(; it!=end; ++it)
-                                str << (*it).family << endl
-                                    << (*it).styleInfo << endl;
-
-                            args << "--embed" << QString().sprintf("0x%x", (unsigned int)window()->winId())
-                                << "--caption" << KGlobal::caption().toUtf8()
-                                << "--icon" << "preferences-desktop-font-installer"
-                                << "--size" << QString().setNum(constSizes[dlg.chosenSize() < 6 ? dlg.chosenSize() : 2])
-                                << "--listfile" << tmpFile.fileName()
-                                << "--deletefile";
-                        }
-                        else
-                        {
-                            KMessageBox::error(this, i18n("Failed to save list of fonts to print."));
-                            startProc=false;
-                        }
-                    }
-                    else
-                    {
-                        args << "--embed" << QString().sprintf("0x%x", (unsigned int)window()->winId())
-                            << "--caption" << KGlobal::caption().toUtf8()
-                            << "--icon" << "preferences-desktop-font-installer"
-                            << "--size" << QString().setNum(constSizes[dlg.chosenSize()<6 ? dlg.chosenSize() : 2]);
+                        QTextStream str(&tmpFile);
 
                         for(; it!=end; ++it)
-                            args << "--pfont" << QString((*it).family.toUtf8()+','+QString().setNum((*it).styleInfo));
-                    }
+                            str << (*it).family << endl
+                                << (*it).styleInfo << endl;
 
-                    if(startProc)
+                        args << "--embed" << QString().sprintf("0x%x", (unsigned int)window()->winId())
+                             << "--caption" << KGlobal::caption().toUtf8()
+                             << "--icon" << "preferences-desktop-font-installer"
+                             << "--size" << QString().setNum(constSizes[dlg.chosenSize() < 6 ? dlg.chosenSize() : 2])
+                             << "--listfile" << tmpFile.fileName()
+                             << "--deletefile";
+                    }
+                    else
                     {
-                        itsPrintProc->start(exe, args);
-
-                        if(itsPrintProc->waitForStarted(1000))
-                        {
-                            if(useFile)
-                                tmpFile.setAutoRemove(false);
-                        }
-                        else
-                            KMessageBox::error(this, i18n("Failed to start font printer."));
+                        KMessageBox::error(this, i18n("Failed to save list of fonts to print."));
+                        startProc=false;
                     }
-                    cg.writeEntry(CFG_FONT_SIZE, dlg.chosenSize());
                 }
+                else
+                {
+                    args << "--embed" << QString().sprintf("0x%x", (unsigned int)window()->winId())
+                         << "--caption" << KGlobal::caption().toUtf8()
+                         << "--icon" << "preferences-desktop-font-installer"
+                         << "--size" << QString().setNum(constSizes[dlg.chosenSize()<6 ? dlg.chosenSize() : 2]);
+
+                    for(; it!=end; ++it)
+                        args << "--pfont" << QString((*it).family.toUtf8()+','+QString().setNum((*it).styleInfo));
+                }
+
+                if(startProc)
+                {
+                    itsPrintProc->start(Misc::app(KFI_PRINTER), args);
+
+                    if(itsPrintProc->waitForStarted(1000))
+                    {
+                        if(useFile)
+                            tmpFile.setAutoRemove(false);
+                    }
+                    else
+                        KMessageBox::error(this, i18n("Failed to start font printer."));
+                }
+                cg.writeEntry(CFG_FONT_SIZE, dlg.chosenSize());
             }
-            else
-                KMessageBox::information(this, i18n("There are no printable fonts.\n"
-                                                    "You can only print non-bitmap and enabled fonts."),
-                                         i18n("Cannot Print"));
         }
+        else
+            KMessageBox::information(this, i18n("There are no printable fonts.\n"
+                                                "You can only print non-bitmap and enabled fonts."),
+                                           i18n("Cannot Print"));
     }
 }
 
@@ -822,8 +824,7 @@ void CKCmFontInst::changeText()
     {
         itsPreview->engine()->setPreviewString(newStr);
 
-        if(itsPreview->width()>6)
-            itsPreview->showFont();
+        itsPreview->showFont();
         itsPreviewList->refreshPreviews();
     }
 }
