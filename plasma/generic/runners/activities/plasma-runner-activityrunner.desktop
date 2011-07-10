@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Activities
+Name[bg]=Дейности
 Name[bs]=motor aktivnosti
 Name[ca]=Activitats
 Name[ca@valencia]=Activitats
@@ -41,6 +42,7 @@ Name[x-test]=xxActivitiesxx
 Name[zh_CN]=活动
 Name[zh_TW]=活動
 Comment=List and switch between desktop activities
+Comment[bg]=Списък и превключване между дейностите
 Comment[bs]=Prikaz i prebacivanje između aktivnosti radne površine
 Comment[ca]=Llista i commuta entre activitats d'escriptori
 Comment[ca@valencia]=Llista i commuta entre activitats d'escriptori
@@ -62,6 +64,7 @@ Comment[lt]=Peržiūrėti ir persijungti tarp darbastalio veiklų
 Comment[nb]=Vis og bytt mellom skrivebordsaktiviteter
 Comment[nds]=Aktiv Schriefdischakschonen ankieken un wesseln
 Comment[nl]=Bureaubladactiviteiten laten zien en er tussen schakelen
+Comment[pa]=ਡੈਸਕਟਾਪ ਸਰਗਰਮੀਆਂ ਵੇਖੋ ਅਤੇ ਉਹਨਾਂ ਵਿੱਚ ਜਾਉ
 Comment[pl]=Twórz listę i przełączaj się pomiędzy działaniami pulpitu
 Comment[pt]=Ver e mudar de actividades no ambiente de trabalho
 Comment[pt_BR]=Listar e alternar entre as atividades da área de trabalho
