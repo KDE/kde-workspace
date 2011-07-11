@@ -59,10 +59,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unmanaged.h"
 #include "deleted.h"
 #include "effects.h"
-#include "screenedge.h"
+#include "overlaywindow.h"
 #include "tilinglayout.h"
 
+#ifdef KWIN_BUILD_SCRIPTING
 #include "scripting/scripting.h"
+#endif
 
 #include <X11/extensions/shape.h>
 #include <X11/keysym.h>
@@ -136,9 +138,9 @@ Workspace::Workspace(bool restore)
     , switch_to_tab_popup(0)
     , keys(0)
     , client_keys(NULL)
+    , disable_shortcuts_keys(NULL)
     , client_keys_dialog(NULL)
     , client_keys_client(NULL)
-    , disable_shortcuts_keys(NULL)
     , global_shortcuts_disabled(false)
     , global_shortcuts_disabled_for_client(false)
     , workspaceInit(true)
@@ -150,9 +152,6 @@ Workspace::Workspace(bool restore)
     , compositingSuspended(false)
     , compositingBlocked(false)
     , xrrRefreshRate(0)
-    , overlay(None)
-    , overlay_visible(true)
-    , overlay_shown(false)
     , transSlider(NULL)
     , transButton(NULL)
     , forceUnredirectCheck(true)
@@ -250,7 +249,9 @@ Workspace::Workspace(bool restore)
 
 void Workspace::init()
 {
+#ifdef KWIN_BUILD_SCREENEDGES
     m_screenEdge.init();
+#endif
 
     // Not used yet
     //topDock = 0L;
@@ -531,7 +532,7 @@ Client* Workspace::createClient(Window w, bool is_mapped)
 
 Unmanaged* Workspace::createUnmanaged(Window w)
 {
-    if (w == overlay)
+    if (compositing() && w == scene->overlayWindow()->window())
         return NULL;
     Unmanaged* c = new Unmanaged(this);
     if (!c->track(w)) {
@@ -911,9 +912,11 @@ void Workspace::slotReconfigure()
     kDebug(1212) << "Workspace::slotReconfigure()";
     reconfigureTimer.stop();
 
+#ifdef KWIN_BUILD_SCREENEDGES
     m_screenEdge.reserveActions(false);
     if (options->electricBorders() == Options::ElectricAlways)
         m_screenEdge.reserveDesktopSwitching(false);
+#endif
 
     bool borderlessMaximizedWindows = options->borderlessMaximizedWindows();
 
@@ -955,10 +958,12 @@ void Workspace::slotReconfigure()
         c->triggerDecorationRepaint();
     }
 
+#ifdef KWIN_BUILD_SCREENEDGES
     m_screenEdge.reserveActions(true);
     if (options->electricBorders() == Options::ElectricAlways)
         m_screenEdge.reserveDesktopSwitching(true);
     m_screenEdge.update();
+#endif
 
     if (!compositingSuspended) {
         setupCompositing();
@@ -1009,7 +1014,9 @@ void Workspace::slotReinitCompositing()
     KGlobal::config()->reparseConfiguration();
 
     // Update any settings that can be set in the compositing kcm.
+#ifdef KWIN_BUILD_SCREENEDGES
     m_screenEdge.update();
+#endif
 
     // Restart compositing
     finishCompositing();
@@ -1096,7 +1103,10 @@ QStringList Workspace::configModules(bool controlCenter)
 #ifdef KWIN_BUILD_TABBOX
              << "kwintabbox"
 #endif
-             << "kwinscreenedges";
+#ifdef KWIN_BUILD_SCREENEDGES
+             << "kwinscreenedges"
+#endif
+             ;
     return args;
 }
 
@@ -2092,10 +2102,12 @@ Outline* Workspace::outline()
     return m_outline;
 }
 
+#ifdef KWIN_BUILD_SCREENEDGES
 ScreenEdge* Workspace::screenEdge()
 {
     return &m_screenEdge;
 }
+#endif
 
 bool Workspace::hasTabBox() const
 {

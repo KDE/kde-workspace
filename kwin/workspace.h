@@ -38,7 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 #include "kdecoration.h"
 #include "kdecorationfactory.h"
+#ifdef KWIN_BUILD_SCREENEDGES
 #include "screenedge.h"
+#endif
 #include "sm.h"
 
 #include <X11/Xlib.h>
@@ -216,7 +218,9 @@ public:
     Position supportedTilingResizeMode(Client *c, Position currentMode);
 
     Outline* outline();
+#ifdef KWIN_BUILD_SCREENEDGES
     ScreenEdge* screenEdge();
+#endif
 
     //-------------------------------------------------
     // Desktop layout
@@ -327,7 +331,9 @@ private:
     QVector<TilingLayout *> tilingLayouts;
 
     Outline* m_outline;
+#ifdef KWIN_BUILD_SCREENEDGES
     ScreenEdge m_screenEdge;
+#endif
 
     //-------------------------------------------------
     // Unsorted
@@ -529,16 +535,6 @@ public:
     void addRepaint(const QRect& r);
     void addRepaint(const QRegion& r);
     void addRepaint(int x, int y, int w, int h);
-    /// Creates XComposite overlay window, call initOverlay() afterwards
-    bool createOverlay();
-    /// Init overlay and the destination window in it
-    void setupOverlay(Window window);
-    void showOverlay();
-    void hideOverlay(); // hides and resets overlay window
-    void setOverlayShape(const QRegion& reg);
-    /// Destroys XComposite overlay window
-    void destroyOverlay();
-    Window overlayWindow();
     void checkUnredirect(bool force = false);
     void checkCompositeTimer();
 
@@ -934,10 +930,6 @@ private:
     uint vBlankInterval, vBlankPadding, fpsInterval, estimatedRenderTime;
     int xrrRefreshRate; // used only for compositing
     QRegion repaints_region;
-    Window overlay; // XComposite overlay window
-    bool overlay_visible;
-    bool overlay_shown; // For showOverlay()
-    QRegion overlay_shape;
     QSlider* transSlider;
     QPushButton* transButton;
     QTimer unredirectTimer;
@@ -1116,11 +1108,6 @@ inline bool Workspace::showingDesktop() const
 inline bool Workspace::globalShortcutsDisabled() const
 {
     return global_shortcuts_disabled || global_shortcuts_disabled_for_client;
-}
-
-inline Window Workspace::overlayWindow()
-{
-    return overlay;
 }
 
 inline bool Workspace::rulesUpdatesDisabled() const

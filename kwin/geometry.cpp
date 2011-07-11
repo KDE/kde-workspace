@@ -30,7 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "workspace.h"
 
+#ifdef KWIN_BUILD_SCRIPTING
 #include "scripting/workspaceproxy.h"
+#endif
 
 #include <kapplication.h>
 #include <kglobal.h>
@@ -40,7 +42,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "notifications.h"
 #include "geometrytip.h"
 #include "rules.h"
-#include "screenedge.h"
 #include "effects.h"
 #include <QPainter>
 #include <QVarLengthArray>
@@ -72,7 +73,9 @@ void Workspace::desktopResized()
     rootInfo->setDesktopGeometry(-1, desktop_geometry);
 
     updateClientArea();
+#ifdef KWIN_BUILD_SCREENEDGES
     m_screenEdge.update(true);
+#endif
     if (compositing())
         compositeResetTimer.start(0);
 }
@@ -1012,7 +1015,7 @@ bool Client::hasOffscreenXineramaStrut() const
     return !region.isEmpty();
 }
 
-void Client::checkWorkspacePosition()
+void Client::checkWorkspacePosition(const QRect &geo)
 {
     if (isDesktop())
         return;
@@ -1025,9 +1028,16 @@ void Client::checkWorkspacePosition()
     if (isDock())
         return;
 
-    if (maximizeMode() != MaximizeRestore)
+    if (maximizeMode() != MaximizeRestore) {
         // TODO update geom_restore?
         changeMaximize(false, false, true);   // adjust size
+        return;
+    }
+
+    if (quick_tile_mode != QuickTileNone) {
+        setGeometry(electricBorderMaximizeGeometry(geometry().center(), desktop()));
+        return;
+    }
 
     if (!isShade()) { // TODO
         // this can be true only if this window was mapped before KWin
@@ -1047,7 +1057,7 @@ void Client::checkWorkspacePosition()
         int oldBottomMax = screenArea.y() + screenArea.height();
         int oldLeftMax = screenArea.x();
         int topMax = INT_MIN, rightMax = INT_MAX, bottomMax = INT_MAX, leftMax = INT_MIN;
-        QRect newGeom = geometry();
+        QRect newGeom = geo.isValid() ? geo : geometry();
         const QRect& newGeomTall = QRect(newGeom.x(), 0, newGeom.width(), displayHeight());   // Full screen height
         const QRect& newGeomWide = QRect(0, newGeom.y(), displayWidth(), newGeom.height());   // Full screen width
 
@@ -2055,6 +2065,7 @@ void Client::maximize(MaximizeMode m)
  */
 void Client::setMaximize(bool vertically, bool horizontally)
 {
+#ifdef KWIN_BUILD_SCRIPTING
     //Scripting call. Does not use a signal/slot mechanism
     //as ensuring connections was a bit difficult between
     //so many clients and the workspace
@@ -2062,6 +2073,7 @@ void Client::setMaximize(bool vertically, bool horizontally)
     if (ws_wrap != 0) {
         ws_wrap->sl_clientMaximizeSet(this, QPair<bool, bool>(vertically, horizontally));
     }
+#endif
 
     emit maximizeSet(QPair<bool, bool>(vertically, horizontally));
 
@@ -2349,10 +2361,12 @@ void Client::setFullScreen(bool set, bool user)
     updateWindowRules();
     workspace()->checkUnredirect();
 
+#ifdef KWIN_BUILD_SCRIPTING
     SWrapper::WorkspaceProxy* ws_object = SWrapper::WorkspaceProxy::instance();
     if (ws_object != 0) {
         ws_object->sl_clientFullScreenSet(this, set, user);
     }
+#endif
 
     emit s_fullScreenSet(set, user);
 }
@@ -2519,10 +2533,12 @@ bool Client::startMoveResize()
     checkUnrestrictedMoveResize();
     Notify::raise(isResize() ? Notify::ResizeStart : Notify::MoveStart);
     emit clientStartUserMovedResized(this);
+#ifdef KWIN_BUILD_SCREENEDGES
     if (options->electricBorders() == Options::ElectricMoveOnly ||
             options->electricBorderMaximize() ||
             options->electricBorderTiling())
         workspace()->screenEdge()->reserveDesktopSwitching(true);
+#endif
     return true;
 }
 
@@ -2586,8 +2602,10 @@ void Client::finishMoveResize(bool cancel)
         if (border == ElectricNone)
             kDebug(1212) << "invalid electric mode" << electricMode << "leading to invalid array acces,\
                                                                         this should not have happened!";
+#ifdef KWIN_BUILD_SCREENEDGES
         else
             workspace()->screenEdge()->restoreSize(border);
+#endif
         electricMaximizing = false;
         workspace()->outline()->hide();
     }
@@ -2614,10 +2632,12 @@ void Client::leaveMoveResize()
     moveResizeMode = false;
     delete sync_timeout;
     sync_timeout = NULL;
+#ifdef KWIN_BUILD_SCREENEDGES
     if (options->electricBorders() == Options::ElectricMoveOnly ||
             options->electricBorderMaximize() ||
             options->electricBorderTiling())
         workspace()->screenEdge()->reserveDesktopSwitching(false);
+#endif
 }
 
 // This function checks if it actually makes sense to perform a restricted move/resize.
@@ -2940,7 +2960,9 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
     if (isMove()) {
         workspace()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
+#ifdef KWIN_BUILD_SCREENEDGES
         workspace()->screenEdge()->check(globalPos, xTime());
+#endif
     }
 }
 
@@ -3068,8 +3090,8 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
     if (mode == QuickTileNone || ((quick_tile_mode & QuickTileHorizontal) && (mode & QuickTileHorizontal))) {
         // Untiling, so just restore geometry, and we're done.
         setGeometry(geom_pretile);
-        checkWorkspacePosition(); // Just in case it's a different screen
         quick_tile_mode = QuickTileNone;
+        checkWorkspacePosition(); // Just in case it's a different screen
         return;
     } else {
         QPoint whichScreen = keyboard ? geometry().center() : cursorPos();

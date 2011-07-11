@@ -34,9 +34,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tabbox.h"
 #endif
 #include "group.h"
+#include "overlaywindow.h"
 #include "rules.h"
 #include "unmanaged.h"
-#include "screenedge.h"
 #include "effects.h"
 
 #include <QWhatsThis>
@@ -384,8 +384,10 @@ bool Workspace::workspaceEvent(XEvent * e)
             if (w)
                 QWhatsThis::leaveWhatsThisMode();
         }
+#ifdef KWIN_BUILD_SCREENEDGES
         if (m_screenEdge.isEntered(e))
             return true;
+#endif
         break;
     }
     case LeaveNotify: {
@@ -436,21 +438,23 @@ bool Workspace::workspaceEvent(XEvent * e)
     case FocusOut:
         return true; // always eat these, they would tell Qt that KWin is the active app
     case ClientMessage:
+#ifdef KWIN_BUILD_SCREENEDGES
         if (m_screenEdge.isEntered(e))
             return true;
+#endif
         break;
     case Expose:
         if (compositing()
                 && (e->xexpose.window == rootWindow()   // root window needs repainting
-                    || (overlay != None && e->xexpose.window == overlay))) { // overlay needs repainting
+                    || (scene->overlayWindow()->window() != None && e->xexpose.window == scene->overlayWindow()->window()))) { // overlay needs repainting
             addRepaint(e->xexpose.x, e->xexpose.y, e->xexpose.width, e->xexpose.height);
         }
         break;
     case VisibilityNotify:
-        if (compositing() && overlay != None && e->xvisibility.window == overlay) {
-            bool was_visible = overlay_visible;
-            overlay_visible = (e->xvisibility.state != VisibilityFullyObscured);
-            if (!was_visible && overlay_visible) {
+        if (compositing() && scene->overlayWindow()->window() != None && e->xvisibility.window == scene->overlayWindow()->window()) {
+            bool was_visible = scene->overlayWindow()->isVisible();
+            scene->overlayWindow()->setVisibility((e->xvisibility.state != VisibilityFullyObscured));
+            if (!was_visible && scene->overlayWindow()->isVisible()) {
                 // hack for #154825
                 addRepaintFull();
                 QTimer::singleShot(2000, this, SLOT(addRepaintFull()));

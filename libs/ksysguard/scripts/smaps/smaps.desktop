@@ -2,6 +2,7 @@
 Name=Detailed Memory Information
 Name[ar]=معلومات مفصلة عن الذاكرة
 Name[ast]=Información detallada sobre la memoria
+Name[bg]=Подробни данни за паметта
 Name[bs]=Detaljni podaci o memoriji
 Name[ca]=Informació detallada de la memòria
 Name[ca@valencia]=Informació detallada de la memòria
@@ -53,6 +54,7 @@ Name[th]=ข้อมูลเกี่ยวกับหน่วยควา�
 Name[tr]=Ayrıntılı Bellek Bilgileri
 Name[ug]=ئەسلەك ئۈچۇرى تەپسىلاتى
 Name[uk]=Докладні відомості щодо пам'яті
+Name[wa]=Sipepieuse infôrmåcion sol memwere
 Name[x-test]=xxDetailed Memory Informationxx
 Name[zh_CN]=内存的详细信息
 Name[zh_TW]=詳細記憶體資訊

@@ -26,7 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "group.h"
 #include "scene_xrender.h"
 #include "scene_opengl.h"
-#include "screenedge.h"
 #include "unmanaged.h"
 #ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
@@ -748,6 +747,8 @@ void EffectsHandlerImpl::setTabBoxWindow(EffectWindow* w)
             Workspace::self()->tabBox()->setCurrentClient(c);
         }
     }
+#else
+    Q_UNUSED(w)
 #endif
 }
 
@@ -757,6 +758,8 @@ void EffectsHandlerImpl::setTabBoxDesktop(int desktop)
     if (Workspace::self()->hasTabBox()) {
         Workspace::self()->tabBox()->setCurrentDesktop(desktop);
     }
+#else
+    Q_UNUSED(desktop)
 #endif
 }
 
@@ -774,7 +777,7 @@ EffectWindowList EffectsHandlerImpl::currentTabBoxWindowList() const
     ret.append(c->effectWindow());
     return ret;
 #else
-    return EffectWindowList;
+    return EffectWindowList();
 #endif
 }
 
@@ -905,7 +908,9 @@ Window EffectsHandlerImpl::createInputWindow(Effect* e, int x, int y, int w, int
 
     // Raise electric border windows above the input windows
     // so they can still be triggered.
+#ifdef KWIN_BUILD_SCREENEDGES
     Workspace::self()->screenEdge()->ensureOnTop();
+#endif
 
     return win;
 }
@@ -976,7 +981,9 @@ void EffectsHandlerImpl::checkInputWindowStacking()
     delete[] wins;
     // Raise electric border windows above the input windows
     // so they can still be triggered. TODO: Do both at once.
+#ifdef KWIN_BUILD_SCREENEDGES
     Workspace::self()->screenEdge()->ensureOnTop();
+#endif
 }
 
 QPoint EffectsHandlerImpl::cursorPos() const
@@ -986,22 +993,39 @@ QPoint EffectsHandlerImpl::cursorPos() const
 
 void EffectsHandlerImpl::checkElectricBorder(const QPoint &pos, Time time)
 {
+#ifdef KWIN_BUILD_SCREENEDGES
     Workspace::self()->screenEdge()->check(pos, time);
+#else
+    Q_UNUSED(pos)
+    Q_UNUSED(time)
+#endif
 }
 
 void EffectsHandlerImpl::reserveElectricBorder(ElectricBorder border)
 {
+#ifdef KWIN_BUILD_SCREENEDGES
     Workspace::self()->screenEdge()->reserve(border);
+#else
+    Q_UNUSED(border)
+#endif
 }
 
 void EffectsHandlerImpl::unreserveElectricBorder(ElectricBorder border)
 {
+#ifdef KWIN_BUILD_SCREENEDGES
     Workspace::self()->screenEdge()->unreserve(border);
+#else
+    Q_UNUSED(border)
+#endif
 }
 
 void EffectsHandlerImpl::reserveElectricBorderSwitching(bool reserve)
 {
+#ifdef KWIN_BUILD_SCREENEDGES
     Workspace::self()->screenEdge()->reserveDesktopSwitching(reserve);
+#else
+    Q_UNUSED(reserve)
+#endif
 }
 
 unsigned long EffectsHandlerImpl::xrenderBufferPicture()
@@ -1734,7 +1758,9 @@ EffectFrameImpl::EffectFrameImpl(EffectFrameStyle style, bool staticSize, QPoint
         m_sceneFrame = new SceneOpenGL::EffectFrame(this);
 #endif
     } else if (effects->compositingType() == XRenderCompositing) {
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
         m_sceneFrame = new SceneXrender::EffectFrame(this);
+#endif
     } else {
         // that should not happen and will definitely crash!
         m_sceneFrame = NULL;
