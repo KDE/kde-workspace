@@ -72,7 +72,7 @@ SceneOpenGL::~SceneOpenGL()
 {
     if (!init_ok) {
         // TODO this probably needs to clean up whatever has been created until the failure
-        wspace->destroyOverlay();
+        m_overlayWindow->destroy();
         return;
     }
     foreach (Window * w, windows)
@@ -86,8 +86,8 @@ SceneOpenGL::~SceneOpenGL()
     eglReleaseThread();
     SceneOpenGL::EffectFrame::cleanup();
     checkGLError("Cleanup");
-    if (wspace->overlayWindow()) {
-        wspace->destroyOverlay();
+    if (m_overlayWindow->window()) {
+        m_overlayWindow->destroy();
     }
 }
 
@@ -122,13 +122,13 @@ bool SceneOpenGL::initRenderingContext()
         return false;
     eglBindAPI(EGL_OPENGL_ES_API);
     initBufferConfigs();
-    if (!wspace->createOverlay()) {
+    if (!m_overlayWindow->create()) {
         kError(1212) << "Could not get overlay window";
         return false;
     } else {
-        wspace->setupOverlay(None);
+        m_overlayWindow->setup(None);
     }
-    surface = eglCreateWindowSurface(dpy, config, wspace->overlayWindow(), 0);
+    surface = eglCreateWindowSurface(dpy, config, m_overlayWindow->window(), 0);
 
     const EGLint context_attribs[] = {
         EGL_CONTEXT_CLIENT_VERSION, 2,
@@ -203,8 +203,8 @@ void SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
     int mask = 0;
     paintScreen(&mask, &damage);   // call generic implementation
     ungrabXServer(); // ungrab before flushBuffer(), it may wait for vsync
-    if (wspace->overlayWindow())  // show the window only after the first pass, since
-        wspace->showOverlay();   // that pass may take long
+    if (m_overlayWindow->window())  // show the window only after the first pass, since
+        m_overlayWindow->show();   // that pass may take long
     lastRenderTime = t.elapsed();
     flushBuffer(mask, damage);
     struct timeval tv;
@@ -265,7 +265,6 @@ void SceneOpenGL::Texture::findTarget()
 bool SceneOpenGL::Texture::load(const Pixmap& pix, const QSize& size,
                                 int depth, QRegion region)
 {
-    Q_UNUSED(size)
     Q_UNUSED(depth)
     Q_UNUSED(region)
 
@@ -296,6 +295,7 @@ bool SceneOpenGL::Texture::load(const Pixmap& pix, const QSize& size,
         unbind();
         checkGLError("load texture");
         setYInverted(true);
+        mSize = size;
     }
     return true;
 }
@@ -333,6 +333,7 @@ bool SceneOpenGL::Texture::load(wl_buffer *buffer)
         }
         glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)m_image);
     }
+    mSize = QSize(buffer->width, buffer->height);
     unbind();
     checkGLError("load texture");
     setYInverted(true);

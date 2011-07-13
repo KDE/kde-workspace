@@ -32,7 +32,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "rules.h"
 #include "group.h"
 
+#ifdef KWIN_BUILD_SCRIPTING
 #include "scripting/workspaceproxy.h"
+#endif
 
 namespace KWin
 {
@@ -46,6 +48,7 @@ bool Client::manage(Window w, bool isMapped)
 {
     StackingUpdatesBlocker stacking_blocker(workspace());
 
+#ifdef KWIN_BUILD_SCRIPTING
     //Scripting call. Does not use a signal/slot mechanism
     //as ensuring connections was a bit difficult between
     //so many clients and the workspace
@@ -53,6 +56,7 @@ bool Client::manage(Window w, bool isMapped)
     if (ws_wrap != 0) {
         ws_wrap->sl_clientManaging(this);
     }
+#endif
 
     grabXServer();
 
@@ -484,9 +488,6 @@ bool Client::manage(Window w, bool isMapped)
     // Set initial user time directly
     user_time = readUserTimeMapTimestamp(asn_valid ? &asn_id : NULL, asn_valid ? &asn_data : NULL, session);
     group()->updateUserTime(user_time);   // And do what Client::updateUserTime() does
-
-    if (isTopMenu())  // They're shown in Workspace::addClient() if their mainwindow
-        hideClient(true);   // Is the active one
 
     // This should avoid flicker, because real restacking is done
     // only after manage() finishes because of blocking, but the window is shown sooner

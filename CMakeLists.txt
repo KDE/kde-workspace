@@ -3,7 +3,7 @@ project(KDEBASE_WORKSPACE)
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
 set(KDE4WORKSPACE_VERSION_MINOR 6)
-set(KDE4WORKSPACE_VERSION_PATCH 80)
+set(KDE4WORKSPACE_VERSION_PATCH 90)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
 
@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 
 #search packages used by KDE
 set (QT_MIN_VERSION "4.7.0")
-set(KDE_MIN_VERSION "4.6.80")
+set(KDE_MIN_VERSION "4.6.90")
 set(SOPRANO_MIN_VERSION "2.5.63")
 find_package(KDE4 ${KDE_MIN_VERSION} REQUIRED)
 find_package(Strigi REQUIRED)
@@ -140,9 +140,7 @@ endif (Q_WS_X11)
 macro_optional_add_subdirectory( klipper )
 macro_optional_add_subdirectory( krunner )
 macro_optional_add_subdirectory( solid )
-if (${QT_QT3SUPPORT_FOUND})
 macro_optional_add_subdirectory( kmenuedit )
-endif (${QT_QT3SUPPORT_FOUND})
 macro_optional_add_subdirectory( plasma )
 macro_optional_add_subdirectory( kstartupconfig )
 macro_optional_add_subdirectory( statusnotifierwatcher )

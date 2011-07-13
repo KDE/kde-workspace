@@ -35,8 +35,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/Xutil.h>
 #include <fixx11h.h>
 
+// TODO: QScriptValue should be in the ifdef, but it breaks the build
 #include <QScriptValue>
+#ifdef KWIN_BUILD_SCRIPTING
 #include "scripting/client.h"
+#endif
 
 #include "utils.h"
 #include "options.h"
@@ -56,12 +59,14 @@ class QProcess;
 class QTimer;
 class KStartupInfoData;
 
+#ifdef KWIN_BUILD_SCRIPTING
 namespace SWrapper
 {
 class Client;
 }
 
 typedef QPair<SWrapper::Client*, QScriptValue> ClientResolution;
+#endif
 
 namespace KWin
 {
@@ -117,12 +122,14 @@ public:
     bool isSpecialWindow() const;
     bool hasNETSupport() const;
 
+#ifdef KWIN_BUILD_SCRIPTING
     /**
       * This is a public object with no wrappers or anything to keep it fast,
       * so in essence, direct access is allowed. Please be very careful while
       * using this object
       */
     QHash<QScriptEngine*, ClientResolution>* scriptCache;
+#endif
 
     QSize minSize() const;
     QSize maxSize() const;
@@ -314,7 +321,7 @@ public:
 
     void gotPing(Time timestamp);
 
-    void checkWorkspacePosition();
+    void checkWorkspacePosition(const QRect &geo = QRect());
     void updateUserTime(Time time = CurrentTime);
     Time userTime() const;
     bool hasUserTimeSupport() const;
@@ -441,11 +448,6 @@ private:
     Position mousePosition(const QPoint&) const;
     void updateCursor();
 
-    // Transparent stuff
-    void drawbound(const QRect& geom);
-    void clearbound();
-    void doDrawbound(const QRect& geom, bool clear);
-
     // Handlers for X11 events
     bool mapRequestEvent(XMapRequestEvent* e);
     void unmapNotifyEvent(XUnmapEvent* e);
@@ -493,11 +495,9 @@ signals:
     void maximizeSet(QPair<bool, bool>);
     void s_activated();
     void s_fullScreenSet(bool, bool);
-    void clientClosed(KWin::Client*);
     void clientMaximizedStateChanged(KWin::Client*, KDecorationDefines::MaximizeMode);
     void clientMinimized(KWin::Client* client, bool animate);
     void clientUnminimized(KWin::Client* client, bool animate);
-    void clientGeometryShapeChanged(KWin::Client* client, const QRect& old);
     void clientStartUserMovedResized(KWin::Client*);
     void clientStepUserMovedResized(KWin::Client *, const QRect&);
     void clientFinishUserMovedResized(KWin::Client*);
@@ -583,7 +583,6 @@ private:
     QStringList activityList;
     bool buttonDown;
     bool moveResizeMode;
-    bool move_faked_activity;
     Window move_resize_grab_window;
     bool move_resize_has_keyboard_grab;
     bool unrestrictedMoveResize;
@@ -721,7 +720,9 @@ private:
     QuickTileMode electricMode;
 
     friend bool performTransiencyCheck();
+#ifdef KWIN_BUILD_SCRIPTING
     friend class SWrapper::Client;
+#endif
 
     void checkActivities();
     bool activitiesDefined; //whether the x property was actually set

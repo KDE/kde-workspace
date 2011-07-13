@@ -178,8 +178,7 @@ protected Q_SLOTS:
     void slotDesktopChanged(int old);
     void slotClientAdded(KWin::Client *c);
     void slotUnmanagedAdded(KWin::Unmanaged *u);
-    void slotClientClosed(KWin::Client *c);
-    void slotUnmanagedClosed(KWin::Unmanaged *u);
+    void slotWindowClosed(KWin::Toplevel *c);
     void slotClientActivated(KWin::Client *c);
     void slotDeletedRemoved(KWin::Deleted *d);
     void slotClientMaximized(KWin::Client *c, KDecorationDefines::MaximizeMode maxMode);
@@ -189,8 +188,7 @@ protected Q_SLOTS:
     void slotOpacityChanged(KWin::Toplevel *t, qreal oldOpacity);
     void slotClientMinimized(KWin::Client *c, bool animate);
     void slotClientUnminimized(KWin::Client *c, bool animate);
-    void slotClientGeometryShapeChanged(KWin::Client *c, const QRect &old);
-    void slotUnmanagedGeometryShapeChanged(KWin::Unmanaged *u, const QRect &old);
+    void slotGeometryShapeChanged(KWin::Toplevel *t, const QRect &old);
     void slotWindowDamaged(KWin::Toplevel *t, const QRect& r);
     void slotPropertyNotify(KWin::Toplevel *t, long atom);
     void slotPropertyNotify(long atom);
@@ -266,7 +264,6 @@ public:
     virtual bool isDesktop() const;
     virtual bool isDock() const;
     virtual bool isToolbar() const;
-    virtual bool isTopMenu() const;
     virtual bool isMenu() const;
     virtual bool isNormalWindow() const; // normal as in 'NET::Normal or NET::Unknown non-transient'
     virtual bool isSpecialWindow() const;

@@ -53,7 +53,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kaction.h>
 
 #include "killwindow.h"
+#ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
+#endif
 
 namespace KWin
 {
@@ -557,78 +559,13 @@ void Workspace::initShortcuts()
     //disable_shortcuts_keys->disableBlocking( true );
 #define IN_KWIN
 #include "kwinbindings.cpp"
-    readShortcuts();
-}
-
-void Workspace::readShortcuts()
-{
-    // TODO: PORT ME (KGlobalAccel related)
-    //KGlobalAccel::self()->readSettings();
-
-    KAction *kaction = qobject_cast<KAction*>(keys->action("Walk Through Desktops"));
-    if (kaction != 0) {
-        cutWalkThroughDesktops = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkThroughDesktopsKeyChanged(QKeySequence)));
+#ifdef KWIN_BUILD_TABBOX
+    if (tab_box) {
+        tab_box->initShortcuts(actionCollection);
     }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Desktops (Reverse)"));
-    if (kaction != 0) {
-        cutWalkThroughDesktopsReverse = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkBackThroughDesktopsKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Desktop List"));
-    if (kaction != 0) {
-        cutWalkThroughDesktopList = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkThroughDesktopListKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Desktop List (Reverse)"));
-    if (kaction != 0) {
-        cutWalkThroughDesktopListReverse = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkBackThroughDesktopListKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Windows"));
-    if (kaction != 0) {
-        cutWalkThroughWindows = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkThroughWindowsKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Windows (Reverse)"));
-    if (kaction != 0) {
-        cutWalkThroughWindowsReverse = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkBackThroughWindowsKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Window Tabs"));
-    if (kaction != 0) {
-        cutWalkThroughGroupWindows = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this,
-                SLOT(slotMoveToTabRightKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Window Tabs (Reverse)"));
-    if (kaction != 0) {
-        cutWalkThroughGroupWindowsReverse = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this,
-                SLOT(slotMoveToTabLeftKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Windows Alternative"));
-    if (kaction != 0) {
-        cutWalkThroughWindowsAlternative = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkThroughWindowsAlternativeKeyChanged(QKeySequence)));
-    }
-
-    kaction = qobject_cast<KAction*>(keys->action("Walk Through Windows Alternative (Reverse)"));
-    if (kaction != 0) {
-        cutWalkThroughWindowsAlternativeReverse = kaction->globalShortcut();
-        connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkBackThroughWindowsAlternativeKeyChanged(QKeySequence)));
-    }
+#endif
     discardPopup(); // so that it's recreated next time
 }
-
 
 void Workspace::setupWindowShortcut(Client* c)
 {
@@ -943,8 +880,6 @@ bool Client::performMouseCommand(Options::MouseCommand command, const QPoint &gl
         workspace()->raiseClient(this);
         workspace()->requestFocus(this);
         workspace()->setActiveScreenMouse(globalPos);
-        if (options->moveMode == Options::Transparent && isMovableAcrossScreens())
-            move_faked_activity = workspace()->fakeRequestedActivity(this);
         // fallthrough
     case Options::MouseMove:
     case Options::MouseUnrestrictedMove: {
@@ -1193,8 +1128,7 @@ void Workspace::slotWindowToDesktop()
     Client* c = active_popup_client ? active_popup_client : active_client;
     if (i >= 1 && i <= numberOfDesktops() && c
             && !c->isDesktop()
-            && !c->isDock()
-            && !c->isTopMenu())
+            && !c->isDock())
         sendClientToDesktop(c, i, true);
 }
 
@@ -1218,8 +1152,7 @@ void Workspace::slotWindowToScreen()
     Client* c = active_popup_client ? active_popup_client : active_client;
     if (i >= 0 && i <= numScreens() && c
             && !c->isDesktop()
-            && !c->isDock()
-            && !c->isTopMenu()) {
+            && !c->isDock()) {
         sendClientToScreen(c, i);
     }
 }
@@ -1229,8 +1162,7 @@ void Workspace::slotWindowToNextScreen()
     Client* c = active_popup_client ? active_popup_client : active_client;
     if (c
             && !c->isDesktop()
-            && !c->isDock()
-            && !c->isTopMenu()) {
+            && !c->isDock()) {
         sendClientToScreen(c, (c->screen() + 1) % numScreens());
     }
 }
@@ -1382,7 +1314,7 @@ void Workspace::windowToNextDesktop(Client* c)
     if (d > numberOfDesktops())
         d = 1;
     if (c && !c->isDesktop()
-            && !c->isDock() && !c->isTopMenu()) {
+            && !c->isDock()) {
         setClientIsMoving(c);
         setCurrentDesktop(d);
         setClientIsMoving(NULL);
@@ -1403,7 +1335,7 @@ void Workspace::windowToPreviousDesktop(Client* c)
     if (d <= 0)
         d = numberOfDesktops();
     if (c && !c->isDesktop()
-            && !c->isDock() && !c->isTopMenu()) {
+            && !c->isDock()) {
         setClientIsMoving(c);
         setCurrentDesktop(d);
         setClientIsMoving(NULL);
@@ -1417,7 +1349,7 @@ void Workspace::slotWindowToDesktopRight()
         return;
     Client* c = active_popup_client ? active_popup_client : active_client;
     if (c && !c->isDesktop()
-            && !c->isDock() && !c->isTopMenu()) {
+            && !c->isDock()) {
         setClientIsMoving(c);
         setCurrentDesktop(d);
         setClientIsMoving(NULL);
@@ -1431,7 +1363,7 @@ void Workspace::slotWindowToDesktopLeft()
         return;
     Client* c = active_popup_client ? active_popup_client : active_client;
     if (c && !c->isDesktop()
-            && !c->isDock() && !c->isTopMenu()) {
+            && !c->isDock()) {
         setClientIsMoving(c);
         setCurrentDesktop(d);
         setClientIsMoving(NULL);
@@ -1445,7 +1377,7 @@ void Workspace::slotWindowToDesktopUp()
         return;
     Client* c = active_popup_client ? active_popup_client : active_client;
     if (c && !c->isDesktop()
-            && !c->isDock() && !c->isTopMenu()) {
+            && !c->isDock()) {
         setClientIsMoving(c);
         setCurrentDesktop(d);
         setClientIsMoving(NULL);
@@ -1459,7 +1391,7 @@ void Workspace::slotWindowToDesktopDown()
         return;
     Client* c = active_popup_client ? active_popup_client : active_client;
     if (c && !c->isDesktop()
-            && !c->isDock() && !c->isTopMenu()) {
+            && !c->isDock()) {
         setClientIsMoving(c);
         setCurrentDesktop(d);
         setClientIsMoving(NULL);
@@ -1659,8 +1591,7 @@ void Workspace::showWindowMenu(const QRect &pos, Client* cl)
     if (active_popup_client != NULL)   // recursion
         return;
     if (cl->isDesktop()
-            || cl->isDock()
-            || cl->isTopMenu())
+            || cl->isDock())
         return;
 
     active_popup_client = cl;

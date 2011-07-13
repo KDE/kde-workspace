@@ -46,6 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "deleted.h"
 #include "effects.h"
+#include "overlaywindow.h"
 #include "kwinxrenderutils.h"
 
 #include <X11/extensions/Xcomposite.h>
@@ -53,7 +54,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kxerrorhandler.h>
 
 #include <QtGui/QPainter>
-#include <QtGui/QPaintEngine>
 
 namespace KWin
 {
@@ -100,16 +100,16 @@ SceneXrender::SceneXrender(Workspace* ws)
         return;
     }
     KXErrorHandler xerr;
-    if (wspace->createOverlay()) {
-        wspace->setupOverlay(None);
+    if (m_overlayWindow->create()) {
+        m_overlayWindow->setup(None);
         XWindowAttributes attrs;
-        XGetWindowAttributes(display(), wspace->overlayWindow(), &attrs);
+        XGetWindowAttributes(display(), m_overlayWindow->window(), &attrs);
         format = XRenderFindVisualFormat(display(), attrs.visual);
         if (format == NULL) {
             kError(1212) << "Failed to find XRender format for overlay window";
             return;
         }
-        front = XRenderCreatePicture(display(), wspace->overlayWindow(), format, 0, NULL);
+        front = XRenderCreatePicture(display(), m_overlayWindow->window(), format, 0, NULL);
     } else {
         // create XRender picture for the root window
         format = XRenderFindVisualFormat(display(), DefaultVisual(display(), DefaultScreen(display())));
@@ -126,11 +126,6 @@ SceneXrender::SceneXrender(Workspace* ws)
         kError(1212) << "XRender compositing setup failed";
         return;
     }
-    if (!initting) { // see comment for opengl version
-        if (!selfCheck())
-            return;
-        selfCheckDone = true;
-    }
     init_ok = true;
 }
 
@@ -138,13 +133,13 @@ SceneXrender::~SceneXrender()
 {
     if (!init_ok) {
         // TODO this probably needs to clean up whatever has been created until the failure
-        wspace->destroyOverlay();
+        m_overlayWindow->destroy();
         return;
     }
     XRenderFreePicture(display(), front);
     XRenderFreePicture(display(), buffer);
     buffer = None;
-    wspace->destroyOverlay();
+    m_overlayWindow->destroy();
     foreach (Window * w, windows)
     delete w;
 }
@@ -163,103 +158,6 @@ void SceneXrender::createBuffer()
     XFreePixmap(display(), pixmap);   // The picture owns the pixmap now
 }
 
-// Just like SceneOpenGL::selfCheck()
-bool SceneXrender::selfCheck()
-{
-    QRegion reg = selfCheckRegion();
-    if (wspace->overlayWindow()) {
-        // avoid covering the whole screen too soon
-        wspace->setOverlayShape(reg);
-        wspace->showOverlay();
-    }
-    selfCheckSetup();
-    flushBuffer(PAINT_SCREEN_REGION, reg);
-    bool ok = selfCheckFinish();
-    if (wspace->overlayWindow())
-        wspace->hideOverlay();
-    return ok;
-}
-
-void SceneXrender::selfCheckSetup()
-{
-    KXErrorHandler err;
-    QImage img(selfCheckWidth(), selfCheckHeight(), QImage::Format_RGB32);
-    img.setPixel(0, 0, QColor(Qt::red).rgb());
-    img.setPixel(1, 0, QColor(Qt::green).rgb());
-    img.setPixel(2, 0, QColor(Qt::blue).rgb());
-    img.setPixel(0, 1, QColor(Qt::white).rgb());
-    img.setPixel(1, 1, QColor(Qt::black).rgb());
-    img.setPixel(2, 1, QColor(Qt::white).rgb());
-    QPixmap pix = QPixmap::fromImage(img);
-    if (pix.handle() == 0) {
-        Pixmap xPix = XCreatePixmap(display(), rootWindow(), pix.width(), pix.height(), DefaultDepth(display(), DefaultScreen(display())));
-        pix = QPixmap::fromX11Pixmap(xPix);
-        QPainter p(&pix);
-        p.drawImage(QPoint(0, 0), img);
-    }
-    foreach (const QPoint & p, selfCheckPoints()) {
-        XSetWindowAttributes wa;
-        wa.override_redirect = True;
-        ::Window window = XCreateWindow(display(), rootWindow(), 0, 0, selfCheckWidth(), selfCheckHeight(),
-                                        0, QX11Info::appDepth(), CopyFromParent, CopyFromParent, CWOverrideRedirect, &wa);
-        XSetWindowBackgroundPixmap(display(), window, pix.handle());
-        XClearWindow(display(), window);
-        XMapWindow(display(), window);
-        // move the window one down to where the result will be rendered too, just in case
-        // the render would fail completely and eventual check would try to read this window's contents
-        XMoveWindow(display(), window, p.x() + 1, p.y());
-        XCompositeRedirectWindow(display(), window, CompositeRedirectAutomatic);
-        Pixmap wpix = XCompositeNameWindowPixmap(display(), window);
-        XWindowAttributes attrs;
-        XGetWindowAttributes(display(), window, &attrs);
-        XRenderPictFormat* format = XRenderFindVisualFormat(display(), attrs.visual);
-        Picture pic = XRenderCreatePicture(display(), wpix, format, 0, 0);
-        QRect rect(p.x(), p.y(), selfCheckWidth(), selfCheckHeight());
-        XRenderComposite(display(), PictOpSrc, pic, None, buffer, 0, 0, 0, 0,
-                         rect.x(), rect.y(), rect.width(), rect.height());
-        XRenderFreePicture(display(), pic);
-        XFreePixmap(display(), wpix);
-        XDestroyWindow(display(), window);
-    }
-    err.error(true);   // just sync and discard
-}
-
-bool SceneXrender::selfCheckFinish()
-{
-    KXErrorHandler err;
-    bool ok = true;
-    foreach (const QPoint & p, selfCheckPoints()) {
-        QPixmap pix = QPixmap::grabWindow(rootWindow(), p.x(), p.y(), selfCheckWidth(), selfCheckHeight());
-        QImage img = pix.toImage();
-//        kDebug(1212) << "P:" << QColor( img.pixel( 0, 0 )).name();
-//        kDebug(1212) << "P:" << QColor( img.pixel( 1, 0 )).name();
-//        kDebug(1212) << "P:" << QColor( img.pixel( 2, 0 )).name();
-//        kDebug(1212) << "P:" << QColor( img.pixel( 0, 1 )).name();
-//        kDebug(1212) << "P:" << QColor( img.pixel( 1, 1 )).name();
-//        kDebug(1212) << "P:" << QColor( img.pixel( 2, 1 )).name();
-        if (img.pixel(0, 0) != QColor(Qt::red).rgb()
-                || img.pixel(1, 0) != QColor(Qt::green).rgb()
-                || img.pixel(2, 0) != QColor(Qt::blue).rgb()
-                || img.pixel(0, 1) != QColor(Qt::white).rgb()
-                || img.pixel(1, 1) != QColor(Qt::black).rgb()
-                || img.pixel(2, 1) != QColor(Qt::white).rgb()) {
-            kError(1212) << "XRender compositing self-check failed, disabling compositing.";
-            ok = false;
-            break;
-        }
-    }
-    if (err.error(true))
-        ok = false;
-    if (ok)
-        kDebug(1212) << "XRender compositing self-check passed.";
-    if (!ok && options->disableCompositingChecks) {
-        kWarning(1212) << "Compositing checks disabled, proceeding regardless of self-check failure.";
-        return true;
-    }
-    return ok;
-}
-
-
 // the entry point for painting
 void SceneXrender::paint(QRegion damage, ToplevelList toplevels)
 {
@@ -270,19 +168,10 @@ void SceneXrender::paint(QRegion damage, ToplevelList toplevels)
     }
     int mask = 0;
     paintScreen(&mask, &damage);
-    if (wspace->overlayWindow())  // show the window only after the first pass, since
-        wspace->showOverlay();   // that pass may take long
-    if (!selfCheckDone) {
-        selfCheckSetup();
-        damage |= selfCheckRegion();
-    }
+    if (m_overlayWindow->window())  // show the window only after the first pass, since
+        m_overlayWindow->show();   // that pass may take long
     lastRenderTime = t.elapsed();
     flushBuffer(mask, damage);
-    if (!selfCheckDone) {
-        if (!selfCheckFinish())
-            QTimer::singleShot(0, Workspace::self(), SLOT(finishCompositing()));
-        selfCheckDone = true;
-    }
     // do cleanup
     stacking_order.clear();
 }
@@ -401,7 +290,7 @@ void SceneXrender::paintBackground(QRegion region)
     }
 }
 
-void SceneXrender::windowGeometryShapeChanged(Toplevel* c)
+void SceneXrender::windowGeometryShapeChanged(KWin::Toplevel* c)
 {
     if (!windows.contains(c))    // this is ok, shape is not valid by default
         return;
@@ -411,7 +300,7 @@ void SceneXrender::windowGeometryShapeChanged(Toplevel* c)
     w->discardAlpha();
 }
 
-void SceneXrender::windowOpacityChanged(Toplevel* c)
+void SceneXrender::windowOpacityChanged(KWin::Toplevel* c)
 {
     if (!windows.contains(c))    // this is ok, alpha is created on demand
         return;
@@ -419,7 +308,7 @@ void SceneXrender::windowOpacityChanged(Toplevel* c)
     w->discardAlpha();
 }
 
-void SceneXrender::windowClosed(Toplevel* c, Deleted* deleted)
+void SceneXrender::windowClosed(KWin::Toplevel* c, KWin::Deleted* deleted)
 {
     assert(windows.contains(c));
     if (deleted != NULL) {
@@ -447,6 +336,9 @@ void SceneXrender::windowAdded(Toplevel* c)
 {
     assert(!windows.contains(c));
     windows[ c ] = new Window(c);
+    connect(c, SIGNAL(opacityChanged(KWin::Toplevel*,qreal)), SLOT(windowOpacityChanged(KWin::Toplevel*)));
+    connect(c, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), SLOT(windowGeometryShapeChanged(KWin::Toplevel*)));
+    connect(c, SIGNAL(windowClosed(KWin::Toplevel*,KWin::Deleted*)), SLOT(windowClosed(KWin::Toplevel*,KWin::Deleted*)));
     c->effectWindow()->setSceneWindow(windows[ c ]);
     c->getShadow();
     windows[ c ]->updateShadow(c->shadow());
@@ -588,11 +480,13 @@ void SceneXrender::Window::prepareTempPixmap(const QPixmap *left, const QPixmap 
 {
     const QRect r = static_cast<Client*>(toplevel)->decorationRect();
 
+    if (temp_pixmap && Extensions::nonNativePixmaps())
+        XFreePixmap(display(), temp_pixmap->handle());   // The picture owns the pixmap now
     if (!temp_pixmap)
         temp_pixmap = new QPixmap(r.width(), r.height());
     else if (temp_pixmap->width() < r.width() || temp_pixmap->height() < r.height())
         *temp_pixmap = QPixmap(r.width(), r.height());
-    if (temp_pixmap->paintEngine()->type() != QPaintEngine::X11 || temp_pixmap->handle() == 0) {
+    if (Extensions::nonNativePixmaps()) {
         Pixmap pix = XCreatePixmap(display(), rootWindow(), temp_pixmap->width(), temp_pixmap->height(), DefaultDepth(display(), DefaultScreen(display())));
         *temp_pixmap = QPixmap::fromX11Pixmap(pix);
     }
@@ -659,6 +553,9 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         transformed_shape = QRegion(deleted->decorationRect());
     else
         transformed_shape = shape();
+
+    if (toplevel->hasShadow())
+        transformed_shape |= toplevel->shadow()->shadowRegion();
 
     XTransform xform = {{
             { XDoubleToFixed(1), XDoubleToFixed(0), XDoubleToFixed(0) },
@@ -742,11 +639,13 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         }
     }
 
-    //shadow
-    if (m_shadow && !(m_shadow->shadowRegion().isEmpty()) && !(mask & PAINT_DECORATION_ONLY)) {
-        QRect stlr, str, strr, srr, sbrr, sbr, sblr, slr;
-        SceneXRenderShadow* m_xrenderShadow = static_cast<SceneXRenderShadow*>(m_shadow);
+    QRect stlr, str, strr, srr, sbrr, sbr, sblr, slr;
+    Picture shadowAlpha;
+    SceneXRenderShadow* m_xrenderShadow = static_cast<SceneXRenderShadow*>(m_shadow);
+    const bool wantShadow = m_shadow && !m_shadow->shadowRegion().isEmpty() && (isOpaque() || !(mask & PAINT_DECORATION_ONLY));
+    if (wantShadow) {
         m_xrenderShadow->layoutShadowRects(str, strr, srr, sbrr, sbr, sblr, slr, stlr);
+        shadowAlpha = alphaMask(data.opacity);
         if (!scaled) {
             stlr = mapToScreen(mask, data, stlr);
             str = mapToScreen(mask, data, str);
@@ -756,26 +655,36 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
             sbr = mapToScreen(mask, data, sbr);
             sblr = mapToScreen(mask, data, sblr);
             slr = mapToScreen(mask, data, slr);
-
-            Picture alpha = alphaMask(data.opacity);
-
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowTopLeft), alpha, buffer, 0, 0, 0, 0, stlr.x(), stlr.y(), stlr.width(), stlr.height());
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowTop), alpha, buffer, 0, 0, 0, 0, str.x(), str.y(), str.width(), str.height());
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowTopRight), alpha, buffer, 0, 0, 0, 0, strr.x(), strr.y(), strr.width(), strr.height());
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowLeft), alpha, buffer, 0, 0, 0, 0, slr.x(), slr.y(), slr.width(), slr.height());
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowRight), alpha, buffer, 0, 0, 0, 0, srr.x(), srr.y(), srr.width(), srr.height());
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowBottomLeft), alpha, buffer, 0, 0, 0, 0, sblr.x(), sblr.y(), sblr.width(), sblr.height());
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowBottom), alpha, buffer, 0, 0, 0, 0, sbr.x(), sbr.y(), sbr.width(), sbr.height());
-            XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadowBottomRight), alpha, buffer, 0, 0, 0, 0, sbrr.x(), sbrr.y(), sbrr.width(), sbrr.height());
-
-        } else {
-            //FIXME: At the moment shadows are not painted for scaled windows
         }
+        // else TODO
     }
 
     for (PaintClipper::Iterator iterator;
             !iterator.isDone();
             iterator.next()) {
+
+#define RENDER_SHADOW_TILE(_TILE_, _RECT_) \
+XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadow##_TILE_), \
+                 shadowAlpha, buffer, 0, 0, 0, 0, _RECT_.x(), _RECT_.y(), _RECT_.width(), _RECT_.height())
+
+        //shadow
+        if (wantShadow) {
+            if (!scaled) {
+                RENDER_SHADOW_TILE(TopLeft, stlr);
+                RENDER_SHADOW_TILE(Top, str);
+                RENDER_SHADOW_TILE(TopRight, strr);
+                RENDER_SHADOW_TILE(Left, slr);
+                RENDER_SHADOW_TILE(Right, srr);
+                RENDER_SHADOW_TILE(BottomLeft, sblr);
+                RENDER_SHADOW_TILE(Bottom, sbr);
+                RENDER_SHADOW_TILE(BottomRight, sbrr);
+            } else {
+                //FIXME: At the moment shadows are not painted for scaled windows
+            }
+        }
+
+#undef RENDER_SHADOW_TILE
+
         QRect decorationRect;
         if (client || deleted) {
             bool noBorder = true;
@@ -952,20 +861,25 @@ void SceneXrender::EffectFrame::render(QRegion region, double opacity, double fr
         if (!m_picture) { // Lazy creation
             updatePicture();
         }
-        qreal left, top, right, bottom;
-        m_effectFrame->frame().getMargins(left, top, right, bottom);   // m_geometry is the inner geometry
-        QRect geom = m_effectFrame->geometry().adjusted(-left, -top, right, bottom);
-        XRenderComposite(display(), PictOpOver, *m_picture, None, effects->xrenderBufferPicture(),
-                         0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
-
+        if (m_picture) {
+            qreal left, top, right, bottom;
+            m_effectFrame->frame().getMargins(left, top, right, bottom);   // m_geometry is the inner geometry
+            QRect geom = m_effectFrame->geometry().adjusted(-left, -top, right, bottom);
+            XRenderComposite(display(), PictOpOver, *m_picture, None, effects->xrenderBufferPicture(),
+                                0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
+        }
     }
     if (!m_effectFrame->selection().isNull()) {
         if (!m_selectionPicture) { // Lazy creation
-            m_selectionPicture = new XRenderPicture(m_effectFrame->selectionFrame().framePixmap());
+            const QPixmap pix = m_effectFrame->selectionFrame().framePixmap();
+            if (!pix.isNull()) // don't try if there's no content
+                m_selectionPicture = new XRenderPicture(m_effectFrame->selectionFrame().framePixmap());
         }
-        const QRect geom = m_effectFrame->selection();
-        XRenderComposite(display(), PictOpOver, *m_selectionPicture, None, effects->xrenderBufferPicture(),
-                            0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
+        if (m_selectionPicture) {
+            const QRect geom = m_effectFrame->selection();
+            XRenderComposite(display(), PictOpOver, *m_selectionPicture, None, effects->xrenderBufferPicture(),
+                                0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
+        }
     }
 
     XRenderPicture fill = xRenderBlendPicture(opacity);
@@ -995,14 +909,19 @@ void SceneXrender::EffectFrame::render(QRegion region, double opacity, double fr
 void SceneXrender::EffectFrame::updatePicture()
 {
     delete m_picture;
-    if (m_effectFrame->style() == EffectFrameStyled)
-        m_picture = new XRenderPicture(m_effectFrame->frame().framePixmap());
+    m_picture = 0L;
+    if (m_effectFrame->style() == EffectFrameStyled) {
+        const QPixmap pix = m_effectFrame->frame().framePixmap();
+        if (!pix.isNull())
+            m_picture = new XRenderPicture(pix);
+    }
 }
 
 void SceneXrender::EffectFrame::updateTextPicture()
 {
     // Mostly copied from SceneOpenGL::EffectFrame::updateTextTexture() above
     delete m_textPicture;
+    m_textPicture = 0L;
 
     if (m_effectFrame->text().isEmpty()) {
         return;

@@ -57,7 +57,7 @@
 #include "interfaces/default/resultscene.h"
 #include "interfaces/default/resultitem.h"
 #include "interfaces/default/krunnerhistorycombobox.h"
-#include "interfaces/default/resultsview.h"
+#include "interfaces/default/resultview.h"
 #include "toolbutton.h"
 
 static const int MIN_WIDTH = 420;
@@ -73,6 +73,10 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
 
     m_hideResultsTimer.setSingleShot(true);
     connect(&m_hideResultsTimer, SIGNAL(timeout()), this, SLOT(hideResultsArea()));
+
+    m_reenableHoverEventsTimer.setSingleShot(true);
+    m_reenableHoverEventsTimer.setInterval(50);
+    connect(&m_reenableHoverEventsTimer, SIGNAL(timeout()), this, SLOT(reenableHoverEvents()));
 
     m_layout = new QVBoxLayout(this);
     m_layout->setMargin(0);
@@ -552,10 +556,9 @@ void Interface::matchCountChanged(int count)
 
     if (show) {
         //kDebug() << "showing!" << minimumSizeHint();
-
-        //fitWindow();
-
         if (!m_resultsView->isVisible()) {
+            fitWindow();
+
             // Next 2 lines are a workaround to allow arrow
             // keys navigation in krunner's result list.
             // Patch submited in bugreport #211578
@@ -573,8 +576,15 @@ void Interface::matchCountChanged(int count)
     }
 }
 
+void Interface::reenableHoverEvents()
+{
+    //kDebug() << "reenabling hover events, for better or worse";
+    m_resultData.processHoverEvents = true;
+}
+
 void Interface::fitWindow()
 {
+    m_resultData.processHoverEvents = false;
     QSize s = m_defaultSize;
     const int resultsHeight = m_resultsScene->viewableHeight() + 2;
     int spacing = m_layout->spacing();
@@ -599,6 +609,7 @@ void Interface::fitWindow()
     }
 
     resize(s);
+    m_reenableHoverEventsTimer.start();
 }
 
 void Interface::hideResultsArea()

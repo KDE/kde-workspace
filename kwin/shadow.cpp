@@ -99,17 +99,20 @@ QVector< long > Shadow::readX11ShadowProperty(WId id)
 bool Shadow::init(const QVector< long > &data)
 {
     for (int i=0; i<ShadowElementsCount; ++i) {
-        QPixmap pix = QPixmap::fromX11Pixmap(data[i]);
+        QPixmap pix = QPixmap::fromX11Pixmap(data[i], QPixmap::ExplicitlyShared);
         if (pix.isNull() || pix.depth() != 32) {
             return false;
         }
-        m_shadowElements[i] = pix;
+        m_shadowElements[i] = pix.copy(0, 0, pix.width(), pix.height());
     }
     m_topOffset = data[ShadowElementsCount];
     m_rightOffset = data[ShadowElementsCount+1];
     m_bottomOffset = data[ShadowElementsCount+2];
     m_leftOffset = data[ShadowElementsCount+3];
     updateShadowRegion();
+    if (!prepareBackend()) {
+        return false;
+    }
     buildQuads();
     return true;
 }

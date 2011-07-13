@@ -182,12 +182,22 @@ void KRandRSystemTray::updateToolTip()
 		else
 		{
 			QString details = "<table>";
+			bool first = true;
 			foreach(RandROutput *output, outputs)
 			{
 				if (output->isConnected()) 
 				{
-					details += "<tr><td colspan=\"2\">" + output->name()
-						+ "</td></tr>";
+					if (first)
+					{
+						first = false;
+						details += "<tr><td>&nbsp;</td></tr>";
+					}
+					else
+					{
+						details += "<tr><td>&nbsp;</td></tr>";
+					}
+					details += "<tr><th align=\"left\" colspan=\"2\">" + output->name()
+						+ "</th></tr>";
 
 					QSize currentSize = output->rect().size();
 					if (output->rotation() & (RandR::Rotate90 | RandR::Rotate270))
@@ -217,8 +227,7 @@ void KRandRSystemTray::updateToolTip()
 
 			if (details != "<table>")
 			{
-				title = details + "</table>";
-				subTitle.clear();
+				subTitle = details + "</table>";
 			}
 		}
 	} 
@@ -585,10 +594,14 @@ void KRandRSystemTray::slotPrefs()
 	    kcm->addModule( "display" );
 	    kcm->setAttribute(Qt::WA_DeleteOnClose);
 	    m_kcm = kcm;
+	} else if (KWindowSystem::activeWindow() == m_kcm.data()->winId()) {
+	    m_kcm.data()->hide();
+	    return;
 	}
 
 	KWindowSystem::setOnDesktop(m_kcm.data()->winId(), KWindowSystem::currentDesktop());
 	m_kcm.data()->show();
 	m_kcm.data()->raise();
+	KWindowSystem::forceActiveWindow(m_kcm.data()->winId());
 }
 // vim:noet:sts=8:sw=8:

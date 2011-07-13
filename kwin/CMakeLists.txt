@@ -1,5 +1,25 @@
 ########### configure tests ###############
 
+OPTION(KWIN_BUILD_DECORATIONS "Enable building of KWin decorations." ON)
+OPTION(KWIN_BUILD_KCMS "Enable building of KWin configuration modules." ON)
+OPTION(KWIN_MOBILE_EFFECTS "Only build effects relevant for mobile devices" OFF)
+OPTION(KWIN_BUILD_TABBOX "Enable building of KWin Tabbox functionality" ON)
+OPTION(KWIN_BUILD_SCREENEDGES "Enable building of KWin with screen edge support" ON)
+OPTION(KWIN_BUILD_SCRIPTING "Enable building of KWin with scripting support" ON)
+OPTION(KWIN_BUILD_XRENDER_COMPOSITING "Enable building of KWin with XRender Compositing support" ON)
+OPTION(KWIN_PLASMA_ACTIVE "Enable building KWin for Plasma Active." OFF)
+
+if(KWIN_PLASMA_ACTIVE)
+    set(KWIN_BUILD_DECORATIONS OFF)
+    set(KWIN_BUILD_KCMS OFF)
+    set(KWIN_BUILD_TABBOX OFF)
+    set(KWIN_BUILD_SCREENEDGES OFF)
+    set(KWIN_BUILD_SCRIPTING OFF)
+    set(KWIN_BUILD_XRENDER_COMPOSITING OFF)
+    set(KWIN_MOBILE_EFFECTS ON)
+    set(KWIN_BUILD_WITH_OPENGLES ON)
+endif(KWIN_PLASMA_ACTIVE)
+
 # KWIN_HAVE_COMPOSITING - whether any compositing support is available
 if( X11_Xcomposite_FOUND AND X11_Xdamage_FOUND )
     set( KWIN_HAVE_COMPOSITING 1 )
@@ -11,9 +31,9 @@ if( KWIN_HAVE_COMPOSITING AND OPENGL_FOUND )
 endif( KWIN_HAVE_COMPOSITING AND OPENGL_FOUND )
 
 # KWIN_HAVE_XRENDER_COMPOSITING - whether XRender-based compositing support is available
-if( KWIN_HAVE_COMPOSITING AND X11_Xrender_FOUND AND X11_Xfixes_FOUND )
+if( KWIN_HAVE_COMPOSITING AND X11_Xrender_FOUND AND X11_Xfixes_FOUND AND KWIN_BUILD_XRENDER_COMPOSITING )
     set( KWIN_HAVE_XRENDER_COMPOSITING 1 )
-endif( KWIN_HAVE_COMPOSITING AND X11_Xrender_FOUND AND X11_Xfixes_FOUND )
+endif( KWIN_HAVE_COMPOSITING AND X11_Xrender_FOUND AND X11_Xfixes_FOUND AND KWIN_BUILD_XRENDER_COMPOSITING )
 
 # KWIN_HAVE_OPENGLES_COMPOSITING - whether OpenGL ES-based compositing support is available
 if( KWIN_HAVE_COMPOSITING AND OPENGLES_FOUND AND KWIN_BUILD_WITH_OPENGLES)
@@ -49,10 +69,6 @@ endif(OPENGLES_FOUND AND KWIN_HAVE_OPENGLES_COMPOSITING)
 if(KWIN_HAVE_WAYLAND)
     include_directories(${WAYLAND_SERVER_INCLUDE_DIR})
 endif(KWIN_HAVE_WAYLAND)
-
-OPTION(KWIN_BUILD_DECORATIONS "Enable building of KWin decorations." ON)
-OPTION(KWIN_BUILD_KCMS "Enable building of KWin configuration modules." ON)
-OPTION(KWIN_MOBILE_EFFECTS "Only build effects relevant for mobile devices" OFF)
 
 # for things that are also used by kwin libraries
 configure_file(libkwineffects/kwinconfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libkwineffects/kwinconfig.h )
@@ -100,15 +116,6 @@ set(kwin_KDEINIT_SRCS
    utils.cpp 
    layers.cpp 
    main.cpp 
-   tabbox.cpp
-   tabbox/clientitemdelegate.cpp 
-   tabbox/clientmodel.cpp 
-   tabbox/desktopitemdelegate.cpp 
-   tabbox/desktopmodel.cpp 
-   tabbox/itemlayoutconfig.cpp 
-   tabbox/tabboxconfig.cpp 
-   tabbox/tabboxhandler.cpp 
-   tabbox/tabboxview.cpp 
    desktopchangeosd.cpp 
    options.cpp 
    outline.cpp
@@ -121,7 +128,8 @@ set(kwin_KDEINIT_SRCS
    group.cpp 
    bridge.cpp 
    manage.cpp 
-   notifications.cpp 
+   notifications.cpp
+   overlaywindow.cpp
    activation.cpp 
    useractions.cpp 
    geometry.cpp 
@@ -144,18 +152,6 @@ set(kwin_KDEINIT_SRCS
    tilinglayout.cpp
    tilinglayoutfactory.cpp
 
-   #load the scripting related functions
-   scripting/scripting.cpp
-   scripting/workspace.cpp
-   scripting/client.cpp
-   scripting/meta.cpp
-   scripting/toplevel.cpp
-   scripting/windowinfo.cpp
-   scripting/s_clientgroup.cpp
-   scripting/workspaceproxy.cpp
-   scripting/chelate.cpp
-   scripting/timer.cpp
-
    # tiling layouts
    # spiral
    #tilinglayouts/spiral/spiralfactory.cpp
@@ -168,6 +164,44 @@ set(kwin_KDEINIT_SRCS
    # floating
    tilinglayouts/floating/floating.cpp
    )
+
+if(KWIN_BUILD_SCRIPTING)
+    set(
+        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+        scripting/scripting.cpp
+        scripting/workspace.cpp
+        scripting/client.cpp
+        scripting/meta.cpp
+        scripting/toplevel.cpp
+        scripting/windowinfo.cpp
+        scripting/s_clientgroup.cpp
+        scripting/workspaceproxy.cpp
+        scripting/chelate.cpp
+        scripting/timer.cpp
+    )
+endif(KWIN_BUILD_SCRIPTING)
+
+if(KWIN_BUILD_TABBOX)
+    set(
+        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+        tabbox.cpp
+        tabbox/clientitemdelegate.cpp
+        tabbox/clientmodel.cpp
+        tabbox/desktopitemdelegate.cpp
+        tabbox/desktopmodel.cpp
+        tabbox/itemlayoutconfig.cpp
+        tabbox/tabboxconfig.cpp
+        tabbox/tabboxhandler.cpp
+        tabbox/tabboxview.cpp
+  )
+endif(KWIN_BUILD_TABBOX)
+
+if(KWIN_BUILD_SCREENEDGES)
+    set(
+        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+        screenedge.cpp
+    )
+endif(KWIN_BUILD_SCREENEDGES)
 
 qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.KWin.xml workspace.h KWin::Workspace )
 
@@ -182,7 +216,15 @@ endif(KWIN_HAVE_WAYLAND)
 
 kde4_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
 
-target_link_libraries(kdeinit_kwin ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTXML_LIBRARY} ${QT_QTSCRIPT_LIBRARY} kephal kworkspace kdecorations kwineffects ${X11_LIBRARIES})
+target_link_libraries(kdeinit_kwin ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} kephal kworkspace kdecorations kwineffects ${X11_LIBRARIES})
+
+if(KWIN_BUILD_SCRIPTING)
+    target_link_libraries(kdeinit_kwin ${QT_QTSCRIPT_LIBRARY})
+endif(KWIN_BUILD_SCRIPTING)
+
+if(KWIN_BUILD_TABBOX)
+    target_link_libraries(kdeinit_kwin ${QT_QTXML_LIBRARY})
+endif(KWIN_BUILD_TABBOX)
 
 if(OPENGL_FOUND AND NOT KWIN_HAVE_OPENGLES_COMPOSITING)
   add_subdirectory(opengltest)

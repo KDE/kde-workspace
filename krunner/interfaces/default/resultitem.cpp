@@ -52,8 +52,6 @@
 
 void shadowBlur(QImage &image, int radius, const QColor &color);
 
-int ResultItem::s_fontHeight = 0;
-
 ResultItem::ResultItem(const SharedResultData *sharedData, const Plasma::QueryMatch &match, Plasma::RunnerManager *runnerManager, QGraphicsWidget *parent)
     : QGraphicsWidget(parent),
       m_match(0),
@@ -77,13 +75,6 @@ ResultItem::ResultItem(const SharedResultData *sharedData, const Plasma::QueryMa
     setFocusPolicy(Qt::TabFocus);
     setCacheMode(DeviceCoordinateCache);
     setZValue(0);
-
-    if (s_fontHeight < 1) {
-        //FIXME: reset when the application font changes
-        QFontMetrics fm(font());
-        s_fontHeight = fm.height();
-        //kDebug() << "font height is: " << s_fontHeight;
-    }
 
     m_highlightAnim = new QPropertyAnimation(this, "highlightState", this);
     m_highlightAnim->setStartValue(0);
@@ -118,6 +109,7 @@ QGraphicsWidget* ResultItem::arrangeTabOrder(QGraphicsWidget* last)
             currentWidget = button;
         }
     }
+
     return currentWidget;
 }
 
@@ -428,6 +420,7 @@ void ResultItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
 void ResultItem::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
+    //kDebug() << "in on" << m_match.text() << m_sharedData->processHoverEvents;
     if (!m_sharedData->processHoverEvents || !m_match.isValid()) {
         return;
     }
@@ -518,10 +511,8 @@ QVariant ResultItem::itemChange(GraphicsItemChange change, const QVariant &value
 {
     if (change == QGraphicsItem::ItemSceneHasChanged) {
         calculateSize();
-    } else if (change == QGraphicsItem::ItemSelectedHasChanged) {
-        if (!isSelected()) {
-            m_highlightCheckTimer.start();
-        }
+    } else if (change == QGraphicsItem::ItemSelectedHasChanged && !isSelected()) {
+        m_highlightCheckTimer.start();
     }
 
     return QGraphicsWidget::itemChange(change, value);

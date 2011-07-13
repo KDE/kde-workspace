@@ -46,6 +46,7 @@ namespace KWin
 class SceneOpenGL
     : public Scene
 {
+    Q_OBJECT
 public:
     class EffectFrame;
     class Texture;
@@ -57,10 +58,7 @@ public:
         return OpenGLCompositing;
     }
     virtual void paint(QRegion damage, ToplevelList windows);
-    virtual void windowGeometryShapeChanged(Toplevel*);
-    virtual void windowOpacityChanged(Toplevel*);
     virtual void windowAdded(Toplevel*);
-    virtual void windowClosed(Toplevel*, Deleted*);
     virtual void windowDeleted(Deleted*);
 
 #ifdef KWIN_HAVE_WAYLAND
@@ -72,7 +70,10 @@ protected:
     virtual void paintGenericScreen(int mask, ScreenPaintData data);
     virtual void paintBackground(QRegion region);
     QMatrix4x4 transformation(int mask, const ScreenPaintData &data) const;
-
+public Q_SLOTS:
+    virtual void windowOpacityChanged(KWin::Toplevel* c);
+    virtual void windowGeometryShapeChanged(KWin::Toplevel* c);
+    virtual void windowClosed(KWin::Toplevel* c, KWin::Deleted* deleted);
 private:
     bool selectMode();
     bool initTfp();
@@ -135,10 +136,6 @@ public:
         y_inverted = inverted;
     }
 
-    bool getYInverted() const {
-        return y_inverted;
-    }
-
 protected:
     Texture(const Pixmap& pix, const QSize& size, int depth);
     void findTarget();
@@ -185,16 +182,16 @@ protected:
 
     QMatrix4x4 transformation(int mask, const WindowPaintData &data) const;
     void paintDecoration(const QPixmap* decoration, TextureType decorationType, const QRegion& region, const QRect& rect, const WindowPaintData& data, const WindowQuadList& quads, bool updateDeco);
-    void paintShadow(WindowQuadType type, const QRegion &region, const WindowPaintData &data);
-    void makeDecorationArrays(const WindowQuadList& quads, const QRect& rect, bool y_inverted) const;
-    void renderQuads(int mask, const QRegion& region, const WindowQuadList& quads);
+    void paintShadow(const QRegion &region, const WindowPaintData &data);
+    void makeDecorationArrays(const WindowQuadList& quads, const QRect &rect, Texture *tex) const;
+    void renderQuads(int, const QRegion& region, const WindowQuadList& quads, GLTexture* tex, bool normalized = false);
     void prepareStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader);
-    void prepareStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader, Texture *texture);
-    void prepareRenderStates(TextureType type, double opacity, double brightness, double saturation, Texture *tex);
+    void prepareStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader, GLTexture *texture);
+    void prepareRenderStates(TextureType type, double opacity, double brightness, double saturation, GLTexture *tex);
     void prepareShaderRenderStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader);
     void restoreStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader);
-    void restoreStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader, Texture *texture);
-    void restoreRenderStates(TextureType type, double opacity, double brightness, double saturation, Texture *tex);
+    void restoreStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader, GLTexture *texture);
+    void restoreRenderStates(TextureType type, double opacity, double brightness, double saturation, GLTexture *tex);
     void restoreShaderRenderStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader);
 
 private:
@@ -255,16 +252,14 @@ public:
     SceneOpenGLShadow(Toplevel *toplevel);
     virtual ~SceneOpenGLShadow();
 
-    /**
-     * Returns the Texture for a specific ShadowQuad. The method takes care of performing
-     * the Texture from Pixmap operation. The calling method can use the returned Texture
-     * directly.
-     * In error case the method returns @c NULL.
-     * @return OpenGL Texture for the Shadow Quad. May be @c NULL.
-     **/
-    SceneOpenGL::Texture *textureForQuadType(WindowQuadType type);
+    GLTexture *shadowTexture() {
+        return m_texture;
+    }
+protected:
+    virtual void buildQuads();
+    virtual bool prepareBackend();
 private:
-    SceneOpenGL::Texture m_shadowTextures[ShadowElementsCount];
+    GLTexture *m_texture;
 };
 
 } // namespace
