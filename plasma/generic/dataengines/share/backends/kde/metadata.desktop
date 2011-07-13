@@ -44,6 +44,7 @@ Name[x-test]=xxkde.orgxx
 Name[zh_CN]=kde.org
 Name[zh_TW]=kde.org
 Comment=Allows text to be shared using the kde.org service
+Comment[bg]=Позволява споделянето на текст чрез kde.org
 Comment[bs]=Dopušta ijeljenje teksta preko servisa wklej.org
 Comment[ca]=Permet la compartició de text utilitzant el servei kde.org
 Comment[ca@valencia]=Permet la compartició de text utilitzant el servei kde.org

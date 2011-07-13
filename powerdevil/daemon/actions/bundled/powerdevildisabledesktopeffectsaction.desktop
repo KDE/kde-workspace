@@ -57,6 +57,7 @@ Name[zh_CN]=禁用桌面效果
 Name[zh_TW]=關閉桌面效果
 Comment=Temporary disables KWin's desktop effects
 Comment[ast]=Desactiva temporalmente los efectos d'escritoriu de KWin
+Comment[bg]=Временно изключване на ефектите на KWin
 Comment[bs]=Privremeno isključuje K‑vinove efekte površi
 Comment[ca]=Deshabilita temporalment els efectes d'escriptori del KWin
 Comment[ca@valencia]=Deshabilita temporalment els efectes d'escriptori del KWin
