@@ -80,9 +80,14 @@ Item {
             height: tasks.height
 
             onFocus: {
+                minimized = tasksSource.data[modelData]["minimized"];
                 service = tasksSource.serviceForSource (modelData);
                 operation = service.operationDescription ("toggleMinimized");
-                service.startOperationCall (operation);
+                job = service.startOperationCall (operation);
+                if ( minimized ) {
+                    operation = service.operationDescription ("activate");
+                    service.startOperationCall (operation);
+                }
             }
         }
     }
