@@ -231,8 +231,21 @@ void BlurEffect::prePaintScreen(ScreenPrePaintData &data, int time)
     if (data.mask & (PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS | PAINT_SCREEN_TRANSFORMED))
         return;
 
-    if (effects->activeFullScreenEffect())
-        return;
+    if (effects->activeFullScreenEffect()) {
+        // search for a window which has the force blur rule set
+        // if there is such a window we need to do the normal blur handling
+        // if there is no such window blur is blocked during the fullscreen effect
+        bool hasForce = false;
+        foreach (EffectWindow *w, windows) {
+            if (w->data(WindowForceBlurRole).toBool()) {
+                hasForce = true;
+                break;
+            }
+        }
+        if (!hasForce) {
+            return;
+        }
+    }
 
     // Walk the window list top->bottom and check if the paint region is fully
     // contained within opaque windows and doesn't intersect any blurred region.
