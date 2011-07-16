@@ -241,6 +241,8 @@ void Client::releaseWindow(bool on_shutdown)
     assert(!deleting);
     deleting = true;
     Deleted* del = Deleted::create(this);
+    if (moveResizeMode)
+        emit clientFinishUserMovedResized(this);
     emit clientClosed(this);
     if (scene) {
         scene->windowClosed(this, del);
@@ -309,6 +311,8 @@ void Client::destroyClient()
     assert(!deleting);
     deleting = true;
     Deleted* del = Deleted::create(this);
+    if (moveResizeMode)
+        emit clientFinishUserMovedResized(this);
     emit clientClosed(this);
     if (scene) {
         scene->windowClosed(this, del);
