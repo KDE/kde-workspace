@@ -59,7 +59,6 @@ protected slots:
 	void clearIndicators();
 	void saveStartup();
 	void disableStartup();
-	void unifiedOutputChanged(bool checked);
 
 signals:
 	void changed(bool change);
