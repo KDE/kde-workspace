@@ -55,6 +55,10 @@ class KStartupInfoData;
 class QSlider;
 class QPushButton;
 
+namespace Kephal
+{
+    class Screen;
+}
 namespace KWin
 {
 
@@ -704,6 +708,11 @@ private slots:
     void clientPopupActivated(QAction*);
     void configureWM();
     void desktopResized();
+    void screenChangeTimeout();
+    void screenAdded(Kephal::Screen*);
+    void screenRemoved(int);
+    void screenResized(Kephal::Screen*, QSize, QSize);
+    void screenMoved(Kephal::Screen*, QPoint, QPoint);
     void slotUpdateToolWindows();
     void lostTopMenuSelection();
     void lostTopMenuOwner();
@@ -833,7 +842,6 @@ private:
 
     QMenu* clientPopup();
     void closeActivePopup();
-
     void updateClientArea(bool force);
 
     bool windowRepaintsPending() const;
@@ -856,6 +864,7 @@ private:
     QList<Rules*> rules;
     KXMessages temporaryRulesMessages;
     QTimer rulesUpdatedTimer;
+    QTimer screenChangedTimer;
     bool rules_updates_disabled;
     static const char* windowTypeToTxt(NET::WindowType type);
     static NET::WindowType txtToWindowType(const char* txt);
