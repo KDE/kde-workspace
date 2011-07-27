@@ -31,10 +31,10 @@
       <default>false</default>
     </entry>
     <entry name="showOnlyCurrentDesktop" type="Bool">
-      <default>true</default>
+      <default>false</default>
     </entry>
     <entry name="showOnlyCurrentActivity" type="Bool">
-      <default>false</default>
+      <default>true</default>
     </entry>
     <entry name="showOnlyMinimized" type="Bool">
       <default>false</default>

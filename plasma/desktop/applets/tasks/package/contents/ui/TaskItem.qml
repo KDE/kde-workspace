@@ -24,15 +24,16 @@ import org.kde.qtextracomponents 0.1
 Item {
     id: taskItem
 
+    property string item_id
     property alias icon: taskIcon.icon
     property alias label: taskName.text
     property bool focused
-    signal focus
+    signal clicked
 
     PlasmaCore.FrameSvgItem {
         anchors.fill: parent
         imagePath: "widgets/tasks"
-        prefix: focused ? "focus" : "normal"
+        prefix: mouseArea.containsMouse ? "hover" : (focused ? "focus" : "normal")
     }
 
     QIconItem {
@@ -59,7 +60,9 @@ Item {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
-        onClicked: parent.focus()
+        hoverEnabled: true
+        onClicked: parent.clicked()
     }
 }

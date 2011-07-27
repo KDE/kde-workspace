@@ -31,13 +31,14 @@ Item {
     property bool kcfg_groupWhenFull: true
     property int kcfg_sortingStrategy: 0
     property bool kcfg_showOnlyCurrentScreen: false
-    property bool kcfg_showOnlyCurrentDesktop: true
-    property bool kcfg_showOnlyCurrentActivity: false
+    property bool kcfg_showOnlyCurrentDesktop: false
+    property bool kcfg_showOnlyCurrentActivity: true
     property bool kcfg_showOnlyMinimized: false
+    property int count: 0
 
     Component.onCompleted: {
         plasmoid.addEventListener ('ConfigChanged', configChanged);
-        configChanged()
+        //tasksView.model = [];
     }
 
     function configChanged() {
@@ -52,6 +53,7 @@ Item {
         kcfg_showOnlyCurrentDesktop = plasmoid.readConfig("showOnlyCurrentDesktop");
         kcfg_showOnlyCurrentActivity = plasmoid.readConfig("showOnlyCurrentActivity");
         kcfg_showOnlyMinimized = plasmoid.readConfig("showOnlyMinimized");
+        reload();
     }
 
     PlasmaCore.DataSource {
@@ -59,13 +61,38 @@ Item {
         engine: "tasks"
         connectedSources: sources
         interval: 0
+        onSourcesChanged: reload()
+        Component.onCompleted: reload()
+    }
+
+    function reload()
+    {
+        print("==reload==");
+        var sources = tasksSource.sources;
+        var mymodel = new Array();
+        for (i=0; i<sources.length; i++) {
+            item_id = sources[i];
+            print ("===test "+item_id);
+            visible = true;
+            if (kcfg_showOnlyCurrentActivity)
+                visible = tasksSource.data[item_id]["onCurrentActivity"] || tasksSource.data[item_id]["onAllActivities"];
+            if (visible && kcfg_showOnlyCurrentDesktop)
+                visible = tasksSource.data[item_id]["onCurrentDesktop"] || tasksSource.data[item_id]["onAllDesktops"];
+            if (visible && kcfg_showOnlyMinimized)
+                visible = tasksSource.data[item_id]["minimized"];
+            if (visible)
+            { print ("===show "+item_id);
+                mymodel.push (item_id);
+            }
+            else print ("===noshow "+item_id);
+        }
+        tasksView.model = mymodel;
     }
 
     ListView {
         id: tasksView
         anchors.fill: parent
         orientation: Qt.Horizontal
-        model: tasksSource.sources
         delegate: taskItem
     }
 
@@ -73,18 +100,21 @@ Item {
         id: taskItem
 
         TaskItem {
+            item_id: modelData
             icon: tasksSource.data[modelData]["icon"]
             label: tasksSource.data[modelData]["name"]
             focused: tasksSource.data[modelData]["active"]
             width: tasks.width/tasksView.model.length
             height: tasks.height
 
-            onFocus: {
-                minimized = tasksSource.data[modelData]["minimized"];
+            onClicked: {
+                current = tasksSource.data[modelData]["onCurrentDesktop"];
                 service = tasksSource.serviceForSource (modelData);
-                operation = service.operationDescription ("toggleMinimized");
-                job = service.startOperationCall (operation);
-                if ( minimized ) {
+                if ( focused ) {
+                    operation = service.operationDescription ("toggleMinimized");
+                    service.startOperationCall (operation);
+                }
+                else {
                     operation = service.operationDescription ("activate");
                     service.startOperationCall (operation);
                 }
