@@ -1085,6 +1085,15 @@ void Client::checkWorkspacePosition()
 //            kDebug(1212) << "TOPMENU size adjust: " << area << ":" << this;
             setGeometry(area);
         }
+    }
+
+    if (maximizeMode() != MaximizeRestore) {
+        // TODO update geom_restore?
+        changeMaximize(false, false, true);   // adjust size
+        const QRect &screenArea = workspace()->clientArea(ScreenArea, this);
+        QRect geom = geometry();
+        checkOffscreenPosition(geom, screenArea);
+        setGeometry(geom);
         return;
     }
 
