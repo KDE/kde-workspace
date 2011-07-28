@@ -1207,11 +1207,24 @@ void Client::checkWorkspacePosition()
                                   newGeom.x() + newGeom.width() - 1));
         }
 
+        checkOffscreenPosition(newGeom, screenArea);
         // Obey size hints. TODO: We really should make sure it stays in the right place
         newGeom.setSize(adjustedSize(newGeom.size()));
 
         if (newGeom != geometry())
             setGeometry(newGeom);
+    }
+}
+
+void Client::checkOffscreenPosition(QRect& geom, const QRect& screenArea)
+{
+    if (geom.x() > screenArea.right()) {
+        int screenWidth = screenArea.width();
+        geom.moveLeft(screenWidth - (screenWidth / 4));
+    }
+    if (geom.y() > screenArea.bottom()) {
+        int screenHeight = screenArea.height();
+        geom.moveBottom(screenHeight - (screenHeight / 4));
     }
 }
 
