@@ -609,9 +609,6 @@ Wayland::Client *Workspace::createWaylandClient(Wayland::Surface *surface)
     Wayland::Client *c = new Wayland::Client(this, surface);
     addWaylandClient(c);
 
-    if (scene) {
-        scene->windowAdded(c);
-    }
     emit waylandClientAdded(c);
     return c;
 }
