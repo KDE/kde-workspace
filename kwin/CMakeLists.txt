@@ -48,10 +48,6 @@ if( KWIN_HAVE_COMPOSITING AND OPENGLES_FOUND AND KWIN_BUILD_WITH_OPENGLES)
     set( KWIN_HAVE_OPENGL_COMPOSITING 1)
     set( KWIN_HAVE_OPENGLES_COMPOSITING 1 )
     message("Compiling KWin for mobile.")
-    if( WAYLAND_SERVER_FOUND )
-        set( KWIN_HAVE_WAYLAND 1 )
-        message("Compiling KWin with Wayland support")
-    endif( WAYLAND_SERVER_FOUND )
 endif( KWIN_HAVE_COMPOSITING AND OPENGLES_FOUND AND KWIN_BUILD_WITH_OPENGLES )
 
 # safety
@@ -73,10 +69,6 @@ endif(OPENGL_FOUND)
 if(OPENGLES_FOUND AND KWIN_HAVE_OPENGLES_COMPOSITING)
   include_directories(${OPENGLES_INCLUDE_DIR})
 endif(OPENGLES_FOUND AND KWIN_HAVE_OPENGLES_COMPOSITING)
-
-if(KWIN_HAVE_WAYLAND)
-    include_directories(${WAYLAND_SERVER_INCLUDE_DIR})
-endif(KWIN_HAVE_WAYLAND)
 
 # for things that are also used by kwin libraries
 configure_file(libkwineffects/kwinconfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libkwineffects/kwinconfig.h )
@@ -220,10 +212,6 @@ if(KWIN_BUILD_SCREENEDGES)
     )
 endif(KWIN_BUILD_SCREENEDGES)
 
-if(KWIN_HAVE_WAYLAND)
-    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} wayland/wayland.cpp wayland/surface.cpp wayland/wayland_client.cpp wayland/wayland_bridge.cpp wayland/decorationeventfilter.cpp)
-endif(KWIN_HAVE_WAYLAND)
-
 qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.KWin.xml workspace.h KWin::Workspace )
 
 qt4_add_dbus_interface( kwin_KDEINIT_SRCS
@@ -240,10 +228,6 @@ endif(KWIN_BUILD_SCRIPTING)
 if(KWIN_BUILD_TABBOX)
     set(kwinLibs ${kwinLibs} ${QT_QTXML_LIBRARY})
 endif(KWIN_BUILD_TABBOX)
-
-if(KWIN_HAVE_WAYLAND)
-    set(kwinLibs ${kwinLibs} ${WAYLAND_SERVER_LIBRARIES})
-endif(KWIN_HAVE_WAYLAND)
 
 if (X11_Xrandr_FOUND)
   set(kwinLibs ${kwinLibs} ${X11_Xrandr_LIB})
@@ -285,9 +269,18 @@ install(TARGETS kdeinit_kwin ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(TARGETS kwin         ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 if(OPENGLES_FOUND)
+  if(WAYLAND_SERVER_FOUND)
+      include_directories(${WAYLAND_SERVER_INCLUDE_DIR})
+      set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} wayland/wayland.cpp wayland/surface.cpp wayland/wayland_client.cpp wayland/wayland_bridge.cpp wayland/decorationeventfilter.cpp)
+  endif(WAYLAND_SERVER_FOUND)
   kde4_add_kdeinit_executable( kwin_gles ${kwin_KDEINIT_SRCS})
   target_link_libraries(kdeinit_kwin_gles ${kwinLibs} kwinglesutils ${OPENGLES_LIBRARIES} ${OPENGLES_EGL_LIBRARIES})
   set_target_properties(kdeinit_kwin_gles PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGL -DKWIN_HAVE_OPENGLES")
+  if( WAYLAND_SERVER_FOUND )
+      set_target_properties(kdeinit_kwin_gles PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGL -DKWIN_HAVE_OPENGLES -DKWIN_HAVE_WAYLAND")
+      target_link_libraries(kdeinit_kwin_gles ${WAYLAND_SERVER_LIBRARIES})
+      message("Compiling KWin with Wayland support")
+  endif( WAYLAND_SERVER_FOUND )
   install(TARGETS kdeinit_kwin_gles ${INSTALL_TARGETS_DEFAULT_ARGS} )
   install(TARGETS kwin_gles         ${INSTALL_TARGETS_DEFAULT_ARGS} )
 endif(OPENGLES_FOUND)
