@@ -61,6 +61,13 @@ KRandRSystemTray::KRandRSystemTray(RandRDisplay *dpy, QWidget* parent)
 	connect(m_menu, SIGNAL(aboutToShow()), this, SLOT(slotPrepareMenu()));
 	m_display->refresh();
 	updateToolTip();
+
+	OutputMap outputs = m_display->currentScreen()->outputs();
+	foreach(RandROutput *output, outputs)
+	{
+		connect(output, SIGNAL(outputChanged(RROutput,int)), this, SLOT(slotPrepareMenu()));
+		connect(output, SIGNAL(outputChanged(RROutput,int)), this, SLOT(updateToolTip()));
+	}
 }
 
 KRandRSystemTray::~KRandRSystemTray()
@@ -94,7 +101,7 @@ void KRandRSystemTray::slotPrepareMenu()
 		for (int s = 0; s < m_display->numScreens(); s++) 
 		{
 			m_display->setCurrentScreen(s);
-			if (s == m_display->screenIndexOfWidget(associatedWidget())) 
+			if (s == QX11Info::appScreen())
 			{
 				/*lastIndex = menu->insertItem(i18n("Screen %1").arg(s+1));
 				menu->setItemEnabled(lastIndex, false);*/
@@ -187,40 +194,46 @@ void KRandRSystemTray::updateToolTip()
 			{
 				if (output->isConnected()) 
 				{
-					if (first)
-					{
-						first = false;
+					if (!output->isActive()) {
 						details += "<tr><td>&nbsp;</td></tr>";
-					}
-					else
-					{
-						details += "<tr><td>&nbsp;</td></tr>";
-					}
-					details += "<tr><th align=\"left\" colspan=\"2\">" + output->name()
-						+ "</th></tr>";
+						details += "<tr><th align=\"left\" colspan=\"2\">" + output->name()
+							+ " (" + i18n("Disabled") + ") </th></tr>";
+					} else {
+						if (first)
+						{
+							first = false;
+							details += "<tr><td>&nbsp;</td></tr>";
+						}
+						else
+						{
+							details += "<tr><td>&nbsp;</td></tr>";
+						}
+						details += "<tr><th align=\"left\" colspan=\"2\">" + output->name()
+							+ "</th></tr>";
 
-					QSize currentSize = output->rect().size();
-					if (output->rotation() & (RandR::Rotate90 | RandR::Rotate270))
-						currentSize = QSize(currentSize.height(), currentSize.width());
+						QSize currentSize = output->rect().size();
+						if (output->rotation() & (RandR::Rotate90 | RandR::Rotate270))
+							currentSize = QSize(currentSize.height(), currentSize.width());
 
-					details += "<tr>" + i18n("<td align=\"right\">Resolution: </td><td>%1 x %2</td></tr>",
-							QString::number(currentSize.width()),
-							QString::number(currentSize.height()));
-					RateList rates = output->refreshRates();
-					if (rates.count())
-					{
-					    details += "<tr><td align=\"right\">" + i18n("Refresh: ") + "</td><td>"
-						    + ki18n("%1 Hz").subs(output->refreshRate(), 0, 'f', 1).toString()
-						    + "</td></tr>";
-					}
+						details += "<tr>" + i18n("<td align=\"right\">Resolution: </td><td>%1 x %2</td></tr>",
+								QString::number(currentSize.width()),
+								QString::number(currentSize.height()));
+						RateList rates = output->refreshRates();
+						if (rates.count())
+						{
+							details += "<tr><td align=\"right\">" + i18n("Refresh: ") + "</td><td>"
+								+ ki18n("%1 Hz").subs(output->refreshRate(), 0, 'f', 1).toString()
+								+ "</td></tr>";
+						}
 
-					int rotations = output->rotations();
-					if (rotations != RandR::Rotate0 &&
-						output->rotation() != RandR::Rotate0)
-					{
-					        details += "<tr><td align=\"right\">" + i18n("Rotation: ") + "</td><td>"
-							+ RandR::rotationName(1 << output->rotation())
-							+ "</td></tr>";
+						int rotations = output->rotations();
+						if (rotations != RandR::Rotate0 &&
+							output->rotation() != RandR::Rotate0)
+						{
+								details += "<tr><td align=\"right\">" + i18n("Rotation: ") + "</td><td>"
+								+ RandR::rotationName(1 << output->rotation())
+								+ "</td></tr>";
+						}
 					}
 				}
 			}
@@ -399,7 +412,7 @@ void KRandRSystemTray::populateMenu(KMenu* menu)
 			}
 		}
 		// if there is more than one output connected, give the option to unify the outputs
-		if (screen->connectedCount() != 1)
+		if (screen->connectedCount() != 1 && !screen->unifiedSizes().isEmpty())
 		{
 			menu->addSeparator();
 			action = menu->addAction( i18n("Unify Outputs"), screen, SLOT(slotUnifyOutputs(bool)) );

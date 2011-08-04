@@ -267,7 +267,6 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
         data.paint = region;
         data.paint |= topw->repaints().translated(topw->pos());
         data.paint |= topw->decorationPendingRegion();
-        dirtyArea |= data.paint;
 
         // Reset the repaint_region.
         // This has to be done here because many effects schedule a repaint for
@@ -292,6 +291,7 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
             w->suspendUnredirect(true);
             continue;
         }
+        dirtyArea |= data.paint;
         // Schedule the window for painting
         phase2data[w] = Phase2Data(w, data.paint, data.clip, data.mask, data.quads);
         // no transformations, but translucency requires window pixmap
@@ -327,7 +327,7 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
 
             // Clip out the client area, so we only draw the rest in the next pass
             data->region -= data->clip;
-            // if prePaintWindow didnt change the clipping area we only have to paint
+            // if prePaintWindow didn't change the clipping area we only have to paint
             // the decoration
             if (data-> clip == data.key()->clientShape().translated(data.key()->x(), data.key()->y())) {
                 data->mask |= PAINT_DECORATION_ONLY;

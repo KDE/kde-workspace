@@ -126,6 +126,14 @@ void Workspace::setupCompositing()
         else {
             unsafeConfig.writeEntry("OpenGLIsUnsafe", true);
             unsafeConfig.sync();
+#ifndef KWIN_HAVE_OPENGLES
+            if (!CompositingPrefs::hasGlx()) {
+                unsafeConfig.writeEntry("OpenGLIsUnsafe", false);
+                unsafeConfig.sync();
+                kDebug(1212) << "No glx extensions available";
+                break;
+            }
+#endif
 
             scene = new SceneOpenGL(this);
 
@@ -198,12 +206,6 @@ void Workspace::setupCompositing()
     c->setupCompositing();
     foreach (Unmanaged * c, unmanaged)
     c->setupCompositing();
-    foreach (Client * c, clients)
-    scene->windowAdded(c);
-    foreach (Client * c, desktops)
-    scene->windowAdded(c);
-    foreach (Unmanaged * c, unmanaged)
-    scene->windowAdded(c);
     discardPopup(); // force re-creation of the Alt+F3 popup (opacity option)
 #else
     kDebug(1212) << "Compositing was not available at compile time";
@@ -578,6 +580,7 @@ void Toplevel::setupCompositing()
     effect_window->setWindow(this);
     unredirect = false;
     workspace()->checkUnredirect(true);
+    scene->windowAdded(this);
 #endif
 }
 
@@ -789,12 +792,17 @@ void Toplevel::addRepaint(int x, int y, int w, int h)
     workspace()->checkCompositeTimer();
 }
 
+void Toplevel::addRepaint(const QRegion& r)
+{
+    if (!compositing())
+        return;
+    repaints_region += r;
+    workspace()->checkCompositeTimer();
+}
+
 void Toplevel::addRepaintFull()
 {
-    repaints_region = rect();
-    if (hasShadow()) {
-        repaints_region = repaints_region.united(shadow()->shadowRegion());
-    }
+    repaints_region = decorationRect();
     workspace()->checkCompositeTimer();
 }
 
@@ -883,11 +891,6 @@ bool Client::shouldUnredirect() const
     return false;
 }
 
-void Client::addRepaintFull()
-{
-    repaints_region = decorationRect();
-    workspace()->checkCompositeTimer();
-}
 
 //****************************************
 // Unmanaged
@@ -926,10 +929,5 @@ bool Deleted::shouldUnredirect() const
     return false;
 }
 
-void Deleted::addRepaintFull()
-{
-    repaints_region = decorationRect();
-    workspace()->checkCompositeTimer();
-}
 
 } // namespace

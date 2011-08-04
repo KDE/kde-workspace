@@ -18,9 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
-#include <config-X11.h>
-
 #include "overlaywindow.h"
+
+#include <config-X11.h>
 
 #include "kwinglobals.h"
 
@@ -39,9 +39,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KWin {
 OverlayWindow::OverlayWindow()
-    : m_window(None)
-    , m_visible(true)
+    : m_visible(true)
     , m_shown(false)
+    , m_window(None)
 {
 }
 

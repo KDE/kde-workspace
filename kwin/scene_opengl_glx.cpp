@@ -39,10 +39,6 @@ SceneOpenGL::SceneOpenGL(Workspace* ws)
     : Scene(ws)
     , init_ok(false)
 {
-    if (!Extensions::glxAvailable()) {
-        kDebug(1212) << "No glx extensions available";
-        return; // error
-    }
     initGLX();
     // check for FBConfig support
     if (!hasGLExtension("GLX_SGIX_fbconfig") || !glXGetFBConfigAttrib || !glXGetFBConfigs ||
@@ -676,7 +672,7 @@ void SceneOpenGL::Texture::bind()
 {
     glEnable(mTarget);
     glBindTexture(mTarget, mTexture);
-    // if one of the GLTexture::load functions is called, the glxpixmap doesnt
+    // if one of the GLTexture::load functions is called, the glxpixmap doesn't
     // have to exist
     if (options->glStrictBinding && glxpixmap) {
         glXReleaseTexImageEXT(display(), glxpixmap, GLX_FRONT_LEFT_EXT);
@@ -695,7 +691,7 @@ void SceneOpenGL::Texture::unbind()
     if (hasGLVersion(1, 4, 0)) {
         glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0.0f);
     }
-    // if one of the GLTexture::load functions is called, the glxpixmap doesnt
+    // if one of the GLTexture::load functions is called, the glxpixmap doesn't
     // have to exist
     if (options->glStrictBinding && glxpixmap) {
         glBindTexture(mTarget, mTexture);

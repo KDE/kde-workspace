@@ -50,6 +50,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kephal/screens.h>
 #include <KDE/KGlobalSettings>
 #include "outline.h"
+#ifdef KWIN_BUILD_TILING
+#include "tiling/tiling.h"
+#endif
 
 namespace KWin
 {
@@ -1031,6 +1034,10 @@ void Client::checkWorkspacePosition(const QRect &geo)
     if (maximizeMode() != MaximizeRestore) {
         // TODO update geom_restore?
         changeMaximize(false, false, true);   // adjust size
+        const QRect &screenArea = workspace()->clientArea(ScreenArea, this);
+        QRect geom = geometry();
+        checkOffscreenPosition(geom, screenArea);
+        setGeometry(geom);
         return;
     }
 
@@ -1154,11 +1161,24 @@ void Client::checkWorkspacePosition(const QRect &geo)
                                   newGeom.x() + newGeom.width() - 1));
         }
 
+        checkOffscreenPosition(newGeom, screenArea);
         // Obey size hints. TODO: We really should make sure it stays in the right place
         newGeom.setSize(adjustedSize(newGeom.size()));
 
         if (newGeom != geometry())
             setGeometry(newGeom);
+    }
+}
+
+void Client::checkOffscreenPosition(QRect& geom, const QRect& screenArea)
+{
+    if (geom.x() > screenArea.right()) {
+        int screenWidth = screenArea.width();
+        geom.moveLeft(screenWidth - (screenWidth / 4));
+    }
+    if (geom.y() > screenArea.bottom()) {
+        int screenHeight = screenArea.height();
+        geom.moveBottom(screenHeight - (screenHeight / 4));
     }
 }
 
@@ -2023,7 +2043,9 @@ void Client::move(int x, int y, ForceGeometry_t force)
     workspace()->checkActiveScreen(this);
     workspace()->updateStackingOrder();
     workspace()->checkUnredirect();
-    workspace()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
+#ifdef KWIN_BUILD_TILING
+    workspace()->tiling()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
+#endif
     // client itself is not damaged
     const QRect deco_rect = decorationRect().translated(geom.x(), geom.y());
     addWorkspaceRepaint(deco_rect_before_block);
@@ -2581,17 +2603,26 @@ void Client::finishMoveResize(bool cancel)
 
     leaveMoveResize();
 
-    if (workspace()->tilingEnabled()) {
+#ifdef KWIN_BUILD_TILING
+    if (workspace()->tiling()->isEnabled()) {
         if (wasResize)
-            workspace()->notifyTilingWindowResizeDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
+            workspace()->tiling()->notifyTilingWindowResizeDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
         else if (wasMove)
-            workspace()->notifyTilingWindowMoveDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
+            workspace()->tiling()->notifyTilingWindowMoveDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
     } else {
         if (cancel)
             setGeometry(initialMoveResizeGeom);
         else
             setGeometry(moveResizeGeom);
     }
+#else
+    if (cancel)
+        setGeometry(initialMoveResizeGeom);
+    else
+        setGeometry(moveResizeGeom);
+    Q_UNUSED(wasResize);
+    Q_UNUSED(wasMove);
+#endif
     if (cancel)
         setGeometry(initialMoveResizeGeom);
 
@@ -2600,7 +2631,7 @@ void Client::finishMoveResize(bool cancel)
         setQuickTileMode(electricMode);
         const ElectricBorder border = electricBorderFromMode(electricMode);
         if (border == ElectricNone)
-            kDebug(1212) << "invalid electric mode" << electricMode << "leading to invalid array acces,\
+            kDebug(1212) << "invalid electric mode" << electricMode << "leading to invalid array access,\
                                                                         this should not have happened!";
 #ifdef KWIN_BUILD_SCREENEDGES
         else
@@ -2753,10 +2784,12 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
     bool update = false;
     if (isResize()) {
+#ifdef KWIN_BUILD_TILING
         // query layout for supported resize mode
-        if (workspace()->tilingEnabled()) {
-            mode = workspace()->supportedTilingResizeMode(this, mode);
+        if (workspace()->tiling()->isEnabled()) {
+            mode = workspace()->tiling()->supportedTilingResizeMode(this, mode);
         }
+#endif
         // first resize (without checking constrains), then snap, then check bounds, then check constrains
         QRect orig = initialMoveResizeGeom;
         Sizemode sizemode = SizemodeAny;
@@ -2790,18 +2823,22 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
             sizemode = SizemodeFixedW;
             break;
         case PositionCenter:
+#ifdef KWIN_BUILD_TILING
             // exception for tiling
             // Center means no resizing allowed
-            if (workspace()->tilingEnabled()) {
+            if (workspace()->tiling()->isEnabled()) {
                 finishMoveResize(false);
                 buttonDown = false;
                 return;
             }
+#endif
         default:
             abort();
             break;
         }
-        workspace()->notifyTilingWindowResize(this, moveResizeGeom, initialMoveResizeGeom);
+#ifdef KWIN_BUILD_TILING
+        workspace()->tiling()->notifyTilingWindowResize(this, moveResizeGeom, initialMoveResizeGeom);
+#endif
         // adjust new size to snap to other windows/borders
         moveResizeGeom = workspace()->adjustClientSize(this, moveResizeGeom, mode);
 
@@ -2959,7 +2996,9 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
         performMoveResize();
 
     if (isMove()) {
-        workspace()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
+#ifdef KWIN_BUILD_TILING
+        workspace()->tiling()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
+#endif
 #ifdef KWIN_BUILD_SCREENEDGES
         workspace()->screenEdge()->check(globalPos, xTime());
 #endif
@@ -2977,8 +3016,10 @@ void Client::performMoveResize()
         sendSyncRequest();
     }
 #endif
-    if (!workspace()->tilingEnabled())
+#ifdef KWIN_BUILD_TILING
+    if (!workspace()->tiling()->isEnabled())
         setGeometry(moveResizeGeom);
+#endif
     positionGeometryTip();
     emit clientStepUserMovedResized(this, moveResizeGeom);
 }

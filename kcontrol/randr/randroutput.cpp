@@ -174,8 +174,8 @@ void RandROutput::handleEvent(XRROutputChangeNotifyEvent *event)
 
 	//FIXME: handling these events incorrectly, causing an X11 I/O error...
 	// Disable for now.
-	kWarning() << "FIXME: Output event ignored!";
-	return;
+// 	kWarning() << "FIXME: Output event ignored!";
+// 	return;
 	
 	RRCrtc currentCrtc = m_crtc->id();
 	if (event->crtc != currentCrtc)
@@ -185,7 +185,7 @@ void RandROutput::handleEvent(XRROutputChangeNotifyEvent *event)
 		if (currentCrtc != None)
 			m_crtc->loadSettings(true);
 			//m_screen->crtc(m_currentCrtc)->loadSettings(true);
-		setCrtc(m_screen->crtc(event->crtc));
+		setCrtc(m_screen->crtc(event->crtc), false);
 		if (currentCrtc != None)
 			m_crtc->loadSettings(true);
 	}
@@ -200,6 +200,7 @@ void RandROutput::handleEvent(XRROutputChangeNotifyEvent *event)
 	{
 		changed |= RandR::ChangeConnection;
 		m_connected = (event->connection == RR_Connected);
+		loadSettings(false);
 		if (!m_connected && currentCrtc != None)
 			setCrtc(None);
 	}
@@ -598,7 +599,7 @@ bool RandROutput::tryCrtc(RandRCrtc *crtc, int changes)
 bool RandROutput::applyProposed(int changes, bool confirm)
 {
 	// If disabled, save anyway to ensure it's saved
-	if (!isActive())
+	if (!isConnected())
 	{
 		KConfig cfg("krandrrc");
 		save(cfg);
