@@ -39,6 +39,7 @@ Item {
     property int rows
 
     Component.onCompleted: {
+        rows = 1;
         plasmoid.addEventListener ('ConfigChanged', configChanged);
     }
 
@@ -54,9 +55,11 @@ Item {
         kcfg_showOnlyCurrentDesktop = plasmoid.readConfig("showOnlyCurrentDesktop");
         kcfg_showOnlyCurrentActivity = plasmoid.readConfig("showOnlyCurrentActivity");
         kcfg_showOnlyMinimized = plasmoid.readConfig("showOnlyMinimized");
-        rows = kcfg_fillRows ? kcfg_maxRows : 1;
+        computeRows();
         reload();
     }
+
+    onHeightChanged: computeRows()
 
     PlasmaCore.DataSource {
         id: tasksSource
@@ -92,6 +95,18 @@ Item {
         tasksView.model = mymodel;
     }
 
+    function computeRows() {
+        if (!kcfg_fillRows) {
+            rowCount = height/minHeight;
+            if (rowCount <= kcfg_maxRows) {
+                rows = rowCount;
+            }
+        }
+        else {
+            rows = kcfg_maxRows;
+        }
+    }
+
     Flow {
         id: tasksContainer
         anchors.fill: parent
@@ -106,15 +121,6 @@ Item {
         }
     }
 
-    onHeightChanged: {
-        if (!kcfg_fillRows) {
-            rowCount = height/minHeight;
-            if (rowCount <= kcfg_maxRows) {
-                rows = rowCount;
-            }
-        }
-    }
-
     Component {
         id: taskItem
 
@@ -123,8 +129,7 @@ Item {
             icon: tasksSource.data[modelData]["icon"]
             label: tasksSource.data[modelData]["name"]
             focused: tasksSource.data[modelData]["active"]
-            // width: Math.min( tasks.width / ((tasksView.count - 1)/rows + 1), 270 )
-            width: Math.min( rows*tasks.width/(tasksView.count+rows-1), 270 )
+            width: Math.min( tasks.width/Math.floor( (tasksView.count + rows -1)/rows ), 270 )
             height: tasks.height/rows
             showLabel: width >= 85
 
