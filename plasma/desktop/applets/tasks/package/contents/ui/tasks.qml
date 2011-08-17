@@ -19,6 +19,7 @@
 
 import Qt 4.7
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.qtextracomponents 0.1
 
 Item {
     id: tasks
@@ -127,6 +128,34 @@ Item {
             height: tasks.height/rows
             showLabel: width >= 85
 
+            QMenu {
+                id: contextMenu
+                QMenuAction {
+                    text: "Move"
+                }
+                QMenuAction {
+                    text: "Resize"
+                    icon: QIcon("transform-move")
+                }
+                QMenuAction {
+                    text: "Minimize"
+                    checkable: true
+                }
+                QMenuAction {
+                    text: "Maximize"
+                    checkable: true
+                }
+                QMenuAction {
+                    text: "Shade"
+                    checkable: true
+                }
+                QMenuAction { separator: true }
+                QMenuAction {
+                    text: "Close"
+                    icon: QIcon("dialog-close");
+                }
+            }
+
             onClicked: {
                 current = tasksSource.data[modelData]["onCurrentDesktop"];
                 service = tasksSource.serviceForSource (modelData);
@@ -138,6 +167,11 @@ Item {
                     operation = service.operationDescription ("activate");
                     service.startOperationCall (operation);
                 }
+            }
+
+            onRightClicked: {
+                globalPos = parent.mapToItem (null, x, y);
+                contextMenu.showMenu (globalPos.x, globalPos.y);
             }
         }
     }

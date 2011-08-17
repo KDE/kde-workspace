@@ -30,6 +30,7 @@ Item {
     property bool focused
     property alias showLabel: taskName.visible
     signal clicked
+    signal rightClicked
 
     PlasmaCore.FrameSvgItem {
         id: frame
@@ -62,8 +63,17 @@ Item {
 
     MouseArea {
         id: mouseArea
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         anchors.fill: parent
         hoverEnabled: true
-        onClicked: parent.clicked()
+        onClicked: {
+            if (mouse.button & Qt.LeftButton) {
+                parent.clicked();
+            }
+            else if (mouse.button & Qt.RightButton) {
+                // FIXME: Plasmoid intercepts right-click mouse events
+                parent.rightClicked();
+            }
+        }
     }
 }
