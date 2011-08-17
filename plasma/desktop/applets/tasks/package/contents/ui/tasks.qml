@@ -24,12 +24,12 @@ Item {
     id: tasks
 
     property bool kcfg_fillRows: false
-    property bool kcfg_showTooltip: true
-    property bool kcfg_highlightWindows: false
+    property bool kcfg_showTooltip: true                //todo
+    property bool kcfg_highlightWindows: false          //todo
     property int kcfg_maxRows: 2
-    property int kcfg_groupingStrategy: 2
-    property bool kcfg_groupWhenFull: true
-    property int kcfg_sortingStrategy: 0
+    property int kcfg_groupingStrategy: 2               //todo
+    property bool kcfg_groupWhenFull: true              //todo
+    property int kcfg_sortingStrategy: 0                //todo
     property bool kcfg_showOnlyCurrentScreen: false
     property bool kcfg_showOnlyCurrentDesktop: false
     property bool kcfg_showOnlyCurrentActivity: true
