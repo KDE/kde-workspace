@@ -136,28 +136,64 @@ Item {
             QMenu {
                 id: contextMenu
                 QMenuAction {
-                    text: "Move"
-                }
-                QMenuAction {
-                    text: "Resize"
+                    text: "&Move"
                     icon: QIcon("transform-move")
+                    onTriggered: {
+                        service = tasksSource.serviceForSource (modelData);
+                        operation = service.operationDescription ("move");
+                        service.startOperationCall (operation);
+                    }
                 }
                 QMenuAction {
-                    text: "Minimize"
-                    checkable: true
+                    text: "Re&size"
+                    onTriggered: {
+                        service = tasksSource.serviceForSource (modelData);
+                        operation = service.operationDescription ("resize");
+                        service.startOperationCall (operation);
+                    }
                 }
                 QMenuAction {
-                    text: "Maximize"
+                    text: "Mi&nimize"
                     checkable: true
+                    checked: tasksSource.data[modelData]["minimized"]
+                    onTriggered: {
+                        service = tasksSource.serviceForSource (modelData);
+                        operation = service.operationDescription ("setMinimized");
+                        operation.minimized = checked;
+                        service.startOperationCall (operation);
+                    }
                 }
                 QMenuAction {
-                    text: "Shade"
+                    text: "Ma&ximize"
                     checkable: true
+                    checked: tasksSource.data[modelData]["maximized"]
+                    onTriggered: {
+                        service = tasksSource.serviceForSource (modelData);
+                        operation = service.operationDescription ("setMaximized");
+                        operation.maximized = checked;
+                        service.startOperationCall (operation);
+                    }
+                }
+                QMenuAction {
+                    text: "&Shade"
+                    checkable: true
+                    checked: tasksSource.data[modelData]["shaded"]
+                    onTriggered: {
+                        service = tasksSource.serviceForSource (modelData);
+                        operation = service.operationDescription ("setShaded");
+                        operation.shaded = checked;
+                        service.startOperationCall (operation);
+                    }
                 }
                 QMenuAction { separator: true }
                 QMenuAction {
-                    text: "Close"
+                    text: "&Close"
                     icon: QIcon("dialog-close");
+                    onTriggered: {
+                        service = tasksSource.serviceForSource (modelData);
+                        operation = service.operationDescription ("close");
+                        service.startOperationCall (operation);
+                    }
                 }
             }
 
