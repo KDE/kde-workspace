@@ -39,8 +39,8 @@ Item {
 
     QIconItem {
         id: taskIcon
-        width: 16
-        height: 16
+        width: showLabel ? 16 : Math.min(taskItem.width-20, taskItem.height-20)
+        height: width
         anchors {
             verticalCenter: parent.verticalCenter
         }

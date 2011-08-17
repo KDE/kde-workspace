@@ -34,11 +34,11 @@ Item {
     property bool kcfg_showOnlyCurrentDesktop: false
     property bool kcfg_showOnlyCurrentActivity: true
     property bool kcfg_showOnlyMinimized: false
-    property int count: 0
+    property int minHeight: 40
+    property int rows: 1
 
     Component.onCompleted: {
         plasmoid.addEventListener ('ConfigChanged', configChanged);
-        //tasksView.model = [];
     }
 
     function configChanged() {
@@ -90,11 +90,25 @@ Item {
         tasksView.model = mymodel;
     }
 
-    ListView {
-        id: tasksView
+    Flow {
+        id: tasksContainer
         anchors.fill: parent
-        orientation: Qt.Horizontal
-        delegate: taskItem
+
+        Repeater {
+            id: tasksView
+            delegate: taskItem
+        }
+
+        move: Transition {
+            NumberAnimation { properties: "x,y" }
+        }
+    }
+
+    onHeightChanged: {
+        rowCount = height/minHeight;
+        if (rowCount <= kcfg_maxRows) {
+            rows = rowCount;
+        }
     }
 
     Component {
@@ -105,8 +119,9 @@ Item {
             icon: tasksSource.data[modelData]["icon"]
             label: tasksSource.data[modelData]["name"]
             focused: tasksSource.data[modelData]["active"]
-            width: Math.min(tasks.width/tasksView.count, 270)
-            height: tasks.height
+            // width: Math.min( tasks.width / ((tasksView.count - 1)/rows + 1), 270 )
+            width: Math.min( rows*tasks.width/(tasksView.count+rows-1), 270 )
+            height: tasks.height/rows
             showLabel: width >= 85
 
             onClicked: {
