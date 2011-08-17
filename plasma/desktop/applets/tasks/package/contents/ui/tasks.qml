@@ -44,7 +44,7 @@ Item {
     function configChanged() {
         kcfg_fillRows = plasmoid.readConfig("fillRows");
         kcfg_showTooltip = plasmoid.readConfig("showTooltip");
-        kcfg_highlightWindiws = plasmoid.readConfig("highlightWindows");
+        kcfg_highlightWindows = plasmoid.readConfig("highlightWindows");
         kcfg_maxRows = plasmoid.readConfig("maxRows");
         kcfg_groupingStrategy = plasmoid.readConfig("groupingStrategy");
         kcfg_groupWhenFull = plasmoid.readConfig("groupWhenFull");
@@ -81,7 +81,8 @@ Item {
             if (visible && kcfg_showOnlyMinimized)
                 visible = tasksSource.data[item_id]["minimized"];
             if (visible)
-            { print ("===show "+item_id);
+            {
+                print ("===show "+item_id);
                 mymodel.push (item_id);
             }
             else print ("===noshow "+item_id);
@@ -104,8 +105,9 @@ Item {
             icon: tasksSource.data[modelData]["icon"]
             label: tasksSource.data[modelData]["name"]
             focused: tasksSource.data[modelData]["active"]
-            width: tasks.width/tasksView.model.length
+            width: Math.min(tasks.width/tasksView.count, 270)
             height: tasks.height
+            showLabel: width >= 85
 
             onClicked: {
                 current = tasksSource.data[modelData]["onCurrentDesktop"];

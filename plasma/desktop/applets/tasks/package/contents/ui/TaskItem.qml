@@ -28,6 +28,7 @@ Item {
     property alias icon: taskIcon.icon
     property alias label: taskName.text
     property bool focused
+    property alias showLabel: taskName.visible
     signal clicked
 
     PlasmaCore.FrameSvgItem {
@@ -42,9 +43,8 @@ Item {
         height: 16
         anchors {
             verticalCenter: parent.verticalCenter
-            left: parent.left
-            leftMargin: 10
         }
+        x: showLabel ? 10 : (parent.width-width)/2
     }
 
     Text {
