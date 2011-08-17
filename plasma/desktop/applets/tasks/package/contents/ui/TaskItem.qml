@@ -32,6 +32,7 @@ Item {
     signal clicked
 
     PlasmaCore.FrameSvgItem {
+        id: frame
         anchors.fill: parent
         imagePath: "widgets/tasks"
         prefix: mouseArea.containsMouse ? "hover" : (focused ? "focus" : "normal")
@@ -39,7 +40,7 @@ Item {
 
     QIconItem {
         id: taskIcon
-        width: showLabel ? 16 : Math.min(taskItem.width-20, taskItem.height-20)
+        width: showLabel ? 16 : Math.max( Math.min(taskItem.width-20, taskItem.height-20), 16 )
         height: width
         anchors {
             verticalCenter: parent.verticalCenter

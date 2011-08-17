@@ -35,7 +35,7 @@ Item {
     property bool kcfg_showOnlyCurrentActivity: true
     property bool kcfg_showOnlyMinimized: false
     property int minHeight: 40
-    property int rows: 1
+    property int rows
 
     Component.onCompleted: {
         plasmoid.addEventListener ('ConfigChanged', configChanged);
@@ -53,6 +53,7 @@ Item {
         kcfg_showOnlyCurrentDesktop = plasmoid.readConfig("showOnlyCurrentDesktop");
         kcfg_showOnlyCurrentActivity = plasmoid.readConfig("showOnlyCurrentActivity");
         kcfg_showOnlyMinimized = plasmoid.readConfig("showOnlyMinimized");
+        rows = kcfg_fillRows ? kcfg_maxRows : 1;
         reload();
     }
 
@@ -105,9 +106,11 @@ Item {
     }
 
     onHeightChanged: {
-        rowCount = height/minHeight;
-        if (rowCount <= kcfg_maxRows) {
-            rows = rowCount;
+        if (!kcfg_fillRows) {
+            rowCount = height/minHeight;
+            if (rowCount <= kcfg_maxRows) {
+                rows = rowCount;
+            }
         }
     }
 
