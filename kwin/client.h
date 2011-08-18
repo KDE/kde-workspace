@@ -419,7 +419,6 @@ public:
         WindowRelative      // Relative to the top left corner of the window
     };
     void layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect &bottom, CoordinateMode mode) const;
-    virtual void addRepaintFull();
 
     TabBox::TabBoxClientImpl* tabBoxClient() const {
         return m_tabBoxClient;
@@ -457,9 +456,7 @@ private:
     void leaveNotifyEvent(XCrossingEvent* e);
     void focusInEvent(XFocusInEvent* e);
     void focusOutEvent(XFocusOutEvent* e);
-#ifdef HAVE_XDAMAGE
     virtual void damageNotifyEvent(XDamageNotifyEvent* e);
-#endif
 
     bool buttonPressEvent(Window w, int button, int state, int x, int y, int x_root, int y_root);
     bool buttonReleaseEvent(Window w, int button, int state, int x, int y, int x_root, int y_root);
@@ -573,6 +570,8 @@ private:
     Time readUserCreationTime() const;
     void startupIdChanged();
 
+    void checkOffscreenPosition (QRect& geom, const QRect& screenArea);
+
     Window client;
     Window wrapper;
     KDecoration* decoration;
@@ -644,6 +643,7 @@ private:
     uint urgency : 1; ///< XWMHints, UrgencyHint
     uint ignore_focus_stealing : 1; ///< Don't apply focus stealing prevention to this client
     uint demands_attention : 1;
+    int m_screenNum;
     bool blocks_compositing;
     WindowRules client_rules;
     void getWMHints();

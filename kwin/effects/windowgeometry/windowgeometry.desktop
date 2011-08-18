@@ -1,6 +1,7 @@
 [Desktop Entry]
 # Name of the effect
 Name=WindowGeometry
+Name[bg]=Геометрия на прозореца
 Name[bs]=Geometrija prozora
 Name[ca]=WindowGeometry
 Name[ca@valencia]=WindowGeometry
@@ -11,6 +12,7 @@ Name[el]=Γεωμετρία παραθύρου
 Name[en_GB]=WindowGeometry
 Name[es]=Geometría de la ventana
 Name[et]=Akna geomeetria
+Name[eu]=Leihoaren geometria
 Name[fi]=Ikkunan mitat
 Name[fr]=Géométrie de la fenêtre
 Name[he]=גדלי חלונות
@@ -50,6 +52,7 @@ Name[x-test]=xxWindowGeometryxx
 Name[zh_CN]=窗口形状
 Name[zh_TW]=視窗位置
 Comment=Display window geometries on move/resize
+Comment[bg]=Показване размерите на прозорците при местене и преоразмеряване
 Comment[bs]=Prikaz geometrije prozora pri premještanju i preuveličavanju
 Comment[ca]=Visualitza la geometria de les finestres en moure/redimensionar
 Comment[ca@valencia]=Visualitza la geometria de les finestres en moure/redimensionar
@@ -60,10 +63,12 @@ Comment[el]=Εμφανίζει την γεωμετρία του παραθύρο
 Comment[en_GB]=Display window geometries on move/resize
 Comment[es]=Muestra la geometría de la ventana al mover/redimensionar
 Comment[et]=Akende geomeetria kuvamine liigutamisel või suuruse muutmisel
+Comment[eu]=Bistaratu leiho geometriak mugitu edo neurri aldatzerakoan
 Comment[fi]=Näytä ikkunan mitat, kun sitä liikutetaan tai sen kokoa muutetaan
 Comment[fr]=Affiche la géométrie de la fenêtre pendant le déplacement ou le redimensionnement
 Comment[he]=מציג גדלי החלון בהזזתו או בשינוי גודלו
 Comment[hr]=Prikaži geometriju prozora pri micanju i mijenjanju veličine
+Comment[hu]=Megjeleníti az ablakméretet mozgatás és átméretezés közben
 Comment[ia]=Monstra geometrias de fenestra quando on move/redimensiona
 Comment[is]=Birtir lögun glugga við færslu/stærðarbreytingu
 Comment[it]=Mostra le geometrie delle finestre durante lo spostamento e il ridimensionamento

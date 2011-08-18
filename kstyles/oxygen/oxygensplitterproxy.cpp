@@ -106,7 +106,11 @@ namespace Oxygen
     SplitterProxy::SplitterProxy( QWidget* parent ):
         QWidget( parent ),
         _timerId( 0 )
-    { hide(); }
+    {
+        setAttribute( Qt::WA_TranslucentBackground, true );
+        setAttribute( Qt::WA_OpaquePaintEvent, false );
+        hide();
+    }
 
     //____________________________________________________________________
     SplitterProxy::~SplitterProxy( void )
@@ -169,15 +173,6 @@ namespace Oxygen
         switch( event->type() )
         {
 
-            case QEvent::Paint:
-            {
-//                 QPainter p( this );
-//                 p.setBrush( Qt::NoBrush );
-//                 p.setPen( QColor( 255, 0, 0, 100 ) );
-//                 p.drawRect( rect().adjusted( 0, 0, -1, -1 ) );
-                return true;
-            }
-
             case QEvent::MouseMove:
             case QEvent::MouseButtonPress:
             case QEvent::MouseButtonRelease:
@@ -199,14 +194,33 @@ namespace Oxygen
                 QMouseEvent *mouseEvent( static_cast<QMouseEvent*>( event ) );
 
                 // get relevant position to post mouse drag event to application
-                const QPoint pos( (event->type() == QEvent::MouseMove) ? _splitter.data()->mapFromGlobal(QCursor::pos()) : _hook );
-                QMouseEvent mouseEvent2(
-                    mouseEvent->type(), pos,
-                    _splitter.data()->mapToGlobal(pos),
-                    mouseEvent->button(),
-                    mouseEvent->buttons(), mouseEvent->modifiers());
+                if( event->type() == QEvent::MouseButtonPress )
+                {
 
-                QCoreApplication::sendEvent( _splitter.data(), &mouseEvent2 );
+                    // use hook, to make sure splitter is properly dragged
+                    QMouseEvent mouseEvent2(
+                        mouseEvent->type(),
+                        _hook,
+                        _splitter.data()->mapToGlobal(_hook),
+                        mouseEvent->button(),
+                        mouseEvent->buttons(), mouseEvent->modifiers());
+
+                    QCoreApplication::sendEvent( _splitter.data(), &mouseEvent2 );
+
+                } else {
+
+                    // map event position to current splitter and post.
+                   QMouseEvent mouseEvent2(
+                        mouseEvent->type(),
+                        _splitter.data()->mapFromGlobal( mouseEvent->globalPos() ),
+                        mouseEvent->globalPos(),
+                        mouseEvent->button(),
+                        mouseEvent->buttons(), mouseEvent->modifiers());
+
+                    QCoreApplication::sendEvent( _splitter.data(), &mouseEvent2 );
+
+
+                }
 
                 // release grab on mouse-Release
                 if( event->type() == QEvent::MouseButtonRelease && mouseGrabber() == this )

@@ -44,10 +44,8 @@
 #include <Plasma/AbstractRunner>
 
 #include "kworkspace/kdisplaymanager.h"
-#include "panelshadows.h"
 
 #include "appadaptor.h"
-#include "kworkspace.h"
 #include "ksystemactivitydialog.h"
 #include "interfaces/default/interface.h"
 #include "interfaces/quicksand/qs_dialog.h"
@@ -73,7 +71,6 @@ KRunnerApp* KRunnerApp::self()
 KRunnerApp::KRunnerApp()
     : KUniqueApplication(),
       m_interface(0),
-      m_shadows(new PanelShadows(this)),
       m_tasks(0),
       m_startupId(NULL),
       m_firstTime(true)
@@ -90,7 +87,6 @@ void KRunnerApp::cleanUp()
 {
     disconnect(KRunnerSettings::self(), SIGNAL(configChanged()), this, SLOT(reloadConfig()));
     kDebug() << "deleting interface";
-    delete m_shadows;
     delete m_interface;
     m_interface = 0;
     delete m_runnerManager;
@@ -174,8 +170,6 @@ void KRunnerApp::initialize()
             m_interface = new QsDialog(m_runnerManager);
             break;
     }
-
-    m_shadows->addWindow(m_interface);
 
 #ifdef Q_WS_X11
     //FIXME: if argb visuals enabled Qt will always set WM_CLASS as "qt-subapplication" no matter what
@@ -388,15 +382,6 @@ int KRunnerApp::newInstance()
 
     return KUniqueApplication::newInstance();
     //return 0;
-}
-
-bool KRunnerApp::hasCompositeManager() const
-{
-#ifdef Q_WS_X11
-    return KWindowSystem::compositingActive();
-#else
-    return false;
-#endif
 }
 
 void KRunnerApp::reloadConfig()

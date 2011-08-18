@@ -6,6 +6,7 @@ Icon=folder-documents
 
 Name=Graphical Information
 Name[ast]=Información gráfica
+Name[bg]=Данни за графичната система
 Name[bs]=Podaci o grafici
 Name[ca]=Informació gràfica
 Name[ca@valencia]=Informació gràfica
@@ -52,7 +53,7 @@ Name[sr@latin]=Podaci o grafici
 Name[sv]=Grafisk information
 Name[th]=ข้อมูลรายละเอียดแบบกราฟิก
 Name[tr]=Grafiksel Bilgiler
-Name[ug]=گىرافىك ئۇچۇرى
+Name[ug]=گرافىك ئۇچۇرى
 Name[uk]=Графічна інформація
 Name[wa]=Informåcions grafikes
 Name[x-test]=xxGraphical Informationxx

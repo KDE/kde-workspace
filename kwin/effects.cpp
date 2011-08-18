@@ -1040,6 +1040,11 @@ unsigned long EffectsHandlerImpl::xrenderBufferPicture()
 KLibrary* EffectsHandlerImpl::findEffectLibrary(KService* service)
 {
     QString libname = service->library();
+#ifdef KWIN_HAVE_OPENGLES
+    if (libname.startsWith(QLatin1String("kwin4_effect_"))) {
+        libname.replace("kwin4_effect_", "kwin4_effect_gles_");
+    }
+#endif
     KLibrary* library = new KLibrary(libname);
     if (!library) {
         kError(1212) << "couldn't open library for effect '" <<
@@ -1119,6 +1124,7 @@ bool EffectsHandlerImpl::loadEffect(const QString& name, bool checkDefault)
     KLibrary::void_function_ptr version_func = library->resolveFunction(version_symbol.toAscii());
     if (version_func == NULL) {
         kWarning(1212) << "Effect " << name << " does not provide required API version, ignoring.";
+	delete library;
         return false;
     }
     typedef int (*t_versionfunc)();
@@ -1129,6 +1135,7 @@ bool EffectsHandlerImpl::loadEffect(const QString& name, bool checkDefault)
             || (version >> 8) != KWIN_EFFECT_API_VERSION_MAJOR
             || (KWIN_EFFECT_API_VERSION_MAJOR == 0 && version != KWIN_EFFECT_API_VERSION)) {
         kWarning(1212) << "Effect " << name << " requires unsupported API version " << version;
+        delete library;
         return false;
     }
 
@@ -1247,6 +1254,16 @@ void EffectsHandlerImpl::effectsChanged()
 EffectFrame* EffectsHandlerImpl::effectFrame(EffectFrameStyle style, bool staticSize, const QPoint& position, Qt::Alignment alignment) const
 {
     return new EffectFrameImpl(style, staticSize, position, alignment);
+}
+
+
+QVariant EffectsHandlerImpl::kwinOption(KWinOption kwopt)
+{
+    switch (kwopt) {
+    case CloseButtonCorner:
+        return Workspace::self()->decorationCloseButtonCorner();
+    }
+    return QVariant(); // an invalid one
 }
 
 void EffectsHandlerImpl::slotShowOutline(const QRect& geometry)
@@ -1754,9 +1771,7 @@ EffectFrameImpl::EffectFrameImpl(EffectFrameStyle style, bool staticSize, QPoint
     m_selection.setEnabledBorders(Plasma::FrameSvg::AllBorders);
 
     if (effects->compositingType() == OpenGLCompositing) {
-#ifdef KWIN_HAVE_OPENGL_COMPOSITING
         m_sceneFrame = new SceneOpenGL::EffectFrame(this);
-#endif
     } else if (effects->compositingType() == XRenderCompositing) {
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
         m_sceneFrame = new SceneXrender::EffectFrame(this);

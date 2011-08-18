@@ -67,15 +67,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <X11/extensions/shape.h>
 
-#ifdef HAVE_XCOMPOSITE
 #include <X11/extensions/Xcomposite.h>
-#if XCOMPOSITE_MAJOR > 0 || XCOMPOSITE_MINOR >= 3
-#define HAVE_XCOMPOSITE_OVERLAY
-#endif
-#endif
-#ifdef HAVE_XRANDR
 #include <X11/extensions/Xrandr.h>
-#endif
 
 namespace KWin
 {
@@ -88,7 +81,6 @@ extern int currentRefreshRate();
 
 void Workspace::setupCompositing()
 {
-#ifdef KWIN_HAVE_COMPOSITING
     if (scene != NULL)
         return;
     if (compositingSuspended) {
@@ -113,7 +105,6 @@ void Workspace::setupCompositing()
             kDebug( 1212 ) << "X compositing";
             scene = new SceneBasic( this );
           break; // don't fall through (this is a testing one) */
-#ifdef KWIN_HAVE_OPENGL_COMPOSITING
     case OpenGLCompositing: {
         kDebug(1212) << "Initializing OpenGL compositing";
 
@@ -125,6 +116,14 @@ void Workspace::setupCompositing()
         else {
             unsafeConfig.writeEntry("OpenGLIsUnsafe", true);
             unsafeConfig.sync();
+#ifndef KWIN_HAVE_OPENGLES
+            if (!CompositingPrefs::hasGlx()) {
+                unsafeConfig.writeEntry("OpenGLIsUnsafe", false);
+                unsafeConfig.sync();
+                kDebug(1212) << "No glx extensions available";
+                break;
+            }
+#endif
 
             scene = new SceneOpenGL(this);
 
@@ -141,7 +140,6 @@ void Workspace::setupCompositing()
         // Do not Fall back to XRender - it causes problems when selfcheck fails during startup, but works later on
         break;
     }
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
     case XRenderCompositing:
         kDebug(1212) << "Initializing XRender compositing";
@@ -149,11 +147,7 @@ void Workspace::setupCompositing()
         break;
 #endif
     default:
-#ifndef KWIN_HAVE_COMPOSITING
-        kDebug(1212) << "Compositing was not available at compile time";
-#else
         kDebug(1212) << "No compositing enabled";
-#endif
         delete cm_selection;
         return;
     }
@@ -185,21 +179,11 @@ void Workspace::setupCompositing()
     c->setupCompositing();
     foreach (Unmanaged * c, unmanaged)
     c->setupCompositing();
-    foreach (Client * c, clients)
-    scene->windowAdded(c);
-    foreach (Client * c, desktops)
-    scene->windowAdded(c);
-    foreach (Unmanaged * c, unmanaged)
-    scene->windowAdded(c);
     discardPopup(); // force re-creation of the Alt+F3 popup (opacity option)
-#else
-    kDebug(1212) << "Compositing was not available at compile time";
-#endif
 }
 
 void Workspace::finishCompositing()
 {
-#ifdef KWIN_HAVE_COMPOSITING
     if (scene == NULL)
         return;
     m_finishingCompositing = true;
@@ -242,7 +226,6 @@ void Workspace::finishCompositing()
     while (!deleted.isEmpty())
         deleted.first()->discard(Allowed);
     m_finishingCompositing = false;
-#endif
 }
 
 // OpenGL self-check failed, fallback to XRender
@@ -378,7 +361,6 @@ void Workspace::timerEvent(QTimerEvent *te)
 
 void Workspace::performCompositing()
 {
-#ifdef KWIN_HAVE_COMPOSITING
     if (((repaints_region.isEmpty() && !windowRepaintsPending())  // no damage
             || !scene->overlayWindow()->isVisible())) { // nothing is visible anyway
         vBlankPadding += 3;
@@ -407,16 +389,6 @@ void Workspace::performCompositing()
     if (c->readyForPainting())
         windows.append(c);
 #endif
-    foreach (Toplevel * c, windows) {
-        // This could be possibly optimized WRT obscuring, but that'd need being already
-        // past prePaint() phase - probably not worth it.
-        repaints_region |= c->repaints().translated(c->pos());
-        repaints_region |= c->decorationPendingRegion();
-        c->resetRepaints(c->decorationRect());
-        if (c->hasShadow()) {
-            c->resetRepaints(c->shadow()->shadowRegion().boundingRect());
-        }
-    }
     QRegion repaints = repaints_region;
     // clear all repaints, so that post-pass can add repaints for the next repaint
     repaints_region = QRegion();
@@ -438,7 +410,6 @@ void Workspace::performCompositing()
     // checkCompositeTime() would restart it again somewhen later, called from functions that
     // would again add something pending.
     checkCompositeTimer();
-#endif
 }
 
 void Workspace::performMousePoll()
@@ -543,9 +514,9 @@ void Workspace::delayedCheckUnredirect()
 
 void Toplevel::setupCompositing()
 {
-#ifdef KWIN_HAVE_COMPOSITING
     if (!compositing())
         return;
+    damageRatio = 0.0;
     if (damage_handle != None)
         return;
     damage_handle = XDamageCreate(display(), frameId(), XDamageReportRawRectangles);
@@ -554,12 +525,12 @@ void Toplevel::setupCompositing()
     effect_window->setWindow(this);
     unredirect = false;
     workspace()->checkUnredirect(true);
-#endif
+    scene->windowAdded(this);
 }
 
 void Toplevel::finishCompositing()
 {
-#ifdef KWIN_HAVE_COMPOSITING
+    damageRatio = 0.0;
     if (damage_handle == None)
         return;
     workspace()->checkUnredirect(true);
@@ -572,11 +543,11 @@ void Toplevel::finishCompositing()
     damage_region = QRegion();
     repaints_region = QRegion();
     effect_window = NULL;
-#endif
 }
 
 void Toplevel::discardWindowPixmap()
 {
+    damageRatio = 0.0;
     addDamageFull();
     if (window_pix == None)
         return;
@@ -588,7 +559,6 @@ void Toplevel::discardWindowPixmap()
 
 Pixmap Toplevel::createWindowPixmap()
 {
-#ifdef KWIN_HAVE_COMPOSITING
     assert(compositing());
     if (unredirected())
         return None;
@@ -607,12 +577,8 @@ Pixmap Toplevel::createWindowPixmap()
     }
     ungrabXServer();
     return pix;
-#else
-    return None;
-#endif
 }
 
-#ifdef HAVE_XDAMAGE
 // We must specify that the two events are a union so the compiler doesn't
 // complain about strict aliasing rules.
 typedef union {
@@ -677,7 +643,6 @@ void Client::damageNotifyEvent(XDamageNotifyEvent* e)
     ready_for_painting = true; // no sync at all, consider done now
 #endif
 }
-#endif
 
 void Toplevel::addDamage(const QRect& r)
 {
@@ -757,12 +722,17 @@ void Toplevel::addRepaint(int x, int y, int w, int h)
     workspace()->checkCompositeTimer();
 }
 
+void Toplevel::addRepaint(const QRegion& r)
+{
+    if (!compositing())
+        return;
+    repaints_region += r;
+    workspace()->checkCompositeTimer();
+}
+
 void Toplevel::addRepaintFull()
 {
-    repaints_region = rect();
-    if (hasShadow()) {
-        repaints_region = repaints_region.united(shadow()->shadowRegion());
-    }
+    repaints_region = decorationRect();
     workspace()->checkCompositeTimer();
 }
 
@@ -791,16 +761,12 @@ bool Toplevel::updateUnredirectedState()
     if (should && !unredirect) {
         unredirect = true;
         kDebug(1212) << "Unredirecting:" << this;
-#ifdef HAVE_XCOMPOSITE
         XCompositeUnredirectWindow(display(), frameId(), CompositeRedirectManual);
-#endif
         return true;
     } else if (!should && unredirect) {
         unredirect = false;
         kDebug(1212) << "Redirecting:" << this;
-#ifdef HAVE_XCOMPOSITE
         XCompositeRedirectWindow(display(), frameId(), CompositeRedirectManual);
-#endif
         discardWindowPixmap();
         return true;
     }
@@ -851,14 +817,6 @@ bool Client::shouldUnredirect() const
     return false;
 }
 
-void Client::addRepaintFull()
-{
-    repaints_region = decorationRect();
-    if (hasShadow()) {
-        repaints_region = repaints_region.united(shadow()->shadowRegion());
-    }
-    workspace()->checkCompositeTimer();
-}
 
 //****************************************
 // Unmanaged
@@ -897,13 +855,5 @@ bool Deleted::shouldUnredirect() const
     return false;
 }
 
-void Deleted::addRepaintFull()
-{
-    repaints_region = decorationRect();
-    if (hasShadow()) {
-        repaints_region = repaints_region.united(shadow()->shadowRegion());
-    }
-    workspace()->checkCompositeTimer();
-}
 
 } // namespace

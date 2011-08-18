@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "overlaywindow.h"
 
+#include <config-X11.h>
+
 #include "kwinglobals.h"
 
 #include "assert.h"
@@ -28,11 +30,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <X11/extensions/shape.h>
 
+#include <X11/extensions/Xcomposite.h>
+#if XCOMPOSITE_MAJOR > 0 || XCOMPOSITE_MINOR >= 3
+#define KWIN_HAVE_XCOMPOSITE_OVERLAY
+#endif
+
 namespace KWin {
 OverlayWindow::OverlayWindow()
-    : m_window(None)
-    , m_visible(true)
+    : m_visible(true)
     , m_shown(false)
+    , m_window(None)
 {
 }
 
@@ -47,11 +54,11 @@ bool OverlayWindow::create()
         return false;
     if (!Extensions::shapeInputAvailable())  // needed in setupOverlay()
         return false;
-#ifdef HAVE_XCOMPOSITE_OVERLAY
-    m_overlay = XCompositeGetOverlayWindow(display(), rootWindow());
-    if (m_overlay == None)
+#ifdef KWIN_HAVE_XCOMPOSITE_OVERLAY
+    m_window = XCompositeGetOverlayWindow(display(), rootWindow());
+    if (m_window == None)
         return false;
-    XResizeWindow(display(), m_overlay, displayWidth(), displayHeight());
+    XResizeWindow(display(), m_window, displayWidth(), displayHeight());
     return true;
 #else
     return false;
@@ -131,8 +138,8 @@ void OverlayWindow::destroy()
     XRectangle rec = { 0, 0, displayWidth(), displayHeight() };
     XShapeCombineRectangles(display(), m_window, ShapeBounding, 0, 0, &rec, 1, ShapeSet, Unsorted);
     XShapeCombineRectangles(display(), m_window, ShapeInput, 0, 0, &rec, 1, ShapeSet, Unsorted);
-#ifdef HAVE_XCOMPOSITE_OVERLAY
-    XCompositeReleaseOverlayWindow(display(), m_overlay);
+#ifdef KWIN_HAVE_XCOMPOSITE_OVERLAY
+    XCompositeReleaseOverlayWindow(display(), m_window);
 #endif
     m_window = None;
     m_shown = false;

@@ -7,6 +7,7 @@ X-KDE-ParentComponents=kwin4_effect_windowgeometry
 X-KDE-PluginKeyword=windowgeometry
 
 Name=WindowGeometry
+Name[bg]=Геометрия на прозореца
 Name[bs]=Geometrija prozora
 Name[ca]=WindowGeometry
 Name[ca@valencia]=WindowGeometry
@@ -17,6 +18,7 @@ Name[el]=Γεωμετρία παραθύρου
 Name[en_GB]=WindowGeometry
 Name[es]=Geometría de la ventana
 Name[et]=Akna geomeetria
+Name[eu]=Leihoaren geometria
 Name[fi]=Ikkunan mitat
 Name[fr]=Géométrie de la fenêtre
 Name[he]=גדלי חלונות

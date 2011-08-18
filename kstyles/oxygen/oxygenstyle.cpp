@@ -184,7 +184,7 @@ namespace Oxygen
 
         // use DBus connection to update on oxygen configuration change
         QDBusConnection dbus = QDBusConnection::sessionBus();
-        dbus.connect( QString(), "/OxygenStyle", "org.kde.Oxygen.Style", "reparseConfiguration", this, SLOT( oxygenConfigurationChanged( void ) ) );
+        dbus.connect( QString(), "/OxygenStyle", "org.kde.Oxygen.Style", "reparseConfiguration", this, SLOT(oxygenConfigurationChanged()) );
 
         // call the slot directly; this initial call will set up things that also
         // need to be reset when the system palette changes
@@ -1745,7 +1745,6 @@ namespace Oxygen
             case QTabBar::RoundedWest:
             case QTabBar::TriangularWest:
             r = QRect( QPoint( paneRect.x() - w, paneRect.y() ), size );
-            r = visualRect( tabOpt->direction, tabOpt->rect, r );
             if( !documentMode ) r.translate( 2, 0 );
             else r.translate( -2, 0 );
             break;
@@ -1753,7 +1752,6 @@ namespace Oxygen
             case QTabBar::RoundedEast:
             case QTabBar::TriangularEast:
             r = QRect( QPoint( paneRect.x() + paneRect.width(), paneRect.y() ), size );
-            r = visualRect( tabOpt->direction, tabOpt->rect, r );
             if( !documentMode ) r.translate( -2, 0 );
             else r.translate( 2, 0 );
             break;
@@ -1803,7 +1801,6 @@ namespace Oxygen
             case QTabBar::RoundedWest:
             case QTabBar::TriangularWest:
             r = QRect( QPoint( paneRect.x() - w, paneRect.bottom() - h + 1 ), size );
-            r = visualRect( tabOpt->direction, tabOpt->rect, r );
             if( !documentMode ) r.translate( 2, 0 );
             else r.translate( -2, 0 );
             break;
@@ -1811,7 +1808,6 @@ namespace Oxygen
             case QTabBar::RoundedEast:
             case QTabBar::TriangularEast:
             r = QRect( QPoint( paneRect.x() + paneRect.width(), paneRect.bottom() - h + 1 ), size );
-            r = visualRect( tabOpt->direction, tabOpt->rect, r );
             if( !documentMode ) r.translate( -2, 0 );
             else r.translate( 2, 0 );
             break;
@@ -8286,7 +8282,7 @@ namespace Oxygen
         }
 
         // connect palette changes to local slot, to make sure caches are cleared
-        connect( KGlobalSettings::self(), SIGNAL( kdisplayPaletteChanged( void ) ), this, SLOT( globalPaletteChanged( void ) ) );
+        connect( KGlobalSettings::self(), SIGNAL(kdisplayPaletteChanged()), this, SLOT(globalPaletteChanged()) );
 
         // update flag
         _kGlobalSettingsInitialized = true;

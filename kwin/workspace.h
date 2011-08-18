@@ -58,6 +58,10 @@ class KStartupInfoData;
 class QSlider;
 class QPushButton;
 
+namespace Kephal
+{
+    class Screen;
+}
 namespace KWin
 {
 
@@ -69,10 +73,15 @@ class TabBox;
 #endif
 
 class Client;
+#ifdef KWIN_BUILD_TILING
 class Tile;
+class Tiling;
 class TilingLayout;
+#endif
 class ClientGroup;
+#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
 class DesktopChangeOSD;
+#endif
 class Outline;
 class RootInfo;
 class PluginMgr;
@@ -191,31 +200,9 @@ public:
         return unmanaged;
     }
 
-    //-------------------------------------------------
-    // Tiling
-public:
-    bool tilingEnabled() const;
-    void setTilingEnabled(bool tiling);
-    bool tileable(Client *c);
-    void createTile(Client *c);
-    // updates geometry of tiles on all desktops,
-    // this rearranges the tiles.
-    void updateAllTiles();
-
-    // The notification functions are called from
-    // various points in existing code so that
-    // tiling can take any action if required.
-    // They are defined in tiling.cpp
-    void notifyTilingWindowResize(Client *c, const QRect &moveResizeGeom, const QRect &orig);
-    void notifyTilingWindowMove(Client *c, const QRect &moveResizeGeom, const QRect &orig);
-    void notifyTilingWindowResizeDone(Client *c, const QRect &moveResizeGeom, const QRect &orig, bool canceled);
-    void notifyTilingWindowMoveDone(Client *c, const QRect &moveResizeGeom, const QRect &orig, bool canceled);
-    void notifyTilingWindowDesktopChanged(Client *c, int old_desktop);
-    void notifyTilingWindowActivated(Client *c);
-    void notifyTilingWindowMinimizeToggled(Client *c);
-    void notifyTilingWindowMaximized(Client *c, WindowOperation op);
-
-    Position supportedTilingResizeMode(Client *c, Position currentMode);
+#ifdef KWIN_BUILD_TILING
+    Tiling* tiling();
+#endif
 
     Outline* outline();
 #ifdef KWIN_BUILD_SCREENEDGES
@@ -323,13 +310,9 @@ private:
 
     KActivityController activityController_;
 
-    bool tilingEnabled_;
-    // Each tilingLayout is for one virtual desktop.
-    // The length is always one more than the number of
-    // virtual desktops so that we can quickly index them
-    // without having to remember to subtract one.
-    QVector<TilingLayout *> tilingLayouts;
-
+#ifdef KWIN_BUILD_TILING
+    Tiling* m_tiling;
+#endif
     Outline* m_outline;
 #ifdef KWIN_BUILD_SCREENEDGES
     ScreenEdge m_screenEdge;
@@ -448,6 +431,7 @@ public:
     bool rulesUpdatesDisabled() const;
 
     bool hasDecorationShadows() const;
+    Qt::Corner decorationCloseButtonCorner();
     bool decorationHasAlpha() const;
     bool decorationSupportsClientGrouping() const; // Returns true if the decoration supports tabs.
     bool decorationSupportsFrameOverlap() const;
@@ -634,25 +618,6 @@ public slots:
     void suspendCompositing();
     void suspendCompositing(bool suspend);
 
-    // user actions, usually bound to shortcuts
-    // and also provided through the D-BUS interface.
-    void slotToggleTiling();
-    void slotToggleFloating();
-    void slotNextTileLayout();
-    void slotPreviousTileLayout();
-
-    // Changes the focused client
-    void slotFocusTileLeft();
-    void slotFocusTileRight();
-    void slotFocusTileTop();
-    void slotFocusTileBottom();
-    // swaps active and adjacent client.
-    void slotMoveTileLeft();
-    void slotMoveTileRight();
-    void slotMoveTileTop();
-    void slotMoveTileBottom();
-    void belowCursor();
-
     // NOTE: debug method
     void dumpTiles() const;
 
@@ -673,6 +638,11 @@ private slots:
     void clientPopupActivated(QAction*);
     void configureWM();
     void desktopResized();
+    void screenChangeTimeout();
+    void screenAdded(Kephal::Screen*);
+    void screenRemoved(int);
+    void screenResized(Kephal::Screen*, QSize, QSize);
+    void screenMoved(Kephal::Screen*, QPoint, QPoint);
     void slotUpdateToolWindows();
     void delayFocus();
     void gotTemporaryRulesMessage(const QString&);
@@ -716,6 +686,7 @@ signals:
                       Qt::MouseButtons buttons, Qt::MouseButtons oldbuttons,
                       Qt::KeyboardModifiers modifiers, Qt::KeyboardModifiers oldmodifiers);
     void propertyNotify(long a);
+    void configChanged();
 
 private:
     void init();
@@ -766,7 +737,6 @@ private:
 
     QMenu* clientPopup();
     void closeActivePopup();
-
     void updateClientArea(bool force);
 
     bool windowRepaintsPending() const;
@@ -788,20 +758,11 @@ private:
     QList<Rules*> rules;
     KXMessages temporaryRulesMessages;
     QTimer rulesUpdatedTimer;
+    QTimer screenChangedTimer;
     bool rules_updates_disabled;
     static const char* windowTypeToTxt(NET::WindowType type);
     static NET::WindowType txtToWindowType(const char* txt);
     static bool sessionInfoWindowTypeMatch(Client* c, SessionInfo* info);
-
-    // try to get a decent tile, either the one with
-    // focus or the one below the mouse.
-    Tile* getNiceTile() const;
-    void removeTile(Client *c);
-    // int, and not Tile::Direction because
-    // we are using a forward declaration for Tile
-    Tile* findAdjacentTile(Tile *ref, int d);
-    void focusTile(int d);
-    void moveTile(int d);
 
     Client* active_client;
     Client* last_active_client;
@@ -846,7 +807,9 @@ private:
 #ifdef KWIN_BUILD_TABBOX
     TabBox::TabBox* tab_box;
 #endif
+#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
     DesktopChangeOSD* desktop_change_osd;
+#endif
 
     QMenu* popup;
     QMenu* advanced_popup;
@@ -1207,6 +1170,14 @@ inline bool Workspace::hasDecorationShadows() const
     return mgr->factory()->supports(AbilityProvidesShadow);
 }
 
+inline Qt::Corner Workspace::decorationCloseButtonCorner()
+{
+    if (!hasDecorationPlugin()) {
+        return Qt::TopRightCorner;
+    }
+    return mgr->factory()->closeButtonCorner();
+}
+
 inline bool Workspace::decorationHasAlpha() const
 {
     if (!hasDecorationPlugin()) {
@@ -1247,30 +1218,6 @@ inline void Workspace::addClientGroup(ClientGroup* group)
 inline void Workspace::removeClientGroup(ClientGroup* group)
 {
     clientGroups.removeAll(group);
-}
-
-/*
- * Called from D-BUS
- */
-inline void Workspace::toggleTiling()
-{
-    slotToggleTiling();
-}
-
-/*
- * Called from D-BUS
- */
-inline void Workspace::nextTileLayout()
-{
-    slotNextTileLayout();
-}
-
-/*
- * Called from D-BUS
- */
-inline void Workspace::previousTileLayout()
-{
-    slotPreviousTileLayout();
 }
 
 } // namespace

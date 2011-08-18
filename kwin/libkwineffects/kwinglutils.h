@@ -22,9 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_GLUTILS_H
 #define KWIN_GLUTILS_H
 
-#include <kwinconfig.h> // KWIN_HAVE_OPENGL
-
-#ifdef KWIN_HAVE_OPENGL
 #include <kwinglutils_funcs.h>
 
 #include <QtGui/QPixmap>
@@ -289,6 +286,13 @@ public:
      * @return @c true if the built-in shaders are valid, @c false otherwise
      **/
     bool isValid() const;
+    /**
+     * Is @c true if the environment variable KWIN_GL_DEBUG is set to 1.
+     * In that case shaders are compiled with KWIN_SHADER_DEBUG defined.
+     * @returns @c true if shaders are compiled with debug information
+     * @since 4.8
+     **/
+    bool isShaderDebug() const;
 
     /**
      * Binds the shader of specified @p type.
@@ -363,6 +367,7 @@ private:
     GLShader *m_colorShader;
     bool m_inited;
     bool m_valid;
+    bool m_debug;
     static ShaderManager *s_shaderManager;
 };
 
@@ -528,8 +533,6 @@ private:
 };
 
 } // namespace
-
-#endif
 
 /** @} */
 

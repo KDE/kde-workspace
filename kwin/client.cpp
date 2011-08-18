@@ -200,9 +200,7 @@ Client::Client(Workspace* ws)
 
     geom = QRect(0, 0, 100, 100);   // So that decorations don't start with size being (0,0)
     client_size = QSize(100, 100);
-#if defined(HAVE_XSYNC) || defined(HAVE_XDAMAGE)
     ready_for_painting = false; // wait for first damage or sync reply
-#endif
 
     connect(this, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), SIGNAL(geometryChanged()));
     connect(this, SIGNAL(clientMaximizedStateChanged(KWin::Client*,KDecorationDefines::MaximizeMode)), SIGNAL(geometryChanged()));
@@ -251,6 +249,8 @@ void Client::releaseWindow(bool on_shutdown)
     assert(!deleting);
     deleting = true;
     Deleted* del = Deleted::create(this);
+    if (moveResizeMode)
+        emit clientFinishUserMovedResized(this);
     emit windowClosed(this, del);
     finishCompositing();
     workspace()->discardUsedWindowRules(this, true);   // Remove ForceTemporarily rules
@@ -316,6 +316,8 @@ void Client::destroyClient()
     assert(!deleting);
     deleting = true;
     Deleted* del = Deleted::create(this);
+    if (moveResizeMode)
+        emit clientFinishUserMovedResized(this);
     emit windowClosed(this, del);
     finishCompositing();
     workspace()->discardUsedWindowRules(this, true);   // Remove ForceTemporarily rules
@@ -500,8 +502,9 @@ void Client::repaintDecorationPending()
         // The scene will update the decoration pixmaps in the next painting pass
         // if it has not been already repainted before
         const QRegion r = paintRedirector->scheduledRepaintRegion();
-        if (!r.isEmpty())
-            Workspace::self()->addRepaint(r.translated(x() - padding_left, y() - padding_top));
+        if (!r.isEmpty()) {
+            addRepaint(r.translated(-padding_left,-padding_top));
+        }
     }
 }
 
@@ -945,9 +948,6 @@ void Client::minimize(bool avoid_animation)
     // TODO: merge signal with s_minimized
     emit clientMinimized(this, !avoid_animation);
 
-    // when tiling, request a rearrangement
-    workspace()->notifyTilingWindowMinimizeToggled(this);
-
     // Update states of all other windows in this group
     if (clientGroup())
         clientGroup()->updateStates(this);
@@ -973,11 +973,7 @@ void Client::unminimize(bool avoid_animation)
     updateAllowedActions();
     workspace()->updateMinimizedOfTransients(this);
     updateWindowRules();
-    workspace()->updateAllTiles();
     emit clientUnminimized(this, !avoid_animation);
-
-    // when tiling, request a rearrangement
-    workspace()->notifyTilingWindowMinimizeToggled(this);
 
     // Update states of all other windows in this group
     if (clientGroup())
@@ -1390,7 +1386,7 @@ void Client::gotPing(Time timestamp)
         process_killer->kill();
         // Recycle when the process manager has noticed that the process exited
         // a delete process_killer here sometimes causes a hang in waitForFinished
-        connect(process_killer, SIGNAL(finished(int, QProcess::ExitStatus)),
+        connect(process_killer, SIGNAL(finished(int,QProcess::ExitStatus)),
                 process_killer, SLOT(deleteLater()));
         process_killer = NULL;
     }
@@ -1424,7 +1420,7 @@ void Client::killProcess(bool ask, Time timestamp)
     } else {
         process_killer = new QProcess(this);
         connect(process_killer, SIGNAL(error(QProcess::ProcessError)), SLOT(processKillerExited()));
-        connect(process_killer, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(processKillerExited()));
+        connect(process_killer, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(processKillerExited()));
         process_killer->start(KStandardDirs::findExe("kwin_killer_helper"),
                               QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << machine
                               << "--windowname" << caption()
@@ -2289,7 +2285,10 @@ void Client::setSessionInteract(bool needed)
 QRect Client::decorationRect() const
 {
     if (decoration && decoration->widget()) {
-        return decoration->widget()->rect().translated(-padding_left, -padding_top);
+        QRect r = decoration->widget()->rect().translated(-padding_left, -padding_top);
+        if (hasShadow())
+            r |= shadow()->shadowRegion().boundingRect();
+        return r;
     } else if (hasShadow()) {
         return shadow()->shadowRegion().boundingRect();
     } else {

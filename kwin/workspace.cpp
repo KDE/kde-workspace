@@ -44,11 +44,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDBus/QtDBus>
 
 #include "client.h"
-#include "tile.h"
 #ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
 #endif
+#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
 #include "desktopchangeosd.h"
+#endif
 #include "atoms.h"
 #include "placement.h"
 #include "notifications.h"
@@ -60,8 +61,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "deleted.h"
 #include "effects.h"
 #include "overlaywindow.h"
-#include "tilinglayout.h"
-
+#ifdef KWIN_BUILD_TILING
+#include "tiling/tile.h"
+#include "tiling/tilinglayout.h"
+#include "tiling/tiling.h"
+#endif
 #ifdef KWIN_BUILD_SCRIPTING
 #include "scripting/scripting.h"
 #endif
@@ -105,7 +109,6 @@ Workspace::Workspace(bool restore)
     , desktopGridSize_(1, 2)   // Default to two rows
     , desktopGrid_(new int[2])
     , currentDesktop_(0)
-    , tilingEnabled_(false)
     // Unsorted
     , active_popup(NULL)
     , active_popup_client(NULL)
@@ -128,7 +131,9 @@ Workspace::Workspace(bool restore)
 #ifdef KWIN_BUILD_TABBOX
     , tab_box(0)
 #endif
+#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
     , desktop_change_osd(0)
+#endif
     , popup(0)
     , advanced_popup(0)
     , trans_popup(0)
@@ -176,8 +181,8 @@ Workspace::Workspace(bool restore)
     default_colormap = DefaultColormap(display(), info.screen());
     installed_colormap = default_colormap;
 
-    connect(&temporaryRulesMessages, SIGNAL(gotMessage(const QString&)),
-            this, SLOT(gotTemporaryRulesMessage(const QString&)));
+    connect(&temporaryRulesMessages, SIGNAL(gotMessage(QString)),
+            this, SLOT(gotTemporaryRulesMessage(QString)));
     connect(&rulesUpdatedTimer, SIGNAL(timeout()), this, SLOT(writeWindowRules()));
     connect(&unredirectTimer, SIGNAL(timeout()), this, SLOT(delayedCheckUnredirect()));
     connect(&compositeResetTimer, SIGNAL(timeout()), this, SLOT(resetCompositing()));
@@ -187,6 +192,10 @@ Workspace::Workspace(bool restore)
     updateXTime(); // Needed for proper initialization of user_time in Client ctor
 
     delayFocusTimer = 0;
+
+#ifdef KWIN_BUILD_TILING
+    m_tiling = new Tiling(this);
+#endif
 
     if (restore)
         loadSessionInfo();
@@ -231,20 +240,58 @@ Workspace::Workspace(bool restore)
     );
 
     client_keys = new KActionCollection(this);
-    initShortcuts();
+
+#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
     desktop_change_osd = new DesktopChangeOSD(this);
+#endif
     m_outline = new Outline();
+
+    initShortcuts();
 
     init();
 
-    connect(Kephal::Screens::self(), SIGNAL(screenAdded(Kephal::Screen*)), SLOT(desktopResized()));
-    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)), SLOT(desktopResized()));
-    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*, QSize, QSize)), SLOT(desktopResized()));
-    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*, QPoint, QPoint)), SLOT(desktopResized()));
+    connect(Kephal::Screens::self(), SIGNAL(screenAdded(Kephal::Screen*)), SLOT(screenAdded(Kephal::Screen*)));
+    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)), SLOT(screenRemoved(int)));
+    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)), SLOT(screenResized(Kephal::Screen*,QSize,QSize)));
+    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*,QPoint,QPoint)), SLOT(screenMoved(Kephal::Screen*,QPoint,QPoint)));
 
     connect(&activityController_, SIGNAL(currentActivityChanged(QString)), SLOT(updateCurrentActivity(QString)));
     connect(&activityController_, SIGNAL(activityRemoved(QString)), SLOT(activityRemoved(QString)));
     connect(&activityController_, SIGNAL(activityAdded(QString)), SLOT(activityAdded(QString)));
+
+    connect(&screenChangedTimer, SIGNAL(timeout()), SLOT(screenChangeTimeout()));
+    screenChangedTimer.setSingleShot(true);
+    screenChangedTimer.setInterval(100);
+}
+
+void Workspace::screenChangeTimeout()
+{
+    kDebug() << "It is time to call desktopResized";
+    desktopResized();
+}
+
+void Workspace::screenAdded(Kephal::Screen* screen)
+{
+    kDebug();
+    screenChangedTimer.start();
+}
+
+void Workspace::screenRemoved(int screen)
+{
+    kDebug();
+    screenChangedTimer.start();
+}
+
+void Workspace::screenResized(Kephal::Screen* screen, QSize old, QSize newSize)
+{
+    kDebug();
+    screenChangedTimer.start();
+}
+
+void Workspace::screenMoved(Kephal::Screen* screen, QPoint old, QPoint newPos)
+{
+    kDebug();
+    screenChangedTimer.start();
 }
 
 void Workspace::init()
@@ -354,7 +401,6 @@ void Workspace::init()
 
     loadDesktopSettings();
     updateDesktopLayout();
-    desktop_change_osd->numberDesktopsChanged();
     // Extra NETRootInfo instance in Client mode is needed to get the values of the properties
     NETRootInfo client_info(display(), NET::ActiveWindow | NET::CurrentDesktop);
     int initial_desktop;
@@ -448,8 +494,10 @@ void Workspace::init()
     if (new_active_client != NULL)
         activateClient(new_active_client);
 
+#ifdef KWIN_BUILD_TILING
     // Enable/disable tiling
-    setTilingEnabled(options->tilingOn);
+    m_tiling->setEnabled(options->tilingOn);
+#endif
 
     // SELI TODO: This won't work with unreasonable focus policies,
     // and maybe in rare cases also if the selected client doesn't
@@ -463,6 +511,9 @@ Workspace::~Workspace()
 {
     finishCompositing();
     blockStackingUpdates(true);
+#ifdef KWIN_BUILD_TILING
+    delete m_tiling;
+#endif
 
     // TODO: grabXServer();
 
@@ -482,7 +533,9 @@ Workspace::~Workspace()
             it != unmanaged.constEnd();
             ++it)
         (*it)->release();
+#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
     delete desktop_change_osd;
+#endif
     delete m_outline;
     discardPopup();
     XDeleteProperty(display(), rootWindow(), atoms->kwin_running);
@@ -520,13 +573,9 @@ Client* Workspace::createClient(Window w, bool is_mapped)
         return NULL;
     }
     addClient(c, Allowed);
-
-    tilingLayouts.resize(numberOfDesktops() + 1);
-
-    createTile(c);
-
-    if (scene)
-        scene->windowAdded(c);
+#ifdef KWIN_BUILD_TILING
+    m_tiling->createTile(c);
+#endif
     return c;
 }
 
@@ -540,8 +589,6 @@ Unmanaged* Workspace::createUnmanaged(Window w)
         return NULL;
     }
     addUnmanaged(c, Allowed);
-    if (scene)
-        scene->windowAdded(c);
     emit unmanagedAdded(c);
     return c;
 }
@@ -632,9 +679,6 @@ void Workspace::removeClient(Client* c, allowed_t)
 #endif
 
     Q_ASSERT(clients.contains(c) || desktops.contains(c));
-    if (tilingEnabled() && tilingLayouts.value(c->desktop())) {
-        removeTile(c);
-    }
     // TODO: if marked client is removed, notify the marked list
     clients.removeAll(c);
     desktops.removeAll(c);
@@ -923,10 +967,7 @@ void Workspace::slotReconfigure()
     KGlobal::config()->reparseConfiguration();
     unsigned long changed = options->updateSettings();
 
-#ifdef KWIN_BUILD_TABBOX
-    tab_box->reconfigure();
-#endif
-    desktop_change_osd->reconfigure();
+    emit configChanged();
     initPositioning->reinitCascading(0);
     discardPopup();
     forEachClient(CheckIgnoreFocusStealingProcedure());
@@ -948,7 +989,7 @@ void Workspace::slotReconfigure()
         // If the new decoration doesn't supports tabs then ungroup clients
         if (!decorationSupportsClientGrouping()) {
             QList<ClientGroup*> tmpGroups = clientGroups; // Prevent crashing
-            for (QList<ClientGroup*>::const_iterator i = tmpGroups.constBegin(); i != tmpGroups.constEnd(); i++)
+            for (QList<ClientGroup*>::const_iterator i = tmpGroups.constBegin(); i != tmpGroups.constEnd(); ++i)
                 (*i)->removeAll();
         }
         mgr->destroyPreviousPlugin();
@@ -994,13 +1035,11 @@ void Workspace::slotReconfigure()
         }
     }
 
-    setTilingEnabled(options->tilingOn);
-    foreach (TilingLayout * layout, tilingLayouts) {
-        if (layout)
-            layout->reconfigureTiling();
-    }
+#ifdef KWIN_BUILD_TILING
+    m_tiling->setEnabled(options->tilingOn);
     // just so that we reset windows in the right manner, 'activate' the current active window
-    notifyTilingWindowActivated(activeClient());
+    m_tiling->notifyTilingWindowActivated(activeClient());
+#endif
     if (hasDecorationPlugin()) {
         rootInfo->setSupported(NET::WM2FrameOverlap, mgr->factory()->supports(AbilityExtendIntoClientArea));
     } else {
@@ -1054,6 +1093,16 @@ void Workspace::loadDesktopSettings()
         rootInfo->setDesktopName(i, s.toUtf8().data());
         desktop_focus_chain[i-1] = i;
     }
+
+    int rows = group.readEntry<int>("Rows", 2);
+    rows = qBound(1, rows, n);
+    // avoid weird cases like having 3 rows for 4 desktops, where the last row is unused
+    int columns = n / rows;
+    if (n % rows > 0) {
+        columns++;
+    }
+    rootInfo->setDesktopLayout(NET::OrientationHorizontal, columns, rows, NET::DesktopLayoutCornerTopLeft);
+    rootInfo->activate();
     _loading_desktop_settings = false;
 }
 
@@ -1263,9 +1312,13 @@ bool Workspace::setCurrentDesktop(int new_desktop)
         if (movingClient && !movingClient->isOnDesktop(new_desktop)) {
             int old_desktop = movingClient->desktop();
             movingClient->setDesktop(new_desktop);
-            if (tilingEnabled()) {
-                notifyTilingWindowDesktopChanged(movingClient, old_desktop);
+#ifdef KWIN_BUILD_TILING
+            if (m_tiling->isEnabled()) {
+                m_tiling->notifyTilingWindowDesktopChanged(movingClient, old_desktop);
             }
+#else
+    Q_UNUSED(old_desktop)
+#endif
         }
 
         for (int i = stacking_order.size() - 1; i >= 0 ; --i)
@@ -1329,10 +1382,6 @@ bool Workspace::setCurrentDesktop(int new_desktop)
     //for ( uint i = 0; i < desktop_focus_chain.size(); i++ )
     //    s += QString::number( desktop_focus_chain[i] ) + ", ";
     //kDebug( 1212 ) << s << "}\n";
-
-    // Not for the very first time, only if something changed and there are more than 1 desktops
-    if (old_desktop != 0 && old_desktop != new_desktop && numberOfDesktops() > 1)
-        desktop_change_osd->desktopChanged(old_desktop);
 
     if (compositing())
         addRepaintFull();
@@ -1548,11 +1597,6 @@ void Workspace::setNumberOfDesktops(int n)
     for (int i = 0; i < int(desktop_focus_chain.size()); i++)
         desktop_focus_chain[i] = i + 1;
 
-    tilingLayouts.resize(numberOfDesktops() + 1);
-
-    // reset the desktop change osd
-    desktop_change_osd->numberDesktopsChanged();
-
     saveDesktopSettings();
     emit numberDesktopsChanged(old_number_of_desktops);
 }
@@ -1585,7 +1629,9 @@ void Workspace::sendClientToDesktop(Client* c, int desk, bool dont_activate)
     } else
         raiseClient(c);
 
-    notifyTilingWindowDesktopChanged(c, old_desktop);
+#ifdef KWIN_BUILD_TILING
+    m_tiling->notifyTilingWindowDesktopChanged(c, old_desktop);
+#endif
 
     ClientList transients_stacking_order = ensureStackingOrder(c->transients());
     for (ClientList::ConstIterator it = transients_stacking_order.constBegin();
@@ -2124,6 +2170,57 @@ TabBox::TabBox* Workspace::tabBox() const
     return tab_box;
 }
 #endif
+
+#ifdef KWIN_BUILD_TILING
+Tiling* Workspace::tiling()
+{
+    return m_tiling;
+}
+#endif
+
+/*
+ * Called from D-BUS
+ */
+void Workspace::toggleTiling()
+{
+#ifdef KWIN_BUILD_TILING
+    if (m_tiling) {
+        m_tiling->slotToggleTiling();
+    }
+#endif
+}
+
+/*
+ * Called from D-BUS
+ */
+void Workspace::nextTileLayout()
+{
+#ifdef KWIN_BUILD_TILING
+    if (m_tiling) {
+        m_tiling->slotNextTileLayout();
+    }
+#endif
+}
+
+/*
+ * Called from D-BUS
+ */
+void Workspace::previousTileLayout()
+{
+#ifdef KWIN_BUILD_TILING
+    if (m_tiling) {
+        m_tiling->slotPreviousTileLayout();
+    }
+#endif
+}
+
+void Workspace::dumpTiles() const {
+#ifdef KWIN_BUILD_TILING
+    if (m_tiling) {
+        m_tiling->dumpTiles();
+    }
+#endif
+}
 
 } // namespace
 

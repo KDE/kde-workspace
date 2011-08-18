@@ -39,7 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kxerrorhandler.h>
 #include <kdefakes.h>
 #include <QtDBus/QtDBus>
-#include <stdlib.h>
 #include <QMessageBox>
 #include <QEvent>
 
@@ -54,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QLabel>
 #include <KComboBox>
 #include <QVBoxLayout>
-#include <kworkspace.h>
+#include <kworkspace/kworkspace.h>
 
 #include <ksmserver_interface.h>
 

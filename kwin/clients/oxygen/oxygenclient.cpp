@@ -96,15 +96,15 @@ namespace Oxygen
         _glowAnimation->setTargetObject( this );
         _glowAnimation->setPropertyName( "glowIntensity" );
         _glowAnimation->setEasingCurve( QEasingCurve::InOutQuad );
-        connect( _glowAnimation, SIGNAL( finished( void ) ), this, SLOT( clearForceActive( void ) ) );
+        connect( _glowAnimation, SIGNAL(finished()), this, SLOT(clearForceActive()) );
 
 
         // title animation data
         _titleAnimationData->initialize();
-        connect( _titleAnimationData, SIGNAL( pixmapsChanged() ), SLOT( updateTitleRect() ) );
+        connect( _titleAnimationData, SIGNAL(pixmapsChanged()), SLOT(updateTitleRect()) );
 
         // lists
-        connect( _itemData.animation().data(), SIGNAL( finished() ), this, SLOT( clearTargetItem() ) );
+        connect( _itemData.animation().data(), SIGNAL(finished()), this, SLOT(clearTargetItem()) );
 
         // in case of preview, one wants to make the label used
         // for the central widget transparent. This allows one to have
@@ -142,11 +142,15 @@ namespace Oxygen
 
         _configuration = _factory->configuration( *this );
 
-        // animations duration
-        _glowAnimation->setDuration( configuration().animationsDuration() );
-        _titleAnimationData->setDuration( configuration().animationsDuration() );
-        _itemData.animation().data()->setDuration( configuration().animationsDuration() );
-        _itemData.setAnimationsEnabled( useAnimations() );
+        // glow animations
+        _glowAnimation->setDuration( configuration().shadowAnimationsDuration() );
+
+        // title transitions
+        _titleAnimationData->setDuration( configuration().titleAnimationsDuration() );
+
+        // tabs
+        _itemData.setAnimationsEnabled( animationsEnabled() && configuration().tabAnimationsEnabled() );
+        _itemData.animation().data()->setDuration( configuration().tabAnimationsDuration() );
 
         // reset title transitions
         _titleAnimationData->reset();
@@ -1193,7 +1197,7 @@ namespace Oxygen
         _itemData.setDirty( true );
 
         // reset animation
-        if( animateActiveChange() )
+        if( shadowAnimationsEnabled() )
         {
             _glowAnimation->setDirection( isActive() ? Animation::Forward : Animation::Backward );
             if(!glowIsAnimated()) { _glowAnimation->start(); }
@@ -1230,7 +1234,7 @@ namespace Oxygen
 
         KCommonDecorationUnstable::captionChange();
         _itemData.setDirty( true );
-        if( animateTitleChange() )
+        if( titleAnimationsEnabled() )
         { _titleAnimationData->setDirty( true ); }
 
     }
@@ -1296,9 +1300,6 @@ namespace Oxygen
     {
 
         // all dedicated event filtering is here to handle multiple tabs.
-        // if tabs are disabled, do nothing
-        if( !configuration().tabsEnabled() )
-        { return KCommonDecorationUnstable::eventFilter( object, event ); }
 
         bool state = false;
         switch( event->type() )
