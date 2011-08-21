@@ -62,31 +62,6 @@ void surfaceAttach(struct wl_client *client, struct wl_surface *surface, struct 
     s->setSurface(surface);
 }
 
-void surfaceMapToplevel(struct wl_client *client, struct wl_surface *surface)
-{
-    Q_UNUSED(client)
-    Q_UNUSED(surface)
-    kDebug(1212) << "Surface Map Toplevel not yet implemented";
-}
-
-void surfaceMapTransient(struct wl_client *client, struct wl_surface *surface, struct wl_surface *parent, int x, int y, uint32_t flags)
-{
-    Q_UNUSED(client)
-    Q_UNUSED(surface)
-    Q_UNUSED(parent)
-    Q_UNUSED(x)
-    Q_UNUSED(y)
-    Q_UNUSED(flags)
-    kDebug(1212) << "Surface Map transient not yet implemented";
-}
-
-void surfaceMapFullscreen(struct wl_client *client, struct wl_surface *surface)
-{
-    Q_UNUSED(client)
-    Q_UNUSED(surface)
-    kDebug(1212) << "Surface Map Fullscreen not yet implemented";
-}
-
 void surfaceDamage(struct wl_client *client, struct wl_surface *surface, int32_t x, int32_t y, int32_t width, int32_t height)
 {
     Q_UNUSED(client)
@@ -97,9 +72,6 @@ void surfaceDamage(struct wl_client *client, struct wl_surface *surface, int32_t
 const static struct wl_surface_interface surfaceInterface = {
         surfaceDestroy,
         surfaceAttach,
-        surfaceMapToplevel,
-        surfaceMapTransient,
-        surfaceMapFullscreen,
         surfaceDamage
 };
 

@@ -75,7 +75,6 @@ Client::~Client()
 void Client::updateDecoration(bool checkWorkspacePos, bool force)
 {
     Q_UNUSED(checkWorkspacePos)
-    QRect oldgeom = geometry();
     if (force) {
         destroyDecoration();
     }

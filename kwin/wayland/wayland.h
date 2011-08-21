@@ -66,6 +66,7 @@ namespace Wayland
 {
 // forward declarations
 class Surface;
+class Shell;
 
 /**
  * @short Wayland Server Implementation.
@@ -137,6 +138,8 @@ private:
     wl_display *m_display;
     wl_shm *m_shm;
     struct wl_compositor m_compositor;
+
+    KWin::Wayland::Shell *m_shell;
 
     struct wl_object m_output;
     // TODO: in future we might need more than one input device

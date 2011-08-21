@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wayland.h"
 #include "surface.h"
+#include "shell.h"
+
 // kwin
 #include <kwinglobals.h>
 // KDE
@@ -109,7 +111,15 @@ const static struct wl_input_device_interface inputDeviceCallbacks = {
 void outputPostGeometry(struct wl_client *client, struct wl_object *global, uint32_t version)
 {
     Q_UNUSED(version)
-    wl_client_post_event(client, global, WL_OUTPUT_GEOMETRY, 0, 0, displayWidth(), displayHeight());
+    wl_client_post_event(client, global,
+            WL_OUTPUT_GEOMETRY,
+            0,
+            0,
+            displayWidth(),
+            displayHeight(),
+            WL_OUTPUT_SUBPIXEL_UNKNOWN,
+            NULL,   // make
+            NULL);  // model
     kDebug(1212) << "Output Post Geometry";
 }
 
@@ -160,10 +170,17 @@ bool Server::init()
         return false;
     }
 
+    m_shell = new Shell();
+    wl_display_add_object(m_display, m_shell->wlObjectHandle());
+    if (wl_display_add_global(m_display, m_shell->wlObjectHandle(), NULL)) {
+        kDebug(1212) << "Failed to add global Shell object";
+        return false;
+    }
+
     // TODO: read socket name from command line
     if (wl_display_add_socket(m_display, QLatin1String("wayland-0").latin1())) {
-            kDebug(1212) << "Failed to create Wayland Socket";
-            return false;
+        kDebug(1212) << "Failed to create Wayland Socket";
+        return false;
     }
 
     memset(&m_input, 0, sizeof(m_input));
