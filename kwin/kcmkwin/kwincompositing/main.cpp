@@ -89,12 +89,6 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
 
 #define OPENGL_INDEX 0
 #define XRENDER_INDEX 1
-#ifndef KWIN_HAVE_OPENGL_COMPOSITING
-    ui.compositingType->removeItem(OPENGL_INDEX);
-    ui.glGroup->setEnabled(false);
-#define OPENGL_INDEX -1
-#define XRENDER_INDEX 0
-#endif
 #ifndef KWIN_HAVE_XRENDER_COMPOSITING
     ui.compositingType->removeItem(XRENDER_INDEX);
     ui.xrenderGroup->setEnabled(false);
@@ -109,8 +103,8 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
     connect(ui.effectAnimations, SIGNAL(toggled(bool)), this, SLOT(changed()));
 
     connect(ui.effectSelector, SIGNAL(changed(bool)), this, SLOT(changed()));
-    connect(ui.effectSelector, SIGNAL(configCommitted(const QByteArray&)),
-            this, SLOT(reparseConfiguration(const QByteArray&)));
+    connect(ui.effectSelector, SIGNAL(configCommitted(QByteArray)),
+            this, SLOT(reparseConfiguration(QByteArray)));
 
     connect(ui.windowSwitchingCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     connect(ui.desktopSwitchingCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
@@ -141,7 +135,7 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
     KAction* a = static_cast<KAction*>(m_actionCollection->addAction( "Suspend Compositing" ));
     a->setProperty("isConfigurationAction", true);
     a->setGlobalShortcut( KShortcut( Qt::ALT + Qt::SHIFT + Qt::Key_F12 ));
-    connect(ui.toggleEffectsShortcut, SIGNAL(keySequenceChanged(const QKeySequence&)), this, SLOT(toggleEffectShortcutChanged(const QKeySequence&)));
+    connect(ui.toggleEffectsShortcut, SIGNAL(keySequenceChanged(QKeySequence)), this, SLOT(toggleEffectShortcutChanged(QKeySequence)));
 
     // Initialize the user interface with the config loaded from kwinrc.
     load();

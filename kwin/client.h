@@ -458,9 +458,7 @@ private:
     void leaveNotifyEvent(XCrossingEvent* e);
     void focusInEvent(XFocusInEvent* e);
     void focusOutEvent(XFocusOutEvent* e);
-#ifdef HAVE_XDAMAGE
     virtual void damageNotifyEvent(XDamageNotifyEvent* e);
-#endif
 
     bool buttonPressEvent(Window w, int button, int state, int x, int y, int x_root, int y_root);
     bool buttonReleaseEvent(Window w, int button, int state, int x, int y, int x_root, int y_root);
@@ -647,6 +645,7 @@ private:
     uint urgency : 1; ///< XWMHints, UrgencyHint
     uint ignore_focus_stealing : 1; ///< Don't apply focus stealing prevention to this client
     uint demands_attention : 1;
+    int m_screenNum;
     bool blocks_compositing;
     WindowRules client_rules;
     void getWMHints();

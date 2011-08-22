@@ -16,12 +16,6 @@
 
 */
 
-/* KWIN_HAVE_COMPOSITING - whether any compositing support is available */
-#cmakedefine KWIN_HAVE_COMPOSITING
-
-/* KWIN_HAVE_OPENGL_COMPOSITING - whether OpenGL-based compositing support is available */
-#cmakedefine KWIN_HAVE_OPENGL_COMPOSITING
-
 /* KWIN_HAVE_XRENDER_COMPOSITING - whether XRender-based compositing support is available */
 #cmakedefine KWIN_HAVE_XRENDER_COMPOSITING
 

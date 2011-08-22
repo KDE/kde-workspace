@@ -114,28 +114,25 @@ if( NOT KWIN_MOBILE_EFFECTS )
 endif( NOT KWIN_MOBILE_EFFECTS )
 
 # OpenGL-specific effects
-if( KWIN_HAVE_OPENGL_COMPOSITING )
-    include( blur/CMakeLists.txt )
-    include( screenshot/CMakeLists.txt )
-    # OpenGL-specific effects for desktop
-    if( NOT KWIN_MOBILE_EFFECTS )
-        include( coverswitch/CMakeLists.txt )
-        include( cube/CMakeLists.txt )
-        include( explosion/CMakeLists.txt )
-        include( flipswitch/CMakeLists.txt )
-        include( glide/CMakeLists.txt )
-        include( invert/CMakeLists.txt )
-        include( lookingglass/CMakeLists.txt )
-# Magnifier currently broken due to removed PaintClipper
-#        include( magnifier/CMakeLists.txt )
-        include( mousemark/CMakeLists.txt )
-        include( sheet/CMakeLists.txt )
-        include( snaphelper/CMakeLists.txt )
-        include( startupfeedback/CMakeLists.txt )
-        include( trackmouse/CMakeLists.txt )
-        include( wobblywindows/CMakeLists.txt )
-    endif( NOT KWIN_MOBILE_EFFECTS )
-endif( KWIN_HAVE_OPENGL_COMPOSITING )
+include( blur/CMakeLists.txt )
+include( screenshot/CMakeLists.txt )
+# OpenGL-specific effects for desktop
+if( NOT KWIN_MOBILE_EFFECTS )
+    include( coverswitch/CMakeLists.txt )
+    include( cube/CMakeLists.txt )
+    include( explosion/CMakeLists.txt )
+    include( flipswitch/CMakeLists.txt )
+    include( glide/CMakeLists.txt )
+    include( invert/CMakeLists.txt )
+    include( lookingglass/CMakeLists.txt )
+    include( magnifier/CMakeLists.txt )
+    include( mousemark/CMakeLists.txt )
+    include( sheet/CMakeLists.txt )
+    include( snaphelper/CMakeLists.txt )
+    include( startupfeedback/CMakeLists.txt )
+    include( trackmouse/CMakeLists.txt )
+    include( wobblywindows/CMakeLists.txt )
+endif( NOT KWIN_MOBILE_EFFECTS )
 
 ###############################################################################
 
@@ -145,9 +142,3 @@ if( NOT KWIN_MOBILE_EFFECTS )
     KWIN4_ADD_EFFECT_CONFIG( builtins ${kwin4_effect_builtins_config_sources} )
 endif( NOT KWIN_MOBILE_EFFECTS )
 KWIN4_EFFECT_LINK_XRENDER( builtins )
-
-# Install global data files
-install( FILES
-    _data/circle-edgy.png
-    _data/circle.png
-    DESTINATION ${DATA_INSTALL_DIR}/kwin )

@@ -243,60 +243,66 @@ void SceneOpenGL::flushBuffer(int mask, QRegion damage)
 // SceneOpenGL::Texture
 //****************************************
 
-void SceneOpenGL::Texture::init()
+SceneOpenGL::TexturePrivate::TexturePrivate()
 {
     m_image = EGL_NO_IMAGE_KHR;
-    findTarget();
+    m_target = GL_TEXTURE_2D;
 }
 
-void SceneOpenGL::Texture::release()
+SceneOpenGL::TexturePrivate::~TexturePrivate()
 {
     if (m_image != EGL_NO_IMAGE_KHR) {
         glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)m_image);
     }
-    mTexture = None;
 }
 
 void SceneOpenGL::Texture::findTarget()
 {
-    mTarget = GL_TEXTURE_2D;
+    Q_D(Texture);
+    d->m_target = GL_TEXTURE_2D;
+}
+
+void SceneOpenGL::TexturePrivate::release()
+{
 }
 
 bool SceneOpenGL::Texture::load(const Pixmap& pix, const QSize& size,
                                 int depth, QRegion region)
 {
+    // decrease the reference counter for the old texture
+    d_ptr = new TexturePrivate();
+
+    Q_D(Texture);
     Q_UNUSED(depth)
     Q_UNUSED(region)
 
     if (pix == None)
         return false;
 
-    if (mTexture == None) {
-        createTexture();
-        bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        const EGLint attribs[] = {
-            EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
-            EGL_NONE
-        };
-        EGLImageKHR image = eglCreateImageKHR(dpy, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR,
-                                              (EGLClientBuffer)pix, attribs);
+    glGenTextures(1, &d->m_texture);
+    bind();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    const EGLint attribs[] = {
+        EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
+        EGL_NONE
+    };
+    EGLImageKHR image = eglCreateImageKHR(dpy, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR,
+                                          (EGLClientBuffer)pix, attribs);
 
-        if (EGL_NO_IMAGE_KHR == image) {
-            kDebug(1212) << "failed to create egl image";
-            unbind();
-            return false;
-        }
-        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)image);
-        eglDestroyImageKHR(dpy, image);
+    if (EGL_NO_IMAGE_KHR == image) {
+        kDebug(1212) << "failed to create egl image";
         unbind();
-        checkGLError("load texture");
-        setYInverted(true);
-        mSize = size;
+        return false;
     }
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)image);
+    eglDestroyImageKHR(dpy, image);
+    unbind();
+    checkGLError("load texture");
+    setYInverted(true);
+    d->m_size = size;
     return true;
 }
 
@@ -306,8 +312,11 @@ bool SceneOpenGL::Texture::load(wl_buffer *buffer)
     if (!buffer) {
         return false;
     }
-    if (mTexture == None) {
-        createTexture();
+    // decrease the reference counter for the old texture
+    d_ptr = new TexturePrivate();
+
+    Q_D(Texture);
+    if (d->m_texture == None) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -324,16 +333,16 @@ bool SceneOpenGL::Texture::load(wl_buffer *buffer)
                         GL_BGRA_EXT, GL_UNSIGNED_BYTE,
                         wl_shm_buffer_get_data(buffer));
     } else {
-        m_image = eglCreateImageKHR(dpy, NULL, EGL_WAYLAND_BUFFER_WL, buffer, NULL);
+        d->m_image = eglCreateImageKHR(dpy, NULL, EGL_WAYLAND_BUFFER_WL, buffer, NULL);
 
-        if (m_image == EGL_NO_IMAGE_KHR) {
+        if (d->m_image == EGL_NO_IMAGE_KHR) {
             kDebug(1212) << "failed to create Wayland egl image";
             unbind();
             return false;
         }
-        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)m_image);
+        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)d->m_image);
     }
-    mSize = QSize(buffer->width, buffer->height);
+    d->m_size = QSize(buffer->width, buffer->height);
     unbind();
     checkGLError("load texture");
     setYInverted(true);
@@ -341,14 +350,14 @@ bool SceneOpenGL::Texture::load(wl_buffer *buffer)
 }
 #endif
 
-void SceneOpenGL::Texture::bind()
+void SceneOpenGL::TexturePrivate::bind()
 {
-    GLTexture::bind();
+    GLTexturePrivate::bind();
 }
 
-void SceneOpenGL::Texture::unbind()
+void SceneOpenGL::TexturePrivate::unbind()
 {
-    GLTexture::unbind();
+    GLTexturePrivate::unbind();
 }
 
 //****************************************

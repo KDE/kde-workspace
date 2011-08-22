@@ -200,9 +200,7 @@ Client::Client(Workspace* ws)
 
     geom = QRect(0, 0, 100, 100);   // So that decorations don't start with size being (0,0)
     client_size = QSize(100, 100);
-#if defined(HAVE_XSYNC) || defined(HAVE_XDAMAGE)
     ready_for_painting = false; // wait for first damage or sync reply
-#endif
 
     connect(this, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), SIGNAL(geometryChanged()));
     connect(this, SIGNAL(clientMaximizedStateChanged(KWin::Client*,KDecorationDefines::MaximizeMode)), SIGNAL(geometryChanged()));
@@ -1388,7 +1386,7 @@ void Client::gotPing(Time timestamp)
         process_killer->kill();
         // Recycle when the process manager has noticed that the process exited
         // a delete process_killer here sometimes causes a hang in waitForFinished
-        connect(process_killer, SIGNAL(finished(int, QProcess::ExitStatus)),
+        connect(process_killer, SIGNAL(finished(int,QProcess::ExitStatus)),
                 process_killer, SLOT(deleteLater()));
         process_killer = NULL;
     }
@@ -1422,7 +1420,7 @@ void Client::killProcess(bool ask, Time timestamp)
     } else {
         process_killer = new QProcess(this);
         connect(process_killer, SIGNAL(error(QProcess::ProcessError)), SLOT(processKillerExited()));
-        connect(process_killer, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(processKillerExited()));
+        connect(process_killer, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(processKillerExited()));
         process_killer->start(KStandardDirs::findExe("kwin_killer_helper"),
                               QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << machine
                               << "--windowname" << caption()
