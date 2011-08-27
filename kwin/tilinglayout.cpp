@@ -214,7 +214,7 @@ Tile* TilingLayout::findTileBelowPoint(const QPoint &p) const
 void TilingLayout::commit()
 {
     foreach (Tile * t, m_tiles)
-    t->commit();
+        t->commit();
 }
 
 /*

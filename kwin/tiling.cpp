@@ -136,16 +136,17 @@ bool Workspace::tileable(Client *c)
 
 void Workspace::belowCursor()
 {
-    // TODO
+    // TODO ... "WHAT?" remove? What's a parameterless void function supposed to do?
 }
 
 Tile* Workspace::getNiceTile() const
 {
     if (!tilingEnabled()) return NULL;
+    if (!activeClient()) return NULL;
     if (!tilingLayouts.value(activeClient()->desktop())) return NULL;
 
     return tilingLayouts[ activeClient()->desktop()]->findTile(activeClient());
-    // TODO
+    // TODO ... WHAT?
 }
 
 void Workspace::updateAllTiles()
@@ -409,6 +410,8 @@ void Workspace::slotMoveTileBottom()
 void Workspace::slotToggleFloating()
 {
     Client *c = activeClient();
+    if (!c)
+        return;
     if (tilingLayouts.value(c->desktop())) {
         tilingLayouts[ c->desktop()]->toggleFloatTile(c);
     }
