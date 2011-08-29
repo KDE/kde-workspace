@@ -539,6 +539,10 @@ void GroupManager::setScreen(int screen)
     d->reloadTasks();
 }
 
+int GroupManager::screen() const
+{
+    return d->currentScreen;
+}
 
 void GroupManagerPrivate::checkScreenChange()
 {
