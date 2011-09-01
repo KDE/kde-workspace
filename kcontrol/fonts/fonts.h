@@ -20,6 +20,7 @@
 
 class QCheckBox;
 class QComboBox;
+class QSpinBox;
 class KDoubleNumInput;
 class FontAASettings;
 
@@ -54,7 +55,7 @@ class FontAASettings : public KDialog
 
 public:
 
-#ifdef HAVE_FONTCONFIG
+#if defined(HAVE_FONTCONFIG) && defined (Q_WS_X11)
     FontAASettings(QWidget *parent);
 
     bool save( bool useAA );
@@ -72,7 +73,7 @@ protected Q_SLOTS:
 
     void changed();
 
-#ifdef HAVE_FONTCONFIG
+#if defined(HAVE_FONTCONFIG) && defined (Q_WS_X11)
 private:
 
     QCheckBox *excludeRange;
@@ -108,7 +109,7 @@ protected Q_SLOTS:
     void slotCfgAa();
 
 private:
-#ifdef HAVE_FONTCONFIG
+#if defined(HAVE_FONTCONFIG) && defined (Q_WS_X11)
     enum AASetting { AAEnabled, AASystem, AADisabled };
     AASetting useAA, useAA_original;
     QComboBox *cbAA;
@@ -116,9 +117,9 @@ private:
     FontAASettings *aaSettings;
 #endif
 
-    enum DPISetting { DPINone, DPI96, DPI120 };
-    DPISetting dpi_original;
-    QComboBox* comboForceDpi;
+    int dpi_original;
+    QCheckBox *checkboxForceDpi;
+    QSpinBox* spinboxDpi;
     QList<FontUseItem *> fontUseList;
 };
 

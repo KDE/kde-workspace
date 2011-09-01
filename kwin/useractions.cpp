@@ -124,25 +124,6 @@ QMenu* Workspace::clientPopup()
         action->setIcon(KIcon("preferences-system-windows-actions"));
         action->setData(Options::ApplicationRulesOp);
 
-        trans_popup = 0;
-        if (compositing()) {
-            trans_popup = new QMenu(popup);
-            trans_popup->setFont(KGlobalSettings::menuFont());
-            connect(trans_popup, SIGNAL(triggered(QAction*)), this, SLOT(setPopupClientOpacity(QAction*)));
-            trans_popup_group = new QActionGroup(trans_popup);
-            const int levels[] = { 100, 90, 75, 50, 25, 10 };
-            for (unsigned int i = 0;
-                    i < sizeof(levels) / sizeof(levels[ 0 ]);
-                    ++i) {
-                action = trans_popup->addAction(QString::number(levels[ i ]) + "%");
-                action->setActionGroup(trans_popup_group);
-                action->setCheckable(true);
-                action->setData(levels[ i ]);
-            }
-            action = popup->addMenu(trans_popup);
-            action->setText(i18n("&Opacity"));
-        }
-
         mMoveOpAction = popup->addAction(i18n("&Move"));
         mMoveOpAction->setIcon(KIcon("transform-move"));
         kaction = qobject_cast<KAction*>(keys->action("Window Move"));
@@ -246,12 +227,20 @@ void Workspace::discardPopup()
     add_tabs_popup = NULL;
 }
 
-void Workspace::setPopupClientOpacity(QAction* action)
+void Workspace::slotIncreaseWindowOpacity()
 {
-    if (active_popup_client == NULL)
+    if (!active_client) {
         return;
-    int level = action->data().toInt();
-    active_popup_client->setOpacity(level / 100.0);
+    }
+    active_client->setOpacity(qMin(active_client->opacity() + 0.05, 1.0));
+}
+
+void Workspace::slotLowerWindowOpacity()
+{
+    if (!active_client) {
+        return;
+    }
+    active_client->setOpacity(qMax(active_client->opacity() - 0.05, 0.05));
 }
 
 /*!
@@ -318,15 +307,6 @@ void Workspace::clientPopupAboutToShow()
 
         mRemoveTabGroup->setVisible(tabGroupSize > 1);
         mCloseGroup->setVisible(tabGroupSize > 1);
-    }
-
-    if (trans_popup != NULL) {
-        foreach (QAction * action, trans_popup->actions()) {
-            if (action->data().toInt() == qRound(active_popup_client->opacity() * 100))
-                action->setChecked(true);
-            else
-                action->setChecked(false);
-        }
     }
 }
 
@@ -446,7 +426,7 @@ void Workspace::initDesktopPopup()
 
     QAction *action = desk_popup->menuAction();
     // set it as the first item
-    popup->insertAction(trans_popup ? trans_popup->menuAction() : mMoveOpAction, action);
+    popup->insertAction(mMoveOpAction, action);
     action->setText(i18n("To &Desktop"));
 }
 
@@ -469,7 +449,7 @@ void Workspace::initActivityPopup()
 
     QAction *action = activity_popup->menuAction();
     // set it as the first item
-    popup->insertAction(trans_popup ? trans_popup->menuAction() : mMoveOpAction, action);
+    popup->insertAction(mMoveOpAction, action);
     action->setText(i18n("Ac&tivities"));   //FIXME is that a good string?
 }
 

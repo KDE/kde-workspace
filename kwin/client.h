@@ -471,11 +471,12 @@ protected:
     virtual bool shouldUnredirect() const;
 
 private slots:
+    void delayedSetShortcut();
+    void performMoveResize();
+    void removeSyncSupport();
     void pingTimeout();
     void processKillerExited();
     void demandAttentionKNotify();
-    void syncTimeout();
-    void delayedSetShortcut();
     void repaintDecorationPending();
 
     //Signals for the scripting interface
@@ -528,7 +529,6 @@ private:
     void blockGeometryUpdates(bool block);
     void getSyncCounter();
     void sendSyncRequest();
-
     bool startMoveResize();
     void finishMoveResize(bool cancel);
     void leaveMoveResize();
@@ -541,7 +541,6 @@ private:
     void ungrabButton(int mod);
     void resetMaximize();
     void resizeDecoration(const QSize& s);
-    void performMoveResize();
 
     void pingWindow();
     void killProcess(bool ask, Time timestamp = CurrentTime);
@@ -643,7 +642,7 @@ private:
     uint urgency : 1; ///< XWMHints, UrgencyHint
     uint ignore_focus_stealing : 1; ///< Don't apply focus stealing prevention to this client
     uint demands_attention : 1;
-    int m_screenNum;
+    int m_screenNum, m_formerScreenNum;
     bool blocks_compositing;
     WindowRules client_rules;
     void getWMHints();
@@ -691,12 +690,14 @@ private:
     QRect deco_rect_before_block;
     bool shade_geometry_change;
 #ifdef HAVE_XSYNC
-    XSyncCounter sync_counter;
-    XSyncValue sync_counter_value;
-    XSyncAlarm sync_alarm;
+    struct {
+        XSyncCounter counter;
+        XSyncValue value;
+        XSyncAlarm alarm;
+        QTimer *timeout, *failsafeTimeout;
+        bool isPending;
+    } syncRequest;
 #endif
-    QTimer* sync_timeout;
-    bool sync_resize_pending;
     int border_left, border_right, border_top, border_bottom;
     int padding_left, padding_right, padding_top, padding_bottom;
     QRegion _mask;

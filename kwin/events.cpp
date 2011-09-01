@@ -473,9 +473,9 @@ bool Workspace::workspaceEvent(XEvent * e)
         } else if (e->type == Extensions::syncAlarmNotifyEvent() && Extensions::syncAvailable()) {
 #ifdef HAVE_XSYNC
             foreach (Client * c, clients)
-            c->syncEvent(reinterpret_cast< XSyncAlarmNotifyEvent* >(e));
+                c->syncEvent(reinterpret_cast< XSyncAlarmNotifyEvent* >(e));
             foreach (Client * c, desktops)
-            c->syncEvent(reinterpret_cast< XSyncAlarmNotifyEvent* >(e));
+                c->syncEvent(reinterpret_cast< XSyncAlarmNotifyEvent* >(e));
 #endif
         }
         break;
@@ -1549,15 +1549,17 @@ void Client::keyPressEvent(uint key_code)
 #ifdef HAVE_XSYNC
 void Client::syncEvent(XSyncAlarmNotifyEvent* e)
 {
-    if (e->alarm == sync_alarm && XSyncValueEqual(e->counter_value, sync_counter_value)) {
+    if (e->alarm == syncRequest.alarm && XSyncValueEqual(e->counter_value, syncRequest.value)) {
         ready_for_painting = true;
+        syncRequest.isPending = false;
+        if (syncRequest.failsafeTimeout)
+            syncRequest.failsafeTimeout->stop();
         if (isResize()) {
-            delete sync_timeout;
-            sync_timeout = NULL;
-            if (sync_resize_pending)
-                performMoveResize();
-            sync_resize_pending = false;
-        }
+            if (syncRequest.timeout)
+                syncRequest.timeout->stop();
+            performMoveResize();
+        } else
+            addRepaintFull();
     }
 }
 #endif
@@ -1659,8 +1661,6 @@ bool Group::groupEvent(XEvent* e)
 {
     unsigned long dirty[ 2 ];
     leader_info->event(e, dirty, 2);   // pass through the NET stuff
-    if ((dirty[ WinInfo::PROTOCOLS ] & NET::WMIcon) != 0)
-        getIcons();
     if ((dirty[ WinInfo::PROTOCOLS2 ] & NET::WM2StartupId) != 0)
         startupIdChanged();
     return false;

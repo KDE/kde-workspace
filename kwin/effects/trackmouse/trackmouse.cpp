@@ -116,9 +116,7 @@ void TrackMouseEffect::paintScreen(int mask, QRegion region, ScreenPaintData& da
 #ifndef KWIN_HAVE_OPENGLES
         glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
 #endif
-        bool useShader = false;
         if (ShaderManager::instance()->isValid()) {
-            useShader = true;
             ShaderManager::instance()->pushShader(ShaderManager::SimpleShader);
         }
         texture->bind();
@@ -207,6 +205,11 @@ void TrackMouseEffect::loadTexture()
     QImage im(file);
     texture = new GLTexture(im);
     textureSize = im.size();
+}
+
+bool TrackMouseEffect::isActive() const
+{
+    return active;
 }
 
 } // namespace

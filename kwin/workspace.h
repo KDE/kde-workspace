@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QCursor>
 #include <netwm.h>
 #include <kxmessages.h>
-#include <QDateTime>
+#include <QElapsedTimer>
 #include <kmanagerselection.h>
 
 #include "kactivitycontroller.h"
@@ -582,6 +582,9 @@ public slots:
     void slotSwitchWindowRight();
     void slotSwitchWindowLeft();
 
+    void slotIncreaseWindowOpacity();
+    void slotLowerWindowOpacity();
+
     void slotWindowOperations();
     void slotWindowClose();
     void slotWindowMove();
@@ -650,7 +653,6 @@ private slots:
     void writeWindowRules();
     void slotBlockShortcuts(int data);
     void slotReloadConfig();
-    void setPopupClientOpacity(QAction* action);
     void setupCompositing();
     void finishCompositing();
     void fallbackToXRenderCompositing();
@@ -813,8 +815,6 @@ private:
 
     QMenu* popup;
     QMenu* advanced_popup;
-    QMenu* trans_popup;
-    QActionGroup* trans_popup_group;
     QMenu* desk_popup;
     QMenu* activity_popup;
     QMenu* add_tabs_popup; // Menu to add the group to other group
@@ -888,7 +888,7 @@ private:
     KSelectionOwner* cm_selection;
     bool compositingSuspended, compositingBlocked;
     QBasicTimer compositeTimer;
-    qint64 nextPaintReference;
+    QElapsedTimer nextPaintReference;
     QTimer mousePollingTimer;
     uint vBlankInterval, vBlankPadding, fpsInterval, estimatedRenderTime;
     int xrrRefreshRate; // used only for compositing
