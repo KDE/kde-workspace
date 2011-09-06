@@ -218,10 +218,11 @@ void GroupManagerPrivate::removeStartup(StartupPtr task)
         return;
     }
 
-    AbstractGroupableItem *item = startupList.take(task);
+    TaskItem *item = startupList.take(task);
     if (item->parentGroup()) {
         item->parentGroup()->remove(item);
     }
+    item->setTaskPointer(TaskPtr());
 }
 
 bool GroupManagerPrivate::addTask(TaskPtr task)
@@ -299,7 +300,9 @@ bool GroupManagerPrivate::addTask(TaskPtr task)
                 item = startupItem = it.value();
                 startupList.erase(it);
                 QObject::disconnect(item, 0, q, 0);
-                item->setTaskPointer(task);
+                if (!skip) {
+                    item->setTaskPointer(task);
+                }
                 break;
             }
             ++it;
@@ -810,7 +813,12 @@ void GroupManagerPrivate::unsaveLauncher(LauncherItem *launcher)
         return;
     }
 
-    cg.deleteEntry(launcher->name());
+    if (launcher->launcherUrl().protocol() == "preferred") {
+        cg.deleteEntry(launcher->launcherUrl().host());
+    } else {
+        cg.deleteEntry(launcher->name());
+    }
+
     emit q->configChanged();
 }
 
