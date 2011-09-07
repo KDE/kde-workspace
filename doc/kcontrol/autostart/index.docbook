@@ -12,8 +12,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2008-03-21</date>
-<releaseinfo>1.0</releaseinfo>
+<date>2011-08-12</date>
+<releaseinfo>1.0 (&kde; 4.7)</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -27,16 +27,26 @@
 <sect1 id="kcm_autostart">
 <title><guilabel>Autostart Manager</guilabel></title>
 
-<para>This module is a configuration tool for managing what programs start up with &kde;. It allows you to add programs or scripts so they automatically start during the startup of &kde; and to manage them. </para>
+<para>This module is a configuration tool for managing what programs start up with your personal &kde;. It allows you to add programs or scripts so they automatically start during the startup of your &kde; session and to manage them. </para>
 
 <note><para>Please note that in this module all changes are immediately applied.</para></note>
 
 <para>The program scans <filename>~/.config/autostart/</filename>, your <filename class="directory">KDE  Autostart</filename> folder (<filename class="directory">$KDEHOME/Autostart</filename> as default), <filename class="directory">$KDEHOME/env</filename> and <filename class="directory">$KDEHOME/shutdown</filename> folders to check what programs and scripts are already there and displays them. It allows you to manage them easily. 
 </para>
-
-<note><para>Note that you can change the location of the <filename class="directory">Autostart</filename> 
-folder in <menuchoice><guimenu>Startup and Shutdown</guimenu> <guimenuitem>Autostart</guimenuitem></menuchoice> 
-in the <guilabel>System Administration</guilabel> category of the &systemsettings; and set a different folder 
+<!--Found this on forum.kde.org:
+The following folders are all checked for .desktop files:
+~/[.kde4|.kde]/Autostart 
+~/[.kde4|.kde]/share/autostart
+~/.config/autostart
+~/.local/share/autostart
+~/Desktop/autostart
+/etc/xdg/autostart
+/usr/share/autostart
+see also http://www.sharpley.org.uk/node/8
+-->
+<note><para>Note that you can change the location of your <filename class="directory">Autostart</filename> 
+folder in <menuchoice><guimenu>Account Details</guimenu> <guimenuitem>Paths</guimenuitem></menuchoice> 
+in the <guilabel>Common Appearance and Behaviour</guilabel> category of the &systemsettings; and set a different folder 
 than <filename class="directory">$KDEHOME/Autostart</filename>.</para></note>
 
 <sect2 id="current">
@@ -131,7 +141,7 @@ Remove will immediately remove the Desktop file for the program or the script or
 <varlistentry><term><guibutton>Properties</guibutton></term>
 <listitem>
 <para>
-This button allows you to change the properties of the program or script. You have general properties, permissions properties, a preview when applicable and properties related to the application for programs.
+This button (only enabled for programs &ie; Desktop files) allows you to change the properties of the program or script. You have general properties, permissions properties, a preview when applicable and properties related to the application for programs.
 </para>
 </listitem>
 </varlistentry>
