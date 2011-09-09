@@ -34,6 +34,7 @@ Comment[ia]=Contraface retro administration pro permitter a kdelibs de leger sta
 Comment[is]=Gabba bakvinnslukerfið til að leyfa kdelibs að lesa stöðu Netstjórapúka, útgáfu 0.9
 Comment[kk]=kdelibs-ке NetworkManager 0.9 қызметінің күй-жайын оқуға мүмкіндік беретін жалған тетік
 Comment[nb]=Attrapp-motor som lar kdelibs lese status for NetWorkManager daemon 0.9
+Comment[nds]=Namaakt Hülpprogramm, mit dat kdelibs den Nettwarkpleger-Dämoon 0.9 sien Status lesen kann
 Comment[nl]=Valse backend om kdelibs toe te staan om de status van NetworkManager daemon 0.9 te lezen
 Comment[pl]=Fikcyjny silnik pozwalający bibliotekom kdelibs na odczyt stanu demon NetworkManager 0.9
 Comment[pt]=Infra-estrutura falsa para permitir ao 'kdelibs' ler o estado do servidor do NetworkManager 0.9
