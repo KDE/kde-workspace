@@ -156,7 +156,7 @@ void EffectsHandlerImpl::prePaintScreen( ScreenPrePaintData& data, int time )
     {
     if( current_paint_screen < loaded_effects.size())
         {
-        loaded_effects[current_paint_screen++].second->prePaintScreen( data, time );
+        loaded_effects.at(current_paint_screen++).second->prePaintScreen( data, time );
         --current_paint_screen;
         }
     // no special final code
@@ -166,7 +166,7 @@ void EffectsHandlerImpl::paintScreen( int mask, QRegion region, ScreenPaintData&
     {
     if( current_paint_screen < loaded_effects.size())
         {
-        loaded_effects[current_paint_screen++].second->paintScreen( mask, region, data );
+        loaded_effects.at(current_paint_screen++).second->paintScreen( mask, region, data );
         --current_paint_screen;
         }
     else
@@ -177,7 +177,7 @@ void EffectsHandlerImpl::postPaintScreen()
     {
     if( current_paint_screen < loaded_effects.size())
         {
-        loaded_effects[current_paint_screen++].second->postPaintScreen();
+        loaded_effects.at(current_paint_screen++).second->postPaintScreen();
         --current_paint_screen;
         }
     // no special final code
@@ -187,7 +187,7 @@ void EffectsHandlerImpl::prePaintWindow( EffectWindow* w, WindowPrePaintData& da
     {
     if( current_paint_window < loaded_effects.size())
         {
-        loaded_effects[current_paint_window++].second->prePaintWindow( w, data, time );
+        loaded_effects.at(current_paint_window++).second->prePaintWindow( w, data, time );
         --current_paint_window;
         }
     // no special final code
@@ -197,7 +197,7 @@ void EffectsHandlerImpl::paintWindow( EffectWindow* w, int mask, QRegion region,
     {
     if( current_paint_window < loaded_effects.size())
         {
-        loaded_effects[current_paint_window++].second->paintWindow( w, mask, region, data );
+        loaded_effects.at(current_paint_window++).second->paintWindow( w, mask, region, data );
         --current_paint_window;
         }
     else
@@ -208,7 +208,7 @@ void EffectsHandlerImpl::paintEffectFrame( EffectFrame* frame, QRegion region, d
     {
     if( current_paint_effectframe < loaded_effects.size())
         {
-        loaded_effects[current_paint_effectframe++].second->paintEffectFrame( frame, region, opacity, frameOpacity );
+        loaded_effects.at(current_paint_effectframe++).second->paintEffectFrame( frame, region, opacity, frameOpacity );
         --current_paint_effectframe;
         }
     else
@@ -222,7 +222,7 @@ void EffectsHandlerImpl::postPaintWindow( EffectWindow* w )
     {
     if( current_paint_window < loaded_effects.size())
         {
-        loaded_effects[current_paint_window++].second->postPaintWindow( w );
+        loaded_effects.at(current_paint_window++).second->postPaintWindow( w );
         --current_paint_window;
         }
     // no special final code
@@ -240,7 +240,7 @@ void EffectsHandlerImpl::drawWindow( EffectWindow* w, int mask, QRegion region, 
     {
     if( current_draw_window < loaded_effects.size())
         {
-        loaded_effects[current_draw_window++].second->drawWindow( w, mask, region, data );
+        loaded_effects.at(current_draw_window++).second->drawWindow( w, mask, region, data );
         --current_draw_window;
         }
     else
@@ -251,7 +251,7 @@ void EffectsHandlerImpl::buildQuads( EffectWindow* w, WindowQuadList& quadList )
     {
     if( current_build_quads < loaded_effects.size())
         {
-        loaded_effects[current_build_quads++].second->buildQuads( w, quadList );
+        loaded_effects.at(current_build_quads++).second->buildQuads( w, quadList );
         --current_build_quads;
         }
     }
