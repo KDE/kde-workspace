@@ -31,6 +31,7 @@ Comment[eu]=kdelibs-ek NetworkManager deabrua 0.9-ren egoera irakurri ahal dezan
 Comment[ia]=Contraface retro administration pro permitter a kdelibs de leger le stato de daemon NetworkManager 0.9
 Comment[kk]=kdelibs-ке NetworkManager 0.9 қызметінің күй-жайын оқуға мүмкіндік беретін жалған тетік
 Comment[nb]=Attrapp-motor som lar kdelibs lese status for NetWorkManager daemon 0.9
+Comment[nds]=Namaakt Hülpprogramm, mit dat kdelibs den Nettwarkpleger-Dämoon 0.9 sien Status lesen kann
 Comment[nl]=Valse backend om kdelibs toe te staan om de status van NetworkManager daemon 0.9 te lezen
 Comment[pt]=Infra-estrutura de testes para permitir ao 'kdelibs' ler o estado do servidor do NetworkManager 0.9
 Comment[pt_BR]=Infraestrutura falsa que permite ao kdelibs ler o estado do serviço do NetworkManager 0.9
