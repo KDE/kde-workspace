@@ -646,9 +646,7 @@ namespace Oxygen
         }
 
         QRect r = (isPreview()) ? this->widget()->rect():window->rect();
-
-        const qreal shadowSize( shadowCache().shadowSize() );
-        r.adjust( shadowSize, shadowSize, -shadowSize, -shadowSize );
+        r.adjust( layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop ), -layoutMetric( LM_OuterPaddingRight ), -layoutMetric( LM_OuterPaddingBottom ) );
         r.adjust(0,0, 1, 1);
 
         // base color
@@ -790,8 +788,7 @@ namespace Oxygen
         }
 
         QRect r = (isPreview()) ? this->widget()->rect():window->rect();
-        qreal shadowSize( shadowCache().shadowSize() );
-        r.adjust( shadowSize, shadowSize, -shadowSize, -shadowSize );
+        r.adjust( layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop ), -layoutMetric( LM_OuterPaddingRight ), -layoutMetric( LM_OuterPaddingBottom ) );
 
         // dimensions
         const int titleHeight = layoutMetric(LM_TitleHeight);
