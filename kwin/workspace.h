@@ -41,7 +41,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sm.h"
 
 #include <X11/Xlib.h>
-
 // TODO: Cleanup the order of things in this .h file
 
 class QMenu;
@@ -61,6 +60,10 @@ namespace Kephal
 }
 namespace KWin
 {
+namespace ScreenLocker
+{
+class ScreenLocker;
+}
 
 namespace TabBox
 {
@@ -560,6 +563,13 @@ public:
 
     void raiseElectricBorderWindows();
 
+    ScreenLocker::ScreenLocker *screenLocker() {
+        return m_screenLocker;
+    }
+    const ScreenLocker::ScreenLocker *screenLocker() const {
+        return m_screenLocker;
+    }
+
 public slots:
     void addRepaintFull();
     void refresh();
@@ -1048,6 +1058,8 @@ private:
     QList< int > composite_paint_times;
     QTimer compositeResetTimer; // for compressing composite resets
     bool m_finishingCompositing; // finishCompositing() sets this variable while shutting down
+
+    ScreenLocker::ScreenLocker *m_screenLocker;
 
 private:
     friend bool performTransiencyCheck();

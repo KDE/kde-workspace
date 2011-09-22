@@ -61,6 +61,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tilinglayout.h"
 
 #include "scripting/scripting.h"
+#include "screenlocker/screenlocker.h"
 
 #include <X11/extensions/shape.h>
 #include <X11/keysym.h>
@@ -161,6 +162,7 @@ Workspace::Workspace(bool restore)
     , transButton(NULL)
     , forceUnredirectCheck(true)
     , m_finishingCompositing(false)
+    , m_screenLocker(NULL)
 {
     (void) new KWinAdaptor(this);
 
@@ -223,6 +225,8 @@ Workspace::Workspace(bool restore)
     // need to create the tabbox before compositing scene is setup
     tab_box = new TabBox::TabBox(this);
     setupCompositing();
+    // ScreenLocker needs to be created after compositing
+    m_screenLocker = new ScreenLocker::ScreenLocker(this);
 
     // Compatibility
     long data = 1;
