@@ -62,6 +62,7 @@ include( fade/CMakeLists.txt )
 include( login/CMakeLists.txt )
 include( outline/CMakeLists.txt )
 include( presentwindows/CMakeLists.txt )
+include( screenlocker/CMakeLists.txt )
 include( slidingpopups/CMakeLists.txt )
 include( taskbarthumbnail/CMakeLists.txt )
 
