@@ -170,57 +170,6 @@ set(kwin_KDEINIT_SRCS
    screenlocker/screensaver/xautolock_engine.c
    )
 
-if(KWIN_BUILD_SCRIPTING)
-    set(
-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
-        scripting/scripting.cpp
-        scripting/workspace.cpp
-        scripting/client.cpp
-        scripting/meta.cpp
-        scripting/toplevel.cpp
-        scripting/windowinfo.cpp
-        scripting/s_clientgroup.cpp
-        scripting/workspaceproxy.cpp
-        scripting/chelate.cpp
-        scripting/timer.cpp
-    )
-endif(KWIN_BUILD_SCRIPTING)
-
-if(KWIN_BUILD_TABBOX)
-    set(
-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
-        tabbox/tabbox.cpp
-        tabbox/clientitemdelegate.cpp
-        tabbox/clientmodel.cpp
-        tabbox/desktopitemdelegate.cpp
-        tabbox/desktopmodel.cpp
-        tabbox/itemlayoutconfig.cpp
-        tabbox/tabboxconfig.cpp
-        tabbox/tabboxhandler.cpp
-        tabbox/tabboxview.cpp
-  )
-endif(KWIN_BUILD_TABBOX)
-
-if(KWIN_BUILD_TILING)
-    set(
-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
-        tiling/tile.cpp
-        tiling/tiling.cpp
-        tiling/tilinglayout.cpp
-        tilinglayoutfactory.cpp
-
-        # tiling layouts
-        # spiral
-        tilinglayouts/spiral/spiral.cpp
-
-        # columns
-        tilinglayouts/columns/columns.cpp
-
-        # floating
-        tilinglayouts/floating/floating.cpp
-   )
-endif(KWIN_BUILD_TILING)
-
 qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.KWin.xml workspace.h KWin::Workspace )
 
 qt4_add_dbus_interface( kwin_KDEINIT_SRCS
