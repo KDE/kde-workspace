@@ -565,6 +565,8 @@ void Workspace::readShortcuts()
 {
     // TODO: PORT ME (KGlobalAccel related)
     //KGlobalAccel::self()->readSettings();
+    keys = new KActionCollection(this);
+    KActionCollection* actionCollection = keys;
 
     KAction *kaction = qobject_cast<KAction*>(keys->action("Walk Through Desktops"));
     if (kaction != 0) {
