@@ -1191,6 +1191,17 @@ EffectFrame* EffectsHandlerImpl::effectFrame(EffectFrameStyle style, bool static
     return new EffectFrameImpl(style, staticSize, position, alignment);
 }
 
+
+QVariant EffectsHandlerImpl::kwinOption(KWinOption kwopt)
+{
+    switch (kwopt)
+    {
+        case CloseButtonCorner:
+            return Workspace::self()->decorationCloseButtonCorner();
+    }
+    return QVariant(); // an invalid one
+}
+
 void EffectsHandlerImpl::slotShowOutline(const QRect& geometry)
 {
     emit showOutline(geometry);
