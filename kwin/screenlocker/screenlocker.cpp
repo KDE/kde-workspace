@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "screenlocker.h"
 #include "saverengine.h"
+#include "workspace.h"
+#include <fixx11h.h>
+#include "effects.h"
 // Qt
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusReply>
@@ -29,9 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KDebug>
 #include <KDE/KShortcut>
 #include <KDE/KLocalizedString>
-
-// needed for calling the kglobalaccel D-Bus interface in initShortcuts
-Q_DECLARE_METATYPE(QList<int>)
 
 namespace KWin
 {
@@ -85,9 +85,18 @@ void ScreenLocker::lock()
         return;
     }
     // TODO: create lock file
-    // TODO: check compositor for KWin effect
-    // TODO: if effect, enforce compositing
-    if (!m_saverEngine->doLock()) {
+    bool hasLock = false;
+    if (Workspace::self()->compositingActive() && static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::ScreenLocking)) {
+        // try locking through an Effect
+        hasLock = static_cast<EffectsHandlerImpl*>(effects)->lockScreen();
+    }
+    if (!hasLock) {
+        // no Effect to lock the screen, try legacy X Screen Saver for locking
+        hasLock = !m_saverEngine->doLock();
+    }
+    if (!hasLock) {
+        // no working lock implementation
+        // TODO: remove lock file
         return;
     }
     m_locked = true;

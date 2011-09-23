@@ -331,7 +331,8 @@ public:
 
     enum Feature {
         Nothing = 0, Resize, GeometryTip,
-        Outline
+        Outline,
+        ScreenLocking
     };
 
     /**
@@ -780,6 +781,42 @@ public:
     virtual EffectFrame* effectFrame(EffectFrameStyle style, bool staticSize = true,
                                      const QPoint& position = QPoint(-1, -1), Qt::Alignment alignment = Qt::AlignCenter) const = 0;
 
+
+    /**
+     * Allows effects to indicate that they are responsible for handling screen locking.
+     * Only one effect at a time should reference the Screen Locker. It is assumed that
+     * all effects want to collaborate and will check @link isScreenLockerReferenced before
+     * trying to reference the screen locker.
+     * When the effect gets into a state that it wants to indicate that the screen got unlocked
+     * it should use @link unrefScreenLocker to remove the reference on the screen locker and
+     * to indicate that the screen got unlocked.
+     *
+     * An Effect may only call this method in a slot connected on the @link requestScreenLock signal.
+     * Calling this method outside the handling of that signal will not do anything.
+     *
+     * @param lockEffect The Effect which implements the lock.
+     * @since 4.8
+     * @see unrefScreenLocker
+     * @see isScreenLockerReferenced
+     **/
+    virtual void refScreenLocker(Effect *lockEffect) = 0;
+    /**
+     * Method to unlock the screen for an Effect which handles Screen Locking through
+     * @link refScreenLocker.
+     * If the Effect had not referenced the Screen Locker this method will not unlock the screen.
+     * @param lockEffect The Effect which implements the lock.
+     * @since 4.8
+     * @see refScreenLocker
+     **/
+    virtual void unrefScreenLocker(Effect *lockEffect) = 0;
+    /**
+     * @returns Whether an Effect referenced the Screen Lock.
+     * @since 4.8
+     * @see refScreenLocker
+     * @see unrefScreenLocker
+     **/
+    virtual bool isScreenLockerReferenced() const = 0;
+
     /**
      * Sends message over DCOP to reload given effect.
      * @param effectname effect's name without "kwin4_effect_" prefix.
@@ -1017,6 +1054,14 @@ Q_SIGNALS:
      * @since 4.7
      **/
     void hideOutline();
+    /**
+     * Signal emitted when the screen is about to be locked. An effect implementing a screen lock
+     * may connect to this signal and call @link refScreenLocker in the slot handling the signal.
+     * @since 4.8
+     * @see refScreenLocker
+     * @see isScreenLockerReferenced
+     **/
+    void requestScreenLock();
 
 protected:
     QVector< EffectPair > loaded_effects;

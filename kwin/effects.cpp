@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tabbox.h"
 #include "workspace.h"
 #include "kwinglutils.h"
+#include "screenlocker/screenlocker.h"
 
 #include <QFile>
 
@@ -96,6 +97,7 @@ EffectsHandlerImpl::EffectsHandlerImpl(CompositingType type)
     , next_window_quad_type(EFFECT_QUAD_TYPE_START)
     , mouse_poll_ref_count(0)
     , current_paint_effectframe(0)
+    , m_activeScreenLockEffect(NULL)
 {
     Workspace *ws = Workspace::self();
     connect(ws, SIGNAL(currentDesktopChanged(int)), this, SLOT(slotDesktopChanged(int)));
@@ -1197,6 +1199,37 @@ void EffectsHandlerImpl::slotShowOutline(const QRect& geometry)
 void EffectsHandlerImpl::slotHideOutline()
 {
     emit hideOutline();
+}
+
+static bool s_prepareLock = false;
+bool EffectsHandlerImpl::lockScreen()
+{
+    s_prepareLock = true;
+    emit requestScreenLock();
+    s_prepareLock = false;
+    return isScreenLockerReferenced();
+}
+
+void EffectsHandlerImpl::refScreenLocker(Effect* lockEffect)
+{
+    if (m_activeScreenLockEffect || !s_prepareLock) {
+        return;
+    }
+    m_activeScreenLockEffect = lockEffect;
+}
+
+void EffectsHandlerImpl::unrefScreenLocker(Effect* lockEffect)
+{
+    if (m_activeScreenLockEffect != lockEffect) {
+        return;
+    }
+    m_activeScreenLockEffect = NULL;
+    Workspace::self()->screenLocker()->unlock();
+}
+
+bool EffectsHandlerImpl::isScreenLockerReferenced() const
+{
+    return m_activeScreenLockEffect != NULL;
 }
 
 //****************************************
