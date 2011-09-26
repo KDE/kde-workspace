@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
 #include <kwinxrenderutils.h>
 #endif
+#include <kdeclarative.h>
 
 namespace KWin
 {
@@ -65,6 +66,11 @@ ScreenLockerEffect::ScreenLockerEffect()
     foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
         m_declarativeView->engine()->addImportPath(importPath);
     }
+    KDeclarative kdeclarative;
+    kdeclarative.setDeclarativeEngine(m_declarativeView->engine());
+    kdeclarative.initialize();
+    //binds things like kconfig and icons
+    kdeclarative.setupBindings();
     m_declarativeView->setSource(QUrl(KStandardDirs::locate("data", "kwin/lockscreen/main.qml")));
     m_declarativeView->setResizeMode(QDeclarativeView::SizeRootObjectToView);
     m_declarativeView->setWindowFlags(Qt::X11BypassWindowManagerHint);
