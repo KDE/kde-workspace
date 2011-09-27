@@ -377,7 +377,8 @@ void SaverEngine::idleTimeout()
 {
     if( mState != Waiting )
         return; // already saving
-    startLockProcess( DefaultLock );
+
+    m_screenLocker->lock();
 }
 
 xautolock_corner_t SaverEngine::applyManualSettings(int action)
