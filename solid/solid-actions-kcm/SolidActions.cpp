@@ -75,9 +75,8 @@ SolidActions::SolidActions(QWidget* parent, const QVariantList&)
     addUi.setupUi( addDialog->mainWidget() );
     addDialog->setInitialSize( QSize(300, 100) ); // Set a sensible default size
 
-    slotTextChanged( addUi.LeActionName->text() );
     connect( addUi.LeActionName, SIGNAL(textChanged(QString)), this, SLOT(slotTextChanged(QString)) );
-    connect( addDialog, SIGNAL(okClicked()), this, SLOT(addAction()) );
+    connect( addDialog, SIGNAL(accepted()), this, SLOT(addAction()) );
 }
 
 SolidActions::~SolidActions()
@@ -91,6 +90,7 @@ void SolidActions::slotShowAddDialog()
    addDialog->show();
    addUi.LeActionName->setFocus();
    addUi.LeActionName->clear();
+   addDialog->enableButtonOk( false );
 }
 
 void SolidActions::slotTextChanged( const QString & text )
