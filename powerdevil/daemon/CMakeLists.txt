@@ -26,6 +26,8 @@ set(powerdevilcore_SRCS
     powerdevilcore.cpp
     powerdevilpolicyagent.cpp
     powerdevilprofilegenerator.cpp
+
+    brightnessosdwidget.cpp
 )
 
 kde4_add_kcfg_files(powerdevilcore_SRCS ../PowerDevilSettings.kcfgc)
@@ -40,6 +42,7 @@ target_link_libraries(powerdevilcore
     ${KDE4_KDECORE_LIBS}
     ${KDE4_SOLID_LIBS}
     ${KDE4_KIDLETIME_LIBS}
+    ${KDE4_PLASMA_LIBS}
     kworkspace
 )
 
