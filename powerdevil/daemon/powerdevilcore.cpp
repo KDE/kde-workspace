@@ -88,7 +88,7 @@ void Core::onBackendReady()
 {
     kDebug() << "Backend is ready, KDE Power Management system initialized";
 
-    m_profilesConfig = KSharedConfig::openConfig("powerdevil2profilesrc", KConfig::SimpleConfig);
+    m_profilesConfig = KSharedConfig::openConfig("powerdevil2profilesrc", KConfig::FullConfig);
 
     // Is it brand new?
     if (m_profilesConfig->groupList().isEmpty()) {
