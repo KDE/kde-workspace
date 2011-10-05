@@ -151,6 +151,12 @@ public:
 
     virtual EffectFrame* effectFrame(EffectFrameStyle style, bool staticSize, const QPoint& position, Qt::Alignment alignment) const;
 
+    virtual QVariant kwinOption(KWinOption kwopt);
+
+    virtual void refScreenLocker(Effect *lockEffect);
+    virtual void unrefScreenLocker(Effect *lockEffect);
+    virtual bool isScreenLockerReferenced() const;
+
     // internal (used by kwin core or compositing code)
     void startPaint();
     bool borderActivated(ElectricBorder border);
@@ -166,6 +172,13 @@ public:
     QStringList listOfEffects() const;
 
     QList<EffectWindow*> elevatedWindows() const;
+
+    /**
+     * Passes the request to lock the screen to the effects and returns whether an effect
+     * will handle the screen locking.
+     * @returns @c true in case an effect handles the screen locking, @c false otherwise.
+     **/
+    bool lockScreen();
 
 public Q_SLOTS:
     void slotClientGroupItemSwitched(EffectWindow* from, EffectWindow* to);
@@ -209,6 +222,15 @@ protected:
     int next_window_quad_type;
     int mouse_poll_ref_count;
     int current_paint_effectframe;
+
+private:
+    QList< Effect* > m_activeEffects;
+    QList< Effect* >::iterator m_currentDrawWindowIterator;
+    QList< Effect* >::iterator m_currentPaintWindowIterator;
+    QList< Effect* >::iterator m_currentPaintEffectFrameIterator;
+    QList< Effect* >::iterator m_currentPaintScreenIterator;
+    QList< Effect* >::iterator m_currentBuildQuadsIterator;
+    Effect *m_activeScreenLockEffect;
 };
 
 class EffectWindowImpl : public EffectWindow

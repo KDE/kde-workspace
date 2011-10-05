@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "effects.h"
 #include "tile.h"
 #include "tilinglayout.h"
+#include "screenlocker/screenlocker.h"
 
 #include "kactivityinfo.h"
 
@@ -564,6 +565,8 @@ void Workspace::readShortcuts()
 {
     // TODO: PORT ME (KGlobalAccel related)
     //KGlobalAccel::self()->readSettings();
+    keys = new KActionCollection(this);
+    KActionCollection* actionCollection = keys;
 
     KAction *kaction = qobject_cast<KAction*>(keys->action("Walk Through Desktops"));
     if (kaction != 0) {
@@ -626,6 +629,7 @@ void Workspace::readShortcuts()
         cutWalkThroughWindowsAlternativeReverse = kaction->globalShortcut();
         connect(kaction, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(slotWalkBackThroughWindowsAlternativeKeyChanged(QKeySequence)));
     }
+    m_screenLocker->initShortcuts(actionCollection);
     discardPopup(); // so that it's recreated next time
 }
 

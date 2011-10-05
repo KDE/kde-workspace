@@ -41,7 +41,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sm.h"
 
 #include <X11/Xlib.h>
-
 // TODO: Cleanup the order of things in this .h file
 
 class QMenu;
@@ -61,6 +60,10 @@ namespace Kephal
 }
 namespace KWin
 {
+namespace ScreenLocker
+{
+class ScreenLocker;
+}
 
 namespace TabBox
 {
@@ -450,6 +453,7 @@ public:
     bool rulesUpdatesDisabled() const;
 
     bool hasDecorationShadows() const;
+    Qt::Corner decorationCloseButtonCorner();
     bool decorationHasAlpha() const;
     bool decorationSupportsClientGrouping() const; // Returns true if the decoration supports tabs.
     bool decorationSupportsFrameOverlap() const;
@@ -559,6 +563,13 @@ public:
     void stopMousePolling();
 
     void raiseElectricBorderWindows();
+
+    ScreenLocker::ScreenLocker *screenLocker() {
+        return m_screenLocker;
+    }
+    const ScreenLocker::ScreenLocker *screenLocker() const {
+        return m_screenLocker;
+    }
 
 public slots:
     void addRepaintFull();
@@ -1049,6 +1060,8 @@ private:
     QTimer compositeResetTimer; // for compressing composite resets
     bool m_finishingCompositing; // finishCompositing() sets this variable while shutting down
 
+    ScreenLocker::ScreenLocker *m_screenLocker;
+
 private:
     friend bool performTransiencyCheck();
 };
@@ -1327,6 +1340,14 @@ inline bool Workspace::hasDecorationShadows() const
         return false;
     }
     return mgr->factory()->supports(AbilityProvidesShadow);
+}
+
+inline Qt::Corner Workspace::decorationCloseButtonCorner()
+{
+    if (!hasDecorationPlugin()) {
+        return Qt::TopRightCorner;
+    }
+    return mgr->factory()->closeButtonCorner();
 }
 
 inline bool Workspace::decorationHasAlpha() const

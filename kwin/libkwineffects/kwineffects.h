@@ -166,7 +166,7 @@ X-KDE-Library=kwin4_effect_cooleffect
 
 #define KWIN_EFFECT_API_MAKE_VERSION( major, minor ) (( major ) << 8 | ( minor ))
 #define KWIN_EFFECT_API_VERSION_MAJOR 0
-#define KWIN_EFFECT_API_VERSION_MINOR 180
+#define KWIN_EFFECT_API_VERSION_MINOR 181
 #define KWIN_EFFECT_API_VERSION KWIN_EFFECT_API_MAKE_VERSION( \
         KWIN_EFFECT_API_VERSION_MAJOR, KWIN_EFFECT_API_VERSION_MINOR )
 
@@ -331,7 +331,8 @@ public:
 
     enum Feature {
         Nothing = 0, Resize, GeometryTip,
-        Outline
+        Outline,
+        ScreenLocking
     };
 
     /**
@@ -580,6 +581,7 @@ public:
     virtual void paintEffectFrame(EffectFrame* frame, QRegion region, double opacity, double frameOpacity) = 0;
     virtual void drawWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data) = 0;
     virtual void buildQuads(EffectWindow* w, WindowQuadList& quadList) = 0;
+    virtual QVariant kwinOption(KWinOption kwopt) = 0;
     // Functions for handling input - e.g. when an Expose-like effect is shown, an input window
     // covering the whole screen is created and all mouse events will be intercepted by it.
     // The effect's windowInputMouseEvent() will get called with such events.
@@ -779,6 +781,42 @@ public:
      */
     virtual EffectFrame* effectFrame(EffectFrameStyle style, bool staticSize = true,
                                      const QPoint& position = QPoint(-1, -1), Qt::Alignment alignment = Qt::AlignCenter) const = 0;
+
+
+    /**
+     * Allows effects to indicate that they are responsible for handling screen locking.
+     * Only one effect at a time should reference the Screen Locker. It is assumed that
+     * all effects want to collaborate and will check @link isScreenLockerReferenced before
+     * trying to reference the screen locker.
+     * When the effect gets into a state that it wants to indicate that the screen got unlocked
+     * it should use @link unrefScreenLocker to remove the reference on the screen locker and
+     * to indicate that the screen got unlocked.
+     *
+     * An Effect may only call this method in a slot connected on the @link requestScreenLock signal.
+     * Calling this method outside the handling of that signal will not do anything.
+     *
+     * @param lockEffect The Effect which implements the lock.
+     * @since 4.8
+     * @see unrefScreenLocker
+     * @see isScreenLockerReferenced
+     **/
+    virtual void refScreenLocker(Effect *lockEffect) = 0;
+    /**
+     * Method to unlock the screen for an Effect which handles Screen Locking through
+     * @link refScreenLocker.
+     * If the Effect had not referenced the Screen Locker this method will not unlock the screen.
+     * @param lockEffect The Effect which implements the lock.
+     * @since 4.8
+     * @see refScreenLocker
+     **/
+    virtual void unrefScreenLocker(Effect *lockEffect) = 0;
+    /**
+     * @returns Whether an Effect referenced the Screen Lock.
+     * @since 4.8
+     * @see refScreenLocker
+     * @see unrefScreenLocker
+     **/
+    virtual bool isScreenLockerReferenced() const = 0;
 
     /**
      * Sends message over DCOP to reload given effect.
@@ -1017,6 +1055,14 @@ Q_SIGNALS:
      * @since 4.7
      **/
     void hideOutline();
+    /**
+     * Signal emitted when the screen is about to be locked. An effect implementing a screen lock
+     * may connect to this signal and call @link refScreenLocker in the slot handling the signal.
+     * @since 4.8
+     * @see refScreenLocker
+     * @see isScreenLockerReferenced
+     **/
+    void requestScreenLock();
 
 protected:
     QVector< EffectPair > loaded_effects;

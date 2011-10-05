@@ -46,21 +46,29 @@ OPTION(KWIN_BUILD_DECORATIONS "Enable building of KWin decorations." ON)
 OPTION(KWIN_BUILD_KCMS "Enable building of KWin configuration modules." ON)
 OPTION(KWIN_MOBILE_EFFECTS "Only build effects relevant for mobile devices" OFF)
 
+# screensaver/locking stuff:
+macro_bool_to_01(X11_Xscreensaver_FOUND HAVE_XSCREENSAVER)
+macro_log_feature(HAVE_XSCREENSAVER "libxss" "XScreenSaver Library" "http://www.x.org/" FALSE "" "Needed to enable screensaver status check")
+
 # for things that are also used by kwin libraries
 configure_file(libkwineffects/kwinconfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libkwineffects/kwinconfig.h )
 # for kwin internal things
 configure_file(config-kwin.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kwin.h )
-
+# for screensaver/locking
+configure_file(screenlocker/config-xautolock.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/screenlocker/config-xautolock.h)
 
 ########### global ###############
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/libkwineffects
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/screenlocker
     ${CMAKE_CURRENT_SOURCE_DIR}/libkwineffects
     ${CMAKE_CURRENT_SOURCE_DIR}/libkdecorations
     ${CMAKE_CURRENT_SOURCE_DIR}/effects
     ${CMAKE_CURRENT_SOURCE_DIR}/tabbox
+    ${CMAKE_CURRENT_SOURCE_DIR}/screenlocker/
+    ${CMAKE_CURRENT_SOURCE_DIR}/screenlocker/screensaver
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kworkspace
     )
@@ -159,7 +167,22 @@ set(kwin_KDEINIT_SRCS
 
    # floating
    tilinglayouts/floating/floating.cpp
+
+   # screensaver activation
+   screenlocker/screenlocker.cpp
+   screenlocker/screensaver/saverengine.cpp
+   screenlocker/screensaver/xautolock.cpp
+   screenlocker/screensaver/xautolock_diy.c
+   screenlocker/screensaver/xautolock_engine.c
    )
+
+set(screensaver_dbusXML screenlocker/dbus/org.freedesktop.ScreenSaver.xml)
+set(kscreensaver_dbusXML screenlocker/dbus/org.kde.screensaver.xml)
+
+kde4_add_kcfg_files( kwin_KDEINIT_SRCS screenlocker/kcfg/kscreensaversettings.kcfgc )
+
+qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS ${screensaver_dbusXML} saverengine.h SaverEngine)
+qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS ${kscreensaver_dbusXML} saverengine.h SaverEngine kscreensaveradaptor KScreenSaverAdaptor)
 
 qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.KWin.xml workspace.h KWin::Workspace )
 
@@ -171,6 +194,10 @@ qt4_add_resources( kwin_KDEINIT_SRCS resources.qrc )
 kde4_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
 
 target_link_libraries(kdeinit_kwin ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTXML_LIBRARY} ${QT_QTSCRIPT_LIBRARY} kephal kworkspace kdecorations kwineffects ${X11_LIBRARIES})
+
+if(X11_Xscreensaver_FOUND)
+  target_link_libraries(kdeinit_kwin ${kwinLibs} ${X11_Xscreensaver_LIB})
+endif(X11_Xscreensaver_FOUND)
 
 if(OPENGL_FOUND AND NOT KWIN_HAVE_OPENGLES_COMPOSITING)
   add_subdirectory(opengltest)
@@ -224,6 +251,8 @@ install(TARGETS kwinnvidiahack ${INSTALL_TARGETS_DEFAULT_ARGS} LIBRARY NAMELINK_
 install( FILES kwin.kcfg  DESTINATION  ${KCFG_INSTALL_DIR} )
 install( FILES kwin.notifyrc  DESTINATION  ${DATA_INSTALL_DIR}/kwin )
 install( FILES org.kde.KWin.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
+install( FILES ${screensaver_dbusXML} DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
+install( FILES ${kscreensaver_dbusXML} DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
 install( FILES tabbox/DefaultTabBoxLayouts.xml DESTINATION ${DATA_INSTALL_DIR}/kwin )
 
 kde4_install_icons( ${ICON_INSTALL_DIR} )
