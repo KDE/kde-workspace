@@ -291,6 +291,7 @@ namespace KWin
 // EGL
 eglCreateImageKHR_func eglCreateImageKHR;
 eglDestroyImageKHR_func eglDestroyImageKHR;
+eglPostSubBufferNV_func eglPostSubBufferNV;
 // GLES
 glEGLImageTargetTexture2DOES_func glEGLImageTargetTexture2DOES;
 
@@ -304,6 +305,12 @@ void eglResolveFunctions()
     } else {
         eglCreateImageKHR = NULL;
         eglDestroyImageKHR = NULL;
+    }
+
+    if (hasGLExtension("EGL_NV_post_sub_buffer")) {
+        eglPostSubBufferNV = (eglPostSubBufferNV_func)eglGetProcAddress("eglPostSubBufferNV");
+    } else {
+        eglPostSubBufferNV = NULL;
     }
 }
 
