@@ -452,10 +452,10 @@ void GLTexture::render(QRegion region, const QRect& rect)
         const float texHeight = (target() == GL_TEXTURE_RECTANGLE_ARB) ? height() : 1.0f;
 #endif
         const float texcoords[ 4 * 2 ] = {
-            0.0f, d->m_yInverted ? 0.0f : texHeight, // y needs to be swapped (normalized coords)
-            0.0f, d->m_yInverted ? texHeight : 0.0f,
-            texWidth, d->m_yInverted ? 0.0f : texHeight,
-            texWidth, d->m_yInverted ? texHeight : 0.0f
+            0.0f, y_inverted ? 0.0f : texHeight, // y needs to be swapped (normalized coords)
+            0.0f, y_inverted ? texHeight : 0.0f,
+            texWidth, y_inverted ? 0.0f : texHeight,
+            texWidth, y_inverted ? texHeight : 0.0f
         };
         m_vbo->setData(4, 2, verts, texcoords);
     }
