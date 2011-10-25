@@ -80,6 +80,7 @@ TaskGroupItem::TaskGroupItem(QGraphicsWidget *parent, Tasks *applet)
 TaskGroupItem::~TaskGroupItem()
 {
     delete m_tasksLayout;
+    m_tasksLayout = 0;
 }
 
 bool TaskGroupItem::isSplit()
