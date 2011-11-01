@@ -28,6 +28,11 @@
 
 #include <math.h>
 
+#ifdef Q_WS_X11
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#endif
+
 namespace Oxygen
 {
 
@@ -35,7 +40,20 @@ namespace Oxygen
     StyleHelper::StyleHelper( const QByteArray &componentName ):
         Helper( componentName ),
         _debugArea( KDebug::registerArea( "Oxygen ( style )" ) )
-    {}
+    {
+
+        #ifdef Q_WS_X11
+        // get display
+        Display *display = QX11Info::display();
+
+        // create compositing screen
+        QByteArray buffer;
+        QTextStream( &buffer ) << "_NET_WM_CM_S" << DefaultScreen( display );
+        _compositingManagerAtom = XInternAtom( display, buffer.constData(), False);
+
+        #endif
+
+    }
 
     //______________________________________________________________________________
     void StyleHelper::invalidateCaches( void )
@@ -628,6 +646,18 @@ namespace Oxygen
     }
 
     //________________________________________________________________________________________________________
+    bool StyleHelper::compositingActive( void ) const
+    {
+        #ifdef Q_WS_X11
+        // direct call to X
+        return XGetSelectionOwner( QX11Info::display(), _compositingManagerAtom ) != None;
+        #else
+        // use KWindowSystem
+        return KWindowSystem::compositingActive();
+        #endif
+    }
+
+    //________________________________________________________________________________________________________
     bool StyleHelper::hasDecoration( const QWidget* widget ) const
     {
         if( !widget->isTopLevel() ) return false;
@@ -1181,39 +1211,28 @@ namespace Oxygen
             QPixmap pixmap( 32+16, height );
             pixmap.fill( Qt::transparent );
 
-            QRect r( pixmap.rect().adjusted( 0, 0, -1, -1 ) );
+            QRectF r( pixmap.rect() );
+            r.adjust( 0.5, 0.5, -0.5, -0.5 );
 
             QPainter p( &pixmap );
             p.setRenderHint( QPainter::Antialiasing );
-            p.translate( .5, .5 );
 
-            {
+            // items with custom background brushes always have their background drawn
+            // regardless of whether they are hovered or selected or neither so
+            // the gradient effect needs to be more subtle
+            const int lightenAmount( custom ? 110 : 130 );
+            QLinearGradient gradient( 0, 0, 0, r.bottom() );
+            gradient.setColorAt( 0, color.lighter( lightenAmount ) );
+            gradient.setColorAt( 1, color );
 
-                // background
-                QPainterPath path;
-                path.addRoundedRect( r, rounding, rounding );
+            p.setPen( QPen( color, 1 ) );
+            p.setBrush( gradient );
+            p.drawRoundedRect( r, rounding, rounding );
 
-                // items with custom background brushes always have their background drawn
-                // regardless of whether they are hovered or selected or neither so
-                // the gradient effect needs to be more subtle
-                const int lightenAmount( custom ? 110 : 130 );
-                QLinearGradient gradient( 0, 0, 0, r.bottom() );
-                gradient.setColorAt( 0, color.lighter( lightenAmount ) );
-                gradient.setColorAt( 1, color );
-
-                p.setPen( QPen( color, 1 ) );
-                p.setBrush( gradient );
-                p.drawPath( path );
-
-            }
-
-            {
-                // contrast pixel
-                QPainterPath path;
-                path.addRoundedRect( r.adjusted( 1, 1, -1, -1 ), rounding - 1, rounding - 1 );
-                p.strokePath( path, QPen( QColor( 255, 255, 255, 64 ), 1 ) );
-            }
-
+            // contrast pixel
+            p.setPen( QPen( QColor( 255, 255, 255, 64 ), 1 ) );
+            p.setBrush( Qt::NoBrush );
+            p.drawRoundedRect( r.adjusted( 1, 1, -1, -1 ), rounding-1, rounding-1 );
             p.end();
 
             tileSet = new TileSet( pixmap, 8, 0, 32, height );

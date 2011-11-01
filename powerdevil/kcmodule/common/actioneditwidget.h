@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Sebastian Kugler <sebas@kde.org>                *
+ *   Copyright (C) 2008-2011 by Dario Freddi <drf@kde.org>                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,27 +17,51 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-#ifndef ACTIONCONFIG_H
-#define ACTIONCONFIG_H
 
-#include <QtGui/QMainWindow>
+#ifndef ACTIONEDITWIDGET_H
+#define ACTIONEDITWIDGET_H
+
 #include <QtGui/QWidget>
 
-#include <QGridLayout>
-#include <QMap>
-#include <QString>
+#include <KSharedConfig>
 
-class ActionConfigWidget : public QWidget
+#include <kdemacros.h>
+
+namespace PowerDevil
 {
-Q_OBJECT
-public:
-    ActionConfigWidget(QWidget* parent);
-    ~ActionConfigWidget();
+class ActionConfig;
+}
 
-    void addWidgets(QList<QPair <QString, QWidget*> > configMap);
+class QCheckBox;
+class KConfigGroup;
+
+class KDE_EXPORT ActionEditWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit ActionEditWidget(const QString &configName, QWidget *parent = 0);
+    virtual ~ActionEditWidget();
+
+    QString configName() const;
+
+public Q_SLOTS:
+    void load();
+    void save();
+
+private Q_SLOTS:
+    void onChanged();
+
+Q_SIGNALS:
+    void changed(bool changed);
 
 private:
-    QGridLayout* m_gridLayout;
+    KConfigGroup configGroup();
+
+private:
+    QString m_configName;
+    KSharedConfig::Ptr m_profilesConfig;
+    QHash< QString, QCheckBox* > m_actionsHash;
+    QHash< QString, PowerDevil::ActionConfig* > m_actionsConfigHash;
 };
 
-#endif // ActionConfigWidget_H
+#endif // ACTIONEDITWIDGET_H

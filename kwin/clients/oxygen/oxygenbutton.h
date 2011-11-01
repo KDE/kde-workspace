@@ -38,9 +38,9 @@ namespace Oxygen
     class Client;
 
     enum ButtonStatus {
-        Normal,
-        Hovered,
-        Pressed
+        Normal = 0,
+        Hovered = 1<<0,
+        Pressed = 1<<1
     };
 
     Q_DECLARE_FLAGS(ButtonState, ButtonStatus)
@@ -82,13 +82,16 @@ namespace Oxygen
         {
             if( _glowIntensity == value ) return;
             _glowIntensity = value;
-            update();
+            parentUpdate();
         }
 
         qreal glowIntensity( void ) const
         { return _glowIntensity; }
 
         //@}
+
+        //! render buttn to provided painter
+        void paint(QPainter& );
 
         protected:
 
@@ -110,8 +113,8 @@ namespace Oxygen
         //! paint
         void paintEvent( QPaintEvent* );
 
-        //! render buttn to provided painter
-        void paint(QPainter& );
+        // parent update
+        void parentUpdate( void );
 
         //! draw icon
         void drawIcon( QPainter* );
@@ -185,7 +188,7 @@ namespace Oxygen
         ButtonType _type;
 
         //! button status
-        ButtonState _status;
+        unsigned int _status;
 
         //! true if button should be forced inactive
         bool _forceInactive;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Dario Freddi <drf@kde.org>                      *
+ *   Copyright (C) 2011 by Dario Freddi <drf@kde.org>                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,38 +18,40 @@
  ***************************************************************************/
 
 
-#ifndef POWERDEVIL_BUNDLEDACTIONS_DISABLEDESKTOPEFFECTS_H
-#define POWERDEVIL_BUNDLEDACTIONS_DISABLEDESKTOPEFFECTS_H
+#ifndef ACTIVITYWIDGET_H
+#define ACTIVITYWIDGET_H
 
-#include <powerdevilaction.h>
+#include <QtGui/QWidget>
+#include <KSharedConfig>
 
+class ActionEditWidget;
+class KActivityConsumer;
+namespace Ui {
+class ActivityWidget;
+}
 
-namespace PowerDevil {
-namespace BundledActions {
-
-class DisableDesktopEffects : public PowerDevil::Action
+class ActivityWidget : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(DisableDesktopEffects)
 public:
-    explicit DisableDesktopEffects(QObject* parent);
-    virtual ~DisableDesktopEffects();
+    explicit ActivityWidget(const QString &activity, QWidget *parent = 0);
+    virtual ~ActivityWidget();
 
-    virtual bool loadAction(const KConfigGroup& config);
+public Q_SLOTS:
+    void load();
+    void save();
 
-protected:
-    virtual void onProfileUnload();
-    virtual void onWakeupFromIdle();
-    virtual void onIdleTimeout(int msec);
-    virtual void onProfileLoad();
-    virtual void triggerImpl(const QVariantMap& args);
+    void setChanged();
+
+Q_SIGNALS:
+    void changed(bool changed);
 
 private:
-    bool m_hasIdleTime;
+    Ui::ActivityWidget *m_ui;
+    KSharedConfig::Ptr m_profilesConfig;
+    QString m_activity;
+    KActivityConsumer *m_activityConsumer;
+    ActionEditWidget* m_actionEditWidget;
 };
 
-}
-
-}
-
-#endif // POWERDEVIL_BUNDLEDACTIONS_DISABLEDESKTOPEFFECTS_H
+#endif // ACTIVITYWIDGET_H

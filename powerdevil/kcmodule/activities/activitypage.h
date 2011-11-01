@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Dario Freddi <drf@kde.org>                      *
+ *   Copyright (C) 2011 by Dario Freddi <drf@kde.org>                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,38 +18,41 @@
  ***************************************************************************/
 
 
-#ifndef POWERDEVIL_BUNDLEDACTIONS_DISABLEDESKTOPEFFECTSCONFIG_H
-#define POWERDEVIL_BUNDLEDACTIONS_DISABLEDESKTOPEFFECTSCONFIG_H
+#ifndef ACTIVITYPAGE_H
+#define ACTIVITYPAGE_H
 
-#include <powerdevilactionconfig.h>
+#include <KCModule>
 
-class KIntSpinBox;
-class KComboBox;
+#include <kworkspace/kactivityconsumer.h>
 
-namespace PowerDevil {
-namespace BundledActions {
-
-class DisableDesktopEffectsConfig : public PowerDevil::ActionConfig
+class ErrorOverlay;
+class ActivityWidget;
+class KActivityConsumer;
+class KMessageWidget;
+class ActivityPage : public KCModule
 {
     Q_OBJECT
-    Q_DISABLE_COPY(DisableDesktopEffectsConfig)
-public:
-    DisableDesktopEffectsConfig(QObject *parent, const QVariantList&);
-    virtual ~DisableDesktopEffectsConfig();
-    
-    virtual void save();
-    virtual void load();
-    virtual QList< QPair< QString, QWidget* > > buildUi();
 
-private:
-    KComboBox *m_comboBox;
-    KIntSpinBox *m_idleTime;
+public:
+    ActivityPage(QWidget *parent, const QVariantList &args);
+    virtual ~ActivityPage();
+    void fillUi();
+
+    void load();
+    void save();
+    virtual void defaults();
 
 private Q_SLOTS:
-    void onIndexChanged(const QString&);
+    void onActivityServiceStatusChanged(KActivityConsumer::ServiceStatus status);
+    void onServiceRegistered(const QString &service);
+    void onServiceUnregistered(const QString &service);
+
+private:
+    KActivityConsumer *m_activityConsumer;
+    QList< ActivityWidget* > m_activityWidgets;
+    QWeakPointer< ErrorOverlay > m_errorOverlay;
+    QWeakPointer< KMessageWidget > m_messageWidget;
+    KActivityConsumer::ServiceStatus m_previousServiceStatus;
 };
 
-}
-}
-
-#endif // POWERDEVIL_BUNDLEDACTIONS_DISABLEDESKTOPEFFECTSCONFIG_H
+#endif // ACTIVITYPAGE_H

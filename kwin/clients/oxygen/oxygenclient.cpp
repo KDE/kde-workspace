@@ -272,6 +272,7 @@ namespace Oxygen
     {
 
         const bool maximized( isMaximized() );
+        const bool shaded( isShade() );
         const bool narrowSpacing( configuration().useNarrowButtonSpacing() );
         const int frameBorder( configuration().frameBorder() );
         const int buttonSize( hideTitleBar() ? 0 : configuration().buttonSize() );
@@ -280,15 +281,35 @@ namespace Oxygen
         {
             case LM_BorderLeft:
             case LM_BorderRight:
-            case LM_BorderBottom:
             {
-                int border( 0 );
+                int border( frameBorder );
                 if( respectWindowState && maximized )
                 {
 
                     border = 0;
 
-                } else if( lm == LM_BorderBottom && frameBorder >= Configuration::BorderNoSide ) {
+                } else if( frameBorder < Configuration::BorderTiny ) {
+
+                    border = 0;
+
+                } else if( !compositingActive() && frameBorder == Configuration::BorderTiny ) {
+
+                    border = qMax( frameBorder, 3 );
+
+                }
+
+                return border;
+            }
+
+            case LM_BorderBottom:
+            {
+                int border( frameBorder );
+                if( (respectWindowState && maximized) || shaded )
+                {
+
+                    border = 0;
+
+                } else if( frameBorder >= Configuration::BorderNoSide ) {
 
                     // for tiny border, the convention is to have a larger bottom area in order to
                     // make resizing easier
@@ -301,10 +322,6 @@ namespace Oxygen
                 } else if( !compositingActive() && frameBorder == Configuration::BorderTiny ) {
 
                     border = qMax( frameBorder, 3 );
-
-                } else {
-
-                    border = frameBorder;
 
                 }
 
@@ -650,13 +667,15 @@ namespace Oxygen
         }
 
         QRect r = (isPreview()) ? this->widget()->rect():window->rect();
-
-        const qreal shadowSize( shadowCache().shadowSize() );
-        r.adjust( shadowSize, shadowSize, -shadowSize, -shadowSize );
+        r.adjust( layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop ), -layoutMetric( LM_OuterPaddingRight ), -layoutMetric( LM_OuterPaddingBottom ) );
         r.adjust(0,0, 1, 1);
 
         // base color
         QColor color( palette.window().color() );
+
+        // add alpha channel
+        if( _itemData.count() == 1 && glowIsAnimated() )
+        { color = helper().alphaColor( color, glowIntensity() ); }
 
         // title height
         const int titleHeight( layoutMetric( LM_TitleEdgeTop ) + layoutMetric( LM_TitleEdgeBottom ) + layoutMetric( LM_TitleHeight ) );
@@ -687,15 +706,23 @@ namespace Oxygen
 
             // adjustements to cope with shadow size and outline border.
             rect.adjust( -shadowSize, 0, shadowSize-1, 0 );
-            if( configuration().frameBorder() > Configuration::BorderTiny && configuration().drawTitleOutline() && isActive() && !isMaximized() )
-            { rect.adjust( HFRAMESIZE-1, 0, -HFRAMESIZE+1, 0 ); }
+            if( configuration().drawTitleOutline() && ( isActive() || glowIsAnimated() ) && !isMaximized() )
+            {
+                if( configuration().frameBorder() == Configuration::BorderTiny ) rect.adjust( 1, 0, -1, 0 );
+                else if( configuration().frameBorder() > Configuration::BorderTiny ) rect.adjust( HFRAMESIZE-1, 0, -HFRAMESIZE+1, 0 );
+            }
 
-            helper().slab( color, 0, shadowSize )->render( rect, painter, TileSet::Top );
+            if( rect.isValid() )
+            { helper().slab( color, 0, shadowSize )->render( rect, painter, TileSet::Top ); }
 
         }
 
-        if( configuration().drawTitleOutline() && isActive() )
+        if( configuration().drawTitleOutline() && ( isActive() || glowIsAnimated() ) )
         {
+
+            // save old hints and turn off anti-aliasing
+            const QPainter::RenderHints hints( painter->renderHints() );
+            painter->setRenderHint( QPainter::Antialiasing, false );
 
             // save mask and frame to where
             // grey window background is to be rendered
@@ -716,7 +743,7 @@ namespace Oxygen
 
                 const QColor shadow( helper().calcDarkColor( color ) );
                 painter->setPen( shadow );
-                painter->drawLine( rect.bottomLeft()+QPoint(0,1), rect.bottomRight()+QPoint(0,1) );
+                painter->drawLine( rect.bottomLeft()+QPoint(-1,1), rect.bottomRight()+QPoint(1,1) );
 
             }
 
@@ -745,6 +772,9 @@ namespace Oxygen
 
                 painter->drawLine( rect.topRight()+QPoint(1,0), rect.bottomRight()+QPoint(1, 0) );
             }
+
+            // restore old hints
+            painter->setRenderHints( hints );
 
             // in preview mode also adds center square
             if( isPreview() )
@@ -794,8 +824,7 @@ namespace Oxygen
         }
 
         QRect r = (isPreview()) ? this->widget()->rect():window->rect();
-        qreal shadowSize( shadowCache().shadowSize() );
-        r.adjust( shadowSize, shadowSize, -shadowSize, -shadowSize );
+        r.adjust( layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop ), -layoutMetric( LM_OuterPaddingRight ), -layoutMetric( LM_OuterPaddingBottom ) );
 
         // dimensions
         const int titleHeight = layoutMetric(LM_TitleHeight);
@@ -833,7 +862,14 @@ namespace Oxygen
         const int offset( -3 );
         const int voffset( 5-shadowSize );
         const QRect adjustedRect( rect.adjusted(offset, voffset, -offset, shadowSize) );
-        helper().slab( palette.color( widget()->backgroundRole() ), 0, shadowSize )->render( adjustedRect, painter, TileSet::Tiles(TileSet::Top|TileSet::Left|TileSet::Right) );
+        QColor color( palette.color( widget()->backgroundRole() ) );
+
+        // add alpha channel
+        if( _itemData.count() == 1 && glowIsAnimated() )
+        { color = helper().alphaColor( color, glowIntensity() ); }
+
+        // render slab
+        helper().slab( color, 0, shadowSize )->render( adjustedRect, painter, TileSet::Tiles(TileSet::Top|TileSet::Left|TileSet::Right) );
 
     }
 
@@ -1394,6 +1430,24 @@ namespace Oxygen
             painter.setClipRegion( event->region() );
             paint( painter );
 
+            // update buttons
+            if( compositingActive() )
+            {
+                QList<Button*> buttons( widget()->findChildren<Button*>() );
+                foreach( Button* button, buttons )
+                {
+                    if( button->isVisible() && event->rect().intersects( button->geometry() ) )
+                    {
+                        painter.save();
+                        painter.setViewport( button->geometry() );
+                        painter.setWindow( button->rect() );
+                        button->paint( painter );
+                        painter.restore();
+                    }
+                }
+            }
+
+
         } else {
 
             {
@@ -1558,8 +1612,8 @@ namespace Oxygen
 
             QPoint point = event->pos();
             int itemClicked( this->itemClicked( point ) );
-            displayClientMenu( itemClicked, widget()->mapToGlobal( event->pos() ) );
             _mouseButton = Qt::NoButton;
+            displayClientMenu( itemClicked, widget()->mapToGlobal( event->pos() ) );
             accepted = true; // displayClientMenu can possibly destroy the deco...
 
         }

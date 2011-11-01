@@ -57,6 +57,7 @@
 #include <QtGui/QDockWidget>
 #include <QtGui/QMdiSubWindow>
 #include <QtGui/QStyleOption>
+#include <QtGui/QStyleOptionSlider>
 #include <QtGui/QToolBar>
 #include <QtGui/QToolBox>
 #include <QtGui/QWidget>
@@ -67,6 +68,7 @@ namespace Oxygen
     class Animations;
     class FrameShadowFactory;
     class MdiWindowShadowFactory;
+    class Mnemonics;
     class ShadowHelper;
     class SplitterFactory;
     class StyleHelper;
@@ -350,6 +352,10 @@ namespace Oxygen
         //! mdi window shadows
         MdiWindowShadowFactory& mdiWindowShadowFactory( void ) const
         { return *_mdiWindowShadowFactory; }
+
+        //! mdi window shadows
+        Mnemonics& mnemonics( void ) const
+        { return *_mnemonics; }
 
         //! widget explorer
         /*!
@@ -711,7 +717,8 @@ namespace Oxygen
 
         //! mdi subwindow titlebar button
         void renderTitleBarButton( QPainter*, const QStyleOptionTitleBar*, const QWidget*, const SubControl& ) const;
-        void renderTitleBarIcon( QPainter*, const QRectF&, const SubControl& ) const;
+        void renderTitleBarButton( QPainter*, const QRect& r, const QColor&, const QColor&, const SubControl& ) const;
+        void renderTitleBarIcon( QPainter*, const QRect&, const SubControl& ) const;
 
         //! header background
         void renderHeaderBackground( const QRect&, const QPalette&, QPainter*, const QWidget*, bool horizontal, bool reverse ) const;
@@ -730,7 +737,8 @@ namespace Oxygen
         {
             CheckOn,
             CheckOff,
-            CheckTriState
+            CheckTriState,
+            CheckSunken
         };
 
         //! checkbox
@@ -755,7 +763,7 @@ namespace Oxygen
         void renderScrollBarArrow( QPainter*, const QRect&, const QColor&, const QColor&, ArrowOrientation ) const;
 
         //! returns true if given scrollbar arrow is animated
-        QColor scrollBarArrowColor( const QStyleOption*, const SubControl&, const QWidget* ) const;
+        QColor scrollBarArrowColor( const QStyleOptionSlider*, const SubControl&, const QWidget* ) const;
 
         //! slider tickmarks
         void renderSliderTickmarks( QPainter*, const QStyleOptionSlider*, const QWidget* ) const;
@@ -838,9 +846,6 @@ namespace Oxygen
         int _doubleButtonHeight;
         //@}
 
-        //! true if keyboard accelerators must be drawn
-        bool _showMnemonics;
-
         //! helper
         StyleHelper* _helper;
 
@@ -864,6 +869,9 @@ namespace Oxygen
 
         //! mdi window shadows
         MdiWindowShadowFactory* _mdiWindowShadowFactory;
+
+        //! keyboard accelerators
+        Mnemonics* _mnemonics;
 
         //! widget explorer
         WidgetExplorer* _widgetExplorer;

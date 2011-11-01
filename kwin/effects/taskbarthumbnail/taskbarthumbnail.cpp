@@ -134,7 +134,7 @@ void TaskbarThumbnailEffect::slotPropertyNotify(EffectWindow* w, long a)
     if (!w || a != atom)
         return;
     foreach (const Data & thumb, thumbnails.values(w)) {
-        w->addRepaint(thumb.rect);
+        w->addRepaintFull();
     }
     thumbnails.remove(w);
     QByteArray data = w->readProperty(atom, atom, 32);
