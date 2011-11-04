@@ -30,6 +30,7 @@ Item {
     property int minutes
     property int seconds
     property bool showSecondsHand: false
+    property bool showTimezone: false
 
     Component.onCompleted: {
         plasmoid.backgroundHints = "NoBackground";
@@ -40,32 +41,52 @@ Item {
 
     function dataUpdated(source, data) {
         var date = new Date("January 1, 1971 "+data.Time);
-        hours = date.getHours()
-        minutes = date.getMinutes()
-        seconds = date.getSeconds()
+        hours = date.getHours();
+        minutes = date.getMinutes();
+        seconds = date.getSeconds();
+        timezoneText.text = data.Timezone;
     }
 
     function configChanged() {
-        showSecondsHand = plasmoid.readConfig("showSecondHandCheckBox");
+        showSecondsHand = plasmoid.readConfig("showSecondHand");
+        showTimezone = plasmoid.readConfig("showTimezoneString");
     }
 
     PlasmaCore.Svg {
         id: clockSvg
         imagePath: "widgets/clock"
     }
-    PlasmaCore.SvgItem {
-        id:face
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        width: Math.min(parent.width, parent.height)
-        height: Math.min(parent.width, parent.height)
-        svg: clockSvg
-        elementId: "ClockFace"
-        onWidthChanged: {
-            clockSvg.size = face.width+"x"+face.height
+
+    Item {
+        id: clock
+        width: parent.width
+        anchors {
+            top: parent.top
+            bottom: showTimezone ? timezoneBg.top : parent.bottom
         }
-        onHeightChanged: {
-            clockSvg.size = face.width+"x"+face.height
+
+        PlasmaCore.SvgItem {
+            id: face
+            anchors.centerIn: parent
+            width: Math.min(parent.width, parent.height)
+            height: Math.min(parent.width, parent.height)
+            svg: clockSvg
+            elementId: "ClockFace"
+        }
+
+        PlasmaCore.SvgItem {
+            id: center
+            width: naturalSize.width
+            height: naturalSize.height
+            anchors.centerIn: face
+            svg: clockSvg
+            elementId: "HandCenterScrew"
+        }
+
+        PlasmaCore.SvgItem {
+            anchors.fill: face
+            svg: clockSvg
+            elementId: "Glass"
         }
     }
 
@@ -78,7 +99,6 @@ Item {
         elementId: "HourHand"
         rotation: 180 + hours * 30 + (minutes/2)
     }
-
 
     Hand {
         anchors.topMargin: 3
@@ -102,19 +122,22 @@ Item {
         visible: showSecondsHand
     }
 
-    PlasmaCore.SvgItem {
-        id: center
-        width: naturalSize.width
-        height: naturalSize.height
-        anchors.horizontalCenter: face.horizontalCenter
-        anchors.verticalCenter: face.verticalCenter
-        svg: clockSvg
-        elementId: "HandCenterScrew"
+    PlasmaCore.FrameSvgItem {
+        id: timezoneBg
+        imagePath: "widgets/background"
+        width: timezoneText.width+30
+        height: timezoneText.height+30
+        anchors.centerIn: timezoneText
+        visible: showTimezone
     }
-    PlasmaCore.SvgItem {
-        anchors.fill: face
-        svg: clockSvg
-        elementId: "Glass"
+    Text {
+        id: timezoneText
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: parent.bottom
+            bottomMargin: 10
+        }
+        visible: showTimezone
     }
 
 }
