@@ -147,21 +147,22 @@ Comment[wa]=Ène ôrlodje avou des aweyes
 Comment[x-test]=xxA clock with handsxx
 Comment[zh_CN]=带指针的时钟
 Comment[zh_TW]=有手的時鐘
+
 Icon=preferences-system-time
 Type=Service
 X-KDE-ServiceTypes=Plasma/Applet
 
-X-KDE-Library=plasma_applet_clock
-X-KDE-PluginInfo-Author=The Plasma Team
-X-KDE-PluginInfo-Email=plasma-devel@kde.org
-X-KDE-PluginInfo-Name=clock
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/analogclock.qml
+X-Plasma-DefaultSize=250,250
+
+X-KDE-PluginInfo-Author=Marco Martin
+X-KDE-PluginInfo-Email=mart@kde.org
+X-KDE-PluginInfo-Name=org.kde.analogclock
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://userbase.kde.org/Plasma/Clocks
 X-KDE-PluginInfo-Category=Date and Time
 X-KDE-PluginInfo-Depends=
 X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-EnabledByDefault=true
-
-X-Plasma-Requires-FileDialog=Unused
-X-Plasma-Requires-LaunchApp=Unused
 
