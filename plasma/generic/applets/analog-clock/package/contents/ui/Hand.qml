@@ -30,8 +30,8 @@ PlasmaCore.SvgItem {
 
     width: naturalSize.width
     height: naturalSize.height
-    anchors.top: center.verticalCenter
-    anchors.horizontalCenter: center.horizontalCenter
+    anchors.top: clock.verticalCenter
+    anchors.horizontalCenter: clock.horizontalCenter
     svg: clockSvg
     smooth: true
     transform: Rotation {
