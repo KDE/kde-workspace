@@ -17,7 +17,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" >
    <item>
-    <widget class="QCheckBox" name="showSecondHandCheckBox" >
+    <widget class="QCheckBox" name="kcfg_showSecondHandCheckBox" >
      <property name="toolTip" >
       <string>Show the seconds</string>
      </property>
@@ -30,7 +30,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="showTimezoneStringCheckBox" >
+    <widget class="QCheckBox" name="kcfg_showTimezoneStringCheckBox" >
      <property name="toolTip" >
       <string>Show the Timezone in text</string>
      </property>

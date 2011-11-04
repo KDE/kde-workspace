@@ -29,19 +29,24 @@ Item {
     property int hours
     property int minutes
     property int seconds
+    property bool showSecondsHand: false
 
     Component.onCompleted: {
         plasmoid.backgroundHints = "NoBackground";
         plasmoid.addEventListener("dataUpdated", dataUpdated);
+        plasmoid.addEventListener("ConfigChanged", configChanged);
         dataEngine("time").connectSource("Local", analogclock, 1000);
     }
 
-    function dataUpdated(source, data)
-    {
+    function dataUpdated(source, data) {
         var date = new Date("January 1, 1971 "+data.Time);
         hours = date.getHours()
         minutes = date.getMinutes()
         seconds = date.getSeconds()
+    }
+
+    function configChanged() {
+        showSecondsHand = plasmoid.readConfig("showSecondHandCheckBox");
     }
 
     PlasmaCore.Svg {
@@ -84,17 +89,18 @@ Item {
         elementId: "MinuteHand"
         rotation: 180 + minutes * 6
     }
-/*
+
     Hand {
         anchors.topMargin: 3
         elementId: "SecondHandShadow"
         rotation: 180 + seconds * 6
+        visible: showSecondsHand
     }
     Hand {
         elementId: "SecondHand"
         rotation: 180 + seconds * 6
+        visible: showSecondsHand
     }
-*/
 
     PlasmaCore.SvgItem {
         id: center
