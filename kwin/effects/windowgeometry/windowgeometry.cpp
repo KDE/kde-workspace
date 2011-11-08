@@ -105,7 +105,7 @@ void WindowGeometry::slotWindowStartUserMovedResized(EffectWindow *w)
     myResizeWindow = w;
     myOriginalGeometry = w->geometry();
     myCurrentGeometry = w->geometry();
-    effects->addRepaint(myCurrentGeometry.adjusted(-20, -20, 20, 20));
+    slotWindowStepUserMovedResized(w, w->geometry());
 }
 
 void WindowGeometry::slotWindowFinishUserMovedResized(EffectWindow *w)
@@ -157,7 +157,9 @@ void WindowGeometry::slotWindowStepUserMovedResized(EffectWindow *w, const QRect
             dx = r.width() - r2.width();
             dy = r.height() - r2.height();
 
-            myMeasure[1]->setText( i18nc(myResizeString, r.width(), r.height(), number(dx), number(dy) ) );
+            const QSize baseInc = w->basicUnit();
+            Q_ASSERT(baseInc.width() && baseInc.height());
+            myMeasure[1]->setText( i18nc(myResizeString, r.width()/baseInc.width(), r.height()/baseInc.height(), number(dx/baseInc.width()), number(dy/baseInc.height()) ) );
 
             // calc width for bottomright element, superfluous otherwise
             dx = r.right() - r2.right();

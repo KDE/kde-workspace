@@ -63,6 +63,7 @@ public:
 
     QIcon icon() const;
     QString name() const;
+    QString taskName() const;
 
     bool isStartupItem() const;
     bool isOnCurrentDesktop() const;
@@ -78,7 +79,10 @@ public:
     bool demandsAttention() const;
     bool isActionSupported(NET::Action) const;
     void addMimeData(QMimeData *mimeData) const;
+    void setLauncherUrl(const KUrl &url);
+    void setLauncherUrl(const AbstractGroupableItem *item);
     KUrl launcherUrl() const;
+    void resetLauncherCheck();
 
 public Q_SLOTS:
     void toDesktop(int);

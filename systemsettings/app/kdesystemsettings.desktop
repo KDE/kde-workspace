@@ -8,7 +8,9 @@ NotShowIn=KDE;
 
 GenericName=KDE System Settings
 GenericName[ca]=Arranjament del sistema del KDE
+GenericName[cs]=Nastavení systému KDE
 GenericName[de]=KDE-Systemeinstellungen
+GenericName[eu]=KDE Sistemaren Ezarpenak
 GenericName[hu]=KDE Rendszerbeállítások
 GenericName[ia]=Preferentias de systema KDE
 GenericName[kk]=KDE жүйелік параметрлері
@@ -19,10 +21,13 @@ GenericName[pt_BR]=Configurações do sistema KDE
 GenericName[sv]=KDE:s systeminställningar
 GenericName[uk]=Системні параметри KDE
 GenericName[x-test]=xxKDE System Settingsxx
+GenericName[zh_CN]=KDE 系统设置
 
 Name=KDE System Settings
 Name[ca]=Arranjament del sistema del KDE
+Name[cs]=Nastavení systému KDE
 Name[de]=KDE-Systemeinstellungen
+Name[eu]=KDE Sistemaren Ezarpenak
 Name[hu]=KDE Rendszerbeállítások
 Name[ia]=Preferentias de systema KDE
 Name[kk]=KDE жүйелік параметрлері
@@ -33,6 +38,7 @@ Name[pt_BR]=Configurações do sistema KDE
 Name[sv]=KDE:s systeminställningar
 Name[uk]=Системні параметри KDE
 Name[x-test]=xxKDE System Settingsxx
+Name[zh_CN]=KDE 系统设置
 
 X-DBUS-StartupType=Unique
 Categories=Qt;KDE;Settings;

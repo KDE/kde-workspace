@@ -47,8 +47,7 @@ class TaskGroup::Private
 {
 public:
     Private(TaskGroup *group)
-        : q(group)
-    {
+        : q(group) {
     }
 
     void itemDestroyed(AbstractGroupableItem *item);
@@ -66,9 +65,9 @@ public:
     bool persistentWithLauncher;
 };
 
-TaskGroup::TaskGroup(GroupManager *parent,const QString &name, const QColor &color)
-:   AbstractGroupableItem(parent),
-    d(new Private(this))
+TaskGroup::TaskGroup(GroupManager *parent, const QString &name, const QColor &color)
+    :   AbstractGroupableItem(parent),
+        d(new Private(this))
 {
     d->groupingStrategy = parent;
     d->groupName = name;
@@ -80,8 +79,8 @@ TaskGroup::TaskGroup(GroupManager *parent,const QString &name, const QColor &col
 }
 
 TaskGroup::TaskGroup(GroupManager *parent)
-:   AbstractGroupableItem(parent),
-    d(new Private(this))
+    :   AbstractGroupableItem(parent),
+        d(new Private(this))
 {
     d->groupingStrategy = parent;
 //    d->groupName = "default";
@@ -107,8 +106,8 @@ WindowList TaskGroup::winIds() const
         kDebug() << "empty group: " << name();
     }
     WindowList ids;
-    foreach (AbstractGroupableItem *groupable, d->members) {
-        ids+=groupable->winIds();
+    foreach (AbstractGroupableItem * groupable, d->members) {
+        ids += groupable->winIds();
     }
     kDebug() << ids.size();
     return ids;
@@ -118,9 +117,9 @@ WindowList TaskGroup::winIds() const
 WindowList TaskGroup::directMemberwinIds() const
 {
     WindowList ids;
-    foreach (AbstractGroupableItem *groupable, d->members) {
+    foreach (AbstractGroupableItem * groupable, d->members) {
         if (!groupable->itemType() == GroupItemType) {
-            ids+=groupable->winIds();
+            ids += groupable->winIds();
         }
     }
     return ids;
@@ -128,7 +127,7 @@ WindowList TaskGroup::directMemberwinIds() const
 
 AbstractGroupableItem *TaskGroup::getMemberByWId(WId id)
 {
-    foreach (AbstractGroupableItem *groupable, d->members) {
+    foreach (AbstractGroupableItem * groupable, d->members) {
         if (groupable->itemType() == GroupItemType) {
             AbstractGroupableItem *item = static_cast<TaskGroup*>(groupable)->getMemberByWId(id);
             if (item) {
@@ -151,7 +150,7 @@ AbstractGroupableItem *TaskGroup::getMemberByWId(WId id)
 int TaskGroup::totalSize()
 {
     int size = 0;
-    foreach (AbstractGroupableItem *groupable, d->members) {
+    foreach (AbstractGroupableItem * groupable, d->members) {
         if (groupable->itemType() == GroupItemType) {
             size += static_cast<TaskGroup*>(groupable)->totalSize();
         } else {
@@ -161,15 +160,15 @@ int TaskGroup::totalSize()
     return size;
 }
 
-void TaskGroup::add(AbstractGroupableItem *item)
+void TaskGroup::add(AbstractGroupableItem *item, int insertIndex)
 {
-/*    if (!item->itemType() == GroupItemType) {
-        if ((dynamic_cast<TaskItem*>(item))->task()) {
-            kDebug() << "Add item" << (dynamic_cast<TaskItem*>(item))->task()->visibleName();
+    /*    if (!item->itemType() == GroupItemType) {
+            if ((dynamic_cast<TaskItem*>(item))->task()) {
+                kDebug() << "Add item" << (dynamic_cast<TaskItem*>(item))->task()->visibleName();
+            }
+            kDebug() << " to Group " << name();
         }
-        kDebug() << " to Group " << name();
-    }
-*/
+    */
     if (!item) {
         kDebug() << "invalid item";
         return;
@@ -183,7 +182,7 @@ void TaskGroup::add(AbstractGroupableItem *item)
     if (d->groupName.isEmpty()) {
         TaskItem *taskItem = qobject_cast<TaskItem*>(item);
         if (taskItem) {
-            d->groupName = taskItem->task()->classClass();
+            d->groupName = taskItem->taskName();
         }
     }
 
@@ -192,20 +191,37 @@ void TaskGroup::add(AbstractGroupableItem *item)
     } else if (item->itemType() == GroupItemType) {
         TaskGroup *group = static_cast<TaskGroup*>(item);
         if (group) {
-            foreach (AbstractGroupableItem *subItem, group->members()) {
+            foreach (AbstractGroupableItem * subItem, group->members()) {
                 connect(subItem, SIGNAL(changed(::TaskManager::TaskChanges)),
                         item, SLOT(itemChanged(::TaskManager::TaskChanges)), Qt::UniqueConnection);
             }
         }
     }
 
-    int index = d->members.count();
-    if (item->itemType() == LauncherItemType) {
-        // insert launchers together at the head of the list, but still
-        // in the order they appear
-        for (index = 0; index < d->members.count(); ++index) {
-            if (d->members.at(index)->itemType() != LauncherItemType) {
-                break;
+    int index = insertIndex;
+
+    if (index < 0) {
+        index = d->members.count();
+        if (d->groupingStrategy->separateLaunchers()) {
+            if (item->itemType() == LauncherItemType) {
+                // insert launchers together at the head of the list, but still
+                // in the order they appear
+                for (index = 0; index < d->members.count(); ++index) {
+                    if (d->members.at(index)->itemType() != LauncherItemType) {
+                        break;
+                    }
+                }
+            }
+        } else {
+            KUrl lUrl = item->launcherUrl();
+            int urlIdx = d->groupingStrategy->launcherIndex(lUrl);
+            if (urlIdx >= 0) {
+                for (index = 0; index < d->members.count(); ++index) {
+                    int idx = d->groupingStrategy->launcherIndex(d->members.at(index)->launcherUrl());
+                    if (urlIdx < idx || idx < 0) {
+                        break;
+                    }
+                }
             }
         }
     }
@@ -224,13 +240,13 @@ void TaskGroup::add(AbstractGroupableItem *item)
     }
 
     //For debug
-   /* foreach (AbstractGroupableItem *item, d->members) {
-        if (item->itemType() == GroupItemType) {
-            kDebug() << (dynamic_cast<TaskGroup*>(item))->name();
-        } else {
-            kDebug() << (dynamic_cast<TaskItem*>(item))->task()->visibleName();
-        }
-    }*/
+    /* foreach (AbstractGroupableItem *item, d->members) {
+         if (item->itemType() == GroupItemType) {
+             kDebug() << (dynamic_cast<TaskGroup*>(item))->name();
+         } else {
+             kDebug() << (dynamic_cast<TaskItem*>(item))->task()->visibleName();
+         }
+     }*/
     emit itemAdded(item);
 }
 
@@ -245,7 +261,7 @@ void TaskGroup::Private::itemDestroyed(AbstractGroupableItem *item)
 void TaskGroup::Private::signalRemovals()
 {
     // signal removals for is full of dangling pointers. do not use them!
-    foreach (AbstractGroupableItem *item, signalRemovalsFor) {
+    foreach (AbstractGroupableItem * item, signalRemovalsFor) {
         emit q->itemRemoved(item);
     }
 
@@ -254,6 +270,11 @@ void TaskGroup::Private::signalRemovals()
 
 void TaskGroup::Private::itemChanged(::TaskManager::TaskChanges changes)
 {
+    if (q->manager()->forceGrouping()) {
+        emit q->changed(changes);
+        return;
+    }
+
     if (changes & ::TaskManager::IconChanged) {
         emit q->checkIcon(q);
     }
@@ -276,14 +297,14 @@ void TaskGroup::remove(AbstractGroupableItem *item)
     kDebug() << "from Group: " << name();
     */
 
-   /* kDebug() << "GroupMembers: ";
-    foreach (AbstractGroupableItem *item, d->members) {
-        if (item->itemType() == GroupItemType) {
-            kDebug() << (dynamic_cast<TaskGroup*>(item))->name();
-        } else {
-            kDebug() << (dynamic_cast<TaskItem*>(item))->task()->visibleName();
-        }
-    }*/
+    /* kDebug() << "GroupMembers: ";
+     foreach (AbstractGroupableItem *item, d->members) {
+         if (item->itemType() == GroupItemType) {
+             kDebug() << (dynamic_cast<TaskGroup*>(item))->name();
+         } else {
+             kDebug() << (dynamic_cast<TaskItem*>(item))->task()->visibleName();
+         }
+     }*/
 
     if (!d->members.contains(item)) {
         kDebug() << "couldn't find item";
@@ -295,11 +316,23 @@ void TaskGroup::remove(AbstractGroupableItem *item)
 
     d->members.removeAll(item);
     item->setParentGroup(0);
-    /*if(d->members.isEmpty()){
+    /*if (d->members.isEmpty()) {
         kDebug() << "empty";
         emit empty(this);
     }*/
     emit itemRemoved(item);
+}
+
+void TaskGroup::clear()
+{
+    ItemList copy = d->members;
+
+    foreach (AbstractGroupableItem * ai, copy) {
+        if (qobject_cast<TaskGroup *>(ai)) {
+            static_cast<TaskGroup *>(ai)->clear();
+        }
+        remove(ai);
+    }
 }
 
 GroupManager *TaskGroup::manager() const
@@ -407,7 +440,7 @@ AbstractGroupableItem *TaskGroup::directMember(AbstractGroupableItem *item) cons
 
 void TaskGroup::setShaded(bool state)
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->setShaded(state);
     }
 }
@@ -419,7 +452,7 @@ void TaskGroup::toggleShaded()
 
 bool TaskGroup::isShaded() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isShaded()) {
             return false;
         }
@@ -429,7 +462,7 @@ bool TaskGroup::isShaded() const
 
 void TaskGroup::toDesktop(int desk)
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->toDesktop(desk);
     }
     emit movedToDesktop(desk);
@@ -437,7 +470,7 @@ void TaskGroup::toDesktop(int desk)
 
 bool TaskGroup::isOnCurrentDesktop() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isOnCurrentDesktop()) {
             return false;
         }
@@ -473,7 +506,7 @@ KUrl TaskGroup::launcherUrl() const
     // Strategy: try to return the first non-group item's launcherUrl,
     // failing that, try to return the  launcherUrl of the first group
     // if any
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (item->itemType() != GroupItemType) {
             return item->launcherUrl();
         }
@@ -488,7 +521,7 @@ KUrl TaskGroup::launcherUrl() const
 
 bool TaskGroup::isOnAllDesktops() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isOnAllDesktops()) {
             return false;
         }
@@ -508,7 +541,7 @@ int TaskGroup::desktop() const
     }
 
     int desk = d->members.first()->desktop();
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (item->desktop() != desk) {
             return 0;
         }
@@ -518,7 +551,7 @@ int TaskGroup::desktop() const
 
 void TaskGroup::setMaximized(bool state)
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->setMaximized(state);
     }
 }
@@ -530,7 +563,7 @@ void TaskGroup::toggleMaximized()
 
 bool TaskGroup::isMaximized() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isMaximized()) {
             return false;
         }
@@ -540,7 +573,7 @@ bool TaskGroup::isMaximized() const
 
 void TaskGroup::setMinimized(bool state)
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->setMinimized(state);
     }
 }
@@ -552,7 +585,7 @@ void TaskGroup::toggleMinimized()
 
 bool TaskGroup::isMinimized() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isMinimized()) {
             return false;
         }
@@ -562,7 +595,7 @@ bool TaskGroup::isMinimized() const
 
 void TaskGroup::setFullScreen(bool state)
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->setFullScreen(state);
     }
 }
@@ -574,7 +607,7 @@ void TaskGroup::toggleFullScreen()
 
 bool TaskGroup::isFullScreen() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isFullScreen()) {
             return false;
         }
@@ -584,7 +617,7 @@ bool TaskGroup::isFullScreen() const
 
 void TaskGroup::setKeptBelowOthers(bool state)
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->setKeptBelowOthers(state);
     }
 }
@@ -596,7 +629,7 @@ void TaskGroup::toggleKeptBelowOthers()
 
 bool TaskGroup::isKeptBelowOthers() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isKeptBelowOthers()) {
             return false;
         }
@@ -606,7 +639,7 @@ bool TaskGroup::isKeptBelowOthers() const
 
 void TaskGroup::setAlwaysOnTop(bool state)
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->setAlwaysOnTop(state);
     }
 }
@@ -618,7 +651,7 @@ void TaskGroup::toggleAlwaysOnTop()
 
 bool TaskGroup::isAlwaysOnTop() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (!item->isAlwaysOnTop()) {
             return false;
         }
@@ -629,7 +662,7 @@ bool TaskGroup::isAlwaysOnTop() const
 bool TaskGroup::isActionSupported(NET::Action action) const
 {
     if (KWindowSystem::allowedActionsSupported()) {
-        foreach (AbstractGroupableItem *item, d->members) {
+        foreach (AbstractGroupableItem * item, d->members) {
             if (!item->isActionSupported(action)) {
                 return false;
             }
@@ -641,14 +674,14 @@ bool TaskGroup::isActionSupported(NET::Action action) const
 
 void TaskGroup::close()
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         item->close();
     }
 }
 
 bool TaskGroup::isActive() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (item->isActive()) {
             return true;
         }
@@ -659,7 +692,7 @@ bool TaskGroup::isActive() const
 
 bool TaskGroup::demandsAttention() const
 {
-    foreach (AbstractGroupableItem *item, d->members) {
+    foreach (AbstractGroupableItem * item, d->members) {
         if (item->demandsAttention()) {
             return true;
         }
@@ -672,7 +705,7 @@ bool TaskGroup::moveItem(int oldIndex, int newIndex)
 {
     //kDebug() << oldIndex << newIndex;
     if ((d->members.count() <= newIndex) || (newIndex < 0) ||
-        (d->members.count() <= oldIndex || oldIndex < 0)) {
+            (d->members.count() <= oldIndex || oldIndex < 0)) {
         kDebug() << "index out of bounds";
         return false;
     }

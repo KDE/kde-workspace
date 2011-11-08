@@ -49,8 +49,7 @@ class LauncherItemPrivate
 {
 public:
     LauncherItemPrivate(LauncherItem *launcher)
-        : q(launcher)
-    {
+        : q(launcher) {
     }
 
     void associateDestroyed(QObject *obj);
@@ -60,6 +59,7 @@ public:
     QIcon       icon;
     QString     name;
     QString     genericName;
+    QString     wmClass;
     QSet<QObject *> associates;
 };
 
@@ -80,32 +80,47 @@ LauncherItem::~LauncherItem()
     delete d;
 }
 
-void LauncherItem::associateItemIfMatches(AbstractGroupableItem *item)
+bool LauncherItem::associateItemIfMatches(AbstractGroupableItem *item)
 {
     if (d->associates.contains(item)) {
-        return;
+        return false;
+    }
+
+    KUrl itemUrl = item->launcherUrl();
+
+    if (!itemUrl.isEmpty() && launcherUrl() == itemUrl) {
+        d->associates.insert(item);
+        connect(item, SIGNAL(destroyed(QObject*)), this, SLOT(associateDestroyed(QObject*)));
+        emit associationChanged();
+        return true;
     }
 
     QString name;
     if (item->itemType() == TaskItemType && !item->isStartupItem()) {
-        name = static_cast<TaskItem *>(item)->task()->classClass().toLower();
+        name = static_cast<TaskItem *>(item)->taskName().toLower();
     } else {
         name = item->name().toLower();
     }
 
-    if (name.isEmpty()) {
-        return;
-    }
-
-    if (name.compare(d->name, Qt::CaseInsensitive) == 0) {
+    if (!name.isEmpty() && name.compare(d->name, Qt::CaseInsensitive) == 0) {
         d->associates.insert(item);
         connect(item, SIGNAL(destroyed(QObject*)), this, SLOT(associateDestroyed(QObject*)));
+        emit associationChanged();
 
-        if (d->associates.count() == 1) {
-            // this is our first associated item, means we need to hide
-            emit show(false);
+        // Store this mapping!
+        if (TaskItemType == item->itemType()) {
+            static_cast<TaskItem *>(item)->setLauncherUrl(this);
         }
+
+        return true;
     }
+
+    return false;
+}
+
+bool LauncherItem::isAssociated(AbstractGroupableItem *item) const
+{
+    return d->associates.contains(item);
 }
 
 void LauncherItem::removeItemIfAssociated(AbstractGroupableItem *item)
@@ -116,10 +131,8 @@ void LauncherItem::removeItemIfAssociated(AbstractGroupableItem *item)
     d->associateDestroyed(item);
 }
 
-bool LauncherItem::shouldShow() const
+bool LauncherItem::shouldShow(const GroupManager *manager) const
 {
-    GroupManager *manager = parentGroup() ? parentGroup()->manager() : 0;
-
     if (!manager) {
         return d->associates.isEmpty();
     }
@@ -128,15 +141,15 @@ bool LauncherItem::shouldShow() const
     const bool desk = manager->showOnlyCurrentDesktop();
     const bool activity = manager->showOnlyCurrentActivity();
 
-    foreach (QObject *obj, d->associates) {
+    foreach (QObject * obj, d->associates) {
         TaskItem *item = static_cast<TaskItem *>(obj);
         if (!item || !item->task()) {
             continue;
         }
 
         if ((!screen || item->task().data()->isOnScreen(manager->screen())) &&
-            (!desk || item->isOnCurrentDesktop()) &&
-            (!activity || item->task().data()->isOnCurrentActivity())) {
+                (!desk || item->isOnCurrentDesktop()) &&
+                (!activity || item->task().data()->isOnCurrentActivity())) {
             return false;
         }
     }
@@ -146,14 +159,8 @@ bool LauncherItem::shouldShow() const
 
 void LauncherItemPrivate::associateDestroyed(QObject *obj)
 {
-    if (associates.isEmpty()) {
-        return;
-    }
-
-    associates.remove(obj);
-
-    if (associates.isEmpty()) {
-        emit q->show(true);
+    if (associates.remove(obj)) {
+        emit q->associationChanged();
     }
 }
 
@@ -172,10 +179,15 @@ QString LauncherItem::genericName() const
     return d->genericName;
 }
 
+QString LauncherItem::wmClass() const
+{
+    return d->wmClass;
+}
+
 void LauncherItem::setName(const QString& name)
 {
     //NOTE: preferred is NOT a protocol, it's just a magic string
-    if (d->url.protocol() != "preferred"){
+    if (d->url.protocol() != "preferred") {
         d->name = name;
     }
 }
@@ -183,9 +195,14 @@ void LauncherItem::setName(const QString& name)
 void LauncherItem::setGenericName(const QString& genericName)
 {
     //NOTE: preferred is NOT a protocol, it's just a magic string
-    if (d->url.protocol() != "preferred"){
+    if (d->url.protocol() != "preferred") {
         d->genericName = genericName;
     }
+}
+
+void LauncherItem::setWmClass(const QString &wmClass)
+{
+    d->wmClass = wmClass;
 }
 
 ItemType LauncherItem::itemType() const
@@ -206,16 +223,16 @@ void LauncherItem::launch()
         KService::Ptr service = KService::serviceByStorageId(storageId);
 
         QString desktopFile = KStandardDirs::locate("xdgdata-apps", service->entryPath());
-        if (desktopFile.isNull()){
+        if (desktopFile.isNull()) {
             desktopFile = KStandardDirs::locate("apps", service->entryPath());
         }
         new KRun(desktopFile, 0);
-    }else{
+    } else {
         new KRun(d->url, 0);
     }
 }
 
-void LauncherItem::addMimeData(QMimeData* mimeData ) const
+void LauncherItem::addMimeData(QMimeData* mimeData) const
 {
     mimeData->setData("text/uri-list", d->url.url().toAscii());
 }
@@ -252,7 +269,7 @@ QString LauncherItem::defaultApplication(QString application, bool storageId)
             if (settings.getSetting(KEMailSettings::ClientTerminal) == "true") {
                 KConfigGroup confGroup(KGlobal::config(), "General");
                 const QString preferredTerminal = confGroup.readPathEntry("TerminalApplication",
-                        QString::fromLatin1("konsole"));
+                                                  QString::fromLatin1("konsole"));
                 command = preferredTerminal + QString::fromLatin1(" -e ") + command;
             }
 
@@ -287,9 +304,9 @@ QString LauncherItem::defaultApplication(QString application, bool storageId)
         return storageId ? service->storageId() : service->exec();
     } else {
         // try the files in share/apps/kcm_componentchooser/
-        const QStringList services = KGlobal::dirs()->findAllResources("data","kcm_componentchooser/*.desktop", KStandardDirs::NoDuplicates);
+        const QStringList services = KGlobal::dirs()->findAllResources("data", "kcm_componentchooser/*.desktop", KStandardDirs::NoDuplicates);
         //kDebug() << "ok, trying in" << services.count();
-        foreach (const QString &service, services) {
+        foreach (const QString & service, services) {
             KConfig config(service, KConfig::SimpleConfig);
             KConfigGroup cg = config.group(QByteArray());
             const QString type = cg.readEntry("valueName", QString());
@@ -298,7 +315,7 @@ QString LauncherItem::defaultApplication(QString application, bool storageId)
                 KConfig store(cg.readPathEntry("storeInFile", "null"));
                 KConfigGroup storeCg(&store, cg.readEntry("valueSection", QString()));
                 const QString exec = storeCg.readPathEntry(cg.readEntry("valueName", "kcm_componenchooser_null"),
-                                                           cg.readEntry("defaultImplementation", QString()));
+                                     cg.readEntry("defaultImplementation", QString()));
                 if (!exec.isEmpty()) {
                     return exec;
                 }
@@ -349,8 +366,9 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
             KConfigGroup cg(&f, "Desktop Entry");
 
             d->icon = KIcon(f.readIcon());
-            const QString exec = cg.readEntry("Exec", "");
-            if (!exec.isNull()) {
+            const QString exec = cg.readEntry("Exec", QString());
+            d->name = cg.readEntry("Name", QString());
+            if (d->name.isEmpty() && !exec.isEmpty()) {
                 d->name = exec.split(' ').at(0);
             }
             d->genericName = f.readGenericName();
@@ -378,7 +396,7 @@ bool LauncherItem::isValid() const
 void LauncherItem::setIcon(const QIcon& icon)
 {
     //NOTE: preferred is NOT a protocol, it's just a magic string
-    if (d->url.protocol() != "preferred"){
+    if (d->url.protocol() != "preferred") {
         d->icon = icon;
     }
 }
@@ -387,7 +405,7 @@ bool LauncherItem::demandsAttention() const
 {
     return false;
 }
-bool LauncherItem::isActionSupported(NET::Action ) const
+bool LauncherItem::isActionSupported(NET::Action) const
 {
     return false;
 }
@@ -432,25 +450,25 @@ int LauncherItem::desktop() const
     return 0;
 }
 
-void LauncherItem::setAlwaysOnTop(bool )
+void LauncherItem::setAlwaysOnTop(bool)
 {
 }
-void LauncherItem::setFullScreen(bool )
+void LauncherItem::setFullScreen(bool)
 {
 }
-void LauncherItem::setKeptBelowOthers(bool )
+void LauncherItem::setKeptBelowOthers(bool)
 {
 }
-void LauncherItem::setMaximized(bool )
+void LauncherItem::setMaximized(bool)
 {
 }
-void LauncherItem::setMinimized(bool )
+void LauncherItem::setMinimized(bool)
 {
 }
-void LauncherItem::setShaded(bool )
+void LauncherItem::setShaded(bool)
 {
 }
-void LauncherItem::toDesktop(int )
+void LauncherItem::toDesktop(int)
 {
 }
 void LauncherItem::toggleAlwaysOnTop()
