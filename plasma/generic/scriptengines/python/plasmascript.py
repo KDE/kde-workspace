@@ -90,10 +90,10 @@ class Applet(QObject):
         return QGraphicsWidget.shape(self.applet)
 
     def initExtenderItem(self, item):
-        print "Missing implementation of initExtenderItem in the applet " + \
+        print("Missing implementation of initExtenderItem in the applet " + \
               item.config().readEntry('SourceAppletPluginName', '').toString() + \
               "!\nAny applet that uses extenders should implement initExtenderItem to " + \
-              "instantiate a widget."
+              "instantiate a widget.")
 
     def saveState(self, config):
         pass
