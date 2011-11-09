@@ -82,13 +82,16 @@ LauncherItem::~LauncherItem()
 
 void LauncherItem::associateItemIfMatches(AbstractGroupableItem *item)
 {
-    if (d->associates.contains(item)) {
+    if (d->associates.contains(item) || !item) {
         return;
     }
 
     QString name;
     if (item->itemType() == TaskItemType && !item->isStartupItem()) {
-        name = static_cast<TaskItem *>(item)->task()->classClass().toLower();
+        TaskItem *taskItem = qobject_cast<TaskItem *>(item);
+        if (taskItem && taskItem->task()) {
+            name = taskItem->task()->classClass().toLower();
+        }
     } else {
         name = item->name().toLower();
     }
