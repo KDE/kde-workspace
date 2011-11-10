@@ -141,6 +141,7 @@ if(NOT WIN32)
    macro_optional_add_subdirectory( powerdevil )
    macro_optional_add_subdirectory( qguiplatformplugin_kde )
    macro_optional_add_subdirectory( ksysguard )
+   macro_optional_add_subdirectory( screenlocker )
 endif(NOT WIN32)
 
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
