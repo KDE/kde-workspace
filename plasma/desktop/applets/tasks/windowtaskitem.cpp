@@ -312,11 +312,6 @@ void WindowTaskItem::setTask(TaskManager::TaskItem* taskItem)
     }
 }
 
-TaskManager::TaskPtr WindowTaskItem::windowTask() const
-{
-    return m_task ? m_task.data()->task() : TaskManager::TaskPtr();
-}
-
 void WindowTaskItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 {
     if (!KAuthorized::authorizeKAction("kwin_rmb") || !m_task) {
