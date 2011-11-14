@@ -38,7 +38,7 @@ struct GreeterPluginHandle {
 
 namespace ScreenLocker
 {
-class Unlocker;
+class Greeter;
 
 class GreeterItem : public QDeclarativeItem
 {
@@ -60,7 +60,7 @@ Q_SIGNALS:
 private:
     void init();
     QGraphicsProxyWidget *m_proxy;
-    Unlocker *m_unlocker;
+    Greeter *m_unlocker;
 };
 
 class KeyboardItem : public QDeclarativeItem
@@ -120,12 +120,12 @@ public:
  *
  * @author Martin Gräßlin <mgraesslin@kde.org>
  **/
-class Unlocker : public QObject, public KGreeterPluginHandler
+class Greeter : public QObject, public KGreeterPluginHandler
 {
     Q_OBJECT
 public:
-    Unlocker(QObject *parent);
-    virtual ~Unlocker();
+    Greeter(QObject *parent);
+    virtual ~Greeter();
     bool isValid() const {
         return m_valid;
     }

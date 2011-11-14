@@ -56,7 +56,7 @@ namespace ScreenLocker
 GreeterItem::GreeterItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
     , m_proxy(new QGraphicsProxyWidget(this))
-    , m_unlocker(new Unlocker(this))
+    , m_unlocker(new Greeter(this))
 {
     init();
 }
@@ -195,7 +195,7 @@ void UserSessionsModel::init()
     endResetModel();
 }
 
-Unlocker::Unlocker(QObject *parent)
+Greeter::Greeter(QObject *parent)
     : QObject(parent)
     , m_greeterWidget(new QWidget())
     , m_greet(0)
@@ -217,7 +217,7 @@ Unlocker::Unlocker(QObject *parent)
     }
 }
 
-Unlocker::~Unlocker()
+Greeter::~Greeter()
 {
     if (m_pluginHandle.library) {
         if (m_pluginHandle.info->done) {
@@ -227,7 +227,7 @@ Unlocker::~Unlocker()
     }
 }
 
-void Unlocker::initialize()
+void Greeter::initialize()
 {
     m_plugins = KScreenSaverSettings::pluginsUnlock();
     if (m_plugins.isEmpty()) {
@@ -238,9 +238,9 @@ void Unlocker::initialize()
 
 // standard greeter stuff
 // private static
-QVariant Unlocker::getConf(void *ctx, const char *key, const QVariant &dflt)
+QVariant Greeter::getConf(void *ctx, const char *key, const QVariant &dflt)
 {
-    Unlocker *that = (Unlocker *)ctx;
+    Greeter *that = (Greeter *)ctx;
     QString fkey = QLatin1String( key ) % QLatin1Char( '=' );
     for (QStringList::ConstIterator it = that->m_pluginOptions.constBegin();
          it != that->m_pluginOptions.constEnd(); ++it)
@@ -249,7 +249,7 @@ QVariant Unlocker::getConf(void *ctx, const char *key, const QVariant &dflt)
     return dflt;
 }
 
-bool Unlocker::loadGreetPlugin()
+bool Greeter::loadGreetPlugin()
 {
     if (m_pluginHandle.library) {
         //we were locked once before, so all the plugin loading's done already
@@ -296,7 +296,7 @@ bool Unlocker::loadGreetPlugin()
     return false;
 }
 
-void Unlocker::verify()
+void Greeter::verify()
 {
     if (m_failedLock) {
         // greeter blocked due to failed unlock attempt
@@ -305,7 +305,7 @@ void Unlocker::verify()
     m_greet->next();
 }
 
-void Unlocker::failedTimer()
+void Greeter::failedTimer()
 {
     emit greeterReady();
     m_greet->revive();
@@ -313,18 +313,18 @@ void Unlocker::failedTimer()
     m_failedLock = false;
 }
 
-bool Unlocker::isSwitchUserSupported() const
+bool Greeter::isSwitchUserSupported() const
 {
     return KDisplayManager().isSwitchable() && KAuthorized::authorizeKAction(QLatin1String("switch_user"));
 }
 
-bool Unlocker::isStartNewSessionSupported() const
+bool Greeter::isStartNewSessionSupported() const
 {
     KDisplayManager dm;
     return dm.isSwitchable() && dm.numReserve() > 0 && KAuthorized::authorizeKAction(QLatin1String("start_new_session"));
 }
 
-void Unlocker::startNewSession()
+void Greeter::startNewSession()
 {
     // verify that starting a new session is allowed
     if (!isStartNewSessionSupported()) {
@@ -334,7 +334,7 @@ void Unlocker::startNewSession()
     KDisplayManager().startReserve();
 }
 
-void Unlocker::activateSession(int index)
+void Greeter::activateSession(int index)
 {
     // verify that starting a new session is allowed
     if (!isSwitchUserSupported()) {
@@ -349,7 +349,7 @@ void Unlocker::activateSession(int index)
 
 ////// kckeckpass interface code
 
-int Unlocker::Reader(void *buf, int count)
+int Greeter::Reader(void *buf, int count)
 {
     int ret, rlen;
 
@@ -370,38 +370,38 @@ int Unlocker::Reader(void *buf, int count)
     return rlen;
 }
 
-bool Unlocker::GRead(void *buf, int count)
+bool Greeter::GRead(void *buf, int count)
 {
     return Reader(buf, count) == count;
 }
 
-bool Unlocker::GWrite(const void *buf, int count)
+bool Greeter::GWrite(const void *buf, int count)
 {
     return ::write(m_fd, buf, count) == count;
 }
 
-bool Unlocker::GSendInt(int val)
+bool Greeter::GSendInt(int val)
 {
     return GWrite(&val, sizeof(val));
 }
 
-bool Unlocker::GSendStr(const char *buf)
+bool Greeter::GSendStr(const char *buf)
 {
     int len = buf ? ::strlen (buf) + 1 : 0;
     return GWrite(&len, sizeof(len)) && GWrite (buf, len);
 }
 
-bool Unlocker::GSendArr(int len, const char *buf)
+bool Greeter::GSendArr(int len, const char *buf)
 {
     return GWrite(&len, sizeof(len)) && GWrite (buf, len);
 }
 
-bool Unlocker::GRecvInt(int *val)
+bool Greeter::GRecvInt(int *val)
 {
     return GRead(val, sizeof(*val));
 }
 
-bool Unlocker::GRecvArr(char **ret)
+bool Greeter::GRecvArr(char **ret)
 {
     int len;
     char *buf;
@@ -424,7 +424,7 @@ bool Unlocker::GRecvArr(char **ret)
     }
 }
 
-void Unlocker::reapVerify()
+void Greeter::reapVerify()
 {
     m_notifier->setEnabled( false );
     m_notifier->deleteLater();
@@ -455,7 +455,7 @@ void Unlocker::reapVerify()
     cantCheck();
 }
 
-void Unlocker::handleVerify()
+void Greeter::handleVerify()
 {
     int ret;
     char *arr;
@@ -504,14 +504,14 @@ void Unlocker::handleVerify()
 
 ////// greeter plugin callbacks
 
-void Unlocker::gplugReturnText( const char *text, int tag )
+void Greeter::gplugReturnText( const char *text, int tag )
 {
     GSendStr( text );
     if (text)
         GSendInt( tag );
 }
 
-void Unlocker::gplugReturnBinary( const char *data )
+void Greeter::gplugReturnBinary( const char *data )
 {
     if (data) {
         unsigned const char *up = (unsigned const char *)data;
@@ -524,12 +524,12 @@ void Unlocker::gplugReturnBinary( const char *data )
         GSendArr( 0, 0 );
 }
 
-void Unlocker::gplugSetUser( const QString & )
+void Greeter::gplugSetUser( const QString & )
 {
     // ignore ...
 }
 
-void Unlocker::cantCheck()
+void Greeter::cantCheck()
 {
     m_greet->failed();
     emit greeterMessage(i18n("Cannot unlock the session because the authentication system failed to work!"));
@@ -540,7 +540,7 @@ void Unlocker::cantCheck()
 //
 // Starts the kcheckpass process to check the user's password.
 //
-void Unlocker::gplugStart()
+void Greeter::gplugStart()
 {
     int sfd[2];
     char fdbuf[16];
@@ -573,22 +573,22 @@ void Unlocker::gplugStart()
     connect(m_notifier, SIGNAL(activated(int)), SLOT(handleVerify()));
 }
 
-void Unlocker::gplugChanged()
+void Greeter::gplugChanged()
 {
 }
 
-void Unlocker::gplugActivity()
+void Greeter::gplugActivity()
 {
     // ignore
 }
 
-void Unlocker::gplugMsgBox(QMessageBox::Icon type, const QString &text)
+void Greeter::gplugMsgBox(QMessageBox::Icon type, const QString &text)
 {
     Q_UNUSED(type)
     emit greeterMessage(text);
 }
 
-bool Unlocker::gplugHasNode(const QString &)
+bool Greeter::gplugHasNode(const QString &)
 {
     return false;
 }
