@@ -38,6 +38,7 @@ struct GreeterPluginHandle {
 
 namespace ScreenLocker
 {
+class Unlocker;
 
 class UnlockerItem : public QDeclarativeItem
 {
@@ -48,12 +49,18 @@ public:
 
     QGraphicsProxyWidget *proxy();
 
+public Q_SLOTS:
+    void verify();
+
 Q_SIGNALS:
     void greeterFailed();
     void greeterReady();
     void greeterMessage(const QString &text);
+    void greeterAccepted();
 private:
+    void init();
     QGraphicsProxyWidget *m_proxy;
+    Unlocker *m_unlocker;
 };
 
 class KeyboardItem : public QDeclarativeItem

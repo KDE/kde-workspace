@@ -48,7 +48,6 @@ namespace ScreenLocker
 UnlockApp::UnlockApp()
     : KApplication()
     , m_view(NULL)
-    , m_unlocker(NULL)
 {
     initialize();
     QTimer::singleShot(0, this, SLOT(prepareShow()));
@@ -57,20 +56,12 @@ UnlockApp::UnlockApp()
 UnlockApp::~UnlockApp()
 {
     delete m_view;
-    delete m_unlocker;
 }
 
 void UnlockApp::initialize()
 {
     // disable DrKonqi as the crash dialog blocks the restart of the locker
     KCrash::setDrKonqiEnabled(false);
-    // create the unlocker
-    m_unlocker = new Unlocker(this);
-    connect(m_unlocker, SIGNAL(greeterAccepted()), SLOT(quit()));
-    if (!m_unlocker->isValid()) {
-        exit(1);
-        return;
-    }
 
     // create the view
     m_view = new QDeclarativeView();
@@ -87,26 +78,23 @@ void UnlockApp::initialize()
     qmlRegisterType<UnlockerItem>("org.kde.screenlocker", 1, 0, "UnlockerItem");
     qmlRegisterType<KeyboardItem>("org.kde.screenlocker", 1, 0, "KeyboardItem");
 
+#if 0
     m_view->rootContext()->setContextProperty("sessionModel", m_unlocker->sessionModel());
+#endif
     m_view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", "ksld/lockscreen.qml")));
     m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
-    connect(m_view->rootObject(), SIGNAL(unlockRequested()), m_unlocker, SLOT(verify()));
+    connect(m_view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
+#if 0
     connect(m_view->rootObject(), SIGNAL(startNewSession()), m_unlocker, SLOT(startNewSession()));
     connect(m_view->rootObject(), SIGNAL(activateSession(int)), m_unlocker, SLOT(activateSession(int)));
+#endif
     KUser user;
     m_view->rootObject()->setProperty("userName", user.property(KUser::FullName).toString());
+#if 0
     m_view->rootObject()->setProperty("switchUserSupported", m_unlocker->isSwitchUserSupported());
     m_view->rootObject()->setProperty("startNewSessionSupported", m_unlocker->isStartNewSessionSupported());
-
-    if (UnlockerItem *unlocker = m_view->rootObject()->findChild<UnlockerItem*>("unlocker")) {
-        QWidget *widget = m_unlocker->greeterWidget();
-        widget->setAttribute(Qt::WA_TranslucentBackground);
-        unlocker->proxy()->setWidget(widget);
-        connect(m_unlocker, SIGNAL(greeterFailed()), unlocker, SIGNAL(greeterFailed()));
-        connect(m_unlocker, SIGNAL(greeterReady()), unlocker, SIGNAL(greeterReady()));
-        connect(m_unlocker, SIGNAL(greeterMessage(QString)), unlocker, SIGNAL(greeterReady()));
-    }
+#endif
 
     // TODO: connect Kephal screens
 }

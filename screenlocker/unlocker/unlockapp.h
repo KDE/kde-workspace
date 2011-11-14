@@ -42,7 +42,6 @@ private Q_SLOTS:
 private:
     void initialize();
     QDeclarativeView *m_view;
-    Unlocker *m_unlocker;
 };
 } // namespace
 

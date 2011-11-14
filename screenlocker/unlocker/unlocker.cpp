@@ -56,7 +56,9 @@ namespace ScreenLocker
 UnlockerItem::UnlockerItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
     , m_proxy(new QGraphicsProxyWidget(this))
+    , m_unlocker(new Unlocker(this))
 {
+    init();
 }
 
 UnlockerItem::~UnlockerItem()
@@ -66,6 +68,27 @@ UnlockerItem::~UnlockerItem()
 QGraphicsProxyWidget *UnlockerItem::proxy()
 {
     return m_proxy;
+}
+
+
+void UnlockerItem::init()
+{
+    if (!m_unlocker->isValid()) {
+        exit(1);
+        return;
+    }
+    QWidget *widget = m_unlocker->greeterWidget();
+    widget->setAttribute(Qt::WA_TranslucentBackground);
+    m_proxy->setWidget(widget);
+    connect(m_unlocker, SIGNAL(greeterFailed()), this, SIGNAL(greeterFailed()));
+    connect(m_unlocker, SIGNAL(greeterReady()), this, SIGNAL(greeterReady()));
+    connect(m_unlocker, SIGNAL(greeterMessage(QString)), this, SIGNAL(greeterMessage(QString)));
+    connect(m_unlocker, SIGNAL(greeterAccepted()), this, SIGNAL(greeterAccepted()));
+}
+
+void UnlockerItem::verify()
+{
+    m_unlocker->verify();
 }
 
 // KeyboardItem

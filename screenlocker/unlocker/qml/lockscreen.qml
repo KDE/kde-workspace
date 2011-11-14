@@ -41,26 +41,6 @@ Rectangle {
         id: theme
     }
 
-    function unlock() {
-        if (unlocker.enabled) {
-            unlockRequested();
-        }
-    }
-
-    function unlockFailed() {
-        message.text = i18n("Unlocking failed");
-        unlocker.enabled = false;
-        switchUser.enabled = false;
-        unlock.enabled = false;
-    }
-
-    function unlockerReady() {
-        message.text = "";
-        unlocker.enabled = true;
-        switchUser.enabled = true;
-        unlock.enabled = true;
-    }
-
     function switchSession(index) {
         lockScreen.state = "UNLOCK";
         lockScreen.activateSession(index);
@@ -81,18 +61,17 @@ Rectangle {
     }
     Item {
         id: unlockUI
+        signal accepted()
+
         anchors.centerIn: dialog
 
         ScreenLocker.UnlockerItem {
             id: unlocker
             objectName: "unlocker"
             anchors.centerIn: parent
-            onGreeterFailed: unlockFailed()
-            onGreeterReady: unlockerReady()
-            onGreeterMessage: message.text = text
             anchors.bottomMargin: 20
-            Keys.onEnterPressed: lockScreen.unlock()
-            Keys.onReturnPressed: lockScreen.unlock()
+            Keys.onEnterPressed: verify()
+            Keys.onReturnPressed: verify()
         }
         Text {
             id: message
@@ -138,11 +117,29 @@ Rectangle {
                 id: unlock
                 text: i18n("Unlock")
                 icon: QIcon("object-unlocked")
-                onClicked: lockScreen.unlock()
+                onClicked: unlocker.verify()
             }
             anchors.top: unlocker.bottom
             anchors.horizontalCenter: unlocker.horizontalCenter
             anchors.topMargin: 100
+        }
+
+        Connections {
+            target: unlocker
+            onGreeterFailed: {
+                message.text = i18n("Unlocking failed");
+                unlocker.enabled = false;
+                switchUser.enabled = false;
+                unlock.enabled = false;
+            }
+            onGreeterReady: {
+                message.text = "";
+                unlocker.enabled = true;
+                switchUser.enabled = true;
+                unlock.enabled = true;
+            }
+            onGreeterMessage: message.text = text
+            onGreeterAccepted: unlockUI.accepted()
         }
     }
 
@@ -231,4 +228,9 @@ Rectangle {
             PropertyChanges {target: userSessionsUI; visible: true}
         }
     ]
+
+    Connections {
+        target: unlockUI
+        onAccepted: unlockRequested()
+    }
 }
