@@ -108,6 +108,37 @@ public:
     bool m_enabled;
 };
 
+class SessionSwitching : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(bool switchUserSupported READ isSwitchUserSupported)
+    Q_PROPERTY(bool startNewSessionSupported READ isStartNewSessionSupported)
+public:
+    SessionSwitching(QObject *parent = NULL);
+    virtual ~SessionSwitching();
+
+    QAbstractItemModel *sessionModel() const {
+        return m_sessionModel;
+    }
+
+    /**
+     * @returns @c true if switching between user sessions is possible, @c false otherwise.
+     **/
+    bool isSwitchUserSupported() const;
+    /**
+     * @returns @c true if a new session can be started, @c false otherwise.
+     **/
+    bool isStartNewSessionSupported() const;
+public Q_SLOTS:
+    /**
+     * Invoke to start a new session if allowed.
+     **/
+    void startNewSession();
+    void activateSession(int index);
+private:
+    UserSessionsModel *m_sessionModel;
+};
+
 /**
  * @short Class which checks authentication through KGreeterPlugin framework.
  *
@@ -143,19 +174,6 @@ public:
         return m_greeterWidget;
     }
 
-    QAbstractItemModel *sessionModel() const {
-        return m_sessionModel;
-    }
-
-    /**
-     * @returns @c true if switching between user sessions is possible, @c false otherwise.
-     **/
-    bool isSwitchUserSupported() const;
-    /**
-     * @returns @c true if a new session can be started, @c false otherwise.
-     **/
-    bool isStartNewSessionSupported() const;
-
 Q_SIGNALS:
     /**
      * Signal emitted in case the authentication through the greeter succeeded.
@@ -180,11 +198,6 @@ public Q_SLOTS:
      * Invoke to perform an authentication through the greeter plugins.
      **/
     void verify();
-    /**
-     * Invoke to start a new session if allowed.
-     **/
-    void startNewSession();
-    void activateSession(int index);
 
 private Q_SLOTS:
     void handleVerify();
@@ -217,7 +230,6 @@ private:
     int  m_pid;
     int m_fd;
     QSocketNotifier *m_notifier;
-    UserSessionsModel *m_sessionModel;
     bool m_failedLock;
 };
 

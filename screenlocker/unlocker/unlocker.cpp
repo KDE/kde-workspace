@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QFile>
 #include <QtCore/QSocketNotifier>
 #include <QtCore/QTimer>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeEngine>
 #include <QtGui/QGraphicsProxyWidget>
 // KDE
 #include <KDE/KAuthorized>
@@ -195,6 +197,50 @@ void UserSessionsModel::init()
     endResetModel();
 }
 
+SessionSwitching::SessionSwitching(QObject *parent)
+    : QObject (parent)
+    , m_sessionModel(new UserSessionsModel(this))
+{
+}
+
+SessionSwitching::~SessionSwitching()
+{
+}
+
+bool SessionSwitching::isSwitchUserSupported() const
+{
+    return KDisplayManager().isSwitchable() && KAuthorized::authorizeKAction(QLatin1String("switch_user"));
+}
+
+bool SessionSwitching::isStartNewSessionSupported() const
+{
+    KDisplayManager dm;
+    return dm.isSwitchable() && dm.numReserve() > 0 && KAuthorized::authorizeKAction(QLatin1String("start_new_session"));
+}
+
+void SessionSwitching::startNewSession()
+{
+    // verify that starting a new session is allowed
+    if (!isStartNewSessionSupported()) {
+        return;
+    }
+
+    KDisplayManager().startReserve();
+}
+
+void SessionSwitching::activateSession(int index)
+{
+    // verify that starting a new session is allowed
+    if (!isSwitchUserSupported()) {
+        return;
+    }
+    QModelIndex modelIndex(m_sessionModel->index(index));
+    if (!modelIndex.isValid()) {
+        return;
+    }
+    KDisplayManager().switchVT(m_sessionModel->data(modelIndex, Qt::UserRole + 2).toInt());
+}
+
 Greeter::Greeter(QObject *parent)
     : QObject(parent)
     , m_greeterWidget(new QWidget())
@@ -203,7 +249,6 @@ Greeter::Greeter(QObject *parent)
     , m_pid(0)
     , m_fd(0)
     , m_notifier(NULL)
-    , m_sessionModel(new UserSessionsModel(this))
     , m_failedLock(false)
 {
     m_pluginHandle.library = 0;
@@ -311,40 +356,6 @@ void Greeter::failedTimer()
     m_greet->revive();
     m_greet->start();
     m_failedLock = false;
-}
-
-bool Greeter::isSwitchUserSupported() const
-{
-    return KDisplayManager().isSwitchable() && KAuthorized::authorizeKAction(QLatin1String("switch_user"));
-}
-
-bool Greeter::isStartNewSessionSupported() const
-{
-    KDisplayManager dm;
-    return dm.isSwitchable() && dm.numReserve() > 0 && KAuthorized::authorizeKAction(QLatin1String("start_new_session"));
-}
-
-void Greeter::startNewSession()
-{
-    // verify that starting a new session is allowed
-    if (!isStartNewSessionSupported()) {
-        return;
-    }
-
-    KDisplayManager().startReserve();
-}
-
-void Greeter::activateSession(int index)
-{
-    // verify that starting a new session is allowed
-    if (!isSwitchUserSupported()) {
-        return;
-    }
-    QModelIndex modelIndex(m_sessionModel->index(index));
-    if (!modelIndex.isValid()) {
-        return;
-    }
-    KDisplayManager().switchVT(m_sessionModel->data(modelIndex, Qt::UserRole + 2).toInt());
 }
 
 ////// kckeckpass interface code

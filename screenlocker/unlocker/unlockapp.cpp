@@ -78,23 +78,19 @@ void UnlockApp::initialize()
     qmlRegisterType<GreeterItem>("org.kde.screenlocker", 1, 0, "GreeterItem");
     qmlRegisterType<KeyboardItem>("org.kde.screenlocker", 1, 0, "KeyboardItem");
 
-#if 0
-    m_view->rootContext()->setContextProperty("sessionModel", m_unlocker->sessionModel());
-#endif
+    SessionSwitching *sessionSwitching = new SessionSwitching(this);
+
+    m_view->rootContext()->setContextProperty("sessionModel", sessionSwitching->sessionModel());
     m_view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", "ksld/lockscreen.qml")));
     m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
     connect(m_view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
-#if 0
-    connect(m_view->rootObject(), SIGNAL(startNewSession()), m_unlocker, SLOT(startNewSession()));
-    connect(m_view->rootObject(), SIGNAL(activateSession(int)), m_unlocker, SLOT(activateSession(int)));
-#endif
+    connect(m_view->rootObject(), SIGNAL(startNewSession()), sessionSwitching, SLOT(startNewSession()));
+    connect(m_view->rootObject(), SIGNAL(activateSession(int)), sessionSwitching, SLOT(activateSession(int)));
     KUser user;
     m_view->rootObject()->setProperty("userName", user.property(KUser::FullName).toString());
-#if 0
-    m_view->rootObject()->setProperty("switchUserSupported", m_unlocker->isSwitchUserSupported());
-    m_view->rootObject()->setProperty("startNewSessionSupported", m_unlocker->isStartNewSessionSupported());
-#endif
+    m_view->rootObject()->setProperty("switchUserSupported", sessionSwitching->isSwitchUserSupported());
+    m_view->rootObject()->setProperty("startNewSessionSupported", sessionSwitching->isStartNewSessionSupported());
 
     // TODO: connect Kephal screens
 }
@@ -107,6 +103,8 @@ void UnlockApp::prepareShow()
 
     m_view->setGeometry(Kephal::Screens::self()->primaryScreen()->geom());
     m_view->show();
+
+    m_view->grabKeyboard();
 
     // HACK: set focus on password field
     if (GreeterItem *unlocker = m_view->rootObject()->findChild<GreeterItem*>("greeter")) {
