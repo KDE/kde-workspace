@@ -75,7 +75,7 @@ void UnlockApp::initialize()
     kdeclarative.setDeclarativeEngine(m_view->engine());
     kdeclarative.initialize();
     kdeclarative.setupBindings();
-    qmlRegisterType<UnlockerItem>("org.kde.screenlocker", 1, 0, "UnlockerItem");
+    qmlRegisterType<GreeterItem>("org.kde.screenlocker", 1, 0, "GreeterItem");
     qmlRegisterType<KeyboardItem>("org.kde.screenlocker", 1, 0, "KeyboardItem");
 
 #if 0
@@ -109,7 +109,7 @@ void UnlockApp::prepareShow()
     m_view->show();
 
     // HACK: set focus on password field
-    if (UnlockerItem *unlocker = m_view->rootObject()->findChild<UnlockerItem*>("unlocker")) {
+    if (GreeterItem *unlocker = m_view->rootObject()->findChild<GreeterItem*>("greeter")) {
         if (QLineEdit *lineEdit = unlocker->proxy()->widget()->findChild<QLineEdit *>()) {
             lineEdit->setFocus(Qt::OtherFocusReason);
         }

@@ -65,9 +65,9 @@ Rectangle {
 
         anchors.centerIn: dialog
 
-        ScreenLocker.UnlockerItem {
-            id: unlocker
-            objectName: "unlocker"
+        ScreenLocker.GreeterItem {
+            id: greeter
+            objectName: "greeter"
             anchors.centerIn: parent
             anchors.bottomMargin: 20
             Keys.onEnterPressed: verify()
@@ -93,14 +93,14 @@ Rectangle {
             id: lockMessage
             text: userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", userName)
             color: theme.textColor
-            anchors.bottom: unlocker.top
-            anchors.horizontalCenter: unlocker.horizontalCenter
+            anchors.bottom: greeter.top
+            anchors.horizontalCenter: greeter.horizontalCenter
             anchors.bottomMargin: 5
         }
         ScreenLocker.KeyboardItem {
             id: keyboard
-            anchors.top: unlocker.bottom
-            anchors.right: unlocker.right
+            anchors.top: greeter.bottom
+            anchors.right: greeter.right
             anchors.topMargin: 40
             anchors.bottomMargin: 20
         }
@@ -117,24 +117,24 @@ Rectangle {
                 id: unlock
                 text: i18n("Unlock")
                 icon: QIcon("object-unlocked")
-                onClicked: unlocker.verify()
+                onClicked: greeter.verify()
             }
-            anchors.top: unlocker.bottom
-            anchors.horizontalCenter: unlocker.horizontalCenter
+            anchors.top: greeter.bottom
+            anchors.horizontalCenter: greeter.horizontalCenter
             anchors.topMargin: 100
         }
 
         Connections {
-            target: unlocker
+            target: greeter
             onGreeterFailed: {
                 message.text = i18n("Unlocking failed");
-                unlocker.enabled = false;
+                greeter.enabled = false;
                 switchUser.enabled = false;
                 unlock.enabled = false;
             }
             onGreeterReady: {
                 message.text = "";
-                unlocker.enabled = true;
+                greeter.enabled = true;
                 switchUser.enabled = true;
                 unlock.enabled = true;
             }

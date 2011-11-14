@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ScreenLocker
 {
 
-UnlockerItem::UnlockerItem(QDeclarativeItem *parent)
+GreeterItem::GreeterItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
     , m_proxy(new QGraphicsProxyWidget(this))
     , m_unlocker(new Unlocker(this))
@@ -61,17 +61,16 @@ UnlockerItem::UnlockerItem(QDeclarativeItem *parent)
     init();
 }
 
-UnlockerItem::~UnlockerItem()
+GreeterItem::~GreeterItem()
 {
 }
 
-QGraphicsProxyWidget *UnlockerItem::proxy()
+QGraphicsProxyWidget *GreeterItem::proxy()
 {
     return m_proxy;
 }
 
-
-void UnlockerItem::init()
+void GreeterItem::init()
 {
     if (!m_unlocker->isValid()) {
         exit(1);
@@ -86,7 +85,7 @@ void UnlockerItem::init()
     connect(m_unlocker, SIGNAL(greeterAccepted()), this, SIGNAL(greeterAccepted()));
 }
 
-void UnlockerItem::verify()
+void GreeterItem::verify()
 {
     m_unlocker->verify();
 }

@@ -40,12 +40,12 @@ namespace ScreenLocker
 {
 class Unlocker;
 
-class UnlockerItem : public QDeclarativeItem
+class GreeterItem : public QDeclarativeItem
 {
     Q_OBJECT
 public:
-    UnlockerItem(QDeclarativeItem *parent = NULL);
-    virtual ~UnlockerItem();
+    GreeterItem(QDeclarativeItem *parent = NULL);
+    virtual ~GreeterItem();
 
     QGraphicsProxyWidget *proxy();
 
