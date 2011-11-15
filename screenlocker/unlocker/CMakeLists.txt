@@ -20,6 +20,7 @@ target_link_libraries(kscreenunlocker kephal kworkspace ${KDE4_KDEUI_LIBS} ${QT_
 
 install(TARGETS kscreenunlocker DESTINATION ${LIBEXEC_INSTALL_DIR})
 install(FILES
+    qml/Greeter.qml
     qml/lockscreen.qml
     qml/SessionSwitching.qml
     DESTINATION ${DATA_INSTALL_DIR}/ksld)

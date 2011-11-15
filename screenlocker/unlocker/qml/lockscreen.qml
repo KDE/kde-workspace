@@ -59,87 +59,19 @@ Rectangle {
         width: parent.width/2
         height: parent.height/2
     }
-    Item {
-        id: unlockUI
-        signal accepted()
 
+    Greeter {
+        id: unlockUI
+        userName: lockScreen.userName
+        switchUserEnabled: switchUserSupported
         anchors.centerIn: dialog
 
-        ScreenLocker.GreeterItem {
-            id: greeter
-            objectName: "greeter"
-            anchors.centerIn: parent
-            anchors.bottomMargin: 20
-            Keys.onEnterPressed: verify()
-            Keys.onReturnPressed: verify()
-        }
-        Text {
-            id: message
-            text: ""
-            anchors.horizontalCenter: lockMessage.horizontalCenter
-            anchors.bottom: lockMessage.top
-            anchors.bottomMargin: 20
-        }
-        Text {
-            id: capsLockMessage
-            text: i18n("Warning: Caps Lock on")
-            color: theme.textColor
-            anchors.horizontalCenter: lockMessage.horizontalCenter
-            anchors.bottom: message.top
-            anchors.bottomMargin: 5
-            visible: capsLockOn
-        }
-        Text {
-            id: lockMessage
-            text: userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", userName)
-            color: theme.textColor
-            anchors.bottom: greeter.top
-            anchors.horizontalCenter: greeter.horizontalCenter
-            anchors.bottomMargin: 5
-        }
-        ScreenLocker.KeyboardItem {
-            id: keyboard
-            anchors.top: greeter.bottom
-            anchors.right: greeter.right
-            anchors.topMargin: 40
-            anchors.bottomMargin: 20
-        }
-        Row {
-            spacing: 5
-            PlasmaWidgets.PushButton {
-                id: switchUser
-                text: i18n("Switch User")
-                icon: QIcon("fork")
-                visible: switchUserSupported
-                onClicked: lockScreen.state = "SESSION"
-            }
-            PlasmaWidgets.PushButton {
-                id: unlock
-                text: i18n("Unlock")
-                icon: QIcon("object-unlocked")
-                onClicked: greeter.verify()
-            }
-            anchors.top: greeter.bottom
-            anchors.horizontalCenter: greeter.horizontalCenter
-            anchors.topMargin: 100
-        }
-
         Connections {
-            target: greeter
-            onGreeterFailed: {
-                message.text = i18n("Unlocking failed");
-                greeter.enabled = false;
-                switchUser.enabled = false;
-                unlock.enabled = false;
+            onAccepted: lockScreen.unlockRequested()
+            onSwitchUserClicked: {
+                // TODO: load if not loaded
+                lockScreen.state = "SESSION"
             }
-            onGreeterReady: {
-                message.text = "";
-                greeter.enabled = true;
-                switchUser.enabled = true;
-                unlock.enabled = true;
-            }
-            onGreeterMessage: message.text = text
-            onGreeterAccepted: unlockUI.accepted()
         }
     }
 
@@ -173,9 +105,4 @@ Rectangle {
             PropertyChanges {target: userSessionsUI; visible: true}
         }
     ]
-
-    Connections {
-        target: unlockUI
-        onAccepted: unlockRequested()
-    }
 }
