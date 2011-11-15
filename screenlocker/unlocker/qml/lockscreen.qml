@@ -143,76 +143,21 @@ Rectangle {
         }
     }
 
-    Item {
+    // TODO: loader
+    SessionSwitching {
         id: userSessionsUI
+        model: sessionModel
+        startNewSessionSupported: lockScreen.startNewSessionSupported
         width: dialog.width * 0.8
         height: dialog.height * 0.8
         anchors.centerIn: dialog
-        ListView {
-            id: userSessionsView
-            width: parent.width * 0.5
-            height: parent.height * 0.8
-            anchors.centerIn: parent
-            spacing: 5
-
-            model: sessionModel
-            delegate: Text {
-                text: session + "(" + location + ")"
+        Connections {
+            onCancel: lockScreen.state = "UNLOCK"
+            onStartNewSessionClicked: lockScreen.startNewSession()
+            onActivateSessionClicked: {
+                lockScreen.activateSession(index)
+                lockScreen.state = "UNLOCK"
             }
-            highlight: PlasmaCore.FrameSvgItem {
-                imagePath: "widgets/viewitem"
-                prefix: "hover"
-            }
-            focus: true
-        }
-        MouseArea {
-            anchors.fill: userSessionsView
-            onClicked: userSessionsView.currentIndex = userSessionsView.indexAt(mouse.x, mouse.y)
-            onDoubleClicked: switchSession(userSessionsView.indexAt(mouse.x, mouse.y))
-        }
-        Text {
-            text: i18n("The current session will be hidden " +
-                        "and a new login screen or an existing session will be displayed.\n" +
-                        "An F-key is assigned to each session; " +
-                        "F%1 is usually assigned to the first session, " +
-                        "F%2 to the second session and so on. " +
-                        "You can switch between sessions by pressing " +
-                        "Ctrl, Alt and the appropriate F-key at the same time. " +
-                        "Additionally, the KDE Panel and Desktop menus have " +
-                        "actions for switching between sessions.",
-                        7, 8)
-            anchors {
-                left: userSessionsView.right
-                leftMargin: 10
-            }
-        }
-        Row {
-            spacing: 5
-            PlasmaWidgets.PushButton {
-                id: activateSession
-                text: i18n("Activate")
-                icon: QIcon("fork")
-                onClicked: switchSession(userSessionsView.currentIndex)
-            }
-            PlasmaWidgets.PushButton {
-                id: newSession
-                text: i18n("Start New Session")
-                icon: QIcon("fork")
-                visible: startNewSessionSupported
-                onClicked: {
-                    lockScreen.state = "UNLOCK";
-                    lockScreen.startNewSession();
-                }
-            }
-            PlasmaWidgets.PushButton {
-                id: cancelSession
-                text: i18n("Cancel")
-                icon: QIcon("dialog-cancel")
-                onClicked: lockScreen.state = "UNLOCK"
-            }
-            anchors.top: userSessionsUI.bottom
-            anchors.horizontalCenter: userSessionsUI.horizontalCenter
-            anchors.bottomMargin: 20
         }
     }
 

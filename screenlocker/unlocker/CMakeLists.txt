@@ -19,4 +19,7 @@ kde4_add_executable(kscreenunlocker ${kscreenunlocker_SRCS})
 target_link_libraries(kscreenunlocker kephal kworkspace ${KDE4_KDEUI_LIBS} ${QT_QTDECLARATIVE_LIBRARY} kdeclarative)
 
 install(TARGETS kscreenunlocker DESTINATION ${LIBEXEC_INSTALL_DIR})
-install(FILES qml/lockscreen.qml DESTINATION ${DATA_INSTALL_DIR}/ksld)
+install(FILES
+    qml/lockscreen.qml
+    qml/SessionSwitching.qml
+    DESTINATION ${DATA_INSTALL_DIR}/ksld)
