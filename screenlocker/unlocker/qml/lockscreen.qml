@@ -20,30 +20,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
-import org.kde.screenlocker 1.0 as ScreenLocker
 
-Rectangle {
+Item {
     id: lockScreen
-    width: 800
-    height: 600
-    color: Qt.rgba(0, 0, 0, 1.0)
     state: "UNLOCK"
     signal unlockRequested()
     signal startNewSession()
     signal activateSession(int index)
-    property string userName
-    property bool switchUserSupported
+    property alias userName: unlockUI.userName
+    property alias switchUserSupported: unlockUI.switchUserEnabled
     property bool startNewSessionSupported
     property bool capsLockOn
 
     PlasmaCore.Theme {
         id: theme
-    }
-
-    function switchSession(index) {
-        lockScreen.state = "UNLOCK";
-        lockScreen.activateSession(index);
     }
 
     Image {
@@ -62,8 +52,6 @@ Rectangle {
 
     Greeter {
         id: unlockUI
-        userName: lockScreen.userName
-        switchUserEnabled: switchUserSupported
         anchors.centerIn: dialog
 
         Connections {
