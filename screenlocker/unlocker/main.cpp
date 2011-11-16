@@ -24,12 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "unlockapp.h"
 
-static const char description[] = I18N_NOOP( "KDE Plasma Workspaces Screen Un-locker" );
+static const char description[] = I18N_NOOP( "Greeter for the KDE Plasma Workspaces Screen locker" );
 static const char version[] = "0.1";
 
 int main(int argc, char* argv[])
 {
-    KAboutData aboutData( "kscreenunlocker", 0, ki18n( "Screen Un-Locker" ),
+    KAboutData aboutData( "kscreenlocker_greet", 0, ki18n( "KScreenLocker Greeter" ),
                           version, ki18n(description), KAboutData::License_GPL,
                           ki18n("(c) 2011, Martin Gräßlin") );
     aboutData.addAuthor( ki18n("Martin Gräßlin"),
