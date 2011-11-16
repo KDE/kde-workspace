@@ -37,9 +37,17 @@ int main(int argc, char* argv[])
                          "mgraesslin@kde.org" );
 
     KCmdLineArgs::init(argc, argv, &aboutData);
+    KCmdLineOptions options;
+    options.add("testing", ki18n("Starts the greeter in testing mode"));
+    KCmdLineArgs::addCmdLineOptions(options);
 
     ScreenLocker::UnlockApp app;
     KGlobal::locale()->insertCatalog(QLatin1String( "libplasma" ));
     app.disableSessionManagement(); // manually-started
+    KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+    if (args->isSet("testing")) {
+        app.setTesting(true);
+    }
+    args->clear();
     return app.exec();
 }

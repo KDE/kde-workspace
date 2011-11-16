@@ -36,12 +36,15 @@ public:
     UnlockApp();
     virtual ~UnlockApp();
 
+    void setTesting(bool enable);
+
 private Q_SLOTS:
     void prepareShow();
 
 private:
     void initialize();
     QDeclarativeView *m_view;
+    bool m_testing;
 };
 } // namespace
 

@@ -49,6 +49,7 @@ namespace ScreenLocker
 UnlockApp::UnlockApp()
     : KApplication()
     , m_view(NULL)
+    , m_testing(false)
 {
     initialize();
     QTimer::singleShot(0, this, SLOT(prepareShow()));
@@ -105,13 +106,25 @@ void UnlockApp::prepareShow()
     m_view->setGeometry(Kephal::Screens::self()->primaryScreen()->geom());
     m_view->show();
 
-    m_view->grabKeyboard();
-
     // HACK: set focus on password field
     if (GreeterItem *unlocker = m_view->rootObject()->findChild<GreeterItem*>("greeter")) {
         if (QLineEdit *lineEdit = unlocker->proxy()->widget()->findChild<QLineEdit *>()) {
             lineEdit->setFocus(Qt::OtherFocusReason);
         }
+    }
+}
+
+void UnlockApp::setTesting(bool enable)
+{
+    m_testing  = enable;
+    if (!m_view) {
+        return;
+    }
+    if (enable) {
+        // remove bypass window manager hint
+        m_view->setWindowFlags(m_view->windowFlags() & ~Qt::X11BypassWindowManagerHint);
+    } else {
+        m_view->setWindowFlags(m_view->windowFlags() | Qt::X11BypassWindowManagerHint);
     }
 }
 
