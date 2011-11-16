@@ -8,6 +8,7 @@ include_directories(
 
 ########### next target ###############
 set(kscreenunlocker_SRCS
+   sessions.cpp
    unlockapp.cpp
    unlocker.cpp
    main.cpp )
