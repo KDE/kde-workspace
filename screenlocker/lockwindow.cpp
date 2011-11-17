@@ -264,6 +264,21 @@ void LockWindow::removeVRoot(Window win)
 {
     XDeleteProperty (QX11Info::display(), win, gXA_VROOT);
 }
+static void fakeFocusIn( WId window )
+{
+    // We have keyboard grab, so this application will
+    // get keyboard events even without having focus.
+    // Fake FocusIn to make Qt realize it has the active
+    // window, so that it will correctly show cursor in the dialog.
+    XEvent ev;
+    memset(&ev, 0, sizeof(ev));
+    ev.xfocus.display = QX11Info::display();
+    ev.xfocus.type = FocusIn;
+    ev.xfocus.window = window;
+    ev.xfocus.mode = NotifyNormal;
+    ev.xfocus.detail = NotifyAncestor;
+    XSendEvent( QX11Info::display(), window, False, NoEventMask, &ev );
+}
 
 // Event filter
 bool LockWindow::x11Event(XEvent* event)
@@ -335,7 +350,7 @@ bool LockWindow::x11Event(XEvent* event)
                         kDebug() << "uhoh! duplicate!";
                     } else {
                         m_lockWindows.prepend(event->xmap.window);
-                        // TODO: fakeFocusIn
+                        fakeFocusIn(event->xmap.window);
                     }
                 }
                 stayOnTop();
