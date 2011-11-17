@@ -18,9 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 import QtQuick 1.0
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     property alias model: userSessionsView.model
@@ -30,18 +28,18 @@ Item {
     signal cancel()
     ListView {
         id: userSessionsView
-        width: parent.width
+        width: parent.width / 2
         height: parent.height
         anchors.centerIn: parent
-        spacing: 5
 
-        delegate: Text {
-            text: session + "(" + location + ")"
+        delegate: PlasmaComponents.ListItem {
+            content: PlasmaComponents.Label {
+                text: session + "(" + location + ")"
+            }
         }
-        // TODO: use component
-        highlight: PlasmaCore.FrameSvgItem {
-            imagePath: "widgets/viewitem"
-            prefix: "hover"
+        highlight: PlasmaComponents.Highlight {
+            hover: true
+            width: parent.width
         }
         focus: true
     }
@@ -50,7 +48,7 @@ Item {
         onClicked: userSessionsView.currentIndex = userSessionsView.indexAt(mouse.x, mouse.y)
         onDoubleClicked: activateSessionClicked(userSessionsView.indexAt(mouse.x, mouse.y))
     }
-    Text {
+    PlasmaComponents.Label {
         text: i18n("The current session will be hidden " +
                     "and a new login screen or an existing session will be displayed.\n" +
                     "An F-key is assigned to each session; " +
@@ -66,25 +64,26 @@ Item {
             leftMargin: 10
         }
     }
-    Row {
-        spacing: 5
-        PlasmaWidgets.PushButton {
+    PlasmaComponents.ButtonRow {
+        exclusive: false
+
+        PlasmaComponents.Button {
             id: activateSession
             text: i18n("Activate")
-            icon: QIcon("fork")
+            iconSource: "fork"
             onClicked: activateSessionClicked(userSessionsView.currentIndex)
         }
-        PlasmaWidgets.PushButton {
+        PlasmaComponents.Button {
             id: newSession
             text: i18n("Start New Session")
-            icon: QIcon("fork")
+            iconSource: "fork"
             visible: startNewSessionSupported
             onClicked: startNewSessionClicked()
         }
-        PlasmaWidgets.PushButton {
+        PlasmaComponents.Button {
             id: cancelSession
             text: i18n("Cancel")
-            icon: QIcon("dialog-cancel")
+            iconSource: "dialog-cancel"
             onClicked: cancel()
         }
         anchors.top: userSessionsUI.bottom

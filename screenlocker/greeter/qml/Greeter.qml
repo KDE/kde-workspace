@@ -18,9 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 import QtQuick 1.0
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
@@ -68,25 +65,25 @@ Item {
         anchors.topMargin: 40
         anchors.bottomMargin: 20
     }
-    Row {
-        spacing: 5
-        PlasmaWidgets.PushButton {
+    PlasmaComponents.ButtonRow {
+        exclusive: false
+        PlasmaComponents.Button {
             id: switchUser
             text: i18n("Switch User")
-            icon: QIcon("fork")
+            iconSource: "fork"
             visible: switchUserEnabled
             onClicked: switchUserClicked()
         }
-        PlasmaWidgets.PushButton {
+        PlasmaComponents.Button {
             id: unlock
             text: i18n("Unlock")
-            icon: QIcon("object-unlocked")
+            iconSource: "object-unlocked"
             onClicked: greeter.verify()
         }
-        PlasmaWidgets.PushButton {
+        PlasmaComponents.Button {
             id: cancelButton
             text: i18n("Cancel")
-            icon: QIcon("dialog-cancel")
+            iconSource: "dialog-cancel"
             onClicked: canceled()
             visible: false
         }
