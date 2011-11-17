@@ -55,6 +55,7 @@ private Q_SLOTS:
     void unlockDesktop();
     void numScreensUpdated(int newCount);
     void greeterAccepted();
+    void greeterCanceled();
 
 private:
     void init();

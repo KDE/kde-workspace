@@ -222,6 +222,7 @@ void SaverCorona::createGreeter()
     m_greeterItem = qobject_cast<QGraphicsObject *>(component.create());
     addItem(m_greeterItem);
     connect(m_greeterItem, SIGNAL(accepted()), SLOT(greeterAccepted()));
+    connect(m_greeterItem, SIGNAL(canceled()), SLOT(greeterCanceled()));
     const QRect screenRect = screenGeometry(QApplication::desktop()->primaryScreen());
     // TODO: center on screen
     m_greeterItem->setPos(screenRect.x() + screenRect.width()/2,
@@ -231,6 +232,11 @@ void SaverCorona::createGreeter()
 void SaverCorona::greeterAccepted()
 {
     qApp->quit();
+}
+
+void SaverCorona::greeterCanceled()
+{
+    m_greeterItem->setVisible(false);
 }
 
 #include "savercorona.moc"

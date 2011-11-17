@@ -22,14 +22,17 @@ import org.kde.kscreenlocker 1.0
 Item {
     id: lockScreen
     signal accepted()
+    signal canceled()
 
     Greeter {
         id: unlockUI
         anchors.centerIn: dialog
         focus: true
+        cancelEnabled: true
 
         Connections {
             onAccepted: lockScreen.accepted()
+            onCanceled: lockScreen.canceled()
         }
     }
 }

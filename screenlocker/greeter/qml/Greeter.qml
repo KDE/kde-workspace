@@ -26,6 +26,8 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 Item {
     signal accepted()
     signal switchUserClicked()
+    signal canceled()
+    property alias cancelEnabled: cancelButton.visible
     property bool switchUserEnabled
 
     GreeterItem {
@@ -79,6 +81,13 @@ Item {
             text: i18n("Unlock")
             icon: QIcon("object-unlocked")
             onClicked: greeter.verify()
+        }
+        PlasmaWidgets.PushButton {
+            id: cancelButton
+            text: i18n("Cancel")
+            icon: QIcon("dialog-cancel")
+            onClicked: canceled()
+            visible: false
         }
         anchors.top: greeter.bottom
         anchors.horizontalCenter: greeter.horizontalCenter
