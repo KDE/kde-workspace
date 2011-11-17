@@ -21,7 +21,6 @@ import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1
 import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
-import org.kde.screenlocker 1.0 as ScreenLocker
 
 Item {
     signal accepted()
@@ -34,7 +33,7 @@ Item {
         id: theme
     }
 
-    ScreenLocker.GreeterItem {
+    GreeterItem {
         id: greeter
         objectName: "greeter"
         anchors.centerIn: parent
@@ -69,7 +68,7 @@ Item {
         anchors.horizontalCenter: greeter.horizontalCenter
         anchors.bottomMargin: 5
     }
-    ScreenLocker.KeyboardItem {
+    KeyboardItem {
         id: keyboard
         anchors.top: greeter.bottom
         anchors.right: greeter.right

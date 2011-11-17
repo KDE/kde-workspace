@@ -6,6 +6,26 @@ include_directories(
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kworkspace
 )
 
+########### declarative plugin ########
+set(kscreenlockerplugin_SRCS
+    greeter.cpp
+    greeterplugin.cpp
+)
+
+kde4_add_kcfg_files(kscreenlockerplugin_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../kcfg/kscreensaversettings.kcfgc)
+
+qt4_automoc(${kscreenlockerplugin_SRCS})
+
+add_library(kscreenlockerplugin SHARED ${kscreenlockerplugin_SRCS})
+target_link_libraries(kscreenlockerplugin ${KDE4_KDEUI_LIBS} ${QT_QTGUI_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY})
+
+install(TARGETS kscreenlockerplugin DESTINATION ${IMPORTS_INSTALL_DIR}/org/kde/kscreenlocker)
+
+install(FILES
+    qml/Greeter.qml
+    qmldir
+    DESTINATION ${IMPORTS_INSTALL_DIR}/org/kde/kscreenlocker)
+
 ########### next target ###############
 set(kscreenlocker_greet_SRCS
    greeter.cpp
@@ -21,7 +41,6 @@ target_link_libraries(kscreenlocker_greet kephal kworkspace ${KDE4_KDEUI_LIBS} $
 
 install(TARGETS kscreenlocker_greet DESTINATION ${LIBEXEC_INSTALL_DIR})
 install(FILES
-    qml/Greeter.qml
     qml/lockscreen.qml
     qml/SessionSwitching.qml
     DESTINATION ${DATA_INSTALL_DIR}/kscreenlocker)

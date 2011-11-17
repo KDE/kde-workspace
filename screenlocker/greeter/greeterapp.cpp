@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeterapp.h"
 #include "sessions.h"
-#include "greeter.h"
 // Qt
 #include <QtCore/QTimer>
 #include <QtDeclarative/QDeclarativeContext>
@@ -77,8 +76,6 @@ void UnlockApp::initialize()
     kdeclarative.setDeclarativeEngine(m_view->engine());
     kdeclarative.initialize();
     kdeclarative.setupBindings();
-    qmlRegisterType<GreeterItem>("org.kde.screenlocker", 1, 0, "GreeterItem");
-    qmlRegisterType<KeyboardItem>("org.kde.screenlocker", 1, 0, "KeyboardItem");
 
     SessionSwitching *sessionSwitching = new SessionSwitching(this);
 
@@ -106,12 +103,14 @@ void UnlockApp::prepareShow()
     m_view->setGeometry(Kephal::Screens::self()->primaryScreen()->geom());
     m_view->show();
 
+#if 0
     // HACK: set focus on password field
     if (GreeterItem *unlocker = m_view->rootObject()->findChild<GreeterItem*>("greeter")) {
         if (QLineEdit *lineEdit = unlocker->proxy()->widget()->findChild<QLineEdit *>()) {
             lineEdit->setFocus(Qt::OtherFocusReason);
         }
     }
+#endif
 }
 
 void UnlockApp::setTesting(bool enable)
