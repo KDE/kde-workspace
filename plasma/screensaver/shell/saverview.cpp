@@ -75,16 +75,12 @@ SaverView::SaverView(Plasma::Containment *containment, QWidget *parent)
 {
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
             Qt::X11BypassWindowManagerHint);
-    if (!PlasmaApp::hasComposite()) {
-        setAutoFillBackground(false);
-        setAttribute(Qt::WA_NoSystemBackground);
-    }
 
     //app is doing this for us - if needed
     //QDesktopWidget *desktop = QApplication::desktop();
     //setGeometry(desktop->screenGeometry(containment->screen()));
 
-    setWallpaperEnabled(!PlasmaApp::hasComposite());
+    setWallpaperEnabled(true);
 
     installEventFilter(this);
 }
@@ -112,13 +108,7 @@ void SaverView::disableSetupMode()
 
 void SaverView::drawBackground(QPainter * painter, const QRectF & rect)
 {
-    if (PlasmaApp::hasComposite()) {
-        painter->setCompositionMode(QPainter::CompositionMode_Source);
-        painter->fillRect(rect, QColor(0, 0, 0, 0));
-        //FIXME kwin's shadow effect is getting drawn behind me. do not want.
-    } else {
-        Plasma::View::drawBackground(painter, rect);
-    }
+    Plasma::View::drawBackground(painter, rect);
 }
 
 void SaverView::showWidgetExplorer()
