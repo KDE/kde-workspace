@@ -17,9 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#include "unlockapp.h"
+#include "greeterapp.h"
 #include "sessions.h"
-#include "unlocker.h"
+#include "greeter.h"
 // Qt
 #include <QtCore/QTimer>
 #include <QtDeclarative/QDeclarativeContext>
@@ -83,7 +83,7 @@ void UnlockApp::initialize()
     SessionSwitching *sessionSwitching = new SessionSwitching(this);
 
     m_view->rootContext()->setContextProperty("sessionModel", sessionSwitching->sessionModel());
-    m_view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", "ksld/lockscreen.qml")));
+    m_view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", "kscreenlocker/lockscreen.qml")));
     m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
     connect(m_view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
@@ -130,4 +130,4 @@ void UnlockApp::setTesting(bool enable)
 
 } // namespace
 
-#include "unlockapp.moc"
+#include "greeterapp.moc"

@@ -8,9 +8,9 @@ include_directories(
 
 ########### next target ###############
 set(kscreenlocker_greet_SRCS
+   greeter.cpp
+   greeterapp.cpp
    sessions.cpp
-   unlockapp.cpp
-   unlocker.cpp
    main.cpp )
 
 kde4_add_kcfg_files(kscreenlocker_greet_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../kcfg/kscreensaversettings.kcfgc)

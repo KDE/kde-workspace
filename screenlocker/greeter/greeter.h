@@ -19,8 +19,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef SCREENLOCKER_UNLOCKER_H
-#define SCREENLOCKER_UNLOCKER_H
+#ifndef SCREENLOCKER_GREETER_H
+#define SCREENLOCKER_GREETER_H
 
 #include <QtDeclarative/QDeclarativeItem>
 #include <kgreeterplugin.h>

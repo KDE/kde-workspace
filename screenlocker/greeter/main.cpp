@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KLocale>
 #include <KDE/KGlobal>
 
-#include "unlockapp.h"
+#include "greeterapp.h"
 
 static const char description[] = I18N_NOOP( "Greeter for the KDE Plasma Workspaces Screen locker" );
 static const char version[] = "0.1";
