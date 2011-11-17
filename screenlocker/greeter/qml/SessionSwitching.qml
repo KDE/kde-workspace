@@ -61,7 +61,8 @@ Item {
                     7, 8)
         anchors {
             left: userSessionsView.right
-            leftMargin: 10
+            right: parent.right
+            leftMargin: 5
         }
     }
     PlasmaComponents.ButtonRow {
