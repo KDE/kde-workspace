@@ -25,6 +25,7 @@
 
 #include <Plasma/Corona>
 
+class QDeclarativeEngine;
 class QDBusMessage;
 class QDBusError;
 
@@ -53,11 +54,15 @@ private Q_SLOTS:
     void dbusError(QDBusError error);
     void unlockDesktop();
     void numScreensUpdated(int newCount);
+    void greeterAccepted();
 
 private:
     void init();
+    void createGreeter();
 
     int m_numScreens;
+    QDeclarativeEngine *m_engine;
+    QGraphicsObject *m_greeterItem;
 };
 
 #endif

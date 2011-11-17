@@ -1,6 +1,7 @@
 /*
  *   Copyright 2008 Aaron Seigo <aseigo@kde.org>
  *   Copyright 2008 by Chani Armitage <chanika@gmail.com>
+ *   Copyright 2011 Martin Gräßlin <mgraesslin@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -29,16 +30,22 @@
 #include <QDBusInterface>
 #include <QDBusMessage>
 
+#include <QtDeclarative/QDeclarativeComponent>
+#include <QtDeclarative/QDeclarativeEngine>
+
 #include <KDebug>
 #include <KDialog>
 #include <KStandardDirs>
 #include <KIcon>
+#include <kdeclarative.h>
 
 #include <Plasma/Containment>
 #include <plasma/containmentactionspluginsconfig.h>
 
 SaverCorona::SaverCorona(QObject *parent)
     : Plasma::Corona(parent)
+    , m_engine(NULL)
+    , m_greeterItem(NULL)
 {
     init();
 }
@@ -81,6 +88,16 @@ void SaverCorona::init()
     addAction("unlock desktop", leave);
 
     //updateShortcuts(); //just in case we ever get a config dialog
+
+    // create the QML Component
+    m_engine = new QDeclarativeEngine(this);
+    foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
+        m_engine->addImportPath(importPath);
+    }
+    KDeclarative kdeclarative;
+    kdeclarative.setDeclarativeEngine(m_engine);
+    kdeclarative.initialize();
+    kdeclarative.setupBindings();
 
     connect(this, SIGNAL(immutabilityChanged(Plasma::ImmutabilityType)), SLOT(updateActions(Plasma::ImmutabilityType)));
 }
@@ -187,17 +204,10 @@ void SaverCorona::dbusError(QDBusError error)
 
 void SaverCorona::unlockDesktop()
 {
-    QDBusInterface lockprocess("org.kde.screenlocker", "/LockProcess",
-            "org.kde.screenlocker.LockProcess", QDBusConnection::sessionBus(), this);
-    bool sent = (lockprocess.isValid() &&
-            lockprocess.callWithCallback("quit", QList<QVariant>(), this, SLOT(unlock(QDBusMessage)), SLOT(dbusError(QDBusError))));
-    //the unlock slot above is a dummy that should never be called.
-    //somehow I need a valid reply slot or the error slot is never ever used.
-    if (!sent) {
-        //ah crud.
-        kDebug() << "bailing out!";
-        qApp->quit();
+    if (!m_greeterItem) {
+        createGreeter();
     }
+    m_greeterItem->setVisible(true);
 }
 
 void SaverCorona::numScreensUpdated(int newCount)
@@ -206,6 +216,22 @@ void SaverCorona::numScreensUpdated(int newCount)
     //do something?
 }
 
+void SaverCorona::createGreeter()
+{
+    QDeclarativeComponent component(m_engine, QUrl::fromLocalFile(KStandardDirs::locate("data", "plasma/screenlocker/lockscreen.qml")));
+    m_greeterItem = qobject_cast<QGraphicsObject *>(component.create());
+    addItem(m_greeterItem);
+    connect(m_greeterItem, SIGNAL(accepted()), SLOT(greeterAccepted()));
+    const QRect screenRect = screenGeometry(QApplication::desktop()->primaryScreen());
+    // TODO: center on screen
+    m_greeterItem->setPos(screenRect.x() + screenRect.width()/2,
+                          screenRect.y() + screenRect.height()/2);
+}
+
+void SaverCorona::greeterAccepted()
+{
+    qApp->quit();
+}
 
 #include "savercorona.moc"
 
