@@ -23,6 +23,7 @@ Item {
     id: lockScreen
     signal accepted()
     signal canceled()
+    property alias notification: unlockUI.notification
 
     Greeter {
         id: unlockUI

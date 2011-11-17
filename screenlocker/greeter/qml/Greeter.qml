@@ -28,6 +28,7 @@ Item {
     signal switchUserClicked()
     signal canceled()
     property alias cancelEnabled: cancelButton.visible
+    property alias notification: message.text
     property bool switchUserEnabled
 
     GreeterItem {

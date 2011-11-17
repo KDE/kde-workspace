@@ -26,10 +26,6 @@
 #include <QGraphicsLayout>
 #include <QAction>
 
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <QDBusMessage>
-
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeEngine>
 
@@ -46,6 +42,7 @@ SaverCorona::SaverCorona(QObject *parent)
     : Plasma::Corona(parent)
     , m_engine(NULL)
     , m_greeterItem(NULL)
+    , m_mode(ScreenLock)
 {
     init();
 }
@@ -164,42 +161,19 @@ void SaverCorona::updateActions(Plasma::ImmutabilityType immutability)
 void SaverCorona::toggleLock()
 {
     //require a password to unlock
-    QDBusInterface lockprocess("org.kde.screenlocker", "/LockProcess",
-            "org.kde.screenlocker.LockProcess", QDBusConnection::sessionBus(), this);
     if (immutability() == Plasma::Mutable) {
         setImmutability(Plasma::UserImmutable);
-        lockprocess.call(QDBus::NoBlock, "startLock");
         kDebug() << "locking up!";
     } else if (immutability() == Plasma::UserImmutable) {
-        QList<QVariant> args;
-        args << i18n("Unlock widgets to configure them");
-        bool sent = lockprocess.callWithCallback("checkPass", args, this, SLOT(unlock(QDBusMessage)), SLOT(dbusError(QDBusError)));
-        kDebug() << sent;
+        // show a greeter
+        if (!m_greeterItem) {
+            createGreeter();
+        }
+        m_mode = AppletLock;
+        // TODO: disable session switching
+        m_greeterItem->setProperty("notification", i18n("Unlock widgets to configure them"));
+        m_greeterItem->setVisible(true);
     }
-}
-
-void SaverCorona::unlock(QDBusMessage reply)
-{
-    //assuming everything went as expected
-    if (reply.arguments().isEmpty()) {
-        kDebug() << "quit succeeded, I guess";
-        return;
-    }
-    //else we were trying to unlock just the widgets
-    bool success = reply.arguments().first().toBool();
-    kDebug() << success;
-    if (success) {
-        setImmutability(Plasma::Mutable);
-    }
-}
-
-void SaverCorona::dbusError(QDBusError error)
-{
-    kDebug() << error.errorString(error.type());
-    kDebug() << "bailing out";
-    //if it was the quit call and it failed, we shouldn't leave the user stuck in
-    //plasma-overlay forever.
-    qApp->quit();
 }
 
 void SaverCorona::unlockDesktop()
@@ -207,6 +181,9 @@ void SaverCorona::unlockDesktop()
     if (!m_greeterItem) {
         createGreeter();
     }
+    m_mode = ScreenLock;
+    m_greeterItem->setProperty("notification", "");
+    // TODO: enable session switching
     m_greeterItem->setVisible(true);
 }
 
@@ -231,7 +208,14 @@ void SaverCorona::createGreeter()
 
 void SaverCorona::greeterAccepted()
 {
-    qApp->quit();
+    if (m_mode == ScreenLock) {
+        qApp->quit();
+    } else if (m_mode == AppletLock)  {
+        setImmutability(Plasma::Mutable);
+        // greeter has problems with reusing after success
+        delete m_greeterItem;
+        m_greeterItem = NULL;
+    }
 }
 
 void SaverCorona::greeterCanceled()
