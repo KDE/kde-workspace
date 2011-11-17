@@ -26,8 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeItem>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
-#include <QtGui/QGraphicsProxyWidget>
-#include <QtGui/QLineEdit>
 // KDE
 #include <KDE/KCrash>
 #include <KDE/KDebug>
@@ -99,15 +97,6 @@ void UnlockApp::prepareShow()
 
     m_view->setGeometry(Kephal::Screens::self()->primaryScreen()->geom());
     m_view->show();
-
-#if 0
-    // HACK: set focus on password field
-    if (GreeterItem *unlocker = m_view->rootObject()->findChild<GreeterItem*>("greeter")) {
-        if (QLineEdit *lineEdit = unlocker->proxy()->widget()->findChild<QLineEdit *>()) {
-            lineEdit->setFocus(Qt::OtherFocusReason);
-        }
-    }
-#endif
 }
 
 void UnlockApp::setTesting(bool enable)

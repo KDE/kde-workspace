@@ -46,8 +46,6 @@ public:
     GreeterItem(QDeclarativeItem *parent = NULL);
     virtual ~GreeterItem();
 
-    QGraphicsProxyWidget *proxy();
-
 public Q_SLOTS:
     void verify();
 
@@ -56,6 +54,8 @@ Q_SIGNALS:
     void greeterReady();
     void greeterMessage(const QString &text);
     void greeterAccepted();
+protected:
+    virtual void focusInEvent(QFocusEvent *event);
 private:
     void init();
     QGraphicsProxyWidget *m_proxy;

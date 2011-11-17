@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtGui/QGraphicsProxyWidget>
+#include <QtGui/QLineEdit>
 // KDE
 #include <KDE/KDebug>
 #include <KDE/KLibrary>
@@ -65,11 +66,6 @@ GreeterItem::~GreeterItem()
 {
 }
 
-QGraphicsProxyWidget *GreeterItem::proxy()
-{
-    return m_proxy;
-}
-
 void GreeterItem::init()
 {
     if (!m_unlocker->isValid()) {
@@ -79,6 +75,8 @@ void GreeterItem::init()
     QWidget *widget = m_unlocker->greeterWidget();
     widget->setAttribute(Qt::WA_TranslucentBackground);
     m_proxy->setWidget(widget);
+    setFlag(QGraphicsItem::ItemIsFocusable);
+    QGraphicsItem::setFocus();
     connect(m_unlocker, SIGNAL(greeterFailed()), this, SIGNAL(greeterFailed()));
     connect(m_unlocker, SIGNAL(greeterReady()), this, SIGNAL(greeterReady()));
     connect(m_unlocker, SIGNAL(greeterMessage(QString)), this, SIGNAL(greeterMessage(QString)));
@@ -88,6 +86,14 @@ void GreeterItem::init()
 void GreeterItem::verify()
 {
     m_unlocker->verify();
+}
+
+void GreeterItem::focusInEvent(QFocusEvent *event)
+{
+    QGraphicsItem::focusInEvent(event);
+    if (QLineEdit *lineEdit = m_proxy->widget()->findChild<QLineEdit *>()) {
+        lineEdit->setFocus(Qt::OtherFocusReason);
+    }
 }
 
 // KeyboardItem

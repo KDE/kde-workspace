@@ -53,6 +53,7 @@ Item {
     Greeter {
         id: unlockUI
         anchors.centerIn: dialog
+        focus: true
 
         Connections {
             onAccepted: lockScreen.unlockRequested()
