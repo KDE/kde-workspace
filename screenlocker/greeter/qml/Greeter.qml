@@ -21,16 +21,12 @@ import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1
 import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     signal accepted()
     signal switchUserClicked()
     property bool switchUserEnabled
-
-    // TODO: remove me when using Plasma Components
-    PlasmaCore.Theme {
-        id: theme
-    }
 
     GreeterItem {
         id: greeter
@@ -40,29 +36,24 @@ Item {
         Keys.onEnterPressed: verify()
         Keys.onReturnPressed: verify()
     }
-    // TODO: Plasma component
-    Text {
+    PlasmaComponents.Label {
         id: message
         text: ""
         anchors.horizontalCenter: lockMessage.horizontalCenter
         anchors.bottom: lockMessage.top
         anchors.bottomMargin: 20
     }
-    // TODO: Plasma component
-    Text {
+    PlasmaComponents.Label {
         id: capsLockMessage
         text: i18n("Warning: Caps Lock on")
-        color: theme.textColor
         anchors.horizontalCenter: lockMessage.horizontalCenter
         anchors.bottom: message.top
         anchors.bottomMargin: 5
         visible: capsLockOn
     }
-    // TODO: Plasma component
-    Text {
+    PlasmaComponents.Label {
         id: lockMessage
         text: kscreenlocker_userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
-        color: theme.textColor
         anchors.bottom: greeter.top
         anchors.horizontalCenter: greeter.horizontalCenter
         anchors.bottomMargin: 5
