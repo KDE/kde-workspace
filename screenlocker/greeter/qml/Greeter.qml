@@ -25,7 +25,6 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
 Item {
     signal accepted()
     signal switchUserClicked()
-    property string userName
     property bool switchUserEnabled
 
     // TODO: remove me when using Plasma Components
@@ -62,7 +61,7 @@ Item {
     // TODO: Plasma component
     Text {
         id: lockMessage
-        text: userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", userName)
+        text: kscreenlocker_userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
         color: theme.textColor
         anchors.bottom: greeter.top
         anchors.horizontalCenter: greeter.horizontalCenter

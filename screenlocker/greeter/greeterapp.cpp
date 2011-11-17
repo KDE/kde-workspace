@@ -32,7 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KCrash>
 #include <KDE/KDebug>
 #include <KDE/KStandardDirs>
-#include <KDE/KUser>
 #include <kdeclarative.h>
 // workspace
 #include <kephal/screens.h>
@@ -86,8 +85,6 @@ void UnlockApp::initialize()
     connect(m_view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
     connect(m_view->rootObject(), SIGNAL(startNewSession()), sessionSwitching, SLOT(startNewSession()));
     connect(m_view->rootObject(), SIGNAL(activateSession(int)), sessionSwitching, SLOT(activateSession(int)));
-    KUser user;
-    m_view->rootObject()->setProperty("userName", user.property(KUser::FullName).toString());
     m_view->rootObject()->setProperty("switchUserSupported", sessionSwitching->isSwitchUserSupported());
     m_view->rootObject()->setProperty("startNewSessionSupported", sessionSwitching->isStartNewSessionSupported());
 

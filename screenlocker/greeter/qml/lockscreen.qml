@@ -28,7 +28,6 @@ Item {
     signal unlockRequested()
     signal startNewSession()
     signal activateSession(int index)
-    property alias userName: unlockUI.userName
     property alias switchUserSupported: unlockUI.switchUserEnabled
     property bool startNewSessionSupported
     property bool capsLockOn

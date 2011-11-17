@@ -20,7 +20,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "greeterplugin.h"
 #include "greeter.h"
 
+// Qt
 #include <QtDeclarative/qdeclarative.h>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeEngine>
+// KDE
+#include <KDE/KUser>
+
+void GreeterPlugin::initializeEngine(QDeclarativeEngine *engine, const char *uri)
+{
+    QDeclarativeExtensionPlugin::initializeEngine(engine, uri);
+    QDeclarativeContext *context = engine->rootContext();
+    KUser user;
+    context->setContextProperty("kscreenlocker_userName", user.property(KUser::FullName).toString());
+}
 
 void GreeterPlugin::registerTypes (const char *uri)
 {
