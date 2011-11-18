@@ -23,8 +23,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QObject>
 #include <QtDBus/QDBusContext>
 
+class QDBusServiceWatcher;
+
 namespace ScreenLocker
 {
+
+class InhibitRequest
+{
+public:
+    QString dbusid;
+    uint cookie;
+};
 
 class KSldApp;
 class Interface : public QObject, protected QDBusContext
@@ -101,9 +110,13 @@ Q_SIGNALS:
 private Q_SLOTS:
     void slotLocked();
     void slotUnlocked();
+    void serviceUnregistered(const QString &name);
 
 private:
     KSldApp *m_daemon;
+    QDBusServiceWatcher *m_serviceWatcher;
+    QList<InhibitRequest> m_requests;
+    uint m_next_cookie;
 };
 }
 

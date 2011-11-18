@@ -63,6 +63,7 @@ KSldApp::KSldApp()
     , m_idleId(0)
     , m_lockGrace(0)
     , m_graceTimer(new QTimer(this))
+    , m_inhibitCounter(0)
 {
     initialize();
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
@@ -273,7 +274,10 @@ void KSldApp::idleTimeout(int identifier)
     if (isLocked()) {
         return;
     }
-    // TODO: check for inhibit
+    if (m_inhibitCounter) {
+        // there is at least one process blocking the auto lock of screen locker
+        return;
+    }
     if (m_lockGrace) {
         m_graceTimer->start(m_lockGrace);
     }
@@ -292,6 +296,16 @@ void KSldApp::unlock()
     }
     s_graceTimeKill = true;
     m_lockProcess->kill();
+}
+
+void KSldApp::inhibit()
+{
+    ++m_inhibitCounter;
+}
+
+void KSldApp::uninhibit()
+{
+    --m_inhibitCounter;
 }
 
 } // namespace

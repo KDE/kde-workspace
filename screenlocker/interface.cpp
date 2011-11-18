@@ -23,14 +23,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kscreensaveradaptor.h"
 // Qt
 #include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusServiceWatcher>
 // KDE
 #include <KDE/KIdleTime>
+#include <KDE/KRandom>
 
 namespace ScreenLocker
 {
 Interface::Interface(KSldApp *parent)
     : QObject(parent)
     , m_daemon(parent)
+    , m_serviceWatcher(new QDBusServiceWatcher(this))
+    , m_next_cookie(0)
 {
     (void) new ScreenSaverAdaptor( this );
     QDBusConnection::sessionBus().registerService(QLatin1String("org.freedesktop.ScreenSaver")) ;
@@ -39,6 +43,14 @@ Interface::Interface(KSldApp *parent)
     QDBusConnection::sessionBus().registerObject(QLatin1String("/ScreenSaver"), this);
     connect(m_daemon, SIGNAL(locked()), SLOT(slotLocked()));
     connect(m_daemon, SIGNAL(unlocked()), SLOT(slotUnlocked()));
+
+    m_serviceWatcher->setConnection(QDBusConnection::sessionBus());
+    m_serviceWatcher->setWatchMode(QDBusServiceWatcher::WatchForUnregistration);
+    connect(m_serviceWatcher, SIGNAL(serviceUnregistered(QString)), SLOT(serviceUnregistered(QString)));
+    // I make it a really random number to avoid
+    // some assumptions in clients, but just increase
+    // while gnome-ss creates a random number every time
+    m_next_cookie = KRandom::random() % 20000;
 }
 
 Interface::~Interface()
@@ -80,14 +92,37 @@ uint Interface::Inhibit(const QString &application_name, const QString &reason_f
 {
     Q_UNUSED(application_name)
     Q_UNUSED(reason_for_inhibit)
-    // TODO: implement me, makes only sense when we have the idle support
-    return 0;
+    InhibitRequest sr;
+    sr.cookie = m_next_cookie++;
+    sr.dbusid = message().service();
+    m_requests.append(sr);
+    m_serviceWatcher->addWatchedService(sr.dbusid);
+    KSldApp::self()->inhibit();
+    return sr.cookie;
 }
 
 void Interface::UnInhibit(uint cookie)
 {
-    Q_UNUSED(cookie)
-    // TODO: implement me
+    QMutableListIterator<InhibitRequest> it(m_requests);
+    while (it.hasNext()) {
+        if (it.next().cookie == cookie) {
+            it.remove();
+            KSldApp::self()->uninhibit();
+            break;
+        }
+    }
+}
+
+void Interface::serviceUnregistered(const QString &name)
+{
+    m_serviceWatcher->removeWatchedService(name);
+    QListIterator<InhibitRequest> it(m_requests);
+    while (it.hasNext()) {
+        const InhibitRequest &r = it.next();
+        if (r.dbusid == name) {
+            UnInhibit(r.cookie);
+        }
+    }
 }
 
 void Interface::SimulateUserActivity()

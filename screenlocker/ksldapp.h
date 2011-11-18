@@ -63,6 +63,8 @@ public:
      * Can be used by the lock window to remove the lock during grace time.
      **/
     void unlock();
+    void inhibit();
+    void uninhibit();
 
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
@@ -106,6 +108,7 @@ private:
      * while this timer is active user activity may remove the lock. Only used after idle timeout.
      **/
     QTimer *m_graceTimer;
+    int m_inhibitCounter;
 };
 } // namespace
 
