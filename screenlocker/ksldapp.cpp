@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KDebug>
 #include <KDE/KIdleTime>
 #include <KDE/KLocalizedString>
+#include <KDE/KProcess>
 #include <KDE/KStandardDirs>
 // workspace
 #include <kdisplaymanager.h>
@@ -64,6 +65,7 @@ KSldApp::KSldApp()
     , m_lockGrace(0)
     , m_graceTimer(new QTimer(this))
     , m_inhibitCounter(0)
+    , m_plasmaEnabled(false)
 {
     initialize();
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
@@ -102,7 +104,7 @@ void KSldApp::initialize()
     // idle support
     connect(KIdleTime::instance(), SIGNAL(timeoutReached(int)), SLOT(idleTimeout(int)));
 
-    m_lockProcess = new QProcess();
+    m_lockProcess = new KProcess();
     connect(m_lockProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(lockProcessFinished(int,QProcess::ExitStatus)));
     m_lockedTimer.invalidate();
     m_graceTimer->setSingleShot(true);
@@ -132,6 +134,7 @@ void KSldApp::configure()
         m_lockGrace = 300000; // 5 minutes, keep the value sane
     }
     m_autoLogoutTimeout = KScreenSaverSettings::autoLogout() ? KScreenSaverSettings::autoLogoutTimeout() * 1000 : 0;
+    m_plasmaEnabled = KScreenSaverSettings::plasmaEnabled();
 }
 
 void KSldApp::lock()
@@ -152,10 +155,14 @@ void KSldApp::lock()
     showLockWindow();
 
     // start unlock screen process
-    startLockProcess();
+    if (!startLockProcess()) {
+        releaseGrab();
+        kError() << "Greeter Process not started in time";
+        return;
+    }
     m_locked  = true;
     m_lockedTimer.restart();
-    emit unlocked();
+    emit locked();
 }
 
 KActionCollection *KSldApp::actionCollection()
@@ -236,9 +243,21 @@ void KSldApp::lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     startLockProcess();
 }
 
-void KSldApp::startLockProcess()
+bool KSldApp::startLockProcess()
 {
-    m_lockProcess->start(KStandardDirs::findExe(QLatin1String("kscreenunlocker")));
+    if (m_plasmaEnabled) {
+        m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("plasma-overlay")));
+        *m_lockProcess << QLatin1String("--nofork");
+    } else {
+        m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")));
+    }
+    m_lockProcess->start();
+    // we wait one minute
+    if (!m_lockProcess->waitForStarted()) {
+        m_lockProcess->kill();
+        return false;
+    }
+    return true;
 }
 
 void KSldApp::showLockWindow()

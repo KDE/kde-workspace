@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // forward declarations
 class KActionCollection;
+class KProcess;
 class QTimer;
 
 namespace ScreenLocker
@@ -89,13 +90,13 @@ private:
     bool establishGrab();
     bool grabKeyboard();
     bool grabMouse();
-    void startLockProcess();
+    bool startLockProcess();
     void showLockWindow();
     void hideLockWindow();
 
     KActionCollection *m_actionCollection;
     bool m_locked;
-    QProcess *m_lockProcess;
+    KProcess *m_lockProcess;
     LockWindow *m_lockWindow;
     /**
      * Timer to measure how long the screen is locked.
@@ -114,6 +115,7 @@ private:
     QTimer *m_graceTimer;
     int m_inhibitCounter;
     uint m_autoLogoutTimeout;
+    bool m_plasmaEnabled;
 };
 } // namespace
 
