@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=ksld
+Exec=kscreenlocker
 X-DBUS-StartupType=none
 Name=Screenlocker Daemon
 Type=Service

@@ -26,12 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ksldapp.h"
 
 static const char description[] = I18N_NOOP( "KDE Plasma Workspaces Screenlocker Daemon" );
-static const char version[] = "0.1";
+static const char version[] = "3.0";
 
 extern "C"
 KDE_EXPORT int kdemain(int argc, char* argv[])
 {
-    KAboutData aboutData( "ksld", 0, ki18n( "Screen Locker" ),
+    KAboutData aboutData( "kscreenlocker", 0, ki18n( "Screen Locker" ),
                           version, ki18n(description), KAboutData::License_GPL,
                           ki18n("(c) 2011, Martin Gräßlin") );
     aboutData.addAuthor( ki18n("Martin Gräßlin"),
