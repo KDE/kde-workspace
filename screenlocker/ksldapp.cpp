@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ksldapp.h"
 #include "interface.h"
 #include "lockwindow.h"
+#include "kscreensaversettings.h"
 // Qt
 #include <QtGui/QDesktopWidget>
 #include <QtGui/QX11Info>
@@ -29,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KAuthorized>
 #include <KDE/KCrash>
 #include <KDE/KDebug>
+#include <KDE/KIdleTime>
 #include <KDE/KLocalizedString>
 #include <KDE/KStandardDirs>
 // workspace
@@ -57,6 +59,7 @@ KSldApp::KSldApp()
     , m_lockProcess(NULL)
     , m_lockWindow(NULL)
     , m_lockedTimer(QElapsedTimer())
+    , m_idleId(0)
 {
     initialize();
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
@@ -91,6 +94,14 @@ void KSldApp::initialize()
         connect(a, SIGNAL(triggered(bool)), this, SLOT(lock()));
     }
     m_actionCollection->readSettings();
+
+    // idle support
+    const int timeout = KScreenSaverSettings::timeout();
+    if (timeout > 0) {
+        // timeout stored in seconds
+        m_idleId = KIdleTime::instance()->addIdleTimeout(timeout*1000);
+    }
+    connect(KIdleTime::instance(), SIGNAL(timeoutReached(int)), SLOT(idleTimeout(int)));
 
     m_lockProcess = new QProcess();
     connect(m_lockProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(lockProcessFinished(int,QProcess::ExitStatus)));
@@ -226,6 +237,16 @@ uint KSldApp::activeTime() const
         return m_lockedTimer.elapsed();
     }
     return 0;
+}
+
+void KSldApp::idleTimeout(int identifier)
+{
+    if (identifier != m_idleId) {
+        // not our identifier
+        return;
+    }
+    // TODO: check for inhibit
+    lock();
 }
 
 } // namespace

@@ -65,6 +65,7 @@ Q_SIGNALS:
 private Q_SLOTS:
     void cleanUp();
     void releaseGrab();
+    void idleTimeout(int identifier);
 
 private:
     KSldApp();
@@ -85,6 +86,7 @@ private:
      * This information is required by DBus Interface.
      **/
     QElapsedTimer m_lockedTimer;
+    int m_idleId;
 };
 } // namespace
 
