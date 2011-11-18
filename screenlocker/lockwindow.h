@@ -43,6 +43,7 @@ Q_SIGNALS:
 
 protected:
     virtual bool x11Event(XEvent *event);
+    virtual void paintEvent(QPaintEvent *);
 
 private Q_SLOTS:
     void autoLogoutTimeout();

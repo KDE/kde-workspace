@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Qt
 #include <QtCore/QTimer>
 #include <QtCore/QPointer>
+#include <QtGui/QPainter>
 #include <QtGui/QX11Info>
 // KDE
 #include <KDE/KApplication>
@@ -143,7 +144,7 @@ void LockWindow::showLockWindow()
                             CWEventMask, &attr);
 
     QPalette p = palette();
-    p.setColor(backgroundRole(), Qt::black);
+    p.setColor(backgroundRole(), Qt::transparent);
     setPalette(p);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NoSystemBackground, false);
@@ -521,6 +522,13 @@ void LockWindow::autoLogoutTimeout()
     if (isVisible()) {
         m_autoLogoutTimer->start(KSldApp::self()->autoLogoutTimeout());
     }
+}
+
+void LockWindow::paintEvent(QPaintEvent* )
+{
+    QPainter p(this);
+    p.setBrush(QBrush(Qt::black));
+    p.drawRect(geometry());
 }
 
 }
