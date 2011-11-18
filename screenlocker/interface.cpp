@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "screensaveradaptor.h"
 // Qt
 #include <QtDBus/QDBusConnection>
+// KDE
+#include <KDE/KIdleTime>
 
 namespace ScreenLocker
 {
@@ -52,8 +54,7 @@ uint Interface::GetActiveTime()
 
 uint Interface::GetSessionIdleTime()
 {
-    // TODO: implement me
-    return 0;
+    return KIdleTime::instance()->idleTime();
 }
 
 void Interface::Lock()
