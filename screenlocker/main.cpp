@@ -39,11 +39,18 @@ KDE_EXPORT int kdemain(int argc, char* argv[])
                          "mgraesslin@kde.org" );
 
     KCmdLineArgs::init(argc, argv, &aboutData);
+    KCmdLineOptions options;
+    options.add("locked", ki18n("Starts the daemon in locked mode"));
+    KCmdLineArgs::addCmdLineOptions(options);
     if (!KUniqueApplication::start()) {
         return 0;
     }
 
     ScreenLocker::KSldApp *app = ScreenLocker::KSldApp::self();
+    KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+    if (args->isSet("locked")) {
+        app->lock();
+    }
     KGlobal::locale()->insertCatalog(QLatin1String( "processui" ));
     KGlobal::locale()->insertCatalog(QLatin1String( "libplasma" ));
     app->disableSessionManagement(); // autostarted
