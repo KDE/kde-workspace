@@ -75,6 +75,11 @@ KSldApp::~KSldApp()
 {
 }
 
+static int s_XTimeout;
+static int s_XInterval;
+static int s_XBlanking;
+static int s_XExposures;
+
 void KSldApp::cleanUp()
 {
     if (m_lockProcess && m_lockProcess->state() != QProcess::NotRunning) {
@@ -83,11 +88,22 @@ void KSldApp::cleanUp()
     delete m_actionCollection;
     delete m_lockProcess;
     delete m_lockWindow;
+
+    // Restore X screensaver parameters
+    XSetScreenSaver(QX11Info::display(), s_XTimeout, s_XInterval, s_XBlanking, s_XExposures);
 }
 
 void KSldApp::initialize()
 {
     KCrash::setFlags(KCrash::AutoRestart);
+    // Save X screensaver parameters
+    XGetScreenSaver(QX11Info::display(), &s_XTimeout, &s_XInterval, &s_XBlanking, &s_XExposures);
+    // And disable it. The internal X screensaver is not used at all, but we use its
+    // internal idle timer (and it is also used by DPMS support in X). This timer must not
+    // be altered by this code, since e.g. resetting the counter after activating our
+    // screensaver would prevent DPMS from activating. We use the timer merely to detect
+    // user activity.
+    XSetScreenSaver(QX11Info::display(), 0, s_XInterval, s_XBlanking, s_XExposures);
 
     // Global keys
     m_actionCollection = new KActionCollection(this);
