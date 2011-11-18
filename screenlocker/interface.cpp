@@ -23,8 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kscreensaveradaptor.h"
 // Qt
 #include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusInterface>
+#include <QtDBus/QDBusReply>
 #include <QtDBus/QDBusServiceWatcher>
 // KDE
+#include <KDE/KDebug>
 #include <KDE/KIdleTime>
 #include <KDE/KProcess>
 #include <KDE/KRandom>
@@ -48,6 +51,24 @@ Interface::Interface(KSldApp *parent)
     m_serviceWatcher->setConnection(QDBusConnection::sessionBus());
     m_serviceWatcher->setWatchMode(QDBusServiceWatcher::WatchForUnregistration);
     connect(m_serviceWatcher, SIGNAL(serviceUnregistered(QString)), SLOT(serviceUnregistered(QString)));
+
+    // Also receive updates triggered through the DBus (from powerdevil) see Bug #177123
+    QStringList modules;
+    QDBusInterface kdedInterface(QLatin1String( "org.kde.kded" ), QLatin1String( "/kded" ), QLatin1String( "org.kde.kded" ));
+    QDBusReply<QStringList> reply = kdedInterface.call(QLatin1String( "loadedModules" ));
+
+    if (!reply.isValid()) {
+        return;
+    }
+
+    modules = reply.value();
+
+    if (modules.contains(QLatin1String( "powerdevil" ))) {
+      if (!QDBusConnection::sessionBus().connect(QLatin1String( "org.kde.kded" ), QLatin1String( "/modules/powerdevil" ), QLatin1String( "org.kde.PowerDevil" ),
+                          QLatin1String( "DPMSconfigUpdated" ), this, SLOT(configure()))) {
+            kDebug() << "error!";
+        }
+    }
     // I make it a really random number to avoid
     // some assumptions in clients, but just increase
     // while gnome-ss creates a random number every time
