@@ -7,6 +7,7 @@ include(PkgConfigGetVar)
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kworkspace)
 
 set(screensaver_dbusXML dbus/org.freedesktop.ScreenSaver.xml)
+set(kscreensaver_dbusXML dbus/org.kde.screensaver.xml)
 
 set(ksld_SRCS
    ksldapp.cpp
@@ -14,6 +15,7 @@ set(ksld_SRCS
    lockwindow.cpp
    main.cpp)
 qt4_add_dbus_adaptor(ksld_SRCS ${screensaver_dbusXML} interface.h ScreenLocker::Interface)
+qt4_add_dbus_adaptor(ksld_SRCS ${kscreensaver_dbusXML} interface.h ScreenLocker::Interface kscreensaveradaptor KScreenSaverAdaptor)
 kde4_add_kcfg_files(ksld_SRCS kcfg/kscreensaversettings.kcfgc)
 
 kde4_add_kdeinit_executable(ksld ${ksld_SRCS})

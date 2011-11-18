@@ -96,11 +96,6 @@ void KSldApp::initialize()
     m_actionCollection->readSettings();
 
     // idle support
-    const int timeout = KScreenSaverSettings::timeout();
-    if (timeout > 0) {
-        // timeout stored in seconds
-        m_idleId = KIdleTime::instance()->addIdleTimeout(timeout*1000);
-    }
     connect(KIdleTime::instance(), SIGNAL(timeoutReached(int)), SLOT(idleTimeout(int)));
 
     m_lockProcess = new QProcess();
@@ -108,6 +103,23 @@ void KSldApp::initialize()
     m_lockedTimer.invalidate();
     // create our D-Bus interface
     new Interface(this);
+
+    configure();
+}
+
+void KSldApp::configure()
+{
+    KScreenSaverSettings::self()->readConfig();
+    // idle support
+    if (m_idleId) {
+        KIdleTime::instance()->removeIdleTimeout(m_idleId);
+        m_idleId = 0;
+    }
+    const int timeout = KScreenSaverSettings::timeout();
+    if (timeout > 0) {
+        // timeout stored in seconds
+        m_idleId = KIdleTime::instance()->addIdleTimeout(timeout*1000);
+    }
 }
 
 void KSldApp::lock()

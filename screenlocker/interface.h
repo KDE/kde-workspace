@@ -89,6 +89,11 @@ public Q_SLOTS:
     /// Cancel a previous call to Throttle() identified by the cookie.
     void UnThrottle(uint cookie);
 
+    // org.kde.screensvar
+    void setupPlasma();
+    void configure();
+    void saverLockReady();
+
 Q_SIGNALS:
     // DBus signals
     void ActiveChanged(bool state);

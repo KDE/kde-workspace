@@ -54,6 +54,8 @@ public:
      **/
     uint activeTime() const;
 
+    void configure();
+
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
      void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

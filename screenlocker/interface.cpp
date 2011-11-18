@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "interface.h"
 #include "ksldapp.h"
 #include "screensaveradaptor.h"
+#include "kscreensaveradaptor.h"
 // Qt
 #include <QtDBus/QDBusConnection>
 // KDE
@@ -33,6 +34,8 @@ Interface::Interface(KSldApp *parent)
 {
     (void) new ScreenSaverAdaptor( this );
     QDBusConnection::sessionBus().registerService(QLatin1String("org.freedesktop.ScreenSaver")) ;
+    (void) new KScreenSaverAdaptor( this );
+    QDBusConnection::sessionBus().registerService(QLatin1String("org.kde.screensaver"));
     QDBusConnection::sessionBus().registerObject(QLatin1String("/ScreenSaver"), this);
     connect(m_daemon, SIGNAL(locked()), SLOT(slotLocked()));
     connect(m_daemon, SIGNAL(unlocked()), SLOT(slotUnlocked()));
@@ -114,6 +117,21 @@ void Interface::slotLocked()
 void Interface::slotUnlocked()
 {
     emit ActiveChanged(false);
+}
+
+void Interface::configure()
+{
+    m_daemon->configure();
+}
+
+void Interface::setupPlasma()
+{
+    // unused
+}
+
+void Interface::saverLockReady()
+{
+    // unused
 }
 
 } // namespace
