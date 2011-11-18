@@ -155,6 +155,13 @@ void Greeter::initialize()
         m_plugins << QLatin1String( "classic" ) << QLatin1String( "generic" );
     }
     m_pluginOptions = KScreenSaverSettings::pluginOptions();
+    const QStringList dmopt =
+        QString::fromLatin1( ::getenv( "XDM_MANAGED" )).split(QLatin1Char(','), QString::SkipEmptyParts);
+    for (QStringList::ConstIterator it = dmopt.constBegin(); it != dmopt.constEnd(); ++it) {
+        if ((*it).startsWith(QLatin1String( "method=" ))) {
+            m_method = (*it).mid(7);
+        }
+    }
 }
 
 // standard greeter stuff
