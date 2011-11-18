@@ -152,10 +152,6 @@ void LockWindow::showLockWindow()
     kDebug() << "Lock window Id: " << winId();
 
     move(0, 0);
-    show();
-    setCursor( Qt::ArrowCursor );
-
-    raise();
     XSync(QX11Info::display(), False);
 
     setVRoot( winId(), winId() );
@@ -373,6 +369,11 @@ bool LockWindow::x11Event(XEvent* event)
                     if (m_lockWindows.contains(event->xmap.window)) {
                         kDebug() << "uhoh! duplicate!";
                     } else {
+                        if (!isVisible()) {
+                            // not yet shown and we have a lock window, so we show our own window
+                            show();
+                            setCursor(Qt::ArrowCursor);
+                        }
                         m_lockWindows.prepend(event->xmap.window);
                         fakeFocusIn(event->xmap.window);
                     }
