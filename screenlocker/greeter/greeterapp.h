@@ -43,7 +43,7 @@ private Q_SLOTS:
 
 private:
     void initialize();
-    QDeclarativeView *m_view;
+    QList<QDeclarativeView*> m_views;
     bool m_testing;
 };
 } // namespace

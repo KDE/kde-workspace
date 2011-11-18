@@ -44,7 +44,6 @@ namespace ScreenLocker
 // App
 UnlockApp::UnlockApp()
     : KApplication()
-    , m_view(NULL)
     , m_testing(false)
 {
     initialize();
@@ -53,63 +52,77 @@ UnlockApp::UnlockApp()
 
 UnlockApp::~UnlockApp()
 {
-    delete m_view;
+    qDeleteAll(m_views);
 }
 
 void UnlockApp::initialize()
 {
     // disable DrKonqi as the crash dialog blocks the restart of the locker
     KCrash::setDrKonqiEnabled(false);
-
-    // create the view
-    m_view = new QDeclarativeView();
-    m_view->setWindowFlags(Qt::X11BypassWindowManagerHint);
-    m_view->setFrameStyle(QFrame::NoFrame);
-    // engine stuff
-    foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-        m_view->engine()->addImportPath(importPath);
-    }
-    KDeclarative kdeclarative;
-    kdeclarative.setDeclarativeEngine(m_view->engine());
-    kdeclarative.initialize();
-    kdeclarative.setupBindings();
-
     SessionSwitching *sessionSwitching = new SessionSwitching(this);
 
-    m_view->rootContext()->setContextProperty("sessionModel", sessionSwitching->sessionModel());
-    m_view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", "kscreenlocker/lockscreen.qml")));
-    m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+    for (int i=0; i<Kephal::Screens::self()->screens().count(); ++i) {
 
-    connect(m_view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
-    connect(m_view->rootObject(), SIGNAL(startNewSession()), sessionSwitching, SLOT(startNewSession()));
-    connect(m_view->rootObject(), SIGNAL(activateSession(int)), sessionSwitching, SLOT(activateSession(int)));
-    m_view->rootObject()->setProperty("switchUserSupported", sessionSwitching->isSwitchUserSupported());
-    m_view->rootObject()->setProperty("startNewSessionSupported", sessionSwitching->isStartNewSessionSupported());
+        // create the view
+        QDeclarativeView *view = new QDeclarativeView();
+        view->setWindowFlags(Qt::X11BypassWindowManagerHint);
+        view->setFrameStyle(QFrame::NoFrame);
+        // engine stuff
+        foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
+            view->engine()->addImportPath(importPath);
+        }
+        KDeclarative kdeclarative;
+        kdeclarative.setDeclarativeEngine(view->engine());
+        kdeclarative.initialize();
+        kdeclarative.setupBindings();
 
-    // TODO: connect Kephal screens
+        view->rootContext()->setContextProperty("sessionModel", sessionSwitching->sessionModel());
+        view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", "kscreenlocker/lockscreen.qml")));
+        view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+
+        connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
+        connect(view->rootObject(), SIGNAL(startNewSession()), sessionSwitching, SLOT(startNewSession()));
+        connect(view->rootObject(), SIGNAL(activateSession(int)), sessionSwitching, SLOT(activateSession(int)));
+        view->rootObject()->setProperty("switchUserSupported", sessionSwitching->isSwitchUserSupported());
+        view->rootObject()->setProperty("startNewSessionSupported", sessionSwitching->isStartNewSessionSupported());
+        m_views << view;
+    }
 }
 
 void UnlockApp::prepareShow()
 {
     // mark as our window
     Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
-    XChangeProperty(QX11Info::display(), m_view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
 
-    m_view->setGeometry(Kephal::Screens::self()->primaryScreen()->geom());
-    m_view->show();
+    for (int i=0; i<Kephal::Screens::self()->screens().count(); ++i) {
+        if (i == m_views.size()) {
+            kError() << "Views and screens not in sync";
+            return;
+        }
+        QDeclarativeView *view = m_views.at(i);
+
+        XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+        view->setGeometry(Kephal::Screens::self()->screen(i)->geom());
+        view->show();
+    }
+
 }
 
 void UnlockApp::setTesting(bool enable)
 {
     m_testing  = enable;
-    if (!m_view) {
+    if (m_views.isEmpty()) {
         return;
     }
     if (enable) {
         // remove bypass window manager hint
-        m_view->setWindowFlags(m_view->windowFlags() & ~Qt::X11BypassWindowManagerHint);
+        foreach (QDeclarativeView * view, m_views) {
+            view->setWindowFlags(view->windowFlags() & ~Qt::X11BypassWindowManagerHint);
+        }
     } else {
-        m_view->setWindowFlags(m_view->windowFlags() | Qt::X11BypassWindowManagerHint);
+        foreach (QDeclarativeView * view, m_views) {
+            view->setWindowFlags(view->windowFlags() | Qt::X11BypassWindowManagerHint);
+        }
     }
 }
 
