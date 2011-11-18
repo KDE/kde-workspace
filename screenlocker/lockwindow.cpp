@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "lockwindow.h"
+#include "ksldapp.h"
 // Qt
 #include <QtGui/QX11Info>
 // KDE
@@ -290,6 +291,10 @@ bool LockWindow::x11Event(XEvent* event)
         case KeyPress:
         case KeyRelease:
         case MotionNotify:
+            if (KSldApp::self()->isGraceTime()) {
+                KSldApp::self()->unlock();
+                return true;
+            }
             if (!m_lockWindows.isEmpty()) {
                 XEvent ev2 = *event;
                 Window root_return;

@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // forward declarations
 class KActionCollection;
+class QTimer;
 
 namespace ScreenLocker
 {
@@ -55,6 +56,13 @@ public:
     uint activeTime() const;
 
     void configure();
+
+    bool isGraceTime() const;
+
+    /**
+     * Can be used by the lock window to remove the lock during grace time.
+     **/
+    void unlock();
 
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
@@ -89,6 +97,15 @@ private:
      **/
     QElapsedTimer m_lockedTimer;
     int m_idleId;
+    /**
+     * Number of milliseconds after locking in which user activity will result in screen being
+     * unlocked without requiring a password.
+     **/
+    int m_lockGrace;
+    /**
+     * while this timer is active user activity may remove the lock. Only used after idle timeout.
+     **/
+    QTimer *m_graceTimer;
 };
 } // namespace
 

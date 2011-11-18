@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lockwindow.h"
 #include "kscreensaversettings.h"
 // Qt
+#include <QtCore/QTimer>
 #include <QtGui/QDesktopWidget>
 #include <QtGui/QX11Info>
 // KDE
@@ -60,6 +61,8 @@ KSldApp::KSldApp()
     , m_lockWindow(NULL)
     , m_lockedTimer(QElapsedTimer())
     , m_idleId(0)
+    , m_lockGrace(0)
+    , m_graceTimer(new QTimer(this))
 {
     initialize();
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
@@ -101,6 +104,7 @@ void KSldApp::initialize()
     m_lockProcess = new QProcess();
     connect(m_lockProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(lockProcessFinished(int,QProcess::ExitStatus)));
     m_lockedTimer.invalidate();
+    m_graceTimer->setSingleShot(true);
     // create our D-Bus interface
     new Interface(this);
 
@@ -119,6 +123,12 @@ void KSldApp::configure()
     if (timeout > 0) {
         // timeout stored in seconds
         m_idleId = KIdleTime::instance()->addIdleTimeout(timeout*1000);
+    }
+    m_lockGrace = KScreenSaverSettings::lockGrace();
+    if (m_lockGrace < 0) {
+        m_lockGrace = 0;
+    } else if (m_lockGrace > 300000) {
+        m_lockGrace = 300000; // 5 minutes, keep the value sane
     }
 }
 
@@ -210,10 +220,13 @@ void KSldApp::releaseGrab()
     //u->sendEvent();
 }
 
+static bool s_graceTimeKill = false;
+
 void KSldApp::lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    if (!exitCode && exitStatus == QProcess::NormalExit) {
+    if ((!exitCode && exitStatus == QProcess::NormalExit) || s_graceTimeKill) {
         // unlock process finished successfully - we can remove the lock grab
+        s_graceTimeKill = false;
         releaseGrab();
         return;
     }
@@ -257,8 +270,28 @@ void KSldApp::idleTimeout(int identifier)
         // not our identifier
         return;
     }
+    if (isLocked()) {
+        return;
+    }
     // TODO: check for inhibit
+    if (m_lockGrace) {
+        m_graceTimer->start(m_lockGrace);
+    }
     lock();
+}
+
+bool KSldApp::isGraceTime() const
+{
+    return m_graceTimer->isActive();
+}
+
+void KSldApp::unlock()
+{
+    if (!m_graceTimer->isActive()) {
+        return;
+    }
+    s_graceTimeKill = true;
+    m_lockProcess->kill();
 }
 
 } // namespace
