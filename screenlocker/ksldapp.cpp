@@ -131,6 +131,7 @@ void KSldApp::configure()
     } else if (m_lockGrace > 300000) {
         m_lockGrace = 300000; // 5 minutes, keep the value sane
     }
+    m_autoLogoutTimeout = KScreenSaverSettings::autoLogout() ? KScreenSaverSettings::autoLogoutTimeout() * 1000 : 0;
 }
 
 void KSldApp::lock()

@@ -20,13 +20,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "lockwindow.h"
+#include "autologout.h"
 #include "ksldapp.h"
 // Qt
+#include <QtCore/QTimer>
+#include <QtCore/QPointer>
 #include <QtGui/QX11Info>
 // KDE
 #include <KDE/KApplication>
 #include <KDE/KDebug>
 #include <KDE/KXErrorHandler>
+// workspace
+#include <kephal/kephal/screens.h>
 // X11
 #include <X11/Xatom.h>
 #include <fixx11h.h>
@@ -58,6 +63,7 @@ namespace ScreenLocker
 
 LockWindow::LockWindow()
     : QWidget()
+    , m_autoLogoutTimer(new QTimer(this))
 {
     initialize();
 }
@@ -105,6 +111,8 @@ void LockWindow::initialize()
         }
         XFree( real );
     }
+    m_autoLogoutTimer->setSingleShot(true);
+    connect(m_autoLogoutTimer, SIGNAL(timeout()), SLOT(autoLogoutTimeout()));
 }
 
 void LockWindow::showLockWindow()
@@ -151,6 +159,9 @@ void LockWindow::showLockWindow()
     XSync(QX11Info::display(), False);
 
     setVRoot( winId(), winId() );
+    if (KSldApp::self()->autoLogoutTimeout()) {
+        m_autoLogoutTimer->start(KSldApp::self()->autoLogoutTimeout());
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -159,6 +170,10 @@ void LockWindow::showLockWindow()
 //
 void LockWindow::hideLockWindow()
 {
+  if (m_autoLogoutTimer->isActive()) {
+      m_autoLogoutTimer->stop();
+  }
+  emit userActivity();
   hide();
   lower();
   removeVRoot(winId());
@@ -295,6 +310,10 @@ bool LockWindow::x11Event(XEvent* event)
                 KSldApp::self()->unlock();
                 return true;
             }
+            if (m_autoLogoutTimer->isActive()) {
+                m_autoLogoutTimer->start(KSldApp::self()->autoLogoutTimeout());
+            }
+            emit userActivity();
             if (!m_lockWindows.isEmpty()) {
                 XEvent ev2 = *event;
                 Window root_return;
@@ -477,6 +496,30 @@ bool LockWindow::isLockWindow(Window id)
         XFree(data);
     }
     return lockWindow;
+}
+
+void LockWindow::autoLogoutTimeout()
+{
+    QPointer<AutoLogout> dlg = new AutoLogout(this);
+    dlg->adjustSize();
+
+    int screen = Kephal::ScreenUtils::primaryScreenId();
+    if (Kephal::ScreenUtils::numScreens() > 1) {
+        screen = Kephal::ScreenUtils::screenId(QCursor::pos());
+    }
+
+    const QRect screenRect = Kephal::ScreenUtils::screenGeometry(screen);
+    QRect rect = dlg->geometry();
+    rect.moveCenter(screenRect.center());
+    dlg->move(rect.topLeft());
+    Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
+    XChangeProperty(QX11Info::display(), dlg->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+    dlg->exec();
+    delete dlg;
+    // start the timer again - only if the window is still shown
+    if (isVisible()) {
+        m_autoLogoutTimer->start(KSldApp::self()->autoLogoutTimeout());
+    }
 }
 
 }

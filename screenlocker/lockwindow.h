@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/Xlib.h>
 #include <fixx11h.h>
 
+class QTimer;
 namespace ScreenLocker
 {
 class LockWindow : public QWidget
@@ -37,8 +38,14 @@ public:
     void showLockWindow();
     void hideLockWindow();
 
+Q_SIGNALS:
+    void userActivity();
+
 protected:
     virtual bool x11Event(XEvent *event);
+
+private Q_SLOTS:
+    void autoLogoutTimeout();
 
 private:
     void initialize();
@@ -55,6 +62,7 @@ private:
     };
     QList<WindowInfo> m_windowInfo;
     QList<WId> m_lockWindows;
+    QTimer *m_autoLogoutTimer;
 };
 }
 

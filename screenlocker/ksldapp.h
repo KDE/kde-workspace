@@ -66,6 +66,10 @@ public:
     void inhibit();
     void uninhibit();
 
+    uint autoLogoutTimeout() const {
+        return m_autoLogoutTimeout;
+    }
+
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
      void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -109,6 +113,7 @@ private:
      **/
     QTimer *m_graceTimer;
     int m_inhibitCounter;
+    uint m_autoLogoutTimeout;
 };
 } // namespace
 
