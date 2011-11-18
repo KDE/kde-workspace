@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDBus/QDBusServiceWatcher>
 // KDE
 #include <KDE/KIdleTime>
+#include <KDE/KProcess>
 #include <KDE/KRandom>
 
 namespace ScreenLocker
@@ -161,7 +162,14 @@ void Interface::configure()
 
 void Interface::setupPlasma()
 {
-    // unused
+    KProcess *plasmaProc = new KProcess;
+    plasmaProc->setProgram(QLatin1String( "plasma-overlay" ));
+    *plasmaProc << QLatin1String( "--setup" );
+
+    //make sure it goes away when it's done (and not before)
+    connect(plasmaProc, SIGNAL(finished(int,QProcess::ExitStatus)), plasmaProc, SLOT(deleteLater()));
+
+    plasmaProc->start();
 }
 
 void Interface::saverLockReady()
