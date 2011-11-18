@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <KDE/KUniqueApplication>
 
+#include <QtCore/QElapsedTimer>
 #include <QtCore/QProcess>
 
 // forward declarations
@@ -44,9 +45,22 @@ public:
     // The action collection of the active widget
     KActionCollection* actionCollection();
 
+    bool isLocked() const {
+        return m_locked;
+    }
+
+    /**
+     * @returns the number of milliseconds passed since the screen has been locked.
+     **/
+    uint activeTime() const;
+
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
      void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+
+Q_SIGNALS:
+    void locked();
+    void unlocked();
 
 private Q_SLOTS:
     void cleanUp();
@@ -66,6 +80,11 @@ private:
     bool m_locked;
     QProcess *m_lockProcess;
     LockWindow *m_lockWindow;
+    /**
+     * Timer to measure how long the screen is locked.
+     * This information is required by DBus Interface.
+     **/
+    QElapsedTimer m_lockedTimer;
 };
 } // namespace
 

@@ -18,9 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "ksldapp.h"
+#include "interface.h"
 #include "lockwindow.h"
 // Qt
-#include <QtCore/QTimer>
 #include <QtGui/QDesktopWidget>
 #include <QtGui/QX11Info>
 // KDE
@@ -56,6 +56,7 @@ KSldApp::KSldApp()
     , m_locked(false)
     , m_lockProcess(NULL)
     , m_lockWindow(NULL)
+    , m_lockedTimer(QElapsedTimer())
 {
     initialize();
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
@@ -93,6 +94,9 @@ void KSldApp::initialize()
 
     m_lockProcess = new QProcess();
     connect(m_lockProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(lockProcessFinished(int,QProcess::ExitStatus)));
+    m_lockedTimer.invalidate();
+    // create our D-Bus interface
+    new Interface(this);
 }
 
 void KSldApp::lock()
@@ -115,6 +119,8 @@ void KSldApp::lock()
     // start unlock screen process
     startLockProcess();
     m_locked  = true;
+    m_lockedTimer.restart();
+    emit unlocked();
 }
 
 KActionCollection *KSldApp::actionCollection()
@@ -174,7 +180,9 @@ void KSldApp::releaseGrab()
     delete m_lockWindow;
     m_lockWindow = NULL;
     m_locked = false;
+    m_lockedTimer.invalidate();
     KDisplayManager().setLock(false);
+    emit unlocked();
     //KNotification *u = new KNotification( QLatin1String("unlocked"));
     //u->sendEvent();
 }
@@ -210,6 +218,14 @@ void KSldApp::hideLockWindow()
         return;
     }
     m_lockWindow->hideLockWindow();
+}
+
+uint KSldApp::activeTime() const
+{
+    if (m_lockedTimer.isValid()) {
+        return m_lockedTimer.elapsed();
+    }
+    return 0;
 }
 
 } // namespace

@@ -6,10 +6,14 @@ include(PkgConfigGetVar)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kworkspace)
 
+set(screensaver_dbusXML dbus/org.freedesktop.ScreenSaver.xml)
+
 set(ksld_SRCS
    ksldapp.cpp
+   interface.cpp
    lockwindow.cpp
    main.cpp)
+qt4_add_dbus_adaptor(ksld_SRCS ${screensaver_dbusXML} interface.h ScreenLocker::Interface)
 
 kde4_add_kdeinit_executable(ksld ${ksld_SRCS})
 
