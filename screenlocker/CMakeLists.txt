@@ -29,3 +29,4 @@ install(TARGETS kdeinit_kscreenlocker ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(TARGETS kscreenlocker         ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 install(FILES kscreenlocker.desktop  DESTINATION  ${AUTOSTART_INSTALL_DIR})
+install( FILES kscreenlocker.notifyrc  DESTINATION  ${DATA_INSTALL_DIR}/kscreenlocker )

@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KDebug>
 #include <KDE/KIdleTime>
 #include <KDE/KLocalizedString>
+#include <KDE/KNotification>
 #include <KDE/KProcess>
 #include <KDE/KStandardDirs>
 // workspace
@@ -166,7 +167,7 @@ void KSldApp::lock()
         return;
     }
     KDisplayManager().setLock(true);
-    //KNotification::event(QLatin1String( "locked" ));
+    KNotification::event(QLatin1String( "locked" ));
 
     // blank the screen
     showLockWindow();
@@ -242,8 +243,7 @@ void KSldApp::releaseGrab()
     m_lockedTimer.invalidate();
     KDisplayManager().setLock(false);
     emit unlocked();
-    //KNotification *u = new KNotification( QLatin1String("unlocked"));
-    //u->sendEvent();
+    KNotification::event( QLatin1String("unlocked"));
 }
 
 static bool s_graceTimeKill = false;
