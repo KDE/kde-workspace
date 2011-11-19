@@ -42,5 +42,8 @@ target_link_libraries(kscreenlocker_greet kephal kworkspace ${KDE4_KDEUI_LIBS} $
 install(TARGETS kscreenlocker_greet DESTINATION ${LIBEXEC_INSTALL_DIR})
 install(FILES
     qml/lockscreen.qml
+    qml/lockscreen-active.qml
     qml/SessionSwitching.qml
+    qml/unlock-normal.png
+    qml/unlock-pressed.png
     DESTINATION ${DATA_INSTALL_DIR}/kscreenlocker)

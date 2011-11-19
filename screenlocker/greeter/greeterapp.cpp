@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeterapp.h"
 #include "sessions.h"
+#include "kscreensaversettings.h"
 // Qt
 #include <QtCore/QTimer>
 #include <QtDeclarative/QDeclarativeContext>
@@ -61,6 +62,8 @@ void UnlockApp::initialize()
     KCrash::setDrKonqiEnabled(false);
     SessionSwitching *sessionSwitching = new SessionSwitching(this);
 
+    KScreenSaverSettings::self()->readConfig();
+
     for (int i=0; i<Kephal::Screens::self()->screens().count(); ++i) {
 
         // create the view
@@ -77,7 +80,7 @@ void UnlockApp::initialize()
         kdeclarative.setupBindings();
 
         view->rootContext()->setContextProperty("sessionModel", sessionSwitching->sessionModel());
-        view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", "kscreenlocker/lockscreen.qml")));
+        view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", KScreenSaverSettings::greeterQML())));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
