@@ -27,6 +27,7 @@ Item {
     property alias cancelEnabled: cancelButton.visible
     property alias notification: message.text
     property bool switchUserEnabled
+    property alias capsLockOn: capsLockMessage.visible
 
     GreeterItem {
         id: greeter
@@ -49,7 +50,7 @@ Item {
         anchors.horizontalCenter: lockMessage.horizontalCenter
         anchors.bottom: message.top
         anchors.bottomMargin: 5
-        visible: capsLockOn
+        visible: false
     }
     PlasmaComponents.Label {
         id: lockMessage

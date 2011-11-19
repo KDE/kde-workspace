@@ -30,7 +30,7 @@ Item {
     signal activateSession(int index)
     property alias switchUserSupported: unlockUI.switchUserEnabled
     property bool startNewSessionSupported
-    property bool capsLockOn
+    property alias capsLockOn: unlockUI.capsLockOn
 
     PlasmaCore.Theme {
         id: theme

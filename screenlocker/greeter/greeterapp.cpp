@@ -46,6 +46,7 @@ namespace ScreenLocker
 UnlockApp::UnlockApp()
     : KApplication()
     , m_testing(false)
+    , m_capsLocked(false)
 {
     initialize();
     QTimer::singleShot(0, this, SLOT(prepareShow()));
@@ -90,6 +91,7 @@ void UnlockApp::initialize()
         view->rootObject()->setProperty("startNewSessionSupported", sessionSwitching->isStartNewSessionSupported());
         m_views << view;
     }
+    installEventFilter(this);
 }
 
 void UnlockApp::prepareShow()
@@ -108,7 +110,7 @@ void UnlockApp::prepareShow()
         view->setGeometry(Kephal::Screens::self()->screen(i)->geom());
         view->show();
     }
-
+    capsLocked();
 }
 
 void UnlockApp::setTesting(bool enable)
@@ -125,6 +127,30 @@ void UnlockApp::setTesting(bool enable)
     } else {
         foreach (QDeclarativeView * view, m_views) {
             view->setWindowFlags(view->windowFlags() | Qt::X11BypassWindowManagerHint);
+        }
+    }
+}
+
+bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj)
+    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
+        capsLocked();
+    }
+    return false;
+}
+
+void UnlockApp::capsLocked()
+{
+    unsigned int lmask;
+    Window dummy1, dummy2;
+    int dummy3, dummy4, dummy5, dummy6;
+    XQueryPointer(QX11Info::display(), DefaultRootWindow( QX11Info::display() ), &dummy1, &dummy2, &dummy3, &dummy4, &dummy5, &dummy6, &lmask);
+    const bool before = m_capsLocked;
+    m_capsLocked = lmask & LockMask;
+    if (before != m_capsLocked) {
+        foreach (QDeclarativeView *view, m_views) {
+            view->rootObject()->setProperty("capsLockOn", m_capsLocked);
         }
     }
 }

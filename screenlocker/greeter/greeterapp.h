@@ -38,13 +38,18 @@ public:
 
     void setTesting(bool enable);
 
+protected:
+    virtual bool eventFilter(QObject *obj, QEvent *event);
+
 private Q_SLOTS:
     void prepareShow();
 
 private:
     void initialize();
+    void capsLocked();
     QList<QDeclarativeView*> m_views;
     bool m_testing;
+    bool m_capsLocked;
 };
 } // namespace
 
