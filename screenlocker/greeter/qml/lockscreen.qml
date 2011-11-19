@@ -26,10 +26,6 @@ Item {
     id: lockScreen
     state: "UNLOCK"
     signal unlockRequested()
-    signal startNewSession()
-    signal activateSession(int index)
-    property alias switchUserSupported: unlockUI.switchUserEnabled
-    property bool startNewSessionSupported
     property alias capsLockOn: unlockUI.capsLockOn
 
     PlasmaCore.Theme {
@@ -55,6 +51,7 @@ Item {
         y: parent.height/2
         x: parent.width/2 - implicitWidth/2
         focus: true
+        switchUserEnabled: userSessionsUI.switchUserSupported
 
         Connections {
             onAccepted: lockScreen.unlockRequested()
@@ -68,8 +65,6 @@ Item {
     // TODO: loader
     SessionSwitching {
         id: userSessionsUI
-        model: sessionModel
-        startNewSessionSupported: lockScreen.startNewSessionSupported
         anchors {
             fill: dialog
             leftMargin: dialog.margins.left
@@ -79,11 +74,8 @@ Item {
         }
         Connections {
             onCancel: lockScreen.state = "UNLOCK"
-            onStartNewSessionClicked: lockScreen.startNewSession()
-            onActivateSessionClicked: {
-                lockScreen.activateSession(index)
-                lockScreen.state = "UNLOCK"
-            }
+            onActivateSession: lockScreen.state = "UNLOCK"
+            onStartNewSession: lockScreen.state = "UNLOCK"
         }
     }
 

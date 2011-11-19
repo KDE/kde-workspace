@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeterplugin.h"
 #include "greeter.h"
+#include "sessions.h"
 
 // Qt
 #include <QtDeclarative/qdeclarative.h>
@@ -41,6 +42,8 @@ void GreeterPlugin::registerTypes (const char *uri)
 
     qmlRegisterType<ScreenLocker::GreeterItem>(uri, 1, 0, "GreeterItem");
     qmlRegisterType<ScreenLocker::KeyboardItem>(uri, 1, 0, "KeyboardItem");
+    qmlRegisterType<ScreenLocker::SessionSwitching>(uri, 1, 0, "Sessions");
+    qmlRegisterType<QAbstractItemModel>();
 }
 
 #include "greeterplugin.moc"

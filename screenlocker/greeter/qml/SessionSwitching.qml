@@ -21,12 +21,15 @@ import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
-    property alias model: userSessionsView.model
-    property bool startNewSessionSupported
-    signal activateSessionClicked(int index)
-    signal startNewSessionClicked()
+    property alias switchUserSupported: sessions.switchUserSupported
+    signal activateSession()
+    signal startNewSession()
     signal cancel()
+    Sessions {
+        id: sessions
+    }
     ListView {
+        model: sessions.model
         id: userSessionsView
         anchors {
             left: parent.left
@@ -49,7 +52,10 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: userSessionsView.currentIndex = userSessionsView.indexAt(mouse.x, mouse.y)
-            onDoubleClicked: activateSessionClicked(userSessionsView.indexAt(mouse.x, mouse.y))
+            onDoubleClicked: {
+                sessions.activateSession(userSessionsView.indexAt(mouse.x, mouse.y));
+                activateSession();
+            }
         }
     }
     PlasmaComponents.Label {
@@ -78,14 +84,20 @@ Item {
             id: activateSession
             text: i18n("Activate")
             iconSource: "fork"
-            onClicked: activateSessionClicked(userSessionsView.currentIndex)
+            onClicked: {
+                sessions.activateSession(userSessionsView.currentIndex);
+                activateSession();
+            }
         }
         PlasmaComponents.Button {
             id: newSession
             text: i18n("Start New Session")
             iconSource: "fork"
-            visible: startNewSessionSupported
-            onClicked: startNewSessionClicked()
+            visible: sessions.startNewSessionSupported
+            onClicked: {
+                sessions.startNewSession();
+                startNewSession();
+            }
         }
         PlasmaComponents.Button {
             id: cancelSession

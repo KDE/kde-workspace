@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeterapp.h"
-#include "sessions.h"
 #include "kscreensaversettings.h"
 // Qt
 #include <QtCore/QTimer>
@@ -61,7 +60,6 @@ void UnlockApp::initialize()
 {
     // disable DrKonqi as the crash dialog blocks the restart of the locker
     KCrash::setDrKonqiEnabled(false);
-    SessionSwitching *sessionSwitching = new SessionSwitching(this);
 
     KScreenSaverSettings::self()->readConfig();
 
@@ -80,15 +78,10 @@ void UnlockApp::initialize()
         kdeclarative.initialize();
         kdeclarative.setupBindings();
 
-        view->rootContext()->setContextProperty("sessionModel", sessionSwitching->sessionModel());
         view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", KScreenSaverSettings::greeterQML())));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
-        connect(view->rootObject(), SIGNAL(startNewSession()), sessionSwitching, SLOT(startNewSession()));
-        connect(view->rootObject(), SIGNAL(activateSession(int)), sessionSwitching, SLOT(activateSession(int)));
-        view->rootObject()->setProperty("switchUserSupported", sessionSwitching->isSwitchUserSupported());
-        view->rootObject()->setProperty("startNewSessionSupported", sessionSwitching->isStartNewSessionSupported());
         m_views << view;
     }
     installEventFilter(this);
