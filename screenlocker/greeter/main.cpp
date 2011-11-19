@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     KCmdLineArgs::addCmdLineOptions(options);
 
     ScreenLocker::UnlockApp app;
-    KGlobal::locale()->insertCatalog(QLatin1String( "libplasma" ));
+    KGlobal::locale()->insertCatalog(QLatin1String( "libkworkspace" ));
     app.disableSessionManagement(); // manually-started
     KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
     if (args->isSet("testing")) {

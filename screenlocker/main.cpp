@@ -51,8 +51,7 @@ KDE_EXPORT int kdemain(int argc, char* argv[])
     if (args->isSet("locked")) {
         app->lock();
     }
-    KGlobal::locale()->insertCatalog(QLatin1String( "processui" ));
-    KGlobal::locale()->insertCatalog(QLatin1String( "libplasma" ));
+    KGlobal::locale()->insertCatalog(QLatin1String( "libkworkspace" ));
     app->disableSessionManagement(); // autostarted
     int rc = app->exec();
     delete app;
