@@ -45,6 +45,9 @@ public:
     virtual int numScreens() const;
     virtual QRect screenGeometry(int id) const;
 
+protected:
+    virtual bool eventFilter(QObject *watched, QEvent *event);
+
 private Q_SLOTS:
     void updateActions(Plasma::ImmutabilityType immutability);
     void toggleLock();
@@ -60,11 +63,13 @@ private:
     };
     void init();
     void createGreeter();
+    void capsLocked();
 
     int m_numScreens;
     QDeclarativeEngine *m_engine;
     QGraphicsObject *m_greeterItem;
     UnlockMode m_mode;
+    bool m_capsLocked;
 };
 
 #endif

@@ -24,6 +24,7 @@ Item {
     signal accepted()
     signal canceled()
     property alias notification: unlockUI.notification
+    property alias capsLockOn: unlockUI.capsLockOn
 
     Greeter {
         id: unlockUI

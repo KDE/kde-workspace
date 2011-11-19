@@ -38,11 +38,16 @@
 #include <Plasma/Containment>
 #include <plasma/containmentactionspluginsconfig.h>
 
+#include <QtGui/QX11Info>
+#include <X11/Xlib.h>
+#include <fixx11h.h>
+
 SaverCorona::SaverCorona(QObject *parent)
     : Plasma::Corona(parent)
     , m_engine(NULL)
     , m_greeterItem(NULL)
     , m_mode(ScreenLock)
+    , m_capsLocked(false)
 {
     init();
 }
@@ -97,6 +102,8 @@ void SaverCorona::init()
     kdeclarative.setupBindings();
 
     connect(this, SIGNAL(immutabilityChanged(Plasma::ImmutabilityType)), SLOT(updateActions(Plasma::ImmutabilityType)));
+
+    installEventFilter(this);
 }
 
 void SaverCorona::loadDefaultLayout()
@@ -221,6 +228,30 @@ void SaverCorona::greeterAccepted()
 void SaverCorona::greeterCanceled()
 {
     m_greeterItem->setVisible(false);
+}
+
+bool SaverCorona::eventFilter(QObject* watched, QEvent* event)
+{
+    Q_UNUSED(watched)
+    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
+        capsLocked();
+    }
+    return false;
+}
+
+void SaverCorona::capsLocked()
+{
+    unsigned int lmask;
+    Window dummy1, dummy2;
+    int dummy3, dummy4, dummy5, dummy6;
+    XQueryPointer(QX11Info::display(), DefaultRootWindow( QX11Info::display() ), &dummy1, &dummy2, &dummy3, &dummy4, &dummy5, &dummy6, &lmask);
+    const bool before = m_capsLocked;
+    m_capsLocked = lmask & LockMask;
+    if (before != m_capsLocked) {
+        if (m_greeterItem) {
+            m_greeterItem->setProperty("capsLockOn", m_capsLocked);
+        }
+    }
 }
 
 #include "savercorona.moc"
