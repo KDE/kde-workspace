@@ -16,7 +16,8 @@
  *   Free Software Foundation, Inc.,
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import QtQuick 1.0
+import QtQuick 1.1
+import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.kscreenlocker 1.0
 
 Item {
@@ -26,9 +27,17 @@ Item {
     property alias notification: unlockUI.notification
     property alias capsLockOn: unlockUI.capsLockOn
 
+    PlasmaCore.FrameSvgItem {
+        id: dialog
+        imagePath: "translucent/dialogs/background"
+        width: unlockUI.implicitWidth * 1.5 + margins.left + margins.right
+        height: unlockUI.implicitHeight * 1.5 + margins.top + margins.bottom
+        anchors.centerIn: parent
+    }
+
     Greeter {
+        x: - implicitWidth/2
         id: unlockUI
-        anchors.centerIn: dialog
         focus: true
         cancelEnabled: true
 

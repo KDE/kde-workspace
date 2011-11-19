@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-import QtQuick 1.0
+import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1
 import org.kde.kscreenlocker 1.0
@@ -46,13 +46,14 @@ Item {
         id: dialog
         anchors.centerIn: parent
         imagePath: "translucent/dialogs/background"
-        width: parent.width/2
-        height: parent.height/2
+        width: unlockUI.implicitWidth * 1.5 + margins.left + margins.right
+        height: unlockUI.implicitHeight * 1.5 + margins.top + margins.bottom
     }
 
     Greeter {
         id: unlockUI
-        anchors.centerIn: dialog
+        y: parent.height/2
+        x: parent.width/2 - implicitWidth/2
         focus: true
 
         Connections {
@@ -69,9 +70,13 @@ Item {
         id: userSessionsUI
         model: sessionModel
         startNewSessionSupported: lockScreen.startNewSessionSupported
-        width: dialog.width * 0.8
-        height: dialog.height * 0.8
-        anchors.centerIn: dialog
+        anchors {
+            fill: dialog
+            leftMargin: dialog.margins.left
+            rightMargin: dialog.margins.right
+            topMargin: dialog.margins.top
+            bottomMargin: dialog.margins.bottom
+        }
         Connections {
             onCancel: lockScreen.state = "UNLOCK"
             onStartNewSessionClicked: lockScreen.startNewSession()

@@ -17,8 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-import QtQuick 1.0
+import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.graphicslayouts 4.7
 
 Item {
     signal accepted()
@@ -28,14 +29,38 @@ Item {
     property alias notification: message.text
     property bool switchUserEnabled
     property alias capsLockOn: capsLockMessage.visible
+    implicitWidth: Math.max(layoutItem.size.width, buttonRow.width)
+    implicitHeight: layoutItem.size.height + buttonRow.height*2 + message.implicitHeight + capsLockMessage.implicitHeight + lockMessage.implicitHeight + 40
 
-    GreeterItem {
-        id: greeter
-        objectName: "greeter"
-        anchors.centerIn: parent
-        anchors.bottomMargin: 20
-        Keys.onEnterPressed: verify()
-        Keys.onReturnPressed: verify()
+    QGraphicsWidget {
+        id: layoutItem
+        size.width: layoutItem1.preferredSize.width + layoutItem2.preferredSize.width
+        size.height: layoutItem1.preferredSize.height
+
+        layout: QGraphicsLinearLayout {
+            LayoutItem {
+                id: layoutItem1
+                minimumSize: "100x50"
+                maximumSize: "1024x768"
+                preferredSize: "200x100"
+                GreeterItem {
+                    id: greeter
+                    objectName: "greeter"
+                    anchors.fill: parent
+                    Keys.onEnterPressed: verify()
+                    Keys.onReturnPressed: verify()
+                }
+            }
+            LayoutItem {
+                id: layoutItem2
+                minimumSize: "50x50"
+                maximumSize: minimumSize
+                preferredSize: minimumSize
+                KeyboardItem {
+                    anchors.fill: parent
+                }
+            }
+        }
     }
     PlasmaComponents.Label {
         id: message
@@ -43,6 +68,7 @@ Item {
         anchors.horizontalCenter: lockMessage.horizontalCenter
         anchors.bottom: lockMessage.top
         anchors.bottomMargin: 20
+        font.bold: true
     }
     PlasmaComponents.Label {
         id: capsLockMessage
@@ -51,22 +77,17 @@ Item {
         anchors.bottom: message.top
         anchors.bottomMargin: 5
         visible: false
+        font.bold: true
     }
     PlasmaComponents.Label {
         id: lockMessage
         text: kscreenlocker_userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
-        anchors.bottom: greeter.top
-        anchors.horizontalCenter: greeter.horizontalCenter
+        anchors.bottom: layoutItem.top
+        anchors.horizontalCenter: layoutItem.horizontalCenter
         anchors.bottomMargin: 5
     }
-    KeyboardItem {
-        id: keyboard
-        anchors.top: greeter.bottom
-        anchors.right: greeter.right
-        anchors.topMargin: 40
-        anchors.bottomMargin: 20
-    }
     PlasmaComponents.ButtonRow {
+        id: buttonRow
         exclusive: false
         PlasmaComponents.Button {
             id: switchUser
@@ -88,9 +109,8 @@ Item {
             onClicked: canceled()
             visible: false
         }
-        anchors.top: greeter.bottom
-        anchors.horizontalCenter: greeter.horizontalCenter
-        anchors.topMargin: 100
+        anchors.top: layoutItem.bottom
+        anchors.horizontalCenter: layoutItem.horizontalCenter
     }
 
     Connections {

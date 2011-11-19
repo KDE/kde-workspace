@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-import QtQuick 1.0
+import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
@@ -28,9 +28,13 @@ Item {
     signal cancel()
     ListView {
         id: userSessionsView
-        width: parent.width / 2
-        height: parent.height
-        anchors.centerIn: parent
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: buttonRow.top
+            bottomMargin: 5
+        }
+        height: parent.height - explainText.implicitHeight - buttonRow.height - 10
 
         delegate: PlasmaComponents.ListItem {
             content: PlasmaComponents.Label {
@@ -42,13 +46,14 @@ Item {
             width: parent.width
         }
         focus: true
-    }
-    MouseArea {
-        anchors.fill: userSessionsView
-        onClicked: userSessionsView.currentIndex = userSessionsView.indexAt(mouse.x, mouse.y)
-        onDoubleClicked: activateSessionClicked(userSessionsView.indexAt(mouse.x, mouse.y))
+        MouseArea {
+            anchors.fill: parent
+            onClicked: userSessionsView.currentIndex = userSessionsView.indexAt(mouse.x, mouse.y)
+            onDoubleClicked: activateSessionClicked(userSessionsView.indexAt(mouse.x, mouse.y))
+        }
     }
     PlasmaComponents.Label {
+        id: explainText
         text: i18n("The current session will be hidden " +
                     "and a new login screen or an existing session will be displayed.\n" +
                     "An F-key is assigned to each session; " +
@@ -60,12 +65,13 @@ Item {
                     "actions for switching between sessions.",
                     7, 8)
         anchors {
-            left: userSessionsView.right
+            top: parent.top
+            left: parent.left
             right: parent.right
-            leftMargin: 5
         }
     }
     PlasmaComponents.ButtonRow {
+        id: buttonRow
         exclusive: false
 
         PlasmaComponents.Button {
@@ -87,8 +93,7 @@ Item {
             iconSource: "dialog-cancel"
             onClicked: cancel()
         }
-        anchors.top: userSessionsUI.bottom
+        anchors.bottom: parent.bottom
         anchors.horizontalCenter: userSessionsUI.horizontalCenter
-        anchors.bottomMargin: 20
     }
 }
