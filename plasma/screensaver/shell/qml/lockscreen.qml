@@ -22,6 +22,7 @@ import org.kde.kscreenlocker 1.0
 
 Item {
     id: lockScreen
+    state: "UNLOCK"
     signal accepted()
     signal canceled()
     property alias notification: unlockUI.notification
@@ -40,10 +41,43 @@ Item {
         id: unlockUI
         focus: true
         cancelEnabled: true
+        switchUserEnabled: userSessionsUI.switchUserSupported
 
         Connections {
             onAccepted: lockScreen.accepted()
             onCanceled: lockScreen.canceled()
+            onSwitchUserClicked: {
+                // TODO: load if not loaded
+                lockScreen.state = "SESSION"
+            }
         }
     }
+    SessionSwitching {
+        id: userSessionsUI
+        anchors {
+            fill: dialog
+            leftMargin: dialog.margins.left
+            rightMargin: dialog.margins.right
+            topMargin: dialog.margins.top
+            bottomMargin: dialog.margins.bottom
+        }
+        Connections {
+            onCancel: lockScreen.state = "UNLOCK"
+            onActivateSession: lockScreen.state = "UNLOCK"
+            onStartNewSession: lockScreen.state = "UNLOCK"
+        }
+    }
+
+    states: [
+        State {
+            name: "UNLOCK"
+            PropertyChanges {target: unlockUI; visible: true}
+            PropertyChanges {target: userSessionsUI; visible: false}
+        },
+        State {
+            name: "SESSION"
+            PropertyChanges {target: unlockUI; visible: false}
+            PropertyChanges {target: userSessionsUI; visible: true}
+        }
+    ]
 }
