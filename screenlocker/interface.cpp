@@ -21,16 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ksldapp.h"
 #include "screensaveradaptor.h"
 #include "kscreensaveradaptor.h"
-// Qt
-#include <QtDBus/QDBusConnection>
-#include <QtDBus/QDBusInterface>
-#include <QtDBus/QDBusReply>
-#include <QtDBus/QDBusServiceWatcher>
 // KDE
 #include <KDE/KDebug>
 #include <KDE/KIdleTime>
 #include <KDE/KProcess>
 #include <KDE/KRandom>
+// Qt
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusInterface>
+#include <QtDBus/QDBusReply>
+#include <QtDBus/QDBusServiceWatcher>
 
 namespace ScreenLocker
 {

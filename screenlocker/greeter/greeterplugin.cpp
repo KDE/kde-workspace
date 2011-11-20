@@ -21,12 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "greeter.h"
 #include "sessions.h"
 
+// KDE
+#include <KDE/KUser>
 // Qt
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
-// KDE
-#include <KDE/KUser>
 
 void GreeterPlugin::initializeEngine(QDeclarativeEngine *engine, const char *uri)
 {

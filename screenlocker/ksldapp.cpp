@@ -21,10 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "interface.h"
 #include "lockwindow.h"
 #include "kscreensaversettings.h"
-// Qt
-#include <QtCore/QTimer>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QX11Info>
+// workspace
+#include <kdisplaymanager.h>
 // KDE
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
@@ -36,8 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KNotification>
 #include <KDE/KProcess>
 #include <KDE/KStandardDirs>
-// workspace
-#include <kdisplaymanager.h>
+// Qt
+#include <QtCore/QTimer>
+#include <QtGui/QDesktopWidget>
+#include <QtGui/QX11Info>
 // X11
 #include <X11/Xlib.h>
 // other

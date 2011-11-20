@@ -20,6 +20,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeter.h"
+#include "kscreensaversettings.h"
+// workspace
+#include <kcheckpass-enums.h>
+// KDE
+#include <KDE/KDebug>
+#include <KDE/KLibrary>
+#include <KDE/KLocale>
+#include <KDE/KPluginFactory>
+#include <KDE/KPluginLoader>
+#include <KDE/KStandardDirs>
 
 // Qt
 #include <QtCore/QFile>
@@ -29,16 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtGui/QGraphicsProxyWidget>
 #include <QtGui/QLineEdit>
-// KDE
-#include <KDE/KDebug>
-#include <KDE/KLibrary>
-#include <KDE/KLocale>
-#include <KDE/KPluginFactory>
-#include <KDE/KPluginLoader>
-#include <KDE/KStandardDirs>
-// workspace
-#include <kcheckpass-enums.h>
-#include "kscreensaversettings.h"
 
 // kscreenlocker stuff
 #include <ctype.h>

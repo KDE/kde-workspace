@@ -20,11 +20,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "sessions.h"
+// workspace
+#include <kdisplaymanager.h>
 // KDE
 #include <KDE/KAuthorized>
 #include <KDE/KLocalizedString>
-// workspace
-#include <kdisplaymanager.h>
 
 namespace ScreenLocker
 {

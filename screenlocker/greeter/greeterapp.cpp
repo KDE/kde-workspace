@@ -19,6 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeterapp.h"
 #include "kscreensaversettings.h"
+// workspace
+#include <kephal/screens.h>
+// KDE
+#include <KDE/KCrash>
+#include <KDE/KDebug>
+#include <KDE/KStandardDirs>
+#include <kdeclarative.h>
 // Qt
 #include <QtCore/QTimer>
 #include <QtDeclarative/QDeclarativeContext>
@@ -26,13 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeItem>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
-// KDE
-#include <KDE/KCrash>
-#include <KDE/KDebug>
-#include <KDE/KStandardDirs>
-#include <kdeclarative.h>
-// workspace
-#include <kephal/screens.h>
 // X11
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>

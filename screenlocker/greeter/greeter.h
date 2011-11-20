@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SCREENLOCKER_GREETER_H
 #define SCREENLOCKER_GREETER_H
 
-#include <QtDeclarative/QDeclarativeItem>
 #include <kgreeterplugin.h>
+#include <QtDeclarative/QDeclarativeItem>
 
 // forward declarations
 class KGreetPlugin;
