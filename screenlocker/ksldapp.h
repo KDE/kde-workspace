@@ -81,7 +81,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void cleanUp();
-    void releaseGrab();
     void idleTimeout(int identifier);
 
 private:
@@ -93,6 +92,7 @@ private:
     bool startLockProcess();
     void showLockWindow();
     void hideLockWindow();
+    void doUnlock();
 
     KActionCollection *m_actionCollection;
     bool m_locked;

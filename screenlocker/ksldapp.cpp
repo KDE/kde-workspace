@@ -174,7 +174,7 @@ void KSldApp::lock()
 
     // start unlock screen process
     if (!startLockProcess()) {
-        releaseGrab();
+        doUnlock();
         kError() << "Greeter Process not started in time";
         return;
     }
@@ -230,7 +230,7 @@ bool KSldApp::grabMouse()
     return (rv == GrabSuccess);
 }
 
-void KSldApp::releaseGrab()
+void KSldApp::doUnlock()
 {
     kDebug() << "Grab Released";
     XUngrabKeyboard(QX11Info::display(), CurrentTime);
@@ -253,7 +253,7 @@ void KSldApp::lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     if ((!exitCode && exitStatus == QProcess::NormalExit) || s_graceTimeKill) {
         // unlock process finished successfully - we can remove the lock grab
         s_graceTimeKill = false;
-        releaseGrab();
+        doUnlock();
         return;
     }
     // failure, restart lock process
