@@ -2,6 +2,7 @@
  KSld - the KDE Screenlocker Daemon
  This file is part of the KDE project.
 
+Copyright (C) 2004 Chris Howells <howells@kde.org>
 Copyright (C) 2011 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify

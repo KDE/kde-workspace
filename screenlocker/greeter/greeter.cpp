@@ -3,6 +3,7 @@
  This file is part of the KDE project.
 
 Copyright (C) 1999 Martin R. Jones <mjones@kde.org>
+Copyright (C) 2002 Luboš Luňák <l.lunak@kde.org>
 Copyright (C) 2003 Oswald Buddenhagen <ossi@kde.org>
 Copyright (C) 2011 Martin Gräßlin <mgraesslin@kde.org>
 
