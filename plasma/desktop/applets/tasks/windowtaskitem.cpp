@@ -218,14 +218,14 @@ void WindowTaskItem::updateToolTip()
         }
 
         Plasma::ToolTipContent data(Qt::escape(m_task.data()->name()), QString(), p);
-        if (m_task.data()->desktop() != 0 && 
+        if (m_task.data()->desktop() != 0 &&
             (!m_applet->groupManager().showOnlyCurrentDesktop() || !m_task.data()->isOnCurrentDesktop())) {
             data.setSubText(i18nc("Which virtual desktop a window is currently on", "On %1",
                                   KWindowSystem::desktopName(m_task.data()->desktop())));
         }
         data.setWindowsToPreview(QList<WId>() << m_task.data()->task()->window());
         data.setClickable(true);
-        data.setInstantPopup(true);
+        data.setInstantPopup(KWindowSystem::compositingActive());
         data.setHighlightWindows(m_applet->highlightWindows());
 
         if (group && group->collapsed()) {

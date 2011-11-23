@@ -117,8 +117,8 @@ QSize AbstractTaskItem::basicPreferredSize() const
         topMargin = 1;
         bottomMargin = 1;
     } else if (m_applet->size().height() < 64) {
-        topMargin = qMax(1, topMargin/2); 
-        bottomMargin = qMax(1, bottomMargin/2); 
+        topMargin = qMax(1, topMargin/2);
+        bottomMargin = qMax(1, bottomMargin/2);
     }
 
     //kDebug() << (QObject*)this;
@@ -168,7 +168,7 @@ void AbstractTaskItem::checkSettings()
 void AbstractTaskItem::clearToolTip()
 {
     Plasma::ToolTipContent data;
-    data.setInstantPopup(true);
+    data.setInstantPopup(KWindowSystem::compositingActive());
 
     Plasma::ToolTipManager::self()->setContent(this, data);
 }
@@ -597,7 +597,7 @@ void AbstractTaskItem::drawBackground(QPainter *painter, const QStyleOptionGraph
     */
     Plasma::FrameSvg *itemBackground = m_applet->itemBackground();
 
-    if (~option->state & QStyle::State_Sunken && 
+    if (~option->state & QStyle::State_Sunken &&
         (!m_backgroundFadeAnim || m_backgroundFadeAnim->state() != QAbstractAnimation::Running)) {
         itemBackground->setElementPrefix(m_backgroundPrefix);
         //since a single framesvg is shared between all tasks, we could have to resize it even if there wasn't a resizeevent

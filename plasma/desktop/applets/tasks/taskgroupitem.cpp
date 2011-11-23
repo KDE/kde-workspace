@@ -308,7 +308,7 @@ void TaskGroupItem::updateToolTip()
 
     data.setImage(m_group.data()->icon());
     data.setClickable(true);
-    data.setInstantPopup(true);
+    data.setInstantPopup(KWindowSystem::compositingActive());
     data.setHighlightWindows(m_applet->highlightWindows());
 
     QList<WId> windows;
@@ -571,7 +571,7 @@ void TaskGroupItem::itemRemoved(TaskManager::AbstractGroupableItem * groupableIt
             m_offscreenWidget->adjustSize();
         }
 
-        if (m_popupDialog && m_popupDialog->isVisible() && 
+        if (m_popupDialog && m_popupDialog->isVisible() &&
             m_applet->containment() && m_applet->containment()->corona()) {
             m_popupDialog->move(m_applet->containment()->corona()->popupPosition(this, m_popupDialog->size(), Qt::AlignCenter));
         }
@@ -1191,7 +1191,7 @@ void TaskGroupItem::handleDroppedId(WId id, AbstractTaskItem *targetTask, QGraph
             m_applet->groupManager().manualGroupingRequest(taskItem->abstractItem(), dynamic_cast<TaskManager::GroupPtr>(targetTask->abstractItem()));
         }
     } else if (m_applet->groupManager().sortingStrategy() == TaskManager::GroupManager::ManualSorting) {
-        //Move action 
+        //Move action
         if (group == m_group.data()) { //same group
             //kDebug() << "Drag within group";
             layoutTaskItem(taskItem, event->pos());
@@ -1392,7 +1392,7 @@ AbstractTaskItem* TaskGroupItem::abstractTaskItem(AbstractGroupableItem * item)
         return 0;
     }
 
-    AbstractTaskItem *abstractTaskItem = m_groupMembers.value(item); 
+    AbstractTaskItem *abstractTaskItem = m_groupMembers.value(item);
     if (!abstractTaskItem) {
         foreach (AbstractTaskItem *taskItem, m_groupMembers) {
             TaskGroupItem *group = qobject_cast<TaskGroupItem*>(taskItem);
