@@ -56,6 +56,9 @@ public:
     void setAutoHide(const bool autoHide);
     bool autoHide() const;
 
+public Q_SLOTS:
+    void perhapsShow();
+
 protected:
     void adjustWindowToTilePos();
 
@@ -72,6 +75,9 @@ protected:
     void savePosition(const QPoint &pos);
     QPoint adjustedSavedPos() const;
 
+private Q_SLOTS:
+    void hideRequested();
+
 private:
     Plasma::Applet *m_applet;
     QWidget *m_windowToTile;
@@ -81,6 +87,7 @@ private:
 
     Plasma::FrameSvg *m_background;
     NotificationStack *m_notificationStack;
+    QTimer *m_showTimer;
     QTimer *m_hideTimer;
     QGraphicsView *m_view;
     bool m_drawLeft;
