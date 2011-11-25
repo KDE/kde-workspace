@@ -163,7 +163,7 @@ void Battery::init()
         initPopupWidget();
         // let's show a brightness OSD
         QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement", "/org/kde/Solid/PowerManagement", "org.kde.Solid.PowerManagement",
-                                              "brightnessChanged", this, SLOT(updateSlider(float)));
+                                              "brightnessChanged", this, SLOT(updateSlider(int)));
     }
 
     if (m_acAdapterPlugged) {
@@ -443,11 +443,11 @@ void Battery::updateSlider()
     updateSlider(reply.value());
 }
 
-void Battery::updateSlider(const float brightness)
+void Battery::updateSlider(int brightness)
 {
-    if (m_brightnessSlider->value() != (int)brightness) {
+    if (m_brightnessSlider->value() != brightness) {
         m_ignoreBrightnessChange = true;
-        m_brightnessSlider->setValue((int) brightness);
+        m_brightnessSlider->setValue(brightness);
         m_ignoreBrightnessChange = false;
     }
 }
