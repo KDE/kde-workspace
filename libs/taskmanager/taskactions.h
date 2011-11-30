@@ -35,6 +35,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <taskmanager/taskitem.h>
 #include <taskmanager/taskmanager_export.h>
 
+namespace KActivities
+{
+    class Consumer;
+} // namespace KActivities
+
 namespace TaskManager
 {
 
@@ -57,6 +62,7 @@ enum TaskAction { ResizeAction = 0,
 enum GroupingAction { LeaveGroupAction = 0
                     };
 
+class 
 /**
  * Factory method to create standard actions for groupable items.
  *
@@ -92,6 +98,22 @@ class TASKMANAGER_EXPORT ToolTipMenu : public QMenu
 public:
     explicit ToolTipMenu(QWidget *parent = 0, const QString &title = QString());
     bool event(QEvent* e);
+};
+
+/** The ToDesktop menu */
+class TASKMANAGER_EXPORT ActivitiesMenu : public ToolTipMenu
+{
+    Q_OBJECT
+public:
+    ActivitiesMenu(QWidget *parent, AbstractGroupableItem *item);
+
+private Q_SLOTS:
+    void activitiesChanged();
+    void populateMenu();
+
+private:
+    KActivities::Consumer *m_consumer;
+    QWeakPointer<AbstractGroupableItem> m_item;
 };
 
 /** The ToDesktop menu */

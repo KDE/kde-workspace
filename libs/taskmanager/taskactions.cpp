@@ -42,6 +42,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDesktopFile>
 #include <KRun>
 
+#include <KActivities/Consumer>
+
 #include <QtCore/QMap>
 #include <QtGui/QHelpEvent>
 #include <QtGui/QToolTip>
@@ -287,11 +289,51 @@ void ToDesktopActionImpl::slotToDesktop()
 }
 
 
+ActivitiesMenu::ActivitiesMenu(QWidget *parent, AbstractGroupableItem *item)
+    : ToolTipMenu(parent),
+      m_consumer(new KActivities::Consumer(this)),
+      m_item(item)
+{
+    m_item = item;
+    setTitle(i18n("&Activities"));
+    setEnabled(!m_consumer->listActivities().isEmpty());
+
+    connect(this, SIGNAL(aboutToShow()), this, SLOT(populateMenu()));
+    connect(m_consumer, SIGNAL(activityAdded(QString)), this, SLOT(activitiesChanged()));
+    connect(m_consumer, SIGNAL(activityRemoved(QString)), this, SLOT(activitiesChanged()));
+}
+
+void ActivitiesMenu::populateMenu()
+{
+    QMap<QString, QAction*> map;
+
+    foreach (const QString &id, m_consumer->listActivities()) {
+        KActivities::Info info(id);
+        const QString name = info.name();
+        QAction *action = new QAction(KIcon(info.icon()), name, this);
+        action->setData(id);
+        map.insert(name, action);
+    }
+
+    foreach (QAction *action, map) {
+        addAction(action);
+    }
+}
+
+void ActivitiesMenu::activitiesChanged()
+{
+    if (isVisible()) {
+        populateMenu();
+    }
+}
+
 DesktopsMenu::DesktopsMenu(QWidget *parent, AbstractGroupableItem *item)
     : ToolTipMenu(parent)
 {
     setTitle(i18n("Move To &Desktop"));
-    addAction(new ToCurrentDesktopActionImpl(this, item));
+    QAction *action = new ToCurrentDesktopActionImpl(this, item);
+    action->setText(i18n("Current Desktop"));
+    addAction(action);
     addAction(new ToDesktopActionImpl(this, item, 0));      //0 means all desktops
     addSeparator();
     for (int i = 1; i <= TaskManager::self()->numberOfDesktops(); i++) {
@@ -556,6 +598,7 @@ BasicMenu::BasicMenu(QWidget *parent, TaskItem* item, GroupManager *strategy, QL
         addMenu(new DesktopsMenu(this, item));
     }
 
+    addMenu(new ActivitiesMenu(this, item));
     addAction(new MinimizeActionImpl(this, item));
     addAction(new MaximizeActionImpl(this, item));
     addAction(new NewInstanceActionImpl(this, item));
@@ -596,12 +639,14 @@ BasicMenu::BasicMenu(QWidget *parent, TaskGroup* group, GroupManager *strategy, 
             addMenu(new BasicMenu(this, dynamic_cast<TaskItem*>(item), strategy));
         }
     }
+
     addSeparator();
 
     if (TaskManager::self()->numberOfDesktops() > 1) {
         addMenu(new DesktopsMenu(this, group));
     }
 
+    addMenu(new ActivitiesMenu(this, group));
     addAction(new MinimizeActionImpl(this, group));
     addAction(new MaximizeActionImpl(this, group));
     addAction(new NewInstanceActionImpl(this, group));

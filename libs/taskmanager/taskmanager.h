@@ -124,7 +124,7 @@ public:
     int currentDesktop() const;
 
     /**
-     * Returns the number of the current desktop.
+     * Returns the id of the current activity.
      */
     QString currentActivity() const;
 
