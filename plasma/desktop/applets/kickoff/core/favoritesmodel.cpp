@@ -46,14 +46,13 @@ public:
 
     void init()
     {
-        headerItem = new QStandardItem(i18n("Favorites"));
-        q->appendRow(headerItem);
     }
 
     void addFavoriteItem(const QString& url)
     {
         QStandardItem *item = StandardItemFactory::createItemForUrl(url, displayOrder);
-        headerItem->appendRow(item);
+        item->setData(i18n("Favorites"), Kickoff::GroupNameRole);
+        q->appendRow(item);
     }
 
     void moveFavoriteItem(int startRow, int destRow)
@@ -62,14 +61,20 @@ public:
             return;
         }
 
+        // TODO: readd
+#if 0
         QStandardItem *item = headerItem->takeChild(startRow);
 
         headerItem->removeRow(startRow);
         headerItem->insertRow(destRow, item);
+#endif
     }
 
     void removeFavoriteItem(const QString& url)
     {
+        // TODO: readd
+        Q_UNUSED(url)
+#if 0
         QModelIndexList matches = q->match(q->index(0, 0), UrlRole,
                                            url, -1,
                                            Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive));
@@ -84,6 +89,7 @@ public:
                 qDeleteAll(q->takeRow(item->row()));
             }
         }
+#endif
     }
 
     static void loadFavorites()
