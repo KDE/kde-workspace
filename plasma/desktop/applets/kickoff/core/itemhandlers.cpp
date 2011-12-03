@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/itemhandlers.h"
+#include "itemhandlers.h"
 
 // Qt
 #include <QTimer>
@@ -35,7 +35,7 @@
 #include <kworkspace/kworkspace.h>
 
 // Local
-#include "core/recentapplications.h"
+#include "recentapplications.h"
 
 // DBus
 #include "krunner_interface.h"
@@ -62,6 +62,10 @@ bool ServiceItemHandler::openUrl(const KUrl& url)
     }
 
     return result == 0;
+}
+LeaveItemHandler::LeaveItemHandler(QObject *parent)
+    : QObject (parent)
+{
 }
 
 bool LeaveItemHandler::openUrl(const KUrl& url)
@@ -210,3 +214,5 @@ void LeaveItemHandler::suspendDisk()
                                                        "suspendToDisk");
     QDBusConnection::sessionBus().asyncCall(call);
 }
+
+#include "itemhandlers.moc"

@@ -85,3 +85,5 @@ install(FILES simpleapplet/plasma-applet-simplelauncher.desktop DESTINATION ${SE
 #    target_link_libraries(kickoff ${KDE4_PLASMA_LIBS} ${Kickoff_LIBS})
 #    install(TARGETS kickoff ${INSTALL_TARGETS_DEFAULT_ARGS})
 #ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
+
+add_subdirectory(core)

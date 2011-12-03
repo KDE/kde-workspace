@@ -20,7 +20,7 @@
 #ifndef RECENTAPPLICATIONS_H
 #define RECENTAPPLICATIONS_H
 
-#include "core/kickoff_export.h"
+#include "kickoff_export.h"
 
 // Qt
 #include <QtCore/QObject>

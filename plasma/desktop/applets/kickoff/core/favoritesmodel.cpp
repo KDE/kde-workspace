@@ -18,7 +18,7 @@
 */
 
 //Own
-#include "core/favoritesmodel.h"
+#include "favoritesmodel.h"
 
 // Qt
 #include <QHash>

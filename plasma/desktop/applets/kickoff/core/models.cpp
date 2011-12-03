@@ -18,8 +18,8 @@
 */
 
 // Own
-#include "core/models.h"
-#include "core/leavemodel.h"
+#include "models.h"
+#include "leavemodel.h"
 
 // Qt
 #include <QFileInfo>

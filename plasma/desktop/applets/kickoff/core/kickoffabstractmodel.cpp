@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/kickoffabstractmodel.h"
+#include "kickoffabstractmodel.h"
 
 // Qt
 #include <QMimeData>
@@ -28,7 +28,7 @@
 #include <KDebug>
 
 // Local
-#include "core/models.h"
+#include "models.h"
 
 using namespace Kickoff;
 

@@ -20,9 +20,9 @@
 #ifndef FAVORITESMODEL_H
 #define FAVORITESMODEL_H
 
-#include "core/kickoff_export.h"
-#include "core/kickoffmodel.h"
-#include "core/models.h"
+#include "kickoff_export.h"
+#include "kickoffmodel.h"
+#include "models.h"
 
 namespace Kickoff
 {
@@ -39,7 +39,7 @@ class KICKOFF_EXPORT FavoritesModel : public KickoffModel
     Q_OBJECT
 
 public:
-    FavoritesModel(QObject *parent);
+    FavoritesModel(QObject *parent = NULL);
     virtual ~FavoritesModel();
 
     /** Add a new item for @p url to the user's favorites list. */

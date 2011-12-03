@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/kickoffmodel.h"
+#include "kickoffmodel.h"
 
 // Qt
 #include <QMimeData>
@@ -28,13 +28,20 @@
 #include <KDebug>
 
 // Local
-#include "core/models.h"
+#include "models.h"
 
 using namespace Kickoff;
 
 KickoffModel::KickoffModel(QObject *parent)
         : QStandardItemModel(parent)
 {
+    QHash<int, QByteArray> roles;
+    roles[Qt::DisplayRole] = "display";
+    roles[Qt::DecorationRole] = "decoration";
+    roles[Kickoff::SubTitleRole] = "subtitle";
+    roles[Kickoff::UrlRole] = "url";
+    roles[GroupNameRole] = "group";
+    setRoleNames(roles);
 }
 
 KickoffModel::~KickoffModel()

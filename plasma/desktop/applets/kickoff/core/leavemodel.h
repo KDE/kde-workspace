@@ -20,7 +20,7 @@
 #ifndef LEAVEMODEL_H
 #define LEAVEMODEL_H
 
-#include "core/kickoff_export.h"
+#include "kickoff_export.h"
 
 #include <QStandardItemModel>
 
@@ -32,7 +32,7 @@ class KICKOFF_EXPORT LeaveModel : public QStandardItemModel
     Q_OBJECT
 
 public:
-    LeaveModel(QObject *parent);
+    LeaveModel(QObject *parent = NULL);
     ~LeaveModel();
 
     static QStandardItem* createStandardItem(const QString& url);

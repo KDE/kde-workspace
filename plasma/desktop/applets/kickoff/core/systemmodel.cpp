@@ -39,8 +39,8 @@
 #include <Solid/StorageDrive>
 
 // Local
-#include "core/models.h"
-#include "core/systemmodel.h"
+#include "models.h"
+#include "systemmodel.h"
 
 using namespace Kickoff;
 
@@ -100,6 +100,13 @@ SystemModel::SystemModel(QObject *parent)
         : KickoffProxyModel(parent)
         , d(new Private(this))
 {
+    QHash<int, QByteArray> roles;
+    roles[Qt::DisplayRole] = "display";
+    roles[Qt::DecorationRole] = "decoration";
+    roles[Kickoff::SubTitleRole] = "subtitle";
+    roles[Kickoff::UrlRole] = "url";
+    roles[Kickoff::GroupNameRole] = "group";
+    setRoleNames(roles);
     reloadApplications();
 }
 

@@ -52,7 +52,7 @@
 #include <kconfiggroup.h>
 #include "kickoffadaptor.h"
 // Local
-#include "core/models.h"
+#include "models.h"
 
 template <> inline
 void KConfigGroup::writeEntry(const char *pKey,
@@ -278,11 +278,21 @@ ApplicationModel::ApplicationModel(QObject *parent, bool allowSeparators)
   : KickoffAbstractModel(parent),
     d(new ApplicationModelPrivate(this, allowSeparators))
 {
+    QHash<int, QByteArray> roles;
+    roles[Qt::DisplayRole] = "display";
+    roles[Qt::DecorationRole] = "decoration";
+    roles[Kickoff::SubTitleRole] = "subtitle";
+    roles[Kickoff::UrlRole] = "url";
+    roles[Kickoff::GroupNameRole] = "group";
+    setRoleNames(roles);
     QDBusConnection dbus = QDBusConnection::sessionBus();
     (void)new KickoffAdaptor(this);
     QDBusConnection::sessionBus().registerObject("/kickoff", this);
     dbus.connect(QString(), "/kickoff", "org.kde.plasma", "reloadMenu", this, SLOT(reloadMenu()));
     connect(KSycoca::self(), SIGNAL(databaseChanged(QStringList)), this, SLOT(checkSycocaChange(QStringList)));
+
+    // TODO: remove me again
+    reloadMenu();
 }
 
 ApplicationModel::~ApplicationModel()

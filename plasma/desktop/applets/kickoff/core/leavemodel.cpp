@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/leavemodel.h"
+#include "leavemodel.h"
 
 // Qt
 #include <QFileInfo>
@@ -32,7 +32,8 @@
 #include <kworkspace/kworkspace.h>
 
 // Local
-#include "core/models.h"
+#include "models.h"
+#include "itemhandlers.h"
 
 using namespace Kickoff;
 
@@ -93,6 +94,15 @@ LeaveModel::LeaveModel(QObject *parent)
         : QStandardItemModel(parent)
         , d(0)
 {
+    QHash<int, QByteArray> roles;
+    roles[Qt::DisplayRole] = "display";
+    roles[Qt::DecorationRole] = "decoration";
+    roles[Kickoff::SubTitleRole] = "subtitle";
+    roles[Kickoff::UrlRole] = "url";
+    roles[GroupNameRole] = "group";
+    setRoleNames(roles);
+    updateModel();
+    Kickoff::UrlItemLauncher::addGlobalHandler(Kickoff::UrlItemLauncher::ProtocolHandler, "leave", new Kickoff::LeaveItemHandler);
 }
 
 QVariant LeaveModel::headerData(int section, Qt::Orientation orientation, int role) const
