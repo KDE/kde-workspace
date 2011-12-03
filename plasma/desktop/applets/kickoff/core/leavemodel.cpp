@@ -125,19 +125,21 @@ void LeaveModel::updateModel()
     clear();
 
     // Session Options
-    QStandardItem *sessionOptions = new QStandardItem(i18n("Session"));
+    const QString session = i18n("Session");
 
     // Logout
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
     if (canLogout) {
         QStandardItem *logoutOption = createStandardItem("leave:/logoutonly");
-        sessionOptions->appendRow(logoutOption);
+        logoutOption->setData(session, Kickoff::GroupNameRole);
+        appendRow(logoutOption);
     }
 
     // Lock
     if (KAuthorized::authorizeKAction("lock_screen")) {
         QStandardItem *lockOption = createStandardItem("leave:/lock");
-        sessionOptions->appendRow(lockOption);
+        lockOption->setData(session, Kickoff::GroupNameRole);
+        appendRow(lockOption);
     }
 
     // Save Session
@@ -145,64 +147,58 @@ void LeaveModel::updateModel()
         KConfigGroup c(KSharedConfig::openConfig("ksmserverrc", KConfig::NoGlobals), "General");
         if (c.readEntry("loginMode") == "restoreSavedSession") {
             QStandardItem *saveSessionOption = createStandardItem("leave:/savesession");
-            sessionOptions->appendRow(saveSessionOption);
+            saveSessionOption->setData(session, Kickoff::GroupNameRole);
+            appendRow(saveSessionOption);
         }
     }
 
     // Switch User
     if (KAuthorized::authorize(QLatin1String("switch_user")))  {
         QStandardItem *switchUserOption = createStandardItem("leave:/switch");
-        sessionOptions->appendRow(switchUserOption);
+        switchUserOption->setData(session, Kickoff::GroupNameRole);
+        appendRow(switchUserOption);
     }
 
     // System Options
-    QStandardItem *systemOptions = new QStandardItem(i18n("System"));
-    bool addSystemSession = false;
 
 //FIXME: the proper fix is to implement the KWorkSpace methods for Windows
 #ifndef Q_WS_WIN
+    const QString system = i18n("System");
     QSet< Solid::PowerManagement::SleepState > spdMethods = Solid::PowerManagement::supportedSleepStates();
     if (spdMethods.contains(Solid::PowerManagement::StandbyState)) {
         QStandardItem *standbyOption = createStandardItem("leave:/standby");
-        systemOptions->appendRow(standbyOption);
-        addSystemSession = true;
+        standbyOption->setData(system, Kickoff::GroupNameRole);
+        appendRow(standbyOption);
     }
 
     if (spdMethods.contains(Solid::PowerManagement::SuspendState)) {
         QStandardItem *suspendramOption = createStandardItem("leave:/suspendram");
-        systemOptions->appendRow(suspendramOption);
-        addSystemSession = true;
+        suspendramOption->setData(system, Kickoff::GroupNameRole);
+        appendRow(suspendramOption);
     }
 
     if (spdMethods.contains(Solid::PowerManagement::HibernateState)) {
         QStandardItem *suspenddiskOption = createStandardItem("leave:/suspenddisk");
-        systemOptions->appendRow(suspenddiskOption);
-        addSystemSession = true;
+        suspenddiskOption->setData(system, Kickoff::GroupNameRole);
+        appendRow(suspenddiskOption);
     }
 
     if (canLogout) {
         if (KWorkSpace::canShutDown(KWorkSpace::ShutdownConfirmDefault, KWorkSpace::ShutdownTypeReboot)) {
             // Restart
             QStandardItem *restartOption = createStandardItem("leave:/restart");
-            systemOptions->appendRow(restartOption);
-            addSystemSession = true;
+            restartOption->setData(system, Kickoff::GroupNameRole);
+            appendRow(restartOption);
         }
 
         if (KWorkSpace::canShutDown(KWorkSpace::ShutdownConfirmDefault, KWorkSpace::ShutdownTypeHalt)) {
             // Shutdown
             QStandardItem *shutDownOption = createStandardItem("leave:/shutdown");
-            systemOptions->appendRow(shutDownOption);
-            addSystemSession = true;
+            shutDownOption->setData(system, Kickoff::GroupNameRole);
+            appendRow(shutDownOption);
         }
     }
 #endif
-
-    appendRow(sessionOptions);
-    if (addSystemSession) {
-        appendRow(systemOptions);
-    } else {
-        delete systemOptions;
-    }
 }
 
 LeaveModel::~LeaveModel()
