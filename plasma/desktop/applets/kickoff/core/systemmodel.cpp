@@ -1,6 +1,7 @@
 /*
     Copyright 2007 Robert Knight <robertknight@gmail.com>
     Copyright 2007 Kevin Ottens <ervin@kde.org>
+    Copyright 2011 Martin Gräßlin <mgraesslin@kde.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -44,11 +45,7 @@
 
 using namespace Kickoff;
 
-static const int APPLICATIONS_ROW = 0;
-static const int BOOKMARKS_ROW = 1;
-static const int REMOVABLE_ROW = 2;
-static const int FIXED_ROW = 3;
-static const int LAST_ROW = FIXED_ROW;
+static const int OFFSET = 100;
 
 struct UsageInfo {
     UsageInfo()
@@ -81,16 +78,11 @@ public:
         connect(placesModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
                 q, SLOT(sourceRowsRemoved(QModelIndex,int,int)));
 
-        topLevelSections << i18n("Applications")
-        << i18n("Places")
-        << i18n("Removable Storage")
-        << i18n("Storage");
         connect(KSycoca::self(), SIGNAL(databaseChanged(QStringList)), q, SLOT(reloadApplications()));
     }
 
     SystemModel * const q;
     KFilePlacesModel *placesModel;
-    QStringList topLevelSections;
     KService::List appsList;
     QMap<QString, UsageInfo> usageByMountpoint;
     int currentPlacesModelUsageIndex;
@@ -121,76 +113,112 @@ QModelIndex SystemModel::mapFromSource(const QModelIndex &sourceIndex) const
         return QModelIndex();
     }
 
-    QModelIndex parent;
-
-    if (!d->placesModel->isDevice(sourceIndex)) {
-        parent = index(BOOKMARKS_ROW, 0);
-    } else {
-        bool isFixedDevice = d->placesModel->data(sourceIndex, KFilePlacesModel::FixedDeviceRole).toBool();
-
-        if (!isFixedDevice) {
-            parent = index(REMOVABLE_ROW, 0);
-        } else {
-            parent = index(FIXED_ROW, 0);
+    if (d->placesModel->isHidden(sourceIndex)) {
+        // hidden items not in our model
+        return QModelIndex();
+    }
+    if (d->placesModel->isDevice(sourceIndex)) {
+        if (d->placesModel->data(sourceIndex, KFilePlacesModel::FixedDeviceRole).toBool()) {
+            // fixed devices not in our list
+            return QModelIndex();
         }
     }
-
-    return index(sourceIndex.row(), 0, parent);
+    int count = d->appsList.size() -1;
+    if (KAuthorized::authorize("run_command")) {
+        ++count;
+    }
+    for (int i=0; i<d->placesModel->rowCount(); ++i) {
+        if (i == sourceIndex.row()) {
+            break;
+        }
+        const QModelIndex index = d->placesModel->index(i, 0);
+        if (d->placesModel->isHidden(index)) {
+            continue;
+        }
+        if (d->placesModel->isDevice(index)) {
+            if (!d->placesModel->data(index, KFilePlacesModel::FixedDeviceRole).toBool()) {
+                ++count;
+            }
+        } else {
+            // visible place
+            ++count;
+        }
+    }
+    return index(count, 0);
 }
 
 QModelIndex SystemModel::mapToSource(const QModelIndex &proxyIndex) const
 {
-    if (!proxyIndex.isValid() || !proxyIndex.parent().isValid()) {
+    if (!proxyIndex.isValid()) {
         return QModelIndex();
     }
-
-    return d->placesModel->index(proxyIndex.row(), proxyIndex.column());
+    if (proxyIndex.internalId() == 0) {
+        // application index
+        return QModelIndex();
+    }
+    return d->placesModel->index(proxyIndex.internalId() - OFFSET, 0);
 }
 
 QModelIndex SystemModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (!parent.isValid()) {
+    Q_UNUSED(parent)
+    int count = d->appsList.size()-1;
+    if (KAuthorized::authorize("run_command")) {
+        ++count;
+    }
+    if (row <= count) {
         return createIndex(row, column, 0);
     }
-
-    // We use the row+1 of the parent as internal Id.
-    return createIndex(row, column, parent.row() + 1);
+    // find the source
+    for (int i=0; i<d->placesModel->rowCount(); ++i) {
+        const QModelIndex index = d->placesModel->index(i, 0);
+        if (d->placesModel->isHidden(index)) {
+            continue;
+        }
+        if (d->placesModel->isDevice(index)) {
+            if (!d->placesModel->data(index, KFilePlacesModel::FixedDeviceRole).toBool()) {
+                ++count;
+            }
+        } else {
+            // visible place
+            ++count;
+        }
+        if (row == count) {
+            return createIndex(row, column, i + OFFSET);
+        }
+    }
+    return QModelIndex();
 }
 
 QModelIndex SystemModel::parent(const QModelIndex &item) const
 {
-    if (item.internalId() > 0) {
-        return index(item.internalId() - 1, 0);
-    } else {
-        return QModelIndex();
-    }
+    Q_UNUSED(item)
+    return QModelIndex();
 }
 
 int SystemModel::rowCount(const QModelIndex &parent) const
 {
-    if (!parent.isValid()) {
-        return LAST_ROW + 1;
-    } else if (!parent.parent().isValid()) {
-        switch (parent.row()) {
-        case APPLICATIONS_ROW:
-            if (KAuthorized::authorize("run_command")) {
-                return d->appsList.size() + 1;
-            } else {
-                return d->appsList.size();
+    Q_UNUSED(parent)
+    int count = d->appsList.size();
+    if (KAuthorized::authorize("run_command")) {
+        ++count;
+    }
+    for (int i=0; i<d->placesModel->rowCount(); ++i) {
+        const QModelIndex index = d->placesModel->index(i, 0);
+        if (d->placesModel->isHidden(index)) {
+            continue;
+        }
+        if (d->placesModel->isDevice(index)) {
+            if (!d->placesModel->data(index, KFilePlacesModel::FixedDeviceRole).toBool()) {
+                ++count;
             }
-            break;
-        case BOOKMARKS_ROW:
-            return d->placesModel->rowCount();
-            break;
-        case REMOVABLE_ROW:
-            return d->placesModel->rowCount();
-            break;
-        default:
-            return 0;
+        } else {
+            // visible place
+            ++count;
         }
     }
 
-    return 0;
+    return count;
 }
 
 int SystemModel::columnCount(const QModelIndex &/*parent*/) const
@@ -205,14 +233,9 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const
     }
 
     if (index.internalId() == 0) {
-        if (role == Qt::DisplayRole) {
-            return d->topLevelSections[index.row()];
-        } else {
-            return QVariant();
+        if (role == GroupNameRole) {
+            return i18n("Applications");
         }
-    }
-
-    if (index.internalId() - 1 == APPLICATIONS_ROW) {
         if (d->appsList.count() < index.row()) {
             return QVariant();
         } else if (d->appsList.count() == index.row()) {
@@ -247,40 +270,10 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    if (role == UrlRole && !d->placesModel->isHidden(mapToSource(index))) {
-        QModelIndex parent = index.parent();
-        QModelIndex sourceIndex = mapToSource(index);
-
-        bool isDevice = d->placesModel->isDevice(sourceIndex);
-        bool wellPlaced = false;
-
-        if (!isDevice && parent.row() == BOOKMARKS_ROW) {
-            wellPlaced = true;
-        } else if (isDevice) {
-            bool fixed = d->placesModel->data(sourceIndex, KFilePlacesModel::FixedDeviceRole).toBool();
-
-            if (!fixed && parent.row() == REMOVABLE_ROW) {
-                wellPlaced = true;
-            } else if (fixed && parent.row() == FIXED_ROW) {
-                wellPlaced = true;
-            }
-        }
-
-        if (wellPlaced) {
-            return d->placesModel->url(sourceIndex).url();
-        } else {
-            return QVariant();
-        }
-    } else if (role == DeviceUdiRole) {
-        QModelIndex sourceIndex = mapToSource(index);
-
-        if (d->placesModel->isDevice(sourceIndex)) {
-            Solid::Device dev = d->placesModel->deviceForIndex(sourceIndex);
-            return dev.udi();
-        } else {
-            return QVariant();
-        }
-    } else if (role == SubTitleRole) {
+    if (role == UrlRole) {
+        return d->placesModel->url(mapToSource(index)).url();
+    }
+    if (role == SubTitleRole) {
         QModelIndex sourceIndex = mapToSource(index);
 
         if (d->placesModel->isDevice(sourceIndex)) {
@@ -290,36 +283,20 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const
             if (access) {
                 return access->filePath();
             }
-        } else if (index.parent().row() != APPLICATIONS_ROW) {
+        } else {
             KUrl url = d->placesModel->url(sourceIndex);
             return url.isLocalFile() ? url.toLocalFile() : url.prettyUrl();
         }
 
         return QVariant();
-    } else if (role == DiskUsedSpaceRole || role == DiskFreeSpaceRole) {
-        QModelIndex sourceIndex = mapToSource(index);
-        QString mp;
-
-        if (d->placesModel->isDevice(sourceIndex)) {
-            Solid::Device dev = d->placesModel->deviceForIndex(sourceIndex);
-            Solid::StorageAccess *access = dev.as<Solid::StorageAccess>();
-
-            if (access) {
-                mp = access->filePath();
-            }
-        }
-
-        if (!mp.isEmpty() && d->usageByMountpoint.contains(mp)) {
-            UsageInfo info = d->usageByMountpoint[mp];
-
-            if (role == DiskUsedSpaceRole) {
-                return info.used;
-            } else {
-                return info.available;
-            }
+    }
+    if (role == GroupNameRole) {
+        if (d->placesModel->isDevice(mapToSource(index))) {
+            return i18n("Removable Storage");
+        } else {
+            return i18n("Places");
         }
     }
-
     return d->placesModel->data(mapToSource(index), role);
 }
 
@@ -396,47 +373,62 @@ void Kickoff::SystemModel::sourceDataChanged(const QModelIndex &start, const QMo
 {
     if (start.parent().isValid()) return;
 
-    for (int row = BOOKMARKS_ROW; row <= LAST_ROW; ++row) {
-        QModelIndex section = index(row, 0);
-
-        QModelIndex new_start = index(start.row(), start.column(), section);
-        QModelIndex new_end = index(end.row(), end.column(), section);
-        emit dataChanged(new_start, new_end);
+    QModelIndex ourStart = QModelIndex();
+    QModelIndex ourEnd = QModelIndex();
+    // find our start
+    for (int i=start.row(); i<=end.row(); ++i) {
+        const QModelIndex ourIndex = mapFromSource(d->placesModel->index(i, 0));
+        if (ourIndex.isValid()) {
+            ourStart = ourIndex;
+            break;
+        }
+    }
+    if (!ourStart.isValid()) {
+        return;
+    }
+    // find our end
+    for (int i=end.row(); i>=start.row(); --i) {
+        const QModelIndex ourIndex = mapFromSource(d->placesModel->index(i, 0));
+        if (ourIndex.isValid()) {
+            ourEnd = ourIndex;
+            break;
+        }
+    }
+    if (ourEnd.isValid()) {
+        emit dataChanged(ourStart, ourEnd);
     }
 }
 
 void Kickoff::SystemModel::sourceRowsAboutToBeInserted(const QModelIndex &parent, int start, int end)
 {
-    if (parent.isValid()) return;
-
-    for (int row = BOOKMARKS_ROW; row <= LAST_ROW; ++row) {
-        QModelIndex section = index(row, 0);
-        beginInsertRows(section, start, end);
-    }
+    Q_UNUSED(parent)
+    Q_UNUSED(start)
+    Q_UNUSED(end)
+    // TODO: can we update without resetting the model?
+    beginResetModel();
 }
 
 void Kickoff::SystemModel::sourceRowsInserted(const QModelIndex &parent, int /*start*/, int /*end*/)
 {
-    if (parent.isValid()) return;
-
-    endInsertRows();
+    Q_UNUSED(parent)
+    // TODO: can we update without resetting the model?
+    endResetModel();
 }
 
 void Kickoff::SystemModel::sourceRowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
-    if (parent.isValid()) return;
-
-    for (int row = BOOKMARKS_ROW; row <= LAST_ROW; ++row) {
-        QModelIndex section = index(row, 0);
-        beginRemoveRows(section, start, end);
-    }
+    Q_UNUSED(parent)
+    Q_UNUSED(start)
+    Q_UNUSED(end)
+    // TODO: can we update without resetting the model?
+    beginResetModel();
 }
 
 void Kickoff::SystemModel::sourceRowsRemoved(const QModelIndex &parent, int /*start*/, int /*end*/)
 {
-    if (parent.isValid()) return;
-
-    endRemoveRows();
+    Q_UNUSED(parent)
+    // TODO: can we update without resetting the model?
+    endResetModel();
 }
 
 #include "systemmodel.moc"
