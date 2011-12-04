@@ -21,6 +21,7 @@
 #include "applicationmodel.h"
 #include "favoritesmodel.h"
 #include "leavemodel.h"
+#include "recentlyusedmodel.h"
 #include "systemmodel.h"
 #include "urlitemlauncher.h"
 
@@ -32,6 +33,7 @@ void KickoffPlugin::registerTypes (const char *uri)
     qmlRegisterType<Kickoff::ApplicationModel>(uri, 0, 1, "ApplicationModel");
     qmlRegisterType<Kickoff::FavoritesModel>(uri, 0, 1, "FavoritesModel");
     qmlRegisterType<Kickoff::LeaveModel>(uri, 0, 1, "LeaveModel");
+    qmlRegisterType<Kickoff::RecentlyUsedModel>(uri, 0, 1, "RecentlyUsedModel");
     qmlRegisterType<Kickoff::SystemModel>(uri, 0, 1, "SystemModel");
     qmlRegisterType<Kickoff::UrlItemLauncher>(uri, 0, 1, "Launcher");
 }

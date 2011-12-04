@@ -1,5 +1,6 @@
 /*
     Copyright 2007 Robert Knight <robertknight@gmail.com>
+    Copyright 2011 Martin Gräßlin <mgraesslin@kde.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -18,7 +19,7 @@
 */
 
 // Own
-#include "core/recentlyusedmodel.h"
+#include "recentlyusedmodel.h"
 
 // Qt
 
@@ -30,7 +31,7 @@
 #include <KDebug>
 
 // Local
-#include "core/recentapplications.h"
+#include "recentapplications.h"
 #include "recentadaptor.h"
 
 using namespace Kickoff;
@@ -42,45 +43,57 @@ public:
             : q(parent),
               recenttype(recenttype),
               maxRecentApps(maxRecentApps >= 0 ? maxRecentApps : Kickoff::RecentApplications::self()->defaultMaximum()),
-              recentDocumentItem(0),
-              recentAppItem(0),
-              displayOrder(NameAfterDescription)
+              displayOrder(NameAfterDescription),
+              applicationTitle(i18n("Applications")),
+              documentTitle(i18n("Documents")),
+              recentApplicationCount(0)
     {
     }
 
-    void removeExistingItem(const QString& path) {
+    bool removeExistingItem(const QString& path) {
         if (!itemsByPath.contains(path)) {
-            return;
+            return false;
         }
 
         QStandardItem *existingItem = itemsByPath[path];
         kDebug() << "Removing existing item" << existingItem;
-        Q_ASSERT(existingItem->parent());
-        existingItem->parent()->removeRow(existingItem->row());
+        QModelIndex index = q->indexFromItem(existingItem);
+        if (!index.isValid()) {
+            kDebug() << "Now Index for our existing item";
+            return false;
+        }
+        q->takeRow(index.row());
         itemsByPath.remove(path);
+        delete existingItem;
+        return true;
     }
 
     void addRecentApplication(KService::Ptr service, bool append) {
         // remove existing item if any
-        removeExistingItem(service->entryPath());
+        if (removeExistingItem(service->entryPath())) {
+            --recentApplicationCount;
+        }
 
         QStandardItem *appItem = StandardItemFactory::createItemForService(service, displayOrder);
+        appItem->setData(applicationTitle, Kickoff::GroupNameRole);
         itemsByPath.insert(service->entryPath(), appItem);
 
         if (append) {
-            recentAppItem->appendRow(appItem);
+            q->insertRow(recentApplicationCount, appItem);
         } else {
-            recentAppItem->insertRow(0, appItem);
+            q->insertRow(0, appItem);
         }
+        ++recentApplicationCount;
 
-        while (recentAppItem->rowCount() > maxRecentApps) {
-            QList<QStandardItem*> row = recentAppItem->takeRow(recentAppItem->rowCount() - 1);
+        while (recentApplicationCount > maxRecentApps) {
+            --recentApplicationCount;
+            QList<QStandardItem*> row = q->takeRow(recentApplicationCount);
 
             //don't leave pending stuff in itemsByPath
             if (!row.isEmpty()) {
                 itemsByPath.remove(row.first()->data(UrlRole).toString());
-		qDeleteAll(row.begin(), row.end());
-	    }
+                qDeleteAll(row.begin(), row.end());
+            }
         }
     }
 
@@ -93,48 +106,43 @@ public:
 
         QStandardItem *documentItem = StandardItemFactory::createItemForUrl(desktopPath, displayOrder);
         documentItem->setData(true, Kickoff::SubTitleMandatoryRole);
+        documentItem->setData(documentTitle, Kickoff::GroupNameRole);
         itemsByPath.insert(desktopPath, documentItem);
 
         //kDebug() << "Document item" << documentItem << "text" << documentItem->text() << "url" << documentUrl.url();
         if (append) {
-            recentDocumentItem->appendRow(documentItem);
+            q->appendRow(documentItem);
         } else {
-            recentDocumentItem->insertRow(0, documentItem);
+            q->insertRow(0, documentItem);
         }
     }
 
     void loadRecentDocuments()
     {
         // create branch for documents and add existing items
-        recentDocumentItem = new QStandardItem(i18n("Documents"));
         const QStringList documents = KRecentDocument::recentDocuments();
         foreach(const QString& document, documents) {
             addRecentDocument(document, true);
         }
-
-        q->appendRow(recentDocumentItem);
     }
 
     void loadRecentApplications()
     {
-        recentAppItem = new QStandardItem(i18n("Applications"));
-
         const QList<KService::Ptr> services = RecentApplications::self()->recentApplications();
         for(int i = 0; i < maxRecentApps && i < services.count(); ++i) {
             addRecentApplication(services[i], true);
         }
-
-        q->appendRow(recentAppItem);
     }
 
     RecentlyUsedModel * const q;
     RecentType recenttype;
     int maxRecentApps;
 
-    QStandardItem *recentDocumentItem;
-    QStandardItem *recentAppItem;
     QHash<QString, QStandardItem*> itemsByPath;
     DisplayOrder displayOrder;
+    QString applicationTitle;
+    QString documentTitle;
+    int recentApplicationCount;
 };
 
 RecentlyUsedModel::RecentlyUsedModel(QObject *parent, RecentType recenttype, int maxRecentApps)
@@ -246,20 +254,11 @@ void RecentlyUsedModel::recentApplicationRemoved(KService::Ptr service)
 
 void RecentlyUsedModel::recentApplicationsCleared()
 {
-    QSet<QStandardItem*> appItems;
-    const int rows = d->recentAppItem->rowCount();
-    for (int i = 0;i < rows;i++) {
-        appItems << d->recentAppItem->child(i);
+    while (d->recentApplicationCount != 0) {
+        delete takeItem(0);
+        takeRow(0);
+        --d->recentApplicationCount;
     }
-    QMutableHashIterator<QString, QStandardItem*> iter(d->itemsByPath);
-    while (iter.hasNext()) {
-        iter.next();
-        if (appItems.contains(iter.value())) {
-            iter.remove();
-        }
-    }
-
-    d->recentAppItem->removeRows(0, d->recentAppItem->rowCount());
 }
 
 void RecentlyUsedModel::clearRecentApplications()

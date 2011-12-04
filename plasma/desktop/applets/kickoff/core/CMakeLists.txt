@@ -9,6 +9,7 @@ set(kickoffplugin_SRCS
     leavemodel.cpp
     models.cpp
     recentapplications.cpp
+    recentlyusedmodel.cpp
     systemmodel.cpp
     urlitemlauncher.cpp
     )
@@ -16,6 +17,7 @@ set(kickoffplugin_SRCS
 qt4_automoc(${kickoffplugin_SRCS})
 
 qt4_add_dbus_adaptor(kickoffplugin_SRCS org.kde.kickoff.xml applicationmodel.h Kickoff::ApplicationModel)
+qt4_add_dbus_adaptor(kickoffplugin_SRCS org.kde.kickoff.recent.xml recentlyusedmodel.h Kickoff::RecentlyUsedModel)
 
 set(screensaver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.freedesktop.ScreenSaver.xml)
 QT4_ADD_DBUS_INTERFACE(kickoffplugin_SRCS ${screensaver_xml} screensaver_interface)
