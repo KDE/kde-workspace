@@ -25,6 +25,7 @@ Item {
     id: root
     property int minimumWidth: 290
     property int minimumHeight: 340
+    property string previousState
     width: 400
     height: 400
     state: "NORMAL"
@@ -40,6 +41,67 @@ Item {
     Component {
         id: kickoffDelegate
         KickoffItem {}
+    }
+    Item {
+        id: searchBar
+        height: 32 + lineSvg.elementSize("horizontal-line").height
+        anchors {
+            top: parent.top
+            right: parent.right
+            left: parent.left
+        }
+        QIconItem {
+            id: searchIcon
+            icon: QIcon("system-search")
+            height: 32
+            width: 32
+            anchors {
+                top: parent.top
+                left: parent.left
+            }
+        }
+        PlasmaComponents.TextField {
+            id: searchField
+            placeholderText: "Search"
+            clearButtonShown: true
+            anchors {
+                left: searchIcon.right
+                right: parent.right
+                top: parent.top
+                leftMargin: 5
+            }
+            onTextChanged: {
+                if (searchView.source == "") {
+                    searchView.source = "SearchView.qml";
+                }
+                if (root.state != "SEARCH") {
+                    root.previousState = root.state;
+                    root.state = "SEARCH";
+                }
+                if (text == "") {
+                    root.state = root.previousState;
+                }
+            }
+        }
+        PlasmaCore.SvgItem {
+            svg: lineSvg
+            elementId: "horizontal-line"
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: searchIcon.bottom
+            }
+            height: lineSvg.elementSize("horizontal-line").height
+        }
+    }
+    Loader {
+        id: searchView
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: searchBar.bottom
+            bottom: parent.bottom
+        }
     }
     ListView {
         id: kickoffListView
@@ -88,7 +150,7 @@ Item {
             kickoffListView.model = newModel;
         }
         anchors {
-            top: parent.top
+            top: searchBar.bottom
             left: parent.left
             bottom: tabBar.top
             right: scrollBar.visible ? scrollBar.left : parent.right
@@ -136,7 +198,7 @@ Item {
         flickableItem: kickoffListView
         anchors {
             right: parent.right
-            top: parent.top
+            top: searchBar.bottom
             bottom: tabBar.top
         }
     }
@@ -183,7 +245,7 @@ Item {
             }
         }
         anchors {
-            top: parent.top
+            top: searchBar.bottom
             left: parent.left
             right: parent.right
             bottom: tabBar.top
@@ -251,6 +313,14 @@ Item {
                 target: applicationsViewContainer
                 visible: false
             }
+            PropertyChanges {
+                target: tabBar
+                visible: true
+            }
+            PropertyChanges {
+                target: searchView
+                visible: false
+            }
         },
         State {
             name: "APPLICATIONS"
@@ -264,6 +334,37 @@ Item {
             }
             PropertyChanges {
                 target: applicationsViewContainer
+                visible: true
+            }
+            PropertyChanges {
+                target: tabBar
+                visible: true
+            }
+            PropertyChanges {
+                target: searchView
+                visible: false
+            }
+        },
+        State {
+            name: "SEARCH"
+            PropertyChanges {
+                target: kickoffListView
+                visible: false
+            }
+            PropertyChanges {
+                target: scrollBar
+                visible: false
+            }
+            PropertyChanges {
+                target: applicationsViewContainer
+                visible: false
+            }
+            PropertyChanges {
+                target: tabBar
+                visible: false
+            }
+            PropertyChanges {
+                target: searchView
                 visible: true
             }
         }
