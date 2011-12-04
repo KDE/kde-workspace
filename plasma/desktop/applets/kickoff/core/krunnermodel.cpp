@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/krunnermodel.h"
+#include "krunnermodel.h"
 
 // Qt
 #include <QBasicTimer>
@@ -35,7 +35,7 @@
 #include <Plasma/RunnerManager>
 
 // Local
-#include "core/recentapplications.h"
+#include "recentapplications.h"
 
 #define DELAY_TIME 50
 
@@ -174,6 +174,8 @@ KRunnerModel::KRunnerModel(QObject *parent)
             SIGNAL(matchesChanged(QList<Plasma::QueryMatch>)),
             this,
             SLOT(matchesChanged(QList<Plasma::QueryMatch>)));
+
+    UrlItemLauncher::addGlobalHandler(UrlItemLauncher::ProtocolHandler, "krunner", new KRunnerItemHandler);
 }
 
 KRunnerModel::~KRunnerModel()

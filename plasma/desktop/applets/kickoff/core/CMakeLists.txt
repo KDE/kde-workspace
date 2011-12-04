@@ -6,6 +6,7 @@ set(kickoffplugin_SRCS
     kickoffmodel.cpp
     kickoffplugin.cpp
     kickoffproxymodel.cpp
+    krunnermodel.cpp
     leavemodel.cpp
     models.cpp
     recentapplications.cpp
@@ -28,7 +29,7 @@ QT4_ADD_DBUS_INTERFACE(kickoffplugin_SRCS ${ksmserver_xml} ksmserver_interface)
 
 
 add_library(kickoffplugin SHARED ${kickoffplugin_SRCS})
-target_link_libraries(kickoffplugin ${QT_QTCORE_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY} ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBRARY} ${KDE4_KIO_LIBS} ${KDE4_KFILE_LIBS} ${KDE4_SOLID_LIBS} kworkspace)
+target_link_libraries(kickoffplugin ${QT_QTCORE_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY} ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBRARY} ${KDE4_KIO_LIBS} ${KDE4_KFILE_LIBS} ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBS} kworkspace)
 
 install(TARGETS kickoffplugin DESTINATION ${IMPORTS_INSTALL_DIR}/org/kde/plasma/kickoff)
 install(FILES qmldir DESTINATION ${IMPORTS_INSTALL_DIR}/org/kde/plasma/kickoff)
