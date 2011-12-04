@@ -20,6 +20,12 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 Item {
+    function decrementCurrentIndex() {
+        searchView.decrementCurrentIndex();
+    }
+    function incrementCurrentIndex() {
+        searchView.incrementCurrentIndex();
+    }
     anchors.fill: parent
     ListView {
         id: searchView

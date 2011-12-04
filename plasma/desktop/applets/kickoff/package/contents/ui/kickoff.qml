@@ -166,7 +166,9 @@ Item {
         if (root.state == "NORMAL") {
             mainView.decrementCurrentIndex();
         } else if (root.state == "APPLICATIONS") {
-            applicationsView.decrementCurrentIndex();
+            applicationsViewContainer.item.decrementCurrentIndex();
+        } else if (root.state == "SEARCH") {
+            searchView.item.decrementCurrentIndex();
         }
         event.accepted = true;
     }
@@ -174,7 +176,9 @@ Item {
         if (root.state == "NORMAL") {
             mainView.incrementCurrentIndex();
         } else if (root.state == "APPLICATIONS") {
-            applicationsView.incrementCurrentIndex();
+            applicationsViewContainer.item.incrementCurrentIndex();
+        } else if (root.state == "SEARCH") {
+            searchView.item.incrementCurrentIndex();
         }
         event.accepted = true;
     }

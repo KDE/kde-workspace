@@ -21,6 +21,12 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 
 Item {
+    function decrementCurrentIndex() {
+        applicationsView.decrementCurrentIndex();
+    }
+    function incrementCurrentIndex() {
+        applicationsView.incrementCurrentIndex();
+    }
     anchors.fill: parent
     PlasmaComponents.ButtonRow {
         id: breadcrumbsElement
