@@ -20,37 +20,75 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 
-ListView {
-    id: root
-    function addBreadcrumb(modelIndex, title) {
-        breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
-        var crumb = Qt.createQmlObject('import QtQuick 1.1; Breadcrumb{}', breadcrumbs, title + "BreadcrumbSnippet");
-        crumb.text = title;
-        crumb.modelIndex = modelIndex;
-        crumb.view = root;
-        crumb.enabled = false;
+Item {
+    anchors.fill: parent
+    PlasmaComponents.ButtonRow {
+        id: breadcrumbsElement
+        exclusive: false
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+        Breadcrumb {
+            id: rootBreadcrumb
+            root: true
+            text: "All Applications"
+            enabled: false
+        }
     }
-    property variant breadcrumbs
-    model: VisualDataModel {
-        model: Kickoff.ApplicationModel {}
-        delegate: KickoffItem {
-            id: kickoffItem
-            PlasmaCore.SvgItem {
-                svg: arrowSvg
-                elementId: "right-arrow"
-                height: arrowSvg.elementSize("right-arrow").height
-                width: arrowSvg.elementSize("right-arrow").width
-                visible: hasModelChildren
-                anchors {
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
+    ListView {
+        id: applicationsView
+        function addBreadcrumb(modelIndex, title) {
+            breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
+            var crumb = Qt.createQmlObject('import QtQuick 1.1; Breadcrumb{}', breadcrumbs, title + "BreadcrumbSnippet");
+            crumb.text = title;
+            crumb.modelIndex = modelIndex;
+            crumb.view = applicationsView;
+            crumb.enabled = false;
+        }
+        property variant breadcrumbs: breadcrumbsElement
+        anchors {
+            top: breadcrumbsElement.bottom
+            left: parent.left
+            bottom: parent.bottom
+            right: applicationsScrollBar.visible ? applicationsScrollBar.left : parent.right
+        }
+        model: VisualDataModel {
+            model: Kickoff.ApplicationModel {}
+            delegate: KickoffItem {
+                id: kickoffItem
+                PlasmaCore.SvgItem {
+                    svg: arrowSvg
+                    elementId: "right-arrow"
+                    height: arrowSvg.elementSize("right-arrow").height
+                    width: arrowSvg.elementSize("right-arrow").width
+                    visible: hasModelChildren
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
                 }
             }
         }
+        highlight: PlasmaComponents.Highlight {}
+        PlasmaCore.Svg {
+            id: arrowSvg
+            imagePath: "widgets/arrows"
+        }
+        clip: true
+        Component.onCompleted: {
+            rootBreadcrumb.modelIndex = model.rootIndex;
+            rootBreadcrumb.view = applicationsView;
+        }
     }
-    highlight: PlasmaComponents.Highlight {}
-    PlasmaCore.Svg {
-        id: arrowSvg
-        imagePath: "widgets/arrows"
+    PlasmaComponents.ScrollBar {
+        id: applicationsScrollBar
+        flickableItem: applicationsView
+        anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
     }
 }

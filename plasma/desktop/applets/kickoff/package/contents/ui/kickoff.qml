@@ -203,47 +203,8 @@ Item {
         }
     }
 
-    Item {
+    Loader {
         id: applicationsViewContainer
-        PlasmaComponents.ButtonRow {
-            id: breadcrumbsElement
-            exclusive: false
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
-            Breadcrumb {
-                id: rootBreadcrumb
-                root: true
-                text: "All Applications"
-                enabled: false
-            }
-        }
-        ApplicationsView {
-            id: applicationsView
-            anchors {
-                top: breadcrumbsElement.bottom
-                left: parent.left
-                bottom: parent.bottom
-                right: applicationsScrollBar.visible ? applicationsScrollBar.left : parent.right
-            }
-            clip: true
-            breadcrumbs: breadcrumbsElement
-            Component.onCompleted: {
-                rootBreadcrumb.modelIndex = model.rootIndex;
-                rootBreadcrumb.view = applicationsView;
-            }
-        }
-        PlasmaComponents.ScrollBar {
-            id: applicationsScrollBar
-            flickableItem: applicationsView
-            anchors {
-                right: parent.right
-                top: breadcrumbsElement.bottom
-                bottom: parent.bottom
-            }
-        }
         anchors {
             top: searchBar.bottom
             left: parent.left
@@ -267,7 +228,12 @@ Item {
         KickoffButton {
             iconSource: "applications-other"
             text: "Applications"
-            onClicked: root.state = "APPLICATIONS";
+            onClicked: {
+                if (applicationsViewContainer.source == "") {
+                    applicationsViewContainer.source = "ApplicationsView.qml";
+                }
+                root.state = "APPLICATIONS";
+            }
         }
         KickoffButton {
             iconSource: "computer" // TODO: could also be computer-laptop
