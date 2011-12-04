@@ -103,103 +103,14 @@ Item {
             bottom: parent.bottom
         }
     }
-    ListView {
-        id: kickoffListView
-        property variant favoritesModel
-        property variant leaveModel
-        property variant systemModel
-        property variant recentlyUsedModel
-        function loadModelScript(name) {
-            return Qt.createQmlObject('import QtQuick 1.0; import org.kde.plasma.kickoff 0.1 as Kickoff; Kickoff.' + name + '{}', kickoffListView, name + "Snippet");
-        }
-        function changeModel(identifier) {
-            if (root.state != "NORMAL") {
-                root.state = "NORMAL";
-            }
-            var newModel;
-            switch (identifier) {
-            case "favorites":
-                newModel = kickoffListView.favoritesModel;
-                if (!newModel) {
-                    newModel = loadModelScript("FavoritesModel");
-                    kickoffListView.favoritesModel = newModel;
-                }
-                break;
-            case "system":
-                newModel = kickoffListView.systemModel;
-                if (!newModel) {
-                    newModel = loadModelScript("SystemModel");
-                    kickoffListView.systemModel = newModel;
-                }
-                break;
-            case "recentlyUsed":
-                newModel = kickoffListView.recentlyUsedModel;
-                if (!newModel) {
-                    newModel = loadModelScript("RecentlyUsedModel");
-                    kickoffListView.recentlyUsedModel = newModel;
-                }
-                break;
-            case "leave":
-                newModel = kickoffListView.leaveModel;
-                if (!newModel) {
-                    newModel = loadModelScript("LeaveModel");
-                    kickoffListView.leaveModel = newModel;
-                }
-                break;
-            }
-            kickoffListView.model = newModel;
-        }
+
+    MainView {
+        id: mainView
         anchors {
             top: searchBar.bottom
             left: parent.left
             bottom: tabBar.top
-            right: scrollBar.visible ? scrollBar.left : parent.right
-        }
-        clip: true
-        focus: true
-        delegate: kickoffDelegate
-        Component.onCompleted: changeModel("favorites")
-
-        section {
-            property: "group"
-            criteria: ViewSection.FullString
-            delegate: Item {
-                id: sectionDelegate
-                width: parent.width
-                height: childrenRect.height
-                PlasmaCore.SvgItem {
-                    visible: sectionDelegate.y > 0
-                    svg: lineSvg
-                    elementId: "horizontal-line"
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: lineSvg.elementSize("horizontal-line").height
-                }
-                PlasmaComponents.Label {
-                    y: 2
-                    opacity: 0.6
-                    text: section
-                    horizontalAlignment: Text.AlignHCenter
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                }
-            }
-        }
-        highlight: PlasmaComponents.Highlight {
-        }
-    }
-
-    PlasmaComponents.ScrollBar {
-        id: scrollBar
-        flickableItem: kickoffListView
-        anchors {
             right: parent.right
-            top: searchBar.bottom
-            bottom: tabBar.top
         }
     }
 
@@ -223,7 +134,7 @@ Item {
         KickoffButton {
             iconSource: "bookmarks"
             text: "Favorites"
-            onClicked: kickoffListView.changeModel("favorites")
+            onClicked: mainView.changeModel("favorites")
         }
         KickoffButton {
             iconSource: "applications-other"
@@ -238,22 +149,22 @@ Item {
         KickoffButton {
             iconSource: "computer" // TODO: could also be computer-laptop
             text: "Computer"
-            onClicked: kickoffListView.changeModel("system")
+            onClicked: mainView.changeModel("system")
         }
         KickoffButton {
             iconSource: "document-open-recent"
             text: "Recently Used"
-            onClicked: kickoffListView.changeModel("recentlyUsed")
+            onClicked: mainView.changeModel("recentlyUsed")
         }
         KickoffButton {
             text: "Leave"
             iconSource: "system-shutdown"
-            onClicked: kickoffListView.changeModel("leave")
+            onClicked: mainView.changeModel("leave")
         }
     }
     Keys.onUpPressed: {
         if (root.state == "NORMAL") {
-            kickoffListView.decrementCurrentIndex();
+            mainView.decrementCurrentIndex();
         } else if (root.state == "APPLICATIONS") {
             applicationsView.decrementCurrentIndex();
         }
@@ -261,7 +172,7 @@ Item {
     }
     Keys.onDownPressed: {
         if (root.state == "NORMAL") {
-            kickoffListView.incrementCurrentIndex();
+            mainView.incrementCurrentIndex();
         } else if (root.state == "APPLICATIONS") {
             applicationsView.incrementCurrentIndex();
         }
@@ -272,7 +183,7 @@ Item {
         State {
             name: "NORMAL"
             PropertyChanges {
-                target: kickoffListView
+                target: mainView
                 visible: true
             }
             PropertyChanges {
@@ -291,11 +202,7 @@ Item {
         State {
             name: "APPLICATIONS"
             PropertyChanges {
-                target: kickoffListView
-                visible: false
-            }
-            PropertyChanges {
-                target: scrollBar
+                target: mainView
                 visible: false
             }
             PropertyChanges {
@@ -314,11 +221,7 @@ Item {
         State {
             name: "SEARCH"
             PropertyChanges {
-                target: kickoffListView
-                visible: false
-            }
-            PropertyChanges {
-                target: scrollBar
+                target: mainView
                 visible: false
             }
             PropertyChanges {
