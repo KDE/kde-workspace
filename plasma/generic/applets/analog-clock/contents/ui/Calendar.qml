@@ -21,6 +21,7 @@
 import Qt 4.7
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
+import "logic.js" as Logic
 
 Item {
     id: calendar
@@ -108,14 +109,7 @@ Item {
             id: nextBtn
             text: ">"
             width: 30
-            onClicked: {
-                if (month==12) {
-                    year+=1;
-                    month=1;
-                } else {
-                    month+=1;
-                }
-            }
+            onClicked: month%12 + 1
         }
     }
 
@@ -163,9 +157,9 @@ Item {
         id: todayBorder
         svg: calSvg
         elementId: "today"
-        visible: parseInt(Qt.formatDate(today, "yyyy")) == year && parseInt(Qt.formatDate(today, "M"))==month
-        x: cellXFromIndex(firstDayOfMonth+parseInt(Qt.formatDate(today, "d"))-1)
-        y: cellYFromIndex(firstDayOfMonth+parseInt(Qt.formatDate(today, "d"))-1)
+        visible: Logic.getYear(today) == year && Logic.getMonth(today)==month
+        x: cellXFromIndex(firstDayOfMonth+Logic.getDate(today)-1)
+        y: cellYFromIndex(firstDayOfMonth+Logic.getDate(today)-1)
         width: cellWidth+cellSpacing
         height: cellHeight+cellSpacing
     }
@@ -201,9 +195,9 @@ Item {
                 daysInPrevMonth: {
                     if (month==1) prevMonth=12;
                     else prevMonth=month-1;
-                    return daysInMonth(prevMonth);
+                    return Logic.daysInMonth(prevMonth);
                 }
-                daysInThisMonth: daysInMonth(month)
+                daysInThisMonth: Logic.daysInMonth(month)
                 calendarSvg: calSvg
                 width: cellWidth
                 height: cellHeight
@@ -213,26 +207,6 @@ Item {
                     selectBorder.visible = true;
                 }
             }
-        }
-    }
-
-    function daysInMonth(month)
-    {
-        if (month==2) {
-            if (year%100==0) {
-                if (year%400==0) return 29;
-                else return 28;
-            }
-            else if (year%4==0) return 29;
-            else return 28;
-        }
-        else if (month<8) {
-            if (month%2==1) return 31;
-            else return 30;
-        }
-        else {
-            if (month%2==0) return 31;
-            else return 30;
         }
     }
 }
