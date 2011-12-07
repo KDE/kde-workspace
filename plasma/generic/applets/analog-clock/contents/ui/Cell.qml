@@ -20,12 +20,13 @@
 
 import Qt 4.7
 import org.kde.plasma.core 0.1 as PlasmaCore
+import "logic.js" as Logic
 
 Item {
     id: cell
     property int dday
-    property int daysInPrevMonth
-    property int daysInThisMonth
+    property int daysInThisMonth: Logic.daysInMonth(month)
+    property int daysInPrevMonth: Logic.daysInMonth( month==1 ? 12 : month-1 )
     property bool valid: (dday>0 && dday<=daysInThisMonth)
     property alias text: date.text
     property QtObject calendarSvg

@@ -30,7 +30,7 @@ Item {
     property int month
     property int day
     property date today
-    width: 300
+    width: (cellWidth*8+cellSpacing*7+10)*2
     height: 250
 
     Components.Menu {
@@ -107,7 +107,10 @@ Item {
             id: nextBtn
             text: ">"
             width: 30
-            onClicked: month%12 + 1
+            onClicked: {
+                month = month%12 + 1;
+                if (month==1) year += 1;
+            }
         }
     }
 
@@ -126,7 +129,7 @@ Item {
             left: table.left
         }
         width: table.width
-        height: calSvg.elementSize(elementId).height*1.5
+        height: cellHeight
     }
 
     Row {
@@ -140,6 +143,7 @@ Item {
             Text {
                 text: Logic.weekdays[(weekdays.startsAt+index)%7]
                 width: cellWidth
+                height: cellHeight
                 font.pixelSize: weekdays.fontSize
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
@@ -156,7 +160,7 @@ Item {
             topMargin: 2
             left: headerBtns.left
         }
-        width: calSvg.elementSize(elementId).width*1.5
+        width: cellWidth
         height: table.height
     }
 
@@ -180,8 +184,8 @@ Item {
         height: cellHeight+cellSpacing
     }
 
-    property int cellWidth: calSvg.elementSize("active").width*1.5
-    property int cellHeight: calSvg.elementSize("active").height*1.5
+    property int cellWidth: calSvg.elementSize("active").width*1.3
+    property int cellHeight: calSvg.elementSize("active").height*1.3
     property int cellSpacing: 2
 
     function cellXFromIndex(index) {
@@ -208,12 +212,6 @@ Item {
             model: 42
             Cell {
                 dday: index-firstDayOfMonth+1;
-                daysInPrevMonth: {
-                    if (month==1) prevMonth=12;
-                    else prevMonth=month-1;
-                    return Logic.daysInMonth(prevMonth);
-                }
-                daysInThisMonth: Logic.daysInMonth(month)
                 calendarSvg: calSvg
                 width: cellWidth
                 height: cellHeight
@@ -224,5 +222,24 @@ Item {
                 }
             }
         }
+    }
+
+    PlasmaCore.Svg {
+        id: lineSvg
+        imagePath: "widgets/line"
+    }
+
+    PlasmaCore.SvgItem {
+        id: separator
+        svg: lineSvg
+        elementId: "vertical-line"
+        anchors {
+            top: headerBtns.top
+            bottom: parent.bottom
+            bottomMargin: 10
+            left: table.right
+            leftMargin: 10
+        }
+        width: lineSvg.elementSize("vertical-line").width
     }
 }
