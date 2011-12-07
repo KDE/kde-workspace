@@ -1,3 +1,6 @@
+var weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
 function daysInMonth(month)
 {
     if (month==2) {

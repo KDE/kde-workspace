@@ -75,9 +75,7 @@ Item {
 
         Components.ToolButton {
             id: monthBtn
-            text: {
-                ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][month-1];
-            }
+            text: Logic.months[month-1]
             width: 100
             onClicked: {
                 monthMenu.open();
@@ -129,6 +127,24 @@ Item {
         }
         width: table.width
         height: calSvg.elementSize(elementId).height*1.5
+    }
+
+    Row {
+        id: weekdays
+        anchors.fill: weekDayHeader
+        spacing: 2
+        property int startsAt: 0
+        property int fontSize: 14
+        Repeater {
+            model: 7
+            Text {
+                text: Logic.weekdays[(weekdays.startsAt+index)%7]
+                width: cellWidth
+                font.pixelSize: weekdays.fontSize
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
     }
 
     PlasmaCore.SvgItem {
