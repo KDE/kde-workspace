@@ -140,4 +140,27 @@ Item {
         visible: showTimezone
     }
 
+    PlasmaCore.Dialog {
+        id: calendar
+        windowFlags: Qt.Popup
+        mainItem: Calendar {
+            firstDayOfMonth: 4
+            today: "2011-12-07"
+            year: parseInt(Qt.formatDate(today, "yyyy"))
+            month: parseInt(Qt.formatDate(today, "M"))
+            day: parseInt(Qt.formatDate(today, "d"))
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            if (!calendar.visible) {
+                var pos = calendar.popupPosition(analogclock, Qt.AlignCenter);
+                calendar.x = pos.x;
+                calendar.y = pos.y;
+            }
+            calendar.visible = !calendar.visible;
+        }
+    }
 }
