@@ -552,7 +552,7 @@ ControllerWindow *PlasmaApp::showController(int screen, Plasma::Containment *con
     }
 
     controller->show();
-    Plasma::WindowEffects::slideWindow(controller, Plasma::BottomEdge);
+    Plasma::WindowEffects::slideWindow(controller, controller->location());
     KWindowSystem::setOnAllDesktops(controller->winId(), true);
     QTimer::singleShot(0, controller, SLOT(activate()));
     KWindowSystem::setState(controller->winId(), NET::SkipTaskbar | NET::SkipPager | NET::Sticky | NET::KeepAbove);
@@ -801,9 +801,9 @@ DesktopView* PlasmaApp::viewForScreen(int screen, int desktop) const
     return 0;
 }
 
-DesktopCorona* PlasmaApp::corona()
+DesktopCorona* PlasmaApp::corona(bool createIfMissing)
 {
-    if (!m_corona) {
+    if (!m_corona && createIfMissing) {
         QTime t;
         t.start();
         DesktopCorona *c = new DesktopCorona(this);
