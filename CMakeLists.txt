@@ -151,6 +151,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    macro_optional_add_subdirectory(krunner)
    macro_optional_add_subdirectory(solid)
    macro_optional_add_subdirectory(kstartupconfig)
+   macro_optional_add_subdirectory( screenlocker )
    macro_optional_add_subdirectory(freespacenotifier)
 
    # data
