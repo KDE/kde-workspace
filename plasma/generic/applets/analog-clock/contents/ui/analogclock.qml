@@ -20,6 +20,7 @@
 
 import Qt 4.7
 import org.kde.plasma.core 0.1 as PlasmaCore
+import "logic.js" as Logic
 
 Item {
     id: analogclock
@@ -146,9 +147,9 @@ Item {
         mainItem: Calendar {
             firstDayOfMonth: 4
             today: "2011-12-07"
-            year: parseInt(Qt.formatDate(today, "yyyy"))
-            month: parseInt(Qt.formatDate(today, "M"))
-            day: parseInt(Qt.formatDate(today, "d"))
+            year: Logic.getYear(today)
+            month: Logic.getMonth(today)
+            day: Logic.getDate(today)
         }
     }
 
