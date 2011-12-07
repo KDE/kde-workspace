@@ -1263,6 +1263,7 @@ void PanelView::unhide(bool destroyTrigger)
     if (!isVisible()) {
         Plasma::WindowEffects::slideWindow(this, location());
         show();
+        KWindowSystem::raiseWindow(winId());
     }
 
     KWindowSystem::setOnAllDesktops(winId(), true);
@@ -1575,7 +1576,7 @@ void PanelView::createUnhideTrigger()
 
 
     attributes.event_mask = EnterWindowMask | LeaveWindowMask | PointerMotionMask |
-                            KeyPressMask | KeyPressMask | ButtonPressMask |
+                            KeyPressMask | ButtonPressMask |
                             ButtonReleaseMask | ButtonMotionMask |
                             KeymapStateMask | VisibilityChangeMask |
                             StructureNotifyMask | ResizeRedirectMask |
