@@ -337,7 +337,7 @@ void Battery::dataUpdated(const QString& source, const Plasma::DataEngine::Data 
         }
 
         isVisible = m_hibernateButton->isVisible();
-        shouldBeVisible = data["Hibernate"].toBool();
+        shouldBeVisible = false;
 
         if (isVisible != shouldBeVisible) {
             m_hibernateButton->setVisible(shouldBeVisible);
