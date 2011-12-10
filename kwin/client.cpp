@@ -71,6 +71,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace KWin
 {
 
+bool Client::s_haveResizeEffect = false;
+
 // Creating a client:
 //  - only by calling Workspace::createClient()
 //      - it creates a new client and calls manage() for it
@@ -976,6 +978,9 @@ void Client::minimize(bool avoid_animation)
 {
     if (!isMinimizable() || isMinimized())
         return;
+    if (!rules()->checkMinimize(true)) {
+        return;
+    }
 
 #ifdef KWIN_BUILD_SCRIPTING
     //Scripting call. Does not use a signal/slot mechanism
@@ -1010,6 +1015,10 @@ void Client::unminimize(bool avoid_animation)
 {
     if (!isMinimized())
         return;
+
+    if (rules()->checkMinimize(false)) {
+        return;
+    }
 
 #ifdef KWIN_BUILD_SCRIPTING
     SWrapper::WorkspaceProxy* ws_wrap = SWrapper::WorkspaceProxy::instance();
