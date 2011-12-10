@@ -945,6 +945,9 @@ bool Client::isMinimizable() const
 {
     if (isSpecialWindow())
         return false;
+    if (!rules()->checkMinimize(true))
+        return false;
+
     if (isTransient()) {
         // #66868 - Let other xmms windows be minimized when the mainwindow is minimized
         bool shown_mainwindow = false;
@@ -978,9 +981,9 @@ void Client::minimize(bool avoid_animation)
 {
     if (!isMinimizable() || isMinimized())
         return;
-    if (!rules()->checkMinimize(true)) {
-        return;
-    }
+
+    if (isShade()) // NETWM restriction - KWindowInfo::isMinimized() == Hidden && !Shaded
+        info->setState(0, NET::Shaded);
 
 #ifdef KWIN_BUILD_SCRIPTING
     //Scripting call. Does not use a signal/slot mechanism
@@ -1019,6 +1022,9 @@ void Client::unminimize(bool avoid_animation)
     if (rules()->checkMinimize(false)) {
         return;
     }
+
+    if (isShade()) // NETWM restriction - KWindowInfo::isMinimized() == Hidden && !Shaded
+        info->setState(NET::Shaded, NET::Shaded);
 
 #ifdef KWIN_BUILD_SCRIPTING
     SWrapper::WorkspaceProxy* ws_wrap = SWrapper::WorkspaceProxy::instance();
@@ -1062,13 +1068,13 @@ QRect Client::iconGeometry() const
 
 bool Client::isShadeable() const
 {
-    return !isSpecialWindow() && !noBorder();
+    return !isSpecialWindow() && !noBorder() && (rules()->checkShade(ShadeNormal) != rules()->checkShade(ShadeNone));
 }
 
 void Client::setShade(ShadeMode mode)
 {
-    if (!isShadeable())
-        return;
+    if (isSpecialWindow() || noBorder())
+        mode = ShadeNone;
     mode = rules()->checkShade(mode);
     if (shade_mode == mode)
         return;
