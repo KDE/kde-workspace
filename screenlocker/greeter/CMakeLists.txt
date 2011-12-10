@@ -38,7 +38,7 @@ kde4_add_kcfg_files(kscreenlocker_greet_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../kcfg
 
 kde4_add_executable(kscreenlocker_greet ${kscreenlocker_greet_SRCS})
 
-target_link_libraries(kscreenlocker_greet kephal ${KDE4_KDEUI_LIBS} ${QT_QTDECLARATIVE_LIBRARY} kdeclarative)
+target_link_libraries(kscreenlocker_greet kephal ${KDE4_KDEUI_LIBS} ${QT_QTDECLARATIVE_LIBRARY} kdeclarative  ${X11_LIBRARIES})
 
 install(TARGETS kscreenlocker_greet DESTINATION ${LIBEXEC_INSTALL_DIR})
 
