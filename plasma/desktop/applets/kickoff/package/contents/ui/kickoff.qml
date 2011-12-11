@@ -26,9 +26,20 @@ Item {
     property int minimumWidth: 290
     property int minimumHeight: 340
     property string previousState
+    property bool switchTabsOnHover: false
+    property bool showAppsByName: false
     width: 400
     height: 400
     state: "NORMAL"
+
+    Component.onCompleted: {
+        plasmoid.addEventListener('ConfigChanged', configChanged);
+    }
+
+    function configChanged() {
+        root.switchTabsOnHover = plasmoid.readConfig("SwitchTabsOnHover");
+        root.showAppsByName = plasmoid.readConfig("ShowAppsByName");
+    }
 
     Kickoff.Launcher {
         id: launcher
