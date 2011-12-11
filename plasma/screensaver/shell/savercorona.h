@@ -22,6 +22,8 @@
 #define SAVERCORONA_H
 
 #include <QtGui/QGraphicsScene>
+#include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusError>
 
 #include <Plasma/Corona>
 
@@ -45,16 +47,13 @@ public:
     virtual int numScreens() const;
     virtual QRect screenGeometry(int id) const;
 
-protected:
-    virtual bool eventFilter(QObject *watched, QEvent *event);
-
 private Q_SLOTS:
     void updateActions(Plasma::ImmutabilityType immutability);
     void toggleLock();
     void unlockDesktop();
     void numScreensUpdated(int newCount);
-    void greeterAccepted();
-    void greeterCanceled();
+    void unlock(QDBusMessage reply);
+    void dbusError(QDBusError error);
 
 private:
     enum UnlockMode {
@@ -67,7 +66,6 @@ private:
 
     int m_numScreens;
     QDeclarativeEngine *m_engine;
-    QGraphicsObject *m_greeterItem;
     UnlockMode m_mode;
     bool m_capsLocked;
 };
