@@ -49,4 +49,13 @@ PlasmaComponents.TabButton {
             bottomMargin: 5
         }
     }
+    MouseArea {
+        enabled: root.switchTabsOnHover
+        anchors.fill: parent
+        hoverEnabled: root.switchTabsOnHover
+        onEntered: {
+            parent.clicked()
+            parent.parent.parent.currentTab = parent
+        }
+    }
 }
