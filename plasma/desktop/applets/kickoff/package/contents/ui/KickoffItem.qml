@@ -35,7 +35,18 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.Label {
         id: titleElement
-        text: display
+        text: {
+            if (root.state == "APPLICATIONS") {
+                if (hasModelChildren) {
+                    return display;
+                } else {
+                    // TODO: games should always show the by name
+                    return root.showAppsByName ? subtitle : display;
+                }
+            } else {
+                return display;
+            }
+        }
         anchors {
             top: parent.top
             left: elementIcon.right
@@ -45,7 +56,17 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.Label {
         id: subTitleElement
-        text: subtitle
+        text: {
+            if (root.state == "APPLICATIONS") {
+                if (hasModelChildren) {
+                    return "";
+                } else {
+                    return root.showAppsByName ? display : subtitle;
+                }
+            } else {
+                return subtitle;
+            }
+        }
         visible: listItem.ListView.isCurrentItem
         opacity: 0.6
         font.pointSize: theme.smallestFont.pointSize
