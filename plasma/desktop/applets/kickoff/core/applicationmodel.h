@@ -76,14 +76,6 @@ public:
         ShowSystemOnlyPolicy
     };
 
-    enum PrimaryNamePolicy {
-        AppNamePrimary,
-        GenericNamePrimary
-    };
-
-    void setNameDisplayOrder(DisplayOrder displayOrder);
-    DisplayOrder nameDisplayOrder() const;
-    //DisplayOrder m_displayOrder;
     /**
      * Sets the policy for handling duplicate applications.
      * See DuplicatePolicy
@@ -99,9 +91,6 @@ public:
     void setSystemApplicationPolicy(SystemApplicationPolicy policy);
     /** See setSystemApplicationPolicy() */
     SystemApplicationPolicy systemApplicationPolicy() const;
-
-    void setPrimaryNamePolicy(PrimaryNamePolicy policy);
-    PrimaryNamePolicy primaryNamePolicy() const;
 
     // reimplemented from QAbstractItemModel
     virtual bool canFetchMore(const QModelIndex &parent) const;
@@ -120,8 +109,6 @@ public slots:
     void checkSycocaChange(const QStringList &changes);
 
 private:
-    bool nameAfterDescription(const QModelIndex &index) const;
-
     friend class ApplicationModelPrivate;
     ApplicationModelPrivate *const d;
 

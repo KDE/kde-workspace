@@ -107,7 +107,6 @@ public:
               root(new AppNode()),
               duplicatePolicy(ApplicationModel::ShowDuplicatesPolicy),
               systemApplicationPolicy(ApplicationModel::ShowSystemOnlyPolicy),
-              primaryNamePolicy(ApplicationModel::GenericNamePrimary),
               displayOrder(NameAfterDescription),
               allowSeparators(_allowSeparators)
     {
@@ -129,7 +128,6 @@ public:
     AppNode *root;
     ApplicationModel::DuplicatePolicy duplicatePolicy;
     ApplicationModel::SystemApplicationPolicy systemApplicationPolicy;
-    ApplicationModel::PrimaryNamePolicy primaryNamePolicy;
     QStringList systemApplications;
     DisplayOrder displayOrder;
     bool allowSeparators;
@@ -147,7 +145,7 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
     const KServiceGroup::List list = root->entries(true /* sorted */,
                                                    true /* exclude no display entries */,
                                                    allowSeparators /* allow separators */,
-                                                   primaryNamePolicy == ApplicationModel::GenericNamePrimary /* sort by generic name */);
+                                                   true /* sort by generic name */);
 
     // application name <-> service map for detecting duplicate entries
     QHash<QString, KService::Ptr> existingServices;
@@ -309,45 +307,10 @@ bool ApplicationModel::canFetchMore(const QModelIndex &parent) const
     return node->isDir && !node->fetched;
 }
 
-void ApplicationModel::setNameDisplayOrder(DisplayOrder displayOrder) 
-{
-    d->displayOrder = displayOrder;
-}
-
-DisplayOrder ApplicationModel::nameDisplayOrder() const
-{
-   return d->displayOrder;
-}
-
 int ApplicationModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
     return 1;
-}
-
-bool ApplicationModel::nameAfterDescription(const QModelIndex &index) const
-{
-    AppNode *node = static_cast<AppNode*>(index.internalPointer());
-    if (node->isDir) {
-        return true;
-    }
-
-    QModelIndex parent = index.parent();
-    while (parent.parent().isValid()) {
-        parent = parent.parent();
-    }
-
-    if (parent.isValid()) {
-        // nasty little hack to always makes games show their unique name
-        // there is no such thing as a "generic name" for a game in practice
-        // though this is apparently quite true for all other kinds of apps
-        AppNode *node = static_cast<AppNode*>(parent.internalPointer());
-        if (node->isDir && node->genericName == i18n("Games")) {
-            return false;
-        }
-    }
-
-    return d->displayOrder == NameAfterDescription;
 }
 
 QVariant ApplicationModel::data(const QModelIndex &index, int role) const
@@ -360,19 +323,9 @@ QVariant ApplicationModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Qt::DisplayRole:
-      if (nameAfterDescription(index) && !node->genericName.isEmpty()) {
-            return node->genericName;
-        } else {
-            return node->appName;
-        }
-        break;
+        return node->genericName;
     case Kickoff::SubTitleRole:
-      if (!nameAfterDescription(index) && !node->genericName.isEmpty()) {
-            return node->genericName;
-        } else {
-            return node->appName;
-        }
-        break;
+        return node->appName;
     case Kickoff::UrlRole:
         if (node->isDir) {
             return QString::fromLatin1("applications://%1").arg(node->desktopEntry);
@@ -381,7 +334,7 @@ QVariant ApplicationModel::data(const QModelIndex &index, int role) const
         }
         break;
     case Kickoff::SubTitleMandatoryRole:
-        return nameAfterDescription(index) && node->subTitleMandatory;
+        return node->subTitleMandatory;
         break;
     case Kickoff::SeparatorRole:
         return node->isSeparator;
@@ -500,19 +453,6 @@ void ApplicationModel::setSystemApplicationPolicy(SystemApplicationPolicy policy
         d->systemApplicationPolicy = policy;
         reloadMenu();
     }
-}
-
-void ApplicationModel::setPrimaryNamePolicy(PrimaryNamePolicy policy)
-{
-    if (policy != d->primaryNamePolicy) {
-        d->primaryNamePolicy = policy;
-        reloadMenu();
-    }
-}
-
-ApplicationModel::PrimaryNamePolicy ApplicationModel::primaryNamePolicy() const
-{
-    return d->primaryNamePolicy;
 }
 
 void ApplicationModel::delayedReloadMenu()
