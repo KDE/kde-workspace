@@ -17,6 +17,9 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA            *
  ***************************************************************************/
 
+#ifndef KTOUCHPADENABLER_DAEMON_H
+#define KTOUCHPADENABLER_DAEMON_H
+
 #include <kdedmodule.h>
 
 class TouchpadEnablerDaemonPrivate;
@@ -30,4 +33,5 @@ class KDE_EXPORT TouchpadEnablerDaemon : public KDEDModule
     private:
         TouchpadEnablerDaemonPrivate *d;
 };
-  
+
+#endif
