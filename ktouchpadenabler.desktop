@@ -7,6 +7,7 @@ X-KDE-Kded-phase=1
 
 Name=KDE TouchPad Enabler Daemon
 Name[de]=Touchpad-Aktivierungsdienst für KDE
+Name[es]=Servicio habilitador del touchpad para KDE
 Name[pt]=Serviço de Activação do Rato por Toque para o KDE
 Name[pt_BR]=Serviço de ativação do TouchPad para o KDE
 Name[sv]=KDE:s demon för aktivering av tryckplatta
@@ -15,6 +16,8 @@ Name[x-test]=xxKDE TouchPad Enabler Daemonxx
 
 Comment=Toggles the enable status of the TouchPad
 Comment[de]=Schaltet den Aktivierungsstatus von Touchpads um
+Comment[es]=Activa o desactiva el estado del touchpad
+Comment[nds]=Maakt dat Tastfeld an oder ut
 Comment[pt]=Activa ou desactiva o rato por toque
 Comment[pt_BR]=Ativa ou desativa o TouchPad
 Comment[sv]=Ändrar tryckplattans aktiveringsstatus
