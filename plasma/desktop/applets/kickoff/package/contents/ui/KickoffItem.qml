@@ -18,6 +18,7 @@
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.qtextracomponents 0.1
+import org.kde.draganddrop 1.0
 
 PlasmaComponents.ListItem {
     id: listItem
@@ -58,18 +59,26 @@ PlasmaComponents.ListItem {
             leftMargin: 5
         }
     }
-    MouseArea {
+    DragArea {
         anchors.fill: parent
-        hoverEnabled: true
-        onEntered: {
-            listItem.ListView.view.currentIndex = index;
-        }
-        onClicked: {
-            if (hasModelChildren) {
-                listItem.ListView.view.addBreadcrumb(listItem.ListView.view.model.modelIndex(index), display);
-                listItem.ListView.view.model.rootIndex = listItem.ListView.view.model.modelIndex(index);
-            } else {
-                launcher.openUrl(url);
+        supportedActions: Qt.MoveAction | Qt.LinkAction
+            mimeData {
+                url: model["url"]
+                source: parent
+            }
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+                listItem.ListView.view.currentIndex = index;
+            }
+            onClicked: {
+                if (hasModelChildren) {
+                    listItem.ListView.view.addBreadcrumb(listItem.ListView.view.model.modelIndex(index), display);
+                    listItem.ListView.view.model.rootIndex = listItem.ListView.view.model.modelIndex(index);
+                } else {
+                    launcher.openUrl(url);
+                }
             }
         }
     }
