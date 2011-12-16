@@ -143,16 +143,6 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         setData("Battery", "Has Battery", !batterySources.isEmpty());
         if (!batterySources.isEmpty()) {
             setData("Battery", "Sources", batterySources);
-            QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                              "/org/kde/Solid/PowerManagement",
-                                                              "org.kde.Solid.PowerManagement",
-                                                              "batteryRemainingTime");
-            QDBusPendingReply< qulonglong > reply = QDBusConnection::sessionBus().asyncCall(msg);
-            reply.waitForFinished();
-            if (reply.isValid()) {
-                //kDebug() << "Remaining time 1:" << reply.value();
-                setData("Battery", "Remaining msec", reply.value());
-            }
         }
 
         m_sources = basicSourceNames() + batterySources;
@@ -327,18 +317,6 @@ void PowermanagementEngine::reloadPowerDevilData()
         reply.waitForFinished();
         if (reply.isValid()) {
             profileChanged(reply.value());
-        }
-    }
-
-    {
-        QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                          "/org/kde/Solid/PowerManagement",
-                                                          "org.kde.Solid.PowerManagement",
-                                                          "batteryRemainingTime");
-        QDBusPendingReply< qulonglong > reply = QDBusConnection::sessionBus().asyncCall(msg);
-        reply.waitForFinished();
-        if (reply.isValid()) {
-            batteryRemainingTimeChanged(reply.value());
         }
     }
 
