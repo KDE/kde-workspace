@@ -57,7 +57,24 @@ Item {
         id: searchBar
         height: 32 + lineSvg.elementSize("horizontal-line").height
         anchors {
-            top: parent.top
+            top: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return undefined;
+                // bottom
+                default:
+                    return parent.top;
+                }
+            }
+            bottom: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return parent.bottom;
+                // bottom
+                default:
+                    return undefined;
+                }
+            }
             right: parent.right
             left: parent.left
         }
@@ -67,7 +84,24 @@ Item {
             height: 32
             width: 32
             anchors {
-                top: parent.top
+                top: {
+                    switch (plasmoid.location) {
+                    case TopEdge:
+                        return undefined;
+                    // bottom
+                    default:
+                        return parent.top;
+                    }
+                }
+                bottom: {
+                    switch (plasmoid.location) {
+                    case TopEdge:
+                        return undefined;
+                    // bottom
+                    default:
+                        return parent.bottom;
+                    }
+                }
                 left: parent.left
             }
         }
@@ -78,7 +112,24 @@ Item {
             anchors {
                 left: searchIcon.right
                 right: parent.right
-                top: parent.top
+                top: {
+                    switch (plasmoid.location) {
+                    case TopEdge:
+                        return undefined;
+                    // bottom
+                    default:
+                        return parent.top;
+                    }
+                }
+                bottom: {
+                    switch (plasmoid.location) {
+                    case TopEdge:
+                        return undefined;
+                    // bottom
+                    default:
+                        return parent.bottom;
+                    }
+                }
                 leftMargin: 5
             }
             onTextChanged: {
@@ -100,7 +151,25 @@ Item {
             anchors {
                 left: parent.left
                 right: parent.right
-                top: searchIcon.bottom
+                top: {
+                    switch (plasmoid.location) {
+                    case TopEdge:
+                        return undefined;
+                    // bottom
+                    default:
+                        return searchIcon.bottom;
+                    }
+                }
+                bottom: {
+                    switch (plasmoid.location) {
+                    // top
+                    case TopEdge:
+                        return searchIcon.top;
+                    // bottom
+                    default:
+                        return undefined;
+                    }
+                }
             }
             height: lineSvg.elementSize("horizontal-line").height
         }
@@ -110,17 +179,49 @@ Item {
         anchors {
             left: parent.left
             right: parent.right
-            top: searchBar.bottom
-            bottom: parent.bottom
+            top: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return parent.top;
+                // bottom
+                default:
+                    return searchBar.bottom;
+                }
+            }
+            bottom: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return searchBar.top;
+                // bottom
+                default:
+                    return parent.bottom;
+                }
+            }
         }
     }
 
     MainView {
         id: mainView
         anchors {
-            top: searchBar.bottom
+            top: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return tabBar.bottom;
+                // bottom
+                default:
+                    return searchBar.bottom;
+                }
+            }
             left: parent.left
-            bottom: tabBar.top
+            bottom: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return searchBar.top;
+                // bottom
+                default:
+                    return tabBar.top;
+                }
+            }
             right: parent.right
         }
     }
@@ -128,10 +229,26 @@ Item {
     Loader {
         id: applicationsViewContainer
         anchors {
-            top: searchBar.bottom
+            top: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return tabBar.bottom;
+                // bottom
+                default:
+                    return searchBar.bottom;
+                }
+            }
             left: parent.left
             right: parent.right
-            bottom: tabBar.top
+            bottom: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return searchBar.top;
+                // bottom
+                default:
+                    return tabBar.top;
+                }
+            }
         }
     }
 
@@ -140,7 +257,24 @@ Item {
         anchors {
             left: parent.left
             right: parent.right
-            bottom: parent.bottom
+            bottom: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return undefined;
+                // bottom
+                default:
+                    return parent.bottom;
+                }
+            }
+            top: {
+                switch (plasmoid.location) {
+                case TopEdge:
+                    return parent.top;
+                // bottom
+                default:
+                    return undefined;
+                }
+            }
         }
         KickoffButton {
             iconSource: "bookmarks"
