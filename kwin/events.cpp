@@ -895,7 +895,7 @@ void Client::enterNotifyEvent(XCrossingEvent* e)
         }
 
         QPoint currentPos(e->x_root, e->y_root);
-        if (options->focusPolicy != Options::FocusStrictlyUnderMouse && (isDesktop() || isDock()))
+        if (isDesktop() || isDock())
             return;
         // for FocusFollowsMouse, change focus only if the mouse has actually been moved, not if the focus
         // change came because of window changes (e.g. closing a window) - #92290
@@ -943,9 +943,9 @@ void Client::leaveNotifyEvent(XCrossingEvent* e)
                 shadeHoverTimer->start(options->shadeHoverInterval);
             }
         }
-        if (options->focusPolicy == Options::FocusStrictlyUnderMouse)
-            if (isActive() && lostMouse)
-                workspace()->requestFocus(0) ;
+        if (options->focusPolicy == Options::FocusStrictlyUnderMouse && isActive() && lostMouse) {
+            workspace()->requestDelayFocus(0);
+        }
         return;
     }
 }
@@ -1656,7 +1656,7 @@ void Toplevel::propertyNotifyEvent(XPropertyEvent* e)
             getWindowRole();
         else if (e->atom == atoms->kde_net_wm_shadow)
             getShadow();
-        else if (e->atom == atoms->kde_net_wm_opaque_region)
+        else if (e->atom == atoms->net_wm_opaque_region)
             getWmOpaqueRegion();
         break;
     }
