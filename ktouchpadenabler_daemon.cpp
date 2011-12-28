@@ -97,10 +97,10 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate() : m_keyCode(0)
     if (foundTouchpad) {
         if (!foundMoreThanOneTouchpad) {
             const int grabResult = XGrabKey(m_display, keyCode, 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
-            if (grabResult == GrabSuccess) {
-                m_keyCode = keyCode;
-            } else {
+            if (grabResult == BadAccess || grabResult == BadValue || grabResult == BadWindow) {
                 kDebug() << "Could not grab the XF86XK_TouchpadToggle key. You probably have some other program grabbig it, if you are sure you don't have any, please report a bug against ktouchpadenabler in http://bugs.kde.org";
+            } else {
+                m_keyCode = keyCode;
             }
         } else {
             KNotification *notification = KNotification::event(KNotification::Warning, i18n("Touchpad status"), i18n("Found more than one touchpad. Touchpad Enabler Daemon does not handle this configuration"));
