@@ -36,6 +36,8 @@ class TouchpadEnablerDaemonPrivate : public QWidget
     public:
         TouchpadEnablerDaemonPrivate();
         
+        bool initSuccessful() const { return m_keyCode != 0; }
+        
         bool x11Event(XEvent *event);
     
     private:
@@ -138,7 +140,13 @@ TouchpadEnablerDaemon::TouchpadEnablerDaemon(QObject *parent, const QList<QVaria
     : KDEDModule(parent)
 {
     d = new TouchpadEnablerDaemonPrivate();
-    kapp->installX11EventFilter(d);
+    
+    if (d->initSuccessful()) {
+        kapp->installX11EventFilter(d);
+    } else {
+        delete d;
+        d = 0;
+    }
 }
 
 TouchpadEnablerDaemon::~TouchpadEnablerDaemon()
