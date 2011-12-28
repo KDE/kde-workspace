@@ -45,20 +45,19 @@ class TouchpadEnablerDaemonPrivate : public QWidget
         Atom m_enabledProperty;
 };
 
-TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
+TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate() : m_keyCode(0)
 {
     bool foundTouchpad = false;
     bool foundMoreThanOneTouchpad = false;
     
     m_display = QX11Info::display();
     if (!m_display) {
-        m_keyCode = 0;
         kWarning() << "Did not find a display to use. This should never happen, thus doing nothing. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
         return;
     }
     
-    m_keyCode = XKeysymToKeycode(m_display, XF86XK_TouchpadToggle);
-    if (!m_keyCode) {
+    const int keyCode = XKeysymToKeycode(m_display, XF86XK_TouchpadToggle);
+    if (!keyCode) {
         kWarning() << "Could not match XF86XK_TouchpadToggle to a Keycode. This should never happen, thus doing nothing. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
         return;
     }
@@ -94,8 +93,10 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
     
     if (foundTouchpad) {
         if (!foundMoreThanOneTouchpad) {
-            const int grabResult = XGrabKey(m_display, m_keyCode, 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
-            if (grabResult != GrabSuccess) {
+            const int grabResult = XGrabKey(m_display, keyCode, 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
+            if (grabResult == GrabSuccess) {
+                m_keyCode = keyCode;
+            } else {
                 kDebug() << "Could not grab the XF86XK_TouchpadToggle key. You probably have some other program grabbig it, if you are sure you don't have any, please report a bug against ktouchpadenabler in http://bugs.kde.org";
             }
         } else {
