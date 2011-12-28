@@ -20,6 +20,7 @@
 #include "ktouchpadenabler_daemon.h"
 
 #include <KApplication>
+#include <KDebug>
 #include <KLocalizedString>
 #include <KNotification>
 #include <KPluginFactory>
@@ -48,8 +49,19 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
 {
     bool foundTouchpad = false;
     bool foundMoreThanOneTouchpad = false;
+    
     m_display = QX11Info::display();
+    if (!m_display) {
+        m_keyCode = 0;
+        kWarning() << "Did not find a display to use. This should never happen, thus doing nothing. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
+        return;
+    }
+    
     m_keyCode = XKeysymToKeycode(m_display, XF86XK_TouchpadToggle);
+    if (!m_keyCode) {
+        kWarning() << "Could not match XF86XK_TouchpadToggle to a Keycode. This should never happen, thus doing nothing. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
+        return;
+    }
 
     Atom synapticsProperty = XInternAtom (m_display, "Synaptics Off", False);
     m_enabledProperty = XInternAtom (m_display, "Device Enabled", False);
@@ -76,15 +88,22 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
             }
         }
         XIFreeDeviceInfo(devices);
+    } else {
+        kWarning() << "Could not get atoms for 'Synaptics Off' or 'Device Enabled'. This should never happen, thus doing nothing. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
     }
     
     if (foundTouchpad) {
         if (!foundMoreThanOneTouchpad) {
-            XGrabKey(m_display, m_keyCode, 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
+            const int grabResult = XGrabKey(m_display, m_keyCode, 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
+            if (grabResult != GrabSuccess) {
+                kDebug() << "Could not grab the XF86XK_TouchpadToggle key. You probably have some other program grabbig it, if you are sure you don't have any, please report a bug against ktouchpadenabler in http://bugs.kde.org";
+            }
         } else {
             KNotification *notification = KNotification::event(KNotification::Warning, i18n("Touchpad status"), i18n("Found more than one touchpad. Touchpad Enabler Daemon does not handle this configuration"));
             notification->sendEvent();
         }
+    } else {
+        kDebug() << "Did not find a touchpad. If you have one, please report a bug against ktouchpadenabler in http://bugs.kde.org";
     }
 }
         
