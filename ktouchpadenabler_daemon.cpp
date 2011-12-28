@@ -35,6 +35,7 @@ class TouchpadEnablerDaemonPrivate : public QWidget
 {
     public:
         TouchpadEnablerDaemonPrivate();
+        ~TouchpadEnablerDaemonPrivate();
         
         bool initSuccessful() const { return m_keyCode != 0; }
         
@@ -109,7 +110,14 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate() : m_keyCode(0)
         kDebug() << "Did not find a touchpad. If you have one, please report a bug against ktouchpadenabler in http://bugs.kde.org";
     }
 }
-        
+
+TouchpadEnablerDaemonPrivate::~TouchpadEnablerDaemonPrivate()
+{
+    if (m_keyCode != 0) {
+        XUngrabKey(m_display, m_keyCode, 0 /* No modifiers */, QX11Info::appRootWindow());
+    }
+}
+
 bool TouchpadEnablerDaemonPrivate::x11Event(XEvent *event)
 {
     if (event->type == KeyPress) {
