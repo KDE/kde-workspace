@@ -42,16 +42,23 @@ class TouchpadEnablerDaemonPrivate : public QWidget
         bool x11Event(XEvent *event);
     
     private:
+        enum TouchpadKey { ToggleKey = 0, OnKey, OffKey };
+        static const int nKeys = OffKey + 1;
+        
         Display *m_display;
-        KeyCode m_keyCode;
+        KeyCode m_keyCode[nKeys];
         int m_deviceId;
         Atom m_enabledProperty;
 };
 
-TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate() : m_keyCode(0)
+TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
 {
     bool foundTouchpad = false;
     bool foundMoreThanOneTouchpad = false;
+    
+    for (int i = 0; i < nKeys; ++i) {
+        m_keyCode[i] = 0;
+    }
     
     m_display = QX11Info::display();
     if (!m_display) {
@@ -59,12 +66,6 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate() : m_keyCode(0)
         return;
     }
     
-    const int keyCode = XKeysymToKeycode(m_display, XF86XK_TouchpadToggle);
-    if (!keyCode) {
-        kWarning() << "Could not match XF86XK_TouchpadToggle to a Keycode. This should never happen, thus doing nothing. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
-        return;
-    }
-
     Atom synapticsProperty = XInternAtom (m_display, "Synaptics Off", False);
     m_enabledProperty = XInternAtom (m_display, "Device Enabled", False);
 
@@ -96,11 +97,19 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate() : m_keyCode(0)
     
     if (foundTouchpad) {
         if (!foundMoreThanOneTouchpad) {
-            const int grabResult = XGrabKey(m_display, keyCode, 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
-            if (grabResult == BadAccess || grabResult == BadValue || grabResult == BadWindow) {
-                kDebug() << "Could not grab the XF86XK_TouchpadToggle key. You probably have some other program grabbig it, if you are sure you don't have any, please report a bug against ktouchpadenabler in http://bugs.kde.org";
-            } else {
-                m_keyCode = keyCode;
+            m_keyCode[ToggleKey] = XKeysymToKeycode(m_display, XF86XK_TouchpadToggle);
+            m_keyCode[OnKey] = XKeysymToKeycode(m_display, XF86XK_TouchpadOn);
+            m_keyCode[OffKey] = XKeysymToKeycode(m_display, XF86XK_TouchpadOff);
+            for (int i = 0; i < nKeys; ++i) {
+                if (m_keyCode[i] != 0) {
+                    const int grabResult = XGrabKey(m_display, m_keyCode[i], 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
+                    if (grabResult == BadAccess || grabResult == BadValue || grabResult == BadWindow) {
+                        kDebug() << "Could not grab ktouchpadenabler key index" << i <<". You probably have some other program grabbig it, if you are sure you don't have any, please report a bug against ktouchpadenabler in http://bugs.kde.org";
+                        m_keyCode[i] = 0;
+                    }
+                } else {
+                    kWarning() << "Could not match ktouchpadenabler key index" << i << "to a Keycode. This should never happen. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
+                }
             }
         } else {
             KNotification *notification = KNotification::event(KNotification::Warning, i18n("Touchpad status"), i18n("Found more than one touchpad. Touchpad Enabler Daemon does not handle this configuration"));
@@ -113,31 +122,40 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate() : m_keyCode(0)
 
 TouchpadEnablerDaemonPrivate::~TouchpadEnablerDaemonPrivate()
 {
-    if (m_keyCode != 0) {
-        XUngrabKey(m_display, m_keyCode, 0 /* No modifiers */, QX11Info::appRootWindow());
+    for (int i = 0; i < nKeys; ++i) {
+        if (m_keyCode[i] != 0) {
+            XUngrabKey(m_display, m_keyCode[i], 0 /* No modifiers */, QX11Info::appRootWindow());
+        }
     }
 }
 
 bool TouchpadEnablerDaemonPrivate::x11Event(XEvent *event)
 {
     if (event->type == KeyPress) {
-        if (event->xkey.keycode == m_keyCode) {
-            unsigned char newValue;
-        
-            Atom realtype;
-            int realformat;
-            unsigned long nitems, bytes_after;
-            unsigned char *data;
-            if ((XIGetProperty (m_display, m_deviceId, m_enabledProperty, 0, 1, False, XA_INTEGER, &realtype, &realformat, &nitems, &bytes_after, &data) == Success) && (realtype != None)) {
-                newValue = (*data == 0) ? 1 : 0;
-                XFree (data);
-                
-                XIChangeProperty (m_display, m_deviceId, m_enabledProperty, XA_INTEGER, 8, PropModeReplace, &newValue, 1);
-                XFlush(m_display);
-                
-                KNotification *notification = KNotification::event(KNotification::Notification, i18n("Touchpad status"), newValue == 1 ? i18n("Touchpad enabled") : i18n("Touchpad disabled"));
-                notification->sendEvent();
-                return true;
+        for (int i = 0; i < nKeys; ++i) {
+            if (event->xkey.keycode == m_keyCode[i]) {
+                unsigned char newValue;
+            
+                Atom realtype;
+                int realformat;
+                unsigned long nitems, bytes_after;
+                unsigned char *currentValue;
+                if ((XIGetProperty (m_display, m_deviceId, m_enabledProperty, 0, 1, False, XA_INTEGER, &realtype, &realformat, &nitems, &bytes_after, &currentValue) == Success) && (realtype != None)) {
+                    switch (i) {
+                        case ToggleKey: newValue = (*currentValue == 0) ? 1 : 0; break;
+                        case OnKey:     newValue = 1; break;
+                        case OffKey:    newValue = 0; break;
+                    }
+                    if (newValue != *currentValue) {
+                        XIChangeProperty (m_display, m_deviceId, m_enabledProperty, XA_INTEGER, 8, PropModeReplace, &newValue, 1);
+                        XFlush(m_display);
+                    
+                        KNotification *notification = KNotification::event(KNotification::Notification, i18n("Touchpad status"), newValue == 1 ? i18n("Touchpad enabled") : i18n("Touchpad disabled"));
+                        notification->sendEvent();
+                    }
+                    XFree (currentValue);
+                    return true;
+                }
             }
         }
     }
