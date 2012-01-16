@@ -1,4 +1,5 @@
 add_subdirectory(engineexplorer)
 add_subdirectory(plasmoidviewer)
 add_subdirectory(remote-widgets-browser)
+add_subdirectory(svgviewer)
 add_subdirectory(wallpaperviewer)
