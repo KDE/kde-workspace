@@ -20,11 +20,10 @@
 #ifndef SVGVIEWER_H
 #define SVGVIEWER_H
 
+#include "ui_svgviewer.h"
+
 class QStandardItemModel;
 class QStandardItem;
-
-
-#include "ui_svgviewer.h"
 
 namespace Plasma
 {
@@ -45,5 +44,5 @@ private:
     QStandardItemModel* m_dataModel;
 };
 
-#endif // multiple inclusion guard
+#endif
 
