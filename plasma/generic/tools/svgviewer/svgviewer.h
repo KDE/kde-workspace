@@ -27,10 +27,8 @@ class QStandardItem;
 
 class KPluginInfo;
 
-namespace Plasma
-{
-    class DataEngineManager;
-    class DataEngine;
+namespace Plasma {
+    class Theme;
 }
 
 class SvgViewer : public KDialog, public Ui::SvgViewer
@@ -45,7 +43,6 @@ public slots:
     void loadTheme(const QString& themeName);
 
     void reloadThemeList();
-    QStringList elementsForTheme(const QString& themeName);
 
 private:
     QStandardItemModel* m_dataModel;
@@ -55,6 +52,8 @@ private:
     // lay it out tho
     //KPluginInfo::List m_themeList;
     QMap <QString, KPluginInfo> m_themeMap;
+
+    Plasma::Theme* m_currentTheme;
 };
 
 #endif

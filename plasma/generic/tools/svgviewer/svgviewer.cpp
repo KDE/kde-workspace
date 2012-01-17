@@ -32,11 +32,13 @@
 #include <KStringHandler>
 #include <KAction>
 
-#include <Plasma/Theme>
 #include <Plasma/Svg>
+#include <Plasma/Theme>
+#include <qdir.h>
 
 SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
+    , m_currentTheme(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
 
@@ -70,6 +72,7 @@ SvgViewer::SvgViewer(QWidget* parent)
 
 SvgViewer::~SvgViewer()
 {
+    delete m_currentTheme;
 }
 
 void SvgViewer::reloadThemeList()
@@ -86,19 +89,25 @@ void SvgViewer::reloadThemeList()
     //KGlobal::dirs()->findAllResources("data", "desktoptheme/*");
 }
 
-QStringList SvgViewer::elementsForTheme(const QString& themeName)
-{
-    kDebug() << "looking up elementsForTheme: " << themeName;
-    kDebug() << "m_themeMap lookup: " << m_themeMap.value(themeName).entryPath();
-
-    return QStringList();
-}
-
 void SvgViewer::loadTheme(const QString& themeName)
 {
-    kDebug() << "begin loading theme name: " << themeName;
+    kDebug() << "begin loading theme: " << themeName;
 
-    elementsForTheme(themeName);
+    delete m_currentTheme;
+    m_currentTheme = new Plasma::Theme(themeName, this);
+
+    QString filePath = m_themeMap.value(themeName).entryPath();
+
+    kDebug() << "loaded theme has entry path: " << filePath;
+
+    QFileInfo fileInfo = QFileInfo(filePath);
+    QString directoryName = fileInfo.dir().dirName();
+
+    kDebug() << "searching for resources/elements in dir: " << directoryName;
+
+    QStringList themeElementList = KGlobal::dirs()->findAllResources("data", "desktoptheme/" + directoryName + "/*", KStandardDirs::Recursive);
+    kDebug() << "$$$" << themeElementList;
+
 //    m_dataModel->clear();
 //    m_dataModel->setColumnCount(4);
 //    QStringList headers;
