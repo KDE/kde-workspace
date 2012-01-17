@@ -26,7 +26,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="4" column="0">
       <widget class="QTreeView" name="m_svgFilesTree">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -62,6 +62,13 @@
          <width>16777215</width>
          <height>24</height>
         </size>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLabel" name="m_svgPreview">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
