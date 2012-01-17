@@ -96,6 +96,14 @@ void SvgViewer::loadTheme(const QString& themeName)
     delete m_currentTheme;
     m_currentTheme = new Plasma::Theme(themeName, this);
 
+    // wipe model prepare to reload
+    m_dataModel->clear();
+    m_dataModel->setColumnCount(1);
+
+    QStringList headers;
+    headers << i18n("SVG Elements");
+    m_dataModel->setHorizontalHeaderLabels(headers);
+
     QString filePath = m_themeMap.value(themeName).entryPath();
 
     kDebug() << "loaded theme has entry path: " << filePath;
@@ -105,43 +113,15 @@ void SvgViewer::loadTheme(const QString& themeName)
 
     kDebug() << "searching for resources/elements in dir: " << directoryName;
 
-    QStringList themeElementList = KGlobal::dirs()->findAllResources("data",
-                                                                     "desktoptheme/" + directoryName + "/*/*.svgz",
-                                                                     KStandardDirs::Recursive);
-    kDebug() << "$$$" << themeElementList;
+    const QStringList themeElementList =
+        KGlobal::dirs()->findAllResources("data", "desktoptheme/" + directoryName + "/*/*.svgz", KStandardDirs::Recursive);
 
-//    m_dataModel->clear();
-//    m_dataModel->setColumnCount(4);
-//    QStringList headers;
-//    headers << i18n("DataSource") << i18n("Key") << i18n("Value") << i18n("Type");
-//    m_dataModel->setHorizontalHeaderLabels(headers);
-//    m_engine = 0;
-//    m_sourceCount = 0;
-//
-//    if (!m_engineName.isEmpty()) {
-//        m_engineManager->unloadEngine(m_engineName);
-//    }
-//
-//    m_engineName = name;
-//    if (m_engineName.isEmpty()) {
-//        updateTitle();
-//        return;
-//    }
-//
-//    m_engine = m_engineManager->loadEngine(m_engineName);
-//    if (!m_engine) {
-//        m_engineName.clear();
-//        updateTitle();
-//        return;
-//    }
-//
-//    m_sourceRequesterButton->setEnabled(true);
-//    m_updateInterval->setEnabled(true);
-//    m_sourceRequester->setEnabled(true);
-//    m_sourceRequester->setFocus();
-//    m_serviceRequester->setEnabled(true);
-//    m_serviceRequesterButton->setEnabled(true);
-//    updateTitle();
+    kDebug() << "theme element list, begin populating: " << themeElementList;
+
+    foreach (const QString& elementFullPath, themeElementList) {
+        QStandardItem *item = new QStandardItem(elementFullPath);
+        m_dataModel->appendRow(item);
+    }
 }
 
 #include "svgviewer.moc"
