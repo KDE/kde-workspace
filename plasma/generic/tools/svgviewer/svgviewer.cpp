@@ -46,7 +46,7 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     m_dataModel = new QStandardItemModel(this);
 
-    connect(m_themeSelector, SIGNAL(indexChanged(QString)), this, SLOT(loadTheme(QString)));
+    connect(m_themeSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(loadTheme(QString)));
 
     m_svgFilesTree->setModel(m_dataModel);
     m_svgFilesTree->setWordWrap(true);
@@ -66,9 +66,6 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     //m_svgFilesTree->setContextMenuPolicy(Qt::CustomContextMenu);
     //connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
-
-
-
 }
 
 SvgViewer::~SvgViewer()
@@ -89,13 +86,19 @@ void SvgViewer::reloadThemeList()
     //KGlobal::dirs()->findAllResources("data", "desktoptheme/*");
 }
 
-QStringList SvgViewer::elementsForTheme(const QString& themeNames)
+QStringList SvgViewer::elementsForTheme(const QString& themeName)
 {
+    kDebug() << "looking up elementsForTheme: " << themeName;
+    kDebug() << "m_themeMap lookup: " << m_themeMap.value(themeName).entryPath();
+
     return QStringList();
 }
 
 void SvgViewer::loadTheme(const QString& themeName)
 {
+    kDebug() << "begin loading theme name: " << themeName;
+
+    elementsForTheme(themeName);
 //    m_dataModel->clear();
 //    m_dataModel->setColumnCount(4);
 //    QStringList headers;
