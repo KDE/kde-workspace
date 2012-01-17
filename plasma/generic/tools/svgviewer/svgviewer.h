@@ -43,7 +43,9 @@ public:
 
 public slots:
     void loadTheme(const QString& themeName);
+
     QStringList themeNames();
+    QStringList elementsForTheme();
 
 private:
     QStandardItemModel* m_dataModel;
