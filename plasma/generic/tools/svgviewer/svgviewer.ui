@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>EngineExplorer</class>
- <widget class="QWidget" name="EngineExplorer">
+ <class>SvgViewer</class>
+ <widget class="QWidget" name="SvgViewer">
   <property name="geometry">
    <rect>
     <x>0</x>
