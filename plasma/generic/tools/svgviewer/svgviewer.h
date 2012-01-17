@@ -39,6 +39,8 @@ public:
     explicit SvgViewer(QWidget *parent = 0);
     ~SvgViewer();
 
+public slots:
+    void loadTheme(const QString& themeName);
 
 private:
     QStandardItemModel* m_dataModel;
