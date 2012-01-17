@@ -47,10 +47,8 @@ public slots:
 private:
     QStandardItemModel* m_dataModel;
 
-    // TODO: make it cache the values, possibly use a
-    // hashmap so we can get other infos too..unsure how to
-    // lay it out tho
-    //KPluginInfo::List m_themeList;
+    // FIXME: might not even need this map
+    // or may need more added to it. we'll see.
     QMap <QString, KPluginInfo> m_themeMap;
 
     Plasma::Theme* m_currentTheme;

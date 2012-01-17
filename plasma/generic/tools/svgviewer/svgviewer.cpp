@@ -119,7 +119,12 @@ void SvgViewer::loadTheme(const QString& themeName)
     kDebug() << "theme element list, begin populating: " << themeElementList;
 
     foreach (const QString& elementFullPath, themeElementList) {
-        QStandardItem *item = new QStandardItem(elementFullPath);
+        QFileInfo file = QFileInfo(elementFullPath);
+
+        //TODO: add full path as a different header?
+        QStandardItem *item = new QStandardItem(file.fileName());
+        item->setData(QVariant(elementFullPath));
+
         m_dataModel->appendRow(item);
     }
 }
