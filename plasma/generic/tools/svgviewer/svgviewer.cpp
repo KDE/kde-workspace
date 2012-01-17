@@ -105,7 +105,9 @@ void SvgViewer::loadTheme(const QString& themeName)
 
     kDebug() << "searching for resources/elements in dir: " << directoryName;
 
-    QStringList themeElementList = KGlobal::dirs()->findAllResources("data", "desktoptheme/" + directoryName + "/*", KStandardDirs::Recursive);
+    QStringList themeElementList = KGlobal::dirs()->findAllResources("data",
+                                                                     "desktoptheme/" + directoryName + "/*/*.svgz",
+                                                                     KStandardDirs::Recursive);
     kDebug() << "$$$" << themeElementList;
 
 //    m_dataModel->clear();
