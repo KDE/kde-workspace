@@ -64,8 +64,10 @@ SvgViewer::SvgViewer(QWidget* parent)
     //m_svgFilesTree->setContextMenuPolicy(Qt::CustomContextMenu);
     //connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
 
-    KPluginInfo::List info = Plasma::Theme::listThemeInfo();
-    kDebug() < "$$$$$$$$" << info.name;
+    KPluginInfo::List infoList = Plasma::Theme::listThemeInfo();
+    foreach(KPluginInfo info, infoList) {
+        kDebug() << "$$$$$$$$" << info.name();
+    }
 
 }
 
@@ -92,6 +94,11 @@ QStringList SvgViewer::themeNames()
     //KGlobal::dirs()->findAllResources("data", "desktoptheme/*");
 
     return themeNames;
+}
+
+QStringList SvgViewer::elementsForTheme(const QString& themeNames)
+{
+    return QStringList();
 }
 
 void SvgViewer::loadTheme(const QString& themeName)
