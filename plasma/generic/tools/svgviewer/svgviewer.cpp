@@ -30,7 +30,7 @@
 #include <KAction>
 
 SvgViewer::SvgViewer(QWidget* parent)
-    : KDialog(parent),
+    : KDialog(parent)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
     QWidget* mainWidget = new QWidget(this);
