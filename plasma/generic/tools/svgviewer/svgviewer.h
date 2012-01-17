@@ -25,6 +25,8 @@
 class QStandardItemModel;
 class QStandardItem;
 
+class KPluginInfo;
+
 namespace Plasma
 {
     class DataEngineManager;
@@ -41,10 +43,15 @@ public:
 
 public slots:
     void loadTheme(const QString& themeName);
-    QStringList listThemes();
+    QStringList themeNames();
 
 private:
     QStandardItemModel* m_dataModel;
+
+    // TODO: make it cache the values, possibly use a
+    // hashmap so we can get other infos too..unsure how to
+    // lay it out tho
+    //KPluginInfo::List m_themeList;
 };
 
 #endif

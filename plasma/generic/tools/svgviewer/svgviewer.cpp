@@ -46,7 +46,7 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     m_dataModel = new QStandardItemModel(this);
 
-    connect(m_themeSelector, SIGNAL(activated(QString)), this, SLOT(showEngine(QString)));
+    connect(m_themeSelector, SIGNAL(indexChanged(QString)), this, SLOT(loadTheme(QString)));
 
     m_svgFilesTree->setModel(m_dataModel);
     m_svgFilesTree->setWordWrap(true);
@@ -55,7 +55,7 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
-    const QStringList themeList = listThemes();
+    const QStringList themeList = themeNames();
     kDebug() << "found list of themes (names): " << themeList;
 
     m_themeSelector->addItems(themeList);
@@ -72,7 +72,7 @@ SvgViewer::~SvgViewer()
 {
 }
 
-QStringList SvgViewer::listThemes()
+QStringList SvgViewer::themeNames()
 {
     const QStringList themeFiles = KGlobal::dirs()->findAllResources("data", "desktoptheme/*/metadata.desktop", KStandardDirs::NoDuplicates);
 
