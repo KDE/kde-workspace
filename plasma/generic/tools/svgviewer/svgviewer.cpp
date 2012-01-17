@@ -55,8 +55,11 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
+    //TODO: connect to a signal or something?
+    reloadThemeList();
+
     // find all theme names we know, populate combobox
-    m_themeSelector->addItems(themeNames());
+    m_themeSelector->addItems(m_themeMap.keys());
 
 //    connect(m_data, SIGNAL(customContextMenuRequested(QPoint)),
 //            this, SLOT(showDataContextMenu(QPoint)));
@@ -64,10 +67,7 @@ SvgViewer::SvgViewer(QWidget* parent)
     //m_svgFilesTree->setContextMenuPolicy(Qt::CustomContextMenu);
     //connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
 
-    KPluginInfo::List infoList = Plasma::Theme::listThemeInfo();
-    foreach(KPluginInfo info, infoList) {
-        kDebug() << "$$$$$$$$" << info.name();
-    }
+
 
 }
 
@@ -75,25 +75,18 @@ SvgViewer::~SvgViewer()
 {
 }
 
-QStringList SvgViewer::themeNames()
+void SvgViewer::reloadThemeList()
 {
-    const QStringList themeFiles = KGlobal::dirs()->findAllResources("data", "desktoptheme/*/metadata.desktop", KStandardDirs::NoDuplicates);
+    m_themeMap.clear();
 
-    kDebug() << "findAllResources found: " << themeFiles;
-
-    QStringList themeNames;
-
-    foreach(const QString& filename, themeFiles)
-    {
-        const KPluginInfo pluginInfo = KPluginInfo(filename);
-        themeNames << pluginInfo.name();
+    const KPluginInfo::List& infoList = Plasma::Theme::listThemeInfo();
+    foreach(const KPluginInfo& info, infoList) {
+        m_themeMap.insert(info.name(), info);
+        kDebug() << "added theme name and kplugininfo to hash: " << info.name();
     }
 
-    kDebug() << "returning pluginfo name list of: " << themeNames;
     //kDebug() <<    KGlobal::dirs()->findDirs("data", "desktoptheme");
     //KGlobal::dirs()->findAllResources("data", "desktoptheme/*");
-
-    return themeNames;
 }
 
 QStringList SvgViewer::elementsForTheme(const QString& themeNames)

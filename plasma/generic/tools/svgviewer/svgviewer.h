@@ -44,7 +44,7 @@ public:
 public slots:
     void loadTheme(const QString& themeName);
 
-    QStringList themeNames();
+    void reloadThemeList();
     QStringList elementsForTheme(const QString& themeName);
 
 private:
@@ -54,6 +54,7 @@ private:
     // hashmap so we can get other infos too..unsure how to
     // lay it out tho
     //KPluginInfo::List m_themeList;
+    QMap <QString, KPluginInfo> m_themeMap;
 };
 
 #endif
