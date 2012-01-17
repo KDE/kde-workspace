@@ -45,6 +45,8 @@ SvgViewer::SvgViewer(QWidget* parent)
     m_svgFilesTree->setModel(m_dataModel);
     m_svgFilesTree->setWordWrap(true);
 
+    setButtons(KDialog::Close);
+
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
 //    connect(m_data, SIGNAL(customContextMenuRequested(QPoint)),
