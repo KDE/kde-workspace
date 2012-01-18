@@ -44,6 +44,8 @@ public slots:
 
     void reloadThemeList();
 
+    void modelIndexChanged(const QModelIndex& index);
+
 private:
     QStandardItemModel* m_dataModel;
 

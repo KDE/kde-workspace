@@ -20,6 +20,7 @@
 #include "svgviewer.h"
 
 #include <QApplication>
+#include <QDir>
 #include <QStandardItemModel>
 
 #include <KDebug>
@@ -34,7 +35,6 @@
 
 #include <Plasma/Svg>
 #include <Plasma/Theme>
-#include <qdir.h>
 
 SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
@@ -52,6 +52,8 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     m_svgFilesTree->setModel(m_dataModel);
     m_svgFilesTree->setWordWrap(true);
+
+    connect(m_svgFilesTree, SIGNAL(activated(QModelIndex)), this, SLOT(modelIndexChanged(QModelIndex)));
 
     setButtons(KDialog::Close);
 
@@ -108,6 +110,8 @@ void SvgViewer::loadTheme(const QString& themeName)
 
     kDebug() << "loaded theme has entry path: " << filePath;
 
+    // only interested in the parent dir's name.
+    // e.g. ascii, Air, etc.
     QFileInfo fileInfo = QFileInfo(filePath);
     QString directoryName = fileInfo.dir().dirName();
 
@@ -122,11 +126,18 @@ void SvgViewer::loadTheme(const QString& themeName)
         QFileInfo file = QFileInfo(elementFullPath);
 
         //TODO: add full path as a different header?
-        QStandardItem *item = new QStandardItem(file.fileName());
-        item->setData(QVariant(elementFullPath));
+        // produces rows looking like "widgets/viewitem.svgz", "lancelot/..." etc.
+        QStandardItem *item = new QStandardItem(file.dir().dirName() + '/' + file.fileName());
 
         m_dataModel->appendRow(item);
     }
+}
+
+void SvgViewer::modelIndexChanged(const QModelIndex& index)
+{
+    const QString& elementFullPath = m_dataModel->item(index.row())->text();
+
+    kDebug() << "modelIndexChanged, previewing elementFullPath: " << elementFullPath;
 }
 
 #include "svgviewer.moc"
