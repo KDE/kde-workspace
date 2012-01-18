@@ -39,12 +39,16 @@
 SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
     , m_currentTheme(0)
+    , m_currentSvg(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
 
     QWidget* mainWidget = new QWidget(this);
     setMainWidget(mainWidget);
     setupUi(mainWidget);
+
+    m_currentTheme = new Plasma::Theme(this);
+    m_currentSvg = new Plasma::Svg(this);
 
     m_dataModel = new QStandardItemModel(this);
 
@@ -75,6 +79,7 @@ SvgViewer::SvgViewer(QWidget* parent)
 SvgViewer::~SvgViewer()
 {
     delete m_currentTheme;
+    delete m_currentSvg;
 }
 
 void SvgViewer::reloadThemeList()
@@ -95,8 +100,8 @@ void SvgViewer::loadTheme(const QString& themeName)
 {
     kDebug() << "begin loading theme: " << themeName;
 
-    delete m_currentTheme;
-    m_currentTheme = new Plasma::Theme(themeName, this);
+    m_currentTheme->setThemeName(themeName);
+    m_currentSvg->setTheme(m_currentTheme);
 
     // wipe model prepare to reload
     m_dataModel->clear();
@@ -135,9 +140,13 @@ void SvgViewer::loadTheme(const QString& themeName)
 
 void SvgViewer::modelIndexChanged(const QModelIndex& index)
 {
-    const QString& elementFullPath = m_dataModel->item(index.row())->text();
+    const QString& elementPath = m_dataModel->item(index.row())->text();
 
-    kDebug() << "modelIndexChanged, previewing elementFullPath: " << elementFullPath;
+    kDebug() << "modelIndexChanged, previewing elementFullPath: " << elementPath;
+
+    const QString& imagePath = m_currentTheme->imagePath(elementPath);
+
+    m_currentSvg->setImagePath(imagePath);
 }
 
 #include "svgviewer.moc"

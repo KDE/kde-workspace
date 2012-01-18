@@ -29,6 +29,7 @@ class KPluginInfo;
 
 namespace Plasma {
     class Theme;
+    class Svg;
 }
 
 class SvgViewer : public KDialog, public Ui::SvgViewer
@@ -54,6 +55,7 @@ private:
     QMap <QString, KPluginInfo> m_themeMap;
 
     Plasma::Theme* m_currentTheme;
+    Plasma::Svg* m_currentSvg;
 };
 
 #endif
