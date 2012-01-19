@@ -61,7 +61,7 @@
     </widget>
    </item>
    <item row="1" column="1" colspan="2">
-    <widget class="QSpinBox" name="sectionCountSpinBox">
+    <widget class="QSpinBox" name="kcfg_sectionCount">
      <property name="suffix">
       <string notr="true"/>
      </property>
@@ -87,7 +87,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QCheckBox" name="launcherNamesVisibleCheckBox">
+    <widget class="QCheckBox" name="kcfg_launcherNamesVisible">
      <property name="text">
       <string/>
      </property>
@@ -107,7 +107,7 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QCheckBox" name="popupEnabledCheckBox">
+    <widget class="QCheckBox" name="kcfg_popupEnabled">
      <property name="text">
       <string/>
      </property>
@@ -130,16 +130,16 @@
  </widget>
  <tabstops>
   <tabstop>autoSectionCountEnabledCheckBox</tabstop>
-  <tabstop>sectionCountSpinBox</tabstop>
-  <tabstop>launcherNamesVisibleCheckBox</tabstop>
-  <tabstop>popupEnabledCheckBox</tabstop>
+  <tabstop>kcfg_sectionCount</tabstop>
+  <tabstop>kcfg_launcherNamesVisible</tabstop>
+  <tabstop>kcfg_popupEnabled</tabstop>
  </tabstops>
  <resources/>
  <connections>
   <connection>
    <sender>autoSectionCountEnabledCheckBox</sender>
    <signal>toggled(bool)</signal>
-   <receiver>sectionCountSpinBox</receiver>
+   <receiver>kcfg_sectionCount</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

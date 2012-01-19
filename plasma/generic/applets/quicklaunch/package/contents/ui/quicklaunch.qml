@@ -14,48 +14,51 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
  ***************************************************************************/
-#ifndef QUICKLAUNCH_POPUP_H
-#define QUICKLAUNCH_POPUP_H
 
-// Qt
-#include <Qt>
-#include <QtGlobal>
-#include <QtCore/QObject>
+import QtQuick 1.1
+import org.kde.plasma.core 0.1 as PlasmaCore
+// import org.kde.plasma.components 0.1 as PlasmaComponents
+// import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
-// KDE
-#include <Plasma/Dialog>
+Item {
+    property int minimumWidth: 100
+    property int minimumHeight: 100
 
-using Plasma::Dialog;
+    Component.onCompleted:
+    {
+    		plasmoid.addEventListener("ConfigChanged", onConfigChanged);
+    }
 
-namespace Quicklaunch {
+    function onConfigChanged() {
+        var sectionCount = plasmoid.readConfig("sectionCount");
+        var launcherNamesVisible = plasmoid.readConfig("launcherNamesVisible");
 
-class PopupLauncherList;
-class Quicklaunch;
+        popupTrigger.enabled = plasmoid.readConfig("popupEnabled");
 
-class Popup : public Dialog {
+        var launchers = new String(plasmoid.readConfig("launchers")).split(",");
+        var launchersOnPopup =
+            new String(plasmoid.readConfig("launchersOnPopup")).split(",");
+    }
 
-    Q_OBJECT
+    PlasmaCore.Svg {
+       id: arrowsSvg
+       imagePath: "widgets/arrows"
+    }
 
-public:
-    Popup(Quicklaunch *applet);
-    ~Popup();
+    PlasmaCore.SvgItem {
+        id: popupTrigger
 
-    PopupLauncherList *launcherList();
-    void show();
-    bool eventFilter(QObject *watched, QEvent *event);
+        property bool enabled: false;
 
-private Q_SLOTS:
-    void onAppletGeometryChanged();
-    void onLauncherClicked();
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        svg: arrowsSvg
+        elementId: "up-arrow"
 
-private:
-    void syncSizeAndPosition();
-
-    Quicklaunch *m_applet;
-    PopupLauncherList *m_launcherList;
-};
+        width: enabled ? 16 : 0;
+        height: enabled ? 16 : 0;
+        visible: enabled;
+    }
 }
-
-#endif /* QUICKLAUNCH_POPUP_H */

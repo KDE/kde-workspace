@@ -147,17 +147,18 @@ Comment[zh_TW]=啟動您最常用的應用程式
 Icon=fork
 Type=Service
 X-KDE-ServiceTypes=Plasma/Applet
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/quicklaunch.qml
 
-X-KDE-Library=plasma_applet_quicklaunch
 X-KDE-PluginInfo-Author=Ingomar Wesp
 X-KDE-PluginInfo-Email=ingomar@wesp.name
 X-KDE-PluginInfo-Name=quicklaunch
-X-KDE-PluginInfo-Version=0.9
+X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-KDE-PluginInfo-Category=Application Launchers
 X-KDE-PluginInfo-Depends=
 X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-EnabledByDefault=true
-X-Plasma-Requires-FileDialog=Required
-X-Plasma-Requires-LaunchApp=Required
+#X-Plasma-Requires-FileDialog=Required
+#X-Plasma-Requires-LaunchApp=Required
 
