@@ -158,7 +158,7 @@ void SvgViewer::loadTheme(const QString& themeName)
         kDebug() << "creating child item: " << file.baseName();
         // produces rows looking like "widgets/viewitem.svgz", "lancelot/..." etc.
         QStandardItem *childItem = new QStandardItem(file.baseName());
-
+        childItem->setData(QVariant(dirName + file.baseName()), Qt::UserRole);
         parentItem->setChild(currentRow, childItem);
 
         previousDirName = dirName;
@@ -174,13 +174,12 @@ void SvgViewer::modelIndexChanged(const QModelIndex& index)
     }
 
     // 'widgets/'
-    QStandardItem *parent = m_dataModel->item(index.parent().row());
+//    QStandardItem *parent = m_dataModel->item(index.parent().row());
 //index.child(index.row(), 0)
     // 'viewitem'
-    QStandardItem *child = m_dataModel->item(index.row());
+    QStandardItem *item =  m_dataModel->itemFromIndex(index);
 
-    const QString& elementPath = parent->text() + child->text();
-
+    const QString& elementPath = item->data(Qt::UserRole).toString();
 
     kDebug() << "modelIndexChanged loading svg theme: " << m_currentTheme->themeName();
     m_currentSvg->setTheme(m_currentTheme);
