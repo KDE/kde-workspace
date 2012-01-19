@@ -144,6 +144,7 @@ void SvgViewer::modelIndexChanged(const QModelIndex& index)
 
     kDebug() << "modelIndexChanged loading svg theme: " << m_currentTheme->themeName();
     m_currentSvg->setTheme(m_currentTheme);
+    m_currentSvg->resize(m_svgFilesTree->size());
 
     kDebug() << "modelIndexChanged, loading svg elementPath: " << elementPath;
     m_currentSvg->setImagePath(elementPath);
