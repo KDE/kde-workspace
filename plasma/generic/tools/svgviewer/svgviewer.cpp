@@ -132,7 +132,7 @@ void SvgViewer::loadTheme(const QString& themeName)
 
         //TODO: add full path as a different header?
         // produces rows looking like "widgets/viewitem.svgz", "lancelot/..." etc.
-        QStandardItem *item = new QStandardItem(file.dir().dirName() + '/' + file.fileName());
+        QStandardItem *item = new QStandardItem(file.dir().dirName() + '/' + file.baseName());
 
         m_dataModel->appendRow(item);
     }
