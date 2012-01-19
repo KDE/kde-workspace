@@ -142,11 +142,12 @@ void SvgViewer::modelIndexChanged(const QModelIndex& index)
 {
     const QString& elementPath = m_dataModel->item(index.row())->text();
 
-    kDebug() << "modelIndexChanged, previewing elementFullPath: " << elementPath;
+    kDebug() << "modelIndexChanged loading svg theme: " << m_currentTheme->themeName();
+    m_currentSvg->setTheme(m_currentTheme);
 
-    const QString& imagePath = m_currentTheme->imagePath(elementPath);
-
-    m_currentSvg->setImagePath(imagePath);
+    kDebug() << "modelIndexChanged, loading svg elementPath: " << elementPath;
+    m_currentSvg->setImagePath(elementPath);
+    m_svgPreview->setPixmap(m_currentSvg->pixmap());
 }
 
 #include "svgviewer.moc"
