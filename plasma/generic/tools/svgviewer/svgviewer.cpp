@@ -48,6 +48,7 @@ SvgViewer::SvgViewer(QWidget* parent)
     setupUi(mainWidget);
 
     m_currentTheme = new Plasma::Theme(this);
+
     m_currentSvg = new Plasma::Svg(this);
     m_currentSvg->setUsingRenderingCache(false);
 
@@ -58,13 +59,16 @@ SvgViewer::SvgViewer(QWidget* parent)
     m_svgFilesTree->setModel(m_dataModel);
     m_svgFilesTree->setWordWrap(true);
 
-    connect(m_svgFilesTree, SIGNAL(activated(QModelIndex)), this, SLOT(modelIndexChanged(QModelIndex)));
+    connect(m_svgFilesTree, SIGNAL(activated(QModelIndex)), SLOT(modelIndexChanged(QModelIndex)));
+
+    connect(m_svgFilesTree->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            SLOT(modelSelectionChanged(QModelIndex,QModelIndex)));
 
     setButtons(KDialog::Close);
 
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
-    //TODO: connect to a signal or something?
+    //TODO: connect to a signal if themes are changed?
     reloadThemeList();
 
     // find all theme names we know, populate combobox
@@ -150,6 +154,11 @@ void SvgViewer::modelIndexChanged(const QModelIndex& index)
     kDebug() << "modelIndexChanged, loading svg elementPath: " << elementPath;
     m_currentSvg->setImagePath(elementPath);
     m_svgPreview->setPixmap(m_currentSvg->pixmap());
+}
+
+void SvgViewer::modelSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    modelIndexChanged(current);
 }
 
 #include "svgviewer.moc"
