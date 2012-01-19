@@ -49,6 +49,7 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     m_currentTheme = new Plasma::Theme(this);
     m_currentSvg = new Plasma::Svg(this);
+    m_currentSvg->setUsingRenderingCache(false);
 
     m_dataModel = new QStandardItemModel(this);
 
