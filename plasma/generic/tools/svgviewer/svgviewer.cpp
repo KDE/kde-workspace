@@ -127,25 +127,60 @@ void SvgViewer::loadTheme(const QString& themeName)
 
     kDebug() << "searching for resources/elements in dir: " << directoryName;
 
-    const QStringList themeElementList =
+    QStringList themeElementList =
         KGlobal::dirs()->findAllResources("data", "desktoptheme/" + directoryName + "/*/*.svgz", KStandardDirs::Recursive);
 
-    kDebug() << "theme element list, begin populating: " << themeElementList;
+//    kDebug() << "theme element list, begin populating: " << themeElementList;
 
-    foreach (const QString& elementFullPath, themeElementList) {
-        QFileInfo file = QFileInfo(elementFullPath);
+    themeElementList.sort();
 
-        //TODO: add full path as a different header?
+//    kDebug() << "theme element list after qsort: " << themeElementList;
+
+    QString previousDirName;
+    QStandardItem *parentItem = 0;
+    int currentRow = 0;
+
+    for (int i = 0; i < themeElementList.length(); ++i) {
+        QFileInfo file = QFileInfo(themeElementList.at(i));
+
+        const QString& dirName = file.dir().dirName() + '/';
+
+        if (previousDirName != dirName) {
+            kDebug() << "creating new dir parent node; previousDirName: " << previousDirName << " dirName: " << dirName;
+            //we're on a new dir set, create new parent node
+            parentItem = new QStandardItem(dirName);
+            m_dataModel->appendRow(parentItem);
+
+            // reset row count since it's a new parent node
+            currentRow = 0;
+        }
+
+        kDebug() << "creating child item: " << file.baseName();
         // produces rows looking like "widgets/viewitem.svgz", "lancelot/..." etc.
-        QStandardItem *item = new QStandardItem(file.dir().dirName() + '/' + file.baseName());
+        QStandardItem *childItem = new QStandardItem(file.baseName());
 
-        m_dataModel->appendRow(item);
+        parentItem->setChild(currentRow, childItem);
+
+        previousDirName = dirName;
+        ++currentRow;
     }
 }
 
 void SvgViewer::modelIndexChanged(const QModelIndex& index)
 {
-    const QString& elementPath = m_dataModel->item(index.row())->text();
+    // root entry, can't load anything
+    if (!index.isValid() || !index.parent().isValid()) {
+        return;
+    }
+
+    // 'widgets/'
+    QStandardItem *parent = m_dataModel->item(index.parent().row());
+//index.child(index.row(), 0)
+    // 'viewitem'
+    QStandardItem *child = m_dataModel->item(index.row());
+
+    const QString& elementPath = parent->text() + child->text();
+
 
     kDebug() << "modelIndexChanged loading svg theme: " << m_currentTheme->themeName();
     m_currentSvg->setTheme(m_currentTheme);
