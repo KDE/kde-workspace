@@ -52,6 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/socket.h>
 #include <sys/wait.h>
 
+#include <QPalette>
 namespace ScreenLocker
 {
 
@@ -67,6 +68,7 @@ GreeterItem::~GreeterItem()
 {
 }
 
+//#define SHOW_GREETER_BACKGROUND
 void GreeterItem::init()
 {
     if (!m_unlocker->isValid()) {
@@ -74,7 +76,13 @@ void GreeterItem::init()
         return;
     }
     QWidget *widget = m_unlocker->greeterWidget();
+#ifndef SHOW_GREETER_BACKGROUND
     widget->setAttribute(Qt::WA_TranslucentBackground);
+#else
+    QPalette p = widget->palette();
+    p.setBrush(QPalette::Background, Qt::red);
+    widget->setPalette(p);
+#endif
     m_proxy->setWidget(widget);
     setFlag(QGraphicsItem::ItemIsFocusable);
     QGraphicsItem::setFocus();
