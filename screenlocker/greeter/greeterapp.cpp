@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtDeclarative/QDeclarativeItem>
+#include <QtDeclarative/QDeclarativeProperty>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDBus/QDBusInterface>
@@ -69,6 +70,9 @@ void UnlockApp::initialize()
 
     KScreenSaverSettings::self()->readConfig();
 
+    const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
+    const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
+
     for (int i=0; i<Kephal::Screens::self()->screens().count(); ++i) {
 
         // create the view
@@ -89,16 +93,21 @@ void UnlockApp::initialize()
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
 
-        QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
+        QDeclarativeProperty sleepProperty(view->rootObject(), "suspendToRamSupported");
+        sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState)) {
             connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
         }
 
+        QDeclarativeProperty hibernateProperty(view->rootObject(), "suspendToDiskSupported");
+        hibernateProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState)) {
             connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
         }
 
-        if (KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout")) {
+        QDeclarativeProperty shutdownProperty(view->rootObject(), "shutdownSupported");
+        shutdownProperty.write(canLogout);
+        if (canLogout) {
             connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
         }
 
@@ -129,8 +138,8 @@ void UnlockApp::prepareShow()
 void UnlockApp::suspendToRam()
 {
     QDBusInterface iface("org.kde.Solid.PowerManagement",
-                         "/org/kde/Solid/PowerManagement",
-                         "org.kde.Solid.PowerManagement");
+            "/org/kde/Solid/PowerManagement",
+            "org.kde.Solid.PowerManagement");
     iface.asyncCall("suspendToRam");
 
 }
@@ -138,8 +147,8 @@ void UnlockApp::suspendToRam()
 void UnlockApp::suspendToDisk()
 {
     QDBusInterface iface("org.kde.Solid.PowerManagement",
-                         "/org/kde/Solid/PowerManagement",
-                         "org.kde.Solid.PowerManagement");
+            "/org/kde/Solid/PowerManagement",
+            "org.kde.Solid.PowerManagement");
     iface.asyncCall("suspendToDisk");
 }
 
@@ -172,9 +181,9 @@ void UnlockApp::setTesting(bool enable)
 bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
 {
     Q_UNUSED(obj)
-    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
-        capsLocked();
-    }
+        if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
+            capsLocked();
+        }
     return false;
 }
 
