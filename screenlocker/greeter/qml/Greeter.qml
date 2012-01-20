@@ -86,9 +86,12 @@ Item {
         anchors.horizontalCenter: layoutItem.horizontalCenter
         anchors.bottomMargin: 5
     }
+
     PlasmaComponents.ButtonRow {
         id: buttonRow
         exclusive: false
+        spacing: theme.defaultFont.mSize.width / 2
+
         PlasmaComponents.Button {
             id: switchUser
             text: i18n("Switch User")
