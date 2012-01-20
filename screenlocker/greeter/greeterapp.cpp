@@ -24,9 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kephal/screens.h>
 #include <kworkspace/kworkspace.h>
 // KDE
+#include <KDE/KAuthorized>
 #include <KDE/KCrash>
 #include <KDE/KDebug>
 #include <KDE/KStandardDirs>
+#include <Solid/PowerManagement>
 #include <kdeclarative.h>
 // Qt
 #include <QtCore/QTimer>
@@ -86,9 +88,20 @@ void UnlockApp::initialize()
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
-        connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
-        connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
-        connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
+
+        QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
+        if (spdMethods.contains(Solid::PowerManagement::SuspendState)) {
+            connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
+        }
+
+        if (spdMethods.contains(Solid::PowerManagement::SuspendState)) {
+            connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
+        }
+
+        if (KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout")) {
+            connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
+        }
+
         m_views << view;
     }
     installEventFilter(this);
