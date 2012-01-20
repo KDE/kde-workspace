@@ -19,8 +19,10 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-// import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.components 0.1 as PlasmaComponents
 // import org.kde.qtextracomponents 0.1 as QtExtraComponents
+
+import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
 Item {
     property int minimumWidth: 100
@@ -28,7 +30,7 @@ Item {
 
     Component.onCompleted:
     {
-    		plasmoid.addEventListener("ConfigChanged", onConfigChanged);
+        plasmoid.addEventListener("ConfigChanged", onConfigChanged);
     }
 
     function onConfigChanged() {
@@ -40,6 +42,10 @@ Item {
         var launchers = new String(plasmoid.readConfig("launchers")).split(",");
         var launchersOnPopup =
             new String(plasmoid.readConfig("launchersOnPopup")).split(",");
+
+        for (i in launchers) {
+            launcherListModel.addLauncher(i, launchers[i]);
+        }
     }
 
     PlasmaCore.Svg {
@@ -60,5 +66,25 @@ Item {
         width: enabled ? 16 : 0;
         height: enabled ? 16 : 0;
         visible: enabled;
+    }
+
+    ListView {
+        id: launcherList
+
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: popupTrigger.left
+            bottom: parent.bottom
+        }
+
+        model: Quicklaunch.LauncherListModel {
+            id: launcherListModel
+        }
+
+        delegate: PlasmaComponents.Button {
+            text: display
+            iconSource: icon
+        }
     }
 }

@@ -1,0 +1,45 @@
+/***************************************************************************
+ *   Copyright (C) 2012 by Ingomar Wesp <ingomar@wesp.name>                *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
+ ***************************************************************************/
+#ifndef LAUNCHERLISTMODEL_H
+#define LAUNCHERLISTMODEL_H
+
+#include <QtGui/QStandardItemModel>
+
+#include <KUrl>
+
+class LauncherListModel : public QStandardItemModel
+{
+    Q_OBJECT
+public:
+    enum LauncherRoles {
+        DescriptionRole = Qt::UserRole + 1,
+        IconRole,
+        URLRole
+    };
+
+    LauncherListModel(QObject *parent = 0);
+
+    Q_INVOKABLE void addLauncher(int index, const QString &url);
+    Q_INVOKABLE void removeLauncher(int index);
+
+private:
+    static QStandardItem *itemForUrl(const KUrl &url);
+};
+
+#endif // LAUNCHERLISTMODEL_H
