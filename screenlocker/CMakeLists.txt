@@ -1,3 +1,6 @@
+# for dbus_add_activation_service
+include(PkgConfigGetVar)
+
 add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1223)
 add_subdirectory(data)
 add_subdirectory(greeter)
@@ -25,6 +28,8 @@ QT4_ADD_DBUS_INTERFACE(ksld_SRCS ${ksmserver_xml} ksmserver_interface)
 kde4_add_kdeinit_executable(kscreenlocker ${ksld_SRCS})
 
 target_link_libraries(kdeinit_kscreenlocker kworkspace kephal ${KDE4_KDEUI_LIBS} ${KDE4_KIDLETIME_LIBS} ${X11_LIBRARIES})
+
+dbus_add_activation_service(dbus/org.kde.kscreenlocker.service.in)
 
 install(TARGETS kdeinit_kscreenlocker ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(TARGETS kscreenlocker         ${INSTALL_TARGETS_DEFAULT_ARGS} )
