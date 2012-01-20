@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 - 2011 by Ingomar Wesp <ingomar@wesp.name>         *
+ *   Copyright (C) 2012 by Ingomar Wesp <ingomar@wesp.name>                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,17 +20,30 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
-// import org.kde.qtextracomponents 0.1 as QtExtraComponents
+import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
 import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
 Item {
     property int minimumWidth: 100
     property int minimumHeight: 100
-
+    
+    property bool popupShown: false;
+    
     Component.onCompleted:
     {
         plasmoid.addEventListener("ConfigChanged", onConfigChanged);
+        plasmoid.addEventListener("LocationChanged", updatePopupTrigger);
+        
+        plasmoid.setAction("addLauncher", i18n("Add Launcher..."), "list-add");
+        plasmoid.setAction("editLauncher", i18n("Edit Launcher..."), "document-edit");
+        plasmoid.setAction("removeLauncher", i18n("Remove Launcher"), "list-remove");
+        plasmoid.setActionSeparator("separator");
+        
+        // TODO: Implement
+        plasmoid.action_addLauncher = function() {}
+        plasmoid.action_editLauncher = function() {}
+        plasmoid.action_removeLauncher = function() {}
     }
 
     function onConfigChanged() {
@@ -38,13 +51,39 @@ Item {
         var launcherNamesVisible = plasmoid.readConfig("launcherNamesVisible");
 
         popupTrigger.enabled = plasmoid.readConfig("popupEnabled");
+        updatePopupTrigger();
 
         var launchers = new String(plasmoid.readConfig("launchers")).split(",");
         var launchersOnPopup =
             new String(plasmoid.readConfig("launchersOnPopup")).split(",");
 
+        // Repopulate launcher list.
+        launcherList.model.clear();
         for (i in launchers) {
-            launcherListModel.addLauncher(i, launchers[i]);
+            launcherList.model.addLauncher(i, launchers[i]);
+            print("Adding launcher: "+launchers[i]);
+        }
+        
+        print("Launchers in model: "+launcherList.count);
+    }
+    
+    function updatePopupTrigger() {
+        if (!popupTrigger.enabled) {
+            return;
+        }
+        
+        switch(plasmoid.location) {
+            case TopEdge:
+                popupTrigger.elementId = popupShown ? "up-arrow" : "down-arrow";
+                break;
+            case LeftEdge:
+                popupTrigger.elementId = popupShown ? "left-arrow" : "right-arrow";
+                break;
+            case RightEdge:
+                popupTrigger.elementId = popupShown ? "right-arrow" : "left-arrow";
+                break;
+            default:
+                popupTrigger.elementId = popupShown ? "down-arrow" : "up-arrow";
         }
     }
 
@@ -66,10 +105,21 @@ Item {
         width: enabled ? 16 : 0;
         height: enabled ? 16 : 0;
         visible: enabled;
+        
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                popupShown = !popupShown;
+                updatePopupTrigger();
+            }
+        }
     }
 
-    ListView {
+    GridView {
         id: launcherList
+        
+        cellWidth: 32
+        cellHeight: 32
 
         anchors {
             top: parent.top
@@ -78,13 +128,13 @@ Item {
             bottom: parent.bottom
         }
 
-        model: Quicklaunch.LauncherListModel {
-            id: launcherListModel
-        }
+        model: Quicklaunch.LauncherListModel {}
 
-        delegate: PlasmaComponents.Button {
-            text: display
-            iconSource: icon
+        delegate: QtExtraComponents.QIconItem {
+            width: 28
+            height: 28
+            anchors.margins: 2
+            icon: QIcon(iconSource)
         }
     }
 }

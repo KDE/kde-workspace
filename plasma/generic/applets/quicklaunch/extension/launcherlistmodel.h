@@ -29,7 +29,7 @@ class LauncherListModel : public QStandardItemModel
 public:
     enum LauncherRoles {
         DescriptionRole = Qt::UserRole + 1,
-        IconRole,
+        IconSourceRole,
         URLRole
     };
 
@@ -37,6 +37,7 @@ public:
 
     Q_INVOKABLE void addLauncher(int index, const QString &url);
     Q_INVOKABLE void removeLauncher(int index);
+    Q_INVOKABLE void clear();
 
 private:
     static QStandardItem *itemForUrl(const KUrl &url);

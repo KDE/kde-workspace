@@ -32,7 +32,7 @@ LauncherListModel::LauncherListModel(QObject *parent)
     QHash<int, QByteArray> roleNames;
     roleNames.insert(Qt::DisplayRole, "display");
     roleNames.insert(DescriptionRole, "description");
-    roleNames.insert(IconRole, "icon");
+    roleNames.insert(IconSourceRole, "iconSource");
     roleNames.insert(URLRole, "url");
 
     setRoleNames(roleNames);
@@ -78,10 +78,14 @@ QStandardItem *LauncherListModel::itemForUrl(const KUrl &url)
     QStandardItem *item = new QStandardItem();
     item->setData(name, Qt::DisplayRole);
     item->setData(description, DescriptionRole);
-    item->setData(icon, IconRole);
+    item->setData(icon, IconSourceRole);
     item->setData(url.url(), URLRole);
 
     return item;
+}
+
+void LauncherListModel::clear() {
+    QStandardItemModel::clear();
 }
 
 #include "launcherlistmodel.moc"
