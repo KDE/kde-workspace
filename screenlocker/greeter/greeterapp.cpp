@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kscreensaversettings.h"
 // workspace
 #include <kephal/screens.h>
+#include <kworkspace/kworkspace.h>
 // KDE
 #include <KDE/KCrash>
 #include <KDE/KDebug>
@@ -34,6 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeItem>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
+#include <QtDBus/QDBusInterface>
+#include <QtDBus/QDBusPendingCall>
 // X11
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -83,6 +86,9 @@ void UnlockApp::initialize()
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
+        connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
+        connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
+        connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
         m_views << view;
     }
     installEventFilter(this);
@@ -105,6 +111,31 @@ void UnlockApp::prepareShow()
         view->show();
     }
     capsLocked();
+}
+
+void UnlockApp::suspendToRam()
+{
+    QDBusInterface iface("org.kde.Solid.PowerManagement",
+                         "/org/kde/Solid/PowerManagement",
+                         "org.kde.Solid.PowerManagement");
+    iface.asyncCall("suspendToRam");
+
+}
+
+void UnlockApp::suspendToDisk()
+{
+    QDBusInterface iface("org.kde.Solid.PowerManagement",
+                         "/org/kde/Solid/PowerManagement",
+                         "org.kde.Solid.PowerManagement");
+    iface.asyncCall("suspendToDisk");
+}
+
+void UnlockApp::shutdown()
+{
+    const KWorkSpace::ShutdownConfirm confirm = KWorkSpace::ShutdownConfirmNo;
+    const KWorkSpace::ShutdownType type = KWorkSpace::ShutdownTypeHalt;
+
+    KWorkSpace::requestShutDown(confirm, type);
 }
 
 void UnlockApp::setTesting(bool enable)

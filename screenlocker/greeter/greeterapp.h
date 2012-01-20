@@ -43,6 +43,9 @@ protected:
 
 private Q_SLOTS:
     void prepareShow();
+    void suspendToRam();
+    void suspendToDisk();
+    void shutdown();
 
 private:
     void initialize();
