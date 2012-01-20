@@ -51,6 +51,7 @@ Item {
                     Keys.onReturnPressed: verify()
                 }
             }
+
             LayoutItem {
                 id: layoutItem2
                 minimumSize: "50x50"
@@ -62,6 +63,7 @@ Item {
             }
         }
     }
+
     PlasmaComponents.Label {
         id: message
         text: ""
@@ -70,6 +72,7 @@ Item {
         anchors.bottomMargin: 20
         font.bold: true
     }
+
     PlasmaComponents.Label {
         id: capsLockMessage
         text: i18n("Warning: Caps Lock on")
@@ -79,6 +82,7 @@ Item {
         visible: false
         font.bold: true
     }
+
     PlasmaComponents.Label {
         id: lockMessage
         text: kscreenlocker_userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
@@ -99,12 +103,14 @@ Item {
             visible: switchUserEnabled
             onClicked: switchUserClicked()
         }
+
         PlasmaComponents.Button {
             id: unlock
             text: i18n("Unlock")
             iconSource: "object-unlocked"
             onClicked: greeter.verify()
         }
+
         PlasmaComponents.Button {
             id: cancelButton
             text: i18n("Cancel")
@@ -112,6 +118,7 @@ Item {
             onClicked: canceled()
             visible: false
         }
+
         anchors.top: layoutItem.bottom
         anchors.horizontalCenter: layoutItem.horizontalCenter
     }
