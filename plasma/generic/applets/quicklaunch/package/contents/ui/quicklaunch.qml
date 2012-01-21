@@ -25,21 +25,23 @@ import org.kde.qtextracomponents 0.1 as QtExtraComponents
 import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
 Item {
-    property int minimumWidth: 100
-    property int minimumHeight: 100
-    
+    property int popupTriggerSize: 16
+
+    property int minimumWidth: 20 + popupTrigger.height
+    property int minimumHeight: 20
+
     property bool popupShown: false;
-    
+
     Component.onCompleted:
     {
         plasmoid.addEventListener("ConfigChanged", onConfigChanged);
         plasmoid.addEventListener("LocationChanged", updatePopupTrigger);
-        
+
         plasmoid.setAction("addLauncher", i18n("Add Launcher..."), "list-add");
         plasmoid.setAction("editLauncher", i18n("Edit Launcher..."), "document-edit");
         plasmoid.setAction("removeLauncher", i18n("Remove Launcher"), "list-remove");
         plasmoid.setActionSeparator("separator");
-        
+
         // TODO: Implement
         plasmoid.action_addLauncher = function() {}
         plasmoid.action_editLauncher = function() {}
@@ -51,7 +53,9 @@ Item {
         var launcherNamesVisible = plasmoid.readConfig("launcherNamesVisible");
 
         popupTrigger.enabled = plasmoid.readConfig("popupEnabled");
-        updatePopupTrigger();
+        if (popupTrigger.enabled) {
+            updatePopupTrigger();
+        }
 
         var launchers = new String(plasmoid.readConfig("launchers")).split(",");
         var launchersOnPopup =
@@ -63,15 +67,11 @@ Item {
             launcherList.model.addLauncher(i, launchers[i]);
             print("Adding launcher: "+launchers[i]);
         }
-        
+
         print("Launchers in model: "+launcherList.count);
     }
-    
+
     function updatePopupTrigger() {
-        if (!popupTrigger.enabled) {
-            return;
-        }
-        
         switch(plasmoid.location) {
             case TopEdge:
                 popupTrigger.elementId = popupShown ? "up-arrow" : "down-arrow";
@@ -102,10 +102,10 @@ Item {
         svg: arrowsSvg
         elementId: "up-arrow"
 
-        width: enabled ? 16 : 0;
-        height: enabled ? 16 : 0;
+        width: enabled ? popupTriggerSize : 0;
+        height: enabled ? popupTriggerSize : 0;
         visible: enabled;
-        
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
@@ -115,12 +115,8 @@ Item {
         }
     }
 
-    GridView {
+    IconGrid {
         id: launcherList
-        
-        cellWidth: 32
-        cellHeight: 32
-
         anchors {
             top: parent.top
             left: parent.left
@@ -129,12 +125,5 @@ Item {
         }
 
         model: Quicklaunch.LauncherListModel {}
-
-        delegate: QtExtraComponents.QIconItem {
-            width: 28
-            height: 28
-            anchors.margins: 2
-            icon: QIcon(iconSource)
-        }
     }
 }
