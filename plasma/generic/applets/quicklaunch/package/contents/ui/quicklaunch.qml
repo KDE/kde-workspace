@@ -16,21 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
  ***************************************************************************/
-
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
 import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
 Item {
-    property int popupTriggerSize: 16
-
     property int minimumWidth: 20 + popupTrigger.height
     property int minimumHeight: 20
-
-    property bool popupShown: false;
 
     Component.onCompleted:
     {
@@ -49,23 +43,40 @@ Item {
     }
 
     function onConfigChanged() {
+        var autoSectionCountEnabled = plasmoid.readConfig("autoSectionCountEnabled");
         var sectionCount = plasmoid.readConfig("sectionCount");
         var launcherNamesVisible = plasmoid.readConfig("launcherNamesVisible");
 
-        popupTrigger.enabled = plasmoid.readConfig("popupEnabled");
-        if (popupTrigger.enabled) {
+        if (sectionCount < 1) {
+            autoSectionCountEnabled = true;
+        }
+
+        popupTrigger.visible = plasmoid.readConfig("popupEnabled");
+        if (popupTrigger.visible) {
             updatePopupTrigger();
         }
 
+        // XXX: Workaround for bug 267809. This should be declared as a
+        // StringList rather than a String in config/main.xml
         var launchers = new String(plasmoid.readConfig("launchers")).split(",");
-        var launchersOnPopup =
-            new String(plasmoid.readConfig("launchersOnPopup")).split(",");
+        var launchersOnPopup = new String(plasmoid.readConfig("launchersOnPopup")).split(",");
 
         // Repopulate launcher list.
         launcherList.model.clear();
         for (i in launchers) {
-            launcherList.model.addLauncher(i, launchers[i]);
-            print("Adding launcher: "+launchers[i]);
+            if (launchers[i].length > 0) {
+                launcherList.model.addLauncher(i, launchers[i]);
+                print("Adding launcher: "+launchers[i]);
+            }
+        }
+
+        // Repopulate popup launcher list.
+        popup.model.clear();
+        for (i in launchersOnPopup) {
+            if (launchersOnPopup[i].length > 0) {
+                popup.model.addLauncher(i, launchersOnPopup[i]);
+                print("Adding launcher: "+launchersOnPopup[i]);
+            }
         }
 
         print("Launchers in model: "+launcherList.count);
@@ -74,16 +85,16 @@ Item {
     function updatePopupTrigger() {
         switch(plasmoid.location) {
             case TopEdge:
-                popupTrigger.elementId = popupShown ? "up-arrow" : "down-arrow";
+                popupTrigger.elementId = popup.visible ? "up-arrow" : "down-arrow";
                 break;
             case LeftEdge:
-                popupTrigger.elementId = popupShown ? "left-arrow" : "right-arrow";
+                popupTrigger.elementId = popup.visible ? "left-arrow" : "right-arrow";
                 break;
             case RightEdge:
-                popupTrigger.elementId = popupShown ? "right-arrow" : "left-arrow";
+                popupTrigger.elementId = popup.visible ? "right-arrow" : "left-arrow";
                 break;
             default:
-                popupTrigger.elementId = popupShown ? "down-arrow" : "up-arrow";
+                popupTrigger.elementId = popup.visible ? "down-arrow" : "up-arrow";
         }
     }
 
@@ -95,21 +106,22 @@ Item {
     PlasmaCore.SvgItem {
         id: popupTrigger
 
-        property bool enabled: false;
-
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
         svg: arrowsSvg
         elementId: "up-arrow"
 
-        width: enabled ? popupTriggerSize : 0;
-        height: enabled ? popupTriggerSize : 0;
-        visible: enabled;
+        visible: false;
+        width: visible ? 16 : 0;
+        height: visible ? 16 : 0;
 
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                popupShown = !popupShown;
+                var popupPosition = popup.popupPosition(popupTrigger);
+                popup.dialogX = popupPosition.x;
+                popup.dialogY = popupPosition.y;
+                popup.visible = !popup.visible;
                 updatePopupTrigger();
             }
         }
@@ -124,6 +136,11 @@ Item {
             bottom: parent.bottom
         }
 
+        model: Quicklaunch.LauncherListModel {}
+    }
+
+    Popup {
+        id: popup
         model: Quicklaunch.LauncherListModel {}
     }
 }

@@ -149,6 +149,7 @@ Type=Service
 X-KDE-ServiceTypes=Plasma/Applet
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/quicklaunch.qml
+X-Plasma-RequiredExtensions=LaunchApp
 
 X-KDE-PluginInfo-Author=Ingomar Wesp
 X-KDE-PluginInfo-Email=ingomar@wesp.name
@@ -159,6 +160,5 @@ X-KDE-PluginInfo-Category=Application Launchers
 X-KDE-PluginInfo-Depends=
 X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-EnabledByDefault=true
-#X-Plasma-Requires-FileDialog=Required
-#X-Plasma-Requires-LaunchApp=Required
+
 
