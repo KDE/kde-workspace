@@ -26,6 +26,8 @@ Item {
     property int minimumWidth: 20 + popupTrigger.height
     property int minimumHeight: 20
 
+    property alias popup: popupLoader.item;
+
     Component.onCompleted:
     {
         plasmoid.addEventListener("ConfigChanged", onConfigChanged);
@@ -51,9 +53,10 @@ Item {
             autoSectionCountEnabled = true;
         }
 
-        popupTrigger.visible = plasmoid.readConfig("popupEnabled");
-        if (popupTrigger.visible) {
-            updatePopupTrigger();
+        if (plasmoid.readConfig("popupEnabled") == true) {
+            popupLoader.source = "popup.qml";
+        } else {
+            popupLoader.sourceComponent = undefined;
         }
 
         // XXX: Workaround for bug 267809. This should be declared as a
@@ -66,7 +69,6 @@ Item {
         for (i in launchers) {
             if (launchers[i].length > 0) {
                 launcherList.model.addLauncher(i, launchers[i]);
-                print("Adding launcher: "+launchers[i]);
             }
         }
 
@@ -78,11 +80,14 @@ Item {
                 print("Adding launcher: "+launchersOnPopup[i]);
             }
         }
-
-        print("Launchers in model: "+launcherList.count);
     }
 
     function updatePopupTrigger() {
+
+        if (!popupLoader.loaded) {
+            return;
+        }
+
         switch(plasmoid.location) {
             case TopEdge:
                 popupTrigger.elementId = popup.visible ? "up-arrow" : "down-arrow";
@@ -111,18 +116,20 @@ Item {
         svg: arrowsSvg
         elementId: "up-arrow"
 
-        visible: false;
+        visible: popupLoader.popupLoaded
         width: visible ? 16 : 0;
         height: visible ? 16 : 0;
 
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                var popupPosition = popup.popupPosition(popupTrigger);
-                popup.dialogX = popupPosition.x;
-                popup.dialogY = popupPosition.y;
-                popup.visible = !popup.visible;
-                updatePopupTrigger();
+                if (popupLoader.popupLoaded) {
+                    var popupPosition = popup.popupPosition(popupTrigger);
+                    popup.dialogX = popupPosition.x;
+                    popup.dialogY = popupPosition.y;
+                    popup.visible = !popup.visible;
+                    updatePopupTrigger();
+                }
             }
         }
     }
@@ -139,8 +146,8 @@ Item {
         model: Quicklaunch.LauncherListModel {}
     }
 
-    Popup {
-        id: popup
-        model: Quicklaunch.LauncherListModel {}
+    Loader {
+        id: popupLoader
+        property bool popupLoaded: status == Loader.Ready
     }
 }

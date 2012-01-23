@@ -18,16 +18,16 @@
  ***************************************************************************/
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
+
+import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
 Item {
     id: main
     property alias model: list.model
     property alias count: list.count
-    property alias dialogX: dialog.x;
-    property alias dialogY: dialog.y;
+    property alias dialogX: dialog.x
+    property alias dialogY: dialog.y
 
     visible: false
 
@@ -48,6 +48,8 @@ Item {
         width: 160
         height: count * (24) + (count - 1) * spacing
         spacing: 8
+
+        model: Quicklaunch.LauncherListModel {}
 
         delegate: Row {
 
