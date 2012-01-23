@@ -6,6 +6,7 @@ X-KDE-Kded-autoload=true
 X-KDE-Kded-phase=1
 
 Name=KDE TouchPad Enabler Daemon
+Name[ar]=مراقب تفعيل لوحة اللمس لكدي
 Name[da]=KDE touchpad-aktiveringsdæmon
 Name[de]=Touchpad-Aktivierungsdienst für KDE
 Name[el]=KDE TouchPad Enabler Daemon
@@ -23,6 +24,7 @@ Name[x-test]=xxKDE TouchPad Enabler Daemonxx
 Name[zh_TW]=KDE 觸控板開啟伺服程式
 
 Comment=Toggles the enable status of the TouchPad
+Comment[ar]=تبديل حالة مراقب لوحة اللمس
 Comment[da]=Slår aktiveringsstatus for touchpad til/fra
 Comment[de]=Schaltet den Aktivierungsstatus von Touchpads um
 Comment[el]=Εναλλάσσει την ενεργή κατάσταση της επιφάνειας αφής
