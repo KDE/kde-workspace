@@ -26,13 +26,43 @@ Item {
     id: main
     property alias model: list.model
     property alias count: list.count
-    property alias dialogX: dialog.x
-    property alias dialogY: dialog.y
 
-    visible: false
+    PlasmaCore.Svg {
+       id: arrowsSvg
+       imagePath: "widgets/arrows"
+    }
 
-    function popupPosition(item, alignment) {
-        return dialog.popupPosition(item, alignment);
+     PlasmaCore.SvgItem {
+        id: popupTrigger
+
+        anchors.right: parent.right
+
+        svg: arrowsSvg
+        elementId: {
+            switch(plasmoid.location) {
+                case TopEdge:
+                    return dialog.visible ? "up-arrow" : "down-arrow";
+                case LeftEdge:
+                    return dialog.visible ? "left-arrow" : "right-arrow";
+                case RightEdge:
+                    return dialog.visible ? "right-arrow" : "left-arrow";
+                default:
+                    return dialog.visible ? "down-arrow" : "up-arrow";
+            }
+        }
+
+        width: 16;
+        height: 16;
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                var popupPosition = dialog.popupPosition(popupTrigger);
+                dialog.x = popupPosition.x;
+                dialog.y = popupPosition.y;
+                dialog.visible = !dialog.visible;
+            }
+        }
     }
 
     PlasmaCore.Dialog {

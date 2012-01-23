@@ -23,7 +23,7 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
 Item {
-    property int minimumWidth: 20 + popupTrigger.height
+    property int minimumWidth: 20 + popupLoader.width
     property int minimumHeight: 20
 
     property alias popup: popupLoader.item;
@@ -31,7 +31,6 @@ Item {
     Component.onCompleted:
     {
         plasmoid.addEventListener("ConfigChanged", onConfigChanged);
-        plasmoid.addEventListener("LocationChanged", updatePopupTrigger);
 
         plasmoid.setAction("addLauncher", i18n("Add Launcher..."), "list-add");
         plasmoid.setAction("editLauncher", i18n("Edit Launcher..."), "document-edit");
@@ -82,64 +81,12 @@ Item {
         }
     }
 
-    function updatePopupTrigger() {
-
-        if (!popupLoader.loaded) {
-            return;
-        }
-
-        switch(plasmoid.location) {
-            case TopEdge:
-                popupTrigger.elementId = popup.visible ? "up-arrow" : "down-arrow";
-                break;
-            case LeftEdge:
-                popupTrigger.elementId = popup.visible ? "left-arrow" : "right-arrow";
-                break;
-            case RightEdge:
-                popupTrigger.elementId = popup.visible ? "right-arrow" : "left-arrow";
-                break;
-            default:
-                popupTrigger.elementId = popup.visible ? "down-arrow" : "up-arrow";
-        }
-    }
-
-    PlasmaCore.Svg {
-       id: arrowsSvg
-       imagePath: "widgets/arrows"
-    }
-
-    PlasmaCore.SvgItem {
-        id: popupTrigger
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        svg: arrowsSvg
-        elementId: "up-arrow"
-
-        visible: popupLoader.popupLoaded
-        width: visible ? 16 : 0;
-        height: visible ? 16 : 0;
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                if (popupLoader.popupLoaded) {
-                    var popupPosition = popup.popupPosition(popupTrigger);
-                    popup.dialogX = popupPosition.x;
-                    popup.dialogY = popupPosition.y;
-                    popup.visible = !popup.visible;
-                    updatePopupTrigger();
-                }
-            }
-        }
-    }
-
     IconGrid {
         id: launcherList
         anchors {
             top: parent.top
             left: parent.left
-            right: popupTrigger.left
+            right: popupLoader.left
             bottom: parent.bottom
         }
 
@@ -149,5 +96,8 @@ Item {
     Loader {
         id: popupLoader
         property bool popupLoaded: status == Loader.Ready
+
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
     }
 }
