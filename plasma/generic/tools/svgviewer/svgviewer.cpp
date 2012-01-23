@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QStandardItemModel>
+#include <QScrollArea>
 
 #include <KDebug>
 #include <KGlobal>
@@ -40,6 +41,7 @@ SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
     , m_currentTheme(0)
     , m_currentSvg(0)
+    , m_svgPreviewImage(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
 
@@ -51,6 +53,11 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     m_currentSvg = new Plasma::Svg(this);
     m_currentSvg->setUsingRenderingCache(false);
+
+    m_svgPreviewImage = new QLabel(this);
+    //set "NO" icon if no icon is loaded.
+
+    m_scrollArea->setWidget(m_svgPreviewImage);
 
     m_dataModel = new QStandardItemModel(this);
 
@@ -183,11 +190,23 @@ void SvgViewer::modelIndexChanged(const QModelIndex& index)
 
     kDebug() << "modelIndexChanged loading svg theme: " << m_currentTheme->themeName();
     m_currentSvg->setTheme(m_currentTheme);
-    m_currentSvg->resize(m_svgFilesTree->size());
+//    m_currentSvg->resize(m_svgFilesTree->size());
 
     kDebug() << "modelIndexChanged, loading svg elementPath: " << elementPath;
     m_currentSvg->setImagePath(elementPath);
-    m_svgPreview->setPixmap(m_currentSvg->pixmap());
+
+    kDebug() << "svg native size: " << m_currentSvg->size();
+
+    // HACK if i ever did know one..
+    m_currentSvg->resize(1024, 1024);
+
+    // FIXME: size() constantly returns 48x48. looking at svg.cpp:225, calling into
+    // ksharedsvgrenderer. problem lies in QSvgRenderer? regression?
+    // or am i misusing API here? m_currentSvg->size()
+    // SEE ABOVE at m_currentSvg->resize() for a hack
+    m_svgPreviewImage->resize(m_currentSvg->size());
+    m_svgPreviewImage->setPixmap(m_currentSvg->pixmap());
+
 }
 
 void SvgViewer::modelSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
