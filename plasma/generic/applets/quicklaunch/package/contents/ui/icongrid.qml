@@ -20,28 +20,122 @@ import QtQuick 1.1
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
 Item {
-    property int minIconSize: 16
-    property int maxIconSize: 64
+    id: iconGrid
+
+    property int minCellSize: 24
+    property int maxCellSize: 64
 
     property int maxSectionCount: 0
 
-    property alias model: grid.model
-    property alias count: grid.count
+    // XXX: This should be an enum, really.
+    property string mode: "horizontalPanel";
+
+    property int minimumWidth: minCellSize;
+    property int minimumHeight: minCellSize;
+    property alias model: gridView.model
+    property alias count: gridView.count
 
     GridView {
-        id: grid
+        id: gridView
 
-        cellWidth: 32
-        cellHeight: 32
+        property int cellSize;
+        cellWidth: cellSize
+        cellHeight: cellSize
 
-        anchors.fill: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
 
-        delegate: QtExtraComponents.QIconItem {
-            anchors.margins: 2
-            width: grid.cellWidth - 2*anchors.margins
-            height: grid.cellHeight - 2*anchors.margins
+        delegate:
+            Item {
 
-            icon: QIcon(iconSource)
+                width: gridView.cellWidth
+                height: gridView.cellHeight
+
+                QtExtraComponents.QIconItem {
+                    anchors.horizontalCenter: parent.horizontalCenter;
+                    anchors.verticalCenter: parent.verticalCenter;
+                    width: gridView.cellWidth - 4
+                    height: gridView.cellHeight - 4
+
+                    icon: QIcon(iconSource)
+            }
+        }
+    }
+
+    // TODO: Do this onAdd / onRemove as well.
+    onMaxSectionCountChanged: updateGridProperties();
+
+    onWidthChanged: {
+        if (mode == "verticalPanel") {
+            updateGridProperties();
+        }
+    }
+
+    onHeightChanged: {
+        if (mode == "horizontalPanel") {
+            updateGridProperties();
+        }
+    }
+
+    function updateGridProperties() {
+        if (mode == "horizontalPanel" || mode == "verticalPanel") {
+
+            var horizontalPanel = (mode == "horizontalPanel");
+
+            var panelThickness =
+                horizontalPanel ? iconGrid.height : iconGrid.width;
+            var sectionCount = Math.floor(panelThickness / minCellSize);
+
+            // Ensure sectionCount is bounded to [1;min(count,maxSectionCount)].
+            if (sectionCount < 1) {
+                sectionCount = 1;
+            }
+            else {
+                if (maxSectionCount != 0 && maxSectionCount < sectionCount) {
+                    sectionCount = maxSectionCount;
+                }
+                if (count != 0 && count < sectionCount) {
+                    sectionCount = count;
+                }
+            }
+
+            // Ensure sectionCount is not bigger than it needs to be.
+            var maxItemsPerSection = Math.ceil(count / sectionCount);
+
+            while (sectionCount > 1)  {
+                var maxItemsPerBiggerSection = Math.ceil(count / (sectionCount-1));
+
+                if (maxItemsPerBiggerSection == maxItemsPerSection) {
+                    sectionCount--;
+                    maxItemsPerSection = maxItemsPerSection;
+                }
+                else {
+                    break;
+                }
+            }
+
+            var newCellSize = Math.floor(panelThickness / sectionCount);
+            if (newCellSize < minCellSize) {
+                newCellSize = minCellSize;
+            }
+            else if (newCellSize > maxCellSize) {
+                newCellSize = maxCellSize;
+            }
+            gridView.cellSize = newCellSize;
+
+            if (horizontalPanel) {
+                gridView.width = maxItemsPerSection * newCellSize;
+                gridView.height = sectionCount * newCellSize;
+
+                iconGrid.minimumWidth = maxItemsPerSection * newCellSize;
+                iconGrid.minimumHeight = minCellSize;
+            } else {
+                gridView.height = maxItemsPerSection * newCellSize;
+                gridView.width = sectionCount * newCellSize;
+
+                iconGrid.minimumHeight = gridView.height;
+                iconGrid.minimumWidth = minCellSize;
+            }
         }
     }
 }

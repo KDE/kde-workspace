@@ -23,14 +23,15 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
 Item {
-    property int minimumWidth: 20 + popupLoader.width
-    property int minimumHeight: 20
+    property int minimumWidth: iconGrid.minimumWidth + popupLoader.width
+    property int minimumHeight: iconGrid.minimumHeight
 
-    property alias popup: popupLoader.item;
+    clip: true
 
     Component.onCompleted:
     {
-        plasmoid.addEventListener("ConfigChanged", onConfigChanged);
+        plasmoid.addEventListener("configChanged", onConfigChanged);
+        // plasmoid.addEventListener("locationChanged", onLocationChanged);
 
         plasmoid.setAction("addLauncher", i18n("Add Launcher..."), "list-add");
         plasmoid.setAction("editLauncher", i18n("Edit Launcher..."), "document-edit");
@@ -52,6 +53,12 @@ Item {
             autoSectionCountEnabled = true;
         }
 
+        if (autoSectionCountEnabled) {
+            sectionCount = 0;
+        }
+
+        iconGrid.maxSectionCount = sectionCount;
+
         if (plasmoid.readConfig("popupEnabled") == true) {
             popupLoader.source = "popup.qml";
         } else {
@@ -64,25 +71,26 @@ Item {
         var launchersOnPopup = new String(plasmoid.readConfig("launchersOnPopup")).split(",");
 
         // Repopulate launcher list.
-        launcherList.model.clear();
+        iconGrid.model.clear();
         for (i in launchers) {
             if (launchers[i].length > 0) {
-                launcherList.model.addLauncher(i, launchers[i]);
+                iconGrid.model.addLauncher(i, launchers[i]);
             }
         }
 
         // Repopulate popup launcher list.
-        popup.model.clear();
-        for (i in launchersOnPopup) {
-            if (launchersOnPopup[i].length > 0) {
-                popup.model.addLauncher(i, launchersOnPopup[i]);
-                print("Adding launcher: "+launchersOnPopup[i]);
+        if (popupLoader.status == Loader.Ready) {
+            popupLoader.item.model.clear();
+            for (i in launchersOnPopup) {
+                if (launchersOnPopup[i].length > 0) {
+                    popupLoader.item.model.addLauncher(i, launchersOnPopup[i]);
+                }
             }
         }
     }
 
     IconGrid {
-        id: launcherList
+        id: iconGrid
         anchors {
             top: parent.top
             left: parent.left
@@ -95,7 +103,6 @@ Item {
 
     Loader {
         id: popupLoader
-        property bool popupLoaded: status == Loader.Ready
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
