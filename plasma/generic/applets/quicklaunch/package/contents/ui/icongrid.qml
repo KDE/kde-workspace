@@ -17,6 +17,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
  ***************************************************************************/
 import QtQuick 1.1
+import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
 Item {
@@ -35,29 +36,39 @@ Item {
     property alias model: gridView.model
     property alias count: gridView.count
 
+
     GridView {
         id: gridView
 
-        property int cellSize;
+        property int cellSize: 16
         cellWidth: cellSize
         cellHeight: cellSize
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        delegate:
-            Item {
+        focus: true
 
-                width: gridView.cellWidth
-                height: gridView.cellHeight
+        delegate: Item {
+            id: delegate
+            width: gridView.cellWidth
+            height: gridView.cellHeight
 
-                QtExtraComponents.QIconItem {
-                    anchors.horizontalCenter: parent.horizontalCenter;
-                    anchors.verticalCenter: parent.verticalCenter;
-                    width: gridView.cellWidth - 4
-                    height: gridView.cellHeight - 4
+            QtExtraComponents.QIconItem {
+                anchors.horizontalCenter: parent.horizontalCenter;
+                anchors.verticalCenter: parent.verticalCenter;
 
-                    icon: QIcon(iconSource)
+                width: gridView.cellWidth - 4
+                height: gridView.cellHeight - 4
+
+                icon: QIcon(iconSource)
+            }
+
+            PlasmaCore.ToolTip {
+                target: delegate
+                mainText: display
+                subText: description
+                image: iconSource
             }
         }
     }

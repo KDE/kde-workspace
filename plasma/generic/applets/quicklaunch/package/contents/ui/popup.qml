@@ -81,8 +81,8 @@ Item {
 
         model: Quicklaunch.LauncherListModel {}
 
-        delegate: Row {
-
+        delegate:Row {
+            id: delegate
             spacing: 4
 
             QtExtraComponents.QIconItem {
