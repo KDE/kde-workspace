@@ -12,6 +12,8 @@ set(activitymanager_SRCS
 )
 
 set(plasma_SRCS
+    accessibility/accessiblefactory.cpp
+    accessibility/accessibleplasmaview.cpp
     activity.cpp
     scripting/desktopscriptengine.cpp
     scripting/panel.cpp
