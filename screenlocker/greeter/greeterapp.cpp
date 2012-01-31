@@ -88,7 +88,11 @@ void UnlockApp::initialize()
         kdeclarative.initialize();
         kdeclarative.setupBindings();
 
-        view->setSource(QUrl::fromLocalFile(KStandardDirs::locate("data", KScreenSaverSettings::greeterQML())));
+        QString path = KStandardDirs::locate("data", KScreenSaverSettings::greeterQML());
+        if (path.isEmpty()) {
+            path = KStandardDirs::locate("data", "kscreenlocker/lockscreen.qml");
+        }
+        view->setSource(QUrl::fromLocalFile(path));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
