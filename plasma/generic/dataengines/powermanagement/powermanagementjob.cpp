@@ -17,8 +17,11 @@
  */
 
 #include <QDBusConnection>
+#include <QDBusInterface>
 #include <QDBusMessage>
 #include <QDBusPendingReply>
+
+#include <KAuthorized>
 
 // kde-workspace/libs
 #include <kworkspace/kworkspace.h>
@@ -26,6 +29,8 @@
 #include "powermanagementjob.h"
 
 #include <kdebug.h>
+
+#include <Solid/PowerManagement>
 
 PowerManagementJob::PowerManagementJob(const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent) :
     ServiceJob(parent->objectName(), operation, parameters, parent)
@@ -39,9 +44,20 @@ PowerManagementJob::~PowerManagementJob()
 void PowerManagementJob::start()
 {
     const QString operation = operationName();
-    kDebug() << "starting operation  ... " << operation;
+    //kDebug() << "starting operation  ... " << operation;
 
-    if (operation == "suspend" || operation == "suspendToRam") {
+    if (operation == "lockScreen") {
+        if (KAuthorized::authorizeKAction("lock_screen")) {
+            const QString interface("org.freedesktop.ScreenSaver");
+            QDBusInterface screensaver(interface, "/ScreenSaver");
+            screensaver.asyncCall("Lock");
+            setResult(true);
+            return;
+        }
+        kDebug() << "operation denied " << operation;
+        setResult(false);
+        return;
+    } else if (operation == "suspend" || operation == "suspendToRam") {
         setResult(suspend(Ram));
         return;
     } else if (operation == "suspendToDisk") {
@@ -54,6 +70,14 @@ void PowerManagementJob::start()
         requestShutDown();
         setResult(true);
         return;
+    } else if (operation == "beginSuppressingSleep") {
+        setResult(Solid::PowerManagement::beginSuppressingSleep(parameters().value("reason").toString()));
+    } else if (operation == "stopSuppressingSleep") {
+        setResult(Solid::PowerManagement::stopSuppressingSleep(parameters().value("cookie").toInt()));
+    } else if (operation == "beginSuppressingScreenPowerManagement") {
+        setResult(Solid::PowerManagement::beginSuppressingScreenPowerManagement(parameters().value("reason").toString()));
+    } else if (operation == "stopSuppressingScreenPowerManagement") {
+        setResult(Solid::PowerManagement::stopSuppressingScreenPowerManagement(parameters().value("cookie").toInt()));
     }
 
     kDebug() << "don't know what to do with " << operation;
@@ -66,8 +90,7 @@ bool PowerManagementJob::suspend(const SuspendType &type)
                                                       "/org/kde/Solid/PowerManagement",
                                                       "org.kde.Solid.PowerManagement",
                                                       callForType(type));
-    QDBusPendingReply< QString > reply = QDBusConnection::sessionBus().asyncCall(msg);
-
+    QDBusConnection::sessionBus().asyncCall(msg);
     return true;
 }
 

@@ -135,6 +135,7 @@ KWinTabBoxConfig::KWinTabBoxConfig(QWidget* parent, const QVariantList& args)
     // combo boxes
     connect(m_primaryTabBoxUi->listModeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     connect(m_primaryTabBoxUi->switchingModeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
+    connect(m_primaryTabBoxUi->minimizedModeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     connect(m_primaryTabBoxUi->effectCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     // check boxes
     connect(m_primaryTabBoxUi->showOutlineCheck, SIGNAL(stateChanged(int)), this, SLOT(changed()));
@@ -144,6 +145,7 @@ KWinTabBoxConfig::KWinTabBoxConfig(QWidget* parent, const QVariantList& args)
     // combo boxes alternative
     connect(m_alternativeTabBoxUi->listModeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     connect(m_alternativeTabBoxUi->switchingModeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
+    connect(m_alternativeTabBoxUi->minimizedModeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     connect(m_alternativeTabBoxUi->effectCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     // check boxes alternative
     connect(m_alternativeTabBoxUi->showOutlineCheck, SIGNAL(stateChanged(int)), this, SLOT(changed()));
@@ -190,29 +192,29 @@ void KWinTabBoxConfig::load()
 
     // effects
     // Set current option to "none" if no plugin is activated.
-    m_primaryTabBoxUi->effectCombo->setCurrentIndex(0);
-    m_alternativeTabBoxUi->effectCombo->setCurrentIndex(0);
+    m_primaryTabBoxUi->effectCombo->setCurrentIndex(Layout);
+    m_alternativeTabBoxUi->effectCombo->setCurrentIndex(Layout);
     KConfigGroup effectconfig(m_config, "Plugins");
     KConfigGroup presentwindowsconfig(m_config, "Effect-PresentWindows");
     if (effectEnabled("presentwindows", effectconfig)) {
         if (presentwindowsconfig.readEntry("TabBox", false))
-            m_primaryTabBoxUi->effectCombo->setCurrentIndex(2);
+            m_primaryTabBoxUi->effectCombo->setCurrentIndex(PresentWindows);
         if (presentwindowsconfig.readEntry("TabBoxAlternative", false))
-            m_alternativeTabBoxUi->effectCombo->setCurrentIndex(2);
+            m_alternativeTabBoxUi->effectCombo->setCurrentIndex(PresentWindows);
     }
     KConfigGroup coverswitchconfig(m_config, "Effect-CoverSwitch");
     if (effectEnabled("coverswitch", effectconfig)) {
         if (coverswitchconfig.readEntry("TabBox", false))
-            m_primaryTabBoxUi->effectCombo->setCurrentIndex(3);
+            m_primaryTabBoxUi->effectCombo->setCurrentIndex(CoverSwitch);
         if (coverswitchconfig.readEntry("TabBoxAlternative", false))
-            m_alternativeTabBoxUi->effectCombo->setCurrentIndex(3);
+            m_alternativeTabBoxUi->effectCombo->setCurrentIndex(CoverSwitch);
     }
     KConfigGroup flipswitchconfig(m_config, "Effect-FlipSwitch");
     if (effectEnabled("flipswitch", effectconfig)) {
         if (flipswitchconfig.readEntry("TabBox", false))
-            m_primaryTabBoxUi->effectCombo->setCurrentIndex(4);
+            m_primaryTabBoxUi->effectCombo->setCurrentIndex(FlipSwitch);
         if (flipswitchconfig.readEntry("TabBoxAlternative", false))
-            m_alternativeTabBoxUi->effectCombo->setCurrentIndex(4);
+            m_alternativeTabBoxUi->effectCombo->setCurrentIndex(FlipSwitch);
     }
     slotEffectSelectionChanged(m_primaryTabBoxUi->effectCombo->currentIndex());
     slotEffectSelectionChangedAlternative(m_alternativeTabBoxUi->effectCombo->currentIndex());
@@ -226,10 +228,10 @@ void KWinTabBoxConfig::loadConfig(const KConfigGroup& config, KWin::TabBox::TabB
                                        config.readEntry<int>("ListMode", TabBox::TabBoxConfig::defaultListMode())));
     tabBoxConfig.setClientSwitchingMode(TabBox::TabBoxConfig::ClientSwitchingMode(
                                             config.readEntry<int>("SwitchingMode", TabBox::TabBoxConfig::defaultSwitchingMode())));
+    tabBoxConfig.setClientMinimizedMode(TabBox::TabBoxConfig::ClientMinimizedMode(
+                                       config.readEntry<int>("MinimizedMode", TabBox::TabBoxConfig::defaultMinimizedMode())));
     tabBoxConfig.setLayout(TabBox::TabBoxConfig::LayoutMode(
                                config.readEntry<int>("LayoutMode", TabBox::TabBoxConfig::defaultLayoutMode())));
-    tabBoxConfig.setSelectedItemViewPosition(TabBox::TabBoxConfig::SelectedItemViewPosition(
-                config.readEntry<int>("SelectedItem", TabBox::TabBoxConfig::defaultSelectedItemViewPosition())));
     tabBoxConfig.setShowDesktop(config.readEntry<bool>("ShowDesktop",
                                 TabBox::TabBoxConfig::defaultShowDesktop()));
 
@@ -254,8 +256,8 @@ void KWinTabBoxConfig::saveConfig(KConfigGroup& config, const KWin::TabBox::TabB
     // combo boxes
     config.writeEntry("ListMode",           int(tabBoxConfig.clientListMode()));
     config.writeEntry("SwitchingMode",      int(tabBoxConfig.clientSwitchingMode()));
+    config.writeEntry("MinimizedMode",      int(tabBoxConfig.clientMinimizedMode()));
     config.writeEntry("LayoutMode",         int(tabBoxConfig.layout()));
-    config.writeEntry("SelectedItem",       int(tabBoxConfig.selectedItemViewPosition()));
     config.writeEntry("LayoutName",         tabBoxConfig.layoutName());
     config.writeEntry("SelectedLayoutName", tabBoxConfig.selectedItemLayoutName());
     config.writeEntry("ShowDesktop",        tabBoxConfig.isShowDesktop());
@@ -284,6 +286,8 @@ void KWinTabBoxConfig::save()
     saveConfig(config, m_tabBoxAlternativeConfig);
 
     // effects
+    bool highlightWindows = m_primaryTabBoxUi->highlightWindowCheck->isChecked() ||
+                            m_alternativeTabBoxUi->highlightWindowCheck->isChecked();
     bool presentWindowSwitching = false;
     bool coverSwitch            = false;
     bool flipSwitch             = false;
@@ -304,18 +308,19 @@ void KWinTabBoxConfig::save()
         break; // nothing
     }
     switch(m_alternativeTabBoxUi->effectCombo->currentIndex()) {
-    case 1:
+    case PresentWindows:
         presentWindowSwitchingAlternative = true;
         break;
-    case 2:
+    case CoverSwitch:
         coverSwitchAlternative = true;
         break;
-    case 3:
+    case FlipSwitch:
         flipSwitchAlternative = true;
         break;
     default:
         break; // nothing
     }
+
     // activate effects if not active
     KConfigGroup effectconfig(m_config, "Plugins");
     if (presentWindowSwitching || presentWindowSwitchingAlternative)
@@ -324,6 +329,8 @@ void KWinTabBoxConfig::save()
         effectconfig.writeEntry("kwin4_effect_coverswitchEnabled", true);
     if (flipSwitch || flipSwitchAlternative)
         effectconfig.writeEntry("kwin4_effect_flipswitchEnabled", true);
+    if (highlightWindows)
+        effectconfig.writeEntry("kwin4_effect_highlightwindowEnabled", true);
     effectconfig.sync();
     KConfigGroup presentwindowsconfig(m_config, "Effect-PresentWindows");
     presentwindowsconfig.writeEntry("TabBox", presentWindowSwitching);
@@ -352,6 +359,7 @@ void KWinTabBoxConfig::defaults()
     // combo boxes
     m_primaryTabBoxUi->listModeCombo->setCurrentIndex(TabBox::TabBoxConfig::defaultListMode());
     m_primaryTabBoxUi->switchingModeCombo->setCurrentIndex(TabBox::TabBoxConfig::defaultSwitchingMode());
+    m_primaryTabBoxUi->minimizedModeCombo->setCurrentIndex(TabBox::TabBoxConfig::defaultMinimizedMode());
 
     // checkboxes
     m_primaryTabBoxUi->showOutlineCheck->setChecked(TabBox::TabBoxConfig::defaultShowOutline());
@@ -366,6 +374,7 @@ void KWinTabBoxConfig::defaults()
     // combo boxes
     m_alternativeTabBoxUi->listModeCombo->setCurrentIndex(TabBox::TabBoxConfig::defaultListMode());
     m_alternativeTabBoxUi->switchingModeCombo->setCurrentIndex(TabBox::TabBoxConfig::defaultSwitchingMode());
+    m_alternativeTabBoxUi->minimizedModeCombo->setCurrentIndex(TabBox::TabBoxConfig::defaultMinimizedMode());
 
     // checkboxes
     m_alternativeTabBoxUi->showOutlineCheck->setChecked(TabBox::TabBoxConfig::defaultShowOutline());
@@ -374,7 +383,7 @@ void KWinTabBoxConfig::defaults()
     m_alternativeTabBoxUi->showDesktopBox->setChecked(TabBox::TabBoxConfig::defaultShowDesktop());
 
     // effects
-    m_alternativeTabBoxUi->effectCombo->setCurrentIndex(0);
+    m_alternativeTabBoxUi->effectCombo->setCurrentIndex(Layout);
 
     m_editor->allDefault();
 
@@ -396,6 +405,7 @@ void KWinTabBoxConfig::updateUiFromConfig(KWinTabBoxConfigForm* ui, const KWin::
     // combo boxes
     ui->listModeCombo->setCurrentIndex(config.clientListMode());
     ui->switchingModeCombo->setCurrentIndex(config.clientSwitchingMode());
+    ui->minimizedModeCombo->setCurrentIndex(config.clientMinimizedMode());
 
     // check boxes
     ui->showOutlineCheck->setChecked(config.isShowOutline());
@@ -408,6 +418,7 @@ void KWinTabBoxConfig::updateConfigFromUi(const KWin::KWinTabBoxConfigForm* ui, 
 {
     config.setClientListMode(TabBox::TabBoxConfig::ClientListMode(ui->listModeCombo->currentIndex()));
     config.setClientSwitchingMode(TabBox::TabBoxConfig::ClientSwitchingMode(ui->switchingModeCombo->currentIndex()));
+    config.setClientMinimizedMode(TabBox::TabBoxConfig::ClientMinimizedMode(ui->minimizedModeCombo->currentIndex()));
 
     config.setShowOutline(ui->showOutlineCheck->isChecked());
     config.setShowTabBox(ui->showTabBox->isChecked());
@@ -495,7 +506,7 @@ void KWinTabBoxConfig::aboutEffectClicked(KWinTabBoxConfigForm* ui)
 
 void KWinTabBoxConfig::slotConfigureEffectClicked()
 {
-    if (m_primaryTabBoxUi->effectCombo->currentIndex() == 0) {
+    if (m_primaryTabBoxUi->effectCombo->currentIndex() == Layout) {
         slotConfigureLayoutClicked();
         return;
     }
@@ -504,7 +515,7 @@ void KWinTabBoxConfig::slotConfigureEffectClicked()
 
 void KWinTabBoxConfig::slotConfigureEffectClickedAlternative()
 {
-    if (m_alternativeTabBoxUi->effectCombo->currentIndex() == 0) {
+    if (m_alternativeTabBoxUi->effectCombo->currentIndex() == Layout) {
         slotConfigureLayoutClickedAlternative();
         return;
     }
@@ -515,13 +526,13 @@ void KWinTabBoxConfig::configureEffectClicked(KWinTabBoxConfigForm* ui)
 {
     QString effect;
     switch(ui->effectCombo->currentIndex()) {
-    case 1:
+    case PresentWindows:
         effect = "presentwindows_config";
         break;
-    case 2:
+    case CoverSwitch:
         effect = "coverswitch_config";
         break;
-    case 3:
+    case FlipSwitch:
         effect = "flipswitch_config";
         break;
     default:

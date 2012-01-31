@@ -64,12 +64,6 @@ Item {
     }
 
     ListView {
-        /**
-         * Called from C++ to get the index at a mouse pos.
-         **/
-        function indexAtMousePos(pos) {
-            return thumbnailListView.indexAt(pos.x, pos.y);
-        }
         signal currentIndexChanged(int index)
         id: thumbnailListView
         objectName: "listView"
@@ -107,6 +101,13 @@ Item {
                     bottomMargin: hoverItem.margins.bottom
                 }
             }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    thumbnailListView.currentIndex = index;
+                    thumbnailListView.currentIndexChanged(thumbnailListView.currentIndex);
+                }
+            }
         }
         highlight: PlasmaCore.FrameSvgItem {
             id: highlightItem
@@ -114,13 +115,6 @@ Item {
             prefix: "hover"
             width: thumbnailListView.thumbnailWidth
             height: thumbnailListView.thumbnailWidth*(1.0/screenFactor)
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                thumbnailListView.currentIndex = thumbnailListView.indexAt(mouse.x, mouse.y);
-                thumbnailListView.currentIndexChanged(thumbnailListView.currentIndex);
-            }
         }
     }
     Item {

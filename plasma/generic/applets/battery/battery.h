@@ -91,7 +91,7 @@ class Battery : public Plasma::PopupApplet
         void sourceAdded(const QString &source);
         void sourceRemoved(const QString &source);
         void brightnessChanged(const int brightness);
-        void updateSlider(const float brightness);
+        void updateSlider(int brightness);
         void updateSlider();
         void openConfig();
         void suspend();
@@ -101,7 +101,6 @@ class Battery : public Plasma::PopupApplet
         void toggleInhibit(bool toggle);
 
     private:
-        void connectSources();
         void initPopupWidget();
         void updateStatus();
         bool isConstrained();
@@ -136,6 +135,9 @@ class Battery : public Plasma::PopupApplet
         Plasma::Label* m_inhibitLabel;
         Plasma::Slider *m_brightnessSlider;
         Plasma::CheckBox *m_inhibitButton;
+        QGraphicsLinearLayout *m_buttonLayout;
+        Plasma::IconWidget *m_suspendButton;
+        Plasma::IconWidget *m_hibernateButton;
 
         /* Show multiple batteries with individual icons and charge info? */
         bool m_showMultipleBatteries;

@@ -79,16 +79,27 @@ void Clock::init()
     dataEngine("time")->connectSource(currentTimezone(), this, updateInterval(), intervalAlignment());
     connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()), this, SLOT(updateColors()));
     connect(KGlobalSettings::self(), SIGNAL(appearanceChanged()), SLOT(resetSize()));
+    connect(KGlobalSettings::self(), SIGNAL(settingsChanged(int)), SLOT(updateClock(int)));
 }
 
 void Clock::constraintsEvent(Plasma::Constraints constraints)
 {
     ClockApplet::constraintsEvent(constraints);
 
-    if (constraints & Plasma::SizeConstraint ||
-        constraints & Plasma::FormFactorConstraint) {
+    if (constraints & Plasma::SizeConstraint || constraints & Plasma::FormFactorConstraint) {
         updateSize();
     }
+}
+
+// In case time format has changed, e.g. from 24h to 12h format.
+void Clock::updateClock(int category)
+{
+    if (category != KGlobalSettings::SETTINGS_LOCALE) {
+        return;
+    }
+
+    generatePixmap();
+    update();
 }
 
 void Clock::resetSize()
@@ -164,6 +175,7 @@ void Clock::updateSize()
     }
 
     generatePixmap();
+    update();
 }
 
 void Clock::clockConfigChanged()
@@ -217,7 +229,10 @@ void Clock::clockConfigChanged()
     const QFontMetricsF metrics(KGlobalSettings::smallestReadableFont());
     const QString timeString = KGlobal::locale()->formatTime(QTime(23, 59), m_showSeconds);
     setMinimumSize(metrics.size(Qt::TextSingleLine, timeString));
-    updateSize();
+
+    if (isUserConfiguring()) {
+        updateSize();
+    }
 }
 
 bool Clock::showTimezone() const

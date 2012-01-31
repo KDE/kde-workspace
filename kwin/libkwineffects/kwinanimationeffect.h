@@ -29,13 +29,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace KWin
 {
 
-class FPx2 {
+class KWIN_EXPORT FPx2 {
 public:
     FPx2() { f[0] = f[1] = 0.0; valid = false; }
     FPx2(float v) { f[0] = f[1] = v; valid = true; }
     FPx2(float v1, float v2) { f[0] = v1; f[1] = v2; valid = true; }
     FPx2(const FPx2 &other) { f[0] = other.f[0]; f[1] = other.f[1]; valid = other.valid; }
+    FPx2(const QPoint &other) { f[0] = other.x(); f[1] = other.y(); valid = true; }
     FPx2(const QPointF &other) { f[0] = other.x(); f[1] = other.y(); valid = true; }
+    FPx2(const QSize &other) { f[0] = other.width(); f[1] = other.height(); valid = true; }
     FPx2(const QSizeF &other) { f[0] = other.width(); f[1] = other.height(); valid = true; }
     inline void invalidate() { valid = false; }
     inline bool isValid() const { return valid; }
@@ -85,7 +87,7 @@ private:
 
 class AniData;
 class AnimationEffectPrivate;
-class AnimationEffect : public Effect
+class KWIN_EXPORT AnimationEffect : public Effect
 {
     Q_OBJECT
 public:
@@ -139,7 +141,7 @@ protected:
      * The central function of this class - call it to create an animated transition of any supported attribute
      * @param w - The EffectWindow to manipulate
      * @param a - The @enum Attribute to manipulate
-     * @param meta - Basically a wildcard to carry various extra informations, eg. the anchor, relativity or rotation axis. You will probably use require it when performing Generic animations.
+     * @param meta - Basically a wildcard to carry various extra information, eg. the anchor, relativity or rotation axis. You will probably use require it when performing Generic animations.
      * @param ms - How long the transition will last
      * @param to - The target value. FPx2 is an agnostic two component float type (like QPointF or QSizeF, but without requiring to be either and supporting an invalid state)
      * @param shape - How the animation progresses, eg. Linear progresses constantly while Exponential start slow and becomes very fast in the end
@@ -162,7 +164,7 @@ protected:
 private:
     float interpolated( const AniData&, int i = 0 ) const;
     float progress( const AniData& ) const;
-private slots:
+private Q_SLOTS:
     void init();
     void triggerRepaint();
     void _windowClosed( EffectWindow* w );

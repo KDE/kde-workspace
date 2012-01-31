@@ -91,6 +91,13 @@ Item {
                     leftMargin: hoverItem.margins.left
                 }
             }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    textListView.currentIndex = index;
+                    textListView.currentIndexChanged(textListView.currentIndex);
+                }
+            }
         }
     }
     ListView {
@@ -124,12 +131,6 @@ Item {
             // icon size or two text elements and margins and hoverItem margins
             return height + hoverItem.margins.top + hoverItem.margins.bottom;
         }
-        /**
-         * Called from C++ to get the index at a mouse pos.
-         **/
-        function indexAtMousePos(pos) {
-            return textListView.indexAt(pos.x, pos.y);
-        }
         signal currentIndexChanged(int index)
         id: textListView
         objectName: "listView"
@@ -154,12 +155,5 @@ Item {
             width: textListView.width
         }
         highlightMoveDuration: 250
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                textListView.currentIndex = textListView.indexAt(mouse.x, mouse.y);
-                textListView.currentIndexChanged(textListView.currentIndex);
-            }
-        }
     }
 }

@@ -108,36 +108,31 @@ void SaverCorona::init()
 
 void SaverCorona::loadDefaultLayout()
 {
-    kDebug();
-    QString defaultConfig = KStandardDirs::locate("appdata", "plasma-overlay-default-layoutrc");
-
-    if (!defaultConfig.isEmpty()) {
-        kDebug() << "attempting to load the default layout from:" << defaultConfig;
-        loadLayout(defaultConfig);
-        return;
-    }
-
+    //kDebug();
     QDesktopWidget *desktop = QApplication::desktop();
 
     // create a containment for the screens
     Plasma::Containment *c;
-    for(int screen=0; screen<m_numScreens; ++screen)
+    for(int screen = 0; screen < m_numScreens; ++screen)
     {
-      QRect g = desktop->screenGeometry(screen);
-      kDebug() << "     screen" << screen << "geometry is" << g;
-      c = addContainment("saverdesktop");
-      c->setScreen(screen);
-      c->setFormFactor(Plasma::Planar);
-      c->flushPendingConstraintsEvents();
+        QRect g = desktop->screenGeometry(screen);
+        kDebug() << "     screen" << screen << "geometry is" << g;
+        c = addContainment("saverdesktop");
+        if (c) {
+            c->setScreen(screen);
+            c->setFormFactor(Plasma::Planar);
+            c->flushPendingConstraintsEvents();
+        }
     }
 
     // a default clock
     c = containmentForScreen(desktop->primaryScreen());
-    Plasma::Applet *clock =  Plasma::Applet::load("clock"/*, c->id() + 1*/);
-    c->addApplet(clock, QPointF(KDialog::spacingHint(), KDialog::spacingHint()), true);
-    clock->init();
-    clock->flushPendingConstraintsEvents();
-
+    if (c) {
+        Plasma::Applet *clock =  Plasma::Applet::load("clock"/*, c->id() + 1*/);
+        c->addApplet(clock, QPointF(KDialog::spacingHint(), KDialog::spacingHint()), true);
+        clock->init();
+        clock->flushPendingConstraintsEvents();
+    }
     //emit containmentAdded(c);
 }
 

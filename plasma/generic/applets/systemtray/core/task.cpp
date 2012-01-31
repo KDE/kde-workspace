@@ -21,8 +21,10 @@
 
 #include "task.h"
 
-#include <QtGui/QGraphicsWidget>
+#include <QGraphicsWidget>
+#include <QTimer>
 
+#include "../ui/applet.h"
 
 namespace SystemTray
 {
@@ -85,13 +87,13 @@ QGraphicsWidget *Task::widget(Plasma::Applet *host, bool createIfNecessary)
     return widget;
 }
 
-bool Task::isEmbeddable(Plasma::Applet *host)
+bool Task::isEmbeddable(SystemTray::Applet *host)
 {
     if (!host) {
         return false;
     }
 
-    return d->widgetsByHost.value(host) || isEmbeddable();
+    return (d->widgetsByHost.value(host) || isEmbeddable()) && host->shownCategories().contains(category());
 }
 
 QHash<Plasma::Applet *, QGraphicsWidget *> Task::widgetsByHost() const
@@ -126,8 +128,20 @@ void Task::widgetDeleted()
     }
 
     if (!wasEmbeddable && isEmbeddable()) {
-        emit changed(this);
+        // we have to delay this call because some Task subclasses have a single widget that
+        // becomes embedabble at this point (e.g. FdoTaskWidget). if the signal is emitted
+        // immediately, another system tray will attempt to immediately embed it, and
+        // part of that process involves removing the item from any previous layouts. now,
+        // if that happens because a system tray is being deleted (removed, app exit, logout, etcS)
+        // then the previous parent layout will be a dangling pointer at this point and
+        // that will not get fixed up until everything is finished... so.. we delay the signal
+        QTimer::singleShot(0, this, SLOT(emitChanged()));
     }
+}
+
+void Task::emitChanged()
+{
+    emit changed(this);
 }
 
 void Task::setHidden(HideStates state)

@@ -59,8 +59,6 @@
 #include <Plasma/Corona>
 #include <Plasma/DataEngine>
 #include <Plasma/Dialog>
-#include <Plasma/Extender>
-#include <Plasma/ExtenderItem>
 #include <Plasma/Theme>
 #include <Plasma/Label>
 
@@ -128,20 +126,20 @@ public:
         return date;
     }
 
-    void createCalendarExtender()
+    void createCalendar()
     {
-        const bool hasExtender = q->extender()->hasItem("calendar");
-
         if (q->config().readEntry("ShowCalendarPopup", true)) {
-            if (!hasExtender) {
-                Plasma::ExtenderItem *eItem = new Plasma::ExtenderItem(q->extender());
-                eItem->setName("calendar");
-                q->initExtenderItem(eItem);
+            if (!calendarWidget) {
+                calendarWidget = new Plasma::Calendar();
+                calendarWidget->setAutomaticUpdateEnabled(false);
+                calendarWidget->setMinimumSize(QSize(230, 220));
             }
         } else {
-            q->extender()->deleteLater();
+            delete calendarWidget;
             calendarWidget = 0;
         }
+
+        q->setGraphicsWidget(calendarWidget);
     }
 
     void setPrettyTimezone()
@@ -280,7 +278,7 @@ void ClockApplet::updateTipContent()
     tzs.append(data);
     bool highlightLocal = false;
 
-    const bool hasEvents = d->calendarWidget->dateHasDetails(localDate);
+    const bool hasEvents = d->calendarWidget ? d->calendarWidget->dateHasDetails(localDate) : false;
     tipData.setMainText(hasEvents ? i18n("Current Time and Events") : i18n("Current Time"));
 
     foreach (const QString &tz, d->selectedTimezones) {
@@ -310,9 +308,7 @@ void ClockApplet::updateTipContent()
 
     // query for custom content
     Plasma::ToolTipContent customContent = toolTipContent();
-    if (customContent.image().isNull()) {
-        tipData.setImage(KIcon(icon()).pixmap(IconSize(KIconLoader::Desktop)));
-    } else {
+    if (!customContent.image().isNull()) {
         tipData.setImage(customContent.image());
     }
 
@@ -434,7 +430,7 @@ void ClockApplet::clockConfigChanged()
 
 void ClockApplet::configChanged()
 {
-    d->createCalendarExtender();
+    d->createCalendar();
 
     if (isUserConfiguring()) {
         configAccepted();
@@ -607,21 +603,6 @@ void ClockApplet::wheelEvent(QGraphicsSceneWheelEvent *event)
     setCurrentTimezone(newTimezone);
     changeEngineTimezone(cur, newTimezone);
     update();
-}
-
-void ClockApplet::initExtenderItem(Plasma::ExtenderItem *item)
-{
-    if (item->name() == "calendar") {
-        if (!d->calendarWidget) {
-            d->calendarWidget = new Plasma::Calendar();
-            d->calendarWidget->setAutomaticUpdateEnabled(false);
-            d->calendarWidget->setMinimumSize(QSize(230, 220));
-        }
-
-        item->setTitle(i18n("Calendar"));
-        item->setIcon("view-pim-calendar");
-        item->setWidget(d->calendarWidget);
-    }
 }
 
 void ClockApplet::init()

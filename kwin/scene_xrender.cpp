@@ -99,8 +99,32 @@ SceneXrender::SceneXrender(Workspace* ws)
         kError(1212) << "No XFixes v3+ extension available";
         return;
     }
+    initXRender(true);
+}
+
+SceneXrender::~SceneXrender()
+{
+    if (!init_ok) {
+        // TODO this probably needs to clean up whatever has been created until the failure
+        m_overlayWindow->destroy();
+        return;
+    }
+    XRenderFreePicture(display(), front);
+    XRenderFreePicture(display(), buffer);
+    buffer = None;
+    m_overlayWindow->destroy();
+    foreach (Window * w, windows)
+    delete w;
+}
+
+void SceneXrender::initXRender(bool createOverlay)
+{
+    init_ok = false;
+    if (front != None)
+        XRenderFreePicture(display(), front);
     KXErrorHandler xerr;
-    if (m_overlayWindow->create()) {
+    bool haveOverlay = createOverlay ? m_overlayWindow->create() : (m_overlayWindow->window() != None);
+    if (haveOverlay) {
         m_overlayWindow->setup(None);
         XWindowAttributes attrs;
         XGetWindowAttributes(display(), m_overlayWindow->window(), &attrs);
@@ -129,21 +153,6 @@ SceneXrender::SceneXrender(Workspace* ws)
     init_ok = true;
 }
 
-SceneXrender::~SceneXrender()
-{
-    if (!init_ok) {
-        // TODO this probably needs to clean up whatever has been created until the failure
-        m_overlayWindow->destroy();
-        return;
-    }
-    XRenderFreePicture(display(), front);
-    XRenderFreePicture(display(), buffer);
-    buffer = None;
-    m_overlayWindow->destroy();
-    foreach (Window * w, windows)
-    delete w;
-}
-
 bool SceneXrender::initFailed() const
 {
     return !init_ok;
@@ -153,6 +162,8 @@ bool SceneXrender::initFailed() const
 // so it is done manually using this buffer,
 void SceneXrender::createBuffer()
 {
+    if (buffer != None)
+        XRenderFreePicture(display(), buffer);
     Pixmap pixmap = XCreatePixmap(display(), rootWindow(), displayWidth(), displayHeight(), DefaultDepth(display(), DefaultScreen(display())));
     buffer = XRenderCreatePicture(display(), pixmap, format, 0, 0);
     XFreePixmap(display(), pixmap);   // The picture owns the pixmap now
@@ -584,7 +595,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         QVector<QRect> rects = transformed_shape.rects();
         for (int i = 0; i < rects.count(); ++i) {
             QRect& r = rects[ i ];
-            r = QRect(qRound(r.x() * xscale), qRound(r.y() * yscale),
+            r.setRect(qRound(r.x() * xscale), qRound(r.y() * yscale),
                       qRound(r.width() * xscale), qRound(r.height() * yscale));
         }
         transformed_shape.setRects(rects.constData(), rects.count());
@@ -594,7 +605,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     PaintClipper pcreg(region);   // clip by the region to paint
     PaintClipper pc(transformed_shape);   // clip by window's shape
 
-    const bool wantShadow = m_shadow && !m_shadow->shadowRegion().isEmpty() && (isOpaque() || !(mask & PAINT_DECORATION_ONLY));
+    const bool wantShadow = m_shadow && !m_shadow->shadowRegion().isEmpty() && isOpaque();
 
     // In order to obtain a pixel perfect rescaling
     // we need to blit the window content togheter with
@@ -707,7 +718,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     for (PaintClipper::Iterator iterator; !iterator.isDone(); iterator.next()) {
 
 #define RENDER_SHADOW_TILE(_TILE_, _RECT_) \
-XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(WindowQuadShadow##_TILE_), \
+XRenderComposite(display(), PictOpOver, m_xrenderShadow->shadowPixmap(SceneXRenderShadow::ShadowElement##_TILE_).x11PictureHandle(), \
                  shadowAlpha, renderTarget, 0, 0, 0, 0, _RECT_.x(), _RECT_.y(), _RECT_.width(), _RECT_.height())
 
         //shadow
@@ -724,6 +735,12 @@ XRenderComposite(display(), PictOpOver, m_xrenderShadow->x11ShadowPictureHandle(
         }
 #undef RENDER_SHADOW_TILE
 
+        // Paint the window contents
+        Picture clientAlpha = opaque ? None : alphaMask(data.opacity);
+        XRenderComposite(display(), clientRenderOp, pic, clientAlpha, renderTarget, cr.x(), cr.y(), 0, 0, dr.x(), dr.y(), dr.width(), dr.height());
+        if (!opaque)
+            transformed_shape = QRegion();
+
 #define RENDER_DECO_PART(_PART_, _RECT_) \
 XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAlpha, renderTarget,\
                  0, 0, 0, 0, _RECT_.x(), _RECT_.y(), _RECT_.width(), _RECT_.height())
@@ -739,14 +756,6 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
         }
 #undef RENDER_DECO_PART
 
-        if (!(mask & PAINT_DECORATION_ONLY)) {
-            // Paint the window contents
-            Picture clientAlpha = opaque ? None : alphaMask(data.opacity);
-            XRenderComposite(display(), clientRenderOp, pic, clientAlpha, renderTarget, cr.x(), cr.y(), 0, 0, dr.x(), dr.y(), dr.width(), dr.height());
-            if (!opaque)
-                transformed_shape = QRegion();
-        }
-
         if (data.brightness < 1.0) {
             // fake brightness change by overlaying black
             XRenderColor col = { 0, 0, 0, 0xffff *(1 - data.brightness) * data.opacity };
@@ -760,7 +769,7 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
             const QRect r = mapToScreen(mask, data, decorationRect);
             XRenderSetPictureTransform(display(), temp_pixmap->x11PictureHandle(), &xform);
             XRenderSetPictureFilter(display(), temp_pixmap->x11PictureHandle(), const_cast<char*>("good"), NULL, 0);
-            XRenderComposite(display(), PictOpOver, temp_pixmap->x11PictureHandle(), alpha, buffer,
+            XRenderComposite(display(), PictOpOver, temp_pixmap->x11PictureHandle(), None, buffer,
                              0, 0, 0, 0, r.x(), r.y(), r.width(), r.height());
             XRenderSetPictureTransform(display(), temp_pixmap->x11PictureHandle(), &identity);
         }
@@ -774,6 +783,12 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
             XRenderChangePicture(display(), pic, CPRepeat, &attr);
         }
     }
+}
+
+void SceneXrender::screenGeometryChanged(const QSize &size)
+{
+    Scene::screenGeometryChanged(size);
+    initXRender(false);
 }
 
 //****************************************
@@ -839,6 +854,7 @@ void SceneXrender::EffectFrame::crossFadeText()
 
 void SceneXrender::EffectFrame::render(QRegion region, double opacity, double frameOpacity)
 {
+    Q_UNUSED(region)
     if (m_effectFrame->geometry().isEmpty()) {
         return; // Nothing to display
     }
@@ -954,30 +970,6 @@ SceneXRenderShadow::~SceneXRenderShadow()
 {
 }
 
-Qt::HANDLE SceneXRenderShadow::x11ShadowPictureHandle(WindowQuadType type)
-{
-    switch (type) {
-    case WindowQuadShadowTopRight:
-        return resizedShadowPixmap(ShadowElementTopRight).x11PictureHandle();
-    case WindowQuadShadowTop:
-        return resizedShadowPixmap(ShadowElementTop).x11PictureHandle();
-    case WindowQuadShadowTopLeft:
-        return resizedShadowPixmap(ShadowElementTopLeft).x11PictureHandle();
-    case WindowQuadShadowLeft:
-        return resizedShadowPixmap(ShadowElementLeft).x11PictureHandle();
-    case WindowQuadShadowBottomLeft:
-        return resizedShadowPixmap(ShadowElementBottomLeft).x11PictureHandle();
-    case WindowQuadShadowBottom:
-        return resizedShadowPixmap(ShadowElementBottom).x11PictureHandle();
-    case WindowQuadShadowBottomRight:
-        return resizedShadowPixmap(ShadowElementBottomRight).x11PictureHandle();
-    case WindowQuadShadowRight:
-        return resizedShadowPixmap(ShadowElementRight).x11PictureHandle();
-    default:
-        return 0;
-    }
-}
-
 void SceneXRenderShadow::layoutShadowRects(QRect& top, QRect& topRight,
                                            QRect& right, QRect& bottomRight,
                                            QRect& bottom, QRect& bottomLeft,
@@ -1019,18 +1011,10 @@ void SceneXRenderShadow::buildQuads()
     QRect stlr, str, strr, srr, sbrr, sbr, sblr, slr;
     layoutShadowRects(str, strr, srr, sbrr, sbr, sblr, slr, stlr);
 
-    m_resizedElements[ShadowElementTop] = shadowPixmap(ShadowElementTop);//.scaled(str.size());
-    m_resizedElements[ShadowElementTopLeft] = shadowPixmap(ShadowElementTopLeft);//.scaled(stlr.size());
-    m_resizedElements[ShadowElementTopRight] = shadowPixmap(ShadowElementTopRight);//.scaled(strr.size());
-    m_resizedElements[ShadowElementLeft] = shadowPixmap(ShadowElementLeft);//.scaled(slr.size());
-    m_resizedElements[ShadowElementRight] = shadowPixmap(ShadowElementRight);//.scaled(srr.size());
-    m_resizedElements[ShadowElementBottom] = shadowPixmap(ShadowElementBottom);//.scaled(sbr.size());
-    m_resizedElements[ShadowElementBottomLeft] = shadowPixmap(ShadowElementBottomLeft);//.scaled(sblr.size());
-    m_resizedElements[ShadowElementBottomRight] = shadowPixmap(ShadowElementBottomRight);//.scaled(sbrr.size());
     XRenderPictureAttributes attr;
     attr.repeat = True;
     for (int i = 0; i < ShadowElementsCount; ++i) {
-        XRenderChangePicture(display(), m_resizedElements[i].x11PictureHandle(), CPRepeat, &attr);
+        XRenderChangePicture(display(), shadowPixmap((Shadow::ShadowElements)i).x11PictureHandle(), CPRepeat, &attr);
     }
 
 }

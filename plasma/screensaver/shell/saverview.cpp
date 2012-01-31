@@ -106,9 +106,18 @@ void SaverView::disableSetupMode()
     }
 }
 
-void SaverView::drawBackground(QPainter * painter, const QRectF & rect)
+void SaverView::drawBackground(QPainter *painter, const QRectF & rect)
 {
+<<<<<<< HEAD
     Plasma::View::drawBackground(painter, rect);
+=======
+    if (PlasmaApp::hasComposite()) {
+        painter->setCompositionMode(QPainter::CompositionMode_Source);
+        painter->fillRect(rect, Qt::transparent);
+    } else {
+        Plasma::View::drawBackground(painter, rect);
+    }
+>>>>>>> master
 }
 
 void SaverView::showWidgetExplorer()
@@ -125,7 +134,6 @@ void SaverView::showWidgetExplorer()
         widgetExplorer->installEventFilter(this);
         widgetExplorer->setContainment(c);
         widgetExplorer->setLocation(Plasma::BottomEdge);
-        widgetExplorer->setIconSize(KIconLoader::SizeHuge);
         widgetExplorer->populateWidgetList();
         widgetExplorer->setMaximumWidth(width());
         widgetExplorer->adjustSize();
@@ -260,18 +268,6 @@ void SaverView::suppressShowTimeout()
 {
     kDebug() << "SaverView::suppressShowTimeout";
     m_suppressShow = false;
-}
-
-void SaverView::keyPressEvent(QKeyEvent *event)
-{
-    /*if (event->key() == Qt::Key_Escape) {
-        hideView();
-        event->accept();
-        return;
-    }*/
-
-    //kDebug() << event->key() << event->spontaneous();
-    Plasma::View::keyPressEvent(event);
 }
 
 void SaverView::setOpacity(qreal opacity)

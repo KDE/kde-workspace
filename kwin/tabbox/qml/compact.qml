@@ -124,6 +124,13 @@ Item {
                     leftMargin: 2 * compactTabBox.textMargin
                 }
             }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    compactListView.currentIndex = index;
+                    compactListView.currentIndexChanged(compactListView.currentIndex);
+                }
+            }
         }
     }
     ListView {
@@ -159,12 +166,6 @@ Item {
             // icon size or two text elements and margins and hoverItem margins
             return Math.max(16, height + hoverItem.margins.top + hoverItem.margins.bottom);
         }
-        /**
-         * Called from C++ to get the index at a mouse pos.
-         **/
-        function indexAtMousePos(pos) {
-            return compactListView.indexAt(pos.x, pos.y);
-        }
         signal currentIndexChanged(int index)
         id: compactListView
         objectName: "listView"
@@ -189,12 +190,5 @@ Item {
             width: compactListView.width
         }
         highlightMoveDuration: 250
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                compactListView.currentIndex = compactListView.indexAt(mouse.x, mouse.y);
-                compactListView.currentIndexChanged(compactListView.currentIndex);
-            }
-        }
     }
 }

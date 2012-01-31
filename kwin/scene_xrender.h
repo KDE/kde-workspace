@@ -49,6 +49,7 @@ public:
     virtual void paint(QRegion damage, ToplevelList windows);
     virtual void windowAdded(Toplevel*);
     virtual void windowDeleted(Deleted*);
+    virtual void screenGeometryChanged(const QSize &size);
     Picture bufferPicture();
 protected:
     virtual void paintBackground(QRegion region);
@@ -61,6 +62,7 @@ private:
     void paintTransformedScreen(int mask);
     void createBuffer();
     void flushBuffer(int mask, QRegion damage);
+    void initXRender(bool createOverlay);
     XRenderPictFormat* format;
     Picture front;
     static Picture buffer;
@@ -150,26 +152,29 @@ class SceneXRenderShadow
 {
 public:
     SceneXRenderShadow(Toplevel *toplevel);
+    using Shadow::ShadowElements;
+    using Shadow::ShadowElementTop;
+    using Shadow::ShadowElementTopRight;
+    using Shadow::ShadowElementRight;
+    using Shadow::ShadowElementBottomRight;
+    using Shadow::ShadowElementBottom;
+    using Shadow::ShadowElementBottomLeft;
+    using Shadow::ShadowElementLeft;
+    using Shadow::ShadowElementTopLeft;
+    using Shadow::ShadowElementsCount;
+    using Shadow::shadowPixmap;
     virtual ~SceneXRenderShadow();
 
-    Qt::HANDLE x11ShadowPictureHandle(WindowQuadType);
     void layoutShadowRects(QRect& top, QRect& topRight,
                            QRect& right, QRect& bottomRight,
                            QRect& bottom, QRect& bottomLeft,
                            QRect& Left, QRect& topLeft);
-
-    const QPixmap &resizedShadowPixmap(ShadowElements element) const {
-        return m_resizedElements[element];
-    };
 
 protected:
     virtual void buildQuads();
     virtual bool prepareBackend() {
         return true;
     };
-
-private:
-    QPixmap m_resizedElements[ShadowElementsCount];
 };
 
 } // namespace

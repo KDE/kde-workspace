@@ -19,7 +19,7 @@
 
 import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
+import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: devicenotifier
@@ -47,15 +47,37 @@ Item {
         property string last
         onSourceAdded: {
             last = source;
+            processLastDevice()
         }
+
+        onSourceRemoved: {
+            if (expandedDevice == source) {
+                notifierDialog.currentExpanded = -1;
+                expandedDevice = "";
+            }
+        }
+
         onDataChanged: {
+            processLastDevice()
+        }
+
+        function processLastDevice() {
             if (last != "") {
                 if (devicesType == "all" ||
                     (devicesType == "removable" && data[last]["Removable"] == true) ||
                     (devicesType == "nonRemovable" && data[last]["Removable"] == false)) {
                     expandDevice(last)
+                    last = "";
                 }
             }
+        }
+    }
+
+    function popupEventSlot(popped) {
+    if (!popped) {
+        expandedDevice = "";
+        notifierDialog.currentExpanded = -1;
+        notifierDialog.currentIndex = -1;
         }
     }
 
@@ -78,6 +100,7 @@ Item {
 
     Component.onCompleted: {
         plasmoid.addEventListener ('ConfigChanged', configChanged);
+        plasmoid.popupEvent.connect(popupEventSlot);
     }
 
     function configChanged() {
@@ -99,7 +122,9 @@ Item {
 
     function expandDevice(udi)
     {
-        expandedDevice = udi
+        if (hpSource.data[udi]["actions"].length > 1) {
+            expandedDevice = udi
+        }
         plasmoid.setPopupIconByName("preferences-desktop-notification")
         plasmoid.status = "ActiveStatus"
         plasmoid.showPopup(7500)
@@ -113,7 +138,7 @@ Item {
     }
 
 
-    Text {
+    PlasmaComponents.Label {
         id: header
         text: filterModel.count>0 ? i18n("Available Devices") : i18n("No Devices Available")
         anchors { top: parent.top; topMargin: 3; left: parent.left; right: parent.right }
@@ -154,7 +179,7 @@ Item {
             }
             filterRole: "Removable"
             filterRegExp: "true"
-            sortRole: "Removable"
+            sortRole: "Timestamp"
             sortOrder: Qt.DescendingOrder
         }
         onCountChanged: {
@@ -183,7 +208,7 @@ Item {
                     }
                     height: lineSvg.elementSize("horizontal-line").height
                 }
-                Text {
+                PlasmaComponents.Label {
                     x: 8
                     y: 8
                     opacity: 0.6
@@ -197,7 +222,7 @@ Item {
         Component.onCompleted: currentIndex=-1
     }
 
-    Components.ScrollBar {
+    PlasmaComponents.ScrollBar {
         id: scrollBar
         flickableItem: notifierDialog
         anchors {
@@ -226,22 +251,19 @@ Item {
                 return used*100/size;
             }
             leftActionIcon: {
-                if (emblemIcon == "emblem-mounted") {
+                if (mounted) {
                     return QIcon("media-eject");
-                } else if (emblemIcon == "emblem-unmounted") {
+                } else {
                     return QIcon("emblem-mounted");
                 }
-                else return QIcon("");
             }
-            mounted: emblemIcon=="emblem-mounted"
+            mounted: model["Accessible"]
 
             onLeftActionTriggered: {
                 operationName = mounted ? "unmount" : "mount";
                 service = sdSource.serviceForSource(udi);
                 operation = service.operationDescription(operationName);
                 service.startOperationCall(operation);
-                plasmoid.setPopupIconByName("dialog-ok")
-                popupIconTimer.restart()
             }
             property bool isLast: (expandedDevice == udi)
             onIsLastChanged: {
@@ -257,7 +279,6 @@ Item {
         id: deviceHighlighter
 
         PlasmaCore.FrameSvgItem {
-            width: devicenotifier.width
             imagePath: "widgets/viewitem"
             prefix: "hover"
             opacity: 0

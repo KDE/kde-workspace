@@ -98,14 +98,14 @@ void AnimationEffect::animate( EffectWindow *w, Attribute a, uint meta, int ms, 
 
     } else if (a == Position) {
         QRect area = effects->clientArea(ScreenArea , w);
-        QPoint pt = w->geometry().topLeft();
+        QPoint pt = w->geometry().bottomRight(); // cannot be < 0 ;-)
         if (from.isValid()) {
             RELATIVE_XY(Source);
             from.set( relative[0] ? area.x() + from[0] * area.width() : from[0],
                       relative[1] ? area.y() + from[1] * area.height() : from[1] );
         } else {
             from.set(pt.x(), pt.y());
-            setMetaData( SourceAnchor, AnimationEffect::Top|AnimationEffect::Left, meta );
+            setMetaData( SourceAnchor, AnimationEffect::Bottom|AnimationEffect::Right, meta );
         }
 
         if (to.isValid()) {
@@ -114,7 +114,7 @@ void AnimationEffect::animate( EffectWindow *w, Attribute a, uint meta, int ms, 
                     relative[1] ? area.y() + to[1] * area.height() : to[1] );
         } else {
             to.set(pt.x(), pt.y());
-            setMetaData( TargetAnchor, AnimationEffect::Top|AnimationEffect::Left, meta );
+            setMetaData( TargetAnchor, AnimationEffect::Bottom|AnimationEffect::Right, meta );
         }
 
 
@@ -191,8 +191,10 @@ void AnimationEffect::prePaintScreen( ScreenPrePaintData& data, int time )
                 d->m_animated = true;
                 ++anim;
             }
-            else
+            else {
+                animationEnded(entry.key(), anim->attribute);
                 anim = entry->erase(anim);
+            }
         }
         if (entry->isEmpty()) {
             const int i = d->m_zombies.indexOf(entry.key());
@@ -370,7 +372,7 @@ void AnimationEffect::paintWindow( EffectWindow* w, int mask, QRegion region, Wi
 
                     if (tAnchor != sAnchor) {
                         QPointF pt2(xCoord(geo, tAnchor), yCoord(geo, tAnchor));
-                        pt += prgrs*(pt2 - pt);
+                        pt += static_cast<qreal>(prgrs)*(pt2 - pt);
                     }
 
                     rot.xRotationPoint = pt.x();
