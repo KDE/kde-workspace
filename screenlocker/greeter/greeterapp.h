@@ -43,6 +43,7 @@ protected:
 private Q_SLOTS:
     void viewStatusChanged(const QDeclarativeView::Status &status);
     void prepareShow();
+    void resetRequestIgnore();
     void suspendToRam();
     void suspendToDisk();
     void shutdown();
@@ -53,8 +54,10 @@ private:
 
     QString m_mainQmlPath;
     QList<QDeclarativeView*> m_views;
+    QTimer *m_resetRequestIgnoreTimer;
     bool m_testing;
     bool m_capsLocked;
+    bool m_ignoreRequests;
 };
 } // namespace
 

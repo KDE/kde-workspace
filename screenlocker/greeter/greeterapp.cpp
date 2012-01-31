@@ -53,8 +53,10 @@ static const char *DEFAULT_MAIN_QML = "kscreenlocker/lockscreen.qml";
 // App
 UnlockApp::UnlockApp()
     : KApplication()
+    , m_resetRequestIgnoreTimer(new QTimer(this))
     , m_testing(false)
     , m_capsLocked(false)
+    , m_ignoreRequests(false)
 {
     initialize();
     QTimer::singleShot(0, this, SLOT(prepareShow()));
@@ -67,6 +69,12 @@ UnlockApp::~UnlockApp()
 
 void UnlockApp::initialize()
 {
+    // set up the request ignore timeout, so that multiple requests to sleep/suspend/shutdown
+    // are not processed in quick (and confusing) succession)
+    m_resetRequestIgnoreTimer->setSingleShot(true);
+    m_resetRequestIgnoreTimer->setInterval(2000);
+    connect(m_resetRequestIgnoreTimer, SIGNAL(timeout()), this, SLOT(resetRequestIgnore()));
+
     // disable DrKonqi as the crash dialog blocks the restart of the locker
     KCrash::setDrKonqiEnabled(false);
 
@@ -158,8 +166,20 @@ void UnlockApp::prepareShow()
     capsLocked();
 }
 
+void UnlockApp::resetRequestIgnore()
+{
+    m_ignoreRequests = false;
+}
+
 void UnlockApp::suspendToRam()
 {
+    if (m_ignoreRequests) {
+        return;
+    }
+
+    m_ignoreRequests = true;
+    m_resetRequestIgnoreTimer->start();
+
     QDBusInterface iface("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement",
             "org.kde.Solid.PowerManagement");
@@ -169,6 +189,13 @@ void UnlockApp::suspendToRam()
 
 void UnlockApp::suspendToDisk()
 {
+    if (m_ignoreRequests) {
+        return;
+    }
+
+    m_ignoreRequests = true;
+    m_resetRequestIgnoreTimer->start();
+
     QDBusInterface iface("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement",
             "org.kde.Solid.PowerManagement");
@@ -177,6 +204,13 @@ void UnlockApp::suspendToDisk()
 
 void UnlockApp::shutdown()
 {
+    if (m_ignoreRequests) {
+        return;
+    }
+
+    m_ignoreRequests = true;
+    m_resetRequestIgnoreTimer->start();
+
     const KWorkSpace::ShutdownConfirm confirm = KWorkSpace::ShutdownConfirmNo;
     const KWorkSpace::ShutdownType type = KWorkSpace::ShutdownTypeHalt;
 
