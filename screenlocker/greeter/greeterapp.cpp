@@ -48,6 +48,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ScreenLocker
 {
 
+static const char *DEFAULT_MAIN_QML = "kscreenlocker/lockscreen.qml";
+
 // App
 UnlockApp::UnlockApp()
     : KApplication()
@@ -73,26 +75,31 @@ void UnlockApp::initialize()
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
 
-    for (int i=0; i<Kephal::Screens::self()->screens().count(); ++i) {
+    m_mainQmlPath = KStandardDirs::locate("data", KScreenSaverSettings::greeterQML());
+    if (m_mainQmlPath.isEmpty()) {
+        m_mainQmlPath = KStandardDirs::locate("data", DEFAULT_MAIN_QML);
+    }
+
+    for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
 
         // create the view
         QDeclarativeView *view = new QDeclarativeView();
+        connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
+                this, SLOT(viewStatusChanged(QDeclarativeView::Status)));
         view->setWindowFlags(Qt::X11BypassWindowManagerHint);
         view->setFrameStyle(QFrame::NoFrame);
+
         // engine stuff
-        foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
+        foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
             view->engine()->addImportPath(importPath);
         }
+
         KDeclarative kdeclarative;
         kdeclarative.setDeclarativeEngine(view->engine());
         kdeclarative.initialize();
         kdeclarative.setupBindings();
 
-        QString path = KStandardDirs::locate("data", KScreenSaverSettings::greeterQML());
-        if (path.isEmpty()) {
-            path = KStandardDirs::locate("data", "kscreenlocker/lockscreen.qml");
-        }
-        view->setSource(QUrl::fromLocalFile(path));
+        view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
@@ -117,7 +124,19 @@ void UnlockApp::initialize()
 
         m_views << view;
     }
+
     installEventFilter(this);
+}
+
+void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
+{
+    // on error, if we did not load the default qml, try to do so now.
+    if (status == QDeclarativeView::Error && !m_mainQmlPath.endsWith(DEFAULT_MAIN_QML)) {
+        if (QDeclarativeView *view = qobject_cast<QDeclarativeView *>(sender())) {
+            m_mainQmlPath = KStandardDirs::locate("data", DEFAULT_MAIN_QML);
+            view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
+        }
+    }
 }
 
 void UnlockApp::prepareShow()
@@ -125,7 +144,7 @@ void UnlockApp::prepareShow()
     // mark as our window
     Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
 
-    for (int i=0; i<Kephal::Screens::self()->screens().count(); ++i) {
+    for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
         if (i == m_views.size()) {
             kError() << "Views and screens not in sync";
             return;

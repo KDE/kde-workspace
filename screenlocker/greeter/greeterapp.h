@@ -22,8 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <KDE/KApplication>
 
-// forward declarations
-class QDeclarativeView;
+#include <QDeclarativeView>
 
 namespace ScreenLocker
 {
@@ -42,6 +41,7 @@ protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
 
 private Q_SLOTS:
+    void viewStatusChanged(const QDeclarativeView::Status &status);
     void prepareShow();
     void suspendToRam();
     void suspendToDisk();
@@ -50,6 +50,8 @@ private Q_SLOTS:
 private:
     void initialize();
     void capsLocked();
+
+    QString m_mainQmlPath;
     QList<QDeclarativeView*> m_views;
     bool m_testing;
     bool m_capsLocked;
