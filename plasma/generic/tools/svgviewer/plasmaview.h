@@ -34,8 +34,7 @@ public:
     explicit PlasmaView(QWidget *parent = 0);
     ~PlasmaView();
 
-    void addApplet(const QString &name, const QString& containment,
-                   const QString& wallpaper, const QVariantList &args = QVariantList());
+    void addApplet(const QString &name, const QString& containment, const QVariantList &args = QVariantList());
 
 private Q_SLOTS:
     void sceneRectChanged(const QRectF &rect);

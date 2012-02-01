@@ -57,6 +57,8 @@ PlasmaView::PlasmaView(QWidget *parent)
 //    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   //  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+    addApplet("pager", "desktop", QVariantList());
 }
 
 PlasmaView::~PlasmaView()
@@ -65,7 +67,7 @@ PlasmaView::~PlasmaView()
 }
 
 void PlasmaView::addApplet(const QString &name, const QString &containment,
-                         const QString& wallpaper, const QVariantList &args)
+                         const QVariantList &args)
 {
     kDebug() << "adding applet" << name << "in" << containment;
     if (!m_containment || m_containment->pluginName() != containment) {
@@ -74,9 +76,9 @@ void PlasmaView::addApplet(const QString &name, const QString &containment,
         connect(m_containment, SIGNAL(appletRemoved(Plasma::Applet*)), this, SLOT(appletRemoved(Plasma::Applet*)));
     }
 
-    if (!wallpaper.isEmpty()) {
-        m_containment->setWallpaper(wallpaper);
-    }
+//    if (!wallpaper.isEmpty()) {
+//        m_containment->setWallpaper(wallpaper);
+//    }
 
     m_containment->setFormFactor(m_formfactor);
     m_containment->setLocation(m_location);
