@@ -32,15 +32,17 @@
 #include <Plasma/ContainmentActions>
 #include <Plasma/Package>
 #include <Plasma/Wallpaper>
+#include <plasma/theme.h>
 
 using namespace Plasma;
 
 PlasmaView::PlasmaView(QWidget *parent)
-    : QGraphicsView(parent),
-      m_formfactor(Plasma::Planar),
-      m_location(Plasma::Desktop),
-      m_containment(0),
-      m_applet(0)
+    : QGraphicsView(parent)
+    , m_formfactor(Plasma::Planar)
+    , m_location(Plasma::Desktop)
+    , m_containment(0)
+    , m_pagerApplet(0)
+    , m_tasksApplet(0)
 {
 //    setFrameStyle(QFrame::NoFrame);
 
@@ -58,63 +60,25 @@ PlasmaView::PlasmaView(QWidget *parent)
   //  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-    addApplet("panel", "desktop", QVariantList());
-
-    m_containment = m_corona.addContainment(containment);
+    m_containment = m_corona.addContainment("desktop");
     connect(m_containment, SIGNAL(appletRemoved(Plasma::Applet*)), this, SLOT(appletRemoved(Plasma::Applet*)));
 
     m_containment->setFormFactor(m_formfactor);
     m_containment->setLocation(m_location);
     setScene(m_containment->scene());
+
+    m_containment->addApplet("pager");
+    m_containment->addApplet("tasks");
+
+    m_containment->setMaximumSize(1000,1000);
+    m_containment->resize(1000, 1000);
+    resize(1000, 1000);
+    setSceneRect(0, 0, 1000, 1000);
 }
 
 PlasmaView::~PlasmaView()
 {
-    storeCurrentApplet();
 }
-
-void PlasmaView::addApplet(const QString &name, const QString &containment,
-                         const QVariantList &args)
-{
-    kDebug() << "adding applet" << name << "in" << containment;
-
-//    if (!wallpaper.isEmpty()) {
-//        m_containment->setWallpaper(wallpaper);
-//    }
-
-
-    if (m_applet) {
-        // we already have an applet!
-        storeCurrentApplet();
-        disconnect(m_applet);
-        m_applet->destroy();
-    }
-
-    m_applet = m_containment->addApplet(name, args, QRectF(0, 0, -1, -1));
-
-    if (!m_applet) {
-        return;
-    }
-
-    if (hasStorageGroupFor(m_applet)) {
-        KConfigGroup cg = m_applet->config();
-        KConfigGroup storage = storageGroup(m_applet);
-        cg.deleteGroup();
-        storage.copyTo(&cg);
-        m_applet->configChanged();
-    }
-
-    m_containment->setMaximumSize(1000,1000);
-    m_containment->resize(1000, 1000);
-//    setSceneRect(m_applet->sceneBoundingRect());
-setSceneRect(0, 0, 1000, 1000);
-    m_applet->setFlag(QGraphicsItem::ItemIsMovable, false);
-    resize(1000, 1000);
-
-    connect(m_applet, SIGNAL(appletTransformedItself()), this, SLOT(appletTransformedItself()));
-    kDebug() << "connecting ----------------";
-}
-
 
 //void PlasmaView::resizeEvent(QResizeEvent *event)
 //{
@@ -171,38 +135,4 @@ setSceneRect(0, 0, 1000, 1000);
 //    setSceneRect(m_applet->sceneBoundingRect());
 //}
 
-void PlasmaView::sceneRectChanged(const QRectF &rect)
-{
-    Q_UNUSED(rect)
-    if (m_applet) {
-        setSceneRect(m_applet->sceneBoundingRect());
-    }
-}
-
-bool PlasmaView::hasStorageGroupFor(Plasma::Applet *applet) const
-{
-    KConfigGroup stored = KConfigGroup(KGlobal::config(), "StoredApplets");
-    return stored.groupList().contains(applet->pluginName());
-}
-
-KConfigGroup PlasmaView::storageGroup(Plasma::Applet *applet) const
-{
-    KConfigGroup stored = KConfigGroup(KGlobal::config(), "StoredApplets");
-    return KConfigGroup(&stored, applet->pluginName());
-}
-
-void PlasmaView::storeCurrentApplet()
-{
-    if (m_applet) {
-        KConfigGroup cg;
-        m_applet->save(cg);
-        cg = m_applet->config();
-        KConfigGroup storage = storageGroup(m_applet);
-        storage.deleteGroup();
-        cg.copyTo(&storage);
-        KGlobal::config()->sync();
-    }
-}
-
 #include "plasmaview.moc"
-

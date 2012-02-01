@@ -34,21 +34,15 @@ public:
     explicit PlasmaView(QWidget *parent = 0);
     ~PlasmaView();
 
-    void addApplet(const QString &name, const QString& containment, const QVariantList &args = QVariantList());
-
-private Q_SLOTS:
-    void sceneRectChanged(const QRectF &rect);
-
 private:
-    KConfigGroup storageGroup(Plasma::Applet *applet) const;
-    bool hasStorageGroupFor(Plasma::Applet *applet) const;
-    void storeCurrentApplet();
-
-    Plasma::Corona m_corona;
     Plasma::FormFactor m_formfactor;
     Plasma::Location m_location;
+
+    Plasma::Corona m_corona;
     Plasma::Containment *m_containment;
-    Plasma::Applet *m_applet;
+
+    Plasma::Applet *m_pagerApplet;
+    Plasma::Applet *m_tasksApplet;
 };
 
 #endif

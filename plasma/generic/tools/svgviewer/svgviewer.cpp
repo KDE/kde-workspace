@@ -119,6 +119,8 @@ void SvgViewer::loadTheme(const QString& themeName)
     m_currentTheme->setThemeName(themeName);
     m_currentSvg->setTheme(m_currentTheme);
 
+    Plasma::Theme::defaultTheme()->setThemeName(themeName);
+
     // wipe model prepare to reload
     m_dataModel->clear();
     m_dataModel->setColumnCount(1);
