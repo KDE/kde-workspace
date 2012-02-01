@@ -1,6 +1,7 @@
 set(plasmasvgviewer_SRCS
     svgviewer.cpp
     main.cpp
+    plasmaview.cpp
 )
 
 kde4_add_ui_files(plasmasvgviewer_SRCS svgviewer.ui)

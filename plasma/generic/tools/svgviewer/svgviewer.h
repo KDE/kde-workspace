@@ -22,6 +22,9 @@
 
 #include "ui_svgviewer.h"
 
+//internal
+class PlasmaView;
+
 class QLabel;
 class QStandardItemModel;
 class QStandardItem;
@@ -62,6 +65,8 @@ private:
     // a label that contains the pixmap of the
     // current svg
     QLabel* m_svgPreviewImage;
+
+    PlasmaView *m_plasmaView;
 };
 
 #endif

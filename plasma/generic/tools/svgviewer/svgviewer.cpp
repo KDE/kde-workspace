@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include "svgviewer.h"
+#include "plasmaview.h"
 
 #include <QApplication>
 #include <QDir>
@@ -42,6 +43,7 @@ SvgViewer::SvgViewer(QWidget* parent)
     , m_currentTheme(0)
     , m_currentSvg(0)
     , m_svgPreviewImage(0)
+    , m_plasmaView(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
 
@@ -80,6 +82,8 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     // find all theme names we know, populate combobox
     m_themeSelector->addItems(m_themeMap.keys());
+
+    m_plasmaView = new PlasmaView(m_shellContainer);
 
 //    connect(m_data, SIGNAL(customContextMenuRequested(QPoint)),
 //            this, SLOT(showDataContextMenu(QPoint)));
