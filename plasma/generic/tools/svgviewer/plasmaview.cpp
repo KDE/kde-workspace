@@ -38,7 +38,7 @@ using namespace Plasma;
 PlasmaView::PlasmaView(QWidget *parent)
     : QGraphicsView(parent),
       m_formfactor(Plasma::Planar),
-      m_location(Plasma::Floating),
+      m_location(Plasma::Desktop),
       m_containment(0),
       m_applet(0)
 {
@@ -58,7 +58,14 @@ PlasmaView::PlasmaView(QWidget *parent)
   //  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-    addApplet("pager", "desktop", QVariantList());
+    addApplet("panel", "desktop", QVariantList());
+
+    m_containment = m_corona.addContainment(containment);
+    connect(m_containment, SIGNAL(appletRemoved(Plasma::Applet*)), this, SLOT(appletRemoved(Plasma::Applet*)));
+
+    m_containment->setFormFactor(m_formfactor);
+    m_containment->setLocation(m_location);
+    setScene(m_containment->scene());
 }
 
 PlasmaView::~PlasmaView()
@@ -70,28 +77,11 @@ void PlasmaView::addApplet(const QString &name, const QString &containment,
                          const QVariantList &args)
 {
     kDebug() << "adding applet" << name << "in" << containment;
-    if (!m_containment || m_containment->pluginName() != containment) {
-        delete m_containment;
-        m_containment = m_corona.addContainment(containment);
-        connect(m_containment, SIGNAL(appletRemoved(Plasma::Applet*)), this, SLOT(appletRemoved(Plasma::Applet*)));
-    }
 
 //    if (!wallpaper.isEmpty()) {
 //        m_containment->setWallpaper(wallpaper);
 //    }
 
-    m_containment->setFormFactor(m_formfactor);
-    m_containment->setLocation(m_location);
-    m_containment->resize(size());
-    setScene(m_containment->scene());
-
-    if (name.startsWith("plasma:") || name.startsWith("zeroconf:")) {
-        kDebug() << "accessing remote: " << name;
-        AccessManager::self()->accessRemoteApplet(KUrl(name));
-        connect(AccessManager::self(), SIGNAL(finished(Plasma::AccessAppletJob*)),
-                this, SLOT(plasmoidAccessFinished(Plasma::AccessAppletJob*)));
-        return;
-    }
 
     if (m_applet) {
         // we already have an applet!
@@ -100,22 +90,7 @@ void PlasmaView::addApplet(const QString &name, const QString &containment,
         m_applet->destroy();
     }
 
-    QFileInfo info(name);
-    if (!info.isAbsolute()) {
-        info = QFileInfo(QDir::currentPath() + "/" + name);
-    }
-
-    if (info.exists()) {
-        m_applet = Applet::loadPlasmoid(info.absoluteFilePath());
-    }
-
-    if (m_applet) {
-        m_containment->addApplet(m_applet, QPointF(-1, -1), false);
-    } else if (name.isEmpty()) {
-        return;
-    } else {
-        m_applet = m_containment->addApplet(name, args, QRectF(0, 0, -1, -1));
-    }
+    m_applet = m_containment->addApplet(name, args, QRectF(0, 0, -1, -1));
 
     if (!m_applet) {
         return;
@@ -129,11 +104,13 @@ void PlasmaView::addApplet(const QString &name, const QString &containment,
         m_applet->configChanged();
     }
 
-    setSceneRect(m_applet->sceneBoundingRect());
+    m_containment->setMaximumSize(1000,1000);
+    m_containment->resize(1000, 1000);
+//    setSceneRect(m_applet->sceneBoundingRect());
+setSceneRect(0, 0, 1000, 1000);
     m_applet->setFlag(QGraphicsItem::ItemIsMovable, false);
-    setWindowTitle(m_applet->name());
-    setWindowIcon(SmallIcon(m_applet->icon()));
-    resize(m_applet->size().toSize());
+    resize(1000, 1000);
+
     connect(m_applet, SIGNAL(appletTransformedItself()), this, SLOT(appletTransformedItself()));
     kDebug() << "connecting ----------------";
 }
