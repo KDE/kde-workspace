@@ -47,6 +47,11 @@ private:
 
     Plasma::Applet *m_pagerApplet;
     Plasma::Applet *m_tasksApplet;
+    Plasma::Applet *m_clockApplet;
+    Plasma::Applet *m_smApplet;
+    Plasma::Applet *m_systrayApplet;
+    Plasma::Applet *m_kickoffApplet;
+    Plasma::Applet *m_calendarApplet;
 };
 
 #endif

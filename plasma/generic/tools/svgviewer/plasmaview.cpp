@@ -43,6 +43,11 @@ PlasmaView::PlasmaView(QWidget *parent)
     , m_containment(0)
     , m_pagerApplet(0)
     , m_tasksApplet(0)
+    , m_clockApplet(0)
+    , m_smApplet(0)
+    , m_systrayApplet(0)
+    , m_kickoffApplet(0)
+    , m_calendarApplet(0)
 {
 //    setFrameStyle(QFrame::NoFrame);
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(cleanup()));
@@ -66,15 +71,26 @@ PlasmaView::PlasmaView(QWidget *parent)
     m_containment->setLocation(m_location);
     setScene(m_containment->scene());
 
-    m_containment->addApplet("pager");
-    m_containment->addApplet("tasks");
-
     m_containment->setMaximumSize(1300,1000);
 //    m_containment->resize(size());
     //HACK fucking sizes..
     m_containment->resize(1300, 1000);
     resize(1300, 1000);
     setSceneRect(0, 0, 1300, 1000);
+
+    m_pagerApplet = m_containment->addApplet("pager");
+    m_clockApplet = m_containment->addApplet("clock");
+    m_systrayApplet = m_containment->addApplet("systemtray");
+    m_kickoffApplet = m_containment->addApplet("launcher");
+
+    //FIXME: unused, the calendar applet is broken...
+    // it resizes itself after containment already fixes it
+    // m_calendarApplet = m_containment->addApplet("calendar");
+
+    m_tasksApplet = m_containment->addApplet("tasks");
+
+    //TODO: enable widgetexplorer. i made us link to plasmagenericshell.
+    // look at code from netbook shell to see how it's done, in plasmaapp.cpp
 }
 
 PlasmaView::~PlasmaView()

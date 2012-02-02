@@ -6,6 +6,6 @@ set(plasmasvgviewer_SRCS
 
 kde4_add_executable(plasmasvgviewer ${plasmasvgviewer_SRCS})
 
-target_link_libraries(plasmasvgviewer ${KDE4_PLASMA_LIBS} ${KDE4_KIO_LIBS})
+target_link_libraries(plasmasvgviewer ${KDE4_PLASMA_LIBS} plasmagenericshell ${KDE4_KIO_LIBS})
 
 install(TARGETS plasmasvgviewer ${INSTALL_TARGETS_DEFAULT_ARGS})
