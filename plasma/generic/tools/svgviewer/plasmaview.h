@@ -34,7 +34,11 @@ public:
     explicit PlasmaView(QWidget *parent = 0);
     ~PlasmaView();
 
+private Q_SLOTS:
+    void cleanup();
+
 private:
+
     Plasma::FormFactor m_formfactor;
     Plasma::Location m_location;
 

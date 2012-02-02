@@ -114,6 +114,8 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
+//    connect(qApp,
+
     //TODO: connect to a signal if themes are changed?
     reloadThemeList();
 

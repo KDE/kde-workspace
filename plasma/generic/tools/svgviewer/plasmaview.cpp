@@ -45,6 +45,7 @@ PlasmaView::PlasmaView(QWidget *parent)
     , m_tasksApplet(0)
 {
 //    setFrameStyle(QFrame::NoFrame);
+    connect(qApp, SIGNAL(aboutToQuit()), SLOT(cleanup()));
 
     Plasma::ContainmentActionsPluginsConfig containmentActionPlugins;
     containmentActionPlugins.addPlugin(Qt::NoModifier, Qt::RightButton, "contextmenu");
@@ -67,7 +68,6 @@ PlasmaView::PlasmaView(QWidget *parent)
 
     m_containment->addApplet("pager");
     m_containment->addApplet("tasks");
-
 //    m_containment->setMaximumSize(1000,1000);
     m_containment->resize(1000, 1000);
     resize(1000, 1000);
@@ -76,6 +76,12 @@ PlasmaView::PlasmaView(QWidget *parent)
 
 PlasmaView::~PlasmaView()
 {
+}
+
+void PlasmaView::cleanup()
+{
+    delete m_containment;
+    m_containment = 0;
 }
 
 //void PlasmaView::resizeEvent(QResizeEvent *event)
