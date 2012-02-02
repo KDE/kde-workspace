@@ -1,5 +1,4 @@
 /*****************************************************************************
- *  This file is part of the KDE libraries                                    *
  *  Copyright (C) 2012 by Shaun Reich <shaun.reich@kdemail.net>               *
  *                                                                            *
  *  This library is free software; you can redistribute it and/or modify      *
@@ -104,7 +103,7 @@ void SvgViewer::reloadThemeList()
 
     const KPluginInfo::List& infoList = Plasma::Theme::listThemeInfo();
     foreach(const KPluginInfo& info, infoList) {
-        m_themeMap.insert(info.name(), info);
+        m_themeMap.insert(info.pluginName(), info);
         kDebug() << "added theme name and kplugininfo to hash: " << info.name();
     }
 
@@ -129,7 +128,7 @@ void SvgViewer::loadTheme(const QString& themeName)
     headers << i18n("SVG Elements");
     m_dataModel->setHorizontalHeaderLabels(headers);
 
-    QString filePath = m_themeMap.value(themeName).entryPath();
+    QString filePath = themeName;
 
     kDebug() << "loaded theme has entry path: " << filePath;
 

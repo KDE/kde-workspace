@@ -1,5 +1,4 @@
 /*****************************************************************************
- *  This file is part of the KDE libraries                                    *
  *  Copyright (C) 2012 by Shaun Reich <shaun.reich@kdemail.net>               *
  *                                                                            *
  *  This library is free software; you can redistribute it and/or modify      *
