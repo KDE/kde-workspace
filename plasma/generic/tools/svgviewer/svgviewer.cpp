@@ -58,7 +58,7 @@ SvgViewer::SvgViewer(QWidget* parent)
     , m_plasmaView(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
-
+    setWindowState(Qt::WindowMaximized);
     QWidget* mainWidget = new QWidget(this);
     setMainWidget(mainWidget);
 
