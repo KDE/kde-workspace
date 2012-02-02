@@ -114,15 +114,17 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
-//    connect(qApp,
-
     //TODO: connect to a signal if themes are changed?
     reloadThemeList();
 
     // find all theme names we know, populate combobox
     m_themeSelector->addItems(m_themeMap.keys());
 
+//    m_shellContainer->resize(size());
     m_plasmaView = new PlasmaView(m_shellContainer);
+    // HACK another sizing one...size() of anything returns something small
+    // for some reason. maybe because it's a kdialog? i don't know..
+    m_plasmaView->resize(1300,1000);
 
 //    connect(m_data, SIGNAL(customContextMenuRequested(QPoint)),
 //            this, SLOT(showDataContextMenu(QPoint)));

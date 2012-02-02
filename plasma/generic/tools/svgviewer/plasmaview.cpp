@@ -68,10 +68,13 @@ PlasmaView::PlasmaView(QWidget *parent)
 
     m_containment->addApplet("pager");
     m_containment->addApplet("tasks");
-//    m_containment->setMaximumSize(1000,1000);
-    m_containment->resize(1000, 1000);
-    resize(1000, 1000);
-    setSceneRect(0, 0, 1000, 1000);
+
+    m_containment->setMaximumSize(1300,1000);
+//    m_containment->resize(size());
+    //HACK fucking sizes..
+    m_containment->resize(1300, 1000);
+    resize(1300, 1000);
+    setSceneRect(0, 0, 1300, 1000);
 }
 
 PlasmaView::~PlasmaView()
