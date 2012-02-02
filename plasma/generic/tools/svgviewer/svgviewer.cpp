@@ -76,8 +76,8 @@ SvgViewer::SvgViewer(QWidget* parent)
     leftLayout->addWidget(m_svgFilesTree);
 
     QHBoxLayout *mainLayout = new QHBoxLayout();
-    mainLayout->addLayout(leftLayout);
-    mainLayout->addWidget(m_tabWidget);
+    mainLayout->addLayout(leftLayout, 0);
+    mainLayout->addWidget(m_tabWidget, 1);
 
     m_shellContainer = new QWidget(this);
     m_scrollArea = new QScrollArea(this);
