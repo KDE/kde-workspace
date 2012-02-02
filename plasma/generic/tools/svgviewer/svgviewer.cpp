@@ -82,6 +82,9 @@ SvgViewer::SvgViewer(QWidget* parent)
     m_shellContainer = new QWidget(this);
     m_scrollArea = new QScrollArea(this);
 
+    m_tabWidget->addTab(m_scrollArea, i18n("SVG Preview"));
+    m_tabWidget->addTab(m_shellContainer, i18n("Plasma Preview Shell"));
+
     mainWidget->setLayout(mainLayout);
 
 
