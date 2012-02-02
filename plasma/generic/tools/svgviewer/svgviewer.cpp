@@ -21,10 +21,13 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QLabel>
 #include <QStandardItemModel>
 #include <QScrollArea>
+#include <QTreeView>
 
 #include <KDebug>
+#include <KComboBox>
 #include <KGlobal>
 #include <KStandardDirs>
 #include <KIconLoader>
@@ -33,22 +36,54 @@
 #include <KStandardAction>
 #include <KStringHandler>
 #include <KAction>
+#include <KTabWidget>
 
 #include <Plasma/Svg>
 #include <Plasma/Theme>
+#include <QVBoxLayout>
 
 SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
+    , m_themeSelector(0)
+    , m_tabWidget(0)
+    , m_shellContainer(0)
+    , m_svgFilesTree(0)
+    , m_scrollAreaContainer(0)
+    , m_scrollArea(0)
+    , m_dataModel(0)
     , m_currentTheme(0)
     , m_currentSvg(0)
     , m_svgPreviewImage(0)
+    , m_svgFilesLabel(0)
     , m_plasmaView(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
 
     QWidget* mainWidget = new QWidget(this);
     setMainWidget(mainWidget);
-    setupUi(mainWidget);
+
+    m_themeSelector = new KComboBox(this);
+    m_svgFilesLabel = new QLabel(this);
+    m_svgFilesLabel->setText(i18n("SVG files for theme:"));
+
+    m_svgFilesTree = new QTreeView(this);
+
+    m_tabWidget = new KTabWidget(this);
+
+    QVBoxLayout *leftLayout = new QVBoxLayout();
+    leftLayout->addWidget(m_themeSelector);
+    leftLayout->addWidget(m_svgFilesLabel);
+    leftLayout->addWidget(m_svgFilesTree);
+
+    QHBoxLayout *mainLayout = new QHBoxLayout();
+    mainLayout->addLayout(leftLayout);
+    mainLayout->addWidget(m_tabWidget);
+
+    m_shellContainer = new QWidget(this);
+    m_scrollArea = new QScrollArea(this);
+
+    mainWidget->setLayout(mainLayout);
+
 
     m_currentTheme = new Plasma::Theme(this);
 

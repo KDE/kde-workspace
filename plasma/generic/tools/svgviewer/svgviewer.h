@@ -19,7 +19,7 @@
 #ifndef SVGVIEWER_H
 #define SVGVIEWER_H
 
-#include "ui_svgviewer.h"
+#include <KDialog>
 
 //internal
 class PlasmaView;
@@ -27,7 +27,13 @@ class PlasmaView;
 class QLabel;
 class QStandardItemModel;
 class QStandardItem;
+class QTreeView;
+class QWidget;
+class QScrollArea;
+class QModelIndex;
 
+class KTabWidget;
+class KComboBox;
 class KPluginInfo;
 
 namespace Plasma {
@@ -35,7 +41,7 @@ namespace Plasma {
     class Svg;
 }
 
-class SvgViewer : public KDialog, public Ui::SvgViewer
+class SvgViewer : public KDialog
 {
     Q_OBJECT
 
@@ -52,6 +58,25 @@ public slots:
     void modelSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
 private:
+
+//NOT NEEDED    QLabel *m_svgPreviewLabel;
+    QLabel *m_svgFilesLabel;
+
+    KComboBox *m_themeSelector;
+
+    //------------- tab widget ------------
+    KTabWidget *m_tabWidget;
+    // first tab (embedded Plasma shell)
+    QWidget *m_shellContainer;
+
+    //-- second tab (tree view of theme elements)
+    QTreeView *m_svgFilesTree;
+    QWidget *m_scrollAreaContainer;
+    QScrollArea *m_scrollArea;
+    // a label that contains the pixmap of the current svg
+    QLabel *m_svgPreviewImage;
+    //-------------------------------------
+
     QStandardItemModel* m_dataModel;
 
     // FIXME: might not even need this map
@@ -61,12 +86,8 @@ private:
     Plasma::Theme* m_currentTheme;
     Plasma::Svg* m_currentSvg;
 
-    // a label that contains the pixmap of the
-    // current svg
-    QLabel* m_svgPreviewImage;
 
     PlasmaView *m_plasmaView;
 };
 
 #endif
-

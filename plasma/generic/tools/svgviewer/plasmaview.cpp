@@ -56,8 +56,6 @@ PlasmaView::PlasmaView(QWidget *parent)
 
     setScene(&m_corona);
     connect(&m_corona, SIGNAL(sceneRectChanged(QRectF)), this, SLOT(sceneRectChanged(QRectF)));
-//    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  //  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     m_containment = m_corona.addContainment("desktop");
@@ -70,7 +68,7 @@ PlasmaView::PlasmaView(QWidget *parent)
     m_containment->addApplet("pager");
     m_containment->addApplet("tasks");
 
-    m_containment->setMaximumSize(1000,1000);
+//    m_containment->setMaximumSize(1000,1000);
     m_containment->resize(1000, 1000);
     resize(1000, 1000);
     setSceneRect(0, 0, 1000, 1000);
