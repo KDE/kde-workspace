@@ -41,6 +41,7 @@
 #include <Plasma/Svg>
 #include <Plasma/Theme>
 #include <QVBoxLayout>
+#include <kio/deletejob.h>
 
 SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
@@ -153,9 +154,22 @@ void SvgViewer::reloadThemeList()
     //KGlobal::dirs()->findAllResources("data", "desktoptheme/*");
 }
 
+void SvgViewer::clearThemeCache()
+{
+    kDebug() << "wiping theme cache";
+    const QStringList caches = KGlobal::dirs()->findAllResources("cache", "*.kcache", KStandardDirs::Recursive);
+    foreach (const QString& cache, caches) {
+        kDebug() << "deleting theme cache file: " << cache;
+        KIO::del(KUrl(cache), KIO::HideProgressInfo);
+    }
+}
+
 void SvgViewer::loadTheme(const QString& themeName)
 {
     kDebug() << "begin loading theme: " << themeName;
+
+    // we're loading a new theme, wipe the old cache
+    clearThemeCache();
 
     m_currentTheme->setThemeName(themeName);
     m_currentSvg->setTheme(m_currentTheme);

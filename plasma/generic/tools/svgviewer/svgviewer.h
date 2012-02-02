@@ -58,6 +58,7 @@ public slots:
     void modelSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
 private:
+    void clearThemeCache();
 
 //NOT NEEDED    QLabel *m_svgPreviewLabel;
     QLabel *m_svgFilesLabel;
