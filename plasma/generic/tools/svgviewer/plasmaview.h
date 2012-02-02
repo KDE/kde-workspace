@@ -52,6 +52,7 @@ private:
     Plasma::Applet *m_systrayApplet;
     Plasma::Applet *m_kickoffApplet;
     Plasma::Applet *m_calendarApplet;
+    Plasma::Applet *m_panelApplet;
 };
 
 #endif

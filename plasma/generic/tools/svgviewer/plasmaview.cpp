@@ -48,6 +48,7 @@ PlasmaView::PlasmaView(QWidget *parent)
     , m_systrayApplet(0)
     , m_kickoffApplet(0)
     , m_calendarApplet(0)
+    , m_panelApplet(0)
 {
 //    setFrameStyle(QFrame::NoFrame);
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(cleanup()));
@@ -72,16 +73,20 @@ PlasmaView::PlasmaView(QWidget *parent)
     setScene(m_containment->scene());
 
     m_containment->setMaximumSize(1300,1000);
-//    m_containment->resize(size());
+
     //HACK fucking sizes..
     m_containment->resize(1300, 1000);
+
     resize(1300, 1000);
+
     setSceneRect(0, 0, 1300, 1000);
 
     m_pagerApplet = m_containment->addApplet("pager");
     m_clockApplet = m_containment->addApplet("clock");
-    m_systrayApplet = m_containment->addApplet("systemtray");
+    m_panelApplet = m_containment->addApplet("panel");
+    //m_systrayApplet = m_panelContainment->addApplet("systemtray");
     m_kickoffApplet = m_containment->addApplet("launcher");
+
 
     //FIXME: unused, the calendar applet is broken...
     // it resizes itself after containment already fixes it
