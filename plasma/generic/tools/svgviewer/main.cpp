@@ -17,15 +17,54 @@
  *  If not, see <http://www.gnu.org/licenses/>.                               *
  *****************************************************************************/
 
+#include "svgviewer.h"
+
+#include <iostream>
+
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
 #include <KLocale>
+#include <KDebug>
 
-#include "svgviewer.h"
+
+#include <Plasma/Theme>
 
 static const char description[] = I18N_NOOP("View and browse SVGs used for Plasma. Useful for Plasma theme creating");
 static const char version[] = "0.1";
+
+void listPlugins(const KPluginInfo::List & plugins)
+{
+    int maxLen = 0;
+    QMap<QString, QString> applets;
+    foreach (const KPluginInfo &info, plugins) {
+        if (info.property("NoDisplay").toBool()) {
+            continue;
+        }
+
+        int len = info.pluginName().length();
+        if (len > maxLen) {
+            maxLen = len;
+        }
+
+        QString name = info.pluginName();
+        QString comment = info.comment();
+
+        if (comment.isEmpty()) {
+            comment = i18n("No description available");
+        }
+
+        applets.insert(name, comment);
+    }
+
+    QMap<QString, QString>::const_iterator it;
+    for (it = applets.constBegin(); it != applets.constEnd(); ++it) {
+        QString applet("%1 - %2");
+
+        applet = applet.arg(it.key().leftJustified(maxLen, ' ')).arg(it.value());
+        std::cout << applet.toLocal8Bit().data() << std::endl;
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -47,12 +86,15 @@ int main(int argc, char **argv)
 
 
     KApplication app;
-    SvgViewer* w = new SvgViewer;
 
     if (args->isSet("list")) {
-        //w->themes()
+        listPlugins(Plasma::Theme::defaultTheme()->listThemeInfo());
         return 0;
     }
+
+
+    SvgViewer* w = new SvgViewer;
+
 
     args->clear();
 
