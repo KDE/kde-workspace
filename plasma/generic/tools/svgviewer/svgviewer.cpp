@@ -42,6 +42,8 @@
 #include <Plasma/Theme>
 #include <QVBoxLayout>
 #include <kio/deletejob.h>
+#include <KDirWatch>
+#include <QTimer>
 
 SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
@@ -57,6 +59,7 @@ SvgViewer::SvgViewer(QWidget* parent)
     , m_svgPreviewImage(0)
     , m_svgFilesLabel(0)
     , m_plasmaView(0)
+    , m_dirWatch(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
     setWindowState(Qt::WindowMaximized);
@@ -115,6 +118,18 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
+
+    const QStringList watchedDirs =
+        KGlobal::dirs()->findDirs("data", "desktoptheme/");
+
+ //   kDebug() << "adding dir watch to paths: " << watchedDirs;
+
+    m_dirWatch = new KDirWatch(this);
+    foreach (const QString& dir, watchedDirs) {
+        m_dirWatch->addDir(dir, KDirWatch::WatchSubDirs);
+    }
+    connect(m_dirWatch, SIGNAL(dirty(QString)), SLOT(themesDirty(QString)));
+
     //TODO: connect to a signal if themes are changed?
     reloadThemeList();
 
@@ -123,15 +138,11 @@ SvgViewer::SvgViewer(QWidget* parent)
 
 //    m_shellContainer->resize(size());
     m_plasmaView = new PlasmaView(m_shellContainer);
+
+
     // HACK another sizing one...size() of anything returns something small
     // for some reason. maybe because it's a kdialog? i don't know..
     m_plasmaView->resize(1300,1000);
-
-//    connect(m_data, SIGNAL(customContextMenuRequested(QPoint)),
-//            this, SLOT(showDataContextMenu(QPoint)));
-
-    //m_svgFilesTree->setContextMenuPolicy(Qt::CustomContextMenu);
-    //connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
 }
 
 SvgViewer::~SvgViewer()
@@ -147,7 +158,7 @@ void SvgViewer::reloadThemeList()
     const KPluginInfo::List& infoList = Plasma::Theme::listThemeInfo();
     foreach(const KPluginInfo& info, infoList) {
         m_themeMap.insert(info.pluginName(), info);
-        kDebug() << "added theme name and kplugininfo to hash: " << info.name();
+//        kDebug() << "added theme name and kplugininfo to hash: " << info.name();
     }
 
     //kDebug() <<    KGlobal::dirs()->findDirs("data", "desktoptheme");
@@ -158,15 +169,39 @@ void SvgViewer::clearThemeCache()
 {
     kDebug() << "wiping theme cache";
     const QStringList caches = KGlobal::dirs()->findAllResources("cache", "*.kcache", KStandardDirs::Recursive);
+    kDebug() << "ALLRESOURCES: " << caches;
     foreach (const QString& cache, caches) {
-        kDebug() << "deleting theme cache file: " << cache;
+        kDebug() << "DFAURE: deleting theme cache file: " << cache;
         KIO::del(KUrl(cache), KIO::HideProgressInfo);
     }
+}
+
+void SvgViewer::themesDirty(const QString& file)
+{
+    //suspend dir watching, otherwise we get infinite requests
+    m_dirWatch->stopScan();
+
+    kDebug() << "themes dir has been dirtied. cache cleared, reloading themeName: " << m_currentTheme->themeName();
+    //yeah, not the cleanest of approaches. couldn't find a way to get it to reload it without loading a different one, though.
+    foreach (const QString& theme, m_themeMap.keys()) {
+        kDebug() << "SEARCHING for theme that does not match ours, so we can switch to it, clear cache, then go back to the one we want";
+        if (theme != m_currentTheme->themeName()) {
+            Plasma::Theme::defaultTheme()->setThemeName(theme);
+            goto done;
+        }
+    }
+    //catching if we run out of non-current themes
+    Q_ASSERT(0);
+done:
+
+    loadTheme(m_currentTheme->themeName());
+    m_dirWatch->startScan();
 }
 
 void SvgViewer::loadTheme(const QString& themeName)
 {
     kDebug() << "begin loading theme: " << themeName;
+
 
     // we're loading a new theme, wipe the old cache
     clearThemeCache();
@@ -186,14 +221,14 @@ void SvgViewer::loadTheme(const QString& themeName)
 
     QString filePath = themeName;
 
-    kDebug() << "loaded theme has entry path: " << filePath;
+ //   kDebug() << "loaded theme has entry path: " << filePath;
 
     // only interested in the parent dir's name.
     // e.g. ascii, Air, etc.
     QFileInfo fileInfo = QFileInfo(filePath);
     QString directoryName = fileInfo.dir().dirName();
 
-    kDebug() << "searching for resources/elements in dir: " << directoryName;
+  //  kDebug() << "searching for resources/elements in dir: " << directoryName;
 
     QStringList themeElementList =
         KGlobal::dirs()->findAllResources("data", "desktoptheme/" + directoryName + "/*/*.svgz", KStandardDirs::Recursive);
@@ -214,7 +249,7 @@ void SvgViewer::loadTheme(const QString& themeName)
         const QString& dirName = file.dir().dirName() + '/';
 
         if (previousDirName != dirName) {
-            kDebug() << "creating new dir parent node; previousDirName: " << previousDirName << " dirName: " << dirName;
+   //         kDebug() << "creating new dir parent node; previousDirName: " << previousDirName << " dirName: " << dirName;
             //we're on a new dir set, create new parent node
             parentItem = new QStandardItem(dirName);
             m_dataModel->appendRow(parentItem);
@@ -223,7 +258,7 @@ void SvgViewer::loadTheme(const QString& themeName)
             currentRow = 0;
         }
 
-        kDebug() << "creating child item: " << file.baseName();
+    //    kDebug() << "creating child item: " << file.baseName();
         // produces rows looking like "widgets/viewitem.svgz", "lancelot/..." etc.
         QStandardItem *childItem = new QStandardItem(file.baseName());
         childItem->setData(QVariant(dirName + file.baseName()), Qt::UserRole);
@@ -232,6 +267,11 @@ void SvgViewer::loadTheme(const QString& themeName)
         previousDirName = dirName;
         ++currentRow;
     }
+
+}
+
+void SvgViewer::restartDirWatch()
+{
 }
 
 void SvgViewer::modelIndexChanged(const QModelIndex& index)
@@ -253,10 +293,10 @@ void SvgViewer::modelIndexChanged(const QModelIndex& index)
     m_currentSvg->setTheme(m_currentTheme);
 //    m_currentSvg->resize(m_svgFilesTree->size());
 
-    kDebug() << "modelIndexChanged, loading svg elementPath: " << elementPath;
+//    kDebug() << "modelIndexChanged, loading svg elementPath: " << elementPath;
     m_currentSvg->setImagePath(elementPath);
 
-    kDebug() << "svg native size: " << m_currentSvg->size();
+//    kDebug() << "svg native size: " << m_currentSvg->size();
 
     // HACK if i ever did know one..
     m_currentSvg->resize(1024, 1024);

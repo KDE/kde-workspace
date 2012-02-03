@@ -20,6 +20,7 @@
 #define SVGVIEWER_H
 
 #include <KDialog>
+#include <KDirWatch>
 
 //internal
 class PlasmaView;
@@ -57,6 +58,16 @@ public slots:
     void modelIndexChanged(const QModelIndex& index);
     void modelSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
+private Q_SLOTS:
+    /**
+     * Watches the desktopthemes/ dir for any changes.
+     * Upon changes, the cache is flushed and the theme
+     * is reloaded
+     */
+    void themesDirty(const QString& file);
+
+    void restartDirWatch();
+
 private:
     void clearThemeCache();
 
@@ -89,6 +100,8 @@ private:
 
 
     PlasmaView *m_plasmaView;
+
+    KDirWatch *m_dirWatch;
 };
 
 #endif
