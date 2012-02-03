@@ -19,6 +19,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
+import org.kde.draganddrop 1.0
 
 Item {
     id: iconGrid
@@ -48,28 +49,45 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         focus: true
+        interactive: false
 
-        delegate: Item {
+        delegate: DropArea {
             id: delegate
             width: gridView.cellWidth
             height: gridView.cellHeight
 
             QtExtraComponents.QIconItem {
-                anchors.horizontalCenter: parent.horizontalCenter;
-                anchors.verticalCenter: parent.verticalCenter;
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
 
-                width: gridView.cellWidth - 4
-                height: gridView.cellHeight - 4
+                width: gridView.cellWidth - 6
+                height: gridView.cellHeight - 6
 
                 icon: QIcon(iconSource)
             }
 
+            DragArea {
+                anchors.fill: parent
+                delegate: Rectangle {color: "red"; width: 32; height: 32}
+                mimeData.url: model.url
+
+                supportedActions: Qt.CopyAction | Qt.MoveAction
+                defaultAction: Qt.CopyAction
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: plasmoid.openUrl(model.url);
+                }
+            }
+
             PlasmaCore.ToolTip {
                 target: delegate
-                mainText: display
-                subText: description
-                image: iconSource
+                mainText: model.display
+                subText: model.description
+                image: model.iconSource
             }
+
+            onDragEnter: print("Drag enter! "+model.display+" - "+event.mimeData.url)
         }
     }
 

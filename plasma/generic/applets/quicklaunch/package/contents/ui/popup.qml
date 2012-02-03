@@ -19,6 +19,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
+import org.kde.draganddrop 1.0
 
 import org.kde.plasma.quicklaunch 1.0 as Quicklaunch
 
@@ -61,6 +62,7 @@ Item {
                 dialog.x = popupPosition.x;
                 dialog.y = popupPosition.y;
                 dialog.visible = !dialog.visible;
+                list.positionViewAtBeginning();
             }
         }
     }
@@ -78,25 +80,50 @@ Item {
         width: 160
         height: count * (24) + (count - 1) * spacing
         spacing: 8
+        interactive: false
 
         model: Quicklaunch.LauncherListModel {}
 
-        delegate:Row {
+        delegate: DropArea {
             id: delegate
-            spacing: 4
+            width: list.width
+            height: iconItem.height
 
-            QtExtraComponents.QIconItem {
-                id: iconItem
-                width: 24
-                height: 24
+            Row {
+                spacing: 4
 
-                icon: QIcon(iconSource)
+                QtExtraComponents.QIconItem {
+                    id: iconItem
+                    width: 24
+                    height: 24
+
+                    icon: QIcon(iconSource)
+                }
+
+                Text {
+                    anchors.verticalCenter: iconItem.verticalCenter
+                    text: display
+                }
             }
 
-            Text {
-                anchors.verticalCenter: iconItem.verticalCenter
-                text: display
+            DragArea {
+                anchors.fill: parent
+                delegate: Rectangle {color: "red"; width: 32; height: 32}
+                mimeData.url: model.url
+
+                supportedActions: Qt.CopyAction | Qt.MoveAction
+                defaultAction: Qt.CopyAction
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        plasmoid.openUrl(model.url);
+                        dialog.visible = false;
+                    }
+                }
             }
+
+            onDragEnter: print("Drag enter! "+model.display+" - "+event.mimeData.url)
         }
     }
 }
