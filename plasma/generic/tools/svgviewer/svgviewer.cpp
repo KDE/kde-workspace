@@ -161,7 +161,7 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     m_plasmaView_panel = new PlasmaView(m_corona->addContainment("panel"), m_shellContainer);
     m_plasmaView_panel->setScene(m_corona);
-    m_plasmaView_panel->resize(1300, 40);
+    m_plasmaView_panel->resize(1000, 120);
     // yes. hardcoded dragons.
     m_plasmaView_panel->move(0, 600);
 
