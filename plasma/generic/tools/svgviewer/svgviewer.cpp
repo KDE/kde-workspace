@@ -154,10 +154,12 @@ SvgViewer::SvgViewer(QWidget* parent)
     // create one of desktop containment and also a panel containment
     m_plasmaView_desktop = new PlasmaView(m_corona->addContainment("desktop"), m_shellContainer);
     m_plasmaView_desktop->setScene(m_corona);
+    m_plasmaView_desktop->setMaximumSize(1300, 1300);
+    m_plasmaView_desktop->resize(1300, 1300);
 
     m_plasmaView_panel = new PlasmaView(m_corona->addContainment("panel"), m_shellContainer);
     m_plasmaView_panel->setScene(m_corona);
-    m_plasmaView_panel->resize(1300, 30);
+    m_plasmaView_panel->resize(1300, 40);
 
     // HACK another sizing one...size() of anything returns something small
     // for some reason. maybe because it's a kdialog? i don't know..

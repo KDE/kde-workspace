@@ -64,10 +64,7 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
 
     //load some specific crap into the panel and size differently
     if (m_containment->pluginName() == "panel") {
-//            m_containment->setMaximumSize(30, 30);
-//            m_containment->resize(30, 30);
-//            resize(30, 30);
-//
+        m_containment->resize(1300, 40);
         m_systrayApplet = containment->addApplet("systemtray");
 
     } else {
@@ -77,7 +74,6 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
         m_containment->resize(1300, 1000);
 
         resize(1300, 1000);
-
 //        setSceneRect(0, 0, 1300, 1000);
 
         m_pagerApplet = m_containment->addApplet("pager");
