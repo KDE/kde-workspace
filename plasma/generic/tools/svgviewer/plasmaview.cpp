@@ -64,13 +64,12 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
 
     //load some specific crap into the panel and size differently
     if (m_containment->pluginName() == "panel") {
-        m_containment->resize(1300, 40);
+        m_containment->resize(1000, 120);
         m_systrayApplet = containment->addApplet("systemtray");
         m_systrayApplet = containment->addApplet("tasks");
-        containment->addApplet("notifier");
-        containment->addApplet("notifications");
+   //     containment->addApplet("notifier");
+  //      containment->addApplet("notifications");
         containment->addApplet("showdesktop");
-        containment->addApplet("digital-clock");
 
     } else {
         m_containment->setMaximumSize(1300,1000);
