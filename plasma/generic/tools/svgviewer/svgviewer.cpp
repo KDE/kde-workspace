@@ -151,6 +151,8 @@ SvgViewer::SvgViewer(QWidget* parent)
     m_corona->setContainmentActionsDefaults(Plasma::Containment::PanelContainment, containmentActionPlugins);
     m_corona->setContainmentActionsDefaults(Plasma::Containment::CustomPanelContainment, containmentActionPlugins);
 
+    m_shellContainer->resize(1300,1300);
+
     // create one of desktop containment and also a panel containment
     m_plasmaView_desktop = new PlasmaView(m_corona->addContainment("desktop"), m_shellContainer);
     m_plasmaView_desktop->setScene(m_corona);
@@ -160,6 +162,8 @@ SvgViewer::SvgViewer(QWidget* parent)
     m_plasmaView_panel = new PlasmaView(m_corona->addContainment("panel"), m_shellContainer);
     m_plasmaView_panel->setScene(m_corona);
     m_plasmaView_panel->resize(1300, 40);
+    // yes. hardcoded dragons.
+    m_plasmaView_panel->move(0, 740);
 
     // HACK another sizing one...size() of anything returns something small
     // for some reason. maybe because it's a kdialog? i don't know..
