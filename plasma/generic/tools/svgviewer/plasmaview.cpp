@@ -50,6 +50,8 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
     , m_calendarApplet(0)
     , m_panelApplet(0)
 {
+    Q_ASSERT(m_containment);
+
 //    setFrameStyle(QFrame::NoFrame);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
@@ -60,9 +62,14 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
     m_containment->setFormFactor(m_formfactor);
     m_containment->setLocation(m_location);
 
-
     //load some specific crap into the panel and size differently
-    if (m_containment->name() == "panel") {
+    if (m_containment->pluginName() == "panel") {
+//            m_containment->setMaximumSize(30, 30);
+//            m_containment->resize(30, 30);
+//            resize(30, 30);
+//
+        m_systrayApplet = containment->addApplet("systemtray");
+
     } else {
         m_containment->setMaximumSize(1300,1000);
 
@@ -71,7 +78,7 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
 
         resize(1300, 1000);
 
-        setSceneRect(0, 0, 1300, 1000);
+//        setSceneRect(0, 0, 1300, 1000);
 
         m_pagerApplet = m_containment->addApplet("pager");
         m_clockApplet = m_containment->addApplet("clock");
