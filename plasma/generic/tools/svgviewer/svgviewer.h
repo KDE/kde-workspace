@@ -38,6 +38,7 @@ class KComboBox;
 class KPluginInfo;
 
 namespace Plasma {
+    class Corona;
     class Theme;
     class Svg;
 }
@@ -99,7 +100,9 @@ private:
     Plasma::Svg* m_currentSvg;
 
 
-    PlasmaView *m_plasmaView;
+    Plasma::Corona *m_corona;
+    PlasmaView *m_plasmaView_desktop;
+    PlasmaView *m_plasmaView_panel;
 
     KDirWatch *m_dirWatch;
 };

@@ -29,18 +29,18 @@
 #include <Plasma/AccessManager>
 #include <Plasma/AccessAppletJob>
 #include <Plasma/Containment>
-#include <Plasma/ContainmentActions>
+
 #include <Plasma/Package>
 #include <Plasma/Wallpaper>
 #include <plasma/theme.h>
 
 using namespace Plasma;
 
-PlasmaView::PlasmaView(QWidget *parent)
-    : QGraphicsView(parent)
+PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
+    : Plasma::View(containment, parent)
     , m_formfactor(Plasma::Planar)
     , m_location(Plasma::Desktop)
-    , m_containment(0)
+    , m_containment(containment)
     , m_pagerApplet(0)
     , m_tasksApplet(0)
     , m_clockApplet(0)
@@ -51,48 +51,40 @@ PlasmaView::PlasmaView(QWidget *parent)
     , m_panelApplet(0)
 {
 //    setFrameStyle(QFrame::NoFrame);
-    connect(qApp, SIGNAL(aboutToQuit()), SLOT(cleanup()));
-
-    Plasma::ContainmentActionsPluginsConfig containmentActionPlugins;
-    containmentActionPlugins.addPlugin(Qt::NoModifier, Qt::RightButton, "contextmenu");
-
-    m_corona.setContainmentActionsDefaults(Plasma::Containment::DesktopContainment, containmentActionPlugins);
-    m_corona.setContainmentActionsDefaults(Plasma::Containment::CustomContainment, containmentActionPlugins);
-    m_corona.setContainmentActionsDefaults(Plasma::Containment::PanelContainment, containmentActionPlugins);
-    m_corona.setContainmentActionsDefaults(Plasma::Containment::CustomPanelContainment, containmentActionPlugins);
-
-    setScene(&m_corona);
-    connect(&m_corona, SIGNAL(sceneRectChanged(QRectF)), this, SLOT(sceneRectChanged(QRectF)));
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-    m_containment = m_corona.addContainment("desktop");
+    connect(qApp, SIGNAL(aboutToQuit()), SLOT(cleanup()));
+
     connect(m_containment, SIGNAL(appletRemoved(Plasma::Applet*)), this, SLOT(appletRemoved(Plasma::Applet*)));
 
     m_containment->setFormFactor(m_formfactor);
     m_containment->setLocation(m_location);
-    setScene(m_containment->scene());
-
-    m_containment->setMaximumSize(1300,1000);
-
-    //HACK fucking sizes..
-    m_containment->resize(1300, 1000);
-
-    resize(1300, 1000);
-
-    setSceneRect(0, 0, 1300, 1000);
-
-    m_pagerApplet = m_containment->addApplet("pager");
-    m_clockApplet = m_containment->addApplet("clock");
-    m_panelApplet = m_containment->addApplet("panel");
-    //m_systrayApplet = m_panelContainment->addApplet("systemtray");
-    m_kickoffApplet = m_containment->addApplet("launcher");
 
 
-    //FIXME: unused, the calendar applet is broken...
-    // it resizes itself after containment already fixes it
-    // m_calendarApplet = m_containment->addApplet("calendar");
+    //load some specific crap into the panel and size differently
+    if (m_containment->name() == "panel") {
+    } else {
+        m_containment->setMaximumSize(1300,1000);
 
-    m_tasksApplet = m_containment->addApplet("tasks");
+        //HACK fucking sizes..
+        m_containment->resize(1300, 1000);
+
+        resize(1300, 1000);
+
+        setSceneRect(0, 0, 1300, 1000);
+
+        m_pagerApplet = m_containment->addApplet("pager");
+        m_clockApplet = m_containment->addApplet("clock");
+    //    m_panelApplet = m_containment->addApplet("panel");
+        //m_systrayApplet = m_panelContainment->addApplet("systemtray");
+        m_kickoffApplet = m_containment->addApplet("launcher");
+
+        //FIXME: unused, the calendar applet is broken...
+        // it resizes itself after containment already fixes it
+        // m_calendarApplet = m_containment->addApplet("calendar");
+
+        m_tasksApplet = m_containment->addApplet("tasks");
+    }
 
     //TODO: enable widgetexplorer. i made us link to plasmagenericshell.
     // look at code from netbook shell to see how it's done, in plasmaapp.cpp

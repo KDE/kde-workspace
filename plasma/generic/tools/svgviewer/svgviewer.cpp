@@ -25,8 +25,12 @@
 #include <QStandardItemModel>
 #include <QScrollArea>
 #include <QTreeView>
+#include <QTimer>
+#include <QVBoxLayout>
 
+#include <KIO/DeleteJob>
 #include <KDebug>
+#include <KDirWatch>
 #include <KComboBox>
 #include <KGlobal>
 #include <KStandardDirs>
@@ -40,10 +44,9 @@
 
 #include <Plasma/Svg>
 #include <Plasma/Theme>
-#include <QVBoxLayout>
-#include <kio/deletejob.h>
-#include <KDirWatch>
-#include <QTimer>
+#include <Plasma/Corona>
+#include <Plasma/ContainmentActions>
+#include <Plasma/Containment>
 
 SvgViewer::SvgViewer(QWidget* parent)
     : KDialog(parent)
@@ -58,7 +61,9 @@ SvgViewer::SvgViewer(QWidget* parent)
     , m_currentSvg(0)
     , m_svgPreviewImage(0)
     , m_svgFilesLabel(0)
-    , m_plasmaView(0)
+    , m_corona(0)
+    , m_plasmaView_desktop(0)
+    , m_plasmaView_panel(0)
     , m_dirWatch(0)
 {
     setWindowTitle(i18n("Plasma SVG Viewer"));
@@ -91,7 +96,6 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     mainWidget->setLayout(mainLayout);
 
-
     m_currentTheme = new Plasma::Theme(this);
 
     m_currentSvg = new Plasma::Svg(this);
@@ -118,16 +122,13 @@ SvgViewer::SvgViewer(QWidget* parent)
 
     addAction(KStandardAction::quit(qApp, SLOT(quit()), this));
 
-
-    const QStringList watchedDirs =
-        KGlobal::dirs()->findDirs("data", "desktoptheme/");
-
- //   kDebug() << "adding dir watch to paths: " << watchedDirs;
+    const QStringList watchedDirs = KGlobal::dirs()->findDirs("data", "desktoptheme/");
 
     m_dirWatch = new KDirWatch(this);
     foreach (const QString& dir, watchedDirs) {
         m_dirWatch->addDir(dir, KDirWatch::WatchSubDirs);
     }
+
     connect(m_dirWatch, SIGNAL(dirty(QString)), SLOT(themesDirty(QString)));
 
     //TODO: connect to a signal if themes are changed?
@@ -137,12 +138,28 @@ SvgViewer::SvgViewer(QWidget* parent)
     m_themeSelector->addItems(m_themeMap.keys());
 
 //    m_shellContainer->resize(size());
-    m_plasmaView = new PlasmaView(m_shellContainer);
 
+    m_corona = new Plasma::Corona(this);
+
+    connect(m_corona, SIGNAL(sceneRectChanged(QRectF)), this, SLOT(sceneRectChanged(QRectF)));
+
+    Plasma::ContainmentActionsPluginsConfig containmentActionPlugins;
+    containmentActionPlugins.addPlugin(Qt::NoModifier, Qt::RightButton, "contextmenu");
+
+    m_corona->setContainmentActionsDefaults(Plasma::Containment::DesktopContainment, containmentActionPlugins);
+    m_corona->setContainmentActionsDefaults(Plasma::Containment::CustomContainment, containmentActionPlugins);
+    m_corona->setContainmentActionsDefaults(Plasma::Containment::PanelContainment, containmentActionPlugins);
+    m_corona->setContainmentActionsDefaults(Plasma::Containment::CustomPanelContainment, containmentActionPlugins);
+
+    // create one of desktop containment and also a panel containment
+    m_plasmaView_desktop = new PlasmaView(m_corona->addContainment("desktop"), m_shellContainer);
+    m_plasmaView_desktop->setScene(m_corona);
+
+    m_plasmaView_panel = new PlasmaView(m_corona->addContainment("panel"), m_shellContainer);
 
     // HACK another sizing one...size() of anything returns something small
     // for some reason. maybe because it's a kdialog? i don't know..
-    m_plasmaView->resize(1300,1000);
+    m_plasmaView_desktop->resize(1300,1000);
 }
 
 SvgViewer::~SvgViewer()

@@ -23,15 +23,20 @@
 #include <Plasma/Corona>
 
 #include <QGraphicsView>
+#include <Plasma/View>
 
 class QTimer;
 
-class PlasmaView : public QGraphicsView
+namespace Plasma {
+    class Containment;
+}
+
+class PlasmaView : public Plasma::View
 {
     Q_OBJECT
 
 public:
-    explicit PlasmaView(QWidget *parent = 0);
+    explicit PlasmaView(Plasma::Containment *containment, QWidget *parent = 0);
     ~PlasmaView();
 
 private Q_SLOTS:
