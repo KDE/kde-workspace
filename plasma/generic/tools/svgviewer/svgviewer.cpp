@@ -163,7 +163,7 @@ SvgViewer::SvgViewer(QWidget* parent)
     m_plasmaView_panel->setScene(m_corona);
     m_plasmaView_panel->resize(1300, 40);
     // yes. hardcoded dragons.
-    m_plasmaView_panel->move(0, 740);
+    m_plasmaView_panel->move(0, 600);
 
     // HACK another sizing one...size() of anything returns something small
     // for some reason. maybe because it's a kdialog? i don't know..

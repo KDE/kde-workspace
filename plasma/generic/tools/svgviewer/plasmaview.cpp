@@ -66,6 +66,11 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
     if (m_containment->pluginName() == "panel") {
         m_containment->resize(1300, 40);
         m_systrayApplet = containment->addApplet("systemtray");
+        m_systrayApplet = containment->addApplet("tasks");
+        containment->addApplet("notifier");
+        containment->addApplet("notifications");
+        containment->addApplet("showdesktop");
+        containment->addApplet("digital-clock");
 
     } else {
         m_containment->setMaximumSize(1300,1000);
@@ -86,7 +91,9 @@ PlasmaView::PlasmaView(Plasma::Containment *containment, QWidget *parent)
         // it resizes itself after containment already fixes it
         // m_calendarApplet = m_containment->addApplet("calendar");
 
-        m_tasksApplet = m_containment->addApplet("tasks");
+        m_containment->addApplet("weather");
+        m_containment->addApplet("sm_hdd");
+        m_containment->addApplet("sm_net");
     }
 
     //TODO: enable widgetexplorer. i made us link to plasmagenericshell.
