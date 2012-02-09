@@ -78,6 +78,10 @@ Item {
             }
         }
 
+        if (iconGrid.count == 0) {
+            iconGrid.model.restoreDefaultLaunchers();
+        }
+
         // Repopulate popup launcher list.
         if (popupLoader.status == Loader.Ready) {
             popupLoader.item.model.clear();

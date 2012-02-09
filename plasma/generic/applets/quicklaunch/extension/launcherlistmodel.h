@@ -38,9 +38,14 @@ public:
     Q_INVOKABLE void addLauncher(int index, const QString &url);
     Q_INVOKABLE void removeLauncher(int index);
     Q_INVOKABLE void clear();
+    Q_INVOKABLE void restoreDefaultLaunchers();
 
 private:
     static QStandardItem *itemForUrl(const KUrl &url);
+
+    static QString defaultBrowserPath();
+    static QString defaultFileManagerPath();
+    static QString defaultEmailClientPath();
 };
 
 #endif // LAUNCHERLISTMODEL_H
