@@ -15,11 +15,11 @@ Canvas {
         var context = getContext();
 
 
-        // Create an array of y points
+        // Create an array of random y points
         var points = new Array();
         for(var i = 0;i < count;i++){
             // Get Ypos
-            var yPercent  =  Math.floor(Math.random()*100) //(sliders.children[i].value - 100) * -1;
+            var yPercent  =  Math.floor(Math.random()*100)
             var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
             points.push(yPos);
         }
