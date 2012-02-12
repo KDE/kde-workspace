@@ -10,6 +10,9 @@ Canvas {
     property int horizSpace: availableSpace / count;
     property int vertSpace: height - (graphPadding * count);
 
+    //milliseconds
+    property int sampleInterval: 2000
+
     onPaint: {
 
         var context = getContext();
@@ -98,4 +101,21 @@ Canvas {
         context.fill();
         context.restore();
     }
+
+    /**
+     * Advances the plotter (shifts all points left) by 1 interval
+     * Should be called every tick of the plotter sampler.
+     */
+    function advancePlotter() {
+        
+    }
+
+    Timer {
+        id: plotterTick
+        interval: 2000
+        running: true
+        repeat: true
+        onTriggered: advancePlotter()
+    }
+
 }
