@@ -46,9 +46,9 @@ function addSample(y)
     debug("requesting new paint event");
 }
 
-function debug(caller1, str)
+function debug(str)
 {
-    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() " + str);
+    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() output:" + str);
 }
 
 function shiftLeft()
