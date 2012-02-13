@@ -24,6 +24,12 @@ Canvas {
     width: 600
     height: 400
 
+    // enable most rendering to a separate background thread
+    renderInThread: true
+
+    //TODO: PERFORMANCE: find a good tileSize to help enable caching
+    //TODO: PERFORMANCE: use Canvas::markDirty to mark the effected rect as dirty
+
     //milliseconds
     property int sampleInterval: 1000
     Component.onCompleted: {
