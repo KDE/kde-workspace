@@ -77,7 +77,7 @@ function init(width, height)
     debug("width: " + this.width);
 
     // TODO: find a scalar, mostly for vertSpace
-    horizSpace = 1;
+    horizSpace = 15;
     vertSpace  = 1 //height - (graphPadding * (points.length));
     //form an array of an array
     points.push([]);
