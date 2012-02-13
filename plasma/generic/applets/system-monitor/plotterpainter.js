@@ -119,14 +119,6 @@ function paint(canvas, context)
     }
 }
 
-function drawDots()
-{
-    // Draw Dots
-    for(var i = 0; i < points.length; ++i){
-        drawCircle(context, points[i][0], points[i][1], (points.length - 1), "rgb(0, 0, 255)");
-    }
-}
-
 function drawLines()
 {
     // Draw Lines
@@ -151,6 +143,14 @@ function drawLines()
     }
     context.stroke();
     context.closePath();
+}
+
+function drawDots()
+{
+    // Draw Dots
+    for(var i = 0; i < points.length; ++i){
+        drawCircle(context, points[i][0], points[i][1], (points.length - 1), "rgb(0, 0, 255)");
+    }
 }
 
 function fillPath()
