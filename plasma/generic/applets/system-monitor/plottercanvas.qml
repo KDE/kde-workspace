@@ -8,7 +8,7 @@ Canvas {
     height: 400
 
     //milliseconds
-    property int sampleInterval: 5000
+    property int sampleInterval: 10000
     Component.onCompleted: {
     }
 
