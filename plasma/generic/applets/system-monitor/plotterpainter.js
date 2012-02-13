@@ -42,18 +42,18 @@ function addSample(y)
     // set y
     points[points.length - 1][1] = y;
 
-    debug("sample list: " + points);
-    debug("requesting new paint event");
+    debug(arguments.callee.name.toString(), "sample list: " + points);
+    debug(arguments.callee.name.toString(), "requesting new paint event");
 }
 
-function debug(str)
+function debug(caller, str)
 {
-    print("PlotterPainter::" + arguments.callee.name.toString() + "() " + str);
+    print("PlotterPainter::" + caller + "() " + str);
 }
 
 function shiftLeft()
 {
-    debug("shiftLeft()");
+    debug(arguments.callee.name.toString(), "");
 //    for (var i = 0; i < count; ++i) {
  //       points[i] -= horizSpace;
   //  }
@@ -68,7 +68,7 @@ function init(width, height)
     graphPadding = 20;
     availableSpace  = width - (graphPadding * (points.length - 1));
 
-    debug("POOOINTS LENGTH: " + points.length);
+    debug(arguments.callee.name.toString(), "POOOINTS LENGTH: " + points.length);
 
     horizSpace = availableSpace / (points.length - 1);
     vertSpace  = height - (graphPadding * (points.length - 1));
@@ -82,7 +82,7 @@ function init(width, height)
  */
 function advancePlotter()
 {
-    debug("advancePlotter()");
+    debug(arguments.callee.name.toString(), "advancePlotter()");
     var yPercent = Math.floor(Math.random() * 100);
     var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
     addSample(yPos);
@@ -101,8 +101,8 @@ function paint(canvas, context)
         this.canvas = canvas;
         this.context = context;
 
-        debug("WIDTH: " + width);
-        debug("PAINT HEIGHT: " + height);
+        debug(arguments.callee.name.toString(), "WIDTH: " + width);
+        debug(arguments.callee.name.toString(), "PAINT HEIGHT: " + height);
 
         drawLines();
         drawDots();
@@ -127,7 +127,7 @@ function drawLines()
     context.beginPath();
 
     for(var i = 0; i < points.length; ++i){
-        print("x value: " + points[i][0] + " y value: " + points[i][1]);
+        debug(arguments.callee.name.toString(), "x value: " + points[i][0] + " y value: " + points[i][1]);
         if(i == 0) {
             context.moveTo(points[i][0], points[i][1]);
         } else {
@@ -168,8 +168,8 @@ function fillPath()
 
 function drawGrid(context)
 {
-    debug("painting on width: " + width);
-    debug("painting on height: " + height);
+    debug(arguments.callee.name.toString(), "painting on width: " + width);
+    debug(arguments.callee.name.toString(), "painting on height: " + height);
 
     // Draw Axis
     context.lineWidth = 1;
