@@ -37,10 +37,10 @@ function addSample(y)
 //    var xPos = graphPadding * 2;
     points.push([points.length, 2]);
 
-    points[points.length][0] = horizSpace * (points.length - 1);
+    points[points.length - 1][0] = horizSpace * (points.length - 1);
 
     // set y
-    points[points.length][1] = y;
+    points[points.length - 1][1] = y;
 
     print("plotterPainter::addSample sample list: " + points);
     print("plotterPainter::addSample requesting new paint event");
