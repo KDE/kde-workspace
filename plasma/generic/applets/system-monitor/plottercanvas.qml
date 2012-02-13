@@ -52,7 +52,7 @@ Canvas {
         id: plotterTick
         interval: sampleInterval
         running: true
-        repeat: false
+        repeat: true
         onTriggered: {
             PlotterPainter.advancePlotter();
             canvas.requestPaint();

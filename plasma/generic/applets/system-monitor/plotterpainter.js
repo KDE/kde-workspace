@@ -131,18 +131,23 @@ function drawLines()
         debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i][0] + " y value: " + points[i][1]);
 
+        context.text("POINT" , points[i][0], points[i][1]);
+
         if(i == 0) {
             context.moveTo(points[i][0], points[i][1]);
         } else {
             context.lineTo(points[i][0], points[i][1]);
         }
 
-        //FIXME: TEXT IS BROKEN, UPSTREAM
-    //            context.text(tempString , xPos, points[i]);
 
     }
     context.stroke();
     context.closePath();
+
+    context.beginPath()
+    //FIXME: TEXT IS BROKEN, UPSTREAM
+    context.stroke();
+    context.closePath;
 }
 
 function drawDots()
