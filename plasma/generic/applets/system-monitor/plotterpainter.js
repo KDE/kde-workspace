@@ -10,6 +10,26 @@ var availableSpace;
 var horizSpace;
 var vertSpace;
 
+var points = new Array();
+
+function addSample(y)
+{
+    points.push(y);
+    print("plotterPainter::addSample sample list: " + points);
+}
+
+/**
+ * Advances the plotter (shifts all points left) by 1 interval
+ * Should be called every tick of the plotter sampler.
+ */
+function advancePlotter() {
+    print("plotterPainter::advancePlotter()");
+    var yPercent = Math.floor(Math.random() * 100);
+    var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
+    addSample(yPos);
+}
+
+
 function paint(canvas, context, width, height)
 {
     //set global vars
@@ -26,18 +46,20 @@ function paint(canvas, context, width, height)
 
    // var points = new List();
     // Create an array of random y points
-    var points = new Array();
-    for(var i = 0;i < count;i++){
-        // Get Ypos
-        var yPercent  =  Math.floor(Math.random()*100)
-        var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
-        points.push(yPos);
-    }
-
+//    var points = new Array();
+//    for(var i = 0;i < count;i++){
+//        // Get Ypos
+//        var yPercent  =  Math.floor(Math.random()*100)
+//        var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
+//        points.push(yPos);
+//
+//        points.pop();
+//    }
+//
     // Draw Lines
     var xPos = graphPadding * 2;
     context.beginPath();
-    for(i = 0;i < count;i++){
+    for(i = 0;i < points.count;i++){
         if(i == 0) {
             context.moveTo(xPos, points[i]);
         } else {

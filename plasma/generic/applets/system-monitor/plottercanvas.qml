@@ -8,6 +8,8 @@ Canvas {
 
     //milliseconds
     property int sampleInterval: 2000
+    Component.onCompleted: {
+    }
 
     onPaint: {
         var context = getContext("2d");
@@ -20,20 +22,13 @@ Canvas {
         PlotterPainter.paint(this, context, width, height)
     }
 
-    /**
-     * Advances the plotter (shifts all points left) by 1 interval
-     * Should be called every tick of the plotter sampler.
-     */
-    function advancePlotter() {
-        
-    }
 
     Timer {
         id: plotterTick
         interval: 2000
         running: true
         repeat: true
-        onTriggered: advancePlotter()
+        onTriggered: PlotterPainter.advancePlotter()
     }
 
 }
