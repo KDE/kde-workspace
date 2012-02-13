@@ -37,25 +37,37 @@ function addSample(y)
 //    var xPos = graphPadding * 2;
     points.push([points.length, 2]);
 
-    points[points.length - 1][0] = horizSpace * (points.length - 1);
+    points[points.length - 1][0] = horizSpace * (points.length);
 
     // set y
     points[points.length - 1][1] = y;
 
-    print("plotterPainter::addSample sample list: " + points);
-    print("plotterPainter::addSample requesting new paint event");
+    print("PlotterPainter::addSample sample list: " + points);
+    print("PlotterPainter::addSample requesting new paint event");
 }
 
 function shiftLeft()
 {
-    print("plotterPainter::shiftLeft()");
+    print("PlotterPainter::shiftLeft()");
 //    for (var i = 0; i < count; ++i) {
  //       points[i] -= horizSpace;
   //  }
 }
 
-function init()
+function init(width, height)
 {
+    //set global vars
+    this.width = width;
+    this.height = height;
+
+    graphPadding = 20;
+    availableSpace  = width - (graphPadding * (points.length - 1));
+
+    print("POOOINTS LENGTH: " + points.length);
+
+    horizSpace = availableSpace / (points.length - 1);
+    vertSpace  = height - (graphPadding * (points.length - 1));
+    //form an array of an array
     points.push([]);
 }
 
@@ -65,38 +77,33 @@ function init()
  */
 function advancePlotter()
 {
-    print("plotterPainter::advancePlotter()");
+    print("PlotterPainter::advancePlotter()");
     var yPercent = Math.floor(Math.random() * 100);
     var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
     addSample(yPos);
 
 
-    if ((points.length * horizSpace) >= width - 20) {
-        shiftLeft();
-    }
+//    if ((points.length * horizSpace) >= width - 20) {
+//        shiftLeft();
+//    }
 }
 
-function paint(canvas, context, width, height)
+function paint(canvas, context)
 {
-    //set global vars
-    this.width = width;
-    this.height = height;
-    this.canvas = canvas;
-    this.context = context;
+    //nothing to paint if 0
+    if (points.length != 0) {
+        //set global vars
+        this.canvas = canvas;
+        this.context = context;
 
-    graphPadding = 20;
-    availableSpace  = width - (graphPadding * points.length - 1);
-    horizSpace = availableSpace / (points.length - 1);
-    vertSpace  = height - (graphPadding * points.length - 1);
-    print("HORIZSPACE: " + horizSpace);
+        print("PlotterPainter::PAINT WIDTH: " + width);
+        print("PlotterPainter::PAINT HEIGHT: " + height);
 
-    print("plotterPainter::PAINT WIDTH: " + width);
-    print("plotterPainter::PAINT HEIGHT: " + height);
-
-    drawLines();
-    drawDots();
-    fillPath();
-    drawGrid(context);
+        drawLines();
+        drawDots();
+        fillPath();
+        drawGrid(context);
+    }
 }
 
 function drawDots()
@@ -115,6 +122,7 @@ function drawLines()
     context.beginPath();
 
     for(var i = 0; i < points.length; ++i){
+        print("PlotterPainter::drawLines() x value: " + points[i][0] + " y value: " + points[i][1]);
         if(i == 0) {
             context.moveTo(points[i][0], points[i][1]);
         } else {
@@ -155,8 +163,8 @@ function fillPath()
 
 function drawGrid(context)
 {
-    print("plotterPainter::drawGrid painting on width: " + width);
-    print("plotterPainter::drawGrid painting on height: " + height);
+    print("PlotterPainter::drawGrid painting on width: " + width);
+    print("PlotterPainter::drawGrid painting on height: " + height);
 
     // Draw Axis
     context.lineWidth = 1;

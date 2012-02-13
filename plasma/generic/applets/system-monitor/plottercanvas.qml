@@ -27,7 +27,7 @@ Canvas {
     //milliseconds
     property int sampleInterval: 5000
     Component.onCompleted: {
-        PlotterPainter.init();
+        PlotterPainter.init(width, height);
     }
 
     onPaint: {
@@ -38,7 +38,7 @@ Canvas {
 //        PlotterPainter.canvas = this
         print("onPaint HEIGHT: " + height);
         print("onPaint WIDTH: " + width);
-        PlotterPainter.paint(this, context, width, height)
+        PlotterPainter.paint(this, context)
     }
 
 
