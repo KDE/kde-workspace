@@ -1,17 +1,32 @@
-//.pragma library
+.pragma library
 
 var count = 6;
 
-var graphPadding = 20;
-var availableSpace = width - (graphPadding * count);
-var horizSpace = availableSpace / count;
-var vertSpace = height - (graphPadding * count);
+var height;
+var width;
 
-function paint(canvas, context)
+var graphPadding;
+var availableSpace;
+var horizSpace;
+var vertSpace;
+
+function paint(canvas, context, width, height)
 {
+    //set global vars
+    this.width = width;
+    this.height = height;
+
+    graphPadding = 20;
+    availableSpace  = width - (graphPadding * count);
+    horizSpace = availableSpace / count;
+    vertSpace  = height - (graphPadding * count);
+
+    print( "plotterPainter::PAINT WIDTH: " + width);
+    print( "plotterPainter::PAINT HEIGHT: " + height);
+
    // var points = new List();
     // Create an array of random y points
-            var points = new Array();
+    var points = new Array();
     for(var i = 0;i < count;i++){
         // Get Ypos
         var yPercent  =  Math.floor(Math.random()*100)
@@ -68,6 +83,9 @@ function paint(canvas, context)
 
         
         function drawGrid(context) {
+            print("plotterPainter::drawGrid painting on width: " + width);
+            print("plotterPainter::drawGrid painting on height: " + height);
+
             // Draw Axis
             context.lineWidth = 1;
             context.strokeStyle = "rgba(0, 0, 0, 0.3)"

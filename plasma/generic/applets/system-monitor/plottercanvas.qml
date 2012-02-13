@@ -11,7 +11,13 @@ Canvas {
 
     onPaint: {
         var context = getContext("2d");
-        PlotterPainter.paint(this, context)
+
+//        PlotterPainter.sceneWidth = 400;
+ //       PlotterPainter.sceneHeight = 400;
+//        PlotterPainter.canvas = this
+        print("onPaint HEIGHT: " + height);
+        print("onPaint WIDTH: " + width);
+        PlotterPainter.paint(this, context, width, height)
     }
 
     /**
