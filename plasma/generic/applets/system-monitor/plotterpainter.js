@@ -95,9 +95,9 @@ function advancePlotter()
     debug("$$$$$$$ vertSspace: " + vertSpace);
     debug("$$$$$$$ yPercent: " + yPercent);
     debug("$$$$$$$ graphPadding: " + graphPadding);
-    var yPos = (400 * (yPercent / 100) + graphPadding * 2);
+    var yPos = 0 //HACK: testing only(400 * (yPercent / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
-    addSample(yPos);
+    addSample(height - yPos);
 
 
 //    if ((points.length * horizSpace) >= width - 20) {
@@ -117,7 +117,6 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-        drawDots();
         fillPath();
         drawGrid(context);
     }
@@ -135,12 +134,12 @@ function drawLines()
         debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i][0] + " y value: " + points[i][1]);
 
-        context.text("POINT" , points[i][0], points[i][1]);
+//        context.text("POINT" , points[i][0], points[i][1]);
 
         if(i == 0) {
-            context.moveTo(points[i][0], points[i][1]);
+            context.moveTo(points[i][0] - graphPadding, points[i][1]);
         } else {
-            context.lineTo(points[i][0], points[i][1]);
+            context.lineTo(points[i][0] - graphPadding, points[i][1]);
         }
 
 
@@ -148,18 +147,10 @@ function drawLines()
     context.stroke();
     context.closePath();
 
-    context.beginPath()
+//    context.beginPath()
     //FIXME: TEXT IS BROKEN, UPSTREAM
-    context.stroke();
+ //   context.stroke();
     context.closePath;
-}
-
-function drawDots()
-{
-    // Draw Dots
-    for(var i = 0; i < points.length; ++i){
-        drawCircle(context, points[i][0], points[i][1], (points.length - 1), "rgb(0, 0, 255)");
-    }
 }
 
 function fillPath()
@@ -168,7 +159,7 @@ function fillPath()
     //fill path (everything below the line graph)
     context.beginPath();
     context.moveTo(graphPadding * 2, height - graphPadding)
-    context.fillStyle = "rgba(255, 0, 0, 0.5)"
+    context.fillStyle = "rgba(255, 0, 0, 1)"
 
     for(var i = 0; i < points.length; ++i)
     {
@@ -209,12 +200,3 @@ function drawGrid(context)
     context.closePath();
 }
 
-function drawCircle(context, x, y, radius, colour)
-{
-    context.save();
-    context.fillStyle = colour;
-    context.beginPath();
-    context.arc(x-1, y-1, radius,0,Math.PI*2,true); // Outer circle
-    context.fill();
-    context.restore();
-}
