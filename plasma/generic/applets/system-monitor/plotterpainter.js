@@ -11,11 +11,12 @@ var horizSpace;
 var vertSpace;
 
 var points = new Array();
-
+var canvas;
 function addSample(y)
 {
     points.push(y);
     print("plotterPainter::addSample sample list: " + points);
+    print("plotterPainter::addSample requesting new paint event");
 }
 
 /**
@@ -29,20 +30,20 @@ function advancePlotter() {
     addSample(yPos);
 }
 
-
 function paint(canvas, context, width, height)
 {
     //set global vars
     this.width = width;
     this.height = height;
+    this.canvas = canvas;
 
     graphPadding = 20;
     availableSpace  = width - (graphPadding * count);
     horizSpace = availableSpace / count;
     vertSpace  = height - (graphPadding * count);
 
-    print( "plotterPainter::PAINT WIDTH: " + width);
-    print( "plotterPainter::PAINT HEIGHT: " + height);
+    print("plotterPainter::PAINT WIDTH: " + width);
+    print("plotterPainter::PAINT HEIGHT: " + height);
 
    // var points = new List();
     // Create an array of random y points
@@ -60,6 +61,7 @@ function paint(canvas, context, width, height)
     var xPos = graphPadding * 2;
     context.beginPath();
     for(i = 0;i < points.count;i++){
+        print("plotterPainter::paint drawing lines, xPos: " + xPos);
         if(i == 0) {
             context.moveTo(xPos, points[i]);
         } else {

@@ -3,11 +3,12 @@ import QtQuick 2.0
 import "plotterpainter.js" as PlotterPainter
 
 Canvas {
+    id: canvas
     width: 600
     height: 400
 
     //milliseconds
-    property int sampleInterval: 2000
+    property int sampleInterval: 5000
     Component.onCompleted: {
     }
 
@@ -28,7 +29,10 @@ Canvas {
         interval: 2000
         running: true
         repeat: true
-        onTriggered: PlotterPainter.advancePlotter()
+        onTriggered: {
+            PlotterPainter.advancePlotter();
+            canvas.requestPaint();
+        }
     }
 
 }
