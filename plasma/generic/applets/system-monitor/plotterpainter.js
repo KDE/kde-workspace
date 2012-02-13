@@ -26,7 +26,7 @@ var horizSpace;
 var vertSpace;
 
 // [i][0] = x, [i][1] = y
-var points = new Array();
+var points = [];
 var canvas;
 var context;
 
@@ -35,7 +35,10 @@ function addSample(y)
     // adding a new sample, making a new element that contains x and y
     // set x
 //    var xPos = graphPadding * 2;
+    points.push([points.length, 2]);
+
     points[points.length][0] = horizSpace * (points.length - 1);
+
     // set y
     points[points.length][1] = y;
 
@@ -49,6 +52,11 @@ function shiftLeft()
 //    for (var i = 0; i < count; ++i) {
  //       points[i] -= horizSpace;
   //  }
+}
+
+function init()
+{
+    points.push([]);
 }
 
 /**
@@ -80,6 +88,7 @@ function paint(canvas, context, width, height)
     availableSpace  = width - (graphPadding * points.length - 1);
     horizSpace = availableSpace / (points.length - 1);
     vertSpace  = height - (graphPadding * points.length - 1);
+    print("HORIZSPACE: " + horizSpace);
 
     print("plotterPainter::PAINT WIDTH: " + width);
     print("plotterPainter::PAINT HEIGHT: " + height);
@@ -101,7 +110,7 @@ function drawDots()
 function drawLines()
 {
     // Draw Lines
-    print("plotterPainter::paint starting to draw lines, xPos: " + xPos);
+//    print("plotterPainter::paint starting to draw lines, xPos: " + xPos);
 
     context.beginPath();
 

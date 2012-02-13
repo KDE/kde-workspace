@@ -27,6 +27,7 @@ Canvas {
     //milliseconds
     property int sampleInterval: 5000
     Component.onCompleted: {
+        PlotterPainter.init();
     }
 
     onPaint: {
