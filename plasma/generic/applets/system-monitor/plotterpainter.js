@@ -17,8 +17,6 @@
 
 .pragma library
 
-var count = 6;
-
 var height;
 var width;
 
@@ -48,9 +46,9 @@ function addSample(y)
 function shiftLeft()
 {
     print("plotterPainter::shiftLeft()");
-    for (var i = 0; i < count; ++i) {
-        points[i] -= horizSpace;
-    }
+//    for (var i = 0; i < count; ++i) {
+ //       points[i] -= horizSpace;
+  //  }
 }
 
 /**
@@ -65,7 +63,6 @@ function advancePlotter()
     addSample(yPos);
 
 
-    print("plotterPainter::advancePlotter() points[count - 1] > width - 20, attempting shift left: " + ((points.length - 1) * horizSpace)  + " WIDTH: " + (width - 20));
     if ((points.length * horizSpace) >= width - 20) {
         shiftLeft();
     }
@@ -81,7 +78,7 @@ function paint(canvas, context, width, height)
 
     graphPadding = 20;
     availableSpace  = width - (graphPadding * points.length - 1);
-    horizSpace = availableSpace / count;
+    horizSpace = availableSpace / (points.length - 1);
     vertSpace  = height - (graphPadding * points.length - 1);
 
     print("plotterPainter::PAINT WIDTH: " + width);
@@ -96,7 +93,7 @@ function paint(canvas, context, width, height)
 function drawDots()
 {
     // Draw Dots
-    for(var i = 0; i < count; ++i){
+    for(var i = 0; i < points.length; ++i){
         drawCircle(context, points[i][0], points[i][1], (points.length - 1), "rgb(0, 0, 255)");
     }
 }
@@ -104,20 +101,20 @@ function drawDots()
 function drawLines()
 {
     // Draw Lines
-    var xPos = graphPadding * 2;
     print("plotterPainter::paint starting to draw lines, xPos: " + xPos);
+
     context.beginPath();
-    for(var i = 0;i < points.count;i++){
+
+    for(var i = 0; i < points.length; ++i){
         if(i == 0) {
-            context.moveTo(xPos, points[i]);
+            context.moveTo(points[i][0], points[i][1]);
         } else {
-            context.lineTo(xPos, points[i]);
+            context.lineTo(points[i][0], points[i][1]);
         }
 
         //FIXME: TEXT IS BROKEN, UPSTREAM
     //            context.text(tempString , xPos, points[i]);
 
-        xPos += horizSpace;
     }
     context.stroke();
     context.closePath();
@@ -131,12 +128,11 @@ function fillPath()
     context.moveTo(graphPadding * 2, height - graphPadding)
     context.fillStyle = "rgba(255, 0, 0, 0.5)"
 
-    for(var i = 0; i < points.length; i++)
+    for(var i = 0; i < points.length; ++i)
     {
-        var pos_y = points[i];
 //        console.log("FILLING POS_Y: " + pos_y + " | lineTo: x: " + (i*horizSpace) + " | lineTo: y: " + pos_y);
-
-        context.lineTo(i * horizSpace + (graphPadding * 2), pos_y);
+        //FIXME: make it use x from points
+        context.lineTo(i * horizSpace + (graphPadding * 2), points[i][1]);
     }
 
     context.lineTo(i * horizSpace, height - graphPadding);
