@@ -35,12 +35,12 @@ function addSample(y)
     // set x
 //    var xPos = graphPadding * 2;
     points.push([points.length, 2]);
-debug("SSAMPLE LIST, horizspace: " + horizSpace + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     points[points.length - 1][0] = horizSpace * (points.length);
 
     // set y
     points[points.length - 1][1] = y;
 
+    debug("SSAMPLE LIST, X VALUE: " + points[points.length - 1][0] + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     debug("sample list: " + points);
     debug("requesting new paint event");
 }
@@ -91,7 +91,11 @@ function advancePlotter()
 {
     debug("");
     var yPercent = Math.floor(Math.random() * 100);
-    var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
+    debug("randomly generated number: " + yPercent);
+    debug("$$$$$$$ vertSspace: " + vertSpace);
+    debug("$$$$$$$ yPercent: " + yPercent);
+    debug("$$$$$$$ graphPadding: " + graphPadding);
+    var yPos = (400 * (yPercent / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
     addSample(yPos);
 
