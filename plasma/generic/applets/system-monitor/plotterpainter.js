@@ -116,7 +116,7 @@ function fillPath()
 
     //fill path (everything below the line graph)
     context.beginPath();
-    context.moveTo(graphPadding * 2, height)
+    context.moveTo(graphPadding * 2, height - graphPadding)
     context.fillStyle = "rgba(255, 0, 0, 0.5)"
 
     for(var i = 0; i < points.length; i++)
@@ -127,8 +127,8 @@ function fillPath()
         context.lineTo(i * horizSpace + (graphPadding * 2), pos_y);
     }
 
-    context.lineTo(i * horizSpace, height);
-    context.lineTo(0, height);
+    context.lineTo(i * horizSpace, height - graphPadding);
+    context.lineTo(0, height - graphPadding);
 
     context.fill();
 
