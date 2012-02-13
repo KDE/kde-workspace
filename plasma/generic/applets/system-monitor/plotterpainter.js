@@ -48,6 +48,20 @@ function paint(canvas, context, width, height)
     print("plotterPainter::PAINT WIDTH: " + width);
     print("plotterPainter::PAINT HEIGHT: " + height);
 
+    drawLines();
+
+    // Draw Dots
+    var xPos = graphPadding * 2;
+    for(var i = 0;i < count;i++){
+        drawCircle(context, xPos, points[i], count, "rgb(0, 0, 255)");
+        xPos += horizSpace;
+    }
+
+    fillPath();
+    drawGrid(context);
+}
+
+function drawLines() {
     // Draw Lines
     var xPos = graphPadding * 2;
     print("plotterPainter::paint starting to draw lines, xPos: " + xPos);
@@ -66,16 +80,6 @@ function paint(canvas, context, width, height)
     }
     context.stroke();
     context.closePath();
-
-    // Draw Dots
-    var xPos = graphPadding * 2;
-    for(var i = 0;i < count;i++){
-        drawCircle(context, xPos, points[i], count, "rgb(0, 0, 255)");
-        xPos += horizSpace;
-    }
-
-    fillPath();
-    drawGrid(context);
 }
 
 function fillPath() {
