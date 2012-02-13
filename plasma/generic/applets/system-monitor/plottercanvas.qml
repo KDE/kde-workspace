@@ -8,7 +8,7 @@ Canvas {
     height: 400
 
     //milliseconds
-    property int sampleInterval: 10000
+    property int sampleInterval: 5000
     Component.onCompleted: {
     }
 
@@ -26,7 +26,7 @@ Canvas {
 
     Timer {
         id: plotterTick
-        interval: 2000
+        interval: sampleInterval
         running: true
         repeat: true
         onTriggered: {
