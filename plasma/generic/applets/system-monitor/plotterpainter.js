@@ -58,8 +58,8 @@ function advancePlotter()
     addSample(yPos);
 
 
-    print("plotterPainter::advancePlotter() points[count - 1] > width - 20, attempting shift left: " + points[points.length - 1] + " WIDTH: " + (width - 20));
-    if (points[points.length - 1] >= width - 20) {
+    print("plotterPainter::advancePlotter() points[count - 1] > width - 20, attempting shift left: " + (points.length * horizSpace)  + " WIDTH: " + (width - 20));
+    if ((points.length * horizSpace) >= width - 20) {
         shiftLeft();
     }
 }
