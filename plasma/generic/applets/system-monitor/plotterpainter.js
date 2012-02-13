@@ -27,13 +27,20 @@ var availableSpace;
 var horizSpace;
 var vertSpace;
 
+// [i][0] = x, [i][1] = y
 var points = new Array();
 var canvas;
 var context;
 
 function addSample(y)
 {
-    points.push(y);
+    // adding a new sample, making a new element that contains x and y
+    // set x
+//    var xPos = graphPadding * 2;
+    points[points.length][0] = horizSpace * (points.length - 1);
+    // set y
+    points[points.length][1] = y;
+
     print("plotterPainter::addSample sample list: " + points);
     print("plotterPainter::addSample requesting new paint event");
 }
@@ -58,7 +65,7 @@ function advancePlotter()
     addSample(yPos);
 
 
-    print("plotterPainter::advancePlotter() points[count - 1] > width - 20, attempting shift left: " + (points.length * horizSpace)  + " WIDTH: " + (width - 20));
+    print("plotterPainter::advancePlotter() points[count - 1] > width - 20, attempting shift left: " + ((points.length - 1) * horizSpace)  + " WIDTH: " + (width - 20));
     if ((points.length * horizSpace) >= width - 20) {
         shiftLeft();
     }
@@ -73,15 +80,14 @@ function paint(canvas, context, width, height)
     this.context = context;
 
     graphPadding = 20;
-    availableSpace  = width - (graphPadding * count);
+    availableSpace  = width - (graphPadding * points.length - 1);
     horizSpace = availableSpace / count;
-    vertSpace  = height - (graphPadding * count);
+    vertSpace  = height - (graphPadding * points.length - 1);
 
     print("plotterPainter::PAINT WIDTH: " + width);
     print("plotterPainter::PAINT HEIGHT: " + height);
 
     drawLines();
-
     drawDots();
     fillPath();
     drawGrid(context);
@@ -90,10 +96,8 @@ function paint(canvas, context, width, height)
 function drawDots()
 {
     // Draw Dots
-    var xPos = graphPadding * 2;
-    for(var i = 0;i < count;i++){
-        drawCircle(context, xPos, points[i], count, "rgb(0, 0, 255)");
-        xPos += horizSpace;
+    for(var i = 0; i < count; ++i){
+        drawCircle(context, points[i][0], points[i][1], (points.length - 1), "rgb(0, 0, 255)");
     }
 }
 
