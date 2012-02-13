@@ -40,7 +40,10 @@ function addSample(y)
 
 function shiftLeft()
 {
-    
+    print("plotterPainter::shiftLeft()");
+    for (var i = 0; i < count; ++i) {
+        points[i] -= horizSpace;
+    }
 }
 
 /**
@@ -53,7 +56,12 @@ function advancePlotter()
     var yPercent = Math.floor(Math.random() * 100);
     var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
     addSample(yPos);
-    shiftLeft();
+
+
+    print("plotterPainter::advancePlotter() points[count - 1] > width - 20, attempting shift left: " + points[points.length - 1] + " WIDTH: " + (width - 20));
+    if (points[points.length - 1] >= width - 20) {
+        shiftLeft();
+    }
 }
 
 function paint(canvas, context, width, height)
