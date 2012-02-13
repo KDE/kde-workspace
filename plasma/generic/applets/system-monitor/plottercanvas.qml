@@ -25,7 +25,7 @@ Canvas {
     height: 400
 
     //milliseconds
-    property int sampleInterval: 5000
+    property int sampleInterval: 1000
     Component.onCompleted: {
         PlotterPainter.init(width, height);
     }
@@ -46,7 +46,7 @@ Canvas {
         id: plotterTick
         interval: sampleInterval
         running: true
-        repeat: true
+        repeat: false
         onTriggered: {
             PlotterPainter.advancePlotter();
             canvas.requestPaint();

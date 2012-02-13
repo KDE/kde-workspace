@@ -21,7 +21,6 @@ var height;
 var width;
 
 var graphPadding;
-var availableSpace;
 var horizSpace;
 var vertSpace;
 
@@ -48,7 +47,7 @@ debug("SSAMPLE LIST, horizspace: " + horizSpace + " POINTS.LENGTH: " + points.le
 
 function debug(str)
 {
-    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() output:" + str);
+    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() OUTPUT: " + str);
 }
 
 function shiftLeft()
@@ -70,15 +69,16 @@ function init(width, height)
     var divisor = points.length;
 
     if (divisor == 0) {
-        //1 would end up doing basically nothing
-        divisor = 1;
+        divisor = this.width;
     }
-    availableSpace  = width - (graphPadding * (points.length));
+
 
     debug("POOOINTS LENGTH: " + points.length);
+    debug("width: " + this.width);
 
-    horizSpace = availableSpace / (divisor);
-    vertSpace  = height - (graphPadding * (points.length));
+    // TODO: find a scalar, mostly for vertSpace
+    horizSpace = 1;
+    vertSpace  = 1 //height - (graphPadding * (points.length));
     //form an array of an array
     points.push([]);
 }
@@ -89,9 +89,10 @@ function init(width, height)
  */
 function advancePlotter()
 {
-    debug("advancePlotter()");
+    debug("");
     var yPercent = Math.floor(Math.random() * 100);
     var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
+    debug("randomly generated y pos: " + yPos);
     addSample(yPos);
 
 
