@@ -36,7 +36,7 @@ function addSample(y)
     // set x
 //    var xPos = graphPadding * 2;
     points.push([points.length, 2]);
-
+debug("SSAMPLE LIST, horizspace: " + horizSpace + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     points[points.length - 1][0] = horizSpace * (points.length);
 
     // set y
@@ -66,12 +66,19 @@ function init(width, height)
     this.height = height;
 
     graphPadding = 20;
-    availableSpace  = width - (graphPadding * (points.length - 1));
+
+    var divisor = points.length;
+
+    if (divisor == 0) {
+        //1 would end up doing basically nothing
+        divisor = 1;
+    }
+    availableSpace  = width - (graphPadding * (points.length));
 
     debug("POOOINTS LENGTH: " + points.length);
 
-    horizSpace = availableSpace / (points.length - 1);
-    vertSpace  = height - (graphPadding * (points.length - 1));
+    horizSpace = availableSpace / (divisor);
+    vertSpace  = height - (graphPadding * (points.length));
     //form an array of an array
     points.push([]);
 }
@@ -126,8 +133,9 @@ function drawLines()
 
     context.beginPath();
 
-    for(var i = 0; i < points.length; ++i){
-        debug("length: " + points.length);
+    //HACK we start at 1.
+    for(var i = 1; i < points.length; ++i){
+        debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i][0] + " y value: " + points[i][1]);
 
         if(i == 0) {
