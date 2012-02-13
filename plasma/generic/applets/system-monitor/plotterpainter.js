@@ -38,15 +38,22 @@ function addSample(y)
     print("plotterPainter::addSample requesting new paint event");
 }
 
+function shiftLeft()
+{
+    
+}
+
 /**
  * Advances the plotter (shifts all points left) by 1 interval
  * Should be called every tick of the plotter sampler.
  */
-function advancePlotter() {
+function advancePlotter()
+{
     print("plotterPainter::advancePlotter()");
     var yPercent = Math.floor(Math.random() * 100);
     var yPos = (vertSpace * (yPercent / 100) + (graphPadding * 2));
     addSample(yPos);
+    shiftLeft();
 }
 
 function paint(canvas, context, width, height)
@@ -67,18 +74,23 @@ function paint(canvas, context, width, height)
 
     drawLines();
 
+    drawDots();
+    fillPath();
+    drawGrid(context);
+}
+
+function drawDots()
+{
     // Draw Dots
     var xPos = graphPadding * 2;
     for(var i = 0;i < count;i++){
         drawCircle(context, xPos, points[i], count, "rgb(0, 0, 255)");
         xPos += horizSpace;
     }
-
-    fillPath();
-    drawGrid(context);
 }
 
-function drawLines() {
+function drawLines()
+{
     // Draw Lines
     var xPos = graphPadding * 2;
     print("plotterPainter::paint starting to draw lines, xPos: " + xPos);
@@ -99,7 +111,8 @@ function drawLines() {
     context.closePath();
 }
 
-function fillPath() {
+function fillPath()
+{
 
     //fill path (everything below the line graph)
     context.beginPath();
@@ -123,7 +136,8 @@ function fillPath() {
 }
 
 
-function drawGrid(context) {
+function drawGrid(context)
+{
     print("plotterPainter::drawGrid painting on width: " + width);
     print("plotterPainter::drawGrid painting on height: " + height);
 
@@ -145,7 +159,8 @@ function drawGrid(context) {
     context.closePath();
 }
 
-function drawCircle(context, x, y, radius, colour){
+function drawCircle(context, x, y, radius, colour)
+{
     context.save();
     context.fillStyle = colour;
     context.beginPath();
