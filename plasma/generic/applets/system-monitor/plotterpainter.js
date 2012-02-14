@@ -166,6 +166,7 @@ function fillPath()
 //        console.log("FILLING POS_Y: " + pos_y + " | lineTo: x: " + (i*horizSpace) + " | lineTo: y: " + pos_y);
         //FIXME: make it use x from points
         context.lineTo(i * horizSpace + (graphPadding * 2), points[i][1]);
+        debug("points[i][1] " + points[i][1]);
     }
 
     context.lineTo(i * horizSpace, height - graphPadding);
