@@ -137,7 +137,7 @@ function paint(canvas, context)
 
         drawLines();
         fillPath();
-   //     drawGrid(context);
+        drawGrid(context);
     }
 }
 
