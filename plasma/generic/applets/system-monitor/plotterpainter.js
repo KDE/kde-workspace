@@ -95,7 +95,7 @@ function advancePlotter()
     debug("$$$$$$$ vertSspace: " + vertSpace);
     debug("$$$$$$$ yPercent: " + yPercent);
     debug("$$$$$$$ graphPadding: " + graphPadding);
-    var yPos = 0 //HACK: testing only(400 * (yPercent / 100) + graphPadding * 2);
+    var yPos = (400 * (yPercent / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
     addSample(height - yPos);
 
@@ -118,7 +118,7 @@ function paint(canvas, context)
 
         drawLines();
         fillPath();
-        drawGrid(context);
+//        drawGrid(context);
     }
 }
 
@@ -172,9 +172,9 @@ function fillPath()
     context.lineTo(i * horizSpace, height - graphPadding);
     context.lineTo(0, height - graphPadding);
 
+    context.closePath();
     context.fill();
 
-    context.closePath();
 }
 
 
