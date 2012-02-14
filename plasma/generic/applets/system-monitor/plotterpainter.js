@@ -66,6 +66,7 @@ function shiftLeft()
     for (var i = 0; i < points.length; ++i) {
 
         if (points[i][0] <= 0 || (points[i][0] - horizSpace) <= 0) {
+            //FIXME: pretty sure this LEAKS. also, not sure how to use splice properly
             points.splice(i, 2);
         }
 
@@ -219,7 +220,9 @@ function fillPath()
     context.lineTo(0, height - graphPadding);
 
     context.closePath();
-    context.fill();
+    if (points.length > 1) {
+        context.fill();
+    }
 
 }
 
