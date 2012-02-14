@@ -159,17 +159,19 @@ function fillPath()
     //fill path (everything below the line graph)
     context.beginPath();
     context.moveTo(graphPadding * 2, height - graphPadding)
-    context.fillStyle = "rgba(255, 0, 0, 1)"
+    context.fillStyle = "rgba(255, 0, 0, .1)"
 
+    //FIXME: because i have no fucking clue where this comes from, or why it's offset
+    var offset = 5;
     for(var i = 0; i < points.length; ++i)
     {
 //        console.log("FILLING POS_Y: " + pos_y + " | lineTo: x: " + (i*horizSpace) + " | lineTo: y: " + pos_y);
         //FIXME: make it use x from points
-        context.lineTo(i * horizSpace + (graphPadding * 2), points[i][1]);
+        context.lineTo(i * horizSpace - offset, points[i][1]);
         debug("points[i][1] " + points[i][1]);
     }
 
-    context.lineTo(i * horizSpace, height - graphPadding);
+    context.lineTo(i * horizSpace - offset, height - graphPadding);
     context.lineTo(0, height - graphPadding);
 
     context.closePath();
