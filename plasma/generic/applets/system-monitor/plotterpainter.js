@@ -158,7 +158,7 @@ function drawLines()
     context.beginPath();
 
     //HACK we start at 1.
-    for(var i = 1; i < points.length; ++i){
+    for(var i = 1; i < points.length; ++i) {
         debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i][0] + " y value: " + points[i][1]);
 
@@ -173,7 +173,7 @@ function drawLines()
 
             context.moveTo(points[i][0] - graphPadding, points[i][1]);
 
-            var cp1x = x 
+            var cp1x = x
             var cp1y = y - 20
             var cp2x = x + 10
             var cp2y = y + 20
@@ -199,9 +199,19 @@ function fillPath()
 
     //FIXME: because i have no fucking clue where this comes from, or why it's offset
     var offset = 20;
-    for(var i = 0; i < points.length; ++i)
-    {
-        context.lineTo(points[i][0] - offset, points[i][1]);
+    var x;
+    var y;
+    for(var i = 0; i < points.length; ++i) {
+        x = points[i][0] - offset;
+        y = points[i][1];
+
+        var cp1x = x 
+        var cp1y = y - 20
+        var cp2x = x + 10
+        var cp2y = y + 20
+
+        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+//        context.lineTo(points[i][0] - offset, points[i][1]);
         debug("points[i][1] " + points[i][1]);
     }
 
