@@ -62,10 +62,13 @@ function shiftLeft()
     debug("");
     //shift all x points left some
     for (var i = 0; i < points.length; ++i) {
-        points[i][0] -= horizSpace;
-        if (points[i][0] <= 0) {
-  //          points = points.splice(i, 1);
+
+        if (points[i][0] <= 0 || points[i][0] -= horizSpace <= 0) {
+            points.splice(i, 1);
         }
+
+        points[i][0] -= horizSpace;
+
     }
 
     clearNeeded = true;
@@ -133,7 +136,7 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-        fillPath();
+       // fillPath();
    //     drawGrid(context);
     }
 }
@@ -165,7 +168,6 @@ function drawLines()
 //    context.beginPath()
     //FIXME: TEXT IS BROKEN, UPSTREAM
  //   context.stroke();
-    context.closePath;
 }
 
 function fillPath()
