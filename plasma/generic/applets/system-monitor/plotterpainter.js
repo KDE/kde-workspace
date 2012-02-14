@@ -252,5 +252,10 @@ function drawGrid(context)
 
 function mouseMoved(x, y)
 {
-    
+    //FIXME: implement binary search, instead of linear
+    for (var i = 0; i < points.length; ++i) {
+        if (points[i][0] - 50 < x > points[i][0] + 50) {
+            debug("****** MOUSE HIT A POINT, NEAREST POINT WE FOUND: " + points[i][0]);
+        }
+    }
 }
