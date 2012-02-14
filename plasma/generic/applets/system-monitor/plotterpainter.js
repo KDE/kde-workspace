@@ -226,7 +226,6 @@ function fillPath()
 
 }
 
-
 function drawGrid(context)
 {
     debug("painting on width: " + width);
@@ -256,6 +255,7 @@ function mouseMoved(x, y)
     for (var i = 0; i < points.length; ++i) {
         if (points[i][0] - 50 < x > points[i][0] + 50) {
             debug("****** MOUSE HIT A POINT, NEAREST POINT WE FOUND: " + points[i][0]);
+            context.text(points[i][0], points[i][0], points[i][1]);
         }
     }
 }
