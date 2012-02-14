@@ -42,7 +42,7 @@ function addSample(y)
     if (points.length != 0) {
         index = points.length - 1;
     }
-    points[index][0] = horizSpace * (points.length);
+    points[index][0] = graphPadding + (horizSpace * (points.length));
 
     // set y
     points[index][1] = y;
