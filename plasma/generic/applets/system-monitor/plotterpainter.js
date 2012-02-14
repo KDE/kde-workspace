@@ -153,7 +153,8 @@ function drawLines()
         debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i][0] + " y value: " + points[i][1]);
 
-//        context.text("POINT" , points[i][0], points[i][1]);
+        // FIXME: TEXT IS BROKEN, UPSTREAM
+        // context.text("POINT" , points[i][0], points[i][1]);
 
         if(i == 0) {
             context.moveTo(points[i][0] - graphPadding, points[i][1]);
@@ -165,9 +166,6 @@ function drawLines()
     context.stroke();
     context.closePath();
 
-//    context.beginPath()
-    //FIXME: TEXT IS BROKEN, UPSTREAM
- //   context.stroke();
 }
 
 function fillPath()
@@ -182,9 +180,6 @@ function fillPath()
     var offset = 20;
     for(var i = 0; i < points.length; ++i)
     {
-//        console.log("FILLING POS_Y: " + pos_y + " | lineTo: x: " + (i*horizSpace) + " | lineTo: y: " + pos_y);
-        //FIXME: make it use x from points
-//        context.lineTo(i * horizSpace - offset, points[i][1]);
         context.lineTo(points[i][0] - offset, points[i][1]);
         debug("points[i][1] " + points[i][1]);
     }
