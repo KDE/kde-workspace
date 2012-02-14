@@ -29,6 +29,8 @@ var points = [];
 var canvas;
 var context;
 
+var clearNeeded = false;
+
 function addSample(y)
 {
     // adding a new sample, making a new element that contains x and y
@@ -58,9 +60,15 @@ function debug(str)
 function shiftLeft()
 {
     debug("");
-//    for (var i = 0; i < count; ++i) {
- //       points[i] -= horizSpace;
-  //  }
+    //shift all x points left some
+    for (var i = 0; i < points.length; ++i) {
+        points[i][0] -= horizSpace;
+        if (points[i][0] <= 0) {
+  //          points = points.splice(i, 1);
+        }
+    }
+
+    clearNeeded = true;
 }
 
 function init(width, height)
@@ -104,26 +112,29 @@ function advancePlotter()
     debug("randomly generated y pos: " + yPos);
     addSample(height - yPos);
 
-
-//    if ((points.length * horizSpace) >= width - 20) {
-//        shiftLeft();
-//    }
+    if ((points.length * horizSpace) >= width - 50) {
+        shiftLeft();
+    }
 }
 
 function paint(canvas, context)
 {
+    if (clearNeeded) {
+        context.clearRect(0, 0, width, height);
+    }
+
+    //set global vars
+    this.canvas = canvas;
+    this.context = context;
     //nothing to paint if 0
     if (points.length != 0) {
-        //set global vars
-        this.canvas = canvas;
-        this.context = context;
 
         debug("WIDTH: " + width);
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
         fillPath();
-//        drawGrid(context);
+   //     drawGrid(context);
     }
 }
 
@@ -146,9 +157,8 @@ function drawLines()
         } else {
             context.lineTo(points[i][0] - graphPadding, points[i][1]);
         }
-
-
     }
+
     context.stroke();
     context.closePath();
 

@@ -32,7 +32,7 @@ Canvas {
     //TODO: PERFORMANCE: use Canvas::markDirty to mark the effected rect as dirty
 
     //milliseconds
-    property int sampleInterval: 1000
+    property int sampleInterval: 1
     Component.onCompleted: {
         PlotterPainter.init(width, height);
     }
