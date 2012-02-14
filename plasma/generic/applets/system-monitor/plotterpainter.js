@@ -250,3 +250,7 @@ function drawGrid(context)
     context.closePath();
 }
 
+function mouseMoved(x, y)
+{
+    
+}

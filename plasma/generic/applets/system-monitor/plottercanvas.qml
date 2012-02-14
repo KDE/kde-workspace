@@ -27,7 +27,7 @@ Item {
         id: canvas
         anchors.fill: parent
 
-    //FIXME: SEGFAULT UPSTREAM    smooth: true
+        //FIXME: SEGFAULT UPSTREAM    smooth: true
         // enable most rendering to a separate background thread
         renderInThread: true
 
@@ -42,26 +42,32 @@ Item {
 
         onPaint: {
             var context = getContext("2d");
-
     //        PlotterPainter.sceneWidth = 400;
     //       PlotterPainter.sceneHeight = 400;
     //        PlotterPainter.canvas = this
             print("onPaint HEIGHT: " + height);
             print("onPaint WIDTH: " + width);
             PlotterPainter.paint(this, context)
-
         }
+    }
 
+    MouseArea {
+        anchors.fill: canvas
+        hoverEnabled: true
 
-        Timer {
-            id: plotterTick
-            interval: sampleInterval
-            running: true
-            repeat: true
-            onTriggered: {
-                PlotterPainter.advancePlotter();
-                canvas.requestPaint();
-            }
+        onPositionChanged: {
+            PlotterPainter.mouseMoved(mouse.x, mouse.y);
+        }
+    }
+
+    Timer {
+        id: plotterTick
+        interval: sampleInterval
+        running: true
+        repeat: true
+        onTriggered: {
+            PlotterPainter.advancePlotter();
+            canvas.requestPaint();
         }
     }
 }
