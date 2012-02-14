@@ -31,6 +31,8 @@ var context;
 
 var clearNeeded = false;
 
+var gridPainted = false;
+
 function addSample(y)
 {
     // adding a new sample, making a new element that contains x and y
@@ -95,6 +97,7 @@ function init(width, height)
     // TODO: find a scalar, mostly for vertSpace
     horizSpace = 15;
     vertSpace  = 1 //height - (graphPadding * (points.length));
+
     //form an array of an array
     points.push([]);
 }
@@ -124,6 +127,9 @@ function paint(canvas, context)
 {
     if (clearNeeded) {
         context.clearRect(0, 0, width, height);
+        //we only draw the grid once. it only needs to be redrawn on certain
+        //events, like clearing the entire thing
+        gridPainted = false;
     }
 
     //set global vars
@@ -137,7 +143,10 @@ function paint(canvas, context)
 
         drawLines();
       //  fillPath();
-        drawGrid(context);
+        if (!gridPainted) {
+            drawGrid(context);
+            gridPainted = true;
+        }
     }
 }
 
