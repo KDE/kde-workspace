@@ -19,46 +19,49 @@ import QtQuick 2.0
 
 import "plotterpainter.js" as PlotterPainter
 
-Canvas {
-    id: canvas
+Item {
     width: 600
     height: 400
 
-//FIXME: SEGFAULT UPSTREAM    smooth: true
-    // enable most rendering to a separate background thread
-    renderInThread: true
+    Canvas {
+        id: canvas
+        anchors.fill: parent
 
-    //TODO: PERFORMANCE: find a good tileSize to help enable caching
-    //TODO: PERFORMANCE: use Canvas::markDirty to mark the effected rect as dirty
+    //FIXME: SEGFAULT UPSTREAM    smooth: true
+        // enable most rendering to a separate background thread
+        renderInThread: true
 
-    //milliseconds
-    property int sampleInterval: 800
-    Component.onCompleted: {
-        PlotterPainter.init(width, height);
-    }
+        //TODO: PERFORMANCE: find a good tileSize to help enable caching
+        //TODO: PERFORMANCE: use Canvas::markDirty to mark the effected rect as dirty
 
-    onPaint: {
-        var context = getContext("2d");
+        //milliseconds
+        property int sampleInterval: 800
+        Component.onCompleted: {
+            PlotterPainter.init(width, height);
+        }
 
-//        PlotterPainter.sceneWidth = 400;
- //       PlotterPainter.sceneHeight = 400;
-//        PlotterPainter.canvas = this
-        print("onPaint HEIGHT: " + height);
-        print("onPaint WIDTH: " + width);
-        PlotterPainter.paint(this, context)
+        onPaint: {
+            var context = getContext("2d");
 
-    }
+    //        PlotterPainter.sceneWidth = 400;
+    //       PlotterPainter.sceneHeight = 400;
+    //        PlotterPainter.canvas = this
+            print("onPaint HEIGHT: " + height);
+            print("onPaint WIDTH: " + width);
+            PlotterPainter.paint(this, context)
+
+        }
 
 
-    Timer {
-        id: plotterTick
-        interval: sampleInterval
-        running: true
-        repeat: true
-        onTriggered: {
-            PlotterPainter.advancePlotter();
-            canvas.requestPaint();
+        Timer {
+            id: plotterTick
+            interval: sampleInterval
+            running: true
+            repeat: true
+            onTriggered: {
+                PlotterPainter.advancePlotter();
+                canvas.requestPaint();
+            }
         }
     }
-
 }
