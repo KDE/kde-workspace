@@ -142,7 +142,7 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-      //  fillPath();
+        fillPath();
         if (!gridPainted) {
             drawGrid(context);
             gridPainted = true;
@@ -180,7 +180,7 @@ function drawLines()
 
             context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
         } else {
-//            context.lineTo(points[i][0] - graphPadding, points[i][1]);
+            context.lineTo(points[i][0] - graphPadding, points[i][1]);
         }
     }
 
