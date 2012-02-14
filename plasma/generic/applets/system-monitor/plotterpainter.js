@@ -63,7 +63,7 @@ function shiftLeft()
     //shift all x points left some
     for (var i = 0; i < points.length; ++i) {
 
-        if (points[i][0] <= 0 || points[i][0] -= horizSpace <= 0) {
+        if (points[i][0] <= 0 || (points[i][0] - horizSpace) <= 0) {
             points.splice(i, 1);
         }
 
