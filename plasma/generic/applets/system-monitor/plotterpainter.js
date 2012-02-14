@@ -33,6 +33,11 @@ var clearNeeded = false;
 
 var gridPainted = false;
 
+// the scalar that gets multiplied to scale it up or down.
+//  if it is 1 then it is not scaled at all
+// all members in points[][] are scaled accordingly well, only y values
+var scalar = 1;
+
 function addSample(y)
 {
     // adding a new sample, making a new element that contains x and y
@@ -48,6 +53,20 @@ function addSample(y)
 
     // set y
     points[index][1] = y;
+
+    if (y > height) {
+        // pick a scalar that's close
+        scalar = .8;
+
+        debug("*** $$$ downscaling values, found one too big");
+        // it's too big, scale all of it down
+        for (var i = 0; i < points.length; ++i) {
+            points[i][1] *= .8;
+        }
+
+        //let it be known we need to clear it because all points got shifted downward
+        clearNeeded = true;
+    }
 
     debug("SSAMPLE LIST, X VALUE: " + points[points.length - 1][0] + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     debug("sample list: " + points);
