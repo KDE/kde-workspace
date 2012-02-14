@@ -46,6 +46,7 @@ Canvas {
         print("onPaint HEIGHT: " + height);
         print("onPaint WIDTH: " + width);
         PlotterPainter.paint(this, context)
+
     }
 
 

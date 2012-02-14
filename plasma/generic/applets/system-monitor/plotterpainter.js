@@ -95,7 +95,7 @@ function init(width, height)
     debug("width: " + this.width);
 
     // TODO: find a scalar, mostly for vertSpace
-    horizSpace = 15;
+    horizSpace = 10;
     vertSpace  = 1 //height - (graphPadding * (points.length));
 
     //form an array of an array
@@ -165,11 +165,22 @@ function drawLines()
         // FIXME: TEXT IS BROKEN, UPSTREAM
         // context.text("POINT" , points[i][0], points[i][1]);
 
+        var x;
+        var y;
         if(points.length > 1) {
+            x = points[i - 1][0] - graphPadding;
+            y = points[i - 1][1];
+
             context.moveTo(points[i][0] - graphPadding, points[i][1]);
-            context.lineTo(points[i - 1][0] - graphPadding, points[i - 1][1]);
+
+            var cp1x = x 
+            var cp1y = y - 20
+            var cp2x = x + 10
+            var cp2y = y + 20
+
+            context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
         } else {
-            context.lineTo(points[i][0] - graphPadding, points[i][1]);
+//            context.lineTo(points[i][0] - graphPadding, points[i][1]);
         }
     }
 
