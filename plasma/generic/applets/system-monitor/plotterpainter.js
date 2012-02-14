@@ -136,7 +136,7 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-        fillPath();
+      //  fillPath();
         drawGrid(context);
     }
 }
@@ -156,8 +156,9 @@ function drawLines()
         // FIXME: TEXT IS BROKEN, UPSTREAM
         // context.text("POINT" , points[i][0], points[i][1]);
 
-        if(i == 0) {
+        if(points.length > 1) {
             context.moveTo(points[i][0] - graphPadding, points[i][1]);
+            context.lineTo(points[i - 1][0] - graphPadding, points[i - 1][1]);
         } else {
             context.lineTo(points[i][0] - graphPadding, points[i][1]);
         }
