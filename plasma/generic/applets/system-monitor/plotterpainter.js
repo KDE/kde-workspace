@@ -64,7 +64,7 @@ function shiftLeft()
     for (var i = 0; i < points.length; ++i) {
 
         if (points[i][0] <= 0 || (points[i][0] - horizSpace) <= 0) {
-            points.splice(i, 1);
+            points.splice(i, 2);
         }
 
         points[i][0] -= horizSpace;
@@ -136,7 +136,7 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-       // fillPath();
+        fillPath();
    //     drawGrid(context);
     }
 }
@@ -176,15 +176,16 @@ function fillPath()
     //fill path (everything below the line graph)
     context.beginPath();
     context.moveTo(graphPadding * 2, height - graphPadding)
-    context.fillStyle = "rgba(255, 0, 0, .1)"
+    context.fillStyle = "rgba(255, 0, 0, 1)"
 
     //FIXME: because i have no fucking clue where this comes from, or why it's offset
-    var offset = 5;
+    var offset = 20;
     for(var i = 0; i < points.length; ++i)
     {
 //        console.log("FILLING POS_Y: " + pos_y + " | lineTo: x: " + (i*horizSpace) + " | lineTo: y: " + pos_y);
         //FIXME: make it use x from points
-        context.lineTo(i * horizSpace - offset, points[i][1]);
+//        context.lineTo(i * horizSpace - offset, points[i][1]);
+        context.lineTo(points[i][0] - offset, points[i][1]);
         debug("points[i][1] " + points[i][1]);
     }
 
