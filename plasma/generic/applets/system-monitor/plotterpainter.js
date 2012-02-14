@@ -35,10 +35,15 @@ function addSample(y)
     // set x
 //    var xPos = graphPadding * 2;
     points.push([points.length, 2]);
-    points[points.length - 1][0] = horizSpace * (points.length);
+
+    var index = 0;
+    if (points.length != 0) {
+        index = points.length - 1;
+    }
+    points[index][0] = horizSpace * (points.length);
 
     // set y
-    points[points.length - 1][1] = y;
+    points[index][1] = y;
 
     debug("SSAMPLE LIST, X VALUE: " + points[points.length - 1][0] + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     debug("sample list: " + points);

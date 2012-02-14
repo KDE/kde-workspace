@@ -24,6 +24,7 @@ Canvas {
     width: 600
     height: 400
 
+//FIXME: SEGFAULT UPSTREAM    smooth: true
     // enable most rendering to a separate background thread
     renderInThread: true
 
