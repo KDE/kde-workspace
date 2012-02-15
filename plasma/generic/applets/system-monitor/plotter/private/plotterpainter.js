@@ -176,7 +176,7 @@ function drawLines()
     context.strokeStyle = "rgba(255, 0, 0, 1)"
     context.fillStyle = "rgba(0, 255, 0, 1)"
 
-    context.moveTo(points[0][0] - graphPadding, height - graphPadding);
+    context.moveTo(graphPadding, height - graphPadding);
 
     //HACK we start at 1.
     for(var i = 1; i < points.length; ++i) {
