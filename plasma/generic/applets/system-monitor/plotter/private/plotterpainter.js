@@ -169,7 +169,7 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-       // fillPath();
+//        fillPath();
         if (!gridPainted) {
             drawGrid(context);
             gridPainted = true;
@@ -196,17 +196,15 @@ function drawLines()
 
         var x;
         var y;
-        if(points.length > 1) {
-            x = points[i - 1][0] - graphPadding;
-            y = points[i - 1][1];
+        x = points[i - 1][0];
+        y = points[i - 1][1];
 
-            var cp1x = x
-            var cp1y = y
-            var cp2x = x
-            var cp2y = y
+        var cp1x = x - 5;
+        var cp1y = y;
+        var cp2x = x;
+        var cp2y = y - 10;
 
-            context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-        }
+        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
     }
 
     context.stroke();
@@ -226,21 +224,21 @@ function fillPath()
     var x;
     var y;
     for(var i = 0; i < points.length; ++i) {
-        x = points[i][0] - offset;
+        x = points[i][0];
         y = points[i][1];
 
-        var cp1x = x
+        var cp1x = x - 10
         var cp1y = y - 10
         var cp2x = x + 10
         var cp2y = y + 10
 
-//        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-        context.lineTo(points[i][0] - graphPadding, points[i][1]);
+        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+     //   context.lineTo(points[i][0] - graphPadding, points[i][1]);
         debug("points[i][1] " + points[i][1]);
     }
 
  //   context.bezierCurveTo(i * horizSpace + graphPadding, cp1y, cp2x, cp2y, i * horizSpace - graphPadding, height - graphPadding);
-    context.lineTo(i * horizSpace - offset, height - graphPadding);
+  //  context.lineTo(i * horizSpace - offset, height - graphPadding);
     context.lineTo(0, height - graphPadding);
 
     context.closePath();
