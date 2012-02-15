@@ -42,7 +42,7 @@ var pointMousedOver = false;
 
 // holds if we have hover text needing painted, and where at
 // access via hoverText.bool = true, etc.
-var hoverText = {bool: false, x: 0, y: 0}
+var hoverText = {bool: false, x: 0, y: 0, clearNeeded: false}
 
 function addSample(y)
 {
@@ -152,17 +152,22 @@ function advancePlotter()
 
 function paint(canvas, context)
 {
+    //set global vars
+    this.canvas = canvas;
+    this.context = context;
+
     if (clearNeeded) {
         print("clear needed");
         context.clearRect(0, 0, width, height);
         //we only draw the grid once. it only needs to be redrawn on certain
         //events, like clearing the entire thing
         gridPainted = false;
+    } else if (hoverText.bool == false && hoverText.clearNeeded == true) {
+        context.clearRect(hoverText.x - 50, hoverText.y - 50, hoverText.x + 50, hoverText.y + 50);
+        hoverText.clearNeeded = false;
+        gridPainted = false
     }
 
-    //set global vars
-    this.canvas = canvas;
-    this.context = context;
     //nothing to paint if 0
     if (points.length != 0) {
 
@@ -233,7 +238,8 @@ function drawGrid(context)
 
     // Draw Axis
     context.lineWidth = 1;
-    context.strokeStyle = "rgba(0, 0, 0, 0.3)"
+    //NOTE: set to .5 alpha or so to get paint regions easily
+    context.strokeStyle = "rgba(0, 0, 0, 1)"
 
     for (var y = 0; y < height - graphPadding; y += height/20) {
         context.moveTo(graphPadding, y);
@@ -264,7 +270,8 @@ function mouseMoved(x, y)
             // we've hit the end (otherwise we'd have broken out of this loop)
             // so there are no matching points.
             hoverText.bool = false;
-            context.clearRect(0, 0, width - graphPadding, height - graphPadding);
+            // wipe the previous one, we don't care
+            hoverText.clearNeeded = true;
         }
     }
 
