@@ -42,16 +42,12 @@ var pointMousedOver = false;
 
 // holds if we have hover text needing painted, and where at
 // access via hoverText.bool = true, etc.
-var hoverText = {bool: false, x: 0, y: 0, clearNeeded: false}
+var hoverText = {visible: false, x: 0, y: 0, clearNeeded: false}
 
 function addSample(y)
 {
     // adding a new sample, making a new element that contains x and y
-    // set x
-//    var xPos = graphPadding * 2;
-if (points.length > 6)
-    return;
-
+    // set x at a predefined interval (horizSpace)
     var xValue = graphPadding + (horizSpace * (points.length));
 
     var yValue = y;
@@ -100,6 +96,7 @@ function shiftLeft()
         }
 
         points[i].x -= horizSpace;
+        if (hoverText.visible = true;
 
     }
 
@@ -164,7 +161,7 @@ function paint(canvas, context)
         gridPainted = false;
     }
 
-    if (hoverText.bool == false && hoverText.clearNeeded == true) {
+    if (hoverText.visible == false && hoverText.clearNeeded == true) {
         //FIXME: trigger repaint only on the previous area. This doesn't work because there's some bug where it paints more than one
 
         // i'm guessign it's a program flow control issue.
@@ -188,7 +185,7 @@ function paint(canvas, context)
 
         drawLines();
 
-        if (hoverText.bool == true) {
+        if (hoverText.visible == true) {
             context.beginPath();
             context.strokeStyle = "rgba(0, 0, 0, 1)"
 
@@ -265,11 +262,10 @@ function drawGrid(context)
 
 function mouseMoved(x, y)
 {
-
     //FIXME: implement binary search, instead of linear
     for (var i = 0; i < points.length; ++i) {
         if (points[i].x - 5 < x && x < points[i].x + 5)  {
-            hoverText.bool = true;
+            hoverText.visible = true;
             hoverText.x = points[i].x;
             hoverText.y = points[i].y;
             // we found one, who cares about anything else
@@ -277,7 +273,7 @@ function mouseMoved(x, y)
         } else if (i == points.length - 1) {
             // we've hit the end (otherwise we'd have broken out of this loop)
             // so there are no matching points.
-            hoverText.bool = false;
+            hoverText.visible = false;
             // wipe the previous one, we don't care
             hoverText.clearNeeded = true;
         }
