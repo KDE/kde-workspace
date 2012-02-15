@@ -211,7 +211,7 @@ function paint(canvas, context)
             context.strokeWidth = 2;
             context.fillStyle = "rgba(50, 0, 0, 1)";
 
-            context.text(height - graphPadding - hoverText.y, hoverText.x, hoverText.y + 10);
+            context.text(Math.round(height - graphPadding - hoverText.y), hoverText.x, hoverText.y + 10);
             context.closePath();
             context.stroke();
             context.fill();
