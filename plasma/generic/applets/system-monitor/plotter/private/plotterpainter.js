@@ -181,9 +181,9 @@ function drawLines()
     // Draw Lines
     context.beginPath();
 
-    context.strokeStyle = "rgba(0, 0, 0, 1)"
+    context.strokeStyle = "rgba(255, 0, 0, 1)"
 
-    context.moveTo(points[0][0] - graphPadding, points[0][1]);
+    context.moveTo(points[0][0] - graphPadding, height - graphPadding);
 
     //HACK we start at 1.
     for(var i = 1; i < points.length; ++i) {
@@ -195,8 +195,8 @@ function drawLines()
 
         var x;
         var y;
-        x = points[i - 1][0];
-        y = points[i - 1][1];
+        x = points[i][0];
+        y = points[i][1];
 
         var cp1x = x - 5;
         var cp1y = y;
@@ -206,9 +206,12 @@ function drawLines()
         context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
     }
 
+    context.lineTo(points[points.length - 1][0], height - graphPadding);
+    context.lineTo(0, height - graphPadding);
+    context.closePath();
+
     context.fill();
     context.stroke();
-    context.closePath();
 }
 
 function drawGrid(context)
