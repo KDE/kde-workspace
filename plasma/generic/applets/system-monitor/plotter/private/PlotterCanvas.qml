@@ -23,19 +23,19 @@ Item {
     width: 600
     height: 400
 
+    //milliseconds
+    property int sampleInterval: 800
     Canvas {
         id: canvas
         anchors.fill: parent
 
-        //FIXME: SEGFAULT UPSTREAM    smooth: true
+        //FIXME: SEGFAULT UPSTREAM?    smooth: true
         // enable most rendering to a separate background thread
         renderInThread: true
 
         //TODO: PERFORMANCE: find a good tileSize to help enable caching
         //TODO: PERFORMANCE: use Canvas::markDirty to mark the effected rect as dirty
 
-        //milliseconds
-        property int sampleInterval: 800
         Component.onCompleted: {
             PlotterPainter.init(width, height);
         }

@@ -17,31 +17,27 @@
 
 import QtQuick 2.0
 
-import "plottercanvas" as PlotterCanvas
-
 /**
- * The most abstracted plotter type.
- * 
+ * Allows one to construct a Plotter component which
+ * can have different types of display.
+ * e.g. Line Graph, (TODO more?).
  *
+ * This is the main graph-like display normally seen.
+ *
+ * No text is included, that is up to a wrapping component
  */
-
 Item {
-    width: 600
-    height: 400
+    width: 1000
+    height: 1000
 
-    Canvas {
-        id: canvas
+    PlotterCanvas {
+        id: plotterCanvas
         anchors.fill: parent
-        renderInThread: true
-        //milliseconds
-        property int sampleInterval: 800
-        Component.onCompleted: {
-            PlotterPainter.init(width, height);
-        }
 
-        onPaint: {
-            var context = getContext("2d");
-            PlotterPainter.paint(this, context)
+        property int sampleInterval: 800
+
+        Component.onCompleted: {
+           // PlotterPainter.init(width, height);
         }
     }
 }
