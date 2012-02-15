@@ -27,8 +27,8 @@ import QtQuick 2.0
  * No text is included, that is up to a wrapping component
  */
 Item {
-    width: 1000
-    height: 1000
+    width: 600
+    height: 400
 
     PlotterCanvas {
         id: plotterCanvas
