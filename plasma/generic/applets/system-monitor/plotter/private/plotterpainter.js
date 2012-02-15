@@ -132,15 +132,6 @@ function init(width, height)
     // TODO: find a scalar, mostly for vertSpace
     horizSpace = 10;
     vertSpace  = 1 //height - (graphPadding * (points.length));
-
-    addSample(0);
-    addSample(0);
-    addSample(0);
-    addSample(0);
-    addSample(100);
-    addSample(100);
-    addSample(100);
-    addSample(100);
 }
 
 /**
@@ -220,7 +211,7 @@ function paint(canvas, context)
             context.strokeWidth = 2;
             context.fillStyle = "rgba(50, 0, 0, 1)";
 
-            context.text(hoverText.x, hoverText.x, hoverText.y + 10);
+            context.text(height - graphPadding - hoverText.y, hoverText.x, hoverText.y + 10);
             context.closePath();
             context.stroke();
             context.fill();
