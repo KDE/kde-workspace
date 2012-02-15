@@ -38,11 +38,15 @@ var gridPainted = false;
 // all members in points[][] are scaled accordingly well, only y values
 var scalar = 1;
 
+var pointMousedOver = false;
+
 function addSample(y)
 {
     // adding a new sample, making a new element that contains x and y
     // set x
 //    var xPos = graphPadding * 2;
+if (points.length > 6)
+    return;
 
     var xValue = graphPadding + (horizSpace * (points.length));
 
@@ -51,7 +55,7 @@ function addSample(y)
     points.push({x: xValue, y: yValue});
 
     if (y < 0 + graphPadding) {
-        downscale(y);
+//        downscale(y);
     } else if (y > height / 2) {
 //        upscale(y);
     }
@@ -145,6 +149,7 @@ function advancePlotter()
 function paint(canvas, context)
 {
     if (clearNeeded) {
+        print("clear needed");
         context.clearRect(0, 0, width, height);
         //we only draw the grid once. it only needs to be redrawn on certain
         //events, like clearing the entire thing
@@ -166,6 +171,7 @@ function paint(canvas, context)
             gridPainted = true;
         }
     }
+
 }
 
 function drawLines()
@@ -232,11 +238,25 @@ function drawGrid(context)
 
 function mouseMoved(x, y)
 {
+    context.beginPath();
+    context.strokeStyle = "rgba(0, 0, 0, 1)"
+
     //FIXME: implement binary search, instead of linear
     for (var i = 0; i < points.length; ++i) {
-        if (points[i].x - 50 < x > points[i].x + 50) {
-            debug("****** MOUSE HIT A POINT, NEAREST POINT WE FOUND: " + points[i].x);
+        if (points[i].x - 5 < x && x < points[i].x + 5)  {
+            if (pointMousedOver == false ) {
+                context.clearRect(0, 0, width, height);
+                paint(canvas, context);
+            }
+
             context.text(points[i].x, points[i].x, points[i].y);
+            pointMousedOver = true;
+        } else if (i == points.length - 1) {
+            pointMousedOver = false;
         }
     }
+
+breakout:
+    context.stroke();
+    context.closePath();
 }
