@@ -233,7 +233,7 @@ function drawLines()
     context.moveTo(graphPadding, height - graphPadding);
 
     //HACK we start at 1.
-    for(var i = 1; i < points.length; ++i) {
+    for(var i = 0; i < points.length; ++i) {
         debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i].x + " y value: " + points[i].y);
 
