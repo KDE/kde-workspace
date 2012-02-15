@@ -174,11 +174,12 @@ function paint(canvas, context)
         debug("WIDTH: " + width);
         debug("PAINT HEIGHT: " + height);
 
-        drawLines();
         if (!gridPainted) {
             drawGrid(context);
             gridPainted = true;
         }
+
+        drawLines();
 
         if (hoverText.bool == true) {
             context.beginPath();
