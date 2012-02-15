@@ -162,8 +162,15 @@ function paint(canvas, context)
         //we only draw the grid once. it only needs to be redrawn on certain
         //events, like clearing the entire thing
         gridPainted = false;
-    } else if (hoverText.bool == false && hoverText.clearNeeded == true) {
-        context.clearRect(hoverText.x - 50, hoverText.y - 50, hoverText.x + 50, hoverText.y + 50);
+    }
+
+    if (hoverText.bool == false && hoverText.clearNeeded == true) {
+        //FIXME: trigger repaint only on the previous area. This doesn't work because there's some bug where it paints more than one
+
+        // i'm guessign it's a program flow control issue.
+        // context.clearRect(hoverText.x - 50, hoverText.y - 50, hoverText.x + 50, hoverText.y + 50);
+
+        context.clearRect(0, 0, width, height);
         hoverText.clearNeeded = false;
         gridPainted = false
     }
