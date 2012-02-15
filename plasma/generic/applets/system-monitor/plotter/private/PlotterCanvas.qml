@@ -64,7 +64,7 @@ Item {
         running: true
         repeat: true
         onTriggered: {
-            PlotterPainter.advancePlotter();
+         //   PlotterPainter.advancePlotter();
             canvas.requestPaint();
         }
     }
