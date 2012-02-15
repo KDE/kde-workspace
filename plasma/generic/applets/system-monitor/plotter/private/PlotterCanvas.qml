@@ -29,7 +29,7 @@ Item {
         id: canvas
         anchors.fill: parent
 
-        //FIXME: SEGFAULT UPSTREAM?    smooth: true
+        //FIXME: SEGFAULT UPSTREAM? smooth: true
         // enable most rendering to a separate background thread
         renderInThread: true
 
@@ -64,7 +64,7 @@ Item {
         running: true
         repeat: true
         onTriggered: {
-         //   PlotterPainter.advancePlotter();
+            PlotterPainter.advancePlotter();
             canvas.requestPaint();
         }
     }

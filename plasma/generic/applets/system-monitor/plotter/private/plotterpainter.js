@@ -215,7 +215,7 @@ function paint(canvas, context)
             context.beginPath();
             context.strokeStyle = "rgba(0, 0, 255, 1)";
             context.strokeWidth = 2;
-    context.fillStyle = "rgba(50, 0, 0, 1)";
+            context.fillStyle = "rgba(50, 0, 0, 1)";
 
             context.text(hoverText.x, hoverText.x, hoverText.y + 10);
             context.closePath();
@@ -300,7 +300,7 @@ function mouseMoved(x, y)
 {
     //FIXME: implement binary search, instead of linear
     for (var i = 0; i < points.length; ++i) {
-        if (points[i].x - 5 < x && x < points[i].x + 5)  {
+        if (points[i].x - 10 < x && x < points[i].x + 10)  {
             hoverText.visible = true;
             hoverText.x = points[i].x;
             hoverText.y = points[i].y;
