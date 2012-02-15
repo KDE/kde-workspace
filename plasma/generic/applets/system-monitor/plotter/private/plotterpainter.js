@@ -159,7 +159,6 @@ function paint(canvas, context)
     this.context = context;
 
     if (clearNeeded) {
-        print("clear needed");
         context.clearRect(0, 0, width, height);
         //we only draw the grid once. it only needs to be redrawn on certain
         //events, like clearing the entire thing
