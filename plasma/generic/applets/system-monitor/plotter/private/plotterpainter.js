@@ -169,7 +169,6 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-//        fillPath();
         if (!gridPainted) {
             drawGrid(context);
             gridPainted = true;
@@ -207,45 +206,9 @@ function drawLines()
         context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
     }
 
+    context.fill();
     context.stroke();
     context.closePath();
-}
-
-function fillPath()
-{
-
-    //fill path (everything below the line graph)
-    context.beginPath();
-    context.moveTo(graphPadding * 2, height - graphPadding)
-    context.fillStyle = "rgba(255, 0, 0, 1)"
-
-    //FIXME: because i have no fucking clue where this comes from, or why it's offset
-    var offset = 20;
-    var x;
-    var y;
-    for(var i = 0; i < points.length; ++i) {
-        x = points[i][0];
-        y = points[i][1];
-
-        var cp1x = x - 10
-        var cp1y = y - 10
-        var cp2x = x + 10
-        var cp2y = y + 10
-
-        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-     //   context.lineTo(points[i][0] - graphPadding, points[i][1]);
-        debug("points[i][1] " + points[i][1]);
-    }
-
- //   context.bezierCurveTo(i * horizSpace + graphPadding, cp1y, cp2x, cp2y, i * horizSpace - graphPadding, height - graphPadding);
-  //  context.lineTo(i * horizSpace - offset, height - graphPadding);
-    context.lineTo(0, height - graphPadding);
-
-    context.closePath();
-    if (points.length > 1) {
-        context.fill();
-    }
-
 }
 
 function drawGrid(context)
