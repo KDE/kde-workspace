@@ -59,7 +59,7 @@ function addSample(y)
     } else if (y > height / 2) {
 //        upscale(y);
     }
-
+print("sample list: " + points);
     debug("SSAMPLE LIST, X VALUE: " + points[points.length - 1][0] + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     debug("sample list: " + points);
     debug("requesting new paint event");
@@ -82,7 +82,7 @@ function downscale(y)
 
 function debug(str)
 {
-    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() OUTPUT: " + str);
+//    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() OUTPUT: " + str);
 }
 
 function shiftLeft()
@@ -92,7 +92,6 @@ function shiftLeft()
     for (var i = 0; i < points.length; ++i) {
 
         if (points[i][0] <= 0 || (points[i][0] - horizSpace) <= 0) {
-            //FIXME: pretty sure this LEAKS. also, not sure how to use splice properly
             points.splice(1);
             --i;
         }

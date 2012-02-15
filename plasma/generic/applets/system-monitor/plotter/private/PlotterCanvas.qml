@@ -45,8 +45,6 @@ Item {
     //        PlotterPainter.sceneWidth = 400;
     //       PlotterPainter.sceneHeight = 400;
     //        PlotterPainter.canvas = this
-            print("onPaint HEIGHT: " + height);
-            print("onPaint WIDTH: " + width);
             PlotterPainter.paint(this, context)
         }
     }
