@@ -180,9 +180,9 @@ function paint(canvas, context)
 function drawLines()
 {
     // Draw Lines
-//    print("plotterPainter::paint starting to draw lines, xPos: " + xPos);
-
     context.beginPath();
+
+    context.strokeStyle = "rgba(0, 0, 0, 1)"
 
     //HACK we start at 1.
     for(var i = 1; i < points.length; ++i) {
@@ -213,7 +213,6 @@ function drawLines()
 
     context.stroke();
     context.closePath();
-
 }
 
 function fillPath()
