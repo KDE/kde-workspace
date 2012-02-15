@@ -53,15 +53,14 @@ function addSample(y)
 
     var yValue = y;
 
-    points.push({x: xValue, y: yValue});
+    points.push({x: xValue, originalY: yValue, scaledY: yValue});
 
     if (y < 0 + graphPadding) {
-//        downscale(y);
+        downscale(y);
     } else if (y > height / 2) {
 //        upscale(y);
     }
 
-    debug("SSAMPLE LIST, X VALUE: " + points[points.length - 1][0] + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     debug("sample list: " + points);
     debug("requesting new paint event");
 }
@@ -74,7 +73,11 @@ function downscale(y)
     debug("*** $$$ downscaling values, found one too big");
     // it's too big, scale all of it down
     for (var i = 0; i < points.length; ++i) {
-        points[i].y = Math.abs(points[i].y) * scalar;
+        points[i].scaledY = Math.abs(points[i].scaledY) * scalar;
+        if (points[i].scaledY > height - graphPadding) {
+            //yeah, it's assumed to be 0 now, truncation i guess
+            points[i].scaledY = height - graphPadding;
+        }
     }
 
     //let it be known we need to clear it because all points got shifted downward
@@ -83,7 +86,7 @@ function downscale(y)
 
 function debug(str)
 {
-//    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() OUTPUT: " + str);
+    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() OUTPUT: " + str);
 }
 
 function shiftLeft()
@@ -246,7 +249,7 @@ function drawLines()
     //HACK we start at 1.
     for(var i = 0; i < points.length; ++i) {
         debug("length: " + points.length + " i has value: " + i);
-        debug("x value: " + points[i].x + " y value: " + points[i].y);
+        debug("x value: " + points[i].x + " y value: " + points[i].scaledY);
 
         // FIXME: TEXT IS BROKEN, UPSTREAM
         // context.text("POINT" , points[i][0], points[i][1]);
@@ -254,7 +257,7 @@ function drawLines()
         var x;
         var y;
         x = points[i].x;
-        y = points[i].y;
+        y = points[i].scaledY;
 
         var cp1x = x - 5;
         var cp1y = y;
@@ -303,7 +306,7 @@ function mouseMoved(x, y)
         if (points[i].x - 10 < x && x < points[i].x + 10)  {
             hoverText.visible = true;
             hoverText.x = points[i].x;
-            hoverText.y = points[i].y;
+            hoverText.y = points[i].scaledY;
             canvas.requestPaint();
             // we found one, who cares about anything else
             break;
