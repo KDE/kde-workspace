@@ -297,7 +297,7 @@ function mouseMoved(x, y)
         if (points[i].x - 10 < x && x < points[i].x + 10)  {
             hoverText.visible = true;
             hoverText.x = points[i].x;
-            hoverText.y = points[i].scaledY;
+            hoverText.y = points[i].originalY;
             canvas.requestPaint();
             // we found one, who cares about anything else
             break;
