@@ -32,6 +32,7 @@ var context = null;
 var clearNeeded = false;
 
 var gridPainted = false;
+var backgroundPainted = false;
 
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
@@ -163,6 +164,7 @@ function paint(canvas, context)
         //we only draw the grid once. it only needs to be redrawn on certain
         //events, like clearing the entire thing
         gridPainted = false;
+        backgroundPainted = false;
     }
 
     if (hoverText.visible == false && hoverText.clearNeeded == true) {
@@ -173,14 +175,26 @@ function paint(canvas, context)
 
         context.clearRect(0, 0, width, height);
         hoverText.clearNeeded = false;
-        gridPainted = false
+        gridPainted = false;
+        backgroundPainted = false;
     }
+
+    //FIXME: HACK, if i put the painting in the if statement of
+    //backgroundPainted, it doesn't get called. well, it does. but doesn't paint wtf?
+    backgroundPainted = true;
+    gridPainted = false;
+
+    context.beginPath();
+    context.fillStyle = "rgba(70, 0, 0, 1)";
+    context.fillRect(0, 0, width, height);
+    context.closePath();
 
     //nothing to paint if 0
     if (points.length != 0) {
 
         debug("WIDTH: " + width);
         debug("PAINT HEIGHT: " + height);
+
 
         if (!gridPainted) {
             drawGrid(context);
@@ -198,7 +212,14 @@ function paint(canvas, context)
             context.closePath();
         }
     }
+}
 
+function drawBackground()
+{
+    context.beginPath();
+    context.fillStyle = "rgba(50, 0, 0, 1)";
+    context.fillRect(0, 0, width, height);
+    context.closePath();
 }
 
 function drawLines()
