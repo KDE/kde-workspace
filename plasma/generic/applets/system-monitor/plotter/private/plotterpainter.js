@@ -43,16 +43,12 @@ function addSample(y)
     // adding a new sample, making a new element that contains x and y
     // set x
 //    var xPos = graphPadding * 2;
-    points.push([points.length, 2]);
 
-    var index = 0;
-    if (points.length != 0) {
-        index = points.length - 1;
-    }
-    points[index][0] = graphPadding + (horizSpace * (points.length));
+    var xValue = graphPadding + (horizSpace * (points.length));
 
+    var yValue = y;
 
-    points[index][1] = y;
+    points.push({x: xValue, y: yValue});
 
     if (y < 0 + graphPadding) {
 //        downscale(y);
@@ -73,7 +69,7 @@ function downscale(y)
     debug("*** $$$ downscaling values, found one too big");
     // it's too big, scale all of it down
     for (var i = 0; i < points.length; ++i) {
-        points[i][1] = Math.abs(points[i][1]) * scalar;
+        points[i].y = Math.abs(points[i].y) * scalar;
     }
 
     //let it be known we need to clear it because all points got shifted downward
@@ -91,12 +87,11 @@ function shiftLeft()
     //shift all x points left some
     for (var i = 0; i < points.length; ++i) {
 
-        if (points[i][0] <= 0 || (points[i][0] - horizSpace) <= 0) {
-            points.splice(1);
-            --i;
+        if (points[i].x <= 50 || (points[i].x - horizSpace) <= 50) {
+            points.splice(i, 1);
         }
 
-        points[i][0] -= horizSpace;
+        points[i].x -= horizSpace;
 
     }
 
@@ -124,9 +119,6 @@ function init(width, height)
     // TODO: find a scalar, mostly for vertSpace
     horizSpace = 10;
     vertSpace  = 1 //height - (graphPadding * (points.length));
-
-    //form an array of an array
-    points.push([]);
 }
 
 /**
@@ -189,15 +181,15 @@ function drawLines()
     //HACK we start at 1.
     for(var i = 1; i < points.length; ++i) {
         debug("length: " + points.length + " i has value: " + i);
-        debug("x value: " + points[i][0] + " y value: " + points[i][1]);
+        debug("x value: " + points[i].x + " y value: " + points[i].y);
 
         // FIXME: TEXT IS BROKEN, UPSTREAM
         // context.text("POINT" , points[i][0], points[i][1]);
 
         var x;
         var y;
-        x = points[i][0];
-        y = points[i][1];
+        x = points[i].x;
+        y = points[i].y;
 
         var cp1x = x - 5;
         var cp1y = y;
@@ -207,7 +199,7 @@ function drawLines()
         context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
     }
 
-    context.lineTo(points[points.length - 1][0], height - graphPadding);
+    context.lineTo(points[points.length - 1].x, height - graphPadding);
     context.lineTo(0, height - graphPadding);
     context.closePath();
 
@@ -242,9 +234,9 @@ function mouseMoved(x, y)
 {
     //FIXME: implement binary search, instead of linear
     for (var i = 0; i < points.length; ++i) {
-        if (points[i][0] - 50 < x > points[i][0] + 50) {
-            debug("****** MOUSE HIT A POINT, NEAREST POINT WE FOUND: " + points[i][0]);
-            context.text(points[i][0], points[i][0], points[i][1]);
+        if (points[i].x - 50 < x > points[i].x + 50) {
+            debug("****** MOUSE HIT A POINT, NEAREST POINT WE FOUND: " + points[i].x);
+            context.text(points[i].x, points[i].x, points[i].y);
         }
     }
 }
