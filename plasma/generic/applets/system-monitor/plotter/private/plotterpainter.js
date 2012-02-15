@@ -93,7 +93,8 @@ function shiftLeft()
 
         if (points[i][0] <= 0 || (points[i][0] - horizSpace) <= 0) {
             //FIXME: pretty sure this LEAKS. also, not sure how to use splice properly
-            points.splice(i, 2);
+            points.splice(1);
+            --i;
         }
 
         points[i][0] -= horizSpace;
