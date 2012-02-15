@@ -137,7 +137,7 @@ function advancePlotter()
     debug("randomly generated y pos: " + yPos);
     addSample(height - yPos);
 
-    if ((points.length * horizSpace) >= width - 50) {
+    if ((points.length * horizSpace) >= width - graphPadding) {
         shiftLeft();
     }
 }
