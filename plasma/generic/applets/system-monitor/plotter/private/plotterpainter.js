@@ -40,6 +40,10 @@ var scalar = 1;
 
 var pointMousedOver = false;
 
+// holds if we have hover text needing painted, and where at
+// access via hoverText.bool = true, etc.
+var hoverText = {bool: false, x: 0, y: 0}
+
 function addSample(y)
 {
     // adding a new sample, making a new element that contains x and y
@@ -170,6 +174,15 @@ function paint(canvas, context)
             drawGrid(context);
             gridPainted = true;
         }
+
+        if (hoverText.bool == true) {
+            context.beginPath();
+            context.strokeStyle = "rgba(0, 0, 0, 1)"
+
+            context.text(hoverText.x, hoverText.x, hoverText.y);
+            context.stroke();
+            context.closePath();
+        }
     }
 
 }
@@ -238,25 +251,21 @@ function drawGrid(context)
 
 function mouseMoved(x, y)
 {
-    context.beginPath();
-    context.strokeStyle = "rgba(0, 0, 0, 1)"
 
     //FIXME: implement binary search, instead of linear
     for (var i = 0; i < points.length; ++i) {
         if (points[i].x - 5 < x && x < points[i].x + 5)  {
-            if (pointMousedOver == false ) {
-                context.clearRect(0, 0, width, height);
-                paint(canvas, context);
-            }
-
-            context.text(points[i].x, points[i].x, points[i].y);
-            pointMousedOver = true;
+            hoverText.bool = true;
+            hoverText.x = points[i].x;
+            hoverText.y = points[i].y;
+            // we found one, who cares about anything else
+            break;
         } else if (i == points.length - 1) {
-            pointMousedOver = false;
+            // we've hit the end (otherwise we'd have broken out of this loop)
+            // so there are no matching points.
+            hoverText.bool = false;
+            context.clearRect(0, 0, width - graphPadding, height - graphPadding);
         }
     }
 
-breakout:
-    context.stroke();
-    context.closePath();
 }
