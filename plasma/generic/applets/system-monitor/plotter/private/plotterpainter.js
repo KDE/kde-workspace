@@ -51,7 +51,7 @@ function addSample(y)
     points.push({x: xValue, y: yValue});
 
     if (y < 0 + graphPadding) {
-//        downscale(y);
+        downscale(y);
     } else if (y > height / 2) {
 //        upscale(y);
     }
@@ -64,7 +64,7 @@ function addSample(y)
 function downscale(y)
 {
     // pick a scalar that's close
-    scalar = 1.8;
+    scalar = 1.1;
 
     debug("*** $$$ downscaling values, found one too big");
     // it's too big, scale all of it down
