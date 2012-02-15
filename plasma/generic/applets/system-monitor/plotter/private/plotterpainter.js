@@ -201,9 +201,9 @@ function drawLines()
             context.moveTo(points[i][0] - graphPadding, points[i][1]);
 
             var cp1x = x
-            var cp1y = y - 20
+            var cp1y = y - 10
             var cp2x = x + 10
-            var cp2y = y + 20
+            var cp2y = y + 10
 
             context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
         } else {
