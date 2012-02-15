@@ -51,6 +51,9 @@ function addSample(y)
     }
     points[index][0] = graphPadding + (horizSpace * (points.length));
 
+
+    points[index][1] = y;
+
     if (y < 0) {
  //       downscale(y);
     } else if (y > height / 2) {
@@ -64,20 +67,17 @@ function addSample(y)
 
 function downscale(y)
 {
-    // set y
-    points[index][1] = y;
+    // pick a scalar that's close
+    scalar = 1.8;
 
-        // pick a scalar that's close
-        scalar = 1.8;
+    debug("*** $$$ downscaling values, found one too big");
+    // it's too big, scale all of it down
+    for (var i = 0; i < points.length; ++i) {
+        points[i][1] = Math.abs(points[i][1]) * scalar;
+    }
 
-        debug("*** $$$ downscaling values, found one too big");
-        // it's too big, scale all of it down
-        for (var i = 0; i < points.length; ++i) {
-            points[i][1] = Math.abs(points[i][1]) * scalar;
-        }
-
-        //let it be known we need to clear it because all points got shifted downward
-        clearNeeded = true;
+    //let it be known we need to clear it because all points got shifted downward
+    clearNeeded = true;
 }
 
 function debug(str)
@@ -169,7 +169,7 @@ function paint(canvas, context)
         debug("PAINT HEIGHT: " + height);
 
         drawLines();
-        fillPath();
+       ////// fillPath();
         if (!gridPainted) {
             drawGrid(context);
             gridPainted = true;
