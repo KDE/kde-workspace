@@ -55,7 +55,7 @@ function addSample(y)
     } else if (y > height / 2) {
 //        upscale(y);
     }
-print("sample list: " + points);
+
     debug("SSAMPLE LIST, X VALUE: " + points[points.length - 1][0] + " POINTS.LENGTH: " + points.length + "Y VALUE" + y);
     debug("sample list: " + points);
     debug("requesting new paint event");
