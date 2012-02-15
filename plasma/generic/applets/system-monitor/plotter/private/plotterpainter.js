@@ -292,6 +292,7 @@ function mouseMoved(x, y)
             hoverText.visible = true;
             hoverText.x = points[i].x;
             hoverText.y = points[i].y;
+            canvas.requestPaint();
             // we found one, who cares about anything else
             break;
         } else if (i == points.length - 1) {
@@ -300,7 +301,7 @@ function mouseMoved(x, y)
             hoverText.visible = false;
             // wipe the previous one, we don't care
             hoverText.clearNeeded = true;
+            canvas.requestPaint();
         }
     }
-
 }
