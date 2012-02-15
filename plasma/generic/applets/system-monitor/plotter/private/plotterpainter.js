@@ -54,8 +54,8 @@ function addSample(y)
 
     points[index][1] = y;
 
-    if (y < 0) {
- //       downscale(y);
+    if (y < 0 + graphPadding) {
+//        downscale(y);
     } else if (y > height / 2) {
 //        upscale(y);
     }
