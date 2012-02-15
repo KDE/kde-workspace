@@ -54,14 +54,14 @@ function addSample(y)
     // set y
     points[index][1] = y;
 
-    if (y > height) {
+    if (y < 0) {
         // pick a scalar that's close
         scalar = .8;
 
         debug("*** $$$ downscaling values, found one too big");
         // it's too big, scale all of it down
         for (var i = 0; i < points.length; ++i) {
-            points[i][1] *= .8;
+            points[i][1] = Math.abs(points[i][1]) * .8;
         }
 
         //let it be known we need to clear it because all points got shifted downward
