@@ -182,6 +182,7 @@ function drawLines()
     context.beginPath();
 
     context.strokeStyle = "rgba(255, 0, 0, 1)"
+    context.fillStyle = "rgba(0, 255, 0, 1)"
 
     context.moveTo(points[0][0] - graphPadding, height - graphPadding);
 
