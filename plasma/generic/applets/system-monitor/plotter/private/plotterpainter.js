@@ -27,7 +27,7 @@ var vertSpace;
 // [i][0] = x, [i][1] = y
 var points = [];
 var canvas;
-var context;
+var context = null;
 
 var clearNeeded = false;
 
@@ -96,7 +96,11 @@ function shiftLeft()
         }
 
         points[i].x -= horizSpace;
-        if (hoverText.visible = true;
+        if (hoverText.visible = true) {
+            //shift hovertext to the left actually
+            hoverText.x -= horizSpace;
+            canvas.requestPaint();
+        }
 
     }
 

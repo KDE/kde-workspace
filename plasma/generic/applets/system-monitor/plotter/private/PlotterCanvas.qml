@@ -24,7 +24,7 @@ Item {
     height: 400
 
     //milliseconds
-    property int sampleInterval: 5
+    property int sampleInterval: 500
     Canvas {
         id: canvas
         anchors.fill: parent
@@ -45,7 +45,7 @@ Item {
     //        PlotterPainter.sceneWidth = 400;
     //       PlotterPainter.sceneHeight = 400;
     //        PlotterPainter.canvas = this
-            PlotterPainter.paint(this, context)
+            PlotterPainter.paint(canvas, context)
         }
     }
 
