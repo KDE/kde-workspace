@@ -68,7 +68,7 @@ function addSample(y, sampleSet)
 {
     // adding a new sample, making a new element that contains x and y
     // set x at a predefined interval (horizSpace)
-    var xValue = graphPadding + (horizSpace * (points.length));
+    var xValue = graphPadding + (horizSpace * (points.length *  sampleSetLength));
 
     var yValue = y;
 
@@ -85,7 +85,7 @@ function addSample(y, sampleSet)
         sampleSetLength += 1;
         print("NEWLENGTH: " + points.length);
         points[points.length - 1][sampleSetLength - 1] = { x: xValue, originalY: yValue, scaledY: yValue };
-        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].originalY);
+        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].x);
 
  //   downscaleOne(y);
 
