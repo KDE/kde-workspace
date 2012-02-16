@@ -34,6 +34,11 @@ var clearNeeded = false;
 var gridPainted = false;
 var backgroundPainted = false;
 
+this.GraphTypeEnum = {
+    BarGraph: "BarGraph",
+    FilledLineGraph: "FilledLineGraph",
+}
+
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
 // all members in points[][] are scaled accordingly well, only y values
