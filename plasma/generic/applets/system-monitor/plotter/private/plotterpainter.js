@@ -34,10 +34,14 @@ var clearNeeded = false;
 var gridPainted = false;
 var backgroundPainted = false;
 
-this.GraphTypeEnum = {
+var GraphTypeEnum = {
     BarGraph: "BarGraph",
-    FilledLineGraph: "FilledLineGraph",
+    FilledLineGraph: "FilledLineGraph"
 }
+
+// what this graph is currently being rendered as
+// a bar graph or a filled line graph
+var graphType = GraphTypeEnum.BarGraph;
 
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
@@ -224,13 +228,16 @@ function paint(canvas, context)
         debug("WIDTH: " + width);
         debug("PAINT HEIGHT: " + height);
 
-
         if (!gridPainted) {
             drawGrid(context);
             gridPainted = true;
         }
 
-        drawLines();
+        if (graphType == GraphTypeEnum.FilledLineGraph) {
+            drawLines();
+        } else if (graphType == GraphTypeEnum.BarGraph) {
+            drawBarGraph();
+        }
 
         if (hoverText.visible == true) {
             context.beginPath();
@@ -252,6 +259,43 @@ function drawBackground()
     context.fillStyle = "rgba(50, 0, 0, 1)";
     context.fillRect(0, 0, width, height);
     context.closePath();
+}
+
+function drawBarGraph()
+{
+    // Draw Bars
+    context.beginPath();
+
+    context.strokeStyle = "rgba(0, 255, 0, 1)"
+
+    context.moveTo(graphPadding, height - graphPadding);
+
+    //HACK we start at 1.
+    for(var i = 0; i < points.length; ++i) {
+        debug("length: " + points.length + " i has value: " + i);
+        debug("x value: " + points[i].x + " y value: " + points[i].scaledY);
+
+        // FIXME: TEXT IS BROKEN, UPSTREAM
+        // context.text("POINT" , points[i][0], points[i][1]);
+
+        var x;
+        var y;
+        x = points[i].x;
+        y = points[i].scaledY;
+
+        context.rect(x, y, horizSpace, height - graphPadding);
+    }
+
+//    context.lineTo(points[points.length - 1].x, height - graphPadding);
+ //   context.lineTo(0, height - graphPadding);
+    context.closePath();
+
+    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
+    grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
+    grd.addColorStop(1, "rgba(0, 180, 0, 0.2)");
+    context.fillStyle = grd;
+    context.fill();
+    context.stroke();
 }
 
 function drawLines()
