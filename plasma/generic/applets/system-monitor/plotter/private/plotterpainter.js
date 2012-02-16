@@ -24,8 +24,17 @@ var graphPadding;
 var horizSpace;
 var vertSpace;
 
-// [i][0] = x, [i][1] = y
-var points = [];
+/* actually a multidimensional array
+* array of arrays
+* each points[i] represents a sample set.
+* A sample set is an entire set of graph data that is logically
+* separated from everything all other sets. e.g. downstream and upstream,
+* read I/O and write I/O, etc. each points[i][j] indicates 1 dot/point
+* on that particular sampleSet
+*/
+var points = Array();
+var sampleSetLength = 0;
+
 var canvas;
 var context = null;
 
@@ -54,7 +63,7 @@ var pointMousedOver = false;
 // access via hoverText.bool = true, etc.
 var hoverText = {visible: false, x: 0, y: 0, clearNeeded: false}
 
-function addSample(y)
+function addSample(y, sampleSet)
 {
     // adding a new sample, making a new element that contains x and y
     // set x at a predefined interval (horizSpace)
@@ -62,7 +71,22 @@ function addSample(y)
 
     var yValue = y;
 
-    points.push({x: xValue, originalY: yValue, scaledY: yValue});
+    if (sampleSet > points.length - 1) {
+        points.push(new Array());
+        points[points.length - 1][points.length] = 22;
+
+        print(points[points.length - 1][points.length]);
+
+
+//        points[sampleSet].push( { x: xValue } );
+   //     points[sampleSet][0] = { test: " TEST" }
+//        points[sampleSet] = {test: 1,test2: 2 };
+//        points[sampleSet][points[sampleSet].length - 1] = { x: 50, originalY: 50, scaledY: 50 };
+
+    print("SAMPLE LISTS POINTS: " + points + " || " + points[sampleSet]);
+        //points[points.length - 1] = [ [ { x: 1, originalY: 2, scaledY: 1 } ], [ x: 0 ] ];
+        //points.push({x: xValue, originalY: yValue, scaledY: yValue});
+    }
 
     downscaleOne(y);
 
@@ -179,7 +203,7 @@ function advancePlotter()
     debug("$$$$$$$ graphPadding: " + graphPadding);
     var yPos = (height * (yPercent / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
-    addSample(height - yPos);
+    addSample(height - yPos, 0);
 
     if ((points.length * horizSpace) >= width - graphPadding) {
         shiftLeft();
