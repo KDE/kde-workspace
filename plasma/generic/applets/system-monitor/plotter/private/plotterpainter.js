@@ -65,7 +65,7 @@ var hoverText = {visible: false, x: 0, y: 0, clearNeeded: false}
 /*
  * @p sampleSet corresponds to the subscript in points[subscript]
  */
-function addSample(y, sampleSet)
+function addSample(y, sampleSet, fillColor)
 {
     if (points.length - 1 < sampleSet) {
         points.push(new Array());
@@ -94,7 +94,7 @@ print("X VALUE: " + xValue);
 
         print("NEWLENGTH: " + points.length);
 
-        points[points.length - 1].push( { x: xValue, originalY: yValue, scaledY: yValue } );
+        points[points.length - 1].push( { x: xValue, originalY: yValue, scaledY: yValue, fillColor: fillColor } );
 debug("SAMPLE POINT ADDED:" + points[points.length - 1][points[points.length - 1].length - 1].x );
 //        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].x);
 
@@ -214,8 +214,8 @@ function advancePlotter()
     debug("$$$$$$$ graphPadding: " + graphPadding);
     var yPos = (height * (yPercent / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
-    addSample(height - yPos, 0);
-    addSample(Math.floor(Math.random() * 100), 1);
+    addSample(height - yPos, 0, "rgba(0, 0, 255, 1)");
+    addSample(Math.floor(Math.random() * 100), 1, "rgba(0, 0, 0, .5)");
 
 //    if ((points[points.length - 1][sampleSetLength - 1] * horizSpace) >= width - graphPadding) {
 //        shiftLeft();
@@ -316,18 +316,22 @@ function drawBarGraph()
             x = points[i][j].x;
             y = points[i][j].scaledY;
 
+            context.fillStyle = points[i][j].fillColor;
+print("%%%%%%%%% FILL COLOR: " + points[i][j].fillColor);
             context.rect(x, y, horizSpace, (height - graphPadding) - y);
         }
-    }
-
+        
     context.closePath();
-
-    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
-    grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
-    grd.addColorStop(1, "rgba(0, 180, 0, 0.2)");
-    context.fillStyle = grd;
     context.fill();
     context.stroke();
+    }
+
+ //   context.closePath();
+
+//    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
+//    grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
+ //   grd.addColorStop(1, "rgba(0, 180, 0, 0.2)");
+  //  context.fillStyle = grd;
 }
 
 function drawLines()
