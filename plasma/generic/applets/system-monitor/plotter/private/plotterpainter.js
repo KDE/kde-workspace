@@ -71,12 +71,12 @@ function addSample(y, sampleSet, fillColor)
 
     if (points[pointsIndex] === undefined) {
         points.push(new Array());
-        print("PUSHED NEW ARRAY TO POINTS");
+ //       print("PUSHED NEW ARRAY TO POINTS");
         points[pointsIndex].push(new Array());
 //        points[points.length - 1][points
     }
 
-    print("INITILA LENGTH: " + points.length);
+//    print("INITILA LENGTH: " + points.length);
     // adding a new sample, making a new element that contains x and y
     // set x at a predefined interval (horizSpace)
     // only takes into consideration current length of sampleSet
@@ -93,13 +93,13 @@ function addSample(y, sampleSet, fillColor)
 
 //        print("NEWLENGTH: " + points.length);
 
-    print("$$$$$$POINTS INDEX IS: " + pointsIndex);
+  //  print("$$$$$$POINTS INDEX IS: " + pointsIndex);
         points[pointsIndex].push( { x: xValue, originalY: yValue, scaledY: yValue, fillColor: fillColor } );
 
-    print("POINTS[INDEX].length " + points[pointsIndex].length);
+ //   print("POINTS[INDEX].length " + points[pointsIndex].length);
 //print("POINTS[INDEX][0]: " + points[pointsIndex][0]);
 //print("POINTS[INDEX][1]: " + points[pointsIndex][1]);
-print("POINTS[INDEX][sampleSet]: " + points[pointsIndex][sampleSet]);
+//print("POINTS[INDEX][sampleSet]: " + points[pointsIndex][sampleSet]);
 
 //debug("SAMPLE POINT ADDED:" + points[points.length - 1][points[points.length - 1].length - 1].x );
 //        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].x);
@@ -157,7 +157,7 @@ function downscaleAll(y)
 
 function debug(str)
 {
-    print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() OUTPUT: " + str);
+   // print("PlotterPainter::" + arguments.callee.caller.name.toString() + "() OUTPUT: " + str);
 }
 
 function shiftLeft()
@@ -165,13 +165,16 @@ function shiftLeft()
     debug("");
     //shift all x points left some
     for (var i = 0; i < points.length; ++i) {
-        for (var j = 0; j < sampleSetLength; ++j) {
+        for (var j = 0; j < points[i].length; ++j) {
 
             if (points[i][j].x < graphPadding || (points[i][j].x - horizSpace) < graphPadding) {
-                points.splice(i, 1);
+//                points.splice(i, 1);
             }
 
+            print("*****^^^^^** SHIFTLEFT VALUE, BEFORE: " + points[i][j].x);
             points[i][j].x -= horizSpace;
+            print("*****^^^^^** SHIFTLEFT VALUE, AFTER: " + points[i][j].x);
+
             if (hoverText.visible = true) {
                 //shift hovertext to the left actually
                 hoverText.x -= horizSpace;
@@ -224,9 +227,10 @@ function advancePlotter()
     addSample(height - yPos, 0, "rgba(0, 0, 255, .5)");
     addSample(height - yPos2, 1, "rgba(0, 0, 0, .5)");
 
-//    if ((points[points.length - 1][sampleSetLength - 1] * horizSpace) >= width - graphPadding) {
-//        shiftLeft();
-  //  }
+    var index = points.length - 1;
+    if ((points[index][points[index].length - 1].x * horizSpace) >= width - graphPadding) {
+        shiftLeft();
+    }
 }
 
 function paint(canvas, context)
