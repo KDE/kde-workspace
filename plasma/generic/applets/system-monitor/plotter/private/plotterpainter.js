@@ -262,6 +262,10 @@ function drawLines()
     context.lineTo(0, height - graphPadding);
     context.closePath();
 
+    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
+    grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
+    grd.addColorStop(1, "rgba(0, 180, 0, 0.2)");
+    context.fillStyle = grd;
     context.fill();
     context.stroke();
 }
