@@ -68,7 +68,9 @@ function addSample(y, sampleSet)
 {
     // adding a new sample, making a new element that contains x and y
     // set x at a predefined interval (horizSpace)
-    var xValue = graphPadding + (horizSpace * (points.length *  sampleSetLength));
+    // only takes into consideration current length of sampleSet
+    // because that's all that matters (each set is compartmentalized)
+    var xValue = graphPadding + (horizSpace * (sampleSetLength) );
 
     var yValue = y;
 
