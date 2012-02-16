@@ -270,13 +270,9 @@ function drawBarGraph()
 
     context.moveTo(graphPadding, height - graphPadding);
 
-    //HACK we start at 1.
     for(var i = 0; i < points.length; ++i) {
         debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i].x + " y value: " + points[i].scaledY);
-
-        // FIXME: TEXT IS BROKEN, UPSTREAM
-        // context.text("POINT" , points[i][0], points[i][1]);
 
         var x;
         var y;
@@ -286,8 +282,6 @@ function drawBarGraph()
         context.rect(x, y, horizSpace, (height - graphPadding) - y);
     }
 
-//    context.lineTo(points[points.length - 1].x, height - graphPadding);
- //   context.lineTo(0, height - graphPadding);
     context.closePath();
 
     var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
@@ -307,13 +301,9 @@ function drawLines()
 
     context.moveTo(graphPadding, height - graphPadding);
 
-    //HACK we start at 1.
     for(var i = 0; i < points.length; ++i) {
         debug("length: " + points.length + " i has value: " + i);
         debug("x value: " + points[i].x + " y value: " + points[i].scaledY);
-
-        // FIXME: TEXT IS BROKEN, UPSTREAM
-        // context.text("POINT" , points[i][0], points[i][1]);
 
         var x;
         var y;
