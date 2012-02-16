@@ -177,7 +177,7 @@ function advancePlotter()
     debug("$$$$$$$ vertSspace: " + vertSpace);
     debug("$$$$$$$ yPercent: " + yPercent);
     debug("$$$$$$$ graphPadding: " + graphPadding);
-    var yPos = (400 * (yPercent / 100) + graphPadding * 2);
+    var yPos = (height * (yPercent / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
     addSample(height - yPos);
 
@@ -283,7 +283,7 @@ function drawBarGraph()
         x = points[i].x;
         y = points[i].scaledY;
 
-        context.rect(x, y, horizSpace, height - graphPadding);
+        context.rect(x, y, horizSpace, (height - graphPadding) - y);
     }
 
 //    context.lineTo(points[points.length - 1].x, height - graphPadding);
