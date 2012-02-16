@@ -71,6 +71,7 @@ function addSample(y, sampleSet)
         points.push(new Array());
         print("PUSHED NEW ARRAY TO POINTS");
         points[points.length - 1].push(new Array());
+//        points[points.length - 1][points
     }
 
     print("INITILA LENGTH: " + points.length);
@@ -78,9 +79,13 @@ function addSample(y, sampleSet)
     // set x at a predefined interval (horizSpace)
     // only takes into consideration current length of sampleSet
     // because that's all that matters (each set is compartmentalized)
-    var xValue = graphPadding + (horizSpace * (points[points.length - 1][0].length) );
-    print("X VALUE: " + xValue);
+    var pointsIndex = points.length - 1;
 
+    var xValue = graphPadding + (horizSpace * (points[pointsIndex].length));
+    print("POINTS[INDEX][0] " + points[pointsIndex].length)
+print("X VALUE: " + xValue);
+
+//    print("X VALUE: " + points[points.length - 1][points[points.length - 1].length - 1].x);
     var yValue = y;
 
      //  print(points[points.length - 1][points.length].originalY);
@@ -89,7 +94,7 @@ function addSample(y, sampleSet)
 
         print("NEWLENGTH: " + points.length);
 
-        points[points.length - 1][points[points.length - 1].length - 1] = { x: xValue, originalY: yValue, scaledY: yValue };
+        points[points.length - 1].push( { x: xValue, originalY: yValue, scaledY: yValue } );
 debug("SAMPLE POINT ADDED:" + points[points.length - 1][points[points.length - 1].length - 1].x );
 //        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].x);
 
@@ -302,9 +307,12 @@ function drawBarGraph()
     context.moveTo(graphPadding, height - graphPadding);
 
     for(var i = 0; i < points.length; ++i) {
-        for(var j = 0; j < points[i][j].length; ++j) {
+        for(var j = 0; j < points[i].length; ++j) {
             var x;
             var y;
+            print("$$$$$$$$$$$$ DRAWING BARS AT X: " + x)
+            print("$$$$$$$$$$$$ DRAWING BARS AT Y: " + y)
+
             x = points[i][j].x;
             y = points[i][j].scaledY;
 
