@@ -219,9 +219,9 @@ function advancePlotter()
     debug("$$$$$$$ yPercent: " + yPercent);
     debug("$$$$$$$ graphPadding: " + graphPadding);
     var yPos = (height * (yPercent / 100) + graphPadding * 2);
-    var yPos2 = (height * (yPercent / 100) + graphPadding * 2);
+    var yPos2 = (height * (yPercent2 / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
-    addSample(height - yPos, 0, "rgba(0, 0, 255, 1)");
+    addSample(height - yPos, 0, "rgba(0, 0, 255, .5)");
     addSample(height - yPos2, 1, "rgba(0, 0, 0, .5)");
 
 //    if ((points[points.length - 1][sampleSetLength - 1] * horizSpace) >= width - graphPadding) {
