@@ -34,7 +34,6 @@ var vertSpace;
 */
 var points = Array();
 // just a convenience instead of doing points[points.length - 1][.. etc.
-//for some reason do points[0][sampleSetLength], not - 1
 var sampleSetLength = 0;
 
 var canvas;
@@ -73,16 +72,20 @@ function addSample(y, sampleSet)
 
     var yValue = y;
 
-    if (sampleSet > points.length - 1) {
+    if (points.length - 1 < sampleSet) {
         points.push(new Array());
+        print("PUSHED NEW ARRAY TO POINTS");
+    }
 
-        sampleSetLength += 1;
      //  print(points[points.length - 1][points.length].originalY);
 
-        print("LENGTH: " + points.length + " SUB LENGTH: " + sampleSetLength);
-        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength].originalY);
-    }
-        points[points.length - 1][points.length] = { x: xValue, originalY: yValue, scaledY: yValue };
+//        print("LENGTH: " + points.length + " SUB LENGTH: " + sampleSetLength);
+        print("OLDLENGTH: " + points.length);
+        points[points.length - 1].push(new Array());
+        sampleSetLength += 1;
+        print("NEWLENGTH: " + points.length);
+        points[points.length - 1][sampleSetLength - 1] = { x: xValue, originalY: yValue, scaledY: yValue };
+        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].originalY);
 
  //   downscaleOne(y);
 
@@ -295,8 +298,8 @@ function drawBarGraph()
         for(var j = 0; j < sampleSetLength; ++j) {
             var x;
             var y;
-            x = points[i][j + 1].x;
-            y = points[i][j + 1].scaledY;
+            x = points[i][j].x;
+            y = points[i][j].scaledY;
 
             context.rect(x, y, horizSpace, (height - graphPadding) - y);
         }
