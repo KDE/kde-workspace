@@ -33,8 +33,6 @@ var vertSpace;
 * on that particular sampleSet
 */
 var points = Array();
-// just a convenience instead of doing points[points.length - 1][.. etc.
-var sampleSetLength = 0;
 
 var canvas;
 var context = null;
@@ -64,30 +62,36 @@ var pointMousedOver = false;
 // access via hoverText.bool = true, etc.
 var hoverText = {visible: false, x: 0, y: 0, clearNeeded: false}
 
+/*
+ * @p sampleSet corresponds to the subscript in points[subscript]
+ */
 function addSample(y, sampleSet)
 {
+    if (points.length - 1 < sampleSet) {
+        points.push(new Array());
+        print("PUSHED NEW ARRAY TO POINTS");
+        points[points.length - 1].push(new Array());
+    }
+
+    print("INITILA LENGTH: " + points.length);
     // adding a new sample, making a new element that contains x and y
     // set x at a predefined interval (horizSpace)
     // only takes into consideration current length of sampleSet
     // because that's all that matters (each set is compartmentalized)
-    var xValue = graphPadding + (horizSpace * (sampleSetLength) );
+    var xValue = graphPadding + (horizSpace * (points[points.length - 1][0].length) );
+    print("X VALUE: " + xValue);
 
     var yValue = y;
-
-    if (points.length - 1 < sampleSet) {
-        points.push(new Array());
-        print("PUSHED NEW ARRAY TO POINTS");
-    }
 
      //  print(points[points.length - 1][points.length].originalY);
 
 //        print("LENGTH: " + points.length + " SUB LENGTH: " + sampleSetLength);
-        print("OLDLENGTH: " + points.length);
-        points[points.length - 1].push(new Array());
-        sampleSetLength += 1;
+
         print("NEWLENGTH: " + points.length);
-        points[points.length - 1][sampleSetLength - 1] = { x: xValue, originalY: yValue, scaledY: yValue };
-        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].x);
+
+        points[points.length - 1][points[points.length - 1].length - 1] = { x: xValue, originalY: yValue, scaledY: yValue };
+debug("SAMPLE POINT ADDED:" + points[points.length - 1][points[points.length - 1].length - 1].x );
+//        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].x);
 
  //   downscaleOne(y);
 
@@ -206,10 +210,11 @@ function advancePlotter()
     var yPos = (height * (yPercent / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
     addSample(height - yPos, 0);
+    addSample(Math.floor(Math.random() * 100), 1);
 
-    if ((points[points.length - 1][sampleSetLength - 1] * horizSpace) >= width - graphPadding) {
-        shiftLeft();
-    }
+//    if ((points[points.length - 1][sampleSetLength - 1] * horizSpace) >= width - graphPadding) {
+//        shiftLeft();
+  //  }
 }
 
 function paint(canvas, context)
@@ -297,7 +302,7 @@ function drawBarGraph()
     context.moveTo(graphPadding, height - graphPadding);
 
     for(var i = 0; i < points.length; ++i) {
-        for(var j = 0; j < sampleSetLength; ++j) {
+        for(var j = 0; j < points[i][j].length; ++j) {
             var x;
             var y;
             x = points[i][j].x;
