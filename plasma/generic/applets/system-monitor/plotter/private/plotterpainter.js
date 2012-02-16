@@ -33,6 +33,8 @@ var vertSpace;
 * on that particular sampleSet
 */
 var points = Array();
+// just a convenience instead of doing points[points.length - 1][.. etc.
+//for some reason do points[0][sampleSetLength], not - 1
 var sampleSetLength = 0;
 
 var canvas;
@@ -73,17 +75,19 @@ function addSample(y, sampleSet)
 
     if (sampleSet > points.length - 1) {
         points.push(new Array());
+
+        sampleSetLength += 1;
+     //  print(points[points.length - 1][points.length].originalY);
+
+        print("LENGTH: " + points.length + " SUB LENGTH: " + sampleSetLength);
+        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength].originalY);
+    }
         points[points.length - 1][points.length] = { x: xValue, originalY: yValue, scaledY: yValue };
 
-        print(points[points.length - 1][points.length].originalY);
-
-        print("SAMPLE LISTS POINTS: " + points + " || " + points[sampleSet]);
-    }
-
-    downscaleOne(y);
+ //   downscaleOne(y);
 
     if (y < 0 + graphPadding) {
-        downscaleAll(y);
+//        downscaleAll(y);
     } else if (y > height / 2) {
 //        upscale(y);
     }
@@ -102,10 +106,10 @@ function downscaleOne(y)
     //no scalar applied if 0
     if (scalar != 0) {
         var index = points.length - 1;
-        points[index].scaledY = Math.abs(points[index].scaledY + ((height - graphPadding) * scalar));
+        points[index][sampleSetLength].scaledY = Math.abs(points[index][sampleSetLength].scaledY + ((height - graphPadding) * scalar));
 
-        if (points[index].scaledY > height - graphPadding) {
-            points[index].scaledY = height - graphPadding;
+        if (points[index][sampleSetLength].scaledY > height - graphPadding) {
+            points[index][sampleSetLength].scaledY = height - graphPadding;
         }
     }
 }
@@ -141,18 +145,19 @@ function shiftLeft()
     debug("");
     //shift all x points left some
     for (var i = 0; i < points.length; ++i) {
+        for (var j = 0; j < sampleSetLength; ++j) {
 
-        if (points[i].x < graphPadding || (points[i].x - horizSpace) < graphPadding) {
-            points.splice(i, 1);
+            if (points[i][j].x < graphPadding || (points[i][j].x - horizSpace) < graphPadding) {
+                points.splice(i, 1);
+            }
+
+            points[i][j].x -= horizSpace;
+            if (hoverText.visible = true) {
+                //shift hovertext to the left actually
+                hoverText.x -= horizSpace;
+                canvas.requestPaint();
+            }
         }
-
-        points[i].x -= horizSpace;
-        if (hoverText.visible = true) {
-            //shift hovertext to the left actually
-            hoverText.x -= horizSpace;
-            canvas.requestPaint();
-        }
-
     }
 
     clearNeeded = true;
@@ -197,7 +202,7 @@ function advancePlotter()
     debug("randomly generated y pos: " + yPos);
     addSample(height - yPos, 0);
 
-    if ((points.length * horizSpace) >= width - graphPadding) {
+    if ((points[points.length - 1][sampleSetLength - 1] * horizSpace) >= width - graphPadding) {
         shiftLeft();
     }
 }
@@ -287,15 +292,14 @@ function drawBarGraph()
     context.moveTo(graphPadding, height - graphPadding);
 
     for(var i = 0; i < points.length; ++i) {
-        debug("length: " + points.length + " i has value: " + i);
-        debug("x value: " + points[i].x + " y value: " + points[i].scaledY);
+        for(var j = 0; j < sampleSetLength; ++j) {
+            var x;
+            var y;
+            x = points[i][j + 1].x;
+            y = points[i][j + 1].scaledY;
 
-        var x;
-        var y;
-        x = points[i].x;
-        y = points[i].scaledY;
-
-        context.rect(x, y, horizSpace, (height - graphPadding) - y);
+            context.rect(x, y, horizSpace, (height - graphPadding) - y);
+        }
     }
 
     context.closePath();
