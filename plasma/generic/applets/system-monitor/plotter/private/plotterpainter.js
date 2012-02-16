@@ -37,7 +37,7 @@ var backgroundPainted = false;
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
 // all members in points[][] are scaled accordingly well, only y values
-var scalar = 1;
+var scalar = 0;
 
 var pointMousedOver = false;
 
@@ -55,8 +55,10 @@ function addSample(y)
 
     points.push({x: xValue, originalY: yValue, scaledY: yValue});
 
+    downscaleOne(y);
+
     if (y < 0 + graphPadding) {
-        downscale(y);
+        downscaleAll(y);
     } else if (y > height / 2) {
 //        upscale(y);
     }
@@ -65,15 +67,35 @@ function addSample(y)
     debug("requesting new paint event");
 }
 
-function downscale(y)
+/**
+ * Attempts to downscale 1 (new!) point to match the rest.
+ * Applicable only if the plotter has already been downscaled
+ * If it has not, nothing happens and you'll need to call downscaleAll(y)
+ */
+function downscaleOne(y)
+{
+    //no scalar applied if 0
+    if (scalar != 0) {
+        var index = points.length - 1;
+        points[index].scaledY = Math.abs(points[index].scaledY + ((height - graphPadding) * scalar));
+
+        if (points[index].scaledY > height - graphPadding) {
+            points[index].scaledY = height - graphPadding;
+        }
+    }
+}
+
+function downscaleAll(y)
 {
     // pick a scalar that's close
-    scalar = 1.1;
+    scalar = 0.05;
 
     debug("*** $$$ downscaling values, found one too big");
     // it's too big, scale all of it down
     for (var i = 0; i < points.length; ++i) {
-        points[i].scaledY = Math.abs(points[i].scaledY) * scalar;
+
+        points[i].scaledY = Math.abs(points[i].scaledY + ((height - graphPadding) * scalar));
+
         if (points[i].scaledY > height - graphPadding) {
             //yeah, it's assumed to be 0 now, truncation i guess
             points[i].scaledY = height - graphPadding;
