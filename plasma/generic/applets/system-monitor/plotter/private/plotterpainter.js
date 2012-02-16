@@ -73,19 +73,11 @@ function addSample(y, sampleSet)
 
     if (sampleSet > points.length - 1) {
         points.push(new Array());
-        points[points.length - 1][points.length] = 22;
+        points[points.length - 1][points.length] = { x: xValue, originalY: yValue, scaledY: yValue };
 
-        print(points[points.length - 1][points.length]);
+        print(points[points.length - 1][points.length].originalY);
 
-
-//        points[sampleSet].push( { x: xValue } );
-   //     points[sampleSet][0] = { test: " TEST" }
-//        points[sampleSet] = {test: 1,test2: 2 };
-//        points[sampleSet][points[sampleSet].length - 1] = { x: 50, originalY: 50, scaledY: 50 };
-
-    print("SAMPLE LISTS POINTS: " + points + " || " + points[sampleSet]);
-        //points[points.length - 1] = [ [ { x: 1, originalY: 2, scaledY: 1 } ], [ x: 0 ] ];
-        //points.push({x: xValue, originalY: yValue, scaledY: yValue});
+        print("SAMPLE LISTS POINTS: " + points + " || " + points[sampleSet]);
     }
 
     downscaleOne(y);
