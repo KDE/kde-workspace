@@ -145,12 +145,11 @@ function shiftLeft()
 
             if (points[i][j].x < graphPadding || (points[i][j].x - horizSpace) < graphPadding) {
                 //FIXME: SHIFTS LEFT FAR,  FAR TOO SOON, THE GRAPH CANT KEEP UP HARDLY
-//                points[i].splice(j, 1);
+                points[i].splice(j, 1);
+                print("&&&&&&& LENGHT LEFTHSIFT: " + points[i].length);
             }
 
-            print("*****^^^^^** SHIFTLEFT VALUE, BEFORE: " + points[i][j].x);
             points[i][j].x -= horizSpace;
-            print("*****^^^^^** SHIFTLEFT VALUE, AFTER: " + points[i][j].x);
 
             if (hoverText.visible = true) {
                 //shift hovertext to the left actually
