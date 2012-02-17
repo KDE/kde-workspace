@@ -205,9 +205,9 @@ function advancePlotter()
     addSample(height - yPos2, 1, "rgba(0, 255, 0, .6)");
 
     var index = points.length - 1;
-    if ((points[index][points[index].length - 1].x * horizSpace) >= width - graphPadding) {
-        //FIXME: shiftleft is broken..occurs far, far too often
-     //   shiftLeft();
+    if ((points[index][points[index].length - 1].x) >= width - graphPadding) {
+        print("SHIFT LEFT ATTEMPT ********************!!!");
+        shiftLeft();
     }
 }
 
@@ -289,9 +289,6 @@ function drawBackground()
 function drawBarGraph()
 {
     // Draw Bars
-
-//    context.strokeStyle = "rgba(0, 255, 0, 1)"
-
 
     for (var i = 0; i < points.length; ++i) {
         for (var j = 0; j < points[i].length; ++j) {
