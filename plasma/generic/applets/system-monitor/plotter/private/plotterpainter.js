@@ -76,33 +76,11 @@ function addSample(y, sampleSet, fillColor)
 //        points[points.length - 1][points
     }
 
-//    print("INITILA LENGTH: " + points.length);
-    // adding a new sample, making a new element that contains x and y
-    // set x at a predefined interval (horizSpace)
-    // only takes into consideration current length of sampleSet
-    // because that's all that matters (each set is compartmentalized)
-
     var xValue = graphPadding + (horizSpace * (points[pointsIndex].length));
 
-//    print("X VALUE: " + points[points.length - 1][points[points.length - 1].length - 1].x);
     var yValue = y;
 
-     //  print(points[points.length - 1][points.length].originalY);
-
-//        print("LENGTH: " + points.length + " SUB LENGTH: " + sampleSetLength);
-
-//        print("NEWLENGTH: " + points.length);
-
-  //  print("$$$$$$POINTS INDEX IS: " + pointsIndex);
         points[pointsIndex].push( { x: xValue, originalY: yValue, scaledY: yValue, fillColor: fillColor } );
-
- //   print("POINTS[INDEX].length " + points[pointsIndex].length);
-//print("POINTS[INDEX][0]: " + points[pointsIndex][0]);
-//print("POINTS[INDEX][1]: " + points[pointsIndex][1]);
-//print("POINTS[INDEX][sampleSet]: " + points[pointsIndex][sampleSet]);
-
-//debug("SAMPLE POINT ADDED:" + points[points.length - 1][points[points.length - 1].length - 1].x );
-//        print("SAMPLE LISTS POINTS:length: " + sampleSetLength +  " " + points[points.length - 1][sampleSetLength - 1].x);
 
  //   downscaleOne(y);
 
@@ -112,8 +90,6 @@ function addSample(y, sampleSet, fillColor)
 //        upscale(y);
     }
 
-//    debug("sample list: " + points);
-   // debug("requesting new paint event");
 }
 
 /**
@@ -323,28 +299,17 @@ function drawBarGraph()
         for (var j = 0; j < points[i].length; ++j) {
             var x;
             var y;
- //           print("$$$$$$$$$$$$ DRAWING BARS AT X: " + x)
- //           print("$$$$$$$$$$$$ DRAWING BARS AT Y: " + y)
 
             x = points[i][j].x;
             y = points[i][j].scaledY;
 
             context.fillStyle = points[i][j].fillColor;
-//            print("^^^^ value of i: " + i + " &^^&& VALUE OF J:"  + j);
-//            
-//            print("^^^^ value of points.length: " + points.length + " &^^&& VALUE OF points[i].length:"  + points[i].length);
-//print("%%%%%%%%% drawbargraph, x: " + points[i][j].x);
-//print("%%%%%%%%% drawbargraph, y: " + points[i][j].scaledY);
-//print("%%%%%%%%% FILL COLOR: " + points[i][j].fillColor);
             context.rect(x, y, horizSpace, (height - graphPadding) - y);
         }
-        
     context.closePath();
     context.fill();
     context.stroke();
     }
-
- //   context.closePath();
 
 //    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
 //    grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
@@ -355,7 +320,6 @@ function drawBarGraph()
 function drawLines()
 {
     // Draw Lines
-
 
     for (var i = 0; i < points.length; ++i) {
 
