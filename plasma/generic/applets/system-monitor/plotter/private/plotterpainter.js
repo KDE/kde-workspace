@@ -225,12 +225,13 @@ function advancePlotter()
     var yPos = (height * (yPercent / 100) + graphPadding * 2);
     var yPos2 = (height * (yPercent2 / 100) + graphPadding * 2);
     debug("randomly generated y pos: " + yPos);
-    addSample(height - yPos, 0, "rgba(0, 0, 255, .5)");
-    addSample(height - yPos2, 1, "rgba(0, 0, 0, .5)");
+    addSample(height - yPos, 0, "rgba(0, 150, 255, .5)");
+    addSample(height - yPos2, 1, "rgba(0, 255, 0, .6)");
 
     var index = points.length - 1;
     if ((points[index][points[index].length - 1].x * horizSpace) >= width - graphPadding) {
-        shiftLeft();
+        //FIXME: shiftleft is broken..occurs far, far too often
+     //   shiftLeft();
     }
 }
 
@@ -354,12 +355,11 @@ function drawBarGraph()
 function drawLines()
 {
     // Draw Lines
-    context.beginPath();
 
-    context.strokeStyle = "rgba(0, 255, 0, 0)"
 
     for (var i = 0; i < points.length; ++i) {
 
+    context.beginPath();
         context.moveTo(graphPadding, height - graphPadding);
 
         for (var j = 0; j < points[i].length; ++j) {
@@ -373,6 +373,7 @@ function drawLines()
             var cp2x = x;
             var cp2y = y - 10;
 
+            context.strokeStyle = points[i][j].fillColor
             context.fillStyle = points[i][j].fillColor;
             context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
 
@@ -391,8 +392,8 @@ function drawLines()
 
         context.lineTo(graphPadding, height - graphPadding);
         context.closePath();
-    context.fill();
-    context.stroke();
+        context.fill();
+        context.stroke();
     }
 
 
