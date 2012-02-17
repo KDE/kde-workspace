@@ -24,7 +24,7 @@ Item {
     height: 400
 
     //milliseconds
-    property int sampleInterval: 50
+    property int sampleInterval: 500
     Canvas {
         id: canvas
         anchors.fill: parent

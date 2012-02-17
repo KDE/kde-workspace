@@ -49,7 +49,7 @@ var GraphTypeEnum = {
 
 // what this graph is currently being rendered as
 // a bar graph or a filled line graph
-var graphType = GraphTypeEnum.BarGraph;
+var graphType = GraphTypeEnum.FilledLineGraph; //BarGraph
 
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
@@ -168,7 +168,7 @@ function shiftLeft()
         for (var j = 0; j < points[i].length; ++j) {
 
             if (points[i][j].x < graphPadding || (points[i][j].x - horizSpace) < graphPadding) {
-//                points.splice(i, 1);
+//                points[i].splice(j, 1);
             }
 
             print("*****^^^^^** SHIFTLEFT VALUE, BEFORE: " + points[i][j].x);
@@ -317,8 +317,8 @@ function drawBarGraph()
 
     context.moveTo(graphPadding, height - graphPadding);
 
-    for(var i = 0; i < points.length; ++i) {
-        for(var j = 0; j < points[i].length; ++j) {
+    for (var i = 0; i < points.length; ++i) {
+        for (var j = 0; j < points[i].length; ++j) {
             var x;
             var y;
  //           print("$$$$$$$$$$$$ DRAWING BARS AT X: " + x)
@@ -355,37 +355,38 @@ function drawLines()
     // Draw Lines
     context.beginPath();
 
-    context.strokeStyle = "rgba(0, 255, 0, 1)"
+    context.strokeStyle = "rgba(0, 255, 0, 0)"
 
     context.moveTo(graphPadding, height - graphPadding);
 
-    for(var i = 0; i < points.length; ++i) {
-        debug("length: " + points.length + " i has value: " + i);
-        debug("x value: " + points[i].x + " y value: " + points[i].scaledY);
+    for (var i = 0; i < points.length; ++i) {
+        for (var j = 0; j < points[i].length; ++j) {
+            var x;
+            var y;
+            x = points[i][j].x;
+            y = points[i][j].scaledY;
 
-        var x;
-        var y;
-        x = points[i].x;
-        y = points[i].scaledY;
+            var cp1x = x - 5;
+            var cp1y = y;
+            var cp2x = x;
+            var cp2y = y - 10;
 
-        var cp1x = x - 5;
-        var cp1y = y;
-        var cp2x = x;
-        var cp2y = y - 10;
+            context.fillStyle = points[i][j].fillColor;
+            context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
+        context.lineTo(points[i][j].x + graphPadding, height - graphPadding);
+        }
 
-        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
-    }
-
-    context.lineTo(points[points.length - 1].x, height - graphPadding);
-    context.lineTo(0, height - graphPadding);
-    context.closePath();
-
-    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
-    grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
-    grd.addColorStop(1, "rgba(0, 180, 0, 0.2)");
-    context.fillStyle = grd;
+        context.lineTo(graphPadding, height - graphPadding);
+        context.closePath();
     context.fill();
     context.stroke();
+    }
+
+
+//    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
+ //   grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
+  //  grd.addColorStop(1, "rgba(0, 180, 0, 0.2)");
+   // context.fillStyle = grd;
 }
 
 function drawGrid(context)
