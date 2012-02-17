@@ -380,7 +380,7 @@ function drawLines()
             if (j < points[i].length - 1) {
                 x = points[i][j + 1].x;
                 cp1x = x - 5;
-                cp2x = x;
+                cp2x = x - 5;
                 y = points[i][j + 1].scaledY;
                 cp1y = y;
                 cp2y = y - 10;
