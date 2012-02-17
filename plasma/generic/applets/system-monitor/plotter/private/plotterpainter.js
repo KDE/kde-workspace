@@ -375,12 +375,18 @@ function drawLines()
 
             context.fillStyle = points[i][j].fillColor;
             context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
+
             if (j < points[i].length - 1) {
-              context.lineTo(points[i][j + 1].x, points[i][j + 1].scaledY);
+                x = points[i][j + 1].x;
+                cp1x = x - 5;
+                cp2x = x;
+                y = points[i][j + 1].scaledY;
+                cp1y = y;
+                cp2y = y - 10;
+              context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
             } else {
               context.lineTo(points[i][j].x, height - graphPadding);
             }
-//            context.lineTo(points[i][j].x + graphPadding, height - graphPadding);
         }
 
         context.lineTo(graphPadding, height - graphPadding);
