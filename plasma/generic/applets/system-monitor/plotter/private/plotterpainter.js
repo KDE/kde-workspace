@@ -49,7 +49,7 @@ var GraphTypeEnum = {
 
 // what this graph is currently being rendered as
 // a bar graph or a filled line graph
-var graphType = GraphTypeEnum.FilledLineGraph; //BarGraph
+var graphType = GraphTypeEnum.BarGraph // FilledLineGraph;
 
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
@@ -289,14 +289,17 @@ function drawBackground()
 function drawBarGraph()
 {
     // Draw Bars
-    context.beginPath();
 
-    context.strokeStyle = "rgba(0, 255, 0, 1)"
+//    context.strokeStyle = "rgba(0, 255, 0, 1)"
 
-    context.moveTo(graphPadding, height - graphPadding);
 
     for (var i = 0; i < points.length; ++i) {
         for (var j = 0; j < points[i].length; ++j) {
+            context.beginPath();
+            context.moveTo(graphPadding, height - graphPadding);
+            context.strokeStyle = points[i][j].fillColor
+            context.fillStyle = points[i][j].fillColor;
+
             var x;
             var y;
 
@@ -305,10 +308,11 @@ function drawBarGraph()
 
             context.fillStyle = points[i][j].fillColor;
             context.rect(x, y, horizSpace, (height - graphPadding) - y);
+            context.closePath();
+            context.fill();
+            context.stroke();
         }
-    context.closePath();
-    context.fill();
-    context.stroke();
+
     }
 
 //    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
@@ -359,7 +363,6 @@ function drawLines()
         context.fill();
         context.stroke();
     }
-
 
 //    var grd = context.createLinearGradient(graphPadding, graphPadding, graphPadding, height - graphPadding);
  //   grd.addColorStop(0, "rgba(0, 255, 0, 0.5)");
