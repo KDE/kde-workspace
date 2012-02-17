@@ -168,6 +168,7 @@ function shiftLeft()
         for (var j = 0; j < points[i].length; ++j) {
 
             if (points[i][j].x < graphPadding || (points[i][j].x - horizSpace) < graphPadding) {
+                //FIXME: SHIFTS LEFT FAR,  FAR TOO SOON, THE GRAPH CANT KEEP UP HARDLY
 //                points[i].splice(j, 1);
             }
 
@@ -357,9 +358,10 @@ function drawLines()
 
     context.strokeStyle = "rgba(0, 255, 0, 0)"
 
-    context.moveTo(graphPadding, height - graphPadding);
-
     for (var i = 0; i < points.length; ++i) {
+
+        context.moveTo(graphPadding, height - graphPadding);
+
         for (var j = 0; j < points[i].length; ++j) {
             var x;
             var y;
@@ -373,7 +375,12 @@ function drawLines()
 
             context.fillStyle = points[i][j].fillColor;
             context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
-        context.lineTo(points[i][j].x + graphPadding, height - graphPadding);
+            if (j < points[i].length - 1) {
+              context.lineTo(points[i][j + 1].x, points[i][j + 1].scaledY);
+            } else {
+              context.lineTo(points[i][j].x, height - graphPadding);
+            }
+//            context.lineTo(points[i][j].x + graphPadding, height - graphPadding);
         }
 
         context.lineTo(graphPadding, height - graphPadding);
