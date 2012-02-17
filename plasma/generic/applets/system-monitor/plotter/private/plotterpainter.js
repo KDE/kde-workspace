@@ -43,13 +43,19 @@ var gridPainted = false;
 var backgroundPainted = false;
 
 var GraphTypeEnum = {
+    // vertical rectangles
     BarGraph: "BarGraph",
-    FilledLineGraph: "FilledLineGraph"
+    // line graph with area below filled
+    FilledLineGraph: "FilledLineGraph",
+    // non filled, only lines
+    LineGraph: "LineGraph"
 }
 
 // what this graph is currently being rendered as
 // a bar graph or a filled line graph
-var graphType = GraphTypeEnum.BarGraph // FilledLineGraph;
+//var graphType = GraphTypeEnum.BarGraph;
+//var graphType = GraphTypeEnum.FilledLineGraph;
+var graphType = GraphTypeEnum.LineGraph;
 
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
@@ -144,7 +150,7 @@ function shiftLeft()
         for (var j = 0; j < points[i].length; ++j) {
 
             if (points[i][j].x < graphPadding || (points[i][j].x - horizSpace) < graphPadding) {
-                //FIXME: SHIFTS LEFT FAR,  FAR TOO SOON, THE GRAPH CANT KEEP UP HARDLY
+                //FIXME: WARNING: leaks slowly, when a break in the graph is seen...probably a  round error or so.
                 points[i].splice(j, 1);
                 print("&&&&&&& LENGHT LEFTHSIFT: " + points[i].length);
             }
@@ -257,7 +263,7 @@ function paint(canvas, context)
             gridPainted = true;
         }
 
-        if (graphType == GraphTypeEnum.FilledLineGraph) {
+        if (graphType == GraphTypeEnum.FilledLineGraph || graphType == GraphTypeEnum.LineGraph) {
             drawLines();
         } else if (graphType == GraphTypeEnum.BarGraph) {
             drawBarGraph();
@@ -350,13 +356,19 @@ function drawLines()
                 cp2y = y - 10;
               context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x + 5, y);
             } else {
-              context.lineTo(points[i][j].x, height - graphPadding);
+                if (graphType == GraphTypeEnum.FilledLineGraph) {
+                    context.lineTo(points[i][j].x, height - graphPadding);
+                }
             }
         }
 
-        context.lineTo(graphPadding, height - graphPadding);
-        context.closePath();
-        context.fill();
+
+        if (graphType == GraphTypeEnum.FilledLineGraph) {
+            context.lineTo(graphPadding, height - graphPadding);
+            context.closePath();
+            context.fill();
+        }
+
         context.stroke();
     }
 
