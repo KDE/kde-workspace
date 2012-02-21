@@ -112,7 +112,7 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
                 }
             }
         } else {
-            KNotification *notification = KNotification::event(KNotification::Warning, i18n("Touchpad status"), i18n("Found more than one touchpad. Touchpad Enabler Daemon does not handle this configuration"));
+            KNotification *notification = KNotification::event(KNotification::Warning, i18n("Touchpad status"), i18n("More than one touchpad detected. Touchpad Enabler Daemon does not handle this configuration"));
             notification->sendEvent();
         }
     } else {
