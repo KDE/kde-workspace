@@ -53,9 +53,7 @@ var GraphTypeEnum = {
 
 // what this graph is currently being rendered as
 // a bar graph or a filled line graph
-//var graphType = GraphTypeEnum.BarGraph;
-//var graphType = GraphTypeEnum.FilledLineGraph;
-var graphType = GraphTypeEnum.LineGraph;
+var graphType = GraphTypeEnum.FilledLineGraph;
 
 // the scalar that gets multiplied to scale it up or down.
 //  if it is 1 then it is not scaled at all
