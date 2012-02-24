@@ -14,6 +14,7 @@
             <choices>
                 <choice name="CommandOriented"/>
                 <choice name="TaskOriented"/>
+                <choice name="QtQuick"/>
             </choices>
             <default>CommandOriented</default>
         </entry>

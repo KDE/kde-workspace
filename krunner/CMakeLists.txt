@@ -38,13 +38,27 @@ set(quicksand_interface_SRCS
    interfaces/quicksand/qs_querymatchitem.cpp
    interfaces/quicksand/qs_statusbar.cpp)
 
+set(qml_interface_SRCS
+   interfaces/qmlrunner/qmlrunnerview.cpp
+)
+install( FILES
+	interfaces/qmlrunner/qml/main.qml
+	interfaces/qmlrunner/qml/ResultsList.qml
+	interfaces/qmlrunner/qml/ResultsGrid.qml
+	interfaces/qmlrunner/qml/ResultsPath.qml
+	interfaces/qmlrunner/qml/HighlightDelegate.qml
+	DESTINATION  ${DATA_INSTALL_DIR}/qmlrunner/qml/
+)
+
 set(krunner_SRCS
    krunnerdialog.cpp
    configdialog.cpp
    krunnerapp.cpp
    main.cpp
    ${default_interface_SRCS}
-   ${quicksand_interface_SRCS})
+   ${quicksand_interface_SRCS}
+   ${qml_interface_SRCS}
+)
 
 kde4_add_ui_files(krunner_SRCS interfaceOptions.ui)
 kde4_add_kcfg_files(krunner_SRCS ${krunner_KCFG_SRCS})
@@ -68,7 +82,8 @@ endif(NOT WIN32)
 
 kde4_add_kdeinit_executable(krunner ${krunner_SRCS})
 
-target_link_libraries(kdeinit_krunner kworkspace  plasmagenericshell kephal ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBRARIES} ${KDE4_THREADWEAVER_LIBRARIES} ${KDE4_KDEUI_LIBS}  ${KDE4_KCMUTILS_LIBS} )
+target_link_libraries(kdeinit_krunner kworkspace  plasmagenericshell kephal kdeclarative ${QT_QTDECLARATIVE_LIBRARY}
+	${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBRARIES} ${KDE4_THREADWEAVER_LIBRARIES} ${KDE4_KDEUI_LIBS}  ${KDE4_KCMUTILS_LIBS} )
 
 if(NOT WIN32)
   target_link_libraries(kdeinit_krunner processui  ${X11_Xrender_LIB} ${X11_LIBRARIES})
