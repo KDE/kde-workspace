@@ -63,7 +63,7 @@ Item {
             iconSource: "plasma"
             id: changeStuff
             checkable: true
-            onClicked: setView("ResultsList.qml")
+            onClicked: setView("ResultsPath.qml")
         }
         
         TextField {
@@ -94,7 +94,7 @@ Item {
     }
     
     Component.onCompleted: {
-        setView("ResultsPath.qml")
+        setView("ResultsList.qml")
     }
     
     Keys.onPressed: {
@@ -104,6 +104,8 @@ Item {
             event.accepted=true
         }
     }
+    
+    Keys.onEscapePressed: app.hide()
     
     Item {
         id: contentItem

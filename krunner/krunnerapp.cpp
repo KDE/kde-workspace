@@ -171,7 +171,7 @@ void KRunnerApp::initialize()
             m_interface = new QsDialog(m_runnerManager);
             break;
         case KRunnerSettings::EnumInterface::QtQuick:
-            m_interface = new QsDialog(m_runnerManager);
+            m_interface = new qmlrunnerView(m_runnerManager, 0);
             break;
     }
 
