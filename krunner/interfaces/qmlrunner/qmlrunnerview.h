@@ -46,7 +46,7 @@ public slots:
     void changeGeometry();
 
 signals:
-    void changeTerm(QString term);
+    void changeTerm(const QString& term);
 
 private:
     RunnerSettings* settings();

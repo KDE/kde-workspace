@@ -44,6 +44,7 @@ qmlrunnerView::qmlrunnerView(Plasma::RunnerManager* manager, QWidget *parent)
     view = new QDeclarativeView(this);
     view->setAttribute(Qt::WA_TranslucentBackground);
     view->setInteractive(true);
+    view->setStyleSheet("background: transparent");
     QPalette pal = view->palette();
     pal.setColor(backgroundRole(), Qt::transparent);
     view->setPalette(pal);
@@ -60,7 +61,7 @@ qmlrunnerView::qmlrunnerView(Plasma::RunnerManager* manager, QWidget *parent)
     view->setSource(QUrl::fromLocalFile(src));
     view->setResizeMode(QDeclarativeView::SizeViewToRootObject);
     if(!view->errors().isEmpty())
-        qDebug() << "lalala" << view->errors();
+        qDebug() << "initialization errors:" << view->errors();
     Q_ASSERT(view->errors().isEmpty());
     
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -117,7 +118,5 @@ void qmlrunnerView::changeGeometry()
     
     int left, top, right, bottom;
     getContentsMargins(&left, &top, &right, &bottom);
-    resize(it->height()+top+bottom, w);
+    resize(it->height()/*+top+bottom*/, w);
 }
-
-#include "qmlrunnerview.moc"
