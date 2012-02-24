@@ -49,6 +49,7 @@
 #include "ksystemactivitydialog.h"
 #include "interfaces/default/interface.h"
 #include "interfaces/quicksand/qs_dialog.h"
+#include "interfaces/qmlrunner/qmlrunnerview.h"
 #ifdef Q_WS_X11
 #include "startupid.h"
 #endif
@@ -167,6 +168,9 @@ void KRunnerApp::initialize()
             m_interface = new Interface(m_runnerManager);
             break;
         case KRunnerSettings::EnumInterface::TaskOriented:
+            m_interface = new QsDialog(m_runnerManager);
+            break;
+        case KRunnerSettings::EnumInterface::QtQuick:
             m_interface = new QsDialog(m_runnerManager);
             break;
     }
@@ -398,6 +402,10 @@ void KRunnerApp::reloadConfig()
                interface == KRunnerSettings::EnumInterface::CommandOriented) {
         m_interface->deleteLater();
         m_interface = new Interface(m_runnerManager);
+    } else if (!qobject_cast<qmlrunnerView*>(m_interface) &&
+               interface == KRunnerSettings::EnumInterface::QtQuick) {
+        m_interface->deleteLater();
+        m_interface = new qmlrunnerView(m_runnerManager, 0);
     }
 
     m_interface->setFreeFloating(KRunnerSettings::freeFloating());
