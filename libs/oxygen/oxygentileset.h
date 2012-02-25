@@ -76,6 +76,18 @@ namespace Oxygen
         virtual ~TileSet()
         {}
 
+        //! set stretch
+        void setStretch( bool value )
+        { _stretch = value; }
+
+        //! initialize
+        /*! old pixmaps, if any, are released */
+        void init(const QPixmap&, int w1, int h1, int w2, int h2 );
+
+        //! initialize
+        /*! old pixmaps, if any, are released */
+        void init(const QPixmap &pix, int w1, int h1, int w3, int h3, int x2, int y2, int w2, int h2 );
+
         /*!
         Flags specifying what sides to draw in ::render. Corners are drawn when
         the sides forming that corner are drawn, e.g. Top|Left draws the

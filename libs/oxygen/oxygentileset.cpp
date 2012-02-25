@@ -29,29 +29,6 @@ namespace Oxygen
     int TileSet::_sideExtent = 32;
 
     //______________________________________________________________
-    void TileSet::initPixmap( PixmapList& pixmaps, const QPixmap &pix, int w, int h, const QRect &rect)
-    {
-        QSize size( w, h );
-        if( !size.isValid() )
-        {
-            pixmaps.push_back( QPixmap() );
-
-        } else if( size != rect.size() ) {
-
-            const QPixmap tile( pix.copy(rect) );
-            QPixmap pixmap( w, h );
-
-            pixmap.fill(Qt::transparent);
-            QPainter p(&pixmap);
-            p.drawTiledPixmap(0, 0, w, h, tile);
-
-            pixmaps.push_back( pixmap );
-
-        } else pixmaps.push_back( pix.copy(rect) );
-
-    }
-
-    //______________________________________________________________
     TileSet::TileSet( void ):
         _stretch( false ),
         _w1(0),
@@ -62,12 +39,38 @@ namespace Oxygen
 
     //______________________________________________________________
     TileSet::TileSet(const QPixmap &pix, int w1, int h1, int w2, int h2, bool stretch ):
-        _stretch( stretch ),
-        _w1(w1),
-        _h1(h1),
+        _stretch( false ),
+        _w1(0),
+        _h1(0),
         _w3(0),
         _h3(0)
     {
+        setStretch( stretch );
+        init( pix, w1, h1, w2, h2 );
+    }
+
+    //______________________________________________________________
+    TileSet::TileSet(const QPixmap &pix, int w1, int h1, int w3, int h3, int x1, int y1, int w2, int h2, bool stretch ):
+        _stretch( false ),
+        _w1(0),
+        _h1(0),
+        _w3(0),
+        _h3(0)
+    {
+        setStretch( stretch );
+        init( pix, w1, h1, w3, h3, x1, y1, w2, h2 );
+    }
+
+    //______________________________________________________________
+    void TileSet::init( const QPixmap &pix, int w1, int h1, int w2, int h2 )
+    {
+
+        _w1 = w1;
+        _h1 = h1;
+        _w3 = 0;
+        _h3 = 0;
+
+        _pixmaps.clear();
         _pixmaps.reserve(9);
         if (pix.isNull()) return;
 
@@ -94,13 +97,15 @@ namespace Oxygen
     }
 
     //______________________________________________________________
-    TileSet::TileSet(const QPixmap &pix, int w1, int h1, int w3, int h3, int x1, int y1, int w2, int h2, bool stretch ):
-        _stretch( stretch ),
-        _w1(w1),
-        _h1(h1),
-        _w3(w3),
-        _h3(h3)
+    void TileSet::init( const QPixmap &pix, int w1, int h1, int w3, int h3, int x1, int y1, int w2, int h2 )
     {
+
+        _w1 = w1;
+        _h1 = h1;
+        _w3 = w3;
+        _h3 = h3;
+
+        _pixmaps.clear();
         _pixmaps.reserve(9);
         if (pix.isNull()) return;
 
@@ -241,6 +246,29 @@ namespace Oxygen
             const QString filename = basename + "-" + location[i] + "." + suffix;
             _pixmaps[i].save( filename, format, quality );
         }
+
+    }
+
+    //______________________________________________________________
+    void TileSet::initPixmap( PixmapList& pixmaps, const QPixmap &pix, int w, int h, const QRect &rect)
+    {
+        QSize size( w, h );
+        if( !size.isValid() )
+        {
+            pixmaps.push_back( QPixmap() );
+
+        } else if( size != rect.size() ) {
+
+            const QPixmap tile( pix.copy(rect) );
+            QPixmap pixmap( w, h );
+
+            pixmap.fill(Qt::transparent);
+            QPainter p(&pixmap);
+            p.drawTiledPixmap(0, 0, w, h, tile);
+
+            pixmaps.push_back( pixmap );
+
+        } else pixmaps.push_back( pix.copy(rect) );
 
     }
 
