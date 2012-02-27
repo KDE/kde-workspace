@@ -302,6 +302,7 @@ namespace Oxygen
         if( source.isNull() )
         {
             _pixmaps.push_back( source );
+
         } else {
 
             #ifdef Q_WS_X11
@@ -325,7 +326,7 @@ namespace Oxygen
     void TileSet::initPixmap( const QPixmap &pix, int w, int h, const QRect &rect)
     {
         QSize size( w, h );
-        if( !size.isValid() )
+        if( !( size.isValid() && rect.isValid() ) )
         {
             _pixmaps.push_back( QPixmap() );
 
@@ -361,6 +362,7 @@ namespace Oxygen
             #endif
 
         } else {
+
             #ifdef Q_WS_X11
 
             // create X11 pixmap and explicitly shared QPixmap from it
