@@ -22,6 +22,12 @@
 
 #include <QtGui/QPainter>
 
+#ifdef Q_WS_X11
+#include <QtGui/QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#endif
+
 namespace Oxygen
 {
 
@@ -62,6 +68,47 @@ namespace Oxygen
     }
 
     //______________________________________________________________
+    TileSet::TileSet( const TileSet& other ):
+        _stretch( other._stretch ),
+        _w1( other._w1 ),
+        _h1( other._h1 ),
+        _w3( other._w3 ),
+        _h3( other._h3 )
+    { foreach( const QPixmap& value, other._pixmaps ) copyPixmap( value ); }
+
+    //______________________________________________________________
+    TileSet& TileSet::operator = ( const TileSet& other )
+    {
+        _stretch = other._stretch;
+        _w1 = other._w1;
+        _h1 = other._h1;
+        _w3 = other._w3;
+        _h3 = other._h3;
+
+        _pixmaps.clear();
+
+        #ifdef Q_WS_X11
+        // free X11 pixmaps
+        foreach( const Qt::HANDLE& value, _x11Pixmaps  ) XFreePixmap( QX11Info::display(), value );
+        _x11Pixmaps.clear();
+        #endif
+
+        foreach( const QPixmap& value, other._pixmaps ) copyPixmap( value );
+
+        return *this;
+
+    }
+
+    //______________________________________________________________
+    TileSet::~TileSet( void )
+    {
+        #ifdef Q_WS_X11
+        // free X11 pixmaps
+        foreach( const Qt::HANDLE& value, _x11Pixmaps  ) XFreePixmap( QX11Info::display(), value );
+        #endif
+    }
+
+    //______________________________________________________________
     void TileSet::init( const QPixmap &pix, int w1, int h1, int w2, int h2 )
     {
 
@@ -85,15 +132,15 @@ namespace Oxygen
         }
 
         // initialise pixmap array
-        initPixmap( _pixmaps, pix, _w1, _h1, QRect(0, 0, _w1, _h1) );
-        initPixmap( _pixmaps, pix, w, _h1, QRect(_w1, 0, w2, _h1) );
-        initPixmap( _pixmaps, pix, _w3, _h1, QRect(_w1+w2, 0, _w3, _h1) );
-        initPixmap( _pixmaps, pix, _w1, h, QRect(0, _h1, _w1, h2) );
-        initPixmap( _pixmaps, pix, w, h, QRect(_w1, _h1, w2, h2) );
-        initPixmap( _pixmaps, pix, _w3, h, QRect(_w1+w2, _h1, _w3, h2) );
-        initPixmap( _pixmaps, pix, _w1, _h3, QRect(0, _h1+h2, _w1, _h3) );
-        initPixmap( _pixmaps, pix, w, _h3, QRect(_w1, _h1+h2, w2, _h3) );
-        initPixmap( _pixmaps, pix, _w3, _h3, QRect(_w1+w2, _h1+h2, _w3, _h3) );
+        initPixmap( pix, _w1, _h1, QRect(0, 0, _w1, _h1) );
+        initPixmap( pix, w, _h1, QRect(_w1, 0, w2, _h1) );
+        initPixmap( pix, _w3, _h1, QRect(_w1+w2, 0, _w3, _h1) );
+        initPixmap( pix, _w1, h, QRect(0, _h1, _w1, h2) );
+        initPixmap( pix, w, h, QRect(_w1, _h1, w2, h2) );
+        initPixmap( pix, _w3, h, QRect(_w1+w2, _h1, _w3, h2) );
+        initPixmap( pix, _w1, _h3, QRect(0, _h1+h2, _w1, _h3) );
+        initPixmap( pix, w, _h3, QRect(_w1, _h1+h2, w2, _h3) );
+        initPixmap( pix, _w3, _h3, QRect(_w1+w2, _h1+h2, _w3, _h3) );
     }
 
     //______________________________________________________________
@@ -120,15 +167,15 @@ namespace Oxygen
         }
 
         // initialise pixmap array
-        initPixmap( _pixmaps, pix, _w1, _h1, QRect(0, 0, _w1, _h1) );
-        initPixmap( _pixmaps, pix, w, _h1, QRect(x1, 0, w2, _h1) );
-        initPixmap( _pixmaps, pix, _w3, _h1, QRect(x2, 0, _w3, _h1) );
-        initPixmap( _pixmaps, pix, _w1, h, QRect(0, y1, _w1, h2) );
-        initPixmap( _pixmaps, pix, w, h, QRect(x1, y1, w2, h2) );
-        initPixmap( _pixmaps, pix, _w3, h, QRect(x2, y1, _w3, h2) );
-        initPixmap( _pixmaps, pix, _w1, _h3, QRect(0, y2, _w1, _h3) );
-        initPixmap( _pixmaps, pix, w, _h3, QRect(x1, y2, w2, _h3) );
-        initPixmap( _pixmaps, pix, _w3, _h3, QRect(x2, y2, _w3, _h3) );
+        initPixmap( pix, _w1, _h1, QRect(0, 0, _w1, _h1) );
+        initPixmap( pix, w, _h1, QRect(x1, 0, w2, _h1) );
+        initPixmap( pix, _w3, _h1, QRect(x2, 0, _w3, _h1) );
+        initPixmap( pix, _w1, h, QRect(0, y1, _w1, h2) );
+        initPixmap( pix, w, h, QRect(x1, y1, w2, h2) );
+        initPixmap( pix, _w3, h, QRect(x2, y1, _w3, h2) );
+        initPixmap( pix, _w1, _h3, QRect(0, y2, _w1, _h3) );
+        initPixmap( pix, w, _h3, QRect(x1, y2, w2, _h3) );
+        initPixmap( pix, _w3, _h3, QRect(x2, y2, _w3, _h3) );
 
     }
 
@@ -250,25 +297,92 @@ namespace Oxygen
     }
 
     //______________________________________________________________
-    void TileSet::initPixmap( PixmapList& pixmaps, const QPixmap &pix, int w, int h, const QRect &rect)
+    void TileSet::copyPixmap( const QPixmap& source )
+    {
+        if( source.isNull() )
+        {
+            _pixmaps.push_back( source );
+        } else {
+
+            #ifdef Q_WS_X11
+            Pixmap x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), source.width(), source.height(), 32 );
+            QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
+            QPainter p(&pixmap);
+            p.drawPixmap(0, 0, source);
+            p.end();
+            _pixmaps.push_back( pixmap );
+            _x11Pixmaps.push_back( x11Pixmap );
+            #else
+            _pixmaps.push_back( source );
+            #endif
+        }
+
+        return;
+
+    }
+
+    //______________________________________________________________
+    void TileSet::initPixmap( const QPixmap &pix, int w, int h, const QRect &rect)
     {
         QSize size( w, h );
         if( !size.isValid() )
         {
-            pixmaps.push_back( QPixmap() );
+            _pixmaps.push_back( QPixmap() );
 
         } else if( size != rect.size() ) {
 
             const QPixmap tile( pix.copy(rect) );
+
+            #ifdef Q_WS_X11
+
+            // create X11 pixmap and explicitly shared QPixmap from it
+            Pixmap x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), w, h, 32 );
+            QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
+
+            #else
+
+            // create QPixmap
             QPixmap pixmap( w, h );
+
+            #endif
 
             pixmap.fill(Qt::transparent);
             QPainter p(&pixmap);
             p.drawTiledPixmap(0, 0, w, h, tile);
+            p.end();
 
-            pixmaps.push_back( pixmap );
+            _pixmaps.push_back( pixmap );
 
-        } else pixmaps.push_back( pix.copy(rect) );
+            #ifdef Q_WS_X11
+
+            // also store X11 pixmap
+            _x11Pixmaps.push_back( x11Pixmap );
+
+            #endif
+
+        } else {
+            #ifdef Q_WS_X11
+
+            // create X11 pixmap and explicitly shared QPixmap from it
+            Pixmap x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), w, h, 32 );
+            QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
+            pixmap.fill(Qt::transparent);
+
+            QPainter p(&pixmap);
+            p.drawPixmap( QPoint(0,0), pix, rect );
+            p.end();
+
+            _pixmaps.push_back( pixmap );
+            _x11Pixmaps.push_back( x11Pixmap );
+
+            #else
+
+            // copy pixmap directly
+            _pixmaps.push_back( pix.copy(rect) );
+
+            #endif
+
+        }
 
     }
 

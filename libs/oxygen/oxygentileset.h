@@ -72,9 +72,14 @@ namespace Oxygen
         //! empty constructor
         TileSet();
 
+        //! copy constructor
+        TileSet( const TileSet& );
+
+        // assignment operator
+        TileSet& operator = (const TileSet& );
+
         //! destructor
-        virtual ~TileSet()
-        {}
+        virtual ~TileSet();
 
         //! set stretch
         void setStretch( bool value )
@@ -148,11 +153,11 @@ namespace Oxygen
 
         protected:
 
-        //! shortcut to pixmap list
-        typedef QVector<QPixmap> PixmapList;
+        //! copy pixmap inside local list
+        void copyPixmap( const QPixmap& );
 
         //! initialize pixmap
-        void initPixmap( PixmapList&, const QPixmap&, int w, int h, const QRect& );
+        void initPixmap( const QPixmap&, int w, int h, const QRect& );
 
         private:
 
@@ -164,7 +169,10 @@ namespace Oxygen
         static int _sideExtent;
 
         //! pixmap arry
-        PixmapList _pixmaps;
+        QVector<QPixmap> _pixmaps;
+
+        //! list of X11 pixmaps
+        QVector<Qt::HANDLE> _x11Pixmaps;
 
         // stretch pixmaps
         bool _stretch;
