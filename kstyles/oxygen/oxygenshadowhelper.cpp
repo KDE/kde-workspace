@@ -64,32 +64,16 @@ namespace Oxygen
 
     //_______________________________________________________
     ShadowHelper::~ShadowHelper( void )
-    {
-
-        #ifdef Q_WS_X11
-        foreach( const Qt::HANDLE& value, _pixmaps  ) XFreePixmap( QX11Info::display(), value );
-        foreach( const Qt::HANDLE& value, _dockPixmaps  ) XFreePixmap( QX11Info::display(), value );
-        #endif
-
-        delete _shadowCache;
-
-    }
+    { delete _shadowCache; }
 
     //______________________________________________
     void ShadowHelper::reset( void )
     {
-        #ifdef Q_WS_X11
-        // round pixmaps
-        foreach( const Qt::HANDLE& value, _pixmaps  ) XFreePixmap( QX11Info::display(), value );
-        foreach( const Qt::HANDLE& value, _dockPixmaps  ) XFreePixmap( QX11Info::display(), value );
-        #endif
-
-        _pixmaps.clear();
-        _dockPixmaps.clear();
+        _tiles = TileSet_x11();
+        _dockTiles = TileSet_x11();
 
         // reset size
         _size = 0;
-
     }
 
     //_______________________________________________________
@@ -227,106 +211,18 @@ namespace Oxygen
         return false;
     }
 
-    //______________________________________________
-    const QVector<Qt::HANDLE>& ShadowHelper::createPixmapHandles( bool isDockWidget )
-    {
-
-        /*!
-        shadow atom and property specification available at
-        http://community.kde.org/KWin/Shadow
-        */
-
-        // create atom
-        #ifdef Q_WS_X11
-        if( !_atom ) _atom = XInternAtom( QX11Info::display(), netWMShadowAtomName, False);
-        #endif
-
-        // make sure size is valid
-        if( _size <= 0 ) return _pixmaps;
-
-        // make sure pixmaps are not already initialized
-        if( isDockWidget )
-        {
-            // make sure pixmaps are not already initialized
-            if( _dockPixmaps.empty() && _dockTiles.isValid() )
-            {
-
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 1 ) ) );
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 2 ) ) );
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 5 ) ) );
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 8 ) ) );
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 7 ) ) );
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 6 ) ) );
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 3 ) ) );
-                _dockPixmaps.push_back( createPixmap( _dockTiles.pixmap( 0 ) ) );
-
-            }
-
-        } else if( _pixmaps.empty() && _tiles.isValid() ) {
-
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 1 ) ) );
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 2 ) ) );
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 5 ) ) );
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 8 ) ) );
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 7 ) ) );
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 6 ) ) );
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 3 ) ) );
-            _pixmaps.push_back( createPixmap( _tiles.pixmap( 0 ) ) );
-
-        }
-
-        // return relevant list of pixmap handles
-        return isDockWidget ? _dockPixmaps:_pixmaps;
-
-    }
-
-    //______________________________________________
-    Qt::HANDLE ShadowHelper::createPixmap( const QPixmap& source ) const
-    {
-
-        // do nothing for invalid pixmaps
-        if( source.isNull() ) return 0;
-
-        /*
-        in some cases, pixmap handle is invalid. This is the case notably
-        when Qt uses to RasterEngine. In this case, we create an X11 Pixmap
-        explicitly and draw the source pixmap on it.
-        */
-
-        #ifdef Q_WS_X11
-        const int width( source.width() );
-        const int height( source.height() );
-
-        // create X11 pixmap
-        Pixmap pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), width, height, 32 );
-
-        // create explicitly shared QPixmap from it
-        QPixmap dest( QPixmap::fromX11Pixmap( pixmap, QPixmap::ExplicitlyShared ) );
-
-        // create surface for pixmap
-        {
-            QPainter painter( &dest );
-            painter.setCompositionMode( QPainter::CompositionMode_Source );
-            painter.drawPixmap( 0, 0, source );
-        }
-
-
-        return pixmap;
-        #else
-        return 0;
-        #endif
-
-    }
-
     //_______________________________________________________
     bool ShadowHelper::installX11Shadows( QWidget* widget )
     {
 
-        // check widget and shadow
-        if( !widget ) return false;
+        // check widget and shadow size
+        if( _size <= 0 || !widget ) return false;
 
         #ifdef Q_WS_X11
         #ifndef QT_NO_XRENDER
+
+        // create atom
+        if( !_atom ) _atom = XInternAtom( QX11Info::display(), netWMShadowAtomName, False);
 
         // TODO: also check for NET_WM_SUPPORTED atom, before installing shadow
 
@@ -337,16 +233,29 @@ namespace Oxygen
         if( !(widget->testAttribute(Qt::WA_WState_Created) || widget->internalWinId() ))
         { return false; }
 
-        // create pixmap handles if needed
-        const bool isDockWidget( qobject_cast<QDockWidget*>( widget ) );
-        const QVector<Qt::HANDLE>& pixmaps( createPixmapHandles( isDockWidget ) );
-        if( pixmaps.size() != numPixmaps ) return false;
-
         // create data
         // add pixmap handles
         QVector<unsigned long> data;
-        foreach( const Qt::HANDLE& value, pixmaps )
-        { data.push_back( value ); }
+        if( qobject_cast<QDockWidget*>( widget ) )
+        {
+            data.push_back( _dockTiles.x11Pixmap( 1 ) );
+            data.push_back( _dockTiles.x11Pixmap( 2 ) );
+            data.push_back( _dockTiles.x11Pixmap( 5 ) );
+            data.push_back( _dockTiles.x11Pixmap( 8 ) );
+            data.push_back( _dockTiles.x11Pixmap( 7 ) );
+            data.push_back( _dockTiles.x11Pixmap( 6 ) );
+            data.push_back( _dockTiles.x11Pixmap( 3 ) );
+            data.push_back( _dockTiles.x11Pixmap( 0 ) );
+        } else {
+            data.push_back( _tiles.x11Pixmap( 1 ) );
+            data.push_back( _tiles.x11Pixmap( 2 ) );
+            data.push_back( _tiles.x11Pixmap( 5 ) );
+            data.push_back( _tiles.x11Pixmap( 8 ) );
+            data.push_back( _tiles.x11Pixmap( 7 ) );
+            data.push_back( _tiles.x11Pixmap( 6 ) );
+            data.push_back( _tiles.x11Pixmap( 3 ) );
+            data.push_back( _tiles.x11Pixmap( 0 ) );
+        }
 
         // add padding
         /*
