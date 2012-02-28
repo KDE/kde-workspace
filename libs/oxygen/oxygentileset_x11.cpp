@@ -32,11 +32,7 @@ namespace Oxygen
 
     //______________________________________________________________
     TileSet_x11::TileSet_x11( void )
-    {
-        #ifdef Q_WS_X11
-        _x11Pixmaps.reserve(9);
-        #endif
-    }
+    {}
 
     //______________________________________________________________
     TileSet_x11::TileSet_x11( const TileSet& other ):
@@ -58,7 +54,8 @@ namespace Oxygen
 
         #ifdef Q_WS_X11
         // free X11 pixmaps
-        foreach( const Qt::HANDLE& value, _x11Pixmaps  ) XFreePixmap( QX11Info::display(), value );
+        foreach( const Qt::HANDLE& value, _x11Pixmaps  )
+        { if( value ) XFreePixmap( QX11Info::display(), value ); }
         _x11Pixmaps.clear();
 
         // clear pixmaps, and make deep copy with explicit X11 pixmap attached
@@ -75,7 +72,8 @@ namespace Oxygen
     {
         #ifdef Q_WS_X11
         // free X11 pixmaps
-        foreach( const Qt::HANDLE& value, _x11Pixmaps  ) XFreePixmap( QX11Info::display(), value );
+        foreach( const Qt::HANDLE& value, _x11Pixmaps  )
+        { if( value ) XFreePixmap( QX11Info::display(), value ); }
         #endif
     }
 
@@ -86,14 +84,20 @@ namespace Oxygen
         if( source.isNull() )
         {
             addPixmap( source );
+            _x11Pixmaps.push_back( 0L );
 
         } else {
 
             Pixmap x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), source.width(), source.height(), 32 );
             QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
-            QPainter p(&pixmap);
-            p.drawPixmap(0, 0, source);
-            p.end();
+            pixmap.fill( Qt::transparent );
+
+            // copy
+            QPainter painter(&pixmap);
+            painter.drawPixmap(0, 0, source);
+            painter.end();
+
+            // add to lists
             addPixmap( pixmap );
             _x11Pixmaps.push_back( x11Pixmap );
 
@@ -112,17 +116,18 @@ namespace Oxygen
         if( !( size.isValid() && rect.isValid() ) )
         {
             addPixmap( QPixmap() );
+            _x11Pixmaps.push_back( 0L );
 
         } else if( size != rect.size() ) {
 
             const QPixmap tile( pix.copy(rect) );
             Pixmap x11Pixmap( XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), w, h, 32 ) );
             QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
+            pixmap.fill( Qt::transparent );
 
-            pixmap.fill(Qt::transparent);
-            QPainter p(&pixmap);
-            p.drawTiledPixmap(0, 0, w, h, tile);
-            p.end();
+            QPainter painter(&pixmap);
+            painter.drawTiledPixmap(0, 0, w, h, tile);
+            painter.end();
 
             addPixmap( pixmap );
             _x11Pixmaps.push_back( x11Pixmap );
@@ -132,11 +137,11 @@ namespace Oxygen
             // create X11 pixmap and explicitly shared QPixmap from it
             Pixmap x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), w, h, 32 );
             QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
-            pixmap.fill(Qt::transparent);
+            pixmap.fill( Qt::transparent );
 
-            QPainter p(&pixmap);
-            p.drawPixmap( QPoint(0,0), pix, rect );
-            p.end();
+            QPainter painter(&pixmap);
+            painter.drawPixmap( QPoint(0,0), pix, rect );
+            painter.end();
 
             addPixmap( pixmap );
             _x11Pixmaps.push_back( x11Pixmap );
