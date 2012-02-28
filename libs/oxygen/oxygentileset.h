@@ -72,22 +72,13 @@ namespace Oxygen
         //! empty constructor
         TileSet();
 
-        //! copy constructor
-        TileSet( const TileSet& );
-
-        // assignment operator
-        TileSet& operator = (const TileSet& );
-
         //! destructor
-        virtual ~TileSet();
+        virtual ~TileSet()
+        {}
 
         //! set stretch
         void setStretch( bool value )
         { _stretch = value; }
-
-        //! force use x11 pixmaps
-        void setForceX11Pixmaps( bool value )
-        { _forceX11Pixmaps = value; }
 
         //! initialize
         /*! old pixmaps, if any, are released */
@@ -155,13 +146,25 @@ namespace Oxygen
             return _pixmaps[index];
         }
 
+        //! shortcut to list of pixmaps
+        typedef QVector<QPixmap> PixmapList;
+
+        //! get pixmaps
+        const PixmapList& pixmaps( void ) const
+        { return _pixmaps; }
+
         protected:
 
-        //! copy pixmap inside local list
-        void copyPixmap( const QPixmap& );
-
         //! initialize pixmap
-        void initPixmap( const QPixmap&, int w, int h, const QRect& );
+        virtual void initPixmap( const QPixmap&, int w, int h, const QRect& );
+
+        //! clear pixmaps
+        void clearPixmaps( void )
+        { _pixmaps.clear(); }
+
+        //! add pixmap to list
+        void addPixmap( const QPixmap& pixmap )
+        { _pixmaps.push_back( pixmap ); }
 
         private:
 
@@ -173,16 +176,10 @@ namespace Oxygen
         static int _sideExtent;
 
         //! pixmap arry
-        QVector<QPixmap> _pixmaps;
-
-        //! list of X11 pixmaps
-        QVector<Qt::HANDLE> _x11Pixmaps;
+        PixmapList _pixmaps;
 
         //! stretch pixmaps
         bool _stretch;
-
-        //! force use X11 pixmaps
-        bool _forceX11Pixmaps;
 
         //!@name dimensions
         //@{
@@ -198,4 +195,4 @@ namespace Oxygen
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Oxygen::TileSet::Tiles)
 
-#endif //TILESET_H
+#endif

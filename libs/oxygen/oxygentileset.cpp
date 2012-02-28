@@ -22,12 +22,6 @@
 
 #include <QtGui/QPainter>
 
-#ifdef Q_WS_X11
-#include <QtGui/QX11Info>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#endif
-
 namespace Oxygen
 {
 
@@ -37,7 +31,6 @@ namespace Oxygen
     //______________________________________________________________
     TileSet::TileSet( void ):
         _stretch( false ),
-        _forceX11Pixmaps( false ),
         _w1(0),
         _h1(0),
         _w3(0),
@@ -47,7 +40,6 @@ namespace Oxygen
     //______________________________________________________________
     TileSet::TileSet(const QPixmap &pix, int w1, int h1, int w2, int h2 ):
         _stretch( false ),
-        _forceX11Pixmaps( false ),
         _w1(0),
         _h1(0),
         _w3(0),
@@ -57,55 +49,11 @@ namespace Oxygen
     //______________________________________________________________
     TileSet::TileSet(const QPixmap &pix, int w1, int h1, int w3, int h3, int x1, int y1, int w2, int h2 ):
         _stretch( false ),
-        _forceX11Pixmaps( false ),
         _w1(0),
         _h1(0),
         _w3(0),
         _h3(0)
     { init( pix, w1, h1, w3, h3, x1, y1, w2, h2 ); }
-
-    //______________________________________________________________
-    TileSet::TileSet( const TileSet& other ):
-        _stretch( other._stretch ),
-        _forceX11Pixmaps( other._forceX11Pixmaps ),
-        _w1( other._w1 ),
-        _h1( other._h1 ),
-        _w3( other._w3 ),
-        _h3( other._h3 )
-    { foreach( const QPixmap& value, other._pixmaps ) copyPixmap( value ); }
-
-    //______________________________________________________________
-    TileSet& TileSet::operator = ( const TileSet& other )
-    {
-        _stretch = other._stretch;
-        _forceX11Pixmaps = other._forceX11Pixmaps;
-        _w1 = other._w1;
-        _h1 = other._h1;
-        _w3 = other._w3;
-        _h3 = other._h3;
-
-        _pixmaps.clear();
-
-        #ifdef Q_WS_X11
-        // free X11 pixmaps
-        foreach( const Qt::HANDLE& value, _x11Pixmaps  ) XFreePixmap( QX11Info::display(), value );
-        _x11Pixmaps.clear();
-        #endif
-
-        foreach( const QPixmap& value, other._pixmaps ) copyPixmap( value );
-
-        return *this;
-
-    }
-
-    //______________________________________________________________
-    TileSet::~TileSet( void )
-    {
-        #ifdef Q_WS_X11
-        // free X11 pixmaps
-        foreach( const Qt::HANDLE& value, _x11Pixmaps  ) XFreePixmap( QX11Info::display(), value );
-        #endif
-    }
 
     //______________________________________________________________
     void TileSet::init( const QPixmap &pix, int w1, int h1, int w2, int h2 )
@@ -296,101 +244,28 @@ namespace Oxygen
     }
 
     //______________________________________________________________
-    void TileSet::copyPixmap( const QPixmap& source )
-    {
-        if( source.isNull() )
-        {
-            _pixmaps.push_back( source );
-
-        } if( _forceX11Pixmaps ) {
-
-            #ifdef Q_WS_X11
-            Pixmap x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), source.width(), source.height(), 32 );
-            QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
-            QPainter p(&pixmap);
-            p.drawPixmap(0, 0, source);
-            p.end();
-            _pixmaps.push_back( pixmap );
-            _x11Pixmaps.push_back( x11Pixmap );
-
-            #else
-            _pixmaps.push_back( source );
-            #endif
-
-        } else _pixmaps.push_back( source );
-
-        return;
-
-    }
-
-    //______________________________________________________________
     void TileSet::initPixmap( const QPixmap &pix, int w, int h, const QRect &rect)
     {
         QSize size( w, h );
         if( !( size.isValid() && rect.isValid() ) )
         {
-            _pixmaps.push_back( QPixmap() );
+            addPixmap( QPixmap() );
 
         } else if( size != rect.size() ) {
 
             const QPixmap tile( pix.copy(rect) );
-            QPixmap pixmap;
-
-            #ifdef Q_WS_X11
-
-            Pixmap x11Pixmap( 0L );
-            if( _forceX11Pixmaps )
-            {
-
-                // create X11 pixmap and explicitly shared QPixmap from it
-                x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), w, h, 32 );
-                pixmap = QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared );
-
-            } else pixmap = QPixmap( w, h );
-
-            #else
-            pixmap = QPixmap( w, h );
-            #endif
-
+            QPixmap pixmap( w, h );
             pixmap.fill(Qt::transparent);
             QPainter p(&pixmap);
             p.drawTiledPixmap(0, 0, w, h, tile);
             p.end();
 
-            _pixmaps.push_back( pixmap );
-
-            #ifdef Q_WS_X11
-            if( _forceX11Pixmaps )
-            { _x11Pixmaps.push_back( x11Pixmap ); }
-            #endif
-
-        } else if( _forceX11Pixmaps ) {
-
-            #ifdef Q_WS_X11
-
-            // create X11 pixmap and explicitly shared QPixmap from it
-            Pixmap x11Pixmap = XCreatePixmap( QX11Info::display(), QX11Info::appRootWindow(), w, h, 32 );
-            QPixmap pixmap( QPixmap::fromX11Pixmap( x11Pixmap, QPixmap::ExplicitlyShared ) );
-            pixmap.fill(Qt::transparent);
-
-            QPainter p(&pixmap);
-            p.drawPixmap( QPoint(0,0), pix, rect );
-            p.end();
-
-            _pixmaps.push_back( pixmap );
-            _x11Pixmaps.push_back( x11Pixmap );
-
-            #else
-
-            // copy pixmap directly
-            _pixmaps.push_back( pix.copy(rect) );
-
-            #endif
+            addPixmap( pixmap );
 
         } else {
 
             // copy pixmap directly
-            _pixmaps.push_back( pix.copy(rect) );
+            addPixmap( pix.copy(rect) );
 
         }
 
