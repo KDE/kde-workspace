@@ -214,12 +214,7 @@ namespace Oxygen
         if( client().isPreview() )
         {
 
-            position -= QPoint(
-                client().layoutMetric( Client::LM_BorderRight )+
-                client().layoutMetric( Client::LM_OuterPaddingRight ),
-                client().layoutMetric( Client::LM_OuterPaddingBottom )+
-                client().layoutMetric( Client::LM_BorderBottom )
-                );
+            position -= QPoint( client().layoutMetric( Client::LM_BorderRight ), client().layoutMetric( Client::LM_BorderBottom ) );
 
         } else {
 

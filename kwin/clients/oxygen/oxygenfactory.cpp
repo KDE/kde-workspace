@@ -158,15 +158,6 @@ namespace Oxygen
             case AbilityButtonSpacer:
             case AbilityButtonShade:
 
-            //       // colors
-            //       case AbilityColorTitleBack:
-            //       case AbilityColorTitleFore:
-            //       case AbilityColorFrame:
-
-            // compositing
-            case AbilityProvidesShadow: // TODO: UI option to use default shadows instead
-            return true;
-
             case AbilityUsesAlphaChannel:
             return true;
 
