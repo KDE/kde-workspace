@@ -53,6 +53,15 @@ namespace Oxygen
         //! destructor
         virtual ~TileSet_x11();
 
+        #ifdef Q_WS_X11
+        //! returns X11 pixmap for given index
+        Qt::HANDLE x11Pixmap( int index ) const
+        {
+            assert( index >= 0 && index < _x11Pixmaps.size() );
+            return _x11Pixmaps[index];
+        }
+        #endif
+
         protected:
 
         #ifdef Q_WS_X11
