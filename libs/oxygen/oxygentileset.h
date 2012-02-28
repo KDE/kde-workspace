@@ -153,6 +153,10 @@ namespace Oxygen
         const PixmapList& pixmaps( void ) const
         { return _pixmaps; }
 
+        //! get X11 pixmap
+        virtual Qt::HANDLE x11Pixmap( int ) const
+        { return 0L; }
+
         protected:
 
         //! initialize pixmap
