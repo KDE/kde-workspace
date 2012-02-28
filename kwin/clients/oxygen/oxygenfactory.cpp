@@ -50,6 +50,10 @@ namespace Oxygen
         _helper( "oxygenDeco" ),
         _shadowCache( _helper )
     {
+
+        // force X11 pixmaps in shadow cache
+        _shadowCache.setForceX11Pixmaps( true );
+
         readConfig();
         setInitialized( true );
     }
