@@ -162,7 +162,7 @@ namespace Oxygen
             case AbilityButtonSpacer:
             case AbilityButtonShade:
 
-            case AbilityUsesAlphaChannel:
+            // case AbilityUsesAlphaChannel:
             return true;
 
             // tabs

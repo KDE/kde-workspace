@@ -180,8 +180,9 @@ namespace Oxygen
 
         } else if( hasSizeGrip() ) deleteSizeGrip();
 
-        // needs to remove shadow property on window since shadows are handled by the decoration
-        removeShadowHint();
+        // shadow hint
+        if( shadowCache().shadowSize() > 0 ) updateShadowHint();
+        else removeShadowHint();
 
     }
 
@@ -1228,8 +1229,15 @@ namespace Oxygen
         // reset animation
         if( shadowAnimationsEnabled() )
         {
+
             _glowAnimation->setDirection( isActive() ? Animation::Forward : Animation::Backward );
             if(!glowIsAnimated()) { _glowAnimation->start(); }
+
+        } else {
+
+            // update shadow hint
+            updateShadowHint();
+
         }
 
         // update size grip so that it gets the right color
@@ -1255,6 +1263,7 @@ namespace Oxygen
     {
         if( hasSizeGrip() ) sizeGrip().setVisible( !( isShade() || isMaximized() ) );
         KCommonDecorationUnstable::shadeChange();
+        updateShadowHint();
     }
 
     //_________________________________________________________
@@ -1915,6 +1924,75 @@ namespace Oxygen
         assert( hasSizeGrip() );
         _sizeGrip->deleteLater();
         _sizeGrip = 0;
+    }
+
+    //_________________________________________________________________
+    void Client::updateShadowHint( void )
+    {
+
+        // do nothing if no window id
+        if( !windowId() ) return;
+
+        // create atom
+        if( !_shadowAtom )
+        { _shadowAtom = XInternAtom( QX11Info::display(), "_KDE_NET_WM_SHADOW", False); }
+
+
+        // store size
+        const int size( shadowCache().shadowSize() );
+
+        // check compositing and size
+        if( !( compositingActive() && size > 0 ) )
+        { return; }
+
+        // shadow cache key
+        const ShadowCache::Key key( this->key() );
+
+        // TileSet
+        TileSet* tileSet;
+
+        if( configuration().useOxygenShadows() && glowIsAnimated() && !isForcedActive() )
+        {
+
+            tileSet = shadowCache().tileSet( key, glowIntensity() );
+
+        } else {
+
+            tileSet = shadowCache().tileSet( key );
+
+        }
+
+        // check
+        if( !tileSet ) return;
+
+        // create data
+        QVector<unsigned long> data;
+        data << tileSet->x11Pixmap( 1 )
+            << tileSet->x11Pixmap( 2 )
+            << tileSet->x11Pixmap( 5 )
+            << tileSet->x11Pixmap( 8 )
+            << tileSet->x11Pixmap( 7 )
+            << tileSet->x11Pixmap( 6 )
+            << tileSet->x11Pixmap( 3 )
+            << tileSet->x11Pixmap( 0 );
+
+        // add padding
+        if( configuration().frameBorder() == Configuration::BorderNone && !isShade() )
+        {
+
+            data << size << size << size-1 << size;
+
+        } else {
+
+            data << size << size << size << size;
+
+        }
+
+        // update property
+        XChangeProperty(
+            QX11Info::display(), windowId(), _shadowAtom, XA_CARDINAL, 32, PropModeReplace,
+            reinterpret_cast<const unsigned char *>(data.constData()), data.size() );
+
     }
 
     //_________________________________________________________________
