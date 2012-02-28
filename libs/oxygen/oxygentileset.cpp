@@ -255,10 +255,10 @@ namespace Oxygen
 
             const QPixmap tile( pix.copy(rect) );
             QPixmap pixmap( w, h );
-            pixmap.fill(Qt::transparent);
-            QPainter p(&pixmap);
-            p.drawTiledPixmap(0, 0, w, h, tile);
-            p.end();
+            pixmap.fill( Qt::transparent );
+            QPainter painter(&pixmap);
+            painter.drawTiledPixmap(0, 0, w, h, tile);
+            painter.end();
 
             addPixmap( pixmap );
 
