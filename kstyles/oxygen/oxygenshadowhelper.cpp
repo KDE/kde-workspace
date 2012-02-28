@@ -238,23 +238,27 @@ namespace Oxygen
         QVector<unsigned long> data;
         if( qobject_cast<QDockWidget*>( widget ) )
         {
-            data.push_back( _dockTiles.x11Pixmap( 1 ) );
-            data.push_back( _dockTiles.x11Pixmap( 2 ) );
-            data.push_back( _dockTiles.x11Pixmap( 5 ) );
-            data.push_back( _dockTiles.x11Pixmap( 8 ) );
-            data.push_back( _dockTiles.x11Pixmap( 7 ) );
-            data.push_back( _dockTiles.x11Pixmap( 6 ) );
-            data.push_back( _dockTiles.x11Pixmap( 3 ) );
-            data.push_back( _dockTiles.x11Pixmap( 0 ) );
+
+            data << _dockTiles.x11Pixmap( 1 )
+                << _dockTiles.x11Pixmap( 2 )
+                << _dockTiles.x11Pixmap( 5 )
+                << _dockTiles.x11Pixmap( 8 )
+                << _dockTiles.x11Pixmap( 7 )
+                << _dockTiles.x11Pixmap( 6 )
+                << _dockTiles.x11Pixmap( 3 )
+                << _dockTiles.x11Pixmap( 0 );
+
         } else {
-            data.push_back( _tiles.x11Pixmap( 1 ) );
-            data.push_back( _tiles.x11Pixmap( 2 ) );
-            data.push_back( _tiles.x11Pixmap( 5 ) );
-            data.push_back( _tiles.x11Pixmap( 8 ) );
-            data.push_back( _tiles.x11Pixmap( 7 ) );
-            data.push_back( _tiles.x11Pixmap( 6 ) );
-            data.push_back( _tiles.x11Pixmap( 3 ) );
-            data.push_back( _tiles.x11Pixmap( 0 ) );
+
+            data << _tiles.x11Pixmap( 1 )
+                << _tiles.x11Pixmap( 2 )
+                << _tiles.x11Pixmap( 5 )
+                << _tiles.x11Pixmap( 8 )
+                << _tiles.x11Pixmap( 7 )
+                << _tiles.x11Pixmap( 6 )
+                << _tiles.x11Pixmap( 3 )
+                << _tiles.x11Pixmap( 0 );
+
         }
 
         // add padding
