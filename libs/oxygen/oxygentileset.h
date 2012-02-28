@@ -49,7 +49,7 @@ namespace Oxygen
         @param w2 width of the not-left-or-right chunks
         @param h2 height of the not-top-or-bottom chunks
         */
-        TileSet(const QPixmap&, int w1, int h1, int w2, int h2, bool stretch = false );
+        TileSet(const QPixmap&, int w1, int h1, int w2, int h2 );
 
         /*!
         Create a TileSet from a pixmap. The size of the top/left and bottom/right
@@ -67,7 +67,7 @@ namespace Oxygen
         @param w2 width of the not-left-or-right chunks
         @param h2 height of the not-top-or-bottom chunks
         */
-        TileSet(const QPixmap &pix, int w1, int h1, int w3, int h3, int x2, int y2, int w2, int h2, bool stretch = false );
+        TileSet(const QPixmap &pix, int w1, int h1, int w3, int h3, int x2, int y2, int w2, int h2 );
 
         //! empty constructor
         TileSet();
@@ -84,6 +84,10 @@ namespace Oxygen
         //! set stretch
         void setStretch( bool value )
         { _stretch = value; }
+
+        //! force use x11 pixmaps
+        void setForceX11Pixmaps( bool value )
+        { _forceX11Pixmaps = value; }
 
         //! initialize
         /*! old pixmaps, if any, are released */
@@ -174,14 +178,19 @@ namespace Oxygen
         //! list of X11 pixmaps
         QVector<Qt::HANDLE> _x11Pixmaps;
 
-        // stretch pixmaps
+        //! stretch pixmaps
         bool _stretch;
 
-        // dimensions
+        //! force use X11 pixmaps
+        bool _forceX11Pixmaps;
+
+        //!@name dimensions
+        //@{
         int _w1;
         int _h1;
         int _w3;
         int _h3;
+        //@}
 
     };
 
