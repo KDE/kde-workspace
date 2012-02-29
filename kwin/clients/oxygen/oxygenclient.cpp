@@ -1977,16 +1977,7 @@ namespace Oxygen
             << tileSet->x11Pixmap( 0 );
 
         // add padding
-        if( configuration().frameBorder() == Configuration::BorderNone && !isShade() )
-        {
-
-            data << size << size << size-1 << size;
-
-        } else {
-
-            data << size << size << size << size;
-
-        }
+        data << size << size << size << size;
 
         // update property
         XChangeProperty(
