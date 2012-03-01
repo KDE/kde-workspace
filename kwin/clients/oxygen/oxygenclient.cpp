@@ -249,7 +249,9 @@ namespace Oxygen
     {
 
         if( isMaximized() ) { return widget()->rect(); }
-        const QRect frame( widget()->rect() );
+        const QRect frame( widget()->rect().adjusted(
+            layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop ),
+            -layoutMetric( LM_OuterPaddingRight ), -layoutMetric( LM_OuterPaddingBottom ) ) );
 
         QRegion mask;
         if( configuration().frameBorder() == Configuration::BorderNone && !isShade() )
@@ -390,6 +392,13 @@ namespace Oxygen
             case LM_ButtonMarginTop:
             return 0;
 
+            // outer margin for shadow/glow
+            case LM_OuterPaddingLeft:
+            case LM_OuterPaddingRight:
+            case LM_OuterPaddingTop:
+            case LM_OuterPaddingBottom:
+            return (isPreview() && compositingActive() ) ? shadowCache().shadowSize():0;
+
             default:
             return KCommonDecoration::layoutMetric(lm, respectWindowState, btn);
         }
@@ -409,8 +418,8 @@ namespace Oxygen
 
             if( configuration().centerTitleOnFullWidth() )
             {
-                titleRect.setLeft( widget()->rect().left() );
-                titleRect.setRight( widget()->rect().right() );
+                titleRect.setLeft( widget()->rect().left() + layoutMetric( LM_OuterPaddingLeft ) );
+                titleRect.setRight( widget()->rect().right() - layoutMetric( LM_OuterPaddingRight ) );
             }
 
             const QRect textRect( titleBoundingRect( options()->font( true, false),  titleRect, caption() ) );
@@ -420,8 +429,8 @@ namespace Oxygen
         } else {
 
             // buttons are properly accounted for in titleBoundingRect method
-            titleRect.setLeft( widget()->rect().left() );
-            titleRect.setRight( widget()->rect().right() );
+            titleRect.setLeft( widget()->rect().left() + layoutMetric( LM_OuterPaddingLeft ) );
+            titleRect.setRight( widget()->rect().right() - layoutMetric( LM_OuterPaddingRight ) );
 
         }
 
@@ -601,7 +610,7 @@ namespace Oxygen
 
         } else {
 
-            int offset(0);
+            int offset = layoutMetric( LM_OuterPaddingTop );
 
             // radial gradient positionning
             int height = 64 - Configuration::ButtonDefault;
@@ -620,7 +629,7 @@ namespace Oxygen
         // background pixmap
         if( isPreview() || helper().hasBackgroundPixmap( windowId() ) )
         {
-            int offset(0);
+            int offset = layoutMetric( LM_OuterPaddingTop );
 
             // radial gradient positionning
             int height = 64 - Configuration::ButtonDefault;
@@ -628,7 +637,7 @@ namespace Oxygen
             if( isMaximized() ) offset -= 3;
 
             // background pixmap
-            QPoint backgroundPixmapOffset( 0, 0 );
+            QPoint backgroundPixmapOffset( layoutMetric( LM_OuterPaddingLeft ) + layoutMetric( LM_BorderLeft ), 0 );
             helper().setBackgroundPixmapOffset( backgroundPixmapOffset );
 
             const QWidget* window( isPreview() ? this->widget() : widget->window() );
@@ -662,6 +671,7 @@ namespace Oxygen
         }
 
         QRect r = (isPreview()) ? this->widget()->rect():window->rect();
+        r.adjust( layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop ), -layoutMetric( LM_OuterPaddingRight ), -layoutMetric( LM_OuterPaddingBottom ) );
         r.adjust(0,0, 1, 1);
 
         // base color
@@ -818,6 +828,7 @@ namespace Oxygen
         }
 
         QRect r = (isPreview()) ? this->widget()->rect():window->rect();
+        r.adjust( layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop ), -layoutMetric( LM_OuterPaddingRight ), -layoutMetric( LM_OuterPaddingBottom ) );
 
         // dimensions
         const int titleHeight = layoutMetric(LM_TitleHeight);
@@ -1493,6 +1504,16 @@ namespace Oxygen
         // base color
         QColor color = palette.window().color();
 
+        // draw shadows
+        if( compositingActive() && shadowCache().shadowSize() > 0 && isPreview() )
+        { shadowCache().tileSet( key() )->render( frame, &painter, TileSet::Ring); }
+
+        // adjust frame
+        frame.adjust(
+            layoutMetric(LM_OuterPaddingLeft),
+            layoutMetric(LM_OuterPaddingTop),
+            -layoutMetric(LM_OuterPaddingRight),
+            -layoutMetric(LM_OuterPaddingBottom) );
 
         //  adjust mask
         if( compositingActive() || isPreview() )
@@ -1685,7 +1706,15 @@ namespace Oxygen
             if( drag->target() == 0 && _itemData.count() > 1 )
             {
                 _itemData.setDirty( true );
-                untab( tabId(_sourceItem), widget()->frameGeometry().translated( QCursor::pos() - event->pos() ) );
+                untab( tabId(_sourceItem),
+                    widget()->frameGeometry().adjusted(
+                    layoutMetric( LM_OuterPaddingLeft ),
+                    layoutMetric( LM_OuterPaddingTop ),
+                    -layoutMetric( LM_OuterPaddingRight ),
+                    -layoutMetric( LM_OuterPaddingBottom )
+                    ).translated( QCursor::pos() - event->pos() +
+                    QPoint( layoutMetric( LM_OuterPaddingLeft ), layoutMetric( LM_OuterPaddingTop )))
+                    );
             }
 
             // reset button
@@ -1789,15 +1818,11 @@ namespace Oxygen
 
         const long source = QString( groupData->data( tabDragMimeType() ) ).toLong();
         int clickedIndex( tabIndexAt( point, true ) );
-        if (clickedIndex < 0)
-            tab_A_behind_B(source, tabId(_itemData.count() - 1));
-        else if (clickedIndex)
-            tab_A_behind_B(source, tabId(clickedIndex));
-        else
-            tab_A_before_B(source, tabId(clickedIndex));
+        if(clickedIndex < 0) tab_A_behind_B(source, tabId(_itemData.count() - 1));
+        else if( clickedIndex ) tab_A_behind_B(source, tabId(clickedIndex));
+        else tab_A_before_B(source, tabId(clickedIndex));
 
-        if( widget() == event->source() )
-            updateTitleRect();
+        if( widget() == event->source() ) updateTitleRect();
 
         _titleAnimationData->reset();
         return true;
