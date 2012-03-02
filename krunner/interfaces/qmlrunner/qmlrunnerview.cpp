@@ -65,6 +65,7 @@ qmlrunnerView::qmlrunnerView(Plasma::RunnerManager* manager, QWidget *parent)
     
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(view);
+    view->setFocus();
     
     connect(view->rootObject(), SIGNAL(heightChanged()), SLOT(changeGeometry()));
     connect(qobject_cast<QDeclarativeItem*>(view->rootObject()), SIGNAL(implicitHeightChanged()), SLOT(changeGeometry()));

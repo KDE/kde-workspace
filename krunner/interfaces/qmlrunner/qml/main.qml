@@ -24,20 +24,17 @@ import org.kde.qtextracomponents 0.1
 
 Item {
     width: 400
-    height: (inputRow.height+inputRow.anchors.margins+
-                (!contentItem.content || runnerModel.count==0 ? 0 : (contentItem.content.childrenRect.height+contentItem.anchors.margins*2)))
-//     Rectangle {
-//         id: bg
-//         anchors.fill: parent
-//         color: "transparent"
-// //         opacity: .0
-// 
-//     }
+    height: (inputRow.height+
+                ((!contentItem.content || runnerModel.count==0) ? 0 : (contentItem.content.childrenRect.height+20)))
+    
     id: main
     
     Connections {
         target: app
-        onChangeTerm: input.text=term
+        onChangeTerm: {
+            input.text=term
+            input.selectAll()
+        }
     }
     
     RunnerModels.RunnerModel { id: runnerModel }
@@ -50,7 +47,6 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: 10
         }
         
         ToolButton {
@@ -63,14 +59,13 @@ Item {
             iconSource: "plasma"
             id: changeStuff
             checkable: true
-            onClicked: setView("ResultsPath.qml")
+            onClicked: checked ? setView("ResultsPath.qml") : setView("ResultsList.qml")
         }
         
         TextField {
             id: input
             onTextChanged: { runnerModel.query = text; contentItem.content.currentIndex = 0 }
             width: 300
-            focus: true
             
             onAccepted: runnerModel.run(contentItem.content.currentIndex)
         }
@@ -93,10 +88,6 @@ Item {
         }
     }
     
-    Component.onCompleted: {
-        setView("ResultsList.qml")
-    }
-    
     Keys.onPressed: {
         if(event.key == Qt.Key_Tab || event.key == Qt.Key_Backtab) {
             var inc = (event.key == Qt.Key_Backtab) ? -1 : 1;
@@ -105,7 +96,10 @@ Item {
         }
     }
     
-    Keys.onEscapePressed: app.hide()
+    Keys.onEscapePressed: {
+        app.hide()
+        input.text=''
+    }
     
     Item {
         id: contentItem
@@ -114,12 +108,16 @@ Item {
             bottom: parent.bottom
             left: parent.left
             right: parent.right
-            margins: 10
         }
         clip: true
         
         property Item content
         
         onContentChanged: content.anchors.fill=contentItem
+        
+        Component.onCompleted: {
+            setView("ResultsList.qml")
+            input.selectAll()
+        }
     }
 }
