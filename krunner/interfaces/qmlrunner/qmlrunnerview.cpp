@@ -76,7 +76,7 @@ qmlrunnerView::~qmlrunnerView()
 
 void qmlrunnerView::configure()
 {
-    m_config->show();
+    toggleConfigDialog();
 }
 
 void qmlrunnerView::closeSettings()
