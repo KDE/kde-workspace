@@ -51,7 +51,6 @@ signals:
 private:
     RunnerSettings* settings();
     
-    QWidget* m_config;
     RunnerSettings* m_settings;
     QDeclarativeView* view;
 };

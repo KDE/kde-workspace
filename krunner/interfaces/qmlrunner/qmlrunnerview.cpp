@@ -39,7 +39,6 @@
 //implementation uses the RunnerModel, we'll see how to fix that...
 qmlrunnerView::qmlrunnerView(Plasma::RunnerManager* manager, QWidget *parent)
     : KRunnerDialog(manager, parent)
-    , m_config(0)
 {
     view = new QDeclarativeView(this);
     view->setAttribute(Qt::WA_TranslucentBackground);
@@ -77,7 +76,7 @@ qmlrunnerView::~qmlrunnerView()
 
 void qmlrunnerView::configure()
 {
-    m_config->show();
+    toggleConfigDialog();
 }
 
 void qmlrunnerView::closeSettings()
@@ -107,7 +106,11 @@ void qmlrunnerView::display(const QString& term)
 
 void qmlrunnerView::setConfigWidget(QWidget* w)
 {
-    m_config = w;
+    KDialog *d = new KDialog(this);
+    connect(w, SIGNAL(destroyed(QObject*)), d, SLOT(deleteLater()));
+    d->setMainWidget(w);
+    d->setButtons(0);
+    d->show();
 }
 
 void qmlrunnerView::changeGeometry()
@@ -118,5 +121,5 @@ void qmlrunnerView::changeGeometry()
     
     int left, top, right, bottom;
     getContentsMargins(&left, &top, &right, &bottom);
-    resize(it->height()/*+top+bottom*/, w);
+    resize(w, it->height()+top+bottom);
 }
