@@ -50,7 +50,7 @@ signals:
 
 private:
     RunnerSettings* settings();
-    
+
     RunnerSettings* m_settings;
     QDeclarativeView* view;
 };
