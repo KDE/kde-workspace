@@ -78,9 +78,6 @@ class Tile;
 class Tiling;
 class TilingLayout;
 #endif
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-class DesktopChangeOSD;
-#endif
 class Outline;
 class RootInfo;
 class PluginMgr;
@@ -451,6 +448,7 @@ public:
     bool stopActivity(const QString &id);
     bool startActivity(const QString &id);
     QStringList activeEffects() const;
+    QString supportInformation() const;
 
     void setCurrentScreen(int new_screen);
 
@@ -806,9 +804,6 @@ private:
 
 #ifdef KWIN_BUILD_TABBOX
     TabBox::TabBox* tab_box;
-#endif
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-    DesktopChangeOSD* desktop_change_osd;
 #endif
 
     QMenu* popup;
