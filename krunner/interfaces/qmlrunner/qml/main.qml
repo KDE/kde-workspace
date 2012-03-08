@@ -68,7 +68,10 @@ Item {
             onTextChanged: { runnerModel.query = text; contentItem.content.currentIndex = 0 }
             width: 300
             
-            onAccepted: runnerModel.run(contentItem.content.currentIndex)
+            onAccepted: {
+                runnerModel.run(contentItem.content.currentIndex)
+                app.hide()
+            }
         }
     }
     
@@ -94,7 +97,6 @@ Item {
             var inc = (event.key == Qt.Key_Backtab) ? -1 : 1;
             contentItem.content.currentIndex = (contentItem.content.currentIndex+inc) % runnerModel.count
             event.accepted=true
-            app.hide()
         }
     }
     
