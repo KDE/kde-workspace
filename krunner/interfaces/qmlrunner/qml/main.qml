@@ -26,6 +26,7 @@ Item {
     width: 400
     height: (inputRow.height+
                 ((!contentItem.content || runnerModel.count==0) ? 0 : (contentItem.content.childrenRect.height+20)))
+    property string views
     
     id: main
     
@@ -59,7 +60,7 @@ Item {
             iconSource: "plasma"
             id: changeStuff
             checkable: true
-            onClicked: checked ? setView("ResultsPath.qml") : setView("ResultsList.qml")
+            onClicked: { views = checked ? "ResultsPath.qml" : "ResultsList.qml" }
         }
         
         TextField {
@@ -71,8 +72,8 @@ Item {
         }
     }
     
-    function setView(str) {
-        var comp=Qt.createComponent(str)
+    onViewsChanged: {
+        var comp=Qt.createComponent(views)
         
         if(comp.status == Component.Ready) {
             if(contentItem.content)
@@ -93,6 +94,7 @@ Item {
             var inc = (event.key == Qt.Key_Backtab) ? -1 : 1;
             contentItem.content.currentIndex = (contentItem.content.currentIndex+inc) % runnerModel.count
             event.accepted=true
+            app.hide()
         }
     }
     
@@ -116,7 +118,7 @@ Item {
         onContentChanged: content.anchors.fill=contentItem
         
         Component.onCompleted: {
-            setView("ResultsList.qml")
+            views = "ResultsList.qml"
             input.selectAll()
         }
     }
