@@ -213,7 +213,7 @@ void Scene::paintGenericScreen(int orig_mask, ScreenPaintData)
         // Reset the repaint_region.
         // This has to be done here because many effects schedule a repaint for
         // the next frame within Effects::prePaintWindow.
-        topw->resetRepaints(topw->decorationRect());
+        topw->resetRepaints(topw->visibleRect().translated(-topw->pos()));
 
         WindowPrePaintData data;
         data.mask = orig_mask | (w->isOpaque() ? PAINT_WINDOW_OPAQUE : PAINT_WINDOW_TRANSLUCENT);
@@ -269,7 +269,7 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
         // Reset the repaint_region.
         // This has to be done here because many effects schedule a repaint for
         // the next frame within Effects::prePaintWindow.
-        topw->resetRepaints(topw->decorationRect());
+        topw->resetRepaints(topw->visibleRect().translated(-topw->pos()));
         // Clip out the decoration for opaque windows; the decoration is drawn in the second pass
         if (w->isOpaque()) {
             // the window is fully opaque
@@ -314,7 +314,7 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
         // In case there is a window with a higher stackposition which has translucent regions
         // (e.g. decorations) that still have to be drawn, we also have to repaint the current window
         // in these particular regions
-        data->region |= (upperTranslucentDamage & tlw->decorationRect().translated(tlw->pos()));
+        data->region |= (upperTranslucentDamage & tlw->visibleRect());
 
         // subtract the parts which have possibly been drawn already as part of
         // a higher opaque window
@@ -360,7 +360,7 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
         Toplevel *tlw = data.key()->window();
 
         // add all regions of the lower windows which have already be drawn in the 1st pass
-        data->region |= (lowerOpaqueDamage & tlw->decorationRect().translated(tlw->pos()));
+        data->region |= (lowerOpaqueDamage & tlw->visibleRect());
         // and extend that region by opaque parts of ourself
         lowerOpaqueDamage |= data->painted_1stpass;
 
@@ -572,7 +572,7 @@ WindowQuadList Scene::Window::buildQuads(bool force) const
     if (cached_quad_list != NULL && !force)
         return *cached_quad_list;
     WindowQuadList ret;
-    if (toplevel->clientPos() == QPoint(0, 0) && toplevel->clientSize() == toplevel->visibleRect().size())
+    if (toplevel->clientPos() == QPoint(0, 0) && toplevel->clientSize() == toplevel->decorationRect().size())
         ret = makeQuads(WindowQuadContents, shape());  // has no decoration
     else {
         Client *client = dynamic_cast<Client*>(toplevel);

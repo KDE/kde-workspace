@@ -1946,7 +1946,7 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force, bool
         discardWindowPixmap();
         emit geometryShapeChanged(this, geom_before_block);
     }
-    const QRect deco_rect = decorationRect().translated(geom.x(), geom.y());
+    const QRect deco_rect = visibleRect();
     addWorkspaceRepaint(deco_rect_before_block);
     addWorkspaceRepaint(deco_rect);
     geom_before_block = geom;
@@ -2019,7 +2019,7 @@ void Client::plainResize(int w, int h, ForceGeometry_t force, bool emitJs)
     workspace()->checkUnredirect();
     discardWindowPixmap();
     emit geometryShapeChanged(this, geom_before_block);
-    const QRect deco_rect = decorationRect().translated(geom.x(), geom.y());
+    const QRect deco_rect = visibleRect();
     addWorkspaceRepaint(deco_rect_before_block);
     addWorkspaceRepaint(deco_rect);
     geom_before_block = geom;
@@ -2064,7 +2064,7 @@ void Client::move(int x, int y, ForceGeometry_t force)
     workspace()->tiling()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
 #endif
     // client itself is not damaged
-    const QRect deco_rect = decorationRect().translated(geom.x(), geom.y());
+    const QRect deco_rect = visibleRect();
     addWorkspaceRepaint(deco_rect_before_block);
     addWorkspaceRepaint(deco_rect);   // trigger repaint of window's new location
     geom_before_block = geom;
