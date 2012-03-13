@@ -54,7 +54,7 @@ InvertEffect::InvertEffect()
     b->setText(i18n("Toggle Invert Effect on Window"));
     b->setGlobalShortcut(KShortcut(Qt::CTRL + Qt::META + Qt::Key_U));
     connect(b, SIGNAL(triggered(bool)), this, SLOT(toggleWindow()));
-    connect(effects, SIGNAL(windowClosed(EffectWindow*)), this, SLOT(slotWindowClosed(EffectWindow*)));
+    connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
 }
 
 InvertEffect::~InvertEffect()
@@ -88,9 +88,6 @@ bool InvertEffect::loadData()
 
 void InvertEffect::prePaintScreen(ScreenPrePaintData &data, int time)
 {
-    if (m_valid && (m_allWindows || !m_windows.isEmpty())) {
-        data.mask |= PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS;
-    }
     effects->prePaintScreen(data, time);
 }
 

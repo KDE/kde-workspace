@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPaintEngine>
 #include <QPixmap>
 
-#include <config-workspace.h>
 #include <config-X11.h>
 
 #include <assert.h>
@@ -134,7 +133,8 @@ void Extensions::init()
     kDebug(1212) << "Extensions: shape: 0x" << QString::number(shape_version, 16)
                  << " composite: 0x" << QString::number(composite_version, 16)
                  << " render: 0x" << QString::number(render_version, 16)
-                 << " fixes: 0x" << QString::number(fixes_version, 16) << endl;
+                 << " fixes: 0x" << QString::number(fixes_version, 16)
+                 << " non_native_pixmaps: " << non_native_pixmaps << endl;
 }
 
 void Extensions::fillExtensionsData(const char**& extensions, int& nextensions, int*&opcodes, int*& error_bases)

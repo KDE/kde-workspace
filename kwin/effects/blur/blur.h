@@ -49,9 +49,10 @@ public:
     void paintEffectFrame(EffectFrame *frame, QRegion region, double opacity, double frameOpacity);
 
 public Q_SLOTS:
-    void slotWindowAdded(EffectWindow *w);
-    void slotWindowDeleted(EffectWindow *w);
-    void slotPropertyNotify(EffectWindow *w, long atom);
+    void slotWindowAdded(KWin::EffectWindow *w);
+    void slotWindowDeleted(KWin::EffectWindow *w);
+    void slotPropertyNotify(KWin::EffectWindow *w, long atom);
+    void slotScreenGeometryChanged();
 
 private:
     QRect expand(const QRect &rect) const;
@@ -77,9 +78,12 @@ private:
     struct BlurWindowInfo {
         GLTexture blurredBackground; // keeps the horizontally blurred background
         QRegion damagedRegion;
+        QPoint windowPos;
+        bool dropCache;
     };
 
     QHash< const EffectWindow*, BlurWindowInfo > windows;
+    typedef QHash<const EffectWindow*, BlurWindowInfo>::iterator CacheEntry;
 };
 
 } // namespace KWin

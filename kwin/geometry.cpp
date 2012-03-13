@@ -30,10 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "workspace.h"
 
-#ifdef KWIN_BUILD_SCRIPTING
-#include "scripting/workspaceproxy.h"
-#endif
-
 #include <kapplication.h>
 #include <kglobal.h>
 #include <kwindowsystem.h>
@@ -80,8 +76,9 @@ void Workspace::desktopResized()
 #ifdef KWIN_BUILD_SCREENEDGES
     m_screenEdge.update(true);
 #endif
-    if (compositing())
-        compositeResetTimer.start(0);
+    if (effects) {
+        static_cast<EffectsHandlerImpl*>(effects)->desktopResized(geom.size());
+    }
 }
 
 void Workspace::saveOldScreenSizes()
@@ -276,40 +273,16 @@ QRect Workspace::clientArea(clientAreaOption opt, int screen, int desktop) const
 
     switch(opt) {
     case MaximizeArea:
-        if (is_multihead)
-            return sarea;
-        else if (options->xineramaMaximizeEnabled)
-            return sarea;
-        else
-            return warea;
-    case MaximizeFullArea:
-        if (is_multihead)
-            return Kephal::ScreenUtils::screenGeometry(screen_number);
-        else if (options->xineramaMaximizeEnabled)
-            return Kephal::ScreenUtils::screenGeometry(screen);
-        else
-            return Kephal::ScreenUtils::desktopGeometry();
-    case FullScreenArea:
-        if (is_multihead)
-            return Kephal::ScreenUtils::screenGeometry(screen_number);
-        else if (options->xineramaFullscreenEnabled)
-            return Kephal::ScreenUtils::screenGeometry(screen);
-        else
-            return Kephal::ScreenUtils::desktopGeometry();
     case PlacementArea:
-        if (is_multihead)
             return sarea;
-        else if (options->xineramaPlacementEnabled)
-            return sarea;
-        else
-            return warea;
+    case MaximizeFullArea:
+    case FullScreenArea:
     case MovementArea:
+    case ScreenArea:
         if (is_multihead)
             return Kephal::ScreenUtils::screenGeometry(screen_number);
-        else if (options->xineramaMovementEnabled)
-            return Kephal::ScreenUtils::screenGeometry(screen);
         else
-            return Kephal::ScreenUtils::desktopGeometry();
+            return Kephal::ScreenUtils::screenGeometry(screen);
     case WorkArea:
         if (is_multihead)
             return sarea;
@@ -320,11 +293,6 @@ QRect Workspace::clientArea(clientAreaOption opt, int screen, int desktop) const
             return Kephal::ScreenUtils::screenGeometry(screen_number);
         else
             return Kephal::ScreenUtils::desktopGeometry();
-    case ScreenArea:
-        if (is_multihead)
-            return Kephal::ScreenUtils::screenGeometry(screen_number);
-        else
-            return Kephal::ScreenUtils::screenGeometry(screen);
     }
     abort();
 }
@@ -397,8 +365,8 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
     //CT 16mar98, 27May98 - magics: BorderSnapZone, WindowSnapZone
     //CT adapted for kwin on 25Nov1999
     //aleXXX 02Nov2000 added second snapping mode
-    if (options->windowSnapZone || options->borderSnapZone || options->centerSnapZone) {
-        const bool sOWO = options->snapOnlyWhenOverlapping;
+    if (options->windowSnapZone() || options->borderSnapZone() || options->centerSnapZone()) {
+        const bool sOWO = options->isSnapOnlyWhenOverlapping();
         const QRect maxRect = clientArea(MovementArea, pos + c->rect().center(), c->desktop());
         const int xmin = maxRect.left();
         const int xmax = maxRect.right() + 1;             //desk size
@@ -419,7 +387,7 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
         int lx, ly, lrx, lry; //coords and size for the comparison client, l
 
         // border snap
-        int snap = options->borderSnapZone * snapAdjust; //snap trigger
+        int snap = options->borderSnapZone() * snapAdjust; //snap trigger
         if (snap) {
             if ((sOWO ? (cx < xmin) : true) && (qAbs(xmin - cx) < snap)) {
                 deltaX = xmin - cx;
@@ -441,14 +409,14 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
         }
 
         // windows snap
-        snap = options->windowSnapZone * snapAdjust;
+        snap = options->windowSnapZone() * snapAdjust;
         if (snap) {
             QList<Client *>::ConstIterator l;
             for (l = clients.constBegin(); l != clients.constEnd(); ++l) {
                 if ((((*l)->isOnDesktop(c->desktop()) && !(*l)->isMinimized())
                         || (c->isOnDesktop(NET::OnAllDesktops) && (*l)->isOnDesktop(Workspace::currentDesktop())
                             && !(*l)->isMinimized()))
-                        && (!(*l)->clientGroup() || (*l) == (*l)->clientGroup()->visible())
+                        && (!(*l)->tabGroup() || (*l) == (*l)->tabGroup()->current())
                         && (*l) != c) {
                     lx = (*l)->x();
                     ly = (*l)->y();
@@ -508,7 +476,7 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
         }
 
         // center snap
-        snap = options->centerSnapZone * snapAdjust; //snap trigger
+        snap = options->centerSnapZone() * snapAdjust; //snap trigger
         if (snap) {
             int diffX = qAbs((xmin + xmax) / 2 - (cx + cw / 2));
             int diffY = qAbs((ymin + ymax) / 2 - (cy + ch / 2));
@@ -518,7 +486,7 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
                 deltaY = diffY;
                 nx = (xmin + xmax) / 2 - cw / 2;
                 ny = (ymin + ymax) / 2 - ch / 2;
-            } else if (options->borderSnapZone) {
+            } else if (options->borderSnapZone()) {
                 // Enhance border snap
                 if ((nx == xmin || nx == xmax - cw) && diffY < snap && diffY < deltaY) {
                     // Snap to vertical center on screen edge
@@ -543,8 +511,8 @@ QRect Workspace::adjustClientSize(Client* c, QRect moveResizeGeom, int mode)
     //adapted from adjustClientPosition on 29May2004
     //this function is called when resizing a window and will modify
     //the new dimensions to snap to other windows/borders if appropriate
-    if (options->windowSnapZone || options->borderSnapZone) {  // || options->centerSnapZone )
-        const bool sOWO = options->snapOnlyWhenOverlapping;
+    if (options->windowSnapZone() || options->borderSnapZone()) {  // || options->centerSnapZone )
+        const bool sOWO = options->isSnapOnlyWhenOverlapping();
 
         const QRect maxRect = clientArea(MovementArea, c->rect().center(), c->desktop());
         const int xmin = maxRect.left();
@@ -565,7 +533,7 @@ QRect Workspace::adjustClientSize(Client* c, QRect moveResizeGeom, int mode)
         int lx, ly, lrx, lry; //coords and size for the comparison client, l
 
         // border snap
-        int snap = options->borderSnapZone; //snap trigger
+        int snap = options->borderSnapZone(); //snap trigger
         if (snap) {
             deltaX = int(snap);
             deltaY = int(snap);
@@ -635,7 +603,7 @@ QRect Workspace::adjustClientSize(Client* c, QRect moveResizeGeom, int mode)
         }
 
         // windows snap
-        snap = options->windowSnapZone;
+        snap = options->windowSnapZone();
         if (snap) {
             deltaX = int(snap);
             deltaY = int(snap);
@@ -1289,8 +1257,8 @@ QSize Client::sizeForClientSize(const QSize& wsize, Sizemode mode, bool noframe)
 
     // basesize, minsize, maxsize, paspect and resizeinc have all values defined,
     // even if they're not set in flags - see getWmNormalHints()
-    QSize min_size = clientGroup() ? clientGroup()->minSize() : minSize();
-    QSize max_size = clientGroup() ? clientGroup()->maxSize() : maxSize();
+    QSize min_size = tabGroup() ? tabGroup()->minSize() : minSize();
+    QSize max_size = tabGroup() ? tabGroup()->maxSize() : maxSize();
     if (decoration != NULL) {
         QSize decominsize = decoration->minimumSize();
         QSize border_size(border_left + border_right, border_top + border_bottom);
@@ -1490,8 +1458,8 @@ void Client::getWmNormalHints()
         xSizeHint.win_gravity = NorthWestGravity;
 
     // Update min/max size of this group
-    if (clientGroup())
-        clientGroup()->updateMinMaxSize();
+    if (tabGroup())
+        tabGroup()->updateMinMaxSize();
 
     if (isManaged()) {
         // update to match restrictions
@@ -1623,10 +1591,12 @@ void Client::configureRequest(int value_mask, int rx, int ry, int rw, int rh, in
     kDebug(1212) << this << bool(value_mask & (CWX|CWWidth|CWY|CWHeight)) <<
                             bool(maximizeMode() & MaximizeVertical) <<
                             bool(maximizeMode() & MaximizeHorizontal);
-    if (maximizeMode() & MaximizeVertical)
-        value_mask &= ~(CWY|CWHeight); // do not allow clients to drop out of vertical ...
-    if (maximizeMode() & MaximizeHorizontal)
-        value_mask &= ~(CWX|CWWidth); // .. or horizontal maximization (MaximizeFull == MaximizeVertical|MaximizeHorizontal)
+    if (!app_noborder) { //
+        if (maximizeMode() & MaximizeVertical)
+            value_mask &= ~(CWY|CWHeight); // do not allow clients to drop out of vertical ...
+        if (maximizeMode() & MaximizeHorizontal)
+            value_mask &= ~(CWX|CWWidth); // .. or horizontal maximization (MaximizeFull == MaximizeVertical|MaximizeHorizontal)
+    }
     if (!(value_mask & (CWX|CWWidth|CWY|CWHeight))) {
         kDebug(1212) << "DENIED";
         return; // nothing to (left) to do for use - bugs #158974, #252314
@@ -1835,8 +1805,8 @@ bool Client::isResizable() const
     if (rules()->checkSize(QSize()).isValid())   // forced size
         return false;
 
-    QSize min = clientGroup() ? clientGroup()->minSize() : minSize();
-    QSize max = clientGroup() ? clientGroup()->maxSize() : maxSize();
+    QSize min = tabGroup() ? tabGroup()->minSize() : minSize();
+    QSize max = tabGroup() ? tabGroup()->maxSize() : maxSize();
     return min.width() < max.width() || min.height() < max.height();
 }
 
@@ -1852,14 +1822,16 @@ bool Client::isMaximizable() const
         if (!isMovable() || !isResizable() || isToolbar())  // SELI isToolbar() ?
             return false;
     }
-    return true;
+    if (rules()->checkMaximize(MaximizeRestore) == MaximizeRestore && rules()->checkMaximize(MaximizeFull) != MaximizeRestore)
+        return true;
+    return false;
 }
 
 
 /*!
   Reimplemented to inform the client about the new window position.
  */
-void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force, bool emitJs)
+void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force)
 {
     // this code is also duplicated in Client::plainResize()
     // Ok, the shading geometry stuff. Generally, code doesn't care about shaded geometry,
@@ -1926,7 +1898,7 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force, bool
     }
     // SELI TODO won't this be too expensive?
     sendSyntheticConfigureNotify();
-    updateWindowRules();
+    updateWindowRules(Rules::Position|Rules::Size);
 
     // keep track of old maximize mode
     // to detect changes
@@ -1943,22 +1915,20 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force, bool
         emit geometryShapeChanged(this, geom_before_block);
     }
     const QRect deco_rect = decorationRect().translated(geom.x(), geom.y());
-    addWorkspaceRepaint(deco_rect_before_block);
-    addWorkspaceRepaint(deco_rect);
+    addLayerRepaint(deco_rect_before_block);
+    addLayerRepaint(deco_rect);
     geom_before_block = geom;
     deco_rect_before_block = deco_rect;
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
 
-    if (emitJs == true) {
-        emit s_clientMoved();
-    }
-
+    // TODO: this signal is emitted too often
+    emit geometryChanged();
 }
 
-void Client::plainResize(int w, int h, ForceGeometry_t force, bool emitJs)
+void Client::plainResize(int w, int h, ForceGeometry_t force)
 {
     // this code is also duplicated in Client::setGeometry(), and it's also commented there
     if (shade_geometry_change)
@@ -2004,26 +1974,24 @@ void Client::plainResize(int w, int h, ForceGeometry_t force, bool emitJs)
     }
     updateShape();
 
-    if (emitJs == true) {
-        emit s_clientMoved();
-    }
-
     sendSyntheticConfigureNotify();
-    updateWindowRules();
+    updateWindowRules(Rules::Position|Rules::Size);
     workspace()->checkActiveScreen(this);
     workspace()->updateStackingOrder();
     workspace()->checkUnredirect();
     discardWindowPixmap();
     emit geometryShapeChanged(this, geom_before_block);
     const QRect deco_rect = decorationRect().translated(geom.x(), geom.y());
-    addWorkspaceRepaint(deco_rect_before_block);
-    addWorkspaceRepaint(deco_rect);
+    addLayerRepaint(deco_rect_before_block);
+    addLayerRepaint(deco_rect);
     geom_before_block = geom;
     deco_rect_before_block = deco_rect;
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
+    // TODO: this signal is emitted too often
+    emit geometryChanged();
 }
 
 /*!
@@ -2052,7 +2020,7 @@ void Client::move(int x, int y, ForceGeometry_t force)
     }
     XMoveWindow(display(), frameId(), x, y);
     sendSyntheticConfigureNotify();
-    updateWindowRules();
+    updateWindowRules(Rules::Position);
     workspace()->checkActiveScreen(this);
     workspace()->updateStackingOrder();
     workspace()->checkUnredirect();
@@ -2061,14 +2029,14 @@ void Client::move(int x, int y, ForceGeometry_t force)
 #endif
     // client itself is not damaged
     const QRect deco_rect = decorationRect().translated(geom.x(), geom.y());
-    addWorkspaceRepaint(deco_rect_before_block);
-    addWorkspaceRepaint(deco_rect);   // trigger repaint of window's new location
+    addLayerRepaint(deco_rect_before_block);
+    addLayerRepaint(deco_rect);   // trigger repaint of window's new location
     geom_before_block = geom;
     deco_rect_before_block = deco_rect;
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
 }
 
 void Client::blockGeometryUpdates(bool block)
@@ -2100,35 +2068,31 @@ void Client::maximize(MaximizeMode m)
  */
 void Client::setMaximize(bool vertically, bool horizontally)
 {
-#ifdef KWIN_BUILD_SCRIPTING
-    //Scripting call. Does not use a signal/slot mechanism
-    //as ensuring connections was a bit difficult between
-    //so many clients and the workspace
-    SWrapper::WorkspaceProxy* ws_wrap = SWrapper::WorkspaceProxy::instance();
-    if (ws_wrap != 0) {
-        ws_wrap->sl_clientMaximizeSet(this, QPair<bool, bool>(vertically, horizontally));
-    }
-#endif
-
-    emit maximizeSet(QPair<bool, bool>(vertically, horizontally));
-
     // changeMaximize() flips the state, so change from set->flip
     changeMaximize(
         max_mode & MaximizeVertical ? !vertically : vertically,
         max_mode & MaximizeHorizontal ? !horizontally : horizontally,
         false);
     emit clientMaximizedStateChanged(this, max_mode);
+    emit clientMaximizedStateChanged(this, vertically, horizontally);
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
 }
 
 static bool changeMaximizeRecursion = false;
 void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
 {
-    if (!isMaximizable() || changeMaximizeRecursion)
+    if (changeMaximizeRecursion)
         return;
+    {
+        // isMovable() and isResizable() may be false for maximized windows
+        // with moving/resizing maximized windows disabled
+        TemporaryAssign< MaximizeMode > tmp(max_mode, MaximizeRestore);
+        if (!isMovable() || !isResizable() || isToolbar())  // SELI isToolbar() ?
+            return;
+    }
 
     MaximizeMode old_mode = max_mode;
     // 'adjust == true' means to update the size only, e.g. after changing workspace size
@@ -2320,7 +2284,7 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
     updateAllowedActions();
     if (decoration != NULL)
         decoration->maximizeChange();
-    updateWindowRules();
+    updateWindowRules(Rules::MaximizeVert|Rules::MaximizeHoriz|Rules::Position|Rules::Size);
 }
 
 void Client::resetMaximize()
@@ -2408,17 +2372,13 @@ void Client::setFullScreen(bool set, bool user)
             setGeometry(workspace()->clientArea(MaximizeArea, this));
         }
     }
-    updateWindowRules();
+    updateWindowRules(Rules::Fullscreen|Rules::Position|Rules::Size);
     workspace()->checkUnredirect();
 
-#ifdef KWIN_BUILD_SCRIPTING
-    SWrapper::WorkspaceProxy* ws_object = SWrapper::WorkspaceProxy::instance();
-    if (ws_object != 0) {
-        ws_object->sl_clientFullScreenSet(this, set, user);
+    if (was_fs != isFullScreen()) {
+        emit clientFullScreenSet(this, set, user);
+        emit fullScreenChanged();
     }
-#endif
-
-    emit s_fullScreenSet(set, user);
 }
 
 
@@ -2467,7 +2427,7 @@ QRect Client::fullscreenMonitorsArea(NETFullscreenMonitors requestedTopology) co
 
 int Client::checkFullScreenHack(const QRect& geom) const
 {
-    if (!options->legacyFullscreenSupport)
+    if (!options->isLegacyFullscreenSupport())
         return 0;
     // if it's noborder window, and has size of one screen or the whole desktop geometry, it's fullscreen hack
     if (noBorder() && app_noborder && isFullScreenable(true)) {
@@ -2493,10 +2453,12 @@ void Client::updateFullScreenHack(const QRect& geom)
         } else
             geom = workspace()->clientArea(FullScreenArea, geom.center(), desktop());
         setGeometry(geom);
+        emit fullScreenChanged();
     } else if (fullscreen_mode == FullScreenHack && type == 0) {
         fullscreen_mode = FullScreenNone;
         updateDecoration(false, false);
         // whoever called this must setup correct geometry
+        emit fullScreenChanged();
     }
     StackingUpdatesBlocker blocker(workspace());
     workspace()->updateClientLayer(this);   // active fullscreens get different layer
@@ -2558,7 +2520,7 @@ bool Client::startMoveResize()
     // If we have quick maximization enabled then it's safe to automatically restore windows
     // when starting a move as the user can undo their action by moving the window back to
     // the top of the screen. When the setting is disabled then doing so is confusing.
-    if (maximizeMode() != MaximizeRestore && options->moveResizeMaximizedWindows()) {
+    if (maximizeMode() != MaximizeRestore && (maximizeMode() != MaximizeFull || options->moveResizeMaximizedWindows())) {
         // allow moveResize, but unset maximization state in resize case
         if (mode != PositionCenter) { // means "isResize()" but moveResizeMode = true is set below
             geom_restore = geom_pretile = geometry(); // "restore" to current geometry
@@ -2580,6 +2542,7 @@ bool Client::startMoveResize()
     }
 
     moveResizeMode = true;
+    s_haveResizeEffect = effects && static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::Resize);
     moveResizeStartScreen = screen();
     workspace()->setClientIsMoving(this);
     initialMoveResizeGeom = moveResizeGeom = geometry();
@@ -2694,8 +2657,10 @@ void Client::leaveMoveResize()
     move_resize_grab_window = None;
     workspace()->setClientIsMoving(0);
     moveResizeMode = false;
+#ifdef HAVE_XSYNC
     delete syncRequest.timeout;
     syncRequest.timeout = NULL;
+#endif
 #ifdef KWIN_BUILD_SCREENEDGES
     if (options->electricBorders() == Options::ElectricMoveOnly ||
             options->electricBorderMaximize() ||
@@ -2776,8 +2741,10 @@ void Client::delayedMoveResize()
 
 void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 {
+#ifdef HAVE_XSYNC
     if (syncRequest.isPending && isResize())
         return; // we're still waiting for the client or the timeout
+#endif
 
     if ((mode == PositionCenter && !isMovableAcrossScreens())
             || (mode != PositionCenter && (isShade() || !isResizable())))
@@ -3034,7 +3001,7 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
         return;
 
 #ifdef HAVE_XSYNC
-    if (isResize() && syncRequest.counter != None) {
+    if (isResize() && syncRequest.counter != None && !s_haveResizeEffect) {
         if (!syncRequest.timeout) {
             syncRequest.timeout = new QTimer(this);
             connect(syncRequest.timeout, SIGNAL(timeout()), SLOT(performMoveResize()));
@@ -3062,7 +3029,11 @@ void Client::performMoveResize()
 #ifdef KWIN_BUILD_TILING
     if (!workspace()->tiling()->isEnabled())
 #endif
-        setGeometry(moveResizeGeom);
+    {
+        if (isMove() || (isResize() && !s_haveResizeEffect)) {
+            setGeometry(moveResizeGeom);
+        }
+    }
 #ifdef HAVE_XSYNC
     if (isResize() && syncRequest.counter != None)
         addRepaintFull();

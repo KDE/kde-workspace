@@ -2,11 +2,10 @@
 Exec=kcmshell4 keys
 Icon=preferences-desktop-keyboard-shortcut
 Type=Service
-X-KDE-ServiceTypes=KCModule,KCModuleInit
+X-KDE-ServiceTypes=KCModule
 X-DocPath=kcontrol/keys/index.html
 
 X-KDE-Library=kcm_keys
-X-KDE-Init-Symbol=keys
 X-KDE-ParentApp=kcontrol
 
 X-KDE-System-Settings-Parent-Category=shortcuts-and-gestures
@@ -32,6 +31,7 @@ Name[eo]=Ĝeneralaj Klavkombinoj
 Name[es]=Accesos rápidos de teclado globales
 Name[et]=Globaalsed kiirklahvid
 Name[eu]=Teklatu laster-tekla globalak
+Name[fa]=میان‌برهای صفحه‌ کلید سراسری
 Name[fi]=Näppäimistön yleispikavalinnat
 Name[fr]=Raccourcis globaux de clavier
 Name[fy]=Globale fluchkeppelings
@@ -183,14 +183,13 @@ Comment[x-test]=xxConfiguration of keybindingsxx
 Comment[zh_CN]=键绑定配置
 Comment[zh_TW]=按鍵關聯設定
 
-X-KDE-Keywords=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts
-X-KDE-Keywords[ia]=Claves,ligamines de clave global,schema de clave,ligamines de clave,vias breve,vias breve de application
-X-KDE-Keywords[kk]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts
-X-KDE-Keywords[nl]=toetsen,globale toetsbindingen,toetsenschema,toetsbindingen,sneltoetsen,sneltoetsen van toepassing
+X-KDE-Keywords=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcuts
+X-KDE-Keywords[nl]=toetsen,globale toetsbindingen,toetsenschema,toetsbindingen,sneltoetsen,sneltoetsen van toepassing,globale sneltoetsen
 X-KDE-Keywords[pt]=Teclas,combinações de teclas,global,esquema de teclas,atalhos de teclado,atalhos,atalhos das aplicações
-X-KDE-Keywords[pt_BR]=Teclas,combinações de teclas global,esquema de teclas,atalhos de teclado,atalhos,atalhos dos aplicativos
-X-KDE-Keywords[sv]=Tangenter,Globala tangentbindingar,Tangentschema,Tangentbindingar,genvägar,programgenvägar
-X-KDE-Keywords[uk]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,клавіатура,скорочення,клавіатурні скорочення,схема,загальні клавіатурні скорочення,клавіатурні скорочення програми
-X-KDE-Keywords[x-test]=xxKeys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcutsxx
+X-KDE-Keywords[pt_BR]=Teclas,combinações de teclas global,esquema de teclas,atalhos de teclado,atalhos,atalhos dos aplicativos, atalhos globais
+X-KDE-Keywords[sv]=Tangenter,Globala tangentbindingar,Tangentschema,Tangentbindingar,genvägar,programgenvägar,globala genvägar
+X-KDE-Keywords[uk]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcuts,клавіатура,скорочення,клавіатурні скорочення,схема,загальні клавіатурні скорочення,клавіатурні скорочення програми,загальні скорочення
+X-KDE-Keywords[x-test]=xxKeys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcutsxx
+X-KDE-Keywords[zh_TW]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcuts
 
 Categories=Qt;KDE;X-KDE-settings-accessibility;

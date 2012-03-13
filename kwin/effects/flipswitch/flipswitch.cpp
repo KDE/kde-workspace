@@ -70,8 +70,8 @@ FlipSwitchEffect::FlipSwitchEffect()
     m_shortcutAll = b->globalShortcut();
     connect(b, SIGNAL(triggered(bool)), this, SLOT(toggleActiveAllDesktops()));
     connect(b, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(globalShortcutChangedAll(QKeySequence)));
-    connect(effects, SIGNAL(windowAdded(EffectWindow*)), this, SLOT(slotWindowAdded(EffectWindow*)));
-    connect(effects, SIGNAL(windowClosed(EffectWindow*)), this, SLOT(slotWindowClosed(EffectWindow*)));
+    connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
     connect(effects, SIGNAL(tabBoxAdded(int)), this, SLOT(slotTabBoxAdded(int)));
     connect(effects, SIGNAL(tabBoxClosed()), this, SLOT(slotTabBoxClosed()));
     connect(effects, SIGNAL(tabBoxUpdated()), this, SLOT(slotTabBoxUpdated()));
@@ -471,8 +471,8 @@ void FlipSwitchEffect::prePaintWindow(EffectWindow* w, WindowPrePaintData& data,
                 w->enablePainting(EffectWindow::PAINT_DISABLED_BY_DESKTOP);
             if (w->isMinimized())
                 w->enablePainting(EffectWindow::PAINT_DISABLED_BY_MINIMIZE);
-            if (!w->visibleInClientGroup())
-                w->enablePainting(EffectWindow::PAINT_DISABLED_BY_CLIENT_GROUP);
+            if (!w->isCurrentTab())
+                w->enablePainting(EffectWindow::PAINT_DISABLED_BY_TAB_GROUP);
         } else {
             if ((m_start || m_stop) && !w->isDesktop() && w->isOnCurrentDesktop())
                 data.setTranslucent();

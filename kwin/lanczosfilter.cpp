@@ -66,8 +66,12 @@ void LanczosFilter::init()
 
     // The lanczos filter is reported to be broken with the Intel driver and Mesa 7.10
     GLPlatform *gl = GLPlatform::instance();
-    if (!force && gl->driver() == Driver_Intel && gl->mesaVersion() >= kVersionNumber(7, 10))
+    if (!force && gl->driver() == Driver_Intel && gl->mesaVersion() >= kVersionNumber(7, 10) && gl->chipClass() < SandyBridge)
         return;
+    // With fglrx the ARB Shader crashes KWin (see Bug #270818 and #286795) and GLSL Shaders are not functional
+    if (!force && gl->driver() == Driver_Catalyst) {
+        return;
+    }
 
     m_shader = new LanczosShader(this);
     if (!m_shader->init()) {
@@ -384,7 +388,12 @@ void LanczosFilter::timerEvent(QTimerEvent *event)
 
 void LanczosFilter::prepareRenderStates(GLTexture* tex, double opacity, double brightness, double saturation)
 {
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGLES
+    Q_UNUSED(tex)
+    Q_UNUSED(opacity)
+    Q_UNUSED(brightness)
+    Q_UNUSED(saturation)
+#else
     const bool alpha = true;
     // setup blending of transparent windows
     glPushAttrib(GL_ENABLE_BIT);
@@ -496,7 +505,12 @@ void LanczosFilter::prepareRenderStates(GLTexture* tex, double opacity, double b
 
 void LanczosFilter::restoreRenderStates(GLTexture* tex, double opacity, double brightness, double saturation)
 {
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGLES
+    Q_UNUSED(tex)
+    Q_UNUSED(opacity)
+    Q_UNUSED(brightness)
+    Q_UNUSED(saturation)
+#else
     if (opacity != 1.0 || saturation != 1.0 || brightness != 1.0f) {
         if (saturation != 1.0 && tex->saturationSupported()) {
             glActiveTexture(GL_TEXTURE3);

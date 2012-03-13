@@ -99,8 +99,32 @@ SceneXrender::SceneXrender(Workspace* ws)
         kError(1212) << "No XFixes v3+ extension available";
         return;
     }
+    initXRender(true);
+}
+
+SceneXrender::~SceneXrender()
+{
+    if (!init_ok) {
+        // TODO this probably needs to clean up whatever has been created until the failure
+        m_overlayWindow->destroy();
+        return;
+    }
+    XRenderFreePicture(display(), front);
+    XRenderFreePicture(display(), buffer);
+    buffer = None;
+    m_overlayWindow->destroy();
+    foreach (Window * w, windows)
+    delete w;
+}
+
+void SceneXrender::initXRender(bool createOverlay)
+{
+    init_ok = false;
+    if (front != None)
+        XRenderFreePicture(display(), front);
     KXErrorHandler xerr;
-    if (m_overlayWindow->create()) {
+    bool haveOverlay = createOverlay ? m_overlayWindow->create() : (m_overlayWindow->window() != None);
+    if (haveOverlay) {
         m_overlayWindow->setup(None);
         XWindowAttributes attrs;
         XGetWindowAttributes(display(), m_overlayWindow->window(), &attrs);
@@ -129,21 +153,6 @@ SceneXrender::SceneXrender(Workspace* ws)
     init_ok = true;
 }
 
-SceneXrender::~SceneXrender()
-{
-    if (!init_ok) {
-        // TODO this probably needs to clean up whatever has been created until the failure
-        m_overlayWindow->destroy();
-        return;
-    }
-    XRenderFreePicture(display(), front);
-    XRenderFreePicture(display(), buffer);
-    buffer = None;
-    m_overlayWindow->destroy();
-    foreach (Window * w, windows)
-    delete w;
-}
-
 bool SceneXrender::initFailed() const
 {
     return !init_ok;
@@ -153,6 +162,8 @@ bool SceneXrender::initFailed() const
 // so it is done manually using this buffer,
 void SceneXrender::createBuffer()
 {
+    if (buffer != None)
+        XRenderFreePicture(display(), buffer);
     Pixmap pixmap = XCreatePixmap(display(), rootWindow(), displayWidth(), displayHeight(), DefaultDepth(display(), DefaultScreen(display())));
     buffer = XRenderCreatePicture(display(), pixmap, format, 0, 0);
     XFreePixmap(display(), pixmap);   // The picture owns the pixmap now
@@ -198,89 +209,6 @@ void SceneXrender::flushBuffer(int mask, QRegion damage)
         // copy composed buffer to the root window
         XRenderComposite(display(), PictOpSrc, buffer, None, front, 0, 0, 0, 0, 0, 0, displayWidth(), displayHeight());
         XSync(display(), false);
-    }
-}
-
-void SceneXrender::paintGenericScreen(int mask, ScreenPaintData data)
-{
-    screen_paint = data; // save, transformations will be done when painting windows
-    if (true)   // as long as paintTransformedScreen() doesn't work properly
-        Scene::paintGenericScreen(mask, data);
-    else
-        paintTransformedScreen(mask);
-}
-
-/*
- TODO currently broken
- Try to do optimized painting even with transformations. Since only scaling
- and translation are supported by the painting code, clipping can be done
- manually to avoid having to paint everything in every pass. Whole screen
- still need to be painted but e.g. obscured windows don't. So this below
- is basically paintSimpleScreen() with extra code to compute clipping correctly.
-
- This code assumes that the only transformations possible with XRender are those
- provided by Window/ScreenPaintData, In the (very unlikely?) case more is needed
- then paintGenericScreen() needs to be used.
-*/
-void SceneXrender::paintTransformedScreen(int orig_mask)
-{
-    QRegion region(0, 0, displayWidth(), displayHeight());
-    QList< Phase2Data > phase2;
-    QRegion allclips;
-    // Draw each opaque window top to bottom, subtracting the bounding rect of
-    // each window from the clip region after it's been drawn.
-    for (int i = stacking_order.count() - 1;  // top to bottom
-            i >= 0;
-            --i) {
-        Window* w = static_cast< Window* >(stacking_order[ i ]);
-        WindowPrePaintData data;
-        data.mask = orig_mask | (w->isOpaque() ? PAINT_WINDOW_OPAQUE : PAINT_WINDOW_TRANSLUCENT);
-        w->resetPaintingEnabled();
-        data.paint = region;
-        // TODO this is wrong, transformedShape() should be used here, but is not known yet
-        data.clip = w->isOpaque() ? region : QRegion();
-        data.quads = w->buildQuads();
-        // preparation step
-        effects->prePaintWindow(effectWindow(w), data, time_diff);
-#ifndef NDEBUG
-        foreach (const WindowQuad & q, data.quads)
-        if (q.isTransformed())
-            kFatal(1212) << "Pre-paint calls are not allowed to transform quads!" ;
-#endif
-        if (!w->isPaintingEnabled())
-            continue;
-        data.paint -= allclips; // make sure to avoid already clipped areas
-        if (data.paint.isEmpty())  // completely clipped
-            continue;
-        if (data.paint != region) { // prepaint added area to draw
-            region |= data.paint; // make sure other windows in that area get painted too
-            painted_region |= data.paint; // make sure it makes it to the screen
-        }
-        // If the window is transparent, the transparent part will be done
-        // in the 2nd pass.
-        if (data.mask & PAINT_WINDOW_TRANSLUCENT)
-            phase2.prepend(Phase2Data(w, data.paint, data.clip, data.mask, data.quads));
-        if (data.mask & PAINT_WINDOW_OPAQUE) {
-            w->setTransformedShape(QRegion());
-            paintWindow(w, data.mask, data.paint, data.quads);
-            // The window can clip by its opaque parts the windows below.
-            region -= w->transformedShape();
-        }
-        // translucency or window transformed require window pixmap
-        w->suspendUnredirect(data.mask & (PAINT_WINDOW_TRANSLUCENT | PAINT_WINDOW_TRANSFORMED));
-    }
-    if (!(orig_mask & PAINT_SCREEN_BACKGROUND_FIRST))
-        paintBackground(region);   // Fill any areas of the root window not covered by windows
-    // Now walk the list bottom to top, drawing translucent windows.
-    // That we draw bottom to top is important now since we're drawing translucent objects
-    // and also are clipping only by opaque windows.
-    QRegion add_paint;
-    foreach (const Phase2Data & d, phase2) {
-        Scene::Window* w = d.window;
-        paintWindow(w, d.mask, d.region | add_paint, d.quads);
-        // It is necessary to also add paint regions of windows below, because their
-        // pre-paint's might have extended the paint area, so those areas need to be painted too.
-        add_paint |= d.region;
     }
 }
 
@@ -522,7 +450,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     if (pic == None)   // The render format can be null for GL and/or Xv visuals
         return;
     // set picture filter
-    if (options->xrenderSmoothScale) { // only when forced, it's slow
+    if (options->isXrenderSmoothScale()) { // only when forced, it's slow
         if (mask & PAINT_WINDOW_TRANSFORMED)
             filter = ImageFilterGood;
         else if (mask & PAINT_SCREEN_TRANSFORMED)
@@ -584,7 +512,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         QVector<QRect> rects = transformed_shape.rects();
         for (int i = 0; i < rects.count(); ++i) {
             QRect& r = rects[ i ];
-            r = QRect(qRound(r.x() * xscale), qRound(r.y() * yscale),
+            r.setRect(qRound(r.x() * xscale), qRound(r.y() * yscale),
                       qRound(r.width() * xscale), qRound(r.height() * yscale));
         }
         transformed_shape.setRects(rects.constData(), rects.count());
@@ -594,7 +522,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     PaintClipper pcreg(region);   // clip by the region to paint
     PaintClipper pc(transformed_shape);   // clip by window's shape
 
-    const bool wantShadow = m_shadow && !m_shadow->shadowRegion().isEmpty() && (isOpaque() || !(mask & PAINT_DECORATION_ONLY));
+    const bool wantShadow = m_shadow && !m_shadow->shadowRegion().isEmpty();
 
     // In order to obtain a pixel perfect rescaling
     // we need to blit the window content togheter with
@@ -724,8 +652,8 @@ XRenderComposite(display(), PictOpOver, m_xrenderShadow->shadowPixmap(SceneXRend
         }
 #undef RENDER_SHADOW_TILE
 
-        if (!(mask & PAINT_DECORATION_ONLY)) {
-            // Paint the window contents
+        // Paint the window contents
+        if (!(client && client->isShade())) {
             Picture clientAlpha = opaque ? None : alphaMask(data.opacity);
             XRenderComposite(display(), clientRenderOp, pic, clientAlpha, renderTarget, cr.x(), cr.y(), 0, 0, dr.x(), dr.y(), dr.width(), dr.height());
             if (!opaque)
@@ -774,6 +702,12 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
             XRenderChangePicture(display(), pic, CPRepeat, &attr);
         }
     }
+}
+
+void SceneXrender::screenGeometryChanged(const QSize &size)
+{
+    Scene::screenGeometryChanged(size);
+    initXRender(false);
 }
 
 //****************************************
@@ -839,6 +773,7 @@ void SceneXrender::EffectFrame::crossFadeText()
 
 void SceneXrender::EffectFrame::render(QRegion region, double opacity, double frameOpacity)
 {
+    Q_UNUSED(region)
     if (m_effectFrame->geometry().isEmpty()) {
         return; // Nothing to display
     }

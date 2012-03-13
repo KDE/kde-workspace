@@ -29,8 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "workspace.h"
 
-#include "scripting/client.h"
-
 #include <fixx11h.h>
 #include <kxerrorhandler.h>
 #include <kstartupinfo.h>
@@ -259,9 +257,6 @@ void Workspace::setActiveClient(Client* c, allowed_t)
     updateColormap();
 
     emit clientActivated(active_client);
-    if (active_client) {
-        active_client->sl_activated();
-    }
     --set_active_client_recursion;
 }
 
@@ -366,8 +361,8 @@ void Workspace::takeActivity(Client* c, int flags, bool handled)
         flags &= ~ActivityFocus;
         handled = false; // no point, can't get clicks
     }
-    if (c->clientGroup() && c->clientGroup()->visible() != c)
-        c->clientGroup()->setVisible(c);
+    if (c->tabGroup() && c->tabGroup()->current() != c)
+        c->tabGroup()->setCurrent(c);
     if (!c->isShown(true)) {  // shouldn't happen, call activateClient() if needed
         kWarning(1212) << "takeActivity: not shown" ;
         return;
@@ -408,6 +403,25 @@ static inline bool isUsableFocusCandidate(Client *c, Client *prev, bool respectS
            (!respectScreen || c->isOnScreen(prev ? prev->screen() : Workspace::self()->activeScreen()));
 }
 
+Client *Workspace::clientUnderMouse(int screen) const
+{
+    QList<Client*>::const_iterator it = stackingOrder().constEnd();
+    while (it != stackingOrder().constBegin()) {
+        Client *client = *(--it);
+
+        // rule out clients which are not really visible.
+        // the screen test is rather superflous for xrandr & twinview since the geometry would differ -> TODO: might be dropped
+        if (!(client->isShown(false) && client->isOnCurrentDesktop() &&
+                client->isOnCurrentActivity() && client->isOnScreen(screen)))
+            continue;
+
+        if (client->geometry().contains(QCursor::pos())) {
+            return client;
+        }
+    }
+    return 0;
+}
+
 // deactivates 'c' and activates next client
 bool Workspace::activateNextClient(Client* c)
 {
@@ -435,37 +449,25 @@ bool Workspace::activateNextClient(Client* c)
 
     Client* get_focus = NULL;
 
-    if (options->nextFocusPrefersMouse) {
-        QList<Client*>::const_iterator it = stackingOrder().constEnd();
-        while (it != stackingOrder().constBegin()) {
-            Client *client = *(--it);
-
-            // rule out clients which are not really visible.
-            // the screen test is rather superflous for xrandr & twinview since the geometry would differ -> TODO: might be dropped
-            if (!(client->isShown(false) && client->isOnCurrentDesktop() &&
-                  client->isOnCurrentActivity() && client->isOnScreen(c ? c->screen() : activeScreen())))
-                continue;
-
-            if (client->geometry().contains(QCursor::pos())) {
-                if (client != c && !client->isDesktop()) // should rather not happen, but it cannot get the focus. rest of usability is tested above
-                    get_focus = client;
-                break; // unconditional break  - we do not pass the focus to some client below an unusable one
-            }
-
+    if (options->isNextFocusPrefersMouse()) {
+        get_focus = clientUnderMouse(c ? c->screen() : activeScreen());
+        if (get_focus && (get_focus == c || get_focus->isDesktop())) {
+            // should rather not happen, but it cannot get the focus. rest of usability is tested above
+            get_focus = 0;
         }
     }
 
     if (!get_focus) { // no suitable window under the mouse -> find sth. else
 
         // first try to pass the focus to the (former) active clients leader
-        if (c  && (get_focus = c->transientFor()) && isUsableFocusCandidate(get_focus, c, options->separateScreenFocus)) {
+        if (c  && (get_focus = c->transientFor()) && isUsableFocusCandidate(get_focus, c, options->isSeparateScreenFocus())) {
             raiseClient(get_focus);   // also raise - we don't know where it came from
         } else {
             // nope, ask the focus chain for the next candidate
             get_focus = NULL; // reset from the inline assignment above
             for (int i = focus_chain[ currentDesktop()].size() - 1; i >= 0; --i) {
                 Client* ci = focus_chain[ currentDesktop()].at(i);
-                if (isUsableFocusCandidate(ci, c, options->separateScreenFocus)) {
+                if (isUsableFocusCandidate(ci, c, options->isSeparateScreenFocus())) {
                     get_focus = ci;
                     break; // we're done
                 }
@@ -543,7 +545,7 @@ bool Workspace::allowClientActivation(const Client* c, Time time, bool focus_in,
     // 4 - extreme - no window gets focus without user intervention
     if (time == -1U)
         time = c->userTime();
-    int level = c->rules()->checkFSP(options->focusStealingPreventionLevel);
+    int level = c->rules()->checkFSP(options->focusStealingPreventionLevel());
     if (session_saving && level <= 2) { // <= normal
         return true;
     }
@@ -598,7 +600,7 @@ bool Workspace::allowClientActivation(const Client* c, Time time, bool focus_in,
 // to the same application
 bool Workspace::allowFullClientRaising(const Client* c, Time time)
 {
-    int level = c->rules()->checkFSP(options->focusStealingPreventionLevel);
+    int level = c->rules()->checkFSP(options->focusStealingPreventionLevel());
     if (session_saving && level <= 2) { // <= normal
         return true;
     }
@@ -648,6 +650,7 @@ void Workspace::clientAttentionChanged(Client* c, bool set)
         attention_chain.prepend(c);
     } else
         attention_chain.removeAll(c);
+    emit clientDemandsAttentionChanged(c, set);
 }
 
 //********************************************
@@ -721,6 +724,7 @@ void Client::demandAttention(bool set)
     } else
         info->setState(set ? NET::DemandsAttention : 0, NET::DemandsAttention);
     workspace()->clientAttentionChanged(this, set);
+    emit demandsAttentionChanged();
 }
 
 void Client::demandAttentionKNotify()
@@ -784,7 +788,7 @@ Time Client::readUserTimeMapTimestamp(const KStartupInfoId* asn_id, const KStart
                     first_window = false;
             }
             // don't refuse if focus stealing prevention is turned off
-            if (!first_window && rules()->checkFSP(options->focusStealingPreventionLevel) > 0) {
+            if (!first_window && rules()->checkFSP(options->focusStealingPreventionLevel()) > 0) {
                 kDebug(1212) << "User timestamp, already exists:" << 0;
                 return 0; // refuse activation
             }
@@ -863,6 +867,7 @@ void Client::setActive(bool act)
             workspace()->updateClientLayer(*it);
     if (decoration != NULL)
         decoration->activeChange();
+    emit activeChanged();
     updateMouseGrab();
     updateUrgency(); // demand attention again if it's still urgent
     workspace()->checkUnredirect();

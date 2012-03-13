@@ -60,6 +60,13 @@ public:
     virtual void windowAdded(Toplevel*) = 0;
     // a window has been destroyed
     virtual void windowDeleted(Deleted*) = 0;
+    /**
+     * Method invoked when the screen geometry is changed.
+     * Reimplementing classes should also invoke the parent method
+     * as it takes care of resizing the overlay window.
+     * @param size The new screen geometry size
+     **/
+    virtual void screenGeometryChanged(const QSize &size);
     // Flags controlling how painting is done.
     enum {
         // Window (or at least part of it) will be painted opaque.
@@ -77,12 +84,10 @@ public:
         PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS = 1 << 5,
         // Clear whole background as the very first step, without optimizing it
         PAINT_SCREEN_BACKGROUND_FIRST = 1 << 6,
-        // Temporary solution since (_OPAQUE | _TRANSLUCENT) is not working currently.
-        PAINT_DECORATION_ONLY = 1 << 7,
+        // PAINT_DECORATION_ONLY = 1 << 7 has been removed
         // Window will be painted with a lanczos filter.
-        PAINT_WINDOW_LANCZOS = 1 << 8,
-        // same as PAINT_SCREEN_TRANSFORMED without full repainting
-        PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS = 1 << 9
+        PAINT_WINDOW_LANCZOS = 1 << 8
+        // PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS = 1 << 9 has been removed
     };
     // types of filtering available
     enum ImageFilterType { ImageFilterFast, ImageFilterGood };
@@ -134,7 +139,6 @@ protected:
         Window* window;
         QRegion region;
         QRegion clip;
-        QRegion painted_1stpass;
         int mask;
         WindowQuadList quads;
     };
@@ -191,7 +195,7 @@ public:
         // Window will not be painted because it is minimized
         PAINT_DISABLED_BY_MINIMIZE     = 1 << 3,
         // Window will not be painted because it is not the active window in a client group
-        PAINT_DISABLED_BY_CLIENT_GROUP = 1 << 4,
+        PAINT_DISABLED_BY_TAB_GROUP = 1 << 4,
         // Window will not be painted because it's not on the current activity
         PAINT_DISABLED_BY_ACTIVITY     = 1 << 5
     };

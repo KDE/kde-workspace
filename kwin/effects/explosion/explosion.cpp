@@ -47,8 +47,8 @@ ExplosionEffect::ExplosionEffect() : Effect()
     mActiveAnimations = 0;
     mValid = true;
     mInited = false;
-    connect(effects, SIGNAL(windowClosed(EffectWindow*)), this, SLOT(slotWindowClosed(EffectWindow*)));
-    connect(effects, SIGNAL(windowDeleted(EffectWindow*)), this, SLOT(slotWindowDeleted(EffectWindow*)));
+    connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
 }
 
 ExplosionEffect::~ExplosionEffect()
@@ -67,6 +67,9 @@ bool ExplosionEffect::supported()
 bool ExplosionEffect::loadData()
 {
     mInited = true;
+    if (!ShaderManager::instance()->isValid()) {
+        return false;
+    }
     QString shadername("explosion");
     const QString fragmentshader =  KGlobal::dirs()->findResource("data", "kwin/explosion.frag");
     QString starttexture =  KGlobal::dirs()->findResource("data", "kwin/explosion-start.png");
@@ -113,8 +116,6 @@ void ExplosionEffect::prePaintScreen(ScreenPrePaintData& data, int time)
 void ExplosionEffect::prePaintWindow(EffectWindow* w, WindowPrePaintData& data, int time)
 {
     if (mWindows.contains(w)) {
-        if (mValid && !mInited)
-            mValid = loadData();
         if (mValid) {
             mWindows[ w  ] += time / animationTime(700.0);   // complete change in 700ms
             if (mWindows[ w  ] < 1) {
@@ -190,6 +191,12 @@ void ExplosionEffect::slotWindowClosed(EffectWindow* c)
     if (e && e != this)
         return;
     if (c->isOnCurrentDesktop() && !c->isMinimized()) {
+        if (mValid && !mInited)
+            mValid = loadData();
+        if (!mValid) {
+            // don't add to list as we cannot animate this window;
+            return;
+        }
         mWindows[ c ] = 0; // count up to 1
         c->addRepaintFull();
         c->refWindow();

@@ -1025,8 +1025,8 @@ namespace Oxygen
             // TabBar
             case PE_FrameTabBarBase: fcn = &Style::drawFrameTabBarBasePrimitive; break;
             case PE_FrameTabWidget: fcn = &Style::drawFrameTabWidgetPrimitive; break;
-
             case PE_FrameWindow: fcn = &Style::drawFrameWindowPrimitive; break;
+            case PE_IndicatorTabClose: fcn = &Style::drawIndicatorTabClose; break;
 
             // arrows
             case PE_IndicatorArrowUp: fcn = &Style::drawIndicatorArrowUpPrimitive; break;
@@ -2894,6 +2894,31 @@ namespace Oxygen
         return true;
 
     }
+    //___________________________________________________________________________________
+    bool Style::drawIndicatorTabClose( const QStyleOption* option, QPainter* painter, const QWidget* ) const
+    {
+        if( _tabCloseIcon.isNull() ) { // load the icon on-demand: in the constructor, KDE is not yet ready to find it!
+            _tabCloseIcon = KIcon( "dialog-close" );
+            if( _tabCloseIcon.isNull() ) return false; // still not found? cancel
+        }
+        const int size( pixelMetric(QStyle::PM_SmallIconSize) );
+        QIcon::Mode mode;
+        if( option->state & State_Enabled )
+        {
+            if( option->state & State_Raised ) mode = QIcon::Active;
+            else mode = QIcon::Normal;
+        } else mode = QIcon::Disabled;
+
+        if (!(option->state & State_Raised)
+            && !(option->state & State_Sunken)
+            && !(option->state & QStyle::State_Selected))
+            mode = QIcon::Disabled;
+
+        QIcon::State state = option->state & State_Sunken ? QIcon::On:QIcon::Off;
+        QPixmap pixmap = _tabCloseIcon.pixmap(size, mode, state);
+        drawItemPixmap( painter, option->rect, Qt::AlignCenter, pixmap );
+        return true;
+    }
 
     //___________________________________________________________________________________
     bool Style::drawIndicatorArrowPrimitive( ArrowOrientation orientation, const QStyleOption* option, QPainter* painter, const QWidget* widget ) const
@@ -4109,7 +4134,8 @@ namespace Oxygen
         grad.setColorAt( 0, Qt::transparent );
         grad.setColorAt( 0.6, Qt::black );
 
-        helper().renderWindowBackground( &pp, pm.rect(), widget, palette );
+	if( widget ) 
+          helper().renderWindowBackground( &pp, pm.rect(), widget, palette );
         pp.setCompositionMode( QPainter::CompositionMode_DestinationAtop );
         pp.fillRect( pm.rect(), QBrush( grad ) );
         pp.end();
@@ -4242,8 +4268,9 @@ namespace Oxygen
 
                 drawItemPixmap( painter, iconRect, Qt::AlignCenter, pixmap );
 
-                if( cb->direction == Qt::RightToLeft ) editRect.translate( -4 - cb->iconSize.width(), 0 );
-                else editRect.translate( cb->iconSize.width() + 4, 0 );
+                if( cb->direction == Qt::RightToLeft ) editRect.adjust( 0, 0, -4-cb->iconSize.width(), 0 );
+                else editRect.adjust( cb->iconSize.width() + 4, 0, 0, 0 );
+
             }
 
             if( !cb->currentText.isEmpty() && !cb->editable )
@@ -4868,8 +4895,12 @@ namespace Oxygen
         if( indicatorRect.adjusted( 2, 1, -2, -1 ).isValid() )
         {
             indicatorRect.adjust( 1, 0, -1, -1 );
-            QPixmap pixmap( helper().progressBarIndicator( palette, indicatorRect ) );
-            painter->drawPixmap( indicatorRect.topLeft(), pixmap );
+
+            // calculate dimension
+            int dimension( 20 );
+            if( pbOpt2 ) dimension = qMax( 5, horizontal ? indicatorRect.height() : indicatorRect.width() );
+            TileSet* tileSet( helper().progressBarIndicator( palette, dimension ) );
+            tileSet->render( indicatorRect, painter, TileSet::Full );
         }
 
         return true;
@@ -8069,7 +8100,6 @@ namespace Oxygen
         // frame focus
         if( StyleConfigData::viewDrawFocusIndicator() ) _frameFocusPrimitive = &Style::drawFrameFocusRectPrimitive;
         else _frameFocusPrimitive = &Style::emptyPrimitive;
-
     }
 
     //_____________________________________________________________________
@@ -8793,6 +8823,7 @@ namespace Oxygen
 
         if( horizontal )
         {
+            const int hCenter = r.center().x();
             const int h = r.height();
 
             if( animated || mouseOver )
@@ -8811,13 +8842,14 @@ namespace Oxygen
             int center( ( h - ( ngroups-1 ) * 250 ) /2 + r.top() );
             for( int k = 0; k < ngroups; k++, center += 250 )
             {
-                helper().renderDot( painter, QPoint( r.left()+1, center-3 ), color );
-                helper().renderDot( painter, QPoint( r.left()+1, center ), color );
-                helper().renderDot( painter, QPoint( r.left()+1, center+3 ), color );
+                helper().renderDot( painter, QPoint( hCenter, center-3 ), color );
+                helper().renderDot( painter, QPoint( hCenter, center ), color );
+                helper().renderDot( painter, QPoint( hCenter, center+3 ), color );
             }
 
         } else {
 
+            const int vCenter( r.center().y() );
             const int w( r.width() );
             if( animated || mouseOver )
             {
@@ -8836,9 +8868,9 @@ namespace Oxygen
             int center = ( w - ( ngroups-1 ) * 250 ) /2 + r.left();
             for( int k = 0; k < ngroups; k++, center += 250 )
             {
-                helper().renderDot( painter, QPoint( center-3, r.top()+1 ), color );
-                helper().renderDot( painter, QPoint( center, r.top()+1 ), color );
-                helper().renderDot( painter, QPoint( center+3, r.top()+1 ), color );
+                helper().renderDot( painter, QPoint( center-3, vCenter ), color );
+                helper().renderDot( painter, QPoint( center, vCenter ), color );
+                helper().renderDot( painter, QPoint( center+3, vCenter ), color );
             }
 
         }

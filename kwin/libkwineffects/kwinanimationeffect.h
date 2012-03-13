@@ -90,6 +90,9 @@ class AnimationEffectPrivate;
 class KWIN_EXPORT AnimationEffect : public Effect
 {
     Q_OBJECT
+    Q_ENUMS(Anchor)
+    Q_ENUMS(Attribute)
+    Q_ENUMS(MetaType)
 public:
     enum Anchor { Left = 1<<0, Top = 1<<1, Right = 1<<2, Bottom = 1<<3,
                   Horizontal = Left|Right, Vertical = Top|Bottom, Mouse = 1<<4  };
@@ -141,7 +144,7 @@ protected:
      * The central function of this class - call it to create an animated transition of any supported attribute
      * @param w - The EffectWindow to manipulate
      * @param a - The @enum Attribute to manipulate
-     * @param meta - Basically a wildcard to carry various extra informations, eg. the anchor, relativity or rotation axis. You will probably use require it when performing Generic animations.
+     * @param meta - Basically a wildcard to carry various extra information, eg. the anchor, relativity or rotation axis. You will probably use require it when performing Generic animations.
      * @param ms - How long the transition will last
      * @param to - The target value. FPx2 is an agnostic two component float type (like QPointF or QSizeF, but without requiring to be either and supporting an invalid state)
      * @param shape - How the animation progresses, eg. Linear progresses constantly while Exponential start slow and becomes very fast in the end
@@ -164,11 +167,11 @@ protected:
 private:
     float interpolated( const AniData&, int i = 0 ) const;
     float progress( const AniData& ) const;
-private slots:
+private Q_SLOTS:
     void init();
     void triggerRepaint();
-    void _windowClosed( EffectWindow* w );
-    void _windowDeleted( EffectWindow* w );
+    void _windowClosed( KWin::EffectWindow* w );
+    void _windowDeleted( KWin::EffectWindow* w );
 private:
     typedef QMap< EffectWindow*, QList<AniData> > AniMap;
     AnimationEffectPrivate * const d_ptr;
@@ -177,5 +180,6 @@ private:
 
 
 } // namespace
+Q_DECLARE_METATYPE(KWin::FPx2)
 
 #endif // ANIMATION_EFFECT_H

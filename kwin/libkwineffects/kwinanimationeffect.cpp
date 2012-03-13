@@ -51,8 +51,8 @@ void AnimationEffect::init()
      * connect it we can provide auto-referencing of animated and closed windows, since at the time
      * our slot will be called, the slot of the subclass has been (SIGNAL/SLOT connections are FIFO)
      * and has pot. started an animation so we have the window in our hash :) */
-    connect ( effects, SIGNAL(windowClosed(EffectWindow*)), SLOT(_windowClosed(EffectWindow*)) );
-    connect ( effects, SIGNAL(windowDeleted(EffectWindow*)), SLOT(_windowDeleted(EffectWindow*)) );
+    connect ( effects, SIGNAL(windowClosed(KWin::EffectWindow*)), SLOT(_windowClosed(KWin::EffectWindow*)) );
+    connect ( effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), SLOT(_windowDeleted(KWin::EffectWindow*)) );
 }
 
 bool AnimationEffect::isActive() const
@@ -191,8 +191,10 @@ void AnimationEffect::prePaintScreen( ScreenPrePaintData& data, int time )
                 d->m_animated = true;
                 ++anim;
             }
-            else
+            else {
+                animationEnded(entry.key(), anim->attribute);
                 anim = entry->erase(anim);
+            }
         }
         if (entry->isEmpty()) {
             const int i = d->m_zombies.indexOf(entry.key());
@@ -370,7 +372,7 @@ void AnimationEffect::paintWindow( EffectWindow* w, int mask, QRegion region, Wi
 
                     if (tAnchor != sAnchor) {
                         QPointF pt2(xCoord(geo, tAnchor), yCoord(geo, tAnchor));
-                        pt += prgrs*(pt2 - pt);
+                        pt += static_cast<qreal>(prgrs)*(pt2 - pt);
                     }
 
                     rot.xRotationPoint = pt.x();

@@ -47,9 +47,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
 #endif
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-#include "desktopchangeosd.h"
-#endif
 #include "atoms.h"
 #include "placement.h"
 #include "notifications.h"
@@ -61,13 +58,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "deleted.h"
 #include "effects.h"
 #include "overlaywindow.h"
+#include <kwinglplatform.h>
+#include <kwinglutils.h>
 #ifdef KWIN_BUILD_TILING
 #include "tiling/tile.h"
 #include "tiling/tilinglayout.h"
 #include "tiling/tiling.h"
-#endif
-#ifdef KWIN_BUILD_SCRIPTING
-#include "scripting/scripting.h"
 #endif
 
 #include <X11/extensions/shape.h>
@@ -130,9 +126,6 @@ Workspace::Workspace(bool restore)
     , block_focus(0)
 #ifdef KWIN_BUILD_TABBOX
     , tab_box(0)
-#endif
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-    , desktop_change_osd(0)
 #endif
     , popup(0)
     , advanced_popup(0)
@@ -217,7 +210,7 @@ Workspace::Workspace(bool restore)
                 );
 
     Extensions::init();
-    compositingSuspended = !options->useCompositing;
+    compositingSuspended = !options->isUseCompositing();
 #ifdef KWIN_BUILD_TABBOX
     // need to create the tabbox before compositing scene is setup
     tab_box = new TabBox::TabBox(this);
@@ -242,19 +235,16 @@ Workspace::Workspace(bool restore)
 
     client_keys = new KActionCollection(this);
 
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-    desktop_change_osd = new DesktopChangeOSD(this);
-#endif
     m_outline = new Outline();
 
     initShortcuts();
 
     init();
 
-    connect(Kephal::Screens::self(), SIGNAL(screenAdded(Kephal::Screen*)), SLOT(screenAdded(Kephal::Screen*)));
-    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)), SLOT(screenRemoved(int)));
-    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)), SLOT(screenResized(Kephal::Screen*,QSize,QSize)));
-    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*,QPoint,QPoint)), SLOT(screenMoved(Kephal::Screen*,QPoint,QPoint)));
+    connect(Kephal::Screens::self(), SIGNAL(screenAdded(Kephal::Screen*)), &screenChangedTimer, SLOT(start()));
+    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)), &screenChangedTimer, SLOT(start()));
+    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)), &screenChangedTimer, SLOT(start()));
+    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*,QPoint,QPoint)), &screenChangedTimer, SLOT(start()));
 
     connect(&activityController_, SIGNAL(currentActivityChanged(QString)), SLOT(updateCurrentActivity(QString)));
     connect(&activityController_, SIGNAL(activityRemoved(QString)), SLOT(activityRemoved(QString)));
@@ -269,30 +259,6 @@ void Workspace::screenChangeTimeout()
 {
     kDebug() << "It is time to call desktopResized";
     desktopResized();
-}
-
-void Workspace::screenAdded(Kephal::Screen* screen)
-{
-    kDebug();
-    screenChangedTimer.start();
-}
-
-void Workspace::screenRemoved(int screen)
-{
-    kDebug();
-    screenChangedTimer.start();
-}
-
-void Workspace::screenResized(Kephal::Screen* screen, QSize old, QSize newSize)
-{
-    kDebug();
-    screenChangedTimer.start();
-}
-
-void Workspace::screenMoved(Kephal::Screen* screen, QPoint old, QPoint newPos)
-{
-    kDebug();
-    screenChangedTimer.start();
 }
 
 void Workspace::init()
@@ -498,7 +464,7 @@ void Workspace::init()
 
 #ifdef KWIN_BUILD_TILING
     // Enable/disable tiling
-    m_tiling->setEnabled(options->tilingOn);
+    m_tiling->setEnabled(options->isTilingOn());
 #endif
 
     // SELI TODO: This won't work with unreasonable focus policies,
@@ -531,9 +497,6 @@ Workspace::~Workspace()
     }
     for (UnmanagedList::iterator it = unmanaged.begin(), end = unmanaged.end(); it != end; ++it)
         (*it)->release();
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-    delete desktop_change_osd;
-#endif
     delete m_outline;
     discardPopup();
     XDeleteProperty(display(), rootWindow(), atoms->kwin_running);
@@ -638,7 +601,7 @@ void Workspace::addClient(Client* c, allowed_t)
         updateToolWindows(true);
     checkNonExistentClients();
 #ifdef KWIN_BUILD_TABBOX
-    if (tabBox()->isGrabbed())
+    if (tabBox()->isDisplayed())
         tab_box->reset(true);
 #endif
 }
@@ -659,6 +622,8 @@ void Workspace::removeClient(Client* c, allowed_t)
     if (c == active_popup_client)
         closeActivePopup();
 
+    c->untab();
+
     if (client_keys_client == c)
         setupWindowShortcutDone(false);
     if (!c->shortcut().isEmpty()) {
@@ -672,7 +637,7 @@ void Workspace::removeClient(Client* c, allowed_t)
         Notify::raise(Notify::Delete);
 
 #ifdef KWIN_BUILD_TABBOX
-    if (tabBox()->isGrabbed() && tabBox()->currentClient() == c)
+    if (tabBox()->isDisplayed() && tabBox()->currentClient() == c)
         tab_box->nextPrev(true);
 #endif
 
@@ -708,7 +673,7 @@ void Workspace::removeClient(Client* c, allowed_t)
     updateCompositeBlocking();
 
 #ifdef KWIN_BUILD_TABBOX
-    if (tabBox()->isGrabbed())
+    if (tabBox()->isDisplayed())
         tab_box->reset(true);
 #endif
 
@@ -807,9 +772,9 @@ void Workspace::updateFocusChains(Client* c, FocusChainChange change)
 void Workspace::updateToolWindows(bool also_hide)
 {
     // TODO: What if Client's transiency/group changes? should this be called too? (I'm paranoid, am I not?)
-    if (!options->hideUtilityWindowsForInactive) {
+    if (!options->isHideUtilityWindowsForInactive()) {
         for (ClientList::ConstIterator it = clients.constBegin(); it != clients.constEnd(); ++it)
-            if (!(*it)->clientGroup() || (*it)->clientGroup()->visible() == *it)
+            if (!(*it)->tabGroup() || (*it)->tabGroup()->current() == *it)
                 (*it)->hideClient(false);
         return;
     }
@@ -979,21 +944,18 @@ void Workspace::slotReconfigure()
         //curtain.setGeometry( Kephal::ScreenUtils::desktopGeometry() );
         //curtain.show();
 
-        for (ClientList::ConstIterator it = clients.constBegin();
-                it != clients.constEnd();
-                ++it)
+        for (ClientList::ConstIterator it = clients.constBegin(); it != clients.constEnd(); ++it)
             (*it)->updateDecoration(true, true);
         // If the new decoration doesn't supports tabs then ungroup clients
-        if (!decorationSupportsClientGrouping()) {
-            QList<ClientGroup*> tmpGroups = clientGroups; // Prevent crashing
-            for (QList<ClientGroup*>::const_iterator i = tmpGroups.constBegin(); i != tmpGroups.constEnd(); ++i)
-                (*i)->removeAll();
+        if (!decorationSupportsTabbing()) {
+            foreach (Client * c, clients)
+                c->untab();
         }
         mgr->destroyPreviousPlugin();
     } else {
         forEachClient(CheckBorderSizesProcedure());
         foreach (Client * c, clients)
-        c->triggerDecorationRepaint();
+            c->triggerDecorationRepaint();
     }
 
 #ifdef KWIN_BUILD_SCREENEDGES
@@ -1033,7 +995,7 @@ void Workspace::slotReconfigure()
     }
 
 #ifdef KWIN_BUILD_TILING
-    m_tiling->setEnabled(options->tilingOn);
+    m_tiling->setEnabled(options->isTilingOn());
     // just so that we reset windows in the right manner, 'activate' the current active window
     m_tiling->notifyTilingWindowActivated(activeClient());
 #endif
@@ -1044,10 +1006,24 @@ void Workspace::slotReconfigure()
     }
 }
 
+void Workspace::restartKWin(const QString &reason)
+{
+    kDebug(1212) << "restarting kwin for:" << reason;
+    char cmd[1024]; // copied from crashhandler - maybe not the best way to do?
+    sprintf(cmd, "%s --replace &", QFile::encodeName(QCoreApplication::applicationFilePath()).constData());
+    system(cmd);
+}
+
 void Workspace::slotReinitCompositing()
 {
     // Reparse config. Config options will be reloaded by setupCompositing()
     KGlobal::config()->reparseConfiguration();
+    const QString graphicsSystem = KConfigGroup(KSharedConfig::openConfig("kwinrc"), "Compositing").readEntry("GraphicsSystem", "");
+    if ((Extensions::nonNativePixmaps() && graphicsSystem == "native") ||
+        (!Extensions::nonNativePixmaps() && (graphicsSystem == "raster" || graphicsSystem == "raster")) ) {
+        restartKWin("explicitly reconfigured graphicsSystem change");
+        return;
+    }
 
     // Update any settings that can be set in the compositing kcm.
 #ifdef KWIN_BUILD_SCREENEDGES
@@ -1059,7 +1035,7 @@ void Workspace::slotReinitCompositing()
 
     // resume compositing if suspended
     compositingSuspended = false;
-    options->compositingInitialized = false;
+    options->setCompositingInitialized(false);
     setupCompositing();
     if (hasDecorationPlugin()) {
         KDecorationFactory* factory = mgr->factory();
@@ -1151,6 +1127,9 @@ QStringList Workspace::configModules(bool controlCenter)
 #endif
 #ifdef KWIN_BUILD_SCREENEDGES
              << "kwinscreenedges"
+#endif
+#ifdef KWIN_BUILD_SCRIPTING
+             << "kwinscripts"
 #endif
              ;
     return args;
@@ -1339,7 +1318,7 @@ bool Workspace::setCurrentDesktop(int new_desktop)
                 active_client->isShown(true) && active_client->isOnCurrentDesktop())
             c = active_client; // The requestFocus below will fail, as the client is already active
         // from actiavtion.cpp
-        if (!c && options->nextFocusPrefersMouse) {
+        if (!c && options->isNextFocusPrefersMouse()) {
             QList<Client*>::const_iterator it = stackingOrder().constEnd();
             while (it != stackingOrder().constBegin()) {
                 Client *client = *(--it);
@@ -1359,7 +1338,7 @@ bool Workspace::setCurrentDesktop(int new_desktop)
             for (int i = focus_chain[currentDesktop()].size() - 1; i >= 0; --i) {
                 Client* tmp = focus_chain[currentDesktop()].at(i);
                 if (tmp->isShown(false) && tmp->isOnCurrentActivity()
-                    && ( !options->separateScreenFocus || tmp->screen() == old_active_screen )) {
+                    && ( !options->isSeparateScreenFocus() || tmp->screen() == old_active_screen )) {
                     c = tmp;
                     break;
                 }
@@ -1696,16 +1675,12 @@ void Workspace::toggleClientOnActivity(Client* c, const QString &activity, bool 
 
 int Workspace::numScreens() const
 {
-    if (!options->xineramaEnabled)
-        return 1;
     return Kephal::ScreenUtils::numScreens();
 }
 
 int Workspace::activeScreen() const
 {
-    if (!options->xineramaEnabled)
-        return 0;
-    if (!options->activeMouseScreen) {
+    if (!options->isActiveMouseScreen()) {
         if (activeClient() != NULL && !activeClient()->isOnScreen(active_screen))
             return activeClient()->screen();
         return active_screen;
@@ -1719,8 +1694,6 @@ int Workspace::activeScreen() const
  */
 void Workspace::checkActiveScreen(const Client* c)
 {
-    if (!options->xineramaEnabled)
-        return;
     if (!c->isActive())
         return;
     if (!c->isOnScreen(active_screen))
@@ -1733,22 +1706,16 @@ void Workspace::checkActiveScreen(const Client* c)
  */
 void Workspace::setActiveScreenMouse(const QPoint& mousepos)
 {
-    if (!options->xineramaEnabled)
-        return;
     active_screen = Kephal::ScreenUtils::screenId(mousepos);
 }
 
 QRect Workspace::screenGeometry(int screen) const
 {
-    if (!options->xineramaEnabled)
-        return Kephal::ScreenUtils::desktopGeometry();
     return Kephal::ScreenUtils::screenGeometry(screen);
 }
 
 int Workspace::screenNumber(const QPoint& pos) const
 {
-    if (!options->xineramaEnabled)
-        return 0;
     return Kephal::ScreenUtils::screenId(pos);
 }
 
@@ -1836,7 +1803,7 @@ void Workspace::requestDelayFocus(Client* c)
     delayFocusTimer = new QTimer(this);
     connect(delayFocusTimer, SIGNAL(timeout()), this, SLOT(delayFocus()));
     delayFocusTimer->setSingleShot(true);
-    delayFocusTimer->start(options->delayFocusInterval);
+    delayFocusTimer->start(options->delayFocusInterval());
 }
 
 void Workspace::cancelDelayFocus()
@@ -2103,87 +2070,6 @@ void Workspace::checkCursorPos()
     }
 }
 
-int Workspace::indexOfClientGroup(ClientGroup* group)
-{
-    return clientGroups.indexOf(group);
-}
-
-void Workspace::moveItemToClientGroup(ClientGroup* oldGroup, int oldIndex,
-                                      ClientGroup* group, int index)
-{
-    Client* c = oldGroup->clients().at(oldIndex);
-    group->add(c, index, true);
-}
-
-void Workspace::removeClientGroup(ClientGroup* group)
-{
-    int index = clientGroups.indexOf(group);
-    if (index == -1) {
-        return;
-    }
-
-    clientGroups.removeAt(index);
-    for (; index < clientGroups.size(); index++) {
-        foreach (Client *c, clientGroups.at(index)->clients()) {
-            c->setClientGroup(c->clientGroup());
-        }
-    }
-}
-
-// To accept "mainwindow#1" to "mainwindow#2"
-static QByteArray truncatedWindowRole(QByteArray a)
-{
-    int i = a.indexOf('#');
-    if (i == -1)
-        return a;
-    QByteArray b(a);
-    b.truncate(i);
-    return b;
-}
-
-Client* Workspace::findSimilarClient(Client* c)
-{
-    // Attempt to find a similar window to the input. If we find multiple possibilities that are in
-    // different groups then ignore all of them. This function is for automatic window grouping.
-    Client* found = NULL;
-
-    // See if the window has a group ID to match with
-    QString wGId = c->rules()->checkAutogroupById(QString());
-    if (!wGId.isEmpty()) {
-        foreach (Client * cl, clients) {
-            if (wGId == cl->rules()->checkAutogroupById(QString())) {
-                if (found && found->clientGroup() != cl->clientGroup()) { // We've found two, ignore both
-                    found = NULL;
-                    break; // Continue to the next test
-                }
-                found = cl;
-            }
-        }
-        if (found)
-            return found;
-    }
-
-    // If this is a transient window don't take a guess
-    if (c->isTransient())
-        return NULL;
-
-    // If we don't have an ID take a guess
-    if (c->rules()->checkAutogrouping(options->autogroupSimilarWindows)) {
-        QByteArray wRole = truncatedWindowRole(c->windowRole());
-        foreach (Client * cl, clients) {
-            QByteArray wRoleB = truncatedWindowRole(cl->windowRole());
-            if (c->resourceClass() == cl->resourceClass() &&  // Same resource class
-                    wRole == wRoleB && // Same window role
-                    cl->isNormalWindow()) { // Normal window TODO: Can modal windows be "normal"?
-                if (found && found->clientGroup() != cl->clientGroup())   // We've found two, ignore both
-                    return NULL;
-                found = cl;
-            }
-        }
-    }
-
-    return found;
-}
 
 Outline* Workspace::outline()
 {
@@ -2262,6 +2148,138 @@ void Workspace::dumpTiles() const {
         m_tiling->dumpTiles();
     }
 #endif
+}
+
+QString Workspace::supportInformation() const
+{
+    QString support;
+
+    support.append(ki18nc("Introductory text shown in the support information.",
+        "KWin Support Information:\n"
+        "The following information should be used when requesting support on e.g. http://forum.kde.org.\n"
+        "It provides information about the currently running instance, which options are used,\n"
+        "what OpenGL driver and which effects are running.\n"
+        "Please post the information provided underneath this introductory text to a paste bin service\n"
+        "like http://paste.kde.org instead of pasting into support threads.\n").toString());
+    support.append("\n==========================\n\n");
+    // all following strings are intended for support. They need to be pasted to e.g forums.kde.org
+    // it is expected that the support will happen in English language or that the people providing
+    // help understand English. Because of that all texts are not translated
+    support.append("Options\n");
+    support.append("=======\n");
+    const QMetaObject *metaOptions = options->metaObject();
+    for (int i=0; i<metaOptions->propertyCount(); ++i) {
+        const QMetaProperty property = metaOptions->property(i);
+        if (QLatin1String(property.name()) == "objectName") {
+            continue;
+        }
+        support.append(QLatin1String(property.name()) % ": " % options->property(property.name()).toString() % '\n');
+    }
+    support.append("\nCompositing\n");
+    support.append(  "===========\n");
+    support.append("Qt Graphics System: ");
+    if (Extensions::nonNativePixmaps()) {
+        support.append("raster\n");
+    } else {
+        support.append("native\n");
+    }
+    if (effects) {
+        support.append("Compositing is active\n");
+        switch (effects->compositingType()) {
+        case OpenGLCompositing: {
+#ifdef KWIN_HAVE_OPENGLES
+            support.append("Compositing Type: OpenGL ES 2.0\n");
+#else
+            support.append("Compositing Type: OpenGL\n");
+#endif
+
+            GLPlatform *platform = GLPlatform::instance();
+            support.append("OpenGL vendor string: " %   platform->glVendorString() % '\n');
+            support.append("OpenGL renderer string: " % platform->glRendererString() % '\n');
+            support.append("OpenGL version string: " %  platform->glVersionString() % '\n');
+
+            if (platform->supports(LimitedGLSL))
+                support.append("OpenGL shading language version string: " % platform->glShadingLanguageVersionString() % '\n');
+
+            support.append("Driver: " % GLPlatform::driverToString(platform->driver()) % '\n');
+            if (!platform->isMesaDriver())
+                support.append("Driver version: " % GLPlatform::versionToString(platform->driverVersion()) % '\n');
+
+            support.append("GPU class: " % GLPlatform::chipClassToString(platform->chipClass()) % '\n');
+
+            support.append("OpenGL version: " % GLPlatform::versionToString(platform->glVersion()) % '\n');
+
+            if (platform->supports(LimitedGLSL))
+                support.append("GLSL version: " % GLPlatform::versionToString(platform->glslVersion()) % '\n');
+
+            if (platform->isMesaDriver())
+                support.append("Mesa version: " % GLPlatform::versionToString(platform->mesaVersion()) % '\n');
+            if (platform->serverVersion() > 0)
+                support.append("X server version: " % GLPlatform::versionToString(platform->serverVersion()) % '\n');
+            if (platform->kernelVersion() > 0)
+                support.append("Linux kernel version: " % GLPlatform::versionToString(platform->kernelVersion()) % '\n');
+
+            support.append("Direct rendering: ");
+            if (platform->isDirectRendering()) {
+                support.append("yes\n");
+            } else {
+                support.append("no\n");
+            }
+            support.append("Requires strict binding: ");
+            if (!platform->isLooseBinding()) {
+                support.append("yes\n");
+            } else {
+                support.append("no\n");
+            }
+            support.append("GLSL shaders: ");
+            if (platform->supports(GLSL)) {
+                if (platform->supports(LimitedGLSL)) {
+                    support.append(" limited\n");
+                } else {
+                    support.append(" yes\n");
+                }
+            } else {
+                support.append(" no\n");
+            }
+            support.append("Texture NPOT support: ");
+            if (platform->supports(TextureNPOT)) {
+                if (platform->supports(LimitedNPOT)) {
+                    support.append(" limited\n");
+                } else {
+                    support.append(" yes\n");
+                }
+            } else {
+                support.append(" no\n");
+            }
+
+            if (ShaderManager::instance()->isValid()) {
+                support.append("OpenGL 2 Shaders are used\n");
+            } else {
+                support.append("OpenGL 2 Shaders are not used. Legacy OpenGL 1.x code path is used.\n");
+            }
+            break;
+        }
+        case XRenderCompositing:
+            support.append("Compositing Type: XRender\n");
+            break;
+        case NoCompositing:
+        default:
+            support.append("Something is really broken, neither OpenGL nor XRender is used");
+        }
+        support.append("\nLoaded Effects:\n");
+        support.append(  "---------------\n");
+        foreach (const QString &effect, loadedEffects()) {
+            support.append(effect % '\n');
+        }
+        support.append("\nCurrently Active Effects:\n");
+        support.append(  "-------------------------\n");
+        foreach (const QString &effect, activeEffects()) {
+            support.append(effect % '\n');
+        }
+    } else {
+        support.append("Compositing is not active\n");
+    }
+    return support;
 }
 
 } // namespace

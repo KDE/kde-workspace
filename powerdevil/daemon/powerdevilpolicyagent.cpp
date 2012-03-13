@@ -176,7 +176,9 @@ void PolicyAgent::onServiceUnregistered(const QString& serviceName)
 {
     if (m_cookieToBusService.values().contains(serviceName)) {
         // Ouch - the application quit or crashed without releasing its inhibitions. Let's fix that.
-        ReleaseInhibition(m_cookieToBusService.key(serviceName));
+        foreach (uint key, m_cookieToBusService.keys(serviceName)) {
+            ReleaseInhibition(key);
+        }
     }
 }
 
@@ -255,6 +257,9 @@ uint PolicyAgent::addInhibitionWithExplicitDBusService(uint types, const QString
         m_busWatcher.data()->addWatchedService(service);
     }
 
+    kDebug() << "Added inhibition from an explicit DBus service, " << service << ", with cookie " <<
+            m_lastCookie << " from " << appName << " with " << reason;
+
     addInhibitionTypeHelper(m_lastCookie, static_cast< PolicyAgent::RequiredPolicies >(types));
 
     return m_lastCookie;
@@ -271,12 +276,14 @@ uint PolicyAgent::AddInhibition(uint types,
     // Retrieve the service, if we've been called from DBus
     if (calledFromDBus() && !m_busWatcher.isNull()) {
         if (!message().service().isEmpty()) {
+            kDebug() << "DBus service " << message().service() << " is requesting inhibition";
             m_cookieToBusService.insert(m_lastCookie, message().service());
             m_busWatcher.data()->addWatchedService(message().service());
         }
     }
 
-    kDebug() << "Added inhibition with cookie " << m_lastCookie;
+    kDebug() << "Added inhibition with cookie " << m_lastCookie << " from " <<
+            appName << " with " << reason;
 
     addInhibitionTypeHelper(m_lastCookie, static_cast< PolicyAgent::RequiredPolicies >(types));
 
@@ -320,6 +327,7 @@ void PolicyAgent::addInhibitionTypeHelper(uint cookie, PolicyAgent::RequiredPoli
 
 void PolicyAgent::ReleaseInhibition(uint cookie)
 {
+    kDebug() << "Released inhibition with cookie " << cookie;
     m_cookieToAppName.remove(cookie);
     if (m_cookieToBusService.contains(cookie)) {
         if (!m_busWatcher.isNull()) {

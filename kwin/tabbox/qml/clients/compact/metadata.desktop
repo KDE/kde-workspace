@@ -1,0 +1,33 @@
+[Desktop Entry]
+Name=Compact
+Name[cs]=Kompaktní
+Name[de]=Kompakt
+Name[nl]=Compact
+Name[pt]=Compacto
+Name[pt_BR]=Compacto
+Name[sv]=Kompakt
+Name[uk]=Компактне
+Name[x-test]=xxCompactxx
+Name[zh_TW]=簡潔模式
+Comment=A compact window switcher layout
+Comment[nl]=Een compacte indeling van de vensterwisselaar
+Comment[pt]=Uma disposição de mudança de janelas compacta
+Comment[pt_BR]=Uma leiaute compacto do seletor de janelas
+Comment[sv]=En kompakt layout för fönsterbyte
+Comment[uk]=Компактне компонування засобу перемикання вікон
+Comment[x-test]=xxA compact window switcher layoutxx
+Comment[zh_TW]=簡潔模式的視窗切換器佈局
+Icon=preferences-system-windows-switcher-compact
+
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/main.qml
+
+X-KDE-PluginInfo-Author=Martin Gräßlin
+X-KDE-PluginInfo-Email=mgraesslin@kde.org
+X-KDE-PluginInfo-Name=compact
+X-KDE-PluginInfo-Version=1.0
+
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL
+X-KDE-ServiceTypes=KWin/WindowSwitcher
+Type=Service

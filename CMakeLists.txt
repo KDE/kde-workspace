@@ -2,8 +2,8 @@ project(KDEBASE_WORKSPACE)
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
-set(KDE4WORKSPACE_VERSION_MINOR 7)
-set(KDE4WORKSPACE_VERSION_PATCH 90)
+set(KDE4WORKSPACE_VERSION_MINOR 8)
+set(KDE4WORKSPACE_VERSION_PATCH 1)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
 
@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 
 #search packages used by KDE
 set(QT_MIN_VERSION "4.7.0")
-set(KDE_MIN_VERSION "4.7.0")
+set(KDE_MIN_VERSION "4.8.1")
 set(SOPRANO_MIN_VERSION "2.5.63")
 find_package(KDE4 ${KDE_MIN_VERSION} REQUIRED)
 find_package(Strigi REQUIRED)
@@ -20,7 +20,6 @@ find_package(ZLIB REQUIRED)
 find_package(KActivities 6.0.0 REQUIRED)
 find_package(DBusMenuQt 0.6.0 REQUIRED)
 find_package(QImageBlitz REQUIRED)
-find_package(KActivities REQUIRED)
 macro_optional_find_package(OpenGL)
 macro_optional_find_package(OpenGLES)
 
@@ -62,6 +61,9 @@ if(Q_WS_X11)
     set(OPENGL_OR_ES_FOUND FALSE)
     macro_log_feature(OPENGL_OR_ES_FOUND "OpenGL (ES)" "OpenGL (ES)" "http://mesa3d.org/" TRUE "" "Either OpenGL or OpenGL ES 2.0 are required for Compositing support in KWin.")
   endif(NOT OPENGL_FOUND AND NOT OPENGLES_FOUND)
+  if(NOT X11_Xcursor_FOUND)
+    macro_log_feature(X11_Xcursor_FOUND "libXcursor" "X11 cursor management library" "http://xorg.freedesktop.org" TRUE "" "Needed for desktop effects support in KWin.")
+  endif(NOT X11_Xcursor_FOUND)
 endif(Q_WS_X11)
 
 macro_optional_find_package(GLIB2)
@@ -141,7 +143,9 @@ if(NOT WIN32)
    macro_optional_add_subdirectory( ksplash )
    macro_optional_add_subdirectory( powerdevil )
    macro_optional_add_subdirectory( qguiplatformplugin_kde )
-   macro_optional_add_subdirectory( ksysguard )
+   if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
+      macro_optional_add_subdirectory( ksysguard )
+   endif (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
 endif(NOT WIN32)
 
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
@@ -152,6 +156,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    macro_optional_add_subdirectory(solid)
    macro_optional_add_subdirectory(kstartupconfig)
    macro_optional_add_subdirectory(freespacenotifier)
+   macro_optional_add_subdirectory(kscreensaver)
 
    # data
    macro_optional_add_subdirectory(doc)
@@ -161,7 +166,6 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    endif (Q_WS_X11)
 
    if(NOT WIN32)
-      macro_optional_add_subdirectory(kscreensaver)
       macro_optional_add_subdirectory(kcminit)
       macro_optional_add_subdirectory(khotkeys)
       macro_optional_add_subdirectory(kwrited)

@@ -79,7 +79,9 @@ public:
     ControllerWindow *showWidgetExplorer(int screen, Plasma::Containment *c);
     void hideController(int screen);
 
-    /**
+    void prepareContainment(Plasma::Containment *containment);
+
+        /**
      * create a new activity based on the active one
      */
     void cloneCurrentActivity();
@@ -110,6 +112,8 @@ public Q_SLOTS:
 
     void showInteractiveConsole();
     void loadScriptInInteractiveConsole(const QString &script);
+    void showInteractiveKWinConsole();
+    void loadKWinScriptInInteractiveConsole(const QString &script);
 
     Q_SCRIPTABLE void quit();
     void setPerVirtualDesktopViews(bool perDesktopViews);

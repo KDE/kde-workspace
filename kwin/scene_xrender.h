@@ -21,8 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_SCENE_XRENDER_H
 #define KWIN_SCENE_XRENDER_H
 
-#include <config-workspace.h>
-
 #include "scene.h"
 #include "shadow.h"
 
@@ -49,18 +47,18 @@ public:
     virtual void paint(QRegion damage, ToplevelList windows);
     virtual void windowAdded(Toplevel*);
     virtual void windowDeleted(Deleted*);
+    virtual void screenGeometryChanged(const QSize &size);
     Picture bufferPicture();
 protected:
     virtual void paintBackground(QRegion region);
-    virtual void paintGenericScreen(int mask, ScreenPaintData data);
 public Q_SLOTS:
     virtual void windowOpacityChanged(KWin::Toplevel* c);
     virtual void windowGeometryShapeChanged(KWin::Toplevel* c);
     virtual void windowClosed(KWin::Toplevel* c, KWin::Deleted* deleted);
 private:
-    void paintTransformedScreen(int mask);
     void createBuffer();
     void flushBuffer(int mask, QRegion damage);
+    void initXRender(bool createOverlay);
     XRenderPictFormat* format;
     Picture front;
     static Picture buffer;

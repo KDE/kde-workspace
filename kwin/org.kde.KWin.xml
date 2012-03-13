@@ -81,5 +81,11 @@
       <arg type="s" direction="in"/>
       <arg type="b" direction="out"/>
     </method>
+    <method name="activeEffects">
+      <arg type="as" direction="out"/>
+    </method>
+    <method name="supportInformation">
+        <arg type="s" direction="out"/>
+    </medthod>
   </interface>
 </node>

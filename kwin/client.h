@@ -35,19 +35,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/Xutil.h>
 #include <fixx11h.h>
 
-// TODO: QScriptValue should be in the ifdef, but it breaks the build
-#include <QScriptValue>
-#ifdef KWIN_BUILD_SCRIPTING
-#include "scripting/client.h"
-#endif
-
 #include "utils.h"
 #include "options.h"
 #include "workspace.h"
 #include "kdecoration.h"
 #include "rules.h"
 #include "toplevel.h"
-#include "clientgroup.h"
+#include "tabgroup.h"
 
 #ifdef HAVE_XSYNC
 #include <X11/extensions/sync.h>
@@ -58,15 +52,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class QProcess;
 class QTimer;
 class KStartupInfoData;
-
-#ifdef KWIN_BUILD_SCRIPTING
-namespace SWrapper
-{
-class Client;
-}
-
-typedef QPair<SWrapper::Client*, QScriptValue> ClientResolution;
-#endif
 
 namespace KWin
 {
@@ -86,6 +71,194 @@ class Client
     : public Toplevel
 {
     Q_OBJECT
+    /**
+     * Whether this Client is active or not. Use Workspace::activateClient() to activate a Client.
+     * @see Workspace::activateClient
+     **/
+    Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
+    /**
+     * The Caption of the Client. Read from WM_NAME property together with a suffix for hostname and shortcut.
+     * To read only the caption as provided by WM_NAME, use the getter with an additional @c false value.
+     **/
+    Q_PROPERTY(QString caption READ caption NOTIFY captionChanged)
+    /**
+     * Whether the window can be closed by the user. The value is evaluated each time the getter is called.
+     * Because of that no changed signal is provided.
+     **/
+    Q_PROPERTY(bool closeable READ isCloseable)
+    /**
+     * The desktop this Client is on. If the Client is on all desktops the property has value -1.
+     **/
+    Q_PROPERTY(int desktop READ desktop WRITE setDesktop NOTIFY desktopChanged)
+    /**
+     * Whether this Client is fullScreen. A Client might either be fullScreen due to the _NET_WM property
+     * or through a legacy support hack. The fullScreen state can only be changed if the Client does not
+     * use the legacy hack. To be sure whether the state changed, connect to the notify signal.
+     **/
+    Q_PROPERTY(bool fullScreen READ isFullScreen WRITE setFullScreen NOTIFY fullScreenChanged)
+    /**
+     * Whether the Client can be set to fullScreen. The property is evaluated each time it is invoked.
+     * Because of that there is no notify signal.
+     **/
+    Q_PROPERTY(bool fullScreenable READ isFullScreenable)
+    /**
+     * The geometry of this Client. Be aware that depending on resize mode the geometryChanged signal
+     * might be emitted at each resize step or only at the end of the resize operation.
+     **/
+    Q_PROPERTY(QRect geometry READ geometry WRITE setGeometry)
+    /**
+     * Whether the Client is set to be kept above other windows.
+     **/
+    Q_PROPERTY(bool keepAbove READ keepAbove WRITE setKeepAbove NOTIFY keepAboveChanged)
+    /**
+     * Whether the Client is set to be kept below other windows.
+     **/
+    Q_PROPERTY(bool keepBelow READ keepBelow WRITE setKeepBelow NOTIFY keepBelowChanged)
+    /**
+     * Whether the Client can be maximized both horizontally and vertically.
+     * The property is evaluated each time it is invoked.
+     * Because of that there is no notify signal.
+     **/
+    Q_PROPERTY(bool maximizable READ isMaximizable)
+    /**
+     * Whether the Client can be minimized. The property is evaluated each time it is invoked.
+     * Because of that there is no notify signal.
+     **/
+    Q_PROPERTY(bool minimizable READ isMinimizable)
+    /**
+     * Whether the Client is minimized.
+     **/
+    Q_PROPERTY(bool minimized READ isMinimized WRITE setMinimized NOTIFY minimizedChanged)
+    /**
+     * Whether the Client represents a modal window.
+     **/
+    Q_PROPERTY(bool modal READ isModal NOTIFY modalChanged)
+    /**
+     * Whether the Client is moveable. Even if it is not moveable, it might be possible to move
+     * it to another screen. The property is evaluated each time it is invoked.
+     * Because of that there is no notify signal.
+     * @see moveableAcrossScreens
+     **/
+    Q_PROPERTY(bool moveable READ isMovable)
+    /**
+     * Whether the Client can be moved to another screen. The property is evaluated each time it is invoked.
+     * Because of that there is no notify signal.
+     * @see moveable
+     **/
+    Q_PROPERTY(bool moveableAcrossScreens READ isMovableAcrossScreens)
+    /**
+     * Whether the Client provides context help. Mostly needed by decorations to decide whether to
+     * show the help button or not.
+     **/
+    Q_PROPERTY(bool providesContextHelp READ providesContextHelp CONSTANT)
+    /**
+     * Whether the Client can be resized. The property is evaluated each time it is invoked.
+     * Because of that there is no notify signal.
+     **/
+    Q_PROPERTY(bool resizeable READ isResizable)
+    /**
+     * Whether the Client can be shaded. The property is evaluated each time it is invoked.
+     * Because of that there is no notify signal.
+     **/
+    Q_PROPERTY(bool shadeable READ isShadeable)
+    /**
+     * Whether the Client is shaded.
+     **/
+    Q_PROPERTY(bool shade READ isShade WRITE setShade NOTIFY shadeChanged)
+    /**
+     * Whether the Client is a transient Window to another Window.
+     * @see transientFor
+     **/
+    Q_PROPERTY(bool transient READ isTransient NOTIFY transientChanged)
+    /**
+     * The Client to which this Client is a transient if any.
+     **/
+    Q_PROPERTY(KWin::Client *transientFor READ transientFor NOTIFY transientChanged)
+    /**
+     * By how much the window wishes to grow/shrink at least. Usually QSize(1,1).
+     * MAY BE DISOBEYED BY THE WM! It's only for information, do NOT rely on it at all.
+     * The value is evaluated each time the getter is called.
+     * Because of that no changed signal is provided.
+     */
+    Q_PROPERTY(QSize basicUnit READ basicUnit)
+    /**
+     * Whether the Client is currently being moved by the user.
+     * Notify signal is emitted when the Client starts or ends move/resize mode.
+     **/
+    Q_PROPERTY(bool move READ isMove NOTIFY moveResizedChanged)
+    /**
+     * Whether the Client is currently being resized by the user.
+     * Notify signal is emitted when the Client starts or ends move/resize mode.
+     **/
+    Q_PROPERTY(bool resize READ isResize NOTIFY moveResizedChanged)
+    /**
+     * The optional geometry representing the minimized Client in e.g a taskbar.
+     * See _NET_WM_ICON_GEOMETRY at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     * The value is evaluated each time the getter is called.
+     * Because of that no changed signal is provided.
+     **/
+    Q_PROPERTY(QRect iconGeometry READ iconGeometry)
+    /**
+     * Returns whether the window is any of special windows types (desktop, dock, splash, ...),
+     * i.e. window types that usually don't have a window frame and the user does not use window
+     * management (moving, raising,...) on them.
+     * The value is evaluated each time the getter is called.
+     * Because of that no changed signal is provided.
+     **/
+    Q_PROPERTY(bool specialWindow READ isSpecialWindow)
+    /**
+     * Whether the Client can accept keyboard focus.
+     * The value is evaluated each time the getter is called.
+     * Because of that no changed signal is provided.
+     **/
+    Q_PROPERTY(bool wantsInput READ wantsInput)
+    // TODO: a QIcon with all icon sizes?
+    Q_PROPERTY(QPixmap icon READ icon NOTIFY iconChanged)
+    /**
+     * Whether the Client should be excluded from window switching effects.
+     **/
+    Q_PROPERTY(bool skipSwitcher READ skipSwitcher WRITE setSkipSwitcher NOTIFY skipSwitcherChanged)
+    /**
+     * Indicates that the window should not be included on a taskbar.
+     **/
+    Q_PROPERTY(bool skipTaskbar READ skipTaskbar WRITE setSkipTaskbar NOTIFY skipTaskbarChanged)
+    /**
+     * Indicates that the window should not be included on a Pager.
+     **/
+    Q_PROPERTY(bool skipPager READ skipPager WRITE setSkipPager NOTIFY skipPagerChanged)
+    /**
+     * The "Window Tabs" Group this Client belongs to.
+     **/
+    Q_PROPERTY(KWin::TabGroup* tabGroup READ tabGroup NOTIFY tabGroupChanged)
+    /**
+     * Whether this Client is the currently visible Client in its Client Group (Window Tabs).
+     * For change connect to the visibleChanged signal on the Client's Group.
+     **/
+    Q_PROPERTY(bool isCurrentTab READ isCurrentTab)
+    /**
+     * Minimum size as specified in WM_NORMAL_HINTS
+     **/
+    Q_PROPERTY(QSize minSize READ minSize)
+    /**
+     * Maximum size as specified in WM_NORMAL_HINTS
+     **/
+    Q_PROPERTY(QSize maxSize READ maxSize)
+    /**
+     * Whether the window has a decoration or not.
+     * This property is not allowed to be set by applications themselves.
+     * The decision whether a window has a border or not belongs to the window manager.
+     * If this property gets abused by application developers, it will be removed again.
+     **/
+    Q_PROPERTY(bool noBorder READ noBorder WRITE setNoBorder)
+    /**
+     * Whether window state _NET_WM_STATE_DEMANDS_ATTENTION is set. This state indicates that some
+     * action in or with the window happened. For example, it may be set by the Window Manager if
+     * the window requested activation but the Window Manager refused it, or the application may set
+     * it if it finished some work. This state may be set by both the Client and the Window Manager.
+     * It should be unset by the Window Manager when it decides the window got the required attention
+     * (usually, that it got activated).
+     **/
+    Q_PROPERTY(bool demandsAttention READ isDemandingAttention WRITE demandAttention NOTIFY demandsAttentionChanged)
 public:
     Client(Workspace* ws);
     Window wrapperId() const;
@@ -111,7 +284,7 @@ public:
     void removeRule(Rules* r);
     void setupWindowRules(bool ignore_temporary);
     void applyWindowRules();
-    void updateWindowRules();
+    void updateWindowRules(Rules::Types selection);
     void updateFullscreenMonitors(NETFullscreenMonitors topology);
 
     /**
@@ -122,15 +295,6 @@ public:
      */
     bool isSpecialWindow() const;
     bool hasNETSupport() const;
-
-#ifdef KWIN_BUILD_SCRIPTING
-    /**
-      * This is a public object with no wrappers or anything to keep it fast,
-      * so in essence, direct access is allowed. Please be very careful while
-      * using this object
-      */
-    QHash<QScriptEngine*, ClientResolution>* scriptCache;
-#endif
 
     QSize minSize() const;
     QSize maxSize() const;
@@ -185,6 +349,7 @@ public:
 
     bool isShade() const; // True only for ShadeNormal
     ShadeMode shadeMode() const; // Prefer isShade()
+    void setShade(bool set);
     void setShade(ShadeMode mode);
     bool isShadeable() const;
 
@@ -197,7 +362,7 @@ public:
     void setMaximize(bool vertically, bool horizontally);
     QRect iconGeometry() const;
 
-    void setFullScreen(bool set, bool user);
+    void setFullScreen(bool set, bool user = true);
     bool isFullScreen() const;
     bool isFullScreenable(bool fullscreen_hack = false) const;
     bool isActiveFullScreen() const;
@@ -215,7 +380,7 @@ public:
     void checkNoBorder();
 
     bool skipTaskbar(bool from_outside = false) const;
-    void setSkipTaskbar(bool set, bool from_outside);
+    void setSkipTaskbar(bool set, bool from_outside = false);
 
     bool skipPager() const;
     void setSkipPager(bool);
@@ -246,6 +411,9 @@ public:
 
     void takeActivity(int flags, bool handled, allowed_t);   // Takes ActivityFlags as arg (in utils.h)
     void takeFocus(allowed_t);
+    bool isDemandingAttention() const {
+        return demands_attention;
+    }
     void demandAttention(bool set = true);
 
     void setMask(const QRegion& r, int mode = X::Unsorted);
@@ -257,13 +425,13 @@ public:
 
     void updateShape();
 
-    void setGeometry(int x, int y, int w, int h, ForceGeometry_t force = NormalGeometrySet, bool emitJs = true);
-    void setGeometry(const QRect& r, ForceGeometry_t force = NormalGeometrySet, bool emitJs = true);
+    void setGeometry(int x, int y, int w, int h, ForceGeometry_t force = NormalGeometrySet);
+    void setGeometry(const QRect& r, ForceGeometry_t force = NormalGeometrySet);
     void move(int x, int y, ForceGeometry_t force = NormalGeometrySet);
     void move(const QPoint& p, ForceGeometry_t force = NormalGeometrySet);
     /// plainResize() simply resizes
-    void plainResize(int w, int h, ForceGeometry_t force = NormalGeometrySet, bool emitJs = true);
-    void plainResize(const QSize& s, ForceGeometry_t force = NormalGeometrySet, bool emitJs = true);
+    void plainResize(int w, int h, ForceGeometry_t force = NormalGeometrySet);
+    void plainResize(const QSize& s, ForceGeometry_t force = NormalGeometrySet);
     /// resizeWithChecks() resizes according to gravity, and checks workarea position
     void resizeWithChecks(int w, int h, ForceGeometry_t force = NormalGeometrySet);
     void resizeWithChecks(const QSize& s, ForceGeometry_t force = NormalGeometrySet);
@@ -337,9 +505,9 @@ public:
     static bool sameAppWindowRoleMatch(const Client* c1, const Client* c2, bool active_hack);
     static void readIcons(Window win, QPixmap* icon, QPixmap* miniicon, QPixmap* bigicon, QPixmap* hugeicon);
 
+    void setMinimized(bool set);
     void minimize(bool avoid_animation = false);
     void unminimize(bool avoid_animation = false);
-    void closeWindow();
     void killWindow();
     void maximize(MaximizeMode);
     void toggleShade();
@@ -352,8 +520,14 @@ public:
     bool hasStrut() const;
 
     // Tabbing functions
-    ClientGroup* clientGroup() const; // Returns a pointer to client_group
-    void setClientGroup(ClientGroup* group);
+    TabGroup* tabGroup() const; // Returns a pointer to client_group
+    Q_INVOKABLE inline bool tabBefore(Client *other, bool activate) { return tabTo(other, false, activate); }
+    Q_INVOKABLE inline bool tabBehind(Client *other, bool activate) { return tabTo(other, true, activate); }
+    Q_INVOKABLE bool untab(const QRect &toGeometry = QRect());
+    /**
+     * Set tab group - this is to be invoked by TabGroup::add/remove(client) and NO ONE ELSE
+     */
+    void setTabGroup(TabGroup* group);
     /*
     *   If shown is true the client is mapped and raised, if false
     *   the client is unmapped and hidden, this function is called
@@ -367,6 +541,7 @@ public:
     *   client, this function stops it.
     */
     void dontMoveResize();
+    bool isCurrentTab() const;
 
     /**
      * Whether or not the window has a strut that expands through the invisible area of
@@ -426,9 +601,20 @@ public:
     TabBox::TabBoxClientImpl* tabBoxClient() const {
         return m_tabBoxClient;
     }
+    bool isFirstInTabBox() const {
+        return m_firstInTabBox;
+    }
+    void setFirstInTabBox(bool enable) {
+        m_firstInTabBox = enable;
+    }
+    void updateFirstInTabBox();
 
     //sets whether the client should be treated as a SessionInteract window
     void setSessionInteract(bool needed);
+    virtual bool isClient() const;
+
+public slots:
+    void closeWindow();
 
 private slots:
     void autoRaise();
@@ -468,6 +654,7 @@ private:
 
     bool processDecorationButtonPress(int button, int state, int x, int y, int x_root, int y_root,
                                       bool ignoreMenu = false);
+    Client* findAutogroupCandidate() const;
 
 protected:
     virtual void debug(QDebug& stream) const;
@@ -487,24 +674,39 @@ private slots:
     //in between objects as compared to simple function
     //calls
 signals:
-    void s_clientMoved();
     void clientManaging(KWin::Client*);
-    void s_minimized();
-    void s_unminimized();
-    void maximizeSet(QPair<bool, bool>);
-    void s_activated();
-    void s_fullScreenSet(bool, bool);
+    void clientFullScreenSet(KWin::Client*, bool, bool);
     void clientMaximizedStateChanged(KWin::Client*, KDecorationDefines::MaximizeMode);
+    void clientMaximizedStateChanged(KWin::Client* c, bool h, bool v);
     void clientMinimized(KWin::Client* client, bool animate);
     void clientUnminimized(KWin::Client* client, bool animate);
     void clientStartUserMovedResized(KWin::Client*);
     void clientStepUserMovedResized(KWin::Client *, const QRect&);
     void clientFinishUserMovedResized(KWin::Client*);
-
-    // To make workspace-client calls, a few slots are also
-    // required
-public slots:
-    void sl_activated();
+    void activeChanged();
+    void captionChanged();
+    void desktopChanged();
+    void fullScreenChanged();
+    void transientChanged();
+    void modalChanged();
+    void shadeChanged();
+    void keepAboveChanged();
+    void keepBelowChanged();
+    void minimizedChanged();
+    void moveResizedChanged();
+    void iconChanged();
+    void skipSwitcherChanged();
+    void skipTaskbarChanged();
+    void skipPagerChanged();
+    /**
+     * Emitted whenever the Client's TabGroup changed. That is whenever the Client is moved to
+     * another group, but not when a Client gets added or removed to the Client's ClientGroup.
+     **/
+    void tabGroupChanged();
+    /**
+     * Emitted whenever the demands attention state changes.
+     **/
+    void demandsAttentionChanged();
 
 private:
     void exportMappingState(int s);   // ICCCM 4.1.3.1, 4.1.4, NETWM 2.5.1
@@ -575,6 +777,8 @@ private:
 
     void updateInputWindow();
 
+    bool tabTo(Client *other, bool behind, bool activate);
+
     Window client;
     Window wrapper;
     KDecoration* decoration;
@@ -587,6 +791,7 @@ private:
     bool move_resize_has_keyboard_grab;
     bool unrestrictedMoveResize;
     int moveResizeStartScreen;
+    static bool s_haveResizeEffect;
 
     Position mode;
     QPoint moveOffset;
@@ -675,7 +880,7 @@ private:
     QString cap_normal, cap_iconic, cap_suffix;
     Group* in_group;
     Window window_group;
-    ClientGroup* client_group;
+    TabGroup* tab_group;
     Layer in_layer;
     QTimer* ping_timer;
     QProcess* process_killer;
@@ -718,14 +923,12 @@ private:
     bool m_responsibleForDecoPixmap;
     PaintRedirector* paintRedirector;
     TabBox::TabBoxClientImpl* m_tabBoxClient;
+    bool m_firstInTabBox;
 
     bool electricMaximizing;
     QuickTileMode electricMode;
 
     friend bool performTransiencyCheck();
-#ifdef KWIN_BUILD_SCRIPTING
-    friend class SWrapper::Client;
-#endif
 
     void checkActivities();
     bool activitiesDefined; //whether the x property was actually set
@@ -826,9 +1029,9 @@ inline Group* Client::group()
     return in_group;
 }
 
-inline ClientGroup* Client::clientGroup() const
+inline TabGroup* Client::tabGroup() const
 {
-    return client_group;
+    return tab_group;
 }
 
 inline bool Client::isMinimized() const
@@ -844,7 +1047,7 @@ inline bool Client::isActive() const
 inline bool Client::isShown(bool shaded_is_shown) const
 {
     return !isMinimized() && (!isShade() || shaded_is_shown) && !hidden &&
-           (clientGroup() == NULL || clientGroup()->visible() == this);
+           (!tabGroup() || tabGroup()->current() == this);
 }
 
 inline bool Client::isHiddenInternal() const
@@ -972,9 +1175,9 @@ inline QRect Client::visibleRect() const
     return Toplevel::visibleRect().adjusted(-padding_left, -padding_top, padding_right, padding_bottom);
 }
 
-inline void Client::setGeometry(const QRect& r, ForceGeometry_t force, bool emitJs)
+inline void Client::setGeometry(const QRect& r, ForceGeometry_t force)
 {
-    setGeometry(r.x(), r.y(), r.width(), r.height(), force, emitJs);
+    setGeometry(r.x(), r.y(), r.width(), r.height(), force);
 }
 
 inline void Client::move(const QPoint& p, ForceGeometry_t force)
@@ -982,9 +1185,9 @@ inline void Client::move(const QPoint& p, ForceGeometry_t force)
     move(p.x(), p.y(), force);
 }
 
-inline void Client::plainResize(const QSize& s, ForceGeometry_t force, bool emitJs)
+inline void Client::plainResize(const QSize& s, ForceGeometry_t force)
 {
-    plainResize(s.width(), s.height(), force, emitJs);
+    plainResize(s.width(), s.height(), force);
 }
 
 inline void Client::resizeWithChecks(const QSize& s, ForceGeometry_t force)
@@ -1033,5 +1236,7 @@ KWIN_COMPARE_PREDICATE(WrapperIdMatchPredicate, Client, Window, cl->wrapperId() 
 KWIN_COMPARE_PREDICATE(InputIdMatchPredicate, Client, Window, cl->inputId() == value);
 
 } // namespace
+Q_DECLARE_METATYPE(KWin::Client*)
+Q_DECLARE_METATYPE(QList<KWin::Client*>)
 
 #endif

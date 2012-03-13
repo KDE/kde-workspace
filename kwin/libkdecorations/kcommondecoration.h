@@ -352,6 +352,9 @@ public:
     const KDecoration* decoration() const;
     KDecoration* decoration();
 
+protected:
+    virtual void timerEvent(QTimerEvent *event);
+
 private Q_SLOTS:
     /* look out for buttons that have been destroyed. */
     void objDestroyed(QObject *obj);
@@ -361,6 +364,7 @@ private:
 
     void moveWidget(int x, int y, QWidget *widget) const;
     void resizeWidget(int w, int h, QWidget *widget) const;
+    void doShowWindowMenu();
 
     typedef QVector <KCommonDecorationButton*> ButtonContainer; ///< If the entry is 0, it's a spacer.
     int buttonContainerWidth(const ButtonContainer &btnContainer, bool countHidden = false) const;
@@ -395,17 +399,19 @@ public:
     bool compositingActive() const;
 
     // Window tabbing
-    bool isClientGroupActive();
-    QList< ClientGroupItem > clientGroupItems() const;
-    long itemId(int index);
-    int visibleClientGroupItem();
-    void setVisibleClientGroupItem(int index);
-    void moveItemInClientGroup(int index, int before);
-    void moveItemToClientGroup(long itemId, int before = -1);
-    void removeFromClientGroup(int index, const QRect& newGeom = QRect());
-    void closeClientGroupItem(int index);
-    void closeAllInClientGroup();
-    void displayClientMenu(int index, const QPoint& pos);
+    using KCommonDecoration::caption;
+    QString caption(int idx) const;
+    void closeTab(long id);
+    void closeTabGroup();
+    long currentTabId() const;
+    QIcon icon(int idx = 0) const;
+    void setCurrentTab(long id);
+    void showWindowMenu(const QPoint &, long id);
+    void tab_A_before_B(long A, long B);
+    void tab_A_behind_B(long A, long B);
+    int tabCount() const;
+    long tabId(int idx) const;
+    void untab(long id, const QRect& newGeom);
 
     WindowOperation buttonToWindowOperation(Qt::MouseButtons button);
     virtual bool eventFilter(QObject* o, QEvent* e);

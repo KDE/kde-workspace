@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // KWin
 #include "atoms.h"
+#include "client.h"
 #include "effects.h"
 #include "options.h"
 #include "utils.h"
@@ -308,21 +309,24 @@ void ScreenEdge::switchDesktop(ElectricBorder border, const QPoint& _pos)
     int desk = Workspace::self()->currentDesktop();
     const int OFFSET = 2;
     if (border == ElectricLeft || border == ElectricTopLeft || border == ElectricBottomLeft) {
-        desk = Workspace::self()->desktopToLeft(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopToLeft(desk, options->isRollOverDesktops());
         pos.setX(displayWidth() - 1 - OFFSET);
     }
     if (border == ElectricRight || border == ElectricTopRight || border == ElectricBottomRight) {
-        desk = Workspace::self()->desktopToRight(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopToRight(desk, options->isRollOverDesktops());
         pos.setX(OFFSET);
     }
     if (border == ElectricTop || border == ElectricTopLeft || border == ElectricTopRight) {
-        desk = Workspace::self()->desktopAbove(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopAbove(desk, options->isRollOverDesktops());
         pos.setY(displayHeight() - 1 - OFFSET);
     }
     if (border == ElectricBottom || border == ElectricBottomLeft || border == ElectricBottomRight) {
-        desk = Workspace::self()->desktopBelow(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopBelow(desk, options->isRollOverDesktops());
         pos.setY(OFFSET);
     }
+    Client *c = Workspace::self()->getMovingClient();
+    if (c && c->rules()->checkDesktop(desk) != desk)
+        return; // user attempts to move a client to another desktop where it is ruleforced to not be
     int desk_before = Workspace::self()->currentDesktop();
     Workspace::self()->setCurrentDesktop(desk);
     if (Workspace::self()->currentDesktop() != desk_before)

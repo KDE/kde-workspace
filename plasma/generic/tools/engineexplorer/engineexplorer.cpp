@@ -30,6 +30,7 @@
 #include <KStandardAction>
 #include <KStringHandler>
 #include <KAction>
+#include <KDateTime>
 
 #ifdef FOUND_SOPRANO
 #include <Soprano/Node>
@@ -63,6 +64,7 @@ EngineExplorer::EngineExplorer(QWidget* parent)
     m_title->setPixmap(pix.pixmap(size, size));
     connect(m_engines, SIGNAL(activated(QString)), this, SLOT(showEngine(QString)));
     connect(m_sourceRequesterButton, SIGNAL(clicked(bool)), this, SLOT(requestSource()));
+    connect(m_serviceRequesterButton, SIGNAL(clicked(bool)), this, SLOT(requestServiceForSource()));
     m_data->setModel(m_dataModel);
     m_data->setWordWrap(true);
 
@@ -144,9 +146,13 @@ void EngineExplorer::dataUpdated(const QString& source, const Plasma::DataEngine
 void EngineExplorer::listEngines()
 {
     m_engines->clear();
-    QStringList engines = m_engineManager->listAllEngines(m_app);
+    KPluginInfo::List engines = m_engineManager->listEngineInfo(m_app);
     qSort(engines);
-    m_engines->addItems(engines);
+
+    foreach (const KPluginInfo engine, engines) {
+        m_engines->addItem(KIcon(engine.icon()), engine.pluginName());
+    }
+
     m_engines->setCurrentIndex(-1);
 }
 
@@ -154,6 +160,8 @@ void EngineExplorer::showEngine(const QString& name)
 {
     m_sourceRequester->setEnabled(false);
     m_sourceRequesterButton->setEnabled(false);
+    m_serviceRequester->setEnabled(false);
+    m_serviceRequesterButton->setEnabled(false);
     enableButton(KDialog::User1, false);
     enableButton(KDialog::User2, false);
     m_dataModel->clear();
@@ -194,6 +202,8 @@ void EngineExplorer::showEngine(const QString& name)
     m_updateInterval->setEnabled(true);
     m_sourceRequester->setEnabled(true);
     m_sourceRequester->setFocus();
+    m_serviceRequester->setEnabled(true);
+    m_serviceRequesterButton->setEnabled(true);
     updateTitle();
 }
 
@@ -243,6 +253,12 @@ void EngineExplorer::removeSource(const QString& source)
 void EngineExplorer::requestSource()
 {
     requestSource(m_sourceRequester->text());
+}
+
+void EngineExplorer::requestServiceForSource()
+{
+    ServiceViewer *viewer = new ServiceViewer(m_engine, m_serviceRequester->text());
+    viewer->show();
 }
 
 void EngineExplorer::requestSource(const QString &source)
@@ -374,6 +390,18 @@ QString EngineExplorer::convertToString(const QVariant &value)
         case QVariant::Url: {
             return QString("%1").arg(value.toUrl().toString());
         }
+        case QVariant::StringList: {
+            return QString("%1").arg(value.toStringList().join(", "));
+        }
+        case QVariant::Date: {
+            return QString("%1").arg(value.toDate().toString());
+        }
+        case QVariant::DateTime: {
+            return QString("%1").arg(value.toDateTime().toString());
+        }
+        case QVariant::Time: {
+            return QString("%1").arg(value.toTime().toString());
+        }
         default: {
 #ifdef FOUND_SOPRANO
             if (QLatin1String(value.typeName()) == "Soprano::Node") {
@@ -387,6 +415,10 @@ QString EngineExplorer::convertToString(const QVariant &value)
                 }
             }
 #endif
+            if (QLatin1String(value.typeName()) == "KDateTime") {
+                return QString("%1").arg(value.value<KDateTime>().toString());
+            }
+
             Plasma::DataEngine::Data data = value.value<Plasma::DataEngine::Data>();
             if (!data.isEmpty()) {
                 QStringList result;
@@ -394,7 +426,7 @@ QString EngineExplorer::convertToString(const QVariant &value)
 
                 while (it.hasNext()) {
                     it.next();
-                    result << (it.key() + ": " + it.value().toString());
+                    result << (it.key() + ": " + convertToString(it.value()));
                 }
 
                 return result.join("\n");

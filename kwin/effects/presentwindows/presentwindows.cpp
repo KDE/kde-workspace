@@ -104,15 +104,15 @@ PresentWindowsEffect::PresentWindowsEffect()
     connect(c, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(globalShortcutChangedClass(QKeySequence)));
     shortcutClass = c->globalShortcut();
     reconfigure(ReconfigureAll);
-    connect(effects, SIGNAL(windowAdded(EffectWindow*)), this, SLOT(slotWindowAdded(EffectWindow*)));
-    connect(effects, SIGNAL(windowClosed(EffectWindow*)), this, SLOT(slotWindowClosed(EffectWindow*)));
-    connect(effects, SIGNAL(windowDeleted(EffectWindow*)), this, SLOT(slotWindowDeleted(EffectWindow*)));
-    connect(effects, SIGNAL(windowGeometryShapeChanged(EffectWindow*,QRect)), this, SLOT(slotWindowGeometryShapeChanged(EffectWindow*,QRect)));
+    connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowGeometryShapeChanged(KWin::EffectWindow*,QRect)));
     connect(effects, SIGNAL(tabBoxAdded(int)), this, SLOT(slotTabBoxAdded(int)));
     connect(effects, SIGNAL(tabBoxClosed()), this, SLOT(slotTabBoxClosed()));
     connect(effects, SIGNAL(tabBoxUpdated()), this, SLOT(slotTabBoxUpdated()));
     connect(effects, SIGNAL(tabBoxKeyEvent(QKeyEvent*)), this, SLOT(slotTabBoxKeyEvent(QKeyEvent*)));
-    connect(effects, SIGNAL(propertyNotify(EffectWindow*,long)), this, SLOT(slotPropertyNotify(EffectWindow*,long)));
+    connect(effects, SIGNAL(propertyNotify(KWin::EffectWindow*,long)), this, SLOT(slotPropertyNotify(KWin::EffectWindow*,long)));
 }
 
 PresentWindowsEffect::~PresentWindowsEffect()
@@ -277,7 +277,7 @@ void PresentWindowsEffect::prePaintWindow(EffectWindow *w, WindowPrePaintData &d
         w->enablePainting(EffectWindow::PAINT_DISABLED_BY_MINIMIZE);   // Display always
         w->enablePainting(EffectWindow::PAINT_DISABLED_BY_DESKTOP);
         if (winData->visible)
-            w->enablePainting(EffectWindow::PAINT_DISABLED_BY_CLIENT_GROUP);
+            w->enablePainting(EffectWindow::PAINT_DISABLED_BY_TAB_GROUP);
 
         // Calculate window's opacity
         // TODO: Minimized windows or windows not on the current desktop are only 75% visible?
@@ -343,18 +343,23 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
         data.brightness *= interpolate(0.40, 1.0, winData->highlight);
 
         if (m_motionManager.isManaging(w)) {
-            if (w->isDesktop())
+            if (w->isDesktop()) {
                 effects->paintWindow(w, mask, region, data);
+            }
             m_motionManager.apply(w, data);
             QRect rect = m_motionManager.transformedGeometry(w).toRect();
 
             if (m_activated && winData->highlight > 0.0) {
                 // scale the window (interpolated by the highlight level) to at least 105% or to cover 1/16 of the screen size - yet keep it in screen bounds
-                QRect area = effects->clientArea(FullScreenArea, w);
+                QRect area = m_tabBoxEnabled ?
+                                effects->clientArea(ScreenArea, effects->activeScreen(), effects->currentDesktop()) :
+                                effects->clientArea(FullScreenArea, w);
+
                 QSizeF effSize(w->width()*data.xScale, w->height()*data.yScale);
                 float tScale = sqrt((area.width()*area.height()) / (16.0*effSize.width()*effSize.height()));
-                if (tScale < 1.05)
+                if (tScale < 1.05) {
                     tScale = 1.05;
+                }
                 if (effSize.width()*tScale > area.width())
                     tScale = area.width() / effSize.width();
                 if (effSize.height()*tScale > area.height())
@@ -364,16 +369,21 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                     if (scale < tScale) // don't use lanczos during transition
                         mask &= ~PAINT_WINDOW_LANCZOS;
 
-                    const QPoint ac = area.center();
-                    const QPoint wc = rect.center();
+                    const float df = (tScale-1.0f)*0.5f;
+                    int tx = qRound(rect.width()*df);
+                    int ty = qRound(rect.height()*df);
+                    QRect tRect(rect.adjusted(-tx, -ty, tx, ty));
+                    tx = qMax(tRect.x(), area.x()) + qMin(0, area.right()-tRect.right());
+                    ty = qMax(tRect.y(), area.y()) + qMin(0, area.bottom()-tRect.bottom());
+                    tx = qRound((tx-rect.x())*winData->highlight);
+                    ty = qRound((ty-rect.y())*winData->highlight);
 
-                    data.xScale *= scale;
-                    data.yScale *= scale;
-                    const int tx = -w->width()*data.xScale*(scale-1.0)*(0.5+(wc.x() - ac.x())/area.width());
-                    const int ty = -w->height()*data.yScale*(scale-1.0)*(0.5+(wc.y() - ac.y())/area.height());
                     rect.translate(tx,ty);
                     rect.setWidth(rect.width()*scale);
                     rect.setHeight(rect.height()*scale);
+
+                    data.xScale *= scale;
+                    data.yScale *= scale;
                     data.xTranslate += tx;
                     data.yTranslate += ty;
                 }
@@ -443,7 +453,7 @@ void PresentWindowsEffect::slotWindowAdded(EffectWindow *w)
         m_motionManager.manage(w);
         rearrangeWindows();
     }
-    if (w == effects->findWindow(m_closeView->winId())) {
+    if (m_closeView && w == effects->findWindow(m_closeView->winId())) {
         winData->visible = true;
         winData->highlight = 1.0;
         m_closeWindow = w;
@@ -517,7 +527,7 @@ void PresentWindowsEffect::windowInputMouseEvent(Window w, QEvent *e)
     Q_UNUSED(w);
 
     QMouseEvent* me = static_cast< QMouseEvent* >(e);
-    if (m_closeView->geometry().contains(me->pos())) {
+    if (m_closeView && m_closeView->geometry().contains(me->pos())) {
         if (!m_closeView->isVisible()) {
             updateCloseWindow();
         }
@@ -547,7 +557,7 @@ void PresentWindowsEffect::windowInputMouseEvent(Window w, QEvent *e)
     }
     if (m_highlightedWindow && m_motionManager.transformedGeometry(m_highlightedWindow).contains(me->pos()))
         updateCloseWindow();
-    else
+    else if (m_closeView)
         m_closeView->hide();
 
     if (e->type() == QEvent::MouseButtonRelease) {
@@ -956,7 +966,8 @@ void PresentWindowsEffect::rearrangeWindows()
         return;
 
     effects->addRepaintFull(); // Trigger the first repaint
-    m_closeView->hide();
+    if (m_closeView)
+        m_closeView->hide();
 
     // Work out which windows are on which screens
     EffectWindowList windowlist;
@@ -1590,8 +1601,10 @@ void PresentWindowsEffect::setActive(bool active, bool closingTab)
         m_highlightedWindow = NULL;
         m_windowFilter.clear();
 
-        m_closeView = new CloseWindowView();
-        connect(m_closeView, SIGNAL(close()), SLOT(closeWindow()));
+        if (!m_doNotCloseWindows) {
+            m_closeView = new CloseWindowView();
+            connect(m_closeView, SIGNAL(close()), SLOT(closeWindow()));
+        }
 
         // Add every single window to m_windowData (Just calling [w] creates it)
         foreach (EffectWindow * w, effects->stackingOrder()) {
@@ -1701,7 +1714,7 @@ void PresentWindowsEffect::setActive(bool active, bool closingTab)
             DataHash::iterator winData = m_windowData.find(w);
             if (winData != m_windowData.end())
                 winData->visible = (w->isOnDesktop(desktop) || w->isOnAllDesktops()) &&
-                                    !w->isMinimized() && (w->visibleInClientGroup() || winData->visible);
+                                    !w->isMinimized() && (w->isCurrentTab() || winData->visible);
         }
         delete m_closeView;
         m_closeView = 0;
@@ -1756,11 +1769,11 @@ bool PresentWindowsEffect::isSelectableWindow(EffectWindow *w)
         return false;
     if (!w->acceptsFocus())
         return false;
-    if (!w->visibleInClientGroup())
+    if (!w->isCurrentTab())
         return false;
     if (w->isSkipSwitcher())
         return false;
-    if (w == effects->findWindow(m_closeView->winId()))
+    if (m_closeView && w == effects->findWindow(m_closeView->winId()))
         return false;
     if (m_tabBoxEnabled)
         return true;
@@ -1793,7 +1806,8 @@ void PresentWindowsEffect::setHighlightedWindow(EffectWindow *w)
     if (w == m_highlightedWindow || (w != NULL && !m_motionManager.isManaging(w)))
         return;
 
-    m_closeView->hide();
+    if (m_closeView)
+        m_closeView->hide();
     if (m_highlightedWindow) {
         effects->setElevatedWindow(m_highlightedWindow, false);
         m_highlightedWindow->addRepaintFull(); // Trigger the first repaint

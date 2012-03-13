@@ -5,7 +5,6 @@ OPTION(KWIN_BUILD_KCMS "Enable building of KWin configuration modules." ON)
 OPTION(KWIN_MOBILE_EFFECTS "Only build effects relevant for mobile devices" OFF)
 OPTION(KWIN_BUILD_TABBOX "Enable building of KWin Tabbox functionality" ON)
 OPTION(KWIN_BUILD_TILING "Enable building of KWin Tiling functionality" ON)
-OPTION(KWIN_BUILD_DESKTOPCHANGEOSD "Enable building of KWin DesktopChangeOSD funtionality" ON)
 OPTION(KWIN_BUILD_SCREENEDGES "Enable building of KWin with screen edge support" ON)
 OPTION(KWIN_BUILD_SCRIPTING "Enable building of KWin with scripting support" ON)
 OPTION(KWIN_BUILD_XRENDER_COMPOSITING "Enable building of KWin with XRender Compositing support" ON)
@@ -18,9 +17,7 @@ endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 if(KWIN_PLASMA_ACTIVE)
     set(KWIN_BUILD_DECORATIONS OFF)
     set(KWIN_BUILD_KCMS OFF)
-    set(KWIN_BUILD_TABBOX OFF)
     set(KWIN_BUILD_TILING OFF)
-    set(KWIN_BUILD_DESKTOPCHANGEOSD OFF)
     set(KWIN_BUILD_SCREENEDGES OFF)
     set(KWIN_BUILD_SCRIPTING OFF)
     set(KWIN_BUILD_XRENDER_COMPOSITING OFF)
@@ -73,13 +70,15 @@ endif( KWIN_BUILD_DECORATIONS )
 add_subdirectory( data )
 
 add_subdirectory( effects )
+add_subdirectory( scripts )
+add_subdirectory( tabbox )
 
 ########### next target ###############
 
 set(kwin_KDEINIT_SRCS
    workspace.cpp 
    client.cpp 
-   clientgroup.cpp
+   tabgroup.cpp
    placement.cpp 
    atoms.cpp 
    utils.cpp 
@@ -106,7 +105,6 @@ set(kwin_KDEINIT_SRCS
    toplevel.cpp
    unmanaged.cpp
    scene.cpp
-   scene_basic.cpp
    scene_xrender.cpp
    scene_opengl.cpp
    thumbnailitem.cpp
@@ -122,14 +120,9 @@ if(KWIN_BUILD_SCRIPTING)
     set(
         kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
         scripting/scripting.cpp
-        scripting/workspace.cpp
-        scripting/client.cpp
+        scripting/workspace_wrapper.cpp
         scripting/meta.cpp
-        scripting/toplevel.cpp
-        scripting/windowinfo.cpp
-        scripting/s_clientgroup.cpp
-        scripting/workspaceproxy.cpp
-        scripting/chelate.cpp
+        scripting/scriptedeffect.cpp
         scripting/timer.cpp
     )
 endif(KWIN_BUILD_SCRIPTING)
@@ -138,15 +131,11 @@ if(KWIN_BUILD_TABBOX)
     set(
         kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
         tabbox/tabbox.cpp
-        tabbox/clientitemdelegate.cpp
         tabbox/clientmodel.cpp
         tabbox/declarative.cpp
-        tabbox/desktopitemdelegate.cpp
         tabbox/desktopmodel.cpp
-        tabbox/itemlayoutconfig.cpp
         tabbox/tabboxconfig.cpp
         tabbox/tabboxhandler.cpp
-        tabbox/tabboxview.cpp
   )
 endif(KWIN_BUILD_TABBOX)
 
@@ -170,12 +159,6 @@ if(KWIN_BUILD_TILING)
    )
 endif(KWIN_BUILD_TILING)
 
-if(KWIN_BUILD_DESKTOPCHANGEOSD)
-    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
-        desktopchangeosd.cpp
-    )
-endif(KWIN_BUILD_DESKTOPCHANGEOSD)
-
 if(KWIN_BUILD_SCREENEDGES)
     set(
         kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
@@ -195,10 +178,6 @@ set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${KACTIVITIES_LIBRARY} ${QT_
 if(KWIN_BUILD_SCRIPTING)
     set(kwinLibs ${kwinLibs} ${QT_QTSCRIPT_LIBRARY})
 endif(KWIN_BUILD_SCRIPTING)
-
-if(KWIN_BUILD_TABBOX)
-    set(kwinLibs ${kwinLibs} ${QT_QTXML_LIBRARY})
-endif(KWIN_BUILD_TABBOX)
 
 kde4_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
 
@@ -247,16 +226,10 @@ install(TARGETS kwinnvidiahack ${INSTALL_TARGETS_DEFAULT_ARGS} LIBRARY NAMELINK_
 install( FILES kwin.kcfg  DESTINATION  ${KCFG_INSTALL_DIR} )
 install( FILES kwin.notifyrc  DESTINATION  ${DATA_INSTALL_DIR}/kwin )
 install( FILES org.kde.KWin.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
-install( FILES tabbox/DefaultTabBoxLayouts.xml DESTINATION ${DATA_INSTALL_DIR}/kwin )
-install( FILES
-    tabbox/qml/informative.qml
-    tabbox/qml/big_icons.qml
-    tabbox/qml/compact.qml
-    tabbox/qml/small_icons.qml
-    tabbox/qml/tabbox.qml
-    tabbox/qml/text.qml
-    tabbox/qml/thumbnails.qml
-    tabbox/qml/IconTabBox.qml
-    DESTINATION ${DATA_INSTALL_DIR}/kwin/tabbox )
+
+if( KWIN_BUILD_SCRIPTING )
+    # Install the KWin/WindowSwitcher service type
+    install( FILES scripting/kwinscript.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR} )
+endif( KWIN_BUILD_SCRIPTING )
 
 kde4_install_icons( ${ICON_INSTALL_DIR} )

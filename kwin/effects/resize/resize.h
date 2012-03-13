@@ -36,15 +36,16 @@ public:
     virtual inline bool provides(Effect::Feature ef) {
         return ef == Effect::Resize;
     }
+    inline bool isActive() const { return m_active; }
     virtual void prePaintScreen(ScreenPrePaintData& data, int time);
     virtual void prePaintWindow(EffectWindow* w, WindowPrePaintData& data, int time);
     virtual void paintWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data);
     virtual void reconfigure(ReconfigureFlags);
 
 public Q_SLOTS:
-    void slotWindowStartUserMovedResized(EffectWindow *w);
-    void slotWindowStepUserMovedResized(EffectWindow *w, const QRect &geometry);
-    void slotWindowFinishUserMovedResized(EffectWindow *w);
+    void slotWindowStartUserMovedResized(KWin::EffectWindow *w);
+    void slotWindowStepUserMovedResized(KWin::EffectWindow *w, const QRect &geometry);
+    void slotWindowFinishUserMovedResized(KWin::EffectWindow *w);
 
 private:
     enum Feature { TextureScale = 1 << 0, Outline = 1 << 1 };
