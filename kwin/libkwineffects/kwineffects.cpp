@@ -327,6 +327,7 @@ WINDOW_HELPER(bool, isManaged, "managed")
 WINDOW_HELPER(bool, isDeleted, "deleted")
 WINDOW_HELPER(bool, hasOwnShape, "shaped")
 WINDOW_HELPER(QString, windowRole, "windowRole")
+WINDOW_HELPER(QStringList, activities, "activities")
 
 QString EffectWindow::windowClass() const
 {
@@ -397,6 +398,15 @@ WINDOW_HELPER_SETTER(minimize, "minimized",,true)
 WINDOW_HELPER_SETTER(unminimize, "minimized",,false)
 
 #undef WINDOW_HELPER_SETTER
+
+void EffectWindow::setMinimized(bool min)
+{
+    if (min) {
+        minimize();
+    } else {
+        unminimize();
+    }
+}
 
 void EffectWindow::closeWindow() const
 {
