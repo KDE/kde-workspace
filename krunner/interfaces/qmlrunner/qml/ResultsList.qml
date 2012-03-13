@@ -29,15 +29,31 @@ ListView {
     layoutDirection: ListView.RightToLeft
 
     delegate: ListItem {
-        height: 20
+        id: delegate
+        height: del.height + (actionsView.visible ? actionsView.height+10 : 0)
         Row {
+            id: del
+            height: 20
             spacing: 15
-            QIconItem { icon: model["icon"]; width: height; height: 10 }
+            QIconItem { icon: model["icon"]; width: height; height: parent.height }
             Label { height: 10; text: label }
+        }
+        
+        Column {
+            id: actionsView
+            visible: resultsView.currentItem==delegate && actions && actions.length>0
+            anchors.top: del.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
             
             Repeater {
                 model: actions
-                ToolButton { text: modelData["name"]; iconSource: icon; onClicked: trigger(); }
+                ToolButton {
+                    text: modelData.text
+                    width: ListView.width
+                    iconSource: icon
+                    onClicked: modelData.trigger()
+                }
             }
         }
     }
