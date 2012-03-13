@@ -26,7 +26,7 @@ Item {
     width: 400
     height: (inputRow.height+
                 ((!contentItem.content || runnerModel.count==0) ? 0 : (contentItem.content.childrenRect.height+20)))
-    property string views
+    property string view
     
     id: main
     
@@ -40,9 +40,8 @@ Item {
     
     RunnerModels.RunnerModel { id: runnerModel }
     
-    Row {
+    Item {
         id: inputRow
-        spacing: 10
         height: 40
         anchors {
             top: parent.top
@@ -51,22 +50,39 @@ Item {
         }
         
         ToolButton {
+            id: configButton
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: parent.left
+            }
             iconSource: "configure"
-            id: settingsSwitch
             onClicked: app.configure()
         }
         
         ToolButton {
+            id: viewsButton
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: configButton.right
+            }
             iconSource: "plasma"
-            id: changeStuff
-            checkable: true
-            onClicked: { views = checked ? "ResultsPath.qml" : "ResultsList.qml" }
+            
+            onClicked: {
+                var views = [ "ResultsPath.qml", "ResultsList.qml", "ResultsGrid.qml"]
+                var i = (views.indexOf(view)+1) % views.length
+                console.log("laaaaa " + i + " " + views.length)
+                view = views[i]
+            }
         }
-        
+    
         TextField {
             id: input
+            anchors {
+                left: viewsButton.right
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+            }
             onTextChanged: { runnerModel.query = text; contentItem.content.currentIndex = 0 }
-            width: 300
             
             onAccepted: {
                 runnerModel.run(contentItem.content.currentIndex)
@@ -75,8 +91,8 @@ Item {
         }
     }
     
-    onViewsChanged: {
-        var comp=Qt.createComponent(views)
+    onViewChanged: {
+        var comp=Qt.createComponent(view)
         
         if(comp.status == Component.Ready) {
             if(contentItem.content)
@@ -120,7 +136,7 @@ Item {
         onContentChanged: content.anchors.fill=contentItem
         
         Component.onCompleted: {
-            views = "ResultsList.qml"
+            view = "ResultsList.qml"
             input.selectAll()
         }
     }
