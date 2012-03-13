@@ -39,6 +39,7 @@ public:
     virtual void clearHistory();
     virtual void display(const QString& term = QString());
     virtual void setConfigWidget(QWidget* w);
+    virtual void resizeEvent(QResizeEvent* event);
 
 public slots:
     void configure();

@@ -32,6 +32,7 @@
 #include <QLayout>
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QResizeEvent>
 #include <QDebug>
 #include "runnersettings.h"
 
@@ -69,7 +70,6 @@ qmlrunnerView::qmlrunnerView(Plasma::RunnerManager* manager, QWidget *parent)
     
     connect(view->rootObject(), SIGNAL(heightChanged()), SLOT(changeGeometry()));
     connect(qobject_cast<QDeclarativeItem*>(view->rootObject()), SIGNAL(implicitHeightChanged()), SLOT(changeGeometry()));
-    connect(qobject_cast<QDeclarativeItem*>(view->rootObject()), SIGNAL(implicitWidthChanged()), SLOT(changeGeometry()));
 }
 
 qmlrunnerView::~qmlrunnerView()
@@ -116,11 +116,23 @@ void qmlrunnerView::setConfigWidget(QWidget* w)
 
 void qmlrunnerView::changeGeometry()
 {
-    QDeclarativeItem* it = qobject_cast<QDeclarativeItem*>(view->rootObject());
-    qDebug() << "sizeeeeee" << it->height() << it->width();
-    int w = width();
-    
     int left, top, right, bottom;
     getContentsMargins(&left, &top, &right, &bottom);
-    resize(w, it->height()+top+bottom);
+    
+    QDeclarativeItem* it = qobject_cast<QDeclarativeItem*>(view->rootObject());
+    int w = width();
+    
+    resize(w, it->height()+top+bottom+2*layout()->margin());
+}
+
+void qmlrunnerView::resizeEvent(QResizeEvent* event)
+{
+    KRunnerDialog::resizeEvent(event);
+    int left, top, right, bottom;
+    getContentsMargins(&left, &top, &right, &bottom);
+    
+    QDeclarativeItem* it = qobject_cast<QDeclarativeItem*>(view->rootObject());
+    int w = event->size().width();
+    
+    it->setWidth(w-left-right-2*layout()->margin());
 }
