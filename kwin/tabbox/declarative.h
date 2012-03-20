@@ -55,7 +55,7 @@ public:
     DeclarativeView(QAbstractItemModel *model, QWidget *parent = NULL);
     virtual void showEvent(QShowEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
-    void setCurrentIndex(const QModelIndex &index);
+    void setCurrentIndex(const QModelIndex &index, bool disableAnimation = false);
     QModelIndex indexAt(const QPoint &pos) const;
 
 public Q_SLOTS:

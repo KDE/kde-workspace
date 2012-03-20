@@ -417,7 +417,7 @@ void TabBoxHandler::show()
                 d->m_declarativeView = new DeclarativeView(d->clientModel());
             }
             d->m_declarativeView->show();
-            d->m_declarativeView->setCurrentIndex(d->index);
+            d->m_declarativeView->setCurrentIndex(d->index, true);
         } else {
             if (!d->view) {
                 d->createView();
