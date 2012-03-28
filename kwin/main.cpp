@@ -487,9 +487,6 @@ KDE_EXPORT int kdemain(int argc, char * argv[])
     args.add("lock", ki18n("Disable configuration options"));
     args.add("replace", ki18n("Replace already-running ICCCM2.0-compliant window manager"));
     args.add("crashes <n>", ki18n("Indicate that KWin has recently crashed n times"));
-#ifdef KWIN_BUILD_SCRIPTING
-    args.add("noscript", ki18n("Load the script testing dialog"));
-#endif
     KCmdLineArgs::addCmdLineOptions(args);
 
     if (KDE_signal(SIGTERM, KWin::sighandler) == SIG_IGN)
@@ -498,9 +495,6 @@ KDE_EXPORT int kdemain(int argc, char * argv[])
         KDE_signal(SIGINT, SIG_IGN);
     if (KDE_signal(SIGHUP, KWin::sighandler) == SIG_IGN)
         KDE_signal(SIGHUP, SIG_IGN);
-
-    // HACK: this is needed to work around a Qt4.4.0RC1 bug (#157659)
-    setenv("QT_SLOW_TOPLEVEL_RESIZE", "1", true);
 
     // Disable the glib event loop integration, since it seems to be responsible
     // for several bug reports about high CPU usage (bug #239963)

@@ -69,9 +69,6 @@ QPixmap ImageProvider::requestPixmap(const QString &id, QSize *size, const QSize
     if (!index.isValid()) {
         return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
     }
-    if (index.model()->data(index, ClientModel::EmptyRole).toBool()) {
-        return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
-    }
     TabBoxClient* client = static_cast< TabBoxClient* >(index.model()->data(index, ClientModel::ClientRole).value<void *>());
     if (!client) {
         return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
@@ -273,13 +270,21 @@ void DeclarativeView::slotUpdateGeometry()
     }
 }
 
-void DeclarativeView::setCurrentIndex(const QModelIndex &index)
+void DeclarativeView::setCurrentIndex(const QModelIndex &index, bool disableAnimation)
 {
     if (tabBox->config().tabBoxMode() != m_mode) {
         return;
     }
     if (QObject *item = rootObject()->findChild<QObject*>("listView")) {
+        QVariant durationRestore;
+        if (disableAnimation) {
+            durationRestore = item->property("highlightMoveDuration");
+            item->setProperty("highlightMoveDuration", QVariant(1));
+        }
         item->setProperty("currentIndex", index.row());
+        if (disableAnimation) {
+            item->setProperty("highlightMoveDuration", durationRestore);
+        }
     }
 }
 
@@ -355,6 +360,11 @@ void DeclarativeView::slotWindowChanged(WId wId, unsigned int properties)
     if (properties & NET::WMGeometry) {
         slotUpdateGeometry();
     }
+}
+
+bool DeclarativeView::sendKeyEvent(QKeyEvent *e)
+{
+    return event(e);
 }
 
 } // namespace TabBox

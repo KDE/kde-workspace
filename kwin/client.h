@@ -356,7 +356,6 @@ public:
     bool isMinimized() const;
     bool isMaximizable() const;
     QRect geometryRestore() const;
-    MaximizeMode maximizeModeRestore() const;
     MaximizeMode maximizeMode() const;
     bool isMinimizable() const;
     void setMaximize(bool vertically, bool horizontally);
@@ -496,7 +495,6 @@ public:
     void updateUserTime(Time time = CurrentTime);
     Time userTime() const;
     bool hasUserTimeSupport() const;
-    bool ignoreFocusStealing() const;
 
     /// Does 'delete c;'
     static void deleteClient(Client* c, allowed_t);
@@ -743,7 +741,6 @@ private:
     void positionGeometryTip();
     void grabButton(int mod);
     void ungrabButton(int mod);
-    void resetMaximize();
     void resizeDecoration(const QSize& s);
 
     void pingWindow();
@@ -872,7 +869,6 @@ private:
     MaximizeMode max_mode;
     QRect geom_restore;
     QRect geom_fs_restore;
-    MaximizeMode maxmode_restore;
     QTimer* autoRaiseTimer;
     QTimer* shadeHoverTimer;
     QTimer* delayedMoveResizeTimer;
@@ -914,7 +910,6 @@ private:
     KShortcut _shortcut;
     int sm_stacking_order;
     friend struct FetchNameInternalPredicate;
-    friend struct CheckIgnoreFocusStealingProcedure;
     friend struct ResetupRulesProcedure;
     friend class GeometryUpdatesBlocker;
     QTimer* demandAttentionKNotifyTimer;
@@ -1090,11 +1085,6 @@ inline QRect Client::geometryRestore() const
     return geom_restore;
 }
 
-inline Client::MaximizeMode Client::maximizeModeRestore() const
-{
-    return maxmode_restore;
-}
-
 inline Client::MaximizeMode Client::maximizeMode() const
 {
     return max_mode;
@@ -1200,17 +1190,10 @@ inline bool Client::hasUserTimeSupport() const
     return info->userTime() != -1U;
 }
 
-inline bool Client::ignoreFocusStealing() const
-{
-    return ignore_focus_stealing;
-}
-
 inline const WindowRules* Client::rules() const
 {
     return &client_rules;
 }
-
-KWIN_PROCEDURE(CheckIgnoreFocusStealingProcedure, Client, cl->ignore_focus_stealing = options->checkIgnoreFocusStealing(cl));
 
 inline Window Client::moveResizeGrabWindow() const
 {
