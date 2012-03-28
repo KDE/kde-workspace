@@ -22,6 +22,7 @@
 
 // Qt
 #include <QMouseEvent>
+#include <QWheelEvent>
 #include <QPainter>
 #include <QScrollBar>
 #include <QStack>
@@ -376,8 +377,35 @@ void FlipScrollView::resizeEvent(QResizeEvent*)
 
 void FlipScrollView::mousePressEvent(QMouseEvent *event)
 {
+    // XButton1 (the 'back' button) - scroll left.
+    if (event->button() == Qt::XButton1) {
+        moveCursor(MoveLeft, event->modifiers());
+        event->accept();
+        return;
+    }
+    if (event->button() == Qt::XButton2) {
+        moveCursor(MoveRight, event->modifiers());
+        event->accept();
+        return;
+    }
+
     d->watchedIndexForDrag = indexAt(event->pos());
     QAbstractItemView::mousePressEvent(event);
+}
+
+void FlipScrollView::wheelEvent(QWheelEvent *event)
+{
+    if (event->orientation() == Qt::Horizontal) {
+        if (event->delta() > 0) {
+            moveCursor(MoveLeft, event->modifiers());
+        } else {
+            moveCursor(MoveRight, event->modifiers());
+        }
+        event->accept();
+        return;
+    }
+
+    QAbstractItemView::wheelEvent(event);
 }
 
 void FlipScrollView::mouseReleaseEvent(QMouseEvent *event)
