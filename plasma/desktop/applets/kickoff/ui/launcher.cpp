@@ -766,13 +766,28 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
             }
         }
 
+        // Key_Up and Key_Down are meaningless on the tabbar and Search view.
+        // These keys indicate that the User wants to enter the currentWidget().
+        //
+        // The applicationView is a unique case, not reached via contentArea->currentWidget().
+        // If contentArea->currentWidget doesn't return an address,  we know that the
+        // applicationView is Highlighted/Selected. Set focus, and enter it.
+
+        if ((keyEvent->key() == Qt::Key_Up) || (keyEvent->key() == Qt::Key_Down)) {
+            QAbstractItemView *activeView = qobject_cast<QAbstractItemView*>(d->contentArea->currentWidget());
+            if (activeView) {
+                QCoreApplication::sendEvent(activeView, event);
+            } else {
+                d->applicationView->setFocus();
+                QCoreApplication::sendEvent(d->applicationView, event);
+            }
+            return true;
+        }
         // if the search view is visible, we are passing the events to it
         if (d->searchView->isVisible()) {
-            if (!d->searchView->initializeSelection()
-                    || keyEvent->key() == Qt::Key_Return
-                    || keyEvent->key() == Qt::Key_Enter
-            ) {
-                qDebug() << "Passing the event to the search view" << event;
+            if (!d->searchView->initializeSelection() ||
+                        keyEvent->key() == Qt::Key_Return ||
+                        keyEvent->key() == Qt::Key_Enter) {
                 QCoreApplication::sendEvent(d->searchView, event);
             }
             return true;
@@ -786,7 +801,6 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
             return true;
         }
     }
-
 
     // the mouse events we are interested in are delivered to the viewport,
     // other events are delivered to the view itself.
