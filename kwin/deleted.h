@@ -40,6 +40,9 @@ public:
     virtual QPoint clientPos() const;
     virtual QSize clientSize() const;
     virtual QRect transparentRect() const;
+    virtual inline QRect visibleRect() const {
+        return Toplevel::visibleRect().adjusted(-padding_left, -padding_top, padding_right, padding_bottom);
+    }
     const QPixmap *topDecoPixmap() const {
         return &decorationPixmapTop;
     }
