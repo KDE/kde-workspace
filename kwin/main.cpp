@@ -53,7 +53,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QLabel>
 #include <KComboBox>
 #include <QVBoxLayout>
-#include <kworkspace/kworkspace.h>
+
+#include "config-workspace.h"
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif // HAVE_UNISTD_H
+
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif // HAVE_MALLOC_H
 
 #include <ksmserver_interface.h>
 
@@ -407,7 +416,20 @@ KDE_EXPORT int kdemain(int argc, char * argv[])
         }
     }
 
-    KWorkSpace::trimMalloc();
+#ifdef M_TRIM_THRESHOLD
+    // Prevent fragmentation of the heap by malloc (glibc).
+    //
+    // The default threshold is 128*1024, which can result in a large memory usage
+    // due to fragmentation especially if we use the raster graphicssystem. On the
+    // otherside if the threshold is too low, free() starts to permanently ask the kernel
+    // about shrinking the heap.
+#ifdef HAVE_UNISTD_H
+    const int pagesize = sysconf(_SC_PAGESIZE);
+#else
+    const int pagesize = 4*1024;
+#endif // HAVE_UNISTD_H
+    mallopt(M_TRIM_THRESHOLD, 5*pagesize);
+#endif // M_TRIM_THRESHOLD
 
     // the raster graphicssystem has a quite terrible performance on the XRender backend or when not
     // compositing at all while some to many decorations suffer from bad performance of the native
@@ -487,9 +509,6 @@ KDE_EXPORT int kdemain(int argc, char * argv[])
     args.add("lock", ki18n("Disable configuration options"));
     args.add("replace", ki18n("Replace already-running ICCCM2.0-compliant window manager"));
     args.add("crashes <n>", ki18n("Indicate that KWin has recently crashed n times"));
-#ifdef KWIN_BUILD_SCRIPTING
-    args.add("noscript", ki18n("Load the script testing dialog"));
-#endif
     KCmdLineArgs::addCmdLineOptions(args);
 
     if (KDE_signal(SIGTERM, KWin::sighandler) == SIG_IGN)
@@ -498,9 +517,6 @@ KDE_EXPORT int kdemain(int argc, char * argv[])
         KDE_signal(SIGINT, SIG_IGN);
     if (KDE_signal(SIGHUP, KWin::sighandler) == SIG_IGN)
         KDE_signal(SIGHUP, SIG_IGN);
-
-    // HACK: this is needed to work around a Qt4.4.0RC1 bug (#157659)
-    setenv("QT_SLOW_TOPLEVEL_RESIZE", "1", true);
 
     // Disable the glib event loop integration, since it seems to be responsible
     // for several bug reports about high CPU usage (bug #239963)

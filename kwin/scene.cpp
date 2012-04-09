@@ -73,6 +73,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <X11/extensions/shape.h>
 
+#include <QGraphicsScene>
+#include <QGraphicsView>
+
 #include "client.h"
 #include "deleted.h"
 #include "effects.h"
@@ -80,7 +83,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "overlaywindow.h"
 #include "shadow.h"
 
-#include <kephal/screens.h>
 #include "thumbnailitem.h"
 
 namespace KWin
@@ -359,11 +361,44 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
         thumbData.opacity = data.opacity;
 
         QSizeF size = QSizeF(thumb->size());
-        size.scale(QSizeF(item->sceneBoundingRect().width(), item->sceneBoundingRect().height()), Qt::KeepAspectRatio);
+        size.scale(QSizeF(item->width(), item->height()), Qt::KeepAspectRatio);
         thumbData.xScale = size.width() / static_cast<qreal>(thumb->width());
         thumbData.yScale = size.height() / static_cast<qreal>(thumb->height());
-        const int x = item->scenePos().x() + w->x() + (item->width() - size.width()) / 2;
-        const int y = item->scenePos().y() + w->y() + (item->height() - size.height()) / 2;
+        // it can happen in the init/closing phase of the tabbox
+        // that the corresponding QGraphicsScene is not available
+        if (item->scene() == 0) {
+            continue;
+        }
+        // in principle there could be more than one QGraphicsView per QGraphicsScene,
+        // although TabBox does not make use of it so far
+        QList<QGraphicsView*> views = item->scene()->views();
+        QGraphicsView* declview = 0;
+        foreach (QGraphicsView* view, views) {
+            if (view->winId() == w->window()->window()) {
+                declview = view;
+                break;
+            }
+            QWidget *parent = view;
+            while ((parent = parent->parentWidget())) {
+                // if the graphicsview is not the topmost widget we try to go up to the
+                // toplevel widget and check whether that is the window we are looking for.
+                if (parent->winId() == w->window()->window()) {
+                    declview = view;
+                    break;
+                }
+            }
+            if (declview) {
+                // our nested loop found it, so we can break this loop as well
+                // doesn't look nice, but still better than goto
+                break;
+            }
+        }
+        if (declview == 0) {
+            continue;
+        }
+        const QPoint point = declview->mapFromScene(item->scenePos());
+        const qreal x = point.x() + w->x() + (item->width() - size.width())/2;
+        const qreal y = point.y() + w->y() + (item->height() - size.height()) / 2;
         thumbData.xTranslate = x - thumb->x();
         thumbData.yTranslate = y - thumb->y();
         int thumbMask = PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_LANCZOS;
@@ -536,7 +571,7 @@ WindowQuadList Scene::Window::buildQuads(bool force) const
     if (cached_quad_list != NULL && !force)
         return *cached_quad_list;
     WindowQuadList ret;
-    if (toplevel->clientPos() == QPoint(0, 0) && toplevel->clientSize() == toplevel->visibleRect().size())
+    if (toplevel->clientPos() == QPoint(0, 0) && toplevel->clientSize() == toplevel->decorationRect().size())
         ret = makeQuads(WindowQuadContents, shape());  // has no decoration
     else {
         Client *client = dynamic_cast<Client*>(toplevel);

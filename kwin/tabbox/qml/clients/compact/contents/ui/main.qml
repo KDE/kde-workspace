@@ -33,6 +33,7 @@ Item {
     property bool canStretchY: false
     width: Math.min(Math.max(screenWidth * 0.2, optimalWidth), screenWidth * 0.8)
     height: Math.min(Math.max(screenHeight * 0.2, optimalHeight), screenHeight * 0.8)
+    focus: true
 
     property int textMargin: 2
 
@@ -89,9 +90,10 @@ Item {
             id: delegateItem
             width: compactListView.width
             height: compactListView.rowHeight
+            opacity: minimized ? 0.6 : 1.0
             Image {
                 id: iconItem
-                source: "image://client/" + index + "/" + compactTabBox.imagePathPrefix + "-" + compactListView.imageId + (index == compactListView.currentIndex ? "/selected" : "/disabled")
+                source: "image://client/" + index + "/" + compactTabBox.imagePathPrefix + "-" + compactListView.imageId + "/selected"
                 width: 16
                 height: 16
                 sourceSize {
@@ -109,8 +111,7 @@ Item {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignBottom
                 text: itemCaption(caption, minimized)
-                font.bold: true
-                font.italic: minimized
+                font.bold: index == compactListView.currentIndex
                 color: theme.textColor
                 elide: Text.ElideMiddle
                 anchors {
@@ -190,5 +191,19 @@ Item {
             width: compactListView.width
         }
         highlightMoveDuration: 250
+    }
+    /*
+     * Key navigation on outer item for two reasons:
+     * @li we have to emit the change signal
+     * @li on multiple invocation it does not work on the list view. Focus seems to be lost.
+     **/
+    Keys.onPressed: {
+        if (event.key == Qt.Key_Up) {
+            compactListView.decrementCurrentIndex();
+            compactListView.currentIndexChanged(compactListView.currentIndex);
+        } else if (event.key == Qt.Key_Down) {
+            compactListView.incrementCurrentIndex();
+            compactListView.currentIndexChanged(compactListView.currentIndex);
+        }
     }
 }

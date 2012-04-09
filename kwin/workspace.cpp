@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kconfig.h>
 #include <kglobal.h>
 #include <klocale.h>
+#include <QtGui/QDesktopWidget>
 #include <QRegExp>
 #include <QPainter>
 #include <QBitmap>
@@ -77,8 +78,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kglobalsettings.h>
 #include <kwindowsystem.h>
 #include <kwindowinfo.h>
-
-#include <kephal/screens.h>
 
 namespace KWin
 {
@@ -241,14 +240,14 @@ Workspace::Workspace(bool restore)
 
     init();
 
-    connect(Kephal::Screens::self(), SIGNAL(screenAdded(Kephal::Screen*)), &screenChangedTimer, SLOT(start()));
-    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)), &screenChangedTimer, SLOT(start()));
-    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)), &screenChangedTimer, SLOT(start()));
-    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*,QPoint,QPoint)), &screenChangedTimer, SLOT(start()));
+    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), &screenChangedTimer, SLOT(start()));
+    connect(QApplication::desktop(), SIGNAL(resized(int)), &screenChangedTimer, SLOT(start()));
 
+#ifdef KWIN_BUILD_ACTIVITIES
     connect(&activityController_, SIGNAL(currentActivityChanged(QString)), SLOT(updateCurrentActivity(QString)));
     connect(&activityController_, SIGNAL(activityRemoved(QString)), SLOT(activityRemoved(QString)));
     connect(&activityController_, SIGNAL(activityAdded(QString)), SLOT(activityAdded(QString)));
+#endif
 
     connect(&screenChangedTimer, SIGNAL(timeout()), SLOT(screenChangeTimeout()));
     screenChangedTimer.setSingleShot(true);
@@ -379,8 +378,10 @@ void Workspace::init()
     }
     if (!setCurrentDesktop(initial_desktop))
         setCurrentDesktop(1);
+#ifdef KWIN_BUILD_ACTIVITIES
     allActivities_ = activityController_.listActivities();
     updateCurrentActivity(activityController_.currentActivity());
+#endif
 
     // Now we know how many desktops we'll have, thus we initialize the positioning object
     initPositioning = new Placement(this);
@@ -437,7 +438,10 @@ void Workspace::init()
         NETPoint* viewports = new NETPoint[numberOfDesktops()];
         rootInfo->setDesktopViewport(numberOfDesktops(), *viewports);
         delete[] viewports;
-        QRect geom = Kephal::ScreenUtils::desktopGeometry();
+        QRect geom;
+        for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
+            geom |= QApplication::desktop()->screenGeometry(i);
+        }
         NETSize desktop_geometry;
         desktop_geometry.width = geom.width();
         desktop_geometry.height = geom.height();
@@ -559,14 +563,6 @@ void Workspace::addClient(Client* c, allowed_t)
     Group* grp = findGroup(c->window());
 
     KWindowInfo info = KWindowSystem::windowInfo(c->window(), -1U, NET::WM2WindowClass);
-
-    /*
-    if (info.windowClassName() == QString("krunner")) {
-    SWrapper::Workspace* ws_object = KWin::Scripting::workspace();
-    if (ws_object != 0) {
-        ws_object->sl_killWindowCalled(c);
-    }
-    }*/
 
     emit clientAdded(c);
 
@@ -932,7 +928,6 @@ void Workspace::slotReconfigure()
     emit configChanged();
     initPositioning->reinitCascading(0);
     discardPopup();
-    forEachClient(CheckIgnoreFocusStealingProcedure());
     updateToolWindows(true);
 
     if (hasDecorationPlugin() && mgr->reset(changed)) {
@@ -1020,7 +1015,7 @@ void Workspace::slotReinitCompositing()
     KGlobal::config()->reparseConfiguration();
     const QString graphicsSystem = KConfigGroup(KSharedConfig::openConfig("kwinrc"), "Compositing").readEntry("GraphicsSystem", "");
     if ((Extensions::nonNativePixmaps() && graphicsSystem == "native") ||
-        (!Extensions::nonNativePixmaps() && (graphicsSystem == "raster" || graphicsSystem == "raster")) ) {
+        (!Extensions::nonNativePixmaps() && (graphicsSystem == "raster" || graphicsSystem == "opengl")) ) {
         restartKWin("explicitly reconfigured graphicsSystem change");
         return;
     }
@@ -1163,18 +1158,6 @@ bool Workspace::isNotManaged(const QString& title)
         }
     }
     return false;
-}
-
-/**
- * Refreshes all the client windows
- */
-void Workspace::refresh()
-{
-    QWidget w(NULL, Qt::X11BypassWindowManagerHint);
-    w.setGeometry(Kephal::ScreenUtils::desktopGeometry());
-    w.show();
-    w.hide();
-    QApplication::flush();
 }
 
 /**
@@ -1675,7 +1658,7 @@ void Workspace::toggleClientOnActivity(Client* c, const QString &activity, bool 
 
 int Workspace::numScreens() const
 {
-    return Kephal::ScreenUtils::numScreens();
+    return QApplication::desktop()->screenCount();
 }
 
 int Workspace::activeScreen() const
@@ -1685,7 +1668,7 @@ int Workspace::activeScreen() const
             return activeClient()->screen();
         return active_screen;
     }
-    return Kephal::ScreenUtils::screenId(cursorPos());
+    return QApplication::desktop()->screenNumber(cursorPos());
 }
 
 /**
@@ -1706,17 +1689,17 @@ void Workspace::checkActiveScreen(const Client* c)
  */
 void Workspace::setActiveScreenMouse(const QPoint& mousepos)
 {
-    active_screen = Kephal::ScreenUtils::screenId(mousepos);
+    active_screen = QApplication::desktop()->screenNumber(mousepos);
 }
 
 QRect Workspace::screenGeometry(int screen) const
 {
-    return Kephal::ScreenUtils::screenGeometry(screen);
+    return QApplication::desktop()->screenGeometry(screen);
 }
 
 int Workspace::screenNumber(const QPoint& pos) const
 {
-    return Kephal::ScreenUtils::screenId(pos);
+    return QApplication::desktop()->screenNumber(pos);
 }
 
 void Workspace::sendClientToScreen(Client* c, int screen)

@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "workspace_wrapper.h"
 #include "../client.h"
 
+#include <QtGui/QDesktopWidget>
+
 namespace KWin {
 
 WorkspaceWrapper::WorkspaceWrapper(QObject* parent) : QObject(parent)
@@ -35,6 +37,7 @@ WorkspaceWrapper::WorkspaceWrapper(QObject* parent) : QObject(parent)
     connect(ws, SIGNAL(clientActivated(KWin::Client*)), SIGNAL(clientActivated(KWin::Client*)));
     connect(ws, SIGNAL(numberDesktopsChanged(int)), SIGNAL(numberDesktopsChanged(int)));
     connect(ws, SIGNAL(clientDemandsAttentionChanged(KWin::Client*,bool)), SIGNAL(clientDemandsAttentionChanged(KWin::Client*,bool)));
+    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SIGNAL(numberScreensChanged(int)));
     foreach (KWin::Client *client, ws->clientList()) {
         setupClientConnections(client);
     }
@@ -184,6 +187,15 @@ QString WorkspaceWrapper::desktopName(int desktop) const
 QString WorkspaceWrapper::supportInformation() const
 {
     return Workspace::self()->supportInformation();
+}
+
+QList< QObject* > WorkspaceWrapper::getClientList() const
+{
+    QList<QObject*> list;
+    foreach (Client* client, Workspace::self()->clientList()) {
+        list << client;
+    }
+    return list;
 }
 
 void WorkspaceWrapper::setupClientConnections(KWin::Client *client)

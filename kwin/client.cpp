@@ -95,6 +95,7 @@ Client::Client(Workspace* ws)
     , transient_for (NULL)
     , transient_for_id(None)
     , original_transient_for_id(None)
+    , shade_below(NULL)
     , skip_switcher(false)
     , blocks_compositing(false)
     , autoRaiseTimer(NULL)
@@ -179,7 +180,6 @@ Client::Client(Workspace* ws)
     skip_pager = false;
 
     max_mode = MaximizeRestore;
-    maxmode_restore = MaximizeRestore;
 
     cmap = None;
 
@@ -1055,6 +1055,8 @@ void Client::setShade(bool set) {
 
 void Client::setShade(ShadeMode mode)
 {
+    if (mode == ShadeHover && isMove())
+        return; // causes geometry breaks and is probably nasty
     if (isSpecialWindow() || noBorder())
         mode = ShadeNone;
     mode = rules()->checkShade(mode);
@@ -1098,8 +1100,11 @@ void Client::setShade(ShadeMode mode)
         plainResize(s);
         shade_geometry_change = false;
         if (isActive()) {
-            if (was_shade_mode == ShadeHover)
+            if (was_shade_mode == ShadeHover) {
+                if (shade_below && workspace()->stackingOrder().indexOf(shade_below) > -1)
+                    workspace()->restack(this, shade_below);
                 workspace()->activateNextClient(this);
+            }
             else
                 workspace()->focusToNull();
         }
@@ -1110,6 +1115,15 @@ void Client::setShade(ShadeMode mode)
         plainResize(s);
         if (shade_mode == ShadeHover || shade_mode == ShadeActivated)
             setActive(true);
+        if (shade_mode == ShadeHover) {
+            ClientList order = workspace()->stackingOrder();
+            int idx = order.indexOf(this) + 1;   // this is likely related to the index parameter?!
+            shade_below = (idx < order.count()) ? order.at(idx) : NULL;
+            if (shade_below && shade_below->isNormalWindow())
+                workspace()->raiseClient(this);
+            else
+                shade_below = NULL;
+        }
         XMapWindow(display(), wrapperId());
         XMapWindow(display(), window());
         if (isActive())
@@ -2298,16 +2312,23 @@ void Client::updateCursor()
 
 void Client::updateCompositeBlocking(bool readProperty)
 {
-    const bool usedToBlock = blocks_compositing;
     if (readProperty) {
         const unsigned long properties[2] = {0, NET::WM2BlockCompositing};
         NETWinInfo2 i(QX11Info::display(), window(), rootWindow(), properties, 2);
-        blocks_compositing = rules()->checkBlockCompositing(i.isBlockingCompositing());
+        setBlockingCompositing(i.isBlockingCompositing());
     }
     else
-        blocks_compositing = rules()->checkBlockCompositing(blocks_compositing);
-    if (usedToBlock != blocks_compositing)
+        setBlockingCompositing(blocks_compositing);
+}
+
+void Client::setBlockingCompositing(bool block)
+{
+    const bool usedToBlock = blocks_compositing;
+    blocks_compositing = rules()->checkBlockCompositing(block);
+    if (usedToBlock != blocks_compositing) {
         workspace()->updateCompositeBlocking(blocks_compositing ? this : 0);
+        emit blockingCompositingChanged();
+    }
 }
 
 Client::Position Client::mousePosition(const QPoint& p) const
@@ -2426,12 +2447,7 @@ void Client::setSessionInteract(bool needed)
 QRect Client::decorationRect() const
 {
     if (decoration && decoration->widget()) {
-        QRect r = decoration->widget()->rect().translated(-padding_left, -padding_top);
-        if (hasShadow())
-            r |= shadow()->shadowRegion().boundingRect();
-        return r;
-    } else if (hasShadow()) {
-        return shadow()->shadowRegion().boundingRect();
+        return decoration->widget()->rect().translated(-padding_left, -padding_top);
     } else {
         return QRect(0, 0, width(), height());
     }

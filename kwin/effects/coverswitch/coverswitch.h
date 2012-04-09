@@ -57,6 +57,7 @@ public Q_SLOTS:
     void slotTabBoxAdded(int mode);
     void slotTabBoxClosed();
     void slotTabBoxUpdated();
+    void slotTabBoxKeyEvent(QKeyEvent* event);
 
 private:
     void paintScene(EffectWindow* frontWindow, const EffectWindowList& leftWindows, const EffectWindowList& rightWindows,
@@ -65,6 +66,12 @@ private:
     void paintFrontWindow(EffectWindow* frontWindow, int width, int leftWindows, int rightWindows, bool reflectedWindow);
     void paintWindows(const EffectWindowList& windows, bool left, bool reflectedWindows, EffectWindow* additionalWindow = NULL);
     void abort();
+    /**
+     * Updates the caption of the caption frame.
+     * Taking care of rewording the desktop client.
+     * As well sets the icon for the caption frame.
+     **/
+    void updateCaption();
 
     bool mActivated;
     float angle;

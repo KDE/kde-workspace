@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scripting.h"
 // own
 #include "meta.h"
+#include "scriptingutils.h"
 #include "workspace_wrapper.h"
+#include "../client.h"
 #include "../thumbnailitem.h"
 #include "../options.h"
 #include "../workspace.h"
@@ -79,6 +81,11 @@ QScriptValue kwinScriptReadConfig(QScriptContext *context, QScriptEngine *engine
     return engine->newVariant(script->config().readEntry(key, defaultValue));
 }
 
+QScriptValue kwinScriptGlobalShortcut(QScriptContext *context, QScriptEngine *engine)
+{
+    return KWin::globalShortcut<KWin::AbstractScript*>(context, engine);
+}
+
 KWin::AbstractScript::AbstractScript(int id, QString scriptName, QString pluginName, QObject *parent)
     : QObject(parent)
     , m_scriptId(id)
@@ -112,6 +119,17 @@ void KWin::AbstractScript::printMessage(const QString &message)
     emit print(message);
 }
 
+void KWin::AbstractScript::registerShortcut(QAction *a, QScriptValue callback)
+{
+    m_shortcutCallbacks.insert(a, callback);
+    connect(a, SIGNAL(triggered(bool)), SLOT(globalShortcutTriggered()));
+}
+
+void KWin::AbstractScript::globalShortcutTriggered()
+{
+    callGlobalShortcutCallback<KWin::AbstractScript*>(this, sender());
+}
+
 void KWin::AbstractScript::installScriptFunctions(QScriptEngine* engine)
 {
     // add our print
@@ -122,6 +140,8 @@ void KWin::AbstractScript::installScriptFunctions(QScriptEngine* engine)
     QScriptValue configFunc = engine->newFunction(kwinScriptReadConfig);
     configFunc.setData(engine->newQObject(this));
     engine->globalObject().setProperty("readConfig", configFunc);
+    // add global Shortcut
+    registerGlobalShortcutFunction(this, engine, kwinScriptGlobalShortcut);
 }
 
 KWin::Script::Script(int id, QString scriptName, QString pluginName, QObject* parent)
@@ -217,6 +237,7 @@ void KWin::DeclarativeScript::run()
     installScriptFunctions(kdeclarative.scriptEngine());
     qmlRegisterType<ThumbnailItem>("org.kde.kwin", 0, 1, "ThumbnailItem");
     qmlRegisterType<WorkspaceWrapper>("org.kde.kwin", 0, 1, "KWin");
+    qmlRegisterType<KWin::Client>();
 
     m_view->rootContext()->setContextProperty("workspace", workspace());
     m_view->rootContext()->setContextProperty("options", options);

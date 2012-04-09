@@ -212,6 +212,12 @@ void SceneXrender::flushBuffer(int mask, QRegion damage)
     }
 }
 
+void SceneXrender::paintGenericScreen(int mask, ScreenPaintData data)
+{
+    screen_paint = data; // save, transformations will be done when painting windows
+    Scene::paintGenericScreen(mask, data);
+}
+
 // fill the screen background
 void SceneXrender::paintBackground(QRegion region)
 {
@@ -283,6 +289,7 @@ void SceneXrender::windowAdded(Toplevel* c)
 //****************************************
 
 QPixmap *SceneXrender::Window::temp_pixmap = 0;
+QRect SceneXrender::Window::temp_visibleRect;
 
 SceneXrender::Window::Window(Toplevel* c)
     : Scene::Window(c)
@@ -411,14 +418,16 @@ QPoint SceneXrender::Window::mapToScreen(int mask, const WindowPaintData &data, 
 
 void SceneXrender::Window::prepareTempPixmap()
 {
-    const QRect r = static_cast<Client*>(toplevel)->decorationRect();
+    temp_visibleRect = toplevel->visibleRect().translated(-toplevel->pos());
 
     if (temp_pixmap && Extensions::nonNativePixmaps())
         XFreePixmap(display(), temp_pixmap->handle());   // The picture owns the pixmap now
     if (!temp_pixmap)
-        temp_pixmap = new QPixmap(r.width(), r.height());
-    else if (temp_pixmap->width() < r.width() || temp_pixmap->height() < r.height())
-        *temp_pixmap = QPixmap(r.width(), r.height());
+        temp_pixmap = new QPixmap(temp_visibleRect.size());
+    else if (temp_pixmap->width() < temp_visibleRect.width() || temp_pixmap->height() < temp_visibleRect.height()) {
+        *temp_pixmap = QPixmap(temp_visibleRect.size());
+        scene_setXRenderOffscreenTarget(0); // invalidate, better crash than cause weird results for developers
+    }
     if (Extensions::nonNativePixmaps()) {
         Pixmap pix = XCreatePixmap(display(), rootWindow(), temp_pixmap->width(), temp_pixmap->height(), DefaultDepth(display(), DefaultScreen(display())));
         *temp_pixmap = QPixmap::fromX11Pixmap(pix);
@@ -469,9 +478,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     Client *client = dynamic_cast<Client*>(toplevel);
     Deleted *deleted = dynamic_cast<Deleted*>(toplevel);
     const QRect decorationRect = toplevel->decorationRect();
-    if (client && Workspace::self()->decorationHasAlpha())
-        transformed_shape = decorationRect;
-    else if (deleted && Workspace::self()->decorationHasAlpha())
+    if ((client || deleted) && Workspace::self()->decorationHasAlpha())
         transformed_shape = decorationRect;
     else
         transformed_shape = shape();
@@ -532,12 +539,17 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     // the window has border
     // This solves a number of glitches and on top of this
     // it optimizes painting quite a bit
-    const bool blitInTempPixmap = scaled && (wantShadow || (client && !client->noBorder()) || (deleted && !deleted->noBorder()));
-    Picture renderTarget = buffer;
+    const bool blitInTempPixmap = xRenderOffscreen() || (scaled && (wantShadow || (client && !client->noBorder()) || (deleted && !deleted->noBorder())));
 
+    Picture renderTarget = buffer;
     if (blitInTempPixmap) {
-        prepareTempPixmap();
-        renderTarget = temp_pixmap->x11PictureHandle();
+        if (scene_xRenderOffscreenTarget()) {
+            temp_visibleRect = toplevel->visibleRect().translated(-toplevel->pos());
+            renderTarget = *scene_xRenderOffscreenTarget();
+        } else {
+            prepareTempPixmap();
+            renderTarget = temp_pixmap->x11PictureHandle();
+        }
     } else {
         XRenderSetPictureTransform(display(), pic, &xform);
         if (filter == ImageFilterGood) {
@@ -562,7 +574,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         //END OF STUPID RADEON HACK
     }
 #define MAP_RECT_TO_TARGET(_RECT_) \
-        if (blitInTempPixmap) _RECT_.translate(-decorationRect.topLeft()); else _RECT_ = mapToScreen(mask, data, _RECT_)
+        if (blitInTempPixmap) _RECT_.translate(-temp_visibleRect.topLeft()); else _RECT_ = mapToScreen(mask, data, _RECT_)
 
     //BEGIN deco preparations
     bool noBorder = true;
@@ -618,7 +630,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     //BEGIN client preparations
     QRect dr = cr;
     if (blitInTempPixmap) {
-        dr.translate(-decorationRect.topLeft());
+        dr.translate(-temp_visibleRect.topLeft());
     } else {
         dr = mapToScreen(mask, data, dr); // Destination rect
         if (scaled) {
@@ -679,13 +691,14 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
             // fake brightness change by overlaying black
             XRenderColor col = { 0, 0, 0, 0xffff *(1 - data.brightness) * data.opacity };
             if (blitInTempPixmap) {
-                XRenderFillRectangle(display(), PictOpOver, renderTarget, &col, -decorationRect.left(), -decorationRect.top(), width(), height());
+                XRenderFillRectangle(display(), PictOpOver, renderTarget, &col,
+                                     -temp_visibleRect.left(), -temp_visibleRect.top(), width(), height());
             } else {
                 XRenderFillRectangle(display(), PictOpOver, renderTarget, &col, wr.x(), wr.y(), wr.width(), wr.height());
             }
         }
         if (blitInTempPixmap) {
-            const QRect r = mapToScreen(mask, data, decorationRect);
+            const QRect r = mapToScreen(mask, data, temp_visibleRect);
             XRenderSetPictureTransform(display(), temp_pixmap->x11PictureHandle(), &xform);
             XRenderSetPictureFilter(display(), temp_pixmap->x11PictureHandle(), const_cast<char*>("good"), NULL, 0);
             XRenderComposite(display(), PictOpOver, temp_pixmap->x11PictureHandle(), None, buffer,
@@ -702,6 +715,8 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
             XRenderChangePicture(display(), pic, CPRepeat, &attr);
         }
     }
+    if (xRenderOffscreen())
+        scene_setXRenderOffscreenTarget(temp_pixmap);
 }
 
 void SceneXrender::screenGeometryChanged(const QSize &size)

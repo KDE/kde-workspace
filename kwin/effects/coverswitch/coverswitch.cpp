@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kconfiggroup.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
+#include <KDE/KIcon>
 
 #include <kwinglutils.h>
 
@@ -74,6 +75,7 @@ CoverSwitchEffect::CoverSwitchEffect()
     connect(effects, SIGNAL(tabBoxAdded(int)), this, SLOT(slotTabBoxAdded(int)));
     connect(effects, SIGNAL(tabBoxClosed()), this, SLOT(slotTabBoxClosed()));
     connect(effects, SIGNAL(tabBoxUpdated()), this, SLOT(slotTabBoxUpdated()));
+    connect(effects, SIGNAL(tabBoxKeyEvent(QKeyEvent*)), this, SLOT(slotTabBoxKeyEvent(QKeyEvent*)));
 }
 
 CoverSwitchEffect::~CoverSwitchEffect()
@@ -577,8 +579,7 @@ void CoverSwitchEffect::slotTabBoxAdded(int mode)
                     captionFrame->setGeometry(frameRect);
                     captionFrame->setIconSize(QSize(frameRect.height(), frameRect.height()));
                     // And initial contents
-                    captionFrame->setText(selected_window->caption());
-                    captionFrame->setIcon(selected_window->icon());
+                    updateCaption();
                 }
 
                 effects->addRepaintFull();
@@ -657,8 +658,7 @@ void CoverSwitchEffect::slotTabBoxUpdated()
                 }
                 selected_window = effects->currentTabBoxWindow();
                 currentWindowList = effects->currentTabBoxWindowList();
-                captionFrame->setText(selected_window->caption());
-                captionFrame->setIcon(selected_window->icon());
+                updateCaption();
             }
         }
         effects->addRepaintFull();
@@ -998,6 +998,53 @@ void CoverSwitchEffect::slotWindowClosed(EffectWindow* c)
 bool CoverSwitchEffect::isActive() const
 {
     return mActivated || stop || stopRequested;
+}
+
+void CoverSwitchEffect::updateCaption()
+{
+    if (!selected_window || !windowTitle) {
+        return;
+    }
+    if (selected_window->isDesktop()) {
+        captionFrame->setText(i18nc("Special entry in alt+tab list for minimizing all windows",
+                     "Show Desktop"));
+        static QPixmap pix = KIcon("user-desktop").pixmap(captionFrame->iconSize());
+        captionFrame->setIcon(pix);
+    } else {
+        captionFrame->setText(selected_window->caption());
+        captionFrame->setIcon(selected_window->icon());
+    }
+}
+
+void CoverSwitchEffect::slotTabBoxKeyEvent(QKeyEvent *event)
+{
+    if (!mActivated || !selected_window) {
+        return;
+    }
+    const int index = effects->currentTabBoxWindowList().indexOf(selected_window);
+    int newIndex = index;
+    if (event->type() == QEvent::KeyPress) {
+        switch (event->key()) {
+        case Qt::Key_Left:
+            newIndex = (index - 1);
+            break;
+        case Qt::Key_Right:
+            newIndex = (index + 1);
+            break;
+        default:
+            // nothing
+            break;
+        }
+    }
+    if (newIndex == effects->currentTabBoxWindowList().size()) {
+        newIndex = 0;
+    } else if (newIndex < 0) {
+        newIndex = effects->currentTabBoxWindowList().size() -1;
+    }
+    if (index == newIndex) {
+        return;
+    }
+    effects->setTabBoxWindow(effects->currentTabBoxWindowList().at(newIndex));
 }
 
 } // namespace

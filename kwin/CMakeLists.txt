@@ -8,6 +8,7 @@ OPTION(KWIN_BUILD_TILING "Enable building of KWin Tiling functionality" ON)
 OPTION(KWIN_BUILD_SCREENEDGES "Enable building of KWin with screen edge support" ON)
 OPTION(KWIN_BUILD_SCRIPTING "Enable building of KWin with scripting support" ON)
 OPTION(KWIN_BUILD_XRENDER_COMPOSITING "Enable building of KWin with XRender Compositing support" ON)
+OPTION(KWIN_BUILD_ACTIVITIES "Enable building of KWin with kactivities support" ON)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    OPTION(KWIN_PLASMA_ACTIVE "Enable building KWin for Plasma Active." OFF)
 else(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
@@ -19,7 +20,7 @@ if(KWIN_PLASMA_ACTIVE)
     set(KWIN_BUILD_KCMS OFF)
     set(KWIN_BUILD_TILING OFF)
     set(KWIN_BUILD_SCREENEDGES OFF)
-    set(KWIN_BUILD_SCRIPTING OFF)
+    set(KWIN_BUILD_SCRIPTING ON)
     set(KWIN_BUILD_XRENDER_COMPOSITING OFF)
     set(KWIN_MOBILE_EFFECTS ON)
     set(KWIN_BUILD_WITH_OPENGLES ON)
@@ -53,8 +54,6 @@ include_directories(BEFORE
     ${CMAKE_CURRENT_SOURCE_DIR}/libkdecorations
     ${CMAKE_CURRENT_SOURCE_DIR}/effects
     ${CMAKE_CURRENT_SOURCE_DIR}/tabbox
-    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal
-    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kworkspace
     )
 
 add_subdirectory( libkdecorations )
@@ -173,11 +172,22 @@ qt4_add_dbus_interface( kwin_KDEINIT_SRCS
 
 qt4_add_resources( kwin_KDEINIT_SRCS resources.qrc )
 
-set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${KACTIVITIES_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY} kdeclarative kephal kworkspace kdecorations kwineffects ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${X11_Xcomposite_LIB} ${X11_Xdamage_LIB} ${X11_Xrender_LIB} ${X11_Xfixes_LIB})
+set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTDECLARATIVE_LIBRARY} kdeclarative kdecorations kwineffects ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${X11_Xcomposite_LIB} ${X11_Xdamage_LIB} ${X11_Xrender_LIB} ${X11_Xfixes_LIB})
+
+find_library(XF86VM_LIBRARY Xxf86vm)
+if (XF86VM_LIBRARY)
+    set(kwinLibs ${kwinLibs} ${XF86VM_LIBRARY})
+else(XF86VM_LIBRARY)
+    add_definitions(-DKWIN_NO_XF86VM)
+endif(XF86VM_LIBRARY)
 
 if(KWIN_BUILD_SCRIPTING)
     set(kwinLibs ${kwinLibs} ${QT_QTSCRIPT_LIBRARY})
 endif(KWIN_BUILD_SCRIPTING)
+
+if(KWIN_BUILD_ACTIVITIES)
+    set(kwinLibs ${kwinLibs} ${KACTIVITIES_LIBRARY})
+endif(KWIN_BUILD_ACTIVITIES)
 
 kde4_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
 

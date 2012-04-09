@@ -259,6 +259,17 @@ class Client
      * (usually, that it got activated).
      **/
     Q_PROPERTY(bool demandsAttention READ isDemandingAttention WRITE demandAttention NOTIFY demandsAttentionChanged)
+    /**
+     * A client can block compositing. That is while the Client is alive and the state is set,
+     * Compositing is suspended and is resumed when there are no Clients blocking compositing any
+     * more.
+     *
+     * This is actually set by a window property, unfortunately not used by the target application
+     * group. For convenience it's exported as a property to the scripts.
+     *
+     * Use with care!
+     **/
+    Q_PROPERTY(bool blocksCompositing READ isBlockingCompositing WRITE setBlockingCompositing NOTIFY blockingCompositingChanged)
 public:
     Client(Workspace* ws);
     Window wrapperId() const;
@@ -356,7 +367,6 @@ public:
     bool isMinimized() const;
     bool isMaximizable() const;
     QRect geometryRestore() const;
-    MaximizeMode maximizeModeRestore() const;
     MaximizeMode maximizeMode() const;
     bool isMinimizable() const;
     void setMaximize(bool vertically, bool horizontally);
@@ -473,6 +483,7 @@ public:
 
     virtual void setupCompositing();
     virtual void finishCompositing();
+    void setBlockingCompositing(bool block);
     inline bool isBlockingCompositing() { return blocks_compositing; }
     void updateCompositeBlocking(bool readProperty = false);
 
@@ -496,7 +507,6 @@ public:
     void updateUserTime(Time time = CurrentTime);
     Time userTime() const;
     bool hasUserTimeSupport() const;
-    bool ignoreFocusStealing() const;
 
     /// Does 'delete c;'
     static void deleteClient(Client* c, allowed_t);
@@ -707,6 +717,10 @@ signals:
      * Emitted whenever the demands attention state changes.
      **/
     void demandsAttentionChanged();
+    /**
+     * Emitted whenever the Client's block compositing state changes.
+     **/
+    void blockingCompositingChanged();
 
 private:
     void exportMappingState(int s);   // ICCCM 4.1.3.1, 4.1.4, NETWM 2.5.1
@@ -743,7 +757,6 @@ private:
     void positionGeometryTip();
     void grabButton(int mod);
     void ungrabButton(int mod);
-    void resetMaximize();
     void resizeDecoration(const QSize& s);
 
     void pingWindow();
@@ -826,6 +839,7 @@ private:
     Window original_transient_for_id;
     ClientList transients_list; // SELI TODO: Make this ordered in stacking order?
     ShadeMode shade_mode;
+    Client *shade_below;
     uint active : 1;
     uint deleting : 1; ///< True when doing cleanup and destroying the client
     uint keep_above : 1; ///< NET::KeepAbove (was stays_on_top)
@@ -872,7 +886,6 @@ private:
     MaximizeMode max_mode;
     QRect geom_restore;
     QRect geom_fs_restore;
-    MaximizeMode maxmode_restore;
     QTimer* autoRaiseTimer;
     QTimer* shadeHoverTimer;
     QTimer* delayedMoveResizeTimer;
@@ -914,7 +927,6 @@ private:
     KShortcut _shortcut;
     int sm_stacking_order;
     friend struct FetchNameInternalPredicate;
-    friend struct CheckIgnoreFocusStealingProcedure;
     friend struct ResetupRulesProcedure;
     friend class GeometryUpdatesBlocker;
     QTimer* demandAttentionKNotifyTimer;
@@ -1090,11 +1102,6 @@ inline QRect Client::geometryRestore() const
     return geom_restore;
 }
 
-inline Client::MaximizeMode Client::maximizeModeRestore() const
-{
-    return maxmode_restore;
-}
-
 inline Client::MaximizeMode Client::maximizeMode() const
 {
     return max_mode;
@@ -1200,17 +1207,10 @@ inline bool Client::hasUserTimeSupport() const
     return info->userTime() != -1U;
 }
 
-inline bool Client::ignoreFocusStealing() const
-{
-    return ignore_focus_stealing;
-}
-
 inline const WindowRules* Client::rules() const
 {
     return &client_rules;
 }
-
-KWIN_PROCEDURE(CheckIgnoreFocusStealingProcedure, Client, cl->ignore_focus_stealing = options->checkIgnoreFocusStealing(cl));
 
 inline Window Client::moveResizeGrabWindow() const
 {

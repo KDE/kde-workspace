@@ -39,11 +39,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositingprefs.h"
 #include <kwinglplatform.h>
 
-#include <kephal/screens.h>
-
 #include <X11/extensions/Xrandr.h>
-
+#ifndef KWIN_HAVE_OPENGLES
+#ifndef KWIN_NO_XF86VM
+#include <X11/extensions/xf86vmode.h>
 #endif
+#endif
+
+#endif //KCMRULES
 
 namespace KWin
 {
@@ -57,17 +60,40 @@ int currentRefreshRate()
         rate = options->refreshRate();
 #ifndef KWIN_HAVE_OPENGLES
     else if (GLPlatform::instance()->driver() == Driver_NVidia) {
-        QProcess nvidia_settings;
-        nvidia_settings.start("nvidia-settings", QStringList() << "-t" << "-q" << "RefreshRate", QIODevice::ReadOnly);
-        nvidia_settings.waitForFinished();
-        if (nvidia_settings.exitStatus() == QProcess::NormalExit) {
-            QString reply = QString::fromLocal8Bit(nvidia_settings.readAllStandardOutput());
-            bool ok;
-            const float frate = reply.split(' ').first().toFloat(&ok);
-            if (!ok)
-                rate = -1;
-            else
-                rate = qRound(frate);
+#ifndef KWIN_NO_XF86VM
+        int major, event, error;
+        if (XQueryExtension(display(), "XFree86-VidModeExtension", &major, &event, &error)) {
+            XF86VidModeModeLine modeline;
+            int dotclock, vtotal;
+            if (XF86VidModeGetModeLine(display(), 0, &dotclock, &modeline)) {
+                vtotal = modeline.vtotal;
+                if (modeline.flags & 0x0010) // V_INTERLACE
+                    dotclock *= 2;
+                if (modeline.flags & 0x0020) // V_DBLSCAN
+                    vtotal *= 2;
+                rate = 1000*dotclock/(modeline.htotal*vtotal); // WTF was wikipedia 1998 when I nedded it?
+                kDebug(1212) << "Vertical Refresh Rate (as detected by XF86VM): " << rate << "Hz";
+            }
+        }
+        if (rate < 1)
+#endif
+        { // modeline approach failed
+            QProcess nvidia_settings;
+            QStringList env = QProcess::systemEnvironment();
+            env << "LC_ALL=C";
+            nvidia_settings.setEnvironment(env);
+            nvidia_settings.start("nvidia-settings", QStringList() << "-t" << "-q" << "RefreshRate", QIODevice::ReadOnly);
+            nvidia_settings.waitForFinished();
+            if (nvidia_settings.exitStatus() == QProcess::NormalExit) {
+                QString reply = QString::fromLocal8Bit(nvidia_settings.readAllStandardOutput()).split(' ').first();
+                bool ok;
+                float frate = QLocale::c().toFloat(reply, &ok);
+                if (!ok)
+                    rate = -1;
+                else
+                    rate = qRound(frate);
+                kDebug(1212) << "Vertical Refresh Rate (as detected by nvidia-settings): " << rate << "Hz";
+            }
         }
     }
 #endif
@@ -84,7 +110,7 @@ int currentRefreshRate()
     // however, additional throttling prevents very high rates from taking place anyway
     else if (rate > 1000)
         rate = 1000;
-    kDebug(1212) << "Refresh rate " << rate << "Hz";
+    kDebug(1212) << "Vertical Refresh rate " << rate << "Hz";
     return rate;
 }
 
@@ -190,19 +216,6 @@ unsigned long Options::updateSettings()
     setOpMaxButtonMiddleClick(windowOperation(config.readEntry("MaximizeButtonMiddleClickCommand", "Maximize (vertical only)"), true));
     setOpMaxButtonRightClick(windowOperation(config.readEntry("MaximizeButtonRightClickCommand", "Maximize (horizontal only)"), true));
 
-    m_ignorePositionClasses = config.readEntry("IgnorePositionClasses", QStringList());
-    ignoreFocusStealingClasses = config.readEntry("IgnoreFocusStealingClasses", QStringList());
-    // Qt3.2 and older had resource class all lowercase, but Qt3.3 has it capitalized
-    // therefore Client::resourceClass() forces lowercase, force here lowercase as well
-    for (QStringList::Iterator it = m_ignorePositionClasses.begin();
-            it != m_ignorePositionClasses.end();
-            ++it)
-        (*it) = (*it).toLower();
-    for (QStringList::Iterator it = ignoreFocusStealingClasses.begin();
-            it != ignoreFocusStealingClasses.end();
-            ++it)
-        (*it) = (*it).toLower();
-
     m_killPingTimeout = config.readEntry("KillPingTimeout", 5000);
     m_hideUtilityWindowsForInactive = config.readEntry("HideUtilityWindowsForInactive", true);
     m_inactiveTabsSkipTaskbar = config.readEntry("InactiveTabsSkipTaskbar", false);
@@ -299,7 +312,7 @@ void Options::reloadCompositingSettings(bool force)
     if (!m_useCompositing)
         return; // not enforced or necessary and not "enabled" by setting
 
-    // from now on we've an initial setup and don't have to reload settigns on compositing activation
+    // from now on we've an initial setup and don't have to reload settings on compositing activation
     // see Workspace::setupCompositing(), composite.cpp
     m_compositingInitialized = true;
 
@@ -458,11 +471,6 @@ int Options::electricBorderDelay() const
 int Options::electricBorderCooldown() const
 {
     return electric_border_cooldown;
-}
-
-bool Options::checkIgnoreFocusStealing(const Client* c) const
-{
-    return ignoreFocusStealingClasses.contains(QString::fromLatin1(c->resourceClass()));
 }
 
 Options::MouseCommand Options::wheelToMouseCommand(MouseWheelCommand com, int delta) const

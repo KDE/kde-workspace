@@ -318,8 +318,11 @@ void ContextMenuFactory::showContextMenu(QAbstractItemView *view,
                     if (desktop) {
                         QVariantList args;
                         args << kurl.url() << index.data(Kickoff::IconNameRole);
-                        if (kurl.scheme().isEmpty()) { // it's a service group
+                        if (kurl.scheme() == "applications") { // it's a service group
                             desktop->addApplet("simplelauncher", args);
+                        } else if (desktop->metaObject()->indexOfSlot("addUrls(KUrl::List)") != -1) {
+                            QMetaObject::invokeMethod(desktop, "addUrls",
+                            Qt::DirectConnection, Q_ARG(KUrl::List, KUrl::List(kurl)));
                         } else {
                             desktop->addApplet("icon", args);
                         }
@@ -350,7 +353,7 @@ void ContextMenuFactory::showContextMenu(QAbstractItemView *view,
 
                 // move it to the middle of the panel
                 QRectF rect(panel->geometry().width() / 2, 0, 150, panel->boundingRect().height());
-                if (kurl.scheme().isEmpty()) { // it's a service group
+                if (kurl.scheme() == "applications") { // it's a service group
                     panel->addApplet("simplelauncher", args);
                 } else {
                     panel->addApplet("icon", args, rect);
