@@ -148,7 +148,7 @@ Comment[zh_CN]=配置活动窗口边缘
 Comment[zh_TW]=設定作用的螢幕邊緣
 
 X-KDE-Keywords=kwin,window,manager,effect,edge,border,action,switch,desktop
-X-KDE-Keywords[ca]=kwin,finestra,gestor,efecte,vora,acció,commutació,escriptori
+X-KDE-Keywords[ca]=kwin,finestra,gestor,efecte,vora,vora,acció,commuta,escriptori
 X-KDE-Keywords[ca@valencia]=kwin,finestra,gestor,efecte,vora,acció,commutació,escriptori
 X-KDE-Keywords[da]=kwin,vindueshåndtering,window,manager,effekt,kant,handling,skrift,skrivebord
 X-KDE-Keywords[de]=kwin,fenster,manager,effekt,verwaltung,ränder,Aktion,Wechsel,Arbeitsfläche
