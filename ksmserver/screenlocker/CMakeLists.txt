@@ -27,6 +27,8 @@ QT4_ADD_DBUS_INTERFACE(ksld_SRCS ${ksmserver_xml} ksmserver_interface)
 kde4_add_library(screenlocker_static STATIC ${ksld_SRCS})
 
 target_link_libraries(screenlocker_static kworkspace kephal ${KDE4_KDEUI_LIBS} ${KDE4_KIDLETIME_LIBS} ${X11_LIBRARIES})
+
+# Needed to compile on Arm target.
 set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
 
 dbus_add_activation_service(dbus/org.kde.kscreenlocker.service.in)

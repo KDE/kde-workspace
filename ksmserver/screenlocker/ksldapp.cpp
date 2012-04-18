@@ -26,7 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KDE
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
-#include <KDE/KApplication>
 #include <KDE/KAuthorized>
 #include <KDE/KCrash>
 #include <KDE/KDebug>
@@ -72,7 +71,6 @@ KSldApp::KSldApp(QObject * parent)
     , m_plasmaEnabled(false)
 {
     initialize();
-    //connect(kapp, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
 }
 
 KSldApp::~KSldApp()
@@ -86,6 +84,7 @@ static int s_XExposures;
 
 void KSldApp::cleanUp()
 {
+    kDebug() << "Lamarque";
     if (m_lockProcess && m_lockProcess->state() != QProcess::NotRunning) {
         m_lockProcess->terminate();
     }
