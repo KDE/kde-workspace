@@ -108,16 +108,12 @@ void SaverView::disableSetupMode()
 
 void SaverView::drawBackground(QPainter *painter, const QRectF & rect)
 {
-<<<<<<< HEAD
-    Plasma::View::drawBackground(painter, rect);
-=======
     if (PlasmaApp::hasComposite()) {
         painter->setCompositionMode(QPainter::CompositionMode_Source);
         painter->fillRect(rect, Qt::transparent);
     } else {
         Plasma::View::drawBackground(painter, rect);
     }
->>>>>>> master
 }
 
 void SaverView::showWidgetExplorer()
