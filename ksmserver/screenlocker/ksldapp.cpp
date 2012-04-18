@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KStandardDirs>
 // Qt
 #include <QtCore/QTimer>
+#include <QtGui/QApplication>
 #include <QtGui/QDesktopWidget>
 #include <QtGui/QX11Info>
 // X11
