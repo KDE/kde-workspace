@@ -20,8 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SCREENLOCKER_KSLDAPP_H
 #define SCREENLOCKER_KSLDAPP_H
 
-#include <KDE/KUniqueApplication>
-
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QProcess>
 
@@ -35,14 +33,16 @@ namespace ScreenLocker
 
 class LockWindow;
 
-class KSldApp : public KUniqueApplication
+class KSldApp : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.ksld.App")
 
 public:
     static KSldApp* self();
-    ~KSldApp();
+
+    KSldApp(QObject * parent = 0);
+    virtual ~KSldApp();
 
     // The action collection of the active widget
     KActionCollection* actionCollection();
@@ -84,7 +84,6 @@ private Q_SLOTS:
     void idleTimeout(int identifier);
 
 private:
-    KSldApp();
     void initialize();
     bool establishGrab();
     bool grabKeyboard();

@@ -18,21 +18,18 @@ set(ksld_SRCS
    ksldapp.cpp
    autologout.cpp
    interface.cpp
-   lockwindow.cpp
-   main.cpp)
+   lockwindow.cpp)
 qt4_add_dbus_adaptor(ksld_SRCS ${screensaver_dbusXML} interface.h ScreenLocker::Interface)
 qt4_add_dbus_adaptor(ksld_SRCS ${kscreensaver_dbusXML} interface.h ScreenLocker::Interface kscreensaveradaptor KScreenSaverAdaptor)
 kde4_add_kcfg_files(ksld_SRCS kcfg/kscreensaversettings.kcfgc)
 QT4_ADD_DBUS_INTERFACE(ksld_SRCS ${ksmserver_xml} ksmserver_interface)
 
-kde4_add_kdeinit_executable(kscreenlocker ${ksld_SRCS})
+kde4_add_library(screenlocker_static STATIC ${ksld_SRCS})
 
-target_link_libraries(kdeinit_kscreenlocker kworkspace kephal ${KDE4_KDEUI_LIBS} ${KDE4_KIDLETIME_LIBS} ${X11_LIBRARIES})
+target_link_libraries(screenlocker_static kworkspace kephal ${KDE4_KDEUI_LIBS} ${KDE4_KIDLETIME_LIBS} ${X11_LIBRARIES})
+set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
 
 dbus_add_activation_service(dbus/org.kde.kscreenlocker.service.in)
 
-install(TARGETS kdeinit_kscreenlocker ${INSTALL_TARGETS_DEFAULT_ARGS} )
-install(TARGETS kscreenlocker         ${INSTALL_TARGETS_DEFAULT_ARGS} )
-
-install(FILES kscreenlocker.desktop  DESTINATION  ${AUTOSTART_INSTALL_DIR})
-install( FILES kscreenlocker.notifyrc  DESTINATION  ${DATA_INSTALL_DIR}/kscreenlocker )
+install(FILES kscreenlocker.desktop   DESTINATION ${AUTOSTART_INSTALL_DIR})
+install(FILES kscreenlocker.notifyrc  DESTINATION ${DATA_INSTALL_DIR}/kscreenlocker)

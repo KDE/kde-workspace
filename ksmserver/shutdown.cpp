@@ -516,7 +516,7 @@ void KSMServer::completeKilling()
     if( state == Killing ) {
         bool wait = false;
         foreach( KSMClient* c, clients ) {
-            if( isWM( c ))
+            if( isWM( c ) )
                 continue;
             wait = true; // still waiting for clients to go away
         }
@@ -531,6 +531,9 @@ void KSMServer::killWM()
     if( state != Killing )
         return;
     delete logoutEffectWidget;
+#ifdef COMPILE_SCREEN_LOCKER
+    ScreenLocker::KSldApp::self()->cleanUp();
+#endif
     kDebug( 1218 ) << "Starting killing WM";
     state = KillingWM;
     bool iswm = false;

@@ -325,12 +325,12 @@ fi
 
 # If the session should be locked from the start (locked autologin),
 # lock now and do the rest of the KDE startup underneath the locker.
-if test -n "$dl"; then
-  if ! kwrapper4 kscreenlocker --locked; then
-    echo 'startkde: Initial session lock failed. Terminating for security reasons.' 1>&2
-    exit 1
-  fi
-fi
+#if test -n "$dl"; then
+#  if ! kwrapper4 kscreenlocker --locked; then
+#    echo 'startkde: Initial session lock failed. Terminating for security reasons.' 1>&2
+#    exit 1
+#  fi
+#fi
 
 # finally, give the session control to the session manager
 # see kdebase/ksmserver for the description of the rest of the startup sequence
@@ -343,6 +343,7 @@ fi
 # started, any problems thereafter, e.g. ksmserver failing to initialize,
 # will remain undetected.
 test -n "$KDEWM" && KDEWM="--windowmanager $KDEWM"
+test -n "$dl" && KDEWM="--lockscreen $KDEWM"
 kwrapper4 ksmserver $KDEWM
 if test $? -eq 255; then
   # Startup error

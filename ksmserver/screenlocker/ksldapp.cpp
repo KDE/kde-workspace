@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KDE
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
+#include <KDE/KApplication>
 #include <KDE/KAuthorized>
 #include <KDE/KCrash>
 #include <KDE/KDebug>
@@ -46,17 +47,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ScreenLocker
 {
 
+static KSldApp * s_instance = 0;
+
 KSldApp* KSldApp::self()
 {
-    if (!kapp) {
-        return new KSldApp();
+    if (!s_instance) {
+        s_instance = new KSldApp();
     }
 
-    return qobject_cast<KSldApp*>(kapp);
+    return s_instance;
 }
 
-KSldApp::KSldApp()
-    : KUniqueApplication()
+KSldApp::KSldApp(QObject * parent)
+    : QObject(parent)
     , m_actionCollection(NULL)
     , m_locked(false)
     , m_lockProcess(NULL)
@@ -69,7 +72,7 @@ KSldApp::KSldApp()
     , m_plasmaEnabled(false)
 {
     initialize();
-    connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
+    //connect(kapp, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
 }
 
 KSldApp::~KSldApp()
