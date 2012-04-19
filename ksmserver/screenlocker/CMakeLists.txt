@@ -33,5 +33,4 @@ set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
 
 dbus_add_activation_service(dbus/org.kde.kscreenlocker.service.in)
 
-install(FILES kscreenlocker.desktop   DESTINATION ${AUTOSTART_INSTALL_DIR})
 install(FILES kscreenlocker.notifyrc  DESTINATION ${DATA_INSTALL_DIR}/kscreenlocker)
