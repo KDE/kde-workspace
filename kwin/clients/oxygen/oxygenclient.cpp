@@ -1406,6 +1406,10 @@ namespace Oxygen
         // prepare item data updates
         _itemData.setDirty( true );
 
+        // mark title animation as dirty
+        if( event->oldSize().width() != event->size().width() )
+        { _titleAnimationData->setDirty( true ); }
+
         // resize backing store pixmap
         if( !compositingActive() )
         { _pixmap = QPixmap( event->size() ); }
