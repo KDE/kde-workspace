@@ -43,6 +43,7 @@ namespace KWin
 {
 
 KWIN_EFFECT(trackmouse, TrackMouseEffect)
+KWIN_EFFECT_SUPPORTED(trackmouse, TrackMouseEffect::supported())
 
 const int STARS = 5;
 const int DIST = 50;
@@ -69,6 +70,11 @@ TrackMouseEffect::~TrackMouseEffect()
     if (mousePolling)
         effects->stopMousePolling();
     delete texture;
+}
+
+bool TrackMouseEffect::supported()
+{
+    return effects->compositingType() == OpenGLCompositing;
 }
 
 void TrackMouseEffect::reconfigure(ReconfigureFlags)

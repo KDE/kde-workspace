@@ -42,6 +42,7 @@ public:
     virtual void postPaintScreen();
     virtual void reconfigure(ReconfigureFlags);
     virtual bool isActive() const;
+    static bool supported();
 private slots:
     void toggle();
     void slotMouseChanged(const QPoint& pos, const QPoint& old,
