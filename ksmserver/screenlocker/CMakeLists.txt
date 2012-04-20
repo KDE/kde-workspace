@@ -31,6 +31,4 @@ target_link_libraries(screenlocker_static kworkspace kephal ${KDE4_KDEUI_LIBS} $
 # Needed to compile on Arm target.
 set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
 
-dbus_add_activation_service(dbus/org.kde.kscreenlocker.service.in)
-
 install(FILES kscreenlocker.notifyrc  DESTINATION ${DATA_INSTALL_DIR}/ksmserver/ksmserver.notifyrc)
