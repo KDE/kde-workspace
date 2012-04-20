@@ -85,7 +85,6 @@ static int s_XExposures;
 
 void KSldApp::cleanUp()
 {
-    kDebug() << "Lamarque";
     if (m_lockProcess && m_lockProcess->state() != QProcess::NotRunning) {
         m_lockProcess->terminate();
     }

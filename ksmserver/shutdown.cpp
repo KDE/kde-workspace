@@ -566,7 +566,6 @@ void KSMServer::completeKillingWM()
 // shutdown is fully complete
 void KSMServer::killingCompleted()
 {
-    kDebug() << "Lamarque";
     kapp->quit();
 }
 
