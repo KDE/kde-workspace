@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kconfig.h>
 #include <kglobal.h>
 #include <klocale.h>
+#include <QtGui/QDesktopWidget>
 #include <QRegExp>
 #include <QPainter>
 #include <QBitmap>
@@ -47,9 +48,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
 #endif
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-#include "desktopchangeosd.h"
-#endif
 #include "atoms.h"
 #include "placement.h"
 #include "notifications.h"
@@ -61,13 +59,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "deleted.h"
 #include "effects.h"
 #include "overlaywindow.h"
+#include <kwinglplatform.h>
+#include <kwinglutils.h>
+#ifdef KWIN_BUILD_SCRIPTING
+#include "scripting/scripting.h"
+#endif
 #ifdef KWIN_BUILD_TILING
 #include "tiling/tile.h"
 #include "tiling/tilinglayout.h"
 #include "tiling/tiling.h"
-#endif
-#ifdef KWIN_BUILD_SCRIPTING
-#include "scripting/scripting.h"
 #endif
 
 #include <X11/extensions/shape.h>
@@ -81,8 +81,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kglobalsettings.h>
 #include <kwindowsystem.h>
 #include <kwindowinfo.h>
-
-#include <kephal/screens.h>
 
 namespace KWin
 {
@@ -131,9 +129,6 @@ Workspace::Workspace(bool restore)
 #ifdef KWIN_BUILD_TABBOX
     , tab_box(0)
 #endif
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-    , desktop_change_osd(0)
-#endif
     , popup(0)
     , advanced_popup(0)
     , desk_popup(0)
@@ -160,7 +155,11 @@ Workspace::Workspace(bool restore)
     , transButton(NULL)
     , forceUnredirectCheck(true)
     , m_finishingCompositing(false)
+    , m_scripting(NULL)
 {
+    // If KWin was already running it saved its configuration after loosing the selection -> Reread
+    QFuture<void> reparseConfigFuture = QtConcurrent::run(options, &Options::reparseConfiguration);
+
     (void) new KWinAdaptor(this);
 
     QDBusConnection dbus = QDBusConnection::sessionBus();
@@ -175,6 +174,14 @@ Workspace::Workspace(bool restore)
     desktopGrid_[1] = 0;
 
     _self = this;
+
+    // first initialize the extensions
+    Extensions::init();
+
+    // PluginMgr needs access to the config file, so we need to wait for it for finishing
+    reparseConfigFuture.waitForFinished();
+    options->loadConfig();
+    options->loadCompositingConfig(false);
     mgr = new PluginMgr;
     QX11Info info;
     default_colormap = DefaultColormap(display(), info.screen());
@@ -216,8 +223,7 @@ Workspace::Workspace(bool restore)
                  ExposureMask
                 );
 
-    Extensions::init();
-    compositingSuspended = !options->useCompositing;
+    compositingSuspended = !options->isUseCompositing();
 #ifdef KWIN_BUILD_TABBOX
     // need to create the tabbox before compositing scene is setup
     tab_box = new TabBox::TabBox(this);
@@ -242,23 +248,20 @@ Workspace::Workspace(bool restore)
 
     client_keys = new KActionCollection(this);
 
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-    desktop_change_osd = new DesktopChangeOSD(this);
-#endif
     m_outline = new Outline();
 
     initShortcuts();
 
     init();
 
-    connect(Kephal::Screens::self(), SIGNAL(screenAdded(Kephal::Screen*)), &screenChangedTimer, SLOT(start()));
-    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)), &screenChangedTimer, SLOT(start()));
-    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)), &screenChangedTimer, SLOT(start()));
-    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*,QPoint,QPoint)), &screenChangedTimer, SLOT(start()));
+    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), &screenChangedTimer, SLOT(start()));
+    connect(QApplication::desktop(), SIGNAL(resized(int)), &screenChangedTimer, SLOT(start()));
 
+#ifdef KWIN_BUILD_ACTIVITIES
     connect(&activityController_, SIGNAL(currentActivityChanged(QString)), SLOT(updateCurrentActivity(QString)));
     connect(&activityController_, SIGNAL(activityRemoved(QString)), SLOT(activityRemoved(QString)));
     connect(&activityController_, SIGNAL(activityAdded(QString)), SLOT(activityAdded(QString)));
+#endif
 
     connect(&screenChangedTimer, SIGNAL(timeout()), SLOT(screenChangeTimeout()));
     screenChangedTimer.setSingleShot(true);
@@ -389,8 +392,9 @@ void Workspace::init()
     }
     if (!setCurrentDesktop(initial_desktop))
         setCurrentDesktop(1);
-    allActivities_ = activityController_.listActivities();
-    updateCurrentActivity(activityController_.currentActivity());
+#ifdef KWIN_BUILD_ACTIVITIES
+    updateActivityList(false, true);
+#endif
 
     // Now we know how many desktops we'll have, thus we initialize the positioning object
     initPositioning = new Placement(this);
@@ -447,7 +451,10 @@ void Workspace::init()
         NETPoint* viewports = new NETPoint[numberOfDesktops()];
         rootInfo->setDesktopViewport(numberOfDesktops(), *viewports);
         delete[] viewports;
-        QRect geom = Kephal::ScreenUtils::desktopGeometry();
+        QRect geom;
+        for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
+            geom |= QApplication::desktop()->screenGeometry(i);
+        }
         NETSize desktop_geometry;
         desktop_geometry.width = geom.width();
         desktop_geometry.height = geom.height();
@@ -474,7 +481,13 @@ void Workspace::init()
 
 #ifdef KWIN_BUILD_TILING
     // Enable/disable tiling
-    m_tiling->setEnabled(options->tilingOn);
+    m_tiling->setEnabled(options->isTilingOn());
+#endif
+
+
+#ifdef KWIN_BUILD_SCRIPTING
+    m_scripting = new Scripting(this);
+    m_scripting->start();
 #endif
 
     // SELI TODO: This won't work with unreasonable focus policies,
@@ -496,20 +509,21 @@ Workspace::~Workspace()
     // TODO: grabXServer();
 
     // Use stacking_order, so that kwin --replace keeps stacking order
-    for (ClientList::iterator it = stacking_order.begin(), end = stacking_order.end(); it != end; ++it) {
+    for (ToplevelList::iterator it = stacking_order.begin(), end = stacking_order.end(); it != end; ++it) {
+        Client *c = qobject_cast<Client*>(*it);
+        if (!c) {
+            continue;
+        }
         // Only release the window
-        (*it)->releaseWindow(true);
+        c->releaseWindow(true);
         // No removeClient() is called, it does more than just removing.
         // However, remove from some lists to e.g. prevent performTransiencyCheck()
         // from crashing.
-        clients.removeAll(*it);
-        desktops.removeAll(*it);
+        clients.removeAll(c);
+        desktops.removeAll(c);
     }
     for (UnmanagedList::iterator it = unmanaged.begin(), end = unmanaged.end(); it != end; ++it)
-        (*it)->release();
-#ifdef KWIN_BUILD_DESKTOPCHANGEOSD
-    delete desktop_change_osd;
-#endif
+        (*it)->release(true);
     delete m_outline;
     discardPopup();
     XDeleteProperty(display(), rootWindow(), atoms->kwin_running);
@@ -573,14 +587,6 @@ void Workspace::addClient(Client* c, allowed_t)
 
     KWindowInfo info = KWindowSystem::windowInfo(c->window(), -1U, NET::WM2WindowClass);
 
-    /*
-    if (info.windowClassName() == QString("krunner")) {
-    SWrapper::Workspace* ws_object = KWin::Scripting::workspace();
-    if (ws_object != 0) {
-        ws_object->sl_killWindowCalled(c);
-    }
-    }*/
-
     emit clientAdded(c);
 
     if (grp != NULL)
@@ -635,6 +641,8 @@ void Workspace::removeClient(Client* c, allowed_t)
     if (c == active_popup_client)
         closeActivePopup();
 
+    c->untab();
+
     if (client_keys_client == c)
         setupWindowShortcutDone(false);
     if (!c->shortcut().isEmpty()) {
@@ -656,8 +664,6 @@ void Workspace::removeClient(Client* c, allowed_t)
     // TODO: if marked client is removed, notify the marked list
     clients.removeAll(c);
     desktops.removeAll(c);
-    unconstrained_stacking_order.removeAll(c);
-    stacking_order.removeAll(c);
     x_stacking_dirty = true;
     for (int i = 1; i <= numberOfDesktops(); ++i)
         focus_chain[i].removeAll(c);
@@ -698,10 +704,22 @@ void Workspace::removeUnmanaged(Unmanaged* c, allowed_t)
     x_stacking_dirty = true;
 }
 
-void Workspace::addDeleted(Deleted* c, allowed_t)
+void Workspace::addDeleted(Deleted* c, Toplevel *orig, allowed_t)
 {
     assert(!deleted.contains(c));
     deleted.append(c);
+    const int unconstraintedIndex = unconstrained_stacking_order.indexOf(orig);
+    if (unconstraintedIndex != -1) {
+        unconstrained_stacking_order.replace(unconstraintedIndex, c);
+    } else {
+        unconstrained_stacking_order.append(c);
+    }
+    const int index = stacking_order.indexOf(orig);
+    if (index != -1) {
+        stacking_order.replace(index, c);
+    } else {
+        stacking_order.append(c);
+    }
     x_stacking_dirty = true;
 }
 
@@ -712,6 +730,8 @@ void Workspace::removeDeleted(Deleted* c, allowed_t)
         scene->windowDeleted(c);
     emit deletedRemoved(c);
     deleted.removeAll(c);
+    unconstrained_stacking_order.removeAll(c);
+    stacking_order.removeAll(c);
     x_stacking_dirty = true;
 }
 
@@ -783,9 +803,9 @@ void Workspace::updateFocusChains(Client* c, FocusChainChange change)
 void Workspace::updateToolWindows(bool also_hide)
 {
     // TODO: What if Client's transiency/group changes? should this be called too? (I'm paranoid, am I not?)
-    if (!options->hideUtilityWindowsForInactive) {
+    if (!options->isHideUtilityWindowsForInactive()) {
         for (ClientList::ConstIterator it = clients.constBegin(); it != clients.constEnd(); ++it)
-            if (!(*it)->clientGroup() || (*it)->clientGroup()->visible() == *it)
+            if (!(*it)->tabGroup() || (*it)->tabGroup()->current() == *it)
                 (*it)->hideClient(false);
         return;
     }
@@ -807,28 +827,32 @@ void Workspace::updateToolWindows(bool also_hide)
 
     // SELI TODO: But maybe it should - what if a new client has been added that's not in stacking order yet?
     ClientList to_show, to_hide;
-    for (ClientList::ConstIterator it = stacking_order.constBegin();
+    for (ToplevelList::ConstIterator it = stacking_order.constBegin();
             it != stacking_order.constEnd();
             ++it) {
-        if ((*it)->isUtility() || (*it)->isMenu() || (*it)->isToolbar()) {
+        Client *c = qobject_cast<Client*>(*it);
+        if (!c) {
+            continue;
+        }
+        if (c->isUtility() || c->isMenu() || c->isToolbar()) {
             bool show = true;
-            if (!(*it)->isTransient()) {
-                if ((*it)->group()->members().count() == 1)   // Has its own group, keep always visible
+            if (!c->isTransient()) {
+                if (c->group()->members().count() == 1)   // Has its own group, keep always visible
                     show = true;
-                else if (client != NULL && (*it)->group() == client->group())
+                else if (client != NULL && c->group() == client->group())
                     show = true;
                 else
                     show = false;
             } else {
-                if (group != NULL && (*it)->group() == group)
+                if (group != NULL && c->group() == group)
                     show = true;
-                else if (client != NULL && client->hasTransient((*it), true))
+                else if (client != NULL && client->hasTransient(c, true))
                     show = true;
                 else
                     show = false;
             }
             if (!show && also_hide) {
-                const ClientList mainclients = (*it)->mainClients();
+                const ClientList mainclients = c->mainClients();
                 // Don't hide utility windows which are standalone(?) or
                 // have e.g. kicker as mainwindow
                 if (mainclients.isEmpty())
@@ -836,14 +860,14 @@ void Workspace::updateToolWindows(bool also_hide)
                 for (ClientList::ConstIterator it2 = mainclients.constBegin();
                         it2 != mainclients.constEnd();
                         ++it2) {
-                    if ((*it2)->isSpecialWindow())
+                    if (c->isSpecialWindow())
                         show = true;
                 }
                 if (!show)
-                    to_hide.append(*it);
+                    to_hide.append(c);
             }
             if (show)
-                to_show.append(*it);
+                to_show.append(c);
         }
     } // First show new ones, then hide
     for (int i = to_show.size() - 1;
@@ -943,7 +967,6 @@ void Workspace::slotReconfigure()
     emit configChanged();
     initPositioning->reinitCascading(0);
     discardPopup();
-    forEachClient(CheckIgnoreFocusStealingProcedure());
     updateToolWindows(true);
 
     if (hasDecorationPlugin() && mgr->reset(changed)) {
@@ -955,21 +978,18 @@ void Workspace::slotReconfigure()
         //curtain.setGeometry( Kephal::ScreenUtils::desktopGeometry() );
         //curtain.show();
 
-        for (ClientList::ConstIterator it = clients.constBegin();
-                it != clients.constEnd();
-                ++it)
+        for (ClientList::ConstIterator it = clients.constBegin(); it != clients.constEnd(); ++it)
             (*it)->updateDecoration(true, true);
         // If the new decoration doesn't supports tabs then ungroup clients
-        if (!decorationSupportsClientGrouping()) {
-            QList<ClientGroup*> tmpGroups = clientGroups; // Prevent crashing
-            for (QList<ClientGroup*>::const_iterator i = tmpGroups.constBegin(); i != tmpGroups.constEnd(); ++i)
-                (*i)->removeAll();
+        if (!decorationSupportsTabbing()) {
+            foreach (Client * c, clients)
+                c->untab();
         }
         mgr->destroyPreviousPlugin();
     } else {
         forEachClient(CheckBorderSizesProcedure());
         foreach (Client * c, clients)
-        c->triggerDecorationRepaint();
+            c->triggerDecorationRepaint();
     }
 
 #ifdef KWIN_BUILD_SCREENEDGES
@@ -1009,7 +1029,7 @@ void Workspace::slotReconfigure()
     }
 
 #ifdef KWIN_BUILD_TILING
-    m_tiling->setEnabled(options->tilingOn);
+    m_tiling->setEnabled(options->isTilingOn());
     // just so that we reset windows in the right manner, 'activate' the current active window
     m_tiling->notifyTilingWindowActivated(activeClient());
 #endif
@@ -1034,7 +1054,7 @@ void Workspace::slotReinitCompositing()
     KGlobal::config()->reparseConfiguration();
     const QString graphicsSystem = KConfigGroup(KSharedConfig::openConfig("kwinrc"), "Compositing").readEntry("GraphicsSystem", "");
     if ((Extensions::nonNativePixmaps() && graphicsSystem == "native") ||
-        (!Extensions::nonNativePixmaps() && (graphicsSystem == "raster" || graphicsSystem == "raster")) ) {
+        (!Extensions::nonNativePixmaps() && (graphicsSystem == "raster" || graphicsSystem == "opengl")) ) {
         restartKWin("explicitly reconfigured graphicsSystem change");
         return;
     }
@@ -1049,7 +1069,7 @@ void Workspace::slotReinitCompositing()
 
     // resume compositing if suspended
     compositingSuspended = false;
-    options->compositingInitialized = false;
+    options->setCompositingInitialized(false);
     setupCompositing();
     if (hasDecorationPlugin()) {
         KDecorationFactory* factory = mgr->factory();
@@ -1180,18 +1200,6 @@ bool Workspace::isNotManaged(const QString& title)
 }
 
 /**
- * Refreshes all the client windows
- */
-void Workspace::refresh()
-{
-    QWidget w(NULL, Qt::X11BypassWindowManagerHint);
-    w.setGeometry(Kephal::ScreenUtils::desktopGeometry());
-    w.show();
-    w.hide();
-    QApplication::flush();
-}
-
-/**
  * During virt. desktop switching, desktop areas covered by windows that are
  * going to be hidden are first obscured by new windows with no background
  * ( i.e. transparent ) placed right below the windows. These invisible windows
@@ -1285,14 +1293,19 @@ bool Workspace::setCurrentDesktop(int new_desktop)
 
         currentDesktop_ = new_desktop; // Change the desktop (so that Client::updateVisibility() works)
 
-        for (ClientList::ConstIterator it = stacking_order.constBegin();
+        for (ToplevelList::ConstIterator it = stacking_order.constBegin();
                 it != stacking_order.constEnd();
-                ++it)
-            if (!(*it)->isOnDesktop(new_desktop) && (*it) != movingClient && (*it)->isOnCurrentActivity()) {
-                if ((*it)->isShown(true) && (*it)->isOnDesktop(old_desktop))
-                    obs_wins.create(*it);
-                (*it)->updateVisibility();
+                ++it) {
+            Client *c = qobject_cast<Client*>(*it);
+            if (!c) {
+                continue;
             }
+            if (!c->isOnDesktop(new_desktop) && c != movingClient && c->isOnCurrentActivity()) {
+                if (c->isShown(true) && c->isOnDesktop(old_desktop))
+                    obs_wins.create(c);
+                (c)->updateVisibility();
+            }
+        }
 
         // Now propagate the change, after hiding, before showing
         rootInfo->setCurrentDesktop(currentDesktop());
@@ -1312,9 +1325,14 @@ bool Workspace::setCurrentDesktop(int new_desktop)
 #endif
         }
 
-        for (int i = stacking_order.size() - 1; i >= 0 ; --i)
-            if (stacking_order.at(i)->isOnDesktop(new_desktop) && stacking_order.at(i)->isOnCurrentActivity())
-                stacking_order.at(i)->updateVisibility();
+        for (int i = stacking_order.size() - 1; i >= 0 ; --i) {
+            Client *c = qobject_cast<Client*>(stacking_order.at(i));
+            if (!c) {
+                continue;
+            }
+            if (c->isOnDesktop(new_desktop) && c->isOnCurrentActivity())
+                c->updateVisibility();
+        }
 
         --block_showing_desktop;
         if (showingDesktop())   // Do this only after desktop change to avoid flicker
@@ -1332,10 +1350,13 @@ bool Workspace::setCurrentDesktop(int new_desktop)
                 active_client->isShown(true) && active_client->isOnCurrentDesktop())
             c = active_client; // The requestFocus below will fail, as the client is already active
         // from actiavtion.cpp
-        if (!c && options->nextFocusPrefersMouse) {
-            QList<Client*>::const_iterator it = stackingOrder().constEnd();
+        if (!c && options->isNextFocusPrefersMouse()) {
+            ToplevelList::const_iterator it = stackingOrder().constEnd();
             while (it != stackingOrder().constBegin()) {
-                Client *client = *(--it);
+                Client *client = qobject_cast<Client*>(*(--it));
+                if (!client) {
+                    continue;
+                }
 
                 if (!(client->isShown(false) && client->isOnDesktop(new_desktop) &&
                     client->isOnCurrentActivity() && client->isOnScreen(activeScreen())))
@@ -1352,7 +1373,7 @@ bool Workspace::setCurrentDesktop(int new_desktop)
             for (int i = focus_chain[currentDesktop()].size() - 1; i >= 0; --i) {
                 Client* tmp = focus_chain[currentDesktop()].at(i);
                 if (tmp->isShown(false) && tmp->isOnCurrentActivity()
-                    && ( !options->separateScreenFocus || tmp->screen() == old_active_screen )) {
+                    && ( !options->isSeparateScreenFocus() || tmp->screen() == old_active_screen )) {
                     c = tmp;
                     break;
                 }
@@ -1399,12 +1420,81 @@ bool Workspace::setCurrentDesktop(int new_desktop)
     return true;
 }
 
+#ifdef KWIN_BUILD_ACTIVITIES
+
+//BEGIN threaded activity list fetching
+typedef QPair<QStringList*, QStringList> AssignedList;
+typedef QPair<QString, QStringList> CurrentAndList;
+
+static AssignedList
+fetchActivityList(KActivities::Controller *controller, QStringList *target, bool running) // could be member function, but actually it's much simpler this way
+{
+    return AssignedList(target, running ? controller->listActivities(KActivities::Info::Running) :
+                                          controller->listActivities());
+}
+
+static CurrentAndList
+fetchActivityListAndCurrent(KActivities::Controller *controller)
+{
+    QStringList l   = controller->listActivities();
+    QString c       = controller->currentActivity();
+    return CurrentAndList(c, l);
+}
+
+void Workspace::updateActivityList(bool running, bool updateCurrent, QString slot)
+{
+    if (updateCurrent) {
+        QFutureWatcher<CurrentAndList>* watcher = new QFutureWatcher<CurrentAndList>;
+        connect( watcher, SIGNAL(finished()), SLOT(handleActivityReply()) );
+        if (!slot.isEmpty())
+            watcher->setProperty("activityControllerCallback", slot); // "activity reply trigger"
+        watcher->setFuture(QtConcurrent::run(fetchActivityListAndCurrent, &activityController_ ));
+    } else {
+        QFutureWatcher<AssignedList>* watcher = new QFutureWatcher<AssignedList>;
+        connect(watcher, SIGNAL(finished()), SLOT(handleActivityReply()));
+        if (!slot.isEmpty())
+            watcher->setProperty("activityControllerCallback", slot); // "activity reply trigger"
+        QStringList *target = running ? &openActivities_ : &allActivities_;
+        watcher->setFuture(QtConcurrent::run(fetchActivityList, &activityController_, target, running));
+    }
+}
+
+void Workspace::handleActivityReply()
+{
+    QObject *watcherObject = 0;
+    if (QFutureWatcher<AssignedList>* watcher = dynamic_cast< QFutureWatcher<AssignedList>* >(sender())) {
+        *(watcher->result().first) = watcher->result().second; // cool trick, ehh? :-)
+        watcherObject = watcher;
+    }
+
+    if (!watcherObject) {
+        if (QFutureWatcher<CurrentAndList>* watcher = dynamic_cast< QFutureWatcher<CurrentAndList>* >(sender())) {
+            allActivities_ = watcher->result().second;
+            updateCurrentActivity(watcher->result().first);
+            watcherObject = watcher;
+        }
+    }
+
+    if (watcherObject) {
+        QString slot = watcherObject->property("activityControllerCallback").toString();
+        watcherObject->deleteLater(); // has done it's job
+        if (!slot.isEmpty())
+            QMetaObject::invokeMethod(this, slot.toAscii().data(), Qt::DirectConnection);
+    }
+}
+//END threaded activity list fetching
+
+#else // make gcc happy - stupd moc cannot handle preproc defs so we MUST define
+void Workspace::handleActivityReply() {}
+#endif // KWIN_BUILD_ACTIVITIES
+
 /**
  * Updates the current activity when it changes
  * do *not* call this directly; it does not set the activity.
  *
  * Shows/Hides windows according to the stacking order
  */
+
 void Workspace::updateCurrentActivity(const QString &new_activity)
 {
 
@@ -1424,14 +1514,19 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
         QString old_activity = activity_;
         activity_ = new_activity;
 
-        for (ClientList::ConstIterator it = stacking_order.constBegin();
+        for (ToplevelList::ConstIterator it = stacking_order.constBegin();
                 it != stacking_order.constEnd();
-                ++it)
-            if (!(*it)->isOnActivity(new_activity) && (*it) != movingClient && (*it)->isOnCurrentDesktop()) {
-                if ((*it)->isShown(true) && (*it)->isOnActivity(old_activity))
-                    obs_wins.create(*it);
-                (*it)->updateVisibility();
+                ++it) {
+            Client *c = qobject_cast<Client*>(*it);
+            if (!c) {
+                continue;
             }
+            if (!c->isOnActivity(new_activity) && c != movingClient && c->isOnCurrentDesktop()) {
+                if (c->isShown(true) && c->isOnActivity(old_activity))
+                    obs_wins.create(c);
+                c->updateVisibility();
+            }
+        }
 
         // Now propagate the change, after hiding, before showing
         //rootInfo->setCurrentDesktop( currentDesktop() );
@@ -1448,9 +1543,14 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
             }
             */
 
-        for (int i = stacking_order.size() - 1; i >= 0 ; --i)
-            if (stacking_order.at(i)->isOnActivity(new_activity))
-                stacking_order.at(i)->updateVisibility();
+        for (int i = stacking_order.size() - 1; i >= 0 ; --i) {
+            Client *c = qobject_cast<Client*>(stacking_order.at(i));
+            if (!c) {
+                continue;
+            }
+            if (c->isOnActivity(new_activity))
+                c->updateVisibility();
+        }
 
         --block_showing_desktop;
         //FIXME not sure if I should do this either
@@ -1528,8 +1628,10 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
 void Workspace::activityRemoved(const QString &activity)
 {
     allActivities_.removeOne(activity);
-    foreach (Client * client, stacking_order) {
-        client->setOnActivity(activity, false);
+    foreach (Toplevel * toplevel, stacking_order) {
+        if (Client *client = qobject_cast<Client*>(toplevel)) {
+            client->setOnActivity(activity, false);
+        }
     }
     //toss out any session data for it
     KConfigGroup cg(KGlobal::config(), QString("SubSession: ") + activity);
@@ -1689,21 +1791,17 @@ void Workspace::toggleClientOnActivity(Client* c, const QString &activity, bool 
 
 int Workspace::numScreens() const
 {
-    if (!options->xineramaEnabled)
-        return 1;
-    return Kephal::ScreenUtils::numScreens();
+    return QApplication::desktop()->screenCount();
 }
 
 int Workspace::activeScreen() const
 {
-    if (!options->xineramaEnabled)
-        return 0;
-    if (!options->activeMouseScreen) {
+    if (!options->isActiveMouseScreen()) {
         if (activeClient() != NULL && !activeClient()->isOnScreen(active_screen))
             return activeClient()->screen();
         return active_screen;
     }
-    return Kephal::ScreenUtils::screenId(cursorPos());
+    return QApplication::desktop()->screenNumber(cursorPos());
 }
 
 /**
@@ -1712,8 +1810,6 @@ int Workspace::activeScreen() const
  */
 void Workspace::checkActiveScreen(const Client* c)
 {
-    if (!options->xineramaEnabled)
-        return;
     if (!c->isActive())
         return;
     if (!c->isOnScreen(active_screen))
@@ -1726,23 +1822,17 @@ void Workspace::checkActiveScreen(const Client* c)
  */
 void Workspace::setActiveScreenMouse(const QPoint& mousepos)
 {
-    if (!options->xineramaEnabled)
-        return;
-    active_screen = Kephal::ScreenUtils::screenId(mousepos);
+    active_screen = QApplication::desktop()->screenNumber(mousepos);
 }
 
 QRect Workspace::screenGeometry(int screen) const
 {
-    if (!options->xineramaEnabled)
-        return Kephal::ScreenUtils::desktopGeometry();
-    return Kephal::ScreenUtils::screenGeometry(screen);
+    return QApplication::desktop()->screenGeometry(screen);
 }
 
 int Workspace::screenNumber(const QPoint& pos) const
 {
-    if (!options->xineramaEnabled)
-        return 0;
-    return Kephal::ScreenUtils::screenId(pos);
+    return QApplication::desktop()->screenNumber(pos);
 }
 
 void Workspace::sendClientToScreen(Client* c, int screen)
@@ -1829,7 +1919,7 @@ void Workspace::requestDelayFocus(Client* c)
     delayFocusTimer = new QTimer(this);
     connect(delayFocusTimer, SIGNAL(timeout()), this, SLOT(delayFocus()));
     delayFocusTimer->setSingleShot(true);
-    delayFocusTimer->start(options->delayFocusInterval);
+    delayFocusTimer->start(options->delayFocusInterval());
 }
 
 void Workspace::cancelDelayFocus()
@@ -1935,14 +2025,19 @@ void Workspace::setShowingDesktop(bool showing)
     if (showing_desktop) {
         showing_desktop_clients.clear();
         ++block_focus;
-        ClientList cls = stackingOrder();
+        ToplevelList cls = stackingOrder();
         // Find them first, then minimize, otherwise transients may get minimized with the window
         // they're transient for
-        for (ClientList::ConstIterator it = cls.constBegin();
+        for (ToplevelList::ConstIterator it = cls.constBegin();
                 it != cls.constEnd();
-                ++it)
-            if ((*it)->isOnCurrentActivity() && (*it)->isOnCurrentDesktop() && (*it)->isShown(true) && !(*it)->isSpecialWindow())
-                showing_desktop_clients.prepend(*it);   // Topmost first to reduce flicker
+                ++it) {
+            Client *c = qobject_cast<Client*>(*it);
+            if (!c) {
+                continue;
+            }
+            if (c->isOnCurrentActivity() && c->isOnCurrentDesktop() && c->isShown(true) && !c->isSpecialWindow())
+                showing_desktop_clients.prepend(c);   // Topmost first to reduce flicker
+        }
         for (ClientList::ConstIterator it = showing_desktop_clients.constBegin();
                 it != showing_desktop_clients.constEnd();
                 ++it)
@@ -2096,87 +2191,6 @@ void Workspace::checkCursorPos()
     }
 }
 
-int Workspace::indexOfClientGroup(ClientGroup* group)
-{
-    return clientGroups.indexOf(group);
-}
-
-void Workspace::moveItemToClientGroup(ClientGroup* oldGroup, int oldIndex,
-                                      ClientGroup* group, int index)
-{
-    Client* c = oldGroup->clients().at(oldIndex);
-    group->add(c, index, true);
-}
-
-void Workspace::removeClientGroup(ClientGroup* group)
-{
-    int index = clientGroups.indexOf(group);
-    if (index == -1) {
-        return;
-    }
-
-    clientGroups.removeAt(index);
-    for (; index < clientGroups.size(); index++) {
-        foreach (Client *c, clientGroups.at(index)->clients()) {
-            c->setClientGroup(c->clientGroup());
-        }
-    }
-}
-
-// To accept "mainwindow#1" to "mainwindow#2"
-static QByteArray truncatedWindowRole(QByteArray a)
-{
-    int i = a.indexOf('#');
-    if (i == -1)
-        return a;
-    QByteArray b(a);
-    b.truncate(i);
-    return b;
-}
-
-Client* Workspace::findSimilarClient(Client* c)
-{
-    // Attempt to find a similar window to the input. If we find multiple possibilities that are in
-    // different groups then ignore all of them. This function is for automatic window grouping.
-    Client* found = NULL;
-
-    // See if the window has a group ID to match with
-    QString wGId = c->rules()->checkAutogroupById(QString());
-    if (!wGId.isEmpty()) {
-        foreach (Client * cl, clients) {
-            if (wGId == cl->rules()->checkAutogroupById(QString())) {
-                if (found && found->clientGroup() != cl->clientGroup()) { // We've found two, ignore both
-                    found = NULL;
-                    break; // Continue to the next test
-                }
-                found = cl;
-            }
-        }
-        if (found)
-            return found;
-    }
-
-    // If this is a transient window don't take a guess
-    if (c->isTransient())
-        return NULL;
-
-    // If we don't have an ID take a guess
-    if (c->rules()->checkAutogrouping(options->autogroupSimilarWindows)) {
-        QByteArray wRole = truncatedWindowRole(c->windowRole());
-        foreach (Client * cl, clients) {
-            QByteArray wRoleB = truncatedWindowRole(cl->windowRole());
-            if (c->resourceClass() == cl->resourceClass() &&  // Same resource class
-                    wRole == wRoleB && // Same window role
-                    cl->isNormalWindow()) { // Normal window TODO: Can modal windows be "normal"?
-                if (found && found->clientGroup() != cl->clientGroup())   // We've found two, ignore both
-                    return NULL;
-                found = cl;
-            }
-        }
-    }
-
-    return found;
-}
 
 Outline* Workspace::outline()
 {
@@ -2255,6 +2269,138 @@ void Workspace::dumpTiles() const {
         m_tiling->dumpTiles();
     }
 #endif
+}
+
+QString Workspace::supportInformation() const
+{
+    QString support;
+
+    support.append(ki18nc("Introductory text shown in the support information.",
+        "KWin Support Information:\n"
+        "The following information should be used when requesting support on e.g. http://forum.kde.org.\n"
+        "It provides information about the currently running instance, which options are used,\n"
+        "what OpenGL driver and which effects are running.\n"
+        "Please post the information provided underneath this introductory text to a paste bin service\n"
+        "like http://paste.kde.org instead of pasting into support threads.\n").toString());
+    support.append("\n==========================\n\n");
+    // all following strings are intended for support. They need to be pasted to e.g forums.kde.org
+    // it is expected that the support will happen in English language or that the people providing
+    // help understand English. Because of that all texts are not translated
+    support.append("Options\n");
+    support.append("=======\n");
+    const QMetaObject *metaOptions = options->metaObject();
+    for (int i=0; i<metaOptions->propertyCount(); ++i) {
+        const QMetaProperty property = metaOptions->property(i);
+        if (QLatin1String(property.name()) == "objectName") {
+            continue;
+        }
+        support.append(QLatin1String(property.name()) % ": " % options->property(property.name()).toString() % '\n');
+    }
+    support.append("\nCompositing\n");
+    support.append(  "===========\n");
+    support.append("Qt Graphics System: ");
+    if (Extensions::nonNativePixmaps()) {
+        support.append("raster\n");
+    } else {
+        support.append("native\n");
+    }
+    if (effects) {
+        support.append("Compositing is active\n");
+        switch (effects->compositingType()) {
+        case OpenGLCompositing: {
+#ifdef KWIN_HAVE_OPENGLES
+            support.append("Compositing Type: OpenGL ES 2.0\n");
+#else
+            support.append("Compositing Type: OpenGL\n");
+#endif
+
+            GLPlatform *platform = GLPlatform::instance();
+            support.append("OpenGL vendor string: " %   platform->glVendorString() % '\n');
+            support.append("OpenGL renderer string: " % platform->glRendererString() % '\n');
+            support.append("OpenGL version string: " %  platform->glVersionString() % '\n');
+
+            if (platform->supports(LimitedGLSL))
+                support.append("OpenGL shading language version string: " % platform->glShadingLanguageVersionString() % '\n');
+
+            support.append("Driver: " % GLPlatform::driverToString(platform->driver()) % '\n');
+            if (!platform->isMesaDriver())
+                support.append("Driver version: " % GLPlatform::versionToString(platform->driverVersion()) % '\n');
+
+            support.append("GPU class: " % GLPlatform::chipClassToString(platform->chipClass()) % '\n');
+
+            support.append("OpenGL version: " % GLPlatform::versionToString(platform->glVersion()) % '\n');
+
+            if (platform->supports(LimitedGLSL))
+                support.append("GLSL version: " % GLPlatform::versionToString(platform->glslVersion()) % '\n');
+
+            if (platform->isMesaDriver())
+                support.append("Mesa version: " % GLPlatform::versionToString(platform->mesaVersion()) % '\n');
+            if (platform->serverVersion() > 0)
+                support.append("X server version: " % GLPlatform::versionToString(platform->serverVersion()) % '\n');
+            if (platform->kernelVersion() > 0)
+                support.append("Linux kernel version: " % GLPlatform::versionToString(platform->kernelVersion()) % '\n');
+
+            support.append("Direct rendering: ");
+            if (platform->isDirectRendering()) {
+                support.append("yes\n");
+            } else {
+                support.append("no\n");
+            }
+            support.append("Requires strict binding: ");
+            if (!platform->isLooseBinding()) {
+                support.append("yes\n");
+            } else {
+                support.append("no\n");
+            }
+            support.append("GLSL shaders: ");
+            if (platform->supports(GLSL)) {
+                if (platform->supports(LimitedGLSL)) {
+                    support.append(" limited\n");
+                } else {
+                    support.append(" yes\n");
+                }
+            } else {
+                support.append(" no\n");
+            }
+            support.append("Texture NPOT support: ");
+            if (platform->supports(TextureNPOT)) {
+                if (platform->supports(LimitedNPOT)) {
+                    support.append(" limited\n");
+                } else {
+                    support.append(" yes\n");
+                }
+            } else {
+                support.append(" no\n");
+            }
+
+            if (ShaderManager::instance()->isValid()) {
+                support.append("OpenGL 2 Shaders are used\n");
+            } else {
+                support.append("OpenGL 2 Shaders are not used. Legacy OpenGL 1.x code path is used.\n");
+            }
+            break;
+        }
+        case XRenderCompositing:
+            support.append("Compositing Type: XRender\n");
+            break;
+        case NoCompositing:
+        default:
+            support.append("Something is really broken, neither OpenGL nor XRender is used");
+        }
+        support.append("\nLoaded Effects:\n");
+        support.append(  "---------------\n");
+        foreach (const QString &effect, loadedEffects()) {
+            support.append(effect % '\n');
+        }
+        support.append("\nCurrently Active Effects:\n");
+        support.append(  "-------------------------\n");
+        foreach (const QString &effect, activeEffects()) {
+            support.append(effect % '\n');
+        }
+    } else {
+        support.append("Compositing is not active\n");
+    }
+    return support;
 }
 
 } // namespace

@@ -1,0 +1,24 @@
+[Desktop Entry]
+Type=ServiceType
+X-KDE-ServiceType=KWin/WindowSwitcher
+
+Comment=KWin Window Switcher Layout
+Comment[ia]=Disposition de commutator de fenestra de KWin
+Comment[nb]=Utforming av KWin vindusbytter
+Comment[nl]=KWin indeling van vensterwisselaar
+Comment[pl]=Układ przełączania okien KWin
+Comment[pt]=Disposição da Mudança de Janelas do KWin
+Comment[pt_BR]=Leiaute do seletor de janelas do KWin
+Comment[sv]=Kwin-fönsterbyteslayout
+Comment[uk]=Компонування засобу перемикання вікон KWin
+Comment[x-test]=xxKWin Window Switcher Layoutxx
+Comment[zh_TW]=KWin 視窗切換器佈局
+
+[PropertyDef::X-Plasma-API]
+Type=QString
+
+[PropertyDef::X-Plasma-MainScript]
+Type=QString
+
+[PropertyDef::X-KWin-Exclude-Listing]
+Type=bool

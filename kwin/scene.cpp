@@ -73,6 +73,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <X11/extensions/shape.h>
 
+#include <QGraphicsScene>
+#include <QGraphicsView>
+
 #include "client.h"
 #include "deleted.h"
 #include "effects.h"
@@ -80,7 +83,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "overlaywindow.h"
 #include "shadow.h"
 
-#include <kephal/screens.h>
 #include "thumbnailitem.h"
 
 namespace KWin
@@ -122,20 +124,9 @@ void Scene::paintScreen(int* mask, QRegion* region)
     pdata.mask = *mask;
     pdata.paint = *region;
 
-    // region only includes all workspace-specific repaints but some effect (e.g. blur)
-    // rely on the full damaged area
-    QRegion dirtyArea;
-    foreach (Window * w, stacking_order) { // bottom to top
-        Toplevel* topw = w->window();
-        dirtyArea |= topw->repaints().translated(topw->pos());
-        dirtyArea |= topw->decorationPendingRegion();
-    }
-    pdata.paint |= dirtyArea;
-
     effects->prePaintScreen(pdata, time_diff);
     *mask = pdata.mask;
-    // Subtract the dirty region and let finalPaintScreen decide which areas have to be drawn
-    *region |= pdata.paint - dirtyArea;
+    *region = pdata.paint;
 
     if (*mask & (PAINT_SCREEN_TRANSFORMED | PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS)) {
         // Region painting is not possible with transformations,
@@ -150,12 +141,14 @@ void Scene::paintScreen(int* mask, QRegion* region)
         *region = QRegion(0, 0, displayWidth(), displayHeight());
     }
     painted_region = *region;
-    if (*mask & PAINT_SCREEN_BACKGROUND_FIRST)
+    if (*mask & PAINT_SCREEN_BACKGROUND_FIRST) {
         paintBackground(*region);
+    }
     ScreenPaintData data;
     effects->paintScreen(*mask, *region, data);
-    foreach (Window * w, stacking_order)
-    effects->postPaintWindow(effectWindow(w));
+    foreach (Window * w, stacking_order) {
+        effects->postPaintWindow(effectWindow(w));
+    }
     effects->postPaintScreen();
     *region |= painted_region;
     // make sure not to go outside of the screen area
@@ -191,8 +184,7 @@ void Scene::idle()
 // the function that'll be eventually called by paintScreen() above
 void Scene::finalPaintScreen(int mask, QRegion region, ScreenPaintData& data)
 {
-    if (mask & (PAINT_SCREEN_TRANSFORMED | PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS
-               | PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS))
+    if (mask & (PAINT_SCREEN_TRANSFORMED | PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS))
         paintGenericScreen(mask, data);
     else
         paintSimpleScreen(mask, region);
@@ -202,21 +194,17 @@ void Scene::finalPaintScreen(int mask, QRegion region, ScreenPaintData& data)
 // It simply paints bottom-to-top.
 void Scene::paintGenericScreen(int orig_mask, ScreenPaintData)
 {
-    if (!(orig_mask & PAINT_SCREEN_BACKGROUND_FIRST))
+    if (!(orig_mask & PAINT_SCREEN_BACKGROUND_FIRST)) {
         paintBackground(infiniteRegion());
+    }
     QList< Phase2Data > phase2;
     foreach (Window * w, stacking_order) { // bottom to top
         Toplevel* topw = w->window();
-        painted_region |= topw->repaints().translated(topw->pos());
-        painted_region |= topw->decorationPendingRegion();
 
         // Reset the repaint_region.
         // This has to be done here because many effects schedule a repaint for
         // the next frame within Effects::prePaintWindow.
-        topw->resetRepaints(topw->decorationRect());
-        if (topw->hasShadow()) {
-            topw->resetRepaints(topw->shadow()->shadowRegion().boundingRect());
-        }
+        topw->resetRepaints();
 
         WindowPrePaintData data;
         data.mask = orig_mask | (w->isOpaque() ? PAINT_WINDOW_OPAQUE : PAINT_WINDOW_TRANSLUCENT);
@@ -227,20 +215,22 @@ void Scene::paintGenericScreen(int orig_mask, ScreenPaintData)
         // preparation step
         effects->prePaintWindow(effectWindow(w), data, time_diff);
 #ifndef NDEBUG
-        foreach (const WindowQuad & q, data.quads)
-        if (q.isTransformed())
+        if (data.quads.isTransformed()) {
             kFatal(1212) << "Pre-paint calls are not allowed to transform quads!" ;
+        }
 #endif
-        if (!w->isPaintingEnabled())
+        if (!w->isPaintingEnabled()) {
             continue;
+        }
         phase2.append(Phase2Data(w, infiniteRegion(), data.clip, data.mask, data.quads));
         // transformations require window pixmap
         w->suspendUnredirect(data.mask
                              & (PAINT_WINDOW_TRANSLUCENT | PAINT_SCREEN_TRANSFORMED | PAINT_WINDOW_TRANSFORMED));
     }
 
-    foreach (const Phase2Data & d, phase2)
-    paintWindow(d.window, d.mask, d.region, d.quads);
+    foreach (const Phase2Data & d, phase2) {
+        paintWindow(d.window, d.mask, d.region, d.quads);
+    }
 }
 
 // The optimized case without any transformations at all.
@@ -248,12 +238,8 @@ void Scene::paintGenericScreen(int orig_mask, ScreenPaintData)
 // to reduce painting and improve performance.
 void Scene::paintSimpleScreen(int orig_mask, QRegion region)
 {
-    // TODO PAINT_WINDOW_* flags don't belong here, that's why it's in the assert,
-    // perhaps the two enums should be separated
-    assert((orig_mask & (PAINT_WINDOW_TRANSFORMED | PAINT_SCREEN_TRANSFORMED
-                         | PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS
-                         | PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS
-                         | PAINT_WINDOW_TRANSLUCENT | PAINT_WINDOW_OPAQUE)) == 0);
+    assert((orig_mask & (PAINT_SCREEN_TRANSFORMED
+                         | PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS)) == 0);
     QList< QPair< Window*, Phase2Data > > phase2data;
 
     QRegion dirtyArea = region;
@@ -266,23 +252,21 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
         data.mask = orig_mask | (w->isOpaque() ? PAINT_WINDOW_OPAQUE : PAINT_WINDOW_TRANSLUCENT);
         w->resetPaintingEnabled();
         data.paint = region;
-        data.paint |= topw->repaints().translated(topw->pos());
+        data.paint |= topw->repaints();
         data.paint |= topw->decorationPendingRegion();
 
         // Reset the repaint_region.
         // This has to be done here because many effects schedule a repaint for
         // the next frame within Effects::prePaintWindow.
-        topw->resetRepaints(topw->decorationRect());
-        if (topw->hasShadow()) {
-            topw->resetRepaints(topw->shadow()->shadowRegion().boundingRect());
-        }
+        topw->resetRepaints();
+
         // Clip out the decoration for opaque windows; the decoration is drawn in the second pass
         if (w->isOpaque()) {
             // the window is fully opaque
             data.clip = w->clientShape().translated(w->x(), w->y());
         } else if (topw->hasAlpha() && topw->opacity() == 1.0) {
             // the window is partially opaque
-            data.clip = (w->clientShape() & topw->opaqueRegion()).translated(w->x(), w->y());
+            data.clip = (w->clientShape() & topw->opaqueRegion().translated(topw->clientPos())).translated(w->x(), w->y());
         } else {
             data.clip = QRegion();
         }
@@ -290,11 +274,9 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
         // preparation step
         effects->prePaintWindow(effectWindow(w), data, time_diff);
 #ifndef NDEBUG
-        foreach (const WindowQuad & q, data.quads)
-        if (q.isTransformed())
+        if (data.quads.isTransformed()) {
             kFatal(1212) << "Pre-paint calls are not allowed to transform quads!" ;
-        if (data.mask & PAINT_WINDOW_TRANSFORMED)
-            kFatal(1212) << "PAINT_WINDOW_TRANSFORMED without PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS!";
+        }
 #endif
         if (!w->isPaintingEnabled()) {
             w->suspendUnredirect(true);
@@ -314,11 +296,7 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
         QPair< Window*, Phase2Data > *entry = &phase2data[i];
         Phase2Data *data = &entry->second;
 
-        Toplevel *tlw = entry->first->window();
-        // In case there is a window with a higher stackposition which has translucent regions
-        // (e.g. decorations) that still have to be drawn, we also have to repaint the current window
-        // in these particular regions
-        data->region |= (upperTranslucentDamage & tlw->decorationRect().translated(tlw->pos()));
+        data->region |= upperTranslucentDamage;
 
         // subtract the parts which will possibly been drawn as part of
         // a higher opaque window
@@ -326,7 +304,7 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
 
         // Here we rely on WindowPrePaintData::setTranslucent() to remove
         // the clip if needed.
-        if (!data->clip.isEmpty()) {
+        if (!data->clip.isEmpty() && !(data->mask & PAINT_WINDOW_TRANSFORMED)) {
             // clip away the opaque regions for all windows below this one
             allclips |= data->clip;
             // extend the translucent damage for windows below this by remaining (translucent) regions
@@ -383,11 +361,44 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
         thumbData.opacity = data.opacity;
 
         QSizeF size = QSizeF(thumb->size());
-        size.scale(QSizeF(item->sceneBoundingRect().width(), item->sceneBoundingRect().height()), Qt::KeepAspectRatio);
+        size.scale(QSizeF(item->width(), item->height()), Qt::KeepAspectRatio);
         thumbData.xScale = size.width() / static_cast<qreal>(thumb->width());
         thumbData.yScale = size.height() / static_cast<qreal>(thumb->height());
-        const int x = item->scenePos().x() + w->x() + (item->width() - size.width()) / 2;
-        const int y = item->scenePos().y() + w->y() + (item->height() - size.height()) / 2;
+        // it can happen in the init/closing phase of the tabbox
+        // that the corresponding QGraphicsScene is not available
+        if (item->scene() == 0) {
+            continue;
+        }
+        // in principle there could be more than one QGraphicsView per QGraphicsScene,
+        // although TabBox does not make use of it so far
+        QList<QGraphicsView*> views = item->scene()->views();
+        QGraphicsView* declview = 0;
+        foreach (QGraphicsView* view, views) {
+            if (view->winId() == w->window()->window()) {
+                declview = view;
+                break;
+            }
+            QWidget *parent = view;
+            while ((parent = parent->parentWidget())) {
+                // if the graphicsview is not the topmost widget we try to go up to the
+                // toplevel widget and check whether that is the window we are looking for.
+                if (parent->winId() == w->window()->window()) {
+                    declview = view;
+                    break;
+                }
+            }
+            if (declview) {
+                // our nested loop found it, so we can break this loop as well
+                // doesn't look nice, but still better than goto
+                break;
+            }
+        }
+        if (declview == 0) {
+            continue;
+        }
+        const QPoint point = declview->mapFromScene(item->scenePos());
+        const qreal x = point.x() + w->x() + (item->width() - size.width())/2;
+        const qreal y = point.y() + w->y() + (item->height() - size.height()) / 2;
         thumbData.xTranslate = x - thumb->x();
         thumbData.yTranslate = y - thumb->y();
         int thumbMask = PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_LANCZOS;
@@ -424,6 +435,11 @@ void Scene::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, Windo
 OverlayWindow* Scene::overlayWindow()
 {
     return m_overlayWindow;
+}
+
+void Scene::screenGeometryChanged(const QSize &size)
+{
+    m_overlayWindow->resize(size);
 }
 
 //****************************************
@@ -533,8 +549,8 @@ void Scene::Window::resetPaintingEnabled()
     if (Client* c = dynamic_cast< Client* >(toplevel)) {
         if (c->isMinimized())
             disable_painting |= PAINT_DISABLED_BY_MINIMIZE;
-        if (c->clientGroup() && c != c->clientGroup()->visible())
-            disable_painting |= PAINT_DISABLED_BY_CLIENT_GROUP;
+        if (c->tabGroup() && c != c->tabGroup()->current())
+            disable_painting |= PAINT_DISABLED_BY_TAB_GROUP;
         else if (c->isHiddenInternal())
             disable_painting |= PAINT_DISABLED;
     }
@@ -555,7 +571,7 @@ WindowQuadList Scene::Window::buildQuads(bool force) const
     if (cached_quad_list != NULL && !force)
         return *cached_quad_list;
     WindowQuadList ret;
-    if (toplevel->clientPos() == QPoint(0, 0) && toplevel->clientSize() == toplevel->visibleRect().size())
+    if (toplevel->clientPos() == QPoint(0, 0) && toplevel->clientSize() == toplevel->decorationRect().size())
         ret = makeQuads(WindowQuadContents, shape());  // has no decoration
     else {
         Client *client = dynamic_cast<Client*>(toplevel);

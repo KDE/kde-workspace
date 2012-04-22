@@ -61,14 +61,57 @@ public:
         HorizontalVerticalLayout ///< Items are laid out in a tabular. Number of columns might be greater by one than number of rows
     };
     /**
-    * ClientListMode defines the mode used to create the TabBoxClient List
-    * in the TabBoxClientModel
+    * ClientDesktopMode defines whether windows from the current desktop or from all
+    * desktops are included in the TabBoxClient List in the TabBoxClientModel
     */
-    enum ClientListMode {
-        CurrentDesktopClientList, ///< Only TabBoxClients on current desktop are included
-        AllDesktopsClientList, ///< TabBoxClients from all desktops are included.
-        CurrentDesktopApplicationList, ///< Only one TabBoxClient for each application on current desktop is included
-        AllDesktopsApplicationList ///< Only one TabBoxClient for each application is included
+    enum ClientDesktopMode {
+        AllDesktopsClients, ///< TabBoxClients from all desktops are included.
+        OnlyCurrentDesktopClients, ///< Only TabBoxClients on current desktop are included
+        ExcludeCurrentDesktopClients ///< Exclude TabBoxClients on current desktop
+    };
+    /**
+    * ClientActivitiesMode defines whether windows from the current activity or from all
+    * activities are included in the TabBoxClient List in the TabBoxClientModel
+    */
+    enum ClientActivitiesMode {
+        AllActivitiesClients, ///< TabBoxClients from all Activities are included.
+        OnlyCurrentActivityClients, ///< Only TabBoxClients on current activity are included
+        ExcludeCurrentActivityClients ///< Exclude TabBoxClients on current activity
+    };
+    /**
+    * ClientApplicationsMode defines which windows from the current application or from all
+    * applications are included in the TabBoxClient List in the TabBoxClientModel
+    */
+    enum ClientApplicationsMode {
+        AllWindowsAllApplications, ///< TabBoxClients from all applications are included
+        OneWindowPerApplication, ///< Only one TabBoxClient for each application is included
+        AllWindowsCurrentApplication ///< Only TabBoxClients for the current application are included
+    };
+    /**
+    * ClientMinimizedMode defines which windows are included in the TabBoxClient List
+    * in the TabBoxClientModel based on whether they are minimized or not
+    */
+    enum ClientMinimizedMode {
+        IgnoreMinimizedStatus, ///< TabBoxClients are included no matter they are minimized or not
+        ExcludeMinimizedClients, ///< Exclude minimized TabBoxClients
+        OnlyMinimizedClients ///< Only minimized TabBoxClients are included
+    };
+    /**
+    * ShowDesktopMode defines whether a TabBoxClient representing the desktop
+    * is included in the TabBoxClient List in the TabBoxClientModel
+    */
+    enum ShowDesktopMode {
+        DoNotShowDesktopClient, ///< A TabBoxClient representing the desktop is not included
+        ShowDesktopClient ///< A TabBoxClient representing the desktop is included
+    };
+    /**
+    * ClientActivitiesMode defines whether windows from the current activity or from all
+    * activities are included in the TabBoxClient List in the TabBoxClientModel
+    */
+    enum ClientMultiScreenMode {
+        IgnoreMultiScreen, ///< TabBoxClients are included independently of the screen they are on
+        OnlyCurrentScreenClients, ///< Only TabBoxClients on current screen are included
+        ExcludeCurrentScreenClients ///< Exclude TabBoxClients from the current screen
     };
     /**
     * ClientSwitchingMode defines the sorting of the TabBoxClients in the
@@ -93,18 +136,6 @@ public:
     enum TabBoxMode {
         ClientTabBox,///< TabBox uses TabBoxClientModel
         DesktopTabBox///< TabBox uses TabBoxDesktopModel
-    };
-    /**
-    * SelectedItemViewPosition defines where an additional view only showing the selected item is shown.
-    * This second view is useful when using for example icon only layout and wanting to provide the
-    * caption of selected item.
-    */
-    enum SelectedItemViewPosition {
-        NonePosition,///< There is no additional view for selected item
-        AbovePosition,///< Additional view is positioned above of the switching list
-        BelowPosition,///< Additional view is positioned below of the switching list
-        LeftPosition,///< Additional view is positioned left of the switching list
-        RightPosition///< Additional view is positioned right of the switching list
     };
     TabBoxConfig();
     ~TabBoxConfig();
@@ -144,12 +175,47 @@ public:
     */
     LayoutMode layout() const;
     /**
-    * @return The current ClientListMode
+    * @return The current ClientDesktopMode
     * This option only applies for TabBoxMode ClientTabBox.
-    * @see setClientListMode
-    * @see defaultListMode
+    * @see setClientDesktopMode
+    * @see defaultDesktopMode
     */
-    ClientListMode clientListMode() const;
+    ClientDesktopMode clientDesktopMode() const;
+    /**
+    * @return The current ClientActivitiesMode
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see setClientActivitiesMode
+    * @see defaultActivitiesMode
+    */
+    ClientActivitiesMode clientActivitiesMode() const;
+    /**
+    * @return The current ClientApplicationsMode
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see setClientApplicationsMode
+    * @see defaultApplicationsMode
+    */
+    ClientApplicationsMode clientApplicationsMode() const;
+    /**
+    * @return The current ClientMinimizedMode
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see setClientMinimizedMode
+    * @see defaultMinimizedMode
+    */
+    ClientMinimizedMode clientMinimizedMode() const;
+    /**
+    * @return The current ShowDesktopMode
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see setShowDesktopMode
+    * @see defaultShowDesktopMode
+    */
+    ShowDesktopMode showDesktopMode() const;
+    /**
+    * @return The current ClientMultiScreenMode
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see setClientMultiScreenMode
+    * @see defaultMultiScreenMode
+    */
+    ClientMultiScreenMode clientMultiScreenMode() const;
     /**
     * @return The current ClientSwitchingMode.
     * This option only applies for TabBoxMode ClientTabBox.
@@ -163,12 +229,6 @@ public:
     * @see setDesktopSwitchingMode
     */
     DesktopSwitchingMode desktopSwitchingMode() const;
-    /**
-    * @return The position of the selected item view.
-    * @see setSelectedItemViewPosition
-    * @see defaultSelectedItemViewPosition
-    */
-    SelectedItemViewPosition selectedItemViewPosition() const;
     /**
     * @return The minimum width in percent of screen width the TabBox should use.
     * @see setMinWidth
@@ -193,11 +253,6 @@ public:
     * @see setlayoutName
     */
     QString& selectedItemLayoutName() const;
-    /**
-    * @return If an item for minimizing all windows to the desktop should be included.
-    * @see setShowDesktop
-    */
-    bool isShowDesktop() const;
 
     // setters
     /**
@@ -229,11 +284,41 @@ public:
     */
     void setLayout(LayoutMode layout);
     /**
-    * @param listMode The new ClientListMode to be used.
+    * @param desktopMode The new ClientDesktopMode to be used.
     * This option only applies for TabBoxMode ClientTabBox.
-    * @see clientListMode
+    * @see clientDesktopMode
     */
-    void setClientListMode(ClientListMode listMode);
+    void setClientDesktopMode(ClientDesktopMode desktopMode);
+    /**
+    * @param activitiesMode The new ClientActivitiesMode to be used.
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see clientActivitiesMode
+    */
+    void setClientActivitiesMode(ClientActivitiesMode activitiesMode);
+    /**
+    * @param applicationsMode The new ClientApplicationsMode to be used.
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see clientApplicationsMode
+    */
+    void setClientApplicationsMode(ClientApplicationsMode applicationsMode);
+    /**
+    * @param minimizedMode The new ClientMinimizedMode to be used.
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see clientMinimizedMode
+    */
+    void setClientMinimizedMode(ClientMinimizedMode minimizedMode);
+    /**
+    * @param showDesktopMode The new ShowDesktopMode to be used.
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see showDesktopMode
+    */
+    void setShowDesktopMode(ShowDesktopMode showDesktopMode);
+    /**
+    * @param multiScreenMode The new ClientMultiScreenMode to be used.
+    * This option only applies for TabBoxMode ClientTabBox.
+    * @see clientMultiScreenMode
+    */
+    void setClientMultiScreenMode(ClientMultiScreenMode multiScreenMode);
     /**
     * @param switchingMode The new ClientSwitchingMode to be used.
     * This option only applies for TabBoxMode ClientTabBox.
@@ -246,11 +331,6 @@ public:
     * @see desktopSwitchingMode
     */
     void setDesktopSwitchingMode(DesktopSwitchingMode switchingMode);
-    /**
-    * @param viewPosition The new position of the selected item view
-    * @see selectedItemViewPosition
-    */
-    void setSelectedItemViewPosition(SelectedItemViewPosition viewPosition);
     /**
     * @param value The minimum width of TabBox in percent of screen width.
     * @see minWidth
@@ -271,24 +351,31 @@ public:
     * @see selectedItemLayoutName
     */
     void setSelectedItemLayoutName(const QString& name);
-    /**
-    * @param show Include item to minimize all windows to the desktop
-    * @see isShowDesktop
-    */
-    void setShowDesktop(bool show);
 
     // some static methods to access default values
-    static ClientListMode defaultListMode() {
-        return CurrentDesktopClientList;
+    static ClientDesktopMode defaultDesktopMode() {
+        return OnlyCurrentDesktopClients;
+    }
+    static ClientActivitiesMode defaultActivitiesMode() {
+        return OnlyCurrentActivityClients;
+    }
+    static ClientApplicationsMode defaultApplicationsMode() {
+        return AllWindowsAllApplications;
+    }
+    static ClientMinimizedMode defaultMinimizedMode() {
+        return IgnoreMinimizedStatus;
+    }
+    static ShowDesktopMode defaultShowDesktopMode() {
+        return DoNotShowDesktopClient;
+    }
+    static ClientMultiScreenMode defaultMultiScreenMode() {
+        return IgnoreMultiScreen;
     }
     static ClientSwitchingMode defaultSwitchingMode() {
         return FocusChainSwitching;
     }
     static LayoutMode defaultLayoutMode() {
         return VerticalLayout;
-    }
-    static SelectedItemViewPosition defaultSelectedItemViewPosition() {
-        return NonePosition;
     }
     static bool defaultShowTabBox() {
         return true;
@@ -310,9 +397,6 @@ public:
     }
     static QString defaultSelectedItemLayoutName() {
         return QString("Text");
-    }
-    static bool defaultShowDesktop() {
-        return false;
     }
 private:
     TabBoxConfigPrivate* d;

@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class QLabel;
 
-#include <config-workspace.h>
 #include <config-X11.h>
 #include <config-kwin.h>
 
@@ -104,6 +103,7 @@ enum Layer {
     DockLayer,
     AboveLayer,
     ActiveLayer, // active fullscreen, or active dialog
+    UnmanagedLayer, // layer for override redirect windows.
     NumLayers // number of layers, must be last
 };
 

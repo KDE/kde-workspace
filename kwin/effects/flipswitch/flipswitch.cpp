@@ -70,11 +70,12 @@ FlipSwitchEffect::FlipSwitchEffect()
     m_shortcutAll = b->globalShortcut();
     connect(b, SIGNAL(triggered(bool)), this, SLOT(toggleActiveAllDesktops()));
     connect(b, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(globalShortcutChangedAll(QKeySequence)));
-    connect(effects, SIGNAL(windowAdded(EffectWindow*)), this, SLOT(slotWindowAdded(EffectWindow*)));
-    connect(effects, SIGNAL(windowClosed(EffectWindow*)), this, SLOT(slotWindowClosed(EffectWindow*)));
+    connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
     connect(effects, SIGNAL(tabBoxAdded(int)), this, SLOT(slotTabBoxAdded(int)));
     connect(effects, SIGNAL(tabBoxClosed()), this, SLOT(slotTabBoxClosed()));
     connect(effects, SIGNAL(tabBoxUpdated()), this, SLOT(slotTabBoxUpdated()));
+    connect(effects, SIGNAL(tabBoxKeyEvent(QKeyEvent*)), this, SLOT(slotTabBoxKeyEvent(QKeyEvent*)));
 }
 
 FlipSwitchEffect::~FlipSwitchEffect()
@@ -471,8 +472,8 @@ void FlipSwitchEffect::prePaintWindow(EffectWindow* w, WindowPrePaintData& data,
                 w->enablePainting(EffectWindow::PAINT_DISABLED_BY_DESKTOP);
             if (w->isMinimized())
                 w->enablePainting(EffectWindow::PAINT_DISABLED_BY_MINIMIZE);
-            if (!w->visibleInClientGroup())
-                w->enablePainting(EffectWindow::PAINT_DISABLED_BY_CLIENT_GROUP);
+            if (!w->isCurrentTab())
+                w->enablePainting(EffectWindow::PAINT_DISABLED_BY_TAB_GROUP);
         } else {
             if ((m_start || m_stop) && !w->isDesktop() && w->isOnCurrentDesktop())
                 data.setTranslucent();
@@ -564,8 +565,7 @@ void FlipSwitchEffect::slotTabBoxUpdated()
                     }
                 }
                 m_selectedWindow = effects->currentTabBoxWindow();
-                m_captionFrame->setText(m_selectedWindow->caption());
-                m_captionFrame->setIcon(m_selectedWindow->icon());
+                updateCaption();
             }
         }
         effects->addRepaintFull();
@@ -662,8 +662,7 @@ void FlipSwitchEffect::setActive(bool activate, FlipSwitchMode mode)
                                 QFontMetrics(m_captionFont).height());
         m_captionFrame->setGeometry(frameRect);
         m_captionFrame->setIconSize(QSize(frameRect.height(), frameRect.height()));
-        m_captionFrame->setText(m_selectedWindow->caption());
-        m_captionFrame->setIcon(m_selectedWindow->icon());
+        updateCaption();
         effects->addRepaintFull();
     } else {
         // only deactivate if mode is current mode
@@ -886,8 +885,7 @@ void FlipSwitchEffect::grabbedKeyboardEvent(QKeyEvent* e)
                 }
             }
             if (found) {
-                m_captionFrame->setText(m_selectedWindow->caption());
-                m_captionFrame->setIcon(m_selectedWindow->icon());
+                updateCaption();
                 scheduleAnimation(DirectionForward);
             }
             break;
@@ -914,8 +912,7 @@ void FlipSwitchEffect::grabbedKeyboardEvent(QKeyEvent* e)
                 }
             }
             if (found) {
-                m_captionFrame->setText(m_selectedWindow->caption());
-                m_captionFrame->setIcon(m_selectedWindow->icon());
+                updateCaption();
                 scheduleAnimation(DirectionBackward);
             }
             break;
@@ -934,9 +931,58 @@ void FlipSwitchEffect::grabbedKeyboardEvent(QKeyEvent* e)
     }
 }
 
+void FlipSwitchEffect::slotTabBoxKeyEvent(QKeyEvent *event)
+{
+    if (!m_active || !m_selectedWindow) {
+        return;
+    }
+    const int index = effects->currentTabBoxWindowList().indexOf(m_selectedWindow);
+    int newIndex = index;
+    if (event->type() == QEvent::KeyPress) {
+        switch (event->key()) {
+        case Qt::Key_Up:
+        case Qt::Key_Left:
+            newIndex = (index - 1);
+            break;
+        case Qt::Key_Down:
+        case Qt::Key_Right:
+            newIndex = (index + 1);
+            break;
+        default:
+            // nothing
+            break;
+        }
+    }
+    if (newIndex == effects->currentTabBoxWindowList().size()) {
+        newIndex = 0;
+    } else if (newIndex < 0) {
+        newIndex = effects->currentTabBoxWindowList().size() -1;
+    }
+    if (index == newIndex) {
+        return;
+    }
+    effects->setTabBoxWindow(effects->currentTabBoxWindowList().at(newIndex));
+}
+
 bool FlipSwitchEffect::isActive() const
 {
     return m_active;
+}
+
+void FlipSwitchEffect::updateCaption()
+{
+    if (!m_selectedWindow) {
+        return;
+    }
+    if (m_selectedWindow->isDesktop()) {
+        m_captionFrame->setText(i18nc("Special entry in alt+tab list for minimizing all windows",
+                     "Show Desktop"));
+        static QPixmap pix = KIcon("user-desktop").pixmap(m_captionFrame->iconSize());
+        m_captionFrame->setIcon(pix);
+    } else {
+        m_captionFrame->setText(m_selectedWindow->caption());
+        m_captionFrame->setIcon(m_selectedWindow->icon());
+    }
 }
 
 //*************************************************************

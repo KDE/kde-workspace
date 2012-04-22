@@ -48,13 +48,13 @@ InvertEffect::InvertEffect()
     KAction* a = (KAction*)actionCollection->addAction("Invert");
     a->setText(i18n("Toggle Invert Effect"));
     a->setGlobalShortcut(KShortcut(Qt::CTRL + Qt::META + Qt::Key_I));
-    connect(a, SIGNAL(triggered(bool)), this, SLOT(toggle()));
+    connect(a, SIGNAL(triggered(bool)), this, SLOT(toggleScreenInversion()));
 
     KAction* b = (KAction*)actionCollection->addAction("InvertWindow");
     b->setText(i18n("Toggle Invert Effect on Window"));
     b->setGlobalShortcut(KShortcut(Qt::CTRL + Qt::META + Qt::Key_U));
     connect(b, SIGNAL(triggered(bool)), this, SLOT(toggleWindow()));
-    connect(effects, SIGNAL(windowClosed(EffectWindow*)), this, SLOT(slotWindowClosed(EffectWindow*)));
+    connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
 }
 
 InvertEffect::~InvertEffect()
@@ -88,9 +88,6 @@ bool InvertEffect::loadData()
 
 void InvertEffect::prePaintScreen(ScreenPrePaintData &data, int time)
 {
-    if (m_valid && (m_allWindows || !m_windows.isEmpty())) {
-        data.mask |= PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS;
-    }
     effects->prePaintScreen(data, time);
 }
 
@@ -146,7 +143,7 @@ void InvertEffect::slotWindowClosed(EffectWindow* w)
     m_windows.removeOne(w);
 }
 
-void InvertEffect::toggle()
+void InvertEffect::toggleScreenInversion()
 {
     m_allWindows = !m_allWindows;
     effects->addRepaintFull();
@@ -164,6 +161,11 @@ void InvertEffect::toggleWindow()
 bool InvertEffect::isActive() const
 {
     return m_valid && (m_allWindows || !m_windows.isEmpty());
+}
+
+bool InvertEffect::provides(Feature f)
+{
+    return f == ScreenInversion;
 }
 
 } // namespace

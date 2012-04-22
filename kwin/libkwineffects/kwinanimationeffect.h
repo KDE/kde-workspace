@@ -90,6 +90,9 @@ class AnimationEffectPrivate;
 class KWIN_EXPORT AnimationEffect : public Effect
 {
     Q_OBJECT
+    Q_ENUMS(Anchor)
+    Q_ENUMS(Attribute)
+    Q_ENUMS(MetaType)
 public:
     enum Anchor { Left = 1<<0, Top = 1<<1, Right = 1<<2, Bottom = 1<<3,
                   Horizontal = Left|Right, Vertical = Top|Bottom, Mouse = 1<<4  };
@@ -167,8 +170,8 @@ private:
 private Q_SLOTS:
     void init();
     void triggerRepaint();
-    void _windowClosed( EffectWindow* w );
-    void _windowDeleted( EffectWindow* w );
+    void _windowClosed( KWin::EffectWindow* w );
+    void _windowDeleted( KWin::EffectWindow* w );
 private:
     typedef QMap< EffectWindow*, QList<AniData> > AniMap;
     AnimationEffectPrivate * const d_ptr;
@@ -177,5 +180,6 @@ private:
 
 
 } // namespace
+Q_DECLARE_METATYPE(KWin::FPx2)
 
 #endif // ANIMATION_EFFECT_H

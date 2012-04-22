@@ -57,10 +57,7 @@ QVariant ClientModel::data(const QModelIndex& index, int role) const
         return QVariant();
 
     if (m_clientList.isEmpty()) {
-        if (role == EmptyRole)
-            return true;
-        else
-            return i18n("*** No Windows ***");
+        return QVariant();
     }
 
     int clientIndex = index.row() * columnCount() + index.column();
@@ -75,14 +72,13 @@ QVariant ClientModel::data(const QModelIndex& index, int role) const
     case DesktopNameRole: {
         return tabBox->desktopName(m_clientList[ clientIndex ]);
     }
-    case EmptyRole:
-        return false;
     case WIdRole:
         return qulonglong(m_clientList[ clientIndex ]->window());
     case MinimizedRole:
         return m_clientList[ clientIndex ]->isMinimized();
     case CloseableRole:
-        return m_clientList[ clientIndex ]->isCloseable();
+        //clients that claim to be first are not closeable
+        return m_clientList[ clientIndex ]->isCloseable() && !m_clientList[ clientIndex ]->isFirstInTabBox();
     default:
         return QVariant();
     }
@@ -182,9 +178,7 @@ void ClientModel::createClientList(int desktop, bool partialReset)
         TabBoxClient* c = tabBox->nextClientFocusChain(start);
         TabBoxClient* stop = c;
         while (c) {
-            TabBoxClient* add = tabBox->clientToAddToList(c, desktop,
-                                tabBox->config().clientListMode() == TabBoxConfig::AllDesktopsClientList ||
-                                tabBox->config().clientListMode() == TabBoxConfig::AllDesktopsApplicationList);
+            TabBoxClient* add = tabBox->clientToAddToList(c, desktop);
             if (add != NULL) {
                 if (start == add) {
                     m_clientList.removeAll(add);
@@ -209,9 +203,7 @@ void ClientModel::createClientList(int desktop, bool partialReset)
         TabBoxClient* stop = c;
         int index = 0;
         while (c) {
-            TabBoxClient* add = tabBox->clientToAddToList(c, desktop,
-                                tabBox->config().clientListMode() == TabBoxConfig::AllDesktopsClientList ||
-                                tabBox->config().clientListMode() == TabBoxConfig::AllDesktopsApplicationList);
+            TabBoxClient* add = tabBox->clientToAddToList(c, desktop);
             if (add != NULL) {
                 if (start == add) {
                     m_clientList.removeAll(add);
@@ -238,7 +230,7 @@ void ClientModel::createClientList(int desktop, bool partialReset)
         m_clientList.removeAll(c);
         m_clientList.prepend(c);
     }
-    if (tabBox->config().isShowDesktop()) {
+    if (tabBox->config().showDesktopMode() == TabBoxConfig::ShowDesktopClient || m_clientList.isEmpty()) {
         TabBoxClient* desktopClient = tabBox->desktopClient();
         if (desktopClient)
             m_clientList.append(desktopClient);

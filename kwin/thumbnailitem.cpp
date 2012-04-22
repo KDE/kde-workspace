@@ -37,10 +37,12 @@ ThumbnailItem::ThumbnailItem(QDeclarativeItem* parent)
     , m_wId(0)
     , m_clip(true)
     , m_parent(QWeakPointer<EffectWindowImpl>())
+    , m_parentWindow(0)
 {
     setFlags(flags() & ~QGraphicsItem::ItemHasNoContents);
     if (effects) {
-        connect(effects, SIGNAL(windowAdded(EffectWindow*)), SLOT(effectWindowAdded()));
+        connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), SLOT(effectWindowAdded()));
+        connect(effects, SIGNAL(windowDamaged(KWin::EffectWindow*,QRect)), SLOT(repaint(KWin::EffectWindow*)));
     }
     QTimer::singleShot(0, this, SLOT(init()));
 }
@@ -57,9 +59,24 @@ void ThumbnailItem::init()
     }
 }
 
+void ThumbnailItem::setParentWindow(qulonglong parentWindow)
+{
+    m_parentWindow = parentWindow;
+    findParentEffectWindow();
+    if (!m_parent.isNull()) {
+        m_parent.data()->registerThumbnail(this);
+    }
+}
+
 void ThumbnailItem::findParentEffectWindow()
 {
     if (effects) {
+        if (m_parentWindow) {
+            if (EffectWindowImpl *w = static_cast<EffectWindowImpl*>(effects->findWindow(m_parentWindow))) {
+                m_parent = QWeakPointer<EffectWindowImpl>(w);
+                return;
+            }
+        }
         QDeclarativeContext *ctx = QDeclarativeEngine::contextForObject(this);
         if (!ctx) {
             kDebug(1212) << "No Context";
@@ -72,6 +89,7 @@ void ThumbnailItem::findParentEffectWindow()
         }
         if (EffectWindowImpl *w = static_cast<EffectWindowImpl*>(effects->findWindow(variant.value<qulonglong>()))) {
             m_parent = QWeakPointer<EffectWindowImpl>(w);
+            m_parentWindow = variant.value<qulonglong>();
         }
     }
 }
@@ -115,6 +133,13 @@ void ThumbnailItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     const QSize size(boundingRect().size().toSize() - pixmap.size());
     painter->drawPixmap(boundingRect().adjusted(size.width()/2.0, size.height()/2.0, -size.width()/2.0, -size.height()/2.0).toRect(),
                         pixmap);
+}
+
+void ThumbnailItem::repaint(KWin::EffectWindow *w)
+{
+    if (static_cast<KWin::EffectWindowImpl*>(w)->window()->window() == m_wId) {
+        update();
+    }
 }
 
 } // namespace KWin

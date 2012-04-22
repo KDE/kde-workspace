@@ -87,9 +87,7 @@ void Tiling::setEnabled(bool tiling)
     KConfigGroup config(_config, "Windows");
     config.writeEntry("TilingOn", m_enabled);
     config.sync();
-    options->tilingOn = m_enabled;
-    options->tilingLayout = static_cast<TilingLayoutFactory::Layouts>(config.readEntry("TilingDefaultLayout", 0));
-    options->tilingRaisePolicy = config.readEntry("TilingRaisePolicy", 0);
+    options->setTilingOn(m_enabled);
 
     if (m_enabled) {
         connect(m_workspace, SIGNAL(clientAdded(KWin::Client*)), this, SLOT(createTile(KWin::Client*)));
@@ -98,8 +96,10 @@ void Tiling::setEnabled(bool tiling)
         connect(m_workspace, SIGNAL(clientRemoved(KWin::Client*)), this, SLOT(removeTile(KWin::Client*)));
         connect(m_workspace, SIGNAL(clientActivated(KWin::Client*)), this, SLOT(notifyTilingWindowActivated(KWin::Client*)));
         m_tilingLayouts.resize(Workspace::self()->numberOfDesktops() + 1);
-        foreach (Client * c, Workspace::self()->stackingOrder()) {
-            createTile(c);
+        foreach (Toplevel *t, Workspace::self()->stackingOrder()) {
+            if (Client *c = qobject_cast<Client*>(t)) {
+                createTile(c);
+            }
         }
     } else {
         disconnect(m_workspace, SIGNAL(clientAdded(KWin::Client*)));
@@ -149,7 +149,7 @@ void Tiling::createTile(Client* c)
     // if tiling is activated, connect to Client's signals and react with rearrangement when (un)minimizing
     connect(c, SIGNAL(clientMinimized(KWin::Client*,bool)), this, SLOT(notifyTilingWindowMinimizeToggled(KWin::Client*)));
     connect(c, SIGNAL(clientUnminimized(KWin::Client*,bool)), this, SLOT(notifyTilingWindowMinimizeToggled(KWin::Client*)));
-    connect(c, SIGNAL(s_unminimized()), this, SLOT(updateAllTiles()));
+    connect(c, SIGNAL(clientUnminimized(KWin::Client*,bool)), this, SLOT(updateAllTiles()));
 }
 
 void Tiling::removeTile(Client *c)
@@ -272,7 +272,7 @@ void Tiling::notifyTilingWindowActivated(KWin::Client *c)
     if (c == NULL)
         return;
 
-    if (options->tilingRaisePolicy == 1)   // individual raise/lowers
+    if (options->tilingRaisePolicy() == 1)   // individual raise/lowers
         return;
 
     if (m_tilingLayouts.value(c->desktop())) {
@@ -288,7 +288,7 @@ void Tiling::notifyTilingWindowActivated(KWin::Client *c)
 
         kDebug(1212) << "FOUND TILE";
         bool raise_floating = false;
-        if (options->tilingRaisePolicy == 2)   // floating always on top
+        if (options->tilingRaisePolicy() == 2)   // floating always on top
             raise_floating = true;
         else
             raise_floating = tile_to_raise->floating();

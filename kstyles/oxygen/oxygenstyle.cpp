@@ -441,22 +441,6 @@ namespace Oxygen
             widget->setWindowFlags( widget->windowFlags() | Qt::FramelessWindowHint );
             #endif
 
-        } else if( widget->inherits( "KWin::GeometryTip" ) ) {
-
-            // special handling of kwin geometry tip widget
-            addEventFilter( widget );
-            widget->setAttribute( Qt::WA_NoSystemBackground );
-            widget->setAttribute( Qt::WA_TranslucentBackground );
-            if( QLabel* label = qobject_cast<QLabel*>( widget ) )
-            {
-                label->setFrameStyle( QFrame::NoFrame );
-                label->setMargin( 5 );
-            }
-
-            #ifdef Q_WS_WIN
-            widget->setWindowFlags( widget->windowFlags() | Qt::FramelessWindowHint );
-            #endif
-
         } else if( qobject_cast<QFrame*>( widget ) && widget->parent() && widget->parent()->inherits( "KTitleWidget" ) ) {
 
             widget->setAutoFillBackground( false );
@@ -867,6 +851,11 @@ namespace Oxygen
             case SH_MessageBox_TextInteractionFlags: return true;
             case SH_WindowFrame_Mask: return false;
             case SH_RequestSoftwareInputPanel: return RSIP_OnMouseClick;
+
+            case SH_ProgressDialog_CenterCancelButton:
+            case SH_MessageBox_CenterButtons:
+            return false;
+
             default: return QCommonStyle::styleHint( hint, option, widget, returnData );
         }
 
@@ -1025,8 +1014,8 @@ namespace Oxygen
             // TabBar
             case PE_FrameTabBarBase: fcn = &Style::drawFrameTabBarBasePrimitive; break;
             case PE_FrameTabWidget: fcn = &Style::drawFrameTabWidgetPrimitive; break;
-
             case PE_FrameWindow: fcn = &Style::drawFrameWindowPrimitive; break;
+            case PE_IndicatorTabClose: fcn = &Style::drawIndicatorTabClose; break;
 
             // arrows
             case PE_IndicatorArrowUp: fcn = &Style::drawIndicatorArrowUpPrimitive; break;
@@ -1221,7 +1210,6 @@ namespace Oxygen
 
         if( widget->inherits( "Q3ListView" ) ) { return eventFilterQ3ListView( widget, event ); }
         if( widget->inherits( "QComboBoxPrivateContainer" ) ) { return eventFilterComboBoxContainer( widget, event ); }
-        if( widget->inherits( "KWin::GeometryTip" ) ) { return eventFilterGeometryTip( widget, event ); }
 
         return QCommonStyle::eventFilter( object, event );
 
@@ -1341,64 +1329,6 @@ namespace Oxygen
             default: return false;
 
         }
-
-    }
-
-    //____________________________________________________________________________
-    bool Style::eventFilterGeometryTip( QWidget* widget, QEvent* event )
-    {
-        switch( event->type() )
-        {
-
-            case QEvent::Show:
-            case QEvent::Resize:
-            {
-
-                // make sure mask is appropriate
-                if( !helper().hasAlphaChannel( widget ) ) widget->setMask( helper().roundedMask( widget->rect() ) );
-                else widget->clearMask();
-                return false;
-            }
-
-            case QEvent::Paint:
-            {
-
-                const QColor color( widget->palette().window().color() );
-                const QRect r( widget->rect() );
-
-                QPainter painter( widget );
-                QPaintEvent *paintEvent = static_cast<QPaintEvent*>( event );
-                painter.setClipRegion( paintEvent->region() );
-
-                const bool hasAlpha( helper().hasAlphaChannel( widget ) );
-                if( hasAlpha )
-                {
-
-                    painter.setCompositionMode( QPainter::CompositionMode_Source );
-                    TileSet *tileSet( helper().roundCorner( color ) );
-                    tileSet->render( r, &painter );
-
-                    painter.setCompositionMode( QPainter::CompositionMode_SourceOver );
-                    painter.setClipRegion( helper().roundedMask( r.adjusted( 1, 1, -1, -1 ) ), Qt::IntersectClip );
-
-                }
-
-                helper().renderMenuBackground( &painter, r, widget,color );
-
-                // frame
-                if( hasAlpha ) painter.setClipping( false );
-                helper().drawFloatFrame( &painter, r, color, !hasAlpha );
-
-            }
-
-            return false;
-
-            default: return false;
-
-        }
-
-        // continue with normal painting
-        return false;
 
     }
 
@@ -2894,6 +2824,31 @@ namespace Oxygen
         return true;
 
     }
+    //___________________________________________________________________________________
+    bool Style::drawIndicatorTabClose( const QStyleOption* option, QPainter* painter, const QWidget* ) const
+    {
+        if( _tabCloseIcon.isNull() ) { // load the icon on-demand: in the constructor, KDE is not yet ready to find it!
+            _tabCloseIcon = KIcon( "dialog-close" );
+            if( _tabCloseIcon.isNull() ) return false; // still not found? cancel
+        }
+        const int size( pixelMetric(QStyle::PM_SmallIconSize) );
+        QIcon::Mode mode;
+        if( option->state & State_Enabled )
+        {
+            if( option->state & State_Raised ) mode = QIcon::Active;
+            else mode = QIcon::Normal;
+        } else mode = QIcon::Disabled;
+
+        if (!(option->state & State_Raised)
+            && !(option->state & State_Sunken)
+            && !(option->state & QStyle::State_Selected))
+            mode = QIcon::Disabled;
+
+        QIcon::State state = option->state & State_Sunken ? QIcon::On:QIcon::Off;
+        QPixmap pixmap = _tabCloseIcon.pixmap(size, mode, state);
+        drawItemPixmap( painter, option->rect, Qt::AlignCenter, pixmap );
+        return true;
+    }
 
     //___________________________________________________________________________________
     bool Style::drawIndicatorArrowPrimitive( ArrowOrientation orientation, const QStyleOption* option, QPainter* painter, const QWidget* widget ) const
@@ -4109,7 +4064,8 @@ namespace Oxygen
         grad.setColorAt( 0, Qt::transparent );
         grad.setColorAt( 0.6, Qt::black );
 
-        helper().renderWindowBackground( &pp, pm.rect(), widget, palette );
+	if( widget )
+          helper().renderWindowBackground( &pp, pm.rect(), widget, palette );
         pp.setCompositionMode( QPainter::CompositionMode_DestinationAtop );
         pp.fillRect( pm.rect(), QBrush( grad ) );
         pp.end();
@@ -4869,8 +4825,12 @@ namespace Oxygen
         if( indicatorRect.adjusted( 2, 1, -2, -1 ).isValid() )
         {
             indicatorRect.adjust( 1, 0, -1, -1 );
-            QPixmap pixmap( helper().progressBarIndicator( palette, indicatorRect ) );
-            painter->drawPixmap( indicatorRect.topLeft(), pixmap );
+
+            // calculate dimension
+            int dimension( 20 );
+            if( pbOpt2 ) dimension = qMax( 5, horizontal ? indicatorRect.height() : indicatorRect.width() );
+            TileSet* tileSet( helper().progressBarIndicator( palette, dimension ) );
+            tileSet->render( indicatorRect, painter, TileSet::Full );
         }
 
         return true;
@@ -8029,6 +7989,9 @@ namespace Oxygen
         widgetExplorer().setEnabled( StyleConfigData::widgetExplorerEnabled() );
         widgetExplorer().setDrawWidgetRects( StyleConfigData::drawWidgetRects() );
 
+        // splitter proxy
+        splitterFactory().setEnabled( StyleConfigData::splitterProxyEnabled() );
+
         // scrollbar button dimentions.
         /* it has to be reinitialized here because scrollbar width might have changed */
         _noButtonHeight = 0;
@@ -8070,7 +8033,6 @@ namespace Oxygen
         // frame focus
         if( StyleConfigData::viewDrawFocusIndicator() ) _frameFocusPrimitive = &Style::drawFrameFocusRectPrimitive;
         else _frameFocusPrimitive = &Style::emptyPrimitive;
-
     }
 
     //_____________________________________________________________________
@@ -8673,36 +8635,20 @@ namespace Oxygen
     {
 
         const QPalette& palette( option->palette );
-
         const State& flags( option->state );
 
+        // enable state
         bool enabled( flags & State_Enabled );
-        bool atLimit( false );
-        if( enabled )
-        {
 
-            if( const QSpinBox* spinbox = qobject_cast<const QSpinBox*>( widget ) )
-            {
+        // check steps enable step
+        const bool atLimit(
+            (subControl == SC_SpinBoxUp && !(option->stepEnabled & QAbstractSpinBox::StepUpEnabled )) ||
+            (subControl == SC_SpinBoxDown && !(option->stepEnabled & QAbstractSpinBox::StepDownEnabled ) ) );
 
-                // cast to spinbox and check if at limit
-                const int value( spinbox->value() );
-                if( !spinbox->wrapping() && (( subControl == SC_SpinBoxUp && value == spinbox->maximum() ) ||
-                    ( subControl == SC_SpinBoxDown && value == spinbox->minimum() ) ) )
-                    { atLimit = true; }
-
-            } else if( const QDoubleSpinBox* spinbox = qobject_cast<const QDoubleSpinBox*>( widget ) ) {
-
-                // cast to spinbox and check if at limit
-                const double value( spinbox->value() );
-                if( !spinbox->wrapping() && (( subControl == SC_SpinBoxUp && value == spinbox->maximum() ) ||
-                    ( subControl == SC_SpinBoxDown && value == spinbox->minimum() ) ) )
-                    { atLimit = true; }
-
-            }
-
-        }
-
+        // update enabled state accordingly
         enabled &= !atLimit;
+
+        // update mouse-over effect
         const bool mouseOver( enabled && ( flags & State_MouseOver ) );
 
         // check animation state
@@ -9463,18 +9409,15 @@ namespace Oxygen
         const bool enabled( option->state & State_Enabled );
         if( !enabled ) return color;
 
-        if( const QAbstractSlider* slider = qobject_cast<const QAbstractSlider*>( widget ) )
+        if(
+            ( control == SC_ScrollBarSubLine && option->sliderValue == option->minimum ) ||
+            ( control == SC_ScrollBarAddLine && option->sliderValue == option->maximum ) )
         {
-            const int value( slider->value() );
-            if(
-                ( control == SC_ScrollBarSubLine && value == slider->minimum() ) ||
-                ( control == SC_ScrollBarAddLine && value == slider->maximum() ) ) {
 
-                // manually disable arrow, to indicate that scrollbar is at limit
-                return palette.color( QPalette::Disabled, QPalette::WindowText );
-            }
+            // manually disable arrow, to indicate that scrollbar is at limit
+            return palette.color( QPalette::Disabled, QPalette::WindowText );
+
         }
-
 
         const bool hover( animations().scrollBarEngine().isHovered( widget, control ) );
         const bool animated( animations().scrollBarEngine().isAnimated( widget, control ) );

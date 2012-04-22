@@ -39,8 +39,8 @@ CubeSlideEffect::CubeSlideEffect()
     , progressRestriction(0.0f)
 {
     connect(effects, SIGNAL(desktopChanged(int,int)), this, SLOT(slotDesktopChanged(int,int)));
-    connect(effects, SIGNAL(windowStepUserMovedResized(EffectWindow*,QRect)), this, SLOT(slotWindowStepUserMovedResized(EffectWindow*)));
-    connect(effects, SIGNAL(windowFinishUserMovedResized(EffectWindow*)), this, SLOT(slotWindowFinishUserMovedResized(EffectWindow*)));
+    connect(effects, SIGNAL(windowStepUserMovedResized(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowStepUserMovedResized(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowFinishUserMovedResized(KWin::EffectWindow*)), this, SLOT(slotWindowFinishUserMovedResized(KWin::EffectWindow*)));
     reconfigure(ReconfigureAll);
 }
 
@@ -82,27 +82,17 @@ void CubeSlideEffect::prePaintScreen(ScreenPrePaintData& data, int time)
 void CubeSlideEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
 {
     if (!slideRotations.empty()) {
-#ifdef KWIN_HAVE_OPENGLES
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
+        pushMatrix();
         paintSlideCube(mask, region, data);
+        popMatrix();
         glCullFace(GL_BACK);
+        pushMatrix();
         paintSlideCube(mask, region, data);
+        popMatrix();
         glDisable(GL_CULL_FACE);
-#else
-        glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        glPushMatrix();
-        paintSlideCube(mask, region, data);
-        glPopMatrix();
-        glCullFace(GL_BACK);
-        glPushMatrix();
-        paintSlideCube(mask, region, data);
-        glPopMatrix();
-        glDisable(GL_CULL_FACE);
-        glPopAttrib();
-#endif
+
         if (dontSlidePanels) {
             foreach (EffectWindow * w, panels) {
                 WindowPaintData wData(w);

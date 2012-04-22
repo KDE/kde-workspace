@@ -45,6 +45,7 @@ public:
     static bool supported();
     static void convertFromGLImage(QImage &img, int w, int h);
 public Q_SLOTS:
+    Q_SCRIPTABLE void screenshotForWindow(qulonglong winid, int mask = 0);
     Q_SCRIPTABLE void screenshotWindowUnderCursor(int mask = 0);
     /**
      * Saves a screenshot of all screen into a file and returns the path to the file.
@@ -55,7 +56,7 @@ public Q_SLOTS:
     /**
      * Saves a screenshot of the screen identified by @p screen into a file and returns the path to the file.
      * Functionality requires hardware support, if not available a null string is returned.
-     * @param screen Number of screen as numbered by kephal
+     * @param screen Number of screen as numbered by QDesktopWidget
      * @returns Path to stored screenshot, or null string in failure case.
      **/
     Q_SCRIPTABLE QString screenshotScreen(int screen);
@@ -74,7 +75,7 @@ Q_SIGNALS:
     Q_SCRIPTABLE void screenshotCreated(qulonglong handle);
 
 private slots:
-    void windowClosed( EffectWindow* w );
+    void windowClosed( KWin::EffectWindow* w );
 
 private:
     void grabPointerImage(QImage& snapshot, int offsetx, int offsety);

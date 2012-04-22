@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "lanczosfilter.h"
 #include "effects.h"
+#include "options.h"
 
 #include <kwinglutils.h>
 #include <kwinglplatform.h>
@@ -59,14 +60,12 @@ void LanczosFilter::init()
         kWarning(1212) << "Lanczos Filter forced on by environment variable";
     }
 
-    KSharedConfigPtr config = KSharedConfig::openConfig("kwinrc");
-
-    if (!force && config->group("Compositing").readEntry("GLTextureFilter", 2) != 2)
+    if (!force && options->glSmoothScale() != 2)
         return; // disabled by config
 
     // The lanczos filter is reported to be broken with the Intel driver and Mesa 7.10
     GLPlatform *gl = GLPlatform::instance();
-    if (!force && gl->driver() == Driver_Intel && gl->mesaVersion() >= kVersionNumber(7, 10))
+    if (!force && gl->driver() == Driver_Intel && gl->mesaVersion() >= kVersionNumber(7, 10) && gl->chipClass() < SandyBridge)
         return;
     // With fglrx the ARB Shader crashes KWin (see Bug #270818 and #286795) and GLSL Shaders are not functional
     if (!force && gl->driver() == Driver_Catalyst) {

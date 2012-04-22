@@ -2,6 +2,17 @@
 Encoding=UTF-8
 Keywords=
 Name=Widget explorer for the desktop
+Name[hu]=Widgetböngésző az asztalhoz
+Name[ia]=Explorator de widget per le scriptorio
+Name[nb]=Elementutforsker for skrivebordet
+Name[nl]=Widget-verkenner voor het bureaublad
+Name[pl]=Eksplorator w postaci elementu interfejsu na pulpit
+Name[pt]=Explorador de elementos para o ecrã
+Name[pt_BR]=Explorador de widgets para a área de trabalho
+Name[sv]=Grafisk komponentutforskare för skrivbordet
+Name[uk]=Перегляд віджетів на стільниці
+Name[x-test]=xxWidget explorer for the desktopxx
+Name[zh_TW]=桌面的元件瀏覽器
 Type=Service
 
 X-KDE-ServiceTypes=Plasma/GenericPackage

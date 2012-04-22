@@ -163,12 +163,8 @@ void Workspace::storeClient(KConfigGroup &cg, int num, Client *c)
     cg.writeEntry(QString("windowType") + n, windowTypeToTxt(c->windowType()));
     cg.writeEntry(QString("shortcut") + n, c->shortcut().toString());
     cg.writeEntry(QString("stackingOrder") + n, unconstrained_stacking_order.indexOf(c));
-    int group = 0;
-    if (c->clientGroup())
-        group = c->clientGroup()->clients().count() > 1 ?
-                // KConfig doesn't support long so we need to live with less precision on 64-bit systems
-                static_cast<int>(reinterpret_cast<long>(c->clientGroup())) : 0;
-    cg.writeEntry(QString("clientGroup") + n, group);
+    // KConfig doesn't support long so we need to live with less precision on 64-bit systems
+    cg.writeEntry(QString("tabGroup") + n, static_cast<int>(reinterpret_cast<long>(c->tabGroup())));
     cg.writeEntry(QString("activities") + n, c->activities());
 }
 
@@ -209,6 +205,9 @@ bool Workspace::stopActivity(const QString &id)
     }
 
     //ugly hack to avoid dbus deadlocks
+#ifdef KWIN_BUILD_ACTIVITIES
+    updateActivityList(true, false);
+#endif
     QMetaObject::invokeMethod(this, "reallyStopActivity", Qt::QueuedConnection, Q_ARG(QString, id));
     //then lie and assume it worked.
     return true;
@@ -216,13 +215,15 @@ bool Workspace::stopActivity(const QString &id)
 
 void Workspace::reallyStopActivity(const QString &id)
 {
+    if (sessionSaving())
+        return; //ksmserver doesn't queue requests (yet)
+
     kDebug() << id;
-    const QStringList openActivities = openActivityList();
 
     QSet<QByteArray> saveSessionIds;
     QSet<QByteArray> dontCloseSessionIds;
-    for (ClientList::Iterator it = clients.begin(); it != clients.end(); ++it) {
-        Client* c = (*it);
+    for (ClientList::const_iterator it = clients.constBegin(); it != clients.constEnd(); ++it) {
+        const Client* c = (*it);
         const QByteArray sessionId = c->sessionId();
         if (sessionId.isEmpty()) {
             continue; //TODO support old wm_command apps too?
@@ -242,7 +243,7 @@ void Workspace::reallyStopActivity(const QString &id)
         foreach (const QString & activityId, activities) {
             if (activityId == id) {
                 saveSessionIds << sessionId;
-            } else if (openActivities.contains(activityId)) {
+            } else if (openActivities_.contains(activityId)) {
                 dontCloseSessionIds << sessionId;
             }
         }
@@ -322,8 +323,8 @@ void Workspace::addSessionInfo(KConfigGroup &cg)
         info->shortcut = cg.readEntry(QString("shortcut") + n, QString());
         info->active = (active_client == i);
         info->stackingOrder = cg.readEntry(QString("stackingOrder") + n, -1);
-        info->clientGroup = cg.readEntry(QString("clientGroup") + n, 0);
-        info->clientGroupClient = NULL;
+        info->tabGroup = cg.readEntry(QString("tabGroup") + n, 0);
+        info->tabGroupClient = NULL;
         info->activities = cg.readEntry(QString("activities") + n, QStringList());
     }
 }
@@ -414,11 +415,13 @@ SessionInfo* Workspace::takeSessionInfo(Client* c)
         }
     }
 
-    // Set clientGroupClient for other clients in the same group
-    if (realInfo && realInfo->clientGroup)
-        foreach (SessionInfo * info, session)
-        if (!info->clientGroupClient && info->clientGroup == realInfo->clientGroup)
-            info->clientGroupClient = c;
+    // Set tabGroupClient for other clients in the same group
+    if (realInfo && realInfo->tabGroup) {
+        foreach (SessionInfo * info, session) {
+            if (!info->tabGroupClient && info->tabGroup == realInfo->tabGroup)
+                info->tabGroupClient = c;
+        }
+    }
 
     return realInfo;
 }

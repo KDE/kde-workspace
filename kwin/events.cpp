@@ -41,6 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QWhatsThis>
 #include <QApplication>
+#include <QtGui/QDesktopWidget>
 
 #include <kkeyserver.h>
 
@@ -48,8 +49,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/extensions/Xrandr.h>
 #include <X11/Xatom.h>
 #include <QX11Info>
-
-#include <kephal/screens.h>
 
 namespace KWin
 {
@@ -144,7 +143,9 @@ void RootInfo::changeActiveWindow(Window w, NET::RequestSource src, Time timesta
             src = NET::FromTool;
         if (src == NET::FromTool)
             workspace->activateClient(c, true);   // force
-        else { // NET::FromApplication
+        else if (c == workspace->mostRecentlyActivatedClient()) {
+            return; // WORKAROUND? With > 1 plasma activities, we cause this ourselves. bug #240673
+        } else { // NET::FromApplication
             Client* c2;
             if (workspace->allowClientActivation(c, timestamp, false, true))
                 workspace->activateClient(c);
@@ -342,29 +343,23 @@ bool Workspace::workspaceEvent(XEvent * e)
     case MapRequest: {
         updateXTime();
 
-        // e->xmaprequest.window is different from e->xany.window
-        // TODO this shouldn't be necessary now
-        Client* c = findClient(WindowMatchPredicate(e->xmaprequest.window));
-        if (!c) {
-// don't check for the parent being the root window, this breaks when some app unmaps
-// a window, changes something and immediately maps it back, without giving KWin
-// a chance to reparent it back to root
-// since KWin can get MapRequest only for root window children and
-// children of WindowWrapper (=clients), the check is AFAIK useless anyway
-// Note: Now the save-set support in Client::mapRequestEvent() actually requires that
-// this code doesn't check the parent to be root.
-//            if ( e->xmaprequest.parent == root ) {
-            if (c = createClient(e->xmaprequest.window, false))
-                c->windowEvent(e);
-            else // refused to manage, simply map it (most probably override redirect)
-                XMapRaised(display(), e->xmaprequest.window);
-            return true;
-        } else {
+        if (Client* c = findClient(WindowMatchPredicate(e->xmaprequest.window))) {
+            // e->xmaprequest.window is different from e->xany.window
+            // TODO this shouldn't be necessary now
             c->windowEvent(e);
             updateFocusChains(c, FocusChainUpdate);
-            return true;
+        } else if ( true /*|| e->xmaprequest.parent != root */ ) {
+            // NOTICE don't check for the parent being the root window, this breaks when some app unmaps
+            // a window, changes something and immediately maps it back, without giving KWin
+            // a chance to reparent it back to root
+            // since KWin can get MapRequest only for root window children and
+            // children of WindowWrapper (=clients), the check is AFAIK useless anyway
+            // NOTICE: The save-set support in Client::mapRequestEvent() actually requires that
+            // this code doesn't check the parent to be root.
+            if (!createClient(e->xmaprequest.window, false))
+                XMapRaised(display(), e->xmaprequest.window);
         }
-        break;
+        return true;
     }
     case MapNotify: {
         if (e->xmap.override_redirect) {
@@ -868,32 +863,34 @@ void Client::enterNotifyEvent(XCrossingEvent* e)
 {
     if (e->window != frameId())
         return; // care only about entering the whole frame
-    if (e->mode == NotifyNormal ||
-            (!options->focusPolicyIsReasonable() &&
-             e->mode == NotifyUngrab)) {
 
-        if (options->shadeHover) {
+#define MOUSE_DRIVEN_FOCUS (!options->focusPolicyIsReasonable() || \
+                            (options->focusPolicy() == Options::FocusFollowsMouse && options->isNextFocusPrefersMouse()))
+    if (e->mode == NotifyNormal || (e->mode == NotifyUngrab && MOUSE_DRIVEN_FOCUS)) {
+
+        if (options->isShadeHover()) {
             cancelShadeHoverTimer();
             if (isShade()) {
                 shadeHoverTimer = new QTimer(this);
                 connect(shadeHoverTimer, SIGNAL(timeout()), this, SLOT(shadeHover()));
                 shadeHoverTimer->setSingleShot(true);
-                shadeHoverTimer->start(options->shadeHoverInterval);
+                shadeHoverTimer->start(options->shadeHoverInterval());
             }
         }
+#undef MOUSE_DRIVEN_FOCUS
 
-        if (options->focusPolicy == Options::ClickToFocus)
+        if (options->focusPolicy() == Options::ClickToFocus || workspace()->windowMenuShown())
             return;
 
-        if (options->autoRaise && !isDesktop() &&
+        if (options->isAutoRaise() && !isDesktop() &&
                 !isDock() && workspace()->focusChangeEnabled() &&
                 workspace()->topClientOnDesktop(workspace()->currentDesktop(),
-                                                options->separateScreenFocus ? screen() : -1) != this) {
+                                                options->isSeparateScreenFocus() ? screen() : -1) != this) {
             delete autoRaiseTimer;
             autoRaiseTimer = new QTimer(this);
             connect(autoRaiseTimer, SIGNAL(timeout()), this, SLOT(autoRaise()));
             autoRaiseTimer->setSingleShot(true);
-            autoRaiseTimer->start(options->autoRaiseInterval);
+            autoRaiseTimer->start(options->autoRaiseInterval());
         }
 
         QPoint currentPos(e->x_root, e->y_root);
@@ -901,7 +898,7 @@ void Client::enterNotifyEvent(XCrossingEvent* e)
             return;
         // for FocusFollowsMouse, change focus only if the mouse has actually been moved, not if the focus
         // change came because of window changes (e.g. closing a window) - #92290
-        if (options->focusPolicy != Options::FocusFollowsMouse
+        if (options->focusPolicy() != Options::FocusFollowsMouse
                 || currentPos != workspace()->focusMousePosition()) {
                 workspace()->requestDelayFocus(this);
         }
@@ -942,10 +939,10 @@ void Client::leaveNotifyEvent(XCrossingEvent* e)
                 shadeHoverTimer = new QTimer(this);
                 connect(shadeHoverTimer, SIGNAL(timeout()), this, SLOT(shadeUnhover()));
                 shadeHoverTimer->setSingleShot(true);
-                shadeHoverTimer->start(options->shadeHoverInterval);
+                shadeHoverTimer->start(options->shadeHoverInterval());
             }
         }
-        if (options->focusPolicy == Options::FocusStrictlyUnderMouse && isActive() && lostMouse) {
+        if (options->focusPolicy() == Options::FocusStrictlyUnderMouse && isActive() && lostMouse) {
             workspace()->requestDelayFocus(0);
         }
         return;
@@ -1000,7 +997,7 @@ void Client::updateMouseGrab()
         XUngrabButton(display(), AnyButton, AnyModifier, wrapperId());
         // keep grab for the simple click without modifiers if needed (see below)
         bool not_obscured = workspace()->topClientOnDesktop(workspace()->currentDesktop(), -1, true, false) == this;
-        if (!(!options->clickRaise || not_obscured))
+        if (!(!options->isClickRaise() || not_obscured))
             grabButton(None);
         return;
     }
@@ -1015,7 +1012,7 @@ void Client::updateMouseGrab()
         // (it is unobscured if it the topmost in the unconstrained stacking order, i.e. it is
         // the most recently raised window)
         bool not_obscured = workspace()->topClientOnDesktop(workspace()->currentDesktop(), -1, true, false) == this;
-        if (!options->clickRaise || not_obscured)
+        if (!options->isClickRaise() || not_obscured)
             ungrabButton(None);
         else
             grabButton(None);
@@ -1153,7 +1150,7 @@ bool Client::buttonPressEvent(Window w, int button, int state, int x, int y, int
             }
             // active inner window
             if (isActive() && w == wrapperId()
-                    && options->clickRaise && button < 4) { // exclude wheel
+                    && options->isClickRaise() && button < 4) { // exclude wheel
                 com = Options::MouseActivateRaiseAndPassClick;
                 was_action = true;
                 perform_handled = true;
@@ -1211,7 +1208,7 @@ bool Client::processDecorationButtonPress(int button, int /*state*/, int x, int 
     if (button == Button1
             && com != Options::MouseOperationsMenu // actions where it's not possible to get the matching
             && com != Options::MouseMinimize  // mouse release event
-            && com != Options::MouseClientGroupDrag) {
+            && com != Options::MouseDragTab) {
         mode = mousePosition(QPoint(x, y));
         buttonDown = true;
         moveOffset = QPoint(x - padding_left, y - padding_top);
@@ -1231,7 +1228,7 @@ bool Client::processDecorationButtonPress(int button, int /*state*/, int x, int 
                com == Options::MouseActivate ||
                com == Options::MouseActivateRaiseAndPassClick ||
                com == Options::MouseActivateAndPassClick ||
-               com == Options::MouseClientGroupDrag ||
+               com == Options::MouseDragTab ||
                com == Options::MouseNothing);
 }
 
@@ -1280,7 +1277,7 @@ bool Client::buttonReleaseEvent(Window w, int /*button*/, int state, int x, int 
             // mouse position is still relative to old Client position, adjust it
             QPoint mousepos(x_root - x + padding_left, y_root - y + padding_top);
             mode = mousePosition(mousepos);
-        } else if (workspace()->decorationSupportsClientGrouping())
+        } else if (workspace()->decorationSupportsTabbing())
             return false;
         updateCursor();
     }
@@ -1325,14 +1322,14 @@ void Client::checkQuickTilingMaximizationZones(int xroot, int yroot)
 {
 
     QuickTileMode mode = QuickTileNone;
-    foreach (Kephal::Screen * screen, Kephal::Screens::self()->screens()) {
+    for (int i=0; i<QApplication::desktop()->screenCount(); ++i) {
 
-        const QRect &area = screen->geom();
+        const QRect &area = QApplication::desktop()->screenGeometry(i);
         if (!area.contains(QPoint(xroot, yroot)))
             continue;
 
         if (options->electricBorderTiling()) {
-        if (xroot <= screen->geom().x() + 20)
+        if (xroot <= area.x() + 20)
             mode |= QuickTileLeft;
         else if (xroot >= area.x() + area.width() - 20)
             mode |= QuickTileRight;
@@ -1560,7 +1557,7 @@ void Client::keyPressEvent(uint key_code)
 void Client::syncEvent(XSyncAlarmNotifyEvent* e)
 {
     if (e->alarm == syncRequest.alarm && XSyncValueEqual(e->counter_value, syncRequest.value)) {
-        ready_for_painting = true;
+        setReadyForPainting();
         syncRequest.isPending = false;
         if (syncRequest.failsafeTimeout)
             syncRequest.failsafeTimeout->stop();
@@ -1568,7 +1565,7 @@ void Client::syncEvent(XSyncAlarmNotifyEvent* e)
             if (syncRequest.timeout)
                 syncRequest.timeout->stop();
             performMoveResize();
-        } else
+        } else // setReadyForPainting does as well, but there's a small chance for resize syncs after the resize ended
             addRepaintFull();
     }
 }
@@ -1591,6 +1588,7 @@ bool Unmanaged::windowEvent(XEvent* e)
     }
     switch(e->type) {
     case UnmapNotify:
+        workspace()->updateFocusMousePosition(QCursor::pos());
         unmapNotifyEvent(&e->xunmap);
         break;
     case MapNotify:

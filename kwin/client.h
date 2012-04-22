@@ -41,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kdecoration.h"
 #include "rules.h"
 #include "toplevel.h"
-#include "clientgroup.h"
+#include "tabgroup.h"
 
 #ifdef HAVE_XSYNC
 #include <X11/extensions/sync.h>
@@ -219,9 +219,57 @@ class Client
      **/
     Q_PROPERTY(bool skipSwitcher READ skipSwitcher WRITE setSkipSwitcher NOTIFY skipSwitcherChanged)
     /**
+     * Indicates that the window should not be included on a taskbar.
+     **/
+    Q_PROPERTY(bool skipTaskbar READ skipTaskbar WRITE setSkipTaskbar NOTIFY skipTaskbarChanged)
+    /**
+     * Indicates that the window should not be included on a Pager.
+     **/
+    Q_PROPERTY(bool skipPager READ skipPager WRITE setSkipPager NOTIFY skipPagerChanged)
+    /**
      * The "Window Tabs" Group this Client belongs to.
      **/
-    Q_PROPERTY(KWin::ClientGroup* clientGroup READ clientGroup NOTIFY clientGroupChanged)
+    Q_PROPERTY(KWin::TabGroup* tabGroup READ tabGroup NOTIFY tabGroupChanged SCRIPTABLE false)
+    /**
+     * Whether this Client is the currently visible Client in its Client Group (Window Tabs).
+     * For change connect to the visibleChanged signal on the Client's Group.
+     **/
+    Q_PROPERTY(bool isCurrentTab READ isCurrentTab)
+    /**
+     * Minimum size as specified in WM_NORMAL_HINTS
+     **/
+    Q_PROPERTY(QSize minSize READ minSize)
+    /**
+     * Maximum size as specified in WM_NORMAL_HINTS
+     **/
+    Q_PROPERTY(QSize maxSize READ maxSize)
+    /**
+     * Whether the window has a decoration or not.
+     * This property is not allowed to be set by applications themselves.
+     * The decision whether a window has a border or not belongs to the window manager.
+     * If this property gets abused by application developers, it will be removed again.
+     **/
+    Q_PROPERTY(bool noBorder READ noBorder WRITE setNoBorder)
+    /**
+     * Whether window state _NET_WM_STATE_DEMANDS_ATTENTION is set. This state indicates that some
+     * action in or with the window happened. For example, it may be set by the Window Manager if
+     * the window requested activation but the Window Manager refused it, or the application may set
+     * it if it finished some work. This state may be set by both the Client and the Window Manager.
+     * It should be unset by the Window Manager when it decides the window got the required attention
+     * (usually, that it got activated).
+     **/
+    Q_PROPERTY(bool demandsAttention READ isDemandingAttention WRITE demandAttention NOTIFY demandsAttentionChanged)
+    /**
+     * A client can block compositing. That is while the Client is alive and the state is set,
+     * Compositing is suspended and is resumed when there are no Clients blocking compositing any
+     * more.
+     *
+     * This is actually set by a window property, unfortunately not used by the target application
+     * group. For convenience it's exported as a property to the scripts.
+     *
+     * Use with care!
+     **/
+    Q_PROPERTY(bool blocksCompositing READ isBlockingCompositing WRITE setBlockingCompositing NOTIFY blockingCompositingChanged)
 public:
     Client(Workspace* ws);
     Window wrapperId() const;
@@ -247,7 +295,7 @@ public:
     void removeRule(Rules* r);
     void setupWindowRules(bool ignore_temporary);
     void applyWindowRules();
-    void updateWindowRules();
+    void updateWindowRules(Rules::Types selection);
     void updateFullscreenMonitors(NETFullscreenMonitors topology);
 
     /**
@@ -319,7 +367,6 @@ public:
     bool isMinimized() const;
     bool isMaximizable() const;
     QRect geometryRestore() const;
-    MaximizeMode maximizeModeRestore() const;
     MaximizeMode maximizeMode() const;
     bool isMinimizable() const;
     void setMaximize(bool vertically, bool horizontally);
@@ -343,7 +390,7 @@ public:
     void checkNoBorder();
 
     bool skipTaskbar(bool from_outside = false) const;
-    void setSkipTaskbar(bool set, bool from_outside);
+    void setSkipTaskbar(bool set, bool from_outside = false);
 
     bool skipPager() const;
     void setSkipPager(bool);
@@ -355,7 +402,7 @@ public:
     void setKeepAbove(bool);
     bool keepBelow() const;
     void setKeepBelow(bool);
-    Layer layer() const;
+    virtual Layer layer() const;
     Layer belongsToLayer() const;
     void invalidateLayer();
     int sessionStackingOrder() const;
@@ -374,6 +421,9 @@ public:
 
     void takeActivity(int flags, bool handled, allowed_t);   // Takes ActivityFlags as arg (in utils.h)
     void takeFocus(allowed_t);
+    bool isDemandingAttention() const {
+        return demands_attention;
+    }
     void demandAttention(bool set = true);
 
     void setMask(const QRegion& r, int mode = X::Unsorted);
@@ -433,6 +483,7 @@ public:
 
     virtual void setupCompositing();
     virtual void finishCompositing();
+    void setBlockingCompositing(bool block);
     inline bool isBlockingCompositing() { return blocks_compositing; }
     void updateCompositeBlocking(bool readProperty = false);
 
@@ -456,7 +507,6 @@ public:
     void updateUserTime(Time time = CurrentTime);
     Time userTime() const;
     bool hasUserTimeSupport() const;
-    bool ignoreFocusStealing() const;
 
     /// Does 'delete c;'
     static void deleteClient(Client* c, allowed_t);
@@ -480,8 +530,14 @@ public:
     bool hasStrut() const;
 
     // Tabbing functions
-    ClientGroup* clientGroup() const; // Returns a pointer to client_group
-    void setClientGroup(ClientGroup* group);
+    TabGroup* tabGroup() const; // Returns a pointer to client_group
+    Q_INVOKABLE inline bool tabBefore(Client *other, bool activate) { return tabTo(other, false, activate); }
+    Q_INVOKABLE inline bool tabBehind(Client *other, bool activate) { return tabTo(other, true, activate); }
+    Q_INVOKABLE bool untab(const QRect &toGeometry = QRect());
+    /**
+     * Set tab group - this is to be invoked by TabGroup::add/remove(client) and NO ONE ELSE
+     */
+    void setTabGroup(TabGroup* group);
     /*
     *   If shown is true the client is mapped and raised, if false
     *   the client is unmapped and hidden, this function is called
@@ -495,6 +551,7 @@ public:
     *   client, this function stops it.
     */
     void dontMoveResize();
+    bool isCurrentTab() const;
 
     /**
      * Whether or not the window has a strut that expands through the invisible area of
@@ -564,6 +621,7 @@ public:
 
     //sets whether the client should be treated as a SessionInteract window
     void setSessionInteract(bool needed);
+    virtual bool isClient() const;
 
 public slots:
     void closeWindow();
@@ -606,6 +664,7 @@ private:
 
     bool processDecorationButtonPress(int button, int state, int x, int y, int x_root, int y_root,
                                       bool ignoreMenu = false);
+    Client* findAutogroupCandidate() const;
 
 protected:
     virtual void debug(QDebug& stream) const;
@@ -616,7 +675,6 @@ private slots:
     void performMoveResize();
     void removeSyncSupport();
     void pingTimeout();
-    void processKillerExited();
     void demandAttentionKNotify();
     void repaintDecorationPending();
 
@@ -626,9 +684,9 @@ private slots:
     //calls
 signals:
     void clientManaging(KWin::Client*);
-    void s_unminimized();
-    void maximizeSet(QPair<bool, bool>);
+    void clientFullScreenSet(KWin::Client*, bool, bool);
     void clientMaximizedStateChanged(KWin::Client*, KDecorationDefines::MaximizeMode);
+    void clientMaximizedStateChanged(KWin::Client* c, bool h, bool v);
     void clientMinimized(KWin::Client* client, bool animate);
     void clientUnminimized(KWin::Client* client, bool animate);
     void clientStartUserMovedResized(KWin::Client*);
@@ -647,11 +705,21 @@ signals:
     void moveResizedChanged();
     void iconChanged();
     void skipSwitcherChanged();
+    void skipTaskbarChanged();
+    void skipPagerChanged();
     /**
-     * Emitted whenever the Client's ClientGroup changed. That is whenever the Client is moved to
+     * Emitted whenever the Client's TabGroup changed. That is whenever the Client is moved to
      * another group, but not when a Client gets added or removed to the Client's ClientGroup.
      **/
-    void clientGroupChanged();
+    void tabGroupChanged();
+    /**
+     * Emitted whenever the demands attention state changes.
+     **/
+    void demandsAttentionChanged();
+    /**
+     * Emitted whenever the Client's block compositing state changes.
+     **/
+    void blockingCompositingChanged();
 
 private:
     void exportMappingState(int s);   // ICCCM 4.1.3.1, 4.1.4, NETWM 2.5.1
@@ -688,7 +756,6 @@ private:
     void positionGeometryTip();
     void grabButton(int mod);
     void ungrabButton(int mod);
-    void resetMaximize();
     void resizeDecoration(const QSize& s);
 
     void pingWindow();
@@ -722,6 +789,8 @@ private:
 
     void updateInputWindow();
 
+    bool tabTo(Client *other, bool behind, bool activate);
+
     Window client;
     Window wrapper;
     KDecoration* decoration;
@@ -754,7 +823,6 @@ private:
     /** The quick tile mode of this window.
      */
     int quick_tile_mode;
-    QRect geom_pretile;
 
     void readTransient();
     Window verifyTransientFor(Window transient_for, bool set);
@@ -769,6 +837,7 @@ private:
     Window original_transient_for_id;
     ClientList transients_list; // SELI TODO: Make this ordered in stacking order?
     ShadeMode shade_mode;
+    Client *shade_below;
     uint active : 1;
     uint deleting : 1; ///< True when doing cleanup and destroying the client
     uint keep_above : 1; ///< NET::KeepAbove (was stays_on_top)
@@ -815,7 +884,6 @@ private:
     MaximizeMode max_mode;
     QRect geom_restore;
     QRect geom_fs_restore;
-    MaximizeMode maxmode_restore;
     QTimer* autoRaiseTimer;
     QTimer* shadeHoverTimer;
     QTimer* delayedMoveResizeTimer;
@@ -823,10 +891,10 @@ private:
     QString cap_normal, cap_iconic, cap_suffix;
     Group* in_group;
     Window window_group;
-    ClientGroup* client_group;
+    TabGroup* tab_group;
     Layer in_layer;
     QTimer* ping_timer;
-    QProcess* process_killer;
+    qint64 m_killHelperPID;
     Time ping_timestamp;
     Time user_time;
     unsigned long allowed_actions;
@@ -857,7 +925,6 @@ private:
     KShortcut _shortcut;
     int sm_stacking_order;
     friend struct FetchNameInternalPredicate;
-    friend struct CheckIgnoreFocusStealingProcedure;
     friend struct ResetupRulesProcedure;
     friend class GeometryUpdatesBlocker;
     QTimer* demandAttentionKNotifyTimer;
@@ -972,9 +1039,9 @@ inline Group* Client::group()
     return in_group;
 }
 
-inline ClientGroup* Client::clientGroup() const
+inline TabGroup* Client::tabGroup() const
 {
-    return client_group;
+    return tab_group;
 }
 
 inline bool Client::isMinimized() const
@@ -990,7 +1057,7 @@ inline bool Client::isActive() const
 inline bool Client::isShown(bool shaded_is_shown) const
 {
     return !isMinimized() && (!isShade() || shaded_is_shown) && !hidden &&
-           (clientGroup() == NULL || clientGroup()->visible() == this);
+           (!tabGroup() || tabGroup()->current() == this);
 }
 
 inline bool Client::isHiddenInternal() const
@@ -1031,11 +1098,6 @@ inline QPixmap Client::hugeIcon() const
 inline QRect Client::geometryRestore() const
 {
     return geom_restore;
-}
-
-inline Client::MaximizeMode Client::maximizeModeRestore() const
-{
-    return maxmode_restore;
 }
 
 inline Client::MaximizeMode Client::maximizeMode() const
@@ -1143,17 +1205,10 @@ inline bool Client::hasUserTimeSupport() const
     return info->userTime() != -1U;
 }
 
-inline bool Client::ignoreFocusStealing() const
-{
-    return ignore_focus_stealing;
-}
-
 inline const WindowRules* Client::rules() const
 {
     return &client_rules;
 }
-
-KWIN_PROCEDURE(CheckIgnoreFocusStealingProcedure, Client, cl->ignore_focus_stealing = options->checkIgnoreFocusStealing(cl));
 
 inline Window Client::moveResizeGrabWindow() const
 {

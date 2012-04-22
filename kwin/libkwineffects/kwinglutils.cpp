@@ -225,6 +225,9 @@ void loadMatrix(const QMatrix4x4 &matrix)
 #ifdef KWIN_HAVE_OPENGLES
     Q_UNUSED(matrix)
 #else
+    if (ShaderManager::instance()->isValid()) {
+        return;
+    }
     GLfloat m[16];
     const qreal *data = matrix.constData();
     for (int i = 0; i < 4; ++i) {
@@ -688,6 +691,20 @@ GLShader *ShaderManager::pushShader(ShaderType type, bool reset)
 
     return shader;
 }
+
+void ShaderManager::resetAllShaders()
+{
+    if (!m_inited || !m_valid) {
+        return;
+    }
+    pushShader(SimpleShader, true);
+    pushShader(GenericShader, true);
+    pushShader(ColorShader, true);
+    popShader();
+    popShader();
+    popShader();
+}
+
 
 void ShaderManager::pushShader(GLShader *shader)
 {

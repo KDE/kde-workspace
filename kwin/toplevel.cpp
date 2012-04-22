@@ -96,15 +96,16 @@ QDebug& operator<<(QDebug& stream, const ConstToplevelList& list)
 
 QRect Toplevel::decorationRect() const
 {
-    QRect r(rect());
-    if (hasShadow())
-        r |= shadow()->shadowRegion().boundingRect();
-    return r;
+    return rect();
 }
 
 void Toplevel::detectShape(Window id)
 {
+    const bool wasShape = is_shape;
     is_shape = Extensions::hasShape(id);
+    if (wasShape != is_shape) {
+        emit shapedChanged();
+    }
 }
 
 // used only by Deleted::copy()
@@ -239,7 +240,7 @@ void Toplevel::getWmClientLeader()
   Returns sessionId for this client,
   taken either from its window or from the leader window.
  */
-QByteArray Toplevel::sessionId()
+QByteArray Toplevel::sessionId() const
 {
     QByteArray result = staticSessionId(window());
     if (result.isEmpty() && wmClientLeaderWin && wmClientLeaderWin != window())
@@ -329,6 +330,21 @@ void Toplevel::setOpacity(double new_opacity)
     }
 }
 
+void Toplevel::setReadyForPainting()
+{
+    if (!ready_for_painting) {
+        ready_for_painting = true;
+        if (compositing()) {
+            addRepaintFull();
+            emit windowShown(this);
+            if (Client *cl = dynamic_cast<Client*>(this)) {
+                if (cl->tabGroup() && cl->tabGroup()->current() == cl)
+                    cl->tabGroup()->setCurrent(cl, true);
+            }
+        }
+    }
+}
+
 void Toplevel::deleteEffectWindow()
 {
     delete effect_window;
@@ -337,8 +353,6 @@ void Toplevel::deleteEffectWindow()
 
 int Toplevel::screen() const
 {
-    if (!options->xineramaEnabled)
-        return 0;
     int s = workspace()->screenNumber(geometry().center());
     if (s < 0) {
         kDebug(1212) << "Invalid screen: Center" << geometry().center() << ", screen" << s;
@@ -349,8 +363,6 @@ int Toplevel::screen() const
 
 bool Toplevel::isOnScreen(int screen) const
 {
-    if (!options->xineramaEnabled)
-        return screen == 0;
     return workspace()->screenGeometry(screen).intersects(geometry());
 }
 
@@ -367,7 +379,7 @@ void Toplevel::getShadow()
         dirtyRect |= shadow()->shadowRegion().boundingRect();
     if (dirtyRect.isValid()) {
         dirtyRect.translate(pos());
-        workspace()->addRepaint(dirtyRect);
+        addLayerRepaint(dirtyRect);
     }
 }
 
@@ -433,6 +445,16 @@ void Toplevel::getWmOpaqueRegion()
     } while (bytes_after_return > 0);
 
     opaque_region = new_opaque_region;
+}
+
+bool Toplevel::isClient() const
+{
+    return false;
+}
+
+bool Toplevel::isDeleted() const
+{
+    return false;
 }
 
 } // namespace

@@ -35,12 +35,12 @@ public:
     // used by effects to keep the window around for e.g. fadeout effects when it's destroyed
     void refWindow();
     void unrefWindow(bool delay = false);
-    void discard(allowed_t);
     virtual int desktop() const;
     virtual QStringList activities() const;
     virtual QPoint clientPos() const;
     virtual QSize clientSize() const;
     virtual QRect transparentRect() const;
+    virtual bool isDeleted() const;
     const QPixmap *topDecoPixmap() const {
         return &decorationPixmapTop;
     }
@@ -58,6 +58,11 @@ public:
     }
     void layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect &bottom) const;
     QRect decorationRect() const;
+    virtual Layer layer() const {
+        return m_layer;
+    }
+public slots:
+    void discard(allowed_t = Allowed);
 protected:
     virtual void debug(QDebug& stream) const;
     virtual bool shouldUnredirect() const;
@@ -82,6 +87,7 @@ private:
     QRect decoration_top;
     QRect decoration_bottom;
     int padding_left, padding_top, padding_right, padding_bottom;
+    Layer m_layer;
 };
 
 inline void Deleted::refWindow()

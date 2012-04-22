@@ -26,6 +26,7 @@
 #include "kcommondecoration_p.h"
 
 #include <QApplication>
+#include <QBasicTimer>
 #include <QCursor>
 #include <QDateTime>
 #include <QLabel>
@@ -37,8 +38,6 @@
 #include <kapplication.h>
 #include "kdecorationfactory.h"
 #include <klocale.h>
-
-#include <kephal/screens.h>
 
 #include "kcommondecoration.moc"
 
@@ -693,32 +692,67 @@ void KCommonDecoration::slotKeepBelow()
     setKeepBelow(!keepBelow());
 }
 
+static QBasicTimer* timer = NULL;
 void KCommonDecoration::menuButtonPressed()
 {
-    static QTime* t = NULL;
-    static KCommonDecoration* lastClient = NULL;
-    if (t == NULL)
-        t = new QTime;
-    bool dbl = (lastClient == this && t->elapsed() <= QApplication::doubleClickInterval());
-    lastClient = this;
-    t->start();
-    if (!dbl || !decorationBehaviour(DB_MenuClose)) {
-        QRect menuRect = m_button[MenuButton]->rect();
-        QPoint menutop = m_button[MenuButton]->mapToGlobal(menuRect.topLeft());
-        QPoint menubottom = m_button[MenuButton]->mapToGlobal(menuRect.bottomRight()) + QPoint(0, 2);
+    if (decorationBehaviour(DB_MenuClose)) {
+        if (timer == NULL) {
+            timer = new QBasicTimer();
+        }
+        if (!timer->isActive()) {
+            timer->start(150, this);
+        }
+        // double click behavior
+        static QTime* t = NULL;
+        static KCommonDecoration* lastClient = NULL;
+        if (t == NULL) {
+            t = new QTime;
+        }
+        if (lastClient == this && t->elapsed() <= QApplication::doubleClickInterval()) {
+            closing = true;
+        } else {
+            lastClient = this;
+            t->start();
+        }
+    } else {
         KDecorationFactory* f = factory();
-        showWindowMenu(QRect(menutop, menubottom));
+        doShowWindowMenu();
         if (!f->exists(decoration()))   // 'this' was deleted
             return;
         m_button[MenuButton]->setDown(false);
-    } else
-        closing = true;
+    }
 }
 
 void KCommonDecoration::menuButtonReleased()
 {
-    if (closing)
+    if (closing) {
+        if (timer && timer->isActive()) {
+            timer->stop();
+        }
         closeWindow();
+    }
+}
+
+void KCommonDecoration::timerEvent(QTimerEvent *event)
+{
+    if (timer && event->timerId() == timer->timerId()) {
+        timer->stop();
+        closing = false;
+        if (!m_button[MenuButton]->isDown()) {
+            return;
+        }
+        doShowWindowMenu();
+        return;
+    }
+    QObject::timerEvent(event);
+}
+
+void KCommonDecoration::doShowWindowMenu()
+{
+    QRect menuRect = m_button[MenuButton]->rect();
+    QPoint menutop = m_button[MenuButton]->mapToGlobal(menuRect.topLeft());
+    QPoint menubottom = m_button[MenuButton]->mapToGlobal(menuRect.bottomRight()) + QPoint(0, 2);
+    showWindowMenu(QRect(menutop, menubottom));
 }
 
 void KCommonDecoration::resizeEvent(QResizeEvent */*e*/)
@@ -1277,59 +1311,64 @@ bool KCommonDecorationUnstable::compositingActive() const
 
 // Window tabbing
 
-bool KCommonDecorationUnstable::isClientGroupActive()
+int KCommonDecorationUnstable::tabCount() const
 {
-    return static_cast<KDecorationUnstable*>(decoration())->isClientGroupActive();
+    return static_cast<const KDecorationUnstable*>(decoration())->tabCount();
 }
 
-QList< ClientGroupItem > KCommonDecorationUnstable::clientGroupItems() const
+QString KCommonDecorationUnstable::caption(int idx) const
 {
-    return static_cast<const KDecorationUnstable*>(decoration())->clientGroupItems();
+    return static_cast<const KDecorationUnstable*>(decoration())->caption(idx);
 }
 
-long KCommonDecorationUnstable::itemId(int index)
+QIcon KCommonDecorationUnstable::icon(int idx) const
 {
-    return static_cast<KDecorationUnstable*>(decoration())->itemId(index);
+    return static_cast<const KDecorationUnstable*>(decoration())->icon(idx);
 }
 
-int KCommonDecorationUnstable::visibleClientGroupItem()
+long KCommonDecorationUnstable::tabId(int idx) const
 {
-    return static_cast<KDecorationUnstable*>(decoration())->visibleClientGroupItem();
+    return static_cast<const KDecorationUnstable*>(decoration())->tabId(idx);
 }
 
-void KCommonDecorationUnstable::setVisibleClientGroupItem(int index)
+long KCommonDecorationUnstable::currentTabId() const
 {
-    static_cast<KDecorationUnstable*>(decoration())->setVisibleClientGroupItem(index);
+    return static_cast<const KDecorationUnstable*>(decoration())->currentTabId();
 }
 
-void KCommonDecorationUnstable::moveItemInClientGroup(int index, int before)
+void KCommonDecorationUnstable::setCurrentTab(long id)
 {
-    static_cast<KDecorationUnstable*>(decoration())->moveItemInClientGroup(index, before);
+    static_cast<KDecorationUnstable*>(decoration())->setCurrentTab(id);
 }
 
-void KCommonDecorationUnstable::moveItemToClientGroup(long itemId, int before)
+void KCommonDecorationUnstable::tab_A_before_B(long A, long B)
 {
-    static_cast<KDecorationUnstable*>(decoration())->moveItemToClientGroup(itemId, before);
+    static_cast<KDecorationUnstable*>(decoration())->tab_A_before_B(A, B);
 }
 
-void KCommonDecorationUnstable::removeFromClientGroup(int index, const QRect& newGeom)
+void KCommonDecorationUnstable::tab_A_behind_B(long A, long B)
 {
-    static_cast<KDecorationUnstable*>(decoration())->removeFromClientGroup(index, newGeom);
+    static_cast<KDecorationUnstable*>(decoration())->tab_A_behind_B(A, B);
 }
 
-void KCommonDecorationUnstable::closeClientGroupItem(int index)
+void KCommonDecorationUnstable::untab(long id, const QRect& newGeom)
 {
-    static_cast<KDecorationUnstable*>(decoration())->closeClientGroupItem(index);
+    static_cast<KDecorationUnstable*>(decoration())->untab(id, newGeom);
 }
 
-void KCommonDecorationUnstable::closeAllInClientGroup()
+void KCommonDecorationUnstable::closeTab(long id)
 {
-    static_cast<KDecorationUnstable*>(decoration())->closeAllInClientGroup();
+    static_cast<KDecorationUnstable*>(decoration())->closeTab(id);
 }
 
-void KCommonDecorationUnstable::displayClientMenu(int index, const QPoint& pos)
+void KCommonDecorationUnstable::closeTabGroup()
 {
-    static_cast<KDecorationUnstable*>(decoration())->displayClientMenu(index, pos);
+    static_cast<KDecorationUnstable*>(decoration())->closeTabGroup();
+}
+
+void KCommonDecorationUnstable::showWindowMenu(const QPoint &pos, long id)
+{
+    static_cast<KDecorationUnstable*>(decoration())->showWindowMenu(pos, id);
 }
 
 KDecoration::WindowOperation KCommonDecorationUnstable::buttonToWindowOperation(Qt::MouseButtons button)

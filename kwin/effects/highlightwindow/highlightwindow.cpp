@@ -38,10 +38,10 @@ HighlightWindowEffect::HighlightWindowEffect()
     // Announce support by creating a dummy version on the root window
     unsigned char dummy = 0;
     XChangeProperty(display(), rootWindow(), m_atom, m_atom, 8, PropModeReplace, &dummy, 1);
-    connect(effects, SIGNAL(windowAdded(EffectWindow*)), this, SLOT(slotWindowAdded(EffectWindow*)));
-    connect(effects, SIGNAL(windowClosed(EffectWindow*)), this, SLOT(slotWindowClosed(EffectWindow*)));
-    connect(effects, SIGNAL(windowDeleted(EffectWindow*)), this, SLOT(slotWindowDeleted(EffectWindow*)));
-    connect(effects, SIGNAL(propertyNotify(EffectWindow*,long)), this, SLOT(slotPropertyNotify(EffectWindow*,long)));
+    connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(propertyNotify(KWin::EffectWindow*,long)), this, SLOT(slotPropertyNotify(KWin::EffectWindow*,long)));
 }
 
 HighlightWindowEffect::~HighlightWindowEffect()
@@ -53,7 +53,7 @@ HighlightWindowEffect::~HighlightWindowEffect()
 static bool isInitiallyHidden(EffectWindow* w)
 {
     // Is the window initially hidden until it is highlighted?
-    return w->isMinimized() || !w->visibleInClientGroup() || !w->isOnCurrentDesktop();
+    return w->isMinimized() || !w->isCurrentTab() || !w->isOnCurrentDesktop();
 }
 
 void HighlightWindowEffect::prePaintWindow(EffectWindow* w, WindowPrePaintData& data, int time)
@@ -97,8 +97,8 @@ void HighlightWindowEffect::prePaintWindow(EffectWindow* w, WindowPrePaintData& 
     if (opacity != m_windowOpacity.end() && *opacity > 0.01) {
         if (w->isMinimized())
             w->enablePainting(EffectWindow::PAINT_DISABLED_BY_MINIMIZE);
-        if (!w->visibleInClientGroup())
-            w->enablePainting(EffectWindow::PAINT_DISABLED_BY_CLIENT_GROUP);
+        if (!w->isCurrentTab())
+            w->enablePainting(EffectWindow::PAINT_DISABLED_BY_TAB_GROUP);
         if (!w->isOnCurrentDesktop())
             w->enablePainting(EffectWindow::PAINT_DISABLED_BY_DESKTOP);
     }

@@ -57,7 +57,7 @@ public:
     virtual void postPaintWindow(EffectWindow* w);
     virtual void paintEffectFrame(EffectFrame* frame, QRegion region, double opacity, double frameOpacity);
 
-    bool provides(Effect::Feature ef);
+    Effect *provides(Effect::Feature ef);
 
     virtual void drawWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data);
 
@@ -160,7 +160,9 @@ public:
     bool borderActivated(ElectricBorder border);
     void grabbedKeyboardEvent(QKeyEvent* e);
     bool hasKeyboardGrab() const;
+    void desktopResized(const QSize &size);
 
+    virtual void reloadEffect(Effect *effect);
     bool loadEffect(const QString& name, bool checkDefault = false);
     void toggleEffect(const QString& name);
     void unloadEffect(const QString& name);
@@ -173,15 +175,16 @@ public:
     QStringList activeEffects() const;
 
 public Q_SLOTS:
-    void slotClientGroupItemSwitched(EffectWindow* from, EffectWindow* to);
-    void slotClientGroupItemAdded(EffectWindow* from, EffectWindow* to);
-    void slotClientGroupItemRemoved(EffectWindow* c, EffectWindow* group);
+    void slotCurrentTabAboutToChange(EffectWindow* from, EffectWindow* to);
+    void slotTabAdded(EffectWindow* from, EffectWindow* to);
+    void slotTabRemoved(EffectWindow* c, EffectWindow* newActiveWindow);
     void slotShowOutline(const QRect &geometry);
     void slotHideOutline();
 
 protected Q_SLOTS:
     void slotDesktopChanged(int old);
     void slotClientAdded(KWin::Client *c);
+    void slotClientShown(KWin::Toplevel*);
     void slotUnmanagedAdded(KWin::Unmanaged *u);
     void slotWindowClosed(KWin::Toplevel *c);
     void slotClientActivated(KWin::Client *c);
@@ -199,6 +202,7 @@ protected Q_SLOTS:
     void slotPropertyNotify(long atom);
 
 protected:
+    bool loadScriptedEffect(const QString &name, KService *service);
     KLibrary* findEffectLibrary(KService* service);
     void effectsChanged();
     void setupClientConnections(KWin::Client *c);
@@ -221,93 +225,31 @@ private:
     QList< Effect* >::iterator m_currentBuildQuadsIterator;
 };
 
-class EffectWindowImpl : public QObject, public EffectWindow
+class EffectWindowImpl : public EffectWindow
 {
     Q_OBJECT
 public:
-    EffectWindowImpl();
+    EffectWindowImpl(Toplevel *toplevel);
     virtual ~EffectWindowImpl();
 
     virtual void enablePainting(int reason);
     virtual void disablePainting(int reason);
     virtual bool isPaintingEnabled();
-    virtual void addRepaint(const QRect& r);
-    virtual void addRepaint(int x, int y, int w, int h);
-    virtual void addRepaintFull();
 
     virtual void refWindow();
     virtual void unrefWindow();
-    virtual bool isDeleted() const;
 
-    virtual bool isOnActivity(QString id) const;
-    virtual bool isOnAllActivities() const;
-
-    virtual bool isOnAllDesktops() const;
-    virtual int desktop() const; // prefer isOnXXX()
-    virtual bool isMinimized() const;
-    virtual double opacity() const;
-    virtual bool hasAlpha() const;
-    virtual QString caption() const;
-    virtual QPixmap icon() const;
-    virtual QString windowClass() const;
-    virtual QString windowRole() const;
     virtual const EffectWindowGroup* group() const;
 
-    virtual int x() const;
-    virtual int y() const;
-    virtual int width() const;
-    virtual int height() const;
-    virtual QSize basicUnit() const;
-    virtual QRect geometry() const;
     virtual QRegion shape() const;
-    virtual int screen() const;
-    virtual bool hasOwnShape() const;
-    virtual QPoint pos() const;
-    virtual QSize size() const;
-    virtual QRect rect() const;
-    virtual bool isMovable() const;
-    virtual bool isMovableAcrossScreens() const;
-    virtual bool isUserMove() const;
-    virtual bool isUserResize() const;
-    virtual QRect iconGeometry() const;
-    virtual QRect contentsRect() const;
     virtual QRect decorationInnerRect() const;
     virtual QByteArray readProperty(long atom, long type, int format) const;
     virtual void deleteProperty(long atom) const;
 
-    virtual bool isDesktop() const;
-    virtual bool isDock() const;
-    virtual bool isToolbar() const;
-    virtual bool isMenu() const;
-    virtual bool isNormalWindow() const; // normal as in 'NET::Normal or NET::Unknown non-transient'
-    virtual bool isSpecialWindow() const;
-    virtual bool isDialog() const;
-    virtual bool isSplash() const;
-    virtual bool isUtility() const;
-    virtual bool isDropdownMenu() const;
-    virtual bool isPopupMenu() const; // a context popup, not dropdown, not torn-off
-    virtual bool isTooltip() const;
-    virtual bool isNotification() const;
-    virtual bool isComboBox() const;
-    virtual bool isDNDIcon() const;
-    virtual NET::WindowType windowType() const;
-    virtual bool isManaged() const; // managed or override-redirect
-    virtual bool acceptsFocus() const;
-    virtual bool keepAbove() const;
-
-    virtual bool isModal() const;
     virtual EffectWindow* findModal();
     virtual EffectWindowList mainWindows() const;
 
-    virtual bool isSkipSwitcher() const;
-
     virtual WindowQuadList buildQuads(bool force = false) const;
-
-    virtual void minimize() const;
-    virtual void unminimize() const;
-    virtual void closeWindow() const;
-
-    virtual bool visibleInClientGroup() const;
 
     const Toplevel* window() const;
     Toplevel* window();

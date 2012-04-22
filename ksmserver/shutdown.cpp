@@ -154,7 +154,8 @@ void KSMServer::shutdown( KWorkSpace::ShutdownConfirm confirm,
     if ( !logoutConfirmed ) {
         KApplication::kApplication()->updateUserTimestamp();
         KSMShutdownFeedback::start(); // make the screen gray
-        logoutConfirmed = KSMShutdownDlg::confirmShutdown( maysd, choose, sdtype, bopt );
+        QString theme = cg.readEntry( "theme", "default" );
+        logoutConfirmed = KSMShutdownDlg::confirmShutdown( maysd, choose, sdtype, bopt, theme);
         // ###### We can't make the screen remain gray while talking to the apps,
         // because this prevents interaction ("do you want to save", etc.)
         // TODO: turn the feedback widget into a list of apps to be closed,
@@ -460,6 +461,12 @@ void KSMServer::completeShutdownOrCheckpoint()
     if ( state == Shutdown ) {
         KNotification *n = KNotification::event( "exitkde" , QString() , QPixmap() , 0l ,  KNotification::DefaultEvent  ); // KDE says good bye
         connect(n, SIGNAL(closed()) , this, SLOT(logoutSoundFinished()) );
+        // https://bugs.kde.org/show_bug.cgi?id=228005
+        // if sound is not working for some reason (e.g. no phonon
+        // backends are installed) the closed() signal never happens
+        // and logoutSoundFinished() never gets called. Add this timer to make
+        // sure the shutdown procedure continues even if sound system is broken.
+        QTimer::singleShot(5000, this, SLOT(logoutSoundTimeout()));
         kDebug( 1218 ) << "Starting logout event";
 	state = WaitingForKNotify;
         createLogoutEffectWidget();
@@ -473,6 +480,15 @@ void KSMServer::completeShutdownOrCheckpoint()
         startKillingSubSession();
     }
 
+}
+
+void KSMServer::logoutSoundTimeout()
+{
+    if (state != WaitingForKNotify) {
+        return;
+    }
+    kDebug( 1218 ) << "logout sound timeout";
+    logoutSoundFinished();
 }
 
 void KSMServer::startKilling()

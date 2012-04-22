@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
+#include <QtGui/QDesktopWidget>
 #include <QtGui/QGraphicsObject>
 #include <QtGui/QResizeEvent>
 #include <QX11Info>
@@ -33,15 +34,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KDebug>
 #include <KDE/KIconEffect>
 #include <KDE/KIconLoader>
+#include <KDE/KServiceTypeTrader>
 #include <KDE/KStandardDirs>
 #include <KDE/Plasma/FrameSvg>
 #include <KDE/Plasma/Theme>
 #include <KDE/Plasma/WindowEffects>
 #include <kdeclarative.h>
-#include <kephal/screens.h>
 // KWin
 #include "thumbnailitem.h"
 #include <kwindowsystem.h>
+#include "../client.h"
+#include "../workspace.h"
 
 namespace KWin
 {
@@ -64,9 +67,6 @@ QPixmap ImageProvider::requestPixmap(const QString &id, QSize *size, const QSize
     }
     const QModelIndex index = m_model->index(row, 0);
     if (!index.isValid()) {
-        return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
-    }
-    if (index.model()->data(index, ClientModel::EmptyRole).toBool()) {
         return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
     }
     TabBoxClient* client = static_cast< TabBoxClient* >(index.model()->data(index, ClientModel::ClientRole).value<void *>());
@@ -151,16 +151,20 @@ DeclarativeView::DeclarativeView(QAbstractItemModel *model, TabBoxConfig::TabBox
 
 void DeclarativeView::showEvent(QShowEvent *event)
 {
+#ifndef TABBOX_KCM
     if (tabBox->embedded()) {
-        connect(KWindowSystem::self(), SIGNAL(windowChanged(WId,uint)), SLOT(slotWindowChanged(WId, uint)));
+        Client *c = Workspace::self()->findClient(WindowMatchPredicate(tabBox->embedded()));
+        if (c) {
+            connect(c, SIGNAL(geometryChanged()), this, SLOT(slotUpdateGeometry()));
+        }
     }
+#endif
     updateQmlSource();
-    m_currentScreenGeometry = Kephal::ScreenUtils::screenGeometry(tabBox->activeScreen());
+    m_currentScreenGeometry = QApplication::desktop()->screenGeometry(tabBox->activeScreen());
     rootObject()->setProperty("screenWidth", m_currentScreenGeometry.width());
     rootObject()->setProperty("screenHeight", m_currentScreenGeometry.height());
     rootObject()->setProperty("allDesktops", tabBox->config().tabBoxMode() == TabBoxConfig::ClientTabBox &&
-        ((tabBox->config().clientListMode() == TabBoxConfig::AllDesktopsClientList) ||
-        (tabBox->config().clientListMode() == TabBoxConfig::AllDesktopsApplicationList)));
+        tabBox->config().clientDesktopMode() == TabBoxConfig::AllDesktopsClients);
     if (ClientModel *clientModel = qobject_cast<ClientModel*>(m_model)) {
         rootObject()->setProperty("longestCaption", clientModel->longestCaption());
     }
@@ -192,9 +196,14 @@ void DeclarativeView::resizeEvent(QResizeEvent *event)
 void DeclarativeView::hideEvent(QHideEvent *event)
 {
     QWidget::hideEvent(event);
+#ifndef TABBOX_KCM
     if (tabBox->embedded()) {
-        disconnect(KWindowSystem::self(), SIGNAL(windowChanged(WId,uint)), this, SLOT(slotWindowChanged(WId,uint)));
+        Client *c = Workspace::self()->findClient(WindowMatchPredicate(tabBox->embedded()));
+        if (c) {
+            disconnect(c, SIGNAL(geometryChanged()), this, SLOT(slotUpdateGeometry()));
+        }
     }
+#endif
 }
 
 bool DeclarativeView::x11Event(XEvent *e)
@@ -261,19 +270,28 @@ void DeclarativeView::slotUpdateGeometry()
     }
 }
 
-void DeclarativeView::setCurrentIndex(const QModelIndex &index)
+void DeclarativeView::setCurrentIndex(const QModelIndex &index, bool disableAnimation)
 {
     if (tabBox->config().tabBoxMode() != m_mode) {
         return;
     }
     if (QObject *item = rootObject()->findChild<QObject*>("listView")) {
+        QVariant durationRestore;
+        if (disableAnimation) {
+            durationRestore = item->property("highlightMoveDuration");
+            item->setProperty("highlightMoveDuration", QVariant(1));
+        }
         item->setProperty("currentIndex", index.row());
+        if (disableAnimation) {
+            item->setProperty("highlightMoveDuration", durationRestore);
+        }
     }
 }
 
 void DeclarativeView::currentIndexChanged(int row)
 {
     tabBox->setCurrentIndex(m_model->index(row, 0));
+    KWindowSystem::forceActiveWindow(m_model->data(m_model->index(row, 0), ClientModel::WIdRole).toLongLong());
 }
 
 void DeclarativeView::updateQmlSource(bool force)
@@ -284,16 +302,35 @@ void DeclarativeView::updateQmlSource(bool force)
     if (!force && tabBox->config().layoutName() == m_currentLayout) {
         return;
     }
-    m_currentLayout = tabBox->config().layoutName();
-    QString file = KStandardDirs::locate("data", "kwin/tabbox/" + m_currentLayout.toLower().replace(' ', '_') + ".qml");
     if (m_mode == TabBoxConfig::DesktopTabBox) {
-        file = KStandardDirs::locate("data", "kwin/tabbox/desktop.qml");
+        m_currentLayout = tabBox->config().layoutName();
+        const QString file = KStandardDirs::locate("data", "kwin/tabbox/desktop.qml");
+        rootObject()->setProperty("source", QUrl(file));
+        return;
     }
-    if (file.isNull()) {
-        // fallback to default
-        if (m_mode == TabBoxConfig::ClientTabBox) {
-            file = KStandardDirs::locate("data", "kwin/tabbox/informative.qml");
+    QString constraint = QString("[X-KDE-PluginInfo-Name] == '%1'").arg(tabBox->config().layoutName());
+    KService::List offers = KServiceTypeTrader::self()->query("KWin/WindowSwitcher", constraint);
+    if (offers.isEmpty()) {
+        // load default
+        constraint = QString("[X-KDE-PluginInfo-Name] == '%1'").arg("informative");
+        offers = KServiceTypeTrader::self()->query("KWin/WindowSwitcher", constraint);
+        if (offers.isEmpty()) {
+            kDebug(1212) << "could not find default window switcher layout";
+            return;
         }
+    }
+    m_currentLayout = tabBox->config().layoutName();
+    KService::Ptr service = offers.first();
+    const QString pluginName = service->property("X-KDE-PluginInfo-Name").toString();
+    if (service->property("X-Plasma-API").toString() != "declarativeappletscript") {
+        kDebug(1212) << "Window Switcher Layout is no declarativeappletscript";
+        return;
+    }
+    const QString scriptName = service->property("X-Plasma-MainScript").toString();
+    const QString file = KStandardDirs::locate("data", "kwin/tabbox/" + pluginName + "/contents/" + scriptName);
+    if (file.isNull()) {
+        kDebug(1212) << "Could not find QML file for window switcher";
+        return;
     }
     rootObject()->setProperty("source", QUrl(file));
 }
@@ -323,6 +360,11 @@ void DeclarativeView::slotWindowChanged(WId wId, unsigned int properties)
     if (properties & NET::WMGeometry) {
         slotUpdateGeometry();
     }
+}
+
+bool DeclarativeView::sendKeyEvent(QKeyEvent *e)
+{
+    return event(e);
 }
 
 } // namespace TabBox

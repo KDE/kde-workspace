@@ -55,11 +55,12 @@ private Q_SLOTS:
     void toggleActiveAllDesktops();
     void globalShortcutChangedCurrent(QKeySequence shortcut);
     void globalShortcutChangedAll(QKeySequence shortcut);
-    void slotWindowAdded(EffectWindow* w);
-    void slotWindowClosed(EffectWindow *w);
+    void slotWindowAdded(KWin::EffectWindow* w);
+    void slotWindowClosed(KWin::EffectWindow *w);
     void slotTabBoxAdded(int mode);
     void slotTabBoxClosed();
     void slotTabBoxUpdated();
+    void slotTabBoxKeyEvent(QKeyEvent* event);
 
 private:
     class ItemInfo;
@@ -76,6 +77,12 @@ private:
     bool isSelectableWindow(EffectWindow *w) const;
     void scheduleAnimation(const SwitchingDirection& direction, int distance = 1);
     void adjustWindowMultiScreen(const EffectWindow *w, WindowPaintData& data);
+    /**
+     * Updates the caption of the caption frame.
+     * Taking care of rewording the desktop client.
+     * As well sets the icon for the caption frame.
+     **/
+    void updateCaption();
     QQueue< SwitchingDirection> m_scheduledDirections;
     EffectWindow* m_selectedWindow;
     QTimeLine m_timeLine;

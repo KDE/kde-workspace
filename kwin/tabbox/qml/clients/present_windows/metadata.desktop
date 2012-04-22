@@ -1,0 +1,38 @@
+[Desktop Entry]
+Name=Grid
+Name[ia]=Grillia
+Name[nb]=Rutenett
+Name[nl]=Raster
+Name[nn]=Rutenett
+Name[pl]=Siatka
+Name[pt]=Grelha
+Name[pt_BR]=Grade
+Name[sv]=Rutnät
+Name[uk]=Ґратка
+Name[x-test]=xxGridxx
+Name[zh_TW]=格線
+Comment=A Window Switcher layout showing all windows as thumbnails in a grid
+Comment[ia]=Un disposition de commutator de fenestra monstrante fenestras como miniaturas in un grillia
+Comment[nb]=En vindusbytterutforming som viser alle vinduer som minibilder i et rutenett
+Comment[nl]=Een indeling van de vensterwisselaar met alle vensters als miniaturen in een raster
+Comment[pl]=Układ przełączania okien pokazujący wszystkie okna jako miniatury w siatce
+Comment[pt]=Uma disposição de mudança de janelas que mostra todas as janelas como miniaturas numa grelha
+Comment[pt_BR]=Um leiaute de mudança de janelas que mostra todas as janelas como miniaturas em uma grade
+Comment[sv]=En layout för fönsterbyte som visar alla fönster som miniatyrbilder i ett rutnät
+Comment[uk]=Компонування засобу перемикання вікон з мініатюрами всіх вікон у форматі ґратки
+Comment[x-test]=xxA Window Switcher layout showing all windows as thumbnails in a gridxx
+Comment[zh_TW]=將所有視窗的縮圖顯示在格線中的視窗切換器佈局
+Icon=preferences-system-windows-switcher-present-windows
+
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/main.qml
+
+X-KDE-PluginInfo-Author=Martin Gräßlin
+X-KDE-PluginInfo-Email=mgraesslin@kde.org
+X-KDE-PluginInfo-Name=present_windows
+X-KDE-PluginInfo-Version=1.0
+
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL
+X-KDE-ServiceTypes=KWin/WindowSwitcher
+Type=Service

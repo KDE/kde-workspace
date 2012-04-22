@@ -41,9 +41,9 @@ ResizeEffect::ResizeEffect()
     , m_resizeWindow(0)
 {
     reconfigure(ReconfigureAll);
-    connect(effects, SIGNAL(windowStartUserMovedResized(EffectWindow*)), this, SLOT(slotWindowStartUserMovedResized(EffectWindow*)));
-    connect(effects, SIGNAL(windowStepUserMovedResized(EffectWindow*,QRect)), this, SLOT(slotWindowStepUserMovedResized(EffectWindow*,QRect)));
-    connect(effects, SIGNAL(windowFinishUserMovedResized(EffectWindow*)), this, SLOT(slotWindowFinishUserMovedResized(EffectWindow*)));
+    connect(effects, SIGNAL(windowStartUserMovedResized(KWin::EffectWindow*)), this, SLOT(slotWindowStartUserMovedResized(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowStepUserMovedResized(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowStepUserMovedResized(KWin::EffectWindow*,QRect)));
+    connect(effects, SIGNAL(windowFinishUserMovedResized(KWin::EffectWindow*)), this, SLOT(slotWindowFinishUserMovedResized(KWin::EffectWindow*)));
 }
 
 ResizeEffect::~ResizeEffect()
@@ -86,9 +86,6 @@ void ResizeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Window
 
 #ifdef KWIN_HAVE_OPENGL
             if (effects->compositingType() == OpenGLCompositing) {
-#ifndef KWIN_HAVE_OPENGLES
-                glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
                 GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
                 vbo->reset();
                 vbo->setUseColor(true);
@@ -115,9 +112,6 @@ void ResizeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Window
                     ShaderManager::instance()->popShader();
                 }
                 glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-                glPopAttrib();
-#endif
             }
 #endif
 

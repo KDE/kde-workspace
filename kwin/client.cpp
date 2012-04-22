@@ -34,11 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <signal.h>
 
-#ifdef KWIN_BUILD_SCRIPTING
-#include "scripting/scripting.h"
-#include "scripting/workspaceproxy.h"
-#endif
-
 #include "bridge.h"
 #include "group.h"
 #include "workspace.h"
@@ -100,6 +95,7 @@ Client::Client(Workspace* ws)
     , transient_for (NULL)
     , transient_for_id(None)
     , original_transient_for_id(None)
+    , shade_below(NULL)
     , skip_switcher(false)
     , blocks_compositing(false)
     , autoRaiseTimer(NULL)
@@ -107,10 +103,10 @@ Client::Client(Workspace* ws)
     , delayedMoveResizeTimer(NULL)
     , in_group(NULL)
     , window_group(None)
-    , client_group(NULL)
+    , tab_group(NULL)
     , in_layer(UnknownLayer)
     , ping_timer(NULL)
-    , process_killer(NULL)
+    , m_killHelperPID(0)
     , user_time(CurrentTime)   // Not known yet
     , allowed_actions(0)
     , block_geometry_updates(0)
@@ -144,7 +140,6 @@ Client::Client(Workspace* ws)
     // Set the initial mapping state
     mapping_state = Withdrawn;
     quick_tile_mode = QuickTileNone;
-    geom_pretile = QRect(0, 0, 0, 0);
     desk = 0; // No desktop yet
 
     mode = PositionCenter;
@@ -184,7 +179,6 @@ Client::Client(Workspace* ws)
     skip_pager = false;
 
     max_mode = MaximizeRestore;
-    maxmode_restore = MaximizeRestore;
 
     cmap = None;
 
@@ -246,7 +240,10 @@ void Client::releaseWindow(bool on_shutdown)
 {
     assert(!deleting);
     deleting = true;
-    Deleted* del = Deleted::create(this);
+    Deleted* del = NULL;
+    if (!on_shutdown) {
+        del = Deleted::create(this);
+    }
     if (moveResizeMode)
         emit clientFinishUserMovedResized(this);
     emit windowClosed(this, del);
@@ -270,15 +267,14 @@ void Client::releaseWindow(bool on_shutdown)
     XUnmapWindow(display(), frameId());  // Destroying decoration would cause ugly visual effect
     destroyDecoration();
     cleanGrouping();
-    if (clientGroup())
-        clientGroup()->remove(this, QRect(), true);
     if (!on_shutdown) {
         workspace()->removeClient(this, Allowed);
         // Only when the window is being unmapped, not when closing down KWin (NETWM sections 5.5,5.7)
         info->setDesktop(0);
         desk = 0;
         info->setState(0, info->state());  // Reset all state flags
-    }
+    } else
+        untab();
     XDeleteProperty(display(), client, atoms->kde_net_wm_user_creation_time);
     XDeleteProperty(display(), client, atoms->net_frame_extents);
     XDeleteProperty(display(), client, atoms->kde_net_wm_frame_strut);
@@ -298,8 +294,10 @@ void Client::releaseWindow(bool on_shutdown)
     XDestroyWindow(display(), frameId());
     //frame = None;
     --block_geometry_updates; // Don't use GeometryUpdatesBlocker, it would now set the geometry
-    disownDataPassedToDeleted();
-    del->unrefWindow();
+    if (!on_shutdown) {
+        disownDataPassedToDeleted();
+        del->unrefWindow();
+    }
     checkNonExistentClients();
     deleteClient(this, Allowed);
     ungrabXServer();
@@ -331,8 +329,6 @@ void Client::destroyClient()
     workspace()->clientHidden(this);
     destroyDecoration();
     cleanGrouping();
-    if (clientGroup())
-        clientGroup()->remove(this, QRect(), true);
     workspace()->removeClient(this, Allowed);
     client = None; // invalidate
     XDestroyWindow(display(), wrapper);
@@ -796,7 +792,7 @@ bool Client::noBorder() const
 
 bool Client::userCanSetNoBorder() const
 {
-    return !isFullScreen() && !isShade() && (clientGroup() == NULL || !(clientGroup()->items().count() > 1));
+    return !isFullScreen() && !isShade() && !tabGroup();
 }
 
 void Client::setNoBorder(bool set)
@@ -808,7 +804,7 @@ void Client::setNoBorder(bool set)
         return;
     noborder = set;
     updateDecoration(true, false);
-    updateWindowRules();
+    updateWindowRules(Rules::NoBorder);
 }
 
 void Client::checkNoBorder()
@@ -826,10 +822,15 @@ void Client::updateShape()
             noborder = true;
             updateDecoration(true);
         }
-    }
-    if (shape() && noBorder())
-        XShapeCombineShape(display(), frameId(), ShapeBounding,
+        if (noBorder())
+            XShapeCombineShape(display(), frameId(), ShapeBounding,
                            clientPos().x(), clientPos().y(), window(), ShapeBounding, ShapeSet);
+    } else if (app_noborder) {
+        XShapeCombineMask(display(), frameId(), ShapeBounding, 0, 0, None, ShapeSet);
+        detectNoBorder();
+        app_noborder = noborder;
+        updateDecoration(true);
+    }
 
     // Decoration mask (i.e. 'else' here) setting is done in setMask()
     // when the decoration calls it or when the decoration is created/destroyed
@@ -985,16 +986,6 @@ void Client::minimize(bool avoid_animation)
     if (isShade()) // NETWM restriction - KWindowInfo::isMinimized() == Hidden && !Shaded
         info->setState(0, NET::Shaded);
 
-#ifdef KWIN_BUILD_SCRIPTING
-    //Scripting call. Does not use a signal/slot mechanism
-    //as ensuring connections was a bit difficult between
-    //so many clients and the workspace
-    SWrapper::WorkspaceProxy* ws_wrap = SWrapper::WorkspaceProxy::instance();
-    if (ws_wrap != 0) {
-        ws_wrap->sl_clientMinimized(this);
-    }
-#endif
-
     Notify::raise(Notify::Minimize);
 
     minimized = true;
@@ -1002,14 +993,14 @@ void Client::minimize(bool avoid_animation)
     updateVisibility();
     updateAllowedActions();
     workspace()->updateMinimizedOfTransients(this);
-    updateWindowRules();
+    updateWindowRules(Rules::Minimize);
     workspace()->updateFocusChains(this, Workspace::FocusChainMakeLast);
     // TODO: merge signal with s_minimized
     emit clientMinimized(this, !avoid_animation);
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
     emit minimizedChanged();
 }
 
@@ -1025,26 +1016,17 @@ void Client::unminimize(bool avoid_animation)
     if (isShade()) // NETWM restriction - KWindowInfo::isMinimized() == Hidden && !Shaded
         info->setState(NET::Shaded, NET::Shaded);
 
-#ifdef KWIN_BUILD_SCRIPTING
-    SWrapper::WorkspaceProxy* ws_wrap = SWrapper::WorkspaceProxy::instance();
-    if (ws_wrap != 0) {
-        ws_wrap->sl_clientUnminimized(this);
-    }
-#endif
-
-    emit s_unminimized();
-
     Notify::raise(Notify::UnMinimize);
     minimized = false;
     updateVisibility();
     updateAllowedActions();
     workspace()->updateMinimizedOfTransients(this);
-    updateWindowRules();
+    updateWindowRules(Rules::Minimize);
     emit clientUnminimized(this, !avoid_animation);
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
     emit minimizedChanged();
 }
 
@@ -1077,6 +1059,8 @@ void Client::setShade(bool set) {
 
 void Client::setShade(ShadeMode mode)
 {
+    if (mode == ShadeHover && isMove())
+        return; // causes geometry breaks and is probably nasty
     if (isSpecialWindow() || noBorder())
         mode = ShadeNone;
     mode = rules()->checkShade(mode);
@@ -1119,19 +1103,35 @@ void Client::setShade(ShadeMode mode)
         XSelectInput(display(), wrapper, ClientWinMask | SubstructureNotifyMask);
         plainResize(s);
         shade_geometry_change = false;
-        if (isActive()) {
-            if (was_shade_mode == ShadeHover)
+        if (was_shade_mode == ShadeHover) {
+            if (shade_below && workspace()->stackingOrder().indexOf(shade_below) > -1)
+                    workspace()->restack(this, shade_below);
+            if (isActive())
                 workspace()->activateNextClient(this);
-            else
-                workspace()->focusToNull();
+        } else if (isActive()) {
+            workspace()->focusToNull();
         }
     } else {
         shade_geometry_change = true;
         QSize s(sizeForClientSize(clientSize()));
         shade_geometry_change = false;
         plainResize(s);
-        if (shade_mode == ShadeHover || shade_mode == ShadeActivated)
+        if ((shade_mode == ShadeHover || shade_mode == ShadeActivated) && rules()->checkAcceptFocus(input))
             setActive(true);
+        if (shade_mode == ShadeHover) {
+            ToplevelList order = workspace()->stackingOrder();
+            // this is likely related to the index parameter?!
+            for (int idx = order.indexOf(this) + 1; idx < order.count(); ++idx) {
+                shade_below = qobject_cast<Client*>(order.at(idx));
+                if (shade_below) {
+                    break;
+                }
+            }
+            if (shade_below && shade_below->isNormalWindow())
+                workspace()->raiseClient(this);
+            else
+                shade_below = NULL;
+        }
         XMapWindow(display(), wrapperId());
         XMapWindow(display(), window());
         if (isActive())
@@ -1144,11 +1144,11 @@ void Client::setShade(ShadeMode mode)
     updateAllowedActions();
     if (decoration)
         decoration->shadeChange();
-    updateWindowRules();
+    updateWindowRules(Rules::Shade);
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
     emit shadeChanged();
 }
 
@@ -1180,20 +1180,20 @@ void Client::updateVisibility()
 {
     if (deleting)
         return;
-    if (hidden && (clientGroup() == NULL || clientGroup()->visible() == this)) {
+    if (hidden && isCurrentTab()) {
         info->setState(NET::Hidden, NET::Hidden);
         setSkipTaskbar(true, false);   // Also hide from taskbar
-        if (compositing() && options->hiddenPreviews == HiddenPreviewsAlways)
+        if (compositing() && options->hiddenPreviews() == HiddenPreviewsAlways)
             internalKeep(Allowed);
         else
             internalHide(Allowed);
         return;
     }
-    if (clientGroup() == NULL || clientGroup()->visible() == this)
+    if (isCurrentTab())
         setSkipTaskbar(original_skip_taskbar, false);   // Reset from 'hidden'
     if (minimized) {
         info->setState(NET::Hidden, NET::Hidden);
-        if (compositing() && options->hiddenPreviews == HiddenPreviewsAlways)
+        if (compositing() && options->hiddenPreviews() == HiddenPreviewsAlways)
             internalKeep(Allowed);
         else
             internalHide(Allowed);
@@ -1201,14 +1201,14 @@ void Client::updateVisibility()
     }
     info->setState(0, NET::Hidden);
     if (!isOnCurrentDesktop()) {
-        if (compositing() && options->hiddenPreviews != HiddenPreviewsNever)
+        if (compositing() && options->hiddenPreviews() != HiddenPreviewsNever)
             internalKeep(Allowed);
         else
             internalHide(Allowed);
         return;
     }
     if (!isOnCurrentActivity()) {
-        if (compositing() && options->hiddenPreviews != HiddenPreviewsNever)
+        if (compositing() && options->hiddenPreviews() != HiddenPreviewsNever)
             internalKeep(Allowed);
         else
             internalHide(Allowed);
@@ -1447,14 +1447,14 @@ void Client::pingWindow()
 {
     if (!Pping)
         return; // Can't ping :(
-    if (options->killPingTimeout == 0)
+    if (options->killPingTimeout() == 0)
         return; // Turned off
     if (ping_timer != NULL)
         return; // Pinging already
     ping_timer = new QTimer(this);
     connect(ping_timer, SIGNAL(timeout()), SLOT(pingTimeout()));
     ping_timer->setSingleShot(true);
-    ping_timer->start(options->killPingTimeout);
+    ping_timer->start(options->killPingTimeout());
     ping_timestamp = xTime();
     workspace()->sendPingToWindow(window(), ping_timestamp);
 }
@@ -1466,13 +1466,9 @@ void Client::gotPing(Time timestamp)
         return;
     delete ping_timer;
     ping_timer = NULL;
-    if (process_killer != NULL) {
-        process_killer->kill();
-        // Recycle when the process manager has noticed that the process exited
-        // a delete process_killer here sometimes causes a hang in waitForFinished
-        connect(process_killer, SIGNAL(finished(int,QProcess::ExitStatus)),
-                process_killer, SLOT(deleteLater()));
-        process_killer = NULL;
+    if (m_killHelperPID && !::kill(m_killHelperPID, 0)) { // means the process is alive
+        ::kill(m_killHelperPID, SIGTERM);
+        m_killHelperPID = 0;
     }
 }
 
@@ -1486,7 +1482,7 @@ void Client::pingTimeout()
 
 void Client::killProcess(bool ask, Time timestamp)
 {
-    if (process_killer != NULL)
+    if (m_killHelperPID && !::kill(m_killHelperPID, 0)) // means the process is alive
         return;
     Q_ASSERT(!ask || timestamp != CurrentTime);
     QByteArray machine = wmClientMachine(true);
@@ -1502,23 +1498,14 @@ void Client::killProcess(bool ask, Time timestamp)
         } else
             ::kill(pid, SIGTERM);
     } else {
-        process_killer = new QProcess(this);
-        connect(process_killer, SIGNAL(error(QProcess::ProcessError)), SLOT(processKillerExited()));
-        connect(process_killer, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(processKillerExited()));
-        process_killer->start(KStandardDirs::findExe("kwin_killer_helper"),
-                              QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << machine
-                              << "--windowname" << caption()
-                              << "--applicationname" << resourceClass()
-                              << "--wid" << QString::number(window())
-                              << "--timestamp" << QString::number(timestamp));
+        QProcess::startDetached(KStandardDirs::findExe("kwin_killer_helper"),
+                                QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << machine
+                                << "--windowname" << caption()
+                                << "--applicationname" << resourceClass()
+                                << "--wid" << QString::number(window())
+                                << "--timestamp" << QString::number(timestamp),
+                                QString(), &m_killHelperPID);
     }
-}
-
-void Client::processKillerExited()
-{
-    kDebug(1212) << "Killer exited";
-    delete process_killer;
-    process_killer = NULL;
 }
 
 void Client::setSkipTaskbar(bool b, bool from_outside)
@@ -1532,10 +1519,11 @@ void Client::setSkipTaskbar(bool b, bool from_outside)
         return;
     skip_taskbar = b;
     info->setState(b ? NET::SkipTaskbar : 0, NET::SkipTaskbar);
-    updateWindowRules();
+    updateWindowRules(Rules::SkipTaskbar);
     if (was_wants_tab_focus != wantsTabFocus())
         workspace()->updateFocusChains(this,
                                        isActive() ? Workspace::FocusChainMakeFirst : Workspace::FocusChainUpdate);
+    emit skipTaskbarChanged();
 }
 
 void Client::setSkipPager(bool b)
@@ -1545,7 +1533,8 @@ void Client::setSkipPager(bool b)
         return;
     skip_pager = b;
     info->setState(b ? NET::SkipPager : 0, NET::SkipPager);
-    updateWindowRules();
+    updateWindowRules(Rules::SkipPager);
+    emit skipPagerChanged();
 }
 
 void Client::setSkipSwitcher(bool set)
@@ -1554,7 +1543,7 @@ void Client::setSkipSwitcher(bool set)
     if (set == skipSwitcher())
         return;
     skip_switcher = set;
-    updateWindowRules();
+    updateWindowRules(Rules::SkipSwitcher);
     emit skipSwitcherChanged();
 }
 
@@ -1605,11 +1594,11 @@ void Client::setDesktop(int desktop)
 
     workspace()->updateFocusChains(this, Workspace::FocusChainMakeFirst);
     updateVisibility();
-    updateWindowRules();
+    updateWindowRules(Rules::Desktop);
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
     emit desktopChanged();
 }
 
@@ -1671,8 +1660,8 @@ void Client::updateActivities(bool includeTransients)
     // TODO: add activity rule
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
 }
 
 /**
@@ -1713,8 +1702,8 @@ void Client::setOnAllDesktops(bool b)
         setDesktop(workspace()->currentDesktop());
 
     // Update states of all other windows in this group
-    if (clientGroup())
-        clientGroup()->updateStates(this);
+    if (tabGroup())
+        tabGroup()->updateStates(this);
 }
 
 /**
@@ -1786,6 +1775,8 @@ void Client::takeFocus(allowed_t)
 #endif
     if (rules()->checkAcceptFocus(input))
         XSetInputFocus(display(), window(), RevertToPointerRoot, xTime());
+    else
+        demandAttention(false); // window cannot take input, at least withdraw urgency
     if (Ptakefocus)
         sendClientMessage(window(), atoms->wm_protocols, atoms->wm_take_focus);
     workspace()->setShouldGetFocus(this);
@@ -1877,9 +1868,7 @@ void Client::setCaption(const QString& _s, bool force)
             // Keep the same suffix in iconic name if it's set
             info->setVisibleIconName(QString(cap_iconic + cap_suffix).toUtf8());
 
-        if (isManaged() && decoration != NULL) {
-            if (client_group)
-                client_group->updateItems();
+        if (isManaged() && decoration) {
             decoration->captionChange();
         }
         emit captionChanged();
@@ -1918,13 +1907,62 @@ QString Client::caption(bool full) const
     return full ? cap_normal + cap_suffix : cap_normal;
 }
 
-void Client::setClientGroup(ClientGroup* group)
+bool Client::tabTo(Client *other, bool behind, bool activate)
 {
-    client_group = group;
-    unsigned long data[1] = {(unsigned long)workspace()->indexOfClientGroup(group)};
-    XChangeProperty(display(), window(), atoms->kde_net_wm_tab_group, XA_CARDINAL, 32,
-                    PropModeReplace, (unsigned char*)(data), 1);
-    emit clientGroupChanged();
+    Q_ASSERT(other && other != this);
+
+    if (tab_group && tab_group == other->tabGroup()) { // special case: move inside group
+        tab_group->move(this, other, behind);
+        return true;
+    }
+
+    GeometryUpdatesBlocker blocker(this);
+    const bool wasBlocking = signalsBlocked();
+    blockSignals(true); // prevent client emitting "retabbed to nowhere" cause it's about to be entabbed the next moment
+    untab();
+    blockSignals(wasBlocking);
+
+    TabGroup *newGroup = other->tabGroup() ? other->tabGroup() : new TabGroup(other);
+
+    if (!newGroup->add(this, other, behind, activate)) {
+        if (newGroup->count() < 2) { // adding "c" to "to" failed for whatever reason
+            newGroup->remove(other);
+            delete newGroup;
+        }
+        return false;
+    }
+    return true;
+}
+
+bool Client::untab(const QRect &toGeometry)
+{
+    TabGroup *group = tab_group;
+    if (group && group->remove(this, toGeometry)) { // remove sets the tabgroup to "0", therefore the pointer is cached
+        if (group->isEmpty()) {
+            delete group;
+        }
+        setClientShown(!(isMinimized() || isShade()));
+        return true;
+    }
+    return false;
+}
+
+void Client::setTabGroup(TabGroup *group)
+{
+    tab_group = group;
+    if (group) {
+        unsigned long data = qHash(group); //->id();
+        XChangeProperty(display(), window(), atoms->kde_net_wm_tab_group, XA_CARDINAL, 32,
+                        PropModeReplace, (unsigned char*)(&data), 1);
+    }
+    else
+        XDeleteProperty(display(), window(), atoms->kde_net_wm_tab_group);
+    emit tabGroupChanged();
+}
+
+bool Client::isCurrentTab() const
+{
+    return !tab_group || tab_group->current() == this;
 }
 
 void Client::dontMoveResize()
@@ -1939,26 +1977,20 @@ void Client::setClientShown(bool shown)
 {
     if (deleting)
         return; // Don't change shown status if this client is being deleted
-    if (shown && hidden) {
+    if (shown != hidden)
+        return; // nothing to change
+    hidden = !shown;
+    if (options->isInactiveTabsSkipTaskbar())
+        setSkipTaskbar(hidden, false); // TODO: Causes reshuffle of the taskbar
+    if (shown) {
         map(Allowed);
-        hidden = false;
-        //updateVisibility();
-        //updateAllowedActions();
-        if (options->inactiveTabsSkipTaskbar)
-            setSkipTaskbar(false, false);
         takeFocus(Allowed);
         autoRaise();
         workspace()->updateFocusChains(this, Workspace::FocusChainMakeFirst);
-    }
-    if (!shown && !hidden) {
+    } else {
         unmap(Allowed);
-        hidden = true;
-        //updateVisibility();
-        //updateAllowedActions();
-        if (options->inactiveTabsSkipTaskbar)
-            setSkipTaskbar(true, false);   // TODO: Causes reshuffle of the taskbar
         // Don't move tabs to the end of the list when another tab get's activated
-        if (!clientGroup() || clientGroup()->visible() == this)
+        if (isCurrentTab())
             workspace()->updateFocusChains(this, Workspace::FocusChainMakeLast);
         addWorkspaceRepaint(visibleRect());
     }
@@ -2006,9 +2038,12 @@ void Client::getMotifHints()
 
     // mminimize; - Ignore, bogus - E.g. shading or sending to another desktop is "minimizing" too
     // mmaximize; - Ignore, bogus - Maximizing is basically just resizing
+    const bool closabilityChanged = motif_may_close != mclose;
     motif_may_close = mclose; // Motif apps like to crash when they set this hint and WM closes them anyway
     if (isManaged())
         updateDecoration(true);   // Check if noborder state has changed
+    if (decoration && closabilityChanged)
+        decoration->reset(KDecoration::SettingButtons);
 }
 
 void Client::readIcons(Window win, QPixmap* icon, QPixmap* miniicon, QPixmap* bigicon, QPixmap* hugeicon)
@@ -2198,14 +2233,15 @@ void Client::sendSyncRequest()
 void Client::removeSyncSupport()
 {
     if (!ready_for_painting) {
-        ready_for_painting = true;
-        addRepaintFull();
+        setReadyForPainting();
         return;
     }
+#ifdef HAVE_XSYNC
     syncRequest.isPending = false;
     syncRequest.counter = syncRequest.alarm = None;
     delete syncRequest.timeout; delete syncRequest.failsafeTimeout;
     syncRequest.timeout = syncRequest.failsafeTimeout = NULL;
+#endif
 }
 
 bool Client::wantsTabFocus() const
@@ -2273,16 +2309,23 @@ void Client::updateCursor()
 
 void Client::updateCompositeBlocking(bool readProperty)
 {
-    const bool usedToBlock = blocks_compositing;
     if (readProperty) {
         const unsigned long properties[2] = {0, NET::WM2BlockCompositing};
         NETWinInfo2 i(QX11Info::display(), window(), rootWindow(), properties, 2);
-        blocks_compositing = rules()->checkBlockCompositing(i.isBlockingCompositing());
+        setBlockingCompositing(i.isBlockingCompositing());
     }
     else
-        blocks_compositing = rules()->checkBlockCompositing(blocks_compositing);
-    if (usedToBlock != blocks_compositing)
+        setBlockingCompositing(blocks_compositing);
+}
+
+void Client::setBlockingCompositing(bool block)
+{
+    const bool usedToBlock = blocks_compositing;
+    blocks_compositing = rules()->checkBlockCompositing(block);
+    if (usedToBlock != blocks_compositing) {
         workspace()->updateCompositeBlocking(blocks_compositing ? this : 0);
+        emit blockingCompositingChanged();
+    }
 }
 
 Client::Position Client::mousePosition(const QPoint& p) const
@@ -2401,12 +2444,7 @@ void Client::setSessionInteract(bool needed)
 QRect Client::decorationRect() const
 {
     if (decoration && decoration->widget()) {
-        QRect r = decoration->widget()->rect().translated(-padding_left, -padding_top);
-        if (hasShadow())
-            r |= shadow()->shadowRegion().boundingRect();
-        return r;
-    } else if (hasShadow()) {
-        return shadow()->shadowRegion().boundingRect();
+        return decoration->widget()->rect().translated(-padding_left, -padding_top);
     } else {
         return QRect(0, 0, width(), height());
     }
@@ -2428,6 +2466,11 @@ void Client::updateFirstInTabBox()
     }
     if (data)
         XFree(data);
+}
+
+bool Client::isClient() const
+{
+    return true;
 }
 
 } // namespace

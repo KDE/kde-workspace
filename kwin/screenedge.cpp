@@ -42,9 +42,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QTextStream>
 #include <QtDBus/QDBusInterface>
 
-// KDE-Workspace
-#include <kephal/screens.h>
-
 namespace KWin {
 
 ScreenEdge::ScreenEdge()
@@ -73,7 +70,7 @@ void ScreenEdge::update(bool force)
     m_screenEdgeTimeLast = xTime();
     m_screenEdgeTimeLastTrigger = xTime();
     m_currentScreenEdge = ElectricNone;
-    QRect r = Kephal::ScreenUtils::desktopGeometry();
+    QRect r = QRect(0, 0, displayWidth(), displayHeight());
     m_screenEdgeTop = r.top();
     m_screenEdgeBottom = r.bottom();
     m_screenEdgeLeft = r.left();
@@ -120,7 +117,7 @@ void ScreenEdge::restoreSize(ElectricBorder border)
 {
     if (m_screenEdgeWindows[border] == None)
         return;
-    QRect r = Kephal::ScreenUtils::desktopGeometry();
+    QRect r(0, 0, displayWidth(), displayHeight());
     int xywh[ELECTRIC_COUNT][4] = {
         { r.left() + 1, r.top(), r.width() - 2, 1 },   // Top
         { r.right(), r.top(), 1, 1 },                  // Top-right
@@ -219,7 +216,10 @@ void ScreenEdge::check(const QPoint& pos, Time now)
     if (pushback_pixels == 0) {
         // no pushback so we have to activate at once
         m_screenEdgeTimeLast = now;
+        m_currentScreenEdge = border;
+        m_screenEdgePushPoint = pos;
     }
+
     if ((m_currentScreenEdge == border) &&
             (timestampDiff(m_screenEdgeTimeLast, now) < treshold_reset) &&
             (timestampDiff(m_screenEdgeTimeLastTrigger, now) > treshold_trigger) &&
@@ -309,19 +309,19 @@ void ScreenEdge::switchDesktop(ElectricBorder border, const QPoint& _pos)
     int desk = Workspace::self()->currentDesktop();
     const int OFFSET = 2;
     if (border == ElectricLeft || border == ElectricTopLeft || border == ElectricBottomLeft) {
-        desk = Workspace::self()->desktopToLeft(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopToLeft(desk, options->isRollOverDesktops());
         pos.setX(displayWidth() - 1 - OFFSET);
     }
     if (border == ElectricRight || border == ElectricTopRight || border == ElectricBottomRight) {
-        desk = Workspace::self()->desktopToRight(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopToRight(desk, options->isRollOverDesktops());
         pos.setX(OFFSET);
     }
     if (border == ElectricTop || border == ElectricTopLeft || border == ElectricTopRight) {
-        desk = Workspace::self()->desktopAbove(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopAbove(desk, options->isRollOverDesktops());
         pos.setY(displayHeight() - 1 - OFFSET);
     }
     if (border == ElectricBottom || border == ElectricBottomLeft || border == ElectricBottomRight) {
-        desk = Workspace::self()->desktopBelow(desk, options->rollOverDesktops);
+        desk = Workspace::self()->desktopBelow(desk, options->isRollOverDesktops());
         pos.setY(OFFSET);
     }
     Client *c = Workspace::self()->getMovingClient();

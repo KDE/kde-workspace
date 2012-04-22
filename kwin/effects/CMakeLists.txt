@@ -1,8 +1,6 @@
 # the factory macros cause errors
 kde4_no_enable_final(kwineffects)
 
-# Uncomment to have the test effects built as well
-#add_subdirectory( _test )
 macro( KWIN4_ADD_EFFECT_BACKEND name )
     kde4_add_plugin( ${name} ${ARGN} )
     target_link_libraries( ${name} kwineffects ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${X11_Xfixes_LIB} ${X11_Xcursor_LIB} ${X11_LIBRARIES})
@@ -78,12 +76,19 @@ if( NOT KWIN_MOBILE_EFFECTS )
 endif( NOT KWIN_MOBILE_EFFECTS )
 set( kwin4_effect_include_directories )
 
+# scripted effects
+add_subdirectory( fade )
+
+# scripted effects only relevant to desktop
+if( NOT KWIN_MOBILE_EFFECTS )
+    add_subdirectory( fadedesktop )
+endif( NOT KWIN_MOBILE_EFFECTS )
+
 ###############################################################################
 # Built-in effects go here
 
 # Common effects
 include( dialogparent/CMakeLists.txt )
-include( fade/CMakeLists.txt )
 include( login/CMakeLists.txt )
 include( outline/CMakeLists.txt )
 include( presentwindows/CMakeLists.txt )
@@ -97,7 +102,6 @@ if( NOT KWIN_MOBILE_EFFECTS )
     include( desktopgrid/CMakeLists.txt )
     include( diminactive/CMakeLists.txt )
     include( dimscreen/CMakeLists.txt )
-    include( fadedesktop/CMakeLists.txt )
     include( fallapart/CMakeLists.txt )
     include( highlightwindow/CMakeLists.txt )
     include( magiclamp/CMakeLists.txt )
@@ -113,9 +117,9 @@ if( NOT KWIN_MOBILE_EFFECTS )
     include( windowgeometry/CMakeLists.txt )
     include( zoom/CMakeLists.txt )
 
-    if( NOT KWIN_HAVE_OPENGLES_COMPOSITING )
+    if( NOT OPENGLES_FOUND )
     include( logout/CMakeLists.txt )
-    endif( NOT KWIN_HAVE_OPENGLES_COMPOSITING )
+    endif( NOT OPENGLES_FOUND )
 endif( NOT KWIN_MOBILE_EFFECTS )
 
 # OpenGL-specific effects

@@ -46,6 +46,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtGui/QHelpEvent>
 #include <QtGui/QToolTip>
 
+///////////////////////////////////////////////////////////////////////////////
+// NOTE: if you change the menu, keep kde-workspace/kwin/useractions.cpp in sync
+//////////////////////////////////////////////////////////////////////////////
+
 namespace TaskManager
 {
 
@@ -290,12 +294,17 @@ void ToDesktopActionImpl::slotToDesktop()
 DesktopsMenu::DesktopsMenu(QWidget *parent, AbstractGroupableItem *item)
     : ToolTipMenu(parent)
 {
+    QActionGroup *group = new QActionGroup(this);
     setTitle(i18n("Move To &Desktop"));
     addAction(new ToCurrentDesktopActionImpl(this, item));
-    addAction(new ToDesktopActionImpl(this, item, 0));      //0 means all desktops
+    QAction *action = new ToDesktopActionImpl(this, item, 0); //0 means all desktops
+    addAction(action);
+    group->addAction(action);
     addSeparator();
     for (int i = 1; i <= TaskManager::self()->numberOfDesktops(); i++) {
-        addAction(new ToDesktopActionImpl(this, item, i));
+        action = new ToDesktopActionImpl(this, item, i);
+        addAction(action);
+        group->addAction(action);
     }
     setEnabled(item->isActionSupported(NET::ActionChangeDesktop));
 }

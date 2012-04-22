@@ -32,10 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "rules.h"
 #include "group.h"
 
-#ifdef KWIN_BUILD_SCRIPTING
-#include "scripting/workspaceproxy.h"
-#endif
-
 namespace KWin
 {
 
@@ -47,16 +43,6 @@ namespace KWin
 bool Client::manage(Window w, bool isMapped)
 {
     StackingUpdatesBlocker stacking_blocker(workspace());
-
-#ifdef KWIN_BUILD_SCRIPTING
-    //Scripting call. Does not use a signal/slot mechanism
-    //as ensuring connections was a bit difficult between
-    //so many clients and the workspace
-    SWrapper::WorkspaceProxy* ws_wrap = SWrapper::WorkspaceProxy::instance();
-    if (ws_wrap != 0) {
-        ws_wrap->sl_clientManaging(this);
-    }
-#endif
 
     grabXServer();
 
@@ -121,7 +107,6 @@ bool Client::manage(Window w, bool isMapped)
     // and also relies on rules already existing
     cap_normal = readName();
     setupWindowRules(false);
-    ignore_focus_stealing = options->checkIgnoreFocusStealing(this);   // TODO: Change to rules
     setCaption(cap_normal, true);
 
     if (Extensions::shapeAvailable())
@@ -221,7 +206,7 @@ bool Client::manage(Window w, bool isMapped)
         }
     }
     if (desk == 0)   // Assume window wants to be visible on the current desktop
-        desk = workspace()->currentDesktop();
+        desk = isDesktop() ? NET::OnAllDesktops : workspace()->currentDesktop();
     desk = rules()->checkDesktop(desk, !isMapped);
     if (desk != NET::OnAllDesktops)   // Do range check
         desk = qMax(1, qMin(workspace()->numberOfDesktops(), desk));
@@ -239,13 +224,10 @@ bool Client::manage(Window w, bool isMapped)
     bool partial_keep_in_area = isMapped || session;
     if (isMapped || session)
         area = workspace()->clientArea(FullArea, geom.center(), desktop());
-    else if (options->xineramaPlacementEnabled) {
-        int screen = options->xineramaPlacementScreen;
-        if (screen == -1)   // Active screen
-            screen = asn_data.xinerama() == -1 ? workspace()->activeScreen() : asn_data.xinerama();
+    else {
+        int screen = asn_data.xinerama() == -1 ? workspace()->activeScreen() : asn_data.xinerama();
         area = workspace()->clientArea(PlacementArea, workspace()->screenGeometry(screen).center(), desktop());
-    } else
-        area = workspace()->clientArea(PlacementArea, cursorPos(), desktop());
+    }
 
     if (int type = checkFullScreenHack(geom)) {
         fullscreen_mode = FullScreenHack;
@@ -291,10 +273,7 @@ bool Client::manage(Window w, bool isMapped)
     else
         usePosition = true;
     if (!rules()->checkIgnoreGeometry(!usePosition)) {
-        bool ignorePPosition = options->ignorePositionClasses.contains(
-                                   QString::fromLatin1(resourceClass()));
-
-        if (((xSizeHint.flags & PPosition) && !ignorePPosition) ||
+        if (((xSizeHint.flags & PPosition)) ||
                 (xSizeHint.flags & USPosition)) {
             placementDone = true;
             // Disobey xinerama placement option for now (#70943)
@@ -322,39 +301,47 @@ bool Client::manage(Window w, bool isMapped)
 
     // Create client group if the window will have a decoration
     bool dontKeepInArea = false;
+    setTabGroup(NULL);
     if (!noBorder()) {
-        setClientGroup(NULL);
-        bool autogrouping = rules()->checkAutogrouping(options->autogroupSimilarWindows);
+        const bool autogrouping = rules()->checkAutogrouping(options->isAutogroupSimilarWindows());
+        const bool autogroupInFg = rules()->checkAutogroupInForeground(options->isAutogroupInForeground());
         // Automatically add to previous groups on session restore
-        if (session && session->clientGroupClient && session->clientGroupClient != this && session->clientGroupClient->clientGroup())
-            session->clientGroupClient->clientGroup()->add(this, -1, true);
-        else if (isMapped && autogrouping)
+        if (session && session->tabGroupClient && session->tabGroupClient != this) {
+            tabBehind(session->tabGroupClient, autogroupInFg);
+        } else if (isMapped && autogrouping) {
             // If the window is already mapped (Restarted KWin) add any windows that already have the
             // same geometry to the same client group. (May incorrectly handle maximized windows)
-            foreach (ClientGroup * group, workspace()->clientGroups)
-            if (geom == QRect(group->visible()->pos(), group->visible()->clientSize()) &&
-                    desk == group->visible()->desktop() &&
-                    activities() == group->visible()->activities() &&
-                    group->visible()->maximizeMode() != MaximizeFull) {
-                group->add(this, -1, true);
-                break;
-            }
-        if (!client_group && !isMapped && !session) {
-            // Attempt to automatically group similar windows
-            const Client* similar = workspace()->findSimilarClient(this);
-            if (similar && similar->clientGroup() && !similar->noBorder()) {
-                geom = QRect(similar->pos() + similar->clientPos(), similar->clientSize());
-                updateDecoration(false);
-                similar->clientGroup()->add(this, -1,
-                                            rules()->checkAutogroupInForeground(options->autogroupInForeground));
-                // Don't move entire group
-                geom = QRect(similar->pos() + similar->clientPos(), similar->clientSize());
-                placementDone = true;
-                dontKeepInArea = true;
+            foreach (Client *other, workspace()->clientList()) {
+                if (other->maximizeMode() != MaximizeFull &&
+                    geom == QRect(other->pos(), other->clientSize()) &&
+                    desk == other->desktop() && activities() == other->activities()) {
+
+                    tabBehind(other, autogroupInFg);
+                    break;
+
+                }
             }
         }
-        if (!client_group)
-            setClientGroup(new ClientGroup(this));
+        if (autogrouping && !tab_group && !isMapped && !session) {
+            // Attempt to automatically group similar windows
+            Client* similar = findAutogroupCandidate();
+            if (similar && !similar->noBorder()) {
+                if (autogroupInFg) {
+                    similar->setDesktop(desk); // can happen when grouping by id. ...
+                    similar->setMinimized(false); // ... or anyway - still group, but "here" and visible
+                }
+                if (!similar->isMinimized()) { // do not attempt to tab in background of a hidden group
+                    geom = QRect(similar->pos() + similar->clientPos(), similar->clientSize());
+                    updateDecoration(false);
+                    if (tabBehind(similar, autogroupInFg)) {
+                        // Don't move entire group
+                        geom = QRect(similar->pos() + similar->clientPos(), similar->clientSize());
+                        placementDone = true;
+                        dontKeepInArea = true;
+                    }
+                }
+            }
+        }
     }
 
     updateDecoration(false);   // Also gravitates
@@ -461,9 +448,9 @@ bool Client::manage(Window w, bool isMapped)
         setSkipSwitcher(session->skipSwitcher);
         setShade(session->shaded ? ShadeNormal : ShadeNone);
         setOpacity(session->opacity);
+        geom_restore = session->restore;
         if (session->maximized != MaximizeRestore) {
             maximize(MaximizeMode(session->maximized));
-            geom_restore = session->restore;
         }
         if (session->fullscreen == FullScreenHack)
             ; // Nothing, this should be already set again above
@@ -572,7 +559,7 @@ bool Client::manage(Window w, bool isMapped)
                 break;
             }
         if (!belongs_to_desktop && workspace()->showingDesktop())
-            workspace()->resetShowingDesktop(options->showDesktopIsMinimizeAll);
+            workspace()->resetShowingDesktop(options->isShowDesktopIsMinimizeAll());
 
         if (isOnCurrentDesktop() && !isMapped && !allow && (!session || session->stackingOrder < 0))
             workspace()->restackClientUnderActive(this);
@@ -610,13 +597,14 @@ bool Client::manage(Window w, bool isMapped)
     client_rules.discardTemporary();
     applyWindowRules(); // Just in case
     workspace()->discardUsedWindowRules(this, false);   // Remove ApplyNow rules
-    updateWindowRules(); // Was blocked while !isManaged()
+    updateWindowRules(Rules::All); // Was blocked while !isManaged()
 
     updateCompositeBlocking(true);
 
     // TODO: there's a small problem here - isManaged() depends on the mapping state,
     // but this client is not yet in Workspace's client list at this point, will
     // be only done in addClient()
+    emit clientManaging(this);
     return true;
 }
 
@@ -672,6 +660,65 @@ void Client::embedClient(Window w, const XWindowAttributes& attr)
                 );
 
     updateMouseGrab();
+}
+
+// To accept "mainwindow#1" to "mainwindow#2"
+static QByteArray truncatedWindowRole(QByteArray a)
+{
+    int i = a.indexOf('#');
+    if (i == -1)
+        return a;
+    QByteArray b(a);
+    b.truncate(i);
+    return b;
+}
+
+Client* Client::findAutogroupCandidate() const
+{
+    // Attempt to find a similar window to the input. If we find multiple possibilities that are in
+    // different groups then ignore all of them. This function is for automatic window grouping.
+    Client *found = NULL;
+
+    // See if the window has a group ID to match with
+    QString wGId = rules()->checkAutogroupById(QString());
+    if (!wGId.isEmpty()) {
+        foreach (Client *c, workspace()->clientList()) {
+            if (activities() != c->activities())
+                continue; // don't cross activities
+            if (wGId == c->rules()->checkAutogroupById(QString())) {
+                if (found && found->tabGroup() != c->tabGroup()) { // We've found two, ignore both
+                    found = NULL;
+                    break; // Continue to the next test
+                }
+                found = c;
+            }
+        }
+        if (found)
+            return found;
+    }
+
+    // If this is a transient window don't take a guess
+    if (isTransient())
+        return NULL;
+
+    // If we don't have an ID take a guess
+    if (rules()->checkAutogrouping(options->isAutogroupSimilarWindows())) {
+        QByteArray wRole = truncatedWindowRole(windowRole());
+        foreach (Client *c, workspace()->clientList()) {
+            if (desktop() != c->desktop() || activities() != c->activities())
+                continue;
+            QByteArray wRoleB = truncatedWindowRole(c->windowRole());
+            if (resourceClass() == c->resourceClass() &&  // Same resource class
+                    wRole == wRoleB && // Same window role
+                    c->isNormalWindow()) { // Normal window TODO: Can modal windows be "normal"?
+                if (found && found->tabGroup() != c->tabGroup())   // We've found two, ignore both
+                    return NULL;
+                found = c;
+            }
+        }
+    }
+
+    return found;
 }
 
 } // namespace

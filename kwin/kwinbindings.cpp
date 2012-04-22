@@ -59,9 +59,9 @@ a->setText(i18n("System"));
 
 a = actionCollection->addAction("Group:Navigation");
 a->setText(i18n("Navigation"));
-DEF(I18N_NOOP("Walk Through Window Tabs"),             0, slotSwitchToTabRight());
-DEF(I18N_NOOP("Walk Through Window Tabs (Reverse)"),   0, slotSwitchToTabLeft());
-DEF(I18N_NOOP("Remove Window From Group"),             0, slotRemoveFromGroup());
+DEF(I18N_NOOP("Walk Through Window Tabs"),             0, slotActivateNextTab());
+DEF(I18N_NOOP("Walk Through Window Tabs (Reverse)"),   0, slotActivatePrevTab());
+DEF(I18N_NOOP("Remove Window From Group"),             0, slotUntab());
 
 a = actionCollection->addAction("Group:Windows");
 a->setText(i18n("Windows"));
@@ -191,6 +191,7 @@ a->setText(i18n("Miscellaneous"));
 DEF(I18N_NOOP("Kill Window"),                      Qt::CTRL + Qt::ALT + Qt::Key_Escape, slotKillWindow());
 DEF(I18N_NOOP("Block Global Shortcuts"),           0, slotDisableGlobalShortcuts());
 DEF(I18N_NOOP("Suspend Compositing"),              Qt::SHIFT + Qt::ALT + Qt::Key_F12, slotToggleCompositing());
+DEF(I18N_NOOP("Invert Screen Colors"),              0, slotInvertScreen());
 
 #undef DEF
 #undef DEF2

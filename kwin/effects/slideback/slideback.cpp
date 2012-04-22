@@ -33,11 +33,10 @@ SlideBackEffect::SlideBackEffect()
     updateStackingOrder();
     disabled = false;
     unminimizedWindow = NULL;
-    connect(effects, SIGNAL(windowAdded(EffectWindow*)), this, SLOT(slotWindowAdded(EffectWindow*)));
-    connect(effects, SIGNAL(windowActivated(EffectWindow*)), this, SLOT(slotWindowActivated(EffectWindow*)));
-    connect(effects, SIGNAL(windowDeleted(EffectWindow*)), this, SLOT(slotWindowDeleted(EffectWindow*)));
-    connect(effects, SIGNAL(windowUnminimized(EffectWindow*)), this, SLOT(slotWindowUnminimized(EffectWindow*)));
-    connect(effects, SIGNAL(clientGroupItemSwitched(EffectWindow*,EffectWindow*)), this, SLOT(slotClientGroupItemSwitched(EffectWindow*,EffectWindow*)));
+    connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowActivated(KWin::EffectWindow*)), this, SLOT(slotWindowActivated(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
+    connect(effects, SIGNAL(windowUnminimized(KWin::EffectWindow*)), this, SLOT(slotWindowUnminimized(KWin::EffectWindow*)));
     connect(effects, SIGNAL(tabBoxClosed()), this, SLOT(slotTabBoxClosed()));
 }
 
@@ -69,16 +68,6 @@ void SlideBackEffect::slotWindowActivated(EffectWindow* w)
         return;
     }
 
-    if (clientItemShown == w) {
-        clientItemShown = NULL;
-        updateStackingOrder();
-        return;
-    }
-    if (clientItemHidden == w) {
-        clientItemHidden = NULL;
-        updateStackingOrder();
-        return;
-    }
     // Determine all windows on top of the activated one
     bool currentFound = false;
     foreach (EffectWindow * tmp, oldStackingOrder) {
@@ -311,12 +300,6 @@ void SlideBackEffect::slotWindowUnminimized(EffectWindow* w)
     }
 }
 
-void SlideBackEffect::slotClientGroupItemSwitched(EffectWindow* from, EffectWindow* to)
-{
-    clientItemShown = to;
-    clientItemHidden = from;
-}
-
 void SlideBackEffect::slotTabBoxClosed()
 {
     disabled = true;
@@ -334,7 +317,7 @@ bool SlideBackEffect::isWindowOnTop(EffectWindow* w)
 bool SlideBackEffect::isWindowUsable(EffectWindow* w)
 {
     return w && (w->isNormalWindow() || w->isDialog()) && !w->keepAbove() && !w->isDeleted() && !w->isMinimized()
-           && w->visibleInClientGroup();
+           && w->isCurrentTab();
 }
 
 bool SlideBackEffect::intersects(EffectWindow* windowUnder, const QRect &windowOverGeometry)

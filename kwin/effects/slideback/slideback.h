@@ -43,11 +43,10 @@ public:
     virtual bool isActive() const;
 
 public Q_SLOTS:
-    void slotWindowAdded(EffectWindow *w);
-    void slotWindowActivated(EffectWindow *w);
-    void slotWindowDeleted(EffectWindow *w);
-    void slotWindowUnminimized(EffectWindow *w);
-    void slotClientGroupItemSwitched(EffectWindow* from, EffectWindow* to);
+    void slotWindowAdded(KWin::EffectWindow *w);
+    void slotWindowActivated(KWin::EffectWindow *w);
+    void slotWindowDeleted(KWin::EffectWindow *w);
+    void slotWindowUnminimized(KWin::EffectWindow *w);
     void slotTabBoxClosed();
 
 private:
@@ -58,8 +57,6 @@ private:
     EffectWindowList coveringWindows;
     EffectWindowList elevatedList;
     EffectWindow* unminimizedWindow;
-    EffectWindow* clientItemShown;
-    EffectWindow* clientItemHidden;
     QHash<EffectWindow *, QRect> destinationList;
     bool disabled;
     QList <QRegion> clippedRegions;

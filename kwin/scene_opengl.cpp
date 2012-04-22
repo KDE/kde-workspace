@@ -487,7 +487,7 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
         return;
 
     // Update the texture filter
-    if (options->glSmoothScale != 0 &&
+    if (options->glSmoothScale() != 0 &&
         (mask & (PAINT_WINDOW_TRANSFORMED | PAINT_SCREEN_TRANSFORMED)))
         filter = ImageFilterGood;
     else
@@ -586,18 +586,21 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
     }
 
     // paint the content
-    texture.bind();
-    prepareStates(Content, data.opacity * data.contents_opacity, data.brightness, data.saturation, data.shader);
-    renderQuads(mask, region, data.quads.select(WindowQuadContents), &texture);
-    restoreStates(Content, data.opacity * data.contents_opacity, data.brightness, data.saturation, data.shader);
-    texture.unbind();
+    WindowQuadList contentQuads = data.quads.select(WindowQuadContents);
+    if (!contentQuads.empty()) {
+        texture.bind();
+        prepareStates(Content, data.opacity * data.contents_opacity, data.brightness, data.saturation, data.shader);
+        renderQuads(mask, region, contentQuads, &texture);
+        restoreStates(Content, data.opacity * data.contents_opacity, data.brightness, data.saturation, data.shader);
+        texture.unbind();
 #ifndef KWIN_HAVE_OPENGLES
-    if (static_cast<SceneOpenGL*>(scene)->debug) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        renderQuads(mask, region, data.quads.select(WindowQuadContents), &texture);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+        if (static_cast<SceneOpenGL*>(scene)->debug) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            renderQuads(mask, region, contentQuads, &texture);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 #endif
+    }
 
     if (sceneShader) {
         ShaderManager::instance()->popShader();
@@ -626,17 +629,16 @@ void SceneOpenGL::Window::paintDecoration(const QPixmap* decoration, TextureType
     default:
         return;
     }
-    if (decorationTexture->texture() != None && !updateDeco) {
-        // texture doesn't need updating, just bind it
-        decorationTexture->bind();
-    } else if (!decoration->isNull()) {
+    if (decoration->isNull()) {
+        return;
+    }
+    if (decorationTexture->isNull() || updateDeco) {
         bool success = decorationTexture->load(*decoration);
         if (!success) {
             kDebug(1212) << "Failed to bind decoartion";
             return;
         }
-    } else
-        return;
+    }
 
     // We have to update the texture although we do not paint anything.
     // This is especially needed if we draw the opaque part of the window
@@ -710,8 +712,8 @@ void SceneOpenGL::Window::makeDecorationArrays(const WindowQuadList& quads, cons
     QVector<float> texcoords;
     vertices.reserve(quads.count() * 6 * 2);
     texcoords.reserve(quads.count() * 6 * 2);
-    float width = tex->size().width();
-    float height = tex->size().height();
+    float width = rect.width();
+    float height = rect.height();
 #ifndef KWIN_HAVE_OPENGLES
     if (tex->target() == GL_TEXTURE_RECTANGLE_ARB) {
         width = 1.0;
@@ -829,9 +831,6 @@ void SceneOpenGL::Window::prepareStates(TextureType type, double opacity, double
 void SceneOpenGL::Window::prepareShaderRenderStates(TextureType type, double opacity, double brightness, double saturation, GLShader* shader)
 {
     // setup blending of transparent windows
-#ifndef KWIN_HAVE_OPENGLES
-    glPushAttrib(GL_ENABLE_BIT);
-#endif
     bool opaque = isOpaque() && opacity == 1.0;
     bool alpha = toplevel->hasAlpha() || type != Content;
     if (type != Content)
@@ -1040,9 +1039,6 @@ void SceneOpenGL::Window::restoreShaderRenderStates(TextureType type, double opa
         glDisable(GL_BLEND);
     }
     ShaderManager::instance()->getBoundShader()->setUniform(GLShader::AlphaToOne, 0);
-#ifndef KWIN_HAVE_OPENGLES
-    glPopAttrib();  // ENABLE_BIT
-#endif
 }
 
 void SceneOpenGL::Window::restoreRenderStates(TextureType type, double opacity, double brightness, double saturation, GLTexture *tex)
@@ -1187,17 +1183,11 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
         shader->setUniform(GLShader::AlphaToOne, 0);
     }
 
-#ifndef KWIN_HAVE_OPENGLES
-    glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TEXTURE_BIT);
-#endif
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #ifndef KWIN_HAVE_OPENGLES
     if (!shader)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    // TODO: drop the push matrix
-    glPushMatrix();
 #endif
 
     // Render the actual frame
@@ -1470,10 +1460,6 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
         ShaderManager::instance()->popShader();
     }
     glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-    glPopMatrix();
-    glPopAttrib();
-#endif
 }
 
 void SceneOpenGL::EffectFrame::updateTexture()
@@ -1584,18 +1570,11 @@ void SceneOpenGLShadow::buildQuads()
         return;
     }
 
-    const QRectF outerRect(QPointF(-leftOffset(), -topOffset()), QPointF(topLevel()->width() + rightOffset(), topLevel()->height() + bottomOffset()));
+    const QRectF outerRect(QPointF(-leftOffset(), -topOffset()),
+                           QPointF(topLevel()->width() + rightOffset(), topLevel()->height() + bottomOffset()));
 
-    // calculate the width
-    const qreal cornerWidth = topLeft.width() + topRight.width() + bottomLeft.width() + bottomRight.width();
-    const qreal leftRightWidth = left.width() + right.width();
-    const qreal topBottomWidth = top.width() + bottom.width();
-    // calculate the height
-    const qreal cornerHeight = qMax<int>(topLeft.height(), qMax<int>(topRight.height(), qMax<int>(bottomLeft.height(), bottomRight.height())));
-    const qreal leftRightHeight = qMax<int>(left.height(), right.height());
-
-    const qreal width = m_texture->width();
-    const qreal height = m_texture->height();
+    const qreal width = topLeft.width() + top.width() + topRight.width();
+    const qreal height = topLeft.height() + left.height() + bottomLeft.height();
 
     qreal tx1(0.0), tx2(0.0), ty1(0.0), ty2(0.0);
 
@@ -1608,9 +1587,9 @@ void SceneOpenGLShadow::buildQuads()
     topLeftQuad[ 3 ] = WindowVertex(outerRect.x(),                      outerRect.y() + topLeft.height(), tx1, ty2);
     m_shadowQuads.append(topLeftQuad);
 
-    tx2 = top.width()/width;
-    ty1 = (cornerHeight + leftRightHeight)/height;
-    ty2 = (cornerHeight + leftRightHeight + top.height())/height;
+    tx1 = tx2;
+    tx2 = (topLeft.width() + top.width())/width;
+    ty2 = top.height()/height;
     WindowQuad topQuad(WindowQuadShadowTop);
     topQuad[ 0 ] = WindowVertex(outerRect.x() + topLeft.width(),        outerRect.y(), tx1, ty1);
     topQuad[ 1 ] = WindowVertex(outerRect.right() - topRight.width(),   outerRect.y(), tx2, ty1);
@@ -1618,9 +1597,8 @@ void SceneOpenGLShadow::buildQuads()
     topQuad[ 3 ] = WindowVertex(outerRect.x() + topLeft.width(),        outerRect.y() + top.height(), tx1, ty2);
     m_shadowQuads.append(topQuad);
 
-    tx1 = topLeft.width()/width;
-    tx2 = (topLeft.width() + topRight.width())/width;
-    ty1 = 0.0;
+    tx1 = tx2;
+    tx2 = 1.0;
     ty2 = topRight.height()/height;
     WindowQuad topRightQuad(WindowQuadShadowTopRight);
     topRightQuad[ 0 ] = WindowVertex(outerRect.right() - topRight.width(),  outerRect.y(), tx1, ty1);
@@ -1629,10 +1607,9 @@ void SceneOpenGLShadow::buildQuads()
     topRightQuad[ 3 ] = WindowVertex(outerRect.right() - topRight.width(),  outerRect.y() + topRight.height(), tx1, ty2);
     m_shadowQuads.append(topRightQuad);
 
-    tx1 = left.width()/width;
-    tx2 = leftRightWidth/width;
-    ty1 = cornerHeight/height;
-    ty2 = (cornerHeight+right.height())/height;
+    tx1 = (width - right.width())/width;
+    ty1 = topRight.height()/height;
+    ty2 = (topRight.height() + right.height())/height;
     WindowQuad rightQuad(WindowQuadShadowRight);
     rightQuad[ 0 ] = WindowVertex(outerRect.right() - right.width(),    outerRect.y() + topRight.height(), tx1, ty1);
     rightQuad[ 1 ] = WindowVertex(outerRect.right(),                    outerRect.y() + topRight.height(), tx2, ty1);
@@ -1640,10 +1617,9 @@ void SceneOpenGLShadow::buildQuads()
     rightQuad[ 3 ] = WindowVertex(outerRect.right() - right.width(),    outerRect.bottom() - bottomRight.height(), tx1, ty2);
     m_shadowQuads.append(rightQuad);
 
-    tx1 = (topLeft.width() + topRight.width() + bottomLeft.width())/width;
-    tx2 = cornerWidth/width;
-    ty1 = 0.0;
-    ty2 = bottomRight.height()/height;
+    tx1 = (width - bottomRight.width())/width;
+    ty1 = ty2;
+    ty2 = 1.0;
     WindowQuad bottomRightQuad(WindowQuadShadowBottomRight);
     bottomRightQuad[ 0 ] = WindowVertex(outerRect.right() - bottomRight.width(),    outerRect.bottom() - bottomRight.height(), tx1, ty1);
     bottomRightQuad[ 1 ] = WindowVertex(outerRect.right(),                          outerRect.bottom() - bottomRight.height(), tx2, ty1);
@@ -1651,10 +1627,9 @@ void SceneOpenGLShadow::buildQuads()
     bottomRightQuad[ 3 ] = WindowVertex(outerRect.right() - bottomRight.width(),    outerRect.bottom(), tx1, ty2);
     m_shadowQuads.append(bottomRightQuad);
 
-    tx1 = top.width()/width;
-    tx2 = topBottomWidth/width;
-    ty1 = (cornerHeight + leftRightHeight)/height;
-    ty2 = (cornerHeight + leftRightHeight + bottom.height())/height;
+    tx2 = tx1;
+    tx1 = bottomLeft.width()/width;
+    ty1 = (height - bottom.height())/height;
     WindowQuad bottomQuad(WindowQuadShadowBottom);
     bottomQuad[ 0 ] = WindowVertex(outerRect.x() + bottomLeft.width(),      outerRect.bottom() - bottom.height(), tx1, ty1);
     bottomQuad[ 1 ] = WindowVertex(outerRect.right() - bottomRight.width(), outerRect.bottom() - bottom.height(), tx2, ty1);
@@ -1662,10 +1637,9 @@ void SceneOpenGLShadow::buildQuads()
     bottomQuad[ 3 ] = WindowVertex(outerRect.x() + bottomLeft.width(),      outerRect.bottom(), tx1, ty2);
     m_shadowQuads.append(bottomQuad);
 
-    tx1 = (topLeft.width() + topRight.width())/width;
-    tx2 = (topLeft.width() + topRight.width() + bottomLeft.width())/width;
-    ty1 = 0.0;
-    ty2 = bottomLeft.height()/height;
+    tx1 = 0.0;
+    tx2 = bottomLeft.width()/width;
+    ty1 = (height - bottomLeft.height())/height;
     WindowQuad bottomLeftQuad(WindowQuadShadowBottomLeft);
     bottomLeftQuad[ 0 ] = WindowVertex(outerRect.x(),                       outerRect.bottom() - bottomLeft.height(), tx1, ty1);
     bottomLeftQuad[ 1 ] = WindowVertex(outerRect.x() + bottomLeft.width(),  outerRect.bottom() - bottomLeft.height(), tx2, ty1);
@@ -1673,10 +1647,9 @@ void SceneOpenGLShadow::buildQuads()
     bottomLeftQuad[ 3 ] = WindowVertex(outerRect.x(),                       outerRect.bottom(), tx1, ty2);
     m_shadowQuads.append(bottomLeftQuad);
 
-    tx1 = 0.0;
     tx2 = left.width()/width;
-    ty1 = cornerHeight/height;
-    ty2 = (cornerHeight+left.height())/height;
+    ty2 = ty1;
+    ty1 = topLeft.height()/height;
     WindowQuad leftQuad(WindowQuadShadowLeft);
     leftQuad[ 0 ] = WindowVertex(outerRect.x(),                 outerRect.y() + topLeft.height(), tx1, ty1);
     leftQuad[ 1 ] = WindowVertex(outerRect.x() + left.width(),  outerRect.y() + topLeft.height(), tx2, ty1);
@@ -1695,29 +1668,22 @@ bool SceneOpenGLShadow::prepareBackend()
     const QSize bottomLeft(shadowPixmap(ShadowElementBottomLeft).size());
     const QSize left(shadowPixmap(ShadowElementLeft).size());
     const QSize topLeft(shadowPixmap(ShadowElementTopLeft).size());
-    // calculate the width
-    const int cornerWidth = topLeft.width() + topRight.width() + bottomLeft.width() + bottomRight.width();
-    const int leftRightWidth = left.width() + right.width();
-    const int topBottomWidth = top.width() + bottom.width();
-    const int width = qMax<int>(cornerWidth, qMax<int>(leftRightWidth, topBottomWidth));
-    // calculate the height
-    const int cornerHeight = qMax<int>(topLeft.height(), qMax<int>(topRight.height(), qMax<int>(bottomLeft.height(), bottomRight.height())));
-    const int leftRightHeight = qMax<int>(left.height(), right.height());
-    const int topBottomHeight = qMax<int>(top.height(), bottom.height());
-    const int height = cornerHeight + leftRightHeight + topBottomHeight;
+
+    const int width = topLeft.width() + top.width() + topRight.width();
+    const int height = topLeft.height() + left.height() + bottomLeft.height();
 
     QImage image(width, height, QImage::Format_ARGB32);
     image.fill(Qt::transparent);
     QPainter p;
     p.begin(&image);
     p.drawPixmap(0, 0, shadowPixmap(ShadowElementTopLeft));
-    p.drawPixmap(topLeft.width(), 0, shadowPixmap(ShadowElementTopRight));
-    p.drawPixmap(topLeft.width() + topRight.width(), 0, shadowPixmap(ShadowElementBottomLeft));
-    p.drawPixmap(topLeft.width() + topRight.width() + bottomLeft.width(), 0, shadowPixmap(ShadowElementBottomRight));
-    p.drawPixmap(0, cornerHeight, shadowPixmap(ShadowElementLeft));
-    p.drawPixmap(left.width(), cornerHeight, shadowPixmap(ShadowElementRight));
-    p.drawPixmap(0, cornerHeight + leftRightHeight, shadowPixmap(ShadowElementTop));
-    p.drawPixmap(top.width(), cornerHeight + leftRightHeight, shadowPixmap(ShadowElementBottom));
+    p.drawPixmap(topLeft.width(), 0, shadowPixmap(ShadowElementTop));
+    p.drawPixmap(topLeft.width() + top.width(), 0, shadowPixmap(ShadowElementTopRight));
+    p.drawPixmap(0, topLeft.height(), shadowPixmap(ShadowElementLeft));
+    p.drawPixmap(width - right.width(), topRight.height(), shadowPixmap(ShadowElementRight));
+    p.drawPixmap(0, topLeft.height() + left.height(), shadowPixmap(ShadowElementBottomLeft));
+    p.drawPixmap(bottomLeft.width(), height - bottom.height(), shadowPixmap(ShadowElementBottom));
+    p.drawPixmap(bottomLeft.width() + bottom.width(), topRight.height() + right.height(), shadowPixmap(ShadowElementBottomRight));
     p.end();
 
     delete m_texture;

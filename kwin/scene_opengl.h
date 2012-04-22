@@ -28,10 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kwinglutils.h"
 #include "kwingltexture_p.h"
 
-#ifdef HAVE_XSHM
-#include <X11/extensions/XShm.h>
-#endif
-
 namespace KWin
 {
 
@@ -53,6 +49,7 @@ public:
     virtual void paint(QRegion damage, ToplevelList windows);
     virtual void windowAdded(Toplevel*);
     virtual void windowDeleted(Deleted*);
+    virtual void screenGeometryChanged(const QSize &size);
 
 protected:
     virtual void paintGenericScreen(int mask, ScreenPaintData data);
@@ -70,6 +67,9 @@ private:
     bool initBufferConfigs();
     bool initDrawableConfigs();
     void waitSync();
+#ifndef KWIN_HAVE_OPENGLES
+    void setupModelViewProjectionMatrix();
+#endif
     void flushBuffer(int mask, QRegion damage);
     GC gcroot;
     class FBConfigInfo
@@ -86,6 +86,7 @@ private:
 #ifndef KWIN_HAVE_OPENGLES
     Drawable buffer;
     GLXFBConfig fbcbuffer;
+    bool m_resetModelViewProjectionMatrix;
 #endif
     static bool db;
 #ifndef KWIN_HAVE_OPENGLES
@@ -109,9 +110,7 @@ public:
     TexturePrivate();
     virtual ~TexturePrivate();
 
-    virtual void bind();
-    virtual void unbind();
-    virtual void release();
+    virtual void onDamage();
 
 #ifndef KWIN_HAVE_OPENGLES
     GLXPixmap m_glxpixmap; // the glx pixmap the texture is bound to, only for tfp_mode

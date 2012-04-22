@@ -69,7 +69,7 @@ class ScreenPaintData;
 
 typedef QPair< QString, Effect* > EffectPair;
 typedef QPair< Effect*, Window > InputWindowPair;
-typedef QList< EffectWindow* > EffectWindowList;
+typedef QList< KWin::EffectWindow* > EffectWindowList;
 
 
 /** @defgroup kwineffects KWin effects library
@@ -315,21 +315,12 @@ public:
         /**
          * Window will be painted with a lanczos filter.
          **/
-        PAINT_WINDOW_LANCZOS = 1 << 8,
-        /**
-         * Same as PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS but does not trigger
-         * full repaints of the screen. If this flag is used the effect has
-         * to ensure by itself that the correct areas are repainted. If not
-         * handled correctly it will cause rendering glitches.
-         * Use with care!
-         * @since 4.6
-         **/
-        PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS = 1 << 9
+        PAINT_WINDOW_LANCZOS = 1 << 8
+        // PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS = 1 << 9 has been removed
     };
 
     enum Feature {
-        Nothing = 0, Resize, GeometryTip,
-        Outline
+        Nothing = 0, Resize, GeometryTip, Outline, ScreenInversion
     };
 
     /**
@@ -423,7 +414,7 @@ public:
 
     /**
      * Called on Transparent resizes.
-     * return true if your effect substitutes the XOR rubberband
+     * return true if your effect substitutes questioned feature
     */
     virtual bool provides(Feature);
 
@@ -581,6 +572,40 @@ public:
 class KWIN_EXPORT EffectsHandler : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int currentDesktop READ currentDesktop WRITE setCurrentDesktop NOTIFY desktopChanged)
+    Q_PROPERTY(QString currentActivity READ currentActivity)
+    Q_PROPERTY(KWin::EffectWindow *activeWindow READ activeWindow WRITE activateWindow NOTIFY windowActivated)
+    Q_PROPERTY(QSize desktopGridSize READ desktopGridSize)
+    Q_PROPERTY(int desktopGridWidth READ desktopGridWidth)
+    Q_PROPERTY(int desktopGridHeight READ desktopGridHeight)
+    Q_PROPERTY(int workspaceWidth READ workspaceWidth)
+    Q_PROPERTY(int workspaceHeight READ workspaceHeight)
+    /**
+     * The number of desktops currently used. Minimum number of desktops is 1, maximum 20.
+     **/
+    Q_PROPERTY(int desktops READ numberOfDesktops WRITE setNumberOfDesktops NOTIFY numberDesktopsChanged)
+    Q_PROPERTY(bool optionRollOverDesktops READ optionRollOverDesktops)
+    Q_PROPERTY(int activeScreen READ activeScreen)
+    Q_PROPERTY(int numScreens READ numScreens)
+    /**
+     * Factor by which animation speed in the effect should be modified (multiplied).
+     * If configurable in the effect itself, the option should have also 'default'
+     * animation speed. The actual value should be determined using animationTime().
+     * Note: The factor can be also 0, so make sure your code can cope with 0ms time
+     * if used manually.
+     */
+    Q_PROPERTY(qreal animationTimeFactor READ animationTimeFactor)
+    Q_PROPERTY(QList< KWin::EffectWindow* > stackingOrder READ stackingOrder)
+    /**
+     * Whether window decorations use the alpha channel.
+     **/
+    Q_PROPERTY(bool decorationsHaveAlpha READ decorationsHaveAlpha)
+    /**
+     * Whether the window decorations support blurring behind the decoration.
+     **/
+    Q_PROPERTY(bool decorationSupportsBlurBehind READ decorationSupportsBlurBehind)
+    Q_PROPERTY(CompositingType compositingType READ compositingType CONSTANT)
+    Q_PROPERTY(QPoint cursorPos READ cursorPos)
     friend class Effect;
 public:
     EffectsHandler(CompositingType type);
@@ -623,11 +648,11 @@ public:
     virtual void reserveElectricBorderSwitching(bool reserve) = 0;
 
     // functions that allow controlling windows/desktop
-    virtual void activateWindow(EffectWindow* c) = 0;
-    virtual EffectWindow* activeWindow() const = 0 ;
-    virtual void moveWindow(EffectWindow* w, const QPoint& pos, bool snap = false, double snapAdjust = 1.0) = 0;
-    virtual void windowToDesktop(EffectWindow* w, int desktop) = 0;
-    virtual void windowToScreen(EffectWindow* w, int screen) = 0;
+    virtual void activateWindow(KWin::EffectWindow* c) = 0;
+    virtual KWin::EffectWindow* activeWindow() const = 0 ;
+    Q_SCRIPTABLE virtual void moveWindow(KWin::EffectWindow* w, const QPoint& pos, bool snap = false, double snapAdjust = 1.0) = 0;
+    Q_SCRIPTABLE virtual void windowToDesktop(KWin::EffectWindow* w, int desktop) = 0;
+    Q_SCRIPTABLE virtual void windowToScreen(KWin::EffectWindow* w, int screen) = 0;
     virtual void setShowingDesktop(bool showing) = 0;
 
 
@@ -690,28 +715,28 @@ public:
      * @returns The ID of the desktop above desktop @a id. Wraps around to the bottom of
      * the layout if @a wrap is set. If @a id is not set use the current one.
      */
-    virtual int desktopAbove(int desktop = 0, bool wrap = true) const = 0;
+    Q_SCRIPTABLE virtual int desktopAbove(int desktop = 0, bool wrap = true) const = 0;
     /**
      * @returns The ID of the desktop to the right of desktop @a id. Wraps around to the
      * left of the layout if @a wrap is set. If @a id is not set use the current one.
      */
-    virtual int desktopToRight(int desktop = 0, bool wrap = true) const = 0;
+    Q_SCRIPTABLE virtual int desktopToRight(int desktop = 0, bool wrap = true) const = 0;
     /**
      * @returns The ID of the desktop below desktop @a id. Wraps around to the top of the
      * layout if @a wrap is set. If @a id is not set use the current one.
      */
-    virtual int desktopBelow(int desktop = 0, bool wrap = true) const = 0;
+    Q_SCRIPTABLE virtual int desktopBelow(int desktop = 0, bool wrap = true) const = 0;
     /**
      * @returns The ID of the desktop to the left of desktop @a id. Wraps around to the
      * right of the layout if @a wrap is set. If @a id is not set use the current one.
      */
-    virtual int desktopToLeft(int desktop = 0, bool wrap = true) const = 0;
-    virtual QString desktopName(int desktop) const = 0;
+    Q_SCRIPTABLE virtual int desktopToLeft(int desktop = 0, bool wrap = true) const = 0;
+    Q_SCRIPTABLE virtual QString desktopName(int desktop) const = 0;
     virtual bool optionRollOverDesktops() const = 0;
 
     virtual int activeScreen() const = 0; // Xinerama
     virtual int numScreens() const = 0; // Xinerama
-    virtual int screenNumber(const QPoint& pos) const = 0;   // Xinerama
+    Q_SCRIPTABLE virtual int screenNumber(const QPoint& pos) const = 0;   // Xinerama
     virtual QRect clientArea(clientAreaOption, int screen, int desktop) const = 0;
     virtual QRect clientArea(clientAreaOption, const EffectWindow* c) const = 0;
     virtual QRect clientArea(clientAreaOption, const QPoint& p, int desktop) const = 0;
@@ -725,7 +750,7 @@ public:
     virtual double animationTimeFactor() const = 0;
     virtual WindowQuadType newWindowQuadType() = 0;
 
-    virtual EffectWindow* findWindow(WId id) const = 0;
+    Q_SCRIPTABLE virtual KWin::EffectWindow* findWindow(WId id) const = 0;
     virtual EffectWindowList stackingOrder() const = 0;
     // window will be temporarily painted as if being at the top of the stack
     virtual void setElevatedWindow(EffectWindow* w, bool set) = 0;
@@ -748,10 +773,10 @@ public:
      * If you call it during painting (including prepaint) then it does not
      *  affect the current painting.
      **/
-    virtual void addRepaintFull() = 0;
-    virtual void addRepaint(const QRect& r) = 0;
-    virtual void addRepaint(const QRegion& r) = 0;
-    virtual void addRepaint(int x, int y, int w, int h) = 0;
+    Q_SCRIPTABLE virtual void addRepaintFull() = 0;
+    Q_SCRIPTABLE virtual void addRepaint(const QRect& r) = 0;
+    Q_SCRIPTABLE virtual void addRepaint(const QRegion& r) = 0;
+    Q_SCRIPTABLE virtual void addRepaint(int x, int y, int w, int h) = 0;
 
     CompositingType compositingType() const;
     virtual unsigned long xrenderBufferPicture() = 0;
@@ -796,6 +821,16 @@ public:
                                      const QPoint& position = QPoint(-1, -1), Qt::Alignment alignment = Qt::AlignCenter) const = 0;
 
     /**
+     * Allows an effect to trigger a reload of itself.
+     * This can be used by an effect which needs to be reloaded when screen geometry changes.
+     * It is possible that the effect cannot be loaded again as it's supported method does no longer
+     * hold.
+     * @param effect The effect to reload
+     * @since 4.8
+     **/
+    virtual void reloadEffect(Effect *effect) = 0;
+
+    /**
      * Sends message over DCOP to reload given effect.
      * @param effectname effect's name without "kwin4_effect_" prefix.
      * Can be called from effect's config module to apply config changes.
@@ -826,7 +861,7 @@ Q_SIGNALS:
      * @param w The added window
      * @since 4.7
      **/
-    void windowAdded(EffectWindow *w);
+    void windowAdded(KWin::EffectWindow *w);
     /**
      * Signal emitted when a window is being removed from the Workspace.
      * An effect which wants to animate the window closing should connect
@@ -835,13 +870,13 @@ Q_SIGNALS:
      * @param w The window which is being closed
      * @since 4.7
      **/
-    void windowClosed(EffectWindow *w);
+    void windowClosed(KWin::EffectWindow *w);
     /**
      * Signal emitted when a window get's activated.
      * @param w The new active window, or @c NULL if there is no active window.
      * @since 4.7
      **/
-    void windowActivated(EffectWindow *w);
+    void windowActivated(KWin::EffectWindow *w);
     /**
      * Signal emitted when a window is deleted.
      * This means that a closed window is not referenced any more.
@@ -853,7 +888,7 @@ Q_SIGNALS:
      * @see windowClosed
      * @since 4.7
      **/
-    void windowDeleted(EffectWindow *w);
+    void windowDeleted(KWin::EffectWindow *w);
     /**
      * Signal emitted when a user begins a window move or resize operation.
      * To figure out whether the user resizes or moves the window use
@@ -869,7 +904,7 @@ Q_SIGNALS:
      * @see EffectWindow::isUserResize
      * @since 4.7
      **/
-    void windowStartUserMovedResized(EffectWindow *w);
+    void windowStartUserMovedResized(KWin::EffectWindow *w);
     /**
      * Signal emitted during a move/resize operation when the user changed the geometry.
      * Please note: KWin supports two operation modes. In one mode all changes are applied
@@ -886,7 +921,7 @@ Q_SIGNALS:
      * @see EffectWindow::isUserResize
      * @since 4.7
      **/
-    void windowStepUserMovedResized(EffectWindow *w, const QRect &geometry);
+    void windowStepUserMovedResized(KWin::EffectWindow *w, const QRect &geometry);
     /**
      * Signal emitted when the user finishes move/resize of window @p w.
      * @param w The window which has been moved/resized
@@ -894,7 +929,7 @@ Q_SIGNALS:
      * @see windowFinishUserMovedResized
      * @since 4.7
      **/
-    void windowFinishUserMovedResized(EffectWindow *w);
+    void windowFinishUserMovedResized(KWin::EffectWindow *w);
     /**
      * Signal emitted when the maximized state of the window @p w changed.
      * A window can be in one of four states:
@@ -907,7 +942,7 @@ Q_SIGNALS:
      * @param vertical If @c true maximized vertically
      * @since 4.7
      **/
-    void windowMaximizedStateChanged(EffectWindow *w, bool horizontal, bool vertical);
+    void windowMaximizedStateChanged(KWin::EffectWindow *w, bool horizontal, bool vertical);
     /**
      * Signal emitted when the geometry or shape of a window changed.
      * This is caused if the window changes geometry without user interaction.
@@ -918,7 +953,7 @@ Q_SIGNALS:
      * @see windowUserMovedResized
      * @since 4.7
      **/
-    void windowGeometryShapeChanged(EffectWindow *w, const QRect &old);
+    void windowGeometryShapeChanged(KWin::EffectWindow *w, const QRect &old);
     /**
      * Signal emitted when the windows opacity is changed.
      * @param w The window whose opacity level is changed.
@@ -926,19 +961,19 @@ Q_SIGNALS:
      * @param newOpacity The new opacity level
      * @since 4.7
      **/
-    void windowOpacityChanged(EffectWindow *w, qreal oldOpacity, qreal newOpacity);
+    void windowOpacityChanged(KWin::EffectWindow *w, qreal oldOpacity, qreal newOpacity);
     /**
      * Signal emitted when a window got minimized.
      * @param w The window which was minimized
      * @since 4.7
      **/
-    void windowMinimized(EffectWindow *w);
+    void windowMinimized(KWin::EffectWindow *w);
     /**
      * Signal emitted when a window got unminimized.
      * @param w The window which was unminimized
      * @since 4.7
      **/
-    void windowUnminimized(EffectWindow *w);
+    void windowUnminimized(KWin::EffectWindow *w);
     /**
      * Signal emitted when an area of a window is scheduled for repainting.
      * Use this signal in an effect if another area needs to be synced as well.
@@ -946,7 +981,7 @@ Q_SIGNALS:
      * @param r The damaged rect
      * @since 4.7
      **/
-    void windowDamaged(EffectWindow *w, const QRect &r);
+    void windowDamaged(KWin::EffectWindow *w, const QRect &r);
     /**
      * Signal emitted when a tabbox is added.
      * An effect who wants to replace the tabbox with itself should use @link refTabBox.
@@ -986,9 +1021,9 @@ Q_SIGNALS:
      * @since 4.7
      **/
     void tabBoxKeyEvent(QKeyEvent* event);
-    void clientGroupItemSwitched(EffectWindow* from, EffectWindow* to);
-    void clientGroupItemAdded(EffectWindow* from, EffectWindow* to);   // from merged with to
-    void clientGroupItemRemoved(EffectWindow* c, EffectWindow* group);   // c removed from group
+    void currentTabAboutToChange(KWin::EffectWindow* from, KWin::EffectWindow* to);
+    void tabAdded(KWin::EffectWindow* from, KWin::EffectWindow* to);   // from merged with to
+    void tabRemoved(KWin::EffectWindow* c, KWin::EffectWindow* group);   // c removed from group
     /**
      * Signal emitted when mouse changed.
      * If an effect needs to get updated mouse positions, it needs to first call @link startMousePolling.
@@ -1015,7 +1050,7 @@ Q_SIGNALS:
      * @param atom The property
      * @since 4.7
      */
-    void propertyNotify(EffectWindow* w, long atom);
+    void propertyNotify(KWin::EffectWindow* w, long atom);
     /**
      * Requests to show an outline. An effect providing to show an outline should
      * connect to the signal and render an outline.
@@ -1033,6 +1068,15 @@ Q_SIGNALS:
      **/
     void hideOutline();
 
+    /**
+     * Signal emitted after the screen geometry changed (e.g. add of a monitor).
+     * Effects using displayWidth()/displayHeight() to cache information should
+     * react on this signal and update the caches.
+     * @param size The new screen size
+     * @since 4.8
+     **/
+    void screenGeometryChanged(const QSize &size);
+
 protected:
     QVector< EffectPair > loaded_effects;
     QHash< QString, KLibrary* > effect_libraries;
@@ -1048,8 +1092,189 @@ protected:
  * The purpose is to hide internal data and also to serve as a single
  *  representation for the case when Client/Unmanaged becomes Deleted.
  **/
-class KWIN_EXPORT EffectWindow
+class KWIN_EXPORT EffectWindow : public QObject
 {
+    Q_OBJECT
+    Q_PROPERTY(bool alpha READ hasAlpha CONSTANT)
+    Q_PROPERTY(QRect geometry READ geometry)
+    Q_PROPERTY(int height READ height)
+    Q_PROPERTY(qreal opacity READ opacity)
+    Q_PROPERTY(QPoint pos READ pos)
+    Q_PROPERTY(int screen READ screen)
+    Q_PROPERTY(QSize size READ size)
+    Q_PROPERTY(int width READ width)
+    Q_PROPERTY(int x READ x)
+    Q_PROPERTY(int y READ y)
+    Q_PROPERTY(int desktop READ desktop)
+    Q_PROPERTY(bool onAllDesktops READ isOnAllDesktops)
+    Q_PROPERTY(bool onCurrentDesktop READ isOnCurrentDesktop)
+    Q_PROPERTY(QRect rect READ rect)
+    Q_PROPERTY(QString windowClass READ windowClass)
+    Q_PROPERTY(QString windowRole READ windowRole)
+    /**
+     * Returns whether the window is a desktop background window (the one with wallpaper).
+     * See _NET_WM_WINDOW_TYPE_DESKTOP at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool desktopWindow READ isDesktop)
+    /**
+     * Returns whether the window is a dock (i.e. a panel).
+     * See _NET_WM_WINDOW_TYPE_DOCK at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool dock READ isDock)
+    /**
+     * Returns whether the window is a standalone (detached) toolbar window.
+     * See _NET_WM_WINDOW_TYPE_TOOLBAR at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool toolbar READ isToolbar)
+    /**
+     * Returns whether the window is a torn-off menu.
+     * See _NET_WM_WINDOW_TYPE_MENU at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool menu READ isMenu)
+    /**
+     * Returns whether the window is a "normal" window, i.e. an application or any other window
+     * for which none of the specialized window types fit.
+     * See _NET_WM_WINDOW_TYPE_NORMAL at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool normalWindow READ isNormalWindow)
+    /**
+     * Returns whether the window is a dialog window.
+     * See _NET_WM_WINDOW_TYPE_DIALOG at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool dialog READ isDialog)
+    /**
+     * Returns whether the window is a splashscreen. Note that many (especially older) applications
+     * do not support marking their splash windows with this type.
+     * See _NET_WM_WINDOW_TYPE_SPLASH at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool splash READ isSplash)
+    /**
+     * Returns whether the window is a utility window, such as a tool window.
+     * See _NET_WM_WINDOW_TYPE_UTILITY at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool utility READ isUtility)
+    /**
+     * Returns whether the window is a dropdown menu (i.e. a popup directly or indirectly open
+     * from the applications menubar).
+     * See _NET_WM_WINDOW_TYPE_DROPDOWN_MENU at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool dropdownMenu READ isDropdownMenu)
+    /**
+     * Returns whether the window is a popup menu (that is not a torn-off or dropdown menu).
+     * See _NET_WM_WINDOW_TYPE_POPUP_MENU at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool popupMenu READ isPopupMenu)
+    /**
+     * Returns whether the window is a tooltip.
+     * See _NET_WM_WINDOW_TYPE_TOOLTIP at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool tooltip READ isTooltip)
+    /**
+     * Returns whether the window is a window with a notification.
+     * See _NET_WM_WINDOW_TYPE_NOTIFICATION at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool notification READ isNotification)
+    /**
+     * Returns whether the window is a combobox popup.
+     * See _NET_WM_WINDOW_TYPE_COMBO at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool comboBox READ isComboBox)
+    /**
+     * Returns whether the window is a Drag&Drop icon.
+     * See _NET_WM_WINDOW_TYPE_DND at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(bool dndIcon READ isDNDIcon)
+    /**
+     * Returns the NETWM window type
+     * See http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     */
+    Q_PROPERTY(int windowType READ windowType)
+    /**
+     * Whether this EffectWindow is managed by KWin (it has control over its placement and other
+     * aspects, as opposed to override-redirect windows that are entirely handled by the application).
+     **/
+    Q_PROPERTY(bool managed READ isManaged)
+    /**
+     * Whether this EffectWindow represents an already deleted window and only kept for the compositor for animations.
+     **/
+    Q_PROPERTY(bool deleted READ isDeleted)
+    /**
+     * Whether the window has an own shape
+     **/
+    Q_PROPERTY(bool shaped READ hasOwnShape)
+    /**
+     * The Window's shape
+     **/
+    Q_PROPERTY(QRegion shape READ shape)
+    /**
+     * The Caption of the window. Read from WM_NAME property together with a suffix for hostname and shortcut.
+     **/
+    Q_PROPERTY(QString caption READ caption)
+    /**
+     * Whether the window is set to be kept above other windows.
+     **/
+    Q_PROPERTY(bool keepAbove READ keepAbove)
+    /**
+     * Whether the window is minimized.
+     **/
+    Q_PROPERTY(bool minimized READ isMinimized WRITE setMinimized)
+    /**
+     * Whether the window represents a modal window.
+     **/
+    Q_PROPERTY(bool modal READ isModal)
+    /**
+     * Whether the window is moveable. Even if it is not moveable, it might be possible to move
+     * it to another screen.
+     * @see moveableAcrossScreens
+     **/
+    Q_PROPERTY(bool moveable READ isMovable)
+    /**
+     * Whether the window can be moved to another screen.
+     * @see moveable
+     **/
+    Q_PROPERTY(bool moveableAcrossScreens READ isMovableAcrossScreens)
+    /**
+     * By how much the window wishes to grow/shrink at least. Usually QSize(1,1).
+     * MAY BE DISOBEYED BY THE WM! It's only for information, do NOT rely on it at all.
+     */
+    Q_PROPERTY(QSize basicUnit READ basicUnit)
+    /**
+     * Whether the window is currently being moved by the user.
+     **/
+    Q_PROPERTY(bool move READ isUserMove)
+    /**
+     * Whether the window is currently being resized by the user.
+     **/
+    Q_PROPERTY(bool resize READ isUserResize)
+    /**
+     * The optional geometry representing the minimized Client in e.g a taskbar.
+     * See _NET_WM_ICON_GEOMETRY at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
+     **/
+    Q_PROPERTY(QRect iconGeometry READ iconGeometry)
+    /**
+     * Returns whether the window is any of special windows types (desktop, dock, splash, ...),
+     * i.e. window types that usually don't have a window frame and the user does not use window
+     * management (moving, raising,...) on them.
+     **/
+    Q_PROPERTY(bool specialWindow READ isSpecialWindow)
+    Q_PROPERTY(QPixmap icon READ icon)
+    /**
+     * Whether the window should be excluded from window switching effects.
+     **/
+    Q_PROPERTY(bool skipSwitcher READ isSkipSwitcher)
+    /**
+     * Geometry of the actual window contents inside the whole (including decorations) window.
+     */
+    Q_PROPERTY(QRect contentsRect READ contentsRect)
+    /**
+     * Geometry of the transparent rect in the decoration.
+     * May be different from contentsRect if the decoration is extended into the client area.
+     */
+    Q_PROPERTY(QRect decorationInnerRect READ decorationInnerRect)
+    Q_PROPERTY(bool hasDecoration READ hasDecoration)
+    Q_PROPERTY(QStringList activities READ activities)
+    Q_PROPERTY(bool onCurrentActivity READ isOnCurrentActivity)
+    Q_PROPERTY(bool onAllActivities READ isOnAllActivities)
 public:
     /**  Flags explaining why painting should be disabled  */
     enum {
@@ -1062,64 +1287,67 @@ public:
         /**  Window will not be painted because it is minimized  */
         PAINT_DISABLED_BY_MINIMIZE     = 1 << 3,
         /**  Window will not be painted because it is not the active window in a client group  */
-        PAINT_DISABLED_BY_CLIENT_GROUP = 1 << 4,
+        PAINT_DISABLED_BY_TAB_GROUP = 1 << 4,
         /**  Window will not be painted because it's not on the current activity  */
         PAINT_DISABLED_BY_ACTIVITY     = 1 << 5
     };
 
-    EffectWindow();
+    EffectWindow(QObject *parent = NULL);
     virtual ~EffectWindow();
 
     virtual void enablePainting(int reason) = 0;
     virtual void disablePainting(int reason) = 0;
     virtual bool isPaintingEnabled() = 0;
-    virtual void addRepaint(const QRect& r) = 0;
-    virtual void addRepaint(int x, int y, int w, int h) = 0;
-    virtual void addRepaintFull() = 0;
+    Q_SCRIPTABLE void addRepaint(const QRect& r);
+    Q_SCRIPTABLE void addRepaint(int x, int y, int w, int h);
+    Q_SCRIPTABLE void addRepaintFull();
+    Q_SCRIPTABLE void addLayerRepaint(const QRect& r);
+    Q_SCRIPTABLE void addLayerRepaint(int x, int y, int w, int h);
 
     virtual void refWindow() = 0;
     virtual void unrefWindow() = 0;
-    virtual bool isDeleted() const = 0;
+    bool isDeleted() const;
 
-    virtual bool isMinimized() const = 0;
-    virtual double opacity() const = 0;
-    virtual bool hasAlpha() const = 0;
+    bool isMinimized() const;
+    double opacity() const;
+    bool hasAlpha() const;
 
-    virtual bool isOnCurrentActivity() const;
-    virtual bool isOnActivity(QString id) const = 0;
-    virtual bool isOnAllActivities() const = 0;
+    bool isOnCurrentActivity() const;
+    Q_SCRIPTABLE bool isOnActivity(QString id) const;
+    bool isOnAllActivities() const;
+    QStringList activities() const;
 
-    virtual bool isOnDesktop(int d) const;
-    virtual bool isOnCurrentDesktop() const;
-    virtual bool isOnAllDesktops() const = 0;
-    virtual int desktop() const = 0; // prefer isOnXXX()
+    bool isOnDesktop(int d) const;
+    bool isOnCurrentDesktop() const;
+    bool isOnAllDesktops() const;
+    int desktop() const; // prefer isOnXXX()
 
-    virtual int x() const = 0;
-    virtual int y() const = 0;
-    virtual int width() const = 0;
-    virtual int height() const = 0;
+    int x() const;
+    int y() const;
+    int width() const;
+    int height() const;
     /**
      * By how much the window wishes to grow/shrink at least. Usually QSize(1,1).
      * MAY BE DISOBEYED BY THE WM! It's only for information, do NOT rely on it at all.
      */
-    virtual QSize basicUnit() const = 0;
-    virtual QRect geometry() const = 0;
+    QSize basicUnit() const;
+    QRect geometry() const;
     virtual QRegion shape() const = 0;
-    virtual int screen() const = 0;
+    int screen() const;
     /** @internal Do not use */
-    virtual bool hasOwnShape() const = 0; // only for shadow effect, for now
-    virtual QPoint pos() const = 0;
-    virtual QSize size() const = 0;
-    virtual QRect rect() const = 0;
-    virtual bool isMovable() const = 0;
-    virtual bool isMovableAcrossScreens() const = 0;
-    virtual bool isUserMove() const = 0;
-    virtual bool isUserResize() const = 0;
-    virtual QRect iconGeometry() const = 0;
+    bool hasOwnShape() const; // only for shadow effect, for now
+    QPoint pos() const;
+    QSize size() const;
+    QRect rect() const;
+    bool isMovable() const;
+    bool isMovableAcrossScreens() const;
+    bool isUserMove() const;
+    bool isUserResize() const;
+    QRect iconGeometry() const;
     /**
      * Geometry of the actual window contents inside the whole (including decorations) window.
      */
-    virtual QRect contentsRect() const = 0;
+    QRect contentsRect() const;
     /**
      * Geometry of the transparent rect in the decoration.
      * May be different from contentsRect() if the decoration is extended into the client area.
@@ -1130,136 +1358,137 @@ public:
     virtual QByteArray readProperty(long atom, long type, int format) const = 0;
     virtual void deleteProperty(long atom) const = 0;
 
-    virtual QString caption() const = 0;
-    virtual QPixmap icon() const = 0;
-    virtual QString windowClass() const = 0;
-    virtual QString windowRole() const = 0;
+    QString caption() const;
+    QPixmap icon() const;
+    QString windowClass() const;
+    QString windowRole() const;
     virtual const EffectWindowGroup* group() const = 0;
 
     /**
      * Returns whether the window is a desktop background window (the one with wallpaper).
      * See _NET_WM_WINDOW_TYPE_DESKTOP at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isDesktop() const = 0;
+    bool isDesktop() const;
     /**
      * Returns whether the window is a dock (i.e. a panel).
      * See _NET_WM_WINDOW_TYPE_DOCK at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isDock() const = 0;
+    bool isDock() const;
     /**
      * Returns whether the window is a standalone (detached) toolbar window.
      * See _NET_WM_WINDOW_TYPE_TOOLBAR at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isToolbar() const = 0;
+    bool isToolbar() const;
     /**
      * Returns whether the window is a torn-off menu.
      * See _NET_WM_WINDOW_TYPE_MENU at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isMenu() const = 0;
+    bool isMenu() const;
     /**
      * Returns whether the window is a "normal" window, i.e. an application or any other window
      * for which none of the specialized window types fit.
      * See _NET_WM_WINDOW_TYPE_NORMAL at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isNormalWindow() const = 0; // normal as in 'NET::Normal or NET::Unknown non-transient'
+    bool isNormalWindow() const; // normal as in 'NET::Normal or NET::Unknown non-transient'
     /**
      * Returns whether the window is any of special windows types (desktop, dock, splash, ...),
      * i.e. window types that usually don't have a window frame and the user does not use window
      * management (moving, raising,...) on them.
      */
-    virtual bool isSpecialWindow() const = 0;
+    bool isSpecialWindow() const;
     /**
      * Returns whether the window is a dialog window.
      * See _NET_WM_WINDOW_TYPE_DIALOG at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isDialog() const = 0;
+    bool isDialog() const;
     /**
      * Returns whether the window is a splashscreen. Note that many (especially older) applications
      * do not support marking their splash windows with this type.
      * See _NET_WM_WINDOW_TYPE_SPLASH at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isSplash() const = 0;
+    bool isSplash() const;
     /**
      * Returns whether the window is a utility window, such as a tool window.
      * See _NET_WM_WINDOW_TYPE_UTILITY at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isUtility() const = 0;
+    bool isUtility() const;
     /**
      * Returns whether the window is a dropdown menu (i.e. a popup directly or indirectly open
      * from the applications menubar).
      * See _NET_WM_WINDOW_TYPE_DROPDOWN_MENU at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isDropdownMenu() const = 0;
+    bool isDropdownMenu() const;
     /**
      * Returns whether the window is a popup menu (that is not a torn-off or dropdown menu).
      * See _NET_WM_WINDOW_TYPE_POPUP_MENU at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isPopupMenu() const = 0; // a context popup, not dropdown, not torn-off
+    bool isPopupMenu() const; // a context popup, not dropdown, not torn-off
     /**
      * Returns whether the window is a tooltip.
      * See _NET_WM_WINDOW_TYPE_TOOLTIP at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isTooltip() const = 0;
+    bool isTooltip() const;
     /**
      * Returns whether the window is a window with a notification.
      * See _NET_WM_WINDOW_TYPE_NOTIFICATION at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isNotification() const = 0;
+    bool isNotification() const;
     /**
      * Returns whether the window is a combobox popup.
      * See _NET_WM_WINDOW_TYPE_COMBO at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isComboBox() const = 0;
+    bool isComboBox() const;
     /**
      * Returns whether the window is a Drag&Drop icon.
      * See _NET_WM_WINDOW_TYPE_DND at http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual bool isDNDIcon() const = 0;
+    bool isDNDIcon() const;
     /**
      * Returns the NETWM window type
      * See http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
-    virtual NET::WindowType windowType() const = 0;
+    NET::WindowType windowType() const;
     /**
      * Returns whether the window is managed by KWin (it has control over its placement and other
      * aspects, as opposed to override-redirect windows that are entirely handled by the application).
      */
-    virtual bool isManaged() const = 0; // whether it's managed or override-redirect
+    bool isManaged() const; // whether it's managed or override-redirect
     /**
      * Returns whether or not the window can accept keyboard focus.
      */
-    virtual bool acceptsFocus() const = 0;
+    bool acceptsFocus() const;
     /**
      * Returns whether or not the window is kept above all other windows.
      */
-    virtual bool keepAbove() const = 0;
+    bool keepAbove() const;
 
-    virtual bool isModal() const = 0;
-    virtual EffectWindow* findModal() = 0;
-    virtual EffectWindowList mainWindows() const = 0;
+    bool isModal() const;
+    Q_SCRIPTABLE virtual KWin::EffectWindow* findModal() = 0;
+    Q_SCRIPTABLE virtual EffectWindowList mainWindows() const = 0;
 
     /**
     * Returns whether the window should be excluded from window switching effects.
     * @since 4.5
     */
-    virtual bool isSkipSwitcher() const = 0;
+    bool isSkipSwitcher() const;
 
     /**
      * Returns the unmodified window quad list. Can also be used to force rebuilding.
      */
     virtual WindowQuadList buildQuads(bool force = false) const = 0;
 
-    virtual void minimize() const = 0;
-    virtual void unminimize() const = 0;
-    virtual void closeWindow() const = 0;
+    void setMinimized(bool minimize);
+    void minimize();
+    void unminimize();
+    Q_SCRIPTABLE void closeWindow() const;
 
-    virtual bool visibleInClientGroup() const = 0;
+    bool isCurrentTab() const;
 
     /**
      * Can be used to by effects to store arbitrary data in the EffectWindow.
      */
-    virtual void setData(int role, const QVariant &data) = 0;
-    virtual QVariant data(int role) const = 0;
+    Q_SCRIPTABLE virtual void setData(int role, const QVariant &data) = 0;
+    Q_SCRIPTABLE virtual QVariant data(int role) const = 0;
 };
 
 class KWIN_EXPORT EffectWindowGroup
@@ -2142,6 +2371,8 @@ void Motion<T>::finish()
 }
 
 } // namespace
+Q_DECLARE_METATYPE(KWin::EffectWindow*)
+Q_DECLARE_METATYPE(QList<KWin::EffectWindow*>)
 
 /** @} */
 
