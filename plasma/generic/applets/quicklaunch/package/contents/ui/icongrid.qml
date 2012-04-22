@@ -76,7 +76,16 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: plasmoid.openUrl(model.url);
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    onClicked: {
+                        if (mouse.button == Qt.LeftButton) {
+                            plasmoid.openUrl(model.url);
+                        }
+                        else {
+                            print("Right click!" + mouse.accepted);
+                            mouse.accepted = false;
+                        }
+                    }
                 }
             }
 

@@ -39,8 +39,12 @@ Item {
         plasmoid.setActionSeparator("separator");
 
         // TODO: Implement
-        plasmoid.action_addLauncher = function() {}
-        plasmoid.action_editLauncher = function() {}
+        plasmoid.action_addLauncher = function() {
+            print(helper.showAddLauncherDialog());
+        }
+        plasmoid.action_editLauncher = function() {
+            // helper.showEditLauncherDialog()
+        }
         plasmoid.action_removeLauncher = function() {}
     }
 
@@ -110,5 +114,9 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
+    }
+
+    Quicklaunch.QuicklaunchHelper {
+        id: helper
     }
 }

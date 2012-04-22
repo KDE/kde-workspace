@@ -16,19 +16,18 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
  ***************************************************************************/
-#include "quicklaunchplugin.h"
+#ifndef QUICKLAUNCHHELPER_H
+#define QUICKLAUNCHHELPER_H
 
-#include <QtDeclarative>
+#include <QtCore/QObject>
 
-#include "launcherlistmodel.h"
-#include "quicklaunchhelper.h"
-
-void QuicklaunchPlugin::registerTypes(const char *uri)
+class QuicklaunchHelper : public QObject
 {
-    qmlRegisterType<LauncherListModel>(
-        "org.kde.plasma.quicklaunch", 1, 0, "LauncherListModel");
-    qmlRegisterType<QuicklaunchHelper>(
-            "org.kde.plasma.quicklaunch", 1, 0, "QuicklaunchHelper");
-}
+    Q_OBJECT
+public:
+    QuicklaunchHelper(QObject *parent = 0);
+    Q_INVOKABLE QString showAddLauncherDialog();
+    Q_INVOKABLE QString showEditLauncherDialog(const QString &url);
+};
 
-#include "quicklaunchplugin.moc"
+#endif // QUICKLAUNCHHELPER_H

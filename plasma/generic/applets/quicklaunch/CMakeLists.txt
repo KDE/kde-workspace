@@ -2,6 +2,7 @@ project(plasma-applet-quicklaunch)
 
 set(quicklaunchplugin_SRCS
     extension/launcherlistmodel.cpp
+    extension/quicklaunchhelper.cpp
     extension/quicklaunchplugin.cpp
 )
 
