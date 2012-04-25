@@ -7989,6 +7989,9 @@ namespace Oxygen
         widgetExplorer().setEnabled( StyleConfigData::widgetExplorerEnabled() );
         widgetExplorer().setDrawWidgetRects( StyleConfigData::drawWidgetRects() );
 
+        // splitter proxy
+        splitterFactory().setEnabled( StyleConfigData::splitterProxyEnabled() );
+
         // scrollbar button dimentions.
         /* it has to be reinitialized here because scrollbar width might have changed */
         _noButtonHeight = 0;
@@ -8632,36 +8635,20 @@ namespace Oxygen
     {
 
         const QPalette& palette( option->palette );
-
         const State& flags( option->state );
 
+        // enable state
         bool enabled( flags & State_Enabled );
-        bool atLimit( false );
-        if( enabled )
-        {
 
-            if( const QSpinBox* spinbox = qobject_cast<const QSpinBox*>( widget ) )
-            {
+        // check steps enable step
+        const bool atLimit(
+            (subControl == SC_SpinBoxUp && !(option->stepEnabled & QAbstractSpinBox::StepUpEnabled )) ||
+            (subControl == SC_SpinBoxDown && !(option->stepEnabled & QAbstractSpinBox::StepDownEnabled ) ) );
 
-                // cast to spinbox and check if at limit
-                const int value( spinbox->value() );
-                if( !spinbox->wrapping() && (( subControl == SC_SpinBoxUp && value == spinbox->maximum() ) ||
-                    ( subControl == SC_SpinBoxDown && value == spinbox->minimum() ) ) )
-                    { atLimit = true; }
-
-            } else if( const QDoubleSpinBox* spinbox = qobject_cast<const QDoubleSpinBox*>( widget ) ) {
-
-                // cast to spinbox and check if at limit
-                const double value( spinbox->value() );
-                if( !spinbox->wrapping() && (( subControl == SC_SpinBoxUp && value == spinbox->maximum() ) ||
-                    ( subControl == SC_SpinBoxDown && value == spinbox->minimum() ) ) )
-                    { atLimit = true; }
-
-            }
-
-        }
-
+        // update enabled state accordingly
         enabled &= !atLimit;
+
+        // update mouse-over effect
         const bool mouseOver( enabled && ( flags & State_MouseOver ) );
 
         // check animation state
@@ -9422,18 +9409,15 @@ namespace Oxygen
         const bool enabled( option->state & State_Enabled );
         if( !enabled ) return color;
 
-        if( const QAbstractSlider* slider = qobject_cast<const QAbstractSlider*>( widget ) )
+        if(
+            ( control == SC_ScrollBarSubLine && option->sliderValue == option->minimum ) ||
+            ( control == SC_ScrollBarAddLine && option->sliderValue == option->maximum ) )
         {
-            const int value( slider->value() );
-            if(
-                ( control == SC_ScrollBarSubLine && value == slider->minimum() ) ||
-                ( control == SC_ScrollBarAddLine && value == slider->maximum() ) ) {
 
-                // manually disable arrow, to indicate that scrollbar is at limit
-                return palette.color( QPalette::Disabled, QPalette::WindowText );
-            }
+            // manually disable arrow, to indicate that scrollbar is at limit
+            return palette.color( QPalette::Disabled, QPalette::WindowText );
+
         }
-
 
         const bool hover( animations().scrollBarEngine().isHovered( widget, control ) );
         const bool animated( animations().scrollBarEngine().isAnimated( widget, control ) );
