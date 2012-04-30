@@ -11,6 +11,8 @@ set(kded_ktouchpadenabler_SRCS
     ktouchpadenabler_daemon.cpp
 )
 
+kde4_add_kcfg_files(kded_ktouchpadenabler_SRCS settings.kcfgc )
+
 kde4_add_plugin(kded_ktouchpadenabler
     ${kded_ktouchpadenabler_SRCS}
 )
