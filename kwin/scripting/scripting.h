@@ -28,9 +28,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class QAction;
 class QDeclarativeView;
+class QMutex;
 class QScriptEngine;
 class QScriptValue;
 class KConfigGroup;
+
+/// @c true == javascript, @c false == qml
+typedef QList< QPair<bool, QPair<QString, QString > > > LoadScriptList;
 
 namespace KWin
 {
@@ -117,9 +121,19 @@ private slots:
       * TODO: Log to file, show from notifier..
       */
     void sigException(const QScriptValue &exception);
+    /**
+     * Callback for when loadScriptFromFile has finished.
+     **/
+    void slotScriptLoadedFromFile();
 
 private:
+    /**
+     * Read the script from file into a byte array.
+     * If file cannot be read an empty byte array is returned.
+     **/
+    QByteArray loadScriptFromFile();
     QScriptEngine *m_engine;
+    bool m_starting;
 };
 
 class DeclarativeScript : public AbstractScript
@@ -147,6 +161,10 @@ class Scripting : public QObject
 private:
     QStringList scriptList;
     QList<KWin::AbstractScript*> scripts;
+    /**
+     * Lock to protect the scripts member variable.
+     **/
+    QScopedPointer<QMutex> m_scriptsLock;
 
     // Preferably call ONLY at load time
     void runScripts();
@@ -162,6 +180,12 @@ public:
 public Q_SLOTS:
     void scriptDestroyed(QObject *object);
     void start();
+
+private Q_SLOTS:
+    void slotScriptsQueried();
+
+private:
+    LoadScriptList queryScriptsToLoad();
 };
 
 }

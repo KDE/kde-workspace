@@ -153,10 +153,10 @@ protected:
      */
     void animate( EffectWindow *w, Attribute a, uint meta, int ms, FPx2 to, QEasingCurve curve = QEasingCurve(), int delay = 0, FPx2 from = FPx2() );
     /**
-     * Called whenever an animation end, passes the transformed @class EffectWindow and @enum Attribute
+     * Called whenever an animation end, passes the transformed @class EffectWindow @enum Attribute and originally supplied @param meta
      * You can reimplement it to keep a constant transformation for the window (ie. keep it a this opacity or position) or to start another animation
      */
-    virtual void animationEnded( EffectWindow *, Attribute ) {}
+    virtual void animationEnded( EffectWindow *, Attribute, uint meta ) {}
     /**
      * Called if the transformed @enum Attribute is Generic. You should reimplement it if you transform this "Attribute".
      * You could use the meta information to eg. support more than one additional animations
@@ -167,13 +167,15 @@ protected:
 private:
     float interpolated( const AniData&, int i = 0 ) const;
     float progress( const AniData& ) const;
+    void updateLayerRepaints();
 private Q_SLOTS:
     void init();
     void triggerRepaint();
     void _windowClosed( KWin::EffectWindow* w );
     void _windowDeleted( KWin::EffectWindow* w );
+    void _expandedGeometryChanged(KWin::EffectWindow *w, const QRect &old);
 private:
-    typedef QMap< EffectWindow*, QList<AniData> > AniMap;
+    typedef QMap< EffectWindow*, QPair<QList<AniData>, QRect> > AniMap;
     AnimationEffectPrivate * const d_ptr;
     Q_DECLARE_PRIVATE(AnimationEffect)
 };

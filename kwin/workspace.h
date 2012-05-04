@@ -61,10 +61,6 @@ class KStartupInfoData;
 class QSlider;
 class QPushButton;
 
-namespace Kephal
-{
-    class Screen;
-}
 namespace KWin
 {
 
@@ -86,6 +82,7 @@ class RootInfo;
 class PluginMgr;
 class Placement;
 class Rules;
+class Scripting;
 class WindowRules;
 
 class Workspace : public QObject, public KDecorationDefines
@@ -218,6 +215,10 @@ public:
      */
     int numberOfDesktops() const;
     /**
+     * @returns The maximum number of desktops that KWin supports.
+     */
+    int maxNumberOfDesktops() const;
+    /**
      * Set the number of available desktops to @a count. This function overrides any previous
      * grid layout.
      */
@@ -306,8 +307,7 @@ private:
     int* desktopGrid_;
     int currentDesktop_;
     QString activity_;
-    QStringList allActivities_;
-
+    QStringList allActivities_, openActivities_;
 #ifdef KWIN_BUILD_ACTIVITIES
     KActivities::Controller activityController_;
 #endif
@@ -318,6 +318,7 @@ private:
     Outline* m_outline;
 #ifdef KWIN_BUILD_SCREENEDGES
     ScreenEdge m_screenEdge;
+    Qt::Orientations m_screenEdgeOrientation;
 #endif
 
     //-------------------------------------------------
@@ -336,14 +337,6 @@ public:
     QStringList activityList() const {
         return allActivities_;
     }
-    QStringList openActivityList() const {
-#ifdef KWIN_BUILD_ACTIVITIES
-        return activityController_.listActivities(KActivities::Info::Running);
-#else
-        return QStringList();
-#endif
-    }
-
     // True when performing Workspace::updateClientArea().
     // The calls below are valid only in that case.
     bool inUpdateClientArea() const;
@@ -378,7 +371,7 @@ public:
      * Returns the list of clients sorted in stacking order, with topmost client
      * at the last position
      */
-    const ClientList& stackingOrder() const;
+    const ToplevelList& stackingOrder() const;
     ToplevelList xStackingOrder() const;
     ClientList ensureStackingOrder(const ClientList& clients) const;
 
@@ -459,6 +452,9 @@ public:
     bool startActivity(const QString &id);
     QStringList activeEffects() const;
     QString supportInformation() const;
+    bool compositingPossible() const;
+    QString compositingNotPossibleReason() const;
+    bool openGLIsBroken() const;
 
     void setCurrentScreen(int new_screen);
 
@@ -481,7 +477,7 @@ public:
 
     void removeUnmanaged(Unmanaged*, allowed_t);   // Only called from Unmanaged::release()
     void removeDeleted(Deleted*, allowed_t);
-    void addDeleted(Deleted*, allowed_t);
+    void addDeleted(Deleted*, Toplevel*, allowed_t);
 
     bool checkStartupNotification(Window w, KStartupInfoId& id, KStartupInfoData& data);
 
@@ -657,6 +653,10 @@ private slots:
     void slotBlockShortcuts(int data);
     void slotReloadConfig();
     void setupCompositing();
+    /**
+     * Called from setupCompositing() when the CompositingPrefs are ready.
+     **/
+    void slotCompositingOptionsInitialized();
     void finishCompositing();
     void fallbackToXRenderCompositing();
     void performCompositing();
@@ -664,22 +664,27 @@ private slots:
     void lostCMSelection();
     void resetCursorPosTime();
     void delayedCheckUnredirect();
-
     void updateCurrentActivity(const QString &new_activity);
     void activityRemoved(const QString &activity);
     void activityAdded(const QString &activity);
     void reallyStopActivity(const QString &id);   //dbus deadlocks suck
-
+    void handleActivityReply();
+    void showHideActivityMenu();
 protected:
     void timerEvent(QTimerEvent *te);
 
 Q_SIGNALS:
     Q_SCRIPTABLE void compositingToggled(bool active);
+    /**
+     * Emitted after the Workspace has setup the complete initialization process.
+     * This can be used to connect to for performing post-workspace initialization.
+     **/
+    void workspaceInitialized();
 
     //Signals required for the scripting interface
 signals:
     void desktopPresenceChanged(KWin::Client*, int);
-    void currentDesktopChanged(int);
+    void currentDesktopChanged(int, KWin::Client*);
     void numberDesktopsChanged(int oldNumberOfDesktops);
     void clientAdded(KWin::Client*);
     void clientRemoved(KWin::Client*);
@@ -704,7 +709,9 @@ private:
     void discardPopup();
     void setupWindowShortcut(Client* c);
     void checkCursorPos();
-
+#ifdef KWIN_BUILD_ACTIVITIES
+    void updateActivityList(bool running, bool updateCurrent, QString slot = QString());
+#endif
     enum Direction {
         DirectionNorth,
         DirectionEast,
@@ -714,7 +721,7 @@ private:
     void switchWindow(Direction direction);
 
     void propagateClients(bool propagate_new_clients);   // Called only from updateStackingOrder
-    ClientList constrainedStackingOrder();
+    ToplevelList constrainedStackingOrder();
     void raiseClientWithinApplication(Client* c);
     void lowerClientWithinApplication(Client* c);
     bool allowFullClientRaising(const Client* c, Time timestamp);
@@ -790,8 +797,8 @@ private:
     UnmanagedList unmanaged;
     DeletedList deleted;
 
-    ClientList unconstrained_stacking_order; // Topmost last
-    ClientList stacking_order; // Topmost last
+    ToplevelList unconstrained_stacking_order; // Topmost last
+    ToplevelList stacking_order; // Topmost last
     bool force_restacking;
     mutable ToplevelList x_stacking; // From XQueryTree()
     mutable bool x_stacking_dirty;
@@ -902,6 +909,8 @@ private:
     bool forceUnredirectCheck;
     QTimer compositeResetTimer; // for compressing composite resets
     bool m_finishingCompositing; // finishCompositing() sets this variable while shutting down
+
+    Scripting *m_scripting;
 
 private:
     friend bool performTransiencyCheck();
@@ -1025,7 +1034,7 @@ inline void Workspace::removeGroup(Group* group, allowed_t)
     groups.removeAll(group);
 }
 
-inline const ClientList& Workspace::stackingOrder() const
+inline const ToplevelList& Workspace::stackingOrder() const
 {
     // TODO: Q_ASSERT( block_stacking_updates == 0 );
     return stacking_order;

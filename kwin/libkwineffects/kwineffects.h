@@ -167,7 +167,7 @@ X-KDE-Library=kwin4_effect_cooleffect
 
 #define KWIN_EFFECT_API_MAKE_VERSION( major, minor ) (( major ) << 8 | ( minor ))
 #define KWIN_EFFECT_API_VERSION_MAJOR 0
-#define KWIN_EFFECT_API_VERSION_MINOR 182
+#define KWIN_EFFECT_API_VERSION_MINOR 183
 #define KWIN_EFFECT_API_VERSION KWIN_EFFECT_API_MAKE_VERSION( \
         KWIN_EFFECT_API_VERSION_MAJOR, KWIN_EFFECT_API_VERSION_MINOR )
 
@@ -645,7 +645,7 @@ public:
     virtual void checkElectricBorder(const QPoint &pos, Time time) = 0;
     virtual void reserveElectricBorder(ElectricBorder border) = 0;
     virtual void unreserveElectricBorder(ElectricBorder border) = 0;
-    virtual void reserveElectricBorderSwitching(bool reserve) = 0;
+    virtual void reserveElectricBorderSwitching(bool reserve, Qt::Orientations o) = 0;
 
     // functions that allow controlling windows/desktop
     virtual void activateWindow(KWin::EffectWindow* c) = 0;
@@ -846,8 +846,14 @@ Q_SIGNALS:
      * Signal emitted when the current desktop changed.
      * @param oldDesktop The previously current desktop
      * @param newDesktop The new current desktop
+     * @param with The window which is taken over to the new desktop, can be NULL
+     * @since 4.9
+     */
+    void desktopChanged(int oldDesktop, int newDesktop, KWin::EffectWindow *with);
+    /**
      * @since 4.7
-     **/
+     * @deprecated
+     */
     void desktopChanged(int oldDesktop, int newDesktop);
     /**
     * Signal emitted when the number of currently existing desktops is changed.
@@ -954,6 +960,13 @@ Q_SIGNALS:
      * @since 4.7
      **/
     void windowGeometryShapeChanged(KWin::EffectWindow *w, const QRect &old);
+    /**
+     * Signal emitted when the padding of a window changed. (eg. shadow size)
+     * @param w The window whose geometry changed
+     * @param old The previous expandedGeometry()
+     * @since 4.9
+     **/
+    void windowPaddingChanged(KWin::EffectWindow *w, const QRect &old);
     /**
      * Signal emitted when the windows opacity is changed.
      * @param w The window whose opacity level is changed.
@@ -1097,6 +1110,7 @@ class KWIN_EXPORT EffectWindow : public QObject
     Q_OBJECT
     Q_PROPERTY(bool alpha READ hasAlpha CONSTANT)
     Q_PROPERTY(QRect geometry READ geometry)
+    Q_PROPERTY(QRect expandedGeometry READ expandedGeometry)
     Q_PROPERTY(int height READ height)
     Q_PROPERTY(qreal opacity READ opacity)
     Q_PROPERTY(QPoint pos READ pos)
@@ -1332,6 +1346,12 @@ public:
      */
     QSize basicUnit() const;
     QRect geometry() const;
+    /**
+     * Geometry of the window including decoration and potentially shadows.
+     * May be different from geometry() if the window has a shadow.
+     * @since 4.9
+     */
+    QRect expandedGeometry() const;
     virtual QRegion shape() const = 0;
     int screen() const;
     /** @internal Do not use */
@@ -1344,6 +1364,7 @@ public:
     bool isUserMove() const;
     bool isUserResize() const;
     QRect iconGeometry() const;
+
     /**
      * Geometry of the actual window contents inside the whole (including decorations) window.
      */

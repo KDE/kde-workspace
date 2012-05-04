@@ -137,7 +137,7 @@ public:
     virtual void checkElectricBorder(const QPoint &pos, Time time);
     virtual void reserveElectricBorder(ElectricBorder border);
     virtual void unreserveElectricBorder(ElectricBorder border);
-    virtual void reserveElectricBorderSwitching(bool reserve);
+    virtual void reserveElectricBorderSwitching(bool reserve, Qt::Orientations o);
 
     virtual unsigned long xrenderBufferPicture();
     virtual void reconfigure();
@@ -182,7 +182,7 @@ public Q_SLOTS:
     void slotHideOutline();
 
 protected Q_SLOTS:
-    void slotDesktopChanged(int old);
+    void slotDesktopChanged(int old, KWin::Client *withClient);
     void slotClientAdded(KWin::Client *c);
     void slotClientShown(KWin::Toplevel*);
     void slotUnmanagedAdded(KWin::Unmanaged *u);
@@ -197,6 +197,7 @@ protected Q_SLOTS:
     void slotClientMinimized(KWin::Client *c, bool animate);
     void slotClientUnminimized(KWin::Client *c, bool animate);
     void slotGeometryShapeChanged(KWin::Toplevel *t, const QRect &old);
+    void slotPaddingChanged(KWin::Toplevel *t, const QRect &old);
     void slotWindowDamaged(KWin::Toplevel *t, const QRect& r);
     void slotPropertyNotify(KWin::Toplevel *t, long atom);
     void slotPropertyNotify(long atom);
@@ -215,6 +216,9 @@ protected:
     QHash< long, int > registered_atoms;
     int next_window_quad_type;
     int mouse_poll_ref_count;
+
+private Q_SLOTS:
+    void slotEffectsQueried();
 
 private:
     QList< Effect* > m_activeEffects;

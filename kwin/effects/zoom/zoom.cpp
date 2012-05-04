@@ -129,6 +129,10 @@ ZoomEffect::~ZoomEffect()
 {
     // switch off and free resources
     showCursor();
+    // Save the zoom value.
+    KConfigGroup conf = EffectsHandler::effectConfig("Zoom");
+    conf.writeEntry("InitialZoom", target_zoom);
+    conf.sync();
 }
 
 void ZoomEffect::showCursor()
@@ -223,6 +227,10 @@ void ZoomEffect::reconfigure(ReconfigureFlags)
     focusDelay = qMax(0, conf.readEntry("FocusDelay", focusDelay));
     // The factor the zoom-area will be moved on touching an edge on push-mode or using the navigation KAction's.
     moveFactor = qMax(0.1, conf.readEntry("MoveFactor", moveFactor));
+    // Load the saved zoom value.
+    target_zoom = conf.readEntry("InitialZoom", target_zoom);
+    if (target_zoom > 1.0)
+        zoomIn(target_zoom);
 }
 
 void ZoomEffect::prePaintScreen(ScreenPrePaintData& data, int time)
@@ -334,18 +342,12 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
 
 #ifdef KWIN_HAVE_OPENGL
         if (texture) {
-#ifndef KWIN_HAVE_OPENGLES
-            glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
             texture->bind();
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             texture->render(region, rect);
             texture->unbind();
             glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-            glPopAttrib();
-#endif
         }
 #endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
@@ -374,9 +376,12 @@ void ZoomEffect::postPaintScreen()
     effects->postPaintScreen();
 }
 
-void ZoomEffect::zoomIn()
+void ZoomEffect::zoomIn(double to)
 {
-    target_zoom *= zoomFactor;
+    if (to < 0.0)
+        target_zoom *= zoomFactor;
+    else
+        target_zoom = to;
     if (!polling) {
         polling = true;
         effects->startMousePolling();

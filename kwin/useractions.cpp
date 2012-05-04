@@ -271,14 +271,9 @@ void Workspace::clientPopupAboutToShow()
     } else {
         initDesktopPopup();
     }
-    QStringList act = openActivityList();
-    kDebug() << "activities:" << act.size();
-    if (act.size() < 2) {
-        delete activity_popup;
-        activity_popup = 0;
-    } else {
-        initActivityPopup();
-    }
+#ifdef KWIN_BUILD_ACTIVITIES
+    updateActivityList(true, false, "showHideActivityMenu");
+#endif
 
     mResizeOpAction->setEnabled(active_popup_client->isResizable());
     mMoveOpAction->setEnabled(active_popup_client->isMovableAcrossScreens());
@@ -313,6 +308,19 @@ void Workspace::clientPopupAboutToShow()
         delete add_tabs_popup;
         add_tabs_popup = 0;
     }
+}
+
+void Workspace::showHideActivityMenu()
+{
+#ifdef KWIN_BUILD_ACTIVITIES
+    kDebug() << "activities:" << openActivities_.size();
+    if (openActivities_.size() < 2) {
+        delete activity_popup;
+        activity_popup = 0;
+    } else {
+        initActivityPopup();
+    }
+#endif
 }
 
 void Workspace::selectPopupClientTab(QAction* action)
@@ -489,6 +497,13 @@ void Workspace::desktopPopupAboutToShow()
                 !active_popup_client->isOnAllDesktops() && active_popup_client->desktop()  == i)
             action->setChecked(true);
     }
+
+    desk_popup->addSeparator();
+    action = desk_popup->addAction(i18nc("Create a new desktop and move there the window", "&New Desktop"));
+    action->setData(numberOfDesktops() + 1);
+
+    if (numberOfDesktops() >= Workspace::self()->maxNumberOfDesktops())
+        action->setEnabled(false);
 }
 
 /*!
@@ -510,7 +525,7 @@ void Workspace::activityPopupAboutToShow()
         action->setChecked(true);
     activity_popup->addSeparator();
 
-    foreach (const QString & id, openActivityList()) {
+    foreach (const QString &id, openActivities_) {
         KActivities::Info activity(id);
         QString name = activity.name();
         name.replace('&', "&&");
@@ -847,12 +862,13 @@ bool Client::performMouseCommand(Options::MouseCommand command, const QPoint &gl
         replay = isActive(); // for clickraise mode
         bool mustReplay = !rules()->checkAcceptFocus(input);
         if (mustReplay) {
-            ClientList::const_iterator  it = workspace()->stackingOrder().constEnd(),
+            ToplevelList::const_iterator  it = workspace()->stackingOrder().constEnd(),
                                      begin = workspace()->stackingOrder().constBegin();
             while (mustReplay && --it != begin && *it != this) {
-                if (((*it)->keepAbove() && !keepAbove()) || (keepBelow() && !(*it)->keepBelow()))
+                Client *c = qobject_cast<Client*>(*it);
+                if (!c || (c->keepAbove() && !keepAbove()) || (keepBelow() && !c->keepBelow()))
                     continue; // can never raise above "it"
-                mustReplay = !((*it)->isOnCurrentDesktop() && (*it)->isOnCurrentActivity() && (*it)->geometry().intersects(geometry()));
+                mustReplay = !(c->isOnCurrentDesktop() && c->isOnCurrentActivity() && c->geometry().intersects(geometry()));
             }
         }
         workspace()->takeActivity(this, ActivityFocus | ActivityRaise, handled && replay);
@@ -1426,6 +1442,8 @@ void Workspace::slotSendToDesktop(QAction *action)
         // the 'on_all_desktops' menu entry
         active_popup_client->setOnAllDesktops(!active_popup_client->isOnAllDesktops());
         return;
+    } else if (desk > numberOfDesktops()) {
+        setNumberOfDesktops(desk);
     }
 
     sendClientToDesktop(active_popup_client, desk, false);
@@ -1467,13 +1485,17 @@ void Workspace::switchWindow(Direction direction)
     QPoint curPos(c->pos().x() + c->geometry().width() / 2,
                   c->pos().y() + c->geometry().height() / 2);
 
-    QList<Client *> clist = stackingOrder();
-    for (QList<Client *>::Iterator i = clist.begin(); i != clist.end(); ++i) {
-        if ((*i)->wantsTabFocus() && *i != c &&
-                (*i)->desktop() == d && !(*i)->isMinimized() && (*i)->isOnCurrentActivity()) {
+    ToplevelList clist = stackingOrder();
+    for (ToplevelList::Iterator i = clist.begin(); i != clist.end(); ++i) {
+        Client *client = qobject_cast<Client*>(c);
+        if (!client) {
+            continue;
+        }
+        if (client->wantsTabFocus() && *i != c &&
+                client->desktop() == d && !client->isMinimized() && (*i)->isOnCurrentActivity()) {
             // Centre of the other window
-            QPoint other((*i)->pos().x() + (*i)->geometry().width() / 2,
-                         (*i)->pos().y() + (*i)->geometry().height() / 2);
+            QPoint other(client->pos().x() + client->geometry().width() / 2,
+                         client->pos().y() + client->geometry().height() / 2);
 
             int distance;
             int offset;
@@ -1503,14 +1525,17 @@ void Workspace::switchWindow(Direction direction)
                 // Inverse score
                 int score = distance + offset + ((offset * offset) / distance);
                 if (score < bestScore || !switchTo) {
-                    switchTo = *i;
+                    switchTo = client;
                     bestScore = score;
                 }
             }
         }
     }
-    if (switchTo)
+    if (switchTo) {
+        if (switchTo->tabGroup())
+            switchTo = switchTo->tabGroup()->current();
         activateClient(switchTo);
+    }
 }
 
 /*!

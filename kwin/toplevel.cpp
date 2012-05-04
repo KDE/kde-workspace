@@ -240,7 +240,7 @@ void Toplevel::getWmClientLeader()
   Returns sessionId for this client,
   taken either from its window or from the leader window.
  */
-QByteArray Toplevel::sessionId()
+QByteArray Toplevel::sessionId() const
 {
     QByteArray result = staticSessionId(window());
     if (result.isEmpty() && wmClientLeaderWin && wmClientLeaderWin != window())
@@ -369,6 +369,7 @@ bool Toplevel::isOnScreen(int screen) const
 void Toplevel::getShadow()
 {
     QRect dirtyRect;  // old & new shadow region
+    const QRect oldVisibleRect = visibleRect();
     if (hasShadow()) {
         dirtyRect = shadow()->shadowRegion().boundingRect();
         effectWindow()->sceneWindow()->shadow()->updateShadow();
@@ -377,6 +378,8 @@ void Toplevel::getShadow()
     }
     if (hasShadow())
         dirtyRect |= shadow()->shadowRegion().boundingRect();
+    if (oldVisibleRect != visibleRect())
+        emit paddingChanged(this, oldVisibleRect);
     if (dirtyRect.isValid()) {
         dirtyRect.translate(pos());
         addLayerRepaint(dirtyRect);

@@ -49,6 +49,7 @@ class Toplevel
     Q_PROPERTY(bool alpha READ hasAlpha CONSTANT)
     Q_PROPERTY(qulonglong frameId READ frameId)
     Q_PROPERTY(QRect geometry READ geometry NOTIFY geometryChanged)
+    Q_PROPERTY(QRect visibleRect READ visibleRect)
     Q_PROPERTY(int height READ height)
     Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity NOTIFY opacityChanged)
     Q_PROPERTY(QPoint pos READ pos)
@@ -210,7 +211,7 @@ public:
     bool isOnAllActivities() const;
 
     QByteArray windowRole() const;
-    QByteArray sessionId();
+    QByteArray sessionId() const;
     QByteArray resourceName() const;
     QByteArray resourceClass() const;
     QByteArray wmCommand();
@@ -227,7 +228,7 @@ public:
     double opacity() const;
     int depth() const;
     bool hasAlpha() const;
-    virtual void setupCompositing();
+    virtual bool setupCompositing();
     virtual void finishCompositing();
     bool updateUnredirectedState();
     bool unredirected() const;
@@ -277,12 +278,15 @@ public:
      **/
     const QRegion& opaqueRegion() const;
 
+    virtual Layer layer() const = 0;
+
 signals:
     void opacityChanged(KWin::Toplevel* toplevel, qreal oldOpacity);
     void damaged(KWin::Toplevel* toplevel, const QRect& damage);
     void propertyNotify(KWin::Toplevel* toplevel, long a);
     void geometryChanged();
     void geometryShapeChanged(KWin::Toplevel* toplevel, const QRect& old);
+    void paddingChanged(KWin::Toplevel* toplevel, const QRect& old);
     void windowClosed(KWin::Toplevel* toplevel, KWin::Deleted* deleted);
     void windowShown(KWin::Toplevel* toplevel);
     /**

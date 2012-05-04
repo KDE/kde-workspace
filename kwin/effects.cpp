@@ -36,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kwinglutils.h"
 
 #include <QFile>
+#include <QtCore/QFutureWatcher>
+#include <QtCore/QtConcurrentRun>
 
 #include "kdebug.h"
 #include "klibrary.h"
@@ -104,7 +106,7 @@ EffectsHandlerImpl::EffectsHandlerImpl(CompositingType type)
     m_currentBuildQuadsIterator = m_activeEffects.end();
 
     Workspace *ws = Workspace::self();
-    connect(ws, SIGNAL(currentDesktopChanged(int)), this, SLOT(slotDesktopChanged(int)));
+    connect(ws, SIGNAL(currentDesktopChanged(int, KWin::Client*)), SLOT(slotDesktopChanged(int, KWin::Client*)));
     connect(ws, SIGNAL(clientAdded(KWin::Client*)), this, SLOT(slotClientAdded(KWin::Client*)));
     connect(ws, SIGNAL(unmanagedAdded(KWin::Unmanaged*)), this, SLOT(slotUnmanagedAdded(KWin::Unmanaged*)));
     connect(ws, SIGNAL(clientActivated(KWin::Client*)), this, SLOT(slotClientActivated(KWin::Client*)));
@@ -150,6 +152,7 @@ void EffectsHandlerImpl::setupClientConnections(Client* c)
     connect(c, SIGNAL(clientMinimized(KWin::Client*,bool)), this, SLOT(slotClientMinimized(KWin::Client*,bool)));
     connect(c, SIGNAL(clientUnminimized(KWin::Client*,bool)), this, SLOT(slotClientUnminimized(KWin::Client*,bool)));
     connect(c, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), this, SLOT(slotGeometryShapeChanged(KWin::Toplevel*,QRect)));
+    connect(c, SIGNAL(paddingChanged(KWin::Toplevel*,QRect)), this, SLOT(slotPaddingChanged(KWin::Toplevel*,QRect)));
     connect(c, SIGNAL(damaged(KWin::Toplevel*,QRect)), this, SLOT(slotWindowDamaged(KWin::Toplevel*,QRect)));
     connect(c, SIGNAL(propertyNotify(KWin::Toplevel*,long)), this, SLOT(slotPropertyNotify(KWin::Toplevel*,long)));
 }
@@ -159,18 +162,32 @@ void EffectsHandlerImpl::setupUnmanagedConnections(Unmanaged* u)
     connect(u, SIGNAL(windowClosed(KWin::Toplevel*,KWin::Deleted*)), this, SLOT(slotWindowClosed(KWin::Toplevel*)));
     connect(u, SIGNAL(opacityChanged(KWin::Toplevel*,qreal)), this, SLOT(slotOpacityChanged(KWin::Toplevel*,qreal)));
     connect(u, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), this, SLOT(slotGeometryShapeChanged(KWin::Toplevel*,QRect)));
+    connect(u, SIGNAL(paddingChanged(KWin::Toplevel*,QRect)), this, SLOT(slotPaddingChanged(KWin::Toplevel*,QRect)));
     connect(u, SIGNAL(damaged(KWin::Toplevel*,QRect)), this, SLOT(slotWindowDamaged(KWin::Toplevel*,QRect)));
     connect(u, SIGNAL(propertyNotify(KWin::Toplevel*,long)), this, SLOT(slotPropertyNotify(KWin::Toplevel*,long)));
 }
 
 void EffectsHandlerImpl::reconfigure()
 {
-    KSharedConfig::Ptr _config = KGlobal::config();
-    KConfigGroup conf(_config, "Plugins");
+    // perform querying for the services in a thread
+    QFutureWatcher<KService::List> *watcher = new QFutureWatcher<KService::List>(this);
+    connect(watcher, SIGNAL(finished()), this, SLOT(slotEffectsQueried()));
+    watcher->setFuture(QtConcurrent::run(KServiceTypeTrader::self(), &KServiceTypeTrader::query, QString("KWin/Effect"), QString()));
+}
 
-    KService::List offers = KServiceTypeTrader::self()->query("KWin/Effect");
+void EffectsHandlerImpl::slotEffectsQueried()
+{
+    QFutureWatcher<KService::List> *watcher = dynamic_cast< QFutureWatcher<KService::List>* >(sender());
+    if (!watcher) {
+        // slot invoked not from a FutureWatcher
+        return;
+    }
+
+    KService::List offers = watcher->result();
     QStringList effectsToBeLoaded;
     QStringList checkDefault;
+    KSharedConfig::Ptr _config = KGlobal::config();
+    KConfigGroup conf(_config, "Plugins");
 
     // First unload necessary effects
     foreach (const KService::Ptr & service, offers) {
@@ -202,6 +219,7 @@ void EffectsHandlerImpl::reconfigure()
         if (!newLoaded.contains(ep.first))    // don't reconfigure newly loaded effects
             ep.second->reconfigure(Effect::ReconfigureAll);
     }
+    watcher->deleteLater();
 }
 
 // the idea is that effects call this function again which calls the next one
@@ -442,10 +460,12 @@ void EffectsHandlerImpl::slotTabRemoved(EffectWindow *w, EffectWindow* leaderOfF
     emit tabRemoved(w, leaderOfFormerGroup);
 }
 
-void EffectsHandlerImpl::slotDesktopChanged(int old)
+void EffectsHandlerImpl::slotDesktopChanged(int old, Client *c)
 {
     const int newDesktop = Workspace::self()->currentDesktop();
     if (old != 0 && newDesktop != old) {
+        emit desktopChanged(old, newDesktop, c ? c->effectWindow() : 0);
+        // TODO: remove in 4.10
         emit desktopChanged(old, newDesktop);
     }
 }
@@ -466,6 +486,15 @@ void EffectsHandlerImpl::slotGeometryShapeChanged(Toplevel* t, const QRect& old)
     if (t == NULL || t->effectWindow() == NULL)
         return;
     emit windowGeometryShapeChanged(t->effectWindow(), old);
+}
+
+void EffectsHandlerImpl::slotPaddingChanged(Toplevel* t, const QRect& old)
+{
+    // during late cleanup effectWindow() may be already NULL
+    // in some functions that may still call this
+    if (t == NULL || t->effectWindow() == NULL)
+        return;
+    emit windowPaddingChanged(t->effectWindow(), old);
 }
 
 void EffectsHandlerImpl::setActiveFullScreenEffect(Effect* e)
@@ -1048,10 +1077,10 @@ void EffectsHandlerImpl::unreserveElectricBorder(ElectricBorder border)
 #endif
 }
 
-void EffectsHandlerImpl::reserveElectricBorderSwitching(bool reserve)
+void EffectsHandlerImpl::reserveElectricBorderSwitching(bool reserve, Qt::Orientations o)
 {
 #ifdef KWIN_BUILD_SCREENEDGES
-    Workspace::self()->screenEdge()->reserveDesktopSwitching(reserve);
+    Workspace::self()->screenEdge()->reserveDesktopSwitching(reserve, o);
 #else
     Q_UNUSED(reserve)
 #endif

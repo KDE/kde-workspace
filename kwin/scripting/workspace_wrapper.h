@@ -68,7 +68,7 @@ private:
 
 signals:
     void desktopPresenceChanged(KWin::Client *client, int desktop);
-    void currentDesktopChanged(int desktop);
+    void currentDesktopChanged(int desktop, KWin::Client *client);
     void clientAdded(KWin::Client *client);
     void clientRemoved(KWin::Client *client);
     void clientManaging(KWin::Client *client);
@@ -148,12 +148,6 @@ void setter( rettype val );
 
     /**
      * List of Clients currently managed by KWin.
-     * Use this method in QML scripts.
-     **/
-    Q_INVOKABLE QList< QObject* > getClientList() const;
-    /**
-     * List of Clients currently managed by KWin.
-     * Use this method in JavaScript scripts.
      **/
     Q_INVOKABLE QList< KWin::Client* > clientList() const;
     /**

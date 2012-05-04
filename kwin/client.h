@@ -229,7 +229,7 @@ class Client
     /**
      * The "Window Tabs" Group this Client belongs to.
      **/
-    Q_PROPERTY(KWin::TabGroup* tabGroup READ tabGroup NOTIFY tabGroupChanged)
+    Q_PROPERTY(KWin::TabGroup* tabGroup READ tabGroup NOTIFY tabGroupChanged SCRIPTABLE false)
     /**
      * Whether this Client is the currently visible Client in its Client Group (Window Tabs).
      * For change connect to the visibleChanged signal on the Client's Group.
@@ -368,6 +368,7 @@ public:
     bool isMaximizable() const;
     QRect geometryRestore() const;
     MaximizeMode maximizeMode() const;
+    QuickTileMode quickTileMode() const;
     bool isMinimizable() const;
     void setMaximize(bool vertically, bool horizontally);
     QRect iconGeometry() const;
@@ -402,7 +403,7 @@ public:
     void setKeepAbove(bool);
     bool keepBelow() const;
     void setKeepBelow(bool);
-    Layer layer() const;
+    virtual Layer layer() const;
     Layer belongsToLayer() const;
     void invalidateLayer();
     int sessionStackingOrder() const;
@@ -481,7 +482,7 @@ public:
     void hideClient(bool hide);
     bool hiddenPreview() const; ///< Window is mapped in order to get a window pixmap
 
-    virtual void setupCompositing();
+    virtual bool setupCompositing();
     virtual void finishCompositing();
     void setBlockingCompositing(bool block);
     inline bool isBlockingCompositing() { return blocks_compositing; }
@@ -533,6 +534,18 @@ public:
     TabGroup* tabGroup() const; // Returns a pointer to client_group
     Q_INVOKABLE inline bool tabBefore(Client *other, bool activate) { return tabTo(other, false, activate); }
     Q_INVOKABLE inline bool tabBehind(Client *other, bool activate) { return tabTo(other, true, activate); }
+    /**
+     * Syncs the *dynamic* @param property @param fromThisClient or the @link currentTab() to
+     * all members of the @link tabGroup() (if there is one)
+     *
+     * eg. if you call:
+     * client->setProperty("kwin_tiling_floats", true);
+     * client->syncTabGroupFor("kwin_tiling_floats", true)
+     * all clients in this tabGroup will have ::property("kwin_tiling_floats").toBool() == true
+     *
+     * WARNING: non dynamic properties are ignored - you're not supposed to alter/update such explicitly
+     */
+    Q_INVOKABLE void syncTabGroupFor(QString property, bool fromThisClient = false);
     Q_INVOKABLE bool untab(const QRect &toGeometry = QRect());
     /**
      * Set tab group - this is to be invoked by TabGroup::add/remove(client) and NO ONE ELSE
@@ -823,7 +836,6 @@ private:
     /** The quick tile mode of this window.
      */
     int quick_tile_mode;
-    QRect geom_pretile;
 
     void readTransient();
     Window verifyTransientFor(Window transient_for, bool set);
@@ -1104,6 +1116,11 @@ inline QRect Client::geometryRestore() const
 inline Client::MaximizeMode Client::maximizeMode() const
 {
     return max_mode;
+}
+
+inline KWin::QuickTileMode Client::quickTileMode() const
+{
+    return (KWin::QuickTileMode)quick_tile_mode;
 }
 
 inline bool Client::skipTaskbar(bool from_outside) const

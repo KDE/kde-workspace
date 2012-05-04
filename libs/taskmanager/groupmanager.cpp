@@ -31,6 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QFile>
 
 #include <KDebug>
+#include <KService>
 #include <KSycoca>
 #include <KDesktopFile>
 
@@ -751,7 +752,11 @@ void GroupManager::removeLauncher(const KUrl &url)
     }
 
     int index = launcherIndex(url);
-    LauncherItem *launcher = -1 != index ? d->launchers.at(index) : 0L;
+    if (index == -1 || index >= d->launchers.count()) {
+        return;
+    }
+
+    LauncherItem *launcher = d->launchers.at(index);
     if (!launcher) {
         return;
     }
@@ -788,8 +793,9 @@ void GroupManagerPrivate::sycocaChanged(const QStringList &types)
 {
     if (types.contains("apps")) {
         KUrl::List removals;
-        foreach (LauncherItem * launcher, launchers) {
-            if (!QFile::exists(launcher->launcherUrl().toLocalFile())) {
+        foreach (LauncherItem *launcher, launchers) {
+            if (launcher->launcherUrl().protocol() != "preferred" &&
+                !QFile::exists(launcher->launcherUrl().toLocalFile())) {
                 removals << launcher->launcherUrl();
             }
         }
@@ -820,7 +826,7 @@ void GroupManagerPrivate::checkLauncherVisibility(LauncherItem *launcher)
 
 bool GroupManager::launcherExists(const KUrl &url) const
 {
-    return -1 != launcherIndex(url);
+    return d->launcherIndex(url) != -1;
 }
 
 void GroupManager::readLauncherConfig(const KConfigGroup &cg)
@@ -1116,11 +1122,31 @@ QList<KUrl> GroupManagerPrivate::readLauncherConfig(KConfigGroup &cg)
 
 int GroupManagerPrivate::launcherIndex(const KUrl &url)
 {
+    // we check first for exact matches ...
     int index = 0;
     foreach (const LauncherItem * item, launchers) {
         if (item->launcherUrl() == url) {
             return index;
+        } 
+
+        ++index;
+    }
+
+    // .. and if that fails for preferred launcher matches
+    index = 0;
+    foreach (const LauncherItem * item, launchers) {
+        if (item->launcherUrl().protocol() == "preferred") {
+            KService::Ptr service = KService::serviceByStorageId(item->defaultApplication());
+            QUrl prefUrl(service->entryPath());
+            if (prefUrl.scheme().isEmpty()) {
+                prefUrl.setScheme("file");
+            }
+
+            if (service && prefUrl == url) {
+                return index;
+            }
         }
+
         ++index;
     }
 

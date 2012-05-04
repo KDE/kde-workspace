@@ -37,7 +37,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kdeclarative.h>
 // Qt
 #include <QtDBus/QDBusConnection>
+#include <QtCore/QFutureWatcher>
 #include <QtCore/QSettings>
+#include <QtCore/QtConcurrentRun>
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtDeclarative/QDeclarativeView>
@@ -142,11 +144,19 @@ void KWin::AbstractScript::installScriptFunctions(QScriptEngine* engine)
     engine->globalObject().setProperty("readConfig", configFunc);
     // add global Shortcut
     registerGlobalShortcutFunction(this, engine, kwinScriptGlobalShortcut);
+    // global properties
+    engine->globalObject().setProperty("KWin", engine->newQMetaObject(&WorkspaceWrapper::staticMetaObject));
+    QScriptValue workspace = engine->newQObject(AbstractScript::workspace(), QScriptEngine::QtOwnership,
+                                                QScriptEngine::ExcludeSuperClassContents | QScriptEngine::ExcludeDeleteLater);
+    engine->globalObject().setProperty("workspace", workspace, QScriptValue::Undeletable);
+    // install meta functions
+    KWin::MetaScripting::registration(engine);
 }
 
 KWin::Script::Script(int id, QString scriptName, QString pluginName, QObject* parent)
     : AbstractScript(id, scriptName, pluginName, parent)
     , m_engine(new QScriptEngine(this))
+    , m_starting(false)
 {
     QDBusConnection::sessionBus().registerObject('/' + QString::number(scriptId()), this, QDBusConnection::ExportScriptableContents | QDBusConnection::ExportScriptableInvokables);
 }
@@ -158,31 +168,56 @@ KWin::Script::~Script()
 
 void KWin::Script::run()
 {
-    if (running()) {
+    if (running() || m_starting) {
         return;
     }
-    if (scriptFile().open(QIODevice::ReadOnly)) {
-        QScriptValue workspace = m_engine->newQObject(AbstractScript::workspace(), QScriptEngine::QtOwnership,
-                                QScriptEngine::ExcludeSuperClassContents | QScriptEngine::ExcludeDeleteLater);
-        QScriptValue optionsValue = m_engine->newQObject(options, QScriptEngine::QtOwnership,
-                                QScriptEngine::ExcludeSuperClassContents | QScriptEngine::ExcludeDeleteLater);
-        m_engine->globalObject().setProperty("workspace", workspace, QScriptValue::Undeletable);
-        m_engine->globalObject().setProperty("options", optionsValue, QScriptValue::Undeletable);
-        m_engine->globalObject().setProperty("QTimer", constructTimerClass(m_engine));
-        m_engine->globalObject().setProperty("KWin", m_engine->newQMetaObject(&WorkspaceWrapper::staticMetaObject));
-        QObject::connect(m_engine, SIGNAL(signalHandlerException(QScriptValue)), this, SLOT(sigException(QScriptValue)));
-        KWin::MetaScripting::registration(m_engine);
-        KWin::MetaScripting::supplyConfig(m_engine);
-        installScriptFunctions(m_engine);
+    m_starting = true;
+    QFutureWatcher<QByteArray> *watcher = new QFutureWatcher<QByteArray>(this);
+    connect(watcher, SIGNAL(finished()), SLOT(slotScriptLoadedFromFile()));
+    watcher->setFuture(QtConcurrent::run(this, &KWin::Script::loadScriptFromFile));
+}
 
-        QScriptValue ret = m_engine->evaluate(scriptFile().readAll());
-
-        if (ret.isError()) {
-            sigException(ret);
-            deleteLater();
-        }
+QByteArray KWin::Script::loadScriptFromFile()
+{
+    if (!scriptFile().open(QIODevice::ReadOnly)) {
+        return QByteArray();
     }
+    QByteArray result(scriptFile().readAll());
+    scriptFile().close();
+    return result;
+}
+
+void KWin::Script::slotScriptLoadedFromFile()
+{
+    QFutureWatcher<QByteArray> *watcher = dynamic_cast< QFutureWatcher< QByteArray>* >(sender());
+    if (!watcher) {
+        // not invoked from a QFutureWatcher
+        return;
+    }
+    if (watcher->result().isNull()) {
+        // do not load empty script
+        deleteLater();
+        watcher->deleteLater();
+        return;
+    }
+    QScriptValue optionsValue = m_engine->newQObject(options, QScriptEngine::QtOwnership,
+                            QScriptEngine::ExcludeSuperClassContents | QScriptEngine::ExcludeDeleteLater);
+    m_engine->globalObject().setProperty("options", optionsValue, QScriptValue::Undeletable);
+    m_engine->globalObject().setProperty("QTimer", constructTimerClass(m_engine));
+    QObject::connect(m_engine, SIGNAL(signalHandlerException(QScriptValue)), this, SLOT(sigException(QScriptValue)));
+    KWin::MetaScripting::supplyConfig(m_engine);
+    installScriptFunctions(m_engine);
+
+    QScriptValue ret = m_engine->evaluate(watcher->result());
+
+    if (ret.isError()) {
+        sigException(ret);
+        deleteLater();
+    }
+
+    watcher->deleteLater();
     setRunning(true);
+    m_starting = false;
 }
 
 void KWin::Script::sigException(const QScriptValue& exception)
@@ -236,10 +271,8 @@ void KWin::DeclarativeScript::run()
     kdeclarative.setupBindings();
     installScriptFunctions(kdeclarative.scriptEngine());
     qmlRegisterType<ThumbnailItem>("org.kde.kwin", 0, 1, "ThumbnailItem");
-    qmlRegisterType<WorkspaceWrapper>("org.kde.kwin", 0, 1, "KWin");
     qmlRegisterType<KWin::Client>();
 
-    m_view->rootContext()->setContextProperty("workspace", workspace());
     m_view->rootContext()->setContextProperty("options", options);
 
     m_view->setSource(QUrl::fromLocalFile(scriptFile().fileName()));
@@ -248,18 +281,29 @@ void KWin::DeclarativeScript::run()
 
 KWin::Scripting::Scripting(QObject *parent)
     : QObject(parent)
+    , m_scriptsLock(new QMutex(QMutex::Recursive))
 {
     QDBusConnection::sessionBus().registerObject("/Scripting", this, QDBusConnection::ExportScriptableContents | QDBusConnection::ExportScriptableInvokables);
     QDBusConnection::sessionBus().registerService("org.kde.kwin.Scripting");
     connect(Workspace::self(), SIGNAL(configChanged()), SLOT(start()));
+    connect(Workspace::self(), SIGNAL(workspaceInitialized()), SLOT(start()));
 }
 
 void KWin::Scripting::start()
+{
+    // perform querying for the services in a thread
+    QFutureWatcher<LoadScriptList> *watcher = new QFutureWatcher<LoadScriptList>(this);
+    connect(watcher, SIGNAL(finished()), this, SLOT(slotScriptsQueried()));
+    watcher->setFuture(QtConcurrent::run(this, &KWin::Scripting::queryScriptsToLoad));
+}
+
+LoadScriptList KWin::Scripting::queryScriptsToLoad()
 {
     KSharedConfig::Ptr _config = KGlobal::config();
     KConfigGroup conf(_config, "Plugins");
 
     KService::List offers = KServiceTypeTrader::self()->query("KWin/Script");
+    LoadScriptList scriptsToLoad;
 
     foreach (const KService::Ptr & service, offers) {
         KPluginInfo plugininfo(service);
@@ -284,18 +328,37 @@ void KWin::Scripting::start()
             kDebug(1212) << "Could not find script file for " << pluginName;
             continue;
         }
-        if (javaScript) {
-            loadScript(file, pluginName);
-        } else if (declarativeScript) {
-            loadDeclarativeScript(file, pluginName);
+        scriptsToLoad << qMakePair(javaScript, qMakePair(file, pluginName));
+    }
+    return scriptsToLoad;
+}
+
+void KWin::Scripting::slotScriptsQueried()
+{
+    QFutureWatcher<LoadScriptList> *watcher = dynamic_cast< QFutureWatcher<LoadScriptList>* >(sender());
+    if (!watcher) {
+        // slot invoked not from a FutureWatcher
+        return;
+    }
+
+    LoadScriptList scriptsToLoad = watcher->result();
+    for (LoadScriptList::const_iterator it = scriptsToLoad.constBegin();
+            it != scriptsToLoad.constEnd();
+            ++it) {
+        if (it->first) {
+            loadScript(it->second.first, it->second.second);
+        } else {
+            loadDeclarativeScript(it->second.first, it->second.second);
         }
     }
 
     runScripts();
+    watcher->deleteLater();
 }
 
 bool KWin::Scripting::isScriptLoaded(const QString &pluginName) const
 {
+    QMutexLocker locker(m_scriptsLock.data());
     foreach (AbstractScript *script, scripts) {
         if (script->pluginName() == pluginName) {
             return true;
@@ -306,6 +369,7 @@ bool KWin::Scripting::isScriptLoaded(const QString &pluginName) const
 
 bool KWin::Scripting::unloadScript(const QString &pluginName)
 {
+    QMutexLocker locker(m_scriptsLock.data());
     foreach (AbstractScript *script, scripts) {
         if (script->pluginName() == pluginName) {
             script->deleteLater();
@@ -317,6 +381,7 @@ bool KWin::Scripting::unloadScript(const QString &pluginName)
 
 void KWin::Scripting::runScripts()
 {
+    QMutexLocker locker(m_scriptsLock.data());
     for (int i = 0; i < scripts.size(); i++) {
         scripts.at(i)->run();
     }
@@ -324,11 +389,13 @@ void KWin::Scripting::runScripts()
 
 void KWin::Scripting::scriptDestroyed(QObject *object)
 {
+    QMutexLocker locker(m_scriptsLock.data());
     scripts.removeAll(static_cast<KWin::Script*>(object));
 }
 
 int KWin::Scripting::loadScript(const QString &filePath, const QString& pluginName)
 {
+    QMutexLocker locker(m_scriptsLock.data());
     if (isScriptLoaded(pluginName)) {
         return -1;
     }
@@ -341,6 +408,7 @@ int KWin::Scripting::loadScript(const QString &filePath, const QString& pluginNa
 
 int KWin::Scripting::loadDeclarativeScript(const QString& filePath, const QString& pluginName)
 {
+    QMutexLocker locker(m_scriptsLock.data());
     if (isScriptLoaded(pluginName)) {
         return -1;
     }

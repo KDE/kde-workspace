@@ -55,9 +55,11 @@ SceneOpenGL::SceneOpenGL(Workspace* ws)
     if (!initRenderingContext())
         return; // error
     // Initialize OpenGL
+    GLPlatform *glPlatform = GLPlatform::instance();
+    glPlatform->detect();
+    glPlatform->printResults();
     initGL();
 
-    GLPlatform *glPlatform = GLPlatform::instance();
     if (glPlatform->isSoftwareEmulation()) {
         kError(1212) << "OpenGL Software Rasterizer detected. Falling back to XRender.";
         QTimer::singleShot(0, Workspace::self(), SLOT(fallbackToXRenderCompositing()));
@@ -105,6 +107,11 @@ SceneOpenGL::SceneOpenGL(Workspace* ws)
     if (checkGLError("Init")) {
         kError(1212) << "OpenGL compositing setup failed";
         return; // error
+    }
+
+    // set strict binding
+    if (options->isGlStrictBindingFollowsDriver()) {
+        options->setGlStrictBinding(!glPlatform->supports(LooseBinding));
     }
     kDebug(1212) << "DB:" << db << ", Direct:" << bool(glXIsDirect(display(), ctxbuffer)) << endl;
     init_ok = true;
@@ -462,7 +469,6 @@ void SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
         // reset model view projection matrix if required
         setupModelViewProjectionMatrix();
     }
-    glPushMatrix();
     int mask = 0;
 #ifdef CHECK_GL_ERROR
     checkGLError("Paint1");
@@ -471,7 +477,6 @@ void SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
 #ifdef CHECK_GL_ERROR
     checkGLError("Paint2");
 #endif
-    glPopMatrix();
     ungrabXServer(); // ungrab before flushBuffer(), it may wait for vsync
     if (m_overlayWindow->window())  // show the window only after the first pass, since
         m_overlayWindow->show();   // that pass may take long

@@ -31,7 +31,7 @@ WorkspaceWrapper::WorkspaceWrapper(QObject* parent) : QObject(parent)
 {
     KWin::Workspace *ws = KWin::Workspace::self();
     connect(ws, SIGNAL(desktopPresenceChanged(KWin::Client*,int)), SIGNAL(desktopPresenceChanged(KWin::Client*,int)));
-    connect(ws, SIGNAL(currentDesktopChanged(int)), SIGNAL(currentDesktopChanged(int)));
+    connect(ws, SIGNAL(currentDesktopChanged(int,KWin::Client*)), SIGNAL(currentDesktopChanged(int,KWin::Client*)));
     connect(ws, SIGNAL(clientAdded(KWin::Client*)), SIGNAL(clientAdded(KWin::Client*)));
     connect(ws, SIGNAL(clientAdded(KWin::Client*)), SLOT(setupClientConnections(KWin::Client*)));
     connect(ws, SIGNAL(clientRemoved(KWin::Client*)), SIGNAL(clientRemoved(KWin::Client*)));
@@ -189,15 +189,6 @@ QString WorkspaceWrapper::desktopName(int desktop) const
 QString WorkspaceWrapper::supportInformation() const
 {
     return Workspace::self()->supportInformation();
-}
-
-QList< QObject* > WorkspaceWrapper::getClientList() const
-{
-    QList<QObject*> list;
-    foreach (Client* client, Workspace::self()->clientList()) {
-        list << client;
-    }
-    return list;
 }
 
 void WorkspaceWrapper::setupClientConnections(KWin::Client *client)

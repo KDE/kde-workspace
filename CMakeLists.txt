@@ -14,14 +14,20 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 set(QT_MIN_VERSION "4.7.0")
 set(KDE_MIN_VERSION "4.8.1")
 set(SOPRANO_MIN_VERSION "2.5.63")
+
+OPTION(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
+
 find_package(KDE4 ${KDE_MIN_VERSION} REQUIRED)
 find_package(Strigi REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(KActivities 6.0.0 REQUIRED)
 find_package(DBusMenuQt 0.6.0 REQUIRED)
 find_package(QImageBlitz REQUIRED)
+find_package(KDeclarative REQUIRED)
 macro_optional_find_package(OpenGL)
 macro_optional_find_package(OpenGLES)
+
+macro_log_feature(KDeclarative_FOUND "libkdeclarative" "KDE Declarative (QML) support from kdelibs" "http://www.kde.org" TRUE "" "Required by ksmserver.")
 
 if(Q_WS_X11)
   if(NOT X11_XTest_FOUND)
@@ -74,27 +80,9 @@ macro_optional_find_package(Fontconfig)
 macro_optional_find_package(Googlegadgets)
 macro_log_feature(GOOGLEGADGETS_FOUND "GoogleGadgets" "Google Gadgets library" "http://code.google.com/p/google-gadgets-for-linux/" FALSE "0.11.0" "Needed to build plasma scriptengine for google gadgets")
 
-#### Python support ####
+#### Python support ( plasma scriptengines ) ####
 macro_optional_find_package(PythonLibrary)
-
-macro_optional_find_package(SIP)
-if(SIP_FOUND AND SIP_VERSION STRLESS "040701")
-  message(STATUS "The version of SIP found is too old. 4.7.1 or later is needed.")
-  set(SIP_FOUND)
-endif(SIP_FOUND AND SIP_VERSION STRLESS "040701")
-
-include(SIPMacros)
-
-macro_optional_find_package(PyQt4)
-if(PYQT4_FOUND AND PYQT4_VERSION STRLESS "040400")
-  message(STATUS "The version of PyQt found is too old. 4.4.0 or later is required.")
-  set(PYQT4_FOUND)
-endif(PYQT4_FOUND AND PYQT4_VERSION STRLESS "040400")
-
-macro_optional_find_package(PyKDE4)
-set(PythonSupport_FOUND TRUE)
-
-#### End Python support ####
+macro_log_feature(PYTHONLIBRARY_FOUND "Python" "Python scripting language" "http://python.org" FALSE "" "Needed to build plasma scriptengine for python.")
 
 include(MacroLibrary)
 include(KDE4Defaults)

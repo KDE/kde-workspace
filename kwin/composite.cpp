@@ -57,6 +57,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 
+#include <QtCore/QtConcurrentRun>
+#include <QtCore/QFutureWatcher>
 #include <QMenu>
 #include <QTimerEvent>
 #include <kaction.h>
@@ -90,9 +92,27 @@ void Workspace::setupCompositing()
         return;
     }
 
-    if (!options->isCompositingInitialized())
+    if (!options->isCompositingInitialized()) {
+#ifndef KWIN_HAVE_OPENGLES
+        // options->reloadCompositingSettings(true) initializes the CompositingPrefs which calls an
+        // external program in turn
+        // run this in an external thread to make startup faster.
+        QFutureWatcher<void> *compositingPrefsFuture = new QFutureWatcher<void>();
+        connect(compositingPrefsFuture, SIGNAL(finished()), this, SLOT(slotCompositingOptionsInitialized()));
+        connect(compositingPrefsFuture, SIGNAL(finished()), compositingPrefsFuture, SLOT(deleteLater()));
+        compositingPrefsFuture->setFuture(QtConcurrent::run(options, &Options::reloadCompositingSettings, true));
+#else
+        // OpenGL ES does not call the external program, so no need to create a thread
         options->reloadCompositingSettings(true);
+        slotCompositingOptionsInitialized();
+#endif
+    } else {
+        slotCompositingOptionsInitialized();
+    }
+}
 
+void Workspace::slotCompositingOptionsInitialized()
+{
     char selection_name[ 100 ];
     sprintf(selection_name, "_NET_WM_CM_S%d", DefaultScreen(display()));
     cm_selection = new KSelectionOwner(selection_name);
@@ -104,7 +124,7 @@ void Workspace::setupCompositing()
         kDebug(1212) << "Initializing OpenGL compositing";
 
         // Some broken drivers crash on glXQuery() so to prevent constant KWin crashes:
-        KSharedConfigPtr unsafeConfigPtr(KSharedConfig::openConfig("kwinrc"));
+        KSharedConfigPtr unsafeConfigPtr = KGlobal::config();
         KConfigGroup unsafeConfig(unsafeConfigPtr, "Compositing");
         if (unsafeConfig.readEntry("OpenGLIsUnsafe", false))
             kWarning(1212) << "KWin has detected that your OpenGL library is unsafe to use";
@@ -175,6 +195,10 @@ void Workspace::setupCompositing()
     foreach (Unmanaged * c, unmanaged)
     c->setupCompositing();
     discardPopup(); // force re-creation of the Alt+F3 popup (opacity option)
+
+    // render at least once
+    compositeTimer.stop();
+    performCompositing();
 }
 
 void Workspace::finishCompositing()
@@ -227,7 +251,7 @@ void Workspace::finishCompositing()
 void Workspace::fallbackToXRenderCompositing()
 {
     finishCompositing();
-    KConfigGroup config(KSharedConfig::openConfig("kwinrc"), "Compositing");
+    KConfigGroup config(KGlobal::config(), "Compositing");
     config.writeEntry("Backend", "XRender");
     config.writeEntry("GraphicsSystem", "native");
     config.sync();
@@ -516,23 +540,40 @@ void Workspace::delayedCheckUnredirect()
     scene->overlayWindow()->setShape(reg);
 }
 
+
+bool Workspace::compositingPossible() const
+{
+    return CompositingPrefs::compositingPossible();
+}
+
+QString Workspace::compositingNotPossibleReason() const
+{
+    return CompositingPrefs::compositingNotPossibleReason();
+}
+
+bool Workspace::openGLIsBroken() const
+{
+    return CompositingPrefs::openGlIsBroken();
+}
+
 //****************************************
 // Toplevel
 //****************************************
 
-void Toplevel::setupCompositing()
+bool Toplevel::setupCompositing()
 {
     if (!compositing())
-        return;
+        return false;
     damageRatio = 0.0;
     if (damage_handle != None)
-        return;
+        return false;
     damage_handle = XDamageCreate(display(), frameId(), XDamageReportRawRectangles);
     damage_region = QRegion(0, 0, width(), height());
     effect_window = new EffectWindowImpl(this);
     unredirect = false;
     workspace()->checkUnredirect(true);
     scene->windowAdded(this);
+    return true;
 }
 
 void Toplevel::finishCompositing()
@@ -836,19 +877,27 @@ void Toplevel::suspendUnredirect(bool suspend)
 // Client
 //****************************************
 
-void Client::setupCompositing()
+bool Client::setupCompositing()
 {
-    Toplevel::setupCompositing();
+    if (!Toplevel::setupCompositing()){
+        return false;
+    }
     updateVisibility(); // for internalKeep()
-    updateDecoration(true, true);
-    move(calculateGravitation(true)); // we just polluted the gravity because the window likely has no decoration yet
+    if (isManaged()) {
+        // only create the decoration when a client is managed
+        updateDecoration(true, true);
+    }
+    return true;
 }
 
 void Client::finishCompositing()
 {
     Toplevel::finishCompositing();
     updateVisibility();
-    updateDecoration(true, true);
+    if (!deleting) {
+        // only recreate the decoration if we are not shutting down completely
+        updateDecoration(true, true);
+    }
     // for safety in case KWin is just resizing the window
     s_haveResizeEffect = false;
 }

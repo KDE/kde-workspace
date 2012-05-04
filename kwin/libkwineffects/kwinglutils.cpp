@@ -105,8 +105,7 @@ void initGL()
 #ifdef KWIN_HAVE_OPENGLES
     legacyGl = false;
 #else
-    KSharedConfig::Ptr kwinconfig = KSharedConfig::openConfig("kwinrc", KConfig::NoGlobals);
-    KConfigGroup config(kwinconfig, "Compositing");
+    KConfigGroup config(KGlobal::config(), "Compositing");
     legacyGl = config.readEntry<bool>("GLLegacy", false);
     glVersion = MAKE_GL_VERSION(glversioninfo[0].toInt(), glversioninfo[1].toInt(), glversioninfo[2].toInt());
 #endif
@@ -225,6 +224,9 @@ void loadMatrix(const QMatrix4x4 &matrix)
 #ifdef KWIN_HAVE_OPENGLES
     Q_UNUSED(matrix)
 #else
+    if (ShaderManager::instance()->isValid()) {
+        return;
+    }
     GLfloat m[16];
     const qreal *data = matrix.constData();
     for (int i = 0; i < 4; ++i) {
@@ -1143,18 +1145,17 @@ public:
     QColor color;
 
     //! VBO is not supported
-    void legacyPainting(QRegion region, GLenum primitiveMode);
+    void legacyPainting(QRegion region, GLenum primitiveMode, bool hardwareClipping);
     //! VBO and shaders are both supported
-    void corePainting(const QRegion& region, GLenum primitiveMode);
+    void corePainting(const QRegion& region, GLenum primitiveMode, bool hardwareClipping);
     //! VBO is supported, but shaders are not supported
-    void fallbackPainting(const QRegion& region, GLenum primitiveMode);
+    void fallbackPainting(const QRegion& region, GLenum primitiveMode, bool hardwareClipping);
 };
 bool GLVertexBufferPrivate::supported = false;
 GLVertexBuffer *GLVertexBufferPrivate::streamingBuffer = NULL;
 
-void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode)
+void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode, bool hardwareClipping)
 {
-    Q_UNUSED(region)
 #ifdef KWIN_HAVE_OPENGLES
     Q_UNUSED(primitiveMode)
 #else
@@ -1170,7 +1171,14 @@ void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode)
         glColor4f(color.redF(), color.greenF(), color.blueF(), color.alphaF());
     }
 
-    glDrawArrays(primitiveMode, 0, numberVertices);
+    if (!hardwareClipping) {
+        glDrawArrays(primitiveMode, 0, numberVertices);
+    } else {
+        foreach (const QRect& r, region.rects()) {
+            glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
+            glDrawArrays(primitiveMode, 0, numberVertices);
+        }
+    }
 
     glDisableClientState(GL_VERTEX_ARRAY);
     if (!legacyTexCoords.isEmpty()) {
@@ -1179,9 +1187,8 @@ void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode)
 #endif
 }
 
-void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitiveMode)
+void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitiveMode, bool hardwareClipping)
 {
-    Q_UNUSED(region)
     GLShader *shader = ShaderManager::instance()->getBoundShader();
     GLint vertexAttrib = shader->attributeLocation("vertex");
     GLint texAttrib = shader->attributeLocation("texCoord");
@@ -1203,7 +1210,14 @@ void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitive
         glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
-    glDrawArrays(primitiveMode, 0, numberVertices);
+    if (!hardwareClipping) {
+        glDrawArrays(primitiveMode, 0, numberVertices);
+    } else {
+        foreach (const QRect& r, region.rects()) {
+            glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
+            glDrawArrays(primitiveMode, 0, numberVertices);
+        }
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -1213,9 +1227,8 @@ void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitive
     glDisableVertexAttribArray(vertexAttrib);
 }
 
-void GLVertexBufferPrivate::fallbackPainting(const QRegion& region, GLenum primitiveMode)
+void GLVertexBufferPrivate::fallbackPainting(const QRegion& region, GLenum primitiveMode, bool hardwareClipping)
 {
-    Q_UNUSED(region)
 #ifdef KWIN_HAVE_OPENGLES
     Q_UNUSED(primitiveMode)
 #else
@@ -1232,7 +1245,14 @@ void GLVertexBufferPrivate::fallbackPainting(const QRegion& region, GLenum primi
     }
 
     // Clip using scissoring
-    glDrawArrays(primitiveMode, 0, numberVertices);
+    if (!hardwareClipping) {
+        glDrawArrays(primitiveMode, 0, numberVertices);
+    } else {
+        foreach (const QRect& r, region.rects()) {
+            glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
+            glDrawArrays(primitiveMode, 0, numberVertices);
+        }
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -1304,17 +1324,17 @@ void GLVertexBuffer::setData(int numberVertices, int dim, const float* vertices,
 
 void GLVertexBuffer::render(GLenum primitiveMode)
 {
-    render(infiniteRegion(), primitiveMode);
+    render(infiniteRegion(), primitiveMode, false);
 }
 
-void GLVertexBuffer::render(const QRegion& region, GLenum primitiveMode)
+void GLVertexBuffer::render(const QRegion& region, GLenum primitiveMode, bool hardwareClipping)
 {
     if (!GLVertexBufferPrivate::supported) {
-        d->legacyPainting(region, primitiveMode);
+        d->legacyPainting(region, primitiveMode, hardwareClipping);
     } else if (ShaderManager::instance()->isShaderBound()) {
-        d->corePainting(region, primitiveMode);
+        d->corePainting(region, primitiveMode, hardwareClipping);
     } else {
-        d->fallbackPainting(region, primitiveMode);
+        d->fallbackPainting(region, primitiveMode, hardwareClipping);
     }
 }
 

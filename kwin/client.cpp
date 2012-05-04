@@ -140,7 +140,6 @@ Client::Client(Workspace* ws)
     // Set the initial mapping state
     mapping_state = Withdrawn;
     quick_tile_mode = QuickTileNone;
-    geom_pretile = QRect(0, 0, 0, 0);
     desk = 0; // No desktop yet
 
     mode = PositionCenter;
@@ -241,7 +240,10 @@ void Client::releaseWindow(bool on_shutdown)
 {
     assert(!deleting);
     deleting = true;
-    Deleted* del = Deleted::create(this);
+    Deleted* del = NULL;
+    if (!on_shutdown) {
+        del = Deleted::create(this);
+    }
     if (moveResizeMode)
         emit clientFinishUserMovedResized(this);
     emit windowClosed(this, del);
@@ -292,8 +294,10 @@ void Client::releaseWindow(bool on_shutdown)
     XDestroyWindow(display(), frameId());
     //frame = None;
     --block_geometry_updates; // Don't use GeometryUpdatesBlocker, it would now set the geometry
-    disownDataPassedToDeleted();
-    del->unrefWindow();
+    if (!on_shutdown) {
+        disownDataPassedToDeleted();
+        del->unrefWindow();
+    }
     checkNonExistentClients();
     deleteClient(this, Allowed);
     ungrabXServer();
@@ -996,7 +1000,7 @@ void Client::minimize(bool avoid_animation)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Minimized);
     emit minimizedChanged();
 }
 
@@ -1022,7 +1026,7 @@ void Client::unminimize(bool avoid_animation)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Minimized);
     emit minimizedChanged();
 }
 
@@ -1115,9 +1119,14 @@ void Client::setShade(ShadeMode mode)
         if ((shade_mode == ShadeHover || shade_mode == ShadeActivated) && rules()->checkAcceptFocus(input))
             setActive(true);
         if (shade_mode == ShadeHover) {
-            ClientList order = workspace()->stackingOrder();
-            int idx = order.indexOf(this) + 1;   // this is likely related to the index parameter?!
-            shade_below = (idx < order.count()) ? order.at(idx) : NULL;
+            ToplevelList order = workspace()->stackingOrder();
+            // this is likely related to the index parameter?!
+            for (int idx = order.indexOf(this) + 1; idx < order.count(); ++idx) {
+                shade_below = qobject_cast<Client*>(order.at(idx));
+                if (shade_below) {
+                    break;
+                }
+            }
             if (shade_below && shade_below->isNormalWindow())
                 workspace()->raiseClient(this);
             else
@@ -1139,7 +1148,7 @@ void Client::setShade(ShadeMode mode)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Shaded);
     emit shadeChanged();
 }
 
@@ -1589,7 +1598,7 @@ void Client::setDesktop(int desktop)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Desktop);
     emit desktopChanged();
 }
 
@@ -1652,7 +1661,7 @@ void Client::updateActivities(bool includeTransients)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Activity);
 }
 
 /**
@@ -1694,7 +1703,7 @@ void Client::setOnAllDesktops(bool b)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Desktop);
 }
 
 /**
@@ -1954,6 +1963,12 @@ void Client::setTabGroup(TabGroup *group)
 bool Client::isCurrentTab() const
 {
     return !tab_group || tab_group->current() == this;
+}
+
+void Client::syncTabGroupFor(QString property, bool fromThisClient)
+{
+    if (tab_group)
+        tab_group->sync(property.toAscii().data(), fromThisClient ? this : tab_group->current());
 }
 
 void Client::dontMoveResize()

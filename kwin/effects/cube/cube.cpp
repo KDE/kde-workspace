@@ -33,7 +33,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QColor>
 #include <QRect>
 #include <QEvent>
+#include <QFutureWatcher>
 #include <QKeyEvent>
+#include <QtConcurrentRun>
 #include <QVector2D>
 
 #include <math.h>
@@ -58,7 +60,7 @@ CubeEffect::CubeEffect()
     , cubeOpacity(1.0)
     , opacityDesktopOnly(true)
     , displayDesktopName(false)
-    , desktopNameFrame(effects->effectFrame(EffectFrameStyled))
+    , desktopNameFrame(NULL)
     , reflection(true)
     , rotating(false)
     , desktopChangedWhileRotating(false)
@@ -95,7 +97,6 @@ CubeEffect::CubeEffect()
 {
     desktopNameFont.setBold(true);
     desktopNameFont.setPointSize(14);
-    desktopNameFrame->setFont(desktopNameFont);
 
     const QString fragmentshader = KGlobal::dirs()->findResource("data", "kwin/cube-reflection.glsl");
     m_reflectionShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, fragmentshader);
@@ -177,31 +178,11 @@ void CubeEffect::loadConfig(QString config)
     invertMouse = conf.readEntry("InvertMouse", false);
     capDeformationFactor = conf.readEntry("CapDeformation", 0) / 100.0f;
     useZOrdering = conf.readEntry("ZOrdering", false);
-    QString file = conf.readEntry("Wallpaper", QString(""));
-    if (wallpaper)
-        wallpaper->discard();
     delete wallpaper;
     wallpaper = NULL;
-    if (!file.isEmpty()) {
-        QImage img = QImage(file);
-        if (!img.isNull()) {
-            wallpaper = new GLTexture(img);
-        }
-    }
     delete capTexture;
     capTexture = NULL;
     texturedCaps = conf.readEntry("TexturedCaps", true);
-    if (texturedCaps) {
-        QString capPath = conf.readEntry("CapPath", KGlobal::dirs()->findResource("appdata", "cubecap.png"));
-        QImage img = QImage(capPath);
-        if (!img.isNull()) {
-            capTexture = new GLTexture(img);
-            capTexture->setFilter(GL_LINEAR);
-#ifndef KWIN_HAVE_OPENGLES
-            capTexture->setWrapMode(GL_CLAMP_TO_BORDER);
-#endif
-        }
-    }
 
     timeLine.setCurveShape(QTimeLine::EaseInOutCurve);
     timeLine.setDuration(rotationDuration);
@@ -260,6 +241,56 @@ CubeEffect::~CubeEffect()
     delete m_reflectionShader;
     delete m_capShader;
     delete m_cubeCapBuffer;
+}
+
+QImage CubeEffect::loadCubeCap(const QString &capPath)
+{
+    if (!texturedCaps) {
+        return QImage();
+    }
+    return QImage(capPath);
+}
+
+void CubeEffect::slotCubeCapLoaded()
+{
+    QFutureWatcher<QImage> *watcher = dynamic_cast<QFutureWatcher<QImage>*>(sender());
+    if (!watcher) {
+        // not invoked from future watcher
+        return;
+    }
+    QImage img = watcher->result();
+    if (!img.isNull()) {
+        capTexture = new GLTexture(img);
+        capTexture->setFilter(GL_LINEAR);
+#ifndef KWIN_HAVE_OPENGLES
+        capTexture->setWrapMode(GL_CLAMP_TO_BORDER);
+#endif
+        // need to recreate the VBO for the cube cap
+        delete m_cubeCapBuffer;
+        m_cubeCapBuffer = NULL;
+        effects->addRepaintFull();
+    }
+    watcher->deleteLater();
+}
+
+QImage CubeEffect::loadWallPaper(const QString &file)
+{
+    return QImage(file);
+}
+
+void CubeEffect::slotWallPaperLoaded()
+{
+    QFutureWatcher<QImage> *watcher = dynamic_cast<QFutureWatcher<QImage>*>(sender());
+    if (!watcher) {
+        // not invoked from future watcher
+        return;
+    }
+    QImage img = watcher->result();
+    if (!img.isNull()) {
+        wallpaper = new GLTexture(img);
+        effects->addRepaintFull();
+    }
+    watcher->deleteLater();
 }
 
 bool CubeEffect::loadShader()
@@ -386,9 +417,6 @@ void CubeEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             }
         }
 
-#ifndef KWIN_HAVE_OPENGLES
-        glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -552,9 +580,6 @@ void CubeEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
         glDisable(GL_CULL_FACE);
 
         glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-        glPopAttrib();
-#endif
 
         // desktop name box - inspired from coverswitch
         if (displayDesktopName) {
@@ -566,6 +591,10 @@ void CubeEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             QRect screenRect = effects->clientArea(ScreenArea, activeScreen, frontDesktop);
             QRect frameRect = QRect(screenRect.width() * 0.33f + screenRect.x(), screenRect.height() * 0.95f + screenRect.y(),
                                     screenRect.width() * 0.34f, QFontMetrics(desktopNameFont).height());
+            if (!desktopNameFrame) {
+                desktopNameFrame = effects->effectFrame(EffectFrameStyled);
+                desktopNameFrame->setFont(desktopNameFont);
+            }
             desktopNameFrame->setGeometry(frameRect);
             desktopNameFrame->setText(effects->desktopName(frontDesktop));
             desktopNameFrame->render(region, opacity);
@@ -1503,9 +1532,6 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
             paint = paint.subtracted(QRegion(w->geometry()));
             // in case of free area in multiscreen setup fill it with cap color
             if (!paint.isEmpty()) {
-#ifndef KWIN_HAVE_OPENGLES
-                glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 QVector<float> verts;
@@ -1561,9 +1587,6 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
                     ShaderManager::instance()->popShader();
                 }
                 glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-                glPopAttrib();
-#endif
             }
         }
         if (!shader) {
@@ -1877,6 +1900,19 @@ void CubeEffect::setActive(bool active)
         inside->setActive(true);
     }
     if (active) {
+        KConfigGroup conf = effects->effectConfig("Cube");
+        QString capPath = conf.readEntry("CapPath", KGlobal::dirs()->findResource("appdata", "cubecap.png"));
+        if (texturedCaps && !capTexture && !capPath.isEmpty()) {
+            QFutureWatcher<QImage> *watcher = new QFutureWatcher<QImage>(this);
+            connect(watcher, SIGNAL(finished()), SLOT(slotCubeCapLoaded()));
+            watcher->setFuture(QtConcurrent::run(this, &CubeEffect::loadCubeCap, capPath));
+        }
+        QString wallpaperPath = conf.readEntry("Wallpaper", QString(""));
+        if (!wallpaper && !wallpaperPath.isEmpty()) {
+            QFutureWatcher<QImage> *watcher = new QFutureWatcher<QImage>(this);
+            connect(watcher, SIGNAL(finished()), SLOT(slotWallPaperLoaded()));
+            watcher->setFuture(QtConcurrent::run(this, &CubeEffect::loadWallPaper, wallpaperPath));
+        }
         if (!mousePolling) {
             effects->startMousePolling();
             mousePolling = true;
