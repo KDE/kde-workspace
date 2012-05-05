@@ -8,6 +8,7 @@ X-KDE-PluginKeyword=khotkeys
 X-KDE-Init-Symbol=khotkeys
 X-KDE-System-Settings-Parent-Category=shortcuts-and-gestures
 X-KDE-ParentApp=kcontrol
+X-DocPath=kcontrol/khotkeys/index.html
 
 Name=Custom Shortcuts
 Name[ar]=اختصارات مخصصة
