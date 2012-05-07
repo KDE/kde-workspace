@@ -63,8 +63,7 @@ you wish to configure.</para>
 <para>You can also at any time <guibutton>Modify...</guibutton> or
 <guibutton>Delete</guibutton> any stored settings profile, and
 reorder the list.  Reordering the list using the <guibutton>Move Up</guibutton>
-and <guibutton>Move Down</guibutton> buttons is a convenience to help you sort
-the profiles, and has no effect on how they are applied.</para>
+and <guibutton>Move Down</guibutton> buttons effects how they are applied.</para>
 
 </chapter>
 <!--userbase <timestamp>2012-03-09T20:50:14Z</timestamp>-->
@@ -102,10 +101,8 @@ the profiles, and has no effect on how they are applied.</para>
 <para>There are several ways to invoke the &kwin; Rule Editor.  Below are two:
 </para>
 <itemizedlist>
-<listitem><para>Right-click on the title-bar of any window, choose <guilabel>Configure Window Settings...</guilabel> and in the <guilabel>Configure</guilabel> window, select <guilabel>Window Rules</guilabel> or</para></listitem>
+<listitem><para>Right-click on the title-bar of any window, choose <guilabel>Configure Window Behavior...</guilabel> and in the <guilabel>Configure</guilabel> window, select <guilabel>Window Rules</guilabel> or</para></listitem>
 </itemizedlist>
-<para><note><para>Pre 4.9:  choose <guilabel>Configure Window Behavior...</guilabel></para></note>
-</para>
 <itemizedlist>
 <listitem><para><menuchoice><guimenu>System Settings</guimenu><guisubmenu>Window Behavior</guisubmenu><guimenuitem>Window Rules</guimenuitem></menuchoice></para></listitem>
 </itemizedlist>
