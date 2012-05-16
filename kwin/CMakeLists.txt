@@ -79,30 +79,30 @@ add_subdirectory( tabbox )
 ########### next target ###############
 
 set(kwin_KDEINIT_SRCS
-   workspace.cpp 
-   client.cpp 
+   workspace.cpp
+   client.cpp
    tabgroup.cpp
-   placement.cpp 
-   atoms.cpp 
-   utils.cpp 
-   layers.cpp 
-   main.cpp 
-   options.cpp 
+   placement.cpp
+   atoms.cpp
+   utils.cpp
+   layers.cpp
+   main.cpp
+   options.cpp
    outline.cpp
-   plugins.cpp 
-   events.cpp 
-   killwindow.cpp 
-   geometrytip.cpp 
+   plugins.cpp
+   events.cpp
+   killwindow.cpp
+   geometrytip.cpp
    shadow.cpp
-   sm.cpp 
-   group.cpp 
-   bridge.cpp 
-   manage.cpp 
+   sm.cpp
+   group.cpp
+   bridge.cpp
+   manage.cpp
    notifications.cpp
    overlaywindow.cpp
-   activation.cpp 
-   useractions.cpp 
-   geometry.cpp 
+   activation.cpp
+   useractions.cpp
+   geometry.cpp
    rules.cpp
    composite.cpp
    toplevel.cpp
@@ -231,7 +231,7 @@ endif(OPENGLES_FOUND)
 
 ########### next target ###############
 
-set( kwinnvidiahack_LIB_SRCS 
+set( kwinnvidiahack_LIB_SRCS
     nvidiahack.cpp )
 
 
