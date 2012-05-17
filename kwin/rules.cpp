@@ -101,8 +101,7 @@ Rules::Rules(const QString& str, bool temporary)
 
 #define READ_SET_RULE( var, func, def ) \
     var = func ( cfg.readEntry( #var, def)); \
-    var##rule = readSetRule( cfg, #var "rule" ); \
-    kDebug(1212) << "READ_SET_RULE" << #var << #func << #def << var << var##rule << title;
+    var##rule = readSetRule( cfg, #var "rule" );
 
 #define READ_SET_RULE_DEF( var , func, def ) \
     var = func ( cfg.readEntry( #var, def )); \
@@ -462,7 +461,6 @@ bool Rules::update(Client* c, int selection)
     }
     if NOW_REMEMBER(Desktop, desktop) {
         updated = updated || desktop != c->desktop();
-        kDebug(1212) << "NOW_REMEMBER" << c->desktop();
         desktop = c->desktop();
     }
     if NOW_REMEMBER(Activity, activity) {
@@ -529,13 +527,10 @@ bool Rules::update(Client* c, int selection)
 #define APPLY_RULE( var, name, type ) \
     bool Rules::apply##name( type& arg, bool init ) const \
     { \
-        kDebug(1212) << "apply" << #name << arg << #var << var##rule; \
         if ( checkSetRule( var##rule, init )) \
             arg = this->var; \
-        kDebug(1212) << "apply" << #name << arg << #var << var##rule; \
         return checkSetStop( var##rule ); \
     }
-        // if (QString(#name) == "Desktop" && arg == (type)1) { int i = 0; i = 1/i; }\
 
 #define APPLY_FORCE_RULE( var, name, type ) \
     bool Rules::apply##name( type& arg ) const \
