@@ -101,8 +101,7 @@ Rules::Rules(const QString& str, bool temporary)
 
 #define READ_SET_RULE( var, func, def ) \
     var = func ( cfg.readEntry( #var, def)); \
-    var##rule = readSetRule( cfg, #var "rule" ); \
-    kDebug(1212) << "READ_SET_RULE" << #var << #func << #def << var << var##rule << title;
+    var##rule = readSetRule( cfg, #var "rule" );
 
 #define READ_SET_RULE_DEF( var , func, def ) \
     var = func ( cfg.readEntry( #var, def )); \
@@ -161,7 +160,6 @@ void Rules::readFromCfg(const KConfigGroup& cfg)
     READ_FORCE_RULE(ignoreposition, , false);
     READ_SET_RULE(desktop, , 0);
     READ_SET_RULE(activity, , QString());
-    // TODO ivan
     type = readType(cfg, "type");
     typerule = type != NET::Unknown ? readForceRule(cfg, "typerule") : UnusedForceRule;
     READ_SET_RULE(maximizevert, , false);
@@ -252,7 +250,6 @@ void Rules::write(KConfigGroup& cfg) const
     WRITE_FORCE_RULE(ignoreposition,);
     WRITE_SET_RULE(desktop,);
     WRITE_SET_RULE(activity,);
-    // TODO: ivan
     WRITE_FORCE_RULE(type, int);
     WRITE_SET_RULE(maximizevert,);
     WRITE_SET_RULE(maximizehoriz,);
@@ -464,14 +461,12 @@ bool Rules::update(Client* c, int selection)
     }
     if NOW_REMEMBER(Desktop, desktop) {
         updated = updated || desktop != c->desktop();
-        kDebug(1212) << "NOW_REMEMBER" << c->desktop();
         desktop = c->desktop();
     }
     if NOW_REMEMBER(Activity, activity) {
         // TODO: ivan - multiple activities support
         const QString & joinedActivities = c->activities().join(",");
         updated = updated || activity != joinedActivities;
-        kDebug(1212) << "NOW_REMEMBER" << joinedActivities;
         activity = joinedActivities;
     }
     if NOW_REMEMBER(MaximizeVert, maximizevert) {
@@ -532,13 +527,10 @@ bool Rules::update(Client* c, int selection)
 #define APPLY_RULE( var, name, type ) \
     bool Rules::apply##name( type& arg, bool init ) const \
     { \
-        kDebug(1212) << "apply" << #name << arg << #var << var##rule; \
         if ( checkSetRule( var##rule, init )) \
             arg = this->var; \
-        kDebug(1212) << "apply" << #name << arg << #var << var##rule; \
         return checkSetStop( var##rule ); \
     }
-        // if (QString(#name) == "Desktop" && arg == (type)1) { int i = 0; i = 1/i; }\
 
 #define APPLY_FORCE_RULE( var, name, type ) \
     bool Rules::apply##name( type& arg ) const \
@@ -801,22 +793,7 @@ bool WindowRules::checkIgnoreGeometry(bool ignore) const
 }
 
 CHECK_RULE(Desktop, int)
-// CHECK_RULE(Activity, QString)
-QString WindowRules::checkActivity( QString arg, bool init ) const
-{
-    if ( rules.count() == 0 )
-        return arg;
-    QString ret = arg;
-    for ( QVector< Rules* >::ConstIterator it = rules.constBegin();
-            it != rules.constEnd();
-            ++it )
-    {
-        if ( (*it)->applyActivity( ret, init ))
-            break;
-    }
-    kDebug(1212) << ret ;
-    return ret;
-}
+CHECK_RULE(Activity, QString)
 CHECK_FORCE_RULE(Type, NET::WindowType)
 CHECK_RULE(MaximizeVert, KDecorationDefines::MaximizeMode)
 CHECK_RULE(MaximizeHoriz, KDecorationDefines::MaximizeMode)
@@ -873,8 +850,6 @@ void Client::applyWindowRules()
     // MinSize, MaxSize handled by Geometry
     // IgnorePosition
     setDesktop(desktop());
-    // TODO: ivan setActivity(activity());
-    kDebug(1212) << "###########" << activities() << this;
     setOnActivities(activities());
     // Type
     maximize(maximizeMode());

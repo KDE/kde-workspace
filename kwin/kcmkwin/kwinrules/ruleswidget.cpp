@@ -33,7 +33,6 @@
 #include <kmessagebox.h>
 #include <QTabWidget>
 #include <QTimer>
-#include <QDebug>
 
 #include "../../rules.h"
 

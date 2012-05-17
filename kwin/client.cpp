@@ -1628,17 +1628,25 @@ void Client::setOnActivity(const QString &activity, bool enable)
  */
 void Client::setOnActivities(QStringList newActivitiesList)
 {
+    QString joinedActivitiesList = newActivitiesList.join(",");
+    joinedActivitiesList = rules()->checkActivity(joinedActivitiesList, false);
+    newActivitiesList = joinedActivitiesList.split(',');
+
     QStringList allActivities = workspace()->activityList();
     if (newActivitiesList.size() == allActivities.size() || newActivitiesList.isEmpty()) {
         setOnAllActivities(true);
-        return;
-    }
+        activityList.clear();
+        XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
+                        PropModeReplace, (const unsigned char *)"ALL", 3);
 
-    QByteArray joined = newActivitiesList.join(",").toAscii();
-    char *data = joined.data();
-    activityList = newActivitiesList;
-    XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
+    } else {
+        QByteArray joined = joinedActivitiesList.toAscii();
+        char *data = joined.data();
+        activityList = newActivitiesList;
+        XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
                     PropModeReplace, (unsigned char *)data, joined.size());
+
+    }
 
     updateActivities(false);
 }
@@ -1715,10 +1723,8 @@ void Client::setOnAllActivities(bool on)
     if (on == isOnAllActivities())
         return;
     if (on) {
-        activityList.clear();
-        XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
-                        PropModeReplace, (const unsigned char *)"ALL", 3);
-        updateActivities(true);
+        setOnActivities(QStringList());
+
     } else {
         setOnActivity(Workspace::self()->currentActivity(), true);
         workspace()->updateOnAllActivitiesOfTransients(this);
