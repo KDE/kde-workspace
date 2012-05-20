@@ -197,7 +197,7 @@ Client::Client(Workspace* ws)
 
 #ifdef KWIN_BUILD_TABBOX
     // TabBoxClient
-    m_tabBoxClient = new TabBox::TabBoxClientImpl();
+    m_tabBoxClient = QSharedPointer<TabBox::TabBoxClientImpl>(new TabBox::TabBoxClientImpl());
     m_tabBoxClient->setClient(this);
 #endif
 
@@ -230,9 +230,6 @@ Client::~Client()
     assert(block_geometry_updates == 0);
     assert(!check_active_modal);
     delete bridge;
-#ifdef KWIN_BUILD_TABBOX
-    delete m_tabBoxClient;
-#endif
 #ifdef KWIN_BUILD_SCRIPTING
     delete scriptCache;
 #endif

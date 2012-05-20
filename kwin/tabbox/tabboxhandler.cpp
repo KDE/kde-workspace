@@ -179,8 +179,14 @@ void TabBoxHandlerPrivate::updateHighlightWindows()
             // TODO if ( (lastRaisedClientWasMinimized = lastRaisedClient->isMinimized()) )
             //         lastRaisedClient->setMinimized( false );
             TabBoxClientList order = q->stackingOrder();
-            int succIdx = order.indexOf(lastRaisedClient) + 1;   // this is likely related to the index parameter?!
-            lastRaisedClientSucc = (succIdx < order.count()) ? order.at(succIdx) : 0;
+            int succIdx = order.count() + 1;
+            for (int i=0; i<order.count(); ++i) {
+                if (order.at(i).data() == lastRaisedClient) {
+                    succIdx = i + 1;
+                    break;
+                }
+            }
+            lastRaisedClientSucc = (succIdx < order.count()) ? order.at(succIdx).data() : 0;
             q->raiseClient(lastRaisedClient);
         }
     }
@@ -633,7 +639,7 @@ QModelIndex TabBoxHandler::indexAt(const QPoint& pos) const
     return QModelIndex();
 }
 
-QModelIndex TabBoxHandler::index(KWin::TabBox::TabBoxClient* client) const
+QModelIndex TabBoxHandler::index(QWeakPointer<KWin::TabBox::TabBoxClient> client) const
 {
     return d->clientModel()->index(client);
 }
@@ -659,13 +665,29 @@ TabBoxClient* TabBoxHandler::client(const QModelIndex& index) const
 void TabBoxHandler::createModel(bool partialReset)
 {
     switch(d->config.tabBoxMode()) {
-    case TabBoxConfig::ClientTabBox:
+    case TabBoxConfig::ClientTabBox: {
         d->clientModel()->createClientList(partialReset);
-        if (d->lastRaisedClient && !stackingOrder().contains(d->lastRaisedClient))
+        // TODO: C++11 use lambda function
+        bool lastRaised = false;
+        bool lastRaisedSucc = false;
+        foreach (QWeakPointer<TabBoxClient> clientPointer, stackingOrder()) {
+            QSharedPointer<TabBoxClient> client = clientPointer.toStrongRef();
+            if (!client) {
+                continue;
+            }
+            if (client.data() == d->lastRaisedClient) {
+                lastRaised = true;
+            }
+            if (client.data() == d->lastRaisedClientSucc) {
+                lastRaisedSucc = true;
+            }
+        }
+        if (d->lastRaisedClient && !lastRaised)
             d->lastRaisedClient = 0;
-        if (d->lastRaisedClientSucc && !stackingOrder().contains(d->lastRaisedClientSucc))
+        if (d->lastRaisedClientSucc && !lastRaisedSucc)
             d->lastRaisedClientSucc = 0;
         break;
+    }
     case TabBoxConfig::DesktopTabBox:
         d->desktopModel()->createDesktopList();
         break;

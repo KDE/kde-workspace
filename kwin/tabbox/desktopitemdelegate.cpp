@@ -154,7 +154,8 @@ void DesktopItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
                 qreal itemWidth = element.width();
                 if (element.isStretch())
                     itemWidth = option.rect.x() + option.rect.width() - x;
-                foreach (TabBoxClient * client, clients) {
+                foreach (QWeakPointer<TabBoxClient> clientPointer, clients) {
+                    QSharedPointer<TabBoxClient> client = clientPointer.toStrongRef();
                     if (!client)
                         continue;
                     QModelIndex clientIndex = clientModel->index(client);
@@ -255,7 +256,8 @@ QSizeF DesktopItemDelegate::rowSize(const QModelIndex& index, int row) const
             TabBoxClientList clients = clientModel->clientList();
             qreal elementWidth = 0.0;
             qreal elementHeight = 0.0;
-            foreach (TabBoxClient * client, clients) {
+            foreach (QWeakPointer<TabBoxClient> clientPointer, clients) {
+                QSharedPointer<TabBoxClient> client = clientPointer.toStrongRef();
                 if (!client)
                     continue;
                 QModelIndex clientIndex = clientModel->index(client);

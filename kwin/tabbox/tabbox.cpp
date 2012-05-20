@@ -92,14 +92,14 @@ QString TabBoxHandlerImpl::desktopName(int desktop) const
     return Workspace::self()->desktopName(desktop);
 }
 
-TabBoxClient* TabBoxHandlerImpl::nextClientFocusChain(TabBoxClient* client) const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::nextClientFocusChain(TabBoxClient* client) const
 {
     if (TabBoxClientImpl* c = static_cast< TabBoxClientImpl* >(client)) {
         Client* next = Workspace::self()->tabBox()->nextClientFocusChain(c->client());
         if (next)
             return next->tabBoxClient();
     }
-    return NULL;
+    return QWeakPointer<TabBoxClient>();
 }
 
 int TabBoxHandlerImpl::nextDesktopFocusChain(int desktop) const
@@ -112,15 +112,15 @@ int TabBoxHandlerImpl::numberOfDesktops() const
     return Workspace::self()->numberOfDesktops();
 }
 
-TabBoxClient* TabBoxHandlerImpl::activeClient() const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::activeClient() const
 {
     if (Workspace::self()->activeClient())
         return Workspace::self()->activeClient()->tabBoxClient();
     else
-        return NULL;
+        return QWeakPointer<TabBoxClient>();
 }
 
-TabBoxClient* TabBoxHandlerImpl::clientToAddToList(TabBoxClient* client, int desktop, bool allDesktops) const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::clientToAddToList(TabBoxClient* client, int desktop, bool allDesktops) const
 {
     Workspace* workspace = Workspace::self();
     Client* ret = NULL;
@@ -146,8 +146,12 @@ TabBoxClient* TabBoxHandlerImpl::clientToAddToList(TabBoxClient* client, int des
         }
         if (ret && applications) {
             // check if the list already contains an entry of this application
-            foreach (TabBoxClient * tabBoxClient, clientList()) {
-                if (TabBoxClientImpl* c = dynamic_cast< TabBoxClientImpl* >(tabBoxClient)) {
+            foreach (QWeakPointer<TabBoxClient> tabBoxClientPointer, clientList()) {
+                QSharedPointer<TabBoxClient> tabBoxClient = tabBoxClientPointer.toStrongRef();
+                if (!tabBoxClient) {
+                    continue;
+                }
+                if (TabBoxClientImpl* c = dynamic_cast< TabBoxClientImpl* >(tabBoxClient.data())) {
                     if (c->client()->resourceClass() == ret->resourceClass()) {
                         ret = NULL;
                         break;
@@ -163,7 +167,7 @@ TabBoxClient* TabBoxHandlerImpl::clientToAddToList(TabBoxClient* client, int des
     if (ret)
         return ret->tabBoxClient();
     else
-        return NULL;
+        return QWeakPointer<TabBoxClient>();
 }
 
 TabBoxClientList TabBoxHandlerImpl::stackingOrder() const
@@ -188,14 +192,14 @@ void TabBoxHandlerImpl::restack(TabBoxClient *c, TabBoxClient *under)
 }
 
 
-TabBoxClient* TabBoxHandlerImpl::desktopClient() const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::desktopClient() const
 {
     foreach (const Client * client, Workspace::self()->stackingOrder()) {
         if (client->isDesktop() && client->isOnCurrentDesktop() && client->screen() == Workspace::self()->activeScreen()) {
             return client->tabBoxClient();
         }
     }
-    return NULL;
+    return QWeakPointer<TabBoxClient>();
 }
 
 void TabBoxHandlerImpl::showOutline(const QRect &outline)
@@ -442,8 +446,11 @@ ClientList TabBox::currentClientList()
 {
     TabBoxClientList list = m_tabBox->clientList();
     ClientList ret;
-    foreach (const TabBoxClient * client, list) {
-        if (const TabBoxClientImpl* c = static_cast< const TabBoxClientImpl* >(client))
+    foreach (QWeakPointer<TabBoxClient> clientPointer, list) {
+        QSharedPointer<TabBoxClient> client = clientPointer.toStrongRef();
+        if (!client)
+            continue;
+        if (const TabBoxClientImpl* c = static_cast< const TabBoxClientImpl* >(client.data()))
             ret.append(c->client());
     }
     return ret;
