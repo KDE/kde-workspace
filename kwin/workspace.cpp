@@ -400,6 +400,9 @@ void Workspace::init()
     QX11Info info;
     rootInfo = new RootInfo(this, display(), supportWindow->winId(), "KWin", protocols, 5, info.screen());
 
+    // Now we know how many desktops we'll have, thus we initialize the positioning object
+    initPositioning = new Placement(this);
+
     loadDesktopSettings();
     updateDesktopLayout();
     // Extra NETRootInfo instance in Client mode is needed to get the values of the properties
@@ -415,9 +418,6 @@ void Workspace::init()
         setCurrentDesktop(1);
     allActivities_ = activityController_.listActivities();
     updateCurrentActivity(activityController_.currentActivity());
-
-    // Now we know how many desktops we'll have, thus we initialize the positioning object
-    initPositioning = new Placement(this);
 
     reconfigureTimer.setSingleShot(true);
     updateToolWindowsTimer.setSingleShot(true);
@@ -965,7 +965,6 @@ void Workspace::slotReconfigure()
     unsigned long changed = options->updateSettings();
 
     emit configChanged();
-    initPositioning->reinitCascading(0);
     discardPopup();
     forEachClient(CheckIgnoreFocusStealingProcedure());
     updateToolWindows(true);
@@ -1591,6 +1590,7 @@ void Workspace::setNumberOfDesktops(int n)
         return;
     int old_number_of_desktops = numberOfDesktops();
     desktopCount_ = n;
+    initPositioning->reinitCascading(0);
     updateDesktopLayout(); // Make sure the layout is still valid
 
     if (currentDesktop() > n)
