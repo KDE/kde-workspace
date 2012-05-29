@@ -26,6 +26,7 @@ Name[sl]=Odzadnji program za omogočanje sledilne ploščice
 Name[sv]=KDE:s demon för aktivering av tryckplatta
 Name[uk]=Фонова служба вмикання сенсорного керування у KDE
 Name[x-test]=xxKDE TouchPad Enabler Daemonxx
+Name[zh_CN]=KDE 触摸板启用器守护进程
 Name[zh_TW]=KDE 觸控板開啟伺服程式
 
 Comment=Toggles the enable status of the TouchPad
@@ -50,4 +51,5 @@ Comment[sl]=Omogoči/onemogoči sledilno ploščico
 Comment[sv]=Ändrar tryckplattans aktiveringsstatus
 Comment[uk]=Вмикає або вимикає сенсорне керування
 Comment[x-test]=xxToggles the enable status of the TouchPadxx
+Comment[zh_CN]=切换触摸板启用状态
 Comment[zh_TW]=切換觸控板的開啟狀態
