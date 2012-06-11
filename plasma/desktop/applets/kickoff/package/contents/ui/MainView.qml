@@ -80,7 +80,6 @@ Item {
             right: scrollBar.visible ? scrollBar.left : parent.right
         }
         clip: true
-        focus: true
         delegate: kickoffDelegate
         Component.onCompleted: changeModel("favorites")
 

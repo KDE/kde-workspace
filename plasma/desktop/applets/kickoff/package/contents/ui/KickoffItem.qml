@@ -23,7 +23,6 @@ import org.kde.draganddrop 1.0
 PlasmaComponents.ListItem {
     id: listItem
     enabled: true
-    width: parent.width
     checked: ListView.isCurrentItem
     QIconItem {
         id: elementIcon

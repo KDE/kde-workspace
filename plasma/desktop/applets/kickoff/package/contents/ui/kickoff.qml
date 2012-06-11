@@ -34,6 +34,11 @@ Item {
 
     Component.onCompleted: {
         plasmoid.addEventListener('ConfigChanged', configChanged);
+        plasmoid.popupEvent.connect('popupEvent', popupEventSlot);
+    }
+
+    function popupEventSlot(shown) {
+        searchField.forceActiveFocus();
     }
 
     function configChanged() {
@@ -107,6 +112,7 @@ Item {
         }
         PlasmaComponents.TextField {
             id: searchField
+            focus: true
             placeholderText: "Search"
             clearButtonShown: true
             anchors {
@@ -279,34 +285,53 @@ Item {
         KickoffButton {
             iconSource: "bookmarks"
             text: "Favorites"
-            onClicked: mainView.changeModel("favorites")
         }
         KickoffButton {
             iconSource: "applications-other"
             text: "Applications"
-            onClicked: {
-                if (applicationsViewContainer.source == "") {
-                    applicationsViewContainer.source = "ApplicationsView.qml";
-                }
-                root.state = "APPLICATIONS";
-            }
         }
         KickoffButton {
             iconSource: "computer" // TODO: could also be computer-laptop
             text: "Computer"
-            onClicked: mainView.changeModel("system")
         }
         KickoffButton {
             iconSource: "document-open-recent"
             text: "Recently Used"
-            onClicked: mainView.changeModel("recentlyUsed")
         }
         KickoffButton {
             text: "Leave"
             iconSource: "system-shutdown"
-            onClicked: mainView.changeModel("leave")
+        }
+
+        onCurrentTabChanged: {
+            switch(tabBar.currentTab.text) {
+                case "Favorites":
+                    mainView.changeModel("favorites");
+                    break;
+                case "Applications": { //don't remove braces QTBUG-17012
+                    if (applicationsViewContainer.source == "") {
+                        applicationsViewContainer.source = "ApplicationsView.qml";
+                    }
+                    root.state = "APPLICATIONS";
+                    break;
+                }
+                case "Computer":
+                    mainView.changeModel("system");
+                    break;
+                case "Recently Used":
+                    mainView.changeModel("recentlyUsed");
+                    break;
+                case "Leave":
+                    mainView.changeModel("leave");
+                    break;
+                default:
+                    break;
+            }
         }
     }
+
+    Keys.forwardTo: [(tabBar.layout)]
+
     Keys.onUpPressed: {
         if (root.state == "NORMAL") {
             mainView.decrementCurrentIndex();
