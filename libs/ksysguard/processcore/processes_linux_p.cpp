@@ -201,6 +201,8 @@ long ProcessesLocal::getParentPid(long pid) {
     //The command name is the second parameter, and this ends with a closing bracket.  So find the last
     //closing bracket and start from there
     word = strrchr(word, ')');
+    if (!word)
+        return -1;
     word++; //Nove to the space after the last ")"
     int current_word = 1;
 
@@ -238,6 +240,8 @@ bool ProcessesLocal::Private::readProcStat(const QString &dir, Process *ps)
     //The command name is the second parameter, and this ends with a closing bracket.  So find the last
     //closing bracket and start from there
     word = strrchr(word, ')');
+    if (!word)
+        return false;
     word++; //Nove to the space after the last ")"
     int current_word = 1; //We've skipped the process ID and now at the end of the command name
     char status='\0';
