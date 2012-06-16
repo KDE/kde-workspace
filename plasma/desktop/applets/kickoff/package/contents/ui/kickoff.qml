@@ -31,6 +31,7 @@ Item {
     width: 400
     height: 400
     state: "NORMAL"
+    focus: true
 
     Component.onCompleted: {
         plasmoid.addEventListener('ConfigChanged', configChanged);
@@ -38,7 +39,7 @@ Item {
     }
 
     function popupEventSlot(shown) {
-        searchField.forceActiveFocus();
+        root.forceActiveFocus();
     }
 
     function configChanged() {
@@ -112,7 +113,6 @@ Item {
         }
         PlasmaComponents.TextField {
             id: searchField
-            focus: true
             placeholderText: "Search"
             clearButtonShown: true
             anchors {
@@ -148,6 +148,7 @@ Item {
                 }
                 if (text == "") {
                     root.state = root.previousState;
+                    root.forceActiveFocus();
                 }
             }
         }
@@ -283,45 +284,50 @@ Item {
             }
         }
         KickoffButton {
+            id: bookmarkButton
             iconSource: "bookmarks"
             text: "Favorites"
         }
         KickoffButton {
+            id: applicationButton
             iconSource: "applications-other"
             text: "Applications"
         }
         KickoffButton {
+            id: computerButton
             iconSource: "computer" // TODO: could also be computer-laptop
             text: "Computer"
         }
         KickoffButton {
+            id: usedButton
             iconSource: "document-open-recent"
             text: "Recently Used"
         }
         KickoffButton {
+            id: leaveButton
             text: "Leave"
             iconSource: "system-shutdown"
         }
 
         onCurrentTabChanged: {
             switch(tabBar.currentTab.text) {
-                case "Favorites":
+                case bookmarkButton.text:
                     mainView.changeModel("favorites");
                     break;
-                case "Applications": { //don't remove braces QTBUG-17012
+                case applicationButton.text: { //don't remove braces QTBUG-17012
                     if (applicationsViewContainer.source == "") {
                         applicationsViewContainer.source = "ApplicationsView.qml";
                     }
                     root.state = "APPLICATIONS";
                     break;
                 }
-                case "Computer":
+                case computerButton.text:
                     mainView.changeModel("system");
                     break;
-                case "Recently Used":
+                case usedButton.text:
                     mainView.changeModel("recentlyUsed");
                     break;
-                case "Leave":
+                case leaveButton.text:
                     mainView.changeModel("leave");
                     break;
                 default:
@@ -332,25 +338,31 @@ Item {
 
     Keys.forwardTo: [(tabBar.layout)]
 
-    Keys.onUpPressed: {
-        if (root.state == "NORMAL") {
-            mainView.decrementCurrentIndex();
-        } else if (root.state == "APPLICATIONS") {
-            applicationsViewContainer.item.decrementCurrentIndex();
-        } else if (root.state == "SEARCH") {
-            searchView.item.decrementCurrentIndex();
+    Keys.onPressed: {
+        if (event.key == Qt.Key_Up) {
+            if (root.state == "NORMAL") {
+                mainView.decrementCurrentIndex();
+            } else if (root.state == "APPLICATIONS") {
+                applicationsViewContainer.item.decrementCurrentIndex();
+            } else if (root.state == "SEARCH") {
+                searchView.item.decrementCurrentIndex();
+            }
+            event.accepted = true;
         }
-        event.accepted = true;
-    }
-    Keys.onDownPressed: {
-        if (root.state == "NORMAL") {
-            mainView.incrementCurrentIndex();
-        } else if (root.state == "APPLICATIONS") {
-            applicationsViewContainer.item.incrementCurrentIndex();
-        } else if (root.state == "SEARCH") {
-            searchView.item.incrementCurrentIndex();
+        else if (event.key == Qt.Key_Down) {
+            if (root.state == "NORMAL") {
+                mainView.incrementCurrentIndex();
+            } else if (root.state == "APPLICATIONS") {
+                applicationsViewContainer.item.incrementCurrentIndex();
+            } else if (root.state == "SEARCH") {
+                searchView.item.incrementCurrentIndex();
+            }
+            event.accepted = true;
         }
-        event.accepted = true;
+        else {
+            searchField.forceActiveFocus()
+            event.accepted = true;
+        }
     }
 
     states: [
