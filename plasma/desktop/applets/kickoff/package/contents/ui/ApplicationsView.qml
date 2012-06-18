@@ -27,6 +27,7 @@ Item {
     function incrementCurrentIndex() {
         applicationsView.incrementCurrentIndex();
     }
+
     anchors.fill: parent
     PlasmaComponents.ButtonRow {
         id: breadcrumbsElement
@@ -45,9 +46,12 @@ Item {
     }
     ListView {
         id: applicationsView
+        focus: true
+
         function addBreadcrumb(modelIndex, title) {
             breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
-            var crumb = Qt.createQmlObject('import QtQuick 1.1; Breadcrumb{}', breadcrumbs, title + "BreadcrumbSnippet");
+            component = Qt.createComponent("Breadcrumb.qml");
+            var crumb = component.createObject(breadcrumbs)
             crumb.text = title;
             crumb.modelIndex = modelIndex;
             crumb.view = applicationsView;
@@ -61,6 +65,7 @@ Item {
             right: applicationsScrollBar.visible ? applicationsScrollBar.left : parent.right
         }
         model: VisualDataModel {
+            id: vmodel
             model: Kickoff.ApplicationModel {}
             delegate: KickoffItem {
                 id: kickoffItem
@@ -86,6 +91,16 @@ Item {
         Component.onCompleted: {
             rootBreadcrumb.modelIndex = model.rootIndex;
             rootBreadcrumb.view = applicationsView;
+        }
+        Keys.onPressed: {
+            if (event.key == Qt.Key_Right) {
+                applicationsView.currentItem.goChildMenu();
+                event.accepted = true;
+            }
+            else if ( event.key == Qt.Key_Left) {
+                breadcrumbs.children[breadcrumbs.children.length-2].deleteCrumb();
+                event.accepted = true;
+            }
         }
     }
     PlasmaComponents.ScrollBar {

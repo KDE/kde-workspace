@@ -21,10 +21,12 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 
 PlasmaComponents.ToolButton {
     id: crumb
+
     property variant modelIndex
     property variant view
     property bool root: false
-    onClicked: {
+
+    function deleteCrumb() {
         view.model.rootIndex = modelIndex;
         crumb.enabled = false;
         var i, found;
@@ -38,5 +40,8 @@ PlasmaComponents.ToolButton {
                 found = true;
             }
         }
+    }
+     onClicked: {
+        deleteCrumb();
     }
 }

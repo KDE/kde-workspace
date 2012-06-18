@@ -24,6 +24,17 @@ PlasmaComponents.ListItem {
     id: listItem
     enabled: true
     checked: ListView.isCurrentItem
+
+    function goChildMenu() {
+        if (hasModelChildren) {
+            listItem.ListView.view.addBreadcrumb(listItem.ListView.view.model.modelIndex(index), display);
+            listItem.ListView.view.model.rootIndex = listItem.ListView.view.model.modelIndex(index);
+        } else {
+            launcher.openUrl(model["url"]);
+            plasmoid.hidePopup();
+        }
+    }
+
     QIconItem {
         id: elementIcon
         icon: decoration
@@ -93,13 +104,7 @@ PlasmaComponents.ListItem {
                 listItem.ListView.view.currentIndex = index;
             }
             onClicked: {
-                if (hasModelChildren) {
-                    listItem.ListView.view.addBreadcrumb(listItem.ListView.view.model.modelIndex(index), display);
-                    listItem.ListView.view.model.rootIndex = listItem.ListView.view.model.modelIndex(index);
-                } else {
-                    launcher.openUrl(url);
-                    plasmoid.hidePopup();
-                }
+                goChildMenu();
             }
         }
     }

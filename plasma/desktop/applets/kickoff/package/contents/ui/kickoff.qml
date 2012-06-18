@@ -36,6 +36,7 @@ Item {
     Component.onCompleted: {
         plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect('popupEvent', popupEventSlot);
+        root.forceActiveFocus();
     }
 
     function popupEventSlot(shown) {
@@ -113,6 +114,7 @@ Item {
         }
         PlasmaComponents.TextField {
             id: searchField
+
             placeholderText: "Search"
             clearButtonShown: true
             anchors {
@@ -235,6 +237,7 @@ Item {
 
     Loader {
         id: applicationsViewContainer
+
         anchors {
             top: {
                 switch (plasmoid.location) {
@@ -310,6 +313,7 @@ Item {
         }
 
         onCurrentTabChanged: {
+            root.forceActiveFocus();
             switch(tabBar.currentTab.text) {
                 case bookmarkButton.text:
                     mainView.changeModel("favorites");
@@ -344,6 +348,7 @@ Item {
                 mainView.decrementCurrentIndex();
             } else if (root.state == "APPLICATIONS") {
                 applicationsViewContainer.item.decrementCurrentIndex();
+                applicationsViewContainer.forceActiveFocus();
             } else if (root.state == "SEARCH") {
                 searchView.item.decrementCurrentIndex();
             }
@@ -354,13 +359,24 @@ Item {
                 mainView.incrementCurrentIndex();
             } else if (root.state == "APPLICATIONS") {
                 applicationsViewContainer.item.incrementCurrentIndex();
+                applicationsViewContainer.forceActiveFocus();
             } else if (root.state == "SEARCH") {
                 searchView.item.incrementCurrentIndex();
             }
             event.accepted = true;
         }
+        else if (event.key == Qt.Key_Tab) {
+            if (root.state == "APPLICATIONS") {
+                if (applicationsViewContainer.activeFocus )
+                    root.forceActiveFocus();
+                else
+                    applicationsViewContainer.forceActiveFocus();
+            }
+            event.accepted = true;
+        }
         else {
-            searchField.forceActiveFocus()
+            searchField.text += event.text;
+            searchField.forceActiveFocus();
             event.accepted = true;
         }
     }
