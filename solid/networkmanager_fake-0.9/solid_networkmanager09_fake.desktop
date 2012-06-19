@@ -72,6 +72,7 @@ Comment[sr@ijekavian]=Лажна позадина преко које КДЕ б�
 Comment[sr@ijekavianlatin]=Lažna pozadina preko koje KDE biblioteka može da čita stanje demona Menadžera mreže 0.9
 Comment[sr@latin]=Lažna pozadina preko koje KDE biblioteka može da čita stanje demona Menadžera mreže 0.9
 Comment[sv]=Testgränssnitt för att låta kdelibs läsa status från nätverkshanteringsdemonen version 0.9
+Comment[tr]=Kdelibs'in NetworkManager servisi 0.9'un durumunu okuyabilmesi için sahte arka uç
 Comment[uk]=Тестовий модуль, який надає змогу kdelibs читати стан фонової служби NetworkManager 0.9
 Comment[x-test]=xxFake backend to allow kdelibs to read NetworkManager daemon 0.9's statusxx
 Comment[zh_CN]=允许 kdelibs 读取网络管理器守护进程 0.9 的虚拟后端
