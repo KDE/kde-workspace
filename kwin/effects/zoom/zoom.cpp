@@ -35,6 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KConfigGroup>
 #include <KDE/KLocale>
 
+#include <kdeaccessibilityclient/accessibleobject.h>
+
 #include <kwinglutils.h>
 #include <kwinxrenderutils.h>
 
@@ -215,10 +217,13 @@ void ZoomEffect::reconfigure(ReconfigureFlags)
     if (enableFocusTracking != _enableFocusTracking) {
         enableFocusTracking = _enableFocusTracking;
         if (QDBusConnection::sessionBus().isConnected()) {
-            if (enableFocusTracking)
-                QDBusConnection::sessionBus().connect("org.kde.kaccessibleapp", "/Adaptor", "org.kde.kaccessibleapp.Adaptor", "focusChanged", this, SLOT(focusChanged(int,int,int,int,int,int)));
-            else
-                QDBusConnection::sessionBus().disconnect("org.kde.kaccessibleapp", "/Adaptor", "org.kde.kaccessibleapp.Adaptor", "focusChanged", this, SLOT(focusChanged(int,int,int,int,int,int)));
+            if (enableFocusTracking) {
+                registry = new KAccessibleClient::Registry;
+                connect(registry, SIGNAL(focusChanged(KAccessibleClient::AccessibleObject)), this, SLOT(focusChanged(KAccessibleClient::AccessibleObject)));
+            } else {
+                disconnect(registry, SIGNAL(focusChanged(KAccessibleClient::AccessibleObject)), this, SLOT(focusChanged(KAccessibleClient::AccessibleObject)));
+                delete registry;
+            }
         }
     }
     // When the focus changes, move the zoom area to the focused location.
@@ -490,11 +495,11 @@ void ZoomEffect::slotMouseChanged(const QPoint& pos, const QPoint& old, Qt::Mous
     }
 }
 
-void ZoomEffect::focusChanged(int px, int py, int rx, int ry, int rwidth, int rheight)
+void ZoomEffect::focusChanged(const KAccessibleClient::AccessibleObject &object)
 {
     if (zoom == 1.0)
         return;
-    focusPoint = (px >= 0 && py >= 0) ? QPoint(px, py) : QPoint(rx + qMax(0, (qMin(displayWidth(), rwidth) / 2) - 60), ry + qMax(0, (qMin(displayHeight(), rheight) / 2) - 60));
+    focusPoint = object.focusPoint();
     if (enableFocusTracking) {
         lastFocusEvent = QTime::currentTime();
         effects->addRepaintFull();

@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kwineffects.h>
 #include <QtCore/QTime>
 #include <QtCore/QTimeLine>
+#include <kdeaccessibilityclient/registry.h>
 
 namespace KWin
 {
@@ -56,7 +57,7 @@ private slots:
     void moveMouseToFocus();
     void moveMouseToCenter();
     void timelineFrameChanged(int frame);
-    void focusChanged(int px, int py, int rx, int ry, int rwidth, int rheight);
+    void focusChanged(const KAccessibleClient::AccessibleObject &object);
     void slotMouseChanged(const QPoint& pos, const QPoint& old,
                               Qt::MouseButtons buttons, Qt::MouseButtons oldbuttons,
                               Qt::KeyboardModifiers modifiers, Qt::KeyboardModifiers oldmodifiers);
@@ -90,6 +91,7 @@ private:
     QTimeLine timeline;
     int xMove, yMove;
     double moveFactor;
+    KAccessibleClient::Registry *registry;
 };
 
 } // namespace
