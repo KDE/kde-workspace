@@ -198,7 +198,7 @@ void ZoomEffect::recreateTexture()
         XcursorImageDestroy(ximg);
     }
     else {
-        qDebug() << "Loading cursor image (" << theme << ") FAILED -> falling back to proportional mouse tracking!";
+        //qDebug() << "Loading cursor image (" << theme << ") FAILED -> falling back to proportional mouse tracking!";
         mouseTracking = MouseTrackingProportional;
     }
 }
@@ -218,9 +218,13 @@ void ZoomEffect::reconfigure(ReconfigureFlags)
         enableFocusTracking = _enableFocusTracking;
         if (QDBusConnection::sessionBus().isConnected()) {
             if (enableFocusTracking) {
+                qDebug() << "Focus tracking enabled";
                 registry = new KAccessibleClient::Registry;
-                connect(registry, SIGNAL(focusChanged(KAccessibleClient::AccessibleObject)), this, SLOT(focusChanged(KAccessibleClient::AccessibleObject)));
+                registry->subscribeEventListeners(KAccessibleClient::Registry::Focus);
+                bool success = connect(registry, SIGNAL(focusChanged(KAccessibleClient::AccessibleObject)), this, SLOT(focusChanged(KAccessibleClient::AccessibleObject)));
+                if(!success) qWarning() << "Could not connect signal to slot";
             } else {
+                qDebug() << "Focus tracking disabled";
                 disconnect(registry, SIGNAL(focusChanged(KAccessibleClient::AccessibleObject)), this, SLOT(focusChanged(KAccessibleClient::AccessibleObject)));
                 delete registry;
             }
@@ -500,6 +504,7 @@ void ZoomEffect::focusChanged(const KAccessibleClient::AccessibleObject &object)
     if (zoom == 1.0)
         return;
     focusPoint = object.focusPoint();
+    qDebug() << "Focus Point : (" <<focusPoint.x()<<","<<focusPoint.y()<<")";
     if (enableFocusTracking) {
         lastFocusEvent = QTime::currentTime();
         effects->addRepaintFull();

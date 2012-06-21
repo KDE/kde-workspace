@@ -1,9 +1,15 @@
 # the factory macros cause errors
 kde4_no_enable_final(kwineffects)
 
+macro_optional_find_package(LibKdeAccessibilityClient)
+macro_log_feature(LibKdeAccessibilityClient_FOUND "libkdeaccessibilityclient" "KDE client-side accessibility library" "https://projects.kde.org/projects/playground/accessibility/libkdeaccessibilityclient" FALSE "" "Required to build focus-tracking feature of kwin's zoom feature.")
+
 macro( KWIN4_ADD_EFFECT_BACKEND name )
     kde4_add_plugin( ${name} ${ARGN} )
     target_link_libraries( ${name} kwineffects ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${X11_Xfixes_LIB} ${X11_Xcursor_LIB} ${X11_LIBRARIES})
+    if(LibKdeAccessibilityClient_FOUND)
+        target_link_libraries( ${name} kdeaccessibilityclient )
+    endif(LibKdeAccessibilityClient_FOUND)
 endmacro( KWIN4_ADD_EFFECT_BACKEND )
 
 # Adds effect plugin with given name. Sources are given after the name
