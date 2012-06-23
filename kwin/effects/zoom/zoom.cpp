@@ -66,10 +66,12 @@ ZoomEffect::ZoomEffect()
     , polling(false)
     , zoomFactor(1.25)
     , mouseTracking(MouseTrackingProportional)
+#ifdef LibKdeAccessibilityClient_FOUND
     , enableFocusTracking(false)
     , followFocus(true)
-    , mousePointer(MousePointerScale)
     , focusDelay(350)   // in milliseconds
+#endif
+    , mousePointer(MousePointerScale)
     , texture(0)
     , xrenderPicture(0)
     , imageWidth(0)
@@ -212,6 +214,7 @@ void ZoomEffect::reconfigure(ReconfigureFlags)
     mousePointer = MousePointerType(conf.readEntry("MousePointer", int(mousePointer)));
     // Track moving of the mouse.
     mouseTracking = MouseTrackingType(conf.readEntry("MouseTracking", int(mouseTracking)));
+#ifdef LibKdeAccessibilityClient_FOUND
     // Enable tracking of the focused location.
     bool _enableFocusTracking = conf.readEntry("EnableFocusTracking", enableFocusTracking);
     if (enableFocusTracking != _enableFocusTracking) {
@@ -234,6 +237,7 @@ void ZoomEffect::reconfigure(ReconfigureFlags)
     followFocus = conf.readEntry("EnableFollowFocus", followFocus);
     // The time in milliseconds to wait before a focus-event takes away a mouse-move.
     focusDelay = qMax(0, conf.readEntry("FocusDelay", focusDelay));
+#endif
     // The factor the zoom-area will be moved on touching an edge on push-mode or using the navigation KAction's.
     moveFactor = qMax(0.1, conf.readEntry("MoveFactor", moveFactor));
     // Load the saved zoom value.
@@ -317,6 +321,7 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             break;
         }
 
+#ifdef LibKdeAccessibilityClient_FOUND
         // use the focusPoint if focus tracking is enabled
         if (enableFocusTracking && followFocus) {
             bool acceptFocus = true;
@@ -332,6 +337,7 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
                 prevPoint = focusPoint;
             }
         }
+#endif
     }
 
     effects->paintScreen(mask, region, data);
@@ -475,10 +481,12 @@ void ZoomEffect::moveZoomDown()
     moveZoom(0, 1);
 }
 
+#ifdef LibKdeAccessibilityClient_FOUND
 void ZoomEffect::moveMouseToFocus()
 {
     QCursor::setPos(focusPoint.x(), focusPoint.y());
 }
+#endif
 
 void ZoomEffect::moveMouseToCenter()
 {
@@ -499,6 +507,7 @@ void ZoomEffect::slotMouseChanged(const QPoint& pos, const QPoint& old, Qt::Mous
     }
 }
 
+#ifdef LibKdeAccessibilityClient_FOUND
 void ZoomEffect::focusChanged(const KAccessibleClient::AccessibleObject &object)
 {
     if (zoom == 1.0)
@@ -510,6 +519,7 @@ void ZoomEffect::focusChanged(const KAccessibleClient::AccessibleObject &object)
         effects->addRepaintFull();
     }
 }
+#endif
 
 bool ZoomEffect::isActive() const
 {

@@ -24,3 +24,8 @@ set( kwin4_effect_builtins_config_sources ${kwin4_effect_builtins_config_sources
 install( FILES
     zoom/zoom_config.desktop
     DESTINATION ${SERVICES_INSTALL_DIR}/kwin )
+
+configure_file(
+    "${PROJECT_SOURCE_DIR}/kwin/effects/zoom/focustrackconfig.h.in"
+    "${PROJECT_BINARY_DIR}/kwin/effects/focustrackconfig.h"
+)

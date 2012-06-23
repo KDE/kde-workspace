@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "zoom_config.h"
-
+#include "focustrackconfig.h"
 #include <kwineffects.h>
 
 #include <klocale.h>
@@ -39,6 +39,12 @@ KWIN_EFFECT_CONFIG_FACTORY
 ZoomEffectConfigForm::ZoomEffectConfigForm(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
+#ifndef LibKdeAccessibilityClient_FOUND
+    groupSize->layout()->removeWidget(focusTrackingCheckBox);
+    groupSize->layout()->removeWidget(followFocusCheckBox);
+    delete focusTrackingCheckBox;
+    delete followFocusCheckBox;
+#endif
 }
 
 ZoomEffectConfig::ZoomEffectConfig(QWidget* parent, const QVariantList& args) :
@@ -52,8 +58,10 @@ ZoomEffectConfig::ZoomEffectConfig(QWidget* parent, const QVariantList& args) :
     connect(m_ui->zoomStepsSpinBox, SIGNAL(valueChanged(double)), this, SLOT(changed()));
     connect(m_ui->mousePointerComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
     connect(m_ui->mouseTrackingComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
+#ifdef LibKdeAccessibilityClient_FOUND
     connect(m_ui->focusTrackingCheckBox, SIGNAL(toggled(bool)), this, SLOT(changed()));
     connect(m_ui->followFocusCheckBox, SIGNAL(toggled(bool)), this, SLOT(changed()));
+#endif
     connect(m_ui->editor, SIGNAL(keyChange()), this, SLOT(changed()));
 
     // Shortcut config. The shortcut belongs to the component "kwin"!
@@ -127,8 +135,10 @@ void ZoomEffectConfig::load()
     m_ui->zoomStepsSpinBox->setValue(conf.readEntry("ZoomFactor", 1.2));
     m_ui->mousePointerComboBox->setCurrentIndex(conf.readEntry("MousePointer", 0));
     m_ui->mouseTrackingComboBox->setCurrentIndex(conf.readEntry("MouseTracking", 0));
+#ifdef LibKdeAccessibilityClient_FOUND
     m_ui->focusTrackingCheckBox->setChecked(conf.readEntry("EnableFocusTracking", false));
     m_ui->followFocusCheckBox->setChecked(conf.readEntry("EnableFollowFocus", true));
+#endif
     emit changed(false);
 }
 
@@ -139,8 +149,10 @@ void ZoomEffectConfig::save()
     conf.writeEntry("ZoomFactor", m_ui->zoomStepsSpinBox->value());
     conf.writeEntry("MousePointer", m_ui->mousePointerComboBox->currentIndex());
     conf.writeEntry("MouseTracking", m_ui->mouseTrackingComboBox->currentIndex());
+#ifdef LibKdeAccessibilityClient_FOUND
     conf.writeEntry("EnableFocusTracking", m_ui->focusTrackingCheckBox->isChecked());
     conf.writeEntry("EnableFollowFocus", m_ui->followFocusCheckBox->isChecked());
+#endif
     m_ui->editor->save(); // undo() will restore to this state from now on
     conf.sync();
     emit changed(false);
@@ -152,8 +164,10 @@ void ZoomEffectConfig::defaults()
     m_ui->zoomStepsSpinBox->setValue(1.25);
     m_ui->mousePointerComboBox->setCurrentIndex(0);
     m_ui->mouseTrackingComboBox->setCurrentIndex(0);
+#ifdef LibKdeAccessibilityClient_FOUND
     m_ui->focusTrackingCheckBox->setChecked(false);
     m_ui->followFocusCheckBox->setChecked(true);
+#endif
     m_ui->editor->allDefault();
     emit changed(true);
 }

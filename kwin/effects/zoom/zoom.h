@@ -22,10 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_ZOOM_H
 #define KWIN_ZOOM_H
 
+#include "focustrackconfig.h"
+
 #include <kwineffects.h>
 #include <QtCore/QTime>
 #include <QtCore/QTimeLine>
+#ifdef LibKdeAccessibilityClient_FOUND
 #include <kdeaccessibilityclient/registry.h>
+#endif
 
 namespace KWin
 {
@@ -54,10 +58,12 @@ private slots:
     void moveZoomRight();
     void moveZoomUp();
     void moveZoomDown();
-    void moveMouseToFocus();
     void moveMouseToCenter();
     void timelineFrameChanged(int frame);
+#ifdef LibKdeAccessibilityClient_FOUND
+    void moveMouseToFocus();
     void focusChanged(const KAccessibleClient::AccessibleObject &object);
+#endif
     void slotMouseChanged(const QPoint& pos, const QPoint& old,
                               Qt::MouseButtons buttons, Qt::MouseButtons oldbuttons,
                               Qt::KeyboardModifiers modifiers, Qt::KeyboardModifiers oldmodifiers);
@@ -73,13 +79,9 @@ private:
     double zoomFactor;
     enum MouseTrackingType { MouseTrackingProportional = 0, MouseTrackingCentred = 1, MouseTrackingPush = 2, MouseTrackingDisabled = 3 };
     MouseTrackingType mouseTracking;
-    bool enableFocusTracking;
-    bool followFocus;
     enum MousePointerType { MousePointerScale = 0, MousePointerKeep = 1, MousePointerHide = 2 };
     MousePointerType mousePointer;
-    int focusDelay;
     QPoint cursorPoint;
-    QPoint focusPoint;
     QPoint prevPoint;
     QTime lastMouseEvent;
     QTime lastFocusEvent;
@@ -91,7 +93,13 @@ private:
     QTimeLine timeline;
     int xMove, yMove;
     double moveFactor;
+#ifdef LibKdeAccessibilityClient_FOUND
+    bool enableFocusTracking;
+    bool followFocus;
+    int focusDelay;
     KAccessibleClient::Registry *registry;
+    QPoint focusPoint;
+#endif
 };
 
 } // namespace
