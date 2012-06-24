@@ -67,6 +67,9 @@ Item {
     function incrementCurrentIndex() {
         kickoffListView.incrementCurrentIndex();
     }
+    function activateCurrentIndex() {
+        kickoffListView.currentItem.activate();
+    }
     ListView {
         id: kickoffListView
         property variant favoritesModel

@@ -26,10 +26,14 @@ Item {
     function incrementCurrentIndex() {
         searchView.incrementCurrentIndex();
     }
+    function activateCurrentIndex() {
+        searchView.currentItem.activate();
+    }
     anchors.fill: parent
     ListView {
         id: searchView
         clip: true
+
         anchors {
             left: parent.left
             top: parent.top

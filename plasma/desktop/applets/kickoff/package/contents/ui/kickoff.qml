@@ -374,6 +374,14 @@ Item {
             }
             event.accepted = true;
         }
+        else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+            if (root.state == "NORMAL") {
+                mainView.activateCurrentIndex();
+            } else if (root.state == "SEARCH") {
+                searchView.item.activateCurrentIndex();
+            }
+            event.accepted = true;
+        }
         else {
             searchField.text += event.text;
             searchField.forceActiveFocus();

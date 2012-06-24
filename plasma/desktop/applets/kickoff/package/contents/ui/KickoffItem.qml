@@ -26,7 +26,9 @@ PlasmaComponents.ListItem {
     checked: ListView.isCurrentItem
     height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight)  + 10
 
-    function goChildMenu() {
+    property bool modelChildren: hasModelChildren
+
+    function activate() {
         if (hasModelChildren) {
             listItem.ListView.view.addBreadcrumb(listItem.ListView.view.model.modelIndex(index), display);
             listItem.ListView.view.model.rootIndex = listItem.ListView.view.model.modelIndex(index);
@@ -105,7 +107,7 @@ PlasmaComponents.ListItem {
                 listItem.ListView.view.currentIndex = index;
             }
             onClicked: {
-                goChildMenu();
+                activate();
             }
         }
     }

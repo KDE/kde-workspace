@@ -94,12 +94,17 @@ Item {
         }
         Keys.onPressed: {
             if (event.key == Qt.Key_Right) {
-                applicationsView.currentItem.goChildMenu();
+                if (applicationsView.currentItem.modelChildren)
+                    applicationsView.currentItem.activate();
                 event.accepted = true;
             }
-            else if ( event.key == Qt.Key_Left) {
+            else if (event.key == Qt.Key_Left) {
                 breadcrumbs.children[breadcrumbs.children.length-2].deleteCrumb();
                 event.accepted = true;
+            }
+            else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                 applicationsView.currentItem.activate();
+                 event.accepted = true;
             }
         }
     }
