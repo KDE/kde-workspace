@@ -24,6 +24,7 @@ PlasmaComponents.ListItem {
     id: listItem
     enabled: true
     checked: ListView.isCurrentItem
+    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight)  + 10
 
     function goChildMenu() {
         if (hasModelChildren) {
