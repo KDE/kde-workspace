@@ -382,9 +382,11 @@ Item {
             }
             event.accepted = true;
         }
-        else {
-            searchField.text += event.text;
-            searchField.forceActiveFocus();
+        else { // forward key to searchView
+            if (event.text != "") {
+                searchField.text += event.text;
+                searchField.forceActiveFocus();
+            }
             event.accepted = true;
         }
     }
