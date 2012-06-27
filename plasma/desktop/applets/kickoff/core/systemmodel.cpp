@@ -315,6 +315,13 @@ QVariant SystemModel::headerData(int section, Qt::Orientation orientation, int r
     }
 }
 
+bool SystemModel::hasChildren(const QModelIndex& parent) const
+{
+    // return always false, else the model states that items in appsList are having children
+    return false;
+}
+
+
 void SystemModel::refreshUsageInfo()
 {
     d->currentPlacesModelUsageIndex = 0;
