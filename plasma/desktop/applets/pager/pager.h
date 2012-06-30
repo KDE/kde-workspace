@@ -38,6 +38,8 @@ class KCModuleProxy;
 namespace Plasma
 {
     class FrameSvg;
+    class DeclarativeWidget;
+    class Package;
 }
 
 class DesktopRectangle : public QObject
@@ -68,7 +70,7 @@ class Pager : public Plasma::Applet
         Pager(QObject *parent, const QVariantList &args);
         ~Pager();
         void init();
-        void paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option,
+        void paintInterface_old(QPainter *painter, const QStyleOptionGraphicsItem *option,
                             const QRect &contents);
         void constraintsEvent(Plasma::Constraints);
         virtual QList<QAction*> contextualActions();
@@ -121,6 +123,9 @@ class Pager : public Plasma::Applet
         void updateToolTip();
 
     private:
+        Plasma::Package *m_package;
+        Plasma::DeclarativeWidget *m_declarativeWidget;
+
         QTimer* m_timer;
         Ui::pagerConfig ui;
         enum DisplayedText

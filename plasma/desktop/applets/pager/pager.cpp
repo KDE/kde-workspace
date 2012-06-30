@@ -32,6 +32,7 @@
 #include <QPropertyAnimation>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QtGui/QGraphicsLinearLayout>
 
 #include <KCModuleInfo>
 #include <KCModuleProxy>
@@ -49,6 +50,8 @@
 #include <Plasma/Theme>
 #include <Plasma/ToolTipManager>
 #include <Plasma/Animator>
+#include <Plasma/DeclarativeWidget>
+#include <Plasma/Package>
 
 #include <KActivities/Consumer>
 
@@ -174,6 +177,14 @@ void Pager::init()
     KActivities::Consumer *act = new KActivities::Consumer(this);
     connect(act, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
     m_currentActivity = act->currentActivity();
+
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
+    m_declarativeWidget = new Plasma::DeclarativeWidget(this);
+    layout->addItem(m_declarativeWidget);
+
+    Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
+    m_package = new Plasma::Package(QString(), "org.kde.pager", structure);
+    m_declarativeWidget->setQmlPath(m_package->filePath("mainscript"));
 }
 
 void Pager::configChanged()
@@ -1097,7 +1108,7 @@ void Pager::dragSwitch()
     m_currentDesktop = m_dragSwitchDesktop + 1;
 }
 
-void Pager::paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect)
+void Pager::paintInterface_old(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect)
 {
     Q_UNUSED( option );
     Q_UNUSED( contentsRect );
