@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Daniel Laidig <d.laidig@gmx.de>                 *
+ *   Copyright (C) 2012 by Luís Gabriel Lima <lampih@gmail.com>            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -33,6 +34,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QtGui/QGraphicsLinearLayout>
+#include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeContext>
 
 #include <KCModuleInfo>
 #include <KCModuleProxy>
@@ -137,6 +140,7 @@ Pager::~Pager()
 
 void Pager::init()
 {
+    initDeclarativeInterface();
     createMenu();
 
     m_verticalFormFactor = (formFactor() == Plasma::Vertical);
@@ -177,14 +181,30 @@ void Pager::init()
     KActivities::Consumer *act = new KActivities::Consumer(this);
     connect(act, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
     m_currentActivity = act->currentActivity();
+}
 
+void Pager::initDeclarativeInterface()
+{
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
     m_declarativeWidget = new Plasma::DeclarativeWidget(this);
     layout->addItem(m_declarativeWidget);
 
+    m_desktopModel = new VirtualDesktopModel(this);
+    m_declarativeWidget->engine()->rootContext()->setContextProperty("desktopModel", m_desktopModel);
+
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
     m_package = new Plasma::Package(QString(), "org.kde.pager", structure);
     m_declarativeWidget->setQmlPath(m_package->filePath("mainscript"));
+}
+
+void Pager::updateDesktopModel()
+{
+    QList<QRectF> newRects;
+    for (int i = 0; i < m_rects.count(); i++) {
+        QPointF p = mapToItem(m_declarativeWidget, m_rects[i].x(), m_rects[i].y());
+        newRects.append(QRectF(p, m_rects[i].size()));
+    }
+    m_desktopModel->setList(newRects);
 }
 
 void Pager::configChanged()
@@ -563,6 +583,7 @@ void Pager::updateSizes(bool allowResize)
     }
 
     m_size = contentsRect().size();
+    updateDesktopModel();
 }
 
 void Pager::recalculateWindowRects()

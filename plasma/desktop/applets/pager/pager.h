@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Daniel Laidig <d.laidig@gmx.de>                 *
+ *   Copyright (C) 2012 by Luís Gabriel Lima <lampih@gmail.com>            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -26,6 +27,8 @@
 
 #include <Plasma/Applet>
 #include <Plasma/DataEngine>
+
+#include "model.h"
 #include "ui_pagerConfig.h"
 
 class QDesktopWidget;
@@ -66,6 +69,7 @@ class DesktopRectangle : public QObject
 class Pager : public Plasma::Applet
 {
     Q_OBJECT
+
     public:
         Pager(QObject *parent, const QVariantList &args);
         ~Pager();
@@ -123,8 +127,12 @@ class Pager : public Plasma::Applet
         void updateToolTip();
 
     private:
+        void initDeclarativeInterface();
+        void updateDesktopModel();
+
         Plasma::Package *m_package;
         Plasma::DeclarativeWidget *m_declarativeWidget;
+        VirtualDesktopModel *m_desktopModel;
 
         QTimer* m_timer;
         Ui::pagerConfig ui;

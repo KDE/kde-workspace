@@ -16,13 +16,34 @@
  */
 
 import QtQuick 1.1
+import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
-    width: 300
-    height: 100
+    id: root
 
-    Rectangle {
-        color: "lightblue"
-        anchors.fill: parent
+    property int minimumWidth: 176
+    property int minimumHeight: 88
+
+    anchors.fill: parent
+
+    Repeater {
+        id: repeater
+        model: desktopModel
+
+        PlasmaCore.FrameSvgItem {
+            id: frameSvg
+            x: model.x
+            y: model.y
+            width: model.width
+            height: model.height
+            imagePath: "widgets/pager"
+            prefix: mouseArea.containsMouse ? "hover" : (index === 1 ? "active" : "normal")
+
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+            }
+        }
     }
 }
