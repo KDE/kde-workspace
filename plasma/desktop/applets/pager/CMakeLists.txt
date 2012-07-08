@@ -1,6 +1,7 @@
 project(plasma-pager)
 
 set(pager_SRCS
+    model.cpp
     pager.cpp)
 
 kde4_add_ui_files(pager_SRCS pagerConfig.ui)
