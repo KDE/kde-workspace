@@ -587,7 +587,7 @@ void Pager::recalculateWindowRects()
     QList<WId> windows = KWindowSystem::stackingOrder();
     m_windowRects.clear();
     for (int i = 0; i < m_desktopCount; i++) {
-        m_windowRects.append(QList<QPair<WId, QRect> >());
+        m_windowRects.append(QList<QPair<WId, QRectF> >());
     }
 
     m_activeWindows.clear();
@@ -627,18 +627,18 @@ void Pager::recalculateWindowRects()
                 continue;
             }
 
-            QRect windowRect = info.frameGeometry();
+            QRectF windowRect = info.frameGeometry();
 
             if (KWindowSystem::mapViewport()) {
-                windowRect = fixViewportPosition( windowRect );
+                windowRect = fixViewportPosition(windowRect.toRect());
             }
 
             windowRect = QRectF(windowRect.x() * m_widthScaleFactor,
                                 windowRect.y() * m_heightScaleFactor,
                                 windowRect.width() * m_widthScaleFactor,
-                                windowRect.height() * m_heightScaleFactor).toRect();
+                                windowRect.height() * m_heightScaleFactor);
             windowRect.translate(m_rects[i].topLeft().toPoint());
-            m_windowRects[i].append(QPair<WId, QRect>(window, windowRect));
+            m_windowRects[i].append(qMakePair(window, windowRect));
             if (window == KWindowSystem::activeWindow()) {
                 m_activeWindows.append(windowRect);
             }
@@ -1186,7 +1186,7 @@ void Pager::paintInterface_old(QPainter *painter, const QStyleOptionGraphicsItem
         painter->setPen(windowPen);
         for (int i = 0; i < m_windowRects.count(); i++) {
             for (int j = 0; j < m_windowRects[i].count(); j++) {
-                QRect rect = m_windowRects[i][j].second;
+                QRectF rect = m_windowRects[i][j].second;
 
                 if (m_currentDesktop > 0 &&
                         m_currentDesktop <= m_rects.count() &&
@@ -1218,7 +1218,8 @@ void Pager::paintInterface_old(QPainter *painter, const QStyleOptionGraphicsItem
 
                 // Draw the window icons/thumbnails
                 // prefer to use the System Settings specified Small icon (usually 16x16)
-                int windowIconSize = qMin(KIconLoader::global()->currentSize(KIconLoader::Small), qMin(rect.width(), rect.height()));
+                int windowIconSize = qMin(KIconLoader::global()->currentSize(KIconLoader::Small),
+                                          qMin(rect.toRect().width(), rect.toRect().height()));
                 if (windowIconSize >= 12 && m_showWindowIcons) {
                     QPixmap windowIcon = QPixmap(KWindowSystem::icon(m_windowRects[i][j].first, windowIconSize, windowIconSize, true));
                     int x = rect.x() + (rect.width() - windowIconSize) / 2;

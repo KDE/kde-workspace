@@ -168,8 +168,8 @@ class Pager : public Plasma::Applet
         QList<DesktopRectangle*> m_animations;
         QRectF m_hoverRect;
         int m_hoverIndex;
-        QList<QList<QPair<WId, QRect> > > m_windowRects;
-        QList<QRect> m_activeWindows;
+        QList<QList<QPair<WId, QRectF> > > m_windowRects;
+        QList<QRectF> m_activeWindows;
         QList<QAction*> m_actions;
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
@@ -179,7 +179,7 @@ class Pager : public Plasma::Applet
         bool m_verticalFormFactor;
 
         // dragging of windows
-        QRect m_dragOriginal;
+        QRectF m_dragOriginal;
         QPointF m_dragOriginalPos;
         QPointF m_dragCurrentPos;
         WId m_dragId;
