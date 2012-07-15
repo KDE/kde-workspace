@@ -127,8 +127,8 @@ class Pager : public Plasma::Applet
         void updateToolTip();
 
     private:
-        void initDeclarativeInterface();
-        void updateDesktopModel();
+        void initDeclarativeUI();
+        QRectF mapToDeclarativeUI(const QRectF &rect) const;
 
         Plasma::Package *m_package;
         Plasma::DeclarativeWidget *m_declarativeWidget;

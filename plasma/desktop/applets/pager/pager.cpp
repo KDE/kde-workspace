@@ -140,7 +140,7 @@ Pager::~Pager()
 
 void Pager::init()
 {
-    initDeclarativeInterface();
+    initDeclarativeUI();
     createMenu();
 
     m_verticalFormFactor = (formFactor() == Plasma::Vertical);
@@ -183,7 +183,7 @@ void Pager::init()
     m_currentActivity = act->currentActivity();
 }
 
-void Pager::initDeclarativeInterface()
+void Pager::initDeclarativeUI()
 {
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
     m_declarativeWidget = new Plasma::DeclarativeWidget(this);
@@ -195,16 +195,6 @@ void Pager::initDeclarativeInterface()
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
     m_package = new Plasma::Package(QString(), "org.kde.pager", structure);
     m_declarativeWidget->setQmlPath(m_package->filePath("mainscript"));
-}
-
-void Pager::updateDesktopModel()
-{
-    QList<QRectF> newRects;
-    for (int i = 0; i < m_rects.count(); i++) {
-        QPointF p = mapToItem(m_declarativeWidget, m_rects[i].x(), m_rects[i].y());
-        newRects.append(QRectF(p, m_rects[i].size()));
-    }
-    m_desktopModel->setList(newRects);
 }
 
 void Pager::configChanged()
@@ -419,6 +409,12 @@ void Pager::recalculateGridSizes(int rows)
     updateSizes(true);
 }
 
+QRectF Pager::mapToDeclarativeUI(const QRectF &rect) const
+{
+    QPointF p = mapToItem(m_declarativeWidget, rect.x(), rect.y());
+    return QRectF(p, rect.size());
+}
+
 void Pager::updateSizes(bool allowResize)
 {
     int padding = 2; // Space between miniatures of desktops
@@ -536,9 +532,10 @@ void Pager::updateSizes(bool allowResize)
     for (int i = 0; i < m_desktopCount; i++) {
         itemRect.moveLeft(leftMargin + floor((i % m_columns)  * (itemWidth + padding)));
         itemRect.moveTop(topMargin + floor((i / m_columns) * (itemHeight + padding)));
-        m_rects.append(itemRect);
+        m_rects.append(mapToDeclarativeUI(itemRect));
         m_animations.append(new DesktopRectangle(this));
     }
+    m_desktopModel->setList(m_rects);
 
     if (m_hoverIndex >= m_animations.count()) {
         m_hoverIndex = -1;
@@ -583,7 +580,6 @@ void Pager::updateSizes(bool allowResize)
     }
 
     m_size = contentsRect().size();
-    updateDesktopModel();
 }
 
 void Pager::recalculateWindowRects()
