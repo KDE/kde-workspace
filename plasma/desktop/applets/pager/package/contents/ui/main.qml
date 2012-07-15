@@ -44,6 +44,28 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
             }
+
+            Item {
+                id: clipRect
+                x: 1
+                y: 1
+                width: frameSvg.width - 2
+                height: frameSvg.height - 2
+                clip: true
+
+                Repeater {
+                    model: windows
+
+                    Rectangle {
+                        x: model.x
+                        y: model.y
+                        width: model.width
+                        height: model.height
+                        color: "red"
+                        opacity: 0.5
+                    }
+                }
+            }
         }
     }
 }

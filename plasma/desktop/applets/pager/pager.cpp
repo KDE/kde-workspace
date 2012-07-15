@@ -636,8 +636,8 @@ void Pager::recalculateWindowRects()
             windowRect = QRectF(windowRect.x() * m_widthScaleFactor,
                                 windowRect.y() * m_heightScaleFactor,
                                 windowRect.width() * m_widthScaleFactor,
-                                windowRect.height() * m_heightScaleFactor);
-            windowRect.translate(m_rects[i].topLeft().toPoint());
+                                windowRect.height() * m_heightScaleFactor).toRect();
+
             m_windowRects[i].append(qMakePair(window, windowRect));
             if (window == KWindowSystem::activeWindow()) {
                 m_activeWindows.append(windowRect);
@@ -646,6 +646,7 @@ void Pager::recalculateWindowRects()
         }
     }
 
+    m_desktopModel->setWindows(m_windowRects);
     update();
 }
 

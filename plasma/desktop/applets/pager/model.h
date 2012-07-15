@@ -18,8 +18,9 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <QAbstractListModel>
-#include <QRectF>
+#include <QtCore/QAbstractListModel>
+#include <QtCore/QRectF>
+#include <QtGui/QWidgetList> // For WId
 
 class VirtualDesktopModel : public QAbstractListModel
 {
@@ -30,6 +31,7 @@ public:
         HeightRole,
         XRole,
         YRole,
+        WindowsRole,
     };
 
     VirtualDesktopModel(QObject *parent = 0);
@@ -37,14 +39,11 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-    void append(const QRectF &rect);
     void setList(const QList<QRectF>& list);
-    void clear();
-    QRectF &operator[](int i);
+    void setWindows(const QList<QList<QPair<WId, QRectF> > >& allWindows);
 
 private:
-    int m_currentIndex;
-    QList<QRectF> m_rects;
+    QList<QPair<QRectF, QObject *> > m_rects;
 };
 
 #endif // MODEL_H
