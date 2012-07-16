@@ -74,8 +74,6 @@ class Pager : public Plasma::Applet
         Pager(QObject *parent, const QVariantList &args);
         ~Pager();
         void init();
-        void paintInterface_old(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                            const QRect &contents);
         void constraintsEvent(Plasma::Constraints);
         virtual QList<QAction*> contextualActions();
 
