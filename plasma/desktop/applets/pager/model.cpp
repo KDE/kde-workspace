@@ -17,54 +17,101 @@
 
 #include "model.h"
 
-VirtualDesktopModel::VirtualDesktopModel(QObject *parent)
+RectangleModel::RectangleModel(QObject *parent)
     : QAbstractListModel(parent)
 {
-    QHash<int, QByteArray> roles;
-    roles[WidthRole] = "width";
-    roles[HeightRole] = "height";
-    roles[XRole] = "x";
-    roles[YRole] = "y";
-    roles[WindowsRole] = "windows";
-    setRoleNames(roles);
+    setRoleNames(roles());
 }
 
-int VirtualDesktopModel::rowCount(const QModelIndex &parent) const
+QHash<int, QByteArray> RectangleModel::roles() const
+{
+    QHash<int, QByteArray> rectRoles;
+    rectRoles[WidthRole] = "width";
+    rectRoles[HeightRole] = "height";
+    rectRoles[XRole] = "x";
+    rectRoles[YRole] = "y";
+    return rectRoles;
+}
+
+void RectangleModel::resetModel(const QList<QRectF> &list)
+{
+    beginResetModel();
+    setList(list);
+    endResetModel();
+}
+
+void RectangleModel::setList(const QList<QRectF> &list)
+{
+    m_rects.clear();
+    m_rects = list;
+}
+
+int RectangleModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return m_rects.count();
 }
 
-QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const
+QVariant RectangleModel::data(const QModelIndex &index, int role) const
 {
     if (index.row() < 0 || index.row() > m_rects.count())
         return QVariant();
 
-    const QPair<QRectF, QObject *> &pair = m_rects[index.row()];
+    const QRectF &rect = m_rects[index.row()];
     if (role == WidthRole)
-        return pair.first.width();
+        return rect.width();
     else if (role == HeightRole)
-        return pair.first.height();
+        return rect.height();
     else if (role == XRole)
-        return pair.first.x();
+        return rect.x();
     else if (role == YRole)
-        return pair.first.y();
-    else if (role == WindowsRole)
-        return QVariant::fromValue(pair.second);
+        return rect.y();
 
     return QVariant();
 }
 
-void VirtualDesktopModel::setList(const QList<QRectF> &list)
+
+VirtualDesktopModel::VirtualDesktopModel(QObject *parent)
+    : RectangleModel(parent)
+{
+    setRoleNames(roles());
+}
+
+RectangleModel *VirtualDesktopModel::windowsAt(int index) const
+{
+    return qobject_cast<RectangleModel *>(m_windows[index]);
+}
+
+QHash<int, QByteArray> VirtualDesktopModel::roles() const
+{
+    QHash<int, QByteArray> rectRoles = RectangleModel::roles();
+    rectRoles[WindowsRole] = "windows";
+    return rectRoles;
+}
+
+void VirtualDesktopModel::resetModel(const QList<QRectF> &list)
 {
     beginResetModel();
 
-    m_rects.clear();
-    QObject *dummy = new VirtualDesktopModel(this);
-    foreach(const QRectF &rect, list)
-        m_rects.append(qMakePair(rect, dummy));
+    RectangleModel::setList(list);
+    for (int i = 0; i < list.count(); i++) {
+        if (i < m_windows.count())
+            windowsAt(i)->resetModel();
+        else
+            m_windows.append(new RectangleModel(this));
+    }
 
     endResetModel();
+}
+
+QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const
+{
+    if (role >= RectangleModel::WidthRole && role < WindowsRole)
+        return RectangleModel::data(index, role);
+    else if (role == WindowsRole)
+        return QVariant::fromValue(m_windows[index.row()]);
+
+    return QVariant();
 }
 
 void VirtualDesktopModel::setWindows(const QList<QList<QPair<WId, QRectF> > >& windows)
@@ -72,23 +119,15 @@ void VirtualDesktopModel::setWindows(const QList<QList<QPair<WId, QRectF> > >& w
     beginResetModel();
 
     for (int desktopId = 0; desktopId < windows.count(); desktopId++) {
-        if (desktopId >= m_rects.count()) {
+        if (desktopId >= RectangleModel::rowCount())
             break;
-        }
 
         QList<QPair<WId, QRectF> > desktopWindows = windows[desktopId];
         QList<QRectF> rects;
-        for(int i = 0; i < desktopWindows.count(); i++) {
+        for(int i = 0; i < desktopWindows.count(); i++)
             rects.append(desktopWindows[i].second);
-        }
 
-        if (m_rects[desktopId].second) {
-            m_rects[desktopId].second->deleteLater();
-        }
-
-        VirtualDesktopModel *model = new VirtualDesktopModel(this);
-        model->setList(rects);
-        m_rects[desktopId].second = model;
+        windowsAt(desktopId)->resetModel(rects);
     }
 
     endResetModel();

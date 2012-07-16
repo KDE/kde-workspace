@@ -535,7 +535,7 @@ void Pager::updateSizes(bool allowResize)
         m_rects.append(mapToDeclarativeUI(itemRect));
         m_animations.append(new DesktopRectangle(this));
     }
-    m_desktopModel->setList(m_rects);
+    m_desktopModel->resetModel(m_rects);
 
     if (m_hoverIndex >= m_animations.count()) {
         m_hoverIndex = -1;
