@@ -857,11 +857,11 @@ void Pager::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     } else if (m_dragStartDesktop != -1 &&
                (event->pos() - m_dragOriginalPos).toPoint().manhattanLength() > KGlobalSettings::dndEventDelay()) {
         m_dragId = 0; // prevent us from going through this more than once
-        RectangleModel *windows= m_pagerModel->windowsAt(m_dragStartDesktop);
+        WindowModel *windows= m_pagerModel->windowsAt(m_dragStartDesktop);
         for (int k = windows->rowCount() - 1; k >= 0 ; k--) {
             if (windows->rectAt(k).contains(m_dragOriginalPos.toPoint())) {
                 m_dragOriginal = windows->rectAt(k);
-                //m_dragId = windows->widAt(k);
+                m_dragId = windows->idAt(k);
                 event->accept();
                 break;
             }

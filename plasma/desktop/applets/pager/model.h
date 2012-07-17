@@ -37,7 +37,7 @@ public:
 
     virtual QHash<int, QByteArray> roles() const;
     virtual void clear();
-    virtual void append(const QRectF &rect);
+    void append(const QRectF &rect);
     QRectF &rectAt(int index);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -45,6 +45,28 @@ public:
 
 private:
     QList<QRectF> m_rects;
+};
+
+
+class WindowModel : public RectangleModel
+{
+    Q_OBJECT
+public:
+    enum WindowRole {
+        IdRole = RectangleModel::YRole + 1,
+    };
+
+    WindowModel(QObject *parent = 0);
+
+    QHash<int, QByteArray> roles() const;
+    void clear();
+    void append(WId windowId, const QRectF &rect);
+    WId idAt(int index) const;
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
+private:
+    QList<WId> m_ids;
 };
 
 
@@ -66,7 +88,7 @@ public:
 
     void clearWindowRects();
     void appendWindowRect(int desktopId, WId window, const QRectF &rect);
-    RectangleModel *windowsAt(int index) const;
+    WindowModel *windowsAt(int index) const;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;

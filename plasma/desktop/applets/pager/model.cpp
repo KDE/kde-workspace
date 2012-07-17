@@ -35,16 +35,12 @@ QHash<int, QByteArray> RectangleModel::roles() const
 
 void RectangleModel::clear()
 {
-    beginResetModel();
     m_rects.clear();
-    endResetModel();
 }
 
 void RectangleModel::append(const QRectF &rect)
 {
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_rects.append(rect);
-    endInsertRows();
 }
 
 QRectF &RectangleModel::rectAt(int index)
@@ -77,15 +73,62 @@ QVariant RectangleModel::data(const QModelIndex &index, int role) const
 }
 
 
+WindowModel::WindowModel(QObject *parent)
+    : RectangleModel(parent)
+{
+    setRoleNames(roles());
+}
+
+QHash<int, QByteArray> WindowModel::roles() const
+{
+    QHash<int, QByteArray> rectRoles = RectangleModel::roles();
+    rectRoles[IdRole] = "windowId";
+    return rectRoles;
+}
+
+void WindowModel::clear()
+{
+    beginResetModel();
+    RectangleModel::clear();
+    m_ids.clear();
+    endResetModel();
+}
+
+void WindowModel::append(WId windowId, const QRectF &rect)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    m_ids.append(windowId);
+    RectangleModel::append(rect);
+    endInsertRows();
+}
+
+WId WindowModel::idAt(int index) const
+{
+    return m_ids[index];
+}
+QVariant WindowModel::data(const QModelIndex &index, int role) const
+{
+    if (index.row() < 0 || index.row() >= rowCount())
+        return QVariant();
+
+    if (role >= RectangleModel::WidthRole && role < IdRole)
+        return RectangleModel::data(index, role);
+    else if (role == IdRole)
+        return int(m_ids[index.row()]);
+
+    return QVariant();
+}
+
+
 VirtualDesktopModel::VirtualDesktopModel(QObject *parent)
     : QAbstractListModel(parent)
 {
     setRoleNames(roles());
 }
 
-RectangleModel *VirtualDesktopModel::windowsAt(int index) const
+WindowModel *VirtualDesktopModel::windowsAt(int index) const
 {
-    return qobject_cast<RectangleModel *>(m_windows[index]);
+    return qobject_cast<WindowModel *>(m_windows[index]);
 }
 
 QHash<int, QByteArray> VirtualDesktopModel::roles() const
@@ -126,13 +169,12 @@ void VirtualDesktopModel::clearWindowRects()
 
     // append more windows model if the number of desktop has increased
     for (int i = m_windows.count(); i < rowCount(); i++)
-        m_windows.append(new RectangleModel(this));
+        m_windows.append(new WindowModel(this));
 }
 
-void VirtualDesktopModel::appendWindowRect(int desktopId, WId window, const QRectF &rect)
+void VirtualDesktopModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect)
 {
-    Q_UNUSED(window); // XXX: add this role in the windows model
-    windowsAt(desktopId)->append(rect);
+    windowsAt(desktopId)->append(windowId, rect);
 
     QModelIndex i = index(desktopId);
     emit dataChanged(i, i);
@@ -145,7 +187,7 @@ QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const
     if (role >= RectangleModel::WidthRole && role < WindowsRole) {
         return m_desktops.data(index, role);
     } else if (role == WindowsRole) {
-        if (index.row() >= 0  && index.row() < m_windows.count())
+        if (index.row() >= 0 && index.row() < m_windows.count())
             return QVariant::fromValue(m_windows[index.row()]);
         else
             return QVariant();
