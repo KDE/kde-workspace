@@ -60,16 +60,18 @@ QVariant RectangleModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     const QRectF &rect = m_rects[index.row()];
-    if (role == WidthRole)
+    switch(role) {
+    case WidthRole:
         return rect.width();
-    else if (role == HeightRole)
+    case HeightRole:
         return rect.height();
-    else if (role == XRole)
+    case XRole:
         return rect.x();
-    else if (role == YRole)
+    case YRole:
         return rect.y();
-
-    return QVariant();
+    default:
+        return QVariant();
+    }
 }
 
 
@@ -116,12 +118,15 @@ QVariant WindowModel::data(const QModelIndex &index, int role) const
 
     if (role >= RectangleModel::WidthRole && role < IdRole)
         return RectangleModel::data(index, role);
-    else if (role == IdRole)
-        return int(m_ids[index.row()]);
-    else if (role == ActiveRole)
-        return m_active[index.row()];
 
-    return QVariant();
+    switch (role) {
+    case IdRole:
+        return int(m_ids[index.row()]);
+    case ActiveRole:
+        return m_active[index.row()];
+    default:
+        return QVariant();
+    }
 }
 
 
@@ -187,16 +192,18 @@ void VirtualDesktopModel::appendWindowRect(int desktopId, WId windowId, const QR
 
 QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const
 {
-    if (role >= RectangleModel::WidthRole && role < WindowsRole) {
+    if (role >= RectangleModel::WidthRole && role < WindowsRole)
         return m_desktops.data(index, role);
-    } else if (role == WindowsRole) {
-        if (index.row() >= 0 && index.row() < m_windows.count())
-            return QVariant::fromValue(m_windows[index.row()]);
-        else
-            return QVariant();
-    }
 
-    return QVariant();
+    if (index.row() < 0 || index.row() >= m_windows.count())
+        return QVariant();
+
+    switch (role) {
+    case WindowsRole:
+        return QVariant::fromValue(m_windows[index.row()]);
+    default:
+        return QVariant();
+    }
 }
 
 int VirtualDesktopModel::rowCount(const QModelIndex &index) const
