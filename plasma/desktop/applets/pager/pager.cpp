@@ -152,14 +152,14 @@ void Pager::init()
     connect(m_dragSwitchTimer, SIGNAL(timeout()), this, SLOT(dragSwitch()));
 
     connect(KWindowSystem::self(), SIGNAL(currentDesktopChanged(int)), this, SLOT(currentDesktopChanged(int)));
-    connect(KWindowSystem::self(), SIGNAL(windowAdded(WId)), this, SLOT(windowAdded(WId)));
-    connect(KWindowSystem::self(), SIGNAL(windowRemoved(WId)), this, SLOT(windowRemoved(WId)));
-    connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(activeWindowChanged(WId)));
+    connect(KWindowSystem::self(), SIGNAL(windowAdded(WId)), this, SLOT(startTimerFast()));
+    connect(KWindowSystem::self(), SIGNAL(windowRemoved(WId)), this, SLOT(startTimerFast()));
+    connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(startTimerFast()));
     connect(KWindowSystem::self(), SIGNAL(numberOfDesktopsChanged(int)), this, SLOT(numberOfDesktopsChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(desktopNamesChanged()), this, SLOT(desktopNamesChanged()));
-    connect(KWindowSystem::self(), SIGNAL(stackingOrderChanged()), this, SLOT(stackingOrderChanged()));
+    connect(KWindowSystem::self(), SIGNAL(stackingOrderChanged()), this, SLOT(startTimerFast()));
     connect(KWindowSystem::self(), SIGNAL(windowChanged(WId,const ulong*)), this, SLOT(windowChanged(WId,const ulong*)));
-    connect(KWindowSystem::self(), SIGNAL(showingDesktopChanged(bool)), this, SLOT(showingDesktopChanged(bool)));
+    connect(KWindowSystem::self(), SIGNAL(showingDesktopChanged(bool)), this, SLOT(startTimer()));
     connect(m_desktopWidget, SIGNAL(screenCountChanged(int)), SLOT(desktopsSizeChanged()));
     connect(m_desktopWidget, SIGNAL(resized(int)), SLOT(desktopsSizeChanged()));
 
@@ -655,46 +655,13 @@ void Pager::currentDesktopChanged(int desktop)
 
     m_currentDesktop = desktop;
     m_desktopDown = false;
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
+    startTimerFast();
 }
 
 void Pager::currentActivityChanged(const QString &activity)
 {
     m_currentActivity = activity;
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
-}
-
-void Pager::windowAdded(WId id)
-{
-    Q_UNUSED(id)
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
-}
-
-void Pager::windowRemoved(WId id)
-{
-    Q_UNUSED(id)
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
-}
-
-void Pager::activeWindowChanged(WId id)
-{
-    Q_UNUSED(id)
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
+    startTimerFast();
 }
 
 void Pager::numberOfDesktopsChanged(int num)
@@ -719,17 +686,7 @@ void Pager::desktopNamesChanged()
 {
     m_pagerModel->clearDesktopRects();
     updateSizes(true);
-
-    if (!m_timer->isActive()) {
-        m_timer->start(UPDATE_DELAY);
-    }
-}
-
-void Pager::stackingOrderChanged()
-{
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
+    startTimer();
 }
 
 void Pager::windowChanged(WId id, const unsigned long* dirty)
@@ -738,17 +695,7 @@ void Pager::windowChanged(WId id, const unsigned long* dirty)
 
     if (dirty[NETWinInfo::PROTOCOLS] & (NET::WMGeometry | NET::WMDesktop) ||
         dirty[NETWinInfo::PROTOCOLS2] & NET::WM2Activities) {
-        if (!m_timer->isActive()) {
-            m_timer->start(UPDATE_DELAY);
-        }
-    }
-}
-
-void Pager::showingDesktopChanged(bool showing)
-{
-    Q_UNUSED(showing)
-    if (!m_timer->isActive()) {
-        m_timer->start(UPDATE_DELAY);
+        startTimer();
     }
 }
 
@@ -756,10 +703,25 @@ void Pager::desktopsSizeChanged()
 {
     m_pagerModel->clearDesktopRects();
     updateSizes(true);
+    startTimer();
+}
 
-    if (!m_timer->isActive()) {
-        m_timer->start(UPDATE_DELAY);
+void Pager::startTimer()
+{
+    if (m_timer->isActive()) {
+        return;
     }
+
+    m_timer->start(UPDATE_DELAY);
+}
+
+void Pager::startTimerFast()
+{
+    if (m_timer->isActive()) {
+        return;
+    }
+
+    m_timer->start(FAST_UPDATE_DELAY);
 }
 
 void Pager::mousePressEvent(QGraphicsSceneMouseEvent *event)
