@@ -189,8 +189,8 @@ void Pager::initDeclarativeUI()
     m_declarativeWidget = new Plasma::DeclarativeWidget(this);
     layout->addItem(m_declarativeWidget);
 
-    m_desktopModel = new VirtualDesktopModel(this);
-    m_declarativeWidget->engine()->rootContext()->setContextProperty("desktopModel", m_desktopModel);
+    m_pagerModel = new VirtualDesktopModel(this);
+    m_declarativeWidget->engine()->rootContext()->setContextProperty("pagerModel", m_pagerModel);
 
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
     m_package = new Plasma::Package(QString(), "org.kde.pager", structure);
@@ -524,7 +524,7 @@ void Pager::updateSizes(bool allowResize)
     }
 
     m_hoverRect = QRectF();
-    m_desktopModel->clearDesktopRects();
+    m_pagerModel->clearDesktopRects();
     qDeleteAll(m_animations);
     m_animations.clear();
 
@@ -532,7 +532,7 @@ void Pager::updateSizes(bool allowResize)
     for (int i = 0; i < m_desktopCount; i++) {
         itemRect.moveLeft(leftMargin + floor((i % m_columns)  * (itemWidth + padding)));
         itemRect.moveTop(topMargin + floor((i / m_columns) * (itemHeight + padding)));
-        m_desktopModel->appendDesktopRect(mapToDeclarativeUI(itemRect));
+        m_pagerModel->appendDesktopRect(mapToDeclarativeUI(itemRect));
         m_animations.append(new DesktopRectangle(this));
     }
 
@@ -584,7 +584,7 @@ void Pager::updateSizes(bool allowResize)
 void Pager::recalculateWindowRects()
 {
     QList<WId> windows = KWindowSystem::stackingOrder();
-    m_desktopModel->clearWindowRects();
+    m_pagerModel->clearWindowRects();
     m_activeWindows.clear();
     m_windowInfo.clear();
 
@@ -633,7 +633,7 @@ void Pager::recalculateWindowRects()
                                 windowRect.width() * m_widthScaleFactor,
                                 windowRect.height() * m_heightScaleFactor).toRect();
 
-            m_desktopModel->appendWindowRect(i, window, windowRect);
+            m_pagerModel->appendWindowRect(i, window, windowRect);
             if (window == KWindowSystem::activeWindow()) {
                 m_activeWindows.append(windowRect);
             }
@@ -740,14 +740,14 @@ void Pager::numberOfDesktopsChanged(int num)
 
     m_desktopCount = num;
 
-    m_desktopModel->clearDesktopRects();
+    m_pagerModel->clearDesktopRects();
     recalculateGridSizes(m_rows);
     recalculateWindowRects();
 }
 
 void Pager::desktopNamesChanged()
 {
-    m_desktopModel->clearDesktopRects();
+    m_pagerModel->clearDesktopRects();
     updateSizes(true);
 
     if (!m_timer->isActive()) {
@@ -784,7 +784,7 @@ void Pager::showingDesktopChanged(bool showing)
 
 void Pager::desktopsSizeChanged()
 {
-    m_desktopModel->clearDesktopRects();
+    m_pagerModel->clearDesktopRects();
     updateSizes(true);
 
     if (!m_timer->isActive()) {
@@ -796,12 +796,12 @@ void Pager::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (event->buttons() != Qt::RightButton)
     {
-        for (int i = 0; i < m_desktopModel->rowCount(); ++i) {
-            if (m_desktopModel->desktopRectAt(i).contains(event->pos())) {
+        for (int i = 0; i < m_pagerModel->rowCount(); ++i) {
+            if (m_pagerModel->desktopRectAt(i).contains(event->pos())) {
                 m_dragStartDesktop = m_dragHighlightedDesktop = i;
                 m_dragOriginalPos = m_dragCurrentPos = event->pos();
                 if (m_dragOriginal.isEmpty()) {
-                    m_dragOriginal = m_desktopModel->desktopRectAt(i).toRect();
+                    m_dragOriginal = m_pagerModel->desktopRectAt(i).toRect();
                 }
 
                 update();
@@ -841,8 +841,8 @@ void Pager::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         m_dragHighlightedDesktop = -1;
         m_hoverRect = QRectF();
         int i = 0;
-        for (int k = 0; k < m_desktopModel->rowCount(); k++) {
-            const QRectF &rect = m_desktopModel->desktopRectAt(k);
+        for (int k = 0; k < m_pagerModel->rowCount(); k++) {
+            const QRectF &rect = m_pagerModel->desktopRectAt(k);
             if (rect.contains(event->pos())) {
                 m_dragHighlightedDesktop = i;
                 m_hoverRect = rect;
@@ -857,7 +857,7 @@ void Pager::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     } else if (m_dragStartDesktop != -1 &&
                (event->pos() - m_dragOriginalPos).toPoint().manhattanLength() > KGlobalSettings::dndEventDelay()) {
         m_dragId = 0; // prevent us from going through this more than once
-        RectangleModel *windows= m_desktopModel->windowsAt(m_dragStartDesktop);
+        RectangleModel *windows= m_pagerModel->windowsAt(m_dragStartDesktop);
         for (int k = windows->rowCount() - 1; k >= 0 ; k--) {
             if (windows->rectAt(k).contains(m_dragOriginalPos.toPoint())) {
                 m_dragOriginal = windows->rectAt(k);
@@ -878,7 +878,7 @@ void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if (m_dragId) {
         if (m_dragHighlightedDesktop != -1) {
             QPointF dest = m_dragCurrentPos
-                           - m_desktopModel->desktopRectAt(m_dragHighlightedDesktop).topLeft()
+                           - m_pagerModel->desktopRectAt(m_dragHighlightedDesktop).topLeft()
                            - m_dragOriginalPos + m_dragOriginal.topLeft();
             dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
             // don't move windows to negative positions
@@ -911,14 +911,14 @@ void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             }
         }
         m_timer->start();
-    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_desktopModel->rowCount() &&
-               m_desktopModel->desktopRectAt(m_dragStartDesktop).contains(event->pos()) &&
+    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_pagerModel->rowCount() &&
+               m_pagerModel->desktopRectAt(m_dragStartDesktop).contains(event->pos()) &&
                m_currentDesktop != m_dragStartDesktop + 1) {
         // only change the desktop if the user presses and releases the mouse on the same desktop
         KWindowSystem::setCurrentDesktop(m_dragStartDesktop + 1);
         m_currentDesktop = m_dragStartDesktop + 1;
-    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_desktopModel->rowCount() &&
-               m_desktopModel->desktopRectAt(m_dragStartDesktop).contains(event->pos()) &&
+    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_pagerModel->rowCount() &&
+               m_pagerModel->desktopRectAt(m_dragStartDesktop).contains(event->pos()) &&
                m_currentDesktop == m_dragStartDesktop + 1) {
         // toogle the desktop or the dashboard
         // if the user presses and releases the mouse on the current desktop, default option is do nothing
@@ -966,8 +966,8 @@ void Pager::handleHoverMove(const QPointF& pos)
     }
 
     int i = 0;
-    for (int j = 0; j < m_desktopModel->rowCount(); j++) {
-        const QRectF &rect = m_desktopModel->desktopRectAt(i);
+    for (int j = 0; j < m_pagerModel->rowCount(); j++) {
+        const QRectF &rect = m_pagerModel->desktopRectAt(i);
         if (rect.contains(pos)) {
             if (m_hoverRect != rect) {
                 m_hoverRect = rect;
@@ -1103,8 +1103,8 @@ void Pager::dropEvent(QGraphicsSceneDragDropEvent *event)
     bool ok;
     QList<WId> ids = TaskManager::Task::idsFromMimeData(event->mimeData(), &ok);
     if (ok) {
-        for (int i = 0; i < m_desktopModel->rowCount(); ++i) {
-            if (m_desktopModel->desktopRectAt(i).contains(event->pos().toPoint())) {
+        for (int i = 0; i < m_pagerModel->rowCount(); ++i) {
+            if (m_pagerModel->desktopRectAt(i).contains(event->pos().toPoint())) {
                 foreach (const WId &id, ids) {
                     KWindowSystem::setOnDesktop(id, i + 1);
                 }
@@ -1154,7 +1154,7 @@ void Pager::updateToolTip()
     int hoverDesktopNumber = 0;
 
     for (int i = 0; i < m_desktopCount; ++i) {
-        if (m_desktopModel->desktopRectAt(i) == m_hoverRect) {
+        if (m_pagerModel->desktopRectAt(i) == m_hoverRect) {
             hoverDesktopNumber = i + 1;
         }
     }

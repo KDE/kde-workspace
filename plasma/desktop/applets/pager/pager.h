@@ -130,7 +130,7 @@ class Pager : public Plasma::Applet
 
         Plasma::Package *m_package;
         Plasma::DeclarativeWidget *m_declarativeWidget;
-        VirtualDesktopModel *m_desktopModel;
+        VirtualDesktopModel *m_pagerModel;
 
         QTimer* m_timer;
         Ui::pagerConfig ui;

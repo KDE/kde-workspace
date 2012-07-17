@@ -28,7 +28,7 @@ Item {
 
     Repeater {
         id: repeater
-        model: desktopModel
+        model: pagerModel
 
         PlasmaCore.FrameSvgItem {
             id: frameSvg
