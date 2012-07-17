@@ -123,10 +123,6 @@ Pager::Pager(QObject *parent, const QVariantList &args)
     setHasConfigurationInterface(true);
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
 
-    m_background = new Plasma::FrameSvg(this);
-    m_background->setImagePath("widgets/pager");
-    m_background->setCacheAllRenderedFrames(true);
-
     // initialize with a decent default
     m_desktopCount = KWindowSystem::numberOfDesktops();
     m_size = QSizeF(176, 88);
@@ -250,10 +246,6 @@ void Pager::constraintsEvent(Plasma::Constraints constraints)
             recalculateWindowRects();
         }
 
-        if (m_background->hasElementPrefix(QString())) {
-            m_background->setElementPrefix(QString());
-            m_background->resizeFrame(size());
-        }
         update();
     }
 
@@ -435,9 +427,6 @@ void Pager::updateSizes(bool allowResize)
 
     // calculate the margins
     if (formFactor() == Plasma::Vertical || formFactor() == Plasma::Horizontal) {
-        m_background->setElementPrefix(QString());
-        m_background->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-
         if (formFactor() == Plasma::Vertical) {
             qreal optimalSize = (geometry().width() -
                                  KIconLoader::SizeSmall * ratio * m_columns -
@@ -538,22 +527,6 @@ void Pager::updateSizes(bool allowResize)
 
     if (m_hoverIndex >= m_animations.count()) {
         m_hoverIndex = -1;
-    }
-
-    //Resize background svgs as needed
-    if (m_background->hasElementPrefix("normal")) {
-        m_background->setElementPrefix("normal");
-        m_background->resizeFrame(itemRect.size());
-    }
-
-    if (m_background->hasElementPrefix("active")) {
-        m_background->setElementPrefix("active");
-        m_background->resizeFrame(itemRect.size());
-    }
-
-    if (m_background->hasElementPrefix("hover")) {
-        m_background->setElementPrefix("hover");
-        m_background->resizeFrame(itemRect.size());
     }
 
     // do not try to resize unless the caller has allowed it,

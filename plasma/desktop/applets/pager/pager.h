@@ -169,7 +169,6 @@ class Pager : public Plasma::Applet
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
         QList<KWindowInfo> m_windowInfo;
-        Plasma::FrameSvg *m_background;
         KColorScheme *m_colorScheme;
         bool m_verticalFormFactor;
 
