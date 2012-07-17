@@ -33,17 +33,23 @@ QHash<int, QByteArray> RectangleModel::roles() const
     return rectRoles;
 }
 
-void RectangleModel::resetModel(const QList<QRectF> &list)
+void RectangleModel::clear()
 {
     beginResetModel();
-    setList(list);
+    m_rects.clear();
     endResetModel();
 }
 
-void RectangleModel::setList(const QList<QRectF> &list)
+void RectangleModel::append(const QRectF &rect)
 {
-    m_rects.clear();
-    m_rects = list;
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    m_rects.append(rect);
+    endInsertRows();
+}
+
+QRectF &RectangleModel::rectAt(int index)
+{
+    return m_rects[index];
 }
 
 int RectangleModel::rowCount(const QModelIndex &parent) const
@@ -72,7 +78,7 @@ QVariant RectangleModel::data(const QModelIndex &index, int role) const
 
 
 VirtualDesktopModel::VirtualDesktopModel(QObject *parent)
-    : RectangleModel(parent)
+    : QAbstractListModel(parent)
 {
     setRoleNames(roles());
 }
@@ -84,51 +90,102 @@ RectangleModel *VirtualDesktopModel::windowsAt(int index) const
 
 QHash<int, QByteArray> VirtualDesktopModel::roles() const
 {
-    QHash<int, QByteArray> rectRoles = RectangleModel::roles();
+    QHash<int, QByteArray> rectRoles = m_desktops.roles();
     rectRoles[WindowsRole] = "windows";
     return rectRoles;
 }
 
-void VirtualDesktopModel::resetModel(const QList<QRectF> &list)
+void VirtualDesktopModel::clearDesktopRects()
 {
     beginResetModel();
+    m_desktops.clear();
+    endResetModel();
+}
 
-    RectangleModel::setList(list);
-    for (int i = 0; i < list.count(); i++) {
-        if (i < m_windows.count())
-            windowsAt(i)->resetModel();
-        else
-            m_windows.append(new RectangleModel(this));
+void VirtualDesktopModel::appendDesktopRect(const QRectF &rect)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    m_desktops.append(rect);
+    endInsertRows();
+}
+
+QRectF& VirtualDesktopModel::desktopRectAt(int index)
+{
+    return m_desktops.rectAt(index);
+}
+
+void VirtualDesktopModel::clearWindowRects()
+{
+    for (int i = 0; i < m_windows.count(); i++) {
+        windowsAt(i)->clear();
+
+        // remove the windows model if the number of desktop has decreased
+        if (i >= rowCount())
+            windowsAt(i)->deleteLater();
     }
 
-    endResetModel();
+    // append more windows model if the number of desktop has increased
+    for (int i = m_windows.count(); i < rowCount(); i++)
+        m_windows.append(new RectangleModel(this));
+}
+
+void VirtualDesktopModel::appendWindowRect(int desktopId, WId window, const QRectF &rect)
+{
+    Q_UNUSED(window); // XXX: add this role in the windows model
+    windowsAt(desktopId)->append(rect);
+
+    QModelIndex i = index(desktopId);
+    emit dataChanged(i, i);
+
+    printModel();
 }
 
 QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const
 {
-    if (role >= RectangleModel::WidthRole && role < WindowsRole)
-        return RectangleModel::data(index, role);
-    else if (role == WindowsRole)
-        return QVariant::fromValue(m_windows[index.row()]);
+    if (role >= RectangleModel::WidthRole && role < WindowsRole) {
+        return m_desktops.data(index, role);
+    } else if (role == WindowsRole) {
+        if (index.row() >= 0  && index.row() < m_windows.count())
+            return QVariant::fromValue(m_windows[index.row()]);
+        else
+            return QVariant();
+    }
 
     return QVariant();
 }
 
-void VirtualDesktopModel::setWindows(const QList<QList<QPair<WId, QRectF> > >& windows)
+int VirtualDesktopModel::rowCount(const QModelIndex &index) const
 {
-    beginResetModel();
+    return m_desktops.rowCount(index);
+}
 
-    for (int desktopId = 0; desktopId < windows.count(); desktopId++) {
-        if (desktopId >= RectangleModel::rowCount())
-            break;
+#include <QDebug>
+void VirtualDesktopModel::printModel() const
+{
+    qDebug() << Q_FUNC_INFO << "-- begin --";
+    for (int i = 0; i < rowCount(); i++) {
+        qDebug() << ">> Desktop" << i;
+        QModelIndex ind = index(i);
+        qDebug() << "x: " << data(ind, RectangleModel::XRole).toDouble() << "y: "
+                 << data(ind, RectangleModel::YRole).toDouble();
+        qDebug() << "width: " << data(ind, RectangleModel::WidthRole).toDouble()
+                 << "height: " << data(ind, RectangleModel::HeightRole).toDouble();
 
-        QList<QPair<WId, QRectF> > desktopWindows = windows[desktopId];
-        QList<QRectF> rects;
-        for(int i = 0; i < desktopWindows.count(); i++)
-            rects.append(desktopWindows[i].second);
+        QObject *ob = data(ind, WindowsRole).value<QObject *>();
+        if (!ob) {
+            qDebug() << "empty (not expected)";
+            continue;
+        }
+        QAbstractListModel *model = qobject_cast<QAbstractListModel *>(ob);
 
-        windowsAt(desktopId)->resetModel(rects);
+        for (int j = 0; j < model->rowCount(); j++) {
+            qDebug() << "   >>> Window" << j;
+            QModelIndex ind2 = index(j);
+            qDebug() << "   x: " << model->data(ind2, RectangleModel::XRole).toDouble()
+                     << "y: " << model->data(ind2, RectangleModel::YRole).toDouble();
+            qDebug() << "   width: " << model->data(ind2, RectangleModel::WidthRole).toDouble()
+                     << "height: " << model->data(ind2, RectangleModel::HeightRole).toDouble();
+        }
     }
-
-    endResetModel();
+    qDebug() << Q_FUNC_INFO << "-- end --\n";
 }

@@ -36,20 +36,19 @@ public:
     RectangleModel(QObject *parent = 0);
 
     virtual QHash<int, QByteArray> roles() const;
-    virtual void resetModel(const QList<QRectF>& list = QList<QRectF>());
+    virtual void clear();
+    virtual void append(const QRectF &rect);
+    QRectF &rectAt(int index);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-
-protected:
-    void setList(const QList<QRectF>& list);
 
 private:
     QList<QRectF> m_rects;
 };
 
 
-class VirtualDesktopModel : public RectangleModel
+class VirtualDesktopModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
@@ -60,15 +59,22 @@ public:
     VirtualDesktopModel(QObject *parent = 0);
 
     QHash<int, QByteArray> roles() const;
-    void resetModel(const QList<QRectF>& list = QList<QRectF>());
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    void clearDesktopRects();
+    void appendDesktopRect(const QRectF &rect);
+    QRectF &desktopRectAt(int index);
 
-    void setWindows(const QList<QList<QPair<WId, QRectF> > >& allWindows);
-
-private:
+    void clearWindowRects();
+    void appendWindowRect(int desktopId, WId window, const QRectF &rect);
     RectangleModel *windowsAt(int index) const;
 
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+
+private:
+    void printModel() const;
+
+    RectangleModel m_desktops;
     QList<QObject *> m_windows;
 };
 
