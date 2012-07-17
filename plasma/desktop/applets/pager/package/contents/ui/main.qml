@@ -61,7 +61,7 @@ Item {
                         y: model.y
                         width: model.width
                         height: model.height
-                        color: "red"
+                        color: model.active ? "green" : "red"
                         opacity: 0.5
                     }
                 }

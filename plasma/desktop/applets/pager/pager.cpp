@@ -585,7 +585,6 @@ void Pager::recalculateWindowRects()
 {
     QList<WId> windows = KWindowSystem::stackingOrder();
     m_pagerModel->clearWindowRects();
-    m_activeWindows.clear();
     m_windowInfo.clear();
 
     foreach (WId window, windows) {
@@ -633,10 +632,8 @@ void Pager::recalculateWindowRects()
                                 windowRect.width() * m_widthScaleFactor,
                                 windowRect.height() * m_heightScaleFactor).toRect();
 
-            m_pagerModel->appendWindowRect(i, window, windowRect);
-            if (window == KWindowSystem::activeWindow()) {
-                m_activeWindows.append(windowRect);
-            }
+            bool active = (window == KWindowSystem::activeWindow());
+            m_pagerModel->appendWindowRect(i, window, windowRect, active);
             m_windowInfo.append(info);
         }
     }

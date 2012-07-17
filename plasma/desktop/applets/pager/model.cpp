@@ -83,6 +83,7 @@ QHash<int, QByteArray> WindowModel::roles() const
 {
     QHash<int, QByteArray> rectRoles = RectangleModel::roles();
     rectRoles[IdRole] = "windowId";
+    rectRoles[ActiveRole] = "active";
     return rectRoles;
 }
 
@@ -91,14 +92,16 @@ void WindowModel::clear()
     beginResetModel();
     RectangleModel::clear();
     m_ids.clear();
+    m_active.clear();
     endResetModel();
 }
 
-void WindowModel::append(WId windowId, const QRectF &rect)
+void WindowModel::append(WId windowId, const QRectF &rect, bool active)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_ids.append(windowId);
     RectangleModel::append(rect);
+    m_active.append(active);
     endInsertRows();
 }
 
@@ -115,6 +118,8 @@ QVariant WindowModel::data(const QModelIndex &index, int role) const
         return RectangleModel::data(index, role);
     else if (role == IdRole)
         return int(m_ids[index.row()]);
+    else if (role == ActiveRole)
+        return m_active[index.row()];
 
     return QVariant();
 }
@@ -172,14 +177,12 @@ void VirtualDesktopModel::clearWindowRects()
         m_windows.append(new WindowModel(this));
 }
 
-void VirtualDesktopModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect)
+void VirtualDesktopModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect, bool active)
 {
-    windowsAt(desktopId)->append(windowId, rect);
+    windowsAt(desktopId)->append(windowId, rect, active);
 
     QModelIndex i = index(desktopId);
     emit dataChanged(i, i);
-
-    printModel();
 }
 
 QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const

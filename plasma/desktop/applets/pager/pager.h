@@ -165,7 +165,6 @@ class Pager : public Plasma::Applet
         QList<DesktopRectangle*> m_animations;
         QRectF m_hoverRect;
         int m_hoverIndex;
-        QList<QRectF> m_activeWindows;
         QList<QAction*> m_actions;
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
