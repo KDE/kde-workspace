@@ -23,7 +23,6 @@
 
 #include <QGraphicsSceneHoverEvent>
 #include <QList>
-#include <QWeakPointer>
 
 #include <Plasma/Applet>
 #include <Plasma/DataEngine>
@@ -32,7 +31,6 @@
 #include "ui_pagerConfig.h"
 
 class QDesktopWidget;
-class QPropertyAnimation;
 
 class KColorScheme;
 class KWindowInfo;
@@ -40,31 +38,9 @@ class KCModuleProxy;
 
 namespace Plasma
 {
-    class FrameSvg;
     class DeclarativeWidget;
     class Package;
 }
-
-class DesktopRectangle : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(qreal alphaValue READ alphaValue WRITE setAlphaValue)
-
-    public:
-        DesktopRectangle(QObject *parent);
-
-        QPropertyAnimation *animation() const;
-        void setAnimation(QPropertyAnimation *animation);
-
-        qreal alphaValue() const;
-
-    protected slots:
-        void setAlphaValue(qreal value);
-
-    private:
-        QWeakPointer<QPropertyAnimation> m_animation;
-        qreal m_alpha;
-};
 
 class Pager : public Plasma::Applet
 {
@@ -85,15 +61,7 @@ class Pager : public Plasma::Applet
         void configChanged();
 
     protected slots:
-        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
-        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-        virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
-        virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
-        virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
-        virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event);
-        virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
-        virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
         virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
         virtual void wheelEvent(QGraphicsSceneWheelEvent *);
 
@@ -110,15 +78,12 @@ class Pager : public Plasma::Applet
         void slotAddDesktop();
         void slotRemoveDesktop();
 #endif
-        void dragSwitch();
 
     protected:
         void createMenu();
         KColorScheme *colorScheme();
         QRect fixViewportPosition( const QRect& r );
         void createConfigurationInterface(KConfigDialog *parent);
-        void handleHoverMove(const QPointF& pos);
-        void handleHoverLeave();
         void updateToolTip();
 
     private:
@@ -158,8 +123,8 @@ class Pager : public Plasma::Applet
         qreal m_widthScaleFactor;
         qreal m_heightScaleFactor;
         QSizeF m_size;
+
         //list of info about animations for each desktop
-        QList<DesktopRectangle*> m_animations;
         QRectF m_hoverRect;
         int m_hoverIndex;
         QList<QAction*> m_actions;
@@ -179,11 +144,7 @@ class Pager : public Plasma::Applet
 
         // desktop switching on drop event
         int m_dragSwitchDesktop;
-        QTimer* m_dragSwitchTimer;
         bool m_ignoreNextSizeConstraint;
-
-        static const int s_FadeInDuration = 50;
-        static const int s_FadeOutDuration = 100;
 
         //embedded KCM module in the configuratoin dialog
         KCModuleProxy *m_configureDesktopsWidget;

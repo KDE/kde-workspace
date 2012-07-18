@@ -67,35 +67,6 @@ const int MAXDESKTOPS = 20;
 // random(), find a less magic one if you can. -sreich
 const qreal MAX_TEXT_WIDTH = 800;
 
-DesktopRectangle::DesktopRectangle(QObject *parent)
-    : QObject(parent),
-      m_alpha(0)
-{
-}
-
-QPropertyAnimation *DesktopRectangle::animation() const
-{
-    return m_animation.data();
-}
-
-void DesktopRectangle::setAnimation(QPropertyAnimation *animation)
-{
-    m_animation = animation;
-}
-
-qreal DesktopRectangle::alphaValue() const
-{
-    return m_alpha;
-}
-
-void DesktopRectangle::setAlphaValue(qreal value)
-{
-    m_alpha = value;
-
-    Pager *parentItem = qobject_cast<Pager*>(parent());
-    parentItem->update();
-}
-
 Pager::Pager(QObject *parent, const QVariantList &args)
     : Plasma::Applet(parent, args),
       m_displayedText(None),
@@ -146,10 +117,6 @@ void Pager::init()
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(recalculateWindowRects()));
-
-    m_dragSwitchTimer = new QTimer(this);
-    m_dragSwitchTimer->setSingleShot(true);
-    connect(m_dragSwitchTimer, SIGNAL(timeout()), this, SLOT(dragSwitch()));
 
     connect(KWindowSystem::self(), SIGNAL(currentDesktopChanged(int)), this, SLOT(currentDesktopChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(windowAdded(WId)), this, SLOT(startTimerFast()));
@@ -514,19 +481,12 @@ void Pager::updateSizes(bool allowResize)
 
     m_hoverRect = QRectF();
     m_pagerModel->clearDesktopRects();
-    qDeleteAll(m_animations);
-    m_animations.clear();
 
     QRectF itemRect(QPoint(leftMargin, topMargin) , QSize(floor(itemWidth), floor(itemHeight)));
     for (int i = 0; i < m_desktopCount; i++) {
         itemRect.moveLeft(leftMargin + floor((i % m_columns)  * (itemWidth + padding)));
         itemRect.moveTop(topMargin + floor((i / m_columns) * (itemHeight + padding)));
         m_pagerModel->appendDesktopRect(mapToDeclarativeUI(itemRect));
-        m_animations.append(new DesktopRectangle(this));
-    }
-
-    if (m_hoverIndex >= m_animations.count()) {
-        m_hoverIndex = -1;
     }
 
     // do not try to resize unless the caller has allowed it,
@@ -724,26 +684,6 @@ void Pager::startTimerFast()
     m_timer->start(FAST_UPDATE_DELAY);
 }
 
-void Pager::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (event->buttons() != Qt::RightButton)
-    {
-        for (int i = 0; i < m_pagerModel->rowCount(); ++i) {
-            if (m_pagerModel->desktopRectAt(i).contains(event->pos())) {
-                m_dragStartDesktop = m_dragHighlightedDesktop = i;
-                m_dragOriginalPos = m_dragCurrentPos = event->pos();
-                if (m_dragOriginal.isEmpty()) {
-                    m_dragOriginal = m_pagerModel->desktopRectAt(i).toRect();
-                }
-
-                update();
-                return;
-            }
-        }
-    }
-    Applet::mousePressEvent(event);
-}
-
 void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
 {
     int newDesk;
@@ -764,45 +704,6 @@ void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
     update();
 
     Applet::wheelEvent(e);
-}
-
-void Pager::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (m_dragId > 0) {
-        m_dragCurrentPos = event->pos();
-        m_dragHighlightedDesktop = -1;
-        m_hoverRect = QRectF();
-        int i = 0;
-        for (int k = 0; k < m_pagerModel->rowCount(); k++) {
-            const QRectF &rect = m_pagerModel->desktopRectAt(k);
-            if (rect.contains(event->pos())) {
-                m_dragHighlightedDesktop = i;
-                m_hoverRect = rect;
-                break;
-            }
-
-            ++i;
-        }
-        update();
-        event->accept();
-        return;
-    } else if (m_dragStartDesktop != -1 &&
-               (event->pos() - m_dragOriginalPos).toPoint().manhattanLength() > KGlobalSettings::dndEventDelay()) {
-        m_dragId = 0; // prevent us from going through this more than once
-        WindowModel *windows= m_pagerModel->windowsAt(m_dragStartDesktop);
-        for (int k = windows->rowCount() - 1; k >= 0 ; k--) {
-            if (windows->rectAt(k).contains(m_dragOriginalPos.toPoint())) {
-                m_dragOriginal = windows->rectAt(k);
-                m_dragId = windows->idAt(k);
-                event->accept();
-                break;
-            }
-        }
-    }
-
-    if (m_dragOriginal.isEmpty()) {
-        Applet::mouseMoveEvent(event);
-    }
 }
 
 void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -875,161 +776,6 @@ void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     Applet::mouseReleaseEvent(event);
 }
 
-// If the pager is hovered in drag and drop mode, no hover events are geneated.
-// This method provides the common implementation for hoverMoveEvent and dragMoveEvent.
-void Pager::handleHoverMove(const QPointF& pos)
-{
-    if (m_hoverRect.contains(pos)) {
-        return;
-    } else if (m_hoverIndex > -1) {
-        QPropertyAnimation *animation = m_animations[m_hoverIndex]->animation();
-        if (animation && animation->state() == QAbstractAnimation::Running) {
-            animation->pause();
-        } else {
-            animation = new QPropertyAnimation(m_animations[m_hoverIndex], "alphaValue");
-            m_animations[m_hoverIndex]->setAnimation(animation);
-        }
-
-        animation->setDuration(s_FadeOutDuration);
-        animation->setEasingCurve(QEasingCurve::OutQuad);
-        animation->setStartValue(1);
-        animation->setEndValue(0);
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
-    }
-
-    int i = 0;
-    for (int j = 0; j < m_pagerModel->rowCount(); j++) {
-        const QRectF &rect = m_pagerModel->desktopRectAt(i);
-        if (rect.contains(pos)) {
-            if (m_hoverRect != rect) {
-                m_hoverRect = rect;
-                m_hoverIndex = i;
-
-                QPropertyAnimation *animation = m_animations[m_hoverIndex]->animation();
-                if (animation && animation->state() == QAbstractAnimation::Running) {
-                    animation->pause();
-                } else {
-                    animation = new QPropertyAnimation(m_animations[m_hoverIndex], "alphaValue");
-                    m_animations[m_hoverIndex]->setAnimation(animation);
-                }
-
-                animation->setDuration(s_FadeInDuration);
-                animation->setEasingCurve(QEasingCurve::InQuad);
-                animation->setStartValue(0);
-                animation->setEndValue(1);
-                animation->start(QAbstractAnimation::DeleteWhenStopped);
-
-                update();
-                updateToolTip();
-            }
-            return;
-        }
-        ++i;
-    }
-
-    m_hoverIndex = -1;
-    m_hoverRect = QRectF();
-    update();
-}
-
-// If the pager is hovered in drag and drop mode, no hover events are geneated.
-// This method provides the common implementation for hoverLeaveEvent and dragLeaveEvent.
-void Pager::handleHoverLeave()
-{
-    if (m_hoverRect != QRectF()) {
-        m_hoverRect = QRectF();
-        update();
-    }
-
-    if (m_hoverIndex != -1) {
-        QPropertyAnimation *animation = m_animations[m_hoverIndex]->animation();
-        if (animation && animation->state() == QAbstractAnimation::Running) {
-            animation->pause();
-        } else {
-            animation = new QPropertyAnimation(m_animations[m_hoverIndex], "alphaValue");
-            m_animations[m_hoverIndex]->setAnimation(animation);
-        }
-
-        animation->setDuration(s_FadeOutDuration);
-        animation->setEasingCurve(QEasingCurve::OutQuad);
-        animation->setStartValue(1);
-        animation->setEndValue(0);
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
-
-        m_hoverIndex = -1;
-    }
-
-    // The applet doesn't always get mouseReleaseEvents, for example when starting a drag
-    // on the containment and releasing the mouse on the desktop or another window. This can cause
-    // weird bugs because the pager still thinks a drag is going on.
-    // The only reliable event I found is the hoverLeaveEvent, so we just stop the drag
-    // on this event.
-    if (m_dragId || m_dragStartDesktop != -1) {
-        m_dragId = 0;
-        m_dragOriginal = QRect();
-        m_dragHighlightedDesktop = -1;
-        m_dragStartDesktop = -1;
-        m_dragOriginalPos = m_dragCurrentPos = QPointF();
-        update();
-    }
-}
-
-void Pager::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{
-    handleHoverMove(event->pos());
-    Applet::hoverEnterEvent(event);
-}
-
-void Pager::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
-{
-    handleHoverMove(event->pos());
-}
-
-void Pager::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
-{
-    handleHoverLeave();
-    Applet::hoverLeaveEvent(event);
-}
-
-void Pager::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
-{
-    event->setAccepted(true);
-    if (event->mimeData()->hasFormat(TaskManager::Task::mimetype())) {
-        return;
-    }
-
-    handleHoverMove(event->pos());
-
-    if (m_hoverIndex != -1) {
-        m_dragSwitchDesktop = m_hoverIndex;
-        m_dragSwitchTimer->start(DRAG_SWITCH_DELAY);
-    }
-    Applet::dragEnterEvent(event);
-}
-
-void Pager::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
-{
-    handleHoverMove(event->pos());
-
-    if (m_dragSwitchDesktop != m_hoverIndex && m_hoverIndex != -1) {
-        m_dragSwitchDesktop = m_hoverIndex;
-        m_dragSwitchTimer->start(DRAG_SWITCH_DELAY);
-    } else if (m_hoverIndex == -1) {
-        m_dragSwitchDesktop = m_hoverIndex;
-        m_dragSwitchTimer->stop();
-    }
-    Applet::dragMoveEvent(event);
-}
-
-void Pager::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
-{
-    handleHoverLeave();
-
-    m_dragSwitchDesktop = -1;
-    m_dragSwitchTimer->stop();
-    Applet::dragLeaveEvent(event);
-}
-
 void Pager::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
     bool ok;
@@ -1045,16 +791,6 @@ void Pager::dropEvent(QGraphicsSceneDragDropEvent *event)
             }
         }
     }
-}
-
-void Pager::dragSwitch()
-{
-    if (m_dragSwitchDesktop == -1) {
-        return;
-    }
-
-    KWindowSystem::setCurrentDesktop(m_dragSwitchDesktop + 1);
-    m_currentDesktop = m_dragSwitchDesktop + 1;
 }
 
 // KWindowSystem does not translate position when mapping viewports
