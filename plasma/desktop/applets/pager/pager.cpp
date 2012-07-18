@@ -139,7 +139,7 @@ void Pager::init()
 
     recalculateGridSizes(m_rows);
 
-    m_currentDesktop = KWindowSystem::currentDesktop();
+    setCurrentDesktop(KWindowSystem::currentDesktop());
 
     KActivities::Consumer *act = new KActivities::Consumer(this);
     connect(act, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
@@ -153,11 +153,21 @@ void Pager::initDeclarativeUI()
     layout->addItem(m_declarativeWidget);
 
     m_pagerModel = new VirtualDesktopModel(this);
-    m_declarativeWidget->engine()->rootContext()->setContextProperty("pagerModel", m_pagerModel);
+    m_declarativeWidget->engine()->rootContext()->setContextProperty("pager", this);
 
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
     m_package = new Plasma::Package(QString(), "org.kde.pager", structure);
     m_declarativeWidget->setQmlPath(m_package->filePath("mainscript"));
+}
+
+void Pager::setCurrentDesktop(int desktop)
+{
+    if (m_currentDesktop == desktop) {
+        return;
+    }
+
+    m_currentDesktop = desktop;
+    emit currentDesktopChanged();
 }
 
 void Pager::configChanged()
@@ -613,7 +623,7 @@ void Pager::currentDesktopChanged(int desktop)
         return; // bogus value, don't accept it
     }
 
-    m_currentDesktop = desktop;
+    setCurrentDesktop(desktop);
     m_desktopDown = false;
     startTimerFast();
 }
@@ -700,7 +710,7 @@ void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
     }
 
     KWindowSystem::setCurrentDesktop(newDesk);
-    m_currentDesktop = newDesk;
+    setCurrentDesktop(newDesk);
     update();
 
     Applet::wheelEvent(e);
@@ -749,7 +759,7 @@ void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                m_currentDesktop != m_dragStartDesktop + 1) {
         // only change the desktop if the user presses and releases the mouse on the same desktop
         KWindowSystem::setCurrentDesktop(m_dragStartDesktop + 1);
-        m_currentDesktop = m_dragStartDesktop + 1;
+        setCurrentDesktop(m_dragStartDesktop + 1);
     } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_pagerModel->rowCount() &&
                m_pagerModel->desktopRectAt(m_dragStartDesktop).contains(event->pos()) &&
                m_currentDesktop == m_dragStartDesktop + 1) {

@@ -45,6 +45,8 @@ namespace Plasma
 class Pager : public Plasma::Applet
 {
     Q_OBJECT
+    Q_PROPERTY(QObject* model READ model CONSTANT)
+    Q_PROPERTY(int currentDesktop READ currentDesktop WRITE setCurrentDesktop NOTIFY currentDesktopChanged)
 
     public:
         Pager(QObject *parent, const QVariantList &args);
@@ -52,6 +54,13 @@ class Pager : public Plasma::Applet
         void init();
         void constraintsEvent(Plasma::Constraints);
         virtual QList<QAction*> contextualActions();
+
+        QObject *model() const { return m_pagerModel; }
+        int currentDesktop() const { return m_currentDesktop; }
+        void setCurrentDesktop(int desktop);
+
+    signals:
+        void currentDesktopChanged();
 
     public slots:
         void recalculateGridSizes(int rows);

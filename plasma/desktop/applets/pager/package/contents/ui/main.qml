@@ -28,7 +28,7 @@ Item {
 
     Repeater {
         id: repeater
-        model: pagerModel
+        model: pager.model
 
         PlasmaCore.FrameSvgItem {
             id: frameSvg
@@ -37,7 +37,8 @@ Item {
             width: model.width
             height: model.height
             imagePath: "widgets/pager"
-            prefix: mouseArea.containsMouse ? "hover" : (index === 1 ? "active" : "normal")
+            prefix: mouseArea.containsMouse ?
+                        "hover" : (index === pager.currentDesktop-1 ? "active" : "normal")
 
             MouseArea {
                 id: mouseArea
