@@ -25,7 +25,6 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QFont>
-#include <QGraphicsSceneHoverEvent>
 #include <QTimer>
 #include <QX11Info>
 #include <QDBusInterface>
@@ -76,15 +75,10 @@ Pager::Pager(QObject *parent, const QVariantList &args)
       m_rows(2),
       m_columns(0),
       m_desktopDown(false),
-      m_hoverIndex(-1),
       m_addDesktopAction(0),
       m_removeDesktopAction(0),
       m_colorScheme(0),
       m_verticalFormFactor(false),
-      m_dragId(0),
-      m_dragStartDesktop(-1),
-      m_dragHighlightedDesktop(-1),
-      m_dragSwitchDesktop(-1),
       m_ignoreNextSizeConstraint(false),
       m_configureDesktopsWidget(0),
       m_desktopWidget(qApp->desktop())
@@ -107,6 +101,8 @@ Pager::~Pager()
 
 void Pager::init()
 {
+    m_pagerModel = new VirtualDesktopModel(this);
+
     initDeclarativeUI();
     createMenu();
 
@@ -152,7 +148,6 @@ void Pager::initDeclarativeUI()
     m_declarativeWidget = new Plasma::DeclarativeWidget(this);
     layout->addItem(m_declarativeWidget);
 
-    m_pagerModel = new VirtualDesktopModel(this);
     m_declarativeWidget->engine()->rootContext()->setContextProperty("pager", this);
 
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
@@ -716,57 +711,51 @@ void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
     Applet::wheelEvent(e);
 }
 
-void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void Pager::moveWindow(int window, double x, double y, int targetDesktop, int sourceDesktop)
 {
-    if (m_dragId) {
-        if (m_dragHighlightedDesktop != -1) {
-            QPointF dest = m_dragCurrentPos
-                           - m_pagerModel->desktopRectAt(m_dragHighlightedDesktop).topLeft()
-                           - m_dragOriginalPos + m_dragOriginal.topLeft();
-            dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
-            // don't move windows to negative positions
-            dest = QPointF(qMax(dest.x(), qreal(0.0)), qMax(dest.y(), qreal(0.0)));
-            if (!KWindowSystem::mapViewport()) {
-                KWindowInfo info = KWindowSystem::windowInfo(m_dragId, NET::WMDesktop | NET::WMState);
+    WId windowId = (WId) window;
 
-                if (!info.onAllDesktops()) {
-                    KWindowSystem::setOnDesktop(m_dragId, m_dragHighlightedDesktop+1);
-                }
+    QPointF dest = QPointF(x, y) - m_pagerModel->desktopRectAt(targetDesktop).topLeft();
 
-                // only move the window if it is not full screen and if it is kept within the same desktop
-                // moving when dropping between desktop is too annoying due to the small drop area.
-                if (!(info.state() & NET::FullScreen) &&
-                    (m_dragHighlightedDesktop == m_dragStartDesktop || info.onAllDesktops())) {
-                    // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
-                    NETRootInfo i( QX11Info::display(), 0 );
-                    int flags = ( 0x20 << 12 ) | ( 0x03 << 8 ) | 1; // from tool, x/y, northwest gravity
-                    i.moveResizeWindowRequest( m_dragId, flags, dest.toPoint().x(), dest.toPoint().y(), 0, 0 );
-                }
-            } else {
-                // setOnDesktop() with viewports is also moving a window, and since it takes a moment
-                // for the WM to do the move, there's a race condition with figuring out how much to move,
-                // so do it only as one move
-                dest += KWindowSystem::desktopToViewport( m_dragHighlightedDesktop+1, false );
-                QPoint d = KWindowSystem::constrainViewportRelativePosition( dest.toPoint());
-                NETRootInfo i( QX11Info::display(), 0 );
-                int flags = ( 0x20 << 12 ) | ( 0x03 << 8 ) | 1; // from tool, x/y, northwest gravity
-                i.moveResizeWindowRequest( m_dragId, flags, d.x(), d.y(), 0, 0 );
-            }
+    dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
+
+    // don't move windows to negative positions
+    dest = QPointF(qMax(dest.x(), 0.0), qMax(dest.y(), 0.0));
+
+    // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
+    NETRootInfo info(QX11Info::display(), 0);
+    int flags = (0x20 << 12) | (0x03 << 8) | 1; // from tool, x/y, northwest gravity
+
+    if (!KWindowSystem::mapViewport()) {
+        KWindowInfo windowInfo = KWindowSystem::windowInfo(windowId, NET::WMDesktop | NET::WMState);
+
+        if (!windowInfo.onAllDesktops()) {
+            KWindowSystem::setOnDesktop(windowId, targetDesktop+1);
         }
-        m_timer->start();
-    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_pagerModel->rowCount() &&
-               m_pagerModel->desktopRectAt(m_dragStartDesktop).contains(event->pos()) &&
-               m_currentDesktop != m_dragStartDesktop + 1) {
-        // only change the desktop if the user presses and releases the mouse on the same desktop
-        KWindowSystem::setCurrentDesktop(m_dragStartDesktop + 1);
-        setCurrentDesktop(m_dragStartDesktop + 1);
-    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_pagerModel->rowCount() &&
-               m_pagerModel->desktopRectAt(m_dragStartDesktop).contains(event->pos()) &&
-               m_currentDesktop == m_dragStartDesktop + 1) {
-        // toogle the desktop or the dashboard
-        // if the user presses and releases the mouse on the current desktop, default option is do nothing
-        if (m_currentDesktopSelected == ShowDesktop) {
 
+        // only move the window if it is not full screen and if it is kept within the same desktop
+        // moving when dropping between desktop is too annoying due to the small drop area.
+        if (!(windowInfo.state() & NET::FullScreen) &&
+            (targetDesktop == sourceDesktop || windowInfo.onAllDesktops())) {
+            QPoint d = dest.toPoint();
+            info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
+        }
+    } else {
+        // setOnDesktop() with viewports is also moving a window, and since it takes a moment
+        // for the WM to do the move, there's a race condition with figuring out how much to move,
+        // so do it only as one move
+        dest += KWindowSystem::desktopToViewport(targetDesktop+1, false);
+        QPoint d = KWindowSystem::constrainViewportRelativePosition(dest.toPoint());
+        info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
+    }
+    m_timer->start();
+}
+
+void Pager::changeDesktop(int newDesktop)
+{
+    if (m_currentDesktop == newDesktop+1) {
+        // toogle the desktop or the dashboard
+        if (m_currentDesktopSelected == ShowDesktop) {
             NETRootInfo info(QX11Info::display(), 0);
             m_desktopDown = !m_desktopDown;
             info.setShowingDesktop(m_desktopDown);
@@ -774,32 +763,9 @@ void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             QDBusInterface plasmaApp("org.kde.plasma-desktop", "/App");
             plasmaApp.call("toggleDashboard");
         }
-    }
-
-    m_dragId = 0;
-    m_dragOriginal = QRect();
-    m_dragHighlightedDesktop = -1;
-    m_dragStartDesktop = -1;
-    m_dragOriginalPos = m_dragCurrentPos = QPointF();
-
-    update();
-    Applet::mouseReleaseEvent(event);
-}
-
-void Pager::dropEvent(QGraphicsSceneDragDropEvent *event)
-{
-    bool ok;
-    QList<WId> ids = TaskManager::Task::idsFromMimeData(event->mimeData(), &ok);
-    if (ok) {
-        for (int i = 0; i < m_pagerModel->rowCount(); ++i) {
-            if (m_pagerModel->desktopRectAt(i).contains(event->pos().toPoint())) {
-                foreach (const WId &id, ids) {
-                    KWindowSystem::setOnDesktop(id, i + 1);
-                }
-                m_dragSwitchDesktop = -1;
-                break;
-            }
-        }
+    } else {
+        KWindowSystem::setCurrentDesktop(newDesktop + 1);
+        setCurrentDesktop(newDesktop + 1);
     }
 }
 

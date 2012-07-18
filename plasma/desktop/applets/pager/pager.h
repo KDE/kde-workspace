@@ -25,7 +25,6 @@
 #include <QList>
 
 #include <Plasma/Applet>
-#include <Plasma/DataEngine>
 
 #include "model.h"
 #include "ui_pagerConfig.h"
@@ -59,6 +58,9 @@ class Pager : public Plasma::Applet
         int currentDesktop() const { return m_currentDesktop; }
         void setCurrentDesktop(int desktop);
 
+        Q_INVOKABLE void moveWindow(int, double, double, int, int);
+        Q_INVOKABLE void changeDesktop(int desktopId);
+
     signals:
         void currentDesktopChanged();
 
@@ -70,8 +72,6 @@ class Pager : public Plasma::Applet
         void configChanged();
 
     protected slots:
-        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-        virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
         virtual void wheelEvent(QGraphicsSceneWheelEvent *);
 
         void configAccepted();
@@ -135,7 +135,6 @@ class Pager : public Plasma::Applet
 
         //list of info about animations for each desktop
         QRectF m_hoverRect;
-        int m_hoverIndex;
         QList<QAction*> m_actions;
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
@@ -143,16 +142,6 @@ class Pager : public Plasma::Applet
         KColorScheme *m_colorScheme;
         bool m_verticalFormFactor;
 
-        // dragging of windows
-        QRectF m_dragOriginal;
-        QPointF m_dragOriginalPos;
-        QPointF m_dragCurrentPos;
-        WId m_dragId;
-        int m_dragStartDesktop;
-        int m_dragHighlightedDesktop;
-
-        // desktop switching on drop event
-        int m_dragSwitchDesktop;
         bool m_ignoreNextSizeConstraint;
 
         //embedded KCM module in the configuratoin dialog

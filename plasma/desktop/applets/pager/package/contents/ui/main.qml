@@ -31,40 +31,96 @@ Item {
         model: pager.model
 
         PlasmaCore.FrameSvgItem {
-            id: frameSvg
+            id: desktop
+
+            property int desktopId: index
+
             x: model.x
             y: model.y
             width: model.width
             height: model.height
             imagePath: "widgets/pager"
             prefix: mouseArea.containsMouse ?
-                        "hover" : (index === pager.currentDesktop-1 ? "active" : "normal")
+                        "hover" : (desktopId === pager.currentDesktop-1 ? "active" : "normal")
 
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
                 hoverEnabled: true
+                onClicked: pager.changeDesktop(desktopId);
             }
 
             Item {
                 id: clipRect
                 x: 1
                 y: 1
-                width: frameSvg.width - 2
-                height: frameSvg.height - 2
+                width: desktop.width - 2
+                height: desktop.height - 2
                 clip: true
 
                 Repeater {
                     model: windows
 
                     Rectangle {
+                        id: windowRect
+
+                        property int windowId: model.windowId
+
                         x: model.x
                         y: model.y
                         width: model.width
                         height: model.height
                         color: model.active ? "green" : "red"
                         opacity: 0.5
+
+                        // used to save the state of some properties before the dragging
+                        QtObject {
+                            id: saveState
+                            property int x: -1
+                            property int y: -1
+                            property variant parent
+                            property int desktop: -1
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            drag.target: windowRect
+                            drag.axis: Drag.XandYAxis
+                            drag.minimumX: -parent.width*2
+                            drag.maximumX: root.width + parent.width*2
+                            drag.minimumY: -parent.height*2
+                            drag.maximumY: root.height + parent.height*2
+
+                            // reparent windowRect to enable the dragging for other desktops
+                            onPressed: {
+                                if (windowRect.parent == root)
+                                    return;
+
+                                saveState.x = windowRect.x;
+                                saveState.y = windowRect.y
+                                saveState.parent = windowRect.parent;
+                                saveState.desktop = desktop.desktopId;
+
+                                var value = root.mapFromItem(clipRect, windowRect.x, windowRect.y);
+                                windowRect.x = value.x;
+                                windowRect.y = value.y
+                                windowRect.parent = root;
+                            }
+
+                            onReleased: {
+                                var newDesktop = root.childAt(windowRect.x-1, windowRect.y-1);
+                                if (newDesktop) {
+                                    pager.moveWindow(windowRect.windowId, windowRect.x, windowRect.y,
+                                                     newDesktop.desktopId, saveState.desktop);
+                                }
+
+                                windowRect.x = saveState.x;
+                                windowRect.y = saveState.y;
+                                windowRect.parent = saveState.parent;
+                            }
+                        }
                     }
+
                 }
             }
         }
