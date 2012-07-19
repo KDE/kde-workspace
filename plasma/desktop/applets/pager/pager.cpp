@@ -77,7 +77,7 @@ Pager::Pager(QObject *parent, const QVariantList &args)
       m_desktopDown(false),
       m_addDesktopAction(0),
       m_removeDesktopAction(0),
-      m_colorScheme(0),
+      m_plasmaColorTheme(0),
       m_verticalFormFactor(false),
       m_ignoreNextSizeConstraint(false),
       m_configureDesktopsWidget(0),
@@ -96,13 +96,14 @@ Pager::Pager(QObject *parent, const QVariantList &args)
 
 Pager::~Pager()
 {
-    delete m_colorScheme;
+    delete m_plasmaColorTheme;
 }
 
 void Pager::init()
 {
     m_pagerModel = new VirtualDesktopModel(this);
 
+    updatePagerStyle();
     initDeclarativeUI();
     createMenu();
 
@@ -140,6 +141,41 @@ void Pager::init()
     KActivities::Consumer *act = new KActivities::Consumer(this);
     connect(act, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
     m_currentActivity = act->currentActivity();
+}
+
+void Pager::updatePagerStyle()
+{
+    m_pagerStyle["font"] = KGlobalSettings::taskbarFont();
+
+    // Desktop background
+    QColor defaultTextColor = Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor);
+    m_pagerStyle["textColor"] = QString("#%1").arg(defaultTextColor.rgba(), 0, 16);
+    defaultTextColor.setAlpha(64);
+
+    // Inactive windows
+    QColor drawingColor = plasmaColorTheme()->foreground(KColorScheme::InactiveText).color();
+    drawingColor.setAlpha(45);
+    m_pagerStyle["windowInactiveColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Inactive windows Active desktop
+    drawingColor.setAlpha(90);
+    m_pagerStyle["windowInactiveOnActiveDesktopColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Inactive window borders
+    drawingColor = defaultTextColor;
+    drawingColor.setAlpha(130);
+    m_pagerStyle["windowInactiveBorderColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Active window borders
+    m_pagerStyle["windowActiveBorderColor"] = QString("#%1").arg(defaultTextColor.rgba(), 0, 16);
+
+    // Active windows
+    drawingColor.setAlpha(130);
+    m_pagerStyle["windowActiveColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Active windows Active desktop
+    drawingColor.setAlpha(155);
+    m_pagerStyle["windowActiveOnActiveDesktopColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
 }
 
 void Pager::initDeclarativeUI()
@@ -247,13 +283,14 @@ void Pager::constraintsEvent(Plasma::Constraints constraints)
     }
 }
 
-KColorScheme *Pager::colorScheme()
+KColorScheme *Pager::plasmaColorTheme()
 {
-    if (!m_colorScheme) {
-        m_colorScheme = new KColorScheme(QPalette::Active, KColorScheme::View, Plasma::Theme::defaultTheme()->colorScheme());
+    if (!m_plasmaColorTheme) {
+        m_plasmaColorTheme = new KColorScheme(QPalette::Active, KColorScheme::View,
+                                    Plasma::Theme::defaultTheme()->colorScheme());
     }
 
-    return m_colorScheme;
+    return m_plasmaColorTheme;
 }
 
 void Pager::createMenu()
@@ -788,8 +825,9 @@ QRect Pager::fixViewportPosition( const QRect& r )
 
 void Pager::themeRefresh()
 {
-    delete m_colorScheme;
-    m_colorScheme = 0;
+    delete m_plasmaColorTheme;
+    m_plasmaColorTheme = 0;
+    updatePagerStyle();
     update();
 }
 

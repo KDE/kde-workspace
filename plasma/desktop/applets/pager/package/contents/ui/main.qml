@@ -34,14 +34,14 @@ Item {
             id: desktop
 
             property int desktopId: index
+            property bool active: (desktopId === pager.currentDesktop-1)
 
             x: model.x
             y: model.y
             width: model.width
             height: model.height
             imagePath: "widgets/pager"
-            prefix: mouseArea.containsMouse ?
-                        "hover" : (desktopId === pager.currentDesktop-1 ? "active" : "normal")
+            prefix: mouseArea.containsMouse ? "hover" : (desktop.active ? "active" : "normal")
 
             MouseArea {
                 id: mouseArea
@@ -70,8 +70,23 @@ Item {
                         y: model.y
                         width: model.width
                         height: model.height
-                        color: model.active ? "green" : "red"
-                        opacity: 0.5
+                        color: {
+                            if (desktop.active) {
+                                if (model.active)
+                                    return pager.style.windowActiveOnActiveDesktopColor;
+                                else
+                                    return pager.style.windowInactiveOnActiveDesktopColor;
+                            } else {
+                                if (model.active)
+                                    return pager.style.windowActiveColor;
+                                else
+                                    return pager.style.windowInactiveColor;
+                            }
+                        }
+
+                        border.width: 1
+                        border.color: model.active ? pager.style.windowActiveBorderColor
+                                                   : pager.style.windowInactiveBorderColor
 
                         // used to save the state of some properties before the dragging
                         QtObject {

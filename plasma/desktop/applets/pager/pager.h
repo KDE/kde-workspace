@@ -45,16 +45,21 @@ class Pager : public Plasma::Applet
 {
     Q_OBJECT
     Q_PROPERTY(QObject* model READ model CONSTANT)
+    Q_PROPERTY(QVariantMap style READ style NOTIFY styleChanged)
     Q_PROPERTY(int currentDesktop READ currentDesktop WRITE setCurrentDesktop NOTIFY currentDesktopChanged)
 
     public:
         Pager(QObject *parent, const QVariantList &args);
         ~Pager();
+
         void init();
         void constraintsEvent(Plasma::Constraints);
         virtual QList<QAction*> contextualActions();
 
         QObject *model() const { return m_pagerModel; }
+
+        QVariantMap style() const { return m_pagerStyle; }
+
         int currentDesktop() const { return m_currentDesktop; }
         void setCurrentDesktop(int desktop);
 
@@ -62,6 +67,7 @@ class Pager : public Plasma::Applet
         Q_INVOKABLE void changeDesktop(int desktopId);
 
     signals:
+        void styleChanged();
         void currentDesktopChanged();
 
     public slots:
@@ -90,18 +96,20 @@ class Pager : public Plasma::Applet
 
     protected:
         void createMenu();
-        KColorScheme *colorScheme();
+        KColorScheme *plasmaColorTheme();
         QRect fixViewportPosition( const QRect& r );
         void createConfigurationInterface(KConfigDialog *parent);
         void updateToolTip();
 
     private:
+        void updatePagerStyle();
         void initDeclarativeUI();
         QRectF mapToDeclarativeUI(const QRectF &rect) const;
 
         Plasma::Package *m_package;
         Plasma::DeclarativeWidget *m_declarativeWidget;
         VirtualDesktopModel *m_pagerModel;
+        QVariantMap m_pagerStyle;
 
         QTimer* m_timer;
         Ui::pagerConfig ui;
@@ -139,7 +147,7 @@ class Pager : public Plasma::Applet
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
         QList<KWindowInfo> m_windowInfo;
-        KColorScheme *m_colorScheme;
+        KColorScheme *m_plasmaColorTheme;
         bool m_verticalFormFactor;
 
         bool m_ignoreNextSizeConstraint;
