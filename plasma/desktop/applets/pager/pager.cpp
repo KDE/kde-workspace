@@ -176,6 +176,8 @@ void Pager::updatePagerStyle()
     // Active windows Active desktop
     drawingColor.setAlpha(155);
     m_pagerStyle["windowActiveOnActiveDesktopColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    emit styleChanged();
 }
 
 void Pager::initDeclarativeUI()
