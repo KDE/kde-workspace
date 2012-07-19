@@ -30,7 +30,7 @@ Item {
         id: repeater
         model: pager.model
 
-        PlasmaCore.FrameSvgItem {
+        Item {
             id: desktop
 
             property int desktopId: index
@@ -40,8 +40,13 @@ Item {
             y: model.y
             width: model.width
             height: model.height
-            imagePath: "widgets/pager"
-            prefix: mouseArea.containsMouse ? "hover" : (desktop.active ? "active" : "normal")
+
+            PlasmaCore.FrameSvgItem {
+                anchors.fill: parent
+                z: 1 // to make sure that the FrameSvg will be placed on top of the windows
+                imagePath: "widgets/pager"
+                prefix: mouseArea.containsMouse ? "hover" : (desktop.active ? "active" : "normal")
+            }
 
             MouseArea {
                 id: mouseArea
