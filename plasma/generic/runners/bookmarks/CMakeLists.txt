@@ -1,8 +1,11 @@
 
 ########### next target ###############
 
-set(krunner_bookmarksrunner_SRCS
+set(krunner_bookmarksrunner_SRCS bookmarkmatch.cpp browsers/chromebookmarksfinder.cpp browsers/chrome.cpp browsers/opera.cpp
     bookmarksrunner.cpp
+    browser.cpp
+    browsers/kdebrowser.cpp
+    browsers/firefox.cpp
 )
 
 kde4_add_plugin(krunner_bookmarksrunner ${krunner_bookmarksrunner_SRCS})
@@ -16,3 +19,5 @@ install(TARGETS krunner_bookmarksrunner DESTINATION ${PLUGIN_INSTALL_DIR} )
 
 install(FILES plasma-runner-bookmarks.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 
+
+add_subdirectory(tests)
