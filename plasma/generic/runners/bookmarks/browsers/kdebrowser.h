@@ -31,6 +31,7 @@ public:
     virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
 private:
     KBookmarkManager * const m_bookmarkManager;
+    KIcon favicon(const KUrl &url);
 
 };
 

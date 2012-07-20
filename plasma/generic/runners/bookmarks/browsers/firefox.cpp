@@ -97,7 +97,7 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
         const QString title = query.value(1).toString();
         const QUrl url = query.value(2).toString();
         //const int favicon_id = query.value(3).toInt();
-        QIcon icon = favicon(url);
+        // TODO: icon is actually stored in sqlite as blob. Fetch it?
         
         if (url.scheme().contains("place")) {
             //Don't use bookmarks with empty title, url or Firefox intern url
@@ -105,7 +105,7 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
             continue;
         }
 
-        BookmarkMatch bookmarkMatch( (icon.isNull() ? m_icon : icon), term, title, url.toString());
+        BookmarkMatch bookmarkMatch( defaultIcon(), term, title, url.toString());
         bookmarkMatch.addTo(matches, addEverything);
 
     }

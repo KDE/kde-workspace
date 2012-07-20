@@ -34,7 +34,7 @@ QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing)
 {
     QList<BookmarkMatch> results;
     foreach(QVariantMap bookmark, m_bookmarks) {
-        BookmarkMatch bookmarkMatch(m_icon, term, bookmark.value("name").toString(), bookmark.value("url").toString());
+        BookmarkMatch bookmarkMatch(defaultIcon(), term, bookmark.value("name").toString(), bookmark.value("url").toString());
         bookmarkMatch.addTo(results, addEveryThing);
     }
     return results;

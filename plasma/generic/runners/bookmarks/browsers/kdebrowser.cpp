@@ -24,6 +24,7 @@
 #include <QIcon>
 #include "bookmarkmatch.h"
 #include <KUrl>
+#include <KMimeType>
 
 KDEBrowser::KDEBrowser(QObject *parent) :
     Browser(parent), m_bookmarkManager(KBookmarkManager::userBookmarksManager())
@@ -68,7 +69,7 @@ QList< BookmarkMatch > KDEBrowser::match(const QString& term, bool addEverything
             continue;
         }
         
-        BookmarkMatch bookmarkMatch(m_icon, term, bookmark.text(), bookmark.url().url() );
+        BookmarkMatch bookmarkMatch(favicon(bookmark.url()), term, bookmark.text(), bookmark.url().url() );
         bookmarkMatch.addTo(matches, addEverything);
 
         bookmark = bookmarkGroup.next(bookmark);
@@ -84,4 +85,16 @@ QList< BookmarkMatch > KDEBrowser::match(const QString& term, bool addEverything
         }
     }
     return matches;
+}
+
+KIcon KDEBrowser::favicon(const KUrl &url)
+{
+    // query the favicons module
+    const QString iconFile = KMimeType::favIconForUrl(url);
+
+    if (iconFile.isEmpty()) {
+        return defaultIcon();
+    }
+
+    return KIcon(iconFile);
 }

@@ -24,7 +24,7 @@
 class BookmarksFinder {
 public:
   virtual QStringList find() = 0;
-  virtual ~BookmarksFinder() {};
+  virtual ~BookmarksFinder() {}
 };
 
 #endif

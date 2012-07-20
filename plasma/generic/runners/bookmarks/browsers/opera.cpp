@@ -55,7 +55,7 @@ QList<BookmarkMatch> Opera::match( const QString& term, bool addEverything )
             }
         }
         
-        BookmarkMatch bookmarkMatch(m_icon, term, name, url, description);
+        BookmarkMatch bookmarkMatch(defaultIcon(), term, name, url, description);
         bookmarkMatch.addTo(matches, addEverything);
     }
     return matches;

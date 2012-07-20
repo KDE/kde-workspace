@@ -25,9 +25,8 @@
 
 
 Browser::Browser(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), m_default_icon(KIcon("bookmarks"))
 {
-    m_icon = KIcon("bookmarks");
 }
 
 Browser::~Browser()
@@ -37,19 +36,6 @@ Browser::~Browser()
 
 void Browser::prepare()
 {
-}
-
-
-KIcon Browser::favicon(const KUrl &url)
-{
-    // query the favicons module
-    const QString iconFile = KMimeType::favIconForUrl(url);
-
-    if (iconFile.isEmpty()) {
-        return m_icon;
-    }
-
-    return KIcon(iconFile);
 }
 
 void Browser::teardown()
