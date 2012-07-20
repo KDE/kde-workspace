@@ -1,7 +1,13 @@
 
 ########### next target ###############
+find_package(QJSON REQUIRED)
 
-set(krunner_bookmarksrunner_SRCS bookmarkmatch.cpp browsers/chromebookmarksfinder.cpp browsers/chrome.cpp browsers/opera.cpp
+set(krunner_bookmarksrunner_SRCS
+    browserfactory.cpp
+    bookmarkmatch.cpp
+    browsers/chromebookmarksfinder.cpp
+    browsers/chrome.cpp
+    browsers/opera.cpp
     bookmarksrunner.cpp
     browser.cpp
     browsers/kdebrowser.cpp
@@ -10,7 +16,7 @@ set(krunner_bookmarksrunner_SRCS bookmarkmatch.cpp browsers/chromebookmarksfinde
 
 kde4_add_plugin(krunner_bookmarksrunner ${krunner_bookmarksrunner_SRCS})
 target_link_libraries(krunner_bookmarksrunner ${KDE4_KIO_LIBS} ${QT_QTSCRIPT_LIBRARY} ${KDE4_PLASMA_LIBS}
-                      ${QT_QTSQL_LIBRARY})
+                      ${QT_QTSQL_LIBRARY} qjson)
 
 install(TARGETS krunner_bookmarksrunner DESTINATION ${PLUGIN_INSTALL_DIR} )
 

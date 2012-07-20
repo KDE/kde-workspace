@@ -22,13 +22,14 @@
 #include "chrome.h"
 #include "browsers/bookmarksfinder.h"
 
-void Chrome::match(Plasma::AbstractRunner* runner, Plasma::RunnerContext& context, bool allBookmarks, const QString& term)
-{
-
-}
-
 Chrome::Chrome( BookmarksFinder* bookmarksFinder, QObject* parent ): Browser(parent), m_bookmarksFiles(bookmarksFinder->find())
 {
+}
+
+QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing)
+{
+    QList<BookmarkMatch> results;
+    return results;
 }
 
 void Chrome::prepare()

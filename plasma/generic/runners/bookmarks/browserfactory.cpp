@@ -18,30 +18,32 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "browser.h"
+#include "browsers/kdebrowser.h"
+#include "browsers/firefox.h"
+#include "browsers/opera.h"
 
-#ifndef TESTCHROMEBOOKMARKS_H
-#define TESTCHROMEBOOKMARKS_H
-
-#include <QObject>
-#include "browsers/bookmarksfinder.h"
-
-class FakeBookmarksFinder : public BookmarksFinder {
-public:
-  FakeBookmarksFinder(const QStringList &bookmarks) : m_bookmarks(bookmarks) {}
-    virtual QStringList find() { return m_bookmarks; }
-private:
-  QStringList m_bookmarks;
-};
-
-class TestChromeBookmarks : public QObject
+Browser *BrowserFactory::find(const QString& browserName, QObject* parent)
 {
-Q_OBJECT
-public:
-    explicit TestChromeBookmarks(QObject* parent = 0) : QObject(parent) {}
+    if(m_previousBrowserName == browserName) {
+      return m_previousBrowser;
+    }
+    delete m_previousBrowser;
+    m_previousBrowserName = browserName;
+    if (browserName.contains("firefox", Qt::CaseInsensitive)) {
+        m_previousBrowser = new Firefox(parent);
+    } else if (browserName.contains("opera", Qt::CaseInsensitive)) {
+        m_previousBrowser = new Opera(parent);
+    } else {
+        m_previousBrowser = new KDEBrowser(parent);
+    }
 
-private slots:
-  void itShouldFindNothingWhenPrepareIsNotCalled();
-  void testBookmarksFinder();
-};
+    return m_previousBrowser;
+}
 
-#endif // TESTCHROMEBOOKMARKS_H
+
+BrowserFactory::BrowserFactory(QObject *parent)
+    : QObject(parent), m_previousBrowser(0), m_previousBrowserName("invalid")
+{
+}
+

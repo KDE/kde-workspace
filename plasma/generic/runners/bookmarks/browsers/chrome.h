@@ -30,7 +30,7 @@ class Chrome : public Browser
   Q_OBJECT
 public:
     Chrome(BookmarksFinder *bookmarksFinder, QObject* parent = 0);
-    virtual void match(Plasma::AbstractRunner* runner, Plasma::RunnerContext& context, bool allBookmarks, const QString& term);
+    virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing);
 public slots:
     virtual void prepare();
     virtual void teardown();

@@ -19,35 +19,10 @@
  */
 
 #include "browser.h"
-#include "browsers/kdebrowser.h"
-#include "browsers/firefox.h"
-#include "browsers/opera.h"
+
 #include <KMimeType>
 
 
-Browser *BrowserFactory::find(const QString& browserName, QObject* parent)
-{
-    if(m_previousBrowserName == browserName) {
-      return m_previousBrowser;
-    }
-    delete m_previousBrowser;
-    m_previousBrowserName = browserName;
-    if (browserName.contains("firefox", Qt::CaseInsensitive)) {
-        m_previousBrowser = new Firefox(parent);
-    } else if (browserName.contains("opera", Qt::CaseInsensitive)) {
-        m_previousBrowser = new Opera(parent);
-    } else {
-        m_previousBrowser = new KDEBrowser(parent);
-    }
-    
-    return m_previousBrowser;
-}
-
-
-BrowserFactory::BrowserFactory(QObject *parent)
-    : QObject(parent), m_previousBrowser(0), m_previousBrowserName("invalid")
-{
-}
 
 Browser::Browser(QObject *parent)
     : QObject(parent)

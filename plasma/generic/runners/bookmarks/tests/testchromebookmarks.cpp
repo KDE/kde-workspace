@@ -34,11 +34,11 @@ void TestChromeBookmarks::testBookmarksFinder()
 }
 
 
-void TestChromeBookmarks::testFindBookmarks()
+void TestChromeBookmarks::itShouldFindNothingWhenPrepareIsNotCalled()
 {
   FakeBookmarksFinder finder(QStringList("Bookmarks"));
-  
   Chrome *chrome = new Chrome(&finder, this);
+  QCOMPARE(chrome->match("any", true).size(), 0);
 }
 
 #include "testchromebookmarks.moc"
