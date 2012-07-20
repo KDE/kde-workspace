@@ -23,6 +23,8 @@
 #include "browsers/bookmarksfinder.h"
 #include <qjson/parser.h>
 #include <QFileInfo>
+#include <KDebug>
+#include "bookmarksrunner_defs.h"
 
 Chrome::Chrome( BookmarksFinder* bookmarksFinder, QObject* parent ): Browser(parent), m_bookmarksFiles(bookmarksFinder->find())
 {
@@ -53,6 +55,7 @@ void Chrome::prepare()
             parseFolder(folder.toMap());
         }
     }
+    kDebug(kdbg_code) << "Found " << m_bookmarks.count() << " bookmarks on profiles " << m_bookmarksFiles;
 }
 
 void Chrome::teardown()

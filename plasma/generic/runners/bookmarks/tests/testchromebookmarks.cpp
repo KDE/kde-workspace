@@ -103,7 +103,7 @@ void TestChromeBookmarks::itShouldFindBookmarksFromAllProfiles()
     verifyMatch(matches[0], "some bookmark in bookmark bar", "http://somehost.com/", 0.18, QueryMatch::PossibleMatch);
     verifyMatch(matches[1], "bookmark in other bookmarks", "http://otherbookmarks.com/", 0.18, QueryMatch::PossibleMatch);
     verifyMatch(matches[2], "bookmark in somefolder", "http://somefolder.com/", 0.18, QueryMatch::PossibleMatch);
-    verifyMatch(matches[3], "bookmark in secondProfile", "http://secondProfile.com/", 0.18, QueryMatch::PossibleMatch);
+    verifyMatch(matches[3], "bookmark in secondProfile", "http://secondprofile.com/", 0.18, QueryMatch::PossibleMatch);
 }
 
 #include "testchromebookmarks.moc"
