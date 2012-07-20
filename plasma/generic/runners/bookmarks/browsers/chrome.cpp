@@ -21,6 +21,8 @@
 
 #include "chrome.h"
 #include "browsers/bookmarksfinder.h"
+#include <qjson/parser.h>
+#include <QFileInfo>
 
 Chrome::Chrome( BookmarksFinder* bookmarksFinder, QObject* parent ): Browser(parent), m_bookmarksFiles(bookmarksFinder->find())
 {
@@ -29,16 +31,43 @@ Chrome::Chrome( BookmarksFinder* bookmarksFinder, QObject* parent ): Browser(par
 QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing)
 {
     QList<BookmarkMatch> results;
+    foreach(QVariantMap bookmark, m_bookmarks) {
+        BookmarkMatch bookmarkMatch(m_icon, term, bookmark.value("name").toString(), bookmark.value("url").toString());
+        bookmarkMatch.addTo(results, addEveryThing);
+    }
     return results;
 }
 
 void Chrome::prepare()
 {
-    Browser::prepare();
+    QJson::Parser parser;
+    bool ok;
+    foreach(QString filename, m_bookmarksFiles) {
+        QFile bookmarksFile(filename);
+        QVariant result = parser.parse(&bookmarksFile, &ok);
+        if(!ok || !result.toMap().contains("roots")) {
+            return;
+        }
+        QVariantMap entries = result.toMap().value("roots").toMap();
+        foreach(QVariant folder, entries.values()) {
+            parseFolder(folder.toMap());
+        }
+    }
 }
 
 void Chrome::teardown()
 {
-    Browser::teardown();
+    m_bookmarks.clear();
 }
 
+void Chrome::parseFolder(const QVariantMap &entry)
+{
+    QVariantList children = entry.value("children").toList();
+    foreach(QVariant child, children) {
+        QVariantMap entry = child.toMap();
+        if(entry.value("type").toString() == "folder")
+            parseFolder(entry);
+        else
+            m_bookmarks << entry;
+    }
+}

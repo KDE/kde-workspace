@@ -24,6 +24,11 @@
 #include "browsers/chrome.h"
 #include "browsers/chromebookmarksfinder.h"
 
+using namespace Plasma;
+
+FakeBookmarksFinder findBookmarksInCurrentDirectory(QStringList("Chrome-Bookmarks-Sample.json"));
+
+
 void TestChromeBookmarks::testBookmarksFinder()
 {
   ChromeBookmarksFinder findChrome("chrome");
@@ -36,9 +41,69 @@ void TestChromeBookmarks::testBookmarksFinder()
 
 void TestChromeBookmarks::itShouldFindNothingWhenPrepareIsNotCalled()
 {
-  FakeBookmarksFinder finder(QStringList("Bookmarks"));
-  Chrome *chrome = new Chrome(&finder, this);
+  Chrome *chrome = new Chrome(&findBookmarksInCurrentDirectory, this);
   QCOMPARE(chrome->match("any", true).size(), 0);
+}
+
+void TestChromeBookmarks::itShouldGracefullyExitWhenFileIsNotFound()
+{
+    FakeBookmarksFinder finder(QStringList("FileNotExisting.json"));
+    Chrome *chrome = new Chrome(&finder, this);
+    chrome->prepare();
+    QCOMPARE(chrome->match("any", true).size(), 0);
+}
+
+
+void verifyMatch(BookmarkMatch &match, const QString &title, const QString &url, qreal relevance, QueryMatch::Type type) {
+    QueryMatch queryMatch = match.asQueryMatch(NULL);
+    QCOMPARE(queryMatch.text(), title);
+    QCOMPARE(queryMatch.data().toString(), url);
+    QCOMPARE(queryMatch.relevance(), relevance);
+    QVERIFY2(queryMatch.type() == type,
+             QString("Wrong query match type: expecting %1 but was %2").arg(type).arg(queryMatch.type() ).toAscii());
+}
+
+void TestChromeBookmarks::itShouldFindAllBookmarks()
+{
+    Chrome *chrome = new Chrome(&findBookmarksInCurrentDirectory, this);
+    chrome->prepare();
+    QList<BookmarkMatch> matches = chrome->match("any", true);
+    QCOMPARE(matches.size(), 3);
+    verifyMatch(matches[0], "some bookmark in bookmark bar", "http://somehost.com/", 0.18, QueryMatch::PossibleMatch);
+    verifyMatch(matches[1], "bookmark in other bookmarks", "http://otherbookmarks.com/", 0.18, QueryMatch::PossibleMatch);
+    verifyMatch(matches[2], "bookmark in somefolder", "http://somefolder.com/", 0.18, QueryMatch::PossibleMatch);
+}
+
+void TestChromeBookmarks::itShouldFindOnlyMatches()
+{
+    Chrome *chrome = new Chrome(&findBookmarksInCurrentDirectory, this);
+    chrome->prepare();
+    QList<BookmarkMatch> matches = chrome->match("other", false);
+    QCOMPARE(matches.size(), 1);
+    verifyMatch(matches[0], "bookmark in other bookmarks", "http://otherbookmarks.com/", 0.45, QueryMatch::PossibleMatch);
+}
+
+void TestChromeBookmarks::itShouldClearResultAfterCallingTeardown()
+{
+    Chrome *chrome = new Chrome(&findBookmarksInCurrentDirectory, this);
+    chrome->prepare();
+    QCOMPARE(chrome->match("any", true).size(), 3);
+    chrome->teardown();
+    QCOMPARE(chrome->match("any", true).size(), 0);
+
+}
+
+void TestChromeBookmarks::itShouldFindBookmarksFromAllProfiles()
+{
+    FakeBookmarksFinder findBookmarksFromAllProfiles(QStringList("Chrome-Bookmarks-Sample.json") << "Chrome-Bookmarks-SecondProfile.json");
+    Chrome *chrome = new Chrome(&findBookmarksFromAllProfiles, this);
+    chrome->prepare();
+    QList<BookmarkMatch> matches = chrome->match("any", true);
+    QCOMPARE(matches.size(), 4);
+    verifyMatch(matches[0], "some bookmark in bookmark bar", "http://somehost.com/", 0.18, QueryMatch::PossibleMatch);
+    verifyMatch(matches[1], "bookmark in other bookmarks", "http://otherbookmarks.com/", 0.18, QueryMatch::PossibleMatch);
+    verifyMatch(matches[2], "bookmark in somefolder", "http://somefolder.com/", 0.18, QueryMatch::PossibleMatch);
+    verifyMatch(matches[3], "bookmark in secondProfile", "http://secondProfile.com/", 0.18, QueryMatch::PossibleMatch);
 }
 
 #include "testchromebookmarks.moc"

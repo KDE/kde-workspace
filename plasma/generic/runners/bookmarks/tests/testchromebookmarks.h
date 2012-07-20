@@ -38,10 +38,15 @@ class TestChromeBookmarks : public QObject
 Q_OBJECT
 public:
     explicit TestChromeBookmarks(QObject* parent = 0) : QObject(parent) {}
-
 private slots:
-  void itShouldFindNothingWhenPrepareIsNotCalled();
   void testBookmarksFinder();
+  void itShouldFindNothingWhenPrepareIsNotCalled();
+  void itShouldGracefullyExitWhenFileIsNotFound();
+  void itShouldFindAllBookmarks();
+  void itShouldFindOnlyMatches();
+  void itShouldClearResultAfterCallingTeardown();
+  void itShouldFindBookmarksFromAllProfiles();
+
 };
 
 #endif // TESTCHROMEBOOKMARKS_H

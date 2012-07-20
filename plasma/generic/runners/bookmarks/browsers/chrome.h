@@ -34,9 +34,11 @@ public:
 public slots:
     virtual void prepare();
     virtual void teardown();
-    
+private:
+    void parseFolder(const QVariantMap &entry);
 private:
   QStringList const m_bookmarksFiles;
+  QList<QVariantMap> m_bookmarks;
 };
 
 #endif // CHROME_H
