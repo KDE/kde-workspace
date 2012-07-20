@@ -27,11 +27,11 @@
 Browser::Browser(QObject *parent)
     : QObject(parent)
 {
+    m_icon = KIcon("bookmarks");
 }
 
 Browser::~Browser()
 {
-    m_icon = KIcon("bookmarks");
 }
 
 
