@@ -23,16 +23,18 @@
 #define CHROMEBOOKMARKSFINDER_H
 
 #include <QObject>
+#include <QDir>
 #include "browsers/bookmarksfinder.h"
 
 class ChromeBookmarksFinder : public QObject, public BookmarksFinder
 {
 
 public:
-    explicit ChromeBookmarksFinder ( const QString& applicationName, QObject* parent = 0 );
+    explicit ChromeBookmarksFinder (const QString& applicationName, const QString &homeDirectory = QDir::homePath(), QObject* parent = 0 );
     virtual QStringList find();
 private:
   QString const m_applicationName;
+  QString const m_homeDirectory;
 };
 
 #endif // CHROMEBOOKMARKSFINDER_H

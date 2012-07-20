@@ -39,7 +39,8 @@ Q_OBJECT
 public:
     explicit TestChromeBookmarks(QObject* parent = 0) : QObject(parent) {}
 private slots:
-  void testBookmarksFinder();
+  void bookmarkFinderShouldFindEachProfileDirectory();
+  void bookmarkFinderShouldReportNoProfilesOnErrors();
   void itShouldFindNothingWhenPrepareIsNotCalled();
   void itShouldGracefullyExitWhenFileIsNotFound();
   void itShouldFindAllBookmarks();

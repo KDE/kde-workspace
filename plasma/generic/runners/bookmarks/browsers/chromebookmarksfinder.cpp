@@ -21,15 +21,39 @@
 
 #include "chromebookmarksfinder.h"
 #include <QDir>
+#include <qjson/parser.h>
+#include <QVariantMap>
+#include <KDebug>
+#include "bookmarksrunner_defs.h"
+#include <QFileInfo>
 
-ChromeBookmarksFinder::ChromeBookmarksFinder ( const QString &applicationName, QObject* parent )
-  : QObject(parent), m_applicationName(applicationName)
+ChromeBookmarksFinder::ChromeBookmarksFinder (const QString &applicationName, const QString &homeDirectory, QObject* parent )
+    : QObject(parent), m_applicationName(applicationName), m_homeDirectory(homeDirectory)
 {
 }
 
 QStringList ChromeBookmarksFinder::find()
 {
-  QString configDir = QString("%1/.config/%2/Default/Bookmarks")
-    .arg(QDir::homePath()).arg(m_applicationName);
-  return QStringList(configDir);
+  QString configDirectory = QString("%1/.config/%2")
+            .arg(m_homeDirectory).arg(m_applicationName);
+  QString localStateFileName = QString("%1/Local State")
+          .arg(configDirectory);
+
+  QStringList profiles;
+  QJson::Parser parser;
+  bool ok;
+  QFile localStateFile(localStateFileName);
+
+  QVariantMap localState = parser.parse(&localStateFile, &ok).toMap();
+  if(!ok) {
+      kDebug(kdbg_code) << "error opening " << QFileInfo(localStateFile).absoluteFilePath();
+      return profiles;
+  }
+
+  QVariantMap profilesConfig = localState.value("profile").toMap().value("info_cache").toMap();
+
+  foreach(QString profile, profilesConfig.keys())
+      profiles << QString("%1/%2/Bookmarks").arg(configDirectory).arg(profile);
+
+  return profiles;
 }

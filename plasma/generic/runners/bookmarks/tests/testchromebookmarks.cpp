@@ -26,16 +26,26 @@
 
 using namespace Plasma;
 
-FakeBookmarksFinder findBookmarksInCurrentDirectory(QStringList("Chrome-Bookmarks-Sample.json"));
+FakeBookmarksFinder findBookmarksInCurrentDirectory(QStringList("chrome-config-home/Chrome-Bookmarks-Sample.json"));
 
 
-void TestChromeBookmarks::testBookmarksFinder()
+void TestChromeBookmarks::bookmarkFinderShouldFindEachProfileDirectory()
 {
-  ChromeBookmarksFinder findChrome("chrome");
-  QString actualTemplate = QString("%1/.config/%2/Default/Bookmarks").arg(QDir::homePath());
-  QCOMPARE(findChrome.find(), QStringList(actualTemplate.arg("chrome")));
-  ChromeBookmarksFinder findChromium("chromium");
-  QCOMPARE(findChromium.find(), QStringList(actualTemplate.arg("chromium")));
+    ChromeBookmarksFinder findChrome("chromium", "./chrome-config-home");
+    QString profileTemplate = QString("./chrome-config-home/.config/%1/%2/Bookmarks");
+
+    QStringList profiles = findChrome.find();
+    QCOMPARE(profiles.size(), 2);
+    QCOMPARE(profiles[0], profileTemplate.arg("chromium").arg("Default"));
+    QCOMPARE(profiles[1], profileTemplate.arg("chromium").arg("Profile 1"));
+}
+
+void TestChromeBookmarks::bookmarkFinderShouldReportNoProfilesOnErrors()
+{
+    ChromeBookmarksFinder findChrome("chromium", "./no-config-directory");
+
+    QStringList profiles = findChrome.find();
+    QCOMPARE(profiles.size(), 0);
 }
 
 
@@ -95,7 +105,8 @@ void TestChromeBookmarks::itShouldClearResultAfterCallingTeardown()
 
 void TestChromeBookmarks::itShouldFindBookmarksFromAllProfiles()
 {
-    FakeBookmarksFinder findBookmarksFromAllProfiles(QStringList("Chrome-Bookmarks-Sample.json") << "Chrome-Bookmarks-SecondProfile.json");
+    FakeBookmarksFinder findBookmarksFromAllProfiles(QStringList("chrome-config-home/Chrome-Bookmarks-Sample.json")
+                                                     << "chrome-config-home/Chrome-Bookmarks-SecondProfile.json");
     Chrome *chrome = new Chrome(&findBookmarksFromAllProfiles, this);
     chrome->prepare();
     QList<BookmarkMatch> matches = chrome->match("any", true);
