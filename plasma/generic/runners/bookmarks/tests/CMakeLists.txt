@@ -1,4 +1,3 @@
-enable_testing()
 set( testChromeBookmarks_SRCS testchromebookmarks.cpp 
   ../browsers/chrome.cpp
   ../browser.cpp
