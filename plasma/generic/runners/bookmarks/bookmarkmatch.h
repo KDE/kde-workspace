@@ -27,17 +27,17 @@
 #include <QList>
 #include <Plasma/QueryMatch>
 
+class Favicon;
 class BookmarkMatch
 {
-
 public:
-    BookmarkMatch(const QIcon &icon, const QString &searchTerm, const QString &bookmarkTitle, const QString &bookmarkURL, const QString &description = QString());
+    BookmarkMatch(Favicon *favicon, const QString &searchTerm, const QString &bookmarkTitle, const QString &bookmarkURL, const QString &description = QString());
     void addTo(QList< BookmarkMatch >& listOfResults, bool addEvenOnNoMatch);
     Plasma::QueryMatch asQueryMatch(Plasma::AbstractRunner *runner);
 private:
     bool matches(const QString &search, const QString &matchingField);
 private:
-  QIcon m_icon;
+  Favicon * m_favicon;
   QString m_searchTerm;
   QString m_bookmarkTitle;
   QString m_bookmarkURL;

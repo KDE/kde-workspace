@@ -23,6 +23,7 @@
 #include "bookmarksrunner_defs.h"
 #include <QDir>
 #include <QFile>
+#include "favicon.h"
 
 QList<BookmarkMatch> Opera::match( const QString& term, bool addEverything )
 {
@@ -55,13 +56,13 @@ QList<BookmarkMatch> Opera::match( const QString& term, bool addEverything )
             }
         }
         
-        BookmarkMatch bookmarkMatch(defaultIcon(), term, name, url, description);
+        BookmarkMatch bookmarkMatch(m_favicon, term, name, url, description);
         bookmarkMatch.addTo(matches, addEverything);
     }
     return matches;
 }
 
-Opera::Opera(QObject* parent): Browser(parent)
+Opera::Opera(QObject* parent): Browser(parent), m_favicon(new FallbackFavicon(this))
 {
 
 }

@@ -28,9 +28,10 @@
 #include <QFile>
 #include <QDir>
 #include "bookmarkmatch.h"
+#include "favicon.h"
 
 Firefox::Firefox(QObject *parent) :
-    Browser(parent)
+    Browser(parent), m_favicon(new FallbackFavicon(this))
 {
   reloadConfiguration();
   kDebug(kdbg_code) << "Loading Firefox Bookmarks Browser";
@@ -105,7 +106,7 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
             continue;
         }
 
-        BookmarkMatch bookmarkMatch( defaultIcon(), term, title, url.toString());
+        BookmarkMatch bookmarkMatch( m_favicon, term, title, url.toString());
         bookmarkMatch.addTo(matches, addEverything);
 
     }

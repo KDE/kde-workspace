@@ -19,35 +19,22 @@
  */
 
 
-#ifndef TESTCHROMEBOOKMARKS_H
-#define TESTCHROMEBOOKMARKS_H
+#ifndef CHROMEFINDPROFILE_H
+#define CHROMEFINDPROFILE_H
 
 #include <QObject>
+#include <QDir>
 #include "browsers/findprofile.h"
 
-class FakeFindProfile : public FindProfile {
-public:
-  FakeFindProfile(const QList<Profile> &profiles) : m_profiles(profiles) {}
-    virtual QList<Profile> find() { return m_profiles; }
-private:
-  QList<Profile> m_profiles;
-};
-
-class TestChromeBookmarks : public QObject
+class FindChromeProfile : public QObject, public FindProfile
 {
-Q_OBJECT
-public:
-    explicit TestChromeBookmarks(QObject* parent = 0) : QObject(parent) {}
-private slots:
-  void bookmarkFinderShouldFindEachProfileDirectory();
-  void bookmarkFinderShouldReportNoProfilesOnErrors();
-  void itShouldFindNothingWhenPrepareIsNotCalled();
-  void itShouldGracefullyExitWhenFileIsNotFound();
-  void itShouldFindAllBookmarks();
-  void itShouldFindOnlyMatches();
-  void itShouldClearResultAfterCallingTeardown();
-  void itShouldFindBookmarksFromAllProfiles();
 
+public:
+    explicit FindChromeProfile (const QString& applicationName, const QString &homeDirectory = QDir::homePath(), QObject* parent = 0 );
+    virtual QList<Profile> find();
+private:
+  QString const m_applicationName;
+  QString const m_homeDirectory;
 };
 
-#endif // TESTCHROMEBOOKMARKS_H
+#endif // CHROMEFINDPROFILE_H

@@ -23,22 +23,27 @@
 #define CHROME_H
 
 #include "browser.h"
+#include "findprofile.h"
+#include <QMap>
+#include <QList>
 
-class BookmarksFinder;
+class ChromeFavicon;
+class ProfileBookmarks;
 class Chrome : public Browser
 {
   Q_OBJECT
 public:
-    Chrome(BookmarksFinder *bookmarksFinder, QObject* parent = 0);
+    Chrome(FindProfile *findProfile, QObject* parent = 0);
+    ~Chrome();
     virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing);
+    virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing, ProfileBookmarks *profileBookmarks);
 public slots:
     virtual void prepare();
     virtual void teardown();
 private:
-    void parseFolder(const QVariantMap &entry);
+    void parseFolder(const QVariantMap &entry, ProfileBookmarks *profile);
 private:
-  QStringList const m_bookmarksFiles;
-  QList<QVariantMap> m_bookmarks;
+    QList<ProfileBookmarks*> m_profileBookmarks;
 };
 
 #endif // CHROME_H

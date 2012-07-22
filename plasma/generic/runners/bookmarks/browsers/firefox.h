@@ -25,6 +25,7 @@
 #include "browser.h"
 
 class KJob;
+class Favicon;
 class Firefox : public Browser
 {
     Q_OBJECT
@@ -38,6 +39,7 @@ private:
     QString m_dbCacheFile;
     QSqlDatabase m_db;
     bool m_dbOK;
+    Favicon *const m_favicon;
 
 
 public slots:

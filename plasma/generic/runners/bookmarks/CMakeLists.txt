@@ -5,13 +5,15 @@ find_package(QJSON REQUIRED)
 set(krunner_bookmarksrunner_SRCS
     browserfactory.cpp
     bookmarkmatch.cpp
-    browsers/chromebookmarksfinder.cpp
+    browsers/chromefavicon.cpp
+    browsers/chromefindprofile.cpp
     browsers/chrome.cpp
     browsers/opera.cpp
     bookmarksrunner.cpp
     browser.cpp
     browsers/kdebrowser.cpp
     browsers/firefox.cpp
+    favicon.cpp
 )
 
 kde4_add_plugin(krunner_bookmarksrunner ${krunner_bookmarksrunner_SRCS})

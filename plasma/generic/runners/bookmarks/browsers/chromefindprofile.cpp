@@ -19,27 +19,28 @@
  */
 
 
-#include "chromebookmarksfinder.h"
+#include "chromefindprofile.h"
 #include <QDir>
 #include <qjson/parser.h>
 #include <QVariantMap>
 #include <KDebug>
 #include "bookmarksrunner_defs.h"
+#include "chromefavicon.h"
 #include <QFileInfo>
 
-ChromeBookmarksFinder::ChromeBookmarksFinder (const QString &applicationName, const QString &homeDirectory, QObject* parent )
+FindChromeProfile::FindChromeProfile (const QString &applicationName, const QString &homeDirectory, QObject* parent )
     : QObject(parent), m_applicationName(applicationName), m_homeDirectory(homeDirectory)
 {
 }
 
-QStringList ChromeBookmarksFinder::find()
+QList<Profile> FindChromeProfile::find()
 {
   QString configDirectory = QString("%1/.config/%2")
             .arg(m_homeDirectory).arg(m_applicationName);
   QString localStateFileName = QString("%1/Local State")
           .arg(configDirectory);
 
-  QStringList profiles;
+  QList<Profile> profiles;
   QJson::Parser parser;
   bool ok;
   QFile localStateFile(localStateFileName);
@@ -52,8 +53,11 @@ QStringList ChromeBookmarksFinder::find()
 
   QVariantMap profilesConfig = localState.value("profile").toMap().value("info_cache").toMap();
 
-  foreach(QString profile, profilesConfig.keys())
-      profiles << QString("%1/%2/Bookmarks").arg(configDirectory).arg(profile);
+  foreach(QString profile, profilesConfig.keys()) {
+      QString profilePath = QString("%1/%2").arg(configDirectory).arg(profile);
+      QString profileBookmarksPath = QString("%1/%2").arg(profilePath).arg("Bookmarks");
+      profiles << Profile(profileBookmarksPath, new ChromeFavicon(profilePath, this));
+  }
 
   return profiles;
 }

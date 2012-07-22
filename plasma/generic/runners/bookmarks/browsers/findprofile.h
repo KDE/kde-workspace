@@ -17,37 +17,26 @@
  *   Free Software Foundation, Inc.,
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#ifndef FIND_PROFILE_H
+#define FIND_PROFILE_H
+#include <QString>
+#include <QList>
 
-
-#ifndef TESTCHROMEBOOKMARKS_H
-#define TESTCHROMEBOOKMARKS_H
-
-#include <QObject>
-#include "browsers/findprofile.h"
-
-class FakeFindProfile : public FindProfile {
+class Favicon;
+class Profile {
 public:
-  FakeFindProfile(const QList<Profile> &profiles) : m_profiles(profiles) {}
-    virtual QList<Profile> find() { return m_profiles; }
+    Profile(const QString &path, Favicon *favicon) : m_path(path), m_favicon(favicon) {}
+    inline QString path() const { return m_path; }
+    inline Favicon *favicon() const { return m_favicon; }
 private:
-  QList<Profile> m_profiles;
+    QString m_path;
+    Favicon *m_favicon;
 };
 
-class TestChromeBookmarks : public QObject
-{
-Q_OBJECT
+class FindProfile {
 public:
-    explicit TestChromeBookmarks(QObject* parent = 0) : QObject(parent) {}
-private slots:
-  void bookmarkFinderShouldFindEachProfileDirectory();
-  void bookmarkFinderShouldReportNoProfilesOnErrors();
-  void itShouldFindNothingWhenPrepareIsNotCalled();
-  void itShouldGracefullyExitWhenFileIsNotFound();
-  void itShouldFindAllBookmarks();
-  void itShouldFindOnlyMatches();
-  void itShouldClearResultAfterCallingTeardown();
-  void itShouldFindBookmarksFromAllProfiles();
-
+  virtual QList<Profile> find() = 0;
+  virtual ~FindProfile() {}
 };
 
-#endif // TESTCHROMEBOOKMARKS_H
+#endif

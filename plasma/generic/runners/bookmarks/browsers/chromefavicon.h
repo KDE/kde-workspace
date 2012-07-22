@@ -18,23 +18,29 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef CHROMEFAVICON_H
+#define CHROMEFAVICON_H
 
-#ifndef CHROMEBOOKMARKSFINDER_H
-#define CHROMEBOOKMARKSFINDER_H
+#include <QIcon>
+#include <QSqlDatabase>
+#include "favicon.h"
 
-#include <QObject>
-#include <QDir>
-#include "browsers/bookmarksfinder.h"
-
-class ChromeBookmarksFinder : public QObject, public BookmarksFinder
+class ChromeFavicon : public Favicon
 {
-
+    Q_OBJECT
 public:
-    explicit ChromeBookmarksFinder (const QString& applicationName, const QString &homeDirectory = QDir::homePath(), QObject* parent = 0 );
-    virtual QStringList find();
+    explicit ChromeFavicon(const QString &profileDirectory, QObject *parent = 0);
+    ~ChromeFavicon();
+    virtual QIcon iconFor(const QString &url);
+
+public slots:
+    virtual void prepare();
+    virtual void teardown();
+
 private:
-  QString const m_applicationName;
-  QString const m_homeDirectory;
+    QSqlDatabase m_db;
+    QString m_profileCacheDirectory;
+    void cleanCacheDirectory();
 };
 
-#endif // CHROMEBOOKMARKSFINDER_H
+#endif // CHROMEFAVICON_H

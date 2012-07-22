@@ -19,35 +19,37 @@
  */
 
 
-#ifndef TESTCHROMEBOOKMARKS_H
-#define TESTCHROMEBOOKMARKS_H
+#ifndef FAVICON_H
+#define FAVICON_H
 
 #include <QObject>
-#include "browsers/findprofile.h"
+#include <KIcon>
 
-class FakeFindProfile : public FindProfile {
-public:
-  FakeFindProfile(const QList<Profile> &profiles) : m_profiles(profiles) {}
-    virtual QList<Profile> find() { return m_profiles; }
-private:
-  QList<Profile> m_profiles;
-};
-
-class TestChromeBookmarks : public QObject
+class Favicon : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 public:
-    explicit TestChromeBookmarks(QObject* parent = 0) : QObject(parent) {}
-private slots:
-  void bookmarkFinderShouldFindEachProfileDirectory();
-  void bookmarkFinderShouldReportNoProfilesOnErrors();
-  void itShouldFindNothingWhenPrepareIsNotCalled();
-  void itShouldGracefullyExitWhenFileIsNotFound();
-  void itShouldFindAllBookmarks();
-  void itShouldFindOnlyMatches();
-  void itShouldClearResultAfterCallingTeardown();
-  void itShouldFindBookmarksFromAllProfiles();
+    explicit Favicon(QObject *parent = 0);
+    virtual QIcon iconFor(const QString &url) = 0;
 
+protected:
+    inline KIcon defaultIcon() const { return m_default_icon; }
+private:
+    KIcon const m_default_icon;
+
+public slots:
+    virtual void prepare() {}
+    virtual void teardown() {}
+    
 };
 
-#endif // TESTCHROMEBOOKMARKS_H
+
+class FallbackFavicon : public Favicon {
+    Q_OBJECT
+public:
+    FallbackFavicon(QObject *parent = 0) : Favicon(parent) {}
+    virtual QIcon iconFor(const QString &) { return defaultIcon(); }
+};
+
+
+#endif // FAVICON_H

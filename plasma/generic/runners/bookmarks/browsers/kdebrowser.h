@@ -22,7 +22,18 @@
 #define KDEBROWSER_H
 
 #include "browser.h"
+#include "favicon.h"
 class KBookmarkManager;
+class Favicon;
+
+class KDEFavicon : public Favicon {
+    Q_OBJECT
+public:
+    KDEFavicon(QObject *parent = 0);
+    virtual QIcon iconFor(const QString &url);
+
+};
+
 class KDEBrowser : public Browser
 {
     Q_OBJECT
@@ -31,8 +42,7 @@ public:
     virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
 private:
     KBookmarkManager * const m_bookmarkManager;
-    KIcon favicon(const KUrl &url);
-
+    Favicon * const m_favicon;
 };
 
 #endif // KDEBROWSER_H

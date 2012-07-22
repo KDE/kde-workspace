@@ -20,21 +20,58 @@
 
 
 #include "chrome.h"
-#include "browsers/bookmarksfinder.h"
+#include "chromefavicon.h"
+#include "browsers/findprofile.h"
 #include <qjson/parser.h>
 #include <QFileInfo>
 #include <KDebug>
 #include "bookmarksrunner_defs.h"
+#include <QFileInfo>
+#include <QDir>
 
-Chrome::Chrome( BookmarksFinder* bookmarksFinder, QObject* parent ): Browser(parent), m_bookmarksFiles(bookmarksFinder->find())
+class ProfileBookmarks {
+public:
+    ProfileBookmarks(Profile &profile) : m_profile(profile) {}
+    inline QList<QVariantMap> bookmarks() { return m_bookmarks; }
+    inline Profile profile() { return m_profile; }
+    void tearDown() { m_profile.favicon()->teardown(); m_bookmarks.clear(); }
+    void add(QVariantMap &bookmarkEntry) { m_bookmarks << bookmarkEntry; }
+private:
+    Profile m_profile;
+    QList<QVariantMap> m_bookmarks;
+};
+
+Chrome::Chrome( FindProfile* findProfile, QObject* parent )
+    : Browser(parent)
 {
+    foreach(Profile profile, findProfile->find()) {
+        m_profileBookmarks << new ProfileBookmarks(profile);
+    }
+}
+
+Chrome::~Chrome()
+{
+    foreach(ProfileBookmarks *profileBookmark, m_profileBookmarks) {
+        delete profileBookmark;
+    }
 }
 
 QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing)
 {
     QList<BookmarkMatch> results;
-    foreach(QVariantMap bookmark, m_bookmarks) {
-        BookmarkMatch bookmarkMatch(defaultIcon(), term, bookmark.value("name").toString(), bookmark.value("url").toString());
+    foreach(ProfileBookmarks *profileBookmarks, m_profileBookmarks) {
+        results << match(term, addEveryThing, profileBookmarks);
+    }
+    return results;
+}
+
+QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing, ProfileBookmarks *profileBookmarks)
+{
+    QList<BookmarkMatch> results;
+    foreach(QVariantMap bookmark, profileBookmarks->bookmarks()) {
+        QString url = bookmark.value("url").toString();
+
+        BookmarkMatch bookmarkMatch(profileBookmarks->profile().favicon(), term, bookmark.value("name").toString(), url);
         bookmarkMatch.addTo(results, addEveryThing);
     }
     return results;
@@ -44,33 +81,37 @@ void Chrome::prepare()
 {
     QJson::Parser parser;
     bool ok;
-    foreach(QString filename, m_bookmarksFiles) {
-        QFile bookmarksFile(filename);
+    foreach(ProfileBookmarks *profileBookmarks, m_profileBookmarks) {
+        Profile profile = profileBookmarks->profile();
+        QFile bookmarksFile(profile.path());
         QVariant result = parser.parse(&bookmarksFile, &ok);
         if(!ok || !result.toMap().contains("roots")) {
             return;
         }
         QVariantMap entries = result.toMap().value("roots").toMap();
         foreach(QVariant folder, entries.values()) {
-            parseFolder(folder.toMap());
+            parseFolder(folder.toMap(), profileBookmarks);
         }
+        profile.favicon()->prepare();
     }
-    kDebug(kdbg_code) << "Found " << m_bookmarks.count() << " bookmarks on profiles " << m_bookmarksFiles;
 }
 
 void Chrome::teardown()
 {
-    m_bookmarks.clear();
+    foreach(ProfileBookmarks *profileBookmarks, m_profileBookmarks) {
+        profileBookmarks->tearDown();
+    }
 }
 
-void Chrome::parseFolder(const QVariantMap &entry)
+void Chrome::parseFolder(const QVariantMap &entry, ProfileBookmarks *profile)
 {
     QVariantList children = entry.value("children").toList();
     foreach(QVariant child, children) {
         QVariantMap entry = child.toMap();
         if(entry.value("type").toString() == "folder")
-            parseFolder(entry);
-        else
-            m_bookmarks << entry;
+            parseFolder(entry, profile);
+        else {
+            profile->add(entry);
+        }
     }
 }

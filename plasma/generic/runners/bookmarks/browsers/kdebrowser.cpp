@@ -25,9 +25,23 @@
 #include "bookmarkmatch.h"
 #include <KUrl>
 #include <KMimeType>
+#include "favicon.h"
+
+
+QIcon KDEFavicon::iconFor(const QString &url)  {
+    const QString iconFile = KMimeType::favIconForUrl(KUrl(url));
+    if (iconFile.isEmpty()) {
+        return defaultIcon();
+    }
+    return KIcon(iconFile);
+}
+
+
+KDEFavicon::KDEFavicon(QObject *parent)  : Favicon(parent) {}
+
 
 KDEBrowser::KDEBrowser(QObject *parent) :
-    Browser(parent), m_bookmarkManager(KBookmarkManager::userBookmarksManager())
+    Browser(parent), m_bookmarkManager(KBookmarkManager::userBookmarksManager()), m_favicon(new KDEFavicon(this))
 {
 }
 
@@ -69,7 +83,7 @@ QList< BookmarkMatch > KDEBrowser::match(const QString& term, bool addEverything
             continue;
         }
         
-        BookmarkMatch bookmarkMatch(favicon(bookmark.url()), term, bookmark.text(), bookmark.url().url() );
+        BookmarkMatch bookmarkMatch(m_favicon, term, bookmark.text(), bookmark.url().url() );
         bookmarkMatch.addTo(matches, addEverything);
 
         bookmark = bookmarkGroup.next(bookmark);
@@ -87,14 +101,3 @@ QList< BookmarkMatch > KDEBrowser::match(const QString& term, bool addEverything
     return matches;
 }
 
-KIcon KDEBrowser::favicon(const KUrl &url)
-{
-    // query the favicons module
-    const QString iconFile = KMimeType::favIconForUrl(url);
-
-    if (iconFile.isEmpty()) {
-        return defaultIcon();
-    }
-
-    return KIcon(iconFile);
-}

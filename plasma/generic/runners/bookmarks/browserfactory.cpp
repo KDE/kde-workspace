@@ -22,7 +22,7 @@
 #include "browsers/kdebrowser.h"
 #include "browsers/firefox.h"
 #include "browsers/opera.h"
-#include "browsers/chromebookmarksfinder.h"
+#include "browsers/chromefindprofile.h"
 #include "browsers/chrome.h"
 
 Browser *BrowserFactory::find(const QString& browserName, QObject* parent)
@@ -37,9 +37,9 @@ Browser *BrowserFactory::find(const QString& browserName, QObject* parent)
     } else if (browserName.contains("opera", Qt::CaseInsensitive)) {
         m_previousBrowser = new Opera(parent);
     } else if (browserName.contains("chrome", Qt::CaseInsensitive)) {
-        m_previousBrowser = new Chrome(new ChromeBookmarksFinder("google-chrome", QDir::homePath(), this), this);
+        m_previousBrowser = new Chrome(new FindChromeProfile("google-chrome", QDir::homePath(), parent), parent);
     } else if (browserName.contains("chromium", Qt::CaseInsensitive)) {
-        m_previousBrowser = new Chrome(new ChromeBookmarksFinder("chromium", QDir::homePath(), this), this);
+        m_previousBrowser = new Chrome(new FindChromeProfile("chromium", QDir::homePath(), parent), parent);
     } else {
         m_previousBrowser = new KDEBrowser(parent);
     }

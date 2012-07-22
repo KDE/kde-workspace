@@ -17,14 +17,10 @@
  *   Free Software Foundation, Inc.,
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef BOOKMARKS_FINDER_H
-#define BOOKMARKS_FINDER_H
-#include <QStringList>
 
-class BookmarksFinder {
-public:
-  virtual QStringList find() = 0;
-  virtual ~BookmarksFinder() {}
-};
+#include "favicon.h"
 
-#endif
+Favicon::Favicon(QObject *parent) :
+    QObject(parent), m_default_icon(KIcon("bookmarks"))
+{
+}

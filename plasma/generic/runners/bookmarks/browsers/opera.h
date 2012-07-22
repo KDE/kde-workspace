@@ -26,6 +26,8 @@
 #include "browser.h"
 #include <QStringList>
 
+class Favicon;
+
 class Opera : public Browser
 {
 
@@ -35,7 +37,8 @@ public:
     virtual void prepare();
     virtual void teardown();
 private:
-          QStringList m_operaBookmarkEntries;
+    QStringList m_operaBookmarkEntries;
+    Favicon * const m_favicon;
 };
 
 #endif // OPERA_H
