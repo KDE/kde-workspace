@@ -26,6 +26,7 @@
 
 class KJob;
 class Favicon;
+class FetchSqlite;
 class Firefox : public Browser
 {
     Q_OBJECT
@@ -37,17 +38,14 @@ private:
     virtual void reloadConfiguration();
     QString m_dbFile;
     QString m_dbCacheFile;
-    QSqlDatabase m_db;
-    bool m_dbOK;
     Favicon *const m_favicon;
+    FetchSqlite *m_fetchsqlite;
 
 
 public slots:
     virtual void teardown();
     virtual void prepare();
 
-private slots:
-    void dbCopied(KJob *);
 };
 
 #endif // FIREFOX_H

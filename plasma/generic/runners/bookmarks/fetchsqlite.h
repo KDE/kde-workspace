@@ -34,7 +34,7 @@ public:
     ~FetchSqlite();
     void prepare();
     void teardown();
-    QList<QVariantMap> query(const QString &sql, QMap<QString,QVariant> bindObjects);
+    QList<QVariantMap> query(const QString &sql, QMap<QString,QVariant> bindObjects = QMap<QString, QVariant>());
 
 
 

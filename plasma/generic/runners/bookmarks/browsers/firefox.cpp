@@ -29,6 +29,7 @@
 #include <QDir>
 #include "bookmarkmatch.h"
 #include "favicon.h"
+#include "fetchsqlite.h"
 
 Firefox::Firefox(QObject *parent) :
     Browser(parent), m_favicon(new FallbackFavicon(this))
@@ -51,55 +52,41 @@ Firefox::~Firefox()
 
 void Firefox::prepare()
 {
-      if (m_db.isValid()) {
-        if (m_dbCacheFile.isEmpty()) {
-            m_dbCacheFile = KStandardDirs::locateLocal("cache", "") + "bookmarkrunnerfirefoxdbfile.sqlite";
-        }
-
-        // ### DO NOT USE KIO FROM RUNNER THREADS!
-        // ### This looks like a local copy, so use QFile::copy instead.
-        KIO::Job *job = KIO::file_copy(m_dbFile, m_dbCacheFile, -1,
-                                       KIO::HideProgressInfo | KIO::Overwrite);
-        connect(job, SIGNAL(result(KJob*)), this, SLOT(dbCopied(KJob*)));
+    if (m_dbCacheFile.isEmpty()) {
+        m_dbCacheFile = KStandardDirs::locateLocal("cache", "") + "bookmarkrunnerfirefoxdbfile.sqlite";
     }
-}
-
-void Firefox::dbCopied(KJob *)
-{
-    m_db.setDatabaseName(m_dbCacheFile);
-    m_dbOK = m_db.open();
-    kDebug(kdbg_code) << "Database was opened: " << m_dbOK;
+      if (!m_dbFile.isEmpty()) {
+          m_fetchsqlite = new FetchSqlite(m_dbFile, m_dbCacheFile);
+          m_fetchsqlite->prepare();
+    }
 }
 
 QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
 {
     QList< BookmarkMatch > matches;
-    if (!m_dbOK) {
+    if (!m_fetchsqlite) {
         return matches;
     }
     kDebug(kdbg_code) << "Firefox bookmark: match " << term;
 
     QString tmpTerm = term;
-    QSqlQuery query;
+    QString query;
     if (addEverything) {
-        query = QSqlQuery("SELECT moz_bookmarks.fk, moz_bookmarks.title, moz_places.url," \
+        query = QString("SELECT moz_bookmarks.fk, moz_bookmarks.title, moz_places.url," \
                     "moz_places.favicon_id FROM moz_bookmarks, moz_places WHERE " \
                     "moz_bookmarks.type = 1 AND moz_bookmarks.fk = moz_places.id");
     } else {
         const QString escapedTerm = tmpTerm.replace('\'', "\\'");
-        query = QSqlQuery("SELECT moz_bookmarks.fk, moz_bookmarks.title, moz_places.url," \
+        query = QString("SELECT moz_bookmarks.fk, moz_bookmarks.title, moz_places.url," \
                         "moz_places.favicon_id FROM moz_bookmarks, moz_places WHERE " \
                         "moz_bookmarks.type = 1 AND moz_bookmarks.fk = moz_places.id AND " \
                         "(moz_bookmarks.title LIKE  '%" + escapedTerm + "%' or moz_places.url LIKE '%"
                         + escapedTerm + "%')");
     }
-
-    while (query.next() /*&& context.isValid() TODO: restore? */) {
-        const QString title = query.value(1).toString();
-        const QUrl url = query.value(2).toString();
-        //const int favicon_id = query.value(3).toInt();
-        // TODO: icon is actually stored in sqlite as blob. Fetch it?
-        
+    QList<QVariantMap> results = m_fetchsqlite->query(query);
+    foreach(QVariantMap result, results) {
+        const QString title = result.value("title").toString();
+        const QUrl url = result.value("url").toUrl();
         if (url.scheme().contains("place")) {
             //Don't use bookmarks with empty title, url or Firefox intern url
             kDebug(kdbg_code) << "element " << url << " was not added";
@@ -108,18 +95,15 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
 
         BookmarkMatch bookmarkMatch( m_favicon, term, title, url.toString());
         bookmarkMatch.addTo(matches, addEverything);
-
     }
+
     return matches;
 }
 
 
 void Firefox::teardown()
 {
-    if (m_db.isOpen()) {
-        m_db.close();
-        m_dbOK = false;
-    }
+    if(m_fetchsqlite) m_fetchsqlite->teardown();
 }
 
 
@@ -157,7 +141,6 @@ void Firefox::reloadConfiguration()
 
             if (profilePath.isEmpty()) {
                 kDebug(kdbg_code) << "No default firefox profile found";
-                m_db = QSqlDatabase();
                 return;
             }
 	    kDebug(kdbg_code) << "Profile " << profilePath << " found";
@@ -165,10 +148,7 @@ void Firefox::reloadConfiguration()
             m_dbFile = profilePath + "/places.sqlite";
             grp.writeEntry("dbfile", m_dbFile);
         }
-        m_db = QSqlDatabase::addDatabase("QSQLITE");
-        m_db.setHostName("localhost");
     } else {
         kDebug(kdbg_code) << "SQLITE driver isn't available";
-        m_db = QSqlDatabase();
     }
 }
