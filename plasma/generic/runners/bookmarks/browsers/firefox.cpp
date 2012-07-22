@@ -30,6 +30,7 @@
 #include "bookmarkmatch.h"
 #include "favicon.h"
 #include "fetchsqlite.h"
+#include "faviconfromblob.h"
 
 Firefox::Firefox(QObject *parent) :
     Browser(parent), m_favicon(new FallbackFavicon(this))
@@ -58,6 +59,7 @@ void Firefox::prepare()
       if (!m_dbFile.isEmpty()) {
           m_fetchsqlite = new FetchSqlite(m_dbFile, m_dbCacheFile);
           m_fetchsqlite->prepare();
+          m_favicon = FaviconFromBlob::firefox(m_fetchsqlite, this);
     }
 }
 
@@ -103,7 +105,10 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
 
 void Firefox::teardown()
 {
-    if(m_fetchsqlite) m_fetchsqlite->teardown();
+    if(m_fetchsqlite) {
+        m_fetchsqlite->teardown();
+        delete m_favicon;
+    }
 }
 
 

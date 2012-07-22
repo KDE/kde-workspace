@@ -20,7 +20,7 @@
 
 
 #include "chrome.h"
-#include "chromefavicon.h"
+#include "faviconfromblob.h"
 #include "browsers/findprofile.h"
 #include <qjson/parser.h>
 #include <QFileInfo>

@@ -2,7 +2,7 @@ enable_testing()
 set( testChromeBookmarks_SRCS testchromebookmarks.cpp 
   ../browsers/chrome.cpp
   ../browser.cpp
-  ../browsers/chromefavicon.cpp
+  ../faviconfromblob.cpp
   ../browsers/chromefindprofile.cpp
   ../bookmarkmatch.cpp
   ../favicon.cpp

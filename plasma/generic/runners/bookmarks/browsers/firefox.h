@@ -38,7 +38,7 @@ private:
     virtual void reloadConfiguration();
     QString m_dbFile;
     QString m_dbCacheFile;
-    Favicon *const m_favicon;
+    Favicon * m_favicon;
     FetchSqlite *m_fetchsqlite;
 
 

@@ -18,7 +18,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "chromefavicon.h"
+#include "faviconfromblob.h"
 
 #include <KDebug>
 #include <QPixmap>
@@ -37,42 +37,64 @@
 
 #define dbFileName m_profileCacheDirectory + QDir::separator() + "Favicons.sqlite"
 
-ChromeFavicon::ChromeFavicon(const QString &profileDirectory, QObject *parent) :
-    Favicon(parent)
+FaviconFromBlob *FaviconFromBlob::chrome(const QString &profileDirectory, QObject *parent)
 {
-    m_profileCacheDirectory = QString("%1/KRunner-Chrome-Favicons-%2")
+    QString profileName = QFileInfo(profileDirectory).fileName();
+    QString chromeFaviconQuery = "SELECT * FROM favicons inner join icon_mapping " \
+            "on icon_mapping.icon_id = favicons.id WHERE page_url = :url LIMIT 1;";
+    QString faviconCache = QString("%1/KRunner-Chrome-Favicons-%2.sqlite")
             .arg(KStandardDirs::locateLocal("cache", ""))
-            .arg(QFileInfo(profileDirectory).fileName());
+            .arg(profileName);
+    FetchSqlite *fetchSqlite = new FetchSqlite(profileDirectory + "/Favicons", faviconCache, parent);
+    return new FaviconFromBlob(profileName, chromeFaviconQuery, "image_data", fetchSqlite, parent);
+}
+
+FaviconFromBlob *FaviconFromBlob::firefox(FetchSqlite *fetchSqlite, QObject *parent)
+{
+
+    QString faviconQuery = QString("SELECT moz_favicons.data FROM moz_favicons" \
+                                   " inner join moz_places ON moz_places.favicon_id = moz_favicons.id" \
+                                   " WHERE moz_places.url = :url LIMIT 1;");
+    return new FaviconFromBlob("firefox-default", faviconQuery, "data", fetchSqlite, parent);
+}
+
+
+FaviconFromBlob::FaviconFromBlob(const QString &profileName, const QString &query, const QString &blobColumn, FetchSqlite *fetchSqlite, QObject *parent)
+    : Favicon(parent), m_query(query), m_blobcolumn(blobColumn), m_fetchsqlite(fetchSqlite)
+{
+    m_profileCacheDirectory = QString("%1/KRunner-Favicons-%2")
+            .arg(KStandardDirs::locateLocal("cache", ""))
+            .arg(profileName);
+    kDebug(kdbg_code) << "got cache directory: " << m_profileCacheDirectory;
     cleanCacheDirectory();
     QDir().mkpath(m_profileCacheDirectory);
-    m_fetchsqlite = new FetchSqlite(profileDirectory + "/Favicons", dbFileName, this);
 }
 
-ChromeFavicon::~ChromeFavicon()
+FaviconFromBlob::~FaviconFromBlob()
 {
     cleanCacheDirectory();
 }
 
-void ChromeFavicon::prepare()
+void FaviconFromBlob::prepare()
 {
     m_fetchsqlite->prepare();
 }
 
-void ChromeFavicon::teardown()
+void FaviconFromBlob::teardown()
 {
     m_fetchsqlite->teardown();
 }
 
-void ChromeFavicon::cleanCacheDirectory()
+void FaviconFromBlob::cleanCacheDirectory()
 {
-    foreach(QFileInfo file, QDir(m_profileCacheDirectory).entryInfoList()) {
+    foreach(QFileInfo file, QDir(m_profileCacheDirectory).entryInfoList(QDir::NoDotAndDotDot)) {
         kDebug(kdbg_code) << "Removing file " << file.absoluteFilePath() << ": " <<
                              QFile(file.absoluteFilePath()).remove();
     }
     QDir().rmdir(m_profileCacheDirectory);
 }
 
-QIcon ChromeFavicon::iconFor(const QString &url)
+QIcon FaviconFromBlob::iconFor(const QString &url)
 {
     kDebug(kdbg_code) << "got url: " << url << "; querying database " << m_db.databaseName();
     QString fileChecksum = QString("%1").arg(qChecksum(url.toAscii(), url.toAscii().size()));
@@ -81,14 +103,13 @@ QIcon ChromeFavicon::iconFor(const QString &url)
     kDebug(kdbg_code) << "Looking for " << iconFile.fileName() << ", url: " << url;
     if(!iconFile.exists()) {
         kDebug(kdbg_code) << "icon is not cached, querying to sqlite";
-        QString query = "SELECT * FROM favicons inner join icon_mapping on icon_mapping.icon_id = favicons.id WHERE page_url = :url LIMIT 1;";
         QMap<QString,QVariant> bindVariables;
         bindVariables.insert("url", url);
-        QList<QVariantMap> faviconFound = m_fetchsqlite->query(query, bindVariables);
+        QList<QVariantMap> faviconFound = m_fetchsqlite->query(m_query, bindVariables);
         if(!faviconFound.size()>0) return defaultIcon();
         kDebug(kdbg_code) << "icon found in sqlite";
 
-        QByteArray iconData = faviconFound.first().value("image_data").toByteArray();
+        QByteArray iconData = faviconFound.first().value(m_blobcolumn).toByteArray();
         kDebug(kdbg_code) << "Data loaded: " << iconData.size() << " bytes";
 
         iconFile.open(QFile::WriteOnly);
@@ -97,3 +118,4 @@ QIcon ChromeFavicon::iconFor(const QString &url)
     }
     return QIcon(iconFile.fileName());
 }
+

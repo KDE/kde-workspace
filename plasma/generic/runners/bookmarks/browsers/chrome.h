@@ -27,7 +27,7 @@
 #include <QMap>
 #include <QList>
 
-class ChromeFavicon;
+class FaviconFromBlob;
 class ProfileBookmarks;
 class Chrome : public Browser
 {

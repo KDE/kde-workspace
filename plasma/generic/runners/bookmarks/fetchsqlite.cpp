@@ -51,7 +51,7 @@ void FetchSqlite::prepare()
 {
     m_db.setDatabaseName(m_databaseFile);
     bool ok = m_db.open();
-    kDebug(kdbg_code) << "Chrome favicon Database " << m_databaseFile << " was opened: " << ok;
+    kDebug(kdbg_code) << "Sqlite Database " << m_databaseFile << " was opened: " << ok;
     if(!ok) {
         kDebug(kdbg_code) << "Error: " << m_db.lastError().text();
     }

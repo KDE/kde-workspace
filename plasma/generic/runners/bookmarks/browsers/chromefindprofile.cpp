@@ -25,7 +25,7 @@
 #include <QVariantMap>
 #include <KDebug>
 #include "bookmarksrunner_defs.h"
-#include "chromefavicon.h"
+#include "faviconfromblob.h"
 #include <QFileInfo>
 
 FindChromeProfile::FindChromeProfile (const QString &applicationName, const QString &homeDirectory, QObject* parent )
@@ -56,7 +56,7 @@ QList<Profile> FindChromeProfile::find()
   foreach(QString profile, profilesConfig.keys()) {
       QString profilePath = QString("%1/%2").arg(configDirectory).arg(profile);
       QString profileBookmarksPath = QString("%1/%2").arg(profilePath).arg("Bookmarks");
-      profiles << Profile(profileBookmarksPath, new ChromeFavicon(profilePath, this));
+      profiles << Profile(profileBookmarksPath, FaviconFromBlob::chrome(profilePath, this));
   }
 
   return profiles;

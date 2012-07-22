@@ -26,12 +26,13 @@
 #include "favicon.h"
 
 class FetchSqlite;
-class ChromeFavicon : public Favicon
+class FaviconFromBlob : public Favicon
 {
     Q_OBJECT
 public:
-    explicit ChromeFavicon(const QString &profileDirectory, QObject *parent = 0);
-    ~ChromeFavicon();
+    static FaviconFromBlob *chrome(const QString &profileDirectory, QObject *parent = 0);
+    static FaviconFromBlob *firefox(FetchSqlite *fetchSqlite, QObject *parent = 0);
+    ~FaviconFromBlob();
     virtual QIcon iconFor(const QString &url);
 
 public slots:
@@ -39,8 +40,11 @@ public slots:
     virtual void teardown();
 
 private:
+    FaviconFromBlob(const QString &profileName, const QString &query, const QString &blobColumn, FetchSqlite *fetchSqlite, QObject *parent = 0);
     QSqlDatabase m_db;
     QString m_profileCacheDirectory;
+    QString const m_query;
+    QString const m_blobcolumn;
     FetchSqlite *m_fetchsqlite;
     void cleanCacheDirectory();
 };

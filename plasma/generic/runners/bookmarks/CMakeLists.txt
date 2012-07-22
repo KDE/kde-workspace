@@ -5,7 +5,7 @@ find_package(QJSON REQUIRED)
 set(krunner_bookmarksrunner_SRCS
     browserfactory.cpp
     bookmarkmatch.cpp
-    browsers/chromefavicon.cpp
+    faviconfromblob.cpp
     browsers/chromefindprofile.cpp
     browsers/chrome.cpp
     browsers/opera.cpp
