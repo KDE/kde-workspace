@@ -18,31 +18,29 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CHROMEFAVICON_H
-#define CHROMEFAVICON_H
-
-#include <QIcon>
+#ifndef FETCHSQLITE_H
+#define FETCHSQLITE_H
 #include <QSqlDatabase>
-#include "favicon.h"
+#include <QList>
+#include <QVariantMap>
 
-class FetchSqlite;
-class ChromeFavicon : public Favicon
+#include <QObject>
+
+class FetchSqlite : public QObject
 {
     Q_OBJECT
 public:
-    explicit ChromeFavicon(const QString &profileDirectory, QObject *parent = 0);
-    ~ChromeFavicon();
-    virtual QIcon iconFor(const QString &url);
+    explicit FetchSqlite(const QString &originalFile, const QString &copyTo, QObject *parent = 0);
+    ~FetchSqlite();
+    void prepare();
+    void teardown();
+    QList<QVariantMap> query(const QString &sql, QMap<QString,QVariant> bindObjects);
 
-public slots:
-    virtual void prepare();
-    virtual void teardown();
+
 
 private:
+    QString const m_databaseFile;
     QSqlDatabase m_db;
-    QString m_profileCacheDirectory;
-    FetchSqlite *m_fetchsqlite;
-    void cleanCacheDirectory();
 };
 
-#endif // CHROMEFAVICON_H
+#endif // FETCHSQLITE_H

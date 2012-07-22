@@ -14,6 +14,7 @@ set(krunner_bookmarksrunner_SRCS
     browsers/kdebrowser.cpp
     browsers/firefox.cpp
     favicon.cpp
+    fetchsqlite.cpp
 )
 
 kde4_add_plugin(krunner_bookmarksrunner ${krunner_bookmarksrunner_SRCS})

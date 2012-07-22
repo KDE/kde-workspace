@@ -6,6 +6,7 @@ set( testChromeBookmarks_SRCS testchromebookmarks.cpp
   ../browsers/chromefindprofile.cpp
   ../bookmarkmatch.cpp
   ../favicon.cpp
+  ../fetchsqlite.cpp
 )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/.. )
 kde4_add_unit_test( testChromeBookmarks TESTNAME TestChromeBookmarks ${testChromeBookmarks_SRCS} )
