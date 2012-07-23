@@ -10,7 +10,6 @@ set(krunner_bookmarksrunner_SRCS
     browsers/chrome.cpp
     browsers/opera.cpp
     bookmarksrunner.cpp
-    browser.cpp
     browsers/kdebrowser.cpp
     browsers/firefox.cpp
     favicon.cpp

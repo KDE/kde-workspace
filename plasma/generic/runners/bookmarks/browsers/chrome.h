@@ -26,23 +26,23 @@
 #include "findprofile.h"
 #include <QMap>
 #include <QList>
+#include <QVariantMap>
 
 class FaviconFromBlob;
 class ProfileBookmarks;
-class Chrome : public Browser
+class Chrome : public QObject, public Browser
 {
   Q_OBJECT
 public:
     Chrome(FindProfile *findProfile, QObject* parent = 0);
     ~Chrome();
     virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing);
-    virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing, ProfileBookmarks *profileBookmarks);
 public slots:
     virtual void prepare();
     virtual void teardown();
 private:
     void parseFolder(const QVariantMap &entry, ProfileBookmarks *profile);
-private:
+    virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing, ProfileBookmarks *profileBookmarks);
     QList<ProfileBookmarks*> m_profileBookmarks;
 };
 

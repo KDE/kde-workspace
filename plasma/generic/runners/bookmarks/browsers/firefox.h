@@ -27,25 +27,22 @@
 class KJob;
 class Favicon;
 class FetchSqlite;
-class Firefox : public Browser
+class Firefox : public QObject, public Browser
 {
     Q_OBJECT
 public:
     explicit Firefox(QObject *parent = 0);
-    virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
     virtual ~Firefox();
+    virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
+public slots:
+    virtual void teardown();
+    virtual void prepare();
 private:
     virtual void reloadConfiguration();
     QString m_dbFile;
     QString m_dbCacheFile;
     Favicon * m_favicon;
     FetchSqlite *m_fetchsqlite;
-
-
-public slots:
-    virtual void teardown();
-    virtual void prepare();
-
 };
 
 #endif // FIREFOX_H

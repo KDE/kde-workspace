@@ -41,7 +41,7 @@ KDEFavicon::KDEFavicon(QObject *parent)  : Favicon(parent) {}
 
 
 KDEBrowser::KDEBrowser(QObject *parent) :
-    Browser(parent), m_bookmarkManager(KBookmarkManager::userBookmarksManager()), m_favicon(new KDEFavicon(this))
+    QObject(parent), m_bookmarkManager(KBookmarkManager::userBookmarksManager()), m_favicon(new KDEFavicon(this))
 {
 }
 

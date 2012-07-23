@@ -28,12 +28,13 @@
 
 class Favicon;
 
-class Opera : public Browser
+class Opera : public QObject, public Browser
 {
-
+Q_OBJECT
 public:
-    virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
     Opera(QObject* parent = 0);
+    virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
+public slots:
     virtual void prepare();
     virtual void teardown();
 private:

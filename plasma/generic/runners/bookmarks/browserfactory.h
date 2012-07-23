@@ -18,27 +18,21 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "browser.h"
+#ifndef BROWSERFACTORY_H
+#define BROWSERFACTORY_H
+#include <QObject>
+#include <QString>
 
-#include <KMimeType>
-
-
-
-Browser::Browser(QObject *parent)
-    : QObject(parent), m_default_icon(KIcon("bookmarks"))
+class Browser;
+class BrowserFactory : public QObject
 {
-}
+    Q_OBJECT
+public:
+    BrowserFactory(QObject *parent =0);
+    Browser *find(const QString &browserName, QObject *parent = 0);
+private:
+  Browser *m_previousBrowser;
+  QString m_previousBrowserName;
+};
 
-Browser::~Browser()
-{
-}
-
-
-void Browser::prepare()
-{
-}
-
-void Browser::teardown()
-{
-}
-
+#endif // BROWSERFACTORY_H

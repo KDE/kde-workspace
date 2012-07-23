@@ -32,6 +32,7 @@
 #include <KStandardDirs>
 #include <KDebug>
 #include "bookmarkmatch.h"
+#include "browserfactory.h"
 #include "bookmarksrunner_defs.h"
 
 BookmarksRunner::BookmarksRunner( QObject* parent, const QVariantList &args )
@@ -54,9 +55,8 @@ BookmarksRunner::~BookmarksRunner()
 
 void BookmarksRunner::prep()
 {
-    kDebug(kdbg_code) << "**** prep called";
     m_browser = m_browserFactory->find(findBrowserName(), this);
-    connect(this, SIGNAL(teardown()), m_browser, SLOT(teardown()));
+    connect(this, SIGNAL(teardown()), dynamic_cast<QObject*>(m_browser), SLOT(teardown()));
 	m_browser->prepare();
 }
 
@@ -125,7 +125,6 @@ void BookmarksRunner::run(const Plasma::RunnerContext &context, const Plasma::Qu
         url.setProtocol("http");
     }
 
-    //kDebug(kdbg_code) << "BookmarksRunner::run opening: " << url.url();
     KToolInvocation::invokeBrowser(url.url());
 }
 

@@ -1,6 +1,5 @@
 set( testChromeBookmarks_SRCS testchromebookmarks.cpp 
   ../browsers/chrome.cpp
-  ../browser.cpp
   ../faviconfromblob.cpp
   ../browsers/chromefindprofile.cpp
   ../bookmarkmatch.cpp

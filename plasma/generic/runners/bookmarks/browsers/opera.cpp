@@ -25,6 +25,11 @@
 #include <QFile>
 #include "favicon.h"
 
+
+Opera::Opera(QObject* parent): QObject(parent), m_favicon(new FallbackFavicon(this))
+{
+}
+
 QList<BookmarkMatch> Opera::match( const QString& term, bool addEverything )
 {
     QList<BookmarkMatch> matches;
@@ -62,10 +67,6 @@ QList<BookmarkMatch> Opera::match( const QString& term, bool addEverything )
     return matches;
 }
 
-Opera::Opera(QObject* parent): Browser(parent), m_favicon(new FallbackFavicon(this))
-{
-
-}
 
 void Opera::prepare()
 {

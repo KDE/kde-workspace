@@ -99,18 +99,14 @@ QIcon FaviconFromBlob::iconFor(const QString &url)
     kDebug(kdbg_code) << "got url: " << url << "; querying database " << m_db.databaseName();
     QString fileChecksum = QString("%1").arg(qChecksum(url.toAscii(), url.toAscii().size()));
     QFile iconFile( m_profileCacheDirectory + QDir::separator() + fileChecksum + "_favicon" );
-
-    kDebug(kdbg_code) << "Looking for " << iconFile.fileName() << ", url: " << url;
     if(!iconFile.exists()) {
-        kDebug(kdbg_code) << "icon is not cached, querying to sqlite";
         QMap<QString,QVariant> bindVariables;
         bindVariables.insert("url", url);
         QList<QVariantMap> faviconFound = m_fetchsqlite->query(m_query, bindVariables);
         if(!faviconFound.size()>0) return defaultIcon();
-        kDebug(kdbg_code) << "icon found in sqlite";
 
         QByteArray iconData = faviconFound.first().value(m_blobcolumn).toByteArray();
-        kDebug(kdbg_code) << "Data loaded: " << iconData.size() << " bytes";
+        kDebug(kdbg_code) << "Favicon found: " << iconData.size() << " bytes";
 
         iconFile.open(QFile::WriteOnly);
         iconFile.write(iconData);

@@ -18,6 +18,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "browserfactory.h"
 #include "browser.h"
 #include "browsers/kdebrowser.h"
 #include "browsers/firefox.h"

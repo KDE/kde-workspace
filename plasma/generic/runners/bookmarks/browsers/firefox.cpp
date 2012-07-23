@@ -23,17 +23,17 @@
 #include <KStandardDirs>
 #include <KDebug>
 #include "bookmarksrunner_defs.h"
-#include <KIO/Job>
-#include <QSqlQuery>
 #include <QFile>
 #include <QDir>
+#include <KConfigGroup>
+#include <KSharedConfig>
 #include "bookmarkmatch.h"
 #include "favicon.h"
 #include "fetchsqlite.h"
 #include "faviconfromblob.h"
 
 Firefox::Firefox(QObject *parent) :
-    Browser(parent), m_favicon(new FallbackFavicon(this))
+    QObject(parent), m_favicon(new FallbackFavicon(this))
 {
   reloadConfiguration();
   kDebug(kdbg_code) << "Loading Firefox Bookmarks Browser";

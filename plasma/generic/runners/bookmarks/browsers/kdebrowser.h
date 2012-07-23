@@ -34,7 +34,7 @@ public:
 
 };
 
-class KDEBrowser : public Browser
+class KDEBrowser : public QObject, public Browser
 {
     Q_OBJECT
 public:

@@ -42,7 +42,7 @@ private:
 };
 
 Chrome::Chrome( FindProfile* findProfile, QObject* parent )
-    : Browser(parent)
+    : QObject(parent)
 {
     foreach(Profile profile, findProfile->find()) {
         m_profileBookmarks << new ProfileBookmarks(profile);
