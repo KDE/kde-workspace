@@ -61,6 +61,7 @@ Plasma::QueryMatch BookmarkMatch::asQueryMatch( Plasma::AbstractRunner* runner )
     match.setType(type);
     match.setRelevance(relevance);
     match.setIcon(m_favicon->iconFor(m_bookmarkURL));
+    match.setSubtext(m_bookmarkURL);
 
     // Try to set the following as text in this order: name, description, url
     match.setText( isNameEmpty
