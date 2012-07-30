@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 2010 Andriy Rysin (rysin@kde.org)
- *
+ *  edited by Shivam Makkar (amourphious1992@gmail.com)
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -17,7 +17,7 @@
  */
 
 #include "kcm_add_layout_dialog.h"
-
+#include<QApplication>
 #include <klocalizedstring.h>
 
 #include "xkb_rules.h"
@@ -63,9 +63,10 @@ AddLayoutDialog::AddLayoutDialog(const Rules* rules_, Flags* flags_, bool showLa
 	}
 
     languageChanged(0);
-
+    //layoutprev=new keyboardpainter();
 	connect(layoutDialogUi->languageComboBox, SIGNAL(activated(int)), this, SLOT(languageChanged(int)));
     connect(layoutDialogUi->layoutComboBox, SIGNAL(activated(int)), this, SLOT(layoutChanged(int)));
+    connect(layoutDialogUi->prevbutton,SIGNAL(clicked()),this,SLOT(preview()));
 }
 
 void AddLayoutDialog::languageChanged(int langIdx)
@@ -150,4 +151,18 @@ void AddLayoutDialog::accept()
 	selectedLayoutUnit.setDisplayName( label );
 	selectedLayoutUnit.setShortcut(layoutDialogUi->kkeysequencewidget->keySequence());
 	QDialog::accept();
+}
+void AddLayoutDialog::preview(){
+    QString variant=layoutDialogUi->variantComboBox->itemData(layoutDialogUi->variantComboBox->currentIndex()).toString();
+    QMessageBox q;
+    QString a=variant;
+    if (variant=="")
+        variant="basic";
+    /*a.append(selectedLayout);
+    q.setText(a);
+    q.exec();*/
+    layoutprev=new keyboardpainter();
+    layoutprev->getkeyboardlayout(selectedLayout,variant);
+    layoutprev->exec();
+    layoutprev->setModal(true);
 }

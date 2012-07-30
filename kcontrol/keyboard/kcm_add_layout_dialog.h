@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 2010 Andriy Rysin (rysin@kde.org)
- *
+ *	Edited by Shivam Makkar (amourphious1992@gmail.com)
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -23,6 +23,7 @@
 #include <QtGui/QDialog>
 
 #include "keyboard_config.h"
+#include "keyboardpainter.h"
 
 class Rules;
 class Flags;
@@ -41,11 +42,13 @@ public:
 public Q_SLOTS:
 	void languageChanged(int langIdx);
 	void layoutChanged(int layoutIdx);
+	void preview();
 
 private:
 	const Rules* rules;
 	Flags* flags;
 	Ui_AddLayoutDialog* layoutDialogUi;
+	keyboardpainter *layoutprev;
 	QString selectedLanguage;
 	QString selectedLayout;
 	LayoutUnit selectedLayoutUnit;
