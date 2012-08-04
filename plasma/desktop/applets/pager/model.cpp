@@ -130,44 +130,44 @@ QVariant WindowModel::data(const QModelIndex &index, int role) const
 }
 
 
-VirtualDesktopModel::VirtualDesktopModel(QObject *parent)
+PagerModel::PagerModel(QObject *parent)
     : QAbstractListModel(parent)
 {
     setRoleNames(roles());
 }
 
-WindowModel *VirtualDesktopModel::windowsAt(int index) const
+WindowModel *PagerModel::windowsAt(int index) const
 {
     return qobject_cast<WindowModel *>(m_windows[index]);
 }
 
-QHash<int, QByteArray> VirtualDesktopModel::roles() const
+QHash<int, QByteArray> PagerModel::roles() const
 {
     QHash<int, QByteArray> rectRoles = m_desktops.roles();
     rectRoles[WindowsRole] = "windows";
     return rectRoles;
 }
 
-void VirtualDesktopModel::clearDesktopRects()
+void PagerModel::clearDesktopRects()
 {
     beginResetModel();
     m_desktops.clear();
     endResetModel();
 }
 
-void VirtualDesktopModel::appendDesktopRect(const QRectF &rect)
+void PagerModel::appendDesktopRect(const QRectF &rect)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_desktops.append(rect);
     endInsertRows();
 }
 
-QRectF& VirtualDesktopModel::desktopRectAt(int index)
+QRectF& PagerModel::desktopRectAt(int index)
 {
     return m_desktops.rectAt(index);
 }
 
-void VirtualDesktopModel::clearWindowRects()
+void PagerModel::clearWindowRects()
 {
     for (int i = 0; i < m_windows.count(); i++) {
         windowsAt(i)->clear();
@@ -182,7 +182,7 @@ void VirtualDesktopModel::clearWindowRects()
         m_windows.append(new WindowModel(this));
 }
 
-void VirtualDesktopModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect, bool active)
+void PagerModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect, bool active)
 {
     windowsAt(desktopId)->append(windowId, rect, active);
 
@@ -190,7 +190,7 @@ void VirtualDesktopModel::appendWindowRect(int desktopId, WId windowId, const QR
     emit dataChanged(i, i);
 }
 
-QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const
+QVariant PagerModel::data(const QModelIndex &index, int role) const
 {
     if (role >= RectangleModel::WidthRole && role < WindowsRole)
         return m_desktops.data(index, role);
@@ -206,13 +206,13 @@ QVariant VirtualDesktopModel::data(const QModelIndex &index, int role) const
     }
 }
 
-int VirtualDesktopModel::rowCount(const QModelIndex &index) const
+int PagerModel::rowCount(const QModelIndex &index) const
 {
     return m_desktops.rowCount(index);
 }
 
 #include <QDebug>
-void VirtualDesktopModel::printModel() const
+void PagerModel::printModel() const
 {
     qDebug() << Q_FUNC_INFO << "-- begin --";
     for (int i = 0; i < rowCount(); i++) {

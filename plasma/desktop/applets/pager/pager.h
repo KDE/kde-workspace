@@ -108,7 +108,7 @@ class Pager : public Plasma::Applet
 
         Plasma::Package *m_package;
         Plasma::DeclarativeWidget *m_declarativeWidget;
-        VirtualDesktopModel *m_pagerModel;
+        PagerModel *m_pagerModel;
         QVariantMap m_pagerStyle;
 
         QTimer* m_timer;

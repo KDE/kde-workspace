@@ -72,15 +72,15 @@ private:
 };
 
 
-class VirtualDesktopModel : public QAbstractListModel
+class PagerModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    enum VirtualDesktopRoles {
+    enum PagerRoles {
         WindowsRole = RectangleModel::YRole + 1,
     };
 
-    VirtualDesktopModel(QObject *parent = 0);
+    PagerModel(QObject *parent = 0);
 
     QHash<int, QByteArray> roles() const;
 

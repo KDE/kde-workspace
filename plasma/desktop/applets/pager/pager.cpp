@@ -101,7 +101,7 @@ Pager::~Pager()
 
 void Pager::init()
 {
-    m_pagerModel = new VirtualDesktopModel(this);
+    m_pagerModel = new PagerModel(this);
 
     updatePagerStyle();
     initDeclarativeUI();
