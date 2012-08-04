@@ -46,7 +46,8 @@ class Pager : public Plasma::Applet
     Q_OBJECT
     Q_PROPERTY(QObject* model READ model CONSTANT)
     Q_PROPERTY(QVariantMap style READ style NOTIFY styleChanged)
-    Q_PROPERTY(int currentDesktop READ currentDesktop WRITE setCurrentDesktop NOTIFY currentDesktopChanged)
+    Q_PROPERTY(int currentDesktop READ currentDesktop NOTIFY currentDesktopChanged)
+    Q_PROPERTY(bool showWindowIcons READ showWindowIcons NOTIFY showWindowIconsChanged)
 
     public:
         Pager(QObject *parent, const QVariantList &args);
@@ -63,12 +64,16 @@ class Pager : public Plasma::Applet
         int currentDesktop() const { return m_currentDesktop; }
         void setCurrentDesktop(int desktop);
 
+        bool showWindowIcons() const { return m_showWindowIcons; }
+        void setShowWindowIcons(bool show);
+
         Q_INVOKABLE void moveWindow(int, double, double, int, int);
         Q_INVOKABLE void changeDesktop(int desktopId);
 
     signals:
         void styleChanged();
         void currentDesktopChanged();
+        void showWindowIconsChanged();
 
     public slots:
         void recalculateGridSizes(int rows);

@@ -195,12 +195,18 @@ void Pager::initDeclarativeUI()
 
 void Pager::setCurrentDesktop(int desktop)
 {
-    if (m_currentDesktop == desktop) {
-        return;
+    if (m_currentDesktop != desktop) {
+        m_currentDesktop = desktop;
+        emit currentDesktopChanged();
     }
+}
 
-    m_currentDesktop = desktop;
-    emit currentDesktopChanged();
+void Pager::setShowWindowIcons(bool show)
+{
+    if (m_showWindowIcons != show) {
+        m_showWindowIcons = show;
+        emit showWindowIconsChanged();
+    }
 }
 
 void Pager::configChanged()
@@ -216,7 +222,7 @@ void Pager::configChanged()
 
     bool showWindowIcons = cg.readEntry("showWindowIcons", m_showWindowIcons);
     if (showWindowIcons != m_showWindowIcons) {
-        m_showWindowIcons = showWindowIcons;
+        setShowWindowIcons(showWindowIcons);
         changed = true;
     }
 
@@ -610,7 +616,9 @@ void Pager::recalculateWindowRects()
                                 windowRect.height() * m_heightScaleFactor).toRect();
 
             bool active = (window == KWindowSystem::activeWindow());
-            m_pagerModel->appendWindowRect(i, window, windowRect, active);
+            int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
+            QPixmap icon = KWindowSystem::icon(info.win(), windowIconSize, windowIconSize, true);
+            m_pagerModel->appendWindowRect(i, window, windowRect, active, icon);
             m_windowInfo.append(info);
         }
     }

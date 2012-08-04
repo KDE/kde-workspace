@@ -21,6 +21,7 @@
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QRectF>
 #include <QtGui/QWidgetList> // For WId
+#include <QtGui/QPixmap>
 
 class RectangleModel : public QAbstractListModel
 {
@@ -54,14 +55,15 @@ class WindowModel : public RectangleModel
 public:
     enum WindowRole {
         IdRole = RectangleModel::YRole + 1,
-        ActiveRole
+        ActiveRole,
+        IconRole
     };
 
     WindowModel(QObject *parent = 0);
 
     QHash<int, QByteArray> roles() const;
     void clear();
-    void append(WId windowId, const QRectF &rect, bool active);
+    void append(WId windowId, const QRectF &rect, bool active, const QPixmap &icon);
     WId idAt(int index) const;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -69,6 +71,7 @@ public:
 private:
     QList<WId> m_ids;
     QList<bool> m_active;
+    QList<QPixmap> m_icons;
 };
 
 
@@ -89,7 +92,7 @@ public:
     QRectF &desktopRectAt(int index);
 
     void clearWindowRects();
-    void appendWindowRect(int desktopId, WId window, const QRectF &rect, bool active);
+    void appendWindowRect(int desktopId, WId, const QRectF &, bool active, const QPixmap &icon);
     WindowModel *windowsAt(int index) const;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;

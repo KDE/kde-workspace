@@ -86,6 +86,7 @@ QHash<int, QByteArray> WindowModel::roles() const
     QHash<int, QByteArray> rectRoles = RectangleModel::roles();
     rectRoles[IdRole] = "windowId";
     rectRoles[ActiveRole] = "active";
+    rectRoles[IconRole] = "icon";
     return rectRoles;
 }
 
@@ -95,15 +96,17 @@ void WindowModel::clear()
     RectangleModel::clear();
     m_ids.clear();
     m_active.clear();
+    m_icons.clear();
     endResetModel();
 }
 
-void WindowModel::append(WId windowId, const QRectF &rect, bool active)
+void WindowModel::append(WId windowId, const QRectF &rect, bool active, const QPixmap &icon)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_ids.append(windowId);
     RectangleModel::append(rect);
     m_active.append(active);
+    m_icons.append(icon);
     endInsertRows();
 }
 
@@ -124,6 +127,8 @@ QVariant WindowModel::data(const QModelIndex &index, int role) const
         return int(m_ids[index.row()]);
     case ActiveRole:
         return m_active[index.row()];
+    case IconRole:
+        return m_icons[index.row()];
     default:
         return QVariant();
     }
@@ -182,9 +187,10 @@ void PagerModel::clearWindowRects()
         m_windows.append(new WindowModel(this));
 }
 
-void PagerModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect, bool active)
+void PagerModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect,
+                                  bool active, const QPixmap &icon)
 {
-    windowsAt(desktopId)->append(windowId, rect, active);
+    windowsAt(desktopId)->append(windowId, rect, active, icon);
 
     QModelIndex i = index(desktopId);
     emit dataChanged(i, i);

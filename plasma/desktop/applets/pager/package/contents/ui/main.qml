@@ -17,6 +17,7 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
 Item {
     id: root
@@ -93,13 +94,12 @@ Item {
                         border.color: model.active ? pager.style.windowActiveBorderColor
                                                    : pager.style.windowInactiveBorderColor
 
-                        // used to save the state of some properties before the dragging
-                        QtObject {
-                            id: saveState
-                            property int x: -1
-                            property int y: -1
-                            property variant parent
-                            property int desktop: -1
+                        QtExtraComponents.QPixmapItem {
+                            anchors.centerIn: parent
+                            pixmap: model.icon
+                            height: nativeHeight
+                            width: nativeWidth
+                            visible: pager.showWindowIcons
                         }
 
                         MouseArea {
@@ -110,6 +110,15 @@ Item {
                             drag.maximumX: root.width + parent.width*2
                             drag.minimumY: -parent.height*2
                             drag.maximumY: root.height + parent.height*2
+
+                            // used to save the state of some properties before the dragging
+                            QtObject {
+                                id: saveState
+                                property int x: -1
+                                property int y: -1
+                                property variant parent
+                                property int desktop: -1
+                            }
 
                             // reparent windowRect to enable the dragging for other desktops
                             onPressed: {
