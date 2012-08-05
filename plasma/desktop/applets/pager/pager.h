@@ -111,7 +111,6 @@ class Pager : public Plasma::Applet
         void initDeclarativeUI();
         QRectF mapToDeclarativeUI(const QRectF &rect) const;
 
-        Plasma::Package *m_package;
         Plasma::DeclarativeWidget *m_declarativeWidget;
         PagerModel *m_pagerModel;
         QVariantMap m_pagerStyle;

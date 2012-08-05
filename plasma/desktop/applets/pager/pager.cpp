@@ -46,8 +46,6 @@
 #include <KWindowSystem>
 #include <NETRootInfo>
 
-#include <Plasma/Svg>
-#include <Plasma/FrameSvg>
 #include <Plasma/PaintUtils>
 #include <Plasma/Theme>
 #include <Plasma/ToolTipManager>
@@ -189,8 +187,8 @@ void Pager::initDeclarativeUI()
     m_declarativeWidget->engine()->rootContext()->setContextProperty("pager", this);
 
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
-    m_package = new Plasma::Package(QString(), "org.kde.pager", structure);
-    m_declarativeWidget->setQmlPath(m_package->filePath("mainscript"));
+    Plasma::Package package(QString(), "org.kde.pager", structure);
+    m_declarativeWidget->setQmlPath(package.filePath("mainscript"));
 }
 
 void Pager::setCurrentDesktop(int desktop)
@@ -266,7 +264,6 @@ void Pager::constraintsEvent(Plasma::Constraints constraints)
     }
 
     if (constraints & Plasma::FormFactorConstraint) {
-
         if (m_verticalFormFactor != (formFactor() == Plasma::Vertical)) {
             m_verticalFormFactor = (formFactor() == Plasma::Vertical);
             // whenever we switch to/from vertical form factor, swap the rows and columns around
@@ -551,9 +548,6 @@ void Pager::updateSizes(bool allowResize)
                                   ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) +
                                        topMargin + bottomMargin));
 
-        //kDebug() << "current size:" << contentsRect() << " new preferred size: " << preferred << " form factor:" << formFactor() << " grid:" << m_rows << "x" << m_columns <<
-        //            " actual grid:" << rows << "x" << columns << " item size:" << itemWidth << "x" << itemHeight << " preferred item size:" << preferredItemWidth << "x" << preferredItemHeight;
-
         // make sure the minimum size is smaller than preferred
         setMinimumSize(qMin(preferred.width(),  minimumSize().width()),
                        qMin(preferred.height(), minimumSize().height()));
@@ -720,20 +714,16 @@ void Pager::desktopsSizeChanged()
 
 void Pager::startTimer()
 {
-    if (m_timer->isActive()) {
-        return;
+    if (!m_timer->isActive()) {
+        m_timer->start(UPDATE_DELAY);
     }
-
-    m_timer->start(UPDATE_DELAY);
 }
 
 void Pager::startTimerFast()
 {
-    if (m_timer->isActive()) {
-        return;
+    if (!m_timer->isActive()) {
+        m_timer->start(FAST_UPDATE_DELAY);
     }
-
-    m_timer->start(FAST_UPDATE_DELAY);
 }
 
 void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
@@ -741,10 +731,6 @@ void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
     int newDesk;
     int desktops = KWindowSystem::numberOfDesktops();
 
-    /*
-       if (m_kwin->numberOfViewports(0).width() * m_kwin->numberOfViewports(0).height() > 1 )
-       desktops = m_kwin->numberOfViewports(0).width() * m_kwin->numberOfViewports(0).height();
-       */
     if (e->delta() < 0) {
         newDesk = m_currentDesktop % desktops + 1;
     } else {
