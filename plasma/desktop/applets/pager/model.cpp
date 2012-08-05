@@ -150,6 +150,7 @@ QHash<int, QByteArray> PagerModel::roles() const
 {
     QHash<int, QByteArray> rectRoles = m_desktops.roles();
     rectRoles[WindowsRole] = "windows";
+    rectRoles[DesktopNameRole] = "desktopName";
     return rectRoles;
 }
 
@@ -157,13 +158,15 @@ void PagerModel::clearDesktopRects()
 {
     beginResetModel();
     m_desktops.clear();
+    m_names.clear();
     endResetModel();
 }
 
-void PagerModel::appendDesktopRect(const QRectF &rect)
+void PagerModel::appendDesktopRect(const QRectF &rect, const QString &name)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_desktops.append(rect);
+    m_names.append(name);
     endInsertRows();
 }
 
@@ -207,6 +210,8 @@ QVariant PagerModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case WindowsRole:
         return QVariant::fromValue(m_windows[index.row()]);
+    case DesktopNameRole:
+        return m_names[index.row()];
     default:
         return QVariant();
     }

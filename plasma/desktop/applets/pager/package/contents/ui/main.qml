@@ -35,6 +35,7 @@ Item {
             id: desktop
 
             property int desktopId: index
+            property string desktopName: model.desktopName ? model.desktopName : ""
             property bool active: (desktopId === pager.currentDesktop-1)
 
             x: model.x
@@ -63,6 +64,16 @@ Item {
                 width: desktop.width - 2
                 height: desktop.height - 2
                 clip: true
+
+                QtExtraComponents.QPixmapItem {
+                    id: desktopText
+                    property string text: pager.showDesktopName ? desktop.desktopName
+                                                                : (pager.showDesktopNumber ? desktop.desktopId+1 : "")
+                    anchors.centerIn: parent
+                    height: nativeHeight
+                    width: nativeWidth
+                    pixmap: pager.shadowText(text)
+                }
 
                 Repeater {
                     model: windows

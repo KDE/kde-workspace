@@ -216,6 +216,7 @@ void Pager::configChanged()
     if (displayedText != m_displayedText) {
         m_displayedText = displayedText;
         changed = true;
+        emit showDesktopTextChanged();
     }
 
     bool showWindowIcons = cg.readEntry("showWindowIcons", m_showWindowIcons);
@@ -533,7 +534,9 @@ void Pager::updateSizes(bool allowResize)
     for (int i = 0; i < m_desktopCount; i++) {
         itemRect.moveLeft(leftMargin + floor((i % m_columns)  * (itemWidth + padding)));
         itemRect.moveTop(topMargin + floor((i / m_columns) * (itemHeight + padding)));
-        m_pagerModel->appendDesktopRect(mapToDeclarativeUI(itemRect));
+
+        QString name = KWindowSystem::desktopName(i + 1);
+        m_pagerModel->appendDesktopRect(mapToDeclarativeUI(itemRect), name);
     }
 
     // do not try to resize unless the caller has allowed it,
@@ -800,6 +803,17 @@ void Pager::changeDesktop(int newDesktop)
         KWindowSystem::setCurrentDesktop(newDesktop + 1);
         setCurrentDesktop(newDesktop + 1);
     }
+}
+
+QPixmap Pager::shadowText(const QString &text)
+{
+    QColor textColor = m_pagerStyle["textColor"].value<QColor>();
+
+    return Plasma::PaintUtils::shadowText(text,
+                                          KGlobalSettings::smallestReadableFont(),
+                                          textColor,
+                                          textColor.value() < 128 ? Qt::white : Qt::black,
+                                          QPoint(0, 0), 2);
 }
 
 // KWindowSystem does not translate position when mapping viewports

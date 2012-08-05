@@ -48,6 +48,8 @@ class Pager : public Plasma::Applet
     Q_PROPERTY(QVariantMap style READ style NOTIFY styleChanged)
     Q_PROPERTY(int currentDesktop READ currentDesktop NOTIFY currentDesktopChanged)
     Q_PROPERTY(bool showWindowIcons READ showWindowIcons NOTIFY showWindowIconsChanged)
+    Q_PROPERTY(bool showDesktopName READ showDesktopName NOTIFY showDesktopTextChanged)
+    Q_PROPERTY(bool showDesktopNumber READ showDesktopNumber NOTIFY showDesktopTextChanged)
 
     public:
         Pager(QObject *parent, const QVariantList &args);
@@ -67,13 +69,18 @@ class Pager : public Plasma::Applet
         bool showWindowIcons() const { return m_showWindowIcons; }
         void setShowWindowIcons(bool show);
 
+        bool showDesktopName() const { return m_displayedText == Name; }
+        bool showDesktopNumber() const { return m_displayedText == Number; }
+
         Q_INVOKABLE void moveWindow(int, double, double, int, int);
         Q_INVOKABLE void changeDesktop(int desktopId);
+        Q_INVOKABLE QPixmap shadowText(const QString& text);
 
     signals:
         void styleChanged();
         void currentDesktopChanged();
         void showWindowIconsChanged();
+        void showDesktopTextChanged();
 
     public slots:
         void recalculateGridSizes(int rows);
@@ -117,15 +124,13 @@ class Pager : public Plasma::Applet
 
         QTimer* m_timer;
         Ui::pagerConfig ui;
-        enum DisplayedText
-        {
+        enum DisplayedText {
             Number,
             Name,
             None
         };
 
-        enum CurrentDesktopSelected
-        {
+        enum CurrentDesktopSelected {
             DoNothing,
             ShowDesktop,
             ShowDashboard

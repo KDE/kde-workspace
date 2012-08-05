@@ -81,6 +81,7 @@ class PagerModel : public QAbstractListModel
 public:
     enum PagerRoles {
         WindowsRole = RectangleModel::YRole + 1,
+        DesktopNameRole
     };
 
     PagerModel(QObject *parent = 0);
@@ -88,7 +89,7 @@ public:
     QHash<int, QByteArray> roles() const;
 
     void clearDesktopRects();
-    void appendDesktopRect(const QRectF &rect);
+    void appendDesktopRect(const QRectF &rect, const QString &name);
     QRectF &desktopRectAt(int index);
 
     void clearWindowRects();
@@ -103,6 +104,7 @@ private:
 
     RectangleModel m_desktops;
     QList<QObject *> m_windows;
+    QStringList m_names;
 };
 
 #endif // MODEL_H
