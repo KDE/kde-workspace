@@ -33,6 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QLabel>
 #include <QPainter>
 #include <QMenu>
+#include <QStack>
 #include <QTimer>
 #include <QTimeLine>
 #include <QPaintEvent>
@@ -465,6 +466,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
                 m_btnReboot->setFocus();
 
             int def, cur;
+            QString sep = " >> ";
             if ( KDisplayManager().bootOptions( rebootOptions, def, cur ) ) {
                 if ( cur == -1 )
                     cur = def;
@@ -474,17 +476,27 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
                 connect( rebootActionGroup, SIGNAL(triggered(QAction*)), SLOT(slotReboot(QAction*)) );
                 m_btnReboot->setPopupMenu( rebootMenu );
 
-                int index = 0;
-                for (QStringList::ConstIterator it = rebootOptions.constBegin(); it != rebootOptions.constEnd(); ++it, ++index) {
-                    QString label = (*it);
-                    label=label.replace('&',"&&");
-                    QAction* action = new QAction(label, rebootActionGroup);
-                    action->setData(index);
-                    if (index == cur) {
-                        action->setText( label + i18nc("default option in boot loader", " (default)") );
+                QStack<QMenu *> menuStack;
+                menuStack.push(rebootMenu);
+                for (int i = 0; i < rebootOptions.size(); i++) {
+                    int n = rebootOptions.at(i).lastIndexOf(sep);
+                    QString label = rebootOptions.at(i).mid(n < 0 ? 0 : n + sep.length());
+                    label.replace('&', "&&");
+                    if (i == cur)
+                        label += i18nc("default option in boot loader", " (default)");
+                    while (menuStack.size() > 1 && !rebootOptions.at(i).startsWith(menuStack.top()->menuAction()->data().toString() + sep))
+                        menuStack.pop();
+                    QAction *action;
+                    if (i < rebootOptions.size() - 1 && rebootOptions.at(i + 1).startsWith(rebootOptions.at(i) + sep)) { //submenu
+                        QMenu *menu = menuStack.top()->addMenu(label);
+                        menuStack.push(menu);
+                        action = menu->menuAction();
+                    } else { //menuentry
+                        action = menuStack.top()->addAction(label);
+                        rebootActionGroup->addAction(action);
                     }
+                    action->setData(rebootOptions.at(i));
                 }
-                rebootMenu->addActions(rebootActionGroup->actions());
             }
         }
     }
@@ -649,9 +661,7 @@ void KSMShutdownDlg::slotReboot()
 
 void KSMShutdownDlg::slotReboot(QAction* action)
 {
-    int opt = action->data().toInt();
-    if (int(rebootOptions.size()) > opt)
-        m_bootOption = rebootOptions[opt];
+    m_bootOption = action->data().toString();
     m_shutdownType = KWorkSpace::ShutdownTypeReboot;
     accept();
 }
