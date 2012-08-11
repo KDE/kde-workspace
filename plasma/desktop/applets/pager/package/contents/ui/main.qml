@@ -18,12 +18,16 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
+import "utils.js" as Utils
 
 Item {
     id: root
 
     property int minimumWidth: 176
     property int minimumHeight: 88
+
+    property bool dragging: false
+    property int dragId
 
     anchors.fill: parent
 
@@ -47,11 +51,12 @@ Item {
                 anchors.fill: parent
                 z: 1 // to make sure that the FrameSvg will be placed on top of the windows
                 imagePath: "widgets/pager"
-                prefix: mouseArea.containsMouse ? "hover" : (desktop.active ? "active" : "normal")
+                prefix: (desktopMouseArea.enabled && desktopMouseArea.containsMouse) || (root.dragging && root.dragId == desktopId) ?
+                            "hover" : (desktop.active ? "active" : "normal")
             }
 
             MouseArea {
-                id: mouseArea
+                id: desktopMouseArea
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: pager.changeDesktop(desktopId);
@@ -106,6 +111,7 @@ Item {
                                                    : pager.style.windowInactiveBorderColor
 
                         QtExtraComponents.QPixmapItem {
+                            id: icon
                             anchors.centerIn: parent
                             pixmap: model.icon
                             height: nativeHeight
@@ -114,6 +120,7 @@ Item {
                         }
 
                         MouseArea {
+                            id: windowMouseArea
                             anchors.fill: parent
                             drag.target: windowRect
                             drag.axis: Drag.XandYAxis
@@ -129,6 +136,8 @@ Item {
                                 property int y: -1
                                 property variant parent
                                 property int desktop: -1
+                                property int mouseX: -1
+                                property int mouseY: -1
                             }
 
                             // reparent windowRect to enable the dragging for other desktops
@@ -145,22 +154,43 @@ Item {
                                 windowRect.x = value.x;
                                 windowRect.y = value.y
                                 windowRect.parent = root;
+
+                                root.dragging = true;
+                                saveState.mouseX = mouseX;
+                                saveState.mouseY = mouseY;
+                                desktopMouseArea.enabled = false;
                             }
 
                             onReleased: {
-                                var newDesktop = root.childAt(windowRect.x-1, windowRect.y-1);
-                                if (newDesktop) {
-                                    pager.moveWindow(windowRect.windowId, windowRect.x, windowRect.y,
-                                                     newDesktop.desktopId, saveState.desktop);
-                                }
+                                pager.moveWindow(windowRect.windowId, windowRect.x, windowRect.y,
+                                                 root.dragId, saveState.desktop);
 
                                 windowRect.x = saveState.x;
                                 windowRect.y = saveState.y;
                                 windowRect.parent = saveState.parent;
+
+                                root.dragging = false;
+                                desktopMouseArea.enabled = true;
                             }
                         }
-                    }
 
+                        function checkDesktopHover() {
+                            if (!windowMouseArea.drag.active)
+                                return;
+
+                            var mouse = root.mapFromItem(windowRect, saveState.mouseX, saveState.mouseY);
+                            for (var i = 0; i < root.children.length; i++) {
+                                var item = root.children[i];
+                                if (item.desktopId != undefined && Utils.contains(item, mouse)) {
+                                    root.dragId = item.desktopId;
+                                    return;
+                                }
+                            }
+                        }
+
+                        onXChanged: checkDesktopHover();
+                        onYChanged: checkDesktopHover();
+                    }
                 }
             }
         }
