@@ -527,7 +527,6 @@ void Pager::updateSizes(bool allowResize)
         m_heightScaleFactor = itemHeight / m_desktopWidget->geometry().height();
     }
 
-    m_hoverRect = QRectF();
     m_pagerModel->clearDesktopRects();
 
     QRectF itemRect(QPoint(leftMargin, topMargin) , QSize(floor(itemWidth), floor(itemHeight)));
@@ -565,7 +564,6 @@ void Pager::recalculateWindowRects()
 {
     QList<WId> windows = KWindowSystem::stackingOrder();
     m_pagerModel->clearWindowRects();
-    m_windowInfo.clear();
 
     foreach (WId window, windows) {
         KWindowInfo info = KWindowSystem::windowInfo(window, NET::WMGeometry | NET::WMFrameExtents |
@@ -615,8 +613,7 @@ void Pager::recalculateWindowRects()
             bool active = (window == KWindowSystem::activeWindow());
             int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
             QPixmap icon = KWindowSystem::icon(info.win(), windowIconSize, windowIconSize, true);
-            m_pagerModel->appendWindowRect(i, window, windowRect, active, icon);
-            m_windowInfo.append(info);
+            m_pagerModel->appendWindowRect(i, window, windowRect, active, icon, info.visibleName());
         }
     }
 
@@ -841,48 +838,42 @@ void Pager::themeRefresh()
     update();
 }
 
-void Pager::updateToolTip()
+void Pager::updateToolTip(int hoverDesktopId)
 {
-    int hoverDesktopNumber = 0;
-
-    for (int i = 0; i < m_desktopCount; ++i) {
-        if (m_pagerModel->desktopRectAt(i) == m_hoverRect) {
-            hoverDesktopNumber = i + 1;
-        }
-    }
-
     Plasma::ToolTipContent data;
     QString subtext;
     int taskCounter = 0;
     int displayedTaskCounter = 0;
+    WindowModel *windows = m_pagerModel->windowsAt(hoverDesktopId);
 
-    QList<WId> windows;
+    for (; taskCounter < windows->rowCount(); taskCounter++) {
+        WId id = windows->idAt(taskCounter);
+        QString visibleName = windows->visibleNameAt(taskCounter);
 
-    foreach(const KWindowInfo &winInfo, m_windowInfo){
-        if (winInfo.isOnDesktop(hoverDesktopNumber) && !windows.contains(winInfo.win())) {
-
-            bool active = (winInfo.win() == KWindowSystem::activeWindow());
-            if ((taskCounter < 4) || active){
-                // prefer to use the System Settings specified Small icon (usually 16x16)
-                // TODO: should we actually be using Small for this? or Panel, Toolbar, etc?
-                int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
-                QPixmap icon = KWindowSystem::icon(winInfo.win(), windowIconSize, windowIconSize, true);
-                if (icon.isNull()) {
-                     subtext += "<br />&bull;" + Qt::escape(winInfo.visibleName());
-                } else {
-                    data.addResource(Plasma::ToolTipContent::ImageResource, QUrl("wicon://" + QString::number(taskCounter)), QVariant(icon));
-                    subtext += "<br /><img src=\"wicon://" + QString::number(taskCounter) + "\"/>&nbsp;";
-                }
-
-                QFontMetricsF metrics(KGlobalSettings::taskbarFont());
-                const QString combinedString = (active ? "<u>" : "") + Qt::escape(winInfo.visibleName()).replace(' ', "&nbsp;") + (active ? "</u>" : "");
-                // elide text that is too long
-                subtext += metrics.elidedText(combinedString, Qt::ElideMiddle, MAX_TEXT_WIDTH, Qt::TextShowMnemonic);
-
-                displayedTaskCounter++;
-                windows.append(winInfo.win());
+        bool active = (id == KWindowSystem::activeWindow());
+        if (taskCounter < 4 || active) {
+            // prefer to use the System Settings specified Small icon (usually 16x16)
+            // TODO: should we actually be using Small for this? or Panel, Toolbar, etc?
+            int iconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
+            QPixmap icon = KWindowSystem::icon(id, iconSize, iconSize, true);
+            if (icon.isNull()) {
+                 subtext += "<br />&bull;" + Qt::escape(visibleName);
+            } else {
+                data.addResource(Plasma::ToolTipContent::ImageResource,
+                                 QUrl("wicon://" + QString::number(taskCounter)),
+                                 QVariant(icon));
+                subtext += "<br /><img src=\"wicon://" + QString::number(taskCounter)
+                           + "\"/>&nbsp;";
             }
-            taskCounter++;
+
+            QFontMetricsF metrics(KGlobalSettings::taskbarFont());
+            const QString combined = (active ? "<u>" : "")
+                                     + Qt::escape(visibleName).replace(' ', "&nbsp;")
+                                     + (active ? "</u>" : "");
+            // elide text that is too long
+            subtext += metrics.elidedText(combined, Qt::ElideMiddle,
+                                          MAX_TEXT_WIDTH, Qt::TextShowMnemonic);
+            displayedTaskCounter++;
         }
     }
 
@@ -891,12 +882,12 @@ void Pager::updateToolTip()
     }
 
     if (taskCounter - displayedTaskCounter > 0) {
-        subtext.append("<br>&bull; <i>" + i18np("and 1 other", "and %1 others", taskCounter - displayedTaskCounter) + "</i>");
+        subtext.append("<br>&bull; <i>" + i18np("and 1 other", "and %1 others",
+                       taskCounter - displayedTaskCounter) + "</i>");
     }
 
-    data.setMainText(KWindowSystem::desktopName(hoverDesktopNumber));
+    data.setMainText(KWindowSystem::desktopName(hoverDesktopId + 1));
     data.setSubText(subtext);
-
     Plasma::ToolTipManager::self()->setContent(this, data);
 }
 

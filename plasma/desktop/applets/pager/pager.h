@@ -75,6 +75,7 @@ class Pager : public Plasma::Applet
         Q_INVOKABLE void moveWindow(int, double, double, int, int);
         Q_INVOKABLE void changeDesktop(int desktopId);
         Q_INVOKABLE QPixmap shadowText(const QString& text);
+        Q_INVOKABLE void updateToolTip(int hoverDesktopId);
 
     signals:
         void styleChanged();
@@ -111,7 +112,6 @@ class Pager : public Plasma::Applet
         KColorScheme *plasmaColorTheme();
         QRect fixViewportPosition( const QRect& r );
         void createConfigurationInterface(KConfigDialog *parent);
-        void updateToolTip();
 
     private:
         void updatePagerStyle();
@@ -151,11 +151,9 @@ class Pager : public Plasma::Applet
         QSizeF m_size;
 
         //list of info about animations for each desktop
-        QRectF m_hoverRect;
         QList<QAction*> m_actions;
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
-        QList<KWindowInfo> m_windowInfo;
         KColorScheme *m_plasmaColorTheme;
         bool m_verticalFormFactor;
 

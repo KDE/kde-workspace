@@ -53,6 +53,11 @@ Item {
                 imagePath: "widgets/pager"
                 prefix: (desktopMouseArea.enabled && desktopMouseArea.containsMouse) || (root.dragging && root.dragId == desktopId) ?
                             "hover" : (desktop.active ? "active" : "normal")
+
+                onPrefixChanged: {
+                    if (prefix == "hover")
+                        pager.updateToolTip(desktopId);
+                }
             }
 
             MouseArea {
