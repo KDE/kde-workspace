@@ -61,20 +61,14 @@ public:
             return;
         }
 
-        // TODO: readd
-#if 0
-        QStandardItem *item = headerItem->takeChild(startRow);
-
-        headerItem->removeRow(startRow);
-        headerItem->insertRow(destRow, item);
-#endif
+        QStandardItem *item = q->takeItem(startRow);
+        q->removeRow(startRow);
+        q->insertRow(destRow, item);
     }
 
     void removeFavoriteItem(const QString& url)
     {
-        // TODO: readd
         Q_UNUSED(url)
-#if 0
         QModelIndexList matches = q->match(q->index(0, 0), UrlRole,
                                            url, -1,
                                            Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive));
@@ -89,7 +83,6 @@ public:
                 qDeleteAll(q->takeRow(item->row()));
             }
         }
-#endif
     }
 
     static void loadFavorites()
@@ -256,11 +249,11 @@ void FavoritesModel::sortFavoritesDescending()
     sortFavorites(Qt::DescendingOrder);
 }
 
-bool FavoritesModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
-                                  int row, int column, const QModelIndex & parent)
+bool FavoritesModel::dropMimeData(const QString& text, const QVariantList& urls,
+                                  int row, int column)
 {
-    Q_UNUSED(parent);
-
+    // FIXME: pass DropAction by qml
+    Qt::DropAction action = Qt::MoveAction;
     if (action == Qt::IgnoreAction) {
         return true;
     }
@@ -273,26 +266,19 @@ bool FavoritesModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
         QModelIndex modelIndex;
         QStandardItem *startItem;
         int startRow = -1;
-
         int destRow = row;
 
         // look for the favorite that was dragged
-        for (int i = 0; i < d->headerItem->rowCount(); i++) {
-            startItem = d->headerItem->child(i, 0);
-            if (QFileInfo(startItem->data(Kickoff::UrlRole).toString()).completeBaseName()
-                    == QFileInfo(data->text()).completeBaseName()) {
-                startRow = i;
-                break;
-            }
-        }
+        bool conv = false;
+        startRow = text.toInt(&conv, 10);
 
-        if (startRow < 0) {
+        if (!conv) {
             bool dropped = false;
-            foreach (const QUrl &url, data->urls()) {
-                if (!url.isValid()) {
+            foreach (const QVariant &varUrl, urls) {
+                if (!varUrl.value<QUrl>().isValid()) {
                     continue;
                 }
-                const QString path = url.toLocalFile();
+                const QString path = varUrl.value<QUrl>().toLocalFile();
                 if (!KDesktopFile::isDesktopFile(path)) {
                     continue;
                 }
@@ -332,7 +318,7 @@ QVariant FavoritesModel::headerData(int section, Qt::Orientation orientation, in
     }
 }
 
-void FavoritesModel::setNameDisplayOrder(DisplayOrder displayOrder) 
+void FavoritesModel::setNameDisplayOrder(DisplayOrder displayOrder)
 {
     if (d->displayOrder == displayOrder) {
         return;

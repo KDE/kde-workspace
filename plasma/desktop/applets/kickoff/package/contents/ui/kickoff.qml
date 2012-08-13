@@ -26,8 +26,10 @@ Item {
     property int minimumWidth: 290
     property int minimumHeight: 340
     property string previousState
+    property string currentView
     property bool switchTabsOnHover: false
     property bool showAppsByName: false
+
     width: 400
     height: 400
     state: "NORMAL"
@@ -322,6 +324,7 @@ Item {
                     if (applicationsViewContainer.source == "") {
                         applicationsViewContainer.source = "ApplicationsView.qml";
                     }
+                    applicationsViewContainer.item.favoritesModel = mainView.favoritesModel;
                     root.state = "APPLICATIONS";
                     break;
                 }

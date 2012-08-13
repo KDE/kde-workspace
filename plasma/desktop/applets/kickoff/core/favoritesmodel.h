@@ -43,17 +43,17 @@ public:
     virtual ~FavoritesModel();
 
     /** Add a new item for @p url to the user's favorites list. */
-    static void add(const QString& url);
+    Q_INVOKABLE static void add(const QString& url);
     /** Remove the item associated with @p url from the user's favorites list. */
-    static void remove(const QString& url);
+    Q_INVOKABLE static void remove(const QString& url);
     /** Returns true if @p url is in the list of the user's favorite URLs. */
     static void move(int startRow, int destRow);
     static int numberOfFavorites();
     static void sortFavorites(Qt::SortOrder order);
     static bool isFavorite(const QString& url);
 
-    virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action,
-                              int row, int column, const QModelIndex & parent);
+    Q_INVOKABLE virtual bool dropMimeData(const QString& text, const QVariantList& urls,
+                                          int row, int column);
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     void setNameDisplayOrder(DisplayOrder displayOrder);
     DisplayOrder nameDisplayOrder() const;

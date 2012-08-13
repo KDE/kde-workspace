@@ -38,6 +38,38 @@ PlasmaComponents.ListItem {
         }
     }
 
+    /*
+     * context menu items
+     */
+    PlasmaComponents.MenuItem {
+        id: addToFavorites
+        text: "Add to favorites"
+        onClicked: {
+            console.log(model["url"]);
+            listItem.ListView.view.parent.favoritesModel.add(model["url"]);
+        }
+    }
+    PlasmaComponents.MenuItem {
+        id: removeFromFavorites
+        text: "Remove from favorites"
+        onClicked: {
+            listItem.ListView.view.model.remove(model["url"]);
+        }
+    }
+
+    Component.onCompleted: {
+        if (root.state == "APPLICATIONS") {
+            contextMenu.addMenuItem(addToFavorites);
+        } else if (root.state == "NORMAL") {
+            if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel)
+                contextMenu.addMenuItem(removeFromFavorites)
+            else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel)
+                contextMenu.addMenuItem(addToFavorites);
+        } else if (root.state == "SEARCH") {
+            contextMenu.addMenuItem(addToFavorites);
+        }
+    }
+
     QIconItem {
         id: elementIcon
         icon: decoration
@@ -93,22 +125,40 @@ PlasmaComponents.ListItem {
             leftMargin: 5
         }
     }
+
+    PlasmaComponents.ContextMenu {
+        id: contextMenu
+        visualParent: listItem
+    }
+
     DragArea {
         anchors.fill: parent
         supportedActions: Qt.MoveAction | Qt.LinkAction
             mimeData {
                 url: model["url"]
                 source: parent
+                text: index
             }
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
             onEntered: {
                 listItem.ListView.view.currentIndex = index;
             }
             onClicked: {
-                activate();
+                if (mouse.button == Qt.LeftButton)
+                    activate();
+                else if (mouse.button == Qt.RightButton) {
+                    contextMenu.open();
+                }
             }
+        }
+    }
+    DropArea {
+        anchors.fill: parent
+        onDrop: {
+            listItem.ListView.view.model.dropMimeData(event.mimeData.text, event.mimeData.urls, index, 0);
         }
     }
 }
