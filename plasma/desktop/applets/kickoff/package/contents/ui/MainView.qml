@@ -21,6 +21,8 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 
 Item {
+    property alias favoritesModel: kickoffListView.favoritesModel
+
     function loadModelScript(name) {
         return Qt.createQmlObject('import QtQuick 1.0; import org.kde.plasma.kickoff 0.1 as Kickoff; Kickoff.' + name + '{}', kickoffListView, name + "Snippet");
     }

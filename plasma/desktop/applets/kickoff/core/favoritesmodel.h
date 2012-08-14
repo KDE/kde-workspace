@@ -50,7 +50,7 @@ public:
     static void move(int startRow, int destRow);
     static int numberOfFavorites();
     static void sortFavorites(Qt::SortOrder order);
-    static bool isFavorite(const QString& url);
+    Q_INVOKABLE static bool isFavorite(const QString& url);
 
     Q_INVOKABLE virtual bool dropMimeData(const QString& text, const QVariantList& urls,
                                           int row, int column);

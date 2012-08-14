@@ -130,7 +130,6 @@ public:
     static QSet<FavoritesModel*> models;
 
     FavoritesModel * const q;
-    QStandardItem *headerItem;
     DisplayOrder displayOrder;
 };
 
@@ -211,7 +210,7 @@ bool FavoritesModel::isFavorite(const QString& url)
 int FavoritesModel::numberOfFavorites()
 {
     foreach (FavoritesModel* model, Private::models) {
-        return model->d->headerItem->rowCount() - 1;
+        return model->d->q->rowCount() - 1;
     }
 
     return 0;
@@ -224,7 +223,7 @@ void FavoritesModel::sortFavorites(Qt::SortOrder order)
     }
 
     foreach (FavoritesModel *model, Private::models) {
-        model->d->headerItem->sortChildren(0, order);
+        model->d->q->sort(0, order);
     }
 
     Private::globalFavoriteList.clear();
@@ -232,10 +231,9 @@ void FavoritesModel::sortFavorites(Qt::SortOrder order)
     FavoritesModel *model = *Private::models.begin();
     QStandardItem *childData;
     for (int i = 0; i <= numberOfFavorites(); i++) {
-        childData = model->d->headerItem->child(i, 0);
+        childData = model->d->q->item(i, 0);
         Private::globalFavoriteList.append(childData->data(Kickoff::UrlRole).toString());
     }
-
     Private::saveFavorites();
 }
 

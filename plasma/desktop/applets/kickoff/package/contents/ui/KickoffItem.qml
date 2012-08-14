@@ -37,32 +37,16 @@ PlasmaComponents.ListItem {
             plasmoid.hidePopup();
         }
     }
-
-    /*
-     * context menu items
-     */
-    PlasmaComponents.MenuItem {
-        id: addToFavorites
-        text: "Add to favorites"
-        onClicked: {
-            console.log(model["url"]);
-            listItem.ListView.view.parent.favoritesModel.add(model["url"]);
-        }
-    }
-    PlasmaComponents.MenuItem {
-        id: removeFromFavorites
-        text: "Remove from favorites"
-        onClicked: {
-            listItem.ListView.view.model.remove(model["url"]);
-        }
-    }
-
     Component.onCompleted: {
         if (root.state == "APPLICATIONS") {
             contextMenu.addMenuItem(addToFavorites);
         } else if (root.state == "NORMAL") {
-            if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel)
+            if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
                 contextMenu.addMenuItem(removeFromFavorites)
+                contextMenu.addMenuItem(separator)
+                contextMenu.addMenuItem(sortFavoritesAscending)
+                contextMenu.addMenuItem(sortFavoritesDescending)
+            }
             else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel)
                 contextMenu.addMenuItem(addToFavorites);
         } else if (root.state == "SEARCH") {
@@ -128,7 +112,46 @@ PlasmaComponents.ListItem {
 
     PlasmaComponents.ContextMenu {
         id: contextMenu
-        visualParent: listItem
+//         visualParent: listItem
+    }
+    /*
+     * context menu items
+     */
+    PlasmaComponents.MenuItem {
+        id: addToFavorites
+        text: "Add to favorites"
+        icon: QIcon("list-add")
+        onClicked: {
+            listItem.ListView.view.parent.favoritesModel.add(model["url"]);
+        }
+    }
+    PlasmaComponents.MenuItem {
+        id: removeFromFavorites
+        text: "Remove from favorites"
+        icon: QIcon("list-remove")
+        onClicked: {
+            listItem.ListView.view.model.remove(model["url"]);
+        }
+    }
+    PlasmaComponents.MenuItem {
+        id: separator
+        separator: true
+    }
+    PlasmaComponents.MenuItem {
+        id: sortFavoritesAscending
+        text: "Sort Alphabetically (A to Z)"
+        icon: QIcon("view-sort-ascending")
+        onClicked: {
+            listItem.ListView.view.model.sortFavoritesAscending();
+        }
+    }
+    PlasmaComponents.MenuItem {
+        id: sortFavoritesDescending
+        text: "Sort Alphabetically (Z to A)"
+        icon: QIcon("view-sort-descending")
+        onClicked: {
+            listItem.ListView.view.model.sortFavoritesDescending();
+        }
     }
 
     DragArea {
@@ -140,6 +163,7 @@ PlasmaComponents.ListItem {
                 text: index
             }
         MouseArea {
+            id: mousy
             anchors.fill: parent
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -150,7 +174,8 @@ PlasmaComponents.ListItem {
                 if (mouse.button == Qt.LeftButton)
                     activate();
                 else if (mouse.button == Qt.RightButton) {
-                    contextMenu.open();
+                    var mapPos = listItem.mapToItem(listItem.ListView.view.parent.parent.parent, mouse.x, mouse.y);
+                    contextMenu.showMenu(mapPos.x,mapPos.y);
                 }
             }
         }

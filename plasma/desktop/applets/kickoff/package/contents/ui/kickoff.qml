@@ -26,7 +26,6 @@ Item {
     property int minimumWidth: 290
     property int minimumHeight: 340
     property string previousState
-    property string currentView
     property bool switchTabsOnHover: false
     property bool showAppsByName: false
 

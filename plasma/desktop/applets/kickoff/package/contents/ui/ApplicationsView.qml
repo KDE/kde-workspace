@@ -50,6 +50,8 @@ Item {
         id: applicationsView
         focus: true
 
+        property variant breadcrumbs: breadcrumbsElement
+
         function addBreadcrumb(modelIndex, title) {
             breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
             component = Qt.createComponent("Breadcrumb.qml");
@@ -59,7 +61,6 @@ Item {
             crumb.view = applicationsView;
             crumb.enabled = false;
         }
-        property variant breadcrumbs: breadcrumbsElement
         anchors {
             top: breadcrumbsElement.bottom
             left: parent.left
