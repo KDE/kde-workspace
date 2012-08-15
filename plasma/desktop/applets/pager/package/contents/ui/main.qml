@@ -145,6 +145,11 @@ Item {
                                 property int mouseY: -1
                             }
 
+                            drag.onActiveChanged: {
+                                root.dragging = drag.active;
+                                desktopMouseArea.enabled = !drag.active;
+                            }
+
                             // reparent windowRect to enable the dragging for other desktops
                             onPressed: {
                                 if (windowRect.parent == root)
@@ -154,28 +159,24 @@ Item {
                                 saveState.y = windowRect.y
                                 saveState.parent = windowRect.parent;
                                 saveState.desktop = desktop.desktopId;
+                                saveState.mouseX = mouseX;
+                                saveState.mouseY = mouseY;
 
                                 var value = root.mapFromItem(clipRect, windowRect.x, windowRect.y);
                                 windowRect.x = value.x;
                                 windowRect.y = value.y
                                 windowRect.parent = root;
-
-                                root.dragging = true;
-                                saveState.mouseX = mouseX;
-                                saveState.mouseY = mouseY;
-                                desktopMouseArea.enabled = false;
                             }
 
                             onReleased: {
-                                pager.moveWindow(windowRect.windowId, windowRect.x, windowRect.y,
-                                                 root.dragId, saveState.desktop);
+                                if (root.dragging) {
+                                    pager.moveWindow(windowRect.windowId, windowRect.x, windowRect.y,
+                                                     root.dragId, saveState.desktop);
+                                }
 
                                 windowRect.x = saveState.x;
                                 windowRect.y = saveState.y;
                                 windowRect.parent = saveState.parent;
-
-                                root.dragging = false;
-                                desktopMouseArea.enabled = true;
                             }
                         }
 
