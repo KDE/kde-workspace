@@ -33,6 +33,7 @@
 #include <QTimer>
 #include <QVarLengthArray>
 #include <QPropertyAnimation>
+#include <QDesktopWidget>
 #ifdef Q_WS_X11
 #include <QX11Info>
 #endif
@@ -139,7 +140,14 @@ void AbstractTaskItem::setPreferredOffscreenSize()
     int leftMargin = m_applet->offscreenLeftMargin();
 
     //kDebug() << (QObject*)this;
-    QSizeF s(mSize.width() * 12 + leftMargin + rightMargin + KIconLoader::SizeSmall,
+    int maxWidth = QApplication::desktop()->availableGeometry().width();
+    if (m_applet->containment() && m_applet->containment()->corona()) {
+        maxWidth = m_applet->containment()->corona()->
+                       availableScreenRegion(m_applet->containment()->screen()).boundingRect().width() * 0.8;
+    }
+
+    QSizeF s(qMax(mSize.width() * 12, qMin(fm.width(text()), maxWidth))
+             + IconTextSpacing + leftMargin + rightMargin + KIconLoader::SizeSmall,
              qMax(mSize.height(), iconsize) + topMargin + bottomMargin);
     setPreferredSize(s);
 }

@@ -417,9 +417,14 @@ void TaskItemLayout::updatePreferredSize()
     //kDebug() << "column count: " << m_layout->columnCount();
 
     if (count() > 0) {
-        QSizeF s = itemAt(0)->preferredSize();
+        qreal maxWidth = 0.0;
+        QSizeF s;
+        for (int i = 0; i < count(); i++) {
+            s = itemAt(i)->preferredSize();
+            maxWidth = qMax(maxWidth, s.width());
+        }
         //kDebug() << s << columnCount();
-        setPreferredSize(s.width() * columnCount(), s.height() * rowCount());
+        setPreferredSize(maxWidth * columnCount(), s.height() * rowCount());
     } else {
         //Empty taskbar, arbitrary small value
         kDebug() << "Empty layout!!!!!!!!!!!!!!!!!!";
