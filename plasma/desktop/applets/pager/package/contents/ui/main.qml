@@ -172,6 +172,10 @@ Item {
                                 if (root.dragging) {
                                     pager.moveWindow(windowRect.windowId, windowRect.x, windowRect.y,
                                                      root.dragId, saveState.desktop);
+                                } else {
+                                    // when there is no dragging (just a click), the event is passed
+                                    // to the desktop mousearea
+                                    desktopMouseArea.clicked(mouse);
                                 }
 
                                 windowRect.x = saveState.x;
