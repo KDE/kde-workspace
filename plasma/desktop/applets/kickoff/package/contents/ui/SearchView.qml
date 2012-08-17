@@ -20,6 +20,9 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 Item {
+    id: searchViewContainer
+    property variant favoritesModel
+
     function decrementCurrentIndex() {
         searchView.decrementCurrentIndex();
     }
@@ -33,6 +36,8 @@ Item {
     ListView {
         id: searchView
         clip: true
+
+        property alias favoritesModel: searchViewContainer.favoritesModel
 
         anchors {
             left: parent.left

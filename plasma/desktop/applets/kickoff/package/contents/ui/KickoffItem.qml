@@ -37,23 +37,6 @@ PlasmaComponents.ListItem {
             plasmoid.hidePopup();
         }
     }
-    Component.onCompleted: {
-        if (root.state == "APPLICATIONS") {
-            contextMenu.addMenuItem(addToFavorites);
-        } else if (root.state == "NORMAL") {
-            if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
-                contextMenu.addMenuItem(removeFromFavorites)
-                contextMenu.addMenuItem(separator)
-                contextMenu.addMenuItem(sortFavoritesAscending)
-                contextMenu.addMenuItem(sortFavoritesDescending)
-            }
-            else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel)
-                contextMenu.addMenuItem(addToFavorites);
-        } else if (root.state == "SEARCH") {
-            contextMenu.addMenuItem(addToFavorites);
-        }
-    }
-
     QIconItem {
         id: elementIcon
         icon: decoration
@@ -118,11 +101,20 @@ PlasmaComponents.ListItem {
      * context menu items
      */
     PlasmaComponents.MenuItem {
+        id: titleMenuItem
+        text: titleElement.text
+        checkable: false
+    }
+    PlasmaComponents.MenuItem {
+        id: separator
+        separator: true
+    }
+    PlasmaComponents.MenuItem {
         id: addToFavorites
         text: "Add to favorites"
-        icon: QIcon("list-add")
+        icon: QIcon("bookmark-new")
         onClicked: {
-            listItem.ListView.view.parent.favoritesModel.add(model["url"]);
+            listItem.ListView.view.favoritesModel.add(model["url"]);
         }
     }
     PlasmaComponents.MenuItem {
@@ -130,19 +122,15 @@ PlasmaComponents.ListItem {
         text: "Remove from favorites"
         icon: QIcon("list-remove")
         onClicked: {
-            listItem.ListView.view.model.remove(model["url"]);
+            listItem.ListView.view.favoritesModel.remove(model["url"]);
         }
-    }
-    PlasmaComponents.MenuItem {
-        id: separator
-        separator: true
     }
     PlasmaComponents.MenuItem {
         id: sortFavoritesAscending
         text: "Sort Alphabetically (A to Z)"
         icon: QIcon("view-sort-ascending")
         onClicked: {
-            listItem.ListView.view.model.sortFavoritesAscending();
+            listItem.ListView.view.favoritesModel.sortFavoritesAscending();
         }
     }
     PlasmaComponents.MenuItem {
@@ -150,7 +138,23 @@ PlasmaComponents.ListItem {
         text: "Sort Alphabetically (Z to A)"
         icon: QIcon("view-sort-descending")
         onClicked: {
-            listItem.ListView.view.model.sortFavoritesDescending();
+            listItem.ListView.view.favoritesModel.sortFavoritesDescending();
+        }
+    }
+    PlasmaComponents.MenuItem {
+        id: clearRecentApplications
+        text: "Clear Recent Applications"
+        icon: QIcon("edit-clear-history")
+        onClicked: {
+            listItem.ListView.view.recentlyUsedModel.clearRecentApplications();
+        }
+    }
+    PlasmaComponents.MenuItem {
+        id: clearRecentDocuments
+        text: "Clear Recent Documents"
+        icon: QIcon("edit-clear-history")
+        onClicked: {
+            listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
         }
     }
 
@@ -174,8 +178,34 @@ PlasmaComponents.ListItem {
                 if (mouse.button == Qt.LeftButton)
                     activate();
                 else if (mouse.button == Qt.RightButton) {
+                    if (hasModelChildren)
+                        return;
+
+                    contextMenu.addMenuItem(titleMenuItem)
+                    contextMenu.addMenuItem(separator)
+
+                    if (listItem.ListView.view.favoritesModel.isFavorite(model["url"]))
+                        contextMenu.addMenuItem(removeFromFavorites)
+                    else {
+                        if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel ||
+                            root.state == "APPLICATIONS" ||
+                            root.state == "SEARCH") {
+                            contextMenu.addMenuItem(addToFavorites);
+                        }
+                    }
+
+                    if (root.state == "NORMAL") {
+                        contextMenu.addMenuItem(separator)
+                        if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
+                            contextMenu.addMenuItem(sortFavoritesAscending)
+                            contextMenu.addMenuItem(sortFavoritesDescending)
+                        } else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel) {
+                            contextMenu.addMenuItem(clearRecentApplications);
+                            contextMenu.addMenuItem(clearRecentDocuments);
+                        }
+                    }
                     var mapPos = listItem.mapToItem(listItem.ListView.view.parent.parent.parent, mouse.x, mouse.y);
-                    contextMenu.showMenu(mapPos.x,mapPos.y);
+                    contextMenu.open(mapPos.x,mapPos.y);
                 }
             }
         }

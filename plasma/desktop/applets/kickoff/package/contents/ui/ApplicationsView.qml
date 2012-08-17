@@ -21,6 +21,7 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 
 Item {
+    id: appViewContainer
     property variant favoritesModel
 
     function decrementCurrentIndex() {
@@ -51,6 +52,7 @@ Item {
         focus: true
 
         property variant breadcrumbs: breadcrumbsElement
+        property alias favoritesModel: appViewContainer.favoritesModel
 
         function addBreadcrumb(modelIndex, title) {
             breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
@@ -69,6 +71,7 @@ Item {
         }
         model: VisualDataModel {
             id: vmodel
+
             model: Kickoff.ApplicationModel {}
             delegate: KickoffItem {
                 id: kickoffItem

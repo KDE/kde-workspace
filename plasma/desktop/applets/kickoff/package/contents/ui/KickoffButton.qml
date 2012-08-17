@@ -40,6 +40,7 @@ PlasmaComponents.TabButton {
         id: labelElement
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
+        font.pointSize: theme.smallestFont.pointSize
         anchors {
             bottom: parent.bottom
             top: iconElement.bottom

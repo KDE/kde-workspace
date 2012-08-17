@@ -144,6 +144,7 @@ Item {
             onTextChanged: {
                 if (searchView.source == "") {
                     searchView.source = "SearchView.qml";
+                    searchView.item.favoritesModel = mainView.favoritesModel;
                 }
                 if (root.state != "SEARCH") {
                     root.previousState = root.state;
