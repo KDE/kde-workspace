@@ -278,15 +278,15 @@ PlasmaCore.FrameSvgItem {
                             contextMenu = shutdownOptionsComponent.createObject(shutdownButton)
                             if (spdMethods.StandbyState) {
                                 // 1 == Solid::PowerManagement::StandbyState
-                                contextMenu.append({itemIndex: 1, itemText: i18n("&Standby")})
+                                contextMenu.append({itemIndex: 1, itemText: i18n("&Standby"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             if (spdMethods.SuspendState) {
                                 // 2 == Solid::PowerManagement::SuspendState
-                                contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM")})
+                                contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             if (spdMethods.HibernateState) {
                                 // 4 == Solid::PowerManagement::HibernateState
-                                contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk")})
+                                contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             contextMenu.clicked.connect(shutdownUi.suspendRequested)
                         }
