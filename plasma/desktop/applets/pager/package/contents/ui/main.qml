@@ -129,10 +129,10 @@ Item {
                             anchors.fill: parent
                             drag.target: windowRect
                             drag.axis: Drag.XandYAxis
-                            drag.minimumX: -parent.width*2
-                            drag.maximumX: root.width + parent.width*2
-                            drag.minimumY: -parent.height*2
-                            drag.maximumY: root.height + parent.height*2
+                            drag.minimumX: -windowRect.width/2
+                            drag.maximumX: root.width - windowRect.width/2
+                            drag.minimumY: -windowRect.height
+                            drag.maximumY: root.height - 2*windowRect.height
 
                             // used to save the state of some properties before the dragging
                             QtObject {
