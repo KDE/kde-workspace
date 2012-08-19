@@ -52,6 +52,7 @@
 #include <Plasma/Animator>
 #include <Plasma/DeclarativeWidget>
 #include <Plasma/Package>
+#include <Plasma/FrameSvg>
 
 #include <KActivities/Consumer>
 
@@ -85,6 +86,9 @@ Pager::Pager(QObject *parent, const QVariantList &args)
     setAcceptDrops(true);
     setHasConfigurationInterface(true);
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
+
+    m_dummy = new Plasma::FrameSvg(this);
+    m_dummy->setImagePath("widgets/pager");
 
     // initialize with a decent default
     m_desktopCount = KWindowSystem::numberOfDesktops();
@@ -442,6 +446,8 @@ void Pager::updateSizes(bool allowResize)
 
     // calculate the margins
     if (formFactor() == Plasma::Vertical || formFactor() == Plasma::Horizontal) {
+        m_dummy->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
+
         if (formFactor() == Plasma::Vertical) {
             qreal optimalSize = (geometry().width() -
                                  KIconLoader::SizeSmall * ratio * m_columns -

@@ -39,6 +39,7 @@ namespace Plasma
 {
     class DeclarativeWidget;
     class Package;
+    class FrameSvg;
 }
 
 class Pager : public Plasma::Applet
@@ -121,6 +122,9 @@ class Pager : public Plasma::Applet
         Plasma::DeclarativeWidget *m_declarativeWidget;
         PagerModel *m_pagerModel;
         QVariantMap m_pagerStyle;
+
+        // Used just to get the margins
+        Plasma::FrameSvg *m_dummy;
 
         QTimer* m_timer;
         Ui::pagerConfig ui;
