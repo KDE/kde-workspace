@@ -38,7 +38,6 @@ class KCModuleProxy;
 namespace Plasma
 {
     class DeclarativeWidget;
-    class Package;
     class FrameSvg;
 }
 
@@ -143,7 +142,6 @@ class Pager : public Plasma::Applet
         DisplayedText m_displayedText;
         CurrentDesktopSelected m_currentDesktopSelected;
         bool m_showWindowIcons;
-        bool m_showOwnBackground;
         int m_rows;
         int m_columns;
         int m_desktopCount;

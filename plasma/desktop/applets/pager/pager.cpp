@@ -22,15 +22,11 @@
 
 #include <math.h>
 
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
 #include <QFont>
 #include <QTimer>
 #include <QX11Info>
 #include <QDBusInterface>
 #include <QTextDocument>
-#include <QPropertyAnimation>
-#include <QApplication>
 #include <QDesktopWidget>
 #include <QtGui/QGraphicsLinearLayout>
 #include <QtDeclarative/QDeclarativeEngine>
@@ -42,14 +38,12 @@
 #include <KConfigDialog>
 #include <KGlobalSettings>
 #include <KIconLoader>
-#include <KSharedConfig>
 #include <KWindowSystem>
 #include <NETRootInfo>
 
 #include <Plasma/PaintUtils>
 #include <Plasma/Theme>
 #include <Plasma/ToolTipManager>
-#include <Plasma/Animator>
 #include <Plasma/DeclarativeWidget>
 #include <Plasma/Package>
 #include <Plasma/FrameSvg>
@@ -60,7 +54,6 @@
 
 const int FAST_UPDATE_DELAY = 100;
 const int UPDATE_DELAY = 500;
-const int DRAG_SWITCH_DELAY = 1000;
 const int MAXDESKTOPS = 20;
 // random(), find a less magic one if you can. -sreich
 const qreal MAX_TEXT_WIDTH = 800;
@@ -70,7 +63,6 @@ Pager::Pager(QObject *parent, const QVariantList &args)
       m_displayedText(None),
       m_currentDesktopSelected(DoNothing),
       m_showWindowIcons(false),
-      m_showOwnBackground(false),
       m_rows(2),
       m_columns(0),
       m_desktopDown(false),
@@ -455,7 +447,6 @@ void Pager::updateSizes(bool allowResize)
 
             if (optimalSize < leftMargin || optimalSize < rightMargin) {
                 leftMargin = rightMargin = qMax(qreal(0), optimalSize);
-                m_showOwnBackground = false;
             }
         } else if (formFactor() == Plasma::Horizontal) {
             qreal optimalSize = (geometry().height() -
@@ -464,7 +455,6 @@ void Pager::updateSizes(bool allowResize)
 
             if (optimalSize < topMargin || optimalSize < bottomMargin) {
                 topMargin = bottomMargin = qMax(qreal(0), optimalSize);
-                m_showOwnBackground = false;
             }
         }
     } else {
