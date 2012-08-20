@@ -240,7 +240,17 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
     Q_UNUSED(obj)
         if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
             capsLocked();
+        } else if (event->type() == QEvent::GraphicsSceneMousePress) {
+            QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
+
+            foreach (QDeclarativeView *view, m_views) {
+                if (view->geometry().contains(me->screenPos())) {
+                    view->activateWindow();
+                    break;
+                }
+            }
         }
+
     return false;
 }
 

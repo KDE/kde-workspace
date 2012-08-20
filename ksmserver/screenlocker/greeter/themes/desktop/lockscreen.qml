@@ -38,7 +38,7 @@ Item {
         anchors.fill: parent
         source: theme.wallpaperPathForSize(parent.width, parent.height)
     }
-PlasmaComponents.TextField {z:9999}
+
     PlasmaCore.FrameSvgItem {
         id: dialog
         anchors.centerIn: parent
