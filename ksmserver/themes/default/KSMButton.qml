@@ -111,11 +111,11 @@ PlasmaCore.FrameSvgItem {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: 5
+            leftMargin: theme.defaultFont.mSize.width
         }
 
         onPaintedWidthChanged: {
-            button.width = Math.max(button.width, 5 + labelElement.width + 20 + iconElement.width + 5)
+            button.width = Math.max(button.width, theme.defaultFont.mSize.width + labelElement.width + 2*theme.defaultFont.mSize.width + iconElement.width + theme.defaultFont.mSize.width)
         }
     }
 
@@ -156,12 +156,25 @@ PlasmaCore.FrameSvgItem {
         id: iconElement
         icon: QIcon(iconSource)
         width: height
-        height: parent.height - 6
+        height: parent.height - 8
 
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: 3
+            rightMargin: 4
+        }
+
+        MouseArea {
+            z: 10
+            anchors.fill: parent
+            onClicked: {
+                button.focus = true
+                if (menu) {
+                    button.pressAndHold()
+                } else {
+                    button.clicked()
+                }
+            }
         }
     }
 
@@ -210,6 +223,7 @@ PlasmaCore.FrameSvgItem {
     MouseArea {
         id: mouseArea
 
+        z: -10
         anchors.fill: parent
         hoverEnabled: true
         onClicked: {

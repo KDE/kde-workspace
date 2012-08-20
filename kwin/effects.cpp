@@ -115,6 +115,9 @@ EffectsHandlerImpl::EffectsHandlerImpl(CompositingType type)
     connect(ws, SIGNAL(mouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)),
             SIGNAL(mouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)));
     connect(ws, SIGNAL(propertyNotify(long)), this, SLOT(slotPropertyNotify(long)));
+    connect(ws, SIGNAL(activityAdded(QString)), SIGNAL(activityAdded(QString)));
+    connect(ws, SIGNAL(activityRemoved(QString)), SIGNAL(activityRemoved(QString)));
+    connect(ws, SIGNAL(currentActivityChanged(QString)), SIGNAL(currentActivityChanged(QString)));
 #ifdef KWIN_BUILD_TABBOX
     connect(ws->tabBox(), SIGNAL(tabBoxAdded(int)), SIGNAL(tabBoxAdded(int)));
     connect(ws->tabBox(), SIGNAL(tabBoxUpdated()), SIGNAL(tabBoxUpdated()));
@@ -307,10 +310,17 @@ void EffectsHandlerImpl::drawWindow(EffectWindow* w, int mask, QRegion region, W
 
 void EffectsHandlerImpl::buildQuads(EffectWindow* w, WindowQuadList& quadList)
 {
+    static bool initIterator = true;
+    if (initIterator) {
+        m_currentBuildQuadsIterator = m_activeEffects.begin();
+        initIterator = false;
+    }
     if (m_currentBuildQuadsIterator != m_activeEffects.end()) {
         (*m_currentBuildQuadsIterator++)->buildQuads(w, quadList);
         --m_currentBuildQuadsIterator;
     }
+    if (m_currentBuildQuadsIterator == m_activeEffects.begin())
+        initIterator = true;
 }
 
 bool EffectsHandlerImpl::hasDecorationShadows() const
@@ -341,7 +351,6 @@ void EffectsHandlerImpl::startPaint()
     m_currentPaintWindowIterator = m_activeEffects.begin();
     m_currentPaintScreenIterator = m_activeEffects.begin();
     m_currentPaintEffectFrameIterator = m_activeEffects.begin();
-    m_currentBuildQuadsIterator = m_activeEffects.begin();
 }
 
 void EffectsHandlerImpl::slotClientMaximized(KWin::Client *c, KDecorationDefines::MaximizeMode maxMode)
@@ -953,23 +962,52 @@ QRect EffectsHandlerImpl::clientArea(clientAreaOption opt, const QPoint& p, int 
 
 Window EffectsHandlerImpl::createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor)
 {
-    XSetWindowAttributes attrs;
-    attrs.override_redirect = True;
-    Window win = XCreateWindow(display(), rootWindow(), x, y, w, h, 0, 0, InputOnly, CopyFromParent,
-                               CWOverrideRedirect, &attrs);
-    // TODO keeping on top?
-    // TODO enter/leave notify?
-    XSelectInput(display(), win, ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
-    XDefineCursor(display(), win, cursor.handle());
-    XMapWindow(display(), win);
-    input_windows.append(qMakePair(e, win));
-
+    Window win = 0;
+    QList<InputWindowPair>::iterator it = input_windows.begin();
+    while (it != input_windows.end()) {
+        if (it->first != e) {
+            ++it;
+            continue;
+        }
+        XWindowAttributes attr;
+        if (!XGetWindowAttributes(display(), it->second, &attr)) {
+            // this is some random junk that certainly should no be here
+            kDebug(1212) << "found input window that is NOT on the server, something is VERY broken here";
+            Q_ASSERT(false); // exit in debug mode - for releases we'll be a bit more graceful
+            it = input_windows.erase(it);
+            continue;
+        }
+        if (attr.x == x && attr.y == y && attr.width == w && attr.height == h) {
+            win = it->second; // re-use
+            break;
+        } else if (attr.map_state == IsUnmapped) {
+            // probably old one, likely no longer of interest
+            XDestroyWindow(display(), it->second);
+            it = input_windows.erase(it);
+            continue;
+        }
+        ++it;
+    }
+    if (!win) {
+        XSetWindowAttributes attrs;
+        attrs.override_redirect = True;
+        win = XCreateWindow(display(), rootWindow(), x, y, w, h, 0, 0, InputOnly, CopyFromParent,
+                                CWOverrideRedirect, &attrs);
+        // TODO keeping on top?
+        // TODO enter/leave notify?
+        XSelectInput(display(), win, ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
+        XDefineCursor(display(), win, cursor.handle());
+        input_windows.append(qMakePair(e, win));
+    }
+    XMapRaised(display(), win);
     // Raise electric border windows above the input windows
     // so they can still be triggered.
 #ifdef KWIN_BUILD_SCREENEDGES
     Workspace::self()->screenEdge()->ensureOnTop();
 #endif
-
+    if (input_windows.count() > 10) // that sounds like some leak - could still be correct, thoug - so NO ABORT HERE!
+        kDebug() << "** warning ** there are now " << input_windows.count() <<
+                    "input windows what's a bit much - please have a look and if this counts up, better report a bug";
     return win;
 }
 
@@ -977,8 +1015,10 @@ void EffectsHandlerImpl::destroyInputWindow(Window w)
 {
     foreach (const InputWindowPair & pos, input_windows) {
         if (pos.second == w) {
-            input_windows.removeAll(pos);
-            XDestroyWindow(display(), w);
+            XUnmapWindow(display(), w);
+#ifdef KWIN_BUILD_SCREENEDGES
+            Workspace::self()->screenEdge()->raisePanelProxies();
+#endif
             return;
         }
     }
@@ -1030,17 +1070,23 @@ void EffectsHandlerImpl::checkInputWindowStacking()
 {
     if (input_windows.count() == 0)
         return;
-    Window* wins = new Window[ input_windows.count()];
+    Window* wins = new Window[input_windows.count()];
     int pos = 0;
-    foreach (const InputWindowPair & it, input_windows)
-    wins[ pos++ ] = it.second;
-    XRaiseWindow(display(), wins[ 0 ]);
-    XRestackWindows(display(), wins, pos);
+    foreach (const InputWindowPair &it, input_windows) {
+        XWindowAttributes attr;
+        if (XGetWindowAttributes(display(), it.second, &attr) && attr.map_state != IsUnmapped)
+            wins[pos++] = it.second;
+    }
+    if (pos) {
+        XRaiseWindow(display(), wins[0]);
+        XRestackWindows(display(), wins, pos);
+    }
     delete[] wins;
     // Raise electric border windows above the input windows
     // so they can still be triggered. TODO: Do both at once.
 #ifdef KWIN_BUILD_SCREENEDGES
-    Workspace::self()->screenEdge()->ensureOnTop();
+    if (pos)
+        Workspace::self()->screenEdge()->ensureOnTop();
 #endif
 }
 
@@ -1103,6 +1149,7 @@ KLibrary* EffectsHandlerImpl::findEffectLibrary(KService* service)
         libname.replace("kwin4_effect_", "kwin4_effect_gles_");
     }
 #endif
+    libname.replace("kwin", KWIN_NAME);
     KLibrary* library = new KLibrary(libname);
     if (!library) {
         kError(1212) << "couldn't open library for effect '" <<
@@ -1265,7 +1312,7 @@ bool EffectsHandlerImpl::loadScriptedEffect(const QString& name, KService *servi
         kDebug(1212) << "X-Plasma-MainScript not set";
         return false;
     }
-    const QString scriptFile = KStandardDirs::locate("data", "kwin/effects/" + name + "/contents/" + scriptName);
+    const QString scriptFile = KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + "/effects/" + name + "/contents/" + scriptName);
     if (scriptFile.isNull()) {
         kDebug(1212) << "Could not locate the effect script";
         return false;
@@ -1312,9 +1359,9 @@ void EffectsHandlerImpl::reconfigureEffect(const QString& name)
         }
 }
 
-bool EffectsHandlerImpl::isEffectLoaded(const QString& name)
+bool EffectsHandlerImpl::isEffectLoaded(const QString& name) const
 {
-    for (QVector< EffectPair >::iterator it = loaded_effects.begin(); it != loaded_effects.end(); ++it)
+    for (QVector< EffectPair >::const_iterator it = loaded_effects.constBegin(); it != loaded_effects.constEnd(); ++it)
         if ((*it).first == name)
             return true;
 
@@ -1381,6 +1428,28 @@ void EffectsHandlerImpl::slotShowOutline(const QRect& geometry)
 void EffectsHandlerImpl::slotHideOutline()
 {
     emit hideOutline();
+}
+
+QString EffectsHandlerImpl::supportInformation(const QString &name) const
+{
+    if (!isEffectLoaded(name)) {
+        return QString();
+    }
+    for (QVector< EffectPair >::const_iterator it = loaded_effects.constBegin(); it != loaded_effects.constEnd(); ++it) {
+        if ((*it).first == name) {
+            QString support((*it).first + ":\n");
+            const QMetaObject *metaOptions = (*it).second->metaObject();
+            for (int i=0; i<metaOptions->propertyCount(); ++i) {
+                const QMetaProperty property = metaOptions->property(i);
+                if (QLatin1String(property.name()) == "objectName") {
+                    continue;
+                }
+                support.append(QLatin1String(property.name()) % ": " % (*it).second->property(property.name()).toString() % '\n');
+            }
+            return support;
+        }
+    }
+    return QString();
 }
 
 //****************************************

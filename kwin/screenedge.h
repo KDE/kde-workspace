@@ -44,7 +44,7 @@ namespace KWin {
  * @author Arthur Arlt
  * @since 4.8
  */
-class ScreenEdge : QObject {
+class ScreenEdge : public QObject {
     Q_OBJECT
 public:
     ScreenEdge();
@@ -58,8 +58,9 @@ public:
      * if one is enabled for the current region and the timeout is satisfied
      * @param pos the position of the mouse pointer
      * @param now the time when the function is called
+     * @param forceNoPushBack needs to be called to workaround some DnD clients, don't use unless you want to chek on a DnD event
      */
-    void check(const QPoint& pos, Time now);
+    void check(const QPoint& pos, Time now, bool forceNoPushBack = false);
     /**
      * Restore the size of the specified screen edges
      * @param border the screen edge to restore the size of
@@ -91,6 +92,11 @@ public:
      */
     void ensureOnTop();
     /**
+     * Raise FOREIGN border windows to the real top of the screen. We usually need
+     * to do this after an effect input window was active.
+     */
+    void raisePanelProxies();
+    /**
     * Called when the user entered an electric border with the mouse.
     * It may switch to another virtual desktop.
     * @param e the X event which is passed to this method.
@@ -108,6 +114,13 @@ public Q_SLOTS:
      * actions or disabled desktop switching.
      */
     void update(bool force=false);
+Q_SIGNALS:
+    /**
+     * Emitted when the @p border got activated and there is neither an effect nor a global
+     * action configured for this @p border.
+     * @param border The border which got activated
+     **/
+    void activated(ElectricBorder border);
 private:
     /**
      * Switch the desktop if desktop switching is enabled and a screen edge

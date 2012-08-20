@@ -78,15 +78,26 @@ SceneOpenGL::SceneOpenGL(Workspace* ws)
         glDrawBuffer(GL_BACK);
     // Check whether certain features are supported
     has_waitSync = false;
-    if (glXGetVideoSync && glXIsDirect(display(), ctxbuffer) && options->isGlVSync()) {
-        unsigned int sync;
-        if (glXGetVideoSync(&sync) == 0) {
-            if (glXWaitVideoSync(1, 0, &sync) == 0)
-                has_waitSync = true;
-            else
-                qWarning() << "NO VSYNC! glXWaitVideoSync(1,0,&uint) isn't 0 but" << glXWaitVideoSync(1, 0, &sync);
+    if (options->isGlVSync()) {
+        if (glXGetVideoSync && glXSwapInterval && glXIsDirect(display(), ctxbuffer)) {
+            unsigned int sync;
+            if (glXGetVideoSync(&sync) == 0) {
+                if (glXWaitVideoSync(1, 0, &sync) == 0) {
+                    // NOTICE at this time we should actually check whether we can successfully
+                    // deactivate the swapInterval "glXSwapInterval(0) == 0"
+                    // (because we don't actually want it active unless we explicitly run a glXSwapBuffers)
+                    // However mesa/dri will return a range error (6) because deactivating the
+                    // swapinterval (as of today) seems completely unsupported
+                    has_waitSync = true;
+                    glXSwapInterval(0);
+                }
+                else
+                    qWarning() << "NO VSYNC! glXWaitVideoSync(1,0,&uint) isn't 0 but" << glXWaitVideoSync(1, 0, &sync);
+            } else
+                qWarning() << "NO VSYNC! glXGetVideoSync(&uint) isn't 0 but" << glXGetVideoSync(&sync);
         } else
-            qWarning() << "NO VSYNC! glXGetVideoSync(&uint) isn't 0 but" << glXGetVideoSync(&sync);
+            qWarning() << "NO VSYNC! glXGetVideoSync, glXSwapInterval, glXIsDirect" <<
+                        bool(glXGetVideoSync) << bool(glXSwapInterval) << glXIsDirect(display(), ctxbuffer);
     }
 
     debug = qstrcmp(qgetenv("KWIN_GL_DEBUG"), "1") == 0;
@@ -411,13 +422,6 @@ bool SceneOpenGL::initDrawableConfigs()
                                  GLX_DEPTH_SIZE, &depth_value);
             if (depth_value > depth)
                 continue;
-            int mipmap_value = -1;
-            if (GLTexture::framebufferObjectSupported()) {
-                glXGetFBConfigAttrib(display(), fbconfigs[ j ],
-                                     GLX_BIND_TO_MIPMAP_TEXTURE_EXT, &mipmap_value);
-                if (mipmap_value < mipmap)
-                    continue;
-            }
             int caveat_value;
             glXGetFBConfigAttrib(display(), fbconfigs[ j ],
                                  GLX_CONFIG_CAVEAT, &caveat_value);
@@ -429,7 +433,7 @@ bool SceneOpenGL::initDrawableConfigs()
             back = back_value;
             stencil = stencil_value;
             depth = depth_value;
-            mipmap = mipmap_value;
+            mipmap = 0;
             glXGetFBConfigAttrib(display(), fbconfigs[ j ],
                                  GLX_BIND_TO_TEXTURE_TARGETS_EXT, &value);
             fbcdrawableinfo[ i ].texture_targets = value;
@@ -453,11 +457,12 @@ bool SceneOpenGL::initDrawableConfigs()
 }
 
 // the entry function for painting
-void SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
+int SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
 {
-    QElapsedTimer renderTimer;
-    renderTimer.start();
+    if (!m_lastDamage.isEmpty())
+        flushBuffer(m_lastMask, m_lastDamage);
 
+    // actually paint the frame, flushed with the NEXT frame
     foreach (Toplevel * c, toplevels) {
         assert(windows.contains(c));
         stacking_order.append(windows[ c ]);
@@ -474,32 +479,61 @@ void SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
     checkGLError("Paint1");
 #endif
     paintScreen(&mask, &damage);   // call generic implementation
+    m_lastMask = mask;
+    m_lastDamage = damage;
 #ifdef CHECK_GL_ERROR
     checkGLError("Paint2");
 #endif
-    ungrabXServer(); // ungrab before flushBuffer(), it may wait for vsync
-    if (m_overlayWindow->window())  // show the window only after the first pass, since
-        m_overlayWindow->show();   // that pass may take long
-    lastRenderTime = renderTimer.elapsed();
-    if (!damage.isEmpty()) {
-        flushBuffer(mask, damage);
-    }
+
+    glFlush();
+
+    ungrabXServer();
+    if (m_overlayWindow->window())  // show the window only after the first pass,
+        m_overlayWindow->show();   // since that pass may take long
+
     // do cleanup
     stacking_order.clear();
     checkGLError("PostPaint");
+    return m_renderTimer.elapsed();
 }
+
+#define VSYNC_DEBUG 0
 
 // wait for vblank signal before painting
 void SceneOpenGL::waitSync()
 {
     // NOTE that vsync has no effect with indirect rendering
     if (waitSyncAvailable()) {
+#if VSYNC_DEBUG
+        m_renderTimer.start();
+#endif
         uint sync;
-        glFlush();
+#if 0
+        // TODO: why precisely is this important?
+        // the sync counter /can/ perform multiple steps during glXGetVideoSync & glXWaitVideoSync
+        // but this only leads to waiting for two frames??!?
         glXGetVideoSync(&sync);
         glXWaitVideoSync(2, (sync + 1) % 2, &sync);
+#else
+        glXWaitVideoSync(1, 0, &sync);
+#endif
+#if VSYNC_DEBUG
+        static int waitTime = 0, waitCounter = 0, doubleSyncCounter = 0;
+        if (m_renderTimer.elapsed() > 11)
+            ++doubleSyncCounter;
+        waitTime += m_renderTimer.elapsed();
+        ++waitCounter;
+        if (waitCounter > 99)
+        {
+            qDebug() << "mean vsync wait time:" << float((float)waitTime / (float)waitCounter) << doubleSyncCounter << "/100";
+            doubleSyncCounter = waitTime = waitCounter = 0;
+        }
+#endif
     }
+    m_renderTimer.start(); // yes, the framerate shall be constant anyway.
 }
+
+#undef VSYNC_DEBUG
 
 // actually paint to the screen (double-buffer swap or copy from pixmap buffer)
 void SceneOpenGL::flushBuffer(int mask, QRegion damage)
@@ -556,22 +590,26 @@ void SceneOpenGL::flushBuffer(int mask, QRegion damage)
                 }
             }
         } else {
-            waitSync();
-            glXSwapBuffers(display(), glxbuffer);
+            if (glXSwapInterval) {
+                glXSwapInterval(options->isGlVSync() ? 1 : 0);
+                glXSwapBuffers(display(), glxbuffer);
+                glXSwapInterval(0);
+                m_renderTimer.start(); // this is important so we don't assume to be loosing frames in the compositor timing calculation
+            } else {
+                waitSync();
+                glXSwapBuffers(display(), glxbuffer);
+            }
         }
         glXWaitGL();
-        XFlush(display());
     } else {
-        glFlush();
         glXWaitGL();
-        waitSync();
         if (mask & PAINT_SCREEN_REGION)
             foreach (const QRect & r, damage.rects())
-            XCopyArea(display(), buffer, rootWindow(), gcroot, r.x(), r.y(), r.width(), r.height(), r.x(), r.y());
+                XCopyArea(display(), buffer, rootWindow(), gcroot, r.x(), r.y(), r.width(), r.height(), r.x(), r.y());
         else
             XCopyArea(display(), buffer, rootWindow(), gcroot, 0, 0, displayWidth(), displayHeight(), 0, 0);
-        XFlush(display());
     }
+    XFlush(display());
 }
 
 void SceneOpenGL::screenGeometryChanged(const QSize &size)
@@ -595,7 +633,7 @@ void SceneOpenGL::screenGeometryChanged(const QSize &size)
         m_overlayWindow->setup(buffer);
         XSync(display(), false);  // ensure X11 stuff has applied ////
         glXMakeCurrent(display(), glxbuffer, ctxbuffer); // reactivate context ////
-        glViewport(0,0, size.width(), size.height()); // adjust viewport last - should btw. be superflous on the Pixmap buffer - iirc glXCreatePixmap sets the context anyway. ////
+        glViewport(0,0, size.width(), size.height()); // adjust viewport last - should btw. be superfluous on the Pixmap buffer - iirc glXCreatePixmap sets the context anyway. ////
     }
     ShaderManager::instance()->resetAllShaders();
     m_resetModelViewProjectionMatrix = true;
@@ -690,7 +728,7 @@ bool SceneOpenGL::Texture::load(const Pixmap& pix, const QSize& size,
     // glXBindTexImageEXT() when the contents of the pixmap has changed.
     int attrs[] = {
         GLX_TEXTURE_FORMAT_EXT, fbcdrawableinfo[ depth ].bind_texture_format,
-        GLX_MIPMAP_TEXTURE_EXT, fbcdrawableinfo[ depth ].mipmap,
+        GLX_MIPMAP_TEXTURE_EXT, fbcdrawableinfo[ depth ].mipmap > 0,
         None, None, None
     };
     // Specifying the texture target explicitly is reported to cause a performance
@@ -712,7 +750,8 @@ bool SceneOpenGL::Texture::load(const Pixmap& pix, const QSize& size,
 #endif
     findTarget();
     d->m_yInverted = fbcdrawableinfo[ depth ].y_inverted ? true : false;
-    d->m_canUseMipmaps = fbcdrawableinfo[ depth ].mipmap ? true : false;
+    d->m_canUseMipmaps = fbcdrawableinfo[ depth ].mipmap > 0;
+    setFilter(fbcdrawableinfo[ depth ].mipmap > 0 ? GL_NEAREST_MIPMAP_LINEAR : GL_NEAREST);
     glBindTexture(d->m_target, d->m_texture);
 #ifdef CHECK_GL_ERROR
     checkGLError("TextureLoadTFP2");

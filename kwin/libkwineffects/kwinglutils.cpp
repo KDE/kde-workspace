@@ -164,11 +164,13 @@ static QString formatGLError(GLenum err)
 bool checkGLError(const char* txt)
 {
     GLenum err = glGetError();
-    if (err != GL_NO_ERROR) {
+    bool hasError = false;
+    while (err != GL_NO_ERROR) {
         kWarning(1212) << "GL error (" << txt << "): " << formatGLError(err);
-        return true;
+        hasError = true;
+        err = glGetError();
     }
-    return false;
+    return hasError;
 }
 
 int nearestPowerOfTwo(int x)
@@ -189,6 +191,9 @@ int nearestPowerOfTwo(int x)
 void pushMatrix()
 {
 #ifndef KWIN_HAVE_OPENGLES
+    if (ShaderManager::instance()->isValid()) {
+        return;
+    }
     glPushMatrix();
 #endif
 }
@@ -198,6 +203,9 @@ void pushMatrix(const QMatrix4x4 &matrix)
 #ifdef KWIN_HAVE_OPENGLES
     Q_UNUSED(matrix)
 #else
+    if (ShaderManager::instance()->isValid()) {
+        return;
+    }
     glPushMatrix();
     multiplyMatrix(matrix);
 #endif
@@ -208,6 +216,9 @@ void multiplyMatrix(const QMatrix4x4 &matrix)
 #ifdef KWIN_HAVE_OPENGLES
     Q_UNUSED(matrix)
 #else
+    if (ShaderManager::instance()->isValid()) {
+        return;
+    }
     GLfloat m[16];
     const qreal *data = matrix.constData();
     for (int i = 0; i < 4; ++i) {
@@ -241,6 +252,9 @@ void loadMatrix(const QMatrix4x4 &matrix)
 void popMatrix()
 {
 #ifndef KWIN_HAVE_OPENGLES
+    if (ShaderManager::instance()->isValid()) {
+        return;
+    }
     glPopMatrix();
 #endif
 }
@@ -1157,7 +1171,9 @@ GLVertexBuffer *GLVertexBufferPrivate::streamingBuffer = NULL;
 void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode, bool hardwareClipping)
 {
 #ifdef KWIN_HAVE_OPENGLES
+    Q_UNUSED(region)
     Q_UNUSED(primitiveMode)
+    Q_UNUSED(hardwareClipping)
 #else
     // Enable arrays
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -1230,7 +1246,9 @@ void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitive
 void GLVertexBufferPrivate::fallbackPainting(const QRegion& region, GLenum primitiveMode, bool hardwareClipping)
 {
 #ifdef KWIN_HAVE_OPENGLES
+    Q_UNUSED(region)
     Q_UNUSED(primitiveMode)
+    Q_UNUSED(hardwareClipping)
 #else
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);

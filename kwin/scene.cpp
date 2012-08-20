@@ -75,6 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QDesktopWidget>
 
 #include "client.h"
 #include "deleted.h"
@@ -96,10 +97,8 @@ Scene* scene = 0;
 
 Scene::Scene(Workspace* ws)
     : QObject(ws)
-    , lastRenderTime(0)
     , wspace(ws)
     , has_waitSync(false)
-    , lanczos_filter(new LanczosFilter())
     , m_overlayWindow(new OverlayWindow())
 {
     last_time.invalidate(); // Initialize the timer
@@ -107,7 +106,6 @@ Scene::Scene(Workspace* ws)
 
 Scene::~Scene()
 {
-    delete lanczos_filter;
     delete m_overlayWindow;
 }
 
@@ -168,7 +166,11 @@ void Scene::updateTimeDiff()
         time_diff = 1;
         last_time.start();
     } else
-        time_diff = last_time.restart();
+
+    // the extra wspace->nextFrameDelay() basically means that we lie to the effect about the passed
+    // time - as a result the (animated) effect will run up to a frame shorter but in return stick
+    // closer to the runtime from the trigger
+    time_diff = last_time.restart()/* + wspace->nextFrameDelay()*/;
 
     if (time_diff < 0)   // check time rollback
         time_diff = 1;
@@ -358,12 +360,15 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
         }
         EffectWindowImpl *thumb = it.value().data();
         WindowPaintData thumbData(thumb);
-        thumbData.opacity = data.opacity;
+        thumbData.setOpacity(data.opacity());
 
         QSizeF size = QSizeF(thumb->size());
         size.scale(QSizeF(item->width(), item->height()), Qt::KeepAspectRatio);
-        thumbData.xScale = size.width() / static_cast<qreal>(thumb->width());
-        thumbData.yScale = size.height() / static_cast<qreal>(thumb->height());
+        if (size.width() > thumb->width() || size.height() > thumb->height()) {
+            size = QSizeF(thumb->size());
+        }
+        thumbData.setXScale(size.width() / static_cast<qreal>(thumb->width()));
+        thumbData.setYScale(size.height() / static_cast<qreal>(thumb->height()));
         // it can happen in the init/closing phase of the tabbox
         // that the corresponding QGraphicsScene is not available
         if (item->scene() == 0) {
@@ -401,10 +406,10 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
         const QPoint point = viewPos + declview->mapFromScene(item->scenePos());
         const qreal x = point.x() + w->x() + (item->width() - size.width())/2;
         const qreal y = point.y() + w->y() + (item->height() - size.height()) / 2;
-        thumbData.xTranslate = x - thumb->x();
-        thumbData.yTranslate = y - thumb->y();
+        thumbData.setXTranslation(x - thumb->x());
+        thumbData.setYTranslation(y - thumb->y());
         int thumbMask = PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_LANCZOS;
-        if (thumbData.opacity == 1.0) {
+        if (thumbData.opacity() == 1.0) {
             thumbMask |= PAINT_WINDOW_OPAQUE;
         } else {
             thumbMask |= PAINT_WINDOW_TRANSLUCENT;
@@ -432,9 +437,15 @@ void Scene::finalPaintWindow(EffectWindowImpl* w, int mask, QRegion region, Wind
 // will be eventually called from drawWindow()
 void Scene::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
 {
-    if (mask & PAINT_WINDOW_LANCZOS)
-        lanczos_filter->performPaint(w, mask, region, data);
-    else
+    if (mask & PAINT_WINDOW_LANCZOS) {
+        if (lanczos_filter.isNull()) {
+            lanczos_filter = new LanczosFilter(this);
+            // recreate the lanczos filter when the screen gets resized
+            connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), lanczos_filter.data(), SLOT(deleteLater()));
+            connect(QApplication::desktop(), SIGNAL(resized(int)), lanczos_filter.data(), SLOT(deleteLater()));
+        }
+        lanczos_filter.data()->performPaint(w, mask, region, data);
+    } else
         w->sceneWindow()->performPaint(mask, region, data);
 }
 

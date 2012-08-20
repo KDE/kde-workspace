@@ -108,6 +108,12 @@ bool SceneOpenGL::db; // destination drawable is double-buffered
 #include "scene_opengl_glx.cpp"
 #endif
 
+void SceneOpenGL::idle()
+{
+    flushBuffer(m_lastMask, m_lastDamage);
+    Scene::idle();
+}
+
 bool SceneOpenGL::initFailed() const
 {
     return !init_ok;
@@ -127,26 +133,18 @@ QMatrix4x4 SceneOpenGL::transformation(int mask, const ScreenPaintData &data) co
     if (!(mask & PAINT_SCREEN_TRANSFORMED))
         return matrix;
 
-    matrix.translate(data.xTranslate, data.yTranslate, data.zTranslate);
-    matrix.scale(data.xScale, data.yScale, data.zScale);
+    matrix.translate(data.translation());
+    data.scale().applyTo(&matrix);
 
-    if (!data.rotation)
+    if (data.rotationAngle() == 0.0)
         return matrix;
 
     // Apply the rotation
-    const qreal xAxis = (data.rotation->axis == RotationData::XAxis ? 1.0 : 0.0);
-    const qreal yAxis = (data.rotation->axis == RotationData::YAxis ? 1.0 : 0.0);
-    const qreal zAxis = (data.rotation->axis == RotationData::ZAxis ? 1.0 : 0.0);
-
-    matrix.translate(data.rotation->xRotationPoint,
-                     data.rotation->yRotationPoint,
-                     data.rotation->zRotationPoint);
-
-    matrix.rotate(data.rotation->angle, xAxis, yAxis, zAxis);
-
-    matrix.translate(-data.rotation->xRotationPoint,
-                     -data.rotation->yRotationPoint,
-                     -data.rotation->zRotationPoint);
+    // cannot use data.rotation->applyTo(&matrix) as QGraphicsRotation uses projectedRotate to map back to 2D
+    matrix.translate(data.rotationOrigin());
+    const QVector3D axis = data.rotationAxis();
+    matrix.rotate(data.rotationAngle(), axis.x(), axis.y(), axis.z());
+    matrix.translate(-data.rotationOrigin());
 
     return matrix;
 }
@@ -418,26 +416,18 @@ QMatrix4x4 SceneOpenGL::Window::transformation(int mask, const WindowPaintData &
     if (!(mask & PAINT_WINDOW_TRANSFORMED))
         return matrix;
 
-    matrix.translate(data.xTranslate, data.yTranslate, data.zTranslate);
-    matrix.scale(data.xScale, data.yScale, data.zScale);
+    matrix.translate(data.translation());
+    data.scale().applyTo(&matrix);
 
-    if (!data.rotation)
+    if (data.rotationAngle() == 0.0)
         return matrix;
 
     // Apply the rotation
-    const qreal xAxis = (data.rotation->axis == RotationData::XAxis ? 1.0 : 0.0);
-    const qreal yAxis = (data.rotation->axis == RotationData::YAxis ? 1.0 : 0.0);
-    const qreal zAxis = (data.rotation->axis == RotationData::ZAxis ? 1.0 : 0.0);
-
-    matrix.translate(data.rotation->xRotationPoint,
-                     data.rotation->yRotationPoint,
-                     data.rotation->zRotationPoint);
-
-    matrix.rotate(data.rotation->angle, xAxis, yAxis, zAxis);
-
-    matrix.translate(-data.rotation->xRotationPoint,
-                     -data.rotation->yRotationPoint,
-                     -data.rotation->zRotationPoint);
+    // cannot use data.rotation.applyTo(&matrix) as QGraphicsRotation uses projectedRotate to map back to 2D
+    matrix.translate(data.rotationOrigin());
+    const QVector3D axis = data.rotationAxis();
+    matrix.rotate(data.rotationAngle(), axis.x(), axis.y(), axis.z());
+    matrix.translate(-data.rotationOrigin());
 
     return matrix;
 }
@@ -583,9 +573,9 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
     WindowQuadList contentQuads = data.quads.select(WindowQuadContents);
     if (!contentQuads.empty()) {
         texture.bind();
-        prepareStates(Content, data.opacity * data.contents_opacity, data.brightness, data.saturation, data.shader);
+        prepareStates(Content, data.opacity(), data.brightness(), data.saturation(), data.shader);
         renderQuads(mask, region, contentQuads, &texture, false, hardwareClipping);
-        restoreStates(Content, data.opacity * data.contents_opacity, data.brightness, data.saturation, data.shader);
+        restoreStates(Content, data.opacity(), data.brightness(), data.saturation(), data.shader);
         texture.unbind();
 #ifndef KWIN_HAVE_OPENGLES
         if (static_cast<SceneOpenGL*>(scene)->debug) {
@@ -656,10 +646,10 @@ void SceneOpenGL::Window::paintDecoration(const QPixmap* decoration, TextureType
     decorationTexture->setWrapMode(GL_CLAMP_TO_EDGE);
     decorationTexture->bind();
 
-    prepareStates(decorationType, data.opacity * data.decoration_opacity, data.brightness, data.saturation, data.shader);
+    prepareStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation(), data.shader);
     makeDecorationArrays(quads, rect, decorationTexture);
     GLVertexBuffer::streamingBuffer()->render(region, GL_TRIANGLES, hardwareClipping);
-    restoreStates(decorationType, data.opacity * data.decoration_opacity, data.brightness, data.saturation, data.shader);
+    restoreStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation(), data.shader);
     decorationTexture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
     if (static_cast<SceneOpenGL*>(scene)->debug) {
@@ -693,9 +683,9 @@ void SceneOpenGL::Window::paintShadow(const QRegion &region, const WindowPaintDa
         texture->setFilter(GL_NEAREST);
     texture->setWrapMode(GL_CLAMP_TO_EDGE);
     texture->bind();
-    prepareStates(Shadow, data.opacity, data.brightness, data.saturation, data.shader, texture);
+    prepareStates(Shadow, data.opacity(), data.brightness(), data.saturation(), data.shader, texture);
     renderQuads(0, region, quads, texture, true, hardwareClipping);
-    restoreStates(Shadow, data.opacity, data.brightness, data.saturation, data.shader, texture);
+    restoreStates(Shadow, data.opacity(), data.brightness(), data.saturation(), data.shader, texture);
     texture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
     if (static_cast<SceneOpenGL*>(scene)->debug) {

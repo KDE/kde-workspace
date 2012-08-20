@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGui/QX11Info>
 #include <QtGui/QApplication>
 #include <QtGui/QStyle>
+#include <QtGui/QVector2D>
 #include <QtDBus/QDBusConnection>
 #include <kaction.h>
 #include <kactioncollection.h>
@@ -185,10 +186,8 @@ void ZoomEffect::recreateTexture()
         imageWidth = ximg->width;
         imageHeight = ximg->height;
         QImage img((uchar*)ximg->pixels, imageWidth, imageHeight, QImage::Format_ARGB32_Premultiplied);
-#ifdef KWIN_HAVE_OPENGL
         if (effects->compositingType() == OpenGLCompositing)
             texture = new GLTexture(img);
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
         if (effects->compositingType() == XRenderCompositing)
             xrenderPicture = new XRenderPicture(QPixmap::fromImage(img));
@@ -265,22 +264,21 @@ static XTransform xrenderIdentity = {{
 void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
 {
     if (zoom != 1.0) {
-        data.xScale *= zoom;
-        data.yScale *= zoom;
+        data *= QVector2D(zoom, zoom);
 
         // mouse-tracking allows navigation of the zoom-area using the mouse.
         switch(mouseTracking) {
         case MouseTrackingProportional:
-            data.xTranslate = - int(cursorPoint.x() * (zoom - 1.0));
-            data.yTranslate = - int(cursorPoint.y() * (zoom - 1.0));
+            data.setXTranslation(- int(cursorPoint.x() * (zoom - 1.0)));
+            data.setYTranslation(- int(cursorPoint.y() * (zoom - 1.0)));
             prevPoint = cursorPoint;
             break;
         case MouseTrackingCentred:
             prevPoint = cursorPoint;
             // fall through
         case MouseTrackingDisabled:
-            data.xTranslate = qMin(0, qMax(int(displayWidth() - displayWidth() * zoom), int(displayWidth() / 2 - prevPoint.x() * zoom)));
-            data.yTranslate = qMin(0, qMax(int(displayHeight() - displayHeight() * zoom), int(displayHeight() / 2 - prevPoint.y() * zoom)));
+            data.setXTranslation(qMin(0, qMax(int(displayWidth() - displayWidth() * zoom), int(displayWidth() / 2 - prevPoint.x() * zoom))));
+            data.setYTranslation(qMin(0, qMax(int(displayHeight() - displayHeight() * zoom), int(displayHeight() / 2 - prevPoint.y() * zoom))));
             break;
         case MouseTrackingPush:
             if (timeline.state() != QTimeLine::Running) {
@@ -303,8 +301,8 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
                     timeline.start();
                 }
             }
-            data.xTranslate = - int(prevPoint.x() * (zoom - 1.0));
-            data.yTranslate = - int(prevPoint.y() * (zoom - 1.0));
+            data.setXTranslation(- int(prevPoint.x() * (zoom - 1.0)));
+            data.setYTranslation(- int(prevPoint.y() * (zoom - 1.0)));
             break;
         }
 
@@ -318,8 +316,8 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
                 acceptFocus = msecs > focusDelay;
             }
             if (acceptFocus) {
-                data.xTranslate = - int(focusPoint.x() * (zoom - 1.0));
-                data.yTranslate = - int(focusPoint.y() * (zoom - 1.0));
+                data.setXTranslation(- int(focusPoint.x() * (zoom - 1.0)));
+                data.setYTranslation(- int(focusPoint.y() * (zoom - 1.0)));
                 prevPoint = focusPoint;
             }
         }
@@ -338,9 +336,8 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             h *= zoom;
         }
         QPoint p = QCursor::pos();
-        QRect rect(p.x() * zoom + data.xTranslate, p.y() * zoom + data.yTranslate, w, h);
+        QRect rect(p.x() * zoom + data.xTranslation(), p.y() * zoom + data.yTranslation(), w, h);
 
-#ifdef KWIN_HAVE_OPENGL
         if (texture) {
             texture->bind();
             glEnable(GL_BLEND);
@@ -349,7 +346,6 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             texture->unbind();
             glDisable(GL_BLEND);
         }
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
         if (xrenderPicture) {
             if (mousePointer == MousePointerScale) {

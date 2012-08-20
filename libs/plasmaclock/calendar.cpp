@@ -87,9 +87,10 @@ class CalendarPrivate
 
         void init(const QDate &date = QDate());
         void refreshWidgets();
-        bool addDateDetailsToDisplay(QString &html, const QDate &date);
+        bool addDateDetailsToDisplay(QString &html, const QDate &date, bool showNoEventsMsg = false);
         void popupMonthsMenu();
         void displayEvents(const QDate &date = QDate());
+        void updatePreferredSize();
 
         Calendar *q;
         ToolButton *back;
@@ -209,6 +210,7 @@ void CalendarPrivate::init(const QDate &initialDate)
 
     q->setDate(initialDate);
     displayEvents();
+    updatePreferredSize();
 }
 
 void Calendar::focusInEvent(QFocusEvent* event)
@@ -340,16 +342,6 @@ const QDate& Calendar::currentDate() const
     return calendarTable()->currentDate();
 }
 
-void Calendar::applyConfiguration(KConfigGroup cg)
-{
-    calendarTable()->applyConfiguration(cg);
-    if (isDisplayingDateDetails()) {
-        setPreferredSize(440, 250);
-    } else {
-        setPreferredSize(220, 250);
-    }
-}
-
 void Calendar::writeConfiguration(KConfigGroup cg)
 {
     calendarTable()->writeConfiguration(cg);
@@ -363,12 +355,40 @@ void Calendar::createConfigurationInterface(KConfigDialog *parent)
 void Calendar::configAccepted(KConfigGroup cg)
 {
     calendarTable()->configAccepted(cg);
-    if (isDisplayingDateDetails()) {
-        setPreferredSize(440, 250);
-    } else {
-        setPreferredSize(220, 250);
+    applyConfiguration(cg);
+}
+
+void Calendar::resizeEvent(QGraphicsSceneResizeEvent * event)
+{
+    Q_UNUSED(event);
+    if (d->calendarTable) {
+        if (isDisplayingDateDetails()) {
+            d->calendarTable->setMaximumWidth(size().width() / 2);
+        } else {
+            d->calendarTable->setMaximumWidth(-1);
+        }
     }
-    d->displayEvents();
+}
+
+void CalendarPrivate::updatePreferredSize()
+{
+    QSize size = calendarTable ? calendarTable->size().toSize() : QSize(250, 250);
+    if (q->isDisplayingDateDetails()) {
+        // our seperators widths is the vertical line + space for the vertical scrollbar + spacing
+        const int sepWidth = (separator ? separator->size().width() : 6 ) + 24;
+        size.setWidth(size.width() * 2 + sepWidth * 2);
+    }
+
+    q->setPreferredSize(size);
+}
+
+void Calendar::applyConfiguration(KConfigGroup cg)
+{
+    const bool details = isDisplayingDateDetails();
+    calendarTable()->applyConfiguration(cg);
+    if (details != isDisplayingDateDetails()) {
+        d->updatePreferredSize();
+    }
 }
 
 void Calendar::manualDateChange()
@@ -411,7 +431,7 @@ void CalendarPrivate::displayEvents(const QDate &date)
 
     QString html;
 
-    if (addDateDetailsToDisplay(html, date) < 1) {
+    if (!addDateDetailsToDisplay(html, date, date.isValid())) {
         QDate dt = calendarTable->date();
         QDate end = calendarTable->endDate();
 
@@ -423,25 +443,38 @@ void CalendarPrivate::displayEvents(const QDate &date)
         }
     }
 
+    if (html.isEmpty()) {
+        html = "<div align=\"center\">";
+        html += i18nc("No events on the calendar starting from today",
+                      "No upcoming events.");
+        html += "</div>";
+    }
+
     eventsDisplay->setText(html);
 }
 
-bool CalendarPrivate::addDateDetailsToDisplay(QString &html, const QDate &date)
+bool CalendarPrivate::addDateDetailsToDisplay(QString &html, const QDate &date, bool showNoEventsMsg)
 {
-    if (!calendarTable->dateHasDetails(date)) {
+    const bool hasEvents = calendarTable->dateHasDetails(date);
+    if (!hasEvents && !showNoEventsMsg) {
         return false;
     }
 
     html += "<b>" + calendarTable->calendar()->formatDate(date, KLocale::LongDate) + "</b>";
-    html += "<ul style='-qt-list-indent: 0;'>";
-
-    const QStringList details = calendarTable->dateDetails(date);
-    foreach (const QString &detail, details) {
-        html+= "<li style='margin-left: 2em;'>" + detail + "</li>";
+    html += "<ul style=\"-qt-list-indent: 0;\">";
+    if (hasEvents) {
+        const QStringList details = calendarTable->dateDetails(date);
+        foreach (const QString &detail, details) {
+            html += "<li style='margin-left: 0.5em;'>" + detail + "</li>";
+        }
+    } else {
+        html += "<li style='type: none; margin-left: 0.5em;'><i>";
+        html += i18nc("No events on the calendar", "No events for this date.");
+        html += "</i></li>";
     }
 
     html += "</ul>";
-    return true;
+    return hasEvents;
 }
 
 // Update the nav widgets to show the current date in the CalendarTable

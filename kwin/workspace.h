@@ -72,11 +72,6 @@ class TabBox;
 #endif
 
 class Client;
-#ifdef KWIN_BUILD_TILING
-class Tile;
-class Tiling;
-class TilingLayout;
-#endif
 class Outline;
 class RootInfo;
 class PluginMgr;
@@ -197,10 +192,6 @@ public:
         return unmanaged;
     }
 
-#ifdef KWIN_BUILD_TILING
-    Tiling* tiling();
-#endif
-
     Outline* outline();
 #ifdef KWIN_BUILD_SCREENEDGES
     ScreenEdge* screenEdge();
@@ -312,9 +303,6 @@ private:
     KActivities::Controller activityController_;
 #endif
 
-#ifdef KWIN_BUILD_TILING
-    Tiling* m_tiling;
-#endif
     Outline* m_outline;
 #ifdef KWIN_BUILD_SCREENEDGES
     ScreenEdge m_screenEdge;
@@ -352,7 +340,7 @@ public:
     bool hasTabBox() const;
 
     const QVector<int> &desktopFocusChain() const {
-        return desktop_focus_chain;
+        return m_desktopFocusChain.value();
     }
     const ClientList &globalFocusChain() const {
         return global_focus_chain;
@@ -392,6 +380,7 @@ public:
     void toggleEffect(const QString& name);
     void reconfigureEffect(const QString& name);
     void unloadEffect(const QString& name);
+    QString supportInformationForEffect(const QString& name) const;
     void updateCompositeBlocking(Client* c = NULL);
 
     QStringList loadedEffects() const;
@@ -445,9 +434,6 @@ public:
     void circulateDesktopApplications();
     bool compositingActive();
     bool waitForCompositingSetup();
-    void toggleTiling();
-    void nextTileLayout();
-    void previousTileLayout();
     bool stopActivity(const QString &id);
     bool startActivity(const QString &id);
     QStringList activeEffects() const;
@@ -455,6 +441,15 @@ public:
     bool compositingPossible() const;
     QString compositingNotPossibleReason() const;
     bool openGLIsBroken() const;
+    /**
+     * Returns the currently used Compositor (Scene):
+     * @li @c none No Compositing
+     * @li @c xrender XRender
+     * @li @c gl1 OpenGL 1
+     * @li @c gl2 OpenGL 2
+     * @li @c gles OpenGL ES 2
+     **/
+    QString compositingType();
 
     void setCurrentScreen(int new_screen);
 
@@ -524,6 +519,10 @@ public:
     void addRepaint(int x, int y, int w, int h);
     void checkUnredirect(bool force = false);
     void checkCompositeTimer();
+    // returns the _estimated_ delay to the next screen update
+    // good for having a rough idea to calculate transformations, bad to rely on.
+    // might happen few ms earlier, might be an entire frame to short. This is NOT deterministic.
+    int nextFrameDelay();
 
     // Mouse polling
     void startMousePolling();
@@ -624,9 +623,6 @@ public slots:
     void suspendCompositing();
     void suspendCompositing(bool suspend);
 
-    // NOTE: debug method
-    void dumpTiles() const;
-
     void slotActivateNextTab(); // Slot to move left the active Client.
     void slotActivatePrevTab(); // Slot to move right the active Client.
     void slotUntab(); // Slot to remove the active client from its group.
@@ -637,9 +633,11 @@ private slots:
     void entabPopupClient(QAction*);
     void selectPopupClientTab(QAction*);
     void desktopPopupAboutToShow();
+    void screenPopupAboutToShow();
     void activityPopupAboutToShow();
     void clientPopupAboutToShow();
     void slotSendToDesktop(QAction*);
+    void slotSendToScreen(QAction*);
     void slotToggleOnActivity(QAction*);
     void clientPopupActivated(QAction*);
     void configureWM();
@@ -665,8 +663,8 @@ private slots:
     void resetCursorPosTime();
     void delayedCheckUnredirect();
     void updateCurrentActivity(const QString &new_activity);
-    void activityRemoved(const QString &activity);
-    void activityAdded(const QString &activity);
+    void slotActivityRemoved(const QString &activity);
+    void slotActivityAdded(const QString &activity);
     void reallyStopActivity(const QString &id);   //dbus deadlocks suck
     void handleActivityReply();
     void showHideActivityMenu();
@@ -698,11 +696,29 @@ signals:
                       Qt::KeyboardModifiers modifiers, Qt::KeyboardModifiers oldmodifiers);
     void propertyNotify(long a);
     void configChanged();
+    /**
+     * This signal is emitted when the global
+     * activity is changed
+     * @param id id of the new current activity
+     */
+    void currentActivityChanged(const QString &id);
+    /**
+     * This signal is emitted when a new activity is added
+     * @param id id of the new activity
+     */
+    void activityAdded(const QString &id);
+    /**
+     * This signal is emitted when the activity
+     * is removed
+     * @param id id of the removed activity
+     */
+    void activityRemoved(const QString &id);
 
 private:
     void init();
     void initShortcuts();
     void initDesktopPopup();
+    void initScreenPopup();
     void initActivityPopup();
     void initTabbingPopups();
     void restartKWin(const QString &reason);
@@ -757,8 +773,11 @@ private:
 
     bool windowRepaintsPending() const;
     void setCompositeTimer();
+    int m_timeSinceLastVBlank, m_nextFrameDelay;
 
-    QVector<int> desktop_focus_chain;
+    typedef QHash< QString, QVector<int> > DesktopFocusChains;
+    DesktopFocusChains::Iterator m_desktopFocusChain;
+    DesktopFocusChains m_activitiesDesktopFocusChain;
 
     QWidget* active_popup;
     Client* active_popup_client;
@@ -827,6 +846,7 @@ private:
     QMenu* popup;
     QMenu* advanced_popup;
     QMenu* desk_popup;
+    QMenu* screen_popup;
     QMenu* activity_popup;
     QMenu* add_tabs_popup; // Menu to add the group to other group
     QMenu* switch_to_tab_popup; // Menu to change tab
@@ -840,7 +860,6 @@ private:
     QAction* mMoveOpAction;
     QAction* mMaximizeOpAction;
     QAction* mShadeOpAction;
-    QAction* mTilingStateOpAction;
     QAction* mKeepAboveOpAction;
     QAction* mKeepBelowOpAction;
     QAction* mFullScreenOpAction;
@@ -898,9 +917,8 @@ private:
     KSelectionOwner* cm_selection;
     bool compositingSuspended, compositingBlocked;
     QBasicTimer compositeTimer;
-    QElapsedTimer nextPaintReference;
     QTimer mousePollingTimer;
-    uint vBlankInterval, vBlankPadding, fpsInterval, estimatedRenderTime;
+    uint vBlankInterval, fpsInterval;
     int xrrRefreshRate; // used only for compositing
     QRegion repaints_region;
     QSlider* transSlider;
@@ -1169,6 +1187,11 @@ inline void Workspace::checkCompositeTimer()
 {
     if (!compositeTimer.isActive())
         setCompositeTimer();
+}
+
+inline int Workspace::nextFrameDelay()
+{
+    return m_nextFrameDelay;
 }
 
 inline bool Workspace::hasDecorationPlugin() const

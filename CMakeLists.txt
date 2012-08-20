@@ -2,8 +2,8 @@ project(KDEBASE_WORKSPACE)
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
-set(KDE4WORKSPACE_VERSION_MINOR 8)
-set(KDE4WORKSPACE_VERSION_PATCH 40)
+set(KDE4WORKSPACE_VERSION_MINOR 9)
+set(KDE4WORKSPACE_VERSION_PATCH 70)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
 
@@ -13,7 +13,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 #search packages used by KDE
 set(QT_MIN_VERSION "4.7.0")
 set(KDE_MIN_VERSION "4.8.1")
-set(SOPRANO_MIN_VERSION "2.5.63")
+set(SOPRANO_MIN_VERSION "2.7.56")
 
 OPTION(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
 
@@ -128,7 +128,11 @@ if(NOT WIN32)
    macro_optional_add_subdirectory( kcheckpass )
    macro_optional_add_subdirectory( kwin )
    macro_optional_add_subdirectory( ksmserver )
+
+   find_package(JPEG REQUIRED)
+   find_package(PNG REQUIRED)
    macro_optional_add_subdirectory( ksplash )
+
    macro_optional_add_subdirectory( powerdevil )
    macro_optional_add_subdirectory( qguiplatformplugin_kde )
    if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)

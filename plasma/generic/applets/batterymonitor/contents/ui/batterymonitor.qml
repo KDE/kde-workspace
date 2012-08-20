@@ -42,19 +42,41 @@ Item {
         MouseArea {
             id: compactItem
             anchors.fill: parent
+            hoverEnabled: true
+            property int minimumWidth
+            property int minimumHeight
             onClicked: plasmoid.togglePopup()
 
             property QtObject pmSource: plasmoid.rootItem.pmSource
             property bool hasBattery: pmSource.data["Battery"]["Has Battery"]
             property int percent: pmSource.data["Battery0"]["Percent"]
+            property string batteryState: pmSource.data["Battery0"]["State"]
             property bool pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
+            property bool showOverlay: false
+
+            Component.onCompleted: {
+                if (plasmoid.formFactor==Planar || plasmoid.formFactor==MediaCenter) {
+                    minimumWidth = 32;
+                    minimumHeight = 32;
+                }
+                plasmoid.addEventListener('ConfigChanged', configChanged);
+            }
+
+            function configChanged() {
+                showOverlay = plasmoid.readConfig("showBatteryString");
+            }
+
+            function isConstrained() {
+                return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
+            }
 
             Item {
                 id: batteryContainer
                 anchors.centerIn: parent
-                width: Math.min(parent.width, parent.height)
-                height: width
-                
+                property real size: Math.min(parent.width, parent.height)
+                width: size
+                height: size
+
                 BatteryIcon {
                     id: batteryIcon
                     monochrome: true
@@ -62,6 +84,33 @@ Item {
                     percent: compactItem.percent
                     pluggedIn: compactItem.pluggedIn
                     anchors.fill: parent
+                }
+
+                PlasmaCore.Theme { id: theme }
+
+                Rectangle {
+                    id: labelRect
+                    // should be 40 when size is 90
+                    width: Math.max(parent.size*4/9, 35)
+                    height: width/2
+                    anchors.centerIn: parent
+                    color: theme.backgroundColor
+                    border.color: "grey"
+                    border.width: 2
+                    radius: 4
+                    opacity: hasBattery ? (showOverlay ? 0.5 : (isConstrained() ? 0 : compactItem.containsMouse*0.7)) : 0
+
+                    Behavior on opacity { NumberAnimation { duration: 100 } }
+                }
+
+                Text {
+                    id: overlayText
+                    text: i18nc("overlay on the battery, needs to be really tiny", "%1%", percent);
+                    color: theme.textColor
+                    font.pixelSize: Math.max(batteryContainer.size/8, 11)
+                    anchors.centerIn: labelRect
+                    // keep the opacity 1 when labelRect.opacity=0.7
+                    opacity: labelRect.opacity/0.7
                 }
             }
 
@@ -71,7 +120,7 @@ Item {
                     var text="";
                     text += i18n("<b>Battery:</b>");
                     text += " ";
-                    text += hasBattery ? plasmoid.rootItem.stringForState(pluggedIn, percent) : i18nc("Battery is not plugged in", "Not present");
+                    text += hasBattery ? plasmoid.rootItem.stringForState(batteryState, percent) : i18nc("Battery is not plugged in", "Not present");
                     text += "<br/>";
                     text += i18nc("tooltip", "<b>AC Adapter:</b>");
                     text += " ";
@@ -86,26 +135,38 @@ Item {
     property QtObject pmSource: PlasmaCore.DataSource {
         id: pmSource
         engine: "powermanagement"
-        connectedSources: ["AC Adapter", "Battery", "Battery0", "PowerDevil", "Sleep States"]
+        connectedSources: sources
+        onDataChanged: {
+            var status = "PassiveStatus";
+            if (data["Battery"]["Has Battery"]) {
+                if (data["Battery0"]["Percent"] <= 10) {
+                    status = "NeedsAttentionStatus";
+                } else if (data["Battery0"]["State"] != "NoCharge") {
+                    status = "ActiveStatus";
+                }
+            }
+            plasmoid.status = status;
+        }
     }
 
-    function stringForState(pluggedIn, percent) {
-        if (pluggedIn) {
-            if (percent<100) return i18n("%1% (charging)", percent);
-            else return i18n("%1% (charged)", percent);
-        } else {
+    function stringForState(state, percent) {
+        if (state == "Charging")
+            return i18n("%1% (charging)", percent);
+        else if (state == "Discharging")
             return i18n("%1% (discharging)", percent);
-        }
+        else
+            return i18n("%1% (charged)", percent);
+
     }
 
     PopupDialog {
         id: dialogItem
         percent: pmSource.data["Battery0"]["Percent"]
+        batteryState: pmSource.data["Battery0"]["State"]
         hasBattery: pmSource.data["Battery"]["Has Battery"]
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         screenBrightness: pmSource.data["PowerDevil"]["Screen Brightness"]
-        remainingMsec: Number(pmSource.data["Battery"]["Remaining msec"])
-        showRemainingTime: parent.show_remaining_time
+        remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
         showSuspendButton: pmSource.data["Sleep States"]["Suspend"]
         showHibernateButton: pmSource.data["Sleep States"]["Hibernate"]
         onSuspendClicked: {

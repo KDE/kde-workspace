@@ -105,6 +105,7 @@ PlasmaCore.FrameSvgItem {
             QPixmapItem {
                 anchors.fill: iconWidget
                 pixmap: Icon ? undefined : activityManager.pixmapForActivity(model["DataEngineSource"])
+                visible: Icon == ""
             }
             QIconItem {
                 width: theme.mediumIconSize
@@ -159,6 +160,7 @@ PlasmaCore.FrameSvgItem {
                         onClicked: delegateStack.push(configurationComponent)
                     }
                     PlasmaComponents.ToolButton {
+                        visible: !model["Current"]
                         iconSource: "media-playback-stop"
                         onClicked: {
                             var activityId = model["DataEngineSource"]

@@ -28,27 +28,20 @@ Flow {
     property int minimumWidth
     property int minimumHeight
 
+    property int minButtonSize: 16
+
     property bool show_lock: true
     property bool show_switchUser: false
     property bool show_leave: true
     property bool show_suspend: false
     property bool show_hibernate: false
-    property int myCount: 2
-    property int orientation: plasmoid.formFactor<2 ? (width>height ? Qt.Horizontal : Qt.Vertical) : (plasmoid.formFactor==2 ? Qt.Horizontal : Qt.Vertical)
+    property int visibleButtons: 2
+    property int orientation: Qt.Vertical
 
     flow: orientation==Qt.Vertical ? Flow.TopToBottom : Flow.LeftToRight
 
-    // when panel is resized
-    onHeightChanged: {
-        if (plasmoid.formFactor==2) {
-            minimumWidth = width = height*myCount;
-        }
-    }
-    onWidthChanged: {
-        if (plasmoid.formFactor==3) {
-            minimumHeight = height = width*myCount;
-        }
-    }
+    onWidthChanged: checkLayout();
+    onHeightChanged: checkLayout();
 
     PlasmaCore.DataSource {
         id: dataEngine
@@ -57,27 +50,47 @@ Flow {
     }
 
     Component.onCompleted: {
-        plasmoid.aspectRatioMode = 0;
+        plasmoid.aspectRatioMode = IgnoreAspectRatio;
         plasmoid.addEventListener('ConfigChanged', configChanged);
     }
 
-    // resizes the applet whenever the list of icons to be shown changes
-    // NOTE: this function should be called BEFORE updating the value of
-    // myCount. Icons auto-resize according to value of myCount. We need
-    // to first resize the applet before icons auto-resize.
-    // The new value of the count should be passed to the function, and
-    // then assign it to myCount AFTER the function returns.
-    function setSize(count) {
-        // resize the applet only if it is on a panel
-        // otherwise, the icons resize themselves
-        if (plasmoid.formFactor<2) {
-            return;
-        }
+    function checkLayout() {
+        switch(plasmoid.formFactor) {
+        case Vertical:
+            if (width >= minButtonSize*visibleButtons) {
+                orientation = Qt.Horizontal;
+                minimumHeight = width/visibleButtons - 1;
+                plasmoid.setPreferredSize(width, width/visibleButtons);
+            } else {
+                orientation = Qt.Vertical;
+                minimumHeight = width*visibleButtons;
+                plasmoid.setPreferredSize(width, width*visibleButtons);
+            }
+            break;
 
-        if (orientation == Qt.Vertical) { // vertical panel
-            height = minimumHeight = items.iconSize*count;
-        } else { // horizontal panel
-            width = minimumWidth = items.iconSize*count;
+        case Horizontal:
+            if (height < minButtonSize*visibleButtons) {
+                orientation = Qt.Horizontal;
+                minimumWidth = height*visibleButtons;
+                plasmoid.setPreferredSize(height*visibleButtons, height);
+            } else {
+                orientation = Qt.Vertical;
+                minimumWidth = height/visibleButtons - 1;
+                plasmoid.setPreferredSize(height/visibleButtons, height);
+            }
+            break;
+
+        default:
+            if (width > height) {
+                orientation = Qt.Horizontal;
+                minimumWidth = minButtonSize*visibleButtons;
+                minimumHeight = minButtonSize;
+            } else {
+                orientation = Qt.Vertical;
+                minimumWidth = minButtonSize;
+                minimumHeight = minButtonSize*visibleButtons;
+            }
+            break;
         }
     }
 
@@ -88,15 +101,15 @@ Flow {
         show_suspend = plasmoid.readConfig("show_suspend");
         show_hibernate = plasmoid.readConfig("show_hibernate");
 
-        var newCount = show_lock+show_switchUser+show_leave+show_suspend+show_hibernate;
-        setSize(newCount);
-        myCount = newCount;
+        visibleButtons = show_lock+show_switchUser+show_leave+show_suspend+show_hibernate;
 
         showModel.get(0).show = show_lock;
         showModel.get(1).show = show_switchUser;
         showModel.get(2).show = show_leave;
         showModel.get(3).show = show_suspend;
         showModel.get(4).show = show_hibernate;
+
+        checkLayout();
     }
 
     // model for setting whether an icon is shown
@@ -114,8 +127,8 @@ Flow {
 
     Repeater {
         id: items
-        property int itemWidth: parent.flow==Flow.LeftToRight ? Math.floor(parent.width/myCount) : parent.width
-        property int itemHeight: parent.flow==Flow.TopToBottom ? Math.floor(parent.height/myCount) : parent.height
+        property int itemWidth: parent.flow==Flow.LeftToRight ? Math.floor(parent.width/visibleButtons) : parent.width
+        property int itemHeight: parent.flow==Flow.TopToBottom ? Math.floor(parent.height/visibleButtons) : parent.height
         property int iconSize: Math.min(itemWidth, itemHeight)
 
         model: Data.data

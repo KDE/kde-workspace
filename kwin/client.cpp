@@ -92,6 +92,7 @@ Client::Client(Workspace* ws)
     , bridge(new Bridge(this))
     , move_resize_grab_window(None)
     , move_resize_has_keyboard_grab(false)
+    , m_managed(false)
     , transient_for (NULL)
     , transient_for_id(None)
     , original_transient_for_id(None)
@@ -187,8 +188,7 @@ Client::Client(Workspace* ws)
 
 #ifdef KWIN_BUILD_TABBOX
     // TabBoxClient
-    m_tabBoxClient = new TabBox::TabBoxClientImpl();
-    m_tabBoxClient->setClient(this);
+    m_tabBoxClient = QSharedPointer<TabBox::TabBoxClientImpl>(new TabBox::TabBoxClientImpl(this));
 #endif
 
     geom = QRect(0, 0, 100, 100);   // So that decorations don't start with size being (0,0)
@@ -222,9 +222,6 @@ Client::~Client()
     assert(block_geometry_updates == 0);
     assert(!check_active_modal);
     delete bridge;
-#ifdef KWIN_BUILD_TABBOX
-    delete m_tabBoxClient;
-#endif
 }
 
 // Use destroyClient() or releaseWindow(), Client instances cannot be deleted directly
@@ -819,7 +816,7 @@ void Client::updateShape()
         if (!app_noborder) {
             // Only when shape is detected for the first time, still let the user to override
             app_noborder = true;
-            noborder = true;
+            noborder = rules()->checkNoBorder(true);
             updateDecoration(true);
         }
         if (noBorder())
@@ -828,7 +825,7 @@ void Client::updateShape()
     } else if (app_noborder) {
         XShapeCombineMask(display(), frameId(), ShapeBounding, 0, 0, None, ShapeSet);
         detectNoBorder();
-        app_noborder = noborder;
+        app_noborder = noborder = rules()->checkNoBorder(noborder);
         updateDecoration(true);
     }
 
@@ -1214,7 +1211,7 @@ void Client::updateVisibility()
             internalHide(Allowed);
         return;
     }
-    if( workspace()->showingDesktop()) {
+    if (isManaged() && workspace()->showingDesktop()) {
         bool belongs_to_desktop = false;
         for (ClientList::ConstIterator it = group()->members().constBegin();
                 it != group()->members().constEnd();
@@ -1629,17 +1626,26 @@ void Client::setOnActivity(const QString &activity, bool enable)
  */
 void Client::setOnActivities(QStringList newActivitiesList)
 {
-    QStringList allActivities = workspace()->activityList();
-    if (newActivitiesList.size() == allActivities.size() || newActivitiesList.isEmpty()) {
-        setOnAllActivities(true);
-        return;
-    }
+    QString joinedActivitiesList = newActivitiesList.join(",");
+    joinedActivitiesList = rules()->checkActivity(joinedActivitiesList, false);
+    newActivitiesList = joinedActivitiesList.split(',', QString::SkipEmptyParts);
 
-    QByteArray joined = newActivitiesList.join(",").toAscii();
-    char *data = joined.data();
-    activityList = newActivitiesList;
-    XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
+    QStringList allActivities = workspace()->activityList();
+    if ( newActivitiesList.isEmpty() ||
+        (newActivitiesList.count() > 1 && newActivitiesList.count() == allActivities.count()) ||
+        (newActivitiesList.count() == 1 && newActivitiesList.at(0) == "ALL")) {
+        activityList.clear();
+        XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
+                        PropModeReplace, (const unsigned char *)"ALL", 3);
+
+    } else {
+        QByteArray joined = joinedActivitiesList.toAscii();
+        char *data = joined.data();
+        activityList = newActivitiesList;
+        XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
                     PropModeReplace, (unsigned char *)data, joined.size());
+
+    }
 
     updateActivities(false);
 }
@@ -1657,7 +1663,7 @@ void Client::updateActivities(bool includeTransients)
         workspace()->updateOnAllActivitiesOfTransients(this);
     workspace()->updateFocusChains(this, Workspace::FocusChainMakeFirst);
     updateVisibility();
-    // TODO: add activity rule
+    updateWindowRules(Rules::Activity);
 
     // Update states of all other windows in this group
     if (tabGroup())
@@ -1715,10 +1721,8 @@ void Client::setOnAllActivities(bool on)
     if (on == isOnAllActivities())
         return;
     if (on) {
-        activityList.clear();
-        XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
-                        PropModeReplace, (const unsigned char *)"ALL", 3);
-        updateActivities(true);
+        setOnActivities(QStringList());
+
     } else {
         setOnActivity(Workspace::self()->currentActivity(), true);
         workspace()->updateOnAllActivitiesOfTransients(this);

@@ -27,6 +27,7 @@
 #include <kwindowsystem.h>
 #include <klocale.h>
 #include <QRegExp>
+#include <KActivities/Consumer>
 
 #include <assert.h>
 #include <kmessagebox.h>
@@ -84,6 +85,7 @@ RulesWidget::RulesWidget(QWidget* parent)
     SETUP(position, set);
     SETUP(size, set);
     SETUP(desktop, set);
+    SETUP(activity, set);
     SETUP(maximizehoriz, set);
     SETUP(maximizevert, set);
     SETUP(minimize, set);
@@ -104,7 +106,6 @@ RulesWidget::RulesWidget(QWidget* parent)
     SETUP(autogroupid, force);
     SETUP(opacityactive, force);
     SETUP(opacityinactive, force);
-    SETUP(tilingoption, force);
     SETUP(shortcut, force);
     // workarounds tab
     SETUP(fsplevel, force);
@@ -116,7 +117,6 @@ RulesWidget::RulesWidget(QWidget* parent)
     SETUP(disableglobalshortcuts, force);
     SETUP(blockcompositing, force);
 
-    connect (title_match, SIGNAL(currentIndexChanged(int)), SLOT(titleMatchChanged()));
     connect (machine_match, SIGNAL(currentIndexChanged(int)), SLOT(machineMatchChanged()));
     connect (shortcut_edit, SIGNAL(clicked()), SLOT(shortcutEditClicked()));
 
@@ -131,6 +131,12 @@ RulesWidget::RulesWidget(QWidget* parent)
             ++i)
         desktop->addItem(QString::number(i).rightJustified(2) + ':' + KWindowSystem::desktopName(i));
     desktop->addItem(i18n("All Desktops"));
+
+    static KActivities::Consumer activities;
+    foreach (const QString & activityId, activities.listActivities()) {
+        activity->addItem(KActivities::Info::name(activityId), activityId);
+    }
+    activity->addItem(i18n("All Activities"), QString::fromLatin1("ALL"));
 }
 
 #undef SETUP
@@ -146,6 +152,7 @@ RulesWidget::RulesWidget(QWidget* parent)
 UPDATE_ENABLE_SLOT(position)
 UPDATE_ENABLE_SLOT(size)
 UPDATE_ENABLE_SLOT(desktop)
+UPDATE_ENABLE_SLOT(activity)
 UPDATE_ENABLE_SLOT(maximizehoriz)
 UPDATE_ENABLE_SLOT(maximizevert)
 UPDATE_ENABLE_SLOT(minimize)
@@ -166,7 +173,6 @@ UPDATE_ENABLE_SLOT(autogroupfg)
 UPDATE_ENABLE_SLOT(autogroupid)
 UPDATE_ENABLE_SLOT(opacityactive)
 UPDATE_ENABLE_SLOT(opacityinactive)
-UPDATE_ENABLE_SLOT(tilingoption)
 void RulesWidget::updateEnableshortcut()
 {
     shortcut->setEnabled(enable_shortcut->isChecked() && rule_shortcut->currentIndex() != 0);
@@ -281,14 +287,25 @@ int RulesWidget::comboToDesktop(int val) const
     return val + 1;
 }
 
-int RulesWidget::tilingToCombo(int t) const
+int RulesWidget::activityToCombo(QString d) const
 {
-    return qBound(0, t, 1);
+    // TODO: ivan - do a multiselection list
+    for (int i = 0; i < activity->count(); i++) {
+        if (activity->itemData(i).toString() == d) {
+            return i;
+        }
+    }
+
+    return activity->count() - 1; // on all activities
 }
 
-int RulesWidget::comboToTiling(int val) const
+QString RulesWidget::comboToActivity(int val) const
 {
-    return val; // 0 is tiling, 1 is floating
+    // TODO: ivan - do a multiselection list
+    if (val < 0 || val >= activity->count())
+        return QString();
+
+    return activity->itemData(val).toString();
 }
 
 static int placementToCombo(Placement::Policy placement)
@@ -423,6 +440,7 @@ void RulesWidget::setRules(Rules* rules)
     LINEEDIT_SET_RULE(position, positionToStr);
     LINEEDIT_SET_RULE(size, sizeToStr);
     COMBOBOX_SET_RULE(desktop, desktopToCombo);
+    COMBOBOX_SET_RULE(activity, activityToCombo);
     CHECKBOX_SET_RULE(maximizehoriz,);
     CHECKBOX_SET_RULE(maximizevert,);
     CHECKBOX_SET_RULE(minimize,);
@@ -442,7 +460,6 @@ void RulesWidget::setRules(Rules* rules)
     LINEEDIT_FORCE_RULE(autogroupid,);
     SPINBOX_FORCE_RULE(opacityactive,);
     SPINBOX_FORCE_RULE(opacityinactive,);
-    COMBOBOX_FORCE_RULE(tilingoption, tilingToCombo);
     LINEEDIT_SET_RULE(shortcut,);
     COMBOBOX_FORCE_RULE(fsplevel,);
     COMBOBOX_FORCE_RULE(type, typeToCombo);
@@ -517,6 +534,7 @@ Rules* RulesWidget::rules() const
     LINEEDIT_SET_RULE(position, strToPosition);
     LINEEDIT_SET_RULE(size, strToSize);
     COMBOBOX_SET_RULE(desktop, comboToDesktop);
+    COMBOBOX_SET_RULE(activity, comboToActivity);
     CHECKBOX_SET_RULE(maximizehoriz,);
     CHECKBOX_SET_RULE(maximizevert,);
     CHECKBOX_SET_RULE(minimize,);
@@ -536,7 +554,6 @@ Rules* RulesWidget::rules() const
     LINEEDIT_FORCE_RULE(autogroupid,);
     SPINBOX_FORCE_RULE(opacityactive,);
     SPINBOX_FORCE_RULE(opacityinactive,);
-    COMBOBOX_FORCE_RULE(tilingoption, comboToTiling);
     LINEEDIT_SET_RULE(shortcut,);
     COMBOBOX_FORCE_RULE(fsplevel,);
     COMBOBOX_FORCE_RULE(type, comboToType);
@@ -635,6 +652,7 @@ void RulesWidget::prefillUnusedValues(const KWindowInfo& info)
     LINEEDIT_PREFILL(position, positionToStr, info.frameGeometry().topLeft());
     LINEEDIT_PREFILL(size, sizeToStr, info.frameGeometry().size());
     COMBOBOX_PREFILL(desktop, desktopToCombo, info.desktop());
+    // COMBOBOX_PREFILL(activity, activityToCombo, info.activity()); // TODO: ivan
     CHECKBOX_PREFILL(maximizehoriz, , info.state() & NET::MaxHoriz);
     CHECKBOX_PREFILL(maximizevert, , info.state() & NET::MaxVert);
     CHECKBOX_PREFILL(minimize, , info.isMinimized());
@@ -655,7 +673,6 @@ void RulesWidget::prefillUnusedValues(const KWindowInfo& info)
     //LINEEDIT_PREFILL( autogroupid, );
     SPINBOX_PREFILL(opacityactive, , 100 /*get the actual opacity somehow*/);
     SPINBOX_PREFILL(opacityinactive, , 100 /*get the actual opacity somehow*/);
-    COMBOBOX_PREFILL(tilingoption, tilingToCombo, 0);
     //LINEEDIT_PREFILL( shortcut, );
     //COMBOBOX_PREFILL( fsplevel, );
     COMBOBOX_PREFILL(type, typeToCombo, info.windowType(SUPPORTED_MANAGED_WINDOW_TYPES_MASK));

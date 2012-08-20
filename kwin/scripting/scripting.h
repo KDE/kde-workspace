@@ -22,12 +22,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_SCRIPTING_H
 #define KWIN_SCRIPTING_H
 
+#include <kwinglobals.h>
+#include <kservice.h>
+
 #include <QtCore/QFile>
 #include <QtCore/QHash>
 #include <QtCore/QStringList>
+#include <QtScript/QScriptEngineAgent>
 
 class QAction;
 class QDeclarativeView;
+class QDBusPendingCallWatcher;
 class QMutex;
 class QScriptEngine;
 class QScriptValue;
@@ -38,6 +43,7 @@ typedef QList< QPair<bool, QPair<QString, QString > > > LoadScriptList;
 
 namespace KWin
 {
+class ScriptUnloaderAgent;
 class WorkspaceWrapper;
 
 class AbstractScript : public QObject
@@ -60,13 +66,20 @@ public:
     const QHash<QAction*, QScriptValue> &shortcutCallbacks() const {
         return m_shortcutCallbacks;
     }
+    QHash<int, QList<QScriptValue > > &screenEdgeCallbacks() {
+        return m_screenEdgeCallbacks;
+    }
+
+    int registerCallback(QScriptValue value);
 
 public Q_SLOTS:
     Q_SCRIPTABLE void stop();
     Q_SCRIPTABLE virtual void run() = 0;
+    void slotPendingDBusCall(QDBusPendingCallWatcher *watcher);
 
 private Q_SLOTS:
     void globalShortcutTriggered();
+    void borderActivated(ElectricBorder edge);
 
 Q_SIGNALS:
     Q_SCRIPTABLE void print(const QString &text);
@@ -98,6 +111,8 @@ private:
     bool m_running;
     WorkspaceWrapper *m_workspace;
     QHash<QAction*, QScriptValue> m_shortcutCallbacks;
+    QHash<int, QList<QScriptValue> > m_screenEdgeCallbacks;
+    QHash<int, QScriptValue> m_callbacks;
 };
 
 class Script : public AbstractScript
@@ -108,6 +123,9 @@ public:
 
     Script(int id, QString scriptName, QString pluginName, QObject *parent = NULL);
     virtual ~Script();
+    QScriptEngine *engine() {
+        return m_engine;
+    }
 
 public Q_SLOTS:
     Q_SCRIPTABLE void run();
@@ -134,6 +152,17 @@ private:
     QByteArray loadScriptFromFile();
     QScriptEngine *m_engine;
     bool m_starting;
+    QScopedPointer<ScriptUnloaderAgent> m_agent;
+};
+
+class ScriptUnloaderAgent : public QScriptEngineAgent
+{
+public:
+    ScriptUnloaderAgent(Script *script);
+    virtual void scriptUnload(qint64 id);
+
+private:
+    Script *m_script;
 };
 
 class DeclarativeScript : public AbstractScript
@@ -148,7 +177,7 @@ public Q_SLOTS:
     Q_SCRIPTABLE void run();
 
 private:
-    QDeclarativeView *m_view;
+    QScopedPointer<QDeclarativeView> m_view;
 };
 
 /**
@@ -179,13 +208,13 @@ public:
 
 public Q_SLOTS:
     void scriptDestroyed(QObject *object);
-    void start();
+    Q_SCRIPTABLE void start();
 
 private Q_SLOTS:
     void slotScriptsQueried();
 
 private:
-    LoadScriptList queryScriptsToLoad();
+    LoadScriptList queryScriptsToLoad(QMap<QString,QString> &pluginStates, KService::List &);
 };
 
 }

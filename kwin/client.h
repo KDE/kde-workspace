@@ -91,6 +91,10 @@ class Client
      **/
     Q_PROPERTY(int desktop READ desktop WRITE setDesktop NOTIFY desktopChanged)
     /**
+     * Whether the Client is on all desktops. That is desktop is -1.
+     **/
+    Q_PROPERTY(bool onAllDesktops READ isOnAllDesktops WRITE setOnAllDesktops NOTIFY desktopChanged)
+    /**
      * Whether this Client is fullScreen. A Client might either be fullScreen due to the _NET_WM property
      * or through a legacy support hack. The fullScreen state can only be changed if the Client does not
      * use the legacy hack. To be sure whether the state changed, connect to the notify signal.
@@ -621,8 +625,8 @@ public:
     };
     void layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect &bottom, CoordinateMode mode) const;
 
-    TabBox::TabBoxClientImpl* tabBoxClient() const {
-        return m_tabBoxClient;
+    QWeakPointer<TabBox::TabBoxClientImpl> tabBoxClient() const {
+        return m_tabBoxClient.toWeakRef();
     }
     bool isFirstInTabBox() const {
         return m_firstInTabBox;
@@ -817,6 +821,7 @@ private:
     bool unrestrictedMoveResize;
     int moveResizeStartScreen;
     static bool s_haveResizeEffect;
+    bool m_managed;
 
     Position mode;
     QPoint moveOffset;
@@ -945,7 +950,7 @@ private:
     // we (instead of Qt) initialize the Pixmaps, and have to free them
     bool m_responsibleForDecoPixmap;
     PaintRedirector* paintRedirector;
-    TabBox::TabBoxClientImpl* m_tabBoxClient;
+    QSharedPointer<TabBox::TabBoxClientImpl> m_tabBoxClient;
     bool m_firstInTabBox;
 
     bool electricMaximizing;
@@ -1180,7 +1185,7 @@ inline int Client::sessionStackingOrder() const
 
 inline bool Client::isManaged() const
 {
-    return mapping_state != Withdrawn;
+    return m_managed;
 }
 
 inline QPoint Client::clientPos() const

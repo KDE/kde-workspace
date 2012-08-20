@@ -50,9 +50,9 @@ Rules::Rules()
     , maxsizerule(UnusedForceRule)
     , opacityactiverule(UnusedForceRule)
     , opacityinactiverule(UnusedForceRule)
-    , tilingoptionrule(UnusedForceRule)
     , ignorepositionrule(UnusedForceRule)
     , desktoprule(UnusedSetRule)
+    , activityrule(UnusedSetRule)
     , typerule(UnusedForceRule)
     , maximizevertrule(UnusedSetRule)
     , maximizehorizrule(UnusedSetRule)
@@ -155,9 +155,9 @@ void Rules::readFromCfg(const KConfigGroup& cfg)
     READ_FORCE_RULE(opacityinactive, , 0);
     if (opacityinactive < 0 || opacityinactive > 100)
         opacityinactive = 100;
-    READ_FORCE_RULE(tilingoption, , 0);
     READ_FORCE_RULE(ignoreposition, , false);
     READ_SET_RULE(desktop, , 0);
+    READ_SET_RULE(activity, , QString());
     type = readType(cfg, "type");
     typerule = type != NET::Unknown ? readForceRule(cfg, "typerule") : UnusedForceRule;
     READ_SET_RULE(maximizevert, , false);
@@ -244,9 +244,9 @@ void Rules::write(KConfigGroup& cfg) const
     WRITE_FORCE_RULE(maxsize,);
     WRITE_FORCE_RULE(opacityactive,);
     WRITE_FORCE_RULE(opacityinactive,);
-    WRITE_FORCE_RULE(tilingoption,);
     WRITE_FORCE_RULE(ignoreposition,);
     WRITE_SET_RULE(desktop,);
+    WRITE_SET_RULE(activity,);
     WRITE_FORCE_RULE(type, int);
     WRITE_SET_RULE(maximizevert,);
     WRITE_SET_RULE(maximizehoriz,);
@@ -285,9 +285,9 @@ bool Rules::isEmpty() const
            && maxsizerule == UnusedForceRule
            && opacityactiverule == UnusedForceRule
            && opacityinactiverule == UnusedForceRule
-           && tilingoptionrule == UnusedForceRule
            && ignorepositionrule == UnusedForceRule
            && desktoprule == UnusedSetRule
+           && activityrule == UnusedSetRule
            && typerule == UnusedForceRule
            && maximizevertrule == UnusedSetRule
            && maximizehorizrule == UnusedSetRule
@@ -459,6 +459,12 @@ bool Rules::update(Client* c, int selection)
         updated = updated || desktop != c->desktop();
         desktop = c->desktop();
     }
+    if NOW_REMEMBER(Activity, activity) {
+        // TODO: ivan - multiple activities support
+        const QString & joinedActivities = c->activities().join(",");
+        updated = updated || activity != joinedActivities;
+        activity = joinedActivities;
+    }
     if NOW_REMEMBER(MaximizeVert, maximizevert) {
         updated = updated || maximizevert != bool(c->maximizeMode() & MaximizeVertical);
         maximizevert = c->maximizeMode() & MaximizeVertical;
@@ -567,7 +573,6 @@ APPLY_FORCE_RULE(maxsize, MaxSize, QSize)
 APPLY_FORCE_RULE(opacityactive, OpacityActive, int)
 APPLY_FORCE_RULE(opacityinactive, OpacityInactive, int)
 APPLY_FORCE_RULE(ignoreposition, IgnorePosition, bool)
-APPLY_FORCE_RULE(tilingoption, TilingOption, int)
 
 // the cfg. entry needs to stay named the say for backwards compatibility
 bool Rules::applyIgnoreGeometry(bool& ignore) const
@@ -576,6 +581,7 @@ bool Rules::applyIgnoreGeometry(bool& ignore) const
 }
 
 APPLY_RULE(desktop, Desktop, int)
+APPLY_RULE(activity, Activity, QString)
 APPLY_FORCE_RULE(type, Type, NET::WindowType)
 
 bool Rules::applyMaximizeHoriz(MaximizeMode& mode, bool init) const
@@ -663,9 +669,9 @@ void Rules::discardUsed(bool withdrawn)
     DISCARD_USED_FORCE_RULE(maxsize);
     DISCARD_USED_FORCE_RULE(opacityactive);
     DISCARD_USED_FORCE_RULE(opacityinactive);
-    DISCARD_USED_FORCE_RULE(tilingoption);
     DISCARD_USED_FORCE_RULE(ignoreposition);
     DISCARD_USED_SET_RULE(desktop);
+    DISCARD_USED_SET_RULE(activity);
     DISCARD_USED_FORCE_RULE(type);
     DISCARD_USED_SET_RULE(maximizevert);
     DISCARD_USED_SET_RULE(maximizehoriz);
@@ -772,7 +778,6 @@ CHECK_FORCE_RULE(MinSize, QSize)
 CHECK_FORCE_RULE(MaxSize, QSize)
 CHECK_FORCE_RULE(OpacityActive, int)
 CHECK_FORCE_RULE(OpacityInactive, int)
-CHECK_FORCE_RULE(TilingOption, int)
 CHECK_FORCE_RULE(IgnorePosition, bool)
 
 bool WindowRules::checkIgnoreGeometry(bool ignore) const
@@ -781,6 +786,7 @@ bool WindowRules::checkIgnoreGeometry(bool ignore) const
 }
 
 CHECK_RULE(Desktop, int)
+CHECK_RULE(Activity, QString)
 CHECK_FORCE_RULE(Type, NET::WindowType)
 CHECK_RULE(MaximizeVert, KDecorationDefines::MaximizeMode)
 CHECK_RULE(MaximizeHoriz, KDecorationDefines::MaximizeMode)
@@ -837,6 +843,7 @@ void Client::applyWindowRules()
     // MinSize, MaxSize handled by Geometry
     // IgnorePosition
     setDesktop(desktop());
+    setOnActivities(activities());
     // Type
     maximize(maximizeMode());
     // Minimize : functions don't check, and there are two functions

@@ -17,8 +17,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
       </authorgroup>
 <legalnotice>&FDLNotice;</legalnotice>
-<date>2012-03-07</date>
-      <releaseinfo>&kde; SC 4.8</releaseinfo>
+<date>2012-06-02</date>
+      <releaseinfo>&kde; SC 4.9</releaseinfo>
 <abstract>
 <para>Here you can customize window settings specifically only for
 some windows.</para>
@@ -63,8 +63,7 @@ you wish to configure.</para>
 <para>You can also at any time <guibutton>Modify...</guibutton> or
 <guibutton>Delete</guibutton> any stored settings profile, and
 reorder the list.  Reordering the list using the <guibutton>Move Up</guibutton>
-and <guibutton>Move Down</guibutton> buttons is a convenience to help you sort
-the profiles, and has no effect on how they are applied.</para>
+and <guibutton>Move Down</guibutton> buttons effects on how they are applied.</para>
 
 </chapter>
 <!--userbase <timestamp>2012-03-09T20:50:14Z</timestamp>-->
@@ -102,10 +101,8 @@ the profiles, and has no effect on how they are applied.</para>
 <para>There are several ways to invoke the &kwin; Rule Editor.  Below are two:
 </para>
 <itemizedlist>
-<listitem><para>Right-click on the title-bar of any window, choose <guilabel>Configure Window Settings...</guilabel> and in the <guilabel>Configure</guilabel> window, select <guilabel>Window Rules</guilabel> or</para></listitem>
+<listitem><para>Right-click on the title-bar of any window, choose <menuchoice><guimenu>More Actions</guimenu><guimenuitem>Window Manager Settings...</guimenuitem></menuchoice> and in the <guilabel>Configure</guilabel> window, select <guilabel>Window Rules</guilabel> or</para></listitem>
 </itemizedlist>
-<para><note><para>Pre 4.9:  choose <guilabel>Configure Window Behavior...</guilabel></para></note>
-</para>
 <itemizedlist>
 <listitem><para><menuchoice><guimenu>System Settings</guimenu><guisubmenu>Window Behavior</guisubmenu><guimenuitem>Window Rules</guimenuitem></menuchoice></para></listitem>
 </itemizedlist>
@@ -453,6 +450,7 @@ the profiles, and has no effect on how they are applied.</para>
   <varlistentry><term><emphasis role="bold">Moving/resizing</emphasis></term>
     <listitem>
     <para><emphasis>Deprecated as of &gt;4.8</emphasis></para>
+    <!-- FIXME remove para in 4.9-->
      </listitem>
   </varlistentry>
   <varlistentry><term><emphasis role="bold">Focus stealing prevention</emphasis></term>
@@ -555,7 +553,7 @@ the profiles, and has no effect on how they are applied.</para>
     </textobject>
   </mediaobject>
 </screenshot></para></listitem>
-<listitem><para>Right-click on the titlebar and select <guilabel>Configure Window Behavior...</guilabel>:
+<listitem><para>Right-click on the titlebar and select <menuchoice><guimenu>More Actions</guimenu><guimenuitem>Window Manager Settings...</guimenuitem></menuchoice>:
 <screenshot>
 <screeninfo></screeninfo>
   <mediaobject>

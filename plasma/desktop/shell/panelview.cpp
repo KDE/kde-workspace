@@ -616,6 +616,8 @@ void PanelView::updatePanelGeometry()
         // so make sure our struts are still valid
         m_strutsTimer->stop();
         m_strutsTimer->start(STRUTSTIMERDELAY);
+	// this is probably papering over some real bug, but it fixes bug 283974
+        setGeometry(geom);
     } else {
         if (m_panelController && QPoint(pos() - geom.topLeft()).manhattanLength() > 100) {
             resize(geom.size());

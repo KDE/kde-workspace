@@ -90,7 +90,7 @@ Item {
             connectSource(source);
         }
         onDataChanged: {
-            if (last!="") {
+            if (last != "") {
                 statusBar.setData(data[last]["error"], data[last]["errorDetails"], data[last]["udi"]);
                 plasmoid.status = "NeedsAttentionStatus";
                 plasmoid.showPopup(2500)
@@ -102,6 +102,10 @@ Item {
         plasmoid.addEventListener ('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
+
+        if (notifierDialog.count == 0) {
+            plasmoid.status = "PassiveStatus"
+        }
     }
 
     function configChanged() {
@@ -127,7 +131,6 @@ Item {
             expandedDevice = udi
         }
         plasmoid.setPopupIconByName("preferences-desktop-notification")
-        plasmoid.status = "ActiveStatus"
         plasmoid.showPopup(7500)
         popupIconTimer.restart()
     }
@@ -186,6 +189,8 @@ Item {
         onCountChanged: {
             if (count == 0) {
                 plasmoid.status = "PassiveStatus"
+            } else {
+                plasmoid.status = "ActiveStatus"
             }
         }
         delegate: deviceItem

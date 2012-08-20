@@ -20,17 +20,18 @@
  *
  */
 
-#ifndef __treeview_h__
-#define __treeview_h__
+#ifndef treeview_h
+#define treeview_h
 
-#include <QMenu>
-#include <QDropEvent>
 #include <QTreeWidget>
+#include <QMimeData>
 
 #include <KService>
 #include <KServiceGroup>
 
 class QMenu;
+class QDropEvent;
+
 class KActionCollection;
 class KDesktopFile;
 class MenuFile;
@@ -92,7 +93,7 @@ class TreeView : public QTreeWidget
     friend class TreeItem;
     Q_OBJECT
 public:
-    TreeView(KActionCollection *ac, QWidget *parent=0, const char *name=0);
+    explicit TreeView(KActionCollection *ac, QWidget *parent=0, const char *name=0);
     ~TreeView();
 
     void readMenuFolderInfo(MenuFolderInfo *folderInfo=0, KServiceGroup::Ptr folder=KServiceGroup::Ptr(), const QString &prefix=QString());
@@ -109,8 +110,8 @@ public:
     void updateTreeView(bool showHidden);
 
 public Q_SLOTS:
-    void currentChanged(MenuFolderInfo *folderInfo);
-    void currentChanged(MenuEntryInfo *entryInfo);
+    void currentDataChanged(MenuFolderInfo *folderInfo);
+    void currentDataChanged(MenuEntryInfo *entryInfo);
     void findServiceShortcut(const KShortcut&, KService::Ptr &);
 
 Q_SIGNALS:
@@ -178,9 +179,9 @@ private:
     MenuSeparatorInfo *m_separator;
     QStringList        m_newMenuIds;
     QStringList        m_newDirectoryList;
+    bool               m_layoutDirty;
     bool               m_detailedMenuEntries;
     bool               m_detailedEntriesNamesFirst;
-    bool               m_layoutDirty;
     QStringList        m_dropMimeTypes;
 };
 

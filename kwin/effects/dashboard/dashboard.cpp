@@ -82,16 +82,14 @@ void DashboardEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
 {
     if (transformWindow && (w != window) && w->isManaged() && !isDashboard(w)) {
         // dashboard active, transform other windows
-        data.brightness *= (1 - ((1.0 - brightness) * timeline.currentValue()));
-        data.saturation *= (1 - ((1.0 - saturation) * timeline.currentValue()));
+        data.multiplyBrightness((1 - ((1.0 - brightness) * timeline.currentValue())));
+        data.multiplySaturation((1 - ((1.0 - saturation) * timeline.currentValue())));
     }
 
     else if (transformWindow && (w == window) && w->isManaged()) {
         // transform dashboard
         if ((timeline.currentValue() * 2) <= 1) {
-            data.opacity *= timeline.currentValue() * 2;
-        } else {
-            data.opacity *= 1;
+            data.multiplyOpacity(timeline.currentValue() * 2);
         }
     }
 
@@ -144,11 +142,7 @@ void DashboardEffect::postPaintScreen()
 
 bool DashboardEffect::isDashboard(EffectWindow *w)
 {
-    if (w->windowClass() == "dashboard dashboard") {
-        return true;
-    } else {
-        return false;
-    }
+    return w->windowRole() == "plasma-dashboard";
 }
 
 void DashboardEffect::slotWindowActivated(EffectWindow *w)
@@ -161,11 +155,6 @@ void DashboardEffect::slotWindowActivated(EffectWindow *w)
         effects->setActiveFullScreenEffect(this);
         transformWindow = true;
         window = w;
-
-        if (blur) {
-            w->setData(WindowBlurBehindRole, w->geometry());
-            w->setData(WindowForceBlurRole, QVariant(true));
-        }
 
         effects->addRepaintFull();
     } else {
@@ -181,6 +170,10 @@ void DashboardEffect::slotWindowAdded(EffectWindow* w)
     if (isDashboard(w)) {
         // Tell other windowAdded() effects to ignore this window
         w->setData(WindowAddedGrabRole, QVariant::fromValue(static_cast<void*>(this)));
+        if (blur) {
+            w->setData(WindowBlurBehindRole, w->geometry());
+            w->setData(WindowForceBlurRole, QVariant(true));
+        }
 
         activateAnimation = true;
         deactivateAnimation = false;

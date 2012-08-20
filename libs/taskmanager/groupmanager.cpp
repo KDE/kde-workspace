@@ -1070,8 +1070,16 @@ void GroupManagerPrivate::unsaveLauncher(LauncherItem *launcher)
         return;
     }
 
-    if (cg.hasKey(launcher->name())) {
-        cg.deleteEntry(launcher->name());
+    QString launcherKey;
+
+    if (launcher->launcherUrl().protocol() == "preferred")
+        // in default config the host of the preferred application url is used as key
+        launcherKey = launcher->launcherUrl().host();
+    else
+        launcherKey = launcher->name();
+
+    if (cg.hasKey(launcherKey)) {
+        cg.deleteEntry(launcherKey);
         emit q->configChanged();
     }
 }
@@ -1127,7 +1135,7 @@ int GroupManagerPrivate::launcherIndex(const KUrl &url)
     foreach (const LauncherItem * item, launchers) {
         if (item->launcherUrl() == url) {
             return index;
-        } 
+        }
 
         ++index;
     }
@@ -1137,13 +1145,16 @@ int GroupManagerPrivate::launcherIndex(const KUrl &url)
     foreach (const LauncherItem * item, launchers) {
         if (item->launcherUrl().protocol() == "preferred") {
             KService::Ptr service = KService::serviceByStorageId(item->defaultApplication());
-            QUrl prefUrl(service->entryPath());
-            if (prefUrl.scheme().isEmpty()) {
-                prefUrl.setScheme("file");
-            }
 
-            if (service && prefUrl == url) {
-                return index;
+            if (service) {
+                QUrl prefUrl(service->entryPath());
+                if (prefUrl.scheme().isEmpty()) {
+                    prefUrl.setScheme("file");
+                }
+
+                if (prefUrl == url) {
+                    return index;
+                }
             }
         }
 

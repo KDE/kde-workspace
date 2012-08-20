@@ -18,40 +18,31 @@
  *
  */
 
+#include "basictab.h"
 
 #include <QCheckBox>
 #include <QLabel>
-#include <QLayout>
-#include <QFileInfo>
 #include <QGroupBox>
-
-//Added by qt3to4:
 #include <QVBoxLayout>
 #include <QGridLayout>
 
-#include <klocale.h>
-#include <kstandarddirs.h>
-#include <kglobal.h>
-#include <kdialog.h>
-#include <kkeysequencewidget.h>
-#include <klineedit.h>
-#include <klinespellchecking.h>
-#include <kmessagebox.h>
-#include <kicondialog.h>
-#include <kdesktopfile.h>
-#include <kurlrequester.h>
-#include <kfiledialog.h>
-#include <kcombobox.h>
-#include <kshell.h>
-#include <khbox.h>
+#include <KLocale>
+#include <KGlobal>
+#include <KDialog>
+#include <KKeySequenceWidget>
+#include <KLineEdit>
+#include <KIconButton>
+#include <KDesktopFile>
+#include <KUrlRequester>
+#include <KShell>
 
 #ifndef Q_WS_WIN
 #include "khotkeys.h"
 #endif
 
+#include "klinespellchecking.h"
 #include "menuinfo.h"
 
-#include "basictab.h"
 #include "basictab.moc"
 
 BasicTab::BasicTab( QWidget *parent )
@@ -59,7 +50,7 @@ BasicTab::BasicTab( QWidget *parent )
 {
     _menuFolderInfo = 0;
     _menuEntryInfo = 0;
-    
+
     // general group
     QWidget *general_group = new QWidget();
     QGridLayout *grid = new QGridLayout(general_group);
@@ -114,7 +105,7 @@ BasicTab::BasicTab( QWidget *parent )
     connect(_nameEdit, SIGNAL(textChanged(QString)),
             SLOT(slotChanged()));
     connect(_descriptionEdit, SIGNAL(textChanged(QString)),
-	    SLOT(slotChanged()));
+            SLOT(slotChanged()));
     connect(_commentEdit, SIGNAL(textChanged(QString)),
             SLOT(slotChanged()));
     connect(_execEdit, SIGNAL(textChanged(QString)),
@@ -145,7 +136,7 @@ BasicTab::BasicTab( QWidget *parent )
 
     // add the general group to the main layout
     addTab(general_group, i18n("General"));
-    
+
     QWidget *advanced = new QWidget();
     QVBoxLayout *advancedLayout = new QVBoxLayout(advanced);
 
@@ -218,7 +209,7 @@ BasicTab::BasicTab( QWidget *parent )
     _uidLabel->setBuddy(_uidEdit);
 
     connect(_uidEdit, SIGNAL(textChanged(QString)),
-	    SLOT(slotChanged()));
+            SLOT(slotChanged()));
     vbox->addWidget(hbox);
     advancedLayout->addWidget(_uid_group);
 
@@ -239,9 +230,9 @@ BasicTab::BasicTab( QWidget *parent )
              this, SLOT(slotCapturedKeySequence(QKeySequence)));
     keybindLayout->addWidget(_keyEdit);
     advancedLayout->addWidget( general_group_keybind );
-    
+
     advancedLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding));
-    
+
     addTab(advanced, i18n("Advanced"));
 #ifndef Q_WS_WIN
     if (!KHotKeys::present())
@@ -386,7 +377,7 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
     }
 #endif
     QString temp = df->desktopGroup().readEntry("Exec");
-    if (temp.startsWith("ksystraycmd "))
+    if (temp.startsWith(QLatin1String("ksystraycmd ")))
     {
       _execEdit->lineEdit()->setText(temp.right(temp.length()-12));
       _systrayCB->setChecked(true);
@@ -407,7 +398,7 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
         _launchCB->setChecked(df->desktopGroup().readEntry("X-KDE-StartupNotify", true));
 
     _onlyShowInKdeCB->setChecked( df->desktopGroup().readXdgListEntry("OnlyShowIn").contains( "KDE" ) ); // or maybe enable only if it contains nothing but KDE?
-    
+
     if ( df->desktopGroup().hasKey( "NoDisplay" ) )
         _hiddenEntryCB->setChecked( df->desktopGroup().readEntry( "NoDisplay", true ) );
     else
@@ -550,9 +541,9 @@ void BasicTab::slotCapturedKeySequence(const QKeySequence& seq)
 }
 
 
-void BasicTab::updateHiddenEntry( bool _hidden )
+void BasicTab::updateHiddenEntry( bool show )
 {
-    if ( _hidden )
+    if ( show )
         _hiddenEntryCB->show();
     else
         _hiddenEntryCB->hide();

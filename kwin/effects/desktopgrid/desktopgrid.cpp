@@ -37,6 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kglobalsettings.h>
 #include <QtGui/QPainter>
 #include <QtGui/QGraphicsLinearLayout>
+#include <QtGui/QVector2D>
 #include <Plasma/FrameSvg>
 #include <Plasma/PushButton>
 #include <Plasma/WindowEffects>
@@ -179,7 +180,7 @@ void DesktopGridEffect::paintScreen(int mask, QRegion region, ScreenPaintData& d
         }
         if (it.value()) {
             WindowPaintData d(it.value());
-            d.opacity *= timeline.currentValue();
+            d.multiplyOpacity(timeline.currentValue());
             effects->drawWindow(it.value(), PAINT_WINDOW_TRANSLUCENT,
                                 infiniteRegion(), d);
         }
@@ -190,10 +191,8 @@ void DesktopGridEffect::paintScreen(int mask, QRegion region, ScreenPaintData& d
         QPoint diff = cursorPos() - m_windowMoveStartPoint;
         QRect geo = m_windowMoveGeometry.translated(diff);
         WindowPaintData d(windowMove);
-        d.xScale *= (float)geo.width() / (float)windowMove->width();
-        d.yScale *= (float)geo.height() / (float)windowMove->height();
-        d.xTranslate += qRound(geo.left() - windowMove->x());
-        d.yTranslate += qRound(geo.top() - windowMove->y());
+        d *= QVector2D((qreal)geo.width() / (qreal)windowMove->width(), (qreal)geo.height() / (qreal)windowMove->height());
+        d += QPoint(qRound(geo.left() - windowMove->x()), qRound(geo.top() - windowMove->y()));
         effects->drawWindow(windowMove, PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_LANCZOS, infiniteRegion(), d);
     }
 
@@ -287,12 +286,12 @@ void DesktopGridEffect::paintWindow(EffectWindow* w, int mask, QRegion region, W
         if (m_desktopButtonsViews.values().contains(w))
             return; // will be painted on top of all other windows
 
-        double xScale = data.xScale;
-        double yScale = data.yScale;
+        qreal xScale = data.xScale();
+        qreal yScale = data.yScale();
 
         // Don't change brightness of windows on all desktops as this causes flickering
         if (!w->isOnAllDesktops() || w->isDesktop())
-            data.brightness *= 1.0 - (0.3 * (1.0 - hoverTimeline[paintingDesktop - 1]->currentValue()));
+            data.multiplyBrightness(1.0 - (0.3 * (1.0 - hoverTimeline[paintingDesktop - 1]->currentValue())));
 
         for (int screen = 0; screen < effects->numScreens(); screen++) {
             // Assume desktop windows can never be on two screens at once (Plasma makes one window per screen)
@@ -333,17 +332,16 @@ void DesktopGridEffect::paintWindow(EffectWindow* w, int mask, QRegion region, W
 
             QPointF newPos = scalePos(transformedGeo.topLeft().toPoint(), paintingDesktop, screen);
             double progress = timeline.currentValue();
-            d.xScale = interpolate(1, xScale * scale[screen] * (float)transformedGeo.width() / (float)w->geometry().width(), progress);
-            d.yScale = interpolate(1, yScale * scale[screen] * (float)transformedGeo.height() / (float)w->geometry().height(), progress);
-            d.xTranslate += qRound(newPos.x() - w->x());
-            d.yTranslate += qRound(newPos.y() - w->y());
+            d.setXScale(interpolate(1, xScale * scale[screen] * (float)transformedGeo.width() / (float)w->geometry().width(), progress));
+            d.setYScale(interpolate(1, yScale * scale[screen] * (float)transformedGeo.height() / (float)w->geometry().height(), progress));
+            d += QPoint(qRound(newPos.x() - w->x()), qRound(newPos.y() - w->y()));
 
             if (isUsingPresentWindows() && (w->isDock() || w->isSkipSwitcher())) {
                 // fade out panels if present windows is used
-                d.opacity *= (1.0 - timeline.currentValue());
+                d.multiplyOpacity((1.0 - timeline.currentValue()));
             }
             if (isUsingPresentWindows() && w->isMinimized()) {
-                d.opacity *= timeline.currentValue();
+                d.multiplyOpacity(timeline.currentValue());
             }
 
             if (effects->compositingType() == XRenderCompositing) {

@@ -4,7 +4,6 @@ OPTION(KWIN_BUILD_DECORATIONS "Enable building of KWin decorations." ON)
 OPTION(KWIN_BUILD_KCMS "Enable building of KWin configuration modules." ON)
 OPTION(KWIN_MOBILE_EFFECTS "Only build effects relevant for mobile devices" OFF)
 OPTION(KWIN_BUILD_TABBOX "Enable building of KWin Tabbox functionality" ON)
-OPTION(KWIN_BUILD_TILING "Enable building of KWin Tiling functionality" ON)
 OPTION(KWIN_BUILD_SCREENEDGES "Enable building of KWin with screen edge support" ON)
 OPTION(KWIN_BUILD_SCRIPTING "Enable building of KWin with scripting support" ON)
 OPTION(KWIN_BUILD_XRENDER_COMPOSITING "Enable building of KWin with XRender Compositing support" ON)
@@ -15,15 +14,18 @@ else(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    OPTION(KWIN_PLASMA_ACTIVE "Enable building KWin for Plasma Active." On)
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 
+# Binary name of KWin
+set(KWIN_NAME "kwin")
+
 if(KWIN_PLASMA_ACTIVE)
     set(KWIN_BUILD_DECORATIONS OFF)
     set(KWIN_BUILD_KCMS OFF)
-    set(KWIN_BUILD_TILING OFF)
     set(KWIN_BUILD_SCREENEDGES OFF)
     set(KWIN_BUILD_SCRIPTING ON)
     set(KWIN_BUILD_XRENDER_COMPOSITING OFF)
     set(KWIN_MOBILE_EFFECTS ON)
     set(KWIN_BUILD_WITH_OPENGLES ON)
+    set(KWIN_NAME "kwinactive")
 endif(KWIN_PLASMA_ACTIVE)
 
 # KWIN_HAVE_XRENDER_COMPOSITING - whether XRender-based compositing support is available: may be disabled
@@ -122,6 +124,7 @@ if(KWIN_BUILD_SCRIPTING)
         scripting/workspace_wrapper.cpp
         scripting/meta.cpp
         scripting/scriptedeffect.cpp
+        scripting/scriptingutils.cpp
         scripting/timer.cpp
     )
 endif(KWIN_BUILD_SCRIPTING)
@@ -137,26 +140,6 @@ if(KWIN_BUILD_TABBOX)
         tabbox/tabboxhandler.cpp
   )
 endif(KWIN_BUILD_TABBOX)
-
-if(KWIN_BUILD_TILING)
-    set(
-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
-        tiling/tile.cpp
-        tiling/tiling.cpp
-        tiling/tilinglayout.cpp
-        tilinglayoutfactory.cpp
-
-        # tiling layouts
-        # spiral
-        tilinglayouts/spiral/spiral.cpp
-
-        # columns
-        tilinglayouts/columns/columns.cpp
-
-        # floating
-        tilinglayouts/floating/floating.cpp
-   )
-endif(KWIN_BUILD_TILING)
 
 if(KWIN_BUILD_SCREENEDGES)
     set(
@@ -192,6 +175,8 @@ endif(KWIN_BUILD_ACTIVITIES)
 kde4_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
 
 target_link_libraries(kdeinit_kwin ${kwinLibs})
+set_target_properties(kwin PROPERTIES OUTPUT_NAME ${KWIN_NAME})
+set_target_properties(kdeinit_kwin PROPERTIES OUTPUT_NAME kdeinit4_${KWIN_NAME})
 
 if(OPENGL_FOUND)
   set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS -DKWIN_HAVE_OPENGL)
@@ -216,6 +201,8 @@ if(OPENGLES_FOUND)
   kde4_add_kdeinit_executable( kwin_gles ${kwin_KDEINIT_SRCS})
   target_link_libraries(kdeinit_kwin_gles ${kwinLibs} kwinglesutils ${OPENGLES_LIBRARIES})
   set_target_properties(kdeinit_kwin_gles PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGL -DKWIN_HAVE_OPENGLES")
+  set_target_properties(kwin_gles PROPERTIES OUTPUT_NAME ${KWIN_NAME}_gles)
+  set_target_properties(kdeinit_kwin_gles PROPERTIES OUTPUT_NAME kdeinit4_${KWIN_NAME}_gles)
   install(TARGETS kdeinit_kwin_gles ${INSTALL_TARGETS_DEFAULT_ARGS} )
   install(TARGETS kwin_gles         ${INSTALL_TARGETS_DEFAULT_ARGS} )
 endif(OPENGLES_FOUND)
@@ -229,12 +216,13 @@ set( kwinnvidiahack_LIB_SRCS
 kde4_add_library(kwinnvidiahack SHARED ${kwinnvidiahack_LIB_SRCS})
 
 set_target_properties(kwinnvidiahack PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION}  )
+set_target_properties(kwinnvidiahack PROPERTIES OUTPUT_NAME ${KWIN_NAME}nvidiahack)
 install(TARGETS kwinnvidiahack ${INSTALL_TARGETS_DEFAULT_ARGS} LIBRARY NAMELINK_SKIP)
 
 ########### install files ###############
 
-install( FILES kwin.kcfg  DESTINATION  ${KCFG_INSTALL_DIR} )
-install( FILES kwin.notifyrc  DESTINATION  ${DATA_INSTALL_DIR}/kwin )
+install( FILES kwin.kcfg  DESTINATION  ${KCFG_INSTALL_DIR} RENAME ${KWIN_NAME}.kcfg )
+install( FILES kwin.notifyrc  DESTINATION  ${DATA_INSTALL_DIR}/${KWIN_NAME} RENAME ${KWIN_NAME}.notifyrc)
 install( FILES org.kde.KWin.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
 
 if( KWIN_BUILD_SCRIPTING )
@@ -243,3 +231,5 @@ if( KWIN_BUILD_SCRIPTING )
 endif( KWIN_BUILD_SCRIPTING )
 
 kde4_install_icons( ${ICON_INSTALL_DIR} )
+
+add_subdirectory(tests)

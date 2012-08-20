@@ -34,6 +34,19 @@ DEALINGS IN THE SOFTWARE.
 
 #define KWIN_EXPORT KDE_EXPORT
 
+#define KWIN_DECORATION_API_VERSION 1
+
+/**
+ * Defines the class to be used for decoration factory.
+ * The class must be namespace complete.
+ * E.g.  KWIN_EFFECT( Oxygen::Factory )
+ **/
+#define KWIN_DECORATION( classname ) \
+    extern "C" { \
+        KWIN_EXPORT KDecorationFactory* create_factory() { return new classname(); } \
+        KWIN_EXPORT int decoration_version() { return KWIN_DECORATION_API_VERSION; } \
+    }
+
 class KConfig;
 
 /** @defgroup kdecoration KWin decorations library */
@@ -108,8 +121,19 @@ public:
         CloseTabGroupOp, // Close the group
         ActivateNextTabOp, // Move left in the group
         ActivatePreviousTabOp, // Move right in the group
+        ///< @deprecated, tiling got removed in 4.10
         ToggleClientTiledStateOp, // put a floating client into tiling
-        TabDragOp
+        TabDragOp,
+
+        //BEGIN ABI stability stuff
+        // NOTICE for ABI stability
+        // TODO remove with mandatory version tagging fo 4.9.x or 4.10
+        /** @deprecated ABI compatibility only - don't use */
+        RemoveClientFromGroupOp = RemoveTabFromGroupOp, // Remove from group
+        CloseClientGroupOp = CloseTabGroupOp, // Close the group
+        MoveClientInGroupLeftOp = ActivateNextTabOp, // Move left in the group
+        MoveClientInGroupRightOp = ActivatePreviousTabOp // Move right in the group
+        //END ABI stability stuff
     };
     /**
      * Basic color types that should be recognized by all decoration styles.
@@ -199,7 +223,14 @@ public:
         // Tabbing
         AbilityTabbing = 4000, ///< The decoration supports tabbing
         // TODO colors for individual button types
-        ABILITY_DUMMY = 10000000
+        ABILITY_DUMMY = 10000000,
+
+        //BEGIN ABI stability stuff
+        // NOTICE for ABI stability
+        // TODO remove with mandatory version tagging fo 4.9.x or 4.10
+        /** @deprecated ABI compatibility only - don't use */
+        AbilityClientGrouping = AbilityTabbing
+        //END ABI stability stuff
     };
 
     enum Requirement { REQUIREMENT_DUMMY = 1000000 };
@@ -228,9 +259,38 @@ public:
     /**
      * Returns the mimeType used to drag and drop clientGroupItems
      */
+    //BEGIN ABI stability stuff
+    // NOTICE for ABI stability
+    // TODO remove with mandatory version tagging fo 4.9.x or 4.10
+    /** @deprecated ABI compatibility only - don't use */
+    static QString clientGroupItemDragMimeType() { return tabDragMimeType(); }
+    //END ABI stability stuff
     static QString tabDragMimeType();
 
 };
+
+//BEGIN ABI stability stuff
+// NOTICE for ABI stability
+// TODO remove with mandatory version tagging fo 4.9.x or 4.10
+/** @deprecated ABI compatibility only - don't use */
+class KWIN_EXPORT ClientGroupItem
+{
+public:
+    ClientGroupItem(QString t, QIcon i) {
+        title_ = t;
+        icon_ = i;
+    }
+    inline QIcon icon() const {
+        return icon_;
+    }
+    inline QString title() const {
+        return title_;
+    }
+private:
+    QString title_;
+    QIcon icon_;
+};
+//END ABI stability stuff
 
 class KDecorationProvides
     : public KDecorationDefines

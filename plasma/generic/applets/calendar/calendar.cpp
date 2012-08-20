@@ -39,6 +39,9 @@ CalendarApplet::CalendarApplet(QObject *parent, const QVariantList &args)
 {
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setCacheMode(DeviceCoordinateCache);
+    m_dateUpdater = new QTimer(this);
+    m_dateUpdater->setSingleShot(true);
+    connect(m_dateUpdater, SIGNAL(timeout()), this, SLOT(updateDate()));
 }
 
 CalendarApplet::~CalendarApplet()
@@ -49,11 +52,7 @@ void CalendarApplet::init()
 {
     setPopupIcon("view-pim-calendar");
     m_calendarWidget = new Plasma::Calendar(this);
-    if (m_calendarWidget->isDisplayingDateDetails()) {
-        m_calendarWidget->setPreferredSize(440, 250);
-    } else {
-        m_calendarWidget->setPreferredSize(220, 250);
-    }
+    m_calendarWidget->setMinimumSize(220, 250);
     updateDate();
     configChanged();
     setFocusPolicy(Qt::StrongFocus);
@@ -125,8 +124,21 @@ void CalendarApplet::configAccepted()
 void CalendarApplet::updateDate()
 {
     QDateTime now = QDateTime::currentDateTime();
-    int updateIn = (24 * 60 * 60) - (now.toTime_t() + KSystemTimeZones::local().currentOffset()) % (24 * 60 * 60);
-    QTimer::singleShot(updateIn * 1000, this, SLOT(updateDate()));
+    static const int secsInDay = 24 * 60 * 60;
+    const int sinceEpoch = now.toTime_t() + KSystemTimeZones::local().currentOffset();
+    const int updateIn = (secsInDay) - (sinceEpoch % secsInDay);
+    if (updateIn > secsInDay - 60) {
+        // after midnight, we try and update right away again in case of odd clock drifting
+        // that could cause us to miss (or delay) the date chagne
+        m_dateUpdater->setInterval(60 * 1000);
+    } else if (updateIn < m_dateUpdater->interval()) {
+        m_dateUpdater->setInterval(updateIn * 1000);
+    } else {
+        // update once an hour
+        m_dateUpdater->setInterval(60 * 60 * 1000);
+    }
+    //kDebug() << "updating in" << m_dateUpdater->interval();
+    m_dateUpdater->start();
     paintIcon();
 }
 

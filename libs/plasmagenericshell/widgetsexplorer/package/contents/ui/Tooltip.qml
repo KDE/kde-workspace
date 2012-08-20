@@ -29,18 +29,35 @@ MouseArea {
     onEntered: toolTipHideTimer.running = false
     onExited: toolTipHideTimer.running = true
 
-    width: 250
+    width: childrenRect.width
     height: 200
 
-    property variant icon: tooltipDialog.appletDelegate.icon
-    property string title: tooltipDialog.appletDelegate.title
-    property string description: tooltipDialog.appletDelegate.description
-    property string author: tooltipDialog.appletDelegate.author
-    property string email: tooltipDialog.appletDelegate.email
-    property string license: tooltipDialog.appletDelegate.license
-    property string pluginName: tooltipDialog.appletDelegate.pluginName
-    property bool local: tooltipDialog.appletDelegate.local
+    property variant icon
+    property string title
+    property string description
+    property string author
+    property string email
+    property string license
+    property string pluginName
+    property bool local
 
+    onClicked: tooltipDialog.visible = false
+    Connections {
+        target: tooltipDialog
+        onAppletDelegateChanged: {
+            if (!tooltipDialog.appletDelegate) {
+                return
+            }
+            icon = tooltipDialog.appletDelegate.icon
+            title = tooltipDialog.appletDelegate.title
+            description = tooltipDialog.appletDelegate.description
+            author = tooltipDialog.appletDelegate.author
+            email = tooltipDialog.appletDelegate.email
+            license = tooltipDialog.appletDelegate.license
+            pluginName = tooltipDialog.appletDelegate.pluginName
+            local = tooltipDialog.appletDelegate.local
+        }
+    }
     QIconItem {
         id: tooltipIconWidget
         anchors.left: parent.left
@@ -59,8 +76,7 @@ MouseArea {
             right: parent.right
         }
 
-        Text {
-            color: theme.textColor
+        PlasmaComponents.Label {
             text: title
             font.bold:true
             anchors.left: parent.left
@@ -68,9 +84,8 @@ MouseArea {
             height: paintedHeight
             wrapMode: Text.Wrap
         }
-        Text {
+        PlasmaComponents.Label {
             text: description
-            color: theme.textColor
             anchors.left: parent.left
             anchors.right: parent.right
             wrapMode: Text.Wrap
@@ -79,35 +94,36 @@ MouseArea {
     Grid {
         anchors.top: tooltipIconWidget.bottom
         anchors.topMargin: 16
-        rows: 2
+        anchors.bottom: uninstallButton.top
+        anchors.bottomMargin: 4
+        rows: 3
         columns: 2
-        Text {
-            text: "License:"
-            color: theme.textColor
-            anchors.right: licenseText.left
-            wrapMode: Text.Wrap
+        spacing: 4
+        PlasmaComponents.Label {
+            text: i18n("License:")
         }
-        Text {
+        PlasmaComponents.Label {
             id: licenseText
             text: license
-            color: theme.textColor
             wrapMode: Text.Wrap
         }
-        Text {
-            text: "Author:"
-            color: theme.textColor
-            anchors.right: authorText.left
-            wrapMode: Text.Wrap
+        PlasmaComponents.Label {
+            text: i18n("Author:")
         }
-        Text {
-            id: authorText
+        PlasmaComponents.Label {
             text: author
-            color: theme.textColor
             wrapMode: Text.Wrap
+        }
+        PlasmaComponents.Label {
+            text: i18n("Email:")
+        }
+        PlasmaComponents.Label {
+            text: email
         }
     }
 
     PlasmaComponents.Button {
+        id: uninstallButton
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
@@ -118,6 +134,9 @@ MouseArea {
         }
         iconSource: "application-exit"
         text: i18n("Uninstall")
-        onClicked: widgetExplorer.uninstall(pluginName)
+        onClicked: {
+            widgetExplorer.uninstall(pluginName)
+            tooltipDialog.visible = false
+        }
     }
 }

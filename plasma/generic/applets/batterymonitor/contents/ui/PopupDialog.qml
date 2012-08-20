@@ -22,15 +22,15 @@ import org.kde.plasma.components 0.1 as Components
 
 Item {
     id: dialog
-    width: childrenRect.width
-    height: childrenRect.height
+    width: childrenRect.width+24
+    height: childrenRect.height+24
 
     property int percent
+    property string batteryState
     property bool hasBattery
     property bool pluggedIn
     property alias screenBrightness: brightnessSlider.value
     property int remainingMsec
-    property bool showRemainingTime
     property alias showSuspendButton: suspendButton.visible
     property alias showHibernateButton: hibernateButton.visible
 
@@ -40,22 +40,25 @@ Item {
     signal suspendClicked(int type)
     signal brightnessChanged(int screenBrightness)
     signal powermanagementChanged(bool checked)
-    
+
     Column {
         id: labels
+        spacing: 6
         anchors {
             top: parent.top
             left: parent.left
+            margins: 12
         }
 
         Components.Label {
             text: i18n("Battery:")
             anchors.right: parent.right
         }
-        
+
         Components.Label {
             text: i18n("AC Adapter:")
             anchors.right: parent.right
+            anchors.bottomMargin: 12
         }
 
         Components.Label {
@@ -63,7 +66,7 @@ Item {
             visible: remainingTime.visible
             anchors.right: parent.right
         }
-        
+
         Components.Label {
             text: i18nc("Label for power management inhibition", "Power management enabled:")
             anchors.right: parent.right
@@ -73,37 +76,39 @@ Item {
             text: i18n("Screen Brightness:")
             anchors.right: parent.right
         }
-        
     }
 
     Column {
         id: values
+        spacing: 6
         anchors {
             top: parent.top
             left: labels.right
-            leftMargin: 5
+            margins: 12
         }
 
         Components.Label {
-            text: dialog.hasBattery ? stringForState(pluggedIn, percent) : i18nc("Battery is not plugged in", "Not present")
+            text: dialog.hasBattery ? stringForState(batteryState, percent) : i18nc("Battery is not plugged in", "Not present")
             font.weight: Font.Bold
         }
 
         Components.Label {
             text: dialog.pluggedIn ? i18n("Plugged in") : i18n("Not plugged in")
             font.weight: Font.Bold
+            anchors.bottomMargin: 12
         }
 
         Components.Label {
             id: remainingTime
             text: formatDuration(remainingMsec);
             font.weight: Font.Bold
-            visible: text!="" && showRemainingTime
+            visible: text!=""
         }
 
-        Components.Switch {
+        Components.CheckBox {
             checked: true
-            onCheckedChanged: powermanagementChanged(checked)
+            onClicked: powermanagementChanged(checked)
+            x: 1
         }
 
         Components.Slider {
@@ -133,25 +138,21 @@ Item {
             right: values.right
         }
 
-        IconButton {
+        Components.ToolButton {
             id: suspendButton
-            icon: QIcon("system-suspend")
-            iconWidth: 22
-            iconHeight: 22
+            iconSource: "system-suspend"
             text: i18nc("Suspend the computer to RAM; translation should be short", "Sleep")
             onClicked: suspendClicked(ram)
         }
 
-        IconButton {
+        Components.ToolButton {
             id: hibernateButton
-            icon: QIcon("system-suspend-hibernate")
-            iconWidth: 22
-            iconHeight: 22
+            iconSource: "system-suspend-hibernate"
             text: i18nc("Suspend the computer to disk; translation should be short", "Hibernate")
             onClicked: suspendClicked(disk)
         }
     }
-        
+
     BatteryIcon {
         monochrome: false
         hasBattery: dialog.hasBattery
@@ -160,6 +161,7 @@ Item {
         anchors {
             top: parent.top
             right: values.right
+            topMargin: 12
         }
         width: 50
         height: 50

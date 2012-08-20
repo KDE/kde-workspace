@@ -58,6 +58,10 @@
     <method name="listOfEffects">
       <arg type="as" direction="out"/>
     </method>
+    <method name="supportInformationForEffect">
+      <arg name="name" type="s" direction="in"/>
+      <arg type="s" direction="out"/>
+    </method>
     <method name="compositingActive">
       <arg type="b" direction="out"/>
     </method>
@@ -68,10 +72,6 @@
       <arg type="ai" direction="out"/>
       <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QList&lt;int>"/>
     </method>
-    <method name="toggleTiling"/>
-    <method name="nextTileLayout"/>
-    <method name="previousTileLayout"/>
-    <method name="dumpTiles"/>
     <method name="stopActivity">
       <arg type="s" direction="in"/>
       <arg type="b" direction="out"/>
@@ -94,6 +94,16 @@
     </method>
     <method name="openGLIsBroken">
         <arg type="b" direction="out"/>
+    </method>
+    <method name="compositingType">
+        <!--
+            none: No Compositing
+            xrender: XRender
+            gl1: OpenGL 1
+            gl2: OpenGL 2
+            gles: OpenGL ES 2
+        -->
+        <arg type="s" direction="out"/>
     </method>
   </interface>
 </node>

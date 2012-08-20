@@ -37,6 +37,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KStandardDirs>
 #include "kwindecoration.h"
 
+/* WARNING -------------------------------------------------------------------------
+* it is *ABSOLUTELY* mandatory to manage loadPlugin() and destroyPreviousPlugin()
+* using disablePreview()
+*
+* loadPlugin() moves the present factory pointer to "old_fact" which is then deleted
+* by the succeeding destroyPreviousPlugin()
+*
+* So if you loaded a new plugin and that changed the current factory, call disablePreview()
+* BEFORE the following destroyPreviousPlugin() destroys the factory for the current m_preview->deco->factory
+* (which is invoked on deco deconstruction)
+* WARNING ------------------------------------------------------------------------ */
+
 namespace KWin
 {
 
@@ -94,6 +106,8 @@ void DecorationModel::findDecorations()
                             findAuroraeThemes();
                             continue;
                         }
+                        if (!m_plugins->canLoad(libName))
+                            continue;
                         DecorationModelData data;
                         data.name = desktopFile.readName();
                         data.libraryName = libName;
@@ -190,10 +204,13 @@ QVariant DecorationModel::data(const QModelIndex& index, int role) const
         return static_cast< int >(m_decorations[ index.row()].borderSize);
     case BorderSizesRole: {
         QList< QVariant > sizes;
-        if (m_plugins->loadPlugin(m_decorations[ index.row()].libraryName) &&
-                m_plugins->factory() != NULL) {
+        const bool mustDisablePreview = m_plugins->factory() && m_plugins->factory() == m_preview->factory();
+        if (m_plugins->loadPlugin(m_decorations[index.row()].libraryName) && m_plugins->factory()) {
             foreach (KDecorationDefines::BorderSize size, m_plugins->factory()->borderSizes())   // krazy:exclude=foreach
-            sizes << int(size) ;
+                sizes << int(size);
+            if (mustDisablePreview) // it's nuked with destroyPreviousPlugin()
+                m_preview->disablePreview(); // so we need to get rid of m_preview->deco first
+            m_plugins->destroyPreviousPlugin();
         }
         return sizes;
     }
@@ -255,11 +272,32 @@ void DecorationModel::setButtons(bool custom, const QString& left, const QString
     m_rightButtons = right;
 }
 
-void DecorationModel::regeneratePreviews()
+void DecorationModel::regenerateNextPreview()
 {
-    for (int i = 0; i < m_decorations.count(); i++) {
-        regeneratePreview(index(i), QSize(qobject_cast<KWinDecorationModule*>(QObject::parent())->itemWidth(), 150));
+    if (m_nextPreviewIndex < m_lastUpdateIndex && m_nextPreviewIndex < m_decorations.count())
+        regeneratePreview(index(m_nextPreviewIndex),
+                          QSize(qobject_cast<KWinDecorationModule*>(QObject::parent())->itemWidth(), 150));
+    ++m_nextPreviewIndex;
+    if (m_nextPreviewIndex >= m_lastUpdateIndex && m_firstUpdateIndex > 0) {
+        // do the above ones
+        m_lastUpdateIndex = qMin(m_firstUpdateIndex, m_decorations.count());
+        m_firstUpdateIndex = m_nextPreviewIndex = 0;
     }
+    if (m_nextPreviewIndex < m_lastUpdateIndex)
+        QMetaObject::invokeMethod(this, "regenerateNextPreview", Qt::QueuedConnection);
+}
+
+void DecorationModel::regeneratePreviews(int firstIndex)
+{
+    m_firstUpdateIndex = firstIndex;
+    m_lastUpdateIndex = m_decorations.count();
+    m_nextPreviewIndex = firstIndex;
+    regenerateNextPreview();
+}
+
+void DecorationModel::stopPreviewGeneration()
+{
+    m_firstUpdateIndex = m_lastUpdateIndex = m_nextPreviewIndex = 0;
 }
 
 void DecorationModel::regeneratePreview(const QModelIndex& index, const QSize& size)
@@ -286,17 +324,27 @@ void DecorationModel::regeneratePreview(const QModelIndex& index, const QSize& s
         html = QString("<div style=\"color: %1\" align=\"center\">%2</div>").arg(color.name()).arg(html);
 
         document.setHtml(html);
-        m_plugins->reset(KDecoration::SettingDecoration);
-        if (m_plugins->loadPlugin(data.libraryName) &&
-                m_preview->recreateDecoration(m_plugins))
+        bool enabled = false;
+        bool loaded;
+        // m_preview->deco management is not required
+        // either the deco loads and the following recreateDecoration will sanitize decos (on new factory)
+        // or the deco does not load and destroyPreviousPlugin() is not called
+        if ((loaded = m_plugins->loadPlugin(data.libraryName)) && m_preview->recreateDecoration(m_plugins)) {
+            enabled = true;
             m_preview->enablePreview();
-        else
+        } else {
             m_preview->disablePreview();
-        m_plugins->destroyPreviousPlugin();
-        m_preview->resize(size);
-        m_preview->setTempButtons(m_plugins, m_customButtons, m_leftButtons, m_rightButtons);
-        m_preview->setTempBorderSize(m_plugins, data.borderSize);
-        data.preview = m_preview->preview(&document, m_renderWidget);
+        }
+        if (loaded)
+            m_plugins->destroyPreviousPlugin();
+        if (enabled) {
+            m_preview->resize(size);
+            m_preview->setTempButtons(m_plugins, m_customButtons, m_leftButtons, m_rightButtons);
+            m_preview->setTempBorderSize(m_plugins, data.borderSize);
+            data.preview = m_preview->preview(&document, m_renderWidget);
+        } else {
+            m_decorations.removeAt(index.row());
+        }
         break;
     }
     default:

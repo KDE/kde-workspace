@@ -29,9 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kdebug.h>
 #include <kglobalsettings.h>
 
-#ifdef KWIN_HAVE_OPENGL
 #include <kwinglutils.h>
-#endif
 
 #include <QMouseEvent>
 #include <QtGui/QPainter>
@@ -45,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <limits.h>
 #include <QTimer>
+#include <QVector2D>
 #include <QVector4D>
 
 namespace KWin
@@ -338,8 +337,8 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
 
         mask |= PAINT_WINDOW_LANCZOS;
         // Apply opacity and brightness
-        data.opacity *= winData->opacity;
-        data.brightness *= interpolate(0.40, 1.0, winData->highlight);
+        data.multiplyOpacity(winData->opacity);
+        data.multiplyBrightness(interpolate(0.40, 1.0, winData->highlight));
 
         if (m_motionManager.isManaging(w)) {
             if (w->isDesktop()) {
@@ -352,7 +351,7 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                 // scale the window (interpolated by the highlight level) to at least 105% or to cover 1/16 of the screen size - yet keep it in screen bounds
                 QRect area = effects->clientArea(FullScreenArea, w);
 
-                QSizeF effSize(w->width()*data.xScale, w->height()*data.yScale);
+                QSizeF effSize(w->width()*data.xScale(), w->height()*data.yScale());
                 float tScale = sqrt((area.width()*area.height()) / (16.0*effSize.width()*effSize.height()));
                 if (tScale < 1.05) {
                     tScale = 1.05;
@@ -361,7 +360,7 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                     tScale = area.width() / effSize.width();
                 if (effSize.height()*tScale > area.height())
                     tScale = area.height() / effSize.height();
-                const float scale = interpolate(1.0, tScale, winData->highlight);
+                const qreal scale = interpolate(1.0, tScale, winData->highlight);
                 if (scale > 1.0) {
                     if (scale < tScale) // don't use lanczos during transition
                         mask &= ~PAINT_WINDOW_LANCZOS;
@@ -379,10 +378,8 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                     rect.setWidth(rect.width()*scale);
                     rect.setHeight(rect.height()*scale);
 
-                    data.xScale *= scale;
-                    data.yScale *= scale;
-                    data.xTranslate += tx;
-                    data.yTranslate += ty;
+                    data *= QVector2D(scale, scale);
+                    data += QPoint(tx, ty);
                 }
             }
 
@@ -390,9 +387,7 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                 mask &= ~PAINT_WINDOW_LANCZOS;
             }
             if (m_dragInProgress && m_dragWindow == w) {
-                QPoint diff = cursorPos() - m_dragStart;
-                data.xTranslate += diff.x();
-                data.yTranslate += diff.y();
+                data += (cursorPos() - m_dragStart);
             }
             effects->paintWindow(w, mask, region, data);
 
@@ -401,25 +396,21 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                 QPoint point(rect.x() + rect.width() * 0.95,
                              rect.y() + rect.height() * 0.95);
                 winData->iconFrame->setPosition(point);
-#ifdef KWIN_HAVE_OPENGL
                 if (effects->compositingType() == KWin::OpenGLCompositing && data.shader) {
-                    const float a = 0.9 * data.opacity * m_decalOpacity * 0.75;
+                    const float a = 0.9 * data.opacity() * m_decalOpacity * 0.75;
                     data.shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
                 }
-#endif
-                winData->iconFrame->render(region, 0.9 * data.opacity * m_decalOpacity, 0.75);
+                winData->iconFrame->render(region, 0.9 * data.opacity() * m_decalOpacity, 0.75);
             }
             if (m_showCaptions) {
                 QPoint point(rect.x() + rect.width() / 2,
                              rect.y() + rect.height() / 2);
                 winData->textFrame->setPosition(point);
-#ifdef KWIN_HAVE_OPENGL
                 if (effects->compositingType() == KWin::OpenGLCompositing && data.shader) {
-                    const float a = 0.9 * data.opacity * m_decalOpacity * 0.75;
+                    const float a = 0.9 * data.opacity() * m_decalOpacity * 0.75;
                     data.shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
                 }
-#endif
-                winData->textFrame->render(region, 0.9 * data.opacity * m_decalOpacity, 0.75);
+                winData->textFrame->render(region, 0.9 * data.opacity() * m_decalOpacity, 0.75);
             }
         } else
             effects->paintWindow(w, mask, region, data);
@@ -1487,7 +1478,7 @@ bool PresentWindowsEffect::isOverlappingAny(EffectWindow *w, const QHash<EffectW
 //-----------------------------------------------------------------------------
 // Activation
 
-void PresentWindowsEffect::setActive(bool active, bool closingTab)
+void PresentWindowsEffect::setActive(bool active)
 {
     if (effects->activeFullScreenEffect() && effects->activeFullScreenEffect() != this)
         return;

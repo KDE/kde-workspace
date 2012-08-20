@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QPair>
 #include <QtCore/QSet>
 #include <QtCore/QRect>
+#include <QtGui/QGraphicsRotation>
 #include <QtGui/QRegion>
 
 #include <QtCore/QVector>
@@ -48,9 +49,13 @@ class KConfigGroup;
 class KActionCollection;
 class QFont;
 class QKeyEvent;
+class QVector2D;
 
 namespace KWin
 {
+
+class PaintDataPrivate;
+class WindowPaintDataPrivate;
 
 class EffectWindow;
 class EffectWindowGroup;
@@ -60,7 +65,6 @@ class Effect;
 class WindowQuad;
 class GLShader;
 class XRenderPicture;
-class RotationData;
 class WindowQuadList;
 class WindowPrePaintData;
 class WindowPaintData;
@@ -573,7 +577,7 @@ class KWIN_EXPORT EffectsHandler : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int currentDesktop READ currentDesktop WRITE setCurrentDesktop NOTIFY desktopChanged)
-    Q_PROPERTY(QString currentActivity READ currentActivity)
+    Q_PROPERTY(QString currentActivity READ currentActivity NOTIFY currentActivityChanged)
     Q_PROPERTY(KWin::EffectWindow *activeWindow READ activeWindow WRITE activateWindow NOTIFY windowActivated)
     Q_PROPERTY(QSize desktopGridSize READ desktopGridSize)
     Q_PROPERTY(int desktopGridWidth READ desktopGridWidth)
@@ -1089,6 +1093,27 @@ Q_SIGNALS:
      * @since 4.8
      **/
     void screenGeometryChanged(const QSize &size);
+
+    /**
+     * This signal is emitted when the global
+     * activity is changed
+     * @param id id of the new current activity
+     * @since 4.9
+     **/
+    void currentActivityChanged(const QString &id);
+    /**
+     * This signal is emitted when a new activity is added
+     * @param id id of the new activity
+     * @since 4.9
+     */
+    void activityAdded(const QString &id);
+    /**
+     * This signal is emitted when the activity
+     * is removed
+     * @param id id of the removed activity
+     * @since 4.9
+     */
+    void activityRemoved(const QString &id);
 
 protected:
     QVector< EffectPair > loaded_effects;
@@ -1627,24 +1652,246 @@ public:
     void setTransformed();
 };
 
-class KWIN_EXPORT WindowPaintData
+class KWIN_EXPORT PaintData
+{
+public:
+    virtual ~PaintData();
+    /**
+     * @returns scale factor in X direction.
+     * @since 4.10
+     **/
+    qreal xScale() const;
+    /**
+     * @returns scale factor in Y direction.
+     * @since 4.10
+     **/
+    qreal yScale() const;
+    /**
+     * @returns scale factor in Z direction.
+     * @since 4.10
+     **/
+    qreal zScale() const;
+    /**
+     * Sets the scale factor in X direction to @p scale
+     * @param scale The scale factor in X direction
+     * @since 4.10
+     **/
+    void setXScale(qreal scale);
+    /**
+     * Sets the scale factor in Y direction to @p scale
+     * @param scale The scale factor in Y direction
+     * @since 4.10
+     **/
+    void setYScale(qreal scale);
+    /**
+     * Sets the scale factor in Z direction to @p scale
+     * @param scale The scale factor in Z direction
+     * @since 4.10
+     **/
+    void setZScale(qreal scale);
+    /**
+     * Sets the scale factor in X and Y direction.
+     * @param scale The scale factor for X and Y direction
+     * @since 4.10
+     **/
+    void setScale(const QVector2D &scale);
+    /**
+     * Sets the scale factor in X, Y and Z direction
+     * @param scale The scale factor for X, Y and Z direction
+     * @since 4.10
+     **/
+    void setScale(const QVector3D &scale);
+    const QGraphicsScale &scale() const;
+    const QVector3D &translation() const;
+    /**
+     * @returns the translation in X direction.
+     * @since 4.10
+     **/
+    qreal xTranslation() const;
+    /**
+     * @returns the translation in Y direction.
+     * @since 4.10
+     **/
+    qreal yTranslation() const;
+    /**
+     * @returns the translation in Z direction.
+     * @since 4.10
+     **/
+    qreal zTranslation() const;
+    /**
+     * Sets the translation in X direction to @p translate.
+     * @since 4.10
+     **/
+    void setXTranslation(qreal translate);
+    /**
+     * Sets the translation in Y direction to @p translate.
+     * @since 4.10
+     **/
+    void setYTranslation(qreal translate);
+    /**
+     * Sets the translation in Z direction to @p translate.
+     * @since 4.10
+     **/
+    void setZTranslation(qreal translate);
+    /**
+     * Performs a translation by adding the values component wise.
+     * @param x Translation in X direction
+     * @param y Translation in Y direction
+     * @param z Translation in Z direction
+     * @since 4.10
+     **/
+    void translate(qreal x, qreal y = 0.0, qreal z = 0.0);
+    /**
+     * Performs a translation by adding the values component wise.
+     * Overloaded method for convenience.
+     * @param translate The translation
+     * @since 4.10
+     **/
+    void translate(const QVector3D &translate);
+
+    /**
+     * Sets the rotation angle.
+     * @param angle The new rotation angle.
+     * @since 4.10
+     * @see rotationAngle()
+     **/
+    void setRotationAngle(qreal angle);
+    /**
+     * Returns the rotation angle.
+     * Initially 0.0.
+     * @returns The current rotation angle.
+     * @since 4.10
+     * @see setRotationAngle
+     **/
+    qreal rotationAngle() const;
+    /**
+     * Sets the rotation origin.
+     * @param origin The new rotation origin.
+     * @since 4.10
+     * @see rotationOrigin()
+     **/
+    void setRotationOrigin(const QVector3D &origin);
+    /**
+     * Returns the rotation origin. That is the point in space which is fixed during the rotation.
+     * Initially this is 0/0/0.
+     * @returns The rotation's origin
+     * @since 4.10
+     * @see setRotationOrigin()
+     **/
+    QVector3D rotationOrigin() const;
+    /**
+     * Sets the rotation axis.
+     * Set a component to 1.0 to rotate around this axis and to 0.0 to disable rotation around the
+     * axis.
+     * @param axis A vector holding information on which axis to rotate
+     * @since 4.10
+     * @see rotationAxis()
+     **/
+    void setRotationAxis(const QVector3D &axis);
+    /**
+     * Sets the rotation axis.
+     * Overloaded method for convenience.
+     * @param axis The axis around which should be rotated.
+     * @since 4.10
+     * @see rotationAxis()
+     **/
+    void setRotationAxis(Qt::Axis axis);
+    /**
+     * The current rotation axis.
+     * By default the rotation is (0/0/1) which means a rotation around the z axis.
+     * @returns The current rotation axis.
+     * @since 4.10
+     * @see setRotationAxis
+     **/
+    QVector3D rotationAxis() const;
+
+protected:
+    PaintData();
+    PaintData(const PaintData &other);
+
+private:
+    PaintDataPrivate * const d;
+};
+
+class KWIN_EXPORT WindowPaintData : public PaintData
 {
 public:
     WindowPaintData(EffectWindow* w);
+    WindowPaintData(const WindowPaintData &other);
+    virtual ~WindowPaintData();
+    /**
+     * Scales the window by @p scale factor.
+     * Multiplies all three components by the given factor.
+     * @since 4.10
+     **/
+    WindowPaintData& operator*=(qreal scale);
+    /**
+     * Scales the window by @p scale factor.
+     * Performs a component wise multiplication on x and y components.
+     * @since 4.10
+     **/
+    WindowPaintData& operator*=(const QVector2D &scale);
+    /**
+     * Scales the window by @p scale factor.
+     * Performs a component wise multiplication.
+     * @since 4.10
+     **/
+    WindowPaintData& operator*=(const QVector3D &scale);
+    /**
+     * Translates the window by the given @p translation and returns a reference to the ScreenPaintData.
+     * @since 4.10
+     **/
+    WindowPaintData& operator+=(const QPointF &translation);
+    /**
+     * Translates the window by the given @p translation and returns a reference to the ScreenPaintData.
+     * Overloaded method for convenience.
+     * @since 4.10
+     **/
+    WindowPaintData& operator+=(const QPoint &translation);
+    /**
+     * Translates the window by the given @p translation and returns a reference to the ScreenPaintData.
+     * Overloaded method for convenience.
+     * @since 4.10
+     **/
+    WindowPaintData& operator+=(const QVector2D &translation);
+    /**
+     * Translates the window by the given @p translation and returns a reference to the ScreenPaintData.
+     * Overloaded method for convenience.
+     * @since 4.10
+     **/
+    WindowPaintData& operator+=(const QVector3D &translation);
     /**
      * Window opacity, in range 0 = transparent to 1 = fully opaque
-     * Opacity for contents is opacity*contents_opacity, the same
-     * way for decoration.
+     * Opacity for decoration is opacity*decorationOpacity
+     * @see decorationOpacity
+     * @see setOpacity
+     * @see setDecorationOpacity
+     * @since 4.10
      */
-    double opacity;
-    double contents_opacity;
-    double decoration_opacity;
-    double xScale;
-    double yScale;
-    double zScale;
-    int xTranslate;
-    int yTranslate;
-    double zTranslate;
+    qreal opacity() const;
+    qreal decorationOpacity() const;
+    /**
+     * Sets the window opacity to the new @p opacity.
+     * If you want to modify the existing opacity level consider using multiplyOpacity.
+     * @param opacity The new opacity level
+     * @since 4.10
+     **/
+    void setOpacity(qreal opacity);
+    void setDecorationOpacity(qreal opacity);
+    /**
+     * Multiplies the current opacity with the @p factor.
+     * @param factor Factor with which the opacity should be multiplied
+     * @return New opacity level
+     * @since 4.10
+     **/
+    qreal multiplyOpacity(qreal factor);
+    /**
+     * Multiplies the current decoration opacity with the @p factor.
+     * @param factor Factor with which the opacity should be multiplied
+     * @return New decoration opacity level
+     * @since 4.10
+     **/
+    qreal multiplyDecorationOpacity(qreal factor);
     /**
      * Saturation of the window, in range [0; 1]
      * 1 means that the window is unchanged, 0 means that it's completely
@@ -1652,33 +1899,100 @@ public:
      *  but not completely grey
      * Use EffectsHandler::saturationSupported() to find out whether saturation
      * is supported by the system, otherwise this value has no effect.
+     * @return The current saturation
+     * @see setSaturation()
+     * @since 4.10
      **/
-    double saturation;
+    qreal saturation() const;
+    /**
+     * Sets the window saturation level to @p saturation.
+     * If you want to modify the existing saturation level consider using multiplySaturation.
+     * @param saturation The new saturation level
+     * @since 4.10
+     **/
+    void setSaturation(qreal saturation) const;
+    /**
+     * Multiplies the current saturation with @p factor.
+     * @param factor with which the saturation should be multiplied
+     * @return New saturation level
+     * @since 4.10
+     **/
+    qreal multiplySaturation(qreal factor);
     /**
      * Brightness of the window, in range [0; 1]
      * 1 means that the window is unchanged, 0 means that it's completely
      * black. 0.5 would make it 50% darker than usual
      **/
-    double brightness;
+    qreal brightness() const;
+    /**
+     * Sets the window brightness level to @p brightness.
+     * If you want to modify the existing brightness level consider using multiplyBrightness.
+     * @param brightness The new brightness level
+     **/
+    void setBrightness(qreal brightness);
+    /**
+     * Multiplies the current brightness level with @p factor.
+     * @param factor with which the brightness should be multiplied.
+     * @return New brightness level
+     * @since 4.10
+     **/
+    qreal multiplyBrightness(qreal factor);
     WindowQuadList quads;
     /**
      * Shader to be used for rendering, if any.
      */
     GLShader* shader;
-    RotationData* rotation;
+private:
+    WindowPaintDataPrivate * const d;
 };
 
-class KWIN_EXPORT ScreenPaintData
+class KWIN_EXPORT ScreenPaintData : public PaintData
 {
 public:
     ScreenPaintData();
-    double xScale;
-    double yScale;
-    double zScale;
-    int xTranslate;
-    int yTranslate;
-    double zTranslate;
-    RotationData* rotation;
+    ScreenPaintData(const ScreenPaintData &other);
+    /**
+     * Scales the screen by @p scale factor.
+     * Multiplies all three components by the given factor.
+     * @since 4.10
+     **/
+    ScreenPaintData& operator*=(qreal scale);
+    /**
+     * Scales the screen by @p scale factor.
+     * Performs a component wise multiplication on x and y components.
+     * @since 4.10
+     **/
+    ScreenPaintData& operator*=(const QVector2D &scale);
+    /**
+     * Scales the screen by @p scale factor.
+     * Performs a component wise multiplication.
+     * @since 4.10
+     **/
+    ScreenPaintData& operator*=(const QVector3D &scale);
+    /**
+     * Translates the screen by the given @p translation and returns a reference to the ScreenPaintData.
+     * @since 4.10
+     **/
+    ScreenPaintData& operator+=(const QPointF &translation);
+    /**
+     * Translates the screen by the given @p translation and returns a reference to the ScreenPaintData.
+     * Overloaded method for convenience.
+     * @since 4.10
+     **/
+    ScreenPaintData& operator+=(const QPoint &translation);
+    /**
+     * Translates the screen by the given @p translation and returns a reference to the ScreenPaintData.
+     * Overloaded method for convenience.
+     * @since 4.10
+     **/
+    ScreenPaintData& operator+=(const QVector2D &translation);
+    /**
+     * Translates the screen by the given @p translation and returns a reference to the ScreenPaintData.
+     * Overloaded method for convenience.
+     * @since 4.10
+     **/
+    ScreenPaintData& operator+=(const QVector3D &translation);
+    ScreenPaintData& operator=(const ScreenPaintData &rhs);
 };
 
 class KWIN_EXPORT ScreenPrePaintData
@@ -1686,22 +2000,6 @@ class KWIN_EXPORT ScreenPrePaintData
 public:
     int mask;
     QRegion paint;
-};
-
-class KWIN_EXPORT RotationData
-{
-public:
-    RotationData();
-    enum RotationAxis {
-        XAxis,
-        YAxis,
-        ZAxis
-    };
-    RotationAxis axis;
-    float angle;
-    float xRotationPoint;
-    float yRotationPoint;
-    float zRotationPoint;
 };
 
 /**

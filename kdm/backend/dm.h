@@ -473,7 +473,7 @@ extern GTalk mstrtalk, grttalk;
 extern GProc grtproc;
 void openGreeter(void);
 int closeGreeter(int force);
-int ctrlGreeterWait(int wreply);
+int ctrlGreeterWait(int wreply, time_t *startTime);
 void prepareErrorGreet(void);
 void finishGreet(void);
 char *conv_interact(int what, const char *prompt);
@@ -566,12 +566,15 @@ void *Calloc(size_t nmemb, size_t size);
 void *Malloc(size_t size);
 void *Realloc(void *ptr, size_t size);
 void wipeStr(char *str);
+void strCat(char **bp, const char *str);
+void strCatL(char **bp, const char *str, int max);
 int strCmp(const char *s1, const char *s2);
 #ifndef HAVE_STRNLEN
 int strnlen(const char *s, int max);
 #endif
 int strNDup(char **dst, const char *src, int len);
 int strDup(char **dst, const char *src);
+char *replaceInString(const char *str, const char *before, const char *after);
 int arrLen(char **arr);
 void freeStrArr(char **arr);
 char **initStrArr(char **arr);
@@ -580,6 +583,7 @@ char **xCopyStrArr(int rn, char **arr);
 int reStrN(char **dst, const char *src, int len);
 int reStr(char **dst, const char *src);
 int strApp(char **dst, ...);
+char **extStrArr(char **arr, char ***strp);
 char **addStrArr(char **arr, const char *str, int len);
 char **parseArgs(char **argv, const char *string);
 /* End note */
@@ -670,7 +674,7 @@ ARRAY8Ptr indirectChoice(ARRAY8Ptr clientAddress, ARRAY8Ptr clientPort, CARD16 c
 int checkIndirectChoice(ARRAY8Ptr clientAddress, ARRAY8Ptr clientPort, CARD16 connectionType);
 void registerIndirectChoice(ARRAY8Ptr clientAddress, ARRAY8Ptr clientPort, CARD16 connectionType,
                             ARRAY8Ptr choice);
-int doChoose(void);
+int doChoose(time_t *startTime);
 
 /* socket.c or streams.c */
 void updateListenSockets(void);

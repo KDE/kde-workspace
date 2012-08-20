@@ -20,6 +20,7 @@
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.qtextracomponents 0.1
 
 Item {
     id: main
@@ -27,13 +28,19 @@ Item {
     //this is used to perfectly align the filter field and delegates
     property int cellWidth: theme.defaultFont.mSize.width * 20
 
-    property int minimumWidth: cellWidth + (widgetExplorer.orientation == Qt.Horizontal ? 0 : scrollBar.width)
+    property int minimumWidth: cellWidth + (
+        widgetExplorer.orientation == Qt.Horizontal
+        ? 0
+        : (scrollBar.width + 4 * 2) // 4 * 2 == left and right margins
+        )
     property int minimumHeight: topBar.height + list.delegateHeight + (widgetExplorer.orientation == Qt.Horizontal ? scrollBar.height : 0) + 4
 
+    property Item getWidgetsButton
+    property Item categoryButton
 
     PlasmaComponents.ContextMenu {
         id: categoriesDialog
-        visualParent: topBar.categoryButton
+        visualParent: main.categoryButton
     }
     Repeater {
         parent: categoriesDialog
@@ -42,10 +49,13 @@ Item {
             text: display
             separator: model["separator"]
             onClicked: {
+                list.contentX = 0
+                list.contentY = 0
                 var item = widgetExplorer.filterModel.get(index)
 
                 widgetExplorer.widgetsModel.filterType = item.filterType
                 widgetExplorer.widgetsModel.filterQuery = item.filterData
+                main.categoryButton.text = item.display
             }
             Component.onCompleted: {
                 parent = categoriesDialog
@@ -55,7 +65,7 @@ Item {
 
     PlasmaComponents.ContextMenu {
         id: getWidgetsDialog
-        visualParent: topBar.getWidgetsButton
+        visualParent: main.getWidgetsButton
     }
     Repeater {
         parent: getWidgetsDialog
@@ -76,14 +86,18 @@ Item {
         property Item appletDelegate
 
         Component.onCompleted: {
-            tooltipDialog.setAttribute(Qt.WA_X11NetWmWindowTypeDock, true)
-            tooltipDialog.windowFlags |= Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
+            tooltipDialog.setAttribute(Qt.WA_X11NetWmWindowTypeToolTip, true)
+            tooltipDialog.windowFlags = Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
         }
 
         onAppletDelegateChanged: {
             if (!appletDelegate) {
                 toolTipHideTimer.restart()
                 toolTipShowTimer.running = false
+            } else if (tooltipDialog.visible) {
+                var point = main.tooltipPosition()
+                tooltipDialog.x = point.x
+                tooltipDialog.y = point.y
             } else {
                 toolTipShowTimer.restart()
                 toolTipHideTimer.running = false
@@ -104,7 +118,7 @@ Item {
         interval: 500
         repeat: false
         onTriggered: {
-            var point = tooltipDialog.popupPosition(tooltipDialog.appletDelegate)
+            var point = main.tooltipPosition()
             tooltipDialog.x = point.x
             tooltipDialog.y = point.y
             tooltipDialog.visible = true
@@ -116,11 +130,13 @@ Item {
         repeat: false
         onTriggered: tooltipDialog.visible = false
     }
+    function tooltipPosition() {
+        return widgetExplorer.tooltipPosition(tooltipDialog.appletDelegate, tooltipDialog.width, tooltipDialog.height);
+    }
 
     Loader {
         id: topBar
         property Item categoryButton
-        property Item getWidgetsButton
 
         sourceComponent: (widgetExplorer.orientation == Qt.Horizontal) ? horizontalTopBarComponent : verticalTopBarComponent
         height: item.height + 2
@@ -129,7 +145,8 @@ Item {
             left: parent.left
             right: parent.right
 
-            margins: 4
+            topMargin: widgetExplorer.orientation == Qt.Horizontal ? 4 : 0
+            leftMargin: 4
         }
     }
 
@@ -153,12 +170,16 @@ Item {
                     width: list.width / Math.floor(list.width / cellWidth) - 4
                     clearButtonShown: true
                     placeholderText: i18n("Enter search term...")
-                    onTextChanged: widgetExplorer.widgetsModel.searchTerm = text
+                    onTextChanged: {
+                        list.contentX = 0
+                        list.contentY = 0
+                        widgetExplorer.widgetsModel.searchTerm = text
+                    }
                     Component.onCompleted: forceActiveFocus()
                 }
                 PlasmaComponents.Button {
                     id: categoryButton
-                    text: "Categories"
+                    text: i18n("Categories")
                     onClicked: categoriesDialog.open()
                 }
             }
@@ -188,8 +209,8 @@ Item {
                 }
             }
             Component.onCompleted: {
-                topBar.categoryButton = categoryButton
-                topBar.getWidgetsButton = getWidgetsButton
+                main.getWidgetsButton = getWidgetsButton
+                main.categoryButton = categoryButton
             }
         }
     }
@@ -215,18 +236,107 @@ Item {
                 }
                 clearButtonShown: true
                 placeholderText: i18n("Enter search term...")
-                onTextChanged: widgetExplorer.widgetsModel.searchTerm = text
+                onTextChanged: {
+                    list.contentX = 0
+                    list.contentY = 0
+                    widgetExplorer.widgetsModel.searchTerm = text
+                }
                 Component.onCompleted: forceActiveFocus()
             }
             PlasmaComponents.Button {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
                 id: categoryButton
-                text: "Categories"
+                text: i18n("Categories")
                 onClicked: categoriesDialog.open()
             }
+            Component.onCompleted: {
+                main.categoryButton = categoryButton
+            }
+        }
+    }
 
+    MouseEventListener {
+        id: listParent
+        anchors {
+            top: topBar.bottom
+            left: parent.left
+            right: widgetExplorer.orientation == Qt.Horizontal
+                ? parent.right
+                : (scrollBar.visible ? scrollBar.left : parent.right)
+            bottom: widgetExplorer.orientation == Qt.Horizontal ? scrollBar.top : bottomBar.top
+            leftMargin: 4
+            bottomMargin: 4
+        }
+        onWheelMoved: {
+            //use this only if the wheel orientation is vertical and the list orientation is horizontal, otherwise will be the list itself managing the wheel
+            if (wheel.orientation == Qt.Vertical && list.orientation == ListView.Horizontal) {
+                var delta = wheel.delta > 0 ? 20 : -20
+                list.contentX = Math.min(Math.max(0, list.contentWidth - list.width),
+                                         Math.max(0, list.contentX - delta))
+            }
+        }
+        ListView {
+            id: list
 
+            property int delegateWidth: (widgetExplorer.orientation == Qt.Horizontal) ? (list.width / Math.floor(list.width / cellWidth)) : list.width
+            property int delegateHeight: theme.defaultFont.mSize.height * 7 - 4
+
+            anchors.fill: parent
+
+            orientation: widgetExplorer.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.vertical
+            snapMode: ListView.SnapToItem
+            model: widgetExplorer.widgetsModel
+
+            clip: widgetExplorer.orientation == Qt.Vertical
+
+            delegate: AppletDelegate {}
+        }
+
+    }
+    PlasmaComponents.ScrollBar {
+            id: scrollBar
+            orientation: widgetExplorer.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.Vertical
+            anchors {
+                top: widgetExplorer.orientation == Qt.Horizontal ? undefined : listParent.top
+                bottom: widgetExplorer.orientation == Qt.Horizontal ? parent.bottom : bottomBar.top
+                left: widgetExplorer.orientation == Qt.Horizontal ? parent.left : undefined
+                right: parent.right
+            }
+            flickableItem: list
+        }
+
+    Loader {
+        id: bottomBar
+
+        sourceComponent: (widgetExplorer.orientation == Qt.Horizontal) ? undefined : verticalBottomBarComponent
+        height: item.height
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: 4
+        }
+    }
+
+    Component {
+        id: verticalBottomBarComponent
+        Column {
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+
+            spacing: 4
 
             PlasmaComponents.Button {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
                 id: getWidgetsButton
                 iconSource: "get-hot-new-stuff"
                 text: i18n("Get new widgets")
@@ -236,6 +346,10 @@ Item {
             Repeater {
                 model: widgetExplorer.extraActions.length
                 PlasmaComponents.Button {
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
                     iconSource: widgetExplorer.extraActions[modelData].icon
                     text: widgetExplorer.extraActions[modelData].text
                     onClicked: {
@@ -245,43 +359,8 @@ Item {
             }
 
             Component.onCompleted: {
-                topBar.categoryButton = categoryButton
-                topBar.getWidgetsButton = getWidgetsButton
+                main.getWidgetsButton = getWidgetsButton
             }
         }
-    }
-
-    ListView {
-        id: list
-
-        property int delegateWidth: (widgetExplorer.orientation == Qt.Horizontal) ? (list.width / Math.floor(list.width / cellWidth)) : cellWidth
-        property int delegateHeight: theme.defaultFont.mSize.height * 7 - 4
-
-        anchors {
-            top: topBar.bottom
-            left: parent.left
-            right: widgetExplorer.orientation == Qt.Horizontal ? parent.right : scrollBar.left
-            bottom: widgetExplorer.orientation == Qt.Horizontal ? scrollBar.top : parent.bottom
-            leftMargin: 4
-            rightMargin: 4
-            bottomMargin: 4
-        }
-
-        orientation: widgetExplorer.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.vertical
-        snapMode: ListView.SnapToItem
-        model: widgetExplorer.widgetsModel
-
-        delegate: AppletDelegate {}
-    }
-    PlasmaComponents.ScrollBar {
-        id: scrollBar
-        orientation: widgetExplorer.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.Vertical
-        anchors {
-            top: widgetExplorer.orientation == Qt.Horizontal ? undefined : list.top
-            bottom: parent.bottom
-            left: widgetExplorer.orientation == Qt.Horizontal ? parent.left : undefined
-            right: parent.right
-        }
-        flickableItem: list
     }
 }

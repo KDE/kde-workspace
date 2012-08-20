@@ -46,9 +46,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <KDE/KGlobalSettings>
 #include "outline.h"
-#ifdef KWIN_BUILD_TILING
-#include "tiling/tiling.h"
-#endif
 
 namespace KWin
 {
@@ -67,7 +64,9 @@ void Workspace::desktopResized()
 {
     QRect geom;
     for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
-        geom |= QApplication::desktop()->screenGeometry(i);
+        //do NOT use - QApplication::desktop()->screenGeometry(i) there could be a virtual geometry
+        // see bug #302783
+        geom |= QApplication::desktop()->screen(i)->geometry();
     }
     NETSize desktop_geometry;
     desktop_geometry.width = geom.width();
@@ -2030,9 +2029,6 @@ void Client::move(int x, int y, ForceGeometry_t force)
     workspace()->checkActiveScreen(this);
     workspace()->updateStackingOrder();
     workspace()->checkUnredirect();
-#ifdef KWIN_BUILD_TILING
-    workspace()->tiling()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
-#endif
     // client itself is not damaged
     const QRect deco_rect = visibleRect();
     addLayerRepaint(deco_rect_before_block);
@@ -2345,7 +2341,9 @@ void Client::setFullScreen(bool set, bool user)
     set = rules()->checkFullScreen(set);
     setShade(ShadeNone);
     bool was_fs = isFullScreen();
-    if (!was_fs)
+    if (was_fs)
+        workspace()->updateFocusMousePosition(QCursor::pos());
+    else
         geom_fs_restore = geometry();
     fullscreen_mode = set ? FullScreenNormal : FullScreenNone;
     if (was_fs == isFullScreen())
@@ -2495,7 +2493,7 @@ void Client::positionGeometryTip()
         geometryTip->raise();
     }
 }
-static int s_lastScreen = 0;
+
 bool Client::startMoveResize()
 {
     assert(!moveResizeMode);
@@ -2535,9 +2533,12 @@ bool Client::startMoveResize()
     if (maximizeMode() != MaximizeRestore && (maximizeMode() != MaximizeFull || options->moveResizeMaximizedWindows())) {
         // allow moveResize, but unset maximization state in resize case
         if (mode != PositionCenter) { // means "isResize()" but moveResizeMode = true is set below
-            geom_restore = geometry(); // "restore" to current geometry
-            setMaximize(false, false);
-        }
+            if (maximizeMode() == MaximizeFull) { // partial is cond. reset in finishMoveResize
+                geom_restore = geometry(); // "restore" to current geometry
+                setMaximize(false, false);
+            }
+        } else if (quick_tile_mode != QuickTileNone) // no longer now - we move, resize is handled below
+            setQuickTileMode(QuickTileNone); // otherwise we mess every second tile, bug #303937
     } else if ((maximizeMode() == MaximizeFull && options->electricBorderMaximize()) ||
                (quick_tile_mode != QuickTileNone && isMovable() && mode == PositionCenter)) {
         // Exit quick tile mode when the user attempts to move a tiled window, cannot use isMove() yet
@@ -2555,7 +2556,7 @@ bool Client::startMoveResize()
     }
 
     s_haveResizeEffect = effects && static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::Resize);
-    s_lastScreen = moveResizeStartScreen = screen();
+    moveResizeStartScreen = screen();
     initialMoveResizeGeom = moveResizeGeom = geometry();
     checkUnrestrictedMoveResize();
     Notify::raise(isResize() ? Notify::ResizeStart : Notify::MoveStart);
@@ -2604,34 +2605,25 @@ static ElectricBorder electricBorderFromMode(QuickTileMode mode)
 
 void Client::finishMoveResize(bool cancel)
 {
-    // store for notification
-    bool wasResize = isResize();
-    bool wasMove = isMove();
-
+    const bool wasResize = isResize(); // store across leaveMoveResize
+    const bool wasMove = isMove();
     leaveMoveResize();
 
-#ifdef KWIN_BUILD_TILING
-    if (workspace()->tiling()->isEnabled()) {
-        if (wasResize)
-            workspace()->tiling()->notifyTilingWindowResizeDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
-        else if (wasMove)
-            workspace()->tiling()->notifyTilingWindowMoveDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
-    } else {
-        if (cancel)
-            setGeometry(initialMoveResizeGeom);
-        else
-            setGeometry(moveResizeGeom);
-        if (screen() != moveResizeStartScreen && maximizeMode() != MaximizeRestore)
-            checkWorkspacePosition();
-    }
-#else
     if (cancel)
         setGeometry(initialMoveResizeGeom);
-    else
+    else {
+        if (wasResize) {
+            const bool restoreH = maximizeMode() == MaximizeHorizontal &&
+                                    moveResizeGeom.width() != initialMoveResizeGeom.width();
+            const bool restoreV = maximizeMode() == MaximizeVertical &&
+                                    moveResizeGeom.height() != initialMoveResizeGeom.height();
+            if (restoreH || restoreV) // NOT setMaximize(restoreH, restoreV); !
+                setMaximize(false, false);
+        }
         setGeometry(moveResizeGeom);
-    Q_UNUSED(wasResize);
-    Q_UNUSED(wasMove);
-#endif
+    }
+    if (screen() != moveResizeStartScreen && maximizeMode() != MaximizeRestore)
+        checkWorkspacePosition();
 
     if (isElectricBorderMaximizing()) {
         setQuickTileMode(electricMode);
@@ -2646,7 +2638,14 @@ void Client::finishMoveResize(bool cancel)
         electricMaximizing = false;
         workspace()->outline()->hide();
     } else if (!cancel) {
-        geom_restore = geometry();
+        if (!(maximizeMode() & MaximizeHorizontal)) {
+            geom_restore.setX(geometry().x());
+            geom_restore.setWidth(geometry().width());
+        }
+        if (!(maximizeMode() & MaximizeVertical)) {
+            geom_restore.setY(geometry().y());
+            geom_restore.setHeight(geometry().height());
+        }
     }
 // FRAME    update();
 
@@ -2799,12 +2798,6 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
     bool update = false;
     if (isResize()) {
-#ifdef KWIN_BUILD_TILING
-        // query layout for supported resize mode
-        if (workspace()->tiling()->isEnabled()) {
-            mode = workspace()->tiling()->supportedTilingResizeMode(this, mode);
-        }
-#endif
         // first resize (without checking constrains), then snap, then check bounds, then check constrains
         QRect orig = initialMoveResizeGeom;
         Sizemode sizemode = SizemodeAny;
@@ -2838,22 +2831,10 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
             sizemode = SizemodeFixedW;
             break;
         case PositionCenter:
-#ifdef KWIN_BUILD_TILING
-            // exception for tiling
-            // Center means no resizing allowed
-            if (workspace()->tiling()->isEnabled()) {
-                finishMoveResize(false);
-                buttonDown = false;
-                return;
-            }
-#endif
         default:
             abort();
             break;
         }
-#ifdef KWIN_BUILD_TILING
-        workspace()->tiling()->notifyTilingWindowResize(this, moveResizeGeom, initialMoveResizeGeom);
-#endif
         // adjust new size to snap to other windows/borders
         moveResizeGeom = workspace()->adjustClientSize(this, moveResizeGeom, mode);
 
@@ -2978,13 +2959,13 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
             if (!unrestrictedMoveResize) {
                 // Make sure the titlebar isn't behind a restricted area.
-                const QRegion fullArea = workspace()->clientArea(ScreenArea, s_lastScreen, 0);   // On the screen
-                const QRegion moveArea = workspace()->restrictedMoveArea(desktop());   // Strut areas
+                const QRegion fullArea = workspace()->clientArea(FullArea, this);   // On the screen
+                const QRegion strut = workspace()->restrictedMoveArea(desktop());   // Strut areas
                 for (;;) {
                     QRegion titlebarRegion(moveResizeGeom.left(), moveResizeGeom.top(),
                                            moveResizeGeom.width(), frameTop);
                     titlebarRegion &= fullArea;
-                    titlebarRegion -= moveArea;   // Strut areas
+                    titlebarRegion -= strut;   // Strut areas
                     // Now we have a region of all the visible areas of the titlebar
                     // Count the visible pixels and check to see if it's enough
                     int visiblePixels = 0;
@@ -2994,6 +2975,31 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
                     if (visiblePixels >= titlebarArea)
                         break; // We have reached a valid position
 
+                    // (esp.) if there're more screens with different struts (panels) it the titlebar
+                    // will be movable outside the movearea (covering one of the panels) until it
+                    // crosses the panel "too much" (not enough visiblePixels) and then stucks because
+                    // it's usually only pushed by 1px to either direction
+                    // so we first check whether we intersect suc strut and move the window below it
+                    // immediately (it's still possible to hit the visiblePixels >= titlebarArea break
+                    // by moving the window slightly downwards, but it won't stuck)
+                    // see bug #274466
+                    // and bug #301805 for why we can't just match the titlearea against the screen
+                    if (QApplication::desktop()->screenCount() > 1) { // optimization
+                        // TODO: could be useful on partial screen struts (half-width panels etc.)
+                        int newTitleTop = -1;
+                        foreach (const QRect &r, strut.rects()) {
+                            if (r.top() == 0 && r.width() > r.height() && // "top panel"
+                                r.intersects(moveResizeGeom) && moveResizeGeom.top() < r.bottom()) {
+                                newTitleTop = r.bottom();
+                                break;
+                            }
+                        }
+                        if (newTitleTop > -1) {
+                            moveResizeGeom.moveTop(newTitleTop); // invalid position, possibly on screen change
+                            break;
+                        }
+                    }
+
                     // Move it (Favour vertically)
                     if (previousMoveResizeGeom.y() != moveResizeGeom.y())
                         moveResizeGeom.translate(0,
@@ -3001,27 +3007,14 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
                     else
                         moveResizeGeom.translate(previousMoveResizeGeom.x() > moveResizeGeom.x() ? 1 : -1,
                                                  0);
-                    if (moveResizeGeom == previousMoveResizeGeom)
+                    if (moveResizeGeom == previousMoveResizeGeom) {
                         break; // Prevent lockup
+                    }
                 }
             }
         }
         if (moveResizeGeom.topLeft() != previousMoveResizeGeom.topLeft())
             update = true;
-        else if (screen() != s_lastScreen) {  // invalid position on screen change?
-            s_lastScreen = screen();
-            const QRect area = workspace()->clientArea(WorkArea, s_lastScreen, desktop());
-            if (moveResizeGeom.bottom() > area.bottom())
-                moveResizeGeom.moveBottom(area.bottom());
-            if (moveResizeGeom.right() > area.right())
-                moveResizeGeom.moveRight(area.right());
-            if (moveResizeGeom.top() < area.top())
-                moveResizeGeom.moveTop(area.top());
-            if (moveResizeGeom.left() < area.left())
-                moveResizeGeom.moveLeft(area.left());
-            if (moveResizeGeom.topLeft() != previousMoveResizeGeom.topLeft())
-                update = true;
-        }
     } else
         abort();
 
@@ -3043,9 +3036,6 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
         performMoveResize();
 
     if (isMove()) {
-#ifdef KWIN_BUILD_TILING
-        workspace()->tiling()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
-#endif
 #ifdef KWIN_BUILD_SCREENEDGES
         workspace()->screenEdge()->check(globalPos, xTime());
 #endif
@@ -3054,13 +3044,8 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
 void Client::performMoveResize()
 {
-#ifdef KWIN_BUILD_TILING
-    if (!workspace()->tiling()->isEnabled())
-#endif
-    {
-        if (isMove() || (isResize() && !s_haveResizeEffect)) {
-            setGeometry(moveResizeGeom);
-        }
+    if (isMove() || (isResize() && !s_haveResizeEffect)) {
+        setGeometry(moveResizeGeom);
     }
 #ifdef HAVE_XSYNC
     if (isResize() && syncRequest.counter != None)

@@ -1,9 +1,9 @@
 project(lockout)
 
 install(DIRECTORY contents
-        DESTINATION ${DATA_INSTALL_DIR}/plasma/plasmoids/org.kde.lockout)
+        DESTINATION ${DATA_INSTALL_DIR}/plasma/plasmoids/lockout)
 install(FILES metadata.desktop
-        DESTINATION ${DATA_INSTALL_DIR}/plasma/plasmoids/org.kde.lockout)
+        DESTINATION ${DATA_INSTALL_DIR}/plasma/plasmoids/lockout)
 
 set(screensaver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/dbus/org.freedesktop.ScreenSaver.xml)
 QT4_ADD_DBUS_INTERFACE(lockout_SRCS ${screensaver_xml} screensaver_interface)

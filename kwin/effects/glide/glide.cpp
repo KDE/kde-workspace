@@ -98,11 +98,9 @@ void GlideEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowP
     InfoHash::const_iterator info = windows.constFind(w);
     if (info != windows.constEnd()) {
         const double progress = info->timeLine->currentValue();
-        RotationData rot;
-        rot.axis = RotationData::XAxis;
-        rot.angle = angle * (1 - progress);
-        data.rotation = &rot;
-        data.opacity *= progress;
+        data.setRotationAxis(Qt::XAxis);
+        data.setRotationAngle(angle * (1 - progress));
+        data.multiplyOpacity(progress);
         switch(effect) {
         default:
         case GlideInOut:
@@ -130,11 +128,8 @@ void GlideEffect::glideIn(EffectWindow* w, WindowPaintData& data)
     if (info == windows.constEnd())
         return;
     const double progress = info->timeLine->currentValue();
-    data.xScale *= progress;
-    data.yScale *= progress;
-    data.zScale *= progress;
-    data.xTranslate += int(w->width() / 2 * (1 - progress));
-    data.yTranslate += int(w->height() / 2 * (1 - progress));
+    data *= progress;
+    data.translate(int(w->width() / 2 * (1 - progress)), int(w->height() / 2 * (1 - progress)));
 }
 
 void GlideEffect::glideOut(EffectWindow* w, WindowPaintData& data)
@@ -143,11 +138,8 @@ void GlideEffect::glideOut(EffectWindow* w, WindowPaintData& data)
     if (info == windows.constEnd())
         return;
     const double progress = info->timeLine->currentValue();
-    data.xScale *= (2 - progress);
-    data.yScale *= (2 - progress);
-    data.zScale *= (2 - progress);
-    data.xTranslate -= int(w->width() / 2 * (1 - progress));
-    data.yTranslate -= int(w->height() / 2 * (1 - progress));
+    data *= (2 - progress);
+    data.translate(- int(w->width() / 2 * (1 - progress)), - int(w->height() / 2 * (1 - progress)));
 }
 
 void GlideEffect::postPaintWindow(EffectWindow* w)

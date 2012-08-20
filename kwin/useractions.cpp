@@ -34,11 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "workspace.h"
 #include "effects.h"
-#ifdef KWIN_BUILD_TILING
-#include "tiling/tile.h"
-#include "tiling/tilinglayout.h"
-#include "tiling/tiling.h"
-#endif
 
 #ifdef KWIN_BUILD_ACTIVITIES
 #include <KActivities/Info>
@@ -197,21 +192,6 @@ QMenu* Workspace::clientPopup()
             popup->addSeparator();
         }
 
-        // create it anyway
-        mTilingStateOpAction = popup->addAction(i18nc("When in tiling mode, toggle's the window's floating/tiled state", "&Float Window"));
-        // then hide it
-        mTilingStateOpAction->setVisible(false);
-#ifdef KWIN_BUILD_TILING
-        // actions for window tiling
-        if (m_tiling->isEnabled()) {
-            kaction = qobject_cast<KAction*>(keys->action("Toggle Floating"));
-            mTilingStateOpAction->setCheckable(true);
-            mTilingStateOpAction->setData(Options::ToggleClientTiledStateOp);
-            if (kaction != 0)
-                mTilingStateOpAction->setShortcut(kaction->globalShortcut().primary());
-        }
-#endif
-
         popup->addSeparator();
 
         action = popup->addMenu(advanced_popup);
@@ -234,6 +214,7 @@ void Workspace::discardPopup()
     delete popup;
     popup = NULL;
     desk_popup = NULL;
+    screen_popup = NULL;
     activity_popup = NULL;
     switch_to_tab_popup = NULL;
     add_tabs_popup = NULL;
@@ -271,6 +252,12 @@ void Workspace::clientPopupAboutToShow()
     } else {
         initDesktopPopup();
     }
+    if (numScreens() == 1 || (!active_popup_client->isMovable() && !active_popup_client->isMovableAcrossScreens())) {
+        delete screen_popup;
+        screen_popup = NULL;
+    } else {
+        initScreenPopup();
+    }
 #ifdef KWIN_BUILD_ACTIVITIES
     updateActivityList(true, false, "showHideActivityMenu");
 #endif
@@ -289,18 +276,6 @@ void Workspace::clientPopupAboutToShow()
     mNoBorderOpAction->setChecked(active_popup_client->noBorder());
     mMinimizeOpAction->setEnabled(active_popup_client->isMinimizable());
     mCloseOpAction->setEnabled(active_popup_client->isCloseable());
-
-#ifdef KWIN_BUILD_TILING
-    if (m_tiling->isEnabled()) {
-        int desktop = active_popup_client->desktop();
-        if (m_tiling->tilingLayouts().value(desktop)) {
-            Tile *t = m_tiling->tilingLayouts()[desktop]->findTile(active_popup_client);
-            if (t)
-                mTilingStateOpAction->setChecked(t->floating());
-        }
-    }
-    mTilingStateOpAction->setVisible(m_tiling->isEnabled());
-#endif
 
     if (decorationSupportsTabbing()) {
         initTabbingPopups();
@@ -412,7 +387,7 @@ void Workspace::initTabbingPopups()
     }
 
     if (!add_tabs_popup) {
-        add_tabs_popup = new QMenu(i18n("Tab behind"), popup);
+        add_tabs_popup = new QMenu(i18n("Attach as tab to"), popup);
         add_tabs_popup->setFont(KGlobalSettings::menuFont());
         connect(add_tabs_popup, SIGNAL(triggered(QAction*)), SLOT(entabPopupClient(QAction*)));
         connect(add_tabs_popup, SIGNAL(aboutToShow()), SLOT(rebuildTabGroupPopup()));
@@ -437,6 +412,23 @@ void Workspace::initDesktopPopup()
     // set it as the first item
     popup->insertAction(mMinimizeOpAction, action);
     action->setText(i18n("Move To &Desktop"));
+}
+
+void Workspace::initScreenPopup()
+{
+    if (screen_popup) {
+        return;
+    }
+
+    screen_popup = new QMenu(popup);
+    screen_popup->setFont(KGlobalSettings::menuFont());
+    connect(screen_popup, SIGNAL(triggered(QAction*)), SLOT(slotSendToScreen(QAction*)));
+    connect(screen_popup, SIGNAL(aboutToShow()), SLOT(screenPopupAboutToShow()));
+
+    QAction *action = screen_popup->menuAction();
+    // set it as the first item after desktop
+    popup->insertAction(activity_popup ? activity_popup->menuAction() : mMinimizeOpAction, action);
+    action->setText(i18n("Move To &Screen"));
 }
 
 /*!
@@ -507,6 +499,33 @@ void Workspace::desktopPopupAboutToShow()
 }
 
 /*!
+  Adjusts the screen popup to the current values and the location of
+  the popup client.
+ */
+void Workspace::screenPopupAboutToShow()
+{
+    if (!screen_popup) {
+        return;
+    }
+
+    screen_popup->clear();
+    QActionGroup *group = new QActionGroup(screen_popup);
+
+    for (int i = 0; i<numScreens(); ++i) {
+        // TODO: retrieve the screen name?
+        // assumption: there are not more than 9 screens attached.
+        QAction *action = screen_popup->addAction(i18nc("@item:inmenu List of all Screens to send a window to",
+                                                        "Screen &%1", (i+1)));
+        action->setData(i);
+        action->setCheckable(true);
+        if (active_popup_client && i == active_popup_client->screen()) {
+            action->setChecked(true);
+        }
+        group->addAction(action);
+    }
+}
+
+/*!
   Adjusts the activity popup to the current values and the location of
   the popup client.
  */
@@ -569,11 +588,6 @@ void Workspace::initShortcuts()
 #ifdef KWIN_BUILD_TABBOX
     if (tab_box) {
         tab_box->initShortcuts(actionCollection);
-    }
-#endif
-#ifdef KWIN_BUILD_TILING
-    if (m_tiling) {
-        m_tiling->initShortcuts(actionCollection);
     }
 #endif
     discardPopup(); // so that it's recreated next time
@@ -673,16 +687,6 @@ void Workspace::performWindowOperation(Client* c, Options::WindowOperation op)
 {
     if (!c)
         return;
-#ifdef KWIN_BUILD_TILING
-    // Allows us to float a window when it is maximized, if it is tiled.
-    if (m_tiling->isEnabled()
-            && (op == Options::MaximizeOp
-                || op == Options::HMaximizeOp
-                || op == Options::VMaximizeOp
-                || op == Options::RestoreOp)) {
-        m_tiling->notifyTilingWindowMaximized(c, op);
-    }
-#endif
     if (op == Options::MoveOp || op == Options::UnrestrictedMoveOp)
         QCursor::setPos(c->geometry().center());
     if (op == Options::ResizeOp || op == Options::UnrestrictedResizeOp)
@@ -701,7 +705,7 @@ void Workspace::performWindowOperation(Client* c, Options::WindowOperation op)
         c->performMouseCommand(Options::MouseUnrestrictedResize, cursorPos());
         break;
     case Options::CloseOp:
-        c->closeWindow();
+        QMetaObject::invokeMethod(c, "closeWindow", Qt::QueuedConnection);
         break;
     case Options::MaximizeOp:
         c->maximize(c->maximizeMode() == Client::MaximizeFull
@@ -780,14 +784,7 @@ void Workspace::performWindowOperation(Client* c, Options::WindowOperation op)
         break;
     case Options::CloseTabGroupOp:
         c->tabGroup()->closeAll();
-    case Options::ToggleClientTiledStateOp: {
-#ifdef KWIN_BUILD_TILING
-        int desktop = c->desktop();
-        if (m_tiling->tilingLayouts().value(desktop)) {
-            m_tiling->tilingLayouts()[desktop]->toggleFloatTile(c);
-        }
-#endif
-    }
+        break;
     }
 }
 
@@ -1049,6 +1046,13 @@ QStringList Workspace::listOfEffects() const
     if (effects)
         listModules = static_cast<EffectsHandlerImpl*>(effects)->listOfEffects();
     return listModules;
+}
+
+QString Workspace::supportInformationForEffect(const QString& name) const
+{
+    if (effects)
+        return static_cast<EffectsHandlerImpl*>(effects)->supportInformation(name);
+    return QString();
 }
 
 void Workspace::slotActivateAttentionWindow()
@@ -1451,6 +1455,24 @@ void Workspace::slotSendToDesktop(QAction *action)
 }
 
 /*!
+  Sends the popup client to screen \a screen
+
+  Internal slot for the window operation menu
+ */
+void Workspace::slotSendToScreen(QAction *action)
+{
+    const int screen = action->data().toInt();
+    if (!active_popup_client) {
+        return;
+    }
+    if (screen >= numScreens()) {
+        return;
+    }
+
+    sendClientToScreen(active_popup_client, screen);
+}
+
+/*!
   Toggles whether the popup client is on the \a activity
 
   Internal slot for the window operation menu
@@ -1487,7 +1509,7 @@ void Workspace::switchWindow(Direction direction)
 
     ToplevelList clist = stackingOrder();
     for (ToplevelList::Iterator i = clist.begin(); i != clist.end(); ++i) {
-        Client *client = qobject_cast<Client*>(c);
+        Client *client = qobject_cast<Client*>(*i);
         if (!client) {
             continue;
         }

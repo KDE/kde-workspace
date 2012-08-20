@@ -36,6 +36,7 @@ Item {
     signal leftActionTriggered
 
     height: container.childrenRect.height + padding.margins.top + padding.margins.bottom
+    width: parent.width
 
     PlasmaCore.FrameSvgItem {
         id: padding
@@ -187,7 +188,7 @@ Item {
             subText: {
                 if (!model["Accessible"]) {
                     return i18n("Click to mount this device.")
-                } else if (model["Device Types"].indexOf("Optical Disk") != -1) {
+                } else if (model["Device Types"].indexOf("OpticalDisc") != -1) {
                     return i18n("Click to eject this disc.")
                 } else if (model["Removable"]) {
                     return i18n("Click to safely remove this device.")

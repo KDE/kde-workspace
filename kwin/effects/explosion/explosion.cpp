@@ -60,8 +60,11 @@ ExplosionEffect::~ExplosionEffect()
 
 bool ExplosionEffect::supported()
 {
-    return GLPlatform::instance()->supports(GLSL) &&
-           (effects->compositingType() == OpenGLCompositing);
+    if (effects->compositingType() == OpenGLCompositing) {
+        return ShaderManager::instance()->isValid();
+    } else {
+        return false;
+    }
 }
 
 bool ExplosionEffect::loadData()
@@ -141,11 +144,10 @@ void ExplosionEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
     if (useshader) {
         double maxscaleadd = 1.5f;
         double scale = 1 + maxscaleadd * mWindows[w];
-        data.xScale = scale;
-        data.yScale = scale;
-        data.xTranslate += int(w->width() / 2 * (1 - scale));
-        data.yTranslate += int(w->height() / 2 * (1 - scale));
-        data.opacity *= 0.99;  // Force blending
+        data.setXScale(scale);
+        data.setYScale(scale);
+        data.translate(int(w->width() / 2 * (1 - scale)), int(w->height() / 2 * (1 - scale)));
+        data.multiplyOpacity(0.99);  // Force blending
         ShaderManager *manager = ShaderManager::instance();
         GLShader *shader = manager->pushShader(ShaderManager::GenericShader);
         QMatrix4x4 screenTransformation = shader->getUniformMatrix4x4("screenTransformation");

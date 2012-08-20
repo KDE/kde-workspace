@@ -57,6 +57,7 @@ private slots:
     void updateEnableposition();
     void updateEnablesize();
     void updateEnabledesktop();
+    void updateEnableactivity();
     void updateEnablemaximizehoriz();
     void updateEnablemaximizevert();
     void updateEnableminimize();
@@ -77,7 +78,6 @@ private slots:
     void updateEnableautogroupid();
     void updateEnableopacityactive();
     void updateEnableopacityinactive();
-    void updateEnabletilingoption();
     // workarounds tab
     void updateEnablefsplevel();
     void updateEnabletype();
@@ -93,7 +93,8 @@ private slots:
 private:
     int desktopToCombo(int d) const;
     int comboToDesktop(int val) const;
-    int tilingToCombo(int t) const;
+    int activityToCombo(QString d) const;
+    QString comboToActivity(int val) const;
     int comboToTiling(int val) const;
     void prefillUnusedValues(const KWindowInfo& info);
     DetectDialog* detect_dlg;

@@ -16,13 +16,13 @@
  *
  */
 
-#ifndef __menufile_h__
-#define __menufile_h__
+#ifndef menufile_h
+#define menufile_h
 
 #include <QtXml/qdom.h>
 
-//Added by qt3to4:
 #include <QList>
+#include <QStringList>
 
 class MenuFile
 {
@@ -35,7 +35,7 @@ public:
    void create();
    QString error() const { return m_error; } // Returns the last error message
 
-    void restoreMenuSystem(const QString &);
+   void restoreMenuSystem(const QString &);
 
    enum ActionType {
        ADD_ENTRY = 0,
@@ -78,7 +78,7 @@ public:
    /**
     * Returns whether the stack contains any actions
     */
-   bool dirty();
+   bool dirty() const;
 
    void addEntry(const QString &menuName, const QString &menuId);
    void removeEntry(const QString &menuName, const QString &menuId);
