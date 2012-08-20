@@ -21,6 +21,7 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1
 import org.kde.kscreenlocker 1.0
+import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: lockScreen
@@ -37,45 +38,45 @@ Item {
         anchors.fill: parent
         source: theme.wallpaperPathForSize(parent.width, parent.height)
     }
-
+PlasmaComponents.TextField {z:9999}
     PlasmaCore.FrameSvgItem {
         id: dialog
         anchors.centerIn: parent
         imagePath: "widgets/background"
         width: unlockUI.implicitWidth * 1.5 + margins.left + margins.right
         height: unlockUI.implicitHeight * 1.5 + margins.top + margins.bottom
-    }
 
-    Greeter {
-        id: unlockUI
-        y: parent.height/2
-        x: parent.width/2 - implicitWidth/2
-        focus: true
-        switchUserEnabled: userSessionsUI.switchUserSupported
+        Greeter {
+            id: unlockUI
+            anchors.centerIn: parent
+            focus: true
+            switchUserEnabled: userSessionsUI.switchUserSupported
 
-        Connections {
-            onAccepted: lockScreen.unlockRequested()
-            onSwitchUserClicked: {
-                // TODO: load if not loaded
-                lockScreen.state = "SESSION"
+            Connections {
+                onAccepted: lockScreen.unlockRequested()
+                onSwitchUserClicked: {
+                    // TODO: load if not loaded
+                    lockScreen.state = "SESSION"
+                }
             }
         }
-    }
 
-    // TODO: loader
-    SessionSwitching {
-        id: userSessionsUI
-        anchors {
-            fill: dialog
-            leftMargin: dialog.margins.left
-            rightMargin: dialog.margins.right
-            topMargin: dialog.margins.top
-            bottomMargin: dialog.margins.bottom
-        }
-        Connections {
-            onCancel: lockScreen.state = "UNLOCK"
-            onActivateSession: lockScreen.state = "UNLOCK"
-            onStartNewSession: lockScreen.state = "UNLOCK"
+
+        // TODO: loader
+        SessionSwitching {
+            id: userSessionsUI
+            anchors {
+                fill: dialog
+                leftMargin: dialog.margins.left
+                rightMargin: dialog.margins.right
+                topMargin: dialog.margins.top
+                bottomMargin: dialog.margins.bottom
+            }
+            Connections {
+                onCancel: lockScreen.state = "UNLOCK"
+                onActivateSession: lockScreen.state = "UNLOCK"
+                onStartNewSession: lockScreen.state = "UNLOCK"
+            }
         }
     }
 

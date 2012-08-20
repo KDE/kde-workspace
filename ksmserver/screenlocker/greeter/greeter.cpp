@@ -84,12 +84,16 @@ void GreeterItem::init()
     widget->setPalette(p);
 #endif
     m_proxy->setWidget(widget);
+    m_proxy->setFlag(QGraphicsItem::ItemIsFocusable);
     setFlag(QGraphicsItem::ItemIsFocusable);
+    m_proxy->setFocus();
     QGraphicsItem::setFocus();
     connect(m_unlocker, SIGNAL(greeterFailed()), this, SIGNAL(greeterFailed()));
     connect(m_unlocker, SIGNAL(greeterReady()), this, SIGNAL(greeterReady()));
     connect(m_unlocker, SIGNAL(greeterMessage(QString)), this, SIGNAL(greeterMessage(QString)));
     connect(m_unlocker, SIGNAL(greeterAccepted()), this, SIGNAL(greeterAccepted()));
+    setWidth(m_proxy->size().width());
+    setHeight(m_proxy->size().width());
 }
 
 void GreeterItem::verify()
@@ -120,6 +124,9 @@ KeyboardItem::KeyboardItem(QDeclarativeItem *parent)
         kDebug() << "can't load keyboard layout widget library";
     }
     m_proxy->setWidget(m_widget);
+
+    setWidth(m_proxy->size().width());
+    setHeight(m_proxy->size().width());
 }
 
 KeyboardItem::~KeyboardItem()

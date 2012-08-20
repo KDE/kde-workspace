@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.extras 0.1 as PlasmaExtras
+import org.kde.kscreenlocker 1.0
 
 Item {
     property alias switchUserSupported: sessions.switchUserSupported
@@ -28,9 +30,7 @@ Item {
     Sessions {
         id: sessions
     }
-    ListView {
-        model: sessions.model
-        id: userSessionsView
+    PlasmaExtras.ScrollArea {
         anchors {
             left: parent.left
             right: parent.right
@@ -39,25 +39,32 @@ Item {
         }
         height: parent.height - explainText.implicitHeight - buttonRow.height - 10
 
-        delegate: PlasmaComponents.ListItem {
-            content: PlasmaComponents.Label {
-                text: session + "(" + location + ")"
-            }
-        }
-        highlight: PlasmaComponents.Highlight {
-            hover: true
-            width: parent.width
-        }
-        focus: true
-        MouseArea {
+        ListView {
+            model: sessions.model
+            id: userSessionsView
             anchors.fill: parent
-            onClicked: userSessionsView.currentIndex = userSessionsView.indexAt(mouse.x, mouse.y)
-            onDoubleClicked: {
-                sessions.activateSession(userSessionsView.indexAt(mouse.x, mouse.y));
-                activateSession();
+
+            delegate: PlasmaComponents.ListItem {
+                content: PlasmaComponents.Label {
+                    text: session + "(" + location + ")"
+                }
+            }
+            highlight: PlasmaComponents.Highlight {
+                hover: true
+                width: parent.width
+            }
+            focus: true
+            MouseArea {
+                anchors.fill: parent
+                onClicked: userSessionsView.currentIndex = userSessionsView.indexAt(mouse.x, mouse.y)
+                onDoubleClicked: {
+                    sessions.activateSession(userSessionsView.indexAt(mouse.x, mouse.y));
+                    activateSession();
+                }
             }
         }
     }
+
     PlasmaComponents.Label {
         id: explainText
         text: i18n("The current session will be hidden " +
@@ -80,6 +87,7 @@ Item {
     PlasmaComponents.ButtonRow {
         id: buttonRow
         exclusive: false
+        spacing: theme.defaultFont.mSize.width / 2
 
         PlasmaComponents.Button {
             id: activateSession
