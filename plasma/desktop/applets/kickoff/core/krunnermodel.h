@@ -29,6 +29,8 @@
 
 namespace Kickoff {
 
+    KService::Ptr serviceForUrl(const KUrl & url);
+
 class KICKOFF_EXPORT KRunnerItemHandler : public UrlItemHandler {
 public:
     virtual bool openUrl(const KUrl& url);

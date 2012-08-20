@@ -95,7 +95,6 @@ PlasmaComponents.ListItem {
 
     PlasmaComponents.ContextMenu {
         id: contextMenu
-//         visualParent: listItem
     }
     /*
      * context menu items
@@ -103,15 +102,21 @@ PlasmaComponents.ListItem {
     PlasmaComponents.MenuItem {
         id: titleMenuItem
         text: titleElement.text
+        icon: decoration
+        font.bold: true
         checkable: false
     }
     PlasmaComponents.MenuItem {
-        id: separator
+        id: titleSeparator
+        separator: true
+    }
+    PlasmaComponents.MenuItem {
+        id: actionsSeparator
         separator: true
     }
     PlasmaComponents.MenuItem {
         id: addToFavorites
-        text: "Add to favorites"
+        text: "Add To Favorites"
         icon: QIcon("bookmark-new")
         onClicked: {
             listItem.ListView.view.favoritesModel.add(model["url"]);
@@ -119,7 +124,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: removeFromFavorites
-        text: "Remove from favorites"
+        text: "Remove From Favorites"
         icon: QIcon("list-remove")
         onClicked: {
             listItem.ListView.view.favoritesModel.remove(model["url"]);
@@ -161,13 +166,13 @@ PlasmaComponents.ListItem {
     DragArea {
         anchors.fill: parent
         supportedActions: Qt.MoveAction | Qt.LinkAction
+        delegateImage: decoration
             mimeData {
                 url: model["url"]
                 source: parent
                 text: index
             }
         MouseArea {
-            id: mousy
             anchors.fill: parent
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -178,11 +183,12 @@ PlasmaComponents.ListItem {
                 if (mouse.button == Qt.LeftButton)
                     activate();
                 else if (mouse.button == Qt.RightButton) {
+                    // don't show a context menu for container
                     if (hasModelChildren)
                         return;
 
                     contextMenu.addMenuItem(titleMenuItem)
-                    contextMenu.addMenuItem(separator)
+                    contextMenu.addMenuItem(titleSeparator)
 
                     if (listItem.ListView.view.favoritesModel.isFavorite(model["url"]))
                         contextMenu.addMenuItem(removeFromFavorites)
@@ -195,7 +201,7 @@ PlasmaComponents.ListItem {
                     }
 
                     if (root.state == "NORMAL") {
-                        contextMenu.addMenuItem(separator)
+                        contextMenu.addMenuItem(actionsSeparator)
                         if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
                             contextMenu.addMenuItem(sortFavoritesAscending)
                             contextMenu.addMenuItem(sortFavoritesDescending)
@@ -214,6 +220,12 @@ PlasmaComponents.ListItem {
         anchors.fill: parent
         onDrop: {
             listItem.ListView.view.model.dropMimeData(event.mimeData.text, event.mimeData.urls, index, 0);
+        }
+        onDragEnter: {
+            listItem.checked = true;
+        }
+        onDragLeave: {
+            listItem.checked = false;
         }
     }
 }

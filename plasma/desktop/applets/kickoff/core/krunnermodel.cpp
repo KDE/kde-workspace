@@ -89,7 +89,7 @@ Plasma::RunnerManager * runnerManager() {
     return _runnerManager;
 }
 
-KService::Ptr serviceForUrl(const KUrl & url)
+KService::Ptr Kickoff::serviceForUrl(const KUrl & url)
 {
     QString runner = url.host();
     QString id = url.path();
@@ -227,7 +227,7 @@ void KRunnerModel::matchesChanged(const QList< Plasma::QueryMatch > & m)
 
     while (matches.size()) {
         Plasma::QueryMatch match = matches.takeLast();
-
+        qDebug() << "matches " << QString("krunner://") + match.runner()->id() + "/" + match.id();
         appendRow(
             StandardItemFactory::createItem(
                 match.icon(),

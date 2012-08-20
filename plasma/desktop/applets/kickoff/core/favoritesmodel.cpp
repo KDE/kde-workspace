@@ -19,6 +19,7 @@
 
 //Own
 #include "favoritesmodel.h"
+#include "krunnermodel.h"
 
 // Qt
 #include <QHash>
@@ -165,11 +166,19 @@ FavoritesModel::~FavoritesModel()
 
 void FavoritesModel::add(const QString& url)
 {
-    Private::globalFavoriteList << url;
-    Private::globalFavoriteSet << url;
+    QString handledUrl;
+    KService::Ptr service = Kickoff::serviceForUrl(url);
+    if (service) {
+        handledUrl = service->entryPath();
+    } else {
+        handledUrl = url;
+    }
+
+    Private::globalFavoriteList << handledUrl;
+    Private::globalFavoriteSet << handledUrl;
 
     foreach (FavoritesModel* model, Private::models) {
-        model->d->addFavoriteItem(url);
+        model->d->addFavoriteItem(handledUrl);
     }
 
     // save after each add in case we crash
