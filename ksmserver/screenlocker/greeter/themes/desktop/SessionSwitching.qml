@@ -70,6 +70,7 @@ Item {
                     "Additionally, the KDE Panel and Desktop menus have " +
                     "actions for switching between sessions.",
                     7, 8)
+        wrapMode: Text.Wrap
         anchors {
             top: parent.top
             left: parent.left

@@ -48,7 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ScreenLocker
 {
 
-static const char *DEFAULT_MAIN_QML = "kscreenlocker/lockscreen.qml";
+static const char *DEFAULT_MAIN_QML = "desktop/lockscreen.qml";
 
 // App
 UnlockApp::UnlockApp()
@@ -83,9 +83,9 @@ void UnlockApp::initialize()
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
 
-    m_mainQmlPath = KStandardDirs::locate("data", KScreenSaverSettings::greeterQML());
+    m_mainQmlPath = KStandardDirs::locate("data", "ksmserver/screenlocker/" + KScreenSaverSettings::greeterQML());
     if (m_mainQmlPath.isEmpty()) {
-        m_mainQmlPath = KStandardDirs::locate("data", DEFAULT_MAIN_QML);
+        m_mainQmlPath = KStandardDirs::locate("data", QString("ksmserver/screenlocker/") + DEFAULT_MAIN_QML);
     }
 
     for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
@@ -141,7 +141,7 @@ void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
     // on error, if we did not load the default qml, try to do so now.
     if (status == QDeclarativeView::Error && !m_mainQmlPath.endsWith(DEFAULT_MAIN_QML)) {
         if (QDeclarativeView *view = qobject_cast<QDeclarativeView *>(sender())) {
-            m_mainQmlPath = KStandardDirs::locate("data", DEFAULT_MAIN_QML);
+            m_mainQmlPath = KStandardDirs::locate("data", QString("ksmserver/screenlocker/") + DEFAULT_MAIN_QML);
             view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         }
     }

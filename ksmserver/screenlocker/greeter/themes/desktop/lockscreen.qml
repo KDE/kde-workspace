@@ -41,7 +41,7 @@ Item {
     PlasmaCore.FrameSvgItem {
         id: dialog
         anchors.centerIn: parent
-        imagePath: "translucent/dialogs/background"
+        imagePath: "widgets/background"
         width: unlockUI.implicitWidth * 1.5 + margins.left + margins.right
         height: unlockUI.implicitHeight * 1.5 + margins.top + margins.bottom
     }
