@@ -38,27 +38,30 @@ Item {
         anchors.fill: parent
         source: theme.wallpaperPathForSize(parent.width, parent.height)
     }
-Text {
-    text: "AAAAAAAAAAAAAAAAA"
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            print("AAAAA")
-            print(theme.wallpaperPathForSize(parent.width, parent.height))
-            parent.text = theme.wallpaperPathForSize(parent.width, parent.height)
-        }
-    }
-}
+
     PlasmaCore.FrameSvgItem {
         id: dialog
         anchors.centerIn: parent
         imagePath: "widgets/background"
         width: unlockUI.implicitWidth * 1.5 + margins.left + margins.right
-        height: unlockUI.implicitHeight * 1.5 + margins.top + margins.bottom
+        height: userSessionsUI.visible ?
+                    userSessionsUI.implicitHeight + margins.top + margins.bottom
+                 : unlockUI.implicitHeight + margins.top + margins.bottom
 
+        Behavior on height {
+            NumberAnimation {
+                duration: 250
+            }
+        }
         Greeter {
             id: unlockUI
-            anchors.centerIn: parent
+            anchors {
+                fill: dialog
+                leftMargin: dialog.margins.left
+                rightMargin: dialog.margins.right
+                topMargin: dialog.margins.top
+                bottomMargin: dialog.margins.bottom
+            }
             focus: true
             switchUserEnabled: userSessionsUI.switchUserSupported
 

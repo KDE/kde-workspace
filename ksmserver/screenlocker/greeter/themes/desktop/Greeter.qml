@@ -36,21 +36,23 @@ Item {
 
     Column {
         id: layoutItem
+        anchors.centerIn: parent
+        spacing: theme.defaultFont.mSize.height
 
         PlasmaComponents.Label {
             id: message
             text: ""
-            anchors.horizontalCenter: lockMessage.horizontalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
             font.bold: true
         }
 
         Item {
             width: childrenRect.width
             height: childrenRect.height
+            anchors.horizontalCenter: parent.horizontalCenter
             PlasmaComponents.Label {
                 id: capsLockMessage
                 text: i18n("Warning: Caps Lock on")
-                anchors.horizontalCenter: lockMessage.horizontalCenter
                 visible: false
                 font.bold: true
             }
@@ -59,10 +61,11 @@ Item {
         PlasmaComponents.Label {
             id: lockMessage
             text: kscreenlocker_userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
-            anchors.horizontalCenter: layoutItem.horizontalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Row {
+            anchors.horizontalCenter: parent.horizontalCenter
             GreeterItem {
                 id: greeter
                 objectName: "greeter"
@@ -78,6 +81,7 @@ Item {
             id: buttonRow
             exclusive: false
             spacing: theme.defaultFont.mSize.width / 2
+            anchors.horizontalCenter: parent.horizontalCenter
 
             PlasmaComponents.Button {
                 id: switchUser
@@ -101,9 +105,6 @@ Item {
                 onClicked: canceled()
                 visible: false
             }
-
-            anchors.top: layoutItem.bottom
-            anchors.horizontalCenter: layoutItem.horizontalCenter
         }
     }
 
