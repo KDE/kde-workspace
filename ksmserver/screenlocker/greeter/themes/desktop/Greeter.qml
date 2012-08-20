@@ -44,12 +44,16 @@ Item {
             font.bold: true
         }
 
-        PlasmaComponents.Label {
-            id: capsLockMessage
-            text: i18n("Warning: Caps Lock on")
-            anchors.horizontalCenter: lockMessage.horizontalCenter
-            visible: false
-            font.bold: true
+        Item {
+            width: childrenRect.width
+            height: childrenRect.height
+            PlasmaComponents.Label {
+                id: capsLockMessage
+                text: i18n("Warning: Caps Lock on")
+                anchors.horizontalCenter: lockMessage.horizontalCenter
+                visible: false
+                font.bold: true
+            }
         }
 
         PlasmaComponents.Label {
@@ -62,7 +66,7 @@ Item {
             GreeterItem {
                 id: greeter
                 objectName: "greeter"
-            // anchors.fill: parent
+
                 Keys.onEnterPressed: verify()
                 Keys.onReturnPressed: verify()
             }

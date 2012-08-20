@@ -38,7 +38,17 @@ Item {
         anchors.fill: parent
         source: theme.wallpaperPathForSize(parent.width, parent.height)
     }
-
+Text {
+    text: "AAAAAAAAAAAAAAAAA"
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            print("AAAAA")
+            print(theme.wallpaperPathForSize(parent.width, parent.height))
+            parent.text = theme.wallpaperPathForSize(parent.width, parent.height)
+        }
+    }
+}
     PlasmaCore.FrameSvgItem {
         id: dialog
         anchors.centerIn: parent

@@ -93,7 +93,7 @@ void GreeterItem::init()
     connect(m_unlocker, SIGNAL(greeterMessage(QString)), this, SIGNAL(greeterMessage(QString)));
     connect(m_unlocker, SIGNAL(greeterAccepted()), this, SIGNAL(greeterAccepted()));
     setWidth(m_proxy->size().width());
-    setHeight(m_proxy->size().width());
+    setHeight(m_proxy->size().height());
 }
 
 void GreeterItem::verify()
@@ -126,7 +126,7 @@ KeyboardItem::KeyboardItem(QDeclarativeItem *parent)
     m_proxy->setWidget(m_widget);
 
     setWidth(m_proxy->size().width());
-    setHeight(m_proxy->size().width());
+    setHeight(m_proxy->size().height());
 }
 
 KeyboardItem::~KeyboardItem()
