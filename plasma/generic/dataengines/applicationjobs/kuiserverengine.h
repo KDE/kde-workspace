@@ -104,6 +104,7 @@ public:
     QDBusObjectPath objectPath() const;
 
     void requestStateChange(State state);
+    void requestInteraction();
 
 public Q_SLOTS:
     void finished();
@@ -112,6 +113,7 @@ Q_SIGNALS:
     void suspendRequested();
     void resumeRequested();
     void cancelRequested();
+    void interactionRequested();
 
 protected:
     void timerEvent(QTimerEvent *event);

@@ -85,6 +85,7 @@ class JobWidget : public QGraphicsWidget
         Plasma::Label *m_fileCountLabel;
         Plasma::Label *m_eta;
         Plasma::IconWidget *m_details;
+        Plasma::IconWidget *m_interactionButton;
         Plasma::SignalPlotter *m_plotter;
 
         QGraphicsGridLayout *m_layout;

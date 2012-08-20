@@ -88,6 +88,8 @@ void DBusJobProtocol::dataUpdated(const QString &source, const Plasma::DataEngin
                 this, SLOT(resume(QString)));
         connect(job, SIGNAL(stop(QString)),
                 this, SLOT(stop(QString)));
+        connect(job, SIGNAL(startInteraction(QString)),
+                this, SLOT(startInteraction(QString)));
         connect(job, SIGNAL(ready(Job*)),
                 this, SIGNAL(jobCreated(Job*)));
     }
@@ -173,6 +175,14 @@ void DBusJobProtocol::stop(const QString &source)
 {
     Plasma::Service *service = m_engine->serviceForSource(source);
     KConfigGroup op = service->operationDescription("stop");
+    KJob *job = service->startOperationCall(op);
+    connect(job, SIGNAL(finished(KJob*)), service, SLOT(deleteLater()));
+}
+
+void DBusJobProtocol::startInteraction(const QString& source)
+{
+    Plasma::Service *service = m_engine->serviceForSource(source);
+    KConfigGroup op = service->operationDescription("startInteraction");
     KJob *job = service->startOperationCall(op);
     connect(job, SIGNAL(finished(KJob*)), service, SLOT(deleteLater()));
 }

@@ -52,3 +52,9 @@ void DBusJob::stop()
     kDebug() << "cancel";
 }
 
+void DBusJob::startInteraction()
+{
+    emit startInteraction(m_source);
+    kDebug() << "startInteraction";
+}
+

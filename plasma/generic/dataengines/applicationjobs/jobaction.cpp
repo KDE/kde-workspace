@@ -42,6 +42,8 @@ void JobAction::start()
         m_jobView->requestStateChange(JobView::Stopped);
         //in case the app crashed and won't call terminate on the jobview.
         m_jobView->terminate(i18n("Job canceled by user."));
+    } else if (operationName() == "startInteraction") {
+        m_jobView->requestInteraction();
     }
 
     emitResult();

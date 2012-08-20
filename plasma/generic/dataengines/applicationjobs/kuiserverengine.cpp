@@ -307,6 +307,11 @@ void JobView::requestStateChange(State state)
     }
 }
 
+void JobView::requestInteraction()
+{
+    emit interactionRequested();
+}
+
 KuiserverEngine::KuiserverEngine(QObject* parent, const QVariantList& args)
     : Plasma::DataEngine(parent, args)
 {

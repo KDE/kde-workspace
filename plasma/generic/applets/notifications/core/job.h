@@ -135,6 +135,11 @@ public slots:
      * stop this job.
      */
     virtual void stop();
+    
+    /**
+     * request this job to start user interaction
+     */
+    virtual void startInteraction();
 
 signals:
     /**

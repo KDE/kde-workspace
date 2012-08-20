@@ -334,6 +334,11 @@ void Job::stop()
     kWarning() << "Stop is not implemented in this job provider.";
 }
 
+void Job::startInteraction()
+{
+    kWarning() << "startInteraction is not implemented in this job provider.";
+}
+
 void Job::show()
 {
     if (state() == Job::Running && !d->shown) {

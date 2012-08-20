@@ -24,6 +24,7 @@
 #include <QFont>
 #include <QAction>
 #include <QGraphicsGridLayout>
+#include <QGraphicsLinearLayout>
 #include <QLabel>
 
 #include <KIconLoader>
@@ -42,6 +43,12 @@
 #include <Plasma/ToolTipManager>
 
 static const int UPDATE_INTERVAL = 200;
+
+static void changeTextWithoutDecreasingWidth(Plasma::Label *label, const QString &text) {
+    qreal previousWidth = label->size().width();
+    label->setText(text);
+    label->setMinimumWidth(qMax<qreal>(previousWidth, label->size().width()));
+}
 
 JobWidget::JobWidget(Job *job, Plasma::ExtenderItem *parent)
     : QGraphicsWidget(parent),
@@ -77,6 +84,11 @@ JobWidget::JobWidget(Job *job, Plasma::ExtenderItem *parent)
     m_details->setSvg("widgets/action-overlays", "add-normal");
     m_details->setMaximumSize(KIconLoader::SizeSmallMedium, KIconLoader::SizeSmallMedium);
     m_details->setMinimumSize(KIconLoader::SizeSmallMedium, KIconLoader::SizeSmallMedium);
+    m_interactionButton = new Plasma::IconWidget(this);
+    m_interactionButton->setIcon("konversation");
+    m_interactionButton->setToolTip("Open dialog");
+    m_interactionButton->setMaximumSize(KIconLoader::SizeSmallMedium, KIconLoader::SizeSmallMedium);
+    m_interactionButton->setMinimumSize(KIconLoader::SizeSmallMedium, KIconLoader::SizeSmallMedium);
 
     m_totalBytesLabel->setVisible(false);
     m_dirCountLabel->setVisible(false);
@@ -98,6 +110,10 @@ JobWidget::JobWidget(Job *job, Plasma::ExtenderItem *parent)
     m_fileCountLabel->nativeWidget()->setWordWrap(false);
     m_totalBytesLabel->nativeWidget()->setWordWrap(false);
     m_eta->nativeWidget()->setWordWrap(false);
+    
+    QGraphicsLinearLayout *buttonsLayout = new QGraphicsLinearLayout(Qt::Horizontal);
+    buttonsLayout->addItem(m_interactionButton);
+    buttonsLayout->addItem(m_details);
 
     m_layout = new QGraphicsGridLayout(this);
     m_layout->addItem(m_fromNameLabel, 0, 0);
@@ -105,7 +121,7 @@ JobWidget::JobWidget(Job *job, Plasma::ExtenderItem *parent)
     m_layout->addItem(m_toNameLabel, 1, 0);
     m_layout->addItem(m_toLabel, 1, 1);
     m_layout->addItem(m_eta, 2, 1);
-    m_layout->addItem(m_details, 3, 0, Qt::AlignVCenter|Qt::AlignRight);
+    m_layout->addItem(buttonsLayout, 3, 0, Qt::AlignVCenter|Qt::AlignRight);
     m_layout->addItem(m_meter, 3, 1, Qt::AlignCenter);
 
     setMinimumWidth(350);
@@ -117,6 +133,7 @@ JobWidget::JobWidget(Job *job, Plasma::ExtenderItem *parent)
         connect(m_job.data(), SIGNAL(stateChanged(Job*)), this, SLOT(updateJobState()));
         connect(m_job.data(), SIGNAL(destroyed(Job*)), this, SLOT(destroyExtenderItem()));
         connect(m_details, SIGNAL(clicked()), this, SLOT(detailsClicked()));
+        connect(m_interactionButton, SIGNAL(clicked()), m_job.data(), SLOT(startInteraction()));
 
         //the suspend action
         QAction *suspendAction = new QAction(m_extenderItem);
@@ -192,16 +209,16 @@ void JobWidget::updateJobState()
     } else if (m_job.data()->state() == Job::Running) {
         m_extenderItem->setTitle(m_job.data()->message());
         if (m_job.data()->eta()) {
-            m_eta->setText(i18n("%1 (%2 remaining)", m_job.data()->speed(),
-                                 KGlobal::locale()->prettyFormatDuration(m_job.data()->eta())));
+            changeTextWithoutDecreasingWidth(m_eta, i18n("%1 (%2 remaining)", m_job.data()->speed(),
+                                                         KGlobal::locale()->prettyFormatDuration(m_job.data()->eta())));
         } else {
-            m_eta->setText(QString());
+            changeTextWithoutDecreasingWidth(m_eta, "");
         }
     } else if (m_job.data()->state() == Job::Suspended) {
         m_extenderItem->setTitle(
             i18nc("%1 is the name of the job, can be things like Copying, deleting, moving",
                   "%1 [Paused]", m_job.data()->message()));
-        m_eta->setText(i18n("Paused"));
+        changeTextWithoutDecreasingWidth(m_eta, i18n("Paused"));
     } else {
         m_extenderItem->setTitle(
             i18nc("%1 is the name of the job, can be things like Copying, deleting, moving",
@@ -221,10 +238,10 @@ void JobWidget::updateJob()
     //Update the ETA and job speed (only if running)
     if (m_job.data()->state() == Job::Running) {
         if (m_job.data()->eta()) {
-            m_eta->setText(i18n("%1 (%2 remaining)", m_job.data()->speed(),
-                                 KGlobal::locale()->prettyFormatDuration(m_job.data()->eta())));
+            changeTextWithoutDecreasingWidth(m_eta, i18n("%1 (%2 remaining)", m_job.data()->speed(),
+                                                         KGlobal::locale()->prettyFormatDuration(m_job.data()->eta())));
         } else {
-            m_eta->setText(QString());
+            changeTextWithoutDecreasingWidth(m_eta, "");
         }
     }
 
@@ -400,6 +417,15 @@ void JobWidget::updateLabels()
         data.setSubText(label1);
         Plasma::ToolTipManager::self()->setContent(m_toLabel, data);
     }
+    
+    qreal maxWidth = 0;
+    for (int i = 0; i < m_layout->rowCount(); i++) {
+        QGraphicsLayoutItem *child = m_layout->itemAt(i, 0);
+        if (child != 0) {
+            maxWidth = qMax<qreal>(child->preferredWidth(), maxWidth);
+        }
+    }
+    m_layout->setColumnMaximumWidth(0, maxWidth);
 }
 
 void JobWidget::detailsClicked()

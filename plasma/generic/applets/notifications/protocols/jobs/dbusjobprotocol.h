@@ -45,6 +45,7 @@ private slots:
     void suspend(const QString &source);
     void resume(const QString &source);
     void stop(const QString &source);
+    void startInteraction(const QString &source);
 
 private:
     Manager *m_manager;

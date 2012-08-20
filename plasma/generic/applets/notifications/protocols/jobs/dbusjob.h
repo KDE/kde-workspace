@@ -38,12 +38,14 @@ public slots:
     void suspend();
     void resume();
     void stop();
+    void startInteraction();
 
 signals:
     void jobDeleted(const QString &source);
     void suspend(const QString &source);
     void resume(const QString &source);
     void stop(const QString &source);
+    void startInteraction(const QString &source);
 
 private:
     QString m_source;

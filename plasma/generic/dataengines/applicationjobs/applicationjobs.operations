@@ -5,4 +5,5 @@
   <group name="resume"/>
   <group name="suspend"/>
   <group name="stop"/>
+  <group name="startInteraction"/>
 </kcfg>
