@@ -6,26 +6,9 @@ include_directories(
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kworkspace
 )
 
-########### declarative plugin ########
-set(kscreenlockerplugin_SRCS
-    greeter.cpp
-    greeterplugin.cpp
-    sessions.cpp
-)
-
-kde4_add_kcfg_files(kscreenlockerplugin_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../kcfg/kscreensaversettings.kcfgc)
-
-qt4_automoc(${kscreenlockerplugin_SRCS})
-
-add_library(kscreenlockerplugin SHARED ${kscreenlockerplugin_SRCS})
-target_link_libraries(kscreenlockerplugin kworkspace ${KDE4_KDEUI_LIBS} ${QT_QTGUI_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY})
-
-install(TARGETS kscreenlockerplugin DESTINATION ${IMPORTS_INSTALL_DIR}/org/kde/kscreenlocker)
-install(FILES qmldir DESTINATION ${IMPORTS_INSTALL_DIR}/org/kde/kscreenlocker)
-
-########### next target ###############
 set(kscreenlocker_greet_SRCS
    greeter.cpp
+   sessions.cpp
    greeterapp.cpp
    main.cpp )
 

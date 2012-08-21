@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeterapp.h"
 #include "kscreensaversettings.h"
+#include "greeter.h"
+#include "sessions.h"
+
 // workspace
 #include <kephal/screens.h>
 #include <kworkspace/kworkspace.h>
@@ -70,6 +73,12 @@ UnlockApp::~UnlockApp()
 
 void UnlockApp::initialize()
 {
+    const char *uri = "org.kde.kscreenlocker";
+    qmlRegisterType<GreeterItem>(uri, 1, 0, "GreeterItem");
+    qmlRegisterType<KeyboardItem>(uri, 1, 0, "KeyboardItem");
+    qmlRegisterType<SessionSwitching>(uri, 1, 0, "Sessions");
+    qmlRegisterType<QAbstractItemModel>();
+
     // set up the request ignore timeout, so that multiple requests to sleep/suspend/shutdown
     // are not processed in quick (and confusing) succession)
     m_resetRequestIgnoreTimer->setSingleShot(true);
