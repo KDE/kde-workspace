@@ -25,7 +25,6 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: lockScreen
-    state: "UNLOCK"
     signal unlockRequested()
     property alias capsLockOn: unlockUI.capsLockOn
 
@@ -43,66 +42,54 @@ Item {
         id: dialog
         anchors.centerIn: parent
         imagePath: "widgets/background"
-        width: unlockUI.implicitWidth * 1.5 + margins.left + margins.right
-        height: userSessionsUI.visible ?
-                    userSessionsUI.implicitHeight + margins.top + margins.bottom
-                 : unlockUI.implicitHeight + margins.top + margins.bottom
+        width: mainStack.currentPage.implicitWidth + margins.left + margins.right
+        height: mainStack.currentPage.implicitHeight + margins.top + margins.bottom
 
         Behavior on height {
             NumberAnimation {
                 duration: 250
             }
         }
-        Greeter {
-            id: unlockUI
-            anchors {
-                fill: dialog
-                leftMargin: dialog.margins.left
-                rightMargin: dialog.margins.right
-                topMargin: dialog.margins.top
-                bottomMargin: dialog.margins.bottom
-            }
-            focus: true
-            switchUserEnabled: userSessionsUI.switchUserSupported
-
-            Connections {
-                onAccepted: lockScreen.unlockRequested()
-                onSwitchUserClicked: {
-                    // TODO: load if not loaded
-                    lockScreen.state = "SESSION"
-                }
+        Behavior on width {
+            NumberAnimation {
+                duration: 250
             }
         }
-
-
-        // TODO: loader
-        SessionSwitching {
-            id: userSessionsUI
+        PlasmaComponents.PageStack {
+            id: mainStack
+            clip: true
             anchors {
-                fill: dialog
+                fill: parent
                 leftMargin: dialog.margins.left
-                rightMargin: dialog.margins.right
                 topMargin: dialog.margins.top
+                rightMargin: dialog.margins.right
                 bottomMargin: dialog.margins.bottom
             }
-            Connections {
-                onCancel: lockScreen.state = "UNLOCK"
-                onActivateSession: lockScreen.state = "UNLOCK"
-                onStartNewSession: lockScreen.state = "UNLOCK"
-            }
+            initialPage: unlockUI
         }
     }
 
-    states: [
-        State {
-            name: "UNLOCK"
-            PropertyChanges {target: unlockUI; visible: true}
-            PropertyChanges {target: userSessionsUI; visible: false}
-        },
-        State {
-            name: "SESSION"
-            PropertyChanges {target: unlockUI; visible: false}
-            PropertyChanges {target: userSessionsUI; visible: true}
+    Greeter {
+        id: unlockUI
+
+        focus: true
+        switchUserEnabled: userSessionsUI.switchUserSupported
+
+        Connections {
+            onAccepted: lockScreen.unlockRequested()
+            onSwitchUserClicked: mainStack.push(userSessionsUI)
         }
-    ]
+    }
+
+
+    // TODO: loader
+    SessionSwitching {
+        id: userSessionsUI
+
+        Connections {
+            onCancel: mainStack.pop()
+            onActivateSession: mainStack.pop()
+            onStartNewSession: mainStack.pop()
+        }
+    }
 }

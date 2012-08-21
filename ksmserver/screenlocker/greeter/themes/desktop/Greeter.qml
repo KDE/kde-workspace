@@ -31,19 +31,24 @@ Item {
     property alias notification: message.text
     property bool switchUserEnabled
     property alias capsLockOn: capsLockMessage.visible
-    implicitWidth: layoutItem.width
+    implicitWidth: layoutItem.width + theme.defaultFont.mSize.width * 4
     implicitHeight: layoutItem.height
 
     Column {
         id: layoutItem
         anchors.centerIn: parent
-        spacing: theme.defaultFont.mSize.height
+        spacing: theme.defaultFont.mSize.height/2
 
-        PlasmaComponents.Label {
-            id: message
-            text: ""
+        Item {
+            width: Math.max(1, childrenRect.width)
+            height: capsLockMessage.height
             anchors.horizontalCenter: parent.horizontalCenter
-            font.bold: true
+            PlasmaComponents.Label {
+                id: message
+                text: ""
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.bold: true
+            }
         }
 
         Item {
@@ -64,7 +69,9 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Row {
+        Item {
+            width: greeter.width
+            height: greeter.height
             anchors.horizontalCenter: parent.horizontalCenter
             GreeterItem {
                 id: greeter
@@ -74,6 +81,7 @@ Item {
                 Keys.onReturnPressed: verify()
             }
             KeyboardItem {
+                anchors.left: greeter.right
             }
         }
 
