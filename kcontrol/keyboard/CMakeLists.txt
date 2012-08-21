@@ -112,10 +112,14 @@ set(kcm_keyboard_PART_SRCS
   iso_codes.cpp
   kcmmisc.cpp
   bindings.cpp
+  keyboardlayout.cpp
+  keyboardpainter.cpp
+  keys.cpp
+  keysym.cpp
 )
 
 
-kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui)
+kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui keyboardpainter.ui)
 
 kde4_add_plugin(kcm_keyboard ${kcm_keyboard_PART_SRCS})
 
