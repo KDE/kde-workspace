@@ -83,6 +83,14 @@ Item {
             KeyboardItem {
                 anchors.left: greeter.right
             }
+            Timer {
+                interval: 10
+                running: true
+                onTriggered: {
+                    greeter.forceActiveFocus()
+                    greeter.focus = true
+                }
+            }
         }
 
         PlasmaComponents.ButtonRow {

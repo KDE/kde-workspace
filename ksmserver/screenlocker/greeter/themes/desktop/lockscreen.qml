@@ -72,7 +72,6 @@ Item {
     Greeter {
         id: unlockUI
 
-        focus: true
         switchUserEnabled: userSessionsUI.switchUserSupported
 
         Connections {
@@ -85,6 +84,7 @@ Item {
     // TODO: loader
     SessionSwitching {
         id: userSessionsUI
+        visible: false
 
         Connections {
             onCancel: mainStack.pop()

@@ -163,6 +163,8 @@ void UnlockApp::prepareShow()
         XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
         view->setGeometry(Kephal::Screens::self()->screen(i)->geom());
         view->show();
+        view->activateWindow();
+        view->grabKeyboard();
     }
     capsLocked();
 }
