@@ -30,7 +30,7 @@ Item {
     property alias cancelEnabled: cancelButton.visible
     property alias notification: message.text
     property bool switchUserEnabled
-    property alias capsLockOn: capsLockMessage.visible
+    property bool capsLockOn
     implicitWidth: layoutItem.width + theme.defaultFont.mSize.width * 4
     implicitHeight: layoutItem.height
 
@@ -39,29 +39,42 @@ Item {
         anchors.centerIn: parent
         spacing: theme.defaultFont.mSize.height/2
 
-        Item {
-            width: Math.max(1, childrenRect.width)
-            height: capsLockMessage.height
+
+        PlasmaComponents.Label {
+            id: message
+            text: ""
             anchors.horizontalCenter: parent.horizontalCenter
-            PlasmaComponents.Label {
-                id: message
-                text: ""
-                anchors.horizontalCenter: parent.horizontalCenter
-                font.bold: true
+            font.bold: true
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 250
+                }
+            }
+            opacity: text == "" ? 0 : 1
+        }
+
+
+
+        PlasmaComponents.Label {
+            id: capsLockMessage
+            text: i18n("Warning: Caps Lock on")
+            anchors.horizontalCenter: parent.horizontalCenter
+            opacity: capsLockOn ? 1 : 0
+            height: capsLockOn ? paintedHeight : 0
+            font.bold: true
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 250
+                }
+            }
+            Behavior on height {
+                enabled: capsLockOff
+                NumberAnimation {
+                    duration: 250
+                }
             }
         }
 
-        Item {
-            width: childrenRect.width
-            height: childrenRect.height
-            anchors.horizontalCenter: parent.horizontalCenter
-            PlasmaComponents.Label {
-                id: capsLockMessage
-                text: i18n("Warning: Caps Lock on")
-                visible: false
-                font.bold: true
-            }
-        }
 
         PlasmaComponents.Label {
             id: lockMessage

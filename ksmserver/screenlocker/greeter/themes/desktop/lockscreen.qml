@@ -46,11 +46,13 @@ Item {
         height: mainStack.currentPage.implicitHeight + margins.top + margins.bottom
 
         Behavior on height {
+            enabled: mainStack.currentPage != null
             NumberAnimation {
                 duration: 250
             }
         }
         Behavior on width {
+            enabled: mainStack.currentPage != null
             NumberAnimation {
                 duration: 250
             }
