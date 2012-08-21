@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KCrash>
 #include <KDE/KDebug>
 #include <KDE/KStandardDirs>
+#include <KDE/KUser>
 #include <Solid/PowerManagement>
 #include <kdeclarative.h>
 // Qt
@@ -116,6 +117,9 @@ void UnlockApp::initialize()
         kdeclarative.setDeclarativeEngine(view->engine());
         kdeclarative.initialize();
         kdeclarative.setupBindings();
+        QDeclarativeContext *context = view->engine()->rootContext();
+        KUser user;
+        context->setContextProperty("kscreenlocker_userName", user.property(KUser::FullName).toString());
 
         view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
