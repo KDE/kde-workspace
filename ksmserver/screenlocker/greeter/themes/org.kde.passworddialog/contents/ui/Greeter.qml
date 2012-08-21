@@ -67,12 +67,6 @@ Item {
                     duration: 250
                 }
             }
-            Behavior on height {
-                enabled: capsLockOff
-                NumberAnimation {
-                    duration: 250
-                }
-            }
         }
 
 
