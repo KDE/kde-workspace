@@ -40,6 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusPendingCall>
+#include <QtGui/QKeyEvent>
 // X11
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -246,6 +247,7 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
             foreach (QDeclarativeView *view, m_views) {
                 if (view->geometry().contains(me->screenPos())) {
                     view->activateWindow();
+                    view->grabKeyboard();
                     break;
                 }
             }
