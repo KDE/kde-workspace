@@ -22,7 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <KDE/KApplication>
 
+#include <Plasma/PackageStructure>
+
 #include <QDeclarativeView>
+
+namespace Plasma {
+    class Package;
+};
 
 namespace ScreenLocker
 {
@@ -55,6 +61,8 @@ private:
     QString m_mainQmlPath;
     QList<QDeclarativeView*> m_views;
     QTimer *m_resetRequestIgnoreTimer;
+    Plasma::PackageStructure::Ptr m_structure;
+    Plasma::Package *m_package;
     bool m_testing;
     bool m_capsLocked;
     bool m_ignoreRequests;

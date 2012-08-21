@@ -34,6 +34,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KUser>
 #include <Solid/PowerManagement>
 #include <kdeclarative.h>
+//Plasma
+#include <Plasma/Package>
+#include <Plasma/PackageMetadata>
 // Qt
 #include <QtCore/QTimer>
 #include <QtDeclarative/QDeclarativeContext>
@@ -53,7 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ScreenLocker
 {
 
-static const char *DEFAULT_MAIN_QML = "desktop/lockscreen.qml";
+static const char *DEFAULT_MAIN_PACKAGE = "org.kde.passworddialog";
 
 // App
 UnlockApp::UnlockApp()
@@ -94,9 +97,13 @@ void UnlockApp::initialize()
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
 
-    m_mainQmlPath = KStandardDirs::locate("data", "ksmserver/screenlocker/" + KScreenSaverSettings::greeterQML());
+    m_structure = Plasma::PackageStructure::load("Plasma/Generic");
+    m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), KScreenSaverSettings::greeterQML(), m_structure);
+    m_mainQmlPath = m_package->filePath("mainscript");
     if (m_mainQmlPath.isEmpty()) {
-        m_mainQmlPath = KStandardDirs::locate("data", QString("ksmserver/screenlocker/") + DEFAULT_MAIN_QML);
+        delete m_package;
+        m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), DEFAULT_MAIN_PACKAGE, m_structure);
+        m_mainQmlPath = m_package->filePath("mainscript");
     }
 
     for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
@@ -153,9 +160,11 @@ void UnlockApp::initialize()
 void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
 {
     // on error, if we did not load the default qml, try to do so now.
-    if (status == QDeclarativeView::Error && !m_mainQmlPath.endsWith(DEFAULT_MAIN_QML)) {
+    if (status == QDeclarativeView::Error &&
+        m_package->metadata().pluginName() != DEFAULT_MAIN_PACKAGE) {
         if (QDeclarativeView *view = qobject_cast<QDeclarativeView *>(sender())) {
-            m_mainQmlPath = KStandardDirs::locate("data", QString("ksmserver/screenlocker/") + DEFAULT_MAIN_QML);
+            m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), DEFAULT_MAIN_PACKAGE, m_structure);
+            m_mainQmlPath = m_package->filePath("mainscript");
             view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         }
     }
