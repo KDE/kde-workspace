@@ -27,13 +27,13 @@
 #include <KDebug>
 #include <KUrl>
 
-#include <nepomuk/nie.h>
-#include <nepomuk/nfo.h>
-#include <Nepomuk/File>
-#include <Nepomuk/Resource>
-#include <Nepomuk/Variant>
-#include <Nepomuk/ResourceManager>
-#include <Nepomuk/Query/QueryServiceClient>
+#include <nepomuk2/nie.h>
+#include <nepomuk2/nfo.h>
+#include <Nepomuk2/File>
+#include <Nepomuk2/Resource>
+#include <Nepomuk2/Variant>
+#include <Nepomuk2/ResourceManager>
+#include <Nepomuk2/Query/QueryServiceClient>
 
 #include <KFileItemActions>
 #include <KFileItemList>
@@ -44,7 +44,7 @@
 #include <KMimeTypeTrader>
 #include <KService>
 
-using namespace Nepomuk::Vocabulary;
+using namespace Nepomuk2::Vocabulary;
 
 namespace {
     /**
@@ -57,21 +57,21 @@ namespace {
 }
 
 
-Nepomuk::SearchRunner::SearchRunner( QObject* parent, const QVariantList& args )
+Nepomuk2::SearchRunner::SearchRunner( QObject* parent, const QVariantList& args )
     : Plasma::AbstractRunner( parent, args )
 {
 }
 
 
-Nepomuk::SearchRunner::SearchRunner( QObject* parent, const QString& serviceId )
+Nepomuk2::SearchRunner::SearchRunner( QObject* parent, const QString& serviceId )
     : Plasma::AbstractRunner( parent, serviceId )
 {
 }
 
 
-void Nepomuk::SearchRunner::init()
+void Nepomuk2::SearchRunner::init()
 {
-    Nepomuk::ResourceManager::instance()->init();
+    Nepomuk2::ResourceManager::instance()->init();
 
     // we are pretty slow at times and use DBus calls
     setSpeed(SlowSpeed);
@@ -84,17 +84,17 @@ void Nepomuk::SearchRunner::init()
 }
 
 
-Nepomuk::SearchRunner::~SearchRunner()
+Nepomuk2::SearchRunner::~SearchRunner()
 {
     qDeleteAll(m_konqActions);
 }
 
 
-void Nepomuk::SearchRunner::match( Plasma::RunnerContext& context )
+void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
 {
     kDebug() << &context << context.query();
 
-    if (Nepomuk::ResourceManager::instance()->initialized()) {
+    if (Nepomuk2::ResourceManager::instance()->initialized()) {
         // This method needs to be thread-safe since KRunner does simply start new threads whenever
         // the query term changes.
         m_mutex.lock();
@@ -122,7 +122,7 @@ void Nepomuk::SearchRunner::match( Plasma::RunnerContext& context )
 }
 
 
-void Nepomuk::SearchRunner::run( const Plasma::RunnerContext&, const Plasma::QueryMatch& match )
+void Nepomuk2::SearchRunner::run( const Plasma::RunnerContext&, const Plasma::QueryMatch& match )
 {
     // If no action was selected, the interface doesn't support multiple
     // actions so we simply open the file
@@ -133,16 +133,16 @@ void Nepomuk::SearchRunner::run( const Plasma::RunnerContext&, const Plasma::Que
         }
     }
 
-    Nepomuk::Resource res = match.data().value<Nepomuk::Resource>();
-    KUrl url = res.resourceUri();
+    Nepomuk2::Resource res = match.data().value<Nepomuk2::Resource>();
+    KUrl url = res.uri();
     KUrl nieUrl = res.property( NIE::url() ).toUrl();
     if( !nieUrl.isEmpty() )
         url = nieUrl;
 
     KService::Ptr preferredServicePtr;
-    if (res.hasProperty(Nepomuk::Vocabulary::NIE::mimeType()) &&
-         KUrl(res.property(Nepomuk::Vocabulary::NIE::url()).toUrl()).isLocalFile()) {
-        preferredServicePtr = KMimeTypeTrader::self()->preferredService(res.property(Nepomuk::Vocabulary::NIE::mimeType()).toString());
+    if (res.hasProperty(Nepomuk2::Vocabulary::NIE::mimeType()) &&
+         KUrl(res.property(Nepomuk2::Vocabulary::NIE::url()).toUrl()).isLocalFile()) {
+        preferredServicePtr = KMimeTypeTrader::self()->preferredService(res.property(Nepomuk2::Vocabulary::NIE::mimeType()).toString());
     }
 
     if (preferredServicePtr.isNull() || !KRun::run(*preferredServicePtr.constData(), KUrl::List(url), 0)) {
@@ -150,7 +150,7 @@ void Nepomuk::SearchRunner::run( const Plasma::RunnerContext&, const Plasma::Que
     }
 }
 
-QList<QAction*> Nepomuk::SearchRunner::actionsFromMenu(QMenu *menu, const QString &prefix, QObject *parent)
+QList<QAction*> Nepomuk2::SearchRunner::actionsFromMenu(QMenu *menu, const QString &prefix, QObject *parent)
 {
     Q_ASSERT(menu);
 
@@ -184,7 +184,7 @@ QList<QAction*> Nepomuk::SearchRunner::actionsFromMenu(QMenu *menu, const QStrin
 }
 
 
-QList<QAction*> Nepomuk::SearchRunner::actionsForMatch(const Plasma::QueryMatch &match)
+QList<QAction*> Nepomuk2::SearchRunner::actionsForMatch(const Plasma::QueryMatch &match)
 {
     //Unlike other runners, the actions generated here are likely to see
     //little reuse. Hence, we will clear the actions then generate new
@@ -198,9 +198,9 @@ QList<QAction*> Nepomuk::SearchRunner::actionsForMatch(const Plasma::QueryMatch 
     }
     ret << action("open");
 
-    Nepomuk::Resource res = match.data().value<Nepomuk::Resource>();
+    Nepomuk2::Resource res = match.data().value<Nepomuk2::Resource>();
 
-    KUrl url(res.resourceUri());
+    KUrl url(res.uri());
     KIO::UDSEntry entry;
     if (!KIO::NetAccess::stat(url.path(), entry, 0)) {
         return QList<QAction*>();
@@ -225,9 +225,9 @@ QList<QAction*> Nepomuk::SearchRunner::actionsForMatch(const Plasma::QueryMatch 
     return ret;
 }
 
-QMimeData * Nepomuk::SearchRunner::mimeDataForMatch(const Plasma::QueryMatch *match)
+QMimeData * Nepomuk2::SearchRunner::mimeDataForMatch(const Plasma::QueryMatch *match)
 {
-    Nepomuk::Resource res = match->data().value<Nepomuk::Resource>();
+    Nepomuk2::Resource res = match->data().value<Nepomuk2::Resource>();
 
     QUrl url = KUrl(res.property(QUrl("http://www.semanticdesktop.org/ontologies/2007/01/19/nie#url")).toString());
 
@@ -243,6 +243,6 @@ QMimeData * Nepomuk::SearchRunner::mimeDataForMatch(const Plasma::QueryMatch *ma
     return result;
 }
 
-K_EXPORT_PLASMA_RUNNER(nepomuksearchrunner, Nepomuk::SearchRunner)
+K_EXPORT_PLASMA_RUNNER(nepomuksearchrunner, Nepomuk2::SearchRunner)
 
 #include "nepomuksearchrunner.moc"
