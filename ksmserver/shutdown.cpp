@@ -402,8 +402,14 @@ void KSMServer::cancelShutdown( KSMClient* c )
 
 void KSMServer::startProtection()
 {
+    KSharedConfig::Ptr config = KGlobal::config();
+    config->reparseConfiguration(); // config may have changed in the KControl module
+    KConfigGroup cg( config, "General" );
+
+    int timeout = cg.readEntry( "clientShutdownTimeoutSecs", 15 ) * 1000;
+
     protectionTimer.setSingleShot( true );
-    protectionTimer.start( 10000 );
+    protectionTimer.start( timeout );
 }
 
 void KSMServer::endProtection()

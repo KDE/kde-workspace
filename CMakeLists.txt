@@ -87,8 +87,8 @@ macro_log_feature(PYTHONLIBRARY_FOUND "Python" "Python scripting language" "http
 include(MacroLibrary)
 include(KDE4Defaults)
 
-macro_optional_find_package(Nepomuk)
-macro_log_feature(Nepomuk_FOUND "Nepomuk" "Nepomuk Libraries" "kdelibs" FALSE "" "Required to build Nepomuk features.")
+macro_optional_find_package(NepomukCore)
+macro_log_feature(NepomukCore_FOUND "Nepomuk" "Nepomuk Core Library" "nepomuk-core" FALSE "" "Required to build Nepomuk features.")
 macro_optional_find_package(Boost)
 macro_log_feature(Boost_FOUND "Boost" "Boost C++ Libraries" "www.boost.org" FALSE "" "Required to build certain Plasma DataEngines (Akonadi, RSS, Calendar)")
 macro_optional_find_package(Akonadi)
