@@ -268,9 +268,20 @@ Item {
                 service.startOperationCall(operation);
             }
             property bool isLast: (expandedDevice == udi)
+            property int operationResult: (model["Operation result"])
+
             onIsLastChanged: {
                 if (isLast) {
                     notifierDialog.currentExpanded = index
+                }
+            }
+            onOperationResultChanged: {
+                if (operationResult == 1) {
+                    plasmoid.setPopupIconByName("dialog-ok")
+                    popupIconTimer.restart()
+                } else if (operationResult == 2) {
+                    plasmoid.setPopupIconByName("dialog-error")
+                    popupIconTimer.restart()
                 }
             }
             Behavior on height { NumberAnimation { duration: 150 } }

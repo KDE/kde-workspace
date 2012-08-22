@@ -113,6 +113,7 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
     setData(name, I18N_NOOP("Icon"), device.icon());
     setData(name, I18N_NOOP("Emblems"), device.emblems());
     setData(name, I18N_NOOP("State"), Idle);
+    setData(name, I18N_NOOP("Operation result"), Working);
     setData(name, I18N_NOOP("Timestamp"), QTime::currentTime());
 
     if (device.is<Solid::Processor>()) {
@@ -570,15 +571,22 @@ void SolidDeviceEngine::deviceAdded(const QString& udi)
 void SolidDeviceEngine::setMountingState(const QString &udi)
 {
     setData(udi, I18N_NOOP("State"), Mounting);
+    setData(udi, I18N_NOOP("Operation result"), Working);
 }
 
 void SolidDeviceEngine::setUnmountingState(const QString &udi)
 {
     setData(udi, I18N_NOOP("State"), Unmounting);
+    setData(udi, I18N_NOOP("Operation result"), Working);
 }
 
 void SolidDeviceEngine::setIdleState(Solid::ErrorType error, QVariant errorData, const QString &udi)
 {
+    if (error == Solid::NoError) {
+        setData(udi, I18N_NOOP("Operation result"), Successful);
+    } else {
+        setData(udi, I18N_NOOP("Operation result"), Unsuccessful);
+    }
     setData(udi, I18N_NOOP("State"), Idle);
 }
 
