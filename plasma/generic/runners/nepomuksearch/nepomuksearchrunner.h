@@ -25,13 +25,13 @@
 #include <QtCore/QWaitCondition>
 #include <QtCore/QList>
 
-#include <Nepomuk/Query/Result>
+#include <Nepomuk2/Query/Result>
 
 class KFileItemActions;
 
 class QAction;
 
-namespace Nepomuk {
+namespace Nepomuk2 {
 
     class SearchRunner : public Plasma::AbstractRunner
     {

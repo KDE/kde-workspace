@@ -163,6 +163,19 @@ PlasmaCore.FrameSvgItem {
             right: parent.right
             rightMargin: 4
         }
+
+        MouseArea {
+            z: 10
+            anchors.fill: parent
+            onClicked: {
+                button.focus = true
+                if (menu) {
+                    button.pressAndHold()
+                } else {
+                    button.clicked()
+                }
+            }
+        }
     }
 
     Component.onCompleted: {
@@ -210,6 +223,7 @@ PlasmaCore.FrameSvgItem {
     MouseArea {
         id: mouseArea
 
+        z: -10
         anchors.fill: parent
         hoverEnabled: true
         onClicked: {

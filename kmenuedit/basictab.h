@@ -17,10 +17,12 @@
  *
  */
 
-#ifndef __basictab_h__
-#define __basictab_h__
+#ifndef basictab_h
+#define basictab_h
 
 #include <KTabWidget>
+#include <KShortcut>
+#include <KService>
 
 class KKeySequenceWidget;
 class KLineEdit;
@@ -44,7 +46,7 @@ public:
 
     void apply();
 
-    void updateHiddenEntry( bool _hidden );
+    void updateHiddenEntry( bool show );
 
 Q_SIGNALS:
     void changed( MenuFolderInfo * );
@@ -72,7 +74,7 @@ protected:
 protected:
     KLineEdit    *_nameEdit;
     KLineSpellChecking*_commentEdit;
-    KLineSpellChecking	 *_descriptionEdit;
+    KLineSpellChecking   *_descriptionEdit;
     KKeySequenceWidget *_keyEdit;
     KUrlRequester *_execEdit, *_pathEdit;
     KLineEdit    *_termOptEdit, *_uidEdit;
@@ -80,11 +82,10 @@ protected:
     KIconButton  *_iconButton;
     QGroupBox    *_path_group, *_term_group, *_uid_group, *general_group_keybind;
     QLabel *_termOptLabel, *_uidLabel, *_pathLabel, *_nameLabel, *_commentLabel, *_execLabel;
-    QLabel	*_descriptionLabel;
+    QLabel      *_descriptionLabel;
 
     MenuFolderInfo *_menuFolderInfo;
     MenuEntryInfo  *_menuEntryInfo;
-    bool _isDeleted;
 };
 
 #endif

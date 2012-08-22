@@ -35,7 +35,7 @@ PlasmaCore.FrameSvgItem {
     property int realMarginRight: margins.right
 
     width: realMarginLeft + 2 * buttonsLayout.width + realMarginRight
-    height: 2*realMarginTop + automaticallyDoLabel.height + buttonsLayout.height + realMarginBottom
+    height: Math.max(realMarginTop + leftPicture.height + realMarginBottom, 2*realMarginTop + automaticallyDoLabel.height + buttonsLayout.height + realMarginBottom)
 
     imagePath: "dialogs/shutdowndialog"
 
@@ -94,7 +94,7 @@ PlasmaCore.FrameSvgItem {
         if (leftPicture.naturalSize.width < 1) {
             // [1]
             //background.elementId = "background"
-            shutdownUi.width += realMarginLeft + realMarginRight
+            shutdownUi.width = buttonsLayout.width + realMarginLeft + realMarginRight
             shutdownUi.height += realMarginTop + realMarginBottom
             automaticallyDoLabel.anchors.topMargin = 2*realMarginTop
             automaticallyDoLabel.anchors.rightMargin = 2*realMarginRight
@@ -224,10 +224,13 @@ PlasmaCore.FrameSvgItem {
             topMargin: 4
             right: parent.right
             rightMargin: realMarginRight
+            bottom: parent.bottom
+            bottomMargin: realMarginBottom
         }
 
         Column {
             id: buttonsLayout
+            anchors.bottom: parent.bottom
             spacing: 9
 
             Column {
@@ -243,7 +246,7 @@ PlasmaCore.FrameSvgItem {
                     tabStopBack: cancelButton
 
                     onClicked: {
-                        console.log("main.qml: logoutRequested")
+                        //console.log("main.qml: logoutRequested")
                         logoutRequested()
                     }
 
@@ -263,7 +266,7 @@ PlasmaCore.FrameSvgItem {
                     tabStopBack: logoutButton
 
                     onClicked: {
-                        console.log("main.qml: haltRequested")
+                        //console.log("main.qml: haltRequested")
                         haltRequested()
                     }
 
@@ -275,15 +278,15 @@ PlasmaCore.FrameSvgItem {
                             contextMenu = shutdownOptionsComponent.createObject(shutdownButton)
                             if (spdMethods.StandbyState) {
                                 // 1 == Solid::PowerManagement::StandbyState
-                                contextMenu.append({itemIndex: 1, itemText: i18n("&Standby")})
+                                contextMenu.append({itemIndex: 1, itemText: i18n("&Standby"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             if (spdMethods.SuspendState) {
                                 // 2 == Solid::PowerManagement::SuspendState
-                                contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM")})
+                                contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             if (spdMethods.HibernateState) {
                                 // 4 == Solid::PowerManagement::HibernateState
-                                contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk")})
+                                contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             contextMenu.clicked.connect(shutdownUi.suspendRequested)
                         }
@@ -312,7 +315,7 @@ PlasmaCore.FrameSvgItem {
                     tabStopBack: shutdownButton
 
                     onClicked: {
-                        console.log("main.qml: rebootRequested")
+                        //console.log("main.qml: rebootRequested")
                         rebootRequested()
                     }
 
@@ -323,8 +326,9 @@ PlasmaCore.FrameSvgItem {
                             return;
                         }
 
+                        var sep = " >> "
                         var text = options[index.value]
-                        var pos = text.lastIndexOf('>')
+                        var pos = text.lastIndexOf(sep)
                         if (pos > -1) {
                             var temp = text.substr(0, pos).trim()
                             if (temp != menuId) {
@@ -332,7 +336,7 @@ PlasmaCore.FrameSvgItem {
                             }
 
                             if (!menus[menuId]) {
-                                console.log("creating menu for " + menuId)
+                                //console.log("creating menu for " + menuId)
                                 menus[menuId] = rebootOptionsComponent.createObject(rebootButton)
                                 menus[menuId].clicked.connect(shutdownUi.rebootRequested2)
                             }
@@ -340,7 +344,7 @@ PlasmaCore.FrameSvgItem {
                             menuId = ""
                         }
 
-                        console.log("index == " + index.value + " of " + options.length + " '" + text + "' menuId == '" + menuId + "'");
+                        //console.log("index == " + index.value + " of " + options.length + " '" + text + "' menuId == '" + menuId + "'");
 
                         var itemData = new Object
                         itemData["itemIndex"] = index.value
@@ -358,13 +362,14 @@ PlasmaCore.FrameSvgItem {
 
                         // remove menuId string from itemText
                         text = itemData["itemText"]
-                        var i = text.lastIndexOf('>')
+                        var i = text.lastIndexOf(sep)
                         if (i > -1) {
-                            text = text.substr(i+1).trim()
+                            text = text.substr(i+sep.length).trim()
                         }
                         itemData["itemText"] = text
+                        itemData["itemAllowAmpersand"] = true
 
-                        console.log("appending " + itemData["itemText"] + " to menu '" + currentMenuId + "'")
+                        //console.log("appending " + itemData["itemText"] + " to menu '" + currentMenuId + "'")
                         menus[currentMenuId].append(itemData)
                     }
 
@@ -396,11 +401,14 @@ PlasmaCore.FrameSvgItem {
                                     var itemData = new Object
                                     itemData["itemIndex"] = index
                                     itemData["itemText"] = options[index]
+                                    itemData["itemSubMenu"] = null
+                                    itemData["itemAllowAmpersand"] = true
                                     if (index == rebootOptions["default"]) {
                                         itemData["itemText"] += i18nc("default option in boot loader", " (default)")
                                     }
                                     contextMenu.append(itemData)
                                 }
+                                contextMenu.clicked.connect(shutdownUi.rebootRequested2)
                             }
                         }
                         contextMenu.open()

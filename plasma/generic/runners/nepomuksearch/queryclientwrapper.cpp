@@ -19,15 +19,15 @@
 #include "queryclientwrapper.h"
 #include "nepomuksearchrunner.h"
 
-#include <nepomuk/nie.h>
-#include <nepomuk/nfo.h>
-#include <Nepomuk/File>
-#include <Nepomuk/Variant>
-#include <Nepomuk/Types/Class>
-#include <Nepomuk/Query/QueryServiceClient>
-#include <Nepomuk/Query/Result>
-#include <Nepomuk/Query/Query>
-#include <Nepomuk/Query/QueryParser>
+#include <nepomuk2/nie.h>
+#include <nepomuk2/nfo.h>
+#include <Nepomuk2/File>
+#include <Nepomuk2/Variant>
+#include <Nepomuk2/Types/Class>
+#include <Nepomuk2/Query/QueryServiceClient>
+#include <Nepomuk2/Query/Result>
+#include <Nepomuk2/Query/Query>
+#include <Nepomuk2/Query/QueryParser>
 
 #include <KIcon>
 #include <KDebug>
@@ -43,24 +43,24 @@
 
 static const int s_maxResults = 10;
 
-Nepomuk::QueryClientWrapper::QueryClientWrapper(SearchRunner* runner, Plasma::RunnerContext* context)
+Nepomuk2::QueryClientWrapper::QueryClientWrapper(SearchRunner* runner, Plasma::RunnerContext* context)
     : QObject(),
       m_runner(runner),
       m_runnerContext(context)
 {
     // initialize the query client
-    m_queryServiceClient = new Nepomuk::Query::QueryServiceClient(this);
-    connect(m_queryServiceClient, SIGNAL(newEntries(QList<Nepomuk::Query::Result>)),
-             this, SLOT(slotNewEntries(QList<Nepomuk::Query::Result>)));
+    m_queryServiceClient = new Nepomuk2::Query::QueryServiceClient(this);
+    connect(m_queryServiceClient, SIGNAL(newEntries(QList<Nepomuk2::Query::Result>)),
+             this, SLOT(slotNewEntries(QList<Nepomuk2::Query::Result>)));
 }
 
 
-Nepomuk::QueryClientWrapper::~QueryClientWrapper()
+Nepomuk2::QueryClientWrapper::~QueryClientWrapper()
 {
 }
 
 
-void Nepomuk::QueryClientWrapper::runQuery()
+void Nepomuk2::QueryClientWrapper::runQuery()
 {
     //kDebug() << m_runnerContext->query();
 
@@ -87,7 +87,7 @@ qreal normalizeScore(double score) {
 }
 }
 
-void Nepomuk::QueryClientWrapper::slotNewEntries(const QList<Nepomuk::Query::Result>& results)
+void Nepomuk2::QueryClientWrapper::slotNewEntries(const QList<Nepomuk2::Query::Result>& results)
 {
     QList<Plasma::QueryMatch> matches;
     foreach(const Query::Result& result, results) {
@@ -95,14 +95,14 @@ void Nepomuk::QueryClientWrapper::slotNewEntries(const QList<Nepomuk::Query::Res
         match.setType(Plasma::QueryMatch::PossibleMatch);
         match.setRelevance(normalizeScore(result.score()));
 
-        Nepomuk::Resource res = result.resource();
+        Nepomuk2::Resource res = result.resource();
 
         QString type;
         QString iconName;
 
         KMimeType::Ptr mimetype;
-        if (res.hasProperty(Nepomuk::Vocabulary::NIE::mimeType())) {
-            mimetype = KMimeType::mimeType(res.property(Nepomuk::Vocabulary::NIE::mimeType()).toString());
+        if (res.hasProperty(Nepomuk2::Vocabulary::NIE::mimeType())) {
+            mimetype = KMimeType::mimeType(res.property(Nepomuk2::Vocabulary::NIE::mimeType()).toString());
         }
         if (!mimetype && res.isFile() && res.toFile().url().isLocalFile()) {
             const KUrl url(res.toFile().url());
@@ -115,7 +115,7 @@ void Nepomuk::QueryClientWrapper::slotNewEntries(const QList<Nepomuk::Query::Res
         }
 
         if (type.isEmpty() ) {
-            type = Nepomuk::Types::Class(res.resourceType()).label();
+            type = Nepomuk2::Types::Class(res.type()).label();
             iconName = res.genericIcon();
         }
 
@@ -124,7 +124,7 @@ void Nepomuk::QueryClientWrapper::slotNewEntries(const QList<Nepomuk::Query::Res
         match.setIcon(KIcon(iconName.isEmpty() ? QString::fromLatin1("nepomuk") : iconName));
 
         match.setData(qVariantFromValue(res));
-        match.setId(KUrl(res.resourceUri()).url());
+        match.setId(KUrl(res.uri()).url());
         matches << match;
     }
     m_runnerContext->addMatches(m_runnerContext->query(), matches);

@@ -20,41 +20,37 @@
  *
  */
 
+#include "treeview.h"
+
 #include <unistd.h>
 
-#include <QCursor>
-#include <QDataStream>
 #include <QDir>
-#include <QEvent>
-#include <QFileInfo>
 #include <QHeaderView>
 #include <QPainter>
 #include <QRegExp>
 #include <QPixmap>
-#include <QFrame>
 #include <QDropEvent>
 #include <QMenu>
+#include <QApplication>
 #include <QtDBus/QtDBus>
 
-#include <kaction.h>
-#include <kactioncollection.h>
-#include <kapplication.h>
-#include <kbuildsycocaprogressdialog.h>
-#include <kdebug.h>
-#include <kdesktopfile.h>
-#include <kglobal.h>
-#include <kiconloader.h>
-#include <kinputdialog.h>
-#include <klocale.h>
-#include <kmessagebox.h>
-#include <kservice.h>
-#include <kservicegroup.h>
-#include <kconfig.h>
-#include <kconfiggroup.h>
-#include <kstandarddirs.h>
-#include <kio/netaccess.h>
+#include <KAction>
+#include <KActionCollection>
+#include <KBuildSycocaProgressDialog>
+#include <KDebug>
+#include <KDesktopFile>
+#include <KGlobal>
+#include <KIconLoader>
+#include <KInputDialog>
+#include <KLocale>
+#include <KMessageBox>
+#include <KService>
+#include <KServiceGroup>
+#include <KConfig>
+#include <KConfigGroup>
+#include <KStandardDirs>
+#include <KIO/NetAccess>
 
-#include "treeview.h"
 #include "treeview.moc"
 #include "menufile.h"
 #include "menuinfo.h"
@@ -76,7 +72,7 @@ public:
     }
 
 protected:
-    void paintEvent(QPaintEvent *event)
+    void paintEvent(QPaintEvent * /*event*/)
     {
         QPainter p(this);
         // Draw Separator
@@ -195,7 +191,8 @@ static QPixmap appIcon(const QString &iconName)
 TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
     : QTreeWidget(parent), m_ac(ac), m_rmb(0), m_clipboard(0),
       m_clipboardFolderInfo(0), m_clipboardEntryInfo(0),
-      m_layoutDirty(false)
+      m_layoutDirty(false),
+      m_detailedMenuEntries(true), m_detailedEntriesNamesFirst(true)
 {
     m_dropMimeTypes << s_internalMimeType << KUrl::List::mimeDataTypes();
     qRegisterMetaType<TreeItem *>("TreeItem");
@@ -604,7 +601,7 @@ void TreeView::itemSelected(QTreeWidgetItem *item)
     }
 }
 
-void TreeView::currentChanged(MenuFolderInfo *folderInfo)
+void TreeView::currentDataChanged(MenuFolderInfo *folderInfo)
 {
     TreeItem *item = (TreeItem*)selectedItem();
     if (item == 0 || folderInfo == 0) {
@@ -615,7 +612,7 @@ void TreeView::currentChanged(MenuFolderInfo *folderInfo)
     item->setIcon(0, appIcon(folderInfo->icon));
 }
 
-void TreeView::currentChanged(MenuEntryInfo *entryInfo)
+void TreeView::currentDataChanged(MenuEntryInfo *entryInfo)
 {
     TreeItem *item = (TreeItem*)selectedItem();
     if (item == 0 || entryInfo == 0) {
@@ -848,7 +845,7 @@ bool TreeView::dropMimeData(QTreeWidgetItem *item, int index, const QMimeData *d
 
         //FIXME: this should really support multiple DnD
         QString path = urls[0].path();
-        if (!path.endsWith(".desktop")) {
+        if (!path.endsWith(QLatin1String(".desktop"))) {
             return false;
         }
 

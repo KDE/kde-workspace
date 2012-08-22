@@ -16,23 +16,23 @@
  *
  */
 
+#include "menufile.h"
+
 #include <QFile>
 #include <QTextStream>
 #include <QRegExp>
 #include <QFileInfo>
 
-#include <kdebug.h>
-#include <kglobal.h>
-#include <klocale.h>
-#include <kstandarddirs.h>
-
-#include "menufile.h"
+#include <KDebug>
+#include <KGlobal>
+#include <KLocale>
+#include <KStandardDirs>
 
 
-#define MF_MENU		"Menu"
-#define MF_PUBLIC_ID	"-//freedesktop//DTD Menu 1.0//EN"
-#define MF_SYSTEM_ID	"http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd"
-#define MF_NAME		"Name"
+#define MF_MENU         "Menu"
+#define MF_PUBLIC_ID    "-//freedesktop//DTD Menu 1.0//EN"
+#define MF_SYSTEM_ID    "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd"
+#define MF_NAME         "Name"
 #define MF_INCLUDE      "Include"
 #define MF_EXCLUDE      "Exclude"
 #define MF_FILENAME     "Filename"
@@ -546,7 +546,7 @@ bool MenuFile::performAllActions()
    return save();
 }
 
-bool MenuFile::dirty()
+bool MenuFile::dirty() const
 {
    return (m_actionList.count() != 0) || m_bDirty;
 }

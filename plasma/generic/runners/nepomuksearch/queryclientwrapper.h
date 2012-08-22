@@ -22,13 +22,13 @@
 #include <QtCore/QObject>
 #include <QtCore/QList>
 
-#include <Nepomuk/Query/Result>
+#include <Nepomuk2/Query/Result>
 
 namespace Plasma {
     class RunnerContext;
 }
 
-namespace Nepomuk {
+namespace Nepomuk2 {
 
     class SearchRunner;
     namespace Query {
@@ -52,7 +52,7 @@ namespace Nepomuk {
         void runQuery();
 
     private Q_SLOTS:
-        void slotNewEntries( const QList<Nepomuk::Query::Result>& );
+        void slotNewEntries( const QList<Nepomuk2::Query::Result>& );
 
     private:
         Query::QueryServiceClient* m_queryServiceClient;
