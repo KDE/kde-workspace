@@ -444,7 +444,7 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
                 data = DIALOG;
             } else {
                 Qt::WindowFlags oldFlags = widget->windowFlags();
-                Qt::WindowFlags newFlags = oldFlags | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint;
+                Qt::WindowFlags newFlags = oldFlags |Qt::X11BypassWindowManagerHint;
                 if (oldFlags != newFlags) {
                     //now we're *really* fucking with things
                     //we force-disable window management and frames to cut off access to wm-y stuff
@@ -466,8 +466,10 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
                     widget->setWindowFlags(newFlags);
                     //we do not know the screen this widget should appear on
                     QRect availableGeometry = desktop->availableGeometry();
-                    //move to the default screen
-                    widget->move(availableGeometry.x(), availableGeometry.y());
+                    //if has weird position, move to the default screen
+                    if (!availableGeometry.contains(widget->pos())) {
+                        widget->move(availableGeometry.x(), availableGeometry.y());
+                    }
                     widget->show(); //setting the flags hid it :(
                     //qApp->setActiveWindow(widget); //gives kbd but not mouse events
                     //kDebug() << "parent" << widget->parentWidget();
