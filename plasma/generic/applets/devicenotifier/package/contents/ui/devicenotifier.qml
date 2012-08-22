@@ -141,6 +141,11 @@ Item {
         onTriggered: plasmoid.setPopupIconByName("device-notifier");
     }
 
+    Timer {
+        id: passiveTimer
+        interval: 2500
+        onTriggered: plasmoid.status = "PassiveStatus"
+    }
 
     PlasmaComponents.Label {
         id: header
@@ -188,8 +193,9 @@ Item {
         }
         onCountChanged: {
             if (count == 0) {
-                plasmoid.status = "PassiveStatus"
+                passiveTimer.restart()
             } else {
+                passiveTimer.stop()
                 plasmoid.status = "ActiveStatus"
             }
         }
