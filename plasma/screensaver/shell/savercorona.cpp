@@ -20,6 +20,7 @@
  */
 
 #include "savercorona.h"
+#include "kscreensaversettings.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -37,10 +38,14 @@
 
 #include <Plasma/Containment>
 #include <plasma/containmentactionspluginsconfig.h>
+#include <Plasma/Package>
+#include <Plasma/PackageStructure>
 
 #include <QtGui/QX11Info>
 #include <X11/Xlib.h>
 #include <fixx11h.h>
+
+static const char *DEFAULT_MAIN_PACKAGE = "org.kde.passworddialog";
 
 SaverCorona::SaverCorona(QObject *parent)
     : Plasma::Corona(parent)
@@ -197,10 +202,22 @@ void SaverCorona::numScreensUpdated(int newCount)
 
 void SaverCorona::createGreeter()
 {
-    QDeclarativeComponent component(m_engine, QUrl::fromLocalFile(KStandardDirs::locate("data", "plasma/screenlocker/lockscreen.qml")));
+    Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
+    Plasma::Package *package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), KScreenSaverSettings::greeterQML(), structure);
+
+    QString mainQmlPath = package->filePath("mainscript");
+    if (mainQmlPath.isEmpty()) {
+        delete package;
+        package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), DEFAULT_MAIN_PACKAGE, structure);
+        mainQmlPath = package->filePath("mainscript");
+    }
+
+    QDeclarativeComponent component(m_engine, QUrl::fromLocalFile(mainQmlPath));
+
     m_greeterItem = qobject_cast<QGraphicsObject *>(component.create());
     addItem(m_greeterItem);
-    connect(m_greeterItem, SIGNAL(accepted()), SLOT(greeterAccepted()));
+    m_greeterItem->setFocus();
+    connect(m_greeterItem, SIGNAL(unlockRequested()), SLOT(greeterAccepted()));
     connect(m_greeterItem, SIGNAL(canceled()), SLOT(greeterCanceled()));
     const QRect screenRect = screenGeometry(QApplication::desktop()->primaryScreen());
     // TODO: center on screen

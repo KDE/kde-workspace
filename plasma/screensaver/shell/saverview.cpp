@@ -82,7 +82,7 @@ SaverView::SaverView(Plasma::Containment *containment, QWidget *parent)
 
     setWallpaperEnabled(true);
 
-    installEventFilter(this);
+    containment->corona()->installEventFilter(this);
 }
 
 SaverView::~SaverView()
@@ -195,6 +195,9 @@ bool SaverView::eventFilter(QObject *watched, QEvent *event)
         (event->type() == QEvent::GraphicsSceneResize || event->type() == QEvent::GraphicsSceneMove)) {
         Plasma::WidgetExplorer *widgetExplorer = m_widgetExplorer.data();
         widgetExplorer->setPos(0, containment()->geometry().height() - widgetExplorer->geometry().height());
+    } else if (watched == containment()->corona() && event->type() == QEvent::GraphicsSceneMousePress) {
+        activateWindow();
+        grabKeyboard();
     }
 
     return false;
@@ -217,6 +220,8 @@ void SaverView::showView()
 
         m_suppressShow = true;
         QTimer::singleShot(SUPPRESS_SHOW_TIMEOUT, this, SLOT(suppressShowTimeout()));
+        activateWindow();
+        grabKeyboard();
     }
 }
 

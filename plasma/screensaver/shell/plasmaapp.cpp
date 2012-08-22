@@ -25,6 +25,9 @@
 
 #include "plasmaapp.h"
 
+#include "greeter.h"
+#include "sessions.h"
+
 #include <unistd.h>
 
 #ifndef _SC_PHYS_PAGES
@@ -43,6 +46,7 @@
 #include <QDesktopWidget>
 #include <QPixmapCache>
 #include <QtDBus/QtDBus>
+#include <QtDeclarative/qdeclarative.h>
 
 //#include <KCrash>
 #include <KDebug>
@@ -130,6 +134,11 @@ PlasmaApp::PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap)
       m_corona(0),
       m_configDialog(0)
 {
+    const char *uri = "org.kde.kscreenlocker";
+    qmlRegisterType<ScreenLocker::GreeterItem>(uri, 1, 0, "GreeterItem");
+    qmlRegisterType<ScreenLocker::KeyboardItem>(uri, 1, 0, "KeyboardItem");
+    qmlRegisterType<ScreenLocker::SessionSwitching>(uri, 1, 0, "Sessions");
+    qmlRegisterType<QAbstractItemModel>();
     //load translations for libplasma
     KGlobal::locale()->insertCatalog("libplasma");
     KGlobal::locale()->insertCatalog("plasmagenericshell");
