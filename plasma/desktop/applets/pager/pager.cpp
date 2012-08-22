@@ -41,12 +41,12 @@
 #include <KWindowSystem>
 #include <NETRootInfo>
 
+#include <Plasma/FrameSvg>
 #include <Plasma/PaintUtils>
 #include <Plasma/Theme>
 #include <Plasma/ToolTipManager>
 #include <Plasma/DeclarativeWidget>
 #include <Plasma/Package>
-#include <Plasma/FrameSvg>
 
 #include <KActivities/Consumer>
 

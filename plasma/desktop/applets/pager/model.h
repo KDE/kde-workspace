@@ -104,8 +104,6 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-    void printModel() const;
-
     RectangleModel m_desktops;
     QList<QObject *> m_windows;
     QStringList m_names;

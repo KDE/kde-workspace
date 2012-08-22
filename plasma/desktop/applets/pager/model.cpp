@@ -241,34 +241,3 @@ int PagerModel::rowCount(const QModelIndex &index) const
 {
     return m_desktops.rowCount(index);
 }
-
-#include <QDebug>
-void PagerModel::printModel() const
-{
-    qDebug() << Q_FUNC_INFO << "-- begin --";
-    for (int i = 0; i < rowCount(); i++) {
-        qDebug() << ">> Desktop" << i;
-        QModelIndex ind = index(i);
-        qDebug() << "x: " << data(ind, RectangleModel::XRole).toDouble() << "y: "
-                 << data(ind, RectangleModel::YRole).toDouble();
-        qDebug() << "width: " << data(ind, RectangleModel::WidthRole).toDouble()
-                 << "height: " << data(ind, RectangleModel::HeightRole).toDouble();
-
-        QObject *ob = data(ind, WindowsRole).value<QObject *>();
-        if (!ob) {
-            qDebug() << "empty (not expected)";
-            continue;
-        }
-        QAbstractListModel *model = qobject_cast<QAbstractListModel *>(ob);
-
-        for (int j = 0; j < model->rowCount(); j++) {
-            qDebug() << "   >>> Window" << j;
-            QModelIndex ind2 = index(j);
-            qDebug() << "   x: " << model->data(ind2, RectangleModel::XRole).toDouble()
-                     << "y: " << model->data(ind2, RectangleModel::YRole).toDouble();
-            qDebug() << "   width: " << model->data(ind2, RectangleModel::WidthRole).toDouble()
-                     << "height: " << model->data(ind2, RectangleModel::HeightRole).toDouble();
-        }
-    }
-    qDebug() << Q_FUNC_INFO << "-- end --\n";
-}
