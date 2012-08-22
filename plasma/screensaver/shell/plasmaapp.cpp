@@ -444,7 +444,7 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
                 data = DIALOG;
             } else {
                 Qt::WindowFlags oldFlags = widget->windowFlags();
-                Qt::WindowFlags newFlags = oldFlags | Qt::X11BypassWindowManagerHint;
+                Qt::WindowFlags newFlags = oldFlags | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint;
                 if (oldFlags != newFlags) {
                     //now we're *really* fucking with things
                     //we force-disable window management and frames to cut off access to wm-y stuff
