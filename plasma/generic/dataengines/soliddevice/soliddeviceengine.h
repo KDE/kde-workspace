@@ -42,6 +42,12 @@ enum State {
     Unmounting = 2
 };
 
+enum OperationResult {
+    Working = 0,
+    Successful = 1,
+    Unsuccessful =2
+};
+
 /**
  * This class evaluates the basic expressions given in the interface.
  */
