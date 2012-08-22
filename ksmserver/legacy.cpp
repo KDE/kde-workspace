@@ -55,8 +55,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #ifndef NO_LEGACY_SESSION_MANAGEMENT
-const int WM_SAVE_YOURSELF_TIMEOUT = 4000;
-
 static WindowMap* windowMapPtr = 0;
 
 static Atom wm_save_yourself = XNone;
@@ -79,6 +77,13 @@ void KSMServer::performLegacySessionSave()
     kDebug( 1218 ) << "Saving legacy session apps";
     if (state == ClosingSubSession)
         return; //FIXME implement later
+
+    KSharedConfig::Ptr config = KGlobal::config();
+    config->reparseConfiguration(); // config may have changed in the KControl module
+    KConfigGroup cg( config, "General" );
+
+    int wmSaveYourselfTimeout = cg.readEntry( "legacySaveTimeoutSecs", 4 ) * 1000;
+
     // Setup error handler
     legacyWindows.clear();
     windowMapPtr = &legacyWindows;
@@ -152,6 +157,7 @@ void KSMServer::performLegacySessionSave()
             ev.xclient.data.l[1] = QX11Info::appTime();
             XSelectInput(newdisplay, w, PropertyChangeMask|StructureNotifyMask);
             XSendEvent(newdisplay, w, False, 0, &ev);
+            kDebug( 1218 ) << "sent >save yourself< to legacy app " << (*it).wmclass1 << (*it).wmclass2;
         }
     }
     // Wait for change in WM_COMMAND with timeout
@@ -173,16 +179,18 @@ void KSMServer::performLegacySessionSave()
         } else {
             /* Check timeout */
             int msecs = start.elapsed();
-            if (msecs >= WM_SAVE_YOURSELF_TIMEOUT)
+            if (msecs >= wmSaveYourselfTimeout) {
+                kDebug( 1218 ) << "legacy timeout expired";
                 break;
+            }
             /* Wait for more events */
             fd_set fds;
             FD_ZERO(&fds);
             int fd = ConnectionNumber(newdisplay);
             FD_SET(fd, &fds);
             struct timeval tmwait;
-            tmwait.tv_sec = (WM_SAVE_YOURSELF_TIMEOUT - msecs) / 1000;
-            tmwait.tv_usec = ((WM_SAVE_YOURSELF_TIMEOUT - msecs) % 1000) * 1000;
+            tmwait.tv_sec = (wmSaveYourselfTimeout - msecs) / 1000;
+            tmwait.tv_usec = ((wmSaveYourselfTimeout - msecs) % 1000) * 1000;
             ::select(fd+1, &fds, NULL, &fds, &tmwait);
         }
     }
