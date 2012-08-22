@@ -189,12 +189,20 @@ QRectF& PagerModel::desktopRectAt(int index)
 
 void PagerModel::clearWindowRects()
 {
+    int removeIndex = -1;
     for (int i = 0; i < m_windows.count(); i++) {
         windowsAt(i)->clear();
 
-        // remove the windows model if the number of desktop has decreased
         if (i >= rowCount())
+            removeIndex = (removeIndex == -1) ? i : -1;
+    }
+
+    if (removeIndex != -1) {
+        // remove the windows model if the number of desktop has decreased
+        for (int i = m_windows.count()-1; i >= removeIndex; i--) {
             windowsAt(i)->deleteLater();
+            m_windows.removeAt(i);
+        }
     }
 
     // append more windows model if the number of desktop has increased
