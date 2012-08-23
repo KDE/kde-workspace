@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kscreensaversettings.h"
 #include "greeter.h"
 #include "sessions.h"
+#include "screensaverwindow.h"
 
 // workspace
 #include <kephal/screens.h>
@@ -187,6 +188,13 @@ void UnlockApp::prepareShow()
         view->show();
         view->activateWindow();
         view->grabKeyboard();
+
+        QWidget *bah = new ScreenSaverWindow;
+        bah->setGeometry(view->geometry());
+        bah->setWindowFlags(Qt::X11BypassWindowManagerHint);
+        XChangeProperty(QX11Info::display(), bah->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+        bah->show();
+        //bah->activateWindow();
     }
     capsLocked();
 }

@@ -10,6 +10,7 @@ set(kscreenlocker_greet_SRCS
    greeter.cpp
    sessions.cpp
    greeterapp.cpp
+   screensaverwindow.cpp
    main.cpp )
 
 kde4_add_kcfg_files(kscreenlocker_greet_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../kcfg/kscreensaversettings.kcfgc)
