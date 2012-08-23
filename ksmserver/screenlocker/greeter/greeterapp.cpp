@@ -153,6 +153,10 @@ void UnlockApp::initialize()
         }
 
         m_views << view;
+
+        ScreenSaverWindow *screensaverWindow = new ScreenSaverWindow;
+        screensaverWindow->setWindowFlags(Qt::X11BypassWindowManagerHint);
+        m_screensaverWindows << screensaverWindow;
     }
 
     installEventFilter(this);
@@ -189,12 +193,12 @@ void UnlockApp::prepareShow()
         view->activateWindow();
         view->grabKeyboard();
 
-        QWidget *bah = new ScreenSaverWindow;
-        bah->setGeometry(view->geometry());
-        bah->setWindowFlags(Qt::X11BypassWindowManagerHint);
-        XChangeProperty(QX11Info::display(), bah->winId(), tag, tag, 32, PropModeReplace, 0, 0);
-        bah->show();
-        //bah->activateWindow();
+        ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
+        screensaverWindow->setGeometry(view->geometry());
+        XChangeProperty(QX11Info::display(), screensaverWindow->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+        screensaverWindow->show();
+        screensaverWindow->activateWindow();
+        screensaverWindow->grabKeyboard();
     }
     capsLocked();
 }
@@ -273,6 +277,12 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
     Q_UNUSED(obj)
         if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
             capsLocked();
+            QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+            if (ke->key() == Qt::Key_Escape) {
+                foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
+                    screensaverWindow->show();
+                }
+            }
         } else if (event->type() == QEvent::GraphicsSceneMousePress) {
             QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
 

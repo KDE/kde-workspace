@@ -33,6 +33,7 @@ namespace Plasma {
 namespace ScreenLocker
 {
 class Unlocker;
+class ScreenSaverWindow;
 
 class UnlockApp : public KApplication
 {
@@ -60,6 +61,7 @@ private:
 
     QString m_mainQmlPath;
     QList<QDeclarativeView*> m_views;
+    QList<ScreenSaverWindow*> m_screensaverWindows;
     QTimer *m_resetRequestIgnoreTimer;
     Plasma::PackageStructure::Ptr m_structure;
     Plasma::Package *m_package;

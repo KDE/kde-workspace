@@ -108,14 +108,19 @@ void ScreenSaverWindow::readSaver()
 
 void ScreenSaverWindow::mousePressEvent(QMouseEvent *event)
 {
-    event->accept();
-}
+    Q_UNUSED(event)
 
-void ScreenSaverWindow::mouseReleaseEvent(QMouseEvent *event)
-{
     m_startMousePos = QPoint(-1, -1);
     //reappear in one minute
     m_reactivateTimer->start(1000 * 60);
+    hide();
+}
+
+
+void ScreenSaverWindow::keyPressEvent(QKeyEvent *event)
+{
+    Q_UNUSED(event)
+
     hide();
 }
 
@@ -134,6 +139,7 @@ void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
 
 void ScreenSaverWindow::showEvent(QShowEvent *event)
 {
+    m_reactivateTimer->stop();
     startXScreenSaver();
 }
 
