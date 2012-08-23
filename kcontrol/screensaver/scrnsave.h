@@ -35,11 +35,19 @@
 
 #include <KCModule>
 
-#include "ui_screenlocker.h"
+#include "kssmonitor.h"
+#include "saverconfig.h"
+#include "testwin.h"
+#include "ui_screensaver.h"
 
 class QTimer;
 
+class KProcess;
 class KIntSpinBox;
+
+class ScreenPreviewWidget;
+
+typedef QList<SaverConfig*> SaverList;
 
 //===========================================================================
 class KScreenSaver : public KCModule, private Ui::ScreenSaver
@@ -58,23 +66,46 @@ public:
 
 protected Q_SLOTS:
     void slotEnable( bool );
+    void slotSelectionChanged();
+    void slotScreenSaver( QTreeWidgetItem* );
+    void slotSetup();
+    void slotTest();
+    void slotStopTest();
     void slotTimeoutChanged( int );
     void slotLockTimeoutChanged( int );
     void slotLock( bool );
     void slotSetupDone();
+    // when selecting a new screensaver, the old preview will
+    // be killed. -- This callback is responsible for restarting the
+    // new preview
+    void slotPreviewExited();
+    void findSavers();
     void slotEnablePlasma(bool enable);
     void slotPlasmaSetup();
 
 protected:
     void writeSettings();
+    void getSaverNames();
+    void setMonitor();
     void setDefaults();
+    bool event(QEvent *);
 
+    QTreeWidgetItem * treeItemForSaverFile(const QString &);
+    int indexForSaverFile(const QString &);
 
 protected:
+    TestWin     *mTestWin;
+    KProcess    *mTestProc;
+    KProcess    *mSetupProc;
+    KProcess    *mPreviewProc;
+    KSSMonitor  *mMonitor;
     ScreenPreviewWidget *mMonitorPreview;
     KService::List mSaverServices;
+    SaverList   mSaverList;
     QTimer      *mLoadTimer;
 
+    int         mSelected;
+    int         mPrevSelected;
     int		mNumLoaded;
     bool        mChanged;
     bool	mTesting;
@@ -84,6 +115,7 @@ protected:
     int         mLockTimeout;
     bool        mLock;
     bool        mEnabled;
+    QString     mSaver;
     bool        mImmutable;
     bool        mPlasmaEnabled;
 };
