@@ -74,6 +74,7 @@ UnlockApp::UnlockApp()
 UnlockApp::~UnlockApp()
 {
     qDeleteAll(m_views);
+    qDeleteAll(m_screensaverWindows);
 }
 
 void UnlockApp::initialize()
