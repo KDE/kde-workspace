@@ -162,6 +162,7 @@ Keywords=Lock, Logout, Sleep, Hibernate, Switch User
 Keywords[es]=Bloquear, Salir, Dormir, Hibernar, Cambiar de usuario
 Keywords[fi]=Lukitse, kirjaudu ulos, valmiustila, lepotila, vaihda käyttäjää
 Keywords[hu]=Zárolás, Kijelentkezés, Alvó állapot, Hibernálás, Felhasználóváltás
+Keywords[ia]=Bloca,Claude session,Dormi, Hiberna,Cambia Usator
 Keywords[nb]=Lås, logg ut, hvile, dvale, bytt bruker
 Keywords[nl]=Vergrendelen, Afmelden, Slapen, Slaapstand naar schijf, Gebruiker wisselen
 Keywords[pt]=Bloquear, Encerrar, Suspender, Hibernar, Mudar de Utilizador
