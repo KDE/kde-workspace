@@ -166,6 +166,7 @@ Greeter::~Greeter()
 
 void Greeter::initialize()
 {
+    KScreenSaverSettings::self()->readConfig();
     m_plugins = KScreenSaverSettings::pluginsUnlock();
     if (m_plugins.isEmpty()) {
         m_plugins << QLatin1String( "classic" ) << QLatin1String( "generic" );

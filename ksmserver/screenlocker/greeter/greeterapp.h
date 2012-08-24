@@ -68,6 +68,7 @@ private:
     bool m_testing;
     bool m_capsLocked;
     bool m_ignoreRequests;
+    bool m_showScreenSaver;
 };
 } // namespace
 

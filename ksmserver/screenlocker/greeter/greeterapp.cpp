@@ -66,6 +66,7 @@ UnlockApp::UnlockApp()
     , m_testing(false)
     , m_capsLocked(false)
     , m_ignoreRequests(false)
+    , m_showScreenSaver(false)
 {
     initialize();
     QTimer::singleShot(0, this, SLOT(prepareShow()));
@@ -95,6 +96,7 @@ void UnlockApp::initialize()
     KCrash::setDrKonqiEnabled(false);
 
     KScreenSaverSettings::self()->readConfig();
+    m_showScreenSaver = KScreenSaverSettings::legacySaverEnabled();
 
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
@@ -155,9 +157,11 @@ void UnlockApp::initialize()
 
         m_views << view;
 
-        ScreenSaverWindow *screensaverWindow = new ScreenSaverWindow;
-        screensaverWindow->setWindowFlags(Qt::X11BypassWindowManagerHint);
-        m_screensaverWindows << screensaverWindow;
+        if (m_showScreenSaver) {
+            ScreenSaverWindow *screensaverWindow = new ScreenSaverWindow;
+            screensaverWindow->setWindowFlags(Qt::X11BypassWindowManagerHint);
+            m_screensaverWindows << screensaverWindow;
+        }
     }
 
     installEventFilter(this);
@@ -194,12 +198,14 @@ void UnlockApp::prepareShow()
         view->activateWindow();
         view->grabKeyboard();
 
-        ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
-        screensaverWindow->setGeometry(view->geometry());
-        XChangeProperty(QX11Info::display(), screensaverWindow->winId(), tag, tag, 32, PropModeReplace, 0, 0);
-        screensaverWindow->show();
-        screensaverWindow->activateWindow();
-        screensaverWindow->grabKeyboard();
+        if (m_showScreenSaver) {
+            ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
+            screensaverWindow->setGeometry(view->geometry());
+            XChangeProperty(QX11Info::display(), screensaverWindow->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+            screensaverWindow->show();
+            screensaverWindow->activateWindow();
+            screensaverWindow->grabKeyboard();
+        }
     }
     capsLocked();
 }
