@@ -68,7 +68,6 @@ class RandrMonitorModule
         Window window;
         QStringList currentMonitors;
         RandrMonitorHelper* helper;
-        QDialog* dialog;
     };
 
 class RandrMonitorHelper

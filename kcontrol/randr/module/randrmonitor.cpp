@@ -70,7 +70,6 @@ RandrMonitorModule::~RandrMonitorModule()
         Display* dpy = QX11Info::display();
         XDestroyWindow( dpy, window );
         delete helper;
-        delete dialog;
         have_randr = false;
         }
     }
@@ -97,7 +96,6 @@ void RandrMonitorModule::initRandr()
 #endif
     helper = new RandrMonitorHelper( this );
     kapp->installX11EventFilter( helper );
-    dialog = NULL;
     currentMonitors = connectedMonitors();
     KActionCollection* coll = new KActionCollection( this );
     KAction* act = coll->addAction( "display" );
