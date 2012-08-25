@@ -37,13 +37,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 K_PLUGIN_FACTORY(RandrMonitorModuleFactory,
                  registerPlugin<RandrMonitorModule>();
-    )
+                )
 K_EXPORT_PLUGIN(RandrMonitorModuleFactory("randrmonitor"))
 
 RandrMonitorModule::RandrMonitorModule( QObject* parent, const QList<QVariant>& )
     : KDEDModule( parent )
     , have_randr( false )
-    {
+{
     m_inhibitionCookie = -1;
     setModuleName( "randrmonitor" );
     initRandr();
@@ -52,7 +52,7 @@ RandrMonitorModule::RandrMonitorModule( QObject* parent, const QList<QVariant>& 
     if (!re.value()) {
         kDebug() << "PowerManagement not loaded, waiting for it";
         QDBusServiceWatcher *serviceWatcher = new QDBusServiceWatcher("org.kde.Solid.PowerManagement", QDBusConnection::sessionBus(),
-                                                                  QDBusServiceWatcher::WatchForRegistration, this);
+                QDBusServiceWatcher::WatchForRegistration, this);
         connect(serviceWatcher, SIGNAL(serviceRegistered(QString)), this, SLOT(checkInhibition()));
         connect(serviceWatcher, SIGNAL(serviceRegistered(QString)), this, SLOT(checkResumeFromSuspend()));
         return;
@@ -60,22 +60,21 @@ RandrMonitorModule::RandrMonitorModule( QObject* parent, const QList<QVariant>& 
 
     checkInhibition();
     checkResumeFromSuspend();
-
-    }
+}
 
 RandrMonitorModule::~RandrMonitorModule()
-    {
+{
     if( have_randr )
-        {
+    {
         Display* dpy = QX11Info::display();
         XDestroyWindow( dpy, window );
         delete helper;
         have_randr = false;
-        }
     }
+}
 
 void RandrMonitorModule::initRandr()
-    {
+{
     Display* dpy = QX11Info::display();
     if( !XRRQueryExtension( dpy, &randr_base, &randr_error ))
         return;
@@ -102,23 +101,23 @@ void RandrMonitorModule::initRandr()
     act->setText( i18n( "Switch Display" ));
     act->setGlobalShortcut( KShortcut( Qt::Key_Display ));
     connect( act, SIGNAL(triggered(bool)), SLOT(switchDisplay()));
-    }
+}
 
 void RandrMonitorModule::poll()
-    {
+{
     // HACK: It seems that RRNotify/RRNotify_OutputChange event (i.e. detecting a newly
     // plugged or unplugged monitor) does not work without polling some randr functionality.
     int dummy;
     XRRGetScreenSizeRange( QX11Info::display(), window, &dummy, &dummy, &dummy, &dummy );
-    }
+}
 
 void RandrMonitorModule::processX11Event( XEvent* e )
-    {
+{
     if( e->xany.type == randr_base + RRNotify )
-        {
+    {
         XRRNotifyEvent* e2 = reinterpret_cast< XRRNotifyEvent* >( e );
         if( e2->subtype == RRNotify_OutputChange ) // TODO && e2->window == window )
-            {
+        {
             kDebug() << "Monitor change detected";
             QStringList newMonitors = connectedMonitors();
 
@@ -130,10 +129,10 @@ void RandrMonitorModule::processX11Event( XEvent* e )
                 return;
             }
             if( QDBusConnection::sessionBus().interface()->isServiceRegistered(
-                "org.kde.internal.KSettingsWidget-kcm_randr" ))
-                { // already running
+                        "org.kde.internal.KSettingsWidget-kcm_randr" ))
+            {   // already running
                 return;
-                }
+            }
             kapp->updateUserTimestamp(); // well, let's say plugging in a monitor is a user activity
 #warning Modal dialog, stupid, fix.
             QString change;
@@ -145,48 +144,44 @@ void RandrMonitorModule::processX11Event( XEvent* e )
             currentMonitors = newMonitors;
             if( KMessageBox::questionYesNo( NULL, question, i18n( "Monitor setup has changed" ),
                     KGuiItem( i18n( "Con&figure" ) ), KGuiItem( i18n( "&Ignore" ) ), "randrmonitorchange" )
-                == KMessageBox::Yes )
-                {
+                    == KMessageBox::Yes )
+            {
                 KToolInvocation::kdeinitExec( "kcmshell4", QStringList() << "display" );
-                }
             }
         }
     }
+}
 
 QStringList RandrMonitorModule::connectedMonitors() const
-    {
+{
     QStringList ret;
     Display* dpy = QX11Info::display();
     XRRScreenResources* resources = XRRGetScreenResources( dpy, window );
-    for( int i = 0;
-         i < resources->noutput;
-         ++i )
-        {
+    for( int i = 0; i < resources->noutput; ++i )
+    {
         XRROutputInfo* info = XRRGetOutputInfo( dpy, resources, resources->outputs[ i ] );
         QString name = QString::fromUtf8( info->name );
         if( info->connection == RR_Connected )
             ret.append( name );
         XRRFreeOutputInfo( info );
-        }
+    }
     XRRFreeScreenResources( resources );
     return ret;
-    }
+}
 
 QStringList RandrMonitorModule::activeMonitors() const
 {
     QStringList ret;
     Display* dpy = QX11Info::display();
     XRRScreenResources* resources = XRRGetScreenResources( dpy, window );
-    for( int i = 0;
-         i < resources->noutput;
-         ++i )
-        {
+    for( int i = 0; i < resources->noutput; ++i )
+    {
         XRROutputInfo* info = XRRGetOutputInfo( dpy, resources, resources->outputs[ i ] );
         QString name = QString::fromUtf8( info->name );
         if(info->crtc != None)
             ret.append( name );
         XRRFreeOutputInfo( info );
-        }
+    }
     XRRFreeScreenResources( resources );
     return ret;
 }
@@ -230,9 +225,9 @@ void RandrMonitorModule::checkInhibition()
 bool RandrMonitorModule::isLidPresent()
 {
     QDBusMessage call = QDBusMessage::createMethodCall("org.freedesktop.UPower",
-                                                  "/org/freedesktop/UPower",
-                                                  "org.freedesktop.DBus.Properties",
-                                                  "Get");
+                        "/org/freedesktop/UPower",
+                        "org.freedesktop.DBus.Properties",
+                        "Get");
     QList <QVariant> args;
     args.append(QVariant::fromValue<QString>(QString("org.freedesktop.UPower")));
     args.append(QVariant::fromValue<QString>(QString("LidIsPresent")));
@@ -256,11 +251,11 @@ void RandrMonitorModule::checkResumeFromSuspend()
 }
 
 void RandrMonitorModule::switchDisplay()
-    {
+{
     QDBusMessage call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                  "/org/kde/Solid/PowerManagement",
-                                                  "org.kde.Solid.PowerManagement",
-                                                  "isLidClosed");
+                        "/org/kde/Solid/PowerManagement",
+                        "org.kde.Solid.PowerManagement",
+                        "isLidClosed");
     QDBusMessage msg =  QDBusConnection::sessionBus().call(call);
     QDBusReply<bool> reply(msg);
 
@@ -276,43 +271,43 @@ void RandrMonitorModule::switchDisplay()
     if( outputs.count() == 0 ) // nothing connected, do nothing
         return;
     if( outputs.count() == 1 ) // just one, enable it
-        {
+    {
         enableOutput( outputs[0], true );
         for( int scr = 0; scr < display.numScreens(); ++scr )
-            {
+        {
             foreach( RandROutput* output, display.screen( scr )->outputs())
-                {
+            {
                 if( !output->isConnected())
                     enableOutput( output, false ); // switch off every output that's not connected
-                }
             }
-        return;
         }
+        return;
+    }
     if( outputs.count() == 2 ) // alternative between one, second, both
-        {
+    {
         if( outputs[ 0 ]->isActive() && !outputs[ 1 ]->isActive())
-            {
+        {
             enableOutput( outputs[ 1 ], true );
             enableOutput( outputs[ 0 ], false );
-            }
+        }
         else if( !outputs[ 0 ]->isActive() && outputs[ 1 ]->isActive())
-            {
+        {
             enableOutput( outputs[ 1 ], true );
             enableOutput( outputs[ 0 ], true );
-            }
+        }
         else
-            {
+        {
             enableOutput( outputs[ 0 ], true );
             enableOutput( outputs[ 1 ], false );
-            }
-        return;
         }
+        return;
+    }
     // no idea what to do here
     KToolInvocation::kdeinitExec( "kcmshell4", QStringList() << "display" );
-    }
+}
 
 void RandrMonitorModule::resumedFromSuspend()
-    {
+{
     RandRDisplay display;
     QList< RandROutput* > m_connectedOutputs, m_validCrtcOutputs;
     m_connectedOutputs = connectedOutputs( display );
@@ -324,47 +319,47 @@ void RandrMonitorModule::resumedFromSuspend()
     // If not, we are going to disable them.
     QList<RandROutput*> outputsToDisable;
     foreach( RandROutput* output, m_validCrtcOutputs )
-        {
+    {
         if( !output->isConnected() )
             outputsToDisable.append( output );
-        }
+    }
     // If no active output is still connected we are going to enable the first connected output.
     if( outputsToDisable.size() == m_validCrtcOutputs.size() )
         enableOutput( m_connectedOutputs[0], true);
     // Now we can disable the disconnected outputs
     foreach( RandROutput* output, outputsToDisable)
-        {
+    {
         enableOutput( output, false );
-        }
     }
+}
 
 void RandrMonitorModule::enableOutput( RandROutput* output, bool enable )
-    { // a bit lame, but I don't know how to do this easily with this codebase :-/
+{   // a bit lame, but I don't know how to do this easily with this codebase :-/
     KProcess::execute( QStringList() << "xrandr" << "--output" << output->name() << ( enable ? "--auto" : "--off" ));
-    }
+}
 
 QList< RandROutput* > RandrMonitorModule::connectedOutputs( RandRDisplay &display )
-    {
+{
     return outputs( display, true, false, false );
-    }
+}
 
 QList< RandROutput* > RandrMonitorModule::activeOutputs( RandRDisplay &display )
-    {
+{
     return outputs( display, false, true, false );
-    }
+}
 
 QList< RandROutput* > RandrMonitorModule::validCrtcOutputs( RandRDisplay &display )
-    {
+{
     return outputs( display, false, false, true );
-    }
+}
 
 QList< RandROutput* > RandrMonitorModule::outputs( RandRDisplay &display, bool connected, bool active, bool validCrtc )
-    {
+{
     QList< RandROutput* > outputs;
     for( int scr = 0; scr < display.numScreens(); ++scr )
-        {
+    {
         foreach( RandROutput* output, display.screen( scr )->outputs() )
-            {
+        {
             if( !output->isConnected() && connected )
                 continue;
             if( !output->isActive() && active )
@@ -373,15 +368,15 @@ QList< RandROutput* > RandrMonitorModule::outputs( RandRDisplay &display, bool c
                 continue;
             if( !outputs.contains( output ) )
                 outputs.append( output );
-            }
         }
-    return outputs;
     }
+    return outputs;
+}
 
 bool RandrMonitorHelper::x11Event( XEvent* e )
-    {
+{
     module->processX11Event( e );
     return QWidget::x11Event( e );
-    }
+}
 
 #include "randrmonitor.moc"
