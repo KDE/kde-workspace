@@ -172,7 +172,7 @@ Item {
         function idleStatus() {
             var actions = hpSource.data[udi]["actions"];
             if (actions.length > 1) {
-                return i18n("%1 actions for this device", actions.length);
+                return i18np("1 action for this device", "%1 actions for this device", actions.length);
             } else {
                 return actions[0]["text"];
             }
