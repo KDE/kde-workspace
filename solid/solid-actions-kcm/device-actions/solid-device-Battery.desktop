@@ -141,6 +141,7 @@ Name[zh_CN]=充电状态
 Name[zh_TW]=充電狀態
 
 [Desktop Action plugged]
+# ctxt: battery plugged in
 Name=Plugged
 Name[ar]=موصول
 Name[ast]=Coneutáu

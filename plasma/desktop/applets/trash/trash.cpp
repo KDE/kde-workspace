@@ -202,7 +202,7 @@ void Trash::empty()
     } else {
         const QString text(i18nc("@info", "Do you really want to empty the trash? All items will be deleted."));
         KDialog *dialog = new KDialog;
-        dialog->setWindowTitle(i18n("Empty Trash"));
+        dialog->setWindowTitle(i18nc("@title:window", "Empty Trash"));
         dialog->setButtons(KDialog::Yes|KDialog::No);
         dialog->setButtonText(KDialog::Yes, i18n("Empty Trash"));
         dialog->setButtonText(KDialog::No, i18n("Cancel"));
