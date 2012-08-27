@@ -36,4 +36,3 @@ set_target_properties(plasma-overlay PROPERTIES OUTPUT_NAME plasma-overlay)
 
 install(TARGETS plasma-overlay ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(FILES plasma-overlayrc DESTINATION ${CONFIG_INSTALL_DIR})
-install(FILES qml/lockscreen.qml DESTINATION ${DATA_INSTALL_DIR}/plasma/screenlocker/)
