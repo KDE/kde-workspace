@@ -48,7 +48,7 @@ Item {
 
             delegate: PlasmaComponents.ListItem {
                 content: PlasmaComponents.Label {
-                    text: session + "(" + location + ")"
+                    text: session + " (" + location + ")"
                 }
             }
             highlight: PlasmaComponents.Highlight {
