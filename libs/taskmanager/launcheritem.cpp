@@ -88,11 +88,15 @@ bool LauncherItem::associateItemIfMatches(AbstractGroupableItem *item)
 
     KUrl itemUrl = item->launcherUrl();
 
-    if (!itemUrl.isEmpty() && launcherUrl() == itemUrl) {
-        d->associates.insert(item);
-        connect(item, SIGNAL(destroyed(QObject*)), this, SLOT(associateDestroyed(QObject*)));
-        emit associationChanged();
-        return true;
+    if (!itemUrl.isEmpty()) {
+        if (launcherUrl() == itemUrl) {
+            d->associates.insert(item);
+            connect(item, SIGNAL(destroyed(QObject*)), this, SLOT(associateDestroyed(QObject*)));
+            emit associationChanged();
+            return true;
+        } else if (!launcherUrl().isEmpty()) {
+            return false;
+        }
     }
 
     QString name;
