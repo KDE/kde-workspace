@@ -195,7 +195,6 @@ void UnlockApp::prepareShow()
         view->setGeometry(Kephal::Screens::self()->screen(i)->geom());
         view->show();
         view->activateWindow();
-        view->grabKeyboard();
 
         if (m_showScreenSaver) {
             ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
@@ -203,7 +202,6 @@ void UnlockApp::prepareShow()
             XChangeProperty(QX11Info::display(), screensaverWindow->winId(), tag, tag, 32, PropModeReplace, 0, 0);
             screensaverWindow->show();
             screensaverWindow->activateWindow();
-            screensaverWindow->grabKeyboard();
         }
     }
     capsLocked();
