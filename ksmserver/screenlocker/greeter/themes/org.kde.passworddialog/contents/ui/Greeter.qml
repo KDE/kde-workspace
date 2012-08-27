@@ -31,8 +31,13 @@ Item {
     property alias notification: message.text
     property bool switchUserEnabled
     property bool capsLockOn
-    implicitWidth: layoutItem.width + theme.defaultFont.mSize.width * 4
-    implicitHeight: layoutItem.height
+    implicitWidth: layoutItem.width + theme.defaultFont.mSize.width * 4 + 12
+    implicitHeight: layoutItem.height + 12
+
+    anchors {
+        fill: parent
+        margins: 6
+    }
 
     Column {
         id: layoutItem
