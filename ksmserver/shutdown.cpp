@@ -527,7 +527,7 @@ void KSMServer::completeKilling()
     if( state == Killing ) {
         bool wait = false;
         foreach( KSMClient* c, clients ) {
-            if( isWM( c ) )
+            if( isWM( c ))
                 continue;
             wait = true; // still waiting for clients to go away
         }

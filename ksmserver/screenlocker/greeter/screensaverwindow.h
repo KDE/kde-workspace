@@ -1,4 +1,7 @@
 /*
+ *   Copyright 1999 Martin R. Jones <mjones@kde.org>
+ *   Copyright 2003 Oswald Buddenhagen <ossi@kde.org>
+ *   Copyright 2008 Chani Armitage <chanika@gmail.com>
  *   Copyright 2012 Marco Martin <mart@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify

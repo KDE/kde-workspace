@@ -615,6 +615,8 @@ KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool locks
     if (lockscreen) {
         ScreenLocker::KSldApp::self()->lock();
     }
+#else
+    Q_UNUSED(lockscreen)
 #endif
 
     new KSMServerInterfaceAdaptor( this );

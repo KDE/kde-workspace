@@ -129,8 +129,7 @@ void UnlockApp::initialize()
         kdeclarative.initialize();
         kdeclarative.setupBindings();
         QDeclarativeContext *context = view->engine()->rootContext();
-        KUser user;
-        context->setContextProperty("kscreenlocker_userName", user.property(KUser::FullName).toString());
+        context->setContextProperty("kscreenlocker_userName", KUser().property(KUser::FullName).toString());
 
         view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
