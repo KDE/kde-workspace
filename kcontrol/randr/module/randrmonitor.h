@@ -50,9 +50,9 @@ private slots:
     void resumedFromSuspend();
     void checkInhibition();
     void checkResumeFromSuspend();
+    void showKcm();
 private:
     void initRandr();
-    void getRandrInfo( XRROutputChangeNotifyEvent* e, QString* change, QRect* rect );
     QStringList connectedMonitors() const;
     QStringList activeMonitors() const;
     void enableOutput( RandROutput* output, bool enable );
@@ -68,6 +68,7 @@ private:
     Window window;
     QStringList currentMonitors;
     RandrMonitorHelper* helper;
+    KDialog* dialog;
 };
 
 class RandrMonitorHelper

@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <qdbusconnectioninterface.h>
 #include <qtimer.h>
 #include <qx11info_x11.h>
+#include <qlayout.h>
 
 K_PLUGIN_FACTORY(RandrMonitorModuleFactory,
                  registerPlugin<RandrMonitorModule>();
@@ -43,6 +44,7 @@ K_EXPORT_PLUGIN(RandrMonitorModuleFactory("randrmonitor"))
 RandrMonitorModule::RandrMonitorModule( QObject* parent, const QList<QVariant>& )
     : KDEDModule( parent )
     , have_randr( false )
+    , dialog(0)
 {
     m_inhibitionCookie = -1;
     setModuleName( "randrmonitor" );
@@ -134,22 +136,44 @@ void RandrMonitorModule::processX11Event( XEvent* e )
                 return;
             }
             kapp->updateUserTimestamp(); // well, let's say plugging in a monitor is a user activity
-#warning Modal dialog, stupid, fix.
-            QString change;
-            QString question =
-                ( newMonitors.count() < currentMonitors.count()
-                    ? i18n( "A monitor output has been disconnected." )
-                    : i18n( "A new monitor output has been connected." ))
-                + "\n\n" + i18n( "Do you wish to run a configuration tool to adjust the monitor setup?" );
             currentMonitors = newMonitors;
-            if( KMessageBox::questionYesNo( NULL, question, i18n( "Monitor setup has changed" ),
-                    KGuiItem( i18n( "Con&figure" ) ), KGuiItem( i18n( "&Ignore" ) ), "randrmonitorchange" )
-                    == KMessageBox::Yes )
-            {
-                KToolInvocation::kdeinitExec( "kcmshell4", QStringList() << "display" );
+
+            // TODO make sure to be on right screen after a screen has been disconnected
+            if (!dialog) {
+                dialog = new KDialog();
+                dialog->setCaption(i18n("Monitor setup has changed"));
+
+                QLabel *icon = new QLabel();
+                icon->setPixmap(KIcon("preferences-desktop-display").pixmap(QSize(64, 64), QIcon::Normal, QIcon::On));
+                QString question =
+                    (newMonitors.count() < currentMonitors.count())
+                    ? i18n("A monitor output has been disconnected.")
+                    : i18n("A new monitor output has been connected.")
+                    + "\n\n" + i18n("Do you wish to run a configuration tool to adjust the monitor setup?");
+                QLabel *label = new QLabel(question);
+                QHBoxLayout *layout = new QHBoxLayout();
+                layout->setSpacing(4);
+                layout->addWidget(icon);
+                layout->addWidget(label);
+                QWidget *mainWidget = new QWidget(dialog);
+                mainWidget->setLayout(layout);
+                dialog->setMainWidget(mainWidget);
+                dialog->setButtons(KDialog::Yes | KDialog::No);
+                dialog->setDefaultButton(KDialog::Yes);
+                connect(dialog, SIGNAL(yesClicked()), this, SLOT(showKcm()));
             }
+            if (!dialog->isVisible()) {
+                dialog->show();
+            }
+            dialog->raise();
+            dialog->activateWindow();
         }
     }
+}
+
+void RandrMonitorModule::showKcm()
+{
+    KToolInvocation::kdeinitExec("kcmshell4", QStringList() << "display");
 }
 
 QStringList RandrMonitorModule::connectedMonitors() const
