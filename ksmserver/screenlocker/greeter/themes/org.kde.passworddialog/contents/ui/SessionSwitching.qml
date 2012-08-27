@@ -48,7 +48,7 @@ Item {
 
             delegate: PlasmaComponents.ListItem {
                 content: PlasmaComponents.Label {
-                    text: session + " (" + location + ")"
+                    text: i18nc("thesession name and the location where the session is running (what vt)", "%1 (%2)", session, location)
                 }
             }
             highlight: PlasmaComponents.Highlight {
