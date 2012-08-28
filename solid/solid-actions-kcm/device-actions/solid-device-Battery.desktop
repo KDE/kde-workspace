@@ -143,6 +143,14 @@ Name[zh_TW]=充電狀態
 [Desktop Action plugged]
 # ctxt: battery plugged in
 Name=Plugged
+Name[cs]=Připojeno
+Name[es]=Enchufado
+Name[nl]=Ingeplugd
+Name[pt]=Ligada
+Name[pt_BR]=Conectada
+Name[sv]=Anslutet
+Name[uk]=З’єднано
+Name[x-test]=xxPluggedxx
 
 [Desktop Action rechargeable]
 Name=Rechargeable
