@@ -23,13 +23,14 @@ import "utils.js" as Utils
 Item {
     id: root
 
-    property int minimumWidth: 176
-    property int minimumHeight: 88
+    property int minimumWidth
+    property int minimumHeight
 
     property bool dragging: false
     property int dragId
 
     anchors.fill: parent
+    visible: repeater.count > 1
 
     Repeater {
         id: repeater
