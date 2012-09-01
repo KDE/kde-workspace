@@ -1,5 +1,13 @@
 [Desktop Entry]
 Name=Pager (QML)
+Name[es]=Paginador (QML)
+Name[hu]=Asztalváltó (QML)
+Name[pt]=Paginador (QML)
+Name[pt_BR]=Paginador (QML)
+Name[sv]=Skrivbordsvisning (QML)
+Name[uk]=Пейджер (QML)
+Name[x-test]=xxPager (QML)xx
+Name[zh_CN]=分页器 (QML)
 Icon=user-desktop
 Type=Service
 X-KDE-ServiceTypes=Plasma/Applet

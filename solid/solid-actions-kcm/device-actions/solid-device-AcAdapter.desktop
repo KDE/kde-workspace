@@ -3,6 +3,7 @@
 Name=Plugged
 Name[cs]=Připojeno
 Name[es]=Enchufado
+Name[hu]=Bedugva
 Name[ia]=Connectite
 Name[nl]=Ingeplugd
 Name[pt]=Ligado
@@ -10,6 +11,7 @@ Name[pt_BR]=Conectado
 Name[sv]=Ansluten
 Name[uk]=З’єднано
 Name[x-test]=xxPluggedxx
+Name[zh_CN]=已插入
 
 [Desktop Entry]
 Actions=plugged;

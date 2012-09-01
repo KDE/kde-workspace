@@ -145,6 +145,7 @@ Name[zh_TW]=充電狀態
 Name=Plugged
 Name[cs]=Připojeno
 Name[es]=Enchufado
+Name[hu]=Bedugva
 Name[ia]=Connectite
 Name[nl]=Ingeplugd
 Name[pt]=Ligada
@@ -152,6 +153,7 @@ Name[pt_BR]=Conectada
 Name[sv]=Anslutet
 Name[uk]=З’єднано
 Name[x-test]=xxPluggedxx
+Name[zh_CN]=已插入
 
 [Desktop Action rechargeable]
 Name=Rechargeable
