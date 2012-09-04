@@ -39,6 +39,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "accessibility/accessiblefactory.h"
+
 static const char description[] = I18N_NOOP( "The KDE desktop, panels and widgets workspace application." );
 static const char version[] = "0.4";
 QString plasmaLocale;
@@ -116,6 +118,10 @@ KDE_EXPORT int kdemain(int argc, char **argv)
     PlasmaApp *app = PlasmaApp::self();
     QApplication::setWindowIcon(KIcon("plasma"));
     app->disableSessionManagement(); // autostarted
+
+#ifndef QT_NO_ACCESSIBILITY
+    QAccessible::installFactory(Plasma::accessibleInterfaceFactory);
+#endif
 
     int rc = app->exec();    
     delete app;

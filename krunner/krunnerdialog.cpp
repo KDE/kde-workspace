@@ -71,7 +71,7 @@ KRunnerDialog::KRunnerDialog(Plasma::RunnerManager *runnerManager, QWidget *pare
     setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
     //setButtons(0);
-    setWindowTitle(i18n("Run Command"));
+    setWindowTitle(i18nc("@title:window", "Run Command"));
     setWindowIcon(KIcon(QLatin1String("system-run")));
 
     QPalette pal = palette();

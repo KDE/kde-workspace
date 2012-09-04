@@ -153,7 +153,7 @@ void HotkeysTreeViewContextMenu::createTriggerMenus(
         KHotKeys::Trigger::TriggerTypes triggerTypes,
         KHotKeys::Action::ActionTypes actionTypes)
     {
-    QMenu *newMenu = new QMenu(i18n("New"));
+    QMenu *newMenu = new QMenu(i18nc("@title:menu create various trigger types", "New"));
 
     if (triggerTypes & KHotKeys::Trigger::ShortcutTriggerType)
         {

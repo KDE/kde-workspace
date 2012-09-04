@@ -45,6 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDBus/QtDBus>
 
 #include "client.h"
+#include "composite.h"
 #ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
 #endif
@@ -59,6 +60,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "deleted.h"
 #include "effects.h"
 #include "overlaywindow.h"
+#include "useractions.h"
 #include <kwinglplatform.h>
 #include <kwinglutils.h>
 #ifdef KWIN_BUILD_SCRIPTING
@@ -71,8 +73,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/cursorfont.h>
 #include <QX11Info>
 #include <stdio.h>
-#include <kauthorized.h>
-#include <ktoolinvocation.h>
 #include <kglobalsettings.h>
 #include <kwindowsystem.h>
 #include <kwindowinfo.h>
@@ -105,8 +105,8 @@ Workspace::Workspace(bool restore)
 #ifdef KWIN_BUILD_SCREENEDGES
     , m_screenEdgeOrientation(0)
 #endif
+    , m_compositor(NULL)
     // Unsorted
-    , m_nextFrameDelay(0)
     , active_popup(NULL)
     , active_popup_client(NULL)
     , temporaryRulesMessages("_KDE_NET_WM_TEMPORARY_RULES", NULL, false)
@@ -128,13 +128,7 @@ Workspace::Workspace(bool restore)
 #ifdef KWIN_BUILD_TABBOX
     , tab_box(0)
 #endif
-    , popup(0)
-    , advanced_popup(0)
-    , desk_popup(0)
-    , screen_popup(NULL)
-    , activity_popup(0)
-    , add_tabs_popup(0)
-    , switch_to_tab_popup(0)
+    , m_userActionsMenu(new UserActionsMenu(this))
     , keys(0)
     , client_keys(NULL)
     , disable_shortcuts_keys(NULL)
@@ -147,14 +141,8 @@ Workspace::Workspace(bool restore)
     , set_active_client_recursion(0)
     , block_stacking_updates(0)
     , forced_global_mouse_grab(false)
-    , cm_selection(NULL)
-    , compositingSuspended(false)
-    , compositingBlocked(false)
-    , xrrRefreshRate(0)
     , transSlider(NULL)
     , transButton(NULL)
-    , forceUnredirectCheck(true)
-    , m_finishingCompositing(false)
     , m_scripting(NULL)
 {
     // If KWin was already running it saved its configuration after loosing the selection -> Reread
@@ -166,8 +154,6 @@ Workspace::Workspace(bool restore)
     dbus.registerObject("/KWin", this);
     dbus.connect(QString(), "/KWin", "org.kde.KWin", "reloadConfig",
                  this, SLOT(slotReloadConfig()));
-    dbus.connect(QString(), "/KWin", "org.kde.KWin", "reinitCompositing",
-                 this, SLOT(slotReinitCompositing()));
 
     // Initialize desktop grid array
     desktopGrid_[0] = 0;
@@ -190,11 +176,6 @@ Workspace::Workspace(bool restore)
     connect(&temporaryRulesMessages, SIGNAL(gotMessage(QString)),
             this, SLOT(gotTemporaryRulesMessage(QString)));
     connect(&rulesUpdatedTimer, SIGNAL(timeout()), this, SLOT(writeWindowRules()));
-    connect(&unredirectTimer, SIGNAL(timeout()), this, SLOT(delayedCheckUnredirect()));
-    connect(&compositeResetTimer, SIGNAL(timeout()), this, SLOT(resetCompositing()));
-    unredirectTimer.setSingleShot(true);
-    compositeResetTimer.setSingleShot(true);
-
     updateXTime(); // Needed for proper initialization of user_time in Client ctor
 
     delayFocusTimer = 0;
@@ -219,13 +200,17 @@ Workspace::Workspace(bool restore)
                  ExposureMask
                 );
 
-    compositingSuspended = !options->isUseCompositing();
 #ifdef KWIN_BUILD_TABBOX
     // need to create the tabbox before compositing scene is setup
     tab_box = new TabBox::TabBox(this);
 #endif
 
-    setupCompositing();
+    m_compositor = new Compositor(this);
+    connect(this, SIGNAL(currentDesktopChanged(int,KWin::Client*)), m_compositor, SLOT(addRepaintFull()));
+    connect(m_compositor, SIGNAL(compositingToggled(bool)), SIGNAL(compositingToggled(bool)));
+    connect(m_compositor, SIGNAL(compositingToggled(bool)), SLOT(slotCompositingToggled()));
+    dbus.connect(QString(), "/KWin", "org.kde.KWin", "reinitCompositing",
+                 m_compositor, SLOT(slotReinitialize()));
 
     // Compatibility
     long data = 1;
@@ -405,7 +390,6 @@ void Workspace::init()
 
     connect(&reconfigureTimer, SIGNAL(timeout()), this, SLOT(slotReconfigure()));
     connect(&updateToolWindowsTimer, SIGNAL(timeout()), this, SLOT(slotUpdateToolWindows()));
-    connect(&mousePollingTimer, SIGNAL(timeout()), SLOT(performMousePoll()));
 
     connect(KGlobalSettings::self(), SIGNAL(appearanceChanged()), this, SLOT(reconfigure()));
     connect(KGlobalSettings::self(), SIGNAL(settingsChanged(int)), this, SLOT(slotSettingsChanged(int)));
@@ -498,7 +482,8 @@ void Workspace::init()
 
 Workspace::~Workspace()
 {
-    finishCompositing();
+    delete m_compositor;
+    m_compositor = NULL;
     blockStackingUpdates(true);
 
     // TODO: grabXServer();
@@ -520,7 +505,6 @@ Workspace::~Workspace()
     for (UnmanagedList::iterator it = unmanaged.begin(), end = unmanaged.end(); it != end; ++it)
         (*it)->release(true);
     delete m_outline;
-    discardPopup();
     XDeleteProperty(display(), rootWindow(), atoms->kwin_running);
 
     writeWindowRules();
@@ -555,19 +539,26 @@ Client* Workspace::createClient(Window w, bool is_mapped)
         Client::deleteClient(c, Allowed);
         return NULL;
     }
+    connect(c, SIGNAL(needsRepaint()), m_compositor, SLOT(scheduleRepaint()));
+    connect(c, SIGNAL(activeChanged()), m_compositor, SLOT(checkUnredirect()));
+    connect(c, SIGNAL(fullScreenChanged()), m_compositor, SLOT(checkUnredirect()));
+    connect(c, SIGNAL(geometryChanged()), m_compositor, SLOT(checkUnredirect()));
+    connect(c, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), m_compositor, SLOT(checkUnredirect()));
+    connect(c, SIGNAL(blockingCompositingChanged(KWin::Client*)), m_compositor, SLOT(updateCompositeBlocking(KWin::Client*)));
     addClient(c, Allowed);
     return c;
 }
 
 Unmanaged* Workspace::createUnmanaged(Window w)
 {
-    if (compositing() && w == scene->overlayWindow()->window())
+    if (m_compositor && m_compositor->checkForOverlayWindow(w))
         return NULL;
     Unmanaged* c = new Unmanaged(this);
     if (!c->track(w)) {
         Unmanaged::deleteUnmanaged(c, Allowed);
         return NULL;
     }
+    connect(c, SIGNAL(needsRepaint()), m_compositor, SLOT(scheduleRepaint()));
     addUnmanaged(c, Allowed);
     emit unmanagedAdded(c);
     return c;
@@ -632,6 +623,9 @@ void Workspace::removeClient(Client* c, allowed_t)
 
     if (c == active_popup_client)
         closeActivePopup();
+    if (m_userActionsMenu->isMenuClient(c)) {
+        m_userActionsMenu->close();
+    }
 
     c->untab();
 
@@ -679,7 +673,9 @@ void Workspace::removeClient(Client* c, allowed_t)
 
     updateStackingOrder(true);
 
-    updateCompositeBlocking();
+    if (m_compositor) {
+        m_compositor->updateCompositeBlocking();
+    }
 
 #ifdef KWIN_BUILD_TABBOX
     if (tabBox()->isDisplayed())
@@ -713,13 +709,12 @@ void Workspace::addDeleted(Deleted* c, Toplevel *orig, allowed_t)
         stacking_order.append(c);
     }
     x_stacking_dirty = true;
+    connect(c, SIGNAL(needsRepaint()), m_compositor, SLOT(scheduleRepaint()));
 }
 
 void Workspace::removeDeleted(Deleted* c, allowed_t)
 {
     assert(deleted.contains(c));
-    if (scene)
-        scene->windowDeleted(c);
     emit deletedRemoved(c);
     deleted.removeAll(c);
     unconstrained_stacking_order.removeAll(c);
@@ -925,14 +920,17 @@ bool Workspace::waitForCompositingSetup()
         reconfigureTimer.stop();
         slotReconfigure();
     }
-    return compositingActive();
+    if (m_compositor) {
+        return m_compositor->isActive();
+    }
+    return false;
 }
 
 void Workspace::slotSettingsChanged(int category)
 {
     kDebug(1212) << "Workspace::slotSettingsChanged()";
     if (category == KGlobalSettings::SETTINGS_SHORTCUTS)
-        discardPopup();
+        m_userActionsMenu->discard();
 }
 
 /**
@@ -957,7 +955,7 @@ void Workspace::slotReconfigure()
     unsigned long changed = options->updateSettings();
 
     emit configChanged();
-    discardPopup();
+    m_userActionsMenu->discard();
     updateToolWindows(true);
 
     if (hasDecorationPlugin() && mgr->reset(changed)) {
@@ -996,15 +994,6 @@ void Workspace::slotReconfigure()
     }
     m_screenEdge.update();
 #endif
-
-    if (!compositingSuspended) {
-        setupCompositing();
-        if (effects)   // setupCompositing() may fail
-            effects->reconfigure();
-        addRepaintFull();
-    } else
-        finishCompositing();
-
     loadWindowRules();
     for (ClientList::Iterator it = clients.begin();
             it != clients.end();
@@ -1030,48 +1019,6 @@ void Workspace::slotReconfigure()
         rootInfo->setSupported(NET::WM2FrameOverlap, mgr->factory()->supports(AbilityExtendIntoClientArea));
     } else {
         rootInfo->setSupported(NET::WM2FrameOverlap, false);
-    }
-}
-
-void Workspace::restartKWin(const QString &reason)
-{
-    kDebug(1212) << "restarting kwin for:" << reason;
-    char cmd[1024]; // copied from crashhandler - maybe not the best way to do?
-    sprintf(cmd, "%s --replace &", QFile::encodeName(QCoreApplication::applicationFilePath()).constData());
-    system(cmd);
-}
-
-void Workspace::slotReinitCompositing()
-{
-    // Reparse config. Config options will be reloaded by setupCompositing()
-    KGlobal::config()->reparseConfiguration();
-    const QString graphicsSystem = KConfigGroup(KGlobal::config(), "Compositing").readEntry("GraphicsSystem", "");
-    if ((Extensions::nonNativePixmaps() && graphicsSystem == "native") ||
-        (!Extensions::nonNativePixmaps() && (graphicsSystem == "raster" || graphicsSystem == "opengl")) ) {
-        restartKWin("explicitly reconfigured graphicsSystem change");
-        return;
-    }
-
-    // Update any settings that can be set in the compositing kcm.
-#ifdef KWIN_BUILD_SCREENEDGES
-    m_screenEdge.update();
-#endif
-
-    // Restart compositing
-    finishCompositing();
-
-    // resume compositing if suspended
-    compositingSuspended = false;
-    options->setCompositingInitialized(false);
-    setupCompositing();
-    if (hasDecorationPlugin()) {
-        KDecorationFactory* factory = mgr->factory();
-        factory->reset(SettingCompositing);
-    }
-
-    if (effects) { // setupCompositing() may fail
-        effects->reconfigure();
-        emit compositingToggled(true);
     }
 }
 
@@ -1140,35 +1087,6 @@ void Workspace::saveDesktopSettings()
     group.sync();
 }
 
-QStringList Workspace::configModules(bool controlCenter)
-{
-    QStringList args;
-    args <<  "kwindecoration";
-    if (controlCenter)
-        args << "kwinoptions";
-    else if (KAuthorized::authorizeControlModule("kde-kwinoptions.desktop"))
-        args << "kwinactions" << "kwinfocus" <<  "kwinmoving" << "kwinadvanced"
-             << "kwinrules" << "kwincompositing"
-#ifdef KWIN_BUILD_TABBOX
-             << "kwintabbox"
-#endif
-#ifdef KWIN_BUILD_SCREENEDGES
-             << "kwinscreenedges"
-#endif
-#ifdef KWIN_BUILD_SCRIPTING
-             << "kwinscripts"
-#endif
-             ;
-    return args;
-}
-
-void Workspace::configureWM()
-{
-    QStringList args;
-    args << "--icon" << "preferences-system-windows" << configModules(false);
-    KToolInvocation::kdeinitExec("kcmshell4", args);
-}
-
 /**
  * Avoids managing a window with title \a title
  */
@@ -1215,8 +1133,6 @@ unsigned int ObscuringWindows::max_cache_size = 0;
 
 void ObscuringWindows::create(Client* c)
 {
-    if (compositing())
-        return; // Not needed with compositing
     if (cached == 0)
         cached = new QList<Window>;
     Window obs_win;
@@ -1294,7 +1210,7 @@ bool Workspace::setCurrentDesktop(int new_desktop)
                 continue;
             }
             if (!c->isOnDesktop(new_desktop) && c != movingClient && c->isOnCurrentActivity()) {
-                if (c->isShown(true) && c->isOnDesktop(old_desktop))
+                if (c->isShown(true) && c->isOnDesktop(old_desktop) && !compositing())
                     obs_wins.create(c);
                 (c)->updateVisibility();
             }
@@ -1396,9 +1312,6 @@ bool Workspace::setCurrentDesktop(int new_desktop)
     //    s += QString::number( desktop_focus_chain[i] ) + ", ";
     //kDebug( 1212 ) << s << "}\n";
 
-    if (compositing())
-        addRepaintFull();
-
     emit currentDesktopChanged(old_desktop, movingClient);
     return true;
 }
@@ -1429,19 +1342,23 @@ fetchActivityListAndCurrent(KActivities::Controller *controller)
     return CurrentAndList(c, l);
 }
 
-void Workspace::updateActivityList(bool running, bool updateCurrent, QString slot)
+void Workspace::updateActivityList(bool running, bool updateCurrent, QObject *target, QString slot)
 {
     if (updateCurrent) {
         QFutureWatcher<CurrentAndList>* watcher = new QFutureWatcher<CurrentAndList>;
         connect( watcher, SIGNAL(finished()), SLOT(handleActivityReply()) );
-        if (!slot.isEmpty())
+        if (!slot.isEmpty()) {
             watcher->setProperty("activityControllerCallback", slot); // "activity reply trigger"
+            watcher->setProperty("activityControllerCallbackTarget", qVariantFromValue((void*)target));
+        }
         watcher->setFuture(QtConcurrent::run(fetchActivityListAndCurrent, &activityController_ ));
     } else {
         QFutureWatcher<AssignedList>* watcher = new QFutureWatcher<AssignedList>;
         connect(watcher, SIGNAL(finished()), SLOT(handleActivityReply()));
-        if (!slot.isEmpty())
+        if (!slot.isEmpty()) {
             watcher->setProperty("activityControllerCallback", slot); // "activity reply trigger"
+            watcher->setProperty("activityControllerCallbackTarget", qVariantFromValue((void*)target));
+        }
         QStringList *target = running ? &openActivities_ : &allActivities_;
         watcher->setFuture(QtConcurrent::run(fetchActivityList, &activityController_, target, running));
     }
@@ -1465,9 +1382,10 @@ void Workspace::handleActivityReply()
 
     if (watcherObject) {
         QString slot = watcherObject->property("activityControllerCallback").toString();
+        QObject *target = static_cast<QObject*>(watcherObject->property("activityControllerCallbackTarget").value<void*>());
         watcherObject->deleteLater(); // has done it's job
         if (!slot.isEmpty())
-            QMetaObject::invokeMethod(this, slot.toAscii().data(), Qt::DirectConnection);
+            QMetaObject::invokeMethod(target, slot.toAscii().data(), Qt::DirectConnection);
     }
 }
 //END threaded activity list fetching
@@ -1510,7 +1428,7 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
                 continue;
             }
             if (!c->isOnActivity(new_activity) && c != movingClient && c->isOnCurrentDesktop()) {
-                if (c->isShown(true) && c->isOnActivity(old_activity))
+                if (c->isShown(true) && c->isOnActivity(old_activity) && !compositing())
                     obs_wins.create(c);
                 c->updateVisibility();
             }
@@ -1603,8 +1521,8 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
 
     //if ( effects != NULL && old_desktop != 0 && old_desktop != new_desktop )
     //    static_cast<EffectsHandlerImpl*>( effects )->desktopChanged( old_desktop );
-    if (compositing())
-        addRepaintFull();
+    if (compositing() && m_compositor)
+        m_compositor->addRepaintFull();
 
 }
 
@@ -1971,49 +1889,6 @@ void Workspace::focusToNull()
     XSetInputFocus(display(), null_focus_window, RevertToPointerRoot, xTime());
 }
 
-void Workspace::helperDialog(const QString& message, const Client* c)
-{
-    QStringList args;
-    QString type;
-    if (message == "noborderaltf3") {
-        KAction* action = qobject_cast<KAction*>(keys->action("Window Operations Menu"));
-        assert(action != NULL);
-        QString shortcut = QString("%1 (%2)").arg(action->text())
-                           .arg(action->globalShortcut().primary().toString(QKeySequence::NativeText));
-        args << "--msgbox" << i18n(
-                 "You have selected to show a window without its border.\n"
-                 "Without the border, you will not be able to enable the border "
-                 "again using the mouse: use the window operations menu instead, "
-                 "activated using the %1 keyboard shortcut.",
-                 shortcut);
-        type = "altf3warning";
-    } else if (message == "fullscreenaltf3") {
-        KAction* action = qobject_cast<KAction*>(keys->action("Window Operations Menu"));
-        assert(action != NULL);
-        QString shortcut = QString("%1 (%2)").arg(action->text())
-                           .arg(action->globalShortcut().primary().toString(QKeySequence::NativeText));
-        args << "--msgbox" << i18n(
-                 "You have selected to show a window in fullscreen mode.\n"
-                 "If the application itself does not have an option to turn the fullscreen "
-                 "mode off you will not be able to disable it "
-                 "again using the mouse: use the window operations menu instead, "
-                 "activated using the %1 keyboard shortcut.",
-                 shortcut);
-        type = "altf3warning";
-    } else
-        abort();
-    if (!type.isEmpty()) {
-        KConfig cfg("kwin_dialogsrc");
-        KConfigGroup cg(&cfg, "Notification Messages");  // Depends on KMessageBox
-        if (!cg.readEntry(type, true))
-            return;
-        args << "--dontagain" << "kwin_dialogsrc:" + type;
-    }
-    if (c != NULL)
-        args << "--embed" << QString::number(c->window());
-    KProcess::startDetached("kdialog", args);
-}
-
 void Workspace::setShowingDesktop(bool showing)
 {
     rootInfo->setShowingDesktop(showing);
@@ -2353,6 +2228,43 @@ QString Workspace::supportInformation() const
         support.append("Compositing is not active\n");
     }
     return support;
+}
+
+void Workspace::slotCompositingToggled()
+{
+    // notify decorations that composition state has changed
+    if (hasDecorationPlugin()) {
+        KDecorationFactory* factory = mgr->factory();
+        factory->reset(SettingCompositing);
+    }
+}
+
+/*
+ * Called from D-BUS
+ */
+bool Workspace::compositingActive()
+{
+    if (m_compositor) {
+        return m_compositor->isActive();
+    }
+    return false;
+}
+
+/*
+ * Called from D-BUS
+ */
+void Workspace::toggleCompositing()
+{
+    if (m_compositor) {
+        m_compositor->toggleCompositing();
+    }
+}
+
+void Workspace::slotToggleCompositing()
+{
+    if (m_compositor) {
+        m_compositor->slotToggleCompositing();
+    }
 }
 
 } // namespace
