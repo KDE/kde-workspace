@@ -95,6 +95,8 @@ macro_optional_find_package(Akonadi)
 macro_log_feature(Akonadi_FOUND "Akonadi" "An extensible cross-desktop storage service for PIM data" "http://pim.kde.org/akonadi" FALSE "" "Required to build certain Plasma DataEngines (Akonadi, Calendar)")
 macro_optional_find_package(KdepimLibs 4.5.60)
 macro_log_feature(KdepimLibs_FOUND "KDE PIM Libs" "KDE Libraries for PIM" "http://pim.kde.org/" FALSE "4.5.60" "Required to build certain Plasma DataEngines (Akonadi, Calendar)")
+macro_optional_find_package(QJSON)
+macro_log_feature(QJSON_FOUND "QJson" "Library to manage JSON objects with Qt" "http://qjson.sourceforge.net/" FALSE "" "Required to build Chrome/Chromium support for Plasma Bookmarks Runners")
 
 
 include(ConfigureChecks.cmake)

@@ -108,6 +108,7 @@ Item {
             anchors.fill: parent
             supportedActions: Qt.MoveAction | Qt.LinkAction
             onDragStarted: tooltipDialog.visible = false
+            delegateImage: root.icon
             mimeData {
                 source: parent
             }

@@ -37,10 +37,12 @@ Browser *BrowserFactory::find(const QString& browserName, QObject* parent)
         m_previousBrowser = new Firefox(parent);
     } else if (browserName.contains("opera", Qt::CaseInsensitive)) {
         m_previousBrowser = new Opera(parent);
+#ifdef HAVE_QJSON
     } else if (browserName.contains("chrome", Qt::CaseInsensitive)) {
         m_previousBrowser = new Chrome(new FindChromeProfile("google-chrome", QDir::homePath(), parent), parent);
     } else if (browserName.contains("chromium", Qt::CaseInsensitive)) {
         m_previousBrowser = new Chrome(new FindChromeProfile("chromium", QDir::homePath(), parent), parent);
+#endif // HAVE_QJSON
     } else {
         m_previousBrowser = new KDEBrowser(parent);
     }

@@ -66,6 +66,7 @@ Item {
                 if (devicesType == "all" ||
                     (devicesType == "removable" && data[last]["Removable"] == true) ||
                     (devicesType == "nonRemovable" && data[last]["Removable"] == false)) {
+                    updateTooltip();
                     expandDevice(last)
                     last = "";
                 }
@@ -106,6 +107,7 @@ Item {
         if (notifierDialog.count == 0) {
             plasmoid.status = "PassiveStatus"
         }
+        updateTooltip()
     }
 
     function configChanged() {
@@ -133,6 +135,20 @@ Item {
         plasmoid.setPopupIconByName("preferences-desktop-notification")
         plasmoid.showPopup(7500)
         popupIconTimer.restart()
+    }
+
+    function updateTooltip()
+    {
+        var tooltip = new Object
+        if (notifierDialog.count == 0) {
+            tooltip["image"] = "device-notifier"
+            tooltip["mainText"] = i18n("No devices available")
+        } else if (sdSource.last !="") {
+            tooltip["image"] = hpSource.data[sdSource.last]["icon"]
+            tooltip["mainText"] = i18n("Most recent device")
+            tooltip["subText"] = hpSource.data[sdSource.last]["text"]
+        }
+        plasmoid.popupIconToolTip = tooltip
     }
 
     Timer {
@@ -193,6 +209,7 @@ Item {
         }
         onCountChanged: {
             if (count == 0) {
+                updateTooltip();
                 passiveTimer.restart()
             } else {
                 passiveTimer.stop()
