@@ -20,6 +20,7 @@
 import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 
 Item {
     id: devicenotifier
@@ -188,76 +189,71 @@ Item {
         height: lineSvg.elementSize("horizontal-line").height
     }
 
-    ListView {
-        id: notifierDialog
+    PlasmaExtras.ScrollArea {
         anchors {
             top : headerSeparator.bottom
             topMargin: 10
             bottom: statusBarSeparator.top
             left: parent.left
-            right: scrollBar.visible ? scrollBar.left : parent.right
-        }
-        model: PlasmaCore.SortFilterModel {
-            id: filterModel
-            sourceModel: PlasmaCore.DataModel {
-                dataSource: sdSource
-            }
-            filterRole: "Removable"
-            filterRegExp: "true"
-            sortRole: "Timestamp"
-            sortOrder: Qt.DescendingOrder
-        }
-        onCountChanged: {
-            if (count == 0) {
-                updateTooltip();
-                passiveTimer.restart()
-            } else {
-                passiveTimer.stop()
-                plasmoid.status = "ActiveStatus"
-            }
-        }
-        delegate: deviceItem
-        highlight: deviceHighlighter
-        highlightMoveDuration: 250
-        highlightMoveSpeed: 1
-        clip: true
-
-        section {
-            property: "Type Description"
-            delegate: Item {
-                height: childrenRect.height
-                width: notifierDialog.width
-                PlasmaCore.SvgItem {
-                    visible: parent.y > 0
-                    svg: lineSvg
-                    elementId: "horizontal-line"
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: lineSvg.elementSize("horizontal-line").height
-                }
-                PlasmaComponents.Label {
-                    x: 8
-                    y: 8
-                    opacity: 0.6
-                    text: section
-                    color: theme.textColor
-                }
-            }
-        }
-
-        property int currentExpanded: -1
-        Component.onCompleted: currentIndex=-1
-    }
-
-    PlasmaComponents.ScrollBar {
-        id: scrollBar
-        flickableItem: notifierDialog
-        anchors {
             right: parent.right
-            top: notifierDialog.top
-            bottom: notifierDialog.bottom
+        }
+        ListView {
+            id: notifierDialog
+
+            model: PlasmaCore.SortFilterModel {
+                id: filterModel
+                sourceModel: PlasmaCore.DataModel {
+                    dataSource: sdSource
+                }
+                filterRole: "Removable"
+                filterRegExp: "true"
+                sortRole: "Timestamp"
+                sortOrder: Qt.DescendingOrder
+            }
+            onCountChanged: {
+                if (count == 0) {
+                    updateTooltip();
+                    passiveTimer.restart()
+                } else {
+                    passiveTimer.stop()
+                    plasmoid.status = "ActiveStatus"
+                }
+            }
+            delegate: deviceItem
+            highlight: deviceHighlighter
+            highlightMoveDuration: 250
+            highlightMoveSpeed: 1
+            //this is needed to make SectionScroller actually work
+            //acceptable since one doesn't have a billion of devices
+            cacheBuffer: 1000
+
+            section {
+                property: "Type Description"
+                delegate: Item {
+                    height: childrenRect.height
+                    width: notifierDialog.width
+                    PlasmaCore.SvgItem {
+                        visible: parent.y > 0
+                        svg: lineSvg
+                        elementId: "horizontal-line"
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        height: lineSvg.elementSize("horizontal-line").height
+                    }
+                    PlasmaComponents.Label {
+                        x: 8
+                        y: 8
+                        opacity: 0.6
+                        text: section
+                        color: theme.textColor
+                    }
+                }
+            }
+
+            property int currentExpanded: -1
+            Component.onCompleted: currentIndex=-1
         }
     }
 
