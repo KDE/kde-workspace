@@ -207,19 +207,27 @@ void keyboardpainter::paintEvent(QPaintEvent *){
 
     painter.drawRect(x,y,ctrlsz,kszy);
     painter.drawText(x+30,y+35,"Ctrl");
+
     x+=ctrlsz;
+
     painter.drawRect(x,y,altsz,kszy);
     painter.drawText(x+30,y+35,"Alt");
+
     x+=altsz;
+
     painter.drawRect(x,y,spsz,kszy);
+
     x+=spsz;
-    painter.drawRect(x,y,ctrlsz,kszy);
-    painter.drawText(x+30,y+35,"Ctrl");
-    x+=ctrlsz;
+
     painter.drawRect(x,y,altsz,kszy);
     painter.setPen(QColor(lev34color));
     painter.drawText(x+30,y+35,"AltGr");
     painter.setPen(QColor(lev12color));
+
+    x+=ctrlsz;
+
+    painter.drawRect(x,y,ctrlsz,kszy);
+    painter.drawText(x+30,y+35,"Ctrl");
 
     if(symbol.nill>=120){
         painter.drawRect(0,0,1030,490);
