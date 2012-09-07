@@ -112,6 +112,7 @@ set(kcm_keyboard_PART_SRCS
   iso_codes.cpp
   kcmmisc.cpp
   bindings.cpp
+  keyaliases.cpp
   keyboardlayout.cpp
   keyboardpainter.cpp
   keys.cpp

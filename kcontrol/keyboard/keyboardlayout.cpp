@@ -3,11 +3,22 @@
 #include"keys.h"
 #include<QMessageBox>
 #include<QFile>
+
+#include <QtGui/QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/XKBlib.h>
+#include <X11/extensions/XKBrules.h>
+#include <fixx11h.h>
+#include <config-workspace.h>
+#include<QDir>
+
+
 Keyboardlayout::Keyboardlayout()
 {
 }
-void Keyboardlayout::getLayout(QString a){
-    includeSymbol(a);
+void Keyboardlayout::getLayout(QString a,QString cname){
+    includeSymbol(a,cname);
     int i=a.indexOf("name[Group1]=");
     i+=13;
     QString n=a.mid(i);
@@ -25,7 +36,7 @@ void Keyboardlayout::getLayout(QString a){
     for(int k=0;k<st.size();k++){
         dum.getKey(st.at(k));
         if(dum.keyname.startsWith("Lat"))
-            dum.keyname=latkeys(dum.keyname);
+            dum.keyname=alias.getAlias(cname,dum.keyname);
         if(dum.keyname.contains("AE")){
             QString ind=dum.keyname.right(2);
             int index=ind.toInt();
@@ -85,13 +96,17 @@ void Keyboardlayout::getLayout(QString a){
     q.setText(e);
     q.exec();*/
 }
-void Keyboardlayout::includeSymbol(QString a){
+void Keyboardlayout::includeSymbol(QString a,QString cname){
+    int k=a.indexOf("include");
+    a=a.mid(k);
+    /*QMessageBox x;
+    x.setText(a);
+    x.exec();*/
     QList<QString>tobeinclude;
     tobeinclude=a.split("include");
-    //int k=a.indexOf("include");
-    QMessageBox s;
+    //QMessageBox s;
     QString r;
-    for(int o=0;o<tobeinclude.size();o++){
+    for(int o=1;o<tobeinclude.size();o++){
         QString d=tobeinclude.at(o);
         d.simplified();
     //s.setText(d);
@@ -102,7 +117,7 @@ void Keyboardlayout::includeSymbol(QString a){
         QString incsym=d.left(k);
         incsym.remove(" ");
         incsym.remove("\"");
-        QMessageBox q;
+        //QMessageBox q;
         QList<QString> incfile;
         incfile=incsym.split("(");
         for(int i=0;i<incfile.size();i++){
@@ -121,7 +136,7 @@ void Keyboardlayout::includeSymbol(QString a){
         r.append(incfile.at(1));
     //q.setText(r);
     //q.exec();
-        QString filename="/usr/share/X11/xkb/symbols/";
+        QString filename=findSymbolbasedir();
         filename.append(incfile.at(0));
     //q.setText(filename);
     //q.exec();
@@ -130,71 +145,42 @@ void Keyboardlayout::includeSymbol(QString a){
         QString content = file.readAll();
         QList<QString> symstrlist;
         symstrlist=content.split("xkb_symbols ");
-        for(int u=0;u<symstrlist.size();u++){
+        for(int u=1;u<symstrlist.size();u++){
             QString cur=symstrlist.at(u);
             int pos = cur.indexOf("{");
             cur=cur.left(pos);
             if(cur.contains(incfile.at(1))){
-                getLayout(symstrlist.at(u));
+                getLayout(symstrlist.at(u),cname);
                 break;
             }
         }
     }
 }
-QString Keyboardlayout::latkeys(QString a){
-    if(a.startsWith("Lat")){
-    if(a=="LatQ")
-        return ("AD01");
-    if(a=="LatW")
-        return ("AD02");
-    if(a=="LatE")
-        return ("AD03");
-    if(a=="LatR")
-        return ("AD04");
-    if(a=="LatT")
-        return ("AD05");
-    if(a=="LatY")
-        return ("AD06");
-    if(a=="LatU")
-        return ("AD07");
-    if(a=="LatI")
-        return ("AD08");
-    if(a=="LatO")
-        return ("AD09");
-    if(a=="LatP")
-        return ("AD10");
-    if(a=="LatA")
-        return ("AC01");
-    if(a=="LatS")
-        return ("AC02");
-    if(a=="LatD")
-        return ("AC03");
-    if(a=="LatF")
-        return ("AC04");
-    if(a=="LatG")
-        return ("AC05");
-    if(a=="LatH")
-        return ("AC06");
-    if(a=="LatJ")
-        return ("AC07");
-    if(a=="LatK")
-        return ("AC08");
-    if(a=="LatL")
-        return ("AC09");
-    if(a=="LatZ")
-        return ("AB01");
-    if(a=="LatX")
-        return ("AB02");
-    if(a=="LatC")
-        return ("AB03");
-    if(a=="LatV")
-        return ("AB04");
-    if(a=="LatB")
-        return ("AB05");
-    if(a=="LatN")
-        return ("AB06");
-        return ("AB07");
+
+QString Keyboardlayout::findSymbolbasedir(){
+
+    QString symBasedir;
+    QString xkbParentDir;
+
+    QString base(XLIBDIR);
+    if( base.count('/') >= 3 ) {
+        // .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
+        QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
+        QDir baseDir(base + delta);
+        if( baseDir.exists() ) {
+            xkbParentDir = baseDir.absolutePath();
+        }
+        else {
+            QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
+            if( baseDir.exists() ) {
+                xkbParentDir = baseDir.absolutePath();
+            }
+        }
     }
-    else
-        return ("a");
+
+    if( xkbParentDir.isEmpty() ) {
+        xkbParentDir = "/usr/share/X11";
+    }
+    symBasedir=QString("%1/xkb/symbols/").arg(xkbParentDir);
+    return(symBasedir);
 }

@@ -144,7 +144,7 @@ void AddLayoutDialog::accept()
 {
 	selectedLayoutUnit.layout = layoutDialogUi->layoutComboBox->itemData(layoutDialogUi->layoutComboBox->currentIndex()).toString();
 	selectedLayoutUnit.variant = layoutDialogUi->variantComboBox->itemData(layoutDialogUi->variantComboBox->currentIndex()).toString();
-	QString label = layoutDialogUi->labelEdit->text();
+    QString label = layoutDialogUi->labelEdit->text();
 	if( label == selectedLayoutUnit.layout ) {
 		label = "";
 	}
@@ -153,57 +153,18 @@ void AddLayoutDialog::accept()
 	QDialog::accept();
 }
 
-QString AddLayoutDialog::getvariant(QString variant){
-    if (variant==""){
-        variant="basic";
-        if(selectedLayout=="ma")
-            variant="arabic";
-        if(selectedLayout=="az")
-            variant="latin";
-        if(selectedLayout=="bg")
-            variant="bds";
-        if(selectedLayout=="fi")
-            variant="kotoistus";
-        if(selectedLayout=="ca")
-            variant="fr";
-        if(selectedLayout=="in")
-            variant="deva";
-        if(selectedLayout=="jp")
-            variant="106";
-        if(selectedLayout=="ir")
-            variant="pes";
-        if(selectedLayout=="kr")
-            variant="kr106";
-        if(selectedLayout=="ru")
-            variant="winkeys";
-        if(selectedLayout=="lk")
-            variant="sin_phonetic";
-        if(selectedLayout=="ke")
-            variant="swa";
-        if(selectedLayout=="tz")
-            variant="swa";
-        if(selectedLayout=="tw")
-            variant="tw";
-        if(selectedLayout=="bw")
-            variant="tswana";
-        if(selectedLayout=="ua")
-            variant="unicode";
-        if(selectedLayout=="pk")
-            variant="urd-phonetic";
-        if(selectedLayout=="uz")
-            variant="cyrillic";
-    }
-    return variant;
-}
 
 void AddLayoutDialog::preview(){
     QString variant=layoutDialogUi->variantComboBox->itemData(layoutDialogUi->variantComboBox->currentIndex()).toString();
     QMessageBox q;
-    variant=getvariant(variant);
-    /*a.append(selectedLayout);
-    q.setText(a);
-    q.exec();*/
+    //variant=getvariant(variant);
+    /*a.append(selectedLayout);*/
+    q.setText(variant);
+    q.exec();
+    q.setText(selectedLayout);
+    q.exec();
     layoutprev=new keyboardpainter();
+    variant=layoutprev->getvariant(variant,selectedLayout);
     layoutprev->getkeyboardlayout(selectedLayout,variant);
     layoutprev->exec();
     layoutprev->setModal(true);

@@ -33,6 +33,7 @@
 #include <QtGui/QX11Info>
 
 #include "keyboard_config.h"
+#include "keyboardpainter.h"
 #include "xkb_rules.h"
 #include "flags.h"
 #include "x11_helper.h"
@@ -335,6 +336,8 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->moveUpBtn, SIGNAL(clicked(bool)), this, SLOT(moveUp()));
 	connect(uiWidget->moveDownBtn, SIGNAL(clicked(bool)), this, SLOT(moveDown()));
 
+    connect(uiWidget->previewbutton,SIGNAL(clicked(bool)),this,SLOT(previewlayout()));
+
 	connect(uiWidget->xkbGrpClearBtn, SIGNAL(clicked(bool)), this, SLOT(clearGroupShortcuts()));
 	connect(uiWidget->xkb3rdLevelClearBtn, SIGNAL(clicked(bool)), this, SLOT(clear3rdLevelShortcuts()));
 
@@ -358,6 +361,35 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 
 	connect(uiWidget->layoutLoopingCheckBox, SIGNAL(clicked(bool)), this, SLOT(uiChanged()));
 	connect(uiWidget->layoutLoopCountSpinBox, SIGNAL(valueChanged(int)), this, SLOT(uiChanged()));
+}
+
+void KCMKeyboardWidget::previewlayout(){
+    QModelIndex index = uiWidget->layoutsTableView->currentIndex() ;
+    QModelIndex idcountry = index.sibling(index.row(),0) ;
+    QString country=uiWidget->layoutsTableView->model()->data(idcountry).toString();
+    QModelIndex idvariant = index.sibling(index.row(),2) ;
+    QString variant=uiWidget->layoutsTableView->model()->data(idvariant).toString();
+    QMessageBox q;
+    q.setText(country);
+    q.exec();
+    layoutprev=new keyboardpainter();
+    if(variant=="")
+    variant=layoutprev->getvariant(variant,country);
+    else{
+        const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
+        foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
+            if(variant==variantInfo->description){
+                q.setText(variant);
+                q.exec();
+                variant=variantInfo->name;
+                break;
+            }
+        }
+    }
+    layoutprev->getkeyboardlayout(country,variant);
+    layoutprev->exec();
+    layoutprev->setModal(true);
+
 }
 
 void KCMKeyboardWidget::configureLayoutsChanged()
@@ -388,6 +420,7 @@ void KCMKeyboardWidget::layoutSelectionChanged()
 	uiWidget->removeLayoutBtn->setEnabled( ! selected.isEmpty() );
 	QPair<int, int> rowsRange( getSelectedRowRange(selected) );
 	uiWidget->moveUpBtn->setEnabled( ! selected.isEmpty() && rowsRange.first > 0);
+    uiWidget->previewbutton->setEnabled(! selected.isEmpty());
 	uiWidget->moveDownBtn->setEnabled( ! selected.isEmpty() && rowsRange.second < keyboardConfig->layouts.size()-1 );
 }
 

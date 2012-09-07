@@ -1,24 +1,6 @@
-/*
- *  Copyright (C) 2012 Shivam Makkar (amourphious1992@gmail.com)
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
-
 #include "keyboardpainter.h"
 #include "ui_keyboardpainter.h"
+
 
 keyboardpainter::keyboardpainter(QWidget *parent) :
     QDialog(parent),
@@ -31,180 +13,242 @@ keyboardpainter::~keyboardpainter()
 {
     delete ui;
 }
+QString keyboardpainter::getvariant(QString variant,QString selectedLayout){
+    if (variant==""){
+        variant="basic";
+        if(selectedLayout=="ma")
+            variant="arabic";
+        if(selectedLayout=="az")
+            variant="latin";
+        if(selectedLayout=="bg")
+            variant="bds";
+        if(selectedLayout=="fi")
+            variant="kotoistus";
+        if(selectedLayout=="ca")
+            variant="fr";
+        if(selectedLayout=="in")
+            variant="deva";
+        if(selectedLayout=="jp")
+            variant="106";
+        if(selectedLayout=="ir")
+            variant="pes";
+        if(selectedLayout=="kr")
+            variant="kr106";
+        if(selectedLayout=="ru")
+            variant="winkeys";
+        if(selectedLayout=="lk")
+            variant="sin_phonetic";
+        if(selectedLayout=="ke")
+            variant="swa";
+        if(selectedLayout=="tz")
+            variant="swa";
+        if(selectedLayout=="tw")
+            variant="tw";
+        if(selectedLayout=="bw")
+            variant="tswana";
+        if(selectedLayout=="ua")
+            variant="unicode";
+        if(selectedLayout=="pk")
+            variant="urd-phonetic";
+        if(selectedLayout=="uz")
+            variant="cyrillic";
+    }
+    return variant;
+}
+
 void keyboardpainter::paintEvent(QPaintEvent *){
 
     //getkeyboardlayout("am","Armenian (eastern)");
+    const QString lev12color="#d4d4d4",lev34color="#FF3300";
     setWindowTitle(kblayout.Layoutname);
     QPainter painter(this);
+    QFont kbfont("Ubuntu",12);
+    painter.setFont(kbfont);
     painter.setBrush(QBrush(Qt::darkGray));
     //painter.setPen(Qt::black);
     //painter.drawText(450,10,kblayout.Layoutname);
     painter.drawRect(0,20,1030,490);
-    painter.setPen(QColor("#d4d4d4"));
+    painter.setPen(QColor(lev12color));
     painter.setBrush(QBrush(Qt::black));
+    int x,y;
+    const int row1x=10,row1y=30;
+    x=row1x;
+    y=row1y;
 
-    int x=10,y=30;
-    painter.drawRect(x,y,50,50);
-    QChar a=0xa4;
-    QString b=QString(a);
-    painter.drawText(20,55,b);
-    int spacex=50;
-    x+=50;
+    const int escsz=50;
+    painter.drawRect(x,y,escsz,escsz);
+    painter.drawText(20,55,"ESC");
+
+    const int spacex=50;
+    x+=spacex;
+
+    const int fnkeyspace=60,fnkeysizex=50,fnkeysizey=50;
     int f=1;
     QString str;
     for(int i=0;i<3;i++){
         x+=spacex;
         for(int j=0;j<4;j++){
-            x+=60;
-            painter.drawRect(x,y,50,50);
+            x+=fnkeyspace;
+            painter.drawRect(x,y,fnkeysizex,fnkeysizey);
             painter.drawText(x+15,y+30,"F");
             painter.drawText(x+20,y+30,str.setNum(f));
             f++;
         }
     }
 
-    x=10;
-    y=90;
+    const int kszx=70,kszy=70;
 
-    painter.drawRect(x,y,70,70);
+    const int row2x=10,row2y=90;
+    x=row2x;
+    y=row2y;
+
+    painter.drawRect(x,y,kszx,kszy);
     painter.drawText(x+5,y+20,"~");
     painter.drawText(x+5,y+60,"`");
-    f=1;
     for(int i=0;i<12;i++){
-        x+=70;
-        painter.drawRect(x,y,70,70);
+        x+=kszx;
+        painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AE[i].klst.size();j++){
-            /*QMessageBox fg;
-            fg.setText("H!");
-            fg.exec();*/
-            if(j==1){
-                /*QMessageBox fg;*/
-
-                QString p;
-                p=kblayout.AE[i].klst.at(1);
-                painter.drawText(x+5,y+20,symbol.getkeyuni(p));
-            }
-            if(j==0){
-                //fg.setText("H2");
-
-                painter.drawText(x+5,y+60,symbol.getkeyuni(kblayout.AE[i].klst.at(0)));
-
-            }
+            if(j==1)
+                painter.drawText(x+15,y+10,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AE[i].klst.at(1)));
+            if(j==0)
+                painter.drawText(x+15,y+40,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AE[i].klst.at(0)));
+            painter.setPen(QColor(lev34color));
             if(j==2)
-                painter.drawText(x+60,y+60,symbol.getkeyuni(kblayout.AE[i].klst.at(2)));
+                painter.drawText(x+40,y+40,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AE[i].klst.at(2)));
             if(j==3)
-                painter.drawText(x+60,y+20,symbol.getkeyuni(kblayout.AE[i].klst.at(3)));
+                painter.drawText(x+40,y+25,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AE[i].klst.at(3)));
+            painter.setPen(QColor(lev12color));
         }
-        f++;
     }
-    x+=70;
-    painter.drawRect(x,y,100,70);
+    x+=kszx;
+
+    const int bkspszx=100;
+
+    painter.drawRect(x,y,bkspszx,kszy);
     painter.drawText(x+10,y+20,"<--");
     painter.drawText(x+10,y+60,"Backspace");
 
-    x=10;
-    y=170;
+    const int row3x=10,row3y=170;
+    x=row3x;
+    y=row3y;
 
-    painter.drawRect(x,y,100,70);
-    painter.drawText(x+10,y+20,"<--");
-    painter.drawText(x+10,y+25,"-->");
+    const int tabszx=100;
+
+    painter.drawRect(x,y,tabszx,kszy);
+    painter.drawText(x+20,y+25,"<--");
+    painter.drawText(x+15,y+35,"-->");
     painter.drawText(x+10,y+60,"TAB");
-    x+=100;
+    x+=tabszx;
 
     for(int i=0;i<12;i++){
-        painter.drawRect(x,y,70,70);
+        painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AD[i].klst.size();j++){
-            /*QMessageBox fg;
-            fg.setText("H3");
-            fg.exec();*/
             if(j==1)
-                painter.drawText(x+5,y+20,symbol.getkeyuni(kblayout.AD[i].klst.at(1)));
+                painter.drawText(x+15,y+10,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AD[i].klst.at(1)));
             if(j==0)
-                painter.drawText(x+5,y+60,symbol.getkeyuni(kblayout.AD[i].klst.at(0)));
+                painter.drawText(x+15,y+40,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AD[i].klst.at(0)));
+            painter.setPen(QColor(lev34color));
             if(j==2)
-                painter.drawText(x+60,y+60,symbol.getkeyuni(kblayout.AD[i].klst.at(2)));
+                painter.drawText(x+40,y+40,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AD[i].klst.at(2)));
             if(j==3)
-                painter.drawText(x+60,y+20,symbol.getkeyuni(kblayout.AD[i].klst.at(3)));
+                painter.drawText(x+40,y+25,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AD[i].klst.at(3)));
+            painter.setPen(QColor(lev12color));
         }
-        x+=70;
+        x+=kszx;
     }
-    x+=100;
-    painter.drawRect(x,y,400,70);
 
-    painter.drawRect(x,y,70,70);
-    painter.drawText(x+10,y+20,"|");
-    painter.drawText(x+10,y+60,"\\");
+    painter.drawRect(x,y,kszx,kszy);
+    painter.drawText(x+20,y+20,"|");
+    painter.drawText(x+20,y+60,"\\");
 
-    x=10;
-    y=250;
-    painter.drawRect(x,y,100,70);
+    const int row4x=10,row4y=250;
+
+    x=row4x;
+    y=row4y;
+
+    const int capszx=100;
+
+    painter.drawRect(x,y,capszx,kszy);
     painter.drawText(x+10,y+20,"^");
     painter.drawText(x+10,y+60,"Caps Lock");
-    x+=100;
+    x+=capszx;
 
     for(int i=0;i<11;i++){
-        painter.drawRect(x,y,70,70);
+        painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AC[i].klst.size();j++){
-            /*QMessageBox fg;
-            fg.setText("H4");
-            fg.exec();*/
             if(j==1)
-                painter.drawText(x+5,y+20,symbol.getkeyuni(kblayout.AC[i].klst.at(1)));
+                painter.drawText(x+15,y+10,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AC[i].klst.at(1)));
             if(j==0)
-                painter.drawText(x+5,y+60,symbol.getkeyuni(kblayout.AC[i].klst.at(0)));
+                painter.drawText(x+15,y+40,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AC[i].klst.at(0)));
+            painter.setPen(QColor(lev34color));
             if(j==2)
-                painter.drawText(x+60,y+60,symbol.getkeyuni(kblayout.AC[i].klst.at(2)));
+                painter.drawText(x+40,y+40,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AC[i].klst.at(2)));
             if(j==3)
-                painter.drawText(x+60,y+20,symbol.getkeyuni(kblayout.AC[i].klst.at(3)));
+                painter.drawText(x+40,y+25,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AC[i].klst.at(3)));
+            painter.setPen(QColor(lev12color));
         }
-        x+=70;
+        x+=kszx;
     }
 
-    painter.drawRect(x,y,140,70);
+    const int retsz=140;
+
+    painter.drawRect(x,y,retsz,kszy);
     painter.drawText(x+90,y+20,"|");
     painter.drawText(x+75,y+25,"<--");
     painter.drawText(x+10,y+60,"Enter");
 
-    x=10;
-    y=330;
+    const int row5x=10,row5y=330;
 
-    painter.drawRect(x,y,155,70);
+    x=row5x;
+    y=row5y;
+
+    const int shiftsz=155;
+
+    painter.drawRect(x,y,shiftsz,kszy);
     painter.drawText(x+10,y+60,"SHIFT");
-    x+=155;
+    x+=shiftsz;
 
     for(int i=0;i<10;i++){
-        painter.drawRect(x,y,70,70);
+        painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AB[i].klst.size();j++){
             if(j==1)
-                painter.drawText(x+5,y+20,symbol.getkeyuni(kblayout.AB[i].klst.at(1)));
+                painter.drawText(x+15,y+10,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AB[i].klst.at(1)));
             if(j==0)
-                painter.drawText(x+5,y+60,symbol.getkeyuni(kblayout.AB[i].klst.at(0)));
+                painter.drawText(x+15,y+40,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AB[i].klst.at(0)));
+            painter.setPen(QColor(lev34color));
             if(j==2)
-                painter.drawText(x+60,y+60,symbol.getkeyuni(kblayout.AB[i].klst.at(2)));
+                painter.drawText(x+40,y+40,20,20,Qt::AlignBottom,symbol.getkeyuni(kblayout.AB[i].klst.at(2)));
             if(j==3)
-                painter.drawText(x+60,y+20,symbol.getkeyuni(kblayout.AB[i].klst.at(3)));
+                painter.drawText(x+40,y+25,20,20,Qt::AlignTop,symbol.getkeyuni(kblayout.AB[i].klst.at(3)));
+            painter.setPen(QColor(lev12color));
         }
-        x+=70;
+        x+=kszx;
     }
-    painter.drawRect(x,y,155,70);
+    painter.drawRect(x,y,shiftsz,kszy);
     painter.drawText(x+10,y+60,"SHIFT");
 
-    x=110;
-    y=410;
+    const int row6x=110,row6y=410;
+    const int ctrlsz=100,altsz=100,spsz=400;
 
-    painter.drawRect(x,y,100,70);
+    x=row6x;
+    y=row6y;
+
+    painter.drawRect(x,y,ctrlsz,kszy);
     painter.drawText(x+30,y+35,"Ctrl");
-    x+=100;
-    painter.drawRect(x,y,100,70);
+    x+=ctrlsz;
+    painter.drawRect(x,y,altsz,kszy);
     painter.drawText(x+30,y+35,"Alt");
-    x+=100;
-    painter.drawRect(x,y,400,70);
-    x+=400;
-    painter.drawRect(x,y,100,70);
+    x+=altsz;
+    painter.drawRect(x,y,spsz,kszy);
+    x+=spsz;
+    painter.drawRect(x,y,ctrlsz,kszy);
     painter.drawText(x+30,y+35,"Ctrl");
-    x+=100;
-    painter.drawRect(x,y,100,70);
-    painter.drawText(x+30,y+35,"Alt");
+    x+=ctrlsz;
+    painter.drawRect(x,y,altsz,kszy);
+    painter.setPen(QColor("#FF3300"));
+    painter.drawText(x+30,y+35,"AltGr");
+    painter.setPen(QColor("#d4d4d4"));
 
     if(symbol.nill>=120){
         painter.drawRect(0,0,1030,490);
@@ -213,8 +257,11 @@ void keyboardpainter::paintEvent(QPaintEvent *){
 
 
 }
+
+
+
 void keyboardpainter::getkeyboardlayout(QString country, QString layoutvariant){
-    QString filename="/usr/share/X11/xkb/symbols/";
+    QString filename=kblayout.findSymbolbasedir();
     filename.append(country);
     QFile file(filename);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -234,7 +281,7 @@ void keyboardpainter::getkeyboardlayout(QString country, QString layoutvariant){
         f.append("\"");
         f=f.remove(" ");
         if(h==f){
-            kblayout.getLayout(symstr.at(i));
+            kblayout.getLayout(symstr.at(i),country);
             /*QString e;
             e=kblayout.Layoutname;
             for(int l=0;l<12;l++){
