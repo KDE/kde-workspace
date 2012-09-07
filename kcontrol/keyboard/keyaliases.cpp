@@ -6,7 +6,7 @@
 
 Aliases::Aliases()
 {
-    QString filename="/usr/share/X11/xkb/keycodes/aliases";
+    QString filename=findaliasdir();
     QFile file(filename);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString content = file.readAll();
@@ -68,3 +68,30 @@ QString Aliases::getAlias(QString cname, QString name){
     return a;
 }
 
+QString Aliases::findaliasdir(){
+
+    QString aliasdir;
+    QString xkbParentDir;
+
+    QString base(XLIBDIR);
+    if( base.count('/') >= 3 ) {
+        // .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
+        QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
+        QDir baseDir(base + delta);
+        if( baseDir.exists() ) {
+            xkbParentDir = baseDir.absolutePath();
+        }
+        else {
+            QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
+            if( baseDir.exists() ) {
+                xkbParentDir = baseDir.absolutePath();
+            }
+        }
+    }
+
+    if( xkbParentDir.isEmpty() ) {
+        xkbParentDir = "/usr/share/X11";
+    }
+    aliasdir=QString("%1/xkb/keycodes/aliases").arg(xkbParentDir);
+    return(aliasdir);
+}

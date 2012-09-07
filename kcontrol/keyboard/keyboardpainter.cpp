@@ -13,63 +13,27 @@ keyboardpainter::~keyboardpainter()
 {
     delete ui;
 }
-QString keyboardpainter::getvariant(QString variant,QString selectedLayout){
-    if (variant==""){
-        variant="basic";
-        if(selectedLayout=="ma")
-            variant="arabic";
-        if(selectedLayout=="az")
-            variant="latin";
-        if(selectedLayout=="bg")
-            variant="bds";
-        if(selectedLayout=="fi")
-            variant="kotoistus";
-        if(selectedLayout=="ca")
-            variant="fr";
-        if(selectedLayout=="in")
-            variant="deva";
-        if(selectedLayout=="jp")
-            variant="106";
-        if(selectedLayout=="ir")
-            variant="pes";
-        if(selectedLayout=="kr")
-            variant="kr106";
-        if(selectedLayout=="ru")
-            variant="winkeys";
-        if(selectedLayout=="lk")
-            variant="sin_phonetic";
-        if(selectedLayout=="ke")
-            variant="swa";
-        if(selectedLayout=="tz")
-            variant="swa";
-        if(selectedLayout=="tw")
-            variant="tw";
-        if(selectedLayout=="bw")
-            variant="tswana";
-        if(selectedLayout=="ua")
-            variant="unicode";
-        if(selectedLayout=="pk")
-            variant="urd-phonetic";
-        if(selectedLayout=="uz")
-            variant="cyrillic";
-    }
-    return variant;
-}
+
 
 void keyboardpainter::paintEvent(QPaintEvent *){
 
-    //getkeyboardlayout("am","Armenian (eastern)");
+
     const QString lev12color="#d4d4d4",lev34color="#FF3300";
+
     setWindowTitle(kblayout.Layoutname);
+
     QPainter painter(this);
+
     QFont kbfont("Ubuntu",12);
+
     painter.setFont(kbfont);
     painter.setBrush(QBrush(Qt::darkGray));
-    //painter.setPen(Qt::black);
-    //painter.drawText(450,10,kblayout.Layoutname);
+
     painter.drawRect(0,20,1030,490);
+
     painter.setPen(QColor(lev12color));
     painter.setBrush(QBrush(Qt::black));
+
     int x,y;
     const int row1x=10,row1y=30;
     x=row1x;
@@ -84,7 +48,9 @@ void keyboardpainter::paintEvent(QPaintEvent *){
 
     const int fnkeyspace=60,fnkeysizex=50,fnkeysizey=50;
     int f=1;
+
     QString str;
+
     for(int i=0;i<3;i++){
         x+=spacex;
         for(int j=0;j<4;j++){
@@ -96,15 +62,18 @@ void keyboardpainter::paintEvent(QPaintEvent *){
         }
     }
 
+
     const int kszx=70,kszy=70;
 
     const int row2x=10,row2y=90;
     x=row2x;
     y=row2y;
 
+
     painter.drawRect(x,y,kszx,kszy);
     painter.drawText(x+5,y+20,"~");
     painter.drawText(x+5,y+60,"`");
+
     for(int i=0;i<12;i++){
         x+=kszx;
         painter.drawRect(x,y,kszx,kszy);
@@ -129,9 +98,11 @@ void keyboardpainter::paintEvent(QPaintEvent *){
     painter.drawText(x+10,y+20,"<--");
     painter.drawText(x+10,y+60,"Backspace");
 
+
     const int row3x=10,row3y=170;
     x=row3x;
     y=row3y;
+
 
     const int tabszx=100;
 
@@ -246,9 +217,9 @@ void keyboardpainter::paintEvent(QPaintEvent *){
     painter.drawText(x+30,y+35,"Ctrl");
     x+=ctrlsz;
     painter.drawRect(x,y,altsz,kszy);
-    painter.setPen(QColor("#FF3300"));
+    painter.setPen(QColor(lev34color));
     painter.drawText(x+30,y+35,"AltGr");
-    painter.setPen(QColor("#d4d4d4"));
+    painter.setPen(QColor(lev12color));
 
     if(symbol.nill>=120){
         painter.drawRect(0,0,1030,490);
@@ -261,14 +232,18 @@ void keyboardpainter::paintEvent(QPaintEvent *){
 
 
 void keyboardpainter::getkeyboardlayout(QString country, QString layoutvariant){
+
     QString filename=kblayout.findSymbolbasedir();
     filename.append(country);
+
     QFile file(filename);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString content = file.readAll();
     file.close();
+
     QList<QString> symstr;
     symstr=content.split("xkb_symbols ");
+
     for(int i=0;i<symstr.size();i++){
         QString h=symstr.at(i);
         int k=h.indexOf("\"");
@@ -280,42 +255,53 @@ void keyboardpainter::getkeyboardlayout(QString country, QString layoutvariant){
         f.append(layoutvariant);
         f.append("\"");
         f=f.remove(" ");
+
         if(h==f){
             kblayout.getLayout(symstr.at(i),country);
-            /*QString e;
-            e=kblayout.Layoutname;
-            for(int l=0;l<12;l++){
-                e.append(kblayout.AE[l].keyname);
-                for(int u=0;u<kblayout.AE[l].klst.size();u++){
-                    e.append(kblayout.AE[l].klst.at(u));
-                }
-                e.append("\n");
-            }
-            for(int l=0;l<12;l++){
-                e.append(kblayout.AD[l].keyname);
-                for(int u=0;u<kblayout.AD[l].klst.size();u++){
-                    e.append(kblayout.AD[l].klst.at(u));
-                }
-                e.append("\n");
-            }
-            for(int l=0;l<11;l++){
-                e.append(kblayout.AC[l].keyname);
-                for(int u=0;u<kblayout.AC[l].klst.size();u++){
-                    e.append(kblayout.AC[l].klst.at(u));
-                }
-                e.append("\n");
-            }
-            for(int l=0;l<10;l++){
-                e.append(kblayout.AB[l].keyname);
-                for(int u=0;u<kblayout.AB[l].klst.size();u++){
-                    e.append(kblayout.AB[l].klst.at(u));
-                }
-                e.append("\n");
-            }
-            QMessageBox q;
-            q.setText(e);
-            q.exec();*/
             break;
         }
     }
+}
+
+QString keyboardpainter::getvariant(QString variant,QString selectedLayout){
+    if (variant==""){
+        variant="basic";
+        if(selectedLayout=="ma")
+            variant="arabic";
+        if(selectedLayout=="az")
+            variant="latin";
+        if(selectedLayout=="bg")
+            variant="bds";
+        if(selectedLayout=="fi")
+            variant="kotoistus";
+        if(selectedLayout=="ca")
+            variant="fr";
+        if(selectedLayout=="in")
+            variant="deva";
+        if(selectedLayout=="jp")
+            variant="106";
+        if(selectedLayout=="ir")
+            variant="pes";
+        if(selectedLayout=="kr")
+            variant="kr106";
+        if(selectedLayout=="ru")
+            variant="winkeys";
+        if(selectedLayout=="lk")
+            variant="sin_phonetic";
+        if(selectedLayout=="ke")
+            variant="swa";
+        if(selectedLayout=="tz")
+            variant="swa";
+        if(selectedLayout=="tw")
+            variant="tw";
+        if(selectedLayout=="bw")
+            variant="tswana";
+        if(selectedLayout=="ua")
+            variant="unicode";
+        if(selectedLayout=="pk")
+            variant="urd-phonetic";
+        if(selectedLayout=="uz")
+            variant="cyrillic";
+    }
+    return variant;
 }

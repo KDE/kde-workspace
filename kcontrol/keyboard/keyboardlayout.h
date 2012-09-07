@@ -13,6 +13,7 @@ public:
     Keys AD[12];
     Keys AC[11];
     Keys AB[11];
+    
     void getLayout(QString a,QString cname);
     QString findSymbolbasedir();
     void includeSymbol(QString a,QString cname);
