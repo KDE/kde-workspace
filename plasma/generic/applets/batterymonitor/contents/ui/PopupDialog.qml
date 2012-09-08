@@ -19,15 +19,14 @@
 
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as Components
+import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: dialog
     width: childrenRect.width+24
     height: childrenRect.height+24
 
-    property int percent
-    property string batteryState
-    property bool hasBattery
+    property QtObject batteryData
     property bool pluggedIn
     property alias screenBrightness: brightnessSlider.value
     property int remainingMsec
@@ -50,9 +49,13 @@ Item {
             margins: 12
         }
 
-        Components.Label {
-            text: i18n("Battery:")
-            anchors.right: parent.right
+        Repeater {
+            model: batteryData.count
+            Components.Label {
+                text: batteryData.count>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
+                width: labels.width
+                horizontalAlignment: Text.AlignRight
+            }
         }
 
         Components.Label {
@@ -87,9 +90,12 @@ Item {
             margins: 12
         }
 
-        Components.Label {
-            text: dialog.hasBattery ? stringForState(batteryState, percent) : i18nc("Battery is not plugged in", "Not present")
-            font.weight: Font.Bold
+        Repeater {
+            model: batteryData.count
+            Components.Label {
+                text: Logic.stringForState(batteryData.get(index))
+                font.weight: Font.Bold
+            }
         }
 
         Components.Label {
@@ -134,7 +140,7 @@ Item {
     Row {
         anchors {
             top: values.bottom
-            topMargin: 10
+            margins: 12
             right: values.right
         }
 
@@ -155,8 +161,8 @@ Item {
 
     BatteryIcon {
         monochrome: false
-        hasBattery: dialog.hasBattery
-        percent: dialog.percent
+        hasBattery: batteryData.cumulativePluggedin
+        percent: batteryData.cumulativePercent
         pluggedIn: dialog.pluggedIn
         anchors {
             top: parent.top
