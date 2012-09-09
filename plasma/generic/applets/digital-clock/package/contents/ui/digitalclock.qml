@@ -2,28 +2,25 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.locale 0.1 as KLocale
 
 Item {
     id: digitalclock
 
-    property int hours
-    property int minutes
-    property int seconds
-    property string timeString
-    property int year
-    property int month
-    property int day
-    property string dateString
+    property variant dateTime
+    property variant dateStyle
 
     property double timeScaleF: 0.7
     property double dateScaleF: 1 - timeScaleF
 
+    property bool showSeconds
+
     property int minimumWidth
     property int minimumHeight
 
-    function formatTime() {
-        timeString = (hours + ':' + minutes + ':' + seconds)
-        dateString = "Thursday 30 August 2012"
+    function twoDigitString(number)
+    {
+        return number < 10 ? "0"+number : number
     }
 
     function calcFontSize(currentSize, length, paintedLength) {
@@ -46,66 +43,74 @@ Item {
         text.destroy();
     }
 
-    Component.onCompleted: {
-        plasmoid.addEventListener("dataUpdated", dataUpdated);
-        // doesn't work
-//         plasmoid.addEventListener("sizeChanged", sizeChanged);
-//         plasmoid.addEventListener("ConfigChanged", configChanged);
-        dataEngine("time").connectSource("Local", digitalclock, 1000);
-        calcMinHeight();
-    }
-
-    function dataUpdated(source, data) {
-        var date = new Date("January 1, 1971 "+data.Time);
-        hours = date.getHours();
-        minutes = date.getMinutes();
-        seconds = date.getSeconds();
-        year = date.getFullYear();
-        month = date.getMonth();
-        day = date.getDay();
-        formatTime();
-        timezoneText.text = data.Timezone;
-    }
-
     function sizeChanged() {
-        timeLabel.calcSize();
-        dateLabel.calcSize();
-        if (plasmoid.formFactor == 2) { // Horizontal
-            if (digitalclock.state == "SideBySide")
+        if (plasmoid.formFactor != Vertical) {
+            if (digitalclock.height < minimumHeight) {
+                digitalclock.state = "SideBySide";
                 digitalclock.width = (timeLabel.paintedWidth + dateLabel.paintedWidth);
-            else
+            } else {
+                digitalclock.state = "Horizontal";
                 digitalclock.width = Math.max(timeLabel.paintedWidth, dateLabel.paintedWidth);
+            }
 
             plasmoid.setMinimumSize(digitalclock.width, 0);
-        } else if (plasmoid.formFactor == 3) { // Vertical
+        } else if (plasmoid.formFactor == Vertical) {
             digitalclock.height = timeLabel.paintedHeight + dateLabel.paintedHeight;
             plasmoid.setMinimumSize(0, digitalclock.height);
         }
     }
 
+    function configChanged() {
+        showSeconds = plasmoid.readConfig("showSeconds");
+        switch(Number(plasmoid.readConfig("dateStyle"))) {
+            case 0:
+                dateStyle = KLocale.Locale.ShortDate;
+                break;
+            case 1:
+                dateStyle = KLocale.Locale.ShortDate;
+                break;
+            case 2:
+                dateStyle = KLocale.Locale.ShortDate;
+                break;
+            case 3:
+                dateStyle = KLocale.Locale.LongDate;
+                break;
+            case 4:
+                dateStyle = KLocale.Locale.IsoDate;
+                break;
+            default:
+                dateStyle = KLocale.Locale.ShortDate;
+        }
+        print("configChanged " + showSeconds + ' ' + dateStyle);
+    }
+
+    PlasmaCore.DataSource {
+        id: clockSource
+        engine: "time"
+        interval: 1000
+        connectedSources: ["Local"]
+        onDataChanged: dateTime = new Date(data["Local"]["DateTime"]);
+    }
+
+    Component.onCompleted: {
+        plasmoid.addEventListener("ConfigChanged", configChanged);
+        calcMinHeight();
+    }
+
+    KLocale.Locale {
+        id: locale
+    }
+
     PlasmaComponents.Label {
         id: timeLabel
-        text: timeString
+        text: twoDigitString(dateTime.getHours()) + ":" + twoDigitString(dateTime.getMinutes()) +
+            (showSeconds ? ":" + twoDigitString(dateTime.getSeconds()) : "")
 
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
 
-        function calcSize() {
-            if (plasmoid.formFactor != 3) {
-                font.pointSize = calcFontSize(font.pointSize, height, paintedHeight);
-                if (digitalclock.height <= minimumHeight - 15) { //squeeze it!
-                    digitalclock.state = 'SideBySide';
-                    width = paintedWidth;
-                    height = digitalclock.height * 1;
-                } else if (digitalclock.height >= minimumHeight - 15) {
-                    digitalclock.state = 'Horizontal';
-                    height = digitalclock.height * timeScaleF;
-                }
-            } else {
-                font.pointSize = calcFontSize(font.pointSize, width, paintedWidth);
-                height = paintedHeight;
-            }
-        }
+        height: digitalclock.height * timeScaleF
+        font.pixelSize: height
 
         anchors {
             top: digitalclock.top
@@ -124,31 +129,13 @@ Item {
 //     PlasmaComponents.Label {
     Text {
         id: dateLabel
-        text: dateString
+        text: locale.formatDate(dateTime, dateStyle)
 
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
 
-        function calcSize() {
-            var pointS;
-            font.pointSize = theme.smallestFont.pointSize;
-            if (plasmoid.formFactor != 3) {
-                if (digitalclock.state != 'SideBySide') {
-                    pointS = calcFontSize(font.pointSize, height, paintedHeight);
-                    anchors.leftMargin = 0;
-                }
-                else {
-                    pointS = theme.smallestFont.pointSize;
-                    anchors.leftMargin = 5;
-                }
-            } else if (plasmoid.formFactor == 3) {
-                if (dateLabel.lineCount > 1)
-                    return;
+        font.pixelSize: height
 
-                pointS = calcFontSize(font.pointSize, width, paintedWidth);
-            }
-            font.pointSize = pointS;
-        }
         anchors {
             top: timeLabel.bottom
             left: digitalclock.left
@@ -173,7 +160,7 @@ Item {
     states: [
         State {
             name: "Vertical"
-            when: (plasmoid.formFactor == 3)
+            when: (plasmoid.formFactor == Vertical)
             PropertyChanges {
                 target: dateLabel
                 maximumLineCount: 4
@@ -189,10 +176,16 @@ Item {
                 wrapMode: Text.NoWrap
                 anchors.bottomMargin: 0
             }
+            PropertyChanges {
+                target: timeLabel
+                height: digitalclock.height
+                width: paintedWidth
+            }
             AnchorChanges {
                 target: timeLabel
                 anchors {
                     right: undefined
+                    bottom: digitalclock.bottom
                 }
             }
             AnchorChanges {
