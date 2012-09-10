@@ -247,7 +247,7 @@ extern "C" KDE_EXPORT int kdemain( int argc, char* argv[] )
     options.add("windowmanager <wm>", ki18n("Starts 'wm' in case no other window manager is \nparticipating in the session. Default is 'kwin'"));
     options.add("nolocal", ki18n("Also allow remote connections"));
 #if COMPILE_SCREEN_LOCKER
-    options.add("lockscreen", ki18n("Starts the screenlocker in locked mode"));
+    options.add("lockscreen", ki18n("Starts the session in locked mode"));
 #endif
     KCmdLineArgs::addCmdLineOptions( options );
 

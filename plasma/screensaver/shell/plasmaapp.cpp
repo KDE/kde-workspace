@@ -69,6 +69,7 @@
 
 Atom tag; //FIXME should this be a member var or what?
 Atom tag2;
+
 const unsigned char DIALOG = 1; //FIXME this is really bad code
 const unsigned char VIEW = 2;
 

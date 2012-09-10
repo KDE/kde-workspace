@@ -13,8 +13,8 @@ set(plasma-overlay_SRCS
     plasmaapp.cpp
     savercorona.cpp
     saverview.cpp
-   ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/greeter/greeter.cpp
-   ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/greeter/sessions.cpp
+    ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/greeter/greeter.cpp
+    ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/greeter/sessions.cpp
 )
 
 kde4_add_ui_files(plasma-overlay_SRCS BackgroundDialog.ui)

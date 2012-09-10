@@ -85,7 +85,7 @@ private:
  * will emit either @link greeterAccepted or @link greeterFailed signals depending on whether
  * the authentication succeeded or failed.
  *
- * @author Martin Gräßlin <mgraesslin@kde.org>
+ * @author Oswald Buddenhagen <ossi@kde.org>
  **/
 class Greeter : public QObject, public KGreeterPluginHandler
 {
