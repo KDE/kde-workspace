@@ -28,11 +28,8 @@ PlasmaComponents.ListItem {
 
     sectionDelegate: true
 
-    anchors {
-        left: parent.left
-        right: parent.right
-    }
-    //height: titleLabel.height + margins.top + margins.bottom
+    width: parent.width
+
     PlasmaComponents.Label {
         id: titleLabel
         horizontalAlignment: Text.AlignHCenter

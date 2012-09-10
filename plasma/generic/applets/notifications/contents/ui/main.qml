@@ -37,7 +37,7 @@ Item {
     property int minimumHeight: mainScrollArea.implicitHeight
 
     property int toolIconSize: UiProperties.toolIconSize
-    
+    property int layoutSpacing: UiProperties.layoutSpacing
 
     property real globalProgress: 0
     //notifications + jobs

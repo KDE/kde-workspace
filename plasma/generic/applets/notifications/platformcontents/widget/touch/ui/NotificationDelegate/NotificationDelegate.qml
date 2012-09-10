@@ -27,6 +27,7 @@ PlasmaComponents.ListItem {
     opacity: 1-Math.abs(x)/width
     width: popupFlickable.width
     property int toolIconSize: theme.smallMediumIconSize
+    property int layoutSpacing: 4
 
     visible: appTabBar.currentTab == allAppsTab || appTabBar.currentTab.text == appName
 
@@ -98,7 +99,7 @@ PlasmaComponents.ListItem {
             }
         }
         Column {
-            spacing: 8
+            spacing: notificationItem.layoutSpacing
             width: parent.width
             Item {
                 width: parent.width
@@ -164,7 +165,7 @@ PlasmaComponents.ListItem {
                 }
                 Column {
                     id: actionsColumn
-                    spacing: 6
+                    spacing: notificationItem.layoutSpacing
                     anchors {
                         right: parent.right
                         rightMargin: 6

@@ -28,9 +28,10 @@ PlasmaComponents.ListItem {
     width: popupFlickable.width
 
     property int toolIconSize: theme.smallMediumIconSize
+    property int layoutSpacing: 4
 
     Column {
-        spacing: 6
+        spacing: notificationItem.layoutSpacing
         width: parent.width
         PlasmaComponents.Label {
             text: jobsSource.data[modelData]["infoMessage"]
@@ -42,9 +43,9 @@ PlasmaComponents.ListItem {
             anchors {
                 left: parent.left
                 right: parent.right
-                rightMargin: 6
+                rightMargin: notificationItem.layoutSpacing
             }
-            spacing: 6
+            spacing: notificationItem.layoutSpacing
             rows: 4
             columns: 2
 
@@ -77,7 +78,7 @@ PlasmaComponents.ListItem {
                 anchors {
                     verticalCenter: progressItem.verticalCenter
                     right: progressItem.left
-                    rightMargin: 6
+                    rightMargin: notificationItem.layoutSpacing
                 }
             }
             Item {
@@ -85,7 +86,7 @@ PlasmaComponents.ListItem {
                 width: parent.width - labelName0Text.width
                 height: childrenRect.height
                 PlasmaComponents.ProgressBar {
-                    width: parent.width - pauseButton.width*2 - theme.largeIconSize - 6*3
+                    width: parent.width - pauseButton.width*2 - theme.largeIconSize - notificationItem.layoutSpacing*3
                     height: 16
                     orientation: Qt.Horizontal
                     minimumValue: 0
@@ -97,12 +98,12 @@ PlasmaComponents.ListItem {
                         left: parent.left
                         right: buttonsRow.left
                         verticalCenter: parent.verticalCenter
-                        rightMargin: 6
+                        rightMargin: notificationItem.layoutSpacing
                     }
                 }
                 Row {
                     id: buttonsRow
-                    spacing: 6
+                    spacing: notificationItem.layoutSpacing
                     anchors.right: parent.right
                     PlasmaComponents.ToolButton {
                         id: pauseButton
@@ -143,7 +144,7 @@ PlasmaComponents.ListItem {
                 checkable: true
                 anchors {
                     right: speedLabel.left
-                    rightMargin: 6
+                    rightMargin: notificationItem.layoutSpacing
                     verticalCenter: speedLabel.verticalCenter
                 }
             }
