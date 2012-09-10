@@ -27,6 +27,8 @@ PlasmaComponents.ListItem {
     id: notificationItem
     width: popupFlickable.width
 
+    property int iconSize: theme.mediumIconSize
+
     Column {
         spacing: 6
         width: parent.width
@@ -70,7 +72,7 @@ PlasmaComponents.ListItem {
             }
             QIconItem {
                 icon: jobsSource.data[modelData]["appIconName"]
-                width: theme.mediumIconSize
+                width: notificationItem.iconSize
                 height: width
                 anchors {
                     verticalCenter: progressItem.verticalCenter
@@ -104,7 +106,7 @@ PlasmaComponents.ListItem {
                     anchors.right: parent.right
                     PlasmaComponents.ToolButton {
                         id: pauseButton
-                        width: theme.mediumIconSize
+                        width: notificationItem.iconSize
                         height: width
                         iconSource: jobsSource.data[modelData]["state"] == "suspended" ? "media-playback-start" : "media-playback-pause"
                         flat: false
@@ -120,7 +122,7 @@ PlasmaComponents.ListItem {
                     }
                     PlasmaComponents.ToolButton {
                         id: stopButton
-                        width: theme.mediumIconSize
+                        width: notificationItem.iconSize
                         height: width
                         iconSource: "media-playback-stop"
                         flat: false
@@ -134,7 +136,7 @@ PlasmaComponents.ListItem {
             }
             PlasmaComponents.ToolButton {
                 id: expandButton
-                width: theme.mediumIconSize
+                width: notificationItem.iconSize
                 height: width
                 flat: false
                 iconSource: checked ? "list-remove" : "list-add"
