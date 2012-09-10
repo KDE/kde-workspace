@@ -39,6 +39,7 @@ PlasmaCore.Dialog {
         lastNotificationPopup.visible = true
         lastNotificationTimer.interval = Math.max(4000, Math.min(60*1000, notificationsModel.get(0).expireTimeout))
         lastNotificationTimer.restart()
+        notificationsView.currentIndex = 0
     }
 
     location: plasmoid.location
@@ -81,6 +82,7 @@ PlasmaCore.Dialog {
                     lastNotificationTimer.running = false
                 }
                 onReleased: {
+                    //FIXME: bind startdragdistance
                     if (Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
                         lastNotificationTimer.restart()
                     } else {
@@ -148,6 +150,40 @@ PlasmaCore.Dialog {
                         }
                     }
                 }
+            }
+        }
+        PlasmaCore.Svg {
+            id: arrowsSvg
+            imagePath: "widgets/arrows"
+        }
+        PlasmaCore.SvgItem {
+            svg: arrowsSvg
+            elementId: "up-arrow"
+            width: theme.smallIconSize
+            height: width
+            visible: notificationsView.currentIndex > 0
+            anchors {
+                top: parent.top
+                horizontalCenter: parent.horizontalCenter
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
+            }
+        }
+        PlasmaCore.SvgItem {
+            svg: arrowsSvg
+            elementId: "down-arrow"
+            width: theme.smallIconSize
+            height: width
+            visible: notificationsView.currentIndex < notificationsView.count-1
+            anchors {
+                bottom: parent.bottom
+                horizontalCenter: parent.horizontalCenter
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
             }
         }
     }
