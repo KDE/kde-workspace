@@ -26,6 +26,7 @@ PlasmaComponents.ListItem {
     id: notificationItem
     opacity: 1-Math.abs(x)/width
     width: popupFlickable.width
+    property int toolIconSize: theme.smallMediumIconSize
 
     visible: appTabBar.currentTab == allAppsTab || appTabBar.currentTab.text == appName
 
@@ -48,7 +49,7 @@ PlasmaComponents.ListItem {
 
 
     MouseArea {
-        width: popupFlickable.width
+        width: parent.width
         height: childrenRect.height
         drag {
             target: notificationItem
@@ -98,7 +99,7 @@ PlasmaComponents.ListItem {
         }
         Column {
             spacing: 8
-            width: popupFlickable.width
+            width: parent.width
             Item {
                 width: parent.width
                 height: summaryLabel.height
@@ -115,22 +116,15 @@ PlasmaComponents.ListItem {
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
                 }
-                PlasmaCore.SvgItem {
-                    svg: configIconsSvg
-                    elementId: "close"
-                    width: theme.mediumIconSize
-                    height: theme.mediumIconSize
+
+                PlasmaComponents.ToolButton {
+                    iconSource: "window-close"
+                    width: notificationItem.toolIconSize
+                    height: width
+                    onClicked: removeAnimation.running = true
                     anchors {
                         top: parent.top
                         right: parent.right
-                        rightMargin: 12
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        anchors.margins: -6
-                        onClicked: {
-                            removeAnimation.running = true
-                        }
                     }
                 }
             }

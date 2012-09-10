@@ -21,6 +21,8 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
+import "plasmapackage:/ui/NotificationDelegate"
+
 Column {
     id: notificationsRoot
     property alias count: notificationsRepeater.count
@@ -138,6 +140,8 @@ Column {
         text: i18n("Notifications")
         PlasmaComponents.ToolButton {
             iconSource: "window-close"
+            width: notificationItem.toolIconSize
+            height: width
             anchors {
                 right: parent.right
                 verticalCenter: parent.verticalCenter
@@ -168,6 +172,8 @@ Column {
     Repeater {
         id: notificationsRepeater
         model: notificationsModel
-        delegate: NotificationDelegate {}
+        delegate: NotificationDelegate {
+            toolIconSize: notificationsApplet.toolIconSize
+        }
     }
 }

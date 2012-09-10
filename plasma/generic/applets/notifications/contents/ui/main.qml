@@ -25,6 +25,9 @@ import org.kde.qtextracomponents 0.1
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.locale 0.1 as KLocale
 
+import "plasmapackage:/ui/uiproperties.js" as UiProperties
+
+
 Item {
     id: notificationsApplet
     state: "default"
@@ -32,6 +35,9 @@ Item {
     height: 32
     property int minimumWidth: mainScrollArea.implicitWidth
     property int minimumHeight: mainScrollArea.implicitHeight
+
+    property int toolIconSize: UiProperties.toolIconSize
+    
 
     property real globalProgress: 0
     //notifications + jobs

@@ -91,6 +91,8 @@ Column {
     Repeater {
         id: jobsRepeater
         model: jobsSource.sources
-        delegate: JobDelegate {}
+        delegate: JobDelegate {
+            toolIconSize: notificationsApplet.toolIconSize
+        }
     }
 }
