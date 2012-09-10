@@ -38,7 +38,7 @@ PlasmaCore.Dialog {
         lastNotificationPopup.y = pos.y
         lastNotificationPopup.visible = true
         lastNotificationTimer.interval = Math.max(4000, Math.min(60*1000, notificationsModel.get(0).expireTimeout))
-        lastNotificationTimer.running = true
+        lastNotificationTimer.restart()
     }
 
     location: plasmoid.location
@@ -51,7 +51,6 @@ PlasmaCore.Dialog {
         id: mainItem
         width: theme.defaultFont.mSize.width * 30
         height: theme.defaultFont.mSize.width * 10
-
 
         Timer {
             id: lastNotificationTimer
@@ -66,12 +65,32 @@ PlasmaCore.Dialog {
             snapMode: ListView.SnapOneItem
             anchors.fill: parent
             model: notificationsModel
-            delegate: MouseArea {
+            interactive: false
+            delegate: MouseEventListener {
                 width: mainItem.width
                 height: mainItem.height
-                onClicked: {
-                    lastNotificationPopup.visible = false
+                property int startX: 0
+                property int startY: 0
+                property int startScreenX: 0
+                property int startScreenY: 0
+                onPressed: {
+                    startX = mouse.x + lastNotificationPopup.margins.left
+                    startY = mouse.y + lastNotificationPopup.margins.top
+                    startScreenX = mouse.screenX
+                    startScreenY = mouse.screenY
                     lastNotificationTimer.running = false
+                }
+                onReleased: {
+                    if (Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
+                        lastNotificationTimer.restart()
+                    } else {
+                        lastNotificationPopup.visible = false
+                        lastNotificationTimer.running = false
+                    }
+                }
+                onPositionChanged: {
+                    lastNotificationPopup.x = mouse.screenX - startX
+                    lastNotificationPopup.y = mouse.screenY - startY
                 }
                 QIconItem {
                     id: appIconItem
@@ -123,7 +142,6 @@ PlasmaCore.Dialog {
                             width: theme.defaultFont.mSize.width * 8
                             height: theme.defaultFont.mSize.width * 2
                             onClicked: {
-                                print("AAAAAAAAA"+source+model.id)
                                 executeAction(source, model.id)
                                 actionsColumn.visible = false
                             }
