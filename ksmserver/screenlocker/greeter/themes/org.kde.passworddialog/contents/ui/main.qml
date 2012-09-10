@@ -82,7 +82,6 @@ Item {
         }
     }
 
-
     // TODO: loader
     SessionSwitching {
         id: userSessionsUI

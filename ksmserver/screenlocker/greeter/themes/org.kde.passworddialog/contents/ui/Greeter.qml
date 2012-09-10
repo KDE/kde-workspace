@@ -58,8 +58,6 @@ Item {
             opacity: text == "" ? 0 : 1
         }
 
-
-
         PlasmaComponents.Label {
             id: capsLockMessage
             text: i18n("Warning: Caps Lock on")
@@ -73,7 +71,6 @@ Item {
                 }
             }
         }
-
 
         PlasmaComponents.Label {
             id: lockMessage
@@ -135,7 +132,6 @@ Item {
             }
         }
     }
-
 
     Connections {
         target: greeter
