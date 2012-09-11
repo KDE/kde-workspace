@@ -167,6 +167,7 @@ X-KDE-ServiceTypes=Plasma/Applet
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/digitalclock.qml
+X-Plasma-DefaultSize=150,75
 
 X-KDE-PluginInfo-Author=Riccardo Iaconelli
 X-KDE-PluginInfo-Email=riccardo@kde.org

@@ -9,11 +9,10 @@ Item {
 
     property variant dateTime
     property variant dateStyle
+    property bool showSeconds
 
     property double timeScaleF: 0.7
     property double dateScaleF: 1 - timeScaleF
-
-    property bool showSeconds
 
     property int minimumWidth
     property int minimumHeight
@@ -44,7 +43,7 @@ Item {
     }
 
     function sizeChanged() {
-        if (plasmoid.formFactor != Vertical) {
+        if (plasmoid.formFactor == Horizontal) {
             if (digitalclock.height < minimumHeight) {
                 digitalclock.state = "SideBySide";
                 digitalclock.width = (timeLabel.paintedWidth + dateLabel.paintedWidth);
@@ -52,11 +51,16 @@ Item {
                 digitalclock.state = "Horizontal";
                 digitalclock.width = Math.max(timeLabel.paintedWidth, dateLabel.paintedWidth);
             }
-
             plasmoid.setMinimumSize(digitalclock.width, 0);
         } else if (plasmoid.formFactor == Vertical) {
             digitalclock.height = timeLabel.paintedHeight + dateLabel.paintedHeight;
             plasmoid.setMinimumSize(0, digitalclock.height);
+            (dateLabel.lineCount == 1) ? dateLabel.font.pixelSize = calcFontSize(dateLabel.font.pixelSize, dateLabel.width - 10, dateLabel.paintedWidth) :
+                                         dateLabel.font.pointSize = 10;
+        } else { // Planar
+            var minWidth = Math.max(timeLabel.paintedWidth, dateLabel.paintedWidth);
+            digitalclock.state = "Horizontal";
+            // FIXME
         }
     }
 
@@ -126,8 +130,7 @@ Item {
         }
     }
 
-//     PlasmaComponents.Label {
-    Text {
+    PlasmaComponents.Label {
         id: dateLabel
         text: locale.formatDate(dateTime, dateStyle)
 
@@ -165,7 +168,13 @@ Item {
                 target: dateLabel
                 maximumLineCount: 4
                 wrapMode: Text.Wrap
-                anchors.bottomMargin: 0
+                font.pixelSize: undefined
+            }
+            PropertyChanges {
+                target: timeLabel
+                // FIXME binding loop...
+                font.pixelSize: calcFontSize(font.pixelSize, width, paintedWidth)
+                height: paintedHeight
             }
         },
         State {
@@ -174,7 +183,6 @@ Item {
                 target: dateLabel
                 maximumLineCount: 1
                 wrapMode: Text.NoWrap
-                anchors.bottomMargin: 0
             }
             PropertyChanges {
                 target: timeLabel
@@ -204,7 +212,8 @@ Item {
                 target: dateLabel
                 maximumLineCount: 1
                 wrapMode: Text.NoWrap
-                anchors.bottomMargin: 5
+                // fixes binding loop
+                height: digitalclock.height - timeLabel.height
             }
         }
     ]
