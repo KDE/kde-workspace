@@ -1,3 +1,7 @@
+
+var ram = 0
+var disk = 1
+
 function updateCumulative() {
     var sum = 0;
     var haveBattery = false;

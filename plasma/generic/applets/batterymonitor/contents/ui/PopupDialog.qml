@@ -33,8 +33,6 @@ Item {
     property alias showSuspendButton: suspendButton.visible
     property alias showHibernateButton: hibernateButton.visible
 
-    property int ram: 0
-    property int disk: 1
 
     signal suspendClicked(int type)
     signal brightnessChanged(int screenBrightness)
@@ -148,14 +146,14 @@ Item {
             id: suspendButton
             iconSource: "system-suspend"
             text: i18nc("Suspend the computer to RAM; translation should be short", "Sleep")
-            onClicked: suspendClicked(ram)
+            onClicked: suspendClicked(Logic.ram)
         }
 
         Components.ToolButton {
             id: hibernateButton
             iconSource: "system-suspend-hibernate"
             text: i18nc("Suspend the computer to disk; translation should be short", "Hibernate")
-            onClicked: suspendClicked(disk)
+            onClicked: suspendClicked(Logic.disk)
         }
     }
 
