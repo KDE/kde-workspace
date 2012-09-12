@@ -27,21 +27,6 @@ Item {
         return Math.max(pointS, theme.smallestFont.pointSize);
     }
 
-    function calcMinHeight() {
-        var text = Qt.createQmlObject('import QtQuick 1.1; Text {}',
-                                                    digitalclock, "calcSize");
-        var bS, bT, lT;
-        (timeScaleF < dateScaleF) ? (bS = dateScaleF, lT = timeLabel.text, bT = dateLabel.text) :
-                                    (bS = timeScaleF, lT = dateLabel.text, bT = timeLabel.text);
-        text.font.pointSize = theme.smallestFont.pointSize;
-        text.text = lT;
-        minimumHeight = text.paintedHeight;
-        text.font.pointSize = theme.smallestFont.pointSize * (bS / (1 - bS))
-        text.text = bT;
-        minimumHeight += text.paintedHeight;
-        text.destroy();
-    }
-
     function sizeChanged() {
         if (plasmoid.formFactor == Horizontal) {
             if (digitalclock.height < minimumHeight) {
@@ -58,9 +43,19 @@ Item {
             (dateLabel.lineCount == 1) ? dateLabel.font.pixelSize = calcFontSize(dateLabel.font.pixelSize, dateLabel.width - 10, dateLabel.paintedWidth) :
                                          dateLabel.font.pointSize = 10;
         } else { // Planar
-            var minWidth = Math.max(timeLabel.paintedWidth, dateLabel.paintedWidth);
-            digitalclock.state = "Horizontal";
-            // FIXME
+            var maxWidth = Math.max(timeLabel.paintedWidth, dateLabel.paintedWidth);
+            //whats a reasonable smallest pixelSize?
+            if (Math.min(timeLabel.font.pixelSize, dateLabel.font.pixelSize) <= 10) {
+                minimumWidth = maxWidth;
+                minimumHeight = timeLabel.height + dateLabel.height;
+            } else { //FIXME not very smooth
+                if (maxWidth > digitalclock.width) {
+                    minimumWidth = digitalclock.width + 1;
+                } else {
+                    minimumWidth = maxWidth - 1;
+                    minimumHeight = 0;
+                }
+            }
         }
     }
 
@@ -98,7 +93,7 @@ Item {
 
     Component.onCompleted: {
         plasmoid.addEventListener("ConfigChanged", configChanged);
-        calcMinHeight();
+        plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
 
     KLocale.Locale {
