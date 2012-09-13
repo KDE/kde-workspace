@@ -868,7 +868,7 @@ void AbstractTaskItem::drawTextLayout(QPainter *painter, const QTextLayout &layo
 
     if (m_cachedShadow.isNull()) {
         QImage shadow = pixmap.toImage();
-        Plasma::PaintUtils::shadowBlur(shadow, 2, shadowColor);
+        Plasma::PaintUtils::shadowBlur(shadow, 1, shadowColor);
         m_cachedShadow = QPixmap(shadow.size());
         m_cachedShadow.fill(Qt::transparent);
         QPainter buffPainter(&m_cachedShadow);
