@@ -20,42 +20,54 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: batterymonitor
     property int minimumWidth: dialogItem.width
     property int minimumHeight: dialogItem.height
 
-    property bool show_multiple_batteries: false
     property bool show_remaining_time: false
 
     Component.onCompleted: {
+        Logic.updateCumulative();
+        Logic.updateTooltip();
         plasmoid.addEventListener('ConfigChanged', configChanged);
     }
 
     function configChanged() {
-        show_multiple_batteries = plasmoid.readConfig("showMultipleBatteries");
         show_remaining_time = plasmoid.readConfig("showRemainingTime");
     }
 
     property Component compactRepresentation: Component {
-        MouseArea {
-            id: compactItem
-            anchors.fill: parent
-            hoverEnabled: true
+        ListView {
+            id: view
+
             property int minimumWidth
             property int minimumHeight
-            onClicked: plasmoid.togglePopup()
+
+            property bool showOverlay: false
+            property bool showMultipleBatteries: false
+            property bool hasBattery: pmSource.data["Battery"]["Has Battery"]
 
             property QtObject pmSource: plasmoid.rootItem.pmSource
-            property bool hasBattery: pmSource.data["Battery"]["Has Battery"]
-            property int percent: pmSource.data["Battery0"]["Percent"]
-            property string batteryState: pmSource.data["Battery0"]["State"]
-            property bool pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
-            property bool showOverlay: false
+            property QtObject batteries: plasmoid.rootItem.batteries
+
+            property bool singleBattery: isConstrained() || !showMultipleBatteries || !hasBattery
+            
+            model: singleBattery ? 1 : batteries
+
+            PlasmaCore.Theme { id: theme }
+
+            anchors.fill: parent
+            orientation: ListView.Horizontal
+
+            function isConstrained() {
+                return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
+            }
 
             Component.onCompleted: {
-                if (plasmoid.formFactor==Planar || plasmoid.formFactor==MediaCenter) {
+                if (!isConstrained()) {
                     minimumWidth = 32;
                     minimumHeight = 32;
                 }
@@ -64,29 +76,30 @@ Item {
 
             function configChanged() {
                 showOverlay = plasmoid.readConfig("showBatteryString");
+                showMultipleBatteries = plasmoid.readConfig("showMultipleBatteries");
             }
 
-            function isConstrained() {
-                return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
-            }
-
-            Item {
+            delegate: Item {
                 id: batteryContainer
-                anchors.centerIn: parent
-                property real size: Math.min(parent.width, parent.height)
-                width: size
-                height: size
+
+                property bool hasBattery: view.singleBattery ? batteries.cumulativePluggedin : model["Plugged in"]
+                property int percent: view.singleBattery ? batteries.cumulativePercent : model["Percent"]
+                property bool pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
+
+                width: view.width/view.count
+                height: view.height
+
+                property real size: Math.min(width, height)
 
                 BatteryIcon {
                     id: batteryIcon
                     monochrome: true
-                    hasBattery: compactItem.hasBattery
-                    percent: compactItem.percent
-                    pluggedIn: compactItem.pluggedIn
-                    anchors.fill: parent
+                    hasBattery: parent.hasBattery
+                    percent: parent.percent
+                    pluggedIn: parent.pluggedIn
+                    width: size; height: size
+                    anchors.centerIn: parent
                 }
-
-                PlasmaCore.Theme { id: theme }
 
                 Rectangle {
                     id: labelRect
@@ -98,7 +111,7 @@ Item {
                     border.color: "grey"
                     border.width: 2
                     radius: 4
-                    opacity: hasBattery ? (showOverlay ? 0.5 : (isConstrained() ? 0 : compactItem.containsMouse*0.7)) : 0
+                    opacity: hasBattery ? (showOverlay ? 0.7 : (isConstrained() ? 0 : mouseArea.containsMouse*0.7)) : 0
 
                     Behavior on opacity { NumberAnimation { duration: 100 } }
                 }
@@ -107,27 +120,25 @@ Item {
                     id: overlayText
                     text: i18nc("overlay on the battery, needs to be really tiny", "%1%", percent);
                     color: theme.textColor
-                    font.pixelSize: Math.max(batteryContainer.size/8, 11)
+                    font.pixelSize: Math.max(parent.size/8, 11)
                     anchors.centerIn: labelRect
                     // keep the opacity 1 when labelRect.opacity=0.7
                     opacity: labelRect.opacity/0.7
                 }
             }
 
-            PlasmaCore.ToolTip {
-                target: batteryContainer
-                subText: {
-                    var text="";
-                    text += i18n("<b>Battery:</b>");
-                    text += " ";
-                    text += hasBattery ? plasmoid.rootItem.stringForState(batteryState, percent) : i18nc("Battery is not plugged in", "Not present");
-                    text += "<br/>";
-                    text += i18nc("tooltip", "<b>AC Adapter:</b>");
-                    text += " ";
-                    text += pluggedIn ? i18nc("tooltip", "Plugged in") : i18nc("tooltip", "Not plugged in");
-                    return text;
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: plasmoid.togglePopup()
+
+                PlasmaCore.ToolTip {
+                    id: tooltip
+                    target: mouseArea
+                    image: "battery"
+                    subText: batteries.tooltipText
                 }
-                image: "battery"
             }
         }
     }
@@ -137,11 +148,14 @@ Item {
         engine: "powermanagement"
         connectedSources: sources
         onDataChanged: {
+            Logic.updateCumulative();
+            Logic.updateTooltip();
+
             var status = "PassiveStatus";
-            if (data["Battery"]["Has Battery"]) {
-                if (data["Battery0"]["Percent"] <= 10) {
+            if (batteries.cumulativePluggedin) {
+                if (batteries.cumulativePercent <= 10) {
                     status = "NeedsAttentionStatus";
-                } else if (data["Battery0"]["State"] != "NoCharge") {
+                } else if (!batteries.allCharged) {
                     status = "ActiveStatus";
                 }
             }
@@ -149,21 +163,22 @@ Item {
         }
     }
 
-    function stringForState(state, percent) {
-        if (state == "Charging")
-            return i18n("%1% (charging)", percent);
-        else if (state == "Discharging")
-            return i18n("%1% (discharging)", percent);
-        else
-            return i18n("%1% (charged)", percent);
+    property QtObject batteries: PlasmaCore.DataModel {
+        id: batteries
+        dataSource: pmSource
+        sourceFilter: "Battery[0-9]+"
 
+        property int cumulativePercent
+        property bool cumulativePluggedin
+        // true  --> all batteries charged
+        // false --> one of the batteries charging/discharging
+        property bool allCharged
+        property string tooltipText
     }
 
     PopupDialog {
         id: dialogItem
-        percent: pmSource.data["Battery0"]["Percent"]
-        batteryState: pmSource.data["Battery0"]["State"]
-        hasBattery: pmSource.data["Battery"]["Has Battery"]
+        batteryData: batteries
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         screenBrightness: pmSource.data["PowerDevil"]["Screen Brightness"]
         remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
@@ -172,7 +187,7 @@ Item {
         onSuspendClicked: {
             plasmoid.togglePopup();
             service = pmSource.serviceForSource("PowerDevil");
-            var operationName = callForType(type);
+            var operationName = Logic.callForType(type);
             operation = service.operationDescription(operationName);
             service.startOperationCall(operation);
         }
@@ -218,16 +233,6 @@ Item {
                     cookie2 = job.result;
                 });
             }
-        }
-
-        function callForType(type) {
-            if (type == ram) {
-                return "suspendToRam";
-            } else if (type == disk) {
-                return "suspendToDisk";
-            }
-
-            return "suspendHybrid";
         }
     }
 }

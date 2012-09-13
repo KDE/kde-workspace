@@ -104,7 +104,7 @@ class PlasmaImporter(object):
             mod.__path__ = [self.marker]
         if code is not None:
             try:
-                exec code in mod.__dict__
+                exec (code in mod.__dict__)
             finally:
                 code.close()
         return mod
