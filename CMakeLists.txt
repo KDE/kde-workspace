@@ -170,7 +170,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    endif(NOT WIN32)
 
    if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
-      add_subdirectory( kdm )
+      macro_optional_add_subdirectory( kdm )
    else(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
       message(STATUS "Xau lib or Xdmcp lib was missing. kdm will not compile")
    endif(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
