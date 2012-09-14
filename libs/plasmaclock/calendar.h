@@ -84,7 +84,7 @@ protected:
     void keyPressEvent(QKeyEvent * event);
     void focusInEvent(QFocusEvent * event);
     void focusOutEvent(QFocusEvent * event);
-    void resizeEvent(QGraphicsSceneResizeEvent * event);
+    void resizeEvent(QGraphicsSceneResizeEvent * event); // not removed due to BC
 
 private Q_SLOTS:
     void prevMonth();
