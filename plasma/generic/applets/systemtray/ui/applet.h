@@ -3,6 +3,7 @@
  *                                                                         *
  *   Copyright (C) 2008 Jason Stubbs <jasonbstubbs@gmail.com>              *
  *   Copyright (C) 2010 Marco Martin <notmart@gmail.com>                   *
+ *   Copyright (C) 2012 Dmitry Ashkadov <dmitry.ashkadov@gmail.com>        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -35,6 +36,7 @@ namespace Plasma
 class ExtenderItem;
 class TabBar;
 class Dialog;
+class DeclarativeWidget;
 }
 
 class QStandardItemModel;
@@ -45,7 +47,7 @@ namespace SystemTray
 class Manager;
 class TaskArea;
 
-class Applet : public Plasma::PopupApplet
+class Applet : public Plasma::Applet
 {
     Q_OBJECT
     Q_PROPERTY(bool firstRun READ isFirstRun)
@@ -55,17 +57,14 @@ public:
     ~Applet();
 
     void init();
-    QGraphicsWidget *graphicsWidget();
     void constraintsEvent(Plasma::Constraints constraints);
     Manager *manager() const;
     QSet<Task::Category> shownCategories() const;
     bool isFirstRun();
 
 protected:
-    void paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect);
     void createConfigurationInterface(KConfigDialog *parent);
     void configChanged();
-    void popupEvent(bool show);
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event); }
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event); }
@@ -77,22 +76,17 @@ private Q_SLOTS:
     void unlockContainment();
     void propogateSizeHintChange(Qt::SizeHint which);
     void themeChanged();
-    void checkSizes();
     void checkDefaultApplets();
 
 private:
     static SystemTray::Manager *s_manager;
     static int s_managerUsage;
 
-    TaskArea *m_taskArea;
-    TaskArea *m_hiddenTaskArea;
     QWeakPointer<QWidget> m_autoHideInterface;
     QWeakPointer<QWidget> m_visibleItemsInterface;
     QSet<Task::Category> m_shownCategories;
     QDateTime m_lastActivity;
-
-    Plasma::FrameSvg *m_background;
-    Plasma::Svg *m_icons;
+    Plasma::DeclarativeWidget *m_widget;
 
     Ui::AutoHideConfig m_autoHideUi;
     Ui::VisibleItemsConfig m_visibleItemsUi;

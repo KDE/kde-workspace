@@ -38,8 +38,12 @@
 #include <QtGui/QX11Info>
 #include <QStandardItemModel>
 #include <QStyledItemDelegate>
+#include <QtDeclarative/QDeclarativeError>
+#include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeComponent>
 
-
+#include <KDE/KStandardDirs>
 #include <KAction>
 #include <KConfigDialog>
 #include <KComboBox>
@@ -65,6 +69,7 @@
 #include <Plasma/IconWidget>
 #include <Plasma/Dialog>
 #include <Plasma/WindowEffects>
+#include <KDE/Plasma/DeclarativeWidget>
 
 #include "config.h"
 
@@ -88,9 +93,8 @@ Manager *Applet::s_manager = 0;
 int Applet::s_managerUsage = 0;
 
 Applet::Applet(QObject *parent, const QVariantList &arguments)
-    : Plasma::PopupApplet(parent, arguments),
-      m_taskArea(0),
-      m_background(0),
+    : Plasma::Applet(parent, arguments),
+      m_widget(0),
       m_firstRun(true)
 {
     if (!s_manager) {
@@ -99,34 +103,8 @@ Applet::Applet(QObject *parent, const QVariantList &arguments)
 
     ++s_managerUsage;
 
-    QGraphicsLinearLayout *lay = new QGraphicsLinearLayout(this);
-    lay->setContentsMargins(0, 0, 0, 0);
-    m_background = new Plasma::FrameSvg(this);
-    m_background->setImagePath("widgets/systemtray");
-    m_background->setCacheAllRenderedFrames(true);
-    m_taskArea = new TaskArea(this);
-    lay->addItem(m_taskArea);
-    connect(m_taskArea, SIGNAL(toggleHiddenItems()), this, SLOT(togglePopup()));
-
-    m_icons = new Plasma::Svg(this);
-    m_icons->setImagePath("widgets/configuration-icons");
-
-    setPopupIcon(QIcon());
-    setPassivePopup(false);
-    setPopupAlignment(Qt::AlignRight);
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setHasConfigurationInterface(true);
-
-    connect(s_manager, SIGNAL(taskAdded(SystemTray::Task*)),
-            m_taskArea, SLOT(addTask(SystemTray::Task*)));
-    //TODO: we re-add the task when it changed: slightly silly!
-    connect(s_manager, SIGNAL(taskChanged(SystemTray::Task*)),
-            m_taskArea, SLOT(addTask(SystemTray::Task*)));
-    connect(s_manager, SIGNAL(taskRemoved(SystemTray::Task*)),
-            m_taskArea, SLOT(removeTask(SystemTray::Task*)));
-
-    connect(m_taskArea, SIGNAL(sizeHintChanged(Qt::SizeHint)),
-            this, SLOT(propogateSizeHintChange(Qt::SizeHint)));
 
     connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()),
             this, SLOT(themeChanged()));
@@ -136,9 +114,6 @@ Applet::~Applet()
 {
     // stop listening to the manager
     disconnect(s_manager, 0, this, 0);
-
-    // remove the taskArea so we can delete the widgets without it going nuts on us
-    delete m_taskArea;
 
     foreach (Task *task, s_manager->tasks()) {
         // we don't care about the task updates anymore
@@ -150,6 +125,8 @@ Applet::~Applet()
         delete task->widget(this, false);
     }
 
+    delete m_widget;
+
     --s_managerUsage;
     if (s_managerUsage < 1) {
         delete s_manager;
@@ -160,6 +137,37 @@ Applet::~Applet()
 
 void Applet::init()
 {
+    // Find data directory
+    KStandardDirs std_dirs;
+    QStringList dirs = std_dirs.findDirs("data", "plasma/plasmoids/systemtray");
+    QString data_path;
+    if (!dirs.isEmpty()) {
+        data_path = dirs.at(0);
+    } else {
+        setFailedToLaunch(true, "Data directory for applet isn't found");
+        return;
+    }
+
+    // Create declarative engine, etc
+    m_widget = new Plasma::DeclarativeWidget(this);
+    m_widget->setInitializationDelayed(true);
+    m_widget->setQmlPath(data_path + QString::fromLatin1("contents/ui/main.qml"));
+
+    if (!m_widget->engine() || !m_widget->engine()->rootContext() || !m_widget->engine()->rootContext()->isValid()
+            || m_widget->mainComponent()->isError()) {
+        QString reason;
+        foreach (QDeclarativeError error, m_widget->mainComponent()->errors()) {
+            reason += error.toString();
+        }
+        setFailedToLaunch(true, reason);
+        return;
+    }
+
+    // add declarative widget to our applet
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addItem(m_widget);
 }
 
 bool Applet::isFirstRun()
@@ -167,10 +175,6 @@ bool Applet::isFirstRun()
     return m_firstRun;
 }
 
-QGraphicsWidget *Applet::graphicsWidget()
-{
-    return m_taskArea->hiddenTasksWidget();
-}
 
 void Applet::configChanged()
 {
@@ -179,8 +183,6 @@ void Applet::configChanged()
 
     const QStringList hiddenTypes = cg.readEntry("hidden", QStringList());
     const QStringList alwaysShownTypes = cg.readEntry("alwaysShown", QStringList());
-    m_taskArea->setHiddenTypes(hiddenTypes);
-    m_taskArea->setAlwaysShownTypes(alwaysShownTypes);
 
     m_shownCategories.clear();
 
@@ -205,39 +207,17 @@ void Applet::configChanged()
     }
 
     s_manager->loadApplets(this);
-    m_taskArea->syncTasks(s_manager->tasks());
-    checkSizes();
-}
-
-void Applet::popupEvent(bool)
-{
-    m_taskArea->updateUnhideToolIcon();
 }
 
 void Applet::constraintsEvent(Plasma::Constraints constraints)
 {
     if (constraints & Plasma::FormFactorConstraint) {
-        QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        policy.setHeightForWidth(true);
-        bool vertical = formFactor() == Plasma::Vertical;
-
-        if (!vertical) {
-            policy.setVerticalPolicy(QSizePolicy::Expanding);
-        } else {
-            policy.setHorizontalPolicy(QSizePolicy::Expanding);
-        }
-
-        setSizePolicy(policy);
-        m_taskArea->setSizePolicy(policy);
-        m_taskArea->setOrientation(vertical ? Qt::Vertical : Qt::Horizontal);
     }
 
     if (constraints & Plasma::LocationConstraint) {
-        m_taskArea->setLocation(location());
     }
 
     if (constraints & Plasma::SizeConstraint) {
-        checkSizes();
     }
 
     if (constraints & Plasma::ImmutableConstraint) {
@@ -269,132 +249,12 @@ QSet<Task::Category> Applet::shownCategories() const
 
 void Applet::themeChanged()
 {
-    checkSizes();
     update();
-}
-
-void Applet::checkSizes()
-{
-    Plasma::FormFactor f = formFactor();
-    qreal leftMargin, topMargin, rightMargin, bottomMargin;
-    m_background->setElementPrefix(QString());
-    m_background->setEnabledBorders(Plasma::FrameSvg::AllBorders);
-    m_background->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-
-    QSizeF minSize = m_taskArea->effectiveSizeHint(Qt::MinimumSize);
-    if (f == Plasma::Horizontal && minSize.height() > size().height() - topMargin - bottomMargin) {
-        m_background->setEnabledBorders(Plasma::FrameSvg::LeftBorder | Plasma::FrameSvg::RightBorder);
-        layout()->setContentsMargins(leftMargin, 0, rightMargin, 0);
-    } else if (f == Plasma::Vertical && minSize.width() > size().width() - leftMargin - rightMargin) {
-        m_background->setEnabledBorders(Plasma::FrameSvg::TopBorder | Plasma::FrameSvg::BottomBorder);
-        layout()->setContentsMargins(0, topMargin, 0, bottomMargin);
-    } else {
-        layout()->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-    }
-
-    static_cast<QGraphicsLayoutItem*>(m_taskArea)->updateGeometry();
-
-    QSizeF preferredSize = m_taskArea->effectiveSizeHint(Qt::PreferredSize);
-
-    preferredSize.setWidth(preferredSize.width() + leftMargin + rightMargin);
-    preferredSize.setHeight(preferredSize.height() + topMargin + bottomMargin);
-    setPreferredSize(preferredSize);
-
-    QSizeF actualSize = size();
-
-    setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    if (f == Plasma::Horizontal) {
-        setMinimumSize(preferredSize.width(), 0);
-        setMaximumSize(preferredSize.width(), QWIDGETSIZE_MAX);
-    } else if (f == Plasma::Vertical) {
-        setMinimumSize(0, preferredSize.height());
-        setMaximumSize(QWIDGETSIZE_MAX, preferredSize.height());
-    } else if (f == Plasma::Planar) {
-        setMinimumSize(preferredSize);
-    }
-}
-
-
-void Applet::paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect)
-{
-    Q_UNUSED(option)
-
-    QRect normalRect = contentsRect;
-    m_background->setElementPrefix(QString());
-
-    const int leftEasement = m_taskArea->leftEasement();
-    if (leftEasement > 0)
-    {
-        QRect firstRect(normalRect);
-
-        if (formFactor() == Plasma::Vertical) {
-            int margin = m_background->marginSize(Plasma::TopMargin);
-            firstRect.setHeight(leftEasement + margin);
-            normalRect.setY(firstRect.bottom() + 1);
-        } else if (QApplication::layoutDirection() == Qt::RightToLeft) {
-            int margin = m_background->marginSize(Plasma::RightMargin);
-            normalRect.setWidth(normalRect.width() - leftEasement - margin);
-            firstRect.setX(normalRect.right() + 1);
-        } else {
-            int margin = m_background->marginSize(Plasma::LeftMargin);
-            firstRect.setWidth(leftEasement + margin);
-            normalRect.setX(firstRect.right() + 1);
-        }
-
-        if (m_background->hasElementPrefix("firstelements")) {
-            m_background->setElementPrefix("firstelements");
-        } else {
-            m_background->setElementPrefix("lastelements");
-        }
-        m_background->resizeFrame(contentsRect.size());
-
-        painter->save();
-        painter->setClipRect(firstRect, Qt::IntersectClip);
-        m_background->paintFrame(painter, contentsRect, QRectF(QPointF(0, 0), contentsRect.size()));
-        painter->restore();
-    }
-
-    const int rightEasement = m_taskArea->rightEasement();
-    if (rightEasement > 0)
-    {
-        QRect lastRect(normalRect);
-
-        if (formFactor() == Plasma::Vertical) {
-            int margin = m_background->marginSize(Plasma::BottomMargin);
-            normalRect.setHeight(normalRect.height() - rightEasement - margin);
-            lastRect.setY(normalRect.bottom() + 1);
-        } else if (QApplication::layoutDirection() == Qt::RightToLeft) {
-            int margin = m_background->marginSize(Plasma::LeftMargin);
-            lastRect.setWidth(rightEasement + margin);
-            normalRect.setX(lastRect.right() + 1);
-        } else {
-            int margin = m_background->marginSize(Plasma::RightMargin);
-            normalRect.setWidth(normalRect.width() - rightEasement - margin);
-            lastRect.setX(normalRect.right() + 1);
-        }
-
-        m_background->setElementPrefix("lastelements");
-        m_background->resizeFrame(contentsRect.size());
-
-        painter->save();
-        painter->setClipRect(lastRect, Qt::IntersectClip);
-        m_background->paintFrame(painter, contentsRect, QRectF(QPointF(0, 0), contentsRect.size()));
-        painter->restore();
-    }
-
-    m_background->setElementPrefix(QString());
-    m_background->resizeFrame(contentsRect.size());
-
-    painter->save();
-    painter->setClipRect(normalRect, Qt::IntersectClip);
-    m_background->paintFrame(painter, contentsRect, QRectF(QPointF(0, 0), contentsRect.size()));
-    painter->restore();
 }
 
 
 void Applet::propogateSizeHintChange(Qt::SizeHint which)
 {
-    checkSizes();
     emit sizeHintChanged(which);
 }
 
@@ -495,8 +355,8 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
 
         if (task->hidden() & Task::UserHidden) {
             itemCombo->setCurrentIndex(1);
-        } else if (m_taskArea->alwaysShownTypes().contains(task->typeId())) {
-            itemCombo->setCurrentIndex(2);
+//        } else if (m_taskArea->alwaysShownTypes().contains(task->typeId())) {
+//            itemCombo->setCurrentIndex(2);
         } else {
             itemCombo->setCurrentIndex(0);
         }
