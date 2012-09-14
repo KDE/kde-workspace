@@ -33,6 +33,7 @@ set(systemtray_SRCS
     ui/applet.cpp
     ui/compactlayout.cpp
     ui/taskarea.cpp
+    ui/plasmoid.cpp
     )
 
 kde4_add_ui_files(systemtray_SRCS

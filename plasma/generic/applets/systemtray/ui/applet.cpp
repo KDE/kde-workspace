@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "applet.h"
+#include "plasmoid.h"
 
 #include <QtCore/QProcess>
 #include <QtCore/QTimer>
@@ -86,6 +87,23 @@ namespace SystemTray
 {
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+namespace
+{
+
+static void _RegisterEnums(QDeclarativeContext *context, const QMetaObject &meta)
+{
+    for (int i = 0, s = meta.enumeratorCount(); i < s; ++i) {
+        QMetaEnum e = meta.enumerator(i);
+        for (int i = 0, s = e.keyCount(); i < s; ++i) {
+            context->setContextProperty(e.key(i), e.value(i));
+        }
+    }
+}
+
+} // namespace
+
+
 K_EXPORT_PLASMA_APPLET(systemtray, Applet)
 
 
@@ -94,6 +112,7 @@ int Applet::s_managerUsage = 0;
 
 Applet::Applet(QObject *parent, const QVariantList &arguments)
     : Plasma::Applet(parent, arguments),
+      m_plasmoid(new Plasmoid(this)),
       m_widget(0),
       m_firstRun(true)
 {
@@ -126,6 +145,7 @@ Applet::~Applet()
     }
 
     delete m_widget;
+    delete m_plasmoid;
 
     --s_managerUsage;
     if (s_managerUsage < 1) {
@@ -162,6 +182,13 @@ void Applet::init()
         setFailedToLaunch(true, reason);
         return;
     }
+
+    // setup context add global object "plasmoid"
+    QDeclarativeEngine *engine = m_widget->engine();
+    engine->rootContext()->setContextProperty("plasmoid", m_plasmoid);
+
+    // add enumerations manually to global context
+    _RegisterEnums(engine->rootContext(), Plasmoid::staticMetaObject);
 
     // add declarative widget to our applet
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
@@ -212,9 +239,11 @@ void Applet::configChanged()
 void Applet::constraintsEvent(Plasma::Constraints constraints)
 {
     if (constraints & Plasma::FormFactorConstraint) {
+        m_plasmoid->setFormFactor(Plasmoid::ToFormFactor(formFactor()));
     }
 
     if (constraints & Plasma::LocationConstraint) {
+        m_plasmoid->setLocation(Plasmoid::ToLocation(location()));
     }
 
     if (constraints & Plasma::SizeConstraint) {

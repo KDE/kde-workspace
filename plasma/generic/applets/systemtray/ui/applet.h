@@ -46,6 +46,7 @@ namespace SystemTray
 
 class Manager;
 class TaskArea;
+class Plasmoid;
 
 class Applet : public Plasma::Applet
 {
@@ -86,6 +87,7 @@ private:
     QWeakPointer<QWidget> m_visibleItemsInterface;
     QSet<Task::Category> m_shownCategories;
     QDateTime m_lastActivity;
+    Plasmoid *m_plasmoid;
     Plasma::DeclarativeWidget *m_widget;
 
     Ui::AutoHideConfig m_autoHideUi;
