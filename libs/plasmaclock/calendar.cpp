@@ -360,35 +360,30 @@ void Calendar::configAccepted(KConfigGroup cg)
 
 void Calendar::resizeEvent(QGraphicsSceneResizeEvent * event)
 {
-    Q_UNUSED(event);
-    if (d->calendarTable) {
-        if (isDisplayingDateDetails()) {
-            d->calendarTable->setMaximumWidth(size().width() / 2);
-        } else {
-            d->calendarTable->setMaximumWidth(-1);
-        }
-    }
+    // just forward the event. Not removed due to BC.
+    QGraphicsWidget::resizeEvent(event);
 }
 
-void CalendarPrivate::updatePreferredSize()
+void CalendarPrivate::updatePreferredSize() // don't rename function in stable branch
 {
-    QSize size = calendarTable ? calendarTable->size().toSize() : QSize(250, 250);
+    QSize minSize = QSize(200, 200);
+    QSize prefSize = calendarTable ? calendarTable->size().toSize() : QSize(250, 250);
     if (q->isDisplayingDateDetails()) {
-        // our seperators widths is the vertical line + space for the vertical scrollbar + spacing
+        // our seperator's width is the vertical line + space for the vertical scrollbar + spacing
         const int sepWidth = (separator ? separator->size().width() : 6 ) + 24;
-        size.setWidth(size.width() * 2 + sepWidth * 2);
+        prefSize.setWidth(prefSize.width() * 2 + sepWidth * 2);
+        minSize.setWidth(minSize.width() * 2); // should be enough even for the separator
     }
 
-    q->setPreferredSize(size);
+    q->setMinimumSize(minSize);
+    q->setPreferredSize(prefSize);
 }
 
 void Calendar::applyConfiguration(KConfigGroup cg)
 {
-    const bool details = isDisplayingDateDetails();
     calendarTable()->applyConfiguration(cg);
-    if (details != isDisplayingDateDetails()) {
-        d->updatePreferredSize();
-    }
+    d->updatePreferredSize();
+    d->displayEvents();
 }
 
 void Calendar::manualDateChange()
