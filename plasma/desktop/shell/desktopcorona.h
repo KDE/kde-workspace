@@ -117,6 +117,7 @@ private:
 
     QAction *m_addPanelAction;
     QMenu *m_addPanelsMenu;
+    QTimer *m_delayedUpdateTimer;
     KActivities::Controller *m_activityController;
     QHash<QString, Activity*> m_activities;
 };

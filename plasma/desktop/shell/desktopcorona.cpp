@@ -63,6 +63,7 @@ DesktopCorona::DesktopCorona(QObject *parent)
     : Plasma::Corona(parent),
       m_addPanelAction(0),
       m_addPanelsMenu(0),
+      m_delayedUpdateTimer(new QTimer(this)),
       m_activityController(new KActivities::Controller(this))
 {
     init();
@@ -120,6 +121,15 @@ void DesktopCorona::init()
     connect(m_activityController, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
     connect(m_activityController, SIGNAL(activityAdded(QString)), this, SLOT(activityAdded(QString)));
     connect(m_activityController, SIGNAL(activityRemoved(QString)), this, SLOT(activityRemoved(QString)));
+
+    // Everything will be repainted shortly after a screen resize was processed, but unfortunately that does not suffice:
+    // When screen size is increased, parts of the newly uncovered area on the panel remain black for some reason. Also,
+    // if compositing is disabled and the desktop background is a color, parts of the panel are left on the background.
+    // Redrawing the entire scene shortly thereafter works around the problem.
+    m_delayedUpdateTimer->setSingleShot(true);
+    m_delayedUpdateTimer->setInterval(250); // 100ms was not enough
+    connect(this, SIGNAL(availableScreenRegionChanged()), m_delayedUpdateTimer, SLOT(start()));
+    connect(m_delayedUpdateTimer, SIGNAL(timeout()), this, SLOT(update()));
 
     mapAnimation(Plasma::Animator::AppearAnimation, Plasma::Animator::ZoomAnimation);
     mapAnimation(Plasma::Animator::DisappearAnimation, Plasma::Animator::ZoomAnimation);
