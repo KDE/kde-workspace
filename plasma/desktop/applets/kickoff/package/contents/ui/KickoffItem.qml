@@ -163,6 +163,17 @@ PlasmaComponents.ListItem {
             listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
         }
     }
+    PlasmaComponents.MenuItem {
+        id: uninstallApp
+        text: "Uninstall"
+        onClicked: {
+            print("uninstall " +  model["url"]);
+            var service = packagekitSource.serviceForSource("Status")
+            var operation = service.operationDescription("uninstallApplication")
+            operation.Url = model["url"];
+            var job = service.startOperationCall(operation)
+        }
+    }
 
     DragArea {
         anchors.fill: parent
@@ -201,6 +212,10 @@ PlasmaComponents.ListItem {
                         }
                     }
 
+                    if (packagekitSource.data["Status"]["available"]) {
+                        contextMenu.addMenuItem(uninstallApp);
+                    }
+
                     if (root.state == "NORMAL") {
                         contextMenu.addMenuItem(actionsSeparator)
                         if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
@@ -211,6 +226,7 @@ PlasmaComponents.ListItem {
                             contextMenu.addMenuItem(clearRecentDocuments);
                         }
                     }
+
                     var mapPos = listItem.mapToItem(listItem.ListView.view.parent.parent.parent, mouse.x, mouse.y);
                     contextMenu.open(mapPos.x,mapPos.y);
                 }

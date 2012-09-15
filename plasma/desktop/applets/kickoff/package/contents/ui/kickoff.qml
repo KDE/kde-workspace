@@ -49,6 +49,12 @@ Item {
         root.showAppsByName = plasmoid.readConfig("ShowAppsByName");
     }
 
+    PlasmaCore.DataSource {
+        id: packagekitSource
+        engine: "packagekit"
+        connectedSources: ["Status"]
+    }
+
     Kickoff.Launcher {
         id: launcher
     }
