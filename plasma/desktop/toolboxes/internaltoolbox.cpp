@@ -442,7 +442,10 @@ void InternalToolBox::reposition()
     updateToolBox();
 
     if (m_userMoved) {
+        bool wasMovable = m_movable;
+        m_movable = true; // make sure we can move it now!
         restore(m_containment->config());
+        m_movable = wasMovable; // restore former movability
         return;
     }
 
