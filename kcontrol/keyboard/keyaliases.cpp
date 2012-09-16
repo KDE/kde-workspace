@@ -1,8 +1,13 @@
 #include "keyaliases.h"
-#include<QString>
-#include<QMap>
-#include<QMessageBox>
-#include<QFile>
+
+#include<QtCore/QString>
+#include<QtCore/QMap>
+#include<QtGui/QMessageBox>
+#include<QtCore/QFile>
+#include<QtCore/QDir>
+
+#include <fixx11h.h>
+#include <config-workspace.h>
 
 Aliases::Aliases()
 {
