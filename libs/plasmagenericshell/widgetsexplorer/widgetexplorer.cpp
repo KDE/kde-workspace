@@ -222,11 +222,16 @@ void WidgetExplorerPrivate::setLocation(const Plasma::Location loc)
         orient = Qt::Horizontal;
     }
 
-    if (orientation == orient) {
+    if (location == loc) {
         return;
     }
 
     location = loc;
+
+    if (orientation == orient) {
+        return;
+    }
+
     emit q->orientationChanged();
 }
 

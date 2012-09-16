@@ -35,7 +35,7 @@ PlasmaCore.FrameSvgItem {
     property int realMarginRight: margins.right
 
     width: realMarginLeft + 2 * buttonsLayout.width + realMarginRight
-    height: Math.max(realMarginTop + leftPicture.height + realMarginBottom, 2*realMarginTop + automaticallyDoLabel.height + buttonsLayout.height + realMarginBottom)
+    height: realMarginTop + 4 + automaticallyDoLabel.height + 4 + buttonsLayout.height + realMarginBottom
 
     imagePath: "dialogs/shutdowndialog"
 
@@ -101,7 +101,7 @@ PlasmaCore.FrameSvgItem {
             leftPicture.anchors.leftMargin = 2*realMarginLeft
             buttonsLayout.anchors.rightMargin = 2*realMarginRight
         } else {
-            var pictureWidth = shutdownUi.height * leftPicture.naturalSize.width / leftPicture.naturalSize.height
+            var pictureWidth = buttonsLayout.height * leftPicture.naturalSize.width / leftPicture.naturalSize.height
 
             if (pictureWidth < leftPicture.naturalSize.width) {
                 leftPicture.width = pictureWidth;
@@ -310,6 +310,7 @@ PlasmaCore.FrameSvgItem {
                     text: i18n("&Restart Computer")
                     iconSource: "system-reboot"
                     anchors.right: parent.right
+                    visible: (choose || sdtype == ShutdownType.ShutdownTypeReboot)
                     menu: rebootOptions["options"].length > 0
                     tabStopNext: cancelButton
                     tabStopBack: shutdownButton

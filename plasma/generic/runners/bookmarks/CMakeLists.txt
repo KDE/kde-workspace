@@ -2,8 +2,10 @@
 set(EXTERNAL_LIBS ${KDE4_KIO_LIBS} ${QT_QTSCRIPT_LIBRARY} ${KDE4_PLASMA_LIBS} ${QT_QTSQL_LIBRARY})
 if(QJSON_FOUND)
     add_definitions(-DHAVE_QJSON=1)
-    set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${QJSON_LIBRARIES} )
-    include_directories(${QJSON_INCLUDE_DIR})
+    # Some distributions (e.g. Debian) seem to install a QJSONConfig.cmake with lower-case variables,
+    # which is preferred to our FindQJSON.cmake. Make sure this does not break the build.
+    set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${QJSON_LIBRARIES} ${qjson_LIBRARIES} )
+    include_directories(${QJSON_INCLUDE_DIR} ${qjson_INCLUDE_DIR})
 endif(QJSON_FOUND)
 
 set(krunner_bookmarksrunner_SRCS

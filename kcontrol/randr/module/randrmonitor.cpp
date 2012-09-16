@@ -142,7 +142,6 @@ void RandrMonitorModule::processX11Event( XEvent* e )
             if (!dialog) {
                 dialog = new KDialog();
                 dialog->setCaption(i18n("Monitor setup has changed"));
-
                 QLabel *icon = new QLabel();
                 icon->setPixmap(KIcon("preferences-desktop-display").pixmap(QSize(64, 64), QIcon::Normal, QIcon::On));
                 QString question =
@@ -158,9 +157,11 @@ void RandrMonitorModule::processX11Event( XEvent* e )
                 QWidget *mainWidget = new QWidget(dialog);
                 mainWidget->setLayout(layout);
                 dialog->setMainWidget(mainWidget);
-                dialog->setButtons(KDialog::Yes | KDialog::No);
+                dialog->setButtons(KDialog::Yes | KDialog::No | KDialog::Try);
                 dialog->setDefaultButton(KDialog::Yes);
+                dialog->setButtonText(KDialog::Try, i18nc("@Button: try to adjust screen configuration automatically", "Try Automatically"));
                 connect(dialog, SIGNAL(yesClicked()), this, SLOT(showKcm()));
+                connect(dialog, SIGNAL(tryClicked()), this, SLOT(tryAutoConfig()));
             }
             if (!dialog->isVisible()) {
                 dialog->show();
@@ -174,6 +175,11 @@ void RandrMonitorModule::processX11Event( XEvent* e )
 void RandrMonitorModule::showKcm()
 {
     KToolInvocation::kdeinitExec("kcmshell4", QStringList() << "display");
+}
+
+void RandrMonitorModule::tryAutoConfig()
+{
+    KProcess::execute(QStringList() << "xrandr" << "--auto");
 }
 
 QStringList RandrMonitorModule::connectedMonitors() const

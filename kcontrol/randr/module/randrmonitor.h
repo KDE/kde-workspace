@@ -51,6 +51,7 @@ private slots:
     void checkInhibition();
     void checkResumeFromSuspend();
     void showKcm();
+    void tryAutoConfig();
 private:
     void initRandr();
     QStringList connectedMonitors() const;
