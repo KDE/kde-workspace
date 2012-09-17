@@ -48,16 +48,9 @@ class Task : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(Status status READ status NOTIFY changedStatus)
+
 public:
-    enum Order { First, Normal, Last };
-
-    enum HideState {
-        NotHidden = 0,
-        UserHidden = 1,
-        AutoHidden = 2
-    };
-    Q_DECLARE_FLAGS(HideStates, HideState)
-
     enum Status {
         UnknownStatus = 0,
         Passive = 1,
@@ -101,6 +94,12 @@ public:
     virtual bool isEmbeddable() const = 0;
 
     /**
+     * Returns whether this task is represented as widget or it provides only information (icon, name, state, etc)
+     * @return true if task is represented as widget.
+     */
+    virtual bool isWidget() const = 0;
+
+    /**
      * Returns the name of this task that should be presented to the user
      **/
     virtual QString name() const = 0;
@@ -121,32 +120,10 @@ public:
     virtual QIcon icon() const = 0;
 
     /**
-     * Make the task ask to be hidden. The systemtray may or may not fullfill that requirement
-     */
-    void setHidden(HideStates state);
-
-    /**
-     * Returns the state of the icon: visible, hidden by the user or hidden by itself
-     */
-    HideStates hidden() const;
-
-    /**
      * @return true if this task is current being used, e.g. it has created
      * widgets for one or more hosts
      */
     bool isUsed() const;
-
-    /**
-     * Returns the order this Task should be placed in: first, normal or last
-     */
-    Order order() const;
-
-    /**
-     * Sets which order this task should be placed in, relative to other Tasks
-     *
-     * @arg order the order to set this Task to
-     */
-    void setOrder(Order order);
 
     /**
      * Sets the category of the task, UnknownCategory by default
@@ -171,11 +148,6 @@ public:
     Status status() const;
 
     /**
-     * Resets the hidden state based purely on the status. Will not emit a changed signal.
-     */
-    void resetHiddenStatus();
-
-    /**
      * Can be used by the hostwhen they no longer wish to use the widget associated
      * with the host.
      */
@@ -188,6 +160,11 @@ Q_SIGNALS:
     //TODO: this should also state _what_ was changed so we can react more
     //      precisely (and therefore with greater efficiency)
     void changed(SystemTray::Task *task);
+
+    /**
+     * Special signal for changed status
+     */
+    void changedStatus();
 
     /**
      * Emitted when the task is about to be destroyed

@@ -37,7 +37,7 @@ class DBusSystemTrayTask;
 class DBusSystemTrayProtocol : public Protocol
 {
     Q_OBJECT
-
+    friend class DBusSystemTrayTask;
 public:
     DBusSystemTrayProtocol(QObject *parent);
     ~DBusSystemTrayProtocol();
@@ -51,6 +51,8 @@ protected Q_SLOTS:
     void cleanupTask(const QString &typeId);
 
 private:
+    void initedTask(DBusSystemTrayTask *task);
+
     Plasma::DataEngine *m_dataEngine;
     QHash<QString, DBusSystemTrayTask*> m_tasks;
 };

@@ -46,6 +46,8 @@ class Plasmoid: public QObject
 
     Q_PROPERTY(FormFactor formFactor READ formFactor NOTIFY changedFormFactor)
     Q_PROPERTY(Location location READ location NOTIFY changedLocation)
+    Q_PROPERTY(unsigned int id READ id CONSTANT)
+    Q_PROPERTY(QVariant applet READ applet CONSTANT) ///< return pointer to applet
 public:
     // Form factor
     enum FormFactor
@@ -78,10 +80,19 @@ public:
     void setFormFactor(FormFactor form_factor);
     Location   location() const;
     void setLocation(Location loc);
+    unsigned int id() const;
+    QVariant applet() const;
+
+    Q_INVOKABLE QVariant createShortcutAction(QString action_id) const;
+    Q_INVOKABLE void updateShortcutAction(QVariant action, QString shortcut) const;
+    Q_INVOKABLE void showMenu(QVariant menu, int x, int y, QVariant item) const;
+    Q_INVOKABLE QPoint popupPosition(QVariant item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
+    Q_INVOKABLE void destroyShortcutAction(QVariant action) const;
 
 signals:
     void changedFormFactor();
     void changedLocation();
+    void activated(); ///< If a plasmoid has been activated
 
 private:
     struct _Private;

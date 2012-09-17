@@ -34,16 +34,12 @@ class Task::Private
 {
 public:
     Private()
-        : hiddenState(Task::NotHidden),
-          order(Task::Normal),
-          status(Task::UnknownStatus),
+        : status(Task::UnknownStatus),
           category(Task::UnknownCategory)
     {
     }
 
     QHash<Plasma::Applet *, QGraphicsWidget *> widgetsByHost;
-    Task::HideStates hiddenState;
-    Task::Order order;
     Task::Status status;
     Task::Category category;
 };
@@ -144,29 +140,9 @@ void Task::emitChanged()
     emit changed(this);
 }
 
-void Task::setHidden(HideStates state)
-{
-    d->hiddenState = state;
-}
-
-Task::HideStates Task::hidden() const
-{
-    return d->hiddenState;
-}
-
 bool Task::isUsed() const
 {
     return !d->widgetsByHost.isEmpty();
-}
-
-Task::Order Task::order() const
-{
-    return d->order;
-}
-
-void Task::setOrder(Order order)
-{
-    d->order = order;
 }
 
 void Task::setCategory(Category category)
@@ -191,32 +167,13 @@ void Task::setStatus(Status status)
     }
 
     d->status = status;
-    resetHiddenStatus();
+    emit changedStatus();
     emit changed(this);
 }
 
 Task::Status Task::status() const
 {
     return d->status;
-}
-
-void Task::resetHiddenStatus()
-{
-     if (d->status == NeedsAttention) {
-        //tasks don't get moved anymore
-        setOrder(Normal);
-        if (hidden() & AutoHidden) {
-            setHidden(hidden() ^ AutoHidden);
-        }
-    } else {
-        if (d->status == Active && (hidden() & AutoHidden)) {
-            setHidden(hidden() ^ AutoHidden);
-        } else if (d->status == Passive) {
-            setHidden(hidden() | AutoHidden);
-        }
-
-        setOrder(Normal);
-    }
 }
 
 }

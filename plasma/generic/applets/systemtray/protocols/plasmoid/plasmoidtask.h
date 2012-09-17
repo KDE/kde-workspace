@@ -48,6 +48,7 @@ public:
     void forwardConstraintsEvent(Plasma::Constraints constraints);
     int id() const;
     Plasma::Applet *host() const;
+    virtual bool isWidget() const;
 
 protected Q_SLOTS:
     void appletDestroyed(Plasma::Applet *object);

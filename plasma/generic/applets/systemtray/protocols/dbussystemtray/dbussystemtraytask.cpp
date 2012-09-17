@@ -20,34 +20,19 @@
 
 #include "dbussystemtraytask.h"
 
-#include <QAction>
-#include <QDir>
-#include <QGraphicsWidget>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QIcon>
-#include <QMovie>
-#include <QTimer>
-#include <QMetaEnum>
+#include "dbussystemtrayprotocol.h"
 
-#include <KAction>
-#include <KDebug>
-#include <KIcon>
-#include <KIconLoader>
-#include <KStandardDirs>
+#include <QtCore/QMetaEnum>
+#include <QtCore/QDir>
+#include <QtCore/QCoreApplication>
+#include <QtGui/QMenu>
+#include <QtGui/QIcon>
 
-#include <Plasma/Applet>
-#include <Plasma/Corona>
-#include <Plasma/DataContainer>
-#include <Plasma/DataEngineManager>
-#include <Plasma/View>
-#include <Plasma/IconWidget>
-#include <Plasma/ToolTipContent>
-#include <Plasma/ToolTipManager>
-#include <Plasma/Plasma>
-
-#include "dbussystemtraywidget.h"
-
-#include <netinet/in.h>
+#include <KDE/KJob>
+#include <KDE/KIconLoader>
+#include <KDE/Plasma/ServiceJob>
+#include <KDE/Plasma/ToolTipManager>
+#include <KDE/Plasma/Applet>
 
 namespace SystemTray
 {
@@ -57,65 +42,24 @@ DBusSystemTrayTask::DBusSystemTrayTask(const QString &serviceName, Plasma::DataE
       m_serviceName(serviceName),
       m_typeId(serviceName),
       m_name(serviceName),
-      m_movie(0),
-      m_blinkTimer(0),
       m_dataEngine(dataEngine),
       m_service(dataEngine->serviceForSource(serviceName)),
-      m_blink(false),
-      m_valid(false),
-      m_embeddable(false)
+      m_isMenu(false),
+      m_valid(false)
 {
     kDebug();
     m_service->setParent(this);
 
-    //TODO: how to behave if its not m_valid?
-    m_valid = !serviceName.isEmpty();
-
-    if (m_valid) {
-        //TODO: is this call to dataUpdated required?
-        dataUpdated(serviceName, Plasma::DataEngine::Data());
-        m_dataEngine->connectSource(serviceName, this);
-    }
+    m_dataEngine->connectSource(serviceName, this);
 }
 
 DBusSystemTrayTask::~DBusSystemTrayTask()
 {
-    delete m_movie;
-    delete m_blinkTimer;
 }
 
-QGraphicsWidget* DBusSystemTrayTask::createWidget(Plasma::Applet *host)
+QGraphicsWidget* DBusSystemTrayTask::createWidget(Plasma::Applet */*host*/)
 {
-    kDebug();
-    DBusSystemTrayWidget *iconWidget = new DBusSystemTrayWidget(host, m_service);
-    // we may already have an icon, so this isn't the first time we've been created,
-    // or the request will come delayed after the creation of this widget and
-    // the data likely already exists in the DataEngine. we can't wait for an update
-    // from the status notifier item since it may never come or only after a while
-    // when the item actually changes.
-    // the call also needs to be delayed, since createWidget is called before the widget is added
-    // to the widgetsByHost() collection, and so an immediate call won't atually work here
-    QTimer::singleShot(0, this, SLOT(updateWidgets()));
-
-    iconWidget->show();
-
-    iconWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    iconWidget->setMinimumSize(KIconLoader::SizeSmall, KIconLoader::SizeSmall);
-    //standard fdo icon sizes is 24x24, opposed to the 22x22 SizeSmallMedium
-    iconWidget->setPreferredSize(24, 24);
-    return iconWidget;
-}
-
-void DBusSystemTrayTask::updateWidgets()
-{
-    if (Plasma::DataContainer *c = m_dataEngine->containerForSource(m_serviceName)) {
-        // fairly inneficient as it updates _all_ icons!
-        Plasma::DataEngine::Data data = c->data();
-        data["IconsChanged"] = true;
-        data["StatusChanged"] = true;
-        data["ToolTipChanged"] = true;
-        dataUpdated(m_serviceName, data);
-    }
+    return 0;  // d-bus tasks don't have widgets but provide info for GUI;
 }
 
 bool DBusSystemTrayTask::isValid() const
@@ -125,7 +69,19 @@ bool DBusSystemTrayTask::isValid() const
 
 bool DBusSystemTrayTask::isEmbeddable() const
 {
-    return m_embeddable;
+    return false; // this task cannot be embed because it only provides information to GUI part
+}
+
+bool DBusSystemTrayTask::isWidget() const
+{
+    return false; // isn't a widget
+}
+
+void DBusSystemTrayTask::setShortcut(QString text) {
+    if (m_shortcut != text) {
+        m_shortcut = text;
+        emit changedShortcut();
+    }
 }
 
 QString DBusSystemTrayTask::name() const
@@ -143,11 +99,88 @@ QIcon DBusSystemTrayTask::icon() const
     return m_icon;
 }
 
+void DBusSystemTrayTask::activate1(int x, int y) const
+{
+    KConfigGroup params;
+    if (m_isMenu) {
+        params = m_service->operationDescription("ContextMenu");
+    } else {
+        params = m_service->operationDescription("Activate");
+    }
+    params.writeEntry("x", x);
+    params.writeEntry("y", y);
+    KJob *job = m_service->startOperationCall(params);
+    connect(job, SIGNAL(result(KJob*)), this, SLOT(_onContextMenu(KJob*)));
+}
+
+void DBusSystemTrayTask::activate2(int x, int y) const
+{
+    KConfigGroup params = m_service->operationDescription("SecondaryActivate");
+    params.writeEntry("x", x);
+    params.writeEntry("y", y);
+    m_service->startOperationCall(params);
+}
+
+void DBusSystemTrayTask::activateHorzScroll(int delta) const
+{
+    _activateScroll(delta, "Horizontal");
+}
+
+void DBusSystemTrayTask::activateVertScroll(int delta) const
+{
+    _activateScroll(delta, "Vertical");
+}
+
+void DBusSystemTrayTask::_activateScroll(int delta, QString direction) const
+{
+    KConfigGroup params = m_service->operationDescription("Scroll");
+    params.writeEntry("delta", delta);
+    params.writeEntry("direction", direction);
+    m_service->startOperationCall(params);
+}
+
+void DBusSystemTrayTask::activateContextMenu(int x, int y) const
+{
+    KConfigGroup params = m_service->operationDescription("ContextMenu");
+    params.writeEntry("x", x);
+    params.writeEntry("y", y);
+    KJob *job = m_service->startOperationCall(params);
+    connect(job, SIGNAL(result(KJob*)), this, SLOT(_onContextMenu(KJob*)));
+}
+
+void DBusSystemTrayTask::_onContextMenu(KJob *job)
+{
+    if (QCoreApplication::closingDown()) {
+        // apparently an edge case can be triggered due to the async nature of all this
+        // see: https://bugs.kde.org/show_bug.cgi?id=251977
+        return;
+    }
+
+    Plasma::ServiceJob *sjob = qobject_cast<Plasma::ServiceJob *>(job);
+    if (!sjob) {
+        return;
+    }
+
+    QMenu *menu = qobject_cast<QMenu *>(sjob->result().value<QObject *>());
+    if (menu) {
+        int x = sjob->parameters()["x"].toInt();
+        int y = sjob->parameters()["y"].toInt();
+        emit showContextMenu(x, y, QVariant::fromValue<QObject*>(menu));
+    }
+}
+
 void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::DataEngine::Data &properties)
 {
     Q_UNUSED(taskName);
 
-    const QString oldTypeId = m_typeId;
+    QString id = properties["Id"].toString();
+    bool become_valid = false;
+    if (!id.isEmpty() && id != m_typeId) {
+        m_typeId = id;
+        m_valid = true;
+        become_valid = true;
+        setObjectName(QString("SystemTray-%1").arg(m_typeId));
+    }
 
     QString cat = properties["Category"].toString();
     if (!cat.isEmpty()) {
@@ -159,197 +192,95 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         }
     }
 
-    if (properties["TitleChanged"].toBool()) {
-        QString m_title = properties["Title"].toString();
-        if (!m_title.isEmpty()) {
-            m_name = m_title;
-
-            if (m_typeId.isEmpty()) {
-                m_typeId = m_title;
-            }
+    if (properties["TitleChanged"].toBool() || become_valid) {
+        QString title = properties["Title"].toString();
+        if (!title.isEmpty()) {
+            bool is_title_changed = (m_name != title);
+            m_name = title;
+            if (is_title_changed)
+                emit changedTitle();
         }
     }
 
-    /*
-    kDebug() << m_name
-    << "status:" << properties["StatusChanged"].toBool() << "title:" <<  properties["TitleChanged"].toBool()
-    << "icons:" << properties["IconsChanged"].toBool() << "tooltip:" << properties["ToolTipChanged"].toBool();
-    */
-
-    QString id = properties["Id"].toString();
-    if (!id.isEmpty()) {
-        m_typeId = id;
-    }
-
-    if (properties["IconsChanged"].toBool()) {
+    if (properties["IconsChanged"].toBool() || become_valid) {
         syncIcons(properties);
+        emit changedIcons();
     }
 
-    if (properties["StatusChanged"].toBool()) {
+    if (properties["StatusChanged"].toBool() || become_valid) {
         syncStatus(properties["Status"].toString());
     }
 
-    if (properties["ToolTipChanged"].toBool()) {
+    if (properties["ToolTipChanged"].toBool() || become_valid) {
         syncToolTip(properties["ToolTipTitle"].toString(),
                     properties["ToolTipSubTitle"].toString(),
                     properties["ToolTipIcon"].value<QIcon>());
     }
 
-    foreach (QGraphicsWidget *widget, widgetsByHost()) {
-        DBusSystemTrayWidget *iconWidget = qobject_cast<DBusSystemTrayWidget *>(widget);
-        if (iconWidget) {
-            iconWidget->setItemIsMenu(properties["ItemIsMenu"].toBool());
-        }
+    bool is_menu = properties["ItemIsMenu"].toBool();
+    if (is_menu != m_isMenu) {
+        m_isMenu = is_menu;
+        emit changedIsMenu();
     }
 
-    if (m_typeId != oldTypeId) {
-        QHashIterator<Plasma::Applet *, QGraphicsWidget *> it(widgetsByHost());
-        while (it.hasNext()) {
-            it.next();
-
-            Plasma::IconWidget *icon = qobject_cast<Plasma::IconWidget *>(it.value());
-            if (!icon) {
-                continue;
-            }
-
-            icon->action()->setObjectName(QString("Systemtray-%1-%2").arg(m_typeId).arg(it.key()->id()));
-
-            KConfigGroup cg = it.key()->config();
-            KConfigGroup shortcutsConfig = KConfigGroup(&cg, "Shortcuts");
-
-            //FIXME: quite ugly, checks if the applet is klipper and if is less than 2 widgets have been created. if so, assign a default global shortcut
-            QString shortcutText;
-            if (it.key()->property("firstRun").toBool() == true && name() == "Klipper" && widgetsByHost().count() < 2) {
-                QString file = KStandardDirs::locateLocal("config", "kglobalshortcutsrc");
-                KConfig config(file);
-                KConfigGroup cg(&config, "klipper");
-                QStringList shortcutTextList = cg.readEntry("show_klipper_popup", QStringList());
-
-                if (shortcutTextList.size() >= 2) {
-                    shortcutText = shortcutTextList.first();
-                    if (shortcutText.isEmpty()) {
-                        shortcutText = shortcutTextList[1];
-                    }
-
-                    if (shortcutText.isEmpty()) {
-                        shortcutText = "Ctrl+Alt+V";
-                    }
-                } else {
-                    shortcutText = "Ctrl+Alt+V";
-                }
-            }
-
-            shortcutText = shortcutsConfig.readEntryUntranslated(icon->action()->objectName(), shortcutText);
-            KAction *action = qobject_cast<KAction *>(icon->action());
-            if (action && !shortcutText.isEmpty()) {
-                action->setGlobalShortcut(KShortcut(shortcutText),
-                            KAction::ShortcutTypes(KAction::ActiveShortcut | KAction::DefaultShortcut),
-                            KAction::NoAutoloading);
-                shortcutsConfig.writeEntry(icon->action()->objectName(), shortcutText);
-            }
+    if (become_valid) {
+        DBusSystemTrayProtocol *protocol = qobject_cast<DBusSystemTrayProtocol*>(parent());
+        if (protocol) {
+            protocol->initedTask(this);
         }
-    }
-
-    m_embeddable = true;
-
-    if (oldTypeId != m_typeId || properties["StatusChanged"].toBool() || properties["TitleChanged"].toBool()) {
-        //kDebug() << "signaling a change";
-        emit changed(this);
     }
 }
 
 void DBusSystemTrayTask::syncIcons(const Plasma::DataEngine::Data &properties)
 {
     m_icon = properties["Icon"].value<QIcon>();
-    m_iconName = properties["IconName"].toString();
-
-    if (status() != Task::NeedsAttention) {
-        foreach (QGraphicsWidget *widget, widgetsByHost()) {
-            DBusSystemTrayWidget *iconWidget = qobject_cast<DBusSystemTrayWidget *>(widget);
-            if (!iconWidget) {
-                continue;
-            }
-
-            iconWidget->setIcon(m_iconName, m_icon);
-
-            //This hardcoded number is needed to support pixel perfection of m_icons coming from other environments, in kde actualsize will just return our usual 22x22
-            if (iconWidget->svg().isEmpty()) {
-                QSize size = m_icon.actualSize(QSize(24, 24));
-                iconWidget->setPreferredSize(iconWidget->sizeFromIconSize(qMax(size.width(), size.height())));
-            } else {
-                iconWidget->setPreferredSize(24, 24);
-            }
-        }
-    }
-
     m_attentionIcon = properties["AttentionIcon"].value<QIcon>();
-    m_attentionIconName = properties["AttentionIconName"].toString();
 
-    QString m_movieName = properties["AttentionMovieName"].toString();
-    syncMovie(m_movieName);
+    QString icon_name            = properties["IconName"].toString();
+    QString att_icon_name        = properties["AttentionIconName"].toString();
+    QString movie_path           = properties["AttentionMovieName"].toString();
+    QString overlay_icon_name    = properties["OverlayIconName"].value<QString>();
+    bool is_icon_name_changed           = false;
+    bool is_att_icon_name_changed       = false;
+    bool is_movie_path_changed          = false;
+    bool is_overlay_icon_name_changed   = false;
 
-    //FIXME: this is used only on the monochrome ones, the third place where the overlay painting is implemented
-    QIcon overlayIcon = properties["OverlayIcon"].value<QIcon>();
-    if (overlayIcon.isNull() && !properties["OverlayIconName"].value<QString>().isEmpty()) {
-        overlayIcon = KIcon(properties["OverlayIconName"].value<QString>());
+    if (icon_name != m_iconName) {
+        m_iconName = icon_name;
+        is_icon_name_changed = true;
     }
 
-    foreach (QGraphicsWidget *widget, widgetsByHost()) {
-        DBusSystemTrayWidget *iconWidget = qobject_cast<DBusSystemTrayWidget *>(widget);
-        if (iconWidget) {
-            iconWidget->setOverlayIcon(overlayIcon);
-        }
-    }
-}
-
-void DBusSystemTrayTask::blinkAttention()
-{
-    foreach (QGraphicsWidget *widget, widgetsByHost()) {
-        DBusSystemTrayWidget *iconWidget = qobject_cast<DBusSystemTrayWidget *>(widget);
-        if (iconWidget) {
-            iconWidget->setIcon(m_blink ? m_attentionIconName : m_iconName, m_blink ? m_attentionIcon : m_icon);
-        }
-    }
-    m_blink = !m_blink;
-}
-
-void DBusSystemTrayTask::syncMovie(const QString &m_movieName)
-{
-    bool wasRunning = false;
-    if (m_movie) {
-        wasRunning = m_movie->state() == QMovie::Running;
+    if (att_icon_name != m_attentionIconName) {
+        m_attentionIconName = att_icon_name;
+        is_att_icon_name_changed = true;
     }
 
-    delete m_movie;
-    if (m_movieName.isEmpty()) {
-        m_movie = 0;
-        return;
+    if (!movie_path.isEmpty() && !QDir::isAbsolutePath(movie_path)) {
+        movie_path = KIconLoader::global()->moviePath(movie_path, KIconLoader::Panel);
     }
-    if (QDir::isAbsolutePath(m_movieName)) {
-        m_movie = new QMovie(m_movieName);
-    } else {
-        m_movie = KIconLoader::global()->loadMovie(m_movieName, KIconLoader::Panel);
+
+    if (movie_path != m_moviePath) {
+        m_moviePath = movie_path;
+        is_movie_path_changed = true;
     }
-    if (m_movie) {
-        connect(m_movie, SIGNAL(frameChanged(int)), this, SLOT(updateMovieFrame()));
 
-        if (wasRunning) {
-            m_movie->start();
-        }
+    if (overlay_icon_name != m_overlayIconName) {
+        m_overlayIconName = overlay_icon_name;
+        is_overlay_icon_name_changed = true;
     }
-}
 
-
-
-void DBusSystemTrayTask::updateMovieFrame()
-{
-    Q_ASSERT(m_movie);
-    QPixmap pix = m_movie->currentPixmap();
-    foreach (QGraphicsWidget *widget, widgetsByHost()) {
-        Plasma::IconWidget *iconWidget = qobject_cast<Plasma::IconWidget *>(widget);
-        if (iconWidget) {
-            iconWidget->setIcon(pix);
-        }
+    // emit signals
+    if (is_icon_name_changed) {
+        emit changedIconName();
+    }
+    if (is_att_icon_name_changed) {
+        emit changedAttIconName();
+    }
+    if (is_movie_path_changed) {
+        emit changedMoviePath();
+    }
+    if (is_overlay_icon_name_changed) {
+        emit changedOverlayIconName();
     }
 }
 
@@ -358,16 +289,23 @@ void DBusSystemTrayTask::updateMovieFrame()
 
 void DBusSystemTrayTask::syncToolTip(const QString &title, const QString &subTitle, const QIcon &toolTipIcon)
 {
-    if (title.isEmpty()) {
-        foreach (QGraphicsWidget *widget, widgetsByHost()) {
-            Plasma::ToolTipManager::self()->clearContent(widget);
-        }
-        return;
+    if (title != m_tooltipTitle) {
+        m_tooltipTitle = title;
+        emit changedTooltipTitle();
     }
 
-    Plasma::ToolTipContent toolTipData(title, subTitle, toolTipIcon);
-    foreach (QGraphicsWidget *widget, widgetsByHost()) {
-        Plasma::ToolTipManager::self()->setContent(widget, toolTipData);
+    if (subTitle != m_tooltipText) {
+        m_tooltipText = subTitle;
+        emit changedTooltipText();
+    }
+
+    bool is_icon_name_changed = (m_tooltipIcon.name() != toolTipIcon.name());
+
+    m_tooltipIcon = toolTipIcon;
+    emit changedTooltip();
+
+    if (is_icon_name_changed) {
+        emit changedTooltipIconName();
     }
 }
 
@@ -380,36 +318,6 @@ void DBusSystemTrayTask::syncStatus(QString newStatus)
 
     if (this->status() == status) {
         return;
-    }
-
-    if (status == Task::NeedsAttention) {
-        if (m_movie) {
-            m_movie->stop();
-            m_movie->start();
-        } else if (!m_attentionIcon.isNull()) {
-            if (!m_blinkTimer) {
-                m_blinkTimer = new QTimer(this);
-                connect(m_blinkTimer, SIGNAL(timeout()), this, SLOT(blinkAttention()));
-                m_blinkTimer->start(500);
-            }
-        }
-    } else {
-        if (m_movie) {
-            m_movie->stop();
-        }
-
-        if (m_blinkTimer) {
-            m_blinkTimer->stop();
-            m_blinkTimer->deleteLater();
-            m_blinkTimer = 0;
-        }
-
-        foreach (QGraphicsWidget *widget, widgetsByHost()) {
-            DBusSystemTrayWidget *iconWidget = qobject_cast<DBusSystemTrayWidget *>(widget);
-            if (iconWidget) {
-                iconWidget->setIcon(m_iconName, m_icon);
-            }
-        }
     }
 
     setStatus(status);

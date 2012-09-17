@@ -24,7 +24,6 @@
 #include "plasmoidtask.h"
 #include <fixx11h.h>
 
-#include <KDebug>
 #include <KIcon>
 #include <KIconLoader>
 
@@ -87,6 +86,10 @@ QIcon PlasmoidTask::icon() const
 Plasma::Applet *PlasmoidTask::host() const
 {
     return m_host;
+}
+
+bool PlasmoidTask::isWidget() const {
+    return true;
 }
 
 QGraphicsWidget* PlasmoidTask::createWidget(Plasma::Applet *host)
@@ -165,9 +168,6 @@ void PlasmoidTask::setupApplet(const QString &plugin, int id)
 
     connect(applet, SIGNAL(appletDestroyed(Plasma::Applet*)), this, SLOT(appletDestroyed(Plasma::Applet*)));
     applet->setBackgroundHints(Plasma::Applet::NoBackground);
-
-    applet->setPreferredSize(KIconLoader::SizeSmallMedium+2, KIconLoader::SizeSmallMedium+2);
-    kDebug() << applet->name() << " Applet loaded";
 }
 
 void PlasmoidTask::appletDestroyed(Plasma::Applet *)
@@ -204,8 +204,6 @@ void PlasmoidTask::newAppletStatus(Plasma::ItemStatus status)
     case Plasma::UnknownStatus:
         setStatus(Task::UnknownStatus);
     }
-
-    emit changed(this);
 }
 
 }

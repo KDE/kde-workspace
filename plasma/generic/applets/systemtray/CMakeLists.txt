@@ -28,12 +28,14 @@ set(systemtray_SRCS
 
     protocols/dbussystemtray/dbussystemtraytask.cpp
     protocols/dbussystemtray/dbussystemtrayprotocol.cpp
-    protocols/dbussystemtray/dbussystemtraywidget.cpp
 
     ui/applet.cpp
-    ui/compactlayout.cpp
-    ui/taskarea.cpp
     ui/plasmoid.cpp
+    ui/taskspool.cpp
+    ui/uitask.cpp
+    ui/widgetitem.cpp
+    ui/wheelarea.cpp
+    ui/dialog.cpp
     )
 
 kde4_add_ui_files(systemtray_SRCS

@@ -74,6 +74,10 @@ bool FdoTask::isEmbeddable() const
     return !isUsed();
 }
 
+bool FdoTask::isWidget() const {
+    return true;
+}
+
 QString FdoTask::name() const
 {
     return d->name;

@@ -24,7 +24,7 @@
 #ifndef APPLET_H
 #define APPLET_H
 
-#include <plasma/popupapplet.h>
+#include <KDE/Plasma/Applet>
 
 #include "ui_autohide.h"
 #include "ui_visibleitems.h"
@@ -47,6 +47,8 @@ namespace SystemTray
 class Manager;
 class TaskArea;
 class Plasmoid;
+class TasksPool;
+class UiTask;
 
 class Applet : public Plasma::Applet
 {
@@ -76,8 +78,17 @@ private Q_SLOTS:
     void configAccepted();
     void unlockContainment();
     void propogateSizeHintChange(Qt::SizeHint which);
-    void themeChanged();
     void checkDefaultApplets();
+
+    void _onAddedTask(SystemTray::Task*);
+    void _onChangedTask(SystemTray::Task*);
+    void _onRemovedTask(SystemTray::Task*);
+
+    void _onWidgetCreationFinished();
+
+private:
+    void _updateHideState(UiTask *ui_task) const;
+    QString _getActionName(Task *task) const;
 
 private:
     static SystemTray::Manager *s_manager;
@@ -86,8 +97,11 @@ private:
     QWeakPointer<QWidget> m_autoHideInterface;
     QWeakPointer<QWidget> m_visibleItemsInterface;
     QSet<Task::Category> m_shownCategories;
+    QSet<QString> m_hiddenTypes;
+    QSet<QString> m_alwaysShownTypes;
     QDateTime m_lastActivity;
     Plasmoid *m_plasmoid;
+    TasksPool *m_tasksPool;
     Plasma::DeclarativeWidget *m_widget;
 
     Ui::AutoHideConfig m_autoHideUi;

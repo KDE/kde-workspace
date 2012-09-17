@@ -13,3 +13,5 @@
 * Handle taskId clashes better
 
 * Misbehavior of certain applets within the plasmoid protocol or vice-versa. (Still needs investigating)
+
+* Qt5: Remove WheelArea implementation, use Qt implementation instead
