@@ -29,6 +29,7 @@ PlasmaCore.Dialog {
     id: lastNotificationPopup
 
     property variant savedPos
+    property bool customPosition: false
 
     function popup(notification)
     {
@@ -58,12 +59,14 @@ PlasmaCore.Dialog {
             if (writeConfig) {
                 plasmoid.writeConfig("CustomPosition", pos)
                 lastNotificationPopup.savedPos = pos
+                lastNotificationPopup.customPosition = true
             }
         } else {
             finalPos = popupPos
             if (writeConfig) {
                 plasmoid.writeConfig("CustomPosition", QPoint(-1,-1))
                 lastNotificationPopup.savedPos = QPoint(-1,-1)
+                lastNotificationPopup.customPosition = false
             }
         }
         mainItem.width = theme.defaultFont.mSize.width * 35
@@ -72,7 +75,7 @@ PlasmaCore.Dialog {
         lastNotificationPopup.y = finalPos.y
     }
 
-    location: plasmoid.location
+    location: customPosition ? Floating : plasmoid.location
     windowFlags: Qt.WindowStaysOnTopHint
     Component.onCompleted: {
         setAttribute(Qt.WA_X11NetWmWindowTypeDock, true)
