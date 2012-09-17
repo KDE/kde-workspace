@@ -81,8 +81,8 @@ Item {
     PlasmaExtras.ScrollArea {
         id: mainScrollArea
         anchors.fill: parent
-        implicitWidth: 400
-        implicitHeight: Math.max(250, Math.min(450, contentsColumn.height))
+        implicitWidth: theme.defaultFont.mSize.width * 30
+        implicitHeight: Math.min(theme.defaultFont.mSize.height * 10, contentsColumn.height)
 
         Flickable {
             id: popupFlickable
