@@ -31,8 +31,10 @@ PlasmaCore.Dialog {
     function popup(notification)
     {
 
+        if (!lastNotificationPopup.visible) {
+            lastNotificationsModel.clear()
+        }
         lastNotificationsModel.append(notification)
-        notificationsView.positionViewAtEnd()
 
         var pos = lastNotificationPopup.popupPosition(notificationIcon, Qt.AlignCenter)
         lastNotificationPopup.x = pos.x
