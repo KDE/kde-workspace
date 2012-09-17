@@ -35,7 +35,7 @@ PlasmaComponents.ListItem {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         anchors {
-            top: parent.top
+            verticalCenter: parent.verticalCenter
             left: parent.left
             right: parent.right
         }

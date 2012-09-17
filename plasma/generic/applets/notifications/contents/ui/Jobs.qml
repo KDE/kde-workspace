@@ -24,6 +24,10 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 Column {
     id: jobsRoot
     property alias count: jobsRepeater.count
+    anchors {
+        left: parent.left
+        right: parent.right
+    }
 
     PlasmaCore.DataSource {
         id: jobsSource

@@ -26,6 +26,10 @@ import "plasmapackage:/ui/NotificationDelegate"
 Column {
     id: notificationsRoot
     property alias count: notificationsRepeater.count
+    anchors {
+        left: parent.left
+        right: parent.right
+    }
 
     function addNotification(source, appIcon, image, appName, summary, body, expireTimeout, urgency, actions) {
         for (var i = 0; i < notificationsModel.count; ++i) {
