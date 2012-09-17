@@ -28,18 +28,21 @@ import org.kde.plasma.extras 0.1 as PlasmaExtras
 PlasmaCore.Dialog {
     id: lastNotificationPopup
 
-    function popup()
+    function popup(notification)
     {
 
-        notificationsView.positionViewAtBeginning()
+        lastNotificationsModel.append(notification)
+        notificationsView.positionViewAtEnd()
 
         var pos = lastNotificationPopup.popupPosition(notificationIcon, Qt.AlignCenter)
         lastNotificationPopup.x = pos.x
         lastNotificationPopup.y = pos.y
+        mainItem.width = theme.defaultFont.mSize.width * 35
+        mainItem.height = theme.defaultFont.mSize.width * 10
         lastNotificationPopup.visible = true
         lastNotificationTimer.interval = Math.max(4000, Math.min(60*1000, notificationsModel.get(0).expireTimeout))
         lastNotificationTimer.restart()
-        notificationsView.currentIndex = 0
+        notificationsView.currentIndex = lastNotificationsModel.count - 1
     }
 
     location: plasmoid.location
@@ -50,7 +53,7 @@ PlasmaCore.Dialog {
 
     mainItem: Item {
         id: mainItem
-        width: theme.defaultFont.mSize.width * 30
+        width: theme.defaultFont.mSize.width * 35
         height: theme.defaultFont.mSize.width * 10
 
         Timer {
@@ -63,13 +66,22 @@ PlasmaCore.Dialog {
 
         ListView {
             id: notificationsView
+            clip: true
             snapMode: ListView.SnapOneItem
-            anchors.fill: parent
-            model: notificationsModel
+            orientation: ListView.Horizontal
+            anchors {
+                left: backButton.right
+                right: nextButton.left
+                top: parent.top
+                bottom: parent.bottom
+            }
+            model: ListModel {
+                id: lastNotificationsModel
+            }
             interactive: false
             delegate: MouseEventListener {
-                width: mainItem.width
-                height: mainItem.height
+                width: notificationsView.width
+                height: notificationsView.height
                 property int startX: 0
                 property int startY: 0
                 property int startScreenX: 0
@@ -128,6 +140,7 @@ PlasmaCore.Dialog {
                     color: theme.textColor
                     wrapMode: Text.Wrap
                     elide: Text.ElideRight
+                    maximumLineCount: 4
                 }
                 Column {
                     id: actionsColumn
@@ -157,33 +170,41 @@ PlasmaCore.Dialog {
             imagePath: "widgets/arrows"
         }
         PlasmaCore.SvgItem {
+            id: backButton
             svg: arrowsSvg
-            elementId: "up-arrow"
+            elementId: "left-arrow"
             width: theme.smallIconSize
             height: width
             visible: notificationsView.currentIndex > 0
             anchors {
-                top: parent.top
-                horizontalCenter: parent.horizontalCenter
+                left: parent.left
+                verticalCenter: parent.verticalCenter
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
+                onClicked: {
+                    lastNotificationTimer.restart()
+                    notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
+                }
             }
         }
         PlasmaCore.SvgItem {
+            id: nextButton
             svg: arrowsSvg
-            elementId: "down-arrow"
+            elementId: "right-arrow"
             width: theme.smallIconSize
             height: width
             visible: notificationsView.currentIndex < notificationsView.count-1
             anchors {
-                bottom: parent.bottom
-                horizontalCenter: parent.horizontalCenter
+                right: parent.right
+                verticalCenter: parent.verticalCenter
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
+                onClicked: {
+                    lastNotificationTimer.restart()
+                    notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
+                }
             }
         }
     }

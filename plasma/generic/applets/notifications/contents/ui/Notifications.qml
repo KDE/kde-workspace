@@ -34,8 +34,7 @@ Column {
                 break
             }
         }
-        notificationsModel.insert(0,
-               {"source"  : source,
+        var notification = {"source"  : source,
                 "appIcon" : appIcon,
                 "image"   : image,
                 "appName" : appName,
@@ -43,8 +42,9 @@ Column {
                 "body"    : body,
                 "expireTimeout": expireTimeout,
                 "urgency" : urgency,
-                "actions" : actions});
-        lastNotificationPopup.popup()
+                "actions" : actions}
+        notificationsModel.insert(0, notification);
+        lastNotificationPopup.popup(notification)
     }
 
     function executeAction(source, id) {
@@ -129,10 +129,6 @@ Column {
                     actions)
         }
 
-        onDataChanged: {
-            var i = connectedSources[connectedSources.length-1]
-            lastNotificationPopup.popup(data[i]["appIcon"], String(data[i]["body"]).replace("\n", " "))
-        }
     }
 
     Title {

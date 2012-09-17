@@ -116,6 +116,7 @@ PlasmaComponents.ListItem {
                     }
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
+                    maximumLineCount: 4
                 }
 
                 PlasmaComponents.ToolButton {
