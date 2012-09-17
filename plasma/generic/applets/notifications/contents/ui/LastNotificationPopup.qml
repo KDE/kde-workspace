@@ -28,29 +28,57 @@ import org.kde.plasma.extras 0.1 as PlasmaExtras
 PlasmaCore.Dialog {
     id: lastNotificationPopup
 
+    property variant savedPos
+
     function popup(notification)
     {
-
         if (!lastNotificationPopup.visible) {
             lastNotificationsModel.clear()
         }
         lastNotificationsModel.append(notification)
 
-        var pos = lastNotificationPopup.popupPosition(notificationIcon, Qt.AlignCenter)
-        lastNotificationPopup.x = pos.x
-        lastNotificationPopup.y = pos.y
-        mainItem.width = theme.defaultFont.mSize.width * 35
-        mainItem.height = theme.defaultFont.mSize.width * 10
+        setCustomPosition(lastNotificationPopup.savedPos, false)
+
         lastNotificationPopup.visible = true
         lastNotificationTimer.interval = Math.max(4000, Math.min(60*1000, notificationsModel.get(0).expireTimeout))
-        lastNotificationTimer.restart()
         notificationsView.currentIndex = lastNotificationsModel.count - 1
+        lastNotificationTimer.restart()
+    }
+
+    function setCustomPosition(pos, writeConfig)
+    {
+        var popupPos = lastNotificationPopup.popupPosition(notificationIcon)
+        var finalPos
+
+        //custom
+        if ((pos.x > 0 && pos.y > 0) &&
+            (Math.abs(popupPos.x - pos.x) > 20 ||
+            Math.abs(popupPos.y - pos.y) > 20)) {
+            finalPos = pos
+            if (writeConfig) {
+                plasmoid.writeConfig("CustomPosition", pos)
+                lastNotificationPopup.savedPos = pos
+            }
+        } else {
+            finalPos = popupPos
+            if (writeConfig) {
+                plasmoid.writeConfig("CustomPosition", QPoint(-1,-1))
+                lastNotificationPopup.savedPos = QPoint(-1,-1)
+            }
+        }
+        mainItem.width = theme.defaultFont.mSize.width * 35
+        mainItem.height = theme.defaultFont.mSize.width * 10
+        lastNotificationPopup.x = finalPos.x
+        lastNotificationPopup.y = finalPos.y
     }
 
     location: plasmoid.location
     windowFlags: Qt.WindowStaysOnTopHint
     Component.onCompleted: {
         setAttribute(Qt.WA_X11NetWmWindowTypeDock, true)
+
+        lastNotificationPopup.savedPos = plasmoid.readConfig("CustomPosition")
+        setCustomPosition(lastNotificationPopup.savedPos, true)
     }
 
     mainItem: Item {
@@ -103,10 +131,23 @@ PlasmaCore.Dialog {
                         lastNotificationPopup.visible = false
                         lastNotificationTimer.running = false
                     }
+
+                    setCustomPosition(QPoint(mouse.screenX - startX, mouse.screenY - startY), true)
                 }
                 onPositionChanged: {
-                    lastNotificationPopup.x = mouse.screenX - startX
-                    lastNotificationPopup.y = mouse.screenY - startY
+                    setCustomPosition(QPoint(mouse.screenX - startX, mouse.screenY - startY), false)
+                }
+                onWheelMoved: {
+                    lastNotificationTimer.restart()
+                    if (notificationsView.moving) {
+                        return
+                    }
+
+                    if (wheel.delta > 0) {
+                        notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
+                    } else {
+                        notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
+                    }
                 }
                 QIconItem {
                     id: appIconItem

@@ -40,6 +40,7 @@ Item {
     property int layoutSpacing: UiProperties.layoutSpacing
 
     property real globalProgress: 0
+
     //notifications + jobs
     property int totalCount: notifications.count + jobs.count
     onTotalCountChanged: {
