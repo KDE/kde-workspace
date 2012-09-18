@@ -43,7 +43,7 @@ Item {
         Breadcrumb {
             id: rootBreadcrumb
             root: true
-            text: "All Applications"
+            text: i18n("All Applications")
             enabled: false
         }
     }

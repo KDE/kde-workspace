@@ -297,27 +297,27 @@ Item {
         KickoffButton {
             id: bookmarkButton
             iconSource: "bookmarks"
-            text: "Favorites"
+            text: i18n("Favorites")
         }
         KickoffButton {
             id: applicationButton
             iconSource: "applications-other"
-            text: "Applications"
+            text: i18n("Applications")
         }
         KickoffButton {
             id: computerButton
             iconSource: "computer" // TODO: could also be computer-laptop
-            text: "Computer"
+            text: i18n("Computer")
         }
         KickoffButton {
             id: usedButton
             iconSource: "document-open-recent"
-            text: "Recently Used"
+            text: i18n("Recently Used")
         }
         KickoffButton {
             id: leaveButton
-            text: "Leave"
             iconSource: "system-shutdown"
+            text: i18n("Leave")
         }
 
         onCurrentTabChanged: {

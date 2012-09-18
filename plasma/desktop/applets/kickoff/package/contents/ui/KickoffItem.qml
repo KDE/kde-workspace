@@ -117,7 +117,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: addToFavorites
-        text: "Add To Favorites"
+        text: i18n("Add To Favorites")
         icon: QIcon("bookmark-new")
         onClicked: {
             listItem.ListView.view.favoritesModel.add(model["url"]);
@@ -125,7 +125,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: removeFromFavorites
-        text: "Remove From Favorites"
+        text: i18n("Remove From Favorites")
         icon: QIcon("list-remove")
         onClicked: {
             listItem.ListView.view.favoritesModel.remove(model["url"]);
@@ -133,7 +133,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: sortFavoritesAscending
-        text: "Sort Alphabetically (A to Z)"
+        text: i18n("Sort Alphabetically (A to Z)")
         icon: QIcon("view-sort-ascending")
         onClicked: {
             listItem.ListView.view.favoritesModel.sortFavoritesAscending();
@@ -141,7 +141,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: sortFavoritesDescending
-        text: "Sort Alphabetically (Z to A)"
+        text: i18n("Sort Alphabetically (Z to A)")
         icon: QIcon("view-sort-descending")
         onClicked: {
             listItem.ListView.view.favoritesModel.sortFavoritesDescending();
@@ -149,7 +149,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: clearRecentApplications
-        text: "Clear Recent Applications"
+        text: i18n("Clear Recent Applications")
         icon: QIcon("edit-clear-history")
         onClicked: {
             listItem.ListView.view.recentlyUsedModel.clearRecentApplications();
@@ -157,7 +157,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: clearRecentDocuments
-        text: "Clear Recent Documents"
+        text: i18n("Clear Recent Documents")
         icon: QIcon("edit-clear-history")
         onClicked: {
             listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
@@ -165,9 +165,8 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.MenuItem {
         id: uninstallApp
-        text: "Uninstall"
+        text: i18n("Uninstall")
         onClicked: {
-            print("uninstall " +  model["url"]);
             var service = packagekitSource.serviceForSource("Status")
             var operation = service.operationDescription("uninstallApplication")
             operation.Url = model["url"];
