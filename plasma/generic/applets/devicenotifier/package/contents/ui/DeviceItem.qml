@@ -181,7 +181,7 @@ Item {
 
         PlasmaCore.ToolTip {
             target: freeSpaceBar
-            subText: i18nc("@info:status Free disk space", "%1 free", model["Free Space Text"])
+            subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
         }
 
         QIconItem {

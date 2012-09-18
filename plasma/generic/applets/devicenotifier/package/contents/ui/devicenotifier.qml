@@ -257,7 +257,7 @@ Item {
             state: model["State"]
 
             percentUsage: {
-                var freeSpace = new Number(model["Free Space"]);
+                var freeSpace = new Number(sdSource.data[udi]["Free Space"]);
                 var size = new Number(model["Size"]);
                 var used = size-freeSpace;
                 return used*100/size;
