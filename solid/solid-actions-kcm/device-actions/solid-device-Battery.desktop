@@ -144,6 +144,7 @@ Name[zh_TW]=充電狀態
 # ctxt: battery plugged in
 Name=Plugged
 Name[cs]=Připojeno
+Name[el]=Σε σύνδεση
 Name[es]=Enchufado
 Name[hu]=Bedugva
 Name[ia]=Connectite
@@ -171,7 +172,7 @@ Name[ca@valencia]=Recarregable
 Name[cs]=Znovu nabitelný
 Name[da]=Genopladeligt
 Name[de]=Wiederaufladbar
-Name[el]=Επαναφορτιζόμενο
+Name[el]=Επαναφορτιζόμενη
 Name[en_GB]=Rechargeable
 Name[eo]=Reŝarĝebla
 Name[es]=Recargable
