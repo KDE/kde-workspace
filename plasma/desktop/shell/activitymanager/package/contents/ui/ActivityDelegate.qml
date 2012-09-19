@@ -85,6 +85,7 @@ PlasmaCore.FrameSvgItem {
         id: iconComponent
         Item {
             anchors.fill: parent
+
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
@@ -193,8 +194,9 @@ PlasmaCore.FrameSvgItem {
         MouseArea {
             anchors.fill: parent
 
-            implicitWidth: (activityManager.orientation == Qt.Horizontal) ? Math.max(parent.width, confirmationLabel.paintedWidth) : parent.width
-            implicitHeight: (activityManager.orientation == Qt.Horizontal) ? parent.height : Math.max(parent.height, confirmationColumn.implicitHeight) 
+            //20 is just a number arbitrarly low, won't be followed
+            implicitWidth: (activityManager.orientation == Qt.Horizontal) ? confirmationLabel.paintedWidth : 20
+            implicitHeight: (activityManager.orientation == Qt.Horizontal) ? 20 : confirmationColumn.childrenRect.height
 
             onClicked: delegateStack.pop()
             Column {
@@ -237,7 +239,9 @@ PlasmaCore.FrameSvgItem {
         MouseArea {
             anchors.fill: parent
 
-            implicitWidth: (activityManager.orientation == Qt.Horizontal) ? (iconButton.x*3 + iconButton.width + theme.defaultFont.mSize.width * 12) : parent.width
+            //20 is just a number arbitrarly low, won't be followed
+            implicitWidth: (activityManager.orientation == Qt.Horizontal) ? (iconButton.x*3 + iconButton.width + theme.defaultFont.mSize.width * 12) : 20
+            implicitHeight: 20
 
             onClicked: delegateStack.pop()
             PlasmaComponents.Button {
