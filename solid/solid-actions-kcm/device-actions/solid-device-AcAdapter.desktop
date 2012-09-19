@@ -2,6 +2,7 @@
 # ctxt: AC adapter plugged in
 Name=Plugged
 Name[cs]=Připojeno
+Name[el]=Σε σύνδεση
 Name[es]=Enchufado
 Name[hu]=Bedugva
 Name[ia]=Connectite

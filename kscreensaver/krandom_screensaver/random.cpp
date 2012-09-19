@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
     QHash<QChar, QString> keyMap;
 #ifdef Q_WS_WIN
-    keyMap.insert('w', QString::number((unsigned long)windowId));
+    keyMap.insert('w', QString::number((quintptr)windowId));
 #else
     keyMap.insert('w', QString::number(windowId));
 #endif

@@ -243,6 +243,8 @@ PAM_conv(int num_msg,
                 /* case PAM_PROMPT_ECHO_ON: cannot happen */
                 case PAM_PROMPT_ECHO_OFF:
                     debug(" PAM_PROMPT_ECHO_OFF (usecur): %s\n", msg[count]->msg);
+                    if (!pd->gconv)
+                        goto bad_time;
                     if (!curpass)
                         pd->gconv(GCONV_PASS, 0);
                     strDup(&reply[count].resp, curpass);
@@ -255,15 +257,21 @@ PAM_conv(int num_msg,
                 switch (msg[count]->msg_style) {
                 case PAM_PROMPT_ECHO_ON:
                     debug(" PAM_PROMPT_ECHO_ON: %s\n", msg[count]->msg);
+                    if (!pd->gconv)
+                        goto bad_time;
                     reply[count].resp = pd->gconv(GCONV_NORMAL, msg[count]->msg);
                     break;
                 case PAM_PROMPT_ECHO_OFF:
                     debug(" PAM_PROMPT_ECHO_OFF: %s\n", msg[count]->msg);
+                    if (!pd->gconv)
+                        goto bad_time;
                     reply[count].resp = pd->gconv(GCONV_HIDDEN, msg[count]->msg);
                     break;
 #ifdef PAM_BINARY_PROMPT
                 case PAM_BINARY_PROMPT:
                     debug(" PAM_BINARY_PROMPT\n");
+                    if (!pd->gconv)
+                        goto bad_time;
                     reply[count].resp = pd->gconv(GCONV_BINARY, msg[count]->msg);
                     break;
 #endif
@@ -283,6 +291,8 @@ PAM_conv(int num_msg,
     *resp = reply;
     return PAM_SUCCESS;
 
+  bad_time:
+    logError("PAM prompt outside authentication phase\n");
   conv_err:
     for (; count >= 0; count--)
         if (reply[count].resp)

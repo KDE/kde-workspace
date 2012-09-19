@@ -36,6 +36,7 @@ Name[zh_TW]=硬碟使用量 I/O 監視器
 Comment=An applet that monitors hard disk throughput and input/output
 Comment[ca]=Una miniaplicació que controla la velocitat de transferència de dades del disc dur i l'entrada/sortida
 Comment[da]=En applet som overvåger gennemgang og input/output for harddisken
+Comment[el]=Μικροεφαρμογή που εποπτεύει τη ρυθμοαπόδοση και την είσοδο/έξοδο του σκληρού δίσκου
 Comment[es]=Una miniaplicación que monitoriza el rendimiento y la entrada/salida del disco duro
 Comment[et]=Kõvaketta läbilaset ja sisendit/väljundit jälgiv aplett
 Comment[fi]=Sovelma joka tarkkailee kiintolevyjen suoritustehoa ja siirtomäärää
