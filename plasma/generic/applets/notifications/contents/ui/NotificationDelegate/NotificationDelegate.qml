@@ -40,7 +40,7 @@ PlasmaComponents.ListItem {
         mainScrollArea.height = mainScrollArea.implicitHeight
     }
     Timer {
-        interval: 30*60*1000
+        interval: 10*60*1000
         repeat: false
         running: true
         onTriggered: {
