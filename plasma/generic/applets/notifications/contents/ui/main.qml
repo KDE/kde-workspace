@@ -41,8 +41,14 @@ Item {
 
     property real globalProgress: 0
 
+    property bool showNotifications: false
+    property bool showJobs: false
+
+    property Item notifications: notificationsLoader.item
+    property Item jobs: jobsLoader.item
+
     //notifications + jobs
-    property int totalCount: notifications.count + jobs.count
+    property int totalCount: (notifications ? notifications.count : 0) + (jobs ? jobs.count : 0)
     onTotalCountChanged: {
         if (totalCount > 0) {
             state = "new-notifications"
@@ -60,6 +66,14 @@ Item {
         plasmoid.status = PassiveStatus
         plasmoid.passivePopup = true
         allApplications = new Object
+        plasmoid.addEventListener('ConfigChanged', configChanged);
+        configChanged()
+    }
+
+    function configChanged()
+    {
+        showNotifications = plasmoid.readConfig("ShowNotifications")
+        showJobs = plasmoid.readConfig("ShowJobs")
     }
 
     KLocale.Locale {
@@ -98,11 +112,21 @@ Item {
                 width: popupFlickable.width
 
                 //TODO: load those on demand based on configuration
-                Jobs {
-                    id: jobs
+                Loader {
+                    id: jobsLoader
+                    source: showJobs ? "Jobs.qml" : ""
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
                 }
-                Notifications {
-                    id: notifications
+                Loader {
+                    id: notificationsLoader
+                    source: showNotifications ? "Notifications.qml" : ""
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
                 }
             }
         }
