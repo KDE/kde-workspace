@@ -90,7 +90,11 @@ Item {
                 Keys.onReturnPressed: verify()
             }
             KeyboardItem {
-                anchors.left: greeter.right
+                anchors {
+                    left: greeter.right
+                    bottom: greeter.bottom
+                    bottomMargin: -2
+                }
             }
             Timer {
                 interval: 10
