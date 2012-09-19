@@ -146,7 +146,7 @@ Column {
         text: i18n("Notifications")
         PlasmaComponents.ToolButton {
             iconSource: "window-close"
-            width: notificationItem.toolIconSize
+            width: notificationsApplet.toolIconSize
             height: width
             anchors {
                 right: parent.right
