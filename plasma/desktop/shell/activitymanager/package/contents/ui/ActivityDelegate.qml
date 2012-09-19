@@ -28,8 +28,8 @@ PlasmaCore.FrameSvgItem {
     width: Math.max((delegateStack.currentPage ? delegateStack.currentPage.implicitWidth : 0) + margins.left + margins.right, list.delegateWidth)
     height: Math.max((delegateStack.currentPage ? delegateStack.currentPage.implicitHeight : 0) + margins.top + margins.bottom, list.delegateHeight)
 
-    imagePath: "widgets/tasks"
-    prefix: Current? "focus" : "normal"
+    imagePath: "widgets/viewitem"
+    prefix: Current ? (mainMouseArea.containsMouse ? "selected+hover" : "selected") : (mainMouseArea.containsMouse ? "hover" : "normal")
 
     ListView.onRemove: SequentialAnimation {
         PropertyAction {
@@ -80,12 +80,15 @@ PlasmaCore.FrameSvgItem {
         initialPage: iconComponent
     }
 
+    property Item mainMouseArea
     Component {
         id: iconComponent
         Item {
             anchors.fill: parent
             MouseArea {
+                id: mouseArea
                 anchors.fill: parent
+                hoverEnabled: true
                 onClicked: {
                     var activityId = model["DataEngineSource"]
                     var service = activitySource.serviceForSource(activityId)
@@ -93,6 +96,7 @@ PlasmaCore.FrameSvgItem {
                     service.startOperationCall(operation)
                 }
             }
+            Component.onCompleted: mainMouseArea = mouseArea
 
             QIconItem {
                 id: iconWidget
@@ -156,12 +160,14 @@ PlasmaCore.FrameSvgItem {
 
                     PlasmaComponents.ToolButton {
                         id: configureButton
+                        flat: false
                         iconSource: "configure"
                         onClicked: delegateStack.push(configurationComponent)
                     }
                     PlasmaComponents.ToolButton {
                         visible: !model["Current"]
                         iconSource: "media-playback-stop"
+                        flat: false
                         onClicked: {
                             var activityId = model["DataEngineSource"]
                             var service = activitySource.serviceForSource(activityId)
