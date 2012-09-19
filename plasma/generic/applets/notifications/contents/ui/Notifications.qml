@@ -38,6 +38,9 @@ Column {
                 break
             }
         }
+        if (notificationsModel.count > 20) {
+            notificationsModel.remove(notificationsModel.count-1)
+        }
         var notification = {"source"  : source,
                 "appIcon" : appIcon,
                 "image"   : image,
