@@ -48,6 +48,9 @@ Column {
                 "urgency" : urgency,
                 "actions" : actions}
         notificationsModel.insert(0, notification);
+        if (!lastNotificationPopup) {
+            lastNotificationPopup = lastNotificationPopupComponent.createObject(notificationsRoot)
+        }
         lastNotificationPopup.popup(notification)
     }
 
@@ -65,8 +68,11 @@ Column {
         }
     }
 
-    LastNotificationPopup {
-        id: lastNotificationPopup
+    property QtObject lastNotificationPopup
+    Component {
+        id: lastNotificationPopupComponent
+        LastNotificationPopup {
+        }
     }
 
     ListModel {
