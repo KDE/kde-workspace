@@ -56,9 +56,16 @@ PlasmaComponents.ListItem {
                 horizontalAlignment: Text.AlignRight
             }
             PlasmaComponents.Label {
+                id: label0
                 text: jobsSource.data[modelData]["label0"]
                 width: parent.width - labelName0Text.width
                 elide: Text.ElideMiddle
+
+                PlasmaCore.ToolTip {
+                    target: label0
+                    subText: label0.truncated ? jobsSource.data[modelData]["label0"] : ""
+                }
+
             }
             PlasmaComponents.Label {
                 id: labelName1Text
@@ -67,9 +74,15 @@ PlasmaComponents.ListItem {
                 horizontalAlignment: Text.AlignRight
             }
             PlasmaComponents.Label {
+                id: label1
                 text: jobsSource.data[modelData]["label1"]
                 width: parent.width - labelName0Text.width
                 elide: Text.ElideMiddle
+
+                PlasmaCore.ToolTip {
+                    target: label1
+                    subText: label1.truncated ? jobsSource.data[modelData]["label1"] : ""
+                }
             }
             QIconItem {
                 icon: jobsSource.data[modelData]["appIconName"]
