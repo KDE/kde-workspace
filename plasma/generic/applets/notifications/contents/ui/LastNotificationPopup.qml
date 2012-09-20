@@ -69,8 +69,6 @@ PlasmaCore.Dialog {
                 lastNotificationPopup.customPosition = false
             }
         }
-        mainItem.width = theme.defaultFont.mSize.width * 35
-        mainItem.height = theme.defaultFont.mSize.width * 10
         lastNotificationPopup.x = finalPos.x
         lastNotificationPopup.y = finalPos.y
     }
@@ -86,8 +84,12 @@ PlasmaCore.Dialog {
 
     mainItem: Item {
         id: mainItem
-        width: theme.defaultFont.mSize.width * 35
-        height: theme.defaultFont.mSize.width * 10
+        width: maximumWidth
+        height: maximumHeight
+        property int maximumWidth: theme.defaultFont.mSize.width * 35
+        property int maximumHeight: theme.defaultFont.mSize.width * 10
+        property int minimumWidth: maximumWidth
+        property int minimumHeight: maximumHeight
 
         Timer {
             id: lastNotificationTimer
