@@ -35,6 +35,8 @@ Item {
     height: 32
     property int minimumWidth: mainScrollArea.implicitWidth
     property int minimumHeight: mainScrollArea.implicitHeight
+    property int maximumWidth: -1
+    property int maximumHeight: mainScrollArea.implicitHeight
 
     property int toolIconSize: UiProperties.toolIconSize
     property int layoutSpacing: UiProperties.layoutSpacing
