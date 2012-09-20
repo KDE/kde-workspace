@@ -157,7 +157,7 @@ Column {
     }
 
     Title {
-        visible: notificationsRepeater.count > 0
+        visible: notificationsRepeater.count > 1 || (jobs && jobs.count > 0 && notificationsRepeater.count > 0)
         text: i18n("Notifications")
         PlasmaComponents.ToolButton {
             iconSource: "window-close"

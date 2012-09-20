@@ -113,7 +113,7 @@ Item {
         id: mainScrollArea
         anchors.fill: parent
         implicitWidth: theme.defaultFont.mSize.width * 40
-        implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 8, contentsColumn.height))
+        implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 6, contentsColumn.height))
 
         Flickable {
             id: popupFlickable

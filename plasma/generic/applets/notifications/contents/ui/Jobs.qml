@@ -40,6 +40,9 @@ Column {
         property variant runningJobs
 
         onSourceRemoved: {
+            if (!notifications) {
+                return
+            }
             var message = runningJobs[source]["label1"] ? runningJobs[source]["label1"] : runningJobs[source]["label0"]
             notifications.addNotification(
                 source,
@@ -76,7 +79,7 @@ Column {
     }
 
     Title {
-        visible: jobsRepeater.count > 0
+        visible: jobsRepeater.count > 0 && notifications && notifications.count > 0
         text: i18n("Transfers")
     }
     PlasmaComponents.ListItem {
