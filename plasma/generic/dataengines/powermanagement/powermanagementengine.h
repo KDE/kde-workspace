@@ -47,6 +47,7 @@ public:
 
 protected:
     bool sourceRequestEvent(const QString &name);
+    bool updateSourceEvent(const QString &source);
     void init();
 
 private slots:
