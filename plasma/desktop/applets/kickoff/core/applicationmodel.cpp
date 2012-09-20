@@ -48,7 +48,6 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <kbuildsycocaprogressdialog.h>
 #include <kconfiggroup.h>
 #include "kickoffadaptor.h"
 // Local
@@ -206,7 +205,7 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
             }
 
             if (systemApplicationPolicy == ApplicationModel::ShowSystemOnlyPolicy &&
-                    systemApplications.contains(service->desktopEntryName())) {
+                systemApplications.contains(service->desktopEntryName())) {
                 // don't duplicate applications that are configured to appear in the System tab
                 // in the Applications tab
                 continue;

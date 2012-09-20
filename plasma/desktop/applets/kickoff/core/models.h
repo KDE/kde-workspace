@@ -73,8 +73,8 @@ enum DataRole {
     /** relative path of the item */
     RelPathRole = Qt::UserRole + 8,
     IconNameRole = Qt::UserRole + 9,
-    LastDataRole = IconNameRole,
-    GroupNameRole = Qt::UserRole + 10
+    GroupNameRole = IconNameRole,
+    LastDataRole = Qt::UserRole + 10
 };
 
 /**

@@ -318,7 +318,7 @@ QVariant FavoritesModel::headerData(int section, Qt::Orientation orientation, in
 
     switch (role) {
     case Qt::DisplayRole:
-        return i18n("Favorites");
+        return i18nc("@title:column", "Favorites");
         break;
     default:
         return QVariant();

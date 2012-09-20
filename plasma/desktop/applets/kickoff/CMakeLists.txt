@@ -10,8 +10,8 @@ configure_file(core/config-kickoff-applets.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/c
 add_subdirectory(core)
 # Package
 install(DIRECTORY package/
-        DESTINATION ${DATA_INSTALL_DIR}/plasma/plasmoids/kickoff2)
+        DESTINATION ${DATA_INSTALL_DIR}/plasma/plasmoids/launcher)
 
 install(FILES package/metadata.desktop
         DESTINATION ${SERVICES_INSTALL_DIR}
-        RENAME plasma-applet-kickoff2.desktop)
+        RENAME plasma-applet-launcher.desktop)
