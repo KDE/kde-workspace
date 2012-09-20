@@ -58,6 +58,20 @@ Item {
             state = "default"
             plasmoid.hidePopup()
         }
+
+        var data = new Object
+        data["image"] = "preferences-desktop-notification"
+        data["mainText"] = i18n("Notifications and Jobs")
+        if (totalCount == 0) {
+            data["subText"] = i18n("No notifications or jobs")
+        } else if (!notifications.count) {
+            data["subText"] = i18np("%1 running job", "%1 running jobs", jobs.count)
+        } else if (!jobs.count) {
+            data["subText"] = i18np("%1 notification", "%1 notifications", notifications.count)
+        } else  {
+            data["subText"] = i18np("%1 running job", "%1 running jobs", jobs.count) + "<br/>" + i18np("%1 notification", "%1 notifications", notifications.count)
+        }
+        plasmoid.popupIconToolTip = data
     }
 
     property Item notificationIcon
