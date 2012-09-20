@@ -154,6 +154,7 @@ PlasmaComponents.ListItem {
                 }
                 PlasmaComponents.ContextMenu {
                     id: contextMenu
+                    visualParent: contextMouseArea
                     PlasmaComponents.MenuItem {
                         text: i18n("Copy")
                         onClicked: bodyText.copy()
@@ -164,6 +165,7 @@ PlasmaComponents.ListItem {
                     }
                 }
                 MouseArea {
+                    id: contextMouseArea
                     anchors {
                         left: appIconItem.right
                         right: actionsColumn.left
