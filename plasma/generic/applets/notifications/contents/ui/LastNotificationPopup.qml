@@ -83,6 +83,14 @@ PlasmaCore.Dialog {
 
         lastNotificationPopup.savedPos = plasmoid.readConfig("CustomPosition")
         setCustomPosition(lastNotificationPopup.savedPos, true)
+        plasmoid.popupEvent.connect(lastNotificationPopup.popupEvent)
+    }
+
+    function popupEvent(popupShowing)
+    {
+        if(popupShowing) {
+           lastNotificationPopup.visible = false
+        }
     }
 
     mainItem: Item {

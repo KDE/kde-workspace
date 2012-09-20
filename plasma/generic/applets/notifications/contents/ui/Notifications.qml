@@ -51,6 +51,9 @@ Column {
                 "urgency" : urgency,
                 "actions" : actions}
         notificationsModel.insert(0, notification);
+        if (plasmoid.popupShowing) {
+            return
+        }
         if (!lastNotificationPopup) {
             lastNotificationPopup = lastNotificationPopupComponent.createObject(notificationsRoot)
         }
