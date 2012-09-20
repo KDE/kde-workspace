@@ -52,7 +52,7 @@ PlasmaCore.Dialog {
         var finalPos
 
         //custom
-        if ((pos.x > 0 && pos.y > 0) &&
+        if ((pos.x >= 0 || pos.y >= 0) &&
             (Math.abs(popupPos.x - pos.x) > 20 ||
             Math.abs(popupPos.y - pos.y) > 20)) {
             finalPos = pos
@@ -137,10 +137,10 @@ PlasmaCore.Dialog {
                         lastNotificationTimer.running = false
                     }
 
-                    setCustomPosition(QPoint(mouse.screenX - startX, mouse.screenY - startY), true)
+                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(mouse.screenY - startY)), true)
                 }
                 onPositionChanged: {
-                    setCustomPosition(QPoint(mouse.screenX - startX, mouse.screenY - startY), false)
+                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(0, mouse.screenY - startY)), false)
                 }
                 onWheelMoved: {
                     lastNotificationTimer.restart()
