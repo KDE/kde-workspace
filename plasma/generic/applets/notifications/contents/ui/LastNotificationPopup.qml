@@ -30,6 +30,9 @@ PlasmaCore.Dialog {
 
     property variant savedPos
     property bool customPosition: false
+    onCustomPositionChanged: {
+        setAttribute(Qt.WA_X11NetWmWindowTypeToolTip, customPosition);
+    }
 
     function popup(notification)
     {
@@ -53,8 +56,8 @@ PlasmaCore.Dialog {
 
         //custom
         if ((pos.x >= 0 || pos.y >= 0) &&
-            (Math.abs(popupPos.x - pos.x) > 20 ||
-            Math.abs(popupPos.y - pos.y) > 20)) {
+            (Math.abs(popupPos.x - pos.x) > 40 ||
+            Math.abs(popupPos.y - pos.y) > 40)) {
             finalPos = pos
             if (writeConfig) {
                 plasmoid.writeConfig("CustomPosition", pos)
