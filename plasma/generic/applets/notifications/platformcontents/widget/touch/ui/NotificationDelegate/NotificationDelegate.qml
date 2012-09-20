@@ -55,6 +55,9 @@ PlasmaComponents.ListItem {
         drag {
             target: notificationItem
             axis: Drag.XAxis
+            //kind of an hack over Column being too smart
+            minimumX: -parent.width + 1
+            maximumX: parent.width - 1
         }
         onReleased: {
             if (notificationItem.x < -notificationItem.width/2) {
