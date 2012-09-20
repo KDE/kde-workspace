@@ -113,6 +113,12 @@ void DesktopCorona::init()
     action->setGlobalShortcut(KShortcut(Qt::META + Qt::SHIFT + Qt::Key_Tab));
     connect(action, SIGNAL(triggered()), this, SLOT(activatePreviousActivity()));
 
+    action = new KAction(PlasmaApp::self());
+    action->setText(i18n("Stop Current Activity"));
+    action->setObjectName( QLatin1String("Stop Activity")); //no I18N
+    action->setGlobalShortcut(KShortcut(Qt::META + Qt::Key_S));
+    connect(action, SIGNAL(triggered()), this, SLOT(stopCurrentActivity()));
+
     connect(this, SIGNAL(immutabilityChanged(Plasma::ImmutabilityType)),
             this, SLOT(updateImmutability(Plasma::ImmutabilityType)));
     connect(KSycoca::self(), SIGNAL(databaseChanged(QStringList)), this, SLOT(checkAddPanelAction(QStringList)));
@@ -731,6 +737,18 @@ void DesktopCorona::activatePreviousActivity()
     }
 
     m_activityController->setCurrentActivity(list.at(i));
+}
+
+void DesktopCorona::stopCurrentActivity()
+{
+    QStringList list = m_activityController->listActivities(KActivities::Info::Running);
+    //if there are no other activities to switch to, do not stop the current activity.
+    if (list.size() <= 1) {
+        return;
+    }
+
+    QString currentActivity = m_activityController->currentActivity();
+    m_activityController->stopActivity(currentActivity);
 }
 
 
