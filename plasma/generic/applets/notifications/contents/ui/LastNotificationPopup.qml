@@ -211,46 +211,36 @@ PlasmaCore.Dialog {
                 }
             }
         }
-        PlasmaCore.Svg {
-            id: arrowsSvg
-            imagePath: "widgets/arrows"
-        }
-        PlasmaCore.SvgItem {
+
+        PlasmaComponents.ToolButton {
             id: backButton
-            svg: arrowsSvg
-            elementId: "left-arrow"
-            width: theme.smallIconSize
+            iconSource: "go-previous"
+            width: theme.smallMediumIconSize
             height: width
             visible: notificationsView.currentIndex > 0
             anchors {
                 left: parent.left
                 verticalCenter: parent.verticalCenter
             }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    lastNotificationTimer.restart()
-                    notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
-                }
+            onClicked: {
+                lastNotificationTimer.restart()
+                notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
             }
         }
-        PlasmaCore.SvgItem {
+
+        PlasmaComponents.ToolButton {
             id: nextButton
-            svg: arrowsSvg
-            elementId: "right-arrow"
-            width: theme.smallIconSize
+            iconSource: "go-next"
+            width: theme.smallMediumIconSize
             height: width
             visible: notificationsView.currentIndex < notificationsView.count-1
             anchors {
                 right: parent.right
                 verticalCenter: parent.verticalCenter
             }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    lastNotificationTimer.restart()
-                    notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
-                }
+            onClicked: {
+                lastNotificationTimer.restart()
+                notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
             }
         }
     }
