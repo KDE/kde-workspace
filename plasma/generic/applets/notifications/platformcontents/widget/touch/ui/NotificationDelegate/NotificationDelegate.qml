@@ -42,7 +42,7 @@ PlasmaComponents.ListItem {
     Timer {
         interval: 10*60*1000
         repeat: false
-        running: true
+        running: !idleTimeSource.idle
         onTriggered: {
             notificationsModel.remove(index)
         }
