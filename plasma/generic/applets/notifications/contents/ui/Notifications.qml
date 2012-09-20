@@ -115,6 +115,15 @@ Column {
     }
 
     PlasmaCore.DataSource {
+        id: idleTimeSource
+        engine: "powermanagement"
+        interval: 30000
+        connectedSources: ["UserActivity"]
+        //Idle whith more than 5 minutes of user inactivity
+        property bool idle: data["UserActivity"]["IdleTime"] > 300000
+    }
+
+    PlasmaCore.DataSource {
         id: notificationsSource
         engine: "notifications"
         interval: 0
