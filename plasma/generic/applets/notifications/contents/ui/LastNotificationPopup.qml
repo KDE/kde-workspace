@@ -140,10 +140,10 @@ PlasmaCore.Dialog {
                         lastNotificationTimer.running = false
                     }
 
-                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(mouse.screenY - startY)), true)
+                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX - lastNotificationPopup.margins.left), Math.max(mouse.screenY - startY)), true)
                 }
                 onPositionChanged: {
-                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(0, mouse.screenY - startY)), false)
+                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX - lastNotificationPopup.margins.left), Math.max(0, mouse.screenY - startY)), false)
                 }
                 onWheelMoved: {
                     lastNotificationTimer.restart()
