@@ -98,7 +98,7 @@
    <item row="7" column="0">
     <widget class="QPushButton" name="prevbutton">
      <property name="text">
-      <string>PREVIIEW</string>
+      <string>PREVIEW</string>
      </property>
     </widget>
    </item>

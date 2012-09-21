@@ -159,13 +159,9 @@ void AddLayoutDialog::preview(){
     QMessageBox q;
     //variant=getvariant(variant);
     /*a.append(selectedLayout);*/
-    q.setText(variant);
-    q.exec();
-    q.setText(selectedLayout);
-    q.exec();
-    layoutprev=new keyboardpainter();
-    variant=layoutprev->getvariant(variant,selectedLayout);
-    layoutprev->getkeyboardlayout(selectedLayout,variant);
+    layoutprev=new KeyboardPainter();
+    variant=layoutprev->getVariant(variant,selectedLayout);
+    layoutprev->kbframe->getKeyboardLayout(selectedLayout,variant);
     layoutprev->exec();
     layoutprev->setModal(true);
 }

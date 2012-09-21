@@ -117,10 +117,11 @@ set(kcm_keyboard_PART_SRCS
   keyboardpainter.cpp
   keys.cpp
   keysym.cpp
+  kbpreviewframe.cpp
 )
 
 
-kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui keyboardpainter.ui)
+kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui KeyboardPainter.ui)
 
 kde4_add_plugin(kcm_keyboard ${kcm_keyboard_PART_SRCS})
 

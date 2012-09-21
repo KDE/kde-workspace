@@ -3,10 +3,10 @@
 #include<QtGui>
 #include<QChar>
 #include<QString>
-class Keysym
+class KeySym
 {
 public:
-    Keysym();
+    KeySym();
     int nill;
     static QString keystr[];
     static QChar keyuni[];

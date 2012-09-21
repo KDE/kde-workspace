@@ -69,7 +69,7 @@ private Q_SLOTS:
     void moveDown();
     void configureLayoutsChanged();
     void configureXkbOptionsChanged();
-    void previewlayout();
+    void previewLayout();
 
 private:
     Rules *rules;
@@ -81,7 +81,7 @@ private:
 	LayoutsTableModel* layoutsTableModel;
 	KCMiscKeyboardWidget* kcmMiscWidget;
 	bool uiUpdating;
-	keyboardpainter *layoutprev;
+	KeyboardPainter *layoutprev;
 
 	void initializeLayoutsUI();
 	void initializeXkbOptionsUI();

@@ -15,7 +15,11 @@ void Keys::getKey(QString a){
     i=str.indexOf("]");
     QString st=str.left(i);
     st=st.simplified();
+    //QStringList klst;
     klst=st.split(",");
-    for(int k=0;k<klst.size();k++)
-        klst[k]=klst.at(k).simplified();
+    for(int k=0;k<klst.size();k++){
+        QString du=klst.at(k);
+        du.remove(" ");
+        klst[k]=du;
+    }
 }

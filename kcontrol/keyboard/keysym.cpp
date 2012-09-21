@@ -1,13 +1,13 @@
 #include "keysym.h"
 #include<QMessageBox>
 #include<QChar>
-Keysym::Keysym()
+KeySym::KeySym()
 {
     nill=0;
 }
-QString Keysym::getkeyuni(QString opton){
+QString KeySym::getkeyuni(QString opton){
     QString a;
-    for(int i=0;i<8289;i++){
+    for(int i=0;i<8291;i++){
         if(keystr[i]==opton){
             a=QString(keyuni[i]);
             return a;
@@ -17,7 +17,7 @@ QString Keysym::getkeyuni(QString opton){
     return(" ");
 }
 
-QString Keysym::keystr[]={
+QString KeySym::keystr[]={
     "0",
     "1",
     "2",
@@ -8306,9 +8306,12 @@ QString Keysym::keystr[]={
     "0x1000E2C",
     "0x1000E1D",
     "0x1000E26",
-    "0x1000309"
+    "0x1000309",
+    "U2019",
+    "U0301"
+
                           };
-QChar Keysym::keyuni[]={
+QChar KeySym::keyuni[]={
     0x30,
     0x31,
     0x32,
@@ -16599,5 +16602,7 @@ QChar Keysym::keyuni[]={
     0x1000E2C,
     0x1000E1D,
     0x1000E26,
-    0x1000309
+    0x1000309,
+    '\'',
+    '~'
                   };

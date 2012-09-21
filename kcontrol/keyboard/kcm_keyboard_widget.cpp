@@ -336,7 +336,7 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->moveUpBtn, SIGNAL(clicked(bool)), this, SLOT(moveUp()));
 	connect(uiWidget->moveDownBtn, SIGNAL(clicked(bool)), this, SLOT(moveDown()));
 
-    connect(uiWidget->previewbutton,SIGNAL(clicked(bool)),this,SLOT(previewlayout()));
+    connect(uiWidget->previewbutton,SIGNAL(clicked(bool)),this,SLOT(previewLayout()));
 
 	connect(uiWidget->xkbGrpClearBtn, SIGNAL(clicked(bool)), this, SLOT(clearGroupShortcuts()));
 	connect(uiWidget->xkb3rdLevelClearBtn, SIGNAL(clicked(bool)), this, SLOT(clear3rdLevelShortcuts()));
@@ -363,30 +363,25 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->layoutLoopCountSpinBox, SIGNAL(valueChanged(int)), this, SLOT(uiChanged()));
 }
 
-void KCMKeyboardWidget::previewlayout(){
+void KCMKeyboardWidget::previewLayout(){
     QModelIndex index = uiWidget->layoutsTableView->currentIndex() ;
     QModelIndex idcountry = index.sibling(index.row(),0) ;
     QString country=uiWidget->layoutsTableView->model()->data(idcountry).toString();
     QModelIndex idvariant = index.sibling(index.row(),2) ;
     QString variant=uiWidget->layoutsTableView->model()->data(idvariant).toString();
-    QMessageBox q;
-    q.setText(country);
-    q.exec();
-    layoutprev=new keyboardpainter();
+    layoutprev=new KeyboardPainter();
     if(variant=="")
-    variant=layoutprev->getvariant(variant,country);
+    variant=layoutprev->getVariant(variant,country);
     else{
         const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
         foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
             if(variant==variantInfo->description){
-                q.setText(variant);
-                q.exec();
                 variant=variantInfo->name;
                 break;
             }
         }
     }
-    layoutprev->getkeyboardlayout(country,variant);
+    layoutprev->kbframe->getKeyboardLayout(country,variant);
     layoutprev->exec();
     layoutprev->setModal(true);
 

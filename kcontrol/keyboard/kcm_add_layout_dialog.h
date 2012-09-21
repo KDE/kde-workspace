@@ -49,7 +49,7 @@ private:
 	const Rules* rules;
 	Flags* flags;
 	Ui_AddLayoutDialog* layoutDialogUi;
-	keyboardpainter *layoutprev;
+	KeyboardPainter *layoutprev;
 	QString selectedLanguage;
 	QString selectedLayout;
 	LayoutUnit selectedLayoutUnit;
