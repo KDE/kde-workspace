@@ -246,18 +246,13 @@ void Clock::dataUpdated(const QString &source, const Plasma::DataEngine::Data &d
     m_time = data["Time"].toTime();
     m_date = data["Date"].toDate();
 
-    // avoid unnecessary repaints
-    if ((m_showSeconds && m_time.second() != lastTimeSeen().second()) ||
-        m_time.minute() != lastTimeSeen().minute()) {
-
-        if (Plasma::ToolTipManager::self()->isVisible(this)) {
-            updateTipContent();
-        }
-
-        updateClockApplet(data);
-        generatePixmap();
-        update();
+    if (Plasma::ToolTipManager::self()->isVisible(this)) {
+        updateTipContent();
     }
+
+    updateClockApplet(data);
+    generatePixmap();
+    update();
 }
 
 void Clock::createClockConfigurationInterface(KConfigDialog *parent)
@@ -309,7 +304,7 @@ void Clock::createClockConfigurationInterface(KConfigDialog *parent)
             parent, SLOT(settingsModified()));
     connect(ui.useCustomShadowColor, SIGNAL(stateChanged(int)),
             parent, SLOT(settingsModified()));
-    connect(ui.plainClockShadowColor, SIGNAL(changed(QColor)), 
+    connect(ui.plainClockShadowColor, SIGNAL(changed(QColor)),
             parent, SLOT(settingsModified()));
     connect(ui.showTimeZone, SIGNAL(stateChanged(int)),
             parent, SLOT(settingsModified()));
