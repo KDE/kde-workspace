@@ -7,7 +7,6 @@ include(PkgConfigGetVar)
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard
                     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processcore
                     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/screensaver
                     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal)
 
 set(krunner_KCFG_SRCS kcfg/krunnersettings.kcfgc kcfg/klaunchsettings.kcfgc)
