@@ -94,7 +94,7 @@ void Clock::connectToEngine()
     if (m_showSecondHand) {
         timeEngine->connectSource(currentTimezone(), this, 500);
     } else {
-        timeEngine->connectSource(currentTimezone(), this, 6000, Plasma::AlignToMinute);
+        timeEngine->connectSource(currentTimezone(), this, 60000, Plasma::AlignToMinute);
     }
 }
 
@@ -152,16 +152,7 @@ void Clock::dataUpdated(const QString& source, const Plasma::DataEngine::Data &d
 {
     Q_UNUSED(source);
     m_time = data["Time"].toTime();
-
-    if (m_time.minute() == lastTimeSeen().minute() &&
-        (!m_showSecondHand || m_time.second() == lastTimeSeen().second())) {
-        // avoid unnecessary repaints
-        return;
-    }
-
-    if (m_time.minute() != lastTimeSeen().minute() && m_repaintCache == RepaintNone) {
-        m_repaintCache = RepaintHands;
-    }
+    m_repaintCache = RepaintHands;
 
     if (Plasma::ToolTipManager::self()->isVisible(this)) {
         updateTipContent();
@@ -224,7 +215,7 @@ void Clock::changeEngineTimezone(const QString &oldTimezone, const QString &newT
     if (m_showSecondHand) {
         timeEngine->connectSource(newTimezone, this, 500);
     } else {
-        timeEngine->connectSource(newTimezone, this, 6000, Plasma::AlignToMinute);
+        timeEngine->connectSource(newTimezone, this, 60000, Plasma::AlignToMinute);
     }
 
     if (m_showingTimezone != (m_showTimezoneString || shouldDisplayTimezone())) {
