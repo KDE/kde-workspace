@@ -1,5 +1,6 @@
 include_directories(
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs
+    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kdm
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/greeter/
     ${CMAKE_BINARY_DIR}/ksmserver/screenlocker/greeter/
