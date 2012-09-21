@@ -168,6 +168,7 @@ Keywords[nb]=Lås, logg ut, hvile, dvale, bytt bruker
 Keywords[nl]=Vergrendelen, Afmelden, Slapen, Slaapstand naar schijf, Gebruiker wisselen
 Keywords[pt]=Bloquear, Encerrar, Suspender, Hibernar, Mudar de Utilizador
 Keywords[pt_BR]=Bloquear, Encerrar, Suspender, Hibernar, Trocar de usuário
+Keywords[sk]=Zamknúť, Odhlásiť, Uspať, Hibernovať, Prepnúť používateľa
 Keywords[sr]=Lock, Logout, Sleep, Hibernate, Switch User,закључавање,одјављивање,спавање,хибернација,пребацивање
 Keywords[sr@ijekavian]=Lock, Logout, Sleep, Hibernate, Switch User,закључавање,одјављивање,спавање,хибернација,пребацивање
 Keywords[sr@ijekavianlatin]=Lock, Logout, Sleep, Hibernate, Switch User,zaključavanje,odjavljivanje,spavanje,hibernacija,prebacivanje
@@ -175,6 +176,7 @@ Keywords[sr@latin]=Lock, Logout, Sleep, Hibernate, Switch User,zaključavanje,od
 Keywords[sv]=Lås,Utloggning,Viloläge,Dvala,Byt användare
 Keywords[uk]=Lock;Logout;Sleep;Hibernate;Switch User;блокування;вихід;присипляння;сон;перемикання;користувач
 Keywords[x-test]=xxLock, Logout, Sleep, Hibernate, Switch Userxx
+Keywords[zh_TW]=Lock, Logout, Sleep, Hibernate, Switch User
 
 Type=Service
 Icon=system-shutdown

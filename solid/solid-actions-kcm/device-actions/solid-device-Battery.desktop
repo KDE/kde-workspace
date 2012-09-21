@@ -151,6 +151,7 @@ Name[ia]=Connectite
 Name[nl]=Ingeplugd
 Name[pt]=Ligada
 Name[pt_BR]=Conectada
+Name[sk]=Pripojené
 Name[sr]=утакнута
 Name[sr@ijekavian]=утакнута
 Name[sr@ijekavianlatin]=utaknuta
@@ -159,6 +160,7 @@ Name[sv]=Anslutet
 Name[uk]=З’єднано
 Name[x-test]=xxPluggedxx
 Name[zh_CN]=已插入
+Name[zh_TW]=已插入
 
 [Desktop Action rechargeable]
 Name=Rechargeable
