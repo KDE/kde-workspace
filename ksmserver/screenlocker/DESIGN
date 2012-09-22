@@ -16,7 +16,7 @@ KSldApp may launch one of two possible unlock screen binaries, decided by the Pl
 The one in the greeter subdirectory, built in the kscreenlocker_greet binary.
 It uses a series of QML files organized in a Plasma Package to display the actual unlocker ui, one for each screen in case of multimonitor.
 This greeter can optionally support legacy X screensavers, for doing so creates another fullscreen window per screen on top of the greeter one, and xembends a screensaver window.
-
+The X screensaver goes away after mouse move and gets back after a minute (or user pressing esc) 
 
 2) Plasma based
 The source lives in kde-workspace/plasma/screensaver/shell/ and the binary is plasma-overlay.
