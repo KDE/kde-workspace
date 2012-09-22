@@ -370,16 +370,12 @@ void KCMKeyboardWidget::previewLayout(){
     QModelIndex idvariant = index.sibling(index.row(),2) ;
     QString variant=uiWidget->layoutsTableView->model()->data(idvariant).toString();
     layoutprev=new KeyboardPainter();
-    if(variant=="")
-    variant=layoutprev->getVariant(variant,country);
-    else{
-        const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
-        foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
-            if(variant==variantInfo->description){
-                variant=variantInfo->name;
-                break;
-            }
-        }
+    const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
+    foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
+        if(variant==variantInfo->description){
+            variant=variantInfo->name;
+            break;
+       }
     }
     layoutprev->kbframe->getKeyboardLayout(country,variant);
     layoutprev->exec();

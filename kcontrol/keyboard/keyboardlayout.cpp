@@ -1,3 +1,22 @@
+/*
+ *  Copyright (C) 2012 Shivam Makkar (amourphious1992@gmail.com)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+
 #include "keyboardlayout.h"
 #include<QList>
 #include"keys.h"
@@ -66,62 +85,21 @@ void KeyboardLayout::getLayout(QString a,QString cname){
             AB[index-1].getKey(r);
         }
     }
-    /*QString e;
-    e=Layoutname;
-    for(int l=0;l<12;l++){
-        e.append(AE[l].keyname);
-        for(int u=0;u<AE[l].klst.size();u++){
-            e.append(AE[l].klst.at(u));
-        }
-        e.append("\n");
-    }
-    for(int l=0;l<12;l++){
-        e.append(AD[l].keyname);
-        for(int u=0;u<AD[l].klst.size();u++){
-            e.append(AD[l].klst.at(u));
-        }
-        e.append("\n");
-    }
-    for(int l=0;l<11;l++){
-        e.append(AC[l].keyname);
-        for(int u=0;u<AC[l].klst.size();u++){
-            e.append(AC[l].klst.at(u));
-        }
-        e.append("\n");
-    }
-    for(int l=0;l<10;l++){
-        e.append(AB[l].keyname);
-        for(int u=0;u<AB[l].klst.size();u++){
-            e.append(AB[l].klst.at(u));
-        }
-        e.append("\n");
-    }
-    QMessageBox q;
-    q.setText(e);
-    q.exec();*/
+
 }
 void KeyboardLayout::includeSymbol(QString a,QString cname){
     int k=a.indexOf("include");
     a=a.mid(k);
-    /*QMessageBox x;
-    x.setText(a);
-    x.exec();*/
     QList<QString>tobeinclude;
     tobeinclude=a.split("include");
-    //QMessageBox s;
     QString r;
     for(int o=1;o<tobeinclude.size();o++){
         QString d=tobeinclude.at(o);
         d.simplified();
-    //s.setText(d);
-    //s.exec();
         int k=d.indexOf("\"",2);
-    //s.setText(r.setNum(k));
-    //s.exec();
         QString incsym=d.left(k);
         incsym.remove(" ");
         incsym.remove("\"");
-        //QMessageBox q;
         QList<QString> incfile;
         incfile=incsym.split("(");
         for(int i=0;i<incfile.size();i++){
@@ -138,12 +116,8 @@ void KeyboardLayout::includeSymbol(QString a,QString cname){
         }
         r=incfile.at(0);
         r.append(incfile.at(1));
-    //q.setText(r);
-    //q.exec();
         QString filename=findSymbolbasedir();
         filename.append(incfile.at(0));
-    //q.setText(filename);
-    //q.exec();
         QFile file(filename);
         file.open(QIODevice::ReadOnly | QIODevice::Text);
         QString content = file.readAll();

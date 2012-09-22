@@ -1,3 +1,21 @@
+/*
+ *  Copyright (C) 2012 Shivam Makkar (amourphious1992@gmail.com)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include "keyboardpainter.h"
 #include "ui_keyboardpainter.h"
 #include<QHBoxLayout>
@@ -23,47 +41,4 @@ KeyboardPainter::~KeyboardPainter()
     delete ui;
     delete kbframe;
     delete exitButton;
-}
-
-QString KeyboardPainter::getVariant(QString variant,QString selectedLayout){
-    if (variant==""){
-        variant="basic";
-        if(selectedLayout=="ma")
-            variant="arabic";
-        if(selectedLayout=="az")
-            variant="latin";
-        if(selectedLayout=="bg")
-            variant="bds";
-        if(selectedLayout=="fi")
-            variant="kotoistus";
-        if(selectedLayout=="ca")
-            variant="fr";
-        if(selectedLayout=="in")
-            variant="deva";
-        if(selectedLayout=="jp")
-            variant="106";
-        if(selectedLayout=="ir")
-            variant="pes";
-        if(selectedLayout=="kr")
-            variant="kr106";
-        if(selectedLayout=="ru")
-            variant="winkeys";
-        if(selectedLayout=="lk")
-            variant="sin_phonetic";
-        if(selectedLayout=="ke")
-            variant="swa";
-        if(selectedLayout=="tz")
-            variant="swa";
-        if(selectedLayout=="tw")
-            variant="tw";
-        if(selectedLayout=="bw")
-            variant="tswana";
-        if(selectedLayout=="ua")
-            variant="unicode";
-        if(selectedLayout=="pk")
-            variant="urd-phonetic";
-        if(selectedLayout=="uz")
-            variant="cyrillic";
-    }
-    return variant;
 }
