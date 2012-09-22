@@ -265,7 +265,7 @@ bool FavoritesModel::dropMimeData(const QString& text, const QVariantList& urls,
         return true;
     }
 
-    if (column > 0) {
+    if (column > 0 || row > numberOfFavorites()) {
         return false;
     }
 

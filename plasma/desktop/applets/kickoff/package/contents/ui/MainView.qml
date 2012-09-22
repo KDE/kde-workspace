@@ -19,6 +19,8 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
+import org.kde.draganddrop 1.0
+
 
 Item {
     property alias favoritesModel: kickoffListView.favoritesModel
@@ -74,6 +76,7 @@ Item {
     }
     ListView {
         id: kickoffListView
+        interactive: contentHeight > height
         property variant favoritesModel
         property variant leaveModel
         property variant systemModel
@@ -118,6 +121,22 @@ Item {
             }
         }
         highlight: PlasmaComponents.Highlight {
+        }
+        footer: Item {
+            height: {
+                if (kickoffListView.contentHeight > kickoffListView.height) {
+                    return 0;
+                } else {
+                    return kickoffListView.height - kickoffListView.contentHeight;
+                }
+            }
+            width: parent.width
+            DropArea {
+                anchors.fill: parent
+                onDrop: {
+                    kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, kickoffListView.count-1, 0);
+                }
+            }
         }
     }
 
