@@ -23,8 +23,9 @@ import org.kde.draganddrop 1.0
 PlasmaComponents.ListItem {
     id: listItem
     enabled: true
+    clip: true
     checked: ListView.isCurrentItem
-    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight)  + 10
+    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight)
 
     property bool modelChildren: hasModelChildren
 
@@ -217,7 +218,14 @@ PlasmaComponents.ListItem {
         }
     }
     DropArea {
-        anchors.fill: parent
+        // We could anchors.fill: parent here, but then, dropping in between items is possible,
+        // so we make the drop area a bit larger than the item itself
+        anchors {
+            verticalCenter: parent.verticalCenter;
+            left: parent.left;
+            right: parent.right;
+        }
+        height: parent.height+8
         onDrop: {
             listItem.ListView.view.model.dropMimeData(event.mimeData.text, event.mimeData.urls, index, 0);
         }
