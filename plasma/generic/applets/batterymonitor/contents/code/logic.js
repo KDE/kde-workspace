@@ -45,6 +45,11 @@ function updateCumulative() {
     batteries.allCharged = charged;
 }
 
+function resetBatteryData() {
+    dialogItem.batteryData = null;
+    dialogItem.batteryData = batteries;
+}
+
 function stringForState(batteryData) {
     var pluggedIn = batteryData["Plugged in"];
     var percent = batteryData["Percent"];

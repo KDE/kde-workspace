@@ -160,6 +160,8 @@ Item {
                 }
             }
             plasmoid.status = status;
+
+            Logic.resetBatteryData();
         }
     }
 
@@ -178,7 +180,6 @@ Item {
 
     PopupDialog {
         id: dialogItem
-        batteryData: batteries
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         screenBrightness: pmSource.data["PowerDevil"]["Screen Brightness"]
         remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0

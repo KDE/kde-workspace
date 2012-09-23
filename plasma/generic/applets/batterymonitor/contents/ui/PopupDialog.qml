@@ -38,6 +38,8 @@ Item {
     signal brightnessChanged(int screenBrightness)
     signal powermanagementChanged(bool checked)
 
+    property int batteryCount: batteryData==null ? 0 : batteryData.count
+
     Column {
         id: labels
         spacing: 6
@@ -48,9 +50,9 @@ Item {
         }
 
         Repeater {
-            model: batteryData.count
+            model: batteryCount
             Components.Label {
-                text: batteryData.count>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
+                text: batteryCount>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
                 width: labels.width
                 horizontalAlignment: Text.AlignRight
             }
@@ -89,9 +91,9 @@ Item {
         }
 
         Repeater {
-            model: batteryData.count
+            model: batteryCount
             Components.Label {
-                text: Logic.stringForState(batteryData.get(index))
+                text: batteryData==null ? "" : Logic.stringForState(batteryData.get(index))
                 font.weight: Font.Bold
             }
         }
@@ -132,7 +134,7 @@ Item {
         var time = new Date(msec);
         var hrs = i18np("1 hour", "%1 hours", time.getUTCHours());
         var mins = i18np("1 minute", "%1 minutes", time.getUTCMinutes());
-        return hrs+", "+mins;
+        return hrs+" "+mins;
     }
 
     Row {
@@ -159,8 +161,8 @@ Item {
 
     BatteryIcon {
         monochrome: false
-        hasBattery: batteryData.cumulativePluggedin
-        percent: batteryData.cumulativePercent
+        hasBattery: batteryData==null ? true : batteryData.cumulativePluggedin
+        percent: batteryData==null ? 0 : batteryData.cumulativePercent
         pluggedIn: dialog.pluggedIn
         anchors {
             top: parent.top
