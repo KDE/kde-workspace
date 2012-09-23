@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <kuser.h>
 
 #include <QRegExp>
-#include <QLayout>
+#include <QFormLayout>
 #include <QLabel>
 
 static int echoMode;
@@ -60,8 +60,7 @@ KClassicGreeter::KClassicGreeter(KGreeterPluginHandler *_handler,
     pExp(-1),
     running(false)
 {
-    QGridLayout *grid = 0;
-    int line = 0;
+    QFormLayout *formLay = 0;
 
     if (!_handler->gplugHasNode("user-entry") ||
         !_handler->gplugHasNode("pw-entry"))
@@ -69,8 +68,8 @@ KClassicGreeter::KClassicGreeter(KGreeterPluginHandler *_handler,
         parent = new QWidget(parent);
         parent->setObjectName("talker");
         widgetList << parent;
-        grid = new QGridLayout(parent);
-        grid->setMargin(0);
+        formLay = new QFormLayout(parent);
+        formLay->setMargin(0);
     }
 
     loginLabel = passwdLabel = passwd1Label = passwd2Label = 0;
@@ -86,25 +85,23 @@ KClassicGreeter::KClassicGreeter(KGreeterPluginHandler *_handler,
             connect(loginEdit, SIGNAL(editingFinished()), SLOT(slotChanged()));
             connect(loginEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
             connect(loginEdit, SIGNAL(selectionChanged()), SLOT(slotChanged()));
-            if (!grid) {
+            if (!formLay) {
                 loginEdit->setObjectName("user-entry");
                 widgetList << loginEdit;
             } else {
                 loginLabel = new QLabel(i18n("&Username:"), parent);
                 loginLabel->setBuddy(loginEdit);
-                grid->addWidget(loginLabel, line, 0);
-                grid->addWidget(loginEdit, line++, 1);
+                formLay->addRow(loginLabel, loginEdit);
             }
-        } else if (ctx != Login && ctx != Shutdown && grid) {
+        } else if (ctx != Login && ctx != Shutdown && formLay) {
             loginLabel = new QLabel(i18n("Username:"), parent);
-            grid->addWidget(loginLabel, line, 0);
-            grid->addWidget(new QLabel(fixedUser, parent), line++, 1);
+            formLay->addRow(loginLabel, new QLabel(fixedUser, parent));
         }
         passwdEdit = new KDMPasswordEdit(parent);
         connect(passwdEdit, SIGNAL(textChanged(QString)),
                 SLOT(slotChanged()));
         connect(passwdEdit, SIGNAL(editingFinished()), SLOT(slotChanged()));
-        if (!grid) {
+        if (!formLay) {
             passwdEdit->setObjectName("pw-entry");
             widgetList << passwdEdit;
         } else {
@@ -113,8 +110,7 @@ KClassicGreeter::KClassicGreeter(KGreeterPluginHandler *_handler,
                                          i18n("Current &password:"),
                                      parent);
             passwdLabel->setBuddy(passwdEdit);
-            grid->addWidget(passwdLabel, line, 0);
-            grid->addWidget(passwdEdit, line++, 1);
+            formLay->addRow(passwdLabel, passwdEdit);
         }
         if (loginEdit)
             loginEdit->setFocus();
@@ -128,11 +124,9 @@ KClassicGreeter::KClassicGreeter(KGreeterPluginHandler *_handler,
         passwd2Edit = new KDMPasswordEdit(parent);
         passwd2Label = new QLabel(i18n("Con&firm password:"), parent);
         passwd2Label->setBuddy(passwd2Edit);
-        if (grid) {
-            grid->addWidget(passwd1Label, line, 0);
-            grid->addWidget(passwd1Edit, line++, 1);
-            grid->addWidget(passwd2Label, line, 0);
-            grid->addWidget(passwd2Edit, line, 1);
+        if (formLay) {
+            formLay->addRow(passwd1Label, passwd1Edit);
+            formLay->addRow(passwd2Label, passwd2Edit);
         }
         if (!passwdEdit)
             passwd1Edit->setFocus();

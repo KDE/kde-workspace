@@ -31,6 +31,7 @@
 #include <KDebug>
 #include <KLocale>
 #include <KStandardDirs>
+#include <KIdleTime>
 
 #include <QtDBus/QDBusConnectionInterface>
 #include <QtDBus/QDBusInterface>
@@ -187,11 +188,23 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
         QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
                             this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
+    //any info concerning lock screen/screensaver goes here
+    } else if (name == "UserActivity") {
+        setData("UserActivity", "IdleTime", KIdleTime::instance()->idleTime());
     } else {
         kDebug() << "Data for '" << name << "' not found";
         return false;
     }
     return true;
+}
+
+bool PowermanagementEngine::updateSourceEvent(const QString &source)
+{
+    if (source == "UserActivity") {
+        setData("UserActivity", "IdleTime", KIdleTime::instance()->idleTime());
+        return true;
+    }
+    return Plasma::DataEngine::updateSourceEvent(source);
 }
 
 Plasma::Service* PowermanagementEngine::serviceForSource(const QString &source)

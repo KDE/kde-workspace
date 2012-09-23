@@ -62,6 +62,7 @@ Comment[ca@valencia]=L'escriptori creat pel KDE
 Comment[cs]=Prostředí od KDE
 Comment[da]=Skrivebordet fra KDE
 Comment[de]=Die von KDE erstellte Arbeitsfläche
+Comment[el]=Η επιφάνεια εργασίας δημιουργήθηκε από το KDE
 Comment[es]=El escritorio diseñado por KDE
 Comment[et]=KDE loodud töölaud
 Comment[eu]=KDE-k eginiko mahaigaina

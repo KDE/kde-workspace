@@ -101,7 +101,7 @@ Item {
         width: list.delegateWidth
         height: list.delegateHeight
 
-        imagePath: "widgets/tasks"
+        imagePath: "widgets/viewitem"
         prefix: "normal"
 
         DragArea {

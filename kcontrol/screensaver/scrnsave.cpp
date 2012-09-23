@@ -167,8 +167,8 @@ KScreenSaver::KScreenSaver(QWidget *parent, const QVariantList&)
     connect(mWaitLockEdit, SIGNAL(valueChanged(int)),
             this, SLOT(slotLockTimeoutChanged(int)));
 
-    mPlasmaCheckBox->setChecked(mPlasmaEnabled);
-    connect(mPlasmaCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotEnablePlasma(bool)));
+    connect(mPlasmaWidgetsRadio, SIGNAL(toggled(bool)), this, SLOT(slotEnablePlasma(bool)));
+    connect(mScreenSaverRadio, SIGNAL(toggled(bool)), this, SLOT(slotEnableLegacyScreenSaver(bool)));
 
     mPlasmaSetup->setEnabled(mPlasmaEnabled);
     connect(mPlasmaSetup, SIGNAL(clicked()), this, SLOT(slotPlasmaSetup()));
@@ -297,7 +297,18 @@ void KScreenSaver::readSettings()
     mLockTimeout = config.readEntry("LockGrace", 60000);
     mLock = config.readEntry("Lock", false);
     mSaver = config.readEntry("Saver");
-    mPlasmaEnabled = config.readEntry("PlasmaEnabled", false);
+
+    bool legacyScreenSaver = config.readEntry("LegacySaverEnabled", false);
+    mScreenSaverRadio->setChecked(legacyScreenSaver);
+    if (!legacyScreenSaver) {
+        mPlasmaEnabled = config.readEntry("PlasmaEnabled", false);
+        mPlasmaWidgetsRadio->setChecked(mPlasmaEnabled);
+    } else {
+        mPlasmaEnabled = false;
+    }
+    if (!legacyScreenSaver && !mPlasmaEnabled) {
+        mSimpleLockerRadio->setChecked(true);
+    }
 
     if (mTimeout < 60) mTimeout = 60;
     if (mLockTimeout < 0) mLockTimeout = 0;
@@ -339,7 +350,7 @@ void KScreenSaver::defaults()
     slotLockTimeoutChanged( 60 );
     slotLock( false );
     mEnabledCheckBox->setChecked(false);
-    mPlasmaCheckBox->setChecked(false);
+    mSimpleLockerRadio->setChecked(true);
     mPlasmaSetup->setEnabled(false);
 
     updateValues();
@@ -361,6 +372,7 @@ void KScreenSaver::save()
     config.writeEntry("LockGrace", mLockTimeout);
     config.writeEntry("Lock", mLock);
     config.writeEntry("PlasmaEnabled", mPlasmaEnabled);
+    config.writeEntry("LegacySaverEnabled", mScreenSaverRadio->isChecked());
 
     if ( !mSaver.isEmpty() )
         config.writeEntry("Saver", mSaver);
@@ -515,7 +527,7 @@ void KScreenSaver::slotPreviewExited()
     palette.setColor(mMonitor->backgroundRole(), Qt::black);
     mMonitor->setPalette(palette);
     mMonitor->setGeometry(mMonitorPreview->previewRect());
-    mMonitor->show();
+    mMonitor->setVisible(mScreenSaverRadio->isChecked());
     // So that hacks can XSelectInput ButtonPressMask
     XSelectInput(QX11Info::display(), mMonitor->winId(), widgetEventMask );
 
@@ -553,6 +565,15 @@ void KScreenSaver::slotEnablePlasma(bool enable)
     //so the button will just show the screensaver, no plasma.
     //what should I do about this?
     mPlasmaSetup->setEnabled(mPlasmaEnabled);
+    mChanged = true;
+    emit changed(true);
+}
+
+void KScreenSaver::slotEnableLegacyScreenSaver(bool enable)
+{
+    if (mMonitor) {
+        mMonitor->setVisible(enable);
+    }
     mChanged = true;
     emit changed(true);
 }

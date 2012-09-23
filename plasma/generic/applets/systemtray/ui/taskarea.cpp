@@ -335,7 +335,7 @@ bool TaskArea::addWidgetForTask(SystemTray::Task *task)
     removeFromHiddenArea(task);
     widget->setParentItem(this);
     //not really pretty, but for consistency attempts to put the notifications applet always in the same position
-    if (task->typeId() == "notifications") {
+    if (task->typeId() == "org.kde.notifications") {
         if (d->firstTasksLayout->count() == 0) {
             d->topLayout->insertItem(0, d->firstTasksLayout);
         }

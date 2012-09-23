@@ -39,8 +39,7 @@ BackgroundDialog::BackgroundDialog(const QSize& res, Plasma::Containment *c, /*P
     : KDialog(parent),
       m_wallpaper(0),
       //m_view(view),
-      m_containment(c),
-      m_preview(0)
+      m_containment(c)
 {
     //setWindowIcon(KIcon("preferences-desktop-wallpaper"));
     setCaption(i18n("Background Settings"));
@@ -54,15 +53,6 @@ BackgroundDialog::BackgroundDialog(const QSize& res, Plasma::Containment *c, /*P
     qreal previewRatio = (qreal)res.width() / (qreal)res.height();
     QSize monitorSize(200, int(200 * previewRatio));
 
-    m_monitor->setFixedSize(200,200);
-    m_monitor->setText(QString());
-    m_monitor->setWhatsThis(i18n(
-        "This picture of a monitor contains a preview of "
-        "what the current settings will look like on your desktop."));
-    m_preview = new ScreenPreviewWidget(m_monitor);
-    m_preview->setRatio(previewRatio);
-    m_preview->resize(200,200);
-
     connect(this, SIGNAL(finished(int)), this, SLOT(cleanup()));
     connect(this, SIGNAL(okClicked()), this, SLOT(saveConfig()));
     connect(this, SIGNAL(applyClicked()), this, SLOT(saveConfig()));
@@ -70,6 +60,13 @@ BackgroundDialog::BackgroundDialog(const QSize& res, Plasma::Containment *c, /*P
     setMainWidget(main);
     reloadConfig();
     adjustSize();
+
+    if (c->view()) {
+        setParent(c->view());
+        setBackgroundRole(QPalette::Window);
+        setAutoFillBackground(true);
+        move(c->view()->width()/2 - width()/2, y());
+    }
 }
 
 BackgroundDialog::~BackgroundDialog()
@@ -86,24 +83,16 @@ void BackgroundDialog::cleanup()
 
 void BackgroundDialog::reloadConfig()
 {
-    //transparency
-    m_activeSlider->setValue(PlasmaApp::self()->activeOpacity() * 10);
-    m_idleSlider->setValue(PlasmaApp::self()->idleOpacity() * 10);
-
-    label->setVisible(PlasmaApp::hasComposite());
-    m_activeSlider->setVisible(PlasmaApp::hasComposite());
-
     // Wallpaper
     disconnect(m_wallpaperMode, SIGNAL(currentIndexChanged(int)), this, SLOT(changeBackgroundMode(int)));
     int wallpaperIndex = 0;
 
-    bool doWallpaper = m_containment->drawWallpaper() && ! PlasmaApp::hasComposite();
+    bool doWallpaper = m_containment->drawWallpaper();
     m_wallpaperLabel->setVisible(doWallpaper);
     m_wallpaperTypeLabel->setVisible(doWallpaper);
     m_wallpaperMode->setVisible(doWallpaper);
     m_wallpaperConfig->setVisible(doWallpaper);
-    m_monitor->setVisible(doWallpaper);
-    m_preview->setVisible(doWallpaper);
+
     if (doWallpaper) {
         // Load wallpaper plugins
         QString currentPlugin;
@@ -174,7 +163,6 @@ void BackgroundDialog::changeBackgroundMode(int mode)
 
     if (!m_wallpaper) {
         m_wallpaper = Plasma::Wallpaper::load(wallpaperInfo.first);
-        m_preview->setPreview(m_wallpaper);
     }
 
     if (m_wallpaper) {
@@ -204,10 +192,6 @@ KConfigGroup BackgroundDialog::wallpaperConfig(const QString &plugin)
 
 void BackgroundDialog::saveConfig()
 {
-    //transparency
-    PlasmaApp::self()->setActiveOpacity(m_activeSlider->value() / 10.0);
-    PlasmaApp::self()->setIdleOpacity(m_idleSlider->value() / 10.0);
-
     // Wallpaper
     QString wallpaperPlugin = m_wallpaperMode->itemData(m_wallpaperMode->currentIndex()).value<WallpaperInfo>().first;
     QString wallpaperMode = m_wallpaperMode->itemData(m_wallpaperMode->currentIndex()).value<WallpaperInfo>().second;

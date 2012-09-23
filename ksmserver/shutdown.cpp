@@ -542,6 +542,10 @@ void KSMServer::killWM()
     if( state != Killing )
         return;
     delete logoutEffectWidget;
+#ifdef COMPILE_SCREEN_LOCKER
+    // To prevent kwin from becoming "defunct".
+    ScreenLocker::KSldApp::self()->cleanUp();
+#endif
     kDebug( 1218 ) << "Starting killing WM";
     state = KillingWM;
     bool iswm = false;
