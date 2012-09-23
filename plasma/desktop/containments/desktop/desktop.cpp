@@ -80,8 +80,8 @@ void DefaultDesktop::constraintsEvent(Plasma::Constraints constraints)
 
         foreach (Applet *applet, applets()) {
             m_layout->addItem(applet, true, false);
-            connect(applet, SIGNAL(appletTransformedByUser()), this, SLOT(onAppletTransformedByUser()));
-            connect(applet, SIGNAL(appletTransformedItself()), this, SLOT(onAppletTransformedItself()));
+            connect(applet, SIGNAL(appletTransformedByUser()), this, SLOT(onAppletTransformed()));
+            connect(applet, SIGNAL(appletTransformedItself()), this, SLOT(onAppletTransformed()));
         }
 
         m_layout->adjustPhysicalPositions();
@@ -102,8 +102,8 @@ void DefaultDesktop::onAppletAdded(Plasma::Applet *applet, const QPointF &pos)
 
     m_layout->adjustPhysicalPositions();
 
-    connect(applet, SIGNAL(appletTransformedByUser()), this, SLOT(onAppletTransformedByUser()));
-    connect(applet, SIGNAL(appletTransformedItself()), this, SLOT(onAppletTransformedItself()));
+    connect(applet, SIGNAL(appletTransformedByUser()), this, SLOT(onAppletTransformed()));
+    connect(applet, SIGNAL(appletTransformedItself()), this, SLOT(onAppletTransformed()));
 }
 
 void DefaultDesktop::onAppletRemoved(Plasma::Applet *applet)
@@ -117,17 +117,10 @@ void DefaultDesktop::onAppletRemoved(Plasma::Applet *applet)
     }
 }
 
-void DefaultDesktop::onAppletTransformedByUser()
+void DefaultDesktop::onAppletTransformed()
 {
     Plasma::Applet *applet = static_cast<Plasma::Applet *>(sender());
-    m_layout->itemTransformed(applet, DesktopLayout::ItemTransformUser);
-    m_layout->adjustPhysicalPositions(applet);
-}
-
-void DefaultDesktop::onAppletTransformedItself()
-{
-    Plasma::Applet *applet = static_cast<Plasma::Applet *>(sender());
-    m_layout->itemTransformed(applet, DesktopLayout::ItemTransformUser);
+    m_layout->itemTransformed(applet);
     m_layout->adjustPhysicalPositions(applet);
 }
 
