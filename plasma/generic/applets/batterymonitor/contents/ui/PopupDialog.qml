@@ -132,9 +132,12 @@ Item {
             return "";
 
         var time = new Date(msec);
-        var hrs = i18np("1 hour", "%1 hours", time.getUTCHours());
-        var mins = i18np("1 minute", "%1 minutes", time.getUTCMinutes());
-        return hrs+" "+mins;
+        var hours = time.getUTCHours();
+        var minutes = time.getUTCMinutes();
+        var str = "";
+        if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
+        if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
+        return str;
     }
 
     Row {
