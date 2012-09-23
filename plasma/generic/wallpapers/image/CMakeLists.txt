@@ -6,6 +6,7 @@ set(image_SRCS
     backgroundlistmodel.cpp
     removebuttonmanager.cpp
     removebutton.cpp
+    itemsview.cpp
 )
 kde4_add_ui_files(image_SRCS imageconfig.ui slideshowconfig.ui)
 

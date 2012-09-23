@@ -114,7 +114,11 @@ Comment[el]=Διαμόρφωση ρυθμίσεων ώρας και ημερομ
 Comment[es]=Configurar las preferencias de fecha y hora
 Comment[et]=Kuupäeva ja kellaaja seadistamine
 Comment[fi]=Aika-asetukset
+<<<<<<< HEAD
 Comment[gl]=Configurar as opcións da data e hora
+=======
+Comment[ga]=Cumraigh socruithe dáta agus ama
+>>>>>>> KDE/4.9
 Comment[hu]=Dátum- és időbeállítások
 Comment[ia]=Configura preferentias de data e tempore
 Comment[it]=Configura le impostazioni della data e ora

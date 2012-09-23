@@ -148,7 +148,11 @@ X-KDE-Keywords[el]=χρώματα,χρώματα,σχήμα,αντίθεση,χ�
 X-KDE-Keywords[es]=colores,esquema,contraste,colores de elementos gráficos,Esquema de color,estilo de color,tema de color
 X-KDE-Keywords[et]=värv,värvid,skeem,kontrast,vidina värvid,värviskeem,värvistiil,värviteema
 X-KDE-Keywords[fi]=värit,teema,kontrasti,käyttöliittymäelementtien värit,elementtien värit,väriteema,värityyli
+<<<<<<< HEAD
 X-KDE-Keywords[gl]=cores,esquema,contraste,cores do widget,esquema de cores, tema de cores
+=======
+X-KDE-Keywords[ga]=dathanna,scéim,codarsnacht,dathanna Giuirléidí,Scéim Datha,téama datha
+>>>>>>> KDE/4.9
 X-KDE-Keywords[hu]=színek,színek,séma,kontraszt,Grafikai elemek színei,Színséma,színstílus,színtéma
 X-KDE-Keywords[ia]=colores,colores,schema,contrasto,colores de Widget,Schema de Color,stilo de color, thema de color
 X-KDE-Keywords[it]=colori,schema,contrasto,colore degli oggetti,schema di colore,stile colore,tema colore
