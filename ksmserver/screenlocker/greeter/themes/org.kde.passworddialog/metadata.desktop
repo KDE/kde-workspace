@@ -1,6 +1,12 @@
 [Desktop Entry]
 Name=Password dialog
+Name[pt_BR]=Diálogo de senha
+Name[uk]=Вікно для вводу пароля
+Name[x-test]=xxPassword dialogxx
 Comment=Screen locker that provides a password dialog and an interface to switch the current user
+Comment[pt_BR]=Bloqueador de sessão que fornece um diálogo de senha e uma interface para mudar o usuário atual
+Comment[uk]=Блокувальник екрана з вікном пароля і інтерфейсом для перемикання поточного користувача
+Comment[x-test]=xxScreen locker that provides a password dialog and an interface to switch the current userxx
 Icon=system-lock-screen
 
 X-Plasma-MainScript=ui/main.qml
