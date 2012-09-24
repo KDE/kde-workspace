@@ -193,11 +193,7 @@ X-KDE-Keywords[el]=χειριστήριο,πληκτρολόγιο παιχνι�
 X-KDE-Keywords[es]=joystick,gamepad,controlador
 X-KDE-Keywords[et]=juhtpult,juhtkang,kontroller
 X-KDE-Keywords[fi]=peliohjain,sauvaohjain,ohjain
-<<<<<<< HEAD
 X-KDE-Keywords[gl]=joystick, gamepad, controlador
-=======
-X-KDE-Keywords[ga]=luamhán stiúrtha,ceap cluiche,rialaitheoir
->>>>>>> KDE/4.9
 X-KDE-Keywords[hu]=botkormány,játéktábla,vezérlő
 X-KDE-Keywords[ia]=joystick,gamepad,controlator
 X-KDE-Keywords[it]=joystick,gamepad,controller
@@ -221,3 +217,6 @@ X-KDE-Keywords[uk]=joystick,gamepad,джойстик,геймпад,контро
 X-KDE-Keywords[x-test]=xxjoystick,gamepad,controllerxx
 X-KDE-Keywords[zh_CN]=joystick,gamepad,controller,手柄,摇杆,控制器
 X-KDE-Keywords[zh_TW]=joystick,gamepad,controller
+<<<<<<< HEAD
+=======
+>>>>>>> KDE/4.9

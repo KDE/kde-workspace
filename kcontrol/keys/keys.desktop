@@ -192,11 +192,7 @@ X-KDE-Keywords[el]=Πλήκτρα,δεσμεύσεις καθολικών πλή
 X-KDE-Keywords[es]=Teclas,Asociaciones globales de teclas,Esquema de teclas,Asociaciones de teclas,accesos rápidos,accesos rápidos de aplicaciones,accesos rápidos globales
 X-KDE-Keywords[et]=klahvid,globaalsed kiirklahvid,klaviatuuriskeem,klahviseosed,kiirklahvid,rakenduse kiirklahvid,globaalsed kiirklahvid
 X-KDE-Keywords[fi]=näppäimet,globaalit näppäinsidokset,yleiset näppäinsidokset,työpöydänlaajuiset näppäinsidokset,globaalit pikanäppäimet,työpöydänlaajuiset pikanäppäimet,globaalit näppäinyhdistelmät,työpöydänlaajuiset näppäinyhdistelmät,näppäimistön yleispikavalinnat,näppäimistön globaalit pikavalinnat,näppäinsidokset,pikanäppäimet,näppäimistön pikavalinnat, näppäinyhdistelmät,näppäinoikotiet,sovellusten pikanäppäimet,sovellusten näppäinyhdistelmät,sovellusten näppäinoikotiet
-<<<<<<< HEAD
 X-KDE-Keywords[gl]=tecla, atallo, asociación, esquema de teclas, atallo de teclado, asociación de teclas, atallo a programa, atallos globais
-=======
-X-KDE-Keywords[ga]=Eochracha,Ceangail chomhchoiteanna eochracha,Scéim eochracha,Ceangail eochracha,aicearraí,aicearraí feidhmchláir,aicearraí comhchoiteanna
->>>>>>> KDE/4.9
 X-KDE-Keywords[hu]=Billentyűk,Globális gyorsbillentyűk,Billentyűséma,Gyorsbillentyűk,alkalmazás gyorsbillentyűk,globális gyorsbillentyűk
 X-KDE-Keywords[ia]=Claves,ligamines de clave global,schema de clave,ligamines de clave,vias breve,vias breve de application,vias breve global
 X-KDE-Keywords[it]=tasti,scorciatoie globali di tastiera,schema di tasti,scorciatoie,scorciatoie delle applicazioni,scorciatoie globali
@@ -220,5 +216,8 @@ X-KDE-Keywords[vi]=Phím,tổ hợp phím toàn cục,phối hợp phím,tổ h�
 X-KDE-Keywords[x-test]=xxKeys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcutsxx
 X-KDE-Keywords[zh_CN]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcuts,按键,全局键绑定,按键方案,按键绑定,快捷键,应用程序,全局快捷键
 X-KDE-Keywords[zh_TW]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcuts
+<<<<<<< HEAD
+=======
+>>>>>>> KDE/4.9
 
 Categories=Qt;KDE;X-KDE-settings-accessibility;

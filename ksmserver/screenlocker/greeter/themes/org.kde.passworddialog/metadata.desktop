@@ -1,10 +1,18 @@
 [Desktop Entry]
 Name=Password dialog
+Name[el]=Διάλογος κωδικού πρόσβασης
+Name[nl]=Wachtwoordvenster
+Name[pt]=Janela da senha
 Name[pt_BR]=Diálogo de senha
+Name[sv]=Lösenordsdialogruta
 Name[uk]=Вікно для вводу пароля
 Name[x-test]=xxPassword dialogxx
 Comment=Screen locker that provides a password dialog and an interface to switch the current user
+Comment[el]=Κλείδωμα οθόνης με διάλογο κωδικού πρόσβασης και μια διεπαφή για την εναλλαγή του τρέχοντος χρήστη
+Comment[nl]=Schermvergrendeling die een wachtwoordvenster en een interface om naar de huidige gebruiker om te schakelen biedt
+Comment[pt]=Bloqueio do ecrã que mostra uma janela de introdução da senha e para mudar o utilizador actual
 Comment[pt_BR]=Bloqueador de sessão que fornece um diálogo de senha e uma interface para mudar o usuário atual
+Comment[sv]=Skärmlåsning som tillhandahåller en lösenordsdialogruta och ett gränssnitt för att byta aktuell användare
 Comment[uk]=Блокувальник екрана з вікном пароля і інтерфейсом для перемикання поточного користувача
 Comment[x-test]=xxScreen locker that provides a password dialog and an interface to switch the current userxx
 Icon=system-lock-screen

@@ -202,11 +202,7 @@ X-KDE-Keywords[el]=πρόσβαση,προσβασιμότητα,βαρήκοο�
 X-KDE-Keywords[es]=acceso,accesibilidad,sordera,descapacitado,oído,pérdida de oído,campana,campana audible,campana visible,teclado,teclas,teclas pegajosas,repetición de teclas,teclas lentas,navegación con ratón,teclado numérico,gestos de activación,gestos,pegajoso,teclas modificadoras,modificador,teclas de bloqueo
 X-KDE-Keywords[et]=hõlbustus,kasutusmugavus,kurdid,tummad,kuulmine,kuulmiskaotus,puuetega,kell,kuuldav kell,nähtav kell,klaviatuur,klahvid,kleepuvad klahvid,põrkuvad klahvid,aeglased klahvid,hiirega liikumine,numbriklahvistik,aktiveerimisžestid,žestid,muuteklahvid,lukustusklahvid
 X-KDE-Keywords[fi]=esteettömyys,kuuro,heikentynyt,heikko,kuulo,varoitus,äänimerkki,visuaalinen äänimerkki,näppäimistö,näppäimet,alas jäävät näppäimet,tahmeat näppäimet,ponnahdusnäppäimet,hitaat näppäimet,hiirinäppäimet,numeronäppäimistö
-<<<<<<< HEAD
 X-KDE-Keywords[gl]=acceso, accesibilidade, xordo, discapacitado, minusválido, audición, auditiva, campá audíbel, campá visíbel, teclado, tecla pegañentas, teclas lentas, navegación co rato, teclado numérico, acenos, teclas modificadoras
-=======
-X-KDE-Keywords[ga]=rochtain,inrochtaineacht,bodhar,lagaithe,cloigín,cloigín inchloiste,clog infheicthe,Méarchlár,eochracha,eochracha greamaitheacha,eochracha preabtha,eochracha go mall,nascleanúint luiche,eochaircheap uimhriúil,gothaí,greamaitheach,mionthraitheoir,eochracha glasála
->>>>>>> KDE/4.9
 X-KDE-Keywords[hu]=kezelés,akadálymentesítés,süket,károsodott,hallás,halláskárosodás,csengő,hallható csengő,látható csengő,Billentyűzet,billentyűk,ragadós billentyűk,pattogó billentyűk,lassú billentyűk,egérnavigáció,numerikus billentyűzet
 X-KDE-Keywords[ia]=accesso,accessibilitate,surde,debilitate,audito, perdita de audito,campana,campana audibile,campana visibile,Claviero,claves,claves collose,claves saltante,claves lente,navigation de mus,pad numeric, gestos de activation,gestos,collose, claves modificator, modificator, claves blocante 
 X-KDE-Keywords[it]=accesso,accessibilità,sordo,handicap,udito,sordità,campanella,campanella udibile,campanella visiva,tastiera,tasti,permanenza dei tasti,pressione ravvicinata dei tasti,rallentamento dei tasti,navigazione col mouse,tastierino numerico,attivazione gesti,gesti,tasti modificatori,modificatore,tasti di blocco
@@ -229,5 +225,8 @@ X-KDE-Keywords[tr]=erişim,erişebilirlik,sağır,bozukluk,işitme,kayıp,zil,i�
 X-KDE-Keywords[uk]=access,accessibility,deaf,impaired,hearing,hearing loss,bell,audible bell,visible bell,Keyboard,keys,sticky keys,bounce keys,slow keys,mouse navigation,num pad,numpad,activation gestures,gestures,sticky,modifier keys,modifier,locking keys,доступ,доступність,спеціальні можливості,глухий,слух,враження,вади,звук,сповіщення,видиме сповіщення,візуальне сповіщення,клавіатура,клавіші,клавіша,липкі клавіші,утримування,повільні клавіші,миша,навігація,цифри,цифровий блок,слух,втрата слуху,жести активування,жести,липка,липкі клавіші,клавіші-модифікатори,модифікатори,клавіші фіксування,фіксування,блокування
 X-KDE-Keywords[x-test]=xxaccess,accessibility,deaf,impaired,hearing,hearing loss,bell,audible bell,visible bell,Keyboard,keys,sticky keys,bounce keys,slow keys,mouse navigation,num pad,numpad,activation gestures,gestures,sticky,modifier keys,modifier,locking keysxx
 X-KDE-Keywords[zh_TW]=access,accessibility,deaf,impaired,hearing,hearing loss,bell,audible bell,visible bell,Keyboard,keys,sticky keys,bounce keys,slow keys,mouse navigation,num pad,numpad,activation gestures,gestures,sticky,modifier keys,modifier,locking keys
+<<<<<<< HEAD
+=======
+>>>>>>> KDE/4.9
 
 Categories=Qt;KDE;X-KDE-settings-accessibility;

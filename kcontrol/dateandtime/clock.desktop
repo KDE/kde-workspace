@@ -114,11 +114,7 @@ Comment[el]=Διαμόρφωση ρυθμίσεων ώρας και ημερομ
 Comment[es]=Configurar las preferencias de fecha y hora
 Comment[et]=Kuupäeva ja kellaaja seadistamine
 Comment[fi]=Aika-asetukset
-<<<<<<< HEAD
 Comment[gl]=Configurar as opcións da data e hora
-=======
-Comment[ga]=Cumraigh socruithe dáta agus ama
->>>>>>> KDE/4.9
 Comment[hu]=Dátum- és időbeállítások
 Comment[ia]=Configura preferentias de data e tempore
 Comment[it]=Configura le impostazioni della data e ora
@@ -144,6 +140,9 @@ Comment[vi]=Cấu hình thiết lập ngày giờ
 Comment[x-test]=xxConfigure date and time settingsxx
 Comment[zh_CN]=配置日期和时间设置
 Comment[zh_TW]=設定日期與時間
+<<<<<<< HEAD
+=======
+>>>>>>> KDE/4.9
 
 X-KDE-Keywords=clock,date,time,time zone,ntp,synchronize,calendar,local time,region time
 X-KDE-Keywords[ca]=rellotge,data,hora,zona horària,ntp,sincronització,calendari,hora local,hora de la regió
