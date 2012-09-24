@@ -56,10 +56,14 @@ void Firefox::prepare()
     if (m_dbCacheFile.isEmpty()) {
         m_dbCacheFile = KStandardDirs::locateLocal("cache", "") + "bookmarkrunnerfirefoxdbfile.sqlite";
     }
-      if (!m_dbFile.isEmpty()) {
-          m_fetchsqlite = new FetchSqlite(m_dbFile, m_dbCacheFile);
-          m_fetchsqlite->prepare();
-          m_favicon = FaviconFromBlob::firefox(m_fetchsqlite, this);
+    if (!m_dbFile.isEmpty()) {
+        m_fetchsqlite = new FetchSqlite(m_dbFile, m_dbCacheFile);
+        m_fetchsqlite->prepare();
+
+        delete m_favicon;
+        m_favicon = 0;
+
+        m_favicon = FaviconFromBlob::firefox(m_fetchsqlite, this);
     }
 }
 
@@ -108,6 +112,7 @@ void Firefox::teardown()
     if(m_fetchsqlite) {
         m_fetchsqlite->teardown();
         delete m_favicon;
+        m_favicon = 0;
     }
 }
 
