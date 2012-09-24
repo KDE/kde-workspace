@@ -118,7 +118,7 @@ GLTexturePrivate::GLTexturePrivate()
 {
     m_texture = 0;
     m_target = 0;
-    m_filter = GL_NEAREST_MIPMAP_LINEAR;
+    m_filter = GL_NEAREST;
     m_wrapMode = GL_REPEAT;
     m_yInverted = false;
     m_canUseMipmaps = false;
@@ -126,7 +126,7 @@ GLTexturePrivate::GLTexturePrivate()
     m_unnormalizeActive = 0;
     m_normalizeActive = 0;
     m_vbo = 0;
-    m_filterChanged = false;
+    m_filterChanged = true;
     m_wrapModeChanged = false;
 }
 
@@ -240,7 +240,8 @@ void GLTexture::discard()
 void GLTexturePrivate::bind()
 {
 #ifndef KWIN_HAVE_OPENGLES
-    glEnable(m_target);
+    if (!ShaderManager::instance()->isValid())
+        glEnable(m_target);
 #endif
     glBindTexture(m_target, m_texture);
 }
@@ -287,7 +288,8 @@ void GLTexturePrivate::unbind()
 {
     glBindTexture(m_target, 0);
 #ifndef KWIN_HAVE_OPENGLES
-    glDisable(m_target);
+    if (!ShaderManager::instance()->isValid())
+        glDisable(m_target);
 #endif
 }
 
@@ -297,7 +299,7 @@ void GLTexture::unbind()
     d->unbind();
 }
 
-void GLTexture::render(QRegion region, const QRect& rect)
+void GLTexture::render(QRegion region, const QRect& rect, bool hardwareClipping)
 {
     Q_D(GLTexture);
     if (rect.size() != d->m_cachedSize) {
@@ -338,7 +340,7 @@ void GLTexture::render(QRegion region, const QRect& rect)
     } else {
         pushMatrix(translation);
     }
-    d->m_vbo->render(region, GL_TRIANGLE_STRIP);
+    d->m_vbo->render(region, GL_TRIANGLE_STRIP, hardwareClipping);
     if (ShaderManager::instance()->isShaderBound()) {
         GLShader *shader = ShaderManager::instance()->getBoundShader();
         shader->setUniform(GLShader::WindowTransformation, QMatrix4x4());

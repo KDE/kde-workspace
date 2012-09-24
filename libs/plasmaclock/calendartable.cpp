@@ -83,7 +83,7 @@ class CalendarTablePrivate
         CalendarTablePrivate(CalendarTable *calTable, const QDate &initialDate = QDate::currentDate())
             : q(calTable),
               calendarType("locale"),
-              calendar(KGlobal::locale()->calendar()),
+              calendar(0),
               displayEvents(false),
               displayHolidays(false),
               calendarDataEngine(0),
@@ -131,8 +131,10 @@ class CalendarTablePrivate
 
             if (calendar == KGlobal::locale()->calendar()) {
                 calendarType = "locale";
+                QObject::connect(KGlobalSettings::self(), SIGNAL(settingsChanged(int)), q, SLOT(settingsChanged(int)));
             } else {
-                calendarType = calendar->calendarType();
+                calendarType = q->calendar()->calendarType();
+                QObject::disconnect(KGlobalSettings::self(), SIGNAL(settingsChanged(int)), q, SLOT(settingsChanged(int)));
             }
 
             // Force date update to refresh cached date componants then update display
@@ -145,13 +147,15 @@ class CalendarTablePrivate
 
         void setDate(const QDate &setDate)
         {
+            //q->calendar() cannot be used because d is still not assigned
+            const KCalendarSystem *cal = calendar ? calendar : KGlobal::locale()->calendar();
             selectedDate = setDate;
-            selectedMonth = calendar->month(setDate);
-            selectedYear = calendar->year(setDate);
+            selectedMonth = cal->month(setDate);
+            selectedYear = cal->year(setDate);
             weekDayFirstOfSelectedMonth = weekDayFirstOfMonth(setDate);
-            daysInWeek = calendar->daysInWeek(setDate);
-            daysInSelectedMonth = calendar->daysInMonth(setDate);
-            daysShownInPrevMonth = (weekDayFirstOfSelectedMonth - calendar->weekStartDay() + daysInWeek) % daysInWeek;
+            daysInWeek = cal->daysInWeek(setDate);
+            daysInSelectedMonth = cal->daysInMonth(setDate);
+            daysShownInPrevMonth = (weekDayFirstOfSelectedMonth - cal->weekStartDay() + daysInWeek) % daysInWeek;
             // make sure at least one day of the previous month is visible.
             // 1 = minimum number of days to show, increase if more days should be forced visible:
             if (daysShownInPrevMonth < 1) {
@@ -235,7 +239,7 @@ class CalendarTablePrivate
         //row and column. Note no direction is assumed
         void rowColumnFromDate(const QDate &cellDate, int &weekRow, int &weekdayColumn)
         {
-            int offset = calendar->day(cellDate) + daysShownInPrevMonth - 1;
+            int offset = q->calendar()->day(cellDate) + daysShownInPrevMonth - 1;
             weekRow = offset / daysInWeek;
             weekdayColumn = offset % daysInWeek;
         }
@@ -246,11 +250,13 @@ class CalendarTablePrivate
         QDate dateFromRowColumn(int weekRow, int weekdayColumn)
         {
             QDate cellDate;
+            //q->calendar() cannot be used because d is still not assigned
+            const KCalendarSystem *cal = calendar ? calendar : KGlobal::locale()->calendar();
 
             //starting from the first of the month, which is known to always be valid, add/subtract
             //number of days to get to the required cell
-            if (calendar->setYMD(cellDate, selectedYear, selectedMonth, 1)) {
-                cellDate = calendar->addDays(cellDate, (weekRow * daysInWeek) + weekdayColumn - daysShownInPrevMonth);
+            if (cal->setYMD(cellDate, selectedYear, selectedMonth, 1)) {
+                cellDate = cal->addDays(cellDate, (weekRow * daysInWeek) + weekdayColumn - daysShownInPrevMonth);
             }
 
             return cellDate;
@@ -279,26 +285,33 @@ class CalendarTablePrivate
 
             // now update what is needed, and only what is needed!
             if (hoverRect != oldHoverRect) {
-                //FIXME: update only of a piece seems to paint over the old stuff
-                /*if (oldHoverRect.isValid()) {
+                if (oldHoverRect.isValid()) {
                     q->update(oldHoverRect);
                 }
+
                 if (hoverRect.isValid()) {
                     q->update(hoverRect);
-                }*/
-                emit q->dateHovered(dateFromRowColumn(hoverWeekRow, hoverWeekdayColumn));
-                q->update();
+                }
+
+                if (hoverWeekRow >= 0 && hoverWeekdayColumn >= 0) {
+                    const QDate date = dateFromRowColumn(hoverWeekRow, hoverWeekdayColumn);
+                    emit q->dateHovered(date);
+                } else {
+                    emit q->dateHovered(QDate());
+                }
             }
         }
 
         // calculate weekday number of first day of this month, this is the anchor for all calculations
         int weekDayFirstOfMonth(const QDate &cellDate)
         {
+            //q->calendar() cannot be used because d is still not assigned
+            const KCalendarSystem *cal = calendar ? calendar : KGlobal::locale()->calendar();
             Q_UNUSED(cellDate);
             QDate firstDayOfMonth;
             int weekday = -1;
-            if ( calendar->setYMD(firstDayOfMonth, selectedYear, selectedMonth, 1)) {
-                weekday = calendar->dayOfWeek(firstDayOfMonth);
+            if ( cal->setYMD(firstDayOfMonth, selectedYear, selectedMonth, 1)) {
+                weekday = cal->dayOfWeek(firstDayOfMonth);
             }
             return weekday;
         }
@@ -362,6 +375,7 @@ class CalendarTablePrivate
         void populateHolidays();
         void populateEvents();
         void populateCalendar();
+        void settingsChanged(int category);
 
         CalendarTable *q;
         QString calendarType;
@@ -483,7 +497,11 @@ void CalendarTable::setCalendar(const KCalendarSystem *newCalendar)
 
 const KCalendarSystem *CalendarTable::calendar() const
 {
-    return d->calendar;
+    if (d->calendar) {
+        return d->calendar;
+    } else {
+        return KGlobal::locale()->calendar();
+    }
 }
 
 void CalendarTable::setDate(const QDate &newDate)
@@ -800,7 +818,7 @@ void CalendarTablePrivate::populateCalendar()
             // Just fetch the days displayed in the grid
             eventsQuery = "events" + QString(':') + viewStartDate.toString(Qt::ISODate) +
                           QString(':') + viewEndDate.toString(Qt::ISODate);
-            kDebug() << "connecting to .. " << eventsQuery;
+            //kDebug() << "connecting to .. " << eventsQuery;
             calendarEngine()->connectSource(eventsQuery, q);
         } else {
             eventsQuery.clear();
@@ -817,6 +835,16 @@ void CalendarTablePrivate::populateEvents()
 {
     pendingPopulations |= PopulateEvents;
     delayedPopulationTimer->start();
+}
+
+void CalendarTablePrivate::settingsChanged(int category)
+{
+    if (category != KGlobalSettings::SETTINGS_LOCALE) {
+        return;
+    }
+
+    calendar = KGlobal::locale()->calendar();
+    q->update();
 }
 
 void CalendarTable::dataUpdated(const QString &source, const Plasma::DataEngine::Data &data)

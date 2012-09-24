@@ -125,9 +125,6 @@ Options::Options(QObject *parent)
     , m_delayFocusInterval(Options::defaultDelayFocusInterval())
     , m_shadeHover(Options::defaultShadeHover())
     , m_shadeHoverInterval(Options::defaultShadeHoverInterval())
-    , m_tilingOn(Options::defaultTiling())
-    , m_tilingLayout(Options::defaultTilingLayout())
-    , m_tilingRaisePolicy(Options::defaultTilingRaisePolicy())
     , m_separateScreenFocus(Options::defaultSeparateScreenFocus())
     , m_activeMouseScreen(Options::defaultActiveMouseScreen())
     , m_placement(Options::defaultPlacement())
@@ -154,8 +151,11 @@ Options::Options(QObject *parent)
     , m_xrenderSmoothScale(Options::defaultXrenderSmoothScale())
     , m_maxFpsInterval(Options::defaultMaxFpsInterval())
     , m_refreshRate(Options::defaultRefreshRate())
+    , m_vBlankTime(Options::defaultVBlankTime())
     , m_glDirect(Options::defaultGlDirect())
     , m_glStrictBinding(Options::defaultGlStrictBinding())
+    , m_glStrictBindingFollowsDriver(Options::defaultGlStrictBindingFollowsDriver())
+    , m_glLegacy(Options::defaultGlLegacy())
     , OpTitlebarDblClick(Options::defaultOperationTitlebarDblClick())
     , CmdActiveTitlebar1(Options::defaultCommandActiveTitlebar1())
     , CmdActiveTitlebar2(Options::defaultCommandActiveTitlebar2())
@@ -289,33 +289,6 @@ void Options::setShadeHoverInterval(int shadeHoverInterval)
     }
     m_shadeHoverInterval = shadeHoverInterval;
     emit shadeHoverIntervalChanged();
-}
-
-void Options::setTiling(bool tiling)
-{
-    if (m_tilingOn == tiling) {
-        return;
-    }
-    m_tilingOn = tiling;
-    emit tilingChanged();
-}
-
-void Options::setTilingLayout(int tilingLayout)
-{
-    if (m_tilingLayout == static_cast<TilingLayoutFactory::Layouts>(tilingLayout)) {
-        return;
-    }
-    m_tilingLayout = static_cast<TilingLayoutFactory::Layouts>(tilingLayout);
-    emit tilingLayoutChanged();
-}
-
-void Options::setTilingRaisePolicy(int tilingRaisePolicy)
-{
-    if (m_tilingRaisePolicy == tilingRaisePolicy) {
-        return;
-    }
-    m_tilingRaisePolicy = tilingRaisePolicy;
-    emit tilingRaisePolicyChanged();
 }
 
 void Options::setSeparateScreenFocus(bool separateScreenFocus)
@@ -753,6 +726,15 @@ void Options::setRefreshRate(uint refreshRate)
     emit refreshRateChanged();
 }
 
+void Options::setVBlankTime(uint vBlankTime)
+{
+    if (m_vBlankTime == vBlankTime) {
+        return;
+    }
+    m_vBlankTime = vBlankTime;
+    emit vBlankTimeChanged();
+}
+
 void Options::setGlDirect(bool glDirect)
 {
     if (m_glDirect == glDirect) {
@@ -769,6 +751,24 @@ void Options::setGlStrictBinding(bool glStrictBinding)
     }
     m_glStrictBinding = glStrictBinding;
     emit glStrictBindingChanged();
+}
+
+void Options::setGlStrictBindingFollowsDriver(bool glStrictBindingFollowsDriver)
+{
+    if (m_glStrictBindingFollowsDriver == glStrictBindingFollowsDriver) {
+        return;
+    }
+    m_glStrictBindingFollowsDriver = glStrictBindingFollowsDriver;
+    emit glStrictBindingFollowsDriverChanged();
+}
+
+void Options::setGlLegacy(bool glLegacy)
+{
+    if (m_glLegacy == glLegacy) {
+        return;
+    }
+    m_glLegacy = glLegacy;
+    emit glLegacyChanged();
 }
 
 void Options::setElectricBorders(int borders)
@@ -852,10 +852,6 @@ unsigned long Options::loadConfig()
     setShadeHover(config.readEntry("ShadeHover", Options::defaultShadeHover()));
     setShadeHoverInterval(config.readEntry("ShadeHoverInterval", Options::defaultShadeHoverInterval()));
 
-    setTiling(config.readEntry("TilingOn", Options::defaultTiling()));
-    setTilingLayout(config.readEntry<int>("TilingDefaultLayout", Options::defaultTilingLayout()));
-    setTilingRaisePolicy(config.readEntry("TilingRaisePolicy", Options::defaultTilingRaisePolicy()));
-
     setClickRaise(config.readEntry("ClickRaise", Options::defaultClickRaise()));
 
     setBorderSnapZone(config.readEntry("BorderSnapZone", Options::defaultBorderSnapZone()));
@@ -919,6 +915,7 @@ unsigned long Options::loadConfig()
     config = KConfigGroup(_config, "Compositing");
     setMaxFpsInterval(qRound(1000.0 / config.readEntry("MaxFPS", Options::defaultMaxFps())));
     setRefreshRate(config.readEntry("RefreshRate", Options::defaultRefreshRate()));
+    setVBlankTime(config.readEntry("VBlankTime", Options::defaultVBlankTime()));
 
     return changed;
 }
@@ -992,9 +989,13 @@ void Options::reloadCompositingSettings(bool force)
     KConfigGroup config(_config, "Compositing");
 
     setGlDirect(prefs.enableDirectRendering());
-    setGlVSync(config.readEntry("GLVSync", prefs.enableVSync()));
+    setGlVSync(config.readEntry("GLVSync", Options::defaultGlVSync()));
     setGlSmoothScale(qBound(-1, config.readEntry("GLTextureFilter", Options::defaultGlSmoothScale()), 2));
-    setGlStrictBinding(config.readEntry("GLStrictBinding", prefs.strictBinding()));
+    setGlStrictBindingFollowsDriver(!config.hasKey("GLStrictBinding"));
+    if (!isGlStrictBindingFollowsDriver()) {
+        setGlStrictBinding(config.readEntry("GLStrictBinding", Options::defaultGlStrictBinding()));
+    }
+    setGlLegacy(config.readEntry("GLLegacy", Options::defaultGlLegacy()));
 
     m_xrenderSmoothScale = config.readEntry("XRenderSmoothScale", false);
 

@@ -17,14 +17,14 @@
  *
  */
 
-#ifndef __menuinfo_h__
-#define __menuinfo_h__
+#ifndef menuinfo_h
+#define menuinfo_h
 
 
 #include <QList>
 
-#include <kshortcut.h>
-#include <kservice.h>
+#include <KShortcut>
+#include <KService>
 
 class MenuFile;
 class MenuEntryInfo;
@@ -143,7 +143,7 @@ public:
 class MenuEntryInfo : public MenuInfo
 {
 public:
-    MenuEntryInfo(const KService::Ptr &_service, KDesktopFile *_df = 0)
+    explicit MenuEntryInfo(const KService::Ptr &_service, KDesktopFile *_df = 0)
      : service(_service), m_desktopFile(_df),
        shortcutLoaded(false), shortcutDirty(false), dirty(_df != 0), hidden(false)
     {

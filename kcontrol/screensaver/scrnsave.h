@@ -81,6 +81,7 @@ protected Q_SLOTS:
     void slotPreviewExited();
     void findSavers();
     void slotEnablePlasma(bool enable);
+    void slotEnableLegacyScreenSaver(bool enable);
     void slotPlasmaSetup();
 
 protected:

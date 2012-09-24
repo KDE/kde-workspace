@@ -31,13 +31,18 @@ WorkspaceWrapper::WorkspaceWrapper(QObject* parent) : QObject(parent)
 {
     KWin::Workspace *ws = KWin::Workspace::self();
     connect(ws, SIGNAL(desktopPresenceChanged(KWin::Client*,int)), SIGNAL(desktopPresenceChanged(KWin::Client*,int)));
-    connect(ws, SIGNAL(currentDesktopChanged(int)), SIGNAL(currentDesktopChanged(int)));
+    connect(ws, SIGNAL(currentDesktopChanged(int,KWin::Client*)), SIGNAL(currentDesktopChanged(int,KWin::Client*)));
     connect(ws, SIGNAL(clientAdded(KWin::Client*)), SIGNAL(clientAdded(KWin::Client*)));
     connect(ws, SIGNAL(clientAdded(KWin::Client*)), SLOT(setupClientConnections(KWin::Client*)));
     connect(ws, SIGNAL(clientRemoved(KWin::Client*)), SIGNAL(clientRemoved(KWin::Client*)));
     connect(ws, SIGNAL(clientActivated(KWin::Client*)), SIGNAL(clientActivated(KWin::Client*)));
     connect(ws, SIGNAL(numberDesktopsChanged(int)), SIGNAL(numberDesktopsChanged(int)));
     connect(ws, SIGNAL(clientDemandsAttentionChanged(KWin::Client*,bool)), SIGNAL(clientDemandsAttentionChanged(KWin::Client*,bool)));
+    connect(ws, SIGNAL(currentActivityChanged(QString)), SIGNAL(currentActivityChanged(QString)));
+    connect(ws, SIGNAL(activityAdded(QString)), SIGNAL(activitiesChanged(QString)));
+    connect(ws, SIGNAL(activityAdded(QString)), SIGNAL(activityAdded(QString)));
+    connect(ws, SIGNAL(activityRemoved(QString)), SIGNAL(activitiesChanged(QString)));
+    connect(ws, SIGNAL(activityRemoved(QString)), SIGNAL(activityRemoved(QString)));
     connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SIGNAL(numberScreensChanged(int)));
     connect(QApplication::desktop(), SIGNAL(resized(int)), SIGNAL(screenResized(int)));
     foreach (KWin::Client *client, ws->clientList()) {
@@ -71,6 +76,8 @@ GETTER(int, desktopGridWidth)
 GETTER(int, desktopGridHeight)
 GETTER(int, activeScreen)
 GETTER(int, numScreens)
+GETTER(QString, currentActivity)
+GETTER(QStringList, activityList)
 
 #undef GETTER
 
@@ -163,7 +170,7 @@ int WorkspaceWrapper::displayWidth() const
 
 int WorkspaceWrapper::displayHeight() const
 {
-    return KWin::displayWidth();
+    return KWin::displayHeight();
 }
 
 QRect WorkspaceWrapper::clientArea(ClientAreaOption option, const QPoint &p, int desktop) const
@@ -213,6 +220,11 @@ void WorkspaceWrapper::showOutline(int x, int y, int width, int height)
 void WorkspaceWrapper::hideOutline()
 {
     Workspace::self()->outline()->hide();
+}
+
+Client *WorkspaceWrapper::getClient(qulonglong windowId)
+{
+    return Workspace::self()->findClient(WindowMatchPredicate(windowId));
 }
 
 } // KWin

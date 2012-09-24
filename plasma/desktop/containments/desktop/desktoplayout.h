@@ -88,18 +88,13 @@ public:
      **/
     void setWorkingArea(QRectF area);
 
-    enum ItemTransformType {
-        ItemTransformUser = 1,
-        ItemTransformSelf = 2
-    };
-
     /**
      * Call this when an item has been moved/resized/transformed either by the user or itself.
      *
      * @param item the item affected
      * @param type whether the change was by the user (ItemTransformUser) or the applet itself (ItemTransformSelf)
      **/
-    void itemTransformed(QGraphicsWidget *item, ItemTransformType type);
+    void itemTransformed(QGraphicsWidget *item);
 
     /**
      * Adjusts the items' on-screen positions to match calculations.

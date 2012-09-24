@@ -88,7 +88,7 @@ Comment[nl]=Programmastarter op volledig scherm met zoekinterface
 Comment[pa]=ਖੋਜ ਇੰਟਰਫੇਸ ਨਾਲ ਪੂਰੀ ਸਕਰੀਨ ਉੱਤੇ ਐਪਲੀਕੇਸਨ ਲਾਂਚਰਖੋਜ ਇੰਟਰਫੇਸ ਨਾਲ ਪੂਰੀ ਸਕਰੀਨ ਉੱਤੇ ਐਪਲੀਕੇਸਨ ਕਖੋਜ ਇੰਟਰਫੇਸ ਨਾਲ ਪੂਰੀ ਸਕਰੀਨ ਉੱਤੇ ਐਪਲੀਕੇਸ਼ਣ ਖੋਜ ਇੰਟਰਫੇਸ ਨਾਲ ਪੂਰੀ ਖੋਜ ਇੰਟਰ
 Comment[pl]=Pełnoekranowy aktywator programów z interfejsem wyszukiwania
 Comment[pt]=Um lançador de aplicações de ecrã completo, com interface de pesquisa
-Comment[pt_BR]=Execução de aplicativos em tela cheia com interface de pesquisa
+Comment[pt_BR]=Executa aplicativos em tela cheia com interface de pesquisa
 Comment[ro]=Lansator de aplicații pe tot ecranul, cu interfață de căutare
 Comment[ru]=Полноэкранное меню запуска приложений с возможностью поиска
 Comment[sk]=Celoobrazovkový spúšťač aplikácií s rozhraním pre vyhľadávanie
@@ -102,6 +102,7 @@ Comment[th]=ตัวเรียกใช้งานแอพลิเคช�
 Comment[tr]=Arama arayüzüyle birlikte tam ekran uygulama başlatıcı
 Comment[ug]=ئىزدەش ئارا يۈزى بار تولۇق ئېكران پروگرامما ئىجراچىسى
 Comment[uk]=Повноекранний інструмент запуску програм з інтерфейсом пошуку
+Comment[vi]=Trình chạy ứng dụng toàn màn hình với giao diện tìm kiếm
 Comment[wa]=Enondeu di programe so tote li waitroûle avou èn eterface di cweraedje
 Comment[x-test]=xxFull screen application launcher with search interfacexx
 Comment[zh_CN]=带搜索界面的全屏应用程序启动器

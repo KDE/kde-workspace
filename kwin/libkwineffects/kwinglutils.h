@@ -355,6 +355,15 @@ public:
      * @return a pointer to the ShaderManager instance
      **/
     static ShaderManager *instance();
+    /**
+     * @brief Ensures that the ShaderManager is disabled.
+     *
+     * Used only by an OpenGL 1 Scene which does not use OpenGL 2 Shaders.
+     *
+     * @internal
+     * @since 4.10
+     **/
+    static void disable();
 
     /**
      * @internal
@@ -510,9 +519,10 @@ public:
      */
     void render(GLenum primitiveMode);
     /**
-     * Same as above restricting painting to @a region.
+     * Same as above restricting painting to @a region if @a hardwareClipping is true.
+     * It's within the caller's responsibility to enable GL_SCISSOR_TEST.
      */
-    void render(const QRegion& region, GLenum primitiveMode);
+    void render(const QRegion& region, GLenum primitiveMode, bool hardwareClipping = false);
     /**
      * Sets the color the geometry will be rendered with.
      * For legacy rendering glColor is used before rendering the geometry.

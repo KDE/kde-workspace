@@ -205,6 +205,7 @@ bool Client::manage(Window w, bool isMapped)
             setOnActivity(Workspace::self()->currentActivity(), true);
         }
     }
+
     if (desk == 0)   // Assume window wants to be visible on the current desktop
         desk = isDesktop() ? NET::OnAllDesktops : workspace()->currentDesktop();
     desk = rules()->checkDesktop(desk, !isMapped);
@@ -213,6 +214,11 @@ bool Client::manage(Window w, bool isMapped)
     info->setDesktop(desk);
     workspace()->updateOnAllDesktopsOfTransients(this);   // SELI TODO
     //onAllDesktopsChange(); // Decoration doesn't exist here yet
+
+    QString activitiesList;
+    activitiesList = rules()->checkActivity(activitiesList, !isMapped);
+    if (!activitiesList.isEmpty())
+        setOnActivities(activitiesList.split(","));
 
     QRect geom(attr.x, attr.y, attr.width, attr.height);
     bool placementDone = false;
@@ -226,6 +232,7 @@ bool Client::manage(Window w, bool isMapped)
         area = workspace()->clientArea(FullArea, geom.center(), desktop());
     else {
         int screen = asn_data.xinerama() == -1 ? workspace()->activeScreen() : asn_data.xinerama();
+        screen = rules()->checkScreen(screen, !isMapped);
         area = workspace()->clientArea(PlacementArea, workspace()->screenGeometry(screen).center(), desktop());
     }
 
@@ -306,6 +313,8 @@ bool Client::manage(Window w, bool isMapped)
         const bool autogrouping = rules()->checkAutogrouping(options->isAutogroupSimilarWindows());
         const bool autogroupInFg = rules()->checkAutogroupInForeground(options->isAutogroupInForeground());
         // Automatically add to previous groups on session restore
+        if (session && session->tabGroupClient && !workspace()->hasClient(session->tabGroupClient))
+            session->tabGroupClient = NULL;
         if (session && session->tabGroupClient && session->tabGroupClient != this) {
             tabBehind(session->tabGroupClient, autogroupInFg);
         } else if (isMapped && autogrouping) {
@@ -322,7 +331,7 @@ bool Client::manage(Window w, bool isMapped)
                 }
             }
         }
-        if (autogrouping && !tab_group && !isMapped && !session) {
+        if (!(tab_group || isMapped || session)) {
             // Attempt to automatically group similar windows
             Client* similar = findAutogroupCandidate();
             if (similar && !similar->noBorder()) {
@@ -550,16 +559,7 @@ bool Client::manage(Window w, bool isMapped)
             }
         }
 
-        bool belongs_to_desktop = false;
-        for (ClientList::ConstIterator it = group()->members().constBegin();
-                it != group()->members().constEnd();
-                ++it)
-            if ((*it)->isDesktop()) {
-                belongs_to_desktop = true;
-                break;
-            }
-        if (!belongs_to_desktop && workspace()->showingDesktop())
-            workspace()->resetShowingDesktop(options->isShowDesktopIsMinimizeAll());
+        resetShowingDesktop(options->isShowDesktopIsMinimizeAll());
 
         if (isOnCurrentDesktop() && !isMapped && !allow && (!session || session->stackingOrder < 0))
             workspace()->restackClientUnderActive(this);
@@ -579,6 +579,7 @@ bool Client::manage(Window w, bool isMapped)
     else // doNotShow
         hideClient(true);   // SELI HACK !!!
     assert(mapping_state != Withdrawn);
+    m_managed = true;
     blockGeometryUpdates(false);
 
     if (user_time == CurrentTime || user_time == -1U) {

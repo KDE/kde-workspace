@@ -12,10 +12,8 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU General Public License for more details
  *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <KAboutData>
@@ -54,6 +52,8 @@ int main(int argc, char **argv)
 
     PlasmaApp *app = PlasmaApp::self();
     QApplication::setWindowIcon(KIcon("plasma"));
+    KGlobal::locale()->insertCatalog(QLatin1String( "libkworkspace" ));
+    KGlobal::locale()->insertCatalog(QLatin1String( "kscreenlocker_greet" ));
     app->disableSessionManagement(); // I assume we'd never want a screensaver thing reppearing on login?
     int rc = app->exec();
     delete app;

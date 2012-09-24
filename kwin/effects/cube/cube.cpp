@@ -18,23 +18,25 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "cube.h"
+// KConfigSkeleton
+#include "cubeconfig.h"
+
 #include "cube_inside.h"
 
 #include <kaction.h>
 #include <kactioncollection.h>
 #include <klocale.h>
 #include <kwinconfig.h>
-#include <kconfiggroup.h>
-#include <kcolorscheme.h>
-#include <kglobal.h>
-#include <kstandarddirs.h>
 #include <kdebug.h>
 
 #include <QColor>
 #include <QRect>
 #include <QEvent>
+#include <QFutureWatcher>
 #include <QKeyEvent>
+#include <QtConcurrentRun>
 #include <QVector2D>
+#include <QVector3D>
 
 #include <math.h>
 
@@ -58,7 +60,7 @@ CubeEffect::CubeEffect()
     , cubeOpacity(1.0)
     , opacityDesktopOnly(true)
     , displayDesktopName(false)
-    , desktopNameFrame(effects->effectFrame(EffectFrameStyled))
+    , desktopNameFrame(NULL)
     , reflection(true)
     , rotating(false)
     , desktopChangedWhileRotating(false)
@@ -95,7 +97,6 @@ CubeEffect::CubeEffect()
 {
     desktopNameFont.setBold(true);
     desktopNameFont.setPointSize(14);
-    desktopNameFrame->setFont(desktopNameFont);
 
     const QString fragmentshader = KGlobal::dirs()->findResource("data", "kwin/cube-reflection.glsl");
     m_reflectionShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, fragmentshader);
@@ -124,7 +125,7 @@ void CubeEffect::reconfigure(ReconfigureFlags)
 
 void CubeEffect::loadConfig(QString config)
 {
-    KConfigGroup conf = effects->effectConfig(config);
+    CubeConfig::self()->readConfig();
     foreach (ElectricBorder border, borderActivate) {
         effects->unreserveElectricBorder(border);
     }
@@ -139,69 +140,47 @@ void CubeEffect::loadConfig(QString config)
     borderActivateSphere.clear();
     QList<int> borderList = QList<int>();
     borderList.append(int(ElectricNone));
-    borderList = conf.readEntry("BorderActivate", borderList);
+    borderList = CubeConfig::borderActivate();
     foreach (int i, borderList) {
         borderActivate.append(ElectricBorder(i));
         effects->reserveElectricBorder(ElectricBorder(i));
     }
     borderList.clear();
     borderList.append(int(ElectricNone));
-    borderList = conf.readEntry("BorderActivateCylinder", borderList);
+    borderList = CubeConfig::borderActivateCylinder();
     foreach (int i, borderList) {
         borderActivateCylinder.append(ElectricBorder(i));
         effects->reserveElectricBorder(ElectricBorder(i));
     }
     borderList.clear();
     borderList.append(int(ElectricNone));
-    borderList = conf.readEntry("BorderActivateSphere", borderList);
+    borderList = CubeConfig::borderActivateSphere();
     foreach (int i, borderList) {
         borderActivateSphere.append(ElectricBorder(i));
         effects->reserveElectricBorder(ElectricBorder(i));
     }
 
-    cubeOpacity = (float)conf.readEntry("Opacity", 80) / 100.0f;
-    opacityDesktopOnly = conf.readEntry("OpacityDesktopOnly", false);
-    displayDesktopName = conf.readEntry("DisplayDesktopName", true);
-    reflection = conf.readEntry("Reflection", true);
-    rotationDuration = animationTime(conf, "RotationDuration", 500);
-    backgroundColor = conf.readEntry("BackgroundColor", QColor(Qt::black));
-    capColor = conf.readEntry("CapColor", KColorScheme(QPalette::Active, KColorScheme::Window).background().color());
-    paintCaps = conf.readEntry("Caps", true);
-    closeOnMouseRelease = conf.readEntry("CloseOnMouseRelease", false);
-    float defaultZPosition = 100.0f;
-    if (config == "Sphere")
-        defaultZPosition = 450.0f;
-    zPosition = conf.readEntry("ZPosition", defaultZPosition);
-    useForTabBox = conf.readEntry("TabBox", false);
-    invertKeys = conf.readEntry("InvertKeys", false);
-    invertMouse = conf.readEntry("InvertMouse", false);
-    capDeformationFactor = conf.readEntry("CapDeformation", 0) / 100.0f;
-    useZOrdering = conf.readEntry("ZOrdering", false);
-    QString file = conf.readEntry("Wallpaper", QString(""));
-    if (wallpaper)
-        wallpaper->discard();
+    cubeOpacity = (float)CubeConfig::opacity() / 100.0f;
+    opacityDesktopOnly = CubeConfig::opacityDesktopOnly();
+    displayDesktopName = CubeConfig::displayDesktopName();
+    reflection = CubeConfig::reflection();
+    rotationDuration = animationTime(CubeConfig::rotationDuration() != 0 ? CubeConfig::rotationDuration() : 500);
+    backgroundColor = CubeConfig::backgroundColor();
+    capColor = CubeConfig::capColor();
+    paintCaps = CubeConfig::caps();
+    closeOnMouseRelease = CubeConfig::closeOnMouseRelease();
+    zPosition = CubeConfig::zPosition();
+
+    useForTabBox = CubeConfig::tabBox();
+    invertKeys = CubeConfig::invertKeys();
+    invertMouse = CubeConfig::invertMouse();
+    capDeformationFactor = (float)CubeConfig::capDeformation() / 100.0f;
+    useZOrdering = CubeConfig::zOrdering();
     delete wallpaper;
     wallpaper = NULL;
-    if (!file.isEmpty()) {
-        QImage img = QImage(file);
-        if (!img.isNull()) {
-            wallpaper = new GLTexture(img);
-        }
-    }
     delete capTexture;
     capTexture = NULL;
-    texturedCaps = conf.readEntry("TexturedCaps", true);
-    if (texturedCaps) {
-        QString capPath = conf.readEntry("CapPath", KGlobal::dirs()->findResource("appdata", "cubecap.png"));
-        QImage img = QImage(capPath);
-        if (!img.isNull()) {
-            capTexture = new GLTexture(img);
-            capTexture->setFilter(GL_LINEAR);
-#ifndef KWIN_HAVE_OPENGLES
-            capTexture->setWrapMode(GL_CLAMP_TO_BORDER);
-#endif
-        }
-    }
+    texturedCaps = CubeConfig::texturedCaps();
 
     timeLine.setCurveShape(QTimeLine::EaseInOutCurve);
     timeLine.setDuration(rotationDuration);
@@ -262,6 +241,56 @@ CubeEffect::~CubeEffect()
     delete m_cubeCapBuffer;
 }
 
+QImage CubeEffect::loadCubeCap(const QString &capPath)
+{
+    if (!texturedCaps) {
+        return QImage();
+    }
+    return QImage(capPath);
+}
+
+void CubeEffect::slotCubeCapLoaded()
+{
+    QFutureWatcher<QImage> *watcher = dynamic_cast<QFutureWatcher<QImage>*>(sender());
+    if (!watcher) {
+        // not invoked from future watcher
+        return;
+    }
+    QImage img = watcher->result();
+    if (!img.isNull()) {
+        capTexture = new GLTexture(img);
+        capTexture->setFilter(GL_LINEAR);
+#ifndef KWIN_HAVE_OPENGLES
+        capTexture->setWrapMode(GL_CLAMP_TO_BORDER);
+#endif
+        // need to recreate the VBO for the cube cap
+        delete m_cubeCapBuffer;
+        m_cubeCapBuffer = NULL;
+        effects->addRepaintFull();
+    }
+    watcher->deleteLater();
+}
+
+QImage CubeEffect::loadWallPaper(const QString &file)
+{
+    return QImage(file);
+}
+
+void CubeEffect::slotWallPaperLoaded()
+{
+    QFutureWatcher<QImage> *watcher = dynamic_cast<QFutureWatcher<QImage>*>(sender());
+    if (!watcher) {
+        // not invoked from future watcher
+        return;
+    }
+    QImage img = watcher->result();
+    if (!img.isNull()) {
+        wallpaper = new GLTexture(img);
+        effects->addRepaintFull();
+    }
+    watcher->deleteLater();
+}
+
 bool CubeEffect::loadShader()
 {
     if (!(GLPlatform::instance()->supports(GLSL) &&
@@ -294,15 +323,15 @@ bool CubeEffect::loadShader()
         float xmin =  ymin * aspect;
         float xmax = ymax * aspect;
         projection.frustum(xmin, xmax, ymin, ymax, zNear, zFar);
-        cylinderShader->setUniform("projection", projection);
+        cylinderShader->setUniform(GLShader::ProjectionMatrix, projection);
         QMatrix4x4 modelview;
         float scaleFactor = 1.1 * tan(fovy * M_PI / 360.0f) / ymax;
         modelview.translate(xmin * scaleFactor, ymax * scaleFactor, -1.1);
         modelview.scale((xmax - xmin)*scaleFactor / displayWidth(), -(ymax - ymin)*scaleFactor / displayHeight(), 0.001);
-        cylinderShader->setUniform("modelview", modelview);
+        cylinderShader->setUniform(GLShader::ModelViewMatrix, modelview);
         const QMatrix4x4 identity;
-        cylinderShader->setUniform("screenTransformation", identity);
-        cylinderShader->setUniform("windowTransformation", identity);
+        cylinderShader->setUniform(GLShader::ScreenTransformation, identity);
+        cylinderShader->setUniform(GLShader::WindowTransformation, identity);
         QRect rect = effects->clientArea(FullArea, activeScreen, effects->currentDesktop());
         cylinderShader->setUniform("width", (float)rect.width() * 0.5f);
         shaderManager->popShader();
@@ -325,15 +354,15 @@ bool CubeEffect::loadShader()
         float xmin =  ymin * aspect;
         float xmax = ymax * aspect;
         projection.frustum(xmin, xmax, ymin, ymax, zNear, zFar);
-        sphereShader->setUniform("projection", projection);
+        sphereShader->setUniform(GLShader::ProjectionMatrix, projection);
         QMatrix4x4 modelview;
         float scaleFactor = 1.1 * tan(fovy * M_PI / 360.0f) / ymax;
         modelview.translate(xmin * scaleFactor, ymax * scaleFactor, -1.1);
         modelview.scale((xmax - xmin)*scaleFactor / displayWidth(), -(ymax - ymin)*scaleFactor / displayHeight(), 0.001);
-        sphereShader->setUniform("modelview", modelview);
+        sphereShader->setUniform(GLShader::ModelViewMatrix, modelview);
         const QMatrix4x4 identity;
-        sphereShader->setUniform("screenTransformation", identity);
-        sphereShader->setUniform("windowTransformation", identity);
+        sphereShader->setUniform(GLShader::ScreenTransformation, identity);
+        sphereShader->setUniform(GLShader::WindowTransformation, identity);
         QRect rect = effects->clientArea(FullArea, activeScreen, effects->currentDesktop());
         sphereShader->setUniform("width", (float)rect.width() * 0.5f);
         sphereShader->setUniform("height", (float)rect.height() * 0.5f);
@@ -560,9 +589,20 @@ void CubeEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             QRect screenRect = effects->clientArea(ScreenArea, activeScreen, frontDesktop);
             QRect frameRect = QRect(screenRect.width() * 0.33f + screenRect.x(), screenRect.height() * 0.95f + screenRect.y(),
                                     screenRect.width() * 0.34f, QFontMetrics(desktopNameFont).height());
+            if (!desktopNameFrame) {
+                desktopNameFrame = effects->effectFrame(EffectFrameStyled);
+                desktopNameFrame->setFont(desktopNameFont);
+            }
             desktopNameFrame->setGeometry(frameRect);
             desktopNameFrame->setText(effects->desktopName(frontDesktop));
             desktopNameFrame->render(region, opacity);
+        }
+        // restore the ScreenTransformation after all desktops are painted
+        // if not done GenericShader keeps the rotation data and transforms windows incorrectly in other rendering calls
+        if (ShaderManager::instance()->isValid()) {
+            GLShader *shader = ShaderManager::instance()->pushShader(KWin::ShaderManager::GenericShader);
+            shader->setUniform(GLShader::ScreenTransformation, QMatrix4x4());
+            ShaderManager::instance()->popShader();
         }
     } else {
         effects->paintScreen(mask, region, data);
@@ -701,13 +741,10 @@ void CubeEffect::paintCube(int mask, QRegion region, ScreenPaintData& data)
             painting_desktop = effects->numberOfDesktops();
         }
         ScreenPaintData newData = data;
-        RotationData rot = RotationData();
-        rot.axis = RotationData::YAxis;
-        rot.angle = internalCubeAngle * i;
-        rot.xRotationPoint = rect.width() / 2;
-        rot.zRotationPoint = -point;
-        newData.rotation = &rot;
-        newData.zTranslate = -zTranslate;
+        newData.setRotationAxis(Qt::YAxis);
+        newData.setRotationAngle(internalCubeAngle * i);
+        newData.setRotationOrigin(QVector3D(rect.width() / 2, 0.0, -point));
+        newData.setZTranslation(-zTranslate);
         effects->paintScreen(mask, region, newData);
     }
     cube_painting = false;
@@ -761,11 +798,11 @@ void CubeEffect::paintCap(bool frontFirst, float zOffset)
         m_capShader->setUniform("u_opacity", opacity);
         m_capShader->setUniform("u_mirror", 1);
         if (reflectionPainting) {
-            m_capShader->setUniform("screenTransformation", m_reflectionMatrix * m_rotationMatrix);
+            m_capShader->setUniform(GLShader::ScreenTransformation, m_reflectionMatrix * m_rotationMatrix);
         } else {
-            m_capShader->setUniform("screenTransformation", m_rotationMatrix);
+            m_capShader->setUniform(GLShader::ScreenTransformation, m_rotationMatrix);
         }
-        m_capShader->setUniform("windowTransformation", capMatrix);
+        m_capShader->setUniform(GLShader::WindowTransformation, capMatrix);
         m_capShader->setUniform("u_untextured", texturedCaps ? 0 : 1);
         if (texturedCaps && effects->numberOfDesktops() > 3 && capTexture) {
             capTexture->bind();
@@ -1127,7 +1164,8 @@ void CubeEffect::postPaintScreen()
 
                 delete m_cubeCapBuffer;
                 m_cubeCapBuffer = NULL;
-                desktopNameFrame->free();
+                if (desktopNameFrame)
+                    desktopNameFrame->free();
             }
             effects->addRepaintFull();
         }
@@ -1315,7 +1353,7 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
                 zOrdering *= timeLine.currentValue();
             if (stop)
                 zOrdering *= (1.0 - timeLine.currentValue());
-            data.zTranslate += zOrdering;
+            data.translate(0.0, 0.0, zOrdering);
         }
         // check for windows belonging to the previous desktop
         int prev_desktop = painting_desktop - 1;
@@ -1337,13 +1375,11 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
             }
             data.quads = new_quads;
             if (shader) {
-                data.xTranslate = -rect.width();
+                data.setXTranslation(-rect.width());
             } else {
-                RotationData rot = RotationData();
-                rot.axis = RotationData::YAxis;
-                rot.xRotationPoint = rect.width() - w->x();
-                rot.angle = 360.0f / effects->numberOfDesktops();
-                data.rotation = &rot;
+                data.setRotationAxis(Qt::YAxis);
+                data.setRotationOrigin(QVector3D(rect.width() - w->x(), 0.0, 0.0));
+                data.setRotationAngle(-360.0f / effects->numberOfDesktops());
                 float cubeAngle = (float)((float)(effects->numberOfDesktops() - 2) / (float)effects->numberOfDesktops() * 180.0f);
                 float point = rect.width() / 2 * tan(cubeAngle * 0.5f * M_PI / 180.0f);
                 QMatrix4x4 matrix;
@@ -1363,13 +1399,11 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
             }
             data.quads = new_quads;
             if (shader) {
-                data.xTranslate = rect.width();
+                data.setXTranslation(rect.width());
             } else {
-                RotationData rot = RotationData();
-                rot.axis = RotationData::YAxis;
-                rot.xRotationPoint = -w->x();
-                rot.angle = -360.0f / effects->numberOfDesktops();
-                data.rotation = &rot;
+                data.setRotationAxis(Qt::YAxis);
+                data.setRotationOrigin(QVector3D(-w->x(), 0.0, 0.0));
+                data.setRotationAngle(-360.0f / effects->numberOfDesktops());
                 float cubeAngle = (float)((float)(effects->numberOfDesktops() - 2) / (float)effects->numberOfDesktops() * 180.0f);
                 float point = rect.width() / 2 * tan(cubeAngle * 0.5f * M_PI / 180.0f);
                 QMatrix4x4 matrix;
@@ -1402,7 +1436,7 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
             opacity = 0.99f;
         if (opacityDesktopOnly && !w->isDesktop())
             opacity = 0.99f;
-        data.opacity *= opacity;
+        data.multiplyOpacity(opacity);
 
         if (w->isOnDesktop(painting_desktop) && w->x() < rect.x()) {
             WindowQuadList new_quads;
@@ -1470,9 +1504,9 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
                 currentShader = sphereShader;
             }
             if (reflectionPainting) {
-                currentShader->setUniform("screenTransformation", m_reflectionMatrix * m_rotationMatrix * origMatrix);
+                currentShader->setUniform(GLShader::ScreenTransformation, m_reflectionMatrix * m_rotationMatrix * origMatrix);
             } else {
-                currentShader->setUniform("screenTransformation", m_rotationMatrix*origMatrix);
+                currentShader->setUniform(GLShader::ScreenTransformation, m_rotationMatrix*origMatrix);
             }
         }
     }
@@ -1482,7 +1516,7 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
             if (mode == Cylinder || mode == Sphere) {
                 shaderManager->popShader();
             } else {
-                shader->setUniform("screenTransformation", origMatrix);
+                shader->setUniform(GLShader::ScreenTransformation, origMatrix);
             }
             shaderManager->popShader();
         }
@@ -1532,11 +1566,11 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
                     m_capShader->setUniform("u_mirror", 0);
                     m_capShader->setUniform("u_untextured", 1);
                     if (reflectionPainting) {
-                        m_capShader->setUniform("screenTransformation", m_reflectionMatrix * m_rotationMatrix * origMatrix);
+                        m_capShader->setUniform(GLShader::ScreenTransformation, m_reflectionMatrix * m_rotationMatrix * origMatrix);
                     } else {
-                        m_capShader->setUniform("screenTransformation", m_rotationMatrix * origMatrix);
+                        m_capShader->setUniform(GLShader::ScreenTransformation, m_rotationMatrix * origMatrix);
                     }
-                    m_capShader->setUniform("windowTransformation", QMatrix4x4());
+                    m_capShader->setUniform(GLShader::WindowTransformation, QMatrix4x4());
                 }
                 GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
                 vbo->reset();
@@ -1865,6 +1899,18 @@ void CubeEffect::setActive(bool active)
         inside->setActive(true);
     }
     if (active) {
+        QString capPath = CubeConfig::capPath();
+        if (texturedCaps && !capTexture && !capPath.isEmpty()) {
+            QFutureWatcher<QImage> *watcher = new QFutureWatcher<QImage>(this);
+            connect(watcher, SIGNAL(finished()), SLOT(slotCubeCapLoaded()));
+            watcher->setFuture(QtConcurrent::run(this, &CubeEffect::loadCubeCap, capPath));
+        }
+        QString wallpaperPath = CubeConfig::wallpaper().toLocalFile();
+        if (!wallpaper && !wallpaperPath.isEmpty()) {
+            QFutureWatcher<QImage> *watcher = new QFutureWatcher<QImage>(this);
+            connect(watcher, SIGNAL(finished()), SLOT(slotWallPaperLoaded()));
+            watcher->setFuture(QtConcurrent::run(this, &CubeEffect::loadWallPaper, wallpaperPath));
+        }
         if (!mousePolling) {
             effects->startMousePolling();
             mousePolling = true;

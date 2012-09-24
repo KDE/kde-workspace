@@ -437,7 +437,7 @@ void KColorCm::on_schemeKnsUploadButton_clicked()
 void KColorCm::on_schemeSaveButton_clicked()
 {
     QString previousName;
-    if (schemeList->currentItem() != NULL)
+    if (schemeList->currentItem() != NULL && schemeList->currentRow() > 1)
     {
         previousName = schemeList->currentItem()->data(Qt::DisplayRole).toString();
     }
@@ -1088,11 +1088,17 @@ void KColorCm::changeColor(int row, const QColor &newColor)
         KConfigGroup(m_config, group).writeEntry(m_colorKeys[row], newColor);
     }
 
+    QIcon icon = createSchemePreviewIcon(m_config);
+    schemeList->item(0)->setIcon(icon);
     updateColorSchemes();
     updatePreviews();
 
     m_loadedSchemeHasUnsavedChanges = true;
     m_currentColorScheme = i18nc("Current color scheme", "Current");
+    KConfigGroup group(m_config, "General");
+    group.writeEntry("ColorScheme", m_currentColorScheme);
+    schemeRemoveButton->setEnabled(false);
+    schemeKnsUploadButton->setEnabled(false);
     schemeList->blockSignals(true); // don't emit changed signals
     schemeList->setCurrentRow(0);
     schemeList->blockSignals(false);
@@ -1174,6 +1180,10 @@ void KColorCm::load()
     // get colorscheme name from global settings
     KConfigGroup group(m_config, "General");
     m_currentColorScheme = group.readEntry("ColorScheme");
+    if (m_currentColorScheme == i18nc("Current color scheme", "Current"))
+    {
+        m_loadedSchemeHasUnsavedChanges = true;
+    }
     QList<QListWidgetItem*> itemList = schemeList->findItems(m_currentColorScheme, Qt::MatchExactly);
     if(!itemList.isEmpty()) // "Current" is already selected, so don't handle the case that itemList is empty
         schemeList->setCurrentItem(itemList.at(0));
@@ -1225,6 +1235,9 @@ void KColorCm::loadInternal(bool loadOptions_)
 
 void KColorCm::save()
 {
+    QIcon icon = createSchemePreviewIcon(m_config);
+    schemeList->item(0)->setIcon(icon);
+
     KConfigGroup groupI(m_config, "ColorEffects:Inactive");
 
     groupI.writeEntry("Enable", useInactiveEffects->isChecked());

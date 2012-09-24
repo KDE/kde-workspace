@@ -36,6 +36,7 @@ Item {
     signal leftActionTriggered
 
     height: container.childrenRect.height + padding.margins.top + padding.margins.bottom
+    width: parent.width
 
     PlasmaCore.FrameSvgItem {
         id: padding
@@ -127,40 +128,51 @@ Item {
                 }
             }
 
-            PlasmaComponents.Label {
-                id: deviceStatus
+            Item {
+                width:deviceStatus.width
+                height:deviceStatus.height
+                PlasmaComponents.Label {
+                    id: deviceStatus
 
-                height: paintedHeight
-                // FIXME: state changes do not reach the plasmoid if the
-                // device was already attached when the plasmoid was
-                // initialized
-                text: deviceItem.state ==0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
-                font.italic: true
-                font.pointSize: theme.smallestFont.pointSize
-                color: "#99"+(theme.textColor.toString().substr(1))
-                opacity: container.containsMouse || expanded ? 1 : 0;
+                    height: paintedHeight
+                    // FIXME: state changes do not reach the plasmoid if the
+                    // device was already attached when the plasmoid was
+                    // initialized
+                    text: deviceItem.state ==0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
+                    font.pointSize: theme.smallestFont.pointSize
+                    color: "#99"+(theme.textColor.toString().substr(1))
+                    opacity: container.containsMouse || expanded ? 1 : 0;
 
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-            }
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    }
+               }
 
-            PlasmaComponents.ProgressBar {
-                id: freeSpaceBar
-                height: deviceStatus.height
+            Item {
+                height:freeSpaceBar.height
                 anchors {
                     left: parent.left
                     right: parent.right
                 }
-                opacity: mounted ? deviceStatus.opacity : 0
-                minimumValue: 0
-                maximumValue: 100
-                orientation: Qt.Horizontal
+                opacity: mounted ? 1 : 0
+                PlasmaComponents.ProgressBar {
+                    id: freeSpaceBar
+                    height: deviceStatus.height
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                    opacity: mounted ? deviceStatus.opacity : 0
+                    minimumValue: 0
+                    maximumValue: 100
+                    orientation: Qt.Horizontal
+               }
             }
         }
 
         function idleStatus() {
             var actions = hpSource.data[udi]["actions"];
             if (actions.length > 1) {
-                return i18n("%1 actions for this device", actions.length);
+                return i18np("1 action for this device", "%1 actions for this device", actions.length);
             } else {
                 return actions[0]["text"];
             }
@@ -169,7 +181,7 @@ Item {
 
         PlasmaCore.ToolTip {
             target: freeSpaceBar
-            subText: i18nc("@info:status Free disk space", "%1 free", model["Free Space Text"])
+            subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
         }
 
         QIconItem {
@@ -188,7 +200,7 @@ Item {
             subText: {
                 if (!model["Accessible"]) {
                     return i18n("Click to mount this device.")
-                } else if (model["Device Types"].indexOf("Optical Disk") != -1) {
+                } else if (model["Device Types"].indexOf("OpticalDisc") != -1) {
                     return i18n("Click to eject this disc.")
                 } else if (model["Removable"]) {
                     return i18n("Click to safely remove this device.")

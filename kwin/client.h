@@ -91,6 +91,10 @@ class Client
      **/
     Q_PROPERTY(int desktop READ desktop WRITE setDesktop NOTIFY desktopChanged)
     /**
+     * Whether the Client is on all desktops. That is desktop is -1.
+     **/
+    Q_PROPERTY(bool onAllDesktops READ isOnAllDesktops WRITE setOnAllDesktops NOTIFY desktopChanged)
+    /**
      * Whether this Client is fullScreen. A Client might either be fullScreen due to the _NET_WM property
      * or through a legacy support hack. The fullScreen state can only be changed if the Client does not
      * use the legacy hack. To be sure whether the state changed, connect to the notify signal.
@@ -312,7 +316,6 @@ public:
     QSize basicUnit() const;
     virtual QPoint clientPos() const; // Inside of geometry()
     virtual QSize clientSize() const;
-    virtual QRect visibleRect() const;
     QPoint inputPos() const { return input_offset; } // Inside of geometry()
 
     bool windowEvent(XEvent* e);
@@ -320,6 +323,7 @@ public:
 #ifdef HAVE_XSYNC
     void syncEvent(XSyncAlarmNotifyEvent* e);
 #endif
+    NET::WindowType windowType(bool direct = false, int supported_types = 0) const;
 
     bool manage(Window w, bool isMapped);
     void releaseWindow(bool on_shutdown = false);
@@ -368,6 +372,7 @@ public:
     bool isMaximizable() const;
     QRect geometryRestore() const;
     MaximizeMode maximizeMode() const;
+    QuickTileMode quickTileMode() const;
     bool isMinimizable() const;
     void setMaximize(bool vertically, bool horizontally);
     QRect iconGeometry() const;
@@ -481,7 +486,7 @@ public:
     void hideClient(bool hide);
     bool hiddenPreview() const; ///< Window is mapped in order to get a window pixmap
 
-    virtual void setupCompositing();
+    virtual bool setupCompositing();
     virtual void finishCompositing();
     void setBlockingCompositing(bool block);
     inline bool isBlockingCompositing() { return blocks_compositing; }
@@ -620,8 +625,8 @@ public:
     };
     void layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect &bottom, CoordinateMode mode) const;
 
-    TabBox::TabBoxClientImpl* tabBoxClient() const {
-        return m_tabBoxClient;
+    QWeakPointer<TabBox::TabBoxClientImpl> tabBoxClient() const {
+        return m_tabBoxClient.toWeakRef();
     }
     bool isFirstInTabBox() const {
         return m_firstInTabBox;
@@ -677,6 +682,7 @@ private:
     bool processDecorationButtonPress(int button, int state, int x, int y, int x_root, int y_root,
                                       bool ignoreMenu = false);
     Client* findAutogroupCandidate() const;
+    void resetShowingDesktop(bool keep_hidden);
 
 protected:
     virtual void debug(QDebug& stream) const;
@@ -731,7 +737,7 @@ signals:
     /**
      * Emitted whenever the Client's block compositing state changes.
      **/
-    void blockingCompositingChanged();
+    void blockingCompositingChanged(KWin::Client *client);
 
 private:
     void exportMappingState(int s);   // ICCCM 4.1.3.1, 4.1.4, NETWM 2.5.1
@@ -816,6 +822,7 @@ private:
     bool unrestrictedMoveResize;
     int moveResizeStartScreen;
     static bool s_haveResizeEffect;
+    bool m_managed;
 
     Position mode;
     QPoint moveOffset;
@@ -944,7 +951,7 @@ private:
     // we (instead of Qt) initialize the Pixmaps, and have to free them
     bool m_responsibleForDecoPixmap;
     PaintRedirector* paintRedirector;
-    TabBox::TabBoxClientImpl* m_tabBoxClient;
+    QSharedPointer<TabBox::TabBoxClientImpl> m_tabBoxClient;
     bool m_firstInTabBox;
 
     bool electricMaximizing;
@@ -1117,6 +1124,11 @@ inline Client::MaximizeMode Client::maximizeMode() const
     return max_mode;
 }
 
+inline KWin::QuickTileMode Client::quickTileMode() const
+{
+    return (KWin::QuickTileMode)quick_tile_mode;
+}
+
 inline bool Client::skipTaskbar(bool from_outside) const
 {
     return from_outside ? original_skip_taskbar : skip_taskbar;
@@ -1174,7 +1186,7 @@ inline int Client::sessionStackingOrder() const
 
 inline bool Client::isManaged() const
 {
-    return mapping_state != Withdrawn;
+    return m_managed;
 }
 
 inline QPoint Client::clientPos() const
@@ -1185,11 +1197,6 @@ inline QPoint Client::clientPos() const
 inline QSize Client::clientSize() const
 {
     return client_size;
-}
-
-inline QRect Client::visibleRect() const
-{
-    return Toplevel::visibleRect().adjusted(-padding_left, -padding_top, padding_right, padding_bottom);
 }
 
 inline void Client::setGeometry(const QRect& r, ForceGeometry_t force)

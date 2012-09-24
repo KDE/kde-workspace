@@ -35,7 +35,7 @@ PlasmaCore.FrameSvgItem {
     property int realMarginRight: margins.right
 
     width: realMarginLeft + 2 * buttonsLayout.width + realMarginRight
-    height: 2*realMarginTop + automaticallyDoLabel.height + buttonsLayout.height + realMarginBottom
+    height: realMarginTop + 4 + automaticallyDoLabel.height + 4 + buttonsLayout.height + realMarginBottom
 
     imagePath: "dialogs/shutdowndialog"
 
@@ -94,14 +94,14 @@ PlasmaCore.FrameSvgItem {
         if (leftPicture.naturalSize.width < 1) {
             // [1]
             //background.elementId = "background"
-            shutdownUi.width += realMarginLeft + realMarginRight
+            shutdownUi.width = buttonsLayout.width + realMarginLeft + realMarginRight
             shutdownUi.height += realMarginTop + realMarginBottom
             automaticallyDoLabel.anchors.topMargin = 2*realMarginTop
             automaticallyDoLabel.anchors.rightMargin = 2*realMarginRight
             leftPicture.anchors.leftMargin = 2*realMarginLeft
             buttonsLayout.anchors.rightMargin = 2*realMarginRight
         } else {
-            var pictureWidth = shutdownUi.height * leftPicture.naturalSize.width / leftPicture.naturalSize.height
+            var pictureWidth = buttonsLayout.height * leftPicture.naturalSize.width / leftPicture.naturalSize.height
 
             if (pictureWidth < leftPicture.naturalSize.width) {
                 leftPicture.width = pictureWidth;
@@ -187,7 +187,7 @@ PlasmaCore.FrameSvgItem {
     Text {
         id: automaticallyDoLabel
         text: " "
-        font.pointSize: theme.desktopFont.pointSize*0.8
+        font.pointSize: theme.desktopFont.pointSize >= 10 ? theme.desktopFont.pointSize*0.9 : theme.desktopFont.pointSize
         color: theme.textColor
         anchors {
             top: parent.top
@@ -224,10 +224,13 @@ PlasmaCore.FrameSvgItem {
             topMargin: 4
             right: parent.right
             rightMargin: realMarginRight
+            bottom: parent.bottom
+            bottomMargin: realMarginBottom
         }
 
         Column {
             id: buttonsLayout
+            anchors.bottom: parent.bottom
             spacing: 9
 
             Column {
@@ -243,7 +246,7 @@ PlasmaCore.FrameSvgItem {
                     tabStopBack: cancelButton
 
                     onClicked: {
-                        console.log("main.qml: logoutRequested")
+                        //console.log("main.qml: logoutRequested")
                         logoutRequested()
                     }
 
@@ -263,7 +266,7 @@ PlasmaCore.FrameSvgItem {
                     tabStopBack: logoutButton
 
                     onClicked: {
-                        console.log("main.qml: haltRequested")
+                        //console.log("main.qml: haltRequested")
                         haltRequested()
                     }
 
@@ -275,15 +278,15 @@ PlasmaCore.FrameSvgItem {
                             contextMenu = shutdownOptionsComponent.createObject(shutdownButton)
                             if (spdMethods.StandbyState) {
                                 // 1 == Solid::PowerManagement::StandbyState
-                                contextMenu.append({itemIndex: 1, itemText: i18n("&Standby")})
+                                contextMenu.append({itemIndex: 1, itemText: i18n("&Standby"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             if (spdMethods.SuspendState) {
                                 // 2 == Solid::PowerManagement::SuspendState
-                                contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM")})
+                                contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             if (spdMethods.HibernateState) {
                                 // 4 == Solid::PowerManagement::HibernateState
-                                contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk")})
+                                contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk"), itemSubMenu: null, itemAllowAmpersand: false})
                             }
                             contextMenu.clicked.connect(shutdownUi.suspendRequested)
                         }
@@ -307,13 +310,68 @@ PlasmaCore.FrameSvgItem {
                     text: i18n("&Restart Computer")
                     iconSource: "system-reboot"
                     anchors.right: parent.right
+                    visible: (choose || sdtype == ShutdownType.ShutdownTypeReboot)
                     menu: rebootOptions["options"].length > 0
                     tabStopNext: cancelButton
                     tabStopBack: shutdownButton
 
                     onClicked: {
-                        console.log("main.qml: rebootRequested")
+                        //console.log("main.qml: rebootRequested")
                         rebootRequested()
+                    }
+
+                    // recursive, let's hope the user does not have too many menu entries.
+                    function findAndCreateMenu(index, options, menus, menuId)
+                    {
+                        if (index.value < 0) {
+                            return;
+                        }
+
+                        var sep = " >> "
+                        var text = options[index.value]
+                        var pos = text.lastIndexOf(sep)
+                        if (pos > -1) {
+                            var temp = text.substr(0, pos).trim()
+                            if (temp != menuId) {
+                                menuId = temp
+                            }
+
+                            if (!menus[menuId]) {
+                                //console.log("creating menu for " + menuId)
+                                menus[menuId] = rebootOptionsComponent.createObject(rebootButton)
+                                menus[menuId].clicked.connect(shutdownUi.rebootRequested2)
+                            }
+                        } else {
+                            menuId = ""
+                        }
+
+                        //console.log("index == " + index.value + " of " + options.length + " '" + text + "' menuId == '" + menuId + "'");
+
+                        var itemData = new Object
+                        itemData["itemIndex"] = index.value
+                        itemData["itemText"] = text
+
+                        if (index.value == rebootOptions["default"]) {
+                            itemData["itemText"] += i18nc("default option in boot loader", " (default)")
+                        }
+
+                        --index.value;
+                        var currentMenuId = menuId
+                        findAndCreateMenu(index, options, menus, menuId)
+
+                        itemData["itemSubMenu"] = menus[itemData["itemText"]]
+
+                        // remove menuId string from itemText
+                        text = itemData["itemText"]
+                        var i = text.lastIndexOf(sep)
+                        if (i > -1) {
+                            text = text.substr(i+sep.length).trim()
+                        }
+                        itemData["itemText"] = text
+                        itemData["itemAllowAmpersand"] = true
+
+                        //console.log("appending " + itemData["itemText"] + " to menu '" + currentMenuId + "'")
+                        menus[currentMenuId].append(itemData)
                     }
 
                     onPressAndHold: {
@@ -321,19 +379,38 @@ PlasmaCore.FrameSvgItem {
                             return
                         }
                         if (!contextMenu) {
-                            contextMenu = rebootOptionsComponent.createObject(rebootButton)
                             var options = rebootOptions["options"]
-                            for (var index = 0; index < options.length; ++index) {
-                                var itemData = new Object
-                                itemData["itemIndex"] = index
-                                itemData["itemText"] = options[index]
-                                if (index == rebootOptions["default"]) {
-                                    itemData["itemText"] += i18nc("default option in boot loader", " (default)")
-                                }
-                                contextMenu.append(itemData)
-                            }
+                            //console.log("bootManager == " + bootManager)
 
-                            contextMenu.clicked.connect(shutdownUi.rebootRequested2)
+                            if (bootManager === "Grub2" || bootManager === "Burg") {
+                                // javascript passes primitive types by value, I need this one passed by reference.
+                                function Index() { this.value = 0 }
+                                var index = new Index()
+                                var menus = {}
+                                var menuId = ""
+
+                                // starts backwards so that the top of the stack is the first menu entry.
+                                index.value = options.length - 1
+                                menus[menuId] = rebootOptionsComponent.createObject(rebootButton)
+                                menus[menuId].clicked.connect(shutdownUi.rebootRequested2)
+                                findAndCreateMenu(index, options, menus, menuId)
+                                contextMenu = menus[menuId]
+                            } else {
+                                contextMenu = rebootOptionsComponent.createObject(rebootButton)
+
+                                for (var index = 0; index < options.length; ++index) {
+                                    var itemData = new Object
+                                    itemData["itemIndex"] = index
+                                    itemData["itemText"] = options[index]
+                                    itemData["itemSubMenu"] = null
+                                    itemData["itemAllowAmpersand"] = true
+                                    if (index == rebootOptions["default"]) {
+                                        itemData["itemText"] += i18nc("default option in boot loader", " (default)")
+                                    }
+                                    contextMenu.append(itemData)
+                                }
+                                contextMenu.clicked.connect(shutdownUi.rebootRequested2)
+                            }
                         }
                         contextMenu.open()
                     }

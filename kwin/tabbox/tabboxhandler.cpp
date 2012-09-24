@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Qt
 #include <QKeyEvent>
 #include <QModelIndex>
+#include <QTimer>
 #include <QX11Info>
 #include <X11/Xlib.h>
 // KDE
@@ -123,7 +124,11 @@ void TabBoxHandlerPrivate::updateOutline()
         q->hideOutline();
         return;
     }
-    TabBoxClient* c = static_cast< TabBoxClient* >(m_clientModel->data(index, ClientModel::ClientRole).value<void *>());
+    const QVariant client = m_clientModel->data(index, ClientModel::ClientRole);
+    if (!client.isValid()) {
+        return;
+    }
+    TabBoxClient* c = static_cast< TabBoxClient* >(client.value<void *>());
     q->showOutline(QRect(c->x(), c->y(), c->width(), c->height()));
 }
 
@@ -134,13 +139,17 @@ void TabBoxHandlerPrivate::updateHighlightWindows()
 
     Display *dpy = QX11Info::display();
     TabBoxClient *currentClient = q->client(index);
+    QWidget *w = NULL;
+    if (m_declarativeView && m_declarativeView->isVisible()) {
+        w = m_declarativeView;
+    }
 
     if (KWindowSystem::compositingActive()) {
         if (lastRaisedClient)
-            q->elevateClient(lastRaisedClient, false);
+            q->elevateClient(lastRaisedClient, m_declarativeView ? m_declarativeView->winId() : 0, false);
         lastRaisedClient = currentClient;
         if (currentClient)
-            q->elevateClient(currentClient, true);
+            q->elevateClient(currentClient, m_declarativeView ? m_declarativeView->winId() : 0, true);
     } else {
         if (lastRaisedClient) {
             if (lastRaisedClientSucc)
@@ -153,18 +162,20 @@ void TabBoxHandlerPrivate::updateHighlightWindows()
             // TODO if ( (lastRaisedClientWasMinimized = lastRaisedClient->isMinimized()) )
             //         lastRaisedClient->setMinimized( false );
             TabBoxClientList order = q->stackingOrder();
-            int succIdx = order.indexOf(lastRaisedClient) + 1;   // this is likely related to the index parameter?!
-            lastRaisedClientSucc = (succIdx < order.count()) ? order.at(succIdx) : 0;
+            int succIdx = order.count() + 1;
+            for (int i=0; i<order.count(); ++i) {
+                if (order.at(i).data() == lastRaisedClient) {
+                    succIdx = i + 1;
+                    break;
+                }
+            }
+            lastRaisedClientSucc = (succIdx < order.count()) ? order.at(succIdx).data() : 0;
             q->raiseClient(lastRaisedClient);
         }
     }
 
     WId wId;
     QVector< WId > data;
-    QWidget *w = NULL;
-    if (m_declarativeView && m_declarativeView->isVisible()) {
-        w = m_declarativeView;
-    }
     if (config.isShowTabBox() && w) {
         wId = w->winId();
         data.resize(2);
@@ -190,7 +201,7 @@ void TabBoxHandlerPrivate::endHighlightWindows(bool abort)
 {
     TabBoxClient *currentClient = q->client(index);
     if (currentClient)
-        q->elevateClient(currentClient, false);
+        q->elevateClient(currentClient, m_declarativeView ? m_declarativeView->winId() : 0, false);
     if (abort && lastRaisedClient && lastRaisedClientSucc)
         q->restack(lastRaisedClient, lastRaisedClientSucc);
     lastRaisedClient = 0;
@@ -254,8 +265,18 @@ void TabBoxHandler::show()
         }
     }
     if (d->config.isHighlightWindows()) {
-        d->updateHighlightWindows();
+        XSync(QX11Info::display(), false);
+        // TODO this should be
+        // QMetaObject::invokeMethod(this, "updateHighlightWindows", Qt::QueuedConnection);
+        // but we somehow need to cross > 1 event cycle (likely because of queued invocation in the effects)
+        // to ensure the EffectWindow is present when updateHighlightWindows, thus elevating the window/tabbox
+        QTimer::singleShot(1, this, SLOT(updateHighlightWindows()));
     }
+}
+
+void TabBoxHandler::updateHighlightWindows()
+{
+    d->updateHighlightWindows();
 }
 
 void TabBoxHandler::hide(bool abort)
@@ -404,7 +425,7 @@ bool TabBoxHandler::containsPos(const QPoint& pos) const
     return w->geometry().contains(pos);
 }
 
-QModelIndex TabBoxHandler::index(KWin::TabBox::TabBoxClient* client) const
+QModelIndex TabBoxHandler::index(QWeakPointer<KWin::TabBox::TabBoxClient> client) const
 {
     return d->clientModel()->index(client);
 }
@@ -429,13 +450,29 @@ TabBoxClient* TabBoxHandler::client(const QModelIndex& index) const
 void TabBoxHandler::createModel(bool partialReset)
 {
     switch(d->config.tabBoxMode()) {
-    case TabBoxConfig::ClientTabBox:
+    case TabBoxConfig::ClientTabBox: {
         d->clientModel()->createClientList(partialReset);
-        if (d->lastRaisedClient && !stackingOrder().contains(d->lastRaisedClient))
+        // TODO: C++11 use lambda function
+        bool lastRaised = false;
+        bool lastRaisedSucc = false;
+        foreach (QWeakPointer<TabBoxClient> clientPointer, stackingOrder()) {
+            QSharedPointer<TabBoxClient> client = clientPointer.toStrongRef();
+            if (!client) {
+                continue;
+            }
+            if (client.data() == d->lastRaisedClient) {
+                lastRaised = true;
+            }
+            if (client.data() == d->lastRaisedClientSucc) {
+                lastRaisedSucc = true;
+            }
+        }
+        if (d->lastRaisedClient && !lastRaised)
             d->lastRaisedClient = 0;
-        if (d->lastRaisedClientSucc && !stackingOrder().contains(d->lastRaisedClientSucc))
+        if (d->lastRaisedClientSucc && !lastRaisedSucc)
             d->lastRaisedClientSucc = 0;
         break;
+    }
     case TabBoxConfig::DesktopTabBox:
         d->desktopModel()->createDesktopList();
         break;

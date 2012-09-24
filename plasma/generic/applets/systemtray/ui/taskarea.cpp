@@ -254,6 +254,11 @@ bool TaskArea::addWidgetForTask(SystemTray::Task *task)
     //kDebug() << "adding task" << task->name();
     if (!task->isEmbeddable(d->host)) {
         //kDebug() << "task is not embeddable, so FAIL" << task->name();
+        //was a widget created previously? kill it
+        QGraphicsWidget *widget = task->widget(d->host, false);
+        if (widget) {
+            task->abandon(d->host);
+        }
         return false;
     }
 
@@ -330,7 +335,7 @@ bool TaskArea::addWidgetForTask(SystemTray::Task *task)
     removeFromHiddenArea(task);
     widget->setParentItem(this);
     //not really pretty, but for consistency attempts to put the notifications applet always in the same position
-    if (task->typeId() == "notifications") {
+    if (task->typeId() == "org.kde.notifications") {
         if (d->firstTasksLayout->count() == 0) {
             d->topLayout->insertItem(0, d->firstTasksLayout);
         }

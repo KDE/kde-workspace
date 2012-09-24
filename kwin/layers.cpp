@@ -86,6 +86,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "deleted.h"
 #include "effects.h"
 #include <QX11Info>
+#include "composite.h"
 
 namespace KWin
 {
@@ -130,7 +131,10 @@ void Workspace::updateStackingOrder(bool propagate_new_clients)
 #endif
     if (changed || propagate_new_clients) {
         propagateClients(propagate_new_clients);
-        addRepaintFull();
+        if (m_compositor) {
+            m_compositor->addRepaintFull();
+        }
+
         if (active_client)
             active_client->updateMouseGrab();
     }
@@ -326,12 +330,17 @@ void Workspace::lowerClientWithinApplication(Client* c)
     // first try to put it below the bottom-most window of the application
     for (ToplevelList::Iterator it = unconstrained_stacking_order.begin();
             it != unconstrained_stacking_order.end();
-            ++it)
-        if (Client::belongToSameApplication(qobject_cast<Client*>(*it), c)) {
+            ++it) {
+        Client *client = qobject_cast<Client*>(*it);
+        if (!client) {
+            continue;
+        }
+        if (Client::belongToSameApplication(client, c)) {
             unconstrained_stacking_order.insert(it, c);
             lowered = true;
             break;
         }
+    }
     if (!lowered)
         unconstrained_stacking_order.prepend(c);
     // ignore mainwindows
@@ -707,7 +716,9 @@ ToplevelList Workspace::xStackingOrder() const
     }
     if (windows != NULL)
         XFree(windows);
-    const_cast< Workspace* >(this)->checkUnredirect();
+    if (m_compositor) {
+        const_cast< Workspace* >(this)->m_compositor->checkUnredirect();
+    }
     return x_stacking;
 }
 
@@ -812,7 +823,7 @@ void Client::setKeepAbove(bool b)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Layer);
     emit keepAboveChanged();
 }
 
@@ -836,7 +847,7 @@ void Client::setKeepBelow(bool b)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Layer);
     emit keepBelowChanged();
 }
 

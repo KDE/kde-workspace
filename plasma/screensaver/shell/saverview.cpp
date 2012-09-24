@@ -14,10 +14,8 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU General Public License for more details
  *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "saverview.h"
@@ -73,15 +71,16 @@ SaverView::SaverView(Plasma::Containment *containment, QWidget *parent)
       m_setupMode(false),
       m_init(false)
 {
-    setAttribute(Qt::WA_TranslucentBackground);
-    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
-    if (!PlasmaApp::hasComposite()) {
-        setAutoFillBackground(false);
-        setAttribute(Qt::WA_NoSystemBackground);
-    }
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
+            Qt::X11BypassWindowManagerHint);
 
-    setWallpaperEnabled(!PlasmaApp::hasComposite());
-    installEventFilter(this);
+    //app is doing this for us - if needed
+    //QDesktopWidget *desktop = QApplication::desktop();
+    //setGeometry(desktop->screenGeometry(containment->screen()));
+
+    setWallpaperEnabled(true);
+
+    containment->corona()->installEventFilter(this);
 }
 
 SaverView::~SaverView()
@@ -194,6 +193,9 @@ bool SaverView::eventFilter(QObject *watched, QEvent *event)
         (event->type() == QEvent::GraphicsSceneResize || event->type() == QEvent::GraphicsSceneMove)) {
         Plasma::WidgetExplorer *widgetExplorer = m_widgetExplorer.data();
         widgetExplorer->setPos(0, containment()->geometry().height() - widgetExplorer->geometry().height());
+    } else if (watched == containment()->corona() && event->type() == QEvent::GraphicsSceneMousePress) {
+        activateWindow();
+        grabKeyboard();
     }
 
     return false;
@@ -216,6 +218,8 @@ void SaverView::showView()
 
         m_suppressShow = true;
         QTimer::singleShot(SUPPRESS_SHOW_TIMEOUT, this, SLOT(suppressShowTimeout()));
+        activateWindow();
+        grabKeyboard();
     }
 }
 

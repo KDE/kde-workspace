@@ -49,6 +49,7 @@ class Toplevel
     Q_PROPERTY(bool alpha READ hasAlpha CONSTANT)
     Q_PROPERTY(qulonglong frameId READ frameId)
     Q_PROPERTY(QRect geometry READ geometry NOTIFY geometryChanged)
+    Q_PROPERTY(QRect visibleRect READ visibleRect)
     Q_PROPERTY(int height READ height)
     Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity NOTIFY opacityChanged)
     Q_PROPERTY(QPoint pos READ pos)
@@ -59,6 +60,10 @@ class Toplevel
     Q_PROPERTY(int x READ x)
     Q_PROPERTY(int y READ y)
     Q_PROPERTY(int desktop READ desktop)
+    /**
+     * Whether the window is on all desktops. That is desktop is -1.
+     **/
+    Q_PROPERTY(bool onAllDesktops READ isOnAllDesktops)
     Q_PROPERTY(QRect rect READ rect)
     Q_PROPERTY(QPoint clientPos READ clientPos)
     Q_PROPERTY(QSize clientSize READ clientSize)
@@ -183,7 +188,7 @@ public:
 
     // prefer isXXX() instead
     // 0 for supported types means default for managed/unmanaged types
-    NET::WindowType windowType(bool direct = false, int supported_types = 0) const;
+    virtual NET::WindowType windowType(bool direct = false, int supported_types = 0) const = 0;
     bool hasNETSupport() const;
     bool isDesktop() const;
     bool isDock() const;
@@ -227,7 +232,7 @@ public:
     double opacity() const;
     int depth() const;
     bool hasAlpha() const;
-    virtual void setupCompositing();
+    virtual bool setupCompositing();
     virtual void finishCompositing();
     bool updateUnredirectedState();
     bool unredirected() const;
@@ -285,6 +290,7 @@ signals:
     void propertyNotify(KWin::Toplevel* toplevel, long a);
     void geometryChanged();
     void geometryShapeChanged(KWin::Toplevel* toplevel, const QRect& old);
+    void paddingChanged(KWin::Toplevel* toplevel, const QRect& old);
     void windowClosed(KWin::Toplevel* toplevel, KWin::Deleted* deleted);
     void windowShown(KWin::Toplevel* toplevel);
     /**
@@ -293,6 +299,11 @@ signals:
      * decoration.
      **/
     void shapedChanged();
+    /**
+     * Emitted whenever the state changes in a way, that the Compositor should
+     * schedule a repaint of the scene.
+     **/
+    void needsRepaint();
 
 protected:
     virtual ~Toplevel();
@@ -307,7 +318,10 @@ protected:
     void addDamageFull();
     void getWmClientLeader();
     void getWmClientMachine();
-    void setReadyForPainting();
+    /**
+     * @returns Whether there is a compositor and it is active.
+     **/
+    bool compositing() const;
 
     /**
      * This function fetches the opaque region from this Toplevel.
@@ -328,8 +342,11 @@ protected:
     int bit_depth;
     NETWinInfo2* info;
     bool ready_for_painting;
+    QTimer *m_readyForPaintingTimer;
     QRegion repaints_region; // updating, repaint just requires repaint of that area
     QRegion layer_repaints_region;
+protected slots:
+    void setReadyForPainting();
 private:
     static QByteArray staticWindowRole(WId);
     static QByteArray staticSessionId(WId);

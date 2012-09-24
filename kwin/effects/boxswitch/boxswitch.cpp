@@ -213,9 +213,9 @@ void BoxSwitchEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
         if (windows.contains(w) && w != selected_window) {
             if (w->isMinimized() || !w->isOnCurrentDesktop())
                 // TODO: When deactivating minimized windows are not painted at all
-                data.opacity *= activeTimeLine.currentValue() * bg_opacity;
+                data.multiplyOpacity(activeTimeLine.currentValue() * bg_opacity);
             else
-                data.opacity *= 1.0 - activeTimeLine.currentValue() * (1.0 - bg_opacity);
+                data.multiplyOpacity(1.0 - activeTimeLine.currentValue() * (1.0 - bg_opacity));
         }
     }
     effects->paintWindow(w, mask, region, data);
@@ -843,15 +843,15 @@ void BoxSwitchEffect::paintDesktopThumbnail(int iDesktop)
     QSize size = QSize(displayWidth(), displayHeight());
 
     size.scale(r.size(), Qt::KeepAspectRatio);
-    data.xScale = size.width() / double(displayWidth());
-    data.yScale = size.height() / double(displayHeight());
-    int width = int(displayWidth() * data.xScale);
-    int height = int(displayHeight() * data.yScale);
+    data.setXScale(size.width() / double(displayWidth()));
+    data.setYScale(size.height() / double(displayHeight()));
+    int width = int(displayWidth() * data.xScale());
+    int height = int(displayHeight() * data.yScale());
     int x = r.x() + (r.width() - width) / 2;
     int y = r.y() + (r.height() - height) / 2;
     region = QRect(x, y, width, height);
-    data.xTranslate = x;
-    data.yTranslate = y;
+    data.setXTranslation(x);
+    data.setYTranslation(y);
 
     effects->paintScreen(PAINT_SCREEN_TRANSFORMED | PAINT_SCREEN_BACKGROUND_FIRST,
                          region, data);

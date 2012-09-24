@@ -57,6 +57,7 @@ void TimeEngine::init()
     QDBusConnection dbus = QDBusConnection::sessionBus();
     dbus.connect(QString(), QString(), "org.kde.KTimeZoned", "configChanged", this, SLOT(tzConfigChanged()));
     dbus.connect("org.kde.Solid.PowerManagement", "/org/kde/Solid/PowerManagement", "org.kde.Solid.PowerManagement", "resumingFromSuspend", this, SLOT(clockSkewed()));
+    dbus.connect(QString(), "/org/kde/kcmshell_clock", "org.kde.kcmshell_clock", "clockUpdated", this, SLOT(clockSkewed()));
 }
 
 void TimeEngine::clockSkewed()

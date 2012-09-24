@@ -33,7 +33,7 @@ namespace KWin
 Toplevel::Toplevel(Workspace* ws)
     : vis(NULL)
     , info(NULL)
-    , ready_for_painting(true)
+    , ready_for_painting(false)
     , client(None)
     , frame(None)
     , wspace(ws)
@@ -45,6 +45,11 @@ Toplevel::Toplevel(Workspace* ws)
     , unredirect(false)
     , unredirectSuspend(false)
 {
+    connect(this, SIGNAL(damaged(KWin::Toplevel*,QRect)), SIGNAL(needsRepaint()));
+    m_readyForPaintingTimer = new QTimer(this);
+    m_readyForPaintingTimer->setSingleShot(true);
+    connect(m_readyForPaintingTimer, SIGNAL(timeout()), SLOT(setReadyForPainting()));
+    m_readyForPaintingTimer->start(50);
 }
 
 Toplevel::~Toplevel()
@@ -147,43 +152,11 @@ void Toplevel::disownDataPassedToDeleted()
 
 QRect Toplevel::visibleRect() const
 {
+    QRect r = decorationRect();
     if (hasShadow() && !shadow()->shadowRegion().isEmpty()) {
-        return shadow()->shadowRegion().boundingRect().translated(geometry().topLeft());
+        r |= shadow()->shadowRegion().boundingRect();
     }
-    return geometry();
-}
-
-NET::WindowType Toplevel::windowType(bool direct, int supported_types) const
-{
-    if (supported_types == 0)
-        supported_types = dynamic_cast< const Client* >(this) != NULL
-                          ? SUPPORTED_MANAGED_WINDOW_TYPES_MASK : SUPPORTED_UNMANAGED_WINDOW_TYPES_MASK;
-    NET::WindowType wt = info->windowType(supported_types);
-    if (direct)
-        return wt;
-    const Client* cl = dynamic_cast< const Client* >(this);
-    NET::WindowType wt2 = cl ? cl->rules()->checkType(wt) : wt;
-    if (wt != wt2) {
-        wt = wt2;
-        info->setWindowType(wt);   // force hint change
-    }
-    // hacks here
-    if (wt == NET::Menu && cl != NULL) {
-        // ugly hack to support the times when NET::Menu meant NET::TopMenu
-        // if it's as wide as the screen, not very high and has its upper-left
-        // corner a bit above the screen's upper-left cornet, it's a topmenu
-        if (x() == 0 && y() < 0 && y() > -10 && height() < 100
-                && abs(width() - workspace()->clientArea(FullArea, cl).width()) < 10)
-            wt = NET::TopMenu;
-    }
-    // TODO change this to rule
-    const char* const oo_prefix = "openoffice.org"; // QByteArray has no startsWith()
-    // oo_prefix is lowercase, because resourceClass() is forced to be lowercase
-    if (qstrncmp(resourceClass(), oo_prefix, strlen(oo_prefix)) == 0 && wt == NET::Dialog)
-        wt = NET::Normal; // see bug #66065
-    if (wt == NET::Unknown && cl != NULL)   // this is more or less suggested in NETWM spec
-        wt = cl->isTransient() ? NET::Dialog : NET::Normal;
-    return wt;
+    return r.translated(geometry().topLeft());
 }
 
 void Toplevel::getWindowRole()
@@ -333,6 +306,8 @@ void Toplevel::setOpacity(double new_opacity)
 void Toplevel::setReadyForPainting()
 {
     if (!ready_for_painting) {
+        delete m_readyForPaintingTimer;
+        m_readyForPaintingTimer = 0;
         ready_for_painting = true;
         if (compositing()) {
             addRepaintFull();
@@ -369,6 +344,7 @@ bool Toplevel::isOnScreen(int screen) const
 void Toplevel::getShadow()
 {
     QRect dirtyRect;  // old & new shadow region
+    const QRect oldVisibleRect = visibleRect();
     if (hasShadow()) {
         dirtyRect = shadow()->shadowRegion().boundingRect();
         effectWindow()->sceneWindow()->shadow()->updateShadow();
@@ -377,6 +353,8 @@ void Toplevel::getShadow()
     }
     if (hasShadow())
         dirtyRect |= shadow()->shadowRegion().boundingRect();
+    if (oldVisibleRect != visibleRect())
+        emit paddingChanged(this, oldVisibleRect);
     if (dirtyRect.isValid()) {
         dirtyRect.translate(pos());
         addLayerRepaint(dirtyRect);

@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "aurorae.h"
 #include "auroraetheme.h"
+#include "config-kwin.h"
 
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeComponent>
@@ -27,6 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <KConfig>
 #include <KConfigGroup>
+#include <KDebug>
+#include <KPluginInfo>
+#include <KServiceTypeTrader>
 #include <KStandardDirs>
 #include <Plasma/FrameSvg>
 
@@ -39,6 +43,7 @@ AuroraeFactory::AuroraeFactory()
         , m_theme(new AuroraeTheme(this))
         , m_engine(new QDeclarativeEngine(this))
         , m_component(new QDeclarativeComponent(m_engine, this))
+        , m_engineType(AuroraeEngine)
 {
     init();
 }
@@ -49,7 +54,23 @@ void AuroraeFactory::init()
 
     KConfig conf("auroraerc");
     KConfigGroup group(&conf, "Engine");
+    if (group.hasKey("EngineType")) {
+        const QString engineType = group.readEntry("EngineType", "aurorae").toLower();
+        if (engineType == "qml") {
+            initQML(group);
+        } else {
+            // fallback to classic Aurorae Themes
+            initAurorae(conf, group);
+        }
+    } else {
+        // fallback to classic Aurorae Themes
+        initAurorae(conf, group);
+    }
+}
 
+void AuroraeFactory::initAurorae(KConfig &conf, KConfigGroup &group)
+{
+    m_engineType = AuroraeEngine;
     const QString themeName = group.readEntry("ThemeName", "example-deco");
     KConfig config("aurorae/themes/" + themeName + '/' + themeName + "rc", KConfig::FullConfig, "data");
     KConfigGroup themeGroup(&conf, themeName);
@@ -63,7 +84,40 @@ void AuroraeFactory::init()
     }
     m_component->loadUrl(QUrl(KStandardDirs::locate("data", "kwin/aurorae/aurorae.qml")));
     m_engine->rootContext()->setContextProperty("auroraeTheme", m_theme);
-    m_engine->rootContext()->setContextProperty("options", this);
+    m_themeName = themeName;
+}
+
+void AuroraeFactory::initQML(const KConfigGroup &group)
+{
+    // try finding the QML package
+    const QString themeName = group.readEntry("ThemeName");
+    kDebug(1212) << "Trying to load QML Decoration " << themeName;
+    const QString internalname = themeName.toLower();
+
+    QString constraint = QString("[X-KDE-PluginInfo-Name] == '%1'").arg(internalname);
+    KService::List offers = KServiceTypeTrader::self()->query("KWin/Decoration", constraint);
+    if (offers.isEmpty()) {
+        kError(1212) << "Couldn't find QML Decoration " << themeName << endl;
+        // TODO: what to do in error case?
+        return;
+    }
+    KService::Ptr service = offers.first();
+    KPluginInfo plugininfo(service);
+    const QString pluginName = service->property("X-KDE-PluginInfo-Name").toString();
+    const QString scriptName = service->property("X-Plasma-MainScript").toString();
+    const QString file = KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + "/decorations/" + pluginName + "/contents/" + scriptName);
+    if (file.isNull()) {
+        kDebug(1212) << "Could not find script file for " << pluginName;
+        // TODO: what to do in error case?
+        return;
+    }
+    m_engineType = QMLEngine;
+    // setup the QML engine
+    foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
+        m_engine->addImportPath(importPath);
+    }
+    m_component->loadUrl(QUrl::fromLocalFile(file));
+    m_themeName = themeName;
 }
 
 AuroraeFactory::~AuroraeFactory()
@@ -85,17 +139,31 @@ bool AuroraeFactory::reset(unsigned long changed)
     if (changed & SettingButtons) {
         emit buttonsChanged();
     }
+    if (changed & SettingFont){
+        emit titleFontChanged();
+    }
+    if (changed & SettingCompositing) {
+        return false;
+    }
     const KConfig conf("auroraerc");
     const KConfigGroup group(&conf, "Engine");
     const QString themeName = group.readEntry("ThemeName", "example-deco");
     const KConfig config("aurorae/themes/" + themeName + '/' + themeName + "rc", KConfig::FullConfig, "data");
     const KConfigGroup themeGroup(&conf, themeName);
     if (themeName != m_theme->themeName()) {
-        m_theme->loadTheme(themeName, config);
-        resetDecorations(changed);
+        delete m_engine;
+        m_engine = new QDeclarativeEngine(this);
+        delete m_component;
+        m_component = new QDeclarativeComponent(m_engine, this);
+        init();
+        // recreate all decorations
+        return true;
     }
-    m_theme->setBorderSize((KDecorationDefines::BorderSize)themeGroup.readEntry<int>("BorderSize", KDecorationDefines::BorderNormal));
-    m_theme->setButtonSize((KDecorationDefines::BorderSize)themeGroup.readEntry<int>("ButtonSize", KDecorationDefines::BorderNormal));
+    if (m_engineType == AuroraeEngine) {
+        m_theme->setBorderSize((KDecorationDefines::BorderSize)themeGroup.readEntry<int>("BorderSize", KDecorationDefines::BorderNormal));
+        m_theme->setButtonSize((KDecorationDefines::BorderSize)themeGroup.readEntry<int>("ButtonSize", KDecorationDefines::BorderNormal));
+    }
+    emit configChanged();
     return false; // need hard reset
 }
 
@@ -146,21 +214,6 @@ QDeclarativeItem *AuroraeFactory::createQmlDecoration(Aurorae::AuroraeClient *cl
     return qobject_cast< QDeclarativeItem* >(m_component->create(context));
 }
 
-QString AuroraeFactory::rightButtons()
-{
-    return options()->titleButtonsRight();
-}
-
-QString AuroraeFactory::leftButtons()
-{
-    return options()->titleButtonsLeft();
-}
-
-bool AuroraeFactory::customButtonPositions()
-{
-    return options()->customButtonPositions();
-}
-
 AuroraeFactory *AuroraeFactory::s_instance = NULL;
 
 /*******************************************************
@@ -174,6 +227,9 @@ AuroraeClient::AuroraeClient(KDecorationBridge *bridge, KDecorationFactory *fact
 {
     connect(this, SIGNAL(keepAboveChanged(bool)), SIGNAL(keepAboveChangedWrapper()));
     connect(this, SIGNAL(keepBelowChanged(bool)), SIGNAL(keepBelowChangedWrapper()));
+    connect(AuroraeFactory::instance(), SIGNAL(buttonsChanged()), SIGNAL(buttonsChanged()));
+    connect(AuroraeFactory::instance(), SIGNAL(configChanged()), SIGNAL(configChanged()));
+    connect(AuroraeFactory::instance(), SIGNAL(titleFontChanged()), SIGNAL(fontChanged()));
 }
 
 AuroraeClient::~AuroraeClient()
@@ -193,6 +249,7 @@ void AuroraeClient::init()
     createMainWidget();
     widget()->setAttribute(Qt::WA_TranslucentBackground);
     widget()->setAttribute(Qt::WA_NoSystemBackground);
+    widget()->installEventFilter(this);
     m_view = new QGraphicsView(m_scene, widget());
     m_view->setAttribute(Qt::WA_TranslucentBackground);
     m_view->setWindowFlags(Qt::X11BypassWindowManagerHint);
@@ -210,7 +267,23 @@ void AuroraeClient::init()
     m_scene->addItem(m_item);
 
     AuroraeFactory::instance()->theme()->setCompositingActive(compositingActive());
-    connect(AuroraeFactory::instance()->theme(), SIGNAL(themeChanged()), SLOT(themeChanged()));
+}
+
+bool AuroraeClient::eventFilter(QObject *object, QEvent *event)
+{
+    // we need to filter the wheel events on the decoration
+    // QML does not yet provide a way to accept wheel events, this will change with Qt 5
+    // TODO: remove in KDE5
+    // see BUG: 304248
+    if (object != widget() || event->type() != QEvent::Wheel) {
+        return KDecorationUnstable::eventFilter(object, event);
+    }
+    QWheelEvent *wheel = static_cast<QWheelEvent*>(event);
+    if (mousePosition(wheel->pos()) == PositionCenter) {
+        titlebarMouseWheelOperation(wheel->delta());
+        return true;
+    }
+    return false;
 }
 
 void AuroraeClient::activeChange()
@@ -427,12 +500,59 @@ int AuroraeClient::doubleClickInterval() const
     return QApplication::doubleClickInterval();
 }
 
+void AuroraeClient::closeWindow()
+{
+    QMetaObject::invokeMethod(qobject_cast< KDecorationUnstable* >(this), "doCloseWindow", Qt::QueuedConnection);
+}
+
+void AuroraeClient::doCloseWindow()
+{
+    KDecorationUnstable::closeWindow();
+}
+
+void AuroraeClient::maximize(int button)
+{
+    // a maximized window does not need to have a window decoration
+    // in that case we need to delay handling by one cycle
+    // BUG: 304870
+    QMetaObject::invokeMethod(qobject_cast< KDecorationUnstable* >(this),
+                              "doMaximzie",
+                              Qt::QueuedConnection,
+                              Q_ARG(int, button));
+}
+
+void AuroraeClient::doMaximzie(int button)
+{
+    KDecorationUnstable::maximize(static_cast<Qt::MouseButton>(button));
+}
+
+void AuroraeClient::titlebarDblClickOperation()
+{
+    // the double click operation can result in a window being maximized
+    // see maximize
+    QMetaObject::invokeMethod(qobject_cast< KDecorationUnstable* >(this), "doTitlebarDblClickOperation", Qt::QueuedConnection);
+}
+
+void AuroraeClient::doTitlebarDblClickOperation()
+{
+    KDecorationUnstable::titlebarDblClickOperation();
+}
+
+QVariant AuroraeClient::readConfig(const QString &key, const QVariant &defaultValue)
+{
+    KSharedConfigPtr config = KSharedConfig::openConfig("auroraerc");
+    return config->group(AuroraeFactory::instance()->currentThemeName()).readEntry(key, defaultValue);
+}
+
 } // namespace Aurorae
 
 extern "C"
 {
     KDE_EXPORT KDecorationFactory *create_factory() {
         return Aurorae::AuroraeFactory::instance();
+    }
+    KWIN_EXPORT int decoration_version() {
+        return KWIN_DECORATION_API_VERSION;
     }
 }
 

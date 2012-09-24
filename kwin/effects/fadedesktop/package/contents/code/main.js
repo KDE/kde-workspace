@@ -26,11 +26,17 @@ loadConfig();
 effect.configChanged.connect(function() {
     loadConfig();
 });
-effects.desktopChanged.connect(function(oldDesktop, newDesktop) {
+effects['desktopChanged(int,int)'].connect(function(oldDesktop, newDesktop) {
     var stackingOrder = effects.stackingOrder;
     for (var i=0; i<stackingOrder.length; i++) {
         var w = stackingOrder[i];
         if (w.desktop != oldDesktop && w.desktop != newDesktop) {
+            continue;
+        }
+        if (w.minimized) {
+            continue;
+        }
+        if (!w.isOnActivity(effects.currentActivity)){
             continue;
         }
         if (w.desktop == oldDesktop) {

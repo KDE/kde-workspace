@@ -13,10 +13,8 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU General Public License for more details
  *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // plasma.loadEngine("hardware")
@@ -24,6 +22,9 @@
 // plasma.connect(graph, "hardware", "cpu");
 
 #include "plasmaapp.h"
+
+#include "greeter.h"
+#include "sessions.h"
 
 #include <unistd.h>
 
@@ -43,6 +44,7 @@
 #include <QDesktopWidget>
 #include <QPixmapCache>
 #include <QtDBus/QtDBus>
+#include <QtDeclarative/qdeclarative.h>
 
 //#include <KCrash>
 #include <KDebug>
@@ -66,6 +68,8 @@
 #include <fixx11h.h>
 
 Atom tag; //FIXME should this be a member var or what?
+Atom tag2;
+
 const unsigned char DIALOG = 1; //FIXME this is really bad code
 const unsigned char VIEW = 2;
 
@@ -129,6 +133,11 @@ PlasmaApp::PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap)
       m_corona(0),
       m_configDialog(0)
 {
+    const char *uri = "org.kde.kscreenlocker";
+    qmlRegisterType<ScreenLocker::GreeterItem>(uri, 1, 0, "GreeterItem");
+    qmlRegisterType<ScreenLocker::KeyboardItem>(uri, 1, 0, "KeyboardItem");
+    qmlRegisterType<ScreenLocker::SessionSwitching>(uri, 1, 0, "Sessions");
+    qmlRegisterType<QAbstractItemModel>();
     //load translations for libplasma
     KGlobal::locale()->insertCatalog("libplasma");
     KGlobal::locale()->insertCatalog("plasmagenericshell");
@@ -206,6 +215,7 @@ PlasmaApp::PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap)
 
     //we have to keep an eye on created windows
     tag = XInternAtom(QX11Info::display(), "_KDE_SCREENSAVER_OVERRIDE", False);
+    tag2 = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
     qApp->installEventFilter(this);
 
     // this line initializes the corona.
@@ -433,7 +443,7 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
                 data = DIALOG;
             } else {
                 Qt::WindowFlags oldFlags = widget->windowFlags();
-                Qt::WindowFlags newFlags = oldFlags | Qt::X11BypassWindowManagerHint;
+                Qt::WindowFlags newFlags = oldFlags |Qt::X11BypassWindowManagerHint;
                 if (oldFlags != newFlags) {
                     //now we're *really* fucking with things
                     //we force-disable window management and frames to cut off access to wm-y stuff
@@ -455,8 +465,10 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
                     widget->setWindowFlags(newFlags);
                     //we do not know the screen this widget should appear on
                     QRect availableGeometry = desktop->availableGeometry();
-                    //move to the default screen
-                    widget->move(availableGeometry.x(), availableGeometry.y());
+                    //if has weird position, move to the default screen
+                    if (!availableGeometry.contains(widget->pos())) {
+                        widget->move(availableGeometry.x(), availableGeometry.y());
+                    }
                     widget->show(); //setting the flags hid it :(
                     //qApp->setActiveWindow(widget); //gives kbd but not mouse events
                     //kDebug() << "parent" << widget->parentWidget();
@@ -469,6 +481,7 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
             }
 
             XChangeProperty(QX11Info::display(), widget->effectiveWinId(), tag, tag, 8, PropModeReplace, &data, 1);
+            XChangeProperty(QX11Info::display(), widget->effectiveWinId(), tag2, tag2, 32, PropModeReplace, 0, 0);
             kDebug() << "tagged" << widget << widget->effectiveWinId() << "as" << data;
         }
     }

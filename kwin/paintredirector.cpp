@@ -24,11 +24,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include "paintredirector.h"
 
+#include "composite.h"
 #include <kdebug.h>
 #include <qevent.h>
 #include <qpainter.h>
 #include <qmath.h>
-#include "utils.h"
 
 namespace KWin
 {
@@ -82,7 +82,7 @@ bool PaintRedirector::eventFilter(QObject* o, QEvent* e)
         break;
     }
     case QEvent::Paint: {
-        if (!compositing()) {
+        if (!Compositor::compositing()) {
             return false;
         }
         if (!recursionCheck) {

@@ -30,11 +30,13 @@ class Deleted
     : public Toplevel
 {
     Q_OBJECT
+    Q_PROPERTY(bool minimized READ isMinimized)
 public:
     static Deleted* create(Toplevel* c);
     // used by effects to keep the window around for e.g. fadeout effects when it's destroyed
     void refWindow();
     void unrefWindow(bool delay = false);
+    void discard(allowed_t);
     virtual int desktop() const;
     virtual QStringList activities() const;
     virtual QPoint clientPos() const;
@@ -56,13 +58,19 @@ public:
     bool noBorder() const {
         return no_border;
     }
-    void layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect &bottom) const;
+    void layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect &bottom, int unused = 0) const;
     QRect decorationRect() const;
     virtual Layer layer() const {
         return m_layer;
     }
-public slots:
-    void discard(allowed_t = Allowed);
+    bool isMinimized() const {
+        return m_minimized;
+    }
+    NET::WindowType windowType(bool direct = false, int supported_types = 0) const;
+    bool decorationPixmapRequiresRepaint() const {
+        return false;
+    }
+    void ensureDecorationPixmapsPainted() {}
 protected:
     virtual void debug(QDebug& stream) const;
     virtual bool shouldUnredirect() const;
@@ -88,6 +96,7 @@ private:
     QRect decoration_bottom;
     int padding_left, padding_top, padding_right, padding_bottom;
     Layer m_layer;
+    bool m_minimized;
 };
 
 inline void Deleted::refWindow()

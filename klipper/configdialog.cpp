@@ -59,7 +59,17 @@ ActionsWidget::ActionsWidget(QWidget* parent)
     m_ui.pbEditAction->setIcon(KIcon("document-edit"));
     m_ui.pbAdvanced->setIcon(KIcon("configure"));
 
-    m_ui.kcfg_ActionList->header()->resizeSection(0, 250);
+    const KConfigGroup grp = KGlobal::config()->group("ActionsWidget");
+    QByteArray hdrState = grp.readEntry("ColumnState", QByteArray());
+    if (!hdrState.isEmpty())
+    {
+        kDebug() << "Restoring column state";
+        m_ui.kcfg_ActionList->header()->restoreState(QByteArray::fromBase64(hdrState));
+    }
+    else
+    {
+        m_ui.kcfg_ActionList->header()->resizeSection(0, 250);
+    }
 
 #if 0
     if ( /*KServiceTypeTrader::self()->query("KRegExpEditor/KRegExpEditor").isEmpty()*/ true) // see notice in configdialog.cpp about KRegExpEditor
@@ -169,6 +179,11 @@ ActionList ActionsWidget::actionList() const
 void ActionsWidget::resetModifiedState()
 {
     m_ui.kcfg_ActionList->resetModifiedState();
+
+    kDebug() << "Saving column state";
+    KConfigGroup grp = KGlobal::config()->group("ActionsWidget");
+    grp.writeEntry("ColumnState",
+                   m_ui.kcfg_ActionList->header()->saveState().toBase64());
 }
 
 void ActionsWidget::onSelectionChanged()
@@ -274,6 +289,9 @@ ConfigDialog::ConfigDialog(QWidget* parent, KConfigSkeleton* skeleton, const Kli
     QWidget* w = new QWidget(this);
     m_shortcutsWidget = new KShortcutsEditor( collection, w, KShortcutsEditor::GlobalAction );
     addPage(m_shortcutsWidget, i18nc("Shortcuts Config", "Shortcuts"), "configure-shortcuts", i18n("Shortcuts Configuration"));
+
+    const KConfigGroup grp = KGlobal::config()->group("ConfigDialog");
+    restoreDialogSize(grp);
 }
 
 
@@ -298,6 +316,9 @@ void ConfigDialog::updateSettings()
     m_klipper->urlGrabber()->setActionList(m_actionsPage->actionList());
     m_klipper->urlGrabber()->setExcludedWMClasses(m_actionsPage->excludedWMClasses());
     m_klipper->saveSettings();
+
+    KConfigGroup grp = KGlobal::config()->group("ConfigDialog");
+    saveDialogSize(grp);
 }
 
 void ConfigDialog::updateWidgets()

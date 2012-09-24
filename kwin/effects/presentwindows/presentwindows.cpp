@@ -20,18 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "presentwindows.h"
-
+//KConfigSkeleton
+#include "presentwindowsconfig.h"
 #include <kactioncollection.h>
 #include <kaction.h>
 #include <klocale.h>
-#include <kcolorscheme.h>
-#include <kconfiggroup.h>
 #include <kdebug.h>
 #include <kglobalsettings.h>
 
-#ifdef KWIN_HAVE_OPENGL
 #include <kwinglutils.h>
-#endif
 
 #include <QMouseEvent>
 #include <QtGui/QPainter>
@@ -45,6 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <limits.h>
 #include <QTimer>
+#include <QVector2D>
 #include <QVector4D>
 
 namespace KWin
@@ -61,7 +59,7 @@ PresentWindowsEffect::PresentWindowsEffect()
     , m_mode(ModeCurrentDesktop)
     , m_managerWindow(NULL)
     , m_highlightedWindow(NULL)
-    , m_filterFrame(effects->effectFrame(EffectFrameStyled, false))
+    , m_filterFrame(NULL)
     , m_closeView(NULL)
     , m_dragInProgress(false)
     , m_dragWindow(NULL)
@@ -77,11 +75,6 @@ PresentWindowsEffect::PresentWindowsEffect()
     unsigned char dummy = 0;
     XChangeProperty(display(), rootWindow(), m_atomDesktop, m_atomDesktop, 8, PropModeReplace, &dummy, 1);
     XChangeProperty(display(), rootWindow(), m_atomWindows, m_atomWindows, 8, PropModeReplace, &dummy, 1);
-
-    QFont font;
-    font.setPointSize(font.pointSize() * 2);
-    font.setBold(true);
-    m_filterFrame->setFont(font);
 
     KActionCollection* actionCollection = new KActionCollection(this);
     KAction* a = (KAction*)actionCollection->addAction("Expose");
@@ -128,7 +121,7 @@ PresentWindowsEffect::~PresentWindowsEffect()
 
 void PresentWindowsEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = effects->effectConfig("PresentWindows");
+    PresentWindowsConfig::self()->readConfig();
     foreach (ElectricBorder border, m_borderActivate) {
         effects->unreserveElectricBorder(border);
     }
@@ -137,43 +130,34 @@ void PresentWindowsEffect::reconfigure(ReconfigureFlags)
     }
     m_borderActivate.clear();
     m_borderActivateAll.clear();
-    QList<int> borderList = QList<int>();
-    borderList.append(int(ElectricNone));
-    borderList = conf.readEntry("BorderActivate", borderList);
-    foreach (int i, borderList) {
+    foreach (int i, PresentWindowsConfig::borderActivate()) {
         m_borderActivate.append(ElectricBorder(i));
         effects->reserveElectricBorder(ElectricBorder(i));
     }
-    borderList.clear();
-    borderList.append(int(ElectricTopLeft));
-    borderList = conf.readEntry("BorderActivateAll", borderList);
-    foreach (int i, borderList) {
+    foreach (int i, PresentWindowsConfig::borderActivateAll()) {
         m_borderActivateAll.append(ElectricBorder(i));
         effects->reserveElectricBorder(ElectricBorder(i));
     }
-    borderList.clear();
-    borderList.append(int(ElectricNone));
-    borderList = conf.readEntry("BorderActivateClass", borderList);
-    foreach (int i, borderList) {
+    foreach (int i, PresentWindowsConfig::borderActivateClass()) {
         m_borderActivateClass.append(ElectricBorder(i));
         effects->reserveElectricBorder(ElectricBorder(i));
     }
-    m_layoutMode = conf.readEntry("LayoutMode", int(LayoutNatural));
-    m_showCaptions = conf.readEntry("DrawWindowCaptions", true);
-    m_showIcons = conf.readEntry("DrawWindowIcons", true);
-    m_doNotCloseWindows = !conf.readEntry("AllowClosingWindows", true);
-    m_ignoreMinimized = conf.readEntry("IgnoreMinimized", false);
-    m_accuracy = conf.readEntry("Accuracy", 1) * 20;
-    m_fillGaps = conf.readEntry("FillGaps", true);
+    m_layoutMode = PresentWindowsConfig::layoutMode();
+    m_showCaptions = PresentWindowsConfig::drawWindowCaptions();
+    m_showIcons = PresentWindowsConfig::drawWindowIcons();
+    m_doNotCloseWindows = !PresentWindowsConfig::allowClosingWindows();
+    m_ignoreMinimized = PresentWindowsConfig::ignoreMinimized();
+    m_accuracy = PresentWindowsConfig::accuracy() * 20;
+    m_fillGaps = PresentWindowsConfig::fillGaps();
     m_fadeDuration = double(animationTime(150));
-    m_showPanel = conf.readEntry("ShowPanel", false);
-    m_leftButtonWindow = (WindowMouseAction)conf.readEntry("LeftButtonWindow", (int)WindowActivateAction);
-    m_middleButtonWindow = (WindowMouseAction)conf.readEntry("MiddleButtonWindow", (int)WindowNoAction);
-    m_rightButtonWindow = (WindowMouseAction)conf.readEntry("RightButtonWindow", (int)WindowExitAction);
-    m_leftButtonDesktop = (DesktopMouseAction)conf.readEntry("LeftButtonDesktop", (int)DesktopExitAction);
-    m_middleButtonDesktop = (DesktopMouseAction)conf.readEntry("MiddleButtonDesktop", (int)DesktopNoAction);
-    m_rightButtonDesktop = (DesktopMouseAction)conf.readEntry("RightButtonDesktop", (int)DesktopNoAction);
-    m_dragToClose = conf.readEntry("DragToClose", false);
+    m_showPanel = PresentWindowsConfig::showPanel();
+    m_leftButtonWindow = (WindowMouseAction)PresentWindowsConfig::leftButtonWindow();
+    m_middleButtonWindow = (WindowMouseAction)PresentWindowsConfig::middleButtonWindow();
+    m_rightButtonWindow = (WindowMouseAction)PresentWindowsConfig::rightButtonWindow();
+    m_leftButtonDesktop = (DesktopMouseAction)PresentWindowsConfig::leftButtonDesktop();
+    m_middleButtonDesktop = (DesktopMouseAction)PresentWindowsConfig::middleButtonDesktop();
+    m_rightButtonDesktop = (DesktopMouseAction)PresentWindowsConfig::rightButtonDesktop();
+    m_dragToClose = PresentWindowsConfig::dragToClose();
 }
 
 void* PresentWindowsEffect::proxy()
@@ -254,7 +238,11 @@ void PresentWindowsEffect::postPaintScreen()
     for (i = m_windowData.constBegin(); i != m_windowData.constEnd(); ++i) {
         if (i.value().opacity > 0.0 && i.value().opacity < 1.0)
             i.key()->addRepaintFull();
-        if (i.value().highlight > 0.0 && i.value().highlight < 1.0)
+        if (i.key()->isDesktop() && !m_motionManager.isManaging(i.key())) {
+            if (i.value().highlight != 0.3)
+                i.key()->addRepaintFull();
+        }
+        else if (i.value().highlight > 0.0 && i.value().highlight < 1.0)
             i.key()->addRepaintFull();
     }
 
@@ -339,8 +327,8 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
 
         mask |= PAINT_WINDOW_LANCZOS;
         // Apply opacity and brightness
-        data.opacity *= winData->opacity;
-        data.brightness *= interpolate(0.40, 1.0, winData->highlight);
+        data.multiplyOpacity(winData->opacity);
+        data.multiplyBrightness(interpolate(0.40, 1.0, winData->highlight));
 
         if (m_motionManager.isManaging(w)) {
             if (w->isDesktop()) {
@@ -353,7 +341,7 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                 // scale the window (interpolated by the highlight level) to at least 105% or to cover 1/16 of the screen size - yet keep it in screen bounds
                 QRect area = effects->clientArea(FullScreenArea, w);
 
-                QSizeF effSize(w->width()*data.xScale, w->height()*data.yScale);
+                QSizeF effSize(w->width()*data.xScale(), w->height()*data.yScale());
                 float tScale = sqrt((area.width()*area.height()) / (16.0*effSize.width()*effSize.height()));
                 if (tScale < 1.05) {
                     tScale = 1.05;
@@ -362,7 +350,7 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                     tScale = area.width() / effSize.width();
                 if (effSize.height()*tScale > area.height())
                     tScale = area.height() / effSize.height();
-                const float scale = interpolate(1.0, tScale, winData->highlight);
+                const qreal scale = interpolate(1.0, tScale, winData->highlight);
                 if (scale > 1.0) {
                     if (scale < tScale) // don't use lanczos during transition
                         mask &= ~PAINT_WINDOW_LANCZOS;
@@ -380,10 +368,8 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                     rect.setWidth(rect.width()*scale);
                     rect.setHeight(rect.height()*scale);
 
-                    data.xScale *= scale;
-                    data.yScale *= scale;
-                    data.xTranslate += tx;
-                    data.yTranslate += ty;
+                    data *= QVector2D(scale, scale);
+                    data += QPoint(tx, ty);
                 }
             }
 
@@ -391,9 +377,7 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                 mask &= ~PAINT_WINDOW_LANCZOS;
             }
             if (m_dragInProgress && m_dragWindow == w) {
-                QPoint diff = cursorPos() - m_dragStart;
-                data.xTranslate += diff.x();
-                data.yTranslate += diff.y();
+                data += (cursorPos() - m_dragStart);
             }
             effects->paintWindow(w, mask, region, data);
 
@@ -402,25 +386,21 @@ void PresentWindowsEffect::paintWindow(EffectWindow *w, int mask, QRegion region
                 QPoint point(rect.x() + rect.width() * 0.95,
                              rect.y() + rect.height() * 0.95);
                 winData->iconFrame->setPosition(point);
-#ifdef KWIN_HAVE_OPENGL
                 if (effects->compositingType() == KWin::OpenGLCompositing && data.shader) {
-                    const float a = 0.9 * data.opacity * m_decalOpacity * 0.75;
+                    const float a = 0.9 * data.opacity() * m_decalOpacity * 0.75;
                     data.shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
                 }
-#endif
-                winData->iconFrame->render(region, 0.9 * data.opacity * m_decalOpacity, 0.75);
+                winData->iconFrame->render(region, 0.9 * data.opacity() * m_decalOpacity, 0.75);
             }
             if (m_showCaptions) {
                 QPoint point(rect.x() + rect.width() / 2,
                              rect.y() + rect.height() / 2);
                 winData->textFrame->setPosition(point);
-#ifdef KWIN_HAVE_OPENGL
                 if (effects->compositingType() == KWin::OpenGLCompositing && data.shader) {
-                    const float a = 0.9 * data.opacity * m_decalOpacity * 0.75;
+                    const float a = 0.9 * data.opacity() * m_decalOpacity * 0.75;
                     data.shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
                 }
-#endif
-                winData->textFrame->render(region, 0.9 * data.opacity * m_decalOpacity, 0.75);
+                winData->textFrame->render(region, 0.9 * data.opacity() * m_decalOpacity, 0.75);
             }
         } else
             effects->paintWindow(w, mask, region, data);
@@ -1488,7 +1468,7 @@ bool PresentWindowsEffect::isOverlappingAny(EffectWindow *w, const QHash<EffectW
 //-----------------------------------------------------------------------------
 // Activation
 
-void PresentWindowsEffect::setActive(bool active, bool closingTab)
+void PresentWindowsEffect::setActive(bool active)
 {
     if (effects->activeFullScreenEffect() && effects->activeFullScreenEffect() != this)
         return;
@@ -1604,7 +1584,9 @@ void PresentWindowsEffect::setActive(bool active, bool closingTab)
         // Move all windows back to their original position
         foreach (EffectWindow * w, m_motionManager.managedWindows())
         m_motionManager.moveWindow(w, w->geometry());
-        m_filterFrame->free();
+        if (m_filterFrame) {
+            m_filterFrame->free();
+        }
         m_windowFilter.clear();
         m_selectedWindows.clear();
 
@@ -1631,6 +1613,13 @@ void PresentWindowsEffect::setActive(bool active, bool closingTab)
 void PresentWindowsEffect::updateFilterFrame()
 {
     QRect area = effects->clientArea(ScreenArea, effects->activeScreen(), effects->currentDesktop());
+    if (!m_filterFrame) {
+        m_filterFrame = effects->effectFrame(EffectFrameStyled, false);
+        QFont font;
+        font.setPointSize(font.pointSize() * 2);
+        font.setBold(true);
+        m_filterFrame->setFont(font);
+    }
     m_filterFrame->setPosition(QPoint(area.x() + area.width() / 2, area.y() + area.height() / 2));
     m_filterFrame->setText(i18n("Filter:\n%1", m_windowFilter));
 }

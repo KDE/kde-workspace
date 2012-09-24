@@ -17,16 +17,15 @@
  *
  */
 
-#ifndef __kmenuedit_h__
-#define __kmenuedit_h__
+#ifndef kmenuedit_h
+#define kmenuedit_h
 
-#include <kxmlguiwindow.h>
-#include <treeview.h>
+#include <KXmlGuiWindow>
 
-class BasicTab;
 class QSplitter;
 class KAction;
-class KToggleAction;
+class BasicTab;
+class TreeView;
 
 class KMenuEdit : public KXmlGuiWindow
 {
@@ -36,8 +35,10 @@ public:
     KMenuEdit();
     ~KMenuEdit();
 
-    void selectMenu(const QString &menu) { m_tree->selectMenu(menu); }
-    void selectMenuEntry(const QString &menuEntry) { m_tree->selectMenuEntry(menuEntry); }
+    void selectMenu(const QString &menu);
+    void selectMenuEntry(const QString &menuEntry);
+
+    // dbus method
     void restoreSystemMenu();
 
 protected:
@@ -48,7 +49,6 @@ protected:
 protected Q_SLOTS:
     void slotSave();
     void slotChangeView();
-    void slotConfigureToolbars();
     void slotRestoreMenu();
     void slotConfigure();
 
@@ -58,7 +58,6 @@ protected:
     QSplitter          *m_splitter;
 
     KAction *m_actionDelete;
-    KToggleAction *m_actionShowHidden;
     bool m_showHidden;
 };
 

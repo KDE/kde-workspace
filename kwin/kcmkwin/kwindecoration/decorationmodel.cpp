@@ -34,8 +34,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KGlobalSettings>
 #include <KIcon>
 #include <KLocale>
+#include <KServiceTypeTrader>
 #include <KStandardDirs>
+#include <KPluginInfo>
 #include "kwindecoration.h"
+
+/* WARNING -------------------------------------------------------------------------
+* it is *ABSOLUTELY* mandatory to manage loadPlugin() and destroyPreviousPlugin()
+* using disablePreview()
+*
+* loadPlugin() moves the present factory pointer to "old_fact" which is then deleted
+* by the succeeding destroyPreviousPlugin()
+*
+* So if you loaded a new plugin and that changed the current factory, call disablePreview()
+* BEFORE the following destroyPreviousPlugin() destroys the factory for the current m_preview->deco->factory
+* (which is invoked on deco deconstruction)
+* WARNING ------------------------------------------------------------------------ */
 
 namespace KWin
 {
@@ -54,6 +68,9 @@ DecorationModel::DecorationModel(KSharedConfigPtr config, QObject* parent)
     roleNames[DecorationModel::PixmapRole] = "preview";
     roleNames[TypeRole] = "type";
     roleNames[AuroraeNameRole] = "auroraeThemeName";
+    roleNames[QmlMainScriptRole] = "mainScript";
+    roleNames[BorderSizeRole] = "borderSize";
+    roleNames[ButtonSizeRole] = "buttonSize";
     setRoleNames(roleNames);
     m_config = KSharedConfig::openConfig("auroraerc");
     findDecorations();
@@ -94,17 +111,46 @@ void DecorationModel::findDecorations()
                             findAuroraeThemes();
                             continue;
                         }
+                        if (!m_plugins->canLoad(libName))
+                            continue;
                         DecorationModelData data;
                         data.name = desktopFile.readName();
                         data.libraryName = libName;
                         data.type = DecorationModelData::NativeDecoration;
                         data.borderSize = KDecorationDefines::BorderNormal;
+                        data.closeDblClick = false;
                         metaData(data, desktopFile);
                         m_decorations.append(data);
                     }
                 }
             }
         }
+    }
+    KService::List offers = KServiceTypeTrader::self()->query("KWin/Decoration");
+    foreach (KService::Ptr service, offers) {
+        DecorationModelData data;
+        data.name = service->name();
+        data.libraryName = "kwin3_aurorae";
+        data.type = DecorationModelData::QmlDecoration;
+        data.auroraeName = service->property("X-KDE-PluginInfo-Name").toString();
+        QString scriptName = service->property("X-Plasma-MainScript").toString();
+        data.qmlPath = KStandardDirs::locate("data", "kwin/decorations/" + data.auroraeName + "/contents/" + scriptName);
+        if (data.qmlPath.isEmpty()) {
+            // not a valid QML theme
+            continue;
+        }
+        KConfigGroup config(m_config, data.auroraeName);
+        data.borderSize = (KDecorationDefines::BorderSize)config.readEntry< int >("BorderSize", KDecorationDefines::BorderNormal);
+        data.buttonSize = (KDecorationDefines::BorderSize)config.readEntry< int >("ButtonSize", KDecorationDefines::BorderNormal);
+        data.closeDblClick = config.readEntry< bool >("CloseOnDoubleClickMenuButton", true);
+        data.comment = service->comment();
+        KPluginInfo info(service);
+        data.author = info.author();
+        data.email= info.email();
+        data.version = info.version();
+        data.license = info.license();
+        data.website = info.website();
+        m_decorations.append(data);
     }
     qSort(m_decorations.begin(), m_decorations.end(), DecorationModelData::less);
     endResetModel();
@@ -136,6 +182,7 @@ void DecorationModel::findAuroraeThemes()
         KConfigGroup config(m_config, data.auroraeName);
         data.borderSize = (KDecorationDefines::BorderSize)config.readEntry< int >("BorderSize", KDecorationDefines::BorderNormal);
         data.buttonSize = (KDecorationDefines::BorderSize)config.readEntry< int >("ButtonSize", KDecorationDefines::BorderNormal);
+        data.closeDblClick = config.readEntry< bool >("CloseOnDoubleClickMenuButton", true);
         metaData(data, df);
         m_decorations.append(data);
     }
@@ -190,18 +237,26 @@ QVariant DecorationModel::data(const QModelIndex& index, int role) const
         return static_cast< int >(m_decorations[ index.row()].borderSize);
     case BorderSizesRole: {
         QList< QVariant > sizes;
-        if (m_plugins->loadPlugin(m_decorations[ index.row()].libraryName) &&
-                m_plugins->factory() != NULL) {
+        const bool mustDisablePreview = m_plugins->factory() && m_plugins->factory() == m_preview->factory();
+        if (m_plugins->loadPlugin(m_decorations[index.row()].libraryName) && m_plugins->factory()) {
             foreach (KDecorationDefines::BorderSize size, m_plugins->factory()->borderSizes())   // krazy:exclude=foreach
-            sizes << int(size) ;
+                sizes << int(size);
+            if (mustDisablePreview) // it's nuked with destroyPreviousPlugin()
+                m_preview->disablePreview(); // so we need to get rid of m_preview->deco first
+            m_plugins->destroyPreviousPlugin();
         }
         return sizes;
     }
     case ButtonSizeRole:
-        if (m_decorations[ index.row()].type == DecorationModelData::AuroraeDecoration)
+        if (m_decorations[ index.row()].type == DecorationModelData::AuroraeDecoration ||
+            m_decorations[ index.row()].type == DecorationModelData::QmlDecoration)
             return static_cast< int >(m_decorations[ index.row()].buttonSize);
         else
             return QVariant();
+    case QmlMainScriptRole:
+        return m_decorations[ index.row()].qmlPath;
+    case CloseOnDblClickRole:
+        return m_decorations[index.row()].closeDblClick;
     default:
         return QVariant();
     }
@@ -209,27 +264,43 @@ QVariant DecorationModel::data(const QModelIndex& index, int role) const
 
 bool DecorationModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (!index.isValid() || (role != BorderSizeRole && role != ButtonSizeRole))
+    if (!index.isValid() || (role != BorderSizeRole && role != ButtonSizeRole && role != CloseOnDblClickRole))
         return QAbstractItemModel::setData(index, value, role);
+
+    const DecorationModelData::DecorationType type = m_decorations[ index.row()].type;
 
     if (role == BorderSizeRole) {
         m_decorations[ index.row()].borderSize = (KDecorationDefines::BorderSize)value.toInt();
-        if (m_decorations[ index.row()].type == DecorationModelData::AuroraeDecoration) {
+        if (type == DecorationModelData::AuroraeDecoration || type == DecorationModelData::QmlDecoration) {
             KConfigGroup config(m_config, m_decorations[ index.row()].auroraeName);
             config.writeEntry("BorderSize", value.toInt());
             config.sync();
         }
         emit dataChanged(index, index);
+        emit configChanged(m_decorations[ index.row()].auroraeName);
         regeneratePreview(index);
         return true;
     }
-    if (role == ButtonSizeRole && m_decorations[ index.row()].type == DecorationModelData::AuroraeDecoration) {
+    if (role == ButtonSizeRole && (type == DecorationModelData::AuroraeDecoration || type == DecorationModelData::QmlDecoration)) {
         m_decorations[ index.row()].buttonSize = (KDecorationDefines::BorderSize)value.toInt();
         KConfigGroup config(m_config, m_decorations[ index.row()].auroraeName);
         config.writeEntry("ButtonSize", value.toInt());
         config.sync();
         emit dataChanged(index, index);
+        emit configChanged(m_decorations[ index.row()].auroraeName);
         regeneratePreview(index);
+        return true;
+    }
+    if (role == CloseOnDblClickRole && (type == DecorationModelData::AuroraeDecoration || type == DecorationModelData::QmlDecoration)) {
+        if (m_decorations[ index.row()].closeDblClick == value.toBool()) {
+            return false;
+        }
+        m_decorations[ index.row()].closeDblClick = value.toBool();
+        KConfigGroup config(m_config, m_decorations[ index.row()].auroraeName);
+        config.writeEntry("CloseOnDoubleClickMenuButton", value.toBool());
+        config.sync();
+        emit dataChanged(index, index);
+        emit configChanged(m_decorations[ index.row()].auroraeName);
         return true;
     }
     return QAbstractItemModel::setData(index, value, role);
@@ -255,11 +326,32 @@ void DecorationModel::setButtons(bool custom, const QString& left, const QString
     m_rightButtons = right;
 }
 
-void DecorationModel::regeneratePreviews()
+void DecorationModel::regenerateNextPreview()
 {
-    for (int i = 0; i < m_decorations.count(); i++) {
-        regeneratePreview(index(i), QSize(qobject_cast<KWinDecorationModule*>(QObject::parent())->itemWidth(), 150));
+    if (m_nextPreviewIndex < m_lastUpdateIndex && m_nextPreviewIndex < m_decorations.count())
+        regeneratePreview(index(m_nextPreviewIndex),
+                          QSize(qobject_cast<KWinDecorationModule*>(QObject::parent())->itemWidth(), 150));
+    ++m_nextPreviewIndex;
+    if (m_nextPreviewIndex >= m_lastUpdateIndex && m_firstUpdateIndex > 0) {
+        // do the above ones
+        m_lastUpdateIndex = qMin(m_firstUpdateIndex, m_decorations.count());
+        m_firstUpdateIndex = m_nextPreviewIndex = 0;
     }
+    if (m_nextPreviewIndex < m_lastUpdateIndex)
+        QMetaObject::invokeMethod(this, "regenerateNextPreview", Qt::QueuedConnection);
+}
+
+void DecorationModel::regeneratePreviews(int firstIndex)
+{
+    m_firstUpdateIndex = firstIndex;
+    m_lastUpdateIndex = m_decorations.count();
+    m_nextPreviewIndex = firstIndex;
+    regenerateNextPreview();
+}
+
+void DecorationModel::stopPreviewGeneration()
+{
+    m_firstUpdateIndex = m_lastUpdateIndex = m_nextPreviewIndex = 0;
 }
 
 void DecorationModel::regeneratePreview(const QModelIndex& index, const QSize& size)
@@ -286,17 +378,27 @@ void DecorationModel::regeneratePreview(const QModelIndex& index, const QSize& s
         html = QString("<div style=\"color: %1\" align=\"center\">%2</div>").arg(color.name()).arg(html);
 
         document.setHtml(html);
-        m_plugins->reset(KDecoration::SettingDecoration);
-        if (m_plugins->loadPlugin(data.libraryName) &&
-                m_preview->recreateDecoration(m_plugins))
+        bool enabled = false;
+        bool loaded;
+        // m_preview->deco management is not required
+        // either the deco loads and the following recreateDecoration will sanitize decos (on new factory)
+        // or the deco does not load and destroyPreviousPlugin() is not called
+        if ((loaded = m_plugins->loadPlugin(data.libraryName)) && m_preview->recreateDecoration(m_plugins)) {
+            enabled = true;
             m_preview->enablePreview();
-        else
+        } else {
             m_preview->disablePreview();
-        m_plugins->destroyPreviousPlugin();
-        m_preview->resize(size);
-        m_preview->setTempButtons(m_plugins, m_customButtons, m_leftButtons, m_rightButtons);
-        m_preview->setTempBorderSize(m_plugins, data.borderSize);
-        data.preview = m_preview->preview(&document, m_renderWidget);
+        }
+        if (loaded)
+            m_plugins->destroyPreviousPlugin();
+        if (enabled) {
+            m_preview->resize(size);
+            m_preview->setTempButtons(m_plugins, m_customButtons, m_leftButtons, m_rightButtons);
+            m_preview->setTempBorderSize(m_plugins, data.borderSize);
+            data.preview = m_preview->preview(&document, m_renderWidget);
+        } else {
+            m_decorations.removeAt(index.row());
+        }
         break;
     }
     default:
@@ -329,11 +431,14 @@ QModelIndex DecorationModel::indexOfName(const QString& decoName) const
     return QModelIndex();
 }
 
-QModelIndex DecorationModel::indexOfAuroraeName(const QString& auroraeName) const
+QModelIndex DecorationModel::indexOfAuroraeName(const QString &auroraeName, const QString &type) const
 {
     for (int i = 0; i < m_decorations.count(); i++) {
         const DecorationModelData& data = m_decorations.at(i);
-        if (data.type == DecorationModelData::AuroraeDecoration &&
+        if (type == "aurorae" && data.type == DecorationModelData::AuroraeDecoration &&
+                data.auroraeName.compare(auroraeName) == 0)
+            return index(i);
+        if (type == "qml" && data.type == DecorationModelData::QmlDecoration &&
                 data.auroraeName.compare(auroraeName) == 0)
             return index(i);
     }
@@ -342,9 +447,22 @@ QModelIndex DecorationModel::indexOfAuroraeName(const QString& auroraeName) cons
 
 void DecorationModel::setBorderSize(const QModelIndex& index, KDecorationDefines::BorderSize size)
 {
-    if (!index.isValid() || m_decorations[ index.row()].type == DecorationModelData::AuroraeDecoration)
+    if (!index.isValid() || m_decorations[ index.row()].type == DecorationModelData::AuroraeDecoration || m_decorations[ index.row()].type == DecorationModelData::QmlDecoration)
         return;
     m_decorations[ index.row()].borderSize = size;
+}
+
+QVariant DecorationModel::readConfig(const QString &themeName, const QString &key, const QVariant &defaultValue)
+{
+    return m_config->group(themeName).readEntry(key, defaultValue);
+}
+
+void DecorationModel::notifyConfigChanged(const QModelIndex &index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+    emit configChanged(m_decorations[index.row()].auroraeName);
 }
 
 } // namespace KWin

@@ -100,6 +100,10 @@ void KclockModule::save()
         dtime->processHelperErrors(reply.errorCode());
     }
   }
+  else {
+      QDBusMessage msg = QDBusMessage::createSignal("/org/kde/kcmshell_clock", "org.kde.kcmshell_clock", "clockUpdated");
+      QDBusConnection::sessionBus().send(msg);
+  }
 
   // NOTE: super nasty hack #1
   // Try to work around time mismatch between KSystemTimeZones' update of local
@@ -108,19 +112,9 @@ void KclockModule::save()
   // local timezone was found.
   QTimer::singleShot(5000, this, SLOT(load()));
 
-  // setDisable(false) happens in load(), since QTimer::singleShot is non-blocking
+  // setDisabled(false) happens in load(), since QTimer::singleShot is non-blocking
 }
 
-void KclockModule::slotDateTimeHelperFinished(int exitCode)
-{
-    dtime->processHelperErrors( exitCode );
-#if 0
-  // Tell the clock applet about the change so that it can update its timezone
-  QDBusInterface clock("org.kde.kicker", "/Applets/Clock", "org.kde.kicker.ClockApplet");
-  clock.call("reconfigure");
-#endif
-
-}
 void KclockModule::load()
 {
   dtime->load();

@@ -93,14 +93,31 @@ QString TabBoxHandlerImpl::desktopName(int desktop) const
     return Workspace::self()->desktopName(desktop);
 }
 
-TabBoxClient* TabBoxHandlerImpl::nextClientFocusChain(TabBoxClient* client) const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::nextClientFocusChain(TabBoxClient* client) const
 {
     if (TabBoxClientImpl* c = static_cast< TabBoxClientImpl* >(client)) {
         Client* next = Workspace::self()->tabBox()->nextClientFocusChain(c->client());
         if (next)
             return next->tabBoxClient();
     }
-    return NULL;
+    return QWeakPointer<TabBoxClient>();
+}
+
+QWeakPointer< TabBoxClient > TabBoxHandlerImpl::firstClientFocusChain() const
+{
+    if (Client *c = m_tabBox->firstClientFocusChain()) {
+        return QWeakPointer<TabBoxClient>(c->tabBoxClient());
+    } else {
+        return QWeakPointer<TabBoxClient>();
+    }
+}
+
+bool TabBoxHandlerImpl::isInFocusChain(TabBoxClient *client) const
+{
+    if (TabBoxClientImpl *c = static_cast<TabBoxClientImpl*>(client)) {
+        return Workspace::self()->globalFocusChain().contains(c->client());
+    }
+    return false;
 }
 
 int TabBoxHandlerImpl::nextDesktopFocusChain(int desktop) const
@@ -113,12 +130,12 @@ int TabBoxHandlerImpl::numberOfDesktops() const
     return Workspace::self()->numberOfDesktops();
 }
 
-TabBoxClient* TabBoxHandlerImpl::activeClient() const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::activeClient() const
 {
     if (Workspace::self()->activeClient())
         return Workspace::self()->activeClient()->tabBoxClient();
     else
-        return NULL;
+        return QWeakPointer<TabBoxClient>();
 }
 
 bool TabBoxHandlerImpl::checkDesktop(TabBoxClient* client, int desktop) const
@@ -153,26 +170,35 @@ bool TabBoxHandlerImpl::checkApplications(TabBoxClient* client) const
 {
     Client* current = (static_cast< TabBoxClientImpl* >(client))->client();
     TabBoxClientImpl* c;
-    QListIterator< TabBoxClient* > i(clientList());
+    QListIterator< QWeakPointer<TabBoxClient> > i(clientList());
 
     switch (config().clientApplicationsMode()) {
     case TabBoxConfig::OneWindowPerApplication:
         // check if the list already contains an entry of this application
         while (i.hasNext()) {
-            if ((c = dynamic_cast< TabBoxClientImpl* >(i.next()))) {
+            QSharedPointer<TabBoxClient> client = i.next().toStrongRef();
+            if (!client) {
+                continue;
+            }
+            if ((c = dynamic_cast< TabBoxClientImpl* >(client.data()))) {
                 if (c->client()->resourceClass() == current->resourceClass()) {
                     return false;
                 }
             }
 	}
         return true;
-    case TabBoxConfig::AllWindowsCurrentApplication:
-        if ((c = dynamic_cast< TabBoxClientImpl* >(tabBox->activeClient()))) {
+    case TabBoxConfig::AllWindowsCurrentApplication: {
+        QSharedPointer<TabBoxClient> pointer = tabBox->activeClient().toStrongRef();
+        if (!pointer) {
+            return false;
+        }
+        if ((c = dynamic_cast< TabBoxClientImpl* >(pointer.data()))) {
             if (c->client()->resourceClass() == current->resourceClass()) {
                 return true;
             }
         }
         return false;
+    }
     default:       // TabBoxConfig::AllWindowsAllApplications
       return true;
     }
@@ -205,8 +231,11 @@ bool TabBoxHandlerImpl::checkMultiScreen(TabBoxClient* client) const
     }
 }
 
-TabBoxClient* TabBoxHandlerImpl::clientToAddToList(TabBoxClient* client, int desktop) const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::clientToAddToList(TabBoxClient* client, int desktop) const
 {
+    if (!client) {
+        return QWeakPointer<TabBoxClient>();
+    }
     Client* ret = NULL;
     Client* current = (static_cast< TabBoxClientImpl* >(client))->client();
 
@@ -230,7 +259,7 @@ TabBoxClient* TabBoxHandlerImpl::clientToAddToList(TabBoxClient* client, int des
     if (ret)
         return ret->tabBoxClient();
     else
-        return NULL;
+        return QWeakPointer<TabBoxClient>();
 }
 
 TabBoxClientList TabBoxHandlerImpl::stackingOrder() const
@@ -256,17 +285,19 @@ void TabBoxHandlerImpl::restack(TabBoxClient *c, TabBoxClient *under)
                                static_cast<TabBoxClientImpl*>(under)->client());
 }
 
-void TabBoxHandlerImpl::elevateClient(TabBoxClient *c, bool b) const
+void TabBoxHandlerImpl::elevateClient(TabBoxClient *c, WId tabbox, bool b) const
 {
     if (effects) {
         const Client *cl = static_cast<TabBoxClientImpl*>(c)->client();
         if (EffectWindow *w = static_cast<EffectsHandlerImpl*>(effects)->findWindow(cl->window()))
             static_cast<EffectsHandlerImpl*>(effects)->setElevatedWindow(w, b);
+        if (EffectWindow *w = static_cast<EffectsHandlerImpl*>(effects)->findWindow(tabbox))
+            static_cast<EffectsHandlerImpl*>(effects)->setElevatedWindow(w, b);
     }
 }
 
 
-TabBoxClient* TabBoxHandlerImpl::desktopClient() const
+QWeakPointer<TabBoxClient> TabBoxHandlerImpl::desktopClient() const
 {
     foreach (Toplevel *toplevel, Workspace::self()->stackingOrder()) {
         Client *client = qobject_cast<Client*>(toplevel);
@@ -274,7 +305,7 @@ TabBoxClient* TabBoxHandlerImpl::desktopClient() const
             return client->tabBoxClient();
         }
     }
-    return NULL;
+    return QWeakPointer<TabBoxClient>();
 }
 
 void TabBoxHandlerImpl::showOutline(const QRect &outline)
@@ -301,8 +332,9 @@ void TabBoxHandlerImpl::activateAndClose()
 * TabBoxClientImpl
 *********************************************************/
 
-TabBoxClientImpl::TabBoxClientImpl()
+TabBoxClientImpl::TabBoxClientImpl(Client *client)
     : TabBoxClient()
+    , m_client(client)
 {
 }
 
@@ -393,7 +425,6 @@ TabBox::TabBox(QObject *parent)
     m_defaultConfig.setShowDesktopMode(TabBoxConfig::DoNotShowDesktopClient);
     m_defaultConfig.setClientMultiScreenMode(TabBoxConfig::IgnoreMultiScreen);
     m_defaultConfig.setClientSwitchingMode(TabBoxConfig::FocusChainSwitching);
-    m_defaultConfig.setLayout(TabBoxConfig::VerticalLayout);
 
     m_alternativeConfig = TabBoxConfig();
     m_alternativeConfig.setTabBoxMode(TabBoxConfig::ClientTabBox);
@@ -404,21 +435,24 @@ TabBox::TabBox(QObject *parent)
     m_alternativeConfig.setShowDesktopMode(TabBoxConfig::DoNotShowDesktopClient);
     m_alternativeConfig.setClientMultiScreenMode(TabBoxConfig::IgnoreMultiScreen);
     m_alternativeConfig.setClientSwitchingMode(TabBoxConfig::FocusChainSwitching);
-    m_alternativeConfig.setLayout(TabBoxConfig::VerticalLayout);
+
+    m_defaultCurrentApplicationConfig = m_defaultConfig;
+    m_defaultCurrentApplicationConfig.setClientApplicationsMode(TabBoxConfig::AllWindowsCurrentApplication);
+
+    m_alternativeCurrentApplicationConfig = m_alternativeConfig;
+    m_alternativeCurrentApplicationConfig.setClientApplicationsMode(TabBoxConfig::AllWindowsCurrentApplication);
 
     m_desktopConfig = TabBoxConfig();
     m_desktopConfig.setTabBoxMode(TabBoxConfig::DesktopTabBox);
     m_desktopConfig.setShowTabBox(true);
     m_desktopConfig.setShowDesktopMode(TabBoxConfig::DoNotShowDesktopClient);
     m_desktopConfig.setDesktopSwitchingMode(TabBoxConfig::MostRecentlyUsedDesktopSwitching);
-    m_desktopConfig.setLayout(TabBoxConfig::VerticalLayout);
 
     m_desktopListConfig = TabBoxConfig();
     m_desktopListConfig.setTabBoxMode(TabBoxConfig::DesktopTabBox);
     m_desktopListConfig.setShowTabBox(true);
     m_desktopListConfig.setShowDesktopMode(TabBoxConfig::DoNotShowDesktopClient);
     m_desktopListConfig.setDesktopSwitchingMode(TabBoxConfig::StaticDesktopSwitching);
-    m_desktopListConfig.setLayout(TabBoxConfig::VerticalLayout);
     m_tabBox = new TabBoxHandlerImpl(this);
     QTimer::singleShot(0, this, SLOT(handlerReady()));
     connect(m_tabBox, SIGNAL(selectedIndexChanged()), SIGNAL(itemSelected()));
@@ -461,6 +495,10 @@ void TabBox::initShortcuts(KActionCollection* keys)
     KEY(I18N_NOOP("Walk Through Windows (Reverse)"),       Qt::ALT + Qt::SHIFT + Qt::Key_Backtab, slotWalkBackThroughWindows(), m_cutWalkThroughWindowsReverse, slotWalkBackThroughWindowsKeyChanged(QKeySequence))
     KEY(I18N_NOOP("Walk Through Windows Alternative"),     0, slotWalkThroughWindowsAlternative(), m_cutWalkThroughWindowsAlternative, slotWalkThroughWindowsAlternativeKeyChanged(QKeySequence))
     KEY(I18N_NOOP("Walk Through Windows Alternative (Reverse)"), 0, slotWalkBackThroughWindowsAlternative(), m_cutWalkThroughWindowsAlternativeReverse, slotWalkBackThroughWindowsAlternativeKeyChanged(QKeySequence))
+    KEY(I18N_NOOP("Walk Through Windows of Current Application"), Qt::ALT + Qt::Key_QuoteLeft, slotWalkThroughCurrentAppWindows(), m_cutWalkThroughCurrentAppWindows, slotWalkThroughCurrentAppWindowsKeyChanged(QKeySequence))
+    KEY(I18N_NOOP("Walk Through Windows of Current Application (Reverse)"), Qt::ALT + Qt::Key_AsciiTilde, slotWalkBackThroughCurrentAppWindows(), m_cutWalkThroughCurrentAppWindowsReverse, slotWalkBackThroughCurrentAppWindowsKeyChanged(QKeySequence))
+    KEY(I18N_NOOP("Walk Through Windows of Current Application Alternative"), 0, slotWalkThroughCurrentAppWindowsAlternative(), m_cutWalkThroughCurrentAppWindowsAlternative, slotWalkThroughCurrentAppWindowsAlternativeKeyChanged(QKeySequence))
+    KEY(I18N_NOOP("Walk Through Windows of Current Application Alternative (Reverse)"), 0, slotWalkBackThroughCurrentAppWindowsAlternative(), m_cutWalkThroughCurrentAppWindowsAlternativeReverse, slotWalkBackThroughCurrentAppWindowsAlternativeKeyChanged(QKeySequence))
     KEY(I18N_NOOP("Walk Through Desktops"),                0, slotWalkThroughDesktops(), m_cutWalkThroughDesktops, slotWalkThroughDesktopsKeyChanged(QKeySequence))
     KEY(I18N_NOOP("Walk Through Desktops (Reverse)"),      0, slotWalkBackThroughDesktops(), m_cutWalkThroughDesktopsReverse, slotWalkBackThroughDesktopsKeyChanged(QKeySequence))
     KEY(I18N_NOOP("Walk Through Desktop List"),            0, slotWalkThroughDesktopList(), m_cutWalkThroughDesktopList, slotWalkThroughDesktopListKeyChanged(QKeySequence))
@@ -482,6 +520,12 @@ void TabBox::setMode(TabBoxMode mode)
         break;
     case TabBoxWindowsAlternativeMode:
         m_tabBox->setConfig(m_alternativeConfig);
+        break;
+    case TabBoxCurrentAppWindowsMode:
+        m_tabBox->setConfig(m_defaultCurrentApplicationConfig);
+        break;
+    case TabBoxCurrentAppWindowsAlternativeMode:
+        m_tabBox->setConfig(m_alternativeCurrentApplicationConfig);
         break;
     case TabBoxDesktopMode:
         m_tabBox->setConfig(m_desktopConfig);
@@ -556,8 +600,11 @@ ClientList TabBox::currentClientList()
 {
     TabBoxClientList list = m_tabBox->clientList();
     ClientList ret;
-    foreach (const TabBoxClient * client, list) {
-        if (const TabBoxClientImpl* c = static_cast< const TabBoxClientImpl* >(client))
+    foreach (QWeakPointer<TabBoxClient> clientPointer, list) {
+        QSharedPointer<TabBoxClient> client = clientPointer.toStrongRef();
+        if (!client)
+            continue;
+        if (const TabBoxClientImpl* c = static_cast< const TabBoxClientImpl* >(client.data()))
             ret.append(c->client());
     }
     return ret;
@@ -656,6 +703,11 @@ void TabBox::reconfigure()
 
     loadConfig(c->group("TabBox"), m_defaultConfig);
     loadConfig(c->group("TabBoxAlternative"), m_alternativeConfig);
+
+    m_defaultCurrentApplicationConfig = m_defaultConfig;
+    m_defaultCurrentApplicationConfig.setClientApplicationsMode(TabBoxConfig::AllWindowsCurrentApplication);
+    m_alternativeCurrentApplicationConfig = m_alternativeConfig;
+    m_alternativeCurrentApplicationConfig.setClientApplicationsMode(TabBoxConfig::AllWindowsCurrentApplication);
 
     m_tabBox->setConfig(m_defaultConfig);
 
@@ -901,6 +953,38 @@ void TabBox::slotWalkBackThroughWindowsAlternative()
     navigatingThroughWindows(false, m_cutWalkThroughWindowsAlternativeReverse, TabBoxWindowsAlternativeMode);
 }
 
+void TabBox::slotWalkThroughCurrentAppWindows()
+{
+    if (!m_ready){
+        return;
+    }
+    navigatingThroughWindows(true, m_cutWalkThroughCurrentAppWindows, TabBoxCurrentAppWindowsMode);
+}
+
+void TabBox::slotWalkBackThroughCurrentAppWindows()
+{
+    if (!m_ready){
+        return;
+    }
+    navigatingThroughWindows(false, m_cutWalkThroughCurrentAppWindowsReverse, TabBoxCurrentAppWindowsMode);
+}
+
+void TabBox::slotWalkThroughCurrentAppWindowsAlternative()
+{
+    if (!m_ready){
+        return;
+    }
+    navigatingThroughWindows(true, m_cutWalkThroughCurrentAppWindowsAlternative, TabBoxCurrentAppWindowsAlternativeMode);
+}
+
+void TabBox::slotWalkBackThroughCurrentAppWindowsAlternative()
+{
+    if (!m_ready){
+        return;
+    }
+    navigatingThroughWindows(false, m_cutWalkThroughCurrentAppWindowsAlternativeReverse, TabBoxCurrentAppWindowsAlternativeMode);
+}
+
 void TabBox::slotWalkThroughDesktops()
 {
     if (!m_ready){
@@ -1010,6 +1094,26 @@ void TabBox::slotWalkBackThroughWindowsAlternativeKeyChanged(const QKeySequence&
     m_cutWalkThroughWindowsAlternativeReverse = KShortcut(seq);
 }
 
+void TabBox::slotWalkThroughCurrentAppWindowsKeyChanged(const QKeySequence& seq)
+{
+    m_cutWalkThroughCurrentAppWindows = KShortcut(seq);
+}
+
+void TabBox::slotWalkBackThroughCurrentAppWindowsKeyChanged(const QKeySequence& seq)
+{
+    m_cutWalkThroughCurrentAppWindowsReverse = KShortcut(seq);
+}
+
+void TabBox::slotWalkThroughCurrentAppWindowsAlternativeKeyChanged(const QKeySequence& seq)
+{
+    m_cutWalkThroughCurrentAppWindowsAlternative = KShortcut(seq);
+}
+
+void TabBox::slotWalkBackThroughCurrentAppWindowsAlternativeKeyChanged(const QKeySequence& seq)
+{
+    m_cutWalkThroughCurrentAppWindowsAlternativeReverse = KShortcut(seq);
+}
+
 void TabBox::modalActionsSwitch(bool enabled)
 {
     QList<KActionCollection*> collections;
@@ -1021,7 +1125,7 @@ void TabBox::modalActionsSwitch(bool enabled)
     action->setEnabled(enabled);
 }
 
-void TabBox::open(bool modal)
+void TabBox::open(bool modal, const QString &layout)
 {
     if (isDisplayed()) {
         return;
@@ -1036,11 +1140,18 @@ void TabBox::open(bool modal)
     }
     m_noModifierGrab = !modal;
     setMode(TabBoxWindowsMode);
+    if (!layout.isNull()) {
+        TabBoxConfig tempConfig;
+        tempConfig = tabBox->config();
+        tempConfig.setLayoutName(layout);
+        tempConfig.setShowTabBox(true);
+        tabBox->setConfig(tempConfig);
+    }
     reset();
     show();
 }
 
-void TabBox::openEmbedded(qulonglong wid, QPoint offset, QSize size, int horizontalAlignment, int verticalAlignment)
+void TabBox::openEmbedded(qulonglong wid, QPoint offset, QSize size, int horizontalAlignment, int verticalAlignment, const QString &layout)
 {
     if (isDisplayed()) {
         return;
@@ -1052,6 +1163,12 @@ void TabBox::openEmbedded(qulonglong wid, QPoint offset, QSize size, int horizon
     tabBox->setEmbeddedSize(size);
     tabBox->setEmbeddedAlignment(static_cast<Qt::AlignmentFlag>(horizontalAlignment) | static_cast<Qt::AlignmentFlag>(verticalAlignment));
     setMode(TabBoxWindowsMode);
+    if (!layout.isNull()) {
+        TabBoxConfig tempConfig;
+        tempConfig = tabBox->config();
+        tempConfig.setLayoutName(layout);
+        tabBox->setConfig(tempConfig);
+    }
     reset();
     show();
 }
@@ -1200,15 +1317,36 @@ void TabBox::keyPress(int keyQt)
     if (m_tabGrab) {
         KShortcut forwardShortcut;
         KShortcut backwardShortcut;
-        if (mode() == TabBoxWindowsMode) {
-            forwardShortcut = m_cutWalkThroughWindows;
-            backwardShortcut = m_cutWalkThroughWindowsReverse;
-        } else {
-            forwardShortcut = m_cutWalkThroughWindowsAlternative;
-            backwardShortcut = m_cutWalkThroughWindowsAlternativeReverse;
+        switch (mode()) {
+            case TabBoxWindowsMode:
+                forwardShortcut = m_cutWalkThroughWindows;
+                backwardShortcut = m_cutWalkThroughWindowsReverse;
+                break;
+            case TabBoxWindowsAlternativeMode:
+                forwardShortcut = m_cutWalkThroughWindowsAlternative;
+                backwardShortcut = m_cutWalkThroughWindowsAlternativeReverse;
+                break;
+            case TabBoxCurrentAppWindowsMode:
+                forwardShortcut = m_cutWalkThroughCurrentAppWindows;
+                backwardShortcut = m_cutWalkThroughCurrentAppWindowsReverse;
+                break;
+            case TabBoxCurrentAppWindowsAlternativeMode:
+                forwardShortcut = m_cutWalkThroughCurrentAppWindowsAlternative;
+                backwardShortcut = m_cutWalkThroughCurrentAppWindowsAlternativeReverse;
+                break;
+            default:
+                kDebug(125) << "Invalid TabBoxMode";
+                return;
         }
         forward = forwardShortcut.contains(keyQt);
         backward = backwardShortcut.contains(keyQt);
+        if (!forward && !backward) {
+            // if the shortcuts do not match, try matching again after filtering the shift key from keyQt
+            // it is needed to handle correctly the ALT+~ shorcut for example as it is coded as ALT+SHIFT+~ in keyQt
+            keyQt &= ~Qt::ShiftModifier;
+            forward = forwardShortcut.contains(keyQt);
+            backward = backwardShortcut.contains(keyQt);
+        }
         if (forward || backward) {
             kDebug(125) << "== " << forwardShortcut.toString()
                         << " or " << backwardShortcut.toString() << endl;
@@ -1395,6 +1533,14 @@ Client* TabBox::previousClientFocusChain(Client* c) const
     if (pos == globalFocusChain.count())
         return globalFocusChain.first();
     return globalFocusChain[ pos ];
+}
+
+Client *TabBox::firstClientFocusChain() const
+{
+    const ClientList &globalFocusChain = Workspace::self()->globalFocusChain();
+    if (globalFocusChain.isEmpty())
+        return NULL;
+    return globalFocusChain.first();
 }
 
 /*!

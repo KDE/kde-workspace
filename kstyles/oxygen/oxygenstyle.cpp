@@ -50,6 +50,7 @@
 #include "oxygenstyle.moc"
 
 #include "oxygenanimations.h"
+#include "oxygenblurhelper.h"
 #include "oxygenframeshadow.h"
 #include "oxygenmdiwindowshadow.h"
 #include "oxygenmnemonics.h"
@@ -171,6 +172,7 @@ namespace Oxygen
         _frameShadowFactory( new FrameShadowFactory( this ) ),
         _mdiWindowShadowFactory( new MdiWindowShadowFactory( this, *_helper ) ),
         _mnemonics( new Mnemonics( this ) ),
+        _blurHelper( new BlurHelper( this, helper() ) ),
         _widgetExplorer( new WidgetExplorer( this ) ),
         _tabBarData( new TabBarData( this ) ),
         _splitterFactory( new SplitterFactory( this ) ),
@@ -179,6 +181,7 @@ namespace Oxygen
         _hintCounter( X_KdeBase+1 ),
         _controlCounter( X_KdeBase ),
         _subElementCounter( X_KdeBase ),
+        SH_ArgbDndWindow( newStyleHint( "SH_ArgbDndWindow" ) ),
         CE_CapacityBar( newControlElement( "CE_CapacityBar" ) )
 
     {
@@ -271,6 +274,10 @@ namespace Oxygen
             default: break;
 
         }
+
+        // enforce translucency for drag and drop window
+        if( widget->testAttribute( Qt::WA_X11NetWmWindowTypeDND ) && helper().compositingActive() )
+        { widget->setAttribute( Qt::WA_TranslucentBackground ); }
 
         if(
             qobject_cast<QAbstractItemView*>( widget )
@@ -369,13 +376,7 @@ namespace Oxygen
         } else if( widget->inherits( "Q3ToolBar" ) || qobject_cast<QToolBar*>( widget ) ) {
 
             widget->setBackgroundRole( QPalette::NoRole );
-            widget->setAttribute( Qt::WA_TranslucentBackground );
             addEventFilter( widget );
-
-            #ifdef Q_WS_WIN
-            //FramelessWindowHint is needed on windows to make WA_TranslucentBackground work properly
-            widget->setWindowFlags( widget->windowFlags() | Qt::FramelessWindowHint );
-            #endif
 
         } else if( qobject_cast<QTabBar*>( widget ) ) {
 
@@ -465,6 +466,7 @@ namespace Oxygen
         mdiWindowShadowFactory().unregisterWidget( widget );
         shadowHelper().unregisterWidget( widget );
         splitterFactory().unregisterWidget( widget );
+        blurHelper().unregisterWidget( widget );
 
         if( isKTextEditFrame( widget ) )
         { widget->setAttribute( Qt::WA_Hover, false  ); }
@@ -766,8 +768,10 @@ namespace Oxygen
         // to avoid warning at compilation
         if( hint == SH_KCustomStyleElement )
         {
+
             if( widget ) return _styleElements.value( widget->objectName(), 0 );
             else return 0;
+
         }
 
         /*
@@ -803,12 +807,22 @@ namespace Oxygen
                     // in order to still preserve rubberband in MainWindow and QGraphicsView
                     // in QMainWindow because it looks better
                     // in QGraphicsView because the painting fails completely otherwise
-                    if( !( widget && (
+                    if( widget && (
+                        qobject_cast<const QAbstractItemView*>( widget->parent() ) ||
                         qobject_cast<const QGraphicsView*>( widget->parent() ) ||
-                        qobject_cast<const QMainWindow*>( widget->parent() ) ) ) )
-                        { mask->region -= option->rect.adjusted( 1,1,-1,-1 ); }
+                        qobject_cast<const QMainWindow*>( widget->parent() ) ) )
+                    { return true; }
 
-                        return true;
+                    // also check if widget's parent is some itemView viewport
+                    if( widget && widget->parent() &&
+                        qobject_cast<const QAbstractItemView*>( widget->parent()->parent() ) &&
+                        static_cast<const QAbstractItemView*>( widget->parent()->parent() )->viewport() == widget->parent() )
+                    { return true; }
+
+                    // mask out center
+                    mask->region -= option->rect.adjusted( 1,1,-1,-1 );
+
+                    return true;
                 }
                 return false;
             }
@@ -848,7 +862,7 @@ namespace Oxygen
             case SH_FormLayoutLabelAlignment: return Qt::AlignRight;
             case SH_FormLayoutFieldGrowthPolicy: return QFormLayout::ExpandingFieldsGrow;
             case SH_FormLayoutWrapPolicy: return QFormLayout::DontWrapRows;
-            case SH_MessageBox_TextInteractionFlags: return true;
+            case SH_MessageBox_TextInteractionFlags: return Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
             case SH_WindowFrame_Mask: return false;
             case SH_RequestSoftwareInputPanel: return RSIP_OnMouseClick;
 
@@ -1275,20 +1289,9 @@ namespace Oxygen
                 // make sure mask is appropriate
                 if( dockWidget->isFloating() )
                 {
-                    if( helper().compositingActive() )
-                    {
-
-                        // TODO: should not be needed
-                        dockWidget->setMask( helper().roundedMask( dockWidget->rect().adjusted( 1, 1, -1, -1 ) ) );
-
-                    } else {
-
-                        dockWidget->setMask( helper().roundedMask( dockWidget->rect() ) );
-
-                    }
-
+                    if( helper().compositingActive() ) dockWidget->setMask( helper().roundedMask( dockWidget->rect().adjusted( 1, 1, -1, -1 ) ) );
+                    else dockWidget->setMask( helper().roundedMask( dockWidget->rect() ) );
                 } else dockWidget->clearMask();
-
                 return false;
             }
 
@@ -1413,14 +1416,17 @@ namespace Oxygen
             case QEvent::Show:
             case QEvent::Resize:
             {
+
                 // make sure mask is appropriate
-                if( toolBar->isFloating() && !helper().hasAlphaChannel( toolBar ) )
+                if( toolBar->isFloating() )
                 {
 
+                    // TODO: should not be needed
                     toolBar->setMask( helper().roundedMask( toolBar->rect() ) );
 
-                } else  toolBar->clearMask();
+                } else toolBar->clearMask();
                 return false;
+
             }
 
             case QEvent::Paint:
@@ -1444,49 +1450,42 @@ namespace Oxygen
 
                     return false;
 
-                }
+                } else {
 
-                const bool hasAlpha( helper().hasAlphaChannel( toolBar ) );
-                if( hasAlpha )
-                {
-                    painter.setCompositionMode( QPainter::CompositionMode_Source );
-                    TileSet *tileSet( helper().roundCorner( color ) );
-                    tileSet->render( r, &painter );
+                    // background
+                    helper().renderWindowBackground( &painter, r, toolBar, color );
 
-                    painter.setCompositionMode( QPainter::CompositionMode_SourceOver );
-                    painter.setClipRegion( helper().roundedMask( r.adjusted( 1, 1, -1, -1 ) ), Qt::IntersectClip );
-                }
-
-                // background
-                helper().renderWindowBackground( &painter, r, toolBar, color );
-
-                if( toolBar->isMovable() )
-                {
-                    // remaining painting: need to add handle
-                    // this is copied from QToolBar::paintEvent
-                    QStyleOptionToolBar opt;
-                    opt.initFrom( toolBar );
-                    if( toolBar->orientation() == Qt::Horizontal )
+                    if( toolBar->isMovable() )
                     {
+                        // remaining painting: need to add handle
+                        // this is copied from QToolBar::paintEvent
+                        QStyleOptionToolBar opt;
+                        opt.initFrom( toolBar );
+                        if( toolBar->orientation() == Qt::Horizontal )
+                        {
 
-                        opt.rect = handleRTL( &opt, QRect( r.topLeft(), QSize( 8, r.height() ) ) );
-                        opt.state |= QStyle::State_Horizontal;
+                            opt.rect = handleRTL( &opt, QRect( r.topLeft(), QSize( 8, r.height() ) ) );
+                            opt.state |= QStyle::State_Horizontal;
 
-                    } else {
+                        } else {
 
-                        opt.rect = handleRTL( &opt, QRect( r.topLeft(), QSize( r.width(), 8 ) ) );
+                            opt.rect = handleRTL( &opt, QRect( r.topLeft(), QSize( r.width(), 8 ) ) );
+
+                        }
+
+                        drawIndicatorToolBarHandlePrimitive( &opt, &painter, toolBar );
 
                     }
 
-                    drawIndicatorToolBarHandlePrimitive( &opt, &painter, toolBar );
+                    #ifndef Q_WS_WIN
+                    if( helper().compositingActive() ) helper().drawFloatFrame( &painter, r.adjusted( -1, -1, 1, 1 ), color, false );
+                    else helper().drawFloatFrame( &painter, r, color, true );
+                    #endif
+
+                    // do not propagate
+                    return true;
 
                 }
-
-                // frame
-                if( hasAlpha ) painter.setClipping( false );
-                helper().drawFloatFrame( &painter, r, color, !hasAlpha );
-
-                return true;
 
             }
             default: return false;
@@ -2917,6 +2916,9 @@ namespace Oxygen
         else if( flags&State_DownArrow || ( headerOpt && headerOpt->sortIndicator==QStyleOptionHeader::SortDown ) ) orientation = ArrowDown;
         if( orientation == ArrowNone ) return true;
 
+        // invert arrows if requested by (hidden) options
+        if( StyleConfigData::viewInvertSortIndicator() ) orientation = (orientation == ArrowUp) ? ArrowDown:ArrowUp;
+
         // flags, rect and palette
         const QRect& r( option->rect );
         const QPalette& palette( option->palette );
@@ -3506,6 +3508,8 @@ namespace Oxygen
         const bool hasAlpha( helper().hasAlphaChannel( widget ) );
         if(  hasAlpha && StyleConfigData::toolTipTransparent() )
         {
+
+            blurHelper().registerWidget( widget->window() );
             topColor.setAlpha( 220 );
             bottomColor.setAlpha( 220 );
         }
@@ -4899,10 +4903,10 @@ namespace Oxygen
         if( !busyIndicator )
         {
             const qreal widthFrac = qMin( (qreal)1.0, progress / steps );
-            indicatorSize = widthFrac*( horizontal ? r.width() : r.height() );
+            indicatorSize = widthFrac*( horizontal ? r.width() : r.height() ) - (horizontal ? 2:1);
         }
 
-        if( indicatorSize )
+        if( indicatorSize > 0 )
         {
             if ( horizontal ) painter->setClipRect( handleRTL( option, QRect( r.x(), r.y(), indicatorSize, r.height() ) ) );
             else if ( !reverseLayout )  painter->setClipRect( QRect( r.height()-indicatorSize, 0, r.height(), r.width() ) );
@@ -7961,6 +7965,7 @@ namespace Oxygen
     void Style::oxygenConfigurationChanged( void )
     {
 
+
         // reset helper configuration
         helper().reloadConfig();
 
@@ -7975,6 +7980,9 @@ namespace Oxygen
             StyleConfigData::maxCacheSize():0 );
 
         helper().setMaxCacheSize( cacheSize );
+
+        // always enable blur helper
+        blurHelper().setEnabled( true );
 
         // reinitialize engines
         animations().setupEngines();

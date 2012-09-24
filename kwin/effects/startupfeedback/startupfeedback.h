@@ -64,6 +64,7 @@ private:
     void prepareTextures(const QPixmap& pix);
     QRect feedbackRect() const;
 
+    qreal m_bounceSizesRatio;
     KStartupInfo* m_startupInfo;
     KSelectionOwner* m_selection;
     KStartupInfoId m_currentStartup;
@@ -74,7 +75,7 @@ private:
     GLTexture* m_bouncingTextures[5];
     GLTexture* m_texture; // for passive and blinking
     FeedbackType m_type;
-    QRect m_currentGeometry;
+    QRect m_currentGeometry, m_dirtyRect;
     GLShader *m_blinkingShader;
 };
 } // namespace

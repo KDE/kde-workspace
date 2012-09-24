@@ -64,8 +64,7 @@ protected:
 protected Q_SLOTS:
     void onAppletAdded(Plasma::Applet *, const QPointF &);
     void onAppletRemoved(Plasma::Applet *);
-    void onAppletTransformedByUser();
-    void onAppletTransformedItself();
+    void onAppletTransformed();
     void refreshWorkingArea();
 
 private:

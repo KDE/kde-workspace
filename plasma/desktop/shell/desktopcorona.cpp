@@ -63,6 +63,7 @@ DesktopCorona::DesktopCorona(QObject *parent)
     : Plasma::Corona(parent),
       m_addPanelAction(0),
       m_addPanelsMenu(0),
+      m_delayedUpdateTimer(new QTimer(this)),
       m_activityController(new KActivities::Controller(this))
 {
     init();
@@ -113,6 +114,12 @@ void DesktopCorona::init()
     action->setGlobalShortcut(KShortcut(Qt::META + Qt::SHIFT + Qt::Key_Tab));
     connect(action, SIGNAL(triggered()), this, SLOT(activatePreviousActivity()));
 
+    action = new KAction(PlasmaApp::self());
+    action->setText(i18n("Stop Current Activity"));
+    action->setObjectName( QLatin1String("Stop Activity")); //no I18N
+    action->setGlobalShortcut(KShortcut(Qt::META + Qt::Key_S));
+    connect(action, SIGNAL(triggered()), this, SLOT(stopCurrentActivity()));
+
     connect(this, SIGNAL(immutabilityChanged(Plasma::ImmutabilityType)),
             this, SLOT(updateImmutability(Plasma::ImmutabilityType)));
     connect(KSycoca::self(), SIGNAL(databaseChanged(QStringList)), this, SLOT(checkAddPanelAction(QStringList)));
@@ -120,6 +127,15 @@ void DesktopCorona::init()
     connect(m_activityController, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
     connect(m_activityController, SIGNAL(activityAdded(QString)), this, SLOT(activityAdded(QString)));
     connect(m_activityController, SIGNAL(activityRemoved(QString)), this, SLOT(activityRemoved(QString)));
+
+    // Everything will be repainted shortly after a screen resize was processed, but unfortunately that does not suffice:
+    // When screen size is increased, parts of the newly uncovered area on the panel remain black for some reason. Also,
+    // if compositing is disabled and the desktop background is a color, parts of the panel are left on the background.
+    // Redrawing the entire scene shortly thereafter works around the problem.
+    m_delayedUpdateTimer->setSingleShot(true);
+    m_delayedUpdateTimer->setInterval(250); // 100ms was not enough
+    connect(this, SIGNAL(availableScreenRegionChanged()), m_delayedUpdateTimer, SLOT(start()));
+    connect(m_delayedUpdateTimer, SIGNAL(timeout()), this, SLOT(update()));
 
     mapAnimation(Plasma::Animator::AppearAnimation, Plasma::Animator::ZoomAnimation);
     mapAnimation(Plasma::Animator::DisappearAnimation, Plasma::Animator::ZoomAnimation);
@@ -596,7 +612,7 @@ void DesktopCorona::checkActivities()
              cont->containmentType() == Plasma::Containment::CustomContainment) &&
             !offscreenWidgets().contains(cont)) {
             Plasma::Context *context = cont->context();
-            QString oldId = context->currentActivityId();
+            const QString oldId = context->currentActivityId();
             if (!oldId.isEmpty()) {
                 if (existingActivities.contains(oldId)) {
                     continue; //it's already claimed
@@ -606,17 +622,18 @@ void DesktopCorona::checkActivities()
                 cont->destroy(false);
                 continue;
             }
-            if (cont->screen() > -1) {
-                //it belongs on the current activity
-                if (!newCurrentActivity.isEmpty()) {
-                    context->setCurrentActivityId(newCurrentActivity);
-                    continue;
-                }
+
+            if (cont->screen() > -1 && !newCurrentActivity.isEmpty()) {
+                //it belongs on the new current activity
+                context->setCurrentActivityId(newCurrentActivity);
+                continue;
             }
+
             //discourage blank names
             if (context->currentActivity().isEmpty()) {
                 context->setCurrentActivity(i18nc("Default name for a new activity", "New Activity"));
             }
+
             //create a new activity for the containment
             QString id = m_activityController->addActivity(context->currentActivity());
             context->setCurrentActivityId(id);
@@ -624,7 +641,7 @@ void DesktopCorona::checkActivities()
             if (cont->screen() > -1) {
                 newCurrentActivity = id;
             }
-            kDebug() << "migrated" << context->currentActivityId() << context->currentActivity();
+            kDebug() << "migrated" << cont->id() << context->currentActivityId() << context->currentActivity();
         }
     }
 
@@ -730,6 +747,18 @@ void DesktopCorona::activatePreviousActivity()
     }
 
     m_activityController->setCurrentActivity(list.at(i));
+}
+
+void DesktopCorona::stopCurrentActivity()
+{
+    QStringList list = m_activityController->listActivities(KActivities::Info::Running);
+    //if there are no other activities to switch to, do not stop the current activity.
+    if (list.size() <= 1) {
+        return;
+    }
+
+    QString currentActivity = m_activityController->currentActivity();
+    m_activityController->stopActivity(currentActivity);
 }
 
 

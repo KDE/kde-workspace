@@ -757,17 +757,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Shade</string>
+           <string comment="inactive intensity effect">Shade</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Darken</string>
+           <string comment="inactive intensity effect">Darken</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Lighten</string>
+           <string comment="inactive intensity effect">Lighten</string>
           </property>
          </item>
         </widget>
@@ -829,17 +829,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Desaturate</string>
+           <string comment="inactive color effect">Desaturate</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Fade</string>
+           <string comment="inactive color effect">Fade</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tint</string>
+           <string comment="inactive color effect">Tint</string>
           </property>
          </item>
         </widget>
@@ -895,12 +895,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Fade</string>
+           <string comment="inactive contrast effect">Fade</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tint</string>
+           <string comment="inactive contrast effect">Tint</string>
           </property>
          </item>
         </widget>
@@ -1007,17 +1007,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Shade</string>
+           <string comment="disabled intensity effect">Shade</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Darken</string>
+           <string comment="disabled intensity effect">Darken</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Lighten</string>
+           <string comment="disabled intensity effect">Lighten</string>
           </property>
          </item>
         </widget>
@@ -1079,17 +1079,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Desaturate</string>
+           <string comment="disabled color effect">Desaturate</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Fade</string>
+           <string comment="disabled color effect">Fade</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tint</string>
+           <string comment="disabled color effect">Tint</string>
           </property>
          </item>
         </widget>
@@ -1145,12 +1145,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Fade</string>
+           <string comment="disabled contrast">Fade</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tint</string>
+           <string comment="disabled contrast">Tint</string>
           </property>
          </item>
         </widget>

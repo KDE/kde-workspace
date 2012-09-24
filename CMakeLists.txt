@@ -2,8 +2,8 @@ project(KDEBASE_WORKSPACE)
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
-set(KDE4WORKSPACE_VERSION_MINOR 8)
-set(KDE4WORKSPACE_VERSION_PATCH 40)
+set(KDE4WORKSPACE_VERSION_MINOR 9)
+set(KDE4WORKSPACE_VERSION_PATCH 70)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
 
@@ -13,15 +13,21 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 #search packages used by KDE
 set(QT_MIN_VERSION "4.7.0")
 set(KDE_MIN_VERSION "4.8.1")
-set(SOPRANO_MIN_VERSION "2.5.63")
+set(SOPRANO_MIN_VERSION "2.7.56")
+
+OPTION(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
+
 find_package(KDE4 ${KDE_MIN_VERSION} REQUIRED)
 find_package(Strigi REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(KActivities 6.0.0 REQUIRED)
 find_package(DBusMenuQt 0.6.0 REQUIRED)
 find_package(QImageBlitz REQUIRED)
+find_package(KDeclarative REQUIRED)
 macro_optional_find_package(OpenGL)
 macro_optional_find_package(OpenGLES)
+
+macro_log_feature(KDeclarative_FOUND "libkdeclarative" "KDE Declarative (QML) support from kdelibs" "http://www.kde.org" TRUE "" "Required by ksmserver.")
 
 if(Q_WS_X11)
   if(NOT X11_XTest_FOUND)
@@ -70,43 +76,28 @@ macro_optional_find_package(GLIB2)
 macro_log_feature(GLIB2_FOUND "glib2" "Low-level core library for data structure handling, portability wrappers, etc." "http://www.gtk.org" FALSE "2.x" "Needed to build the kxkb keyboard map control program and provide XMMS support in the Now Playing Plasma data engine")
 
 macro_optional_find_package(Fontconfig)
+macro_log_feature(FONTCONFIG_FOUND "Fontconfig" "Font access configuration library" "http://www.freedesktop.org/wiki/Software/fontconfig" FALSE "" "Needed to build font configuration and installation tools")
 
 macro_optional_find_package(Googlegadgets)
 macro_log_feature(GOOGLEGADGETS_FOUND "GoogleGadgets" "Google Gadgets library" "http://code.google.com/p/google-gadgets-for-linux/" FALSE "0.11.0" "Needed to build plasma scriptengine for google gadgets")
 
-#### Python support ####
+#### Python support ( plasma scriptengines ) ####
 macro_optional_find_package(PythonLibrary)
-
-macro_optional_find_package(SIP)
-if(SIP_FOUND AND SIP_VERSION STRLESS "040701")
-  message(STATUS "The version of SIP found is too old. 4.7.1 or later is needed.")
-  set(SIP_FOUND)
-endif(SIP_FOUND AND SIP_VERSION STRLESS "040701")
-
-include(SIPMacros)
-
-macro_optional_find_package(PyQt4)
-if(PYQT4_FOUND AND PYQT4_VERSION STRLESS "040400")
-  message(STATUS "The version of PyQt found is too old. 4.4.0 or later is required.")
-  set(PYQT4_FOUND)
-endif(PYQT4_FOUND AND PYQT4_VERSION STRLESS "040400")
-
-macro_optional_find_package(PyKDE4)
-set(PythonSupport_FOUND TRUE)
-
-#### End Python support ####
+macro_log_feature(PYTHONLIBRARY_FOUND "Python" "Python scripting language" "http://python.org" FALSE "" "Needed to build plasma scriptengine for python.")
 
 include(MacroLibrary)
 include(KDE4Defaults)
 
-macro_optional_find_package(Nepomuk)
-macro_log_feature(Nepomuk_FOUND "Nepomuk" "Nepomuk Libraries" "kdelibs" FALSE "" "Required to build Nepomuk features.")
+macro_optional_find_package(NepomukCore)
+macro_log_feature(NepomukCore_FOUND "Nepomuk" "Nepomuk Core Library" "nepomuk-core" FALSE "" "Required to build Nepomuk features.")
 macro_optional_find_package(Boost)
 macro_log_feature(Boost_FOUND "Boost" "Boost C++ Libraries" "www.boost.org" FALSE "" "Required to build certain Plasma DataEngines (Akonadi, RSS, Calendar)")
 macro_optional_find_package(Akonadi)
 macro_log_feature(Akonadi_FOUND "Akonadi" "An extensible cross-desktop storage service for PIM data" "http://pim.kde.org/akonadi" FALSE "" "Required to build certain Plasma DataEngines (Akonadi, Calendar)")
 macro_optional_find_package(KdepimLibs 4.5.60)
 macro_log_feature(KdepimLibs_FOUND "KDE PIM Libs" "KDE Libraries for PIM" "http://pim.kde.org/" FALSE "4.5.60" "Required to build certain Plasma DataEngines (Akonadi, Calendar)")
+macro_optional_find_package(QJSON)
+macro_log_feature(QJSON_FOUND "QJson" "Library to manage JSON objects with Qt" "http://qjson.sourceforge.net/" FALSE "" "Required to build Chrome/Chromium support for Plasma Bookmarks Runners")
 
 
 include(ConfigureChecks.cmake)
@@ -140,7 +131,11 @@ if(NOT WIN32)
    macro_optional_add_subdirectory( kcheckpass )
    macro_optional_add_subdirectory( kwin )
    macro_optional_add_subdirectory( ksmserver )
+
+   find_package(JPEG REQUIRED)
+   find_package(PNG REQUIRED)
    macro_optional_add_subdirectory( ksplash )
+
    macro_optional_add_subdirectory( powerdevil )
    macro_optional_add_subdirectory( qguiplatformplugin_kde )
    if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
@@ -175,7 +170,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    endif(NOT WIN32)
 
    if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
-      add_subdirectory( kdm )
+      macro_optional_add_subdirectory( kdm )
    else(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
       message(STATUS "Xau lib or Xdmcp lib was missing. kdm will not compile")
    endif(X11_Xau_FOUND AND X11_Xdmcp_FOUND)

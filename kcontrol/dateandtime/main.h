@@ -34,11 +34,9 @@ class KclockModule : public KCModule
 
 public:
   KclockModule(QWidget *parent, const QVariantList &);
-  
+
   void	save();
   void	load();
-private Q_SLOTS:
-  void slotDateTimeHelperFinished(int exitCode);
 
 private:
   QTabWidget   *tab;

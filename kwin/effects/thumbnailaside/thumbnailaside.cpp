@@ -20,10 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "thumbnailaside.h"
+// KConfigSkeleton
+#include "thumbnailasideconfig.h"
 
 #include <kactioncollection.h>
 #include <kaction.h>
-#include <kconfiggroup.h>
 #include <klocale.h>
 
 namespace KWin
@@ -46,11 +47,11 @@ ThumbnailAsideEffect::ThumbnailAsideEffect()
 
 void ThumbnailAsideEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = EffectsHandler::effectConfig("ThumbnailAside");
-    maxwidth = conf.readEntry("MaxWidth", 200);
-    spacing = conf.readEntry("Spacing", 10);
-    opacity = conf.readEntry("Opacity", 50) / 100.0;
-    screen = conf.readEntry("Screen", -1); // Xinerama screen TODO add gui option
+    ThumbnailAsideConfig::self()->readConfig();
+    maxwidth = ThumbnailAsideConfig::maxWidth();
+    spacing = ThumbnailAsideConfig::spacing();
+    opacity = ThumbnailAsideConfig::opacity()/100.0;
+    screen = ThumbnailAsideConfig::screen(); // Xinerama screen TODO add gui option
     arrange();
 }
 
@@ -60,7 +61,7 @@ void ThumbnailAsideEffect::paintScreen(int mask, QRegion region, ScreenPaintData
     foreach (const Data & d, windows) {
         if (region.contains(d.rect)) {
             WindowPaintData data(d.window);
-            data.opacity = opacity;
+            data.multiplyOpacity(opacity);
             QRect region;
             setPositionTransformations(data, region, d.window, d.rect, Qt::KeepAspectRatio);
             effects->drawWindow(d.window, PAINT_WINDOW_OPAQUE | PAINT_WINDOW_TRANSLUCENT | PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_LANCZOS,

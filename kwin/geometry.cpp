@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "client.h"
+#include "composite.h"
 #include "workspace.h"
 
 #include <kapplication.h>
@@ -46,9 +47,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <KDE/KGlobalSettings>
 #include "outline.h"
-#ifdef KWIN_BUILD_TILING
-#include "tiling/tiling.h"
-#endif
 
 namespace KWin
 {
@@ -67,7 +65,9 @@ void Workspace::desktopResized()
 {
     QRect geom;
     for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
-        geom |= QApplication::desktop()->screenGeometry(i);
+        //do NOT use - QApplication::desktop()->screenGeometry(i) there could be a virtual geometry
+        // see bug #302783
+        geom |= QApplication::desktop()->screen(i)->geometry();
     }
     NETSize desktop_geometry;
     desktop_geometry.width = geom.width();
@@ -1910,7 +1910,6 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force)
     // to detect changes
     workspace()->checkActiveScreen(this);
     workspace()->updateStackingOrder();
-    workspace()->checkUnredirect();
 
     // need to regenerate decoration pixmaps when either
     // - size is changed
@@ -1928,7 +1927,7 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Geometry);
 
     // TODO: this signal is emitted too often
     emit geometryChanged();
@@ -1984,7 +1983,6 @@ void Client::plainResize(int w, int h, ForceGeometry_t force)
     updateWindowRules(Rules::Position|Rules::Size);
     workspace()->checkActiveScreen(this);
     workspace()->updateStackingOrder();
-    workspace()->checkUnredirect();
     discardWindowPixmap();
     emit geometryShapeChanged(this, geom_before_block);
     const QRect deco_rect = visibleRect();
@@ -1995,7 +1993,7 @@ void Client::plainResize(int w, int h, ForceGeometry_t force)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Geometry);
     // TODO: this signal is emitted too often
     emit geometryChanged();
 }
@@ -2029,10 +2027,10 @@ void Client::move(int x, int y, ForceGeometry_t force)
     updateWindowRules(Rules::Position);
     workspace()->checkActiveScreen(this);
     workspace()->updateStackingOrder();
-    workspace()->checkUnredirect();
-#ifdef KWIN_BUILD_TILING
-    workspace()->tiling()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
-#endif
+    if (Compositor::isCreated()) {
+        // TODO: move out of geometry.cpp, is this really needed here?
+        Compositor::self()->checkUnredirect();
+    }
     // client itself is not damaged
     const QRect deco_rect = visibleRect();
     addLayerRepaint(deco_rect_before_block);
@@ -2042,7 +2040,7 @@ void Client::move(int x, int y, ForceGeometry_t force)
 
     // Update states of all other windows in this group
     if (tabGroup())
-        tabGroup()->updateStates(this);
+        tabGroup()->updateStates(this, TabGroup::Geometry);
 }
 
 void Client::blockGeometryUpdates(bool block)
@@ -2082,10 +2080,35 @@ void Client::setMaximize(bool vertically, bool horizontally)
     emit clientMaximizedStateChanged(this, max_mode);
     emit clientMaximizedStateChanged(this, vertically, horizontally);
 
-    // Update states of all other windows in this group
-    if (tabGroup())
-        tabGroup()->updateStates(this);
 }
+
+// Update states of all other windows in this group
+class TabSynchronizer
+{
+public:
+    TabSynchronizer(Client *client, TabGroup::States syncStates) :
+    m_client(client) , m_states(syncStates)
+    {
+        if (client->tabGroup())
+            client->tabGroup()->blockStateUpdates(true);
+    }
+    ~TabSynchronizer()
+    {
+        syncNow();
+    }
+    void syncNow()
+    {
+        if (m_client && m_client->tabGroup()) {
+            m_client->tabGroup()->blockStateUpdates(false);
+            m_client->tabGroup()->updateStates(m_client, m_states);
+        }
+        m_client = 0;
+    }
+private:
+    Client *m_client;
+    TabGroup::States m_states;
+};
+
 
 static bool changeMaximizeRecursion = false;
 void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
@@ -2116,6 +2139,8 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
         return;
 
     GeometryUpdatesBlocker blocker(this);
+    // QT synchronizing required because we eventually change from QT to Maximized
+    TabSynchronizer syncer(this, TabGroup::Maximized|TabGroup::QuickTile);
 
     // maximing one way and unmaximizing the other way shouldn't happen,
     // so restore first and then maximize the other way
@@ -2246,6 +2271,7 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
                 restore.moveLeft(geom_restore.x());
             if (geom_restore.height() > 0)
                 restore.moveTop(geom_restore.y());
+            geom_restore = restore; // relevant for mouse pos calculation, bug #298646
         }
         setGeometry(restore, geom_mode);
         if (!clientArea.contains(geom_restore.center()))    // Not restoring to the same screen
@@ -2270,6 +2296,8 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
     default:
         break;
     }
+
+    syncer.syncNow(); // important because of window rule updates!
 
     updateAllowedActions();
     if (decoration != NULL)
@@ -2315,7 +2343,9 @@ void Client::setFullScreen(bool set, bool user)
     set = rules()->checkFullScreen(set);
     setShade(ShadeNone);
     bool was_fs = isFullScreen();
-    if (!was_fs)
+    if (was_fs)
+        workspace()->updateFocusMousePosition(QCursor::pos());
+    else
         geom_fs_restore = geometry();
     fullscreen_mode = set ? FullScreenNormal : FullScreenNone;
     if (was_fs == isFullScreen())
@@ -2346,7 +2376,6 @@ void Client::setFullScreen(bool set, bool user)
         }
     }
     updateWindowRules(Rules::Fullscreen|Rules::Position|Rules::Size);
-    workspace()->checkUnredirect();
 
     if (was_fs != isFullScreen()) {
         emit clientFullScreenSet(this, set, user);
@@ -2465,7 +2494,7 @@ void Client::positionGeometryTip()
         geometryTip->raise();
     }
 }
-static int s_lastScreen = 0;
+
 bool Client::startMoveResize()
 {
     assert(!moveResizeMode);
@@ -2495,6 +2524,9 @@ bool Client::startMoveResize()
         return false;
     }
 
+    moveResizeMode = true;
+    workspace()->setClientIsMoving(this);
+
     // If we have quick maximization enabled then it's safe to automatically restore windows
     // when starting a move as the user can undo their action by moving the window back to
     // the top of the screen. When the setting is disabled then doing so is confusing.
@@ -2502,9 +2534,12 @@ bool Client::startMoveResize()
     if (maximizeMode() != MaximizeRestore && (maximizeMode() != MaximizeFull || options->moveResizeMaximizedWindows())) {
         // allow moveResize, but unset maximization state in resize case
         if (mode != PositionCenter) { // means "isResize()" but moveResizeMode = true is set below
-            geom_restore = geometry(); // "restore" to current geometry
-            setMaximize(false, false);
-        }
+            if (maximizeMode() == MaximizeFull) { // partial is cond. reset in finishMoveResize
+                geom_restore = geometry(); // "restore" to current geometry
+                setMaximize(false, false);
+            }
+        } else if (quick_tile_mode != QuickTileNone) // no longer now - we move, resize is handled below
+            setQuickTileMode(QuickTileNone); // otherwise we mess every second tile, bug #303937
     } else if ((maximizeMode() == MaximizeFull && options->electricBorderMaximize()) ||
                (quick_tile_mode != QuickTileNone && isMovable() && mode == PositionCenter)) {
         // Exit quick tile mode when the user attempts to move a tiled window, cannot use isMove() yet
@@ -2521,10 +2556,8 @@ bool Client::startMoveResize()
         quick_tile_mode = QuickTileNone; // Do so without restoring original geometry
     }
 
-    moveResizeMode = true;
     s_haveResizeEffect = effects && static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::Resize);
-    s_lastScreen = moveResizeStartScreen = screen();
-    workspace()->setClientIsMoving(this);
+    moveResizeStartScreen = screen();
     initialMoveResizeGeom = moveResizeGeom = geometry();
     checkUnrestrictedMoveResize();
     Notify::raise(isResize() ? Notify::ResizeStart : Notify::MoveStart);
@@ -2533,7 +2566,7 @@ bool Client::startMoveResize()
     if (options->electricBorders() == Options::ElectricMoveOnly ||
             options->electricBorderMaximize() ||
             options->electricBorderTiling())
-        workspace()->screenEdge()->reserveDesktopSwitching(true);
+        workspace()->screenEdge()->reserveDesktopSwitching(true, Qt::Vertical|Qt::Horizontal);
 #endif
     if (fakeMove) // fix geom_restore position - it HAS to happen at the end, ie. when all moving is set up. inline call will lock focus!!
         handleMoveResize(QCursor::pos().x(), QCursor::pos().y(), QCursor::pos().x(), QCursor::pos().y());
@@ -2573,34 +2606,28 @@ static ElectricBorder electricBorderFromMode(QuickTileMode mode)
 
 void Client::finishMoveResize(bool cancel)
 {
-    // store for notification
-    bool wasResize = isResize();
-    bool wasMove = isMove();
-
+    const bool wasResize = isResize(); // store across leaveMoveResize
     leaveMoveResize();
 
-#ifdef KWIN_BUILD_TILING
-    if (workspace()->tiling()->isEnabled()) {
-        if (wasResize)
-            workspace()->tiling()->notifyTilingWindowResizeDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
-        else if (wasMove)
-            workspace()->tiling()->notifyTilingWindowMoveDone(this, moveResizeGeom, initialMoveResizeGeom, cancel);
-    } else {
-        if (cancel)
-            setGeometry(initialMoveResizeGeom);
-        else
-            setGeometry(moveResizeGeom);
-        if (screen() != moveResizeStartScreen && maximizeMode() != MaximizeRestore)
-            checkWorkspacePosition();
-    }
-#else
     if (cancel)
         setGeometry(initialMoveResizeGeom);
-    else
+    else {
+        if (wasResize) {
+            const bool restoreH = maximizeMode() == MaximizeHorizontal &&
+                                    moveResizeGeom.width() != initialMoveResizeGeom.width();
+            const bool restoreV = maximizeMode() == MaximizeVertical &&
+                                    moveResizeGeom.height() != initialMoveResizeGeom.height();
+            if (restoreH || restoreV) // NOT setMaximize(restoreH, restoreV); !
+                setMaximize(false, false);
+        }
         setGeometry(moveResizeGeom);
-    Q_UNUSED(wasResize);
-    Q_UNUSED(wasMove);
-#endif
+    }
+    const int newScreen = screen();
+    if (newScreen != moveResizeStartScreen) {
+        workspace()->sendClientToScreen(this, newScreen); // checks rule validity
+        if (maximizeMode() != MaximizeRestore)
+            checkWorkspacePosition();
+    }
 
     if (isElectricBorderMaximizing()) {
         setQuickTileMode(electricMode);
@@ -2615,7 +2642,14 @@ void Client::finishMoveResize(bool cancel)
         electricMaximizing = false;
         workspace()->outline()->hide();
     } else if (!cancel) {
-        geom_restore = geometry();
+        if (!(maximizeMode() & MaximizeHorizontal)) {
+            geom_restore.setX(geometry().x());
+            geom_restore.setWidth(geometry().width());
+        }
+        if (!(maximizeMode() & MaximizeVertical)) {
+            geom_restore.setY(geometry().y());
+            geom_restore.setHeight(geometry().height());
+        }
     }
 // FRAME    update();
 
@@ -2646,7 +2680,7 @@ void Client::leaveMoveResize()
     if (options->electricBorders() == Options::ElectricMoveOnly ||
             options->electricBorderMaximize() ||
             options->electricBorderTiling())
-        workspace()->screenEdge()->reserveDesktopSwitching(false);
+        workspace()->screenEdge()->reserveDesktopSwitching(false, Qt::Vertical|Qt::Horizontal);
 #endif
 }
 
@@ -2768,12 +2802,6 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
     bool update = false;
     if (isResize()) {
-#ifdef KWIN_BUILD_TILING
-        // query layout for supported resize mode
-        if (workspace()->tiling()->isEnabled()) {
-            mode = workspace()->tiling()->supportedTilingResizeMode(this, mode);
-        }
-#endif
         // first resize (without checking constrains), then snap, then check bounds, then check constrains
         QRect orig = initialMoveResizeGeom;
         Sizemode sizemode = SizemodeAny;
@@ -2807,22 +2835,10 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
             sizemode = SizemodeFixedW;
             break;
         case PositionCenter:
-#ifdef KWIN_BUILD_TILING
-            // exception for tiling
-            // Center means no resizing allowed
-            if (workspace()->tiling()->isEnabled()) {
-                finishMoveResize(false);
-                buttonDown = false;
-                return;
-            }
-#endif
         default:
             abort();
             break;
         }
-#ifdef KWIN_BUILD_TILING
-        workspace()->tiling()->notifyTilingWindowResize(this, moveResizeGeom, initialMoveResizeGeom);
-#endif
         // adjust new size to snap to other windows/borders
         moveResizeGeom = workspace()->adjustClientSize(this, moveResizeGeom, mode);
 
@@ -2947,13 +2963,13 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
             if (!unrestrictedMoveResize) {
                 // Make sure the titlebar isn't behind a restricted area.
-                const QRegion fullArea = workspace()->clientArea(ScreenArea, s_lastScreen, 0);   // On the screen
-                const QRegion moveArea = workspace()->restrictedMoveArea(desktop());   // Strut areas
+                const QRegion fullArea = workspace()->clientArea(FullArea, this);   // On the screen
+                const QRegion strut = workspace()->restrictedMoveArea(desktop());   // Strut areas
                 for (;;) {
                     QRegion titlebarRegion(moveResizeGeom.left(), moveResizeGeom.top(),
                                            moveResizeGeom.width(), frameTop);
                     titlebarRegion &= fullArea;
-                    titlebarRegion -= moveArea;   // Strut areas
+                    titlebarRegion -= strut;   // Strut areas
                     // Now we have a region of all the visible areas of the titlebar
                     // Count the visible pixels and check to see if it's enough
                     int visiblePixels = 0;
@@ -2963,6 +2979,31 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
                     if (visiblePixels >= titlebarArea)
                         break; // We have reached a valid position
 
+                    // (esp.) if there're more screens with different struts (panels) it the titlebar
+                    // will be movable outside the movearea (covering one of the panels) until it
+                    // crosses the panel "too much" (not enough visiblePixels) and then stucks because
+                    // it's usually only pushed by 1px to either direction
+                    // so we first check whether we intersect suc strut and move the window below it
+                    // immediately (it's still possible to hit the visiblePixels >= titlebarArea break
+                    // by moving the window slightly downwards, but it won't stuck)
+                    // see bug #274466
+                    // and bug #301805 for why we can't just match the titlearea against the screen
+                    if (QApplication::desktop()->screenCount() > 1) { // optimization
+                        // TODO: could be useful on partial screen struts (half-width panels etc.)
+                        int newTitleTop = -1;
+                        foreach (const QRect &r, strut.rects()) {
+                            if (r.top() == 0 && r.width() > r.height() && // "top panel"
+                                r.intersects(moveResizeGeom) && moveResizeGeom.top() < r.bottom()) {
+                                newTitleTop = r.bottom();
+                                break;
+                            }
+                        }
+                        if (newTitleTop > -1) {
+                            moveResizeGeom.moveTop(newTitleTop); // invalid position, possibly on screen change
+                            break;
+                        }
+                    }
+
                     // Move it (Favour vertically)
                     if (previousMoveResizeGeom.y() != moveResizeGeom.y())
                         moveResizeGeom.translate(0,
@@ -2970,27 +3011,14 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
                     else
                         moveResizeGeom.translate(previousMoveResizeGeom.x() > moveResizeGeom.x() ? 1 : -1,
                                                  0);
-                    if (moveResizeGeom == previousMoveResizeGeom)
+                    if (moveResizeGeom == previousMoveResizeGeom) {
                         break; // Prevent lockup
+                    }
                 }
             }
         }
         if (moveResizeGeom.topLeft() != previousMoveResizeGeom.topLeft())
             update = true;
-        else if (screen() != s_lastScreen) {  // invalid position on screen change?
-            s_lastScreen = screen();
-            const QRect area = workspace()->clientArea(WorkArea, s_lastScreen, desktop());
-            if (moveResizeGeom.bottom() > area.bottom())
-                moveResizeGeom.moveBottom(area.bottom());
-            if (moveResizeGeom.right() > area.right())
-                moveResizeGeom.moveRight(area.right());
-            if (moveResizeGeom.top() < area.top())
-                moveResizeGeom.moveTop(area.top());
-            if (moveResizeGeom.left() < area.left())
-                moveResizeGeom.moveLeft(area.left());
-            if (moveResizeGeom.topLeft() != previousMoveResizeGeom.topLeft())
-                update = true;
-        }
     } else
         abort();
 
@@ -3012,9 +3040,6 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
         performMoveResize();
 
     if (isMove()) {
-#ifdef KWIN_BUILD_TILING
-        workspace()->tiling()->notifyTilingWindowMove(this, moveResizeGeom, initialMoveResizeGeom);
-#endif
 #ifdef KWIN_BUILD_SCREENEDGES
         workspace()->screenEdge()->check(globalPos, xTime());
 #endif
@@ -3023,13 +3048,8 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
 
 void Client::performMoveResize()
 {
-#ifdef KWIN_BUILD_TILING
-    if (!workspace()->tiling()->isEnabled())
-#endif
-    {
-        if (isMove() || (isResize() && !s_haveResizeEffect)) {
-            setGeometry(moveResizeGeom);
-        }
+    if (isMove() || (isResize() && !s_haveResizeEffect)) {
+        setGeometry(moveResizeGeom);
     }
 #ifdef HAVE_XSYNC
     if (isResize() && syncRequest.counter != None)
@@ -3100,6 +3120,7 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
 
     if (mode == QuickTileMaximize)
     {
+        TabSynchronizer syncer(this, TabGroup::QuickTile|TabGroup::Geometry|TabGroup::Maximized);
         quick_tile_mode = QuickTileNone;
         if (maximizeMode() == MaximizeFull)
             setMaximize(false, false);
@@ -3121,6 +3142,9 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
 
     // restore from maximized so that it is possible to tile maximized windows with one hit or by dragging
     if (maximizeMode() == MaximizeFull) {
+
+        TabSynchronizer syncer(this, TabGroup::QuickTile|TabGroup::Geometry|TabGroup::Maximized);
+
         setMaximize(false, false);
 
         // Temporary, so the maximize code doesn't get all confused
@@ -3136,12 +3160,18 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
     // First, check if the requested tile negates the tile we're in now: move right when left or left when right
     // is the same as explicitly untiling this window, so allow it.
     if (mode == QuickTileNone || ((quick_tile_mode & QuickTileHorizontal) && (mode & QuickTileHorizontal))) {
-        // Untiling, so just restore geometry, and we're done.
-        setGeometry(geom_restore);
+        TabSynchronizer syncer(this, TabGroup::QuickTile|TabGroup::Geometry);
+
         quick_tile_mode = QuickTileNone;
+        // Untiling, so just restore geometry, and we're done.
+        if (!geom_restore.isValid()) // invalid if we started maximized and wait for placement
+            geom_restore = geometry();
+        setGeometry(geom_restore);
         checkWorkspacePosition(); // Just in case it's a different screen
         return;
     } else {
+        TabSynchronizer syncer(this, TabGroup::QuickTile|TabGroup::Geometry);
+
         QPoint whichScreen = keyboard ? geometry().center() : cursorPos();
 
         // If trying to tile to the side that the window is already tiled to move the window to the next
@@ -3179,18 +3209,19 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
                 mode = QuickTileRight;
             else
                 mode = QuickTileLeft;
-        } else
+        } else {
             // Not coming out of an existing tile, not shifting monitors, we're setting a brand new tile.
             // Store geometry first, so we can go out of this tile later.
             geom_restore = geometry();
+        }
 
         // Temporary, so the maximize code doesn't get all confused
         quick_tile_mode = QuickTileNone;
         if (mode != QuickTileNone)
             setGeometry(electricBorderMaximizeGeometry(whichScreen, desktop()));
+
         // Store the mode change
         quick_tile_mode = mode;
-
     }
 }
 

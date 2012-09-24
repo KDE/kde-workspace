@@ -36,7 +36,7 @@
          <widget class="QComboBox" name="window_title_combo" >
           <item>
            <property name="text" >
-            <string>Is Not Important</string>
+            <string comment="window title is not important">Is Not Important</string>
            </property>
           </item>
           <item>
@@ -82,7 +82,7 @@
          <widget class="QComboBox" name="window_class_combo" >
           <item>
            <property name="text" >
-            <string>Is Not Important</string>
+            <string comment="window class is not important">Is Not Important</string>
            </property>
           </item>
           <item>
@@ -128,7 +128,7 @@
          <widget class="QComboBox" name="window_role_combo" >
           <item>
            <property name="text" >
-            <string>Is Not Important</string>
+            <string comment="window role is not important">Is Not Important</string>
            </property>
           </item>
           <item>

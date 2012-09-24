@@ -17,10 +17,10 @@
  *
  */
 
-#ifndef __PREFERENCESDLG_h__
-#define __PREFERENCESDLG_h__
+#ifndef PREFERENCESDLG_h
+#define PREFERENCESDLG_h
 
-#include <kpagedialog.h>
+#include <KPageDialog>
 
 class SpellCheckingPage;
 class MiscPage;

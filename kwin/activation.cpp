@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "atoms.h"
 #include "group.h"
 #include "rules.h"
+#include "useractions.h"
 #include <QX11Info>
 
 namespace KWin
@@ -228,6 +229,9 @@ void Workspace::setActiveClient(Client* c, allowed_t)
 
     if (active_popup && active_popup_client != c && set_active_client_recursion == 0)
         closeActivePopup();
+    if (m_userActionsMenu->hasClient() && !m_userActionsMenu->isMenuClient(c) && set_active_client_recursion == 0) {
+        m_userActionsMenu->close();
+    }
     StackingUpdatesBlocker blocker(this);
     ++set_active_client_recursion;
     updateFocusMousePosition(cursorPos());
@@ -414,7 +418,7 @@ Client *Workspace::clientUnderMouse(int screen) const
         }
 
         // rule out clients which are not really visible.
-        // the screen test is rather superflous for xrandr & twinview since the geometry would differ -> TODO: might be dropped
+        // the screen test is rather superfluous for xrandr & twinview since the geometry would differ -> TODO: might be dropped
         if (!(client->isShown(false) && client->isOnCurrentDesktop() &&
                 client->isOnCurrentActivity() && client->isOnScreen(screen)))
             continue;
@@ -869,7 +873,6 @@ void Client::setActive(bool act)
     emit activeChanged();
     updateMouseGrab();
     updateUrgency(); // demand attention again if it's still urgent
-    workspace()->checkUnredirect();
 }
 
 void Client::startupIdChanged()

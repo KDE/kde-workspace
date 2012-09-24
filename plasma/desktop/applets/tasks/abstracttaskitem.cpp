@@ -33,6 +33,7 @@
 #include <QTimer>
 #include <QVarLengthArray>
 #include <QPropertyAnimation>
+#include <QDesktopWidget>
 #ifdef Q_WS_X11
 #include <QX11Info>
 #endif
@@ -139,7 +140,14 @@ void AbstractTaskItem::setPreferredOffscreenSize()
     int leftMargin = m_applet->offscreenLeftMargin();
 
     //kDebug() << (QObject*)this;
-    QSizeF s(mSize.width() * 12 + leftMargin + rightMargin + KIconLoader::SizeSmall,
+    int maxWidth = QApplication::desktop()->availableGeometry().width();
+    if (m_applet->containment() && m_applet->containment()->corona()) {
+        maxWidth = m_applet->containment()->corona()->
+                       availableScreenRegion(m_applet->containment()->screen()).boundingRect().width() * 0.8;
+    }
+
+    QSizeF s(qMax(mSize.width() * 12, qMin(fm.width(text()), maxWidth))
+             + IconTextSpacing + leftMargin + rightMargin + KIconLoader::SizeSmall,
              qMax(mSize.height(), iconsize) + topMargin + bottomMargin);
     setPreferredSize(s);
 }
@@ -231,7 +239,9 @@ void AbstractTaskItem::setTaskFlags(const TaskFlags flags)
     m_flags = flags;
 
     QString newBackground;
-    if (m_flags & TaskIsMinimized) {
+    if (m_flags & TaskWantsAttention) {
+        newBackground = "attention";
+    } else if (m_flags & TaskIsMinimized) {
         newBackground = "minimized";
     } else if (m_flags & TaskHasFocus) {
         newBackground = "focus";
@@ -858,7 +868,7 @@ void AbstractTaskItem::drawTextLayout(QPainter *painter, const QTextLayout &layo
 
     if (m_cachedShadow.isNull()) {
         QImage shadow = pixmap.toImage();
-        Plasma::PaintUtils::shadowBlur(shadow, 2, shadowColor);
+        Plasma::PaintUtils::shadowBlur(shadow, 1, shadowColor);
         m_cachedShadow = QPixmap(shadow.size());
         m_cachedShadow.fill(Qt::transparent);
         QPainter buffPainter(&m_cachedShadow);

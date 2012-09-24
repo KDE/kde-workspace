@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "options.h"
 
 #include <kconfiggroup.h>
+#include "composite.h"
 
 namespace KWin
 {
@@ -215,7 +216,7 @@ void Bridge::grabXServer(bool grab)
 
 bool Bridge::compositingActive() const
 {
-    return c->workspace()->compositingActive();
+    return Compositor::compositing();
 }
 
 QRect Bridge::transparentRect() const

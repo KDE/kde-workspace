@@ -21,15 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "mousemark.h"
 
+// KConfigSkeleton
+#include "mousemarkconfig.h"
+
 #include <kwinconfig.h>
 #include <kwinglutils.h>
 
 #include <kaction.h>
 #include <kactioncollection.h>
-#include <kglobal.h>
 #include <klocale.h>
-#include <kstandarddirs.h>
-#include <kconfiggroup.h>
 
 #include <math.h>
 
@@ -68,10 +68,10 @@ MouseMarkEffect::~MouseMarkEffect()
 static int width_2 = 1;
 void MouseMarkEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = EffectsHandler::effectConfig("MouseMark");
-    width = conf.readEntry("LineWidth", 3);
+    MouseMarkConfig::self()->readConfig();
+    width = MouseMarkConfig::lineWidth();
     width_2 = width / 2;
-    color = conf.readEntry("Color", QColor(Qt::red));
+    color = MouseMarkConfig::color();
     color.setAlphaF(1.0);
 }
 
@@ -107,7 +107,6 @@ void MouseMarkEffect::paintScreen(int mask, QRegion region, ScreenPaintData& dat
     effects->paintScreen(mask, region, data);   // paint normal screen
     if (marks.isEmpty() && drawing.isEmpty())
         return;
-#ifdef KWIN_HAVE_OPENGL
     if ( effects->compositingType() == OpenGLCompositing) {
 #ifndef KWIN_HAVE_OPENGLES
         glEnable(GL_LINE_SMOOTH);
@@ -147,7 +146,6 @@ void MouseMarkEffect::paintScreen(int mask, QRegion region, ScreenPaintData& dat
         glDisable(GL_LINE_SMOOTH);
     #endif
     }
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
     if ( effects->compositingType() == XRenderCompositing) {
         XRenderColor c = preMultiply(color);

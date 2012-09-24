@@ -577,7 +577,7 @@ void TaskGroupItem::itemRemoved(TaskManager::AbstractGroupableItem * groupableIt
         if (m_popupDialog && m_popupDialog->isVisible() && 
             m_applet->containment() && m_applet->containment()->corona()) {
             m_popupDialog->syncToGraphicsWidget();
-            m_popupDialog->move(m_applet->containment()->corona()->popupPosition(this, m_popupDialog->size(), Qt::AlignCenter));
+            m_popupDialog->move(m_applet->containment()->corona()->popupPosition(this, m_popupDialog->size(), Qt::AlignLeft));
         }
     }
 
@@ -673,22 +673,20 @@ void TaskGroupItem::popupMenu()
         return;
     }
 
-    if (!m_offscreenWidget) {
-        foreach (AbstractTaskItem *member, m_groupMembers) {
-            member->setPreferredOffscreenSize();
-        }
+    foreach (AbstractTaskItem *member, m_groupMembers) {
+        member->setPreferredOffscreenSize();
+    }
 
+    if (!m_offscreenWidget) {
         tasksLayout()->invalidate();
         m_tasksLayout->setOrientation(Plasma::Vertical);
         m_tasksLayout->setMaximumRows(1);
         m_offscreenWidget = new QGraphicsWidget(this);
         m_offscreenLayout = new QGraphicsLinearLayout(m_offscreenWidget);
         m_offscreenLayout->setContentsMargins(0,0,0,0); //default are 4 on each side
+        m_offscreenLayout->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
         m_offscreenLayout->addItem(tasksLayout());
-        m_offscreenWidget->setLayout(m_offscreenLayout);
-        m_offscreenWidget->adjustSize();
         m_applet->containment()->corona()->addOffscreenWidget(m_offscreenWidget);
-        m_offscreenLayout->activate();
     }
 
     if (!m_popupDialog) {
@@ -700,10 +698,6 @@ void TaskGroupItem::popupMenu()
         connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(handleActiveWindowChanged(WId)));
         KWindowSystem::setState(m_popupDialog->winId(), NET::SkipTaskbar| NET::SkipPager);
         m_popupDialog->setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-
-        int left, top, right, bottom;
-        m_popupDialog->getContentsMargins(&left, &top, &right, &bottom);
-        m_offscreenWidget->setMinimumWidth(size().width() - left - right);
         m_popupDialog->setGraphicsWidget(m_offscreenWidget);
     }
 
@@ -719,10 +713,10 @@ void TaskGroupItem::popupMenu()
     } else {
         m_tasksLayout->setOrientation(Plasma::Vertical);
         m_tasksLayout->setMaximumRows(1);
-        m_offscreenWidget->layout()->activate();
-        m_offscreenWidget->resize(m_offscreenWidget->effectiveSizeHint(Qt::PreferredSize));
+        tasksLayout()->layoutItems();  // essential
+        m_offscreenWidget->adjustSize();
         m_popupDialog->syncToGraphicsWidget();
-        m_popupDialog->move(m_applet->containment()->corona()->popupPosition(this, m_popupDialog->size(), Qt::AlignCenter));
+        m_popupDialog->move(m_applet->containment()->corona()->popupPosition(this, m_popupDialog->size(), Qt::AlignLeft));
         KWindowSystem::setState(m_popupDialog->winId(), NET::SkipTaskbar| NET::SkipPager);
         if (m_applet->location() != Plasma::Floating) {
             m_popupDialog->animatedShow(Plasma::locationToDirection(m_applet->location()));
@@ -814,12 +808,6 @@ void TaskGroupItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void TaskGroupItem::resizeEvent(QGraphicsSceneResizeEvent *event)
 {
     Q_UNUSED(event)
-
-    if (m_offscreenWidget && m_popupDialog) {
-        int left, top, right, bottom;
-        m_popupDialog->getContentsMargins(&left, &top, &right, &bottom);
-        m_offscreenWidget->setMinimumWidth(size().width() - left - right);
-    }
 
     AbstractTaskItem::resizeEvent(event);
 }

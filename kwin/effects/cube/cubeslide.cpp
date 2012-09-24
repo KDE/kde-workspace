@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "cubeslide.h"
+// KConfigSkeleton
+#include "cubeslideconfig.h"
 
 #include <kwinconfig.h>
-#include <kconfiggroup.h>
 
 #include <math.h>
 
@@ -55,14 +56,14 @@ bool CubeSlideEffect::supported()
 
 void CubeSlideEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = effects->effectConfig("CubeSlide");
-    rotationDuration = animationTime(conf, "RotationDuration", 500);
+    CubeSlideConfig::self()->readConfig();
+    rotationDuration = animationTime(CubeSlideConfig::rotationDuration() != 0 ? CubeSlideConfig::rotationDuration() : 500);
     timeLine.setCurveShape(QTimeLine::EaseInOutCurve);
     timeLine.setDuration(rotationDuration);
-    dontSlidePanels = conf.readEntry("DontSlidePanels", true);
-    dontSlideStickyWindows = conf.readEntry("DontSlideStickyWindows", false);
-    usePagerLayout = conf.readEntry("UsePagerLayout", true);
-    useWindowMoving = conf.readEntry("UseWindowMoving", false);
+    dontSlidePanels = CubeSlideConfig::dontSlidePanels();
+    dontSlideStickyWindows = CubeSlideConfig::dontSlideStickyWindows();
+    usePagerLayout = CubeSlideConfig::usePagerLayout();
+    useWindowMoving = CubeSlideConfig::useWindowMoving();
 }
 
 void CubeSlideEffect::prePaintScreen(ScreenPrePaintData& data, int time)
@@ -118,14 +119,12 @@ void CubeSlideEffect::paintSlideCube(int mask, QRegion region, ScreenPaintData& 
 
     ScreenPaintData firstFaceData = data;
     ScreenPaintData secondFaceData = data;
-    RotationData firstFaceRot = RotationData();
-    RotationData secondFaceRot = RotationData();
     RotationDirection direction = slideRotations.head();
     int secondDesktop;
     switch(direction) {
     case Left:
-        firstFaceRot.axis = RotationData::YAxis;
-        secondFaceRot.axis = RotationData::YAxis;
+        firstFaceData.setRotationAxis(Qt::YAxis);
+        secondFaceData.setRotationAxis(Qt::YAxis);
         if (usePagerLayout)
             secondDesktop = effects->desktopToLeft(front_desktop, true);
         else {
@@ -133,12 +132,12 @@ void CubeSlideEffect::paintSlideCube(int mask, QRegion region, ScreenPaintData& 
             if (secondDesktop == 0)
                 secondDesktop = effects->numberOfDesktops();
         }
-        firstFaceRot.angle = 90.0f * timeLine.currentValue();
-        secondFaceRot.angle = -90.0f * (1.0f - timeLine.currentValue());
+        firstFaceData.setRotationAngle(90.0f * timeLine.currentValue());
+        secondFaceData.setRotationAngle(-90.0f * (1.0f - timeLine.currentValue()));
         break;
     case Right:
-        firstFaceRot.axis = RotationData::YAxis;
-        secondFaceRot.axis = RotationData::YAxis;
+        firstFaceData.setRotationAxis(Qt::YAxis);
+        secondFaceData.setRotationAxis(Qt::YAxis);
         if (usePagerLayout)
             secondDesktop = effects->desktopToRight(front_desktop, true);
         else {
@@ -146,23 +145,23 @@ void CubeSlideEffect::paintSlideCube(int mask, QRegion region, ScreenPaintData& 
             if (secondDesktop > effects->numberOfDesktops())
                 secondDesktop = 1;
         }
-        firstFaceRot.angle = -90.0f * timeLine.currentValue();
-        secondFaceRot.angle = 90.0f * (1.0f - timeLine.currentValue());
+        firstFaceData.setRotationAngle(-90.0f * timeLine.currentValue());
+        secondFaceData.setRotationAngle(90.0f * (1.0f - timeLine.currentValue()));
         break;
     case Upwards:
-        firstFaceRot.axis = RotationData::XAxis;
-        secondFaceRot.axis = RotationData::XAxis;
+        firstFaceData.setRotationAxis(Qt::XAxis);
+        secondFaceData.setRotationAxis(Qt::XAxis);
         secondDesktop = effects->desktopAbove(front_desktop, true);
-        firstFaceRot.angle = -90.0f * timeLine.currentValue();
-        secondFaceRot.angle = 90.0f * (1.0f - timeLine.currentValue());
+        firstFaceData.setRotationAngle(-90.0f * timeLine.currentValue());
+        secondFaceData.setRotationAngle(90.0f * (1.0f - timeLine.currentValue()));
         point = rect.height() / 2 * tan(45.0f * M_PI / 180.0f);
         break;
     case Downwards:
-        firstFaceRot.axis = RotationData::XAxis;
-        secondFaceRot.axis = RotationData::XAxis;
+        firstFaceData.setRotationAxis(Qt::XAxis);
+        secondFaceData.setRotationAxis(Qt::XAxis);
         secondDesktop = effects->desktopBelow(front_desktop, true);
-        firstFaceRot.angle = 90.0f * timeLine.currentValue();
-        secondFaceRot.angle = -90.0f * (1.0f - timeLine.currentValue());
+        firstFaceData.setRotationAngle(90.0f * timeLine.currentValue());
+        secondFaceData.setRotationAngle(-90.0f * (1.0f - timeLine.currentValue()));
         point = rect.height() / 2 * tan(45.0f * M_PI / 180.0f);
         break;
     default:
@@ -170,10 +169,7 @@ void CubeSlideEffect::paintSlideCube(int mask, QRegion region, ScreenPaintData& 
         return;
     }
     // front desktop
-    firstFaceRot.xRotationPoint = rect.width() / 2;
-    firstFaceRot.yRotationPoint = rect.height() / 2;
-    firstFaceRot.zRotationPoint = -point;
-    firstFaceData.rotation = &firstFaceRot;
+    firstFaceData.setRotationOrigin(QVector3D(rect.width() / 2, rect.height() / 2, -point));
     other_desktop = secondDesktop;
     firstDesktop = true;
     effects->paintScreen(mask, region, firstFaceData);
@@ -181,10 +177,7 @@ void CubeSlideEffect::paintSlideCube(int mask, QRegion region, ScreenPaintData& 
     other_desktop = painting_desktop;
     painting_desktop = secondDesktop;
     firstDesktop = false;
-    secondFaceRot.xRotationPoint = rect.width() / 2;
-    secondFaceRot.yRotationPoint = rect.height() / 2;
-    secondFaceRot.zRotationPoint = -point;
-    secondFaceData.rotation = &secondFaceRot;
+    secondFaceData.setRotationOrigin(QVector3D(rect.width() / 2, rect.height() / 2, -point));
     effects->paintScreen(mask, region, secondFaceData);
     cube_painting = false;
     painting_desktop = effects->currentDesktop();
@@ -309,7 +302,7 @@ void CubeSlideEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
             if (w->x() < rect.x() &&
                     (direction == Left || direction == Right)) {
                 WindowQuadList new_quads;
-                data.xTranslate = rect.width();
+                data.setXTranslation(rect.width());
                 foreach (const WindowQuad & quad, data.quads) {
                     if (quad.right() <= -w->x()) {
                         new_quads.append(quad);
@@ -320,7 +313,7 @@ void CubeSlideEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
             if (w->x() + w->width() > rect.x() + rect.width() &&
                     (direction == Left || direction == Right)) {
                 WindowQuadList new_quads;
-                data.xTranslate = -rect.width();
+                data.setXTranslation(-rect.width());
                 foreach (const WindowQuad & quad, data.quads) {
                     if (quad.right() > rect.width() - w->x()) {
                         new_quads.append(quad);
@@ -331,7 +324,7 @@ void CubeSlideEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
             if (w->y() < rect.y() &&
                     (direction == Upwards || direction == Downwards)) {
                 WindowQuadList new_quads;
-                data.yTranslate = rect.height();
+                data.setYTranslation(rect.height());
                 foreach (const WindowQuad & quad, data.quads) {
                     if (quad.bottom() <= -w->y()) {
                         new_quads.append(quad);
@@ -342,7 +335,7 @@ void CubeSlideEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
             if (w->y() + w->height() > rect.y() + rect.height() &&
                     (direction == Upwards || direction == Downwards)) {
                 WindowQuadList new_quads;
-                data.yTranslate = -rect.height();
+                data.setYTranslation(-rect.height());
                 foreach (const WindowQuad & quad, data.quads) {
                     if (quad.bottom() > rect.height() - w->y()) {
                         new_quads.append(quad);
@@ -351,9 +344,9 @@ void CubeSlideEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
                 data.quads = new_quads;
             }
             if (firstDesktop)
-                data.opacity *= timeLine.currentValue();
+                data.multiplyOpacity(timeLine.currentValue());
             else
-                data.opacity *= (1.0 - timeLine.currentValue());
+                data.multiplyOpacity((1.0 - timeLine.currentValue()));
         }
     }
     effects->paintWindow(w, mask, region, data);

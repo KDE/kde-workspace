@@ -20,6 +20,7 @@
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.qtextracomponents 0.1
 
 Item {
     id: main
@@ -27,7 +28,11 @@ Item {
     //this is used to perfectly align the filter field and delegates
     property int cellWidth: theme.defaultFont.mSize.width * 20
 
-    property int minimumWidth: cellWidth + (activityManager.orientation == Qt.Horizontal ? 0 : scrollBar.width)
+    property int minimumWidth: cellWidth + (
+        activityManager.orientation == Qt.Horizontal
+        ? 0
+        : (scrollBar.width + 4 * 2) // 4 * 2 == left and right margins
+        )
     property int minimumHeight: topBar.height + list.delegateHeight + (activityManager.orientation == Qt.Horizontal ? scrollBar.height : 0) + 4
 
 
@@ -109,7 +114,8 @@ Item {
             left: parent.left
             right: parent.right
 
-            margins: 4
+            topMargin: activityManager.orientation == Qt.Horizontal ? 4 : 0
+            leftMargin: 4
         }
     }
     Component {
@@ -189,14 +195,13 @@ Item {
 
             PlasmaComponents.Button {
                 id: newActivityButton
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
                 iconSource: "list-add"
                 text: i18n("Create activity...")
                 onClicked: newActivityMenu.open()
-            }
-            PlasmaComponents.Button {
-                iconSource: "plasma"
-                text: i18n("Add widgets")
-                onClicked: activityManager.addWidgetsRequested()
             }
             Component.onCompleted: {
                 topBar.newActivityButton = newActivityButton
@@ -204,44 +209,94 @@ Item {
         }
     }
 
-    ListView {
-        id: list
-
-        property int delegateWidth: (activityManager.orientation == Qt.Horizontal) ? (list.width / Math.floor(list.width / cellWidth)) : cellWidth
-        property int delegateHeight: theme.defaultFont.mSize.height * 7 - 4
-
-
+    MouseEventListener {
+        id: listParent
         anchors {
             top: topBar.bottom
             left: parent.left
-            right: activityManager.orientation == Qt.Horizontal ? parent.right : scrollBar.left
-            bottom: activityManager.orientation == Qt.Horizontal ? scrollBar.top : parent.bottom
+            right: activityManager.orientation == Qt.Horizontal
+                ? parent.right
+                : (scrollBar.visible ? scrollBar.left : parent.right)
+            bottom: activityManager.orientation == Qt.Horizontal ? scrollBar.top : bottomBar.top
             leftMargin: 4
-            rightMargin: 4
             bottomMargin: 4
         }
-
-        orientation: activityManager.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.vertical
-        snapMode: ListView.SnapToItem
-        model: PlasmaCore.SortFilterModel {
-            sourceModel: PlasmaCore.DataModel {
-                dataSource: activitySource
+        onWheelMoved: {
+            //use this only if the wheel orientation is vertical and the list orientation is horizontal, otherwise will be the list itself managing the wheel
+            if (wheel.orientation == Qt.Vertical && list.orientation == ListView.Horizontal) {
+                var delta = wheel.delta > 0 ? 20 : -20
+                list.contentX = Math.min(Math.max(0, list.contentWidth - list.width),
+                                         Math.max(0, list.contentX - delta))
             }
-            filterRole: "Name"
-            filterRegExp: ".*"+topBar.query+".*"
         }
+        ListView {
+            id: list
 
-        delegate: ActivityDelegate {}
+            property int delegateWidth: (activityManager.orientation == Qt.Horizontal) ? (list.width / Math.floor(list.width / cellWidth)) : list.width
+            property int delegateHeight: theme.defaultFont.mSize.height * 7 - 4
+
+
+            anchors.fill: parent
+
+            orientation: activityManager.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.vertical
+            snapMode: ListView.SnapToItem
+            model: PlasmaCore.SortFilterModel {
+                sourceModel: PlasmaCore.DataModel {
+                    dataSource: activitySource
+                }
+                filterRole: "Name"
+                filterRegExp: ".*"+topBar.query+".*"
+            }
+            clip: activityManager.orientation == Qt.Vertical
+
+            delegate: ActivityDelegate {}
+        }
     }
     PlasmaComponents.ScrollBar {
         id: scrollBar
         orientation: activityManager.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.Vertical
         anchors {
-            top: activityManager.orientation == Qt.Horizontal ? undefined : list.top
-            bottom: parent.bottom
+            top: activityManager.orientation == Qt.Horizontal ? undefined : listParent.top
+            bottom: activityManager.orientation == Qt.Horizontal ? parent.bottom : bottomBar.top
             left: activityManager.orientation == Qt.Horizontal ? parent.left : undefined
             right: parent.right
         }
         flickableItem: list
+    }
+
+    Loader {
+        id: bottomBar
+
+        sourceComponent: (activityManager.orientation == Qt.Horizontal) ? undefined : verticalBottomBarComponent
+        height: item.height
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: 4
+        }
+    }
+
+    Component {
+        id: verticalBottomBarComponent
+        Column {
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+
+            spacing: 4
+
+            PlasmaComponents.Button {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+                iconSource: "plasma"
+                text: i18n("Add widgets")
+                onClicked: activityManager.addWidgetsRequested()
+            }
+        }
     }
 }

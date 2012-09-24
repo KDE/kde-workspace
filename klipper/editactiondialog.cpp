@@ -276,11 +276,21 @@ EditActionDialog::EditActionDialog(QWidget* parent)
     // For some reason, the default row height is 30 pixel. Set it to the minimum sectionSize instead,
     // which is the font height+struts.
     m_ui->twCommandList->verticalHeader()->setDefaultSectionSize(m_ui->twCommandList->verticalHeader()->minimumSectionSize());
+    m_ui->twCommandList->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     setMainWidget(dlgWidget);
 
     connect(m_ui->pbAddCommand, SIGNAL(clicked()), SLOT(onAddCommand()) );
     connect(m_ui->pbRemoveCommand, SIGNAL(clicked()), SLOT(onRemoveCommand()) );
 
+    const KConfigGroup grp = KGlobal::config()->group("EditActionDialog");
+    restoreDialogSize(grp);
+    QByteArray hdrState = grp.readEntry("ColumnState", QByteArray());
+    if (!hdrState.isEmpty()) {
+        kDebug() << "Restoring column state";
+        m_ui->twCommandList->horizontalHeader()->restoreState(QByteArray::fromBase64(hdrState));
+    }
+							// do this after restoreState()
+    m_ui->twCommandList->horizontalHeader()->setHighlightSections(false);
 }
 
 EditActionDialog::~EditActionDialog()
@@ -340,6 +350,12 @@ void EditActionDialog::slotButtonClicked( int button )
 {
     if ( button == KDialog::Ok ) {
         saveAction();
+
+        kDebug() << "Saving dialogue state";
+        KConfigGroup grp = KGlobal::config()->group("EditActionDialog");
+        saveDialogSize(grp);
+        grp.writeEntry("ColumnState",
+                       m_ui->twCommandList->horizontalHeader()->saveState().toBase64());
     }
 
     KDialog::slotButtonClicked( button );

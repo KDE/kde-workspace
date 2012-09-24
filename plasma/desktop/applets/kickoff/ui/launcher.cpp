@@ -753,7 +753,7 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
     // deliver unhandled key presses from the search bar
     // (mainly arrow keys, enter) to the active view
     if ((object == d->contentSwitcher || object == d->searchBar) && event->type() == QEvent::KeyPress) {
-        // we want left/right to still nav the tabbar
+        // If the search text is empty, then we want left/right to still nav the tabbar.
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         if (keyEvent->modifiers() == Qt::NoModifier &&
                 (keyEvent->key() == Qt::Key_Left ||
@@ -765,28 +765,44 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
                 return true;
             }
         }
+        // It works, using Key_Tab to enter or leave the flipScrollView versus
+        // other views, and arrow keys to move around inside. This decision tree
+        // is NOT able to figure out that Key_Up or Key_Down might "really want"
+        // to leave the FlipScrollView: If Key_Up is pressed at the top of a column,
+        // or Key_Down at the bottom, it does not move from the current
+        // highlighted item. It just sits there.
 
-        // if the search view is visible, we are passing the events to it
         if (d->searchView->isVisible()) {
-            if (!d->searchView->initializeSelection()
-                    || keyEvent->key() == Qt::Key_Return
-                    || keyEvent->key() == Qt::Key_Enter
-            ) {
-                qDebug() << "Passing the event to the search view" << event;
+            if (keyEvent->key() == Qt::Key_Up ||
+                    keyEvent->key() == Qt::Key_Down ||
+                    keyEvent->key() == Qt::Key_Tab) {
+                d->searchView->setFocus();
                 QCoreApplication::sendEvent(d->searchView, event);
+            }
+        }
+
+        if ((keyEvent->key() == Qt::Key_Up) || (keyEvent->key() == Qt::Key_Down)) {
+            QAbstractItemView *activeView = qobject_cast<QAbstractItemView*>(d->contentArea->currentWidget());
+            if (activeView) {
+                QCoreApplication::sendEvent(activeView, event);
+            } else {
+                d->applicationView->setFocus();
+                QCoreApplication::sendEvent(d->applicationView, event);
             }
             return true;
         }
-
-        // getting for the active view, and passing the events to it
+        if (!d->searchView->initializeSelection() ||
+                keyEvent->key() == Qt::Key_Return ||
+                keyEvent->key() == Qt::Key_Enter) {
+             QCoreApplication::sendEvent(d->searchView, event);
+             return true;
+        }
         QAbstractItemView *activeView = qobject_cast<QAbstractItemView*>(d->contentArea->currentWidget());
-
         if (activeView) {
             QCoreApplication::sendEvent(activeView, event);
             return true;
         }
     }
-
 
     // the mouse events we are interested in are delivered to the viewport,
     // other events are delivered to the view itself.
