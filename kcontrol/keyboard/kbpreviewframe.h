@@ -21,11 +21,20 @@
 #include"keyboardlayout.h"
 #include"keysym.h"
 #include"keyaliases.h"
+#include<QPainter>
 #include <QFrame>
 
 class KbPreviewFrame : public QFrame
 {
     Q_OBJECT
+private:
+	void paintTLDE(QPainter &painter,int &x,int &y);
+	void paintAERow(QPainter &painter,int &x,int &y);
+	void paintADRow(QPainter &painter,int &x,int &y);
+	void paintACRow(QPainter &painter,int &x,int &y);
+	void paintABRow(QPainter &painter,int &x,int &y);
+	void paintBottomRow(QPainter &painter,int &x,int &y);
+	void paintFnKeys(QPainter &painter,int &x,int &y);
 public:
     explicit KbPreviewFrame(QWidget *parent = 0);
     void paintEvent(QPaintEvent *);
