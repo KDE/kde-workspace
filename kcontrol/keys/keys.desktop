@@ -216,8 +216,5 @@ X-KDE-Keywords[vi]=Phím,tổ hợp phím toàn cục,phối hợp phím,tổ h�
 X-KDE-Keywords[x-test]=xxKeys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcutsxx
 X-KDE-Keywords[zh_CN]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcuts,按键,全局键绑定,按键方案,按键绑定,快捷键,应用程序,全局快捷键
 X-KDE-Keywords[zh_TW]=Keys,Global key bindings,Key scheme,Key bindings,shortcuts,application shortcuts,global shortcuts
-<<<<<<< HEAD
-=======
->>>>>>> KDE/4.9
 
 Categories=Qt;KDE;X-KDE-settings-accessibility;

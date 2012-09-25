@@ -134,9 +134,6 @@ Comment[uk]=Керування програмами, які будуть зап�
 Comment[x-test]=xxA configuration tool for managing which programs start up automatically with KDE.xx
 Comment[zh_CN]=管理随 KDE 自动启动的程序的配置工具。
 Comment[zh_TW]=管理 KDE 要自動啟動哪些程式的設定工具。
-<<<<<<< HEAD
-=======
->>>>>>> KDE/4.9
 
 X-KDE-Keywords=Autostart Manager,autostart,startup,system startup,kde start,cron
 X-KDE-Keywords[ca]=Gestor d'inici automàtic,inici automàtic,inici,inici del sistema,inici del kde,cron
