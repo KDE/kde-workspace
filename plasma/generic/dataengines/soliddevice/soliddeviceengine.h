@@ -54,6 +54,7 @@ enum OperationResult {
 class SolidDeviceEngine : public Plasma::DataEngine
 {
     Q_OBJECT
+    friend class SolidDeviceService;
 
 public:
     SolidDeviceEngine( QObject* parent, const QVariantList& args);

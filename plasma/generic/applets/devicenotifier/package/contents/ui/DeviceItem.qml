@@ -58,6 +58,9 @@ Item {
         onEntered: {
             notifierDialog.currentIndex = index;
             notifierDialog.highlightItem.opacity = 1;
+            service = sdSource.serviceForSource(udi);
+            operation = service.operationDescription("updateFreespace");
+            service.startOperationCall(operation);
         }
         onExited: {
             notifierDialog.highlightItem.opacity = expanded ? 1 : 0;
