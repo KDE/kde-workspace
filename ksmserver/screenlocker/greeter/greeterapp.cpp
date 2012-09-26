@@ -200,6 +200,12 @@ void UnlockApp::prepareShow()
             ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
             screensaverWindow->setGeometry(view->geometry());
             XChangeProperty(QX11Info::display(), screensaverWindow->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+
+            QPixmap backgroundPix(screensaverWindow->size());
+            QPainter p(&backgroundPix);
+            view->render(&p);
+            p.end();
+            screensaverWindow->setBackground(backgroundPix);
             screensaverWindow->show();
             screensaverWindow->activateWindow();
         }

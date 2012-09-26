@@ -59,6 +59,16 @@ ScreenSaverWindow::~ScreenSaverWindow()
 {
 }
 
+QPixmap ScreenSaverWindow::background() const
+{
+    return m_background;
+}
+
+void ScreenSaverWindow::setBackground(const QPixmap &pix)
+{
+    m_background = pix;
+}
+
 //---------------------------------------------------------------------------
 //
 // Read the command line needed to run the screensaver given a .desktop file.
@@ -147,7 +157,7 @@ void ScreenSaverWindow::showEvent(QShowEvent *event)
 void ScreenSaverWindow::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
-    p.fillRect(event->rect(), Qt::black);
+    p.drawPixmap(m_background.rect(), m_background, m_background.rect());
     p.end();
 }
 

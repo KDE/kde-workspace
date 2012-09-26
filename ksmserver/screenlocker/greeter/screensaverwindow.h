@@ -38,6 +38,9 @@ public:
     ScreenSaverWindow(QWidget *parent = 0);
     virtual ~ScreenSaverWindow();
 
+    QPixmap background() const;
+    void setBackground(const QPixmap &pix);
+
 protected:
     void mousePressEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
@@ -54,6 +57,7 @@ private:
     QPoint m_startMousePos;
     QString m_saver;
     QString m_saverExec;
+    QPixmap m_background;
 
     QTimer *m_reactivateTimer;
 
