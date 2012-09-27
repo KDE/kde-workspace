@@ -2,6 +2,8 @@
 Name=Password dialog
 Name[el]=Διάλογος κωδικού πρόσβασης
 Name[es]=Diálogo de contraseña
+Name[hu]=Jelszóbeviteli ablak
+Name[ia]=Dialogo de contrasigno
 Name[nl]=Wachtwoordvenster
 Name[pt]=Janela da senha
 Name[pt_BR]=Diálogo de senha
@@ -12,6 +14,7 @@ Name[x-test]=xxPassword dialogxx
 Comment=Screen locker that provides a password dialog and an interface to switch the current user
 Comment[el]=Κλείδωμα οθόνης με διάλογο κωδικού πρόσβασης και μια διεπαφή για την εναλλαγή του τρέχοντος χρήστη
 Comment[es]=Bloqueador de pantalla que proporciona un diálogo de contraseña y una interfaz para cambiar el usuario actual
+Comment[ia]=Blocator de schermo que da un dialogo de contrasigno e uninterfacie pro commutar le usator currente
 Comment[nl]=Schermvergrendeling die een wachtwoordvenster en een interface om naar de huidige gebruiker om te schakelen biedt
 Comment[pt]=Bloqueio do ecrã que mostra uma janela de introdução da senha e para mudar o utilizador actual
 Comment[pt_BR]=Bloqueador de sessão que fornece um diálogo de senha e uma interface para mudar o usuário atual
