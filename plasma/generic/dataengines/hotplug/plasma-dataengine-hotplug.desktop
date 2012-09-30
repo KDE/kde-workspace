@@ -134,8 +134,8 @@ Type=Service
 Icon=drive-removable-media-usb
 X-KDE-Library=plasma_engine_hotplug
 
-X-KDE-PluginInfo-Author=
-X-KDE-PluginInfo-Email=
+X-KDE-PluginInfo-Author=The Plasma Team
+X-KDE-PluginInfo-Email=wilderkde@gmail.com
 X-KDE-PluginInfo-Name=hotplug
 X-KDE-PluginInfo-Version=
 X-KDE-PluginInfo-Website=

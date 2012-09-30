@@ -161,8 +161,8 @@ X-Plasma-DefaultSize=290,340
 X-Plasma-NotificationArea=true
 X-Plasma-ConfigPlugins=solid-actions,device_automounter_kcm
 
-X-KDE-PluginInfo-Author=Viranch Mehta
-X-KDE-PluginInfo-Email=viranch.mehta@gmail.com
+X-KDE-PluginInfo-Author=Viranch Mehta, Jacopo De Simoi
+X-KDE-PluginInfo-Email=wilderkde@gmail.com
 X-KDE-PluginInfo-Name=notifier
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://userbase.kde.org/Plasma/DeviceNotifier
