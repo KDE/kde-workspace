@@ -111,7 +111,6 @@ void UnlockApp::initialize()
     }
 
     for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
-
         // create the view
         QDeclarativeView *view = new QDeclarativeView();
         connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
@@ -138,19 +137,22 @@ void UnlockApp::initialize()
 
         QDeclarativeProperty sleepProperty(view->rootObject(), "suspendToRamSupported");
         sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
-        if (spdMethods.contains(Solid::PowerManagement::SuspendState)) {
+        if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
+            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(suspendToRam())) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
         }
 
         QDeclarativeProperty hibernateProperty(view->rootObject(), "suspendToDiskSupported");
         hibernateProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
-        if (spdMethods.contains(Solid::PowerManagement::SuspendState)) {
+        if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
+            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(suspendToDisk())) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
         }
 
         QDeclarativeProperty shutdownProperty(view->rootObject(), "shutdownSupported");
         shutdownProperty.write(canLogout);
-        if (canLogout) {
+        if (canLogout &&
+            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(shutdown())) != -1) {
             connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
         }
 
