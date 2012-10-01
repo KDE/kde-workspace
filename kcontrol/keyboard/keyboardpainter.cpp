@@ -18,12 +18,13 @@
 
 #include "keyboardpainter.h"
 #include "ui_keyboardpainter.h"
-#include<QHBoxLayout>
-#include<QVBoxLayout>
+
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QVBoxLayout>
 
 KeyboardPainter::KeyboardPainter() :
     kbframe(new KbPreviewFrame(this)),
-    exitButton(new QPushButton(tr("CLOSE"),this)),
+    exitButton(new QPushButton(tr("Close"),this)),
     ui(new Ui::keyboardpainter)
 {
     ui->setupUi(this);
@@ -33,7 +34,7 @@ KeyboardPainter::KeyboardPainter() :
     QVBoxLayout*const vLayout = new QVBoxLayout( this );
     vLayout->addWidget(kbframe);
     vLayout->addWidget(exitButton);
-    setWindowTitle(kbframe->kblayout.Layoutname);
+    setWindowTitle(kbframe->kblayout.getLayoutName());
 }
 
 KeyboardPainter::~KeyboardPainter()
@@ -41,4 +42,9 @@ KeyboardPainter::~KeyboardPainter()
     delete ui;
     delete kbframe;
     delete exitButton;
+}
+
+void KeyboardPainter::getKeyboardLayout(QString country, QString variant)
+{
+	kbframe->getKeyboardLayout(country,variant);
 }

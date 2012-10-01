@@ -18,22 +18,30 @@
  
 #ifndef KEYBOARDLAYOUT_H
 #define KEYBOARDLAYOUT_H
+
 #include"keys.h"
 #include"keyaliases.h"
-#include<QApplication>
+
+#include <QtGui/QApplication>
+
 class KeyboardLayout
 {
-public:
-    KeyboardLayout();
-    QString Layoutname;
+    QString layoutName;
     Aliases alias;
-    Keys TLDE;
+
+public:
     Keys AE[12];
     Keys AD[12];
     Keys AC[11];
     Keys AB[11];
+    Keys TLDE;
+
+    KeyboardLayout();
     void getLayout(QString a,QString cname);
     QString findSymbolbasedir();
     void includeSymbol(QString a,QString cname);
+    QString getLayoutName() const {
+    	return layoutName;
+    }
 };
 #endif // KEYBOARDLAYOUT_H

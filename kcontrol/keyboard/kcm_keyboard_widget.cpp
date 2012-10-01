@@ -377,7 +377,7 @@ void KCMKeyboardWidget::previewLayout(){
             break;
        }
     }
-    layoutprev->kbframe->getKeyboardLayout(country,variant);
+    layoutprev->getKeyboardLayout(country,variant);
     layoutprev->exec();
     layoutprev->setModal(true);
 

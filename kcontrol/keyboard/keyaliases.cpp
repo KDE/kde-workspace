@@ -17,19 +17,20 @@
  */
 
 #include "keyaliases.h"
-#include<QString>
-#include<QMap>
-#include<QMessageBox>
-#include<QFile>
+#include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtGui/QMessageBox>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
 
 #include <QtGui/QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBrules.h>
+
 #include <fixx11h.h>
 #include <config-workspace.h>
-#include<QDir>
 
 Aliases::Aliases()
 {

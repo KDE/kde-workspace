@@ -20,10 +20,10 @@
 #ifndef KEYBOARDPAINTER_H
 #define KEYBOARDPAINTER_H
 
-#include <QDialog>
-#include<QPushButton>
+#include <QtGui/QDialog>
+#include <QtGui/QPushButton>
 
-#include"kbpreviewframe.h"
+#include "kbpreviewframe.h"
 
 namespace Ui {
 class keyboardpainter;
@@ -32,15 +32,17 @@ class keyboardpainter;
 class KeyboardPainter : public QDialog
 {
     Q_OBJECT
-    
+
 public:
     explicit KeyboardPainter();
+    ~KeyboardPainter();
+
+    QString getVariant(QString variant,QString selectedLayout);
+    void getKeyboardLayout(QString country, QString layoutvariant);
+
+private:
     KbPreviewFrame *kbframe;
     QPushButton *exitButton;
-    QString getVariant(QString variant,QString selectedLayout);
-    ~KeyboardPainter();
-    
-private:
     Ui::keyboardpainter *ui;
 };
 

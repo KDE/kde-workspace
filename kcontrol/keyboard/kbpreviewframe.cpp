@@ -18,8 +18,10 @@
 
 
 #include "kbpreviewframe.h"
-#include<QPainter>
-#include<QFont>
+
+#include <QtGui/QPainter>
+#include <QtGui/QFont>
+
 #include <KApplication>
 #include <KLocale>
 
@@ -308,7 +310,7 @@ void KbPreviewFrame::paintEvent(QPaintEvent *){
     if(symbol.nill>=120){
         painter.drawRect(strtx,strty,endx,endy);
         const int midx=470,midy=240;
-        painter.drawText(midx,midy,i18n("NO PREVIEW FOUND"));
+        painter.drawText(midx,midy,i18n("No preview found"));
     }
 
 }
