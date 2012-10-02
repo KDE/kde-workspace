@@ -31,15 +31,60 @@ class TranslucencyEffect
     : public Effect
 {
     Q_OBJECT
+    Q_PROPERTY(qreal decoration READ configuredDecoration)
+    Q_PROPERTY(qreal moveResize READ configuredMoveResize)
+    Q_PROPERTY(qreal dialogs READ configuredDialogs)
+    Q_PROPERTY(qreal inactive READ configuredInactive)
+    Q_PROPERTY(qreal comboboxPopups READ configuredComboboxPopups)
+    Q_PROPERTY(qreal menus READ configuredMenus)
+    Q_PROPERTY(bool individualMenuConfig READ isIndividualMenuConfig)
+    Q_PROPERTY(qreal dropDownMenus READ configuredDropDownMenus)
+    Q_PROPERTY(qreal popupMenus READ configuredPopupMenus)
+    Q_PROPERTY(qreal tornOffMenus READ configuredTornOffMenus)
 public:
     TranslucencyEffect();
     virtual void reconfigure(ReconfigureFlags);
     virtual void prePaintWindow(EffectWindow* w, WindowPrePaintData& data, int time);
     virtual void paintWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data);
+    virtual bool isActive() const;
 
+    // for properties
+    qreal configuredDecoration() const {
+        return decoration;
+    }
+    qreal configuredMoveResize() const {
+        return moveresize;
+    }
+    qreal configuredDialogs() const {
+        return dialogs;
+    }
+    qreal configuredInactive() const {
+        return inactive;
+    }
+    qreal configuredComboboxPopups() const {
+        return comboboxpopups;
+    }
+    qreal configuredMenus() const {
+        return menus;
+    }
+    bool isIndividualMenuConfig() const {
+        return individualmenuconfig;
+    }
+    qreal configuredDropDownMenus() const {
+        return dropdownmenus;
+    }
+    qreal configuredPopupMenus() const {
+        return popupmenus;
+    }
+    qreal configuredTornOffMenus() const {
+        return tornoffmenus;
+    }
 public Q_SLOTS:
     void slotWindowActivated(KWin::EffectWindow* w);
     void slotWindowStartStopUserMovedResized(KWin::EffectWindow *w);
+
+private Q_SLOTS:
+    void checkIsActive();
 
 private:
     bool isInactive(const EffectWindow *w) const;
@@ -55,13 +100,15 @@ private:
     double popupmenus;
     double tornoffmenus;
 
-    EffectWindow* fadeout;
-    EffectWindow* current;
-    EffectWindow* previous;
     EffectWindow* active;
 
-    QTimeLine moveresize_timeline;
-    QTimeLine activeinactive_timeline;
+    bool m_activeDecorations;
+    bool m_activeMoveResize;
+    bool m_activeDialogs;
+    bool m_activeInactive;
+    bool m_activeCombobox;
+    bool m_activeMenus;
+    bool m_active;
 };
 
 } // namespace

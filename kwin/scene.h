@@ -49,17 +49,20 @@ public:
     // Returns true if the ctor failed to properly initialize.
     virtual bool initFailed() const = 0;
     virtual CompositingType compositingType() const = 0;
+
+    virtual bool hasPendingFlush() const { return false; }
+
     // Repaints the given screen areas, windows provides the stacking order.
     // The entry point for the main part of the painting pass.
-    virtual void paint(QRegion damage, ToplevelList windows) = 0;
+    // returns the time since the last vblank signal - if there's one
+    // ie. "what of this frame is lost to painting"
+    virtual int paint(QRegion damage, ToplevelList windows) = 0;
 
     // Notification function - KWin core informs about changes.
     // Used to mainly discard cached data.
 
     // a new window has been created
     virtual void windowAdded(Toplevel*) = 0;
-    // a window has been destroyed
-    virtual void windowDeleted(Deleted*) = 0;
     /**
      * Method invoked when the screen geometry is changed.
      * Reimplementing classes should also invoke the parent method
@@ -91,16 +94,13 @@ public:
     };
     // types of filtering available
     enum ImageFilterType { ImageFilterFast, ImageFilterGood };
-    inline uint estimatedRenderTime() {
-        return lastRenderTime;
-    }
     // there's nothing to paint (adjust time_diff later)
-    void idle();
-    bool waitSyncAvailable() {
-        return has_waitSync;
-    }
-    OverlayWindow* overlayWindow();
+    virtual void idle();
+    virtual bool waitSyncAvailable() const;
+    virtual OverlayWindow* overlayWindow() = 0;
 public Q_SLOTS:
+    // a window has been destroyed
+    virtual void windowDeleted(KWin::Deleted*) = 0;
     // opacity of a window changed
     virtual void windowOpacityChanged(KWin::Toplevel* c) = 0;
     // shape/size of a window changed
@@ -152,12 +152,9 @@ protected:
     QRegion painted_region;
     // time since last repaint
     int time_diff;
-    uint lastRenderTime;
     QElapsedTimer last_time;
     Workspace* wspace;
-    bool has_waitSync;
-    LanczosFilter* lanczos_filter;
-    OverlayWindow* m_overlayWindow;
+    QWeakPointer<LanczosFilter> lanczos_filter;
 };
 
 // The base class for windows representations in composite backends
@@ -206,7 +203,7 @@ public:
     // is the window fully opaque
     bool isOpaque() const;
     // shape of the window
-    QRegion shape() const;
+    const QRegion &shape() const;
     QRegion clientShape() const;
     void discardShape();
     void updateToplevel(Toplevel* c);
@@ -245,8 +242,6 @@ public:
 protected:
     EffectFrameImpl* m_effectFrame;
 };
-
-extern Scene* scene;
 
 inline
 int Scene::Window::x() const

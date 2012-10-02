@@ -12,10 +12,8 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU General Public License for more details
  *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SAVERCORONA_H
@@ -25,8 +23,7 @@
 
 #include <Plasma/Corona>
 
-class QDBusMessage;
-class QDBusError;
+class QDeclarativeEngine;
 
 /**
  * @short A Corona for the screensaver
@@ -46,18 +43,31 @@ public:
     virtual int numScreens() const;
     virtual QRect screenGeometry(int id) const;
 
+protected:
+    virtual bool eventFilter(QObject *watched, QEvent *event);
+
 private Q_SLOTS:
     void updateActions(Plasma::ImmutabilityType immutability);
     void toggleLock();
-    void unlock(QDBusMessage reply);
-    void dbusError(QDBusError error);
     void unlockDesktop();
     void numScreensUpdated(int newCount);
+    void greeterAccepted();
+    void greeterCanceled();
 
 private:
+    enum UnlockMode {
+        AppletLock,
+        ScreenLock
+    };
     void init();
+    void createGreeter();
+    void capsLocked();
 
     int m_numScreens;
+    QDeclarativeEngine *m_engine;
+    QGraphicsObject *m_greeterItem;
+    UnlockMode m_mode;
+    bool m_capsLocked;
 };
 
 #endif

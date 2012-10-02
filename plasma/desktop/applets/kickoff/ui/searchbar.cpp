@@ -130,6 +130,13 @@ bool SearchBar::eventFilter(QObject *watched, QEvent *event)
             QCoreApplication::sendEvent(this, event);
             return true;
         }
+    // The Tab key, should propagate up to the parent 'launcher', and
+    // switch focus (either to select from the view of "found" search match
+    // items, or another view -- the URL View or Application View.)
+        if (keyEvent->key() == Qt::Key_Tab) {
+            QCoreApplication::sendEvent(this, event);
+            return true;
+        }
     }
     return false;
 }

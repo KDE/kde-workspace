@@ -3,10 +3,6 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 add_subdirectory( kcm )
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/ksmserver ${CMAKE_MODULE_PATH})
-find_package(KDeclarative REQUIRED)
-macro_log_feature(KDECLARATIVE_FOUND "libkdeclarative" "KDE Declarative (QML) support from kdelibs" "http://www.kde.org" TRUE "" "Required by ksmserver.")
-
 include_directories(
    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs
    ${QIMAGEBLITZ_INCLUDES}
@@ -14,6 +10,12 @@ include_directories(
 )
 
 add_subdirectory( tests )
+
+if(NOT WIN32)
+   macro_optional_add_subdirectory( screenlocker )
+   set(COMPILE_SCREEN_LOCKER 1)
+   set(SCREEN_LOCKER "screenlocker_static")
+endif(NOT WIN32)
 
 check_library_exists(ICE _IceTransNoListen "" HAVE__ICETRANSNOLISTEN)
 configure_file(config-ksmserver.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-ksmserver.h)
@@ -58,7 +60,7 @@ qt4_add_dbus_adaptor( ksmserver_KDEINIT_SRCS org.kde.KSMServerInterface.xml serv
 
 kde4_add_kdeinit_executable( ksmserver ${ksmserver_KDEINIT_SRCS})
 
-target_link_libraries(kdeinit_ksmserver ${KDE4_PLASMA_LIBS} kworkspace
+target_link_libraries(kdeinit_ksmserver ${SCREEN_LOCKER} ${KDE4_PLASMA_LIBS} kworkspace
    ${KDE4_KDEUI_LIBS} ${KDE4_KIO_LIBS} ${QIMAGEBLITZ_LIBRARIES} ${KDE4_SOLID_LIBS} ${X11_LIBRARIES} ${X11_Xrender_LIB}
    ${QT_QTDECLARATIVE_LIBRARY} ${KDECLARATIVE_LIBRARIES}
 )

@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "options.h"
 
 #include <kconfiggroup.h>
+#include "composite.h"
 
 namespace KWin
 {
@@ -172,25 +173,29 @@ Qt::WFlags Bridge::initialWFlags() const
 QRegion Bridge::unobscuredRegion(const QRegion& r) const
 {
     QRegion reg(r);
-    const ClientList stacking_order = c->workspace()->stackingOrder();
+    const ToplevelList stacking_order = c->workspace()->stackingOrder();
     int pos = stacking_order.indexOf(c);
     ++pos;
     for (; pos < stacking_order.count(); ++pos) {
-        if (!stacking_order[pos]->isShown(true))
+        Client *client = qobject_cast<Client*>(stacking_order[pos]);
+        if (!client) {
+            continue;
+        }
+        if (!client->isShown(true))
             continue; // these don't obscure the window
         if (c->isOnAllDesktops()) {
-            if (!stacking_order[ pos ]->isOnCurrentDesktop())
+            if (!client->isOnCurrentDesktop())
                 continue;
         } else {
-            if (!stacking_order[ pos ]->isOnDesktop(c->desktop()))
+            if (!client->isOnDesktop(c->desktop()))
                 continue;
         }
         /* the clients all have their mask-regions in local coords
            so we have to translate them to a shared coord system
            we choose ours */
-        int dx = stacking_order[ pos ]->x() - c->x();
-        int dy = stacking_order[ pos ]->y() - c->y();
-        QRegion creg = stacking_order[ pos ]->mask();
+        int dx = client->x() - c->x();
+        int dy = client->y() - c->y();
+        QRegion creg = client->mask();
         creg.translate(dx, dy);
         reg -= creg;
         if (reg.isEmpty()) {
@@ -211,7 +216,7 @@ void Bridge::grabXServer(bool grab)
 
 bool Bridge::compositingActive() const
 {
-    return c->workspace()->compositingActive();
+    return Compositor::compositing();
 }
 
 QRect Bridge::transparentRect() const

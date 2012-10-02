@@ -12,7 +12,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0" colspan="3">
-    <widget class="QListView" name="m_view">
+    <widget class="ItemsView" name="m_view">
      <property name="minimumSize">
       <size>
        <width>300</width>
@@ -173,6 +173,11 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ItemsView</class>
+   <extends>QListView</extends>
+   <header>itemsview.h</header>
+  </customwidget>
   <customwidget>
    <class>KPushButton</class>
    <extends>QPushButton</extends>

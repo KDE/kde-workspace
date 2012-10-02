@@ -40,14 +40,19 @@ namespace KWin
 class ThumbnailItem;
 
 class Client;
+class Compositor;
 class Deleted;
 class Unmanaged;
 
 class EffectsHandlerImpl : public EffectsHandler
 {
     Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.kde.kwin.Effects")
+    Q_PROPERTY(QStringList activeEffects READ activeEffects)
+    Q_PROPERTY(QStringList loadedEffects READ loadedEffects)
+    Q_PROPERTY(QStringList listOfEffects READ listOfEffects)
 public:
-    EffectsHandlerImpl(CompositingType type);
+    EffectsHandlerImpl(Compositor *compositor, Scene *scene);
     virtual ~EffectsHandlerImpl();
     virtual void prePaintScreen(ScreenPrePaintData& data, int time);
     virtual void paintScreen(int mask, QRegion region, ScreenPaintData& data);
@@ -57,7 +62,7 @@ public:
     virtual void postPaintWindow(EffectWindow* w);
     virtual void paintEffectFrame(EffectFrame* frame, QRegion region, double opacity, double frameOpacity);
 
-    bool provides(Effect::Feature ef);
+    Effect *provides(Effect::Feature ef);
 
     virtual void drawWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data);
 
@@ -137,7 +142,7 @@ public:
     virtual void checkElectricBorder(const QPoint &pos, Time time);
     virtual void reserveElectricBorder(ElectricBorder border);
     virtual void unreserveElectricBorder(ElectricBorder border);
-    virtual void reserveElectricBorderSwitching(bool reserve);
+    virtual void reserveElectricBorderSwitching(bool reserve, Qt::Orientations o);
 
     virtual unsigned long xrenderBufferPicture();
     virtual void reconfigure();
@@ -163,11 +168,6 @@ public:
     void desktopResized(const QSize &size);
 
     virtual void reloadEffect(Effect *effect);
-    bool loadEffect(const QString& name, bool checkDefault = false);
-    void toggleEffect(const QString& name);
-    void unloadEffect(const QString& name);
-    void reconfigureEffect(const QString& name);
-    bool isEffectLoaded(const QString& name);
     QStringList loadedEffects() const;
     QStringList listOfEffects() const;
 
@@ -181,11 +181,20 @@ public Q_SLOTS:
     void slotShowOutline(const QRect &geometry);
     void slotHideOutline();
 
+    // slots for D-Bus interface
+    Q_SCRIPTABLE void reconfigureEffect(const QString& name);
+    Q_SCRIPTABLE bool loadEffect(const QString& name, bool checkDefault = false);
+    Q_SCRIPTABLE void toggleEffect(const QString& name);
+    Q_SCRIPTABLE void unloadEffect(const QString& name);
+    Q_SCRIPTABLE bool isEffectLoaded(const QString& name) const;
+    Q_SCRIPTABLE QString supportInformation(const QString& name) const;
+
 protected Q_SLOTS:
-    void slotDesktopChanged(int old);
+    void slotDesktopChanged(int old, KWin::Client *withClient);
     void slotClientAdded(KWin::Client *c);
     void slotClientShown(KWin::Toplevel*);
     void slotUnmanagedAdded(KWin::Unmanaged *u);
+    void slotUnmanagedShown(KWin::Toplevel*);
     void slotWindowClosed(KWin::Toplevel *c);
     void slotClientActivated(KWin::Client *c);
     void slotDeletedRemoved(KWin::Deleted *d);
@@ -197,6 +206,7 @@ protected Q_SLOTS:
     void slotClientMinimized(KWin::Client *c, bool animate);
     void slotClientUnminimized(KWin::Client *c, bool animate);
     void slotGeometryShapeChanged(KWin::Toplevel *t, const QRect &old);
+    void slotPaddingChanged(KWin::Toplevel *t, const QRect &old);
     void slotWindowDamaged(KWin::Toplevel *t, const QRect& r);
     void slotPropertyNotify(KWin::Toplevel *t, long atom);
     void slotPropertyNotify(long atom);
@@ -216,6 +226,9 @@ protected:
     int next_window_quad_type;
     int mouse_poll_ref_count;
 
+private Q_SLOTS:
+    void slotEffectsQueried();
+
 private:
     QList< Effect* > m_activeEffects;
     QList< Effect* >::iterator m_currentDrawWindowIterator;
@@ -223,6 +236,8 @@ private:
     QList< Effect* >::iterator m_currentPaintEffectFrameIterator;
     QList< Effect* >::iterator m_currentPaintScreenIterator;
     QList< Effect* >::iterator m_currentBuildQuadsIterator;
+    Compositor *m_compositor;
+    Scene *m_scene;
 };
 
 class EffectWindowImpl : public EffectWindow

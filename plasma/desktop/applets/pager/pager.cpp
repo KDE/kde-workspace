@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Daniel Laidig <d.laidig@gmx.de>                 *
+ *   Copyright (C) 2012 by Luís Gabriel Lima <lampih@gmail.com>            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,15 +22,15 @@
 
 #include <math.h>
 
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
 #include <QFont>
-#include <QGraphicsSceneHoverEvent>
 #include <QTimer>
 #include <QX11Info>
 #include <QDBusInterface>
 #include <QTextDocument>
-#include <QPropertyAnimation>
+#include <QDesktopWidget>
+#include <QtGui/QGraphicsLinearLayout>
+#include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeContext>
 
 #include <KCModuleInfo>
 #include <KCModuleProxy>
@@ -37,88 +38,49 @@
 #include <KConfigDialog>
 #include <KGlobalSettings>
 #include <KIconLoader>
-#include <KSharedConfig>
 #include <KWindowSystem>
 #include <NETRootInfo>
 
-#include <Plasma/Svg>
 #include <Plasma/FrameSvg>
 #include <Plasma/PaintUtils>
 #include <Plasma/Theme>
 #include <Plasma/ToolTipManager>
-#include <Plasma/Animator>
+#include <Plasma/DeclarativeWidget>
+#include <Plasma/Package>
 
 #include <KActivities/Consumer>
-
-#include <kephal/screens.h>
 
 #include <taskmanager/task.h>
 
 const int FAST_UPDATE_DELAY = 100;
 const int UPDATE_DELAY = 500;
-const int DRAG_SWITCH_DELAY = 1000;
 const int MAXDESKTOPS = 20;
 // random(), find a less magic one if you can. -sreich
 const qreal MAX_TEXT_WIDTH = 800;
-
-DesktopRectangle::DesktopRectangle(QObject *parent)
-    : QObject(parent),
-      m_alpha(0)
-{
-}
-
-QPropertyAnimation *DesktopRectangle::animation() const
-{
-    return m_animation.data();
-}
-
-void DesktopRectangle::setAnimation(QPropertyAnimation *animation)
-{
-    m_animation = animation;
-}
-
-qreal DesktopRectangle::alphaValue() const
-{
-    return m_alpha;
-}
-
-void DesktopRectangle::setAlphaValue(qreal value)
-{
-    m_alpha = value;
-
-    Pager *parentItem = qobject_cast<Pager*>(parent());
-    parentItem->update();
-}
 
 Pager::Pager(QObject *parent, const QVariantList &args)
     : Plasma::Applet(parent, args),
       m_displayedText(None),
       m_currentDesktopSelected(DoNothing),
       m_showWindowIcons(false),
-      m_showOwnBackground(false),
       m_rows(2),
       m_columns(0),
       m_desktopDown(false),
-      m_hoverIndex(-1),
       m_addDesktopAction(0),
       m_removeDesktopAction(0),
-      m_colorScheme(0),
+      m_plasmaColorTheme(0),
       m_verticalFormFactor(false),
-      m_dragId(0),
-      m_dragStartDesktop(-1),
-      m_dragHighlightedDesktop(-1),
-      m_dragSwitchDesktop(-1),
       m_ignoreNextSizeConstraint(false),
-      m_configureDesktopsWidget(0)
+      m_configureDesktopsWidget(0),
+      m_desktopWidget(qApp->desktop())
 {
     setAcceptsHoverEvents(true);
     setAcceptDrops(true);
     setHasConfigurationInterface(true);
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
 
-    m_background = new Plasma::FrameSvg(this);
-    m_background->setImagePath("widgets/pager");
-    m_background->setCacheAllRenderedFrames(true);
+    m_dummy = new Plasma::FrameSvg(this);
+    m_dummy->setImagePath("widgets/pager");
 
     // initialize with a decent default
     m_desktopCount = KWindowSystem::numberOfDesktops();
@@ -128,11 +90,15 @@ Pager::Pager(QObject *parent, const QVariantList &args)
 
 Pager::~Pager()
 {
-    delete m_colorScheme;
+    delete m_plasmaColorTheme;
 }
 
 void Pager::init()
 {
+    m_pagerModel = new PagerModel(this);
+
+    updatePagerStyle();
+    initDeclarativeUI();
     createMenu();
 
     m_verticalFormFactor = (formFactor() == Plasma::Vertical);
@@ -143,23 +109,17 @@ void Pager::init()
     m_timer->setSingleShot(true);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(recalculateWindowRects()));
 
-    m_dragSwitchTimer = new QTimer(this);
-    m_dragSwitchTimer->setSingleShot(true);
-    connect(m_dragSwitchTimer, SIGNAL(timeout()), this, SLOT(dragSwitch()));
-
     connect(KWindowSystem::self(), SIGNAL(currentDesktopChanged(int)), this, SLOT(currentDesktopChanged(int)));
-    connect(KWindowSystem::self(), SIGNAL(windowAdded(WId)), this, SLOT(windowAdded(WId)));
-    connect(KWindowSystem::self(), SIGNAL(windowRemoved(WId)), this, SLOT(windowRemoved(WId)));
-    connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(activeWindowChanged(WId)));
+    connect(KWindowSystem::self(), SIGNAL(windowAdded(WId)), this, SLOT(startTimerFast()));
+    connect(KWindowSystem::self(), SIGNAL(windowRemoved(WId)), this, SLOT(startTimerFast()));
+    connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(startTimerFast()));
     connect(KWindowSystem::self(), SIGNAL(numberOfDesktopsChanged(int)), this, SLOT(numberOfDesktopsChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(desktopNamesChanged()), this, SLOT(desktopNamesChanged()));
-    connect(KWindowSystem::self(), SIGNAL(stackingOrderChanged()), this, SLOT(stackingOrderChanged()));
+    connect(KWindowSystem::self(), SIGNAL(stackingOrderChanged()), this, SLOT(startTimerFast()));
     connect(KWindowSystem::self(), SIGNAL(windowChanged(WId,const ulong*)), this, SLOT(windowChanged(WId,const ulong*)));
-    connect(KWindowSystem::self(), SIGNAL(showingDesktopChanged(bool)), this, SLOT(showingDesktopChanged(bool)));
-    connect(Kephal::Screens::self(), SIGNAL(screenAdded(Kephal::Screen*)), SLOT(desktopsSizeChanged()));
-    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)), SLOT(desktopsSizeChanged()));
-    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)), SLOT(desktopsSizeChanged()));
-    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*,QPoint,QPoint)), SLOT(desktopsSizeChanged()));
+    connect(KWindowSystem::self(), SIGNAL(showingDesktopChanged(bool)), this, SLOT(startTimer()));
+    connect(m_desktopWidget, SIGNAL(screenCountChanged(int)), SLOT(desktopsSizeChanged()));
+    connect(m_desktopWidget, SIGNAL(resized(int)), SLOT(desktopsSizeChanged()));
 
     // connect to KWin's reloadConfig signal to get updates on the desktop layout
     QDBusConnection dbus = QDBusConnection::sessionBus();
@@ -170,11 +130,77 @@ void Pager::init()
 
     recalculateGridSizes(m_rows);
 
-    m_currentDesktop = KWindowSystem::currentDesktop();
+    setCurrentDesktop(KWindowSystem::currentDesktop());
 
     KActivities::Consumer *act = new KActivities::Consumer(this);
     connect(act, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
     m_currentActivity = act->currentActivity();
+}
+
+void Pager::updatePagerStyle()
+{
+    m_pagerStyle["font"] = KGlobalSettings::taskbarFont();
+
+    // Desktop background
+    QColor defaultTextColor = Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor);
+    m_pagerStyle["textColor"] = QString("#%1").arg(defaultTextColor.rgba(), 0, 16);
+    defaultTextColor.setAlpha(64);
+
+    // Inactive windows
+    QColor drawingColor = plasmaColorTheme()->foreground(KColorScheme::InactiveText).color();
+    drawingColor.setAlpha(45);
+    m_pagerStyle["windowInactiveColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Inactive windows Active desktop
+    drawingColor.setAlpha(90);
+    m_pagerStyle["windowInactiveOnActiveDesktopColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Inactive window borders
+    drawingColor = defaultTextColor;
+    drawingColor.setAlpha(130);
+    m_pagerStyle["windowInactiveBorderColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Active window borders
+    m_pagerStyle["windowActiveBorderColor"] = QString("#%1").arg(defaultTextColor.rgba(), 0, 16);
+
+    // Active windows
+    drawingColor.setAlpha(130);
+    m_pagerStyle["windowActiveColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    // Active windows Active desktop
+    drawingColor.setAlpha(155);
+    m_pagerStyle["windowActiveOnActiveDesktopColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
+
+    emit styleChanged();
+}
+
+void Pager::initDeclarativeUI()
+{
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
+    m_declarativeWidget = new Plasma::DeclarativeWidget(this);
+    layout->addItem(m_declarativeWidget);
+
+    m_declarativeWidget->engine()->rootContext()->setContextProperty("pager", this);
+
+    Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
+    Plasma::Package package(QString(), "org.kde.pager", structure);
+    m_declarativeWidget->setQmlPath(package.filePath("mainscript"));
+}
+
+void Pager::setCurrentDesktop(int desktop)
+{
+    if (m_currentDesktop != desktop) {
+        m_currentDesktop = desktop;
+        emit currentDesktopChanged();
+    }
+}
+
+void Pager::setShowWindowIcons(bool show)
+{
+    if (m_showWindowIcons != show) {
+        m_showWindowIcons = show;
+        emit showWindowIconsChanged();
+    }
 }
 
 void Pager::configChanged()
@@ -186,11 +212,12 @@ void Pager::configChanged()
     if (displayedText != m_displayedText) {
         m_displayedText = displayedText;
         changed = true;
+        emit showDesktopTextChanged();
     }
 
     bool showWindowIcons = cg.readEntry("showWindowIcons", m_showWindowIcons);
     if (showWindowIcons != m_showWindowIcons) {
-        m_showWindowIcons = showWindowIcons;
+        setShowWindowIcons(showWindowIcons);
         changed = true;
     }
 
@@ -230,15 +257,10 @@ void Pager::constraintsEvent(Plasma::Constraints constraints)
             recalculateWindowRects();
         }
 
-        if (m_background->hasElementPrefix(QString())) {
-            m_background->setElementPrefix(QString());
-            m_background->resizeFrame(size());
-        }
         update();
     }
 
     if (constraints & Plasma::FormFactorConstraint) {
-
         if (m_verticalFormFactor != (formFactor() == Plasma::Vertical)) {
             m_verticalFormFactor = (formFactor() == Plasma::Vertical);
             // whenever we switch to/from vertical form factor, swap the rows and columns around
@@ -263,13 +285,14 @@ void Pager::constraintsEvent(Plasma::Constraints constraints)
     }
 }
 
-KColorScheme *Pager::colorScheme()
+KColorScheme *Pager::plasmaColorTheme()
 {
-    if (!m_colorScheme) {
-        m_colorScheme = new KColorScheme(QPalette::Active, KColorScheme::View, Plasma::Theme::defaultTheme()->colorScheme());
+    if (!m_plasmaColorTheme) {
+        m_plasmaColorTheme = new KColorScheme(QPalette::Active, KColorScheme::View,
+                                    Plasma::Theme::defaultTheme()->colorScheme());
     }
 
-    return m_colorScheme;
+    return m_plasmaColorTheme;
 }
 
 void Pager::createMenu()
@@ -389,6 +412,12 @@ void Pager::recalculateGridSizes(int rows)
     updateSizes(true);
 }
 
+QRectF Pager::mapToDeclarativeUI(const QRectF &rect) const
+{
+    QPointF p = mapToItem(m_declarativeWidget, rect.x(), rect.y());
+    return QRectF(p, rect.size());
+}
+
 void Pager::updateSizes(bool allowResize)
 {
     int padding = 2; // Space between miniatures of desktops
@@ -399,13 +428,17 @@ void Pager::updateSizes(bool allowResize)
     qreal rightMargin = 0;
     qreal bottomMargin = 0;
 
-    qreal ratio = (qreal) Kephal::ScreenUtils::desktopGeometry().width() /
-                  (qreal) Kephal::ScreenUtils::desktopGeometry().height();
+    QRect totalRect;
+    for (int x = 0; x < m_desktopWidget->screenCount(); x++) {
+        totalRect |= m_desktopWidget->screenGeometry(x);
+    }
+
+    qreal ratio = (qreal) totalRect.width() /
+                  (qreal) totalRect.height();
 
     // calculate the margins
     if (formFactor() == Plasma::Vertical || formFactor() == Plasma::Horizontal) {
-        m_background->setElementPrefix(QString());
-        m_background->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
+        m_dummy->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
 
         if (formFactor() == Plasma::Vertical) {
             qreal optimalSize = (geometry().width() -
@@ -414,7 +447,6 @@ void Pager::updateSizes(bool allowResize)
 
             if (optimalSize < leftMargin || optimalSize < rightMargin) {
                 leftMargin = rightMargin = qMax(qreal(0), optimalSize);
-                m_showOwnBackground = false;
             }
         } else if (formFactor() == Plasma::Horizontal) {
             qreal optimalSize = (geometry().height() -
@@ -423,7 +455,6 @@ void Pager::updateSizes(bool allowResize)
 
             if (optimalSize < topMargin || optimalSize < bottomMargin) {
                 topMargin = bottomMargin = qMax(qreal(0), optimalSize);
-                m_showOwnBackground = false;
             }
         }
     } else {
@@ -449,8 +480,8 @@ void Pager::updateSizes(bool allowResize)
         }
         itemWidth = itemHeight * ratio;
 
-        m_widthScaleFactor = itemWidth / Kephal::ScreenUtils::desktopGeometry().width();
-        m_heightScaleFactor = itemHeight / Kephal::ScreenUtils::desktopGeometry().height();
+        m_widthScaleFactor = itemWidth / m_desktopWidget->geometry().width();
+        m_heightScaleFactor = itemHeight / m_desktopWidget->geometry().height();
     } else {
         // work out the preferred size based on the height of the contentsRect
         if (formFactor() == Plasma::Horizontal) {
@@ -488,41 +519,19 @@ void Pager::updateSizes(bool allowResize)
             itemHeight = itemWidth / ratio;
         }
 
-        m_widthScaleFactor = itemWidth / Kephal::ScreenUtils::desktopGeometry().width();
-        m_heightScaleFactor = itemHeight / Kephal::ScreenUtils::desktopGeometry().height();
+        m_widthScaleFactor = itemWidth / m_desktopWidget->geometry().width();
+        m_heightScaleFactor = itemHeight / m_desktopWidget->geometry().height();
     }
 
-    m_hoverRect = QRectF();
-    m_rects.clear();
-    qDeleteAll(m_animations);
-    m_animations.clear();
+    m_pagerModel->clearDesktopRects();
 
     QRectF itemRect(QPoint(leftMargin, topMargin) , QSize(floor(itemWidth), floor(itemHeight)));
     for (int i = 0; i < m_desktopCount; i++) {
         itemRect.moveLeft(leftMargin + floor((i % m_columns)  * (itemWidth + padding)));
         itemRect.moveTop(topMargin + floor((i / m_columns) * (itemHeight + padding)));
-        m_rects.append(itemRect);
-        m_animations.append(new DesktopRectangle(this));
-    }
 
-    if (m_hoverIndex >= m_animations.count()) {
-        m_hoverIndex = -1;
-    }
-
-    //Resize background svgs as needed
-    if (m_background->hasElementPrefix("normal")) {
-        m_background->setElementPrefix("normal");
-        m_background->resizeFrame(itemRect.size());
-    }
-
-    if (m_background->hasElementPrefix("active")) {
-        m_background->setElementPrefix("active");
-        m_background->resizeFrame(itemRect.size());
-    }
-
-    if (m_background->hasElementPrefix("hover")) {
-        m_background->setElementPrefix("hover");
-        m_background->resizeFrame(itemRect.size());
+        QString name = KWindowSystem::desktopName(i + 1);
+        m_pagerModel->appendDesktopRect(mapToDeclarativeUI(itemRect), name);
     }
 
     // do not try to resize unless the caller has allowed it,
@@ -537,9 +546,6 @@ void Pager::updateSizes(bool allowResize)
                                   ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) +
                                        topMargin + bottomMargin));
 
-        //kDebug() << "current size:" << contentsRect() << " new preferred size: " << preferred << " form factor:" << formFactor() << " grid:" << m_rows << "x" << m_columns <<
-        //            " actual grid:" << rows << "x" << columns << " item size:" << itemWidth << "x" << itemHeight << " preferred item size:" << preferredItemWidth << "x" << preferredItemHeight;
-
         // make sure the minimum size is smaller than preferred
         setMinimumSize(qMin(preferred.width(),  minimumSize().width()),
                        qMin(preferred.height(), minimumSize().height()));
@@ -553,13 +559,7 @@ void Pager::updateSizes(bool allowResize)
 void Pager::recalculateWindowRects()
 {
     QList<WId> windows = KWindowSystem::stackingOrder();
-    m_windowRects.clear();
-    for (int i = 0; i < m_desktopCount; i++) {
-        m_windowRects.append(QList<QPair<WId, QRect> >());
-    }
-
-    m_activeWindows.clear();
-    m_windowInfo.clear();
+    m_pagerModel->clearWindowRects();
 
     foreach (WId window, windows) {
         KWindowInfo info = KWindowSystem::windowInfo(window, NET::WMGeometry | NET::WMFrameExtents |
@@ -595,22 +595,21 @@ void Pager::recalculateWindowRects()
                 continue;
             }
 
-            QRect windowRect = info.frameGeometry();
+            QRectF windowRect = info.frameGeometry();
 
             if (KWindowSystem::mapViewport()) {
-                windowRect = fixViewportPosition( windowRect );
+                windowRect = fixViewportPosition(windowRect.toRect());
             }
 
             windowRect = QRectF(windowRect.x() * m_widthScaleFactor,
                                 windowRect.y() * m_heightScaleFactor,
                                 windowRect.width() * m_widthScaleFactor,
                                 windowRect.height() * m_heightScaleFactor).toRect();
-            windowRect.translate(m_rects[i].topLeft().toPoint());
-            m_windowRects[i].append(QPair<WId, QRect>(window, windowRect));
-            if (window == KWindowSystem::activeWindow()) {
-                m_activeWindows.append(windowRect);
-            }
-            m_windowInfo.append(info);
+
+            bool active = (window == KWindowSystem::activeWindow());
+            int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
+            QPixmap icon = KWindowSystem::icon(info.win(), windowIconSize, windowIconSize, true);
+            m_pagerModel->appendWindowRect(i, window, windowRect, active, icon, info.visibleName());
         }
     }
 
@@ -656,48 +655,15 @@ void Pager::currentDesktopChanged(int desktop)
         return; // bogus value, don't accept it
     }
 
-    m_currentDesktop = desktop;
+    setCurrentDesktop(desktop);
     m_desktopDown = false;
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
+    startTimerFast();
 }
 
 void Pager::currentActivityChanged(const QString &activity)
 {
     m_currentActivity = activity;
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
-}
-
-void Pager::windowAdded(WId id)
-{
-    Q_UNUSED(id)
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
-}
-
-void Pager::windowRemoved(WId id)
-{
-    Q_UNUSED(id)
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
-}
-
-void Pager::activeWindowChanged(WId id)
-{
-    Q_UNUSED(id)
-
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
+    startTimerFast();
 }
 
 void Pager::numberOfDesktopsChanged(int num)
@@ -713,26 +679,16 @@ void Pager::numberOfDesktopsChanged(int num)
 
     m_desktopCount = num;
 
-    m_rects.clear();
+    m_pagerModel->clearDesktopRects();
     recalculateGridSizes(m_rows);
     recalculateWindowRects();
 }
 
 void Pager::desktopNamesChanged()
 {
-    m_rects.clear();
+    m_pagerModel->clearDesktopRects();
     updateSizes(true);
-
-    if (!m_timer->isActive()) {
-        m_timer->start(UPDATE_DELAY);
-    }
-}
-
-void Pager::stackingOrderChanged()
-{
-    if (!m_timer->isActive()) {
-        m_timer->start(FAST_UPDATE_DELAY);
-    }
+    startTimer();
 }
 
 void Pager::windowChanged(WId id, const unsigned long* dirty)
@@ -741,48 +697,29 @@ void Pager::windowChanged(WId id, const unsigned long* dirty)
 
     if (dirty[NETWinInfo::PROTOCOLS] & (NET::WMGeometry | NET::WMDesktop) ||
         dirty[NETWinInfo::PROTOCOLS2] & NET::WM2Activities) {
-        if (!m_timer->isActive()) {
-            m_timer->start(UPDATE_DELAY);
-        }
-    }
-}
-
-void Pager::showingDesktopChanged(bool showing)
-{
-    Q_UNUSED(showing)
-    if (!m_timer->isActive()) {
-        m_timer->start(UPDATE_DELAY);
+        startTimer();
     }
 }
 
 void Pager::desktopsSizeChanged()
 {
-    m_rects.clear();
+    m_pagerModel->clearDesktopRects();
     updateSizes(true);
+    startTimer();
+}
 
+void Pager::startTimer()
+{
     if (!m_timer->isActive()) {
         m_timer->start(UPDATE_DELAY);
     }
 }
 
-void Pager::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void Pager::startTimerFast()
 {
-    if (event->buttons() != Qt::RightButton)
-    {
-        for (int i = 0; i < m_rects.count(); ++i) {
-            if (m_rects[i].contains(event->pos())) {
-                m_dragStartDesktop = m_dragHighlightedDesktop = i;
-                m_dragOriginalPos = m_dragCurrentPos = event->pos();
-                if (m_dragOriginal.isEmpty()) {
-                    m_dragOriginal = m_rects[i].toRect();
-                }
-
-                update();
-                return;
-            }
-        }
+    if (!m_timer->isActive()) {
+        m_timer->start(FAST_UPDATE_DELAY);
     }
-    Applet::mousePressEvent(event);
 }
 
 void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
@@ -790,10 +727,6 @@ void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
     int newDesk;
     int desktops = KWindowSystem::numberOfDesktops();
 
-    /*
-       if (m_kwin->numberOfViewports(0).width() * m_kwin->numberOfViewports(0).height() > 1 )
-       desktops = m_kwin->numberOfViewports(0).width() * m_kwin->numberOfViewports(0).height();
-       */
     if (e->delta() < 0) {
         newDesk = m_currentDesktop % desktops + 1;
     } else {
@@ -801,98 +734,57 @@ void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
     }
 
     KWindowSystem::setCurrentDesktop(newDesk);
-    m_currentDesktop = newDesk;
+    setCurrentDesktop(newDesk);
     update();
 
     Applet::wheelEvent(e);
 }
 
-void Pager::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+void Pager::moveWindow(int window, double x, double y, int targetDesktop, int sourceDesktop)
 {
-    if (m_dragId > 0) {
-        m_dragCurrentPos = event->pos();
-        m_dragHighlightedDesktop = -1;
-        m_hoverRect = QRectF();
-        int i = 0;
-        foreach (const QRectF &rect, m_rects) {
-            if (rect.contains(event->pos())) {
-                m_dragHighlightedDesktop = i;
-                m_hoverRect = rect;
-                break;
-            }
+    WId windowId = (WId) window;
 
-            ++i;
-        }
-        update();
-        event->accept();
-        return;
-    } else if (m_dragStartDesktop != -1 &&
-               (event->pos() - m_dragOriginalPos).toPoint().manhattanLength() > KGlobalSettings::dndEventDelay()) {
-        m_dragId = 0; // prevent us from going through this more than once
-        for (int k = m_windowRects[m_dragStartDesktop].count() - 1; k >= 0 ; k--) {
-            if (m_windowRects[m_dragStartDesktop][k].second.contains(m_dragOriginalPos.toPoint())) {
-                m_dragOriginal = m_windowRects[m_dragStartDesktop][k].second;
-                m_dragId = m_windowRects[m_dragStartDesktop][k].first;
-                event->accept();
-                break;
-            }
-        }
-    }
+    QPointF dest = QPointF(x, y) - m_pagerModel->desktopRectAt(targetDesktop).topLeft();
 
-    if (m_dragOriginal.isEmpty()) {
-        Applet::mouseMoveEvent(event);
+    dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
+
+    // don't move windows to negative positions
+    dest = QPointF(qMax(dest.x(), 0.0), qMax(dest.y(), 0.0));
+
+    // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
+    NETRootInfo info(QX11Info::display(), 0);
+    int flags = (0x20 << 12) | (0x03 << 8) | 1; // from tool, x/y, northwest gravity
+
+    if (!KWindowSystem::mapViewport()) {
+        KWindowInfo windowInfo = KWindowSystem::windowInfo(windowId, NET::WMDesktop | NET::WMState);
+
+        if (!windowInfo.onAllDesktops()) {
+            KWindowSystem::setOnDesktop(windowId, targetDesktop+1);
+        }
+
+        // only move the window if it is not full screen and if it is kept within the same desktop
+        // moving when dropping between desktop is too annoying due to the small drop area.
+        if (!(windowInfo.state() & NET::FullScreen) &&
+            (targetDesktop == sourceDesktop || windowInfo.onAllDesktops())) {
+            QPoint d = dest.toPoint();
+            info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
+        }
+    } else {
+        // setOnDesktop() with viewports is also moving a window, and since it takes a moment
+        // for the WM to do the move, there's a race condition with figuring out how much to move,
+        // so do it only as one move
+        dest += KWindowSystem::desktopToViewport(targetDesktop+1, false);
+        QPoint d = KWindowSystem::constrainViewportRelativePosition(dest.toPoint());
+        info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
     }
+    m_timer->start();
 }
 
-void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void Pager::changeDesktop(int newDesktop)
 {
-    if (m_dragId) {
-        if (m_dragHighlightedDesktop != -1) {
-            QPointF dest = m_dragCurrentPos - m_rects[m_dragHighlightedDesktop].topLeft() - m_dragOriginalPos + m_dragOriginal.topLeft();
-            dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
-            // don't move windows to negative positions
-            dest = QPointF(qMax(dest.x(), qreal(0.0)), qMax(dest.y(), qreal(0.0)));
-            if (!KWindowSystem::mapViewport()) {
-                KWindowInfo info = KWindowSystem::windowInfo(m_dragId, NET::WMDesktop | NET::WMState);
-
-                if (!info.onAllDesktops()) {
-                    KWindowSystem::setOnDesktop(m_dragId, m_dragHighlightedDesktop+1);
-                }
-
-                // only move the window if it is not full screen and if it is kept within the same desktop
-                // moving when dropping between desktop is too annoying due to the small drop area.
-                if (!(info.state() & NET::FullScreen) &&
-                    (m_dragHighlightedDesktop == m_dragStartDesktop || info.onAllDesktops())) {
-                    // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
-                    NETRootInfo i( QX11Info::display(), 0 );
-                    int flags = ( 0x20 << 12 ) | ( 0x03 << 8 ) | 1; // from tool, x/y, northwest gravity
-                    i.moveResizeWindowRequest( m_dragId, flags, dest.toPoint().x(), dest.toPoint().y(), 0, 0 );
-                }
-            } else {
-                // setOnDesktop() with viewports is also moving a window, and since it takes a moment
-                // for the WM to do the move, there's a race condition with figuring out how much to move,
-                // so do it only as one move
-                dest += KWindowSystem::desktopToViewport( m_dragHighlightedDesktop+1, false );
-                QPoint d = KWindowSystem::constrainViewportRelativePosition( dest.toPoint());
-                NETRootInfo i( QX11Info::display(), 0 );
-                int flags = ( 0x20 << 12 ) | ( 0x03 << 8 ) | 1; // from tool, x/y, northwest gravity
-                i.moveResizeWindowRequest( m_dragId, flags, d.x(), d.y(), 0, 0 );
-            }
-        }
-        m_timer->start();
-    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_rects.size() &&
-               m_rects[m_dragStartDesktop].contains(event->pos()) &&
-               m_currentDesktop != m_dragStartDesktop + 1) {
-        // only change the desktop if the user presses and releases the mouse on the same desktop
-        KWindowSystem::setCurrentDesktop(m_dragStartDesktop + 1);
-        m_currentDesktop = m_dragStartDesktop + 1;
-    } else if (m_dragStartDesktop != -1 && m_dragStartDesktop < m_rects.size() &&
-               m_rects[m_dragStartDesktop].contains(event->pos()) &&
-               m_currentDesktop == m_dragStartDesktop + 1) {
+    if (m_currentDesktop == newDesktop+1) {
         // toogle the desktop or the dashboard
-        // if the user presses and releases the mouse on the current desktop, default option is do nothing
         if (m_currentDesktopSelected == ShowDesktop) {
-
             NETRootInfo info(QX11Info::display(), 0);
             m_desktopDown = !m_desktopDown;
             info.setShowingDesktop(m_desktopDown);
@@ -900,393 +792,21 @@ void Pager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             QDBusInterface plasmaApp("org.kde.plasma-desktop", "/App");
             plasmaApp.call("toggleDashboard");
         }
-    }
-
-    m_dragId = 0;
-    m_dragOriginal = QRect();
-    m_dragHighlightedDesktop = -1;
-    m_dragStartDesktop = -1;
-    m_dragOriginalPos = m_dragCurrentPos = QPointF();
-
-    update();
-    Applet::mouseReleaseEvent(event);
-}
-
-// If the pager is hovered in drag and drop mode, no hover events are geneated.
-// This method provides the common implementation for hoverMoveEvent and dragMoveEvent.
-void Pager::handleHoverMove(const QPointF& pos)
-{
-    if (m_hoverRect.contains(pos)) {
-        return;
-    } else if (m_hoverIndex > -1) {
-        QPropertyAnimation *animation = m_animations[m_hoverIndex]->animation();
-        if (animation && animation->state() == QAbstractAnimation::Running) {
-            animation->pause();
-        } else {
-            animation = new QPropertyAnimation(m_animations[m_hoverIndex], "alphaValue");
-            m_animations[m_hoverIndex]->setAnimation(animation);
-        }
-
-        animation->setDuration(s_FadeOutDuration);
-        animation->setEasingCurve(QEasingCurve::OutQuad);
-        animation->setStartValue(1);
-        animation->setEndValue(0);
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
-    }
-
-    int i = 0;
-    foreach (const QRectF &rect, m_rects) {
-        if (rect.contains(pos)) {
-            if (m_hoverRect != rect) {
-                m_hoverRect = rect;
-                m_hoverIndex = i;
-
-                QPropertyAnimation *animation = m_animations[m_hoverIndex]->animation();
-                if (animation && animation->state() == QAbstractAnimation::Running) {
-                    animation->pause();
-                } else {
-                    animation = new QPropertyAnimation(m_animations[m_hoverIndex], "alphaValue");
-                    m_animations[m_hoverIndex]->setAnimation(animation);
-                }
-
-                animation->setDuration(s_FadeInDuration);
-                animation->setEasingCurve(QEasingCurve::InQuad);
-                animation->setStartValue(0);
-                animation->setEndValue(1);
-                animation->start(QAbstractAnimation::DeleteWhenStopped);
-
-                update();
-                updateToolTip();
-            }
-            return;
-        }
-        ++i;
-    }
-
-    m_hoverIndex = -1;
-    m_hoverRect = QRectF();
-    update();
-}
-
-// If the pager is hovered in drag and drop mode, no hover events are geneated.
-// This method provides the common implementation for hoverLeaveEvent and dragLeaveEvent.
-void Pager::handleHoverLeave()
-{
-    if (m_hoverRect != QRectF()) {
-        m_hoverRect = QRectF();
-        update();
-    }
-
-    if (m_hoverIndex != -1) {
-        QPropertyAnimation *animation = m_animations[m_hoverIndex]->animation();
-        if (animation && animation->state() == QAbstractAnimation::Running) {
-            animation->pause();
-        } else {
-            animation = new QPropertyAnimation(m_animations[m_hoverIndex], "alphaValue");
-            m_animations[m_hoverIndex]->setAnimation(animation);
-        }
-
-        animation->setDuration(s_FadeOutDuration);
-        animation->setEasingCurve(QEasingCurve::OutQuad);
-        animation->setStartValue(1);
-        animation->setEndValue(0);
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
-
-        m_hoverIndex = -1;
-    }
-
-    // The applet doesn't always get mouseReleaseEvents, for example when starting a drag
-    // on the containment and releasing the mouse on the desktop or another window. This can cause
-    // weird bugs because the pager still thinks a drag is going on.
-    // The only reliable event I found is the hoverLeaveEvent, so we just stop the drag
-    // on this event.
-    if (m_dragId || m_dragStartDesktop != -1) {
-        m_dragId = 0;
-        m_dragOriginal = QRect();
-        m_dragHighlightedDesktop = -1;
-        m_dragStartDesktop = -1;
-        m_dragOriginalPos = m_dragCurrentPos = QPointF();
-        update();
+    } else {
+        KWindowSystem::setCurrentDesktop(newDesktop + 1);
+        setCurrentDesktop(newDesktop + 1);
     }
 }
 
-void Pager::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+QPixmap Pager::shadowText(const QString &text)
 {
-    handleHoverMove(event->pos());
-    Applet::hoverEnterEvent(event);
-}
+    QColor textColor = m_pagerStyle["textColor"].value<QColor>();
 
-void Pager::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
-{
-    handleHoverMove(event->pos());
-}
-
-void Pager::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
-{
-    handleHoverLeave();
-    Applet::hoverLeaveEvent(event);
-}
-
-void Pager::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
-{
-    event->setAccepted(true);
-    if (event->mimeData()->hasFormat(TaskManager::Task::mimetype())) {
-        return;
-    }
-
-    handleHoverMove(event->pos());
-
-    if (m_hoverIndex != -1) {
-        m_dragSwitchDesktop = m_hoverIndex;
-        m_dragSwitchTimer->start(DRAG_SWITCH_DELAY);
-    }
-    Applet::dragEnterEvent(event);
-}
-
-void Pager::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
-{
-    handleHoverMove(event->pos());
-
-    if (m_dragSwitchDesktop != m_hoverIndex && m_hoverIndex != -1) {
-        m_dragSwitchDesktop = m_hoverIndex;
-        m_dragSwitchTimer->start(DRAG_SWITCH_DELAY);
-    } else if (m_hoverIndex == -1) {
-        m_dragSwitchDesktop = m_hoverIndex;
-        m_dragSwitchTimer->stop();
-    }
-    Applet::dragMoveEvent(event);
-}
-
-void Pager::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
-{
-    handleHoverLeave();
-
-    m_dragSwitchDesktop = -1;
-    m_dragSwitchTimer->stop();
-    Applet::dragLeaveEvent(event);
-}
-
-void Pager::dropEvent(QGraphicsSceneDragDropEvent *event)
-{
-    bool ok;
-    QList<WId> ids = TaskManager::Task::idsFromMimeData(event->mimeData(), &ok);
-    if (ok) {
-        for (int i = 0; i < m_rects.count(); ++i) {
-            if (m_rects[i].contains(event->pos().toPoint())) {
-                foreach (const WId &id, ids) {
-                    KWindowSystem::setOnDesktop(id, i + 1);
-                }
-                m_dragSwitchDesktop = -1;
-                break;
-            }
-        }
-    }
-}
-
-void Pager::dragSwitch()
-{
-    if (m_dragSwitchDesktop == -1) {
-        return;
-    }
-
-    KWindowSystem::setCurrentDesktop(m_dragSwitchDesktop + 1);
-    m_currentDesktop = m_dragSwitchDesktop + 1;
-}
-
-void Pager::paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect)
-{
-    Q_UNUSED( option );
-    Q_UNUSED( contentsRect );
-
-    KColorScheme* plasmaColorTheme = colorScheme();
-    painter->setFont(KGlobalSettings::taskbarFont());
-
-    // Desktop background
-    QColor defaultTextColor = Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor);
-    QColor hoverColor = defaultTextColor;
-    hoverColor.setAlpha(64);
-
-    // Inactive windows
-    QColor drawingColor = plasmaColorTheme->foreground(KColorScheme::InactiveText).color();
-    drawingColor.setAlpha(45);
-    QBrush windowBrush(drawingColor);
-    // Inactive windows Active desktop
-    drawingColor.setAlpha(90);
-    QBrush windowBrushActiveDesk(drawingColor);
-
-    // Inactive window borders
-    drawingColor = defaultTextColor;
-    drawingColor.setAlpha(130);
-    QPen windowPen(drawingColor);
-
-    // Active window borders
-    QPen activeWindowPen(defaultTextColor);
-
-    // Active windows
-    drawingColor.setAlpha(130);
-    QBrush activeWindowBrush(drawingColor);
-    // Active windows Active desktop
-    drawingColor.setAlpha(155);
-    QBrush activeWindowBrushActiveDesk(drawingColor);
-
-    if (m_showOwnBackground && (formFactor() == Plasma::Vertical || formFactor() == Plasma::Horizontal)) {
-        m_background->setElementPrefix(QString());
-        m_background->paintFrame(painter);
-    }
-
-    // Draw backgrounds of desktops only when there are not the proper theme elements
-    painter->setPen(Qt::NoPen);
-    if (!m_background->hasElementPrefix("hover")) {
-        for (int i = 0; i < m_rects.count(); i++) {
-            if (m_rects[i] == m_hoverRect) {
-                QColor animHoverColor = hoverColor;
-                if (m_animations[i]->animation()) {
-                    animHoverColor.setAlpha(hoverColor.alpha() * m_animations[i]->alphaValue());
-                }
-                painter->setBrush(animHoverColor);
-                painter->drawRect(m_rects[i]);
-            }
-        }
-    }
-
-    // Draw miniatures of windows from each desktop
-    if (!m_rects.isEmpty() && m_rects[0].width() > 12 && m_rects[0].height() > 12) {
-        painter->setPen(windowPen);
-        for (int i = 0; i < m_windowRects.count(); i++) {
-            for (int j = 0; j < m_windowRects[i].count(); j++) {
-                QRect rect = m_windowRects[i][j].second;
-
-                if (m_currentDesktop > 0 &&
-                        m_currentDesktop <= m_rects.count() &&
-                        m_rects[m_currentDesktop-1].contains(rect)) {
-                    if (m_activeWindows.contains(rect)) {
-                        painter->setBrush(activeWindowBrushActiveDesk);
-                        painter->setPen(activeWindowPen);
-                    } else {
-                        painter->setBrush(windowBrushActiveDesk);
-                        painter->setPen(windowPen);
-                    }
-                } else {
-                    if (m_activeWindows.contains(rect)) {
-                        painter->setBrush(activeWindowBrush);
-                        painter->setPen(activeWindowPen);
-                    } else {
-                        painter->setBrush(windowBrush);
-                        painter->setPen(windowPen);
-                    }
-                }
-                if (m_dragId == m_windowRects[i][j].first) {
-                    rect.translate((m_dragCurrentPos - m_dragOriginalPos).toPoint());
-                    painter->setClipRect(option->exposedRect);
-                } else if (i < m_rects.count()) {
-                    painter->setClipRect(m_rects[i].adjusted(1, 1, -1, -1));
-                }
-
-                painter->drawRect(rect);
-
-                // Draw the window icons/thumbnails
-                // prefer to use the System Settings specified Small icon (usually 16x16)
-                int windowIconSize = qMin(KIconLoader::global()->currentSize(KIconLoader::Small), qMin(rect.width(), rect.height()));
-                if (windowIconSize >= 12 && m_showWindowIcons) {
-                    QPixmap windowIcon = QPixmap(KWindowSystem::icon(m_windowRects[i][j].first, windowIconSize, windowIconSize, true));
-                    int x = rect.x() + (rect.width() - windowIconSize) / 2;
-                    int y = rect.y() + (rect.height() - windowIconSize) / 2;
-                    painter->drawPixmap(x, y, windowIconSize, windowIconSize, windowIcon);
-                }
-            }
-        }
-    }
-
-    // Draw desktop frame and possibly text over it
-    painter->setClipRect(option->exposedRect);
-    painter->setBrush(Qt::NoBrush);
-
-    QString prefix;
-    for (int i = 0; i < m_rects.count(); i++) {
-        if (i + 1 == m_currentDesktop || i == m_dragHighlightedDesktop) {
-            prefix = "active";
-        } else {
-            prefix = "normal";
-        }
-
-        //Paint the panel or fallback if we don't have that prefix
-        if (m_background->hasElementPrefix(prefix)) {
-            m_background->setElementPrefix(prefix);
-            if (m_animations[i]->animation()) {
-                QPixmap normal = m_background->framePixmap();
-                m_background->setElementPrefix("hover");
-                QPixmap result = Plasma::PaintUtils::transition(normal, m_background->framePixmap(), m_animations[i]->alphaValue());
-                painter->drawPixmap(m_rects[i].topLeft(), result);
-            } else {
-                //no anims, simpler thing
-                if (m_rects[i] == m_hoverRect) {
-                    m_background->setElementPrefix("hover");
-                }
-                m_background->paintFrame(painter, m_rects[i].topLeft());
-            }
-        } else {
-            QPen drawingPen;
-
-            if (i + 1 == m_currentDesktop || i == m_dragHighlightedDesktop) {
-                defaultTextColor.setAlphaF(1);
-                drawingPen = QPen(defaultTextColor);
-            } else {
-                drawingPen = QPen(plasmaColorTheme->foreground(KColorScheme::InactiveText).color());
-            }
-
-            painter->setPen(drawingPen);
-            painter->drawRect(m_rects[i]);
-        }
-
-        //Draw text
-        if (!m_animations[i]->animation()) {
-            defaultTextColor.setAlphaF(1);
-        }
-        defaultTextColor.setAlphaF(m_animations[i]->alphaValue() / 2 + 0.5);
-        painter->setPen(defaultTextColor);
-
-        QColor shadowColor(Qt::black);
-        if (defaultTextColor.value() < 128) {
-            shadowColor = Qt::white;
-        }
-
-        QString desktopText;
-        if (m_displayedText == Number) { // Display number of desktop
-            desktopText = QString::number(i + 1);
-        } else if (m_displayedText == Name) { // Display name of desktop
-            desktopText = KWindowSystem::desktopName(i + 1);
-        }
-
-        if (!desktopText.isEmpty()) {
-            int radius = 2;
-            QPixmap result = Plasma::PaintUtils::shadowText(desktopText,
-                                                            KGlobalSettings::smallestReadableFont(),
-                                                            defaultTextColor,
-                                                            shadowColor, QPoint(0, 0), radius);
-            QRectF target = m_rects[i];
-            //take also shadow position and radius into account
-            //kDebug() << target << result.height();
-
-            // for the default size of the panel we can allow this "one pixel"
-            // offset on the bottom. the applet is so small that you almost
-            // can't see the offset and this brings back the labels for the
-            // panel's default size.
-            if (target.height() + 1 >= result.height() - radius * 2) {
-                QPointF paintPoint = target.center() - (result.rect().center() + QPoint(radius, radius));
-
-                if (paintPoint.x() + radius < target.x() + 1) {
-                    paintPoint.setX(target.x() + 1 - radius);
-                }
-
-                if (paintPoint.y() + radius < target.y() + 1) {
-                    paintPoint.setY(target.y() + 1 - radius);
-                }
-
-                target.moveTopLeft(QPointF(0, 0));
-                painter->drawPixmap(paintPoint, result, target);
-            }
-        }
-    }
+    return Plasma::PaintUtils::shadowText(text,
+                                          KGlobalSettings::smallestReadableFont(),
+                                          textColor,
+                                          textColor.value() < 128 ? Qt::white : Qt::black,
+                                          QPoint(0, 0), 2);
 }
 
 // KWindowSystem does not translate position when mapping viewports
@@ -1294,7 +814,7 @@ void Pager::paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *op
 // so the offscreen coordinates need to be fixed
 QRect Pager::fixViewportPosition( const QRect& r )
 {
-    QRect desktopGeom = Kephal::ScreenUtils::desktopGeometry();
+    QRect desktopGeom = m_desktopWidget->geometry();
     int x = r.center().x() % desktopGeom.width();
     int y = r.center().y() % desktopGeom.height();
     if( x < 0 ) {
@@ -1308,53 +828,48 @@ QRect Pager::fixViewportPosition( const QRect& r )
 
 void Pager::themeRefresh()
 {
-    delete m_colorScheme;
-    m_colorScheme = 0;
+    delete m_plasmaColorTheme;
+    m_plasmaColorTheme = 0;
+    updatePagerStyle();
     update();
 }
 
-void Pager::updateToolTip()
+void Pager::updateToolTip(int hoverDesktopId)
 {
-    int hoverDesktopNumber = 0;
-
-    for (int i = 0; i < m_desktopCount; ++i) {
-        if (m_rects[i] == m_hoverRect) {
-            hoverDesktopNumber = i + 1;
-        }
-    }
-
     Plasma::ToolTipContent data;
     QString subtext;
     int taskCounter = 0;
     int displayedTaskCounter = 0;
+    WindowModel *windows = m_pagerModel->windowsAt(hoverDesktopId);
 
-    QList<WId> windows;
+    for (; taskCounter < windows->rowCount(); taskCounter++) {
+        WId id = windows->idAt(taskCounter);
+        QString visibleName = windows->visibleNameAt(taskCounter);
 
-    foreach(const KWindowInfo &winInfo, m_windowInfo){
-        if (winInfo.isOnDesktop(hoverDesktopNumber) && !windows.contains(winInfo.win())) {
-
-            bool active = (winInfo.win() == KWindowSystem::activeWindow());
-            if ((taskCounter < 4) || active){
-                // prefer to use the System Settings specified Small icon (usually 16x16)
-                // TODO: should we actually be using Small for this? or Panel, Toolbar, etc?
-                int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
-                QPixmap icon = KWindowSystem::icon(winInfo.win(), windowIconSize, windowIconSize, true);
-                if (icon.isNull()) {
-                     subtext += "<br />&bull;" + Qt::escape(winInfo.visibleName());
-                } else {
-                    data.addResource(Plasma::ToolTipContent::ImageResource, QUrl("wicon://" + QString::number(taskCounter)), QVariant(icon));
-                    subtext += "<br /><img src=\"wicon://" + QString::number(taskCounter) + "\"/>&nbsp;";
-                }
-
-                QFontMetricsF metrics(KGlobalSettings::taskbarFont());
-                const QString combinedString = (active ? "<u>" : "") + Qt::escape(winInfo.visibleName()).replace(' ', "&nbsp;") + (active ? "</u>" : "");
-                // elide text that is too long
-                subtext += metrics.elidedText(combinedString, Qt::ElideMiddle, MAX_TEXT_WIDTH, Qt::TextShowMnemonic);
-
-                displayedTaskCounter++;
-                windows.append(winInfo.win());
+        bool active = (id == KWindowSystem::activeWindow());
+        if (taskCounter < 4 || active) {
+            // prefer to use the System Settings specified Small icon (usually 16x16)
+            // TODO: should we actually be using Small for this? or Panel, Toolbar, etc?
+            int iconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
+            QPixmap icon = KWindowSystem::icon(id, iconSize, iconSize, true);
+            if (icon.isNull()) {
+                 subtext += "<br />&bull;" + Qt::escape(visibleName);
+            } else {
+                data.addResource(Plasma::ToolTipContent::ImageResource,
+                                 QUrl("wicon://" + QString::number(taskCounter)),
+                                 QVariant(icon));
+                subtext += "<br /><img src=\"wicon://" + QString::number(taskCounter)
+                           + "\"/>&nbsp;";
             }
-            taskCounter++;
+
+            QFontMetricsF metrics(KGlobalSettings::taskbarFont());
+            const QString combined = (active ? "<u>" : "")
+                                     + Qt::escape(visibleName).replace(' ', "&nbsp;")
+                                     + (active ? "</u>" : "");
+            // elide text that is too long
+            subtext += metrics.elidedText(combined, Qt::ElideMiddle,
+                                          MAX_TEXT_WIDTH, Qt::TextShowMnemonic);
+            displayedTaskCounter++;
         }
     }
 
@@ -1363,12 +878,12 @@ void Pager::updateToolTip()
     }
 
     if (taskCounter - displayedTaskCounter > 0) {
-        subtext.append("<br>&bull; <i>" + i18np("and 1 other", "and %1 others", taskCounter - displayedTaskCounter) + "</i>");
+        subtext.append("<br>&bull; <i>" + i18np("and 1 other", "and %1 others",
+                       taskCounter - displayedTaskCounter) + "</i>");
     }
 
-    data.setMainText(KWindowSystem::desktopName(hoverDesktopNumber));
+    data.setMainText(KWindowSystem::desktopName(hoverDesktopId + 1));
     data.setSubText(subtext);
-
     Plasma::ToolTipManager::self()->setContent(this, data);
 }
 

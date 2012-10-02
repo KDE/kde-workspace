@@ -38,56 +38,57 @@ class RandrMonitorHelper;
 
 class RandrMonitorModule
     : public KDEDModule
-    {
+{
     Q_OBJECT
-    public:
-        RandrMonitorModule(QObject* parent, const QList<QVariant>&);
-        virtual ~RandrMonitorModule();
-        void processX11Event( XEvent* e );
-    private slots:
-        void poll();
-        void switchDisplay();
-        void resumedFromSuspend();
-        void checkInhibition();
-        void checkResumeFromSuspend();
-    private:
-        void initRandr();
-        void getRandrInfo( XRROutputChangeNotifyEvent* e, QString* change, QRect* rect );
-        QStringList connectedMonitors() const;
-        QStringList activeMonitors() const;
-        void enableOutput( RandROutput* output, bool enable );
-        QList< RandROutput* > connectedOutputs( RandRDisplay &display );
-        QList< RandROutput* > activeOutputs( RandRDisplay &display );
-        QList< RandROutput* > validCrtcOutputs( RandRDisplay &display );
-        QList< RandROutput* > outputs( RandRDisplay &display, bool connected = false, bool active = false, bool validCrtc = false );
-        bool isLidPresent();
-        bool have_randr;
-        int randr_base;
-        int randr_error;
-        int m_inhibitionCookie;
-        Window window;
-        QStringList currentMonitors;
-        RandrMonitorHelper* helper;
-        QDialog* dialog;
-    };
+public:
+    RandrMonitorModule(QObject* parent, const QList<QVariant>&);
+    virtual ~RandrMonitorModule();
+    void processX11Event( XEvent* e );
+private slots:
+    void poll();
+    void switchDisplay();
+    void resumedFromSuspend();
+    void checkInhibition();
+    void checkResumeFromSuspend();
+    void showKcm();
+    void tryAutoConfig();
+private:
+    void initRandr();
+    QStringList connectedMonitors() const;
+    QStringList activeMonitors() const;
+    void enableOutput( RandROutput* output, bool enable );
+    QList< RandROutput* > connectedOutputs( RandRDisplay &display );
+    QList< RandROutput* > activeOutputs( RandRDisplay &display );
+    QList< RandROutput* > validCrtcOutputs( RandRDisplay &display );
+    QList< RandROutput* > outputs( RandRDisplay &display, bool connected = false, bool active = false, bool validCrtc = false );
+    bool isLidPresent();
+    bool have_randr;
+    int randr_base;
+    int randr_error;
+    int m_inhibitionCookie;
+    Window window;
+    QStringList currentMonitors;
+    RandrMonitorHelper* helper;
+    KDialog* dialog;
+};
 
 class RandrMonitorHelper
     : public QWidget
-    {
+{
     Q_OBJECT
-    public:
-        RandrMonitorHelper( RandrMonitorModule* module );
-    protected:
-        virtual bool x11Event( XEvent* e );
-    private:
-        RandrMonitorModule* module;
-    };
+public:
+    RandrMonitorHelper( RandrMonitorModule* module );
+protected:
+    virtual bool x11Event( XEvent* e );
+private:
+    RandrMonitorModule* module;
+};
 
 
 inline
 RandrMonitorHelper::RandrMonitorHelper( RandrMonitorModule* m )
     : module( m )
-    {
-    }
+{
+}
 
 #endif

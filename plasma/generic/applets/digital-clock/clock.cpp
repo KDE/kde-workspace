@@ -246,18 +246,13 @@ void Clock::dataUpdated(const QString &source, const Plasma::DataEngine::Data &d
     m_time = data["Time"].toTime();
     m_date = data["Date"].toDate();
 
-    // avoid unnecessary repaints
-    if ((m_showSeconds && m_time.second() != lastTimeSeen().second()) ||
-        m_time.minute() != lastTimeSeen().minute()) {
-
-        if (Plasma::ToolTipManager::self()->isVisible(this)) {
-            updateTipContent();
-        }
-
-        updateClockApplet(data);
-        generatePixmap();
-        update();
+    if (Plasma::ToolTipManager::self()->isVisible(this)) {
+        updateTipContent();
     }
+
+    updateClockApplet(data);
+    generatePixmap();
+    update();
 }
 
 void Clock::createClockConfigurationInterface(KConfigDialog *parent)
@@ -309,7 +304,7 @@ void Clock::createClockConfigurationInterface(KConfigDialog *parent)
             parent, SLOT(settingsModified()));
     connect(ui.useCustomShadowColor, SIGNAL(stateChanged(int)),
             parent, SLOT(settingsModified()));
-    connect(ui.plainClockShadowColor, SIGNAL(changed(QColor)), 
+    connect(ui.plainClockShadowColor, SIGNAL(changed(QColor)),
             parent, SLOT(settingsModified()));
     connect(ui.showTimeZone, SIGNAL(stateChanged(int)),
             parent, SLOT(settingsModified()));
@@ -472,12 +467,8 @@ void Clock::paintInterface(QPainter *p, const QStyleOptionGraphicsItem *option, 
         //Create the localized date string if needed
         if (m_dateStyle) {
             // JPL This needs a complete rewrite for l10n issues
-            KLocale tmpLocale(*KGlobal::locale());
-            tmpLocale.setCalendar(calendar()->calendarType()); 
-            tmpLocale.setDateFormat("%e"); // day number of the month
-            QString day = tmpLocale.formatDate(m_date);
-            tmpLocale.setDateFormat("%m"); // short form of the month
-            QString month = tmpLocale.formatDate(m_date);
+            QString day = KGlobal::locale()->calendar()->formatDate(m_date, KLocale::Day, KLocale::ShortNumber);
+            QString month = KGlobal::locale()->calendar()->formatDate(m_date, KLocale::Month, KLocale::LongNumber);
 
             if (m_dateStyle == 1) {         //compact date
                 dateString = i18nc("@label Compact date: "

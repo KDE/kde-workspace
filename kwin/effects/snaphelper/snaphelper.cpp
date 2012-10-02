@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "snaphelper.h"
 
 #include "kwinglutils.h"
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
 #include "kwinxrenderutils.h"
+#endif
 
 namespace KWin
 {
@@ -75,16 +77,11 @@ void SnapHelperEffect::postPaintScreen()
     effects->postPaintScreen();
     if (m_timeline.currentValue() != 0.0) {
         // Display the guide
-        if (effects->compositingType() == OpenGLCompositing) {
-#ifndef KWIN_HAVE_OPENGLES
-            glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
+        if (effects->isOpenGLCompositing()) {
             GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
             vbo->reset();
             vbo->setUseColor(true);
-            if (ShaderManager::instance()->isValid()) {
-                ShaderManager::instance()->pushShader(ShaderManager::ColorShader);
-            }
+            ShaderBinder binder(ShaderManager::ColorShader);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -123,17 +120,12 @@ void SnapHelperEffect::postPaintScreen()
             }
             vbo->setData(verts.count() / 2, 2, verts.data(), NULL);
             vbo->render(GL_LINES);
-            if (ShaderManager::instance()->isValid()) {
-                ShaderManager::instance()->popShader();
-            }
 
             glDisable(GL_BLEND);
             glLineWidth(1.0);
-#ifndef KWIN_HAVE_OPENGLES
-            glPopAttrib();
-#endif
         }
         if ( effects->compositingType() == XRenderCompositing ) {
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
             for ( int i = 0; i < effects->numScreens(); i++ ) {
                 const QRect& rect = effects->clientArea( ScreenArea, i, 0 );
                 int midX = rect.x() + rect.width() / 2;
@@ -174,6 +166,7 @@ void SnapHelperEffect::postPaintScreen()
                 XRenderColor c = preMultiply(QColor(128, 128, 128, m_timeline.currentValue()*128));
                 XRenderFillRectangles(display(), PictOpOver, effects->xrenderBufferPicture(), &c, rects, 6);
             }
+#endif
         }
     } else if (m_window && !m_active) {
         if (m_window->isDeleted())

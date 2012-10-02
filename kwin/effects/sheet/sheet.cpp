@@ -44,7 +44,7 @@ SheetEffect::SheetEffect()
 
 bool SheetEffect::supported()
 {
-    return effects->compositingType() == OpenGLCompositing;
+    return effects->isOpenGLCompositing();
 }
 
 void SheetEffect::reconfigure(ReconfigureFlags)
@@ -89,13 +89,11 @@ void SheetEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowP
     InfoMap::const_iterator info = windows.constFind(w);
     if (info != windows.constEnd()) {
         const double progress = info->timeLine->currentValue();
-        RotationData rot;
-        rot.axis = RotationData::XAxis;
-        rot.angle = 60.0 * (1.0 - progress);
-        data.rotation = &rot;
-        data.yScale *= progress;
-        data.zScale *= progress;
-        data.yTranslate -= (w->y() - info->parentY) * (1.0 - progress);
+        QGraphicsRotation rot;
+        data.setRotationAxis(Qt::XAxis);
+        data.setRotationAngle(60.0 * (1.0 - progress));
+        data *= QVector3D(1.0, progress, progress);
+        data.translate(0.0, - (w->y() - info->parentY) * (1.0 - progress));
     }
     effects->paintWindow(w, mask, region, data);
 }

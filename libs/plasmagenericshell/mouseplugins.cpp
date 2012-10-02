@@ -77,7 +77,7 @@ void MousePlugins::addTrigger(const QString&, const QString &trigger)
     //check for duplicate
     if (m_plugins.contains(trigger)) {
         int ret = KMessageBox::warningContinueCancel(this,
-                i18n("This trigger is already assigned to another action."), QString(), KGuiItem(i18n("Reassign")));
+                i18n("This trigger is already assigned to another action."), QString(), KGuiItem(i18nc("reassign to this action", "Reassign")));
         if (ret == KMessageBox::Continue) {
             //clear it from the UI
             MousePluginWidget *w = m_plugins.value(trigger);
@@ -155,7 +155,7 @@ void MousePlugins::setTrigger(const QString &oldTrigger, const QString &newTrigg
     Q_ASSERT(plugin);
     if (!newTrigger.isEmpty() && m_plugins.contains(newTrigger)) {
         int ret = KMessageBox::warningContinueCancel(this,
-                i18n("This trigger is assigned to another plugin."), QString(), KGuiItem(i18n("Reassign")));
+                i18n("This trigger is assigned to another plugin."), QString(), KGuiItem(i18nc("reassign to this plugin", "Reassign")));
         if (ret == KMessageBox::Continue) {
             //clear it from the UI
             MousePluginWidget *w = m_plugins.value(newTrigger);

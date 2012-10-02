@@ -112,6 +112,7 @@ int main(int argc, char **argv)
     options.add("m");
     options.add("mode <mode name>", ki18n("The mode to put the wallpaper in"), "SingleImage");
     options.add("list", ki18n("List all the known wallpapers and their modes"));
+    options.add("configure", ki18n("Open configuration dialog additionally to show the wallpaper plugin"));
     KCmdLineArgs::addCmdLineOptions(options);
 
     KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
@@ -127,20 +128,20 @@ int main(int argc, char **argv)
     // set wallpaper
     QString pluginName = args->getOption("wallpaper");
     QString mode = args->getOption("mode");
-    WallpaperWidget *w = new WallpaperWidget(pluginName, mode);
+    WallpaperWidget w(pluginName, mode);
 
     bool ok1, ok2 = false;
     // get size
     int width = args->getOption("width").toInt(&ok2);
     int height = args->getOption("height").toInt(&ok1);
     if (ok1 && ok2) {
-        w->resize(width, height);
+        w.resize(width, height);
     }
 
+    w.show();
+    if(args->isSet("configure")) {
+        w.configure();
+    }
     args->clear();
-    w->show();
-    int rv = app.exec();
-
-    delete w;
-    return rv;
+    return app.exec();
 }

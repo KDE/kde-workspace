@@ -283,6 +283,13 @@ public:
      **/
     bool isShaderBound() const;
     /**
+     * Allows to query whether Shaders are supported by the compositor, that is
+     * whether the Shaders compiled successfully.
+     *
+     * With OpenGL 1 compositing this method will always return @c false.
+     *
+     * Do not use this method to check whether the compositor uses OpenGL 1 or 2,
+     * use @link EffectsHandler::compositingType instead.
      * @return @c true if the built-in shaders are valid, @c false otherwise
      **/
     bool isValid() const;
@@ -355,6 +362,15 @@ public:
      * @return a pointer to the ShaderManager instance
      **/
     static ShaderManager *instance();
+    /**
+     * @brief Ensures that the ShaderManager is disabled.
+     *
+     * Used only by an OpenGL 1 Scene which does not use OpenGL 2 Shaders.
+     *
+     * @internal
+     * @since 4.10
+     **/
+    static void disable();
 
     /**
      * @internal
@@ -377,6 +393,95 @@ private:
     bool m_debug;
     static ShaderManager *s_shaderManager;
 };
+
+/**
+ * An helper class to push a Shader on to ShaderManager's stack and ensuring that the Shader
+ * gets popped again from the stack automatically once the object goes out of life.
+ *
+ * How to use:
+ * @code
+ * {
+ * GLShader *myCustomShaderIWantToPush;
+ * ShaderBinder binder(myCustomShaderIWantToPush);
+ * // do stuff with the shader being pushed on the stack
+ * }
+ * // here the Shader is automatically popped as helper does no longer exist.
+ * @endcode
+ *
+ * This class takes care for the case that the Compositor uses OpenGL 1 and the ShaderManager is
+ * not valid. In that case the helper does not do anything. So this helper can be used to simplify
+ * the code to remove checks for OpenGL 1/2.
+ * @since 4.10
+ **/
+class KWIN_EXPORT ShaderBinder
+{
+public:
+    /**
+     * @brief Pushes the Shader of the given @p type to the ShaderManager's stack.
+     *
+     * @param type The built-in Shader type
+     * @param reset Whether all uniforms should be reset to their default values. Defaults to false.
+     * @see ShaderManager::pushShader
+     **/
+    ShaderBinder(ShaderManager::ShaderType type, bool reset = false);
+    /**
+     * @brief Pushes the given @p shader to the ShaderManager's stack.
+     *
+     * @param shader The Shader to push on the stack
+     * @see ShaderManager::pushShader
+     **/
+    ShaderBinder(GLShader *shader);
+    ~ShaderBinder();
+
+    /**
+     * @return The Shader pushed to the Stack. On OpenGL 1 this returns a @c null pointer.
+     **/
+    GLShader *shader();
+
+private:
+    GLShader *m_shader;
+};
+
+inline
+ShaderBinder::ShaderBinder(ShaderManager::ShaderType type, bool reset)
+    : m_shader(NULL)
+{
+#ifndef KWIN_HAVE_OPENGLES
+    if (!ShaderManager::instance()->isValid()) {
+        return;
+    }
+#endif
+    m_shader = ShaderManager::instance()->pushShader(type, reset);
+}
+
+inline
+ShaderBinder::ShaderBinder(GLShader *shader)
+    : m_shader(shader)
+{
+#ifndef KWIN_HAVE_OPENGLES
+    if (!ShaderManager::instance()->isValid()) {
+        return;
+    }
+#endif
+    ShaderManager::instance()->pushShader(shader);
+}
+
+inline
+ShaderBinder::~ShaderBinder()
+{
+#ifndef KWIN_HAVE_OPENGLES
+    if (!ShaderManager::instance()->isValid()) {
+        return;
+    }
+#endif
+    ShaderManager::instance()->popShader();
+}
+
+inline
+GLShader* ShaderBinder::shader()
+{
+    return m_shader;
+}
 
 /**
  * @short Render target object
@@ -510,9 +615,10 @@ public:
      */
     void render(GLenum primitiveMode);
     /**
-     * Same as above restricting painting to @a region.
+     * Same as above restricting painting to @a region if @a hardwareClipping is true.
+     * It's within the caller's responsibility to enable GL_SCISSOR_TEST.
      */
-    void render(const QRegion& region, GLenum primitiveMode);
+    void render(const QRegion& region, GLenum primitiveMode, bool hardwareClipping = false);
     /**
      * Sets the color the geometry will be rendered with.
      * For legacy rendering glColor is used before rendering the geometry.

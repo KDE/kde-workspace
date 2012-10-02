@@ -87,6 +87,9 @@ namespace Oxygen
         _pixmaps.clear();
         _dockPixmaps.clear();
 
+        _tiles = TileSet();
+        _dockTiles = TileSet();
+
         // reset size
         _size = 0;
 
@@ -143,6 +146,7 @@ namespace Oxygen
         _size = shadowCache().shadowSize();
 
         QPixmap pixmap( shadowCache().pixmap( ShadowCache::Key() ) );
+        if( !pixmap.isNull() )
         {
             QPainter painter( &pixmap );
 
@@ -154,6 +158,7 @@ namespace Oxygen
         // recreate tileset
         _tiles = TileSet( pixmap, pixmap.width()/2, pixmap.height()/2, 1, 1 );
 
+        if( !pixmap.isNull() )
         {
             QPainter painter( &pixmap );
 
@@ -200,6 +205,14 @@ namespace Oxygen
     //_______________________________________________________
     bool ShadowHelper::isToolTip( QWidget* widget ) const
     { return widget->inherits( "QTipLabel" ) || (widget->windowFlags() & Qt::WindowType_Mask) == Qt::ToolTip; }
+
+    //_______________________________________________________
+    bool ShadowHelper::isDockWidget( QWidget* widget ) const
+    { return qobject_cast<QDockWidget*>( widget ); }
+
+    //_______________________________________________________
+    bool ShadowHelper::isToolBar( QWidget* widget ) const
+    { return qobject_cast<QToolBar*>( widget ) || widget->inherits( "Q3ToolBar" ); }
 
     //_______________________________________________________
     bool ShadowHelper::acceptWidget( QWidget* widget ) const
@@ -338,7 +351,7 @@ namespace Oxygen
         { return false; }
 
         // create pixmap handles if needed
-        const bool isDockWidget( qobject_cast<QDockWidget*>( widget ) );
+        const bool isDockWidget( this->isDockWidget( widget ) || this->isToolBar( widget ) );
         const QVector<Qt::HANDLE>& pixmaps( createPixmapHandles( isDockWidget ) );
         if( pixmaps.size() != numPixmaps ) return false;
 
@@ -354,7 +367,7 @@ namespace Oxygen
         there is one extra pixel needed with respect to actual shadow size, to deal with how
         menu backgrounds are rendered
         */
-        if( isToolTip( widget ) )
+        if( isToolTip( widget ) || isToolBar( widget ) )
         {
 
             data << _size << _size << _size << _size;
@@ -385,16 +398,6 @@ namespace Oxygen
         #ifdef Q_WS_X11
         if( !( widget && widget->testAttribute(Qt::WA_WState_Created) ) ) return;
         XDeleteProperty(QX11Info::display(), widget->winId(), _atom);
-        #endif
-
-    }
-
-    //_______________________________________________________
-    void ShadowHelper::uninstallX11Shadows( WId id ) const
-    {
-
-        #ifdef Q_WS_X11
-        XDeleteProperty(QX11Info::display(), id, _atom);
         #endif
 
     }

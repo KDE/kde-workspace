@@ -24,7 +24,7 @@ function isFadeWindow(w) {
     } else if (!w.deleted && effect.isGrabbed(w, Effect.WindowAddedGrabRole)) {
         return false;
     }
-    return !isLoginWindow(w) && !w.desktopWindow && !w.utility;
+    return w.onCurrentDesktop && !isLoginWindow(w) && !w.desktopWindow && !w.utility && !w.minimized;
 }
 
 function isLoginWindow(w) {
@@ -33,9 +33,9 @@ function isLoginWindow(w) {
 
 var fadeInTime, fadeOutTime, fadeWindows;
 function loadConfig() {
-    fadeInTime = animationTime(effect.readConfig("FadeInTime"));
-    fadeOutTime = animationTime(effect.readConfig("FadeOutTime"));
-    fadeWindows = effect.readConfig("FadeWindows");
+    fadeInTime = animationTime(effect.readConfig("FadeInTime", 150));
+    fadeOutTime = animationTime(effect.readConfig("FadeOutTime", 150));
+    fadeWindows = effect.readConfig("FadeWindows", true);
 }
 loadConfig();
 effect.configChanged.connect(function() {

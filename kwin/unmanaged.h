@@ -35,7 +35,7 @@ class Unmanaged
 public:
     Unmanaged(Workspace *ws);
     bool windowEvent(XEvent* e);
-    void release();
+    void release(bool on_shutdown = false);
     bool track(Window w);
     static void deleteUnmanaged(Unmanaged* c, allowed_t);
     virtual int desktop() const;
@@ -43,7 +43,12 @@ public:
     virtual QPoint clientPos() const;
     virtual QSize clientSize() const;
     virtual QRect transparentRect() const;
+    virtual Layer layer() const {
+        return UnmanagedLayer;
+    }
+    NET::WindowType windowType(bool direct = false, int supported_types = 0) const;
 protected:
+    virtual void damageNotifyEvent(XDamageNotifyEvent* e);
     virtual void debug(QDebug& stream) const;
     virtual bool shouldUnredirect() const;
 private:

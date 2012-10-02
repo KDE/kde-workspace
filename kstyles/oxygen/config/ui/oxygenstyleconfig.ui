@@ -60,6 +60,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="_splitterProxyEnabled">
+         <property name="text">
+          <string>Enable extended resize handles</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="_cacheEnabled">
          <property name="text">
           <string>Enable pixmap cache</string>
@@ -238,17 +245,17 @@
            <widget class="KComboBox" name="_viewTriangularExpanderSize">
             <item>
              <property name="text">
-              <string>Tiny</string>
+              <string comment="triangle size">Tiny</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Small</string>
+              <string comment="triangle size">Small</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Normal</string>
+              <string comment="triangle size">Normal</string>
              </property>
             </item>
            </widget>
@@ -371,6 +378,9 @@
           <widget class="KIntSpinBox" name="_scrollBarWidth">
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="suffix">
+            <string>px</string>
            </property>
            <property name="minimum">
             <number>10</number>

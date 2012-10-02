@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QObject>
 #include <QtCore/QSize>
+#include <QtCore/QStringList>
 #include <kwinglobals.h>
 
 namespace KWin
@@ -35,6 +36,7 @@ class WorkspaceWrapper : public QObject
 {
     Q_OBJECT
     Q_ENUMS(ClientAreaOption)
+    Q_ENUMS(ElectricBorder)
     Q_PROPERTY(int currentDesktop READ currentDesktop WRITE setCurrentDesktop NOTIFY currentDesktopChanged)
     Q_PROPERTY(KWin::Client *activeClient READ activeClient WRITE setActiveClient NOTIFY clientActivated)
     // TODO: write and notify?
@@ -61,14 +63,16 @@ class WorkspaceWrapper : public QObject
      **/
     Q_PROPERTY(int displayHeight READ displayHeight)
     Q_PROPERTY(int activeScreen READ activeScreen)
-    Q_PROPERTY(int numScreens READ numScreens)
+    Q_PROPERTY(int numScreens READ numScreens NOTIFY numberScreensChanged)
+    Q_PROPERTY(QString currentActivity READ currentActivity NOTIFY currentActivityChanged)
+    Q_PROPERTY(QStringList activities READ activityList NOTIFY activitiesChanged)
 
 private:
     Q_DISABLE_COPY(WorkspaceWrapper)
 
 signals:
     void desktopPresenceChanged(KWin::Client *client, int desktop);
-    void currentDesktopChanged(int desktop);
+    void currentDesktopChanged(int desktop, KWin::Client *client);
     void clientAdded(KWin::Client *client);
     void clientRemoved(KWin::Client *client);
     void clientManaging(KWin::Client *client);
@@ -92,6 +96,37 @@ signals:
      * @param set New value of demands attention
      **/
     void clientDemandsAttentionChanged(KWin::Client *client, bool set);
+    /**
+     * Signal emitted when the number of screens changes.
+     * @param count The new number of screens
+     **/
+    void numberScreensChanged(int count);
+    /**
+     * This signal is emitted when the size of @p screen changes.
+     * Don't forget to fetch an updated client area.
+     **/
+    void screenResized(int screen);
+    /**
+     * Signal emitted whenever the current activity changed.
+     * @param id id of the new activity
+     **/
+    void currentActivityChanged(const QString &id);
+    /**
+     * Signal emitted whenever the list of activities changed.
+     * @param id id of the new activity
+     **/
+    void activitiesChanged(const QString &id);
+    /**
+     * This signal is emitted when a new activity is added
+     * @param id id of the new activity
+     */
+    void activityAdded(const QString &id);
+    /**
+     * This signal is emitted when the activity
+     * is removed
+     * @param id id of the removed activity
+     */
+    void activityRemoved(const QString &id);
 
 public:
 //------------------------------------------------------------------
@@ -115,6 +150,18 @@ public:
         ///< one whole screen, ignore struts
         ScreenArea
     };
+    enum ElectricBorder {
+        ElectricTop,
+        ElectricTopRight,
+        ElectricRight,
+        ElectricBottomRight,
+        ElectricBottom,
+        ElectricBottomLeft,
+        ElectricLeft,
+        ElectricTopLeft,
+        ELECTRIC_COUNT,
+        ElectricNone
+    };
 
     WorkspaceWrapper(QObject* parent = 0);
 #define GETTERSETTERDEF( rettype, getter, setter ) \
@@ -135,15 +182,11 @@ void setter( rettype val );
     QSize displaySize() const;
     int activeScreen() const;
     int numScreens() const;
+    QString currentActivity() const;
+    QStringList activityList() const;
 
     /**
      * List of Clients currently managed by KWin.
-     * Use this method in QML scripts.
-     **/
-    Q_INVOKABLE QList< QObject* > getClientList() const;
-    /**
-     * List of Clients currently managed by KWin.
-     * Use this method in JavaScript scripts.
      **/
     Q_INVOKABLE QList< KWin::Client* > clientList() const;
     /**
@@ -179,6 +222,12 @@ void setter( rettype val );
      * Provides support information about the currently running KWin instance.
      **/
     Q_SCRIPTABLE QString supportInformation() const;
+    /**
+     * Finds the Client with the given @p windowId.
+     * @param windowId The window Id of the Client
+     * @return The found Client or @c null
+     **/
+    Q_SCRIPTABLE KWin::Client *getClient(qulonglong windowId);
 
 public Q_SLOTS:
     // all the available key bindings
@@ -241,6 +290,21 @@ public Q_SLOTS:
     void slotWindowToDesktopLeft();
     void slotWindowToDesktopUp();
     void slotWindowToDesktopDown();
+
+    /**
+     * Shows an outline at the specified @p geometry.
+     * If an outline is already shown the outline is moved to the new position.
+     * Use @link hideOutline to remove the outline again.
+     **/
+    void showOutline(const QRect &geometry);
+    /**
+     * Overloaded method for convenience.
+     **/
+    void showOutline(int x, int y, int width, int height);
+    /**
+     * Hides the outline previously shown by @link showOutline.
+     **/
+    void hideOutline();
 
 private Q_SLOTS:
     void setupClientConnections(KWin::Client* client);

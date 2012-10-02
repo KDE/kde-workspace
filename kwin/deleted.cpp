@@ -35,6 +35,8 @@ Deleted::Deleted(Workspace* ws)
     , padding_top(0)
     , padding_right(0)
     , padding_bottom(0)
+    , m_layer(UnknownLayer)
+    , m_minimized(false)
 {
 }
 
@@ -51,7 +53,7 @@ Deleted* Deleted::create(Toplevel* c)
 {
     Deleted* d = new Deleted(c->workspace());
     d->copyToDeleted(c);
-    d->workspace()->addDeleted(d, Allowed);
+    d->workspace()->addDeleted(d, c, Allowed);
     return d;
 }
 
@@ -66,19 +68,11 @@ void Deleted::copyToDeleted(Toplevel* c)
 {
     assert(dynamic_cast< Deleted* >(c) == NULL);
     Toplevel::copyToDeleted(c);
-    // In some cases the window has been deleted before the sync request which marks
-    // the window ready for painting has finished. This is especially troublesome
-    // when effects reference the deleted window and the unreferencing is part of
-    // the rendering pass (e.g. Effect::postPaintScreen/postPaintWindow), which will
-    // never be executed because we remove it every time from the stacking list in
-    // Workspace::performCompositing.
-    if (!c->readyForPainting()) {
-        QTimer::singleShot(0, this, SLOT(discard()));
-    }
     desk = c->desktop();
     activityList = c->activities();
     contentsRect = QRect(c->clientPos(), c->clientSize());
     transparent_rect = c->transparentRect();
+    m_layer = c->layer();
     if (WinInfo* cinfo = dynamic_cast< WinInfo* >(info))
         cinfo->disable();
     Client* client = dynamic_cast<Client*>(c);
@@ -99,6 +93,7 @@ void Deleted::copyToDeleted(Toplevel* c)
             decorationPixmapTop = *client->topDecoPixmap();
             decorationPixmapBottom = *client->bottomDecoPixmap();
         }
+        m_minimized = client->isMinimized();
     }
 }
 
@@ -139,7 +134,7 @@ void Deleted::debug(QDebug& stream) const
     stream << "\'ID:" << window() << "\' (deleted)";
 }
 
-void Deleted::layoutDecorationRects(QRect& left, QRect& top, QRect& right, QRect& bottom) const
+void Deleted::layoutDecorationRects(QRect& left, QRect& top, QRect& right, QRect& bottom, int) const
 {
     left = decoration_left;
     top = decoration_top;
@@ -160,6 +155,16 @@ QRect Deleted::transparentRect() const
 bool Deleted::isDeleted() const
 {
     return true;
+}
+
+NET::WindowType Deleted::windowType(bool direct, int supportedTypes) const
+{
+    Q_UNUSED(direct)
+    // TODO: maybe retrieve the actual window type when copying to deleted?
+    if (supportedTypes == 0) {
+        supportedTypes = SUPPORTED_UNMANAGED_WINDOW_TYPES_MASK;
+    }
+    return info->windowType(supportedTypes);
 }
 
 } // namespace

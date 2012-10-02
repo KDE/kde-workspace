@@ -20,12 +20,13 @@
 
 #include "blur.h"
 #include "blurshader.h"
+// KConfigSkeleton
+#include "blurconfig.h"
 
 #include <X11/Xatom.h>
 
 #include <QMatrix4x4>
 #include <QLinkedList>
-#include <KConfigGroup>
 #include <KDebug>
 
 namespace KWin
@@ -86,11 +87,11 @@ void BlurEffect::reconfigure(ReconfigureFlags flags)
 {
     Q_UNUSED(flags)
 
-    KConfigGroup cg = EffectsHandler::effectConfig("Blur");
-    int radius = qBound(2, cg.readEntry("BlurRadius", 12), 14);
+    BlurConfig::self()->readConfig();
+    int radius = qBound(2, BlurConfig::blurRadius(), 14);
     shader->setRadius(radius);
 
-    m_shouldCache = cg.readEntry("CacheTexture", true);
+    m_shouldCache = BlurConfig::cacheTexture();
 
     windows.clear();
 
@@ -364,8 +365,8 @@ bool BlurEffect::shouldBlur(const EffectWindow *w, int mask, const WindowPaintDa
     if (w->isDesktop())
         return false;
 
-    bool scaled = !qFuzzyCompare(data.xScale, 1.0) && !qFuzzyCompare(data.yScale, 1.0);
-    bool translated = data.xTranslate || data.yTranslate;
+    bool scaled = !qFuzzyCompare(data.xScale(), 1.0) && !qFuzzyCompare(data.yScale(), 1.0);
+    bool translated = data.xTranslation() || data.yTranslation();
 
     if (scaled || ((translated || (mask & PAINT_WINDOW_TRANSFORMED)) && !w->data(WindowForceBlurRole).toBool()))
         return false;
@@ -385,18 +386,18 @@ void BlurEffect::drawWindow(EffectWindow *w, int mask, QRegion region, WindowPai
     if (shouldBlur(w, mask, data)) {
         QRegion shape = region & blurRegion(w).translated(w->pos()) & screen;
 
-        const bool translated = data.xTranslate || data.yTranslate;
+        const bool translated = data.xTranslation() || data.yTranslation();
         // let's do the evil parts - someone wants to blur behind a transformed window
         if (translated) {
-            shape = shape.translated(data.xTranslate, data.yTranslate);
+            shape = shape.translated(data.xTranslation(), data.yTranslation());
             shape = shape & region;
         }
 
         if (!shape.isEmpty()) {
             if (m_shouldCache && !translated) {
-                doCachedBlur(w, region, data.opacity * data.contents_opacity);
+                doCachedBlur(w, region, data.opacity());
             } else {
-                doBlur(shape, screen, data.opacity * data.contents_opacity);
+                doBlur(shape, screen, data.opacity());
             }
         }
     }
@@ -442,9 +443,11 @@ void BlurEffect::doBlur(const QRegion& shape, const QRect& screen, const float o
     // Set up the texture matrix to transform from screen coordinates
     // to texture coordinates.
 #ifndef KWIN_HAVE_OPENGLES
-    glMatrixMode(GL_TEXTURE);
+    if (effects->compositingType() == OpenGL1Compositing) {
+        glMatrixMode(GL_TEXTURE);
+        pushMatrix();
+    }
 #endif
-    pushMatrix();
     QMatrix4x4 textureMatrix;
     textureMatrix.scale(1.0 / scratch.width(), -1.0 / scratch.height(), 1);
     textureMatrix.translate(-r.x(), -scratch.height() - r.y(), 0);
@@ -466,9 +469,6 @@ void BlurEffect::doBlur(const QRegion& shape, const QRect& screen, const float o
 
     // Modulate the blurred texture with the window opacity if the window isn't opaque
     if (opacity < 1.0) {
-#ifndef KWIN_HAVE_OPENGLES
-        glPushAttrib(GL_COLOR_BUFFER_BIT);
-#endif
         glEnable(GL_BLEND);
         glBlendColor(0, 0, 0, opacity);
         glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
@@ -484,16 +484,15 @@ void BlurEffect::doBlur(const QRegion& shape, const QRect& screen, const float o
 
     drawRegion(shape);
 
-    popMatrix();
 #ifndef KWIN_HAVE_OPENGLES
-    glMatrixMode(GL_MODELVIEW);
+    if (effects->compositingType() == OpenGL1Compositing) {
+        popMatrix();
+        glMatrixMode(GL_MODELVIEW);
+    }
 #endif
 
     if (opacity < 1.0) {
         glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-        glPopAttrib();
-#endif
     }
 
     tex.unbind();
@@ -533,13 +532,15 @@ void BlurEffect::doCachedBlur(EffectWindow *w, const QRegion& region, const floa
     QMatrix4x4 textureMatrix;
     QMatrix4x4 modelViewProjectionMatrix;
 #ifndef KWIN_HAVE_OPENGLES
-    glMatrixMode(GL_MODELVIEW);
-    pushMatrix();
-    glLoadIdentity();
-    glMatrixMode(GL_TEXTURE);
-    pushMatrix();
-    glMatrixMode(GL_PROJECTION);
-    pushMatrix();
+    if (effects->compositingType() == OpenGL1Compositing) {
+        glMatrixMode(GL_MODELVIEW);
+        pushMatrix();
+        glLoadIdentity();
+        glMatrixMode(GL_TEXTURE);
+        pushMatrix();
+        glMatrixMode(GL_PROJECTION);
+        pushMatrix();
+    }
 #endif
 
     /**
@@ -603,9 +604,11 @@ void BlurEffect::doCachedBlur(EffectWindow *w, const QRegion& region, const floa
         textureMatrix.scale(1.0 / tex.width(), -1.0 / tex.height(), 1);
         textureMatrix.translate(-updateRect.x(), -updateRect.height() - updateRect.y(), 0);
 #ifndef KWIN_HAVE_OPENGLES
-        glMatrixMode(GL_TEXTURE);
-        loadMatrix(textureMatrix);
-        glMatrixMode(GL_PROJECTION);
+        if (effects->compositingType() == OpenGL1Compositing) {
+            glMatrixMode(GL_TEXTURE);
+            loadMatrix(textureMatrix);
+            glMatrixMode(GL_PROJECTION);
+        }
 #endif
         shader->setTextureMatrix(textureMatrix);
 
@@ -626,9 +629,6 @@ void BlurEffect::doCachedBlur(EffectWindow *w, const QRegion& region, const floa
 
     // Modulate the blurred texture with the window opacity if the window isn't opaque
     if (opacity < 1.0) {
-#ifndef KWIN_HAVE_OPENGLES
-        glPushAttrib(GL_COLOR_BUFFER_BIT);
-#endif
         glEnable(GL_BLEND);
         glBlendColor(0, 0, 0, opacity);
         glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
@@ -645,31 +645,37 @@ void BlurEffect::doCachedBlur(EffectWindow *w, const QRegion& region, const floa
     textureMatrix.scale(1.0 / targetTexture.width(), -1.0 / targetTexture.height(), 1);
     textureMatrix.translate(-r.x(), -targetTexture.height() - r.y(), 0);
 #ifndef KWIN_HAVE_OPENGLES
-    glMatrixMode(GL_TEXTURE);
-    loadMatrix(textureMatrix);
-    glMatrixMode(GL_PROJECTION);
+    if (effects->compositingType() == OpenGL1Compositing) {
+        glMatrixMode(GL_TEXTURE);
+        loadMatrix(textureMatrix);
+        glMatrixMode(GL_PROJECTION);
+    }
 #endif
     shader->setTextureMatrix(textureMatrix);
 
     drawRegion(blurredRegion & region);
 
 #ifndef KWIN_HAVE_OPENGLES
-    popMatrix();
-    glMatrixMode(GL_TEXTURE);
-    popMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    popMatrix();
+    if (effects->compositingType() == OpenGL1Compositing) {
+        popMatrix();
+        glMatrixMode(GL_TEXTURE);
+        popMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        popMatrix();
+    }
 #endif
 
     if (opacity < 1.0) {
         glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-        glPopAttrib();
-#endif
     }
 
     targetTexture.unbind();
     shader->unbind();
+}
+
+int BlurEffect::blurRadius() const
+{
+    return shader->radius();
 }
 
 } // namespace KWin

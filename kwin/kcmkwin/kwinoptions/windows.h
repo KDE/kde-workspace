@@ -45,15 +45,6 @@ class KIntNumInput;
 #define TITLEBAR_PLAIN  0
 #define TITLEBAR_SHADED 1
 
-#define SMART_PLACEMENT        0
-#define MAXIMIZING_PLACEMENT   1
-#define CASCADE_PLACEMENT      2
-#define RANDOM_PLACEMENT       3
-#define CENTERED_PLACEMENT     4
-#define ZEROCORNERED_PLACEMENT 5
-#define INTERACTIVE_PLACEMENT  6
-#define MANUAL_PLACEMENT       7
-
 #define  CLICK_TO_FOCUS               0
 #define  FOCUS_FOLLOWS_MOUSE          1
 #define  FOCUS_UNDER_MOUSE            2
@@ -190,7 +181,6 @@ private slots:
         emit KCModule::changed(true);
     }
 
-    void tilingOnChanged(bool a);
 private:
 
     int getShadeHoverInterval(void);
@@ -218,23 +208,7 @@ private:
     void setAutogroupInForeground(bool);
     QCheckBox* autogroupInForeground;
 
-    int getPlacement(void);   //CT
-    void setPlacement(int); //CT
-
     KComboBox *placementCombo;
-
-    // ------------------------------
-    // Tiling related widgets/methods
-    // ------------------------------
-    KButtonGroup *tilBox;
-    QCheckBox *tilingOn;
-    QLabel *tilingLayoutLabel;
-    QLabel *tilingRaiseLabel;
-    KComboBox *tilingLayoutCombo;
-    KComboBox *tilingRaiseCombo;
-    void setTilingOn(bool);
-    void setTilingLayout(int);
-    void setTilingRaisePolicy(int);
 };
 
 #endif // KKWMWINDOWS_H

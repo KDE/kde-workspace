@@ -75,6 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QDesktopWidget>
 
 #include "client.h"
 #include "deleted.h"
@@ -83,7 +84,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "overlaywindow.h"
 #include "shadow.h"
 
-#include <kephal/screens.h>
 #include "thumbnailitem.h"
 
 namespace KWin
@@ -93,23 +93,16 @@ namespace KWin
 // Scene
 //****************************************
 
-Scene* scene = 0;
-
 Scene::Scene(Workspace* ws)
     : QObject(ws)
-    , lastRenderTime(0)
     , wspace(ws)
-    , has_waitSync(false)
-    , lanczos_filter(new LanczosFilter())
-    , m_overlayWindow(new OverlayWindow())
 {
     last_time.invalidate(); // Initialize the timer
+    connect(Workspace::self(), SIGNAL(deletedRemoved(KWin::Deleted*)), SLOT(windowDeleted(KWin::Deleted*)));
 }
 
 Scene::~Scene()
 {
-    delete lanczos_filter;
-    delete m_overlayWindow;
 }
 
 // returns mask and possibly modified region
@@ -169,7 +162,11 @@ void Scene::updateTimeDiff()
         time_diff = 1;
         last_time.start();
     } else
-        time_diff = last_time.restart();
+
+    // the extra wspace->nextFrameDelay() basically means that we lie to the effect about the passed
+    // time - as a result the (animated) effect will run up to a frame shorter but in return stick
+    // closer to the runtime from the trigger
+    time_diff = last_time.restart()/* + wspace->nextFrameDelay()*/;
 
     if (time_diff < 0)   // check time rollback
         time_diff = 1;
@@ -359,12 +356,17 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
         }
         EffectWindowImpl *thumb = it.value().data();
         WindowPaintData thumbData(thumb);
-        thumbData.opacity = data.opacity;
+        thumbData.setOpacity(data.opacity());
 
-        QSizeF size = QSizeF(thumb->size());
+        const QRect visualThumbRect(thumb->expandedGeometry());
+
+        QSizeF size = QSizeF(visualThumbRect.size());
         size.scale(QSizeF(item->width(), item->height()), Qt::KeepAspectRatio);
-        thumbData.xScale = size.width() / static_cast<qreal>(thumb->width());
-        thumbData.yScale = size.height() / static_cast<qreal>(thumb->height());
+        if (size.width() > visualThumbRect.width() || size.height() > visualThumbRect.height()) {
+            size = QSizeF(visualThumbRect.size());
+        }
+        thumbData.setXScale(size.width() / static_cast<qreal>(visualThumbRect.width()));
+        thumbData.setYScale(size.height() / static_cast<qreal>(visualThumbRect.height()));
         // it can happen in the init/closing phase of the tabbox
         // that the corresponding QGraphicsScene is not available
         if (item->scene() == 0) {
@@ -374,6 +376,7 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
         // although TabBox does not make use of it so far
         QList<QGraphicsView*> views = item->scene()->views();
         QGraphicsView* declview = 0;
+        QPoint viewPos;
         foreach (QGraphicsView* view, views) {
             if (view->winId() == w->window()->window()) {
                 declview = view;
@@ -385,6 +388,7 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
                 // toplevel widget and check whether that is the window we are looking for.
                 if (parent->winId() == w->window()->window()) {
                     declview = view;
+                    viewPos = view->mapTo(parent, QPoint());
                     break;
                 }
             }
@@ -397,24 +401,33 @@ void Scene::paintWindow(Window* w, int mask, QRegion region, WindowQuadList quad
         if (declview == 0) {
             continue;
         }
-        const QPoint point = declview->mapFromScene(item->scenePos());
-        const qreal x = point.x() + w->x() + (item->width() - size.width())/2;
-        const qreal y = point.y() + w->y() + (item->height() - size.height()) / 2;
-        thumbData.xTranslate = x - thumb->x();
-        thumbData.yTranslate = y - thumb->y();
+        const QPoint point = viewPos + declview->mapFromScene(item->scenePos());
+        qreal x = point.x() + w->x() + (item->width() - size.width())/2;
+        qreal y = point.y() + w->y() + (item->height() - size.height()) / 2;
+        x -= thumb->x();
+        y -= thumb->y();
+        // compensate shadow topleft padding
+        x += (thumb->x()-visualThumbRect.x())*thumbData.xScale();
+        y += (thumb->y()-visualThumbRect.y())*thumbData.yScale();
+        thumbData.setXTranslation(x);
+        thumbData.setYTranslation(y);
         int thumbMask = PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_LANCZOS;
-        if (thumbData.opacity == 1.0) {
+        if (thumbData.opacity() == 1.0) {
             thumbMask |= PAINT_WINDOW_OPAQUE;
         } else {
             thumbMask |= PAINT_WINDOW_TRANSLUCENT;
         }
-        if (item->isClip() && (x < wImpl->x() || x + size.width() > wImpl->x() + wImpl->width() ||
-            y < wImpl->y() || y + size.height() > wImpl->y() + wImpl->height())) {
-            // don't render windows outside the containing window.
-            // TODO: improve by spliting out the window quads which do not fit
-            continue;
+        QRegion clippingRegion = region;
+        clippingRegion &= QRegion(wImpl->x(), wImpl->y(), wImpl->width(), wImpl->height());
+        QPainterPath path = item->clipPath();
+        if (!path.isEmpty()) {
+            // here we assume that the clippath consists of a single rectangle
+            const QPolygonF sceneBounds = item->mapToScene(path.boundingRect());
+            const QRect viewBounds = declview->mapFromScene(sceneBounds).boundingRect();
+            // shrinking the rect due to rounding errors
+            clippingRegion &= viewBounds.adjusted(0,0,-1,-1).translated(viewPos + w->pos());
         }
-        effects->drawWindow(thumb, thumbMask, QRegion(x, y, size.width(), size.height()), thumbData);
+        effects->drawWindow(thumb, thumbMask, clippingRegion, thumbData);
     }
 }
 
@@ -427,20 +440,26 @@ void Scene::finalPaintWindow(EffectWindowImpl* w, int mask, QRegion region, Wind
 // will be eventually called from drawWindow()
 void Scene::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
 {
-    if (mask & PAINT_WINDOW_LANCZOS)
-        lanczos_filter->performPaint(w, mask, region, data);
-    else
+    if (mask & PAINT_WINDOW_LANCZOS) {
+        if (lanczos_filter.isNull()) {
+            lanczos_filter = new LanczosFilter(this);
+            // recreate the lanczos filter when the screen gets resized
+            connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), lanczos_filter.data(), SLOT(deleteLater()));
+            connect(QApplication::desktop(), SIGNAL(resized(int)), lanczos_filter.data(), SLOT(deleteLater()));
+        }
+        lanczos_filter.data()->performPaint(w, mask, region, data);
+    } else
         w->sceneWindow()->performPaint(mask, region, data);
 }
 
-OverlayWindow* Scene::overlayWindow()
+bool Scene::waitSyncAvailable() const
 {
-    return m_overlayWindow;
+    return false;
 }
 
 void Scene::screenGeometryChanged(const QSize &size)
 {
-    m_overlayWindow->resize(size);
+    overlayWindow()->resize(size);
 }
 
 //****************************************
@@ -474,7 +493,7 @@ void Scene::Window::discardShape()
 
 // Find out the shape of the window using the XShape extension
 // or if shape is not set then simply it's the window geometry.
-QRegion Scene::Window::shape() const
+const QRegion &Scene::Window::shape() const
 {
     if (!shape_valid) {
         Client* c = dynamic_cast< Client* >(toplevel);
@@ -503,29 +522,28 @@ QRegion Scene::Window::shape() const
 
 QRegion Scene::Window::clientShape() const
 {
-    Client *c = dynamic_cast< Client* >(toplevel);
-    if (c && c->isShade())
-        return QRegion();
+    if (toplevel->isClient()) {
+        Client *c = static_cast< Client * > (toplevel);
+        if (c->isShade())
+            return QRegion();
+    }
 
+    // TODO: cache
     const QRegion r = shape() & QRect(toplevel->clientPos(), toplevel->clientSize());
     return r.isEmpty() ? QRegion() : r;
 }
 
 bool Scene::Window::isVisible() const
 {
-    if (dynamic_cast< Deleted* >(toplevel) != NULL)
+    if (toplevel->isDeleted())
         return false;
     if (!toplevel->isOnCurrentDesktop())
         return false;
     if (!toplevel->isOnCurrentActivity())
         return false;
-    if (Client* c = dynamic_cast< Client* >(toplevel))
-        return c->isShown(true);
+    if (toplevel->isClient())
+        return (static_cast< Client *>(toplevel))->isShown(true);
     return true; // Unmanaged is always visible
-    // TODO there may be transformations, so ignore this for now
-    return !toplevel->geometry()
-           .intersected(QRect(0, 0, displayWidth(), displayHeight()))
-           .isEmpty();
 }
 
 bool Scene::Window::isOpaque() const
@@ -541,13 +559,14 @@ bool Scene::Window::isPaintingEnabled() const
 void Scene::Window::resetPaintingEnabled()
 {
     disable_painting = 0;
-    if (dynamic_cast< Deleted* >(toplevel) != NULL)
+    if (toplevel->isDeleted())
         disable_painting |= PAINT_DISABLED_BY_DELETE;
     if (!toplevel->isOnCurrentDesktop())
         disable_painting |= PAINT_DISABLED_BY_DESKTOP;
     if (!toplevel->isOnCurrentActivity())
         disable_painting |= PAINT_DISABLED_BY_ACTIVITY;
-    if (Client* c = dynamic_cast< Client* >(toplevel)) {
+    if (toplevel->isClient()) {
+        Client *c = static_cast<Client*>(toplevel);
         if (c->isMinimized())
             disable_painting |= PAINT_DISABLED_BY_MINIMIZE;
         if (c->tabGroup() && c != c->tabGroup()->current())
@@ -596,7 +615,7 @@ WindowQuadList Scene::Window::buildQuads(bool force) const
     if (m_shadow) {
         ret << m_shadow->shadowQuads();
     }
-    effects->buildQuads(static_cast<Client*>(toplevel)->effectWindow(), ret);
+    effects->buildQuads(toplevel->effectWindow(), ret);
     cached_quad_list = new WindowQuadList(ret);
     return ret;
 }

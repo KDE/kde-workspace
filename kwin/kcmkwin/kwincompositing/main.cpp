@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "main.h"
 
 #include "kwin_interface.h"
+#include "kwinglobals.h"
 
 #include <kaboutdata.h>
 #include <kaction.h>
@@ -78,6 +79,8 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
     : KCModule(KWinCompositingConfigFactory::componentData(), parent)
     , mKWinConfig(KSharedConfig::openConfig("kwinrc"))
     , m_showConfirmDialog(false)
+    , m_showDetailedErrors(new QAction(i18nc("Action to open a dialog showing detailed information why an effect could not be loaded",
+                                             "Details"), this))
 {
     KGlobal::locale()->insertCatalog("kwin_effects");
     ui.setupUi(this);
@@ -85,6 +88,9 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
     ui.tabWidget->setCurrentIndex(0);
     ui.statusTitleWidget->hide();
     ui.rearmGlSupport->hide();
+    ui.messageBox->setVisible(false);
+    ui.messageBox->addAction(m_showDetailedErrors);
+    ui.messageBox->setMessageType(KMessageWidget::Warning);
 
     // For future use
     (void) I18N_NOOP("Use GLSL shaders");
@@ -93,7 +99,6 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
 #define XRENDER_INDEX 1
 #ifndef KWIN_HAVE_XRENDER_COMPOSITING
     ui.compositingType->removeItem(XRENDER_INDEX);
-    ui.xrenderGroup->setEnabled(false);
 #define XRENDER_INDEX -1
 #endif
 
@@ -123,6 +128,7 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
 
     connect(ui.glVSync, SIGNAL(toggled(bool)), this, SLOT(changed()));
     connect(ui.glShaders, SIGNAL(toggled(bool)), this, SLOT(changed()));
+    connect(m_showDetailedErrors, SIGNAL(triggered(bool)), SLOT(showDetailedEffectLoadingInformation()));
 
     // Open the temporary config file
     // Temporary conf file is used to synchronize effect checkboxes with effect
@@ -165,7 +171,7 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
     if (!services.isEmpty())
         fadedesktop = services.first()->name();
 
-    ui.desktopSwitchingCombo->addItem(i18n("No Effect"));
+    ui.desktopSwitchingCombo->addItem(i18n("No effect"));
     ui.desktopSwitchingCombo->addItem(slide);
     ui.desktopSwitchingCombo->addItem(cube);
     ui.desktopSwitchingCombo->addItem(fadedesktop);
@@ -259,7 +265,7 @@ void KWinCompositingConfig::currentTabChanged(int tab)
 void KWinCompositingConfig::loadGeneralTab()
 {
     KConfigGroup config(mKWinConfig, "Compositing");
-    bool enabled = config.readEntry("Enabled", mDefaultPrefs.recommendCompositing());
+    bool enabled = config.readEntry("Enabled", true);
     ui.useCompositing->setChecked(enabled);
 
     // this works by global shortcut magics - it will pick the current sc
@@ -373,7 +379,7 @@ void KWinCompositingConfig::loadAdvancedTab()
     ui.xrScaleFilter->setCurrentIndex((int)config.readEntry("XRenderSmoothScale", false));
     ui.glScaleFilter->setCurrentIndex(config.readEntry("GLTextureFilter", 2));
 
-    ui.glVSync->setChecked(config.readEntry("GLVSync", mDefaultPrefs.enableVSync()));
+    ui.glVSync->setChecked(config.readEntry("GLVSync", true));
     ui.glShaders->setChecked(!config.readEntry<bool>("GLLegacy", false));
 
     toogleSmoothScaleUi(ui.compositingType->currentIndex());
@@ -385,19 +391,18 @@ void KWinCompositingConfig::updateStatusUI(bool compositingIsPossible)
         ui.compositingOptionsContainer->show();
         ui.statusTitleWidget->hide();
         ui.rearmGlSupport->hide();
-
-        // Driver-specific config detection
-        mDefaultPrefs.detect();
     }
     else {
+        OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
         ui.compositingOptionsContainer->hide();
         QString text = i18n("Desktop effects are not available on this system due to the following technical issues:");
         text += "<hr>";
-        text += CompositingPrefs::compositingNotPossibleReason();
+        text += kwin.isValid() ? kwin.compositingNotPossibleReason() : i18nc("Reason shown when trying to activate desktop effects and KWin (most likely) crashes",
+                                                                             "Window Manager seems not to be running");
         ui.statusTitleWidget->setText(text);
         ui.statusTitleWidget->setPixmap(KTitleWidget::InfoMessage, KTitleWidget::ImageLeft);
         ui.statusTitleWidget->show();
-        ui.rearmGlSupport->setVisible(CompositingPrefs::openGlIsBroken());
+        ui.rearmGlSupport->setVisible(kwin.isValid() ? kwin.openGLIsBroken() : true);
     }
 }
 
@@ -405,7 +410,8 @@ void KWinCompositingConfig::load()
 {
     initEffectSelector();
     mKWinConfig->reparseConfiguration();
-    updateStatusUI(CompositingPrefs::compositingPossible());
+    QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.kwin", "/KWin", "org.kde.KWin", "compositingPossible");
+    QDBusConnection::sessionBus().callWithCallback(msg, this, SLOT(updateStatusUI(bool)));
 
     // Copy Plugins group to temp config file
     QMap<QString, QString> entries = mKWinConfig->entryMap("Plugins");
@@ -486,7 +492,7 @@ bool KWinCompositingConfig::saveAdvancedTab()
 
     if (config.readEntry("Backend", "OpenGL")
             != ((ui.compositingType->currentIndex() == OPENGL_INDEX) ? "OpenGL" : "XRender")
-            || config.readEntry("GLVSync", mDefaultPrefs.enableVSync()) != ui.glVSync->isChecked()
+            || config.readEntry("GLVSync", true) != ui.glVSync->isChecked()
             || config.readEntry<bool>("GLLegacy", false) == ui.glShaders->isChecked()) {
         m_showConfirmDialog = true;
         advancedChanged = true;
@@ -515,8 +521,9 @@ bool KWinCompositingConfig::saveAdvancedTab()
 
 void KWinCompositingConfig::save()
 {
+    OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
     if (ui.compositingType->currentIndex() == OPENGL_INDEX &&
-        CompositingPrefs::openGlIsBroken() && !ui.rearmGlSupport->isVisible())
+        kwin.openGLIsBroken() && !ui.rearmGlSupport->isVisible())
     {
         KConfigGroup config(mKWinConfig, "Compositing");
         QString oldBackend = config.readEntry("Backend", "OpenGL");
@@ -571,7 +578,10 @@ void KWinCompositingConfig::save()
 
     if (m_showConfirmDialog) {
         m_showConfirmDialog = false;
-        showConfirmDialog(advancedChanged);
+        if (advancedChanged)
+            QTimer::singleShot(1000, this, SLOT(confirmReInit()));
+        else
+            showConfirmDialog(false);
     }
 }
 
@@ -579,14 +589,15 @@ void KWinCompositingConfig::checkLoadedEffects()
 {
     // check for effects not supported by Backend or hardware
     // such effects are enabled but not returned by DBus method loadedEffects
-    QDBusMessage message = QDBusMessage::createMethodCall("org.kde.kwin", "/KWin", "org.kde.KWin", "loadedEffects");
-    QDBusMessage reply = QDBusConnection::sessionBus().call(message);
+    OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
     KConfigGroup effectConfig = KConfigGroup(mKWinConfig, "Compositing");
-    bool enabledAfter = effectConfig.readEntry("Enabled", mDefaultPrefs.recommendCompositing());
+    bool enabledAfter = effectConfig.readEntry("Enabled", true);
 
-    if (reply.type() == QDBusMessage::ReplyMessage && enabledAfter && !getenv("KDE_FAILSAFE")) {
+    QDBusPendingReply< QStringList > reply = kwin.loadedEffects();
+
+    if (!reply.isError() && enabledAfter && !getenv("KDE_FAILSAFE")) {
         effectConfig = KConfigGroup(mKWinConfig, "Plugins");
-        QStringList loadedEffects = reply.arguments()[0].toStringList();
+        QStringList loadedEffects = reply.value();
         QStringList effects = effectConfig.keyList();
         QStringList disabledEffects = QStringList();
         foreach (QString effect, effects) { // krazy:exclude=foreach
@@ -597,23 +608,106 @@ void KWinCompositingConfig::checkLoadedEffects()
             }
         }
         if (!disabledEffects.isEmpty()) {
-            KServiceTypeTrader* trader = KServiceTypeTrader::self();
-            KService::List services;
-            QString message = i18n("The following desktop effects could not be activated:");
-            message.append("<ul>");
-            foreach (const QString & effect, disabledEffects) {
-                services = trader->query("KWin/Effect", "[X-KDE-PluginInfo-Name] == '" + effect + '\'');
-                message.append("<li>");
-                if (!services.isEmpty())
-                    message.append(services.first()->name());
-                else
-                    message.append(effect);
-                message.append("</li>");
-            }
-            message.append("</ul>");
-            KNotification::event("effectsnotsupported", message, QPixmap(), NULL, KNotification::CloseOnTimeout, KComponentData("kwin"));
+            m_showDetailedErrors->setData(disabledEffects);
+            ui.messageBox->setText(i18ncp("Error Message shown when a desktop effect could not be loaded",
+                                          "One desktop effect could not be loaded.",
+                                          "%1 desktop effects could not be loaded.", disabledEffects.count()));
+            ui.messageBox->animatedShow();
         }
     }
+}
+
+void KWinCompositingConfig::showDetailedEffectLoadingInformation()
+{
+    QStringList disabledEffects = m_showDetailedErrors->data().toStringList();
+    OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+    QDBusPendingReply< QString > pendingCompositingType = kwin.compositingType();
+    QString compositingType = pendingCompositingType.isError() ? "none" : pendingCompositingType.value();
+    KServiceTypeTrader* trader = KServiceTypeTrader::self();
+    KService::List services;
+    const KLocalizedString unknownReason = ki18nc("Effect with given name could not be activated due to unknown reason",
+                                                    "%1 effect failed to load due to unknown reason.");
+    const KLocalizedString requiresShaders = ki18nc("Effect with given name could not be activated as it requires hardware shaders",
+                                                    "%1 effect requires hardware support.");
+    const KLocalizedString requiresOpenGL = ki18nc("Effect with given name could not be activated as it requires OpenGL",
+                                                    "%1 effect requires OpenGL.");
+    const KLocalizedString requiresOpenGL2 = ki18nc("Effect with given name could not be activated as it requires OpenGL 2",
+                                                    "%1 effect requires OpenGL 2.");
+    KDialog *dialog = new KDialog(this);
+    dialog->setWindowTitle(i18nc("Window title", "List of effects which could not be loaded"));
+    dialog->setButtons(KDialog::Ok);
+    QWidget *mainWidget = new QWidget(dialog);
+    dialog->setMainWidget(mainWidget);
+    QVBoxLayout *vboxLayout = new QVBoxLayout(mainWidget);
+    mainWidget->setLayout(vboxLayout);
+    KTitleWidget *titleWidget = new KTitleWidget(mainWidget);
+    titleWidget->setText(i18n("For technical reasons it is not possible to determine all possible error causes."),
+                         KTitleWidget::InfoMessage);
+    QLabel *label = new QLabel(mainWidget);
+    label->setOpenExternalLinks(true);
+    vboxLayout->addWidget(titleWidget);
+    vboxLayout->addWidget(label);
+    if (compositingType != "none") {
+        QString text;
+        if (disabledEffects.count() > 1) {
+            text = "<ul>";
+        }
+        foreach (const QString & effect, disabledEffects) {
+            QString message;
+            services = trader->query("KWin/Effect", "[X-KDE-PluginInfo-Name] == '" + effect + '\'');
+            if (!services.isEmpty()) {
+                KService::Ptr service = services.first();
+                if (compositingType == "xrender") {
+                    // XRender compositing
+                    QVariant openGL = service->property("X-KWin-Requires-OpenGL");
+                    QVariant openGL2 = service->property("X-KWin-Requires-OpenGL2");
+                    if ((openGL.isValid() && openGL.toBool()) ||
+                            (openGL2.isValid() && openGL2.toBool())) {
+                        // effect requires OpenGL
+                        message = requiresOpenGL.subs(service->name()).toString();
+                    } else {
+                        // effect does not require OpenGL, unknown reason
+                        message = unknownReason.subs(service->name()).toString();
+                    }
+                } else if (compositingType == "gl1") {
+                    // OpenGL 1 compositing
+                    QVariant openGL2 = service->property("X-KWin-Requires-OpenGL2");
+                    QVariant shaders = service->property("X-KWin-Requires-Shaders");
+                    if (openGL2.isValid() && openGL2.toBool()) {
+                        // effect requires OpenGL 2
+                        message = requiresOpenGL2.subs(service->name()).toString();
+                    } else if (shaders.isValid() && shaders.toBool()) {
+                        // effect requires hardware shaders
+                        message = requiresShaders.subs(service->name()).toString();
+                    } else {
+                        // unknown reason
+                        message = unknownReason.subs(service->name()).toString();
+                    }
+                } else {
+                    // OpenGL 2 compositing - unknown reason
+                    message = unknownReason.subs(service->name()).toString();
+                }
+            } else {
+                message = unknownReason.subs(effect).toString();
+            }
+            if (disabledEffects.count() > 1) {
+                text.append("<li>");
+                text.append(message);
+                text.append("</li>");
+            } else {
+                text = message;
+            }
+        }
+        if (disabledEffects.count() > 1) {
+            text.append("</ul>");
+        }
+        label->setText(text);
+    } else {
+        // compositing is not active - no effect can be active
+        label->setText(i18nc("Error Message shown when compositing is not active after tried activation",
+                             "Desktop effect system is not running."));
+    }
+    dialog->show();
 }
 
 void KWinCompositingConfig::configChanged(bool reinitCompositing)
@@ -642,7 +736,7 @@ void KWinCompositingConfig::defaults()
 {
     ui.tabWidget->setCurrentIndex(0);
 
-    ui.useCompositing->setChecked(mDefaultPrefs.recommendCompositing());
+    ui.useCompositing->setChecked(true);
     ui.effectWinManagement->setChecked(true);
     ui.effectAnimations->setChecked(true);
 
@@ -656,7 +750,7 @@ void KWinCompositingConfig::defaults()
     ui.unredirectFullscreen->setChecked(false);
     ui.xrScaleFilter->setCurrentIndex(0);
     ui.glScaleFilter->setCurrentIndex(2);
-    ui.glVSync->setChecked(mDefaultPrefs.enableVSync());
+    ui.glVSync->setChecked(true);
     ui.glShaders->setChecked(true);
 }
 

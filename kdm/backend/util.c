@@ -44,6 +44,7 @@ from the copyright holder.
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <signal.h>
 
 #if 0 /*def USG; this was hpux once upon a time */
 # define NEED_UTSNAME
@@ -81,6 +82,22 @@ Realloc(void *ptr, size_t size)
     if (!(ret = realloc(ptr, size)) && size)
         logOutOfMem();
     return ret;
+}
+
+void
+strCatL(char **bp, const char *str, int max)
+{
+    int dnl = strnlen(str, max);
+    memcpy(*bp, str, dnl);
+    *bp += dnl;
+}
+
+void
+strCat(char **bp, const char *str)
+{
+    int dnl = strlen(str);
+    memcpy(*bp, str, dnl);
+    *bp += dnl;
 }
 
 int
@@ -166,6 +183,29 @@ int
 strDup(char **dst, const char *src)
 {
     return strNDup(dst, src, -1);
+}
+
+char *
+replaceInString(const char *str, const char *before, const char *after)
+{
+    int len;
+    size_t beforeLen = strlen(before), afterLen = strlen(after);
+    char *buf, *ret;
+    const char *ptr;
+
+    for (ptr = str, len = 0; (ptr = strstr(ptr, before)); len++)
+        ptr += beforeLen;
+    len = strlen(str) + (afterLen - beforeLen) * len;
+
+    if (!(buf = ret = Malloc(len + 1)))
+        return 0;
+
+    for (ptr = str; (str = strstr(str, before)); str += beforeLen, ptr = str) {
+        strCatL(&buf, ptr, str - ptr);
+        strCatL(&buf, after, afterLen);
+    }
+    strcpy(buf, ptr);
+    return ret;
 }
 
 /* append any number of strings to dst */
@@ -296,7 +336,7 @@ arrLen(char **arr)
     return nu;
 }
 
-static char **
+char **
 extStrArr(char **arr, char ***strp)
 {
     char **rarr;

@@ -116,7 +116,7 @@ namespace Oxygen
         typedef BaseCache<T> Value;
         Value* get( const QColor& color )
         {
-            quint64 key = ( quint64( color.rgba() ) << 32 );
+            const quint64 key = ( color.isValid() ? color.rgba():0 );
             Value* cache = data_.object( key );
 
             if ( !cache )
@@ -179,7 +179,7 @@ namespace Oxygen
         \par gradientHeight: the height of the generated gradient.
         for different heights, the gradient is translated so that it is always at the same position from the bottom
         */
-        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QPalette&  pal, int y_shift=-23, int gradientHeight = 64 )
+        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QPalette&  pal, int y_shift=-23, int gradientHeight = 20 )
         { renderWindowBackground( p, clipRect, widget, pal.color( widget->window()->backgroundRole() ), y_shift, gradientHeight ); }
 
         /*!
@@ -187,15 +187,15 @@ namespace Oxygen
         gradientHeight: the height of the generated gradient.
         for different heights, the gradient is translated so that it is always at the same position from the bottom
         */
-        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QWidget* window, const QPalette&  pal, int y_shift=-23, int gradientHeight = 64 )
+        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QWidget* window, const QPalette&  pal, int y_shift=-23, int gradientHeight = 20 )
         { renderWindowBackground( p, clipRect, widget, window, pal.color( window->backgroundRole() ), y_shift, gradientHeight ); }
 
         //! render window background using a given color as a reference
-        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QColor& color, int y_shift=-23, int gradientHeight = 64 )
+        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QColor& color, int y_shift=-23, int gradientHeight = 20 )
         { renderWindowBackground( p, clipRect, widget, widget->window(), color, y_shift, gradientHeight ); }
 
         //! render window background using a given color as a reference
-        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QWidget* window, const QColor& color, int y_shift=-23, int gradientHeight = 64 );
+        virtual void renderWindowBackground( QPainter* p, const QRect& clipRect, const QWidget* widget, const QWidget* window, const QColor& color, int y_shift=-23, int gradientHeight = 20 );
 
         //! background pixmap
         bool hasBackgroundPixmap( void ) const
@@ -210,7 +210,7 @@ namespace Oxygen
         { _backgroundPixmapOffset = offset; }
 
         //! render window background using a given color as a reference
-        virtual void renderBackgroundPixmap( QPainter* p, const QRect& clipRect, const QWidget* widget, const QWidget* window, int y_shift=-23, int gradientHeight = 64 );
+        virtual void renderBackgroundPixmap( QPainter* p, const QRect& clipRect, const QWidget* widget, const QWidget* window, int y_shift=-23, int gradientHeight = 20 );
 
         //@}
 
@@ -259,7 +259,7 @@ namespace Oxygen
         virtual QPixmap verticalGradient( const QColor& color, int height, int offset = 0 );
 
         //! radial gradient for window background
-        virtual QPixmap radialGradient( const QColor& color, int width, int height = 64 );
+        virtual QPixmap radialGradient( const QColor& color, int width, int height = 20 );
 
         //! merge background and front color for check marks, arrows, etc. using _contrast
         virtual const QColor& decoColor( const QColor& background, const QColor& color );
@@ -336,6 +336,10 @@ namespace Oxygen
         //@}
 
         protected:
+
+        //! return color key for a given color, properly accounting for invalid colors
+        quint64 colorKey( const QColor& color ) const
+        { return color.isValid() ? color.rgba():0; }
 
         //! generic slab painting (to be stored in tilesets)
         virtual void drawSlab( QPainter&, const QColor&, qreal shade );
@@ -431,7 +435,7 @@ namespace Oxygen
         Atom _backgroundPixmapAtom;
 
         #endif
-     };
+    };
 
 }
 

@@ -27,7 +27,7 @@
      <item>
       <widget class="QPushButton" name="new_button" >
        <property name="text" >
-        <string>New</string>
+        <string comment="new condition">New</string>
        </property>
       </widget>
      </item>

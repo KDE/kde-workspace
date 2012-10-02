@@ -63,6 +63,13 @@ class DesktopGridEffect
     : public Effect
 {
     Q_OBJECT
+    Q_PROPERTY(int zoomDuration READ configuredZoomDuration)
+    Q_PROPERTY(int border READ configuredBorder)
+    Q_PROPERTY(Qt::Alignment desktopNameAlignment READ configuredDesktopNameAlignment)
+    Q_PROPERTY(int layoutMode READ configuredLayoutMode)
+    Q_PROPERTY(int customLayoutRows READ configuredCustomLayoutRows)
+    Q_PROPERTY(bool usePresentWindows READ isUsePresentWindows)
+    // TODO: electric borders
 public:
     DesktopGridEffect();
     ~DesktopGridEffect();
@@ -79,6 +86,25 @@ public:
 
     enum { LayoutPager, LayoutAutomatic, LayoutCustom }; // Layout modes
 
+    // for properties
+    int configuredZoomDuration() const {
+        return zoomDuration;
+    }
+    int configuredBorder() const {
+        return border;
+    }
+    Qt::Alignment configuredDesktopNameAlignment() const {
+        return desktopNameAlignment;
+    }
+    int configuredLayoutMode() const {
+        return layoutMode;
+    }
+    int configuredCustomLayoutRows() const {
+        return customLayoutRows;
+    }
+    bool isUsePresentWindows() const {
+        return m_usePresentWindows;
+    }
 private slots:
     void toggle();
     // slots for global shortcut changed
@@ -108,6 +134,7 @@ private:
     void setupGrid();
     void finish();
     bool isMotionManagerMovingWindows() const;
+    bool isRelevantWithPresentWindows(EffectWindow *w) const;
     bool isUsingPresentWindows() const;
     QRectF moveGeometryToDesktop(int desktop) const;
     void desktopsAdded(int old);
@@ -124,6 +151,7 @@ private:
     QTimeLine timeline;
     int paintingDesktop;
     int highlightedDesktop;
+    int m_originalMovingDesktop;
     Window input;
     bool keyboardGrab;
     bool wasWindowMove, wasDesktopMove, isValidMove;

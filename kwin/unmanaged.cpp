@@ -80,20 +80,25 @@ bool Unmanaged::track(Window w)
     return true;
 }
 
-void Unmanaged::release()
+void Unmanaged::release(bool on_shutdown)
 {
-    Deleted* del = Deleted::create(this);
+    Deleted* del = NULL;
+    if (!on_shutdown) {
+        del = Deleted::create(this);
+    }
     emit windowClosed(this, del);
     finishCompositing();
-    workspace()->removeUnmanaged(this, Allowed);
     if (!QWidget::find(window())) { // don't affect our own windows
         if (Extensions::shapeAvailable())
             XShapeSelectInput(display(), window(), NoEventMask);
         XSelectInput(display(), window(), NoEventMask);
     }
-    addWorkspaceRepaint(del->visibleRect());
-    disownDataPassedToDeleted();
-    del->unrefWindow();
+    if (!on_shutdown) {
+        workspace()->removeUnmanaged(this, Allowed);
+        addWorkspaceRepaint(del->visibleRect());
+        disownDataPassedToDeleted();
+        del->unrefWindow();
+    }
     deleteUnmanaged(this, Allowed);
 }
 
@@ -130,6 +135,17 @@ QRect Unmanaged::transparentRect() const
 void Unmanaged::debug(QDebug& stream) const
 {
     stream << "\'ID:" << window() << "\'";
+}
+
+NET::WindowType Unmanaged::windowType(bool direct, int supportedTypes) const
+{
+    // for unmanaged windows the direct does not make any difference
+    // as there are no rules to check and no hacks to apply
+    Q_UNUSED(direct)
+    if (supportedTypes == 0) {
+        supportedTypes = SUPPORTED_UNMANAGED_WINDOW_TYPES_MASK;
+    }
+    return info->windowType(supportedTypes);
 }
 
 } // namespace

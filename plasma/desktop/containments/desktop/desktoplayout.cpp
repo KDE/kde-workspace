@@ -336,7 +336,7 @@ void DesktopLayout::adjustPhysicalPositions(QGraphicsWidget *item)
     }
 }
 
-void DesktopLayout::itemTransformed(QGraphicsWidget *layoutItem, ItemTransformType type)
+void DesktopLayout::itemTransformed(QGraphicsWidget *layoutItem)
 {
     // get local item key
     int itemKey = -1;
@@ -361,11 +361,7 @@ void DesktopLayout::itemTransformed(QGraphicsWidget *layoutItem, ItemTransformTy
     QTransform revertTransform;
     getItemInstantRelativeGeometry(layoutItem, logicalGeom, revertTransform);
 
-    if (type == ItemTransformSelf) {
-        // don't care about the new position, just update the size
-        itemSpace.resizeItem(group, item, logicalGeom.size());
-    }
-    else if (spaceItem.lastGeometry != logicalGeom) {
+    if (spaceItem.lastGeometry != logicalGeom) {
         // use the new geometry as the preferred
         itemSpace.moveItem(group, item, logicalGeom);
     }

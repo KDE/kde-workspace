@@ -158,7 +158,7 @@ void LanczosShader::createOffsets(int count, float width, Qt::Orientation direct
 
 void LanczosFilter::performPaint(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
 {
-    if (effects->compositingType() == KWin::OpenGLCompositing && (data.xScale < 0.9 || data.yScale < 0.9) &&
+    if (effects->isOpenGLCompositing() && (data.xScale() < 0.9 || data.yScale() < 0.9) &&
             KGlobalSettings::graphicEffectsLevel() & KGlobalSettings::SimpleAnimationEffects) {
         if (!m_inited)
             init();
@@ -186,11 +186,12 @@ void LanczosFilter::performPaint(EffectWindowImpl* w, int mask, QRegion region, 
                 width = w->width();
                 height = w->height();
             }
-            int tx = data.xTranslate + w->x() + left * data.xScale;
-            int ty = data.yTranslate + w->y() + top * data.yScale;
-            int tw = width * data.xScale;
-            int th = height * data.yScale;
+            int tx = data.xTranslation() + w->x() + left * data.xScale();
+            int ty = data.yTranslation() + w->y() + top * data.yScale();
+            int tw = width * data.xScale();
+            int th = height * data.yScale();
             const QRect textureRect(tx, ty, tw, th);
+            const bool hardwareClipping = !(QRegion(textureRect)-region).isEmpty();
 
             int sw = width;
             int sh = height;
@@ -199,27 +200,33 @@ void LanczosFilter::performPaint(EffectWindowImpl* w, int mask, QRegion region, 
             if (cachedTexture) {
                 if (cachedTexture->width() == tw && cachedTexture->height() == th) {
                     cachedTexture->bind();
-                    if (ShaderManager::instance()->isValid()) {
+                    if (hardwareClipping) {
+                        glEnable(GL_SCISSOR_TEST);
+                    }
+                    if (effects->compositingType() == OpenGL2Compositing) {
                         glEnable(GL_BLEND);
                         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-                        const float rgb = data.brightness * data.opacity;
-                        const float a = data.opacity;
+                        const qreal rgb = data.brightness() * data.opacity();
+                        const qreal a = data.opacity();
 
-                        GLShader *shader = ShaderManager::instance()->pushShader(ShaderManager::SimpleShader);
+                        ShaderBinder binder(ShaderManager::SimpleShader);
+                        GLShader *shader = binder.shader();
                         shader->setUniform(GLShader::Offset, QVector2D(0, 0));
                         shader->setUniform(GLShader::ModulationConstant, QVector4D(rgb, rgb, rgb, a));
-                        shader->setUniform(GLShader::Saturation, data.saturation);
+                        shader->setUniform(GLShader::Saturation, data.saturation());
                         shader->setUniform(GLShader::AlphaToOne, 0);
 
-                        cachedTexture->render(textureRect, textureRect);
+                        cachedTexture->render(region, textureRect, hardwareClipping);
 
-                        ShaderManager::instance()->popShader();
                         glDisable(GL_BLEND);
                     } else {
-                        prepareRenderStates(cachedTexture, data.opacity, data.brightness, data.saturation);
-                        cachedTexture->render(textureRect, textureRect);
-                        restoreRenderStates(cachedTexture, data.opacity, data.brightness, data.saturation);
+                        prepareRenderStates(cachedTexture, data.opacity(), data.brightness(), data.saturation());
+                        cachedTexture->render(region, textureRect, hardwareClipping);
+                        restoreRenderStates(cachedTexture, data.opacity(), data.brightness(), data.saturation());
+                    }
+                    if (hardwareClipping) {
+                        glDisable(GL_SCISSOR_TEST);
                     }
                     cachedTexture->unbind();
                     m_timer.start(5000, this);
@@ -233,13 +240,13 @@ void LanczosFilter::performPaint(EffectWindowImpl* w, int mask, QRegion region, 
             }
 
             WindowPaintData thumbData = data;
-            thumbData.xScale = 1.0;
-            thumbData.yScale = 1.0;
-            thumbData.xTranslate = -w->x() - left;
-            thumbData.yTranslate = -w->y() - top;
-            thumbData.brightness = 1.0;
-            thumbData.opacity = 1.0;
-            thumbData.saturation = 1.0;
+            thumbData.setXScale(1.0);
+            thumbData.setYScale(1.0);
+            thumbData.setXTranslation(-w->x() - left);
+            thumbData.setYTranslation(-w->y() - top);
+            thumbData.setBrightness(1.0);
+            thumbData.setOpacity(1.0);
+            thumbData.setSaturation(1.0);
 
             // Bind the offscreen FBO and draw the window on it unscaled
             updateOffscreenSurfaces();
@@ -330,27 +337,33 @@ void LanczosFilter::performPaint(EffectWindowImpl* w, int mask, QRegion region, 
             glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, m_offscreenTex->height() - th, tw, th);
             GLRenderTarget::popRenderTarget();
 
-            if (ShaderManager::instance()->isValid()) {
+            if (hardwareClipping) {
+                glEnable(GL_SCISSOR_TEST);
+            }
+            if (effects->compositingType() == OpenGL2Compositing) {
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-                const float rgb = data.brightness * data.opacity;
-                const float a = data.opacity;
+                const qreal rgb = data.brightness() * data.opacity();
+                const qreal a = data.opacity();
 
-                GLShader *shader = ShaderManager::instance()->pushShader(ShaderManager::SimpleShader);
+                ShaderBinder binder(ShaderManager::SimpleShader);
+                GLShader *shader = binder.shader();
                 shader->setUniform(GLShader::Offset, QVector2D(0, 0));
                 shader->setUniform(GLShader::ModulationConstant, QVector4D(rgb, rgb, rgb, a));
-                shader->setUniform(GLShader::Saturation, data.saturation);
+                shader->setUniform(GLShader::Saturation, data.saturation());
                 shader->setUniform(GLShader::AlphaToOne, 0);
 
-                cache->render(textureRect, textureRect);
+                cache->render(region, textureRect, hardwareClipping);
 
-                ShaderManager::instance()->popShader();
                 glDisable(GL_BLEND);
             } else {
-                prepareRenderStates(cache, data.opacity, data.brightness, data.saturation);
-                cache->render(textureRect, textureRect);
-                restoreRenderStates(cache, data.opacity, data.brightness, data.saturation);
+                prepareRenderStates(cache, data.opacity(), data.brightness(), data.saturation());
+                cache->render(region, textureRect, hardwareClipping);
+                restoreRenderStates(cache, data.opacity(), data.brightness(), data.saturation());
+            }
+            if (hardwareClipping) {
+                glDisable(GL_SCISSOR_TEST);
             }
 
             cache->unbind();
@@ -534,6 +547,9 @@ void LanczosFilter::restoreRenderStates(GLTexture* tex, double opacity, double b
 LanczosShader::LanczosShader(QObject* parent)
     : QObject(parent)
     , m_shader(0)
+    , m_uTexUnit(0)
+    , m_uOffsets(0)
+    , m_uKernel(0)
     , m_arbProgram(0)
 {
 }
@@ -569,7 +585,7 @@ void LanczosShader::unbind()
     else {
         int boundObject;
         glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &boundObject);
-        if (boundObject == m_arbProgram) {
+        if (boundObject == (int)m_arbProgram) {
             glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
             glDisable(GL_FRAGMENT_PROGRAM_ARB);
         }
@@ -600,16 +616,15 @@ bool LanczosShader::init()
 {
     GLPlatform *gl = GLPlatform::instance();
     if (gl->supports(GLSL) &&
-            ShaderManager::instance()->isValid() &&
+            effects->compositingType() == OpenGL2Compositing &&
             GLRenderTarget::supported() &&
             !(gl->isRadeon() && gl->chipClass() < R600)) {
         m_shader = ShaderManager::instance()->loadFragmentShader(ShaderManager::SimpleShader, ":/resources/lanczos-fragment.glsl");
         if (m_shader->isValid()) {
-            ShaderManager::instance()->pushShader(m_shader);
+            ShaderBinder binder(m_shader);
             m_uTexUnit    = m_shader->uniformLocation("texUnit");
             m_uKernel     = m_shader->uniformLocation("kernel");
             m_uOffsets    = m_shader->uniformLocation("offsets");
-            ShaderManager::instance()->popShader();
             return true;
         } else {
             kDebug(1212) << "Shader is not valid";
@@ -624,6 +639,10 @@ bool LanczosShader::init()
 #else
     // try to create an ARB Shader
     if (!hasGLExtension("GL_ARB_fragment_program"))
+        return false;
+
+    // We allow Lanczos for SandyBridge or later, but only GLSL shaders are supported, see BUG 301729
+    if (gl->isIntel())
         return false;
 
     QByteArray text;

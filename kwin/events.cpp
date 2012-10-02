@@ -37,10 +37,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "overlaywindow.h"
 #include "rules.h"
 #include "unmanaged.h"
+#include "useractions.h"
 #include "effects.h"
 
 #include <QWhatsThis>
 #include <QApplication>
+#include <QtGui/QDesktopWidget>
 
 #include <kkeyserver.h>
 
@@ -49,7 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/Xatom.h>
 #include <QX11Info>
 
-#include <kephal/screens.h>
+#include "composite.h"
 
 namespace KWin
 {
@@ -441,20 +443,20 @@ bool Workspace::workspaceEvent(XEvent * e)
     case Expose:
         if (compositing()
                 && (e->xexpose.window == rootWindow()   // root window needs repainting
-                    || (scene->overlayWindow()->window() != None && e->xexpose.window == scene->overlayWindow()->window()))) { // overlay needs repainting
-            addRepaint(e->xexpose.x, e->xexpose.y, e->xexpose.width, e->xexpose.height);
+                    || (m_compositor->overlayWindow() != None && e->xexpose.window == m_compositor->overlayWindow()))) { // overlay needs repainting
+            m_compositor->addRepaint(e->xexpose.x, e->xexpose.y, e->xexpose.width, e->xexpose.height);
         }
         break;
     case VisibilityNotify:
-        if (compositing() && scene->overlayWindow()->window() != None && e->xvisibility.window == scene->overlayWindow()->window()) {
-            bool was_visible = scene->overlayWindow()->isVisible();
-            scene->overlayWindow()->setVisibility((e->xvisibility.state != VisibilityFullyObscured));
-            if (!was_visible && scene->overlayWindow()->isVisible()) {
+        if (compositing() && m_compositor->overlayWindow() != None && e->xvisibility.window == m_compositor->overlayWindow()) {
+            bool was_visible = m_compositor->isOverlayWindowVisible();
+            m_compositor->setOverlayWindowVisibility((e->xvisibility.state != VisibilityFullyObscured));
+            if (!was_visible && m_compositor->isOverlayWindowVisible()) {
                 // hack for #154825
-                addRepaintFull();
-                QTimer::singleShot(2000, this, SLOT(addRepaintFull()));
+                m_compositor->addRepaintFull();
+                QTimer::singleShot(2000, m_compositor, SLOT(addRepaintFull()));
             }
-            checkCompositeTimer();
+            m_compositor->scheduleRepaint();
         }
         break;
     default:
@@ -464,8 +466,8 @@ bool Workspace::workspaceEvent(XEvent * e)
                 // desktopResized() should take care of when the size or
                 // shape of the desktop has changed, but we also want to
                 // catch refresh rate changes
-                if (xrrRefreshRate != currentRefreshRate())
-                    compositeResetTimer.start(0);
+                if (m_compositor->xrrRefreshRate() != currentRefreshRate())
+                    m_compositor->setCompositeResetTimer(0);
             }
 
         } else if (e->type == Extensions::syncAlarmNotifyEvent() && Extensions::syncAvailable()) {
@@ -880,11 +882,13 @@ void Client::enterNotifyEvent(XCrossingEvent* e)
         }
 #undef MOUSE_DRIVEN_FOCUS
 
-        if (options->focusPolicy() == Options::ClickToFocus)
+        if (options->focusPolicy() == Options::ClickToFocus || workspace()->userActionsMenu()->isShown())
             return;
 
+        QPoint currentPos(e->x_root, e->y_root);
         if (options->isAutoRaise() && !isDesktop() &&
                 !isDock() && workspace()->focusChangeEnabled() &&
+                currentPos != workspace()->focusMousePosition() &&
                 workspace()->topClientOnDesktop(workspace()->currentDesktop(),
                                                 options->isSeparateScreenFocus() ? screen() : -1) != this) {
             delete autoRaiseTimer;
@@ -894,7 +898,6 @@ void Client::enterNotifyEvent(XCrossingEvent* e)
             autoRaiseTimer->start(options->autoRaiseInterval());
         }
 
-        QPoint currentPos(e->x_root, e->y_root);
         if (isDesktop() || isDock())
             return;
         // for FocusFollowsMouse, change focus only if the mouse has actually been moved, not if the focus
@@ -1081,6 +1084,13 @@ bool Client::eventFilter(QObject* o, QEvent* e)
     return false;
 }
 
+static bool modKeyDown(int state) {
+    const uint keyModX = (options->keyCmdAllModKey() == Qt::Key_Meta) ?
+                                                    KKeyServer::modXMeta() : KKeyServer::modXAlt();
+    return keyModX  && (state & KKeyServer::accelModMaskX()) == keyModX;
+}
+
+
 // return value matters only when filtering events before decoration gets them
 bool Client::buttonPressEvent(Window w, int button, int state, int x, int y, int x_root, int y_root)
 {
@@ -1094,10 +1104,7 @@ bool Client::buttonPressEvent(Window w, int button, int state, int x, int y, int
         // FRAME neco s tohohle by se melo zpracovat, nez to dostane dekorace
         updateUserTime();
         workspace()->setWasUserInteraction();
-        uint keyModX = (options->keyCmdAllModKey() == Qt::Key_Meta) ?
-                       KKeyServer::modXMeta() :
-                       KKeyServer::modXAlt();
-        bool bModKeyHeld = keyModX != 0 && (state & KKeyServer::accelModMaskX()) == keyModX;
+        const bool bModKeyHeld = modKeyDown(state);
 
         if (isSplash()
                 && button == Button1 && !bModKeyHeld) {
@@ -1323,14 +1330,14 @@ void Client::checkQuickTilingMaximizationZones(int xroot, int yroot)
 {
 
     QuickTileMode mode = QuickTileNone;
-    foreach (Kephal::Screen * screen, Kephal::Screens::self()->screens()) {
+    for (int i=0; i<QApplication::desktop()->screenCount(); ++i) {
 
-        const QRect &area = screen->geom();
+        const QRect &area = QApplication::desktop()->screenGeometry(i);
         if (!area.contains(QPoint(xroot, yroot)))
             continue;
 
         if (options->electricBorderTiling()) {
-        if (xroot <= screen->geom().x() + 20)
+        if (xroot <= area.x() + 20)
             mode |= QuickTileLeft;
         else if (xroot >= area.x() + area.width() - 20)
             mode |= QuickTileRight;
@@ -1350,7 +1357,7 @@ void Client::checkQuickTilingMaximizationZones(int xroot, int yroot)
 }
 
 // return value matters only when filtering events before decoration gets them
-bool Client::motionNotifyEvent(Window w, int /*state*/, int x, int y, int x_root, int y_root)
+bool Client::motionNotifyEvent(Window w, int state, int x, int y, int x_root, int y_root)
 {
     if (w != frameId() && w != decorationId() && w != inputId() && w != moveResizeGrabWindow())
         return true; // care only about the whole frame
@@ -1363,7 +1370,7 @@ bool Client::motionNotifyEvent(Window w, int /*state*/, int x, int y, int x_root
             int y = y_root - geometry().y() + padding_top;
             mousePos = QPoint(x, y);
         }
-        Position newmode = mousePosition(mousePos);
+        Position newmode = modKeyDown(state) ? PositionCenter : mousePosition(mousePos);
         if (newmode != mode) {
             mode = newmode;
             updateCursor();
@@ -1589,6 +1596,7 @@ bool Unmanaged::windowEvent(XEvent* e)
     }
     switch(e->type) {
     case UnmapNotify:
+        workspace()->updateFocusMousePosition(QCursor::pos());
         unmapNotifyEvent(&e->xunmap);
         break;
     case MapNotify:

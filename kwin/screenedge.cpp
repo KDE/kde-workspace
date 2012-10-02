@@ -42,9 +42,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QTextStream>
 #include <QtDBus/QDBusInterface>
 
-// KDE-Workspace
-#include <kephal/screens.h>
-
 namespace KWin {
 
 ScreenEdge::ScreenEdge()
@@ -61,9 +58,6 @@ ScreenEdge::~ScreenEdge()
 void ScreenEdge::init()
 {
     reserveActions(true);
-    if (options->electricBorders() == Options::ElectricAlways) {
-        reserveDesktopSwitching(true);
-    }
     update();
 }
 
@@ -73,7 +67,7 @@ void ScreenEdge::update(bool force)
     m_screenEdgeTimeLast = xTime();
     m_screenEdgeTimeLastTrigger = xTime();
     m_currentScreenEdge = ElectricNone;
-    QRect r = Kephal::ScreenUtils::desktopGeometry();
+    QRect r = QRect(0, 0, displayWidth(), displayHeight());
     m_screenEdgeTop = r.top();
     m_screenEdgeBottom = r.bottom();
     m_screenEdgeLeft = r.left();
@@ -120,7 +114,7 @@ void ScreenEdge::restoreSize(ElectricBorder border)
 {
     if (m_screenEdgeWindows[border] == None)
         return;
-    QRect r = Kephal::ScreenUtils::desktopGeometry();
+    QRect r(0, 0, displayWidth(), displayHeight());
     int xywh[ELECTRIC_COUNT][4] = {
         { r.left() + 1, r.top(), r.width() - 2, 1 },   // Top
         { r.right(), r.top(), 1, 1 },                  // Top-right
@@ -146,13 +140,39 @@ void ScreenEdge::reserveActions(bool isToReserve)
         }
 }
 
-void ScreenEdge::reserveDesktopSwitching(bool isToReserve)
+void ScreenEdge::reserveDesktopSwitching(bool isToReserve, Qt::Orientations o)
 {
-    for (int pos = 0; pos < ELECTRIC_COUNT; ++pos)
-        if (isToReserve)
-            reserve(static_cast<ElectricBorder>(pos));
-        else
-            unreserve(static_cast<ElectricBorder>(pos));
+    if (!o)
+        return;
+    if (isToReserve) {
+        reserve(ElectricTopLeft);
+        reserve(ElectricTopRight);
+        reserve(ElectricBottomRight);
+        reserve(ElectricBottomLeft);
+
+        if (o & Qt::Horizontal) {
+            reserve(ElectricLeft);
+            reserve(ElectricRight);
+        }
+        if (o & Qt::Vertical) {
+            reserve(ElectricTop);
+            reserve(ElectricBottom);
+        }
+    } else {
+        unreserve(ElectricTopLeft);
+        unreserve(ElectricTopRight);
+        unreserve(ElectricBottomRight);
+        unreserve(ElectricBottomLeft);
+
+        if (o & Qt::Horizontal) {
+            unreserve(ElectricLeft);
+            unreserve(ElectricRight);
+        }
+        if (o & Qt::Vertical) {
+            unreserve(ElectricTop);
+            unreserve(ElectricBottom);
+        }
+    }
 }
 
 void ScreenEdge::reserve(ElectricBorder border)
@@ -172,7 +192,7 @@ void ScreenEdge::unreserve(ElectricBorder border)
         QTimer::singleShot(0, this, SLOT(update()));
 }
 
-void ScreenEdge::check(const QPoint& pos, Time now)
+void ScreenEdge::check(const QPoint& pos, Time now, bool forceNoPushback)
 {
     if ((pos.x() != m_screenEdgeLeft) &&
             (pos.x() != m_screenEdgeRight) &&
@@ -191,7 +211,7 @@ void ScreenEdge::check(const QPoint& pos, Time now)
     Time treshold_reset = 250; // Reset timeout
     Time treshold_trigger = options->electricBorderCooldown(); // Minimum time between triggers
     int distance_reset = 30; // Mouse should not move more than this many pixels
-    int pushback_pixels = options->electricBorderPushbackPixels();
+    int pushback_pixels = forceNoPushback ? 0 : options->electricBorderPushbackPixels();
 
     ElectricBorder border;
     if (pos.x() == m_screenEdgeLeft && pos.y() == m_screenEdgeTop)
@@ -219,7 +239,10 @@ void ScreenEdge::check(const QPoint& pos, Time now)
     if (pushback_pixels == 0) {
         // no pushback so we have to activate at once
         m_screenEdgeTimeLast = now;
+        m_currentScreenEdge = border;
+        m_screenEdgePushPoint = pos;
     }
+
     if ((m_currentScreenEdge == border) &&
             (timestampDiff(m_screenEdgeTimeLast, now) < treshold_reset) &&
             (timestampDiff(m_screenEdgeTimeLastTrigger, now) > treshold_trigger) &&
@@ -266,8 +289,11 @@ void ScreenEdge::check(const QPoint& pos, Time now)
                     if (effects && static_cast<EffectsHandlerImpl*>(effects)->borderActivated(border))
                         {} // Handled by effects
                     else {
-                        switchDesktop(border, pos);
-                        return; // Don't reset cursor position
+                        if (options->electricBorders() == Options::ElectricAlways) {
+                            switchDesktop(border, pos);
+                            return; // Don't reset cursor position
+                        }
+                        emit activated(border);
                     }
                 }
                 }
@@ -348,7 +374,7 @@ bool ScreenEdge::isEntered(XEvent* e)
             for (int i = 0; i < ELECTRIC_COUNT; ++i)
                 if (m_screenEdgeWindows[i] != None && e->xclient.window == m_screenEdgeWindows[i]) {
                     updateXTime();
-                    check(QPoint(e->xclient.data.l[2] >> 16, e->xclient.data.l[2] & 0xffff), xTime());
+                    check(QPoint(e->xclient.data.l[2] >> 16, e->xclient.data.l[2] & 0xffff), xTime(), true);
                     return true;
                 }
         }
@@ -370,6 +396,56 @@ void ScreenEdge::ensureOnTop()
     XRaiseWindow(display(), windows[ 0 ]);
     XRestackWindows(display(), windows, pos);
     delete [] windows;
+}
+
+/*
+ * NOTICE THIS IS A HACK
+ * or at least a quite cumbersome way to handle conflictive electric borders
+ * (like for autohiding panels or whatever)
+ * the SANE solution is a central electric border daemon and a protocol
+ * what this function does is to search for windows on the screen edges that are
+ * * not our own screenedge
+ * * either very slim
+ * * or InputOnly
+ * and raises them on top of everything else, including our own screen borders
+ * this is typically (and for now ONLY) called when an effect input window is destroyed
+ * (which raised our electric borders)
+ */
+
+void ScreenEdge::raisePanelProxies()
+{
+    XWindowAttributes attr;
+    Window dummy;
+    Window* windows = NULL;
+    unsigned int count = 0;
+    QRect screen = QRect(0, 0, displayWidth(), displayHeight());
+    QVector<Window> proxies;
+    XQueryTree(display(), rootWindow(), &dummy, &dummy, &windows, &count);
+    for (unsigned int i = 0; i < count; ++i) {
+        if (m_screenEdgeWindows.contains(windows[i]))
+            continue;
+        if (XGetWindowAttributes(display(), windows[i], &attr)) {
+            if (attr.map_state == IsUnmapped) // a thousand Qt group leader dummies ...
+                continue;
+            const QRect geo(attr.x, attr.y, attr.width, attr.height);
+            if (geo.width() < 1 || geo.height() < 1)
+                continue;
+            if (!(geo.width() > 1 || geo.height() > 1))
+                continue; // random 1x1 dummy windows, all your corners are belong to us >-)
+            if (attr.c_class != InputOnly && (geo.width() > 3 && geo.height() > 3))
+                continue;
+            if (geo.x() != screen.x() && geo.right() != screen.right() &&
+                geo.y() != screen.y() && geo.bottom() != screen.bottom())
+                continue;
+            proxies << windows[i];
+        }
+    }
+    if (!proxies.isEmpty()) {
+        XRaiseWindow(display(), proxies.data()[ 0 ]);
+        XRestackWindows(display(), proxies.data(), proxies.count());
+    }
+    if (windows)
+        XFree(windows);
 }
 
 const QVector< Window >& ScreenEdge::windows()

@@ -1,0 +1,38 @@
+[Desktop Entry]
+Name=Password dialog
+Name[el]=Διάλογος κωδικού πρόσβασης
+Name[es]=Diálogo de contraseña
+Name[hu]=Jelszóbeviteli ablak
+Name[ia]=Dialogo de contrasigno
+Name[nl]=Wachtwoordvenster
+Name[pt]=Janela da senha
+Name[pt_BR]=Diálogo de senha
+Name[sk]=Dialóg hesla
+Name[sv]=Lösenordsdialogruta
+Name[uk]=Вікно для вводу пароля
+Name[x-test]=xxPassword dialogxx
+Comment=Screen locker that provides a password dialog and an interface to switch the current user
+Comment[el]=Κλείδωμα οθόνης με διάλογο κωδικού πρόσβασης και μια διεπαφή για την εναλλαγή του τρέχοντος χρήστη
+Comment[es]=Bloqueador de pantalla que proporciona un diálogo de contraseña y una interfaz para cambiar el usuario actual
+Comment[he]=נועל מסך שמאפשר חלון ססמה וממשק להחליף את המשתמש הנוכחי
+Comment[hu]=Képernyőzároló, amely jelszó párbeszédablakot biztosít és egy felületet a jelenlegi felhasználó váltásához
+Comment[ia]=Blocator de schermo que da un dialogo de contrasigno e uninterfacie pro commutar le usator currente
+Comment[nl]=Schermvergrendeling die een wachtwoordvenster en een interface om naar de huidige gebruiker om te schakelen biedt
+Comment[pt]=Bloqueio do ecrã que mostra uma janela de introdução da senha e para mudar o utilizador actual
+Comment[pt_BR]=Bloqueador de sessão que fornece um diálogo de senha e uma interface para mudar o usuário atual
+Comment[sk]=Zamykač obrazovky, ktorý poskytuje dialóg s heslom a rozhranie na prepnutie aktuálneho používateľa
+Comment[sv]=Skärmlåsning som tillhandahåller en lösenordsdialogruta och ett gränssnitt för att byta aktuell användare
+Comment[uk]=Блокувальник екрана з вікном пароля і інтерфейсом для перемикання поточного користувача
+Comment[x-test]=xxScreen locker that provides a password dialog and an interface to switch the current userxx
+Icon=system-lock-screen
+
+X-Plasma-MainScript=ui/main.qml
+
+X-KDE-PluginInfo-Author=Martin Gräßlin
+X-KDE-PluginInfo-Email=mgraesslin@kde.org
+X-KDE-PluginInfo-Name=org.kde.passworddialog
+X-KDE-PluginInfo-Version=1.0
+
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL
+Type=Service

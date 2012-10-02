@@ -96,6 +96,8 @@ public Q_SLOTS:
     void populateAddPanelsMenu();
     void activateNextActivity();
     void activatePreviousActivity();
+    /** If there are more than 1 active activities, stop the current activity*/
+    void stopCurrentActivity();
     void evaluateScripts(const QStringList &scripts, bool isStartup = true);
 
 protected Q_SLOTS:
@@ -117,6 +119,7 @@ private:
 
     QAction *m_addPanelAction;
     QMenu *m_addPanelsMenu;
+    QTimer *m_delayedUpdateTimer;
     KActivities::Controller *m_activityController;
     QHash<QString, Activity*> m_activities;
 };

@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "dashboard.h"
+// KConfigSkeleton
+#include "dashboardconfig.h"
+
 #include <KDE/KConfigGroup>
 
 namespace KWin
@@ -66,14 +69,10 @@ void DashboardEffect::unpropagate()
 
 void DashboardEffect::reconfigure(ReconfigureFlags)
 {
-    // read settings again
-    KConfigGroup config = EffectsHandler::effectConfig("Dashboard");
-
-    brightness = qreal(config.readEntry<int>("Brightness", 50)) / 100.0;
-    saturation = qreal(config.readEntry<int>("Saturation", 50)) / 100.0;
-    duration = config.readEntry<int>("Duration", 500);
-
-    blur = config.readEntry("Blur", false);
+    brightness = DashboardConfig::brightness()/ 100.0;
+    saturation = DashboardConfig::saturation()/ 100.0;
+    duration = DashboardConfig::duration() != 0  ? DashboardConfig::duration() : 500;
+    blur = DashboardConfig::blur();
 
     timeline.setDuration(animationTime(duration));
 }
@@ -82,16 +81,14 @@ void DashboardEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
 {
     if (transformWindow && (w != window) && w->isManaged() && !isDashboard(w)) {
         // dashboard active, transform other windows
-        data.brightness *= (1 - ((1.0 - brightness) * timeline.currentValue()));
-        data.saturation *= (1 - ((1.0 - saturation) * timeline.currentValue()));
+        data.multiplyBrightness((1 - ((1.0 - brightness) * timeline.currentValue())));
+        data.multiplySaturation((1 - ((1.0 - saturation) * timeline.currentValue())));
     }
 
     else if (transformWindow && (w == window) && w->isManaged()) {
         // transform dashboard
         if ((timeline.currentValue() * 2) <= 1) {
-            data.opacity *= timeline.currentValue() * 2;
-        } else {
-            data.opacity *= 1;
+            data.multiplyOpacity(timeline.currentValue() * 2);
         }
     }
 
@@ -144,11 +141,7 @@ void DashboardEffect::postPaintScreen()
 
 bool DashboardEffect::isDashboard(EffectWindow *w)
 {
-    if (w->windowClass() == "dashboard dashboard") {
-        return true;
-    } else {
-        return false;
-    }
+    return w->windowRole() == "plasma-dashboard";
 }
 
 void DashboardEffect::slotWindowActivated(EffectWindow *w)
@@ -161,11 +154,6 @@ void DashboardEffect::slotWindowActivated(EffectWindow *w)
         effects->setActiveFullScreenEffect(this);
         transformWindow = true;
         window = w;
-
-        if (blur) {
-            w->setData(WindowBlurBehindRole, w->geometry());
-            w->setData(WindowForceBlurRole, QVariant(true));
-        }
 
         effects->addRepaintFull();
     } else {
@@ -181,6 +169,10 @@ void DashboardEffect::slotWindowAdded(EffectWindow* w)
     if (isDashboard(w)) {
         // Tell other windowAdded() effects to ignore this window
         w->setData(WindowAddedGrabRole, QVariant::fromValue(static_cast<void*>(this)));
+        if (blur) {
+            w->setData(WindowBlurBehindRole, w->geometry());
+            w->setData(WindowForceBlurRole, QVariant(true));
+        }
 
         activateAnimation = true;
         deactivateAnimation = false;

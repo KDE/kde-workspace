@@ -35,9 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSocketNotifier>
 #include <QSessionManager>
 #include <kdebug.h>
-#ifdef KWIN_BUILD_TILING
-#include "tiling/tiling.h"
-#endif
 
 namespace KWin
 {
@@ -86,16 +83,6 @@ void Workspace::storeSession(KConfig* config, SMSavePhase phase)
     KConfigGroup cg(config, "Session");
     int count =  0;
     int active_client = -1;
-
-    if (phase == SMSavePhase2 || phase == SMSavePhase2Full) {
-#ifdef KWIN_BUILD_TILING
-        cg.writeEntry("tiling", m_tiling->isEnabled());
-        if (m_tiling->isEnabled()) {
-            kDebug(1212) << "Tiling was ON";
-            m_tiling->setEnabled(false);
-        }
-#endif
-    }
 
     for (ClientList::Iterator it = clients.begin(); it != clients.end(); ++it) {
         Client* c = (*it);
@@ -205,6 +192,9 @@ bool Workspace::stopActivity(const QString &id)
     }
 
     //ugly hack to avoid dbus deadlocks
+#ifdef KWIN_BUILD_ACTIVITIES
+    updateActivityList(true, false);
+#endif
     QMetaObject::invokeMethod(this, "reallyStopActivity", Qt::QueuedConnection, Q_ARG(QString, id));
     //then lie and assume it worked.
     return true;
@@ -212,13 +202,15 @@ bool Workspace::stopActivity(const QString &id)
 
 void Workspace::reallyStopActivity(const QString &id)
 {
+    if (sessionSaving())
+        return; //ksmserver doesn't queue requests (yet)
+
     kDebug() << id;
-    const QStringList openActivities = openActivityList();
 
     QSet<QByteArray> saveSessionIds;
     QSet<QByteArray> dontCloseSessionIds;
-    for (ClientList::Iterator it = clients.begin(); it != clients.end(); ++it) {
-        Client* c = (*it);
+    for (ClientList::const_iterator it = clients.constBegin(); it != clients.constEnd(); ++it) {
+        const Client* c = (*it);
         const QByteArray sessionId = c->sessionId();
         if (sessionId.isEmpty()) {
             continue; //TODO support old wm_command apps too?
@@ -238,7 +230,7 @@ void Workspace::reallyStopActivity(const QString &id)
         foreach (const QString & activityId, activities) {
             if (activityId == id) {
                 saveSessionIds << sessionId;
-            } else if (openActivities.contains(activityId)) {
+            } else if (openActivities_.contains(activityId)) {
                 dontCloseSessionIds << sessionId;
             }
         }
@@ -276,10 +268,6 @@ void Workspace::loadSessionInfo()
 {
     session.clear();
     KConfigGroup cg(kapp->sessionConfig(), "Session");
-
-#ifdef KWIN_BUILD_TILING
-    m_tiling->setEnabled(cg.readEntry("tiling", false));
-#endif
 
     addSessionInfo(cg);
 }

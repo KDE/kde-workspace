@@ -15,20 +15,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 import QtQuick 1.1
+import org.kde.kwin.decoration 0.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 
 Decoration {
-    function updateState() {
-        if (!decoration.active && decoration.maximized && backgroundSvg.supportsMaximizedInactive) {
-            root.state = "maximized-inactive";
-        } else if (decoration.maximized && backgroundSvg.supportsMaximized) {
-            root.state = "maximized";
-        } else if (!decoration.active && backgroundSvg.supportsInactive) {
-            root.state = "inactive";
-        } else {
-            root.state = "active";
-        }
-    }
     id: root
     borderLeft: Math.max(0, auroraeTheme.borderLeft)
     borderRight: Math.max(0, auroraeTheme.borderRight)
@@ -42,30 +32,49 @@ Decoration {
     paddingRight: auroraeTheme.paddingRight
     paddingBottom: auroraeTheme.paddingBottom
     paddingTop: auroraeTheme.paddingTop
-    Component.onCompleted: updateState()
+    DecorationOptions {
+        id: options
+        deco: decoration
+    }
     PlasmaCore.FrameSvg {
         property bool supportsInactive: hasElementPrefix("decoration-inactive")
         property bool supportsMaximized: hasElementPrefix("decoration-maximized")
         property bool supportsMaximizedInactive: hasElementPrefix("decoration-maximized-inactive")
+        property bool supportsInnerBorder: hasElementPrefix("innerborder")
         property bool supportsInnerBorderInactive: hasElementPrefix("innerborder-inactive")
         id: backgroundSvg
         imagePath: auroraeTheme.decorationPath
     }
     PlasmaCore.FrameSvgItem {
         id: decorationActive
+        property bool shown: (!decoration.maxized || !backgroundSvg.supportsMaximized) && (decoration.active || !backgroundSvg.supportsInactive)
         anchors.fill: parent
         imagePath: backgroundSvg.imagePath
         prefix: "decoration"
+        opacity: shown ? 1 : 0
+        enabledBorders: decoration.maximized ? PlasmaCore.FrameSvg.NoBorder : PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.RightBorder
+        Behavior on opacity {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
+            }
+        }
     }
     PlasmaCore.FrameSvgItem {
         id: decorationInactive
         anchors.fill: parent
         imagePath: backgroundSvg.imagePath
         prefix: "decoration-inactive"
-        opacity: 0
+        opacity: (!decoration.active && backgroundSvg.supportsInactive) ? 1 : 0
+        enabledBorders: decoration.maximized ? PlasmaCore.FrameSvg.NoBorder : PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.RightBorder
+        Behavior on opacity {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
+            }
+        }
     }
     PlasmaCore.FrameSvgItem {
         id: decorationMaximized
+        property bool shown: decoration.maximized && backgroundSvg.supportsMaximized && (decoration.active || !backgroundSvg.supportsMaximizedInactive)
         anchors {
             left: parent.left
             right: parent.right
@@ -76,8 +85,14 @@ Decoration {
         }
         imagePath: backgroundSvg.imagePath
         prefix: "decoration-maximized"
-        opacity: 0
         height: parent.borderTopMaximized
+        opacity: shown ? 1 : 0
+        enabledBorders: PlasmaCore.FrameSvg.NoBorder
+        Behavior on opacity {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
+            }
+        }
     }
     PlasmaCore.FrameSvgItem {
         id: decorationMaximizedInactive
@@ -91,75 +106,58 @@ Decoration {
         }
         imagePath: backgroundSvg.imagePath
         prefix: "decoration-maximized-inactive"
-        opacity: 0
         height: parent.borderTopMaximized
+        opacity: (!decoration.active && decoration.maximized && backgroundSvg.supportsMaximizedInactive) ? 1 : 0
+        enabledBorders: PlasmaCore.FrameSvg.NoBorder
+        Behavior on opacity {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
+            }
+        }
     }
     AuroraeButtonGroup {
         id: leftButtonGroup
-        buttons: options.customButtonPositions ? options.leftButtons : auroraeTheme.defaultButtonsLeft
+        buttons: options.titleButtonsLeft
         width: childrenRect.width
         anchors {
-            top: parent.top
             left: parent.left
-            leftMargin: auroraeTheme.titleEdgeLeft + root.paddingLeft
-            topMargin: root.paddingTop + auroraeTheme.titleEdgeTop + auroraeTheme.buttonMarginTop
+            leftMargin: decoration.maximized ? auroraeTheme.titleEdgeLeftMaximized : (auroraeTheme.titleEdgeLeft + root.paddingLeft)
         }
-        transitions: [
-            Transition {
-                to: "normal"
-                ParallelAnimation {
-                    NumberAnimation { target: leftButtonGroup; property: "anchors.leftMargin"; to: auroraeTheme.titleEdgeLeft + root.paddingLeft; duration: auroraeTheme.animationTime }
-                    NumberAnimation { target: leftButtonGroup; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTop + auroraeTheme.buttonMarginTop; duration: auroraeTheme.animationTime }
-                }
-            },
-            Transition {
-                to: "maximized"
-                ParallelAnimation {
-                    NumberAnimation { target: leftButtonGroup; property: "anchors.leftMargin"; to: auroraeTheme.titleEdgeLeftMaximized + root.paddingLeft; duration: auroraeTheme.animationTime }
-                    NumberAnimation { target: leftButtonGroup; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTopMaximized + auroraeTheme.buttonMarginTop; duration: auroraeTheme.animationTime }
-                }
+        Behavior on anchors.leftMargin {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
             }
-        ]
+        }
     }
     AuroraeButtonGroup {
         id: rightButtonGroup
-        buttons: options.customButtonPositions ? options.rightButtons : auroraeTheme.defaultButtonsRight
+        buttons: options.titleButtonsRight
         width: childrenRect.width
         anchors {
-            top: parent.top
             right: parent.right
-            rightMargin: auroraeTheme.titleEdgeRight + root.paddingRight
-            topMargin: root.paddingTop + auroraeTheme.titleEdgeTop + auroraeTheme.buttonMarginTop
+            rightMargin: decoration.maximized ? auroraeTheme.titleEdgeRightMaximized : (auroraeTheme.titleEdgeRight + root.paddingRight)
         }
-        transitions: [
-            Transition {
-                to: "normal"
-                ParallelAnimation {
-                    NumberAnimation { target: rightButtonGroup; property: "anchors.rightMargin"; to: auroraeTheme.titleEdgeRight + root.paddingRight; duration: auroraeTheme.animationTime }
-                    NumberAnimation { target: rightButtonGroup; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTop + auroraeTheme.buttonMarginTop; duration: auroraeTheme.animationTime }
-                }
-            },
-            Transition {
-                to: "maximized"
-                ParallelAnimation {
-                    NumberAnimation { target: rightButtonGroup; property: "anchors.rightMargin"; to: auroraeTheme.titleEdgeRightMaximized + root.paddingRight; duration: auroraeTheme.animationTime }
-                    NumberAnimation { target: rightButtonGroup; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTopMaximized + auroraeTheme.buttonMarginTop; duration: auroraeTheme.animationTime }
-                }
+        Behavior on anchors.rightMargin {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
             }
-        ]
+        }
     }
     Text {
         id: caption
         text: decoration.caption
+        textFormat: Text.PlainText
         horizontalAlignment: auroraeTheme.horizontalAlignment
         verticalAlignment: auroraeTheme.verticalAlignment
         elide: Text.ElideRight
-        height: auroraeTheme.titleHeight
+        height: Math.max(auroraeTheme.titleHeight, auroraeTheme.buttonHeight * auroraeTheme.buttonSizeFactor)
+        color: decoration.active ? auroraeTheme.activeTextColor : auroraeTheme.inactiveTextColor
+        font: options.titleFont
         anchors {
             left: leftButtonGroup.right
             right: rightButtonGroup.left
             top: root.top
-            topMargin: root.paddingTop + auroraeTheme.titleEdgeTop
+            topMargin: decoration.maximized ? auroraeTheme.titleEdgeTopMaximized : (auroraeTheme.titleEdgeTop + root.paddingTop)
             leftMargin: auroraeTheme.titleBorderLeft
             rightMargin: auroraeTheme.titleBorderRight
         }
@@ -167,22 +165,27 @@ Decoration {
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             anchors.fill: parent
             onDoubleClicked: decoration.titlebarDblClickOperation()
-            onPressed: decoration.titlePressed(mouse.button, mouse.buttons)
+            onPressed: {
+                if (mouse.button == Qt.LeftButton) {
+                    mouse.accepted = false;
+                } else {
+                    decoration.titlePressed(mouse.button, mouse.buttons);
+                }
+            }
             onReleased: decoration.titleReleased(mouse.button, mouse.buttons)
+        }
+        Behavior on color {
+            ColorAnimation {
+                duration: auroraeTheme.animationTime
+            }
+        }
+        Behavior on anchors.topMargin {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
+            }
         }
     }
     PlasmaCore.FrameSvgItem {
-        function checkVisible() {
-            if (decoration.maximized) {
-                state = "invisible";
-            } else {
-                if (!decoration.active && backgroundSvg.supportsInnerBorderInactive) {
-                    state = "invisible";
-                } else {
-                    state = "visible";
-                }
-            }
-        }
         id: innerBorder
         anchors {
             fill: parent
@@ -193,43 +196,14 @@ Decoration {
         }
         imagePath: backgroundSvg.imagePath
         prefix: "innerborder"
-        states: [
-            State { name: "visible" },
-            State { name: "invisible" }
-        ]
-        transitions:  [
-            Transition {
-                to: "visible"
-                ParallelAnimation {
-                    NumberAnimation { target: innerBorder; property: "opacity"; to: 1; duration: auroraeTheme.animationTime }
-                }
-            },
-            Transition {
-                to: "invisible"
-                ParallelAnimation {
-                    NumberAnimation { target: innerBorder; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                }
+        opacity: (decoration.active && !decoration.maximized && backgroundSvg.supportsInnerBorder) ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
             }
-        ]
-        Component.onCompleted: checkVisible()
-        Connections {
-            target: decoration
-            onActiveChanged: innerBorder.checkVisible()
-            onMaximizedChanged: innerBorder.checkVisible()
         }
     }
     PlasmaCore.FrameSvgItem {
-        function checkVisible() {
-            if (decoration.maximized) {
-                state = "invisible";
-            } else {
-                if (!decoration.active && backgroundSvg.supportsInnerBorderInactive) {
-                    state = "visible";
-                } else {
-                    state = "invisible";
-                }
-            }
-        }
         id: innerBorderInactive
         anchors {
             fill: parent
@@ -240,87 +214,11 @@ Decoration {
         }
         imagePath: backgroundSvg.imagePath
         prefix: "innerborder-inactive"
-        states: [
-            State { name: "visible" },
-            State { name: "invisible" }
-        ]
-        transitions:  [
-            Transition {
-                to: "visible"
-                ParallelAnimation {
-                    NumberAnimation { target: innerBorderInactive; property: "opacity"; to: 1; duration: auroraeTheme.animationTime }
-                }
-            },
-            Transition {
-                to: "invisible"
-                ParallelAnimation {
-                    NumberAnimation { target: innerBorderInactive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                }
-            }
-        ]
-        Component.onCompleted: checkVisible()
-        Connections {
-            target: decoration
-            onActiveChanged: innerBorderInactive.checkVisible()
-            onMaximizedChanged: innerBorderInactive.checkVisible()
-        }
-    }
-    states: [
-        State { name: "active" },
-        State { name: "inactive" },
-        State { name: "maximized" },
-        State { name: "maximized-inactive" }
-    ]
-    transitions: [
-        Transition {
-            to: "active"
-            // Cross fade from inactive to active
-            ParallelAnimation {
-                NumberAnimation { target: decorationActive; property: "opacity"; to: 1; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationInactive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationMaximized; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                ColorAnimation { target: caption; property: "color"; to: auroraeTheme.activeTextColor; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: caption; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTop; duration: auroraeTheme.animationTime }
-            }
-        },
-        Transition {
-            to: "inactive"
-            // Cross fade from active to inactive
-            ParallelAnimation {
-                NumberAnimation { target: decorationActive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationInactive; property: "opacity"; to: 1; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationMaximized; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationMaximizedInactive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                ColorAnimation { target: caption; property: "color"; to: auroraeTheme.inactiveTextColor; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: caption; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTop; duration: auroraeTheme.animationTime }
-            }
-        },
-        Transition {
-            to: "maximized"
-            ParallelAnimation {
-                NumberAnimation { target: decorationActive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationInactive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationMaximizedInactive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationMaximized; property: "opacity"; to: 1; duration: auroraeTheme.animationTime }
-                ColorAnimation { target: caption; property: "color"; to: auroraeTheme.activeTextColor; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: caption; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTopMaximized; duration: auroraeTheme.animationTime }
-            }
-        },
-        Transition {
-            to: "maximized-inactive"
-            ParallelAnimation {
-                NumberAnimation { target: decorationActive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationInactive; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationMaximizedInactive; property: "opacity"; to: 1; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: decorationMaximized; property: "opacity"; to: 0; duration: auroraeTheme.animationTime }
-                ColorAnimation { target: caption; property: "color"; to: auroraeTheme.inactiveTextColor; duration: auroraeTheme.animationTime }
-                NumberAnimation { target: caption; property: "anchors.topMargin"; to: root.paddingTop + auroraeTheme.titleEdgeTopMaximized; duration: auroraeTheme.animationTime }
+        opacity: (!decoration.active && !decoration.maximized && backgroundSvg.supportsInnerBorderInactive) ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: auroraeTheme.animationTime
             }
         }
-    ]
-    Connections {
-        target: decoration
-        onActiveChanged: updateState()
-        onMaximizedChanged: updateState()
     }
 }

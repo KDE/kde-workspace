@@ -20,15 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "showfps.h"
 
+// KConfigSkeleton
+#include "showfpsconfig.h"
+
 #include <kwinconfig.h>
 
-#include <kconfiggroup.h>
-#include <kglobal.h>
-#include <ksharedconfig.h>
-
-#ifdef KWIN_HAVE_OPENGL
 #include <kwinglutils.h>
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrender.h>
@@ -51,9 +48,7 @@ const int MAX_TIME = 100;
 ShowFpsEffect::ShowFpsEffect()
     : paints_pos(0)
     , frames_pos(0)
-#ifdef KWIN_HAVE_OPENGL
     , fpsText(0)
-#endif
 {
     for (int i = 0;
             i < NUM_PAINTS;
@@ -70,10 +65,10 @@ ShowFpsEffect::ShowFpsEffect()
 
 void ShowFpsEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup config(KGlobal::config(), "EffectShowFps");
-    alpha = config.readEntry("Alpha", 0.5);
-    x = config.readEntry("X", -10000);
-    y = config.readEntry("Y", 0);
+    ShowFpsConfig::self()->readConfig();
+    alpha = ShowFpsConfig::alpha();
+    x = ShowFpsConfig::x();
+    y = ShowFpsConfig::y();
     if (x == -10000)   // there's no -0 :(
         x = displayWidth() - 2 * NUM_PAINTS - FPS_WIDTH;
     else if (x < 0)
@@ -84,11 +79,10 @@ void ShowFpsEffect::reconfigure(ReconfigureFlags)
         y = displayHeight() - MAX_TIME - y;
     fps_rect = QRect(x, y, FPS_WIDTH + 2 * NUM_PAINTS, MAX_TIME);
 
-    config = effects->effectConfig("ShowFps");
-    int textPosition = config.readEntry("TextPosition", int(INSIDE_GRAPH));
-    textFont = config.readEntry("TextFont", QFont());
-    textColor = config.readEntry("TextColor", QColor());
-    double textAlpha = config.readEntry("TextAlpha", 1.0);
+    int textPosition = ShowFpsConfig::textPosition();
+    textFont = ShowFpsConfig::textFont();
+    textColor = ShowFpsConfig::textColor();
+    double textAlpha = ShowFpsConfig::textAlpha();
 
     if (!textColor.isValid())
         textColor = QPalette().color(QPalette::Active, QPalette::WindowText);
@@ -162,12 +156,10 @@ void ShowFpsEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             ++fps; // count all frames in the last second
     if (fps > MAX_TIME)
         fps = MAX_TIME; // keep it the same height
-#ifdef KWIN_HAVE_OPENGL
-    if (effects->compositingType() == OpenGLCompositing) {
+    if (effects->isOpenGLCompositing()) {
         paintGL(fps);
         glFinish(); // make sure all rendering is done
     }
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
     if (effects->compositingType() == XRenderCompositing) {
         paintXrender(fps);
@@ -176,21 +168,15 @@ void ShowFpsEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
 #endif
 }
 
-#ifdef KWIN_HAVE_OPENGL
 void ShowFpsEffect::paintGL(int fps)
 {
     int x = this->x;
     int y = this->y;
-#ifndef KWIN_HAVE_OPENGLES
-    glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // TODO painting first the background white and then the contents
     // means that the contents also blend with the background, I guess
-    if (ShaderManager::instance()->isValid()) {
-        ShaderManager::instance()->pushShader(ShaderManager::ColorShader);
-    }
+    ShaderBinder binder(ShaderManager::ColorShader);
     GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
     vbo->reset();
     QColor color(255, 255, 255);
@@ -240,20 +226,13 @@ void ShowFpsEffect::paintGL(int fps)
 
     // Paint amount of rendered pixels graph
     paintDrawSizeGraph(x, y);
-    if (ShaderManager::instance()->isValid()) {
-        ShaderManager::instance()->popShader();
-    }
 
     // Paint FPS numerical value
     paintFPSText(fps);
 
     // Paint paint sizes
     glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-    glPopAttrib();
-#endif
 }
-#endif
 
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
 /*
@@ -343,8 +322,7 @@ void ShowFpsEffect::paintDrawSizeGraph(int x, int y)
 
 void ShowFpsEffect::paintGraph(int x, int y, QList<int> values, QList<int> lines, bool colorize)
 {
-#ifdef KWIN_HAVE_OPENGL
-    if (effects->compositingType() == OpenGLCompositing) {
+    if (effects->isOpenGLCompositing()) {
         QColor color(0, 0, 0);
         color.setAlphaF(alpha);
         GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
@@ -389,7 +367,6 @@ void ShowFpsEffect::paintGraph(int x, int y, QList<int> values, QList<int> lines
             vbo->render(GL_LINES);
         }
     }
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
     if (effects->compositingType() == XRenderCompositing) {
         Pixmap pixmap = XCreatePixmap(display(), rootWindow(), values.count(), MAX_TIME, 32);
@@ -458,7 +435,6 @@ void ShowFpsEffect::paintFPSText(int fps)
 {
     if (!fpsTextRect.isValid())
         return;
-#ifdef KWIN_HAVE_OPENGL
     QImage im(100, 100, QImage::Format_ARGB32);
     im.fill(0);
     QPainter painter(&im);
@@ -468,17 +444,13 @@ void ShowFpsEffect::paintFPSText(int fps)
     delete fpsText;
     fpsText = new GLTexture(im);
     fpsText->bind();
-    if (ShaderManager::instance()->isValid()) {
-        GLShader *shader = ShaderManager::instance()->pushShader(ShaderManager::SimpleShader);
-        shader->setUniform("offset", QVector2D(0, 0));
+    ShaderBinder binder(ShaderManager::SimpleShader);
+    if (effects->compositingType() == OpenGL2Compositing) {
+        binder.shader()->setUniform("offset", QVector2D(0, 0));
     }
     fpsText->render(QRegion(fpsTextRect), fpsTextRect);
-    if (ShaderManager::instance()->isValid()) {
-        ShaderManager::instance()->popShader();
-    }
     fpsText->unbind();
     effects->addRepaint(fpsTextRect);
-#endif
 }
 
 } // namespace

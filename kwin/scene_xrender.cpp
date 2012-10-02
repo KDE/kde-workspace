@@ -89,6 +89,7 @@ ScreenPaintData SceneXrender::screen_paint;
 SceneXrender::SceneXrender(Workspace* ws)
     : Scene(ws)
     , front(None)
+    , m_overlayWindow(new OverlayWindow())
     , init_ok(false)
 {
     if (!Extensions::renderAvailable()) {
@@ -115,6 +116,7 @@ SceneXrender::~SceneXrender()
     m_overlayWindow->destroy();
     foreach (Window * w, windows)
     delete w;
+    delete m_overlayWindow;
 }
 
 void SceneXrender::initXRender(bool createOverlay)
@@ -170,7 +172,7 @@ void SceneXrender::createBuffer()
 }
 
 // the entry point for painting
-void SceneXrender::paint(QRegion damage, ToplevelList toplevels)
+int SceneXrender::paint(QRegion damage, ToplevelList toplevels)
 {
     QElapsedTimer renderTimer;
     renderTimer.start();
@@ -186,11 +188,11 @@ void SceneXrender::paint(QRegion damage, ToplevelList toplevels)
     if (m_overlayWindow->window())  // show the window only after the first pass, since
         m_overlayWindow->show();   // that pass may take long
 
-    lastRenderTime = renderTimer.elapsed();
-
     flushBuffer(mask, damage);
     // do cleanup
     stacking_order.clear();
+
+    return renderTimer.elapsed();
 }
 
 void SceneXrender::flushBuffer(int mask, QRegion damage)
@@ -373,10 +375,10 @@ QRect SceneXrender::Window::mapToScreen(int mask, const WindowPaintData &data, c
 
     if (mask & PAINT_WINDOW_TRANSFORMED) {
         // Apply the window transformation
-        r.moveTo(r.x() * data.xScale + data.xTranslate,
-                 r.y() * data.yScale + data.yTranslate);
-        r.setWidth(r.width() * data.xScale);
-        r.setHeight(r.height() * data.yScale);
+        r.moveTo(r.x() * data.xScale() + data.xTranslation(),
+                 r.y() * data.yScale() + data.yTranslation());
+        r.setWidth(r.width() * data.xScale());
+        r.setHeight(r.height() * data.yScale());
     }
 
     // Move the rectangle to the screen position
@@ -384,10 +386,10 @@ QRect SceneXrender::Window::mapToScreen(int mask, const WindowPaintData &data, c
 
     if (mask & PAINT_SCREEN_TRANSFORMED) {
         // Apply the screen transformation
-        r.moveTo(r.x() * screen_paint.xScale + screen_paint.xTranslate,
-                 r.y() * screen_paint.yScale + screen_paint.yTranslate);
-        r.setWidth(r.width() * screen_paint.xScale);
-        r.setHeight(r.height() * screen_paint.yScale);
+        r.moveTo(r.x() * screen_paint.xScale() + screen_paint.xTranslation(),
+                 r.y() * screen_paint.yScale() + screen_paint.yTranslation());
+        r.setWidth(r.width() * screen_paint.xScale());
+        r.setHeight(r.height() * screen_paint.yScale());
     }
 
     return r;
@@ -400,8 +402,8 @@ QPoint SceneXrender::Window::mapToScreen(int mask, const WindowPaintData &data, 
 
     if (mask & PAINT_WINDOW_TRANSFORMED) {
         // Apply the window transformation
-        pt.rx() = pt.x() * data.xScale + data.xTranslate;
-        pt.ry() = pt.y() * data.yScale + data.yTranslate;
+        pt.rx() = pt.x() * data.xScale() + data.xTranslation();
+        pt.ry() = pt.y() * data.yScale() + data.yTranslation();
     }
 
     // Move the point to the screen position
@@ -409,8 +411,8 @@ QPoint SceneXrender::Window::mapToScreen(int mask, const WindowPaintData &data, 
 
     if (mask & PAINT_SCREEN_TRANSFORMED) {
         // Apply the screen transformation
-        pt.rx() = pt.x() * screen_paint.xScale + screen_paint.xTranslate;
-        pt.ry() = pt.y() * screen_paint.yScale + screen_paint.yTranslate;
+        pt.rx() = pt.x() * screen_paint.xScale() + screen_paint.xTranslation();
+        pt.ry() = pt.y() * screen_paint.yScale() + screen_paint.yTranslation();
     }
 
     return pt;
@@ -440,7 +442,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
 {
     setTransformedShape(QRegion());  // maybe nothing will be painted
     // check if there is something to paint
-    bool opaque = isOpaque() && qFuzzyCompare(data.opacity, 1.0);
+    bool opaque = isOpaque() && qFuzzyCompare(data.opacity(), 1.0);
     /* HACK: It seems this causes painting glitches, disable temporarily
     if (( mask & PAINT_WINDOW_OPAQUE ) ^ ( mask & PAINT_WINDOW_TRANSLUCENT ))
         { // We are only painting either opaque OR translucent windows, not both
@@ -471,8 +473,8 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     // do required transformations
     const QRect wr = mapToScreen(mask, data, QRect(0, 0, width(), height()));
     QRect cr = QRect(toplevel->clientPos(), toplevel->clientSize()); // Client rect (in the window)
-    double xscale = 1;
-    double yscale = 1;
+    qreal xscale = 1;
+    qreal yscale = 1;
     bool scaled = false;
 
     Client *client = dynamic_cast<Client*>(toplevel);
@@ -503,12 +505,12 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     XRenderPictureAttributes attr;
 
     if (mask & PAINT_WINDOW_TRANSFORMED) {
-        xscale = data.xScale;
-        yscale = data.yScale;
+        xscale = data.xScale();
+        yscale = data.yScale();
     }
     if (mask & PAINT_SCREEN_TRANSFORMED) {
-        xscale *= screen_paint.xScale;
-        yscale *= screen_paint.yScale;
+        xscale *= screen_paint.xScale();
+        yscale *= screen_paint.yScale();
     }
     if (!qFuzzyCompare(xscale, 1.0) || !qFuzzyCompare(yscale, 1.0)) {
         scaled = true;
@@ -652,7 +654,7 @@ XRenderComposite(display(), PictOpOver, m_xrenderShadow->shadowPixmap(SceneXRend
 
         //shadow
         if (wantShadow) {
-            Picture shadowAlpha = opaque ? None : alphaMask(data.opacity);
+            Picture shadowAlpha = opaque ? None : alphaMask(data.opacity());
             RENDER_SHADOW_TILE(TopLeft, stlr);
             RENDER_SHADOW_TILE(Top, str);
             RENDER_SHADOW_TILE(TopRight, strr);
@@ -666,7 +668,7 @@ XRenderComposite(display(), PictOpOver, m_xrenderShadow->shadowPixmap(SceneXRend
 
         // Paint the window contents
         if (!(client && client->isShade())) {
-            Picture clientAlpha = opaque ? None : alphaMask(data.opacity);
+            Picture clientAlpha = opaque ? None : alphaMask(data.opacity());
             XRenderComposite(display(), clientRenderOp, pic, clientAlpha, renderTarget, cr.x(), cr.y(), 0, 0, dr.x(), dr.y(), dr.width(), dr.height());
             if (!opaque)
                 transformed_shape = QRegion();
@@ -678,7 +680,7 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
 
         if (client || deleted) {
             if (!noBorder) {
-                Picture decorationAlpha = alphaMask(data.opacity * data.decoration_opacity);
+                Picture decorationAlpha = alphaMask(data.opacity() * data.decorationOpacity());
                 RENDER_DECO_PART(top, dtr);
                 RENDER_DECO_PART(left, dlr);
                 RENDER_DECO_PART(right, drr);
@@ -687,9 +689,9 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
         }
 #undef RENDER_DECO_PART
 
-        if (data.brightness < 1.0) {
+        if (data.brightness() < 1.0) {
             // fake brightness change by overlaying black
-            XRenderColor col = { 0, 0, 0, 0xffff *(1 - data.brightness) * data.opacity };
+            XRenderColor col = { 0, 0, 0, 0xffff *(1 - data.brightness()) * data.opacity() };
             if (blitInTempPixmap) {
                 XRenderFillRectangle(display(), PictOpOver, renderTarget, &col,
                                      -temp_visibleRect.left(), -temp_visibleRect.top(), width(), height());

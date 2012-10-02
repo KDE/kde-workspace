@@ -13,18 +13,6 @@ fi
 # because we still need to do some cleanup.
 trap 'echo GOT SIGHUP' HUP
 
-# Check if a KDE session already is running and whether it's possible to connect to X
-kcheckrunning
-kcheckrunning_result=$?
-if test $kcheckrunning_result -eq 0 ; then
-	echo "KDE seems to be already running on this display."
-	xmessage -geometry 500x100 "KDE seems to be already running on this display." > /dev/null 2>/dev/null
-	exit 1
-elif test $kcheckrunning_result -eq 2 ; then
-	echo "\$DISPLAY is not set or cannot connect to the X server."
-        exit 1
-fi
-
 # we have to unset this for Darwin since it will screw up KDE's dynamic-loading
 unset DYLD_FORCE_FLAT_NAMESPACE
 
@@ -42,6 +30,18 @@ if [ -n "$bindir" ]; then
     $bindir|$bindir:*|*:$bindir|*:$bindir:*) ;;
     *) PATH=$bindir:$PATH; export PATH;;
   esac
+fi
+
+# Check if a KDE session already is running and whether it's possible to connect to X
+kcheckrunning
+kcheckrunning_result=$?
+if test $kcheckrunning_result -eq 0 ; then
+	echo "KDE seems to be already running on this display."
+	xmessage -geometry 500x100 "KDE seems to be already running on this display." > /dev/null 2>/dev/null
+	exit 1
+elif test $kcheckrunning_result -eq 2 ; then
+	echo "\$DISPLAY is not set or cannot connect to the X server."
+        exit 1
 fi
 
 # Boot sequence:
@@ -323,15 +323,6 @@ if test $? -ne 0; then
   exit 1
 fi
 
-# If the session should be locked from the start (locked autologin),
-# lock now and do the rest of the KDE startup underneath the locker.
-if test -n "$dl"; then
-  if ! kwrapper4 kscreenlocker --forcelock --showunlock --daemon; then
-    echo 'startkde: Initial session lock failed. Terminating for security reasons.' 1>&2
-    exit 1
-  fi
-fi
-
 # finally, give the session control to the session manager
 # see kdebase/ksmserver for the description of the rest of the startup sequence
 # if the KDEWM environment variable has been set, then it will be used as KDE's
@@ -343,7 +334,11 @@ fi
 # started, any problems thereafter, e.g. ksmserver failing to initialize,
 # will remain undetected.
 test -n "$KDEWM" && KDEWM="--windowmanager $KDEWM"
-kwrapper4 ksmserver $KDEWM
+# If the session should be locked from the start (locked autologin),
+# lock now and do the rest of the KDE startup underneath the locker.
+KSMSERVEROPTIONS=""
+test -n "$dl" && KSMSERVEROPTIONS=" --lockscreen"
+kwrapper4 ksmserver $KDEWM $KSMSERVEROPTIONS
 if test $? -eq 255; then
   # Startup error
   echo 'startkde: Could not start ksmserver. Check your installation.'  1>&2

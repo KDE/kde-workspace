@@ -29,6 +29,8 @@ class QDeclarativeItem;
 class QGraphicsSceneMouseEvent;
 class QGraphicsScene;
 class QGraphicsView;
+class KConfig;
+class KConfigGroup;
 
 namespace Aurorae
 {
@@ -38,9 +40,6 @@ class AuroraeClient;
 class AuroraeFactory :  public QObject, public KDecorationFactoryUnstable
 {
     Q_OBJECT
-    Q_PROPERTY(QString leftButtons READ leftButtons NOTIFY buttonsChanged)
-    Q_PROPERTY(QString rightButtons READ rightButtons NOTIFY buttonsChanged)
-    Q_PROPERTY(bool customButtonPositions READ customButtonPositions NOTIFY buttonsChanged)
 public:
     ~AuroraeFactory();
 
@@ -54,16 +53,24 @@ public:
         return m_theme;
     }
     QDeclarativeItem *createQmlDecoration(AuroraeClient *client);
-    QString leftButtons();
-    QString rightButtons();
-    bool customButtonPositions();
+    const QString &currentThemeName() const {
+        return m_themeName;
+    }
 
 private:
+    enum EngineType {
+        AuroraeEngine,
+        QMLEngine
+    };
     AuroraeFactory();
     void init();
+    void initAurorae(KConfig &conf, KConfigGroup &group);
+    void initQML(const KConfigGroup& group);
 
 Q_SIGNALS:
     void buttonsChanged();
+    void titleFontChanged();
+    void configChanged();
 
 private:
     static AuroraeFactory *s_instance;
@@ -71,6 +78,8 @@ private:
     AuroraeTheme *m_theme;
     QDeclarativeEngine *m_engine;
     QDeclarativeComponent *m_component;
+    EngineType m_engineType;
+    QString m_themeName;
 };
 
 class AuroraeClient : public KDecorationUnstable
@@ -105,6 +114,7 @@ class AuroraeClient : public KDecorationUnstable
 public:
     AuroraeClient(KDecorationBridge* bridge, KDecorationFactory* factory);
     virtual ~AuroraeClient();
+    virtual bool eventFilter(QObject *object, QEvent *event);
     virtual void activeChange();
     virtual void borders(int& left, int& right, int& top, int& bottom) const;
     virtual void captionChange();
@@ -122,6 +132,8 @@ public:
     bool isMaximized() const;
     int doubleClickInterval() const;
 
+    Q_INVOKABLE QVariant readConfig(const QString &key, const QVariant &defaultValue = QVariant());
+
 Q_SIGNALS:
     void activeChanged();
     void captionChanged();
@@ -131,6 +143,13 @@ Q_SIGNALS:
     void shadeChanged();
     void keepAboveChangedWrapper();
     void keepBelowChangedWrapper();
+    void buttonsChanged();
+    /**
+     * Signal emitted when the decoration's configuration might have changed.
+     * A decoration could reload it's configuration when this signal is emitted.
+     **/
+    void configChanged();
+    void fontChanged();
 
 public slots:
     void menuClicked();
@@ -143,9 +162,15 @@ public slots:
     void titlePressed(Qt::MouseButton button, Qt::MouseButtons buttons);
     void titleReleased(Qt::MouseButton button, Qt::MouseButtons buttons);
     void titleMouseMoved(Qt::MouseButton button, Qt::MouseButtons buttons);
+    void closeWindow();
+    void titlebarDblClickOperation();
+    void maximize(int button);
 
 private slots:
     void themeChanged();
+    void doCloseWindow();
+    void doTitlebarDblClickOperation();
+    void doMaximzie(int button);
 
 private:
     QGraphicsView *m_view;

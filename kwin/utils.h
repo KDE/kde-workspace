@@ -103,6 +103,7 @@ enum Layer {
     DockLayer,
     AboveLayer,
     ActiveLayer, // active fullscreen, or active dialog
+    UnmanagedLayer, // layer for override redirect windows.
     NumLayers // number of layers, must be last
 };
 
@@ -251,13 +252,6 @@ void ungrabXServer();
 bool grabbedXServer();
 bool grabXKeyboard(Window w = rootWindow());
 void ungrabXKeyboard();
-
-class Scene;
-extern Scene* scene;
-inline bool compositing()
-{
-    return scene != NULL;
-}
 
 // the docs say it's UrgencyHint, but it's often #defined as XUrgencyHint
 #ifndef UrgencyHint

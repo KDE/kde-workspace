@@ -39,8 +39,6 @@
 #include "kdecorationfactory.h"
 #include <klocale.h>
 
-#include <kephal/screens.h>
-
 #include "kcommondecoration.moc"
 
 /** @addtogroup kdecoration */
@@ -739,10 +737,10 @@ void KCommonDecoration::timerEvent(QTimerEvent *event)
 {
     if (timer && event->timerId() == timer->timerId()) {
         timer->stop();
-        closing = false;
-        if (!m_button[MenuButton]->isDown()) {
+        if (closing || !m_button[MenuButton]->isDown()) {
             return;
         }
+        closing = false;
         doShowWindowMenu();
         return;
     }

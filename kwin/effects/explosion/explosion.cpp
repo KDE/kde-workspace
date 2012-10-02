@@ -60,16 +60,12 @@ ExplosionEffect::~ExplosionEffect()
 
 bool ExplosionEffect::supported()
 {
-    return GLPlatform::instance()->supports(GLSL) &&
-           (effects->compositingType() == OpenGLCompositing);
+    return effects->compositingType() == OpenGL2Compositing;
 }
 
 bool ExplosionEffect::loadData()
 {
     mInited = true;
-    if (!ShaderManager::instance()->isValid()) {
-        return false;
-    }
     QString shadername("explosion");
     const QString fragmentshader =  KGlobal::dirs()->findResource("data", "kwin/explosion.frag");
     QString starttexture =  KGlobal::dirs()->findResource("data", "kwin/explosion-start.png");
@@ -84,10 +80,9 @@ bool ExplosionEffect::loadData()
         kError(1212) << "The shader failed to load!" << endl;
         return false;
     } else {
-        ShaderManager::instance()->pushShader(mShader);
+        ShaderBinder binder(mShader);
         mShader->setUniform("startOffsetTexture", 4);
         mShader->setUniform("endOffsetTexture", 5);
-        ShaderManager::instance()->popShader();
     }
 
     mStartOffsetTex = new GLTexture(starttexture);
@@ -141,11 +136,10 @@ void ExplosionEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
     if (useshader) {
         double maxscaleadd = 1.5f;
         double scale = 1 + maxscaleadd * mWindows[w];
-        data.xScale = scale;
-        data.yScale = scale;
-        data.xTranslate += int(w->width() / 2 * (1 - scale));
-        data.yTranslate += int(w->height() / 2 * (1 - scale));
-        data.opacity *= 0.99;  // Force blending
+        data.setXScale(scale);
+        data.setYScale(scale);
+        data.translate(int(w->width() / 2 * (1 - scale)), int(w->height() / 2 * (1 - scale)));
+        data.multiplyOpacity(0.99);  // Force blending
         ShaderManager *manager = ShaderManager::instance();
         GLShader *shader = manager->pushShader(ShaderManager::GenericShader);
         QMatrix4x4 screenTransformation = shader->getUniformMatrix4x4("screenTransformation");

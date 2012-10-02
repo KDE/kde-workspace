@@ -170,6 +170,7 @@ void DesktopToolBox::init()
     setZValue(INT_MAX);
 
     setIsMovable(true);
+    setFlags(flags()|QGraphicsItem::ItemIsFocusable);
     updateTheming();
 
     connect(this, SIGNAL(toggled()), this, SLOT(toggle()));
@@ -258,7 +259,8 @@ QRectF DesktopToolBox::boundingRect() const
 
     //keep space for the label and a character more
     if (!m_containment->activity().isNull()) {
-        extraSpace = Plasma::Theme::defaultTheme()->fontMetrics().width(m_containment->activity()+'x');
+        extraSpace = iconSize().width()
+            + Plasma::Theme::defaultTheme()->fontMetrics().width(m_containment->activity()+'x');
     }
 
     qreal left, top, right, bottom;
@@ -364,7 +366,7 @@ void DesktopToolBox::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
                               m_background->contentsRect().width()));
 
         textRect = QStyle::alignedRect(QApplication::layoutDirection(), Qt::AlignRight|Qt::AlignVCenter, textSize, boundRect);
-        textRect.moveTopLeft(textRect.topLeft() + QPoint(rect.top(), rect.left()));
+        textRect.moveTopLeft(textRect.topLeft() + QPoint(rect.top() - iconSize().height(), rect.left()));
     } else {
         Qt::Alignment alignment;
 
@@ -377,7 +379,7 @@ void DesktopToolBox::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
         iconRect = QStyle::alignedRect(QApplication::layoutDirection(), alignment, iconSize(), m_background->contentsRect().toRect());
 
         textRect = QStyle::alignedRect(QApplication::layoutDirection(), Qt::AlignRight|Qt::AlignVCenter, textSize, m_background->contentsRect().toRect());
-        textRect.moveTopLeft(textRect.topLeft() + rect.topLeft().toPoint());
+        textRect.moveTopLeft(textRect.topLeft() + QPoint(rect.top() - iconSize().height(), rect.left()));
     }
 
     iconRect.moveTopLeft(iconRect.topLeft() + rect.topLeft().toPoint());
@@ -506,6 +508,7 @@ void DesktopToolBox::showToolBox()
     fadeAnim->setProperty("targetOpacity", 1);
     fadeAnim->start(QAbstractAnimation::DeleteWhenStopped);
     highlight(true);
+    setFocus();
 }
 
 void DesktopToolBox::addTool(QAction *action)
@@ -841,6 +844,16 @@ void DesktopToolBox::logout()
     }
 
     KWorkSpace::requestShutDown();
+}
+
+void DesktopToolBox::keyPressEvent(QKeyEvent *event)
+{
+    m_containment->setFocus();
+    //don't make the containment lose keystrokes
+    if (scene()) {
+        scene()->sendEvent(m_containment, event);
+    }
+    setShowing(false);
 }
 
 #include "desktoptoolbox.moc"

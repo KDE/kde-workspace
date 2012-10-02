@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "zoom.h"
+// KConfigSkeleton
+#include "zoomconfig.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -28,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGui/QX11Info>
 #include <QtGui/QApplication>
 #include <QtGui/QStyle>
+#include <QtGui/QVector2D>
 #include <QtDBus/QDBusConnection>
 #include <kaction.h>
 #include <kactioncollection.h>
@@ -129,6 +132,10 @@ ZoomEffect::~ZoomEffect()
 {
     // switch off and free resources
     showCursor();
+    // Save the zoom value.
+    KConfigGroup conf = EffectsHandler::effectConfig("Zoom");
+    conf.writeEntry("InitialZoom", target_zoom);
+    conf.sync();
 }
 
 void ZoomEffect::showCursor()
@@ -181,10 +188,8 @@ void ZoomEffect::recreateTexture()
         imageWidth = ximg->width;
         imageHeight = ximg->height;
         QImage img((uchar*)ximg->pixels, imageWidth, imageHeight, QImage::Format_ARGB32_Premultiplied);
-#ifdef KWIN_HAVE_OPENGL
-        if (effects->compositingType() == OpenGLCompositing)
+        if (effects->isOpenGLCompositing())
             texture = new GLTexture(img);
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
         if (effects->compositingType() == XRenderCompositing)
             xrenderPicture = new XRenderPicture(QPixmap::fromImage(img));
@@ -199,15 +204,15 @@ void ZoomEffect::recreateTexture()
 
 void ZoomEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = EffectsHandler::effectConfig("Zoom");
+    ZoomConfig::self()->readConfig();
     // On zoom-in and zoom-out change the zoom by the defined zoom-factor.
-    zoomFactor = qMax(0.1, conf.readEntry("ZoomFactor", zoomFactor));
+    zoomFactor = qMax(0.1, ZoomConfig::zoomFactor());
     // Visibility of the mouse-pointer.
-    mousePointer = MousePointerType(conf.readEntry("MousePointer", int(mousePointer)));
+    mousePointer = MousePointerType(ZoomConfig::mousePointer());
     // Track moving of the mouse.
-    mouseTracking = MouseTrackingType(conf.readEntry("MouseTracking", int(mouseTracking)));
+    mouseTracking = MouseTrackingType(ZoomConfig::mouseTracking());
     // Enable tracking of the focused location.
-    bool _enableFocusTracking = conf.readEntry("EnableFocusTracking", enableFocusTracking);
+    bool _enableFocusTracking = ZoomConfig::enableFocusTracking();
     if (enableFocusTracking != _enableFocusTracking) {
         enableFocusTracking = _enableFocusTracking;
         if (QDBusConnection::sessionBus().isConnected()) {
@@ -218,11 +223,15 @@ void ZoomEffect::reconfigure(ReconfigureFlags)
         }
     }
     // When the focus changes, move the zoom area to the focused location.
-    followFocus = conf.readEntry("EnableFollowFocus", followFocus);
+    followFocus = ZoomConfig::enableFollowFocus();
     // The time in milliseconds to wait before a focus-event takes away a mouse-move.
-    focusDelay = qMax(0, conf.readEntry("FocusDelay", focusDelay));
+    focusDelay = qMax(uint(0), ZoomConfig::focusDelay());
     // The factor the zoom-area will be moved on touching an edge on push-mode or using the navigation KAction's.
-    moveFactor = qMax(0.1, conf.readEntry("MoveFactor", moveFactor));
+    moveFactor = qMax(0.1, ZoomConfig::moveFactor());
+    // Load the saved zoom value.
+    target_zoom = ZoomConfig::initialZoom();
+    if (target_zoom > 1.0)
+        zoomIn(target_zoom);
 }
 
 void ZoomEffect::prePaintScreen(ScreenPrePaintData& data, int time)
@@ -257,22 +266,21 @@ static XTransform xrenderIdentity = {{
 void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
 {
     if (zoom != 1.0) {
-        data.xScale *= zoom;
-        data.yScale *= zoom;
+        data *= QVector2D(zoom, zoom);
 
         // mouse-tracking allows navigation of the zoom-area using the mouse.
         switch(mouseTracking) {
         case MouseTrackingProportional:
-            data.xTranslate = - int(cursorPoint.x() * (zoom - 1.0));
-            data.yTranslate = - int(cursorPoint.y() * (zoom - 1.0));
+            data.setXTranslation(- int(cursorPoint.x() * (zoom - 1.0)));
+            data.setYTranslation(- int(cursorPoint.y() * (zoom - 1.0)));
             prevPoint = cursorPoint;
             break;
         case MouseTrackingCentred:
             prevPoint = cursorPoint;
             // fall through
         case MouseTrackingDisabled:
-            data.xTranslate = qMin(0, qMax(int(displayWidth() - displayWidth() * zoom), int(displayWidth() / 2 - prevPoint.x() * zoom)));
-            data.yTranslate = qMin(0, qMax(int(displayHeight() - displayHeight() * zoom), int(displayHeight() / 2 - prevPoint.y() * zoom)));
+            data.setXTranslation(qMin(0, qMax(int(displayWidth() - displayWidth() * zoom), int(displayWidth() / 2 - prevPoint.x() * zoom))));
+            data.setYTranslation(qMin(0, qMax(int(displayHeight() - displayHeight() * zoom), int(displayHeight() / 2 - prevPoint.y() * zoom))));
             break;
         case MouseTrackingPush:
             if (timeline.state() != QTimeLine::Running) {
@@ -295,8 +303,8 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
                     timeline.start();
                 }
             }
-            data.xTranslate = - int(prevPoint.x() * (zoom - 1.0));
-            data.yTranslate = - int(prevPoint.y() * (zoom - 1.0));
+            data.setXTranslation(- int(prevPoint.x() * (zoom - 1.0)));
+            data.setYTranslation(- int(prevPoint.y() * (zoom - 1.0)));
             break;
         }
 
@@ -310,8 +318,8 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
                 acceptFocus = msecs > focusDelay;
             }
             if (acceptFocus) {
-                data.xTranslate = - int(focusPoint.x() * (zoom - 1.0));
-                data.yTranslate = - int(focusPoint.y() * (zoom - 1.0));
+                data.setXTranslation(- int(focusPoint.x() * (zoom - 1.0)));
+                data.setYTranslation(- int(focusPoint.y() * (zoom - 1.0)));
                 prevPoint = focusPoint;
             }
         }
@@ -330,24 +338,16 @@ void ZoomEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             h *= zoom;
         }
         QPoint p = QCursor::pos();
-        QRect rect(p.x() * zoom + data.xTranslate, p.y() * zoom + data.yTranslate, w, h);
+        QRect rect(p.x() * zoom + data.xTranslation(), p.y() * zoom + data.yTranslation(), w, h);
 
-#ifdef KWIN_HAVE_OPENGL
         if (texture) {
-#ifndef KWIN_HAVE_OPENGLES
-            glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
             texture->bind();
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             texture->render(region, rect);
             texture->unbind();
             glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-            glPopAttrib();
-#endif
         }
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
         if (xrenderPicture) {
             if (mousePointer == MousePointerScale) {
@@ -374,9 +374,12 @@ void ZoomEffect::postPaintScreen()
     effects->postPaintScreen();
 }
 
-void ZoomEffect::zoomIn()
+void ZoomEffect::zoomIn(double to)
 {
-    target_zoom *= zoomFactor;
+    if (to < 0.0)
+        target_zoom *= zoomFactor;
+    else
+        target_zoom = to;
     if (!polling) {
         polling = true;
         effects->startMousePolling();

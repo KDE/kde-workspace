@@ -20,6 +20,7 @@
 import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 
 Item {
     id: devicenotifier
@@ -66,6 +67,7 @@ Item {
                 if (devicesType == "all" ||
                     (devicesType == "removable" && data[last]["Removable"] == true) ||
                     (devicesType == "nonRemovable" && data[last]["Removable"] == false)) {
+                    updateTooltip();
                     expandDevice(last)
                     last = "";
                 }
@@ -90,7 +92,7 @@ Item {
             connectSource(source);
         }
         onDataChanged: {
-            if (last!="") {
+            if (last != "") {
                 statusBar.setData(data[last]["error"], data[last]["errorDetails"], data[last]["udi"]);
                 plasmoid.status = "NeedsAttentionStatus";
                 plasmoid.showPopup(2500)
@@ -101,6 +103,12 @@ Item {
     Component.onCompleted: {
         plasmoid.addEventListener ('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);
+        plasmoid.aspectRatioMode = IgnoreAspectRatio;
+
+        if (notifierDialog.count == 0) {
+            plasmoid.status = "PassiveStatus"
+        }
+        updateTooltip()
     }
 
     function configChanged() {
@@ -126,9 +134,22 @@ Item {
             expandedDevice = udi
         }
         plasmoid.setPopupIconByName("preferences-desktop-notification")
-        plasmoid.status = "ActiveStatus"
         plasmoid.showPopup(7500)
         popupIconTimer.restart()
+    }
+
+    function updateTooltip()
+    {
+        var tooltip = new Object
+        if (notifierDialog.count == 0) {
+            tooltip["image"] = "device-notifier"
+            tooltip["mainText"] = i18n("No devices available")
+        } else if (sdSource.last !="") {
+            tooltip["image"] = hpSource.data[sdSource.last]["icon"]
+            tooltip["mainText"] = i18n("Most recent device")
+            tooltip["subText"] = hpSource.data[sdSource.last]["text"]
+        }
+        plasmoid.popupIconToolTip = tooltip
     }
 
     Timer {
@@ -137,6 +158,11 @@ Item {
         onTriggered: plasmoid.setPopupIconByName("device-notifier");
     }
 
+    Timer {
+        id: passiveTimer
+        interval: 2500
+        onTriggered: plasmoid.status = "PassiveStatus"
+    }
 
     PlasmaComponents.Label {
         id: header
@@ -163,72 +189,71 @@ Item {
         height: lineSvg.elementSize("horizontal-line").height
     }
 
-    ListView {
-        id: notifierDialog
+    PlasmaExtras.ScrollArea {
         anchors {
             top : headerSeparator.bottom
             topMargin: 10
             bottom: statusBarSeparator.top
             left: parent.left
-            right: scrollBar.visible ? scrollBar.left : parent.right
-        }
-        model: PlasmaCore.SortFilterModel {
-            id: filterModel
-            sourceModel: PlasmaCore.DataModel {
-                dataSource: sdSource
-            }
-            filterRole: "Removable"
-            filterRegExp: "true"
-            sortRole: "Timestamp"
-            sortOrder: Qt.DescendingOrder
-        }
-        onCountChanged: {
-            if (count == 0) {
-                plasmoid.status = "PassiveStatus"
-            }
-        }
-        delegate: deviceItem
-        highlight: deviceHighlighter
-        highlightMoveDuration: 250
-        highlightMoveSpeed: 1
-        clip: true
-
-        section {
-            property: "Type Description"
-            delegate: Item {
-                height: childrenRect.height
-                width: notifierDialog.width
-                PlasmaCore.SvgItem {
-                    visible: parent.y > 0
-                    svg: lineSvg
-                    elementId: "horizontal-line"
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: lineSvg.elementSize("horizontal-line").height
-                }
-                PlasmaComponents.Label {
-                    x: 8
-                    y: 8
-                    opacity: 0.6
-                    text: section
-                    color: theme.textColor
-                }
-            }
-        }
-
-        property int currentExpanded: -1
-        Component.onCompleted: currentIndex=-1
-    }
-
-    PlasmaComponents.ScrollBar {
-        id: scrollBar
-        flickableItem: notifierDialog
-        anchors {
             right: parent.right
-            top: notifierDialog.top
-            bottom: notifierDialog.bottom
+        }
+        ListView {
+            id: notifierDialog
+
+            model: PlasmaCore.SortFilterModel {
+                id: filterModel
+                sourceModel: PlasmaCore.DataModel {
+                    dataSource: sdSource
+                }
+                filterRole: "Removable"
+                filterRegExp: "true"
+                sortRole: "Timestamp"
+                sortOrder: Qt.DescendingOrder
+            }
+            onCountChanged: {
+                if (count == 0) {
+                    updateTooltip();
+                    passiveTimer.restart()
+                } else {
+                    passiveTimer.stop()
+                    plasmoid.status = "ActiveStatus"
+                }
+            }
+            delegate: deviceItem
+            highlight: deviceHighlighter
+            highlightMoveDuration: 250
+            highlightMoveSpeed: 1
+            //this is needed to make SectionScroller actually work
+            //acceptable since one doesn't have a billion of devices
+            cacheBuffer: 1000
+
+            section {
+                property: "Type Description"
+                delegate: Item {
+                    height: childrenRect.height
+                    width: notifierDialog.width
+                    PlasmaCore.SvgItem {
+                        visible: parent.y > 0
+                        svg: lineSvg
+                        elementId: "horizontal-line"
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        height: lineSvg.elementSize("horizontal-line").height
+                    }
+                    PlasmaComponents.Label {
+                        x: 8
+                        y: 8
+                        opacity: 0.6
+                        text: section
+                        color: theme.textColor
+                    }
+                }
+            }
+
+            property int currentExpanded: -1
+            Component.onCompleted: currentIndex=-1
         }
     }
 
@@ -245,8 +270,8 @@ Item {
             state: model["State"]
 
             percentUsage: {
-                var freeSpace = Number(model["Free Space"]);
-                var size = Number(model["Size"]);
+                var freeSpace = new Number(sdSource.data[udi]["Free Space"]);
+                var size = new Number(model["Size"]);
                 var used = size-freeSpace;
                 return used*100/size;
             }
@@ -266,9 +291,20 @@ Item {
                 service.startOperationCall(operation);
             }
             property bool isLast: (expandedDevice == udi)
+            property int operationResult: (model["Operation result"])
+
             onIsLastChanged: {
                 if (isLast) {
                     notifierDialog.currentExpanded = index
+                }
+            }
+            onOperationResultChanged: {
+                if (operationResult == 1) {
+                    plasmoid.setPopupIconByName("dialog-ok")
+                    popupIconTimer.restart()
+                } else if (operationResult == 2) {
+                    plasmoid.setPopupIconByName("dialog-error")
+                    popupIconTimer.restart()
                 }
             }
             Behavior on height { NumberAnimation { duration: 150 } }

@@ -73,7 +73,8 @@ static const QColor BLINKING_COLORS[] = {
 };
 
 StartupFeedbackEffect::StartupFeedbackEffect()
-    : m_startupInfo(new KStartupInfo(KStartupInfo::CleanOnCantDetect, this))
+    : m_bounceSizesRatio(1.0)
+    , m_startupInfo(new KStartupInfo(KStartupInfo::CleanOnCantDetect, this))
     , m_selection(new KSelectionOwner("_KDE_STARTUP_FEEDBACK", -1, this))
     , m_active(false)
     , m_frame(0)
@@ -108,7 +109,7 @@ StartupFeedbackEffect::~StartupFeedbackEffect()
 
 bool StartupFeedbackEffect::supported()
 {
-    return effects->compositingType() == OpenGLCompositing;
+    return effects->isOpenGLCompositing();
 }
 
 void StartupFeedbackEffect::reconfigure(Effect::ReconfigureFlags flags)
@@ -128,7 +129,7 @@ void StartupFeedbackEffect::reconfigure(Effect::ReconfigureFlags flags)
         m_type = BouncingFeedback;
     else if (busyBlinking) {
         m_type = BlinkingFeedback;
-        if (ShaderManager::instance()->isValid()) {
+        if (effects->compositingType() == OpenGL2Compositing) {
             delete m_blinkingShader;
             m_blinkingShader = 0;
             const QString shader = KGlobal::dirs()->findResource("data", "kwin/blinking-startup-fragment.glsl");
@@ -163,6 +164,8 @@ void StartupFeedbackEffect::prePaintScreen(ScreenPrePaintData& data, int time)
         default:
             break; // nothing
         }
+        data.paint.unite(m_dirtyRect);
+        m_dirtyRect = QRect();
         m_currentGeometry = feedbackRect();
         data.paint.unite(m_currentGeometry);
     }
@@ -185,9 +188,6 @@ void StartupFeedbackEffect::paintScreen(int mask, QRegion region, ScreenPaintDat
         default:
             return; // safety
         }
-#ifndef KWIN_HAVE_OPENGLES
-        glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         texture->bind();
@@ -216,7 +216,7 @@ void StartupFeedbackEffect::paintScreen(int mask, QRegion region, ScreenPaintDat
                 glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 #endif
             }
-        } else if (ShaderManager::instance()->isValid()) {
+        } else if (effects->compositingType() == OpenGL2Compositing) {
             useShader = true;
             ShaderManager::instance()->pushShader(ShaderManager::SimpleShader);
         }
@@ -236,9 +236,6 @@ void StartupFeedbackEffect::paintScreen(int mask, QRegion region, ScreenPaintDat
         }
         texture->unbind();
         glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-        glPopAttrib();
-#endif
     }
 }
 
@@ -249,7 +246,8 @@ void StartupFeedbackEffect::postPaintScreen()
         case BouncingFeedback: // fall through
         case BlinkingFeedback:
             // repaint the icon
-            effects->addRepaint(m_currentGeometry);
+            m_dirtyRect = m_currentGeometry;
+            effects->addRepaint(m_dirtyRect);
             break;
         case PassiveFeedback: // fall through
         default:
@@ -270,8 +268,10 @@ void StartupFeedbackEffect::slotMouseChanged(const QPoint& pos, const QPoint& ol
     Q_UNUSED(modifiers)
     Q_UNUSED(oldmodifiers)
     if (m_active) {
-        effects->addRepaint(m_currentGeometry);
-        effects->addRepaint(feedbackRect());
+        m_dirtyRect |= m_currentGeometry;
+        m_currentGeometry = feedbackRect();
+        m_dirtyRect |= m_currentGeometry;
+        effects->addRepaint(m_dirtyRect);
     }
 }
 
@@ -314,11 +314,15 @@ void StartupFeedbackEffect::start(const QString& icon)
     if (!m_active)
         effects->startMousePolling();
     m_active = true;
+    // get ratio for bouncing cursor so we don't need to manually calculate the sizes for each icon size
+    if (m_type == BouncingFeedback)
+        m_bounceSizesRatio = IconSize(KIconLoader::Small) / 16.0;
     QPixmap iconPixmap = KIconLoader::global()->loadIcon(icon, KIconLoader::Small, 0,
                          KIconLoader::DefaultState, QStringList(), 0, true);  // return null pixmap if not found
     if (iconPixmap.isNull())
         iconPixmap = SmallIcon("system-run");
     prepareTextures(iconPixmap);
+    m_dirtyRect = m_currentGeometry = feedbackRect();
     effects->addRepaintFull();
 }
 
@@ -369,15 +373,16 @@ void StartupFeedbackEffect::prepareTextures(const QPixmap& pix)
 
 QImage StartupFeedbackEffect::scalePixmap(const QPixmap& pm, const QSize& size) const
 {
-    QImage scaled = pm.toImage().scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    const QSize& adjustedSize = size * m_bounceSizesRatio;
+    QImage scaled = pm.toImage().scaled(adjustedSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     if (scaled.format() != QImage::Format_ARGB32_Premultiplied && scaled.format() != QImage::Format_ARGB32)
         scaled = scaled.convertToFormat(QImage::Format_ARGB32);
 
-    QImage result(20, 20, QImage::Format_ARGB32);
+    QImage result(20 * m_bounceSizesRatio, 20 * m_bounceSizesRatio, QImage::Format_ARGB32);
     QPainter p(&result);
     p.setCompositionMode(QPainter::CompositionMode_Source);
     p.fillRect(result.rect(), Qt::transparent);
-    p.drawImage((20 - size.width()) / 2, (20 - size.height()) / 2, scaled, 0, 0, size.width(), size.height());
+    p.drawImage((20 * m_bounceSizesRatio - adjustedSize.width()) / 2, (20*m_bounceSizesRatio - adjustedSize.height()) / 2, scaled, 0, 0, adjustedSize.width(), adjustedSize.height() * m_bounceSizesRatio);
     return result;
 }
 
@@ -400,7 +405,7 @@ QRect StartupFeedbackEffect::feedbackRect() const
     switch(m_type) {
     case BouncingFeedback:
         texture = m_bouncingTextures[ FRAME_TO_BOUNCE_TEXTURE[ m_frame ]];
-        yOffset = FRAME_TO_BOUNCE_YOFFSET[ m_frame ];
+        yOffset = FRAME_TO_BOUNCE_YOFFSET[ m_frame ] * m_bounceSizesRatio;
         break;
     case BlinkingFeedback: // fall through
     case PassiveFeedback:

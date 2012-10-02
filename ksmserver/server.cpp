@@ -84,6 +84,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "server.moc"
 
+// must go after #include <config-ksmserver.h>
+#ifdef COMPILE_SCREEN_LOCKER
+#include "screenlocker/ksldapp.h"
+#endif
+
 #include <kworkspace/kdisplaymanager.h>
 #include <QX11Info>
 #include <krandom.h>
@@ -598,11 +603,22 @@ static Status KSMNewClientProc ( SmsConn conn, SmPointer manager_data,
 extern "C" int _IceTransNoListen(const char * protocol);
 #endif
 
-KSMServer::KSMServer( const QString& windowManager, bool _only_local )
+KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool lockscreen )
   : wmProcess( NULL )
   , sessionGroup( "" )
   , logoutEffectWidget( NULL )
 {
+#ifdef COMPILE_SCREEN_LOCKER
+    KGlobal::locale()->insertCatalog(QLatin1String( "libkworkspace" ));
+
+    ScreenLocker::KSldApp::self();
+    if (lockscreen) {
+        ScreenLocker::KSldApp::self()->lock();
+    }
+#else
+    Q_UNUSED(lockscreen)
+#endif
+
     new KSMServerInterfaceAdaptor( this );
     QDBusConnection::sessionBus().registerObject("/KSMServer", this);
     klauncherSignals = new OrgKdeKLauncherInterface(QLatin1String("org.kde.klauncher"),

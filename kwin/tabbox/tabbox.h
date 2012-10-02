@@ -46,18 +46,21 @@ public:
     virtual ~TabBoxHandlerImpl();
 
     virtual int activeScreen() const;
-    virtual TabBoxClient* activeClient() const;
+    virtual QWeakPointer< TabBoxClient > activeClient() const;
     virtual int currentDesktop() const;
     virtual QString desktopName(TabBoxClient* client) const;
     virtual QString desktopName(int desktop) const;
-    virtual TabBoxClient* nextClientFocusChain(TabBoxClient* client) const;
+    virtual QWeakPointer< TabBoxClient > nextClientFocusChain(TabBoxClient* client) const;
+    virtual QWeakPointer< TabBoxClient > firstClientFocusChain() const;
+    virtual bool isInFocusChain (TabBoxClient* client) const;
     virtual int nextDesktopFocusChain(int desktop) const;
     virtual int numberOfDesktops() const;
     virtual TabBoxClientList stackingOrder() const;
+    virtual void elevateClient(TabBoxClient* c, WId tabbox, bool elevate) const;
     virtual void raiseClient(TabBoxClient *client) const;
     virtual void restack(TabBoxClient *c, TabBoxClient *under);
-    virtual TabBoxClient* clientToAddToList(TabBoxClient* client, int desktop) const;
-    virtual TabBoxClient* desktopClient() const;
+    virtual QWeakPointer< TabBoxClient > clientToAddToList(KWin::TabBox::TabBoxClient* client, int desktop) const;
+    virtual QWeakPointer< TabBoxClient > desktopClient() const;
     virtual void hideOutline();
     virtual void showOutline(const QRect &outline);
     virtual QVector< Window > outlineWindowIds() const;
@@ -76,7 +79,7 @@ private:
 class TabBoxClientImpl : public TabBoxClient
 {
 public:
-    TabBoxClientImpl();
+    TabBoxClientImpl(Client *client);
     virtual ~TabBoxClientImpl();
 
     virtual QString caption() const;
@@ -93,9 +96,6 @@ public:
 
     Client* client() const {
         return m_client;
-    }
-    void setClient(Client* client) {
-        m_client = client;
     }
 
 private:
@@ -165,6 +165,7 @@ public:
 
     Client* nextClientFocusChain(Client*) const;
     Client* previousClientFocusChain(Client*) const;
+    Client* firstClientFocusChain() const;
     Client* nextClientStatic(Client*) const;
     Client* previousClientStatic(Client*) const;
     int nextDesktopFocusChain(int iDesktop) const;
@@ -180,8 +181,9 @@ public slots:
      * Only for DBus Interface to start primary KDE Walk through windows.
      * @param modal Whether the TabBox should grab keyboard and mouse, that is go into modal
      * mode or whether the TabBox is controlled externally (e.g. through an effect).
+     * @param layout The name of the layout to use, if null string (default) the configured layout is used
      **/
-    Q_SCRIPTABLE void open(bool modal = true);
+    Q_SCRIPTABLE void open(bool modal = true, const QString &layout = QString());
     /**
      * Opens the TabBox view embedded on a different window. This implies non-modal mode.
      * The geometry of the TabBox is determined by offset, size and the alignment flags.
@@ -196,8 +198,9 @@ public slots:
      * @param size The size of the TabBox. To use the same size as the container, set alignment to center
      * @param horizontalAlignment Either Qt::AlignLeft, Qt::AlignHCenter or Qt::AlignRight
      * @param verticalAlignment Either Qt::AlignTop, Qt::AlignVCenter or Qt::AlignBottom
+     * @param layout The name of the layout to use, if null string (default) the configured layout is used
      **/
-    Q_SCRIPTABLE void openEmbedded(qulonglong wid, QPoint offset, QSize size, int horizontalAlignment, int verticalAlignment);
+    Q_SCRIPTABLE void openEmbedded(qulonglong wid, QPoint offset, QSize size, int horizontalAlignment, int verticalAlignment, const QString &layout = QString());
     Q_SCRIPTABLE void close(bool abort = false);
     Q_SCRIPTABLE void accept();
     Q_SCRIPTABLE void reject();
@@ -209,6 +212,10 @@ public slots:
     void slotWalkBackThroughWindows();
     void slotWalkThroughWindowsAlternative();
     void slotWalkBackThroughWindowsAlternative();
+    void slotWalkThroughCurrentAppWindows();
+    void slotWalkBackThroughCurrentAppWindows();
+    void slotWalkThroughCurrentAppWindowsAlternative();
+    void slotWalkBackThroughCurrentAppWindowsAlternative();
 
     void slotWalkThroughDesktopsKeyChanged(const QKeySequence& seq);
     void slotWalkBackThroughDesktopsKeyChanged(const QKeySequence& seq);
@@ -220,6 +227,10 @@ public slots:
     void slotMoveToTabRightKeyChanged(const QKeySequence& seq);
     void slotWalkThroughWindowsAlternativeKeyChanged(const QKeySequence& seq);
     void slotWalkBackThroughWindowsAlternativeKeyChanged(const QKeySequence& seq);
+    void slotWalkThroughCurrentAppWindowsKeyChanged(const QKeySequence& seq);
+    void slotWalkBackThroughCurrentAppWindowsKeyChanged(const QKeySequence& seq);
+    void slotWalkThroughCurrentAppWindowsAlternativeKeyChanged(const QKeySequence& seq);
+    void slotWalkBackThroughCurrentAppWindowsAlternativeKeyChanged(const QKeySequence& seq);
 
     void handlerReady();
 
@@ -264,6 +275,8 @@ private:
 
     TabBoxConfig m_defaultConfig;
     TabBoxConfig m_alternativeConfig;
+    TabBoxConfig m_defaultCurrentApplicationConfig;
+    TabBoxConfig m_alternativeCurrentApplicationConfig;
     TabBoxConfig m_desktopConfig;
     TabBoxConfig m_desktopListConfig;
     // false if an effect has referenced the tabbox
@@ -278,6 +291,8 @@ private:
     KShortcut m_cutWalkThroughWindows, m_cutWalkThroughWindowsReverse;
     KShortcut m_cutWalkThroughGroupWindows, m_cutWalkThroughGroupWindowsReverse;
     KShortcut m_cutWalkThroughWindowsAlternative, m_cutWalkThroughWindowsAlternativeReverse;
+    KShortcut m_cutWalkThroughCurrentAppWindows, m_cutWalkThroughCurrentAppWindowsReverse;
+    KShortcut m_cutWalkThroughCurrentAppWindowsAlternative, m_cutWalkThroughCurrentAppWindowsAlternativeReverse;
     bool m_forcedGlobalMouseGrab;
     bool m_ready; // indicates whether the config is completely loaded
 };

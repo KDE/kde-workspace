@@ -529,7 +529,9 @@ void CFontFileListView::openViewer()
 
     if(files.count() &&
        (files.count()<constMaxBeforePrompt ||
-        KMessageBox::Yes==KMessageBox::questionYesNo(this, i18n("Open all %1 fonts in font viewer?", files.count()))))
+        KMessageBox::Yes==KMessageBox::questionYesNo(this, i18np("Open font in font viewer?",
+                                                                 "Open all %1 fonts in font viewer?",
+                                                                 files.count()))))
     {
          QSet<QString>::ConstIterator it(files.begin()),
                                       end(files.end());

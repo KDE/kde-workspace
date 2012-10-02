@@ -39,7 +39,7 @@ KWIN_EFFECT_SUPPORTED(screenshot, ScreenShotEffect::supported())
 bool ScreenShotEffect::supported()
 {
     return  effects->compositingType() == XRenderCompositing ||
-            (effects->compositingType() == KWin::OpenGLCompositing && GLRenderTarget::supported());
+            (effects->isOpenGLCompositing() && GLRenderTarget::supported());
 }
 
 ScreenShotEffect::ScreenShotEffect()
@@ -64,7 +64,7 @@ void ScreenShotEffect::postPaintScreen()
         bool validTarget = true;
         GLTexture* offscreenTexture = 0;
         GLRenderTarget* target = 0;
-        if (effects->compositingType() == KWin::OpenGLCompositing) {
+        if (effects->isOpenGLCompositing()) {
             if (!GLTexture::NPOTTextureSupported()) {
                 w = nearestPowerOfTwo(w);
                 h = nearestPowerOfTwo(h);
@@ -108,13 +108,13 @@ void ScreenShotEffect::postPaintScreen()
             }
             int width = right - left;
             int height = bottom - top;
-            d.xTranslate = -m_scheduledScreenshot->x() - left;
-            d.yTranslate = -m_scheduledScreenshot->y() - top;
+            d.setXTranslation(-m_scheduledScreenshot->x() - left);
+            d.setYTranslation(-m_scheduledScreenshot->y() - top);
 
             // render window into offscreen texture
             int mask = PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_TRANSLUCENT;
             QImage img;
-            if (effects->compositingType() == KWin::OpenGLCompositing) {
+            if (effects->isOpenGLCompositing()) {
                 GLRenderTarget::pushRenderTarget(target);
                 glClearColor(0.0, 0.0, 0.0, 0.0);
                 glClear(GL_COLOR_BUFFER_BIT);
@@ -176,6 +176,16 @@ void ScreenShotEffect::screenshotWindowUnderCursor(int mask)
     }
 }
 
+void ScreenShotEffect::screenshotForWindow(qulonglong winid, int mask)
+{
+    m_type = (ScreenShotType) mask;
+    EffectWindow* w = effects->findWindow(winid);
+    if(w && !w->isMinimized() && !w->isDeleted()) {
+        m_scheduledScreenshot = w;
+        m_scheduledScreenshot->addRepaintFull();
+    }
+}
+
 QString ScreenShotEffect::screenshotFullscreen()
 {
     return blitScreenshot(QRect(0, 0, displayWidth(), displayHeight()));
@@ -199,7 +209,7 @@ QString ScreenShotEffect::blitScreenshot(const QRect &geometry)
     return QString();
 #else
     QImage img;
-    if (effects->compositingType() == KWin::OpenGLCompositing)
+    if (effects->isOpenGLCompositing())
     {
         if (!GLRenderTarget::blitSupported()) {
             kDebug(1212) << "Framebuffer Blit not supported";
@@ -217,6 +227,7 @@ QString ScreenShotEffect::blitScreenshot(const QRect &geometry)
     }
 
     if (effects->compositingType() == XRenderCompositing) {
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
         QPixmap buffer(geometry.size());
         if (buffer.handle() == 0) {
             Pixmap xpix = XCreatePixmap(display(), rootWindow(), geometry.width(), geometry.height(), 32);
@@ -225,6 +236,7 @@ QString ScreenShotEffect::blitScreenshot(const QRect &geometry)
         XRenderComposite(display(), PictOpSrc, effects->xrenderBufferPicture(), None, buffer.x11PictureHandle(),
                                     0, 0, 0, 0, geometry.x(), geometry.y(), geometry.width(), geometry.height());
         img = buffer.toImage();
+#endif
     }
 
     KTemporaryFile temp;

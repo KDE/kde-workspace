@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
+#include <QtGui/QDesktopWidget>
 #include <QtGui/QGraphicsObject>
 #include <QtGui/QResizeEvent>
 #include <QX11Info>
@@ -39,7 +40,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/Plasma/Theme>
 #include <KDE/Plasma/WindowEffects>
 #include <kdeclarative.h>
-#include <kephal/screens.h>
 // KWin
 #include "thumbnailitem.h"
 #include <kwindowsystem.h>
@@ -136,7 +136,7 @@ DeclarativeView::DeclarativeView(QAbstractItemModel *model, TabBoxConfig::TabBox
     } else if (m_mode == TabBoxConfig::DesktopTabBox) {
         rootContext()->setContextProperty("clientModel", model);
     }
-    setSource(QUrl(KStandardDirs::locate("data", "kwin/tabbox/tabbox.qml")));
+    setSource(QUrl(KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + QLatin1String("/tabbox/tabbox.qml"))));
 
     // FrameSvg
     m_frame->setImagePath("dialogs/background");
@@ -160,7 +160,7 @@ void DeclarativeView::showEvent(QShowEvent *event)
     }
 #endif
     updateQmlSource();
-    m_currentScreenGeometry = Kephal::ScreenUtils::screenGeometry(tabBox->activeScreen());
+    m_currentScreenGeometry = QApplication::desktop()->screenGeometry(tabBox->activeScreen());
     rootObject()->setProperty("screenWidth", m_currentScreenGeometry.width());
     rootObject()->setProperty("screenHeight", m_currentScreenGeometry.height());
     rootObject()->setProperty("allDesktops", tabBox->config().tabBoxMode() == TabBoxConfig::ClientTabBox &&
@@ -304,7 +304,7 @@ void DeclarativeView::updateQmlSource(bool force)
     }
     if (m_mode == TabBoxConfig::DesktopTabBox) {
         m_currentLayout = tabBox->config().layoutName();
-        const QString file = KStandardDirs::locate("data", "kwin/tabbox/desktop.qml");
+        const QString file = KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + QLatin1String("/tabbox/desktop.qml"));
         rootObject()->setProperty("source", QUrl(file));
         return;
     }
@@ -327,7 +327,7 @@ void DeclarativeView::updateQmlSource(bool force)
         return;
     }
     const QString scriptName = service->property("X-Plasma-MainScript").toString();
-    const QString file = KStandardDirs::locate("data", "kwin/tabbox/" + pluginName + "/contents/" + scriptName);
+    const QString file = KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + "/tabbox/" + pluginName + "/contents/" + scriptName);
     if (file.isNull()) {
         kDebug(1212) << "Could not find QML file for window switcher";
         return;

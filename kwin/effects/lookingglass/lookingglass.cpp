@@ -21,12 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "lookingglass.h"
 
+// KConfigSkeleton
+#include "lookingglassconfig.h"
+
 #include <kwinglutils.h>
 #include <kwinglplatform.h>
 
 #include <kactioncollection.h>
 #include <kaction.h>
-#include <kconfiggroup.h>
 #include <klocale.h>
 #include <kdebug.h>
 #include <KDE/KGlobal>
@@ -79,15 +81,13 @@ LookingGlassEffect::~LookingGlassEffect()
 
 bool LookingGlassEffect::supported()
 {
-    return GLRenderTarget::supported() &&
-           GLPlatform::instance()->supports(GLSL) &&
-           (effects->compositingType() == OpenGLCompositing);
+    return effects->compositingType() == OpenGL2Compositing;
 }
 
 void LookingGlassEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = EffectsHandler::effectConfig("LookingGlass");
-    initialradius = conf.readEntry("Radius", 200);
+    LookingGlassConfig::self()->readConfig();
+    initialradius = LookingGlassConfig::radius();
     radius = initialradius;
     kDebug(1212) << QString("Radius from config: %1").arg(radius) << endl;
     actionCollection->readSettings();
@@ -119,9 +119,8 @@ bool LookingGlassEffect::loadData()
     const QString fragmentshader =  KGlobal::dirs()->findResource("data", "kwin/lookingglass.frag");
     m_shader = ShaderManager::instance()->loadFragmentShader(ShaderManager::SimpleShader, fragmentshader);
     if (m_shader->isValid()) {
-        ShaderManager::instance()->pushShader(m_shader);
+        ShaderBinder binder(m_shader);
         m_shader->setUniform("u_textureSize", QVector2D(displayWidth(), displayHeight()));
-        ShaderManager::instance()->popShader();
     } else {
         kError(1212) << "The shader failed to load!" << endl;
         return false;
@@ -242,12 +241,11 @@ void LookingGlassEffect::postPaintScreen()
         m_texture->bind();
 
         // Use the shader
-        ShaderManager::instance()->pushShader(m_shader);
+        ShaderBinder binder(m_shader);
         m_shader->setUniform("u_zoom", (float)zoom);
         m_shader->setUniform("u_radius", (float)radius);
         m_shader->setUniform("u_cursor", QVector2D(cursorPos().x(), cursorPos().y()));
         m_vbo->render(GL_TRIANGLES);
-        ShaderManager::instance()->popShader();
         m_texture->unbind();
     }
 }

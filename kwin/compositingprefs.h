@@ -50,44 +50,14 @@ public:
      * @returns @c true if GLX is available, @c false otherwise and if not build with OpenGL support.
      **/
     static bool hasGlx();
-    bool recommendCompositing() const;
-    bool enableVSync() const  {
-        return mEnableVSync;
-    }
     bool enableDirectRendering() const  {
         return mEnableDirectRendering;
-    }
-    bool strictBinding() const {
-        return mStrictBinding;
     }
 
     void detect();
 
-protected:
-
-    void detectDriverAndVersion();
-    void applyDriverSpecificOptions();
-
-    bool initGLXContext();
-    void deleteGLXContext();
-    bool initEGLContext();
-    void deleteEGLContext();
-
-
 private:
-    bool mRecommendCompositing;
-    bool mEnableVSync;
     bool mEnableDirectRendering;
-    bool mStrictBinding;
-
-#ifdef KWIN_HAVE_OPENGLES
-    EGLDisplay mEGLDisplay;
-    EGLContext mEGLContext;
-    EGLSurface mEGLSurface;
-#else
-    GLXContext mGLContext;
-#endif
-    Window mGLWindow;
 };
 
 }

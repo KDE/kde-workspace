@@ -246,6 +246,9 @@ extern "C" KDE_EXPORT int kdemain( int argc, char* argv[] )
     options.add("w");
     options.add("windowmanager <wm>", ki18n("Starts 'wm' in case no other window manager is \nparticipating in the session. Default is 'kwin'"));
     options.add("nolocal", ki18n("Also allow remote connections"));
+#if COMPILE_SCREEN_LOCKER
+    options.add("lockscreen", ki18n("Starts the session in locked mode"));
+#endif
     KCmdLineArgs::addCmdLineOptions( options );
 
     putenv((char*)"SESSION_MANAGER=");
@@ -282,7 +285,11 @@ extern "C" KDE_EXPORT int kdemain( int argc, char* argv[] )
     only_local = false;
 #endif
 
-    KSMServer *server = new KSMServer( wm, only_local);
+#if COMPILE_SCREEN_LOCKER
+    KSMServer *server = new KSMServer( wm, only_local, args->isSet("lockscreen") );
+#else
+    KSMServer *server = new KSMServer( wm, only_local );
+#endif
     
     // for the KDE-already-running check in startkde
     KSelectionOwner kde_running( "_KDE_RUNNING", 0 );

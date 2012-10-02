@@ -23,9 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kdebug.h>
 
-#ifdef KWIN_HAVE_OPENGL
 #include <kwinglutils.h>
-#endif
 
 // This effect shows a preview inside a window that has a special property set
 // on it that says which window and where to render. It is used by the taskbar
@@ -72,7 +70,7 @@ void TaskbarThumbnailEffect::paintWindow(EffectWindow* w, int mask, QRegion regi
     if (thumbnails.contains(w)) {
         // paint thumbnails on it
         int mask = PAINT_WINDOW_TRANSFORMED;
-        if (data.opacity == 1.0)
+        if (data.opacity() == 1.0)
             mask |= PAINT_WINDOW_OPAQUE;
         else
             mask |= PAINT_WINDOW_TRANSLUCENT;
@@ -82,18 +80,16 @@ void TaskbarThumbnailEffect::paintWindow(EffectWindow* w, int mask, QRegion regi
             if (thumbw == NULL)
                 continue;
             WindowPaintData thumbData(thumbw);
-            thumbData.opacity *= data.opacity;
+            thumbData.multiplyOpacity(data.opacity());
             QRect r, thumbRect(thumb.rect);
-            thumbRect.translate(w->pos() + QPoint(data.xTranslate, data.yTranslate));
-            thumbRect.setSize(QSize(thumbRect.width() * data.xScale, thumbRect.height() * data.yScale)); // QSize has no vector multiplicator... :-(
+            thumbRect.translate(w->pos() + QPoint(data.xTranslation(), data.yTranslation()));
+            thumbRect.setSize(QSize(thumbRect.width() * data.xScale(), thumbRect.height() * data.yScale())); // QSize has no vector multiplicator... :-(
 
-#ifdef KWIN_HAVE_OPENGL
-            if (effects->compositingType() == KWin::OpenGLCompositing) {
+            if (effects->isOpenGLCompositing()) {
                 if (data.shader) {
                     thumbData.shader = data.shader;
                 }
             } // if ( effects->compositingType() == KWin::OpenGLCompositing )
-#endif
             setPositionTransformations(thumbData, r, thumbw, thumbRect, Qt::KeepAspectRatio);
             effects->drawWindow(thumbw, mask, r, thumbData);
         }
@@ -131,9 +127,7 @@ void TaskbarThumbnailEffect::slotPropertyNotify(EffectWindow* w, long a)
 {
     if (!w || a != atom)
         return;
-    foreach (const Data & thumb, thumbnails.values(w)) {
-        w->addRepaintFull();
-    }
+    w->addRepaintFull();
     thumbnails.remove(w);
     QByteArray data = w->readProperty(atom, atom, 32);
     if (data.length() < 1)

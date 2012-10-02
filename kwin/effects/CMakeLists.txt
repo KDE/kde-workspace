@@ -18,6 +18,7 @@ macro( KWIN4_ADD_EFFECT name )
             target_link_libraries(kwin4_effect_${name} kwinglesutils)
             set_target_properties(kwin4_effect_${name} PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGL -DKWIN_HAVE_OPENGLES")
         endif(OPENGL_FOUND)
+        set_target_properties(kwin4_effect_${name} PROPERTIES OUTPUT_NAME ${KWIN_NAME}4_effect_${name})
         install( TARGETS kwin4_effect_${name} DESTINATION ${PLUGIN_INSTALL_DIR} )
     endif(OPENGL_FOUND OR NOT(OPENGL_FOUND AND OPENGLES_FOUND))
 
@@ -27,6 +28,7 @@ macro( KWIN4_ADD_EFFECT name )
         # OpenGL ES gets into a different library
         target_link_libraries(kwin4_effect_gles_${name} kwinglesutils)
         set_target_properties(kwin4_effect_gles_${name} PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGL -DKWIN_HAVE_OPENGLES")
+        set_target_properties(kwin4_effect_gles_${name} PROPERTIES OUTPUT_NAME ${KWIN_NAME}4_effect_gles_${name})
         install( TARGETS kwin4_effect_gles_${name} DESTINATION ${PLUGIN_INSTALL_DIR} )
     endif(OPENGLES_FOUND)
 endmacro( KWIN4_ADD_EFFECT )
@@ -116,10 +118,7 @@ if( NOT KWIN_MOBILE_EFFECTS )
     include( thumbnailaside/CMakeLists.txt )
     include( windowgeometry/CMakeLists.txt )
     include( zoom/CMakeLists.txt )
-
-    if( NOT KWIN_HAVE_OPENGLES_COMPOSITING )
     include( logout/CMakeLists.txt )
-    endif( NOT KWIN_HAVE_OPENGLES_COMPOSITING )
 endif( NOT KWIN_MOBILE_EFFECTS )
 
 # OpenGL-specific effects

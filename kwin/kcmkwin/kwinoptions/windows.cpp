@@ -30,6 +30,7 @@
 #include <KComboBox>
 #include <QHBoxLayout>
 #include <QFormLayout>
+#include <QtGui/QDesktopWidget>
 #include <QtDBus/QtDBus>
 
 #include <KButtonGroup>
@@ -42,8 +43,6 @@
 #include <X11/Xutil.h>
 
 #include "windows.h"
-
-#include <kephal/screens.h>
 
 // kwin config keywords
 #define KWIN_FOCUS                 "FocusPolicy"
@@ -63,9 +62,6 @@
 #define KWIN_AUTOGROUP_FOREGROUND  "AutogroupInForeground"
 #define KWIN_SEPARATE_SCREEN_FOCUS "SeparateScreenFocus"
 #define KWIN_ACTIVE_MOUSE_SCREEN   "ActiveMouseScreen"
-#define KWIN_TILINGON              "TilingOn"
-#define KWIN_TILING_DEFAULT_LAYOUT "TilingDefaultLayout"
-#define KWIN_TILING_RAISE_POLICY   "TilingRaisePolicy"
 
 //CT 15mar 98 - magics
 #define KWM_BRDR_SNAP_ZONE                   "BorderSnapZone"
@@ -253,7 +249,7 @@ KFocusConfig::KFocusConfig(bool _standAlone, KConfig *_config, const KComponentD
     activeMouseScreen->setWhatsThis(wtstr);
     connect(focusCombo, SIGNAL(activated(int)), this, SLOT(updateActiveMouseScreen()));
 
-    if (Kephal::ScreenUtils::numScreens() == 1) { // No Ximerama
+    if (QApplication::desktop()->screenCount() == 1) { // No Ximerama
         separateScreenFocus->hide();
         activeMouseScreen->hide();
     }
@@ -595,16 +591,17 @@ KAdvancedConfig::KAdvancedConfig(bool _standAlone, KConfig *_config, const KComp
 
     placementCombo = new KComboBox(this);
     placementCombo->setEditable(false);
-    placementCombo->addItem(i18n("Smart"), SMART_PLACEMENT);
-    placementCombo->addItem(i18n("Maximizing"), MAXIMIZING_PLACEMENT);
-    placementCombo->addItem(i18n("Cascade"), CASCADE_PLACEMENT);
-    placementCombo->addItem(i18n("Random"), RANDOM_PLACEMENT);
-    placementCombo->addItem(i18n("Centered"), CENTERED_PLACEMENT);
-    placementCombo->addItem(i18n("Zero-Cornered"), ZEROCORNERED_PLACEMENT);
+    placementCombo->addItem(i18n("Smart"), "Smart");
+    placementCombo->addItem(i18n("Maximizing"), "Maximizing");
+    placementCombo->addItem(i18n("Cascade"), "Cascade");
+    placementCombo->addItem(i18n("Random"), "Random");
+    placementCombo->addItem(i18n("Centered"), "Centered");
+    placementCombo->addItem(i18n("Zero-Cornered"), "ZeroCornered");
+    placementCombo->addItem(i18n("Under Mouse"), "UnderMouse");
     // CT: disabling is needed as long as functionality misses in kwin
     //placementCombo->addItem(i18n("Interactive"), INTERACTIVE_PLACEMENT);
     //placementCombo->addItem(i18n("Manual"), MANUAL_PLACEMENT);
-    placementCombo->setCurrentIndex(SMART_PLACEMENT);
+    placementCombo->setCurrentIndex(0); // default to "Smart"
 
     // FIXME, when more policies have been added to KWin
     wtstr = i18n("The placement policy determines where a new window"
@@ -618,6 +615,7 @@ KAdvancedConfig::KAdvancedConfig(bool _standAlone, KConfig *_config, const KComp
                  " <li><em>Random</em> will use a random position</li>"
                  " <li><em>Centered</em> will place the window centered</li>"
                  " <li><em>Zero-Cornered</em> will place the window in the top-left corner</li>"
+                 " <li><em>Under Mouse</em> will place the window under the pointer</li>"
                  "</ul>") ;
 
     placementCombo->setWhatsThis(wtstr);
@@ -638,58 +636,6 @@ KAdvancedConfig::KAdvancedConfig(bool _standAlone, KConfig *_config, const KComp
              " have to mark the windows with the proper window type for this feature to work."));
     connect(hideUtilityWindowsForInactive, SIGNAL(toggled(bool)), SLOT(changed()));
     vLay->addWidget(hideUtilityWindowsForInactive, 1, 0, 1, 2);
-
-    tilBox = new KButtonGroup(this);
-    tilBox->setTitle(i18n("Tiling"));
-    QGridLayout *tilBoxLay = new QGridLayout(tilBox);
-
-    tilingOn = new QCheckBox(i18n("Enable Tiling"), tilBox);
-    tilingOn->setWhatsThis(
-        i18n("A tiling window manager lays out all the windows in a non-overlapping manner."
-             " This way all windows are always visible."));
-    tilBoxLay->addWidget(tilingOn);
-    connect(tilingOn, SIGNAL(toggled(bool)), SLOT(tilingOnChanged(bool)));
-    connect(tilingOn, SIGNAL(toggled(bool)), SLOT(changed()));
-
-    tilingLayoutLabel = new QLabel(i18n("Default Tiling &Layout"), tilBox);
-    tilBoxLay->addWidget(tilingLayoutLabel, 1, 0);
-
-    tilingLayoutCombo = new KComboBox(tilBox);
-
-    // NOTE: add your layout to the bottom of this list
-    tilingLayoutCombo->addItem(i18nc("Spiral tiling layout", "Spiral"));
-    tilingLayoutCombo->addItem(i18nc("Two-column horizontal tiling layout", "Columns"));
-    tilingLayoutCombo->addItem(i18nc("Floating layout, windows aren't tiled at all", "Floating"));
-
-    tilingLayoutLabel->setBuddy(tilingLayoutCombo);
-    connect(tilingLayoutCombo, SIGNAL(activated(int)), SLOT(changed()));
-    tilBoxLay->addWidget(tilingLayoutCombo, 1, 1);
-
-    tilingRaiseLabel = new QLabel(i18n("Floating &Windows Raising"), tilBox);
-    tilBoxLay->addWidget(tilingRaiseLabel, 2, 0);
-
-    tilingRaiseCombo = new KComboBox(tilBox);
-    // when a floating window is activated, all other floating
-    // windows are also brought to the front, above the tiled windows
-    // when a tiled window is focused, all floating windows go to the back.
-    // NOTE: If the user has explicitly set a client to "keep above others", that will be respected.
-    tilingRaiseCombo->addItem(i18nc("Window Raising Policy", "Raise/Lower all floating windows"));
-    tilingRaiseCombo->addItem(i18nc("Window Raising Policy", "Raise/Lower current window only"));
-    tilingRaiseCombo->addItem(i18nc("Window Raising Policy", "Floating windows are always on top"));
-    wtstr = i18n("The window raising policy determines how floating windows are stacked"
-                 " <ul>"
-                 " <li><em>Raise/Lower all</em> will raise all floating windows when a"
-                 " floating window is activated.</li>"
-                 " <li><em>Raise/Lower current</em> will raise only the current window.</li>"
-                 " <li><em>Floating windows on top</em> will always keep floating windows on top, even"
-                 " when a tiled window is activated."
-                 "</ul>") ;
-    tilingRaiseCombo->setWhatsThis(wtstr);
-    connect(tilingRaiseCombo, SIGNAL(activated(int)), SLOT(changed()));
-    tilingRaiseLabel->setBuddy(tilingRaiseCombo);
-    tilBoxLay->addWidget(tilingRaiseCombo, 2, 1);
-
-    lay->addWidget(tilBox);
 
     lay->addStretch();
     load();
@@ -718,33 +664,6 @@ void KAdvancedConfig::shadeHoverChanged(bool a)
 {
     shadeHoverLabel->setEnabled(a);
     shadeHover->setEnabled(a);
-}
-
-void KAdvancedConfig::setTilingOn(bool on)
-{
-    tilingOn->setChecked(on);
-    tilingLayoutLabel->setEnabled(on);
-    tilingLayoutCombo->setEnabled(on);
-    tilingRaiseLabel->setEnabled(on);
-    tilingRaiseCombo->setEnabled(on);
-}
-
-void KAdvancedConfig::setTilingLayout(int l)
-{
-    tilingLayoutCombo->setCurrentIndex(l);
-}
-
-void KAdvancedConfig::setTilingRaisePolicy(int l)
-{
-    tilingRaiseCombo->setCurrentIndex(l);
-}
-
-void KAdvancedConfig::tilingOnChanged(bool a)
-{
-    tilingLayoutLabel->setEnabled(a);
-    tilingLayoutCombo->setEnabled(a);
-    tilingRaiseLabel->setEnabled(a);
-    tilingRaiseCombo->setEnabled(a);
 }
 
 void KAdvancedConfig::showEvent(QShowEvent *ev)
@@ -782,31 +701,16 @@ void KAdvancedConfig::load(void)
 //     interactiveTrigger->setValue(0);
 //     iTLabel->setEnabled(false);
 //     interactiveTrigger->hide();
-    if (key == "Random")
-        setPlacement(RANDOM_PLACEMENT);
-    else if (key == "Cascade")
-        setPlacement(CASCADE_PLACEMENT); //CT 31jan98
-    //CT 31mar98 manual placement
-    else if (key == "manual")
-        setPlacement(MANUAL_PLACEMENT);
-    else if (key == "Centered")
-        setPlacement(CENTERED_PLACEMENT);
-    else if (key == "ZeroCornered")
-        setPlacement(ZEROCORNERED_PLACEMENT);
-    else if (key == "Maximizing")
-        setPlacement(MAXIMIZING_PLACEMENT);
-    else
-        setPlacement(SMART_PLACEMENT);
+    int idx = placementCombo->findData(key);
+    if (idx < 0)
+        idx = placementCombo->findData("Smart");
+    placementCombo->setCurrentIndex(idx);
 //  }
 
     setHideUtilityWindowsForInactive(cg.readEntry(KWIN_HIDE_UTILITY, true));
     setInactiveTabsSkipTaskbar(cg.readEntry(KWIN_INACTIVE_SKIP_TASKBAR, false));
     setAutogroupSimilarWindows(cg.readEntry(KWIN_AUTOGROUP_SIMILAR, false));
     setAutogroupInForeground(cg.readEntry(KWIN_AUTOGROUP_FOREGROUND, true));
-
-    setTilingOn(cg.readEntry(KWIN_TILINGON, false));
-    setTilingLayout(cg.readEntry(KWIN_TILING_DEFAULT_LAYOUT, 0));
-    setTilingRaisePolicy(cg.readEntry(KWIN_TILING_RAISE_POLICY, 0));
 
     emit KCModule::changed(false);
 }
@@ -823,17 +727,7 @@ void KAdvancedConfig::save(void)
     cg.writeEntry(KWIN_SHADEHOVER_INTERVAL, v);
 
     // placement policy --- CT 31jan98 ---
-    v = getPlacement();
-    if (v == RANDOM_PLACEMENT)
-        cg.writeEntry(KWIN_PLACEMENT, "Random");
-    else if (v == CASCADE_PLACEMENT)
-        cg.writeEntry(KWIN_PLACEMENT, "Cascade");
-    else if (v == CENTERED_PLACEMENT)
-        cg.writeEntry(KWIN_PLACEMENT, "Centered");
-    else if (v == ZEROCORNERED_PLACEMENT)
-        cg.writeEntry(KWIN_PLACEMENT, "ZeroCornered");
-    else if (v == MAXIMIZING_PLACEMENT)
-        cg.writeEntry(KWIN_PLACEMENT, "Maximizing");
+    cg.writeEntry(KWIN_PLACEMENT, placementCombo->itemData(placementCombo->currentIndex()).toString());
 //CT 13mar98 manual and interactive placement
 //   else if (v == MANUAL_PLACEMENT)
 //     cg.writeEntry(KWIN_PLACEMENT, "Manual");
@@ -841,8 +735,6 @@ void KAdvancedConfig::save(void)
 //       QString tmpstr = QString("Interactive,%1").arg(interactiveTrigger->value());
 //       cg.writeEntry(KWIN_PLACEMENT, tmpstr);
 //   }
-    else
-        cg.writeEntry(KWIN_PLACEMENT, "Smart");
 
     cg.writeEntry(KWIN_HIDE_UTILITY, hideUtilityWindowsForInactive->isChecked());
     cg.writeEntry(KWIN_INACTIVE_SKIP_TASKBAR, inactiveTabsSkipTaskbar->isChecked());
@@ -857,10 +749,6 @@ void KAdvancedConfig::save(void)
         QDBusConnection::sessionBus().send(message);
 
     }
-
-    cg.writeEntry(KWIN_TILINGON, tilingOn->isChecked());
-    cg.writeEntry(KWIN_TILING_DEFAULT_LAYOUT, tilingLayoutCombo->currentIndex());
-    cg.writeEntry(KWIN_TILING_RAISE_POLICY, tilingRaiseCombo->currentIndex());
     emit KCModule::changed(false);
 }
 
@@ -868,26 +756,12 @@ void KAdvancedConfig::defaults()
 {
     setShadeHover(false);
     setShadeHoverInterval(250);
-    setPlacement(SMART_PLACEMENT);
+    placementCombo->setCurrentIndex(0); // default to Smart
     setHideUtilityWindowsForInactive(true);
-    setTilingOn(false);
-    setTilingLayout(0);
-    setTilingRaisePolicy(0);
     setInactiveTabsSkipTaskbar(false);
     setAutogroupSimilarWindows(false);
     setAutogroupInForeground(true);
     emit KCModule::changed(true);
-}
-
-// placement policy --- CT 31jan98 ---
-int KAdvancedConfig::getPlacement()
-{
-    return placementCombo->currentIndex();
-}
-
-void KAdvancedConfig::setPlacement(int plac)
-{
-    placementCombo->setCurrentIndex(plac);
 }
 
 
@@ -1115,7 +989,7 @@ void KMovingConfig::load(void)
 void KMovingConfig::save(void)
 {
     KConfigGroup cg(config, "Windows");
-
+    cg.writeEntry(KWIN_GEOMETRY, getGeometryTip());
     cg.writeEntry(KWIN_MOVE_RESIZE_MAXIMIZED, moveResizeMaximized->isChecked());
 
 

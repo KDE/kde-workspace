@@ -26,9 +26,9 @@
 #include <kfilemetainfo.h>
 
 // Nepomuk
-#include <Nepomuk/Resource>
-#include <Nepomuk/ResourceManager>
-#include <Nepomuk/Tag>
+#include <Nepomuk2/Resource>
+#include <Nepomuk2/ResourceManager>
+#include <Nepomuk2/Tag>
 
 MetaDataEngine::MetaDataEngine(QObject* parent, const QVariantList& args) :
         Plasma::DataEngine(parent, args)
@@ -41,7 +41,7 @@ MetaDataEngine::~MetaDataEngine()
 
 void MetaDataEngine::init()
 {
-    Nepomuk::ResourceManager::instance()->init();
+    Nepomuk2::ResourceManager::instance()->init();
 }
 
 bool MetaDataEngine::sourceRequestEvent(const QString &name)
@@ -85,9 +85,9 @@ bool MetaDataEngine::updateSourceEvent(const QString &name)
     // Get picture tags through Nepomuk
     QUrl uri = QUrl(name);
     QStringList tags;
-    Nepomuk::Resource res( uri);
-    QList<Nepomuk::Tag> picTags = res.tags();
-    Q_FOREACH(const Nepomuk::Tag& tag, picTags) {
+    Nepomuk2::Resource res( uri);
+    QList<Nepomuk2::Tag> picTags = res.tags();
+    Q_FOREACH(const Nepomuk2::Tag& tag, picTags) {
         tags.append(tag.label() + ", ");
     }
 

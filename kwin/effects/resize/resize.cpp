@@ -19,17 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "resize.h"
+// KConfigSkeleton
+#include "resizeconfig.h"
 
-#ifdef KWIN_HAVE_OPENGL
 #include <kwinglutils.h>
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrender.h>
 #endif
 
 #include <KColorScheme>
-#include <KDE/KConfigGroup>
+
+#include <QtGui/QVector2D>
 
 namespace KWin
 {
@@ -69,12 +70,9 @@ void ResizeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Window
 {
     if (m_active && w == m_resizeWindow) {
         if (m_features & TextureScale) {
-            data.xTranslate += m_currentGeometry.x() - m_originalGeometry.x();
-            data.xScale *= m_currentGeometry.width();
-            data.xScale /= m_originalGeometry.width();
-            data.yTranslate += m_currentGeometry.y() - m_originalGeometry.y();
-            data.yScale *= m_currentGeometry.height();
-            data.yScale /= m_originalGeometry.height();
+            data += (m_currentGeometry.topLeft() - m_originalGeometry.topLeft());
+            data *= QVector2D(float(m_currentGeometry.width())/m_originalGeometry.width(),
+                              float(m_currentGeometry.height())/m_originalGeometry.height());
         }
         effects->paintWindow(w, mask, region, data);
 
@@ -84,17 +82,11 @@ void ResizeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Window
             float alpha = 0.8f;
             QColor color = KColorScheme(QPalette::Normal, KColorScheme::Selection).background().color();
 
-#ifdef KWIN_HAVE_OPENGL
-            if (effects->compositingType() == OpenGLCompositing) {
-#ifndef KWIN_HAVE_OPENGLES
-                glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
+            if (effects->isOpenGLCompositing()) {
                 GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
                 vbo->reset();
                 vbo->setUseColor(true);
-                if (ShaderManager::instance()->isValid()) {
-                    ShaderManager::instance()->pushShader(ShaderManager::ColorShader);
-                }
+                ShaderBinder binder(ShaderManager::ColorShader);
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 color.setAlphaF(alpha);
@@ -111,15 +103,8 @@ void ResizeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Window
                 }
                 vbo->setData(verts.count() / 2, 2, verts.data(), NULL);
                 vbo->render(GL_TRIANGLES);
-                if (ShaderManager::instance()->isValid()) {
-                    ShaderManager::instance()->popShader();
-                }
                 glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-                glPopAttrib();
-#endif
             }
-#endif
 
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
             if (effects->compositingType() == XRenderCompositing) {
@@ -140,11 +125,11 @@ void ResizeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Window
 
 void ResizeEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = effects->effectConfig("Resize");
     m_features = 0;
-    if (conf.readEntry("TextureScale", true))
+    ResizeConfig::self()->readConfig();
+    if (ResizeConfig::textureScale())
         m_features |= TextureScale;
-    if (conf.readEntry("Outline", false))
+    if (ResizeConfig::outline())
         m_features |= Outline;
 }
 

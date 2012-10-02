@@ -21,16 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "magnifier.h"
+// KConfigSkeleton
+#include "magnifierconfig.h"
 
 #include <kwinconfig.h>
 
 #include <kaction.h>
 #include <kactioncollection.h>
-#include <kconfiggroup.h>
 #include <kstandardaction.h>
 
 #include <kwinglutils.h>
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
 #include <kwinxrenderutils.h>
+#endif
 
 namespace KWin
 {
@@ -66,21 +69,29 @@ MagnifierEffect::~MagnifierEffect()
     delete m_fbo;
     delete m_texture;
     delete m_pixmap;
+    // Save the zoom value.
+    KConfigGroup conf = EffectsHandler::effectConfig("Magnifier");
+    conf.writeEntry("InitialZoom", target_zoom);
+    conf.sync();
 }
 
 bool MagnifierEffect::supported()
 {
     return  effects->compositingType() == XRenderCompositing ||
-            (effects->compositingType() == OpenGLCompositing && GLRenderTarget::blitSupported());
+            (effects->isOpenGLCompositing() && GLRenderTarget::blitSupported());
 }
 
 void MagnifierEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = EffectsHandler::effectConfig("Magnifier");
+    MagnifierConfig::self()->readConfig();
     int width, height;
-    width = conf.readEntry("Width", 200);
-    height = conf.readEntry("Height", 200);
+    width = MagnifierConfig::width();
+    height = MagnifierConfig::height();
     magnifier_size = QSize(width, height);
+    // Load the saved zoom value.
+    target_zoom = MagnifierConfig::initialZoom();
+    if (target_zoom != zoom)
+        toggle();
 }
 
 void MagnifierEffect::prePaintScreen(ScreenPrePaintData& data, int time)
@@ -118,7 +129,7 @@ void MagnifierEffect::paintScreen(int mask, QRegion region, ScreenPaintData& dat
         QRect srcArea(cursor.x() - (double)area.width() / (zoom*2),
                       cursor.y() - (double)area.height() / (zoom*2),
                       (double)area.width() / zoom, (double)area.height() / zoom);
-        if (effects->compositingType() == OpenGLCompositing) {
+        if (effects->isOpenGLCompositing()) {
             m_fbo->blitFromFramebuffer(srcArea);
             // paint magnifier
             m_texture->bind();
@@ -157,15 +168,12 @@ void MagnifierEffect::paintScreen(int mask, QRegion region, ScreenPaintData& dat
             verts << area.right() + FRAME_WIDTH << area.bottom() + FRAME_WIDTH;
             verts << area.right() + FRAME_WIDTH << area.bottom() + 1;
             vbo->setData(verts.size() / 2, 2, verts.constData(), NULL);
-            if (ShaderManager::instance()->isValid()) {
-                ShaderManager::instance()->pushShader(ShaderManager::ColorShader);
-            }
+
+            ShaderBinder binder(ShaderManager::ColorShader);
             vbo->render(GL_TRIANGLES);
-            if (ShaderManager::instance()->isValid()) {
-                ShaderManager::instance()->popShader();
-            }
         }
         if (effects->compositingType() == XRenderCompositing) {
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
             if (!m_pixmap || m_pixmap->size() != srcArea.size()) {
                 delete m_pixmap;
                 m_pixmap = new QPixmap(srcArea.size());
@@ -199,6 +207,7 @@ void MagnifierEffect::paintScreen(int mask, QRegion region, ScreenPaintData& dat
                                           { area.x(), area.y(), FRAME_WIDTH, area.height()-FRAME_WIDTH} };
             XRenderColor c = preMultiply(QColor(0,0,0,255));
             XRenderFillRectangles(display(), PictOpSrc, effects->xrenderBufferPicture(), &c, rects, 4);
+#endif
         }
     }
 }
@@ -256,8 +265,10 @@ void MagnifierEffect::zoomOut()
 
 void MagnifierEffect::toggle()
 {
-    if (target_zoom == 1.0) {
-        target_zoom = 2;
+    if (zoom == 1.0) {
+        if (target_zoom == 1.0) {
+            target_zoom = 2;
+        }
         if (!polling) {
             polling = true;
             effects->startMousePolling();

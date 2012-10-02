@@ -129,7 +129,7 @@ bool GLSLBlurShader::supported()
 {
     if (!GLPlatform::instance()->supports(GLSL))
         return false;
-    if (!ShaderManager::instance()->isValid())
+    if (effects->compositingType() == OpenGL1Compositing)
         return false;
 
     (void) glGetError(); // Clear the error state
@@ -396,7 +396,7 @@ void ARBBlurShader::unbind()
 #ifndef KWIN_HAVE_OPENGLES
     int boundObject;
     glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &boundObject);
-    if (boundObject == program) {
+    if (boundObject == (int)program) {
         glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
         glDisable(GL_FRAGMENT_PROGRAM_ARB);
     }

@@ -23,9 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kwinconfig.h>
 
-#ifdef KWIN_HAVE_OPENGL
 #include <kwinglutils.h>
-#endif
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrender.h>
@@ -57,7 +55,7 @@ void ShowPaintEffect::paintScreen(int mask, QRegion region, ScreenPaintData& dat
 {
     painted = QRegion();
     effects->paintScreen(mask, region, data);
-    if (effects->compositingType() == OpenGLCompositing)
+    if (effects->isOpenGLCompositing())
         paintGL();
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
     if (effects->compositingType() == XRenderCompositing)
@@ -75,16 +73,10 @@ void ShowPaintEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
 
 void ShowPaintEffect::paintGL()
 {
-#ifdef KWIN_HAVE_OPENGL
-#ifndef KWIN_HAVE_OPENGLES
-    glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
-#endif
     GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
     vbo->reset();
     vbo->setUseColor(true);
-    if (ShaderManager::instance()->isValid()) {
-        ShaderManager::instance()->pushShader(ShaderManager::ColorShader);
-    }
+    ShaderBinder binder(ShaderManager::ColorShader);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     QColor color = colors[ color_index ];
@@ -102,14 +94,7 @@ void ShowPaintEffect::paintGL()
     }
     vbo->setData(verts.count() / 2, 2, verts.data(), NULL);
     vbo->render(GL_TRIANGLES);
-    if (ShaderManager::instance()->isValid()) {
-        ShaderManager::instance()->popShader();
-    }
     glDisable(GL_BLEND);
-#ifndef KWIN_HAVE_OPENGLES
-    glPopAttrib();
-#endif
-#endif
 }
 
 void ShowPaintEffect::paintXrender()

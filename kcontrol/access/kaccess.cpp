@@ -239,7 +239,7 @@ void KAccessApp::readSettings()
   else
      xkb->ctrls->ax_options &= ~(XkbAX_FeatureFBMask | XkbAX_SlowWarnFBMask);
 
-  _gestureConfirmation = keyboardGroup.readEntry("GestureConfirmation", true);
+  _gestureConfirmation = keyboardGroup.readEntry("GestureConfirmation", false);
 
   _kNotifyModifiers = keyboardGroup.readEntry("kNotifyModifiers", false);
   _kNotifyAccessX = keyboardGroup.readEntry("kNotifyAccessX", false);
@@ -282,7 +282,8 @@ void KAccessApp::readSettings()
   // select AccessX events
   XkbSelectEvents(QX11Info::display(), XkbUseCoreKbd, XkbAllEventsMask, XkbAllEventsMask);
 
-  if (!_artsBell && !_visibleBell && !_gestureConfirmation
+  // do we need to stay running to perform notifications?
+  if (!_artsBell && !_visibleBell && !(_gestures && _gestureConfirmation)
       && !_kNotifyModifiers && !_kNotifyAccessX) {
 
      // We will exit, but the features need to stay configured

@@ -42,12 +42,19 @@ enum State {
     Unmounting = 2
 };
 
+enum OperationResult {
+    Working = 0,
+    Successful = 1,
+    Unsuccessful =2
+};
+
 /**
  * This class evaluates the basic expressions given in the interface.
  */
 class SolidDeviceEngine : public Plasma::DataEngine
 {
     Q_OBJECT
+    friend class SolidDeviceService;
 
 public:
     SolidDeviceEngine( QObject* parent, const QVariantList& args);

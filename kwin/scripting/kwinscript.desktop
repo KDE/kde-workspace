@@ -3,15 +3,37 @@ Type=ServiceType
 X-KDE-ServiceType=KWin/Script
 
 Comment=KWin Script
+Comment[ca]=Script del KWin
 Comment[cs]=Skript KWinu
+Comment[da]=KWin-script
+Comment[de]=KWin-Skript
+Comment[el]=Σενάριο KWin
+Comment[es]=Guion de KWin
+Comment[et]=KWini skript
+Comment[fi]=KWin-skripti
+Comment[hu]=KWin parancsfájl
 Comment[ia]=Script de kwin
+Comment[it]=Script kwin
+Comment[kk]=KWin скрипті
+Comment[km]=ស្គ្រីប KWin
 Comment[nb]=KWin-skript
 Comment[nl]=KWin-scripts
+Comment[pa]=KWin ਸਕ੍ਰਿਪਟ
+Comment[pl]=Skrypt KWin
 Comment[pt]=Programa do KWin
 Comment[pt_BR]=Script do KWin
+Comment[sk]=KWin skript
+Comment[sl]=Skript KWin
+Comment[sr]=К‑винова скрипта
+Comment[sr@ijekavian]=К‑винова скрипта
+Comment[sr@ijekavianlatin]=KWinova skripta
+Comment[sr@latin]=KWinova skripta
 Comment[sv]=Kwin-skript
+Comment[tr]=KWin Betiği
 Comment[uk]=Скрипт KWin
+Comment[vi]=Tập lệnh KWin
 Comment[x-test]=xxKWin Scriptxx
+Comment[zh_CN]=KWin 脚本
 Comment[zh_TW]=KWin 文稿
 
 [PropertyDef::X-Plasma-API]

@@ -74,6 +74,7 @@ Name[th]=ภาพ
 Name[tr]=Resim
 Name[ug]=سۈرەت
 Name[uk]=Зображення
+Name[vi]=Ảnh
 Name[wa]=Imådje
 Name[x-test]=xxImagexx
 Name[zh_CN]=图像
@@ -92,8 +93,8 @@ X-KDE-PluginInfo-Depends=
 X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-EnabledByDefault=true
 
-MimeType=image/jpeg;image/png;image/svg+xml;image/svg+xml-compressed;
-X-Plasma-DropMimeTypes=image/jpeg,image/png,image/svg+xml,image/svg+xml-compressed
+MimeType=image/jpeg;image/png;image/svg+xml;image/svg+xml-compressed;image/bmp;
+X-Plasma-DropMimeTypes=image/jpeg,image/png,image/svg+xml,image/svg+xml-compressed,image/bmp
 
 [Desktop Action SingleImage]
 Name=Image
@@ -170,6 +171,7 @@ Name[th]=ภาพ
 Name[tr]=Resim
 Name[ug]=سۈرەت
 Name[uk]=Зображення
+Name[vi]=Ảnh
 Name[wa]=Imådje
 Name[x-test]=xxImagexx
 Name[zh_CN]=图像
