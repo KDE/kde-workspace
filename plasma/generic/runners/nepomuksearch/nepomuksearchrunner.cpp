@@ -17,7 +17,6 @@
 */
 
 #include "nepomuksearchrunner.h"
-#include "queryclientwrapper.h"
 
 #include <QMenu>
 #include <QMimeData>
@@ -33,7 +32,8 @@
 #include <Nepomuk2/Resource>
 #include <Nepomuk2/Variant>
 #include <Nepomuk2/ResourceManager>
-#include <Nepomuk2/Query/QueryServiceClient>
+#include <Nepomuk2/Query/ResultIterator>
+#include <Nepomuk2/Query/QueryParser>
 
 #include <KFileItemActions>
 #include <KFileItemList>
@@ -54,6 +54,7 @@ namespace {
      * roughly equal the time between key presses of an average user.
      */
     const int s_userActionTimeout = 400;
+    const int s_maxResults = 10;
 }
 
 
@@ -94,7 +95,7 @@ void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
 {
     kDebug() << &context << context.query();
 
-    if (Nepomuk2::ResourceManager::instance()->initialized()) {
+    if( ResourceManager::instance()->initialized() ) {
         // This method needs to be thread-safe since KRunner does simply start new threads whenever
         // the query term changes.
         m_mutex.lock();
@@ -113,10 +114,16 @@ void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
         }
 
         // no queries on very short strings
-        if (Query::QueryServiceClient::serviceAvailable() && context.query().count() >= 3) {
-            QueryClientWrapper queryWrapper(this, &context);
-            queryWrapper.runQuery();
-            m_waiter.wakeAll();
+        // We use a default length of 4 characters cause virtuoso has a min length requirement of 4
+        // leading characters. This way we avoid using the expensive regex search
+        if( context.query().length() >= 4 ) {
+            Query::Query query = Query::QueryParser::parseQuery(context.query());
+            query.setLimit(s_maxResults);
+
+            Query::ResultIterator it( query );
+            while( it.next() ) {
+                context.addMatch(context.query(), convertToQueryMatch(it.result()));
+            }
         }
     }
 }
@@ -229,7 +236,7 @@ QMimeData * Nepomuk2::SearchRunner::mimeDataForMatch(const Plasma::QueryMatch *m
 {
     Nepomuk2::Resource res = match->data().value<Nepomuk2::Resource>();
 
-    QUrl url = KUrl(res.property(QUrl("http://www.semanticdesktop.org/ontologies/2007/01/19/nie#url")).toString());
+    QUrl url = res.property(NIE::url()).toUrl();
 
     if (!url.isValid()) {
         return 0;
@@ -242,6 +249,60 @@ QMimeData * Nepomuk2::SearchRunner::mimeDataForMatch(const Plasma::QueryMatch *m
     result->setUrls(urls);
     return result;
 }
+
+namespace {
+    qreal normalizeScore(double score) {
+        // no search result is ever a perfect match, NEVER. And mostly, when typing a URL
+        // the users wants to open that url instead of using the search result. Thus, all
+        // search results need to have a lower score than URLs which can drop to 0.5
+        // And in the end, for 10 results, the score is not that important at the moment.
+        // This can be improved in the future.
+        // We go the easy way here and simply cut the score at 0.4
+        return qMin(0.4, score);
+    }
+}
+
+// FIXME: Avoid using the Resource class. Request the extra properties from the query
+Plasma::QueryMatch Nepomuk2::SearchRunner::convertToQueryMatch(const Nepomuk2::Query::Result& result)
+{
+    Plasma::QueryMatch match( this );
+    match.setType(Plasma::QueryMatch::PossibleMatch);
+    match.setRelevance(normalizeScore(result.score()));
+
+    Nepomuk2::Resource res = result.resource();
+
+    QString type;
+    QString iconName;
+
+    KMimeType::Ptr mimetype;
+    if (res.hasProperty(NIE::mimeType())) {
+        mimetype = KMimeType::mimeType(res.property(NIE::mimeType()).toString());
+    }
+    if (!mimetype && res.isFile() && res.toFile().url().isLocalFile()) {
+        const KUrl url(res.toFile().url());
+        mimetype = KMimeType::findByUrl(url);
+    }
+
+    if (mimetype) {
+        type = mimetype->comment();
+        iconName = mimetype->iconName();
+    }
+
+    if (type.isEmpty() ) {
+        type = Nepomuk2::Types::Class(res.type()).label();
+        iconName = res.genericIcon();
+    }
+
+    match.setText(res.genericLabel());
+    match.setSubtext(type);
+    match.setIcon(KIcon(iconName.isEmpty() ? QString::fromLatin1("nepomuk") : iconName));
+
+    match.setData(qVariantFromValue(res));
+    match.setId(KUrl(res.uri()).url());
+
+    return match;
+}
+
 
 K_EXPORT_PLASMA_RUNNER(nepomuksearchrunner, Nepomuk2::SearchRunner)
 

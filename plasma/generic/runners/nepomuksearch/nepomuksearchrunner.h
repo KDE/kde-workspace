@@ -65,6 +65,12 @@ namespace Nepomuk2 {
          */
         QList<QAction*> actionsFromMenu(QMenu *menu, const QString &prefix = QString(), QObject *parent = 0);
 
+        /**
+         * Converts a Nepomuk Query Result to a Plasma::QueryMatch, which can be used
+         * in the runner context
+         */
+        Plasma::QueryMatch convertToQueryMatch( const Query::Result& result );
+
         QMutex m_mutex;
         QWaitCondition m_waiter;
 

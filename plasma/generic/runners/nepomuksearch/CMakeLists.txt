@@ -8,8 +8,7 @@ include_directories(
 )
 
 SET(nepomuksearchrunner_SRCS
-	nepomuksearchrunner.cpp
-    queryclientwrapper.cpp
+    nepomuksearchrunner.cpp
 )
 
 kde4_add_plugin(krunner_nepomuksearchrunner ${nepomuksearchrunner_SRCS})
