@@ -97,7 +97,7 @@ PlasmaCore.Dialog {
         id: mainItem
         width: maximumWidth
         height: maximumHeight
-        property int maximumWidth: theme.defaultFont.mSize.width * 25
+        property int maximumWidth: theme.defaultFont.mSize.width * 35
         property int maximumHeight: theme.defaultFont.mSize.width * 8
         property int minimumWidth: maximumWidth
         property int minimumHeight: maximumHeight
