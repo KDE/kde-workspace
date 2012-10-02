@@ -94,7 +94,7 @@
       <whatsthis></whatsthis>
     </entry>
     <entry key="GreeterQML" type="String">
-      <default>kscreenlocker/lockscreen.qml</default>
+      <default>org.kde.passworddialog</default>
       <label></label>
       <whatsthis></whatsthis>
     </entry>
