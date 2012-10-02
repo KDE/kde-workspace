@@ -1,5 +1,6 @@
 /*
  *   Copyright 2008 by Petri Damsten <damu@iki.fi>
+ *   Copyright 2012 by Reza Fatahilah Shah <rshah0385@kireihana.com>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -24,6 +25,8 @@
 #include <Plasma/Wallpaper>
 #include "ui_config.h"
 
+class BackgroundListModel;
+
 class Color : public Plasma::Wallpaper
 {
     Q_OBJECT
@@ -33,24 +36,27 @@ class Color : public Plasma::Wallpaper
         virtual void save(KConfigGroup &config);
         virtual void paint(QPainter* painter, const QRectF& exposedRect);
         virtual QWidget* createConfigurationInterface(QWidget* parent);
+        void generatePainting(int mode, QPainter* painter, const QRectF& exposedRect, const QRectF &boundingRect) const;
 
     Q_SIGNALS:
         void settingsChanged(bool modified);
 
     protected:
-        virtual void init(const KConfigGroup &config);        
+        virtual void init(const KConfigGroup &config);
 
     protected slots:
-        void settingsModified();
+        void backgroundModeChanged(const QModelIndex &index);
+
+    private slots:
+        void widgetChanged();
 
     private:
         Ui::Config m_ui;
+        BackgroundListModel *m_model;
         QColor m_color1;
         QColor m_color2;
 
         int m_backgroundMode;
 };
-
-K_EXPORT_PLASMA_WALLPAPER(color, Color)
 
 #endif

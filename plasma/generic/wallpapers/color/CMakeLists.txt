@@ -2,6 +2,9 @@ project(plasma-wallpaper-color)
 
 set(color_SRCS
     color.cpp
+    backgrounddelegate.cpp
+    backgroundlistmodel.cpp
+    itemsview.cpp
 )
 kde4_add_ui_files(color_SRCS config.ui)
 
