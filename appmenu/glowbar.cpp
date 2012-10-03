@@ -58,10 +58,6 @@ GlowBar::GlowBar(const QPoint pos, uint width)
     m_buffer = QPixmap(zone.size());
 
     setInputMask();
-
-    static QTimer timer;
-    connect(&timer, SIGNAL(timeout()), this, SIGNAL(destroy()));
-    timer.start(30000);
 }
 
 GlowBar::~GlowBar()

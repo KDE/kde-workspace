@@ -42,9 +42,6 @@ public:
 
     void paintEvent(QPaintEvent*);
 
-Q_SIGNALS:
-    void destroy();
-
 private:
     void setInputMask();
     Plasma::Svg *m_svg;

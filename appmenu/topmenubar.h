@@ -56,11 +56,14 @@ protected:
 private Q_SLOTS:
     void slotAboutToHide();
     void slotMouseTracker();
-    void slotDestroyGlowBar();
+    void slotHideGlowBar();
 private:
+    void deleteGlowBar();
     QRect triggerRect();
     WId m_wid;
     QTimer* m_mouseTracker;
+    QTimer* m_hideGlowTimer;
+    QPoint m_prevCursorPos;
     GlowBar* m_glowBar;
 };
 

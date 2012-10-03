@@ -38,16 +38,18 @@
 TopMenuBar::TopMenuBar(QMenu *menu)
     : MenuBar(menu),
     m_mouseTracker(new QTimer(this)),
+    m_hideGlowTimer(new QTimer(this)),
     m_glowBar(0)
 {
     connect(this, SIGNAL(aboutToHide()), this, SLOT(slotAboutToHide()));
     connect(m_mouseTracker, SIGNAL(timeout()), this, SLOT(slotMouseTracker()));
+    connect(m_hideGlowTimer, SIGNAL(timeout()), this, SLOT(slotHideGlowBar()));
 }
 
 TopMenuBar::~TopMenuBar()
 {
-    disconnect(m_mouseTracker, SIGNAL(timeout()), this, SLOT(slotMouseTracker()));
     delete m_mouseTracker;
+    delete m_hideGlowTimer;
     if (m_glowBar) {
         m_glowBar->hide();
         delete m_glowBar;
@@ -58,10 +60,10 @@ TopMenuBar::~TopMenuBar()
 void TopMenuBar::enableMouseTracking(bool enable) {
     if (enable) {
         m_mouseTracker->start(250);
-        slotDestroyGlowBar();
+        deleteGlowBar();
         m_glowBar = new GlowBar(triggerRect().topLeft(), triggerRect().width());
-        connect(m_glowBar, SIGNAL(destroy()), this, SLOT(slotDestroyGlowBar()));
         m_glowBar->show();
+        m_hideGlowTimer->start(5000);
     }
     else
         m_mouseTracker->stop();
@@ -83,25 +85,32 @@ void TopMenuBar::slotAboutToHide()
 
 void TopMenuBar::slotMouseTracker()
 {
-    static QPoint prevCursorPos;
-
+    QPoint cursorPos = QCursor::pos();
     if (cursorInMenuBar()) {
         m_mouseTracker->stop();
-        slotDestroyGlowBar();
+        deleteGlowBar();
         show();
     } else  {
-        QPoint cursorPos = QCursor::pos();
         // if cursor move, show glow bar
-        if (!m_glowBar && cursorPos != prevCursorPos) {
+        if (!m_glowBar && cursorPos != m_prevCursorPos) {
             m_glowBar = new GlowBar(triggerRect().topLeft(), triggerRect().width());
-            connect(m_glowBar, SIGNAL(destroy()), this, SLOT(slotDestroyGlowBar()));
             m_glowBar->show();
+            m_hideGlowTimer->start(5000);
         }
-        prevCursorPos = cursorPos;
+    }
+    m_prevCursorPos = cursorPos;
+}
+
+void TopMenuBar::slotHideGlowBar()
+{
+    if (m_prevCursorPos == QCursor::pos()) {
+       deleteGlowBar();
+    } else {
+        m_hideGlowTimer->start(5000);
     }
 }
 
-void TopMenuBar::slotDestroyGlowBar()
+void TopMenuBar::deleteGlowBar()
 {
     if (m_glowBar) {
         m_glowBar->hide();
@@ -109,6 +118,7 @@ void TopMenuBar::slotDestroyGlowBar()
         m_glowBar = 0;
     }
 }
+
 QRect TopMenuBar::triggerRect()
 {
     QPoint triggerPoint = QPoint(x(), y());
