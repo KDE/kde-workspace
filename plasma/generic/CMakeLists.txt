@@ -4,7 +4,6 @@ endif(NOT KDE_PLATFORM_FEATURE_DISABLE_DEPRECATED)
 
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    add_subdirectory(containmentactions)
-   add_subdirectory(tools)
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 
 add_subdirectory(applets)
