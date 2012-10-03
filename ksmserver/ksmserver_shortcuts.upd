@@ -7,3 +7,4 @@ Key=Log Out
 Key=Log Out Without Confirmation
 Key=Reboot Without Confirmation
 Options=overwrite
+RemoveGroup=kscreenlocker
