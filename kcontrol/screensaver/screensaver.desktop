@@ -13,6 +13,7 @@ X-KDE-Weight=70
 
 Name=Screen Locker
 Name[cs]=Zámek obrazovky
+Name[es]=Bloqueador de pantalla
 Name[hu]=Képernyőzároló
 Name[ia]=Blocator de schermo
 Name[nl]=Schermvergrendelaar
@@ -25,6 +26,7 @@ Name[x-test]=xxScreen Lockerxx
 
 Comment=Screen Locker Settings
 Comment[cs]=Nastavení zámku obrazovky
+Comment[es]=Preferencias del bloqueador de pantalla
 Comment[hu]=A képernyőzároló beállításai
 Comment[ia]=Preferentias de Blocator de schermo
 Comment[nl]=Instellingen voor schermvergrendeling
@@ -37,6 +39,7 @@ Comment[x-test]=xxScreen Locker Settingsxx
 
 X-KDE-Keywords=screensavers,Priority,locking,security
 X-KDE-Keywords[cs]=spořiče obrazovky,priorita,zamykání,bezpečnost
+X-KDE-Keywords[es]=salvapantallas,Prioridad,bloqueo,seguridad
 X-KDE-Keywords[hu]=képernyővédők,Prioritás,zárolás,biztonság
 X-KDE-Keywords[ia]=Salvatores de schermo,Prioritate,blocante,securitate
 X-KDE-Keywords[nl]=schermbeveiliging,prioriteit,vergrendeling,beveiliging
