@@ -165,6 +165,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
       macro_optional_add_subdirectory(khotkeys)
       macro_optional_add_subdirectory(kwrited)
       macro_optional_add_subdirectory(ksystraycmd)
+      macro_optional_add_subdirectory(appmenu)
       # data
       macro_optional_add_subdirectory(cursors)
    endif(NOT WIN32)
