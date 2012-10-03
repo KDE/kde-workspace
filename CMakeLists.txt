@@ -13,11 +13,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 #search packages used by KDE
 set(QT_MIN_VERSION "4.7.0")
 set(KDE_MIN_VERSION "4.8.1")
-set(SOPRANO_MIN_VERSION "2.7.56")
 
 OPTION(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
 
 find_package(KDE4 ${KDE_MIN_VERSION} REQUIRED)
+include(KDE4Defaults)
+
 find_package(Strigi REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(KActivities 6.0.0 REQUIRED)
@@ -85,9 +86,9 @@ macro_log_feature(GOOGLEGADGETS_FOUND "GoogleGadgets" "Google Gadgets library" "
 macro_optional_find_package(PythonLibrary)
 macro_log_feature(PYTHONLIBRARY_FOUND "Python" "Python scripting language" "http://python.org" FALSE "" "Needed to build plasma scriptengine for python.")
 
-include(MacroLibrary)
-include(KDE4Defaults)
-
+set(SOPRANO_MIN_VERSION "2.7.56")
+macro_optional_find_package(Soprano)
+macro_log_feature(Soprano_FOUND "Soprano" "Semantic Desktop Storing" "http://soprano.sourceforge.net" FALSE "${SOPRANO_MIN_VERSION}" "Required to build Nepomuk features.")
 macro_optional_find_package(NepomukCore)
 macro_log_feature(NepomukCore_FOUND "Nepomuk" "Nepomuk Core Library" "nepomuk-core" FALSE "" "Required to build Nepomuk features.")
 macro_optional_find_package(Boost)

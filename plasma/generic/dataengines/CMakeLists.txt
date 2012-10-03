@@ -22,9 +22,9 @@ add_subdirectory(weather)
 add_subdirectory(statusnotifieritem)
 add_subdirectory(share)
 
-if (NepomukCore_FOUND)
+if (NepomukCore_FOUND AND Soprano_FOUND)
     add_subdirectory(metadata)
-endif (NepomukCore_FOUND)
+endif ()
 
 if(Boost_FOUND AND KDEPIMLIBS_FOUND)
    if(AKONADI_FOUND)
