@@ -106,6 +106,15 @@ PlasmaCore.Dialog {
         property int startY: 0
         property int startScreenX: 0
         property int startScreenY: 0
+        hoverEnabled: true
+        state: "controlsHidden"
+        onContainsMouseChanged: {
+            if (containsMouse) {
+                mainItem.state = "controlsShown"
+            } else {
+                mainItem.state = "controlsHidden"
+            }
+        }
         onPressed: {
             startX = mouse.x + lastNotificationPopup.margins.left
             startY = mouse.y + lastNotificationPopup.margins.top
@@ -225,6 +234,7 @@ PlasmaCore.Dialog {
 
         Column {
             id: navigationButtonsColumn
+            opacity: 0
             visible: backButton.enabled || nextButton.enabled
             anchors {
                 left: parent.left
@@ -255,5 +265,52 @@ PlasmaCore.Dialog {
                 }
             }
         }
+        PlasmaComponents.ToolButton {
+            id: closeButton
+            opacity: 0
+            iconSource: "window-close"
+            width: theme.smallMediumIconSize
+            anchors {
+                right: parent.right
+                top: parent.top
+            }
+            onClicked: {
+                lastNotificationPopup.visible = false
+                lastNotificationTimer.running = false
+            }
+        }
+        states: [
+            State {
+                name: "controlsShown"
+                PropertyChanges {
+                    target: navigationButtonsColumn
+                    opacity: 1
+                }
+                PropertyChanges {
+                    target: closeButton
+                    opacity: 1
+                }
+            },
+            State {
+                name: "controlsHidden"
+                PropertyChanges {
+                    target: navigationButtonsColumn
+                    opacity: 0
+                }
+                PropertyChanges {
+                    target: closeButton
+                    opacity: 0
+                }
+            }
+        ]
+        transitions: [
+            Transition {
+             NumberAnimation {
+                 properties: "opacity"
+                 easing.type: Easing.InOutQuad
+                 duration: 250
+            }
+         }
+        ]
     }
 }
