@@ -93,7 +93,7 @@ PlasmaCore.Dialog {
         }
     }
 
-    mainItem: Item {
+    mainItem: MouseEventListener {
         id: mainItem
         width: maximumWidth
         height: maximumHeight
@@ -101,6 +101,47 @@ PlasmaCore.Dialog {
         property int maximumHeight: theme.defaultFont.mSize.width * 8
         property int minimumWidth: maximumWidth
         property int minimumHeight: maximumHeight
+
+        property int startX: 0
+        property int startY: 0
+        property int startScreenX: 0
+        property int startScreenY: 0
+        onPressed: {
+            startX = mouse.x + lastNotificationPopup.margins.left
+            startY = mouse.y + lastNotificationPopup.margins.top
+            startScreenX = mouse.screenX
+            startScreenY = mouse.screenY
+            lastNotificationTimer.running = false
+        }
+        onReleased: {
+            //FIXME: bind startdragdistance
+            if (mouse.x < backButton.width ||
+                mouse.x > nextButton.x ||
+                Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
+                lastNotificationTimer.restart()
+            } else {
+                lastNotificationPopup.visible = false
+                lastNotificationTimer.running = false
+            }
+
+            setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(mouse.screenY - startY)), true)
+        }
+        onPositionChanged: {
+            setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(0, mouse.screenY - startY)), false)
+        }
+        onWheelMoved: {
+            lastNotificationTimer.restart()
+            if (notificationsView.moving) {
+                return
+            }
+
+            if (wheel.delta > 0) {
+                notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
+            } else {
+                notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
+            }
+        }
+        
 
         Timer {
             id: lastNotificationTimer
@@ -125,46 +166,9 @@ PlasmaCore.Dialog {
                 id: lastNotificationsModel
             }
             interactive: false
-            delegate: MouseEventListener {
+            delegate: Item {
                 width: notificationsView.width
                 height: notificationsView.height
-                property int startX: 0
-                property int startY: 0
-                property int startScreenX: 0
-                property int startScreenY: 0
-                onPressed: {
-                    startX = mouse.x + lastNotificationPopup.margins.left
-                    startY = mouse.y + lastNotificationPopup.margins.top
-                    startScreenX = mouse.screenX
-                    startScreenY = mouse.screenY
-                    lastNotificationTimer.running = false
-                }
-                onReleased: {
-                    //FIXME: bind startdragdistance
-                    if (Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
-                        lastNotificationTimer.restart()
-                    } else {
-                        lastNotificationPopup.visible = false
-                        lastNotificationTimer.running = false
-                    }
-
-                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX - lastNotificationPopup.margins.left), Math.max(mouse.screenY - startY)), true)
-                }
-                onPositionChanged: {
-                    setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX - lastNotificationPopup.margins.left), Math.max(0, mouse.screenY - startY)), false)
-                }
-                onWheelMoved: {
-                    lastNotificationTimer.restart()
-                    if (notificationsView.moving) {
-                        return
-                    }
-
-                    if (wheel.delta > 0) {
-                        notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
-                    } else {
-                        notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
-                    }
-                }
                 QIconItem {
                     id: appIconItem
                     icon: model.appIcon
