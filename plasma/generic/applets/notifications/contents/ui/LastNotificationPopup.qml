@@ -115,8 +115,7 @@ PlasmaCore.Dialog {
         }
         onReleased: {
             //FIXME: bind startdragdistance
-            if (mouse.x < backButton.width ||
-                mouse.x > nextButton.x ||
+            if ((navigationButtonsColumn.visible && mouse.x < navigationButtonsColumn.width) ||
                 Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
                 lastNotificationTimer.restart()
             } else {
@@ -141,7 +140,6 @@ PlasmaCore.Dialog {
                 notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
             }
         }
-        
 
         Timer {
             id: lastNotificationTimer
@@ -157,8 +155,8 @@ PlasmaCore.Dialog {
             snapMode: ListView.SnapOneItem
             orientation: ListView.Horizontal
             anchors {
-                left: backButton.right
-                right: nextButton.left
+                left: (0&&navigationButtonsColumn.visible) ? navigationButtonsColumn.right : parent.left
+                right: parent.right
                 top: parent.top
                 bottom: parent.bottom
             }
@@ -178,6 +176,7 @@ PlasmaCore.Dialog {
                     anchors {
                         left: parent.left
                         verticalCenter: parent.verticalCenter
+                        leftMargin: navigationButtonsColumn.visible ? navigationButtonsColumn.width : 0
                     }
                 }
                 QImageItem {
@@ -229,35 +228,36 @@ PlasmaCore.Dialog {
             }
         }
 
-        PlasmaComponents.ToolButton {
-            id: backButton
-            iconSource: "go-previous"
-            width: theme.smallMediumIconSize
-            height: width
-            visible: notificationsView.currentIndex > 0
+        Column {
+            id: navigationButtonsColumn
+            visible: backButton.enabled || nextButton.enabled
             anchors {
                 left: parent.left
                 verticalCenter: parent.verticalCenter
             }
-            onClicked: {
-                lastNotificationTimer.restart()
-                notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
-            }
-        }
 
-        PlasmaComponents.ToolButton {
-            id: nextButton
-            iconSource: "go-next"
-            width: theme.smallMediumIconSize
-            height: width
-            visible: notificationsView.currentIndex < notificationsView.count-1
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
+            PlasmaComponents.ToolButton {
+                id: nextButton
+                iconSource: "go-next"
+                width: theme.smallMediumIconSize
+                height: mainItem.height/2 - 4
+                enabled: notificationsView.currentIndex < notificationsView.count-1
+                onClicked: {
+                    lastNotificationTimer.restart()
+                    notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
+                }
             }
-            onClicked: {
-                lastNotificationTimer.restart()
-                notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
+
+            PlasmaComponents.ToolButton {
+                id: backButton
+                iconSource: "go-previous"
+                width: theme.smallMediumIconSize
+                height: mainItem.height/2 - 4
+                enabled: notificationsView.currentIndex > 0
+                onClicked: {
+                    lastNotificationTimer.restart()
+                    notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
+                }
             }
         }
     }
