@@ -20,7 +20,7 @@
 #include "soliddeviceservice.h"
 
 #include <QMetaEnum>
-#include <QTime>
+#include <QDateTime>
 
 #include <KDebug>
 #include <KDiskFreeSpaceInfo>
@@ -114,7 +114,7 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
     setData(name, I18N_NOOP("Emblems"), device.emblems());
     setData(name, I18N_NOOP("State"), Idle);
     setData(name, I18N_NOOP("Operation result"), Working);
-    setData(name, I18N_NOOP("Timestamp"), QTime::currentTime());
+    setData(name, I18N_NOOP("Timestamp"), QDateTime::QDateTime::currentDateTime());
 
     if (device.is<Solid::Processor>()) {
         Solid::Processor *processor = device.as<Solid::Processor>();
