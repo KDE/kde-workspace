@@ -18,29 +18,26 @@
 
 
 #include "keyboardlayout.h"
-#include "keys.h"
+#include<QtCore/QList>
+#include"keys.h"
+#include<QtGui/QMessageBox>
+#include<QtCore/QFile>
+#include<QtCore/QDir>
 
-#include <QtCore/QList>
-#include <QtCore/QFile>
-#include <QtCore/QDir>
-
-#include <QtGui/QMessageBox>
 #include <QtGui/QX11Info>
-
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBrules.h>
-
 #include <fixx11h.h>
 #include <config-workspace.h>
+
 
 
 KeyboardLayout::KeyboardLayout()
 {
 }
-
-void KeyboardLayout::getLayout(QString a,QString cname){
+void KeyboardLayout::generateLayout(QString a,const QString& cname){
     includeSymbol(a,cname);
     int i=a.indexOf("name[Group1]=");
     i+=13;
@@ -57,41 +54,45 @@ void KeyboardLayout::getLayout(QString a,QString cname){
     Keys dum;
     QString r,y;
     for(int k=0;k<st.size();k++){
-        dum.getKey(st.at(k));
+        dum.setKey(st.at(k));
         if(dum.keyname.startsWith("Lat"))
             dum.keyname=alias.getAlias(cname,dum.keyname);
         if(dum.keyname=="TLDE"){
             r=st.at(k);
-            TLDE.getKey(r);
+            TLDE.setKey(r);
+        }
+        if(dum.keyname=="BKSL"){
+            r=st.at(k);
+            BKSL.setKey(r);
         }
         if(dum.keyname.contains("AE")){
             QString ind=dum.keyname.right(2);
             int index=ind.toInt();
             r=st.at(k);
-            AE[index-1].getKey(r);
+            AE[index-1].setKey(r);
         }
         if(dum.keyname.contains("AD")){
             QString ind=dum.keyname.right(2);
             int index=ind.toInt();
             r=st.at(k);
-            AD[index-1].getKey(r);
+            AD[index-1].setKey(r);
         }
         if(dum.keyname.contains("AC")){
             QString ind=dum.keyname.right(2);
             int index=ind.toInt();
             r=st.at(k);
-            AC[index-1].getKey(r);
+            AC[index-1].setKey(r);
         }
         if(dum.keyname.contains("AB")){
             QString ind=dum.keyname.right(2);
             int index=ind.toInt();
             r=st.at(k);
-            AB[index-1].getKey(r);
+            AB[index-1].setKey(r);
         }
     }
 
 }
-void KeyboardLayout::includeSymbol(QString a,QString cname){
+void KeyboardLayout::includeSymbol(QString a,const QString& cname){
     int k=a.indexOf("include");
     a=a.mid(k);
     QList<QString>tobeinclude;
@@ -132,7 +133,7 @@ void KeyboardLayout::includeSymbol(QString a,QString cname){
             int pos = cur.indexOf("{");
             cur=cur.left(pos);
             if(cur.contains(incfile.at(1))){
-                getLayout(symstrlist.at(u),cname);
+                generateLayout(symstrlist.at(u),cname);
                 break;
             }
         }

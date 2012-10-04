@@ -17,14 +17,19 @@
  */
 
 #include "keysym.h"
-#include<QMessageBox>
-#include<QChar>
+#include<QtGui/QMessageBox>
+#include<QtCore/QChar>
 KeySym::KeySym()
 {
     nill=0;
 }
 QString KeySym::getkeyuni(QString opton){
     QString a;
+    QRegExp krx("^U+[0-9]");
+    if(opton.contains(krx)){
+        opton.remove("U");
+        opton.prepend("0x");
+    }
     for(int i=0;i<8291;i++){
         if(keystr[i]==opton){
             a=QString(keyuni[i]);
@@ -36,6 +41,8 @@ QString KeySym::getkeyuni(QString opton){
 }
 
 QString KeySym::keystr[]={
+    "0x2019",
+    "0x0301",
     "0",
     "1",
     "2",
@@ -8330,6 +8337,8 @@ QString KeySym::keystr[]={
 
                           };
 QChar KeySym::keyuni[]={
+    0x2019,
+    0x0301,
     0x30,
     0x31,
     0x32,
@@ -16621,6 +16630,6 @@ QChar KeySym::keyuni[]={
     0x1000E1D,
     0x1000E26,
     0x1000309,
-    '\'',
-    '~'
+    0x2019,
+    0x0301
                   };

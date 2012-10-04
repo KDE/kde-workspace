@@ -17,19 +17,18 @@
  */
 #ifndef ALIASES_H
 #define ALIASES_H
-
-#include <QtCore/QMap>
+#include<QtCore/QMap>
 
 class Aliases
 {
-    QMap<QString,QString>qwerty;
+private:
+	QMap<QString,QString>qwerty;
     QMap<QString,QString>azerty;
     QMap<QString,QString>qwertz;
-
+	QString findaliasdir();
 public:
     Aliases();
-	QString findaliasdir();
-    QString getAlias(QString type,QString name);
+    QString getAlias(const QString &type, const QString &name);
 };
 
 #endif // ALIASES_H

@@ -160,7 +160,7 @@ void AddLayoutDialog::preview(){
     //variant=getvariant(variant);
     /*a.append(selectedLayout);*/
     layoutprev=new KeyboardPainter();
-    layoutprev->getKeyboardLayout(selectedLayout,variant);
+    layoutprev->generateKeyboardLayout(selectedLayout,variant);
     layoutprev->exec();
     layoutprev->setModal(true);
 }

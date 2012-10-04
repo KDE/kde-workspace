@@ -18,14 +18,13 @@
 
 #include "keyboardpainter.h"
 #include "ui_keyboardpainter.h"
-
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
+#include<QtGui/QHBoxLayout>
+#include<QtGui/QVBoxLayout>
 
 KeyboardPainter::KeyboardPainter() :
+    ui(new Ui::keyboardpainter),
     kbframe(new KbPreviewFrame(this)),
-    exitButton(new QPushButton(tr("Close"),this)),
-    ui(new Ui::keyboardpainter)
+    exitButton(new QPushButton(tr("Close"),this))
 {
     ui->setupUi(this);
     kbframe->setFixedSize( 1030, 490 );
@@ -37,14 +36,14 @@ KeyboardPainter::KeyboardPainter() :
     setWindowTitle(kbframe->kblayout.getLayoutName());
 }
 
+void KeyboardPainter::generateKeyboardLayout(QString country, QString variant)
+{
+    kbframe->generateKeyboardLayout(country,variant);
+}
+
 KeyboardPainter::~KeyboardPainter()
 {
     delete ui;
     delete kbframe;
     delete exitButton;
-}
-
-void KeyboardPainter::getKeyboardLayout(QString country, QString variant)
-{
-	kbframe->getKeyboardLayout(country,variant);
 }

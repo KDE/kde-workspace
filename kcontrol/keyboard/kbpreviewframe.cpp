@@ -18,7 +18,6 @@
 
 
 #include "kbpreviewframe.h"
-
 #include <QtGui/QPainter>
 #include <QtGui/QFont>
 
@@ -92,7 +91,7 @@ void KbPreviewFrame::paintAERow(QPainter &painter,int &x,int &y){
 void KbPreviewFrame::paintADRow(QPainter &painter,int &x,int&y){
 
     const int gr1=0,gr2=1,gr3=2,gr4=3,sz=20,kszx=70,kszy=70;
-    const int lv1x=15,lvl2x=40,lvly=10,shify=60;
+    const int lv1x=15,lvl2x=40,lvly=10;
     const QString lev12color="#d4d4d4",lev34color="#FF3300";
 
     const int noADk=12;
@@ -123,8 +122,18 @@ void KbPreviewFrame::paintADRow(QPainter &painter,int &x,int&y){
         x+=kszx;
     }
     painter.drawRect(x,y,kszx,kszy);
-    painter.drawText(x+sz,y+sz,i18n("|"));
-    painter.drawText(x+sz,y+shify,i18n("\\"));
+    for(int j=0;j<kblayout.BKSL.klst.size();j++){
+        if(j==gr2)
+            painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getkeyuni(kblayout.BKSL.klst.at(gr2)));
+        if(j==gr1)
+            painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.BKSL.klst.at(gr1)));
+        painter.setPen(QColor(lev34color));
+        if(j==gr3)
+            painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.BKSL.klst.at(gr3)));
+        if(j==gr4)
+            painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.BKSL.klst.at(gr4)));
+        painter.setPen(QColor(lev12color));
+    }
 }
 
 void KbPreviewFrame::paintACRow(QPainter &painter,int &x,int &y){
@@ -310,14 +319,14 @@ void KbPreviewFrame::paintEvent(QPaintEvent *){
     if(symbol.nill>=120){
         painter.drawRect(strtx,strty,endx,endy);
         const int midx=470,midy=240;
-        painter.drawText(midx,midy,i18n("No preview found"));
+        painter.drawText(midx,midy,i18n("No Preview Found"));
     }
 
 }
 
 
 
-void KbPreviewFrame::getKeyboardLayout(QString country, QString layoutvariant){
+void KbPreviewFrame::generateKeyboardLayout(const QString& country, const QString& layoutvariant){
 
     QString filename=kblayout.findSymbolbasedir();
     filename.append(country);
@@ -331,23 +340,26 @@ void KbPreviewFrame::getKeyboardLayout(QString country, QString layoutvariant){
     symstr=content.split("xkb_symbols ");
 
     if(layoutvariant=="")
-        kblayout.getLayout(symstr.at(1),country);
+        kblayout.generateLayout(symstr.at(1),country);
 
-    for(int i=1;i<symstr.size();i++){
-        QString h=symstr.at(i);
-        int k=h.indexOf("\"");
-        h=h.mid(k);
-        k=h.indexOf("{");
-        h=h.left(k);
-        h=h.remove(" ");
-        QString f="\"";
-        f.append(layoutvariant);
-        f.append("\"");
-        f=f.remove(" ");
+    else
+    {
+        for(int i=1;i<symstr.size();i++){
+            QString h=symstr.at(i);
+            int k=h.indexOf("\"");
+            h=h.mid(k);
+            k=h.indexOf("{");
+            h=h.left(k);
+            h=h.remove(" ");
+            QString f="\"";
+            f.append(layoutvariant);
+            f.append("\"");
+            f=f.remove(" ");
 
-        if(h==f){
-            kblayout.getLayout(symstr.at(i),country);
-            break;
+            if(h==f){
+                kblayout.generateLayout(symstr.at(i),country);
+                break;
+            }
         }
     }
 }

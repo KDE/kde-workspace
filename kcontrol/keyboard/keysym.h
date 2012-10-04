@@ -19,15 +19,16 @@
 #ifndef KEYSYM_H
 #define KEYSYM_H
 #include<QtGui>
-#include<QChar>
-#include<QString>
+#include<QtCore/QChar>
+#include<QtCore/QString>
 class KeySym
 {
+private:
+    static QString keystr[];
+    static QChar keyuni[];
 public:
     KeySym();
     int nill;
-    static QString keystr[];
-    static QChar keyuni[];
     QString getkeyuni(QString opton);
 };
 

@@ -22,7 +22,7 @@
 #include"keysym.h"
 #include"keyaliases.h"
 #include<QPainter>
-#include <QFrame>
+#include <QtGui/QFrame>
 
 class KbPreviewFrame : public QFrame
 {
@@ -35,13 +35,13 @@ private:
 	void paintABRow(QPainter &painter,int &x,int &y);
 	void paintBottomRow(QPainter &painter,int &x,int &y);
 	void paintFnKeys(QPainter &painter,int &x,int &y);
+	KeySym symbol;
+	Aliases alias;
 public:
     explicit KbPreviewFrame(QWidget *parent = 0);
     void paintEvent(QPaintEvent *);
     KeyboardLayout kblayout;
-    KeySym symbol;
-    Aliases alias;
-    void getKeyboardLayout(QString country, QString layoutvariant);
+    void generateKeyboardLayout(const QString &country, const QString &layoutvariant);
 
     
 };
