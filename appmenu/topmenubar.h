@@ -59,6 +59,7 @@ private Q_SLOTS:
     void slotHideGlowBar();
 private:
     void deleteGlowBar();
+    qreal glowBarOpacity();
     QRect triggerRect();
     WId m_wid;
     QTimer* m_mouseTracker;

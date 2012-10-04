@@ -42,6 +42,7 @@ TopMenuBar::TopMenuBar(QMenu *menu)
     : MenuBar(menu),
     m_mouseTracker(new QTimer(this)),
     m_hideGlowTimer(new QTimer(this)),
+    m_prevCursorPos(-1, -1),
     m_glowBar(0)
 {
     connect(this, SIGNAL(aboutToHide()), this, SLOT(slotAboutToHide()));
@@ -53,15 +54,15 @@ TopMenuBar::~TopMenuBar()
 {
     delete m_mouseTracker;
     delete m_hideGlowTimer;
-    if (m_glowBar) {
-        m_glowBar->hide();
-        delete m_glowBar;
-        m_glowBar = 0;
-    }
+    deleteGlowBar();
 }
 
 void TopMenuBar::enableMouseTracking(bool enable) {
     if (enable) {
+        deleteGlowBar();
+        m_glowBar = new GlowBar(triggerRect().topLeft(), triggerRect().width());
+        m_glowBar->setWindowOpacity(glowBarOpacity());
+        m_glowBar->show();
         m_mouseTracker->start(250);
     }
     else
@@ -84,7 +85,6 @@ void TopMenuBar::slotAboutToHide()
 
 void TopMenuBar::slotMouseTracker()
 {
-    static qreal opacity;
     QPoint cursorPos = QCursor::pos();
 
     // reset timer
@@ -97,23 +97,18 @@ void TopMenuBar::slotMouseTracker()
         deleteGlowBar();
         show();
     } else if(m_glowBar) { // change glowbar opacity
-        QDesktopWidget *desktop = QApplication::desktop();
-        int screen = desktop->screenNumber(cursorPos);
-        QRect desktopRect = desktop->availableGeometry(screen);
-        qreal newOpacity = 1.0 - (cursorPos.y()/qreal(desktopRect.height())*2.0);
+        qreal opacity = glowBarOpacity();
         QPropertyAnimation *anim = new QPropertyAnimation(m_glowBar, "windowOpacity");
-        anim->setStartValue(opacity);
-        anim->setEndValue(newOpacity);
+        anim->setStartValue(m_glowBar->windowOpacity());
+        anim->setEndValue(opacity);
         anim->setDuration(200);
         anim->start(QAbstractAnimation::DeleteWhenStopped);
-        opacity = newOpacity;
         if (!m_glowBar->isVisible()) {
             m_glowBar->show();
         }
     } else { // create a new glow bar
         if (cursorPos != m_prevCursorPos) {
             m_glowBar = new GlowBar(triggerRect().topLeft(), triggerRect().width());
-            opacity = 0.0;
             m_hideGlowTimer->start(10000);
         }
     }
@@ -136,6 +131,15 @@ void TopMenuBar::deleteGlowBar()
         delete m_glowBar;
         m_glowBar = 0;
     }
+}
+
+qreal TopMenuBar::glowBarOpacity()
+{
+    QPoint cursorPos = QCursor::pos();
+    QDesktopWidget *desktop = QApplication::desktop();
+    int screen = desktop->screenNumber(cursorPos);
+    QRect desktopRect = desktop->availableGeometry(screen);
+    return 1.0 - (cursorPos.y()/qreal(desktopRect.height())*2.0);
 }
 
 QRect TopMenuBar::triggerRect()
