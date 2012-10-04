@@ -67,6 +67,7 @@ private Q_SLOTS:
     void updateConfigurationMode(bool config);
     void overlayRequestedDrop(QGraphicsSceneDragDropEvent *event);
     void containmentAdded(Plasma::Containment *containment);
+    void showToolBox();
 
 private:
     /**

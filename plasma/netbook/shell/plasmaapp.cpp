@@ -710,10 +710,10 @@ void PlasmaApp::createView(Plasma::Containment *containment)
 
     KConfigGroup viewIds(KGlobal::config(), "ViewIds");
     int defaultId = 0;
-    if (containment->containmentType() == Plasma::Containment::PanelContainment && 
+    if (containment->containmentType() == Plasma::Containment::PanelContainment &&
         (!m_controlBar || m_controlBar->containment() == 0) ) {
         defaultId = NetView::controlBarId();
-    } else if (containment->containmentType() == Plasma::Containment::PanelContainment && 
+    } else if (containment->containmentType() == Plasma::Containment::PanelContainment &&
         m_mainView->containment() == 0 ) {
         defaultId = NetView::mainViewId();
     }
@@ -783,7 +783,7 @@ void PlasmaApp::updateToolBoxVisibility(bool visible)
         if (cont->isToolBoxOpen()) {
             hadToolBoxOpen = true;
         }
-         cont->setToolBoxOpen(visible);
+        cont->setToolBoxOpen(visible);
     }
 
     if (!visible && hadToolBoxOpen) {
