@@ -154,12 +154,7 @@ PlasmaCore.Dialog {
             clip: true
             snapMode: ListView.SnapOneItem
             orientation: ListView.Horizontal
-            anchors {
-                left: (0&&navigationButtonsColumn.visible) ? navigationButtonsColumn.right : parent.left
-                right: parent.right
-                top: parent.top
-                bottom: parent.bottom
-            }
+            anchors.fill: parent
             model: ListModel {
                 id: lastNotificationsModel
             }
@@ -176,7 +171,7 @@ PlasmaCore.Dialog {
                     anchors {
                         left: parent.left
                         verticalCenter: parent.verticalCenter
-                        leftMargin: navigationButtonsColumn.visible ? navigationButtonsColumn.width : 0
+                        leftMargin: navigationButtonsColumn.width
                     }
                 }
                 QImageItem {
