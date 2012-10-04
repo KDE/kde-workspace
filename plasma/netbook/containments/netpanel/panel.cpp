@@ -90,6 +90,10 @@ void Panel::init()
     QObject::connect(lockAction, SIGNAL(triggered(bool)), this, SLOT(toggleImmutability()));
     lockAction->setShortcut(KShortcut("alt+d, l"));
     lockAction->setShortcutContext(Qt::ApplicationShortcut);
+
+    QAction *configureAction = new QAction(KIcon("configure"), i18n("Settings"), this);
+    addAction("configure panel", configureAction);
+    connect(configureAction, SIGNAL(triggered(bool)), this, SLOT(showToolBox()));
 }
 
 void Panel::toggleImmutability()
@@ -105,6 +109,11 @@ void Panel::containmentAdded(Plasma::Containment *containment)
 {
     connect(containment, SIGNAL(toolBoxVisibilityChanged(bool)),
             this, SLOT(updateConfigurationMode(bool)));
+}
+
+void Panel::showToolBox()
+{
+    setToolBoxOpen(true);
 }
 
 void Panel::backgroundChanged()
@@ -337,24 +346,34 @@ void Panel::constraintsEvent(Plasma::Constraints constraints)
         QAction *a = action("lock panel");
         if (a) {
             switch (immutability()) {
-                case Plasma::SystemImmutable:
-                    a->setEnabled(false);
-                    a->setVisible(false);
-                    break;
-
-                case Plasma::UserImmutable:
-                    a->setText(i18n("Unlock Panel"));
-                    a->setIcon(KIcon("object-unlocked"));
-                    a->setEnabled(true);
-                    a->setVisible(true);
-                    break;
-
-                case Plasma::Mutable:
-                    a->setText(i18n("Lock Panel"));
-                    a->setIcon(KIcon("object-locked"));
-                    a->setEnabled(true);
-                    a->setVisible(true);
-                    break;
+            case Plasma::SystemImmutable:
+                a->setEnabled(false);
+                a->setVisible(false);
+                break;
+            case Plasma::UserImmutable:
+                a->setText(i18n("Unlock Panel"));
+                a->setIcon(KIcon("object-unlocked"));
+                a->setEnabled(true);
+                a->setVisible(true);
+                break;
+            case Plasma::Mutable:
+                a->setText(i18n("Lock Panel"));
+                a->setIcon(KIcon("object-locked"));
+                a->setEnabled(true);
+                a->setVisible(true);
+                break;
+            }
+        }
+        a = action("configure panel");
+        if (a) {
+            switch (immutability()) {
+            case Plasma::Mutable:
+                a->setEnabled(true);
+                a->setVisible(true);
+                break;
+            default:
+                a->setEnabled(false);
+                a->setVisible(false);
             }
         }
     }
@@ -371,6 +390,10 @@ QList<QAction *> Panel::contextualActions()
     QList<QAction *> actions;
 
     QAction *a = action("lock panel");
+    if (a) {
+        actions << a;
+    }
+    a = action("configure panel");
     if (a) {
         actions << a;
     }
