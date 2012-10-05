@@ -376,10 +376,6 @@ void InternalToolBox::save(KConfigGroup &cg) const
 
 void InternalToolBox::restore(const KConfigGroup &containmentGroup)
 {
-    if (!m_movable) {
-        return;
-    }
-
     KConfigGroup group = KConfigGroup(&containmentGroup, "ToolBox");
 
     if (!group.hasKey("corner")) {
@@ -442,10 +438,7 @@ void InternalToolBox::reposition()
     updateToolBox();
 
     if (m_userMoved) {
-        bool wasMovable = m_movable;
-        m_movable = true; // make sure we can move it now!
         restore(m_containment->config());
-        m_movable = wasMovable; // restore former movability
         return;
     }
 
