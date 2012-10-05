@@ -216,7 +216,7 @@ void RssEngine::processRss(Syndication::Loader* loader,
             dataItem["feed_url"]    = url;
             dataItem["description"] = item->description();
             dataItem["content"]     = item->content();
-            dataItem["time"]        = (uint)item->datePublished();
+            dataItem["time"]        = (uint)item->dateUpdated();
             if (!m_feedIcons.contains(url.toLower()) && !iconRequested) {
                 //lets request an icon, and only do this once per feed.
                 location = iconLocation(u);
