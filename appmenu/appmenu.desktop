@@ -1,7 +1,22 @@
 [Desktop Entry]
 Type=Service
 Name=Application menus daemon
+Name[ia]=Demone de menus de application
+Name[nl]=Daemon voor menu van toepassingen
+Name[pt_BR]=Servidor dos menus do aplicativo
+Name[sk]=Démon ponúk aplikácie
+Name[sv]=Demon för programmenyer
+Name[uk]=Фонова служба меню програм
+Name[x-test]=xxApplication menus daemonxx
 Comment=Transfers application's menu to the desktop
+Comment[de]=Überträgt Anwendungsmenüs auf die Arbeitsfläche
+Comment[ia]=Il transfere menu de applicationes al scriptorio
+Comment[nl]=Brengt het menu van de toepassing over naar het bureaublad
+Comment[pt_BR]=Transfere o menu do aplicativo para a área de trabalho
+Comment[sk]=Presunúť ponuky aplikácie na plochu
+Comment[sv]=Överför programmets meny till skrivbordet
+Comment[uk]=Передає меню програм на стільницю
+Comment[x-test]=xxTransfers application's menu to the desktopxx
 X-KDE-ServiceTypes=KDEDModule
 X-KDE-Library=appmenu
 X-KDE-DBus-ModuleName=appmenu
