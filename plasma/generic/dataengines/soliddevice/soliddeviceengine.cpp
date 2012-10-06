@@ -28,6 +28,22 @@
 
 #include <Plasma/DataContainer>
 
+//TODO: implement in libsolid2
+namespace
+{
+    template <class DevIface> DevIface *getAncestorAs(const Solid::Device &device)
+    {
+        for (Solid::Device parent = device.parent();
+             parent.isValid();
+             parent = parent.parent()) {
+            if (parent.is<DevIface>()) {
+                return parent.as<DevIface>();
+            }
+        }
+        return NULL;
+    }
+}
+
 SolidDeviceEngine::SolidDeviceEngine(QObject* parent, const QVariantList& args)
         : Plasma::DataEngine(parent, args),
           m_temperature(0),
@@ -184,10 +200,16 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
         updateHardDiskTemperature(name);
     }
     else {
-        // Fixes removable property, needs better fix though
-        Solid::Device parentDevice = device.parent();
-        Solid::StorageDrive *drive = parentDevice.as<Solid::StorageDrive>();
-        setData(name, I18N_NOOP("Removable"), ( drive && (drive->isHotpluggable() || drive->isRemovable()) ));
+        bool isRemovable = false;
+        bool isHotpluggable = false;
+        Solid::StorageDrive *drive = getAncestorAs<Solid::StorageDrive>(device);
+        if (drive) {
+            //remove check for isHotpluggable() when plasmoids are changed to check for both properties
+            isRemovable = (drive->isRemovable() || drive->isHotpluggable());
+            isHotpluggable = drive->isHotpluggable();
+        }
+        setData(name, I18N_NOOP("Removable"), isRemovable);
+        setData(name, I18N_NOOP("Hotpluggable"), isHotpluggable);
     }
 
 
@@ -545,7 +567,7 @@ void SolidDeviceEngine::deviceAdded(const QString& udi)
     }
 
     if (device.is<Solid::OpticalDisc>()) {
-        Solid::OpticalDrive *drive = device.parent().as<Solid::OpticalDrive>();
+        Solid::OpticalDrive *drive = getAncestorAs<Solid::OpticalDrive>(device);
         if (drive) {
             connect(drive, SIGNAL(ejectRequested(QString)),
                     this, SLOT(setUnmountingState(QString)));
@@ -694,12 +716,13 @@ bool SolidDeviceEngine::updateInUse(const QString &udi)
         return false;
     }
 
-    Solid::Device parent = Solid::Device(udi).parent();
-
     if (storageaccess->isAccessible()) {
         setData(udi, I18N_NOOP("In Use"), true);
-    } else if (parent.is<Solid::StorageDrive>()) {
-        setData(udi, I18N_NOOP("In Use"), parent.as<Solid::StorageDrive>()->isInUse());
+    } else {
+        Solid::StorageDrive *drive = getAncestorAs<Solid::StorageDrive>(Solid::Device(udi));
+        if (drive) {
+            setData(udi, I18N_NOOP("In Use"), drive->isInUse());
+        }
     }
 
     return true;
@@ -739,7 +762,7 @@ void SolidDeviceEngine::deviceRemoved(const QString& udi)
         }
     }
     else if (device.is<Solid::OpticalDisc>()) {
-        Solid::OpticalDrive *drive = device.parent().as<Solid::OpticalDrive>();
+        Solid::OpticalDrive *drive = getAncestorAs<Solid::OpticalDrive>(device);
         if (drive) {
             disconnect(drive, 0, this, 0);
         }
