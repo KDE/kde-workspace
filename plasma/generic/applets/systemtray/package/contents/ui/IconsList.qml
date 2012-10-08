@@ -24,6 +24,8 @@ import QtQuick 1.1
 import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
 import Private 0.1
 
+import "IconsList.js" as IconsListJS
+
 Item {
     id: root_item
 
@@ -32,8 +34,10 @@ Item {
     property alias icons_number: list.count  ///< [readonly] Number of icons
     property alias model:    list.model; ///< Model for grid
     property int cell_size: icons_size + 2*icons_margins ///< [readonly] size of grid cell
-    property int min_width:   cell_size*11  ///< [readonly] minimum width of component required to show whole grid
+    property int min_width:   cell_size + icons_margins + __max_name_width   ///< [readonly] minimum width of component required to show whole grid
     property int min_height:  list.count*cell_size + 2*icons_margins ///< [readonly] minimum height of compontn required to show whole grid
+
+    property int __max_name_width: 0
 
     Component {
         id: delegate_task
@@ -52,7 +56,7 @@ Item {
 
             PlasmaWidgets.Label {
                 id: name_item
-                anchors { left: tray_icon.right; top: parent.top; bottom: parent.bottom; right: parent.right; leftMargin: icons_margins }
+                anchors { left: tray_icon.right; top: parent.top; bottom: parent.bottom; leftMargin: icons_margins }
                 alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wordWrap: false
                 textSelectable: false
@@ -87,6 +91,28 @@ Item {
                 }
             }
 
+            ListView.onAdd: {
+                var text_width = name_item.width
+                IconsListJS.tasks[delegate_root_item] = text_width
+                if (text_width > __max_name_width) {
+                    __max_name_width = text_width
+                }
+            }
+
+            ListView.onRemove: {
+                delete IconsListJS.tasks[delegate_root_item]
+                __max_name_width = IconsListJS.findMax()  // recalculate width of maximum name
+            }
+
+            Connections {
+                target: ui_task
+                onChangedName: {
+                    // if name is changed => we should recalculate width of popup
+                    IconsListJS.tasks[delegate_root_item] = name_item.width
+                    __max_name_width = IconsListJS.findMax()
+                }
+            }
+
         }
     }
 
@@ -96,7 +122,8 @@ Item {
         id: delegate_highlight
         Item {
             PlasmaWidgets.ItemBackground {
-                anchors.fill: parent
+                height: cell_size
+                width: min_width
             }
         }
     }
