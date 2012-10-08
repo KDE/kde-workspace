@@ -197,8 +197,10 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         if (!title.isEmpty()) {
             bool is_title_changed = (m_name != title);
             m_name = title;
-            if (is_title_changed)
+            if (is_title_changed) {
                 emit changedTitle();
+                emit changed(this);
+            }
         }
     }
 

@@ -29,7 +29,6 @@ Item {
     property int icons_margins:  4  ///< Margins for icons
     property alias icons_number: grid.count  ///< [readonly] Number of icons
     property alias model:    grid.model; ///< Model for grid
-    property alias delegate: grid.delegate; ///< Delegate
     property int cols_num: 0 ///< [readonly] Number of columns
     property int rows_num: 0 ///< [readonly] Number of rows
     property int min_width:   cols_num*cell_size  ///< [readonly] minimum width of component required to show whole grid
@@ -48,6 +47,7 @@ Item {
         cellWidth: cell_size
         cellHeight: cellWidth
         interactive: false
+        delegate: TrayIcon { width: grid.cellWidth; height: grid.cellHeight }
     }
 
     states: [

@@ -54,7 +54,7 @@ Item {
         onNewTask: {
             // create declarative item
             var component = (task_type === TaskTypeStatusItem ? component_status_item : component_widget)
-            var props = (task_type === TaskTypeStatusItem ? {"task": task.task} : {}) // some properties we set later
+            var props = {"ui_task": task}
             var item = component.createObject(null, props)
             if (item) {
                 var loc = __getLocationForTask(task)
@@ -84,7 +84,6 @@ Item {
         icons_size:    __icons_size
         icons_margins: __icons_margins
         model: model_notifications
-        delegate: delegate_task
     }
 
     // Tray area that is in panel ======================================================================================
@@ -93,7 +92,6 @@ Item {
         icons_size: __icons_size
         icons_margins: __icons_margins
         model: model_tray
-        delegate: delegate_task
     }
 
     // An area that contains arrow =====================================================================================
@@ -107,7 +105,6 @@ Item {
             height: popup_area.min_height
             anchors.centerIn: parent
             model: model_popup
-            delegate: delegate_task
         }
     }
 
@@ -117,13 +114,22 @@ Item {
 
         StatusNotifierItem {
             id: status_item
+
+            property variant ui_task;
+
             icons_size: __icons_size
             blink_interval: __blink_interval
-            task: null
-            visible: task !== null
+            task: ui_task.task
+            visible: ui_task.task !== null
             width: __icons_size
             height: width
             anchors.centerIn: parent
+
+            Connections {
+                target: ui_task
+                onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+                onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+            }
         }
     }
 
@@ -132,11 +138,20 @@ Item {
 
         WidgetItem {
             id: widget_item
-            widget: null
-            visible:  widget !== null
+
+            property variant ui_task;
+
+            widget: ui_task.widget
+            visible:  ui_task.widget !== null
             width: __icons_size
             height: width
             anchors.centerIn: parent
+
+            Connections {
+ 				target: ui_task
+ 				onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+ 				onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+ 			}
         }
     }
 
