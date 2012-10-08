@@ -33,21 +33,57 @@ var LOCATION = {
 var NO_INDEX = -1
 
 
+/// Set of all known tasks
+var tasks = {}
+
+//Arrays of numbers of tasks grouped by category
+var category_size = [ {}, {}, {} ]
+
+
+// initialize arrays
+/**
+ * Clears arrays for number of tasks groupped by categoryies
+ * @param categories_list a list of categories
+ */
+function clearCategoryArrays(categories_list) {
+    for (var i = 0; i < category_size.length; ++i) {
+        var clean_obj = category_size[i] = new Object
+        for (var cat = 0; cat < categories_list.length; ++cat) {
+            clean_obj[categories_list[cat]] = 0
+        }
+    }
+}
+
+
 /**
  * Represents task
  * @param id an ID of task
  * @param model_index an index of item in corresponding model
  * @param location a location of icon (location corresponds to model)
+ * @param category a category of task
  */
-var Task = function(id, model_index, location, item) {
+var Task = function(id, model_index, location, category, item) {
     this.id     = id
     this.model_index = model_index
     this.location = location
+    this.category = category
     this.item = item
 }
 
-/// Set of all known tasks
-var tasks = {}
+
+/**
+ * Increments model indexes for all tasks located in specified location
+ * @param index if task has model index same as model_index or more than it then its model index will be incremented
+ * @param location a location
+ */
+function incrementIndexes(index, location) {
+    if (index === NO_INDEX)
+        return
+    for (var t in tasks) {
+        if ( tasks[t].location === location && tasks[t].model_index >= index)
+            ++tasks[t].model_index
+    }
+}
 
 /**
  * Add task to set of tasks.
@@ -55,8 +91,10 @@ var tasks = {}
  * @param model_index an index of item in corresponding model
  * @param location a location of icon (location corresponds to model)
  */
-function addTask(id, model_index, location, item) {
-    tasks[id] = new Task(id, model_index, location, item)
+function addTask(id, model_index, location, category, item) {
+    incrementIndexes(model_index, location)
+    tasks[id] = new Task(id, model_index, location, category, item)
+    category_size[location][category]++
 }
 
 
@@ -64,7 +102,7 @@ function addTask(id, model_index, location, item) {
  * Decrements model indexes of tasks to make indexes corresponding to model
  * @param task a task
  */
-function unbind(task) {
+function decrementIndexes(task) {
     var loc = task.location
     var index = task.model_index
     // update model indexes
@@ -84,6 +122,7 @@ function unbind(task) {
  */
 function removeTask(id) {
     var task = tasks[id]
-    unbind(task)
+    decrementIndexes(task)
+    category_size[task.location][task.category]--
     delete tasks[id]
 }

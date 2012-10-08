@@ -48,8 +48,12 @@ class Task : public QObject
 {
     Q_OBJECT
 
+    Q_ENUMS(Status)
+    Q_ENUMS(Category)
+
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
+    Q_PROPERTY(Category category READ category NOTIFY changedCategory)
 
 public:
     enum Status {
@@ -168,6 +172,9 @@ Q_SIGNALS:
      * Special signal for changed status
      */
     void changedStatus();
+
+    // if a category of task has been changed
+    void changedCategory();
 
     // If a name of task has been changed
     void changedName();

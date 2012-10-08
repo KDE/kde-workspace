@@ -153,6 +153,7 @@ void Task::setCategory(Category category)
     }
 
     d->category = category;
+    emit changedCategory();
     emit changed(this);
 }
 

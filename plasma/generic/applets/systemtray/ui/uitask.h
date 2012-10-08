@@ -55,6 +55,7 @@ class UiTask: public QObject
     Q_ENUMS(TaskHideState)
     Q_ENUMS(TaskType)
     Q_ENUMS(TaskStatus)
+    Q_ENUMS(TaskCategory)
 
     Q_PROPERTY(TaskHideState hideState READ hideState NOTIFY changedHideState)
     Q_PROPERTY(TaskType type READ type CONSTANT)
@@ -64,8 +65,18 @@ class UiTask: public QObject
     Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
+    Q_PROPERTY(TaskCategory category READ category)  // TODO: it may change
 
 public:
+    enum TaskCategory
+    {
+        TaskCategoryUnknown = Task::UnknownCategory,
+        TaskCategoryApplicationStatus = Task::ApplicationStatus,
+        TaskCategoryCommunications = Task::Communications,
+        TaskCategorySystemServices = Task::SystemServices,
+        TaskCategoryHardware = Task::Hardware
+    };
+
     enum TaskHideState
     {
         TaskHideStateAuto = 0,
@@ -95,6 +106,7 @@ public:
     TaskHideState hideState() const;
     void setHideState(TaskHideState state);
     TaskStatus status() const;
+    TaskCategory category() const;
     TaskType type() const;
     QVariant task() const;
     QString taskId() const;

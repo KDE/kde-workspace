@@ -38,6 +38,15 @@ Item {
     property string __notification_task_name: "notifications"
     property bool __popup_like_grid: false  // true if in popup icons should be placed like a grid without names
 
+    // This list determines order of categories of tasks
+    property variant __categories: [
+        TaskCategoryUnknown,
+        TaskCategoryApplicationStatus,
+        TaskCategoryCommunications,
+        TaskCategorySystemServices,
+        TaskCategoryHardware
+    ]
+
     // This 2 properties must be defined because we use states to set their values
     property int minimumWidth:  __minimum_size
     property int minimumHeight: __minimum_size
@@ -60,8 +69,9 @@ Item {
             if (item) {
                 var loc = __getLocationForTask(task)
                 var model = __models[loc]
-                Tasks.addTask(task_id, model.count, loc, item)
-                model.append({"ui_task": task, "ui_item": item})
+                var index = __findInsertIndex(loc, task.category)
+                Tasks.addTask(task_id, index, loc, task.category, item)
+                model.insert(index, {"ui_task": task, "ui_item": item})
             }
         }
 
@@ -77,6 +87,10 @@ Item {
     Connections {
         target: plasmoid
         onActivated: arrow_area.togglePopup()
+    }
+
+    Component.onCompleted: {
+        Tasks.clearCategoryArrays(__categories)
     }
 
     Item {
@@ -211,12 +225,30 @@ Item {
         // remove from old location
         var model = __models[task.location]
         model.remove(task.model_index)
-        Tasks.unbind(task)
+        Tasks.decrementIndexes(task)
+        Tasks.category_size[task.location][task.category]--
+
         // add to new model
         model = __models[loc]
-        task.model_index = model.count
+        var index = task.model_index = __findInsertIndex(loc, task.category)
         task.location = loc
-        model.append({"ui_task": tasks_pool.tasks[task_id], "ui_item": task.item})
+        model.insert(index, {"ui_task": tasks_pool.tasks[task_id], "ui_item": task.item})
+        Tasks.incrementIndexes(index, loc)
+        task.model_index = index  // incrementIndexes changes index of this task
+        Tasks.category_size[loc][task.category]++
+    }
+
+    /** Returns index for new task
+     * @param location an index of area (TRAY, POPUP or NOTIFICATIONS), an index of model, a location
+     * @param category a category of new task
+     */
+    function __findInsertIndex(location, category) {
+        var sizes = Tasks.category_size[location]
+        var index = 0 // index is a sum of numbers of tasks groupped by category
+        for (var cat = 0; cat < __categories.length && __categories[cat] !== category; ++cat) {
+            index += sizes[__categories[cat]]
+        }
+        return index
     }
 
 
