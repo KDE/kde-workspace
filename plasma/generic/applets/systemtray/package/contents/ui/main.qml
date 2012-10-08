@@ -26,7 +26,7 @@ import Private 0.1
 import "tasks.js" as Tasks
 
 Item {
-    id: root_item
+    id: root_item // represents available space on screen
 
     // Constants
     property int __icons_size: 24 // Size of icons, icons are square i.e. width == height
@@ -79,33 +79,38 @@ Item {
         onActivated: arrow_area.togglePopup()
     }
 
-    // Notifications area in panel part of tray ========================================================================
-    IconsGrid {
-        id: notifications_area
-        icons_size:    __icons_size
-        icons_margins: __icons_margins
-        model: model_notifications
-    }
+    Item {
+        id: content_item // represents rectangle containing all visual elements on panel
+        anchors.centerIn: parent
 
-    // Tray area that is in panel ======================================================================================
-    IconsGrid {
-        id: tray_area
-        icons_size: __icons_size
-        icons_margins: __icons_margins
-        model: model_tray
-    }
-
-    // An area that contains arrow =====================================================================================
-    ArrowArea {
-        id: arrow_area
-        content: IconsList {
-            id: popup_area
+        // Notifications area in panel part of tray
+        IconsGrid {
+            id: notifications_area
             icons_size:    __icons_size
             icons_margins: __icons_margins
-            width: popup_area.min_width
-            height: popup_area.min_height
-            anchors.centerIn: parent
-            model: model_popup
+            model: model_notifications
+        }
+
+        // Tray area that is in panel
+        IconsGrid {
+            id: tray_area
+            icons_size: __icons_size
+            icons_margins: __icons_margins
+            model: model_tray
+        }
+
+        // An area that contains arrow
+        ArrowArea {
+            id: arrow_area
+            content: IconsList {
+                id: popup_area
+                icons_size:    __icons_size
+                icons_margins: __icons_margins
+                width: popup_area.min_width
+                height: popup_area.min_height
+                anchors.centerIn: parent
+                model: model_popup
+            }
         }
     }
 
@@ -218,30 +223,10 @@ Item {
     // States ==========================================================================================================
     states: [
         State {
-            name: "HORZ"
-            when: (plasmoid.formFactor === Horizontal)
-
-            AnchorChanges {
-                target: notifications_area
-                anchors { top: root_item.top; bottom: root_item.bottom; left: root_item.left; right: undefined }
-            }
-            PropertyChanges {
-                target: notifications_area
-                state: "HORZ"
-                width: notifications_area.min_width
-            }
-            AnchorChanges {
-                target: tray_area
-                anchors { top: root_item.top; bottom: root_item.bottom; left: notifications_area.right; right: undefined }
-            }
-            PropertyChanges {
-                target: tray_area
-                state: "HORZ"
-                width: tray_area.min_width
-            }
+            name: "_HORZ" // it is shared state for HORZ and FLOAT
             AnchorChanges {
                 target: arrow_area
-                anchors { left: tray_area.right; top: root_item.top; bottom: root_item.bottom; right: undefined }
+                anchors { left: tray_area.right; top: content_item.top; bottom: content_item.bottom }
             }
             PropertyChanges {
                 target: arrow_area
@@ -253,9 +238,39 @@ Item {
                 target: popup_area
                 state: __popup_like_grid ? "SQR_H" : ""
             }
+        },
+
+        State {
+            name: "HORZ"
+            extend: "_HORZ"
+            when: (plasmoid.formFactor === Horizontal)
+
+            AnchorChanges {
+                target: notifications_area
+                anchors { top: content_item.top; bottom: content_item.bottom; left: content_item.left }
+            }
+            PropertyChanges {
+                target: notifications_area
+                state: "HORZ"
+                width: notifications_area.min_width
+            }
+            AnchorChanges {
+                target: tray_area
+                anchors { left: notifications_area.right; top: content_item.top; bottom: content_item.bottom }
+            }
+            PropertyChanges {
+                target: tray_area
+                state: "HORZ"
+                width: tray_area.min_width
+            }
+            PropertyChanges {
+                target: content_item
+                width: notifications_area.width + tray_area.width + arrow_area.width + 2*__arrow_margins
+                height: root_item.height
+            }
             PropertyChanges {
                 target: root_item
-                minimumWidth: notifications_area.width + tray_area.width + arrow_area.width + 2*__arrow_margins
+                minimumWidth: content_item.width
                 minimumHeight: __minimum_size
             }
         },
@@ -266,7 +281,7 @@ Item {
 
             AnchorChanges {
                 target: notifications_area
-                anchors { left: root_item.left; right: root_item.right; top: root_item.top; bottom: undefined}
+                anchors { left: content_item.left; right: content_item.right; top: content_item.top }
             }
             PropertyChanges {
                 target: notifications_area
@@ -275,7 +290,7 @@ Item {
             }
             AnchorChanges {
                 target: tray_area
-                anchors { left: root_item.left; right: root_item.right; top: notifications_area.bottom; bottom: undefined }
+                anchors { left: content_item.left; right: content_item.right; top: notifications_area.bottom }
             }
             PropertyChanges {
                 target: tray_area
@@ -284,7 +299,7 @@ Item {
             }
             AnchorChanges {
                 target: arrow_area
-                anchors { top: tray_area.bottom; left: root_item.left; right: root_item.right; bottom: undefined }
+                anchors { left: content_item.left; right: content_item.right; top: tray_area.bottom }
             }
             PropertyChanges {
                 target: arrow_area
@@ -300,6 +315,53 @@ Item {
                 target: root_item
                 minimumWidth: __minimum_size
                 minimumHeight: notifications_area.height + tray_area.height + arrow_area.height + 2*__arrow_margins
+            }
+            PropertyChanges {
+                target: content_item
+                width: root_item.width
+                height: notifications_area.height + tray_area.height + arrow_area.height + 2*__arrow_margins
+            }
+            PropertyChanges {
+                target: root_item
+                minimumWidth: __minimum_size
+                minimumHeight: content_item.height
+            }
+        },
+
+        State {
+            name: "FLOAT"
+            extend: "_HORZ"
+            when: (plasmoid.formFactor === Floating)
+
+            PropertyChanges {
+                target: notifications_area
+                state: "SQR_H"
+                width: notifications_area.min_width
+                height: notifications_area.min_height
+            }
+            AnchorChanges {
+                target: notifications_area
+                anchors { left: content_item.left; verticalCenter: content_item.verticalCenter }
+            }
+            AnchorChanges {
+                target: tray_area
+                anchors { left: notifications_area.right; verticalCenter: content_item.verticalCenter }
+            }
+            PropertyChanges {
+                target: tray_area
+                state: "SQR_H"
+                width: tray_area.min_width
+                height: tray_area.min_height
+            }
+            PropertyChanges {
+                target: content_item
+                width: notifications_area.width + tray_area.width + arrow_area.width + 2*__arrow_margins
+                height: Math.max(notifications_area.min_height, tray_area.min_height, __arrow_size)
+            }
+            PropertyChanges {
+                target: root_item
+                minimumWidth: content_item.width
+                minimumHeight: content_item.height
             }
         }
     ]
