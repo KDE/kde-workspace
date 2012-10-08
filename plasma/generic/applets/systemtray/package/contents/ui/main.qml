@@ -154,10 +154,10 @@ Item {
             anchors.centerIn: parent
 
             Connections {
- 				target: ui_task
- 				onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
- 				onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
- 			}
+                target: ui_task
+                onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+                onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+            }
         }
     }
 
