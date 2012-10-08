@@ -59,16 +59,21 @@ void Color::paint(QPainter *painter, const QRectF& exposedRect)
 {
     generatePainting(m_backgroundMode, painter, exposedRect, boundingRect());
 }
-
+#include <kephal/kephal/screens.h>
 QWidget* Color::createConfigurationInterface(QWidget* parent)
 {
+    Kephal::Screens *screens = Kephal::Screens::self();
+    QRect geom = screens->primaryScreen()->geom();
+
     QWidget *widget = new QWidget(parent);
+
     m_ui.setupUi(widget);
 
     m_ui.m_color1->setColor(m_color1);
     m_ui.m_color2->setColor(m_color2);
 
     m_model = new BackgroundListModel(this, widget);
+    m_model->setWallpaperSize(geom.size());
     m_model->addColor(0,i18n("Solid"));
     m_model->addColor(1,i18n("Horizontal"));
     m_model->addColor(2,i18n("Vertical"));

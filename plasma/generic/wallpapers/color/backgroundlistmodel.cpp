@@ -101,14 +101,29 @@ int BackgroundListModel::backgroundMode(int index) const
     return m_backgroundModes.at(index);
 }
 
+void BackgroundListModel::setWallpaperSize(const QSize& size)
+{
+    float newHeight = ((float)size.height() / (float)size.width()) * BackgroundDelegate::SCREENSHOT_SIZE;
+
+    m_size = QSize(BackgroundDelegate::SCREENSHOT_SIZE, newHeight);
+
+    m_size.scale(BackgroundDelegate::SCREENSHOT_SIZE, BackgroundDelegate::SCREENSHOT_SIZE/1.6, Qt::KeepAspectRatio);
+}
+
 QPixmap BackgroundListModel::createPixmap(int mode) const
 {
-    QPixmap pix(120, 80);
-    QPainter p(&pix);
-    m_structureParent.data()->generatePainting(mode, &p, pix.rect(), pix.rect());
+    if (m_structureParent.isNull()) {
+        return QPixmap();
+    }
+
+    QPixmap scaledPixmap(m_size);
+    QPainter p(&scaledPixmap);
+
+    m_structureParent.data()->generatePainting(mode, &p, scaledPixmap.rect(), scaledPixmap.rect());
+
     p.end();
 
-    return pix;
+    return scaledPixmap;
 }
 #include "backgroundlistmodel.moc"
 

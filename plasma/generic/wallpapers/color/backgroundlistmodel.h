@@ -33,7 +33,7 @@ public:
     void reload();
     QModelIndex indexOf(const int &path) const;
 
-    //void setWallpaperSize(const QSize& size);
+    void setWallpaperSize(const QSize& size);
     void setResizeMethod(Plasma::Wallpaper::ResizeMethod resizeMethod);
 
     void addColor(int mode, const QString &title);
@@ -47,6 +47,7 @@ private:
     QHash<int, QPixmap> m_previews;
     QHash<int, QString> m_titles;
     QPixmap m_previewUnavailablePix;
+    QSize m_size;
 };
 
 #endif // BACKGROUNDLISTMODEL_H
