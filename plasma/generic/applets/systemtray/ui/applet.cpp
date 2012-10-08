@@ -27,6 +27,7 @@
 #include "uitask.h"
 #include "widgetitem.h"
 #include "wheelarea.h"
+#include "mouseredirectarea.h"
 #include "dialog.h"
 
 #include "../protocols/dbussystemtray/dbussystemtraytask.h"
@@ -141,6 +142,7 @@ void Applet::init()
     // First of all, we have to register new QML types because they won't be registered later
     qmlRegisterType<WidgetItem>("Private", 0, 1, "WidgetItem");
     qmlRegisterType<WheelArea>("Private", 0, 1, "WheelArea");
+    qmlRegisterType<MouseRedirectArea>("Private", 0, 1, "MouseRedirectArea");
     qmlRegisterType<Dialog>("Private", 0, 1, "Dialog");
 
     // Find data directory

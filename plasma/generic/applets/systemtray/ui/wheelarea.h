@@ -38,6 +38,7 @@ namespace SystemTray
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class WheelArea
+// TODO: remove in QtQuick 2
 /** @class WheelArea
  * This helper class is introduced to provide mouse wheel functionality prior to Qt 5.
  */

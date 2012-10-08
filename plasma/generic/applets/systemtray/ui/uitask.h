@@ -61,7 +61,9 @@ class UiTask: public QObject
     Q_PROPERTY(QGraphicsWidget *widget READ widget CONSTANT)
     Q_PROPERTY(TaskStatus status READ status NOTIFY changedStatus)
     Q_PROPERTY(QVariant task READ task CONSTANT)
+    Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
+    Q_PROPERTY(QString name READ name CONSTANT) // TODO: it may change
 
 public:
     enum TaskHideState
@@ -99,7 +101,8 @@ public:
     QGraphicsWidget *widget() const;
     Plasma::Applet *host() const;
 
-    Q_INVOKABLE QString name() const;
+    QString name() const;
+    QString typeId() const;
 
     static UiTask::TaskType DefineTaskType(Task *t);
 

@@ -114,7 +114,13 @@ QString UiTask::taskId() const
 }
 
 
-QString UiTask::name() const {
+QString UiTask::name() const
+{
+    return d->task ? d->task->name() : "";
+}
+
+QString UiTask::typeId() const
+{
     return  d->task ? d->task->typeId() : "";
 }
 

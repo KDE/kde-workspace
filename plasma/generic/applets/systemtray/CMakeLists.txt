@@ -35,6 +35,7 @@ set(systemtray_SRCS
     ui/uitask.cpp
     ui/widgetitem.cpp
     ui/wheelarea.cpp
+    ui/mouseredirectarea.cpp
     ui/dialog.cpp
     )
 

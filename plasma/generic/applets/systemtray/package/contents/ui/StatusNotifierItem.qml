@@ -42,6 +42,23 @@ Item {
     property string   __movie_path:        __has_task ? task.moviePath : ""
     property int      __status:            __has_task ? task.status : TaskStatusUnknown
 
+    // Public functions ================================================================================================
+    function click(buttons) {
+        __processClick(buttons, mouse_area)
+    }
+
+    function scrollHorz(delta) {
+        task.activateHorzScroll(delta)
+    }
+
+    function scrollVert(delta) {
+        task.activateVertScroll(delta)
+    }
+
+    function getIconWidget() {
+        return icon_widget
+    }
+
     // main svg icon redefined by desktop-theme ========================================================================
     property variant svg: PlasmaCore.Svg {
         property variant icon: QIcon(pixmap(__icon_name))
@@ -158,6 +175,7 @@ Item {
         onClicked: 	__processClick(mouse.button, mouse_area)
     }
 
+    // TODO: remove wheel area in QtQuick 2.0
     WheelArea {
         id: wheel_area
         anchors.fill: parent

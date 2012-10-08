@@ -36,6 +36,7 @@ Item {
     property int __arrow_margins: 5 // margins for an arrow
     property int __blink_interval: 750 // time interval of blinking
     property string __notification_task_name: "notifications"
+    property bool __popup_like_grid: false  // true if in popup icons should be placed like a grid without names
 
     // This 2 properties must be defined because we use states to set their values
     property int minimumWidth:  __minimum_size
@@ -97,7 +98,7 @@ Item {
     // An area that contains arrow =====================================================================================
     ArrowArea {
         id: arrow_area
-        content: IconsGrid {
+        content: IconsList {
             id: popup_area
             icons_size:    __icons_size
             icons_margins: __icons_margins
@@ -183,7 +184,7 @@ Item {
     // Funtions ========================================================================================================
     function __getLocationForTask(task) {
         var loc = __getDefaultLocationForTask(task)
-        if (loc === Tasks.LOCATION.TRAY && task.name() == __notification_task_name)
+        if (loc === Tasks.LOCATION.TRAY && task.typeId == __notification_task_name)
             return Tasks.LOCATION.NOTIFICATIONS // redefine location for notifications applet
         return loc
     }
@@ -250,7 +251,7 @@ Item {
             }
             PropertyChanges {
                 target: popup_area
-                state: "SQR_H"
+                state: __popup_like_grid ? "SQR_H" : ""
             }
             PropertyChanges {
                 target: root_item
@@ -293,7 +294,7 @@ Item {
             }
             PropertyChanges {
                 target: popup_area
-                state: "SQR_V"
+                state: __popup_like_grid ? "SQR_V" : ""
             }
             PropertyChanges {
                 target: root_item
