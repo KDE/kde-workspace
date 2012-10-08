@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Service
 Name=Application menus daemon
+Name[el]=Δαίμων για τα μενού των εφαρμογών
 Name[es]=Demonio de menús de aplicación
 Name[hu]=Alkalmazás menük démon
 Name[ia]=Demone de menus de application
@@ -17,6 +18,7 @@ Name[uk]=Фонова служба меню програм
 Name[x-test]=xxApplication menus daemonxx
 Comment=Transfers application's menu to the desktop
 Comment[de]=Überträgt Anwendungsmenüs auf die Arbeitsfläche
+Comment[el]=Μεταφέρει το μενού της εφαρμογής στην επιφάνεια εργασίας
 Comment[es]=Transfiere el menú de aplicaciones al escritorio
 Comment[hu]=Átviszi az alkalmazás menüjét az asztalra
 Comment[ia]=Il transfere menu de applicationes al scriptorio
