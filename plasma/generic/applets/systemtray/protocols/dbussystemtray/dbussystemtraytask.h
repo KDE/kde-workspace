@@ -68,7 +68,6 @@ public:
     QGraphicsWidget* createWidget(Plasma::Applet *host);
     bool isValid() const;
     bool isEmbeddable() const;
-    virtual QString name() const;
     virtual QString typeId() const;
     virtual QIcon icon() const;
     virtual bool isWidget() const;
@@ -78,7 +77,7 @@ public:
     QString attIconName() const { return m_attentionIconName; }
     QString moviePath() const { return m_moviePath; }
     QString overlayIconName() const { return m_overlayIconName; }
-    QString title() const { return m_name; }
+    QString title() const { return name(); }
     bool    isMenu() const { return m_isMenu; }
     QString tooltipTitle() const { return m_tooltipTitle; }
     QString tooltipText() const { return m_tooltipText; }
@@ -121,7 +120,6 @@ private Q_SLOTS:
 private:
     QString m_serviceName;
     QString m_typeId;
-    QString m_name;
     QIcon m_icon;
     QString m_iconName;
     QIcon m_attentionIcon;

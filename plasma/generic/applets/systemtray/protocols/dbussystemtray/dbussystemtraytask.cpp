@@ -41,7 +41,6 @@ DBusSystemTrayTask::DBusSystemTrayTask(const QString &serviceName, Plasma::DataE
     : Task(parent),
       m_serviceName(serviceName),
       m_typeId(serviceName),
-      m_name(serviceName),
       m_dataEngine(dataEngine),
       m_service(dataEngine->serviceForSource(serviceName)),
       m_isMenu(false),
@@ -84,10 +83,6 @@ void DBusSystemTrayTask::setShortcut(QString text) {
     }
 }
 
-QString DBusSystemTrayTask::name() const
-{
-    return m_name;
-}
 
 QString DBusSystemTrayTask::typeId() const
 {
@@ -195,8 +190,8 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
     if (properties["TitleChanged"].toBool() || become_valid) {
         QString title = properties["Title"].toString();
         if (!title.isEmpty()) {
-            bool is_title_changed = (m_name != title);
-            m_name = title;
+            bool is_title_changed = (name() != title);
+            setName(title);
             if (is_title_changed) {
                 emit changedTitle();
                 emit changed(this);

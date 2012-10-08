@@ -42,6 +42,7 @@ public:
     QHash<Plasma::Applet *, QGraphicsWidget *> widgetsByHost;
     Task::Status status;
     Task::Category category;
+    QString name;
 };
 
 
@@ -174,6 +175,19 @@ void Task::setStatus(Status status)
 Task::Status Task::status() const
 {
     return d->status;
+}
+
+
+QString Task::name() const {
+    return d->name;
+}
+
+
+void Task::setName(QString name) {
+    if (d->name != name) {
+        d->name = name;
+        emit changedName();
+    }
 }
 
 }

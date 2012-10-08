@@ -49,6 +49,7 @@ class Task : public QObject
     Q_OBJECT
 
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
+    Q_PROPERTY(QString name READ name NOTIFY changedName)
 
 public:
     enum Status {
@@ -102,7 +103,9 @@ public:
     /**
      * Returns the name of this task that should be presented to the user
      **/
-    virtual QString name() const = 0;
+    QString name() const;
+
+    void setName(QString name);
 
     /**
      * Returns a unique identifier for this task
@@ -165,6 +168,9 @@ Q_SIGNALS:
      * Special signal for changed status
      */
     void changedStatus();
+
+    // If a name of task has been changed
+    void changedName();
 
     /**
      * Emitted when the task is about to be destroyed

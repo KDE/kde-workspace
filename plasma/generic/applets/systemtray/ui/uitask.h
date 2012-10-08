@@ -63,7 +63,7 @@ class UiTask: public QObject
     Q_PROPERTY(QVariant task READ task CONSTANT)
     Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
-    Q_PROPERTY(QString name READ name CONSTANT) // TODO: it may change
+    Q_PROPERTY(QString name READ name NOTIFY changedName)
 
 public:
     enum TaskHideState
@@ -110,6 +110,7 @@ public:
 signals:
     void changedHideState();
     void changedStatus();
+    void changedName();
 
 public slots:
     void _onChangedStatus();

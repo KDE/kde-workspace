@@ -61,6 +61,7 @@ FdoTask::FdoTask(WId winId, QObject *parent)
       d(new Private(winId))
 {
     setCategory(ApplicationStatus);
+    setName(d->name);
 }
 
 FdoTask::~FdoTask()
@@ -76,11 +77,6 @@ bool FdoTask::isEmbeddable() const
 
 bool FdoTask::isWidget() const {
     return true;
-}
-
-QString FdoTask::name() const
-{
-    return d->name;
 }
 
 QString FdoTask::typeId() const

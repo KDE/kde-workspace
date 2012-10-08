@@ -37,11 +37,12 @@ namespace SystemTray
 
 PlasmoidTask::PlasmoidTask(const QString &appletname, int id, QObject *parent, Plasma::Applet *host)
     : Task(parent),
-      m_name(appletname),
+      m_appletName(appletname),
       m_typeId(appletname),
       m_host(host),
       m_takenByParent(false)
 {
+    setName(appletname);
     setupApplet(appletname, id);
 }
 
@@ -59,16 +60,7 @@ bool PlasmoidTask::isEmbeddable() const
 
 bool PlasmoidTask::isValid() const
 {
-    return !m_name.isEmpty() && m_applet;
-}
-
-QString PlasmoidTask::name() const
-{
-    if (m_applet) {
-        return m_applet.data()->name();
-    }
-
-    return m_name;
+    return !m_appletName.isEmpty() && m_applet;
 }
 
 
@@ -161,6 +153,8 @@ void PlasmoidTask::setupApplet(const QString &plugin, int id)
     } else if (applet->category() == "Online Services") {
         setCategory(Communications);
     }
+
+    setName(applet->name());
 
     m_icon = KIcon(applet->icon());
 

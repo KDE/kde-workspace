@@ -66,6 +66,7 @@ UiTask::UiTask(TasksPool &pool, QString task_id, Task *task):
     d(new _Private(pool, task_id, task))
 {
     connect(task, SIGNAL(changedStatus()), this, SLOT(_onChangedStatus()));
+    connect(task, SIGNAL(changedName()), this, SIGNAL(changedName()));
 }
 
 
