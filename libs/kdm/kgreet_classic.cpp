@@ -58,8 +58,7 @@ KClassicGreeter::KClassicGreeter(KGreeterPluginHandler *_handler,
     ctx(_ctx),
     exp(-1),
     pExp(-1),
-    running(false),
-    authTok(false)
+    running(false)
 {
     QFormLayout *formLay = 0;
 

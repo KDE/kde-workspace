@@ -151,6 +151,7 @@ Greeter::Greeter(QObject *parent)
         m_greet = m_pluginHandle.info->create(this, m_greeterWidget, QString(),
                                         KGreeterPlugin::Authenticate,
                                         KGreeterPlugin::ExUnlock);
+        m_greet->start();
     }
 }
 
