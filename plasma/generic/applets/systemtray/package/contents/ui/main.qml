@@ -23,36 +23,18 @@
 import QtQuick 1.1
 import Private 0.1
 
-import "tasks.js" as Tasks
+import "TasksSet.js" as TasksSet
+import "main.js" as JS  // stuff & JS additions
 
 Item {
     id: root_item // represents available space on screen
 
-    // Constants
-    property int __icons_size: 24 // Size of icons, icons are square i.e. width == height
-    property int __icons_margins: 2 // Margins for icons
-    property int __minimum_size: 30 // minimum size of widget
-    property int __arrow_size: 12 // size of an arrow for popup
-    property int __arrow_margins: 5 // margins for an arrow
-    property int __blink_interval: 750 // time interval of blinking
-    property string __notification_task_name: "notifications"
-    property bool __popup_like_grid: false  // true if in popup icons should be placed like a grid without names
-
-    // This list determines order of categories of tasks
-    property variant __categories: [
-        TaskCategoryUnknown,
-        TaskCategoryApplicationStatus,
-        TaskCategoryCommunications,
-        TaskCategorySystemServices,
-        TaskCategoryHardware
-    ]
-
     // This 2 properties must be defined because we use states to set their values
-    property int minimumWidth:  __minimum_size
-    property int minimumHeight: __minimum_size
+    property int minimumWidth:  JS.MINIMUM_SIZE
+    property int minimumHeight: JS.MINIMUM_SIZE
 
     // Data Models
-    property list<ListModel> __models: [
+    property list<ListModel> models: [
         ListModel {id: model_tray},
         ListModel {id: model_popup},
         ListModel {id: model_notifications}
@@ -67,20 +49,17 @@ Item {
             var props = {"ui_task": task}
             var item = component.createObject(null, props)
             if (item) {
-                var loc = __getLocationForTask(task)
-                var model = __models[loc]
-                var index = __findInsertIndex(loc, task.category)
-                Tasks.addTask(task_id, index, loc, task.category, item)
-                model.insert(index, {"ui_task": task, "ui_item": item})
+                var loc = getLocationForTask(task)
+                var t = JS.tasks[loc].add(task_id, task.category, item)
+                models[loc].insert(t.index, {"ui_task": task, "ui_item": item})
             }
         }
 
         onDeletedTask: {
-            var task = Tasks.tasks[task_id]
-            var model = __models[task.location]
-            model.remove(task.model_index)
-            task.item.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
-            Tasks.removeTask(task_id)
+            var loc = JS.findLocation(task_id)
+            var t = JS.tasks[loc].remove(task_id)
+            models[loc].remove(t.index)
+            t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
         }
     }
 
@@ -90,7 +69,9 @@ Item {
     }
 
     Component.onCompleted: {
-        Tasks.clearCategoryArrays(__categories)
+        // create sets for tasks
+        for (var i = 0; i < JS.LOCATIONS_NUMBER; ++i)
+            JS.tasks[JS.LOCATIONS[i]] = new TasksSet.TasksSet(JS.CATEGORIES)
     }
 
     Item {
@@ -100,16 +81,16 @@ Item {
         // Notifications area in panel part of tray
         IconsGrid {
             id: notifications_area
-            icons_size:    __icons_size
-            icons_margins: __icons_margins
+            icons_size:    JS.ICONS_SIZE
+            icons_margins: JS.ICONS_MARGINS
             model: model_notifications
         }
 
         // Tray area that is in panel
         IconsGrid {
             id: tray_area
-            icons_size: __icons_size
-            icons_margins: __icons_margins
+            icons_size: JS.ICONS_SIZE
+            icons_margins: JS.ICONS_MARGINS
             model: model_tray
         }
 
@@ -118,8 +99,8 @@ Item {
             id: arrow_area
             content: IconsList {
                 id: popup_area
-                icons_size:    __icons_size
-                icons_margins: __icons_margins
+                icons_size:    JS.ICONS_SIZE
+                icons_margins: JS.ICONS_MARGINS
                 width: popup_area.min_width
                 height: popup_area.min_height
                 anchors.centerIn: parent
@@ -137,18 +118,18 @@ Item {
 
             property variant ui_task;
 
-            icons_size: __icons_size
-            blink_interval: __blink_interval
+            icons_size: JS.ICONS_SIZE
+            blink_interval: JS.BLINK_INTERVAL
             task: ui_task.task
             visible: ui_task.task !== null
-            width: __icons_size
+            width: JS.ICONS_SIZE
             height: width
             anchors.centerIn: parent
 
             Connections {
                 target: ui_task
-                onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
-                onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
+                onChangedHideState: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
         }
     }
@@ -163,14 +144,14 @@ Item {
 
             widget: ui_task.widget
             visible:  ui_task.widget !== null
-            width: __icons_size
+            width: JS.ICONS_SIZE
             height: width
             anchors.centerIn: parent
 
             Connections {
                 target: ui_task
-                onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
-                onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
+                onChangedHideState: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
         }
     }
@@ -201,54 +182,34 @@ Item {
     }
 
     // Funtions ========================================================================================================
-    function __getLocationForTask(task) {
-        var loc = __getDefaultLocationForTask(task)
-        if (loc === Tasks.LOCATION.TRAY && task.typeId == __notification_task_name)
-            return Tasks.LOCATION.NOTIFICATIONS // redefine location for notifications applet
+    function getLocationForTask(task) {
+        var loc = getDefaultLocationForTask(task)
+        if (loc === JS.LOCATION_TRAY && task.typeId == JS.TASK_NOTIFICATIONS_TYPEID)
+            return JS.LOCATION_NOTIFICATION // redefine location for notifications applet
         return loc
     }
 
     /// Returns location depending on status and hide state of task
-    function __getDefaultLocationForTask(task) {
-        if (task.status === TaskStatusAttention || task.hideState === TaskHideStateShown) return Tasks.LOCATION.TRAY
+    function getDefaultLocationForTask(task) {
+        if (task.status === TaskStatusAttention || task.hideState === TaskHideStateShown) return JS.LOCATION_TRAY
         if (task.hideState === TaskHideStateHidden || (task.status !== TaskStatusActive && task.status !== TaskStatusUnknown)) {
-            return Tasks.LOCATION.POPUP
+            return JS.LOCATION_POPUP
         }
-        return Tasks.LOCATION.TRAY
+        return JS.LOCATION_TRAY
     }
 
     /// Moves task to specified location
-    function __moveTaskToLocation(task_id, loc) {
-        var task = Tasks.tasks[task_id]
-        if (!task || task.location === loc)
+    function moveTaskToLocation(task_id, loc) {
+        var old_loc = JS.findLocation(task_id)
+        if (old_loc === loc)
             return
         // remove from old location
-        var model = __models[task.location]
-        model.remove(task.model_index)
-        Tasks.decrementIndexes(task)
-        Tasks.category_size[task.location][task.category]--
+        var t = JS.tasks[old_loc].remove(task_id)
+        models[old_loc].remove(t.index)
 
         // add to new model
-        model = __models[loc]
-        var index = task.model_index = __findInsertIndex(loc, task.category)
-        task.location = loc
-        model.insert(index, {"ui_task": tasks_pool.tasks[task_id], "ui_item": task.item})
-        Tasks.incrementIndexes(index, loc)
-        task.model_index = index  // incrementIndexes changes index of this task
-        Tasks.category_size[loc][task.category]++
-    }
-
-    /** Returns index for new task
-     * @param location an index of area (TRAY, POPUP or NOTIFICATIONS), an index of model, a location
-     * @param category a category of new task
-     */
-    function __findInsertIndex(location, category) {
-        var sizes = Tasks.category_size[location]
-        var index = 0 // index is a sum of numbers of tasks groupped by category
-        for (var cat = 0; cat < __categories.length && __categories[cat] !== category; ++cat) {
-            index += sizes[__categories[cat]]
-        }
-        return index
+        t = JS.tasks[loc].add(task_id, t.category, t.data)
+        models[loc].insert(t.index, {"ui_task": tasks_pool.tasks[task_id], "ui_item": t.data})
     }
 
 
@@ -262,13 +223,13 @@ Item {
             }
             PropertyChanges {
                 target: arrow_area
-                width: root_item.__arrow_size
-                anchors { leftMargin: __arrow_margins; rightMargin: __arrow_margins; topMargin: 0; bottomMargin: 0 }
+                width: JS.ARROW_SIZE
+                anchors { leftMargin: JS.ARROW_MARGINS; rightMargin: JS.ARROW_MARGINS; topMargin: 0; bottomMargin: 0 }
                 state: plasmoid.location === TopEdge ? "TOP_EDGE" : "BOTTOM_EDGE"
             }
             PropertyChanges {
                 target: popup_area
-                state: __popup_like_grid ? "SQR_H" : ""
+                state: JS.USE_GRID_IN_POPUP ? "SQR_H" : ""
             }
         },
 
@@ -297,13 +258,13 @@ Item {
             }
             PropertyChanges {
                 target: content_item
-                width: notifications_area.width + tray_area.width + arrow_area.width + 2*__arrow_margins
+                width: notifications_area.width + tray_area.width + arrow_area.width + 2*JS.ARROW_MARGINS
                 height: root_item.height
             }
             PropertyChanges {
                 target: root_item
                 minimumWidth: content_item.width
-                minimumHeight: __minimum_size
+                minimumHeight: JS.MINIMUM_SIZE
             }
         },
 
@@ -335,27 +296,22 @@ Item {
             }
             PropertyChanges {
                 target: arrow_area
-                height: root_item.__arrow_size
-                anchors { leftMargin: 0; rightMargin: 0; topMargin: __arrow_margins; bottomMargin: __arrow_margins }
+                height: JS.ARROW_SIZE
+                anchors { leftMargin: 0; rightMargin: 0; topMargin: JS.ARROW_MARGINS; bottomMargin: JS.ARROW_MARGINS }
                 state: plasmoid.location === LeftEdge ? "LEFT_EDGE" : "RIGHT_EDGE"
             }
             PropertyChanges {
                 target: popup_area
-                state: __popup_like_grid ? "SQR_V" : ""
-            }
-            PropertyChanges {
-                target: root_item
-                minimumWidth: __minimum_size
-                minimumHeight: notifications_area.height + tray_area.height + arrow_area.height + 2*__arrow_margins
+                state: JS.USE_GRID_IN_POPUP ? "SQR_V" : ""
             }
             PropertyChanges {
                 target: content_item
                 width: root_item.width
-                height: notifications_area.height + tray_area.height + arrow_area.height + 2*__arrow_margins
+                height: notifications_area.height + tray_area.height + arrow_area.height + 2*JS.ARROW_MARGINS
             }
             PropertyChanges {
                 target: root_item
-                minimumWidth: __minimum_size
+                minimumWidth: JS.MINIMUM_SIZE
                 minimumHeight: content_item.height
             }
         },
@@ -387,8 +343,8 @@ Item {
             }
             PropertyChanges {
                 target: content_item
-                width: notifications_area.width + tray_area.width + arrow_area.width + 2*__arrow_margins
-                height: Math.max(notifications_area.min_height, tray_area.min_height, __arrow_size)
+                width: notifications_area.width + tray_area.width + arrow_area.width + 2*JS.ARROW_MARGINS
+                height: Math.max(notifications_area.min_height, tray_area.min_height, JS.ARROW_SIZE)
             }
             PropertyChanges {
                 target: root_item
