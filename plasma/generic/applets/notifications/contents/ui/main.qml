@@ -28,7 +28,7 @@ import org.kde.locale 0.1 as KLocale
 import "plasmapackage:/ui/uiproperties.js" as UiProperties
 
 
-Item {
+MouseEventListener {
     id: notificationsApplet
     state: "default"
     width: 32
@@ -108,12 +108,33 @@ Item {
         }
     }
 
+    hoverEnabled: !UiProperties.touchInput
 
     PlasmaExtras.ScrollArea {
         id: mainScrollArea
         anchors.fill: parent
         implicitWidth: theme.defaultFont.mSize.width * 40
         implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 6, contentsColumn.height))
+        state: ""
+
+        states: [
+            State {
+                name: "underMouse"
+                when: notificationsApplet.containsMouse
+                PropertyChanges {
+                    target: mainScrollArea
+                    implicitHeight: implicitHeight
+                }
+            },
+            State {
+                name: ""
+                when: !notificationsApplet.containsMouse
+                PropertyChanges {
+                    target: mainScrollArea
+                    implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 6, contentsColumn.height))
+                }
+            }
+        ]
 
         Flickable {
             id: popupFlickable

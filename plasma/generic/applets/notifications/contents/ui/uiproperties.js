@@ -20,3 +20,4 @@
 
 var toolIconSize = theme.smallMediumIconSize
 var layoutSpacing = 4
+var touchInput = false
