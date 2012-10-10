@@ -44,7 +44,7 @@ Desktop::~Desktop()
 
 void Desktop::init()
 {
-    setWallpaper("image");
+    setWallpaper("color");
     setDrawWallpaper(true);
     configChanged();
 
@@ -58,10 +58,10 @@ void Desktop::init()
     kDebug() << " Loading QML File from package: " << qmlFile;
 
     m_declarativeWidget = new Plasma::DeclarativeWidget(this);
+    m_declarativeWidget->setAttribute(Qt::WA_TranslucentBackground);
+
     QGraphicsLinearLayout *l = new QGraphicsLinearLayout(this);
     l->addItem(m_declarativeWidget);
-
-
     setLayout(l);
 //     connect(m_declarativeWidget->mainComponent(), SIGNAL(statusChanged(QDeclarativeComponent::Status)), SLOT(connectObjects(QDeclarativeComponent::Status)));
 
