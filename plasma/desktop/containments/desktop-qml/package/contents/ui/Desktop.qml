@@ -22,15 +22,28 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
+import "../code/LayoutManager.js" as LayoutManager
+
 Item {
     id: main
     width: 540
     height: 540
 
     Rectangle {
-        color: "blue"
-        opacity: .5
+        color: "grey"
+        opacity: .2
         anchors.fill: parent
         anchors.margins: 24
+    }
+
+    PlasmaComponents.Button {
+        id: addAppletButton
+        text: "Add Applet"
+        iconSource: "list-add"
+        anchors { top: parent.top; right: parent.right; margins: 12; }
+        onClicked: {
+            var ap = "digital-clock";
+            print("Adding applet..." + ap);
+        }
     }
 }
