@@ -208,7 +208,7 @@ Item {
                 });
 
                 var job2 = service.startOperationCall(op2);
-                job1.finished.connect(function(job) {
+                job2.finished.connect(function(job) {
                     cookie2 = -1;
                 });
             } else {
@@ -224,7 +224,7 @@ Item {
                 });
 
                 var job2 = service.startOperationCall(op2);
-                job1.finished.connect(function(job) {
+                job2.finished.connect(function(job) {
                     cookie2 = job.result;
                 });
             }
