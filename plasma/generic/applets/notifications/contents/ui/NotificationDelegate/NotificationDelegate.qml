@@ -125,7 +125,13 @@ PlasmaComponents.ListItem {
                     iconSource: "window-close"
                     width: notificationItem.toolIconSize
                     height: width
-                    onClicked: removeAnimation.running = true
+                    onClicked: {
+                        if (notificationsModel.count > 1) {
+                            removeAnimation.running = true
+                        } else {
+                            notificationsModel.remove(index)
+                        }
+                    }
                     anchors {
                         top: parent.top
                         right: parent.right
