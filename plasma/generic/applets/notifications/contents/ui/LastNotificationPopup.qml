@@ -270,6 +270,7 @@ PlasmaCore.Dialog {
             opacity: 0
             iconSource: "window-close"
             width: theme.smallMediumIconSize
+            height: width
             anchors {
                 right: parent.right
                 top: parent.top
