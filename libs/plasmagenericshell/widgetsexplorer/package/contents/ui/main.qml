@@ -156,17 +156,18 @@ Item {
         Item {
             anchors {
                 top: parent.top
-                left:parent.left
+                left: parent.left
                 right: parent.right
             }
-            height: categoryButton.height
+            height: filterField.height
             Row {
-                spacing: 4
+                spacing: 5
                 anchors {
                     left: parent.left
-                    leftMargin: 1
+                    leftMargin: 2
                 }
                 PlasmaComponents.TextField {
+                    id: filterField
                     width: list.width / Math.floor(list.width / cellWidth) - 4
                     clearButtonShown: true
                     placeholderText: i18n("Enter search term...")
@@ -185,7 +186,7 @@ Item {
             }
             Row {
                 anchors.right: parent.right
-                spacing: 4
+                spacing: 5
                 PlasmaComponents.Button {
                     id: getWidgetsButton
                     iconSource: "get-hot-new-stuff"

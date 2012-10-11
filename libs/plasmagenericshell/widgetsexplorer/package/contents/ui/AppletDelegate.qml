@@ -96,9 +96,6 @@ PlasmaCore.FrameSvgItem {
     }
 
 
-    width: list.delegateWidth
-    height: list.delegateHeight
-
     imagePath: "widgets/viewitem"
     prefix: "normal"
 
