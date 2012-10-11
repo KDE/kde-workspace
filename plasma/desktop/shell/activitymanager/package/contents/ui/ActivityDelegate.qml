@@ -90,100 +90,102 @@ PlasmaCore.FrameSvgItem {
                 id: mouseArea
                 anchors.fill: parent
                 hoverEnabled: true
+
                 onClicked: {
                     var activityId = model["DataEngineSource"]
                     var service = activitySource.serviceForSource(activityId)
                     var operation = service.operationDescription("setCurrent")
                     service.startOperationCall(operation)
                 }
-            }
-            Component.onCompleted: mainMouseArea = mouseArea
 
-            QIconItem {
-                id: iconWidget
-                anchors.verticalCenter: parent.verticalCenter
-                x: y
-                width: theme.hugeIconSize
-                height: width
-                icon: QIcon(Icon)
-            }
-            QPixmapItem {
-                anchors.fill: iconWidget
-                pixmap: Icon ? undefined : activityManager.pixmapForActivity(model["DataEngineSource"])
-                visible: Icon == ""
-            }
-            QIconItem {
-                width: theme.mediumIconSize
-                height: width
-                anchors.centerIn: iconWidget
-                icon: QIcon("media-playback-start")
-                visible: model["State"] != "Running"
-            }
-            Column {
-                anchors {
-                    left: iconWidget.right
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
+                Component.onCompleted: mainMouseArea = mouseArea
 
-                    leftMargin: background.margins.left
+                QIconItem {
+                    id: iconWidget
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: y
+                    width: theme.hugeIconSize
+                    height: width
+                    icon: QIcon(Icon)
                 }
-                PlasmaComponents.Label {
-                    id: titleText
-                    text: Name
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    horizontalAlignment: Text.AlignHCenter
-                    height: paintedHeight
-                    wrapMode: Text.WordWrap
-                    //go with nowrap only if there is a single word too long
-                    onPaintedWidthChanged: {
-                        wrapTimer.restart()
+                QPixmapItem {
+                    anchors.fill: iconWidget
+                    pixmap: Icon ? undefined : activityManager.pixmapForActivity(model["DataEngineSource"])
+                    visible: Icon == ""
+                }
+                QIconItem {
+                    width: theme.mediumIconSize
+                    height: width
+                    anchors.centerIn: iconWidget
+                    icon: QIcon("media-playback-start")
+                    visible: model["State"] != "Running"
+                }
+                Column {
+                    anchors {
+                        left: iconWidget.right
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+
+                        leftMargin: background.margins.left
                     }
-                    Timer {
-                        id: wrapTimer
-                        interval: 200
-                        onTriggered: {
-                            //give it some pixels of tolerance
-                            if (titleText.paintedWidth > titleText.width + 3) {
-                                titleText.wrapMode = Text.NoWrap
-                                titleText.elide = Text.ElideRight
-                            } else {
-                                titleText.wrapMode = Text.WordWrap
-                                titleText.elide = Text.ElideNone
+                    PlasmaComponents.Label {
+                        id: titleText
+                        text: Name
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        horizontalAlignment: Text.AlignHCenter
+                        height: paintedHeight
+                        wrapMode: Text.WordWrap
+                        //go with nowrap only if there is a single word too long
+                        onPaintedWidthChanged: {
+                            wrapTimer.restart()
+                        }
+                        Timer {
+                            id: wrapTimer
+                            interval: 200
+                            onTriggered: {
+                                //give it some pixels of tolerance
+                                if (titleText.paintedWidth > titleText.width + 3) {
+                                    titleText.wrapMode = Text.NoWrap
+                                    titleText.elide = Text.ElideRight
+                                } else {
+                                    titleText.wrapMode = Text.WordWrap
+                                    titleText.elide = Text.ElideNone
+                                }
                             }
                         }
                     }
-                }
-                Row {
-                    id: buttonsRow
-                    visible: model["State"] == "Running"
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    Row {
+                        id: buttonsRow
+                        visible: model["State"] == "Running"
+                        anchors.horizontalCenter: parent.horizontalCenter
 
-                    PlasmaComponents.ToolButton {
-                        id: configureButton
-                        flat: false
-                        iconSource: "configure"
-                        onClicked: delegateStack.push(configurationComponent)
-                    }
-                    PlasmaComponents.ToolButton {
-                        visible: !model["Current"]
-                        iconSource: "media-playback-stop"
-                        flat: false
-                        onClicked: {
-                            var activityId = model["DataEngineSource"]
-                            var service = activitySource.serviceForSource(activityId)
-                            var operation = service.operationDescription("stop")
-                            service.startOperationCall(operation)
+                        PlasmaComponents.ToolButton {
+                            id: configureButton
+                            flat: false
+                            iconSource: "configure"
+                            onClicked: delegateStack.push(configurationComponent)
+                        }
+                        PlasmaComponents.ToolButton {
+                            visible: !model["Current"]
+                            iconSource: "media-playback-stop"
+                            flat: false
+                            onClicked: {
+                                var activityId = model["DataEngineSource"]
+                                var service = activitySource.serviceForSource(activityId)
+                                var operation = service.operationDescription("stop")
+                                service.startOperationCall(operation)
+                            }
                         }
                     }
-                }
-                PlasmaComponents.ToolButton {
-                    visible: model["State"] != "Running"
-                    iconSource: "edit-delete"
-                    text: i18n("Delete")
-                    width: Math.min(implicitWidth, parent.width)
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    onClicked: delegateStack.push(confirmationComponent)
+                    PlasmaComponents.ToolButton {
+                        visible: model["State"] != "Running"
+                        iconSource: "edit-delete"
+                        text: i18n("Delete")
+                        width: Math.min(implicitWidth, parent.width)
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        onClicked: delegateStack.push(confirmationComponent)
+                    }
                 }
             }
         }
