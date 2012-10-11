@@ -23,9 +23,9 @@ import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.plasma.mobilecomponents 0.1 as MobileComponents
-import org.kde.plasma.slccomponents 0.1 as SlcComponents
-import org.kde.metadatamodels 0.1 as MetadataModels
+// import org.kde.plasma.mobilecomponents 0.1 as MobileComponents
+//import org.kde.plasma.slccomponents 0.1 as SlcComponents
+//import org.kde.metadatamodels 0.1 as MetadataModels
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
@@ -95,19 +95,19 @@ Item {
         imagePath: "widgets/extender-dragger"
     }
 
-    MetadataModels.MetadataCloudModel {
-        id: categoryListModel
-        cloudCategory: "rdf:type"
-        activityId: plasmoid.activityId
-        allowedCategories: userTypes.userTypes
-        onCategoriesChanged: {
-            categoriesTimer.restart()
-        }
-    }
-
-    MetadataModels.MetadataUserTypes {
-        id: userTypes
-    }
+//     MetadataModels.MetadataCloudModel {
+//         id: categoryListModel
+//         cloudCategory: "rdf:type"
+//         activityId: plasmoid.activityId
+//         allowedCategories: userTypes.userTypes
+//         onCategoriesChanged: {
+//             categoriesTimer.restart()
+//         }
+//     }
+//
+//     MetadataModels.MetadataUserTypes {
+//         id: userTypes
+//     }
 
     PlasmaExtras.ResourceInstance {
         id: resourceInstance
@@ -152,6 +152,10 @@ Item {
         }
     }
 
+    ToolBox {
+        id: toolBox
+        anchors { top: parent.top; right: parent.right; }
+    }
     Flickable {
         id: mainFlickable
         anchors {
@@ -159,7 +163,8 @@ Item {
             leftMargin: availScreenRect.x
             rightMargin: parent.width - availScreenRect.x - availScreenRect.width
         }
-        interactive: contentItem.height>mainFlickable.height
+        //interactive: contentItem.height>mainFlickable.height
+        interactive: false
         PropertyAnimation {
             id: contentScrollTo0Animation
             target: mainFlickable
@@ -188,49 +193,45 @@ Item {
                 onActivityNameChanged: titleText.text = plasmoid.activityName
             }
 
-            Row {
-                id: toolBar
-                spacing: 16
-                anchors {
-                    top: parent.top
-                    left: resultsFlow.left
-                    topMargin: availScreenRect.y+20
-                    leftMargin: 4
-                }
-
-                MobileComponents.ActionButton {
-                    svg: iconsSvg
-                    elementId: "add"
-                    action: plasmoid.action("add widgets")
-                    //FIXME: WHY?
-                    Component.onCompleted: {
-                        action.enabled = true
-                    }
-                }
-
-                MobileComponents.ActionButton {
-                    id: configureButton
-                    svg: iconsSvg
-                    elementId: "configure"
-                    action: plasmoid.action("configure")
-                    //FIXME: WHY?
-                    Component.onCompleted: {
-                        action.enabled = true
-                    }
-                }
-
-                MobileComponents.TextEffects {
-                    id: titleText
-                    text: (String(plasmoid.activityName).length <= 28) ? plasmoid.activityName:String(plasmoid.activityName).substr(0,28) + "..."
-                    color: "white"
-                    horizontalOffset: 1
-                    verticalOffset: 1
-                    bold: true
-                    pointSize: theme.defaultFont.pointSize * 1.1
-                    anchors.verticalCenter: configureButton.verticalCenter
-                }
-            }
-
+//             Row {
+//                 id: toolBar
+//                 spacing: 16
+//                 anchors {
+//                     top: parent.top
+//                     left: resultsFlow.left
+//                     topMargin: availScreenRect.y+20
+//                     leftMargin: 4
+//                 }
+//
+//                 ActionButton {
+//                     svg: iconsSvg
+//                     elementId: "add"
+//                     action: plasmoid.action("add widgets")
+//                     //FIXME: WHY?
+//                     Component.onCompleted: {
+//                         action.enabled = true
+//                     }
+//                 }
+//
+//                 ActionButton {
+//                     id: configureButton
+//                     svg: iconsSvg
+//                     elementId: "configure"
+//                     action: plasmoid.action("configure")
+//                     //FIXME: WHY?
+//                     Component.onCompleted: {
+//                         action.enabled = true
+//                     }
+//                 }
+//
+//                 PlasmaExtras.Heading {
+//                     id: titleText
+//                     text: (String(plasmoid.activityName).length <= 28) ? plasmoid.activityName:String(plasmoid.activityName).substr(0,28) + "..."
+//                     level: 2
+//                     anchors.verticalCenter: configureButton.verticalCenter
+//                 }
+//             }
+/*
             Timer {
                 id: categoriesTimer
                 repeat: false
@@ -265,7 +266,7 @@ Item {
                         layoutTimer.restart()
                     }
                 }
-            }
+            }*/
 
             //FIXME: debug purposes only, remove asap
             /*Flow {
@@ -296,7 +297,7 @@ Item {
                 z: 900
 
                 anchors {
-                    top: toolBar.bottom
+                    top: parent.top
                     topMargin: 5
                     horizontalCenter: parent.horizontalCenter
                 }
@@ -423,7 +424,7 @@ Item {
         }
     }
 
-    SlcComponents.SlcMenu {
-        id: contextMenu
-    }
+//     SlcComponents.SlcMenu {
+//         id: contextMenu
+//     }
 }

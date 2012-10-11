@@ -63,13 +63,13 @@ PlasmaCore.FrameSvgItem {
             globalLastPoint1 = mapToItem(main, pinch.point1.x, pinch.point1.y)
             globalLastPoint2 = mapToItem(main, pinch.point2.x, pinch.point2.y)
             globalStartPoint1 = globalLastPoint1
-            globalStartPoint2 = globalLastPoint2 
+            globalStartPoint2 = globalLastPoint2
             dragMouseArea.enabled = false
         }
         onPinchUpdated: {
             var globalPoint1 = mapToItem(main, pinch.point1.x, pinch.point1.y)
             var globalPoint2 = mapToItem(main, pinch.point2.x, pinch.point2.y)
-            
+
             if (globalPoint1.x == globalPoint2.x) {
                 return
             }
@@ -96,7 +96,7 @@ print(itemGroup.x+" "+itemGroup.y)
 
         onPressed: {
             //FIXME: this shouldn't be necessary
-            mainFlickable.interactive = false
+//             mainFlickable.interactive = false
             itemGroup.z = 999
             animationsEnabled = false
             mouse.accepted = true
@@ -174,14 +174,14 @@ print(itemGroup.x+" "+itemGroup.y)
         NumberAnimation {
             duration: 250
             easing.type: Easing.InOutQuad
-            onRunningChanged: {
-                if (!running) {
-                    mainFlickable.interactive = contentItem.height>mainFlickable.height
-                    if (!mainFlickable.interactive) {
-                        contentScrollTo0Animation.running = true
-                    }
-                }
-            }
+//             onRunningChanged: {
+//                 if (!running) {
+//                     mainFlickable.interactive = contentItem.height>mainFlickable.height
+//                     if (!mainFlickable.interactive) {
+//                         contentScrollTo0Animation.running = true
+//                     }
+//                 }
+//             }
         }
     }
     Behavior on width {
@@ -203,14 +203,14 @@ print(itemGroup.x+" "+itemGroup.y)
             id: heightAnimation
             duration: 250
             easing.type: Easing.InOutQuad
-            onRunningChanged: {
-                if (!running) {
-                    mainFlickable.interactive = contentItem.height>mainFlickable.height
-                    if (!mainFlickable.interactive) {
-                        contentScrollTo0Animation.running = true
-                    }
-                }
-            }
+//             onRunningChanged: {
+//                 if (!running) {
+//                     mainFlickable.interactive = contentItem.height>mainFlickable.height
+//                     if (!mainFlickable.interactive) {
+//                         contentScrollTo0Animation.running = true
+//                     }
+//                 }
+//             }
         }
     }
 
@@ -245,7 +245,7 @@ print(itemGroup.x+" "+itemGroup.y)
             itemGroup.z = 999
             mouse.accepted = true
             //FIXME: this shouldn't be necessary
-            mainFlickable.interactive = false
+//             mainFlickable.interactive = false
             animationsEnabled = false
             startX = mouse.x
             startY = mouse.y
