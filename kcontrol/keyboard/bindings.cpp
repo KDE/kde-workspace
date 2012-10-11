@@ -23,6 +23,7 @@
 #include <kaction.h>
 #include <klocalizedstring.h>
 #include <kglobalaccel.h>
+#include <kaboutdata.h>
 
 #include <QtCore/QList>
 
@@ -31,11 +32,11 @@
 
 
 static const char* actionName = I18N_NOOP("Switch to Next Keyboard Layout");
-static const char* COMPONENT_NAME = "KDE Keyboard Layout Switcher";
+static const char* COMPONENT_NAME = I18N_NOOP("KDE Keyboard Layout Switcher");
 
 
 KeyboardLayoutActionCollection::KeyboardLayoutActionCollection(QObject* parent, bool configAction_):
-		KActionCollection(parent, KComponentData(COMPONENT_NAME)),
+		KActionCollection(parent, KComponentData(KAboutData(COMPONENT_NAME, 0, ki18n(COMPONENT_NAME), 0))),
 		configAction(configAction_)
 {
 	KAction* toggleAction = addAction( actionName );
