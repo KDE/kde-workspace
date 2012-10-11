@@ -19,12 +19,15 @@
 
 import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.desktop 0.1 as PlasmaDesktop
+
 import org.kde.plasma.mobilecomponents 0.1 as MobileComponents
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 ItemGroup {
     id: plasmoidGroup
-    scale: plasmoid.scale
+//     scale: plasmoid.scale
+    scale: 1.0
     canResizeHeight: true
     title: applet.name
     minimumWidth: Math.max(LayoutManager.cellSize.width,
@@ -40,7 +43,7 @@ ItemGroup {
     property alias applet: appletContainer.applet
 
 
-    MobileComponents.AppletContainer {
+    PlasmaDesktop.AppletContainer {
         id: appletContainer
         anchors.fill: plasmoidGroup.contents
         onAppletChanged: {
@@ -54,7 +57,7 @@ ItemGroup {
         }
     }
 
-    MobileComponents.ActionButton {
+    ActionButton {
         svg: configIconsSvg
         elementId: "close"
         iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
@@ -71,7 +74,7 @@ ItemGroup {
         }
     }
 
-    MobileComponents.ActionButton {
+    ActionButton {
         svg: configIconsSvg
         elementId: "configure"
         iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
