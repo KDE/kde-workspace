@@ -22,7 +22,7 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
-import "../code/LayoutManager.js" as LayoutManager
+import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 Item {
     id: main
@@ -36,6 +36,11 @@ Item {
         anchors.margins: 24
     }
 
+    Item {
+        id: resultsFlow
+        anchors.fill: parent
+    }
+
     PlasmaComponents.Button {
         id: addAppletButton
         text: "Add Applet"
@@ -45,5 +50,32 @@ Item {
             var ap = "digital-clock";
             print("Adding applet..." + ap);
         }
+    }
+    Component.onCompleted: {
+        print("\n\n\n");
+        //do it here since theme is not accessible in LayoutManager
+        //TODO: icon size from the configuration
+        //TODO: remove hardcoded sizes, use framesvg boders
+        //updateGridSize()
+
+        plasmoid.containmentType = "CustomContainment"
+        plasmoid.appletAdded.connect(addApplet)
+        LayoutManager.restore()
+        for (var i = 0; i < plasmoid.applets.length; ++i) {
+            var applet = plasmoid.applets[i]
+            addApplet(applet, 0)
+        }
+    }
+
+    function addApplet(applet, pos)
+    {
+        print("ADD APPLET! " + applet.id + " " + pos);
+        var component = Qt.createComponent("PlasmoidGroup.qml")
+        var plasmoidGroup = component.createObject(resultsFlow)
+        plasmoidGroup.width = LayoutManager.cellSize.width*2
+        plasmoidGroup.height = LayoutManager.cellSize.height*2
+        plasmoidGroup.applet = applet
+        plasmoidGroup.category = "Applet-"+applet.id
+        LayoutManager.itemGroups[plasmoidGroup.category] = plasmoidGroup
     }
 }
