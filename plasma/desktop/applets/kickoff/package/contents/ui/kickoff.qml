@@ -36,8 +36,23 @@ Item {
     focus: true
 
     Component.onCompleted: {
+        // events
         plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect('popupEvent', popupEventSlot);
+
+        // plasmoid look
+        plasmoid.aspectRatioMode = IgnoreAspectRatio;
+        plasmoid.popupIcon = QIcon("start-here-kde"); // same as in the .desktop file
+
+        // tooltip shown when hovering the plasmoid (makes only sense when the plasmoid is added to a panel)
+        if (plasmoid.formFactor == Horizontal || plasmoid.formFactor == Vertical) {
+            var toolTipData = new Object;
+            toolTipData["image"] = "start-here-kde"; // same as in the .desktop file
+            toolTipData["mainText"] = i18n("Application Launcher"); // same as in the .desktop file
+            toolTipData["subText"] = i18n("Favorites, applications, computer places, recently used items and desktop sessions");
+            plasmoid.popupIconToolTip = toolTipData;
+        }
+
         root.forceActiveFocus();
     }
 
@@ -123,7 +138,7 @@ Item {
         PlasmaComponents.TextField {
             id: searchField
 
-            placeholderText: "Search"
+            placeholderText: i18nc("Search field placeholder text", "Search")
             clearButtonShown: true
             anchors {
                 left: searchIcon.right

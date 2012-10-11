@@ -26,7 +26,8 @@ PlasmaComponents.ListItem {
     enabled: true
     clip: true
     checked: ListView.isCurrentItem
-    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight)
+    //FIXME: better use background.margins from ListItem.qml but not accessible here
+    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight) + background.margins.top
 
     property bool modelChildren: hasModelChildren
 
@@ -56,7 +57,7 @@ PlasmaComponents.ListItem {
                     return display;
                 } else {
                     // TODO: games should always show the by name
-                    return root.showAppsByName ? subtitle : display;
+                    return root.showAppsByName || display.length == 0 ? subtitle : display;
                 }
             } else {
                 return display;
@@ -76,7 +77,7 @@ PlasmaComponents.ListItem {
                 if (hasModelChildren) {
                     return "";
                 } else {
-                    return root.showAppsByName ? display : subtitle;
+                    return root.showAppsByName || display.length == 0 ? display : subtitle;
                 }
             } else {
                 return subtitle;

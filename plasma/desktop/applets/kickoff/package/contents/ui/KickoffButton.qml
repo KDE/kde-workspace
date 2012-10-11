@@ -56,7 +56,7 @@ PlasmaComponents.TabButton {
         hoverEnabled: root.switchTabsOnHover
         onEntered: {
             parent.clicked()
-            parent.parent.parent.currentTab = parent
+            tabBar.currentTab = parent
         }
     }
 }
