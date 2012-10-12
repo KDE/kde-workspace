@@ -42,8 +42,10 @@ Item {
 
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
 
-    property int iconWidth: theme.defaultFont.mSize.width * 14
-    property int iconHeight: theme.defaultIconSize + theme.defaultFont.mSize.height
+//     property int iconWidth: theme.defaultFont.mSize.width * 14
+//     property int iconHeight: theme.defaultIconSize + theme.defaultFont.mSize.height
+    property int iconWidth: 24
+    property int iconHeight: iconWidth
     onIconHeightChanged: updateGridSize()
 
     function updateGridSize()
@@ -165,17 +167,19 @@ Item {
         }
         //interactive: contentItem.height>mainFlickable.height
         interactive: false
-        PropertyAnimation {
-            id: contentScrollTo0Animation
-            target: mainFlickable
-            properties: "contentY"
-            to: 0
-            duration: 250
-            running: false
-        }
+//         PropertyAnimation {
+//             id: contentScrollTo0Animation
+//             target: mainFlickable
+//             properties: "contentY"
+//             to: 0
+//             duration: 250
+//             running: false
+//         }
 
-        contentWidth: contentItem.width
-        contentHeight: contentItem.height
+//         contentWidth: contentItem.width
+//         contentHeight: contentItem.height
+        contentWidth: mainFlickable.width
+        contentHeight: mainFlickable.height
 
         MouseArea {
             id: contentItem
@@ -188,10 +192,10 @@ Item {
             }
 
 
-            Connections {
-                target: plasmoid
-                onActivityNameChanged: titleText.text = plasmoid.activityName
-            }
+//             Connections {
+//                 target: plasmoid
+//                 onActivityNameChanged: titleText.text = plasmoid.activityName
+//             }
 
 //             Row {
 //                 id: toolBar
@@ -383,6 +387,7 @@ Item {
                 }
                 Rectangle {
                     id: placeHolderPaint
+                    property real visibleOpacity: 0.25
                     x: placeHolder.x
                     y: placeHolder.y
                     width: placeHolder.width
@@ -391,7 +396,7 @@ Item {
                     opacity: 0
                     radius: 8
                     smooth: true
-                    color: Qt.rgba(1,1,1,0.3)
+                    color: Qt.rgba(1,1,1,0.15)
                     Behavior on opacity {
                         NumberAnimation {
                             duration: 250

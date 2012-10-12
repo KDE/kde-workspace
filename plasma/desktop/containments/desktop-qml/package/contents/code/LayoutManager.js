@@ -22,8 +22,8 @@
 var positions = new Array()
 
 var cellSize = new Object()
-cellSize.width = 48
-cellSize.height = 48
+cellSize.width = 24
+cellSize.height = 24
 
 var resultsFlow
 
