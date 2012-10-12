@@ -4,9 +4,9 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article id="splashscreen" lang="&language;">
+<article lang="&language;">
 <title>Splash Screen</title>
-<article id="splashscreen"info>
+<articleinfo>
 <authorgroup>
 <author>
 <firstname>Anne-Marie</firstname>

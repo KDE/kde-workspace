@@ -5,8 +5,8 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article id="kcmstyle" lang="&language;">
-<article id="kcmstyle"info>
+<article lang="&language;">
+<articleinfo>
 
 <title>Style</title>
 <authorgroup>

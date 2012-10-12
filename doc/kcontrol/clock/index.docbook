@@ -5,8 +5,8 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article id="clock" lang="&language;">
-<article id="clock"info>
+<article lang="&language;">
+<articleinfo>
 <title>Date &amp; Time</title>
 <authorgroup>
 <author>&Mike.McBride; &Mike.McBride.mail;</author>

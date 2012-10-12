@@ -4,8 +4,8 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article id="joystick" lang="&language;">
-<article id="joystick"info>
+<article lang="&language;">
+<articleinfo>
 <title>Joystick</title>
 <authorgroup>
 <author>
