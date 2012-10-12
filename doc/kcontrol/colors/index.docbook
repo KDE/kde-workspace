@@ -6,8 +6,8 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article id="colors" lang="&language;">
-<article id="colors"info>
+<article lang="&language;">
+<articleinfo>
 <title>Colors</title>
 <authorgroup>
 <author>&Matthew.Woehlke; &Matthew.Woehlke.mail;</author>

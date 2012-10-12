@@ -4,8 +4,8 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article id="desktopthemedetails" lang="&language;">
-<article id="desktopthemedetails"info>
+<article lang="&language;">
+<articleinfo>
 <title>Desktop Theme</title>
 <authorgroup>
 <author>

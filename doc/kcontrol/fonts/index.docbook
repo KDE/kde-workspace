@@ -5,8 +5,8 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article id="fonts" lang="&language;">
-<article id="fonts"info>
+<article lang="&language;">
+<articleinfo>
 <title>Fonts</title>
 <authorgroup>
 <author>&Mike.McBride; &Mike.McBride.mail;</author>

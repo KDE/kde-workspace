@@ -4,8 +4,8 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article id="solid-actions" lang="&language;">
-<article id="solid-actions"info>
+<article lang="&language;">
+<articleinfo>
 <title>Device Actions</title>
 <authorgroup>
 <author><firstname>Ben</firstname><surname>Cooksley</surname></author>

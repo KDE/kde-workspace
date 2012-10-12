@@ -8,9 +8,9 @@
   <!ENTITY % English "INCLUDE">
 ]>
 
-<article id="kfontview" lang="&language;">
+<article lang="&language;">
 
-<article id="kfontview"info>
+<articleinfo>
 <title>Font Viewer</title>
 <authorgroup>
 <author>&Burkhard.Lueck; &Burkhard.Lueck.mail;</author>

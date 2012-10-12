@@ -5,8 +5,8 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article id="kwincompositing" lang="&language;">
-<article id="kwincompositing"info>
+<article lang="&language;">
+<articleinfo>
 
 <title>Desktop Effects</title>
 <authorgroup>

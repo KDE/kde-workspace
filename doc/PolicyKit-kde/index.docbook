@@ -11,9 +11,9 @@
   <!ENTITY % addindex "IGNORE">
 ]>
 
-<book id="PolicyKit-kde" lang="&language;"> 
+<book lang="&language;"> 
 
-<book id="PolicyKit-kde"info>
+<bookinfo>
 <title>The &policykit-kde; manual</title>
 
 <authorgroup>
