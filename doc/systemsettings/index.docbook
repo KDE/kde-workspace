@@ -5,9 +5,9 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<book lang="&language;">
+<book id="systemsettings" lang="&language;">
 
-<bookinfo>
+<book id="systemsettings"info>
 <title>The &systemsettings; Handbook</title>
 
 <authorgroup>

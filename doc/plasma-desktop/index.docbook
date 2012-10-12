@@ -5,9 +5,9 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<book lang="&language;">
+<book id="plasma-desktop" lang="&language;">
 
-<bookinfo>
+<book id="plasma-desktop"info>
 <title>The &plasma; Handbook</title>
 
 <authorgroup>

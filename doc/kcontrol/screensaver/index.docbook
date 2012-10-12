@@ -5,8 +5,8 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article lang="&language;">
-<articleinfo>
+<article id="screensaver" lang="&language;">
+<article id="screensaver"info>
 <title>Screen Saver</title>
 <authorgroup>
 <author>&Mike.McBride; &Mike.McBride.mail;</author>
