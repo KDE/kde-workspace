@@ -25,6 +25,7 @@ PlasmaComponents.TabButton {
     property string iconSource
     property alias text: labelElement.text
     implicitHeight: 48 + labelElement.implicitHeight + 15
+
     QIconItem {
         id: iconElement
         icon: QIcon(iconSource)
@@ -55,8 +56,7 @@ PlasmaComponents.TabButton {
         anchors.fill: parent
         hoverEnabled: root.switchTabsOnHover
         onEntered: {
-            parent.clicked()
-            tabBar.currentTab = parent
+            parent.clicked();
         }
     }
 }

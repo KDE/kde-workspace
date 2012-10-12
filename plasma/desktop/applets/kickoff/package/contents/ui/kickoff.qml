@@ -288,6 +288,7 @@ Item {
 
     PlasmaComponents.TabBar {
         id: tabBar
+        currentTab: bookmarkButton
         anchors {
             left: parent.left
             right: parent.right
@@ -314,26 +315,31 @@ Item {
             id: bookmarkButton
             iconSource: "bookmarks"
             text: i18n("Favorites")
+            onClicked: tabBar.currentTab = bookmarkButton
         }
         KickoffButton {
             id: applicationButton
             iconSource: "applications-other"
             text: i18n("Applications")
+            onClicked: tabBar.currentTab = applicationButton
         }
         KickoffButton {
             id: computerButton
             iconSource: "computer" // TODO: could also be computer-laptop
             text: i18n("Computer")
+            onClicked: tabBar.currentTab = computerButton
         }
         KickoffButton {
             id: usedButton
             iconSource: "document-open-recent"
             text: i18n("Recently Used")
+            onClicked: tabBar.currentTab = usedButton
         }
         KickoffButton {
             id: leaveButton
             iconSource: "system-shutdown"
             text: i18n("Leave")
+            onClicked: tabBar.currentTab = leaveButton
         }
 
         onCurrentTabChanged: {

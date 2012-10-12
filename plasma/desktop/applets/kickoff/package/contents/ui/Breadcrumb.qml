@@ -29,7 +29,7 @@ PlasmaComponents.ToolButton {
     function deleteCrumb() {
         view.model.rootIndex = modelIndex;
         crumb.enabled = false;
-        found = false;
+        var found = false;
         for (var i = 0; i < parent.children.length; i++) {
             if (found) {
                 parent.children[i].destroy();

@@ -130,7 +130,7 @@ Item {
                     return kickoffListView.height - kickoffListView.contentHeight;
                 }
             }
-            width: parent.width
+            width: kickoffListView.width
             DropArea {
                 anchors.fill: parent
                 onDrop: {

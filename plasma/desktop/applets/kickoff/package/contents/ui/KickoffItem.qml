@@ -27,7 +27,7 @@ PlasmaComponents.ListItem {
     clip: true
     checked: ListView.isCurrentItem
     //FIXME: better use background.margins from ListItem.qml but not accessible here
-    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight) + background.margins.top
+    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight) + 10
 
     property bool modelChildren: hasModelChildren
 
@@ -228,7 +228,7 @@ PlasmaComponents.ListItem {
                         }
                     }
 
-                    var mapPos = listItem.mapToItem(listItem.ListView.view.parent.parent.parent, mouse.x, mouse.y);
+                    var mapPos = listItem.mapToItem(listItem, mouse.x, mouse.y);
                     contextMenu.open(mapPos.x,mapPos.y);
                 }
             }
