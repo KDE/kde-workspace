@@ -4,8 +4,8 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article lang="&language;">
-<articleinfo>
+<article id="kwintabbox" lang="&language;">
+<article id="kwintabbox"info>
 <title>Task Switcher</title>
 <authorgroup>
 <author>&Martin.Graesslin;&Martin.Graesslin.mail;</author>

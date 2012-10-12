@@ -7,8 +7,8 @@
 
 <!--copy from r308626 Tue May 4 17:11:51 2004 UTC -->
 
-<article lang="&language;">
-<articleinfo>
+<article id="windowbehaviour" lang="&language;">
+<article id="windowbehaviour"info>
 <title>Window Behavior</title>
 <authorgroup>
 <author>&Mike.McBride; &Mike.McBride.mail;</author>

@@ -4,8 +4,8 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article lang="&language;">
-<articleinfo>
+<article id="workspaceoptions" lang="&language;">
+<article id="workspaceoptions"info>
 <title>Workspace</title>
 <authorgroup>
 <author>&Marco.Martin;&Marco.Martin.mail;</author>

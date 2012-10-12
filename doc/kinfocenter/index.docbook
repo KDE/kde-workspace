@@ -6,8 +6,8 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<book lang="&language;">
-<bookinfo>
+<book id="kinfocenter" lang="&language;">
+<book id="kinfocenter"info>
 <title>The &infocenter;</title>
 
 <authorgroup>

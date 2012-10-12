@@ -4,8 +4,8 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article lang="&language;">
-<articleinfo>
+<article id="autostart" lang="&language;">
+<article id="autostart"info>
 <title>Autostart</title>
 <authorgroup>
 <author>&Anne-Marie.Mahfouf;</author>

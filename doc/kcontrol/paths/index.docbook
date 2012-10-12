@@ -5,9 +5,9 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article lang="&language;">
+<article id="paths" lang="&language;">
 <title>Paths</title>
-<articleinfo>
+<article id="paths"info>
 
 <authorgroup>
 <author>

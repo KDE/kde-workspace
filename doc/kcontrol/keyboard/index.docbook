@@ -5,9 +5,9 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article lang="&language;">
+<article id="keyboard" lang="&language;">
 <title>Keyboard</title>
-<articleinfo>
+<article id="keyboard"info>
 
 <authorgroup>
 <author>&Mike.McBride; &Mike.McBride.mail;</author>

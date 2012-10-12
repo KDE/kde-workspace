@@ -4,9 +4,9 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article lang="&language;">
+<article id="solid-hardware" lang="&language;">
 <title>Information Sources</title>
-<articleinfo>
+<article id="solid-hardware"info>
 <authorgroup>
 <author><firstname>Ben</firstname><surname>Cooksley</surname></author>
 <!-- TRANS:ROLES_OF_TRANSLATORS -->

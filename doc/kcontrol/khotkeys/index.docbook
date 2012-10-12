@@ -4,10 +4,10 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article lang="&language;">
+<article id="khotkeys" lang="&language;">
 <title>Custom Shortcuts</title>
 
-<articleinfo>
+<article id="khotkeys"info>
 <authorgroup>
 <author><firstname>Subhashish</firstname> <surname>Pradhan</surname></author>
 <author>&TC.Hollingsworth; &TC.Hollingsworth.mail;</author>
