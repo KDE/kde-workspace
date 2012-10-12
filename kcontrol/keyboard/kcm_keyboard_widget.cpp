@@ -364,23 +364,29 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 }
 
 void KCMKeyboardWidget::previewLayout(){
+    QMessageBox q;
     QModelIndex index = uiWidget->layoutsTableView->currentIndex() ;
     QModelIndex idcountry = index.sibling(index.row(),0) ;
     QString country=uiWidget->layoutsTableView->model()->data(idcountry).toString();
     QModelIndex idvariant = index.sibling(index.row(),2) ;
     QString variant=uiWidget->layoutsTableView->model()->data(idvariant).toString();
-    layoutprev=new KeyboardPainter();
-    const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
-    foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
-        if(variant==variantInfo->description){
-            variant=variantInfo->name;
-            break;
-       }
+    if(index.row()==-1 || index.column()==-1){
+        q.setText(i18n("No layout selected "));
+        q.exec();
     }
-    layoutprev->generateKeyboardLayout(country,variant);
-    layoutprev->exec();
-    layoutprev->setModal(true);
-
+    else{
+        layoutprev=new KeyboardPainter();
+        const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
+        foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
+            if(variant==variantInfo->description){
+                variant=variantInfo->name;
+                break;
+            }
+        }
+        layoutprev->generateKeyboardLayout(country,variant);
+        layoutprev->exec();
+        layoutprev->setModal(true);
+    }
 }
 
 void KCMKeyboardWidget::configureLayoutsChanged()
