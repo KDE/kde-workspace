@@ -20,6 +20,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
     id: button
@@ -27,16 +28,18 @@ Item {
     //API
     property QtObject svg
     property alias elementId: icon.elementId
+    property alias iconSource: buttonIcon.icon
     property QtObject action
     property bool backgroundVisible: true
-    property int iconSize: 32
+    property int iconSize: 24
     property bool checked: false
     property bool toggle: false
     property string text
     signal clicked
+    signal triggered
 
-    width: buttonRow.width
-    height: buttonRow.height
+    width: parent.width - 32
+    height: iconSize + 12
 
     opacity: action==undefined||action.enabled?1:0.6
 
@@ -50,10 +53,10 @@ Item {
     onCheckedChanged: {
         if (checked) {
             buttonItem.elementId = "pressed"
-            shadowItem.opacity = 0
+//            shadowItem.opacity = 0
         } else {
             buttonItem.elementId = "normal"
-            shadowItem.opacity = 1
+            //shadowItem.opacity = 1
         }
     }
 
@@ -61,19 +64,19 @@ Item {
         id: theme
     }
 
-    PlasmaCore.Svg {
-        id: buttonSvg
-        imagePath: "widgets/actionbutton"
-    }
-
-    PlasmaCore.SvgItem {
-        id: shadowItem
-        svg: buttonSvg
-        elementId: "shadow"
-        width: iconSize+13//button.backgroundVisible?iconSize+8:iconSize
-        height: width
-        visible: button.backgroundVisible
-    }
+//     PlasmaCore.Svg {
+//         id: buttonSvg
+//         imagePath: "widgets/actionbutton"
+//     }
+//
+//     PlasmaCore.SvgItem {
+//         id: shadowItem
+//         svg: buttonSvg
+//         elementId: "shadow"
+//         width: iconSize+13//button.backgroundVisible?iconSize+8:iconSize
+//         height: width
+//         visible: button.backgroundVisible
+//     }
 
     Row {
         id: buttonRow
@@ -95,7 +98,15 @@ Item {
                 id: icon
                 width: iconSize
                 height: iconSize
+                opacity: 0
                 svg: button.svg
+                anchors.centerIn: parent
+            }
+            QtExtras.QIconItem {
+                id: buttonIcon
+                width: iconSize
+                height: iconSize
+                //iconSource: button.svg
                 anchors.centerIn: parent
             }
         }

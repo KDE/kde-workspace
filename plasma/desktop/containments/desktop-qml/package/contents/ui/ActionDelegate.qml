@@ -21,9 +21,22 @@ import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
 PlasmaComponents.ToolButton {
-//     width: 140
-//     height: 48
-    signal triggered
     id: toolBox
-    onClicked: triggered()
+    property QtObject action
+    signal triggered
+
+    height: 32
+//     width: 140
+    width: parent.width - 24
+    //onClicked: triggered()
+
+    onClicked: {
+        if (action) {
+            action.trigger()
+        } else {
+            //clicked()
+        }
+        triggered();
+    }
+
 }
