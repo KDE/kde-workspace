@@ -387,16 +387,15 @@ Item {
                 }
                 Rectangle {
                     id: placeHolderPaint
-                    property real visibleOpacity: 0.25
-                    x: placeHolder.x
-                    y: placeHolder.y
-                    width: placeHolder.width
-                    height: placeHolder.height
+                    x: placeHolder.x + 6
+                    y: placeHolder.y + 6
+                    width: placeHolder.width - 12
+                    height: placeHolder.height - 12
                     z: 0
                     opacity: 0
                     radius: 8
                     smooth: true
-                    color: Qt.rgba(1,1,1,0.15)
+                    color: Qt.rgba(1,1,1,0.25)
                     Behavior on opacity {
                         NumberAnimation {
                             duration: 250
