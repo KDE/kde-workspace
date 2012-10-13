@@ -5,7 +5,7 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article id="desktop" lang="&language;">
+<article lang="&language;">
 <title>Virtual Desktops</title>
 <articleinfo>
 
