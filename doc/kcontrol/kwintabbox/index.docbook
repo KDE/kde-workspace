@@ -4,7 +4,7 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article lang="&language;">
+<article id="kwintabbox" lang="&language;">
 <articleinfo>
 <title>Task Switcher</title>
 <authorgroup>

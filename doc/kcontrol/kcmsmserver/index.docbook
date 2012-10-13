@@ -5,7 +5,7 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article lang="&language;">
+<article id="kcmsmserver" lang="&language;">
 <articleinfo>
 <title>Session Management</title>
 <authorgroup>

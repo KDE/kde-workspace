@@ -4,7 +4,7 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<article lang="&language;">
+<article id="powerdevil" lang="&language;">
 <articleinfo>
 <title>Power Management</title>
 <authorgroup>
