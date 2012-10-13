@@ -89,7 +89,7 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
                         "(moz_bookmarks.title LIKE  '%" + escapedTerm + "%' or moz_places.url LIKE '%"
                         + escapedTerm + "%')");
     }
-    QList<QVariantMap> results = m_fetchsqlite->query(query);
+    QList<QVariantMap> results = m_fetchsqlite->query(query, QMap<QString, QVariant>());
     foreach(QVariantMap result, results) {
         const QString title = result.value("title").toString();
         const QUrl url = result.value("url").toUrl();
