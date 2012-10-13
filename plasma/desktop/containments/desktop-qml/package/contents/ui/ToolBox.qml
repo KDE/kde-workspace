@@ -25,67 +25,121 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
     id: toolBox
-    width: iconSize
-    height: iconSize
+    width: childrenRect.width
+    height: childrenRect.height
     state: "collapsed"
-
-    property int expandedWidth: 200
-    property int expandedHeight: 320
+    z: 9999
+    property int expandedWidth: 240
+    property int expandedHeight: 240
     property int iconSize: 32
-
     states: [
         State {
-            name: "collapsed"
-            PropertyChanges {
-                target: toolBox
-                width: iconSize
-                height: iconSize
-            }
-            PropertyChanges { target: toolBoxFrame; opacity: 0.0; }
+            name: "expanded"
+            PropertyChanges { target: toolBoxFrame; x: 0 }
+            PropertyChanges { target: toolBoxFrame; y: 0 }
         },
         State {
-            name: "expanded"
-            PropertyChanges {
-                target: toolBox
-                width: expandedWidth
-                height: expandedHeight
-            }
-            PropertyChanges { target: toolBoxFrame; opacity: 1.0; }
+            name: "collapsed"
+            PropertyChanges { target: toolBoxFrame; x: 76 }
+            PropertyChanges { target: toolBoxFrame; y: -76 }
         }
     ]
 
-    Behavior on width { NumberAnimation { duration: 350; easing.type: Easing.OutExpo; } }
-    Behavior on height { NumberAnimation { duration: 350; easing.type: Easing.OutExpo; } }
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
-        imagePath: "widgets/background"
-        anchors.fill: parent;
-        anchors.margins: -4
-        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutExpo; } }
-        Column {
-            anchors.fill: parent
-            anchors.margins: 24
-            spacing: 12
-            ActionButton {
-                svg: iconsSvg
-                elementId: "add"
-                action: plasmoid.action("add widgets")
-                //FIXME: WHY?
-                Component.onCompleted: {
-                    action.enabled = true
-                }
+        imagePath: "widgets/translucentbackground"
+        //anchors.fill: parent;
+//         width: lockedList.width + 32
+//         height: lockedlist.width + 32
+        width: expandedWidth
+        height: expandedHeight
+        //enabledBorders: "BottomBorder|LeftBorder"
+        opacity: 0
+        state: "unlocked" // FIXME: default value
+        states: [
+            State {
+                name: "locked"
+                PropertyChanges { target: lockedList; opacity: 1.0; }
+                PropertyChanges { target: unlockedList; opacity: 0.0; }
+            },
+            State {
+                name: "unlocked"
+                PropertyChanges { target: lockedList; opacity: 0.0; }
+                PropertyChanges { target: unlockedList; opacity: 1.0; }
+            }
+        ]
+        Item {
+            anchors { fill: parent; leftMargin: 24; topMargin: 24;}
+            ListView {
+                id: lockedList
+                interactive: false
+                model: lockedModel
+//                 height: contentHeight
+//                 width: contentWidth
+                anchors { fill: parent; }
+    //             spacing: 12
+                Rectangle { color: "green"; opacity: 0.4; }
             }
 
-            ActionButton {
-                id: configureButton
-                svg: iconsSvg
-                elementId: "configure"
-                action: plasmoid.action("configure")
-                //FIXME: WHY?
-                Component.onCompleted: {
-                    action.enabled = true
-                }
+            ListView {
+                id: unlockedList
+                model: lockedModel
+                interactive: false
+//                 height: contentHeight
+//                 width: contentWidth
+                anchors { fill: parent; }
+    //             spacing: 12
+                Rectangle { color: "blue"; opacity: 0.4; }
+            }
+        }
+
+        /** Action Mapping for ToolBox
+
+        list-add                    Add Panel
+        list-add                    Add Widgets
+        preferences-activities      Activities                          Activities
+        configure-shortcuts         Shortcut Settings                   Shortcut Settings
+        configure                   $containment_name Settings          $containment_name Settings
+        object-locked               Lock Widgets
+        object-unlocked                                                 Unlock Widgets
+        system-lock-screen          Lock Screen                         Lock Screen
+        system-shutdown             Leave                               Leave
+
+        **/
+
+        VisualItemModel {
+            id: lockedModel
+            ActionDelegate {
+                text: i18n("Activities")
+                iconSource: "preferences-activities"
+                onTriggered: activitiesAction()
+            }
+            ActionDelegate {
+                text: i18n("Shortcut Settings")
+                iconSource: "configure-shortcuts"
+                onTriggered: shortcutSettingsAction()
+            }
+            ActionDelegate {
+                text: i18n("Desktop (QML) Settings")
+                iconSource: "configure"
+                onTriggered: configureAction()
+            }
+            ActionDelegate {
+                text: i18n("Unlock Widgets")
+                iconSource: "object-unlocked"
+                onTriggered: unlockWidgetsAction()
+            }
+            ActionDelegate {
+                text: i18n("Lock Screen")
+                iconSource: "system-lock-screen"
+                onTriggered: lockScreenAction()
+            }
+            ActionDelegate {
+                text: i18n("Leave")
+                iconSource: "system-shutdown"
+                onTriggered: leaveAction()
+
             }
         }
     }
@@ -100,9 +154,28 @@ Item {
         //anchors { fill: parent }
         MouseArea {
             anchors.fill: parent
-            onClicked: {
-
-                toolBox.state = (toolBox.state == "expanded") ? "collapsed" : "expanded";
+            visible: toolBox.state == "collapsed"
+            onClicked: ParallelAnimation {
+                ScriptAction {
+                    script:toolBox.state = (toolBox.state == "expanded") ? "collapsed" : "expanded";
+                }
+                PlasmaExtras.AppearAnimation {
+                    targetItem: toolBoxFrame
+//                     duration: 2000
+                }
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            visible: toolBox.state == "expanded"
+            onClicked: SequentialAnimation {
+                PlasmaExtras.DisappearAnimation {
+                    targetItem: toolBoxFrame
+//                     duration: 2000
+                }
+                ScriptAction {
+                    script:toolBox.state = (toolBox.state == "expanded") ? "collapsed" : "expanded";
+                }
             }
         }
 //         onClicked: {
@@ -110,4 +183,41 @@ Item {
 //             print("Adding applet..." + ap);
 //         }
     }
+//     Component.onCompleted: ParallelAnimation {
+//         ScriptAction {
+//             script:toolBox.state = (toolBox.state == "expanded") ? "collapsed" : "expanded";
+//         }
+//         PlasmaExtras.AppearAnimation {
+//             targetItem: toolBoxFrame
+// //                     duration: 2000
+//         }
+//     }
+
+        function activitiesAction() {
+            print("activities action");
+        }
+        function addWidgetsAction() {
+            print("add widgets action");
+            plasmoid.action("add widgets")
+        }
+        function configureAction() {
+            print("configure action");
+            plasmoid.action("configure")
+        }
+        function shortcutSettingsAction() {
+            print("shortcuts action");
+        }
+        function unlockWidgetsAction() {
+            print("unlock widgets action");
+        }
+        function lockWidgetsAction() {
+            print("lock widgets action");
+        }
+        function lockScreenAction() {
+            print("lock screen");
+        }
+        function leaveAction() {
+            print("leave action");
+        }
+
 }
