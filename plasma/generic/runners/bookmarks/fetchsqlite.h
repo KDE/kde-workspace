@@ -24,6 +24,9 @@
 #include <QList>
 #include <QVariantMap>
 
+#include <QVariant>
+#include <QString>
+
 #include <QObject>
 
 class FetchSqlite : public QObject
@@ -34,9 +37,8 @@ public:
     ~FetchSqlite();
     void prepare();
     void teardown();
-    QList<QVariantMap> query(const QString &sql, QMap<QString,QVariant> bindObjects = QMap<QString, QVariant>());
-
-
+    QList<QVariantMap> query(const QString &sql, QMap<QString,QVariant> bindObjects);
+    QList<QVariantMap> query(const QString &sql);
 
 private:
     QString const m_databaseFile;
