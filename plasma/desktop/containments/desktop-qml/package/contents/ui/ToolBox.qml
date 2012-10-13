@@ -30,7 +30,7 @@ Item {
     state: "collapsed"
     z: 9999
     property int expandedWidth: 240
-    property int expandedHeight: 240
+    property int expandedHeight: toolBoxFrame.state == "locked" ? 240 : 320
     property int iconSize: 32
     states: [
         State {
@@ -56,7 +56,7 @@ Item {
         height: expandedHeight
         //enabledBorders: "BottomBorder|LeftBorder"
         opacity: 0
-        state: "unlocked" // FIXME: default value
+        state: "unlocked" // FIXME: correct default value
         states: [
             State {
                 name: "locked"
@@ -75,22 +75,18 @@ Item {
                 id: lockedList
                 interactive: false
                 model: lockedModel
-//                 height: contentHeight
-//                 width: contentWidth
                 anchors { fill: parent; }
-    //             spacing: 12
                 Rectangle { color: "green"; opacity: 0.4; }
+                Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
             }
 
             ListView {
                 id: unlockedList
-                model: lockedModel
+                model: unlockedModel
                 interactive: false
-//                 height: contentHeight
-//                 width: contentWidth
                 anchors { fill: parent; }
-    //             spacing: 12
                 Rectangle { color: "blue"; opacity: 0.4; }
+                Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
             }
         }
 
@@ -109,6 +105,53 @@ Item {
         **/
 
         VisualItemModel {
+            id: unlockedModel
+            ActionDelegate {
+                text: i18n("Add Panel")
+                iconSource: "list-add"
+                onTriggered: addPanelAction()
+            }
+            ActionDelegate {
+                text: i18n("Add Widgets")
+                iconSource: "list-add"
+                onTriggered: addWidgetsAction()
+            }
+            ActionDelegate {
+                text: i18n("Activities")
+                iconSource: "preferences-activities"
+                onTriggered: activitiesAction()
+            }
+            ActionDelegate {
+                text: i18n("Shortcut Settings")
+                iconSource: "configure-shortcuts"
+                onTriggered: shortcutSettingsAction()
+            }
+            ActionDelegate {
+                text: i18n("Desktop (QML) Settings")
+                iconSource: "configure"
+//                 onTriggered: configureAction()
+                action: plasmoid.action("configure")
+            }
+            ActionDelegate {
+                text: i18n("Lock Widgets")
+                iconSource: "object-locked"
+                onTriggered: lockWidgetsAction()
+                action: plasmoid.action("lock widgets")
+            }
+            ActionDelegate {
+                text: i18n("Lock Screen")
+                iconSource: "system-lock-screen"
+                onTriggered: lockScreenAction()
+            }
+            ActionDelegate {
+                text: i18n("Leave")
+                iconSource: "system-shutdown"
+                onTriggered: leaveAction()
+
+            }
+        }
+
+        VisualItemModel {
             id: lockedModel
             ActionDelegate {
                 text: i18n("Activities")
@@ -123,12 +166,14 @@ Item {
             ActionDelegate {
                 text: i18n("Desktop (QML) Settings")
                 iconSource: "configure"
-                onTriggered: configureAction()
+                //onTriggered: configureAction()
+                action: plasmoid.action("configure")
             }
             ActionDelegate {
                 text: i18n("Unlock Widgets")
                 iconSource: "object-unlocked"
                 onTriggered: unlockWidgetsAction()
+                action: plasmoid.action("Unlock widgets")
             }
             ActionDelegate {
                 text: i18n("Lock Screen")
@@ -196,28 +241,36 @@ Item {
         function activitiesAction() {
             print("activities action");
         }
+        function addPanelAction() {
+            print("add panel action ??");
+            plasmoid.action("add panel") // ??
+        }
         function addWidgetsAction() {
             print("add widgets action");
-            plasmoid.action("add widgets")
+            plasmoid.action("add widgets");
         }
         function configureAction() {
             print("configure action");
-            plasmoid.action("configure")
+            var ac = plasmoid.action("configure");
+            ac.trigger();
         }
         function shortcutSettingsAction() {
-            print("shortcuts action");
+            print("shortcuts action ??");
+            plasmoid.action("configure shortcuts"); // ??
         }
         function unlockWidgetsAction() {
             print("unlock widgets action");
+            toolBoxFrame.state = "unlocked";
         }
         function lockWidgetsAction() {
             print("lock widgets action");
+            toolBoxFrame.state = "locked";
         }
         function lockScreenAction() {
-            print("lock screen");
+            print("lock screen ??");
         }
         function leaveAction() {
-            print("leave action");
+            print("leave action ??");
         }
 
 }
