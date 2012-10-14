@@ -33,6 +33,11 @@ static const QString CONFIG_GROUPNAME("Layout");
 
 const int KeyboardConfig::NO_LOOPING = -1;
 
+KeyboardConfig::KeyboardConfig()
+{
+    setDefaults();
+}
+
 QString KeyboardConfig::getSwitchingPolicyString(SwitchingPolicy switchingPolicy) {
 	return SWITCHING_POLICIES[switchingPolicy];
 }
