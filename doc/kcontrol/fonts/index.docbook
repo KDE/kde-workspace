@@ -5,7 +5,7 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article lang="&language;">
+<article id="fonts" lang="&language;">
 <articleinfo>
 <title>Fonts</title>
 <authorgroup>
@@ -24,7 +24,7 @@
 </keywordset>
 </articleinfo>
 
-<sect1 id="fonts">
+<sect1 id="kcm_fonts">
 
 <title>Fonts</title>
 

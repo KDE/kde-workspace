@@ -5,7 +5,7 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article lang="&language;">
+<article id="mouse" lang="&language;">
 <articleinfo>
 <title>Mouse</title>
 <authorgroup>
@@ -29,7 +29,7 @@
 </keywordset>
 </articleinfo>
 
-<sect1 id="mouse">
+<sect1 id="kcm_mouse">
 <title>Mouse</title>
 
 <para>This module allows you to configure your pointing device. Your

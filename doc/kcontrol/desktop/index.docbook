@@ -5,7 +5,7 @@
 <!ENTITY % English "INCLUDE" > <!-- change language only here -->
 ]>
 
-<article lang="&language;">
+<article id="desktop" lang="&language;">
 <title>Virtual Desktops</title>
 <articleinfo>
 
@@ -65,7 +65,7 @@ Desktop.</para></listitem>
 </variablelist>
 </sect2>
 -->
-<sect1 id="desktop">
+<sect1 id="virtual-desktops">
 
 <title>Virtual Desktops</title>
 

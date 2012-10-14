@@ -70,6 +70,7 @@ public:
 	IndicatorType indicatorType;
 	bool showSingle;
 
+	KeyboardConfig();
 	bool isSpareLayoutsEnabled() const {
 		return layoutLoopCount != KeyboardConfig::NO_LOOPING;
 	}
