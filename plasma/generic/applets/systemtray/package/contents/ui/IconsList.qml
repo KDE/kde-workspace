@@ -81,14 +81,8 @@ Item {
                 onScrollVert: ui_item.scrollVert(delta)
                 onScrollHorz: ui_item.scrollHorz(delta)
                 onChangedMousePos: {
-                    var pos = mapToItem(list, mouseX, mouseY)
-                    // we don't use list.indexAt(pos.x, pos.y) because it has strange behaviour. If user clicks on
-                    // embeded applet it will remove from popup and then it will return to popup. Such actions cause
-                    // ListView.indexAt return wrong index, at the same time pos.x and pos.y are correct.
-                    var index = Math.round(pos.y / cell_size - 0.5)
-                    if (index < 0 || index >= list.count)
-                        index = -1
-                    list.currentIndex = index //list.indexAt(pos.x, pos.y)
+                    var pos = mapToItem(list.contentItem, mouseX, mouseY)
+                    list.currentIndex = list.indexAt(pos.x, pos.y)
                 }
             }
 
