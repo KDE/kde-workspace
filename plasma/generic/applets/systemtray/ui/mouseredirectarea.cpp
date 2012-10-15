@@ -71,7 +71,6 @@ MouseRedirectArea::MouseRedirectArea(QDeclarativeItem *parent)
     , m_applet(0)
     , m_isApplet(false)
 {
-    setAcceptsHoverEvents(true);
     setAcceptHoverEvents(true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
 }
