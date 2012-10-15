@@ -338,7 +338,7 @@ Item {
             }
             PropertyChanges {
                 target: tray_area
-                state: "SQR_H"
+                state: "SQR_V"
                 width: tray_area.min_width
                 height: tray_area.min_height
             }
