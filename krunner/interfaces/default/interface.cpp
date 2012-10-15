@@ -552,12 +552,15 @@ void Interface::delayedQueryLaunch()
                                                          : static_cast<KLineEdit*>(m_searchTerm->lineEdit())->userText()).trimmed();
     const QString runnerId = m_runnerManager->singleMode() ? m_runnerManager->singleModeRunnerId() : QString();
 
+    // we want to check if this is a new query or not for the later running of
+    // the default item
+    const bool newQuery = !query.isEmpty() && m_runnerManager->query() != query;
     if (!query.isEmpty() || m_runnerManager->singleMode()) {
-        m_queryRunning = m_runnerManager->query() != query || !runnerId.isEmpty();
+        m_queryRunning = m_queryRunning || newQuery || !runnerId.isEmpty();
         m_runnerManager->launchQuery(query, runnerId);
     }
 
-    if (!m_queryRunning && m_delayedRun) {
+    if (newQuery && m_delayedRun) {
         runDefaultResultItem();
     }
 }
