@@ -68,7 +68,8 @@ public:
 
     /** Specifies the direction the launcher is popping up in relative to its icon */
     void setLauncherOrigin(const Plasma::PopupPlacement placement, Plasma::Location location);
-
+    void setAppViewIsReceivingKeyEvents(bool isReceiving);
+    bool appViewIsReceivingKeyEvents() const;
     // reimplemented
     virtual bool eventFilter(QObject *object, QEvent *event);
     virtual QSize minimumSizeHint() const;
@@ -95,6 +96,7 @@ private Q_SLOTS:
     void updateThemedPalette();
     void fillBreadcrumbs(const QModelIndex &index);
     void breadcrumbActivated();
+    void moveViewToLeft();
 
 private:
     void addBreadcrumb(const QModelIndex &index, bool isLeaf);

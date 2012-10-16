@@ -84,10 +84,12 @@ public:
             , contentArea(0)
             , contentAreaFooter(0)
             , contentSwitcher(0)
+            , applicationView(0)
             , searchView(0)
             , favoritesView(0)
             , contextMenuFactory(0)
             , autoHide(false)
+            , appViewIsReceivingKeyEvents(false)
             , visibleItemCount(10)
             , placement(Plasma::TopPosedLeftAlignedPopup)
             , panelEdge(Plasma::BottomEdge)
@@ -196,7 +198,6 @@ public:
         QAction *sortDescendingAction = new QAction(KIcon("view-sort-descending"),
                                                     i18n("Sort Alphabetically (Z to A)"), q);
 
-
         connect(favoritesModel, SIGNAL(rowsInserted(QModelIndex,int,int)), q, SLOT(focusFavoritesView()));
         connect(sortAscendingAction, SIGNAL(triggered()), favoritesModel, SLOT(sortFavoritesAscending()));
         connect(sortDescendingAction, SIGNAL(triggered()), favoritesModel, SLOT(sortFavoritesDescending()));
@@ -212,7 +213,8 @@ public:
         applicationModel = new ApplicationModel(q);
         applicationModel->setDuplicatePolicy(ApplicationModel::ShowLatestOnlyPolicy);
 
-        applicationView = new FlipScrollView();
+        FlipScrollView *view = new FlipScrollView();
+        applicationView = view;
         ItemDelegate *delegate = new ItemDelegate(q);
         delegate->setRoleMapping(Plasma::Delegate::SubTitleRole, SubTitleRole);
         delegate->setRoleMapping(Plasma::Delegate::SubTitleMandatoryRole, SubTitleMandatoryRole);
@@ -231,6 +233,9 @@ public:
 
         connect(applicationView, SIGNAL(currentRootChanged(QModelIndex)),
                 q, SLOT(fillBreadcrumbs(QModelIndex)));
+        connect(applicationView, SIGNAL(focusNextViewLeft()),
+                q, SLOT(moveViewToLeft()));
+
         q->fillBreadcrumbs(QModelIndex());
 
         addView(i18n("Applications"), KIcon("applications-other"),
@@ -284,7 +289,7 @@ public:
         view->setFrameStyle(QFrame::NoFrame);
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         // prevent view from stealing focus from the search bar
-        view->setFocusPolicy(Qt::NoFocus);
+        view->setFocusPolicy(Qt::StrongFocus);
         view->setDragEnabled(true);
 
         setupEventHandler(view);
@@ -494,6 +499,7 @@ public:
     QAbstractItemView *favoritesView;
     ContextMenuFactory *contextMenuFactory;
     bool autoHide;
+    bool appViewIsReceivingKeyEvents;
     int visibleItemCount;
     Plasma::PopupPlacement placement;
     Plasma::Location panelEdge;
@@ -512,7 +518,6 @@ Launcher::Launcher(Plasma::Applet *applet)
 {
     init();
     setApplet(applet);
-
 }
 
 void Launcher::init()
@@ -593,6 +598,8 @@ void Launcher::init()
     updateThemedPalette();
     connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()),
             this, SLOT(updateThemedPalette()));
+
+    setAppViewIsReceivingKeyEvents(false); // Left/Right arrow keys are delivered elsewhere (for now)
 }
 
 void Launcher::updateThemedPalette()
@@ -700,6 +707,16 @@ int Launcher::visibleItemCount() const
     return d->visibleItemCount;
 }
 
+void Launcher::setAppViewIsReceivingKeyEvents(bool isReceiving)
+{
+    d->appViewIsReceivingKeyEvents = isReceiving;
+}
+
+bool Launcher::appViewIsReceivingKeyEvents() const
+{
+    return d->appViewIsReceivingKeyEvents;
+}
+
 void Launcher::setApplet(Plasma::Applet *applet)
 {
     KConfigGroup cg = applet->globalConfig();
@@ -746,61 +763,89 @@ void Launcher::focusFavoritesView()
     d->contentArea->setCurrentWidget(d->favoritesView);
     d->contentSwitcher->setVisible(true);
     d->searchBar->clear();
+    setAppViewIsReceivingKeyEvents(false);
+}
+
+void Launcher::moveViewToLeft()
+{
+    d->contentSwitcher->setCurrentIndex(d->contentArea->indexOf(d->favoritesView));
+    d->contentArea->setCurrentWidget(d->favoritesView);
+    d->contentSwitcher->setVisible(true);
+    d->searchBar->clear();
+    setAppViewIsReceivingKeyEvents(false);
+
 }
 
 bool Launcher::eventFilter(QObject *object, QEvent *event)
 {
     // deliver unhandled key presses from the search bar
     // (mainly arrow keys, enter) to the active view
-    if ((object == d->contentSwitcher || object == d->searchBar) && event->type() == QEvent::KeyPress) {
-        // If the search text is empty, then we want left/right to still nav the tabbar.
+
+    if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->modifiers() == Qt::NoModifier &&
-                (keyEvent->key() == Qt::Key_Left ||
-                 keyEvent->key() == Qt::Key_Right)) {
-            if (object == d->contentSwitcher) {
-                return false;
-            } else {
-                QCoreApplication::sendEvent(d->contentSwitcher, event);
+
+        if ((object == d->contentSwitcher || object == d->searchBar)) {
+
+            // left/right should Nav the tabbar, unless ApplicationView is receiving them.
+            if (keyEvent->modifiers() == Qt::NoModifier &&
+                        (keyEvent->key() == Qt::Key_Left || keyEvent->key() == Qt::Key_Right)) {
+                kDebug() << "launcher, at filter #2";
+                if (d->applicationView->isVisible() && appViewIsReceivingKeyEvents()) {
+                    QCoreApplication::sendEvent(d->applicationView, event);
+                    return true;
+                }
+                if (object == d->contentSwitcher) {
+                    return false;
+                } else {
+                    QCoreApplication::sendEvent(d->contentSwitcher, event);
+                    return true;
+                }
+            }
+
+            // Next: Up/Down should ALWAYS go into the ApplicationView, if it is visible.
+            if (keyEvent->modifiers() == Qt::NoModifier &&
+                        (keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down)) {
+                kDebug() << "launcher, at filter #3A";
+                if (d->applicationView->isVisible()) {
+                    kDebug() << "launcher, at filter #3B";
+                    setAppViewIsReceivingKeyEvents(true);
+                    QCoreApplication::sendEvent(d->applicationView, event);
+                    return true;
+                }
+            }
+
+            // Third: Up/Down, Key_Enter, and Key_Return must be explicitly sent into the ApplicationView., if it is receiving Keys
+            if (keyEvent->key() == Qt::Key_Up ||
+                        keyEvent->key() == Qt::Key_Down ||
+                        keyEvent->key() == Qt::Key_Enter ||
+                        keyEvent->key() == Qt::Key_Return) {
+                kDebug() << "launcher, at filter #3";
+                if (d->applicationView->isVisible()) {
+                    if (appViewIsReceivingKeyEvents()) {
+                        QCoreApplication::sendEvent(d->applicationView, event);
+                        return true;
+                    }
+                }
+            }
+
+            // if the search view is visible, we are passing the events to it
+            if (d->searchView->isVisible()) {
+                if (!d->searchView->initializeSelection()
+                        || keyEvent->key() == Qt::Key_Return
+                        || keyEvent->key() == Qt::Key_Enter) {
+                    kDebug() << "Passing the event to the search view" << event;
+                    QCoreApplication::sendEvent(d->searchView, event);
+                }
                 return true;
             }
-        }
-        // It works, using Key_Tab to enter or leave the flipScrollView versus
-        // other views, and arrow keys to move around inside. This decision tree
-        // is NOT able to figure out that Key_Up or Key_Down might "really want"
-        // to leave the FlipScrollView: If Key_Up is pressed at the top of a column,
-        // or Key_Down at the bottom, it does not move from the current
-        // highlighted item. It just sits there.
 
-        if (d->searchView->isVisible()) {
-            if (keyEvent->key() == Qt::Key_Up ||
-                    keyEvent->key() == Qt::Key_Down ||
-                    keyEvent->key() == Qt::Key_Tab) {
-                d->searchView->setFocus();
-                QCoreApplication::sendEvent(d->searchView, event);
-            }
-        }
-
-        if ((keyEvent->key() == Qt::Key_Up) || (keyEvent->key() == Qt::Key_Down)) {
+            // getting for the active view, and passing the events to it
             QAbstractItemView *activeView = qobject_cast<QAbstractItemView*>(d->contentArea->currentWidget());
+
             if (activeView) {
                 QCoreApplication::sendEvent(activeView, event);
-            } else {
-                d->applicationView->setFocus();
-                QCoreApplication::sendEvent(d->applicationView, event);
+                return true;
             }
-            return true;
-        }
-        if (!d->searchView->initializeSelection() ||
-                keyEvent->key() == Qt::Key_Return ||
-                keyEvent->key() == Qt::Key_Enter) {
-             QCoreApplication::sendEvent(d->searchView, event);
-             return true;
-        }
-        QAbstractItemView *activeView = qobject_cast<QAbstractItemView*>(d->contentArea->currentWidget());
-        if (activeView) {
-            QCoreApplication::sendEvent(activeView, event);
-            return true;
         }
     }
 

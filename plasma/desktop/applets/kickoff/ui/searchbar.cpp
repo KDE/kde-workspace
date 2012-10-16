@@ -119,21 +119,23 @@ SearchBar::~SearchBar()
 
 bool SearchBar::eventFilter(QObject *watched, QEvent *event)
 {
-    // left and right arrow key presses in the search edit when the
-    // edit is empty are propagated up to the parent widget
-    // this allows views in the Launcher to use left and right arrows for
-    // navigation whilst the search bar still has the focus
     if (watched == d->editWidget && event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
+        // Left and right arrow key presses in the search edit when the
+        // edit is empty are propagated up to the 'launcher'. This allows
+        // the launcher to navigate among views (switch among the Tabs)
+        //while the search bar still has the focus.
         if ((keyEvent->key() == Qt::Key_Left || keyEvent->key() == Qt::Key_Right) &&
                 d->editWidget->text().isEmpty()) {
             QCoreApplication::sendEvent(this, event);
             return true;
         }
-    // The Tab key, should propagate up to the parent 'launcher', and
-    // switch focus (either to select from the view of "found" search match
-    // items, or another view -- the URL View or Application View.)
-        if (keyEvent->key() == Qt::Key_Tab) {
+        // Up and Down arrows, as well as Tab, propagate up to 'launcher'.
+        // It will recognize them as a request to enter the currently-visible Tab View.
+        if (keyEvent->key() == Qt::Key_Down ||
+                    keyEvent->key() == Qt::Key_Up ||
+                    keyEvent->key() == Qt::Key_Tab) {
             QCoreApplication::sendEvent(this, event);
             return true;
         }
