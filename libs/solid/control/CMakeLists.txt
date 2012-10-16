@@ -44,7 +44,7 @@ install(TARGETS solidcontrol EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS
 
 ########### install files ###############
 
-install( FILES solidnetworkmanager.desktop solidmodemmanager.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR}  )
+install( FILES solidnetworkmanager.desktop solidmodemmanager.desktop solidremotecontrolmanager.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR}  )
 install( FILES networkmanager.h networkinterface.h 
     wirednetworkinterface.h wirelessnetworkinterface.h
     wirelessaccesspoint.h singletondefs.h networking.h networkipv4config.h solid_control_export.h 
