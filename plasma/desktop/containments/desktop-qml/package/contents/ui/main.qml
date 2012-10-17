@@ -39,6 +39,7 @@ Item {
     property int currentIndex: -1
 
     property Item addResource
+    property int iconSize: 32
 
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
 
@@ -53,6 +54,37 @@ Item {
         LayoutManager.cellSize.width = main.iconWidth + borderSvg.elementSize("left").width + borderSvg.elementSize("right").width
         LayoutManager.cellSize.height = main.iconHeight + theme.defaultFont.mSize.height + borderSvg.elementSize("top").height + borderSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
         layoutTimer.restart()
+    }
+
+    GridView {
+        id: gridView
+        opacity: 0.3
+        cellWidth: 24
+        cellHeight: 24
+        model: gridModel
+        interactive: false
+        anchors.fill: parent
+        delegate: Rectangle {
+            border { color: "#000000"; width: 1; }
+            anchors.margins: 12
+            width: gridView.cellWidth
+            height: gridView.cellHeight
+            color: Qt.rgba(0, 0, 0, 0)
+            opacity: 0.3
+
+        }
+
+        ListModel {
+            id: gridModel
+            Component.onCompleted: {
+                var cells  = (main.width / gridView.cellWidth) * (main.height / gridView.cellHeight);
+                print(" Got " + cells + " Cells. w: " + (availScreenRect.width / gridView.cellWidth) + " h: " + (availScreenRect.height / gridView.cellHeight));
+                for (i = 0; i < cells*3; i++) {
+                    gridModel.append({"numbor": i, "name":"Jackfruit"});
+                }
+
+            }
+        }
     }
 
     Component.onCompleted: {
@@ -152,6 +184,10 @@ Item {
             top: parent.top
             bottom: parent.bottom
         }
+    }
+    ToolBoxButton {
+        id: toolBoxButton
+        anchors { top: parent.top; right: parent.right; }
     }
 
     ToolBox {

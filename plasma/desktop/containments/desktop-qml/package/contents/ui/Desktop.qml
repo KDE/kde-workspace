@@ -36,6 +36,32 @@ Item {
         anchors.margins: 24
     }
 
+    Grid {
+        property int cellWidth: 24
+        property int cellHeight: 24
+        model: gridModel
+        anchors.fill: parent
+        delegate: Rectangle {
+            width: cellWidth
+            height: cellHeight
+            color: theme.backgroundColor
+            opacity: 0.3
+
+        }
+
+        ListModel {
+            id: gridModel
+            Component.onCompleted: {
+                var cells  = (main.width / cellWidth) * (main.height / cellHeight);
+                print(" Got " + cells + " Cells.");
+                for (i = 0; i < cells; i++) {
+                    gridModel.append({"numbor": id, "name":"Jackfruit"});
+                }
+
+            }
+        }
+    }
+
     Item {
         id: resultsFlow
         anchors.fill: parent
