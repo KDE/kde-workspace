@@ -25,40 +25,32 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
     id: toolBox
+
+    property int expandedWidth: 240
+    property int expandedHeight: toolBoxFrame.state == "locked" ? 240 : 320
+
     width: childrenRect.width
     height: childrenRect.height
     state: "collapsed"
     z: 9999
-    property int expandedWidth: 240
-    property int expandedHeight: toolBoxFrame.state == "locked" ? 240 : 320
+    transformOrigin: Item.TopRight
     states: [
         State {
             name: "expanded"
-            PropertyChanges { target: toolBoxFrame; x: 0 }
-            PropertyChanges { target: toolBoxFrame; y: 0 }
-            PropertyChanges { target: toolBoxFrame; opacity: 1.0 }
+             PropertyChanges { target: toolBoxFrame; opacity: 1.0 }
         },
         State {
             name: "collapsed"
-            PropertyChanges { target: toolBoxFrame; x: toolBoxFrame.width }
-            PropertyChanges { target: toolBoxFrame; y: -toolBoxFrame.height }
-            PropertyChanges { target: toolBoxFrame; opacity: 0 }
+             PropertyChanges { target: toolBoxFrame; opacity: 0 }
         }
     ]
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
         imagePath: "widgets/translucentbackground"
-        //anchors.fill: parent;
-//         width: lockedList.width + 32
-//         height: lockedlist.width + 32
         width: expandedWidth
         height: expandedHeight
         //enabledBorders: "BottomBorder|LeftBorder"
-        //opacity: 0
-        Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutExpo; } }
-        Behavior on y { NumberAnimation { duration: 250; easing.type: Easing.OutExpo; } }
-        Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
 
         state: "unlocked" // FIXME: correct default value
         states: [
