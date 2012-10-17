@@ -27,7 +27,7 @@ Item {
     id: root_item
 
     property int icons_size:     24  ///< Size of icons, icons are square i.e. width == height
-    property int icons_margins:  4  ///< Margins for icons
+    property int icons_margins:  2  ///< Margins for icons
     property alias icons_number: grid.count  ///< [readonly] Number of icons
     property alias model:    grid.model; ///< Model for grid
     property int cols_num: 0 ///< [readonly] Number of columns

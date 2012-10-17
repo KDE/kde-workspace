@@ -83,7 +83,6 @@ Item {
         IconsGrid {
             id: notifications_area
             icons_size:    JS.ICONS_SIZE
-            icons_margins: JS.ICONS_MARGINS
             model: model_notifications
         }
 
@@ -91,7 +90,6 @@ Item {
         IconsGrid {
             id: tray_area
             icons_size: JS.ICONS_SIZE
-            icons_margins: JS.ICONS_MARGINS
             model: model_tray
         }
 
@@ -101,7 +99,6 @@ Item {
             content: IconsList {
                 id: popup_area
                 icons_size:    JS.ICONS_SIZE
-                icons_margins: JS.ICONS_MARGINS
                 width: popup_area.min_width
                 height: popup_area.min_height
                 anchors.centerIn: parent

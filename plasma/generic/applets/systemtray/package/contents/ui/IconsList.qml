@@ -36,7 +36,7 @@ Item {
     property alias model:    list.model; ///< Model for grid
     property int cell_size: icons_size + 2*icons_margins ///< [readonly] size of grid cell
     property int min_width:   cell_size + icons_margins + __max_name_width   ///< [readonly] minimum width of component required to show whole grid
-    property int min_height:  list.count*cell_size + 2*icons_margins ///< [readonly] minimum height of compontn required to show whole grid
+    property int min_height:  list.count*cell_size ///< [readonly] minimum height of compontn required to show whole grid
 
     property int __max_name_width: 0
 
@@ -47,17 +47,23 @@ Item {
             width: min_width
             height: cell_size
 
-            TrayIcon {
+            Item {
                 id: tray_icon
-                width: icons_size
-                height: icons_size
-                anchors { left: parent.left; top: parent.top; margins: icons_margins }
+                anchors { left: parent.left; top: parent.top; }
+                width: cell_size
+                height: width
                 z: 10 // We place icon over mouse area because icon should receive mouse events
+
+                TrayIcon {
+                    anchors.centerIn: parent
+                    width: icons_size
+                    height: width
+                }
             }
 
             PlasmaWidgets.Label {
                 id: name_item
-                anchors { left: tray_icon.right; top: parent.top; bottom: parent.bottom; leftMargin: icons_margins }
+                anchors { left: tray_icon.right; top: parent.top; bottom: parent.bottom }
                 alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wordWrap: false
                 textSelectable: false
@@ -116,9 +122,11 @@ Item {
     Component {
         id: delegate_highlight
         Item {
+            height: cell_size
+            width: min_width
+
             PlasmaWidgets.ItemBackground {
-                height: cell_size
-                width: min_width
+                anchors.fill: parent
             }
         }
     }
