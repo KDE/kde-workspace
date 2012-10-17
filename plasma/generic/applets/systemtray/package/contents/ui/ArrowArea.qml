@@ -74,6 +74,16 @@ Item {
         onChangedActive: {
             dialog.visible = active  // hide window if it deactivates
         }
+
+        // We have to move dialog if its size is changed
+        onChangedHeight: updatePosition()
+        onChangedWidth:  updatePosition()
+
+        function updatePosition() {
+            var pos = plasmoid.popupPosition(arrow_area, Qt.size(width, height), Qt.AlignCenter)
+            x = pos.x
+            y = pos.y
+        }
     }
 
 
@@ -82,9 +92,7 @@ Item {
             dialog.visible = false
             return
         }
-        var pos = plasmoid.popupPosition(arrow_area, Qt.size(dialog.width, dialog.height), Qt.AlignCenter)
-        dialog.x = pos.x
-        dialog.y = pos.y
+        dialog.updatePosition()
         dialog.visible = true
         dialog.activate()
     }
