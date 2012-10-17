@@ -30,7 +30,7 @@ Item {
     id: arrow_area
 
     property variant content; ///< content of popup dialog
-    property int __arrow_size: Math.min(width, height) // for internal use only
+    property int arrow_size: 12 // size of an icon
 
     MouseArea {
         anchors.fill: parent
@@ -40,11 +40,11 @@ Item {
 
     PlasmaWidgets.IconWidget {
         id: arrow_widget
-        width:  __arrow_size
+        width:  arrow_size
         height: width
-        preferredIconSize: Qt.size(__arrow_size, __arrow_size)
-        maximumIconSize:   Qt.size(__arrow_size, __arrow_size)
-        minimumIconSize:   Qt.size(__arrow_size, __arrow_size)
+        preferredIconSize: Qt.size(arrow_size, arrow_size)
+        maximumIconSize:   Qt.size(arrow_size, arrow_size)
+        minimumIconSize:   Qt.size(arrow_size, arrow_size)
         anchors.centerIn: parent
         icon: QIcon(svg.pixmap(svg_element_id))
 

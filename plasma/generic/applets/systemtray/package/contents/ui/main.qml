@@ -96,6 +96,8 @@ Item {
         // An area that contains arrow
         ArrowArea {
             id: arrow_area
+            visible: models[JS.LOCATION_POPUP].count
+
             content: IconsList {
                 id: popup_area
                 icons_size:    JS.ICONS_SIZE
@@ -221,8 +223,7 @@ Item {
             }
             PropertyChanges {
                 target: arrow_area
-                width: JS.ARROW_SIZE
-                anchors { leftMargin: JS.ARROW_MARGINS; rightMargin: JS.ARROW_MARGINS; topMargin: 0; bottomMargin: 0 }
+                width: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 0
                 state: plasmoid.location === TopEdge ? "TOP_EDGE" : "BOTTOM_EDGE"
             }
             PropertyChanges {
@@ -256,7 +257,7 @@ Item {
             }
             PropertyChanges {
                 target: content_item
-                width: notifications_area.width + tray_area.width + arrow_area.width + 2*JS.ARROW_MARGINS
+                width: notifications_area.width + tray_area.width + arrow_area.width
                 height: root_item.height
             }
             PropertyChanges {
@@ -294,8 +295,7 @@ Item {
             }
             PropertyChanges {
                 target: arrow_area
-                height: JS.ARROW_SIZE
-                anchors { leftMargin: 0; rightMargin: 0; topMargin: JS.ARROW_MARGINS; bottomMargin: JS.ARROW_MARGINS }
+                height: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 0
                 state: plasmoid.location === LeftEdge ? "LEFT_EDGE" : "RIGHT_EDGE"
             }
             PropertyChanges {
@@ -305,7 +305,7 @@ Item {
             PropertyChanges {
                 target: content_item
                 width: root_item.width
-                height: notifications_area.height + tray_area.height + arrow_area.height + 2*JS.ARROW_MARGINS
+                height: notifications_area.height + tray_area.height + arrow_area.height
             }
             PropertyChanges {
                 target: root_item
@@ -341,8 +341,8 @@ Item {
             }
             PropertyChanges {
                 target: content_item
-                width: notifications_area.width + tray_area.width + arrow_area.width + 2*JS.ARROW_MARGINS
-                height: Math.max(notifications_area.min_height, tray_area.min_height, JS.ARROW_SIZE)
+                width: notifications_area.width + tray_area.width + arrow_area.width
+                height: Math.max(notifications_area.min_height, tray_area.min_height, arrow_area.arrow_size)
             }
             PropertyChanges {
                 target: root_item
