@@ -92,7 +92,7 @@ Item {
                 }
             }
 
-            ListView.onAdd: {
+            Component.onCompleted: {
                 var text_width = name_item.width
                 IconsListJS.tasks[delegate_root_item] = text_width
                 if (text_width > __max_name_width) {
@@ -100,7 +100,7 @@ Item {
                 }
             }
 
-            ListView.onRemove: {
+            Component.onDestruction: {
                 delete IconsListJS.tasks[delegate_root_item]
                 __max_name_width = IconsListJS.findMax()  // recalculate width of maximum name
             }
@@ -136,6 +136,7 @@ Item {
         anchors.centerIn: parent
         width:  min_width
         height: min_height
+        cacheBuffer: 0
 
         interactive: false
         delegate: delegate_task
