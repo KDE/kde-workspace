@@ -18,20 +18,40 @@
  ***************************************************************************/
 
 import QtQuick 1.1
-import org.kde.plasma.components 0.1 as PlasmaComponents
+//import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.qtextracomponents 0.1 as QtExtras
 
-PlasmaComponents.ToolButton {
-    id: toolBox
-    property QtObject action
-    signal triggered
-
-    height: 32
-    width: parent.width - 24
-
-    onClicked: {
-        if (action) {
-            action.trigger()
+QtExtras.QIconItem {
+    id: toolBoxButton
+    width: iconSize
+    height: iconSize
+    icon: "plasma"
+    //x: main.width - iconSize
+    //y: iconSize
+    //anchors { top: toolBoxFrame.top; right: toolBoxFrame.left; }
+    Component.onCompleted: print("ToolBoxButton " + x + ":" + y);
+    MouseArea {
+        anchors.fill: parent
+        visible: toolBox.state == "collapsed"
+        onClicked: ParallelAnimation {
+            ScriptAction {
+                script: toolBox.state = "expanded";
+            }
+//                 PlasmaExtras.AppearAnimation {
+//                     targetItem: toolBoxFrame
+//                 }
         }
-        triggered();
+    }
+    MouseArea {
+        anchors.fill: parent
+        visible: toolBox.state == "expanded"
+        onClicked: ParallelAnimation {
+//                 PlasmaExtras.DisappearAnimation {
+//                     targetItem: toolBoxFrame
+//                 }
+            ScriptAction {
+                script:toolBox.state = "collapsed";
+            }
+        }
     }
 }

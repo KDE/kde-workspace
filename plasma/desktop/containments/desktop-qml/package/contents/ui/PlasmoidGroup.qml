@@ -26,8 +26,8 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 ItemGroup {
     id: plasmoidGroup
-//     scale: plasmoid.scale
-    scale: 1.0
+    scale: plasmoid.scale
+    //scale: 1.0
     canResizeHeight: true
     title: applet.name
     minimumWidth: Math.max(LayoutManager.cellSize.width,

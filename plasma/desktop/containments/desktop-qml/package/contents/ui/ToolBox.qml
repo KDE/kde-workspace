@@ -31,20 +31,20 @@ Item {
     z: 9999
     property int expandedWidth: 240
     property int expandedHeight: toolBoxFrame.state == "locked" ? 240 : 320
-    property int iconSize: 32
     states: [
         State {
             name: "expanded"
             PropertyChanges { target: toolBoxFrame; x: 0 }
             PropertyChanges { target: toolBoxFrame; y: 0 }
+            PropertyChanges { target: toolBoxFrame; opacity: 1.0 }
         },
         State {
             name: "collapsed"
-            PropertyChanges { target: toolBoxFrame; x: 76 }
-            PropertyChanges { target: toolBoxFrame; y: -76 }
+            PropertyChanges { target: toolBoxFrame; x: toolBoxFrame.width }
+            PropertyChanges { target: toolBoxFrame; y: -toolBoxFrame.height }
+            PropertyChanges { target: toolBoxFrame; opacity: 0 }
         }
     ]
-
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
@@ -55,7 +55,11 @@ Item {
         width: expandedWidth
         height: expandedHeight
         //enabledBorders: "BottomBorder|LeftBorder"
-        opacity: 0
+        //opacity: 0
+        Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutExpo; } }
+        Behavior on y { NumberAnimation { duration: 250; easing.type: Easing.OutExpo; } }
+        Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
+
         state: "unlocked" // FIXME: correct default value
         states: [
             State {
@@ -76,7 +80,7 @@ Item {
                 interactive: false
                 model: lockedModel
                 anchors { fill: parent; }
-                Rectangle { color: "green"; opacity: 0.4; }
+                //Rectangle { color: "green"; opacity: 0.4; }
                 Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
             }
 
@@ -85,7 +89,7 @@ Item {
                 model: unlockedModel
                 interactive: false
                 anchors { fill: parent; }
-                Rectangle { color: "blue"; opacity: 0.4; }
+                //Rectangle { color: "blue"; opacity: 0.4; }
                 Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
             }
         }
@@ -184,93 +188,43 @@ Item {
                 text: i18n("Leave")
                 iconSource: "system-shutdown"
                 onTriggered: leaveAction()
-
             }
         }
     }
 
-    QtExtras.QIconItem {
-        id: toolBoxButton
-        //text: "Add Applet"
-        width: iconSize
-        height: iconSize
-        icon: "plasma"
-        anchors { top: parent.top; right: parent.right; }
-        //anchors { fill: parent }
-        MouseArea {
-            anchors.fill: parent
-            visible: toolBox.state == "collapsed"
-            onClicked: ParallelAnimation {
-                ScriptAction {
-                    script:toolBox.state = (toolBox.state == "expanded") ? "collapsed" : "expanded";
-                }
-                PlasmaExtras.AppearAnimation {
-                    targetItem: toolBoxFrame
-//                     duration: 2000
-                }
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-            visible: toolBox.state == "expanded"
-            onClicked: SequentialAnimation {
-                PlasmaExtras.DisappearAnimation {
-                    targetItem: toolBoxFrame
-//                     duration: 2000
-                }
-                ScriptAction {
-                    script:toolBox.state = (toolBox.state == "expanded") ? "collapsed" : "expanded";
-                }
-            }
-        }
-//         onClicked: {
-//             var ap = "digital-clock";
-//             print("Adding applet..." + ap);
-//         }
+    function activitiesAction() {
+        print("activities action");
     }
-//     Component.onCompleted: ParallelAnimation {
-//         ScriptAction {
-//             script:toolBox.state = (toolBox.state == "expanded") ? "collapsed" : "expanded";
-//         }
-//         PlasmaExtras.AppearAnimation {
-//             targetItem: toolBoxFrame
-// //                     duration: 2000
-//         }
-//     }
-
-        function activitiesAction() {
-            print("activities action");
-        }
-        function addPanelAction() {
-            print("add panel action ??");
-            plasmoid.action("add panel") // ??
-        }
-        function addWidgetsAction() {
-            print("add widgets action");
-            plasmoid.action("add widgets");
-        }
-        function configureAction() {
-            print("configure action");
-            var ac = plasmoid.action("configure");
-            ac.trigger();
-        }
-        function shortcutSettingsAction() {
-            print("shortcuts action ??");
-            plasmoid.action("configure shortcuts"); // ??
-        }
-        function unlockWidgetsAction() {
-            print("unlock widgets action");
-            toolBoxFrame.state = "unlocked";
-        }
-        function lockWidgetsAction() {
-            print("lock widgets action");
-            toolBoxFrame.state = "locked";
-        }
-        function lockScreenAction() {
-            print("lock screen ??");
-        }
-        function leaveAction() {
-            print("leave action ??");
-        }
+    function addPanelAction() {
+        print("add panel action ??");
+        plasmoid.action("add panel") // ??
+    }
+    function addWidgetsAction() {
+        print("add widgets action");
+        plasmoid.action("add widgets");
+    }
+    function configureAction() {
+        print("configure action");
+        var ac = plasmoid.action("configure");
+        ac.trigger();
+    }
+    function shortcutSettingsAction() {
+        print("shortcuts action ??");
+        plasmoid.action("configure shortcuts"); // ??
+    }
+    function unlockWidgetsAction() {
+        print("unlock widgets action");
+        toolBoxFrame.state = "unlocked";
+    }
+    function lockWidgetsAction() {
+        print("lock widgets action");
+        toolBoxFrame.state = "locked";
+    }
+    function lockScreenAction() {
+        print("lock screen ??");
+    }
+    function leaveAction() {
+        print("leave action ??");
+    }
 
 }
