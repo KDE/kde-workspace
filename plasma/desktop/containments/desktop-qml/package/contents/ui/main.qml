@@ -37,7 +37,7 @@ Item {
     property int currentIndex: -1
 
     property Item addResource
-    property int iconSize: 24
+    property int iconSize: 32
 
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
 
@@ -98,6 +98,9 @@ Item {
             var applet = plasmoid.applets[i]
             addApplet(applet, 0)
         }
+        print("logoutAllowed: " + plasmoid.logoutAllowed());
+        print("lockScreenAllowed: " + plasmoid.lockScreenAllowed());
+
     }
 
     function addApplet(applet, pos)

@@ -19,14 +19,28 @@
 
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.qtextracomponents 0.1 as QtExtras
 
-PlasmaComponents.ToolButton {
+PlasmaComponents.ListItem {
     id: toolBox
     property QtObject action
+    property alias iconSource: iconItem.icon
+    property alias text: label.text
     signal triggered
+    enabled: true
 
-    height: 32
-    width: parent.width - 24
+    height: main.iconSize
+
+    QtExtras.QIconItem {
+        id: iconItem
+        height: parent.height
+        width: parent.height
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter; }
+    }
+    PlasmaComponents.Label {
+        id: label
+        anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
+    }
 
     onClicked: {
         if (action) {

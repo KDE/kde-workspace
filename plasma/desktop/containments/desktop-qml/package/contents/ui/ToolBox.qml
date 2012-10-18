@@ -28,6 +28,7 @@ Item {
 
     property int expandedWidth: 240
     property int expandedHeight: toolBoxFrame.state == "locked" ? 240 : 320
+    //property int expandedHeight: height
 
     width: childrenRect.width
     height: childrenRect.height
@@ -47,9 +48,12 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
-        imagePath: "widgets/translucentbackground"
+        imagePath: "widgets/toolbox"
         width: expandedWidth
-        height: expandedHeight
+        //width: childrenRect.width
+        //height: childrenRect.height
+        height: state == "unlocked" ? (addPanelDelegate.height * unlockedModel.count + 24) : (addPanelDelegate.height * lockedModel.count + 24)
+        //height: expandedHeight
         //enabledBorders: "BottomBorder|LeftBorder"
 
         state: "unlocked" // FIXME: correct default value
@@ -65,25 +69,24 @@ Item {
                 PropertyChanges { target: unlockedList; opacity: 1.0; }
             }
         ]
-        Item {
-            anchors { fill: parent; leftMargin: 24; topMargin: 24;}
-            ListView {
-                id: lockedList
-                interactive: false
-                model: lockedModel
-                anchors { fill: parent; }
-                //Rectangle { color: "green"; opacity: 0.4; }
-                Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
-            }
+        ListView {
+            id: lockedList
+            interactive: false
+            model: lockedModel
+            highlight: PlasmaComponents.Highlight {}
+            highlightFollowsCurrentItem: true
+            anchors { fill: parent; margins: 12; }
+            Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
+        }
 
-            ListView {
-                id: unlockedList
-                model: unlockedModel
-                interactive: false
-                anchors { fill: parent; }
-                //Rectangle { color: "blue"; opacity: 0.4; }
-                Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
-            }
+        ListView {
+            id: unlockedList
+            model: unlockedModel
+            highlight: PlasmaComponents.Highlight {}
+            highlightFollowsCurrentItem: true
+            interactive: false
+            anchors { fill: parent; margins: 12; }
+            Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
         }
 
         /** Action Mapping for ToolBox
@@ -103,6 +106,7 @@ Item {
         VisualItemModel {
             id: unlockedModel
             ActionDelegate {
+                id: addPanelDelegate
                 text: i18n("Add Panel")
                 iconSource: "list-add"
                 onTriggered: addPanelAction()
