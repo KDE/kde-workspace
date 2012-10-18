@@ -50,11 +50,7 @@ Item {
         id: toolBoxFrame
         imagePath: "widgets/toolbox"
         width: expandedWidth
-        //width: childrenRect.width
-        //height: childrenRect.height
         height: state == "unlocked" ? (addPanelDelegate.height * unlockedModel.count + 24) : (addPanelDelegate.height * lockedModel.count + 24)
-        //height: expandedHeight
-        //enabledBorders: "BottomBorder|LeftBorder"
 
         state: "unlocked" // FIXME: correct default value
         states: [
