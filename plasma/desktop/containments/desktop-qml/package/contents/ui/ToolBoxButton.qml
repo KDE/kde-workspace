@@ -26,6 +26,7 @@ QtExtras.QIconItem {
     width: iconSize
     height: iconSize
     icon: "plasma"
+    z: toolBox.z + 1
 
     MouseArea {
         anchors.fill: parent
