@@ -18,16 +18,41 @@
  ***************************************************************************/
 
 import QtQuick 1.1
+import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.qtextracomponents 0.1 as QtExtras
 
-QtExtras.QIconItem {
+Item {
     id: toolBoxButton
     width: iconSize
     height: iconSize
-    icon: "plasma"
     z: toolBox.z + 1
+    property string cornerElement: "desktop-northeast"
+    /*
+        cornerElement = "desktop-northwest";
+        cornerElement = "desktop-northeast";
+        cornerElement = "desktop-southeast";
+        cornerElement = "desktop-southwest";
+     */
+    PlasmaCore.SvgItem {
+        svg: PlasmaCore.Svg {
+            imagePath: "widgets/toolbox"
+        }
+        elementId: cornerElement
+        anchors.fill: parent
 
+    }
+
+    QtExtras.QIconItem {
+        id: toolBoxIcon
+        anchors { top: parent.top; right: parent.right; }
+        width: iconSize/2
+        height: iconSize/2
+        icon: "plasma"
+    }
+
+
+    // This part is a bit messy, but this way we can avoid createComponent
     MouseArea {
         anchors.fill: parent
         visible: toolBox.state == "collapsed"
