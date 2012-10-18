@@ -39,6 +39,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.Label {
         id: label
+        elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
 

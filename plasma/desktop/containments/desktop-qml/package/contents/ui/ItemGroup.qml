@@ -20,7 +20,6 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.mobilecomponents 0.1 as MobileComponents
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 PlasmaCore.FrameSvgItem {
