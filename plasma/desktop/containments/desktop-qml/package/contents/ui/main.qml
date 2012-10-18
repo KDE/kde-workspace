@@ -19,13 +19,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.0
+import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
-// import org.kde.plasma.mobilecomponents 0.1 as MobileComponents
-//import org.kde.plasma.slccomponents 0.1 as SlcComponents
-//import org.kde.metadatamodels 0.1 as MetadataModels
+import org.kde.qtextracomponents 0.1 as QtExtras
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
@@ -39,7 +37,7 @@ Item {
     property int currentIndex: -1
 
     property Item addResource
-    property int iconSize: 32
+    property int iconSize: 24
 
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
 
@@ -56,36 +54,36 @@ Item {
         layoutTimer.restart()
     }
 
-    GridView {
-        id: gridView
-        opacity: 0.3
-        cellWidth: 24
-        cellHeight: 24
-        model: gridModel
-        interactive: false
-        anchors.fill: parent
-        delegate: Rectangle {
-            border { color: "#000000"; width: 1; }
-            anchors.margins: 12
-            width: gridView.cellWidth
-            height: gridView.cellHeight
-            color: Qt.rgba(0, 0, 0, 0)
-            opacity: 0.3
-
-        }
-
-        ListModel {
-            id: gridModel
-            Component.onCompleted: {
-                var cells  = (main.width / gridView.cellWidth) * (main.height / gridView.cellHeight);
-                print(" Got " + cells + " Cells. w: " + (availScreenRect.width / gridView.cellWidth) + " h: " + (availScreenRect.height / gridView.cellHeight));
-                for (i = 0; i < cells*3; i++) {
-                    gridModel.append({"numbor": i, "name":"Jackfruit"});
-                }
-
-            }
-        }
-    }
+//     GridView {
+//         id: gridView
+//         opacity: 0.3
+//         cellWidth: 24
+//         cellHeight: 24
+//         model: gridModel
+//         interactive: false
+//         anchors.fill: parent
+//         delegate: Rectangle {
+//             border { color: "#000000"; width: 1; }
+//             anchors.margins: 12
+//             width: gridView.cellWidth
+//             height: gridView.cellHeight
+//             color: Qt.rgba(0, 0, 0, 0)
+//             opacity: 0.3
+//
+//         }
+//
+//         ListModel {
+//             id: gridModel
+//             Component.onCompleted: {
+//                 var cells  = (main.width / gridView.cellWidth) * (main.height / gridView.cellHeight);
+//                 print(" Got " + cells + " Cells. w: " + (availScreenRect.width / gridView.cellWidth) + " h: " + (availScreenRect.height / gridView.cellHeight));
+//                 for (i = 0; i < cells*3; i++) {
+//                     gridModel.append({"numbor": i, "name":"Jackfruit"});
+//                 }
+//
+//             }
+//         }
+//     }
 
     Component.onCompleted: {
         //do it here since theme is not accessible in LayoutManager
@@ -185,15 +183,7 @@ Item {
             bottom: parent.bottom
         }
     }
-    ToolBoxButton {
-        id: toolBoxButton
-        anchors { top: parent.top; right: parent.right; }
-    }
 
-    ToolBox {
-        id: toolBox
-        anchors { top: parent.top; right: parent.right; }
-    }
     Flickable {
         id: mainFlickable
         anchors {
@@ -226,87 +216,6 @@ Item {
                 resourceInstance.uri = ""
                 main.currentIndex = -1
             }
-
-
-//             Connections {
-//                 target: plasmoid
-//                 onActivityNameChanged: titleText.text = plasmoid.activityName
-//             }
-
-//             Row {
-//                 id: toolBar
-//                 spacing: 16
-//                 anchors {
-//                     top: parent.top
-//                     left: resultsFlow.left
-//                     topMargin: availScreenRect.y+20
-//                     leftMargin: 4
-//                 }
-//
-//                 ActionButton {
-//                     svg: iconsSvg
-//                     elementId: "add"
-//                     action: plasmoid.action("add widgets")
-//                     //FIXME: WHY?
-//                     Component.onCompleted: {
-//                         action.enabled = true
-//                     }
-//                 }
-//
-//                 ActionButton {
-//                     id: configureButton
-//                     svg: iconsSvg
-//                     elementId: "configure"
-//                     action: plasmoid.action("configure")
-//                     //FIXME: WHY?
-//                     Component.onCompleted: {
-//                         action.enabled = true
-//                     }
-//                 }
-//
-//                 PlasmaExtras.Heading {
-//                     id: titleText
-//                     text: (String(plasmoid.activityName).length <= 28) ? plasmoid.activityName:String(plasmoid.activityName).substr(0,28) + "..."
-//                     level: 2
-//                     anchors.verticalCenter: configureButton.verticalCenter
-//                 }
-//             }
-/*
-            Timer {
-                id: categoriesTimer
-                repeat: false
-                running: false
-                interval: 0
-                onTriggered: {
-                    var component = Qt.createComponent("ItemsListGroup.qml")
-                    var existingCategories = Array()
-
-                    //FIXME: find a more efficient way
-                    //destroy removed categories
-                    for (var category in LayoutManager.itemGroups) {
-                        if (category.indexOf("Applet-") != 0 &&
-                            categoryListModel.categories.indexOf(category) == -1) {
-                            var item = LayoutManager.itemGroups[category]
-                            LayoutManager.setSpaceAvailable(item.x, item.y, item.width, item.height, true)
-                            item.destroy()
-                            delete LayoutManager.itemGroups[category]
-                            //debugFlow.refresh();
-                        }
-                    }
-
-                    //add newly created categories
-                    for (var i = 0; i < categoryListModel.categories.length; ++i) {
-                        var category = categoryListModel.categories[i]
-                        if (!LayoutManager.itemGroups[category]) {
-                            var itemGroup = component.createObject(resultsFlow)
-                            itemGroup.category = category
-                            LayoutManager.itemGroups[category] = itemGroup
-                        }
-                        existingCategories[existingCategories.length] = category
-                        layoutTimer.restart()
-                    }
-                }
-            }*/
 
             //FIXME: debug purposes only, remove asap
             /*Flow {
@@ -462,6 +371,16 @@ Item {
                 }
             }
         }
+    }
+
+    ToolBox {
+        id: toolBox
+        anchors { top: parent.top; right: parent.right; }
+    }
+
+    ToolBoxButton {
+        id: toolBoxButton
+        anchors { top: parent.top; right: parent.right; }
     }
 
 //     SlcComponents.SlcMenu {

@@ -47,7 +47,7 @@ QtExtras.QIconItem {
                 targetItem: toolBox
             }
             ScriptAction {
-                script:toolBox.state = "collapsed";
+                script: toolBox.state = "collapsed";
             }
         }
     }
