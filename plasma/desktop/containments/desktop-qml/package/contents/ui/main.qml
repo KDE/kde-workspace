@@ -123,7 +123,7 @@ Item {
     //FIXME: way to avoid instantiating them?
     PlasmaCore.Svg {
         id: borderSvg
-        imagePath: "widgets/background"
+        imagePath: "widgets/toolbox"
     }
     PlasmaCore.Svg {
         id: draggerSvg
