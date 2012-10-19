@@ -387,7 +387,7 @@ Item {
 
     ToolBoxButton {
         id: toolBoxButton
-        anchors { top: parent.top; right: parent.right; }
+        //anchors { top: parent.top; right: parent.right; }
     }
 
 //     SlcComponents.SlcMenu {

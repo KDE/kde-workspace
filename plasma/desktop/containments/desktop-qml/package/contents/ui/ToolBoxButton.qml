@@ -34,6 +34,36 @@ Item {
         cornerElement = "desktop-southeast";
         cornerElement = "desktop-southwest";
      */
+    state: "topright" // FIXME: read default value from config
+    states: [
+        State {
+            name: "topleft"
+        },
+        State {
+            name: "top"
+        },
+        State {
+            name: "topright"
+        },
+        State {
+            name: "right"
+        },
+        State {
+            name: "bottomright"
+        },
+        State {
+            name: "bottom"
+        },
+        State {
+            name: "bottomleft"
+        },
+        State {
+            name: "topleft"
+        },
+        State {
+            name: "left"
+        }
+    ]
     PlasmaCore.SvgItem {
         svg: PlasmaCore.Svg {
             imagePath: "widgets/toolbox"
@@ -53,7 +83,16 @@ Item {
 
     MouseArea {
         id: buttonMouse
+        property QtObject container: main
         anchors.fill: parent
+
+        drag.target: toolBoxButton
+        drag.axis: Drag.XAxis | Drag.YAxis
+        drag.minimumX: 0
+        drag.maximumX: container.width - toolBoxButton.width
+        drag.minimumY: 0
+        drag.maximumY: container.height - toolBoxButton.height
+
         onClicked: {
             var qmlFile = (toolBox.state == "expanded") ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
             var component = Qt.createComponent(qmlFile);
