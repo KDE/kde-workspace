@@ -171,6 +171,7 @@ X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/kickoff.qml
 X-Plasma-DefaultSize=400,400
+X-Plasma-RequiredExtensions=LaunchApp
 
 X-KDE-PluginInfo-Author=Martin Graesslin
 X-KDE-PluginInfo-Email=plasma-devel@kde.org

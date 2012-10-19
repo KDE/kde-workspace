@@ -36,6 +36,9 @@ Item {
     focus: true
 
     Component.onCompleted: {
+        // actions
+        plasmoid.setAction("menuEditor", i18n("Edit Applications..."));
+
         // events
         plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect('popupEvent', popupEventSlot);
@@ -63,6 +66,10 @@ Item {
     function configChanged() {
         root.switchTabsOnHover = plasmoid.readConfig("SwitchTabsOnHover");
         root.showAppsByName = plasmoid.readConfig("ShowAppsByName");
+    }
+
+    function action_menuEditor() {
+        plasmoid.runApplication("kmenuedit.desktop");
     }
 
     PlasmaCore.DataSource {

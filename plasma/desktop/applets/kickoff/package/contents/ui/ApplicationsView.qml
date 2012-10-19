@@ -106,8 +106,10 @@ Item {
                 event.accepted = true;
             }
             else if (event.key == Qt.Key_Left) {
-                breadcrumbs.children[breadcrumbs.children.length-2].deleteCrumb();
-                event.accepted = true;
+                if (breadcrumbs.children.length > 1) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
+                    breadcrumbs.children[breadcrumbs.children.length-2].deleteCrumb();
+                    event.accepted = true;
+                }
             }
             else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
                  applicationsView.currentItem.activate();
