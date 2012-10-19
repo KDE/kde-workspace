@@ -24,8 +24,8 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
     id: toolBoxButton
-    width: iconSize
-    height: iconSize
+    width: isCorner ? iconSize : 64
+    height: isCorner ? iconSize : iconSize
 
     y: 0
     x: main.width - toolBoxButton.width
@@ -76,8 +76,33 @@ Item {
         }
         elementId: cornerElement
         anchors.fill: parent
+        visible: isCorner
 
     }
+
+    PlasmaCore.FrameSvgItem {
+        id: toolBoxButtonFrame
+        imagePath: "widgets/background"
+        anchors.fill: parent
+        visible: !isCorner
+        Connections {
+            target: toolBoxButton
+            onStateChanged: {
+                var s = toolBoxButton.state;
+                if (s == "top") {
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.RightBorder | PlasmaCore.FrameSvgItem.BottomBorder | PlasmaCore.FrameSvgItem.LeftBorder;
+                } else if (s == "right") {
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.TopBorder | PlasmaCore.FrameSvgItem.BottomBorder | PlasmaCore.FrameSvgItem.LeftBorder;
+                } else if (s == "bottom") {
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.RightBorder | PlasmaCore.FrameSvgItem.TopBorder | PlasmaCore.FrameSvgItem.LeftBorder;
+                } else if (s == "left") {
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.TopBorder | PlasmaCore.FrameSvgItem.LeftBorder | PlasmaCore.FrameSvgItem.BottomBorder;
+                }
+                print ( "S " + s);
+            }
+        }
+    }
+
 
     QtExtras.QIconItem {
         id: toolBoxIcon
@@ -92,35 +117,35 @@ Item {
 
     function updateState() {
         var _m = 2;
-        var _s = "UNKNOWN";
+        var _s = "INVALID"; // will be changed
         var container = main;
         //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y);
-        if (x < _m) { // || container.x > (drag.maximumX - toolBoxButton.width - 12)) {
-            if (y < _m) {
+        if (x <= _m) {
+            if (y <= _m) {
                 _s = "topleft"
-            } else if (y > (container.width - toolBoxButton.height - _m)) {
+            } else if (y >= (container.height - toolBoxButton.height - _m)) {
                 _s = "bottomleft"
             } else {
                 _s = "left";
             }
-        } else if (x > (container.width - toolBoxButton.width - _m)) {
-            if (y < _m) {
+        } else if (x >= (container.width - toolBoxButton.width - _m)) {
+            if (y <= _m) {
                 _s = "topright"
-            } else if (y > (container.height- toolBoxButton.height - _m)) {
+            } else if (y >= (container.height- toolBoxButton.height - _m)) {
                 _s = "bottomright"
             } else {
                 _s = "right";
             }
         } else {
-            if (y < _m) {
+            if (y <= _m) {
                 _s = "top"
-            } else if (y > (container.height - toolBoxButton.height - _m)) {
+            } else if (y >= (container.height - toolBoxButton.height - _m)) {
                 _s = "bottom"
             } else {
-                _s = "we shouldn't end up here";
+                _s = "INVALID2"; // should never happen
             }
         }
-        //print("  aand? " + _s);
+        print("  new state: " + _s);
         toolBoxButton.state = _s;
     }
 
