@@ -21,6 +21,8 @@
 #include "ui/flipscrollview.h"
 
 // Qt
+#include <QCoreApplication>
+#include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>
@@ -307,6 +309,9 @@ QModelIndex FlipScrollView::moveCursor(CursorAction cursorAction, Qt::KeyboardMo
         } else if (currentIndex().row() > 0) {
             index = currentIndex().sibling(currentIndex().row() - 1,
                                            currentIndex().column());
+        } else if (currentIndex().row() == 0) {
+            kDebug() << "we are in row 0, processing Key_Up";
+            emit focusNextViewLeft();
         }
         break;
     case MoveDown:
@@ -316,6 +321,9 @@ QModelIndex FlipScrollView::moveCursor(CursorAction cursorAction, Qt::KeyboardMo
                    model()->rowCount(currentIndex().parent()) - 1) {
             index = currentIndex().sibling(currentIndex().row() + 1,
                                            currentIndex().column());
+        } else {
+            kDebug() << "we are in Last row, processing Key_Down";
+            emit focusNextViewLeft();
         }
         break;
     case MoveLeft:
@@ -342,7 +350,6 @@ QModelIndex FlipScrollView::moveCursor(CursorAction cursorAction, Qt::KeyboardMo
     d->hoveredIndex = index;
 
     //kDebug() << "New index after move" << index.data(Qt::DisplayRole);
-
     return index;
 }
 
@@ -403,19 +410,26 @@ void FlipScrollView::mouseMoveEvent(QMouseEvent *event)
 void FlipScrollView::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Enter ||
-            event->key() == Qt::Key_Return) {
+            event->key() == Qt::Key_Return ||
+            event->key() == Qt::Key_Right) {
         moveCursor(MoveRight, event->modifiers());
         event->accept();
         return;
     }
 
-    if (event->key() == Qt::Key_Escape &&
-            d->currentRoot().isValid()) {
-        moveCursor(MoveLeft, event->modifiers());
-        event->accept();
-        return;
+    if (event->key() == Qt::Key_Escape || event->key() == Qt::Key_Left) {
+        if (d->currentRoot().isValid()) {
+            moveCursor(MoveLeft, event->modifiers());
+            event->accept();
+            return;
+        } else {
+            // we are already in the leftmost column.
+            kDebug() << "we are in Left-Most column, processing Key_Left";
+            event->accept();
+            emit focusNextViewLeft();
+            return;
+        }
     }
-
     QAbstractItemView::keyPressEvent(event);
 }
 

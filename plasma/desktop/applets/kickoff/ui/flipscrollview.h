@@ -64,6 +64,7 @@ public:
 
 Q_SIGNALS:
     void currentRootChanged(const QModelIndex &index);
+    void focusNextViewLeft();
 
 protected:
     // reimplemented from QWidget
