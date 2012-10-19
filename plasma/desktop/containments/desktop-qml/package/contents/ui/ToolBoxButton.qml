@@ -26,8 +26,14 @@ Item {
     id: toolBoxButton
     width: iconSize
     height: iconSize
+
+    y: 0
+    x: main.width - toolBoxButton.width
     z: toolBox.z + 1
+
     property string cornerElement: "desktop-northeast"
+    property bool isCorner: ((state == "topleft") || (state == "topright") ||
+                             (state == "bottomright") || (state == "bottomleft"))
     /*
         cornerElement = "desktop-northwest";
         cornerElement = "desktop-northeast";
@@ -81,13 +87,75 @@ Item {
         icon: "plasma"
     }
 
+    onXChanged: updateState()
+    onYChanged: updateState()
+
+    function updateState() {
+        var _m = 2;
+        var _s = "UNKNOWN";
+        var container = main;
+        //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y);
+        if (x < _m) { // || container.x > (drag.maximumX - toolBoxButton.width - 12)) {
+            if (y < _m) {
+                _s = "topleft"
+            } else if (y > (container.width - toolBoxButton.height - _m)) {
+                _s = "bottomleft"
+            } else {
+                _s = "left";
+            }
+        } else if (x > (container.width - toolBoxButton.width - _m)) {
+            if (y < _m) {
+                _s = "topright"
+            } else if (y > (container.height- toolBoxButton.height - _m)) {
+                _s = "bottomright"
+            } else {
+                _s = "right";
+            }
+        } else {
+            if (y < _m) {
+                _s = "top"
+            } else if (y > (container.height - toolBoxButton.height - _m)) {
+                _s = "bottom"
+            } else {
+                _s = "we shouldn't end up here";
+            }
+        }
+        //print("  aand? " + _s);
+        toolBoxButton.state = _s;
+    }
+
     MouseArea {
         id: buttonMouse
         property QtObject container: main
         anchors.fill: parent
 
         drag.target: toolBoxButton
-        drag.axis: Drag.XAxis | Drag.YAxis
+        Connections {
+            target: toolBoxButton
+            onStateChanged: {
+                s = toolBoxButton.state;
+                print(" Changing axis to " + s);
+                if (isCorner) {
+                    buttonMouse.drag.axis = Drag.XAxis | Drag.YAxis;
+                } else if (s == "top" || s == "bottom" ) {
+                    buttonMouse.drag.axis = Drag.XAxis;
+                } else {
+                    buttonMouse.drag.axis = Drag.YAxis;
+                }
+            }
+        }
+//         drag.axis: {
+//             if (container.x < _m || container.x > (drag.maximumX - toolBoxButton.width - 12)) {
+//                 print("both axes");
+//                 return Drag.XAxis | Drag.YAxis;
+//             } else if (false) {
+//                 print("both axes");
+//                 return Drag.XAxis;
+//             } else {
+//                 print("both axes");
+//                 return Drag.YAxis;
+//             }
+//         }
         drag.minimumX: 0
         drag.maximumX: container.width - toolBoxButton.width
         drag.minimumY: 0
