@@ -24,7 +24,7 @@ import org.kde.qtextracomponents 0.1
 PlasmaComponents.TabButton {
     property string iconSource
     property alias text: labelElement.text
-    implicitHeight: 48 + labelElement.implicitHeight + 15
+    implicitHeight: iconElement.height + labelElement.implicitHeight + iconElement.anchors.topMargin + labelElement.anchors.topMargin + labelElement.anchors.bottomMargin
 
     QIconItem {
         id: iconElement

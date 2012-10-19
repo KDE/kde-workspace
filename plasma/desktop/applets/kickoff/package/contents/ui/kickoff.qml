@@ -36,10 +36,15 @@ Item {
     focus: true
     onFocusChanged: {
         searchField.forceActiveFocus();
+
     }
 
     Component.onCompleted: {
         searchField.forceActiveFocus();
+    }
+
+    function action_menuEditor() {
+        plasmoid.runApplication("kmenuedit.desktop");
     }
 
     PlasmaCore.DataSource {
