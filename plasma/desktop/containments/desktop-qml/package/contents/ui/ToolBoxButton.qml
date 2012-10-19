@@ -19,7 +19,7 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.extras 0.1 as PlasmaExtras
+//import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
@@ -51,29 +51,16 @@ Item {
         icon: "plasma"
     }
 
-
-    // This part is a bit messy, but this way we can avoid createComponent
     MouseArea {
+        id: buttonMouse
         anchors.fill: parent
-        visible: toolBox.state == "collapsed"
-        onClicked: ParallelAnimation {
-            ScriptAction {
-                script: toolBox.state = "expanded";
-            }
-            PlasmaExtras.AppearAnimation {
-                targetItem: toolBox
-            }
-        }
-    }
-    MouseArea {
-        anchors.fill: parent
-        visible: toolBox.state == "expanded"
-        onClicked: SequentialAnimation {
-            PlasmaExtras.DisappearAnimation {
-                targetItem: toolBox
-            }
-            ScriptAction {
-                script: toolBox.state = "collapsed";
+        onClicked: {
+            var qmlFile = (toolBox.state == "expanded") ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
+            var component = Qt.createComponent(qmlFile);
+            if (component.status == Component.Ready) {
+                var ani = component.createObject(buttonMouse);
+                ani.targetItem = toolBox;
+                ani.start();
             }
         }
     }
