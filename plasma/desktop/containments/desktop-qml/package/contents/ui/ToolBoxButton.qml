@@ -28,7 +28,7 @@ Item {
     height: isCorner ? iconSize : iconSize
 
     y: 0
-    x: main.width - toolBoxButton.width
+    x: main.width - toolBoxButtonFrame.width
     z: toolBox.z + 1
 
     property string cornerElement: "desktop-northeast"
@@ -71,7 +71,7 @@ Item {
         }
         elementId: cornerElement
         anchors.fill: parent
-        opacity: isCorner ? 1 : 0
+        opacity: isCorner ? 1 : 0.2
         Connections {
             target: toolBoxButton
             onStateChanged: {
@@ -96,10 +96,11 @@ Item {
         id: toolBoxButtonFrame
         imagePath: "widgets/background"
         anchors.fill: parent
+        property int mWidth: iconSize + activityName.paintedWidth + 24
 //         anchors.centerIn: parent
 //         width: parent.width +24
 //         height: parent.height +24
-        opacity: !isCorner ? 1 : 0
+        opacity: !isCorner ? 1 : 0.1
         enabledBorders: PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.BottomBorder;
         Connections {
             target: toolBoxButton
@@ -126,7 +127,7 @@ Item {
                     width = iconSize
                     height = iconSize
                 }
-                print ( "S " + s);
+                //print ( "S " + s);
             }
         }
         Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.InOutExpo; } }
@@ -136,9 +137,10 @@ Item {
     }
     PlasmaComponents.Label {
         id: activityName
-        visible: toolBoxButton.state == "top" || toolBoxButton.state == "bottom"
-        text: "Activity which you're currently on: " + plasmoid.activityName
-        anchors { left: toolBoxIcon.right; right: parent.right; horizontalCenter: toolBoxIcon.horizontalCenter; }
+        opacity: !isCorner ? 1 : 0.1
+        //visible: toolBoxButton.state == "top" || toolBoxButton.state == "bottom"
+        text: "Activity" + plasmoid.activityName
+        anchors { left: toolBoxIcon.right; right: parent.right; verticalCenter: toolBoxIcon.verticalCenter; }
     }
 
 
@@ -202,22 +204,22 @@ Item {
     onYChanged: updateState()
 
     function updateState() {
-        var _m = 0;
+        var _m = 2;
         var _s = ""; // will be changed
         var container = main;
-        //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y);
+        print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y+" tbw: " + toolBoxButtonFrame.width);
         if (x <= _m) {
             if (y <= _m) {
                 _s = "topleft"
-            } else if (y >= (container.height - toolBoxButton.height - _m)) {
+            } else if (y >= (container.height - toolBoxButtonFrame.height - _m)) {
                 _s = "bottomleft"
             } else {
                 _s = "left";
             }
-        } else if (x >= (container.width - toolBoxButton.width - _m)) {
+        } else if (x >= (container.width - toolBoxButtonFrame.mWidth - _m)) {
             if (y <= _m) {
                 _s = "topright"
-            } else if (y >= (container.height- toolBoxButton.height - _m)) {
+            } else if (y >= (container.height- toolBoxButtonFrame.height - _m)) {
                 _s = "bottomright"
             } else {
                 _s = "right";
@@ -225,7 +227,7 @@ Item {
         } else {
             if (y <= _m) {
                 _s = "top"
-            } else if (y >= (container.height - toolBoxButton.height - _m)) {
+            } else if (y >= (container.height - toolBoxButtonFrame.height - _m)) {
                 _s = "bottom"
             } else {
                 print("Error: Reached invalid state in ToolBoxButton.updateState()")
@@ -235,7 +237,34 @@ Item {
         //print("  new state: " + _s);
         if (_s != ""){
             toolBoxButton.state = _s;
+            updateStateTimer.tmpState = _s;
+            updateStateTimer.start();
         }
+//         if (_s == "topright" || s == "bottomright") {
+//             print("Moving to " + (container.width - toolBoxButtonFrame.width));
+//             toolBoxButton.x = container.width - toolBoxButtonFrame.width;
+//         }
+    }
+
+    Timer {
+        id: updateStateTimer
+        interval: 50
+        property string tmpState: ""
+        running: false
+        repeat: false
+        onTriggered: {
+            if (tmpState != "") {
+                //print("Updating state to: " + tmpState);
+                //toolBoxButton.state = tmpState;
+                if (tmpState == "topright" || tmpState == "bottomright" || tmpState == "right") {
+                    //print("Moving to " + (main.width - toolBoxButton.width));
+                    toolBoxButton.x = main.width - toolBoxButton.width;
+                }
+
+            }
+
+        }
+
     }
 
     MouseArea {
@@ -248,7 +277,7 @@ Item {
             target: toolBoxButton
             onStateChanged: {
                 s = toolBoxButton.state;
-                print(" Changing axis to " + s);
+                //print(" Changing axis to " + s);
                 if (isCorner) {
                     buttonMouse.drag.axis = Drag.XAxis | Drag.YAxis;
                 } else if (s == "top" || s == "bottom" ) {
