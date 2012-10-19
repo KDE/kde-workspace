@@ -19,12 +19,12 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-//import org.kde.plasma.extras 0.1 as PlasmaExtras
+import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
     id: toolBoxButton
-    width: isCorner ? iconSize : 64
+    width: isCorner ? iconSize : iconSize
     height: isCorner ? iconSize : iconSize
 
     y: 0
@@ -34,12 +34,6 @@ Item {
     property string cornerElement: "desktop-northeast"
     property bool isCorner: ((state == "topleft") || (state == "topright") ||
                              (state == "bottomright") || (state == "bottomleft"))
-    /*
-        cornerElement = "desktop-northwest";
-        cornerElement = "desktop-northeast";
-        cornerElement = "desktop-southeast";
-        cornerElement = "desktop-southwest";
-     */
     state: "topright" // FIXME: read default value from config
     states: [
         State {
@@ -71,53 +65,145 @@ Item {
         }
     ]
     PlasmaCore.SvgItem {
+        //id: cornerSvg
         svg: PlasmaCore.Svg {
             imagePath: "widgets/toolbox"
         }
         elementId: cornerElement
         anchors.fill: parent
-        visible: isCorner
-
+        opacity: isCorner ? 1 : 0
+        Connections {
+            target: toolBoxButton
+            onStateChanged: {
+                var s = toolBoxButton.state;
+                var corner = ""
+                if (s == "topleft") {
+                    corner = "desktop-northwest";
+                } else if (s == "topright") {
+                    corner = "desktop-northeast";
+                } else if (s == "bottomright") {
+                    corner = "desktop-southeast";
+                } else if (s == "bottomleft") {
+                    corner = "desktop-southwest";
+                }
+                toolBoxButton.cornerElement = corner;
+            }
+        }
+        Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.InOutExpo; } }
     }
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxButtonFrame
         imagePath: "widgets/background"
         anchors.fill: parent
-        visible: !isCorner
+//         anchors.centerIn: parent
+//         width: parent.width +24
+//         height: parent.height +24
+        opacity: !isCorner ? 1 : 0
+        enabledBorders: PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.BottomBorder;
         Connections {
             target: toolBoxButton
             onStateChanged: {
+                //return;
                 var s = toolBoxButton.state;
                 if (s == "top") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.RightBorder | PlasmaCore.FrameSvgItem.BottomBorder | PlasmaCore.FrameSvgItem.LeftBorder;
+                    width = iconSize + activityName.paintedWidth + 24
+                    height = iconSize
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "right") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.TopBorder | PlasmaCore.FrameSvgItem.BottomBorder | PlasmaCore.FrameSvgItem.LeftBorder;
+                    width = iconSize
+                    height = iconSize * 2
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "bottom") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.RightBorder | PlasmaCore.FrameSvgItem.TopBorder | PlasmaCore.FrameSvgItem.LeftBorder;
+                    width = iconSize + activityName.paintedWidth + 24
+                    height = iconSize
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "left") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvgItem.TopBorder | PlasmaCore.FrameSvgItem.LeftBorder | PlasmaCore.FrameSvgItem.BottomBorder;
+                    width = iconSize
+                    height = iconSize * 2
+                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder;
+                } else {
+                    width = iconSize
+                    height = iconSize
                 }
                 print ( "S " + s);
             }
         }
+        Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.InOutExpo; } }
+//         PlasmaComponents.Label {
+//             text: plasmoid.activityName
+//         }
+    }
+    PlasmaComponents.Label {
+        id: activityName
+        visible: toolBoxButton.state == "top" || toolBoxButton.state == "bottom"
+        text: "Activity which you're currently on: " + plasmoid.activityName
+        anchors { left: toolBoxIcon.right; right: parent.right; horizontalCenter: toolBoxIcon.horizontalCenter; }
     }
 
 
     QtExtras.QIconItem {
         id: toolBoxIcon
-        anchors { top: parent.top; right: parent.right; }
+        anchors { top: parent.top; right: parent.right; margins: 4; }
         width: iconSize/2
         height: iconSize/2
         icon: "plasma"
+        Connections {
+            target: toolBoxButton
+            onStateChanged: {
+                var s = toolBoxButton.state;
+                var t = toolBoxButton;
+                var _m = 24;
+                //var corner = ""
+                toolBoxIcon.anchors.top = undefined;
+                toolBoxIcon.anchors.left = undefined;
+                toolBoxIcon.anchors.bottom = undefined;
+                toolBoxIcon.anchors.right = undefined;
+                //toolBoxIcon.anchors.horizontalCenter = undefined;
+                //toolBoxIcon.anchors.verticalCenter = undefined;
+                toolBoxIcon.anchors.leftMargin = 0;
+                toolBoxIcon.anchors.topMargin = 0;
+
+                if (s == "topleft") {
+                    toolBoxIcon.anchors.top = t.top;
+                    toolBoxIcon.anchors.left = t.left;
+                } else if (s == "topright") {
+                    toolBoxIcon.anchors.top = t.top;
+                    toolBoxIcon.anchors.right = t.right;
+                } else if (s == "bottomright") {
+                    toolBoxIcon.anchors.bottom = t.bottom;
+                    toolBoxIcon.anchors.right = t.right;
+                } else if (s == "bottomleft") {
+                    toolBoxIcon.anchors.bottom = t.bottom;
+                    toolBoxIcon.anchors.left = t.left;
+                } else if (s == "top") {
+                    toolBoxIcon.anchors.top = t.top;
+                    toolBoxIcon.anchors.left = t.left;
+                    toolBoxIcon.anchors.leftMargin = _m;
+                } else if (s == "right") {
+                    toolBoxIcon.anchors.top = t.top;
+                    toolBoxIcon.anchors.right = t.right;
+                    toolBoxIcon.anchors.topMargin = _m;
+                } else if (s == "bottom") {
+                    toolBoxIcon.anchors.bottom = t.bottom;
+                    toolBoxIcon.anchors.left = t.left;
+                    toolBoxIcon.anchors.leftMargin = _m;
+                } else if (s == "left") {
+                    toolBoxIcon.anchors.top = t.top;
+                    toolBoxIcon.anchors.left = t.left;
+                    toolBoxIcon.anchors.topMargin = _m;
+                }
+                //toolBoxButton.cornerElement = corner;
+            }
+        }
     }
 
     onXChanged: updateState()
     onYChanged: updateState()
 
     function updateState() {
-        var _m = 2;
-        var _s = "INVALID"; // will be changed
+        var _m = 0;
+        var _s = ""; // will be changed
         var container = main;
         //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y);
         if (x <= _m) {
@@ -142,11 +228,14 @@ Item {
             } else if (y >= (container.height - toolBoxButton.height - _m)) {
                 _s = "bottom"
             } else {
-                _s = "INVALID2"; // should never happen
+                print("Error: Reached invalid state in ToolBoxButton.updateState()")
+                //_s = ""; // should never happen
             }
         }
-        print("  new state: " + _s);
-        toolBoxButton.state = _s;
+        //print("  new state: " + _s);
+        if (_s != ""){
+            toolBoxButton.state = _s;
+        }
     }
 
     MouseArea {
