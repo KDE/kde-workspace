@@ -37,7 +37,7 @@ PlasmaComponents.ListItem {
             listItem.ListView.view.model.rootIndex = listItem.ListView.view.model.modelIndex(index);
         } else {
             launcher.openUrl(model["url"]);
-            plasmoid.hidePopup();
+            kickoff.hidePopup();
         }
     }
     QIconItem {

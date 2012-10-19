@@ -27,42 +27,19 @@ Item {
     property int minimumWidth: 290
     property int minimumHeight: 340
     property string previousState
-    property bool switchTabsOnHover: false
-    property bool showAppsByName: false
+    property bool switchTabsOnHover: kickoff.switchTabsOnHover
+    property bool showAppsByName: kickoff.showAppsByName
 
     width: 400
     height: 400
     state: "NORMAL"
     focus: true
+    onFocusChanged: {
+        searchField.forceActiveFocus();
+    }
 
     Component.onCompleted: {
-        // events
-        plasmoid.addEventListener('ConfigChanged', configChanged);
-        plasmoid.popupEvent.connect('popupEvent', popupEventSlot);
-
-        // plasmoid look
-        plasmoid.aspectRatioMode = IgnoreAspectRatio;
-        plasmoid.popupIcon = QIcon("start-here-kde"); // same as in the .desktop file
-
-        // tooltip shown when hovering the plasmoid (makes only sense when the plasmoid is added to a panel)
-        if (plasmoid.formFactor == Horizontal || plasmoid.formFactor == Vertical) {
-            var toolTipData = new Object;
-            toolTipData["image"] = "start-here-kde"; // same as in the .desktop file
-            toolTipData["mainText"] = i18n("Application Launcher"); // same as in the .desktop file
-            toolTipData["subText"] = i18n("Favorites, applications, computer places, recently used items and desktop sessions");
-            plasmoid.popupIconToolTip = toolTipData;
-        }
-
-        root.forceActiveFocus();
-    }
-
-    function popupEventSlot(shown) {
-        root.forceActiveFocus();
-    }
-
-    function configChanged() {
-        root.switchTabsOnHover = plasmoid.readConfig("SwitchTabsOnHover");
-        root.showAppsByName = plasmoid.readConfig("ShowAppsByName");
+        searchField.forceActiveFocus();
     }
 
     PlasmaCore.DataSource {
@@ -88,8 +65,8 @@ Item {
         height: 32 + lineSvg.elementSize("horizontal-line").height
         anchors {
             top: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return undefined;
                 // bottom
                 default:
@@ -97,8 +74,8 @@ Item {
                 }
             }
             bottom: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return parent.bottom;
                 // bottom
                 default:
@@ -115,8 +92,8 @@ Item {
             width: 32
             anchors {
                 top: {
-                    switch (plasmoid.location) {
-                    case TopEdge:
+                    switch (kickoff.location) {
+                    case Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -124,8 +101,8 @@ Item {
                     }
                 }
                 bottom: {
-                    switch (plasmoid.location) {
-                    case TopEdge:
+                    switch (kickoff.location) {
+                    case Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -144,8 +121,8 @@ Item {
                 left: searchIcon.right
                 right: parent.right
                 top: {
-                    switch (plasmoid.location) {
-                    case TopEdge:
+                    switch (kickoff.location) {
+                    case Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -153,8 +130,8 @@ Item {
                     }
                 }
                 bottom: {
-                    switch (plasmoid.location) {
-                    case TopEdge:
+                    switch (kickoff.location) {
+                    case Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -185,8 +162,8 @@ Item {
                 left: parent.left
                 right: parent.right
                 top: {
-                    switch (plasmoid.location) {
-                    case TopEdge:
+                    switch (kickoff.location) {
+                    case Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -194,9 +171,9 @@ Item {
                     }
                 }
                 bottom: {
-                    switch (plasmoid.location) {
+                    switch (kickoff.location) {
                     // top
-                    case TopEdge:
+                    case Kickoff.TopEdge:
                         return searchIcon.top;
                     // bottom
                     default:
@@ -213,8 +190,8 @@ Item {
             left: parent.left
             right: parent.right
             top: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return parent.top;
                 // bottom
                 default:
@@ -222,8 +199,8 @@ Item {
                 }
             }
             bottom: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return searchBar.top;
                 // bottom
                 default:
@@ -237,8 +214,8 @@ Item {
         id: mainView
         anchors {
             top: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return tabBar.bottom;
                 // bottom
                 default:
@@ -247,8 +224,8 @@ Item {
             }
             left: parent.left
             bottom: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return searchBar.top;
                 // bottom
                 default:
@@ -264,8 +241,8 @@ Item {
 
         anchors {
             top: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return tabBar.bottom;
                 // bottom
                 default:
@@ -275,8 +252,8 @@ Item {
             left: parent.left
             right: parent.right
             bottom: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return searchBar.top;
                 // bottom
                 default:
@@ -293,8 +270,8 @@ Item {
             left: parent.left
             right: parent.right
             bottom: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return undefined;
                 // bottom
                 default:
@@ -302,8 +279,8 @@ Item {
                 }
             }
             top: {
-                switch (plasmoid.location) {
-                case TopEdge:
+                switch (kickoff.location) {
+                case Kickoff.TopEdge:
                     return parent.top;
                 // bottom
                 default:

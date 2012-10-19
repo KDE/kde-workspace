@@ -27,6 +27,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QGraphicsLinearLayout>
+#include <QtDeclarative>
 
 // KDE
 #include <KAuthorized>
@@ -36,45 +37,77 @@
 #include <KProcess>
 
 // Plasma
-#include <Plasma/IconWidget>
 #include <Plasma/Containment>
-#include <Plasma/View>
+#include <Plasma/Package>
 #include <Plasma/ToolTipManager>
+#include <Plasma/DeclarativeWidget>
 
 // Local
 #include "ui_kickoffConfig.h"
-#include "ui/launcher.h"
+#include "core/applicationmodel.h"
+#include "core/favoritesmodel.h"
+#include "core/krunnermodel.h"
+#include "core/leavemodel.h"
 #include "core/recentapplications.h"
+#include "core/recentlyusedmodel.h"
+#include "core/systemmodel.h"
+#include "core/urlitemlauncher.h"
 
 class LauncherApplet::Private
 {
 public:
-    Private(LauncherApplet *lApplet) : launcher(0), switcher(0), q(lApplet) { }
-    ~Private() {
-        delete launcher;
+    Private(LauncherApplet *lApplet)
+        : declarativeWidget(0),
+          switcher(0),
+          q(lApplet),
+          switchTabsOnHover(false),
+          showAppsByName(false)
+    {
+    }
+
+    ~Private()
+    {
+        delete declarativeWidget;
     }
     void createLauncher();
     void initToolTip();
 
-    Kickoff::Launcher *launcher;
+    Plasma::DeclarativeWidget *declarativeWidget;
 
     QList<QAction*> actions;
     QAction* switcher;
     LauncherApplet *q;
     Ui::kickoffConfig ui;
+    bool switchTabsOnHover;
+    bool showAppsByName;
 };
 
 void LauncherApplet::Private::createLauncher()
 {
-    if (launcher) {
+    if (declarativeWidget) {
         return;
     }
 
-    launcher = new Kickoff::Launcher(q);
-    launcher->setAttribute(Qt::WA_NoSystemBackground);
-    launcher->setAutoHide(true);
-    QObject::connect(launcher, SIGNAL(aboutToHide()), q, SLOT(hidePopup()));
-    QObject::connect(launcher, SIGNAL(configNeedsSaving()), q, SIGNAL(configNeedsSaving()));
+    const char *uri = "org.kde.plasma.kickoff";
+    qmlRegisterType<Kickoff::ApplicationModel>(uri, 0, 1, "ApplicationModel");
+    qmlRegisterType<Kickoff::FavoritesModel>(uri, 0, 1, "FavoritesModel");
+    qmlRegisterType<Kickoff::KRunnerModel>(uri, 0, 1, "KRunnerModel");
+    qmlRegisterType<Kickoff::LeaveModel>(uri, 0, 1, "LeaveModel");
+    qmlRegisterType<Kickoff::RecentlyUsedModel>(uri, 0, 1, "RecentlyUsedModel");
+    qmlRegisterType<Kickoff::SystemModel>(uri, 0, 1, "SystemModel");
+    qmlRegisterType<Kickoff::UrlItemLauncher>(uri, 0, 1, "Launcher");
+    //for the enum
+    qmlRegisterUncreatableType<LauncherApplet>(uri, 0, 1, "Kickoff", QLatin1String("Do not create objects of this type."));
+
+    declarativeWidget = new Plasma::DeclarativeWidget(q);
+    declarativeWidget->engine()->rootContext()->setContextProperty("kickoff", q);
+    
+    Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
+    Plasma::Package package(QString(), "org.kde.kickoff", structure);
+    declarativeWidget->setQmlPath(package.filePath("mainscript"));
+
+    //QObject::connect(declarativeWidget, SIGNAL(aboutToHide()), q, SLOT(hidePopup()));
+    //QObject::connect(declarativeWidget, SIGNAL(configNeedsSaving()), q, SIGNAL(configNeedsSaving()));
     //launcher->resize(launcher->sizeHint());
     //QObject::connect(launcher, SIGNAL(aboutToHide()), icon, SLOT(setUnpressed()));
 }
@@ -123,6 +156,8 @@ void LauncherApplet::constraintsEvent(Plasma::Constraints constraints)
 {
     if ((constraints & Plasma::ImmutableConstraint) && d->switcher) {
         d->switcher->setVisible(immutability() == Plasma::Mutable);
+    } else if (constraints & Plasma::LocationConstraint) {
+        emit locationChanged((Location)location());
     }
 }
 
@@ -163,8 +198,8 @@ void LauncherApplet::createConfigurationInterface(KConfigDialog *parent)
 
     d->createLauncher();
     d->ui.iconButton->setIcon(popupIcon());
-    d->ui.switchOnHoverCheckBox->setChecked(d->launcher->switchTabsOnHover());
-    d->ui.appsByNameCheckBox->setChecked(d->launcher->showAppsByName());
+    d->ui.switchOnHoverCheckBox->setChecked(switchTabsOnHover());
+    d->ui.appsByNameCheckBox->setChecked(showAppsByName());
     connect(d->ui.iconButton, SIGNAL(iconChanged(QString)), parent, SLOT(settingsModified()));
     connect(d->ui.switchOnHoverCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
     connect(d->ui.appsByNameCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
@@ -175,13 +210,15 @@ void LauncherApplet::popupEvent(bool show)
     if (show) {
         Plasma::ToolTipManager::self()->clearContent(this);
         d->createLauncher();
-        d->launcher->setLauncherOrigin(popupPlacement(), location());
+        if (d->declarativeWidget->rootObject()) {
+            d->declarativeWidget->rootObject()->setProperty("focus", true);
+        }
     }
 }
 
 void LauncherApplet::toolTipAboutToShow()
 {
-    if (d->launcher->isVisible()) {
+    if (d->declarativeWidget->isVisible()) {
         Plasma::ToolTipManager::self()->clearContent(this);
     } else {
         d->initToolTip();
@@ -193,10 +230,10 @@ void LauncherApplet::configChanged()
     KConfigGroup cg = config();
     setPopupIcon(cg.readEntry("icon", "start-here-kde"));
     constraintsEvent(Plasma::ImmutableConstraint);
+    setShowAppsByName(cg.readEntry("ShowAppsByName", false));
 
-    if (d->launcher) {
-        d->launcher->setApplet(this);
-    }
+    cg = globalConfig();
+    setSwitchTabsOnHover(cg.readEntry("SwitchTabsOnHover", true));
 }
 
 void LauncherApplet::configAccepted()
@@ -221,8 +258,8 @@ void LauncherApplet::configAccepted()
         emit configNeedsSaving();
     }
 
-    d->launcher->setSwitchTabsOnHover(switchTabsOnHover);
-    d->launcher->setShowAppsByName(showAppsByName);
+    setSwitchTabsOnHover(switchTabsOnHover);
+    setShowAppsByName(showAppsByName);
 }
 
 QList<QAction*> LauncherApplet::contextualActions()
@@ -230,10 +267,10 @@ QList<QAction*> LauncherApplet::contextualActions()
     return d->actions;
 }
 
-QWidget *LauncherApplet::widget()
+QGraphicsWidget *LauncherApplet::graphicsWidget()
 {
     d->createLauncher();
-    return d->launcher;
+    return d->declarativeWidget;
 }
 
 void LauncherApplet::saveConfigurationFromSimpleLauncher(const KConfigGroup & configGroup, const KConfigGroup & globalConfigGroup)
@@ -247,6 +284,46 @@ void LauncherApplet::saveConfigurationFromSimpleLauncher(const KConfigGroup & co
 
     configChanged();
     emit configNeedsSaving();
+}
+
+bool LauncherApplet::switchTabsOnHover() const
+{
+    return d->switchTabsOnHover;
+}
+
+void LauncherApplet::setSwitchTabsOnHover(bool on)
+{
+    if (on == d->switchTabsOnHover) {
+        return;
+    }
+
+    d->switchTabsOnHover = on;
+    KConfigGroup cg = globalConfig();
+    cg.writeEntry("SwitchTabsOnHover", on);
+    emit switchTabsOnHoverChanged(on);
+}
+
+
+bool LauncherApplet::showAppsByName() const
+{
+    return d->showAppsByName;
+}
+
+void LauncherApplet::setShowAppsByName(bool on)
+{
+    if (on == d->showAppsByName) {
+        return;
+    }
+
+    d->showAppsByName = on;
+    KConfigGroup cg = config();
+    cg.writeEntry("ShowAppsByName", on);
+    emit showAppsByNameChanged(on);
+}
+
+LauncherApplet::Location LauncherApplet::plasmoidLocation() const
+{
+    return (Location)location();
 }
 
 #include "applet.moc"

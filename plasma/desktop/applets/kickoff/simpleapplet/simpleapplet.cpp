@@ -612,10 +612,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
                 Kickoff::ApplicationModel *appModel = new Kickoff::ApplicationModel(menuview, true /*allow separators*/);
 
                 appModel->setDuplicatePolicy(Kickoff::ApplicationModel::ShowLatestOnlyPolicy);
-                if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription) {
-                    appModel->setNameDisplayOrder(Kickoff::NameBeforeDescription);
-                    appModel->setPrimaryNamePolicy(Kickoff::ApplicationModel::AppNamePrimary);
-                }
+
                 appModel->setSystemApplicationPolicy(Kickoff::ApplicationModel::ShowApplicationAndSystemPolicy);
 
                 menuview->addModel(appModel, Kickoff::MenuView::None, d->relativePath);
@@ -633,7 +630,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
                 if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription) {
                     favoritesModel->setNameDisplayOrder(Kickoff::NameBeforeDescription);
                 }
-                d->addModel(favoritesModel, Favorites);
+                d->addModel(favoritesModel, Favorites, Kickoff::MenuView::None);
             } else if(vtname == "Computer") {
                 d->addModel(new Kickoff::SystemModel(menuview), Computer);
             } else if(vtname == "RecentlyUsed") {
@@ -648,7 +645,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
                     if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription) {
                         recentModel->setNameDisplayOrder(Kickoff::NameBeforeDescription);
                     }
-                    menuview->addModel(recentModel, Kickoff::MenuView::MergeFirstLevel);
+                    menuview->addModel(recentModel);
 
                     if (d->showMenuTitles) {
                         menuview->setModelTitleVisible(recentModel, true);
@@ -744,7 +741,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
             } else if(vtname == "Leave") {
                 Kickoff::LeaveModel *leavemodel = new Kickoff::LeaveModel(menuview);
                 leavemodel->updateModel();
-                d->addModel(leavemodel, Leave, Kickoff::MenuView::MergeFirstLevel, Kickoff::MenuView::Name);
+                d->addModel(leavemodel, Leave, Kickoff::MenuView::None, Kickoff::MenuView::Name);
             } else {
 #ifndef Q_WS_WIN
                 QSet< Solid::PowerManagement::SleepState > spdMethods = Solid::PowerManagement::supportedSleepStates();

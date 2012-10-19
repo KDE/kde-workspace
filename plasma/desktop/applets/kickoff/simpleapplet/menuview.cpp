@@ -189,34 +189,43 @@ void MenuView::updateAction(QAbstractItemModel *model, QAction *action, const QM
     //    Qt::DisplayRole returns appName,
     //    Kickoff::SubTitleRole returns genericName.
 
-    QString mainText = index.data(Qt::DisplayRole).value<QString>().replace('&', "&&");
-    QString altText = index.data(Kickoff::SubTitleRole).value<QString>().replace('&', "&&");
+    QString descText = index.data(Qt::DisplayRole).value<QString>().replace('&', "&&");
+    QString nameText = index.data(Kickoff::SubTitleRole).value<QString>().replace('&', "&&");
+    if (descText.isEmpty()) {
+        descText = nameText;
+    }
     if (action->menu() != 0) { // if it is an item with sub-menuitems, we probably like to thread them another way...
-        action->setText(mainText);
+        action->setText(descText);
     } else {
         switch (d->formattype) {
-        case Name:
+        case Name: {
+            action->setText(nameText);
+            action->setToolTip(descText);
+        } break;
         case Description: {
-            action->setText(mainText);
-            action->setToolTip(altText);
+            action->setText(descText);
+            action->setToolTip(nameText);
         } break;
         case NameDescription: // fall through
         case NameDashDescription: // fall through
         case DescriptionName: {
-            if (!mainText.isEmpty()) { // seems we have a program, but some of them don't define a name at all
-                if (mainText.contains(altText, Qt::CaseInsensitive)) { // sometimes the description contains also the name
-                    action->setText(mainText);
-                } else if (altText.contains(mainText, Qt::CaseInsensitive)) { // and sometimes the name also contains the description
-                    action->setText(altText);
+            if (!descText.isEmpty()) { // seems we have a program, but some of them don't define a name at all
+                if (descText.contains(nameText, Qt::CaseInsensitive)) { // sometimes the description contains also the name
+                    action->setText(descText);
+                } else if (nameText.contains(descText, Qt::CaseInsensitive)) { // and sometimes the name also contains the description
+                    action->setText(nameText);
                 } else { // seems we have a perfect desktop-file (likely a KDE one, heh) and name+description are clear separated
                     if (d->formattype == NameDashDescription) {
-                        action->setText(QString("%1 - %2").arg(mainText).arg(altText));
+                        action->setText(QString("%1 - %2").arg(nameText).arg(descText));
+                    } else if (d->formattype == NameDescription) {
+                        action->setText(QString("%1 (%2)").arg(nameText).arg(descText));
+                    //DescriptionName
                     } else {
-                        action->setText(QString("%1 (%2)").arg(mainText).arg(altText));
+                        action->setText(QString("%1 (%2)").arg(descText).arg(nameText));
                     }
                 }
             } else { // if there is no name, let's just use the describing text
-                action->setText(altText);
+                action->setText(nameText);
             }
         } break;
         }
@@ -409,13 +418,9 @@ void MenuView::rowsInserted(const QModelIndex& parent, int start, int end)
 {
     kDebug()<<start<<end;
 
-    Q_ASSERT(parent.isValid());
-    Q_ASSERT(parent.model());
-
-    //Q_ASSERT( ! isValidIndex(parent) );
     QMenu *menu = isValidIndex(parent) ? actionForIndex(parent)->menu() : this;
 
-    QAbstractItemModel *model = const_cast<QAbstractItemModel*>(parent.model());
+    QAbstractItemModel *model = qobject_cast<QAbstractItemModel*>(sender());
     Q_ASSERT(model);
 
     QList<QAction*> newActions;
