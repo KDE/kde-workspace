@@ -25,7 +25,7 @@ KeySym::KeySym()
     nill = 0;
 }
 
-QString KeySym::getkeyuni(QString opton){
+QString KeySym::getkeyuni(const QString& opton){
     QRegExp krx("^U[0-9]");
 
     QString opton2(opton);

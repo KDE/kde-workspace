@@ -29,7 +29,7 @@ private:
 public:
     KeySym();
     int nill;
-    QString getkeyuni(QString opton);
+    QString getkeyuni(const QString &opton);
 };
 
 #endif // KEYSYM_H

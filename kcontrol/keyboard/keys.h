@@ -19,15 +19,15 @@
 
 #ifndef KEYS_H
 #define KEYS_H
-#include<QApplication>
-#include<QtCore/QList>
+#include <QApplication>
+#include <QtCore/QList>
 class Keys
 {
 public:
     Keys();
     QString keyname;
     QList<QString>klst;
-    void setKey(QString a);
+    void setKey(QString opton);
 };
 
 #endif // KEYS_H
