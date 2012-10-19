@@ -72,7 +72,7 @@ Item {
             highlight: PlasmaComponents.Highlight {}
             highlightFollowsCurrentItem: true
             anchors { fill: parent; margins: 12; }
-            Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
+            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutExpo; } }
         }
 
         ListView {
@@ -82,7 +82,7 @@ Item {
             highlightFollowsCurrentItem: true
             interactive: false
             anchors { fill: parent; margins: 12; }
-            Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutExpo; } }
+            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutExpo; } }
         }
 
         /** Action Mapping for ToolBox
