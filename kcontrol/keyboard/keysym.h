@@ -18,9 +18,9 @@
 
 #ifndef KEYSYM_H
 #define KEYSYM_H
-#include<QtGui>
-#include<QtCore/QChar>
-#include<QtCore/QString>
+#include <QtGui>
+#include <QtCore/QChar>
+#include <QtCore/QString>
 class KeySym
 {
 private:
