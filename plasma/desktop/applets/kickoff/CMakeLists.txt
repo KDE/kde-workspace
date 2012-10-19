@@ -58,7 +58,7 @@ install(FILES applet/plasma-applet-launcher.desktop DESTINATION ${SERVICES_INSTA
 # Kickoff Simple KMenu Plasma Applet
 
 set(SimpleApplet_SRCS
-    ui/contextmenufactory.cpp
+    simpleapplet/contextmenufactory.cpp
     simpleapplet/menuview.cpp
     simpleapplet/simpleapplet.cpp
 )

@@ -72,7 +72,7 @@
 #include "core/recentapplications.h"
 #include "core/leavemodel.h"
 #include "core/urlitemlauncher.h"
-#include "ui/contextmenufactory.h"
+#include "contextmenufactory.h"
 
 #ifndef KDE_USE_FINAL
 Q_DECLARE_METATYPE(QPersistentModelIndex)
