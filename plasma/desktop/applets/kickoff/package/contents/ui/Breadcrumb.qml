@@ -25,22 +25,21 @@ PlasmaComponents.ToolButton {
     property variant modelIndex
     property variant view
     property bool root: false
+    property int childNode
 
-    function deleteCrumb() {
+    function selectCrumb() {
         view.model.rootIndex = modelIndex;
         crumb.enabled = false;
-        var found = false;
-        for (var i = 0; i < parent.children.length; i++) {
-            if (found) {
-                parent.children[i].destroy();
-                continue;
-            }
-            if (parent.children[i] == crumb) {
-                found = true;
-            }
-        }
+        deleteCrumb();
+    }
+
+    function deleteCrumb() {
+        if (parent.children[childNode].childNode)
+            parent.children[childNode].deleteCrumb();
+
+        parent.children[childNode].destroy();
     }
     onClicked: {
-        deleteCrumb();
+        selectCrumb();
     }
 }

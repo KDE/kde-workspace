@@ -63,6 +63,7 @@ Item {
             crumb.modelIndex = modelIndex;
             crumb.view = applicationsView;
             crumb.enabled = false;
+            breadcrumbs.children[breadcrumbs.children.length-2].childNode = breadcrumbs.children.length-1;
         }
         anchors {
             top: breadcrumbsElement.bottom
@@ -107,7 +108,7 @@ Item {
             }
             else if (event.key == Qt.Key_Left) {
                 if (breadcrumbs.children.length > 1) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
-                    breadcrumbs.children[breadcrumbs.children.length-2].deleteCrumb();
+                    breadcrumbs.children[breadcrumbs.children.length-2].selectCrumb();
                     event.accepted = true;
                 }
             }
