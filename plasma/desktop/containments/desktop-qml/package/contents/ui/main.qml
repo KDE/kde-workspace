@@ -41,8 +41,6 @@ Item {
 
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
 
-//     property int iconWidth: theme.defaultFont.mSize.width * 14
-//     property int iconHeight: theme.defaultIconSize + theme.defaultFont.mSize.height
     property int iconWidth: 24
     property int iconHeight: iconWidth
     onIconHeightChanged: updateGridSize()
@@ -129,20 +127,6 @@ Item {
         id: draggerSvg
         imagePath: "widgets/extender-dragger"
     }
-
-//     MetadataModels.MetadataCloudModel {
-//         id: categoryListModel
-//         cloudCategory: "rdf:type"
-//         activityId: plasmoid.activityId
-//         allowedCategories: userTypes.userTypes
-//         onCategoriesChanged: {
-//             categoriesTimer.restart()
-//         }
-//     }
-//
-//     MetadataModels.MetadataUserTypes {
-//         id: userTypes
-//     }
 
     PlasmaExtras.ResourceInstance {
         id: resourceInstance
@@ -389,8 +373,4 @@ Item {
         id: toolBoxButton
         //anchors { top: parent.top; right: parent.right; }
     }
-
-//     SlcComponents.SlcMenu {
-//         id: contextMenu
-//     }
 }
