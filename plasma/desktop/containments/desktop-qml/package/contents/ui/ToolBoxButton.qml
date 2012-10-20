@@ -25,7 +25,7 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 Item {
     id: toolBoxButton
     width: isCorner ? iconSize : iconSize
-    height: isCorner ? iconSize : iconSize
+    height: isCorner ? iconSize: iconSize
 
     y: 0
     x: main.width - toolBoxButtonFrame.width
@@ -71,6 +71,7 @@ Item {
         }
         elementId: cornerElement
         anchors.fill: parent
+        //anchors.margins: 8
         opacity: isCorner ? 1 : 0
         Connections {
             target: toolBoxButton
@@ -97,65 +98,78 @@ Item {
         imagePath: "widgets/background"
         anchors.fill: parent
         property int mWidth: iconSize + activityName.paintedWidth + 24
-//         anchors.centerIn: parent
-//         width: parent.width +24
-//         height: parent.height +24
+        property int mHeight: iconSize + activityName.paintedWidth + 36
         opacity: !isCorner ? 1 : 0.01
         enabledBorders: PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.BottomBorder;
         Connections {
             target: toolBoxButton
             onStateChanged: {
-                //return;
                 var s = toolBoxButton.state;
                 if (s == "top") {
+                    // resize frame
                     width = iconSize + activityName.paintedWidth + 24
                     height = iconSize
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "right") {
-                    width = iconSize
-                    height = iconSize * 2
+                    // resize frame
+                    width = iconSize;
+                    height = toolBoxButtonFrame.mHeight;
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "bottom") {
-                    width = iconSize + activityName.paintedWidth + 24
+                    // resize frame
+                    width = toolBoxButtonFrame.mWidth;
                     height = iconSize
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "left") {
-                    width = iconSize
-                    height = iconSize * 2
+                    // resize frame
+                    width = iconSize;
+                    height = toolBoxButtonFrame.mHeight;
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder;
                 } else {
                     width = iconSize
                     height = iconSize
                 }
-                //print ( "S " + s);
             }
         }
         Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.InOutExpo; } }
-//         PlasmaComponents.Label {
-//             text: plasmoid.activityName
-//         }
     }
     PlasmaComponents.Label {
         id: activityName
-        opacity: !isCorner ? 1 : 0.01
-        //visible: toolBoxButton.state == "top" || toolBoxButton.state == "bottom"
-        text: "Activity" + plasmoid.activityName
+        opacity: (!isCorner && (toolBoxButton.state == "top" || toolBoxButton.state == "bottom"))? 1 : 0.01
+        text: "Activity Name" + plasmoid.activityName
         anchors { left: toolBoxIcon.right; right: parent.right; verticalCenter: toolBoxIcon.verticalCenter; }
     }
 
+    PlasmaComponents.Label {
+        id: activityNameVertical
+        horizontalAlignment: Text.AlignBottom
+        x: toolBoxIcon.x
+        y: toolBoxIcon.y
+        opacity: (!isCorner && (toolBoxButton.state == "left" || toolBoxButton.state == "right"))? 1 : 0.01
+        transform: Rotation { angle: 90 }
+        text: "Activity Name" + plasmoid.activityName
+        anchors {
+            top: toolBoxIcon.bottom;
+            left: toolBoxIcon.left;
+            leftMargin: (paintedHeight+20-activityNameVertical.font.pixelSize);
+            topMargin: 8;
+            rightMargin: -6
+        }
+//         Rectangle { color: "green"; opacity: 0.5; anchors.fill: parent; }
+    }
 
     QtExtras.QIconItem {
         id: toolBoxIcon
         anchors { top: parent.top; right: parent.right; margins: 4; }
-        width: iconSize/2
-        height: iconSize/2
+        width: iconSize/2-6
+        height: iconSize/2-6
         icon: "plasma"
         Connections {
             target: toolBoxButton
             onStateChanged: {
                 var s = toolBoxButton.state;
                 var t = toolBoxButton;
-                var _m = 24;
+                var _m = 28;
                 //var corner = ""
                 toolBoxIcon.anchors.top = undefined;
                 toolBoxIcon.anchors.left = undefined;
@@ -163,8 +177,10 @@ Item {
                 toolBoxIcon.anchors.right = undefined;
                 //toolBoxIcon.anchors.horizontalCenter = undefined;
                 //toolBoxIcon.anchors.verticalCenter = undefined;
-                toolBoxIcon.anchors.leftMargin = 0;
-                toolBoxIcon.anchors.topMargin = 0;
+                toolBoxIcon.anchors.leftMargin = 4;
+                toolBoxIcon.anchors.rightMargin = 4;
+                toolBoxIcon.anchors.topMargin = 4;
+                toolBoxIcon.anchors.bottomMargin = 4;
 
                 if (s == "topleft") {
                     toolBoxIcon.anchors.top = t.top;
@@ -186,6 +202,7 @@ Item {
                     toolBoxIcon.anchors.top = t.top;
                     toolBoxIcon.anchors.right = t.right;
                     toolBoxIcon.anchors.topMargin = _m;
+                    //toolBoxIcon.anchors.rightMargin = 0;
                 } else if (s == "bottom") {
                     toolBoxIcon.anchors.bottom = t.bottom;
                     toolBoxIcon.anchors.left = t.left;
@@ -211,11 +228,11 @@ Item {
         var _m = 2;
         var _s = ""; // will be changed
         var container = main;
-        print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y+" tbw: " + toolBoxButtonFrame.mWidth);
+        //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y+" tbw: " + toolBoxButtonFrame.mWidth);
         if (x <= _m) {
             if (y <= _m) {
                 _s = "topleft"
-            } else if (y >= (container.height - toolBoxButtonFrame.height - _m)) {
+            } else if (y >= (container.height - toolBoxButtonFrame.mHeight - _m)) {
                 _s = "bottomleft"
             } else {
                 _s = "left";
@@ -223,7 +240,7 @@ Item {
         } else if (x >= (container.width - toolBoxButtonFrame.mWidth - _m)) {
             if (y <= _m) {
                 _s = "topright"
-            } else if (y >= (container.height- toolBoxButtonFrame.height - _m)) {
+            } else if (y >= (container.height- toolBoxButtonFrame.mHeight - _m)) {
                 _s = "bottomright"
             } else {
                 _s = "right";
@@ -231,7 +248,7 @@ Item {
         } else {
             if (y <= _m) {
                 _s = "top"
-            } else if (y >= (container.height - toolBoxButtonFrame.height - _m)) {
+            } else if (y >= (container.height - toolBoxButtonFrame.mHeight - _m)) {
                 _s = "bottom"
             } else {
                 print("Error: Reached invalid state in ToolBoxButton.updateState()")
@@ -243,6 +260,10 @@ Item {
                 updateStateTimer.tmpState = _s;
                 updateStateTimer.start();
                 toolBoxButton.x = main.width - toolBoxButton.width;
+            }
+            if (_s == "bottomleft" || _s == "bottomright" || _s == "bottom") {
+                toolBoxButton.y = main.height - toolBoxButton.height;
+                updateStateTimer.running = true;
             }
             toolBoxButton.state = _s;
         }
