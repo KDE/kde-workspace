@@ -494,7 +494,7 @@ void MenuLauncherApplet::createConfigurationInterface(KConfigDialog *parent)
     connect(d->formatComboBox, SIGNAL(currentIndexChanged(QString)), parent, SLOT(settingsModified()));
     connect(d->recentApplicationsSpinBox, SIGNAL(valueChanged(int)), parent, SLOT(settingsModified()));
     connect(d->showMenuTitlesCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(d->view, SIGNAL(currentTextChanged(QString)), parent, SLOT(settingsModified()));    
+    connect(d->view, SIGNAL(currentTextChanged(QString)), parent, SLOT(settingsModified()));
 }
 
 void MenuLauncherApplet::configAccepted()
@@ -815,7 +815,7 @@ void MenuLauncherApplet::iconSizeChanged(int group)
 QSizeF MenuLauncherApplet::sizeHint(Qt::SizeHint which, const QSizeF & constraint) const
 {
     if (which == Qt::PreferredSize) {
-        int iconSize;
+        int iconSize = 0;
 
         switch (formFactor()) {
             case Plasma::Planar:
