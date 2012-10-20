@@ -90,39 +90,56 @@ Item {
             margins: 12
         }
 
-        Repeater {
-            model: batteryCount
+        Column {
+            id: upperValues
+            spacing: 6
+            anchors {
+                left: labels.right
+            }
+
+            Repeater {
+                model: batteryCount
+                Components.Label {
+                    text: batteryData==null ? "" : Logic.stringForState(batteryData.get(index))
+                    font.weight: Font.Bold
+                }
+            }
+
             Components.Label {
-                text: batteryData==null ? "" : Logic.stringForState(batteryData.get(index))
+                text: dialog.pluggedIn ? i18n("Plugged in") : i18n("Not plugged in")
                 font.weight: Font.Bold
+                anchors.bottomMargin: 12
+            }
+
+            Components.Label {
+                id: remainingTime
+                text: formatDuration(remainingMsec);
+                font.weight: Font.Bold
+                visible: text!=""
             }
         }
 
-        Components.Label {
-            text: dialog.pluggedIn ? i18n("Plugged in") : i18n("Not plugged in")
-            font.weight: Font.Bold
-            anchors.bottomMargin: 12
-        }
+        Column {
+            id: lowerValues
+            spacing: 6
+            width: upperValues.width + batteryIcon.width * 2
+            anchors {
+                left: labels.right
+            }
+            Components.CheckBox {
+                checked: true
+                onClicked: powermanagementChanged(checked)
+                x: 1
+            }
 
-        Components.Label {
-            id: remainingTime
-            text: formatDuration(remainingMsec);
-            font.weight: Font.Bold
-            visible: text!=""
-        }
-
-        Components.CheckBox {
-            checked: true
-            onClicked: powermanagementChanged(checked)
-            x: 1
-        }
-
-        Components.Slider {
-            id: brightnessSlider
-            minimumValue: 0
-            maximumValue: 100
-            stepSize: 10
-            onValueChanged: brightnessChanged(value)
+            Components.Slider {
+                id: brightnessSlider
+                width: lowerValues.width
+                minimumValue: 0
+                maximumValue: 100
+                stepSize: 10
+                onValueChanged: brightnessChanged(value)
+            }
         }
     }
 
@@ -163,6 +180,7 @@ Item {
     }
 
     BatteryIcon {
+        id: batteryIcon
         monochrome: false
         hasBattery: batteryData==null ? true : batteryData.cumulativePluggedin
         percent: batteryData==null ? 0 : batteryData.cumulativePercent
@@ -172,7 +190,7 @@ Item {
             right: values.right
             topMargin: 12
         }
-        width: 50
-        height: 50
+        width: height
+        height: hibernateButton.height * 2
     }
 }
