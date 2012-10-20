@@ -147,7 +147,7 @@ void Applet::init()
 
     // Find data directory
     KStandardDirs std_dirs;
-    QStringList dirs = std_dirs.findDirs("data", "plasma/plasmoids/systemtray");
+    QStringList dirs = std_dirs.findDirs("data", SYSTEMTRAY_DATA_INSTALL_DIR);
     QString data_path;
     if (!dirs.isEmpty()) {
         data_path = dirs.at(0);

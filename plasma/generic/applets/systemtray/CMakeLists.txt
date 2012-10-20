@@ -5,7 +5,7 @@ kde4_no_enable_final(plasma-systemtray)
 
 find_package(Qt4 4.8 COMPONENTS QtCore QtGui QtDeclarative REQUIRED)
 
-set(_data_install_dir "${DATA_INSTALL_DIR}/plasma/plasmoids/systemtray")
+set(data_install_dir "plasma/packages/org.kde.systemtray")
 
 set(systemtray_SRCS
 
@@ -67,5 +67,5 @@ target_link_libraries(plasma_applet_systemtray
 )
 
 install(TARGETS plasma_applet_systemtray DESTINATION ${PLUGIN_INSTALL_DIR})
-install(DIRECTORY "package/" DESTINATION ${_data_install_dir})
+install(DIRECTORY "package/" DESTINATION "${DATA_INSTALL_DIR}/${data_install_dir}")
 install(FILES plasma-applet-systemtray.desktop DESTINATION ${SERVICES_INSTALL_DIR})
