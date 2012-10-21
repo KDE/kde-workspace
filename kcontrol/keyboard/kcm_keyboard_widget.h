@@ -21,7 +21,7 @@
 #define KCM_KEYBOARD_WIDGET_H_
 
 #include "ui_kcm_keyboard.h"
-#include "keyboardpainter.h"
+//#include "keyboardpainter.h"
 
 #include <kcomponentdata.h>
 #include <QtGui/QTabWidget>
@@ -81,7 +81,7 @@ private:
 	LayoutsTableModel* layoutsTableModel;
 	KCMiscKeyboardWidget* kcmMiscWidget;
 	bool uiUpdating;
-	KeyboardPainter *layoutprev;
+//	KeyboardPainter *layoutprev;
 
 	void initializeLayoutsUI();
 	void initializeXkbOptionsUI();

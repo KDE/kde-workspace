@@ -23,7 +23,7 @@
 #include <QtGui/QDialog>
 
 #include "keyboard_config.h"
-#include "keyboardpainter.h"
+#include "preview/keyboardpainter.h"
 
 class Rules;
 class Flags;

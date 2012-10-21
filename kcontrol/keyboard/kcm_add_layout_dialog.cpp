@@ -17,7 +17,7 @@
  */
 
 #include "kcm_add_layout_dialog.h"
-#include<QApplication>
+#include <QApplication>
 #include <klocalizedstring.h>
 
 #include "xkb_rules.h"

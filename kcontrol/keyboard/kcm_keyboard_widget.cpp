@@ -33,7 +33,7 @@
 #include <QtGui/QX11Info>
 
 #include "keyboard_config.h"
-#include "keyboardpainter.h"
+#include "preview/keyboardpainter.h"
 #include "xkb_rules.h"
 #include "flags.h"
 #include "x11_helper.h"
@@ -375,7 +375,7 @@ void KCMKeyboardWidget::previewLayout(){
         q.exec();
     }
     else{
-        layoutprev=new KeyboardPainter();
+        KeyboardPainter* layoutPreview = new KeyboardPainter();
         const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
         foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
             if(variant==variantInfo->description){
@@ -383,9 +383,9 @@ void KCMKeyboardWidget::previewLayout(){
                 break;
             }
         }
-        layoutprev->generateKeyboardLayout(country,variant);
-        layoutprev->exec();
-        layoutprev->setModal(true);
+        layoutPreview->generateKeyboardLayout(country,variant);
+        layoutPreview->exec();
+        layoutPreview->setModal(true);
     }
 }
 

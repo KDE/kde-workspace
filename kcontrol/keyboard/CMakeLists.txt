@@ -98,6 +98,7 @@ install( TARGETS keyboard_layout_widget DESTINATION ${PLUGIN_INSTALL_DIR} )
 
 
 ### kcm keyboard ###
+include_directories("preview")
 
 set(kcm_keyboard_PART_SRCS 
   kcm_keyboard.cpp
@@ -112,16 +113,16 @@ set(kcm_keyboard_PART_SRCS
   iso_codes.cpp
   kcmmisc.cpp
   bindings.cpp
-  keyaliases.cpp
-  keyboardlayout.cpp
-  keyboardpainter.cpp
-  keys.cpp
-  keysym.cpp
-  kbpreviewframe.cpp
+  preview/keyaliases.cpp
+  preview/keyboardlayout.cpp
+  preview/keyboardpainter.cpp
+  preview/keys.cpp
+  preview/keysym.cpp
+  preview/kbpreviewframe.cpp
 )
 
 
-kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui KeyboardPainter.ui)
+kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui preview/KeyboardPainter.ui)
 
 kde4_add_plugin(kcm_keyboard ${kcm_keyboard_PART_SRCS})
 

@@ -21,7 +21,7 @@
 #define KEYBOARDPAINTER_H
 
 #include <QtGui/QDialog>
-#include<QtGui/QPushButton>
+#include <QtGui/QPushButton>
 
 #include"kbpreviewframe.h"
 
