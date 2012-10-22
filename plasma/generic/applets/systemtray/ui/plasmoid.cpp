@@ -156,15 +156,15 @@ void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) cons
 
 
 QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const {
-	QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
-	SystemTray::Applet *applet = _Private::GetApplet(*this);
-	if (applet) {
-		if ( item && applet->containment() && applet->containment()->corona() ) {
-			return applet->containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
-		}
-		return applet->popupPosition(size, (Qt::AlignmentFlag)align);
-	}
-	return QPoint();
+    QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
+    SystemTray::Applet *applet = _Private::GetApplet(*this);
+    if (applet) {
+        if ( item && applet->containment() && applet->containment()->corona() ) {
+            return applet->containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
+        }
+        return applet->popupPosition(size, (Qt::AlignmentFlag)align);
+    }
+    return QPoint();
 }
 
 
