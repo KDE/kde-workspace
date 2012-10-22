@@ -339,6 +339,48 @@ Item {
 
     ToolBoxButton {
         id: toolBoxButton
+        Timer {
+            id: placeToolBoxTimer
+            interval: 50
+            repeat: false
+            running: true
+            onTriggered: placeToolBox();
+        }
         //anchors { top: parent.top; right: parent.right; }
+    }
+
+    function placeToolBox() {
+
+        var ts = plasmoid.readConfig("ToolBoxButtonState")
+        if (ts) {
+            print("Read state from config: " + ts);
+            if (ts == "topleft") {
+                toolBoxButton.x = 0;
+                toolBoxButton.y = 0;
+                return;
+            } else if (ts == "topright") {
+                toolBoxButton.x = main.width - toolBoxButton.width;
+                toolBoxButton.y = 0;
+                return;
+            } else if (ts == "bottomright") {
+                toolBoxButton.x = main.width - toolBoxButton.width;
+                toolBoxButton.y = main.height - toolBoxButton.height;
+
+            } else if (ts == "bottomleft") {
+                toolBoxButton.x = 0;
+                toolBoxButton.y = main.height - toolBoxButton.height;
+                return;
+            }
+        }
+
+        var tx = plasmoid.readConfig("ToolBoxButtonX")
+        if (tx) tx = main.width - toolBoxButton.width;
+
+        var ty = plasmoid.readConfig("ToolBoxButtonY")
+        if (ty) ty = 0;
+        print("Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
+        toolBoxButton.x = tx;
+        toolBoxButton.y = ty;
+
     }
 }
