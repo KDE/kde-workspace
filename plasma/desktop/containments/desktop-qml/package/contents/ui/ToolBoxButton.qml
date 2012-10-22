@@ -65,7 +65,7 @@ Item {
         }
     ]
     PlasmaCore.SvgItem {
-        //id: cornerSvg
+        id: cornerSvg
         svg: PlasmaCore.Svg {
             imagePath: "widgets/toolbox"
         }
@@ -131,7 +131,7 @@ Item {
                 }
             }
         }
-        Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.InOutExpo; } }
+        Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.InOutExpo; } }
     }
     PlasmaComponents.Label {
         id: activityName
