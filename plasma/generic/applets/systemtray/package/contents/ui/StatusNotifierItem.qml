@@ -25,6 +25,7 @@ import QtQuick 1.1
 import Private 0.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
 
 Item {
@@ -171,21 +172,25 @@ Item {
         acceptedButtons: __has_task ? (( icon_widget.visible ? 0 : Qt.LeftButton) | Qt.RightButton | Qt.MiddleButton) : 0
         enabled: __has_task
         visible: __has_task
-        z: 100
+        z: -1
 
         onClicked: 	__processClick(mouse.button, mouse_area)
     }
 
     // TODO: remove wheel area in QtQuick 2.0
-    WheelArea {
+    QtExtraComponents.MouseEventListener {
         id: wheel_area
         anchors.fill: parent
         enabled: __has_task
         visible: __has_task
-        z: 100
+        z: -2
 
-        onScrollVert: task.activateVertScroll(delta)
-        onScrollHorz: task.activateHorzScroll(delta)
+        onWheelMoved: {
+            if (wheel.orientation === Qt.Horizontal)
+                task.activateHorzScroll(wheel.delta)
+            else
+                task.activateVertScroll(wheel.delta)
+        }
     }
 
     // Functions =======================================================================================================
