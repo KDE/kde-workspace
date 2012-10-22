@@ -33,6 +33,7 @@ Item {
     z: toolBox.z + 1
 
     property string cornerElement: "desktop-northeast"
+    property bool skipNextUpdate: false
     property bool isCorner: ((state == "topleft") || (state == "topright") ||
                              (state == "bottomright") || (state == "bottomleft"))
     state: "topright" // FIXME: read default value from config
@@ -223,8 +224,8 @@ Item {
     onYChanged: updateState()
 
     function updateState() {
-        if (updateStateTimer.running) {
-            updateStateTimer.running = false;
+        if (skipNextUpdate) {
+            skipNextUpdate = false;
             return;
         }
         var _m = 2;
@@ -256,40 +257,19 @@ Item {
                 print("Error: Reached invalid state in ToolBoxButton.updateState()")
             }
         }
-        //print("  new state: " + _s);
         if (_s != ""){
             if (_s == "topright" || _s == "bottomright" || _s == "right") {
-                updateStateTimer.tmpState = _s;
-                updateStateTimer.start();
+                //updateStateTimer.tmpState = _s;
+                //updateStateTimer.start();
+                skipNextUpdate = true;
                 toolBoxButton.x = main.width - toolBoxButton.width;
             }
             if (_s == "bottomleft" || _s == "bottomright" || _s == "bottom") {
                 toolBoxButton.y = main.height - toolBoxButton.height;
-                updateStateTimer.running = true;
+                skipNextUpdate = true;
             }
             toolBoxButton.state = _s;
         }
-    }
-
-    Timer {
-        id: updateStateTimer
-        interval: 1
-        property string tmpState: ""
-        running: false
-        repeat: false
-        onTriggered: {
-            if (tmpState != "") {
-                //print("Updating state to: " + tmpState);
-                //toolBoxButton.state = tmpState;
-                if (toolBoxButton.state == "topright" || toolBoxButton.state == "bottomright" || toolBoxButton.state == "right") {
-                    //print("Moving to " + (main.width - toolBoxButton.width));
-                    //toolBoxButton.x = main.width - toolBoxButton.width;
-                }
-
-            }
-
-        }
-
     }
 
     MouseArea {
@@ -302,7 +282,6 @@ Item {
             target: toolBoxButton
             onStateChanged: {
                 s = toolBoxButton.state;
-                //print(" Changing axis to " + s);
                 if (isCorner) {
                     buttonMouse.drag.axis = Drag.XAxis | Drag.YAxis;
                 } else if (s == "top" || s == "bottom" ) {
@@ -312,18 +291,6 @@ Item {
                 }
             }
         }
-//         drag.axis: {
-//             if (container.x < _m || container.x > (drag.maximumX - toolBoxButton.width - 12)) {
-//                 print("both axes");
-//                 return Drag.XAxis | Drag.YAxis;
-//             } else if (false) {
-//                 print("both axes");
-//                 return Drag.XAxis;
-//             } else {
-//                 print("both axes");
-//                 return Drag.YAxis;
-//             }
-//         }
         drag.minimumX: 0
         drag.maximumX: container.width - toolBoxButton.width
         drag.minimumY: 0
