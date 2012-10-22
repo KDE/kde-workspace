@@ -22,6 +22,7 @@ import org.kde.plasma.kickoff 0.1 as Kickoff
 import org.kde.qtextracomponents 0.1
 
 PlasmaComponents.TabButton {
+    id: button
     property string iconSource
     property alias text: labelElement.text
     implicitHeight: iconElement.height + labelElement.implicitHeight + iconElement.anchors.topMargin + labelElement.anchors.topMargin + labelElement.anchors.bottomMargin
@@ -29,8 +30,8 @@ PlasmaComponents.TabButton {
     QIconItem {
         id: iconElement
         icon: QIcon(iconSource)
-        width: 48
-        height: 48
+        width: theme.largeIconSize
+        height: width
         anchors {
             topMargin: 5
             top: parent.top
@@ -56,7 +57,10 @@ PlasmaComponents.TabButton {
         anchors.fill: parent
         hoverEnabled: root.switchTabsOnHover
         onEntered: {
-            parent.clicked();
+            clickTimer.pendingButton = button
+            clickTimer.restart()
         }
+        onExited: clickTimer.running = false
+        onClicked: button.clicked()
     }
 }

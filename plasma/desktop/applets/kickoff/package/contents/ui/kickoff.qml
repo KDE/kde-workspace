@@ -270,6 +270,12 @@ Item {
         }
     }
 
+    Timer {
+        id: clickTimer
+        interval: 250
+        property Item pendingButton
+        onTriggered: pendingButton.clicked()
+    }
     PlasmaComponents.TabBar {
         id: tabBar
         currentTab: bookmarkButton
