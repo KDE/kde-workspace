@@ -57,10 +57,6 @@ Item {
         id: launcher
     }
 
-    PlasmaCore.Svg {
-        id: lineSvg
-        imagePath: "widgets/line"
-    }
     Component {
         id: kickoffDelegate
         KickoffItem {
@@ -69,7 +65,7 @@ Item {
     }
     Item {
         id: searchBar
-        height: 32 + lineSvg.elementSize("horizontal-line").height
+        height: 32
         anchors {
             top: {
                 switch (kickoff.location) {
@@ -161,34 +157,6 @@ Item {
                     root.forceActiveFocus();
                 }
             }
-        }
-        PlasmaCore.SvgItem {
-            svg: lineSvg
-            elementId: "horizontal-line"
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: {
-                    switch (kickoff.location) {
-                    case Kickoff.TopEdge:
-                        return undefined;
-                    // bottom
-                    default:
-                        return searchIcon.bottom;
-                    }
-                }
-                bottom: {
-                    switch (kickoff.location) {
-                    // top
-                    case Kickoff.TopEdge:
-                        return searchIcon.top;
-                    // bottom
-                    default:
-                        return undefined;
-                    }
-                }
-            }
-            height: lineSvg.elementSize("horizontal-line").height
         }
     }
     Loader {
