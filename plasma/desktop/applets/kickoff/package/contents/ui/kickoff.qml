@@ -63,7 +63,9 @@ Item {
     }
     Component {
         id: kickoffDelegate
-        KickoffItem {}
+        KickoffItem {
+            dropEnabled: ListView.view.model == favoritesModel
+        }
     }
     Item {
         id: searchBar

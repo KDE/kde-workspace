@@ -133,8 +133,19 @@ Item {
             width: kickoffListView.width
             DropArea {
                 anchors.fill: parent
+                onDragEnter:  dropTarget.visible = true
+                onDragLeave: dropTarget.visible = false
+
                 onDrop: {
                     kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, kickoffListView.count-1, 0);
+                    dropTarget.visible = false
+                }
+                Rectangle {
+                    id: dropTarget
+                    visible: false
+                    width: parent.width
+                    height: 2
+                    color: theme.highlightColor
                 }
             }
         }

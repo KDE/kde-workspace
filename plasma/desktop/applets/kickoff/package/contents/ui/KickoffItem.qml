@@ -21,14 +21,12 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.qtextracomponents 0.1
 import org.kde.draganddrop 1.0
 
-PlasmaComponents.ListItem {
+Item {
     id: listItem
-    enabled: true
-    clip: true
-    checked: ListView.isCurrentItem
-    //FIXME: better use background.margins from ListItem.qml but not accessible here
-    height: Math.max(elementIcon.height, titleElement.paintedHeight + subTitleElement.paintedHeight) + 10
+    width: ListView.view.width
+    height: listItemDelegate.height
 
+    property bool dropEnabled: false
     property bool modelChildren: hasModelChildren
 
     function activate() {
@@ -40,217 +38,244 @@ PlasmaComponents.ListItem {
             kickoff.hidePopup();
         }
     }
-    QIconItem {
-        id: elementIcon
-        icon: decoration
-        width: 32
-        height: 32
-        anchors {
-            left: parent.left
+
+
+    PlasmaComponents.ListItem {
+        id: listItemDelegate
+
+        QIconItem {
+            id: elementIcon
+            icon: decoration
+            width: theme.mediumIconSize
+            height: width
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
         }
-    }
-    PlasmaComponents.Label {
-        id: titleElement
-        text: {
-            if (root.state == "APPLICATIONS") {
-                if (hasModelChildren) {
+        PlasmaComponents.Label {
+            id: titleElement
+            text: {
+                if (root.state == "APPLICATIONS") {
+                    if (hasModelChildren) {
+                        return display;
+                    } else {
+                        // TODO: games should always show the by name
+                        return root.showAppsByName || display.length == 0 ? subtitle : display;
+                    }
+                } else {
                     return display;
-                } else {
-                    // TODO: games should always show the by name
-                    return root.showAppsByName || display.length == 0 ? subtitle : display;
                 }
-            } else {
-                return display;
+            }
+            height: paintedHeight
+            anchors {
+                top: elementIcon.top
+                left: elementIcon.right
+                right: parent.right
+                leftMargin: 5
             }
         }
-        anchors {
-            top: parent.top
-            left: elementIcon.right
-            right: parent.right
-            leftMargin: 5
-        }
-    }
-    PlasmaComponents.Label {
-        id: subTitleElement
-        text: {
-            if (root.state == "APPLICATIONS") {
-                if (hasModelChildren) {
-                    return "";
+        PlasmaComponents.Label {
+            id: subTitleElement
+            text: {
+                if (root.state == "APPLICATIONS") {
+                    if (hasModelChildren) {
+                        return "";
+                    } else {
+                        return root.showAppsByName || display.length == 0 ? display : subtitle;
+                    }
                 } else {
-                    return root.showAppsByName || display.length == 0 ? display : subtitle;
+                    return subtitle;
                 }
-            } else {
-                return subtitle;
+            }
+            opacity: listItem.ListView.isCurrentItem ? 0.6 : 0
+            font.pointSize: theme.smallestFont.pointSize
+            elide: Text.ElideMiddle
+            height: paintedHeight
+            anchors {
+                left: elementIcon.right
+                right: parent.right
+                bottom: parent.bottom
+                top: titleElement.bottom
+                leftMargin: 5
+            }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 250
+                    easing.type: Easing.OutQuad
+                }
             }
         }
-        visible: listItem.ListView.isCurrentItem
-        opacity: 0.6
-        font.pointSize: theme.smallestFont.pointSize
-        elide: Text.ElideMiddle
-        anchors {
-            left: elementIcon.right
-            right: parent.right
-            bottom: parent.bottom
-            top: titleElement.bottom
-            leftMargin: 5
-        }
-    }
 
-    PlasmaComponents.ContextMenu {
-        id: contextMenu
-    }
-    /*
-     * context menu items
-     */
-    PlasmaComponents.MenuItem {
-        id: titleMenuItem
-        text: titleElement.text
-        icon: decoration
-        font.bold: true
-        checkable: false
-    }
-    PlasmaComponents.MenuItem {
-        id: titleSeparator
-        separator: true
-    }
-    PlasmaComponents.MenuItem {
-        id: actionsSeparator
-        separator: true
-    }
-    PlasmaComponents.MenuItem {
-        id: addToFavorites
-        text: i18n("Add To Favorites")
-        icon: QIcon("bookmark-new")
-        onClicked: {
-            listItem.ListView.view.favoritesModel.add(model["url"]);
-        }
-    }
-    PlasmaComponents.MenuItem {
-        id: removeFromFavorites
-        text: i18n("Remove From Favorites")
-        icon: QIcon("list-remove")
-        onClicked: {
-            listItem.ListView.view.favoritesModel.remove(model["url"]);
-        }
-    }
-    PlasmaComponents.MenuItem {
-        id: sortFavoritesAscending
-        text: i18n("Sort Alphabetically (A to Z)")
-        icon: QIcon("view-sort-ascending")
-        onClicked: {
-            listItem.ListView.view.favoritesModel.sortFavoritesAscending();
-        }
-    }
-    PlasmaComponents.MenuItem {
-        id: sortFavoritesDescending
-        text: i18n("Sort Alphabetically (Z to A)")
-        icon: QIcon("view-sort-descending")
-        onClicked: {
-            listItem.ListView.view.favoritesModel.sortFavoritesDescending();
-        }
-    }
-    PlasmaComponents.MenuItem {
-        id: clearRecentApplications
-        text: i18n("Clear Recent Applications")
-        icon: QIcon("edit-clear-history")
-        onClicked: {
-            listItem.ListView.view.recentlyUsedModel.clearRecentApplications();
-        }
-    }
-    PlasmaComponents.MenuItem {
-        id: clearRecentDocuments
-        text: i18n("Clear Recent Documents")
-        icon: QIcon("edit-clear-history")
-        onClicked: {
-            listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
-        }
-    }
-    PlasmaComponents.MenuItem {
-        id: uninstallApp
-        text: i18n("Uninstall")
-        onClicked: {
-            var service = packagekitSource.serviceForSource("Status")
-            var operation = service.operationDescription("uninstallApplication")
-            operation.Url = model["url"];
-            var job = service.startOperationCall(operation)
-        }
-    }
-
-    DragArea {
-        anchors.fill: parent
-        supportedActions: Qt.MoveAction | Qt.LinkAction
-        delegateImage: decoration
-            mimeData {
-                url: model["url"]
-                source: parent
-                text: index
+        PlasmaComponents.ContextMenu {
+            id: contextMenu
+            /*
+            * context menu items
+            */
+            PlasmaComponents.MenuItem {
+                id: titleMenuItem
+                text: titleElement.text
+                icon: decoration
+                font.bold: true
+                checkable: false
             }
-        MouseArea {
+            PlasmaComponents.MenuItem {
+                id: titleSeparator
+                separator: true
+            }
+            PlasmaComponents.MenuItem {
+                id: actionsSeparator
+                separator: true
+            }
+            PlasmaComponents.MenuItem {
+                id: addToFavorites
+                text: i18n("Add To Favorites")
+                icon: QIcon("bookmark-new")
+                onClicked: {
+                    listItem.ListView.view.favoritesModel.add(model["url"]);
+                }
+            }
+            PlasmaComponents.MenuItem {
+                id: removeFromFavorites
+                text: i18n("Remove From Favorites")
+                icon: QIcon("list-remove")
+                onClicked: {
+                    listItem.ListView.view.favoritesModel.remove(model["url"]);
+                }
+            }
+            PlasmaComponents.MenuItem {
+                id: sortFavoritesAscending
+                text: i18n("Sort Alphabetically (A to Z)")
+                icon: QIcon("view-sort-ascending")
+                onClicked: {
+                    listItem.ListView.view.favoritesModel.sortFavoritesAscending();
+                }
+            }
+            PlasmaComponents.MenuItem {
+                id: sortFavoritesDescending
+                text: i18n("Sort Alphabetically (Z to A)")
+                icon: QIcon("view-sort-descending")
+                onClicked: {
+                    listItem.ListView.view.favoritesModel.sortFavoritesDescending();
+                }
+            }
+            PlasmaComponents.MenuItem {
+                id: clearRecentApplications
+                text: i18n("Clear Recent Applications")
+                icon: QIcon("edit-clear-history")
+                onClicked: {
+                    listItem.ListView.view.recentlyUsedModel.clearRecentApplications();
+                }
+            }
+            PlasmaComponents.MenuItem {
+                id: clearRecentDocuments
+                text: i18n("Clear Recent Documents")
+                icon: QIcon("edit-clear-history")
+                onClicked: {
+                    listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
+                }
+            }
+            PlasmaComponents.MenuItem {
+                id: uninstallApp
+                text: i18n("Uninstall")
+                onClicked: {
+                    var service = packagekitSource.serviceForSource("Status")
+                    var operation = service.operationDescription("uninstallApplication")
+                    operation.Url = model["url"];
+                    var job = service.startOperationCall(operation)
+                }
+            }
+        }
+
+        DragArea {
             anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onEntered: {
-                listItem.ListView.view.currentIndex = index;
-            }
-            onClicked: {
-                if (mouse.button == Qt.LeftButton)
-                    activate();
-                else if (mouse.button == Qt.RightButton) {
-                    // don't show a context menu for container
-                    if (hasModelChildren)
-                        return;
+            supportedActions: Qt.MoveAction | Qt.LinkAction
+            delegateImage: decoration
+                mimeData {
+                    url: model["url"]
+                    source: parent
+                    text: index
+                }
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onEntered: {
+                    listItem.ListView.view.currentIndex = index;
+                }
+                onClicked: {
+                    if (mouse.button == Qt.LeftButton)
+                        activate();
+                    else if (mouse.button == Qt.RightButton) {
+                        // don't show a context menu for container
+                        if (hasModelChildren)
+                            return;
 
-                    contextMenu.addMenuItem(titleMenuItem)
-                    contextMenu.addMenuItem(titleSeparator)
+                        contextMenu.addMenuItem(titleMenuItem)
+                        contextMenu.addMenuItem(titleSeparator)
 
-                    if (listItem.ListView.view.favoritesModel.isFavorite(model["url"]))
-                        contextMenu.addMenuItem(removeFromFavorites)
-                    else {
-                        if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel ||
-                            root.state == "APPLICATIONS" ||
-                            root.state == "SEARCH") {
-                            contextMenu.addMenuItem(addToFavorites);
+                        if (listItem.ListView.view.favoritesModel.isFavorite(model["url"]))
+                            contextMenu.addMenuItem(removeFromFavorites)
+                        else {
+                            if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel ||
+                                root.state == "APPLICATIONS" ||
+                                root.state == "SEARCH") {
+                                contextMenu.addMenuItem(addToFavorites);
+                            }
                         }
-                    }
 
-                    if (packagekitSource.data["Status"]["available"]) {
-                        contextMenu.addMenuItem(uninstallApp);
-                    }
-
-                    if (root.state == "NORMAL") {
-                        contextMenu.addMenuItem(actionsSeparator)
-                        if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
-                            contextMenu.addMenuItem(sortFavoritesAscending)
-                            contextMenu.addMenuItem(sortFavoritesDescending)
-                        } else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel) {
-                            contextMenu.addMenuItem(clearRecentApplications);
-                            contextMenu.addMenuItem(clearRecentDocuments);
+                        if (packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]) {
+                            contextMenu.addMenuItem(uninstallApp);
                         }
-                    }
 
-                    var mapPos = listItem.mapToItem(listItem, mouse.x, mouse.y);
-                    contextMenu.open(mapPos.x,mapPos.y);
+                        if (root.state == "NORMAL") {
+                            contextMenu.addMenuItem(actionsSeparator)
+                            if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
+                                contextMenu.addMenuItem(sortFavoritesAscending)
+                                contextMenu.addMenuItem(sortFavoritesDescending)
+                            } else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel) {
+                                contextMenu.addMenuItem(clearRecentApplications);
+                                contextMenu.addMenuItem(clearRecentDocuments);
+                            }
+                        }
+
+                        var mapPos = listItem.mapToItem(listItem, mouse.x, mouse.y);
+                        contextMenu.open(mapPos.x,mapPos.y);
+                    }
                 }
             }
         }
     }
     DropArea {
-        // We could anchors.fill: parent here, but then, dropping in between items is possible,
-        // so we make the drop area a bit larger than the item itself
-        anchors {
-            verticalCenter: parent.verticalCenter;
-            left: parent.left;
-            right: parent.right;
-        }
+        enabled: dropEnabled
+        anchors.fill: listItem
         height: parent.height+8
         onDrop: {
-            listItem.ListView.view.model.dropMimeData(event.mimeData.text, event.mimeData.urls, index, 0);
+            var row = index
+            if (event.y < height/2) {
+                --row
+            }
+            listItem.ListView.view.model.dropMimeData(event.mimeData.text, event.mimeData.urls, row, 0);
+            dropTarget.visible = false;
         }
         onDragEnter: {
-            listItem.checked = true;
+            if (event.y > height/2) {
+                dropTarget.y = height - 1
+            } else {
+                dropTarget.y = -1
+            }
+            dropTarget.visible = true
         }
         onDragLeave: {
-            listItem.checked = false;
+            dropTarget.visible = false;
+        }
+
+        Rectangle {
+            id: dropTarget
+            visible: false
+            width: parent.width
+            height: 2
+            color: theme.highlightColor
         }
     }
 }
