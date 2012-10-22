@@ -24,7 +24,7 @@ import org.kde.draganddrop 1.0
 Item {
     id: listItem
     width: ListView.view.width
-    height: listItemDelegate.height
+    height: listItemDelegate.height + listItemDelegate.anchors.margins*2
 
     property bool dropEnabled: false
     property bool modelChildren: hasModelChildren
@@ -40,8 +40,15 @@ Item {
     }
 
 
-    PlasmaComponents.ListItem {
+    Item {
         id: listItemDelegate
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            margins: theme.defaultFont.mSize.width/2
+        }
+        height: Math.max(elementIcon.height, titleElement.height + subTitleElement.height)
 
         QIconItem {
             id: elementIcon
@@ -107,82 +114,118 @@ Item {
             }
         }
 
-        PlasmaComponents.ContextMenu {
-            id: contextMenu
-            /*
-            * context menu items
-            */
-            PlasmaComponents.MenuItem {
-                id: titleMenuItem
-                text: titleElement.text
-                icon: decoration
-                font.bold: true
-                checkable: false
-            }
-            PlasmaComponents.MenuItem {
-                id: titleSeparator
-                separator: true
-            }
-            PlasmaComponents.MenuItem {
-                id: actionsSeparator
-                separator: true
-            }
-            PlasmaComponents.MenuItem {
-                id: addToFavorites
-                text: i18n("Add To Favorites")
-                icon: QIcon("bookmark-new")
-                onClicked: {
-                    listItem.ListView.view.favoritesModel.add(model["url"]);
+        property Item contextMenu
+        Component {
+            id: contextMenuComponent
+            Item {
+                property QtObject menu: PlasmaComponents.ContextMenu {
+                    id: contextMenu
                 }
-            }
-            PlasmaComponents.MenuItem {
-                id: removeFromFavorites
-                text: i18n("Remove From Favorites")
-                icon: QIcon("list-remove")
-                onClicked: {
-                    listItem.ListView.view.favoritesModel.remove(model["url"]);
+                
+                Component.onCompleted: {
+                    contextMenu.addMenuItem(titleMenuItem)
+                    contextMenu.addMenuItem(titleSeparator)
+
+                    if (listItem.ListView.view.favoritesModel.isFavorite(model["url"]))
+                        contextMenu.addMenuItem(removeFromFavorites)
+                    else {
+                        if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel ||
+                            root.state == "APPLICATIONS" ||
+                            root.state == "SEARCH") {
+                            contextMenu.addMenuItem(addToFavorites);
+                        }
+                    }
+
+                    if (packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]) {
+                        contextMenu.addMenuItem(uninstallApp);
+                    }
+
+                    if (root.state == "NORMAL") {
+                        contextMenu.addMenuItem(actionsSeparator)
+                        if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
+                            contextMenu.addMenuItem(sortFavoritesAscending)
+                            contextMenu.addMenuItem(sortFavoritesDescending)
+                        } else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel) {
+                            contextMenu.addMenuItem(clearRecentApplications);
+                            contextMenu.addMenuItem(clearRecentDocuments);
+                        }
+                    }
                 }
-            }
-            PlasmaComponents.MenuItem {
-                id: sortFavoritesAscending
-                text: i18n("Sort Alphabetically (A to Z)")
-                icon: QIcon("view-sort-ascending")
-                onClicked: {
-                    listItem.ListView.view.favoritesModel.sortFavoritesAscending();
+                /*
+                * context menu items
+                */
+                PlasmaComponents.MenuItem {
+                    id: titleMenuItem
+                    text: titleElement.text
+                    icon: decoration
+                    font.bold: true
+                    checkable: false
                 }
-            }
-            PlasmaComponents.MenuItem {
-                id: sortFavoritesDescending
-                text: i18n("Sort Alphabetically (Z to A)")
-                icon: QIcon("view-sort-descending")
-                onClicked: {
-                    listItem.ListView.view.favoritesModel.sortFavoritesDescending();
+                PlasmaComponents.MenuItem {
+                    id: titleSeparator
+                    separator: true
                 }
-            }
-            PlasmaComponents.MenuItem {
-                id: clearRecentApplications
-                text: i18n("Clear Recent Applications")
-                icon: QIcon("edit-clear-history")
-                onClicked: {
-                    listItem.ListView.view.recentlyUsedModel.clearRecentApplications();
+                PlasmaComponents.MenuItem {
+                    id: actionsSeparator
+                    separator: true
                 }
-            }
-            PlasmaComponents.MenuItem {
-                id: clearRecentDocuments
-                text: i18n("Clear Recent Documents")
-                icon: QIcon("edit-clear-history")
-                onClicked: {
-                    listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
+                PlasmaComponents.MenuItem {
+                    id: addToFavorites
+                    text: i18n("Add To Favorites")
+                    icon: QIcon("bookmark-new")
+                    onClicked: {
+                        listItem.ListView.view.favoritesModel.add(model["url"]);
+                    }
                 }
-            }
-            PlasmaComponents.MenuItem {
-                id: uninstallApp
-                text: i18n("Uninstall")
-                onClicked: {
-                    var service = packagekitSource.serviceForSource("Status")
-                    var operation = service.operationDescription("uninstallApplication")
-                    operation.Url = model["url"];
-                    var job = service.startOperationCall(operation)
+                PlasmaComponents.MenuItem {
+                    id: removeFromFavorites
+                    text: i18n("Remove From Favorites")
+                    icon: QIcon("list-remove")
+                    onClicked: {
+                        listItem.ListView.view.favoritesModel.remove(model["url"]);
+                    }
+                }
+                PlasmaComponents.MenuItem {
+                    id: sortFavoritesAscending
+                    text: i18n("Sort Alphabetically (A to Z)")
+                    icon: QIcon("view-sort-ascending")
+                    onClicked: {
+                        listItem.ListView.view.favoritesModel.sortFavoritesAscending();
+                    }
+                }
+                PlasmaComponents.MenuItem {
+                    id: sortFavoritesDescending
+                    text: i18n("Sort Alphabetically (Z to A)")
+                    icon: QIcon("view-sort-descending")
+                    onClicked: {
+                        listItem.ListView.view.favoritesModel.sortFavoritesDescending();
+                    }
+                }
+                PlasmaComponents.MenuItem {
+                    id: clearRecentApplications
+                    text: i18n("Clear Recent Applications")
+                    icon: QIcon("edit-clear-history")
+                    onClicked: {
+                        listItem.ListView.view.recentlyUsedModel.clearRecentApplications();
+                    }
+                }
+                PlasmaComponents.MenuItem {
+                    id: clearRecentDocuments
+                    text: i18n("Clear Recent Documents")
+                    icon: QIcon("edit-clear-history")
+                    onClicked: {
+                        listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
+                    }
+                }
+                PlasmaComponents.MenuItem {
+                    id: uninstallApp
+                    text: i18n("Uninstall")
+                    onClicked: {
+                        var service = packagekitSource.serviceForSource("Status")
+                        var operation = service.operationDescription("uninstallApplication")
+                        operation.Url = model["url"];
+                        var job = service.startOperationCall(operation)
+                    }
                 }
             }
         }
@@ -211,34 +254,9 @@ Item {
                         if (hasModelChildren)
                             return;
 
-                        contextMenu.addMenuItem(titleMenuItem)
-                        contextMenu.addMenuItem(titleSeparator)
-
-                        if (listItem.ListView.view.favoritesModel.isFavorite(model["url"]))
-                            contextMenu.addMenuItem(removeFromFavorites)
-                        else {
-                            if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel ||
-                                root.state == "APPLICATIONS" ||
-                                root.state == "SEARCH") {
-                                contextMenu.addMenuItem(addToFavorites);
-                            }
+                        if (!listItemDelegate.contextMenu) {
+                            contextMenu = contextMenuComponent.createObject(listItem).menu
                         }
-
-                        if (packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]) {
-                            contextMenu.addMenuItem(uninstallApp);
-                        }
-
-                        if (root.state == "NORMAL") {
-                            contextMenu.addMenuItem(actionsSeparator)
-                            if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
-                                contextMenu.addMenuItem(sortFavoritesAscending)
-                                contextMenu.addMenuItem(sortFavoritesDescending)
-                            } else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel) {
-                                contextMenu.addMenuItem(clearRecentApplications);
-                                contextMenu.addMenuItem(clearRecentDocuments);
-                            }
-                        }
-
                         var mapPos = listItem.mapToItem(listItem, mouse.x, mouse.y);
                         contextMenu.open(mapPos.x,mapPos.y);
                     }

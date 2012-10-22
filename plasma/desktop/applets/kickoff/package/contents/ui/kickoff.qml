@@ -24,8 +24,8 @@ import org.kde.qtextracomponents 0.1
 
 Item {
     id: root
-    property int minimumWidth: 290
-    property int minimumHeight: 340
+    property int minimumWidth: theme.defaultFont.mSize.width * 45
+    property int minimumHeight: theme.defaultFont.mSize.height * 30
     property string previousState
     property bool switchTabsOnHover: kickoff.switchTabsOnHover
     property bool showAppsByName: kickoff.showAppsByName
