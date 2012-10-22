@@ -22,24 +22,21 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 PlasmaComponents.ToolButton {
     id: crumb
 
-    property variant modelIndex
-    property variant view
     property bool root: false
-    property int childNode
+    property int depth: model.depth
+    enabled: depth < crumbModel.count
 
-    function selectCrumb() {
-        view.model.rootIndex = modelIndex;
-        crumb.enabled = false;
-        deleteCrumb();
-    }
 
-    function deleteCrumb() {
-        if (parent.children[childNode].childNode)
-            parent.children[childNode].deleteCrumb();
-
-        parent.children[childNode].destroy();
-    }
     onClicked: {
-        selectCrumb();
+        if (root) {
+            applicationsView.model.rootIndex = 0
+        } else {
+            applicationsView.model.rootIndex = model.modelIndex;
+        }
+
+        while (crumbModel.count > 0 &&
+            depth < crumbModel.get(crumbModel.count-1).depth) {
+            crumbModel.remove(crumbModel.count-1)
+        }
     }
 }

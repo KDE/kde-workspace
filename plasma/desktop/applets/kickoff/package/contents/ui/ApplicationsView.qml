@@ -46,7 +46,17 @@ Item {
             id: rootBreadcrumb
             root: true
             text: i18n("All Applications")
-            enabled: false
+            depth: 0
+        }
+        Repeater {
+            model: ListModel {
+                id: crumbModel
+            }
+            Breadcrumb {
+                root: false
+                text: model.text
+                enabled: true
+            }
         }
     }
     PlasmaExtras.ScrollArea {
@@ -64,14 +74,7 @@ Item {
             property alias favoritesModel: appViewContainer.favoritesModel
 
             function addBreadcrumb(modelIndex, title) {
-                breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
-                component = Qt.createComponent("Breadcrumb.qml");
-                var crumb = component.createObject(breadcrumbs)
-                crumb.text = title;
-                crumb.modelIndex = modelIndex;
-                crumb.view = applicationsView;
-                crumb.enabled = false;
-                breadcrumbs.children[breadcrumbs.children.length-2].childNode = breadcrumbs.children.length-1;
+                crumbModel.append({"text": title, "modelIndex": modelIndex, "depth": crumbModel.count+1})
             }
             anchors.fill: parent
             model: VisualDataModel {
