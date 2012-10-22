@@ -37,11 +37,11 @@ Item {
     property int currentIndex: -1
 
     property Item addResource
-    property int iconSize: 48
+    property int iconSize: 22
 
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
 
-    property int iconWidth: 24
+    property int iconWidth: 22
     property int iconHeight: iconWidth
     onIconHeightChanged: updateGridSize()
 
