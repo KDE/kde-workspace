@@ -334,11 +334,11 @@ Item {
 
         onCurrentTabChanged: {
             root.forceActiveFocus();
-            switch(tabBar.currentTab.text) {
-                case bookmarkButton.text:
+            switch(tabBar.currentTab) {
+                case bookmarkButton:
                     mainView.changeModel("favorites");
                     break;
-                case applicationButton.text: { //don't remove braces QTBUG-17012
+                case applicationButton: { //don't remove braces QTBUG-17012
                     if (applicationsViewContainer.source == "") {
                         applicationsViewContainer.source = "ApplicationsView.qml";
                     }
@@ -346,13 +346,13 @@ Item {
                     root.state = "APPLICATIONS";
                     break;
                 }
-                case computerButton.text:
+                case computerButton:
                     mainView.changeModel("system");
                     break;
-                case usedButton.text:
+                case usedButton:
                     mainView.changeModel("recentlyUsed");
                     break;
-                case leaveButton.text:
+                case leaveButton:
                     mainView.changeModel("leave");
                     break;
                 default:
