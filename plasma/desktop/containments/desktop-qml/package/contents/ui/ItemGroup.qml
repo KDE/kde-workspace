@@ -124,23 +124,11 @@ print(itemGroup.x+" "+itemGroup.y)
 
             lastX = globalMousePos.x
             lastY = globalMousePos.y
-
-            if (globalPos.y < 100) {
-                scrollTimer.backwards = true
-                scrollTimer.running = true
-                scrollTimer.draggingItem = itemGroup
-            } else if (globalPos.y > main.height-100) {
-                scrollTimer.backwards = false
-                scrollTimer.running = true
-                scrollTimer.draggingItem = itemGroup
-            } else if (scrollTimer.running) {
-                scrollTimer.running = false
-            }
         }
         onReleased: dragEnded()
         function dragEnded()
         {
-            scrollTimer.running = false
+            //scrollTimer.running = false
             repositionTimer.running = false
             placeHolderPaint.opacity = 0
             animationsEnabled = true
