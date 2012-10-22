@@ -34,6 +34,7 @@
 #include <KDE/KAction>
 #include <KDE/Plasma/Containment>
 #include <KDE/Plasma/Corona>
+#include <KDE/KWindowSystem>
 
 
 
@@ -165,6 +166,12 @@ QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const {
         return applet->popupPosition(size, (Qt::AlignmentFlag)align);
     }
     return QPoint();
+}
+
+
+void Plasmoid::hideFromTaskbar(qulonglong win_id) const {
+    if (win_id > 0)
+        KWindowSystem::setState(win_id, NET::SkipTaskbar | NET::SkipPager);
 }
 
 

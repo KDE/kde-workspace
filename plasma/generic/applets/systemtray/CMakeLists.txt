@@ -35,7 +35,6 @@ set(systemtray_SRCS
     ui/uitask.cpp
     ui/widgetitem.cpp
     ui/mouseredirectarea.cpp
-    ui/dialog.cpp
     )
 
 kde4_add_ui_files(systemtray_SRCS

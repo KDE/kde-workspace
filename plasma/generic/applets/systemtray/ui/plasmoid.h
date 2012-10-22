@@ -89,6 +89,7 @@ public:
     Q_INVOKABLE void showMenu(QVariant menu, int x, int y, QVariant item) const;
     Q_INVOKABLE QPoint popupPosition(QVariant item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
     Q_INVOKABLE void destroyShortcutAction(QVariant action) const;
+    Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
 
 signals:
     void changedFormFactor();

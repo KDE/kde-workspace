@@ -22,7 +22,6 @@
  **********************************************************************************************************************/
 
 import QtQuick 1.1
-import Private 0.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
 
@@ -65,22 +64,29 @@ Item {
     }
 
     // Popup dialog (window) -------------------------------------------------------------------------------------------
-    Dialog {
+    PlasmaCore.Dialog {
         id: dialog
         visible: false
-        item: content
+        mainItem: content
         location: plasmoid.location
 
-        onChangedActive: {
-            dialog.visible = active  // hide window if it deactivates
-        }
+        onActiveWindowChanged: dialog.visible = activeWindow  // hide window if it deactivates
+
 
         // We have to move dialog if its size is changed
-        onChangedHeight: updatePosition()
-        onChangedWidth:  updatePosition()
+        onHeightChanged:  updatePosition()
+        onWidthChanged:   updatePosition()
+
+        onVisibleChanged: {
+            if (visible) {
+                if (dialog.windowId)
+                    plasmoid.hideFromTaskbar(dialog.windowId)
+                updatePosition()
+            }
+        }
 
         function updatePosition() {
-            var pos = plasmoid.popupPosition(arrow_area, Qt.size(width, height), Qt.AlignCenter)
+            var pos = dialog.popupPosition(arrow_area, Qt.size(width, height), Qt.AlignCenter)
             x = pos.x
             y = pos.y
         }
@@ -92,9 +98,8 @@ Item {
             dialog.visible = false
             return
         }
-        dialog.updatePosition()
         dialog.visible = true
-        dialog.activate()
+        dialog.activateWindow()
     }
 
 
