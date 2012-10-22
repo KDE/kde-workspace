@@ -158,19 +158,7 @@ Item {
             leftMargin: availScreenRect.x
             rightMargin: parent.width - availScreenRect.x - availScreenRect.width
         }
-        //interactive: contentItem.height>mainFlickable.height
         interactive: false
-//         PropertyAnimation {
-//             id: contentScrollTo0Animation
-//             target: mainFlickable
-//             properties: "contentY"
-//             to: 0
-//             duration: 250
-//             running: false
-//         }
-
-//         contentWidth: contentItem.width
-//         contentHeight: contentItem.height
         contentWidth: mainFlickable.width
         contentHeight: mainFlickable.height
 

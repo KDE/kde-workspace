@@ -27,6 +27,5 @@ SequentialAnimation {
     }
     PlasmaExtras.AppearAnimation {
         id: anim
-        //targetItem: toolBox
     }
 }
