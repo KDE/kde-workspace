@@ -254,22 +254,24 @@ Item {
             } else if (y >= (container.height - toolBoxButtonFrame.mHeight - _m)) {
                 _s = "bottom"
             } else {
-                print("Error: Reached invalid state in ToolBoxButton.updateState()")
+                //print("Error: Reached invalid state in ToolBoxButton.updateState()")
             }
         }
         if (_s != ""){
             if (_s == "topright" || _s == "bottomright" || _s == "right") {
-                //updateStateTimer.tmpState = _s;
-                //updateStateTimer.start();
                 skipNextUpdate = true;
                 toolBoxButton.x = main.width - toolBoxButton.width;
             }
             if (_s == "bottomleft" || _s == "bottomright" || _s == "bottom") {
-                toolBoxButton.y = main.height - toolBoxButton.height;
                 skipNextUpdate = true;
+                toolBoxButton.y = main.height - toolBoxButton.height;
             }
             toolBoxButton.state = _s;
+            plasmoid.writeConfig("ToolBoxButtonState", toolBoxButton.state);
+            plasmoid.writeConfig("ToolBoxButtonX", toolBoxButton.x);
+            plasmoid.writeConfig("ToolBoxButtonY", toolBoxButton.y);
         }
+        print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + "x" +toolBoxButton.x);
     }
 
     MouseArea {
