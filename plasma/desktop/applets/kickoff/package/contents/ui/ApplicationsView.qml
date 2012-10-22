@@ -101,7 +101,6 @@ Item {
                 id: arrowSvg
                 imagePath: "widgets/arrows"
             }
-            clip: true
             Component.onCompleted: {
                 rootBreadcrumb.modelIndex = model.rootIndex;
                 rootBreadcrumb.view = applicationsView;

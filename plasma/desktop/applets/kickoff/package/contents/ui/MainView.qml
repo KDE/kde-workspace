@@ -86,7 +86,6 @@ Item {
             property variant recentlyUsedModel
 
             anchors.fill: parent
-            clip: true
             delegate: kickoffDelegate
             Component.onCompleted: changeModel("favorites")
 

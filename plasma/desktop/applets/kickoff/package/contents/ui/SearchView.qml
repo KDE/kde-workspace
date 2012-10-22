@@ -39,7 +39,6 @@ Item {
         anchors.fill: parent
         ListView {
             id: searchView
-            clip: true
 
             property alias favoritesModel: searchViewContainer.favoritesModel
 
