@@ -96,7 +96,7 @@ Item {
         // An area that contains arrow
         ArrowArea {
             id: arrow_area
-            visible: models[JS.LOCATION_POPUP].count
+            visible: model_popup.count > 0
 
             content: IconsList {
                 id: popup_area
@@ -223,7 +223,8 @@ Item {
             }
             PropertyChanges {
                 target: arrow_area
-                width: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 0
+                // it's strange but if width of arrow area is set to 0 then this may cause crashing of plasma during resising of panel (somewhere in QtDeclarative)
+                width: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 1
                 state: plasmoid.location === TopEdge ? "TOP_EDGE" : "BOTTOM_EDGE"
             }
             PropertyChanges {
@@ -295,7 +296,7 @@ Item {
             }
             PropertyChanges {
                 target: arrow_area
-                height: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 0
+                height: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 1
                 state: plasmoid.location === LeftEdge ? "LEFT_EDGE" : "RIGHT_EDGE"
             }
             PropertyChanges {
