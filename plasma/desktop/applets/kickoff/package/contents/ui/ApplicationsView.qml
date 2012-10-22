@@ -18,6 +18,7 @@
 */
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 
@@ -48,83 +49,77 @@ Item {
             enabled: false
         }
     }
-    ListView {
-        id: applicationsView
-        focus: true
-
-        property variant breadcrumbs: breadcrumbsElement
-        property alias favoritesModel: appViewContainer.favoritesModel
-
-        function addBreadcrumb(modelIndex, title) {
-            breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
-            component = Qt.createComponent("Breadcrumb.qml");
-            var crumb = component.createObject(breadcrumbs)
-            crumb.text = title;
-            crumb.modelIndex = modelIndex;
-            crumb.view = applicationsView;
-            crumb.enabled = false;
-            breadcrumbs.children[breadcrumbs.children.length-2].childNode = breadcrumbs.children.length-1;
-        }
+    PlasmaExtras.ScrollArea {
         anchors {
             top: breadcrumbsElement.bottom
             left: parent.left
             bottom: parent.bottom
-            right: applicationsScrollBar.visible ? applicationsScrollBar.left : parent.right
+            right: parent.right
         }
-        model: VisualDataModel {
-            id: vmodel
+        ListView {
+            id: applicationsView
+            focus: true
 
-            model: Kickoff.ApplicationModel {}
-            delegate: KickoffItem {
-                id: kickoffItem
-                PlasmaCore.SvgItem {
-                    svg: arrowSvg
-                    elementId: "right-arrow"
-                    height: arrowSvg.elementSize("right-arrow").height
-                    width: arrowSvg.elementSize("right-arrow").width
-                    visible: hasModelChildren
-                    anchors {
-                        right: parent.right
-                        verticalCenter: parent.verticalCenter
+            property variant breadcrumbs: breadcrumbsElement
+            property alias favoritesModel: appViewContainer.favoritesModel
+
+            function addBreadcrumb(modelIndex, title) {
+                breadcrumbs.children[breadcrumbs.children.length-1].enabled = true;
+                component = Qt.createComponent("Breadcrumb.qml");
+                var crumb = component.createObject(breadcrumbs)
+                crumb.text = title;
+                crumb.modelIndex = modelIndex;
+                crumb.view = applicationsView;
+                crumb.enabled = false;
+                breadcrumbs.children[breadcrumbs.children.length-2].childNode = breadcrumbs.children.length-1;
+            }
+            anchors.fill: parent
+            model: VisualDataModel {
+                id: vmodel
+
+                model: Kickoff.ApplicationModel {}
+                delegate: KickoffItem {
+                    id: kickoffItem
+                    PlasmaCore.SvgItem {
+                        svg: arrowSvg
+                        elementId: "right-arrow"
+                        height: arrowSvg.elementSize("right-arrow").height
+                        width: arrowSvg.elementSize("right-arrow").width
+                        visible: hasModelChildren
+                        anchors {
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                        }
                     }
                 }
             }
-        }
-        highlight: PlasmaComponents.Highlight {}
-        PlasmaCore.Svg {
-            id: arrowSvg
-            imagePath: "widgets/arrows"
-        }
-        clip: true
-        Component.onCompleted: {
-            rootBreadcrumb.modelIndex = model.rootIndex;
-            rootBreadcrumb.view = applicationsView;
-        }
-        Keys.onPressed: {
-            if (event.key == Qt.Key_Right) {
-                if (applicationsView.currentItem.modelChildren)
-                    applicationsView.currentItem.activate();
-                event.accepted = true;
+            highlight: PlasmaComponents.Highlight {}
+            PlasmaCore.Svg {
+                id: arrowSvg
+                imagePath: "widgets/arrows"
             }
-            else if (event.key == Qt.Key_Left) {
-                if (breadcrumbs.children.length > 1) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
-                    breadcrumbs.children[breadcrumbs.children.length-2].selectCrumb();
+            clip: true
+            Component.onCompleted: {
+                rootBreadcrumb.modelIndex = model.rootIndex;
+                rootBreadcrumb.view = applicationsView;
+            }
+            Keys.onPressed: {
+                if (event.key == Qt.Key_Right) {
+                    if (applicationsView.currentItem.modelChildren)
+                        applicationsView.currentItem.activate();
+                    event.accepted = true;
+                }
+                else if (event.key == Qt.Key_Left) {
+                    if (breadcrumbs.children.length > 1) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
+                        breadcrumbs.children[breadcrumbs.children.length-2].selectCrumb();
+                        event.accepted = true;
+                    }
+                }
+                else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                    applicationsView.currentItem.activate();
                     event.accepted = true;
                 }
             }
-            else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
-                 applicationsView.currentItem.activate();
-                 event.accepted = true;
-            }
-        }
-    }
-    PlasmaComponents.ScrollBar {
-        id: applicationsScrollBar
-        flickableItem: applicationsView
-        anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
         }
     }
 }

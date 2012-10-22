@@ -18,6 +18,7 @@
 */
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 Item {
@@ -34,35 +35,24 @@ Item {
         searchView.currentItem.activate();
     }
     anchors.fill: parent
-    ListView {
-        id: searchView
-        clip: true
+    PlasmaExtras.ScrollArea {
+        anchors.fill: parent
+        ListView {
+            id: searchView
+            clip: true
 
-        property alias favoritesModel: searchViewContainer.favoritesModel
+            property alias favoritesModel: searchViewContainer.favoritesModel
 
-        anchors {
-            left: parent.left
-            top: parent.top
-            bottom: parent.bottom
-            right: scrollBar.visible ? scrollBar.left : parent.right
-        }
-        model: Kickoff.KRunnerModel{}
-        delegate: KickoffItem{}
-        highlight: PlasmaComponents.Highlight {}
-        Connections {
-            target: searchField
-            onTextChanged: {
-                searchView.model.setQuery(searchField.text)
+            anchors.fill: parent
+            model: Kickoff.KRunnerModel{}
+            delegate: KickoffItem{}
+            highlight: PlasmaComponents.Highlight {}
+            Connections {
+                target: searchField
+                onTextChanged: {
+                    searchView.model.setQuery(searchField.text)
+                }
             }
-        }
-    }
-    PlasmaComponents.ScrollBar {
-        id: scrollBar
-        flickableItem: searchView
-        anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
         }
     }
 }

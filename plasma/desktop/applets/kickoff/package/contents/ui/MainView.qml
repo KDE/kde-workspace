@@ -17,6 +17,7 @@
 */
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 import org.kde.draganddrop 1.0
@@ -74,90 +75,79 @@ Item {
     function activateCurrentIndex() {
         kickoffListView.currentItem.activate();
     }
-    ListView {
-        id: kickoffListView
-        interactive: contentHeight > height
-        property variant favoritesModel
-        property variant leaveModel
-        property variant systemModel
-        property variant recentlyUsedModel
-        anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-            right: scrollBar.visible ? scrollBar.left : parent.right
-        }
-        clip: true
-        delegate: kickoffDelegate
-        Component.onCompleted: changeModel("favorites")
+    PlasmaExtras.ScrollArea {
+        anchors.fill: parent
+        ListView {
+            id: kickoffListView
+            interactive: contentHeight > height
+            property variant favoritesModel
+            property variant leaveModel
+            property variant systemModel
+            property variant recentlyUsedModel
 
-        section {
-            property: "group"
-            criteria: ViewSection.FullString
-            delegate: Item {
-                id: sectionDelegate
-                width: parent.width
-                height: childrenRect.height
-                PlasmaCore.SvgItem {
-                    visible: sectionDelegate.y > 0
-                    svg: lineSvg
-                    elementId: "horizontal-line"
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: lineSvg.elementSize("horizontal-line").height
-                }
-                PlasmaComponents.Label {
-                    y: 2
-                    opacity: 0.6
-                    text: section
-                    horizontalAlignment: Text.AlignHCenter
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                }
-            }
-        }
-        highlight: PlasmaComponents.Highlight {
-        }
-        footer: Item {
-            height: {
-                if (kickoffListView.contentHeight > kickoffListView.height) {
-                    return 0;
-                } else {
-                    return kickoffListView.height - kickoffListView.contentHeight;
-                }
-            }
-            width: kickoffListView.width
-            DropArea {
-                anchors.fill: parent
-                onDragEnter:  dropTarget.visible = true
-                onDragLeave: dropTarget.visible = false
+            anchors.fill: parent
+            clip: true
+            delegate: kickoffDelegate
+            Component.onCompleted: changeModel("favorites")
 
-                onDrop: {
-                    kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, kickoffListView.count-1, 0);
-                    dropTarget.visible = false
-                }
-                Rectangle {
-                    id: dropTarget
-                    visible: false
+            section {
+                property: "group"
+                criteria: ViewSection.FullString
+                delegate: Item {
+                    id: sectionDelegate
                     width: parent.width
-                    height: 2
-                    color: theme.highlightColor
+                    height: childrenRect.height
+                    PlasmaCore.SvgItem {
+                        visible: sectionDelegate.y > 0
+                        svg: lineSvg
+                        elementId: "horizontal-line"
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        height: lineSvg.elementSize("horizontal-line").height
+                    }
+                    PlasmaComponents.Label {
+                        y: 2
+                        opacity: 0.6
+                        text: section
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                    }
                 }
             }
-        }
-    }
+            highlight: PlasmaComponents.Highlight {
+            }
+            footer: Item {
+                height: {
+                    if (kickoffListView.contentHeight > kickoffListView.height) {
+                        return 0;
+                    } else {
+                        return kickoffListView.height - kickoffListView.contentHeight;
+                    }
+                }
+                width: kickoffListView.width
+                DropArea {
+                    anchors.fill: parent
+                    onDragEnter:  dropTarget.visible = true
+                    onDragLeave: dropTarget.visible = false
 
-    PlasmaComponents.ScrollBar {
-        id: scrollBar
-        flickableItem: kickoffListView
-        anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
+                    onDrop: {
+                        kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, kickoffListView.count-1, 0);
+                        dropTarget.visible = false
+                    }
+                    Rectangle {
+                        id: dropTarget
+                        visible: false
+                        width: parent.width
+                        height: 2
+                        color: theme.highlightColor
+                    }
+                }
+            }
         }
     }
 }
