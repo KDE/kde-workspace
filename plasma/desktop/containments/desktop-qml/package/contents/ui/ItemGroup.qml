@@ -108,8 +108,6 @@ print(itemGroup.x+" "+itemGroup.y)
             lastY = globalMousePos.y
 
             //debugFlow.refresh();
-
-
             placeHolder.syncWithItem(parent)
             placeHolderPaint.opacity = 1
         }
@@ -128,7 +126,6 @@ print(itemGroup.x+" "+itemGroup.y)
         onReleased: dragEnded()
         function dragEnded()
         {
-            //scrollTimer.running = false
             repositionTimer.running = false
             placeHolderPaint.opacity = 0
             animationsEnabled = true
@@ -161,14 +158,6 @@ print(itemGroup.x+" "+itemGroup.y)
         NumberAnimation {
             duration: 250
             easing.type: Easing.InOutQuad
-//             onRunningChanged: {
-//                 if (!running) {
-//                     mainFlickable.interactive = contentItem.height>mainFlickable.height
-//                     if (!mainFlickable.interactive) {
-//                         contentScrollTo0Animation.running = true
-//                     }
-//                 }
-//             }
         }
     }
     Behavior on width {

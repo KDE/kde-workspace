@@ -24,7 +24,6 @@ SequentialAnimation {
     property alias targetItem: anim.targetItem
     PlasmaExtras.DisappearAnimation {
         id: anim
-    //    targetItem: toolBox
     }
     ScriptAction {
         script: toolBox.state = "collapsed";
