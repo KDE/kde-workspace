@@ -39,7 +39,6 @@ class LauncherApplet : public Plasma::PopupApplet
     Q_PROPERTY(bool switchTabsOnHover READ switchTabsOnHover WRITE setSwitchTabsOnHover NOTIFY switchTabsOnHoverChanged)
     Q_PROPERTY(bool showAppsByName READ showAppsByName WRITE setShowAppsByName NOTIFY showAppsByNameChanged)
     Q_PROPERTY(Location location READ plasmoidLocation NOTIFY locationChanged)
-    Q_ENUMS(Location)
 
 public:
     enum Location {
@@ -53,6 +52,7 @@ public:
         LeftEdge,     /**< Along the left side of the screen */
         RightEdge     /**< Along the right side of the screen */
     };
+    Q_ENUMS(Location)
 
 
     LauncherApplet(QObject *parent, const QVariantList &args);

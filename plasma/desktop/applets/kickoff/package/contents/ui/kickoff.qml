@@ -69,16 +69,18 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return undefined;
                 // bottom
                 default:
                     return parent.top;
                 }
             }
+            /*top: kickoff.location == "TopEdge" ? undefined : parent.top
+            bottom: kickoff.location == "TopEdge" ? parent.bottom : undefined*/
             bottom: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return parent.bottom;
                 // bottom
                 default:
@@ -96,7 +98,7 @@ Item {
             anchors {
                 top: {
                     switch (kickoff.location) {
-                    case Kickoff.TopEdge:
+                    case Kickoff.Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -105,7 +107,7 @@ Item {
                 }
                 bottom: {
                     switch (kickoff.location) {
-                    case Kickoff.TopEdge:
+                    case Kickoff.Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -125,7 +127,7 @@ Item {
                 right: parent.right
                 top: {
                     switch (kickoff.location) {
-                    case Kickoff.TopEdge:
+                    case Kickoff.Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -134,7 +136,7 @@ Item {
                 }
                 bottom: {
                     switch (kickoff.location) {
-                    case Kickoff.TopEdge:
+                    case Kickoff.Kickoff.TopEdge:
                         return undefined;
                     // bottom
                     default:
@@ -166,7 +168,7 @@ Item {
             right: parent.right
             top: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return parent.top;
                 // bottom
                 default:
@@ -175,7 +177,7 @@ Item {
             }
             bottom: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return searchBar.top;
                 // bottom
                 default:
@@ -190,7 +192,7 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return tabBar.bottom;
                 // bottom
                 default:
@@ -200,7 +202,7 @@ Item {
             left: parent.left
             bottom: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return searchBar.top;
                 // bottom
                 default:
@@ -217,7 +219,7 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return tabBar.bottom;
                 // bottom
                 default:
@@ -228,7 +230,7 @@ Item {
             right: parent.right
             bottom: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return searchBar.top;
                 // bottom
                 default:
@@ -252,7 +254,7 @@ Item {
             right: parent.right
             bottom: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return undefined;
                 // bottom
                 default:
@@ -261,7 +263,7 @@ Item {
             }
             top: {
                 switch (kickoff.location) {
-                case Kickoff.TopEdge:
+                case Kickoff.Kickoff.TopEdge:
                     return parent.top;
                 // bottom
                 default:
