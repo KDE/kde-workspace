@@ -29,12 +29,12 @@ PlasmaComponents.ListItem {
     signal triggered
     enabled: true
 
-    height: main.iconSize
+    height: main.iconSize*1.8
 
     QtExtras.QIconItem {
         id: iconItem
-        height: parent.height
-        width: parent.height
+        height: iconSize
+        width: iconSize
         anchors { left: parent.left; verticalCenter: parent.verticalCenter; }
     }
     PlasmaComponents.Label {
