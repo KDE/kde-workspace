@@ -80,7 +80,7 @@ Item {
             imagePath: "dialogs/shutdowndialog"
         }
         elementId: "button-hover"
-        visible: false
+        visible: root.ListView.isCurrentItem
     }
 
     QIconItem {
@@ -117,11 +117,10 @@ Item {
                 root.clicked()
         }
         onEntered: {
-            background.visible = true
+            root.ListView.view.currentIndex = root.ListView.view.indexAt(root.x, root.y)
         }
         onExited: {
             canceled = true
-            background.visible = false
         }
     }
 
