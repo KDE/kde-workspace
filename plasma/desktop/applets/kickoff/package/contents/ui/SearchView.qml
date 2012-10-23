@@ -23,6 +23,7 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 Item {
     id: searchViewContainer
+    objectName: "SearchView"
     property variant favoritesModel
 
     function decrementCurrentIndex() {

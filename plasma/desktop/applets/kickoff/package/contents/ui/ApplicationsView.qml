@@ -24,6 +24,8 @@ import org.kde.plasma.kickoff 0.1 as Kickoff
 
 Item {
     id: appViewContainer
+    objectName: "ApplicationsView"
+
     property variant favoritesModel
 
     function decrementCurrentIndex() {

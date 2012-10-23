@@ -179,7 +179,7 @@ Item {
             }
             right: parent.right
         }
-        //initialPage: Qt.createComponent("FavoritesView.qml")
+        initialPage: Qt.createComponent("FavoritesView.qml")
     }
 
 /*
@@ -329,7 +329,9 @@ Item {
             root.forceActiveFocus();
             switch(tabBar.currentTab) {
                 case bookmarkButton:
-                    mainStack.replace(Qt.createComponent("FavoritesView.qml"));
+                    if (mainStack.currentPage.objectName !== "FavoritesView") {
+                        mainStack.replace(Qt.createComponent("FavoritesView.qml"));
+                    }
                     root.state = "Normal";
                     break;
                 case applicationButton:

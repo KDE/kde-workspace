@@ -22,5 +22,6 @@ import org.kde.plasma.kickoff 0.1 as Kickoff
 
 
 BaseView {
+    objectName: "SystemView"
     model: Kickoff.SystemModel {}
 }

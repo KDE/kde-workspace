@@ -26,6 +26,8 @@ import org.kde.draganddrop 1.0
 
 PlasmaComponents.Page {
     anchors.fill: parent
+    objectName: "FavoritesView"
+
     function decrementCurrentIndex() {
         kickoffListView.decrementCurrentIndex();
     }
@@ -47,8 +49,6 @@ PlasmaComponents.Page {
             }
 
             delegate: KickoffItem {}
-
-            Component.onCompleted: changeModel("favorites")
 
             section {
                 property: "group"
