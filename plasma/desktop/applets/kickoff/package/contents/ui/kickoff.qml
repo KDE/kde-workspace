@@ -36,15 +36,10 @@ Item {
     focus: true
     onFocusChanged: {
         searchField.forceActiveFocus();
-
     }
 
     Component.onCompleted: {
         searchField.forceActiveFocus();
-    }
-
-    function action_menuEditor() {
-        plasmoid.runApplication("kmenuedit.desktop");
     }
 
     PlasmaCore.DataSource {
@@ -60,9 +55,11 @@ Item {
     Component {
         id: kickoffDelegate
         KickoffItem {
-            dropEnabled: ListView.view.model == favoritesModel
+            dropEnabled: true//ListView.view.model == favoritesModel
         }
     }
+
+
     Item {
         id: searchBar
         height: 32
@@ -117,6 +114,7 @@ Item {
                 left: parent.left
             }
         }
+
         PlasmaComponents.TextField {
             id: searchField
 
@@ -161,6 +159,35 @@ Item {
             }
         }
     }
+
+    PlasmaComponents.PageStack {
+        id: mainView
+        anchors {
+            top: {
+                switch (kickoff.location) {
+                case Kickoff.Kickoff.TopEdge:
+                    return tabBar.bottom;
+                // bottom
+                default:
+                    return searchBar.bottom;
+                }
+            }
+            left: parent.left
+            bottom: {
+                switch (kickoff.location) {
+                case Kickoff.Kickoff.TopEdge:
+                    return searchBar.top;
+                // bottom
+                default:
+                    return tabBar.top;
+                }
+            }
+            right: parent.right
+        }
+        //initialPage: Qt.createComponent("FavoritesView.qml")
+    }
+
+/*
     Loader {
         id: searchView
         anchors {
@@ -239,6 +266,7 @@ Item {
             }
         }
     }
+*/
 
     Timer {
         id: clickTimer
@@ -306,24 +334,19 @@ Item {
             root.forceActiveFocus();
             switch(tabBar.currentTab) {
                 case bookmarkButton:
-                    mainView.changeModel("favorites");
+                    mainView.replace(Qt.createComponent("FavoritesView.qml"));
                     break;
-                case applicationButton: { //don't remove braces QTBUG-17012
-                    if (applicationsViewContainer.source == "") {
-                        applicationsViewContainer.source = "ApplicationsView.qml";
-                    }
-                    applicationsViewContainer.item.favoritesModel = mainView.favoritesModel;
-                    root.state = "APPLICATIONS";
+                case applicationButton:
+                    mainView.replace(Qt.createComponent("ApplicationsView.qml"));
                     break;
-                }
                 case computerButton:
-                    mainView.changeModel("system");
+                    mainView.replace(Qt.createComponent("SystemView.qml"));
                     break;
                 case usedButton:
-                    mainView.changeModel("recentlyUsed");
+                    mainView.replace(Qt.createComponent("RecentlyUsedView.qml"));
                     break;
                 case leaveButton:
-                    mainView.changeModel("leave");
+                    mainView.replace(Qt.createComponent("LeaveView.qml"));
                     break;
                 default:
                     break;

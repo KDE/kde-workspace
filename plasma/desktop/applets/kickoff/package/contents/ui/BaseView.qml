@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2011  Martin Gräßlin <mgraesslin@kde.org>
+    Copyright (C) 2012 Marco Martin <mart@kde.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,49 +24,9 @@ import org.kde.plasma.kickoff 0.1 as Kickoff
 import org.kde.draganddrop 1.0
 
 
-Item {
-    property alias favoritesModel: kickoffListView.favoritesModel
+PlasmaComponents.Page {
+    property alias model: kickoffListView.model
 
-    function loadModelScript(name) {
-        return Qt.createQmlObject('import QtQuick 1.0; import org.kde.plasma.kickoff 0.1 as Kickoff; Kickoff.' + name + '{}', kickoffListView, name + "Snippet");
-    }
-    function changeModel(identifier) {
-        if (root.state != "NORMAL") {
-            root.state = "NORMAL";
-        }
-        var newModel;
-        switch (identifier) {
-        case "favorites":
-            newModel = kickoffListView.favoritesModel;
-            if (!newModel) {
-                newModel = loadModelScript("FavoritesModel");
-                kickoffListView.favoritesModel = newModel;
-            }
-            break;
-        case "system":
-            newModel = kickoffListView.systemModel;
-            if (!newModel) {
-                newModel = loadModelScript("SystemModel");
-                kickoffListView.systemModel = newModel;
-            }
-            break;
-        case "recentlyUsed":
-            newModel = kickoffListView.recentlyUsedModel;
-            if (!newModel) {
-                newModel = loadModelScript("RecentlyUsedModel");
-                kickoffListView.recentlyUsedModel = newModel;
-            }
-            break;
-        case "leave":
-            newModel = kickoffListView.leaveModel;
-            if (!newModel) {
-                newModel = loadModelScript("LeaveModel");
-                kickoffListView.leaveModel = newModel;
-            }
-            break;
-        }
-        kickoffListView.model = newModel;
-    }
     function decrementCurrentIndex() {
         kickoffListView.decrementCurrentIndex();
     }
@@ -80,10 +41,7 @@ Item {
         ListView {
             id: kickoffListView
             interactive: contentHeight > height
-            property variant favoritesModel
-            property variant leaveModel
-            property variant systemModel
-            property variant recentlyUsedModel
+
 
             anchors.fill: parent
             delegate: kickoffDelegate
@@ -119,33 +77,6 @@ Item {
                 }
             }
             highlight: PlasmaComponents.Highlight {
-            }
-            footer: Item {
-                height: {
-                    if (kickoffListView.contentHeight > kickoffListView.height) {
-                        return 0;
-                    } else {
-                        return kickoffListView.height - kickoffListView.contentHeight;
-                    }
-                }
-                width: kickoffListView.width
-                DropArea {
-                    anchors.fill: parent
-                    onDragEnter:  dropTarget.visible = true
-                    onDragLeave: dropTarget.visible = false
-
-                    onDrop: {
-                        kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, kickoffListView.count-1, 0);
-                        dropTarget.visible = false
-                    }
-                    Rectangle {
-                        id: dropTarget
-                        visible: false
-                        width: parent.width
-                        height: 2
-                        color: theme.highlightColor
-                    }
-                }
             }
         }
     }
