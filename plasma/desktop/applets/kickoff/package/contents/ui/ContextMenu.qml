@@ -37,7 +37,7 @@ PlasmaComponents.ContextMenu {
         open(x, y)
     }
 
-    /*
+   /*
     * context menu items
     */
     PlasmaComponents.MenuItem {

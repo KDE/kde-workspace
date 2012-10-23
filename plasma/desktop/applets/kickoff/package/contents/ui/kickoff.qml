@@ -20,6 +20,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.kickoff 0.1 as Kickoff
 import org.kde.qtextracomponents 0.1
 
@@ -86,9 +87,9 @@ Item {
         }
     }
 
-    property Item currentView: mainStack.currentPage
+    property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
-    PlasmaComponents.PageStack {
+    PlasmaComponents.TabGroup {
         id: mainStack
         anchors {
             top: {
@@ -112,7 +113,31 @@ Item {
             }
             right: parent.right
         }
-        initialPage: Qt.createComponent("FavoritesView.qml")
+
+        //pages
+        FavoritesView {
+            id: favoritesPage
+        }
+        PlasmaExtras.ConditionalLoader {
+            id: applicationsPage
+            when: mainStack.currentTab == applicationsPage
+            source: Qt.createComponent("ApplicationsView.qml")
+        }
+        PlasmaExtras.ConditionalLoader {
+            id: systemPage
+            when: mainStack.currentTab == systemPage
+            source: Qt.createComponent("SystemView.qml")
+        }
+        PlasmaExtras.ConditionalLoader {
+            id: recentlyUsedPage
+            when: mainStack.currentTab == recentlyUsedPage
+            source: Qt.createComponent("RecentlyUsedView.qml")
+        }
+        PlasmaExtras.ConditionalLoader {
+            id: leavePage
+            when: mainStack.currentTab == leavePage
+            source: Qt.createComponent("LeaveView.qml")
+        }
     }
 
     Kickoff.FavoritesModel {
@@ -152,64 +177,36 @@ Item {
         }
         KickoffButton {
             id: bookmarkButton
+            tab: favoritesPage
             iconSource: "bookmarks"
             text: i18n("Favorites")
-            onClicked: tabBar.currentTab = bookmarkButton
         }
         KickoffButton {
             id: applicationButton
+            tab: applicationsPage
             iconSource: "applications-other"
             text: i18n("Applications")
-            onClicked: tabBar.currentTab = applicationButton
         }
         KickoffButton {
             id: computerButton
+            tab: systemPage
             iconSource: "computer" // TODO: could also be computer-laptop
             text: i18n("Computer")
-            onClicked: tabBar.currentTab = computerButton
         }
         KickoffButton {
             id: usedButton
+            tab: recentlyUsedPage
             iconSource: "document-open-recent"
             text: i18n("Recently Used")
-            onClicked: tabBar.currentTab = usedButton
         }
         KickoffButton {
             id: leaveButton
+            tab: leavePage
             iconSource: "system-shutdown"
             text: i18n("Leave")
-            onClicked: tabBar.currentTab = leaveButton
         }
 
-        onCurrentTabChanged: {
-            root.forceActiveFocus();
-            switch(tabBar.currentTab) {
-                case bookmarkButton:
-                    if (mainStack.currentPage.objectName !== "FavoritesView") {
-                        mainStack.replace(Qt.createComponent("FavoritesView.qml"));
-                    }
-                    root.state = "Normal";
-                    break;
-                case applicationButton:
-                    mainStack.replace(Qt.createComponent("ApplicationsView.qml"));
-                    root.state = "Applications";
-                    break;
-                case computerButton:
-                    mainStack.replace(Qt.createComponent("SystemView.qml"));
-                    root.state = "Normal";
-                    break;
-                case usedButton:
-                    mainStack.replace(Qt.createComponent("RecentlyUsedView.qml"));
-                    root.state = "Normal";
-                    break;
-                case leaveButton:
-                    mainStack.replace(Qt.createComponent("LeaveView.qml"));
-                    root.state = "Normal";
-                    break;
-                default:
-                    break;
-            }
-        }
+        onCurrentTabChanged: root.forceActiveFocus();
     }
 
     Keys.forwardTo: [(tabBar.layout)]

@@ -24,7 +24,7 @@ import org.kde.plasma.kickoff 0.1 as Kickoff
 import org.kde.draganddrop 1.0
 
 
-PlasmaComponents.Page {
+Item {
     property alias model: kickoffListView.model
 
     function decrementCurrentIndex() {

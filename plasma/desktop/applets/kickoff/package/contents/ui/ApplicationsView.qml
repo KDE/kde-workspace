@@ -32,6 +32,9 @@ Item {
     function incrementCurrentIndex() {
         applicationsView.incrementCurrentIndex();
     }
+    function activateCurrentIndex() {
+        applicationsView.currentItem.activate();
+    }
 
     anchors.fill: parent
 
