@@ -27,30 +27,6 @@ Item {
 
     ContextMenu {
         id: contextMenu
-
-        PlasmaComponents.MenuItem {
-            id: addToFavorites
-            text: contextMenu.favorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
-            icon: contextMenu.favorite ? QIcon("list-remove") : QIcon("bookmark-new")
-            onClicked: {
-                if (contextMenu.favorite) {
-                    favoritesModel.remove(contextMenu.url);
-                } else {
-                    favoritesModel.add(contextMenu.url);
-                }
-            }
-        }
-        PlasmaComponents.MenuItem {
-            id: uninstallApp
-            text: i18n("Uninstall")
-            enabled: packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]
-            onClicked: {
-                var service = packagekitSource.serviceForSource("Status")
-                var operation = service.operationDescription("uninstallApplication")
-                operation.Url = contextMenu.url;
-                var job = service.startOperationCall(operation)
-            }
-        }
     }
 
     function decrementCurrentIndex() {

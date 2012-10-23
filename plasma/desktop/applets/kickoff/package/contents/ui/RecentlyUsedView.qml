@@ -28,43 +28,18 @@ BaseView {
         id: contextMenu
 
         PlasmaComponents.MenuItem {
-            id: addToFavorites
-            text: contextMenu.favorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
-            icon: contextMenu.favorite ? QIcon("list-remove") : QIcon("bookmark-new")
-            onClicked: {
-                if (contextMenu.favorite) {
-                    favoritesModel.remove(contextMenu.model.url);
-                } else {
-                    favoritesModel.add(contextMenu.model.url);
-                }
-            }
-        }
-        PlasmaComponents.MenuItem {
-            id: uninstallApp
-            text: i18n("Uninstall")
-            enabled: packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]
-            onClicked: {
-                var service = packagekitSource.serviceForSource("Status")
-                var operation = service.operationDescription("uninstallApplication")
-                operation.Url = contextMenu.model.url;
-                var job = service.startOperationCall(operation)
-            }
-        }
-        PlasmaComponents.MenuItem {
-            id: actionsSeparator
-            separator: true
-        }
-        PlasmaComponents.MenuItem {
             id: clearRecentApplications
             text: i18n("Clear Recent Applications")
             icon: QIcon("edit-clear-history")
             onClicked: recentlyUsedModel.clearRecentApplications();
+            visible: contextMenu.isApp
         }
         PlasmaComponents.MenuItem {
             id: clearRecentDocuments
             text: i18n("Clear Recent Documents")
             icon: QIcon("edit-clear-history")
             onClicked: recentlyUsedModel.clearRecentDocuments();
+            visible: !contextMenu.isApp
         }
     }
 

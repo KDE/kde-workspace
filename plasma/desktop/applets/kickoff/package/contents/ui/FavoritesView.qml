@@ -42,25 +42,6 @@ PlasmaComponents.Page {
         id: contextMenu
 
         PlasmaComponents.MenuItem {
-            id: removeFromFavorites
-            text: i18n("Remove From Favorites")
-            icon: QIcon("list-remove")
-            onClicked: {
-                favoritesModel.remove(contextMenu.model.url);
-            }
-        }
-        PlasmaComponents.MenuItem {
-            id: uninstallApp
-            text: i18n("Uninstall")
-            enabled: packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]
-            onClicked: {
-                var service = packagekitSource.serviceForSource("Status")
-                var operation = service.operationDescription("uninstallApplication")
-                operation.Url = contextMenu.model.url;
-                var job = service.startOperationCall(operation)
-            }
-        }
-        PlasmaComponents.MenuItem {
             id: actionsSeparator
             separator: true
         }

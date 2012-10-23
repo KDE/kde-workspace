@@ -28,6 +28,7 @@ PlasmaComponents.ContextMenu {
     property string title
     property variant model
     property bool favorite: favoritesModel.isFavorite(contextMenu.model.url)
+    property bool isApp: contextMenu.model.url.indexOf(".desktop") !== -1
 
     function openAt(title, model, x, y) {
         contextMenu.title = title
@@ -49,7 +50,30 @@ PlasmaComponents.ContextMenu {
         id: titleSeparator
         separator: true
     }
-
+    PlasmaComponents.MenuItem {
+        id: addToFavorites
+        text: contextMenu.favorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
+        icon: contextMenu.favorite ? QIcon("list-remove") : QIcon("bookmark-new")
+        visible: contextMenu.isApp
+        onClicked: {
+            if (contextMenu.favorite) {
+                favoritesModel.remove(contextMenu.model.url);
+            } else {
+                favoritesModel.add(contextMenu.model.url);
+            }
+        }
+    }
+    PlasmaComponents.MenuItem {
+        id: uninstallApp
+        text: i18n("Uninstall")
+        visible: packagekitSource.data["Status"] !== undefined && contextMenu.isApp
+        onClicked: {
+            var service = packagekitSource.serviceForSource("Status")
+            var operation = service.operationDescription("uninstallApplication")
+            operation.Url = contextMenu.model.url;
+            var job = service.startOperationCall(operation)
+        }
+    }
 
 }
 
