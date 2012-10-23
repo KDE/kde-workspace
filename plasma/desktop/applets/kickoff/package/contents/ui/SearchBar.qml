@@ -26,7 +26,7 @@ import org.kde.qtextracomponents 0.1
 
 Item {
     id: searchBar
-    height: 32
+    height: Math.max(searchIcon.height+4, searchField.height+4)
 
     property alias query: searchField.text
 
@@ -40,24 +40,7 @@ Item {
         height: 32
         width: 32
         anchors {
-            top: {
-                switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return undefined;
-                // bottom
-                default:
-                    return parent.top;
-                }
-            }
-            bottom: {
-                switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return undefined;
-                // bottom
-                default:
-                    return parent.bottom;
-                }
-            }
+            verticalCenter: parent.verticalCenter
             left: parent.left
         }
     }
@@ -70,25 +53,9 @@ Item {
         anchors {
             left: searchIcon.right
             right: parent.right
-            top: {
-                switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return undefined;
-                // bottom
-                default:
-                    return parent.top;
-                }
-            }
-            bottom: {
-                switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return undefined;
-                // bottom
-                default:
-                    return parent.bottom;
-                }
-            }
+            verticalCenter: parent.verticalCenter
             leftMargin: 5
+            rightMargin: y
         }
         onTextChanged: {
             if (root.state != "Search") {
