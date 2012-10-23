@@ -54,7 +54,7 @@ Item {
             left: searchIcon.right
             right: parent.right
             verticalCenter: parent.verticalCenter
-            leftMargin: 5
+            leftMargin: y
             rightMargin: y
         }
         onTextChanged: {
