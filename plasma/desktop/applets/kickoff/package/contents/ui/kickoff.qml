@@ -32,7 +32,7 @@ Item {
 
     width: 400
     height: 400
-    state: "NORMAL"
+    state: "Normal"
     focus: true
     onFocusChanged: {
         searchField.forceActiveFocus();
@@ -144,13 +144,9 @@ Item {
                 leftMargin: 5
             }
             onTextChanged: {
-                if (searchView.source == "") {
-                    searchView.source = "SearchView.qml";
-                    searchView.item.favoritesModel = mainView.favoritesModel;
-                }
-                if (root.state != "SEARCH") {
+                if (root.state != "Search") {
                     root.previousState = root.state;
-                    root.state = "SEARCH";
+                    root.state = "Search";
                 }
                 if (text == "") {
                     root.state = root.previousState;
@@ -335,18 +331,23 @@ Item {
             switch(tabBar.currentTab) {
                 case bookmarkButton:
                     mainView.replace(Qt.createComponent("FavoritesView.qml"));
+                    root.state = "Normal";
                     break;
                 case applicationButton:
                     mainView.replace(Qt.createComponent("ApplicationsView.qml"));
+                    root.state = "Applications";
                     break;
                 case computerButton:
                     mainView.replace(Qt.createComponent("SystemView.qml"));
+                    root.state = "Normal";
                     break;
                 case usedButton:
                     mainView.replace(Qt.createComponent("RecentlyUsedView.qml"));
+                    root.state = "Normal";
                     break;
                 case leaveButton:
                     mainView.replace(Qt.createComponent("LeaveView.qml"));
+                    root.state = "Normal";
                     break;
                 default:
                     break;
@@ -358,29 +359,29 @@ Item {
 
     Keys.onPressed: {
         if (event.key == Qt.Key_Up) {
-            if (root.state == "NORMAL") {
+            if (root.state == "Normal") {
                 mainView.decrementCurrentIndex();
-            } else if (root.state == "APPLICATIONS") {
+            } else if (root.state == "Applications") {
                 applicationsViewContainer.item.decrementCurrentIndex();
                 applicationsViewContainer.forceActiveFocus();
-            } else if (root.state == "SEARCH") {
+            } else if (root.state == "Search") {
                 searchView.item.decrementCurrentIndex();
             }
             event.accepted = true;
         }
         else if (event.key == Qt.Key_Down) {
-            if (root.state == "NORMAL") {
+            if (root.state == "Normal") {
                 mainView.incrementCurrentIndex();
-            } else if (root.state == "APPLICATIONS") {
+            } else if (root.state == "Applications") {
                 applicationsViewContainer.item.incrementCurrentIndex();
                 applicationsViewContainer.forceActiveFocus();
-            } else if (root.state == "SEARCH") {
+            } else if (root.state == "Search") {
                 searchView.item.incrementCurrentIndex();
             }
             event.accepted = true;
         }
         else if (event.key == Qt.Key_Tab) {
-            if (root.state == "APPLICATIONS") {
+            if (root.state == "Applications") {
                 if (applicationsViewContainer.activeFocus )
                     root.forceActiveFocus();
                 else
@@ -389,9 +390,9 @@ Item {
             event.accepted = true;
         }
         else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
-            if (root.state == "NORMAL") {
+            if (root.state == "Normal") {
                 mainView.activateCurrentIndex();
-            } else if (root.state == "SEARCH") {
+            } else if (root.state == "Search") {
                 searchView.item.activateCurrentIndex();
             }
             event.accepted = true;
@@ -407,61 +408,37 @@ Item {
 
     states: [
         State {
-            name: "NORMAL"
-            PropertyChanges {
-                target: mainView
-                visible: true
-            }
-            PropertyChanges {
-                target: applicationsViewContainer
-                visible: false
-            }
+            name: "Normal"
             PropertyChanges {
                 target: tabBar
                 visible: true
-            }
-            PropertyChanges {
-                target: searchView
-                visible: false
             }
         },
         State {
-            name: "APPLICATIONS"
-            PropertyChanges {
-                target: mainView
-                visible: false
-            }
-            PropertyChanges {
-                target: applicationsViewContainer
-                visible: true
-            }
+            name: "Applications"
             PropertyChanges {
                 target: tabBar
                 visible: true
-            }
-            PropertyChanges {
-                target: searchView
-                visible: false
             }
         },
         State {
-            name: "SEARCH"
-            PropertyChanges {
-                target: mainView
-                visible: false
-            }
-            PropertyChanges {
-                target: applicationsViewContainer
-                visible: false
-            }
+            name: "Search"
             PropertyChanges {
                 target: tabBar
                 visible: false
             }
-            PropertyChanges {
-                target: searchView
-                visible: true
-            }
+        }
+    ]
+    transitions: [
+        Transition {
+            from: "*"
+            to: "Search"
+            ScriptAction {script: mainView.push(Qt.createComponent("SearchView.qml"));}
+        },
+        Transition {
+            from: "Search"
+            to: "*"
+            ScriptAction {script: mainView.pop();}
         }
     ]
 }
