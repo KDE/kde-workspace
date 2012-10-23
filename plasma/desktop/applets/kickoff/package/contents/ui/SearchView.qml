@@ -44,7 +44,7 @@ Item {
 
             anchors.fill: parent
             model: Kickoff.KRunnerModel{}
-            delegate: KickoffItem{}
+            delegate: KickoffItem {}
             highlight: PlasmaComponents.Highlight {}
             Connections {
                 target: searchField

@@ -52,13 +52,6 @@ Item {
         id: launcher
     }
 
-    Component {
-        id: kickoffDelegate
-        KickoffItem {
-            dropEnabled: true//ListView.view.model == favoritesModel
-        }
-    }
-
     PlasmaCore.Svg {
         id: lineSvg
         imagePath: "widgets/line"
@@ -160,8 +153,10 @@ Item {
         }
     }
 
+    property Item currentView: mainStack.currentPage
+
     PlasmaComponents.PageStack {
-        id: mainView
+        id: mainStack
         anchors {
             top: {
                 switch (kickoff.location) {
@@ -215,7 +210,7 @@ Item {
     }
 
     MainView {
-        id: mainView
+        id: currentView
         anchors {
             top: {
                 switch (kickoff.location) {
@@ -334,23 +329,23 @@ Item {
             root.forceActiveFocus();
             switch(tabBar.currentTab) {
                 case bookmarkButton:
-                    mainView.replace(Qt.createComponent("FavoritesView.qml"));
+                    mainStack.replace(Qt.createComponent("FavoritesView.qml"));
                     root.state = "Normal";
                     break;
                 case applicationButton:
-                    mainView.replace(Qt.createComponent("ApplicationsView.qml"));
+                    mainStack.replace(Qt.createComponent("ApplicationsView.qml"));
                     root.state = "Applications";
                     break;
                 case computerButton:
-                    mainView.replace(Qt.createComponent("SystemView.qml"));
+                    mainStack.replace(Qt.createComponent("SystemView.qml"));
                     root.state = "Normal";
                     break;
                 case usedButton:
-                    mainView.replace(Qt.createComponent("RecentlyUsedView.qml"));
+                    mainStack.replace(Qt.createComponent("RecentlyUsedView.qml"));
                     root.state = "Normal";
                     break;
                 case leaveButton:
-                    mainView.replace(Qt.createComponent("LeaveView.qml"));
+                    mainStack.replace(Qt.createComponent("LeaveView.qml"));
                     root.state = "Normal";
                     break;
                 default:
@@ -364,7 +359,7 @@ Item {
     Keys.onPressed: {
         if (event.key == Qt.Key_Up) {
             if (root.state == "Normal") {
-                mainView.decrementCurrentIndex();
+                currentView.decrementCurrentIndex();
             } else if (root.state == "Applications") {
                 applicationsViewContainer.item.decrementCurrentIndex();
                 applicationsViewContainer.forceActiveFocus();
@@ -375,7 +370,7 @@ Item {
         }
         else if (event.key == Qt.Key_Down) {
             if (root.state == "Normal") {
-                mainView.incrementCurrentIndex();
+                currentView.incrementCurrentIndex();
             } else if (root.state == "Applications") {
                 applicationsViewContainer.item.incrementCurrentIndex();
                 applicationsViewContainer.forceActiveFocus();
@@ -395,7 +390,7 @@ Item {
         }
         else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
             if (root.state == "Normal") {
-                mainView.activateCurrentIndex();
+                currentView.activateCurrentIndex();
             } else if (root.state == "Search") {
                 searchView.item.activateCurrentIndex();
             }
@@ -437,12 +432,12 @@ Item {
         Transition {
             from: "*"
             to: "Search"
-            ScriptAction {script: mainView.push(Qt.createComponent("SearchView.qml"));}
+            ScriptAction {script: currentView.push(Qt.createComponent("SearchView.qml"));}
         },
         Transition {
             from: "Search"
             to: "*"
-            ScriptAction {script: mainView.pop();}
+            ScriptAction {script: currentView.pop();}
         }
     ]
 }

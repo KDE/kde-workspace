@@ -44,7 +44,7 @@ PlasmaComponents.Page {
 
 
             anchors.fill: parent
-            delegate: kickoffDelegate
+            delegate: KickoffItem {}
             Component.onCompleted: changeModel("favorites")
 
             section {
