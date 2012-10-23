@@ -27,12 +27,14 @@ PlasmaComponents.ContextMenu {
 
     property string title
     property variant model
-    property bool favorite: favoritesModel.isFavorite(contextMenu.model.url)
+    property bool isFavorite: favoritesModel.isFavorite(contextMenu.model.url)
     property bool isApp: contextMenu.model.url.indexOf(".desktop") !== -1
 
     function openAt(title, model, x, y) {
         contextMenu.title = title
         contextMenu.model = model
+        isFavorite = favoritesModel.isFavoritez(contextMenu.model.url)
+
         open(x, y)
     }
 
@@ -53,11 +55,11 @@ PlasmaComponents.ContextMenu {
     }
     PlasmaComponents.MenuItem {
         id: addToFavorites
-        text: contextMenu.favorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
-        icon: contextMenu.favorite ? QIcon("list-remove") : QIcon("bookmark-new")
+        text: contextMenu.isFavorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
+        icon: contextMenu.isFavorite ? QIcon("list-remove") : QIcon("bookmark-new")
         visible: contextMenu.isApp
         onClicked: {
-            if (contextMenu.favorite) {
+            if (contextMenu.isFavorite) {
                 favoritesModel.remove(contextMenu.model.url);
             } else {
                 favoritesModel.add(contextMenu.model.url);

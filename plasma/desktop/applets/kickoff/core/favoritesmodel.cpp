@@ -213,7 +213,15 @@ void FavoritesModel::remove(const QString& url)
 
 bool FavoritesModel::isFavorite(const QString& url)
 {
-    return Private::globalFavoriteSet.contains(url);
+    QString handledUrl;
+    KService::Ptr service = Kickoff::serviceForUrl(url);
+    if (service) {
+        handledUrl = service->entryPath();
+    } else {
+        handledUrl = url;
+    }
+
+    return Private::globalFavoriteSet.contains(handledUrl);
 }
 
 int FavoritesModel::numberOfFavorites()
