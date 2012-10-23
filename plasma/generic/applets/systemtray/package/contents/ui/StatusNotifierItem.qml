@@ -161,7 +161,7 @@ Item {
         target: icon_widget
         mainText: __has_task ? task.tooltipTitle : ""
         subText: __has_task ? task.tooltipText : ""
-        image:   __has_task ? task.tooltipIconName : ""
+        image:   __has_task ? task.tooltipIcon : ""
     }
 
     // Mouse events handlers ===========================================================================================
