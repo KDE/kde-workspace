@@ -136,7 +136,7 @@ Item {
                         activate();
                     else if (mouse.button == Qt.RightButton) {
                         // don't show a context menu for container
-                        if (hasModelChildren) {
+                        if (hasModelChildren || typeof(contextMenu) === "undefined") {
                             return;
                         }
 
