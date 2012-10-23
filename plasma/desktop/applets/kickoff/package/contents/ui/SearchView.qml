@@ -25,35 +25,9 @@ Item {
     id: searchViewContainer
     objectName: "SearchView"
 
-    PlasmaComponents.ContextMenu {
+    ContextMenu {
         id: contextMenu
 
-        property string title
-        property variant icon
-        property string url
-        property bool favorite: favoritesModel.isFavorite(contextMenu.url)
-
-        function openAt(title, icon, url, x, y) {
-            contextMenu.title = title
-            contextMenu.icon = icon
-            contextMenu.url = url
-            open(x, y)
-        }
-
-        /*
-        * context menu items
-        */
-        PlasmaComponents.MenuItem {
-            id: titleMenuItem
-            text: contextMenu.title
-            icon: contextMenu.icon
-            font.bold: true
-            checkable: false
-        }
-        PlasmaComponents.MenuItem {
-            id: titleSeparator
-            separator: true
-        }
         PlasmaComponents.MenuItem {
             id: addToFavorites
             text: contextMenu.favorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")

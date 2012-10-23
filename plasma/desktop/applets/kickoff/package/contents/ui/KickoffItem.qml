@@ -141,7 +141,7 @@ Item {
                         }
 
                         var mapPos = listItem.mapToItem(listItem, mouse.x, mouse.y);
-                        contextMenu.openAt(titleElement.text, decoration, model["url"], mapPos.x, mapPos.y);
+                        contextMenu.openAt(titleElement.text, model, mapPos.x, mapPos.y);
                     }
                 }
             }

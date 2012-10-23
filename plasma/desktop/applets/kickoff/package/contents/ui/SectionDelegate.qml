@@ -18,42 +18,31 @@
 */
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.plasma.kickoff 0.1 as Kickoff
-import org.kde.draganddrop 1.0
 
 
-PlasmaComponents.Page {
-    property alias model: kickoffListView.model
-
-    function decrementCurrentIndex() {
-        kickoffListView.decrementCurrentIndex();
+Item {
+    id: sectionDelegate
+    width: parent.width
+    height: childrenRect.height
+    PlasmaCore.SvgItem {
+        visible: sectionDelegate.y > 0
+        svg: lineSvg
+        elementId: "horizontal-line"
+        anchors {
+            left: parent.left
+            right: parent.right
+        }
+        height: lineSvg.elementSize("horizontal-line").height
     }
-    function incrementCurrentIndex() {
-        kickoffListView.incrementCurrentIndex();
-    }
-    function activateCurrentIndex() {
-        kickoffListView.currentItem.activate();
-    }
-
-    PlasmaExtras.ScrollArea {
-        anchors.fill: parent
-        ListView {
-            id: kickoffListView
-            interactive: contentHeight > height
-
-
-            anchors.fill: parent
-            delegate: KickoffItem {}
-
-            section {
-                property: "group"
-                criteria: ViewSection.FullString
-                delegate: SectionDelegate {}
-            }
-            highlight: PlasmaComponents.Highlight {
-            }
+    PlasmaComponents.Label {
+        y: 2
+        opacity: 0.6
+        text: section
+        horizontalAlignment: Text.AlignHCenter
+        anchors {
+            left: parent.left
+            right: parent.right
         }
     }
 }

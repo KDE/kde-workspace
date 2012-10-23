@@ -24,44 +24,18 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 BaseView {
     objectName: "RecentlyUsedView"
 
-    PlasmaComponents.ContextMenu {
+    ContextMenu {
         id: contextMenu
 
-        property string title
-        property variant icon
-        property string url
-        property bool favorite: favoritesModel.isFavorite(contextMenu.url)
-
-        function openAt(title, icon, url, x, y) {
-            contextMenu.title = title
-            contextMenu.icon = icon
-            contextMenu.url = url
-            open(x, y)
-        }
-
-        /*
-        * context menu items
-        */
-        PlasmaComponents.MenuItem {
-            id: titleMenuItem
-            text: contextMenu.title
-            icon: contextMenu.icon
-            font.bold: true
-            checkable: false
-        }
-        PlasmaComponents.MenuItem {
-            id: titleSeparator
-            separator: true
-        }
         PlasmaComponents.MenuItem {
             id: addToFavorites
             text: contextMenu.favorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
             icon: contextMenu.favorite ? QIcon("list-remove") : QIcon("bookmark-new")
             onClicked: {
                 if (contextMenu.favorite) {
-                    favoritesModel.remove(contextMenu.url);
+                    favoritesModel.remove(contextMenu.model.url);
                 } else {
-                    favoritesModel.add(contextMenu.url);
+                    favoritesModel.add(contextMenu.model.url);
                 }
             }
         }
@@ -72,7 +46,7 @@ BaseView {
             onClicked: {
                 var service = packagekitSource.serviceForSource("Status")
                 var operation = service.operationDescription("uninstallApplication")
-                operation.Url = contextMenu.url;
+                operation.Url = contextMenu.model.url;
                 var job = service.startOperationCall(operation)
             }
         }

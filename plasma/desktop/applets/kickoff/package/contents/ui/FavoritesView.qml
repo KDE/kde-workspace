@@ -37,37 +37,16 @@ PlasmaComponents.Page {
     function activateCurrentIndex() {
         kickoffListView.currentItem.activate();
     }
-    PlasmaComponents.ContextMenu {
+
+    ContextMenu {
         id: contextMenu
 
-        property string title
-        property variant icon
-        property string url
-
-        function openAt(title, icon, url, x, y) {
-            contextMenu.title = title
-            contextMenu.icon = icon
-            contextMenu.url = url
-            open(x, y)
-        }
-
-        PlasmaComponents.MenuItem {
-            id: titleMenuItem
-            text: contextMenu.title
-            icon: contextMenu.icon
-            font.bold: true
-            checkable: false
-        }
-        PlasmaComponents.MenuItem {
-            id: titleSeparator
-            separator: true
-        }
         PlasmaComponents.MenuItem {
             id: removeFromFavorites
             text: i18n("Remove From Favorites")
             icon: QIcon("list-remove")
             onClicked: {
-                favoritesModel.remove(contextMenu.url);
+                favoritesModel.remove(contextMenu.model.url);
             }
         }
         PlasmaComponents.MenuItem {
@@ -77,7 +56,7 @@ PlasmaComponents.Page {
             onClicked: {
                 var service = packagekitSource.serviceForSource("Status")
                 var operation = service.operationDescription("uninstallApplication")
-                operation.Url = contextMenu.url;
+                operation.Url = contextMenu.model.url;
                 var job = service.startOperationCall(operation)
             }
         }
@@ -102,6 +81,7 @@ PlasmaComponents.Page {
             }
         }
     }
+
     PlasmaExtras.ScrollArea {
         id: scrollArea
         anchors.fill: parent

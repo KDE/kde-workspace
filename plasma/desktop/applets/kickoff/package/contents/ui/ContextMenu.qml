@@ -18,9 +18,38 @@
 */
 import QtQuick 1.1
 import org.kde.plasma.kickoff 0.1 as Kickoff
+import org.kde.plasma.components 0.1 as PlasmaComponents
 
 
-BaseView {
-    objectName: "LeaveView"
-    model: Kickoff.LeaveModel {}
+
+PlasmaComponents.ContextMenu {
+    id: contextMenu
+
+    property string title
+    property variant model
+    property bool favorite: favoritesModel.isFavorite(contextMenu.model.url)
+
+    function openAt(title, model, x, y) {
+        contextMenu.title = title
+        contextMenu.model = model
+        open(x, y)
+    }
+
+    /*
+    * context menu items
+    */
+    PlasmaComponents.MenuItem {
+        id: titleMenuItem
+        text: contextMenu.title
+        icon: contextMenu.model.decoration
+        font.bold: true
+        checkable: false
+    }
+    PlasmaComponents.MenuItem {
+        id: titleSeparator
+        separator: true
+    }
+
+
 }
+
