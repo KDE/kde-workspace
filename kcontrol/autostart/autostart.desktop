@@ -100,7 +100,7 @@ Name[x-test]=xxAutostartxx
 Name[zh_CN]=自动启动
 Name[zh_TW]=自動啟動
 
-Comment=A configuration tool for managing which programs start up automatically with KDE.
+Comment=Manage which programs start up automatically with KDE.
 Comment[ca]=Una eina de configuració per a gestionar els programes que s'iniciaran automàticament amb el KDE.
 Comment[cs]=Konfigurační nástroj pro správu automatického spouštění programů při startu KDE.
 Comment[da]=Et konfigurationsværktøj til håndtering af hvilke programmer der starter automatisk op sammen med KDE.

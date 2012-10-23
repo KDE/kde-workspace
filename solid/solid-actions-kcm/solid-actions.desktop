@@ -80,7 +80,7 @@ Name[x-test]=xxDevice Actionsxx
 Name[zh_CN]=设备动作
 Name[zh_TW]=裝置動作
 
-Comment=A configuration tool for managing the actions available to the user when connecting new devices to the computer
+Comment=Manage actions available to the user when connecting new devices
 Comment[ar]=أداة ضبط لإدارة الإجراءات المتوفرة للمستخدم عندما يصل أجهزة جديدة بالحاسوب.
 Comment[ast]=Una ferramienta de configuración pa xestionar les aiciones disponibles pal usuariu cuando coneuta preseos nuevos al ordenador
 Comment[bg]=Инструмент за настройване на възможните действия при свързване на нови устройства към компютъра
