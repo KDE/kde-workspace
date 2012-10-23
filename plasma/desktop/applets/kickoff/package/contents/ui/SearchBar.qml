@@ -45,13 +45,22 @@ Item {
         }
     }
 
+    PlasmaComponents.Label {
+        id: searchLabel
+        text: i18n("Search:")
+        anchors {
+            left: searchIcon.right
+            verticalCenter: parent.verticalCenter
+            leftMargin: y
+        }
+    }
     PlasmaComponents.TextField {
         id: searchField
 
         placeholderText: i18nc("Search field placeholder text", "Search")
         clearButtonShown: true
         anchors {
-            left: searchIcon.right
+            left: searchLabel.right
             right: parent.right
             verticalCenter: parent.verticalCenter
             leftMargin: y
