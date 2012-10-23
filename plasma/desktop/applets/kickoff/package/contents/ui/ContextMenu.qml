@@ -33,7 +33,6 @@ PlasmaComponents.ContextMenu {
     function openAt(title, model, x, y) {
         contextMenu.title = title
         contextMenu.model = model
-        isFavorite = favoritesModel.isFavoritez(contextMenu.model.url)
 
         open(x, y)
     }
