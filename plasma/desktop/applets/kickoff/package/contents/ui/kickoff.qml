@@ -35,11 +35,11 @@ Item {
     state: "Normal"
     focus: true
     onFocusChanged: {
-        searchField.forceActiveFocus();
+        searchBar.focus = true;
     }
 
     Component.onCompleted: {
-        searchField.forceActiveFocus();
+        searchBar.focus = true;
     }
 
     PlasmaCore.DataSource {
@@ -57,9 +57,8 @@ Item {
         imagePath: "widgets/line"
     }
 
-    Item {
+    SearchBar {
         id: searchBar
-        height: 32
         anchors {
             top: {
                 switch (kickoff.location) {
@@ -83,73 +82,6 @@ Item {
             }
             right: parent.right
             left: parent.left
-        }
-        QIconItem {
-            id: searchIcon
-            icon: QIcon("system-search")
-            height: 32
-            width: 32
-            anchors {
-                top: {
-                    switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                        return undefined;
-                    // bottom
-                    default:
-                        return parent.top;
-                    }
-                }
-                bottom: {
-                    switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                        return undefined;
-                    // bottom
-                    default:
-                        return parent.bottom;
-                    }
-                }
-                left: parent.left
-            }
-        }
-
-        PlasmaComponents.TextField {
-            id: searchField
-
-            placeholderText: i18nc("Search field placeholder text", "Search")
-            clearButtonShown: true
-            anchors {
-                left: searchIcon.right
-                right: parent.right
-                top: {
-                    switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                        return undefined;
-                    // bottom
-                    default:
-                        return parent.top;
-                    }
-                }
-                bottom: {
-                    switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                        return undefined;
-                    // bottom
-                    default:
-                        return parent.bottom;
-                    }
-                }
-                leftMargin: 5
-            }
-            onTextChanged: {
-                if (root.state != "Search") {
-                    root.previousState = root.state;
-                    root.state = "Search";
-                }
-                if (text == "") {
-                    root.state = root.previousState;
-                    root.forceActiveFocus();
-                }
-            }
         }
     }
 
@@ -323,8 +255,8 @@ Item {
         }
         else { // forward key to searchView
             if (event.text != "") {
-                searchField.text += event.text;
-                searchField.forceActiveFocus();
+                searchBar.text += event.text;
+                searchBar.focus = true;
             }
             event.accepted = true;
         }
@@ -357,12 +289,12 @@ Item {
         Transition {
             from: "*"
             to: "Search"
-            ScriptAction {script: currentView.push(Qt.createComponent("SearchView.qml"));}
+            ScriptAction {script: mainStack.push(Qt.createComponent("SearchView.qml"));}
         },
         Transition {
             from: "Search"
             to: "*"
-            ScriptAction {script: currentView.pop();}
+            ScriptAction {script: mainStack.pop();}
         }
     ]
 }

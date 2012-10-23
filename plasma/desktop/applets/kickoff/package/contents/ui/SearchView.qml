@@ -45,9 +45,9 @@ Item {
             delegate: KickoffItem {}
             highlight: PlasmaComponents.Highlight {}
             Connections {
-                target: searchField
-                onTextChanged: {
-                    searchView.model.setQuery(searchField.text)
+                target: searchBar
+                onQueryChanged: {
+                    searchView.model.setQuery(searchBar.query)
                 }
             }
         }
