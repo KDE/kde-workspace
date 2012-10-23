@@ -45,6 +45,7 @@ PlasmaComponents.ContextMenu {
         icon: contextMenu.model.decoration
         font.bold: true
         checkable: false
+        enabled: false
     }
     PlasmaComponents.MenuItem {
         id: titleSeparator

@@ -125,6 +125,7 @@ Item {
                     text: index
                 }
             MouseArea {
+                id: mouseArea
                 anchors.fill: parent
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -132,16 +133,16 @@ Item {
                     listItem.ListView.view.currentIndex = index;
                 }
                 onClicked: {
-                    if (mouse.button == Qt.LeftButton)
+                    if (mouse.button == Qt.LeftButton) {
                         activate();
-                    else if (mouse.button == Qt.RightButton) {
+                    } else if (mouse.button == Qt.RightButton) {
                         // don't show a context menu for container
                         if (hasModelChildren || typeof(contextMenu) === "undefined") {
                             return;
                         }
 
-                        var mapPos = listItem.mapToItem(listItem, mouse.x, mouse.y);
-                        contextMenu.openAt(titleElement.text, model, mapPos.x, mapPos.y);
+                        contextMenu.visualParent = mouseArea
+                        contextMenu.openAt(titleElement.text, model, mouse.x, mouse.y);
                     }
                 }
             }
