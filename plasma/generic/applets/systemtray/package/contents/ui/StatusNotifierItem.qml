@@ -195,11 +195,11 @@ Item {
 
     // Functions =======================================================================================================
     function __getDefaultIcon() {
-        return svg.isValid() ? svg.icon : ( __icon_name ? QIcon(__icon_name) : __icon)
+        return svg.isValid() ? svg.icon : __icon
     }
 
     function __getAttentionIcon() {
-        return svg_att.isValid() ? svg_att.icon : (__att_icon_name ? QIcon(__att_icon_name) : __att_icon)
+        return svg_att.isValid() ? svg_att.icon : __att_icon
     }
 
     function __processClick(buttons, item) {
