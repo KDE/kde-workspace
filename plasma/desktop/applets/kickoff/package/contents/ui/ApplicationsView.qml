@@ -26,8 +26,6 @@ Item {
     id: appViewContainer
     objectName: "ApplicationsView"
 
-    property variant favoritesModel
-
     function decrementCurrentIndex() {
         applicationsView.decrementCurrentIndex();
     }
@@ -36,6 +34,62 @@ Item {
     }
 
     anchors.fill: parent
+
+    PlasmaComponents.ContextMenu {
+        id: contextMenu
+
+        property string title
+        property variant icon
+        property string url
+        property bool favorite: favoritesModel.isFavorite(contextMenu.url)
+
+        function openAt(title, icon, url, x, y) {
+            contextMenu.title = title
+            contextMenu.icon = icon
+            contextMenu.url = url
+            open(x, y)
+        }
+
+        /*
+        * context menu items
+        */
+        PlasmaComponents.MenuItem {
+            id: titleMenuItem
+            text: contextMenu.title
+            icon: contextMenu.icon
+            font.bold: true
+            checkable: false
+        }
+        PlasmaComponents.MenuItem {
+            id: titleSeparator
+            separator: true
+        }
+        PlasmaComponents.MenuItem {
+            id: addToFavorites
+            text: contextMenu.favorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
+            icon: contextMenu.favorite ? QIcon("list-remove") : QIcon("bookmark-new")
+            onClicked: {
+                if (contextMenu.favorite) {
+                    favoritesModel.remove(contextMenu.url);
+                } else {
+                    favoritesModel.add(contextMenu.url);
+                }
+            }
+        }
+        PlasmaComponents.MenuItem {
+            id: uninstallApp
+            text: i18n("Uninstall")
+            enabled: packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]
+            onClicked: {
+                var service = packagekitSource.serviceForSource("Status")
+                var operation = service.operationDescription("uninstallApplication")
+                operation.Url = contextMenu.url;
+                var job = service.startOperationCall(operation)
+            }
+        }
+    }
+
+
     PlasmaComponents.ButtonRow {
         id: breadcrumbsElement
         exclusive: false
@@ -73,7 +127,6 @@ Item {
             focus: true
 
             property variant breadcrumbs: breadcrumbsElement
-            property alias favoritesModel: appViewContainer.favoritesModel
 
             function addBreadcrumb(modelIndex, title) {
                 crumbModel.append({"text": title, "modelIndex": modelIndex, "depth": crumbModel.count+1})

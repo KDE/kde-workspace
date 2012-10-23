@@ -37,6 +37,71 @@ PlasmaComponents.Page {
     function activateCurrentIndex() {
         kickoffListView.currentItem.activate();
     }
+    PlasmaComponents.ContextMenu {
+        id: contextMenu
+
+        property string title
+        property variant icon
+        property string url
+
+        function openAt(title, icon, url, x, y) {
+            contextMenu.title = title
+            contextMenu.icon = icon
+            contextMenu.url = url
+            open(x, y)
+        }
+
+        PlasmaComponents.MenuItem {
+            id: titleMenuItem
+            text: contextMenu.title
+            icon: contextMenu.icon
+            font.bold: true
+            checkable: false
+        }
+        PlasmaComponents.MenuItem {
+            id: titleSeparator
+            separator: true
+        }
+        PlasmaComponents.MenuItem {
+            id: removeFromFavorites
+            text: i18n("Remove From Favorites")
+            icon: QIcon("list-remove")
+            onClicked: {
+                favoritesModel.remove(contextMenu.url);
+            }
+        }
+        PlasmaComponents.MenuItem {
+            id: uninstallApp
+            text: i18n("Uninstall")
+            enabled: packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]
+            onClicked: {
+                var service = packagekitSource.serviceForSource("Status")
+                var operation = service.operationDescription("uninstallApplication")
+                operation.Url = contextMenu.url;
+                var job = service.startOperationCall(operation)
+            }
+        }
+        PlasmaComponents.MenuItem {
+            id: actionsSeparator
+            separator: true
+        }
+        PlasmaComponents.MenuItem {
+            id: sortFavoritesAscending
+            text: i18n("Sort Alphabetically (A to Z)")
+            icon: QIcon("view-sort-ascending")
+            onClicked: {
+                favoritesModel.sortFavoritesAscending();
+            }
+        }
+        PlasmaComponents.MenuItem {
+            id: sortFavoritesDescending
+            text: i18n("Sort Alphabetically (Z to A)")
+            icon: QIcon("view-sort-descending")
+            onClicked: {
+                favoritesModel.sortFavoritesDescending();
+            }
+        }
+    }
     PlasmaExtras.ScrollArea {
         id: scrollArea
         anchors.fill: parent
@@ -44,9 +109,7 @@ PlasmaComponents.Page {
             id: kickoffListView
             anchors.fill: parent
             interactive: contentHeight > height
-            model: Kickoff.FavoritesModel {
-                
-            }
+            model: favoritesModel
 
             delegate: KickoffItem {}
 

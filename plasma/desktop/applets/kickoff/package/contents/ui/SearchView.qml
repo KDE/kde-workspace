@@ -24,7 +24,6 @@ import org.kde.plasma.kickoff 0.1 as Kickoff
 Item {
     id: searchViewContainer
     objectName: "SearchView"
-    property variant favoritesModel
 
     function decrementCurrentIndex() {
         searchView.decrementCurrentIndex();
@@ -40,8 +39,6 @@ Item {
         anchors.fill: parent
         ListView {
             id: searchView
-
-            property alias favoritesModel: searchViewContainer.favoritesModel
 
             anchors.fill: parent
             model: Kickoff.KRunnerModel{}

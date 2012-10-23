@@ -63,7 +63,7 @@ Item {
         PlasmaComponents.Label {
             id: titleElement
             text: {
-                if (root.state == "APPLICATIONS") {
+                if (root.state == "Applications") {
                     if (hasModelChildren) {
                         return display;
                     } else {
@@ -85,7 +85,7 @@ Item {
         PlasmaComponents.Label {
             id: subTitleElement
             text: {
-                if (root.state == "APPLICATIONS") {
+                if (root.state == "Applications") {
                     if (hasModelChildren) {
                         return "";
                     } else {
@@ -114,121 +114,6 @@ Item {
             }
         }
 
-        property Item contextMenu
-        Component {
-            id: contextMenuComponent
-            Item {
-                property QtObject menu: PlasmaComponents.ContextMenu {
-                    id: contextMenu
-                }
-                
-                Component.onCompleted: {
-                    contextMenu.addMenuItem(titleMenuItem)
-                    contextMenu.addMenuItem(titleSeparator)
-
-                    if (listItem.ListView.view.favoritesModel.isFavorite(model["url"]))
-                        contextMenu.addMenuItem(removeFromFavorites)
-                    else {
-                        if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel ||
-                            root.state == "APPLICATIONS" ||
-                            root.state == "SEARCH") {
-                            contextMenu.addMenuItem(addToFavorites);
-                        }
-                    }
-
-                    if (packagekitSource.data["Status"] && packagekitSource.data["Status"]["available"]) {
-                        contextMenu.addMenuItem(uninstallApp);
-                    }
-
-                    if (root.state == "NORMAL") {
-                        contextMenu.addMenuItem(actionsSeparator)
-                        if (listItem.ListView.view.model == listItem.ListView.view.favoritesModel) {
-                            contextMenu.addMenuItem(sortFavoritesAscending)
-                            contextMenu.addMenuItem(sortFavoritesDescending)
-                        } else if (listItem.ListView.view.model == listItem.ListView.view.recentlyUsedModel) {
-                            contextMenu.addMenuItem(clearRecentApplications);
-                            contextMenu.addMenuItem(clearRecentDocuments);
-                        }
-                    }
-                }
-                /*
-                * context menu items
-                */
-                PlasmaComponents.MenuItem {
-                    id: titleMenuItem
-                    text: titleElement.text
-                    icon: decoration
-                    font.bold: true
-                    checkable: false
-                }
-                PlasmaComponents.MenuItem {
-                    id: titleSeparator
-                    separator: true
-                }
-                PlasmaComponents.MenuItem {
-                    id: actionsSeparator
-                    separator: true
-                }
-                PlasmaComponents.MenuItem {
-                    id: addToFavorites
-                    text: i18n("Add To Favorites")
-                    icon: QIcon("bookmark-new")
-                    onClicked: {
-                        listItem.ListView.view.favoritesModel.add(model["url"]);
-                    }
-                }
-                PlasmaComponents.MenuItem {
-                    id: removeFromFavorites
-                    text: i18n("Remove From Favorites")
-                    icon: QIcon("list-remove")
-                    onClicked: {
-                        listItem.ListView.view.favoritesModel.remove(model["url"]);
-                    }
-                }
-                PlasmaComponents.MenuItem {
-                    id: sortFavoritesAscending
-                    text: i18n("Sort Alphabetically (A to Z)")
-                    icon: QIcon("view-sort-ascending")
-                    onClicked: {
-                        listItem.ListView.view.favoritesModel.sortFavoritesAscending();
-                    }
-                }
-                PlasmaComponents.MenuItem {
-                    id: sortFavoritesDescending
-                    text: i18n("Sort Alphabetically (Z to A)")
-                    icon: QIcon("view-sort-descending")
-                    onClicked: {
-                        listItem.ListView.view.favoritesModel.sortFavoritesDescending();
-                    }
-                }
-                PlasmaComponents.MenuItem {
-                    id: clearRecentApplications
-                    text: i18n("Clear Recent Applications")
-                    icon: QIcon("edit-clear-history")
-                    onClicked: {
-                        listItem.ListView.view.recentlyUsedModel.clearRecentApplications();
-                    }
-                }
-                PlasmaComponents.MenuItem {
-                    id: clearRecentDocuments
-                    text: i18n("Clear Recent Documents")
-                    icon: QIcon("edit-clear-history")
-                    onClicked: {
-                        listItem.ListView.view.recentlyUsedModel.clearRecentDocuments();
-                    }
-                }
-                PlasmaComponents.MenuItem {
-                    id: uninstallApp
-                    text: i18n("Uninstall")
-                    onClicked: {
-                        var service = packagekitSource.serviceForSource("Status")
-                        var operation = service.operationDescription("uninstallApplication")
-                        operation.Url = model["url"];
-                        var job = service.startOperationCall(operation)
-                    }
-                }
-            }
-        }
 
         DragArea {
             anchors.fill: parent
@@ -251,14 +136,12 @@ Item {
                         activate();
                     else if (mouse.button == Qt.RightButton) {
                         // don't show a context menu for container
-                        if (hasModelChildren)
+                        if (hasModelChildren) {
                             return;
-
-                        if (!listItemDelegate.contextMenu) {
-                            contextMenu = contextMenuComponent.createObject(listItem).menu
                         }
+
                         var mapPos = listItem.mapToItem(listItem, mouse.x, mouse.y);
-                        contextMenu.open(mapPos.x,mapPos.y);
+                        contextMenu.openAt(titleElement.text, decoration, model["url"], mapPos.x, mapPos.y);
                     }
                 }
             }

@@ -263,6 +263,10 @@ Item {
     }
 */
 
+    Kickoff.FavoritesModel {
+        id: favoritesModel
+    }
+
     Timer {
         id: clickTimer
         interval: 250
