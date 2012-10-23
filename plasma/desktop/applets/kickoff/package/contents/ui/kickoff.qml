@@ -121,22 +121,22 @@ Item {
         PlasmaExtras.ConditionalLoader {
             id: applicationsPage
             when: mainStack.currentTab == applicationsPage
-            source: Qt.createComponent("ApplicationsView.qml")
+            source: Qt.resolvedUrl("ApplicationsView.qml")
         }
         PlasmaExtras.ConditionalLoader {
             id: systemPage
             when: mainStack.currentTab == systemPage
-            source: Qt.createComponent("SystemView.qml")
+            source: Qt.resolvedUrl("SystemView.qml")
         }
         PlasmaExtras.ConditionalLoader {
             id: recentlyUsedPage
             when: mainStack.currentTab == recentlyUsedPage
-            source: Qt.createComponent("RecentlyUsedView.qml")
+            source: Qt.resolvedUrl("RecentlyUsedView.qml")
         }
         PlasmaExtras.ConditionalLoader {
             id: leavePage
             when: mainStack.currentTab == leavePage
-            source: Qt.createComponent("LeaveView.qml")
+            source: Qt.resolvedUrl("LeaveView.qml")
         }
     }
 
