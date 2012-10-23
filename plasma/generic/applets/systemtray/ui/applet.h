@@ -3,6 +3,7 @@
  *                                                                         *
  *   Copyright (C) 2008 Jason Stubbs <jasonbstubbs@gmail.com>              *
  *   Copyright (C) 2010 Marco Martin <notmart@gmail.com>                   *
+ *   Copyright (C) 2012 Dmitry Ashkadov <dmitry.ashkadov@gmail.com>        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +24,7 @@
 #ifndef APPLET_H
 #define APPLET_H
 
-#include <plasma/popupapplet.h>
+#include <KDE/Plasma/Applet>
 
 #include "ui_autohide.h"
 #include "ui_visibleitems.h"
@@ -35,6 +36,7 @@ namespace Plasma
 class ExtenderItem;
 class TabBar;
 class Dialog;
+class DeclarativeWidget;
 }
 
 class QStandardItemModel;
@@ -44,8 +46,11 @@ namespace SystemTray
 
 class Manager;
 class TaskArea;
+class Plasmoid;
+class TasksPool;
+class UiTask;
 
-class Applet : public Plasma::PopupApplet
+class Applet : public Plasma::Applet
 {
     Q_OBJECT
     Q_PROPERTY(bool firstRun READ isFirstRun)
@@ -55,17 +60,14 @@ public:
     ~Applet();
 
     void init();
-    QGraphicsWidget *graphicsWidget();
     void constraintsEvent(Plasma::Constraints constraints);
     Manager *manager() const;
     QSet<Task::Category> shownCategories() const;
     bool isFirstRun();
 
 protected:
-    void paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect);
     void createConfigurationInterface(KConfigDialog *parent);
     void configChanged();
-    void popupEvent(bool show);
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event); }
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event); }
@@ -76,23 +78,31 @@ private Q_SLOTS:
     void configAccepted();
     void unlockContainment();
     void propogateSizeHintChange(Qt::SizeHint which);
-    void themeChanged();
-    void checkSizes();
     void checkDefaultApplets();
+
+    void _onAddedTask(SystemTray::Task*);
+    void _onChangedTask(SystemTray::Task*);
+    void _onRemovedTask(SystemTray::Task*);
+
+    void _onWidgetCreationFinished();
+
+private:
+    void _updateHideState(UiTask *ui_task) const;
+    QString _getActionName(Task *task) const;
 
 private:
     static SystemTray::Manager *s_manager;
     static int s_managerUsage;
 
-    TaskArea *m_taskArea;
-    TaskArea *m_hiddenTaskArea;
     QWeakPointer<QWidget> m_autoHideInterface;
     QWeakPointer<QWidget> m_visibleItemsInterface;
     QSet<Task::Category> m_shownCategories;
+    QSet<QString> m_hiddenTypes;
+    QSet<QString> m_alwaysShownTypes;
     QDateTime m_lastActivity;
-
-    Plasma::FrameSvg *m_background;
-    Plasma::Svg *m_icons;
+    Plasmoid *m_plasmoid;
+    TasksPool *m_tasksPool;
+    Plasma::DeclarativeWidget *m_widget;
 
     Ui::AutoHideConfig m_autoHideUi;
     Ui::VisibleItemsConfig m_visibleItemsUi;

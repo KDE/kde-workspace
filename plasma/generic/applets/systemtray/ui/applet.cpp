@@ -22,63 +22,65 @@
  ***************************************************************************/
 
 #include "applet.h"
+#include "plasmoid.h"
+#include "taskspool.h"
+#include "uitask.h"
+#include "widgetitem.h"
+#include "mouseredirectarea.h"
 
-#include <QtCore/QProcess>
+#include "../protocols/dbussystemtray/dbussystemtraytask.h"
+
 #include <QtCore/QTimer>
-#include <QtGui/QApplication>
-#include <QtGui/QGraphicsLayout>
 #include <QtGui/QGraphicsLinearLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QIcon>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QCheckBox>
-#include <QtGui/QPainter>
-#include <QtGui/QX11Info>
-#include <QStandardItemModel>
-#include <QStyledItemDelegate>
+#include <QtGui/QStandardItemModel>
+#include <QtDeclarative/QDeclarativeError>
+#include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeComponent>
 
-
+#include <KDE/KStandardDirs>
 #include <KAction>
 #include <KConfigDialog>
 #include <KComboBox>
-#include <KWindowSystem>
-#include <KCategorizedView>
 #include <KCategorizedSortFilterProxyModel>
 #include <KCategoryDrawer>
 #include <KKeySequenceWidget>
 
-#include <Solid/Device>
-
-#include <plasma/extender.h>
-#include <plasma/extenderitem.h>
-#include <plasma/extendergroup.h>
-#include <plasma/framesvg.h>
-#include <plasma/widgets/label.h>
-#include <plasma/theme.h>
 #include <plasma/dataenginemanager.h>
-#include <plasma/dataengine.h>
-#include <Plasma/TabBar>
-#include <Plasma/Containment>
 #include <Plasma/Corona>
 #include <Plasma/IconWidget>
-#include <Plasma/Dialog>
-#include <Plasma/WindowEffects>
+#include <KDE/Plasma/DeclarativeWidget>
 
 #include "config.h"
 
 #include "../core/manager.h"
-#include "taskarea.h"
 
 static const bool DEFAULT_SHOW_APPS = true;
 static const bool DEFAULT_SHOW_COMMUNICATION = true;
 static const bool DEFAULT_SHOW_SERVICES = true;
 static const bool DEFAULT_SHOW_HARDWARE = true;
 static const bool DEFAULT_SHOW_UNKNOWN = true;
+static const char KlipperName[] = "Klipper";
 
 namespace SystemTray
 {
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+namespace
+{
+
+static void _RegisterEnums(QDeclarativeContext *context, const QMetaObject &meta)
+{
+    for (int i = 0, s = meta.enumeratorCount(); i < s; ++i) {
+        QMetaEnum e = meta.enumerator(i);
+        for (int i = 0, s = e.keyCount(); i < s; ++i) {
+            context->setContextProperty(e.key(i), e.value(i));
+        }
+    }
+}
+
+} // namespace
 
 
 K_EXPORT_PLASMA_APPLET(systemtray, Applet)
@@ -88,9 +90,10 @@ Manager *Applet::s_manager = 0;
 int Applet::s_managerUsage = 0;
 
 Applet::Applet(QObject *parent, const QVariantList &arguments)
-    : Plasma::PopupApplet(parent, arguments),
-      m_taskArea(0),
-      m_background(0),
+    : Plasma::Applet(parent, arguments),
+      m_plasmoid(new Plasmoid(this)),
+      m_tasksPool(new TasksPool(this)),
+      m_widget(0),
       m_firstRun(true)
 {
     if (!s_manager) {
@@ -99,46 +102,15 @@ Applet::Applet(QObject *parent, const QVariantList &arguments)
 
     ++s_managerUsage;
 
-    QGraphicsLinearLayout *lay = new QGraphicsLinearLayout(this);
-    lay->setContentsMargins(0, 0, 0, 0);
-    m_background = new Plasma::FrameSvg(this);
-    m_background->setImagePath("widgets/systemtray");
-    m_background->setCacheAllRenderedFrames(true);
-    m_taskArea = new TaskArea(this);
-    lay->addItem(m_taskArea);
-    connect(m_taskArea, SIGNAL(toggleHiddenItems()), this, SLOT(togglePopup()));
-
-    m_icons = new Plasma::Svg(this);
-    m_icons->setImagePath("widgets/configuration-icons");
-
-    setPopupIcon(QIcon());
-    setPassivePopup(false);
-    setPopupAlignment(Qt::AlignRight);
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setHasConfigurationInterface(true);
-
-    connect(s_manager, SIGNAL(taskAdded(SystemTray::Task*)),
-            m_taskArea, SLOT(addTask(SystemTray::Task*)));
-    //TODO: we re-add the task when it changed: slightly silly!
-    connect(s_manager, SIGNAL(taskChanged(SystemTray::Task*)),
-            m_taskArea, SLOT(addTask(SystemTray::Task*)));
-    connect(s_manager, SIGNAL(taskRemoved(SystemTray::Task*)),
-            m_taskArea, SLOT(removeTask(SystemTray::Task*)));
-
-    connect(m_taskArea, SIGNAL(sizeHintChanged(Qt::SizeHint)),
-            this, SLOT(propogateSizeHintChange(Qt::SizeHint)));
-
-    connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()),
-            this, SLOT(themeChanged()));
+    connect(this, SIGNAL(activate()), m_plasmoid, SIGNAL(activated()));
 }
 
 Applet::~Applet()
 {
     // stop listening to the manager
     disconnect(s_manager, 0, this, 0);
-
-    // remove the taskArea so we can delete the widgets without it going nuts on us
-    delete m_taskArea;
 
     foreach (Task *task, s_manager->tasks()) {
         // we don't care about the task updates anymore
@@ -147,8 +119,13 @@ Applet::~Applet()
         // delete our widget (if any); some widgets (such as the extender info one)
         // may rely on the applet being around, so we need to delete them here and now
         // while we're still kicking
-        delete task->widget(this, false);
+        if (task->isWidget())
+            delete task->widget(this, false);
     }
+
+    delete m_widget;
+    delete m_tasksPool;
+    delete m_plasmoid;
 
     --s_managerUsage;
     if (s_managerUsage < 1) {
@@ -160,27 +137,219 @@ Applet::~Applet()
 
 void Applet::init()
 {
+    // First of all, we have to register new QML types because they won't be registered later
+    qmlRegisterType<WidgetItem>("Private", 0, 1, "WidgetItem");
+    qmlRegisterType<MouseRedirectArea>("Private", 0, 1, "MouseRedirectArea");
+
+    // Find data directory
+    KStandardDirs std_dirs;
+    QStringList dirs = std_dirs.findDirs("data", SYSTEMTRAY_DATA_INSTALL_DIR);
+    QString data_path;
+    if (!dirs.isEmpty()) {
+        data_path = dirs.at(0);
+    } else {
+        setFailedToLaunch(true, "Data directory for applet isn't found");
+        return;
+    }
+
+    // Create declarative engine, etc
+    m_widget = new Plasma::DeclarativeWidget(this);
+    m_widget->setInitializationDelayed(true);
+    connect(m_widget, SIGNAL(finished()), this, SLOT(_onWidgetCreationFinished()));
+    m_widget->setQmlPath(data_path + QString::fromLatin1("contents/ui/main.qml"));
+
+    if (!m_widget->engine() || !m_widget->engine()->rootContext() || !m_widget->engine()->rootContext()->isValid()
+            || m_widget->mainComponent()->isError()) {
+        QString reason;
+        foreach (QDeclarativeError error, m_widget->mainComponent()->errors()) {
+            reason += error.toString();
+        }
+        setFailedToLaunch(true, reason);
+        return;
+    }
+
+    // setup context add global object "plasmoid"
+    QDeclarativeContext *root_context = m_widget->engine()->rootContext();
+    root_context->setContextProperty("plasmoid", m_plasmoid);
+    root_context->setContextProperty("tasks_pool", m_tasksPool);
+
+    // add enumerations manually to global context
+    _RegisterEnums(root_context, Plasmoid::staticMetaObject);
+    _RegisterEnums(root_context, UiTask::staticMetaObject);
+
+    // add declarative widget to our applet
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addItem(m_widget);
 }
+
+
+void Applet::_onAddedTask(Task *task)
+{
+    if (task->isWidget()) {
+        // If task is presented as a widget then we should check that widget
+        if (!task->isEmbeddable(this)) {
+            //was a widget created previously? kill it
+            QGraphicsWidget *widget = task->widget(this, false);
+            if (widget) {
+                task->abandon(this);
+            }
+            return;
+        }
+
+        QGraphicsWidget *widget = task->widget(this);
+        if (!widget) {
+            return;
+        }
+
+        //If the applet doesn't want to show FDO tasks, remove (not just hide) any of them
+        //if the dbus icon has a category that the applet doesn't want to show remove it
+        if (!m_shownCategories.contains(task->category()) && !qobject_cast<Plasma::Applet *>(widget)) {
+            task->abandon(this);
+            return;
+        }
+    } else if (!m_shownCategories.contains(task->category())) {
+        return;
+    }
+
+    // define hide state of task
+    UiTask::TaskHideState hide_state = UiTask::TaskHideStateAuto;
+    if (m_hiddenTypes.contains(task->typeId())) {
+        hide_state = UiTask::TaskHideStateHidden;
+    } else if (m_alwaysShownTypes.contains(task->typeId())) {
+        hide_state = UiTask::TaskHideStateShown;
+    }
+
+    // add task to pool
+    m_tasksPool->addTask(task, hide_state);
+
+    DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
+    if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
+        // try to set shortcut
+        bool is_klipper = false;
+        QString default_shortcut;
+        if (dbus_task->name() == KlipperName) {
+            // for klipper we have to read its default hotkey from its config
+            is_klipper = true;
+            QString file = KStandardDirs::locateLocal("config", "kglobalshortcutsrc");
+            KConfig config(file);
+            KConfigGroup cg(&config, "klipper");
+            QStringList shortcutTextList = cg.readEntry("show_klipper_popup", QStringList());
+
+            if (shortcutTextList.size() >= 2) {
+                default_shortcut = shortcutTextList.first();
+                if (default_shortcut.isEmpty()) {
+                    default_shortcut = shortcutTextList[1];
+                }
+            }
+            if (default_shortcut.isEmpty()) {
+                default_shortcut = "Ctrl+Alt+V";
+            }
+        }
+
+        QString action_name = _getActionName(task);
+        KConfigGroup cg = config();
+        KConfigGroup shortcutsConfig = KConfigGroup(&cg, "Shortcuts");
+        QString shortcut = shortcutsConfig.readEntryUntranslated(action_name, default_shortcut);
+        dbus_task->setShortcut(shortcut);
+
+        if (is_klipper && shortcut == default_shortcut) {
+            // we have to write klipper's hotkey to config
+            if (shortcut.isEmpty())
+                shortcutsConfig.deleteEntry(action_name);
+            else
+                shortcutsConfig.writeEntry(action_name, shortcut);
+        }
+    }
+}
+
+
+void Applet::_onChangedTask(Task *task)
+{
+    UiTask *ui_task = m_tasksPool->uiTask(task);
+    if (!ui_task) {
+        _onAddedTask(task);
+        return;
+    }
+    // we need update hide state in case of changing of typeId
+    _updateHideState(ui_task);
+
+    DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
+    if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
+        // try to set shortcut
+        bool is_klipper = false;
+        QString default_shortcut;
+        if (dbus_task->name() == KlipperName) {
+            // for klipper we have to read its default hotkey from its config
+            is_klipper = true;
+            QString file = KStandardDirs::locateLocal("config", "kglobalshortcutsrc");
+            KConfig config(file);
+            KConfigGroup cg(&config, "klipper");
+            QStringList shortcutTextList = cg.readEntry("show_klipper_popup", QStringList());
+
+            if (shortcutTextList.size() >= 2) {
+                default_shortcut = shortcutTextList.first();
+                if (default_shortcut.isEmpty()) {
+                    default_shortcut = shortcutTextList[1];
+                }
+            }
+            if (default_shortcut.isEmpty()) {
+                default_shortcut = "Ctrl+Alt+V";
+            }
+        }
+        // try to set shortcut
+        QString action_name = _getActionName(task);
+        KConfigGroup cg = config();
+        KConfigGroup shortcutsConfig = KConfigGroup(&cg, "Shortcuts");
+        QString shortcut = shortcutsConfig.readEntryUntranslated(action_name, default_shortcut);
+        dbus_task->setShortcut(shortcut);
+
+        if (is_klipper && shortcut == default_shortcut) {
+            // we have to write klipper's hotkey to config
+            if (shortcut.isEmpty())
+                shortcutsConfig.deleteEntry(action_name);
+            else
+                shortcutsConfig.writeEntry(action_name, shortcut);
+        }
+    }
+}
+
+
+void Applet::_onRemovedTask(Task *task)
+{
+    //remove task from pool
+    m_tasksPool->removeTask(task);
+}
+
+
+void Applet::_onWidgetCreationFinished()
+{
+    // add already existing tasks
+    QList<Task*> tasks = s_manager->tasks();
+    foreach (Task *t, tasks) {
+        _onAddedTask(t);
+    }
+
+    connect(s_manager, SIGNAL(taskAdded(SystemTray::Task*)),   this, SLOT(_onAddedTask(SystemTray::Task*)));
+    connect(s_manager, SIGNAL(taskChanged(SystemTray::Task*)), this, SLOT(_onChangedTask(SystemTray::Task*)));
+    connect(s_manager, SIGNAL(taskRemoved(SystemTray::Task*)), this, SLOT(_onRemovedTask(SystemTray::Task*)));
+}
+
 
 bool Applet::isFirstRun()
 {
     return m_firstRun;
 }
 
-QGraphicsWidget *Applet::graphicsWidget()
-{
-    return m_taskArea->hiddenTasksWidget();
-}
 
 void Applet::configChanged()
 {
     KConfigGroup gcg = globalConfig();
     KConfigGroup cg = config();
 
-    const QStringList hiddenTypes = cg.readEntry("hidden", QStringList());
-    const QStringList alwaysShownTypes = cg.readEntry("alwaysShown", QStringList());
-    m_taskArea->setHiddenTypes(hiddenTypes);
-    m_taskArea->setAlwaysShownTypes(alwaysShownTypes);
+    m_hiddenTypes = QSet<QString>::fromList(cg.readEntry("hidden", QStringList()));
+    m_alwaysShownTypes = QSet<QString>::fromList(cg.readEntry("alwaysShown", QStringList()));
 
     m_shownCategories.clear();
 
@@ -205,39 +374,45 @@ void Applet::configChanged()
     }
 
     s_manager->loadApplets(this);
-    m_taskArea->syncTasks(s_manager->tasks());
-    checkSizes();
+
+    // change hide state for every tasks in GUI
+    QVariantHash tasks = m_tasksPool->tasks();
+    for (QVariantHash::const_iterator i = tasks.constBegin(), e = tasks.constEnd(); i != e; ++i) {
+        UiTask *ui_task = static_cast<UiTask*>(i.value().value<QObject*>());
+        _updateHideState(ui_task);
+    }
 }
 
-void Applet::popupEvent(bool)
-{
-    m_taskArea->updateUnhideToolIcon();
+
+void Applet::_updateHideState(UiTask *ui_task) const {
+    Task *task = static_cast<Task*>(ui_task->task().value<QObject*>());
+    if (task) {
+        QString task_id = task->typeId();
+        UiTask::TaskHideState state = UiTask::TaskHideStateAuto;
+        if (m_hiddenTypes.contains(task_id)) {
+            state = UiTask::TaskHideStateHidden;
+        } else if (m_alwaysShownTypes.contains(task_id)) {
+            state = UiTask::TaskHideStateShown;
+        }
+        ui_task->setHideState(state);
+    }
+}
+
+
+QString Applet::_getActionName(Task *task) const {
+    if (task->objectName().isEmpty())
+        return QString("");
+    return task->objectName() + QString("-") + QString::number(this->id());
 }
 
 void Applet::constraintsEvent(Plasma::Constraints constraints)
 {
     if (constraints & Plasma::FormFactorConstraint) {
-        QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        policy.setHeightForWidth(true);
-        bool vertical = formFactor() == Plasma::Vertical;
-
-        if (!vertical) {
-            policy.setVerticalPolicy(QSizePolicy::Expanding);
-        } else {
-            policy.setHorizontalPolicy(QSizePolicy::Expanding);
-        }
-
-        setSizePolicy(policy);
-        m_taskArea->setSizePolicy(policy);
-        m_taskArea->setOrientation(vertical ? Qt::Vertical : Qt::Horizontal);
+        m_plasmoid->setFormFactor(Plasmoid::ToFormFactor(formFactor()));
     }
 
     if (constraints & Plasma::LocationConstraint) {
-        m_taskArea->setLocation(location());
-    }
-
-    if (constraints & Plasma::SizeConstraint) {
-        checkSizes();
+        m_plasmoid->setLocation(Plasmoid::ToLocation(location()));
     }
 
     if (constraints & Plasma::ImmutableConstraint) {
@@ -267,134 +442,9 @@ QSet<Task::Category> Applet::shownCategories() const
     return m_shownCategories;
 }
 
-void Applet::themeChanged()
-{
-    checkSizes();
-    update();
-}
-
-void Applet::checkSizes()
-{
-    Plasma::FormFactor f = formFactor();
-    qreal leftMargin, topMargin, rightMargin, bottomMargin;
-    m_background->setElementPrefix(QString());
-    m_background->setEnabledBorders(Plasma::FrameSvg::AllBorders);
-    m_background->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-
-    QSizeF minSize = m_taskArea->effectiveSizeHint(Qt::MinimumSize);
-    if (f == Plasma::Horizontal && minSize.height() > size().height() - topMargin - bottomMargin) {
-        m_background->setEnabledBorders(Plasma::FrameSvg::LeftBorder | Plasma::FrameSvg::RightBorder);
-        layout()->setContentsMargins(leftMargin, 0, rightMargin, 0);
-    } else if (f == Plasma::Vertical && minSize.width() > size().width() - leftMargin - rightMargin) {
-        m_background->setEnabledBorders(Plasma::FrameSvg::TopBorder | Plasma::FrameSvg::BottomBorder);
-        layout()->setContentsMargins(0, topMargin, 0, bottomMargin);
-    } else {
-        layout()->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-    }
-
-    static_cast<QGraphicsLayoutItem*>(m_taskArea)->updateGeometry();
-
-    QSizeF preferredSize = m_taskArea->effectiveSizeHint(Qt::PreferredSize);
-
-    preferredSize.setWidth(preferredSize.width() + leftMargin + rightMargin);
-    preferredSize.setHeight(preferredSize.height() + topMargin + bottomMargin);
-    setPreferredSize(preferredSize);
-
-    QSizeF actualSize = size();
-
-    setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    if (f == Plasma::Horizontal) {
-        setMinimumSize(preferredSize.width(), 0);
-        setMaximumSize(preferredSize.width(), QWIDGETSIZE_MAX);
-    } else if (f == Plasma::Vertical) {
-        setMinimumSize(0, preferredSize.height());
-        setMaximumSize(QWIDGETSIZE_MAX, preferredSize.height());
-    } else if (f == Plasma::Planar) {
-        setMinimumSize(preferredSize);
-    }
-}
-
-
-void Applet::paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect)
-{
-    Q_UNUSED(option)
-
-    QRect normalRect = contentsRect;
-    m_background->setElementPrefix(QString());
-
-    const int leftEasement = m_taskArea->leftEasement();
-    if (leftEasement > 0)
-    {
-        QRect firstRect(normalRect);
-
-        if (formFactor() == Plasma::Vertical) {
-            int margin = m_background->marginSize(Plasma::TopMargin);
-            firstRect.setHeight(leftEasement + margin);
-            normalRect.setY(firstRect.bottom() + 1);
-        } else if (QApplication::layoutDirection() == Qt::RightToLeft) {
-            int margin = m_background->marginSize(Plasma::RightMargin);
-            normalRect.setWidth(normalRect.width() - leftEasement - margin);
-            firstRect.setX(normalRect.right() + 1);
-        } else {
-            int margin = m_background->marginSize(Plasma::LeftMargin);
-            firstRect.setWidth(leftEasement + margin);
-            normalRect.setX(firstRect.right() + 1);
-        }
-
-        if (m_background->hasElementPrefix("firstelements")) {
-            m_background->setElementPrefix("firstelements");
-        } else {
-            m_background->setElementPrefix("lastelements");
-        }
-        m_background->resizeFrame(contentsRect.size());
-
-        painter->save();
-        painter->setClipRect(firstRect, Qt::IntersectClip);
-        m_background->paintFrame(painter, contentsRect, QRectF(QPointF(0, 0), contentsRect.size()));
-        painter->restore();
-    }
-
-    const int rightEasement = m_taskArea->rightEasement();
-    if (rightEasement > 0)
-    {
-        QRect lastRect(normalRect);
-
-        if (formFactor() == Plasma::Vertical) {
-            int margin = m_background->marginSize(Plasma::BottomMargin);
-            normalRect.setHeight(normalRect.height() - rightEasement - margin);
-            lastRect.setY(normalRect.bottom() + 1);
-        } else if (QApplication::layoutDirection() == Qt::RightToLeft) {
-            int margin = m_background->marginSize(Plasma::LeftMargin);
-            lastRect.setWidth(rightEasement + margin);
-            normalRect.setX(lastRect.right() + 1);
-        } else {
-            int margin = m_background->marginSize(Plasma::RightMargin);
-            normalRect.setWidth(normalRect.width() - rightEasement - margin);
-            lastRect.setX(normalRect.right() + 1);
-        }
-
-        m_background->setElementPrefix("lastelements");
-        m_background->resizeFrame(contentsRect.size());
-
-        painter->save();
-        painter->setClipRect(lastRect, Qt::IntersectClip);
-        m_background->paintFrame(painter, contentsRect, QRectF(QPointF(0, 0), contentsRect.size()));
-        painter->restore();
-    }
-
-    m_background->setElementPrefix(QString());
-    m_background->resizeFrame(contentsRect.size());
-
-    painter->save();
-    painter->setClipRect(normalRect, Qt::IntersectClip);
-    m_background->paintFrame(painter, contentsRect, QRectF(QPointF(0, 0), contentsRect.size()));
-    painter->restore();
-}
-
 
 void Applet::propogateSizeHintChange(Qt::SizeHint which)
 {
-    checkSizes();
     emit sizeHintChanged(which);
 }
 
@@ -469,7 +519,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
             continue;
         }
 
-        if (!task->widget(this, false)) {
+        if (task->isWidget() && !task->widget(this, false)) {
             // it is not being used by this widget
             continue;
         }
@@ -493,9 +543,9 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
         itemCombo->addItem(i18nc("Item is never visible in the systray", "Hidden"));
         itemCombo->addItem(i18nc("Item is always visible in the systray", "Always Visible"));
 
-        if (task->hidden() & Task::UserHidden) {
+        if (m_hiddenTypes.contains(task->typeId())) {
             itemCombo->setCurrentIndex(1);
-        } else if (m_taskArea->alwaysShownTypes().contains(task->typeId())) {
+        } else if (m_alwaysShownTypes.contains(task->typeId())) {
             itemCombo->setCurrentIndex(2);
         } else {
             itemCombo->setCurrentIndex(0);
@@ -504,11 +554,12 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
 
         KKeySequenceWidget *button = new KKeySequenceWidget(m_autoHideUi.icons);
 
-        Plasma::IconWidget *icon = qobject_cast<Plasma::IconWidget *>(task->widget(this));
+        DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
         Plasma::Applet *applet = qobject_cast<Plasma::Applet *>(task->widget(this));
 
-        if (task && icon) {
-            QString shortcutText = shortcutsConfig.readEntryUntranslated(icon->action()->objectName(), QString());
+        if (task && dbus_task && !dbus_task->objectName().isEmpty()) {
+            QString action_name = _getActionName(task);
+            QString shortcutText = shortcutsConfig.readEntryUntranslated(action_name, QString());
             button->setKeySequence(shortcutText);
         } else if (task && applet) {
             button->setKeySequence(applet->globalShortcut().primary());
@@ -642,24 +693,22 @@ void Applet::configAccepted()
         }
 
         if (task) {
-            QGraphicsWidget *widget = task->widget(this);
-
-            if (widget) {
-                Plasma::Applet *applet = qobject_cast<Plasma::Applet *>(widget);
-                Plasma::IconWidget *icon = qobject_cast<Plasma::IconWidget *>(widget);
+            if (!task->isWidget()) {
+                DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
+                if (dbus_task) {
+                    QString shortcut = seq.toString();
+                    dbus_task->setShortcut(shortcut);
+                    QString action_name = _getActionName(task);
+                    if (seq.isEmpty())
+                        shortcutsConfig.deleteEntry(action_name);
+                    else
+                        shortcutsConfig.writeEntry(action_name, shortcut);
+                    dbus_task->setShortcut(shortcut);
+                }
+            } else {
+                Plasma::Applet *applet = qobject_cast<Plasma::Applet *>( task->widget(this) );
                 if (applet) {
                     applet->setGlobalShortcut(KShortcut(seq));
-                } else if (icon) {
-                    KAction *action = qobject_cast<KAction *>(icon->action());
-                    if (action && !seq.isEmpty()) {
-                        action->setGlobalShortcut(KShortcut(seq),
-                            KAction::ShortcutTypes(KAction::ActiveShortcut | KAction::DefaultShortcut),
-                            KAction::NoAutoloading);
-                        shortcutsConfig.writeEntry(action->objectName(), seq.toString());
-                    } else if (seq.isEmpty()) {
-                        action->forgetGlobalShortcut();
-                        shortcutsConfig.deleteEntry(action->objectName());
-                    }
                 }
             }
         }

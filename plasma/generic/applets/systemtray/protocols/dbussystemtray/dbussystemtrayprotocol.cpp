@@ -59,15 +59,7 @@ void DBusSystemTrayProtocol::newTask(const QString &service)
 
     DBusSystemTrayTask *task = new DBusSystemTrayTask(service, m_dataEngine, this);
 
-    if (!task->isValid()) {
-        // we failed to load our task, *sob*
-        delete task;
-        return;
-    }
-
     m_tasks[service] = task;
-//    connect(task, SIGNAL(taskDeleted(QString)), this, SLOT(cleanupTask(QString)));
-    emit taskCreated(task);
 }
 
 void DBusSystemTrayProtocol::cleanupTask(const QString &service)
@@ -77,9 +69,16 @@ void DBusSystemTrayProtocol::cleanupTask(const QString &service)
     if (task) {
         m_dataEngine->disconnectSource(service, task);
         m_tasks.remove(service);
-        emit task->destroyed(task);
+        if (task->isValid()) {
+            emit task->destroyed(task);
+        }
         task->deleteLater();
     }
+}
+
+void DBusSystemTrayProtocol::initedTask(DBusSystemTrayTask *task)
+{
+    emit taskCreated(task);
 }
 
 void DBusSystemTrayProtocol::initRegisteredServices()

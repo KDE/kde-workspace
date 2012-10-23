@@ -37,10 +37,10 @@ public:
     ~FdoTask();
 
     bool isEmbeddable() const;
-    QString name() const;
     QString typeId() const;
     QIcon icon() const;
     void abandon(Plasma::Applet *host);
+    virtual bool isWidget() const;
 
 signals:
     void taskDeleted(WId winId);

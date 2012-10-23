@@ -42,12 +42,12 @@ public:
 
     bool isValid() const;
     virtual bool isEmbeddable() const;
-    virtual QString name() const;
     virtual QString typeId() const;
     virtual QIcon icon() const;
     void forwardConstraintsEvent(Plasma::Constraints constraints);
     int id() const;
     Plasma::Applet *host() const;
+    virtual bool isWidget() const;
 
 protected Q_SLOTS:
     void appletDestroyed(Plasma::Applet *object);
@@ -62,7 +62,7 @@ protected:
 private:
     void setupApplet(const QString &plugin, int id);
 
-    QString m_name;
+    QString m_appletName;
     QString m_typeId;
     QIcon m_icon;
     QWeakPointer<Plasma::Applet> m_applet;

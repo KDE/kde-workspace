@@ -24,7 +24,6 @@
 #include "plasmoidtask.h"
 #include <fixx11h.h>
 
-#include <KDebug>
 #include <KIcon>
 #include <KIconLoader>
 
@@ -38,11 +37,12 @@ namespace SystemTray
 
 PlasmoidTask::PlasmoidTask(const QString &appletname, int id, QObject *parent, Plasma::Applet *host)
     : Task(parent),
-      m_name(appletname),
+      m_appletName(appletname),
       m_typeId(appletname),
       m_host(host),
       m_takenByParent(false)
 {
+    setName(appletname);
     setupApplet(appletname, id);
 }
 
@@ -60,16 +60,7 @@ bool PlasmoidTask::isEmbeddable() const
 
 bool PlasmoidTask::isValid() const
 {
-    return !m_name.isEmpty() && m_applet;
-}
-
-QString PlasmoidTask::name() const
-{
-    if (m_applet) {
-        return m_applet.data()->name();
-    }
-
-    return m_name;
+    return !m_appletName.isEmpty() && m_applet;
 }
 
 
@@ -87,6 +78,10 @@ QIcon PlasmoidTask::icon() const
 Plasma::Applet *PlasmoidTask::host() const
 {
     return m_host;
+}
+
+bool PlasmoidTask::isWidget() const {
+    return true;
 }
 
 QGraphicsWidget* PlasmoidTask::createWidget(Plasma::Applet *host)
@@ -159,15 +154,14 @@ void PlasmoidTask::setupApplet(const QString &plugin, int id)
         setCategory(Communications);
     }
 
+    setName(applet->name());
+
     m_icon = KIcon(applet->icon());
 
     applet->setFlag(QGraphicsItem::ItemIsMovable, false);
 
     connect(applet, SIGNAL(appletDestroyed(Plasma::Applet*)), this, SLOT(appletDestroyed(Plasma::Applet*)));
     applet->setBackgroundHints(Plasma::Applet::NoBackground);
-
-    applet->setPreferredSize(KIconLoader::SizeSmallMedium+2, KIconLoader::SizeSmallMedium+2);
-    kDebug() << applet->name() << " Applet loaded";
 }
 
 void PlasmoidTask::appletDestroyed(Plasma::Applet *)
@@ -204,8 +198,6 @@ void PlasmoidTask::newAppletStatus(Plasma::ItemStatus status)
     case Plasma::UnknownStatus:
         setStatus(Task::UnknownStatus);
     }
-
-    emit changed(this);
 }
 
 }
