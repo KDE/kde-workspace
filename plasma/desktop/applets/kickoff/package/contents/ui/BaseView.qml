@@ -50,31 +50,7 @@ PlasmaComponents.Page {
             section {
                 property: "group"
                 criteria: ViewSection.FullString
-                delegate: Item {
-                    id: sectionDelegate
-                    width: parent.width
-                    height: childrenRect.height
-                    PlasmaCore.SvgItem {
-                        visible: sectionDelegate.y > 0
-                        svg: lineSvg
-                        elementId: "horizontal-line"
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        height: lineSvg.elementSize("horizontal-line").height
-                    }
-                    PlasmaComponents.Label {
-                        y: 2
-                        opacity: 0.6
-                        text: section
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                    }
-                }
+                delegate: SectionDelegate {}
             }
             highlight: PlasmaComponents.Highlight {
             }

@@ -36,76 +36,73 @@ PlasmaComponents.Page {
         kickoffListView.currentItem.activate();
     }
     PlasmaExtras.ScrollArea {
+        id: scrollArea
         anchors.fill: parent
         ListView {
             id: kickoffListView
+            anchors.fill: parent
             interactive: contentHeight > height
             model: Kickoff.FavoritesModel {
                 
             }
 
-            anchors.fill: parent
-            delegate: kickoffDelegate
+            delegate: KickoffItem {}
+
             Component.onCompleted: changeModel("favorites")
 
             section {
                 property: "group"
                 criteria: ViewSection.FullString
-                delegate: Item {
-                    id: sectionDelegate
-                    width: parent.width
-                    height: childrenRect.height
-                    PlasmaCore.SvgItem {
-                        visible: sectionDelegate.y > 0
-                        svg: lineSvg
-                        elementId: "horizontal-line"
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        height: lineSvg.elementSize("horizontal-line").height
-                    }
-                    PlasmaComponents.Label {
-                        y: 2
-                        opacity: 0.6
-                        text: section
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                    }
-                }
+                delegate: SectionDelegate {}
             }
             highlight: PlasmaComponents.Highlight {
             }
-            footer: Item {
-                height: {
-                    if (kickoffListView.contentHeight > kickoffListView.height) {
-                        return 0;
-                    } else {
-                        return kickoffListView.height - kickoffListView.contentHeight;
-                    }
-                }
-                width: kickoffListView.width
-                DropArea {
-                    anchors.fill: parent
-                    onDragEnter:  dropTarget.visible = true
-                    onDragLeave: dropTarget.visible = false
+        }
+    }
+    DropArea {
+        anchors.fill: scrollArea
 
-                    onDrop: {
-                        kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, kickoffListView.count-1, 0);
-                        dropTarget.visible = false
-                    }
-                    Rectangle {
-                        id: dropTarget
-                        visible: false
-                        width: parent.width
-                        height: 2
-                        color: theme.highlightColor
-                    }
+        function syncTarget(event) {
+            kickoffListView.currentIndex = kickoffListView.indexAt(event.x, event.y + kickoffListView.contentY)
+
+            if (kickoffListView.currentIndex === -1) {
+                if (event.y < height/2) {
+                    kickoffListView.currentIndex = 0
+                } else {
+                    kickoffListView.currentIndex = kickoffListView.count - 1
                 }
             }
+            if (event.y < kickoffListView.currentItem.y + kickoffListView.currentItem.height / 2) {
+                dropTarget.y = kickoffListView.currentItem.y - kickoffListView.contentY
+            } else {
+                dropTarget.y = kickoffListView.currentItem.y + kickoffListView.currentItem.height - kickoffListView.contentY
+            }
+        }
+
+        onDrop: {
+            var row = kickoffListView.currentIndex
+            if (event.y + kickoffListView.contentY < kickoffListView.currentItem.y + kickoffListView.currentItem.height / 2) {
+                --row
+            }
+            kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, row, 0);
+            dropTarget.visible = false;
+        }
+        onDragEnter: {
+            syncTarget(event);
+            dropTarget.visible = true;
+        }
+        onDragMove: syncTarget(event);
+
+        onDragLeave: {
+            dropTarget.visible = false;
+        }
+
+        Rectangle {
+            id: dropTarget
+            visible: false
+            width: parent.width
+            height: 2
+            color: theme.highlightColor
         }
     }
 }

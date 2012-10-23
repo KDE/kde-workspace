@@ -264,36 +264,4 @@ Item {
             }
         }
     }
-    DropArea {
-        enabled: dropEnabled
-        anchors.fill: listItem
-        height: parent.height+8
-        onDrop: {
-            var row = index
-            if (event.y < height/2) {
-                --row
-            }
-            listItem.ListView.view.model.dropMimeData(event.mimeData.text, event.mimeData.urls, row, 0);
-            dropTarget.visible = false;
-        }
-        onDragEnter: {
-            if (event.y > height/2) {
-                dropTarget.y = height - 1
-            } else {
-                dropTarget.y = -1
-            }
-            dropTarget.visible = true
-        }
-        onDragLeave: {
-            dropTarget.visible = false;
-        }
-
-        Rectangle {
-            id: dropTarget
-            visible: false
-            width: parent.width
-            height: 2
-            color: theme.highlightColor
-        }
-    }
 }

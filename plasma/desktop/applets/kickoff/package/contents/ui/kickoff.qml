@@ -59,6 +59,10 @@ Item {
         }
     }
 
+    PlasmaCore.Svg {
+        id: lineSvg
+        imagePath: "widgets/line"
+    }
 
     Item {
         id: searchBar
