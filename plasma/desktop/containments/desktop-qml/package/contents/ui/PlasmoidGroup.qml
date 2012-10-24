@@ -19,7 +19,7 @@
 
 import QtQuick 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.desktop 0.1 as PlasmaDesktop
+import org.kde.plasma.containments 0.1 as PlasmaContainments
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
@@ -42,7 +42,7 @@ ItemGroup {
     property alias applet: appletContainer.applet
 
 
-    PlasmaDesktop.AppletContainer {
+    PlasmaContainments.AppletContainer {
         id: appletContainer
         anchors.fill: plasmoidGroup.contents
         onAppletChanged: {
