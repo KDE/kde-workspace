@@ -95,7 +95,7 @@ Item {
                     return subtitle;
                 }
             }
-            opacity: listItem.ListView.isCurrentItem ? 0.6 : 0
+            opacity: 0.6
             font.pointSize: theme.smallestFont.pointSize
             elide: Text.ElideMiddle
             height: paintedHeight
@@ -105,12 +105,6 @@ Item {
                 bottom: parent.bottom
                 top: titleElement.bottom
                 leftMargin: 5
-            }
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 250
-                    easing.type: Easing.OutQuad
-                }
             }
         }
 
