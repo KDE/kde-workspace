@@ -322,9 +322,17 @@ QVariant ApplicationModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Qt::DisplayRole:
-        return node->genericName;
+        if (node->genericName.isEmpty()) {
+            return node->appName;
+        } else {
+            return node->genericName;
+        }
     case Kickoff::SubTitleRole:
-        return node->appName;
+        if (node->genericName.isEmpty() || node->appName == node->genericName) {
+            return QString(); //return empty string to avoid errors in QML assigning null to Text
+        } else {
+            return node->appName;
+        }
     case Kickoff::UrlRole:
         if (node->isDir) {
             return QString::fromLatin1("applications://%1").arg(node->desktopEntry);
