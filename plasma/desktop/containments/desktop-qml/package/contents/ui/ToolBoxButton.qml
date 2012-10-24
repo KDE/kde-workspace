@@ -28,7 +28,7 @@ Item {
     //height: isCorner ? 48 : iconSize * 2
     width: 128; height: 128
 
-    property string text: plasmoid.activityName == "" ? "Activity" : plasmoid.activityName
+    property string text: plasmoid.activityName == "" ? "Activity Name That Is 37 Miles Long" : plasmoid.activityName
 
     y: 0
     x: main.width - toolBoxButtonFrame.width
@@ -141,8 +141,8 @@ Item {
                     height = toolBoxButtonFrame.mHeight;
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder;
                 } else {
-                    width = iconSize*1.6
-                    height = iconSize*1.6
+                    width = iconSize+borderSvg.leftBorder
+                    height = iconSize + borderSvg.topBorder
                 }
             }
         }
@@ -157,7 +157,7 @@ Item {
         id: activityName
         opacity: (!isCorner && (toolBoxButton.state == "top" || toolBoxButton.state == "bottom"))? 1 : 0.01
         text: toolBoxButton.text
-        anchors { left: toolBoxIcon.right; right: parent.right; verticalCenter: toolBoxIcon.verticalCenter; }
+        anchors { left: toolBoxIcon.right; right: parent.right; verticalCenter: toolBoxIcon.verticalCenter; leftMargin: 4; }
     }
 
     PlasmaComponents.Label {
@@ -171,7 +171,7 @@ Item {
         anchors {
             top: toolBoxIcon.bottom;
             left: toolBoxIcon.left;
-            leftMargin: (paintedHeight+20-activityNameVertical.font.pixelSize);
+            leftMargin: (paintedHeight+iconSize-activityNameVertical.font.pixelSize);
             topMargin: 4
             rightMargin: -6
         }
@@ -180,7 +180,7 @@ Item {
 
     QtExtras.QIconItem {
         id: toolBoxIcon
-        anchors { top: parent.top; right: parent.right; margins: 4; }
+        anchors { top: parent.top; right: parent.right; margins: 4; topMargin: 12; }
         width: iconSize
         height: iconSize
         icon: "plasma"
@@ -198,10 +198,11 @@ Item {
                 toolBoxIcon.anchors.right = undefined;
                 //toolBoxIcon.anchors.horizontalCenter = undefined;
                 //toolBoxIcon.anchors.verticalCenter = undefined;
-                toolBoxIcon.anchors.leftMargin = 0;
-                toolBoxIcon.anchors.rightMargin = 0;
-                toolBoxIcon.anchors.topMargin = 0;
-                toolBoxIcon.anchors.bottomMargin = 0;
+                var _m = 2;
+                toolBoxIcon.anchors.leftMargin = _m;
+                toolBoxIcon.anchors.rightMargin = _m;
+                toolBoxIcon.anchors.topMargin = _m;
+                toolBoxIcon.anchors.bottomMargin = _m;
 
                 if (s == "topleft") {
                     toolBoxIcon.anchors.top = t.top;

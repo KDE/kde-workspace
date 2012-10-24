@@ -23,19 +23,20 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 PlasmaComponents.ListItem {
     id: toolBox
+    property int iconSize: 22
     property QtObject action
     property alias iconSource: iconItem.icon
     property alias text: label.text
     signal triggered
     enabled: true
 
-    height: main.iconSize*1.8
+    height: toolBox.iconSize + 14
 
     QtExtras.QIconItem {
         id: iconItem
-        height: iconSize
-        width: iconSize
-        anchors { left: parent.left; verticalCenter: parent.verticalCenter; }
+        height: toolBox.iconSize
+        width: toolBox.iconSize
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 4 }
     }
     PlasmaComponents.Label {
         id: label

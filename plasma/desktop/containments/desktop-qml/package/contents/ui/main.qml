@@ -37,7 +37,7 @@ Item {
     property int currentIndex: -1
 
     property Item addResource
-    property int iconSize: 22
+    property int iconSize: 16
 
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
 
