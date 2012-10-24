@@ -90,6 +90,8 @@ Item {
             id: applicationsView
             focus: true
 
+            boundsBehavior: Flickable.StopAtBounds
+
             function addBreadcrumb(modelIndex, title) {
                 crumbModel.append({"text": title, "modelIndex": modelIndex, "depth": crumbModel.count+1})
             }

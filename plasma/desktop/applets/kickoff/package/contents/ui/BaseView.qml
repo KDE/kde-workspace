@@ -42,7 +42,7 @@ Item {
         ListView {
             id: kickoffListView
             interactive: contentHeight > height
-
+            boundsBehavior: Flickable.StopAtBounds
 
             anchors.fill: parent
             delegate: KickoffItem {}
