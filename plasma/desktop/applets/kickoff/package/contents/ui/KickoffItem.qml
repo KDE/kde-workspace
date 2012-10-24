@@ -79,7 +79,7 @@ Item {
                 top: elementIcon.top
                 left: elementIcon.right
                 right: parent.right
-                leftMargin: 5
+                leftMargin: 8
             }
         }
         PlasmaComponents.Label {
@@ -104,7 +104,7 @@ Item {
                 right: parent.right
                 bottom: parent.bottom
                 top: titleElement.bottom
-                leftMargin: 5
+                leftMargin: 8
             }
         }
 
