@@ -96,8 +96,8 @@ Item {
             var applet = plasmoid.applets[i]
             addApplet(applet, 0)
         }
-        print("logoutAllowed: " + plasmoid.logoutAllowed());
-        print("lockScreenAllowed: " + plasmoid.lockScreenAllowed());
+//         print("logoutAllowed: " + plasmoid.logoutAllowed());
+//         print("lockScreenAllowed: " + plasmoid.lockScreenAllowed());
 
     }
 
@@ -121,7 +121,11 @@ Item {
     //FIXME: way to avoid instantiating them?
     PlasmaCore.Svg {
         id: borderSvg
-        imagePath: "widgets/background"
+        imagePath: "widgets/toolbox"
+        property int rightBorder: elementSize("right").width
+        property int topBorder: elementSize("top").height
+        property int bottomBorder: elementSize("bottom").height
+        property int leftBorder: elementSize("left").width
     }
     PlasmaCore.Svg {
         id: draggerSvg

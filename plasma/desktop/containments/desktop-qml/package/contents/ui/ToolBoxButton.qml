@@ -28,6 +28,8 @@ Item {
     //height: isCorner ? 48 : iconSize * 2
     width: 128; height: 128
 
+    property string text: plasmoid.activityName == "" ? "Activity" : plasmoid.activityName
+
     y: 0
     x: main.width - toolBoxButtonFrame.width
     z: toolBox.z + 1
@@ -36,6 +38,8 @@ Item {
     property bool skipNextUpdate: false
     property bool isCorner: ((state == "topleft") || (state == "topright") ||
                              (state == "bottomright") || (state == "bottomleft"))
+    property bool isHorizontal: (state == "top") || (state == "bottom")
+
     state: "topright" // FIXME: read default value from config
     states: [
         State {
@@ -97,17 +101,25 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxButtonFrame
-        imagePath: "widgets/background"
+        imagePath: "widgets/toolbox"
         anchors.fill: parent
-        property int mWidth: iconSize*3.5 + activityName.paintedWidth
-        property int mHeight: (activityName.text == "") ? mWidth+2 : iconSize*3.5 + activityName.paintedWidth+2
+
+        property int borderWidth: toolBoxButton.isHorizontal ? borderSvg.elementSize("left").width + borderSvg.elementSize("right").width : borderSvg.elementSize("left").width
+        property int borderHeight: !toolBoxButton.isHorizontal ? borderSvg.elementSize("top").height + borderSvg.elementSize("bottom").height: borderSvg.elementSize("bottom").height
+
+//         property int mWidth: iconSize*3.5 + activityName.paintedWidth
+//         property int mHeight: (activityName.text == "") ? mWidth+2 : iconSize*3.5 + activityName.paintedWidth+2
+
+        property int mWidth: iconSize + borderWidth + activityName.paintedWidth
+        property int mHeight: (activityName.text == "") ? mWidth+2 : iconSize + borderHeight + activityName.paintedWidth+2
+
         opacity: !isCorner ? 1 : 0.01
         enabledBorders: PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.BottomBorder;
         Connections {
             target: toolBoxButton
             onStateChanged: {
                 var s = toolBoxButton.state;
-                var h = iconSize*2.25;
+                var h = iconSize + toolBoxButtonFrame.borderHeight;
                 if (s == "top") {
                     // resize frame
                     width = toolBoxButtonFrame.mWidth;
@@ -115,7 +127,7 @@ Item {
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "right") {
                     // resize frame
-                    width = h;
+                    width = iconSize + borderSvg.leftBorder;
                     height = toolBoxButtonFrame.mHeight;
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "bottom") {
@@ -125,7 +137,7 @@ Item {
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "left") {
                     // resize frame
-                    width = h;
+                    width = iconSize + borderSvg.rightBorder;
                     height = toolBoxButtonFrame.mHeight;
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder;
                 } else {
@@ -135,11 +147,16 @@ Item {
             }
         }
         Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.InOutExpo; } }
+
+        Component.onCompleted: {
+            print(" borders are: " + borderWidth+" and " + borderHeight + " " + borderSvg.elementSize("top").height);
+            print(" mSize are: " + mWidth+" and " + mHeight + " " + iconSize);
+        }
     }
     PlasmaComponents.Label {
         id: activityName
         opacity: (!isCorner && (toolBoxButton.state == "top" || toolBoxButton.state == "bottom"))? 1 : 0.01
-        text: plasmoid.activityName
+        text: toolBoxButton.text
         anchors { left: toolBoxIcon.right; right: parent.right; verticalCenter: toolBoxIcon.verticalCenter; }
     }
 
@@ -150,7 +167,7 @@ Item {
         y: toolBoxIcon.y
         opacity: (!isCorner && (toolBoxButton.state == "left" || toolBoxButton.state == "right"))? 1 : 0.01
         transform: Rotation { angle: 90 }
-        text: plasmoid.activityName
+        text: toolBoxButton.text
         anchors {
             top: toolBoxIcon.bottom;
             left: toolBoxIcon.left;
@@ -172,8 +189,9 @@ Item {
             onStateChanged: {
                 var s = toolBoxButton.state;
                 var t = toolBoxButton;
-                var _m = 28;
-                //var corner = ""
+                var _lm = borderSvg.leftBorder;
+                var _tm = borderSvg.topBorder;
+
                 toolBoxIcon.anchors.top = undefined;
                 toolBoxIcon.anchors.left = undefined;
                 toolBoxIcon.anchors.bottom = undefined;
@@ -200,20 +218,20 @@ Item {
                 } else if (s == "top") {
                     toolBoxIcon.anchors.top = t.top;
                     toolBoxIcon.anchors.left = t.left;
-                    toolBoxIcon.anchors.leftMargin = _m;
+                    toolBoxIcon.anchors.leftMargin = _lm;
                 } else if (s == "right") {
                     toolBoxIcon.anchors.top = t.top;
                     toolBoxIcon.anchors.right = t.right;
-                    toolBoxIcon.anchors.topMargin = _m;
+                    toolBoxIcon.anchors.topMargin = _tm;
                     //toolBoxIcon.anchors.rightMargin = 0;
                 } else if (s == "bottom") {
                     toolBoxIcon.anchors.bottom = t.bottom;
                     toolBoxIcon.anchors.left = t.left;
-                    toolBoxIcon.anchors.leftMargin = _m;
+                    toolBoxIcon.anchors.leftMargin = _lm;
                 } else if (s == "left") {
                     toolBoxIcon.anchors.top = t.top;
                     toolBoxIcon.anchors.left = t.left;
-                    toolBoxIcon.anchors.topMargin = _m;
+                    toolBoxIcon.anchors.topMargin = _tm;
                 }
                 //toolBoxButton.cornerElement = corner;
             }
@@ -267,11 +285,20 @@ Item {
                 toolBoxButton.y = main.height - toolBoxButton.height;
             }
             toolBoxButton.state = _s;
+            configSaveTimer.running = true;
+        }
+    }
+
+    Timer {
+        id: configSaveTimer
+        interval: 5000
+        running: false
+        onTriggered: {
             plasmoid.writeConfig("ToolBoxButtonState", toolBoxButton.state);
             plasmoid.writeConfig("ToolBoxButtonX", toolBoxButton.x);
             plasmoid.writeConfig("ToolBoxButtonY", toolBoxButton.y);
+            print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + "x" +toolBoxButton.x);
         }
-        print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + "x" +toolBoxButton.x);
     }
 
     MouseArea {
