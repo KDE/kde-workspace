@@ -72,9 +72,7 @@ Item {
     ]
     PlasmaCore.SvgItem {
         id: cornerSvg
-        svg: PlasmaCore.Svg {
-            imagePath: "widgets/toolbox"
-        }
+        svg: toolBoxSvg
         elementId: cornerElement
         anchors.fill: parent
         //anchors.margins: 8
@@ -104,8 +102,8 @@ Item {
         imagePath: "widgets/toolbox"
         anchors.fill: parent
 
-        property int borderWidth: toolBoxButton.isHorizontal ? borderSvg.elementSize("left").width + borderSvg.elementSize("right").width : borderSvg.elementSize("left").width
-        property int borderHeight: !toolBoxButton.isHorizontal ? borderSvg.elementSize("top").height + borderSvg.elementSize("bottom").height: borderSvg.elementSize("bottom").height
+        property int borderWidth: toolBoxButton.isHorizontal ? toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width : toolBoxSvg.elementSize("left").width
+        property int borderHeight: !toolBoxButton.isHorizontal ? toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height: toolBoxSvg.elementSize("bottom").height
 
 //         property int mWidth: iconSize*3.5 + activityName.paintedWidth
 //         property int mHeight: (activityName.text == "") ? mWidth+2 : iconSize*3.5 + activityName.paintedWidth+2
@@ -127,7 +125,7 @@ Item {
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "right") {
                     // resize frame
-                    width = iconSize + borderSvg.leftBorder;
+                    width = iconSize + toolBoxSvg.leftBorder;
                     height = toolBoxButtonFrame.mHeight;
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "bottom") {
@@ -137,19 +135,19 @@ Item {
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder;
                 } else if (s == "left") {
                     // resize frame
-                    width = iconSize + borderSvg.rightBorder;
+                    width = iconSize + toolBoxSvg.rightBorder;
                     height = toolBoxButtonFrame.mHeight;
                     toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder;
                 } else {
-                    width = iconSize+borderSvg.leftBorder
-                    height = iconSize + borderSvg.topBorder
+                    width = iconSize+toolBoxSvg.leftBorder
+                    height = iconSize + toolBoxSvg.topBorder
                 }
             }
         }
         Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.InOutExpo; } }
 
         Component.onCompleted: {
-            print(" borders are: " + borderWidth+" and " + borderHeight + " " + borderSvg.elementSize("top").height);
+            print(" borders are: " + borderWidth+" and " + borderHeight + " " + toolBoxSvg.elementSize("top").height);
             print(" mSize are: " + mWidth+" and " + mHeight + " " + iconSize);
         }
     }
@@ -189,8 +187,8 @@ Item {
             onStateChanged: {
                 var s = toolBoxButton.state;
                 var t = toolBoxButton;
-                var _lm = borderSvg.leftBorder;
-                var _tm = borderSvg.topBorder;
+                var _lm = toolBoxSvg.leftBorder;
+                var _tm = toolBoxSvg.topBorder;
 
                 toolBoxIcon.anchors.top = undefined;
                 toolBoxIcon.anchors.left = undefined;

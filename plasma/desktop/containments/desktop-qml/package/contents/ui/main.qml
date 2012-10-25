@@ -47,8 +47,8 @@ Item {
 
     function updateGridSize()
     {
-        LayoutManager.cellSize.width = main.iconWidth + borderSvg.elementSize("left").width + borderSvg.elementSize("right").width
-        LayoutManager.cellSize.height = main.iconHeight + theme.defaultFont.mSize.height + borderSvg.elementSize("top").height + borderSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
+        LayoutManager.cellSize.width = main.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width
+        LayoutManager.cellSize.height = main.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
         layoutTimer.restart()
     }
 
@@ -117,10 +117,8 @@ Item {
         imagePath: "widgets/configuration-icons"
     }
 
-    //those two are used only for sizes, not painted ever
-    //FIXME: way to avoid instantiating them?
     PlasmaCore.Svg {
-        id: borderSvg
+        id: toolBoxSvg
         imagePath: "widgets/toolbox"
         property int rightBorder: elementSize("right").width
         property int topBorder: elementSize("top").height
@@ -330,10 +328,6 @@ Item {
                 }
             }
         }
-    }
-    PlasmaCore.FrameSvg {
-        id: toolBoxSvg
-        imagePath: "widgets/toolbox"
     }
 
     ToolBox {

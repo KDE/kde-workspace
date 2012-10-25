@@ -19,6 +19,7 @@
 
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.qtextracomponents 0.1 as QtExtras
 
 PlasmaComponents.ListItem {
@@ -28,8 +29,10 @@ PlasmaComponents.ListItem {
     property int index: 0
     property alias iconSource: iconItem.icon
     property alias text: label.text
+    property Item view: unlockedList
     signal triggered
     enabled: true
+    //parent: unlockedList
 
     height: toolBoxDelegate.iconSize + 14
 
@@ -55,8 +58,8 @@ PlasmaComponents.ListItem {
             }
             triggered();
         }
-        onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
-        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
+//         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
+//         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
 
         onEntered: {
             exitTimer.running = false;

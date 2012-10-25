@@ -81,7 +81,7 @@ Item {
                 }
             }
             anchors { fill: parent; margins: 12; }
-            Component.onCompleted: currentIndex=-1
+            Component.onCompleted: { currentIndex=-1; model: lockedModel }
 
         }
 
