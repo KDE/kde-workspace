@@ -25,7 +25,7 @@ import QtQuick 1.1
 import Private 0.1
 
 import "../code/TasksSet.js" as TasksSet
-import "main.js" as JS  // stuff & JS additions
+import "../code/main.js" as JS  // stuff & JS additions
 
 Item {
     id: root_item // represents available space on screen
