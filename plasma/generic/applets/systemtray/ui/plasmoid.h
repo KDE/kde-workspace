@@ -35,6 +35,8 @@
 namespace SystemTray
 {
 
+class Applet;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class Plasmoid
 // Makes applet be accessible from QML code, like global object "plasmoid" for declarative applets
@@ -97,8 +99,9 @@ signals:
     void activated(); ///< If a plasmoid has been activated
 
 private:
-    struct _Private;
-    _Private * const d;
+    SystemTray::Applet *parentApplet() const;
+    Plasmoid::FormFactor m_form;
+    Plasmoid::Location   m_location;
 };
 
 } // namespace SystemTray

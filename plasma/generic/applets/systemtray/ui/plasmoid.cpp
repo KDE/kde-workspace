@@ -37,74 +37,52 @@
 #include <KDE/KWindowSystem>
 
 
-
 namespace SystemTray
 {
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// struct Plasmoid::_Private
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct Plasmoid::_Private
-{
-    Plasmoid::FormFactor form;
-    Plasmoid::Location   location;
-
-    _Private();
-
-    static SystemTray::Applet *GetApplet(const Plasmoid &pl) { return qobject_cast<SystemTray::Applet*>(pl.parent()); }
-};
-
-
-Plasmoid::_Private::_Private():
-    form(Plasmoid::Planar),
-    location(Plasmoid::Floating)
-{
-
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class Plasmoid
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Plasmoid::Plasmoid(QObject *parent):
-    QObject(parent),
-    d(new _Private)
+Plasmoid::Plasmoid(QObject *parent)
+    : QObject(parent),
+      m_form(Plasmoid::Planar),
+      m_location(Plasmoid::Floating)
 {
 }
 
 
 Plasmoid::~Plasmoid()
 {
-    delete d;
 }
 
 
 Plasmoid::Location Plasmoid::location() const
 {
-    return d->location;
+    return m_location;
 }
 
 
 void Plasmoid::setLocation(Plasmoid::Location loc)
 {
-    if (loc == d->location) {
+    if (loc == m_location) {
         return;
     }
 
-    d->location = loc;
+    m_location = loc;
     emit changedLocation();
 }
 
 
 unsigned int Plasmoid::id() const
 {
-    Applet *applet = _Private::GetApplet(*this);
+    Applet *applet = parentApplet();
     return applet ? applet->id() : 0;
 }
 
 
 QVariant Plasmoid::applet() const
 {
-    return QVariant::fromValue<QObject*>(_Private::GetApplet(*this));
+    return QVariant::fromValue<QObject*>(parentApplet());
 }
 
 
@@ -146,7 +124,7 @@ void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) cons
     QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
     QMenu *menu = qobject_cast<QMenu*>(menu_var.value<QObject*>());
     if (menu) {
-        SystemTray::Applet *applet = _Private::GetApplet(*this);
+        SystemTray::Applet *applet = parentApplet();
         QPoint pos(x, y);
         if ( applet ) {
             menu->adjustSize();
@@ -164,7 +142,7 @@ void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) cons
 QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const
 {
     QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
-    SystemTray::Applet *applet = _Private::GetApplet(*this);
+    SystemTray::Applet *applet = parentApplet();
     if (applet) {
         if ( item && applet->containment() && applet->containment()->corona() ) {
             return applet->containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
@@ -185,19 +163,23 @@ void Plasmoid::hideFromTaskbar(qulonglong win_id) const
 
 Plasmoid::FormFactor Plasmoid::formFactor() const
 {
-    return d->form;
+    return m_form;
 }
 
 
 void Plasmoid::setFormFactor(Plasmoid::FormFactor form_factor)
 {
-    if (form_factor == d->form) {
+    if (form_factor == m_form) {
         return;
     }
 
-    d->form = form_factor;
+    m_form = form_factor;
     emit changedFormFactor();
 }
 
+SystemTray::Applet *Plasmoid::parentApplet() const
+{
+    return qobject_cast<SystemTray::Applet*>(parent());
+}
 
 } // namespace SystemTray
