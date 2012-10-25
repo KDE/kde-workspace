@@ -46,8 +46,8 @@ PlasmaComponents.ListItem {
     }
     MouseArea {
         anchors.fill: parent
-        anchors.topMargin: -4
-        anchors.bottomMargin: -4
+        anchors.topMargin: -6
+        anchors.bottomMargin: -6
         hoverEnabled: true
         onClicked: {
             if (action) {
@@ -55,6 +55,8 @@ PlasmaComponents.ListItem {
             }
             triggered();
         }
+        onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
+        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
 
         onEntered: {
             exitTimer.running = false;
