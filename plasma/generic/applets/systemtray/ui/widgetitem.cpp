@@ -35,36 +35,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace SystemTray
 {
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// struct WidgetItem::_Private
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct WidgetItem::_Private
-{
-    QWeakPointer<QGraphicsWidget> widget;
-    WidgetItem &owner;
-
-    _Private(WidgetItem &owner): owner(owner) {}
-    void unbind();
-};
-
-
-void WidgetItem::_Private::unbind()
-{
-    if (widget) {
-        QGraphicsWidget *w = widget.data();
-        if (w->parentItem() == &owner) {
-            w->hide();
-            w->setParentItem(0);
-        }
-    }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class WidgetItem
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-WidgetItem::WidgetItem(QDeclarativeItem *parent): QDeclarativeItem(parent),
-    d(new _Private(*this))
+WidgetItem::WidgetItem(QDeclarativeItem *parent)
+    : QDeclarativeItem(parent)
 {
     setClip(false);
 }
@@ -72,14 +46,13 @@ WidgetItem::WidgetItem(QDeclarativeItem *parent): QDeclarativeItem(parent),
 
 WidgetItem::~WidgetItem()
 {
-    d->unbind();
-    delete d;
+    unbind();
 }
 
 
 QVariant WidgetItem::widget() const
 {
-    return QVariant::fromValue(static_cast<QObject*>(d->widget.data()));
+    return QVariant::fromValue(static_cast<QObject*>(m_widget.data()));
 }
 
 
@@ -87,15 +60,15 @@ void WidgetItem::setWidget(QVariant w)
 {
     QGraphicsWidget *widget = qobject_cast<QGraphicsWidget*>(w.value<QObject*>());
     // check input
-    if ( widget == d->widget.data() ) {
+    if ( widget == m_widget.data() ) {
         return;
     }
 
     // unbind old widget
-    d->unbind();
+    unbind();
 
     // bind new widget
-    d->widget = widget;
+    m_widget = widget;
     if (widget) {
         widget->setParentItem(this);
         widget->setPos(0, 0);
@@ -106,6 +79,18 @@ void WidgetItem::setWidget(QVariant w)
     }
     emit changedWidget();
 }
+
+void WidgetItem::unbind()
+{
+    QGraphicsWidget *w = m_widget.data();
+    if (w && w->parentItem() == this) {
+        w->hide();
+        w->setParentItem(0);
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 } //namespace SystemTray

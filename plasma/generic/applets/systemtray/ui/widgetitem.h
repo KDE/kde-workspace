@@ -54,8 +54,8 @@ signals:
     void changedWidget();
 
 private:
-    struct _Private;
-    _Private * const d; // implementation
+    void unbind();
+    QWeakPointer<QGraphicsWidget> m_widget;
 };
 
 } //namespace SystemTray
