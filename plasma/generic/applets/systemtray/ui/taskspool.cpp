@@ -97,10 +97,7 @@ bool TasksPool::addTask(Task *task, UiTask::TaskHideState hide_state)
 
     QString task_id = QString::number(reinterpret_cast<uintmax_t>(task));
 
-    UiTask *ui_task = new(std::nothrow) UiTask(*this, task_id, task);
-    if (!ui_task) {
-        return false;
-    }
+    UiTask *ui_task = new UiTask(*this, task_id, task);
 
     ui_task->setHideState(hide_state);
     d->tasks.insert(task, _TaskData(task_id, ui_task));
