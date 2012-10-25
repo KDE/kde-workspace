@@ -35,6 +35,7 @@ PlasmaComponents.ListItem {
     //parent: unlockedList
 
     height: toolBoxDelegate.iconSize + 14
+    width: parent.width-24
 
     QtExtras.QIconItem {
         id: iconItem
@@ -72,4 +73,11 @@ PlasmaComponents.ListItem {
             //unlockedList.currentIndex = -1;
         }
     }
+    Component.onCompleted: {
+        index = unlockedList.count;
+        print("new actions with text: " + text + " index: " + index);
+    }
+//     Rectangle { anchors.fill: parent; color: "yellow"; opacity: 0.4; }
+
+
 }

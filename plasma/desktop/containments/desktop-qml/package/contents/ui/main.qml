@@ -344,7 +344,6 @@ Item {
             running: true
             onTriggered: placeToolBox();
         }
-        //anchors { top: parent.top; right: parent.right; }
     }
 
     function placeToolBox() {

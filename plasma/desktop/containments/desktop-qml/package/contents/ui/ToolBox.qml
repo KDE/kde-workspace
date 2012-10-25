@@ -50,26 +50,33 @@ Item {
         id: toolBoxFrame
         imagePath: "widgets/toolbox"
         width: expandedWidth
-        height: state == "unlocked" ? (addPanelDelegate.height * unlockedModel.count + 24) : (addPanelDelegate.height * lockedModel.count + 24)
+        height: (addPanelDelegate.height * unlockedList.count + 24)
+        //height: unlockedList.contentHeight + toolBox.topBorder + toolBox.bottomBorder + 200
 
         state: "unlocked" // FIXME: correct default value
         states: [
             State {
                 name: "locked"
-                PropertyChanges { target: unlockedList; model: lockedModel; }
+                //PropertyChanges { target: unlockedList; model: lockedModel; }
             },
             State {
                 name: "unlocked"
-                PropertyChanges { target: unlockedList; model: unlockedModel; }
+                //PropertyChanges { target: unlockedList; model: unlockedModel; }
             }
         ]
         ListView {
             id: unlockedList
             model: unlockedModel
+            //model: plasmoid.toolBoxActions
             highlight: PlasmaComponents.Highlight {}
             highlightFollowsCurrentItem: true
             interactive: false
             spacing: 0
+            delegate: ActionDelegate {
+                action: modelData
+                text: modelData.text + "Foobar"
+                iconSource: modelData.icon
+            }
             Timer {
                 id: exitTimer
                 interval: 100
@@ -81,7 +88,8 @@ Item {
                 }
             }
             anchors { fill: parent; margins: 12; }
-            Component.onCompleted: { currentIndex=-1; model: lockedModel }
+            Component.onCompleted: { currentIndex=-1; }
+//             Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.4; }
 
         }
 
@@ -98,16 +106,26 @@ Item {
         system-shutdown             Leave                               Leave
 
         **/
+            ActionDelegate {
+                id: addPanelDelegate
+                //text: i18n("Add Panel")
+                //iconSource: "list-add"
+                //index: 0
+                x: 10000
+                y: 10000
+                //parent: unlockedModel
+                //onTriggered: addPanelAction()
+            }
 
         VisualItemModel {
             id: unlockedModel
-            ActionDelegate {
-                id: addPanelDelegate
-                text: i18n("Add Panel")
-                iconSource: "list-add"
-                index: 0
-                onTriggered: addPanelAction()
-            }
+//             ActionDelegate {
+//                 id: addPanelDelegate
+//                 text: i18n("Add Panel")
+//                 iconSource: "list-add"
+//                 index: 0
+//                 onTriggered: addPanelAction()
+//             }
             ActionDelegate {
                 text: i18n("Add Widgets")
                 iconSource: "list-add"
@@ -154,7 +172,7 @@ Item {
 
             }
         }
-
+        /*
         VisualItemModel {
             id: lockedModel
             ActionDelegate {
@@ -196,6 +214,7 @@ Item {
                 onTriggered: leaveAction()
             }
         }
+        */
     }
 
     function activitiesAction() {
