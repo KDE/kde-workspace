@@ -86,40 +86,43 @@ Plasmoid::Location Plasmoid::location() const
 
 void Plasmoid::setLocation(Plasmoid::Location loc)
 {
-    if (loc == d->location)
+    if (loc == d->location) {
         return;
+    }
+
     d->location = loc;
     emit changedLocation();
 }
 
 
-unsigned int Plasmoid::id() const {
-    Applet * applet = _Private::GetApplet(*this);
-    if (applet)
-        return applet->id();
-    return 0;
+unsigned int Plasmoid::id() const
+{
+    Applet *applet = _Private::GetApplet(*this);
+    return applet ? applet->id() : 0;
 }
 
 
-QVariant Plasmoid::applet() const {
+QVariant Plasmoid::applet() const
+{
     return QVariant::fromValue<QObject*>(_Private::GetApplet(*this));
 }
 
 
-QVariant Plasmoid::createShortcutAction(QString action_id) const {
-    KAction *action = new (std::nothrow) KAction(parent());
-    if (action) {
-        action->setObjectName(action_id);
-    }
+QVariant Plasmoid::createShortcutAction(QString action_id) const
+{
+    KAction *action = new KAction(parent());
+    action->setObjectName(action_id);
     return QVariant::fromValue<QObject*>(action);
 }
 
 
-void Plasmoid::updateShortcutAction(QVariant action, QString shortcut) const {
+void Plasmoid::updateShortcutAction(QVariant action, QString shortcut) const
+{
     KAction *act = qobject_cast<KAction*>(action.value<QObject*>());
     if (!act) {
         return;
     }
+
     act->forgetGlobalShortcut();
     if (!shortcut.isEmpty()) {
         act->setGlobalShortcut(KShortcut(QKeySequence(shortcut)),
@@ -129,7 +132,8 @@ void Plasmoid::updateShortcutAction(QVariant action, QString shortcut) const {
 }
 
 
-void Plasmoid::destroyShortcutAction(QVariant action) const {
+void Plasmoid::destroyShortcutAction(QVariant action) const
+{
     KAction *act = qobject_cast<KAction*>(action.value<QObject*>());
     if (act) {
         delete act;
@@ -137,7 +141,8 @@ void Plasmoid::destroyShortcutAction(QVariant action) const {
 }
 
 
-void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) const {
+void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) const
+{
     QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
     QMenu *menu = qobject_cast<QMenu*>(menu_var.value<QObject*>());
     if (menu) {
@@ -145,7 +150,7 @@ void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) cons
         QPoint pos(x, y);
         if ( applet ) {
             menu->adjustSize();
-            if ( item && applet->containment() && applet->containment()->corona() ) {
+            if (item && applet->containment() && applet->containment()->corona()) {
                 pos = applet->containment()->corona()->popupPosition(item, menu->size());
             } else {
                 pos = applet->popupPosition(menu->size());
@@ -156,7 +161,8 @@ void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) cons
 }
 
 
-QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const {
+QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const
+{
     QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
     SystemTray::Applet *applet = _Private::GetApplet(*this);
     if (applet) {
@@ -169,9 +175,11 @@ QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const {
 }
 
 
-void Plasmoid::hideFromTaskbar(qulonglong win_id) const {
-    if (win_id > 0)
+void Plasmoid::hideFromTaskbar(qulonglong win_id) const
+{
+    if (win_id > 0) {
         KWindowSystem::setState(win_id, NET::SkipTaskbar | NET::SkipPager);
+    }
 }
 
 
@@ -183,8 +191,10 @@ Plasmoid::FormFactor Plasmoid::formFactor() const
 
 void Plasmoid::setFormFactor(Plasmoid::FormFactor form_factor)
 {
-    if (form_factor == d->form)
+    if (form_factor == d->form) {
         return;
+    }
+
     d->form = form_factor;
     emit changedFormFactor();
 }
