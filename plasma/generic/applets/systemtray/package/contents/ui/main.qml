@@ -24,7 +24,7 @@
 import QtQuick 1.1
 import Private 0.1
 
-import "TasksSet.js" as TasksSet
+import "../code/TasksSet.js" as TasksSet
 import "main.js" as JS  // stuff & JS additions
 
 Item {
