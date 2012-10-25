@@ -41,14 +41,14 @@ namespace SystemTray
 class WidgetItem: public QDeclarativeItem
 {
     Q_OBJECT
-    Q_PROPERTY(QVariant widget READ widget WRITE setWidget NOTIFY changedWidget) ///< widget to embed
+    Q_PROPERTY(QObject *widget READ widget WRITE setWidget NOTIFY changedWidget) ///< widget to embed
 public:
     explicit WidgetItem(QDeclarativeItem *parent = 0);
     virtual ~WidgetItem();
 
 public:
-    QVariant widget() const;
-    void setWidget(QVariant);
+    QObject *widget() const;
+    void setWidget(QObject *obj);
 
 signals:
     void changedWidget();

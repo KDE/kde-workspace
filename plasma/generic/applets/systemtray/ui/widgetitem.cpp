@@ -50,17 +50,17 @@ WidgetItem::~WidgetItem()
 }
 
 
-QVariant WidgetItem::widget() const
+QObject *WidgetItem::widget() const
 {
-    return QVariant::fromValue(static_cast<QObject*>(m_widget.data()));
+    return m_widget.data();
 }
 
 
-void WidgetItem::setWidget(QVariant w)
+void WidgetItem::setWidget(QObject *w)
 {
-    QGraphicsWidget *widget = qobject_cast<QGraphicsWidget*>(w.value<QObject*>());
+    QGraphicsWidget *widget = qobject_cast<QGraphicsWidget*>(w);
     // check input
-    if ( widget == m_widget.data() ) {
+    if (!widget || widget == m_widget.data()) {
         return;
     }
 
