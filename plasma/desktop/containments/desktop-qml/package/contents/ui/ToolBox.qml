@@ -56,33 +56,33 @@ Item {
         states: [
             State {
                 name: "locked"
-                PropertyChanges { target: lockedList; opacity: 1.0; }
-                PropertyChanges { target: unlockedList; opacity: 0.0; }
+                PropertyChanges { target: unlockedList; model: lockedModel; }
             },
             State {
                 name: "unlocked"
-                PropertyChanges { target: lockedList; opacity: 0.0; }
-                PropertyChanges { target: unlockedList; opacity: 1.0; }
+                PropertyChanges { target: unlockedList; model: unlockedModel; }
             }
         ]
-        ListView {
-            id: lockedList
-            interactive: false
-            model: lockedModel
-            highlight: PlasmaComponents.Highlight {}
-            highlightFollowsCurrentItem: true
-            anchors { fill: parent; margins: 12; }
-            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutExpo; } }
-        }
-
         ListView {
             id: unlockedList
             model: unlockedModel
             highlight: PlasmaComponents.Highlight {}
             highlightFollowsCurrentItem: true
             interactive: false
+            spacing: 0
+            Timer {
+                id: exitTimer
+                interval: 100
+                running: false
+                repeat: false
+                onTriggered: {
+                    unlockedList.currentIndex = -1;
+                    print("reset list highlight");
+                }
+            }
             anchors { fill: parent; margins: 12; }
-            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutExpo; } }
+            Component.onCompleted: currentIndex=-1
+
         }
 
         /** Action Mapping for ToolBox
@@ -105,43 +105,51 @@ Item {
                 id: addPanelDelegate
                 text: i18n("Add Panel")
                 iconSource: "list-add"
+                index: 0
                 onTriggered: addPanelAction()
             }
             ActionDelegate {
                 text: i18n("Add Widgets")
                 iconSource: "list-add"
+                index: 1
                 onTriggered: addWidgetsAction()
             }
             ActionDelegate {
                 text: i18n("Activities")
                 iconSource: "preferences-activities"
+                index: 2
                 onTriggered: activitiesAction()
             }
             ActionDelegate {
                 text: i18n("Shortcut Settings")
                 iconSource: "configure-shortcuts"
+                index: 3
                 onTriggered: shortcutSettingsAction()
             }
             ActionDelegate {
                 text: i18n("Desktop (QML) Settings")
                 iconSource: "configure"
 //                 onTriggered: configureAction()
+                index: 4
                 action: plasmoid.action("configure")
             }
             ActionDelegate {
                 text: i18n("Lock Widgets")
                 iconSource: "object-locked"
                 onTriggered: lockWidgetsAction()
+                index: 5
                 action: plasmoid.action("lock widgets")
             }
             ActionDelegate {
                 text: i18n("Lock Screen")
                 iconSource: "system-lock-screen"
+                index: 6
                 onTriggered: lockScreenAction()
             }
             ActionDelegate {
                 text: i18n("Leave")
                 iconSource: "system-shutdown"
+                index: 7
                 onTriggered: leaveAction()
 
             }
@@ -152,33 +160,39 @@ Item {
             ActionDelegate {
                 text: i18n("Activities")
                 iconSource: "preferences-activities"
+                index: 0
                 onTriggered: activitiesAction()
             }
             ActionDelegate {
                 text: i18n("Shortcut Settings")
                 iconSource: "configure-shortcuts"
+                index: 1
                 onTriggered: shortcutSettingsAction()
             }
             ActionDelegate {
                 text: i18n("Desktop (QML) Settings")
                 iconSource: "configure"
+                index: 2
                 //onTriggered: configureAction()
                 action: plasmoid.action("configure")
             }
             ActionDelegate {
                 text: i18n("Unlock Widgets")
                 iconSource: "object-unlocked"
+                index: 3
                 onTriggered: unlockWidgetsAction()
                 action: plasmoid.action("Unlock widgets")
             }
             ActionDelegate {
                 text: i18n("Lock Screen")
                 iconSource: "system-lock-screen"
+                index: 4
                 onTriggered: lockScreenAction()
             }
             ActionDelegate {
                 text: i18n("Leave")
                 iconSource: "system-shutdown"
+                index: 5
                 onTriggered: leaveAction()
             }
         }

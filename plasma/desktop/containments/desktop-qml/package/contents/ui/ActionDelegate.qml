@@ -22,20 +22,21 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.qtextracomponents 0.1 as QtExtras
 
 PlasmaComponents.ListItem {
-    id: toolBox
+    id: toolBoxDelegate
     property int iconSize: 22
     property QtObject action
+    property int index: 0
     property alias iconSource: iconItem.icon
     property alias text: label.text
     signal triggered
     enabled: true
 
-    height: toolBox.iconSize + 14
+    height: toolBoxDelegate.iconSize + 14
 
     QtExtras.QIconItem {
         id: iconItem
-        height: toolBox.iconSize
-        width: toolBox.iconSize
+        height: toolBoxDelegate.iconSize
+        width: toolBoxDelegate.iconSize
         anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 4 }
     }
     PlasmaComponents.Label {
@@ -43,11 +44,27 @@ PlasmaComponents.ListItem {
         elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
-
-    onClicked: {
-        if (action) {
-            action.trigger()
+    MouseArea {
+        anchors.fill: parent
+        anchors.topMargin: -4
+        anchors.bottomMargin: -4
+        hoverEnabled: true
+        onClicked: {
+            if (action) {
+                action.trigger()
+            }
+            triggered();
         }
-        triggered();
+
+        onEntered: {
+            exitTimer.running = false;
+            print("hover entered ");
+            unlockedList.currentIndex = index;
+        }
+        onExited: {
+            exitTimer.start();
+            print("hover exited");
+            //unlockedList.currentIndex = -1;
+        }
     }
 }
