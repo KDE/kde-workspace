@@ -21,6 +21,7 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.containments 0.1 as PlasmaContainments
 import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
@@ -50,8 +51,9 @@ Item {
         id: toolBoxFrame
         imagePath: "widgets/toolbox"
         width: expandedWidth
-        height: (addPanelDelegate.height * unlockedList.count + 24)
-        //height: unlockedList.contentHeight + toolBox.topBorder + toolBox.bottomBorder + 200
+        //height: typeof(plasmoid.toolBoxActionsList) != "undefined" ? ((36 * plasmoid.toolBoxActionsList.count) + 24) : 400
+        //height: 400
+        height: unlockedList.contentHeight + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
 
         state: "unlocked" // FIXME: correct default value
         states: [
@@ -66,16 +68,16 @@ Item {
         ]
         ListView {
             id: unlockedList
-            model: unlockedModel
-            //model: plasmoid.toolBoxActions
+            //model: unlockedModel
+            //model: plasmoid.toolBoxActions2
+            model: plasmoid.tools
             highlight: PlasmaComponents.Highlight {}
             highlightFollowsCurrentItem: true
             interactive: false
             spacing: 0
             delegate: ActionDelegate {
-                action: modelData
-                text: modelData.text + "Foobar"
-                iconSource: modelData.icon
+                action: plasmoid.toolAction(modelData)
+                label: modelData
             }
             Timer {
                 id: exitTimer
@@ -88,9 +90,18 @@ Item {
                 }
             }
             anchors { fill: parent; margins: 12; }
-            Component.onCompleted: { currentIndex=-1; }
+            Component.onCompleted: {
+                currentIndex=-1;
+                //print("toolBoxFrame w.h " + width + "." + height + " count: " + plasmoid.toolBoxActionsList.count);
+                //width = 200; height: 300;
+            }
 //             Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.4; }
 
+        }
+        Component.onCompleted: {
+            //currentIndex=-1;
+            print(" . . . . toolBoxFrame w.h " + width + "." + height + " count: " + plasmoid.tools.count);
+            //width = 200; height: 300;
         }
 
         /** Action Mapping for ToolBox
@@ -106,17 +117,17 @@ Item {
         system-shutdown             Leave                               Leave
 
         **/
-            ActionDelegate {
-                id: addPanelDelegate
-                //text: i18n("Add Panel")
-                //iconSource: "list-add"
-                //index: 0
-                x: 10000
-                y: 10000
-                //parent: unlockedModel
-                //onTriggered: addPanelAction()
-            }
-
+//             ActionDelegate {
+//                 id: addPanelDelegate
+//                 //text: i18n("Add Panel")
+//                 //iconSource: "list-add"
+//                 //index: 0
+//                 x: 10000
+//                 y: 10000
+//                 //parent: unlockedModel
+//                 //onTriggered: addPanelAction()
+//             }
+/*
         VisualItemModel {
             id: unlockedModel
 //             ActionDelegate {

@@ -26,9 +26,9 @@ PlasmaComponents.ListItem {
     id: toolBoxDelegate
     property int iconSize: 22
     property QtObject action
-    property int index: 0
+    //property int index: 0
     property alias iconSource: iconItem.icon
-    property alias text: label.text
+    property alias label: textLabel.text
     property Item view: unlockedList
     signal triggered
     enabled: true
@@ -42,9 +42,10 @@ PlasmaComponents.ListItem {
         height: toolBoxDelegate.iconSize
         width: toolBoxDelegate.iconSize
         anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 4 }
+        icon: action.icon
     }
     PlasmaComponents.Label {
-        id: label
+        id: textLabel
         elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
@@ -54,9 +55,10 @@ PlasmaComponents.ListItem {
         anchors.bottomMargin: -6
         hoverEnabled: true
         onClicked: {
-            if (action) {
-                action.trigger()
-            }
+//             if (action) {
+//                 action.trigger()
+//             }
+            action.trigger();
             triggered();
         }
 //         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
@@ -64,18 +66,22 @@ PlasmaComponents.ListItem {
 
         onEntered: {
             exitTimer.running = false;
-            print("hover entered ");
+//             print("hover entered ");
             unlockedList.currentIndex = index;
         }
         onExited: {
             exitTimer.start();
-            print("hover exited");
+//             print("hover exited");
             //unlockedList.currentIndex = -1;
         }
     }
     Component.onCompleted: {
-        index = unlockedList.count;
-        print("new actions with text: " + text + " index: " + index);
+        //index = unlockedList.count;
+        print("new actions with text: " + label + " index: " + index);
+    }
+    onActionChanged: {
+        print(" Action: " + action.text);
+        print("  icon: " + action.icon.name);
     }
 //     Rectangle { anchors.fill: parent; color: "yellow"; opacity: 0.4; }
 
