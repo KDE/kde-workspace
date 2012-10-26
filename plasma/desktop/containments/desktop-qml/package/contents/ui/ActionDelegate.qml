@@ -27,8 +27,8 @@ PlasmaComponents.ListItem {
     property int iconSize: 22
     property QtObject action
     //property int index: 0
-    property alias iconSource: iconItem.icon
-    property alias label: textLabel.text
+    //property alias iconSource: iconItem.icon
+    //property alias label: textLabel.text
     property Item view: unlockedList
     signal triggered
     enabled: true
@@ -46,6 +46,7 @@ PlasmaComponents.ListItem {
     }
     PlasmaComponents.Label {
         id: textLabel
+        text: action.text.replace("&", "") // hack to get rid of keyboard accelerator hints
         elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
@@ -55,14 +56,11 @@ PlasmaComponents.ListItem {
         anchors.bottomMargin: -6
         hoverEnabled: true
         onClicked: {
-//             if (action) {
-//                 action.trigger()
-//             }
             action.trigger();
             triggered();
         }
-//         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
-//         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
+        onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
+        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
 
         onEntered: {
             exitTimer.running = false;
@@ -77,11 +75,11 @@ PlasmaComponents.ListItem {
     }
     Component.onCompleted: {
         //index = unlockedList.count;
-        print("new actions with text: " + label + " index: " + index);
+        //print("new actions with text: " + label + " index: " + index);
     }
     onActionChanged: {
         print(" Action: " + action.text);
-        print("  icon: " + action.icon.name);
+        print("  icon: " + action.name);
     }
 //     Rectangle { anchors.fill: parent; color: "yellow"; opacity: 0.4; }
 

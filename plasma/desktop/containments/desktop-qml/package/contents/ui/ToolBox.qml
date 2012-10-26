@@ -27,6 +27,8 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 Item {
     id: toolBox
 
+    property QtObject proxy: plasmoid.toolBox
+
     property int expandedWidth: 240
     property int expandedHeight: toolBoxFrame.state == "locked" ? 240 : 320
     //property int expandedHeight: height
@@ -70,14 +72,14 @@ Item {
             id: unlockedList
             //model: unlockedModel
             //model: plasmoid.toolBoxActions2
-            model: plasmoid.tools
+            //model: plasmoid.tools
+            model: proxy.actionKeys
             highlight: PlasmaComponents.Highlight {}
             highlightFollowsCurrentItem: true
             interactive: false
             spacing: 0
             delegate: ActionDelegate {
-                action: plasmoid.toolAction(modelData)
-                label: modelData
+                action: proxy.toolAction(modelData)
             }
             Timer {
                 id: exitTimer

@@ -27,6 +27,7 @@ Item {
     //width: isCorner ? 48 : iconSize * 2
     //height: isCorner ? 48 : iconSize * 2
     width: 128; height: 128
+    property QtObject proxy: plasmoid.toolBox
 
     property string text: plasmoid.activityName == "" ? "Activity Name That Is 37 Miles Long" : plasmoid.activityName
 
@@ -305,7 +306,7 @@ Item {
         property QtObject container: main
         anchors.fill: parent
 
-        drag.target: toolBoxButton
+        drag.target: proxy.immutable ? undefined : toolBoxButton
         Connections {
             target: toolBoxButton
             onStateChanged: {
@@ -323,6 +324,11 @@ Item {
         drag.maximumX: container.width - toolBoxButton.width
         drag.minimumY: 0
         drag.maximumY: container.height - toolBoxButton.height
+
+        Connections {
+            target: proxy
+            onImmutableChanged: print("immutableChanged: " + proxy.immutable);
+        }
 
         onClicked: {
             var qmlFile = (toolBox.state == "expanded") ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
