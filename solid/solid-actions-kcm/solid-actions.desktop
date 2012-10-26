@@ -81,6 +81,9 @@ Name[zh_CN]=设备动作
 Name[zh_TW]=裝置動作
 
 Comment=Manage actions available to the user when connecting new devices
+Comment[el]=Διαχείριση ενεργειών διαθέσιμων στο χρήστη κατά τη σύνδεση νέων συσκευών
+Comment[es]=Gestionar las acciones disponibles para el usuario cuando conecta nuevos dispositivos
+Comment[nl]=Beheren van acties die beschikbaar zijn voor de gebruiker bij het aankoppelen van nieuwe apparaten
 Comment[pt]=Gerir as acções disponíveis para o utilizador, quando são ligados dispositivos novos ao computador
 Comment[pt_BR]=Gerencia as ações disponíveis ao usuário, quando novos dispositivos são conectados
 Comment[sk]=Spravovať akcie dostupné aktuálnemu používateľovi pri pripájaní nových zariadení
