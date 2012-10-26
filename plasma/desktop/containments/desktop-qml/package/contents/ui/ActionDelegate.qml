@@ -26,13 +26,8 @@ PlasmaComponents.ListItem {
     id: toolBoxDelegate
     property int iconSize: 22
     property QtObject action
-    //property int index: 0
-    //property alias iconSource: iconItem.icon
-    //property alias label: textLabel.text
     property Item view: unlockedList
-    signal triggered
     enabled: true
-    //parent: unlockedList
 
     height: toolBoxDelegate.iconSize + 14
     width: parent.width-24
@@ -55,33 +50,13 @@ PlasmaComponents.ListItem {
         anchors.topMargin: -6
         anchors.bottomMargin: -6
         hoverEnabled: true
-        onClicked: {
-            action.trigger();
-            triggered();
-        }
+        onClicked: action.trigger()
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
-
         onEntered: {
             exitTimer.running = false;
-//             print("hover entered ");
             unlockedList.currentIndex = index;
         }
-        onExited: {
-            exitTimer.start();
-//             print("hover exited");
-            //unlockedList.currentIndex = -1;
-        }
+        onExited: exitTimer.start()
     }
-    Component.onCompleted: {
-        //index = unlockedList.count;
-        //print("new actions with text: " + label + " index: " + index);
-    }
-    onActionChanged: {
-        print(" Action: " + action.text);
-        print("  icon: " + action.name);
-    }
-//     Rectangle { anchors.fill: parent; color: "yellow"; opacity: 0.4; }
-
-
 }

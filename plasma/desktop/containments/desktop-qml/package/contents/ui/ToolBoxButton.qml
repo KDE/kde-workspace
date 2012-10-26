@@ -223,7 +223,6 @@ Item {
                     toolBoxIcon.anchors.top = t.top;
                     toolBoxIcon.anchors.right = t.right;
                     toolBoxIcon.anchors.topMargin = _tm;
-                    //toolBoxIcon.anchors.rightMargin = 0;
                 } else if (s == "bottom") {
                     toolBoxIcon.anchors.bottom = t.bottom;
                     toolBoxIcon.anchors.left = t.left;
@@ -233,7 +232,6 @@ Item {
                     toolBoxIcon.anchors.left = t.left;
                     toolBoxIcon.anchors.topMargin = _tm;
                 }
-                //toolBoxButton.cornerElement = corner;
             }
         }
     }
@@ -332,6 +330,7 @@ Item {
 
         onClicked: {
             var qmlFile = (toolBox.state == "expanded") ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
+            proxy.setShowing((toolBox.state != "expanded"));
             var component = Qt.createComponent(qmlFile);
             if (component.status == Component.Ready) {
                 var ani = component.createObject(buttonMouse);

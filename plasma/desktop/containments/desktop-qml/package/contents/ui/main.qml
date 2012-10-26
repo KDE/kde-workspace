@@ -96,9 +96,6 @@ Item {
             var applet = plasmoid.applets[i]
             addApplet(applet, 0)
         }
-//         print("logoutAllowed: " + plasmoid.logoutAllowed());
-//         print("lockScreenAllowed: " + plasmoid.lockScreenAllowed());
-
     }
 
     function addApplet(applet, pos)

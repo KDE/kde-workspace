@@ -30,8 +30,7 @@ Item {
     property QtObject proxy: plasmoid.toolBox
 
     property int expandedWidth: 240
-    property int expandedHeight: toolBoxFrame.state == "locked" ? 240 : 320
-    //property int expandedHeight: height
+    property int expandedHeight: 240
 
     width: childrenRect.width
     height: childrenRect.height
@@ -49,30 +48,20 @@ Item {
         }
     ]
 
+    Connections {
+        target: proxy
+        onShowingChanged: print("Showing now: " + proxy.showing);
+
+    }
+
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
         imagePath: "widgets/toolbox"
         width: expandedWidth
-        //height: typeof(plasmoid.toolBoxActionsList) != "undefined" ? ((36 * plasmoid.toolBoxActionsList.count) + 24) : 400
-        //height: 400
         height: unlockedList.contentHeight + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
-
-        state: "unlocked" // FIXME: correct default value
-        states: [
-            State {
-                name: "locked"
-                //PropertyChanges { target: unlockedList; model: lockedModel; }
-            },
-            State {
-                name: "unlocked"
-                //PropertyChanges { target: unlockedList; model: unlockedModel; }
-            }
-        ]
         ListView {
             id: unlockedList
-            //model: unlockedModel
-            //model: plasmoid.toolBoxActions2
-            //model: plasmoid.tools
+            anchors { fill: parent; margins: 12; }
             model: proxy.actionKeys
             highlight: PlasmaComponents.Highlight {}
             highlightFollowsCurrentItem: true
@@ -84,26 +73,10 @@ Item {
             Timer {
                 id: exitTimer
                 interval: 100
-                running: false
+                running: true
                 repeat: false
-                onTriggered: {
-                    unlockedList.currentIndex = -1;
-                    print("reset list highlight");
-                }
+                onTriggered: unlockedList.currentIndex = -1
             }
-            anchors { fill: parent; margins: 12; }
-            Component.onCompleted: {
-                currentIndex=-1;
-                //print("toolBoxFrame w.h " + width + "." + height + " count: " + plasmoid.toolBoxActionsList.count);
-                //width = 200; height: 300;
-            }
-//             Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.4; }
-
-        }
-        Component.onCompleted: {
-            //currentIndex=-1;
-            print(" . . . . toolBoxFrame w.h " + width + "." + height + " count: " + plasmoid.tools.count);
-            //width = 200; height: 300;
         }
 
         /** Action Mapping for ToolBox
@@ -119,150 +92,5 @@ Item {
         system-shutdown             Leave                               Leave
 
         **/
-//             ActionDelegate {
-//                 id: addPanelDelegate
-//                 //text: i18n("Add Panel")
-//                 //iconSource: "list-add"
-//                 //index: 0
-//                 x: 10000
-//                 y: 10000
-//                 //parent: unlockedModel
-//                 //onTriggered: addPanelAction()
-//             }
-/*
-        VisualItemModel {
-            id: unlockedModel
-//             ActionDelegate {
-//                 id: addPanelDelegate
-//                 text: i18n("Add Panel")
-//                 iconSource: "list-add"
-//                 index: 0
-//                 onTriggered: addPanelAction()
-//             }
-            ActionDelegate {
-                text: i18n("Add Widgets")
-                iconSource: "list-add"
-                index: 1
-                onTriggered: addWidgetsAction()
-            }
-            ActionDelegate {
-                text: i18n("Activities")
-                iconSource: "preferences-activities"
-                index: 2
-                onTriggered: activitiesAction()
-            }
-            ActionDelegate {
-                text: i18n("Shortcut Settings")
-                iconSource: "configure-shortcuts"
-                index: 3
-                onTriggered: shortcutSettingsAction()
-            }
-            ActionDelegate {
-                text: i18n("Desktop (QML) Settings")
-                iconSource: "configure"
-//                 onTriggered: configureAction()
-                index: 4
-                action: plasmoid.action("configure")
-            }
-            ActionDelegate {
-                text: i18n("Lock Widgets")
-                iconSource: "object-locked"
-                onTriggered: lockWidgetsAction()
-                index: 5
-                action: plasmoid.action("lock widgets")
-            }
-            ActionDelegate {
-                text: i18n("Lock Screen")
-                iconSource: "system-lock-screen"
-                index: 6
-                onTriggered: lockScreenAction()
-            }
-            ActionDelegate {
-                text: i18n("Leave")
-                iconSource: "system-shutdown"
-                index: 7
-                onTriggered: leaveAction()
-
-            }
-        }
-        /*
-        VisualItemModel {
-            id: lockedModel
-            ActionDelegate {
-                text: i18n("Activities")
-                iconSource: "preferences-activities"
-                index: 0
-                onTriggered: activitiesAction()
-            }
-            ActionDelegate {
-                text: i18n("Shortcut Settings")
-                iconSource: "configure-shortcuts"
-                index: 1
-                onTriggered: shortcutSettingsAction()
-            }
-            ActionDelegate {
-                text: i18n("Desktop (QML) Settings")
-                iconSource: "configure"
-                index: 2
-                //onTriggered: configureAction()
-                action: plasmoid.action("configure")
-            }
-            ActionDelegate {
-                text: i18n("Unlock Widgets")
-                iconSource: "object-unlocked"
-                index: 3
-                onTriggered: unlockWidgetsAction()
-                action: plasmoid.action("Unlock widgets")
-            }
-            ActionDelegate {
-                text: i18n("Lock Screen")
-                iconSource: "system-lock-screen"
-                index: 4
-                onTriggered: lockScreenAction()
-            }
-            ActionDelegate {
-                text: i18n("Leave")
-                iconSource: "system-shutdown"
-                index: 5
-                onTriggered: leaveAction()
-            }
-        }
-        */
     }
-
-    function activitiesAction() {
-        print("activities action");
-    }
-    function addPanelAction() {
-        print("add panel action ??");
-        plasmoid.action("add panel") // ??
-    }
-    function addWidgetsAction() {
-        print("add widgets action");
-        plasmoid.action("add widgets");
-    }
-    function configureAction() {
-        print("configure action");
-        var ac = plasmoid.action("configure");
-        ac.trigger();
-    }
-    function shortcutSettingsAction() {
-        print("shortcuts action ??");
-        plasmoid.action("configure shortcuts"); // ??
-    }
-    function unlockWidgetsAction() {
-        print("unlock widgets action");
-        toolBoxFrame.state = "unlocked";
-    }
-    function lockWidgetsAction() {
-        print("lock widgets action");
-        toolBoxFrame.state = "locked";
-    }
-    function lockScreenAction() {
-        print("lock screen ??");
-    }
-    function leaveAction() {
-        print("leave action ??");
-    }
-
 }
