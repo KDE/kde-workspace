@@ -101,6 +101,7 @@ Name[zh_CN]=自动启动
 Name[zh_TW]=自動啟動
 
 Comment=Manage which programs start up automatically with KDE.
+Comment[cs]=Spravujte automatické spouštění programů při startu KDE.
 Comment[el]=Διαχείριση των προγραμμάτων που θα ξεκινούν αυτόματα με το KDE.
 Comment[es]=Gestionar qué programas se inician automáticamente con KDE.
 Comment[nl]=Beheren van programma's die automatisch met KDE opstarten.
