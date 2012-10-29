@@ -191,8 +191,8 @@ void ShareProvider::finishedContentData(KIO::Job *job, const QByteArray &data)
 
     if (!m_isBlob) {
         // it's just text and we can return here using data()
-        addPostItem(m_contentKey, data.data(), "text/plain");
-        addQueryItem(m_contentKey, data.data());
+        addPostItem(m_contentKey, QString::fromLocal8Bit(data), "text/plain");
+        addQueryItem(m_contentKey, QString::fromLocal8Bit(data));
         emit readyToPublish();
         return;
     }
