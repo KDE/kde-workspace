@@ -37,11 +37,11 @@ Item {
     state: "Normal"
     focus: true
     onFocusChanged: {
-        searchBar.focus = true;
+        root.focus = true;
     }
 
     Component.onCompleted: {
-        searchBar.focus = true;
+        root.focus = true;
     }
 
     PlasmaCore.DataSource {
@@ -91,6 +91,7 @@ Item {
 
     PlasmaComponents.TabGroup {
         id: mainStack
+
         anchors {
             top: {
                 switch (kickoff.location) {
@@ -209,34 +210,29 @@ Item {
         onCurrentTabChanged: root.forceActiveFocus();
     }
 
-    Keys.forwardTo: [(tabBar.layout)]
+    Keys.forwardTo: [tabBar.layout]
 
     Keys.onPressed: {
         if (event.key == Qt.Key_Up) {
-            if (root.state == "Normal") {
-                currentView.decrementCurrentIndex();
-            } else if (root.state == "Applications") {
-                applicationsViewContainer.item.decrementCurrentIndex();
-                applicationsViewContainer.forceActiveFocus();
-            } else if (root.state == "Search") {
-                searchView.item.decrementCurrentIndex();
-            }
+            currentView.decrementCurrentIndex();
             event.accepted = true;
         }
         else if (event.key == Qt.Key_Down) {
-            if (root.state == "Normal") {
-                currentView.incrementCurrentIndex();
-            } else if (root.state == "Applications") {
-                applicationsViewContainer.item.incrementCurrentIndex();
-                applicationsViewContainer.forceActiveFocus();
-            } else if (root.state == "Search") {
-                searchView.item.incrementCurrentIndex();
-            }
+            currentView.incrementCurrentIndex();
+            event.accepted = true;
+        }
+        else if (event.key == Qt.Key_Left) {
+//FIXME
+//             currentView.incrementCurrentIndex();
+//             event.accepted = true;
+        }
+        else if (event.key == Qt.Key_Right) {
+            currentView.activateCurrentIndex();
             event.accepted = true;
         }
         else if (event.key == Qt.Key_Tab) {
             if (root.state == "Applications") {
-                if (applicationsViewContainer.activeFocus )
+                if (applicationsViewContainer.activeFocus)
                     root.forceActiveFocus();
                 else
                     applicationsViewContainer.forceActiveFocus();
@@ -244,16 +240,12 @@ Item {
             event.accepted = true;
         }
         else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
-            if (root.state == "Normal") {
-                currentView.activateCurrentIndex();
-            } else if (root.state == "Search") {
-                searchView.item.activateCurrentIndex();
-            }
+            currentView.activateCurrentIndex(1);
             event.accepted = true;
         }
         else { // forward key to searchView
             if (event.text != "") {
-                searchBar.text += event.text;
+                searchBar.query += event.text;
                 searchBar.focus = true;
             }
             event.accepted = true;
@@ -263,16 +255,18 @@ Item {
     states: [
         State {
             name: "Normal"
+            when: (mainStack.currentTab != applicationsPage)
             PropertyChanges {
-                target: tabBar
-                visible: true
+                target: root
+                Keys.forwardTo: [tabBar.layout]
             }
         },
         State {
             name: "Applications"
+            when: (mainStack.currentTab == applicationsPage)
             PropertyChanges {
-                target: tabBar
-                visible: true
+                target: root
+                Keys.forwardTo: [root]
             }
         },
         State {
@@ -283,16 +277,17 @@ Item {
             }
         }
     ]
-    transitions: [
-        Transition {
-            from: "*"
-            to: "Search"
-            ScriptAction {script: mainStack.push(Qt.createComponent("SearchView.qml"));}
-        },
-        Transition {
-            from: "Search"
-            to: "*"
-            ScriptAction {script: mainStack.pop();}
-        }
-    ]
+//     FIXME: not a function...
+//     transitions: [
+//         Transition {
+//             from: "*"
+//             to: "Search"
+//             ScriptAction {script: mainStack.push(Qt.createComponent("SearchView.qml"));}
+//         },
+//         Transition {
+//             from: "Search"
+//             to: "*"
+//             ScriptAction {script: mainStack.pop();}
+//         }
+//     ]
 }
