@@ -32,7 +32,7 @@ Item {
     property int state
     property alias leftActionIcon: leftAction.icon
     property bool mounted
-    property bool expanded: (notifierDialog.currentExpanded==index)
+    property bool expanded: (notifierDialog.currentExpanded == index)
     property alias percentUsage: freeSpaceBar.value
     signal leftActionTriggered
 
@@ -67,6 +67,7 @@ Item {
             notifierDialog.highlightItem.opacity = expanded ? 1 : 0;
         }
         onClicked: {
+            notifierDialog.itemFocused();
             if (leftAction.visible
                 && mouse.x >= leftAction.x
                 && mouse.x <= leftAction.x + leftAction.width

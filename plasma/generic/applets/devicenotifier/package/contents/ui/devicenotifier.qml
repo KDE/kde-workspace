@@ -66,8 +66,8 @@ Item {
         function processLastDevice() {
             if (last != "") {
                 if (devicesType == "all" ||
-                    (devicesType == "removable" && data[last]["Removable"] == true) ||
-                    (devicesType == "nonRemovable" && data[last]["Removable"] == false)) {
+                    (devicesType == "removable" && data[last] && data[last]["Removable"] == true) ||
+                    (devicesType == "nonRemovable" && data[last] && data[last]["Removable"] == false)) {
                     updateTooltip();
                     expandDevice(last)
                     last = "";
@@ -78,6 +78,9 @@ Item {
 
     function popupEventSlot(popped) {
         if (!popped) {
+            // reset the property that lets us remember if an item was clicked
+            // (versus only hovered) for autohide purposes
+            notifierDialog.itemClicked = true;
             expandedDevice = "";
             notifierDialog.currentExpanded = -1;
             notifierDialog.currentIndex = -1;
@@ -112,7 +115,8 @@ Item {
         updateTooltip()
     }
 
-    function configChanged() {
+    function configChanged()
+    {
         var all = plasmoid.readConfig("allDevices");
         var removable = plasmoid.readConfig("removableDevices");
         if (all == true) {
@@ -134,6 +138,11 @@ Item {
         if (hpSource.data[udi]["actions"].length > 1) {
             expandedDevice = udi
         }
+
+        // reset the property that lets us remember if an item was clicked
+        // (versus only hovered) for autohide purposes
+        notifierDialog.itemClicked = false;
+
         plasmoid.setPopupIconByName("preferences-desktop-notification")
         plasmoid.showPopup(7500)
         popupIconTimer.restart()
@@ -165,194 +174,227 @@ Item {
         onTriggered: plasmoid.status = "PassiveStatus"
     }
 
-    PlasmaComponents.Label {
-        id: header
-        text: filterModel.count>0 ? i18n("Available Devices") : i18n("No Devices Available")
-        anchors { top: parent.top; topMargin: 3; left: parent.left; right: parent.right }
-        horizontalAlignment: Text.AlignHCenter
-    }
+    MouseArea {
+        hoverEnabled: true
+        anchors.fill: parent
 
+        onEntered: notifierDialog.itemHovered()
+        onExited: notifierDialog.itemUnhovered()
 
-    PlasmaCore.Svg {
-        id: lineSvg
-        imagePath: "widgets/line"
-    }
-    PlasmaCore.SvgItem {
-        id: headerSeparator
-        svg: lineSvg
-        elementId: "horizontal-line"
-        anchors {
-            top: header.bottom
-            left: parent.left
-            right: parent.right
-            topMargin: 3
+        PlasmaComponents.Label {
+            id: header
+            text: filterModel.count>0 ? i18n("Available Devices") : i18n("No Devices Available")
+            anchors { top: parent.top; topMargin: 3; left: parent.left; right: parent.right }
+            horizontalAlignment: Text.AlignHCenter
         }
-        height: lineSvg.elementSize("horizontal-line").height
-    }
 
-    PlasmaExtras.ScrollArea {
-        anchors {
-            top : headerSeparator.bottom
-            topMargin: 10
-            bottom: statusBarSeparator.top
-            left: parent.left
-            right: parent.right
+
+        PlasmaCore.Svg {
+            id: lineSvg
+            imagePath: "widgets/line"
         }
-        ListView {
-            id: notifierDialog
-
-            model: PlasmaCore.SortFilterModel {
-                id: filterModel
-                sourceModel: PlasmaCore.DataModel {
-                    dataSource: sdSource
-                }
-                filterRole: "Removable"
-                filterRegExp: "true"
-                sortRole: "Timestamp"
-                sortOrder: Qt.DescendingOrder
+        PlasmaCore.SvgItem {
+            id: headerSeparator
+            svg: lineSvg
+            elementId: "horizontal-line"
+            anchors {
+                top: header.bottom
+                left: parent.left
+                right: parent.right
+                topMargin: 3
             }
-            onCountChanged: {
-                if (count == 0) {
-                    updateTooltip();
-                    passiveTimer.restart()
-                } else {
-                    passiveTimer.stop()
-                    plasmoid.status = "ActiveStatus"
-                }
-            }
-            delegate: deviceItem
-            highlight: deviceHighlighter
-            highlightMoveDuration: 250
-            highlightMoveSpeed: 1
-            //this is needed to make SectionScroller actually work
-            //acceptable since one doesn't have a billion of devices
-            cacheBuffer: 1000
+            height: lineSvg.elementSize("horizontal-line").height
+        }
 
-            section {
-                property: "Type Description"
-                delegate: Item {
-                    height: childrenRect.height
-                    width: notifierDialog.width
-                    PlasmaCore.SvgItem {
-                        visible: parent.y > 0
-                        svg: lineSvg
-                        elementId: "horizontal-line"
-                        anchors {
-                            left: parent.left
-                            right: parent.right
+        PlasmaExtras.ScrollArea {
+            anchors {
+                top : headerSeparator.bottom
+                topMargin: 10
+                bottom: statusBarSeparator.top
+                left: parent.left
+                right: parent.right
+            }
+            ListView {
+                id: notifierDialog
+
+                model: PlasmaCore.SortFilterModel {
+                    id: filterModel
+                    sourceModel: PlasmaCore.DataModel {
+                        dataSource: sdSource
+                    }
+                    filterRole: "Removable"
+                    filterRegExp: "true"
+                    sortRole: "Timestamp"
+                    sortOrder: Qt.DescendingOrder
+                }
+
+                property int currentExpanded: -1
+                property bool itemClicked: true
+                delegate: deviceItem
+                highlight: deviceHighlighter
+                highlightMoveDuration: 250
+                highlightMoveSpeed: 1
+                //this is needed to make SectionScroller actually work
+                //acceptable since one doesn't have a billion of devices
+                cacheBuffer: 1000
+
+                onCountChanged: {
+                    if (count == 0) {
+                        updateTooltip();
+                        passiveTimer.restart()
+                    } else {
+                        passiveTimer.stop()
+                        plasmoid.status = "ActiveStatus"
+                    }
+                }
+
+                function itemHovered()
+                {
+                    // prevent autohide from catching us!
+                    plasmoid.showPopup(0);
+                }
+
+                function itemUnhovered()
+                {
+                    if (!itemClicked) {
+                        plasmoid.showPopup(1000);
+                    }
+                }
+
+                function itemFocused()
+                {
+                    if (!itemClicked) {
+                        // prevent autohide from catching us!
+                        itemClicked = true;
+                        plasmoid.showPopup(0)
+                    }
+                }
+
+                section {
+                    property: "Type Description"
+                    delegate: Item {
+                        height: childrenRect.height
+                        width: notifierDialog.width
+                        PlasmaCore.SvgItem {
+                            visible: parent.y > 0
+                            svg: lineSvg
+                            elementId: "horizontal-line"
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            height: lineSvg.elementSize("horizontal-line").height
                         }
-                        height: lineSvg.elementSize("horizontal-line").height
+                        PlasmaComponents.Label {
+                            x: 8
+                            y: 8
+                            opacity: 0.6
+                            text: section
+                            color: theme.textColor
+                        }
                     }
-                    PlasmaComponents.Label {
-                        x: 8
-                        y: 8
-                        opacity: 0.6
-                        text: section
-                        color: theme.textColor
+                }
+
+                Component.onCompleted: currentIndex=-1
+            }
+        }
+
+        Component {
+            id: deviceItem
+
+            DeviceItem {
+                id: wrapper
+                width: notifierDialog.width
+                udi: DataEngineSource
+                icon: hpSource.data[udi]["icon"]
+                deviceName: hpSource.data[udi]["text"]
+                emblemIcon: Emblems[0]
+                state: model["State"]
+
+                percentUsage: {
+                    var freeSpace = new Number(sdSource.data[udi]["Free Space"]);
+                    var size = new Number(model["Size"]);
+                    var used = size-freeSpace;
+                    return used*100/size;
+                }
+                leftActionIcon: {
+                    if (mounted) {
+                        return QIcon("media-eject");
+                    } else {
+                        return QIcon("emblem-mounted");
+                    }
+                }
+                mounted: model["Accessible"]
+
+                onLeftActionTriggered: {
+                    operationName = mounted ? "unmount" : "mount";
+                    service = sdSource.serviceForSource(udi);
+                    operation = service.operationDescription(operationName);
+                    service.startOperationCall(operation);
+                }
+                property bool isLast: (expandedDevice == udi)
+                property int operationResult: (model["Operation result"])
+
+                onIsLastChanged: {
+                    if (isLast) {
+                        notifierDialog.currentExpanded = index
+                    }
+                }
+                onOperationResultChanged: {
+                    if (operationResult == 1) {
+                        plasmoid.setPopupIconByName("dialog-ok")
+                        popupIconTimer.restart()
+                    } else if (operationResult == 2) {
+                        plasmoid.setPopupIconByName("dialog-error")
+                        popupIconTimer.restart()
+                    }
+                }
+                Behavior on height { NumberAnimation { duration: 150 } }
+            }
+        }
+
+        Component {
+            id: deviceHighlighter
+
+            PlasmaCore.FrameSvgItem {
+                imagePath: "widgets/viewitem"
+                prefix: "hover"
+                opacity: 0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.OutQuad
                     }
                 }
             }
-
-            property int currentExpanded: -1
-            Component.onCompleted: currentIndex=-1
         }
-    }
 
-    Component {
-        id: deviceItem
-
-        DeviceItem {
-            id: wrapper
-            width: notifierDialog.width
-            udi: DataEngineSource
-            icon: hpSource.data[udi]["icon"]
-            deviceName: hpSource.data[udi]["text"]
-            emblemIcon: Emblems[0]
-            state: model["State"]
-
-            percentUsage: {
-                var freeSpace = new Number(sdSource.data[udi]["Free Space"]);
-                var size = new Number(model["Size"]);
-                var used = size-freeSpace;
-                return used*100/size;
+        PlasmaCore.SvgItem {
+            id: statusBarSeparator
+            svg: lineSvg
+            elementId: "horizontal-line"
+            height: lineSvg.elementSize("horizontal-line").height
+            anchors {
+                bottom: statusBar.top
+                bottomMargin: statusBar.visible ? 3:0
+                left: parent.left
+                right: parent.right
             }
-            leftActionIcon: {
-                if (mounted) {
-                    return QIcon("media-eject");
-                } else {
-                    return QIcon("emblem-mounted");
-                }
-            }
-            mounted: model["Accessible"]
-
-            onLeftActionTriggered: {
-                operationName = mounted ? "unmount" : "mount";
-                service = sdSource.serviceForSource(udi);
-                operation = service.operationDescription(operationName);
-                service.startOperationCall(operation);
-            }
-            property bool isLast: (expandedDevice == udi)
-            property int operationResult: (model["Operation result"])
-
-            onIsLastChanged: {
-                if (isLast) {
-                    notifierDialog.currentExpanded = index
-                }
-            }
-            onOperationResultChanged: {
-                if (operationResult == 1) {
-                    plasmoid.setPopupIconByName("dialog-ok")
-                    popupIconTimer.restart()
-                } else if (operationResult == 2) {
-                    plasmoid.setPopupIconByName("dialog-error")
-                    popupIconTimer.restart()
-                }
-            }
-            Behavior on height { NumberAnimation { duration: 150 } }
+            visible: statusBar.height>0
         }
-    }
 
-    Component {
-        id: deviceHighlighter
-
-        PlasmaCore.FrameSvgItem {
-            imagePath: "widgets/viewitem"
-            prefix: "hover"
-            opacity: 0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 250
-                    easing.type: Easing.OutQuad
-                }
+        StatusBar {
+            id: statusBar
+            anchors {
+                left: parent.left
+                leftMargin: 5
+                right: parent.right
+                rightMargin: 5
+                bottom: parent.bottom
+                bottomMargin: 5
             }
         }
-    }
-
-    PlasmaCore.SvgItem {
-        id: statusBarSeparator
-        svg: lineSvg
-        elementId: "horizontal-line"
-        height: lineSvg.elementSize("horizontal-line").height
-        anchors {
-            bottom: statusBar.top
-            bottomMargin: statusBar.visible ? 3:0
-            left: parent.left
-            right: parent.right
-        }
-        visible: statusBar.height>0
-    }
-
-    StatusBar {
-        id: statusBar
-        anchors {
-            left: parent.left
-            leftMargin: 5
-            right: parent.right
-            rightMargin: 5
-            bottom: parent.bottom
-            bottomMargin: 5
-        }
-    }
+    } // MouseArea
 
     function isMounted (udi) {
         var types = sdSource.data[udi]["Device Types"];
