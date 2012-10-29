@@ -77,10 +77,10 @@ Item {
     }
 
     function popupEventSlot(popped) {
-    if (!popped) {
-        expandedDevice = "";
-        notifierDialog.currentExpanded = -1;
-        notifierDialog.currentIndex = -1;
+        if (!popped) {
+            expandedDevice = "";
+            notifierDialog.currentExpanded = -1;
+            notifierDialog.currentIndex = -1;
         }
     }
 

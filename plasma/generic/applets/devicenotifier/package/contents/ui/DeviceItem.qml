@@ -68,14 +68,14 @@ Item {
         }
         onClicked: {
             if (leftAction.visible
-            && mouse.x>=leftAction.x && mouse.x<=leftAction.x+leftAction.width
-            && mouse.y>=leftAction.y && mouse.y<=leftAction.y+leftAction.height)
-            {
+                && mouse.x >= leftAction.x
+                && mouse.x <= leftAction.x + leftAction.width
+                && mouse.y >= leftAction.y
+                && mouse.y <= leftAction.y + leftAction.height) {
                 leftActionTriggered();
-            }
-            else {
+            } else {
                 var actions = hpSource.data[udi]["actions"];
-                if (actions.length==1) {
+                if (actions.length == 1) {
                     service = hpSource.serviceForSource(udi);
                     operation = service.operationDescription("invokeAction");
                     operation.predicate = actions[0]["predicate"];
