@@ -186,12 +186,14 @@ SystemTray::Task::VisibilityPreference Task::visibilityPreference() const
 }
 
 
-QString Task::name() const {
+QString Task::name() const
+{
     return d->name;
 }
 
 
-void Task::setName(QString name) {
+void Task::setName(QString name)
+{
     if (d->name != name) {
         d->name = name;
         emit changedName();
