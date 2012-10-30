@@ -129,7 +129,11 @@ Item {
             Connections {
                 target: ui_task
                 onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-                onChangedHideState: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
+            }
+
+            Connections {
+                target: ui_task.task
+                onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
         }
     }
@@ -151,7 +155,11 @@ Item {
             Connections {
                 target: ui_task
                 onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-                onChangedHideState: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
+            }
+
+            Connections {
+                target: ui_task.task
+                onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
         }
     }
@@ -168,7 +176,11 @@ Item {
             Connections {
                 target: ui_task
                 onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
-                onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
+            }
+
+            Connections {
+                target: ui_task.task
+                onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
 
             Component.onCompleted: {
@@ -191,8 +203,8 @@ Item {
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        if (task.status === TaskStatusAttention || task.hideState === TaskHideStateShown) return JS.LOCATION_TRAY
-        if (task.hideState === TaskHideStateHidden || (task.status !== TaskStatusActive && task.status !== TaskStatusUnknown)) {
+        if (task.status === TaskStatusAttention || task.task.visibilityPreference === AlwaysShown) return JS.LOCATION_TRAY
+        if (task.task.visibilityPreference === AlwaysHidden || (task.status !== TaskStatusActive && task.status !== TaskStatusUnknown)) {
             return JS.LOCATION_POPUP
         }
         return JS.LOCATION_TRAY

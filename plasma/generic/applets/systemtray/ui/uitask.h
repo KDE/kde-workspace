@@ -53,12 +53,10 @@ class UiTask: public QObject
 {
     Q_OBJECT
 
-    Q_ENUMS(TaskHideState)
     Q_ENUMS(TaskType)
     Q_ENUMS(TaskStatus)
     Q_ENUMS(TaskCategory)
 
-    Q_PROPERTY(TaskHideState hideState READ hideState NOTIFY changedHideState)
     Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(QGraphicsWidget *widget READ widget CONSTANT)
     Q_PROPERTY(TaskStatus status READ status NOTIFY changedStatus)
@@ -76,13 +74,6 @@ public:
         TaskCategoryCommunications = Task::Communications,
         TaskCategorySystemServices = Task::SystemServices,
         TaskCategoryHardware = Task::Hardware
-    };
-
-    enum TaskHideState
-    {
-        TaskHideStateAuto = 0,
-        TaskHideStateHidden,
-        TaskHideStateShown
     };
 
     enum TaskType
@@ -104,8 +95,6 @@ public:
     explicit UiTask(TasksPool &pool, QString task_id, Task *task);
     virtual ~UiTask();
 
-    TaskHideState hideState() const;
-    void setHideState(TaskHideState state);
     TaskStatus status() const;
     TaskCategory category() const;
     TaskType type() const;
@@ -121,7 +110,6 @@ public:
 
 
 signals:
-    void changedHideState();
     void changedStatus();
     void changedName();
 

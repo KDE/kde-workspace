@@ -21,8 +21,8 @@
 
 #include "task.h"
 
-#include <QGraphicsWidget>
-#include <QTimer>
+#include <QtGui/QGraphicsWidget>
+#include <QtCore/QTimer>
 
 #include "../ui/applet.h"
 
@@ -35,7 +35,8 @@ class Task::Private
 public:
     Private()
         : status(Task::UnknownStatus),
-          category(Task::UnknownCategory)
+          category(Task::UnknownCategory),
+          visibilityPreference(Task::AutoVisibility)
     {
     }
 
@@ -43,6 +44,7 @@ public:
     Task::Status status;
     Task::Category category;
     QString name;
+    Task::VisibilityPreference visibilityPreference;
 };
 
 
@@ -178,6 +180,11 @@ Task::Status Task::status() const
     return d->status;
 }
 
+SystemTray::Task::VisibilityPreference Task::visibilityPreference() const
+{
+    return d->visibilityPreference;
+}
+
 
 QString Task::name() const {
     return d->name;
@@ -188,6 +195,14 @@ void Task::setName(QString name) {
     if (d->name != name) {
         d->name = name;
         emit changedName();
+    }
+}
+
+void Task::setVisibilityPreference(SystemTray::Task::VisibilityPreference vis)
+{
+    if (d->visibilityPreference != vis) {
+        d->visibilityPreference = vis;
+        emit changedVisibilityPreference();
     }
 }
 

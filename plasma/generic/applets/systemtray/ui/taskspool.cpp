@@ -86,7 +86,7 @@ TasksPool::~TasksPool()
 }
 
 
-bool TasksPool::addTask(Task *task, UiTask::TaskHideState hide_state)
+bool TasksPool::addTask(Task *task)
 {
     if ( !task || d->tasks.contains(task) ) {
         return false;
@@ -99,7 +99,6 @@ bool TasksPool::addTask(Task *task, UiTask::TaskHideState hide_state)
 
     UiTask *ui_task = new UiTask(*this, task_id, task);
 
-    ui_task->setHideState(hide_state);
     d->tasks.insert(task, _TaskData(task_id, ui_task));
     d->tasks_hash.insert(task_id, QVariant::fromValue(static_cast<QObject*>(ui_task)));
     emit newTask(task_id, QVariant::fromValue(static_cast<QObject*>(ui_task)), int(task_type));

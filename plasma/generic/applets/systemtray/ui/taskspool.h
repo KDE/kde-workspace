@@ -59,7 +59,7 @@ public:
     explicit TasksPool(Plasma::Applet *host);
     virtual ~TasksPool();
 
-    bool addTask(Task *task, UiTask::TaskHideState hide_state = UiTask::TaskHideStateAuto);
+    bool addTask(Task *task);
     void removeTask(Task *task);
     bool hasTask(Task *task) const;
     UiTask *uiTask(Task *task) const;

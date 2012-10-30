@@ -48,12 +48,10 @@ class Task : public QObject
 {
     Q_OBJECT
 
-    Q_ENUMS(Status)
-    Q_ENUMS(Category)
-
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
+    Q_PROPERTY(VisibilityPreference visibilityPreference READ visibilityPreference NOTIFY changedVisibilityPreference)
 
 public:
     enum Status {
@@ -72,6 +70,13 @@ public:
         Hardware = 4
     };
     Q_ENUMS(Category)
+
+    enum VisibilityPreference {
+        AutoVisibility = 0,
+        AlwaysHidden,
+        AlwaysShown
+    };
+    Q_ENUMS(VisibilityPreference)
 
 
     virtual ~Task();
@@ -155,6 +160,22 @@ public:
     Status status() const;
 
     /**
+     * Value of visibility setting of task. It means an user's preference in default visibility of
+     * task. He can prefer to show some tasks and to hide other tasks. But this function doesn't
+     * return real visibility of task, for example, task may be visible on panel, but the user
+     * prefer it to be hidden in popup.
+     * @return value of visibility setting of task
+     * @sa enum Visibility
+     */
+    VisibilityPreference visibilityPreference() const;
+
+    /**
+     * @sa visibilityPreference()
+     */
+    void setVisibilityPreference(VisibilityPreference vis);
+
+
+    /**
      * Can be used by the hostwhen they no longer wish to use the widget associated
      * with the host.
      */
@@ -178,6 +199,9 @@ Q_SIGNALS:
 
     // If a name of task has been changed
     void changedName();
+
+    /// if visibility preference of task is changed
+    void changedVisibilityPreference();
 
     /**
      * Emitted when the task is about to be destroyed

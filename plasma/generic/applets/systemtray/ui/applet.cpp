@@ -175,6 +175,7 @@ void Applet::init()
 
     // add enumerations manually to global context
     _RegisterEnums(root_context, Plasmoid::staticMetaObject);
+    _RegisterEnums(root_context, Task::staticMetaObject);
     _RegisterEnums(root_context, UiTask::staticMetaObject);
 
     // add declarative widget to our applet
@@ -214,15 +215,10 @@ void Applet::_onAddedTask(Task *task)
     }
 
     // define hide state of task
-    UiTask::TaskHideState hide_state = UiTask::TaskHideStateAuto;
-    if (m_hiddenTypes.contains(task->typeId())) {
-        hide_state = UiTask::TaskHideStateHidden;
-    } else if (m_alwaysShownTypes.contains(task->typeId())) {
-        hide_state = UiTask::TaskHideStateShown;
-    }
+    _updateVisibilityPreference(task);
 
     // add task to pool
-    m_tasksPool->addTask(task, hide_state);
+    m_tasksPool->addTask(task);
 
     DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
     if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
@@ -273,7 +269,7 @@ void Applet::_onChangedTask(Task *task)
         return;
     }
     // we need update hide state in case of changing of typeId
-    _updateHideState(ui_task);
+    _updateVisibilityPreference(task);
 
     DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
     if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
@@ -379,22 +375,21 @@ void Applet::configChanged()
     QVariantHash tasks = m_tasksPool->tasks();
     for (QVariantHash::const_iterator i = tasks.constBegin(), e = tasks.constEnd(); i != e; ++i) {
         UiTask *ui_task = static_cast<UiTask*>(i.value().value<QObject*>());
-        _updateHideState(ui_task);
+        _updateVisibilityPreference(qobject_cast<Task*>(ui_task->task().value<QObject*>()));
     }
 }
 
 
-void Applet::_updateHideState(UiTask *ui_task) const {
-    Task *task = static_cast<Task*>(ui_task->task().value<QObject*>());
+void Applet::_updateVisibilityPreference(Task *task) const {
     if (task) {
         QString task_id = task->typeId();
-        UiTask::TaskHideState state = UiTask::TaskHideStateAuto;
+        Task::VisibilityPreference vis = Task::AutoVisibility;
         if (m_hiddenTypes.contains(task_id)) {
-            state = UiTask::TaskHideStateHidden;
+            vis = Task::AlwaysHidden;
         } else if (m_alwaysShownTypes.contains(task_id)) {
-            state = UiTask::TaskHideStateShown;
+            vis = Task::AlwaysShown;
         }
-        ui_task->setHideState(state);
+        task->setVisibilityPreference(vis);
     }
 }
 

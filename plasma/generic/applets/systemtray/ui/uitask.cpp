@@ -43,7 +43,6 @@ struct UiTask::_Private
     UiTask::TaskType const task_type;
     QString const task_id;
     Task * const task;
-    UiTask::TaskHideState hide_state;
 
     _Private(TasksPool &pool, QString task_id, Task *task);
 };
@@ -53,8 +52,7 @@ UiTask::_Private::_Private(TasksPool &pool, QString task_id, Task *task):
     pool(pool),
     task_type(UiTask::DefineTaskType(task)),
     task_id(task_id),
-    task(task),
-    hide_state(UiTask::TaskHideStateAuto)
+    task(task)
 {
 
 }
@@ -75,21 +73,6 @@ UiTask::~UiTask()
 {
     disconnect(d->task, 0, this, 0);
     delete d;
-}
-
-
-UiTask::TaskHideState UiTask::hideState() const
-{
-    return d->hide_state;
-}
-
-
-void UiTask::setHideState(UiTask::TaskHideState state)
-{
-    if (d->hide_state == state)
-        return;
-    d->hide_state = state;
-    emit changedHideState();
 }
 
 

@@ -87,7 +87,7 @@ private Q_SLOTS:
     void _onWidgetCreationFinished();
 
 private:
-    void _updateHideState(UiTask *ui_task) const;
+    void _updateVisibilityPreference(Task *task) const;
     QString _getActionName(Task *task) const;
 
 private:
