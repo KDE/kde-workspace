@@ -93,13 +93,14 @@ Item {
                     id: kickoffItem
                     PlasmaCore.SvgItem {
                         svg: arrowSvg
-                        elementId: "right-arrow"
-                        height: arrowSvg.elementSize("right-arrow").height
-                        width: arrowSvg.elementSize("right-arrow").width
+                        elementId: "go-next"
+                        height: theme.smallIconSize
+                        width: height
                         visible: hasModelChildren
                         anchors {
                             right: parent.right
                             verticalCenter: parent.verticalCenter
+                            rightMargin: y
                         }
                     }
                 }
@@ -107,7 +108,7 @@ Item {
             highlight: PlasmaComponents.Highlight {}
             PlasmaCore.Svg {
                 id: arrowSvg
-                imagePath: "widgets/arrows"
+                imagePath: "toolbar-icons/go"
             }
             Component.onCompleted: {
                 rootBreadcrumb.modelIndex = model.rootIndex;
