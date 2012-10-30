@@ -156,31 +156,6 @@ Item {
         }
     }
 
-    // Delegate for views ==============================================================================================
-    Component {
-        id: delegate_task
-
-        Item {
-            id: delegate_task_item
-            width:  GridView.view.cellWidth
-            height: GridView.view.cellHeight
-
-            Connections {
-                target: ui_task.task
-                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-                onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-            }
-
-            Component.onCompleted: {
-                ui_item.parent = delegate_task_item
-                // reset properties
-                if (ui_task.type !== TaskTypeStatusItem && !ui_item.widget) {
-                    ui_item.widget = ui_task.widget
-                }
-            }
-        }
-    }
-
     // Funtions ========================================================================================================
     function getLocationForTask(task) {
         var loc = getDefaultLocationForTask(task)
