@@ -32,7 +32,11 @@ Item {
     function incrementCurrentIndex() {
         applicationsView.incrementCurrentIndex();
     }
-    function activateCurrentIndex() {
+    function activateCurrentIndex(start) {
+        if (!applicationsView.currentItem.modelChildren)
+            if (!start)
+                return;
+
         applicationsView.currentItem.activate();
     }
 
@@ -121,8 +125,8 @@ Item {
                     event.accepted = true;
                 }
                 else if (event.key == Qt.Key_Left) {
-                    if (breadcrumbs.children.length > 1) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
-                        breadcrumbs.children[breadcrumbs.children.length-2].selectCrumb();
+                    if (crumbModel.count > 1) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
+                        breadcrumbs.children[crumbModel.count-2].clicked();
                         event.accepted = true;
                     }
                 }
