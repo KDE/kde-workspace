@@ -27,7 +27,7 @@ PlasmaComponents.ListItem {
     property int iconSize: 22
     //property QtObject action
     property Item view: unlockedList
-    property string label: text
+    property string label: text.replace("&", "")
     property alias actionIcon: iconItem.icon
     enabled: true
 

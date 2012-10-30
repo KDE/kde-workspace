@@ -59,31 +59,18 @@ Item {
         imagePath: "widgets/toolbox"
         width: expandedWidth
         height: unlockedList.contentHeight + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
-        Repeater {
+        ListView {
             id: unlockedList
             anchors { fill: parent; margins: 12; }
             //model: proxy.actionKeys
             model: proxy.actions
-            //highlight: PlasmaComponents.Highlight {}
-            //highlightFollowsCurrentItem: true
-            //interactive: false
-            //spacing: 0
-//             delegate: MouseArea {
-//                 property string label: text
-//                 width: parent.width
-//                 height: 48
-//                 Text {
-//                     id: txtLabel
-//                     text: "action text: " + parent.label
-//                 }
-//                 onClicked: trigger()
-//             }
-//
+            highlight: PlasmaComponents.Highlight {}
+            highlightFollowsCurrentItem: true
+            interactive: false
+            spacing: 0
             delegate: ActionDelegate {
                 actionIcon: icon
-                //action: proxy.toolAction(modelData)
             }
-        }
             Timer {
                 id: exitTimer
                 interval: 100
@@ -91,6 +78,7 @@ Item {
                 repeat: false
                 onTriggered: unlockedList.currentIndex = -1
             }
+        }
 
         /** Action Mapping for ToolBox
 
