@@ -154,7 +154,7 @@ Item {
         if (notifierDialog.count == 0) {
             tooltip["image"] = "device-notifier"
             tooltip["mainText"] = i18n("No devices available")
-        } else if (sdSource.last !="") {
+        } else if (sdSource.last != "") {
             tooltip["image"] = hpSource.data[sdSource.last]["icon"]
             tooltip["mainText"] = i18n("Most recent device")
             tooltip["subText"] = hpSource.data[sdSource.last]["text"]
