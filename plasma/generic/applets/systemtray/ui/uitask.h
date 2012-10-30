@@ -54,11 +54,9 @@ class UiTask: public QObject
     Q_OBJECT
 
     Q_ENUMS(TaskType)
-    Q_ENUMS(TaskStatus)
 
     Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(QGraphicsWidget *widget READ widget CONSTANT)
-    Q_PROPERTY(TaskStatus status READ status NOTIFY changedStatus)
     Q_PROPERTY(QVariant task READ task CONSTANT)
     Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
@@ -74,18 +72,9 @@ public:
         TaskTypeStatusItem
     };
 
-    enum TaskStatus
-    {
-        TaskStatusUnknown   = Task::UnknownStatus,
-        TaskStatusPassive   = Task::Passive,
-        TaskStatusActive    = Task::Active,
-        TaskStatusAttention = Task::NeedsAttention
-    };
-
     explicit UiTask(TasksPool &pool, QString task_id, Task *task);
     virtual ~UiTask();
 
-    TaskStatus status() const;
     TaskType type() const;
     QVariant task() const;
     QString taskId() const;
@@ -99,11 +88,7 @@ public:
 
 
 signals:
-    void changedStatus();
     void changedName();
-
-public slots:
-    void _onChangedStatus();
 
 private:
     struct _Private;

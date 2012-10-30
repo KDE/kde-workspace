@@ -64,7 +64,6 @@ UiTask::_Private::_Private(TasksPool &pool, QString task_id, Task *task):
 UiTask::UiTask(TasksPool &pool, QString task_id, Task *task):
     d(new _Private(pool, task_id, task))
 {
-    connect(task, SIGNAL(changedStatus()), this, SLOT(_onChangedStatus()));
     connect(task, SIGNAL(changedName()), this, SIGNAL(changedName()));
 }
 
@@ -79,12 +78,6 @@ UiTask::~UiTask()
 UiTask::TaskType UiTask::type() const
 {
     return d->task_type;
-}
-
-
-UiTask::TaskStatus UiTask::status() const
-{
-    return TaskStatus(d->task->status());
 }
 
 
@@ -134,11 +127,6 @@ UiTask::TaskType UiTask::DefineTaskType(Task *t)
     return UiTask::TaskTypeUnknown;
 }
 
-
-void UiTask::_onChangedStatus()
-{
-    emit changedStatus();
-}
 
 
 

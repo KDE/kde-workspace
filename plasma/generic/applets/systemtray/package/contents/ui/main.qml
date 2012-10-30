@@ -127,12 +127,8 @@ Item {
             anchors.centerIn: parent
 
             Connections {
-                target: ui_task
-                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-            }
-
-            Connections {
                 target: ui_task.task
+                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
                 onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
         }
@@ -153,12 +149,8 @@ Item {
             anchors.centerIn: parent
 
             Connections {
-                target: ui_task
-                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-            }
-
-            Connections {
                 target: ui_task.task
+                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
                 onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
         }
@@ -174,12 +166,8 @@ Item {
             height: GridView.view.cellHeight
 
             Connections {
-                target: ui_task
-                onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
-            }
-
-            Connections {
                 target: ui_task.task
+                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
                 onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
             }
 
@@ -203,8 +191,8 @@ Item {
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        if (task.status === TaskStatusAttention || task.task.visibilityPreference === AlwaysShown) return JS.LOCATION_TRAY
-        if (task.task.visibilityPreference === AlwaysHidden || (task.status !== TaskStatusActive && task.status !== TaskStatusUnknown)) {
+        if (task.task.status === NeedsAttention || task.task.visibilityPreference === AlwaysShown) return JS.LOCATION_TRAY
+        if (task.task.visibilityPreference === AlwaysHidden || (task.task.status !== Active && task.task.status !== UnknownStatus)) {
             return JS.LOCATION_POPUP
         }
         return JS.LOCATION_TRAY
