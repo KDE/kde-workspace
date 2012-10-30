@@ -28,7 +28,6 @@ Item {
     id: toolBox
 
     property QtObject proxy: plasmoid.toolBox
-
     property int expandedWidth: 240
     property int expandedHeight: 240
 
@@ -37,16 +36,6 @@ Item {
     state: "collapsed"
     z: 9999
     transformOrigin: Item.TopRight
-    states: [
-        State {
-            name: "expanded"
-            PropertyChanges { target: toolBoxFrame; opacity: 1.0 }
-        },
-        State {
-            name: "collapsed"
-            PropertyChanges { target: toolBoxFrame; opacity: 0 }
-        }
-    ]
 
     Connections {
         target: proxy
@@ -94,4 +83,14 @@ Item {
 
         **/
     }
+    states: [
+        State {
+            name: "expanded"
+            PropertyChanges { target: toolBoxFrame; opacity: 1.0 }
+        },
+        State {
+            name: "collapsed"
+            PropertyChanges { target: toolBoxFrame; opacity: 0 }
+        }
+    ]
 }

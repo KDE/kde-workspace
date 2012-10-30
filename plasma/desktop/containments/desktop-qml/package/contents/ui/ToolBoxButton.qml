@@ -24,53 +24,86 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
     id: toolBoxButton
-    //width: isCorner ? 48 : iconSize * 2
-    //height: isCorner ? 48 : iconSize * 2
-    width: 128; height: 128
+
     property QtObject proxy: plasmoid.toolBox
-
     property string text: plasmoid.activityName == "" ? "Activity Name That Is 37 Miles Long" : plasmoid.activityName
-
-    y: 0
-    x: main.width - toolBoxButtonFrame.width
-    z: toolBox.z + 1
-
     property string cornerElement: "desktop-northeast"
     property bool skipNextUpdate: false
     property bool isCorner: ((state == "topleft") || (state == "topright") ||
                              (state == "bottomright") || (state == "bottomleft"))
     property bool isHorizontal: (state == "top") || (state == "bottom")
 
+    width: 128; height: 128
+    y: 0
+    x: main.width - toolBoxButtonFrame.width
+    z: toolBox.z + 1
+
     state: "topright" // FIXME: read default value from config
-    states: [
-        State {
-            name: "topleft"
-        },
-        State {
-            name: "top"
-        },
-        State {
-            name: "topright"
-        },
-        State {
-            name: "right"
-        },
-        State {
-            name: "bottomright"
-        },
-        State {
-            name: "bottom"
-        },
-        State {
-            name: "bottomleft"
-        },
-        State {
-            name: "topleft"
-        },
-        State {
-            name: "left"
+
+    onXChanged: updateState()
+    onYChanged: updateState()
+
+    function updateState()
+    {
+        if (skipNextUpdate) {
+            skipNextUpdate = false;
+            return;
         }
-    ]
+        var _m = 2;
+        var _s = "";
+        var container = main;
+        //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y+" tbw: " + toolBoxButtonFrame.mWidth);
+        if (x <= _m) {
+            if (y <= _m) {
+                _s = "topleft"
+            } else if (y >= (container.height - toolBoxButtonFrame.mHeight - _m)) {
+                _s = "bottomleft"
+            } else {
+                _s = "left";
+            }
+        } else if (x >= (container.width - toolBoxButtonFrame.mWidth - _m)) {
+            if (y <= _m) {
+                _s = "topright"
+            } else if (y >= (container.height- toolBoxButtonFrame.mHeight - _m)) {
+                _s = "bottomright"
+            } else {
+                _s = "right";
+            }
+        } else {
+            if (y <= _m) {
+                _s = "top"
+            } else if (y >= (container.height - toolBoxButtonFrame.mHeight - _m)) {
+                _s = "bottom"
+            } else {
+                //print("Error: Reached invalid state in ToolBoxButton.updateState()")
+            }
+        }
+        if (_s != "") {
+            if (_s == "topright" || _s == "bottomright" || _s == "right") {
+                skipNextUpdate = true;
+                toolBoxButton.x = main.width - toolBoxButton.width;
+            }
+            if (_s == "bottomleft" || _s == "bottomright" || _s == "bottom") {
+                skipNextUpdate = true;
+                toolBoxButton.y = main.height - toolBoxButton.height;
+            }
+            toolBoxButton.state = _s;
+            configSaveTimer.running = true;
+        }
+    }
+
+    Timer {
+        id: configSaveTimer
+        interval: 5000
+        running: false
+        onTriggered: {
+            plasmoid.writeConfig("ToolBoxButtonState", toolBoxButton.state);
+            plasmoid.writeConfig("ToolBoxButtonX", toolBoxButton.x);
+            plasmoid.writeConfig("ToolBoxButtonY", toolBoxButton.y);
+            print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + "x" +toolBoxButton.x);
+        }
+    }
+
     PlasmaCore.SvgItem {
         id: cornerSvg
         svg: toolBoxSvg
@@ -114,6 +147,7 @@ Item {
 
         opacity: !isCorner ? 1 : 0.01
         enabledBorders: PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.BottomBorder;
+
         Connections {
             target: toolBoxButton
             onStateChanged: {
@@ -236,70 +270,6 @@ Item {
         }
     }
 
-    onXChanged: updateState()
-    onYChanged: updateState()
-
-    function updateState()
-    {
-        if (skipNextUpdate) {
-            skipNextUpdate = false;
-            return;
-        }
-        var _m = 2;
-        var _s = ""; // will be changed
-        var container = main;
-        //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y+" tbw: " + toolBoxButtonFrame.mWidth);
-        if (x <= _m) {
-            if (y <= _m) {
-                _s = "topleft"
-            } else if (y >= (container.height - toolBoxButtonFrame.mHeight - _m)) {
-                _s = "bottomleft"
-            } else {
-                _s = "left";
-            }
-        } else if (x >= (container.width - toolBoxButtonFrame.mWidth - _m)) {
-            if (y <= _m) {
-                _s = "topright"
-            } else if (y >= (container.height- toolBoxButtonFrame.mHeight - _m)) {
-                _s = "bottomright"
-            } else {
-                _s = "right";
-            }
-        } else {
-            if (y <= _m) {
-                _s = "top"
-            } else if (y >= (container.height - toolBoxButtonFrame.mHeight - _m)) {
-                _s = "bottom"
-            } else {
-                //print("Error: Reached invalid state in ToolBoxButton.updateState()")
-            }
-        }
-        if (_s != ""){
-            if (_s == "topright" || _s == "bottomright" || _s == "right") {
-                skipNextUpdate = true;
-                toolBoxButton.x = main.width - toolBoxButton.width;
-            }
-            if (_s == "bottomleft" || _s == "bottomright" || _s == "bottom") {
-                skipNextUpdate = true;
-                toolBoxButton.y = main.height - toolBoxButton.height;
-            }
-            toolBoxButton.state = _s;
-            configSaveTimer.running = true;
-        }
-    }
-
-    Timer {
-        id: configSaveTimer
-        interval: 5000
-        running: false
-        onTriggered: {
-            plasmoid.writeConfig("ToolBoxButtonState", toolBoxButton.state);
-            plasmoid.writeConfig("ToolBoxButtonX", toolBoxButton.x);
-            plasmoid.writeConfig("ToolBoxButtonY", toolBoxButton.y);
-            print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + "x" +toolBoxButton.x);
-        }
-    }
-
     MouseArea {
         id: buttonMouse
 
@@ -337,4 +307,33 @@ Item {
             }
         }
     }
+    states: [
+        State {
+            name: "topleft"
+        },
+        State {
+            name: "top"
+        },
+        State {
+            name: "topright"
+        },
+        State {
+            name: "right"
+        },
+        State {
+            name: "bottomright"
+        },
+        State {
+            name: "bottom"
+        },
+        State {
+            name: "bottomleft"
+        },
+        State {
+            name: "topleft"
+        },
+        State {
+            name: "left"
+        }
+    ]
 }
