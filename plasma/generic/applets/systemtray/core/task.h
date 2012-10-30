@@ -48,6 +48,7 @@ class Task : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
@@ -77,6 +78,19 @@ public:
         AlwaysShown
     };
     Q_ENUMS(VisibilityPreference)
+
+    /**
+     * Derived classes should provide its type. We assume that number of different types of tasks is
+     * a limited value. So, it's easier to provide constants for each type of tasks than always
+     * try to cast classes. Moreover, these contants are used in QML code.
+     */
+    enum TaskType {
+        TypePlasmoid,
+        TypeX11Task,
+        TypeStatusItem,
+        TypeUserDefined
+    };
+    Q_ENUMS(TaskType)
 
 
     virtual ~Task();
@@ -173,6 +187,13 @@ public:
      * @sa visibilityPreference()
      */
     void setVisibilityPreference(VisibilityPreference vis);
+
+    /**
+     * This function must always return type of task (an integer value). This value must always be
+     * the same for each call of function.
+     * @return a type of task.
+     */
+    virtual TaskType type() const = 0;
 
 
     /**

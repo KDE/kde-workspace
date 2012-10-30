@@ -69,7 +69,7 @@ public:
     Plasma::Applet *host() const;
 
 signals:
-    void newTask(const QString &task_id, QVariant task, int task_type);
+    void newTask(const QString &task_id, QVariant task);
     void deletedTask(const QString &task_id);
 
 public slots:

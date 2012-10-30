@@ -92,16 +92,13 @@ bool TasksPool::addTask(Task *task)
         return false;
     }
 
-    UiTask::TaskType task_type = UiTask::DefineTaskType(task);
-    Q_ASSERT(task_type >= 0 && task_type < 4);
-
     QString task_id = QString::number(reinterpret_cast<uintmax_t>(task));
 
     UiTask *ui_task = new UiTask(*this, task_id, task);
 
     d->tasks.insert(task, _TaskData(task_id, ui_task));
     d->tasks_hash.insert(task_id, QVariant::fromValue(static_cast<QObject*>(ui_task)));
-    emit newTask(task_id, QVariant::fromValue(static_cast<QObject*>(ui_task)), int(task_type));
+    emit newTask(task_id, QVariant::fromValue(static_cast<QObject*>(ui_task)));
     return true;
 }
 

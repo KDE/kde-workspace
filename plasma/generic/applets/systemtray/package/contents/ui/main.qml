@@ -46,7 +46,7 @@ Item {
 
         onNewTask: {
             // create declarative item
-            var component = (task_type === TaskTypeStatusItem ? component_status_item : component_widget)
+            var component = (task.task.type === TypeStatusItem ? component_status_item : component_widget)
             var props = {"ui_task": task}
             var item = component.createObject(null, props)
             if (item) {

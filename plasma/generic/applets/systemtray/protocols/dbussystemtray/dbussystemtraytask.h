@@ -71,6 +71,7 @@ public:
     virtual QString typeId() const;
     virtual QIcon icon() const;
     virtual bool isWidget() const;
+    virtual TaskType type() const { return TypeStatusItem; }
 
     QString iconName() const { return m_iconName; }
     QIcon   attIcon() const { return m_attentionIcon; }

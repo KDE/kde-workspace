@@ -53,9 +53,6 @@ class UiTask: public QObject
 {
     Q_OBJECT
 
-    Q_ENUMS(TaskType)
-
-    Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(QGraphicsWidget *widget READ widget CONSTANT)
     Q_PROPERTY(QVariant task READ task CONSTANT)
     Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
@@ -64,18 +61,9 @@ class UiTask: public QObject
 
 public:
 
-    enum TaskType
-    {
-        TaskTypeUnknown = 0,
-        TaskTypePlasmoid,
-        TaskTypeX11Task,
-        TaskTypeStatusItem
-    };
-
     explicit UiTask(TasksPool &pool, QString task_id, Task *task);
     virtual ~UiTask();
 
-    TaskType type() const;
     QVariant task() const;
     QString taskId() const;
     QGraphicsWidget *widget() const;
@@ -83,8 +71,6 @@ public:
 
     QString name() const;
     QString typeId() const;
-
-    static UiTask::TaskType DefineTaskType(Task *t);
 
 
 signals:

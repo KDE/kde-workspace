@@ -40,7 +40,6 @@ namespace SystemTray
 struct UiTask::_Private
 {
     TasksPool &pool;
-    UiTask::TaskType const task_type;
     QString const task_id;
     Task * const task;
 
@@ -50,7 +49,6 @@ struct UiTask::_Private
 
 UiTask::_Private::_Private(TasksPool &pool, QString task_id, Task *task):
     pool(pool),
-    task_type(UiTask::DefineTaskType(task)),
     task_id(task_id),
     task(task)
 {
@@ -72,12 +70,6 @@ UiTask::~UiTask()
 {
     disconnect(d->task, 0, this, 0);
     delete d;
-}
-
-
-UiTask::TaskType UiTask::type() const
-{
-    return d->task_type;
 }
 
 
@@ -112,19 +104,6 @@ QGraphicsWidget *UiTask::widget() const
 Plasma::Applet *UiTask::host() const
 {
     return d->pool.host();
-}
-
-
-UiTask::TaskType UiTask::DefineTaskType(Task *t)
-{
-    if (qobject_cast<DBusSystemTrayTask*>(t)) {
-        return UiTask::TaskTypeStatusItem;
-    } else if (qobject_cast<PlasmoidTask*>(t)) {
-        return UiTask::TaskTypePlasmoid;
-    } else if (qobject_cast<FdoTask*>(t)) {
-        return UiTask::TaskTypeX11Task;
-    }
-    return UiTask::TaskTypeUnknown;
 }
 
 

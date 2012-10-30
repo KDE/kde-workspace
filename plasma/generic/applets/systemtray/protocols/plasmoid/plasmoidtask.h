@@ -48,6 +48,7 @@ public:
     int id() const;
     Plasma::Applet *host() const;
     virtual bool isWidget() const;
+    virtual TaskType type() const { return TypePlasmoid; }
 
 protected Q_SLOTS:
     void appletDestroyed(Plasma::Applet *object);
