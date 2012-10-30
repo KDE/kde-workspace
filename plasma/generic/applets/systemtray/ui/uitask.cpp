@@ -88,12 +88,6 @@ UiTask::TaskStatus UiTask::status() const
 }
 
 
-UiTask::TaskCategory UiTask::category() const
-{
-    return d->task ? TaskCategory(d->task->category()) : TaskCategoryUnknown;
-}
-
-
 QVariant UiTask::task() const
 {
     return QVariant::fromValue(static_cast<QObject*>(d->task));

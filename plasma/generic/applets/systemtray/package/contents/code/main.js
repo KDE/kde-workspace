@@ -50,11 +50,11 @@ var LOCATIONS_NUMBER = LOCATIONS.length
 
 // This list determines order of categories of tasks
 var CATEGORIES = [
-    TaskCategoryUnknown,
-    TaskCategoryApplicationStatus,
-    TaskCategoryCommunications,
-    TaskCategorySystemServices,
-    TaskCategoryHardware
+    UnknownCategory,
+    ApplicationStatus,
+    Communications,
+    SystemServices,
+    Hardware
 ]
 
 

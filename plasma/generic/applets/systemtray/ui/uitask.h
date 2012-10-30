@@ -55,7 +55,6 @@ class UiTask: public QObject
 
     Q_ENUMS(TaskType)
     Q_ENUMS(TaskStatus)
-    Q_ENUMS(TaskCategory)
 
     Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(QGraphicsWidget *widget READ widget CONSTANT)
@@ -64,17 +63,8 @@ class UiTask: public QObject
     Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
-    Q_PROPERTY(TaskCategory category READ category)  // TODO: it may change
 
 public:
-    enum TaskCategory
-    {
-        TaskCategoryUnknown = Task::UnknownCategory,
-        TaskCategoryApplicationStatus = Task::ApplicationStatus,
-        TaskCategoryCommunications = Task::Communications,
-        TaskCategorySystemServices = Task::SystemServices,
-        TaskCategoryHardware = Task::Hardware
-    };
 
     enum TaskType
     {
@@ -96,7 +86,6 @@ public:
     virtual ~UiTask();
 
     TaskStatus status() const;
-    TaskCategory category() const;
     TaskType type() const;
     QVariant task() const;
     QString taskId() const;

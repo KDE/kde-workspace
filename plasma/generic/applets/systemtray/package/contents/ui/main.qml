@@ -51,7 +51,7 @@ Item {
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
-                var t = JS.tasks[loc].add(task_id, task.category, item)
+                var t = JS.tasks[loc].add(task_id, task.task.category, item)
                 models[loc].insert(t.index, {"ui_task": task, "ui_item": item})
             }
         }
