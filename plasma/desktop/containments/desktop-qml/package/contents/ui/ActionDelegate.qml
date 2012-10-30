@@ -34,7 +34,7 @@ PlasmaComponents.ListItem {
     height: toolBoxDelegate.iconSize + 14
     width: parent.width-24
 
-    Component.onCompleted: print("delegate text: " + text)
+    Component.onCompleted: print("delegate text: " + text + objectName)
 
     QtExtras.QIconItem {
         id: iconItem
@@ -55,8 +55,16 @@ PlasmaComponents.ListItem {
         anchors.bottomMargin: -6
         hoverEnabled: true
         onClicked: {
-            print("trigger");
-            trigger();
+            if (label == i18n("Lock Screen")) {
+                print("implement me: Lock!!!");
+                // TODO: use lock/logout dataengine services
+            } else if (label == i18n("Leave...")) {
+                print("implement me: Leave!!!");
+                // TODO: use lock/logout dataengine services
+            } else {
+                print("trigger");
+                trigger();
+            }
         }
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }

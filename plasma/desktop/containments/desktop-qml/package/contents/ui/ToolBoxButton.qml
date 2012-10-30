@@ -239,7 +239,8 @@ Item {
     onXChanged: updateState()
     onYChanged: updateState()
 
-    function updateState() {
+    function updateState()
+    {
         if (skipNextUpdate) {
             skipNextUpdate = false;
             return;
@@ -303,9 +304,25 @@ Item {
         id: buttonMouse
 
         property QtObject container: main
+
         anchors.fill: parent
 
         drag.target: proxy.immutable ? undefined : toolBoxButton
+        drag.minimumX: 0
+        drag.maximumX: container.width - toolBoxButton.width
+        drag.minimumY: 0
+        drag.maximumY: container.height - toolBoxButton.height
+
+        onClicked: {
+            var qmlFile = (toolBox.state == "expanded") ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
+            proxy.setShowing((toolBox.state != "expanded"));
+            var component = Qt.createComponent(qmlFile);
+            if (component.status == Component.Ready) {
+                var ani = component.createObject(buttonMouse);
+                ani.targetItem = toolBox;
+                ani.start();
+            }
+        }
         Connections {
             target: toolBoxButton
             onStateChanged: {
@@ -317,26 +334,6 @@ Item {
                 } else {
                     buttonMouse.drag.axis = Drag.YAxis;
                 }
-            }
-        }
-        drag.minimumX: 0
-        drag.maximumX: container.width - toolBoxButton.width
-        drag.minimumY: 0
-        drag.maximumY: container.height - toolBoxButton.height
-
-        Connections {
-            target: proxy
-            onImmutableChanged: print("immutableChanged: " + proxy.immutable);
-        }
-
-        onClicked: {
-            var qmlFile = (toolBox.state == "expanded") ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
-            proxy.setShowing((toolBox.state != "expanded"));
-            var component = Qt.createComponent(qmlFile);
-            if (component.status == Component.Ready) {
-                var ani = component.createObject(buttonMouse);
-                ani.targetItem = toolBox;
-                ani.start();
             }
         }
     }
