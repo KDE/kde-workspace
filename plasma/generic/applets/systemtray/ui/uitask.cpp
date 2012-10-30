@@ -62,13 +62,11 @@ UiTask::_Private::_Private(TasksPool &pool, QString task_id, Task *task):
 UiTask::UiTask(TasksPool &pool, QString task_id, Task *task):
     d(new _Private(pool, task_id, task))
 {
-    connect(task, SIGNAL(changedName()), this, SIGNAL(changedName()));
 }
 
 
 UiTask::~UiTask()
 {
-    disconnect(d->task, 0, this, 0);
     delete d;
 }
 
@@ -81,12 +79,6 @@ QVariant UiTask::task() const
 QString UiTask::taskId() const
 {
     return d->task_id;
-}
-
-
-QString UiTask::name() const
-{
-    return d->task ? d->task->name() : "";
 }
 
 QString UiTask::typeId() const

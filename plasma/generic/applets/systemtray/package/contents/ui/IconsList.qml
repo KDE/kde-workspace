@@ -67,7 +67,7 @@ Item {
                 alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wordWrap: false
                 textSelectable: false
-                text: ui_task.name
+                text: ui_task.task.name
                 z: -10 // We place label under mouse area to be able to handle mouse events
             }
 
@@ -106,7 +106,7 @@ Item {
             }
 
             Connections {
-                target: ui_task
+                target: ui_task.task
                 onChangedName: {
                     // if name is changed => we should recalculate width of popup
                     IconsListJS.tasks[delegate_root_item] = name_item.width

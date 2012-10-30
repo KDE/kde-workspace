@@ -57,7 +57,6 @@ class UiTask: public QObject
     Q_PROPERTY(QVariant task READ task CONSTANT)
     Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
-    Q_PROPERTY(QString name READ name NOTIFY changedName)
 
 public:
 
@@ -69,12 +68,7 @@ public:
     QGraphicsWidget *widget() const;
     Plasma::Applet *host() const;
 
-    QString name() const;
     QString typeId() const;
-
-
-signals:
-    void changedName();
 
 private:
     struct _Private;
