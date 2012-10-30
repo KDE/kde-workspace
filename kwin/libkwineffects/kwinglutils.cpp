@@ -1132,8 +1132,7 @@ class GLVertexBufferPrivate
 {
 public:
     GLVertexBufferPrivate(GLVertexBuffer::UsageHint usageHint)
-        : hint(usageHint)
-        , numberVertices(0)
+        : vertexCount(0)
         , dimension(2)
         , useColor(false)
         , useTexCoords(true)
@@ -1141,15 +1140,29 @@ public:
         if (GLVertexBufferPrivate::supported) {
             glGenBuffers(2, buffers);
         }
+
+        switch(usageHint) {
+        case GLVertexBuffer::Dynamic:
+            usage = GL_DYNAMIC_DRAW;
+            break;
+        case GLVertexBuffer::Static:
+            usage = GL_STATIC_DRAW;
+            break;
+        default:
+            usage = GL_STREAM_DRAW;
+            break;
+        }
     }
+
     ~GLVertexBufferPrivate() {
         if (GLVertexBufferPrivate::supported) {
             glDeleteBuffers(2, buffers);
         }
     }
-    GLVertexBuffer::UsageHint hint;
+
     GLuint buffers[2];
-    int numberVertices;
+    GLenum usage;
+    int vertexCount;
     int dimension;
     static bool supported;
     static GLVertexBuffer *streamingBuffer;
@@ -1189,11 +1202,11 @@ void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode,
     }
 
     if (!hardwareClipping) {
-        glDrawArrays(primitiveMode, 0, numberVertices);
+        glDrawArrays(primitiveMode, 0, vertexCount);
     } else {
         foreach (const QRect& r, region.rects()) {
             glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
-            glDrawArrays(primitiveMode, 0, numberVertices);
+            glDrawArrays(primitiveMode, 0, vertexCount);
         }
     }
 
@@ -1228,11 +1241,11 @@ void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitive
     }
 
     if (!hardwareClipping) {
-        glDrawArrays(primitiveMode, 0, numberVertices);
+        glDrawArrays(primitiveMode, 0, vertexCount);
     } else {
         foreach (const QRect& r, region.rects()) {
             glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
-            glDrawArrays(primitiveMode, 0, numberVertices);
+            glDrawArrays(primitiveMode, 0, vertexCount);
         }
     }
 
@@ -1265,11 +1278,11 @@ void GLVertexBufferPrivate::fallbackPainting(const QRegion& region, GLenum primi
 
     // Clip using scissoring
     if (!hardwareClipping) {
-        glDrawArrays(primitiveMode, 0, numberVertices);
+        glDrawArrays(primitiveMode, 0, vertexCount);
     } else {
         foreach (const QRect& r, region.rects()) {
             glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
-            glDrawArrays(primitiveMode, 0, numberVertices);
+            glDrawArrays(primitiveMode, 0, vertexCount);
         }
     }
 
@@ -1293,49 +1306,35 @@ GLVertexBuffer::~GLVertexBuffer()
     delete d;
 }
 
-void GLVertexBuffer::setData(int numberVertices, int dim, const float* vertices, const float* texcoords)
+void GLVertexBuffer::setData(int vertexCount, int dim, const float* vertices, const float* texcoords)
 {
-    d->numberVertices = numberVertices;
+    d->vertexCount = vertexCount;
     d->dimension = dim;
     d->useTexCoords = (texcoords != NULL);
+
     if (!GLVertexBufferPrivate::supported) {
         // legacy data
         d->legacyVertices.clear();
-        d->legacyVertices.reserve(numberVertices * dim);
-        for (int i = 0; i < numberVertices * dim; ++i) {
+        d->legacyVertices.reserve(vertexCount * dim);
+        for (int i = 0; i < vertexCount * dim; ++i) {
             d->legacyVertices << vertices[i];
         }
         d->legacyTexCoords.clear();
         if (d->useTexCoords) {
-            d->legacyTexCoords.reserve(numberVertices * 2);
-            for (int i = 0; i < numberVertices * 2; ++i) {
+            d->legacyTexCoords.reserve(vertexCount * 2);
+            for (int i = 0; i < vertexCount * 2; ++i) {
                 d->legacyTexCoords << texcoords[i];
             }
         }
         return;
     }
-    GLenum hint;
-    switch(d->hint) {
-    case Dynamic:
-        hint = GL_DYNAMIC_DRAW;
-        break;
-    case Static:
-        hint = GL_STATIC_DRAW;
-        break;
-    case Stream:
-        hint = GL_STREAM_DRAW;
-        break;
-    default:
-        // just to make the compiler happy
-        hint = GL_STREAM_DRAW;
-        break;
-    }
+
     glBindBuffer(GL_ARRAY_BUFFER, d->buffers[ 0 ]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*numberVertices * d->dimension, vertices, hint);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertexCount * d->dimension, vertices, d->usage);
 
     if (d->useTexCoords) {
         glBindBuffer(GL_ARRAY_BUFFER, d->buffers[ 1 ]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*numberVertices * 2, texcoords, hint);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertexCount * 2, texcoords, d->usage);
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1382,7 +1381,7 @@ void GLVertexBuffer::reset()
 {
     d->useColor       = false;
     d->color          = QColor(0, 0, 0, 255);
-    d->numberVertices = 0;
+    d->vertexCount    = 0;
     d->dimension      = 2;
     d->useTexCoords   = true;
 }
