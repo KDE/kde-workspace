@@ -301,6 +301,7 @@ Item {
 
     MouseArea {
         id: buttonMouse
+
         property QtObject container: main
         anchors.fill: parent
 

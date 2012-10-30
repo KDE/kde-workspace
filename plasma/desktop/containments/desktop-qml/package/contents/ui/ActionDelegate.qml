@@ -25,23 +25,27 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 PlasmaComponents.ListItem {
     id: toolBoxDelegate
     property int iconSize: 22
-    property QtObject action
+    //property QtObject action
     property Item view: unlockedList
+    property string label: text
+    property alias actionIcon: iconItem.icon
     enabled: true
 
     height: toolBoxDelegate.iconSize + 14
     width: parent.width-24
+
+    Component.onCompleted: print("delegate text: " + text)
 
     QtExtras.QIconItem {
         id: iconItem
         height: toolBoxDelegate.iconSize
         width: toolBoxDelegate.iconSize
         anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 4 }
-        icon: action.icon
+        //icon: actionIcon
     }
     PlasmaComponents.Label {
         id: textLabel
-        text: action.text.replace("&", "") // hack to get rid of keyboard accelerator hints
+        text:  (label != "") ? label : action.text.replace("&", "") // hack to get rid of keyboard accelerator hints
         elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
@@ -50,7 +54,10 @@ PlasmaComponents.ListItem {
         anchors.topMargin: -6
         anchors.bottomMargin: -6
         hoverEnabled: true
-        onClicked: action.trigger()
+        onClicked: {
+            print("trigger");
+            trigger();
+        }
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
         onEntered: {
