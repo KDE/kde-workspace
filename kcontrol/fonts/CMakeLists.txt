@@ -4,7 +4,7 @@ KDE4_NO_ENABLE_FINAL(fonts)
 if(FONTCONFIG_FOUND)
     include_directories(${FONTCONFIG_INCLUDE_DIR})
 endif(FONTCONFIG_FOUND)
-include_directories(${FREETYPE_INCLUDE_DIR})
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 ########### next target ###############
 
