@@ -14,7 +14,8 @@ if (X11_Xft_FOUND)
     configure_file(config-fontinst.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-fontinst.h)
     include_directories(
         ${KDE4_INCLUDES}
-        ${FREETYPE_INCLUDE_DIR}
+        ${FREETYPE_INCLUDE_DIR} # TODO Remove when kde-workspace will require kdelibs 4.10
+        ${FREETYPE_INCLUDE_DIRS} # kdelibs 4.10 compat
         ${FONTCONFIG_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
