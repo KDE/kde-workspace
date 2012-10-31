@@ -26,7 +26,6 @@ PlasmaComponents.ToolButton {
     property int depth: model.depth
     enabled: depth < crumbModel.count
 
-
     onClicked: {
         if (root) {
             applicationsView.model.rootIndex = 0

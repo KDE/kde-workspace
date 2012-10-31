@@ -213,49 +213,60 @@ Item {
     Keys.forwardTo: [tabBar.layout]
 
     Keys.onPressed: {
-        if (event.key == Qt.Key_Up) {
-            currentView.decrementCurrentIndex();
-            event.accepted = true;
-        }
-        else if (event.key == Qt.Key_Down) {
-            currentView.incrementCurrentIndex();
-            event.accepted = true;
-        }
-        else if (event.key == Qt.Key_Left) {
-//FIXME
-//             currentView.incrementCurrentIndex();
-//             event.accepted = true;
-        }
-        else if (event.key == Qt.Key_Right) {
-            currentView.activateCurrentIndex();
-            event.accepted = true;
-        }
-        else if (event.key == Qt.Key_Tab) {
-            if (root.state == "Applications") {
-                if (applicationsViewContainer.activeFocus)
-                    root.forceActiveFocus();
-                else
-                    applicationsViewContainer.forceActiveFocus();
+        if (mainStack.currentTab == applicationsPage) {
+            if (event.key != Qt.Key_Tab) {
+                root.state = "Applications";
             }
-            event.accepted = true;
         }
-        else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
-            currentView.activateCurrentIndex(1);
-            event.accepted = true;
-        }
-        else { // forward key to searchView
-            if (event.text != "") {
-                searchBar.query += event.text;
-                searchBar.focus = true;
+
+        switch(event.key) {
+            case Qt.Key_Up: {
+                currentView.decrementCurrentIndex();
+                event.accepted = true;
+                break;
             }
-            event.accepted = true;
+            case Qt.Key_Down: {
+                currentView.incrementCurrentIndex();
+                event.accepted = true;
+                break;
+            }
+            case Qt.Key_Left: {
+                if (!currentView.deactivateCurrentIndex()) {
+                    // FIXME move to the previous tab immediately
+                    root.state = "Normal"
+                }
+                event.accepted = true;
+                break;
+            }
+            case Qt.Key_Right: {
+                currentView.activateCurrentIndex();
+                event.accepted = true;
+                break;
+            }
+            case Qt.Key_Tab: {
+                root.state == "Applications" ? root.state = "Normal" : root.state = "Applications";
+                event.accepted = true;
+                break;
+            }
+            case Qt.Key_Enter:
+            case Qt.Key_Return: {
+                currentView.activateCurrentIndex(1);
+                event.accepted = true;
+                break;
+            }
+            default: { // forward key to searchView
+                if (event.text != "") {
+                    searchBar.query += event.text;
+                    searchBar.focus = true;
+                }
+                event.accepted = true;
+            }
         }
     }
 
     states: [
         State {
             name: "Normal"
-            when: (mainStack.currentTab != applicationsPage)
             PropertyChanges {
                 target: root
                 Keys.forwardTo: [tabBar.layout]
@@ -263,10 +274,9 @@ Item {
         },
         State {
             name: "Applications"
-            when: (mainStack.currentTab == applicationsPage)
             PropertyChanges {
                 target: root
-                Keys.forwardTo: [root]
+                Keys.forwardTo: [currentView]
             }
         },
         State {

@@ -39,6 +39,13 @@ Item {
 
         applicationsView.currentItem.activate();
     }
+    function deactivateCurrentIndex() {
+        if (crumbModel.count > 0) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
+            breadcrumbsElement.children[crumbModel.count-1].clicked();
+            return true;
+        }
+        return false;
+    }
 
     anchors.fill: parent
 
@@ -83,8 +90,6 @@ Item {
             id: applicationsView
             focus: true
 
-            property variant breadcrumbs: breadcrumbsElement
-
             function addBreadcrumb(modelIndex, title) {
                 crumbModel.append({"text": title, "modelIndex": modelIndex, "depth": crumbModel.count+1})
             }
@@ -117,23 +122,6 @@ Item {
             Component.onCompleted: {
                 rootBreadcrumb.modelIndex = model.rootIndex;
                 rootBreadcrumb.view = applicationsView;
-            }
-            Keys.onPressed: {
-                if (event.key == Qt.Key_Right) {
-                    if (applicationsView.currentItem.modelChildren)
-                        applicationsView.currentItem.activate();
-                    event.accepted = true;
-                }
-                else if (event.key == Qt.Key_Left) {
-                    if (crumbModel.count > 1) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
-                        breadcrumbs.children[crumbModel.count-2].clicked();
-                        event.accepted = true;
-                    }
-                }
-                else if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
-                    applicationsView.currentItem.activate();
-                    event.accepted = true;
-                }
             }
         }
     }
