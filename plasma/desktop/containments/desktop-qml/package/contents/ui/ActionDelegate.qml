@@ -24,8 +24,8 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 PlasmaComponents.ListItem {
     id: toolBoxDelegate
+    signal triggered
     property int iconSize: 22
-    //property QtObject action
     property Item view: unlockedList
     property string label: text.replace("&", "")
     property alias actionIcon: iconItem.icon
@@ -34,7 +34,7 @@ PlasmaComponents.ListItem {
     height: toolBoxDelegate.iconSize + 14
     width: parent.width-24
 
-    Component.onCompleted: print("delegate text: " + text + objectName)
+    Component.onCompleted: print("delegate text: " + label + objectName)
 
     QtExtras.QIconItem {
         id: iconItem
@@ -55,23 +55,34 @@ PlasmaComponents.ListItem {
         anchors.bottomMargin: -6
         hoverEnabled: true
         onClicked: {
-            if (label == i18n("Lock Screen")) {
-                print("implement me: Lock!!!");
-                // TODO: use lock/logout dataengine services
-            } else if (label == i18n("Leave...")) {
-                print("implement me: Leave!!!");
-                // TODO: use lock/logout dataengine services
+            if (typeof(index) == "undefined") {
+                triggered();
             } else {
-                print("trigger");
+                trigger();
+
+            }
+            /*
+            if (label == i18n("Lock Screen")) {
+                triggered();
+            } else if (label == i18n("Leave...")) {
+                triggered();
+            } else {
                 trigger();
             }
+            */
         }
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
         onEntered: {
-            exitTimer.running = false;
-            unlockedList.currentIndex = index;
+            if (typeof(index) != "undefined") {
+                exitTimer.running = false;
+                unlockedList.currentIndex = index;
+            }
         }
-        onExited: exitTimer.start()
+        onExited:  {
+            if (typeof(index) != "undefined") {
+                exitTimer.start()
+            }
+        }
     }
 }

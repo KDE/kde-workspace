@@ -37,20 +37,42 @@ Item {
     z: 9999
     transformOrigin: Item.TopRight
 
+    function performOperation(what) {
+        var service = dataEngine.serviceForSource("PowerDevil");
+        var operation = service.operationDescription(what);
+        return service.startOperationCall(operation);
+    }
+
+    function lockScreen() {
+        print(" locking...");
+        performOperation("lockScreen");
+    }
+
+    function logout() {
+        print(" shutdown...");
+        performOperation("requestShutDown");
+    }
     Connections {
         target: proxy
         onShowingChanged: print("Showing now: " + proxy.showing);
 
     }
 
+    PlasmaCore.DataSource {
+        id: dataEngine
+        engine: "powermanagement"
+        connectedSources: ["PowerDevil"]
+    }
+
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
         imagePath: "widgets/toolbox"
         width: expandedWidth
-        height: unlockedList.contentHeight + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
+        height: unlockedList.contentHeight + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder + (36*2)
         ListView {
             id: unlockedList
-            anchors { fill: parent; margins: 12; }
+            anchors { top: parent.top; bottom: extraActions.top; left: parent.left; right: parent.right; margins: 12; }
+            height: unlockedList.contentHeight + 24
             //model: proxy.actionKeys
             model: proxy.actions
             highlight: PlasmaComponents.Highlight {}
@@ -66,6 +88,20 @@ Item {
                 running: true
                 repeat: false
                 onTriggered: unlockedList.currentIndex = -1
+            }
+        }
+        Column {
+            id: extraActions
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12; }
+            ActionDelegate {
+                label: i18n("Lock Screen")
+                actionIcon: "system-lock-screen"
+                onTriggered: lockScreen();
+            }
+            ActionDelegate {
+                label: i18n("Leave...")
+                actionIcon: "system-shutdown"
+                onTriggered: logout();
             }
         }
 
