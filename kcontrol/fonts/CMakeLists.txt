@@ -4,10 +4,7 @@ KDE4_NO_ENABLE_FINAL(fonts)
 if(FONTCONFIG_FOUND)
     include_directories(${FONTCONFIG_INCLUDE_DIR})
 endif(FONTCONFIG_FOUND)
-
-include_directories(${FREETYPE_INCLUDE_DIR} # TODO Remove when kde-workspace will require kdelibs 4.10
-                    ${FREETYPE_INCLUDE_DIRS} # kdelibs 4.10 compat
-                   )
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 ########### next target ###############
 

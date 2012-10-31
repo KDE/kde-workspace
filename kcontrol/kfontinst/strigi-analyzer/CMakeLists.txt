@@ -9,3 +9,4 @@ target_link_libraries(font ${STRIGI_STREAMANALYZER_LIBRARY} ${FREETYPE_LIBRARIES
 set_target_properties(font PROPERTIES  PREFIX strigita_)
 
 install(TARGETS font LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strigi)
+
