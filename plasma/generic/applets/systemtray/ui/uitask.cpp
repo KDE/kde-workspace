@@ -81,11 +81,6 @@ QString UiTask::taskId() const
     return d->task_id;
 }
 
-QString UiTask::typeId() const
-{
-    return  d->task ? d->task->typeId() : "";
-}
-
 
 QGraphicsWidget *UiTask::widget() const
 {

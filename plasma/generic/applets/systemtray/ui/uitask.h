@@ -55,7 +55,6 @@ class UiTask: public QObject
 
     Q_PROPERTY(QGraphicsWidget *widget READ widget CONSTANT)
     Q_PROPERTY(QVariant task READ task CONSTANT)
-    Q_PROPERTY(QString typeId READ typeId CONSTANT) // TODO: it may change
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
 
 public:
@@ -67,8 +66,6 @@ public:
     QString taskId() const;
     QGraphicsWidget *widget() const;
     Plasma::Applet *host() const;
-
-    QString typeId() const;
 
 private:
     struct _Private;
