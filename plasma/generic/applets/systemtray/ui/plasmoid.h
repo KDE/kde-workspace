@@ -92,6 +92,7 @@ public:
     Q_INVOKABLE QPoint popupPosition(QVariant item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
     Q_INVOKABLE void destroyShortcutAction(QVariant action) const;
     Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
+    Q_INVOKABLE QString getUniqueId(QObject *obj) const;
 
 signals:
     void changedFormFactor();

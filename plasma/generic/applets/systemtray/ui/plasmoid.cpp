@@ -28,6 +28,8 @@
 
 #include "applet.h"
 
+#include <inttypes.h>
+
 #include <QtGui/QMenu>
 
 #include <KDE/Plasma/IconWidget>
@@ -158,6 +160,11 @@ void Plasmoid::hideFromTaskbar(qulonglong win_id) const
     if (win_id > 0) {
         KWindowSystem::setState(win_id, NET::SkipTaskbar | NET::SkipPager);
     }
+}
+
+QString Plasmoid::getUniqueId(QObject *obj) const
+{
+    return QString::number(reinterpret_cast<uintmax_t>(obj));
 }
 
 

@@ -51,14 +51,15 @@ Item {
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
-                var t = JS.tasks[loc].add(task.task, task.task.category, item)
+                var t = JS.tasks[loc].add(plasmoid.getUniqueId(task.task), task.task.category, item)
                 models[loc].insert(t.index, {"ui_task": task, "ui_item": item})
             }
         }
 
         onDeletedTask: {
-            var loc = JS.findLocation(task.task)
-            var t = JS.tasks[loc].remove(task.task)
+            var task_id = plasmoid.getUniqueId(task.task)
+            var loc = JS.findLocation(task_id)
+            var t = JS.tasks[loc].remove(task_id)
             models[loc].remove(t.index)
             t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
         }
@@ -174,7 +175,8 @@ Item {
     }
 
     /// Moves task to specified location
-    function moveTaskToLocation(task_id, loc) {
+    function moveTaskToLocation(task, loc) {
+        var task_id = plasmoid.getUniqueId(task)
         var old_loc = JS.findLocation(task_id)
         if (old_loc === loc)
             return
@@ -184,7 +186,7 @@ Item {
 
         // add to new model
         t = JS.tasks[loc].add(task_id, t.category, t.data)
-        models[loc].insert(t.index, {"ui_task": tasks_pool.getTask(task_id), "ui_item": t.data})
+        models[loc].insert(t.index, {"ui_task": tasks_pool.getTask(task), "ui_item": t.data})
     }
 
 
