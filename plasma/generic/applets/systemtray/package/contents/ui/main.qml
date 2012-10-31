@@ -51,14 +51,14 @@ Item {
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
-                var t = JS.tasks[loc].add(task_id, task.task.category, item)
+                var t = JS.tasks[loc].add(task.task, task.task.category, item)
                 models[loc].insert(t.index, {"ui_task": task, "ui_item": item})
             }
         }
 
         onDeletedTask: {
-            var loc = JS.findLocation(task_id)
-            var t = JS.tasks[loc].remove(task_id)
+            var loc = JS.findLocation(task.task)
+            var t = JS.tasks[loc].remove(task.task)
             models[loc].remove(t.index)
             t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
         }
@@ -128,8 +128,8 @@ Item {
 
             Connections {
                 target: ui_task.task
-                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-                onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
+                onChangedStatus:    moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
+                onChangedVisibilityPreference: moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
             }
         }
     }
@@ -150,8 +150,8 @@ Item {
 
             Connections {
                 target: ui_task.task
-                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-                onChangedVisibilityPreference: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
+                onChangedStatus:    moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
+                onChangedVisibilityPreference: moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
             }
         }
     }
@@ -184,7 +184,7 @@ Item {
 
         // add to new model
         t = JS.tasks[loc].add(task_id, t.category, t.data)
-        models[loc].insert(t.index, {"ui_task": tasks_pool.tasks[task_id], "ui_item": t.data})
+        models[loc].insert(t.index, {"ui_task": tasks_pool.getTask(task_id), "ui_item": t.data})
     }
 
 

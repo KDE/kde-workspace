@@ -40,16 +40,14 @@ namespace SystemTray
 struct UiTask::_Private
 {
     TasksPool &pool;
-    QString const task_id;
     Task * const task;
 
-    _Private(TasksPool &pool, QString task_id, Task *task);
+    _Private(TasksPool &pool, Task *task);
 };
 
 
-UiTask::_Private::_Private(TasksPool &pool, QString task_id, Task *task):
+UiTask::_Private::_Private(TasksPool &pool, Task *task):
     pool(pool),
-    task_id(task_id),
     task(task)
 {
 
@@ -59,8 +57,8 @@ UiTask::_Private::_Private(TasksPool &pool, QString task_id, Task *task):
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class UiTask
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-UiTask::UiTask(TasksPool &pool, QString task_id, Task *task):
-    d(new _Private(pool, task_id, task))
+UiTask::UiTask(TasksPool &pool, Task *task):
+    d(new _Private(pool, task))
 {
 }
 
@@ -74,11 +72,6 @@ UiTask::~UiTask()
 QVariant UiTask::task() const
 {
     return QVariant::fromValue(static_cast<QObject*>(d->task));
-}
-
-QString UiTask::taskId() const
-{
-    return d->task_id;
 }
 
 

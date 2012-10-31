@@ -55,15 +55,13 @@ class UiTask: public QObject
 
     Q_PROPERTY(QGraphicsWidget *widget READ widget CONSTANT)
     Q_PROPERTY(QVariant task READ task CONSTANT)
-    Q_PROPERTY(QString taskId READ taskId CONSTANT)
 
 public:
 
-    explicit UiTask(TasksPool &pool, QString task_id, Task *task);
+    explicit UiTask(TasksPool &pool, Task *task);
     virtual ~UiTask();
 
     QVariant task() const;
-    QString taskId() const;
     QGraphicsWidget *widget() const;
     Plasma::Applet *host() const;
 

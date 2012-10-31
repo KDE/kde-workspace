@@ -52,9 +52,9 @@ class UiTask;
 // Provides access from QML to tasks, notifies about new tasks
 class TasksPool: public QObject
 {
+private:
     Q_OBJECT
 
-    Q_PROPERTY(QVariantHash tasks READ tasks)
 public:
     explicit TasksPool(Plasma::Applet *host);
     virtual ~TasksPool();
@@ -64,13 +64,13 @@ public:
     bool hasTask(Task *task) const;
     UiTask *uiTask(Task *task) const;
 
-    QVariantHash tasks() const;
+    Q_INVOKABLE QVariant getTask(QObject *task) const;
 
     Plasma::Applet *host() const;
 
 signals:
-    void newTask(const QString &task_id, QVariant task);
-    void deletedTask(const QString &task_id);
+    void newTask(QVariant task);
+    void deletedTask(QVariant task);
 
 public slots:
 

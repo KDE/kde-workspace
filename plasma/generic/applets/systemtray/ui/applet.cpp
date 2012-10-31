@@ -372,10 +372,9 @@ void Applet::configChanged()
     s_manager->loadApplets(this);
 
     // change hide state for every tasks in GUI
-    QVariantHash tasks = m_tasksPool->tasks();
-    for (QVariantHash::const_iterator i = tasks.constBegin(), e = tasks.constEnd(); i != e; ++i) {
-        UiTask *ui_task = static_cast<UiTask*>(i.value().value<QObject*>());
-        _updateVisibilityPreference(qobject_cast<Task*>(ui_task->task().value<QObject*>()));
+    QList<Task*> tasks = s_manager->tasks();
+    for (QList<Task*>::const_iterator i = tasks.constBegin(), e = tasks.constEnd(); i != e; ++i) {
+        _updateVisibilityPreference(*i);
     }
 }
 
