@@ -75,15 +75,19 @@ Item {
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
         onEntered: {
+            toolBoxFrame.currentItem = toolBoxDelegate;
+            toolBoxHighlight.opacity = 1;
+            exitTimer.running = false;
             return;
             if (typeof(index) != "undefined") {
                 exitTimer.running = false;
+                toolBoxHighlight.opacity = 1;
                 unlockedList.currentIndex = index;
             }
         }
         onExited:  {
-            return;
-            if (typeof(index) != "undefined") {
+            //return;
+            if (toolBoxFrame.currentItem != null) {
                 exitTimer.start()
             }
         }

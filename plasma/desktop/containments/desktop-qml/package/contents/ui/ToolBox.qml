@@ -75,15 +75,20 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
+        property Item currentItem: null
         imagePath: "widgets/toolbox"
         width: expandedWidth
         height: actionList.height + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
+
+//         onCurrentItemChanged: {
+//             print("highlgiht is now: " + currentItem.x + " " +currentItem.y + " " +currentItem.width + " " + currentItem.height + " ");
+//         }
         Timer {
             id: exitTimer
-            interval: 100
+            interval: 200
             running: true
             repeat: false
-            //onTriggered: unlockedList.currentIndex = -1
+            onTriggered: toolBoxHighlight.opacity = 0
         }
         Column {
             id: actionList
@@ -109,6 +114,28 @@ Item {
             }
         }
 
+        PlasmaComponents.Highlight {
+            id: toolBoxHighlight
+            opacity: toolBoxFrame.currentItem != null ? 1 : 0
+            x: (toolBoxFrame.currentItem != null) ? toolBoxFrame.currentItem.x + toolBoxSvg.topBorder : toolBoxSvg.topBorder
+            y: (toolBoxFrame.currentItem != null) ? toolBoxFrame.currentItem.y + toolBoxSvg.leftBorder : toolBoxSvg.leftBorder
+            //y: toolBoxFrame.currentItem.y + toolBoxSvg.leftBorder
+            width: actionList.width
+            height: (toolBoxFrame.currentItem != null) ? toolBoxFrame.currentItem.height : 0
+            Behavior on x {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.InOutQuad
+                }
+            }
+            Behavior on y {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.InOutQuad
+                }
+            }
+
+        }
         /** Action Mapping for ToolBox
 
         list-add                    Add Panel
