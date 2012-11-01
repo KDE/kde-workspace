@@ -8,7 +8,7 @@
   <!ENTITY % English "INCLUDE">
 ]>
 
-<article lang="&language;">
+<article id="kfontview" lang="&language;">
 
 <articleinfo>
 <title>Font Viewer</title>
