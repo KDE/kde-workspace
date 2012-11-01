@@ -6,8 +6,7 @@ include(PkgConfigGetVar)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard
                     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processcore
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal)
+                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell)
 
 set(krunner_KCFG_SRCS kcfg/krunnersettings.kcfgc kcfg/klaunchsettings.kcfgc)
 set(krunner_dbusAppXML dbus/org.kde.krunner.App.xml)
@@ -61,7 +60,7 @@ endif(NOT WIN32)
 
 kde4_add_kdeinit_executable(krunner ${krunner_SRCS})
 
-target_link_libraries(kdeinit_krunner kworkspace  plasmagenericshell kephal ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBRARIES} ${KDE4_THREADWEAVER_LIBRARIES} ${KDE4_KDEUI_LIBS}  ${KDE4_KCMUTILS_LIBS} )
+target_link_libraries(kdeinit_krunner kworkspace  plasmagenericshell ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBRARIES} ${KDE4_THREADWEAVER_LIBRARIES} ${KDE4_KDEUI_LIBS}  ${KDE4_KCMUTILS_LIBS} )
 
 if(NOT WIN32)
   target_link_libraries(kdeinit_krunner processui  ${X11_Xrender_LIB} ${X11_LIBRARIES})
