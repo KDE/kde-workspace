@@ -32,6 +32,12 @@ QtExtras.MouseEventListener {
     width: 540
     height: 540
 
+    signal minimumWidthChanged
+    signal minimumHeightChanged
+    signal maximumWidthChanged
+    signal maximumHeightChanged
+    signal preferredWidthChanged
+    signal preferredHeightChanged
 
     property Item currentGroup
     property int currentIndex: -1

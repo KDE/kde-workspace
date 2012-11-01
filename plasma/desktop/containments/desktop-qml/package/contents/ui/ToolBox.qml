@@ -128,6 +128,12 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.InOutQuad
+                }
+            }
             Behavior on y {
                 NumberAnimation {
                     duration: 150
