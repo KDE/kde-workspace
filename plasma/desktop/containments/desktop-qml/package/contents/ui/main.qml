@@ -109,6 +109,7 @@ QtExtras.MouseEventListener {
         updateGridSize()
 
         plasmoid.containmentType = "CustomContainment"
+        //plasmoid.containmentType = "DesktopContainment"
         plasmoid.appletAdded.connect(addApplet)
         LayoutManager.restore()
         for (var i = 0; i < plasmoid.applets.length; ++i) {
