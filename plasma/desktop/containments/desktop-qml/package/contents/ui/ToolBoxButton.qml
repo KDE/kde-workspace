@@ -139,9 +139,6 @@ Item {
         property int borderWidth: toolBoxButton.isHorizontal ? toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width : toolBoxSvg.elementSize("left").width
         property int borderHeight: !toolBoxButton.isHorizontal ? toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height: toolBoxSvg.elementSize("bottom").height
 
-//         property int mWidth: iconSize*3.5 + activityName.paintedWidth
-//         property int mHeight: (activityName.text == "") ? mWidth+2 : iconSize*3.5 + activityName.paintedWidth+2
-
         property int mWidth: iconSize + borderWidth + activityName.paintedWidth
         property int mHeight: (activityName.text == "") ? mWidth+2 : iconSize + borderHeight + activityName.paintedWidth+2
 
@@ -208,7 +205,6 @@ Item {
             topMargin: 4
             rightMargin: -6
         }
-//         Rectangle { color: "green"; opacity: 0.5; anchors.fill: parent; }
     }
 
     QtExtras.QIconItem {
@@ -284,14 +280,8 @@ Item {
         drag.maximumY: container.height - toolBoxButton.height
 
         onClicked: {
-            var qmlFile = (toolBox.state == "expanded") ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
-            proxy.setShowing((toolBox.state != "expanded"));
-            var component = Qt.createComponent(qmlFile);
-            if (component.status == Component.Ready) {
-                var ani = component.createObject(buttonMouse);
-                ani.targetItem = toolBox;
-                ani.start();
-            }
+            print ("click state now: " + toolBox.state);
+            proxy.showing  = toolBox.state != "expanded";
         }
         Connections {
             target: toolBoxButton

@@ -27,7 +27,7 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
-Item {
+QtExtras.MouseEventListener {
     id: main
     width: 540
     height: 540
@@ -43,8 +43,21 @@ Item {
 
     property int iconWidth: 22
     property int iconHeight: iconWidth
-    onIconHeightChanged: updateGridSize()
 
+    //property alias tb: plasmoid.toolBox
+
+
+    onIconHeightChanged: updateGridSize()
+    onPressed: {
+        if ((mouse.x > toolBox.x && mouse.x < (toolBox.x + toolBox.width)) &&
+            (mouse.y > toolBox.y && mouse.y < (toolBox.y + toolBox.height))) {
+            return;
+        }
+        if (toolBox.proxy.showing) {
+            toolBox.proxy.showing = false;
+        }
+        print("MEL clicked");
+    }
     function updateGridSize()
     {
         LayoutManager.cellSize.width = main.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width

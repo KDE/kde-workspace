@@ -53,10 +53,10 @@ Item {
     onCheckedChanged: {
         if (checked) {
             buttonItem.elementId = "pressed"
-//            shadowItem.opacity = 0
+           shadowItem.opacity = 0
         } else {
             buttonItem.elementId = "normal"
-            //shadowItem.opacity = 1
+            shadowItem.opacity = 1
         }
     }
 
@@ -64,19 +64,19 @@ Item {
         id: theme
     }
 
-//     PlasmaCore.Svg {
-//         id: buttonSvg
-//         imagePath: "widgets/actionbutton"
-//     }
-//
-//     PlasmaCore.SvgItem {
-//         id: shadowItem
-//         svg: buttonSvg
-//         elementId: "shadow"
-//         width: iconSize+13//button.backgroundVisible?iconSize+8:iconSize
-//         height: width
-//         visible: button.backgroundVisible
-//     }
+    PlasmaCore.Svg {
+        id: buttonSvg
+        imagePath: "widgets/actionbutton"
+    }
+
+    PlasmaCore.SvgItem {
+        id: shadowItem
+        svg: buttonSvg
+        elementId: "shadow"
+        width: iconSize+13//button.backgroundVisible?iconSize+8:iconSize
+        height: width
+        visible: button.backgroundVisible
+    }
 
     Row {
         id: buttonRow
@@ -106,7 +106,8 @@ Item {
                 id: buttonIcon
                 width: iconSize
                 height: iconSize
-                //iconSource: button.svg
+                icon: button.svg
+                //svg: buttonSvg
                 anchors.centerIn: parent
             }
         }

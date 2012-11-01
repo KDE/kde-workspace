@@ -33,7 +33,7 @@ Item {
 
     width: childrenRect.width
     height: childrenRect.height
-    state: "collapsed"
+    state: proxy.showing ? "expanded" : "collapsed"
     z: 9999
     transformOrigin: Item.TopRight
 
@@ -52,10 +52,19 @@ Item {
         print(" shutdown...");
         performOperation("requestShutDown");
     }
+
     Connections {
         target: proxy
-        onShowingChanged: print("Showing now: " + proxy.showing);
+        onShowingChanged: {
+            var qmlFile = (!proxy.showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
+            var component = Qt.createComponent(qmlFile);
+            if (component.status == Component.Ready) {
+                var ani = component.createObject(toolBox);
+                ani.targetItem = toolBox;
+                ani.start();
+            }
 
+        }
     }
 
     PlasmaCore.DataSource {
@@ -69,7 +78,6 @@ Item {
         imagePath: "widgets/toolbox"
         width: expandedWidth
         height: actionList.height + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
-//         Rectangle { color: "violet"; opacity: 0.3; anchors.fill: actionList; }
         Timer {
             id: exitTimer
             interval: 100
@@ -86,7 +94,6 @@ Item {
                 id: unlockedList
                 model: proxy.actions
                 delegate: ActionDelegate {
-                    //height: 36
                     actionIcon: icon
                 }
             }
