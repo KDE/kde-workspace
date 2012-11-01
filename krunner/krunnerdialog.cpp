@@ -27,6 +27,7 @@
 #endif
 #include <QBitmap>
 #include <QTimer>
+#include <QDesktopWidget>
 
 #include <KDebug>
 #include <KWindowSystem>
@@ -66,7 +67,8 @@ KRunnerDialog::KRunnerDialog(Plasma::RunnerManager *runnerManager, QWidget *pare
       m_resizing(false),
       m_rightResize(false),
       m_vertResize(false),
-      m_runningTimer(false)
+      m_runningTimer(false),
+      m_desktopWidget(qApp->desktop())
 {
     setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
@@ -83,12 +85,9 @@ KRunnerDialog::KRunnerDialog(Plasma::RunnerManager *runnerManager, QWidget *pare
 
     connect(m_background, SIGNAL(repaintNeeded()), this, SLOT(themeUpdated()));
 
-    connect(Kephal::Screens::self(), SIGNAL(screenRemoved(int)),
-            this, SLOT(screenRemoved(int)));
-    connect(Kephal::Screens::self(), SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)),
-            this, SLOT(screenGeometryChanged(Kephal::Screen*)));
-    connect(Kephal::Screens::self(), SIGNAL(screenMoved(Kephal::Screen*,QPoint,QPoint)),
-            this, SLOT(screenGeometryChanged(Kephal::Screen*)));
+    connect(m_desktopWidget, SIGNAL(resized(int)), this, SLOT(screenGeometryChanged(int)));
+    connect(m_desktopWidget, SIGNAL(screenCountChanged(int)), this, SLOT(screenGeometryChanged(int)));
+
     connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SLOT(resetScreenPos()));
     connect(KWindowSystem::self(), SIGNAL(compositingChanged(bool)), this, SLOT(compositingChanged(bool)));
 
@@ -104,16 +103,16 @@ KRunnerDialog::~KRunnerDialog()
     }
 }
 
-void KRunnerDialog::screenRemoved(int screen)
+void KRunnerDialog::screenResized(int screen)
 {
-    if (isVisible() && m_shownOnScreen == screen) {
+    if (isVisible() && screen == m_shownOnScreen) {
         positionOnScreen();
     }
 }
 
-void KRunnerDialog::screenGeometryChanged(Kephal::Screen* screen)
+void KRunnerDialog::screenGeometryChanged(int screenCount)
 {
-    if (isVisible() && screen->id() == m_shownOnScreen) {
+    if (isVisible()) {
         positionOnScreen();
     }
 }
@@ -127,15 +126,15 @@ void KRunnerDialog::resetScreenPos()
 
 void KRunnerDialog::positionOnScreen()
 {
-    if (Kephal::ScreenUtils::numScreens() < 2) {
-        m_shownOnScreen = Kephal::ScreenUtils::primaryScreenId();
+    if (m_desktopWidget->screenCount() < 2) {
+        m_shownOnScreen = m_desktopWidget->primaryScreen();
     } else if (isVisible()) {
-        m_shownOnScreen = Kephal::ScreenUtils::screenId(geometry().center());
+        m_shownOnScreen = m_desktopWidget->screenNumber(geometry().center());
     } else {
-        m_shownOnScreen = Kephal::ScreenUtils::screenId(QCursor::pos());
+        m_shownOnScreen = m_desktopWidget->screenNumber(QCursor::pos());
     }
 
-    const QRect r = Kephal::ScreenUtils::screenGeometry(m_shownOnScreen);
+    const QRect r = m_desktopWidget->screenGeometry(m_shownOnScreen);
 
     if (m_floating && !m_customPos.isNull()) {
         int x = qBound(r.left(), m_customPos.x(), r.right() - width());
@@ -182,7 +181,7 @@ void KRunnerDialog::moveEvent(QMoveEvent *)
     if (m_floating) {
         m_customPos = pos();
     } else {
-        const QRect screen = Kephal::ScreenUtils::screenGeometry(m_shownOnScreen);
+        const QRect screen = m_desktopWidget->screenGeometry(m_shownOnScreen);
         m_offset = qRound((geometry().center().x() - screen.x())  / qreal(screen.width()) * 100) / 100.0;
     }
 }
@@ -217,7 +216,7 @@ void KRunnerDialog::updatePresentation()
         // load the positions for each screen from our config
         KConfigGroup cg(KGlobal::config(), "EdgePositions");
         m_offset = cg.readEntry(QLatin1String("Offset"), m_offset);
-        const QRect r = Kephal::ScreenUtils::screenGeometry(m_shownOnScreen);
+        const QRect r = m_desktopWidget->screenGeometry(m_shownOnScreen);
         checkBorders(r);
         KWindowSystem::setType(winId(), NET::Dock);
     }
@@ -377,7 +376,7 @@ void KRunnerDialog::resizeEvent(QResizeEvent *e)
 
     bool maskDirty = true;
     if (m_resizing && !m_vertResize) {
-        const QRect r = Kephal::ScreenUtils::screenGeometry(m_shownOnScreen);
+        const QRect r = m_desktopWidget->screenGeometry(m_shownOnScreen);
         //kDebug() << "if" << x() << ">" << r.left() << "&&" << r.right() << ">" << (x() + width());
         const Plasma::FrameSvg::EnabledBorders borders = m_background->enabledBorders();
         if (borders & Plasma::FrameSvg::LeftBorder) {
@@ -475,7 +474,7 @@ void KRunnerDialog::mouseMoveEvent(QMouseEvent *e)
             resize(width(), qMax(80, height() + deltaY));
             m_lastPressPos = e->globalPos();
         } else {
-            const QRect r = Kephal::ScreenUtils::screenGeometry(m_shownOnScreen);
+            const QRect r = m_desktopWidget->availableGeometry(m_shownOnScreen);
             const int deltaX = (m_rightResize ? -1 : 1) * (m_lastPressPos.x() - e->globalX());
             int newWidth = width() + deltaX;
 
@@ -497,7 +496,7 @@ void KRunnerDialog::mouseMoveEvent(QMouseEvent *e)
         }
     } else {
         // moving
-        const QRect r = Kephal::ScreenUtils::screenGeometry(m_shownOnScreen);
+        const QRect r = m_desktopWidget->availableGeometry(m_shownOnScreen);
         int newX = qBound(r.left(), x() - (m_lastPressPos.x() - e->globalX()), r.right() - width() + 1);
         if (abs(r.center().x() - (newX + (width() / 2))) < 20) {
             newX = r.center().x() - (width() / 2);
