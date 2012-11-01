@@ -336,7 +336,7 @@ Item {
         id: toolBoxButton
         Timer {
             id: placeToolBoxTimer
-            interval: 50
+            interval: 500
             repeat: false
             running: true
             onTriggered: placeToolBox();

@@ -22,7 +22,7 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.qtextracomponents 0.1 as QtExtras
 
-PlasmaComponents.ListItem {
+Item {
     id: toolBoxDelegate
     signal triggered
     property int iconSize: 22
@@ -31,7 +31,8 @@ PlasmaComponents.ListItem {
     property alias actionIcon: iconItem.icon
     enabled: true
 
-    height: toolBoxDelegate.iconSize + 14
+    //height: toolBoxDelegate.iconSize + 14
+    height: 36
     width: parent.width-24
 
     Component.onCompleted: print("delegate text: " + label + objectName)
@@ -74,12 +75,14 @@ PlasmaComponents.ListItem {
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
         onEntered: {
+            return;
             if (typeof(index) != "undefined") {
                 exitTimer.running = false;
                 unlockedList.currentIndex = index;
             }
         }
         onExited:  {
+            return;
             if (typeof(index) != "undefined") {
                 exitTimer.start()
             }

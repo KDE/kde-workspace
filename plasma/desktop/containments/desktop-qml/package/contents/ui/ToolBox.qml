@@ -68,31 +68,28 @@ Item {
         id: toolBoxFrame
         imagePath: "widgets/toolbox"
         width: expandedWidth
-        height: unlockedList.contentHeight + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder + (36*2)
-        ListView {
-            id: unlockedList
-            anchors { top: parent.top; bottom: extraActions.top; left: parent.left; right: parent.right; margins: 12; }
-            height: unlockedList.contentHeight + 24
-            //model: proxy.actionKeys
-            model: proxy.actions
-            highlight: PlasmaComponents.Highlight {}
-            highlightFollowsCurrentItem: true
-            interactive: false
-            spacing: 0
-            delegate: ActionDelegate {
-                actionIcon: icon
-            }
-            Timer {
-                id: exitTimer
-                interval: 100
-                running: true
-                repeat: false
-                onTriggered: unlockedList.currentIndex = -1
-            }
+        height: actionList.height + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
+//         Rectangle { color: "violet"; opacity: 0.3; anchors.fill: actionList; }
+        Timer {
+            id: exitTimer
+            interval: 100
+            running: true
+            repeat: false
+            //onTriggered: unlockedList.currentIndex = -1
         }
         Column {
-            id: extraActions
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12; }
+            id: actionList
+            x: parent.x + toolBoxSvg.topBorder
+            y: parent.y + toolBoxSvg.leftBorder
+            width: parent.width - (toolBoxSvg.leftBorder + toolBoxSvg.rightBorder)
+            Repeater {
+                id: unlockedList
+                model: proxy.actions
+                delegate: ActionDelegate {
+                    //height: 36
+                    actionIcon: icon
+                }
+            }
             ActionDelegate {
                 label: i18n("Lock Screen")
                 actionIcon: "system-lock-screen"
