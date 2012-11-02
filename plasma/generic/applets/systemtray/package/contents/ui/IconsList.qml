@@ -67,7 +67,7 @@ Item {
                 alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wordWrap: false
                 textSelectable: false
-                text: ui_task.task.name
+                text: task.name
                 z: -10 // We place label under mouse area to be able to handle mouse events
             }
 
@@ -77,7 +77,7 @@ Item {
                 z: 0
 
                 // we redirect some events to IconWidget or applet
-                target: ui_task.task.type == TypeStatusItem ? ui_item.getIconWidget() : ui_task.task
+                target: task.type == TypeStatusItem ? ui_item.getIconWidget() : task
                 applet: plasmoid.applet
 
                 // Next events we process manually
@@ -105,7 +105,7 @@ Item {
             }
 
             Connections {
-                target: ui_task.task
+                target: task
                 onChangedName: {
                     // if name is changed => we should recalculate width of popup
                     IconsListJS.tasks[delegate_root_item] = name_item.width

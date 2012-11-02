@@ -28,6 +28,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Includes
 #include <QtCore/QObject>
+#include <QtCore/QSet>
 
 #include <KDE/Plasma/Plasma>
 #include <KDE/Plasma/Applet>
@@ -35,6 +36,7 @@
 
 namespace SystemTray
 {
+class Task;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class Plasmoid
@@ -85,6 +87,23 @@ public:
     unsigned int id() const;
     QObject* applet() const { return m_applet; }
 
+    /**
+     * Adds task to QML code
+     * @param task a new task
+     */
+    void addTask(Task *task);
+
+    /**
+     * Removes old task from QML code
+     * @param task a task to be removed
+     */
+    void removeTask(Task *task);
+
+    /**
+     * @return true if task is added to QML code
+     */
+    bool hasTask(Task *task);
+
     Q_INVOKABLE QVariant createShortcutAction(QString action_id) const;
     Q_INVOKABLE void updateShortcutAction(QVariant action, QString shortcut) const;
     Q_INVOKABLE void showMenu(QVariant menu, int x, int y, QVariant item) const;
@@ -98,10 +117,23 @@ signals:
     void changedLocation();
     void activated(); ///< If a plasmoid has been activated
 
+    /**
+     * This signal is emmited for each new task
+     * @param task a new task
+     */
+    void newTask(QObject *task);
+
+    /**
+     * This signal is emmited before task is deleted
+     * @param task a task that is being deleted
+     */
+    void deletedTask(QObject *task);
+
 private:
     Plasma::Applet* m_applet;
     Plasmoid::FormFactor m_form;
     Plasmoid::Location   m_location;
+    QSet<Task*> m_tasks;
 };
 
 } // namespace SystemTray

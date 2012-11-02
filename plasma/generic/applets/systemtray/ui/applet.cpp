@@ -23,8 +23,6 @@
 
 #include "applet.h"
 #include "plasmoid.h"
-#include "taskspool.h"
-#include "uitask.h"
 #include "widgetitem.h"
 #include "mouseredirectarea.h"
 
@@ -92,7 +90,6 @@ int Applet::s_managerUsage = 0;
 Applet::Applet(QObject *parent, const QVariantList &arguments)
     : Plasma::Applet(parent, arguments),
       m_plasmoid(new Plasmoid(this)),
-      m_tasksPool(new TasksPool(this)),
       m_widget(0),
       m_firstRun(true)
 {
@@ -124,7 +121,6 @@ Applet::~Applet()
     }
 
     delete m_widget;
-    delete m_tasksPool;
     delete m_plasmoid;
 
     --s_managerUsage;
@@ -171,12 +167,10 @@ void Applet::init()
     // setup context add global object "plasmoid"
     QDeclarativeContext *root_context = m_widget->engine()->rootContext();
     root_context->setContextProperty("plasmoid", m_plasmoid);
-    root_context->setContextProperty("tasks_pool", m_tasksPool);
 
     // add enumerations manually to global context
     _RegisterEnums(root_context, Plasmoid::staticMetaObject);
     _RegisterEnums(root_context, Task::staticMetaObject);
-    _RegisterEnums(root_context, UiTask::staticMetaObject);
 
     // add declarative widget to our applet
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
@@ -217,8 +211,8 @@ void Applet::_onAddedTask(Task *task)
     // define hide state of task
     _updateVisibilityPreference(task);
 
-    // add task to pool
-    m_tasksPool->addTask(task);
+    // provide task to qml code
+    m_plasmoid->addTask(task);
 
     DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
     if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
@@ -263,8 +257,7 @@ void Applet::_onAddedTask(Task *task)
 
 void Applet::_onChangedTask(Task *task)
 {
-    UiTask *ui_task = m_tasksPool->uiTask(task);
-    if (!ui_task) {
+    if (!m_plasmoid->hasTask(task)) {
         _onAddedTask(task);
         return;
     }
@@ -314,8 +307,8 @@ void Applet::_onChangedTask(Task *task)
 
 void Applet::_onRemovedTask(Task *task)
 {
-    //remove task from pool
-    m_tasksPool->removeTask(task);
+    //remove task from QML code
+    m_plasmoid->removeTask(task);
 }
 
 

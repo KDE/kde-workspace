@@ -101,7 +101,6 @@ private:
     QSet<QString> m_alwaysShownTypes;
     QDateTime m_lastActivity;
     Plasmoid *m_plasmoid;
-    TasksPool *m_tasksPool;
     Plasma::DeclarativeWidget *m_widget;
 
     Ui::AutoHideConfig m_autoHideUi;

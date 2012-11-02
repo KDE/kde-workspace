@@ -42,33 +42,31 @@ Item {
     ]
 
     Connections {
-        target: tasks_pool
+        target: plasmoid
 
         onNewTask: {
             // create declarative item
-            var component = (task.task.type === TypeStatusItem ? component_status_item : component_widget)
-            var props = {"ui_task": task}
+            var component = (task.type === TypeStatusItem ? component_status_item : component_widget)
+            var props = {"task": task}
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
-                var t = JS.tasks[loc].add(plasmoid.getUniqueId(task.task), task.task.category, item)
-                models[loc].insert(t.index, {"ui_task": task, "ui_item": item})
+                var t = JS.tasks[loc].add(plasmoid.getUniqueId(task), task.category, item)
+                models[loc].insert(t.index, {"task": task, "ui_item": item})
             }
         }
 
         onDeletedTask: {
-            var task_id = plasmoid.getUniqueId(task.task)
+            var task_id = plasmoid.getUniqueId(task)
             var loc = JS.findLocation(task_id)
             var t = JS.tasks[loc].remove(task_id)
             models[loc].remove(t.index)
             t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
         }
-    }
 
-    Connections {
-        target: plasmoid
         onActivated: arrow_area.togglePopup()
     }
+
 
     Component.onCompleted: {
         // create sets for tasks
@@ -117,20 +115,17 @@ Item {
         StatusNotifierItem {
             id: status_item
 
-            property variant ui_task;
-
             icons_size: JS.ICONS_SIZE
             blink_interval: JS.BLINK_INTERVAL
-            task: ui_task.task
-            visible: ui_task.task !== null
+            visible: task !== null
             width: JS.ICONS_SIZE
             height: width
             anchors.centerIn: parent
 
             Connections {
-                target: ui_task.task
-                onChangedStatus:    moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
-                onChangedVisibilityPreference: moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
+                target: task
+                onChangedStatus:    moveTaskToLocation(task, getLocationForTask(task))
+                onChangedVisibilityPreference: moveTaskToLocation(task, getLocationForTask(task))
             }
         }
     }
@@ -141,19 +136,16 @@ Item {
         WidgetItem {
             id: widget_item
 
-            property variant ui_task;
-
             applet: plasmoid.applet
-            task: ui_task.task
-            visible:  ui_task.task !== null
+            visible:  task !== null
             width: JS.ICONS_SIZE
             height: width
             anchors.centerIn: parent
 
             Connections {
-                target: ui_task.task
-                onChangedStatus:    moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
-                onChangedVisibilityPreference: moveTaskToLocation(ui_task.task, getLocationForTask(ui_task))
+                target: task
+                onChangedStatus:    moveTaskToLocation(task, getLocationForTask(task))
+                onChangedVisibilityPreference: moveTaskToLocation(task, getLocationForTask(task))
             }
         }
     }
@@ -161,15 +153,15 @@ Item {
     // Funtions ========================================================================================================
     function getLocationForTask(task) {
         var loc = getDefaultLocationForTask(task)
-        if (loc === JS.LOCATION_TRAY && task.task.typeId == JS.TASK_NOTIFICATIONS_TYPEID)
+        if (loc === JS.LOCATION_TRAY && task.typeId == JS.TASK_NOTIFICATIONS_TYPEID)
             return JS.LOCATION_NOTIFICATION // redefine location for notifications applet
         return loc
     }
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        if (task.task.status === NeedsAttention || task.task.visibilityPreference === AlwaysShown) return JS.LOCATION_TRAY
-        if (task.task.visibilityPreference === AlwaysHidden || (task.task.status !== Active && task.task.status !== UnknownStatus)) {
+        if (task.status === NeedsAttention || task.visibilityPreference === AlwaysShown) return JS.LOCATION_TRAY
+        if (task.visibilityPreference === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
             return JS.LOCATION_POPUP
         }
         return JS.LOCATION_TRAY
@@ -187,7 +179,7 @@ Item {
 
         // add to new model
         t = JS.tasks[loc].add(task_id, t.category, t.data)
-        models[loc].insert(t.index, {"ui_task": tasks_pool.getTask(task), "ui_item": t.data})
+        models[loc].insert(t.index, {"task": task, "ui_item": t.data})
     }
 
 
