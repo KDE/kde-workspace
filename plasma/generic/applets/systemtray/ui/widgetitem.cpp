@@ -58,6 +58,7 @@ void WidgetItem::setTask(QObject *task)
     unbind();
     m_task = t;
     bind();
+    emit changedTask();
 }
 
 void WidgetItem::setApplet(QObject *a)

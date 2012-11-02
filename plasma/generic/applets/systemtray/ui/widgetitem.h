@@ -46,7 +46,7 @@ class WidgetItem: public QDeclarativeItem
     Q_OBJECT
 
     Q_PROPERTY(QObject* applet READ applet WRITE setApplet) ///< host applet
-    Q_PROPERTY(QObject* task READ task WRITE setTask) ///< task
+    Q_PROPERTY(QObject* task READ task WRITE setTask NOTIFY changedTask) ///< task
 public:
     explicit WidgetItem(QDeclarativeItem *parent = 0);
     virtual ~WidgetItem();
@@ -62,7 +62,7 @@ public:
     void setApplet(QObject *applet);
 
 signals:
-    void changedWidget();
+    void changedTask();
 
 private:
     void bind();
