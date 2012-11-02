@@ -64,7 +64,7 @@ Item {
         id: toolBoxButton
         Timer {
             id: placeToolBoxTimer
-            interval: 500
+            interval: 100
             repeat: false
             running: true
             onTriggered: placeToolBox();
@@ -77,10 +77,11 @@ Item {
     }
 
     function placeToolBox() {
-        return;
+        //return;
         var ts = plasmoid.readConfig("ToolBoxButtonState")
+        ts = "topright"; // FIXME: hardcoded for now, test config saving!
         if (ts) {
-            print("Read state from config: " + ts);
+            //print("Read state from config: " + ts);
             if (ts == "topleft") {
                 toolBoxButton.x = 0;
                 toolBoxButton.y = 0;

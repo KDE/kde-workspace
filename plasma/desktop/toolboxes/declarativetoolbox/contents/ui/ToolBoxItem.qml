@@ -123,7 +123,6 @@ Item {
             opacity: toolBoxFrame.currentItem != null ? 1 : 0
             x: (toolBoxFrame.currentItem != null) ? toolBoxFrame.currentItem.x + toolBoxSvg.topBorder : toolBoxSvg.topBorder
             y: (toolBoxFrame.currentItem != null) ? toolBoxFrame.currentItem.y + toolBoxSvg.leftBorder : toolBoxSvg.leftBorder
-            //y: toolBoxFrame.currentItem.y + toolBoxSvg.leftBorder
             width: actionList.width
             height: (toolBoxFrame.currentItem != null) ? toolBoxFrame.currentItem.height : 0
             Behavior on x {
