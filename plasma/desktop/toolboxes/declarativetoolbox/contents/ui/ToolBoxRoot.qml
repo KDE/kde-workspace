@@ -60,11 +60,6 @@ Item {
         property int leftBorder: elementSize("left").width
     }
 
-    ToolBox {
-        id: toolBox
-        anchors { top: parent.top; right: parent.right; }
-    }
-
     ToolBoxButton {
         id: toolBoxButton
         Timer {
@@ -74,6 +69,11 @@ Item {
             running: true
             onTriggered: placeToolBox();
         }
+    }
+
+    ToolBoxItem {
+        id: toolBoxItem
+        anchors { top: parent.top; right: parent.right; }
     }
 
     function placeToolBox() {

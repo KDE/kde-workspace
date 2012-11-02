@@ -29,11 +29,9 @@ Item {
     property Item view: unlockedList
     property string label: text.replace("&", "")
     property alias actionIcon: iconItem.icon
-    enabled: true
 
-    //height: toolBoxDelegate.iconSize + 14
-    height: 36
-    width: parent.width-24
+    height: toolBoxDelegate.iconSize + 14
+    width: parent.width
 
     Component.onCompleted: print("delegate text: " + label + objectName)
 
@@ -42,7 +40,6 @@ Item {
         height: toolBoxDelegate.iconSize
         width: toolBoxDelegate.iconSize
         anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 4 }
-        //icon: actionIcon
     }
     PlasmaComponents.Label {
         id: textLabel
@@ -52,25 +49,14 @@ Item {
     }
     MouseArea {
         anchors.fill: parent
-        anchors.topMargin: -6
-        anchors.bottomMargin: -6
+        anchors.margins: -6
         hoverEnabled: true
         onClicked: {
             if (typeof(index) == "undefined") {
                 triggered();
             } else {
                 trigger();
-
             }
-            /*
-            if (label == i18n("Lock Screen")) {
-                triggered();
-            } else if (label == i18n("Leave...")) {
-                triggered();
-            } else {
-                trigger();
-            }
-            */
         }
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: toolBoxDelegate }
@@ -78,15 +64,8 @@ Item {
             toolBoxFrame.currentItem = toolBoxDelegate;
             toolBoxHighlight.opacity = 1;
             exitTimer.running = false;
-            return;
-            if (typeof(index) != "undefined") {
-                exitTimer.running = false;
-                toolBoxHighlight.opacity = 1;
-                unlockedList.currentIndex = index;
-            }
         }
         onExited:  {
-            //return;
             if (toolBoxFrame.currentItem != null) {
                 exitTimer.start()
             }

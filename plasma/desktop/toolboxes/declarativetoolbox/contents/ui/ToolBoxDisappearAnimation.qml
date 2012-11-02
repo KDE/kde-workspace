@@ -26,6 +26,6 @@ SequentialAnimation {
         id: anim
     }
     ScriptAction {
-        script: toolBox.state = "collapsed";
+        script: toolBoxItem.state = "collapsed";
     }
 }

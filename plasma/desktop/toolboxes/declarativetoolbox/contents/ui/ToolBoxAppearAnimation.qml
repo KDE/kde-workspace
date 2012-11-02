@@ -23,7 +23,7 @@ import org.kde.plasma.extras 0.1 as PlasmaExtras
 SequentialAnimation {
     property alias targetItem: anim.targetItem
     ScriptAction {
-        script: toolBox.state = "expanded"
+        script: toolBoxItem.state = "expanded"
     }
     PlasmaExtras.AppearAnimation {
         id: anim

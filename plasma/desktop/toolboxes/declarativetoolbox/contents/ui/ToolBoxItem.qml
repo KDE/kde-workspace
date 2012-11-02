@@ -25,7 +25,7 @@ import org.kde.plasma.containments 0.1 as PlasmaContainments
 import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
-    id: toolBox
+    id: toolBoxItem
 
     property QtObject proxy: plasmoid.toolBox
     property int expandedWidth: 240
@@ -34,7 +34,6 @@ Item {
     width: childrenRect.width
     height: childrenRect.height
     state: proxy.showing ? "expanded" : "collapsed"
-    z: 9999
     transformOrigin: Item.TopRight
 
     function performOperation(what) {
@@ -59,8 +58,8 @@ Item {
             var qmlFile = (!proxy.showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
             var component = Qt.createComponent(qmlFile);
             if (component.status == Component.Ready) {
-                var ani = component.createObject(toolBox);
-                ani.targetItem = toolBox;
+                var ani = component.createObject(toolBoxItem);
+                ani.targetItem = toolBoxItem;
                 ani.start();
             }
 
@@ -75,14 +74,14 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
+
         property Item currentItem: null
-        imagePath: "widgets/toolbox"
+
         width: expandedWidth
         height: actionList.height + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
 
-//         onCurrentItemChanged: {
-//             print("highlgiht is now: " + currentItem.x + " " +currentItem.y + " " +currentItem.width + " " + currentItem.height + " ");
-//         }
+        imagePath: "widgets/toolbox"
+
         Timer {
             id: exitTimer
             interval: 200
@@ -90,11 +89,14 @@ Item {
             repeat: false
             onTriggered: toolBoxHighlight.opacity = 0
         }
+
         Column {
             id: actionList
+
             x: parent.x + toolBoxSvg.topBorder
             y: parent.y + toolBoxSvg.leftBorder
             width: parent.width - (toolBoxSvg.leftBorder + toolBoxSvg.rightBorder)
+
             Repeater {
                 id: unlockedList
                 model: proxy.actions
@@ -102,11 +104,13 @@ Item {
                     actionIcon: icon
                 }
             }
+
             ActionDelegate {
                 label: i18n("Lock Screen")
                 actionIcon: "system-lock-screen"
                 onTriggered: lockScreen();
             }
+
             ActionDelegate {
                 label: i18n("Leave...")
                 actionIcon: "system-shutdown"

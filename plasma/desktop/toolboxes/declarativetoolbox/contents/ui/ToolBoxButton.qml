@@ -36,7 +36,7 @@ Item {
     width: 128; height: 128
     y: 0
     x: main.width - toolBoxButtonFrame.width
-    z: toolBox.z + 1
+    //z: toolBox.z + 1
 
     state: "topright" // FIXME: read default value from config
 
@@ -280,8 +280,8 @@ Item {
         drag.maximumY: container.height - toolBoxButton.height
 
         onClicked: {
-            print ("click state now: " + toolBox.state);
-            proxy.showing  = toolBox.state != "expanded";
+            print ("click state now: " + toolBoxItem.state);
+            proxy.showing  = toolBoxItem.state != "expanded";
         }
         Connections {
             target: toolBoxButton
