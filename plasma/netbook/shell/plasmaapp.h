@@ -45,11 +45,7 @@ class NetCorona;
 class QTimer;
 class GlowBar;
 class ShadowWindow;
-
-namespace Kephal
-{
-    class Screen;
-}
+class QDesktopWidget;
 
 class PlasmaApp : public KUniqueApplication
 {
@@ -111,7 +107,7 @@ private Q_SLOTS:
     void syncConfig();
     void positionPanel();
     void createView(Plasma::Containment *containment);
-    void adjustSize(Kephal::Screen *);
+    void adjustSize();
     void controlBarMoved(const NetView *controlBar);
     void showWidgetExplorer();
     void widgetExplorerDestroyed();
@@ -152,6 +148,7 @@ private:
     QTimer *m_unHideTimer;
     ShadowWindow *m_shadowWindow;
     int m_startupSuspendWaitCount;
+    QDesktopWidget* m_desktop;
 };
 
 #endif // multiple inclusion guard

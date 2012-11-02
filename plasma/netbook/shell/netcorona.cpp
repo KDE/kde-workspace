@@ -30,8 +30,6 @@
 #include <KStandardDirs>
 #include <KIcon>
 
-#include <kephal/screens.h>
-
 #include <Plasma/Containment>
 #include <Plasma/DataEngineManager>
 
@@ -42,6 +40,7 @@
 
 NetCorona::NetCorona(QObject *parent)
     : Plasma::Corona(parent)
+    , m_desktop(new QDesktopWidget())
 {
     init();
 }
@@ -49,8 +48,7 @@ NetCorona::NetCorona(QObject *parent)
 void NetCorona::init()
 {
     setPreferredToolBoxPlugin(Plasma::Containment::DesktopContainment, "org.kde.nettoolbox");
-    QDesktopWidget *desktop = QApplication::desktop();
-    QObject::connect(desktop, SIGNAL(resized(int)), this, SLOT(screenResized(int)));
+    QObject::connect(m_desktop, SIGNAL(resized(int)), this, SLOT(screenResized(int)));
     connect(PlasmaApp::self(), SIGNAL(controlBarChanged()), this, SIGNAL(availableScreenRegionChanged()));
 
     connect(this, SIGNAL(containmentAdded(Plasma::Containment*)), this, SLOT(containmentAdded(Plasma::Containment*)));
@@ -174,7 +172,7 @@ void NetCorona::screenResized(int screen)
 
 int NetCorona::numScreens() const
 {
-    return Kephal::ScreenUtils::numScreens();
+    return m_desktop->numScreens();
 }
 
 QRect NetCorona::screenGeometry(int id) const

@@ -24,6 +24,7 @@
 #include <QGraphicsWidget>
 #include <QToolButton>
 #include <QLayout>
+#include <QDesktopWidget>
 
 #include <KIcon>
 #include <KIconLoader>
@@ -35,13 +36,12 @@
 #include <Plasma/Svg>
 #include <Plasma/WindowEffects>
 
-#include <kephal/screens.h>
-
 NetPanelController::NetPanelController(QWidget *parent, NetView *view, Plasma::Containment *containment)
    : Plasma::Dialog(parent),
      m_containment(containment),
      m_view(view),
-     m_watched(0)
+     m_watched(0),
+     m_desktop(new QDesktopWidget())
 {
     hide();
 
@@ -157,7 +157,7 @@ bool NetPanelController::eventFilter(QObject *watched, QEvent *event)
         m_watched = 0;
     } else if (watched == m_moveButton && event->type() == QEvent::GraphicsSceneMouseMove) {
         QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
-        QRect screenGeom = Kephal::ScreenUtils::screenGeometry(m_containment->screen());
+        QRect screenGeom = m_desktop->screenGeometry(m_containment->screen());
 
         //only move when the mouse cursor is out of the controller to avoid an endless reposition cycle
         if (geometry().contains(me->screenPos())) {
@@ -166,7 +166,7 @@ bool NetPanelController::eventFilter(QObject *watched, QEvent *event)
 
         if (!screenGeom.contains(me->screenPos())) {
             //move panel to new screen if dragged there
-            int targetScreen = Kephal::ScreenUtils::screenId(me->screenPos());
+            int targetScreen = m_desktop->screenNumber(me->screenPos());
             //kDebug() << "Moving panel from screen" << containment()->screen() << "to screen" << targetScreen;
             m_containment->setScreen(targetScreen);
             return false;

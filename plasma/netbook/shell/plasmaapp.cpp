@@ -24,6 +24,7 @@
 
 #include <QApplication>
 #include <QPixmapCache>
+#include <QDesktopWidget>
 #include <QTimer>
 #include <QtDBus/QtDBus>
 
@@ -35,8 +36,6 @@
 #include <KAction>
 
 #include <ksmserver_interface.h>
-
-#include <kephal/screens.h>
 
 #include <Plasma/Containment>
 #include <Plasma/Dialog>
@@ -210,7 +209,8 @@ public:
     ShadowWindow(NetView *panel)
        : QWidget(0),
          m_panel(panel),
-         m_valid(false)
+         m_valid(false),
+         m_desktop(new QDesktopWidget())
     {
         setAttribute(Qt::WA_TranslucentBackground);
         setAttribute(Qt::WA_NoSystemBackground, false);
@@ -247,7 +247,7 @@ public:
 
     void adjustMargins(const QRect &geo)
     {
-        QRect screenRect = Kephal::ScreenUtils::screenGeometry(m_panel->screen());
+        QRect screenRect = m_desktop->screenGeometry(m_panel->screen());
 
         Plasma::FrameSvg::EnabledBorders enabledBorders = Plasma::FrameSvg::AllBorders;
 
@@ -305,6 +305,7 @@ private:
     Plasma::FrameSvg *m_shadow;
     NetView *m_panel;
     bool m_valid;
+    QDesktopWidget* m_desktop;
 };
 
 PlasmaApp::PlasmaApp()
@@ -320,7 +321,8 @@ PlasmaApp::PlasmaApp()
       m_autoHideControlBar(true),
       m_unHideTimer(0),
       m_shadowWindow(0),
-      m_startupSuspendWaitCount(0)
+      m_startupSuspendWaitCount(0),
+      m_desktop(new QDesktopWidget())
 {
     PlasmaApp::suspendStartup(true);
     KGlobal::locale()->insertCatalog("libplasma");
@@ -364,7 +366,7 @@ PlasmaApp::PlasmaApp()
     int width = 400;
     int height = 200;
     if (isDesktop) {
-        QRect rect = Kephal::ScreenUtils::screenGeometry(m_mainView->screen());
+        QRect rect = m_desktop->screenGeometry(m_mainView->screen());
         width = rect.width();
         height = rect.height();
     } else {
@@ -438,7 +440,7 @@ void PlasmaApp::positionPanel()
         return;
     }
 
-    QRect screenRect = Kephal::ScreenUtils::screenGeometry(m_controlBar->screen());
+    QRect screenRect = m_desktop->screenGeometry(m_controlBar->screen());
     if (!m_isDesktop) {
         screenRect = m_mainView->geometry();
     }
@@ -549,11 +551,9 @@ bool PlasmaApp::isDesktop() const
     return m_isDesktop;
 }
 
-void PlasmaApp::adjustSize(Kephal::Screen *screen)
+void PlasmaApp::adjustSize()
 {
-    Q_UNUSED(screen)
-
-    QRect rect = Kephal::ScreenUtils::screenGeometry(m_mainView->screen());
+    QRect rect = m_desktop->screenGeometry(m_mainView->screen());
 
     int width = rect.width();
     int height = rect.height();
@@ -612,7 +612,7 @@ void PlasmaApp::reserveStruts()
                                     strut.bottom_width, strut.bottom_start, strut.bottom_end);
 
     //ensure the main view is at the proper position too
-    QRect screenRect = Kephal::ScreenUtils::screenGeometry(m_controlBar->screen());
+    QRect screenRect = m_desktop->screenGeometry(m_controlBar->screen());
     m_mainView->move(screenRect.topLeft());
 }
 
@@ -735,9 +735,8 @@ void PlasmaApp::createView(Plasma::Containment *containment)
         if (!m_controlBar) {
             m_controlBar = new NetView(0, NetView::controlBarId(), 0);
 
-            Kephal::Screens *screens = Kephal::Screens::self();
-            connect(screens, SIGNAL(screenResized(Kephal::Screen*,QSize,QSize)),
-                    this, SLOT(adjustSize(Kephal::Screen*)));
+            connect(m_desktop, SIGNAL(resized(int)),
+                    this, SLOT(adjustSize()));
 
             m_controlBar->setAutoFillBackground(false);
             m_controlBar->viewport()->setAutoFillBackground(false);
@@ -797,7 +796,7 @@ void PlasmaApp::controlBarMoved(const NetView *controlBar)
         return;
     }
 
-    QRect screenRect = Kephal::ScreenUtils::screenGeometry(m_controlBar->screen());
+    QRect screenRect = m_desktop->screenGeometry(m_controlBar->screen());
 
     Plasma::Containment *cont = m_controlBar->containment();
 
@@ -972,7 +971,7 @@ void PlasmaApp::configureContainment(Plasma::Containment *containment)
     if (configDialog) {
         configDialog->reloadConfig();
     } else {
-        const QSize resolution = Kephal::ScreenUtils::screenGeometry(m_mainView->screen()).size();
+        const QSize resolution = m_desktop->screenGeometry(m_mainView->screen()).size();
 
 
         KConfigSkeleton *nullManager = new KConfigSkeleton(0);

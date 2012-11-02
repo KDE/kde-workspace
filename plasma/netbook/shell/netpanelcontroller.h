@@ -32,6 +32,7 @@ namespace Plasma
 
 class QGraphicsWidget;
 class QGraphicsLinearLayout;
+class QDesktopWidget;
 
 class NetView;
 
@@ -60,6 +61,7 @@ private:
     Plasma::ToolButton *m_autoHideButton;
     Plasma::ToolButton *m_watched;
     Plasma::Svg *m_iconSvg;
+    QDesktopWidget* m_desktop;
 };
 
 #endif

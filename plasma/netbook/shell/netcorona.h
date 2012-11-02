@@ -24,6 +24,7 @@
 
 #include <Plasma/Corona>
 
+class QDesktopWidget;
 namespace Plasma
 {
     class Applet;
@@ -66,6 +67,7 @@ private:
     Plasma::Applet *loadDefaultApplet(const QString &pluginName, Plasma::Containment *c);
 
     int m_numScreens;
+    QDesktopWidget *m_desktop;
 };
 
 #endif
