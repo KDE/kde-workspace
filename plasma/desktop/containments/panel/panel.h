@@ -26,6 +26,7 @@
 class QAction;
 class QTimer;
 class QGraphicsLinearLayout;
+class QDesktopWidget;
 class Spacer;
 
 namespace Plasma
@@ -95,6 +96,7 @@ private:
     QTimer *m_enableUpdateResizeTimer;
     QTimer *m_updateSizeTimer;
     QGraphicsLinearLayout *m_layout;
+    QDesktopWidget *m_desktop;
     int m_resizedApplets;
 
     friend class Spacer;

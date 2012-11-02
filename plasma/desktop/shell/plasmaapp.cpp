@@ -118,7 +118,8 @@ PlasmaApp::PlasmaApp()
       m_startupSuspendWaitCount(0),
       m_ignoreDashboardClosures(false),
       m_pendingFixedDashboard(false),
-      m_unlockCorona(false)
+      m_unlockCorona(false),
+      m_desktop(qApp->desktop())
 {
     kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "plasma app ctor start" << "(line:" << __LINE__ << ")";
     suspendStartup(true);
@@ -194,12 +195,12 @@ PlasmaApp::PlasmaApp()
             XCloseDisplay(dpy);
         }
 #endif
-        const QSize size = Kephal::ScreenUtils::screenSize(id);
+        const QSize size = m_desktop->screenGeometry(id).size();
         cacheSize += 4 * size.width() * size.height() / 1024;
     } else {
-        const int numScreens = Kephal::ScreenUtils::numScreens();
+        const int numScreens = m_desktop->numScreens();
         for (int i = 0; i < numScreens; i++) {
-            QSize size = Kephal::ScreenUtils::screenSize(i);
+            QSize size = m_desktop->screenGeometry(i).size();
             cacheSize += 4 * size.width() * size.height() / 1024;
         }
     }

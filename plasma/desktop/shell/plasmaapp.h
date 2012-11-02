@@ -33,6 +33,7 @@
 #include <plasma/packagemetadata.h>
 
 class QSignalMapper;
+class QDesktopWidget;
 
 namespace Plasma
 {
@@ -166,6 +167,7 @@ private Q_SLOTS:
 private:
     DesktopCorona *m_corona;
     PanelShadows *m_panelShadows;
+    QDesktopWidget *m_desktop;
 
     QList<PanelView*> m_panels;
     QList<QWeakPointer<Plasma::Containment> > m_panelsWaiting;

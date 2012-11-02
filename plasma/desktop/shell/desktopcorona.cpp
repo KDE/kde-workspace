@@ -26,6 +26,7 @@
 #include <QTimer>
 #include <QMenu>
 #include <QSignalMapper>
+#include <QDesktopWidget>
 
 #include <KAction>
 #include <KDebug>
@@ -64,7 +65,8 @@ DesktopCorona::DesktopCorona(QObject *parent)
       m_addPanelAction(0),
       m_addPanelsMenu(0),
       m_delayedUpdateTimer(new QTimer(this)),
-      m_activityController(new KActivities::Controller(this))
+      m_activityController(new KActivities::Controller(this)),
+      m_desktop(qApp->desktop())
 {
     init();
 }
@@ -263,7 +265,7 @@ int DesktopCorona::numScreens() const
     }
 #endif
 
-    return Kephal::ScreenUtils::numScreens();
+    return m_desktop->numScreens();
 }
 
 QRect DesktopCorona::screenGeometry(int id) const
@@ -280,7 +282,7 @@ QRect DesktopCorona::screenGeometry(int id) const
     }
 #endif
 
-    return Kephal::ScreenUtils::screenGeometry(id);
+    return m_desktop->screenGeometry(id);
 }
 
 QRegion DesktopCorona::availableScreenRegion(int id) const
@@ -298,7 +300,7 @@ QRegion DesktopCorona::availableScreenRegion(int id) const
 #endif
 
     if (id < 0) {
-        id = Kephal::ScreenUtils::primaryScreenId();
+        id = m_desktop->primaryScreen();
     }
 
     QRegion r(screenGeometry(id));
@@ -314,7 +316,7 @@ QRegion DesktopCorona::availableScreenRegion(int id) const
 QRect DesktopCorona::availableScreenRect(int id) const
 {
     if (id < 0) {
-        id = Kephal::ScreenUtils::primaryScreenId();
+        id = m_desktop->primaryScreen();
     }
 
     QRect r(screenGeometry(id));
@@ -365,7 +367,7 @@ int DesktopCorona::screenId(const QPoint &pos) const
     }
 #endif
 
-    return Kephal::ScreenUtils::screenId(pos);
+    return m_desktop->screenNumber(pos);
 }
 
 void DesktopCorona::processUpdateScripts()
@@ -527,7 +529,7 @@ void DesktopCorona::addPanel(const QString &plugin)
     panel->showConfigurationInterface();
 
     //Fall back to the cursor position since we don't know what is the originating containment
-    const int screen = Kephal::ScreenUtils::screenId(QCursor::pos());
+    const int screen = m_desktop->screenNumber(QCursor::pos());
 
     panel->setScreen(screen);
 

@@ -26,6 +26,7 @@
 #include <QGraphicsLinearLayout>
 #include <QGraphicsLayout>
 #include <QGraphicsSceneDragDropEvent>
+#include <QDesktopWidget>
 #include <QTimer>
 #include <QPainter>
 
@@ -40,8 +41,6 @@
 #include <Plasma/View>
 #include <Plasma/PaintUtils>
 #include <Plasma/WindowEffects>
-
-#include <kephal/screens.h>
 
 using namespace Plasma;
 
@@ -90,14 +89,15 @@ protected:
 Panel::Panel(QObject *parent, const QVariantList &args)
     : Containment(parent, args),
       m_configureAction(0),
-      m_currentSize(QSize(Kephal::ScreenUtils::screenSize(screen()).width(), 35)),
+      m_currentSize(QSize(m_desktop->screenGeometry(screen()).size().width(), 35)),
       m_maskDirty(true),
       m_canResize(true),
       m_spacerIndex(-1),
       m_spacer(0),
       m_lastSpace(0),
       m_layout(0),
-      m_resizedApplets(0)
+      m_resizedApplets(0),
+      m_desktop(qApp->desktop())
 {
     setContainmentType(Containment::PanelContainment);
     setDrawWallpaper(false);
@@ -391,7 +391,7 @@ void Panel::updateBorders(const QRect &geom, bool inPaintEvent)
     if (s < 0) {
         // do nothing in this case, we want all the borders
     } else if (loc == BottomEdge || loc == TopEdge) {
-        QRect r = Kephal::ScreenUtils::screenGeometry(s);
+        QRect r = m_desktop->screenGeometry(s);
 
         if (loc == BottomEdge) {
             enabledBorders ^= FrameSvg::BottomBorder;
@@ -412,7 +412,7 @@ void Panel::updateBorders(const QRect &geom, bool inPaintEvent)
 
         //kDebug() << "top/bottom: Width:" << width << ", height:" << height;
     } else if (loc == LeftEdge || loc == RightEdge) {
-        QRect r = Kephal::ScreenUtils::screenGeometry(s);
+        QRect r = m_desktop->screenGeometry(s);
 
         if (loc == RightEdge) {
             enabledBorders ^= FrameSvg::RightBorder;
@@ -499,7 +499,7 @@ void Panel::constraintsEvent(Plasma::Constraints constraints)
     if (constraints & Plasma::LocationConstraint || constraints & Plasma::SizeConstraint) {
         m_maskDirty = true;
         m_currentSize = geometry().size().toSize();
-        QRectF screenRect = screen() >= 0 ? Kephal::ScreenUtils::screenGeometry(screen()) :
+        QRectF screenRect = screen() >= 0 ? m_desktop->screenGeometry(screen()) :
                                             geometry();
 
         if ((formFactor() == Horizontal && m_currentSize.width() >= screenRect.width()) ||

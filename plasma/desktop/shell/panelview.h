@@ -40,6 +40,7 @@
 class QWidget;
 class QTimeLine;
 class QTimer;
+class QDesktopWidget;
 
 class GlowBar;
 
@@ -262,6 +263,7 @@ private:
     QTimer *m_rehideAfterAutounhideTimer;
     QTimeLine *m_timeLine;
     QGraphicsWidget *m_spacer;
+    QDesktopWidget *m_desktop;
     int m_spacerIndex;
 
     int m_offset;

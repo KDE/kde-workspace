@@ -122,6 +122,7 @@ private:
     QTimer *m_delayedUpdateTimer;
     KActivities::Controller *m_activityController;
     QHash<QString, Activity*> m_activities;
+    QDesktopWidget *m_desktop;
 };
 
 #endif
