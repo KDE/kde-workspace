@@ -51,16 +51,18 @@ QtExtras.MouseEventListener {
     property int iconHeight: iconWidth
 
     //property alias tb: plasmoid.toolBox
+    property QtObject toolBox: plasmoid.toolBox
 
 
     onIconHeightChanged: updateGridSize()
     onPressed: {
-        if ((mouse.x > toolBox.x && mouse.x < (toolBox.x + toolBox.width)) &&
-            (mouse.y > toolBox.y && mouse.y < (toolBox.y + toolBox.height))) {
-            return;
-        }
-        if (toolBox.proxy.showing) {
-            toolBox.proxy.showing = false;
+//         if ((mouse.x > toolBox.x && mouse.x < (toolBox.x + toolBox.width)) &&
+//             (mouse.y > toolBox.y && mouse.y < (toolBox.y + toolBox.height))) {
+//             return;
+//         }
+        //var tb = plasmoid.toolBox;
+        if (toolBox.showing) {
+            toolBox.showing = false;
         }
         print("MEL clicked");
     }
@@ -346,7 +348,7 @@ QtExtras.MouseEventListener {
             }
         }
     }
-
+/*
     ToolBox {
         id: toolBox
         anchors { top: parent.top; right: parent.right; }
@@ -397,4 +399,5 @@ QtExtras.MouseEventListener {
         toolBoxButton.y = ty;
 
     }
+    */
 }
