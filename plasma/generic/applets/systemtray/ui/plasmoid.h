@@ -30,12 +30,11 @@
 #include <QtCore/QObject>
 
 #include <KDE/Plasma/Plasma>
+#include <KDE/Plasma/Applet>
 
 
 namespace SystemTray
 {
-
-class Applet;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class Plasmoid
@@ -50,7 +49,7 @@ class Plasmoid: public QObject
     Q_PROPERTY(FormFactor formFactor READ formFactor NOTIFY changedFormFactor)
     Q_PROPERTY(Location location READ location NOTIFY changedLocation)
     Q_PROPERTY(unsigned int id READ id CONSTANT)
-    Q_PROPERTY(QVariant applet READ applet CONSTANT) ///< return pointer to applet
+    Q_PROPERTY(QObject* applet READ applet CONSTANT) ///< return pointer to applet
 public:
     // Form factor
     enum FormFactor
@@ -76,7 +75,7 @@ public:
     static FormFactor ToFormFactor(Plasma::FormFactor form) { return static_cast<FormFactor>(form); }
     static Location ToLocation(Plasma::Location loc) { return static_cast<Location>(loc); }
 
-    explicit Plasmoid(QObject *parent = 0);
+    explicit Plasmoid(Plasma::Applet *parent);
     virtual ~Plasmoid();
 
     FormFactor formFactor() const;
@@ -84,7 +83,7 @@ public:
     Location   location() const;
     void setLocation(Location loc);
     unsigned int id() const;
-    QVariant applet() const;
+    QObject* applet() const { return m_applet; }
 
     Q_INVOKABLE QVariant createShortcutAction(QString action_id) const;
     Q_INVOKABLE void updateShortcutAction(QVariant action, QString shortcut) const;
@@ -100,7 +99,7 @@ signals:
     void activated(); ///< If a plasmoid has been activated
 
 private:
-    SystemTray::Applet *parentApplet() const;
+    Plasma::Applet* m_applet;
     Plasmoid::FormFactor m_form;
     Plasmoid::Location   m_location;
 };

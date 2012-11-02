@@ -26,9 +26,12 @@
 #define __SYSTEMTRAY__WIDGETITEM_H
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Includes
-#include <QtGui/QGraphicsWidget>
+// Includess
+#include "../core/task.h"
+
 #include <QtDeclarative/QDeclarativeItem>
+
+#include <KDE/Plasma/Applet>
 
 namespace SystemTray
 {
@@ -41,21 +44,32 @@ namespace SystemTray
 class WidgetItem: public QDeclarativeItem
 {
     Q_OBJECT
-    Q_PROPERTY(QObject *widget READ widget WRITE setWidget NOTIFY changedWidget) ///< widget to embed
+
+    Q_PROPERTY(QObject* applet READ applet WRITE setApplet) ///< host applet
+    Q_PROPERTY(QObject* task READ task WRITE setTask) ///< task
 public:
     explicit WidgetItem(QDeclarativeItem *parent = 0);
     virtual ~WidgetItem();
 
 public:
-    QObject *widget() const;
-    void setWidget(QObject *obj);
+    QObject *task() const { return m_task.data(); }
+    void setTask(QObject *task);
+
+    /**
+     * @return applet as a host for widget
+     */
+    QObject *applet() const { return m_applet; }
+    void setApplet(QObject *applet);
 
 signals:
     void changedWidget();
 
 private:
+    void bind();
     void unbind();
-    QWeakPointer<QGraphicsWidget> m_widget;
+
+    Plasma::Applet *m_applet;
+    QWeakPointer<Task> m_task;
 };
 
 } //namespace SystemTray

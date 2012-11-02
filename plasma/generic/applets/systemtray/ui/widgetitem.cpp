@@ -26,10 +26,11 @@
 // Includes
 #include "widgetitem.h"
 
+#include "../core/task.h"
+
 #include <QtCore/QWeakPointer>
 #include <QtGui/QGraphicsWidget>
 
-#include <KDE/Plasma/Applet>
 #include <KDE/Plasma/Containment>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,43 +50,49 @@ WidgetItem::~WidgetItem()
     unbind();
 }
 
-
-QObject *WidgetItem::widget() const
+void WidgetItem::setTask(QObject *task)
 {
-    return m_widget.data();
+    Task *t = qobject_cast<Task*>(task);
+    if (m_task.data() == t)
+        return;
+    unbind();
+    m_task = t;
+    bind();
 }
 
-
-void WidgetItem::setWidget(QObject *w)
+void WidgetItem::setApplet(QObject *a)
 {
-    QGraphicsWidget *widget = qobject_cast<QGraphicsWidget*>(w);
-    // check input
-    if (!widget || widget == m_widget.data()) {
+    Plasma::Applet *applet = qobject_cast<Plasma::Applet*>(a);
+    if (m_applet == applet)
         return;
-    }
-
-    // unbind old widget
     unbind();
-
-    // bind new widget
-    m_widget = widget;
-    if (widget) {
-        widget->setParentItem(this);
-        widget->setPos(0, 0);
-        widget->setPreferredSize(width(), width());
-        widget->setMinimumSize(width(), width());
-        widget->setMaximumSize(width(), width());
-        widget->show();
-    }
-    emit changedWidget();
+    m_applet = applet;
+    bind();
 }
 
 void WidgetItem::unbind()
 {
-    QGraphicsWidget *w = m_widget.data();
-    if (w && w->parentItem() == this) {
-        w->hide();
-        w->setParentItem(0);
+    if (m_applet && m_task) {
+        QGraphicsWidget *widget = m_task.data()->widget(m_applet, false);
+        if (widget && widget->parentItem() == this) {
+            widget->hide();
+            widget->setParentItem(0);
+        }
+    }
+}
+
+void WidgetItem::bind()
+{
+    if (m_applet && m_task) {
+        QGraphicsWidget *widget = m_task.data()->widget(m_applet);
+        if (widget) {
+            widget->setParentItem(this);
+            widget->setPos(0, 0);
+            widget->setPreferredSize(width(), width());
+            widget->setMinimumSize(width(), width());
+            widget->setMaximumSize(width(), width());
+            widget->show();
+        }
     }
 }
 

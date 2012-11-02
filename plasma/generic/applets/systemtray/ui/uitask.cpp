@@ -69,15 +69,9 @@ UiTask::~UiTask()
 }
 
 
-QVariant UiTask::task() const
+Task *UiTask::task() const
 {
-    return QVariant::fromValue(static_cast<QObject*>(d->task));
-}
-
-
-QGraphicsWidget *UiTask::widget() const
-{
-    return d->task->widget(d->pool.host(), false);
+    return d->task;
 }
 
 

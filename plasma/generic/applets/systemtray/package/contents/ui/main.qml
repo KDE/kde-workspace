@@ -143,8 +143,9 @@ Item {
 
             property variant ui_task;
 
-            widget: ui_task.widget
-            visible:  ui_task.widget !== null
+            applet: plasmoid.applet
+            task: ui_task.task
+            visible:  ui_task.task !== null
             width: JS.ICONS_SIZE
             height: width
             anchors.centerIn: parent

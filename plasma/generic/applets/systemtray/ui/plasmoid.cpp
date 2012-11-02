@@ -26,8 +26,6 @@
 // Includes
 #include "plasmoid.h"
 
-#include "applet.h"
-
 #include <inttypes.h>
 
 #include <QtGui/QMenu>
@@ -45,8 +43,9 @@ namespace SystemTray
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class Plasmoid
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Plasmoid::Plasmoid(QObject *parent)
+Plasmoid::Plasmoid(Plasma::Applet *parent)
     : QObject(parent),
+      m_applet(parent),
       m_form(Plasmoid::Planar),
       m_location(Plasmoid::Floating)
 {
@@ -77,16 +76,8 @@ void Plasmoid::setLocation(Plasmoid::Location loc)
 
 unsigned int Plasmoid::id() const
 {
-    Applet *applet = parentApplet();
-    return applet ? applet->id() : 0;
+    return m_applet ? m_applet->id() : 0;
 }
-
-
-QVariant Plasmoid::applet() const
-{
-    return QVariant::fromValue<QObject*>(parentApplet());
-}
-
 
 QVariant Plasmoid::createShortcutAction(QString action_id) const
 {
@@ -126,14 +117,13 @@ void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) cons
     QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
     QMenu *menu = qobject_cast<QMenu*>(menu_var.value<QObject*>());
     if (menu) {
-        SystemTray::Applet *applet = parentApplet();
         QPoint pos(x, y);
-        if ( applet ) {
+        if ( m_applet ) {
             menu->adjustSize();
-            if (item && applet->containment() && applet->containment()->corona()) {
-                pos = applet->containment()->corona()->popupPosition(item, menu->size());
+            if (item && m_applet->containment() && m_applet->containment()->corona()) {
+                pos = m_applet->containment()->corona()->popupPosition(item, menu->size());
             } else {
-                pos = applet->popupPosition(menu->size());
+                pos = m_applet->popupPosition(menu->size());
             }
         }
         menu->popup(pos);
@@ -144,12 +134,11 @@ void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) cons
 QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const
 {
     QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
-    SystemTray::Applet *applet = parentApplet();
-    if (applet) {
-        if ( item && applet->containment() && applet->containment()->corona() ) {
-            return applet->containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
+    if (m_applet) {
+        if ( item && m_applet->containment() && m_applet->containment()->corona() ) {
+            return m_applet->containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
         }
-        return applet->popupPosition(size, (Qt::AlignmentFlag)align);
+        return m_applet->popupPosition(size, (Qt::AlignmentFlag)align);
     }
     return QPoint();
 }
@@ -182,11 +171,6 @@ void Plasmoid::setFormFactor(Plasmoid::FormFactor form_factor)
 
     m_form = form_factor;
     emit changedFormFactor();
-}
-
-SystemTray::Applet *Plasmoid::parentApplet() const
-{
-    return qobject_cast<SystemTray::Applet*>(parent());
 }
 
 } // namespace SystemTray
