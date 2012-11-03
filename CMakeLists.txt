@@ -162,6 +162,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 
    if (Q_WS_X11)
       macro_optional_add_subdirectory(kinfocenter)
+      macro_optional_add_subdirectory(ktouchpadenabler)
    endif (Q_WS_X11)
 
    if(NOT WIN32)
