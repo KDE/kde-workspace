@@ -139,6 +139,11 @@ Item {
             when: mainStack.currentTab == leavePage
             source: Qt.resolvedUrl("LeaveView.qml")
         }
+        PlasmaExtras.ConditionalLoader {
+            id: searchPage
+            when: root.state == "Search"
+            source: Qt.resolvedUrl("SearchView.qml")
+        }
     }
 
     Kickoff.FavoritesModel {
@@ -285,19 +290,10 @@ Item {
                 target: tabBar
                 visible: false
             }
+            PropertyChanges {
+                target: mainStack
+                currentTab: searchPage
+            }
         }
     ]
-//     FIXME: not a function...
-//     transitions: [
-//         Transition {
-//             from: "*"
-//             to: "Search"
-//             ScriptAction {script: mainStack.push(Qt.createComponent("SearchView.qml"));}
-//         },
-//         Transition {
-//             from: "Search"
-//             to: "*"
-//             ScriptAction {script: mainStack.pop();}
-//         }
-//     ]
 }
