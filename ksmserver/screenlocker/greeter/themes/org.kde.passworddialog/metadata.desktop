@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Password dialog
+Name[ca]=Diàleg de contrasenya
 Name[de]=Passwort-Dialog
 Name[el]=Διάλογος κωδικού πρόσβασης
 Name[es]=Diálogo de contraseña
@@ -23,6 +24,7 @@ Name[uk]=Вікно для вводу пароля
 Name[x-test]=xxPassword dialogxx
 Name[zh_TW]=密碼對話框
 Comment=Screen locker that provides a password dialog and an interface to switch the current user
+Comment[ca]=Bloqueig de pantalla que proporciona una diàleg de contrasenya i una interfície per commutar l'usuari actual
 Comment[el]=Κλείδωμα οθόνης με διάλογο κωδικού πρόσβασης και μια διεπαφή για την εναλλαγή του τρέχοντος χρήστη
 Comment[es]=Bloqueador de pantalla que proporciona un diálogo de contraseña y una interfaz para cambiar el usuario actual
 Comment[et]=Ekraani lukustaja, mis pakub paroolidialoogi ja liidest aktiivse kasutaja vahetamiseks

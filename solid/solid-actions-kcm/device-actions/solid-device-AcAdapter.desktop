@@ -1,6 +1,7 @@
 [Desktop Action plugged]
 # ctxt: AC adapter plugged in
 Name=Plugged
+Name[ca]=Endollat
 Name[cs]=Připojeno
 Name[el]=Σε σύνδεση
 Name[es]=Enchufado
