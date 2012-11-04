@@ -117,8 +117,9 @@ set(kcm_keyboard_PART_SRCS
   preview/keyboardlayout.cpp
   preview/keyboardpainter.cpp
   preview/keys.cpp
-  preview/keysym.cpp
+  preview/keysymhelper.cpp
   preview/kbpreviewframe.cpp
+  preview/keysym2ucs.cpp
 )
 
 

@@ -16,20 +16,25 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef KEYSYM_H
-#define KEYSYM_H
-#include <QtGui>
-#include <QtCore/QChar>
+#ifndef KEYSYMHELPER_H
+#define KEYSYMHELPER_H
+
 #include <QtCore/QString>
-class KeySym
+#include <QtCore/QMap>
+
+class KeySymHelper
 {
-private:
-    static QString keystr[];
-    static QChar keyuni[];
 public:
-    KeySym();
+    KeySymHelper();
+    
+    QString getKeySymbol(const QString &opton);
+    bool isFailed() const {
+        return nill >= 120;
+    }
+
+private:
+    QMap<QString, QString> keySymbolMap;
     int nill;
-    QString getkeyuni(const QString &opton);
 };
 
-#endif // KEYSYM_H
+#endif // KEYSYMHELPER_H

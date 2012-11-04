@@ -18,11 +18,11 @@
 
 
 #include "keyboardlayout.h"
-#include<QtCore/QList>
-#include"keys.h"
-#include<QtGui/QMessageBox>
-#include<QtCore/QFile>
-#include<QtCore/QDir>
+#include <QtCore/QList>
+#include "keys.h"
+#include <QtGui/QMessageBox>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
 
 #include <QtGui/QX11Info>
 #include <X11/Xlib.h>
@@ -37,7 +37,9 @@
 KeyboardLayout::KeyboardLayout()
 {
 }
-void KeyboardLayout::generateLayout(QString a,const QString& cname){
+
+void KeyboardLayout::generateLayout(QString a,const QString& cname)
+{
     includeSymbol(a,cname);
     int i=a.indexOf("name[Group1]=");
     i+=13;
@@ -90,9 +92,10 @@ void KeyboardLayout::generateLayout(QString a,const QString& cname){
             AB[index-1].setKey(r);
         }
     }
-
 }
-void KeyboardLayout::includeSymbol(QString a,const QString& cname){
+
+void KeyboardLayout::includeSymbol(QString a,const QString& cname)
+{
     int k=a.indexOf("include");
     a=a.mid(k);
     QList<QString>tobeinclude;
@@ -140,8 +143,8 @@ void KeyboardLayout::includeSymbol(QString a,const QString& cname){
     }
 }
 
-QString KeyboardLayout::findSymbolbasedir(){
-
+QString KeyboardLayout::findSymbolbasedir()
+{
     QString symBasedir;
     QString xkbParentDir;
 

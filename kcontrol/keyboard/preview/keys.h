@@ -19,8 +19,10 @@
 
 #ifndef KEYS_H
 #define KEYS_H
+
 #include <QApplication>
 #include <QtCore/QList>
+
 class Keys
 {
 public:

@@ -17,11 +17,11 @@
  */
 
 #include "keyaliases.h"
-#include<QtCore/QString>
-#include<QtCore/QMap>
-#include<QtGui/QMessageBox>
-#include<QtCore/QFile>
-#include<QtCore/QDir>
+#include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtGui/QMessageBox>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
 
 #include <QtGui/QX11Info>
 #include <X11/Xlib.h>
@@ -85,7 +85,8 @@ Aliases::Aliases()
 
 }
 
-QString Aliases::getAlias(const QString& cname, const QString& name){
+QString Aliases::getAlias(const QString& cname, const QString& name)
+{
     QMessageBox q;
     QString a=name;
     if(cname=="ma"){

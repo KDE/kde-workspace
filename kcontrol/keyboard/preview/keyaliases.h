@@ -17,7 +17,8 @@
  */
 #ifndef ALIASES_H
 #define ALIASES_H
-#include<QtCore/QMap>
+
+#include <QtCore/QMap>
 
 class Aliases
 {

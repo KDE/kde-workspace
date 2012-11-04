@@ -18,10 +18,11 @@
 #ifndef KBPREVIEWFRAME_H
 #define KBPREVIEWFRAME_H
 
-#include"keyboardlayout.h"
-#include"keysym.h"
-#include"keyaliases.h"
-#include<QPainter>
+#include "keyboardlayout.h"
+#include "keysymhelper.h"
+#include "keyaliases.h"
+
+#include <QPainter>
 #include <QtGui/QFrame>
 
 class KbPreviewFrame : public QFrame
@@ -35,7 +36,7 @@ private:
 	void paintABRow(QPainter &painter,int &x,int &y);
 	void paintBottomRow(QPainter &painter,int &x,int &y);
 	void paintFnKeys(QPainter &painter,int &x,int &y);
-	KeySym symbol;
+	KeySymHelper symbol;
 	Aliases alias;
 public:
     explicit KbPreviewFrame(QWidget *parent = 0);

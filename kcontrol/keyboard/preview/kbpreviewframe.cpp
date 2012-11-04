@@ -18,7 +18,9 @@
 
 
 #include "kbpreviewframe.h"
-#include <QtGui/QPainter>
+
+#include <QtCore/QFile>
+#include <QtGui/QFont>
 #include <QtGui/QFont>
 
 #include <KApplication>
@@ -32,7 +34,8 @@ KbPreviewFrame::KbPreviewFrame(QWidget *parent) :
      setFrameShadow(QFrame::Sunken);
 }
 
-void KbPreviewFrame::paintTLDE(QPainter &painter,int &x,int &y){
+void KbPreviewFrame::paintTLDE(QPainter &painter,int &x,int &y)
+{
     const int gr1=0,gr2=1,gr3=2,gr4=3,sz=20,kszx=70,kszy=70;
     const int lv1x=15,lvl2x=40,lvly=10;
     const QString lev12color="#d4d4d4",lev34color="#FF3300";
@@ -40,21 +43,21 @@ void KbPreviewFrame::paintTLDE(QPainter &painter,int &x,int &y){
     painter.drawRect(x,y,kszx,kszy);
     for(int j=0;j<kblayout.TLDE.klst.size();j++){
         if(j==gr2)
-            painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getkeyuni(kblayout.TLDE.klst.at(gr2)));
+            painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getKeySymbol(kblayout.TLDE.klst.at(gr2)));
         if(j==gr1)
-            painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.TLDE.klst.at(gr1)));
+            painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.TLDE.klst.at(gr1)));
         painter.setPen(QColor(lev34color));
         if(j==gr3)
-            painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.TLDE.klst.at(gr3)));
+            painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.TLDE.klst.at(gr3)));
         if(j==gr4)
-            painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.TLDE.klst.at(gr4)));
+            painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.TLDE.klst.at(gr4)));
         painter.setPen(QColor(lev12color));
     }
 
 }
 
-void KbPreviewFrame::paintAERow(QPainter &painter,int &x,int &y){
-
+void KbPreviewFrame::paintAERow(QPainter &painter,int &x,int &y)
+{
     const int gr1=0,gr2=1,gr3=2,gr4=3,sz=20,kszx=70,kszy=70;
     const int lv1x=15,lvl2x=40,lvly=10;
     const QString lev12color="#d4d4d4",lev34color="#FF3300";
@@ -66,14 +69,14 @@ void KbPreviewFrame::paintAERow(QPainter &painter,int &x,int &y){
         painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AE[i].klst.size();j++){
             if(j==gr2)
-                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getkeyuni(kblayout.AE[i].klst.at(gr2)));
+                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getKeySymbol(kblayout.AE[i].klst.at(gr2)));
             if(j==gr1)
-                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AE[i].klst.at(gr1)));
+                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AE[i].klst.at(gr1)));
             painter.setPen(QColor(lev34color));
             if(j==gr3)
-                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AE[i].klst.at(gr3)));
+                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AE[i].klst.at(gr3)));
             if(j==gr4)
-                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AE[i].klst.at(gr4)));
+                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AE[i].klst.at(gr4)));
             painter.setPen(QColor(lev12color));
 
         }
@@ -85,11 +88,10 @@ void KbPreviewFrame::paintAERow(QPainter &painter,int &x,int &y){
     painter.drawRect(x,y,bkspszx,kszy);
     painter.drawText(x+bk1x,y+bk1y,i18n("<--"));
     painter.drawText(x+bk1x,y+bk2y,i18n("Backspace"));
-
 }
 
-void KbPreviewFrame::paintADRow(QPainter &painter,int &x,int&y){
-
+void KbPreviewFrame::paintADRow(QPainter &painter,int &x,int&y)
+{
     const int gr1=0,gr2=1,gr3=2,gr4=3,sz=20,kszx=70,kszy=70;
     const int lv1x=15,lvl2x=40,lvly=10;
     const QString lev12color="#d4d4d4",lev34color="#FF3300";
@@ -109,14 +111,14 @@ void KbPreviewFrame::paintADRow(QPainter &painter,int &x,int&y){
         painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AD[i].klst.size();j++){
             if(j==gr2)
-                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getkeyuni(kblayout.AD[i].klst.at(gr2)));
+                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getKeySymbol(kblayout.AD[i].klst.at(gr2)));
             if(j==gr1)
-                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AD[i].klst.at(gr1)));
+                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AD[i].klst.at(gr1)));
             painter.setPen(QColor(lev34color));
             if(j==gr3)
-                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AD[i].klst.at(gr3)));
+                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AD[i].klst.at(gr3)));
             if(j==gr4)
-                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AD[i].klst.at(gr4)));
+                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AD[i].klst.at(gr4)));
             painter.setPen(QColor(lev12color));
         }
         x+=kszx;
@@ -124,20 +126,20 @@ void KbPreviewFrame::paintADRow(QPainter &painter,int &x,int&y){
     painter.drawRect(x,y,kszx,kszy);
     for(int j=0;j<kblayout.BKSL.klst.size();j++){
         if(j==gr2)
-            painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getkeyuni(kblayout.BKSL.klst.at(gr2)));
+            painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getKeySymbol(kblayout.BKSL.klst.at(gr2)));
         if(j==gr1)
-            painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.BKSL.klst.at(gr1)));
+            painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.BKSL.klst.at(gr1)));
         painter.setPen(QColor(lev34color));
         if(j==gr3)
-            painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.BKSL.klst.at(gr3)));
+            painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.BKSL.klst.at(gr3)));
         if(j==gr4)
-            painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.BKSL.klst.at(gr4)));
+            painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.BKSL.klst.at(gr4)));
         painter.setPen(QColor(lev12color));
     }
 }
 
-void KbPreviewFrame::paintACRow(QPainter &painter,int &x,int &y){
-
+void KbPreviewFrame::paintACRow(QPainter &painter,int &x,int &y)
+{
     const int gr1=0,gr2=1,gr3=2,gr4=3,sz=20,kszx=70,kszy=70,capszx=100;
     const int noACk=11;
     const int lv1x=15,lvl2x=40,lvly=10,shifx=10,shify=60,retsz=140,ret1x=50,ret2x=30,ret1y=38,ret2y=43;
@@ -152,14 +154,14 @@ void KbPreviewFrame::paintACRow(QPainter &painter,int &x,int &y){
         painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AC[i].klst.size();j++){
             if(j==gr2)
-                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getkeyuni(kblayout.AC[i].klst.at(gr2)));
+                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getKeySymbol(kblayout.AC[i].klst.at(gr2)));
             if(j==gr1)
-                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AC[i].klst.at(gr1)));
+                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AC[i].klst.at(gr1)));
             painter.setPen(QColor(lev34color));
             if(j==gr3)
-                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AC[i].klst.at(gr3)));
+                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AC[i].klst.at(gr3)));
             if(j==gr4)
-                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AC[i].klst.at(gr4)));
+                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AC[i].klst.at(gr4)));
             painter.setPen(QColor(lev12color));
         }
         x+=kszx;
@@ -172,8 +174,8 @@ void KbPreviewFrame::paintACRow(QPainter &painter,int &x,int &y){
 
 }
 
-void KbPreviewFrame::paintABRow(QPainter &painter,int &x,int &y){
-
+void KbPreviewFrame::paintABRow(QPainter &painter,int &x,int &y)
+{
     const int gr1=0,gr2=1,gr3=2,gr4=3,sz=20,kszx=70,kszy=70;
     const int lv1x=15,lvl2x=40,lvly=10;
     const QString lev12color="#d4d4d4",lev34color="#FF3300";
@@ -183,14 +185,14 @@ void KbPreviewFrame::paintABRow(QPainter &painter,int &x,int &y){
         painter.drawRect(x,y,kszx,kszy);
         for(int j=0;j<kblayout.AB[i].klst.size();j++){
             if(j==gr2)
-                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getkeyuni(kblayout.AB[i].klst.at(gr2)));
+                painter.drawText(x+lv1x,y+lvly,sz,sz,Qt::AlignBottom,symbol.getKeySymbol(kblayout.AB[i].klst.at(gr2)));
             if(j==gr1)
-                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AB[i].klst.at(gr1)));
+                painter.drawText(x+lv1x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AB[i].klst.at(gr1)));
             painter.setPen(QColor(lev34color));
             if(j==gr3)
-                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AB[i].klst.at(gr3)));
+                painter.drawText(x+lvl2x,y+lvl2x,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AB[i].klst.at(gr3)));
             if(j==gr4)
-                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getkeyuni(kblayout.AB[i].klst.at(gr4)));
+                painter.drawText(x+lvl2x,y+lvly,sz,sz,Qt::AlignTop,symbol.getKeySymbol(kblayout.AB[i].klst.at(gr4)));
             painter.setPen(QColor(lev12color));
         }
         x+=kszx;
@@ -199,8 +201,8 @@ void KbPreviewFrame::paintABRow(QPainter &painter,int &x,int &y){
 
 }
 
-void KbPreviewFrame::paintBottomRow(QPainter &painter,int &x,int &y){
-
+void KbPreviewFrame::paintBottomRow(QPainter &painter,int &x,int &y)
+{
     const int txtx=30,txty=35,ctrlsz=100,altsz=100,spsz=400,kszy=70;
     const QString lev12color="#d4d4d4",lev34color="#FF3300";
 
@@ -231,8 +233,8 @@ void KbPreviewFrame::paintBottomRow(QPainter &painter,int &x,int &y){
 
 }
 
-void KbPreviewFrame::paintFnKeys(QPainter &painter,int &x,int &y){
-
+void KbPreviewFrame::paintFnKeys(QPainter &painter,int &x,int &y)
+{
     const int escsz=50,escx=20,escy=55;
     painter.drawRect(x,y,escsz,escsz);
 
@@ -258,8 +260,8 @@ void KbPreviewFrame::paintFnKeys(QPainter &painter,int &x,int &y){
     }
 }
 
-void KbPreviewFrame::paintEvent(QPaintEvent *){
-
+void KbPreviewFrame::paintEvent(QPaintEvent *)
+{
     const QString lev12color="#d4d4d4";
     QPainter painter(this);
 
@@ -316,9 +318,9 @@ void KbPreviewFrame::paintEvent(QPaintEvent *){
 
     paintBottomRow(painter,x,y);
 
-    if(symbol.nill>=120){
+    if( symbol.isFailed() ) {
         painter.drawRect(strtx,strty,endx,endy);
-        const int midx=470,midy=240;
+        const int midx=470, midy=240;
         painter.drawText(midx,midy,i18n("No Preview Found"));
     }
 
@@ -326,8 +328,8 @@ void KbPreviewFrame::paintEvent(QPaintEvent *){
 
 
 
-void KbPreviewFrame::generateKeyboardLayout(const QString& country, const QString& layoutvariant){
-
+void KbPreviewFrame::generateKeyboardLayout(const QString& country, const QString& layoutvariant)
+{
     QString filename=kblayout.findSymbolbasedir();
     filename.append(country);
 

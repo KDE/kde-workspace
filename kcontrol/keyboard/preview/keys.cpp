@@ -18,24 +18,31 @@
 
 
 #include "keys.h"
-#include<QApplication>
-#include<QtCore/QStringList>
+
+#include <QApplication>
+#include <QtCore/QStringList>
+
 Keys::Keys()
 {
 }
-void Keys::setKey(QString a){
+
+void Keys::setKey(QString a)
+{
     int i=a.indexOf("<");
     i++;
     keyname=a.mid(i,4);
     keyname.remove(" ");
     i=a.indexOf("[");
     i++;
+
     QString str=a.mid(i);
     i=str.indexOf("]");
+
     QString st=str.left(i);
     st=st.remove(" ");
     //QStringList klst;
     klst=st.split(",");
+
     for(int k=0;k<klst.size();k++){
         QString du=klst.at(k);
         du.remove(" ");
