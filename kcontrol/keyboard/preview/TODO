@@ -1,0 +1,10 @@
+Important:
+* improve symkey2ucs - it's quite out of date!
+* display tooltip for each key with key description from symbol file
+
+Good to have:
+* read keyboard geometry and show it properly instead of default keyboard
+* use some common parser to parse symbol and geometry descriptions
+
+Cleanup:
+* clean up the code (especially kbpreviewframe.cpp)
