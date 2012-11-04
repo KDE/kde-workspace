@@ -156,7 +156,6 @@ void AddLayoutDialog::accept()
 
 void AddLayoutDialog::preview(){
     QString variant=layoutDialogUi->variantComboBox->itemData(layoutDialogUi->variantComboBox->currentIndex()).toString();
-    QMessageBox q;
     //variant=getvariant(variant);
     /*a.append(selectedLayout);*/
     layoutprev=new KeyboardPainter();
