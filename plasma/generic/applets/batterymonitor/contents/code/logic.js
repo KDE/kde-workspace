@@ -57,28 +57,28 @@ function stringForState(batteryData) {
 
     if (pluggedIn) {
         if (state == "NoCharge") {
-            return i18n("%1% (charged)", percent);
+            return i18n("<b>%1% (charged)</b>", percent);
         } else if (state == "Discharging") {
-            return i18n("%1% (discharging)", percent);
+            return i18n("<b>%1% (discharging)</b>", percent);
         } else {//charging
-            return i18n("%1% (charging)", percent);
+            return i18n("<b>%1% (charging)</b>", percent);
         }
     }
 
-    return i18nc("Battery is not plugged in", "Not present");
+    return i18nc("Battery is not plugged in", "<b>Not present</b>");
 }
 
 function updateTooltip() {
     var text="";
     for (var i=0; i<batteries.count; i++) {
         if (batteries.count == 1) {
-            text += i18n("<b>Battery:</b>");
+            text += i18n("Battery:");
         } else {
             if (text != "") {
                 text += "<br/>";
             }
 
-            text += i18nc("tooltip: placeholder is the battery ID", "<b>Battery %1:</b>", i+1);
+            text += i18nc("tooltip: placeholder is the battery ID", "Battery %1:", i+1);
         }
 
         text += " ";
@@ -89,8 +89,8 @@ function updateTooltip() {
         text += "<br/>";
     }
 
-    text += i18nc("tooltip", "<b>AC Adapter:</b>") + " ";
-    text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "Plugged in") : i18nc("tooltip", "Not plugged in");
+    text += i18nc("tooltip", "AC Adapter:") + " ";
+    text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "<b>Plugged in</b>") : i18nc("tooltip", "<b>Not plugged in</b>");
     batteries.tooltipText = text;
 }
 
