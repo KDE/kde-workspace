@@ -357,9 +357,15 @@ void BackgroundDialog::reloadConfig()
         }
 
         plugins = Plasma::Wallpaper::listWallpaperInfo();
+
+        QMap<QString, KPluginInfo> sortedPlugins;
+        foreach (const KPluginInfo &info, plugins) {
+            sortedPlugins.insert(info.name(), info);
+        }
+
         d->backgroundDialogUi.wallpaperMode->clear();
         int i = 0;
-        foreach (const KPluginInfo& info, plugins) {
+        foreach (const KPluginInfo& info, sortedPlugins) {
             //kDebug() << "doing wallpaper" << info.pluginName() << currentPlugin;
             bool matches = info.pluginName() == currentPlugin;
             const QList<KServiceAction>& modes = info.service()->actions();
