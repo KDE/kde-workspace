@@ -121,10 +121,6 @@ Item {
                 id: arrowSvg
                 imagePath: "toolbar-icons/go"
             }
-            Component.onCompleted: {
-                rootBreadcrumb.modelIndex = model.rootIndex;
-                rootBreadcrumb.view = applicationsView;
-            }
         }
     }
 }

@@ -328,7 +328,7 @@ QVariant ApplicationModel::data(const QModelIndex &index, int role) const
             return node->genericName;
         }
     case Kickoff::SubTitleRole:
-        if (node->genericName.isEmpty() || node->appName == node->genericName) {
+        if (node->appName.isEmpty() || node->appName == node->genericName) {
             return QString(); //return empty string to avoid errors in QML assigning null to Text
         } else {
             return node->appName;

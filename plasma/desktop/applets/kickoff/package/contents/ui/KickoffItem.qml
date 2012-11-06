@@ -62,18 +62,9 @@ Item {
         }
         PlasmaComponents.Label {
             id: titleElement
-            text: {
-                if (root.state == "Applications") {
-                    if (hasModelChildren) {
-                        return display;
-                    } else {
-                        // TODO: games should always show the by name
-                        return root.showAppsByName || display.length == 0 ? subtitle : display;
-                    }
-                } else {
-                    return display;
-                }
-            }
+            // TODO: games should always show the by name...really?
+            text: root.showAppsByName || display.length == 0 ? (subtitle == undefined ? display : subtitle) :
+                                                                display
             height: paintedHeight
             anchors {
                 top: elementIcon.top
@@ -84,17 +75,7 @@ Item {
         }
         PlasmaComponents.Label {
             id: subTitleElement
-            text: {
-                if (root.state == "Applications") {
-                    if (hasModelChildren) {
-                        return "";
-                    } else {
-                        return root.showAppsByName || display.length == 0 ? display : subtitle;
-                    }
-                } else {
-                    return subtitle;
-                }
-            }
+            text: root.showAppsByName || subtitle == undefined ? display : subtitle;
             opacity: 0.6
             font.pointSize: theme.smallestFont.pointSize
             elide: Text.ElideMiddle
