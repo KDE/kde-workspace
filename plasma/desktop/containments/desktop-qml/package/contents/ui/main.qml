@@ -177,7 +177,7 @@ QtExtras.MouseEventListener {
         width: 128
         icon: "object-locked"
         opacity: plasmoid.immutable ? 0.2 : 0
-        anchors.centerIn: parent
+        anchors { left: parent.left; bottom: parent.bottom; margins: 32; }
         Behavior on opacity {
             NumberAnimation {
                 duration: 250

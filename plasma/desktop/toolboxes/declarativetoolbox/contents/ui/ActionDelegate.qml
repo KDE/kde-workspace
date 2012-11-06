@@ -29,10 +29,10 @@ Item {
     property Item view: unlockedList
     property string label: text.replace("&", "")
     property alias actionIcon: iconItem.icon
-
     height: toolBoxDelegate.iconSize + 14
     //width: parent.width
     width: 200
+
 
     Component.onCompleted: print("delegate text: " + label + objectName)
 
