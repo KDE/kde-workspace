@@ -19,7 +19,6 @@
 #include "triggers/gestures.h"
 
 
-#include <kaboutdata.h>
 #include <kdebug.h>
 #include <kglobalaccel.h>
 #include <kpluginfactory.h>
