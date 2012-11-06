@@ -105,6 +105,13 @@ Item {
                 }
             }
 
+            Connections {
+                target: proxy
+                onActionsChanged: {
+                    print("Actions changed .....");
+                }
+
+            }
             ActionDelegate {
                 label: i18n("Lock Screen")
                 actionIcon: "system-lock-screen"

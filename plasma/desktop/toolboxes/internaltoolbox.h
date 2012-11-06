@@ -34,7 +34,7 @@ class KConfigGroup;
 
 
 class IconWidget;
-class InternalToolBoxPrivate;
+class ToolBoxProxyPrivate;
 
 class InternalToolBox : public Plasma::AbstractToolBox
 {

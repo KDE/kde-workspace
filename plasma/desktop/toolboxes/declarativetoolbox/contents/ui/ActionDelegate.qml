@@ -31,7 +31,8 @@ Item {
     property alias actionIcon: iconItem.icon
 
     height: toolBoxDelegate.iconSize + 14
-    width: parent.width
+    //width: parent.width
+    width: 200
 
     Component.onCompleted: print("delegate text: " + label + objectName)
 

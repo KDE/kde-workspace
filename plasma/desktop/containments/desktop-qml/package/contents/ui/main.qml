@@ -162,14 +162,37 @@ QtExtras.MouseEventListener {
         imagePath: "widgets/configuration-icons"
     }
 
-    PlasmaComponents.ScrollBar {
-        flickableItem: mainFlickable
-        orientation: Qt.Vertical
-        anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
+//     PlasmaComponents.ScrollBar {
+//         flickableItem: mainFlickable
+//         orientation: Qt.Vertical
+//         anchors {
+//             right: parent.right
+//             top: parent.top
+//             bottom: parent.bottom
+//         }
+//     }
+    QtExtras.QIconItem {
+        id: lockIcon
+        height: 128
+        width: 128
+        icon: "object-locked"
+        opacity: plasmoid.immutable ? 0.2 : 0
+        anchors.centerIn: parent
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.InOutQuad
+            }
         }
+    }
+
+    Connections {
+        target: plasmoid
+        onImmutableChanged: {
+            print("plasmoid.immutable == " + plasmoid.immutable);
+            lockIcon.opacity = plasmoid.immutable ? 0.3 : 0.0;
+        }
+
     }
 
     Flickable {

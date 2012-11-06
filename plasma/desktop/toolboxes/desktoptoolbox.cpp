@@ -520,7 +520,7 @@ void DesktopToolBox::addTool(QAction *action)
     if (actions().contains(action)) {
         return;
     }
-
+    kDebug() << "Adding actions: " << action->text();
     InternalToolBox::addTool(action);
     Plasma::IconWidget *tool = new Plasma::IconWidget(toolParent());
 
