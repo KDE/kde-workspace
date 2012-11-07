@@ -30,11 +30,7 @@ Item {
     property string label: text.replace("&", "")
     property alias actionIcon: iconItem.icon
     height: toolBoxDelegate.iconSize + 14
-    //width: parent.width
-    width: 200
-
-
-    Component.onCompleted: print("delegate text: " + label + objectName)
+    width: parent ? parent.width : 200
 
     QtExtras.QIconItem {
         id: iconItem
@@ -45,7 +41,7 @@ Item {
     PlasmaComponents.Label {
         id: textLabel
         text:  (label != "") ? label : action.text.replace("&", "") // hack to get rid of keyboard accelerator hints
-        elide: Text.ElideMiddle
+        //elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
     MouseArea {

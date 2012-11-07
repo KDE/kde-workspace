@@ -28,7 +28,7 @@ Item {
     id: toolBoxItem
 
     property QtObject proxy: plasmoid.toolBox
-    property int expandedWidth: 240
+    property int expandedWidth: 320
     property int expandedHeight: 240
 
     width: childrenRect.width
@@ -62,7 +62,6 @@ Item {
                 ani.targetItem = toolBoxItem;
                 ani.start();
             }
-
         }
     }
 
@@ -102,18 +101,21 @@ Item {
                 model: proxy.actions
                 delegate: ActionDelegate {
                     actionIcon: icon
+                    objectName: modelData.objectName
                 }
             }
 
             ActionDelegate {
                 label: i18n("Lock Screen")
                 actionIcon: "system-lock-screen"
+                objectName: "lock screen"
                 onTriggered: lockScreen();
             }
 
             ActionDelegate {
-                label: i18n("Leave...")
+                label: i18n("Leave")
                 actionIcon: "system-shutdown"
+                objectName: "leave"
                 onTriggered: logout();
             }
         }

@@ -189,7 +189,7 @@ QtExtras.MouseEventListener {
     Connections {
         target: plasmoid
         onImmutableChanged: {
-            print("plasmoid.immutable == " + plasmoid.immutable);
+//             print("plasmoid.immutable == " + plasmoid.immutable);
             lockIcon.opacity = plasmoid.immutable ? 0.3 : 0.0;
         }
 

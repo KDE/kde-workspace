@@ -73,7 +73,7 @@ Item {
 
     ToolBoxItem {
         id: toolBoxItem
-        anchors { top: parent.top; right: parent.right; }
+        anchors { top: parent.top; right: parent.right; margins: 16; }
     }
 
     function placeToolBox() {

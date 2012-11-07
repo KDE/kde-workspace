@@ -273,7 +273,7 @@ Item {
 
         anchors.fill: parent
 
-        drag.target: proxy.immutable ? undefined : toolBoxButton
+        drag.target: plasmoid.immutable ? undefined : toolBoxButton
         drag.minimumX: 0
         drag.maximumX: container.width - toolBoxButton.width
         drag.minimumY: 0
@@ -296,6 +296,14 @@ Item {
                 }
             }
         }
+        Connections {
+            target: plasmoid
+            onImmutableChanged: {
+                buttonMouse.drag.target = plasmoid.immutable ? undefined : toolBoxButton                //print("plasmoid.immutable == " + plasmoid.immutable);
+            }
+
+        }
+
     }
     states: [
         State {
