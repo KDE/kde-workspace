@@ -23,10 +23,12 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QPushButton>
 
+#include <KLocale>
+
 
 KeyboardPainter::KeyboardPainter():
     kbframe(new KbPreviewFrame(this)),
-    exitButton(new QPushButton(tr("Close"),this))
+    exitButton(new QPushButton(i18n("Close"),this))
 {
     kbframe->setFixedSize( 1030, 490 );
     exitButton->setFixedSize(120, 30);
