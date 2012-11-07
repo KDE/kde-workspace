@@ -17,7 +17,7 @@
  */
 
 #include "kcm_add_layout_dialog.h"
-
+#include <QApplication>
 #include <klocalizedstring.h>
 
 #include "xkb_rules.h"
@@ -63,9 +63,9 @@ AddLayoutDialog::AddLayoutDialog(const Rules* rules_, Flags* flags_, bool showLa
 	}
 
     languageChanged(0);
-
-	connect(layoutDialogUi->languageComboBox, SIGNAL(activated(int)), this, SLOT(languageChanged(int)));
+    connect(layoutDialogUi->languageComboBox, SIGNAL(activated(int)), this, SLOT(languageChanged(int)));
     connect(layoutDialogUi->layoutComboBox, SIGNAL(activated(int)), this, SLOT(layoutChanged(int)));
+    connect(layoutDialogUi->prevbutton,SIGNAL(clicked()),this,SLOT(preview()));
 }
 
 void AddLayoutDialog::languageChanged(int langIdx)
@@ -143,11 +143,22 @@ void AddLayoutDialog::accept()
 {
 	selectedLayoutUnit.layout = layoutDialogUi->layoutComboBox->itemData(layoutDialogUi->layoutComboBox->currentIndex()).toString();
 	selectedLayoutUnit.variant = layoutDialogUi->variantComboBox->itemData(layoutDialogUi->variantComboBox->currentIndex()).toString();
-	QString label = layoutDialogUi->labelEdit->text();
+    QString label = layoutDialogUi->labelEdit->text();
 	if( label == selectedLayoutUnit.layout ) {
 		label = "";
 	}
 	selectedLayoutUnit.setDisplayName( label );
 	selectedLayoutUnit.setShortcut(layoutDialogUi->kkeysequencewidget->keySequence());
 	QDialog::accept();
+}
+
+
+void AddLayoutDialog::preview(){
+    int index = layoutDialogUi->variantComboBox->currentIndex();
+    QString variant = layoutDialogUi->variantComboBox->itemData(index).toString();
+    KeyboardPainter* layoutPreview = new KeyboardPainter();
+    layoutPreview->generateKeyboardLayout(selectedLayout, variant);
+    layoutPreview->setModal(true);
+    layoutPreview->exec();
+    delete layoutPreview;
 }

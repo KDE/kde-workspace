@@ -23,6 +23,7 @@
 #include <QtGui/QDialog>
 
 #include "keyboard_config.h"
+#include "preview/keyboardpainter.h"
 
 class Rules;
 class Flags;
@@ -36,11 +37,13 @@ public:
 	AddLayoutDialog(const Rules* rules, Flags* flags, bool showLabel, QWidget* parent=NULL);
 
 	LayoutUnit getSelectedLayoutUnit() { return selectedLayoutUnit; }
+	QString getvariant(QString variant);
 	void accept();
 
 public Q_SLOTS:
 	void languageChanged(int langIdx);
 	void layoutChanged(int layoutIdx);
+	void preview();
 
 private:
 	const Rules* rules;

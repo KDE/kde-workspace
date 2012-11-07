@@ -347,7 +347,7 @@ bool XEventNotifier::isGroupSwitchEvent(XEvent* event)
 #define GROUP_CHANGE_MASK \
     ( XkbGroupStateMask | XkbGroupBaseMask | XkbGroupLatchMask | XkbGroupLockMask )
 
-    return xkbEvent->any.xkb_type == XkbStateNotify && xkbEvent->state.changed & GROUP_CHANGE_MASK;
+    return xkbEvent->any.xkb_type == XkbStateNotify && (xkbEvent->state.changed & GROUP_CHANGE_MASK);
 }
 
 bool XEventNotifier::isLayoutSwitchEvent(XEvent* event)

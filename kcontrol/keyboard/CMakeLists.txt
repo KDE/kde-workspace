@@ -98,6 +98,7 @@ install( TARGETS keyboard_layout_widget DESTINATION ${PLUGIN_INSTALL_DIR} )
 
 
 ### kcm keyboard ###
+include_directories("preview")
 
 set(kcm_keyboard_PART_SRCS 
   kcm_keyboard.cpp
@@ -112,6 +113,13 @@ set(kcm_keyboard_PART_SRCS
   iso_codes.cpp
   kcmmisc.cpp
   bindings.cpp
+  preview/keyaliases.cpp
+  preview/keyboardlayout.cpp
+  preview/keyboardpainter.cpp
+  preview/keysymbols.cpp
+  preview/keysymhelper.cpp
+  preview/kbpreviewframe.cpp
+  preview/keysym2ucs.cpp
 )
 
 
