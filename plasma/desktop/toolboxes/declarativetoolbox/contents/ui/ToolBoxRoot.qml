@@ -27,7 +27,7 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 
 // import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
-Item {
+QtExtras.MouseEventListener {
     id: main
     width: 540
     height: 540
@@ -45,6 +45,19 @@ Item {
 
     property int iconWidth: 22
     property int iconHeight: iconWidth
+
+    onPressed: {
+        toolBoxItem.showing = false;
+// //         if ((mouse.x > toolBox.x && mouse.x < (toolBox.x + toolBox.width)) &&
+// //             (mouse.y > toolBox.y && mouse.y < (toolBox.y + toolBox.height))) {
+// //             return;
+// //         }
+//         //var tb = plasmoid.toolBox;
+//         if (toolBox.showing) {
+//             toolBox.showing = false;
+//         }
+        print("MEL clicked");
+    }
 
     PlasmaCore.Svg {
         id: iconsSvg

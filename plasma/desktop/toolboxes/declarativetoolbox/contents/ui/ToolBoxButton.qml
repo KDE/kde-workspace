@@ -281,7 +281,8 @@ Item {
 
         onClicked: {
             print ("click state now: " + toolBoxItem.state);
-            proxy.showing  = toolBoxItem.state != "expanded";
+            toolBoxItem.showing = (toolBoxItem.state != "expanded");
+            //proxy.showing  = toolBoxItem.state != "expanded";
         }
         Connections {
             target: toolBoxButton

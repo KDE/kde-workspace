@@ -28,6 +28,7 @@ Item {
     id: toolBoxItem
 
     property QtObject proxy: plasmoid.toolBox
+    property bool showing: false
     property int expandedWidth: 320
     property int expandedHeight: 240
 
@@ -52,16 +53,14 @@ Item {
         performOperation("requestShutDown");
     }
 
-    Connections {
-        target: proxy
-        onShowingChanged: {
-            var qmlFile = (!proxy.showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
-            var component = Qt.createComponent(qmlFile);
-            if (component.status == Component.Ready) {
-                var ani = component.createObject(toolBoxItem);
-                ani.targetItem = toolBoxItem;
-                ani.start();
-            }
+    onShowingChanged: {
+        print("showing changed to " + showing);
+        var qmlFile = (!showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
+        var component = Qt.createComponent(qmlFile);
+        if (component.status == Component.Ready) {
+            var ani = component.createObject(toolBoxItem);
+            ani.targetItem = toolBoxItem;
+            ani.start();
         }
     }
 
