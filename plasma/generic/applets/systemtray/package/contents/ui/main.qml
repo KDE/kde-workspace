@@ -51,7 +51,9 @@ Item {
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
-                var t = JS.tasks[loc].add(plasmoid.getUniqueId(task), task.category, item)
+                var task_id = plasmoid.getUniqueId(task)
+                JS.allTasks[task_id] = task
+                var t = JS.tasks[loc].add(task_id, task.category, item)
                 models[loc].insert(t.index, {"task": task, "ui_item": item})
             }
         }
@@ -62,6 +64,15 @@ Item {
             var t = JS.tasks[loc].remove(task_id)
             models[loc].remove(t.index)
             t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
+            delete JS.allTasks[task_id]
+        }
+
+        onVisibilityPreferenceChanged: {
+            // move all tasks to their new location
+            for (var task_id in JS.allTasks) {
+                var task = JS.allTasks[task_id]
+                moveTaskToLocation(task, getLocationForTask(task))
+            }
         }
 
         onActivated: arrow_area.togglePopup()
@@ -160,8 +171,9 @@ Item {
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        if (task.status === NeedsAttention || task.visibilityPreference === AlwaysShown) return JS.LOCATION_TRAY
-        if (task.visibilityPreference === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
+        var vis_pref = plasmoid.getTaskVisibilityPreference(task)
+        if (task.status === NeedsAttention || vis_pref === AlwaysShown) return JS.LOCATION_TRAY
+        if (vis_pref === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
             return JS.LOCATION_POPUP
         }
         return JS.LOCATION_TRAY

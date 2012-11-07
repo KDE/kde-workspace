@@ -53,7 +53,6 @@ class Task : public QObject
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
-    Q_PROPERTY(VisibilityPreference visibilityPreference READ visibilityPreference NOTIFY changedVisibilityPreference)
 
 public:
     enum Status {
@@ -72,13 +71,6 @@ public:
         Hardware = 4
     };
     Q_ENUMS(Category)
-
-    enum VisibilityPreference {
-        AutoVisibility = 0,
-        AlwaysHidden,
-        AlwaysShown
-    };
-    Q_ENUMS(VisibilityPreference)
 
     /**
      * Derived classes should provide its type. We assume that number of different types of tasks is
@@ -173,21 +165,6 @@ public:
      * @return the status for this task
      */
     Status status() const;
-
-    /**
-     * Value of visibility setting of task. It means an user's preference in default visibility of
-     * task. He can prefer to show some tasks and to hide other tasks. But this function doesn't
-     * return real visibility of task, for example, task may be visible on panel, but the user
-     * prefer it to be hidden in popup.
-     * @return value of visibility setting of task
-     * @sa enum Visibility
-     */
-    VisibilityPreference visibilityPreference() const;
-
-    /**
-     * @sa visibilityPreference()
-     */
-    void setVisibilityPreference(VisibilityPreference vis);
 
     /**
      * This function must always return type of task (an integer value). This value must always be

@@ -35,8 +35,7 @@ class Task::Private
 public:
     Private()
         : status(Task::UnknownStatus),
-          category(Task::UnknownCategory),
-          visibilityPreference(Task::AutoVisibility)
+          category(Task::UnknownCategory)
     {
     }
 
@@ -44,7 +43,6 @@ public:
     Task::Status status;
     Task::Category category;
     QString name;
-    Task::VisibilityPreference visibilityPreference;
 };
 
 
@@ -180,12 +178,6 @@ Task::Status Task::status() const
     return d->status;
 }
 
-SystemTray::Task::VisibilityPreference Task::visibilityPreference() const
-{
-    return d->visibilityPreference;
-}
-
-
 QString Task::name() const
 {
     return d->name;
@@ -200,13 +192,6 @@ void Task::setName(QString name)
     }
 }
 
-void Task::setVisibilityPreference(SystemTray::Task::VisibilityPreference vis)
-{
-    if (d->visibilityPreference != vis) {
-        d->visibilityPreference = vis;
-        emit changedVisibilityPreference();
-    }
-}
 
 }
 

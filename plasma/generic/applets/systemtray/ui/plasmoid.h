@@ -27,11 +27,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Includes
+#include "applet.h"
+
 #include <QtCore/QObject>
 #include <QtCore/QSet>
-
-#include <KDE/Plasma/Plasma>
-#include <KDE/Plasma/Applet>
 
 
 namespace SystemTray
@@ -47,6 +46,7 @@ class Plasmoid: public QObject
 
     Q_ENUMS(FormFactor)
     Q_ENUMS(Location)
+    Q_ENUMS(VisibilityPreference)
 
     Q_PROPERTY(FormFactor formFactor READ formFactor NOTIFY changedFormFactor)
     Q_PROPERTY(Location location READ location NOTIFY changedLocation)
@@ -74,10 +74,17 @@ public:
         RightEdge   = Plasma::RightEdge
     };
 
+    /// User's preference of visibility of task
+    enum VisibilityPreference {
+        AutoVisibility = 0,
+        AlwaysHidden,
+        AlwaysShown
+    };
+
     static FormFactor ToFormFactor(Plasma::FormFactor form) { return static_cast<FormFactor>(form); }
     static Location ToLocation(Plasma::Location loc) { return static_cast<Location>(loc); }
 
-    explicit Plasmoid(Plasma::Applet *parent);
+    explicit Plasmoid(SystemTray::Applet *parent);
     virtual ~Plasmoid();
 
     FormFactor formFactor() const;
@@ -104,6 +111,8 @@ public:
      */
     bool hasTask(Task *task);
 
+    void updateVisibilityPreference();
+
     Q_INVOKABLE QVariant createShortcutAction(QString action_id) const;
     Q_INVOKABLE void updateShortcutAction(QVariant action, QString shortcut) const;
     Q_INVOKABLE void showMenu(QVariant menu, int x, int y, QVariant item) const;
@@ -111,11 +120,13 @@ public:
     Q_INVOKABLE void destroyShortcutAction(QVariant action) const;
     Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
     Q_INVOKABLE QString getUniqueId(QObject *obj) const;
+    Q_INVOKABLE int getTaskVisibilityPreference(QObject *task) const;
 
 signals:
     void changedFormFactor();
     void changedLocation();
     void activated(); ///< If a plasmoid has been activated
+    void visibilityPreferenceChanged();  ///< If user has changed his preference on visibility of tasks
 
     /**
      * This signal is emmited for each new task
@@ -130,7 +141,7 @@ signals:
     void deletedTask(QObject *task);
 
 private:
-    Plasma::Applet* m_applet;
+    SystemTray::Applet* m_applet;
     Plasmoid::FormFactor m_form;
     Plasmoid::Location   m_location;
     QSet<Task*> m_tasks;

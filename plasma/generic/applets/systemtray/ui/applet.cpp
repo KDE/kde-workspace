@@ -208,9 +208,6 @@ void Applet::_onAddedTask(Task *task)
         return;
     }
 
-    // define hide state of task
-    _updateVisibilityPreference(task);
-
     // provide task to qml code
     m_plasmoid->addTask(task);
 
@@ -261,8 +258,6 @@ void Applet::_onChangedTask(Task *task)
         _onAddedTask(task);
         return;
     }
-    // we need update hide state in case of changing of typeId
-    _updateVisibilityPreference(task);
 
     DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
     if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
@@ -364,25 +359,8 @@ void Applet::configChanged()
 
     s_manager->loadApplets(this);
 
-    // change hide state for every tasks in GUI
-    QList<Task*> tasks = s_manager->tasks();
-    for (QList<Task*>::const_iterator i = tasks.constBegin(), e = tasks.constEnd(); i != e; ++i) {
-        _updateVisibilityPreference(*i);
-    }
-}
-
-
-void Applet::_updateVisibilityPreference(Task *task) const {
-    if (task) {
-        QString task_id = task->typeId();
-        Task::VisibilityPreference vis = Task::AutoVisibility;
-        if (m_hiddenTypes.contains(task_id)) {
-            vis = Task::AlwaysHidden;
-        } else if (m_alwaysShownTypes.contains(task_id)) {
-            vis = Task::AlwaysShown;
-        }
-        task->setVisibilityPreference(vis);
-    }
+    // notify QML code about new user's preferences
+    m_plasmoid->updateVisibilityPreference();
 }
 
 

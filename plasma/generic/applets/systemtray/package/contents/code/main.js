@@ -57,7 +57,8 @@ var CATEGORIES = [
     Hardware
 ]
 
-
+// all available tasks by their id
+var allTasks = {}
 
 // Set of tasks sets, each set for one location (area)
 var tasks = new Array(LOCATIONS_NUMBER)

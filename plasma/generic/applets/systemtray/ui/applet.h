@@ -63,6 +63,8 @@ public:
     void constraintsEvent(Plasma::Constraints constraints);
     Manager *manager() const;
     QSet<Task::Category> shownCategories() const;
+    bool isAlwaysHidden(const QString &type_id) const { return m_hiddenTypes.contains(type_id); }
+    bool isAlwaysShown(const QString &type_id) const { return m_alwaysShownTypes.contains(type_id); }
     bool isFirstRun();
 
 protected:
@@ -87,7 +89,6 @@ private Q_SLOTS:
     void _onWidgetCreationFinished();
 
 private:
-    void _updateVisibilityPreference(Task *task) const;
     QString _getActionName(Task *task) const;
 
 private:

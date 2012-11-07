@@ -45,7 +45,7 @@ namespace SystemTray
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class Plasmoid
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Plasmoid::Plasmoid(Plasma::Applet *parent)
+Plasmoid::Plasmoid(SystemTray::Applet *parent)
     : QObject(parent),
       m_applet(parent),
       m_form(Plasmoid::Planar),
@@ -100,6 +100,11 @@ void Plasmoid::removeTask(Task *task)
 bool Plasmoid::hasTask(Task *task)
 {
     return m_tasks.contains(task);
+}
+
+void Plasmoid::updateVisibilityPreference()
+{
+    emit visibilityPreferenceChanged();
 }
 
 QVariant Plasmoid::createShortcutAction(QString action_id) const
@@ -194,6 +199,19 @@ void Plasmoid::setFormFactor(Plasmoid::FormFactor form_factor)
 
     m_form = form_factor;
     emit changedFormFactor();
+}
+
+int Plasmoid::getTaskVisibilityPreference(QObject *task) const
+{
+    Task *t = qobject_cast<Task*>(task);
+    if (!t)
+        return AutoVisibility;
+    if ( m_applet->isAlwaysHidden(t->typeId()) ) {
+        return AlwaysHidden;
+    } else if ( m_applet->isAlwaysShown(t->typeId()) ) {
+        return AlwaysShown;
+    }
+    return AutoVisibility;
 }
 
 } // namespace SystemTray
