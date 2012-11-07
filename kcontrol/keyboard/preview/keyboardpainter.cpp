@@ -17,7 +17,7 @@
  */
 
 #include "keyboardpainter.h"
-#include "ui_KeyboardPainter.h"
+#include "ui_keyboardpainter.h"
 
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
