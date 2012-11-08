@@ -42,7 +42,7 @@ Item {
     ]
 
     Connections {
-        target: plasmoid
+        target: plasmoid.applet
 
         onNewTask: {
             // create declarative item
@@ -66,10 +66,6 @@ Item {
             t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
             delete JS.allTasks[task_id]
         }
-    }
-
-    Connections {
-        target: plasmoid.applet
 
         onVisibilityPreferenceChanged: {
             // move all tasks to their new location

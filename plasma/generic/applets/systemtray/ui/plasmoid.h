@@ -51,23 +51,6 @@ public:
     virtual ~Plasmoid();
     QObject* applet() const { return m_applet; }
 
-    /**
-     * Adds task to QML code
-     * @param task a new task
-     */
-    void addTask(Task *task);
-
-    /**
-     * Removes old task from QML code
-     * @param task a task to be removed
-     */
-    void removeTask(Task *task);
-
-    /**
-     * @return true if task is added to QML code
-     */
-    bool hasTask(Task *task);
-
     Q_INVOKABLE QVariant createShortcutAction(QString action_id) const;
     Q_INVOKABLE void updateShortcutAction(QVariant action, QString shortcut) const;
     Q_INVOKABLE void showMenu(QVariant menu, int x, int y, QVariant item) const;
@@ -76,22 +59,8 @@ public:
     Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
     Q_INVOKABLE QString getUniqueId(QObject *obj) const;
 
-signals:
-    /**
-     * This signal is emmited for each new task
-     * @param task a new task
-     */
-    void newTask(QObject *task);
-
-    /**
-     * This signal is emmited before task is deleted
-     * @param task a task that is being deleted
-     */
-    void deletedTask(QObject *task);
-
 private:
     SystemTray::Applet* m_applet;
-    QSet<Task*> m_tasks;
 };
 
 } // namespace SystemTray

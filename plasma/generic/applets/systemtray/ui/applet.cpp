@@ -209,7 +209,7 @@ void Applet::_onAddedTask(Task *task)
     }
 
     // provide task to qml code
-    m_plasmoid->addTask(task);
+    emit newTask(task);
 
     DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
     if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
@@ -254,11 +254,6 @@ void Applet::_onAddedTask(Task *task)
 
 void Applet::_onChangedTask(Task *task)
 {
-    if (!m_plasmoid->hasTask(task)) {
-        _onAddedTask(task);
-        return;
-    }
-
     DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
     if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
         // try to set shortcut
@@ -303,7 +298,7 @@ void Applet::_onChangedTask(Task *task)
 void Applet::_onRemovedTask(Task *task)
 {
     //remove task from QML code
-    m_plasmoid->removeTask(task);
+    emit deletedTask(task);
 }
 
 

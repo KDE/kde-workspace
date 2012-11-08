@@ -56,28 +56,6 @@ Plasmoid::~Plasmoid()
 {
 }
 
-
-void Plasmoid::addTask(Task *task)
-{
-    if (task && !m_tasks.contains(task)) {
-        m_tasks.insert(task);
-        emit newTask(task);
-    }
-}
-
-void Plasmoid::removeTask(Task *task)
-{
-    if (task && m_tasks.contains(task)) {
-        emit deletedTask(task);
-        m_tasks.remove(task);
-    }
-}
-
-bool Plasmoid::hasTask(Task *task)
-{
-    return m_tasks.contains(task);
-}
-
 QVariant Plasmoid::createShortcutAction(QString action_id) const
 {
     KAction *action = new KAction(parent());

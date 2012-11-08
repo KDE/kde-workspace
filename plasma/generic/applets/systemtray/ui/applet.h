@@ -118,6 +118,18 @@ signals:
     void locationChanged();
     void visibilityPreferenceChanged();  ///< If user has changed his preference on visibility of tasks
 
+    /**
+     * This signal is emmited for each new task
+     * @param task a new task
+     */
+    void newTask(QObject *task);
+
+    /**
+     * This signal is emmited before task is deleted
+     * @param task a task that is being deleted
+     */
+    void deletedTask(QObject *task);
+
 private Q_SLOTS:
     void configAccepted();
     void unlockContainment();
