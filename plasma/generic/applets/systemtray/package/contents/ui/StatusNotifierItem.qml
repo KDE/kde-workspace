@@ -97,7 +97,7 @@ Item {
     // Widget for icon =================================================================================================
     PlasmaWidgets.IconWidget {
         id: icon_widget
-        action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.id) : null
+        action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.applet.id) : null
         anchors.fill: parent
         maximumIconSize: Qt.size(parent.width, parent.height)
         visible: false

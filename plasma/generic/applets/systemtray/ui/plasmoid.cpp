@@ -57,11 +57,6 @@ Plasmoid::~Plasmoid()
 }
 
 
-unsigned int Plasmoid::id() const
-{
-    return m_applet ? m_applet->id() : 0;
-}
-
 void Plasmoid::addTask(Task *task)
 {
     if (task && !m_tasks.contains(task)) {

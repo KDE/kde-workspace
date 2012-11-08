@@ -46,7 +46,6 @@ class Plasmoid: public QObject
 
     Q_ENUMS(VisibilityPreference)
 
-    Q_PROPERTY(unsigned int id READ id CONSTANT)
     Q_PROPERTY(QObject* applet READ applet CONSTANT) ///< return pointer to applet
 public:
     /// User's preference of visibility of task
@@ -59,7 +58,6 @@ public:
 
     explicit Plasmoid(SystemTray::Applet *parent);
     virtual ~Plasmoid();
-    unsigned int id() const;
     QObject* applet() const { return m_applet; }
 
     /**
