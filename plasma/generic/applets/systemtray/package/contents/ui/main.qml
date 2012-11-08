@@ -67,6 +67,12 @@ Item {
             delete JS.allTasks[task_id]
         }
 
+        onActivated: arrow_area.togglePopup()
+    }
+
+    Connections {
+        target: plasmoid.applet
+
         onVisibilityPreferenceChanged: {
             // move all tasks to their new location
             for (var task_id in JS.allTasks) {
@@ -74,8 +80,6 @@ Item {
                 moveTaskToLocation(task, getLocationForTask(task))
             }
         }
-
-        onActivated: arrow_area.togglePopup()
     }
 
 
@@ -171,7 +175,7 @@ Item {
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        var vis_pref = plasmoid.getTaskVisibilityPreference(task)
+        var vis_pref = plasmoid.applet.getVisibilityPreference(task)
         if (task.status === NeedsAttention || vis_pref === AlwaysShown) return JS.LOCATION_TRAY
         if (vis_pref === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
             return JS.LOCATION_POPUP

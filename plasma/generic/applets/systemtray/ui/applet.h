@@ -56,6 +56,7 @@ class Applet : public Plasma::Applet
 
     Q_ENUMS(FormFactor)
     Q_ENUMS(Location)
+    Q_ENUMS(VisibilityPreference)
 
     Q_PROPERTY(bool firstRun READ isFirstRun)
 
@@ -85,6 +86,13 @@ public:
         RightEdge   = Plasma::RightEdge
     };
 
+    /// User's preference of visibility of task
+    enum VisibilityPreference {
+        AutoVisibility = 0,
+        AlwaysHidden,
+        AlwaysShown
+    };
+
     explicit Applet(QObject *parent, const QVariantList &arguments = QVariantList());
     ~Applet();
 
@@ -92,9 +100,9 @@ public:
     void constraintsEvent(Plasma::Constraints constraints);
     Manager *manager() const;
     QSet<Task::Category> shownCategories() const;
-    bool isAlwaysHidden(const QString &type_id) const { return m_hiddenTypes.contains(type_id); }
-    bool isAlwaysShown(const QString &type_id) const { return m_alwaysShownTypes.contains(type_id); }
     bool isFirstRun();
+
+    Q_INVOKABLE int getVisibilityPreference(QObject *task) const;
 
 protected:
     void createConfigurationInterface(KConfigDialog *parent);
@@ -108,6 +116,7 @@ protected:
 signals:
     void formFactorChanged();
     void locationChanged();
+    void visibilityPreferenceChanged();  ///< If user has changed his preference on visibility of tasks
 
 private Q_SLOTS:
     void configAccepted();

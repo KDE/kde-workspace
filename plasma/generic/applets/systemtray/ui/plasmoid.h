@@ -44,17 +44,8 @@ class Plasmoid: public QObject
 {
     Q_OBJECT
 
-    Q_ENUMS(VisibilityPreference)
-
     Q_PROPERTY(QObject* applet READ applet CONSTANT) ///< return pointer to applet
 public:
-    /// User's preference of visibility of task
-    enum VisibilityPreference {
-        AutoVisibility = 0,
-        AlwaysHidden,
-        AlwaysShown
-    };
-
 
     explicit Plasmoid(SystemTray::Applet *parent);
     virtual ~Plasmoid();
@@ -77,8 +68,6 @@ public:
      */
     bool hasTask(Task *task);
 
-    void updateVisibilityPreference();
-
     Q_INVOKABLE QVariant createShortcutAction(QString action_id) const;
     Q_INVOKABLE void updateShortcutAction(QVariant action, QString shortcut) const;
     Q_INVOKABLE void showMenu(QVariant menu, int x, int y, QVariant item) const;
@@ -86,11 +75,9 @@ public:
     Q_INVOKABLE void destroyShortcutAction(QVariant action) const;
     Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
     Q_INVOKABLE QString getUniqueId(QObject *obj) const;
-    Q_INVOKABLE int getTaskVisibilityPreference(QObject *task) const;
 
 signals:
     void activated(); ///< If a plasmoid has been activated
-    void visibilityPreferenceChanged();  ///< If user has changed his preference on visibility of tasks
 
     /**
      * This signal is emmited for each new task

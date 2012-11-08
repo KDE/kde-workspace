@@ -361,7 +361,7 @@ void Applet::configChanged()
     s_manager->loadApplets(this);
 
     // notify QML code about new user's preferences
-    m_plasmoid->updateVisibilityPreference();
+    emit visibilityPreferenceChanged();
 }
 
 
@@ -747,6 +747,21 @@ void Applet::checkDefaultApplets()
 
     config().writeEntry("DefaultAppletsAdded", true);
 }
+
+
+int Applet::getVisibilityPreference(QObject *task) const
+{
+    Task *t = qobject_cast<Task*>(task);
+    if (!t)
+        return AutoVisibility;
+    if ( m_hiddenTypes.contains(t->typeId()) ) {
+        return AlwaysHidden;
+    } else if ( m_alwaysShownTypes.contains(t->typeId()) ) {
+        return AlwaysShown;
+    }
+    return AutoVisibility;
+}
+
 
 }
 

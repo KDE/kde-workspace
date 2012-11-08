@@ -78,11 +78,6 @@ bool Plasmoid::hasTask(Task *task)
     return m_tasks.contains(task);
 }
 
-void Plasmoid::updateVisibilityPreference()
-{
-    emit visibilityPreferenceChanged();
-}
-
 QVariant Plasmoid::createShortcutAction(QString action_id) const
 {
     KAction *action = new KAction(parent());
@@ -160,17 +155,5 @@ QString Plasmoid::getUniqueId(QObject *obj) const
     return QString::number(reinterpret_cast<uintmax_t>(obj));
 }
 
-int Plasmoid::getTaskVisibilityPreference(QObject *task) const
-{
-    Task *t = qobject_cast<Task*>(task);
-    if (!t)
-        return AutoVisibility;
-    if ( m_applet->isAlwaysHidden(t->typeId()) ) {
-        return AlwaysHidden;
-    } else if ( m_applet->isAlwaysShown(t->typeId()) ) {
-        return AlwaysShown;
-    }
-    return AutoVisibility;
-}
 
 } // namespace SystemTray
