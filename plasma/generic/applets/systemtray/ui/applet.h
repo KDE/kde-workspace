@@ -137,7 +137,6 @@ private Q_SLOTS:
     void checkDefaultApplets();
 
     void _onAddedTask(SystemTray::Task*);
-    void _onChangedTask(SystemTray::Task*);
     void _onRemovedTask(SystemTray::Task*);
 
     void _onWidgetCreationFinished();
