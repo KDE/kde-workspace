@@ -44,36 +44,11 @@ class Plasmoid: public QObject
 {
     Q_OBJECT
 
-    Q_ENUMS(FormFactor)
-    Q_ENUMS(Location)
     Q_ENUMS(VisibilityPreference)
 
-    Q_PROPERTY(FormFactor formFactor READ formFactor NOTIFY changedFormFactor)
-    Q_PROPERTY(Location location READ location NOTIFY changedLocation)
     Q_PROPERTY(unsigned int id READ id CONSTANT)
     Q_PROPERTY(QObject* applet READ applet CONSTANT) ///< return pointer to applet
 public:
-    // Form factor
-    enum FormFactor
-    {
-        Planar       = Plasma::Planar,
-        MediaCenter  = Plasma::MediaCenter,
-        Horizontal   = Plasma::Horizontal,
-        Vertical     = Plasma::Vertical
-    };
-
-    // Location
-    enum Location
-    {
-        Floating    = Plasma::Floating,
-        Desktop     = Plasma::Desktop,
-        FullScreen  = Plasma::FullScreen,
-        TopEdge     = Plasma::TopEdge,
-        BottomEdge  = Plasma::BottomEdge,
-        LeftEdge    = Plasma::LeftEdge,
-        RightEdge   = Plasma::RightEdge
-    };
-
     /// User's preference of visibility of task
     enum VisibilityPreference {
         AutoVisibility = 0,
@@ -81,16 +56,9 @@ public:
         AlwaysShown
     };
 
-    static FormFactor ToFormFactor(Plasma::FormFactor form) { return static_cast<FormFactor>(form); }
-    static Location ToLocation(Plasma::Location loc) { return static_cast<Location>(loc); }
 
     explicit Plasmoid(SystemTray::Applet *parent);
     virtual ~Plasmoid();
-
-    FormFactor formFactor() const;
-    void setFormFactor(FormFactor form_factor);
-    Location   location() const;
-    void setLocation(Location loc);
     unsigned int id() const;
     QObject* applet() const { return m_applet; }
 
@@ -123,8 +91,6 @@ public:
     Q_INVOKABLE int getTaskVisibilityPreference(QObject *task) const;
 
 signals:
-    void changedFormFactor();
-    void changedLocation();
     void activated(); ///< If a plasmoid has been activated
     void visibilityPreferenceChanged();  ///< If user has changed his preference on visibility of tasks
 
@@ -142,8 +108,6 @@ signals:
 
 private:
     SystemTray::Applet* m_applet;
-    Plasmoid::FormFactor m_form;
-    Plasmoid::Location   m_location;
     QSet<Task*> m_tasks;
 };
 

@@ -62,7 +62,7 @@ Item {
         id: dialog
         visible: false
         mainItem: content
-        location: plasmoid.location
+        location: plasmoid.applet.location
 
         onActiveWindowChanged: dialog.visible = activeWindow  // hide window if it deactivates
 

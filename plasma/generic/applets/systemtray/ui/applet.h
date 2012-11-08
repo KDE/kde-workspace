@@ -53,9 +53,38 @@ class UiTask;
 class Applet : public Plasma::Applet
 {
     Q_OBJECT
+
+    Q_ENUMS(FormFactor)
+    Q_ENUMS(Location)
+
     Q_PROPERTY(bool firstRun READ isFirstRun)
 
+    // TODO: remove these properties in the future (they will be supported in Plasma::Applet)
+    Q_PROPERTY(int formFactor READ formFactor NOTIFY formFactorChanged)
+    Q_PROPERTY(int location READ location NOTIFY locationChanged)
+
 public:
+    // Form factor
+    enum FormFactor
+    {
+        Planar       = Plasma::Planar,
+        MediaCenter  = Plasma::MediaCenter,
+        Horizontal   = Plasma::Horizontal,
+        Vertical     = Plasma::Vertical
+    };
+
+    // Location
+    enum Location
+    {
+        Floating    = Plasma::Floating,
+        Desktop     = Plasma::Desktop,
+        FullScreen  = Plasma::FullScreen,
+        TopEdge     = Plasma::TopEdge,
+        BottomEdge  = Plasma::BottomEdge,
+        LeftEdge    = Plasma::LeftEdge,
+        RightEdge   = Plasma::RightEdge
+    };
+
     explicit Applet(QObject *parent, const QVariantList &arguments = QVariantList());
     ~Applet();
 
@@ -75,6 +104,10 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event); }
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
+
+signals:
+    void formFactorChanged();
+    void locationChanged();
 
 private Q_SLOTS:
     void configAccepted();

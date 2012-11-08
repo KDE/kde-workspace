@@ -207,7 +207,7 @@ Item {
                 target: arrow_area
                 // it's strange but if width of arrow area is set to 0 then this may cause crashing of plasma during resising of panel (somewhere in QtDeclarative)
                 width: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 1
-                state: plasmoid.location === TopEdge ? "TOP_EDGE" : "BOTTOM_EDGE"
+                state: plasmoid.applet.location === TopEdge ? "TOP_EDGE" : "BOTTOM_EDGE"
             }
             PropertyChanges {
                 target: popup_area
@@ -218,7 +218,7 @@ Item {
         State {
             name: "HORZ"
             extend: "_HORZ"
-            when: (plasmoid.formFactor === Horizontal)
+            when: (plasmoid.applet.formFactor === Horizontal)
 
             AnchorChanges {
                 target: notifications_area
@@ -252,7 +252,7 @@ Item {
 
         State {
             name: "VERT"
-            when: (plasmoid.formFactor === Vertical)
+            when: (plasmoid.applet.formFactor === Vertical)
 
             AnchorChanges {
                 target: notifications_area
@@ -279,7 +279,7 @@ Item {
             PropertyChanges {
                 target: arrow_area
                 height: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 1
-                state: plasmoid.location === LeftEdge ? "LEFT_EDGE" : "RIGHT_EDGE"
+                state: plasmoid.applet.location === LeftEdge ? "LEFT_EDGE" : "RIGHT_EDGE"
             }
             PropertyChanges {
                 target: popup_area
@@ -300,7 +300,7 @@ Item {
         State {
             name: "FLOAT"
             extend: "_HORZ"
-            when: (plasmoid.formFactor === Floating)
+            when: (plasmoid.applet.formFactor === Floating)
 
             PropertyChanges {
                 target: notifications_area

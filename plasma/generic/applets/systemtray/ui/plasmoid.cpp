@@ -47,32 +47,13 @@ namespace SystemTray
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Plasmoid::Plasmoid(SystemTray::Applet *parent)
     : QObject(parent),
-      m_applet(parent),
-      m_form(Plasmoid::Planar),
-      m_location(Plasmoid::Floating)
+      m_applet(parent)
 {
 }
 
 
 Plasmoid::~Plasmoid()
 {
-}
-
-
-Plasmoid::Location Plasmoid::location() const
-{
-    return m_location;
-}
-
-
-void Plasmoid::setLocation(Plasmoid::Location loc)
-{
-    if (loc == m_location) {
-        return;
-    }
-
-    m_location = loc;
-    emit changedLocation();
 }
 
 
@@ -182,23 +163,6 @@ void Plasmoid::hideFromTaskbar(qulonglong win_id) const
 QString Plasmoid::getUniqueId(QObject *obj) const
 {
     return QString::number(reinterpret_cast<uintmax_t>(obj));
-}
-
-
-Plasmoid::FormFactor Plasmoid::formFactor() const
-{
-    return m_form;
-}
-
-
-void Plasmoid::setFormFactor(Plasmoid::FormFactor form_factor)
-{
-    if (form_factor == m_form) {
-        return;
-    }
-
-    m_form = form_factor;
-    emit changedFormFactor();
 }
 
 int Plasmoid::getTaskVisibilityPreference(QObject *task) const

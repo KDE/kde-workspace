@@ -171,6 +171,7 @@ void Applet::init()
     // add enumerations manually to global context
     _RegisterEnums(root_context, Plasmoid::staticMetaObject);
     _RegisterEnums(root_context, Task::staticMetaObject);
+    _RegisterEnums(root_context, SystemTray::Applet::staticMetaObject);
 
     // add declarative widget to our applet
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
@@ -373,11 +374,11 @@ QString Applet::_getActionName(Task *task) const {
 void Applet::constraintsEvent(Plasma::Constraints constraints)
 {
     if (constraints & Plasma::FormFactorConstraint) {
-        m_plasmoid->setFormFactor(Plasmoid::ToFormFactor(formFactor()));
+        emit formFactorChanged();
     }
 
     if (constraints & Plasma::LocationConstraint) {
-        m_plasmoid->setLocation(Plasmoid::ToLocation(location()));
+        emit locationChanged();
     }
 
     if (constraints & Plasma::ImmutableConstraint) {
