@@ -101,7 +101,6 @@ Applet::Applet(QObject *parent, const QVariantList &arguments)
 
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setHasConfigurationInterface(true);
-    connect(this, SIGNAL(activate()), m_plasmoid, SIGNAL(activated()));
 }
 
 Applet::~Applet()

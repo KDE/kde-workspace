@@ -66,8 +66,6 @@ Item {
             t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
             delete JS.allTasks[task_id]
         }
-
-        onActivated: arrow_area.togglePopup()
     }
 
     Connections {
@@ -80,6 +78,8 @@ Item {
                 moveTaskToLocation(task, getLocationForTask(task))
             }
         }
+
+        onActivate: arrow_area.togglePopup()
     }
 
 

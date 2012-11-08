@@ -77,8 +77,6 @@ public:
     Q_INVOKABLE QString getUniqueId(QObject *obj) const;
 
 signals:
-    void activated(); ///< If a plasmoid has been activated
-
     /**
      * This signal is emmited for each new task
      * @param task a new task
