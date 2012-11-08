@@ -81,7 +81,7 @@ Item {
             // update shortcut for icon widget
             if (!icon_widget.action)
                 return
-            plasmoid.updateShortcutAction(icon_widget.action, task.shortcut)
+            plasmoid.applet.updateShortcutAction(icon_widget.action, task.shortcut)
             icon_widget.action.triggered.disconnect(__onActivatedShortcut) // disconnect old signals
             icon_widget.action.triggered.connect(__onActivatedShortcut)
         }
@@ -97,7 +97,7 @@ Item {
     // Widget for icon =================================================================================================
     PlasmaWidgets.IconWidget {
         id: icon_widget
-        action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.applet.id) : null
+        action: __has_task ? plasmoid.applet.createShortcutAction(task.objectName + "-" + plasmoid.applet.id) : null
         anchors.fill: parent
         maximumIconSize: Qt.size(parent.width, parent.height)
         visible: false
@@ -112,7 +112,7 @@ Item {
         Component.onDestruction: {
             var act = icon_widget.action
             icon_widget.action = null
-            plasmoid.destroyShortcutAction(act)
+            plasmoid.applet.destroyShortcutAction(act)
         }
     }
 

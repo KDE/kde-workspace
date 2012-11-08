@@ -103,6 +103,9 @@ public:
     bool isFirstRun();
 
     Q_INVOKABLE int getVisibilityPreference(QObject *task) const;
+    Q_INVOKABLE QAction* createShortcutAction(QString action_id) const;
+    Q_INVOKABLE void updateShortcutAction(QAction *action, QString shortcut) const;
+    Q_INVOKABLE void destroyShortcutAction(QAction *action) const;
 
 protected:
     void createConfigurationInterface(KConfigDialog *parent);

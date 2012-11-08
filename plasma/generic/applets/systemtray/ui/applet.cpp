@@ -37,7 +37,7 @@
 #include <QtDeclarative/QDeclarativeComponent>
 
 #include <KDE/KStandardDirs>
-#include <KAction>
+#include <KDE/KAction>
 #include <KConfigDialog>
 #include <KComboBox>
 #include <KCategorizedSortFilterProxyModel>
@@ -710,6 +710,36 @@ int Applet::getVisibilityPreference(QObject *task) const
         return AlwaysShown;
     }
     return AutoVisibility;
+}
+
+QAction *Applet::createShortcutAction(QString action_id) const
+{
+    KAction *action = new KAction(parent());
+    action->setObjectName(action_id);
+    return action;
+}
+
+void Applet::updateShortcutAction(QAction *action, QString shortcut) const
+{
+    KAction *act = qobject_cast<KAction*>(action);
+    if (!act) {
+        return;
+    }
+
+    act->forgetGlobalShortcut();
+    if (!shortcut.isEmpty()) {
+        act->setGlobalShortcut(KShortcut(QKeySequence(shortcut)),
+                               KAction::ShortcutTypes(KAction::ActiveShortcut | KAction::DefaultShortcut),
+                               KAction::NoAutoloading);
+    }
+}
+
+void Applet::destroyShortcutAction(QAction *action) const
+{
+    KAction *act = qobject_cast<KAction*>(action);
+    if (act) {
+        delete act;
+    }
 }
 
 

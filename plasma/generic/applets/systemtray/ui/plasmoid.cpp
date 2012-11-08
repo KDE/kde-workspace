@@ -56,38 +56,6 @@ Plasmoid::~Plasmoid()
 {
 }
 
-QVariant Plasmoid::createShortcutAction(QString action_id) const
-{
-    KAction *action = new KAction(parent());
-    action->setObjectName(action_id);
-    return QVariant::fromValue<QObject*>(action);
-}
-
-
-void Plasmoid::updateShortcutAction(QVariant action, QString shortcut) const
-{
-    KAction *act = qobject_cast<KAction*>(action.value<QObject*>());
-    if (!act) {
-        return;
-    }
-
-    act->forgetGlobalShortcut();
-    if (!shortcut.isEmpty()) {
-        act->setGlobalShortcut(KShortcut(QKeySequence(shortcut)),
-                               KAction::ShortcutTypes(KAction::ActiveShortcut | KAction::DefaultShortcut),
-                               KAction::NoAutoloading);
-    }
-}
-
-
-void Plasmoid::destroyShortcutAction(QVariant action) const
-{
-    KAction *act = qobject_cast<KAction*>(action.value<QObject*>());
-    if (act) {
-        delete act;
-    }
-}
-
 
 void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) const
 {
