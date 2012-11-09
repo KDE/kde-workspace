@@ -205,7 +205,7 @@ Task *TaskManager::findTask(int desktop, const QPoint& p)
 {
     QList<WId> list = KWindowSystem::stackingOrder();
 
-    Task *task;
+    Task *task = 0;
     int currentIndex = -1;
     foreach (Task *t, d->tasksByWId) {
         if (!t->isOnAllDesktops() && t->desktop() != desktop) {
