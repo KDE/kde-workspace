@@ -78,6 +78,8 @@ protected:
     void finishHeader();
 
 private:
+    void cleanup();
+
     QString m_content;
     QString m_contentKey;
     QString m_mimetype;
