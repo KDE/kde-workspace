@@ -23,7 +23,6 @@
 #include "krandrapp.h"
 #include "krandrapp.moc"
 
-#include "randrconfig.h"
 #include "krandrtray.h"
 
 #ifdef HAS_RANDR_1_2
