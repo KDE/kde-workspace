@@ -60,17 +60,7 @@ Plasmoid::~Plasmoid()
 
 
 
-QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const
-{
-    QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
-    if (m_applet) {
-        if ( item && m_applet->containment() && m_applet->containment()->corona() ) {
-            return m_applet->containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
-        }
-        return m_applet->popupPosition(size, (Qt::AlignmentFlag)align);
-    }
-    return QPoint();
-}
+
 
 
 

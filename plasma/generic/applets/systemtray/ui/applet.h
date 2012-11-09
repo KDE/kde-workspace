@@ -109,6 +109,7 @@ public:
     Q_INVOKABLE void showMenu(QObject *menu, int x, int y, QObject *item) const;
     Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
     Q_INVOKABLE QString getUniqueId(QObject *obj) const;
+    Q_INVOKABLE QPoint popupPosition(QObject *item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
 
 protected:
     void createConfigurationInterface(KConfigDialog *parent);

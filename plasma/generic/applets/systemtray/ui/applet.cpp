@@ -756,7 +756,7 @@ void Applet::showMenu(QObject *menu_var, int x, int y, QObject *item_var) const
         if (item && containment() && containment()->corona()) {
             pos = containment()->corona()->popupPosition(item, menu->size());
         } else {
-            pos = popupPosition(menu->size());
+            pos = Plasma::Applet::popupPosition(menu->size());
         }
         menu->popup(pos);
     }
@@ -774,6 +774,14 @@ QString Applet::getUniqueId(QObject *obj) const
     return QString::number(reinterpret_cast<uintmax_t>(obj));
 }
 
+QPoint Applet::popupPosition(QObject *item_var, QSize size, int align) const
+{
+    QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var);
+    if ( item && containment() && containment()->corona() ) {
+        return containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
+    }
+    return Plasma::Applet::popupPosition(size, (Qt::AlignmentFlag)align);
+}
 
 
 }

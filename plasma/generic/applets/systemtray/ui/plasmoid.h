@@ -51,9 +51,6 @@ public:
     virtual ~Plasmoid();
     QObject* applet() const { return m_applet; }
 
-
-    Q_INVOKABLE QPoint popupPosition(QVariant item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
-
 private:
     SystemTray::Applet* m_applet;
 };

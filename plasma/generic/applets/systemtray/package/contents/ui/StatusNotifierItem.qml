@@ -203,7 +203,7 @@ Item {
     }
 
     function __processClick(buttons, item) {
-        var pos = plasmoid.popupPosition(item)
+        var pos = plasmoid.applet.popupPosition(item)
         switch (buttons) {
         case Qt.LeftButton:    task.activate1(pos.x, pos.y); break
         case Qt.RightButton:   task.activateContextMenu(pos.x, pos.y); break
