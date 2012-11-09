@@ -56,8 +56,8 @@ private:
 
     // action name and whether it is enabled or not
     QHash<QString, bool> m_actions;
+    QStringList m_actionOrder;
     QButtonGroup *m_buttons;
-
 };
 
 K_EXPORT_PLASMA_CONTAINMENTACTIONS(contextmenu, ContextMenu)

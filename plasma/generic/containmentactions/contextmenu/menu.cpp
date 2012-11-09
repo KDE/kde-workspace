@@ -67,33 +67,22 @@ void ContextMenu::init(const KConfigGroup &config)
 
     m_actions.clear();
     QHash<QString, bool> actions;
+    QSet<QString> disabled;
 
-    //FIXME what if it's a customcontainment?
-    //FIXME does anyone care that the panel/desktopaction orders are different?
     if (c->containmentType() == Plasma::Containment::PanelContainment ||
         c->containmentType() == Plasma::Containment::CustomPanelContainment) {
-        actions.insert("add widgets", true);
-        actions.insert("_add panel", true);
-        actions.insert("lock widgets", true);
-        actions.insert("_context", true);
-        actions.insert("remove", true);
+        m_actionOrder << "add widgets" << "_add panel" << "lock widgets" << "_context" << "remove";
     } else {
-        //FIXME ugly code!
-        actions.insert("_context", true);
-        actions.insert("_run_command", true);
-        actions.insert("add widgets", true);
-        actions.insert("_add panel", true);
-        actions.insert("manage activities", true);
-        actions.insert("remove", true);
-        actions.insert("lock widgets", true);
-        actions.insert("_sep1", true);
-        actions.insert("_lock_screen", true);
-        actions.insert("_logout", true);
-        actions.insert("_sep2", true);
-        actions.insert("configure", true);
         actions.insert("configure shortcuts", false);
-        actions.insert("_sep3", true);
-        actions.insert("_wallpaper", true);
+        m_actionOrder << "_context" << "_run_command" << "add widgets" << "_add panel"
+                      << "manage activities" << "remove" << "lock widgets" << "_sep1"
+                      <<"_lock_screen" << "_logout" << "_sep2" << "configure"
+                      << "configure shortcuts" << "_sep3" << "_wallpaper";
+        disabled.insert("configure shortcuts");
+    }
+
+    foreach (const QString &name, m_actionOrder) {
+        actions.insert(name, disabled.contains(name));
     }
 
     QHashIterator<QString, bool> it(actions);
@@ -105,8 +94,7 @@ void ContextMenu::init(const KConfigGroup &config)
     // everything below should only happen once, so check for it
     if (c->containmentType() == Plasma::Containment::PanelContainment ||
         c->containmentType() == Plasma::Containment::CustomPanelContainment) {
-        //panel does its own config action atm... FIXME how do I fit it in properly?
-        //can I do something with configureRequested? damn privateslot...
+        //FIXME: panel does its own config action atm...
     } else if (!m_runCommandAction) {
         m_runCommandAction = new QAction(i18n("Run Command..."), this);
         m_runCommandAction->setIcon(KIcon("system-run"));
@@ -147,14 +135,11 @@ QList<QAction*> ContextMenu::contextualActions()
     Plasma::Containment *c = containment();
     Q_ASSERT(c);
     QList<QAction*> actions;
-    QHashIterator<QString, bool> it(m_actions);
-    while (it.hasNext()) {
-        it.next();
-        if (!it.value()) {
+    foreach (const QString &name, m_actionOrder) {
+        if (!m_actions.value(name)) {
             continue;
         }
 
-        const QString name = it.key();
         if (name == "_context") {
             actions << c->contextualActions();
         } if (name == "_wallpaper") {
@@ -269,10 +254,7 @@ QWidget* ContextMenu::createConfigurationInterface(QWidget* parent)
     m_buttons = new QButtonGroup(widget);
     m_buttons->setExclusive(false);
 
-    QHashIterator<QString, bool> it(m_actions);
-    while (it.hasNext()) {
-        it.next();
-        const QString name = it.key();
+    foreach (const QString &name, m_actionOrder) {
         QCheckBox *item = 0;
 
         if (name == "_context") {
@@ -296,7 +278,7 @@ QWidget* ContextMenu::createConfigurationInterface(QWidget* parent)
         }
 
         if (item) {
-            item->setChecked(it.value());
+            item->setChecked(m_actions.value(name));
             item->setProperty("actionName", name);
             lay->addWidget(item);
             m_buttons->addButton(item);
