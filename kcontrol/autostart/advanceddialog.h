@@ -17,8 +17,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA          *
  ***************************************************************************/
 
-#ifndef _ADVANCEDDIALOG_H_
-#define _ADVANCEDDIALOG_H_
+#ifndef ADVANCEDDIALOG_H
+#define ADVANCEDDIALOG_H
 
 #include <KDialog>
 class QCheckBox;
