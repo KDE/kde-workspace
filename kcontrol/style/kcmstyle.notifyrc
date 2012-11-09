@@ -1,0 +1,9 @@
+[Global]
+IconName=show-menu
+Name=Menubar manager
+Comment=Menubar exporter
+
+[Event/reload]
+Name=Menubar changed
+Comment=Settings changes will take effect only on application restart
+Action=Popup
