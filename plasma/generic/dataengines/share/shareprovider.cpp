@@ -193,7 +193,11 @@ void ShareProvider::openFile(KIO::Job *job)
 
 void ShareProvider::finishedContentData(KIO::Job *job, const QByteArray &data)
 {
-    Q_UNUSED(job);
+    // Close the job as we don't need it anymore.
+    // NOTE: this is essential to ensure the job gets de-scheduled and deleted!
+    job->disconnect(this);
+    static_cast<KIO::FileJob *>(job)->close();
+
     if (data.length() == 0) {
         error(i18n("It was not possible to read the selected file"));
         return;
