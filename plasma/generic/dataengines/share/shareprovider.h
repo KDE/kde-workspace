@@ -68,6 +68,7 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
     // slots for kio
+    void mimetypeJobFinished(KJob *job);
     void openFile(KIO::Job *job);
     void finishedContentData(KIO::Job *job, const QByteArray &data);
     void finishedPublish(KJob *job);

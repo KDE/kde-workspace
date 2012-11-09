@@ -145,7 +145,17 @@ void ShareProvider::addPostFile(const QString &contentKey, const QString &conten
     KUrl url(m_content);
 
     KIO::MimetypeJob *mjob = KIO::mimetype(url);
-    if (!mjob->exec()) {
+    connect(mjob, SIGNAL(finished(KJob*)), this, SLOT(mimetypeJobFinished(KJob*)));
+}
+
+void ShareProvider::mimetypeJobFinished(KJob *job)
+{
+    KIO::MimetypeJob *mjob = qobject_cast<KIO::MimetypeJob *>(job);
+    if (!job) {
+        return;
+    }
+
+    if (mjob->error()) {
         // it's not a file - usually this happens when we are
         // just sharing plain text, so add the content and publish it
         addPostItem(m_contentKey, m_content, "text/plain");
