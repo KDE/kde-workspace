@@ -106,7 +106,7 @@ public:
     Q_INVOKABLE QAction* createShortcutAction(QString action_id) const;
     Q_INVOKABLE void updateShortcutAction(QAction *action, QString shortcut) const;
     Q_INVOKABLE void destroyShortcutAction(QAction *action) const;
-    Q_INVOKABLE void showMenu(QVariant menu, int x, int y, QVariant item) const;
+    Q_INVOKABLE void showMenu(QObject *menu, int x, int y, QObject *item) const;
     Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
     Q_INVOKABLE QString getUniqueId(QObject *obj) const;
 

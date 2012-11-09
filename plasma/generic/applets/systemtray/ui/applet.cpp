@@ -746,10 +746,10 @@ void Applet::destroyShortcutAction(QAction *action) const
     }
 }
 
-void Applet::showMenu(QVariant menu_var, int x, int y, QVariant item_var) const
+void Applet::showMenu(QObject *menu_var, int x, int y, QObject *item_var) const
 {
-    QGraphicsItem *item = qobject_cast<QGraphicsItem *>(item_var.value<QObject *>());
-    QMenu *menu = qobject_cast<QMenu *>(menu_var.value<QObject *>());
+    QGraphicsItem *item = qobject_cast<QGraphicsItem *>(item_var);
+    QMenu *menu = qobject_cast<QMenu *>(menu_var);
     if (menu) {
         QPoint pos(x, y);
         menu->adjustSize();
