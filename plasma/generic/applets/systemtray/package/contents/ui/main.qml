@@ -42,7 +42,7 @@ Item {
     ]
 
     Connections {
-        target: plasmoid.applet
+        target: plasmoid
 
         onNewTask: {
             // create declarative item
@@ -51,7 +51,7 @@ Item {
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
-                var task_id = plasmoid.applet.getUniqueId(task)
+                var task_id = plasmoid.getUniqueId(task)
                 JS.allTasks[task_id] = task
                 var t = JS.tasks[loc].add(task_id, task.category, item)
                 models[loc].insert(t.index, {"task": task, "ui_item": item})
@@ -59,7 +59,7 @@ Item {
         }
 
         onDeletedTask: {
-            var task_id = plasmoid.applet.getUniqueId(task)
+            var task_id = plasmoid.getUniqueId(task)
             var loc = JS.findLocation(task_id)
             var t = JS.tasks[loc].remove(task_id)
             models[loc].remove(t.index)
@@ -147,7 +147,7 @@ Item {
         WidgetItem {
             id: widget_item
 
-            applet: plasmoid.applet
+            applet: plasmoid
             visible:  task !== null
             width: JS.ICONS_SIZE
             height: width
@@ -171,7 +171,7 @@ Item {
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        var vis_pref = plasmoid.applet.getVisibilityPreference(task)
+        var vis_pref = plasmoid.getVisibilityPreference(task)
         if (task.status === NeedsAttention || vis_pref === AlwaysShown) return JS.LOCATION_TRAY
         if (vis_pref === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
             return JS.LOCATION_POPUP
@@ -181,7 +181,7 @@ Item {
 
     /// Moves task to specified location
     function moveTaskToLocation(task, loc) {
-        var task_id = plasmoid.applet.getUniqueId(task)
+        var task_id = plasmoid.getUniqueId(task)
         var old_loc = JS.findLocation(task_id)
         if (old_loc === loc)
             return
@@ -207,7 +207,7 @@ Item {
                 target: arrow_area
                 // it's strange but if width of arrow area is set to 0 then this may cause crashing of plasma during resising of panel (somewhere in QtDeclarative)
                 width: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 1
-                state: plasmoid.applet.location === TopEdge ? "TOP_EDGE" : "BOTTOM_EDGE"
+                state: plasmoid.location === TopEdge ? "TOP_EDGE" : "BOTTOM_EDGE"
             }
             PropertyChanges {
                 target: popup_area
@@ -218,7 +218,7 @@ Item {
         State {
             name: "HORZ"
             extend: "_HORZ"
-            when: (plasmoid.applet.formFactor === Horizontal)
+            when: (plasmoid.formFactor === Horizontal)
 
             AnchorChanges {
                 target: notifications_area
@@ -252,7 +252,7 @@ Item {
 
         State {
             name: "VERT"
-            when: (plasmoid.applet.formFactor === Vertical)
+            when: (plasmoid.formFactor === Vertical)
 
             AnchorChanges {
                 target: notifications_area
@@ -279,7 +279,7 @@ Item {
             PropertyChanges {
                 target: arrow_area
                 height: arrow_area.visible ? arrow_area.arrow_size + 2*JS.ARROW_MARGINS : 1
-                state: plasmoid.applet.location === LeftEdge ? "LEFT_EDGE" : "RIGHT_EDGE"
+                state: plasmoid.location === LeftEdge ? "LEFT_EDGE" : "RIGHT_EDGE"
             }
             PropertyChanges {
                 target: popup_area
@@ -300,7 +300,7 @@ Item {
         State {
             name: "FLOAT"
             extend: "_HORZ"
-            when: (plasmoid.applet.formFactor === Floating)
+            when: (plasmoid.formFactor === Floating)
 
             PropertyChanges {
                 target: notifications_area

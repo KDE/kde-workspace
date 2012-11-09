@@ -45,10 +45,6 @@ namespace SystemTray
 {
 
 class Manager;
-class TaskArea;
-class Plasmoid;
-class TasksPool;
-class UiTask;
 
 class Applet : public Plasma::Applet
 {
@@ -161,7 +157,6 @@ private:
     QSet<QString> m_hiddenTypes;
     QSet<QString> m_alwaysShownTypes;
     QDateTime m_lastActivity;
-    Plasmoid *m_plasmoid;
     Plasma::DeclarativeWidget *m_widget;
 
     Ui::AutoHideConfig m_autoHideUi;

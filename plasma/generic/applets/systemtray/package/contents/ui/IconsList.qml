@@ -78,7 +78,7 @@ Item {
 
                 // we redirect some events to IconWidget or applet
                 target: task.type == TypeStatusItem ? ui_item.getIconWidget() : task
-                applet: plasmoid.applet
+                applet: plasmoid
 
                 // Next events we process manually
                 onClickMiddle: ui_item.click(Qt.MiddleButton)

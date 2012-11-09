@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include "applet.h"
-#include "plasmoid.h"
 #include "widgetitem.h"
 #include "mouseredirectarea.h"
 
@@ -93,7 +92,6 @@ int Applet::s_managerUsage = 0;
 
 Applet::Applet(QObject *parent, const QVariantList &arguments)
     : Plasma::Applet(parent, arguments),
-      m_plasmoid(new Plasmoid(this)),
       m_widget(0),
       m_firstRun(true)
 {
@@ -124,7 +122,6 @@ Applet::~Applet()
     }
 
     delete m_widget;
-    delete m_plasmoid;
 
     --s_managerUsage;
     if (s_managerUsage < 1) {
@@ -169,10 +166,9 @@ void Applet::init()
 
     // setup context add global object "plasmoid"
     QDeclarativeContext *root_context = m_widget->engine()->rootContext();
-    root_context->setContextProperty("plasmoid", m_plasmoid);
+    root_context->setContextProperty("plasmoid", this);
 
     // add enumerations manually to global context
-    _RegisterEnums(root_context, Plasmoid::staticMetaObject);
     _RegisterEnums(root_context, Task::staticMetaObject);
     _RegisterEnums(root_context, SystemTray::Applet::staticMetaObject);
 

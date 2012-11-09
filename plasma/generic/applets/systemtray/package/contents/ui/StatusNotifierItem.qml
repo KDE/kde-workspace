@@ -81,12 +81,12 @@ Item {
             // update shortcut for icon widget
             if (!icon_widget.action)
                 return
-            plasmoid.applet.updateShortcutAction(icon_widget.action, task.shortcut)
+            plasmoid.updateShortcutAction(icon_widget.action, task.shortcut)
             icon_widget.action.triggered.disconnect(__onActivatedShortcut) // disconnect old signals
             icon_widget.action.triggered.connect(__onActivatedShortcut)
         }
 
-        onShowContextMenu: plasmoid.applet.showMenu(menu, x, y, root_item)
+        onShowContextMenu: plasmoid.showMenu(menu, x, y, root_item)
     }
 
     function __onActivatedShortcut() {
@@ -97,7 +97,7 @@ Item {
     // Widget for icon =================================================================================================
     PlasmaWidgets.IconWidget {
         id: icon_widget
-        action: __has_task ? plasmoid.applet.createShortcutAction(task.objectName + "-" + plasmoid.applet.id) : null
+        action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.id) : null
         anchors.fill: parent
         maximumIconSize: Qt.size(parent.width, parent.height)
         visible: false
@@ -112,7 +112,7 @@ Item {
         Component.onDestruction: {
             var act = icon_widget.action
             icon_widget.action = null
-            plasmoid.applet.destroyShortcutAction(act)
+            plasmoid.destroyShortcutAction(act)
         }
     }
 
@@ -203,7 +203,7 @@ Item {
     }
 
     function __processClick(buttons, item) {
-        var pos = plasmoid.applet.popupPosition(item)
+        var pos = plasmoid.popupPosition(item)
         switch (buttons) {
         case Qt.LeftButton:    task.activate1(pos.x, pos.y); break
         case Qt.RightButton:   task.activateContextMenu(pos.x, pos.y); break

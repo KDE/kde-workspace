@@ -62,7 +62,7 @@ Item {
         id: dialog
         visible: false
         mainItem: content
-        location: plasmoid.applet.location
+        location: plasmoid.location
 
         onActiveWindowChanged: dialog.visible = activeWindow  // hide window if it deactivates
 
@@ -74,7 +74,7 @@ Item {
         onVisibleChanged: {
             if (visible) {
                 if (dialog.windowId)
-                    plasmoid.applet.hideFromTaskbar(dialog.windowId)
+                    plasmoid.hideFromTaskbar(dialog.windowId)
                 updatePosition()
             }
         }
