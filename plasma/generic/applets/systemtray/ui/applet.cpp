@@ -29,6 +29,7 @@
 #include "../protocols/dbussystemtray/dbussystemtraytask.h"
 
 #include <QtCore/QTimer>
+#include <QtGui/QMenu>
 #include <QtGui/QGraphicsLinearLayout>
 #include <QtGui/QStandardItemModel>
 #include <QtDeclarative/QDeclarativeError>
@@ -38,6 +39,7 @@
 
 #include <KDE/KStandardDirs>
 #include <KDE/KAction>
+#include <KDE/KWindowSystem>
 #include <KConfigDialog>
 #include <KComboBox>
 #include <KCategorizedSortFilterProxyModel>
@@ -48,6 +50,8 @@
 #include <Plasma/Corona>
 #include <Plasma/IconWidget>
 #include <KDE/Plasma/DeclarativeWidget>
+
+#include <inttypes.h>
 
 #include "config.h"
 
@@ -741,6 +745,35 @@ void Applet::destroyShortcutAction(QAction *action) const
         delete act;
     }
 }
+
+void Applet::showMenu(QVariant menu_var, int x, int y, QVariant item_var) const
+{
+    QGraphicsItem *item = qobject_cast<QGraphicsItem *>(item_var.value<QObject *>());
+    QMenu *menu = qobject_cast<QMenu *>(menu_var.value<QObject *>());
+    if (menu) {
+        QPoint pos(x, y);
+        menu->adjustSize();
+        if (item && containment() && containment()->corona()) {
+            pos = containment()->corona()->popupPosition(item, menu->size());
+        } else {
+            pos = popupPosition(menu->size());
+        }
+        menu->popup(pos);
+    }
+}
+
+void Applet::hideFromTaskbar(qulonglong win_id) const
+{
+    if (win_id > 0) {
+        KWindowSystem::setState(win_id, NET::SkipTaskbar | NET::SkipPager);
+    }
+}
+
+QString Applet::getUniqueId(QObject *obj) const
+{
+    return QString::number(reinterpret_cast<uintmax_t>(obj));
+}
+
 
 
 }

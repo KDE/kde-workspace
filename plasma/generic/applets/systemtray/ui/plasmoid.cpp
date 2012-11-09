@@ -57,23 +57,7 @@ Plasmoid::~Plasmoid()
 }
 
 
-void Plasmoid::showMenu(QVariant menu_var, int x, int y, QVariant item_var) const
-{
-    QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var.value<QObject*>());
-    QMenu *menu = qobject_cast<QMenu*>(menu_var.value<QObject*>());
-    if (menu) {
-        QPoint pos(x, y);
-        if ( m_applet ) {
-            menu->adjustSize();
-            if (item && m_applet->containment() && m_applet->containment()->corona()) {
-                pos = m_applet->containment()->corona()->popupPosition(item, menu->size());
-            } else {
-                pos = m_applet->popupPosition(menu->size());
-            }
-        }
-        menu->popup(pos);
-    }
-}
+
 
 
 QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const
@@ -89,17 +73,6 @@ QPoint Plasmoid::popupPosition(QVariant item_var, QSize size, int align) const
 }
 
 
-void Plasmoid::hideFromTaskbar(qulonglong win_id) const
-{
-    if (win_id > 0) {
-        KWindowSystem::setState(win_id, NET::SkipTaskbar | NET::SkipPager);
-    }
-}
-
-QString Plasmoid::getUniqueId(QObject *obj) const
-{
-    return QString::number(reinterpret_cast<uintmax_t>(obj));
-}
 
 
 } // namespace SystemTray

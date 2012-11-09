@@ -74,7 +74,7 @@ Item {
         onVisibleChanged: {
             if (visible) {
                 if (dialog.windowId)
-                    plasmoid.hideFromTaskbar(dialog.windowId)
+                    plasmoid.applet.hideFromTaskbar(dialog.windowId)
                 updatePosition()
             }
         }

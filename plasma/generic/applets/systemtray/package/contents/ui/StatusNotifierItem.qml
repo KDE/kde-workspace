@@ -86,7 +86,7 @@ Item {
             icon_widget.action.triggered.connect(__onActivatedShortcut)
         }
 
-        onShowContextMenu: plasmoid.showMenu(menu, x, y, root_item)
+        onShowContextMenu: plasmoid.applet.showMenu(menu, x, y, root_item)
     }
 
     function __onActivatedShortcut() {

@@ -51,7 +51,7 @@ Item {
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
-                var task_id = plasmoid.getUniqueId(task)
+                var task_id = plasmoid.applet.getUniqueId(task)
                 JS.allTasks[task_id] = task
                 var t = JS.tasks[loc].add(task_id, task.category, item)
                 models[loc].insert(t.index, {"task": task, "ui_item": item})
@@ -59,7 +59,7 @@ Item {
         }
 
         onDeletedTask: {
-            var task_id = plasmoid.getUniqueId(task)
+            var task_id = plasmoid.applet.getUniqueId(task)
             var loc = JS.findLocation(task_id)
             var t = JS.tasks[loc].remove(task_id)
             models[loc].remove(t.index)
@@ -181,7 +181,7 @@ Item {
 
     /// Moves task to specified location
     function moveTaskToLocation(task, loc) {
-        var task_id = plasmoid.getUniqueId(task)
+        var task_id = plasmoid.applet.getUniqueId(task)
         var old_loc = JS.findLocation(task_id)
         if (old_loc === loc)
             return
