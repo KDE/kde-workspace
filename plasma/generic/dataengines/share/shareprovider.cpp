@@ -144,7 +144,7 @@ void ShareProvider::addPostFile(const QString &contentKey, const QString &conten
     // it will return as an error later in the process.
     KUrl url(m_content);
 
-    KIO::MimetypeJob *mjob = KIO::mimetype(url);
+    KIO::MimetypeJob *mjob = KIO::mimetype(url, KIO::HideProgressInfo);
     connect(mjob, SIGNAL(finished(KJob*)), this, SLOT(mimetypeJobFinished(KJob*)));
 }
 
