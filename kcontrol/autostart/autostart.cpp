@@ -238,11 +238,11 @@ void Autostart::load()
 
 void Autostart::slotAddProgram()
 {
-    KService::Ptr service;
     KOpenWithDialog owdlg( this );
     if (owdlg.exec() != QDialog::Accepted)
         return;
-    service = owdlg.service();
+
+    KService::Ptr service = owdlg.service();
 
     Q_ASSERT(service);
     if (!service)
