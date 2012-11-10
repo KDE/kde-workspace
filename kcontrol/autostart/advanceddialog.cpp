@@ -18,9 +18,11 @@
  ***************************************************************************/
 
 #include "advanceddialog.h"
+
 #include <QCheckBox>
-#include <KLocale>
 #include <QVBoxLayout>
+
+#include <KLocale>
 
 AdvancedDialog::AdvancedDialog( QWidget *parent, bool status )
     :KDialog( parent )

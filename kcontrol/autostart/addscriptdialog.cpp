@@ -20,15 +20,17 @@
  ***************************************************************************/
 
 #include "addscriptdialog.h"
-#include <KLineEdit>
+
 #include <QCheckBox>
 #include <QVBoxLayout>
-#include <klocale.h>
+#include <QLabel>
+#include <QFileInfo>
+
+#include <KLineEdit>
+#include <KLocale>
 #include <KUrlRequester>
 #include <KShell>
 #include <KMessageBox>
-#include <QLabel>
-#include <QFileInfo>
 
 AddScriptDialog::AddScriptDialog (QWidget* parent)
     : KDialog( parent ) {
@@ -51,20 +53,22 @@ AddScriptDialog::AddScriptDialog (QWidget* parent)
 }
 
 AddScriptDialog::~AddScriptDialog()
-{}
+{
+}
 
-void AddScriptDialog::textChanged(const QString &text) {
+void AddScriptDialog::textChanged(const QString &text)
+{
     enableButtonOk(!text.isEmpty());
 }
 
-void AddScriptDialog::accept() {
-
+void AddScriptDialog::accept()
+{
     if ( doBasicSanityCheck() )
         KDialog::accept();
 }
 
-bool AddScriptDialog::doBasicSanityCheck() {
-
+bool AddScriptDialog::doBasicSanityCheck()
+{
     const QString& path = KShell::tildeExpand(m_url->text());
 
     QFileInfo file(path);
@@ -86,11 +90,13 @@ bool AddScriptDialog::doBasicSanityCheck() {
     return true;
 }
 
-KUrl AddScriptDialog::importUrl() const {
+KUrl AddScriptDialog::importUrl() const
+{
     return m_url->lineEdit()->text();
 }
 
-bool AddScriptDialog::symLink() const {
+bool AddScriptDialog::symLink() const
+{
     return m_symlink->isChecked();
 }
 

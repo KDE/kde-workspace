@@ -23,11 +23,11 @@
 #ifndef AUTOSTART_H
 #define AUTOSTART_H
 
-#include <KCModule>
-#include <KFileItem>
-
 #include <QPushButton>
 #include <QTreeWidget>
+
+#include <KCModule>
+#include <KFileItem>
 
 #include "ui_autostartconfig.h"
 #include "autostartitem.h"

@@ -19,9 +19,11 @@
 
 #include "autostartitem.h"
 #include "autostart.h"
+
 #include <QComboBox>
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
+#include <QDir>
 
 #include <KLocale>
 #include <KDebug>
@@ -43,13 +45,18 @@ KUrl AutoStartItem::fileName() const
     return m_fileName;
 }
 
-void AutoStartItem::setPath(const QString &path) {
+void AutoStartItem::setPath(const QString &path)
+{
+    Q_ASSERT( path.endsWith(QDir::separator()) );
+
     if (path == m_fileName.directory(KUrl::AppendTrailingSlash))
         return;
-    KIO::move(m_fileName, KUrl( path + '/' + m_fileName.fileName() ));
-    m_fileName = KUrl(path + m_fileName.fileName());
-}
 
+    const QString& newFileName = path + m_fileName.fileName();
+    KIO::move(m_fileName, KUrl(newFileName));
+
+    m_fileName = KUrl(newFileName);
+}
 
 DesktopStartItem::DesktopStartItem( const QString &service, QTreeWidgetItem *parent, Autostart*autostart )
     : AutoStartItem( service, parent,autostart )
@@ -96,7 +103,7 @@ void ScriptStartItem::changeStartup(ScriptStartItem::ENV type )
         m_comboBoxStartup->setCurrentIndex( 2 );
         break;
     default:
-        kDebug()<<" type is not defined :"<<type;
+        kWarning() << " startup type is not defined :" << type;
         break;
     }
 }
