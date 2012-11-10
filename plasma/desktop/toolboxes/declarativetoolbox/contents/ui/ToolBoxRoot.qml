@@ -1,4 +1,3 @@
-// -*- coding: iso-8859-1 -*-
 /*
  *   Copyright 2011 Sebastian Kügler <sebas@kde.org>
  *   Copyright 2011 Marco Martin <mart@kde.org>
@@ -21,14 +20,12 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.extras 0.1 as PlasmaExtras
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.qtextracomponents 0.1 as QtExtras
 
-// import "plasmapackage:/code/LayoutManager.js" as LayoutManager
-
-QtExtras.MouseEventListener {
+Item {
     id: main
+
     width: 540
     height: 540
 
@@ -40,28 +37,15 @@ QtExtras.MouseEventListener {
     signal preferredHeightChanged
 
     property int iconSize: 16
-
     property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
-
     property int iconWidth: 22
     property int iconHeight: iconWidth
 
-    onPressed: {
-        toolBoxItem.showing = false;
-// //         if ((mouse.x > toolBox.x && mouse.x < (toolBox.x + toolBox.width)) &&
-// //             (mouse.y > toolBox.y && mouse.y < (toolBox.y + toolBox.height))) {
-// //             return;
-// //         }
-//         //var tb = plasmoid.toolBox;
-//         if (toolBox.showing) {
-//             toolBox.showing = false;
-//         }
-        print("MEL clicked");
-    }
-
-    PlasmaCore.Svg {
-        id: iconsSvg
-        imagePath: "widgets/configuration-icons"
+    MouseArea {
+        id: toolBoxDismisser
+        anchors.fill: parent
+        visible: toolBoxItem.showing
+        onPressed: toolBoxItem.showing = false
     }
 
     PlasmaCore.Svg {
@@ -86,7 +70,25 @@ QtExtras.MouseEventListener {
 
     ToolBoxItem {
         id: toolBoxItem
-        anchors { top: parent.top; right: parent.right; margins: 16; }
+        //anchors { top: parent.top; right: parent.right; margins: 16; }
+        property int margin: 22
+        x: {
+            var maxX = main.width - toolBoxItem.width - margin
+            if (toolBoxButton.x > maxX) {
+                return maxX;
+            } else {
+                return Math.max(toolBoxButton.x, margin);
+            }
+        }
+        y: {
+            var maxY = main.height - toolBoxItem.height - margin
+            if (toolBoxButton.y > maxY) {
+                return maxY;
+            } else {
+                return Math.max(toolBoxButton.y, margin);
+            }
+        }
+        anchors.margins: 16
     }
 
     function placeToolBox() {

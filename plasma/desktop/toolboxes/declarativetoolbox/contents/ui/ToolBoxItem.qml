@@ -27,6 +27,7 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 Item {
     id: toolBoxItem
 
+
     property QtObject proxy: plasmoid.toolBox
     property bool showing: false
     property int expandedWidth: 320
@@ -34,7 +35,7 @@ Item {
 
     width: childrenRect.width
     height: childrenRect.height
-    state: proxy.showing ? "expanded" : "collapsed"
+    state: "collapsed"
     transformOrigin: Item.TopRight
 
     function performOperation(what) {
