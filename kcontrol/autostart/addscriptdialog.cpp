@@ -25,7 +25,10 @@
 #include <QVBoxLayout>
 #include <klocale.h>
 #include <KUrlRequester>
+#include <KShell>
+#include <KMessageBox>
 #include <QLabel>
+#include <QFileInfo>
 
 AddScriptDialog::AddScriptDialog (QWidget* parent)
     : KDialog( parent ) {
@@ -52,6 +55,35 @@ AddScriptDialog::~AddScriptDialog()
 
 void AddScriptDialog::textChanged(const QString &text) {
     enableButtonOk(!text.isEmpty());
+}
+
+void AddScriptDialog::accept() {
+
+    if ( doBasicSanityCheck() )
+        KDialog::accept();
+}
+
+bool AddScriptDialog::doBasicSanityCheck() {
+
+    const QString& path = KShell::tildeExpand(m_url->text());
+
+    QFileInfo file(path);
+
+    if ( ! file.isAbsolute() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" is not an absolute path.", path) );
+        return false;
+    } else if ( ! file.exists() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" does not exist.", path) );
+        return false;
+    } else if ( !file.isFile() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" is not a file.", path) );
+        return false;
+    } else if ( ! file.isReadable() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" is not readable.", path) );
+        return false;
+    }
+
+    return true;
 }
 
 KUrl AddScriptDialog::importUrl() const {

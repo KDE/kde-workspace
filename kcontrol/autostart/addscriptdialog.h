@@ -37,6 +37,13 @@ public:
     KUrl importUrl() const;
     bool symLink() const;
 
+public slots:
+    // reimplemented
+    virtual void accept();
+
+protected:
+    virtual bool doBasicSanityCheck();
+
 private slots:
     void textChanged(const QString &text);
 
