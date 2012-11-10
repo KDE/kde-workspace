@@ -25,7 +25,6 @@
 #include "advanceddialog.h"
 
 #include <KLocale>
-#include <KGlobal>
 #include <KConfig>
 #include <KConfigGroup>
 #include <KGlobalSettings>
