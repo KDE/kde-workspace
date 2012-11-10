@@ -74,10 +74,10 @@ Item {
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
 
-        property Item currentItem: null
-
         width: expandedWidth
         height: actionList.height + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
+
+        property Item currentItem: null
 
         imagePath: "widgets/toolbox"
 
