@@ -21,8 +21,6 @@
 
 #include <KDialog>
 
-#include <kephal/screens.h>
-
 namespace Plasma
 {
     class RunnerManager;
@@ -32,6 +30,7 @@ namespace Plasma
 
 class KRunnerConfigWidget;
 class PanelShadows;
+class QDesktopWidget;
 
 class KRunnerDialog : public QWidget
 {
@@ -92,8 +91,8 @@ class KRunnerDialog : public QWidget
         /**
          * React to screen changes
          */
-        void screenRemoved(int screen);
-        void screenGeometryChanged(Kephal::Screen* screen);
+        void screenResized(int screen);
+        void screenGeometryChanged(int screenCount);
         void resetScreenPos();
 
         void compositingChanged(bool);
@@ -120,6 +119,7 @@ class KRunnerDialog : public QWidget
         bool m_rightResize : 1;
         bool m_vertResize : 1;
         bool m_runningTimer : 1;
+        QDesktopWidget *m_desktopWidget;
         QString m_singleRunnerId;
 };
 

@@ -88,6 +88,7 @@ PolicyAgent *PolicyAgent::instance()
 PolicyAgent::PolicyAgent(QObject* parent)
     : QObject(parent)
     , m_sdAvailable(false)
+    , m_systemdInhibitFd(-1)
     , m_ckAvailable(false)
     , m_sessionIsBeingInterrupted(false)
     , m_lastCookie(0)
@@ -223,23 +224,7 @@ void PolicyAgent::onSessionHandlerRegistered(const QString & serviceName)
 
         onActiveSessionChanged(m_activeSessionPath);
 
-        // inhibit systemd handling of power/sleep/lid buttons
-        // http://www.freedesktop.org/wiki/Software/systemd/inhibit
-        kDebug() << "fd passing available:" << bool(managerIface.connection().connectionCapabilities() & QDBusConnection::UnixFileDescriptorPassing);
-
-        QVariantList args;
-        args << "handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch"; // what
-        args << "PowerDevil"; // who
-        args << "KDE handles power events"; // why
-        args << "block"; // mode
-        QDBusPendingReply<QDBusUnixFileDescriptor> desc = managerIface.asyncCallWithArgumentList("Inhibit", args);
-        desc.waitForFinished();
-        if (desc.isValid()) {
-            m_systemdInhibitFd = desc.value();
-            kDebug() << "systemd powersave events handling inhibited, descriptor:" << m_systemdInhibitFd.fileDescriptor();
-        }
-        else
-            kWarning() << "failed to inhibit systemd powersave handling";
+        setupSystemdInhibition();
 
         kDebug() << "systemd support initialized";
     } else if (serviceName == CONSOLEKIT_SERVICE) {
@@ -374,7 +359,7 @@ PolicyAgent::RequiredPolicies PolicyAgent::requirePolicyCheck(PolicyAgent::Requi
     } else if (!m_sdSessionInterface.isNull()) {
         bool isActive = m_sdSessionInterface.data()->property("Active").toBool();
 
-        if (!isActive && !m_wasLastActiveSession && policies != InterruptSession) {
+        if (!isActive && !m_wasLastActiveSession) {
             return policies;
         }
     }
@@ -386,7 +371,7 @@ PolicyAgent::RequiredPolicies PolicyAgent::requirePolicyCheck(PolicyAgent::Requi
         QDBusPendingReply< bool > rp = m_ckSessionInterface.data()->asyncCall("IsActive");
         rp.waitForFinished();
 
-        if (!rp.value() && !m_wasLastActiveSession && policies != InterruptSession) {
+        if (!rp.value() && !m_wasLastActiveSession) {
             return policies;
         }
     }
@@ -550,6 +535,31 @@ void PolicyAgent::releaseAllInhibitions()
     foreach (uint cookie, allCookies) {
         ReleaseInhibition(cookie);
     }
+}
+
+void PolicyAgent::setupSystemdInhibition()
+{
+    if (m_systemdInhibitFd.fileDescriptor() != -1)
+        return;
+
+    // inhibit systemd handling of power/sleep/lid buttons
+    // http://www.freedesktop.org/wiki/Software/systemd/inhibit
+    QDBusInterface managerIface(SYSTEMD_LOGIN1_SERVICE, SYSTEMD_LOGIN1_PATH, SYSTEMD_LOGIN1_MANAGER_IFACE, QDBusConnection::systemBus());
+    kDebug() << "fd passing available:" << bool(managerIface.connection().connectionCapabilities() & QDBusConnection::UnixFileDescriptorPassing);
+
+    QVariantList args;
+    args << "handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch"; // what
+    args << "PowerDevil"; // who
+    args << "KDE handles power events"; // why
+    args << "block"; // mode
+    QDBusPendingReply<QDBusUnixFileDescriptor> desc = managerIface.asyncCallWithArgumentList("Inhibit", args);
+    desc.waitForFinished();
+    if (desc.isValid()) {
+        m_systemdInhibitFd = desc.value();
+        kDebug() << "systemd powersave events handling inhibited, descriptor:" << m_systemdInhibitFd.fileDescriptor();
+    }
+    else
+        kWarning() << "failed to inhibit systemd powersave handling";
 }
 
 }

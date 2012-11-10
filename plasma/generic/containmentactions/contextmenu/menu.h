@@ -54,10 +54,10 @@ private:
     QAction *m_separator2;
     QAction *m_separator3;
 
-    QList<QString> m_allActions;
-    QList<bool> m_enabledActions;
+    // action name and whether it is enabled or not
+    QHash<QString, bool> m_actions;
+    QStringList m_actionOrder;
     QButtonGroup *m_buttons;
-
 };
 
 K_EXPORT_PLASMA_CONTAINMENTACTIONS(contextmenu, ContextMenu)

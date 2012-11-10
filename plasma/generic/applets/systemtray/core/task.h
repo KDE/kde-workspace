@@ -48,9 +48,8 @@ class Task : public QObject
 {
     Q_OBJECT
 
-    Q_ENUMS(Status)
-    Q_ENUMS(Category)
-
+    Q_PROPERTY(TaskType type READ type CONSTANT)
+    Q_PROPERTY(QString typeId READ typeId CONSTANT)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
@@ -72,6 +71,19 @@ public:
         Hardware = 4
     };
     Q_ENUMS(Category)
+
+    /**
+     * Derived classes should provide its type. We assume that number of different types of tasks is
+     * a limited value. So, it's easier to provide constants for each type of tasks than always
+     * try to cast classes. Moreover, these contants are used in QML code.
+     */
+    enum TaskType {
+        TypePlasmoid,
+        TypeX11Task,
+        TypeStatusItem,
+        TypeUserDefined
+    };
+    Q_ENUMS(TaskType)
 
 
     virtual ~Task();
@@ -155,6 +167,14 @@ public:
     Status status() const;
 
     /**
+     * This function must always return type of task (an integer value). This value must always be
+     * the same for each call of function.
+     * @return a type of task.
+     */
+    virtual TaskType type() const = 0;
+
+
+    /**
      * Can be used by the hostwhen they no longer wish to use the widget associated
      * with the host.
      */
@@ -178,6 +198,9 @@ Q_SIGNALS:
 
     // If a name of task has been changed
     void changedName();
+
+    /// if visibility preference of task is changed
+    void changedVisibilityPreference();
 
     /**
      * Emitted when the task is about to be destroyed

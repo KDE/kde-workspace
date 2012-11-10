@@ -188,7 +188,7 @@ public:
         AbilityAnnounceButtons = 0, ///< decoration supports AbilityButton* values (always use)
         AbilityAnnounceColors = 1, ///< decoration supports AbilityColor* values (always use), @deprecated @todo remove KDE5
         // buttons
-        AbilityButtonMenu = 1000,   ///< decoration supports the menu button
+        AbilityButtonMenu = 1000,   ///< decoration supports the window menu button
         AbilityButtonOnAllDesktops = 1001, ///< decoration supports the on all desktops button
         AbilityButtonSpacer = 1002, ///< decoration supports inserting spacers between buttons
         AbilityButtonHelp = 1003,   ///< decoration supports what's this help button
@@ -199,6 +199,7 @@ public:
         AbilityButtonBelowOthers = 1008, ///< decoration supports a below button
         AbilityButtonShade = 1009, ///< decoration supports a shade button
         AbilityButtonResize = 1010, ///< decoration supports a resize button
+        AbilityButtonApplicationMenu = 1011,   ///< decoration supports the application menu button
         // colors
         AbilityColorTitleBack = 2000, ///< decoration supports titlebar background color, @deprecated @todo remove KDE5
         ABILITYCOLOR_FIRST = AbilityColorTitleBack, ///< @internal, @deprecated @todo remove KDE5
@@ -220,6 +221,8 @@ public:
         ///  @since 4.4
         AbilityUsesBlurBehind = 3003, ///< The decoration wants the background to be blurred, when the blur plugin is enabled.
         /// @since 4.6
+        AbilityAnnounceAlphaChannel = 4004, ///< The decoration can tell whether it currently uses an alpha channel or not. Requires AbilityUsesAlphaChannel.
+        /// @since 4.10
         // Tabbing
         AbilityTabbing = 4000, ///< The decoration supports tabbing
         // TODO colors for individual button types
@@ -352,7 +355,8 @@ public:
      * If customButtonPositions() returns true, titleButtonsLeft
      * returns which buttons should be on the left side of the titlebar from left
      * to right. Characters in the returned string have this meaning :
-     * @li 'M' menu button
+     * @li 'N' application menu button
+     * @li 'M' window menu button
      * @li 'S' on_all_desktops button
      * @li 'H' quickhelp button
      * @li 'I' minimize ( iconify ) button
@@ -622,6 +626,14 @@ public:
      */
     void showWindowMenu(QPoint pos);
     /**
+     * show application menu at p
+     */
+    void showApplicationMenu(const QPoint& p);
+    /**
+     * Returns @a true if menu available for client
+     */
+    bool menuAvailable() const;
+    /**
      * This function performs the given window operation. This function may destroy
      * the current decoration object, just like showWindowMenu().
      */
@@ -706,6 +718,22 @@ public:
      */
     void processMousePressEvent(QMouseEvent* e);
 
+    /**
+     * Whether the alpha channel is currently enabled. The value of this property is
+     * only relevant in case the decoration provides the AbilityAnnounceAlphaChannel.
+     *
+     * The compositor can make use of this information to optimize the rendering of the
+     * decoration.
+     *
+     * The default value of this property is @c false. That means if a decoration wants to make
+     * use alpha channel it has to call setAlphaEnabled with @c true.
+     *
+     * @see setAlphaEnabled
+     * @see alphaEnabledChanged
+     * @since 4.10
+     **/
+    bool isAlphaEnabled() const;
+
     // requests to decoration
 
     /**
@@ -789,6 +817,35 @@ Q_SIGNALS:
      * This signal is emitted whenever the window's keep-below state changes.
      */
     void keepBelowChanged(bool);
+
+    /**
+     * This signal is emitted whenever application menu is closed
+     * Application menu button may need to be modified on this signal
+     */
+    void menuHidden();
+    /**
+     * This signal is emitted whenever application want to show it menu
+     */
+    void showRequest();
+    /**
+     * This signal is emitted whenever application menu becomes available
+     */
+    void appMenuAvailable();
+    /**
+     * This signal is emitted whenever application menu becomes unavailable
+     */
+    void appMenuUnavailable();
+
+    /**
+     * This signal is emitted whenever the decoration changes it's alpha enabled
+     * change. Only relevant in case the decoration provides AbilityAnnounceAlphaChannel.
+     *
+     * @param enabled The new state of alpha channel usage
+     * @see setAlphaEnabled
+     * @see isAlphaEnabled
+     * @since 4.10
+     **/
+    void alphaEnabledChanged(bool enabled);
 
 public:
     /**
@@ -940,6 +997,20 @@ public Q_SLOTS:
      * @internal
      */
     void emitKeepBelowChanged(bool below);
+
+protected Q_SLOTS:
+    /**
+     * A decoration providing AbilityAnnounceAlphaChannel can use this method to enable/disable the
+     * use of alpha channel. This is useful if for a normal window the decoration renders its own
+     * shadows or round corners and thus needs alpha channel. But in maximized state the decoration
+     * is fully opaque. By disabling the alpha channel the Compositor can optimize the rendering.
+     *
+     * @param enabled If @c true alpha channel is enabled, if @c false alpha channel is disabled
+     * @see isAlphaEnabled
+     * @see alphaEnabledChanged
+     * @since 4.10
+     **/
+    void setAlphaEnabled(bool enabled);
 
 private:
     KDecorationBridge* bridge_;

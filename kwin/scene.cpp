@@ -75,12 +75,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QDesktopWidget>
 
 #include "client.h"
 #include "deleted.h"
 #include "effects.h"
-#include "lanczosfilter.h"
 #include "overlaywindow.h"
 #include "shadow.h"
 
@@ -260,8 +258,22 @@ void Scene::paintSimpleScreen(int orig_mask, QRegion region)
 
         // Clip out the decoration for opaque windows; the decoration is drawn in the second pass
         if (w->isOpaque()) {
+            Client *c = NULL;
+            if (topw->isClient()) {
+                c = static_cast<Client*>(topw);
+            }
             // the window is fully opaque
-            data.clip = w->clientShape().translated(w->x(), w->y());
+            if (c && c->decorationHasAlpha()) {
+                // decoration uses alpha channel, so we may not exclude it in clipping
+                data.clip = w->clientShape().translated(w->x(), w->y());
+            } else {
+                // decoration is fully opaque
+                if (c && c->isShade()) {
+                    data.clip = QRegion();
+                } else {
+                    data.clip = w->shape().translated(w->x(), w->y());
+                }
+            }
         } else if (topw->hasAlpha() && topw->opacity() == 1.0) {
             // the window is partially opaque
             data.clip = (w->clientShape() & topw->opaqueRegion().translated(topw->clientPos())).translated(w->x(), w->y());
@@ -440,16 +452,7 @@ void Scene::finalPaintWindow(EffectWindowImpl* w, int mask, QRegion region, Wind
 // will be eventually called from drawWindow()
 void Scene::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
 {
-    if (mask & PAINT_WINDOW_LANCZOS) {
-        if (lanczos_filter.isNull()) {
-            lanczos_filter = new LanczosFilter(this);
-            // recreate the lanczos filter when the screen gets resized
-            connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), lanczos_filter.data(), SLOT(deleteLater()));
-            connect(QApplication::desktop(), SIGNAL(resized(int)), lanczos_filter.data(), SLOT(deleteLater()));
-        }
-        lanczos_filter.data()->performPaint(w, mask, region, data);
-    } else
-        w->sceneWindow()->performPaint(mask, region, data);
+    w->sceneWindow()->performPaint(mask, region, data);
 }
 
 bool Scene::waitSyncAvailable() const

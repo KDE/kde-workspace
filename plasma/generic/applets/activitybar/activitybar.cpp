@@ -266,9 +266,9 @@ void ActivityBar::activityAdded(const QString &id)
 
 void ActivityBar::containmentDestroyed(QObject *obj)
 {
-    Plasma::Containment *containment = static_cast<Plasma::Containment *>(obj);
+    Plasma::Containment *destroyedContainment = static_cast<Plasma::Containment *>(obj);
 
-    int index = m_containments.indexOf(containment);
+    int index = m_containments.indexOf(destroyedContainment);
     if (index != -1) {
         m_containments.removeAt(index);
         m_tabBar->blockSignals(true);

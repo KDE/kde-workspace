@@ -165,10 +165,10 @@ void KGlobalShortcutsEditor::KGlobalShortcutsEditorPrivate::initGUI()
 
     // Build the menu
     QMenu *menu = new QMenu(q);
-    menu->addAction( i18n("Import Scheme..."), q, SLOT(importScheme()));
-    menu->addAction( i18n("Export Scheme..."), q, SLOT(exportScheme()));
+    menu->addAction( KIcon("document-import"), i18n("Import Scheme..."), q, SLOT(importScheme()));
+    menu->addAction( KIcon("document-export"), i18n("Export Scheme..."), q, SLOT(exportScheme()));
     menu->addAction( i18n("Set All Shortcuts to None"), q, SLOT(clearConfiguration()));
-    menu->addAction( i18n("Remove Component"), q, SLOT(removeComponent()));
+    menu->addAction( KIcon("edit-delete"), i18n("Remove Component"), q, SLOT(removeComponent()));
 
     ui.menu_button->setMenu(menu);
 
@@ -231,7 +231,9 @@ void KGlobalShortcutsEditor::addCollection(
         d->stack->addWidget(editor);
 
         // Add to the component combobox
-        d->ui.components->addItem(friendlyName);
+        d->ui.components->addItem(KIconLoader::global()->loadIcon(id, KIconLoader::Small, 0,
+                                  KIconLoader::DefaultState, QStringList(), 0, true) // so it returns a NULL pixmap if no icon found
+                                  , friendlyName);
         d->ui.components->model()->sort(0);
 
         // Add to our component registry

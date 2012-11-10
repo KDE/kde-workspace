@@ -19,6 +19,7 @@ target_link_libraries(kcm_krunner_kill
 kde4_add_plugin(krunner_kill ${krunner_kill_SRCS})
 target_link_libraries(krunner_kill
                       ${KDE4_PLASMA_LIBS} ${KDE4_KIO_LIBS} processcore)
+add_dependencies(krunner_kill kcm_krunner_kill)
 
 install(TARGETS krunner_kill kcm_krunner_kill
         DESTINATION ${PLUGIN_INSTALL_DIR})

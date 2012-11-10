@@ -24,8 +24,8 @@
 import QtQuick 1.1
 import Private 0.1
 
-import "TasksSet.js" as TasksSet
-import "main.js" as JS  // stuff & JS additions
+import "../code/TasksSet.js" as TasksSet
+import "../code/main.js" as JS  // stuff & JS additions
 
 Item {
     id: root_item // represents available space on screen
@@ -42,32 +42,42 @@ Item {
     ]
 
     Connections {
-        target: tasks_pool
+        target: plasmoid
 
         onNewTask: {
             // create declarative item
-            var component = (task_type === TaskTypeStatusItem ? component_status_item : component_widget)
-            var props = {"ui_task": task}
+            var component = (task.type === TypeStatusItem ? component_status_item : component_widget)
+            var props = {"task": task}
             var item = component.createObject(null, props)
             if (item) {
                 var loc = getLocationForTask(task)
+                var task_id = plasmoid.getUniqueId(task)
+                JS.allTasks[task_id] = task
                 var t = JS.tasks[loc].add(task_id, task.category, item)
-                models[loc].insert(t.index, {"ui_task": task, "ui_item": item})
+                models[loc].insert(t.index, {"task": task, "ui_item": item})
             }
         }
 
         onDeletedTask: {
+            var task_id = plasmoid.getUniqueId(task)
             var loc = JS.findLocation(task_id)
             var t = JS.tasks[loc].remove(task_id)
             models[loc].remove(t.index)
             t.data.destroy() // destroy item / we have to destroy it manually because we don't provide parent at initialization
+            delete JS.allTasks[task_id]
         }
+
+        onVisibilityPreferenceChanged: {
+            // move all tasks to their new location
+            for (var task_id in JS.allTasks) {
+                var task = JS.allTasks[task_id]
+                moveTaskToLocation(task, getLocationForTask(task))
+            }
+        }
+
+        onActivate: arrow_area.togglePopup()
     }
 
-    Connections {
-        target: plasmoid
-        onActivated: arrow_area.togglePopup()
-    }
 
     Component.onCompleted: {
         // create sets for tasks
@@ -116,20 +126,17 @@ Item {
         StatusNotifierItem {
             id: status_item
 
-            property variant ui_task;
-
             icons_size: JS.ICONS_SIZE
             blink_interval: JS.BLINK_INTERVAL
-            task: ui_task.task
-            visible: ui_task.task !== null
+            visible: task !== null
             width: JS.ICONS_SIZE
             height: width
             anchors.centerIn: parent
 
             Connections {
-                target: ui_task
-                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-                onChangedHideState: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
+                target: task
+                onChangedStatus:    moveTaskToLocation(task, getLocationForTask(task))
+                onChangedVisibilityPreference: moveTaskToLocation(task, getLocationForTask(task))
             }
         }
     }
@@ -140,43 +147,16 @@ Item {
         WidgetItem {
             id: widget_item
 
-            property variant ui_task;
-
-            widget: ui_task.widget
-            visible:  ui_task.widget !== null
+            applet: plasmoid
+            visible:  task !== null
             width: JS.ICONS_SIZE
             height: width
             anchors.centerIn: parent
 
             Connections {
-                target: ui_task
-                onChangedStatus:    moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-                onChangedHideState: moveTaskToLocation(ui_task.taskId, getLocationForTask(ui_task))
-            }
-        }
-    }
-
-    // Delegate for views ==============================================================================================
-    Component {
-        id: delegate_task
-
-        Item {
-            id: delegate_task_item
-            width:  GridView.view.cellWidth
-            height: GridView.view.cellHeight
-
-            Connections {
-                target: ui_task
-                onChangedStatus:    __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
-                onChangedHideState: __moveTaskToLocation(ui_task.taskId, __getLocationForTask(ui_task))
-            }
-
-            Component.onCompleted: {
-                ui_item.parent = delegate_task_item
-                // reset properties
-                if (ui_task.type !== TaskTypeStatusItem && !ui_item.widget) {
-                    ui_item.widget = ui_task.widget
-                }
+                target: task
+                onChangedStatus:    moveTaskToLocation(task, getLocationForTask(task))
+                onChangedVisibilityPreference: moveTaskToLocation(task, getLocationForTask(task))
             }
         }
     }
@@ -191,15 +171,17 @@ Item {
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        if (task.status === TaskStatusAttention || task.hideState === TaskHideStateShown) return JS.LOCATION_TRAY
-        if (task.hideState === TaskHideStateHidden || (task.status !== TaskStatusActive && task.status !== TaskStatusUnknown)) {
+        var vis_pref = plasmoid.getVisibilityPreference(task)
+        if (task.status === NeedsAttention || vis_pref === AlwaysShown) return JS.LOCATION_TRAY
+        if (vis_pref === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
             return JS.LOCATION_POPUP
         }
         return JS.LOCATION_TRAY
     }
 
     /// Moves task to specified location
-    function moveTaskToLocation(task_id, loc) {
+    function moveTaskToLocation(task, loc) {
+        var task_id = plasmoid.getUniqueId(task)
         var old_loc = JS.findLocation(task_id)
         if (old_loc === loc)
             return
@@ -209,7 +191,7 @@ Item {
 
         // add to new model
         t = JS.tasks[loc].add(task_id, t.category, t.data)
-        models[loc].insert(t.index, {"ui_task": tasks_pool.tasks[task_id], "ui_item": t.data})
+        models[loc].insert(t.index, {"task": task, "ui_item": t.data})
     }
 
 

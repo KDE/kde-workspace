@@ -23,7 +23,7 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 
 Item {
     id: arrow_area
@@ -34,26 +34,20 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: togglePopup()
-        z: -1 // avoid overlap of arrow_widget
+        onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow_widget }
+        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow_widget }
     }
 
-    PlasmaWidgets.IconWidget {
+    PlasmaCore.SvgItem {
+
         id: arrow_widget
-        width:  arrow_size
-        height: width
-        preferredIconSize: Qt.size(arrow_size, arrow_size)
-        maximumIconSize:   Qt.size(arrow_size, arrow_size)
-        minimumIconSize:   Qt.size(arrow_size, arrow_size)
+
         anchors.centerIn: parent
-        icon: QIcon(svg.pixmap(svg_element_id))
+        width: arrow_size
+        height: width
 
-        property string svg_element_id: "left-arrow"  // name of element in svg file
-
-        property variant svg: PlasmaCore.Svg {
-            imagePath: "widgets/arrows"
-        }
-
-        onClicked: togglePopup()
+        svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
+        elementId: "left-arrow"
     }
 
     // Tooltip for arrow -----------------------------------------------------------------------------------------------
@@ -108,7 +102,7 @@ Item {
             name: "LEFT_EDGE"
             PropertyChanges {
                 target: arrow_widget
-                svg_element_id: (dialog.visible ? "left-arrow" : "right-arrow")
+                elementId: dialog.visible ? "left-arrow" : "right-arrow"
             }
         },
 
@@ -116,7 +110,7 @@ Item {
             name: "RIGHT_EDGE"
             PropertyChanges {
                 target: arrow_widget
-                svg_element_id: dialog.visible ? "right-arrow" : "left-arrow"
+                elementId: dialog.visible ? "right-arrow" : "left-arrow"
             }
         },
 
@@ -124,7 +118,7 @@ Item {
             name: "TOP_EDGE"
             PropertyChanges {
                 target: arrow_widget
-                svg_element_id: dialog.visible ? "up-arrow" : "down-arrow"
+                elementId: dialog.visible ? "up-arrow" : "down-arrow"
             }
         },
 
@@ -132,7 +126,7 @@ Item {
             name: "BOTTOM_EDGE"
             PropertyChanges {
                 target: arrow_widget
-                svg_element_id: dialog.visible ? "down-arrow" : "up-arrow"
+                elementId: dialog.visible ? "down-arrow" : "up-arrow"
             }
         }
     ]

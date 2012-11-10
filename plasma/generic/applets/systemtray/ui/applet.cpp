@@ -22,15 +22,13 @@
  ***************************************************************************/
 
 #include "applet.h"
-#include "plasmoid.h"
-#include "taskspool.h"
-#include "uitask.h"
 #include "widgetitem.h"
 #include "mouseredirectarea.h"
 
 #include "../protocols/dbussystemtray/dbussystemtraytask.h"
 
 #include <QtCore/QTimer>
+#include <QtGui/QMenu>
 #include <QtGui/QGraphicsLinearLayout>
 #include <QtGui/QStandardItemModel>
 #include <QtDeclarative/QDeclarativeError>
@@ -39,7 +37,8 @@
 #include <QtDeclarative/QDeclarativeComponent>
 
 #include <KDE/KStandardDirs>
-#include <KAction>
+#include <KDE/KAction>
+#include <KDE/KWindowSystem>
 #include <KConfigDialog>
 #include <KComboBox>
 #include <KCategorizedSortFilterProxyModel>
@@ -50,6 +49,8 @@
 #include <Plasma/Corona>
 #include <Plasma/IconWidget>
 #include <KDE/Plasma/DeclarativeWidget>
+
+#include <inttypes.h>
 
 #include "config.h"
 
@@ -91,8 +92,6 @@ int Applet::s_managerUsage = 0;
 
 Applet::Applet(QObject *parent, const QVariantList &arguments)
     : Plasma::Applet(parent, arguments),
-      m_plasmoid(new Plasmoid(this)),
-      m_tasksPool(new TasksPool(this)),
       m_widget(0),
       m_firstRun(true)
 {
@@ -104,7 +103,6 @@ Applet::Applet(QObject *parent, const QVariantList &arguments)
 
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setHasConfigurationInterface(true);
-    connect(this, SIGNAL(activate()), m_plasmoid, SIGNAL(activated()));
 }
 
 Applet::~Applet()
@@ -124,8 +122,6 @@ Applet::~Applet()
     }
 
     delete m_widget;
-    delete m_tasksPool;
-    delete m_plasmoid;
 
     --s_managerUsage;
     if (s_managerUsage < 1) {
@@ -170,12 +166,11 @@ void Applet::init()
 
     // setup context add global object "plasmoid"
     QDeclarativeContext *root_context = m_widget->engine()->rootContext();
-    root_context->setContextProperty("plasmoid", m_plasmoid);
-    root_context->setContextProperty("tasks_pool", m_tasksPool);
+    root_context->setContextProperty("plasmoid", this);
 
     // add enumerations manually to global context
-    _RegisterEnums(root_context, Plasmoid::staticMetaObject);
-    _RegisterEnums(root_context, UiTask::staticMetaObject);
+    _RegisterEnums(root_context, Task::staticMetaObject);
+    _RegisterEnums(root_context, SystemTray::Applet::staticMetaObject);
 
     // add declarative widget to our applet
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
@@ -213,16 +208,8 @@ void Applet::_onAddedTask(Task *task)
         return;
     }
 
-    // define hide state of task
-    UiTask::TaskHideState hide_state = UiTask::TaskHideStateAuto;
-    if (m_hiddenTypes.contains(task->typeId())) {
-        hide_state = UiTask::TaskHideStateHidden;
-    } else if (m_alwaysShownTypes.contains(task->typeId())) {
-        hide_state = UiTask::TaskHideStateShown;
-    }
-
-    // add task to pool
-    m_tasksPool->addTask(task, hide_state);
+    // provide task to qml code
+    emit newTask(task);
 
     DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
     if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
@@ -248,57 +235,6 @@ void Applet::_onAddedTask(Task *task)
             }
         }
 
-        QString action_name = _getActionName(task);
-        KConfigGroup cg = config();
-        KConfigGroup shortcutsConfig = KConfigGroup(&cg, "Shortcuts");
-        QString shortcut = shortcutsConfig.readEntryUntranslated(action_name, default_shortcut);
-        dbus_task->setShortcut(shortcut);
-
-        if (is_klipper && shortcut == default_shortcut) {
-            // we have to write klipper's hotkey to config
-            if (shortcut.isEmpty())
-                shortcutsConfig.deleteEntry(action_name);
-            else
-                shortcutsConfig.writeEntry(action_name, shortcut);
-        }
-    }
-}
-
-
-void Applet::_onChangedTask(Task *task)
-{
-    UiTask *ui_task = m_tasksPool->uiTask(task);
-    if (!ui_task) {
-        _onAddedTask(task);
-        return;
-    }
-    // we need update hide state in case of changing of typeId
-    _updateHideState(ui_task);
-
-    DBusSystemTrayTask *dbus_task = qobject_cast<DBusSystemTrayTask*>(task);
-    if (dbus_task && !dbus_task->objectName().isEmpty() && dbus_task->shortcut().isEmpty()) {
-        // try to set shortcut
-        bool is_klipper = false;
-        QString default_shortcut;
-        if (dbus_task->name() == KlipperName) {
-            // for klipper we have to read its default hotkey from its config
-            is_klipper = true;
-            QString file = KStandardDirs::locateLocal("config", "kglobalshortcutsrc");
-            KConfig config(file);
-            KConfigGroup cg(&config, "klipper");
-            QStringList shortcutTextList = cg.readEntry("show_klipper_popup", QStringList());
-
-            if (shortcutTextList.size() >= 2) {
-                default_shortcut = shortcutTextList.first();
-                if (default_shortcut.isEmpty()) {
-                    default_shortcut = shortcutTextList[1];
-                }
-            }
-            if (default_shortcut.isEmpty()) {
-                default_shortcut = "Ctrl+Alt+V";
-            }
-        }
-        // try to set shortcut
         QString action_name = _getActionName(task);
         KConfigGroup cg = config();
         KConfigGroup shortcutsConfig = KConfigGroup(&cg, "Shortcuts");
@@ -318,8 +254,8 @@ void Applet::_onChangedTask(Task *task)
 
 void Applet::_onRemovedTask(Task *task)
 {
-    //remove task from pool
-    m_tasksPool->removeTask(task);
+    //remove task from QML code
+    emit deletedTask(task);
 }
 
 
@@ -332,7 +268,6 @@ void Applet::_onWidgetCreationFinished()
     }
 
     connect(s_manager, SIGNAL(taskAdded(SystemTray::Task*)),   this, SLOT(_onAddedTask(SystemTray::Task*)));
-    connect(s_manager, SIGNAL(taskChanged(SystemTray::Task*)), this, SLOT(_onChangedTask(SystemTray::Task*)));
     connect(s_manager, SIGNAL(taskRemoved(SystemTray::Task*)), this, SLOT(_onRemovedTask(SystemTray::Task*)));
 }
 
@@ -375,27 +310,8 @@ void Applet::configChanged()
 
     s_manager->loadApplets(this);
 
-    // change hide state for every tasks in GUI
-    QVariantHash tasks = m_tasksPool->tasks();
-    for (QVariantHash::const_iterator i = tasks.constBegin(), e = tasks.constEnd(); i != e; ++i) {
-        UiTask *ui_task = static_cast<UiTask*>(i.value().value<QObject*>());
-        _updateHideState(ui_task);
-    }
-}
-
-
-void Applet::_updateHideState(UiTask *ui_task) const {
-    Task *task = static_cast<Task*>(ui_task->task().value<QObject*>());
-    if (task) {
-        QString task_id = task->typeId();
-        UiTask::TaskHideState state = UiTask::TaskHideStateAuto;
-        if (m_hiddenTypes.contains(task_id)) {
-            state = UiTask::TaskHideStateHidden;
-        } else if (m_alwaysShownTypes.contains(task_id)) {
-            state = UiTask::TaskHideStateShown;
-        }
-        ui_task->setHideState(state);
-    }
+    // notify QML code about new user's preferences
+    emit visibilityPreferenceChanged();
 }
 
 
@@ -408,11 +324,11 @@ QString Applet::_getActionName(Task *task) const {
 void Applet::constraintsEvent(Plasma::Constraints constraints)
 {
     if (constraints & Plasma::FormFactorConstraint) {
-        m_plasmoid->setFormFactor(Plasmoid::ToFormFactor(formFactor()));
+        emit formFactorChanged();
     }
 
     if (constraints & Plasma::LocationConstraint) {
-        m_plasmoid->setLocation(Plasmoid::ToLocation(location()));
+        emit locationChanged();
     }
 
     if (constraints & Plasma::ImmutableConstraint) {
@@ -781,6 +697,88 @@ void Applet::checkDefaultApplets()
 
     config().writeEntry("DefaultAppletsAdded", true);
 }
+
+
+int Applet::getVisibilityPreference(QObject *task) const
+{
+    Task *t = qobject_cast<Task*>(task);
+    if (!t)
+        return AutoVisibility;
+    if ( m_hiddenTypes.contains(t->typeId()) ) {
+        return AlwaysHidden;
+    } else if ( m_alwaysShownTypes.contains(t->typeId()) ) {
+        return AlwaysShown;
+    }
+    return AutoVisibility;
+}
+
+QAction *Applet::createShortcutAction(QString action_id) const
+{
+    KAction *action = new KAction(parent());
+    action->setObjectName(action_id);
+    return action;
+}
+
+void Applet::updateShortcutAction(QAction *action, QString shortcut) const
+{
+    KAction *act = qobject_cast<KAction*>(action);
+    if (!act) {
+        return;
+    }
+
+    act->forgetGlobalShortcut();
+    if (!shortcut.isEmpty()) {
+        act->setGlobalShortcut(KShortcut(QKeySequence(shortcut)),
+                               KAction::ShortcutTypes(KAction::ActiveShortcut | KAction::DefaultShortcut),
+                               KAction::NoAutoloading);
+    }
+}
+
+void Applet::destroyShortcutAction(QAction *action) const
+{
+    KAction *act = qobject_cast<KAction*>(action);
+    if (act) {
+        delete act;
+    }
+}
+
+void Applet::showMenu(QObject *menu_var, int x, int y, QObject *item_var) const
+{
+    QGraphicsItem *item = qobject_cast<QGraphicsItem *>(item_var);
+    QMenu *menu = qobject_cast<QMenu *>(menu_var);
+    if (menu) {
+        QPoint pos(x, y);
+        menu->adjustSize();
+        if (item && containment() && containment()->corona()) {
+            pos = containment()->corona()->popupPosition(item, menu->size());
+        } else {
+            pos = Plasma::Applet::popupPosition(menu->size());
+        }
+        menu->popup(pos);
+    }
+}
+
+void Applet::hideFromTaskbar(qulonglong win_id) const
+{
+    if (win_id > 0) {
+        KWindowSystem::setState(win_id, NET::SkipTaskbar | NET::SkipPager);
+    }
+}
+
+QString Applet::getUniqueId(QObject *obj) const
+{
+    return QString::number(reinterpret_cast<uintmax_t>(obj));
+}
+
+QPoint Applet::popupPosition(QObject *item_var, QSize size, int align) const
+{
+    QGraphicsItem *item = qobject_cast<QGraphicsItem*>(item_var);
+    if ( item && containment() && containment()->corona() ) {
+        return containment()->corona()->popupPosition(item, size, (Qt::AlignmentFlag)align);
+    }
+    return Plasma::Applet::popupPosition(size, (Qt::AlignmentFlag)align);
+}
+
 
 }
 

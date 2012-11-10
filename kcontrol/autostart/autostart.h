@@ -20,8 +20,8 @@
  ***************************************************************************/
 
 
-#ifndef _AUTOSTART_H_
-#define _AUTOSTART_H_
+#ifndef AUTOSTART_H
+#define AUTOSTART_H
 
 #include <KCModule>
 #include <KFileItem>

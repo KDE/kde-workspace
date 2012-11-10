@@ -134,8 +134,8 @@ void QsDialog::clearHistory()
 void QsDialog::setConfigWidget(QWidget *w)
 {
     //Yet another code copy pasted from default interface, should we move this to a common place?
-    const int screenId = qApp->desktop()->screenNumber(this); //Kephal::ScreenUtils::screenId(geometry().center());
-    const int maxHeight = qApp->desktop()->availableGeometry(screenId).height(); //Kephal::Screens::self()->screen(screenId)->geometry().height();
+    const int screenId = qApp->desktop()->screenNumber(this);
+    const int maxHeight = qApp->desktop()->availableGeometry(screenId).height();
 
     int left, top, right, bottom;
     getContentsMargins(&left, &top, &right, &bottom);

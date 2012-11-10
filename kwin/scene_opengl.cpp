@@ -76,12 +76,15 @@ Sources and other compositing managers:
 
 #include <kxerrorhandler.h>
 
+#include <kwinglcolorcorrection.h>
 #include <kwinglplatform.h>
 
 #include "utils.h"
 #include "client.h"
+#include "composite.h"
 #include "deleted.h"
 #include "effects.h"
+#include "lanczosfilter.h"
 #include "overlaywindow.h"
 #include "paintredirector.h"
 
@@ -94,6 +97,7 @@ Sources and other compositing managers:
 #include <X11/extensions/Xcomposite.h>
 
 #include <qpainter.h>
+#include <QDesktopWidget>
 #include <QVector2D>
 #include <QVector4D>
 #include <QMatrix4x4>
@@ -132,7 +136,7 @@ void OpenGLBackend::setFailed(const QString &reason)
 
 void OpenGLBackend::idle()
 {
-    flushBuffer();
+    present();
 }
 
 /************************************************
@@ -150,11 +154,6 @@ SceneOpenGL::SceneOpenGL(Workspace* ws, OpenGLBackend *backend)
 
     // perform Scene specific checks
     GLPlatform *glPlatform = GLPlatform::instance();
-    if (glPlatform->isSoftwareEmulation()) {
-        kError(1212) << "OpenGL Software Rasterizer detected. Falling back to XRender.";
-        QTimer::singleShot(0, Workspace::self(), SLOT(fallbackToXRenderCompositing()));
-        return;
-    }
 #ifndef KWIN_HAVE_OPENGLES
     if (!hasGLExtension("GL_ARB_texture_non_power_of_two")
             && !hasGLExtension("GL_ARB_texture_rectangle")) {
@@ -162,8 +161,8 @@ SceneOpenGL::SceneOpenGL(Workspace* ws, OpenGLBackend *backend)
         return; // error
     }
 #endif
-    if (glPlatform->isMesaDriver() && glPlatform->mesaVersion() < kVersionNumber(7, 10)) {
-        kError(1212) << "KWin requires at least Mesa 7.10 for OpenGL compositing.";
+    if (glPlatform->isMesaDriver() && glPlatform->mesaVersion() < kVersionNumber(8, 0)) {
+        kError(1212) << "KWin requires at least Mesa 8.0 for OpenGL compositing.";
         return;
     }
 #ifndef KWIN_HAVE_OPENGLES
@@ -246,7 +245,7 @@ SceneOpenGL *SceneOpenGL::createScene()
             return scene;
         }
     }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (SceneOpenGL1::supported(backend)) {
         scene = new SceneOpenGL1(backend);
         if (scene->initFailed()) {
@@ -256,6 +255,12 @@ SceneOpenGL *SceneOpenGL::createScene()
     }
 #endif
     if (!scene) {
+        if (GLPlatform::instance()->recommendedCompositor() == XRenderCompositing) {
+            kError(1212) << "OpenGL driver recommends XRender based compositing. Falling back to XRender.";
+            kError(1212) << "To overwrite the detection use the environment variable KWIN_COMPOSE";
+            kError(1212) << "For more information see http://community.kde.org/KWin/Environment_Variables#KWIN_COMPOSE";
+            QTimer::singleShot(0, Compositor::self(), SLOT(fallbackToXRenderCompositing()));
+        }
         delete backend;
     }
 
@@ -439,14 +444,23 @@ void SceneOpenGL::screenGeometryChanged(const QSize &size)
 //****************************************
 bool SceneOpenGL2::supported(OpenGLBackend *backend)
 {
+    const QByteArray forceEnv = qgetenv("KWIN_COMPOSE");
+    if (!forceEnv.isEmpty()) {
+        if (qstrcmp(forceEnv, "O2") == 0) {
+            kDebug(1212) << "OpenGL 2 compositing enforced by environment variable";
+            return true;
+        } else {
+            // OpenGL 2 disabled by environment variable
+            return false;
+        }
+    }
     if (!backend->isDirectRendering()) {
         return false;
     }
-#ifndef KWIN_HAVE_OPENGLES
-    if (!GLPlatform::instance()->supports(GLSL) || GLPlatform::instance()->supports(LimitedNPOT)) {
+    if (GLPlatform::instance()->recommendedCompositor() < OpenGL2Compositing) {
+        kDebug(1212) << "Driver does not recommend OpenGL 2 compositing";
         return false;
     }
-#endif
     if (options->isGlLegacy()) {
         kDebug(1212) << "OpenGL 2 disabled by config option";
         return false;
@@ -456,7 +470,14 @@ bool SceneOpenGL2::supported(OpenGLBackend *backend)
 
 SceneOpenGL2::SceneOpenGL2(OpenGLBackend *backend)
     : SceneOpenGL(Workspace::self(), backend)
+    , m_colorCorrection(new ColorCorrection(this))
 {
+    // Initialize color correction before the shaders
+    kDebug(1212) << "Color correction:" << options->isColorCorrected();
+    m_colorCorrection->setEnabled(options->isColorCorrected());
+    connect(m_colorCorrection, SIGNAL(changed()), Compositor::self(), SLOT(addRepaintFull()));
+    connect(options, SIGNAL(colorCorrectedChanged()), this, SLOT(slotColorCorrectedChanged()));
+
     if (!ShaderManager::instance()->isValid()) {
         kDebug(1212) << "No Scene Shaders available";
         return;
@@ -504,14 +525,73 @@ SceneOpenGL::Window *SceneOpenGL2::createWindow(Toplevel *t)
     return new SceneOpenGL2Window(t);
 }
 
+void SceneOpenGL2::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
+{
+    if (options->isColorCorrected()) {
+        // Split the painting for separate screens
+        int numScreens = Workspace::self()->numScreens();
+        for (int screen = 0; screen < numScreens; ++ screen) {
+            QRegion regionForScreen(region);
+            if (numScreens > 1)
+                regionForScreen = region.intersected(Workspace::self()->screenGeometry(screen));
+
+            data.setScreen(screen);
+            performPaintWindow(w, mask, regionForScreen, data);
+        }
+    } else {
+        performPaintWindow(w, mask, region, data);
+    }
+}
+
+void SceneOpenGL2::performPaintWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
+{
+    if (mask & PAINT_WINDOW_LANCZOS) {
+        if (m_lanczosFilter.isNull()) {
+            m_lanczosFilter = new LanczosFilter(this);
+            // recreate the lanczos filter when the screen gets resized
+            connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), m_lanczosFilter.data(), SLOT(deleteLater()));
+            connect(QApplication::desktop(), SIGNAL(resized(int)), m_lanczosFilter.data(), SLOT(deleteLater()));
+        }
+        m_lanczosFilter.data()->performPaint(w, mask, region, data);
+    } else
+        w->sceneWindow()->performPaint(mask, region, data);
+}
+
+ColorCorrection *SceneOpenGL2::colorCorrection()
+{
+    return m_colorCorrection;
+}
+
+void SceneOpenGL2::slotColorCorrectedChanged()
+{
+    m_colorCorrection->setEnabled(options->isColorCorrected());
+
+    // Reload all shaders
+    ShaderManager::cleanup();
+    ShaderManager::instance();
+}
+
 //****************************************
 // SceneOpenGL1
 //****************************************
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
 bool SceneOpenGL1::supported(OpenGLBackend *backend)
 {
-    // any OpenGL context will do
-    return !backend->isFailed();
+    const QByteArray forceEnv = qgetenv("KWIN_COMPOSE");
+    if (!forceEnv.isEmpty()) {
+        if (qstrcmp(forceEnv, "O1") == 0) {
+            kDebug(1212) << "OpenGL 1 compositing enforced by environment variable";
+            return true;
+        } else {
+            // OpenGL 1 disabled by environment variable
+            return false;
+        }
+    }
+    if (GLPlatform::instance()->recommendedCompositor() < OpenGL1Compositing) {
+        kDebug(1212) << "Driver does not recommend OpenGL 1 compositing";
+        return false;
+    }
+    return true;
 }
 
 SceneOpenGL1::SceneOpenGL1(OpenGLBackend *backend)
@@ -687,12 +767,12 @@ SceneOpenGL::TexturePrivate::~TexturePrivate()
 
 SceneOpenGL::Window::Window(Toplevel* c)
     : Scene::Window(c)
+    , m_scene(NULL)
     , texture(NULL)
     , topTexture(NULL)
     , leftTexture(NULL)
     , rightTexture(NULL)
     , bottomTexture(NULL)
-    , m_scene(NULL)
 {
 }
 
@@ -871,9 +951,9 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
     WindowQuadList contentQuads = data.quads.select(WindowQuadContents);
     if (!contentQuads.empty()) {
         texture->bind();
-        prepareStates(Content, data.opacity(), data.brightness(), data.saturation());
+        prepareStates(Content, data.opacity(), data.brightness(), data.saturation(), data.screen());
         renderQuads(mask, region, contentQuads, texture, false, hardwareClipping);
-        restoreStates(Content, data.opacity(), data.brightness(), data.saturation());
+        restoreStates(Content, data.opacity(), data.brightness(), data.saturation(), data.screen());
         texture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
         if (m_scene && m_scene->debug) {
@@ -1001,10 +1081,10 @@ void SceneOpenGL::Window::paintDecoration(const QPixmap* decoration, TextureType
     decorationTexture->setWrapMode(GL_CLAMP_TO_EDGE);
     decorationTexture->bind();
 
-    prepareStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation());
+    prepareStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation(), data.screen());
     makeDecorationArrays(quads, rect, decorationTexture);
     GLVertexBuffer::streamingBuffer()->render(region, GL_TRIANGLES, hardwareClipping);
-    restoreStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation());
+    restoreStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation(), data.screen());
     decorationTexture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
     if (m_scene && m_scene->debug) {
@@ -1038,9 +1118,9 @@ void SceneOpenGL::Window::paintShadow(const QRegion &region, const WindowPaintDa
         texture->setFilter(GL_NEAREST);
     texture->setWrapMode(GL_CLAMP_TO_EDGE);
     texture->bind();
-    prepareStates(Shadow, data.opacity(), data.brightness(), data.saturation());
+    prepareStates(Shadow, data.opacity(), data.brightness(), data.saturation(), data.screen());
     renderQuads(0, region, quads, texture, true, hardwareClipping);
-    restoreStates(Shadow, data.opacity(), data.brightness(), data.saturation());
+    restoreStates(Shadow, data.opacity(), data.brightness(), data.saturation(), data.screen());
     texture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
     if (m_scene && m_scene->debug) {
@@ -1167,6 +1247,7 @@ GLTexture *SceneOpenGL::Window::textureForType(SceneOpenGL::Window::TextureType 
 //***************************************
 SceneOpenGL2Window::SceneOpenGL2Window(Toplevel *c)
     : SceneOpenGL::Window(c)
+    , m_blendingEnabled(false)
 {
 }
 
@@ -1188,6 +1269,8 @@ void SceneOpenGL2Window::beginRenderWindow(int mask, const WindowPaintData &data
     }
 
     shader->setUniform(GLShader::WindowTransformation, transformation(mask, data));
+
+    static_cast<SceneOpenGL2*>(m_scene)->colorCorrection()->setupForOutput(data.screen());
 }
 
 void SceneOpenGL2Window::endRenderWindow(const WindowPaintData &data)
@@ -1197,22 +1280,37 @@ void SceneOpenGL2Window::endRenderWindow(const WindowPaintData &data)
     }
 }
 
-void SceneOpenGL2Window::prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation)
+void SceneOpenGL2Window::prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen)
 {
     // setup blending of transparent windows
     bool opaque = isOpaque() && opacity == 1.0;
     bool alpha = toplevel->hasAlpha() || type != Content;
-    if (type != Content)
-        opaque = false;
-    if (!opaque) {
-        glEnable(GL_BLEND);
-        if (alpha) {
-            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    if (type != Content) {
+        if (type == Shadow) {
+            opaque = false;
         } else {
-            glBlendColor((float)opacity, (float)opacity, (float)opacity, (float)opacity);
-            glBlendFunc(GL_ONE, GL_ONE_MINUS_CONSTANT_ALPHA);
+            if (opacity == 1.0 && toplevel->isClient()) {
+                opaque = !(static_cast<Client*>(toplevel)->decorationHasAlpha());
+            } else {
+                // TODO: add support in Deleted
+                opaque = false;
+            }
         }
     }
+    if (!opaque) {
+        glEnable(GL_BLEND);
+        if (options->isColorCorrected()) {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        } else {
+            if (alpha) {
+                glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            } else {
+                glBlendColor((float)opacity, (float)opacity, (float)opacity, (float)opacity);
+                glBlendFunc(GL_ONE, GL_ONE_MINUS_CONSTANT_ALPHA);
+            }
+        }
+    }
+    m_blendingEnabled = !opaque;
 
     const qreal rgb = brightness * opacity;
     const qreal a = opacity;
@@ -1221,25 +1319,29 @@ void SceneOpenGL2Window::prepareStates(TextureType type, qreal opacity, qreal br
     shader->setUniform(GLShader::ModulationConstant, QVector4D(rgb, rgb, rgb, a));
     shader->setUniform(GLShader::Saturation,         saturation);
     shader->setUniform(GLShader::AlphaToOne,         opaque ? 1 : 0);
+
+    static_cast<SceneOpenGL2*>(m_scene)->colorCorrection()->setupForOutput(screen);
 }
 
-void SceneOpenGL2Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation)
+void SceneOpenGL2Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen)
 {
+    Q_UNUSED(type);
+    Q_UNUSED(opacity);
     Q_UNUSED(brightness);
     Q_UNUSED(saturation);
-    bool opaque = isOpaque() && opacity == 1.0;
-    if (type != Content)
-        opaque = false;
-    if (!opaque) {
+    Q_UNUSED(screen);
+    if (m_blendingEnabled) {
         glDisable(GL_BLEND);
     }
     ShaderManager::instance()->getBoundShader()->setUniform(GLShader::AlphaToOne, 0);
+
+    static_cast<SceneOpenGL2*>(m_scene)->colorCorrection()->setupForOutput(-1);
 }
 
 //***************************************
 // SceneOpenGL1Window
 //***************************************
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
 SceneOpenGL1Window::SceneOpenGL1Window(Toplevel *c)
     : SceneOpenGL::Window(c)
 {
@@ -1260,8 +1362,10 @@ void SceneOpenGL1Window::endRenderWindow(const WindowPaintData &data)
     popMatrix();
 }
 
-void SceneOpenGL1Window::prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation)
+void SceneOpenGL1Window::prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen)
 {
+    Q_UNUSED(screen)
+
     GLTexture *tex = textureForType(type);
     bool alpha = false;
     bool opaque = true;
@@ -1299,7 +1403,8 @@ void SceneOpenGL1Window::prepareStates(TextureType type, qreal opacity, qreal br
         // Note that both operands have to be in range [0.5; 1] since opengl
         //  automatically substracts 0.5 from them
         glActiveTexture(GL_TEXTURE1);
-        float saturation_constant[] = { 0.5 + 0.5 * 0.30, 0.5 + 0.5 * 0.59, 0.5 + 0.5 * 0.11, saturation };
+        float saturation_constant[] = { 0.5 + 0.5 * 0.30, 0.5 + 0.5 * 0.59, 0.5 + 0.5 * 0.11,
+                                        static_cast<float>(saturation) };
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
         glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
         glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PREVIOUS);
@@ -1367,7 +1472,8 @@ void SceneOpenGL1Window::prepareStates(TextureType type, qreal opacity, qreal br
                       opacity);
         } else {
             // Multiply color by brightness and replace alpha by opacity
-            float constant[] = { opacityByBrightness, opacityByBrightness, opacityByBrightness, opacity };
+            float constant[] = { opacityByBrightness, opacityByBrightness, opacityByBrightness,
+                                 static_cast<float>(opacity) };
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
             glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
             glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
@@ -1389,8 +1495,10 @@ void SceneOpenGL1Window::prepareStates(TextureType type, qreal opacity, qreal br
     }
 }
 
-void SceneOpenGL1Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation)
+void SceneOpenGL1Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen)
 {
+    Q_UNUSED(screen)
+
     GLTexture *tex = textureForType(type);
     if (opacity != 1.0 || saturation != 1.0 || brightness != 1.0f) {
         if (saturation != 1.0 && tex->saturationSupported()) {
@@ -1528,7 +1636,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (!shader)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 #endif
@@ -1645,7 +1753,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
             const float a = opacity * frameOpacity;
             shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
         }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
         else
             glColor4f(0.0, 0.0, 0.0, opacity * frameOpacity);
 #endif
@@ -1680,7 +1788,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
             const float a = opacity * frameOpacity;
             shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
         }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
         else
             glColor4f(1.0, 1.0, 1.0, opacity * frameOpacity);
 #endif
@@ -1702,7 +1810,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
                 const float a = opacity * frameOpacity;
                 shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
             }
-    #ifndef KWIN_HAVE_OPENGLES
+    #ifdef KWIN_HAVE_OPENGL_1
             else
                 glColor4f(1.0, 1.0, 1.0, opacity * frameOpacity);
     #endif
@@ -1724,7 +1832,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
                 const float a = opacity * (1.0 - m_effectFrame->crossFadeProgress());
                 shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
             }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
             else
                 glColor4f(1.0, 1.0, 1.0, opacity * (1.0 - m_effectFrame->crossFadeProgress()));
 #endif
@@ -1736,7 +1844,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
                 const float a = opacity * m_effectFrame->crossFadeProgress();
                 shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
             }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
             else
                 glColor4f(1.0, 1.0, 1.0, opacity * m_effectFrame->crossFadeProgress());
 #endif
@@ -1745,7 +1853,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
                 const QVector4D constant(opacity, opacity, opacity, opacity);
                 shader->setUniform(GLShader::ModulationConstant, constant);
             }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
             else
                 glColor4f(1.0, 1.0, 1.0, opacity);
 #endif
@@ -1766,7 +1874,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
                 const float a = opacity * (1.0 - m_effectFrame->crossFadeProgress());
                 shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
             }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
             else
                 glColor4f(1.0, 1.0, 1.0, opacity *(1.0 - m_effectFrame->crossFadeProgress()));
 #endif
@@ -1778,7 +1886,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
                 const float a = opacity * m_effectFrame->crossFadeProgress();
                 shader->setUniform(GLShader::ModulationConstant, QVector4D(a, a, a, a));
             }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
             else
                 glColor4f(1.0, 1.0, 1.0, opacity * m_effectFrame->crossFadeProgress());
 #endif
@@ -1787,7 +1895,7 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
                 const QVector4D constant(opacity, opacity, opacity, opacity);
                 shader->setUniform(GLShader::ModulationConstant, constant);
             }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
             else
                 glColor4f(1.0, 1.0, 1.0, opacity);
 #endif

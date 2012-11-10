@@ -54,7 +54,10 @@ void AuroraeFactory::init()
 
     KConfig conf("auroraerc");
     KConfigGroup group(&conf, "Engine");
-    if (group.hasKey("EngineType")) {
+    if (!group.hasKey("EngineType") && !group.hasKey("ThemeName")) {
+        // neither engine type and theme name are configured, use the only available theme
+        initQML(group);
+    } else if (group.hasKey("EngineType")) {
         const QString engineType = group.readEntry("EngineType", "aurorae").toLower();
         if (engineType == "qml") {
             initQML(group);
@@ -71,7 +74,12 @@ void AuroraeFactory::init()
 void AuroraeFactory::initAurorae(KConfig &conf, KConfigGroup &group)
 {
     m_engineType = AuroraeEngine;
-    const QString themeName = group.readEntry("ThemeName", "example-deco");
+    const QString themeName = group.readEntry("ThemeName");
+    if (themeName.isEmpty()) {
+        // no theme configured, fall back to Plastik QML theme
+        initQML(group);
+        return;
+    }
     KConfig config("aurorae/themes/" + themeName + '/' + themeName + "rc", KConfig::FullConfig, "data");
     KConfigGroup themeGroup(&conf, themeName);
     m_theme->loadTheme(themeName, config);
@@ -90,7 +98,7 @@ void AuroraeFactory::initAurorae(KConfig &conf, KConfigGroup &group)
 void AuroraeFactory::initQML(const KConfigGroup &group)
 {
     // try finding the QML package
-    const QString themeName = group.readEntry("ThemeName");
+    const QString themeName = group.readEntry("ThemeName", "kwin4_decoration_qml_plastik");
     kDebug(1212) << "Trying to load QML Decoration " << themeName;
     const QString internalname = themeName.toLower();
 
@@ -172,6 +180,7 @@ bool AuroraeFactory::supports(Ability ability) const
     switch (ability) {
     case AbilityAnnounceButtons:
     case AbilityUsesAlphaChannel:
+    case AbilityAnnounceAlphaChannel:
     case AbilityButtonMenu:
     case AbilityButtonSpacer:
     case AbilityExtendIntoClientArea:
@@ -230,6 +239,7 @@ AuroraeClient::AuroraeClient(KDecorationBridge *bridge, KDecorationFactory *fact
     connect(AuroraeFactory::instance(), SIGNAL(buttonsChanged()), SIGNAL(buttonsChanged()));
     connect(AuroraeFactory::instance(), SIGNAL(configChanged()), SIGNAL(configChanged()));
     connect(AuroraeFactory::instance(), SIGNAL(titleFontChanged()), SIGNAL(fontChanged()));
+    connect(m_item, SIGNAL(alphaChanged()), SLOT(slotAlphaChanged()));
 }
 
 AuroraeClient::~AuroraeClient()
@@ -265,6 +275,7 @@ void AuroraeClient::init()
     pal2.setColor(widget()->backgroundRole(), Qt::transparent);
     widget()->setPalette(pal2);
     m_scene->addItem(m_item);
+    slotAlphaChanged();
 
     AuroraeFactory::instance()->theme()->setCompositingActive(compositingActive());
 }
@@ -497,6 +508,8 @@ void AuroraeClient::themeChanged()
         m_item->setHeight(m_scene->sceneRect().height());
     }
     m_scene->addItem(m_item);
+    connect(m_item, SIGNAL(alphaChanged()), SLOT(slotAlphaChanged()));
+    slotAlphaChanged();
 }
 
 int AuroraeClient::doubleClickInterval() const
@@ -546,6 +559,17 @@ QVariant AuroraeClient::readConfig(const QString &key, const QVariant &defaultVa
 {
     KSharedConfigPtr config = KSharedConfig::openConfig("auroraerc");
     return config->group(AuroraeFactory::instance()->currentThemeName()).readEntry(key, defaultValue);
+}
+
+void AuroraeClient::slotAlphaChanged()
+{
+    QVariant alphaProperty = m_item->property("alpha");
+    if (alphaProperty.isValid() && alphaProperty.canConvert<bool>()) {
+        setAlphaEnabled(alphaProperty.toBool());
+    } else {
+        // by default all Aurorae themes use the alpha channel
+        setAlphaEnabled(true);
+    }
 }
 
 } // namespace Aurorae

@@ -130,6 +130,10 @@ class Options : public QObject, public KDecorationOptions
     */
     Q_PROPERTY(bool showGeometryTip READ showGeometryTip WRITE setShowGeometryTip NOTIFY showGeometryTipChanged)
     /**
+    * whether the visible name should be condensed
+    */
+    Q_PROPERTY(bool condensedTitle READ condensedTitle WRITE setCondensedTitle NOTIFY condensedTitleChanged)
+    /**
     * Whether electric borders are enabled. With electric borders
     * you can change desktop by moving the mouse pointer towards the edge
     * of the screen
@@ -155,6 +159,10 @@ class Options : public QObject, public KDecorationOptions
     * Whether a window is tiled to half screen when reaching left or right screen edge while been moved
     */
     Q_PROPERTY(bool electricBorderTiling READ electricBorderTiling WRITE setElectricBorderTiling NOTIFY electricBorderTilingChanged)
+    /**
+    * Whether a window is tiled to half screen when reaching left or right screen edge while been moved
+    */
+    Q_PROPERTY(float electricBorderCornerRatio READ electricBorderCornerRatio WRITE setElectricBorderCornerRatio NOTIFY electricBorderCornerRatioChanged)
     Q_PROPERTY(bool borderlessMaximizedWindows READ borderlessMaximizedWindows WRITE setBorderlessMaximizedWindows NOTIFY borderlessMaximizedWindowsChanged)
     /**
      * timeout before non-responding application will be killed after attempt to close
@@ -179,6 +187,7 @@ class Options : public QObject, public KDecorationOptions
      **/
     Q_PROPERTY(int glSmoothScale READ glSmoothScale WRITE setGlSmoothScale NOTIFY glSmoothScaleChanged)
     Q_PROPERTY(bool glVSync READ isGlVSync WRITE setGlVSync NOTIFY glVSyncChanged)
+    Q_PROPERTY(bool colorCorrected READ isColorCorrected WRITE setColorCorrected NOTIFY colorCorrectedChanged)
     Q_PROPERTY(bool xrenderSmoothScale READ isXrenderSmoothScale WRITE setXrenderSmoothScale NOTIFY xrenderSmoothScaleChanged)
     Q_PROPERTY(uint maxFpsInterval READ maxFpsInterval WRITE setMaxFpsInterval NOTIFY maxFpsIntervalChanged)
     Q_PROPERTY(uint refreshRate READ refreshRate WRITE setRefreshRate NOTIFY refreshRateChanged)
@@ -440,6 +449,11 @@ public:
     */
     bool showGeometryTip() const;
 
+    /**
+     * returns whether the user prefers his caption clean
+     */
+    bool condensedTitle() const;
+
     enum { ElectricDisabled = 0, ElectricMoveOnly = 1, ElectricAlways = 2 };
     /**
     * @returns The action assigned to the specified electric border
@@ -479,6 +493,12 @@ public:
     */
     bool electricBorderTiling() const {
         return electric_border_tiling;
+    }
+    /**
+    * @returns the factor that determines the corner part of the edge (ie. 0.1 means tiny corner)
+    */
+    float electricBorderCornerRatio() const {
+        return electric_border_corner_ratio;
     }
 
     bool borderlessMaximizedWindows() const {
@@ -541,6 +561,9 @@ public:
     }
     bool isGlVSync() const {
         return m_glVSync;
+    }
+    bool isColorCorrected() const {
+        return m_colorCorrected;
     }
     // XRender
     bool isXrenderSmoothScale() const {
@@ -606,11 +629,13 @@ public:
     void setCommandAll3(MouseCommand commandAll3);
     void setKeyCmdAllModKey(uint keyCmdAllModKey);
     void setShowGeometryTip(bool showGeometryTip);
+    void setCondensedTitle(bool condensedTitle);
     void setElectricBorderDelay(int electricBorderDelay);
     void setElectricBorderCooldown(int electricBorderCooldown);
     void setElectricBorderPushbackPixels(int electricBorderPushbackPixels);
     void setElectricBorderMaximize(bool electricBorderMaximize);
     void setElectricBorderTiling(bool electricBorderTiling);
+    void setElectricBorderCornerRatio(float electricBorderCornerRatio);
     void setBorderlessMaximizedWindows(bool borderlessMaximizedWindows);
     void setKillPingTimeout(int killPingTimeout);
     void setHideUtilityWindowsForInactive(bool hideUtilityWindowsForInactive);
@@ -624,6 +649,7 @@ public:
     void setUnredirectFullscreen(bool unredirectFullscreen);
     void setGlSmoothScale(int glSmoothScale);
     void setGlVSync(bool glVSync);
+    void setColorCorrected(bool colorCorrected);
     void setXrenderSmoothScale(bool xrenderSmoothScale);
     void setMaxFpsInterval(uint maxFpsInterval);
     void setRefreshRate(uint refreshRate);
@@ -746,6 +772,9 @@ public:
     static bool defaultShowGeometryTip() {
         return false;
     }
+    static bool defaultCondensedTitle() {
+        return false;
+    }
     static ElectricBorderAction defaultElectricBorderTop() {
         return ElectricActionNone;
     }
@@ -788,6 +817,9 @@ public:
     static bool defaultElectricBorderTiling() {
         return true;
     }
+    static float defaultElectricBorderCornerRatio() {
+        return 0.25;
+    }
     static bool defaultBorderlessMaximizedWindows() {
         return false;
     }
@@ -826,6 +858,9 @@ public:
     }
     static bool defaultGlVSync() {
         return true;
+    }
+    static bool defaultColorCorrected() {
+        return false;
     }
     static bool defaultXrenderSmoothScale() {
         return false;
@@ -908,12 +943,14 @@ Q_SIGNALS:
     void commandAll3Changed();
     void keyCmdAllModKeyChanged();
     void showGeometryTipChanged();
+    void condensedTitleChanged();
     void electricBordersChanged();
     void electricBorderDelayChanged();
     void electricBorderCooldownChanged();
     void electricBorderPushbackPixelsChanged();
     void electricBorderMaximizeChanged();
     void electricBorderTilingChanged();
+    void electricBorderCornerRatioChanged();
     void borderlessMaximizedWindowsChanged();
     void killPingTimeoutChanged();
     void hideUtilityWindowsForInactiveChanged();
@@ -927,6 +964,7 @@ Q_SIGNALS:
     void unredirectFullscreenChanged();
     void glSmoothScaleChanged();
     void glVSyncChanged();
+    void colorCorrectedChanged();
     void xrenderSmoothScaleChanged();
     void maxFpsIntervalChanged();
     void refreshRateChanged();
@@ -970,6 +1008,7 @@ private:
     bool m_unredirectFullscreen;
     int m_glSmoothScale;
     bool m_glVSync;
+    bool m_colorCorrected;
     bool m_xrenderSmoothScale;
     uint m_maxFpsInterval;
     // Settings that should be auto-detected
@@ -1014,8 +1053,10 @@ private:
     int electric_border_pushback_pixels;
     bool electric_border_maximize;
     bool electric_border_tiling;
+    float electric_border_corner_ratio;
     bool borderless_maximized_windows;
     bool show_geometry_tip;
+    bool condensed_title;
     int animationSpeed; // 0 - instant, 5 - very slow
 
     MouseCommand wheelToMouseCommand(MouseWheelCommand com, int delta) const;

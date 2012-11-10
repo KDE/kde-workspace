@@ -63,12 +63,12 @@ void LanczosFilter::init()
     if (!force && options->glSmoothScale() != 2)
         return; // disabled by config
 
-    // The lanczos filter is reported to be broken with the Intel driver and Mesa 7.10
+    // The lanczos filter is reported to be broken with the Intel driver prior SandyBridge
     GLPlatform *gl = GLPlatform::instance();
-    if (!force && gl->driver() == Driver_Intel && gl->mesaVersion() >= kVersionNumber(7, 10) && gl->chipClass() < SandyBridge)
+    if (!force && gl->driver() == Driver_Intel && gl->chipClass() < SandyBridge)
         return;
-    // With fglrx the ARB Shader crashes KWin (see Bug #270818 and #286795) and GLSL Shaders are not functional
-    if (!force && gl->driver() == Driver_Catalyst) {
+    // With fglrx the ARB Shader crashes KWin (see Bug #270818 and #286795)
+    if (!force && gl->driver() == Driver_Catalyst && effects->compositingType() == OpenGL1Compositing) {
         return;
     }
 
@@ -400,7 +400,7 @@ void LanczosFilter::timerEvent(QTimerEvent *event)
 
 void LanczosFilter::prepareRenderStates(GLTexture* tex, double opacity, double brightness, double saturation)
 {
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     Q_UNUSED(tex)
     Q_UNUSED(opacity)
     Q_UNUSED(brightness)
@@ -432,7 +432,8 @@ void LanczosFilter::prepareRenderStates(GLTexture* tex, double opacity, double b
         // Note that both operands have to be in range [0.5; 1] since opengl
         //  automatically substracts 0.5 from them
         glActiveTexture(GL_TEXTURE1);
-        float saturation_constant[] = { 0.5 + 0.5 * 0.30, 0.5 + 0.5 * 0.59, 0.5 + 0.5 * 0.11, saturation };
+        float saturation_constant[] = { 0.5 + 0.5 * 0.30, 0.5 + 0.5 * 0.59, 0.5 + 0.5 * 0.11,
+                                        static_cast<float>(saturation) };
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
         glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
         glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PREVIOUS);
@@ -500,7 +501,8 @@ void LanczosFilter::prepareRenderStates(GLTexture* tex, double opacity, double b
                       opacity);
         } else {
             // Multiply color by brightness and replace alpha by opacity
-            float constant[] = { opacityByBrightness, opacityByBrightness, opacityByBrightness, opacity };
+            float constant[] = { opacityByBrightness, opacityByBrightness, opacityByBrightness,
+                                 static_cast<float>(opacity) };
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
             glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
             glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
@@ -517,7 +519,7 @@ void LanczosFilter::prepareRenderStates(GLTexture* tex, double opacity, double b
 
 void LanczosFilter::restoreRenderStates(GLTexture* tex, double opacity, double brightness, double saturation)
 {
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     Q_UNUSED(tex)
     Q_UNUSED(opacity)
     Q_UNUSED(brightness)
@@ -557,7 +559,7 @@ LanczosShader::LanczosShader(QObject* parent)
 LanczosShader::~LanczosShader()
 {
     delete m_shader;
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (m_arbProgram) {
         glDeleteProgramsARB(1, &m_arbProgram);
         m_arbProgram = 0;
@@ -569,7 +571,7 @@ void LanczosShader::bind()
 {
     if (m_shader)
         ShaderManager::instance()->pushShader(m_shader);
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     else {
         glEnable(GL_FRAGMENT_PROGRAM_ARB);
         glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_arbProgram);
@@ -581,7 +583,7 @@ void LanczosShader::unbind()
 {
     if (m_shader)
         ShaderManager::instance()->popShader();
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     else {
         int boundObject;
         glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &boundObject);
@@ -600,7 +602,7 @@ void LanczosShader::setUniforms()
         glUniform2fv(m_uOffsets, 16, (const GLfloat*)m_offsets);
         glUniform4fv(m_uKernel, 16, (const GLfloat*)m_kernel);
     }
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     else {
         for (int i = 0; i < 16; ++i) {
             glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, i, m_offsets[i].x(), m_offsets[i].y(), 0, 0);
@@ -633,7 +635,7 @@ bool LanczosShader::init()
         }
     }
 
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     // no ARB shader in GLES
     return false;
 #else

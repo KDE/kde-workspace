@@ -68,6 +68,7 @@ K_EXPORT_PLUGIN(PowerDevilDPMSActionFactory("powerdevildpmsaction"))
 
 PowerDevilDPMSAction::PowerDevilDPMSAction(QObject* parent, const QVariantList &args)
     : Action(parent)
+    , m_idleTime(0)
     , d(new Private)
 {
     setRequiredPolicies(PowerDevil::PolicyAgent::ChangeScreenSettings);
@@ -121,6 +122,7 @@ void PowerDevilDPMSAction::onProfileUnload()
     } else {
         kDebug() << "Not performing DPMS action due to inhibition";
     }
+    DPMSSetTimeouts(dpy, 0, 0, 0);
 }
 
 void PowerDevilDPMSAction::onWakeupFromIdle()
@@ -147,6 +149,9 @@ void PowerDevilDPMSAction::onProfileLoad()
     XFlush(dpy);
     XSetErrorHandler(d->defaultHandler);
 
+    // An unloaded action will have m_idleTime = 0:
+    // DPMS enabled with zeroed timeouts is effectively disabled.
+    // So onProfileLoad is always safe
     DPMSSetTimeouts(dpy, (CARD16)m_idleTime, (CARD16)(m_idleTime * 1.5), (CARD16)(m_idleTime * 2));
 
     XFlush(dpy);
@@ -185,6 +190,9 @@ void PowerDevilDPMSAction::triggerImpl(const QVariantMap& args)
             DPMSForceLevel(dpy, DPMSModeSuspend);
         }
     }
+
+    // this leaves DPMS enabled but if it's meant to be disabled
+    // then the timeouts will be zero and so effectively disabled
 }
 
 bool PowerDevilDPMSAction::loadAction(const KConfigGroup& config)
@@ -194,13 +202,20 @@ bool PowerDevilDPMSAction::loadAction(const KConfigGroup& config)
     return true;
 }
 
+bool PowerDevilDPMSAction::onUnloadAction()
+{
+    m_idleTime = 0;
+    return Action::onUnloadAction();
+}
+
 void PowerDevilDPMSAction::onUnavailablePoliciesChanged(PowerDevil::PolicyAgent::RequiredPolicies policies)
 {
     if (policies & PowerDevil::PolicyAgent::ChangeScreenSettings) {
         // Inhibition triggered: disable DPMS
         kDebug() << "Disabling DPMS due to inhibition";
         Display *dpy = QX11Info::display();
-        DPMSDisable(dpy);
+        DPMSSetTimeouts(dpy, 0, 0, 0);
+        DPMSDisable(dpy); // wakes the screen - do we want this?
     } else {
         // Inhibition removed: let's start again
         onProfileLoad();

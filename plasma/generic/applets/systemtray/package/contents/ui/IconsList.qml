@@ -25,7 +25,7 @@ import QtQuick 1.1
 import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
 import Private 0.1
 
-import "IconsList.js" as IconsListJS
+import "../code/IconsList.js" as IconsListJS
 
 Item {
     id: root_item
@@ -67,7 +67,7 @@ Item {
                 alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wordWrap: false
                 textSelectable: false
-                text: ui_task.name
+                text: task.name
                 z: -10 // We place label under mouse area to be able to handle mouse events
             }
 
@@ -77,9 +77,8 @@ Item {
                 z: 0
 
                 // we redirect some events to IconWidget or applet
-                target: ui_task.widget ? ui_task.widget : ui_item.getIconWidget()
-                applet: plasmoid.applet
-                isWidget: ui_task.widget != null
+                target: task.type == TypeStatusItem ? ui_item.getIconWidget() : task
+                applet: plasmoid
 
                 // Next events we process manually
                 onClickMiddle: ui_item.click(Qt.MiddleButton)
@@ -106,7 +105,7 @@ Item {
             }
 
             Connections {
-                target: ui_task
+                target: task
                 onChangedName: {
                     // if name is changed => we should recalculate width of popup
                     IconsListJS.tasks[delegate_root_item] = name_item.width

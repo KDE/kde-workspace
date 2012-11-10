@@ -27,8 +27,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Includes
-#include <QtCore/QVariant>
-#include <QtGui/QGraphicsItem>
 #include <QtDeclarative/QDeclarativeItem>
 
 #include <KDE/Plasma/Applet>
@@ -36,12 +34,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Forward declarations
+class QGraphicsWidget;
 class QGraphicsSceneWheelEvent;
 class QGraphicsSceneContextMenuEvent;
 
 
 namespace SystemTray
 {
+class Task;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /** @class MouseRedirectArea
@@ -51,18 +51,15 @@ class MouseRedirectArea: public QDeclarativeItem
 {
     Q_OBJECT
 
-    Q_PROPERTY(QVariant target READ target WRITE setTarget)
-    Q_PROPERTY(QVariant applet READ applet WRITE setApplet)
-    Q_PROPERTY(bool isWidget READ isWidget WRITE setIsWidget)
+    Q_PROPERTY(QObject* target READ target WRITE setTarget)
+    Q_PROPERTY(QObject* applet READ applet WRITE setApplet)
 public:
     explicit MouseRedirectArea(QDeclarativeItem *parent = 0);
 
-    QVariant target() const { return QVariant::fromValue(m_target); }
-    void setTarget(QVariant t);
-    QVariant applet() const { return QVariant::fromValue((QObject*)m_applet); }
-    void setApplet(QVariant t);
-    bool isWidget() const { return m_isWidget; }
-    void setIsWidget(bool is_widget);
+    QObject* target() const { return m_target; }
+    void setTarget(QObject* t);
+    QObject *applet() const { return m_applet; }
+    void setApplet(QObject *applet);
 
 signals:
     void clickMiddle();
@@ -82,11 +79,15 @@ private: //Events
 
     template<class T> void forwardEvent(T *event, bool is_context_menu = false);
 
+private: // Methods
+    void processTarget();
+
 private: //Variables
-    QGraphicsItem *m_target;
+    QGraphicsWidget *m_widget;
+    Task *m_task;
+    QObject *m_target;
     Plasma::Applet *m_applet;
     bool m_isApplet; // true if target is an applet
-    bool m_isWidget;
 };
 
 } // namespace SystemTray

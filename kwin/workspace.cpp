@@ -83,6 +83,12 @@ namespace KWin
 extern int screen_number;
 static const int KWIN_MAX_NUMBER_DESKTOPS = 20;
 
+#ifdef KWIN_BUILD_KAPPMENU
+static const char *KDED_SERVICE = "org.kde.kded";
+static const char *KDED_APPMENU_PATH = "/modules/appmenu";
+static const char *KDED_INTERFACE = "org.kde.kded";
+#endif
+
 Workspace* Workspace::_self = 0;
 
 //-----------------------------------------------------------------------------
@@ -147,6 +153,18 @@ Workspace::Workspace(bool restore)
 {
     // If KWin was already running it saved its configuration after loosing the selection -> Reread
     QFuture<void> reparseConfigFuture = QtConcurrent::run(options, &Options::reparseConfiguration);
+
+#ifdef KWIN_BUILD_KAPPMENU
+    QDBusConnection dbus = QDBusConnection::sessionBus();
+    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "showRequest",
+                 this, SLOT(slotShowRequest(qulonglong)));
+    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "menuAvailable",
+                 this, SLOT(slotMenuAvailable(qulonglong)));
+    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "menuHidden",
+                 this, SLOT(slotMenuHidden(qulonglong)));
+    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "clearMenus",
+                 this, SLOT(slotClearMenus()));
+#endif
 
     // Initialize desktop grid array
     desktopGrid_[0] = 0;
@@ -397,26 +415,50 @@ void Workspace::init()
         // Begin updates blocker block
         StackingUpdatesBlocker blocker(this);
 
-        unsigned int i, nwins;
-        Window root_return, parent_return;
-        Window* wins;
-        XQueryTree(display(), rootWindow(), &root_return, &parent_return, &wins, &nwins);
         bool fixoffset = KCmdLineArgs::parsedArgs()->getOption("crashes").toInt() > 0;
-        for (i = 0; i < nwins; i++) {
-            XWindowAttributes attr;
-            XGetWindowAttributes(display(), wins[i], &attr);
-            if (attr.override_redirect) {
-                createUnmanaged(wins[i]);
+        xcb_connection_t *conn = connection();
+
+        xcb_query_tree_reply_t *tree = xcb_query_tree_reply(conn,
+                            xcb_query_tree_unchecked(conn, rootWindow()), 0);
+        xcb_window_t *wins = xcb_query_tree_children(tree);
+
+        QVector<xcb_get_window_attributes_cookie_t> attr_cookies;
+        QVector<xcb_get_geometry_cookie_t> geom_cookies;
+
+        attr_cookies.reserve(tree->children_len);
+        geom_cookies.reserve(tree->children_len);
+
+        // Request the attributes and geometries of all toplevel windows
+        for (int i = 0; i < tree->children_len; i++) {
+            attr_cookies << xcb_get_window_attributes(conn, wins[i]);
+            geom_cookies << xcb_get_geometry(conn, wins[i]);
+        }
+
+        // Get the replies
+        for (int i = 0; i < tree->children_len; i++) {
+            ScopedCPointer<xcb_get_window_attributes_reply_t> attr
+                        = xcb_get_window_attributes_reply(conn, attr_cookies[i], 0);
+            ScopedCPointer<xcb_get_geometry_reply_t> geometry
+                        = xcb_get_geometry_reply(conn, geom_cookies[i], 0);
+
+            if (!attr || !geometry)
                 continue;
-            }
-            if (attr.map_state != IsUnmapped) {
+
+            if (attr->override_redirect) {
+                if (attr->map_state == XCB_MAP_STATE_VIEWABLE &&
+                    attr->_class != XCB_WINDOW_CLASS_INPUT_ONLY)
+                    // ### This will request the attributes again
+                    createUnmanaged(wins[i]);
+            } else if (attr->map_state != XCB_MAP_STATE_UNMAPPED) {
                 if (fixoffset)
-                    fixPositionAfterCrash(wins[ i ], attr);
+                    fixPositionAfterCrash(wins[i], geometry);
+
+                // ### This will request the attributes again
                 createClient(wins[i], true);
             }
         }
-        if (wins)
-            XFree((void*)(wins));
+
+        free(tree);
 
         // Propagate clients, will really happen at the end of the updates blocker block
         updateStackingOrder(true);
@@ -527,16 +569,16 @@ Client* Workspace::createClient(Window w, bool is_mapped)
 {
     StackingUpdatesBlocker blocker(this);
     Client* c = new Client(this);
-    if (!c->manage(w, is_mapped)) {
-        Client::deleteClient(c, Allowed);
-        return NULL;
-    }
     connect(c, SIGNAL(needsRepaint()), m_compositor, SLOT(scheduleRepaint()));
     connect(c, SIGNAL(activeChanged()), m_compositor, SLOT(checkUnredirect()));
     connect(c, SIGNAL(fullScreenChanged()), m_compositor, SLOT(checkUnredirect()));
     connect(c, SIGNAL(geometryChanged()), m_compositor, SLOT(checkUnredirect()));
     connect(c, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), m_compositor, SLOT(checkUnredirect()));
     connect(c, SIGNAL(blockingCompositingChanged(KWin::Client*)), m_compositor, SLOT(updateCompositeBlocking(KWin::Client*)));
+    if (!c->manage(w, is_mapped)) {
+        Client::deleteClient(c, Allowed);
+        return NULL;
+    }
     addClient(c, Allowed);
     return c;
 }
@@ -597,6 +639,10 @@ void Workspace::addClient(Client* c, allowed_t)
 #ifdef KWIN_BUILD_TABBOX
     if (tabBox()->isDisplayed())
         tab_box->reset(true);
+#endif
+#ifdef KWIN_BUILD_KAPPMENU
+        if (m_windowsMenu.removeOne(c->window()))
+            c->setAppMenuAvailable();
 #endif
 }
 
@@ -894,7 +940,34 @@ void Workspace::slotReloadConfig()
 {
     reconfigure();
 }
+#ifdef KWIN_BUILD_KAPPMENU
+void Workspace::slotShowRequest(qulonglong wid)
+{
+    if (Client *c = findClient(WindowMatchPredicate(wid)))
+        c->emitShowRequest();
+}
 
+void Workspace::slotMenuAvailable(qulonglong wid)
+{
+    if (Client *c = findClient(WindowMatchPredicate(wid)))
+        c->setAppMenuAvailable();
+    else
+        m_windowsMenu.append(wid);
+}
+
+void Workspace::slotMenuHidden(qulonglong wid)
+{
+    if (Client *c = findClient(WindowMatchPredicate(wid)))
+        c->emitMenuHidden();
+}
+
+void Workspace::slotClearMenus()
+{
+    foreach (Client *c, clients) {
+       c->setAppMenuUnavailable();
+    }
+}
+#endif
 void Workspace::reconfigure()
 {
     reconfigureTimer.start(200);
@@ -2185,6 +2258,12 @@ QString Workspace::supportInformation() const
                 } else {
                     support.append(" yes\n");
                 }
+            } else {
+                support.append(" no\n");
+            }
+            support.append("Virtual Machine: ");
+            if (platform->isVirtualMachine()) {
+                support.append(" yes\n");
             } else {
                 support.append(" no\n");
             }

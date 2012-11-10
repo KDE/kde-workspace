@@ -189,14 +189,14 @@ int SceneXrender::paint(QRegion damage, ToplevelList toplevels)
     if (m_overlayWindow->window())  // show the window only after the first pass, since
         m_overlayWindow->show();   // that pass may take long
 
-    flushBuffer(mask, damage);
+    present(mask, damage);
     // do cleanup
     stacking_order.clear();
 
     return renderTimer.elapsed();
 }
 
-void SceneXrender::flushBuffer(int mask, QRegion damage)
+void SceneXrender::present(int mask, QRegion damage)
 {
     if (mask & PAINT_SCREEN_REGION) {
         // Use the damage region as the clip region for the root window
@@ -696,7 +696,7 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
 
         if (data.brightness() < 1.0) {
             // fake brightness change by overlaying black
-            XRenderColor col = { 0, 0, 0, 0xffff *(1 - data.brightness()) * data.opacity() };
+            XRenderColor col = { 0, 0, 0, static_cast<unsigned short>(0xffff *(1 - data.brightness()) * data.opacity()) };
             if (blitInTempPixmap) {
                 XRenderFillRectangle(display(), PictOpOver, renderTarget, &col,
                                      -temp_visibleRect.left(), -temp_visibleRect.top(), width(), height());

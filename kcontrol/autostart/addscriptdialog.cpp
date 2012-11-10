@@ -33,7 +33,7 @@ AddScriptDialog::AddScriptDialog (QWidget* parent)
     setButtons( Cancel|Ok );
     QVBoxLayout *lay= new QVBoxLayout;
     w->setLayout( lay );
-    QLabel *lab = new QLabel( i18n( "Shell script:" ), w );
+    QLabel *lab = new QLabel( i18n( "Shell script path:" ), w );
     lay->addWidget( lab );
     m_url = new KUrlRequester( w );
     lay->addWidget( m_url );

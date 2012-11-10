@@ -121,3 +121,18 @@ void KCommonDecorationWrapper::padding(int &left, int &right, int &top, int &bot
     bottom = decoration->layoutMetric(KCommonDecoration::LM_OuterPaddingBottom);
 }
 
+void KCommonDecorationWrapper::wrapSetAlphaEnabled(bool enabled)
+{
+    setAlphaEnabled(enabled);
+}
+
+QRegion KCommonDecorationWrapper::region(KDecorationDefines::Region r)
+{
+    QRegion region;
+    QMetaObject::invokeMethod(decoration, "region",
+        Qt::DirectConnection,
+        Q_RETURN_ARG(QRegion, region),
+        Q_ARG(KDecorationDefines::Region,
+        KDecorationDefines::ExtendedBorderRegion));
+    return region;
+}

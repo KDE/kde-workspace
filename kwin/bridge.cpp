@@ -53,7 +53,6 @@ BRIDGE_HELPER(bool, keepAbove, , , const)
 BRIDGE_HELPER(bool, keepBelow, , , const)
 BRIDGE_HELPER(bool, isMovable, , , const)
 BRIDGE_HELPER(bool, isResizable, , , const)
-BRIDGE_HELPER(QString, caption, , , const)
 BRIDGE_HELPER(void, processMousePressEvent, QMouseEvent* e, e,)
 BRIDGE_HELPER(QRect, geometry, , , const)
 BRIDGE_HELPER(void, closeWindow, , ,)
@@ -112,6 +111,22 @@ void Bridge::showWindowMenu(const QPoint &p, long id)
 void Bridge::showWindowMenu(const QRect &p)
 {
     c->workspace()->showWindowMenu(p, c);
+}
+
+void Bridge::showApplicationMenu(const QPoint &p)
+{
+#ifdef KWIN_BUILD_KAPPMENU
+    c->showApplicationMenu(p);
+#endif
+}
+
+bool Bridge::menuAvailable() const
+{
+#ifdef KWIN_BUILD_KAPPMENU
+    return c->menuAvailable();
+#else
+    return false;
+#endif
 }
 
 void Bridge::performWindowOperation(WindowOperation op)
@@ -261,11 +276,16 @@ QIcon Bridge::icon(int idx) const
     return icon();
 }
 
+QString Bridge::caption() const
+{
+    return c->caption(true, true);
+}
+
 QString Bridge::caption(int idx) const
 {
     if (c->tabGroup())
-        return c->tabGroup()->clients().at(idx)->caption();
-    return c->caption();
+        return c->tabGroup()->clients().at(idx)->caption(true, true);
+    return c->caption(true, true);
 }
 
 long Bridge::currentTabId() const

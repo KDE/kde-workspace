@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // need to call GLTexturePrivate::initStatic()
 #include "kwingltexture_p.h"
 
+#include "kwinglcolorcorrection.h"
 #include "kwinglobals.h"
 #include "kwineffects.h"
 #include "kwinglplatform.h"
@@ -185,7 +186,7 @@ int nearestPowerOfTwo(int x)
 
 void pushMatrix()
 {
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (ShaderManager::instance()->isValid()) {
         return;
     }
@@ -195,7 +196,7 @@ void pushMatrix()
 
 void pushMatrix(const QMatrix4x4 &matrix)
 {
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     Q_UNUSED(matrix)
 #else
     if (ShaderManager::instance()->isValid()) {
@@ -208,7 +209,7 @@ void pushMatrix(const QMatrix4x4 &matrix)
 
 void multiplyMatrix(const QMatrix4x4 &matrix)
 {
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     Q_UNUSED(matrix)
 #else
     if (ShaderManager::instance()->isValid()) {
@@ -227,7 +228,7 @@ void multiplyMatrix(const QMatrix4x4 &matrix)
 
 void loadMatrix(const QMatrix4x4 &matrix)
 {
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     Q_UNUSED(matrix)
 #else
     if (ShaderManager::instance()->isValid()) {
@@ -246,7 +247,7 @@ void loadMatrix(const QMatrix4x4 &matrix)
 
 void popMatrix()
 {
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (ShaderManager::instance()->isValid()) {
         return;
     }
@@ -257,6 +258,8 @@ void popMatrix()
 //****************************************
 // GLShader
 //****************************************
+
+bool GLShader::sColorCorrect = false;
 
 GLShader::GLShader()
     : mProgram(0)
@@ -299,10 +302,8 @@ bool GLShader::loadFromFiles(const QString &vertexFile, const QString &fragmentF
     return load(vertexSource, fragmentSource);
 }
 
-bool GLShader::compile(GLuint program, GLenum shaderType, const QByteArray &source) const
+const QByteArray GLShader::prepareSource(GLenum shaderType, const QByteArray &source) const
 {
-    GLuint shader = glCreateShader(shaderType);
-
     // Prepare the source code
     QByteArray ba;
 #ifdef KWIN_HAVE_OPENGLES
@@ -313,7 +314,19 @@ bool GLShader::compile(GLuint program, GLenum shaderType, const QByteArray &sour
     }
     ba.append(source);
 
-    const char* src = ba.constData();
+    // Inject color correction code for fragment shaders, if possible
+    if (shaderType == GL_FRAGMENT_SHADER && sColorCorrect)
+        ba = ColorCorrection::prepareFragmentShader(ba);
+
+    return ba;
+}
+
+bool GLShader::compile(GLuint program, GLenum shaderType, const QByteArray &source) const
+{
+    GLuint shader = glCreateShader(shaderType);
+
+    QByteArray preparedSource = prepareSource(shaderType, source);
+    const char* src = preparedSource.constData();
     glShaderSource(shader, 1, &src, NULL);
 
     // Compile the shader
@@ -1132,8 +1145,7 @@ class GLVertexBufferPrivate
 {
 public:
     GLVertexBufferPrivate(GLVertexBuffer::UsageHint usageHint)
-        : hint(usageHint)
-        , numberVertices(0)
+        : vertexCount(0)
         , dimension(2)
         , useColor(false)
         , useTexCoords(true)
@@ -1141,15 +1153,29 @@ public:
         if (GLVertexBufferPrivate::supported) {
             glGenBuffers(2, buffers);
         }
+
+        switch(usageHint) {
+        case GLVertexBuffer::Dynamic:
+            usage = GL_DYNAMIC_DRAW;
+            break;
+        case GLVertexBuffer::Static:
+            usage = GL_STATIC_DRAW;
+            break;
+        default:
+            usage = GL_STREAM_DRAW;
+            break;
+        }
     }
+
     ~GLVertexBufferPrivate() {
         if (GLVertexBufferPrivate::supported) {
             glDeleteBuffers(2, buffers);
         }
     }
-    GLVertexBuffer::UsageHint hint;
+
     GLuint buffers[2];
-    int numberVertices;
+    GLenum usage;
+    int vertexCount;
     int dimension;
     static bool supported;
     static GLVertexBuffer *streamingBuffer;
@@ -1171,7 +1197,7 @@ GLVertexBuffer *GLVertexBufferPrivate::streamingBuffer = NULL;
 
 void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode, bool hardwareClipping)
 {
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     Q_UNUSED(region)
     Q_UNUSED(primitiveMode)
     Q_UNUSED(hardwareClipping)
@@ -1189,11 +1215,11 @@ void GLVertexBufferPrivate::legacyPainting(QRegion region, GLenum primitiveMode,
     }
 
     if (!hardwareClipping) {
-        glDrawArrays(primitiveMode, 0, numberVertices);
+        glDrawArrays(primitiveMode, 0, vertexCount);
     } else {
         foreach (const QRect& r, region.rects()) {
             glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
-            glDrawArrays(primitiveMode, 0, numberVertices);
+            glDrawArrays(primitiveMode, 0, vertexCount);
         }
     }
 
@@ -1228,11 +1254,11 @@ void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitive
     }
 
     if (!hardwareClipping) {
-        glDrawArrays(primitiveMode, 0, numberVertices);
+        glDrawArrays(primitiveMode, 0, vertexCount);
     } else {
         foreach (const QRect& r, region.rects()) {
             glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
-            glDrawArrays(primitiveMode, 0, numberVertices);
+            glDrawArrays(primitiveMode, 0, vertexCount);
         }
     }
 
@@ -1246,7 +1272,7 @@ void GLVertexBufferPrivate::corePainting(const QRegion& region, GLenum primitive
 
 void GLVertexBufferPrivate::fallbackPainting(const QRegion& region, GLenum primitiveMode, bool hardwareClipping)
 {
-#ifdef KWIN_HAVE_OPENGLES
+#ifndef KWIN_HAVE_OPENGL_1
     Q_UNUSED(region)
     Q_UNUSED(primitiveMode)
     Q_UNUSED(hardwareClipping)
@@ -1265,11 +1291,11 @@ void GLVertexBufferPrivate::fallbackPainting(const QRegion& region, GLenum primi
 
     // Clip using scissoring
     if (!hardwareClipping) {
-        glDrawArrays(primitiveMode, 0, numberVertices);
+        glDrawArrays(primitiveMode, 0, vertexCount);
     } else {
         foreach (const QRect& r, region.rects()) {
             glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
-            glDrawArrays(primitiveMode, 0, numberVertices);
+            glDrawArrays(primitiveMode, 0, vertexCount);
         }
     }
 
@@ -1293,49 +1319,35 @@ GLVertexBuffer::~GLVertexBuffer()
     delete d;
 }
 
-void GLVertexBuffer::setData(int numberVertices, int dim, const float* vertices, const float* texcoords)
+void GLVertexBuffer::setData(int vertexCount, int dim, const float* vertices, const float* texcoords)
 {
-    d->numberVertices = numberVertices;
+    d->vertexCount = vertexCount;
     d->dimension = dim;
     d->useTexCoords = (texcoords != NULL);
+
     if (!GLVertexBufferPrivate::supported) {
         // legacy data
         d->legacyVertices.clear();
-        d->legacyVertices.reserve(numberVertices * dim);
-        for (int i = 0; i < numberVertices * dim; ++i) {
+        d->legacyVertices.reserve(vertexCount * dim);
+        for (int i = 0; i < vertexCount * dim; ++i) {
             d->legacyVertices << vertices[i];
         }
         d->legacyTexCoords.clear();
         if (d->useTexCoords) {
-            d->legacyTexCoords.reserve(numberVertices * 2);
-            for (int i = 0; i < numberVertices * 2; ++i) {
+            d->legacyTexCoords.reserve(vertexCount * 2);
+            for (int i = 0; i < vertexCount * 2; ++i) {
                 d->legacyTexCoords << texcoords[i];
             }
         }
         return;
     }
-    GLenum hint;
-    switch(d->hint) {
-    case Dynamic:
-        hint = GL_DYNAMIC_DRAW;
-        break;
-    case Static:
-        hint = GL_STATIC_DRAW;
-        break;
-    case Stream:
-        hint = GL_STREAM_DRAW;
-        break;
-    default:
-        // just to make the compiler happy
-        hint = GL_STREAM_DRAW;
-        break;
-    }
+
     glBindBuffer(GL_ARRAY_BUFFER, d->buffers[ 0 ]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*numberVertices * d->dimension, vertices, hint);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertexCount * d->dimension, vertices, d->usage);
 
     if (d->useTexCoords) {
         glBindBuffer(GL_ARRAY_BUFFER, d->buffers[ 1 ]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*numberVertices * 2, texcoords, hint);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertexCount * 2, texcoords, d->usage);
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1382,7 +1394,7 @@ void GLVertexBuffer::reset()
 {
     d->useColor       = false;
     d->color          = QColor(0, 0, 0, 255);
-    d->numberVertices = 0;
+    d->vertexCount    = 0;
     d->dimension      = 2;
     d->useTexCoords   = true;
 }

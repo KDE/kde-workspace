@@ -26,45 +26,20 @@
 // Includes
 #include "widgetitem.h"
 
+#include "../core/task.h"
+
 #include <QtCore/QWeakPointer>
 #include <QtGui/QGraphicsWidget>
 
-#include <KDE/Plasma/Applet>
 #include <KDE/Plasma/Containment>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace SystemTray
 {
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// struct WidgetItem::_Private
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct WidgetItem::_Private
-{
-    QWeakPointer<QGraphicsWidget> widget;
-    WidgetItem &owner;
-
-    _Private(WidgetItem &owner): owner(owner) {}
-    void unbind();
-};
-
-
-void WidgetItem::_Private::unbind()
-{
-    if (widget) {
-        QGraphicsWidget *w = widget.data();
-        if (w->parentItem() == &owner) {
-            w->hide();
-            w->setParentItem(0);
-        }
-    }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // class WidgetItem
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-WidgetItem::WidgetItem(QDeclarativeItem *parent): QDeclarativeItem(parent),
-    d(new _Private(*this))
+WidgetItem::WidgetItem(QDeclarativeItem *parent)
+    : QDeclarativeItem(parent)
 {
     setClip(false);
 }
@@ -72,40 +47,58 @@ WidgetItem::WidgetItem(QDeclarativeItem *parent): QDeclarativeItem(parent),
 
 WidgetItem::~WidgetItem()
 {
-    d->unbind();
-    delete d;
+    unbind();
 }
 
-
-QVariant WidgetItem::widget() const
+void WidgetItem::setTask(QObject *task)
 {
-    return QVariant::fromValue(static_cast<QObject*>(d->widget.data()));
-}
-
-
-void WidgetItem::setWidget(QVariant w)
-{
-    QGraphicsWidget *widget = qobject_cast<QGraphicsWidget*>(w.value<QObject*>());
-    // check input
-    if ( widget == d->widget.data() ) {
+    Task *t = qobject_cast<Task*>(task);
+    if (m_task.data() == t)
         return;
-    }
-
-    // unbind old widget
-    d->unbind();
-
-    // bind new widget
-    d->widget = widget;
-    if (widget) {
-        widget->setParentItem(this);
-        widget->setPos(0, 0);
-        widget->setPreferredSize(width(), width());
-        widget->setMinimumSize(width(), width());
-        widget->setMaximumSize(width(), width());
-        widget->show();
-    }
-    emit changedWidget();
+    unbind();
+    m_task = t;
+    bind();
+    emit changedTask();
 }
+
+void WidgetItem::setApplet(QObject *a)
+{
+    Plasma::Applet *applet = qobject_cast<Plasma::Applet*>(a);
+    if (m_applet == applet)
+        return;
+    unbind();
+    m_applet = applet;
+    bind();
+}
+
+void WidgetItem::unbind()
+{
+    if (m_applet && m_task) {
+        QGraphicsWidget *widget = m_task.data()->widget(m_applet, false);
+        if (widget && widget->parentItem() == this) {
+            widget->hide();
+            widget->setParentItem(0);
+        }
+    }
+}
+
+void WidgetItem::bind()
+{
+    if (m_applet && m_task) {
+        QGraphicsWidget *widget = m_task.data()->widget(m_applet);
+        if (widget) {
+            widget->setParentItem(this);
+            widget->setPos(0, 0);
+            widget->setPreferredSize(width(), width());
+            widget->setMinimumSize(width(), width());
+            widget->setMaximumSize(width(), width());
+            widget->show();
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 } //namespace SystemTray

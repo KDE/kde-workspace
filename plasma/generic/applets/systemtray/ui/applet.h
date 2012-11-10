@@ -45,17 +45,50 @@ namespace SystemTray
 {
 
 class Manager;
-class TaskArea;
-class Plasmoid;
-class TasksPool;
-class UiTask;
 
 class Applet : public Plasma::Applet
 {
     Q_OBJECT
+
+    Q_ENUMS(FormFactor)
+    Q_ENUMS(Location)
+    Q_ENUMS(VisibilityPreference)
+
     Q_PROPERTY(bool firstRun READ isFirstRun)
 
+    // TODO: remove these properties in the future (they will be supported in Plasma::Applet)
+    Q_PROPERTY(int formFactor READ formFactor NOTIFY formFactorChanged)
+    Q_PROPERTY(int location READ location NOTIFY locationChanged)
+
 public:
+    // Form factor
+    enum FormFactor
+    {
+        Planar       = Plasma::Planar,
+        MediaCenter  = Plasma::MediaCenter,
+        Horizontal   = Plasma::Horizontal,
+        Vertical     = Plasma::Vertical
+    };
+
+    // Location
+    enum Location
+    {
+        Floating    = Plasma::Floating,
+        Desktop     = Plasma::Desktop,
+        FullScreen  = Plasma::FullScreen,
+        TopEdge     = Plasma::TopEdge,
+        BottomEdge  = Plasma::BottomEdge,
+        LeftEdge    = Plasma::LeftEdge,
+        RightEdge   = Plasma::RightEdge
+    };
+
+    /// User's preference of visibility of task
+    enum VisibilityPreference {
+        AutoVisibility = 0,
+        AlwaysHidden,
+        AlwaysShown
+    };
+
     explicit Applet(QObject *parent, const QVariantList &arguments = QVariantList());
     ~Applet();
 
@@ -64,6 +97,15 @@ public:
     Manager *manager() const;
     QSet<Task::Category> shownCategories() const;
     bool isFirstRun();
+
+    Q_INVOKABLE int getVisibilityPreference(QObject *task) const;
+    Q_INVOKABLE QAction* createShortcutAction(QString action_id) const;
+    Q_INVOKABLE void updateShortcutAction(QAction *action, QString shortcut) const;
+    Q_INVOKABLE void destroyShortcutAction(QAction *action) const;
+    Q_INVOKABLE void showMenu(QObject *menu, int x, int y, QObject *item) const;
+    Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
+    Q_INVOKABLE QString getUniqueId(QObject *obj) const;
+    Q_INVOKABLE QPoint popupPosition(QObject *item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
 
 protected:
     void createConfigurationInterface(KConfigDialog *parent);
@@ -74,6 +116,23 @@ protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
 
+signals:
+    void formFactorChanged();
+    void locationChanged();
+    void visibilityPreferenceChanged();  ///< If user has changed his preference on visibility of tasks
+
+    /**
+     * This signal is emmited for each new task
+     * @param task a new task
+     */
+    void newTask(QObject *task);
+
+    /**
+     * This signal is emmited before task is deleted
+     * @param task a task that is being deleted
+     */
+    void deletedTask(QObject *task);
+
 private Q_SLOTS:
     void configAccepted();
     void unlockContainment();
@@ -81,13 +140,11 @@ private Q_SLOTS:
     void checkDefaultApplets();
 
     void _onAddedTask(SystemTray::Task*);
-    void _onChangedTask(SystemTray::Task*);
     void _onRemovedTask(SystemTray::Task*);
 
     void _onWidgetCreationFinished();
 
 private:
-    void _updateHideState(UiTask *ui_task) const;
     QString _getActionName(Task *task) const;
 
 private:
@@ -100,8 +157,6 @@ private:
     QSet<QString> m_hiddenTypes;
     QSet<QString> m_alwaysShownTypes;
     QDateTime m_lastActivity;
-    Plasmoid *m_plasmoid;
-    TasksPool *m_tasksPool;
     Plasma::DeclarativeWidget *m_widget;
 
     Ui::AutoHideConfig m_autoHideUi;

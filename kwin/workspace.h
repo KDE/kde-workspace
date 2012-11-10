@@ -419,6 +419,8 @@ public:
         return m_userActionsMenu;
     }
 
+    void showApplicationMenu(const QPoint &, const WId);
+
     void updateMinimizedOfTransients(Client*);
     void updateOnAllDesktopsOfTransients(Client*);
     void updateOnAllActivitiesOfTransients(Client*);
@@ -440,6 +442,7 @@ public:
     bool hasDecorationShadows() const;
     Qt::Corner decorationCloseButtonCorner();
     bool decorationHasAlpha() const;
+    bool decorationSupportsAnnounceAlpha() const;
     bool decorationSupportsTabbing() const; // Returns true if the decoration supports tabs.
     bool decorationSupportsFrameOverlap() const;
     bool decorationSupportsBlurBehind() const;
@@ -624,6 +627,12 @@ private slots:
     void writeWindowRules();
     void slotBlockShortcuts(int data);
     void slotReloadConfig();
+#ifdef KWIN_BUILD_KAPPMENU
+    void slotShowRequest(qulonglong wid);
+    void slotMenuAvailable(qulonglong wid);
+    void slotMenuHidden(qulonglong wid);
+    void slotClearMenus();
+#endif
     void resetCursorPosTime();
     void updateCurrentActivity(const QString &new_activity);
     void slotActivityRemoved(const QString &activity);
@@ -694,7 +703,7 @@ private:
     bool keepTransientAbove(const Client* mainwindow, const Client* transient);
     void blockStackingUpdates(bool block);
     void updateToolWindows(bool also_hide);
-    void fixPositionAfterCrash(Window w, const XWindowAttributes& attr);
+    void fixPositionAfterCrash(xcb_window_t w, const xcb_get_geometry_reply_t *geom);
     void saveOldScreenSizes();
 
     /// This is the right way to create a new client
@@ -850,6 +859,11 @@ private:
 
     QSlider* transSlider;
     QPushButton* transButton;
+
+#ifdef KWIN_BUILD_KAPPMENU
+    //used for menu available before window is mapped
+    QList<WId> m_windowsMenu;
+#endif
 
     Scripting *m_scripting;
 
@@ -1131,6 +1145,14 @@ inline bool Workspace::decorationHasAlpha() const
         return false;
     }
     return mgr->factory()->supports(AbilityUsesAlphaChannel);
+}
+
+inline bool Workspace::decorationSupportsAnnounceAlpha() const
+{
+    if (!hasDecorationPlugin()) {
+        return false;
+    }
+    return mgr->factory()->supports(AbilityAnnounceAlphaChannel);
 }
 
 inline bool Workspace::decorationSupportsTabbing() const

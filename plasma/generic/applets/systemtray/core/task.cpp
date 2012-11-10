@@ -21,8 +21,8 @@
 
 #include "task.h"
 
-#include <QGraphicsWidget>
-#include <QTimer>
+#include <QtGui/QGraphicsWidget>
+#include <QtCore/QTimer>
 
 #include "../ui/applet.h"
 
@@ -178,18 +178,20 @@ Task::Status Task::status() const
     return d->status;
 }
 
-
-QString Task::name() const {
+QString Task::name() const
+{
     return d->name;
 }
 
 
-void Task::setName(QString name) {
+void Task::setName(QString name)
+{
     if (d->name != name) {
         d->name = name;
         emit changedName();
     }
 }
+
 
 }
 

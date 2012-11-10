@@ -335,6 +335,7 @@ static ChipClass detectNVidiaClass(const QString &chipset)
 
 static ChipClass detectIntelClass(const QByteArray &chipset)
 {
+    // see mesa repository: src/mesa/drivers/dri/intel/intel_context.c
     // GL 1.3, DX8? SM ?
     if (chipset.contains("845G")        ||
             chipset.contains("830M")        ||
@@ -372,6 +373,16 @@ static ChipClass detectIntelClass(const QByteArray &chipset)
     // GL 3.1, CL 1.1, DX 10.1
     if (chipset.contains("Sandybridge")) {
         return SandyBridge;
+    }
+
+    // GL4.0, CL1.1, DX11, SM 5.0
+    if (chipset.contains("Ivybridge")) {
+        return IvyBridge;
+    }
+
+    // GL4.0, CL1.2, DX11.1, SM 5.0
+    if (chipset.contains("Haswell")) {
+        return Haswell;
     }
 
     return UnknownIntel;
@@ -419,6 +430,10 @@ QString GLPlatform::driverToString(Driver driver)
         return "softpipe";
     case Driver_Llvmpipe:
         return "LLVMpipe";
+    case Driver_VirtualBox:
+        return "VirtualBox (Chromium)";
+    case Driver_VMware:
+        return "VMware (SVGA3D)";
 
     default:
         return "Unknown";
@@ -468,6 +483,10 @@ QString GLPlatform::chipClassToString(ChipClass chipClass)
         return "i965";
     case SandyBridge:
         return "SandyBridge";
+    case IvyBridge:
+        return "IvyBridge";
+    case Haswell:
+        return "Haswell";
 
     default:
         return "Unknown";
@@ -483,6 +502,7 @@ QString GLPlatform::chipClassToString(ChipClass chipClass)
 GLPlatform::GLPlatform()
     : m_driver(Driver_Unknown),
       m_chipClass(UnknownChipClass),
+      m_recommendedCompositor(XRenderCompositing),
       m_mesaVersion(0),
       m_galliumVersion(0),
       m_looseBinding(false),
@@ -490,7 +510,8 @@ GLPlatform::GLPlatform()
       m_supportsGLSL(false),
       m_limitedGLSL(false),
       m_textureNPOT(false),
-      m_limitedNPOT(false)
+      m_limitedNPOT(false),
+      m_virtualMachine(false)
 {
 }
 
@@ -662,6 +683,11 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
         else if (m_vendor == "VMware, Inc." && m_chipset == "llvmpipe") {
             m_driver = Driver_Llvmpipe;
         }
+
+        // SVGA3D
+        else if (m_vendor == "VMware, Inc." && m_chipset.contains("SVGA3D")) {
+            m_driver = Driver_VMware;
+        }
     }
 
 
@@ -694,6 +720,19 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
         m_driver = Driver_Swrast;
     }
 
+    // Virtual Hardware
+    // ====================================================
+    else if (m_vendor == "Humper" && m_renderer == "Chromium") {
+        // Virtual Box
+        m_driver = Driver_VirtualBox;
+
+        const int index = versionTokens.indexOf("Chromium");
+        if (versionTokens.count() > index)
+            m_driverVersion = parseVersionString(versionTokens.at(index + 1));
+        else
+            m_driverVersion = 0;
+    }
+
 
     // Driver/GPU specific features
     // ====================================================
@@ -715,6 +754,16 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
             m_limitedGLSL = m_supportsGLSL;
         }
 
+        if (m_chipClass < R300) {
+            // fallback to XRender for R100 and R200
+            m_recommendedCompositor = XRenderCompositing;
+        } else if (m_chipClass < R600) {
+            // OpenGL 1 due to NPOT limitations not supported by KWin's shaders
+            m_recommendedCompositor = OpenGL1Compositing;
+        } else {
+            m_recommendedCompositor = OpenGL2Compositing;
+        }
+
         if (driver() == Driver_R600G ||
                 (driver() == Driver_R600C && m_renderer.contains("DRI2"))) {
             m_looseBinding = true;
@@ -728,6 +777,14 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
         if (m_driver == Driver_NVidia)
             m_looseBinding = true;
 
+        if (m_chipClass < NV20) {
+            m_recommendedCompositor = XRenderCompositing;
+        } else if (m_chipClass < NV40) {
+            m_recommendedCompositor = OpenGL1Compositing;
+        } else {
+            m_recommendedCompositor = OpenGL2Compositing;
+        }
+
         m_limitedNPOT = m_textureNPOT && m_chipClass < NV40;
         m_limitedGLSL = m_supportsGLSL && m_chipClass < G80;
     }
@@ -737,6 +794,13 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
             m_supportsGLSL = false;
 
         m_limitedGLSL = m_supportsGLSL && m_chipClass < I965;
+        m_looseBinding = true;
+
+        if (m_chipClass < I965) {
+            m_recommendedCompositor = OpenGL1Compositing;
+        } else {
+            m_recommendedCompositor = OpenGL2Compositing;
+        }
     }
 
     if (isMesaDriver() && platformInterface == EglPlatformInterface) {
@@ -746,13 +810,31 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
         m_looseBinding = true;
     }
 
-    // Loose binding is broken with Gallium drivers in Mesa 7.10
-    if (isGalliumDriver() && mesaVersion() == kVersionNumber(7, 10, 0))
-        m_looseBinding = false;
-
     if (isSoftwareEmulation()) {
-        // Software emulation does not provide GLSL
-        m_limitedGLSL = m_supportsGLSL = false;
+        // we recommend XRender
+        m_recommendedCompositor = XRenderCompositing;
+        if (m_driver < Driver_Llvmpipe) {
+            // Software emulation does not provide GLSL
+            m_limitedGLSL = m_supportsGLSL = false;
+        } else {
+            // llvmpipe does support GLSL
+            m_limitedGLSL = false;
+            m_supportsGLSL = true;
+        }
+    }
+
+    if (m_chipClass == UnknownChipClass && m_driver == Driver_Unknown) {
+        // we don't know the hardware. Let's be optimistic and assume OpenGL compatible hardware
+        m_recommendedCompositor = OpenGL2Compositing;
+        m_supportsGLSL = true;
+    }
+
+    if (isVirtualBox()) {
+        m_virtualMachine = true;
+    }
+
+    if (isVMware()) {
+        m_virtualMachine = true;
     }
 }
 
@@ -795,6 +877,7 @@ void GLPlatform::printResults() const
     print("Requires strict binding:", !m_looseBinding ? "yes" : "no");
     print("GLSL shaders:", m_supportsGLSL ? (m_limitedGLSL ? "limited" : "yes") : "no");
     print("Texture NPOT support:", m_textureNPOT ? (m_limitedNPOT ? "limited" : "yes") : "no");
+    print("Virtual Machine:", m_virtualMachine ? "yes" : "no");
 }
 
 bool GLPlatform::supports(GLFeature feature) const
@@ -893,6 +976,16 @@ bool GLPlatform::isIntel() const
     return m_chipClass >= I8XX && m_chipClass <= UnknownIntel;
 }
 
+bool GLPlatform::isVirtualBox() const
+{
+    return m_driver == Driver_VirtualBox;
+}
+
+bool GLPlatform::isVMware() const
+{
+    return m_driver == Driver_VMware;
+}
+
 bool GLPlatform::isSoftwareEmulation() const
 {
     return m_driver == Driver_Softpipe || m_driver == Driver_Swrast || m_driver == Driver_Llvmpipe;
@@ -926,6 +1019,25 @@ bool GLPlatform::isDirectRendering() const
 bool GLPlatform::isLooseBinding() const
 {
     return m_looseBinding;
+}
+
+bool GLPlatform::isVirtualMachine() const
+{
+    return m_virtualMachine;
+}
+
+CompositingType GLPlatform::recommendedCompositor() const
+{
+    return m_recommendedCompositor;
+}
+
+bool GLPlatform::isGLES() const
+{
+#ifdef KWIN_HAVE_OPENGLES
+    return true;
+#else
+    return false;
+#endif
 }
 
 } // namespace KWin

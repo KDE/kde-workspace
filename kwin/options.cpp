@@ -148,6 +148,7 @@ Options::Options(QObject *parent)
     , m_unredirectFullscreen(Options::defaultUnredirectFullscreen())
     , m_glSmoothScale(Options::defaultGlSmoothScale())
     , m_glVSync(Options::defaultGlVSync())
+    , m_colorCorrected(Options::defaultColorCorrected())
     , m_xrenderSmoothScale(Options::defaultXrenderSmoothScale())
     , m_maxFpsInterval(Options::defaultMaxFpsInterval())
     , m_refreshRate(Options::defaultRefreshRate())
@@ -187,8 +188,10 @@ Options::Options(QObject *parent)
     , electric_border_pushback_pixels(Options::defaultElectricBorderPushbackPixels())
     , electric_border_maximize(Options::defaultElectricBorderMaximize())
     , electric_border_tiling(Options::defaultElectricBorderTiling())
+    , electric_border_corner_ratio(Options::defaultElectricBorderCornerRatio())
     , borderless_maximized_windows(Options::defaultBorderlessMaximizedWindows())
     , show_geometry_tip(Options::defaultShowGeometryTip())
+    , condensed_title(Options::defaultCondensedTitle())
     , animationSpeed(Options::defaultAnimationSpeed())
 {
 }
@@ -537,6 +540,15 @@ void Options::setShowGeometryTip(bool showGeometryTip)
     emit showGeometryTipChanged();
 }
 
+void Options::setCondensedTitle(bool condensedTitle)
+{
+    if (condensed_title == condensedTitle) {
+        return;
+    }
+    condensed_title = condensedTitle;
+    emit condensedTitleChanged();
+}
+
 void Options::setElectricBorderDelay(int electricBorderDelay)
 {
     if (electric_border_delay == electricBorderDelay) {
@@ -580,6 +592,15 @@ void Options::setElectricBorderTiling(bool electricBorderTiling)
     }
     electric_border_tiling = electricBorderTiling;
     emit electricBorderTilingChanged();
+}
+
+void Options::setElectricBorderCornerRatio(float electricBorderCornerRatio)
+{
+    if (electric_border_corner_ratio == electricBorderCornerRatio) {
+        return;
+    }
+    electric_border_corner_ratio = electricBorderCornerRatio;
+    emit electricBorderCornerRatioChanged();
 }
 
 void Options::setBorderlessMaximizedWindows(bool borderlessMaximizedWindows)
@@ -699,6 +720,15 @@ void Options::setGlVSync(bool glVSync)
     emit glVSyncChanged();
 }
 
+void Options::setColorCorrected(bool colorCorrected)
+{
+    if (m_colorCorrected == colorCorrected) {
+        return;
+    }
+    m_colorCorrected = colorCorrected;
+    emit colorCorrectedChanged();
+}
+
 void Options::setXrenderSmoothScale(bool xrenderSmoothScale)
 {
     if (m_xrenderSmoothScale == xrenderSmoothScale) {
@@ -814,6 +844,7 @@ unsigned long Options::loadConfig()
 
     KConfigGroup config(_config, "Windows");
     setShowGeometryTip(config.readEntry("GeometryTip", Options::defaultShowGeometryTip()));
+    setCondensedTitle(config.readEntry("CondensedTitle", Options::defaultCondensedTitle()));
 
     QString val;
 
@@ -876,6 +907,8 @@ unsigned long Options::loadConfig()
     setElectricBorderPushbackPixels(config.readEntry("ElectricBorderPushbackPixels", Options::defaultElectricBorderPushbackPixels()));
     setElectricBorderMaximize(config.readEntry("ElectricBorderMaximize", Options::defaultElectricBorderMaximize()));
     setElectricBorderTiling(config.readEntry("ElectricBorderTiling", Options::defaultElectricBorderTiling()));
+    const float ebr = config.readEntry("ElectricBorderCornerRatio", Options::defaultElectricBorderCornerRatio());
+    setElectricBorderCornerRatio(qMin(qMax(ebr, 0.0f), 1.0f));
 
     OpTitlebarDblClick = windowOperation(config.readEntry("TitlebarDoubleClickCommand", "Maximize"), true);
     setOpMaxButtonLeftClick(windowOperation(config.readEntry("MaximizeButtonLeftClickCommand", "Maximize"), true));
@@ -997,6 +1030,8 @@ void Options::reloadCompositingSettings(bool force)
     }
     setGlLegacy(config.readEntry("GLLegacy", Options::defaultGlLegacy()));
 
+    setColorCorrected(config.readEntry("GLColorCorrection", Options::defaultColorCorrected()));
+
     m_xrenderSmoothScale = config.readEntry("XRenderSmoothScale", false);
 
     HiddenPreviews previews = Options::defaultHiddenPreviews();
@@ -1103,6 +1138,11 @@ Options::MouseWheelCommand Options::mouseWheelCommand(const QString &name)
 bool Options::showGeometryTip() const
 {
     return show_geometry_tip;
+}
+
+bool Options::condensedTitle() const
+{
+    return condensed_title;
 }
 
 ElectricBorderAction Options::electricBorderAction(ElectricBorder edge) const

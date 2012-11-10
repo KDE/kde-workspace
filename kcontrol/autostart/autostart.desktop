@@ -101,6 +101,26 @@ Name[zh_CN]=自动启动
 Name[zh_TW]=自動啟動
 
 Comment=Manage which programs start up automatically with KDE.
+Comment[ca]=Gestiona quins programes s'iniciaran automàticament amb el KDE.
+Comment[cs]=Spravujte automatické spouštění programů při startu KDE.
+Comment[el]=Διαχείριση των προγραμμάτων που θα ξεκινούν αυτόματα με το KDE.
+Comment[es]=Gestionar qué programas se inician automáticamente con KDE.
+Comment[et]=Määramine, millised programmid käivituvad automaatselt koos KDE-ga.
+Comment[hu]=Annak kezelése, hogy mely programok induljanak automatikusan a KDE-vel.
+Comment[ia]=Gere qual programma debe startar automaticamente con KDE.
+Comment[lt]=Konfigūravimo įrankis valdyti programas, kurios paleidžiamos automatiškai kartu su KDE.
+Comment[nl]=Beheren van programma's die automatisch met KDE opstarten.
+Comment[pl]=Zdecyduj, które programy mają się uruchamiać wraz ze startem KDE.
+Comment[pt]=Gerir os programas que são arrancados automaticamente com o KDE.
+Comment[pt_BR]=Gerencia os programas que são carregados automaticamente com o KDE.
+Comment[sk]=Spravovať, ktoré programy spustiť automaticky s KDE.
+Comment[sr]=Одредите који се програми покрећу са КДЕ‑ом по пријављивању.
+Comment[sr@ijekavian]=Одредите који се програми покрећу са КДЕ‑ом по пријављивању.
+Comment[sr@ijekavianlatin]=Odredite koji se programi pokreću sa KDE‑om po prijavljivanju.
+Comment[sr@latin]=Odredite koji se programi pokreću sa KDE‑om po prijavljivanju.
+Comment[sv]=Hantera vilka program som startas automatiskt när KDE startas.
+Comment[uk]=Керування програмами, які будуть запускатися разом з графічним середовищем KDE автоматично.
+Comment[x-test]=xxManage which programs start up automatically with KDE.xx
 
 X-KDE-Keywords=Autostart Manager,autostart,startup,system startup,kde start,cron
 X-KDE-Keywords[ca]=Gestor d'inici automàtic,inici automàtic,inici,inici del sistema,inici del kde,cron

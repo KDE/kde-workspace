@@ -1,4 +1,5 @@
 ########### configure tests ###############
+INCLUDE(CMakeDependentOption)
 
 OPTION(KWIN_BUILD_DECORATIONS "Enable building of KWin decorations." ON)
 OPTION(KWIN_BUILD_OXYGEN "Enable building of default decoration Oxygen" ON)
@@ -7,7 +8,9 @@ OPTION(KWIN_MOBILE_EFFECTS "Only build effects relevant for mobile devices" OFF)
 OPTION(KWIN_BUILD_TABBOX "Enable building of KWin Tabbox functionality" ON)
 OPTION(KWIN_BUILD_SCREENEDGES "Enable building of KWin with screen edge support" ON)
 OPTION(KWIN_BUILD_SCRIPTING "Enable building of KWin with scripting support" ON)
+OPTION(KWIN_BUILD_KAPPMENU "Enable building of KWin with application menu support" ON)
 OPTION(KWIN_BUILD_XRENDER_COMPOSITING "Enable building of KWin with XRender Compositing support" ON)
+OPTION(KWIN_BUILD_OPENGL_1_COMPOSITING "Enable support for OpenGL 1.x, automatically disabled when building for OpenGL ES 2.0" ON)
 OPTION(KWIN_BUILD_ACTIVITIES "Enable building of KWin with kactivities support" ON)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    OPTION(KWIN_PLASMA_ACTIVE "Enable building KWin for Plasma Active." OFF)
@@ -29,6 +32,8 @@ if(KWIN_PLASMA_ACTIVE)
     set(KWIN_NAME "kwinactive")
 endif(KWIN_PLASMA_ACTIVE)
 
+cmake_dependent_option(KWIN_BUILD_KAPPMENU "Build without appmenu support" ON "KWIN_BUILD_DECORATIONS" FALSE)
+
 # KWIN_HAVE_XRENDER_COMPOSITING - whether XRender-based compositing support is available: may be disabled
 if( KWIN_BUILD_XRENDER_COMPOSITING )
     set( KWIN_HAVE_XRENDER_COMPOSITING 1 )
@@ -46,6 +51,8 @@ endif(OPENGL_EGL_FOUND)
 if(OPENGLES_FOUND)
   include_directories(${OPENGLES_INCLUDE_DIR})
 endif(OPENGLES_FOUND)
+
+include_directories(${XCB_INCLUDE_DIR})
 
 # for things that are also used by kwin libraries
 configure_file(libkwineffects/kwinconfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libkwineffects/kwinconfig.h )
@@ -169,7 +176,7 @@ qt4_add_dbus_interface( kwin_KDEINIT_SRCS
 
 qt4_add_resources( kwin_KDEINIT_SRCS resources.qrc )
 
-set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTDECLARATIVE_LIBRARY} ${KDECLARATIVE_LIBRARIES} kdecorations kwineffects ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${X11_Xcomposite_LIB} ${X11_Xdamage_LIB} ${X11_Xrender_LIB} ${X11_Xfixes_LIB})
+set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTDECLARATIVE_LIBRARY} ${KDECLARATIVE_LIBRARIES} kdecorations kwineffects ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${X11_Xcomposite_LIB} ${X11_Xdamage_LIB} ${X11_Xrender_LIB} ${X11_Xfixes_LIB} ${XCB_XCB_LIBRARIES} ${X11_XCB_LIBRARIES} ${XCB_XFIXES_LIBRARIES} ${XCB_DAMAGE_LIBRARIES})
 
 find_library(XF86VM_LIBRARY Xxf86vm)
 if (XF86VM_LIBRARY)
@@ -197,7 +204,9 @@ set_target_properties(kwin PROPERTIES OUTPUT_NAME ${KWIN_NAME})
 set_target_properties(kdeinit_kwin PROPERTIES OUTPUT_NAME kdeinit4_${KWIN_NAME})
 
 if(OPENGL_FOUND)
-  set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS -DKWIN_HAVE_OPENGL)
+    if( KWIN_BUILD_OPENGL_1_COMPOSITING )
+        set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS -DKWIN_HAVE_OPENGL_1)
+    endif( KWIN_BUILD_OPENGL_1_COMPOSITING )
   add_subdirectory(opengltest)
   target_link_libraries(kdeinit_kwin kwinglutils ${OPENGL_gl_LIBRARY})
   # -ldl used by OpenGL code
@@ -209,7 +218,7 @@ if(OPENGL_FOUND)
   target_link_libraries(kdeinit_kwin kwinnvidiahack)
 elseif(OPENGLES_FOUND)
   target_link_libraries(kdeinit_kwin ${kwinLibs} kwinglesutils ${OPENGLES_LIBRARIES})
-  set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGL -DKWIN_HAVE_OPENGLES")
+  set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGLES")
 endif(OPENGL_FOUND)
 
 install(TARGETS kdeinit_kwin ${INSTALL_TARGETS_DEFAULT_ARGS} )
@@ -218,7 +227,7 @@ install(TARGETS kwin         ${INSTALL_TARGETS_DEFAULT_ARGS} )
 if(OPENGLES_FOUND)
   kde4_add_kdeinit_executable( kwin_gles ${kwin_KDEINIT_SRCS})
   target_link_libraries(kdeinit_kwin_gles ${kwinLibs} kwinglesutils ${OPENGLES_LIBRARIES})
-  set_target_properties(kdeinit_kwin_gles PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGL -DKWIN_HAVE_OPENGLES")
+  set_target_properties(kdeinit_kwin_gles PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGLES")
   set_target_properties(kwin_gles PROPERTIES OUTPUT_NAME ${KWIN_NAME}_gles)
   set_target_properties(kdeinit_kwin_gles PROPERTIES OUTPUT_NAME kdeinit4_${KWIN_NAME}_gles)
   install(TARGETS kdeinit_kwin_gles ${INSTALL_TARGETS_DEFAULT_ARGS} )

@@ -5,7 +5,7 @@
   <!ENTITY % addindex "IGNORE">
   <!ENTITY % English "INCLUDE">
 ]>
-<book lang="&language;">
+<book id="systemsettings" lang="&language;">
 
 <bookinfo>
 <title>The &systemsettings; Handbook</title>
@@ -24,8 +24,8 @@
 </copyright>
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2011-11-21</date>
-<releaseinfo>1.0 (&kde; 4.9)</releaseinfo>
+<date>2012-11-08</date>
+<releaseinfo>1.0 (&kde; 4.10)</releaseinfo>
 
 <abstract>
 <para>
@@ -166,7 +166,7 @@ File Associations
 Locale (Country/Region &amp; Language, Spell Checker)
 </para></listitem>
 <listitem><para>
-Personal Information (Akonadi Resources Configuration, KDE Resources)
+Personal Information (Akonadi Resources Configuration)
 </para></listitem>
 <listitem><para>
 Shortcuts and Gestures (Custom Shortcuts, Standard Keyboard Shortcuts, Global Keyboard Shortcuts)
@@ -229,9 +229,6 @@ SSL Preferences
 <listitem>
 <para><itemizedlist>
 <listitem><para>
-Printer Configuration
-</para></listitem>
-<listitem><para>
 Device Actions
 </para></listitem>
 <listitem><para>
@@ -248,6 +245,9 @@ Input Devices (Keyboard, Mouse, Joystick, Remote Controls)
 </para></listitem>
 <listitem><para>
 Power Management (Energy Savings Settings, Activity settings, Advanced settings)
+</para></listitem>
+<listitem><para>
+Printers
 </para></listitem>
 <listitem><para>
 Removable Devices

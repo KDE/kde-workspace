@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include "kdecorationfactory.h"
 #include "kdecorationbridge.h"
 
+
 /*
 
 Extending KDecoration:
@@ -54,13 +55,23 @@ inheriting KCommonDecoration and adding the new API matching KDecoration2.
 
 */
 
+class KDecorationPrivate
+{
+public:
+    KDecorationPrivate()
+        : alphaEnabled(false)
+    {
+    }
+    bool alphaEnabled;
+};
 
 KDecorationOptions* KDecoration::options_;
 
 KDecoration::KDecoration(KDecorationBridge* bridge, KDecorationFactory* factory)
     :   bridge_(bridge),
         w_(NULL),
-        factory_(factory)
+        factory_(factory),
+        d(new KDecorationPrivate())
 {
     factory->addDecoration(this);
 }
@@ -69,6 +80,7 @@ KDecoration::~KDecoration()
 {
     factory()->removeDecoration(this);
     delete w_;
+    delete d;
 }
 
 const KDecorationOptions* KDecoration::options()
@@ -209,6 +221,16 @@ void KDecoration::showWindowMenu(const QRect &pos)
 void KDecoration::showWindowMenu(QPoint pos)
 {
     bridge_->showWindowMenu(pos);
+}
+
+void KDecoration::showApplicationMenu(const QPoint &p)
+{
+    bridge_->showApplicationMenu(p);
+}
+
+bool KDecoration::menuAvailable() const
+{
+    return bridge_->menuAvailable();
 }
 
 void KDecoration::performWindowOperation(WindowOperation op)
@@ -391,6 +413,19 @@ QRect KDecoration::transparentRect() const
         return QRect();
 }
 
+void KDecoration::setAlphaEnabled(bool enabled)
+{
+    if (d->alphaEnabled == enabled) {
+        return;
+    }
+    d->alphaEnabled = enabled;
+    emit alphaEnabledChanged(enabled);
+}
+
+bool KDecoration::isAlphaEnabled() const
+{
+    return d->alphaEnabled;
+}
 
 KDecorationUnstable::KDecorationUnstable(KDecorationBridge* bridge, KDecorationFactory* factory)
     : KDecoration(bridge, factory)

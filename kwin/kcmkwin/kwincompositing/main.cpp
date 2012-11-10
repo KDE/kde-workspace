@@ -37,6 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kservice.h>
 #include <ktitlewidget.h>
 #include <knotification.h>
+#include <KNS3/DownloadDialog>
 
 #include <QtDBus/QtDBus>
 #include <QPainter>
@@ -91,6 +92,7 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
     ui.messageBox->setVisible(false);
     ui.messageBox->addAction(m_showDetailedErrors);
     ui.messageBox->setMessageType(KMessageWidget::Warning);
+    ui.ghns->setIcon(KIcon("get-hot-new-stuff"));
 
     // For future use
     (void) I18N_NOOP("Use GLSL shaders");
@@ -128,7 +130,9 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
 
     connect(ui.glVSync, SIGNAL(toggled(bool)), this, SLOT(changed()));
     connect(ui.glShaders, SIGNAL(toggled(bool)), this, SLOT(changed()));
+    connect(ui.glColorCorrection, SIGNAL(toggled(bool)), this, SLOT(changed()));
     connect(m_showDetailedErrors, SIGNAL(triggered(bool)), SLOT(showDetailedEffectLoadingInformation()));
+    connect(ui.ghns, SIGNAL(clicked(bool)), SLOT(slotGHNS()));
 
     // Open the temporary config file
     // Temporary conf file is used to synchronize effect checkboxes with effect
@@ -381,6 +385,7 @@ void KWinCompositingConfig::loadAdvancedTab()
 
     ui.glVSync->setChecked(config.readEntry("GLVSync", true));
     ui.glShaders->setChecked(!config.readEntry<bool>("GLLegacy", false));
+    ui.glColorCorrection->setChecked(config.readEntry("GLColorCorrection", false));
 
     toogleSmoothScaleUi(ui.compositingType->currentIndex());
 }
@@ -514,7 +519,7 @@ bool KWinCompositingConfig::saveAdvancedTab()
 
     config.writeEntry("GLVSync", ui.glVSync->isChecked());
     config.writeEntry("GLLegacy", !ui.glShaders->isChecked());
-
+    config.writeEntry("GLColorCorrection", ui.glColorCorrection->isChecked());
 
     return advancedChanged;
 }
@@ -752,11 +757,23 @@ void KWinCompositingConfig::defaults()
     ui.glScaleFilter->setCurrentIndex(2);
     ui.glVSync->setChecked(true);
     ui.glShaders->setChecked(true);
+    ui.glColorCorrection->setChecked(false);
 }
 
 QString KWinCompositingConfig::quickHelp() const
 {
     return i18n("<h1>Desktop Effects</h1>");
+}
+
+void KWinCompositingConfig::slotGHNS()
+{
+    QPointer<KNS3::DownloadDialog> downloadDialog = new KNS3::DownloadDialog("kwineffect.knsrc", this);
+    if (downloadDialog->exec() == KDialog::Accepted) {
+        if (!downloadDialog->changedEntries().isEmpty()) {
+            initEffectSelector();
+        }
+    }
+    delete downloadDialog;
 }
 
 } // namespace

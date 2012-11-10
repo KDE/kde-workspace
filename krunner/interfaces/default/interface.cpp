@@ -201,7 +201,7 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
         restoreDialogSize(interfaceConfig);
         m_defaultSize = size();
     } else {
-        const int screenWidth = qApp->desktop()->screenGeometry().width(); //Kephal::Screens::self()->screen(screenId)->geometry().height();
+        const int screenWidth = qApp->desktop()->screenGeometry().width();
         int width = size().width();
 
         if (screenWidth >= 1920) {
@@ -277,9 +277,8 @@ void Interface::updateSystemActivityToolTip()
 
 void Interface::setConfigWidget(QWidget *w)
 {
-    //FIXME: would like to use kephal here, but it doesn't provide an availableGeometry call
-    const int screenId = qApp->desktop()->screenNumber(this); //Kephal::ScreenUtils::screenId(geometry().center());
-    const int maxHeight = qApp->desktop()->availableGeometry(screenId).height(); //Kephal::Screens::self()->screen(screenId)->geometry().height();
+    const int screenId = qApp->desktop()->screenNumber(this);
+    const int maxHeight = qApp->desktop()->availableGeometry(screenId).height();
 
     int left, top, right, bottom;
     getContentsMargins(&left, &top, &right, &bottom);

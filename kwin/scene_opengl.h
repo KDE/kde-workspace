@@ -30,6 +30,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KWin
 {
+class ColorCorrection;
+class LanczosFilter;
 class OpenGLBackend;
 
 class SceneOpenGL
@@ -84,6 +86,7 @@ private:
 
 class SceneOpenGL2 : public SceneOpenGL
 {
+    Q_OBJECT
 public:
     SceneOpenGL2(OpenGLBackend *backend);
     virtual ~SceneOpenGL2();
@@ -93,13 +96,26 @@ public:
 
     static bool supported(OpenGLBackend *backend);
 
+    ColorCorrection *colorCorrection();
+
 protected:
     virtual void paintGenericScreen(int mask, ScreenPaintData data);
     virtual void doPaintBackground(const QVector< float >& vertices);
     virtual SceneOpenGL::Window *createWindow(Toplevel *t);
+    virtual void finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data);
+
+private Q_SLOTS:
+    void slotColorCorrectedChanged();
+
+private:
+    void performPaintWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data);
+
+private:
+    QWeakPointer<LanczosFilter> m_lanczosFilter;
+    ColorCorrection *m_colorCorrection;
 };
 
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
 class SceneOpenGL1 : public SceneOpenGL
 {
 public:
@@ -226,8 +242,9 @@ protected:
      * @param opacity The opacity value to use for this rendering
      * @param brightness The brightness value to use for this rendering
      * @param saturation The saturation value to use for this rendering
+     * @param screen The index of the screen to use for this rendering
      **/
-    virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation) = 0;
+    virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen) = 0;
     /**
      * @brief Restores the OpenGL rendering state after the texture with @p type has been rendered.
      *
@@ -235,8 +252,9 @@ protected:
      * @param opacity The opacity value used for the rendering
      * @param brightness The brightness value used for this rendering
      * @param saturation The saturation value used for this rendering
+     * @param screen The index of the screen to use for this rendering
      **/
-    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation) = 0;
+    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen) = 0;
 
     /**
      * @brief Returns the texture for the given @p type.
@@ -246,6 +264,9 @@ protected:
      **/
     GLTexture *textureForType(TextureType type);
 
+protected:
+    SceneOpenGL *m_scene;
+
 private:
     template<class T>
     void paintDecorations(const WindowPaintData &data, const QRegion &region, bool hardwareClipping);
@@ -254,7 +275,6 @@ private:
     Texture *leftTexture;
     Texture *rightTexture;
     Texture *bottomTexture;
-    SceneOpenGL *m_scene;
 };
 
 class SceneOpenGL2Window : public SceneOpenGL::Window
@@ -266,11 +286,17 @@ public:
 protected:
     virtual void beginRenderWindow(int mask, const WindowPaintData &data);
     virtual void endRenderWindow(const WindowPaintData &data);
-    virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
-    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
+    virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
+    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
+
+private:
+    /**
+     * Whether prepareStates enabled blending and restore states should disable again.
+     **/
+    bool m_blendingEnabled;
 };
 
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
 class SceneOpenGL1Window : public SceneOpenGL::Window
 {
 public:
@@ -280,8 +306,8 @@ public:
 protected:
     virtual void beginRenderWindow(int mask, const WindowPaintData &data);
     virtual void endRenderWindow(const WindowPaintData &data);
-    virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
-    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
+    virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
+    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
 };
 #endif
 
@@ -453,7 +479,7 @@ protected:
     /**
      * @brief Backend specific flushing of frame to screen.
      **/
-    virtual void flushBuffer() = 0;
+    virtual void present() = 0;
     /**
      * @brief Sets the backend initialization to failed.
      *

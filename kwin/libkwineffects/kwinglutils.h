@@ -204,6 +204,7 @@ protected:
     GLShader();
     bool loadFromFiles(const QString& vertexfile, const QString& fragmentfile);
     bool load(const QByteArray &vertexSource, const QByteArray &fragmentSource);
+    const QByteArray prepareSource(GLenum shaderType, const QByteArray &sourceCode) const;
     bool compile(GLuint program, GLenum shaderType, const QByteArray &sourceCode) const;
     void bind();
     void unbind();
@@ -219,6 +220,9 @@ private:
     int mFloatLocation[FloatUniformCount];
     int mIntLocation[IntUniformCount];
 
+    static bool sColorCorrect;
+
+    friend class ColorCorrection;
     friend class ShaderManager;
 };
 
@@ -446,7 +450,7 @@ inline
 ShaderBinder::ShaderBinder(ShaderManager::ShaderType type, bool reset)
     : m_shader(NULL)
 {
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (!ShaderManager::instance()->isValid()) {
         return;
     }
@@ -458,7 +462,7 @@ inline
 ShaderBinder::ShaderBinder(GLShader *shader)
     : m_shader(shader)
 {
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (!ShaderManager::instance()->isValid()) {
         return;
     }
@@ -469,7 +473,7 @@ ShaderBinder::ShaderBinder(GLShader *shader)
 inline
 ShaderBinder::~ShaderBinder()
 {
-#ifndef KWIN_HAVE_OPENGLES
+#ifdef KWIN_HAVE_OPENGL_1
     if (!ShaderManager::instance()->isValid()) {
         return;
     }

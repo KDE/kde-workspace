@@ -14,13 +14,6 @@
    <string>Add Layout</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Limit selection by language:</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="QComboBox" name="languageComboBox">
      <property name="sizePolicy">
@@ -38,8 +31,22 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QComboBox" name="layoutComboBox"/>
+   <item row="4" column="1">
+    <widget class="QLineEdit" name="labelEdit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="labelLabel_2">
+     <property name="text">
+      <string>Shortcut:</string>
+     </property>
+    </widget>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="label_3">
@@ -51,31 +58,21 @@
    <item row="2" column="1">
     <widget class="QComboBox" name="variantComboBox"/>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QLabel" name="labelLabel">
      <property name="text">
       <string>Label:</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QLineEdit" name="labelEdit">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="labelLabel_2">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
      <property name="text">
-      <string>Shortcut:</string>
+      <string>Limit selection by language:</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="6" column="1">
     <widget class="KKeySequenceWidget" name="kkeysequencewidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -85,13 +82,23 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="7" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="layoutComboBox"/>
+   </item>
+   <item row="7" column="0">
+    <widget class="QPushButton" name="prevbutton">
+     <property name="text">
+      <string>Preview</string>
      </property>
     </widget>
    </item>

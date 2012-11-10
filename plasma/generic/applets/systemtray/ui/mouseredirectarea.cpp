@@ -25,6 +25,8 @@
 // Includes
 #include "mouseredirectarea.h"
 
+#include "../core/task.h"
+
 #include <QtGui/QGraphicsSceneWheelEvent>
 #include <QtGui/QGraphicsSceneContextMenuEvent>
 #include <QtGui/QGraphicsSceneMouseEvent>
@@ -42,11 +44,14 @@ namespace SystemTray
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<class T> void MouseRedirectArea::forwardEvent(T *event, bool is_context_menu)
 {
-    if (!isEnabled() || !m_target || !m_applet)
+    if (!isEnabled() || !(m_task || m_widget) || !m_applet)
+        return;
+    QGraphicsWidget *target = m_widget ? m_widget : (m_task ? m_task->widget(m_applet, false) : 0);
+    if (!target)
         return;
 
-    QPointF delta = m_target->sceneBoundingRect().center() - event->scenePos();
-    event->setScenePos(m_target->sceneBoundingRect().center());
+    QPointF delta = target->sceneBoundingRect().center() - event->scenePos();
+    event->setScenePos(target->sceneBoundingRect().center());
     event->setScreenPos((event->screenPos() + delta).toPoint());
 
     if (m_isApplet) {
@@ -59,14 +64,16 @@ template<class T> void MouseRedirectArea::forwardEvent(T *event, bool is_context
             scene()->sendEvent(scene()->itemAt(event->scenePos()), event);
         }
     } else {
-        event->setPos(m_target->boundingRect().center());
-        scene()->sendEvent(m_target, event);
+        event->setPos(target->boundingRect().center());
+        scene()->sendEvent(target, event);
     }
 }
 
 
 MouseRedirectArea::MouseRedirectArea(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
+    , m_widget(0)
+    , m_task(0)
     , m_target(0)
     , m_applet(0)
     , m_isApplet(false)
@@ -75,28 +82,27 @@ MouseRedirectArea::MouseRedirectArea(QDeclarativeItem *parent)
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
 }
 
-void MouseRedirectArea::setTarget(QVariant t)
+void MouseRedirectArea::setTarget(QObject *t)
 {
-    QGraphicsItem *target = qobject_cast<QGraphicsItem*>(t.value<QObject*>());
-    m_target = target;
-    m_isApplet = (qobject_cast<Plasma::Applet*>(target) != 0);
+    if (m_target != t) {
+        m_target = t;
+        processTarget();
+    }
 }
 
-void MouseRedirectArea::setApplet(QVariant t)
+void MouseRedirectArea::setApplet(QObject *a)
 {
-    Plasma::Applet *applet = qobject_cast<Plasma::Applet*>(t.value<QObject*>());
-    m_applet = applet;
-}
-
-void MouseRedirectArea::setIsWidget(bool is_widget)
-{
-    m_isWidget = is_widget;
+    Plasma::Applet *applet = qobject_cast<Plasma::Applet*>(a);
+    if (m_applet != applet) {
+        m_applet = applet;
+        processTarget(); // it may be that target already set so we should process it
+    }
 }
 
 
 void MouseRedirectArea::wheelEvent(QGraphicsSceneWheelEvent *event)
 {
-    if (!m_isApplet && !m_isWidget) {
+    if (!m_isApplet && m_widget) {
         switch (event->orientation()) {
         case Qt::Vertical:
             emit scrollVert(event->delta());
@@ -121,7 +127,7 @@ void MouseRedirectArea::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 void MouseRedirectArea::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (!m_isApplet && !m_isWidget) {
+    if (!m_isApplet && m_widget) {
         switch (event->button()) {
         case Qt::MiddleButton: emit clickMiddle(); return;
         case Qt::RightButton: emit clickRight(); return;
@@ -153,6 +159,24 @@ void MouseRedirectArea::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
     QPointF pos = event->pos();
     emit changedMousePos(pos.x(), pos.y());
     forwardEvent(event);
+}
+
+void MouseRedirectArea::processTarget()
+{
+    // we have target as QObject but it may be Task or Widget
+    if (!m_applet || !m_target)
+        return; // applet and target must be already set
+
+    m_isApplet = false;
+    m_widget = 0;
+    m_task = 0;
+    m_task = qobject_cast<Task*>(m_target);
+    if (m_task) {
+        QGraphicsWidget *widget = m_task->widget(m_applet);
+        m_isApplet = (qobject_cast<Plasma::Applet*>(widget) != 0);
+    } else {
+        m_widget = qobject_cast<QGraphicsWidget*>(m_target);
+    }
 }
 
 

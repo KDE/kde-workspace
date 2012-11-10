@@ -65,36 +65,37 @@ void ContextMenu::init(const KConfigGroup &config)
     Plasma::Containment *c = containment();
     Q_ASSERT(c);
 
-    m_allActions.clear();
-    m_enabledActions.clear();
-    QList<bool> defaultEnabled;
-
-    //FIXME what if it's a customcontainment?
-    //FIXME does anyone care that the panel/desktopaction orders are different?
-    if (c->containmentType() == Plasma::Containment::PanelContainment ||
-            c->containmentType() == Plasma::Containment::CustomPanelContainment) {
-        m_allActions << "add widgets" << "_add panel" << "lock widgets" << "_context" << "remove";
-        defaultEnabled << true << true << true << true << true;
-    } else {
-        //FIXME ugly code!
-        m_allActions << "_context" << "_run_command" << "add widgets" << "_add panel" << "add sibling containment" << "manage activities" << "remove" << "lock widgets" << "_sep1" << "_lock_screen" << "_logout" << "_sep2" << "configure" << "configure shortcuts" << "_sep3" << "_wallpaper";
-        defaultEnabled << true << true << true << true << false << true << true << true << true << true << true << true << true << false << true << true;
-    }
-
-    for (int i = 0; i < m_allActions.count(); ++i) {
-        m_enabledActions << config.readEntry(m_allActions.at(i), defaultEnabled.at(i));
-    }
-
-    if (isInitialized()) {
-        kDebug() << "second init";
-        return; //below here is stuff we only want to do once
-    }
+    m_actions.clear();
+    QHash<QString, bool> actions;
+    QSet<QString> disabled;
 
     if (c->containmentType() == Plasma::Containment::PanelContainment ||
-            c->containmentType() == Plasma::Containment::CustomPanelContainment) {
-        //panel does its own config action atm... FIXME how do I fit it in properly?
-        //can I do something with configureRequested? damn privateslot...
+        c->containmentType() == Plasma::Containment::CustomPanelContainment) {
+        m_actionOrder << "add widgets" << "_add panel" << "lock widgets" << "_context" << "remove";
     } else {
+        actions.insert("configure shortcuts", false);
+        m_actionOrder << "_context" << "_run_command" << "add widgets" << "_add panel"
+                      << "manage activities" << "remove" << "lock widgets" << "_sep1"
+                      <<"_lock_screen" << "_logout" << "_sep2" << "configure"
+                      << "configure shortcuts" << "_sep3" << "_wallpaper";
+        disabled.insert("configure shortcuts");
+    }
+
+    foreach (const QString &name, m_actionOrder) {
+        actions.insert(name, disabled.contains(name));
+    }
+
+    QHashIterator<QString, bool> it(actions);
+    while (it.hasNext()) {
+        it.next();
+        m_actions.insert(it.key(), config.readEntry(it.key(), it.value()));
+    }
+
+    // everything below should only happen once, so check for it
+    if (c->containmentType() == Plasma::Containment::PanelContainment ||
+        c->containmentType() == Plasma::Containment::CustomPanelContainment) {
+        //FIXME: panel does its own config action atm...
+    } else if (!m_runCommandAction) {
         m_runCommandAction = new QAction(i18n("Run Command..."), this);
         m_runCommandAction->setIcon(KIcon("system-run"));
         connect(m_runCommandAction, SIGNAL(triggered(bool)), this, SLOT(runCommand()));
@@ -134,24 +135,22 @@ QList<QAction*> ContextMenu::contextualActions()
     Plasma::Containment *c = containment();
     Q_ASSERT(c);
     QList<QAction*> actions;
-    for (int i = 0; i < m_allActions.count(); ++i) {
-        if (m_enabledActions.at(i)) {
-            QString name = m_allActions.at(i);
-            if (name == "_context") {
-                actions << c->contextualActions();
-            } if (name == "_wallpaper") {
-                if (c->wallpaper() &&
-                      !c->wallpaper()->contextualActions().isEmpty()) {
-                    actions << c->wallpaper()->contextualActions();
-                }
-            } else {
-                QAction *a = action(name);
-                if (a) {
-                    actions << a;
-                }
+    foreach (const QString &name, m_actionOrder) {
+        if (!m_actions.value(name)) {
+            continue;
+        }
+
+        if (name == "_context") {
+            actions << c->contextualActions();
+        } if (name == "_wallpaper") {
+            if (c->wallpaper()) {
+                actions << c->wallpaper()->contextualActions();
             }
+        } else if (QAction *a = action(name)) {
+            actions << a;
         }
     }
+
     return actions;
 }
 
@@ -254,8 +253,8 @@ QWidget* ContextMenu::createConfigurationInterface(QWidget* parent)
     widget->setWindowTitle(i18n("Configure Contextual Menu Plugin"));
     m_buttons = new QButtonGroup(widget);
     m_buttons->setExclusive(false);
-    for (int i = 0; i < m_allActions.count(); ++i) {
-        QString name = m_allActions.at(i);
+
+    foreach (const QString &name, m_actionOrder) {
         QCheckBox *item = 0;
 
         if (name == "_context") {
@@ -279,9 +278,10 @@ QWidget* ContextMenu::createConfigurationInterface(QWidget* parent)
         }
 
         if (item) {
-            item->setChecked(m_enabledActions.at(i));
+            item->setChecked(m_actions.value(name));
+            item->setProperty("actionName", name);
             lay->addWidget(item);
-            m_buttons->addButton(item, i);
+            m_buttons->addButton(item);
         }
     }
 
@@ -290,19 +290,22 @@ QWidget* ContextMenu::createConfigurationInterface(QWidget* parent)
 
 void ContextMenu::configurationAccepted()
 {
-    for (int i = 0; i < m_allActions.count(); ++i) {
-        QAbstractButton *b = m_buttons->button(i);
+    QList<QAbstractButton *> buttons = m_buttons->buttons();
+    QListIterator<QAbstractButton *> it(buttons);
+    while (it.hasNext()) {
+        QAbstractButton *b = it.next();
         if (b) {
-            m_enabledActions.replace(i, b->isChecked());
+            m_actions.insert(b->property("actionName").toString(), b->isChecked());
         }
     }
 }
 
 void ContextMenu::save(KConfigGroup &config)
 {
-    //TODO should I only write the changed ones?
-    for (int i = 0; i < m_allActions.count(); ++i) {
-        config.writeEntry(m_allActions.at(i), m_enabledActions.at(i));
+    QHashIterator<QString, bool> it(m_actions);
+    while (it.hasNext()) {
+        it.next();
+        config.writeEntry(it.key(), it.value());
     }
 }
 

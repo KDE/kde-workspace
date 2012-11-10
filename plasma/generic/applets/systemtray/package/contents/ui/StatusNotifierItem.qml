@@ -42,7 +42,7 @@ Item {
     property variant  __att_icon:          __has_task ? task.attIcon : __getDefaultIcon()
     property string   __overlay_icon_name: __has_task ? task.overlayIconName : ""
     property string   __movie_path:        __has_task ? task.moviePath : ""
-    property int      __status:            __has_task ? task.status : TaskStatusUnknown
+    property int      __status:            __has_task ? task.status : UnknownStatus
 
     // Public functions ================================================================================================
     function click(buttons) {
@@ -216,7 +216,7 @@ Item {
         // Static icon
         State {
             name: "__STATIC"
-            when: __status !== TaskStatusAttention
+            when: __status !== NeedsAttention
             PropertyChanges {
                 target: timer_blink
                 running: false
@@ -238,7 +238,7 @@ Item {
         // Attention icon
         State {
             name: "__BLINK"
-            when: __status === TaskStatusAttention && !__movie_path
+            when: __status === NeedsAttention && !__movie_path
             PropertyChanges {
                 target: icon_widget
                 icon: __getAttentionIcon()
@@ -261,7 +261,7 @@ Item {
         // Animation icon
         State {
             name: "__ANIM"
-            when: __status === TaskStatusAttention && __movie_path
+            when: __status === NeedsAttention && __movie_path
             PropertyChanges {
                 target: timer_blink
                 running: false

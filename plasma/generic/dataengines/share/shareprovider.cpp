@@ -144,8 +144,18 @@ void ShareProvider::addPostFile(const QString &contentKey, const QString &conten
     // it will return as an error later in the process.
     KUrl url(m_content);
 
-    KIO::MimetypeJob *mjob = KIO::mimetype(url);
-    if (!mjob->exec()) {
+    KIO::MimetypeJob *mjob = KIO::mimetype(url, KIO::HideProgressInfo);
+    connect(mjob, SIGNAL(finished(KJob*)), this, SLOT(mimetypeJobFinished(KJob*)));
+}
+
+void ShareProvider::mimetypeJobFinished(KJob *job)
+{
+    KIO::MimetypeJob *mjob = qobject_cast<KIO::MimetypeJob *>(job);
+    if (!job) {
+        return;
+    }
+
+    if (mjob->error()) {
         // it's not a file - usually this happens when we are
         // just sharing plain text, so add the content and publish it
         addPostItem(m_contentKey, m_content, "text/plain");
@@ -183,7 +193,11 @@ void ShareProvider::openFile(KIO::Job *job)
 
 void ShareProvider::finishedContentData(KIO::Job *job, const QByteArray &data)
 {
-    Q_UNUSED(job);
+    // Close the job as we don't need it anymore.
+    // NOTE: this is essential to ensure the job gets de-scheduled and deleted!
+    job->disconnect(this);
+    static_cast<KIO::FileJob *>(job)->close();
+
     if (data.length() == 0) {
         error(i18n("It was not possible to read the selected file"));
         return;
@@ -191,8 +205,8 @@ void ShareProvider::finishedContentData(KIO::Job *job, const QByteArray &data)
 
     if (!m_isBlob) {
         // it's just text and we can return here using data()
-        addPostItem(m_contentKey, data.data(), "text/plain");
-        addQueryItem(m_contentKey, data.data());
+        addPostItem(m_contentKey, QString::fromLocal8Bit(data), "text/plain");
+        addQueryItem(m_contentKey, QString::fromLocal8Bit(data));
         emit readyToPublish();
         return;
     }
@@ -314,13 +328,20 @@ void ShareProvider::redirected(KIO::Job *job, const KUrl &to)
 void ShareProvider::success(const QString &url)
 {
     // notify the service that it worked and the result url
+    cleanup();
     emit finished(url);
 }
 
 void ShareProvider::error(const QString &msg)
 {
     // notify the service that it didnt work and the error msg
+    cleanup();
     emit finishedError(msg);
+}
+
+void ShareProvider::cleanup()
+{
+    KIO::file_delete(KUrl(m_content), KIO::HideProgressInfo);
 }
 
 Plasma::PackageStructure::Ptr ShareProvider::packageStructure()

@@ -1001,7 +1001,7 @@ Q_SIGNALS:
      * Signal emitted when an area of a window is scheduled for repainting.
      * Use this signal in an effect if another area needs to be synced as well.
      * @param w The window which is scheduled for repainting
-     * @param r The damaged rect
+     * @param r Always empty.
      * @since 4.7
      **/
     void windowDamaged(KWin::EffectWindow *w, const QRect &r);
@@ -1320,6 +1320,11 @@ class KWIN_EXPORT EffectWindow : public QObject
     Q_PROPERTY(QStringList activities READ activities)
     Q_PROPERTY(bool onCurrentActivity READ isOnCurrentActivity)
     Q_PROPERTY(bool onAllActivities READ isOnAllActivities)
+    /**
+     * Whether the decoration currently uses an alpha channel.
+     * @since 4.10
+     **/
+    Q_PROPERTY(bool decorationHasAlpha READ decorationHasAlpha)
 public:
     /**  Flags explaining why painting should be disabled  */
     enum {
@@ -1407,6 +1412,7 @@ public:
      */
     virtual QRect decorationInnerRect() const = 0;
     bool hasDecoration() const;
+    bool decorationHasAlpha() const;
     virtual QByteArray readProperty(long atom, long type, int format) const = 0;
     virtual void deleteProperty(long atom) const = 0;
 
@@ -1943,6 +1949,18 @@ public:
      * @since 4.10
      **/
     qreal multiplyBrightness(qreal factor);
+    /**
+     * The screen number for which the painting should be done.
+     * This affects color correction (different screens may need different
+     * color correction lookup tables because they have different ICC profiles).
+     * @return screen for which painting should be done
+     */
+    int screen() const;
+    /**
+     * @param screen New screen number
+     * A value less than 0 will indicate that a default profile should be done.
+     */
+    void setScreen(int screen) const;
     WindowQuadList quads;
     /**
      * Shader to be used for rendering, if any.

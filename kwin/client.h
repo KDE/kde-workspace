@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config-X11.h>
 
+#include "config-kwin.h"
+
 #include <QFrame>
 #include <QPixmap>
 #include <netwm.h>
@@ -274,6 +276,10 @@ class Client
      * Use with care!
      **/
     Q_PROPERTY(bool blocksCompositing READ isBlockingCompositing WRITE setBlockingCompositing NOTIFY blockingCompositingChanged)
+    /**
+     * Whether the decoration is currently using an alpha channel.
+     **/
+    Q_PROPERTY(bool decorationHasAlpha READ decorationHasAlpha)
 public:
     Client(Workspace* ws);
     Window wrapperId() const;
@@ -492,7 +498,7 @@ public:
     inline bool isBlockingCompositing() { return blocks_compositing; }
     void updateCompositeBlocking(bool readProperty = false);
 
-    QString caption(bool full = true) const;
+    QString caption(bool full = true, bool stripped = false) const;
     void updateCaption();
 
     void keyPressEvent(uint key_code);   // FRAME ??
@@ -607,6 +613,8 @@ public:
 
     QRegion decorationPendingRegion() const;
 
+    bool decorationHasAlpha() const;
+
     enum CoordinateMode {
         DecorationRelative, // Relative to the top left corner of the decoration
         WindowRelative      // Relative to the top left corner of the window
@@ -627,6 +635,22 @@ public:
     //sets whether the client should be treated as a SessionInteract window
     void setSessionInteract(bool needed);
     virtual bool isClient() const;
+
+#ifdef KWIN_BUILD_KAPPMENU
+    // Used by workspace
+    void emitShowRequest() {
+        emit showRequest();
+    }
+    void emitMenuHidden() {
+        emit menuHidden();
+    }
+    void setAppMenuAvailable();
+    void setAppMenuUnavailable();
+    void showApplicationMenu(const QPoint&);
+    bool menuAvailable() {
+        return m_menuAvailable;
+    }
+#endif
 
 public slots:
     void closeWindow();
@@ -717,6 +741,24 @@ signals:
      * another group, but not when a Client gets added or removed to the Client's ClientGroup.
      **/
     void tabGroupChanged();
+
+    /**
+     * Emitted whenever the Client want to show it menu
+     */
+    void showRequest();
+    /**
+     * Emitted whenever the Client's menu is closed
+     */
+    void menuHidden();
+    /**
+     * Emitted whenever the Client's menu is available
+     **/
+    void appMenuAvailable();
+    /**
+     * Emitted whenever the Client's menu is unavailable
+     */
+    void appMenuUnavailable();
+
     /**
      * Emitted whenever the demands attention state changes.
      **/
@@ -892,7 +934,7 @@ private:
     QTimer* shadeHoverTimer;
     QTimer* delayedMoveResizeTimer;
     Colormap cmap;
-    QString cap_normal, cap_iconic, cap_suffix;
+    QString cap_normal, cap_iconic, cap_suffix, cap_deco;
     Group* in_group;
     Window window_group;
     TabGroup* tab_group;
@@ -946,6 +988,9 @@ private:
 
     bool needsSessionInteract;
 
+#ifdef KWIN_BUILD_KAPPMENU
+    bool m_menuAvailable;
+#endif
     Window input_window;
     QPoint input_offset;
 };

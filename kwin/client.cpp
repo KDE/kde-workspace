@@ -26,6 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDateTime>
 #include <QProcess>
 #include <QPaintEngine>
+
+#ifdef KWIN_BUILD_SCRIPTING
+#include <QScriptEngine>
+#include <QScriptProgram>
+#endif
+
 #include <unistd.h>
 #include <kstandarddirs.h>
 #include <QWhatsThis>
@@ -129,6 +135,9 @@ Client::Client(Workspace* ws)
     , electricMaximizing(false)
     , activitiesDefined(false)
     , needsSessionInteract(false)
+#ifdef KWIN_BUILD_KAPPMENU
+    , m_menuAvailable(false)
+#endif
     , input_window(None)
 {
     // TODO: Do all as initialization
@@ -401,6 +410,12 @@ void Client::updateDecoration(bool check_workspace_pos, bool force)
     if (!noBorder()) {
         setMask(QRegion());  // Reset shape mask
         decoration = workspace()->createDecoration(bridge);
+#ifdef KWIN_BUILD_KAPPMENU
+        connect(this, SIGNAL(showRequest()), decoration, SIGNAL(showRequest()));
+        connect(this, SIGNAL(appMenuAvailable()), decoration, SIGNAL(appMenuAvailable()));
+        connect(this, SIGNAL(appMenuUnavailable()), decoration, SIGNAL(appMenuUnavailable()));
+        connect(this, SIGNAL(menuHidden()), decoration, SIGNAL(menuHidden()));
+#endif
         // TODO: Check decoration's minimum size?
         decoration->init();
         decoration->widget()->installEventFilter(this);
@@ -744,7 +759,8 @@ void Client::setMask(const QRegion& reg, int mode)
     }
     if (shape()) {
         // The rest of the applyign using a temporary window
-        XRectangle rec = { 0, 0, clientSize().width(), clientSize().height() };
+        XRectangle rec = { 0, 0, static_cast<unsigned short>(clientSize().width()),
+                           static_cast<unsigned short>(clientSize().height()) };
         XShapeCombineRectangles(display(), shape_helper_window, ShapeBounding,
                                 clientPos().x(), clientPos().y(), &rec, 1, ShapeSubtract, Unsorted);
         XShapeCombineShape(display(), shape_helper_window, ShapeBounding,
@@ -907,6 +923,11 @@ void Client::setShade(ShadeMode mode)
     ShadeMode was_shade_mode = shade_mode;
     shade_mode = mode;
 
+    // Decorations may turn off some borders when shaded
+    // this has to happen _before_ the tab alignment since it will restrict the minimum geometry
+    if (decoration)
+        decoration->borders(border_left, border_right, border_top, border_bottom);
+
     // Update states of all other windows in this group
     if (tabGroup())
         tabGroup()->updateStates(this, TabGroup::Shaded);
@@ -927,9 +948,6 @@ void Client::setShade(ShadeMode mode)
 
     assert(decoration != NULL);   // noborder windows can't be shaded
     GeometryUpdatesBlocker blocker(this);
-    // Decorations may turn off some borders when shaded
-    if (decoration)
-        decoration->borders(border_left, border_right, border_top, border_bottom);
 
     // TODO: All this unmapping, resizing etc. feels too much duplicated from elsewhere
     if (isShade()) {
@@ -1696,41 +1714,72 @@ QChar PDF(0x202C);
 
 void Client::setCaption(const QString& _s, bool force)
 {
-    QString s = _s;
-    if (s != cap_normal || force) {
-        bool reset_name = force;
-        for (int i = 0; i < s.length(); ++i)
-            if (!s[i].isPrint())
-                s[i] = QChar(' ');
-        cap_normal = s;
-        bool was_suffix = (!cap_suffix.isEmpty());
-        QString machine_suffix;
+    if (!force && _s == cap_normal)
+        return;
+    QString s(_s);
+    for (int i = 0; i < s.length(); ++i)
+        if (!s[i].isPrint())
+            s[i] = QChar(' ');
+    cap_normal = s;
+#ifdef KWIN_BUILD_SCRIPTING
+    if (options->condensedTitle()) {
+        static QScriptEngine engine;
+        static QScriptProgram stripTitle;
+        static QScriptValue script;
+        if (stripTitle.isNull()) {
+            const QString scriptFile = KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + "/stripTitle.js");
+            if (!scriptFile.isEmpty()) {
+                QFile f(scriptFile);
+                if (f.open(QIODevice::ReadOnly|QIODevice::Text)) {
+                    f.reset();
+                    stripTitle = QScriptProgram(QString::fromLocal8Bit(f.readAll()), "stripTitle.js");
+                    f.close();
+                }
+            }
+            if (stripTitle.isNull())
+                stripTitle = QScriptProgram("(function(title, wm_name, wm_class){ return title ; })", "stripTitle.js");
+            script = engine.evaluate(stripTitle);
+        }
+        QScriptValueList args;
+        args << _s << QString(resourceName()) << QString(resourceClass());
+        s = script.call(QScriptValue(), args).toString();
+    }
+#endif
+    if (!force && s == cap_deco)
+        return;
+    cap_deco = s;
+
+    bool reset_name = force;
+    bool was_suffix = (!cap_suffix.isEmpty());
+    cap_suffix.clear();
+    QString machine_suffix;
+    if (!options->condensedTitle()) { // machine doesn't qualify for "clean"
         if (wmClientMachine(false) != "localhost" && !isLocalMachine(wmClientMachine(false)))
             machine_suffix = QString(" <@") + wmClientMachine(true) + '>' + LRM;
-        QString shortcut_suffix = !shortcut().isEmpty() ? (" {" + shortcut().toString() + '}') : QString();
-        cap_suffix = machine_suffix + shortcut_suffix;
-        if ((!isSpecialWindow() || isToolbar()) && workspace()->findClient(FetchNameInternalPredicate(this))) {
-            int i = 2;
-            do {
-                cap_suffix = machine_suffix + " <" + QString::number(i) + '>' + LRM + shortcut_suffix;
-                i++;
-            } while (workspace()->findClient(FetchNameInternalPredicate(this)));
-            info->setVisibleName(caption().toUtf8());
-            reset_name = false;
-        }
-        if ((was_suffix && cap_suffix.isEmpty()) || reset_name) {
-            // If it was new window, it may have old value still set, if the window is reused
-            info->setVisibleName("");
-            info->setVisibleIconName("");
-        } else if (!cap_suffix.isEmpty() && !cap_iconic.isEmpty())
-            // Keep the same suffix in iconic name if it's set
-            info->setVisibleIconName(QString(cap_iconic + cap_suffix).toUtf8());
-
-        if (isManaged() && decoration) {
-            decoration->captionChange();
-        }
-        emit captionChanged();
     }
+    QString shortcut_suffix = !shortcut().isEmpty() ? (" {" + shortcut().toString() + '}') : QString();
+    cap_suffix = machine_suffix + shortcut_suffix;
+    if ((!isSpecialWindow() || isToolbar()) && workspace()->findClient(FetchNameInternalPredicate(this))) {
+        int i = 2;
+        do {
+            cap_suffix = machine_suffix + " <" + QString::number(i) + '>' + LRM;
+            i++;
+        } while (workspace()->findClient(FetchNameInternalPredicate(this)));
+        info->setVisibleName(caption().toUtf8());
+        reset_name = false;
+    }
+    if ((was_suffix && cap_suffix.isEmpty()) || reset_name) {
+        // If it was new window, it may have old value still set, if the window is reused
+        info->setVisibleName("");
+        info->setVisibleIconName("");
+    } else if (!cap_suffix.isEmpty() && !cap_iconic.isEmpty())
+        // Keep the same suffix in iconic name if it's set
+        info->setVisibleIconName(QString(cap_iconic + cap_suffix).toUtf8());
+
+    if (isManaged() && decoration) {
+        decoration->captionChange();
+    }
+    emit captionChanged();
 }
 
 void Client::updateCaption()
@@ -1760,9 +1809,12 @@ void Client::fetchIconicName()
 /**
  * \reimp
  */
-QString Client::caption(bool full) const
+QString Client::caption(bool full, bool stripped) const
 {
-    return full ? cap_normal + cap_suffix : cap_normal;
+    QString cap = stripped ? cap_deco : cap_normal;
+    if (full)
+        cap += cap_suffix;
+    return cap;
 }
 
 bool Client::tabTo(Client *other, bool behind, bool activate)
@@ -2080,8 +2132,6 @@ void Client::getSyncCounter()
 void Client::sendSyncRequest()
 {
 #ifdef HAVE_XSYNC
-    delete m_readyForPaintingTimer;
-    m_readyForPaintingTimer = 0;
     if (syncRequest.counter == None || syncRequest.isPending)
         return; // do NOT, NEVER send a sync request when there's one on the stack. the clients will just stop respoding. FOREVER! ...
 
@@ -2362,6 +2412,25 @@ bool Client::isClient() const
     return true;
 }
 
+#ifdef KWIN_BUILD_KAPPMENU
+void Client::setAppMenuAvailable()
+{
+    m_menuAvailable = true;
+    emit appMenuAvailable();
+}
+
+void Client::setAppMenuUnavailable()
+{
+    m_menuAvailable = false;
+    emit appMenuUnavailable();
+}
+
+void Client::showApplicationMenu(const QPoint &p)
+{
+    workspace()->showApplicationMenu(p, window());
+}
+#endif
+
 NET::WindowType Client::windowType(bool direct, int supportedTypes) const
 {
     // TODO: does it make sense to cache the returned window type for SUPPORTED_MANAGED_WINDOW_TYPES_MASK?
@@ -2381,6 +2450,20 @@ NET::WindowType Client::windowType(bool direct, int supportedTypes) const
     if (wt == NET::Unknown)   // this is more or less suggested in NETWM spec
         wt = isTransient() ? NET::Dialog : NET::Normal;
     return wt;
+}
+
+bool Client::decorationHasAlpha() const
+{
+    if (!decoration || !workspace()->decorationHasAlpha()) {
+        // either no decoration or decoration has alpha disabled
+        return false;
+    }
+    if (workspace()->decorationSupportsAnnounceAlpha()) {
+        return decoration->isAlphaEnabled();
+    } else {
+        // decoration has alpha enabled and does not support alpha announcement
+        return true;
+    }
 }
 
 } // namespace

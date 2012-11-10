@@ -68,6 +68,7 @@ private Q_SLOTS:
     void moveDown();
     void configureLayoutsChanged();
     void configureXkbOptionsChanged();
+    void previewLayout();
 
 private:
     Rules *rules;

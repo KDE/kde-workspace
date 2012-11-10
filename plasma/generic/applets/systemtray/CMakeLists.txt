@@ -30,9 +30,6 @@ set(systemtray_SRCS
     protocols/dbussystemtray/dbussystemtrayprotocol.cpp
 
     ui/applet.cpp
-    ui/plasmoid.cpp
-    ui/taskspool.cpp
-    ui/uitask.cpp
     ui/widgetitem.cpp
     ui/mouseredirectarea.cpp
     )

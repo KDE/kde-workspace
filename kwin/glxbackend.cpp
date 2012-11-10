@@ -112,6 +112,12 @@ void GlxBackend::init()
             qWarning() << "NO VSYNC! glXGetVideoSync, glXSwapInterval, glXIsDirect" <<
                         bool(glXGetVideoSync) << bool(glXSwapInterval) << glXIsDirect(display(), ctxbuffer);
     }
+    if (glPlatform->isVirtualBox()) {
+        // VirtualBox does not support glxQueryDrawable
+        // this should actually be in kwinglutils_funcs, but QueryDrawable seems not to be provided by an extension
+        // and the GLPlatform has not been initialized at the moment when initGLX() is called.
+        glXQueryDrawable = NULL;
+    }
     setIsDirectRendering(bool(glXIsDirect(display(), ctxbuffer)));
     kDebug(1212) << "DB:" << isDoubleBuffer() << ", Direct:" << isDirectRendering() << endl;
 }
@@ -201,12 +207,15 @@ bool GlxBackend::initBufferConfigs()
     fbcbuffer_nondb = NULL;
 
     for (int i = 0; i < 2; i++) {
-        int back, stencil, depth, caveat, alpha;
+        int back, stencil, depth, caveat, msaa_buffers, msaa_samples, alpha;
         back = i > 0 ? INT_MAX : 1;
         stencil = INT_MAX;
         depth = INT_MAX;
         caveat = INT_MAX;
+        msaa_buffers = INT_MAX;
+        msaa_samples = INT_MAX;
         alpha = 0;
+
         for (int j = 0; j < cnt; j++) {
             XVisualInfo *vi;
             int visual_depth;
@@ -253,10 +262,26 @@ bool GlxBackend::initBufferConfigs()
                                  GLX_CONFIG_CAVEAT, &caveat_value);
             if (caveat_value > caveat)
                 continue;
+
+            int msaa_buffers_value;
+            glXGetFBConfigAttrib(display(), fbconfigs[j], GLX_SAMPLE_BUFFERS,
+                                 &msaa_buffers_value);
+            if (msaa_buffers_value > msaa_buffers)
+                continue;
+
+            int msaa_samples_value;
+            glXGetFBConfigAttrib(display(), fbconfigs[j], GLX_SAMPLES,
+                                 &msaa_samples_value);
+            if (msaa_samples_value > msaa_samples)
+                continue;
+
             back = back_value;
             stencil = stencil_value;
             depth = depth_value;
             caveat = caveat_value;
+            msaa_buffers = msaa_buffers_value;
+            msaa_samples = msaa_samples_value;
+
             if (i > 0)
                 fbcbuffer_nondb = fbconfigs[ j ];
             else
@@ -423,7 +448,7 @@ void GlxBackend::waitSync()
 
 #undef VSYNC_DEBUG
 
-void GlxBackend::flushBuffer()
+void GlxBackend::present()
 {
     if (isDoubleBuffer()) {
         if (lastMask() & Scene::PAINT_SCREEN_REGION) {
@@ -529,7 +554,7 @@ SceneOpenGL::TexturePrivate *GlxBackend::createBackendTexture(SceneOpenGL::Textu
 void GlxBackend::prepareRenderingFrame()
 {
     if (!lastDamage().isEmpty())
-        flushBuffer();
+        present();
     glXWaitX();
 }
 

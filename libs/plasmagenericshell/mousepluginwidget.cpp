@@ -262,7 +262,7 @@ void MousePluginWidget::prepareForSave()
 
 void MousePluginWidget::save()
 {
-    QString trigger = m_triggerButton->trigger();
+    const QString trigger = m_triggerButton->trigger();
     if (trigger.isEmpty()) {
         m_lastConfigLocation.clear();
         return;
@@ -275,7 +275,6 @@ void MousePluginWidget::save()
             m_pluginInstance.data()->save(cfg);
         } else {
             m_tempConfig.copyTo(&cfg);
-            //kDebug() << "copied from temp";
         }
         m_lastConfigLocation = trigger;
     }

@@ -41,6 +41,7 @@ public:
     QIcon icon() const;
     void abandon(Plasma::Applet *host);
     virtual bool isWidget() const;
+    virtual TaskType type() const { return TypeX11Task; }
 
 signals:
     void taskDeleted(WId winId);

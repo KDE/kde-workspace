@@ -44,6 +44,7 @@ enum ButtonType {
     AboveButton,
     BelowButton,
     ShadeButton,
+    AppMenuButton,
     NumButtons,
     ItemCloseButton = 100, // Close only one tab
     ItemMenuButton // shows the window menu for one tab
@@ -274,6 +275,9 @@ public Q_SLOTS:
     void slotKeepBelow();
     void menuButtonPressed();
     void menuButtonReleased();
+    void appMenuButtonPressed();
+    void slotAppMenuAvailable();
+    void slotAppMenuUnavailable();
 public:
     virtual Position mousePosition(const QPoint &point) const;
 
@@ -355,9 +359,32 @@ public:
 protected:
     virtual void timerEvent(QTimerEvent *event);
 
+protected Q_SLOTS:
+    /**
+     * A decoration providing AbilityAnnounceAlphaChannel can use this method to enable/disable the
+     * use of alpha channel. This is useful if for a normal window the decoration renders its own
+     * shadows or round corners and thus needs alpha channel. But in maximized state the decoration
+     * is fully opaque. By disabling the alpha channel the Compositor can optimize the rendering.
+     *
+     * @param enabled If @c true alpha channel is enabled, if @c false alpha channel is disabled
+     * @see KDecoration::setAlphaEnabled
+     * @since 4.10
+     **/
+    void setAlphaEnabled(bool enabled);
+
 private Q_SLOTS:
     /* look out for buttons that have been destroyed. */
     void objDestroyed(QObject *obj);
+
+    /**
+     * This slot can be reimplemented to return the regions defined
+     * by KDecorationDefines::Region.
+     *
+     * The default implementation always returns an empty region.
+     *
+     * @since 4.10
+     */
+    QRegion region(KDecorationDefines::Region r);
 
 private:
     void resetLayout();

@@ -19,8 +19,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA          *
  ***************************************************************************/
 
-#ifndef _ADDSCRIPTDIALOG_H_
-#define _ADDSCRIPTDIALOG_H_
+#ifndef ADDSCRIPTDIALOG_H
+#define ADDSCRIPTDIALOG_H
 
 #include <KDialog>
 class KUrlRequester;

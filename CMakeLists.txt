@@ -31,6 +31,9 @@ macro_optional_find_package(OpenGLES)
 macro_log_feature(KDeclarative_FOUND "libkdeclarative" "KDE Declarative (QML) support from kdelibs" "http://www.kde.org" TRUE "" "Required by ksmserver.")
 
 if(Q_WS_X11)
+  find_package(XCB REQUIRED)
+  find_package(X11XCB REQUIRED)
+
   if(NOT X11_XTest_FOUND)
     macro_log_feature(X11_XTest_FOUND "libXtst" "X11 Testing Resource extension library" "http://xorg.freedesktop.org" FALSE "" "useful for automated testing of X clients.")
   endif(NOT X11_XTest_FOUND)
@@ -159,6 +162,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 
    if (Q_WS_X11)
       macro_optional_add_subdirectory(kinfocenter)
+      macro_optional_add_subdirectory(ktouchpadenabler)
    endif (Q_WS_X11)
 
    if(NOT WIN32)

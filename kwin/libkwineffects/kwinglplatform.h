@@ -96,6 +96,8 @@ enum Driver {
     Driver_Swrast,
     Driver_Softpipe,
     Driver_Llvmpipe,
+    Driver_VirtualBox,
+    Driver_VMware,
     Driver_Unknown
 };
 
@@ -126,6 +128,8 @@ enum ChipClass {
     I915,                   // GL1.4/1.5     DX9/DX9c  SM 2.0      2004
     I965,                   // GL2.0/2.1     DX9/DX10  SM 3.0/4.0  2006
     SandyBridge,            // GL3.1  CL1.1  DX10.1    SM 4.0      2010
+    IvyBridge,              // GL4.0  CL1.1  DX11      SM 5.0      2012
+    Haswell,                // GL4.0  CL1.2  DX11.1    SM 5.0      2013
     UnknownIntel  = 2999,
 
     UnknownChipClass = 99999
@@ -237,10 +241,28 @@ public:
     bool isIntel() const;
 
     /**
+     * @returns @c true if the "GPU" is a VirtualBox GPU, and @c false otherwise.
+     * @since 4.10
+     **/
+    bool isVirtualBox() const;
+
+    /**
+     * @returns @c true if the "GPU" is a VMWare GPU, and @c false otherwise.
+     * @since 4.10
+     **/
+    bool isVMware() const;
+
+    /**
      * @returns @c true if OpenGL is emulated in software.
      * @since 4.7
      **/
     bool isSoftwareEmulation() const;
+
+    /**
+     * @returns @c true if the driver is known to be from a virtual machine.
+     * @since 4.10
+     **/
+    bool isVirtualMachine() const;
 
     /**
      * @returns the GL_VERSION string as provided by the driver.
@@ -273,6 +295,16 @@ public:
      * @since 4.9
      **/
     bool isLooseBinding() const;
+    /**
+     * @returns Whether OpenGL ES is used
+     */
+    bool isGLES() const;
+
+    /**
+     * @returns The CompositingType recommended by the driver.
+     * @since 4.10
+     **/
+    CompositingType recommendedCompositor() const;
 
     /**
      * @returns a human readable form of the @p version.
@@ -311,6 +343,7 @@ private:
     QSet<QByteArray> m_extensions;
     Driver m_driver;
     ChipClass m_chipClass;
+    CompositingType m_recommendedCompositor;
     qint64 m_glVersion;
     qint64 m_glslVersion;
     qint64 m_mesaVersion;
@@ -324,6 +357,7 @@ private:
     bool m_limitedGLSL: 1;
     bool m_textureNPOT: 1;
     bool m_limitedNPOT: 1;
+    bool m_virtualMachine: 1;
     static GLPlatform *s_platform;
 };
 
