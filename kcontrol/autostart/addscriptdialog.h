@@ -37,7 +37,7 @@ public:
     KUrl importUrl() const;
     bool symLink() const;
 
-public slots:
+private slots:
     void textChanged(const QString &text);
 
 private:
