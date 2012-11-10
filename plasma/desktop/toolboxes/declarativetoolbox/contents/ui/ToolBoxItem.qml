@@ -36,7 +36,26 @@ Item {
     width: childrenRect.width
     height: childrenRect.height
     state: "collapsed"
-    transformOrigin: Item.TopRight
+    transformOrigin: {
+        if (toolBoxButton.state == "topright") {
+            return Item.TopRight;
+        } else if (toolBoxButton.state == "right") {
+            return Item.Right;
+        } else if (toolBoxButton.state == "bottomright") {
+            return Item.BottomRight;
+        } else if (toolBoxButton.state == "bottom") {
+            return Item.Bottom;
+        } else if (toolBoxButton.state == "bottomleft") {
+            return Item.BottomLeft;
+        } else if (toolBoxButton.state == "left") {
+            return Item.Left;
+        } else if (toolBoxButton.state == "topleft") {
+            return Item.TopLeft;
+        } else if (toolBoxButton.state == "top") {
+            return Item.Top;
+        }
+    }
+
 
     function performOperation(what) {
         var service = dataEngine.serviceForSource("PowerDevil");
