@@ -55,7 +55,7 @@ protected:
 
 private slots:
     void slotAddProgram();
-    void slotAddCMD();
+    void slotAddScript();
     void slotRemoveCMD();
     void slotEditCMD(QTreeWidgetItem*);
     bool slotEditCMD(const KFileItem&);

@@ -57,7 +57,7 @@ K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
     lstHeader<<i18n( "Name" )<< i18n( "Command" )<< i18n( "Status" )<<i18nc("@title:column The name of the column that decides if the program is run on kde startup, on kde shutdown, etc", "Run On" );
     widget->listCMD->setHeaderLabels(lstHeader);
     setButtons(Help);
-    connect( widget->btnAddScript, SIGNAL(clicked()), SLOT(slotAddCMD()) );
+    connect( widget->btnAddScript, SIGNAL(clicked()), SLOT(slotAddScript()) );
     connect( widget->btnAddProgram, SIGNAL(clicked()), SLOT(slotAddProgram()) );
     connect( widget->btnRemove, SIGNAL(clicked()), SLOT(slotRemoveCMD()) );
     connect( widget->btnAdvanced, SIGNAL(clicked()), SLOT(slotAdvanced()) );
@@ -280,7 +280,7 @@ void Autostart::slotAddProgram()
     addItem( item, service->name(), m_pathName[0],  service->exec() , false);
 }
 
-void Autostart::slotAddCMD() {
+void Autostart::slotAddScript() {
     AddScriptDialog * addDialog = new AddScriptDialog(this);
     int result = addDialog->exec();
     if (result == QDialog::Accepted) {
