@@ -377,16 +377,17 @@ void Autostart::slotAdvanced() {
     delete dlg;
 }
 
-void Autostart::slotChangeStartup( int index )
+void Autostart::slotChangeStartup( ScriptStartItem* item, int index )
 {
-    if ( widget->listCMD->currentItem() == 0 )
-        return;
-    ScriptStartItem* entry = dynamic_cast<ScriptStartItem*>( widget->listCMD->currentItem() );
-    if ( entry )
+    Q_ASSERT(item);
+
+    if ( item )
     {
-        entry->setPath(m_paths.value(index));
-        if ( ( index != 0 ) && !entry->fileName().path().endsWith( ".sh" ))
+        item->setPath(m_paths.value(index));
+        widget->listCMD->setCurrentItem( item );
+        if ( ( index != 0 ) && !item->fileName().path().endsWith( ".sh" ))
             KMessageBox::information( this, i18n( "Only files with “.sh” extensions are allowed for setting up the environment." ) );
+
     }
 }
 

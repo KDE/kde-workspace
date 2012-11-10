@@ -47,7 +47,7 @@ public:
     QStringList listPathName() const { return m_pathName;}
 
 public slots:
-    void slotChangeStartup( int index );
+    void slotChangeStartup( ScriptStartItem* item, int index );
 
 protected:
     void addItem(DesktopStartItem *item, const QString& name, const QString& run, const QString& command, bool disable );
