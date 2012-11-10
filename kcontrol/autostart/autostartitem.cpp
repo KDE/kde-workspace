@@ -23,7 +23,7 @@
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
 
-#include <klocale.h>
+#include <KLocale>
 #include <KDebug>
 #include <KIO/CopyJob>
 
