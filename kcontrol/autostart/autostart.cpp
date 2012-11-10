@@ -386,7 +386,7 @@ void Autostart::slotChangeStartup( ScriptStartItem* item, int index )
     {
         item->setPath(m_paths.value(index));
         widget->listCMD->setCurrentItem( item );
-        if ( ( index != 0 ) && !item->fileName().path().endsWith( ".sh" ))
+        if ( ( index == 2 ) && !item->fileName().path().endsWith( ".sh" ))
             KMessageBox::information( this, i18n( "Only files with “.sh” extensions are allowed for setting up the environment." ) );
 
     }
