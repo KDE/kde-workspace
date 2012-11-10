@@ -191,12 +191,20 @@ void Autostart::load()
                 }
 
                 DesktopStartItem *item = new DesktopStartItem( fi.absoluteFilePath(), m_programItem, this );
+
                 const KConfigGroup grp = config.desktopGroup();
-                bool status = grp.readEntry("Hidden", false);
+                const bool hidden = grp.readEntry("Hidden", false);
+                const QStringList notShowList = grp.readXdgListEntry("NotShowIn");
+                const QStringList onlyShowList = grp.readXdgListEntry("OnlyShowIn");
+
+                const bool disabled = hidden ||
+                                      notShowList.contains("KDE") ||
+                                      (!onlyShowList.isEmpty() && !onlyShowList.contains("KDE"));
+
                 int indexPath = m_paths.indexOf((item->fileName().directory()+'/' ) );
                 if ( indexPath > 2 )
                     indexPath = 0; //.kde/share/autostart and .config/autostart load destkop at startup
-                addItem(item, config.readName(), m_pathName.value(indexPath),  grp.readEntry("Exec"),status );
+                addItem(item, config.readName(), m_pathName.value(indexPath),  grp.readEntry("Exec"), disabled );
             }
             else
             {
