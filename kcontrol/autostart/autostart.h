@@ -53,7 +53,7 @@ protected:
     void addItem(DesktopStartItem *item, const QString& name, const QString& run, const QString& command, bool disable );
     void addItem(ScriptStartItem *item, const QString& name, const QString& command, ScriptStartItem::ENV type );
 
-public slots:
+private slots:
     void slotAddProgram();
     void slotAddCMD();
     void slotRemoveCMD();
