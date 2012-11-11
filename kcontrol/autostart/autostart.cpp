@@ -113,14 +113,14 @@ void Autostart::slotItemClicked( QTreeWidgetItem *item, int col)
     }
 }
 
-void Autostart::addItem( DesktopStartItem* item, const QString& name, const QString& run, const QString& command, bool status )
+void Autostart::addItem( DesktopStartItem* item, const QString& name, const QString& run, const QString& command, bool disabled )
 {
     Q_ASSERT( item );
     item->setText( COL_NAME, name );
     item->setText( COL_RUN, run );
     item->setText( COL_COMMAND, command );
-    item->setCheckState( COL_STATUS, status ? Qt::Unchecked : Qt::Checked );
-    item->setText( COL_STATUS, status ? i18nc( "The program won't be run", "Disabled" ) : i18nc( "The program will be run", "Enabled" ));
+    item->setCheckState( COL_STATUS, disabled ? Qt::Unchecked : Qt::Checked );
+    item->setText( COL_STATUS, disabled ? i18nc( "The program won't be run", "Disabled" ) : i18nc( "The program will be run", "Enabled" ));
 }
 
 void Autostart::addItem(ScriptStartItem* item, const QString& name, const QString& command, ScriptStartItem::ENV type )

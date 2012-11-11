@@ -50,7 +50,7 @@ public slots:
     void slotChangeStartup( ScriptStartItem* item, int index );
 
 protected:
-    void addItem(DesktopStartItem *item, const QString& name, const QString& run, const QString& command, bool disable );
+    void addItem(DesktopStartItem *item, const QString& name, const QString& run, const QString& command, bool disabled );
     void addItem(ScriptStartItem *item, const QString& name, const QString& command, ScriptStartItem::ENV type );
 
 private slots:
