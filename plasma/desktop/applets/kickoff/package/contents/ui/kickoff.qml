@@ -215,8 +215,6 @@ Item {
         onCurrentTabChanged: root.forceActiveFocus();
     }
 
-    Keys.forwardTo: [tabBar.layout]
-
     Keys.onPressed: {
         if (mainStack.currentTab == applicationsPage) {
             if (event.key != Qt.Key_Tab) {
@@ -281,7 +279,7 @@ Item {
             name: "Applications"
             PropertyChanges {
                 target: root
-                Keys.forwardTo: [currentView]
+                Keys.forwardTo: [root]
             }
         },
         State {

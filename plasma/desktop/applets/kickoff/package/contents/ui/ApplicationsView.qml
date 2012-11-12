@@ -53,7 +53,6 @@ Item {
         id: contextMenu
     }
 
-
     PlasmaComponents.ButtonRow {
         id: breadcrumbsElement
         exclusive: false
