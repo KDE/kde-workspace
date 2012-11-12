@@ -49,8 +49,7 @@ ItemGroup {
             applet.appletDestroyed.connect(appletDestroyed)
             appletTimer.running = true
         }
-        function appletDestroyed()
-        {
+        function appletDestroyed() {
             LayoutManager.setSpaceAvailable(plasmoidGroup.x, plasmoidGroup.y, plasmoidGroup.width, plasmoidGroup.height, true)
             plasmoidGroup.destroy()
         }
@@ -68,6 +67,7 @@ ItemGroup {
             bottom: plasmoidGroup.contents.top
             bottomMargin: 4
         }
+//         Rectangle { color: "green"; opacity: 0.4; anchors.fill: parent; }
         Component.onCompleted: {
             action.enabled = true
         }
@@ -88,6 +88,7 @@ ItemGroup {
         Component.onCompleted: {
             action.enabled = true
         }
+//         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
     }
 
 

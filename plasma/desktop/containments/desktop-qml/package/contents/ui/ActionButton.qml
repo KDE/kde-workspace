@@ -20,7 +20,6 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1 as QtExtras
 
 Item {
     id: button
@@ -28,18 +27,16 @@ Item {
     //API
     property QtObject svg
     property alias elementId: icon.elementId
-    property alias iconSource: buttonIcon.icon
     property QtObject action
     property bool backgroundVisible: true
-    property int iconSize: 24
+    property int iconSize: 32
     property bool checked: false
     property bool toggle: false
     property string text
     signal clicked
-    signal triggered
 
-    width: parent.width - 32
-    height: iconSize + 12
+    width: buttonRow.width
+    height: buttonRow.height
 
     opacity: action==undefined||action.enabled?1:0.6
 
@@ -53,7 +50,7 @@ Item {
     onCheckedChanged: {
         if (checked) {
             buttonItem.elementId = "pressed"
-           shadowItem.opacity = 0
+            shadowItem.opacity = 0
         } else {
             buttonItem.elementId = "normal"
             shadowItem.opacity = 1
@@ -98,16 +95,7 @@ Item {
                 id: icon
                 width: iconSize
                 height: iconSize
-                opacity: 0
                 svg: button.svg
-                anchors.centerIn: parent
-            }
-            QtExtras.QIconItem {
-                id: buttonIcon
-                width: iconSize
-                height: iconSize
-                icon: button.svg
-                //svg: buttonSvg
                 anchors.centerIn: parent
             }
         }
