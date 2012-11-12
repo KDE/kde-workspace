@@ -49,46 +49,22 @@ ItemGroup {
             applet.appletDestroyed.connect(appletDestroyed)
             appletTimer.running = true
         }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.InOutQuad
+            }
+        }
         function appletDestroyed() {
             LayoutManager.setSpaceAvailable(plasmoidGroup.x, plasmoidGroup.y, plasmoidGroup.width, plasmoidGroup.height, true)
             plasmoidGroup.destroy()
         }
     }
-
-    ActionButton {
-        svg: configIconsSvg
-        elementId: "close"
-        iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
-        backgroundVisible: false
-        visible: action.enabled
-        action: applet.action("remove")
-        anchors {
-            right: plasmoidGroup.contents.right
-            bottom: plasmoidGroup.contents.top
-            bottomMargin: 4
+    Connections {
+        target: plasmoid
+        onImmutableChanged: {
+            configIconsSvg.opacity = plasmoid.immutable ? 0 : 1;
         }
-//         Rectangle { color: "green"; opacity: 0.4; anchors.fill: parent; }
-        Component.onCompleted: {
-            action.enabled = true
-        }
-    }
-
-    ActionButton {
-        svg: configIconsSvg
-        elementId: "configure"
-        iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
-        backgroundVisible: false
-        visible: action.enabled
-        action: applet.action("configure")
-        anchors {
-            left: plasmoidGroup.contents.left
-            bottom: plasmoidGroup.contents.top
-            bottomMargin: 4
-        }
-        Component.onCompleted: {
-            action.enabled = true
-        }
-//         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
     }
 
 

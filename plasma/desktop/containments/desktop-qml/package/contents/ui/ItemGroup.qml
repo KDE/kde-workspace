@@ -27,6 +27,8 @@ PlasmaCore.FrameSvgItem {
     property string category
     property string title
     property bool canResizeHeight: false
+    property real controlsOpacity: plasmoid.immutable ? 0 : 1
+    //property alias immutable: plasmoid.immutable
     imagePath: "widgets/background"
     width: LayoutManager.cellSize.width*2
     height: LayoutManager.cellSize.height
@@ -37,6 +39,22 @@ PlasmaCore.FrameSvgItem {
     property int titleHeight: categoryTitle.height
 
     property Item contents: contentsItem
+
+    //imagePath: "widgets/background"
+    Connections {
+        target: plasmoid
+        onImmutableChanged: {
+            //categoryTitle.opacity = plasmoid.immutable ? 0 : 1;
+            dragMouseArea.visible = !plasmoid.immutable;
+            itemGroup.controlsOpacity = plasmoid.immutable ? 0 : 1;
+            appletContainer.opacity = plasmoid.immutable ? 1.0 : 0.25;
+            //imagePath = plasmoid.immutable ? "" : "widgets/background";
+            //titleHeight = plasmoid.immutable ? 0: categoryTitle.height;
+            //applet.backgroundHints = plasmoid.immutable ? "NormalBackground" : "NoBackground";
+
+        }
+    }
+
     Item {
         id: contentsItem
         anchors {
@@ -44,7 +62,8 @@ PlasmaCore.FrameSvgItem {
             top: parent.top
             right: parent.right
             bottom: parent.bottom
-            topMargin: parent.margins.top+itemGroup.titleHeight
+            //topMargin: parent.margins.top+itemGroup.titleHeight
+            topMargin: parent.margins.top
             leftMargin: parent.margins.left
             rightMargin: parent.margins.right
             bottomMargin: parent.margins.bottom
@@ -89,10 +108,10 @@ print(itemGroup.x+" "+itemGroup.y)
     }
     MouseArea {
         id: dragMouseArea
-        anchors.fill: parent
+        anchors.fill: categoryTitle
         property int lastX
         property int lastY
-
+        z: appletContainer.z + 10
         onPressed: {
             //FIXME: this shouldn't be necessary
 //             mainFlickable.interactive = false
@@ -135,6 +154,12 @@ print(itemGroup.x+" "+itemGroup.y)
         }
     }
 
+    Behavior on controlsOpacity {
+        NumberAnimation {
+            duration: 250
+            easing.type: Easing.InOutQuad
+        }
+    }
     Behavior on scale {
         NumberAnimation {
             duration: 250
@@ -191,6 +216,7 @@ print(itemGroup.x+" "+itemGroup.y)
     }
 
     PlasmaCore.SvgItem {
+        opacity: controlsOpacity
         svg: PlasmaCore.Svg {
             imagePath: plasmoid.file("images", "resize-handle.svgz")
         }
@@ -208,6 +234,7 @@ print(itemGroup.x+" "+itemGroup.y)
         width: 48
         height: 48
         z: 9999
+        opacity: controlsOpacity
         anchors {
             right: parent.right
             bottom: parent.bottom
@@ -252,6 +279,8 @@ print(itemGroup.x+" "+itemGroup.y)
 
     PlasmaCore.FrameSvgItem {
         id: categoryTitle
+        z: appletContainer.z + 1
+        opacity: itemGroup.controlsOpacity
         imagePath: "widgets/extender-dragger"
         prefix: "root"
         anchors {
@@ -263,9 +292,50 @@ print(itemGroup.x+" "+itemGroup.y)
             topMargin: parent.margins.top
         }
         height: categoryText.height + margins.top + margins.bottom
+
+        ActionButton {
+            svg: configIconsSvg
+            elementId: "close"
+            iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
+            backgroundVisible: false
+            //visible: action.enabled
+            action: applet.action("remove")
+            z: dragMouseArea + 1
+            anchors {
+                right: parent.right
+                top: plasmoidGroup.contents.top
+                bottomMargin: 4
+            }
+    //         Rectangle { color: "green"; opacity: 0.4; anchors.fill: parent; }
+            Component.onCompleted: {
+                action.enabled = true
+            }
+        }
+
+        ActionButton {
+            svg: configIconsSvg
+            z: dragMouseArea + 1
+            elementId: "configure"
+            iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
+            backgroundVisible: false
+            //visible: action.enabled
+            action: applet.action("configure")
+            anchors {
+                left: parent.left
+                top: plasmoidGroup.contents.top
+                bottomMargin: 4
+            }
+            Component.onCompleted: {
+                action.enabled = true
+            }
+    //         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
+        }
+
         Text {
             id: categoryText
-            text: itemGroup.title
+//             opacity: 0
+//             text: itemGroup.title
+            text: i18n("Drag to move")
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             font.pointSize: theme.defaultFont.pointSize
@@ -277,6 +347,29 @@ print(itemGroup.x+" "+itemGroup.y)
                 topMargin: parent.margins.top
                 leftMargin: height + 2
                 rightMargin: height + 2
+            }
+        }
+        PlasmaCore.Svg {
+            id: buttonSvg
+            imagePath: "widgets/actionbutton"
+        }
+
+        PlasmaCore.SvgItem {
+            id: shadowItem
+            svg: buttonSvg
+            elementId: "move"
+            width: iconSize+13//button.backgroundVisible?iconSize+8:iconSize
+            height: width
+            visible: button.backgroundVisible
+            anchors {
+                top: parent.top
+//                 left: parent.left
+//                 right: parent.right
+                bottom: parent.bottom;
+                topMargin: parent.margins.top
+                horizontalCenter: parent.horizontalCenter
+//                 leftMargin: height + 2
+//                 rightMargin: height + 2
             }
         }
     }
