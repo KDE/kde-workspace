@@ -1,24 +1,32 @@
 [Global]
 IconName=show-menu
 Name=Menubar manager
+Name[hu]=Menüsor kezelő
 Name[pt]=Gestor do menu
+Name[pt_BR]=Gerenciador da barra de menus
 Name[sk]=Správca panelu ponuky
 Name[uk]=Керування смужкою меню
 Name[x-test]=xxMenubar managerxx
 Comment=Menubar exporter
+Comment[hu]=Menüsor exportáló
 Comment[pt]=Exportador do menu
+Comment[pt_BR]=Exportador da barra de menus
 Comment[sk]=Exportovač panelu ponuky
 Comment[uk]=Експортування смужки меню
 Comment[x-test]=xxMenubar exporterxx
 
 [Event/reload]
 Name=Menubar changed
+Name[hu]=A menüsor megváltozott
 Name[pt]=O menu foi alterado
+Name[pt_BR]=Barra de menus alterada
 Name[sk]=Panel ponuky zmenený
 Name[uk]=До смужки меню внесено зміни
 Name[x-test]=xxMenubar changedxx
 Comment=Settings changes will take effect only on application restart
+Comment[hu]=A beállítások változásai csak az alkalmazás újraindításakor lépnek életbe
 Comment[pt]=As mudanças de configuração farão efeito ao reiniciar a aplicação
+Comment[pt_BR]=As alterações na configuração somente terão efeito ao reiniciar o aplicativo
 Comment[sk]=Zmeny nastavení sa prejavia iba pri reštarte aplikácie
 Comment[uk]=Зміни у параметрах набудуть чинності лише після перезапуску програми
 Comment[x-test]=xxSettings changes will take effect only on application restartxx
