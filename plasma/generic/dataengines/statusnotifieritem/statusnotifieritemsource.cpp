@@ -250,6 +250,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
         {
             KDbusImageVector image;
             QIcon icon;
+            QString iconName;
 
             properties["OverlayIconPixmap"].value<QDBusArgument>() >> image;
             if (image.isEmpty()) {
@@ -265,8 +266,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
 
             properties["IconPixmap"].value<QDBusArgument>() >> image;
             if (image.isEmpty()) {
-                QString iconName = properties["IconName"].toString();
-                setData("IconName", iconName);
+                iconName = properties["IconName"].toString();
                 if (!iconName.isEmpty()) {
                     icon = KIcon(iconName, iconLoader(), overlayNames);
 
@@ -281,6 +281,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
                 }
             }
             setData("Icon", icon);
+            setData("IconName", iconName);
         }
 
         //Attention icon
