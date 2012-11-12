@@ -25,7 +25,7 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 ItemGroup {
     id: plasmoidGroup
-    scale: plasmoid.scale
+    //scale: plasmoid.scale
     //scale: 1.0
     canResizeHeight: true
     title: applet.name
@@ -63,7 +63,13 @@ ItemGroup {
     Connections {
         target: plasmoid
         onImmutableChanged: {
-            //configIconsSvg.opacity = plasmoid.immutable ? 0 : 1;
+            print("Applet backgroundhints: "  + applet.name + " : "  + applet.backgroundHints);
+//             if (applet.backgroundHints != 0) {
+//                 plasmoidGroup.imagePath = "widgets/background"
+//             } else {
+//                 plasmoidGroup.imagePath = "widgets/translucentbackground"
+//             }
+//             applet.backgroundHints = "NoBackground"
         }
     }
 
@@ -75,6 +81,7 @@ ItemGroup {
         repeat: false
         running: false
         onTriggered: {
+
             if (applet.backgroundHints != 0) {
                 plasmoidGroup.imagePath = "widgets/background"
             } else {

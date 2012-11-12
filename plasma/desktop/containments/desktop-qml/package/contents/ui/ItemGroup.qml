@@ -309,21 +309,23 @@ print(itemGroup.x+" "+itemGroup.y)
             backgroundVisible: false
             //visible: action.enabled
             action: applet.action("remove")
-            z: dragMouseArea + 1
+            z: dragMouseArea.z + 1
             anchors {
                 right: parent.right
-                top: plasmoidGroup.contents.top
+                top: parent.top
                 bottomMargin: 4
             }
     //         Rectangle { color: "green"; opacity: 0.4; anchors.fill: parent; }
             Component.onCompleted: {
-                action.enabled = true
+                if (action && typeof(action) != "undefined") {
+                    action.enabled = true
+                }
             }
         }
 
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea + 1
+            z: dragMouseArea.z + 1
             elementId: "configure"
             iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
             backgroundVisible: false
@@ -331,11 +333,13 @@ print(itemGroup.x+" "+itemGroup.y)
             action: applet.action("configure")
             anchors {
                 left: parent.left
-                top: plasmoidGroup.contents.top
+                top: parent.top
                 bottomMargin: 4
             }
             Component.onCompleted: {
-                action.enabled = true
+                if (action && typeof(action) != "undefined") {
+                    action.enabled = true
+                }
             }
     //         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
         }
@@ -369,7 +373,7 @@ print(itemGroup.x+" "+itemGroup.y)
             elementId: "move"
             width: iconSize+13//button.backgroundVisible?iconSize+8:iconSize
             height: width
-            visible: button.backgroundVisible
+            //visible: button.backgroundVisible
             anchors {
                 top: parent.top
 //                 left: parent.left
