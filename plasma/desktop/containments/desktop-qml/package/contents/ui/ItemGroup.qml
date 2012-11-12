@@ -22,14 +22,15 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
-PlasmaCore.FrameSvgItem {
+// PlasmaCore.FrameSvgItem {
+Item {
     id: itemGroup
     property string category
     property string title
     property bool canResizeHeight: false
     property real controlsOpacity: plasmoid.immutable ? 0 : 1
     //property alias immutable: plasmoid.immutable
-    imagePath: "widgets/background"
+    //imagePath: "widgets/background"
     width: LayoutManager.cellSize.width*2
     height: LayoutManager.cellSize.height
     z: 0
@@ -39,8 +40,16 @@ PlasmaCore.FrameSvgItem {
     property int titleHeight: categoryTitle.height
 
     property Item contents: contentsItem
+    property alias margins: plasmoidBackground.margins
+    property alias imagePath: plasmoidBackground.imagePath
 
-    //imagePath: "widgets/background"
+    PlasmaCore.FrameSvgItem {
+        id: plasmoidBackground
+        opacity: controlsOpacity
+        anchors.fill: parent
+        imagePath: "widgets/background"
+
+    }
     Connections {
         target: plasmoid
         onImmutableChanged: {

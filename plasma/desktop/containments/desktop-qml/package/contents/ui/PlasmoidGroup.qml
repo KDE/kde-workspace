@@ -63,7 +63,7 @@ ItemGroup {
     Connections {
         target: plasmoid
         onImmutableChanged: {
-            configIconsSvg.opacity = plasmoid.immutable ? 0 : 1;
+            //configIconsSvg.opacity = plasmoid.immutable ? 0 : 1;
         }
     }
 
