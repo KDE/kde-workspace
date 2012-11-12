@@ -35,7 +35,6 @@ Item {
 
     width: childrenRect.width
     height: childrenRect.height
-    state: "collapsed"
     transformOrigin: {
         if (toolBoxButton.state == "topright") {
             return Item.TopRight;
@@ -56,6 +55,7 @@ Item {
         }
     }
 
+    state: "collapsed"
 
     function performOperation(what) {
         var service = dataEngine.serviceForSource("PowerDevil");
@@ -164,22 +164,9 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
-
         }
-        /** Action Mapping for ToolBox
-
-        list-add                    Add Panel
-        list-add                    Add Widgets
-        preferences-activities      Activities                          Activities
-        configure-shortcuts         Shortcut Settings                   Shortcut Settings
-        configure                   $containment_name Settings          $containment_name Settings
-        object-locked               Lock Widgets
-        object-unlocked                                                 Unlock Widgets
-        system-lock-screen          Lock Screen                         Lock Screen
-        system-shutdown             Leave                               Leave
-
-        **/
     }
+
     states: [
         State {
             name: "expanded"
