@@ -1,4 +1,4 @@
- 
+
 
 
 * ToolBox QML files move into their own package
@@ -7,6 +7,20 @@
 * ToolBox-visible name to the runtime is ToolBox
 
 
+
+/** Action Mapping for ToolBox
+
+list-add                    Add Panel
+list-add                    Add Widgets
+preferences-activities      Activities                          Activities
+configure-shortcuts         Shortcut Settings                   Shortcut Settings
+configure                   $containment_name Settings          $containment_name Settings
+object-locked               Lock Widgets
+object-unlocked                                                 Unlock Widgets
+system-lock-screen          Lock Screen                         Lock Screen
+system-shutdown             Leave                               Leave
+
+**/
 
 [17:04:19] <notmart> sebas: i think should be in DeclarativeAppletScript::qmlCreationFinished, same thing as now checks if is a popupapplet and does compactrepresentation
 [17:04:58] <sebas> notmart: hah, I've that file open as well
