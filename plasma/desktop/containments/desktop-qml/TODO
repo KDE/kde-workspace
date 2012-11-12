@@ -1,10 +1,12 @@
 
 
+* drag input is blocked for folderview, debug.
 
-* ToolBox QML files move into their own package
-* ToolBox is put on top of the scene in DeclarativeAppletScript::qmlCreationFinished()
-* rename ToolBox.qml to ToolBoxItem.qml
-* ToolBox-visible name to the runtime is ToolBox
+
+o ToolBox QML files move into their own package
+o ToolBox is put on top of the scene in DeclarativeAppletScript::qmlCreationFinished()
+o rename ToolBox.qml to ToolBoxItem.qml
+o ToolBox-visible name to the runtime is ToolBox
 
 
 

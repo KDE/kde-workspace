@@ -63,7 +63,7 @@ ItemGroup {
     Connections {
         target: plasmoid
         onImmutableChanged: {
-            print("Applet backgroundhints: "  + applet.name + " : "  + applet.backgroundHints);
+            print("Applet backgroundhints: "  + applet.name + " : "  + hasBackground + " " + applet.backgroundHints + " " + plasmoidGroup.imagePath);
 //             if (applet.backgroundHints != 0) {
 //                 plasmoidGroup.imagePath = "widgets/background"
 //             } else {
@@ -81,12 +81,13 @@ ItemGroup {
         repeat: false
         running: false
         onTriggered: {
-
-            if (applet.backgroundHints != 0) {
+            hasBackground = (applet.backgroundHints != 0);
+            if (applet.backgroundHints == 1) {
                 plasmoidGroup.imagePath = "widgets/background"
-            } else {
+            } else if (applet.backgroundHints == 2) {
                 plasmoidGroup.imagePath = "widgets/translucentbackground"
             }
+            print(" @@@@@@@ Background: " + applet.name + " " + applet.backgroundHints + " " + hasBackground + " " + plasmoidGroup.imagePath);
             applet.backgroundHints = "NoBackground"
         }
     }

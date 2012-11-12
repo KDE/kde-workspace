@@ -25,15 +25,18 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 // PlasmaCore.FrameSvgItem {
 Item {
     id: itemGroup
+
+    width: LayoutManager.cellSize.width*2
+    height: LayoutManager.cellSize.height
+    z: 0
+
     property string category
     property string title
     property bool canResizeHeight: false
     property real controlsOpacity: plasmoid.immutable ? 0 : 1
+    property bool hasBackground: false
     //property alias immutable: plasmoid.immutable
     //imagePath: "widgets/background"
-    width: LayoutManager.cellSize.width*2
-    height: LayoutManager.cellSize.height
-    z: 0
     property bool animationsEnabled: false
     property int minimumWidth: LayoutManager.cellSize.width
     property int minimumHeight: LayoutManager.cellSize.height
@@ -45,7 +48,7 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: plasmoidBackground
-        opacity: controlsOpacity
+        opacity: hasBackground ? 1 : controlsOpacity
         anchors.fill: parent
         imagePath: "widgets/background"
 
@@ -56,7 +59,7 @@ Item {
             //categoryTitle.opacity = plasmoid.immutable ? 0 : 1;
             dragMouseArea.visible = !plasmoid.immutable;
             itemGroup.controlsOpacity = plasmoid.immutable ? 0 : 1;
-            appletContainer.opacity = plasmoid.immutable ? 1.0 : 0.25;
+            appletContainer.opacity = plasmoid.immutable ? 1.0 : 0.66;
             //imagePath = plasmoid.immutable ? "" : "widgets/background";
             //titleHeight = plasmoid.immutable ? 0: categoryTitle.height;
             //applet.backgroundHints = plasmoid.immutable ? "NormalBackground" : "NoBackground";
@@ -118,6 +121,9 @@ print(itemGroup.x+" "+itemGroup.y)
     MouseArea {
         id: dragMouseArea
         anchors.fill: categoryTitle
+        anchors.leftMargin: iconSize*1.5
+        anchors.rightMargin: iconSize*1.5
+        //Rectangle { color: "purple"; opacity: .3; anchors.fill: parent; }
         property int lastX
         property int lastY
         z: appletContainer.z + 10
@@ -309,7 +315,7 @@ print(itemGroup.x+" "+itemGroup.y)
             backgroundVisible: false
             //visible: action.enabled
             action: applet.action("remove")
-            z: dragMouseArea.z + 1
+            z: dragMouseArea.z + 1000
             anchors {
                 right: parent.right
                 top: parent.top
@@ -325,7 +331,7 @@ print(itemGroup.x+" "+itemGroup.y)
 
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1
+            z: dragMouseArea.z + 1000
             elementId: "configure"
             iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
             backgroundVisible: false
