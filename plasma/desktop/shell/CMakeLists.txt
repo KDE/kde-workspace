@@ -31,6 +31,7 @@ set(plasma_SRCS
     plasmaapp.cpp
     positioningruler.cpp
     klistconfirmationdialog.cpp
+    screenevents.cpp
     ${wallpaper_SRCS}
     ${activitymanager_SRCS}
 )
