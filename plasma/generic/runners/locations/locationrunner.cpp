@@ -38,7 +38,7 @@ LocationsRunner::LocationsRunner(QObject *parent, const QVariantList& args)
 {
     Q_UNUSED(args);
     // set the name shown after the result in krunner window
-    setObjectName( QLatin1String("Locations" ));
+    setObjectName(QLatin1String("Locations"));
     setIgnoredTypes(Plasma::RunnerContext::Executable | Plasma::RunnerContext::ShellCommand);
     addSyntax(Plasma::RunnerSyntax(":q:",
               i18n("Finds local directories and files, network locations and Internet sites with paths matching :q:.")));
@@ -50,12 +50,10 @@ LocationsRunner::~LocationsRunner()
 
 void LocationsRunner::match(Plasma::RunnerContext &context)
 {
-
     QString term = context.query();
     Plasma::RunnerContext::Type type = context.type();
 
-    if (type == Plasma::RunnerContext::Directory ||
-        type == Plasma::RunnerContext::File) {
+    if (type == Plasma::RunnerContext::Directory || type == Plasma::RunnerContext::File) {
         Plasma::QueryMatch match(this);
         match.setType(Plasma::QueryMatch::ExactMatch);
         match.setText(i18n("Open %1", term));
@@ -86,10 +84,8 @@ void LocationsRunner::match(Plasma::RunnerContext &context)
         match.setType(Plasma::QueryMatch::ExactMatch);
         match.setId("help");
         context.addMatch(term, match);
-    } else if (type == Plasma::RunnerContext::NetworkLocation ||
-               type == Plasma::RunnerContext::UnknownType) {
-
-        bool filtered = KUriFilter::self()->filterUri(term, QStringList() << QLatin1String("kshorturifilter"));
+    } else if (type == Plasma::RunnerContext::NetworkLocation || type == Plasma::RunnerContext::UnknownType) {
+        const bool filtered = KUriFilter::self()->filterUri(term, QStringList() << QLatin1String("kshorturifilter"));
 
         if (!filtered) {
             return;
