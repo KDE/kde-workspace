@@ -87,6 +87,11 @@ Item {
         }
     }
 
+    Footer {
+        id: footer
+        anchors.top: searchBar.bottom
+    }
+
     property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
     PlasmaComponents.TabGroup {
@@ -99,7 +104,7 @@ Item {
                     return tabBar.bottom;
                 // bottom
                 default:
-                    return searchBar.bottom;
+                    return footer.bottom;
                 }
             }
             left: parent.left
@@ -214,6 +219,8 @@ Item {
 
         onCurrentTabChanged: root.forceActiveFocus();
     }
+
+    Keys.forwardTo: [tabBar.layout]
 
     Keys.onPressed: {
         if (mainStack.currentTab == applicationsPage) {

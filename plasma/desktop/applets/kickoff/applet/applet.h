@@ -39,6 +39,7 @@ class LauncherApplet : public Plasma::PopupApplet
     Q_PROPERTY(bool switchTabsOnHover READ switchTabsOnHover WRITE setSwitchTabsOnHover NOTIFY switchTabsOnHoverChanged)
     Q_PROPERTY(bool showAppsByName READ showAppsByName WRITE setShowAppsByName NOTIFY showAppsByNameChanged)
     Q_PROPERTY(Location location READ plasmoidLocation NOTIFY locationChanged)
+    Q_PROPERTY(QString footerText READ footerText NOTIFY footerTextChanged)
 
 public:
     enum Location {
@@ -73,11 +74,13 @@ public:
     void setShowAppsByName(bool on);
 
     Location plasmoidLocation() const;
+    QString footerText() const;
 
 Q_SIGNALS:
     void switchTabsOnHoverChanged(bool switchTabsOnHover);
     void showAppsByNameChanged(bool showAppsByName);
     void locationChanged(Location location);
+    void footerTextChanged(QString footerText);
 
 protected Q_SLOTS:
     void switchMenuStyle();

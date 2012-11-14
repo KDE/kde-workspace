@@ -28,6 +28,7 @@
 #include <QtGui/QLabel>
 #include <QtGui/QGraphicsLinearLayout>
 #include <QtDeclarative>
+#include <QHostInfo>
 
 // KDE
 #include <KAuthorized>
@@ -35,6 +36,7 @@
 #include <KDebug>
 #include <KConfigDialog>
 #include <KProcess>
+#include <KUser>
 
 // Plasma
 #include <Plasma/Containment>
@@ -101,7 +103,7 @@ void LauncherApplet::Private::createLauncher()
 
     declarativeWidget = new Plasma::DeclarativeWidget(q);
     declarativeWidget->engine()->rootContext()->setContextProperty("kickoff", q);
-    
+
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
     Plasma::Package package(QString(), "org.kde.kickoff", structure);
     declarativeWidget->setQmlPath(package.filePath("mainscript"));
@@ -325,5 +327,17 @@ LauncherApplet::Location LauncherApplet::plasmoidLocation() const
 {
     return (Location)location();
 }
+
+QString LauncherApplet::footerText() const
+{
+    KUser user;
+    QString fullName = user.property(KUser::FullName).toString();
+    if (fullName.isEmpty()) {
+        return i18nc("login name, hostname", "User <b>%1</b> on <b>%2</b>", user.loginName(), QHostInfo::localHostName());
+    } else {
+        return i18nc("full name, login name, hostname", "<b>%1 (%2)</b> on <b>%3</b>", fullName, user.loginName(), QHostInfo::localHostName());
+    }
+}
+
 
 #include "applet.moc"
