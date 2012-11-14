@@ -34,6 +34,11 @@ if (!findWidgets('org.kde.showActivityManager')) {
     var found = false
     for (i in panels) {
 	found = findWidgetsIn(panels[i], 'launcher')
+        // Also check for the old style simplelauncher
+	if (!found) {
+		found = findWidgetsIn(panels[i], 'simplelauncher')
+	}
+
 	if (found) {
 	  var showWidget = panels[i].addWidget("org.kde.showActivityManager")
 	  showWidget.index = found.index + 1;
