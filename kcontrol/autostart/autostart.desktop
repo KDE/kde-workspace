@@ -101,11 +101,24 @@ Name[zh_CN]=自动启动
 Name[zh_TW]=自動啟動
 
 Comment=A configuration tool for managing which programs start up automatically with KDE.
+Comment[cs]=Konfigurační nástroj pro správu automatického spouštění programů při startu KDE.
+Comment[es]=Una herramienta de configuración para gestionar qué programas se iniciarán automáticamente con KDE.
+Comment[et]=Seadistustööriist programmide haldamiseks, mis käivituvad automaatselt koos KDE-ga.
+Comment[fi]=Automaattisesti käynnistettävien ohjelmien asetukset
+Comment[ia]=Un instrumento de configuration pro gerer qual programma debe startar automaticamente con KDE..
 Comment[nb]=Et oppsettsverktøy for å håndtere hvilke program som skal starte automatisk med KDE.
+Comment[nl]=Een configuratiehulpmiddel voor het beheren van programma's die automatisch met KDE opstarten.
+Comment[pt]=Uma ferramenta de configuração para gerir os programas que são arrancados automaticamente com o KDE.
+Comment[sk]=Konfiguračný nástroj pre správu programov, ktoré sa majú spúšťať pri štarte KDE.
+Comment[sl]=Orodje za upravljanje programov, ki se samodejno zaženejo ob zagonu KDE-jevega delovnega okolja.
 Comment[sr]=Алатка за одређивање програма који се покрећу са КДЕ‑ом по пријављивању.
 Comment[sr@ijekavian]=Алатка за одређивање програма који се покрећу са КДЕ‑ом по пријављивању.
 Comment[sr@ijekavianlatin]=Alatka za određivanje programa koji se pokreću sa KDE‑om po prijavljivanju.
 Comment[sr@latin]=Alatka za određivanje programa koji se pokreću sa KDE‑om po prijavljivanju.
+Comment[sv]=Ett inställningsverktyg för att hantera vilka program som startas automatiskt när KDE startas.
+Comment[uk]=Керування програмами, які будуть запускатися разом з графічним середовищем автоматично.
+Comment[x-test]=xxA configuration tool for managing which programs start up automatically with KDE.xx
+Comment[zh_TW]=管理 KDE 要自動啟動哪些程式的設定工具。
 
 X-KDE-Keywords=Autostart Manager,autostart,startup,system startup,kde start,cron
 X-KDE-Keywords[ca]=Gestor d'inici automàtic,inici automàtic,inici,inici del sistema,inici del kde,cron

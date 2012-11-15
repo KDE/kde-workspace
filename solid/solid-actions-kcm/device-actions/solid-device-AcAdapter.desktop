@@ -1,12 +1,26 @@
 [Desktop Action plugged]
 Name=Plugged
+Name[cs]=Připojeno
+Name[el]=Σε σύνδεση
+Name[es]=Enchufado
+Name[et]=Ühendatud
+Name[fi]=Kytketty
 Name[hr]=Priključen
+Name[ia]=Connectite
 Name[nb]=Tilkoblet
+Name[nl]=Ingeplugd
 Name[nn]=Tilkopla
+Name[pt]=Ligado
+Name[sk]=Pripojené
+Name[sl]=Priključeno
 Name[sr]=утакнут
 Name[sr@ijekavian]=утакнут
 Name[sr@ijekavianlatin]=utaknut
 Name[sr@latin]=utaknut
+Name[sv]=Anslutet
+Name[uk]=З’єднано
+Name[x-test]=xxPluggedxx
+Name[zh_TW]=已插入
 
 [Desktop Entry]
 Actions=plugged;

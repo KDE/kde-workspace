@@ -81,13 +81,26 @@ Name[zh_CN]=设备动作
 Name[zh_TW]=裝置動作
 
 Comment=A configuration tool for managing the actions available to the user when connecting new devices to the computer
+Comment[cs]=Konfigurační nástroj pro správu činností souvisejících s připojenými zařízeními do počítače.
+Comment[es]=Una herramienta de configuración para gestionar las acciones disponibles para el usuario cuando conecta dispositivos nuevos al equipo
+Comment[et]=Seadistamistööriist toimingute haldamiseks, mida kasutaja saab tarvitada uue seadme ühendamisel arvutiga
+Comment[fi]=Asetustyökalu toiminnoille, jotka ovat käyttäjän valittavissa, kun uusia laitteita kytketään tietokoneeseen
 Comment[hr]=Konfiguracijski alat za upravljanje akcijama dostupnima korisniku kad spoji novi uređaj na računalo
+Comment[ia]=Un instrumento de configuration pro gerer actiones disponibile al usator quando il connecte nove dispositivos al computator
 Comment[nb]=Et oppsettsverktøy for å håndtere handlingene som er tilgjengelige for brukeren når nye enheter kobles til datamaskinen
+Comment[nl]=Een configuratiehulpmiddel voor het beheren van acties die beschikbaar zijn voor de gebruiker bij het verbinden van nieuwe apparaten aan de computer
 Comment[nn]=Eit oppsettsverktøy for kva handlingar som er tilgjengelege når ei ny eining vert kopla til datamaskina
+Comment[pt]=Uma ferramenta de configuração para gerir as acções disponíveis para o utilizador, quando são ligados dispositivos novos ao computador
+Comment[sk]=Konfiguračný nástroj pre správu akcií dostupných pri pripojení nových zariadení k počítaču
+Comment[sl]=Nastavitveno orodje za upravljanje dejanj, ki so na voljo uporabniku, ko se nova naprava priključi na računalnik
 Comment[sr]=Поставна алатка за управљање радњама доступним кориснику при повезивању нових уређаја на рачунар.
 Comment[sr@ijekavian]=Поставна алатка за управљање радњама доступним кориснику при повезивању нових уређаја на рачунар.
 Comment[sr@ijekavianlatin]=Postavna alatka za upravljanje radnjama dostupnim korisniku pri povezivanju novih uređaja na računar.
 Comment[sr@latin]=Postavna alatka za upravljanje radnjama dostupnim korisniku pri povezivanju novih uređaja na računar.
+Comment[sv]=Ett inställningsverktyg för att hantera tillgängliga åtgärder för användare när nya enheter ansluts till datorn
+Comment[uk]=Керування діями, доступними користувачеві після з’єднання пристроїв з комп’ютером
+Comment[x-test]=xxA configuration tool for managing the actions available to the user when connecting new devices to the computerxx
+Comment[zh_TW]=管理新增裝置到電腦時要做些什麼動作的設定工具
 
 X-KDE-Keywords=Solid Devices Actions
 X-KDE-Keywords[ca]=Accions de dispositiu del Solid
