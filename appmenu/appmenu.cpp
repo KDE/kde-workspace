@@ -47,11 +47,6 @@
 #include <kpluginloader.h>
 #include <netwm.h>
 
-// About deleting KDBusMenuImporter objects:
-// We use deleteLater() to disable dbusmenu warnings
-// KDBusMenuImporter may have pending dbus actions and deleting it with delete
-// will cause warnings
-
 K_PLUGIN_FACTORY(AppMenuFactory,
                  registerPlugin<AppMenuModule>();
     )
@@ -153,7 +148,7 @@ void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const Q
 {
     KDBusMenuImporter* importer = m_importers.take(id);
      if (importer) {
-        importer->deleteLater();
+        delete importer;
     }
 
     if (m_menuStyle == "ButtonVertical") {
@@ -176,31 +171,31 @@ void AppMenuModule::slotWindowUnregistered(WId id)
         hideMenubar(m_menubar);
     }
 
-    if (importer) {
-        importer->deleteLater();
-    }
-
     // Send a signal on bus for others dbus interface registrars
     emit WindowUnregistered(id);
+
+    if (importer) {
+        delete importer;
+    }
 }
 
 // Window importer change
 void AppMenuModule::slotUpdateImporter(WId id)
-{
+{return;
     KDBusMenuImporter* importer = m_importers.take(id);
     if (importer) {
         if (m_menuStyle == "TopMenuBar") { // Importer menu may be on screen
             // Take care of deleting any previous dead importer for this window (should not happen)
             KDBusMenuImporter* deadImporter = m_deadImporters.take(id);
             if (deadImporter) {
-                deadImporter->deleteLater();
+                delete deadImporter;
             }
             m_deadImporters.insert(id, importer); // Will be delete later when hidding associated menubar
             if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
                 slotActiveWindowChanged(id);
             }
         } else {
-            importer->deleteLater();
+            delete importer;
         }
     }
 }
@@ -381,7 +376,7 @@ void AppMenuModule::hideMenubar(TopMenuBar *menubar)
         }
         KDBusMenuImporter* deadImporter = m_deadImporters.take(menubar->parentWid());
         if (deadImporter) {
-            deadImporter->deleteLater();
+            delete deadImporter;
         }
     }
 }
