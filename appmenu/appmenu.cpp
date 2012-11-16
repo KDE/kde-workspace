@@ -47,6 +47,11 @@
 #include <kpluginloader.h>
 #include <netwm.h>
 
+// About deleting KDBusMenuImporter objects:
+// We use deleteLater() to disable dbusmenu warnings
+// KDBusMenuImporter may have pending dbus actions and deleting it with delete
+// will cause warnings
+
 K_PLUGIN_FACTORY(AppMenuFactory,
                  registerPlugin<AppMenuModule>();
     )
@@ -117,7 +122,7 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
     }
 
     m_menu = new VerticalMenu();
-    m_menu->setMenuBarParentWid(id);
+    m_menu->setParentWid(id);
     // Populate menu
     foreach (QAction *action, menu->actions()) {
         m_menu->addAction(action);
@@ -136,7 +141,7 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
 void AppMenuModule::slotAboutToHide()
 {
     if (m_menu) {
-        emit menuHidden(m_menu->menuBarParentWid());
+        emit menuHidden(m_menu->parentWid());
         m_menu->deleteLater();
         m_menu = 0;
     }
@@ -148,7 +153,7 @@ void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const Q
 {
     KDBusMenuImporter* importer = m_importers.take(id);
      if (importer) {
-        delete importer;
+        importer->deleteLater();
     }
 
     if (m_menuStyle == "ButtonVertical") {
@@ -167,15 +172,37 @@ void AppMenuModule::slotWindowUnregistered(WId id)
 {
     KDBusMenuImporter* importer = m_importers.take(id);
 
+    if (m_menubar && m_menubar->parentWid() == id) {
+        hideMenubar(m_menubar);
+    }
+
     if (importer) {
         importer->deleteLater();
     }
 
-    if (m_menubar && m_menubar->menuBarParentWid() == id) {
-        hideMenubar(m_menubar);
-    }
     // Send a signal on bus for others dbus interface registrars
     emit WindowUnregistered(id);
+}
+
+// Window importer change
+void AppMenuModule::slotUpdateImporter(WId id)
+{
+    KDBusMenuImporter* importer = m_importers.take(id);
+    if (importer) {
+        if (m_menuStyle == "TopMenuBar") { // Importer menu may be on screen
+            // Take care of deleting any previous dead importer for this window (should not happen)
+            KDBusMenuImporter* deadImporter = m_deadImporters.take(id);
+            if (deadImporter) {
+                deadImporter->deleteLater();
+            }
+            m_deadImporters.insert(id, importer); // Will be delete later when hidding associated menubar
+            if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
+                slotActiveWindowChanged(id);
+            }
+        } else {
+            importer->deleteLater();
+        }
+    }
 }
 
 // Keyboard activation requested, transmit it to menu
@@ -230,9 +257,9 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     QMenu *menu = importer->menu();
     // length == 0 means menu not ready
     // Start a m_menuTimer looking for menu to be ready
-    if(menu->actions().length()) {
+    if(menu && menu->actions().length()) {
         showTopMenuBar(menu);
-        m_menubar->setMenuBarParentWid(id);
+        m_menubar->setParentWid(id);
     } else {
         m_menuTimer->start(500);
     }
@@ -247,7 +274,7 @@ void AppMenuModule::slotCurrentScreenChanged()
 {
     if (m_currentScreen != currentScreen()) {
         if (m_menubar) {
-            m_menubar->setMenuBarParentWid(0);
+            m_menubar->setParentWid(0);
         }
         slotActiveWindowChanged(KWindowSystem::self()->activeWindow());
     }
@@ -290,6 +317,8 @@ void AppMenuModule::reconfigure()
             SLOT(slotWindowRegistered(WId, const QString&, const QDBusObjectPath&)));
         connect(m_menuImporter, SIGNAL(WindowUnregistered(WId)),
             SLOT(slotWindowUnregistered(WId)));
+        connect(m_menuImporter, SIGNAL(UpdateImporter(WId)),
+            SLOT(slotUpdateImporter(WId)));
         m_menuImporter->connectToBus();
     }
 
@@ -349,6 +378,10 @@ void AppMenuModule::hideMenubar(TopMenuBar *menubar)
         delete menubar;
         if (m_menubar == menubar) {
             m_menubar = 0;
+        }
+        KDBusMenuImporter* deadImporter = m_deadImporters.take(menubar->parentWid());
+        if (deadImporter) {
+            deadImporter->deleteLater();
         }
     }
 }

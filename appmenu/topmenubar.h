@@ -46,11 +46,11 @@ public:
     /**
      * Set menubar parent window id
      */
-    void setMenuBarParentWid(WId id) { m_wid = id; }
+    void setParentWid(WId id) { m_wid = id; }
     /**
      * Get menubar parent window id
      */
-    WId menuBarParentWid() { return m_wid; }
+    WId parentWid() { return m_wid; }
 protected:
     bool cursorInMenuBar();
 private Q_SLOTS:

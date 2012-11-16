@@ -92,6 +92,10 @@ private Q_SLOTS:
      */
     void slotWindowUnregistered(WId id);
     /**
+     * Update window importer
+     */
+    void slotUpdateImporter(WId id);
+    /**
      * Open a action in current menu
      */
     void slotActionActivationRequested(QAction* a);
@@ -134,6 +138,7 @@ private:
     MenuImporter* m_menuImporter;
     AppmenuDBus* m_appmenuDBus;
     QHash<WId, KDBusMenuImporter*> m_importers;
+    QHash<WId, KDBusMenuImporter*> m_deadImporters;
     GtkIcons m_icons;
     QString m_menuStyle;
     TopMenuBar* m_menubar;
