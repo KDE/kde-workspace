@@ -181,7 +181,7 @@ void AppMenuModule::slotWindowUnregistered(WId id)
 
 // Window importer change
 void AppMenuModule::slotUpdateImporter(WId id)
-{return;
+{
     KDBusMenuImporter* importer = m_importers.take(id);
     if (importer) {
         if (m_menuStyle == "TopMenuBar") { // Importer menu may be on screen
