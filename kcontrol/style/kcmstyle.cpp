@@ -448,7 +448,7 @@ void KCMStyle::save()
         kwinConfig.writeEntry("CustomButtonPositions", "true");
     }
 
-    args = QList<QVariant>() << "appmenu" << load;
+    args = QList<QVariant>() << "appmenu" << style != "InApplication";
     method = QDBusMessage::createMethodCall("org.kde.kded",
                                             "/kded",
                                             "org.kde.kded",
