@@ -43,6 +43,7 @@ namespace Kephal
 }
 
 class ActivityManager;
+class PanelShadows;
 
 class ControllerWindow : public QWidget
 {
@@ -101,6 +102,7 @@ private:
     Plasma::WidgetExplorer *m_widgetExplorer;
     QGraphicsWidget *m_graphicsWidget;
     QTimer *m_adjustViewTimer;
+    PanelShadows *m_panelShadow;
     bool m_ignoredWindowClosed;
 };
 

@@ -72,6 +72,8 @@ ControllerWindow::ControllerWindow(QWidget* parent)
     setPalette(pal);
 
     Plasma::WindowEffects::overrideShadow(winId(), true);
+    m_panelShadow = new PanelShadows(this);
+    m_panelShadow->setImagePath("dialogs/background");
 
     m_layout->setContentsMargins(0, 0, 0, 0);
 
@@ -107,7 +109,7 @@ ControllerWindow::~ControllerWindow()
 
 void ControllerWindow::showEvent(QShowEvent * event)
 {
-    PlasmaApp::self()->panelShadows()->addWindow(this);
+    m_panelShadow->addWindow(this);
 }
 
 void ControllerWindow::activate()
