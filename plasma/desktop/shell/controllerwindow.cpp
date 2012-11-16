@@ -39,6 +39,7 @@
 #include "panelview.h"
 #include "plasmaapp.h"
 #include "widgetsexplorer/widgetexplorer.h"
+#include "panelshadows.h"
 
 #include <kephal/screens.h>
 
@@ -102,6 +103,11 @@ ControllerWindow::~ControllerWindow()
     delete m_activityManager;
     delete m_widgetExplorer;
     delete m_view;
+}
+
+void ControllerWindow::showEvent(QShowEvent * event)
+{
+    PlasmaApp::self()->panelShadows()->addWindow(this);
 }
 
 void ControllerWindow::activate()

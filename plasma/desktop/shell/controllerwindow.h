@@ -83,6 +83,7 @@ protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *event);
     bool eventFilter(QObject *watched, QEvent *event);
+    void showEvent(QShowEvent * event);
 
 private Q_SLOTS:
     void backgroundChanged();
