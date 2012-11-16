@@ -7,7 +7,7 @@ set( EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR} )
 #   solidnettest.cpp )
 
 
-#kde4_add_unit_test(solidnettest ${solidnettest_SRCS})
+#kde4_add_unit_test(solidnettest TESTNAME solid-control-solidnettest ${solidnettest_SRCS})
 #add_definitions(-DFAKE_NETWORKING_XML="\\"${CMAKE_CURRENT_SOURCE_DIR}/../backends/fakenet/fakenetworking.xml\\"")
 
 #include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../backends/fakenet )
