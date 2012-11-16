@@ -122,6 +122,7 @@ Comment[sr@latin]=Odredite koji se programi pokreću sa KDE‑om po prijavljivan
 Comment[sv]=Hantera vilka program som startas automatiskt när KDE startas.
 Comment[uk]=Керування програмами, які будуть запускатися разом з графічним середовищем KDE автоматично.
 Comment[x-test]=xxManage which programs start up automatically with KDE.xx
+Comment[zh_TW]=管理 KDE 要自動啟動哪些程式。
 
 X-KDE-Keywords=Autostart Manager,autostart,startup,system startup,kde start,cron
 X-KDE-Keywords[ca]=Gestor d'inici automàtic,inici automàtic,inici,inici del sistema,inici del kde,cron
