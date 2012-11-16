@@ -182,20 +182,28 @@ void AppMenuModule::slotWindowUnregistered(WId id)
 // Window importer change
 void AppMenuModule::slotUpdateImporter(WId id)
 {
-    KDBusMenuImporter* importer = m_importers.take(id);
+    KDBusMenuImporter* importer = 0;
+
+    if (m_importers.contains(id)) {
+        importer = m_importers.value(id);
+    }
+
     if (importer) {
-        if (m_menuStyle == "TopMenuBar") { // Importer menu may be on screen
-            // Take care of deleting any previous dead importer for this window (should not happen)
-            KDBusMenuImporter* deadImporter = m_deadImporters.take(id);
-            if (deadImporter) {
-                delete deadImporter;
-            }
-            m_deadImporters.insert(id, importer); // Will be delete later when hidding associated menubar
+        if (m_menuStyle == "TopMenuBar") {
             if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
-                slotActiveWindowChanged(id);
+                slotActiveWindowChanged(id, true);
             }
         } else {
+            KDBusMenuImporter* newImporter = getImporter(id, true);
+
+            // Delete menu if on screen
+            if (m_menu && m_menu->isVisible()) {
+                m_menu->hide();
+                delete m_menu;
+            }
+            m_importers.remove(id);
             delete importer;
+            m_importers.insert(id, newImporter);
         }
     }
 }
@@ -215,7 +223,7 @@ void AppMenuModule::slotActionActivationRequested(QAction* a)
 
 // Current window change, update menubar
 // See comments in slotWindowRegistered() for why we get importers here
-void AppMenuModule::slotActiveWindowChanged(WId id)
+void AppMenuModule::slotActiveWindowChanged(WId id, bool force)
 {
     bool firstCall = !m_menuTimer->isActive();
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
@@ -247,7 +255,7 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
         }
     }
 
-    KDBusMenuImporter *importer = getImporter(id);
+    KDBusMenuImporter *importer = getImporter(id, force);
 
     QMenu *menu = importer->menu();
     // length == 0 means menu not ready
@@ -255,9 +263,14 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     if(menu && menu->actions().length()) {
         showTopMenuBar(menu);
         m_menubar->setParentWid(id);
+        if (force) { // Clean previous importer
+            KDBusMenuImporter* previous = m_importers.take(id);
+            delete previous;
+        }
     } else {
         m_menuTimer->start(500);
     }
+    m_importers.insert(id, importer);
 }
 
 void AppMenuModule::slotShowCurrentWindowMenu()
@@ -333,15 +346,14 @@ void AppMenuModule::reconfigure()
     }
 }
 
-KDBusMenuImporter* AppMenuModule::getImporter(WId id)
+KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool force)
 {
     KDBusMenuImporter* importer = 0;
-    if (m_importers.contains(id)) { // importer already exist
+    if (m_importers.contains(id) && !force) { // importer already exist
         importer = m_importers.value(id);
     } else { // get importer
         importer = new KDBusMenuImporter(id, m_menuImporter->serviceForWindow(id), &m_icons,
                                              m_menuImporter->pathForWindow(id), this);
-        m_importers.insert(id, importer);
         connect(importer, SIGNAL(actionActivationRequested(QAction*)),
                 SLOT(slotActionActivationRequested(QAction*)));
         QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
@@ -373,10 +385,6 @@ void AppMenuModule::hideMenubar(TopMenuBar *menubar)
         delete menubar;
         if (m_menubar == menubar) {
             m_menubar = 0;
-        }
-        KDBusMenuImporter* deadImporter = m_deadImporters.take(menubar->parentWid());
-        if (deadImporter) {
-            delete deadImporter;
         }
     }
 }

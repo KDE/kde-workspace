@@ -100,9 +100,10 @@ private Q_SLOTS:
      */
     void slotActionActivationRequested(QAction* a);
     /**
-     * Active window changed, update menubar
+     * Active window changed, update menubar for id
+     * if force, menubar will be updated
      */
-    void slotActiveWindowChanged(WId id);
+    void slotActiveWindowChanged(WId id, bool force = false);
     /**
      * Update menubar with current window menu
      */
@@ -119,8 +120,9 @@ private Q_SLOTS:
 private:
     /**
      * return an importer for window id
+     * if force, menu importer will no be taken from cache
      */
-    KDBusMenuImporter* getImporter(WId id);
+    KDBusMenuImporter* getImporter(WId id, bool force = false);
     /**
      * Show top menubar with menu
      */
@@ -138,7 +140,6 @@ private:
     MenuImporter* m_menuImporter;
     AppmenuDBus* m_appmenuDBus;
     QHash<WId, KDBusMenuImporter*> m_importers;
-    QHash<WId, KDBusMenuImporter*> m_deadImporters;
     GtkIcons m_icons;
     QString m_menuStyle;
     TopMenuBar* m_menubar;
