@@ -462,7 +462,9 @@ void KCMStyle::save()
                                                 "/kded",
                                                 "org.kde.kded",
                                                 "loadModule");
-    } else {
+        QDBusMessage method = QDBusMessage::createMethodCall("org.kde.kded", "/modules/appmenu", "org.kde.kded", "reconfigure");
+        QDBusConnection::sessionBus().asyncCall(method);
+    } else if (style == "InApplication") {
         method = QDBusMessage::createMethodCall("org.kde.kded",
                                                 "/kded",
                                                 "org.kde.kded",
