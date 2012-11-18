@@ -19,23 +19,50 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
-PlasmaComponents.ToolButton {
-    id: crumb
-
+Item {
+    id: crumbRoot
+    property string text
     property bool root: false
     property int depth: model.depth
-    enabled: depth < crumbModel.count
 
-    onClicked: {
-        if (root) {
-            applicationsView.model.rootIndex = 0
-        } else {
-            applicationsView.model.rootIndex = model.modelIndex;
-        }
+    function clickCrumb() {
+        crumb.clicked();
+    }
 
-        while (crumbModel.count > 0 &&
-            depth < crumbModel.get(crumbModel.count-1).depth) {
-            crumbModel.remove(crumbModel.count-1)
+    height: crumb.implicitHeight
+    width: crumb.implicitWidth + arrowSvg.width
+
+    PlasmaComponents.ToolButton {
+        id: crumb
+        text: crumbRoot.text
+        enabled: crumbRoot.depth < crumbModel.count
+
+        anchors.left: arrowSvg.right
+
+        onClicked: {
+            if (crumbRoot.root) {
+                applicationsView.model.rootIndex = 0
+            } else {
+                applicationsView.model.rootIndex = model.modelIndex;
+            }
+
+            while (crumbModel.count > 0 &&
+                crumbRoot.depth < crumbModel.get(crumbModel.count-1).depth) {
+                crumbModel.remove(crumbModel.count-1)
+            }
         }
+    }
+
+    PlasmaCore.SvgItem {
+        id: arrowSvg
+        svg: PlasmaCore.Svg {
+            imagePath: "toolbar-icons/go"
+        }
+        elementId: "go-next"
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        height: crumbRoot.height / 2
+        width: visible ? height : 0
+        visible: !crumbRoot.root
     }
 }

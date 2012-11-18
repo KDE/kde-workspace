@@ -41,7 +41,7 @@ Item {
     }
     function deactivateCurrentIndex() {
         if (crumbModel.count > 0) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
-            breadcrumbsElement.children[crumbModel.count-1].clicked();
+            breadcrumbsElement.children[crumbModel.count-1].clickCrumb();
             return true;
         }
         return false;
@@ -53,34 +53,47 @@ Item {
         id: contextMenu
     }
 
-    PlasmaComponents.ButtonRow {
-        id: breadcrumbsElement
-        exclusive: false
+    Item {
+        id: crumbContainer
+        height: childrenRect.height
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
         }
-        Breadcrumb {
-            id: rootBreadcrumb
-            root: true
-            text: i18n("All Applications")
-            depth: 0
-        }
-        Repeater {
-            model: ListModel {
-                id: crumbModel
+        Flickable {
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
             }
-            Breadcrumb {
-                root: false
-                text: model.text
-                enabled: true
+            height: breadcrumbsElement.height
+            contentWidth: breadcrumbsElement.width
+            PlasmaComponents.ButtonRow {
+                id: breadcrumbsElement
+                exclusive: false
+
+                Breadcrumb {
+                    id: rootBreadcrumb
+                    root: true
+                    text: i18n("All Applications")
+                    depth: 0
+                }
+                Repeater {
+                    model: ListModel {
+                        id: crumbModel
+                    }
+                    Breadcrumb {
+                        root: false
+                        text: model.text
+                    }
+                }
             }
         }
     }
     PlasmaExtras.ScrollArea {
         anchors {
-            top: breadcrumbsElement.bottom
+            top: crumbContainer.bottom
             left: parent.left
             bottom: parent.bottom
             right: parent.right
