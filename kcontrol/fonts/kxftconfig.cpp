@@ -31,6 +31,8 @@
 #include <QByteArray>
 #include <klocale.h>
 #include <kde_file.h>
+#include <KDE/KGlobal>
+#include <KDE/KStandardDirs>
 #include <QDir>
 
 #include <stdarg.h>
@@ -143,7 +145,18 @@ QString getConfigFile()
         return files.front();  // Just return the 1st one...
     }
     else // Hmmm... no known files?
-        return home+"/.fonts.conf";
+    {
+        if(FcGetVersion() >= 21000)
+        {
+            QString targetPath(KGlobal::dirs()->localxdgconfdir()+"fontconfig");
+            QDir target(targetPath);
+            if(!target.exists())
+                target.mkpath(targetPath);
+            return targetPath+"/fonts.conf";
+        }
+        else
+            return home+"/.fonts.conf";
+    }
 }
 
 static QString getEntry(QDomElement element, const char *type, unsigned int numAttributes, ...)

@@ -23,11 +23,11 @@
 #ifndef AUTOSTART_H
 #define AUTOSTART_H
 
-#include <KCModule>
-#include <KFileItem>
-
 #include <QPushButton>
 #include <QTreeWidget>
+
+#include <KCModule>
+#include <KFileItem>
 
 #include "ui_autostartconfig.h"
 #include "autostartitem.h"
@@ -47,15 +47,15 @@ public:
     QStringList listPathName() const { return m_pathName;}
 
 public slots:
-    void slotChangeStartup( int index );
+    void slotChangeStartup( ScriptStartItem* item, int index );
 
 protected:
-    void addItem(DesktopStartItem *item, const QString& name, const QString& run, const QString& command, bool disable );
+    void addItem(DesktopStartItem *item, const QString& name, const QString& run, const QString& command, bool disabled );
     void addItem(ScriptStartItem *item, const QString& name, const QString& command, ScriptStartItem::ENV type );
 
-public slots:
+private slots:
     void slotAddProgram();
-    void slotAddCMD();
+    void slotAddScript();
     void slotRemoveCMD();
     void slotEditCMD(QTreeWidgetItem*);
     bool slotEditCMD(const KFileItem&);

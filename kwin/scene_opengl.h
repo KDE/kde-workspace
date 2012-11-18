@@ -254,7 +254,7 @@ protected:
      * @param saturation The saturation value used for this rendering
      * @param screen The index of the screen to use for this rendering
      **/
-    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen) = 0;
+    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation) = 0;
 
     /**
      * @brief Returns the texture for the given @p type.
@@ -287,7 +287,7 @@ protected:
     virtual void beginRenderWindow(int mask, const WindowPaintData &data);
     virtual void endRenderWindow(const WindowPaintData &data);
     virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
-    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
+    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
 
 private:
     /**
@@ -307,7 +307,7 @@ protected:
     virtual void beginRenderWindow(int mask, const WindowPaintData &data);
     virtual void endRenderWindow(const WindowPaintData &data);
     virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
-    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
+    virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
 };
 #endif
 

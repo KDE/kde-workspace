@@ -39,6 +39,7 @@
 #include "panelview.h"
 #include "plasmaapp.h"
 #include "widgetsexplorer/widgetexplorer.h"
+#include "panelshadows.h"
 
 #include <kephal/screens.h>
 
@@ -71,6 +72,8 @@ ControllerWindow::ControllerWindow(QWidget* parent)
     setPalette(pal);
 
     Plasma::WindowEffects::overrideShadow(winId(), true);
+    m_panelShadow = new PanelShadows(this);
+    m_panelShadow->setImagePath("dialogs/background");
 
     m_layout->setContentsMargins(0, 0, 0, 0);
 
@@ -102,6 +105,11 @@ ControllerWindow::~ControllerWindow()
     delete m_activityManager;
     delete m_widgetExplorer;
     delete m_view;
+}
+
+void ControllerWindow::showEvent(QShowEvent * event)
+{
+    m_panelShadow->addWindow(this);
 }
 
 void ControllerWindow::activate()

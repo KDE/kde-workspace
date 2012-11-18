@@ -56,6 +56,7 @@ public:
 
     LauncherItem *q;
     KUrl        url;
+    KUrl        resolvedUrl;
     QIcon       icon;
     QString     name;
     QString     genericName;
@@ -89,7 +90,7 @@ bool LauncherItem::associateItemIfMatches(AbstractGroupableItem *item)
     KUrl itemUrl = item->launcherUrl();
 
     if (!itemUrl.isEmpty()) {
-        if (launcherUrl() == itemUrl) {
+        if (d->url == itemUrl || d->resolvedUrl == itemUrl) {
             d->associates.insert(item);
             connect(item, SIGNAL(destroyed(QObject*)), this, SLOT(associateDestroyed(QObject*)));
             emit associationChanged();
@@ -375,6 +376,8 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
                 d->name = exec.split(' ').at(0);
             }
             d->genericName = f.readGenericName();
+            d->resolvedUrl = desktopFile;
+            d->resolvedUrl.setScheme("file");
         } else {
             d->url = KUrl();
         }

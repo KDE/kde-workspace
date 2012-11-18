@@ -953,7 +953,7 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
         texture->bind();
         prepareStates(Content, data.opacity(), data.brightness(), data.saturation(), data.screen());
         renderQuads(mask, region, contentQuads, texture, false, hardwareClipping);
-        restoreStates(Content, data.opacity(), data.brightness(), data.saturation(), data.screen());
+        restoreStates(Content, data.opacity(), data.brightness(), data.saturation());
         texture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
         if (m_scene && m_scene->debug) {
@@ -1084,7 +1084,7 @@ void SceneOpenGL::Window::paintDecoration(const QPixmap* decoration, TextureType
     prepareStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation(), data.screen());
     makeDecorationArrays(quads, rect, decorationTexture);
     GLVertexBuffer::streamingBuffer()->render(region, GL_TRIANGLES, hardwareClipping);
-    restoreStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation(), data.screen());
+    restoreStates(decorationType, data.opacity() * data.decorationOpacity(), data.brightness(), data.saturation());
     decorationTexture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
     if (m_scene && m_scene->debug) {
@@ -1120,7 +1120,7 @@ void SceneOpenGL::Window::paintShadow(const QRegion &region, const WindowPaintDa
     texture->bind();
     prepareStates(Shadow, data.opacity(), data.brightness(), data.saturation(), data.screen());
     renderQuads(0, region, quads, texture, true, hardwareClipping);
-    restoreStates(Shadow, data.opacity(), data.brightness(), data.saturation(), data.screen());
+    restoreStates(Shadow, data.opacity(), data.brightness(), data.saturation());
     texture->unbind();
 #ifndef KWIN_HAVE_OPENGLES
     if (m_scene && m_scene->debug) {
@@ -1318,22 +1318,19 @@ void SceneOpenGL2Window::prepareStates(TextureType type, qreal opacity, qreal br
     GLShader *shader = ShaderManager::instance()->getBoundShader();
     shader->setUniform(GLShader::ModulationConstant, QVector4D(rgb, rgb, rgb, a));
     shader->setUniform(GLShader::Saturation,         saturation);
-    shader->setUniform(GLShader::AlphaToOne,         opaque ? 1 : 0);
 
     static_cast<SceneOpenGL2*>(m_scene)->colorCorrection()->setupForOutput(screen);
 }
 
-void SceneOpenGL2Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen)
+void SceneOpenGL2Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation)
 {
     Q_UNUSED(type);
     Q_UNUSED(opacity);
     Q_UNUSED(brightness);
     Q_UNUSED(saturation);
-    Q_UNUSED(screen);
     if (m_blendingEnabled) {
         glDisable(GL_BLEND);
     }
-    ShaderManager::instance()->getBoundShader()->setUniform(GLShader::AlphaToOne, 0);
 
     static_cast<SceneOpenGL2*>(m_scene)->colorCorrection()->setupForOutput(-1);
 }
@@ -1495,10 +1492,8 @@ void SceneOpenGL1Window::prepareStates(TextureType type, qreal opacity, qreal br
     }
 }
 
-void SceneOpenGL1Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen)
+void SceneOpenGL1Window::restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation)
 {
-    Q_UNUSED(screen)
-
     GLTexture *tex = textureForType(type);
     if (opacity != 1.0 || saturation != 1.0 || brightness != 1.0f) {
         if (saturation != 1.0 && tex->saturationSupported()) {
@@ -1631,7 +1626,6 @@ void SceneOpenGL::EffectFrame::render(QRegion region, double opacity, double fra
 
         shader->setUniform(GLShader::ModulationConstant, QVector4D(1.0, 1.0, 1.0, 1.0));
         shader->setUniform(GLShader::Saturation, 1.0f);
-        shader->setUniform(GLShader::AlphaToOne, 0);
     }
 
     glEnable(GL_BLEND);

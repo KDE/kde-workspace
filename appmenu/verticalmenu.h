@@ -41,13 +41,13 @@ public:
     bool event(QEvent *);
 
     /**
-     * Set menubar parent window id
+     * Set menu parent window id
      */
-    void setMenuBarParentWid(WId id) { m_wid = id; }
+    void setParentWid(WId id) { m_wid = id; }
     /**
-     * Get menubar parent window id
+     * Get menu parent window id
      */
-    WId menuBarParentWid() { return m_wid; }
+    WId parentWid() { return m_wid; }
 private:
     WId m_wid;
 };

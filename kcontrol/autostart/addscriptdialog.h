@@ -23,6 +23,7 @@
 #define ADDSCRIPTDIALOG_H
 
 #include <KDialog>
+
 class KUrlRequester;
 class QCheckBox;
 
@@ -38,6 +39,13 @@ public:
     bool symLink() const;
 
 public slots:
+    // reimplemented
+    virtual void accept();
+
+protected:
+    virtual bool doBasicSanityCheck();
+
+private slots:
     void textChanged(const QString &text);
 
 private:

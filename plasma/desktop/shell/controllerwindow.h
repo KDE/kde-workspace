@@ -43,6 +43,7 @@ namespace Kephal
 }
 
 class ActivityManager;
+class PanelShadows;
 
 class ControllerWindow : public QWidget
 {
@@ -83,6 +84,7 @@ protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *event);
     bool eventFilter(QObject *watched, QEvent *event);
+    void showEvent(QShowEvent * event);
 
 private Q_SLOTS:
     void backgroundChanged();
@@ -100,6 +102,7 @@ private:
     Plasma::WidgetExplorer *m_widgetExplorer;
     QGraphicsWidget *m_graphicsWidget;
     QTimer *m_adjustViewTimer;
+    PanelShadows *m_panelShadow;
     bool m_ignoredWindowClosed;
 };
 

@@ -20,12 +20,17 @@
  ***************************************************************************/
 
 #include "addscriptdialog.h"
-#include <KLineEdit>
+
 #include <QCheckBox>
 #include <QVBoxLayout>
-#include <klocale.h>
-#include <KUrlRequester>
 #include <QLabel>
+#include <QFileInfo>
+
+#include <KLineEdit>
+#include <KLocale>
+#include <KUrlRequester>
+#include <KShell>
+#include <KMessageBox>
 
 AddScriptDialog::AddScriptDialog (QWidget* parent)
     : KDialog( parent ) {
@@ -48,17 +53,50 @@ AddScriptDialog::AddScriptDialog (QWidget* parent)
 }
 
 AddScriptDialog::~AddScriptDialog()
-{}
+{
+}
 
-void AddScriptDialog::textChanged(const QString &text) {
+void AddScriptDialog::textChanged(const QString &text)
+{
     enableButtonOk(!text.isEmpty());
 }
 
-KUrl AddScriptDialog::importUrl() const {
+void AddScriptDialog::accept()
+{
+    if ( doBasicSanityCheck() )
+        KDialog::accept();
+}
+
+bool AddScriptDialog::doBasicSanityCheck()
+{
+    const QString& path = KShell::tildeExpand(m_url->text());
+
+    QFileInfo file(path);
+
+    if ( ! file.isAbsolute() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" is not an absolute path.", path) );
+        return false;
+    } else if ( ! file.exists() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" does not exist.", path) );
+        return false;
+    } else if ( !file.isFile() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" is not a file.", path) );
+        return false;
+    } else if ( ! file.isReadable() ) {
+        KMessageBox::sorry( 0, i18n("\"%1\" is not readable.", path) );
+        return false;
+    }
+
+    return true;
+}
+
+KUrl AddScriptDialog::importUrl() const
+{
     return m_url->lineEdit()->text();
 }
 
-bool AddScriptDialog::symLink() const {
+bool AddScriptDialog::symLink() const
+{
     return m_symlink->isChecked();
 }
 

@@ -19,11 +19,13 @@
 
 #include "autostartitem.h"
 #include "autostart.h"
+
 #include <QComboBox>
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
+#include <QDir>
 
-#include <klocale.h>
+#include <KLocale>
 #include <KDebug>
 #include <KIO/CopyJob>
 
@@ -43,13 +45,18 @@ KUrl AutoStartItem::fileName() const
     return m_fileName;
 }
 
-void AutoStartItem::setPath(const QString &path) {
+void AutoStartItem::setPath(const QString &path)
+{
+    Q_ASSERT( path.endsWith(QDir::separator()) );
+
     if (path == m_fileName.directory(KUrl::AppendTrailingSlash))
         return;
-    KIO::move(m_fileName, KUrl( path + '/' + m_fileName.fileName() ));
-    m_fileName = KUrl(path + m_fileName.fileName());
-}
 
+    const QString& newFileName = path + m_fileName.fileName();
+    KIO::move(m_fileName, KUrl(newFileName));
+
+    m_fileName = KUrl(newFileName);
+}
 
 DesktopStartItem::DesktopStartItem( const QString &service, QTreeWidgetItem *parent, Autostart*autostart )
     : AutoStartItem( service, parent,autostart )
@@ -68,12 +75,18 @@ ScriptStartItem::ScriptStartItem( const QString &service, QTreeWidgetItem *paren
     m_comboBoxStartup->addItems( autostart->listPathName() );
 
     setText( 2, i18nc( "The program will be run", "Enabled" ) );
-    QObject::connect( m_comboBoxStartup, SIGNAL(activated(int)),autostart,SLOT(slotChangeStartup(int)) );
+    QObject::connect( m_comboBoxStartup,SIGNAL(activated(int)),this,SLOT(slotStartupChanged(int)) );
+    QObject::connect( this,SIGNAL(askChangeStartup(ScriptStartItem*,int)),autostart,SLOT(slotChangeStartup(ScriptStartItem*,int)) );
     treeWidget()->setItemWidget ( this, Autostart::COL_RUN, m_comboBoxStartup );
 }
 
 ScriptStartItem::~ScriptStartItem()
 {
+}
+
+void ScriptStartItem::slotStartupChanged(int index)
+{
+    emit askChangeStartup(this, index);
 }
 
 void ScriptStartItem::changeStartup(ScriptStartItem::ENV type )
@@ -90,8 +103,9 @@ void ScriptStartItem::changeStartup(ScriptStartItem::ENV type )
         m_comboBoxStartup->setCurrentIndex( 2 );
         break;
     default:
-        kDebug()<<" type is not defined :"<<type;
+        kWarning() << " startup type is not defined :" << type;
         break;
     }
 }
 
+#include "autostartitem.moc"

@@ -21,13 +21,14 @@
 #define AUTOSTARTITEM_H
 
 #include <QTreeWidgetItem>
+#include <QObject>
 #include <KUrl>
 
 class QComboBox;
 class QTreeWidget;
 class Autostart;
 
-class AutoStartItem : public QTreeWidgetItem
+class AutoStartItem : public QTreeWidgetItem, public QObject
 {
 public:
     AutoStartItem( const QString &service, QTreeWidgetItem *parent, Autostart* );
@@ -51,12 +52,21 @@ public:
 
 class ScriptStartItem : public AutoStartItem
 {
+    Q_OBJECT
+
 public:
     enum ENV { START=0, SHUTDOWN=1, PRE_START=2}; //rename
     ScriptStartItem( const QString &service, QTreeWidgetItem *parent, Autostart* );
     ~ScriptStartItem();
 
     void changeStartup( ScriptStartItem::ENV type );
+
+signals:
+    void askChangeStartup(ScriptStartItem* item, int index);
+
+private slots:
+
+    void slotStartupChanged(int index);
 
 private:
     QComboBox *m_comboBoxStartup;

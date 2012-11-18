@@ -1902,7 +1902,14 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force)
         }
         updateShape();
     } else {
-        XMoveWindow(display(), frameId(), x, y);
+        if (moveResizeMode && compositing()) {
+            // Defer the X update until we leave this mode
+            needsXWindowMove = true;
+        } else {
+            XMoveWindow(display(), frameId(), x, y);
+        }
+
+        // Unconditionally move the input window: it won't affect rendering
         if (inputId()) {
             const QPoint pos = QPoint(x, y) + inputPos();
             XMoveWindow(display(), inputId(), pos.x(), pos.y());
@@ -2537,24 +2544,27 @@ bool Client::startMoveResize()
     // when starting a move as the user can undo their action by moving the window back to
     // the top of the screen. When the setting is disabled then doing so is confusing.
     bool fakeMove = false;
-    if (maximizeMode() != MaximizeRestore && (maximizeMode() != MaximizeFull || options->moveResizeMaximizedWindows())) {
-        // allow moveResize, but unset maximization state in resize case
-        if (mode != PositionCenter) { // means "isResize()" but moveResizeMode = true is set below
-            if (maximizeMode() == MaximizeFull) { // partial is cond. reset in finishMoveResize
-                geom_restore = geometry(); // "restore" to current geometry
-                setMaximize(false, false);
-            }
-        } else if (quick_tile_mode != QuickTileNone) // no longer now - we move, resize is handled below
-            setQuickTileMode(QuickTileNone); // otherwise we mess every second tile, bug #303937
-    } else if ((maximizeMode() == MaximizeFull && options->electricBorderMaximize()) ||
-               (quick_tile_mode != QuickTileNone && isMovable() && mode == PositionCenter)) {
-        // Exit quick tile mode when the user attempts to move a tiled window, cannot use isMove() yet
-        const QRect before = geometry();
-        setQuickTileMode(QuickTileNone);
-        // Move the window so it's under the cursor
-        moveOffset = QPoint(double(moveOffset.x()) / double(before.width()) * double(geom_restore.width()),
-                            double(moveOffset.y()) / double(before.height()) * double(geom_restore.height()));
-        fakeMove = true;
+    if (!isFullScreen()) { // xinerama move across screens -> window is FS, everything else is secondary and untouched
+        if (maximizeMode() != MaximizeRestore &&
+            (maximizeMode() != MaximizeFull || options->moveResizeMaximizedWindows())) {
+            // allow moveResize, but unset maximization state in resize case
+            if (mode != PositionCenter) { // means "isResize()" but moveResizeMode = true is set below
+                if (maximizeMode() == MaximizeFull) { // partial is cond. reset in finishMoveResize
+                    geom_restore = geometry(); // "restore" to current geometry
+                    setMaximize(false, false);
+                }
+            } else if (quick_tile_mode != QuickTileNone) // no longer now - we move, resize is handled below
+                setQuickTileMode(QuickTileNone); // otherwise we mess every second tile, bug #303937
+        } else if ((maximizeMode() == MaximizeFull && options->electricBorderMaximize()) ||
+                   (quick_tile_mode != QuickTileNone && isMovable() && mode == PositionCenter)) {
+            // Exit quick tile mode when the user attempts to move a tiled window, cannot use isMove() yet
+            const QRect before = geometry();
+            setQuickTileMode(QuickTileNone);
+            // Move the window so it's under the cursor
+            moveOffset = QPoint(double(moveOffset.x()) / double(before.width()) * double(geom_restore.width()),
+                                double(moveOffset.y()) / double(before.height()) * double(geom_restore.height()));
+            fakeMove = true;
+        }
     }
 
     if (quick_tile_mode != QuickTileNone && mode != PositionCenter) { // Cannot use isResize() yet
@@ -2665,6 +2675,11 @@ void Client::finishMoveResize(bool cancel)
 
 void Client::leaveMoveResize()
 {
+    if (needsXWindowMove) {
+        // Do the deferred move
+        XMoveWindow(display(), frameId(), geom.x(), geom.y());
+        needsXWindowMove = false;
+    }
     if (geometryTip) {
         geometryTip->hide();
         delete geometryTip;

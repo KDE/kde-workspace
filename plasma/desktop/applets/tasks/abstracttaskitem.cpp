@@ -735,12 +735,13 @@ void AbstractTaskItem::drawTask(QPainter *painter, const QStyleOptionGraphicsIte
             Plasma::FrameSvg *itemBackground = m_applet->itemBackground();
 
             if (itemBackground->hasElement(expanderElement())) {
-                QSizeF arrowSize(itemBackground->elementSize(expanderElement()));
-                QRectF arrowRect(rect.center()-QPointF(arrowSize.width()/2, arrowSize.height()+fm.xHeight()/2), arrowSize);
+                QSize arrowSize(itemBackground->elementSize(expanderElement()));
+                QRect arrowRect(rect.toRect().center() - QPoint(arrowSize.width()/2, arrowSize.height() + fm.xHeight()/1.8), arrowSize);
                 itemBackground->paint(painter, arrowRect, expanderElement());
 
                 painter->setFont(font);
                 rect.setTop(arrowRect.bottom());
+
                 painter->drawText(rect, Qt::AlignHCenter|Qt::AlignTop, QString::number(groupItem->count()));
             } else {
                 painter->setFont(font);
@@ -1097,6 +1098,13 @@ QRectF AbstractTaskItem::expanderRect(const QRectF &bounds)
         return QRectF();
     }
 
+    QRectF effectiveBounds(bounds);
+    if (QApplication::layoutDirection() == Qt::RightToLeft) {
+        effectiveBounds.setRight(iconRect(bounds).left() - qMax(0, IconTextSpacing - 2));
+    } else {
+        effectiveBounds.setLeft(iconRect(bounds).right() + qMax(0, IconTextSpacing - 2));
+    }
+    
     QFontMetrics fm(KGlobalSettings::smallestReadableFont());
     Plasma::FrameSvg *itemBackground = m_applet->itemBackground();
 
@@ -1104,8 +1112,8 @@ QRectF AbstractTaskItem::expanderRect(const QRectF &bounds)
                        itemBackground->elementSize(expanderElement()).width()),
                        size().height());
 
-    return QStyle::alignedRect(QApplication::layoutDirection(), Qt::AlignRight | Qt::AlignVCenter,
-                               expanderSize, bounds.toRect());
+    return QStyle::alignedRect(QApplication::layoutDirection(), Qt::AlignLeft | Qt::AlignVCenter,
+                               expanderSize, effectiveBounds.toRect());
 }
 
 QRectF AbstractTaskItem::textRect(const QRectF &bounds)
@@ -1118,9 +1126,9 @@ QRectF AbstractTaskItem::textRect(const QRectF &bounds)
         size.rwidth() -= int(expanderRect(bounds).width()) + qMax(0, IconTextSpacing - 2);
 
         if (QApplication::layoutDirection() == Qt::RightToLeft) {
-            effectiveBounds.setLeft(expanderRect(bounds).right());
-        } else {
             effectiveBounds.setRight(expanderRect(bounds).left());
+        } else {
+            effectiveBounds.setLeft(expanderRect(bounds).right());
         }
     }
 

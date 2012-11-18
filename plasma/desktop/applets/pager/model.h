@@ -31,7 +31,7 @@ public:
         WidthRole = Qt::UserRole + 1,
         HeightRole,
         XRole,
-        YRole,
+        YRole
     };
 
     RectangleModel(QObject *parent = 0);

@@ -86,6 +86,7 @@ Comment[cs]=Spravovat činnosti dostupné pro uživatele při připojení novýc
 Comment[el]=Διαχείριση ενεργειών διαθέσιμων στο χρήστη κατά τη σύνδεση νέων συσκευών
 Comment[es]=Gestionar las acciones disponibles para el usuario cuando conecta nuevos dispositivos
 Comment[et]=Toimingute haldamine, mida kasutaja saab tarvitada uue seadme ühendamisel arvutiga
+Comment[fi]=Hallitse toimintoja, jotka ovat käyttäjän valittavissa, kun uusia laitteita kytketään
 Comment[hu]=Új eszköz csatlakoztatásakor a felhasználónak elérhető műveletek kezelése
 Comment[ia]=Gerer actiones disponibile al usator quando il connecte nove dispositivos al computator
 Comment[nl]=Beheren van acties die beschikbaar zijn voor de gebruiker bij het aankoppelen van nieuwe apparaten
@@ -100,6 +101,7 @@ Comment[sr@latin]=Odredite radnje dostupne korisniku pri povezivanju novih uređ
 Comment[sv]=Hantera tillgängliga åtgärder för användare när nya enheter ansluts
 Comment[uk]=Керування діями, доступними користувачеві після з’єднання пристроїв з комп’ютером
 Comment[x-test]=xxManage actions available to the user when connecting new devicesxx
+Comment[zh_TW]=管理新增裝置到電腦時要做些什麼動作
 
 X-KDE-Keywords=Solid Devices Actions
 X-KDE-Keywords[ca]=Accions de dispositiu del Solid

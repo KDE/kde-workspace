@@ -82,7 +82,7 @@ void ContextMenu::init(const KConfigGroup &config)
     }
 
     foreach (const QString &name, m_actionOrder) {
-        actions.insert(name, disabled.contains(name));
+        actions.insert(name, !disabled.contains(name));
     }
 
     QHashIterator<QString, bool> it(actions);

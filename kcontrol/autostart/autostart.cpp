@@ -24,8 +24,11 @@
 #include "addscriptdialog.h"
 #include "advanceddialog.h"
 
+#include <QDir>
+#include <QTreeWidget>
+#include <QStringList>
+
 #include <KLocale>
-#include <KGlobal>
 #include <KConfig>
 #include <KConfigGroup>
 #include <KGlobalSettings>
@@ -41,10 +44,6 @@
 #include <KIO/DeleteJob>
 #include <KIO/CopyJob>
 
-#include <QDir>
-#include <QTreeWidget>
-#include <QStringList>
-
 
 K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
     K_EXPORT_PLUGIN(AutostartFactory( "kcmautostart", "kcm_autostart" ))
@@ -54,11 +53,18 @@ K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
 {
     widget = new Ui_AutostartConfig();
     widget->setupUi(this);
+
     QStringList lstHeader;
-    lstHeader<<i18n( "Name" )<< i18n( "Command" )<< i18n( "Status" )<<i18nc("@title:column The name of the column that decides if the program is run on kde startup, on kde shutdown, etc", "Run On" );
+    lstHeader << i18n( "Name" )
+              << i18n( "Command" )
+              << i18n( "Status" )
+              << i18nc("@title:column The name of the column that decides if the program is run on kde startup, on kde shutdown, etc", "Run On" );
     widget->listCMD->setHeaderLabels(lstHeader);
+    widget->listCMD->setFocus();
+
     setButtons(Help);
-    connect( widget->btnAddScript, SIGNAL(clicked()), SLOT(slotAddCMD()) );
+
+    connect( widget->btnAddScript, SIGNAL(clicked()), SLOT(slotAddScript()) );
     connect( widget->btnAddProgram, SIGNAL(clicked()), SLOT(slotAddProgram()) );
     connect( widget->btnRemove, SIGNAL(clicked()), SLOT(slotRemoveCMD()) );
     connect( widget->btnAdvanced, SIGNAL(clicked()), SLOT(slotAdvanced()) );
@@ -66,8 +72,6 @@ K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
     connect( widget->listCMD, SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(slotItemClicked(QTreeWidgetItem*,int)) );
     connect( widget->btnProperties, SIGNAL(clicked()), SLOT(slotEditCMD()) );
     connect( widget->listCMD, SIGNAL(itemSelectionChanged()), SLOT(slotSelectionChanged()) );
-
-    widget->listCMD->setFocus();
 
 
     KAboutData* about = new KAboutData("Autostart", 0, ki18n("KDE Autostart Manager"), "1.0",
@@ -80,7 +84,6 @@ K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
 
 }
 
-
 Autostart::~Autostart()
 {
    delete widget;
@@ -89,20 +92,18 @@ Autostart::~Autostart()
 
 void Autostart::slotItemClicked( QTreeWidgetItem *item, int col)
 {
-    if ( item && col == COL_STATUS )
-    {
+    if ( item && col == COL_STATUS ) {
         DesktopStartItem *entry = dynamic_cast<DesktopStartItem*>( item );
-        if ( entry )
-        {
+        if ( entry ) {
             bool disable = ( item->checkState( col ) == Qt::Unchecked );
             KDesktopFile kc(entry->fileName().path());
             KConfigGroup grp = kc.desktopGroup();
-            if ( grp.hasKey( "Hidden" ) && !disable)
-            {
+            if ( grp.hasKey( "Hidden" ) && !disable) {
                 grp.deleteEntry( "Hidden" );
             }
             else
                 grp.writeEntry("Hidden", disable);
+
             kc.sync();
             if ( disable )
                 item->setText( COL_STATUS, i18nc( "The program won't be run", "Disabled" ) );
@@ -112,17 +113,17 @@ void Autostart::slotItemClicked( QTreeWidgetItem *item, int col)
     }
 }
 
-void Autostart::addItem( DesktopStartItem*item, const QString& name, const QString& run, const QString& command, bool status )
+void Autostart::addItem( DesktopStartItem* item, const QString& name, const QString& run, const QString& command, bool disabled )
 {
     Q_ASSERT( item );
     item->setText( COL_NAME, name );
     item->setText( COL_RUN, run );
     item->setText( COL_COMMAND, command );
-    item->setCheckState( COL_STATUS, status ? Qt::Unchecked : Qt::Checked );
-    item->setText( COL_STATUS, status ? i18nc( "The program won't be run", "Disabled" ) : i18nc( "The program will be run", "Enabled" ));
+    item->setCheckState( COL_STATUS, disabled ? Qt::Unchecked : Qt::Checked );
+    item->setText( COL_STATUS, disabled ? i18nc( "The program won't be run", "Disabled" ) : i18nc( "The program will be run", "Enabled" ));
 }
 
-void Autostart::addItem(ScriptStartItem *item, const QString& name, const QString& command, ScriptStartItem::ENV type )
+void Autostart::addItem(ScriptStartItem* item, const QString& name, const QString& command, ScriptStartItem::ENV type )
 {
     Q_ASSERT( item );
     item->setText( COL_NAME, name );
@@ -142,7 +143,7 @@ void Autostart::load()
             << componentData().dirs()->localkdedir() + "env/"
             << componentData().dirs()->localkdedir() + "share/autostart/"	// For Importing purposes
             << componentData().dirs()->localxdgconfdir() + "autostart/" ; //xdg-config autostart dir
-    //kDebug()<<"  path "<<m_paths;
+
     // share/autostart shouldn't be an option as this should be reserved for global autostart entries
     m_pathName << i18n("Startup")
              << i18n("Shutdown")
@@ -157,10 +158,11 @@ void Autostart::load()
     QFont boldFont =  m_programItem->font(0);
     boldFont.setBold( true );
     m_programItem->setData ( 0, Qt::FontRole, boldFont );
+
     m_scriptItem = new QTreeWidgetItem( widget->listCMD );
     m_scriptItem->setText( 0, i18n( "Script File" ));
     m_scriptItem->setFlags(m_scriptItem->flags()^Qt::ItemIsSelectable);
-    m_scriptItem->setData ( 0,Qt::FontRole, boldFont);
+    m_scriptItem->setData ( 0, Qt::FontRole, boldFont);
 
     widget->listCMD->expandItem( m_programItem );
     widget->listCMD->expandItem( m_scriptItem );
@@ -191,12 +193,20 @@ void Autostart::load()
                 }
 
                 DesktopStartItem *item = new DesktopStartItem( fi.absoluteFilePath(), m_programItem, this );
+
                 const KConfigGroup grp = config.desktopGroup();
-                bool status = grp.readEntry("Hidden", false);
+                const bool hidden = grp.readEntry("Hidden", false);
+                const QStringList notShowList = grp.readXdgListEntry("NotShowIn");
+                const QStringList onlyShowList = grp.readXdgListEntry("OnlyShowIn");
+
+                const bool disabled = hidden ||
+                                      notShowList.contains("KDE") ||
+                                      (!onlyShowList.isEmpty() && !onlyShowList.contains("KDE"));
+
                 int indexPath = m_paths.indexOf((item->fileName().directory()+'/' ) );
                 if ( indexPath > 2 )
                     indexPath = 0; //.kde/share/autostart and .config/autostart load destkop at startup
-                addItem(item, config.readName(), m_pathName.value(indexPath),  grp.readEntry("Exec"),status );
+                addItem(item, config.readName(), m_pathName.value(indexPath),  grp.readEntry("Exec"), disabled );
             }
             else
             {
@@ -239,15 +249,14 @@ void Autostart::load()
 
 void Autostart::slotAddProgram()
 {
-    KService::Ptr service;
     KOpenWithDialog owdlg( this );
     if (owdlg.exec() != QDialog::Accepted)
         return;
-    service = owdlg.service();
+
+    KService::Ptr service = owdlg.service();
 
     Q_ASSERT(service);
-    if (!service)
-    {
+    if (!service) {
         return; // Don't crash if KOpenWith wasn't able to create service.
     }
 
@@ -281,7 +290,8 @@ void Autostart::slotAddProgram()
     addItem( item, service->name(), m_pathName[0],  service->exec() , false);
 }
 
-void Autostart::slotAddCMD() {
+void Autostart::slotAddScript()
+{
     AddScriptDialog * addDialog = new AddScriptDialog(this);
     int result = addDialog->exec();
     if (result == QDialog::Accepted) {
@@ -296,7 +306,8 @@ void Autostart::slotAddCMD() {
     delete addDialog;
 }
 
-void Autostart::slotRemoveCMD() {
+void Autostart::slotRemoveCMD()
+{
     QTreeWidgetItem* item = widget->listCMD->currentItem();
     if (!item)
         return;
@@ -319,7 +330,8 @@ void Autostart::slotRemoveCMD() {
     }
 }
 
-void Autostart::slotEditCMD(QTreeWidgetItem* ent) {
+void Autostart::slotEditCMD(QTreeWidgetItem* ent)
+{
     if (!ent) return;
     AutoStartItem *entry = dynamic_cast<AutoStartItem*>( ent );
     if ( entry )
@@ -335,21 +347,25 @@ void Autostart::slotEditCMD(QTreeWidgetItem* ent) {
     }
 }
 
-bool Autostart::slotEditCMD( const KFileItem &item) {
+bool Autostart::slotEditCMD( const KFileItem &item)
+{
     KPropertiesDialog dlg( item, this );
     bool c = ( dlg.exec() == QDialog::Accepted );
     return c;
 }
 
-void Autostart::slotEditCMD() {
+void Autostart::slotEditCMD()
+{
     if ( widget->listCMD->currentItem() == 0 )
         return;
     slotEditCMD( (AutoStartItem*)widget->listCMD->currentItem() );
 }
 
-void Autostart::slotAdvanced() {
+void Autostart::slotAdvanced()
+{
     if ( widget->listCMD->currentItem() == 0 )
         return;
+
     DesktopStartItem *entry = static_cast<DesktopStartItem *>( widget->listCMD->currentItem() );
     KDesktopFile kc(entry->fileName().path());
     KConfigGroup grp = kc.desktopGroup();
@@ -360,6 +376,7 @@ void Autostart::slotAdvanced() {
         lstEntry = grp.readXdgListEntry("OnlyShowIn");
         status = lstEntry.contains("KDE");
     }
+
     AdvancedDialog *dlg = new AdvancedDialog( this,status );
     if ( dlg->exec() )
     {
@@ -378,24 +395,28 @@ void Autostart::slotAdvanced() {
     delete dlg;
 }
 
-void Autostart::slotChangeStartup( int index )
+void Autostart::slotChangeStartup( ScriptStartItem* item, int index )
 {
-    if ( widget->listCMD->currentItem() == 0 )
-        return;
-    ScriptStartItem* entry = dynamic_cast<ScriptStartItem*>( widget->listCMD->currentItem() );
-    if ( entry )
+    Q_ASSERT(item);
+
+    if ( item )
     {
-        entry->setPath(m_paths.value(index));
-        if ( ( index != 0 ) && !entry->fileName().path().endsWith( ".sh" ))
+        item->setPath(m_paths.value(index));
+        widget->listCMD->setCurrentItem( item );
+        if ( ( index == 2 ) && !item->fileName().path().endsWith( ".sh" ))
             KMessageBox::information( this, i18n( "Only files with “.sh” extensions are allowed for setting up the environment." ) );
+
     }
 }
 
-void Autostart::slotSelectionChanged() {
-    bool hasItems = ( dynamic_cast<AutoStartItem*>( widget->listCMD->currentItem() )!=0 ) ;
+void Autostart::slotSelectionChanged()
+{
+    const bool hasItems = ( dynamic_cast<AutoStartItem*>( widget->listCMD->currentItem() )!=0 ) ;
     widget->btnRemove->setEnabled(hasItems);
-    widget->btnProperties->setEnabled(dynamic_cast<DesktopStartItem*>( widget->listCMD->currentItem() )!=0);
-    widget->btnAdvanced->setEnabled( dynamic_cast<DesktopStartItem*>( widget->listCMD->currentItem() )!=0 ) ;
+
+    const bool isDesktopItem = (dynamic_cast<DesktopStartItem*>(widget->listCMD->currentItem() ) != 0) ;
+    widget->btnProperties->setEnabled(isDesktopItem);
+    widget->btnAdvanced->setEnabled(isDesktopItem) ;
 }
 
 void Autostart::defaults()

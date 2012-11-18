@@ -443,8 +443,6 @@ void GLShader::resolveLocations()
 
     mFloatLocation[Saturation]    = uniformLocation("saturation");
 
-    mIntLocation[AlphaToOne] = uniformLocation("u_forceAlpha");
-
     mLocationsResolved = true;
 }
 
@@ -908,7 +906,6 @@ void ShaderManager::resetShader(ShaderType type)
     shader->setUniform(GLShader::ModulationConstant, QVector4D(1.0, 1.0, 1.0, 1.0));
 
     shader->setUniform(GLShader::Saturation, 1.0f);
-    shader->setUniform(GLShader::AlphaToOne, 0);
 }
 
 /***  GLRenderTarget  ***/

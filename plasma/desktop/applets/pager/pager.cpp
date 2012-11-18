@@ -65,6 +65,7 @@ Pager::Pager(QObject *parent, const QVariantList &args)
       m_showWindowIcons(false),
       m_rows(2),
       m_columns(0),
+      m_currentDesktop(0),
       m_desktopDown(false),
       m_addDesktopAction(0),
       m_removeDesktopAction(0),

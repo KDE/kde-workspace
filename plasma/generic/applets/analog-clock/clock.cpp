@@ -152,7 +152,10 @@ void Clock::dataUpdated(const QString& source, const Plasma::DataEngine::Data &d
 {
     Q_UNUSED(source);
     m_time = data["Time"].toTime();
-    m_repaintCache = RepaintHands;
+
+    if (m_time.minute() != lastTimeSeen().minute() && m_repaintCache == RepaintNone) {
+        m_repaintCache = RepaintHands;
+    }
 
     if (Plasma::ToolTipManager::self()->isVisible(this)) {
         updateTipContent();
