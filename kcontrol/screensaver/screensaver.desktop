@@ -104,7 +104,9 @@ Name[zh_CN]=屏幕保护程序
 Name[zh_TW]=螢幕保護程式
 
 Comment=Screen Saver Settings
+Comment[ca]=Arranjament de l'estalvi de pantalla
 Comment[cs]=Nastavení šetřiče obrazovky
+Comment[da]=Indstillinger for pauseskærm
 Comment[es]=Preferencias del salvapantallas
 Comment[et]=Ekraanisäästja seadistused
 Comment[fi]=Näytönsäästäjän asetukset
@@ -116,6 +118,7 @@ Comment[nb]=Tilpasning av pauseskjerm
 Comment[nl]=Schermbeveiliging instellen
 Comment[nn]=Innstillingar for pauseskjerm
 Comment[pt]=Configuração do Protector do Ecrã
+Comment[pt_BR]=Configurações do protetor de tela
 Comment[se]=Šearbmasiestejeaddji heivehusat
 Comment[sk]=Nastavenie šetriča obrazovky
 Comment[sl]=Nastavitve ohranjevalnika zaslona
@@ -130,7 +133,9 @@ Comment[zh_TW]=螢幕保護程式設定
 
 
 X-KDE-Keywords=screensavers,Priority
+X-KDE-Keywords[ca]=estalvis de pantalla,Prioritat
 X-KDE-Keywords[cs]=spořiče obrazovky,priorita
+X-KDE-Keywords[da]=pauseskærme,prioritet
 X-KDE-Keywords[es]=salvapantallas,Prioridad
 X-KDE-Keywords[et]=ekraanisäästjad,prioriteet
 X-KDE-Keywords[fi]=näytönsäästäjät,prioriteetti,tärkeys
@@ -140,6 +145,7 @@ X-KDE-Keywords[ia]=salvatores de schermo,Prioritate
 X-KDE-Keywords[nb]=pauseskjermer,Prioritet
 X-KDE-Keywords[nl]=schermbeveiliging,prioriteit
 X-KDE-Keywords[pt]=protector de ecrã,prioridade
+X-KDE-Keywords[pt_BR]=protetores de tela,Prioridade
 X-KDE-Keywords[sk]=šetriče obrazovky,Priorita
 X-KDE-Keywords[sl]=ohranjevalnik zaslona,prednost
 X-KDE-Keywords[sr]=screensavers,Priority,чувар екрана,приоритет

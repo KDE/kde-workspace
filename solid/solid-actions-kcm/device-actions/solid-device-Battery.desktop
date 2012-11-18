@@ -142,7 +142,9 @@ Name[zh_TW]=充電狀態
 
 [Desktop Action plugged]
 Name=Plugged
+Name[ca]=Endollat
 Name[cs]=Připojeno
+Name[da]=I stikkontakten
 Name[el]=Σε σύνδεση
 Name[es]=Enchufado
 Name[et]=Ühendatud
@@ -155,6 +157,7 @@ Name[nb]=Tilkoblet
 Name[nl]=Ingeplugd
 Name[nn]=Tilkopla
 Name[pt]=Ligado
+Name[pt_BR]=Conectado
 Name[sk]=Pripojené
 Name[sl]=Priključeno
 Name[sr]=утакнут
