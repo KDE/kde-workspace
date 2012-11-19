@@ -25,7 +25,7 @@
 
 // Constants
 var ICONS_SIZE = 24 // Size of icons, icons are square i.e. width == height
-var MINIMUM_SIZE = 30 // minimum size of widget
+var MINIMUM_SIZE = 8 // minimum size of widget
 var ARROW_MARGINS = 5 // margins for an arrow
 var BLINK_INTERVAL = 750 // time interval of blinking
 var TASK_NOTIFICATIONS_TYPEID = "org.kde.notifications"

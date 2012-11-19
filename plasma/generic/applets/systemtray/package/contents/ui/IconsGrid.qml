@@ -69,8 +69,8 @@ Item {
             PropertyChanges {
                 target: root_item
                 _sqrt: 0
-                cols_num: grid.count*cell_size <= width ? grid.count : Math.floor(width / cell_size)
-                rows_num: cols_num > 0 ? (Math.floor(grid.count / cols_num) + (grid.count % cols_num ? 1 : 0)) : 0
+                cols_num: grid.count*cell_size <= width ? grid.count : Math.max(1, Math.floor(width / cell_size))
+                rows_num: cols_num > 0 ? (Math.max(1, Math.floor(grid.count / cols_num)) + (grid.count % cols_num ? 1 : 0)) : 0
             }
             PropertyChanges {
                 target: grid
@@ -85,8 +85,8 @@ Item {
             PropertyChanges {
                 target: root_item
                 _sqrt: 0
-                rows_num: grid.count*cell_size <= height ? grid.count : Math.floor(height / cell_size)
-                cols_num: rows_num > 0 ? (Math.floor(grid.count / rows_num) + (grid.count % rows_num ? 1 : 0)) : 0
+                rows_num: grid.count*cell_size <= height ? grid.count : Math.max(1, Math.floor(height / cell_size))
+                cols_num: rows_num > 0 ? (Math.max(1, Math.floor(grid.count / rows_num)) + (grid.count % rows_num ? 1 : 0)) : 0
             }
             PropertyChanges {
                 target: grid

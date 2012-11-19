@@ -31,7 +31,6 @@ import org.kde.qtextracomponents 0.1 as QtExtraComponents
 Item {
     id: root_item
 
-    property int icons_size: 24 // size of icons
     property int blink_interval: 1000 // interval of blinking (if status of task is NeedsAttention)
     property variant task: null // task that provides information for item
 
