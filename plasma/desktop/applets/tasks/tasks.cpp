@@ -68,6 +68,7 @@ Tasks::Tasks(QObject* parent, const QVariantList &arguments)
      : Plasma::Applet(parent, arguments),
        m_showTooltip(false),
        m_highlightWindows(false),
+       m_arrows(0),
        m_taskItemBackground(0),
        m_leftMargin(0),
        m_topMargin(0),
@@ -274,7 +275,19 @@ void Tasks::publishIconGeometry()
     }
 }
 
-Plasma::FrameSvg* Tasks::itemBackground()
+Plasma::Svg *Tasks::arrows()
+{
+    if (!m_arrows) {
+        m_arrows = new Plasma::Svg(this);
+        m_arrows->setImagePath("widgets/arrows");
+        m_arrows->setContainsMultipleImages(true);
+        m_arrows->resize(16, 16);
+    }
+
+    return m_arrows;
+}
+
+Plasma::FrameSvg *Tasks::itemBackground()
 {
     if (!m_taskItemBackground) {
         m_taskItemBackground = new Plasma::FrameSvg(this);

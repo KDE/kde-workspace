@@ -66,7 +66,7 @@
 
 static const int HOVER_EFFECT_TIMEOUT = 900;
 // distance (in pixels) between a task's icon and its text
-static const int IconTextSpacing = 4;
+static const int IconTextSpacing = 5;
 
 
 AbstractTaskItem::AbstractTaskItem(QGraphicsWidget *parent, Tasks *applet)
@@ -659,18 +659,16 @@ void AbstractTaskItem::drawBackground(QPainter *painter, const QStyleOptionGraph
 
 void AbstractTaskItem::drawTask(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
 {
-    Q_UNUSED(option)
-
     TaskManager::AbstractGroupableItem *abstractItem = m_abstractItem.data();
     if (!abstractItem) {
         return;
     }
 
     QRectF bounds = boundingRect();
-    if (abstractItem->itemType() != TaskManager::LauncherItemType) {
-        bounds = bounds.adjusted(m_applet->itemLeftMargin(), m_applet->itemTopMargin(), -m_applet->itemRightMargin(), -m_applet->itemBottomMargin());
+    if (abstractItem->itemType() == TaskManager::LauncherItemType) {
+        bounds = bounds.adjusted(4, 4, -5, -5);
     } else {
-        bounds = bounds.adjusted(4,4,-5,-5);
+        bounds = bounds.adjusted(m_applet->itemLeftMargin(), m_applet->itemTopMargin(), -m_applet->itemRightMargin(), -m_applet->itemBottomMargin());
     }
 
     WindowTaskItem *window = qobject_cast<WindowTaskItem *>(this);
@@ -728,24 +726,15 @@ void AbstractTaskItem::drawTask(QPainter *painter, const QStyleOptionGraphicsIte
 
         TaskGroupItem *groupItem = qobject_cast<TaskGroupItem *>(this);
         if (groupItem) {
-            QFont font(KGlobalSettings::smallestReadableFont());
-            QFontMetrics fm(font);
-            QRectF rect(expanderRect(bounds));
+            Plasma::Svg *svg = m_applet->arrows();
+            const QString element = expanderElement();
 
-            Plasma::FrameSvg *itemBackground = m_applet->itemBackground();
-
-            if (itemBackground->hasElement(expanderElement())) {
-                QSize arrowSize(itemBackground->elementSize(expanderElement()));
-                QRect arrowRect(rect.toRect().center() - QPoint(arrowSize.width()/2, arrowSize.height() + fm.xHeight()/1.8), arrowSize);
-                itemBackground->paint(painter, arrowRect, expanderElement());
-
-                painter->setFont(font);
-                rect.setTop(arrowRect.bottom());
-
-                painter->drawText(rect, Qt::AlignHCenter|Qt::AlignTop, QString::number(groupItem->count()));
-            } else {
-                painter->setFont(font);
-                painter->drawText(rect, Qt::AlignCenter, QString::number(groupItem->count()));
+            if (svg->hasElement(element)) {
+                const QSize arrowSize = svg->size();
+                const QPoint start = QPoint(iconR.center().x() - arrowSize.width()/2,
+                                            rect().bottom() - arrowSize.height());
+                const QRect arrowRect(start, arrowSize);
+                svg->paint(painter, arrowRect, element);
             }
         }
     }
@@ -767,10 +756,10 @@ QSize AbstractTaskItem::layoutText(QTextLayout &layout, const QString &text,
                                    const QSize &constraints) const
 {
     QFontMetrics metrics(layout.font());
-    int leading     = metrics.leading();
-    int height      = 0;
-    int maxWidth    = constraints.width();
-    int widthUsed   = 0;
+    int leading = metrics.leading();
+    int height = 0;
+    int maxWidth = constraints.width();
+    int widthUsed = 0;
     int lineSpacing = metrics.lineSpacing();
     QTextLine line;
 
@@ -814,12 +803,10 @@ void AbstractTaskItem::drawTextLayout(QPainter *painter, const QTextLayout &layo
     // Create the alpha gradient for the fade out effect
     QLinearGradient alphaGradient(0, 0, 1, 0);
     alphaGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-    if (layout.textOption().textDirection() == Qt::LeftToRight)
-    {
+    if (layout.textOption().textDirection() == Qt::LeftToRight) {
         alphaGradient.setColorAt(0, QColor(0, 0, 0, 255));
         alphaGradient.setColorAt(1, QColor(0, 0, 0, 0));
-    } else
-    {
+    } else {
         alphaGradient.setColorAt(0, QColor(0, 0, 0, 0));
         alphaGradient.setColorAt(1, QColor(0, 0, 0, 255));
     }
@@ -832,8 +819,7 @@ void AbstractTaskItem::drawTextLayout(QPainter *painter, const QTextLayout &layo
     int fadeWidth = 30;
 
     // Draw each line in the layout
-    for (int i = 0; i < layout.lineCount(); i++)
-    {
+    for (int i = 0; i < layout.lineCount(); i++) {
         QTextLine line = layout.lineAt(i);
         line.draw(&p, position);
 
@@ -849,8 +835,7 @@ void AbstractTaskItem::drawTextLayout(QPainter *painter, const QTextLayout &layo
     }
 
     // Reduce the alpha in each fade out rect using the alpha gradient
-    if (!fadeRects.isEmpty())
-    {
+    if (!fadeRects.isEmpty()) {
         p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         foreach (const QRect &rect, fadeRects) {
             p.fillRect(rect, alphaGradient);
@@ -1091,47 +1076,12 @@ QRectF AbstractTaskItem::iconRect(const QRectF &b)
                                iconSize, bounds.toRect());
 }
 
-QRectF AbstractTaskItem::expanderRect(const QRectF &bounds)
-{
-    const TaskGroupItem *groupItem = qobject_cast<const TaskGroupItem *>(this);
-    if (!groupItem) {
-        return QRectF();
-    }
-
-    QRectF effectiveBounds(bounds);
-    if (QApplication::layoutDirection() == Qt::RightToLeft) {
-        effectiveBounds.setRight(iconRect(bounds).left() - qMax(0, IconTextSpacing - 2));
-    } else {
-        effectiveBounds.setLeft(iconRect(bounds).right() + qMax(0, IconTextSpacing - 2));
-    }
-    
-    QFontMetrics fm(KGlobalSettings::smallestReadableFont());
-    Plasma::FrameSvg *itemBackground = m_applet->itemBackground();
-
-    QSize expanderSize(qMax(fm.width(QString::number(groupItem->count())),
-                       itemBackground->elementSize(expanderElement()).width()),
-                       size().height());
-
-    return QStyle::alignedRect(QApplication::layoutDirection(), Qt::AlignLeft | Qt::AlignVCenter,
-                               expanderSize, effectiveBounds.toRect());
-}
-
 QRectF AbstractTaskItem::textRect(const QRectF &bounds)
 {
     QSize size(bounds.size().toSize());
     QRectF effectiveBounds(bounds);
 
     size.rwidth() -= int(iconRect(bounds).width()) + qMax(0, IconTextSpacing - 2);
-    if (!isWindowItem()) {
-        size.rwidth() -= int(expanderRect(bounds).width()) + qMax(0, IconTextSpacing - 2);
-
-        if (QApplication::layoutDirection() == Qt::RightToLeft) {
-            effectiveBounds.setRight(expanderRect(bounds).left());
-        } else {
-            effectiveBounds.setLeft(expanderRect(bounds).right());
-        }
-    }
-
     return QStyle::alignedRect(QApplication::layoutDirection(), Qt::AlignRight | Qt::AlignVCenter,
                                      size, effectiveBounds.toRect());
 }
@@ -1174,14 +1124,14 @@ QString AbstractTaskItem::expanderElement() const
 {
     switch (m_applet->location()) {
     case Plasma::TopEdge:
-        return "group-expander-top";
+        return "down-arrow";
     case Plasma::RightEdge:
-        return "group-expander-right";
+        return "right-arrow";
     case Plasma::LeftEdge:
-        return "group-expander-left";
+        return "left-arrow";
     case Plasma::BottomEdge:
     default:
-        return "group-expander-bottom";
+        return "up-arrow";
     }
 }
 
