@@ -113,9 +113,6 @@ Item {
             content: IconsList {
                 id: popup_area
                 icons_size:    JS.ICONS_SIZE
-                width: popup_area.min_width
-                height: popup_area.min_height
-                anchors.centerIn: parent
                 model: model_popup
             }
         }
