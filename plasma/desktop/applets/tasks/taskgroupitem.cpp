@@ -708,15 +708,19 @@ void TaskGroupItem::popupMenu()
         } else {
             m_popupDialog->hide();
         }
-
-        QRect rect = iconGeometry();
     } else {
         m_tasksLayout->setOrientation(Plasma::Vertical);
         m_tasksLayout->setMaximumRows(1);
         tasksLayout()->layoutItems();  // essential
         m_offscreenWidget->adjustSize();
         m_popupDialog->syncToGraphicsWidget();
-        m_popupDialog->move(m_applet->containment()->corona()->popupPosition(this, m_popupDialog->size(), Qt::AlignLeft));
+        /*
+        const bool smallPopup = m_popupDialog->size().width() < size().width();
+        const Qt::AlignmentFlag alignment = smallPopup ? Qt::AlignCenter : Qt::AlignCenter;
+        */
+        const Qt::AlignmentFlag alignment = Qt::AlignCenter;
+        Plasma::Corona *corona = m_applet->containment()->corona();
+        m_popupDialog->move(corona->popupPosition(this, m_popupDialog->size(), alignment));
         KWindowSystem::setState(m_popupDialog->winId(), NET::SkipTaskbar| NET::SkipPager);
         if (m_applet->location() != Plasma::Floating) {
             m_popupDialog->animatedShow(Plasma::locationToDirection(m_applet->location()));
