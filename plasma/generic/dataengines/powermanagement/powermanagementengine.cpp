@@ -152,8 +152,8 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         bool isPlugged = false;
 
         const QList<Solid::Device> list_ac = Solid::Device::listFromType(Solid::DeviceInterface::AcAdapter);
-        foreach (Solid::Device device_ac, list_ac) {
-            Solid::AcAdapter* acadapter = device_ac.as<Solid::AcAdapter>();
+        foreach (const Solid::Device & device_ac, list_ac) {
+            const Solid::AcAdapter* acadapter = device_ac.as<Solid::AcAdapter>();
             isPlugged |= acadapter->isPlugged();
             connect(acadapter, SIGNAL(plugStateChanged(bool,QString)), this,
                     SLOT(updateAcPlugState(bool)), Qt::UniqueConnection);
@@ -250,6 +250,7 @@ void PowermanagementEngine::deviceRemoved(const QString& udi)
         QStringList sourceNames(m_batterySources.values());
         sourceNames.removeAll(source);
         setData("Battery", "Sources", sourceNames);
+        setData("Battery", "Has Battery", !sourceNames.isEmpty());
     }
 }
 
@@ -284,6 +285,7 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
             updateBatteryPlugState(battery->isPlugged(), device.udi());
 
             setData("Battery", "Sources", sourceNames);
+            setData("Battery", "Has Battery", !sourceNames.isEmpty());
         }
     }
 }
