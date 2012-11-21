@@ -27,7 +27,6 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 Item {
     id: toolBoxItem
 
-
     property QtObject proxy: plasmoid.toolBox
     property bool showing: false
     property int expandedWidth: 320
@@ -57,6 +56,23 @@ Item {
 
     state: "collapsed"
 
+    PlasmaCore.DataSource {
+        id: dataEngine
+        engine: "powermanagement"
+        connectedSources: ["PowerDevil"]
+    }
+
+    onShowingChanged: {
+        print("showing changed to " + showing);
+        var qmlFile = (!showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
+        var component = Qt.createComponent(qmlFile);
+        if (component.status == Component.Ready) {
+            var ani = component.createObject(toolBoxItem);
+            ani.targetItem = toolBoxItem;
+            ani.start();
+        }
+    }
+
     function performOperation(what) {
         var service = dataEngine.serviceForSource("PowerDevil");
         var operation = service.operationDescription(what);
@@ -73,22 +89,6 @@ Item {
         performOperation("requestShutDown");
     }
 
-    onShowingChanged: {
-        print("showing changed to " + showing);
-        var qmlFile = (!showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
-        var component = Qt.createComponent(qmlFile);
-        if (component.status == Component.Ready) {
-            var ani = component.createObject(toolBoxItem);
-            ani.targetItem = toolBoxItem;
-            ani.start();
-        }
-    }
-
-    PlasmaCore.DataSource {
-        id: dataEngine
-        engine: "powermanagement"
-        connectedSources: ["PowerDevil"]
-    }
 
     PlasmaCore.FrameSvgItem {
         id: toolBoxFrame
