@@ -79,6 +79,7 @@ public:
         void constraintsEvent(Plasma::Constraints constraints);
 
         Plasma::FrameSvg *itemBackground();
+        Plasma::Svg *arrows();
 
         qreal itemLeftMargin() { return m_leftMargin; }
         qreal itemRightMargin() { return m_rightMargin; }
@@ -140,6 +141,7 @@ private:
         Ui::tasksConfig m_ui;
         QTimer m_screenTimer;
 
+        Plasma::Svg *m_arrows;
         Plasma::FrameSvg *m_taskItemBackground;
         qreal m_leftMargin;
         qreal m_topMargin;

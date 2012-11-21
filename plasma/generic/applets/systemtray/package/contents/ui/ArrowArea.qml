@@ -80,7 +80,7 @@ Item {
         }
 
         function updatePosition() {
-            var pos = dialog.popupPosition(arrow_area, Qt.size(width, height), Qt.AlignCenter)
+            var pos = dialog.popupPosition(arrow_area, Qt.AlignCenter)
             x = pos.x
             y = pos.y
         }

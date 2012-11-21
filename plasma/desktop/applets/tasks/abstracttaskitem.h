@@ -197,8 +197,6 @@ protected:
 
     // area of item occupied by task's icon
     QRectF iconRect(const QRectF &bounds);
-    // area for the expander arrow for group items
-    QRectF expanderRect(const QRectF &b);
     // area of item occupied by task's text
     QRectF textRect(const QRectF &bounds);
     // start an animation to chnge the task background

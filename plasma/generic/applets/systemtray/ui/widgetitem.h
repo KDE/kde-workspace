@@ -64,6 +64,10 @@ public:
 signals:
     void changedTask();
 
+private Q_SLOTS:
+    void afterWidthChanged();
+    void afterHeightChanged();
+
 private:
     void bind();
     void unbind();

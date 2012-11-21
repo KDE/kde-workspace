@@ -42,6 +42,8 @@ WidgetItem::WidgetItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
 {
     setClip(false);
+    connect(this, SIGNAL(widthChanged()), this, SLOT(afterWidthChanged()), Qt::QueuedConnection);
+    connect(this, SIGNAL(heightChanged()), this, SLOT(afterHeightChanged()), Qt::QueuedConnection);
 }
 
 
@@ -97,6 +99,36 @@ void WidgetItem::bind()
     }
 }
 
+
+void WidgetItem::afterWidthChanged()
+{
+    if (!m_applet || !m_task) {
+        return;
+    }
+
+    QGraphicsWidget *widget = m_task.data()->widget(m_applet);
+    if (widget) {
+        widget->setPreferredSize(width(), width());
+        widget->setMinimumSize(width(), width());
+        widget->setMaximumSize(width(), width());
+        widget->show();
+    }
+}
+
+void WidgetItem::afterHeightChanged()
+{
+    if (!m_applet) {
+        return;
+    }
+
+    QGraphicsWidget *widget = m_task.data()->widget(m_applet);
+    if (widget) {
+        widget->setPreferredSize(width(), width());
+        widget->setMinimumSize(width(), width());
+        widget->setMaximumSize(width(), width());
+        widget->show();
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

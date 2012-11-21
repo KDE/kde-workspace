@@ -34,6 +34,8 @@ Item {
     property int minimumWidth:  JS.MINIMUM_SIZE
     property int minimumHeight: JS.MINIMUM_SIZE
 
+    property int iconSize: Math.min(root_item.width, Math.min(root_item.height, JS.ICONS_SIZE))
+
     // Data Models
     property list<ListModel> models: [
         ListModel {id: model_tray},
@@ -92,14 +94,14 @@ Item {
         // Notifications area in panel part of tray
         IconsGrid {
             id: notifications_area
-            icons_size:    JS.ICONS_SIZE
+            icons_size:    root_item.iconSize
             model: model_notifications
         }
 
         // Tray area that is in panel
         IconsGrid {
             id: tray_area
-            icons_size: JS.ICONS_SIZE
+            icons_size: root_item.iconSize
             model: model_tray
         }
 
@@ -111,9 +113,6 @@ Item {
             content: IconsList {
                 id: popup_area
                 icons_size:    JS.ICONS_SIZE
-                width: popup_area.min_width
-                height: popup_area.min_height
-                anchors.centerIn: parent
                 model: model_popup
             }
         }
@@ -126,10 +125,9 @@ Item {
         StatusNotifierItem {
             id: status_item
 
-            icons_size: JS.ICONS_SIZE
             blink_interval: JS.BLINK_INTERVAL
             visible: task !== null
-            width: JS.ICONS_SIZE
+            width: root_item.iconSize
             height: width
             anchors.centerIn: parent
 
@@ -149,7 +147,7 @@ Item {
 
             applet: plasmoid
             visible:  task !== null
-            width: JS.ICONS_SIZE
+            width: root_item.iconSize
             height: width
             anchors.centerIn: parent
 

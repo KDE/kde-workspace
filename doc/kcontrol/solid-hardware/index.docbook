@@ -12,8 +12,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2011-05-20</date>
-<releaseinfo>&kde; 4.7</releaseinfo>
+<date>2012-11-17</date>
+<releaseinfo>&kde; 4.10</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -34,14 +34,6 @@ it up to the first position using the arrow buttons next to the list. Then the
 </para>
 
 <variablelist>
-<varlistentry><term><guilabel>Power Management Backend</guilabel></term>
-<listitem><para>
-This is used to gather information such as hardware present in your system 
-(such as the connection of storage devices) as well as change settings such 
-as screen brightness, and is used to handle shutting down and suspending the system.
-</para></listitem>
-</varlistentry>
-
 <varlistentry><term><guilabel>Network Management Backend</guilabel></term>
 <listitem><para>
 This is used by &kde; applications to determine the status of your computers 
@@ -51,16 +43,15 @@ their configuration if permitted.
 </para></listitem>
 </varlistentry>
 
-<varlistentry><term><guilabel>Bluetooth Management Backend</guilabel></term>
-<listitem><para>
-This is used to communicate with other bluetooth devices, and allows them to be 
-discovered. It can also be used to change the configuration of the systems bluetooth status.
-</para></listitem>
-</varlistentry>
-
 <varlistentry><term><guilabel>Remote Control Management Backend</guilabel></term>
 <listitem><para>
 Used by &kde; applications to handle input from devices such as infrared remote controls. 
+</para></listitem>
+</varlistentry>
+
+<varlistentry><term><guilabel>Modem Management Backend</guilabel></term>
+<listitem><para>
+A &DBus; interface to communicate with mobile broadband (GSM, CDMA, UMTS, &etc;) cards.
 </para></listitem>
 </varlistentry>
 
