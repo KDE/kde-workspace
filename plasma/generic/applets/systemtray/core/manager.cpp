@@ -79,14 +79,13 @@ QList<Task*> Manager::tasks() const
 void Manager::addTask(Task *task)
 {
     connect(task, SIGNAL(destroyed(SystemTray::Task*)), this, SLOT(removeTask(SystemTray::Task*)));
-    connect(task, SIGNAL(changed(SystemTray::Task*)), this, SIGNAL(taskChanged(SystemTray::Task*)));
+    connect(task, SIGNAL(changedStatus()), this, SIGNAL(taskStatusChanged()));
 
     kDebug() << task->name() << "(" << task->typeId() << ")";
 
     d->tasks.append(task);
     emit taskAdded(task);
 }
-
 
 void Manager::removeTask(Task *task)
 {

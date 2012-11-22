@@ -141,6 +141,7 @@ private Q_SLOTS:
 
     void _onAddedTask(SystemTray::Task*);
     void _onRemovedTask(SystemTray::Task*);
+    void _onStatusChangedTask();
 
     void _onWidgetCreationFinished();
 

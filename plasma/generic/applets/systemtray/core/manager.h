@@ -76,10 +76,10 @@ signals:
     void taskAdded(SystemTray::Task *task);
 
     /**
-     * Emitted when something about a task changes (such as it changing from
-     * non-embeddable to embeddable)
+     * Emitted when status of task changes (such as it changing from
+     * Passive to NeedsAttention)
      **/
-    void taskChanged(SystemTray::Task *task);
+    void taskStatusChanged();
 
     /**
      * Emitted when a task has been removed
