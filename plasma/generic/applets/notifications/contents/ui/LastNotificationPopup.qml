@@ -47,6 +47,7 @@ PlasmaCore.Dialog {
         lastNotificationTimer.interval = Math.max(4000, Math.min(60*1000, notificationsModel.get(0).expireTimeout))
         notificationsView.currentIndex = lastNotificationsModel.count - 1
         lastNotificationTimer.restart()
+        mainItem.buttonPressed = false
     }
 
     function setCustomPosition(pos, writeConfig)
@@ -107,6 +108,8 @@ PlasmaCore.Dialog {
         property int startScreenX: 0
         property int startScreenY: 0
         hoverEnabled: true
+        property bool buttonPressed: false
+
         state: "controlsHidden"
         onContainsMouseChanged: {
             if (containsMouse) {
@@ -125,6 +128,7 @@ PlasmaCore.Dialog {
         onReleased: {
             //FIXME: bind startdragdistance
             if ((navigationButtonsColumn.visible && mouse.x < navigationButtonsColumn.width) ||
+                buttonPressed ||
                 Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
                 lastNotificationTimer.restart()
             } else {
@@ -222,6 +226,13 @@ PlasmaCore.Dialog {
                             text: model.text
                             width: theme.defaultFont.mSize.width * 8
                             height: theme.defaultFont.mSize.width * 2
+                            onPressedChanged: {
+                                if (pressed) {
+                                    mainItem.buttonPressed = true
+                                } else {
+                                    mainItem.buttonPressed = false
+                                }
+                            }
                             onClicked: {
                                 executeAction(source, model.id)
                                 actionsColumn.visible = false
@@ -247,6 +258,13 @@ PlasmaCore.Dialog {
                 width: theme.smallMediumIconSize
                 height: mainItem.height/2 - 4
                 enabled: notificationsView.currentIndex < notificationsView.count-1
+                onPressedChanged: {
+                    if (pressed) {
+                        mainItem.buttonPressed = true
+                    } else {
+                        mainItem.buttonPressed = false
+                    }
+                }
                 onClicked: {
                     lastNotificationTimer.restart()
                     notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
@@ -259,6 +277,13 @@ PlasmaCore.Dialog {
                 width: theme.smallMediumIconSize
                 height: mainItem.height/2 - 4
                 enabled: notificationsView.currentIndex > 0
+                onPressedChanged: {
+                    if (pressed) {
+                        mainItem.buttonPressed = true
+                    } else {
+                        mainItem.buttonPressed = false
+                    }
+                }
                 onClicked: {
                     lastNotificationTimer.restart()
                     notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
@@ -274,6 +299,13 @@ PlasmaCore.Dialog {
             anchors {
                 right: parent.right
                 top: parent.top
+            }
+            onPressedChanged: {
+                if (pressed) {
+                    mainItem.buttonPressed = true
+                } else {
+                    mainItem.buttonPressed = false
+                }
             }
             onClicked: {
                 lastNotificationPopup.visible = false
