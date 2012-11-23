@@ -750,7 +750,7 @@ void Pager::moveWindow(int window, double x, double y, int targetDesktop, int so
     dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
 
     // don't move windows to negative positions
-    dest = QPointF(qMax(dest.x(), 0.0), qMax(dest.y(), 0.0));
+    dest = QPointF(qMax(dest.x(), qreal(0.0)), qMax(dest.y(), qreal(0.0)));
 
     // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
     NETRootInfo info(QX11Info::display(), 0);
