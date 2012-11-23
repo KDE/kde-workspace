@@ -146,12 +146,14 @@ void MouseRedirectArea::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void MouseRedirectArea::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     forwardEvent(event);
+    emit entered();
 }
 
 
 void MouseRedirectArea::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     forwardEvent(event);
+    emit exited();
 }
 
 void MouseRedirectArea::hoverMoveEvent(QGraphicsSceneHoverEvent *event)

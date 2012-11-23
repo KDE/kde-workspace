@@ -67,6 +67,8 @@ signals:
     void scrollVert(int delta);
     void scrollHorz(int delta);
     void changedMousePos(qreal mouseX, qreal mouseY);
+    void entered();
+    void exited();
 
 private: //Events
     virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
