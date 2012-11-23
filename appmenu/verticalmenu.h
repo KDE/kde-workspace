@@ -28,17 +28,12 @@
 
 #include <QMenu>
 
-class QMenu;
-
 class VerticalMenu : public QMenu
 {
 Q_OBJECT
 public:
     VerticalMenu(QWidget * parent = 0);
     ~VerticalMenu();
-
-    void popup(QPoint);
-    bool event(QEvent *);
 
     /**
      * Set menu parent window id

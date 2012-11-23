@@ -31,32 +31,12 @@
 #include <KWindowSystem>
 #include <netwm.h>
 
-VerticalMenu::VerticalMenu(QWidget* parent) :
-    QMenu(parent)
+VerticalMenu::VerticalMenu(QWidget* parent) : QMenu(parent)
 {
 }
 
 VerticalMenu::~VerticalMenu()
 {
-}
-
-void VerticalMenu::popup(QPoint p)
-{
-    // This flags are mandatory to get focus.
-    // Qt::Popup will fail to grab input here
-    setWindowFlags(Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
-    QMenu::popup(p);
-    KWindowSystem::forceActiveWindow(winId());
-}
-
-bool VerticalMenu::event(QEvent *e)
-{
-    if (e->type() == QEvent::WindowDeactivate) {
-        hide();
-    } else if (e->type() == QEvent::Show) {
-        KWindowSystem::setState(winId(), NET::SkipTaskbar|NET::SkipPager);
-    }
-    return QMenu::event(e);
 }
 
 #include "verticalmenu.moc"
