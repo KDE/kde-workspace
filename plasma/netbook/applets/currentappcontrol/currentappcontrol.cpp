@@ -355,7 +355,13 @@ void CurrentAppControl::listWindows()
                 }
 
                 icon->setOrientation(Qt::Horizontal);
-                icon->setText(info.name());
+                if (containment()) {
+                    const qreal maxWidth = containment()->corona()->screenGeometry(containment()->screen()).width() * 0.8;
+                    QFontMetrics fm(icon->font());
+                    icon->setText(fm.elidedText(info.name(), Qt::ElideRight, maxWidth));
+                } else {
+                    icon->setText(info.name());
+                }
                 icon->setIcon(KWindowSystem::icon(window, KIconLoader::SizeSmallMedium, KIconLoader::SizeSmallMedium));
                 icon->setMinimumSize(icon->effectiveSizeHint(Qt::PreferredSize));
                 connect(icon, SIGNAL(clicked()), this, SLOT(windowItemClicked()));
