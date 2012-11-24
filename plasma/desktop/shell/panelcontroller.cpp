@@ -101,7 +101,7 @@ PanelController::PanelController(QWidget* parent)
     m_iconSvg = new Plasma::Svg(this);
     m_iconSvg->setImagePath("widgets/configuration-icons");
     m_iconSvg->setContainsMultipleImages(true);
-    m_iconSvg->resize(KIconLoader::SizeSmall, KIconLoader::SizeSmall);
+    m_iconSvg->resize(IconSize(KIconLoader::Small), IconSize(KIconLoader::Small));
 
     //setWindowFlags(Qt::Popup);
     //setWindowFlags(Qt::FramelessWindowHint);
