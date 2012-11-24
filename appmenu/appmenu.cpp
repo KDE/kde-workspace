@@ -95,6 +95,10 @@ AppMenuModule::~AppMenuModule()
 
 void AppMenuModule::slotShowMenu(int x, int y, WId id)
 {
+    if (!m_menuImporter) {
+        return;
+    }
+
     // If menu visible, hide it
     if (m_menu && m_menu->isVisible()) {
         m_menu->hide();
@@ -113,7 +117,6 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
         return;
     }
 
-    
     QMenu *menu = importer->menu();
 
     // Window do not have menu
