@@ -109,7 +109,12 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
     }
 
     KDBusMenuImporter *importer = getImporter(id);
-    QMenu *menu = importer ? importer->menu() : 0;
+    if (!importer) {
+        return;
+    }
+
+    
+    QMenu *menu = importer->menu();
 
     // Window do not have menu
     if (!menu) {
@@ -196,6 +201,10 @@ void AppMenuModule::slotUpdateImporter(WId id)
         } else {
             KDBusMenuImporter* newImporter = getImporter(id, true);
 
+            if (!newImporter) {
+                return;
+            }
+
             // Delete menu if on screen
             if (m_menu && m_menu->isVisible()) {
                 m_menu->hide();
@@ -256,6 +265,10 @@ void AppMenuModule::slotActiveWindowChanged(WId id, bool force)
     }
 
     KDBusMenuImporter *importer = getImporter(id, force);
+    if (!importer) {
+        return;
+    }
+    m_importers.insert(id, importer);
 
     QMenu *menu = importer->menu();
     // length == 0 means menu not ready
@@ -270,7 +283,6 @@ void AppMenuModule::slotActiveWindowChanged(WId id, bool force)
     } else {
         m_menuTimer->start(500);
     }
-    m_importers.insert(id, importer);
 }
 
 void AppMenuModule::slotShowCurrentWindowMenu()
