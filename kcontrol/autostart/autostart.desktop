@@ -110,6 +110,7 @@ Comment[fi]=Aseta, mitkä ohjelmat käynnistetään automaattisesti KDE:n käynn
 Comment[hu]=Annak kezelése, hogy mely programok induljanak automatikusan a KDE-vel.
 Comment[ia]=Gere qual programma debe startar automaticamente con KDE.
 Comment[lt]=Konfigūravimo įrankis valdyti programas, kurios paleidžiamos automatiškai kartu su KDE.
+Comment[nb]=Styr hvilke program som skal starte automatisk med KDE.
 Comment[nl]=Beheren van programma's die automatisch met KDE opstarten.
 Comment[pl]=Zdecyduj, które programy mają się uruchamiać wraz ze startem KDE.
 Comment[pt]=Gerir os programas que são arrancados automaticamente com o KDE.
