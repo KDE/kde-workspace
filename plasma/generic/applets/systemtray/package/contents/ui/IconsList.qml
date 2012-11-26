@@ -55,7 +55,7 @@ MouseArea {
             height: childrenRect.height
 
             // we redirect some events to IconWidget or applet
-            target: task.type == TypeStatusItem ? ui_item.getIconWidget() : task
+            target: task.type == TypeStatusItem ? ui_item.getMouseArea() : task
             applet: plasmoid
 
             // Next events we process manually

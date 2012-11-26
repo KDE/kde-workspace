@@ -91,8 +91,8 @@ Item {
         // or specifically, when some UI element changes.
         QIconItem {
             id: deviceIcon
-            width: 32
-            height: 32
+            width: theme.iconSizes.dialog
+            height: width
             z: 900
             icon: QIcon(deviceItem.icon)
             anchors {

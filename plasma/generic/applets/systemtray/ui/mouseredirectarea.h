@@ -85,7 +85,7 @@ private: // Methods
     void processTarget();
 
 private: //Variables
-    QGraphicsWidget *m_widget;
+    QGraphicsObject *m_widget;
     Task *m_task;
     QObject *m_target;
     Plasma::Applet *m_applet;

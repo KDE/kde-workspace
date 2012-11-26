@@ -46,7 +46,7 @@ template<class T> void MouseRedirectArea::forwardEvent(T *event, bool is_context
 {
     if (!isEnabled() || !(m_task || m_widget) || !m_applet)
         return;
-    QGraphicsWidget *target = m_widget ? m_widget : (m_task ? m_task->widget(m_applet, false) : 0);
+    QGraphicsObject *target = m_widget ? m_widget : (m_task ? m_task->widget(m_applet, false) : 0);
     if (!target)
         return;
 
@@ -177,7 +177,7 @@ void MouseRedirectArea::processTarget()
         QGraphicsWidget *widget = m_task->widget(m_applet);
         m_isApplet = (qobject_cast<Plasma::Applet*>(widget) != 0);
     } else {
-        m_widget = qobject_cast<QGraphicsWidget*>(m_target);
+        m_widget = qobject_cast<QGraphicsObject*>(m_target);
     }
 }
 
