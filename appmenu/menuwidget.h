@@ -26,12 +26,13 @@
 #ifndef MENUWIDGET__H
 #define MENUWIDGET__H
 
+#include "menubutton.h"
+
 #include <QGraphicsWidget>
 #include <QTimer>
 
 class QGraphicsLinearLayout;
 class QGraphicsView;
-class MenuButton;
 
 class MenuWidget : public QGraphicsWidget
 {
@@ -63,7 +64,13 @@ public:
      */
     void autoOpen() { m_mouseTimer->start(100); }
 
+    /**
+     * Return content bottom margin
+     */
+    qreal contentBottomMargin() { return m_contentBottomMargin; }
+
     void hide();
+
 protected:
     /**
      * Use to get keyboard events
@@ -105,6 +112,7 @@ private:
     QList<MenuButton*> m_buttons;
     MenuButton *m_currentButton;
     bool m_aMenuIsVisible;
+    qreal m_contentBottomMargin;
     QMenu *m_menu;
 };
 

@@ -23,7 +23,6 @@
   DEALINGS IN THE SOFTWARE.
 */
 
-#include "menubutton.h"
 #include "menuwidget.h"
 
 #include <QMenu>
@@ -42,11 +41,10 @@ MenuWidget::MenuWidget(QGraphicsView *view, QMenu *menu) :
     m_layout(new QGraphicsLinearLayout(this)),
     m_currentButton(0),
     m_aMenuIsVisible(false),
+    m_contentBottomMargin(0),
     m_menu(menu)
 {
     connect(m_mouseTimer, SIGNAL(timeout()), SLOT(slotCheckActiveItem()));
-
-    m_layout->setContentsMargins(0, 0, 0, 0);
 }
 
 MenuWidget::~MenuWidget()
@@ -60,11 +58,11 @@ MenuWidget::~MenuWidget()
 
 void MenuWidget::updateLayout()
 {
+    MenuButton* button = 0;
     foreach( QAction* action, m_menu->actions() )
     {
         QMenu *menu = action->menu();
         action->setShortcut(QKeySequence());
-        MenuButton* button;
         if( action->isSeparator() || !menu )
             continue;
 
@@ -76,6 +74,11 @@ void MenuWidget::updateLayout()
         connect(button, SIGNAL(clicked()), SLOT(slotButtonClicked()));
         m_layout->addItem(button);
         m_buttons << button;
+    }
+
+    //Assume all buttons have same margins
+    if (button) {
+        m_contentBottomMargin = button->bottomMargin();
     }
 }
 

@@ -80,7 +80,7 @@ MenuBar::~MenuBar()
 QSize MenuBar::sizeHint() const
 {
     QSizeF size = m_container->minimumSize();
-    return QSize(size.width(), size.height());
+    return QSize(size.width(), size.height() - m_container->contentBottomMargin());
 }
 
 void MenuBar::show()
