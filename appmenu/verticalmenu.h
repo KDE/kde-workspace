@@ -43,6 +43,12 @@ public:
      * Get menu parent window id
      */
     WId parentWid() { return m_wid; }
+protected:
+    void keyPressEvent(QKeyEvent*);
+    void keyReleaseEvent(QKeyEvent*);
+    void paintEvent(QPaintEvent*);
+private:
+    QMenu *leafMenu();
 private:
     WId m_wid;
 };
