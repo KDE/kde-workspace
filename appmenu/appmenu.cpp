@@ -95,6 +95,8 @@ AppMenuModule::~AppMenuModule()
 
 void AppMenuModule::slotShowMenu(int x, int y, WId id)
 {
+    static KDBusMenuImporter *importer = 0;
+
     if (!m_menuImporter) {
         return;
     }
@@ -112,7 +114,12 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
         return;
     }
 
-    KDBusMenuImporter *importer = getImporter(id);
+    if (importer) {
+        delete importer;
+    }
+
+    importer = getImporter(id);
+
     if (!importer) {
         return;
     }
@@ -137,8 +144,6 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
         m_waitingAction = 0;
     }
     connect(m_menu, SIGNAL(aboutToHide()), this, SLOT(slotAboutToHide()));
-    // Application may crash and original menu destroyed
-    connect(menu, SIGNAL(destroyed()), this, SLOT(slotAboutToHide()), Qt::UniqueConnection);
 }
 
 void AppMenuModule::slotAboutToHide()
@@ -201,21 +206,6 @@ void AppMenuModule::slotUpdateImporter(WId id)
             if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
                 slotActiveWindowChanged(id, true);
             }
-        } else {
-            KDBusMenuImporter* newImporter = getImporter(id, true);
-
-            if (!newImporter) {
-                return;
-            }
-
-            // Delete menu if on screen
-            if (m_menu && m_menu->isVisible()) {
-                m_menu->hide();
-                delete m_menu;
-            }
-            m_importers.remove(id);
-            delete importer;
-            m_importers.insert(id, newImporter);
         }
     }
 }
