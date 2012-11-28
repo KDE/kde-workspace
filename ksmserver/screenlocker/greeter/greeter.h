@@ -50,6 +50,9 @@ public:
 public Q_SLOTS:
     void verify();
 
+private Q_SLOTS:
+    void themeChanged();
+
 Q_SIGNALS:
     void greeterFailed();
     void greeterReady();
@@ -60,6 +63,7 @@ protected:
 private:
     void init();
     QGraphicsProxyWidget *m_proxy;
+    QWidget *m_widget;
     Greeter *m_unlocker;
 };
 
@@ -69,6 +73,9 @@ class KeyboardItem : public QDeclarativeItem
 public:
     KeyboardItem(QDeclarativeItem *parent = NULL);
     virtual ~KeyboardItem();
+
+private Q_SLOTS:
+    void themeChanged();
 
 private:
     QWidget *m_widget;
