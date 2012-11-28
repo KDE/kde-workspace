@@ -371,7 +371,6 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool force)
                                              m_menuImporter->pathForWindow(id), this);
         connect(importer, SIGNAL(actionActivationRequested(QAction*)),
                 SLOT(slotActionActivationRequested(QAction*)));
-        QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
     }
     return importer;
 }
