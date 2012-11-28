@@ -204,7 +204,9 @@ void AppMenuModule::slotUpdateImporter(WId id)
     if (importer) {
         if (m_menuStyle == "TopMenuBar") {
             if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
-                slotActiveWindowChanged(id, true);
+                KDBusMenuImporter *previous = m_importers.take(id);
+                slotActiveWindowChanged(id);
+                delete previous;
             }
         }
     }
@@ -225,7 +227,7 @@ void AppMenuModule::slotActionActivationRequested(QAction* a)
 
 // Current window change, update menubar
 // See comments in slotWindowRegistered() for why we get importers here
-void AppMenuModule::slotActiveWindowChanged(WId id, bool force)
+void AppMenuModule::slotActiveWindowChanged(WId id)
 {
     bool firstCall = !m_menuTimer->isActive();
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
@@ -257,11 +259,10 @@ void AppMenuModule::slotActiveWindowChanged(WId id, bool force)
         }
     }
 
-    KDBusMenuImporter *importer = getImporter(id, force);
+    KDBusMenuImporter *importer = getImporter(id);
     if (!importer) {
         return;
     }
-    m_importers.insert(id, importer);
 
     QMenu *menu = importer->menu();
     // length == 0 means menu not ready
@@ -269,10 +270,6 @@ void AppMenuModule::slotActiveWindowChanged(WId id, bool force)
     if(menu && menu->actions().length()) {
         showTopMenuBar(menu);
         m_menubar->setParentWid(id);
-        if (force) { // Clean previous importer
-            KDBusMenuImporter* previous = m_importers.take(id);
-            delete previous;
-        }
     } else {
         m_menuTimer->start(500);
     }
@@ -351,18 +348,21 @@ void AppMenuModule::reconfigure()
     }
 }
 
-KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool force)
+KDBusMenuImporter* AppMenuModule::getImporter(WId id)
 {
     KDBusMenuImporter* importer = 0;
-    if (m_importers.contains(id) && !force) { // importer already exist
+    if (m_importers.contains(id)) { // importer already exist
         importer = m_importers.value(id);
     } else { // get importer
         importer = new KDBusMenuImporter(id, m_menuImporter->serviceForWindow(id), &m_icons,
                                              m_menuImporter->pathForWindow(id), this);
-        connect(importer, SIGNAL(actionActivationRequested(QAction*)),
-                SLOT(slotActionActivationRequested(QAction*)));
-        if( m_menuStyle == "ButtonVertical" ) {
-            QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
+        if (importer) {
+            connect(importer, SIGNAL(actionActivationRequested(QAction*)),
+                    SLOT(slotActionActivationRequested(QAction*)));
+            if( m_menuStyle == "ButtonVertical" ) {
+                QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
+            }
+            m_importers.insert(id, importer);
         }
     }
     return importer;

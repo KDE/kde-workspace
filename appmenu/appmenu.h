@@ -100,10 +100,9 @@ private Q_SLOTS:
      */
     void slotActionActivationRequested(QAction* a);
     /**
-     * Active window changed, update menubar for id
-     * if force, menubar will be updated
+     * Active window changed, show menubar for id
      */
-    void slotActiveWindowChanged(WId id, bool force = false);
+    void slotActiveWindowChanged(WId id);
     /**
      * Update menubar with current window menu
      */
@@ -120,9 +119,8 @@ private Q_SLOTS:
 private:
     /**
      * return an importer for window id
-     * if force, menu importer will no be taken from cache
      */
-    KDBusMenuImporter* getImporter(WId id, bool force = false);
+    KDBusMenuImporter* getImporter(WId id);
     /**
      * Show top menubar with menu
      */
