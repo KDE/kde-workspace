@@ -70,6 +70,25 @@ void TopMenuBar::enableMouseTracking(bool enable) {
         m_mouseTracker->stop();
 }
 
+void TopMenuBar::update(QMenu *menu)
+{
+    MenuBar::update(menu);
+    if (m_glowBar) {
+        m_glowBar->resize(QSize(sizeHint().width(), 5));
+    }
+
+    resize(sizeHint());
+}
+
+void TopMenuBar::move(QPoint p)
+{
+    MenuBar::move(p);
+    if (m_glowBar) {
+        m_glowBar->move(p);
+        m_glowBar->setPixmap(triggerRect().topLeft(), triggerRect().width());
+    }
+}
+
 bool TopMenuBar::cursorInMenuBar()
 {
     if (m_mouseTracker->isActive()) {
@@ -148,4 +167,5 @@ QRect TopMenuBar::triggerRect()
     QSize triggerSize = QSize(sizeHint().width(), 5);
     return QRect(triggerPoint, triggerSize);
 }
+
 #include "topmenubar.moc"

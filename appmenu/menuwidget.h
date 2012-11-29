@@ -42,9 +42,13 @@ public:
     ~MenuWidget();
 
     /**
-     *  Update layout with root menu
+     *  Init layout with root menu
      */
-    void updateLayout();
+    void initLayout();
+    /**
+     * Update layout with menu
+     */
+    void updateLayout(QMenu *menu);
     /**
      * Return true if layout is valid and populated
      */

@@ -205,8 +205,16 @@ void AppMenuModule::slotUpdateImporter(WId id)
         if (m_menuStyle == "TopMenuBar") {
             if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
                 KDBusMenuImporter *previous = m_importers.take(id);
-                slotActiveWindowChanged(id);
-                delete previous;
+                KDBusMenuImporter *importer = getImporter(id);
+                if (importer->menu() && importer->menu()->actions().length()) {
+                    m_menubar->update(importer->menu());
+                    m_menubar->move(centeredMenubarPos());
+                    delete previous;
+                } else {
+                    importer = m_importers.take(id);
+                    m_importers.insert(id, previous);
+                    delete importer;
+                }
             }
         }
     }
@@ -359,9 +367,7 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id)
         if (importer) {
             connect(importer, SIGNAL(actionActivationRequested(QAction*)),
                     SLOT(slotActionActivationRequested(QAction*)));
-            if( m_menuStyle == "ButtonVertical" ) {
-                QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
-            }
+            QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
             m_importers.insert(id, importer);
         }
     }
@@ -373,12 +379,7 @@ void AppMenuModule::showTopMenuBar(QMenu *menu)
     TopMenuBar *previous = m_menubar;
 
     m_menubar = new TopMenuBar(menu);
-
-    QDesktopWidget *desktop = QApplication::desktop();
-    m_currentScreen = currentScreen();
-    QRect screen = desktop->availableGeometry(m_currentScreen);
-    int x = screen.center().x() - m_menubar->sizeHint().width()/2;
-    m_menubar->move(QPoint(x, screen.topLeft().y()));
+    m_menubar->move(centeredMenubarPos());
     m_menubar->enableMouseTracking();
     hideMenubar(previous);
 }
@@ -406,5 +407,16 @@ int AppMenuModule::currentScreen()
     QDesktopWidget *desktop = QApplication::desktop();
     return desktop->screenNumber(QPoint(x,y));
 }
+
+
+QPoint AppMenuModule::centeredMenubarPos()
+{
+    QDesktopWidget *desktop = QApplication::desktop();
+    m_currentScreen = currentScreen();
+    QRect screen = desktop->availableGeometry(m_currentScreen);
+    int x = screen.center().x() - m_menubar->sizeHint().width()/2;
+    return QPoint(x, screen.topLeft().y());
+}
+
 
 #include "appmenu.moc"

@@ -59,7 +59,8 @@ MenuBar::MenuBar(QMenu *menu)
     //Setup the widgets
     m_background->setImagePath("widgets/tooltip");
     m_background->setEnabledBorders(Plasma::FrameSvg::BottomBorder|Plasma::FrameSvg::LeftBorder|Plasma::FrameSvg::RightBorder);
-    m_container->updateLayout();
+
+    m_container->initLayout();
 
     m_scene->addItem(m_container);
 
@@ -75,6 +76,11 @@ MenuBar::MenuBar(QMenu *menu)
 
 MenuBar::~MenuBar()
 {
+}
+
+void MenuBar::update(QMenu *menu)
+{
+    m_container->updateLayout(menu);
 }
 
 QSize MenuBar::sizeHint() const

@@ -56,7 +56,7 @@ MenuWidget::~MenuWidget()
     }
 }
 
-void MenuWidget::updateLayout()
+void MenuWidget::initLayout()
 {
     MenuButton* button = 0;
     foreach( QAction* action, m_menu->actions() )
@@ -79,6 +79,34 @@ void MenuWidget::updateLayout()
     //Assume all buttons have same margins
     if (button) {
         m_contentBottomMargin = button->bottomMargin();
+    }
+}
+
+void MenuWidget::updateLayout(QMenu *menu)
+{
+    bool mouseTimer = false;
+
+    m_menu = 0;
+
+    if (m_mouseTimer->isActive()) {
+       m_mouseTimer->stop();
+       mouseTimer = true;
+    }
+
+    //Clear layout
+    foreach (MenuButton *button, m_buttons) {
+        disconnect(button, SIGNAL(clicked()), this, SLOT(slotButtonClicked()));
+        m_layout->removeItem(button);
+        button->hide();
+        m_buttons.removeOne(button);
+        button->deleteLater();
+    }
+
+    m_menu = menu;
+    initLayout();
+    m_layout->invalidate();
+    if (mouseTimer) {
+        m_mouseTimer->start();
     }
 }
 
@@ -133,10 +161,10 @@ void MenuWidget::slotCheckActiveItem()
                 menu->hide();
                 m_aMenuIsVisible = false;
             }
+            m_currentButton = buttonBelow;
+            m_currentButton->nativeWidget()->setDown(true);
+            showMenu();
         }
-        m_currentButton = buttonBelow;
-        m_currentButton->nativeWidget()->setDown(true);
-        showMenu();
     }
 }
 
@@ -187,6 +215,11 @@ void MenuWidget::hide()
 void MenuWidget::showMenu()
 {
     QMenu *menu = 0;
+
+    if (!m_menu) {
+        return;
+    }
+
     //Look for submenu, we do not use m_currentButton->menu() as menu may have changed.
     foreach (QAction *action, m_menu->actions()) {
         if (m_currentButton->text() == action->text()) {

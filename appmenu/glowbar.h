@@ -42,6 +42,7 @@ public:
 
     void paintEvent(QPaintEvent*);
 
+    void setPixmap(const QPoint pos, uint width);
 private:
     void setInputMask();
     Plasma::Svg *m_svg;

@@ -133,6 +133,10 @@ private:
      * Return current screen
      */
     int currentScreen();
+    /**
+     * Return position of menubar for being centered on screen
+     */
+    QPoint centeredMenubarPos();
 
     QObject* m_parent;
     MenuImporter* m_menuImporter;

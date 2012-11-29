@@ -52,9 +52,14 @@ public:
     void autoOpen() { m_container->autoOpen(); }
 
     /**
-     * set action as active menubar action
+     * Set action as active menubar action
      */
     void setActiveAction(QAction *action) { m_container->setActiveAction(action); }
+
+    /**
+     * Update menubar with menu
+     */
+    void update(QMenu *menu);
 
     virtual QSize sizeHint() const;
     virtual void show();

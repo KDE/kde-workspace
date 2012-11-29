@@ -51,6 +51,14 @@ public:
      * Get menubar parent window id
      */
     WId parentWid() { return m_wid; }
+    /**
+     * Update menubar with menu
+     */
+    void update(QMenu *menu);
+    /**
+     * Move menubar and glow bar at position
+     */
+    void move(QPoint p);
 protected:
     bool cursorInMenuBar();
 private Q_SLOTS:
@@ -61,6 +69,7 @@ private:
     void deleteGlowBar();
     qreal glowBarOpacity();
     QRect triggerRect();
+
     WId m_wid;
     QTimer* m_mouseTracker;
     QTimer* m_hideGlowTimer;
