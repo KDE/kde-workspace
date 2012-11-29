@@ -82,6 +82,14 @@ protected:
     virtual bool eventFilter(QObject*, QEvent*);
 private Q_SLOTS:
     /**
+     * Filter events on main menu
+     */
+    bool menuEventFilter(QEvent* event);
+    /**
+     * Filter events on submenus
+     */
+    bool subMenuEventFilter(QObject* object, QEvent* event);
+    /**
      * Check hovered item and active it
      */
     void slotCheckActiveItem();
@@ -105,6 +113,10 @@ private:
      * Show next menu if next, otherwise previous
      */
     void showLeftRightMenu(bool next);
+    /**
+     * Update buttons actions
+     */
+    void updateActions();
     /**
      * Install event filter for menu and it submenus
      */

@@ -45,6 +45,7 @@ MenuWidget::MenuWidget(QGraphicsView *view, QMenu *menu) :
     m_menu(menu)
 {
     connect(m_mouseTimer, SIGNAL(timeout()), SLOT(slotCheckActiveItem()));
+    m_menu->installEventFilter(this);
 }
 
 MenuWidget::~MenuWidget()
@@ -70,6 +71,7 @@ void MenuWidget::initLayout()
         button = new MenuButton(this);
         button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
         button->setAction(action);
+        button->setText(action->text()); // mnemonic missing otherwise :-(
         connect(button, SIGNAL(clicked()), SLOT(slotButtonClicked()));
         m_layout->addItem(button);
         m_buttons << button;
@@ -102,6 +104,7 @@ void MenuWidget::updateLayout(QMenu *menu)
     }
 
     m_menu = menu;
+    m_menu->installEventFilter(this);
     initLayout();
     m_layout->invalidate();
     if (mouseTimer) {
@@ -110,6 +113,33 @@ void MenuWidget::updateLayout(QMenu *menu)
 }
 
 bool MenuWidget::eventFilter(QObject* object, QEvent* event)
+{
+    bool filtered;
+    if (object == m_menu) {
+        filtered = menuEventFilter(event);
+    } else {
+        filtered = subMenuEventFilter(static_cast<QMenu*>(object), event);
+    }
+    return filtered ? true : QGraphicsWidget::eventFilter(object, event);
+}
+
+bool MenuWidget::menuEventFilter(QEvent* event)
+{
+    switch (event->type()) {
+    case QEvent::ActionAdded:
+        //If all actions added, update buttons actions
+        //We know number of actions can't change as our menuimporter track LayoutUpdated() dbus signal
+        if (m_menu->actions().length() == m_buttons.length()) {
+            updateActions();
+        }
+        break;
+    default:
+        break;
+    }
+    return false;
+}
+
+bool MenuWidget::subMenuEventFilter(QObject* object, QEvent* event)
 {
     QMenu *menu = static_cast<QMenu*>(object);
 
@@ -271,6 +301,16 @@ void MenuWidget::showLeftRightMenu(bool next)
     m_currentButton = m_buttons.at(index);
     m_currentButton->nativeWidget()->setDown(true);
     showMenu();
+}
+
+void MenuWidget::updateActions()
+{
+    uint i = 0;
+    foreach(QAction *action, m_menu->actions()) {
+        m_buttons[i]->setAction(action);
+        m_buttons[i]->setText(action->text()); // mnemonic missing otherwise :-(
+        ++i;
+    }
 }
 
 void MenuWidget::installEventFilterForAll(QMenu *menu, QObject *object)
