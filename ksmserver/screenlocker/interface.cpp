@@ -150,7 +150,7 @@ void Interface::serviceUnregistered(const QString &name)
 
 void Interface::SimulateUserActivity()
 {
-    // TODO: implement me when we support user activity interaction or the autolock
+    KIdleTime::instance()->simulateUserActivity();
 }
 
 uint Interface::Throttle(const QString &application_name, const QString &reason_for_inhibit)
