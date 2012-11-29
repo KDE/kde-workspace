@@ -88,6 +88,7 @@ void MenuWidget::updateLayout(QMenu *menu)
     bool mouseTimer = false;
 
     m_menu = 0;
+    m_currentButton = 0;
 
     if (m_mouseTimer->isActive()) {
        m_mouseTimer->stop();
@@ -200,7 +201,9 @@ void MenuWidget::slotCheckActiveItem()
 
 void MenuWidget::slotMenuAboutToHide()
 {
-    m_currentButton->setDown( false );
+    if (m_currentButton) {
+        m_currentButton->setDown( false );
+    }
     if (m_mouseTimer->isActive())
         m_mouseTimer->stop();
     m_aMenuIsVisible = false;
