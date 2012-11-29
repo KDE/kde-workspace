@@ -120,7 +120,7 @@ private:
     /**
      * return an importer for window id
      */
-    KDBusMenuImporter* getImporter(WId id);
+    KDBusMenuImporter* getImporter(WId id, bool cached = true);
     /**
      * Show top menubar with menu
      */

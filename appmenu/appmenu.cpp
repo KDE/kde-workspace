@@ -118,7 +118,7 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
         delete importer;
     }
 
-    importer = getImporter(id);
+    importer = getImporter(id, false);
 
     if (!importer) {
         return;
@@ -356,10 +356,10 @@ void AppMenuModule::reconfigure()
     }
 }
 
-KDBusMenuImporter* AppMenuModule::getImporter(WId id)
+KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool cached)
 {
     KDBusMenuImporter* importer = 0;
-    if (m_importers.contains(id)) { // importer already exist
+    if (cached && m_importers.contains(id)) { // importer already exist
         importer = m_importers.value(id);
     } else { // get importer
         importer = new KDBusMenuImporter(id, m_menuImporter->serviceForWindow(id), &m_icons,
@@ -368,7 +368,9 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id)
             connect(importer, SIGNAL(actionActivationRequested(QAction*)),
                     SLOT(slotActionActivationRequested(QAction*)));
             QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
-            m_importers.insert(id, importer);
+            if (cached) {
+                m_importers.insert(id, importer);
+            }
         }
     }
     return importer;
