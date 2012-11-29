@@ -133,29 +133,9 @@ Item {
         }
     }
 
-    // Tooltip =========================================================================================================
-    PlasmaCore.ToolTip {
-        id: tooltip
-        target: icon_widget
-        mainText: __has_task ? task.tooltipTitle : ""
-        subText: __has_task ? task.tooltipText : ""
-        image:   __has_task ? task.tooltipIcon : ""
-    }
+    
 
-    // Mouse events handlers ===========================================================================================
-    MouseArea {
-        id: mouse_area
-        anchors.fill: parent
-        hoverEnabled: true
-        // if no task passed we don't accept any buttons, if icon_widget is visible we pass left button to it
-        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-        enabled: __has_task
-        visible: __has_task
-        //z: -1
-        //z: 100
-
-        onClicked: __processClick(mouse.button, mouse_area)
-    }
+    
 
     // TODO: remove wheel area in QtQuick 2.0
     QtExtraComponents.MouseEventListener {
@@ -165,11 +145,33 @@ Item {
         visible: __has_task
         z: -2
 
+        // Mouse events handlers ===========================================================================================
+        MouseArea {
+            id: mouse_area
+            anchors.fill: parent
+            hoverEnabled: true
+            // if no task passed we don't accept any buttons, if icon_widget is visible we pass left button to it
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            enabled: __has_task
+            visible: __has_task
+            //z: -1
+            //z: 100
+
+            onClicked: __processClick(mouse.button, mouse_area)
+        }
         onWheelMoved: {
             if (wheel.orientation === Qt.Horizontal)
                 task.activateHorzScroll(wheel.delta)
             else
                 task.activateVertScroll(wheel.delta)
+        }
+        // Tooltip =========================================================================================================
+        PlasmaCore.ToolTip {
+            id: tooltip
+            target: wheel_area
+            mainText: __has_task ? task.tooltipTitle : ""
+            subText:  __has_task ? task.tooltipText : ""
+            image:    __has_task ? task.tooltipIcon : ""
         }
     }
 
