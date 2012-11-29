@@ -24,12 +24,23 @@
 */
 
 #include "menubutton.h"
+#include <QAction>
 
 MenuButton::MenuButton(QGraphicsWidget *parent):
     Plasma::ToolButton(parent),
-    m_enterEvent(false),
-    m_menu(0)
+    m_enterEvent(false)
 {
+}
+
+QAction* MenuButton::action()
+{
+    QAction *action = Plasma::ToolButton::action();
+    if (action) {
+        if (action->menu()) {
+            return action;
+        }
+    }
+    return 0;
 }
 
 void MenuButton::setHovered(bool hovered)

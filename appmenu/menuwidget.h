@@ -98,8 +98,9 @@ Q_SIGNALS:
 private:
     /**
      * Show current button menu
+     * return true if menu is shown
      */
-    void showMenu();
+    bool showMenu();
     /**
      * Show next menu if next, otherwise previous
      */

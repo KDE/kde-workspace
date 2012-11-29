@@ -35,8 +35,10 @@ Q_OBJECT
 public:
     MenuButton(QGraphicsWidget *parent);
 
-    void setMenu(QMenu *menu) { m_menu = menu; }
-    QMenu *menu() { return m_menu; }
+    /**
+     * Return null if action->menu() is null
+     */
+    QAction* action();
     void setHovered(bool hovered);
 
     QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint) const;
@@ -48,6 +50,5 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *);
 private:
     bool m_enterEvent;
-    QMenu *m_menu;
 };
 #endif
