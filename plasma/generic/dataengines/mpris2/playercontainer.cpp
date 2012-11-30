@@ -115,14 +115,6 @@ PlayerContainer::PlayerContainer(const QString& busAddress, QObject* parent)
     QDBusConnection::sessionBus().connect(
             busAddress,
             MPRIS2_PATH,
-            DBUS_PROPS_IFACE,
-            "PropertiesChanged", /* signature, */
-            this,
-            SLOT(propertiesChanged(QString,QVariantMap,QStringList)));
-
-    QDBusConnection::sessionBus().connect(
-            busAddress,
-            MPRIS2_PATH,
             MPRIS2_PLAYER_IFACE,
             "Seeked", /* signature, */
             this,
