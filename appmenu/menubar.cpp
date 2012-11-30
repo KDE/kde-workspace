@@ -110,7 +110,6 @@ void MenuBar::slotAboutToHide()
     }
     else if (!cursorInMenuBar()) { //MenuWidget::AboutToHide signal
         hide();
-        emit aboutToHide();
     } else if (!m_hideTimer->isActive()){ //use click on menubar button while a popup was shown
         m_hideTimer->start(1000);
     }

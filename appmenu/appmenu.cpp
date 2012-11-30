@@ -209,7 +209,7 @@ void AppMenuModule::slotUpdateImporter(WId id)
                 if (importer->menu() && importer->menu()->actions().length()) {
                     m_menubar->update(importer->menu());
                     m_menubar->move(centeredMenubarPos());
-                    delete previous;
+                    m_oldImporters.append(previous);
                 } else {
                     importer = m_importers.take(id);
                     m_importers.insert(id, previous);
@@ -298,6 +298,13 @@ void AppMenuModule::slotCurrentScreenChanged()
     }
 }
 
+void AppMenuModule::slotDeleteImporters()
+{
+    while (!m_oldImporters.isEmpty()) {
+        delete m_oldImporters.takeFirst();
+    }
+}
+
 // reload settings
 void AppMenuModule::reconfigure()
 {
@@ -381,6 +388,7 @@ void AppMenuModule::showTopMenuBar(QMenu *menu)
     TopMenuBar *previous = m_menubar;
 
     m_menubar = new TopMenuBar(menu);
+    connect(m_menubar, SIGNAL(aboutToHide()), SLOT(slotDeleteImporters()));
     m_menubar->move(centeredMenubarPos());
     m_menubar->enableMouseTracking();
     hideMenubar(previous);

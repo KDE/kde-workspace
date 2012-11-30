@@ -112,6 +112,10 @@ private Q_SLOTS:
      */
     void slotCurrentScreenChanged();
     /**
+     * Delete obsolete importers
+     */
+    void slotDeleteImporters();
+    /**
      * Reconfigure module
      */
     void reconfigure();
@@ -142,6 +146,7 @@ private:
     MenuImporter* m_menuImporter;
     AppmenuDBus* m_appmenuDBus;
     QHash<WId, KDBusMenuImporter*> m_importers;
+    QList<KDBusMenuImporter*> m_oldImporters; // Only delete old importers when we are sure it's safe
     GtkIcons m_icons;
     QString m_menuStyle;
     TopMenuBar* m_menubar;
