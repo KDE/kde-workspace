@@ -959,7 +959,7 @@ QStringList KSMServer::sessionList()
     QStringList sessions ( "default" );
     KSharedConfig::Ptr config = KGlobal::config();
     const QStringList groups = config->groupList();
-    for ( QStringList::ConstIterator it = groups.constBegin(); it != groups.constEnd(); it++ )
+    for ( QStringList::ConstIterator it = groups.constBegin(); it != groups.constEnd(); ++it )
         if ( (*it).startsWith( "Session: " ) )
             sessions << (*it).mid( 9 );
     return sessions;

@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class KSMClient
 {
 public:
-    KSMClient( SmsConn );
+    explicit KSMClient( SmsConn );
     ~KSMClient();
 
     void registerClient( const char* previousId  = 0 );
