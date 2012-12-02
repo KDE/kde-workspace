@@ -104,6 +104,7 @@ Comment=A configuration tool for managing which programs start up automatically 
 Comment[ca]=Una eina de configuració per a gestionar els programes que s'iniciaran automàticament amb el KDE.
 Comment[cs]=Konfigurační nástroj pro správu automatického spouštění programů při startu KDE.
 Comment[da]=Et konfigurationsværktøj til håndtering af hvilke programmer der starter automatisk op sammen med KDE.
+Comment[de]=Ein Einrichtungswerkzeug zum Verwalten der automatisch mit KDE zu startenden Anwendungen.
 Comment[es]=Una herramienta de configuración para gestionar qué programas se iniciarán automáticamente con KDE.
 Comment[et]=Seadistustööriist programmide haldamiseks, mis käivituvad automaatselt koos KDE-ga.
 Comment[fi]=Automaattisesti käynnistettävien ohjelmien asetukset
