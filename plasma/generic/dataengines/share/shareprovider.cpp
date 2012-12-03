@@ -328,20 +328,13 @@ void ShareProvider::redirected(KIO::Job *job, const KUrl &to)
 void ShareProvider::success(const QString &url)
 {
     // notify the service that it worked and the result url
-    cleanup();
     emit finished(url);
 }
 
 void ShareProvider::error(const QString &msg)
 {
     // notify the service that it didnt work and the error msg
-    cleanup();
     emit finishedError(msg);
-}
-
-void ShareProvider::cleanup()
-{
-    KIO::file_delete(KUrl(m_content), KIO::HideProgressInfo);
 }
 
 Plasma::PackageStructure::Ptr ShareProvider::packageStructure()
