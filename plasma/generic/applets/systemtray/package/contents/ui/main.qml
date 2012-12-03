@@ -112,7 +112,7 @@ Item {
 
             content: IconsList {
                 id: popup_area
-                icons_size:    JS.ICONS_SIZE
+                icons_size: JS.ICONS_SIZE
                 model: model_popup
             }
         }
@@ -161,35 +161,45 @@ Item {
 
     // Funtions ========================================================================================================
     function getLocationForTask(task) {
-        var loc = getDefaultLocationForTask(task)
-        if (loc === JS.LOCATION_TRAY && task.typeId == JS.TASK_NOTIFICATIONS_TYPEID)
-            return JS.LOCATION_NOTIFICATION // redefine location for notifications applet
-        return loc
+        var loc = getDefaultLocationForTask(task);
+        if (loc === JS.LOCATION_TRAY && task.typeId == JS.TASK_NOTIFICATIONS_TYPEID) {
+            // redefine location for notifications applet
+            return JS.LOCATION_NOTIFICATION;
+        }
+        return loc;
     }
 
     /// Returns location depending on status and hide state of task
     function getDefaultLocationForTask(task) {
-        var vis_pref = plasmoid.getVisibilityPreference(task)
-        if (task.status === NeedsAttention || vis_pref === AlwaysShown) return JS.LOCATION_TRAY
-        if (vis_pref === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
-            return JS.LOCATION_POPUP
+        var vis_pref = plasmoid.getVisibilityPreference(task);
+
+        if (task.status === NeedsAttention || vis_pref === AlwaysShown) {
+            return JS.LOCATION_TRAY;
         }
-        return JS.LOCATION_TRAY
+
+        if (vis_pref === AlwaysHidden || (task.status !== Active && task.status !== UnknownStatus)) {
+            return JS.LOCATION_POPUP;
+        }
+
+        return JS.LOCATION_TRAY;
     }
 
     /// Moves task to specified location
     function moveTaskToLocation(task, loc) {
-        var task_id = plasmoid.getUniqueId(task)
-        var old_loc = JS.findLocation(task_id)
-        if (old_loc === loc)
+        var task_id = plasmoid.getUniqueId(task);
+        var old_loc = JS.findLocation(task_id);
+
+        if (old_loc === loc) {
             return
+        }
+
         // remove from old location
-        var t = JS.tasks[old_loc].remove(task_id)
-        models[old_loc].remove(t.index)
+        var t = JS.tasks[old_loc].remove(task_id);
+        models[old_loc].remove(t.index);
 
         // add to new model
-        t = JS.tasks[loc].add(task_id, t.category, t.data)
-        models[loc].insert(t.index, {"task": task, "ui_item": t.data})
+        t = JS.tasks[loc].add(task_id, t.category, t.data);
+        models[loc].insert(t.index, {"task": task, "ui_item": t.data});
     }
 
 
