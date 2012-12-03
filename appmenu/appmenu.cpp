@@ -203,17 +203,18 @@ void AppMenuModule::slotUpdateImporter(WId id)
     }
 
     if (previous) {
-        if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
-            KDBusMenuImporter *importer = getImporter(id);
-            if (importer) {
-                if (m_menubar && m_menubar->parentWid() == id && importer->menu()) {
+        KDBusMenuImporter *importer = getImporter(id);
+        if (importer && importer->menu()) {
+            if (m_menubar && m_menubar->parentWid() == id) { //Update menubar
                     m_menubar->update(importer->menu());
                     m_menubar->move(centeredMenubarPos());
-                }
-                m_previousImporters.append(previous);
-            } else { // keep previous importer
-                m_importers.insert(id, previous);
+            } else if (KWindowSystem::activeWindow() == id) { // Show a new menubar (not ready on active window signal)
+                showTopMenuBar(importer->menu());
+                m_menubar->setParentWid(id);
             }
+            m_previousImporters.append(previous);
+        } else { // keep previous importer
+            m_importers.insert(id, previous);
         }
     }
 }
@@ -258,7 +259,8 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     }
 
     QMenu *menu = importer->menu();
-    if(menu) {
+    // Do not show empty menubar, will be shown later on layout update
+    if(menu && menu->actions().length()) {
         showTopMenuBar(menu);
         m_menubar->setParentWid(id);
     }
