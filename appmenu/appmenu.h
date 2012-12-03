@@ -156,7 +156,6 @@ private:
     QString m_menuStyle;
     TopMenuBar* m_menubar;
     VerticalMenu* m_menu;
-    QTimer* m_menuTimer;
     QTimer* m_screenTimer;
     QAction *m_waitingAction;
     int m_currentScreen;
