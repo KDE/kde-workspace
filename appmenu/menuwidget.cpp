@@ -88,11 +88,15 @@ void MenuWidget::updateLayout(QMenu *menu)
     // Revalidate menu
     int i = 0;
     bool menu_ok = m_buttons.length() == menu->actions().length();
-    foreach (MenuButton *button, m_buttons) {
-        if (button->text() != menu->actions()[i]->text()) {
-            menu_ok = false;
+
+    // Menu size the same, look for changes in items
+    if (menu_ok) {
+        foreach (MenuButton *button, m_buttons) {
+            if (button->text() != menu->actions()[i]->text()) {
+                menu_ok = false;
+            }
+            ++i;
         }
-        ++i;
     }
 
     m_menu = menu;
