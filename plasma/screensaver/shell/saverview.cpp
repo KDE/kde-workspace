@@ -269,11 +269,6 @@ void SaverView::suppressShowTimeout()
     m_suppressShow = false;
 }
 
-void SaverView::setOpacity(qreal opacity)
-{
-    setWindowOpacity(opacity);
-}
-
 void SaverView::openToolBox()
 {
     kDebug() << "close toolbox";
