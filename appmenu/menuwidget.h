@@ -46,7 +46,7 @@ public:
      */
     void initLayout();
     /**
-     * Update layout with menu
+     * Update layout with menu if menuwidget not in use
      */
     void updateLayout(QMenu *menu);
     /**
@@ -56,7 +56,7 @@ public:
     /**
      * True if a menu is visible in menuwidget
      */
-    bool aMenuIsVisible() { return m_aMenuIsVisible; }
+    bool aMenuIsVisible() { return m_visibleMenu; }
 
     /**
      * Activate action, or first action if null
@@ -82,14 +82,6 @@ protected:
     virtual bool eventFilter(QObject*, QEvent*);
 private Q_SLOTS:
     /**
-     * Filter events on main menu
-     */
-    bool menuEventFilter(QEvent* event);
-    /**
-     * Filter events on submenus
-     */
-    bool subMenuEventFilter(QObject* object, QEvent* event);
-    /**
      * Check hovered item and active it
      */
     void slotCheckActiveItem();
@@ -106,17 +98,13 @@ Q_SIGNALS:
 private:
     /**
      * Show current button menu
-     * return true if menu is shown
+     * return showed menu
      */
-    bool showMenu();
+    QMenu* showMenu();
     /**
      * Show next menu if next, otherwise previous
      */
     void showLeftRightMenu(bool next);
-    /**
-     * Update buttons actions
-     */
-    void updateActions();
     /**
      * Install event filter for menu and it submenus
      */
@@ -128,8 +116,8 @@ private:
     QGraphicsLinearLayout *m_layout;
     QList<MenuButton*> m_buttons;
     MenuButton *m_currentButton;
-    bool m_aMenuIsVisible;
     qreal m_contentBottomMargin;
+    QMenu *m_visibleMenu;
     QMenu *m_menu;
 };
 

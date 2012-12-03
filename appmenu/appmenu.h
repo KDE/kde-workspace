@@ -96,10 +96,6 @@ private Q_SLOTS:
      */
     void slotUpdateImporter(WId id);
     /**
-     * Delayed importers update
-     */
-    void slotDelayedImportersUpdate();
-    /**
      * Open a action in current menu
      */
     void slotActionActivationRequested(QAction* a);
@@ -116,6 +112,10 @@ private Q_SLOTS:
      */
     void slotCurrentScreenChanged();
     /**
+     * Delete obsolete importers
+     */
+    void slotDeletePreviousImporters();
+    /**
      * Reconfigure module
      */
     void reconfigure();
@@ -126,10 +126,6 @@ private:
      * take it from cache if cached is true
      */
     KDBusMenuImporter* getImporter(WId id, bool cached = true);
-    /**
-     * Update importer for id and update menubar layout
-     */
-    void updateImporterAndMenubar(WId id);
     /**
      * Show top menubar with menu
      */
@@ -151,7 +147,7 @@ private:
     MenuImporter* m_menuImporter;
     AppmenuDBus* m_appmenuDBus;
     QHash<WId, KDBusMenuImporter*> m_importers;
-    QList<WId> m_obsoleteImporters;
+    QList<KDBusMenuImporter*> m_previousImporters; // Only delete previous importers when we are sure it's safe
     GtkIcons m_icons;
     QString m_menuStyle;
     TopMenuBar* m_menubar;

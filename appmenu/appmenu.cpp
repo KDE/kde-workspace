@@ -192,39 +192,30 @@ void AppMenuModule::slotWindowUnregistered(WId id)
 // Window importer change
 void AppMenuModule::slotUpdateImporter(WId id)
 {
-    KDBusMenuImporter* importer = 0;
+    KDBusMenuImporter *previous = 0;
 
     if (m_menuStyle != "TopMenuBar") {
         return;
     }
 
     if (m_importers.contains(id)) {
-        importer = m_importers.value(id);
+        previous = m_importers.take(id);
     }
 
-    if (importer) {
+    if (previous) {
         if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
-            if (m_menubar->aMenuIsVisible()) {
-                if (!m_obsoleteImporters.contains(id)) {
-                    m_obsoleteImporters.append(id);
+            KDBusMenuImporter *importer = getImporter(id);
+            if (importer) {
+                if (m_menubar && m_menubar->parentWid() == id && importer->menu()) {
+                    m_menubar->update(importer->menu());
+                    m_menubar->move(centeredMenubarPos());
                 }
-            } else {
-                updateImporterAndMenubar(id);
+                m_previousImporters.append(previous);
+            } else { // keep previous importer
+                m_importers.insert(id, previous);
             }
         }
     }
-}
-
-// Update importers waiting in the queue
-void AppMenuModule::slotDelayedImportersUpdate()
-{
-    WId id = 0;
-
-    while (!m_obsoleteImporters.isEmpty()) {
-        id = m_obsoleteImporters.takeFirst();
-        updateImporterAndMenubar(id);
-    }
-
 }
 
 // Keyboard activation requested, transmit it to menu
@@ -285,6 +276,13 @@ void AppMenuModule::slotCurrentScreenChanged()
             m_menubar->setParentWid(0);
         }
         slotActiveWindowChanged(KWindowSystem::self()->activeWindow());
+    }
+}
+
+void AppMenuModule::slotDeletePreviousImporters()
+{
+    while (!m_previousImporters.isEmpty()) {
+        delete m_previousImporters.takeFirst();
     }
 }
 
@@ -366,28 +364,12 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool cached)
     return importer;
 }
 
-void AppMenuModule::updateImporterAndMenubar(WId id)
-{
-    KDBusMenuImporter *previous = m_importers.take(id);
-    KDBusMenuImporter *importer = getImporter(id);
-
-    if (importer) {
-        if (m_menubar && m_menubar->parentWid() == id && importer->menu()) {
-            m_menubar->update(importer->menu());
-            m_menubar->move(centeredMenubarPos());
-        }
-        delete previous;
-    } else { // keep previous importer
-        m_importers.insert(id, previous);
-    }
-}
-
 void AppMenuModule::showTopMenuBar(QMenu *menu)
 {
     TopMenuBar *previous = m_menubar;
 
     m_menubar = new TopMenuBar(menu);
-    connect(m_menubar, SIGNAL(aboutToHide()), SLOT(slotDelayedImportersUpdate()));
+    connect(m_menubar, SIGNAL(aboutToHide()), SLOT(slotDeletePreviousImporters()));
     m_menubar->move(centeredMenubarPos());
     m_menubar->enableMouseTracking();
     hideMenubar(previous);
