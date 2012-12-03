@@ -7,4 +7,8 @@ Key=Log Out
 Key=Log Out Without Confirmation
 Key=Reboot Without Confirmation
 Options=overwrite
+
+# remove the kscreenlocker group
+Id=kde4.10-remove-group-kscreenlocker
+File=kglobalshortcutsrc
 RemoveGroup=kscreenlocker
