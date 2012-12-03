@@ -47,15 +47,17 @@ public:
     ~MenuBar();
 
     /**
+     * True if a menu is visible in menuwidget
+     */
+    bool aMenuIsVisible() { return m_container->aMenuIsVisible(); }
+    /**
      * Auto open menu items on mouse over
      */
     void autoOpen() { m_container->autoOpen(); }
-
     /**
      * Set action as active menubar action
      */
     void setActiveAction(QAction *action) { m_container->setActiveAction(action); }
-
     /**
      * Update menubar with menu
      */

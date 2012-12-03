@@ -197,27 +197,35 @@ void AppMenuModule::slotUpdateImporter(WId id)
 {
     KDBusMenuImporter* importer = 0;
 
+    if (m_menuStyle != "TopMenuBar") {
+        return;
+    }
+
     if (m_importers.contains(id)) {
         importer = m_importers.value(id);
     }
 
     if (importer) {
-        if (m_menuStyle == "TopMenuBar") {
-            if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
-                KDBusMenuImporter *previous = m_importers.take(id);
-                KDBusMenuImporter *importer = getImporter(id);
-                if (importer->menu() && importer->menu()->actions().length()) {
-                    m_menubar->update(importer->menu());
-                    m_menubar->move(centeredMenubarPos());
-                    m_oldImporters.append(previous);
-                } else {
-                    importer = m_importers.take(id);
-                    m_importers.insert(id, previous);
-                    delete importer;
-                }
+        if (m_menubar && id == m_menubar->parentWid()) { // Update menubar
+            if (m_menubar->aMenuIsVisible()) {
+                m_obsoleteImporters.append(id);
+            } else {
+                updateImporterAndMenubar(id);
             }
         }
     }
+}
+
+// Update importers waiting in the queue
+void AppMenuModule::slotDelayedImportersUpdate()
+{
+    WId id = 0;
+
+    while (!m_obsoleteImporters.isEmpty()) {
+        id = m_obsoleteImporters.takeFirst();
+        updateImporterAndMenubar(id);
+    }
+
 }
 
 // Keyboard activation requested, transmit it to menu
@@ -298,13 +306,6 @@ void AppMenuModule::slotCurrentScreenChanged()
     }
 }
 
-void AppMenuModule::slotDeleteImporters()
-{
-    while (!m_oldImporters.isEmpty()) {
-        delete m_oldImporters.takeFirst();
-    }
-}
-
 // reload settings
 void AppMenuModule::reconfigure()
 {
@@ -368,7 +369,7 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool cached)
     KDBusMenuImporter* importer = 0;
     if (cached && m_importers.contains(id)) { // importer already exist
         importer = m_importers.value(id);
-    } else { // get importer
+    } else if (m_menuImporter->serviceExist(id)) { // get importer
         importer = new KDBusMenuImporter(id, m_menuImporter->serviceForWindow(id), &m_icons,
                                              m_menuImporter->pathForWindow(id), this);
         if (importer) {
@@ -383,12 +384,29 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool cached)
     return importer;
 }
 
+void AppMenuModule::updateImporterAndMenubar(WId id)
+{
+    KDBusMenuImporter *previous = m_importers.take(id);
+    KDBusMenuImporter *importer = getImporter(id);
+
+    if (importer) {
+        if (m_menubar && m_menubar->parentWid() == id &&
+            importer->menu() && importer->menu()->actions().length()) {
+            m_menubar->update(importer->menu());
+            m_menubar->move(centeredMenubarPos());
+        }
+        delete previous;
+    } else { // keep previous importer
+        m_importers.insert(id, previous);
+    }
+}
+
 void AppMenuModule::showTopMenuBar(QMenu *menu)
 {
     TopMenuBar *previous = m_menubar;
 
     m_menubar = new TopMenuBar(menu);
-    connect(m_menubar, SIGNAL(aboutToHide()), SLOT(slotDeleteImporters()));
+    connect(m_menubar, SIGNAL(aboutToHide()), SLOT(slotDelayedImportersUpdate()));
     m_menubar->move(centeredMenubarPos());
     m_menubar->enableMouseTracking();
     hideMenubar(previous);

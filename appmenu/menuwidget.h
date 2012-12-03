@@ -54,7 +54,7 @@ public:
      */
     bool layoutValid();
     /**
-     * True if a menu is visible in menubar
+     * True if a menu is visible in menuwidget
      */
     bool aMenuIsVisible() { return m_aMenuIsVisible; }
 

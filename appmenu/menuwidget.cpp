@@ -190,11 +190,10 @@ void MenuWidget::slotCheckActiveItem()
                 QMenu *menu = action->menu();
                 disconnect(menu, SIGNAL(aboutToHide()), this, SLOT(slotMenuAboutToHide()));
                 menu->hide();
-                m_aMenuIsVisible = false;
             }
             m_currentButton = buttonBelow;
             m_currentButton->nativeWidget()->setDown(true);
-            showMenu();
+            m_aMenuIsVisible = showMenu();
         }
     }
 }
@@ -215,7 +214,7 @@ void MenuWidget::slotButtonClicked()
     m_currentButton = qobject_cast<MenuButton*>(sender());
 
     m_currentButton->nativeWidget()->setDown(true);
-    showMenu();
+    m_aMenuIsVisible = showMenu();
     // Start auto navigation after click
     if (!m_mouseTimer->isActive())
         m_mouseTimer->start(100);
@@ -258,7 +257,6 @@ bool MenuWidget::showMenu()
 
         m_currentButton->setAction(action);
         menu->popup(QPoint(x, y));
-        m_aMenuIsVisible = true;
 
         // Fix offscreen menu
         if (menu->size().height() + y > screen.height() + screen.y()) {
@@ -296,14 +294,13 @@ void MenuWidget::showLeftRightMenu(bool next)
     if (action) {
         QMenu *menu = action->menu();
         disconnect(menu, SIGNAL(aboutToHide()), this, SLOT(slotMenuAboutToHide()));
-        m_aMenuIsVisible = false;
         menu->hide();
     }
 
     m_currentButton->setDown(false);
     m_currentButton = m_buttons.at(index);
     m_currentButton->nativeWidget()->setDown(true);
-    showMenu();
+    m_aMenuIsVisible = showMenu();
 }
 
 void MenuWidget::updateActions()
