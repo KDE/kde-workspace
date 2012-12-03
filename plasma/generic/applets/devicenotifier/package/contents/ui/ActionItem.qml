@@ -19,6 +19,7 @@
  */
 
 import Qt 4.7
+import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
@@ -29,9 +30,9 @@ Item {
     height: actionIcon.height+(2*actionsList.actionVerticalMargins)
     width: actionsList.width
 
-    QIconItem {
+    PlasmaCore.IconItem {
         id: actionIcon
-        icon: QIcon (parent.icon)
+        source: QIcon (parent.icon)
         height: actionsList.actionIconHeight
         width: actionsList.actionIconHeight
         anchors {

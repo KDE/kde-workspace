@@ -30,7 +30,7 @@ Item {
     property alias deviceName: deviceLabel.text
     property string emblemIcon
     property int state
-    property alias leftActionIcon: leftAction.icon
+    property alias leftActionIcon: leftAction.source
     property bool mounted
     property bool expanded: (notifierDialog.currentExpanded == index)
     property alias percentUsage: freeSpaceBar.value
@@ -89,22 +89,22 @@ Item {
 
         // FIXME: Device item loses focus on mounting/unmounting it,
         // or specifically, when some UI element changes.
-        QIconItem {
+        PlasmaCore.IconItem {
             id: deviceIcon
             width: theme.iconSizes.dialog
             height: width
             z: 900
-            icon: QIcon(deviceItem.icon)
+            source: QIcon(deviceItem.icon)
             anchors {
                 left: parent.left
                 top: parent.top
             }
 
-            QIconItem {
+            PlasmaCore.IconItem {
                 id: emblem
-                width: 16
-                height: 16
-                icon: deviceItem.state == 0 ? QIcon(emblemIcon) : QIcon();
+                width: theme.iconSizes.dialog * 0.5
+                height: width
+                source: deviceItem.state == 0 ? QIcon(emblemIcon) : QIcon();
                 anchors {
                     left: parent.left
                     bottom: parent.bottom
@@ -189,10 +189,10 @@ Item {
             subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
         }
 
-        QIconItem {
+        PlasmaCore.IconItem {
             id: leftAction
-            width: 22
-            height: 22
+            width: deviceIcon.width*0.8
+            height: width
             anchors {
                 right: parent.right
                 verticalCenter: deviceIcon.verticalCenter
@@ -240,8 +240,8 @@ Item {
 
         PlasmaComponents.BusyIndicator {
             id: busySpinner
-            width: 22
-            height: 22
+            width: deviceIcon.width*0.8
+            height: width
             anchors {
                 right: parent.right
                 verticalCenter: deviceIcon.verticalCenter
