@@ -144,10 +144,10 @@ Item {
                     // FIXME: state changes do not reach the plasmoid if the
                     // device was already attached when the plasmoid was
                     // initialized
-                    text: deviceItem.state ==0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
+                    text: deviceItem.state == 0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
-                    opacity: container.containsMouse || expanded ? 1 : 0;
+                    opacity: deviceItem.state != 0 || container.containsMouse || expanded ? 1 : 0;
 
                     Behavior on opacity { NumberAnimation { duration: 150 } }
                     }
@@ -159,7 +159,7 @@ Item {
                     left: parent.left
                     right: parent.right
                 }
-                opacity: mounted ? 1 : 0
+                opacity: (deviceItem.state == 0 && mounted) ? 1 : 0
                 PlasmaComponents.ProgressBar {
                     id: freeSpaceBar
                     height: deviceStatus.height
