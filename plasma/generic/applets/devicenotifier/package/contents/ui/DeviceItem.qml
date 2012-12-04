@@ -95,6 +95,7 @@ Item {
             height: width
             z: 900
             source: QIcon(deviceItem.icon)
+            enabled: deviceItem.state == 0
             anchors {
                 left: parent.left
                 top: parent.top
