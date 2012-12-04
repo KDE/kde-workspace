@@ -121,7 +121,7 @@ Item {
             anchors {
                 top: parent.top
                 left: deviceIcon.right
-                right: leftAction.left
+                right: leftActionArea.left
                 leftMargin: padding.margins.left
             }
             PlasmaComponents.Label {
@@ -205,6 +205,15 @@ Item {
                 active: leftActionArea.containsMouse
                 visible: !busySpinner.visible
             }
+
+            PlasmaComponents.BusyIndicator {
+                id: busySpinner
+                anchors.fill: parent
+                running: visible
+                visible: deviceItem.state != 0
+            }
+
+            // FIXME onClicked: ...
         }
 
         PlasmaCore.ToolTip {
@@ -243,18 +252,6 @@ Item {
                     }
                 }
             }
-        }
-
-        PlasmaComponents.BusyIndicator {
-            id: busySpinner
-            width: theme.iconSizes.dialog*0.8
-            height: width
-            anchors {
-                right: parent.right
-                verticalCenter: deviceIcon.verticalCenter
-            }
-            running: visible
-            visible: deviceItem.state != 0
         }
 
         ListView {
