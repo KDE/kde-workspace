@@ -29,8 +29,8 @@ class FontUseItem : public KFontRequester
   Q_OBJECT
 
 public:
-    FontUseItem(QWidget * parent, const QString &name, const QString &grp, 
-        const QString &key, const QString &rc, const QFont &default_fnt, 
+    FontUseItem(QWidget * parent, const QString &name, const QString &grp,
+        const QString &key, const QString &rc, const QFont &default_fnt,
         bool fixed = false);
 
     void readFont();
@@ -104,7 +104,7 @@ public:
 
 protected Q_SLOTS:
     void fontSelected();
-    void slotApplyFontDiff(); 
+    void slotApplyFontDiff();
     void slotUseAntiAliasing();
     void slotCfgAa();
 

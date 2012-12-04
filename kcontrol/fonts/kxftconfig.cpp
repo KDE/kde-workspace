@@ -201,7 +201,7 @@ static KXftConfig::SubPixel::Type strToType(const char *str)
 {
     if(0==strcmp(str, "rgb"))
         return KXftConfig::SubPixel::Rgb;
-    else if(0==strcmp(str, "bgr")) 
+    else if(0==strcmp(str, "bgr"))
         return KXftConfig::SubPixel::Bgr;
     else if(0==strcmp(str, "vrgb"))
         return KXftConfig::SubPixel::Vrgb;
