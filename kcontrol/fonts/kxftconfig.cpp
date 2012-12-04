@@ -20,25 +20,27 @@
 #include "kxftconfig.h"
 #ifdef HAVE_FONTCONFIG
 
+#include <stdarg.h>
+#include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+
 #include <QRegExp>
 #include <QFile>
+#include <QDir>
 #include <QX11Info>
 #include <QByteArray>
-#include <klocale.h>
-#include <kde_file.h>
-#include <KDE/KGlobal>
-#include <KDE/KStandardDirs>
-#include <QDir>
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <KLocale>
+#include <kde_file.h>
+#include <KGlobal>
+#include <KStandardDirs>
+#include <KDebug>
+
 #include <fontconfig/fontconfig.h>
-#include <kdebug.h>
 
 using namespace std;
 

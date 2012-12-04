@@ -11,10 +11,9 @@
 #include <QLabel>
 #include <QList>
 
-#include <kcmodule.h>
-#include <kdialog.h>
-#include <kfontdialog.h>
-#include <kfontrequester.h>
+#include <KCModule>
+#include <KDialog>
+#include <KFontRequester>
 
 #include "kxftconfig.h"
 
