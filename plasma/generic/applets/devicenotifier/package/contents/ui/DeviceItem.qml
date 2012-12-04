@@ -193,7 +193,12 @@ Item {
                 verticalCenter: deviceIcon.verticalCenter
             }
 
-            onClicked: leftActionTriggered()
+            onClicked: {
+                notifierDialog.itemFocused();
+                if (leftAction.visible) {
+                    leftActionTriggered()
+                }
+            }
 
             PlasmaCore.IconItem {
                 id: leftAction
