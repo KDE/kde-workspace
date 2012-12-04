@@ -190,15 +190,21 @@ Item {
             subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
         }
 
-        PlasmaCore.IconItem {
-            id: leftAction
+        MouseEventListener {
+            id: leftActionArea
             width: theme.iconSizes.dialog*0.8
             height: width
+            hoverEnabled: true
             anchors {
                 right: parent.right
                 verticalCenter: deviceIcon.verticalCenter
             }
-            visible: !busySpinner.visible
+            PlasmaCore.IconItem {
+                id: leftAction
+                anchors.fill: parent
+                active: leftActionArea.containsMouse
+                visible: !busySpinner.visible
+            }
         }
 
         PlasmaCore.ToolTip {
@@ -256,7 +262,7 @@ Item {
             anchors {
                 top: labelsColumn.bottom
                 left: deviceIcon.right
-                right: leftAction.right
+                right: leftActionArea.right
             }
             interactive: false
             model: hpSource.data[udi]["actions"]
