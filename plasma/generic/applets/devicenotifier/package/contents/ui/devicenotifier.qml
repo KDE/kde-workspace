@@ -231,9 +231,8 @@ Item {
                 property int currentExpanded: -1
                 property bool itemClicked: true
                 delegate: deviceItem
-                highlight: deviceHighlighter
-                highlightMoveDuration: 250
-                highlightMoveSpeed: 1
+                highlight: PlasmaComponents.Highlight{}
+
                 //this is needed to make SectionScroller actually work
                 //acceptable since one doesn't have a billion of devices
                 cacheBuffer: 1000
@@ -350,22 +349,6 @@ Item {
                     }
                 }
                 Behavior on height { NumberAnimation { duration: 150 } }
-            }
-        }
-
-        Component {
-            id: deviceHighlighter
-
-            PlasmaCore.FrameSvgItem {
-                imagePath: "widgets/viewitem"
-                prefix: "hover"
-                opacity: 0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.OutQuad
-                    }
-                }
             }
         }
 

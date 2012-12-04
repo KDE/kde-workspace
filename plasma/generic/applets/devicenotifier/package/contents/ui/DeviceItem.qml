@@ -265,7 +265,7 @@ Item {
             height: expanded ? ((actionIconHeight+(2*actionVerticalMargins))*model.length)+anchors.topMargin : 0
             opacity: expanded ? 1 : 0
             delegate: actionItem
-            highlight: actionHighlighter
+            highlight: PlasmaComponents.Highlight{}
             Behavior on opacity { NumberAnimation { duration: 150 } }
         }
 
@@ -276,23 +276,6 @@ Item {
                 icon: modelData["icon"]
                 label: modelData["text"]
                 predicate: modelData["predicate"]
-            }
-        }
-
-        Component {
-            id: actionHighlighter
-
-            PlasmaCore.FrameSvgItem {
-                width: actionsList.width
-                imagePath: "widgets/viewitem"
-                prefix: "hover"
-                opacity: 0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.OutQuad
-                    }
-                }
             }
         }
     }
