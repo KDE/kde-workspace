@@ -260,7 +260,7 @@ Item {
             interactive: false
             model: hpSource.data[udi]["actions"]
             property int actionVerticalMargins: 5
-            property int actionIconHeight: theme.iconSizes.dialog
+            property int actionIconHeight: theme.iconSizes.dialog*0.8
             height: expanded ? ((actionIconHeight+(2*actionVerticalMargins))*model.length)+anchors.topMargin : 0
             opacity: expanded ? 1 : 0
             delegate: actionItem
