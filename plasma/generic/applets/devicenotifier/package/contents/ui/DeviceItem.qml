@@ -68,22 +68,15 @@ Item {
         }
         onClicked: {
             notifierDialog.itemFocused();
-            if (leftAction.visible
-                && mouse.x >= leftAction.x
-                && mouse.x <= leftAction.x + leftAction.width
-                && mouse.y >= leftAction.y
-                && mouse.y <= leftAction.y + leftAction.height) {
-                leftActionTriggered();
+
+            var actions = hpSource.data[udi]["actions"];
+            if (actions.length == 1) {
+                service = hpSource.serviceForSource(udi);
+                operation = service.operationDescription("invokeAction");
+                operation.predicate = actions[0]["predicate"];
+                service.startOperationCall(operation);
             } else {
-                var actions = hpSource.data[udi]["actions"];
-                if (actions.length == 1) {
-                    service = hpSource.serviceForSource(udi);
-                    operation = service.operationDescription("invokeAction");
-                    operation.predicate = actions[0]["predicate"];
-                    service.startOperationCall(operation);
-                } else {
-                    notifierDialog.currentExpanded = expanded ? -1 : index;
-                }
+                notifierDialog.currentExpanded = expanded ? -1 : index;
             }
         }
 
@@ -199,6 +192,9 @@ Item {
                 right: parent.right
                 verticalCenter: deviceIcon.verticalCenter
             }
+
+            onClicked: leftActionTriggered()
+
             PlasmaCore.IconItem {
                 id: leftAction
                 anchors.fill: parent
@@ -212,8 +208,6 @@ Item {
                 running: visible
                 visible: deviceItem.state != 0
             }
-
-            // FIXME onClicked: ...
         }
 
         PlasmaCore.ToolTip {
