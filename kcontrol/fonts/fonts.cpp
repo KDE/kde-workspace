@@ -773,20 +773,6 @@ void KFonts::save()
   }
 #endif
 
-  // KDE-1.x support
-  {
-  KConfig config( QDir::homePath() + "/.kderc", KConfig::SimpleConfig);
-  KConfigGroup grp(&config, "General");
-
-  for(it=fontUseList.begin(); it!=end; ++it) {
-      if("font"==(*it)->rcKey())
-          QSettings().setValue("/qt/font", (*it)->font().toString());
-      kDebug(1208) << "write entry " <<  (*it)->rcKey();
-      grp.writeEntry( (*it)->rcKey(), (*it)->font() );
-  }
-  config.sync();
-  }
-
   KGlobalSettings::self()->emitChange(KGlobalSettings::FontChanged);
 
   kapp->processEvents(); // Process font change ourselves
