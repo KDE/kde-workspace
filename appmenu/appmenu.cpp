@@ -204,7 +204,7 @@ void AppMenuModule::slotUpdateImporter(WId id)
 
     if (previous) {
         KDBusMenuImporter *importer = getImporter(id);
-        if (importer && importer->menu()) {
+        if (importer && importer->menu() &&  importer->menu()->actions().length()) {
             if (m_menubar && m_menubar->parentWid() == id) { //Update menubar
                     m_menubar->update(importer->menu());
                     m_menubar->move(centeredMenubarPos());
