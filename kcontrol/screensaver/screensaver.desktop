@@ -38,6 +38,7 @@ Name[sr@latin]=Zaključavač ekrana
 Name[sv]=Skärmlåsning
 Name[uk]=Блокування екрана
 Name[x-test]=xxScreen Lockerxx
+Name[zh_CN]=屏幕锁
 Name[zh_TW]=螢幕鎖定程式
 
 Comment=Screen Locker Settings
@@ -67,6 +68,7 @@ Comment[sr@latin]=Postavke zaključavača ekrana
 Comment[sv]=Inställningar av skärmlåsning
 Comment[uk]=Параметри блокування екрана
 Comment[x-test]=xxScreen Locker Settingsxx
+Comment[zh_CN]=屏幕锁定程序设置
 Comment[zh_TW]=螢幕鎖定程式設定
 
 X-KDE-Keywords=screensavers,Priority,locking,security
@@ -95,6 +97,7 @@ X-KDE-Keywords[sr@latin]=screensavers,Priority,locking,security,čuvar ekrana,pr
 X-KDE-Keywords[sv]=skärmsläckare,Prioritet,låsa,säkerhet
 X-KDE-Keywords[uk]=screensavers,Priority,locking,security,зберігач,екран,блокування,захист,безпека
 X-KDE-Keywords[x-test]=xxscreensavers,Priority,locking,securityxx
+X-KDE-Keywords[zh_CN]=screensavers,Priority,locking,security,屏幕保护,优先级,锁定,安全
 X-KDE-Keywords[zh_TW]=screensavers,Priority,locking,security
 
 Categories=Qt;KDE;X-KDE-settings-looknfeel;

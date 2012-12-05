@@ -181,6 +181,7 @@ Keywords[sr@latin]=Lock, Logout, Sleep, Hibernate, Switch User,zaključavanje,od
 Keywords[sv]=Lås,Utloggning,Viloläge,Dvala,Byt användare
 Keywords[uk]=Lock;Logout;Sleep;Hibernate;Switch User;блокування;вихід;присипляння;сон;перемикання;користувач
 Keywords[x-test]=xxLock, Logout, Sleep, Hibernate, Switch Userxx
+Keywords[zh_CN]=Lock, Logout, Sleep, Hibernate, Switch User, 锁定, 注销, 待机, 休眠, 切换用户
 Keywords[zh_TW]=Lock, Logout, Sleep, Hibernate, Switch User
 
 Type=Service
