@@ -125,6 +125,7 @@ Item {
                     left: parent.left
                     right: parent.right
                 }
+                enabled: deviceItem.state == 0
             }
 
             Item {
