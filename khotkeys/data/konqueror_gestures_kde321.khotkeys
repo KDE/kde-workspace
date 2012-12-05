@@ -2901,7 +2901,7 @@ Type=KEYBOARD_INPUT_GESTURE_ACTION_DATA
 ActionsCount=1
 
 [Data_1_5Actions0]
-Input=Ctrl+Home\n
+Input=Alt+Home\n
 IsDestinationWindow=false
 Type=KEYBOARD_INPUT
 
