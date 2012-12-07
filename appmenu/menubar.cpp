@@ -71,16 +71,12 @@ MenuBar::MenuBar(QMenu *menu)
     resize(sizeHint());
 
     connect(m_container, SIGNAL(aboutToHide()), this, SLOT(slotAboutToHide()));
+    connect(m_container, SIGNAL(needResize()), this, SIGNAL(needResize()));
     connect(m_hideTimer, SIGNAL(timeout()), this, SLOT(slotAboutToHide()));
 }
 
 MenuBar::~MenuBar()
 {
-}
-
-void MenuBar::update(QMenu *menu)
-{
-    m_container->updateLayout(menu);
 }
 
 QSize MenuBar::sizeHint() const

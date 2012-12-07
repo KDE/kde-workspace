@@ -30,6 +30,8 @@
 
 #include <QGraphicsWidget>
 #include <QTimer>
+#include <QDebug>
+#include <QMenu>
 
 class QGraphicsLinearLayout;
 class QGraphicsView;
@@ -46,10 +48,6 @@ public:
      */
     void initLayout();
     /**
-     * Update layout with menu if menuwidget not in use
-     */
-    void updateLayout(QMenu *menu);
-    /**
      * Return true if layout is valid and populated
      */
     bool layoutValid();
@@ -57,7 +55,6 @@ public:
      * True if a menu is visible in menuwidget
      */
     bool aMenuIsVisible() { return m_visibleMenu; }
-
     /**
      * Activate action, or first action if null
      */
@@ -80,22 +77,39 @@ protected:
      * Use to get keyboard events
      */
     virtual bool eventFilter(QObject*, QEvent*);
+    /**
+     * Filter events on main menu
+     */
+    bool menuEventFilter(QEvent* event);
+    /**
+     * Filter events on submenus
+     */
+    bool subMenuEventFilter(QObject* object, QEvent* event);
 private Q_SLOTS:
     /**
      * Check hovered item and active it
      */
     void slotCheckActiveItem();
     /**
-     * a menu is hidding
+     * A menu is hidding
      */
     void slotMenuAboutToHide();
     /**
-     * menubar button clicked
+     * Menubar button clicked
      */
     void slotButtonClicked();
+    /**
+     * Update pending actions
+     */
+    void slotUpdateActions();
 Q_SIGNALS:
+    void needResize();
     void aboutToHide();
 private:
+    /**
+     * Return a button based on action
+     */
+    MenuButton* createButton(QAction *action);
     /**
      * Show current button menu
      * return showed menu
@@ -112,6 +126,8 @@ private:
 
     //Follow mouse position
     QTimer *m_mouseTimer;
+    //Update actions
+    QTimer *m_actionTimer;
     QGraphicsView *m_view;
     QGraphicsLinearLayout *m_layout;
     QList<MenuButton*> m_buttons;

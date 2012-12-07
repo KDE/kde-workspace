@@ -54,10 +54,6 @@ public:
      * Set action as active menubar action
      */
     void setActiveAction(QAction *action) { m_container->setActiveAction(action); }
-    /**
-     * Update menubar with menu
-     */
-    void update(QMenu *menu);
 
     virtual QSize sizeHint() const;
     virtual void show();
@@ -66,6 +62,7 @@ public:
 private Q_SLOTS:
     void slotAboutToHide();
 Q_SIGNALS:
+    void needResize();
     void aboutToHide();
 protected:
     /**

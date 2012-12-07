@@ -70,9 +70,8 @@ void TopMenuBar::enableMouseTracking(bool enable) {
         m_mouseTracker->stop();
 }
 
-void TopMenuBar::update(QMenu *menu)
+void TopMenuBar::updateSize()
 {
-    MenuBar::update(menu);
     if (m_glowBar) {
         m_glowBar->resize(QSize(sizeHint().width(), 5));
     }

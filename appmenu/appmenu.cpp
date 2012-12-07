@@ -189,36 +189,6 @@ void AppMenuModule::slotWindowUnregistered(WId id)
     }
 }
 
-// Window importer change
-void AppMenuModule::slotUpdateImporter(WId id)
-{
-    KDBusMenuImporter *previous = 0;
-
-    if (m_menuStyle != "TopMenuBar") {
-        return;
-    }
-
-    if (m_importers.contains(id)) {
-        previous = m_importers.take(id);
-    }
-
-    if (previous) {
-        KDBusMenuImporter *importer = getImporter(id);
-        if (importer && importer->menu() &&  importer->menu()->actions().length()) {
-            if (m_menubar && m_menubar->parentWid() == id) { //Update menubar
-                    m_menubar->update(importer->menu());
-                    m_menubar->move(centeredMenubarPos());
-            } else if (KWindowSystem::activeWindow() == id) { // Show a new menubar (not ready on active window signal)
-                showTopMenuBar(importer->menu());
-                m_menubar->setParentWid(id);
-            }
-            m_previousImporters.append(previous);
-        } else { // keep previous importer
-            m_importers.insert(id, previous);
-        }
-    }
-}
-
 // Keyboard activation requested, transmit it to menu
 void AppMenuModule::slotActionActivationRequested(QAction* a)
 {
@@ -241,7 +211,7 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
 
     if (id == 0) {// Ignore root window
         return;
-    } else if (info.windowType(mask) & NET::Dock) { // hide immediatly menubar for docks (krunner)
+    } else if (info.windowType(mask) & NET::Dock) { // Hide immediatly menubar for docks (krunner)
         hideMenubar(m_menubar);
         return;
     }
@@ -255,14 +225,18 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
 
     KDBusMenuImporter *importer = getImporter(id);
     if (!importer) {
+        hideMenubar(m_menubar);
         return;
     }
 
     QMenu *menu = importer->menu();
-    // Do not show empty menubar, will be shown later on layout update
+    QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
+
     if(menu && menu->actions().length()) {
         showTopMenuBar(menu);
         m_menubar->setParentWid(id);
+    } else {
+        hideMenubar(m_menubar);
     }
 }
 
@@ -281,10 +255,11 @@ void AppMenuModule::slotCurrentScreenChanged()
     }
 }
 
-void AppMenuModule::slotDeletePreviousImporters()
+void AppMenuModule::slotBarNeedResize()
 {
-    while (!m_previousImporters.isEmpty()) {
-        delete m_previousImporters.takeFirst();
+    if (m_menubar) {
+        m_menubar->updateSize();
+        m_menubar->move(centeredMenubarPos());
     }
 }
 
@@ -325,8 +300,6 @@ void AppMenuModule::reconfigure()
             SLOT(slotWindowRegistered(WId, const QString&, const QDBusObjectPath&)));
         connect(m_menuImporter, SIGNAL(WindowUnregistered(WId)),
             SLOT(slotWindowUnregistered(WId)));
-        connect(m_menuImporter, SIGNAL(UpdateImporter(WId)),
-            SLOT(slotUpdateImporter(WId)));
         m_menuImporter->connectToBus();
     }
 
@@ -357,7 +330,6 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool cached)
         if (importer) {
             connect(importer, SIGNAL(actionActivationRequested(QAction*)),
                     SLOT(slotActionActivationRequested(QAction*)));
-            QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
             if (cached) {
                 m_importers.insert(id, importer);
             }
@@ -371,7 +343,7 @@ void AppMenuModule::showTopMenuBar(QMenu *menu)
     TopMenuBar *previous = m_menubar;
 
     m_menubar = new TopMenuBar(menu);
-    connect(m_menubar, SIGNAL(aboutToHide()), SLOT(slotDeletePreviousImporters()));
+    connect(m_menubar, SIGNAL(needResize()), SLOT(slotBarNeedResize()));
     m_menubar->move(centeredMenubarPos());
     m_menubar->enableMouseTracking();
     hideMenubar(previous);

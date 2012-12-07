@@ -32,17 +32,6 @@ MenuButton::MenuButton(QGraphicsWidget *parent):
 {
 }
 
-QAction* MenuButton::action()
-{
-    QAction *action = Plasma::ToolButton::action();
-    if (action) {
-        if (action->menu()) {
-            return action;
-        }
-    }
-    return 0;
-}
-
 void MenuButton::setHovered(bool hovered)
 {
     if (hovered) {

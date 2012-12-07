@@ -185,13 +185,6 @@ void MenuImporter::slotLayoutUpdated(uint /*revision*/, int parentId)
 
     if (parentId == 0) { //root menu
         fakeUnityAboutToShow();
-        // update window menu importer
-        Q_FOREACH(const WId id, m_menuServices.keys()) {
-            if (m_menuServices.value(id) == message().service() &&
-                m_menuPaths.value(id).path() == message().path()) {
-                emit UpdateImporter(id);
-            }
-        }
     }
 }
 

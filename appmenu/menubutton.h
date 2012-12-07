@@ -35,14 +35,8 @@ Q_OBJECT
 public:
     MenuButton(QGraphicsWidget *parent);
 
-    /**
-     * Return null if action->menu() is null
-     */
-    QAction* action();
     void setHovered(bool hovered);
-
     QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint) const;
-
     qreal bottomMargin() const;
 
 protected:

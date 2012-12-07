@@ -52,9 +52,9 @@ public:
      */
     WId parentWid() { return m_wid; }
     /**
-     * Update menubar with menu
+     * resize menu bar to feet content
      */
-    void update(QMenu *menu);
+    void updateSize();
     /**
      * Move menubar and glow bar at position
      */
