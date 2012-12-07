@@ -231,7 +231,7 @@ void MenuWidget::hide()
 
 MenuButton* MenuWidget::createButton(QAction *action)
 {
-    if( action->isSeparator() || !action->menu()) {
+    if( action->isSeparator() || !action->menu() || !action->isVisible()) {
         return 0;
     }
 
