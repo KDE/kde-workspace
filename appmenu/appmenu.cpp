@@ -235,7 +235,12 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     }
 
     QMenu *menu = importer->menu();
-    QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
+
+    // Old code from plasma-widget-menubar
+    // Putting this here can make later menu->actions().length() make a segfault
+    // Putting this in WindowRegistered() can freeze plasma on startup
+    // Do not seems needed
+    //QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
 
     if(menu && menu->actions().length()) {
         showTopMenuBar(menu);
