@@ -92,6 +92,12 @@ private Q_SLOTS:
      */
     void slotWindowUnregistered(WId id);
     /**
+     * Hide menubar when a window is removed
+     * Why not hidding in slotWindowUnregistered() ?
+     * Some apps unregister with an unique id (konsole for ex)
+     */
+    void slotWindowRemoved(WId id);
+    /**
      * Open a action in current menu
      */
     void slotActionActivationRequested(QAction* a);

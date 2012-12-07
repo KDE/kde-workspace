@@ -177,15 +177,19 @@ void AppMenuModule::slotWindowUnregistered(WId id)
 {
     KDBusMenuImporter* importer = m_importers.take(id);
 
-    if (m_menubar && m_menubar->parentWid() == id) {
-        hideMenubar(m_menubar);
-    }
-
     // Send a signal on bus for others dbus interface registrars
     emit WindowUnregistered(id);
 
     if (importer) {
         delete importer;
+    }
+}
+
+// Window removed
+void AppMenuModule::slotWindowRemoved(WId id)
+{
+    if (m_menubar && m_menubar->parentWid() == id) {
+        hideMenubar(m_menubar);
     }
 }
 
@@ -210,6 +214,8 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     unsigned long mask = NET::AllTypesMask;
 
     if (id == 0) {// Ignore root window
+        return;
+    } else if (info.windowType(mask) & NET::Desktop) { // Keep menu bar of last application in this case
         return;
     } else if (info.windowType(mask) & NET::Dock) { // Hide immediatly menubar for docks (krunner)
         hideMenubar(m_menubar);
@@ -312,6 +318,7 @@ void AppMenuModule::reconfigure()
     // Setup top menubar if needed
     if (m_menuStyle == "TopMenuBar") {
         connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(slotActiveWindowChanged(WId)));
+        connect(KWindowSystem::self(), SIGNAL(windowRemoved(WId)), this, SLOT(slotWindowRemoved(WId)));
         connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SLOT(slotShowCurrentWindowMenu()));
         connect(m_screenTimer, SIGNAL(timeout()), this, SLOT(slotCurrentScreenChanged()));
         m_screenTimer->start(1000);
