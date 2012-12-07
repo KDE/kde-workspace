@@ -111,11 +111,7 @@ void AppMenuModule::slotShowMenu(int x, int y, WId id)
         return;
     }
 
-    if (importer) {
-        delete importer;
-    }
-
-    importer = getImporter(id, false);
+    importer = getImporter(id);
 
     if (!importer) {
         return;
@@ -160,6 +156,9 @@ void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const Q
      if (importer) {
         delete importer;
     }
+
+    // Put importer in cache
+    getImporter(id);
 
     if (m_menuStyle == "ButtonVertical") {
         // Tell Kwin menu is available
@@ -326,10 +325,10 @@ void AppMenuModule::reconfigure()
     }
 }
 
-KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool cached)
+KDBusMenuImporter* AppMenuModule::getImporter(WId id)
 {
     KDBusMenuImporter* importer = 0;
-    if (cached && m_importers.contains(id)) { // importer already exist
+    if (m_importers.contains(id)) { // importer already exist
         importer = m_importers.value(id);
     } else if (m_menuImporter->serviceExist(id)) { // get importer
         importer = new KDBusMenuImporter(id, m_menuImporter->serviceForWindow(id), &m_icons,
@@ -337,9 +336,7 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id, bool cached)
         if (importer) {
             connect(importer, SIGNAL(actionActivationRequested(QAction*)),
                     SLOT(slotActionActivationRequested(QAction*)));
-            if (cached) {
-                m_importers.insert(id, importer);
-            }
+            m_importers.insert(id, importer);
         }
     }
     return importer;

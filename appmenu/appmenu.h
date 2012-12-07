@@ -125,9 +125,8 @@ private Q_SLOTS:
 private:
     /**
      * return an importer for window id
-     * take it from cache if cached is true
      */
-    KDBusMenuImporter* getImporter(WId id, bool cached = true);
+    KDBusMenuImporter* getImporter(WId id);
     /**
      * Show top menubar with menu
      */
