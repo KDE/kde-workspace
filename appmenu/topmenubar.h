@@ -41,7 +41,7 @@ public:
     /**
      * Start mouse tracking (hide/show on mouse event)
      */
-    void enableMouseTracking(bool enable = true);
+    void enableMouseTracking();
 
     /**
      * Set menubar parent window id

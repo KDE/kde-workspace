@@ -57,21 +57,22 @@ TopMenuBar::~TopMenuBar()
     deleteGlowBar();
 }
 
-void TopMenuBar::enableMouseTracking(bool enable) {
-    if (enable) {
-        deleteGlowBar();
-        m_glowBar = new GlowBar(triggerRect().topLeft(), triggerRect().width());
-        m_glowBar->setWindowOpacity(glowBarOpacity());
-        m_glowBar->show();
-        m_mouseTracker->start(250);
-        m_hideGlowTimer->start(10000);
-    }
-    else
-        m_mouseTracker->stop();
+void TopMenuBar::enableMouseTracking()
+{
+    deleteGlowBar();
+    m_glowBar = new GlowBar(triggerRect().topLeft(), triggerRect().width());
+    m_glowBar->setWindowOpacity(glowBarOpacity());
+    m_glowBar->show();
+    m_mouseTracker->start(250);
+    m_hideGlowTimer->start(10000);
 }
 
 void TopMenuBar::updateSize()
 {
+    if (!m_mouseTracker->isActive() && !cursorInMenuBar()) {
+        enableMouseTracking();
+    }
+
     if (m_glowBar) {
         m_glowBar->resize(QSize(sizeHint().width(), 5));
     }
@@ -99,7 +100,9 @@ bool TopMenuBar::cursorInMenuBar()
 
 void TopMenuBar::slotAboutToHide()
 {
-    enableMouseTracking();
+    if (!m_mouseTracker->isActive()) {
+        enableMouseTracking();
+    }
 }
 
 void TopMenuBar::slotMouseTracker()

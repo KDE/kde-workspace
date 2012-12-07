@@ -99,7 +99,8 @@ bool MenuWidget::menuEventFilter(QEvent* event)
     case QEvent::ActionAdded:
     case QEvent::ActionRemoved:
     case QEvent::ActionChanged:
-        m_actionTimer->start(1000);
+        // Try to limit layout updates
+        m_actionTimer->start(500);
         break;
     default:
         break;

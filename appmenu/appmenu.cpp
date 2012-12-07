@@ -242,7 +242,7 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     // Do not seems needed
     //QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
 
-    if(menu && menu->actions().length()) {
+    if(menu) {
         showTopMenuBar(menu);
         m_menubar->setParentWid(id);
     } else {
@@ -351,10 +351,16 @@ void AppMenuModule::showTopMenuBar(QMenu *menu)
 {
     TopMenuBar *previous = m_menubar;
 
+    if (!menu) {
+        return;
+    }
+
     m_menubar = new TopMenuBar(menu);
     connect(m_menubar, SIGNAL(needResize()), SLOT(slotBarNeedResize()));
     m_menubar->move(centeredMenubarPos());
-    m_menubar->enableMouseTracking();
+    if (menu->actions().length()) {
+        m_menubar->enableMouseTracking();
+    }
     hideMenubar(previous);
 }
 

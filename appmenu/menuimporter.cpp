@@ -134,22 +134,33 @@ WId MenuImporter::recursiveMenuId(WId id)
 
 void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 {
+    bool changes = false;
+
     if (path.path().isEmpty()) //prevent bad dbusmenu usage
         return;
 
     QString service = message().service();
-    KWindowInfo info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
-    QString classClass = info.windowClassClass();
 
-    // Should this happen ?
-    m_menuServices.remove(id);
-    m_menuPaths.remove(id);
+    // Check if window already registered and if some changes happenned
+    // RegisterWindow happen on window mapping (unminimizing for ex)
+    if (m_menuServices.contains(id)) {
+        if (m_menuServices.value(id) != service ||
+            m_menuPaths.value(id) != path) {
+            changes = true;
+        }
+    } else {
+        changes = true; // First time
+    }
 
-    m_menuServices.insert(id, service);
-    m_menuPaths.insert(id, path);
-    m_windowClasses.insert(id, classClass);
-    m_serviceWatcher->addWatchedService(service);
-    WindowRegistered(id, service, path);
+    if (changes) {
+        KWindowInfo info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
+        QString classClass = info.windowClassClass();
+        m_windowClasses.insert(id, classClass);
+        m_menuServices.insert(id, service);
+        m_menuPaths.insert(id, path);
+        m_serviceWatcher->addWatchedService(service);
+        WindowRegistered(id, service, path);
+    }
 }
 
 void MenuImporter::UnregisterWindow(WId id)
