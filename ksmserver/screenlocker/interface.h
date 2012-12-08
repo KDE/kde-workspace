@@ -34,6 +34,7 @@ class InhibitRequest
 public:
     QString dbusid;
     uint cookie;
+    uint powerdevilcookie;
 };
 
 class KSldApp;
