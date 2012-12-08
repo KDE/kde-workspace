@@ -1208,10 +1208,6 @@ void TreeView::cut()
 {
     copy( true );
 
-    m_ac->action("edit_cut")->setEnabled(false);
-    m_ac->action("edit_copy")->setEnabled(false);
-    m_ac->action("delete")->setEnabled(false);
-
     // Select new current item
     // TODO: is this completely redundant?
     setCurrentItem(currentItem());
@@ -1419,9 +1415,6 @@ void TreeView::del()
 
     del(item, true);
 
-    m_ac->action("edit_cut")->setEnabled(false);
-    m_ac->action("edit_copy")->setEnabled(false);
-    m_ac->action("delete")->setEnabled(false);
     // Select new current item
     // TODO: is this completely redundant?
     setCurrentItem(currentItem());
