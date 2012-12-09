@@ -1134,9 +1134,9 @@ QString AbstractTaskItem::expanderElement() const
     case Plasma::TopEdge:
         return "down-arrow";
     case Plasma::RightEdge:
-        return "right-arrow";
-    case Plasma::LeftEdge:
         return "left-arrow";
+    case Plasma::LeftEdge:
+        return "right-arrow";
     case Plasma::BottomEdge:
     default:
         return "up-arrow";
