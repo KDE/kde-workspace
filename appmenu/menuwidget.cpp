@@ -85,6 +85,7 @@ void MenuWidget::initLayout()
         button = createButton(action);
         if (button) {
             m_layout->addItem(button);
+            button->setMenu(action->menu());
             m_buttons << button;
         }
     }
@@ -268,22 +269,15 @@ MenuButton* MenuWidget::createButton(QAction *action)
 
 QMenu* MenuWidget::showMenu()
 {
+    QMenu *menu = 0;
+
     if (m_visibleMenu) {
         disconnect(m_visibleMenu, SIGNAL(aboutToHide()), this, SLOT(slotMenuAboutToHide()));
         m_visibleMenu->hide();
     }
 
-    if (!m_menu) {
-        return 0;
-    }
-
-    QMenu *menu = 0;
-    // Search for submenu
-    foreach (QAction *action, m_menu->actions()) {
-        if (action->text() == m_currentButton->text()) {
-            menu = action->menu();
-            break;
-        }
+    if (m_currentButton && m_menu) {
+        menu = m_currentButton->menu();
     }
 
     if (menu) {

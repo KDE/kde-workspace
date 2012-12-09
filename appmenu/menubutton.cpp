@@ -25,10 +25,12 @@
 
 #include "menubutton.h"
 #include <QAction>
+#include <QMenu>
 
 MenuButton::MenuButton(QGraphicsWidget *parent):
     Plasma::ToolButton(parent),
-    m_enterEvent(false)
+    m_enterEvent(false),
+    m_menu(0)
 {
 }
 

@@ -29,6 +29,8 @@
 #include <Plasma/ToolButton>
 #include <QToolButton>
 
+class QMenu;
+
 class MenuButton : public Plasma::ToolButton
 {
 Q_OBJECT
@@ -36,13 +38,17 @@ public:
     MenuButton(QGraphicsWidget *parent);
 
     void setHovered(bool hovered);
+
     QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint) const;
     qreal bottomMargin() const;
 
+    void setMenu(QMenu *menu) { m_menu = menu; }
+    QMenu* menu() { return m_menu; }
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *);
 private:
     bool m_enterEvent;
+    QMenu *m_menu;
 };
 #endif
