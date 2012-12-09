@@ -37,7 +37,7 @@ class GlowBar : public QWidget
 {
 Q_OBJECT
 public:
-    GlowBar(const QPoint pos, uint width);
+    GlowBar();
     ~GlowBar();
 
     void paintEvent(QPaintEvent*);

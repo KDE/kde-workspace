@@ -43,9 +43,13 @@ class MenuBar : public QGraphicsView
 {
 Q_OBJECT
 public:
-    MenuBar(QMenu *menu = 0);
+    MenuBar();
     ~MenuBar();
 
+    /**
+     * Set root menu
+     */
+    void setMenu(QMenu *menu) { m_container->setMenu(menu); }
     /**
      * Auto open menu items on mouse over
      */

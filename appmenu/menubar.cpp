@@ -38,12 +38,12 @@
 #include <Plasma/WindowEffects>
 #include <KApplication>
 
-MenuBar::MenuBar(QMenu *menu)
+MenuBar::MenuBar()
     : QGraphicsView(),
     m_hideTimer(new QTimer(this)),
     m_background(new Plasma::FrameSvg(this)),
     m_scene(new QGraphicsScene(this)),
-    m_container(new MenuWidget(this, menu))
+    m_container(new MenuWidget(this))
 {
     qreal left, top, right, bottom;
 

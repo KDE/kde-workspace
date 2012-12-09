@@ -34,7 +34,7 @@
 #include <KDebug>
 #include <KApplication>
 
-MenuWidget::MenuWidget(QGraphicsView *view, QMenu *menu) :
+MenuWidget::MenuWidget(QGraphicsView *view) :
     QGraphicsWidget(),
     m_mouseTimer(new QTimer(this)),
     m_actionTimer(new QTimer(this)),
@@ -43,11 +43,10 @@ MenuWidget::MenuWidget(QGraphicsView *view, QMenu *menu) :
     m_currentButton(0),
     m_contentBottomMargin(0),
     m_visibleMenu(0),
-    m_menu(menu)
+    m_menu(0)
 {
     connect(m_actionTimer, SIGNAL(timeout()), SLOT(slotUpdateActions()));
     connect(m_mouseTimer, SIGNAL(timeout()), SLOT(slotCheckActiveItem()));
-    m_menu->installEventFilter(this);
 }
 
 MenuWidget::~MenuWidget()
@@ -56,6 +55,20 @@ MenuWidget::~MenuWidget()
     while (!m_buttons.isEmpty()) {
         delete m_buttons.front();
         m_buttons.pop_front();
+    }
+}
+
+void MenuWidget::setMenu(QMenu *menu)
+{
+    if (m_menu) {
+        disconnect(m_menu, SIGNAL(destroyed()), this, SLOT(slotMenuDestroyed()));
+        m_menu->removeEventFilter(this);
+    }
+    if (menu) {
+        m_menu = menu;
+        connect(m_menu, SIGNAL(destroyed()), SLOT(slotMenuDestroyed()), Qt::UniqueConnection);
+        m_menu->installEventFilter(this);
+        slotUpdateActions();
     }
 }
 
@@ -137,6 +150,11 @@ bool MenuWidget::subMenuEventFilter(QObject* object, QEvent* event)
     return false;
 }
 
+void MenuWidget::slotMenuDestroyed()
+{
+    m_menu = 0;
+}
+
 void MenuWidget::slotCheckActiveItem()
 {
     MenuButton* buttonBelow = 0;
@@ -197,7 +215,11 @@ void MenuWidget::slotUpdateActions()
         delete button;
     }
     initLayout();
-    emit needResize();
+    // Menu may be empty on application startup
+    // slotUpdateActions will be called later by eventFilter()
+    if (m_menu && m_menu->actions().length()) {
+        emit needResize();
+    }
 }
 
 void MenuWidget::setActiveAction(QAction *action)

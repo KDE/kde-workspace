@@ -30,8 +30,6 @@
 
 #include <QGraphicsWidget>
 #include <QTimer>
-#include <QDebug>
-#include <QMenu>
 
 class QGraphicsLinearLayout;
 class QGraphicsView;
@@ -40,17 +38,17 @@ class MenuWidget : public QGraphicsWidget
 {
 Q_OBJECT
 public:
-    MenuWidget(QGraphicsView *view = 0, QMenu *menu = 0);
+    MenuWidget(QGraphicsView *view = 0);
     ~MenuWidget();
 
+    /**
+     * Set root menu
+     */
+    void setMenu(QMenu *menu);
     /**
      *  Init layout with root menu
      */
     void initLayout();
-    /**
-     * Return true if layout is valid and populated
-     */
-    bool layoutValid();
     /**
      * True if a menu is visible in menuwidget
      */
@@ -86,6 +84,10 @@ protected:
      */
     bool subMenuEventFilter(QObject* object, QEvent* event);
 private Q_SLOTS:
+    /**
+     * Clean menu if destroyed
+     */
+    void slotMenuDestroyed();
     /**
      * Check hovered item and active it
      */

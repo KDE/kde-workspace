@@ -35,13 +35,13 @@ class TopMenuBar : public MenuBar
 {
 Q_OBJECT
 public:
-    TopMenuBar(QMenu *menu = 0);
+    TopMenuBar();
     ~TopMenuBar();
 
     /**
      * Start mouse tracking (hide/show on mouse event)
      */
-    void enableMouseTracking();
+    void enableMouseTracking(bool enable = true);
 
     /**
      * Set menubar parent window id
@@ -66,14 +66,15 @@ private Q_SLOTS:
     void slotMouseTracker();
     void slotHideGlowBar();
 private:
-    void deleteGlowBar();
+    void showGlowBar();
+    void hideGlowBar();
     qreal glowBarOpacity();
     QRect triggerRect();
 
     WId m_wid;
+    QPoint m_prevCursorPos;
     QTimer* m_mouseTracker;
     QTimer* m_hideGlowTimer;
-    QPoint m_prevCursorPos;
     GlowBar* m_glowBar;
 };
 

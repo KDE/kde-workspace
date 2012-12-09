@@ -85,7 +85,10 @@ AppMenuModule::AppMenuModule(QObject* parent, const QList<QVariant>&)
 AppMenuModule::~AppMenuModule()
 {
     emit clearMenus();
-    hideMenubar(m_menubar);
+    hideMenubar();
+    if (m_menubar) {
+        delete m_menubar;
+    }
     delete m_menuImporter;
     delete m_appmenuDBus;
 }
@@ -182,13 +185,9 @@ void AppMenuModule::slotWindowUnregistered(WId id)
     if (importer) {
         delete importer;
     }
-}
 
-// Window removed
-void AppMenuModule::slotWindowRemoved(WId id)
-{
     if (m_menubar && m_menubar->parentWid() == id) {
-        hideMenubar(m_menubar);
+        hideMenubar();
     }
 }
 
@@ -214,10 +213,8 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
 
     if (id == 0) {// Ignore root window
         return;
-    } else if (info.windowType(mask) & NET::Desktop) { // Keep menu bar of last application in this case
-        return;
     } else if (info.windowType(mask) & NET::Dock) { // Hide immediatly menubar for docks (krunner)
-        hideMenubar(m_menubar);
+        hideMenubar();
         return;
     }
 
@@ -230,7 +227,7 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
 
     KDBusMenuImporter *importer = getImporter(id);
     if (!importer) {
-        hideMenubar(m_menubar);
+        hideMenubar();
         return;
     }
 
@@ -243,10 +240,10 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     //QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
 
     if(menu) {
-        showTopMenuBar(menu);
+        showMenuBar(menu);
         m_menubar->setParentWid(id);
     } else {
-        hideMenubar(m_menubar);
+        hideMenubar();
     }
 }
 
@@ -280,9 +277,15 @@ void AppMenuModule::reconfigure()
     KConfigGroup configGroup = config.group("Appmenu Style");
     m_menuStyle = configGroup.readEntry("Style", "InApplication");
 
-    // Clean up current menu
     m_waitingAction = 0;
-    hideMenubar(m_menubar); // hide menubar if exist
+
+    // hide menubar if exist
+    hideMenubar();
+    if (m_menubar) {
+        delete m_menubar;
+        m_menubar = 0;
+    }
+
     slotAboutToHide(); // hide vertical menu if exist
 
     // Disconnect all options specifics signals
@@ -321,10 +324,11 @@ void AppMenuModule::reconfigure()
 
     // Setup top menubar if needed
     if (m_menuStyle == "TopMenuBar") {
+        m_menubar = new TopMenuBar();
         connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(slotActiveWindowChanged(WId)));
-        connect(KWindowSystem::self(), SIGNAL(windowRemoved(WId)), this, SLOT(slotWindowRemoved(WId)));
         connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SLOT(slotShowCurrentWindowMenu()));
         connect(m_screenTimer, SIGNAL(timeout()), this, SLOT(slotCurrentScreenChanged()));
+        connect(m_menubar, SIGNAL(needResize()), SLOT(slotBarNeedResize()));
         m_screenTimer->start(1000);
         slotShowCurrentWindowMenu();
     }
@@ -347,33 +351,27 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id)
     return importer;
 }
 
-void AppMenuModule::showTopMenuBar(QMenu *menu)
+void AppMenuModule::showMenuBar(QMenu *menu)
 {
-    TopMenuBar *previous = m_menubar;
-
     if (!menu) {
         return;
     }
 
-    m_menubar = new TopMenuBar(menu);
-    connect(m_menubar, SIGNAL(needResize()), SLOT(slotBarNeedResize()));
-    m_menubar->move(centeredMenubarPos());
+    m_menubar->setMenu(menu);
     if (menu->actions().length()) {
         m_menubar->enableMouseTracking();
     }
-    hideMenubar(previous);
 }
 
-void AppMenuModule::hideMenubar(TopMenuBar *menubar)
+void AppMenuModule::hideMenubar()
 {
-    if (menubar) {
-        if (menubar->isVisible()) {
-            menubar->hide();
-        }
-        delete menubar;
-        if (m_menubar == menubar) {
-            m_menubar = 0;
-        }
+    if (!m_menubar) {
+        return;
+    }
+
+    m_menubar->enableMouseTracking(false);
+    if (m_menubar->isVisible()) {
+        m_menubar->hide();
     }
 }
 
