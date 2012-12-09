@@ -116,13 +116,15 @@ PlasmaComponents.ListItem {
                     anchors {
                         left: parent.left
                         right: parent.right
+                        leftMargin: closeButton.width
+                        rightMargin: closeButton.width
                     }
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
-                    maximumLineCount: 4
                 }
 
                 PlasmaComponents.ToolButton {
+                    id: closeButton
                     iconSource: "window-close"
                     width: notificationItem.toolIconSize
                     height: width
