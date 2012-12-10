@@ -259,9 +259,17 @@ void Autostart::slotAddProgram()
         return; // Don't crash if KOpenWith wasn't able to create service.
     }
 
+    // It is important to ensure that we make an exact copy of an existing
+    // desktop file (if selected) to enable users to override global autostarts.
+    // Also see
+    // https://bugs.launchpad.net/ubuntu/+source/kde-workspace/+bug/923360
+    QString desktopPath;
     KUrl desktopTemplate;
     if ( service->desktopEntryName().isEmpty() ) {
-        desktopTemplate = KUrl( m_paths[4] + service->name() + ".desktop" );
+        // Build custom desktop file (e.g. when the user entered an executable
+        // name in the OpenWithDialog).
+        desktopPath = m_paths[4] + service->name() + ".desktop";
+        desktopTemplate = KUrl( desktopPath );
         KConfig kc(desktopTemplate.path(), KConfig::SimpleConfig);
         KConfigGroup kcg = kc.group("Desktop Entry");
         kcg.writeEntry("Exec",service->exec());
@@ -279,13 +287,15 @@ void Autostart::slotAddProgram()
     }
     else
     {
+        // Use existing desktop file and use same file name to enable overrides.
+        desktopPath = m_paths[4] + service->desktopEntryName() + ".desktop";
         desktopTemplate = KUrl( KStandardDirs::locate("apps", service->entryPath()) );
 
-        KPropertiesDialog dlg( desktopTemplate, KUrl(m_paths[4]), service->name() + ".desktop", this );
+        KPropertiesDialog dlg( desktopTemplate, KUrl(m_paths[4]), service->desktopEntryName() + ".desktop", this );
         if ( dlg.exec() != QDialog::Accepted )
             return;
     }
-    DesktopStartItem * item = new DesktopStartItem( m_paths[4] + service->name() + ".desktop", m_programItem,this );
+    DesktopStartItem * item = new DesktopStartItem( desktopPath, m_programItem,this );
     addItem( item, service->name(), m_pathName[0],  service->exec() , false);
 }
 
