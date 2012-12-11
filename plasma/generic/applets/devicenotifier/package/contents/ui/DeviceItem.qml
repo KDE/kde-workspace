@@ -270,6 +270,8 @@ Item {
             delegate: actionItem
             highlight: PlasmaComponents.Highlight{}
             Behavior on opacity { NumberAnimation { duration: 150 } }
+
+            Component.onCompleted: currentIndex = -1
         }
 
         Component {
@@ -286,6 +288,6 @@ Item {
     function makeCurrent()
     {
         notifierDialog.currentIndex = index;
-        notifierDialog.highlightItem.opacity=1;
+        notifierDialog.highlightItem.opacity = 1;
     }
 }
