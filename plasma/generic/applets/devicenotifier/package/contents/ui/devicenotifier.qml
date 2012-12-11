@@ -337,6 +337,7 @@ Item {
                 onIsLastChanged: {
                     if (isLast) {
                         notifierDialog.currentExpanded = index
+                        makeCurrent();
                     }
                 }
                 onOperationResultChanged: {
