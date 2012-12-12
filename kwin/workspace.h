@@ -58,8 +58,6 @@ class KActionCollection;
 class KStartupInfo;
 class KStartupInfoId;
 class KStartupInfoData;
-class QSlider;
-class QPushButton;
 
 namespace KWin
 {
@@ -460,7 +458,6 @@ public:
     QList<int> decorationSupportedColors() const;
     void nextDesktop();
     void previousDesktop();
-    void circulateDesktopApplications();
     bool waitForCompositingSetup();
     bool stopActivity(const QString &id);
     bool startActivity(const QString &id);
@@ -524,7 +521,6 @@ public:
     void updateFocusMousePosition(const QPoint& pos);
     QPoint focusMousePosition() const;
 
-    void toggleTopDockShadows(bool on);
     Client* getMovingClient() {
         return movingClient;
     }
@@ -716,10 +712,6 @@ private:
 
     Window findSpecialEventWindow(XEvent* e);
 
-    void randomPlacement(Client* c);
-    void smartPlacement(Client* c);
-    void cascadePlacement(Client* c, bool re_init = false);
-
     // Desktop names and number of desktops
     void loadDesktopSettings();
     void saveDesktopSettings();
@@ -858,9 +850,6 @@ private:
     Window null_focus_window;
     bool forced_global_mouse_grab;
     friend class StackingUpdatesBlocker;
-
-    QSlider* transSlider;
-    QPushButton* transButton;
 
 #ifdef KWIN_BUILD_KAPPMENU
     //used for menu available before window is mapped

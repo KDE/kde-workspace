@@ -43,6 +43,4 @@ install( FILES
     schemes/wm3.kksrc
     DESTINATION  ${DATA_INSTALL_DIR}/kcmkeys )
 
-install( FILES kaccel.upd  DESTINATION  ${KCONF_UPDATE_INSTALL_DIR} )
-install(PROGRAMS convertShortcuts.pl  DESTINATION  ${KCONF_UPDATE_INSTALL_DIR} )
 

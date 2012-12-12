@@ -35,7 +35,7 @@ class TopMenuBar : public MenuBar
 {
 Q_OBJECT
 public:
-    TopMenuBar(QMenu *menu = 0);
+    TopMenuBar();
     ~TopMenuBar();
 
     /**
@@ -51,6 +51,14 @@ public:
      * Get menubar parent window id
      */
     WId parentWid() { return m_wid; }
+    /**
+     * resize menu bar to feet content
+     */
+    void updateSize();
+    /**
+     * Move menubar and glow bar at position
+     */
+    void move(QPoint p);
 protected:
     bool cursorInMenuBar();
 private Q_SLOTS:
@@ -58,13 +66,15 @@ private Q_SLOTS:
     void slotMouseTracker();
     void slotHideGlowBar();
 private:
-    void deleteGlowBar();
+    void showGlowBar();
+    void hideGlowBar();
     qreal glowBarOpacity();
     QRect triggerRect();
+
     WId m_wid;
+    QPoint m_prevCursorPos;
     QTimer* m_mouseTracker;
     QTimer* m_hideGlowTimer;
-    QPoint m_prevCursorPos;
     GlowBar* m_glowBar;
 };
 

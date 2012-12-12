@@ -29,6 +29,7 @@
 #include <QPainter>
 #include <QMenu>
 #include <QDesktopWidget>
+#include <QGraphicsDropShadowEffect>
 
 #include <KWindowSystem>
 #include <Plasma/FrameSvg>
@@ -38,12 +39,12 @@
 #include <Plasma/WindowEffects>
 #include <KApplication>
 
-MenuBar::MenuBar(QMenu *menu)
+MenuBar::MenuBar()
     : QGraphicsView(),
     m_hideTimer(new QTimer(this)),
     m_background(new Plasma::FrameSvg(this)),
     m_scene(new QGraphicsScene(this)),
-    m_container(new MenuWidget(this, menu))
+    m_container(new MenuWidget(this))
 {
     qreal left, top, right, bottom;
 
@@ -59,17 +60,28 @@ MenuBar::MenuBar(QMenu *menu)
     //Setup the widgets
     m_background->setImagePath("widgets/tooltip");
     m_background->setEnabledBorders(Plasma::FrameSvg::BottomBorder|Plasma::FrameSvg::LeftBorder|Plasma::FrameSvg::RightBorder);
-    m_container->updateLayout();
+
+    m_container->initLayout();
 
     m_scene->addItem(m_container);
 
     setScene(m_scene);
+
+    // Add shadow for better readability
+    if (! Plasma::WindowEffects::isEffectAvailable(Plasma::WindowEffects::BlurBehind)) {
+        QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect();
+        shadow->setBlurRadius(5);
+        shadow->setOffset(QPointF(1, 1));
+        shadow->setColor(Plasma::Theme::defaultTheme()->color(Plasma::Theme::BackgroundColor));
+        setGraphicsEffect(shadow);
+    }
 
     m_background->getMargins(left, top, right, bottom);
     m_container->layout()->setContentsMargins(left, top, right, bottom);
     resize(sizeHint());
 
     connect(m_container, SIGNAL(aboutToHide()), this, SLOT(slotAboutToHide()));
+    connect(m_container, SIGNAL(needResize()), this, SIGNAL(needResize()));
     connect(m_hideTimer, SIGNAL(timeout()), this, SLOT(slotAboutToHide()));
 }
 
@@ -80,7 +92,7 @@ MenuBar::~MenuBar()
 QSize MenuBar::sizeHint() const
 {
     QSizeF size = m_container->minimumSize();
-    return QSize(size.width(), size.height());
+    return QSize(size.width(), size.height() - m_container->contentBottomMargin());
 }
 
 void MenuBar::show()
@@ -104,7 +116,6 @@ void MenuBar::slotAboutToHide()
     }
     else if (!cursorInMenuBar()) { //MenuWidget::AboutToHide signal
         hide();
-        emit aboutToHide();
     } else if (!m_hideTimer->isActive()){ //use click on menubar button while a popup was shown
         m_hideTimer->start(1000);
     }

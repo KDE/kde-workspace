@@ -75,7 +75,9 @@ SingleView::SingleView(Plasma::Corona *corona, Plasma::Containment *containment,
     QAction *action = m_applet->action("remove");
     delete action;
 
-    m_applet->addAction(QString("remove"), KStandardAction::quit(this, SLOT(hide()), m_applet));
+    QAction *quitAction = KStandardAction::quit(this, SLOT(close()), this);
+    m_applet->addAction(QString("remove"), quitAction);
+    addAction(quitAction);
     // enforce the applet being our size
     connect(m_applet, SIGNAL(geometryChanged()), this, SLOT(updateGeometry()));
 }

@@ -29,29 +29,21 @@
 #include <Plasma/ToolButton>
 #include <QToolButton>
 
+class QMenu;
+
 class MenuButton : public Plasma::ToolButton
 {
 Q_OBJECT
 public:
-    MenuButton(QGraphicsWidget *parent):
-    Plasma::ToolButton(parent),
-    m_enterEvent(false),
-    m_menu(0)
-    {}
+    MenuButton(QGraphicsWidget *parent);
 
-    void setMenu(QMenu *menu) { m_menu = menu; }
-    QMenu *menu() { return m_menu; }
     void setHovered(bool hovered);
 
-    QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint) const
-    {
-        QSizeF sh = Plasma::ToolButton::sizeHint(which, constraint);
-        if (which == Qt::MinimumSize || which == Qt::PreferredSize) {
-            sh.setHeight(nativeWidget()->fontMetrics().height());
-        }
-        return sh;
-    }
+    QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint) const;
+    qreal bottomMargin() const;
 
+    void setMenu(QMenu *menu) { m_menu = menu; }
+    QMenu* menu() { return m_menu; }
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *);

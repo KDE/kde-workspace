@@ -206,8 +206,6 @@ PlasmaApp::PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap)
 
     KConfigGroup cg(KGlobal::config(), "General");
     Plasma::Theme::defaultTheme()->setFont(cg.readEntry("desktopFont", font()));
-    m_activeOpacity = cg.readEntry("activeOpacity", 1.0);
-    m_idleOpacity = cg.readEntry("idleOpacity", 1.0);
 
     if (cg.readEntry("forceNoComposite", false)) {
         composite = false;
@@ -245,18 +243,6 @@ void PlasmaApp::cleanup()
     m_corona = 0;
 
     KGlobal::config()->sync();
-}
-
-void PlasmaApp::setActiveOpacity(qreal opacity)
-{
-    if (qFuzzyCompare(opacity, m_activeOpacity)) {
-        return;
-    }
-    m_activeOpacity = opacity;
-    emit setViewOpacity(opacity);
-    KConfigGroup cg(KGlobal::config(), "General");
-    cg.writeEntry("activeOpacity", opacity);
-    m_corona->requestConfigSync();
 }
 
 void PlasmaApp::createWaitingViews()
@@ -298,7 +284,6 @@ void PlasmaApp::createWaitingViews()
             connect(view, SIGNAL(hidden()), SIGNAL(hidden()));
             connect(this, SIGNAL(showViews()), view, SLOT(show()));
             connect(this, SIGNAL(hideViews()), view, SLOT(hide()));
-            connect(this, SIGNAL(setViewOpacity(qreal)), view, SLOT(setOpacity(qreal)));
             connect(this, SIGNAL(enableSetupMode()), view, SLOT(disableSetupMode()));
             connect(this, SIGNAL(disableSetupMode()), view, SLOT(disableSetupMode()));
             connect(this, SIGNAL(openToolBox()), view, SLOT(openToolBox()));
@@ -312,27 +297,6 @@ void PlasmaApp::createWaitingViews()
     setActive(m_active);
 }
 
-void PlasmaApp::setIdleOpacity(qreal opacity)
-{
-    if (qFuzzyCompare(opacity, m_idleOpacity)) {
-        return;
-    }
-    m_idleOpacity = opacity;
-    KConfigGroup cg(KGlobal::config(), "General");
-    cg.writeEntry("idleOpacity", opacity);
-    m_corona->requestConfigSync();
-}
-
-qreal PlasmaApp::activeOpacity() const
-{
-    return m_activeOpacity;
-}
-
-qreal PlasmaApp::idleOpacity() const
-{
-    return m_idleOpacity;
-}
-
 
 void PlasmaApp::setActive(bool activate)
 {
@@ -340,19 +304,10 @@ void PlasmaApp::setActive(bool activate)
     //note: allow this to run even if the value isn't changed,
     //because some views may need updating.
     if (activate) {
-        emit setViewOpacity(m_activeOpacity);
         emit showViews();
         emit openToolBox();
     } else {
-        if (qFuzzyCompare(m_idleOpacity + qreal(1.0), qreal(1.0))) {
-            //opacity is 0
-            emit hideViews();
-        } else {
-            lock();
-            emit setViewOpacity(m_idleOpacity);
-            emit showViews();
-            emit closeToolBox();
-        }
+        emit hideViews();
     }
 }
 

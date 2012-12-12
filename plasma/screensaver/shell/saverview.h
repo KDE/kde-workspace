@@ -51,7 +51,6 @@ protected:
 public slots:
     void showView();
     void hideView();
-    void setOpacity(qreal opacity);
     void adjustSize(int screen);
 
     /**

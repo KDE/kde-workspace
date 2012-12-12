@@ -258,6 +258,17 @@ void Applet::_onRemovedTask(Task *task)
     emit deletedTask(task);
 }
 
+void Applet::_onStatusChangedTask()
+{
+    foreach (Task *task, s_manager->tasks()) { 
+        if (task->status() == Task::NeedsAttention)  { 
+            setStatus(Plasma::NeedsAttentionStatus);
+            return; 
+        }
+    }
+    
+    setStatus(Plasma::PassiveStatus);
+}
 
 void Applet::_onWidgetCreationFinished()
 {
@@ -269,6 +280,7 @@ void Applet::_onWidgetCreationFinished()
 
     connect(s_manager, SIGNAL(taskAdded(SystemTray::Task*)),   this, SLOT(_onAddedTask(SystemTray::Task*)));
     connect(s_manager, SIGNAL(taskRemoved(SystemTray::Task*)), this, SLOT(_onRemovedTask(SystemTray::Task*)));
+    connect(s_manager, SIGNAL(taskStatusChanged()), this, SLOT(_onStatusChangedTask()));
 }
 
 

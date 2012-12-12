@@ -120,11 +120,6 @@ bool CubeEffect::supported()
 
 void CubeEffect::reconfigure(ReconfigureFlags)
 {
-    loadConfig("Cube");
-}
-
-void CubeEffect::loadConfig(QString config)
-{
     CubeConfig::self()->readConfig();
     foreach (ElectricBorder border, borderActivate) {
         effects->unreserveElectricBorder(border);
@@ -164,6 +159,7 @@ void CubeEffect::loadConfig(QString config)
     opacityDesktopOnly = CubeConfig::opacityDesktopOnly();
     displayDesktopName = CubeConfig::displayDesktopName();
     reflection = CubeConfig::reflection();
+    // TODO: rename rotationDuration to duration
     rotationDuration = animationTime(CubeConfig::rotationDuration() != 0 ? CubeConfig::rotationDuration() : 500);
     backgroundColor = CubeConfig::backgroundColor();
     capColor = CubeConfig::capColor();
@@ -303,7 +299,6 @@ bool CubeEffect::loadShader()
         return false;
     }
 
-    ShaderManager *shaderManager = ShaderManager::instance();
     // TODO: use generic shader - currently it is failing in alpha/brightness manipulation
     cylinderShader = new GLShader(cylinderVertexshader, fragmentshader);
     if (!cylinderShader->isValid()) {
@@ -475,11 +470,13 @@ void CubeEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
 #endif
             popMatrix();
 
+            const float width = rect.width();
+            const float height = rect.height();
             float vertices[] = {
-                -rect.width() * 0.5f, rect.height(), 0.0,
-                rect.width() * 0.5f, rect.height(), 0.0,
-                (float)rect.width()*scaleFactor, rect.height(), -5000,
-                -(float)rect.width()*scaleFactor, rect.height(), -5000
+                -width * 0.5f, height, 0.0,
+                width * 0.5f, height, 0.0,
+                width * scaleFactor, height, -5000,
+                -width * scaleFactor, height, -5000
             };
             // foreground
             float alpha = 0.7;
@@ -811,7 +808,8 @@ void CubeEffect::paintCap(bool frontFirst, float zOffset)
             // modulate the cap texture: cap color should be background for translucent pixels
             // cube opacity should be used for all pixels
             // blend with cap color
-            float color[4] = { capColor.redF(), capColor.greenF(), capColor.blueF(), cubeOpacity };
+            float color[4] = { static_cast<float>(capColor.redF()), static_cast<float>(capColor.greenF()),
+                               static_cast<float>(capColor.blueF()), cubeOpacity };
             glActiveTexture(GL_TEXTURE0);
             capTexture->bind();
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);

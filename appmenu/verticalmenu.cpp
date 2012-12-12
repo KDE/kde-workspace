@@ -25,14 +25,13 @@
 
 #include "verticalmenu.h"
 
-#include <QMenu>
+#include <QCoreApplication>
+#include <QKeyEvent>
 #include <QEvent>
+#include <QMenu>
+#include <QMouseEvent>
 
-#include <KWindowSystem>
-#include <netwm.h>
-
-VerticalMenu::VerticalMenu(QWidget* parent) :
-    QMenu(parent)
+VerticalMenu::VerticalMenu(QWidget* parent) : QMenu(parent)
 {
 }
 
@@ -40,23 +39,41 @@ VerticalMenu::~VerticalMenu()
 {
 }
 
-void VerticalMenu::popup(QPoint p)
+QMenu *VerticalMenu::leafMenu()
 {
-    // This flags are mandatory to get focus.
-    // Qt::Popup will fail to grab input here
-    setWindowFlags(Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
-    QMenu::popup(p);
-    KWindowSystem::forceActiveWindow(winId());
+    QMenu *leaf = this;
+    while (true) {
+        QAction *act = leaf->activeAction();
+        if (act && act->menu() && act->menu()->isVisible()) {
+            leaf = act->menu();
+            continue;
+        }
+        return leaf == this ? 0 : leaf;
+    }
+    return 0; // make gcc happy
 }
 
-bool VerticalMenu::event(QEvent *e)
+void VerticalMenu::paintEvent(QPaintEvent *pe)
 {
-    if (e->type() == QEvent::WindowDeactivate) {
-        hide();
-    } else if (e->type() == QEvent::Show) {
-        KWindowSystem::setState(winId(), NET::SkipTaskbar|NET::SkipPager);
-    }
-    return QMenu::event(e);
+    QMenu::paintEvent(pe);
+    if (QWidget::mouseGrabber() == this)
+        return;
+    if (QWidget::mouseGrabber())
+        QWidget::mouseGrabber()->releaseMouse();
+    grabMouse();
+    grabKeyboard();
 }
+
+#define FORWARD(_EVENT_, _TYPE_) \
+void VerticalMenu::_EVENT_##Event(Q##_TYPE_##Event *e) \
+{ \
+    if (QMenu *leaf = leafMenu()) \
+        QCoreApplication::sendEvent(leaf, e); \
+    else \
+        QMenu::_EVENT_##Event(e); \
+} \
+
+FORWARD(keyPress, Key)
+FORWARD(keyRelease, Key)
 
 #include "verticalmenu.moc"

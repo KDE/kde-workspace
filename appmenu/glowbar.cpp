@@ -38,7 +38,7 @@
 #include <QX11Info>
 
 
-GlowBar::GlowBar(const QPoint pos, uint width)
+GlowBar::GlowBar()
     : QWidget(0),
       m_svg(new Plasma::Svg(this))
 {
@@ -52,10 +52,6 @@ GlowBar::GlowBar(const QPoint pos, uint width)
     QPalette pal = palette();
     pal.setColor(backgroundRole(), Qt::transparent);
     setPalette(pal);
-
-    QRect zone = QRect(pos, QSize(width, 10));
-    setGeometry(zone);
-    m_buffer = QPixmap(zone.size());
 
     setInputMask();
 }
@@ -81,6 +77,13 @@ void GlowBar::paintEvent(QPaintEvent*)
     p.end();
     p.begin(this);
     p.drawPixmap(QPoint(0, 0), m_buffer);
+}
+
+void GlowBar::setPixmap(const QPoint pos, uint width)
+{
+    QRect zone = QRect(pos, QSize(width, 10));
+    setGeometry(zone);
+    m_buffer = QPixmap(zone.size());
 }
 
 void GlowBar::setInputMask()

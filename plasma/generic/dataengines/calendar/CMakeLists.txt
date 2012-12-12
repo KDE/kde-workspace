@@ -11,7 +11,7 @@ set(calendar_engine_srcs
     calendarengine.cpp
 )
 
-if(AKONADI_FOUND)
+if(Akonadi_FOUND)
     ADD_DEFINITIONS(-DAKONADI_FOUND)
     set(calendar_engine_srcs ${calendar_engine_srcs}
         eventdatacontainer.cpp
@@ -23,7 +23,7 @@ if(AKONADI_FOUND)
         akonadi/blockalarmsattribute.cpp
         akonadi/collectionselection.cpp
     )
-endif(AKONADI_FOUND)
+endif(Akonadi_FOUND)
 
 kde4_add_plugin(plasma_engine_calendar ${calendar_engine_srcs})
 
@@ -37,13 +37,13 @@ target_link_libraries(
     ${KDE4_KCALUTILS_LIBS}
 )
 
-if(AKONADI_FOUND)
+if(Akonadi_FOUND)
     target_link_libraries(
         plasma_engine_calendar
         ${KDE4_AKONADI_LIBS}
         ${KDEPIMLIBS_AKONADI_KCAL_LIBS}
     )
-endif(AKONADI_FOUND)
+endif(Akonadi_FOUND)
 
 install(TARGETS plasma_engine_calendar DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-dataengine-calendar.desktop DESTINATION ${SERVICES_INSTALL_DIR})

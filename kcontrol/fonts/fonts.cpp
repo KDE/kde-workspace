@@ -8,13 +8,16 @@
 
 #include <config-workspace.h>
 
+#include "fonts.h"
+#include "fonts.moc"
+
+#include <stdlib.h>
+
 #include <QCheckBox>
 #include <QComboBox>
-#include <QDir>
 #include <QLabel>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QtCore/QSettings>
 #include <qplatformdefs.h>
 
 //Added by qt3to4:
@@ -25,22 +28,20 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 
-#include <kacceleratormanager.h>
-#include <kapplication.h>
-#include <kglobalsettings.h>
-#include <kmessagebox.h>
-#include <knuminput.h>
-#include <kprocess.h>
-#include <kconfig.h>
-#include <kstandarddirs.h>
-#include <stdlib.h>
+#include <KFontDialog>
+#include <KAcceleratorManager>
+#include <KApplication>
+#include <KGlobalSettings>
+#include <KMessageBox>
+#include <KNumInput>
+#include <KProcess>
+#include <KConfig>
+#include <KStandardDirs>
+#include <KDebug>
+#include <KLocale>
+#include <KPluginFactory>
 
 #include "../krdb/krdb.h"
-#include "fonts.h"
-#include "fonts.moc"
-
-#include <kdebug.h>
-#include <klocale.h>
 
 #ifdef HAVE_FREETYPE
 #include <ft2build.h>
@@ -53,8 +54,6 @@
 #ifdef Q_WS_X11
 #include <X11/Xlib.h>
 #endif
-
-#include <KPluginFactory>
 
 #ifdef Q_WS_X11
 // X11 headers
@@ -772,20 +771,6 @@ void KFonts::save()
       }
   }
 #endif
-
-  // KDE-1.x support
-  {
-  KConfig config( QDir::homePath() + "/.kderc", KConfig::SimpleConfig);
-  KConfigGroup grp(&config, "General");
-
-  for(it=fontUseList.begin(); it!=end; ++it) {
-      if("font"==(*it)->rcKey())
-          QSettings().setValue("/qt/font", (*it)->font().toString());
-      kDebug(1208) << "write entry " <<  (*it)->rcKey();
-      grp.writeEntry( (*it)->rcKey(), (*it)->font() );
-  }
-  config.sync();
-  }
 
   KGlobalSettings::self()->emitChange(KGlobalSettings::FontChanged);
 

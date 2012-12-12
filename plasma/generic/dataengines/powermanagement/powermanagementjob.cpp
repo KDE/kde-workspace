@@ -127,13 +127,13 @@ QString PowerManagementJob::callForType(const SuspendType &type)
     }
 }
 
-void PowerManagementJob::setScreenBrightness(const int value)
+void PowerManagementJob::setScreenBrightness(int value)
 {
     QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
                                                       "/org/kde/Solid/PowerManagement",
                                                       "org.kde.Solid.PowerManagement",
                                                       "setBrightness");
-    msg.setArguments(QList<QVariant>() << QVariant::fromValue(value));
+    msg << value;
     QDBusConnection::sessionBus().asyncCall(msg);
 }
 

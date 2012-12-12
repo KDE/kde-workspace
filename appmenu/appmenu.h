@@ -92,18 +92,13 @@ private Q_SLOTS:
      */
     void slotWindowUnregistered(WId id);
     /**
-     * Update window importer
-     */
-    void slotUpdateImporter(WId id);
-    /**
      * Open a action in current menu
      */
     void slotActionActivationRequested(QAction* a);
     /**
-     * Active window changed, update menubar for id
-     * if force, menubar will be updated
+     * Active window changed, show menubar for id
      */
-    void slotActiveWindowChanged(WId id, bool force = false);
+    void slotActiveWindowChanged(WId id);
     /**
      * Update menubar with current window menu
      */
@@ -113,6 +108,10 @@ private Q_SLOTS:
      */
     void slotCurrentScreenChanged();
     /**
+     * Resize menubar
+     */
+    void slotBarNeedResize();
+    /**
      * Reconfigure module
      */
     void reconfigure();
@@ -120,21 +119,24 @@ private Q_SLOTS:
 private:
     /**
      * return an importer for window id
-     * if force, menu importer will no be taken from cache
      */
-    KDBusMenuImporter* getImporter(WId id, bool force = false);
+    KDBusMenuImporter* getImporter(WId id);
     /**
-     * Show top menubar with menu
+     * Show menubar and update it with menu
      */
-    void showTopMenuBar(QMenu *menu);
+    void showMenuBar(QMenu *menu);
     /**
-     * Hide menubar. Delete object
+     * Hide menubar
      */
-    void hideMenubar(TopMenuBar* menubar);
+    void hideMenubar();
     /**
      * Return current screen
      */
     int currentScreen();
+    /**
+     * Return position of menubar for being centered on screen
+     */
+    QPoint centeredMenubarPos();
 
     QObject* m_parent;
     MenuImporter* m_menuImporter;
@@ -144,7 +146,6 @@ private:
     QString m_menuStyle;
     TopMenuBar* m_menubar;
     VerticalMenu* m_menu;
-    QTimer* m_menuTimer;
     QTimer* m_screenTimer;
     QAction *m_waitingAction;
     int m_currentScreen;

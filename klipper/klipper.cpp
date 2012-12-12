@@ -199,6 +199,7 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config)
     // add barcode for mobile phones
     m_showBarcodeAction = m_collection->addAction("show-barcode");
     m_showBarcodeAction->setText(i18n("&Show Barcode..."));
+    m_showBarcodeAction->setGlobalShortcut(KShortcut());
     connect(m_showBarcodeAction, SIGNAL(triggered()), SLOT(slotShowBarcode()));
 #endif
 

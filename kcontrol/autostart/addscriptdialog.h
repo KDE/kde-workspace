@@ -32,7 +32,7 @@ class AddScriptDialog : public KDialog
     Q_OBJECT
 
 public:
-    AddScriptDialog(QWidget* parent=0);
+    explicit AddScriptDialog(QWidget* parent=0);
     ~AddScriptDialog();
     // Returns the Url of the script to be imported
     KUrl importUrl() const;

@@ -684,7 +684,15 @@ void AbstractTaskItem::drawTask(QPainter *painter, const QStyleOptionGraphicsIte
         kDebug() << bool(option->state & QStyle::State_MouseOver) << m_backgroundFadeAnim <<
             (m_backgroundFadeAnim ? m_backgroundFadeAnim->state() : QAbstractAnimation::Stopped);*/
         const bool fadingBg = m_backgroundFadeAnim && m_backgroundFadeAnim->state() == QAbstractAnimation::Running;
-        if ((!fadingBg && !(option->state & QStyle::State_MouseOver)) ||
+
+        //disabled look if the task is minimized
+        //AND show only minimized tasks is disabled
+        if ((m_flags & TaskIsMinimized) && !m_applet->groupManager().showOnlyMinimized()) {
+            KIconEffect *effect = KIconLoader::global()->iconEffect();
+            QPixmap result = icon().pixmap(iconR.toRect().size());
+            result = effect->apply(result, KIconLoader::Desktop, KIconLoader::DisabledState);
+            painter->drawPixmap(iconR.topLeft(), result);
+        } else if ((!fadingBg && !(option->state & QStyle::State_MouseOver)) ||
             (m_oldBackgroundPrefix != "hover" && m_backgroundPrefix != "hover")) {
             // QIcon::paint does some alignment work and can lead to funny
             // things when icon().size() != iconR.toRect().size()
@@ -1113,7 +1121,7 @@ QColor AbstractTaskItem::textColor() const
         color = theme->color(Plasma::Theme::TextColor);
     }
 
-    if (m_flags & TaskIsMinimized) {
+    if ((m_flags & TaskIsMinimized) && !m_applet->groupManager().showOnlyMinimized()) {
         color.setAlphaF(0.5);
     }
 
@@ -1126,9 +1134,9 @@ QString AbstractTaskItem::expanderElement() const
     case Plasma::TopEdge:
         return "down-arrow";
     case Plasma::RightEdge:
-        return "right-arrow";
-    case Plasma::LeftEdge:
         return "left-arrow";
+    case Plasma::LeftEdge:
+        return "right-arrow";
     case Plasma::BottomEdge:
     default:
         return "up-arrow";

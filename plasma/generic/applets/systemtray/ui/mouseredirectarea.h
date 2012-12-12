@@ -67,6 +67,8 @@ signals:
     void scrollVert(int delta);
     void scrollHorz(int delta);
     void changedMousePos(qreal mouseX, qreal mouseY);
+    void entered();
+    void exited();
 
 private: //Events
     virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
@@ -83,7 +85,7 @@ private: // Methods
     void processTarget();
 
 private: //Variables
-    QGraphicsWidget *m_widget;
+    QGraphicsObject *m_widget;
     Task *m_task;
     QObject *m_target;
     Plasma::Applet *m_applet;

@@ -171,7 +171,7 @@ X-KDE-Library=kwin4_effect_cooleffect
 
 #define KWIN_EFFECT_API_MAKE_VERSION( major, minor ) (( major ) << 8 | ( minor ))
 #define KWIN_EFFECT_API_VERSION_MAJOR 0
-#define KWIN_EFFECT_API_VERSION_MINOR 183
+#define KWIN_EFFECT_API_VERSION_MINOR 200
 #define KWIN_EFFECT_API_VERSION KWIN_EFFECT_API_MAKE_VERSION( \
         KWIN_EFFECT_API_VERSION_MAJOR, KWIN_EFFECT_API_VERSION_MINOR )
 
@@ -477,6 +477,12 @@ public:
      * in the effect itself.
      */
     static double animationTime(int defaultTime);
+    /**
+     * @overload Use this variant if animation time is provided through a KConfigXT generated class
+     * having a property called "duration".
+     **/
+    template <typename T>
+    int animationTime(int defaultDuration);
     /**
      * Linearly interpolates between @p x and @p y.
      *
@@ -2711,6 +2717,15 @@ void Motion<T>::finish()
 {
     m_value = m_target;
     m_velocity = T();
+}
+
+/***************************************************************
+ Effect
+***************************************************************/
+template <typename T>
+int Effect::animationTime(int defaultDuration)
+{
+    return animationTime(T::duration() != 0 ? T::duration() : defaultDuration);
 }
 
 } // namespace

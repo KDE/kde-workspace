@@ -25,6 +25,24 @@
 
 #include "menubutton.h"
 
+#include <QAction>
+#include <QMenu>
+#include <QGraphicsDropShadowEffect>
+
+#include <Plasma/Theme>
+
+MenuButton::MenuButton(QGraphicsWidget *parent):
+    Plasma::ToolButton(parent),
+    m_enterEvent(false),
+    m_menu(0)
+{
+    QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect();
+    shadow->setBlurRadius(5);
+    shadow->setOffset(QPointF(1, 1));
+    shadow->setColor(Plasma::Theme::defaultTheme()->color(Plasma::Theme::BackgroundColor));
+    setGraphicsEffect(shadow);
+}
+
 void MenuButton::setHovered(bool hovered)
 {
     if (hovered) {
@@ -32,6 +50,22 @@ void MenuButton::setHovered(bool hovered)
     } else {
         hoverLeaveEvent(0);
     }
+}
+
+QSizeF MenuButton::sizeHint(Qt::SizeHint which, const QSizeF& constraint) const
+{
+    QSizeF sh = Plasma::ToolButton::sizeHint(which, constraint);
+    if (which == Qt::MinimumSize || which == Qt::PreferredSize) {
+        sh.setHeight(nativeWidget()->fontMetrics().height() + bottomMargin());
+    }
+    return sh;
+}
+
+qreal MenuButton::bottomMargin() const
+{
+    qreal left, right, top, bottom;
+    getContentsMargins(&left, &right, &top, &bottom);
+    return bottom;
 }
 
 void MenuButton::hoverEnterEvent(QGraphicsSceneHoverEvent *e)

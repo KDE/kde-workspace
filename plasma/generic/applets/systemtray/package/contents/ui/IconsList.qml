@@ -34,13 +34,13 @@ MouseArea {
 
     property int icons_size:     24  ///< Size of icons, icons are square i.e. width == height
     property int icons_margins:  4  ///< Margins for icons
-    property alias icons_number: list.count  ///< [readonly] Number of icons
-    property alias model:    list.model; ///< Model for grid
+    property alias icons_number: repeater.count  ///< [readonly] Number of icons
+    property alias model:    repeater.model; ///< Model for grid
     property int cell_size: icons_size + 2*icons_margins ///< [readonly] size of grid cell
 
     //Those properties are used by PlasmaCore.Dialog for size hints
-    property int minimumWidth:   list.contentItem.childrenRect.width ///< [readonly] minimum width of component required to show whole grid
-    property int minimumHeight:  list.contentItem.childrenRect.height ///< [readonly] minimum height of compontn required to show whole grid
+    property int minimumWidth:   layoutColumn.childrenRect.width ///< [readonly] minimum width of component required to show whole grid
+    property int minimumHeight:  layoutColumn.childrenRect.height ///< [readonly] minimum height of compontn required to show whole grid
     property int maximumWidth: minimumWidth
     property int maximumHeight: minimumHeight
 
@@ -53,10 +53,9 @@ MouseArea {
             id: delegate_root_item
             width: childrenRect.width
             height: childrenRect.height
-            z: 0
 
             // we redirect some events to IconWidget or applet
-            target: task.type == TypeStatusItem ? ui_item.getIconWidget() : task
+            target: task.type == TypeStatusItem ? ui_item.getMouseArea() : task
             applet: plasmoid
 
             // Next events we process manually
@@ -64,9 +63,8 @@ MouseArea {
             onClickRight: ui_item.click(Qt.RightButton)
             onScrollVert: ui_item.scrollVert(delta)
             onScrollHorz: ui_item.scrollHorz(delta)
-            onChangedMousePos: {
-                var pos = mapToItem(list.contentItem, mouseX, mouseY)
-                list.currentIndex = list.indexAt(pos.x, pos.y)
+            onEntered: {
+                delegate_highlight.y = delegate_root_item.y
             }
 
             Row {
@@ -110,42 +108,38 @@ MouseArea {
             }
 
         }
+
     }
 
 
 
-    Component {
+    PlasmaWidgets.ItemBackground {
         id: delegate_highlight
-        Item {
-            height: cell_size
-            width: minimumWidth
+        height: cell_size
+        width: minimumWidth
 
-            PlasmaWidgets.ItemBackground {
-                anchors.fill: parent
+        opacity: root_item.containsMouse
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 150
+                easing: Easing.InOutQuad
             }
-            opacity: root_item.containsMouse
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 150
-                    easing: Easing.InOutQuad
-                }
+        }
+        Behavior on y {
+            NumberAnimation {
+                duration: 250
+                easing: Easing.InOutQuad
             }
         }
     }
 
-    ListView {
-        id: list
-        anchors.fill: parent
-        //never delete items
-        cacheBuffer: 1000
 
-        interactive: false
-        delegate: delegate_task
-        highlight: delegate_highlight
-        highlightFollowsCurrentItem: true
-        highlightMoveSpeed: -1
-        highlightMoveDuration: 250
+    Column {
+        id: layoutColumn
         spacing: 0
-        snapMode: ListView.SnapToItem
+        Repeater {
+            id: repeater
+            delegate: delegate_task
+        }
     }
 }

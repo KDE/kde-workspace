@@ -134,22 +134,36 @@ WId MenuImporter::recursiveMenuId(WId id)
 
 void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 {
+    bool changes = false;
+
     if (path.path().isEmpty()) //prevent bad dbusmenu usage
         return;
 
     QString service = message().service();
-    KWindowInfo info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
-    QString classClass = info.windowClassClass();
 
-    // Should this happen ?
-    m_menuServices.remove(id);
-    m_menuPaths.remove(id);
+    // Check if window already registered and if some changes happenned
+    // RegisterWindow happen on window mapping (unminimizing for ex)
+    if (m_menuServices.contains(id)) {
+        if (m_menuServices.value(id) != service ||
+            m_menuPaths.value(id) != path) {
+            changes = true;
+        }
+    } else {
+        changes = true; // First time
+    }
 
-    m_menuServices.insert(id, service);
-    m_menuPaths.insert(id, path);
-    m_windowClasses.insert(id, classClass);
-    m_serviceWatcher->addWatchedService(service);
-    WindowRegistered(id, service, path);
+    if (changes) {
+        KWindowInfo info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
+        QString classClass = info.windowClassClass();
+        m_windowClasses.insert(id, classClass);
+        m_menuServices.insert(id, service);
+        m_menuPaths.insert(id, path);
+        m_serviceWatcher->addWatchedService(service);
+        emit WindowRegistered(id, service, path);
+    } else {
+        // Importer do not need to be updated
+        emit WindowRegistered(id, "", QDBusObjectPath());
+    }
 }
 
 void MenuImporter::UnregisterWindow(WId id)
@@ -158,7 +172,7 @@ void MenuImporter::UnregisterWindow(WId id)
     m_menuPaths.remove(id);
     m_windowClasses.remove(id);
 
-    WindowUnregistered(id);
+    emit WindowUnregistered(id);
 }
 
 QString MenuImporter::GetMenuForWindow(WId id, QDBusObjectPath& path)
@@ -172,7 +186,7 @@ void MenuImporter::slotServiceUnregistered(const QString& service)
     WId id = m_menuServices.key(service);
     m_menuServices.remove(id);
     m_menuPaths.remove(id);
-    WindowUnregistered(id);
+    emit WindowUnregistered(id);
     m_serviceWatcher->removeWatchedService(service);
 }
 
@@ -185,13 +199,6 @@ void MenuImporter::slotLayoutUpdated(uint /*revision*/, int parentId)
 
     if (parentId == 0) { //root menu
         fakeUnityAboutToShow();
-        // update window menu importer
-        Q_FOREACH(const WId id, m_menuServices.keys()) {
-            if (m_menuServices.value(id) == message().service() &&
-                m_menuPaths.value(id).path() == message().path()) {
-                emit UpdateImporter(id);
-            }
-        }
     }
 }
 

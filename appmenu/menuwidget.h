@@ -26,33 +26,33 @@
 #ifndef MENUWIDGET__H
 #define MENUWIDGET__H
 
+#include "menubutton.h"
+
 #include <QGraphicsWidget>
 #include <QTimer>
 
 class QGraphicsLinearLayout;
 class QGraphicsView;
-class MenuButton;
 
 class MenuWidget : public QGraphicsWidget
 {
 Q_OBJECT
 public:
-    MenuWidget(QGraphicsView *view = 0, QMenu *menu = 0);
+    MenuWidget(QGraphicsView *view = 0);
     ~MenuWidget();
 
     /**
-     *  Update layout with root menu
+     * Set root menu
      */
-    void updateLayout();
+    void setMenu(QMenu *menu);
     /**
-     * Return true if layout is valid and populated
+     *  Init layout with root menu
      */
-    bool layoutValid();
+    void initLayout();
     /**
-     * True if a menu is visible in menubar
+     * True if a menu is visible in menuwidget
      */
-    bool aMenuIsVisible() { return m_aMenuIsVisible; }
-
+    bool aMenuIsVisible() { return m_visibleMenu; }
     /**
      * Activate action, or first action if null
      */
@@ -63,32 +63,60 @@ public:
      */
     void autoOpen() { m_mouseTimer->start(100); }
 
+    /**
+     * Return content bottom margin
+     */
+    qreal contentBottomMargin() { return m_contentBottomMargin; }
+
     void hide();
+
 protected:
     /**
      * Use to get keyboard events
      */
     virtual bool eventFilter(QObject*, QEvent*);
+    /**
+     * Filter events on main menu
+     */
+    bool menuEventFilter(QEvent* event);
+    /**
+     * Filter events on submenus
+     */
+    bool subMenuEventFilter(QObject* object, QEvent* event);
 private Q_SLOTS:
+    /**
+     * Clean menu if destroyed
+     */
+    void slotMenuDestroyed();
     /**
      * Check hovered item and active it
      */
     void slotCheckActiveItem();
     /**
-     * a menu is hidding
+     * A menu is hidding
      */
     void slotMenuAboutToHide();
     /**
-     * menubar button clicked
+     * Menubar button clicked
      */
     void slotButtonClicked();
+    /**
+     * Update pending actions
+     */
+    void slotUpdateActions();
 Q_SIGNALS:
+    void needResize();
     void aboutToHide();
 private:
     /**
-     * Show current button menu
+     * Return a button based on action
      */
-    void showMenu();
+    MenuButton* createButton(QAction *action);
+    /**
+     * Show current button menu
+     * return showed menu
+     */
+    QMenu* showMenu();
     /**
      * Show next menu if next, otherwise previous
      */
@@ -100,11 +128,14 @@ private:
 
     //Follow mouse position
     QTimer *m_mouseTimer;
+    //Update actions
+    QTimer *m_actionTimer;
     QGraphicsView *m_view;
     QGraphicsLinearLayout *m_layout;
     QList<MenuButton*> m_buttons;
     MenuButton *m_currentButton;
-    bool m_aMenuIsVisible;
+    qreal m_contentBottomMargin;
+    QMenu *m_visibleMenu;
     QMenu *m_menu;
 };
 

@@ -73,9 +73,9 @@ public:
     WId recursiveMenuId(WId id);
 
 Q_SIGNALS:
+    // Empty service means that we do not need to update importer
     void WindowRegistered(WId id, const QString& service, const QDBusObjectPath&);
     void WindowUnregistered(WId id);
-    void UpdateImporter(WId id);
 
 public Q_SLOTS:
     Q_NOREPLY void RegisterWindow(WId id, const QDBusObjectPath& path);

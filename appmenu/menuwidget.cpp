@@ -23,7 +23,6 @@
   DEALINGS IN THE SOFTWARE.
 */
 
-#include "menubutton.h"
 #include "menuwidget.h"
 
 #include <QMenu>
@@ -35,18 +34,19 @@
 #include <KDebug>
 #include <KApplication>
 
-MenuWidget::MenuWidget(QGraphicsView *view, QMenu *menu) :
+MenuWidget::MenuWidget(QGraphicsView *view) :
     QGraphicsWidget(),
     m_mouseTimer(new QTimer(this)),
+    m_actionTimer(new QTimer(this)),
     m_view(view),
     m_layout(new QGraphicsLinearLayout(this)),
     m_currentButton(0),
-    m_aMenuIsVisible(false),
-    m_menu(menu)
+    m_contentBottomMargin(0),
+    m_visibleMenu(0),
+    m_menu(0)
 {
+    connect(m_actionTimer, SIGNAL(timeout()), SLOT(slotUpdateActions()));
     connect(m_mouseTimer, SIGNAL(timeout()), SLOT(slotCheckActiveItem()));
-
-    m_layout->setContentsMargins(0, 0, 0, 0);
 }
 
 MenuWidget::~MenuWidget()
@@ -58,28 +58,71 @@ MenuWidget::~MenuWidget()
     }
 }
 
-void MenuWidget::updateLayout()
+void MenuWidget::setMenu(QMenu *menu)
 {
-    foreach( QAction* action, m_menu->actions() )
-    {
-        QMenu *menu = action->menu();
-        action->setShortcut(QKeySequence());
-        MenuButton* button;
-        if( action->isSeparator() || !menu )
-            continue;
+    if (m_menu) {
+        disconnect(m_menu, SIGNAL(destroyed()), this, SLOT(slotMenuDestroyed()));
+        m_menu->removeEventFilter(this);
+    }
+    if (menu) {
+        m_menu = menu;
+        connect(m_menu, SIGNAL(destroyed()), SLOT(slotMenuDestroyed()), Qt::UniqueConnection);
+        m_menu->installEventFilter(this);
+        slotUpdateActions();
+    }
+}
 
-        //Create a new button, we do not set menu here as it may have changed on showMenu()
-        button = new MenuButton(this);
-        button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-        button->setText(action->text());
-        button->setMenu(action->menu());
-        connect(button, SIGNAL(clicked()), SLOT(slotButtonClicked()));
-        m_layout->addItem(button);
-        m_buttons << button;
+void MenuWidget::initLayout()
+{
+    MenuButton* button = 0;
+
+    if (!m_menu) {
+        return;
+    }
+
+    foreach (QAction* action, m_menu->actions())
+    {
+        button = createButton(action);
+        if (button) {
+            m_layout->addItem(button);
+            button->setMenu(action->menu());
+            m_buttons << button;
+        }
+    }
+
+    //Assume all buttons have same margins
+    if (button) {
+        m_contentBottomMargin = button->bottomMargin();
     }
 }
 
 bool MenuWidget::eventFilter(QObject* object, QEvent* event)
+{
+    bool filtered;
+    if (object == m_menu) {
+        filtered = menuEventFilter(event);
+    } else {
+        filtered = subMenuEventFilter(static_cast<QMenu*>(object), event);
+    }
+    return filtered ? true : QGraphicsWidget::eventFilter(object, event);
+}
+
+bool MenuWidget::menuEventFilter(QEvent* event)
+{
+    switch (event->type()) {
+    case QEvent::ActionAdded:
+    case QEvent::ActionRemoved:
+    case QEvent::ActionChanged:
+        // Try to limit layout updates
+        m_actionTimer->start(500);
+        break;
+    default:
+        break;
+    }
+    return false;
+}
+
+bool MenuWidget::subMenuEventFilter(QObject* object, QEvent* event)
 {
     QMenu *menu = static_cast<QMenu*>(object);
 
@@ -108,6 +151,11 @@ bool MenuWidget::eventFilter(QObject* object, QEvent* event)
     return false;
 }
 
+void MenuWidget::slotMenuDestroyed()
+{
+    m_menu = 0;
+}
+
 void MenuWidget::slotCheckActiveItem()
 {
     MenuButton* buttonBelow = 0;
@@ -123,26 +171,22 @@ void MenuWidget::slotCheckActiveItem()
     if (buttonBelow != m_currentButton) {
         if (m_currentButton) {
             m_currentButton->nativeWidget()->setDown(false);
-            m_currentButton->setHovered( false );
-            QMenu *menu = m_currentButton->menu();
-            if (menu) {
-                disconnect(menu, SIGNAL(aboutToHide()), this, SLOT(slotMenuAboutToHide()));
-                menu->hide();
-                m_aMenuIsVisible = false;
-            }
+            m_currentButton->setHovered(false);
+            m_currentButton = buttonBelow;
+            m_currentButton->nativeWidget()->setDown(true);
+            m_visibleMenu = showMenu();
         }
-        m_currentButton = buttonBelow;
-        m_currentButton->nativeWidget()->setDown(true);
-        showMenu();
     }
 }
 
 void MenuWidget::slotMenuAboutToHide()
 {
-    m_currentButton->setDown( false );
+    if (m_currentButton) {
+        m_currentButton->setDown(false);
+    }
     if (m_mouseTimer->isActive())
         m_mouseTimer->stop();
-    m_aMenuIsVisible = false;
+    m_visibleMenu = 0;
     emit aboutToHide();
 }
 
@@ -151,20 +195,47 @@ void MenuWidget::slotButtonClicked()
     m_currentButton = qobject_cast<MenuButton*>(sender());
 
     m_currentButton->nativeWidget()->setDown(true);
-    showMenu();
+    m_visibleMenu = showMenu();
     // Start auto navigation after click
     if (!m_mouseTimer->isActive())
         m_mouseTimer->start(100);
 }
 
+void MenuWidget::slotUpdateActions()
+{
+    if (m_visibleMenu) {
+        return; // Later
+    }
+
+    m_actionTimer->stop();
+    foreach (MenuButton *button, m_buttons) {
+        disconnect(button, SIGNAL(clicked()), this, SLOT(slotButtonClicked()));
+        m_layout->removeItem(button);
+        button->hide();
+        m_buttons.removeOne(button);
+        delete button;
+    }
+    initLayout();
+    // Menu may be empty on application startup
+    // slotUpdateActions will be called later by eventFilter()
+    if (m_menu && m_menu->actions().length()) {
+        emit needResize();
+    }
+}
+
 void MenuWidget::setActiveAction(QAction *action)
 {
+    if (!m_menu) {
+        return;
+    }
+
     m_currentButton = m_buttons.first();
 
     if (action) {
         QMenu *menu;
+        int i = 0;
         foreach (MenuButton *button, m_buttons) {
-            menu = button->menu();
+            menu = m_menu->actions()[i]->menu();
             if (menu && menu == action->menu()) {
                 m_currentButton = button;
                 break;
@@ -176,19 +247,49 @@ void MenuWidget::setActiveAction(QAction *action)
 
 void MenuWidget::hide()
 {
-    if (m_mouseTimer->isActive())
+    if (m_mouseTimer->isActive()) {
         m_mouseTimer->stop();
+    }
     QGraphicsWidget::hide();
 }
 
-void MenuWidget::showMenu()
+MenuButton* MenuWidget::createButton(QAction *action)
+{
+    if( action->isSeparator() || !action->menu() || !action->isVisible()) {
+        return 0;
+    }
+
+    action->setShortcut(QKeySequence());
+    MenuButton *button = new MenuButton(this);
+    button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+    button->setText(action->text());
+    connect(button, SIGNAL(clicked()), SLOT(slotButtonClicked()));
+    return button;
+}
+
+QMenu* MenuWidget::showMenu()
 {
     QMenu *menu = 0;
-    //Look for submenu, we do not use m_currentButton->menu() as menu may have changed.
-    foreach (QAction *action, m_menu->actions()) {
-        if (m_currentButton->text() == action->text()) {
-            menu = action->menu();
-            break;
+
+    if (m_visibleMenu) {
+        disconnect(m_visibleMenu, SIGNAL(aboutToHide()), this, SLOT(slotMenuAboutToHide()));
+        m_visibleMenu->hide();
+    }
+
+    if (m_currentButton && m_menu) {
+        menu = m_currentButton->menu();
+    }
+
+    // Last chance to get menu
+    // Some applications like Firefox have empties menus on layout updates
+    // They should populate this menu later but in fact, they use another object
+    // So, we check here directly the button name, may fail with menubar with buttons with same name (test apps)
+    if (menu && menu->actions().length() == 0) {
+        foreach (QAction *action, m_menu->actions()) {
+            if (action->text() == m_currentButton->text()) {
+                menu = action->menu();
+                break;
+            }
         }
     }
 
@@ -199,9 +300,7 @@ void MenuWidget::showMenu()
         int x = globalPos.x() - parentPos.x();
         int y = globalPos.y() + m_currentButton->size().height() - parentPos.y();
 
-        m_currentButton->setMenu(menu);
         menu->popup(QPoint(x, y));
-        m_aMenuIsVisible = true;
 
         // Fix offscreen menu
         if (menu->size().height() + y > screen.height() + screen.y()) {
@@ -217,10 +316,15 @@ void MenuWidget::showMenu()
 
         installEventFilterForAll(menu, this);
     }
+    return menu;
 }
 
 void MenuWidget::showLeftRightMenu(bool next)
 {
+    if (!m_currentButton) {
+        return;
+    }
+
     int index = m_buttons.indexOf(m_currentButton);
     if (index == -1) {
         kWarning() << "Couldn't find button!";
@@ -232,22 +336,18 @@ void MenuWidget::showLeftRightMenu(bool next)
         index = (index == 0 ? m_buttons.count() : index) - 1;
     }
 
-    QMenu *menu = m_currentButton->menu();
-
-    if (menu) {
-        disconnect(menu, SIGNAL(aboutToHide()), this, SLOT(slotMenuAboutToHide()));
-        m_aMenuIsVisible = false;
-        menu->hide();
-    }
-
     m_currentButton->setDown(false);
     m_currentButton = m_buttons.at(index);
     m_currentButton->nativeWidget()->setDown(true);
-    showMenu();
+    m_visibleMenu = showMenu();
 }
 
 void MenuWidget::installEventFilterForAll(QMenu *menu, QObject *object)
 {
+    if (!menu) {
+        return;
+    }
+
     menu->installEventFilter(this);
 
     foreach (QAction *action, menu->actions()) {

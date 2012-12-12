@@ -30,7 +30,7 @@ Item {
     property alias deviceName: deviceLabel.text
     property string emblemIcon
     property int state
-    property alias leftActionIcon: leftAction.icon
+    property alias leftActionIcon: leftAction.source
     property bool mounted
     property bool expanded: (notifierDialog.currentExpanded == index)
     property alias percentUsage: freeSpaceBar.value
@@ -68,43 +68,37 @@ Item {
         }
         onClicked: {
             notifierDialog.itemFocused();
-            if (leftAction.visible
-                && mouse.x >= leftAction.x
-                && mouse.x <= leftAction.x + leftAction.width
-                && mouse.y >= leftAction.y
-                && mouse.y <= leftAction.y + leftAction.height) {
-                leftActionTriggered();
+
+            var actions = hpSource.data[udi]["actions"];
+            if (actions.length == 1) {
+                service = hpSource.serviceForSource(udi);
+                operation = service.operationDescription("invokeAction");
+                operation.predicate = actions[0]["predicate"];
+                service.startOperationCall(operation);
             } else {
-                var actions = hpSource.data[udi]["actions"];
-                if (actions.length == 1) {
-                    service = hpSource.serviceForSource(udi);
-                    operation = service.operationDescription("invokeAction");
-                    operation.predicate = actions[0]["predicate"];
-                    service.startOperationCall(operation);
-                } else {
-                    notifierDialog.currentExpanded = expanded ? -1 : index;
-                }
+                notifierDialog.currentExpanded = expanded ? -1 : index;
             }
         }
 
         // FIXME: Device item loses focus on mounting/unmounting it,
         // or specifically, when some UI element changes.
-        QIconItem {
+        PlasmaCore.IconItem {
             id: deviceIcon
-            width: 32
-            height: 32
+            width: theme.iconSizes.dialog
+            height: width
             z: 900
-            icon: QIcon(deviceItem.icon)
+            source: QIcon(deviceItem.icon)
+            enabled: deviceItem.state == 0
             anchors {
                 left: parent.left
                 top: parent.top
             }
 
-            QIconItem {
+            PlasmaCore.IconItem {
                 id: emblem
-                width: 16
-                height: 16
-                icon: deviceItem.state == 0 ? QIcon(emblemIcon) : QIcon();
+                width: theme.iconSizes.dialog * 0.5
+                height: width
+                source: deviceItem.state == 0 ? QIcon(emblemIcon) : QIcon();
                 anchors {
                     left: parent.left
                     bottom: parent.bottom
@@ -120,7 +114,7 @@ Item {
             anchors {
                 top: parent.top
                 left: deviceIcon.right
-                right: leftAction.left
+                right: leftActionArea.left
                 leftMargin: padding.margins.left
             }
             PlasmaComponents.Label {
@@ -131,6 +125,7 @@ Item {
                     left: parent.left
                     right: parent.right
                 }
+                enabled: deviceItem.state == 0
             }
 
             Item {
@@ -143,10 +138,10 @@ Item {
                     // FIXME: state changes do not reach the plasmoid if the
                     // device was already attached when the plasmoid was
                     // initialized
-                    text: deviceItem.state ==0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
+                    text: deviceItem.state == 0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
-                    opacity: container.containsMouse || expanded ? 1 : 0;
+                    opacity: deviceItem.state != 0 || container.containsMouse || expanded ? 1 : 0;
 
                     Behavior on opacity { NumberAnimation { duration: 150 } }
                     }
@@ -158,7 +153,7 @@ Item {
                     left: parent.left
                     right: parent.right
                 }
-                opacity: mounted ? 1 : 0
+                opacity: (deviceItem.state == 0 && mounted) ? 1 : 0
                 PlasmaComponents.ProgressBar {
                     id: freeSpaceBar
                     height: deviceStatus.height
@@ -189,15 +184,36 @@ Item {
             subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
         }
 
-        QIconItem {
-            id: leftAction
-            width: 22
-            height: 22
+        MouseEventListener {
+            id: leftActionArea
+            width: theme.iconSizes.dialog*0.8
+            height: width
+            hoverEnabled: true
             anchors {
                 right: parent.right
                 verticalCenter: deviceIcon.verticalCenter
             }
-            visible: !busySpinner.visible
+
+            onClicked: {
+                notifierDialog.itemFocused();
+                if (leftAction.visible) {
+                    leftActionTriggered()
+                }
+            }
+
+            PlasmaCore.IconItem {
+                id: leftAction
+                anchors.fill: parent
+                active: leftActionArea.containsMouse
+                visible: !busySpinner.visible
+            }
+
+            PlasmaComponents.BusyIndicator {
+                id: busySpinner
+                anchors.fill: parent
+                running: visible
+                visible: deviceItem.state != 0
+            }
         }
 
         PlasmaCore.ToolTip {
@@ -238,34 +254,24 @@ Item {
             }
         }
 
-        PlasmaComponents.BusyIndicator {
-            id: busySpinner
-            width: 22
-            height: 22
-            anchors {
-                right: parent.right
-                verticalCenter: deviceIcon.verticalCenter
-            }
-            running: visible
-            visible: deviceItem.state != 0
-        }
-
         ListView {
             id: actionsList
             anchors {
                 top: labelsColumn.bottom
                 left: deviceIcon.right
-                right: leftAction.right
+                right: leftActionArea.right
             }
             interactive: false
             model: hpSource.data[udi]["actions"]
             property int actionVerticalMargins: 5
-            property int actionIconHeight: 30
+            property int actionIconHeight: theme.iconSizes.dialog*0.8
             height: expanded ? ((actionIconHeight+(2*actionVerticalMargins))*model.length)+anchors.topMargin : 0
             opacity: expanded ? 1 : 0
             delegate: actionItem
-            highlight: actionHighlighter
+            highlight: PlasmaComponents.Highlight{}
             Behavior on opacity { NumberAnimation { duration: 150 } }
+
+            Component.onCompleted: currentIndex = -1
         }
 
         Component {
@@ -277,28 +283,11 @@ Item {
                 predicate: modelData["predicate"]
             }
         }
-
-        Component {
-            id: actionHighlighter
-
-            PlasmaCore.FrameSvgItem {
-                width: actionsList.width
-                imagePath: "widgets/viewitem"
-                prefix: "hover"
-                opacity: 0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.OutQuad
-                    }
-                }
-            }
-        }
     }
 
     function makeCurrent()
     {
         notifierDialog.currentIndex = index;
-        notifierDialog.highlightItem.opacity=1;
+        notifierDialog.highlightItem.opacity = 1;
     }
 }

@@ -37,11 +37,12 @@ class GlowBar : public QWidget
 {
 Q_OBJECT
 public:
-    GlowBar(const QPoint pos, uint width);
+    GlowBar();
     ~GlowBar();
 
     void paintEvent(QPaintEvent*);
 
+    void setPixmap(const QPoint pos, uint width);
 private:
     void setInputMask();
     Plasma::Svg *m_svg;

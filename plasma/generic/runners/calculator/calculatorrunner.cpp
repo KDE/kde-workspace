@@ -207,12 +207,14 @@ void CalculatorRunner::match(Plasma::RunnerContext &context)
     if (cmd.length() < 4) {
         return;
     }
+
     if (cmd.toLower() == "universe" || cmd.toLower() == "life") {
         Plasma::QueryMatch match(this);
         match.setType(Plasma::QueryMatch::InformationalMatch);
         match.setIcon(KIcon("accessories-calculator"));
-        match.setText("= 42");
-        match.setId(QString());
+        match.setText("42");
+        match.setData("42");
+        match.setId(term);
         context.addMatch(term, match);
         return;
     }
@@ -249,8 +251,8 @@ void CalculatorRunner::match(Plasma::RunnerContext &context)
         match.setType(Plasma::QueryMatch::InformationalMatch);
         match.setIcon(KIcon("accessories-calculator"));
         match.setText(result);
-        match.setData(QString::fromLatin1("= %1").arg(result));
-        match.setId(QString());
+        match.setData(result);
+        match.setId(term);
         context.addMatch(term, match);
     }
 }
@@ -258,7 +260,7 @@ void CalculatorRunner::match(Plasma::RunnerContext &context)
 QString CalculatorRunner::calculate(const QString& term)
 {
     #ifdef ENABLE_QALCULATE
-    QString result = "";
+    QString result;
 
     try {
         result = m_engine->evaluate(term);
@@ -282,8 +284,8 @@ QString CalculatorRunner::calculate(const QString& term)
     }
 
     if (!resultString.contains('.')) {
-            return resultString;
-        }
+        return resultString;
+    }
 
     //ECMAScript has issues with the last digit in simple rational computations
     //This script rounds off the last digit; see bug 167986
@@ -300,7 +302,7 @@ QString CalculatorRunner::calculate(const QString& term)
 QMimeData * CalculatorRunner::mimeDataForMatch(const Plasma::QueryMatch *match)
 {
     //kDebug();
-    QMimeData * result = new QMimeData();
+    QMimeData *result = new QMimeData();
     result->setText(match->text());
     return result;
 }

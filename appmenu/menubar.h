@@ -43,16 +43,19 @@ class MenuBar : public QGraphicsView
 {
 Q_OBJECT
 public:
-    MenuBar(QMenu *menu = 0);
+    MenuBar();
     ~MenuBar();
 
+    /**
+     * Set root menu
+     */
+    void setMenu(QMenu *menu) { m_container->setMenu(menu); }
     /**
      * Auto open menu items on mouse over
      */
     void autoOpen() { m_container->autoOpen(); }
-
     /**
-     * set action as active menubar action
+     * Set action as active menubar action
      */
     void setActiveAction(QAction *action) { m_container->setActiveAction(action); }
 
@@ -63,6 +66,7 @@ public:
 private Q_SLOTS:
     void slotAboutToHide();
 Q_SIGNALS:
+    void needResize();
     void aboutToHide();
 protected:
     /**

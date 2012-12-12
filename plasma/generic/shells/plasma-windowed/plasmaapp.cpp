@@ -124,7 +124,7 @@ int  PlasmaApp::newInstance()
 
     int appletId;
     Plasma::Containment *containment = m_corona->addContainment("null");
-    containment->setFormFactor(Plasma::Planar);
+    containment->setFormFactor(Plasma::Application);
     containment->setLocation(Plasma::Floating);
     appletId = ++m_maxId;
 

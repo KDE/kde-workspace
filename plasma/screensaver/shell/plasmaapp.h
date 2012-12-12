@@ -48,11 +48,6 @@ public:
 
     Plasma::Corona* corona();
 
-    void setActiveOpacity(qreal opacity);
-    void setIdleOpacity(qreal opacity);
-    qreal activeOpacity() const;
-    qreal idleOpacity() const;
-
 Q_SIGNALS:
     // DBUS interface.
     //if you change stuff, remember to regenerate with:
@@ -78,7 +73,7 @@ public Q_SLOTS:
 
     /**
      * get plasma all set up and ready
-     * this makes sure things like opacity, visibility and locked-ness are set right
+     * this makes sure things like visibility and locked-ness are set right
      * normally this is called only by plasmaapp itself when it finishes initialization, but it's
      * possible that it might need to be run again by lockprocess
      *
@@ -105,7 +100,6 @@ private Q_SLOTS:
 Q_SIGNALS:
     void showViews();
     void hideViews();
-    void setViewOpacity(qreal opacity);
     void showDialogs();
     void hideDialogs();
     void hideWidgetExplorer();
@@ -129,8 +123,6 @@ private:
     QList<QWeakPointer<Plasma::Containment> > m_viewsWaiting;
     QTimer m_viewCreationTimer;
 
-    qreal m_activeOpacity;
-    qreal m_idleOpacity;
     bool m_active;
 };
 

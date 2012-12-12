@@ -334,7 +334,7 @@ void KCommonDecoration::objDestroyed(QObject *obj)
         m_previewWidget = 0;
 }
 
-QRegion KCommonDecoration::region(KDecorationDefines::Region r)
+QRegion KCommonDecoration::region(KDecorationDefines::Region)
 {
     return QRegion();
 }
@@ -399,7 +399,7 @@ void KCommonDecoration::addButtons(ButtonContainer &btnContainer, const QString&
                     if (!btn) break;
                     btn->setTipText(i18nc("Button showing application menu", "Application Menu"));
                     btn->setRealizeButtons(Qt::LeftButton);
-                    connect(btn, SIGNAL(pressed()), SLOT(appMenuButtonPressed()));
+                    connect(btn, SIGNAL(clicked()), SLOT(appMenuButtonPressed()), Qt::QueuedConnection);
                     // Application want to show it menu
                     connect(decoration(), SIGNAL(showRequest()), this, SLOT(appMenuButtonPressed()), Qt::UniqueConnection);
                     // Wait for menu to become available before displaying any button
@@ -543,7 +543,7 @@ void KCommonDecoration::addButtons(ButtonContainer &btnContainer, const QString&
                 btn->setLeft(isLeft);
                 btn->setSize(QSize(layoutMetric(LM_ButtonWidth, true, btn), layoutMetric(LM_ButtonHeight, true, btn)));
                 // will be shown later on window registration
-                if (btn->type() == AppMenuButton && !wrapper->menuAvailable()) {
+                if (btn->type() == AppMenuButton && !isPreview() && !wrapper->menuAvailable()) {
                     btn->hide();
                 } else {
                     btn->show();

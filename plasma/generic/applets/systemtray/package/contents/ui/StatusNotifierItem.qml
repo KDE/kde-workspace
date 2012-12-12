@@ -24,7 +24,6 @@
 import QtQuick 1.1
 import Private 0.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
 
 
@@ -56,22 +55,9 @@ Item {
         task.activateVertScroll(delta)
     }
 
-    function getIconWidget() {
-        return icon_widget
+    function getMouseArea() {
+        return mouse_area
     }
-
-    // main svg icon redefined by desktop-theme ========================================================================
-    property variant svg: PlasmaCore.Svg {
-        property variant icon: QIcon(pixmap(__icon_name))
-        imagePath: "icons/" + __icon_name.split("-", 1)[0]
-    }
-
-    // attention svg icon redefined by desktop-theme ===================================================================
-    property variant svg_att: PlasmaCore.Svg {
-        property variant icon: QIcon(pixmap(__att_icon_name))
-        imagePath: "icons/" + __att_icon_name.split("-", 1)[0]
-    }
-
 
     Connections {
         target: task
@@ -94,19 +80,12 @@ Item {
 
 
     // Widget for icon =================================================================================================
-    PlasmaWidgets.IconWidget {
+    PlasmaCore.IconItem {
         id: icon_widget
-        action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.id) : null
+        property QtObject action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.id) : null
         anchors.fill: parent
-        maximumIconSize: Qt.size(parent.width, parent.height)
         visible: false
-
-        onClicked: {
-            // we don't process mouse click if action has non-empty shortcut, because icon_widget will trigger action
-            if ( !(icon_widget.action && icon_widget.action.globalShortcutEnabled) ) {
-                __processClick(Qt.LeftButton, icon_widget)
-            }
-        }
+        active: mouse_area.containsMouse
 
         Component.onDestruction: {
             var act = icon_widget.action
@@ -149,32 +128,14 @@ Item {
         property bool is_att_icon: false
 
         onTriggered: {
-            icon_widget.icon = is_att_icon ? __getAttentionIcon() : __getDefaultIcon()
+            icon_widget.source = is_att_icon ? __getAttentionIcon() : __getDefaultIcon()
             is_att_icon = !is_att_icon
         }
     }
 
-    // Tooltip =========================================================================================================
-    PlasmaCore.ToolTip {
-        id: tooltip
-        target: icon_widget
-        mainText: __has_task ? task.tooltipTitle : ""
-        subText: __has_task ? task.tooltipText : ""
-        image:   __has_task ? task.tooltipIcon : ""
-    }
+    
 
-    // Mouse events handlers ===========================================================================================
-    MouseArea {
-        id: mouse_area
-        anchors.fill: parent
-        // if no task passed we don't accept any buttons, if icon_widget is visible we pass left button to it
-        acceptedButtons: __has_task ? (( icon_widget.visible ? 0 : Qt.LeftButton) | Qt.RightButton | Qt.MiddleButton) : 0
-        enabled: __has_task
-        visible: __has_task
-        z: -1
-
-        onClicked: 	__processClick(mouse.button, mouse_area)
-    }
+    
 
     // TODO: remove wheel area in QtQuick 2.0
     QtExtraComponents.MouseEventListener {
@@ -184,21 +145,43 @@ Item {
         visible: __has_task
         z: -2
 
+        // Mouse events handlers ===========================================================================================
+        MouseArea {
+            id: mouse_area
+            anchors.fill: parent
+            hoverEnabled: true
+            // if no task passed we don't accept any buttons, if icon_widget is visible we pass left button to it
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            enabled: __has_task
+            visible: __has_task
+            //z: -1
+            //z: 100
+
+            onClicked: __processClick(mouse.button, mouse_area)
+        }
         onWheelMoved: {
             if (wheel.orientation === Qt.Horizontal)
                 task.activateHorzScroll(wheel.delta)
             else
                 task.activateVertScroll(wheel.delta)
         }
+        // Tooltip =========================================================================================================
+        PlasmaCore.ToolTip {
+            id: tooltip
+            target: wheel_area
+            mainText: __has_task ? task.tooltipTitle : ""
+            subText:  __has_task ? task.tooltipText : ""
+            image:    __has_task ? task.tooltipIcon : ""
+        }
     }
 
     // Functions =======================================================================================================
     function __getDefaultIcon() {
-        return svg.isValid() ? svg.icon : __icon
+        return __icon_name != "" ? __icon_name : __icon
     }
 
     function __getAttentionIcon() {
-        return svg_att.isValid() ? svg_att.icon : __att_icon
+        return __att_icon_name != "" ? __att_icon_name : __att_icon
     }
 
     function __processClick(buttons, item) {
@@ -222,7 +205,7 @@ Item {
             }
             PropertyChanges {
                 target: icon_widget
-                icon: __getDefaultIcon()
+                source: __getDefaultIcon()
                 visible: true
             }
             PropertyChanges {
@@ -240,7 +223,7 @@ Item {
             when: __status === NeedsAttention && !__movie_path
             PropertyChanges {
                 target: icon_widget
-                icon: __getAttentionIcon()
+                source: __getAttentionIcon()
                 visible: true
             }
             PropertyChanges {
@@ -267,7 +250,7 @@ Item {
             }
             PropertyChanges {
                 target: icon_widget
-                icon: __getDefaultIcon()
+                source: __getDefaultIcon()
                 visible: false
             }
             PropertyChanges {

@@ -24,10 +24,9 @@
 
 #ifdef HAVE_FONTCONFIG
 
-#include <QStringList>
-#include <stdio.h>
-#include <fstream>
 #include <time.h>
+
+#include <QStringList>
 #include <QtXml/QtXml>
 
 class KXftConfig
