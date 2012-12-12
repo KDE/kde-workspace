@@ -152,9 +152,16 @@ void AppMenuModule::slotAboutToHide()
 }
 
 // New window registered
-// Do not get importer here as it can freeze module on session loading
 void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const QDBusObjectPath& path)
 {
+    if (m_menuStyle == "ButtonVertical") {
+        // Tell Kwin menu is available
+        emit menuAvailable(id);
+    }
+    if (service == "") { // We do not need to update importer
+        return;
+    }
+
     KDBusMenuImporter* importer = m_importers.take(id);
      if (importer) {
         delete importer;
@@ -163,11 +170,8 @@ void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const Q
     // Put importer in cache
     getImporter(id);
 
-    if (m_menuStyle == "ButtonVertical") {
-        // Tell Kwin menu is available
-        emit menuAvailable(id);
-    } else if ( m_menuStyle == "TopMenuBar" && id == KWindowSystem::self()->activeWindow()) {
-        // Application already active so check if we need create menubar
+    // Application already active so check if we need create menubar
+    if ( m_menuStyle == "TopMenuBar" && id == KWindowSystem::self()->activeWindow()) {
         slotActiveWindowChanged(id);
     }
     // Send a signal on bus for others dbus interface registrars

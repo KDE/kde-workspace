@@ -159,7 +159,10 @@ void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
         m_menuServices.insert(id, service);
         m_menuPaths.insert(id, path);
         m_serviceWatcher->addWatchedService(service);
-        WindowRegistered(id, service, path);
+        emit WindowRegistered(id, service, path);
+    } else {
+        // Importer do not need to be updated
+        emit WindowRegistered(id, "", QDBusObjectPath());
     }
 }
 
@@ -169,7 +172,7 @@ void MenuImporter::UnregisterWindow(WId id)
     m_menuPaths.remove(id);
     m_windowClasses.remove(id);
 
-    WindowUnregistered(id);
+    emit WindowUnregistered(id);
 }
 
 QString MenuImporter::GetMenuForWindow(WId id, QDBusObjectPath& path)
@@ -183,7 +186,7 @@ void MenuImporter::slotServiceUnregistered(const QString& service)
     WId id = m_menuServices.key(service);
     m_menuServices.remove(id);
     m_menuPaths.remove(id);
-    WindowUnregistered(id);
+    emit WindowUnregistered(id);
     m_serviceWatcher->removeWatchedService(service);
 }
 
