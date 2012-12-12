@@ -280,6 +280,19 @@ QMenu* MenuWidget::showMenu()
         menu = m_currentButton->menu();
     }
 
+    // Last chance to get menu
+    // Some applications like Firefox have empties menus on layout updates
+    // They should populate this menu later but in fact, they use another object
+    // So, we check here directly the button name, may fail with menubar with buttons with same name (test apps)
+    if (menu && menu->actions().length() == 0) {
+        foreach (QAction *action, m_menu->actions()) {
+            if (action->text() == m_currentButton->text()) {
+                menu = action->menu();
+                break;
+            }
+        }
+    }
+
     if (menu) {
         QPoint globalPos = m_view->mapToGlobal(QPoint(0,0));
         QPointF parentPos =  m_currentButton->mapFromParent(QPoint(0,0));
