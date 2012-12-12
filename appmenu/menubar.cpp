@@ -29,6 +29,7 @@
 #include <QPainter>
 #include <QMenu>
 #include <QDesktopWidget>
+#include <QGraphicsDropShadowEffect>
 
 #include <KWindowSystem>
 #include <Plasma/FrameSvg>
@@ -65,6 +66,15 @@ MenuBar::MenuBar()
     m_scene->addItem(m_container);
 
     setScene(m_scene);
+
+    // Add shadow for better readability
+    if (! Plasma::WindowEffects::isEffectAvailable(Plasma::WindowEffects::BlurBehind)) {
+        QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect();
+        shadow->setBlurRadius(5);
+        shadow->setOffset(QPointF(1, 1));
+        shadow->setColor(Plasma::Theme::defaultTheme()->color(Plasma::Theme::BackgroundColor));
+        setGraphicsEffect(shadow);
+    }
 
     m_background->getMargins(left, top, right, bottom);
     m_container->layout()->setContentsMargins(left, top, right, bottom);
