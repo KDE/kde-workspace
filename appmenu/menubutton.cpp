@@ -24,14 +24,23 @@
 */
 
 #include "menubutton.h"
+
 #include <QAction>
 #include <QMenu>
+#include <QGraphicsDropShadowEffect>
+
+#include <Plasma/Theme>
 
 MenuButton::MenuButton(QGraphicsWidget *parent):
     Plasma::ToolButton(parent),
     m_enterEvent(false),
     m_menu(0)
 {
+    QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect();
+    shadow->setBlurRadius(5);
+    shadow->setOffset(QPointF(1, 1));
+    shadow->setColor(Plasma::Theme::defaultTheme()->color(Plasma::Theme::BackgroundColor));
+    setGraphicsEffect(shadow);
 }
 
 void MenuButton::setHovered(bool hovered)
