@@ -215,6 +215,8 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
     unsigned long mask = NET::AllTypesMask;
 
+    m_currentScreen = currentScreen();
+
     if (id == 0) {// Ignore root window
         return;
     } else if (info.windowType(mask) & NET::Dock) { // Hide immediatly menubar for docks (krunner)
