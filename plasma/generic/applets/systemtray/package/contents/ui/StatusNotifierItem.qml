@@ -98,9 +98,11 @@ Item {
     Image {
         width: 10  // we fix size of an overlay icon
         height: width
+        sourceSize.width: width
+        sourceSize.height: width
         fillMode: Image.PreserveAspectFit
         anchors { right: parent.right; bottom: parent.bottom }
-        smooth: false
+        smooth: true
         source: "image://icon/" + __overlay_icon_name
         visible: __overlay_icon_name
         z: 2
