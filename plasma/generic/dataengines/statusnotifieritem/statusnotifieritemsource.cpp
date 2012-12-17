@@ -232,6 +232,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
                 }
             }
         }
+        setData("IconThemePath", properties["IconThemePath"]);
 
         setData("Category", properties["Category"]);
         setData("Status", properties["Status"]);
