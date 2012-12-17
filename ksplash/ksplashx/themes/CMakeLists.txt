@@ -1,1 +1,1 @@
-add_subdirectory( horos )
+add_subdirectory( air )
