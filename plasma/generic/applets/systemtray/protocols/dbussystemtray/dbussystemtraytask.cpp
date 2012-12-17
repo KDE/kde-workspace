@@ -29,7 +29,9 @@
 #include <QtGui/QIcon>
 
 #include <KDE/KJob>
+#include <KDE/KIcon>
 #include <KDE/KIconLoader>
+#include <KDE/KStandardDirs>
 #include <KDE/Plasma/ServiceJob>
 #include <KDE/Plasma/ToolTipManager>
 #include <KDE/Plasma/Applet>
@@ -41,6 +43,7 @@ DBusSystemTrayTask::DBusSystemTrayTask(const QString &serviceName, Plasma::DataE
     : Task(parent),
       m_serviceName(serviceName),
       m_typeId(serviceName),
+      m_customIconLoader(0),
       m_dataEngine(dataEngine),
       m_service(dataEngine->serviceForSource(serviceName)),
       m_isMenu(false),
@@ -119,6 +122,51 @@ void DBusSystemTrayTask::activate2(int x, int y) const
 void DBusSystemTrayTask::activateHorzScroll(int delta) const
 {
     _activateScroll(delta, "Horizontal");
+}
+
+// Copied from kde-runtime/plasma/declarativeimports/core/iconitem.cpp
+bool static hasm_svgIcon(QVariant source)
+{
+    // Set up compat envrionment, afterwards it is 100% copy'n'pastable.
+    QVariant m_source = source;
+    Plasma::Svg svgIcon;
+    Plasma::Svg *m_svgIcon = &svgIcon;
+
+    //try as a svg toolbar icon
+    m_svgIcon->setImagePath("toolbar-icons/" + source.toString().split("-").first());
+
+    //try as a svg normal icon (like systray)
+    if (!m_svgIcon->isValid() || !m_svgIcon->hasElement(m_source.toString())) {
+        m_svgIcon->setImagePath("icons/" + source.toString().split("-").first());
+    }
+    m_svgIcon->setContainsMultipleImages(true);
+
+    //success?
+    if (m_svgIcon->isValid() && m_svgIcon->hasElement(m_source.toString())) {
+        return true;
+    }
+    return false;
+}
+
+QVariant DBusSystemTrayTask::customIcon(QVariant variant) const
+{
+    if (variant.canConvert<QString>()) {
+        // If we have no icon loader there is nothing to be done with strings.
+        if (!m_customIconLoader)
+            return variant;
+
+        // If an SVG icon can be found (via Plasma theme) the name needs to be
+        // passed along for IconItem to be able to resolve to the theme name as
+        // well.
+        if (hasm_svgIcon(variant))
+            return variant;
+
+        // Otherwise return a QIcon from our custom icon loader.
+        return QVariant(KIcon(variant.toString(), m_customIconLoader));
+    } else {
+        // Most importantly QIcons. Nothing to do for those.
+        return variant;
+    }
 }
 
 void DBusSystemTrayTask::activateVertScroll(int delta) const
@@ -237,6 +285,7 @@ void DBusSystemTrayTask::syncIcons(const Plasma::DataEngine::Data &properties)
     QString att_icon_name        = properties["AttentionIconName"].toString();
     QString movie_path           = properties["AttentionMovieName"].toString();
     QString overlay_icon_name    = properties["OverlayIconName"].value<QString>();
+    QString icon_theme_path      = properties["IconThemePath"].value<QString>();
     bool is_icon_name_changed           = false;
     bool is_att_icon_name_changed       = false;
     bool is_movie_path_changed          = false;
@@ -264,6 +313,40 @@ void DBusSystemTrayTask::syncIcons(const Plasma::DataEngine::Data &properties)
     if (overlay_icon_name != m_overlayIconName) {
         m_overlayIconName = overlay_icon_name;
         is_overlay_icon_name_changed = true;
+    }
+
+    if (icon_theme_path != m_iconThemePath) {
+        m_iconThemePath = icon_theme_path;
+
+        if (m_customIconLoader) {
+            delete m_customIconLoader;
+            m_customIconLoader = 0;
+        }
+        const QString path = m_iconThemePath;
+        if (!path.isEmpty()) {
+            // FIXME: If last part of path is not "icons", this won't work!
+            QStringList tokens = path.split('/', QString::SkipEmptyParts);
+            if (tokens.length() >= 3 && tokens.takeLast() == QLatin1String("icons")) {
+                QString appName = tokens.takeLast();
+                QString prefix = QChar('/') % tokens.join("/");
+                // FIXME: Fix KIconLoader and KIconTheme so that we can use
+                // our own instance of KStandardDirs
+                KGlobal::dirs()->addResourceDir("data", prefix);
+                // We use a separate instance of KIconLoader to avoid
+                // adding all application dirs to KIconLoader::global(), to
+                // avoid potential icon name clashes between application
+                // icons
+                m_customIconLoader = new KIconLoader(appName, 0 /* dirs */, this);
+            } else {
+                kWarning() << "Wrong IconThemePath" << path << ": too short or does not end with 'icons'";
+            }
+        }
+
+        // Trigger updates
+        is_icon_name_changed = true;
+        is_att_icon_name_changed = true;
+        is_overlay_icon_name_changed = true;
+        emit changedIcons();
     }
 
     // emit signals

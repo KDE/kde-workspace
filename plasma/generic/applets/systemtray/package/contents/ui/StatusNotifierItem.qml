@@ -179,11 +179,11 @@ Item {
 
     // Functions =======================================================================================================
     function __getDefaultIcon() {
-        return __icon_name != "" ? __icon_name : __icon
+        return task.customIcon(__icon_name != "" ? __icon_name : __icon)
     }
 
     function __getAttentionIcon() {
-        return __att_icon_name != "" ? __att_icon_name : __att_icon
+        return task.customIcon(__att_icon_name != "" ? __att_icon_name : __att_icon)
     }
 
     function __processClick(buttons, item) {

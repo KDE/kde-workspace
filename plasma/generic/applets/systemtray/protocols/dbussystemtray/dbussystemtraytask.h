@@ -25,6 +25,7 @@
 
 #include <Plasma/DataEngine>
 
+class KIconLoader;
 class KJob;
 
 namespace Plasma
@@ -91,7 +92,8 @@ public:
     Q_INVOKABLE void activate1(int x, int y) const;
     Q_INVOKABLE void activate2(int x, int y) const;
     Q_INVOKABLE void activateVertScroll(int delta) const;
-    Q_INVOKABLE void activateHorzScroll(int delta) const ;
+    Q_INVOKABLE void activateHorzScroll(int delta) const;
+    Q_INVOKABLE QVariant customIcon(QVariant variant) const;
 
 signals:
     void changedIcons(); // if icons, icon names, movie path are changed
@@ -128,9 +130,13 @@ private:
     QString m_shortcut;
     QString m_moviePath;
     QString m_overlayIconName;
+    QString m_iconThemePath;
     QString m_tooltipTitle;
     QString m_tooltipText;
     QIcon   m_tooltipIcon;
+
+    KIconLoader *m_customIconLoader;
+
     Plasma::DataEngine *m_dataEngine;
     Plasma::Service *m_service;
     bool m_isMenu;
