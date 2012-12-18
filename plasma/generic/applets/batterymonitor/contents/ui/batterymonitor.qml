@@ -21,6 +21,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import "plasmapackage:/code/logic.js" as Logic
+import "plasmapackage:/code/platform.js" as Platform
 
 Item {
     id: batterymonitor
@@ -54,7 +55,7 @@ Item {
             property QtObject batteries: plasmoid.rootItem.batteries
 
             property bool singleBattery: isConstrained() || !showMultipleBatteries || !hasBattery
-            
+
             model: singleBattery ? 1 : batteries
 
             PlasmaCore.Theme { id: theme }
@@ -183,8 +184,8 @@ Item {
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         screenBrightness: pmSource.data["PowerDevil"]["Screen Brightness"]
         remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
-        showSuspendButton: pmSource.data["Sleep States"]["Suspend"]
-        showHibernateButton: pmSource.data["Sleep States"]["Hibernate"]
+        showSuspendButton: Platform.shouldOfferSuspend(pmSource)
+        showHibernateButton: Platform.shouldOfferHibernate(pmSource)
         onSuspendClicked: {
             plasmoid.togglePopup();
             service = pmSource.serviceForSource("PowerDevil");

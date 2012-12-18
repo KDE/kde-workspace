@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ksldapp.h"
 #include "screensaveradaptor.h"
 #include "kscreensaveradaptor.h"
+#include "powerdevilpolicyagent.h"
 // KDE
 #include <KDE/KDebug>
 #include <KDE/KIdleTime>
@@ -35,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ScreenLocker
 {
+const uint ChangeScreenSettings = 4;
+
 Interface::Interface(KSldApp *parent)
     : QObject(parent)
     , m_daemon(parent)
@@ -113,11 +116,15 @@ bool Interface::SetActive (bool state)
 
 uint Interface::Inhibit(const QString &application_name, const QString &reason_for_inhibit)
 {
-    Q_UNUSED(application_name)
-    Q_UNUSED(reason_for_inhibit)
+    OrgKdeSolidPowerManagementPolicyAgentInterface policyAgent("org.kde.Solid.PowerManagement.PolicyAgent",
+                                                               "/org/kde/Solid/PowerManagement/PolicyAgent",
+                                                               QDBusConnection::sessionBus());
+    QDBusReply<uint> reply = policyAgent.AddInhibition(ChangeScreenSettings, application_name, reason_for_inhibit);
+
     InhibitRequest sr;
     sr.cookie = m_next_cookie++;
     sr.dbusid = message().service();
+    sr.powerdevilcookie = reply.isValid() ? reply : 0;
     m_requests.append(sr);
     m_serviceWatcher->addWatchedService(sr.dbusid);
     KSldApp::self()->inhibit();
@@ -129,6 +136,12 @@ void Interface::UnInhibit(uint cookie)
     QMutableListIterator<InhibitRequest> it(m_requests);
     while (it.hasNext()) {
         if (it.next().cookie == cookie) {
+            if (uint powerdevilcookie = it.value().powerdevilcookie) {
+                OrgKdeSolidPowerManagementPolicyAgentInterface policyAgent("org.kde.Solid.PowerManagement.PolicyAgent",
+                                                               "/org/kde/Solid/PowerManagement/PolicyAgent",
+                                                               QDBusConnection::sessionBus());
+                policyAgent.ReleaseInhibition(powerdevilcookie);
+            }
             it.remove();
             KSldApp::self()->uninhibit();
             break;

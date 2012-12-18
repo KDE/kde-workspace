@@ -136,6 +136,14 @@ void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 {
     bool changes = false;
 
+    KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
+    unsigned long mask = NET::AllTypesMask;
+
+    // Menu can try to register, right click in gimp for exemple
+    if (info.windowType(mask) & (NET::Menu|NET::DropdownMenu||NET::PopupMenu)) {
+        return;
+    }
+
     if (path.path().isEmpty()) //prevent bad dbusmenu usage
         return;
 

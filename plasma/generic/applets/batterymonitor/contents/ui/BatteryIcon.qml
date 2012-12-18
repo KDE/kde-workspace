@@ -46,15 +46,15 @@ Item {
     }
 
     function fillElement(p) {
-        if (p > 95) {
+        if (p >= 90) {
             return "Fill100";
-        } else if (p > 80) {
+        } else if (p >= 70) {
             return "Fill80";
-        } else if (p > 50) {
+        } else if (p >= 50) {
             return "Fill60";
         } else if (p > 20) {
             return "Fill40";
-        } else if (p > 10) {
+        } else if (p >= 10) {
             return "Fill20";
         }
         return "";

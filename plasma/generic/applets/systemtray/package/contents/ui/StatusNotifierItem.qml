@@ -98,9 +98,11 @@ Item {
     Image {
         width: 10  // we fix size of an overlay icon
         height: width
+        sourceSize.width: width
+        sourceSize.height: width
         fillMode: Image.PreserveAspectFit
         anchors { right: parent.right; bottom: parent.bottom }
-        smooth: false
+        smooth: true
         source: "image://icon/" + __overlay_icon_name
         visible: __overlay_icon_name
         z: 2
@@ -177,11 +179,11 @@ Item {
 
     // Functions =======================================================================================================
     function __getDefaultIcon() {
-        return __icon_name != "" ? __icon_name : __icon
+        return task.customIcon(__icon_name != "" ? __icon_name : __icon)
     }
 
     function __getAttentionIcon() {
-        return __att_icon_name != "" ? __att_icon_name : __att_icon
+        return task.customIcon(__att_icon_name != "" ? __att_icon_name : __att_icon)
     }
 
     function __processClick(buttons, item) {
