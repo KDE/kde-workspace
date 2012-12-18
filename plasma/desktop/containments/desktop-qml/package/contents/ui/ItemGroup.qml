@@ -40,7 +40,7 @@ Item {
     property bool animationsEnabled: false
     property int minimumWidth: LayoutManager.cellSize.width
     property int minimumHeight: LayoutManager.cellSize.height
-    property int titleHeight: categoryTitle.height
+    property int titleHeight: categoryTitle.width
 
     property Item contents: contentsItem
     property alias margins: plasmoidBackground.margins
@@ -48,8 +48,9 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: plasmoidBackground
-        opacity: hasBackground ? 1 : controlsOpacity
+        visible: hasBackground
         anchors.fill: parent
+        anchors.rightMargin: (controlsOpacity * -24)
         imagePath: "widgets/background"
 
     }
@@ -121,8 +122,8 @@ print(itemGroup.x+" "+itemGroup.y)
     MouseArea {
         id: dragMouseArea
         anchors.fill: categoryTitle
-        anchors.leftMargin: iconSize*1.5
-        anchors.rightMargin: iconSize*1.5
+        anchors.topMargin: iconSize*1.5
+        anchors.bottomMargin: iconSize*1.5
         //Rectangle { color: "purple"; opacity: .3; anchors.fill: parent; }
         property int lastX
         property int lastY
@@ -292,21 +293,26 @@ print(itemGroup.x+" "+itemGroup.y)
         visible = false
     }
 
-    PlasmaCore.FrameSvgItem {
+    Item {
         id: categoryTitle
         z: appletContainer.z + 1
         opacity: itemGroup.controlsOpacity
-        imagePath: "widgets/extender-dragger"
-        prefix: "root"
+        //imagePath: "widgets/extender-dragger"
+        //prefix: "root"
+        width: 24
         anchors {
-            left: parent.left
+            //left: parent.left
             right: parent.right
             top: parent.top
-            leftMargin: parent.margins.left
-            rightMargin: parent.margins.right
+            //leftMargin: parent.margins.left
+            bottom: parent.bottom
+            rightMargin: parent.margins.right - titleHeight
+            bottomMargin: parent.margins.bottom
             topMargin: parent.margins.top
         }
-        height: categoryText.height + margins.top + margins.bottom
+        //height: categoryText.height + margins.top + margins.bottom
+
+        //Rectangle { color: "orange"; anchors.fill: parent; opacity: 0.5 }
 
         ActionButton {
             svg: configIconsSvg
@@ -318,7 +324,8 @@ print(itemGroup.x+" "+itemGroup.y)
             z: dragMouseArea.z + 1000
             anchors {
                 right: parent.right
-                top: parent.top
+                left: parent.left
+                bottom: parent.bottom
                 bottomMargin: 4
             }
     //         Rectangle { color: "green"; opacity: 0.4; anchors.fill: parent; }
@@ -329,43 +336,28 @@ print(itemGroup.x+" "+itemGroup.y)
             }
         }
 
-        ActionButton {
-            svg: configIconsSvg
-            z: dragMouseArea.z + 1000
-            elementId: "configure"
-            iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
-            backgroundVisible: false
-            //visible: action.enabled
-            action: applet.action("configure")
-            anchors {
-                left: parent.left
-                top: parent.top
-                bottomMargin: 4
-            }
-            Component.onCompleted: {
-                if (action && typeof(action) != "undefined") {
-                    action.enabled = true
+        Column {
+            anchors.fill: parent
+            ActionButton {
+                svg: configIconsSvg
+                z: dragMouseArea.z + 1000
+                elementId: "configure"
+                iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
+                backgroundVisible: false
+                //visible: action.enabled
+                action: applet.action("configure")
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    bottomMargin: 4
                 }
-            }
-    //         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
-        }
-
-        Text {
-            id: categoryText
-//             opacity: 0
-//             text: itemGroup.title
-            text: i18n("Drag to move")
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-            font.pointSize: theme.defaultFont.pointSize
-            color: theme.textColor
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-                topMargin: parent.margins.top
-                leftMargin: height + 2
-                rightMargin: height + 2
+                Component.onCompleted: {
+                    if (action && typeof(action) != "undefined") {
+                        action.enabled = true
+                    }
+                }
+        //         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
             }
         }
         PlasmaCore.Svg {
