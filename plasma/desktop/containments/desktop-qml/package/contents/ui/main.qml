@@ -307,7 +307,7 @@ Item {
                     }
                     Timer {
                         id: repositionTimer
-                        interval: 200
+                        interval: 100
                         repeat: false
                         running: false
                         onTriggered: {
@@ -325,7 +325,7 @@ Item {
                     opacity: 0
                     radius: 8
                     smooth: true
-                    color: Qt.rgba(1,1,1,0.25)
+                    color: Qt.rgba(1,1,1,0.15)
                     Behavior on opacity {
                         NumberAnimation {
                             duration: 250
@@ -335,21 +335,21 @@ Item {
                     Behavior on x {
                         enabled: placeHolderPaint.opacity == 1
                         NumberAnimation {
-                            duration: 250
+                            duration: 100
                             easing.type: Easing.InOutQuad
                         }
                     }
                     Behavior on y {
                         enabled: placeHolderPaint.opacity == 1
                         NumberAnimation {
-                            duration: 250
+                            duration: 100
                             easing.type: Easing.InOutQuad
                         }
                     }
                     Behavior on width {
                         enabled: placeHolderPaint.opacity == 1
                         NumberAnimation {
-                            duration: 250
+                            duration: 100
                             easing.type: Easing.InOutQuad
                         }
                     }

@@ -40,7 +40,7 @@ Item {
     property bool animationsEnabled: false
     property int minimumWidth: LayoutManager.cellSize.width
     property int minimumHeight: LayoutManager.cellSize.height
-    property int titleHeight: categoryTitle.width
+    property int appletHandleWidth: appletHandle.width
 
     property Item contents: contentsItem
     property alias margins: plasmoidBackground.margins
@@ -57,12 +57,12 @@ Item {
     Connections {
         target: plasmoid
         onImmutableChanged: {
-            //categoryTitle.opacity = plasmoid.immutable ? 0 : 1;
+            //appletHandle.opacity = plasmoid.immutable ? 0 : 1;
             dragMouseArea.visible = !plasmoid.immutable;
             itemGroup.controlsOpacity = plasmoid.immutable ? 0 : 1;
-            appletContainer.opacity = plasmoid.immutable ? 1.0 : 0.66;
+            //appletContainer.opacity = plasmoid.immutable ? 1.0 : 0.66;
             //imagePath = plasmoid.immutable ? "" : "widgets/background";
-            //titleHeight = plasmoid.immutable ? 0: categoryTitle.height;
+            //appletHandleWidth = plasmoid.immutable ? 0: appletHandle.height;
             //applet.backgroundHints = plasmoid.immutable ? "NormalBackground" : "NoBackground";
 
         }
@@ -75,7 +75,7 @@ Item {
             top: parent.top
             right: parent.right
             bottom: parent.bottom
-            //topMargin: parent.margins.top+itemGroup.titleHeight
+            //topMargin: parent.margins.top+itemGroup.appletHandleWidth
             topMargin: parent.margins.top
             leftMargin: parent.margins.left
             rightMargin: parent.margins.right
@@ -121,7 +121,7 @@ print(itemGroup.x+" "+itemGroup.y)
     }
     MouseArea {
         id: dragMouseArea
-        anchors.fill: categoryTitle
+        anchors.fill: appletHandle
         anchors.topMargin: iconSize*1.5
         anchors.bottomMargin: iconSize*1.5
         //Rectangle { color: "purple"; opacity: .3; anchors.fill: parent; }
@@ -294,7 +294,7 @@ print(itemGroup.x+" "+itemGroup.y)
     }
 
     Item {
-        id: categoryTitle
+        id: appletHandle
         z: appletContainer.z + 1
         opacity: itemGroup.controlsOpacity
         //imagePath: "widgets/extender-dragger"
@@ -306,7 +306,7 @@ print(itemGroup.x+" "+itemGroup.y)
             top: parent.top
             //leftMargin: parent.margins.left
             bottom: parent.bottom
-            rightMargin: parent.margins.right - titleHeight
+            rightMargin: parent.margins.right - appletHandleWidth
             bottomMargin: parent.margins.bottom
             topMargin: parent.margins.top
         }
@@ -317,16 +317,17 @@ print(itemGroup.x+" "+itemGroup.y)
         ActionButton {
             svg: configIconsSvg
             elementId: "close"
-            iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
+            iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
             backgroundVisible: false
             //visible: action.enabled
             action: applet.action("remove")
             z: dragMouseArea.z + 1000
+            width: appletHandleWidth
             anchors {
-                right: parent.right
-                left: parent.left
                 bottom: parent.bottom
-                bottomMargin: 4
+                bottomMargin: 6
+                right: parent.right
+                rightMargin: -6
             }
     //         Rectangle { color: "green"; opacity: 0.4; anchors.fill: parent; }
             Component.onCompleted: {
@@ -337,27 +338,68 @@ print(itemGroup.x+" "+itemGroup.y)
         }
 
         Column {
-            anchors.fill: parent
+            id: buttonColumn
+            width: appletHandleWidth
+            anchors {
+                top: parent.top
+                right: parent.right
+                rightMargin: -6
+            }
+            spacing: 12
             ActionButton {
                 svg: configIconsSvg
                 z: dragMouseArea.z + 1000
-                elementId: "configure"
-                iconSize: Math.max(16, plasmoidGroup.titleHeight - 2)
+                elementId: "size-diagonal-tr2bl"
+                iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
                 backgroundVisible: false
                 //visible: action.enabled
-                action: applet.action("configure")
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                    bottomMargin: 4
-                }
+                //action: applet.action("configure")
+//                 anchors {
+//                     left: parent.left
+//                     right: parent.right
+//                     top: parent.top
+//                     bottomMargin: 4
+//                 }
                 Component.onCompleted: {
                     if (action && typeof(action) != "undefined") {
                         action.enabled = true
                     }
                 }
+            }
         //         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
+            ActionButton {
+                svg: configIconsSvg
+                z: dragMouseArea.z + 1000
+                elementId: "rotate"
+                iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
+                backgroundVisible: false
+                //visible: action.enabled
+                //action: applet.action("rotate")
+                Component.onCompleted: {
+                    if (action && typeof(action) != "undefined") {
+                        action.enabled = true
+                    }
+                }
+            }
+            ActionButton {
+                svg: configIconsSvg
+                z: dragMouseArea.z + 1000
+                elementId: "configure"
+                iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
+                backgroundVisible: false
+                //visible: action.enabled
+                action: applet.action("configure")
+//                 anchors {
+//                     left: parent.left
+//                     right: parent.right
+//                     top: parent.top
+//                     bottomMargin: 4
+//                 }
+                Component.onCompleted: {
+                    if (action && typeof(action) != "undefined") {
+                        action.enabled = true
+                    }
+                }
             }
         }
         PlasmaCore.Svg {
