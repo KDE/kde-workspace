@@ -122,7 +122,7 @@ Item {
                             pixmap: model.icon
                             height: nativeHeight
                             width: nativeWidth
-                            visible: pager.showWindowIcons
+                            visible: pager.showWindowIcons && (windowRect.width > icon.width) && (windowRect.height > icon.height)
                         }
 
                         MouseArea {
@@ -132,8 +132,8 @@ Item {
                             drag.axis: Drag.XandYAxis
                             drag.minimumX: -windowRect.width/2
                             drag.maximumX: root.width - windowRect.width/2
-                            drag.minimumY: -windowRect.height
-                            drag.maximumY: root.height - 2*windowRect.height
+                            drag.minimumY: -windowRect.height/2
+                            drag.maximumY: root.height - windowRect.height/2
 
                             // used to save the state of some properties before the dragging
                             QtObject {
