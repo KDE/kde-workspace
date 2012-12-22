@@ -79,6 +79,7 @@ X-KDE-ServiceTypes=Plasma/Runner
 Type=Service
 Icon=user-home
 Comment=Open devices and folder bookmarks
+Comment[bs]=Otvoreni uređaji i mape favorita
 Comment[ca]=Obre els punts dels dispositius i dels preferits
 Comment[cs]=Otevřít záložky zařízení a složek
 Comment[da]=Åbn enheder og mappebogmærker
