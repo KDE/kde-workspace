@@ -104,6 +104,7 @@ Name[zh_CN]=屏幕保护程序
 Name[zh_TW]=螢幕保護程式
 
 Comment=Screen Saver Settings
+Comment[bs]=Postavke čuvara ekrana
 Comment[ca]=Arranjament de l'estalvi de pantalla
 Comment[cs]=Nastavení šetřiče obrazovky
 Comment[da]=Indstillinger for pauseskærm
@@ -137,6 +138,7 @@ Comment[zh_TW]=螢幕保護程式設定
 
 
 X-KDE-Keywords=screensavers,Priority
+X-KDE-Keywords[bs]=čuvar ekrana,prioritet
 X-KDE-Keywords[ca]=estalvis de pantalla,Prioritat
 X-KDE-Keywords[cs]=spořiče obrazovky,priorita
 X-KDE-Keywords[da]=pauseskærme,prioritet

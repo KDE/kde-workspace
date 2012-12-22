@@ -186,6 +186,7 @@ Name[zh_CN]=游戏杆
 Name[zh_TW]=搖桿
 
 X-KDE-Keywords=joystick,gamepad,controller
+X-KDE-Keywords[bs]=dzojstik
 X-KDE-Keywords[ca]=palanca de control,comandament de joc,controlador
 X-KDE-Keywords[da]=joystick,gamepad,controller
 X-KDE-Keywords[de]=Joystick,Gamepad,Spielsteuerung
