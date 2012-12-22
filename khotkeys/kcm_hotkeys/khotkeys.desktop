@@ -142,6 +142,7 @@ Comment[zh_TW]=設定輸入動作
 Categories=Qt;KDE;X-KDE-settings-accessibility;
 
 X-KDE-Keywords=global,keyboard shortcuts,hot keys,hotkeys,KHotKeys,input actions,mouse gestures,actions,triggers,launch
+X-KDE-Keywords[bs]=globalni, prečice na tastaturi, učestale tipke, vreleTipke, kVreleTipke, ulazne akcije, kretnje miša, akcije, pokretanja, lansira
 X-KDE-Keywords[ca]=global,dreceres de teclat,dreceres de teclat,hotkeys,KHotKeys,accions d'entrada,gestos del ratolí,accions,activadors,llança
 X-KDE-Keywords[ca@valencia]=global,dreceres de teclat,dreceres de teclat,hotkeys,KHotKeys,accions d'entrada,gestos de ratolí,accions,activadors,llançament
 X-KDE-Keywords[da]=globale,tastaturgenveje,genvejstaster,hotkeys,KHotKeys,input-handlinger,musegestusser,handlinger,udløsere,kør

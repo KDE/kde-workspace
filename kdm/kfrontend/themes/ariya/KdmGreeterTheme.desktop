@@ -4,6 +4,7 @@
 [KdmGreeterTheme]
 Greeter=ariya.xml
 Name=Ariya
+Name[bs]=Ariya
 Name[ca]=Ariya
 Name[ca@valencia]=Ariya
 Name[cs]=Ariya

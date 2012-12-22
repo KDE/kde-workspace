@@ -4,6 +4,8 @@
 [KdmGreeterTheme]
 Greeter=elarun.xml
 Name=Elarun
+Name[ca]=Elarun
+Name[hu]=Elarun
 Name[ia]=Elarun
 Name[nl]=Elarun
 Name[pt]=Elarun
