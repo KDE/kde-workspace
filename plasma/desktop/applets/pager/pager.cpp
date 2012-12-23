@@ -888,4 +888,18 @@ void Pager::updateToolTip(int hoverDesktopId)
     Plasma::ToolTipManager::self()->setContent(this, data);
 }
 
+void Pager::dropMimeData(QObject* mime, int desktop)
+{
+    QMimeData* mimeData = qobject_cast<QMimeData*>(mime);
+    if (!mimeData)
+        return;
+    bool ok;
+    QList<WId> ids = TaskManager::Task::idsFromMimeData(mimeData, &ok);
+    if (ok) {
+        foreach (const WId &id, ids) {
+            KWindowSystem::setOnDesktop(id, desktop + 1);
+        }
+    }
+}
+
 #include "pager.moc"
