@@ -116,6 +116,7 @@ Item {
                 left: deviceIcon.right
                 right: leftActionArea.left
                 leftMargin: padding.margins.left
+                rightMargin: padding.margins.right
             }
             PlasmaComponents.Label {
                 id: deviceLabel
@@ -259,7 +260,7 @@ Item {
             anchors {
                 top: labelsColumn.bottom
                 left: deviceIcon.right
-                right: leftActionArea.right
+                right: leftActionArea.left
             }
             interactive: false
             model: hpSource.data[udi]["actions"]
