@@ -76,6 +76,7 @@ class Pager : public Plasma::Applet
         Q_INVOKABLE void changeDesktop(int desktopId);
         Q_INVOKABLE QPixmap shadowText(const QString& text);
         Q_INVOKABLE void updateToolTip(int hoverDesktopId);
+        Q_INVOKABLE void dropMimeData(QObject* mime, int desktop);
 
     signals:
         void styleChanged();

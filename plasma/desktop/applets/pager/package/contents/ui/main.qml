@@ -18,6 +18,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
+import org.kde.draganddrop 1.0
 import "utils.js" as Utils
 
 Item {
@@ -29,8 +30,20 @@ Item {
     property bool dragging: false
     property int dragId
 
+    property int dragSwitchDesktopId: -1
+
     anchors.fill: parent
     visible: repeater.count > 1
+
+    Timer {
+        id: dragTimer
+        interval: 1000
+        onTriggered: {
+            if (dragSwitchDesktopId != -1 && dragSwitchDesktopId !== pager.currentDesktop-1) {
+                pager.changeDesktop(dragSwitchDesktopId);
+            }
+        }
+    }
 
     Repeater {
         id: repeater
@@ -58,6 +71,24 @@ Item {
                 onPrefixChanged: {
                     if (prefix == "hover")
                         pager.updateToolTip(desktopId);
+                }
+            }
+
+            DropArea {
+                id: droparea
+                anchors.fill: parent
+                onDragEnter: {
+                    root.dragSwitchDesktopId = desktop.desktopId;
+                    dragTimer.start();
+                }
+                onDragLeave: {
+                    root.dragSwitchDesktopId = -1;
+                    dragTimer.stop();
+                }
+                onDrop: {
+                    pager.dropMimeData(event.mimeData, desktop.desktopId);
+                    root.dragSwitchDesktopId = -1;
+                    dragTimer.stop();
                 }
             }
 
