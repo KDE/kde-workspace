@@ -2,7 +2,6 @@
 Name=Imgur
 Name[ast]=Imgur
 Name[bg]=Imgur
-Name[bs]=Imgur
 Name[ca]=Imgur
 Name[ca@valencia]=Imgur
 Name[cs]=Imgur
@@ -59,7 +58,6 @@ Name[zh_TW]=Imgur
 Comment=Allows images to be shared using the imgur service
 Comment[ar]=يسمح للصور أن تُشارك بإستخدام خدمة imgur
 Comment[bg]=Позволява споделянето на картинки чрез imgur
-Comment[bs]=Dopušta dijeljenje slika preko servisa  Imgur
 Comment[ca]=Permet la compartició d'imatges utilitzant el servei imgur
 Comment[ca@valencia]=Permet la compartició d'imatges utilitzant el servei imgur
 Comment[cs]=Povolí sdílení obrázků pomocí služby imgur
