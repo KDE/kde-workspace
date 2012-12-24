@@ -223,7 +223,7 @@ PlasmaCore.Dialog {
                      */
                     Item {
                         clip: true
-                        height: Math.min(parent.height, lastNotificationText.paintedHeight)
+                        height: Math.min(parent.height, lastNotificationText.height)
                         anchors {
                             verticalCenter: parent.verticalCenter
                             left: appIconItem.right
