@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Nepomuk Desktop Search
+Name[bs]=Nepomuk pretraga desktopa
 Name[ca]=Cerca d'escriptori del Nepomuk
 Name[cs]=Vyhledávání v počítači pomocí Nepomuku
 Name[da]=Nepomuk skrivebordssøgning
@@ -43,6 +44,7 @@ Comment[ar]=مشغل لـKRunner ينفذ البحث لسطح المكتب بو�
 Comment[ast]=Krunner executa guetes nel escritoriu vía Nepomuk
 Comment[be@latin]=Modul „KRunner”, jaki šukaje ŭ kamputary praz systemu „Nepomuk”
 Comment[bg]=KRunner търси с помощта на Nepomuk
+Comment[bs]=Izvođač za pretraživanje radne površi putem Nepomuka
 Comment[ca]=El KRunner executa cerques d'escriptori via el Nepomuk
 Comment[ca@valencia]=El KRunner executa cerques d'escriptori via el Nepomuk
 Comment[cs]=KRunner vyhledává v počítači prostřednictvím Nepomuku

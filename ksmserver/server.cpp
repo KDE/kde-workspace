@@ -932,8 +932,16 @@ void KSMServer::storeSession()
            continue;
         if (state == ClosingSubSession && ! clientsToSave.contains(c))
             continue;
-        if (excludeApps.contains( program.toLower()))
+
+        // 'program' might be (mostly) fullpath, or (sometimes) just the name.
+        // 'name' is just the name.
+        QFileInfo info(program);
+        const QString& name = info.fileName();
+
+        if ( excludeApps.contains(program.toLower()) ||
+             excludeApps.contains(name.toLower()) ) {
             continue;
+        }
 
         count++;
         QString n = QString::number(count);
