@@ -24,9 +24,9 @@
 
 #include <Plasma/DataEngine>
 
-namespace CalendarSupport {
-    class Calendar;
-}
+#ifdef AKONADI_FOUND
+# include <Akonadi/Calendar/ETMCalendar>
+#endif
 
 namespace KHolidays
 {
@@ -163,11 +163,10 @@ class CalendarEngine : public Plasma::DataEngine
         /// creates EventDataContainers as needed
         bool akonadiCalendarSourceRequest(const QString& key, const QStringList& args, const QString& request);
 
-        /// this will start akonadi if necessary and init m_calendarModel
-        void initAkonadiCalendar();
-
+#ifdef AKONADI_FOUND
         /// this is the representation of the root calendar itself. it contains everything (calendars, incidences)
-        CalendarSupport::Calendar *m_calendar;
+        Akonadi::ETMCalendar::Ptr m_calendar;
+#endif
 
         /// holiday calendar
         QHash<QString, KHolidays::HolidayRegion *> m_regions;

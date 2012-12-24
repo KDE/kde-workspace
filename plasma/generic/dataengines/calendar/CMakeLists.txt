@@ -15,13 +15,6 @@ if(Akonadi_FOUND)
     ADD_DEFINITIONS(-DAKONADI_FOUND)
     set(calendar_engine_srcs ${calendar_engine_srcs}
         eventdatacontainer.cpp
-        # taken from kdepim/akonadi/kcal as long as it's not yet exported:
-        akonadi/calendar.cpp
-        akonadi/calendarmodel.cpp
-        akonadi/calfilterproxymodel.cpp
-        akonadi/utils.cpp
-        akonadi/blockalarmsattribute.cpp
-        akonadi/collectionselection.cpp
     )
 endif(Akonadi_FOUND)
 
@@ -40,6 +33,7 @@ target_link_libraries(
 if(Akonadi_FOUND)
     target_link_libraries(
         plasma_engine_calendar
+        akonadi-calendar
         ${KDE4_AKONADI_LIBS}
         ${KDEPIMLIBS_AKONADI_KCAL_LIBS}
     )

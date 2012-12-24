@@ -21,30 +21,28 @@
 
 #include <KSystemTimeZones>
 
-#include <KCalCore/Calendar>
 #include <KCalCore/Event>
 #include <KCalCore/Todo>
 #include <KCalCore/Journal>
 #include <KCalUtils/Stringify>
 
-#include "akonadi/calendar.h"
-#include "akonadi/calendarmodel.h"
+#include <QDebug>
 
 using namespace Akonadi;
-using namespace CalendarSupport;
 
-EventDataContainer::EventDataContainer(CalendarSupport::Calendar* calendar, const QString& name, const KDateTime& start, const KDateTime& end, QObject* parent)
+EventDataContainer::EventDataContainer(const Akonadi::ETMCalendar::Ptr &calendar, const QString& name, const KDateTime& start, const KDateTime& end, QObject* parent)
                   : Plasma::DataContainer(parent),
                     m_calendar(calendar),
                     m_name(name),
                     m_startDate(start),
                     m_endDate(end)
 {
+    qDebug() << "DEBUG1";
     // name under which this dataEngine source appears
     setObjectName(name);
 
     // Connect directly to the calendar for now
-    connect(calendar, SIGNAL(calendarChanged()), this, SLOT(updateData()));
+    connect(calendar.data(), SIGNAL(calendarChanged()), this, SLOT(updateData()));
 
     // create the initial data
     updateData();
@@ -61,14 +59,10 @@ void EventDataContainer::updateData()
 
 void EventDataContainer::updateEventData()
 {
-    Akonadi::Item::List events = m_calendar->events(m_startDate.date(), m_endDate.date(), m_calendar->timeSpec());
+    KCalCore::Event::List events = m_calendar->events(m_startDate.date(), m_endDate.date(), m_calendar->timeSpec());
 
-    foreach (const Akonadi::Item &item, events) {
-        Q_ASSERT(item.hasPayload<KCalCore::Event::Ptr>());
-        const KCalCore::Event::Ptr event = item.payload<KCalCore::Event::Ptr>();
-
+    foreach (const KCalCore::Event::Ptr &event, events) {
         Plasma::DataEngine::Data eventData;
-
         populateIncidenceData(event, eventData);
 
         // Event specific fields
@@ -90,14 +84,10 @@ void EventDataContainer::updateTodoData()
 {
     QDate todoDate = m_startDate.date();
     while(todoDate <= m_endDate.date()) {
-        Akonadi::Item::List todos = m_calendar->todos(todoDate);
+        KCalCore::Todo::List todos = m_calendar->todos(todoDate);
 
-        foreach (const Akonadi::Item &item, todos) {
-            Q_ASSERT(item.hasPayload<KCalCore::Todo::Ptr>());
-            const KCalCore::Todo::Ptr todo = item.payload<KCalCore::Todo::Ptr>();
-
+        foreach (const KCalCore::Todo::Ptr &todo, todos) {
             Plasma::DataEngine::Data todoData;
-
             populateIncidenceData(todo, todoData);
 
             QVariant var;
@@ -126,18 +116,13 @@ void EventDataContainer::updateJournalData()
 {
     QDate journalDate = m_startDate.date();
     while(journalDate <= m_endDate.date()) {
-        Akonadi::Item::List journals = m_calendar->journals(journalDate);
+        KCalCore::Journal::List journals = m_calendar->journals(journalDate);
 
-        foreach (const Akonadi::Item &item, journals) {
-            Q_ASSERT(item.hasPayload<KCalCore::Journal::Ptr>());
-            const KCalCore::Journal::Ptr journal = item.payload<KCalCore::Journal::Ptr>();
-
+        foreach (const KCalCore::Journal::Ptr &journal, journals) {
             Plasma::DataEngine::Data journalData;
-
             populateIncidenceData(journal, journalData);
 
             // No Journal specific fields
-
             setData(journal->uid(), journalData);
         }
 
@@ -145,7 +130,7 @@ void EventDataContainer::updateJournalData()
     }
 }
 
-void EventDataContainer::populateIncidenceData(KCalCore::Incidence::Ptr incidence, Plasma::DataEngine::Data &incidenceData)
+void EventDataContainer::populateIncidenceData(const KCalCore::Incidence::Ptr &incidence, Plasma::DataEngine::Data &incidenceData)
 {
     QVariant var;
     incidenceData["UID"] = incidence->uid();
