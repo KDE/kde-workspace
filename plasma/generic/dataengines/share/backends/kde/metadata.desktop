@@ -2,7 +2,6 @@
 Name=kde.org
 Name[ar]=kde.org
 Name[bg]=kde.org
-Name[bs]=wklej.org
 Name[ca]=kde.org
 Name[ca@valencia]=kde.org
 Name[cs]=kde.org
@@ -54,7 +53,6 @@ Name[zh_TW]=kde.org
 Comment=Allows text to be shared using the kde.org service
 Comment[ar]=يسمح للنصوص أن تُشارك بإستخدام خدمة kde.org
 Comment[bg]=Позволява споделянето на текст чрез kde.org
-Comment[bs]=Dopušta ijeljenje teksta preko servisa wklej.org
 Comment[ca]=Permet la compartició de text utilitzant el servei kde.org
 Comment[ca@valencia]=Permet la compartició de text utilitzant el servei kde.org
 Comment[cs]=Povolí sdílení textů pomocí služby kde.org

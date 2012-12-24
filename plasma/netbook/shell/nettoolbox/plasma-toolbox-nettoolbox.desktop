@@ -2,7 +2,6 @@
 Comment=Default toolbox for the netbook shell
 Comment[ast]=Caxa de ferramientes predeterminada de la shell pa netbooks
 Comment[bg]=Стандартни инструменти за обвивка на нетбук
-Comment[bs]=Podrazumijevana alatnica za netbuk školjku
 Comment[ca]=Caixa d'eines per defecte per a l'àrea pels ordinadors ultraportàtils
 Comment[ca@valencia]=Caixa d'eines per defecte per a l'àrea pels ordinadors ultraportàtils
 Comment[cs]=Výchozí nástroje pro netbook shell
@@ -56,7 +55,6 @@ Comment[zh_TW]=netbook shell 的預設工具盒
 Icon=plasma
 Name=Net toolbox
 Name[ast]=Caxa de ferramientes netbook
-Name[bs]=Netbuk alatnica
 Name[ca]=Caixa d'eines de xarxa
 Name[ca@valencia]=Caixa d'eines de xarxa
 Name[cs]=Nástroje sítě

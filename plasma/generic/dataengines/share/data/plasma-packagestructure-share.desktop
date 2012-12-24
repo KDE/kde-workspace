@@ -2,7 +2,6 @@
 Name=ShareProvider
 Name[ast]=Fornidor de Servicios
 Name[bg]=Доставчик на услуги за споделяне
-Name[bs]=Dobavljač dijeljenja
 Name[ca]=ShareProvider
 Name[ca@valencia]=ShareProvider
 Name[cs]=ShareProvider
@@ -54,7 +53,6 @@ Name[zh_CN]=共享提供
 Name[zh_TW]=分享服務提供者
 Comment=Share Package Structure
 Comment[ast]=Estructura Paquete Compartir
-Comment[bs]=Struktura paketa dijeljenja
 Comment[ca]=Estructura de paquet de compartició
 Comment[ca@valencia]=Estructura de paquet de compartició
 Comment[cs]=Struktura sdíleného balíčku
