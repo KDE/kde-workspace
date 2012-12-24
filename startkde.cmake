@@ -347,8 +347,18 @@ if test $? -eq 255; then
 fi
 
 # wait if there's any crashhandler shown
+wait_seconds=0
+wait_timeout=900
 while qdbus | grep "^[^w]*org.kde.drkonqi" > /dev/null ; do
     sleep 5
+    wait_seconds=$((wait_seconds+5))
+    if test "$wait_seconds" -ge "$wait_timeout" ; then
+        # ask remaining drkonqis to die in a graceful way
+        qdbus | grep 'org.kde.drkonqi-' | while read address ; do
+            qdbus "$address" "/MainApplication" "quit"
+        done
+        break
+    fi
 done
 
 echo 'startkde: Shutting down...'  1>&2
