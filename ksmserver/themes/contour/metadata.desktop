@@ -1,6 +1,7 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=Contour
+Name[bs]=Kontura
 Name[ca]=Contour
 Name[cs]=Contour
 Name[da]=Contour
@@ -38,6 +39,7 @@ Name[x-test]=xxContourxx
 Name[zh_CN]=Contour
 Name[zh_TW]=輪廓
 Comment=Plasma Active theme
+Comment[bs]=Plazma aktivna tema
 Comment[ca]=Tema Plasma Active
 Comment[cs]=Motiv Plasma Active
 Comment[da]=Tema til Plasma Active
