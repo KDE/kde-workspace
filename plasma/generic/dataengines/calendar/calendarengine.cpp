@@ -299,8 +299,10 @@ bool CalendarEngine::akonadiCalendarSourceRequest(const QString& key, const QStr
         return false;
     }
 
-    if (!m_calendar)
+    if (!m_calendar) {
         m_calendar = Akonadi::ETMCalendar::Ptr(new Akonadi::ETMCalendar());
+        m_calendar->setCollectionFilteringEnabled(false);
+    }
 
     // create the corresponding EventDataContainer
     addSource(new EventDataContainer(m_calendar, request, KDateTime(start, QTime(0, 0, 0)), KDateTime(end, QTime(23, 59, 59))));
