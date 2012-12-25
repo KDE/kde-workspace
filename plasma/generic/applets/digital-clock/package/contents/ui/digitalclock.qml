@@ -11,7 +11,7 @@ Item {
     property variant dateStyle
     property bool showSeconds
 
-    property double timeScaleF: 0.7
+    property double timeScaleF: dateLabel.text ? 0.7 : 1
     property double dateScaleF: 1 - timeScaleF
 
     property int minimumWidth
@@ -63,9 +63,9 @@ Item {
         showSeconds = plasmoid.readConfig("showSeconds");
         switch(Number(plasmoid.readConfig("dateStyle"))) {
             case 0:
-                dateStyle = KLocale.Locale.ShortDate;
+                dateStyle = undefined;
                 break;
-            case 1:
+            case 1: //TODO compact date here
                 dateStyle = KLocale.Locale.ShortDate;
                 break;
             case 2:
@@ -127,7 +127,7 @@ Item {
 
     PlasmaComponents.Label {
         id: dateLabel
-        text: locale.formatDate(dateTime, dateStyle)
+        text: dateStyle === undefined ? "" : locale.formatDate(dateTime, dateStyle)
 
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
