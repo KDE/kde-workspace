@@ -23,6 +23,7 @@ import org.kde.qtextracomponents 0.1
 
 Item {
     id: footer
+
     height: statusLabel.height
 
     PlasmaComponents.Label {

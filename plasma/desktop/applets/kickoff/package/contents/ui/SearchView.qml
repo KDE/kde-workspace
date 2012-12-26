@@ -23,37 +23,47 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.kickoff 0.1 as Kickoff
 Item {
     id: searchViewContainer
-    objectName: "SearchView"
 
-    ContextMenu {
-        id: contextMenu
-    }
+    anchors.fill: parent
+
+    objectName: "SearchView"
 
     function decrementCurrentIndex() {
         searchView.decrementCurrentIndex();
     }
+
     function incrementCurrentIndex() {
         searchView.incrementCurrentIndex();
     }
+
     function activateCurrentIndex() {
         searchView.currentItem.activate();
     }
-    anchors.fill: parent
+
     PlasmaExtras.ScrollArea {
         anchors.fill: parent
+
         ListView {
             id: searchView
 
             anchors.fill: parent
-            model: Kickoff.KRunnerModel{}
+
             delegate: KickoffItem {}
             highlight: PlasmaComponents.Highlight {}
+
+            model: Kickoff.KRunnerModel{}
+
             Connections {
                 target: searchBar
+
                 onQueryChanged: {
                     searchView.model.setQuery(searchBar.query)
                 }
             }
-        }
+        } // searchView
+    } // ScrollArea
+
+    ContextMenu {
+        id: contextMenu
     }
 }

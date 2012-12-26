@@ -42,6 +42,7 @@ PlasmaComponents.ContextMenu {
     */
     PlasmaComponents.MenuItem {
         id: titleMenuItem
+
         text: contextMenu.title
         icon: contextMenu.model.decoration
         font.bold: true
@@ -50,13 +51,16 @@ PlasmaComponents.ContextMenu {
     }
     PlasmaComponents.MenuItem {
         id: titleSeparator
+
         separator: true
     }
     PlasmaComponents.MenuItem {
         id: addToFavorites
+
         text: contextMenu.isFavorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
         icon: contextMenu.isFavorite ? QIcon("list-remove") : QIcon("bookmark-new")
         visible: contextMenu.isApp
+
         onClicked: {
             if (contextMenu.isFavorite) {
                 favoritesModel.remove(contextMenu.model.url);
@@ -67,8 +71,10 @@ PlasmaComponents.ContextMenu {
     }
     PlasmaComponents.MenuItem {
         id: uninstallApp
+
         text: i18n("Uninstall")
         visible: packagekitSource.data["Status"] !== undefined && contextMenu.isApp
+
         onClicked: {
             var service = packagekitSource.serviceForSource("Status")
             var operation = service.operationDescription("uninstallApplication")
@@ -76,6 +82,5 @@ PlasmaComponents.ContextMenu {
             var job = service.startOperationCall(operation)
         }
     }
-
-}
+} // contextMenu
 

@@ -21,6 +21,10 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: crumbRoot
+
+    height: crumb.implicitHeight
+    width: crumb.implicitWidth + arrowSvg.width
+
     property string text
     property bool root: false
     property int depth: model.depth
@@ -29,15 +33,13 @@ Item {
         crumb.clicked();
     }
 
-    height: crumb.implicitHeight
-    width: crumb.implicitWidth + arrowSvg.width
-
     PlasmaComponents.ToolButton {
         id: crumb
-        text: crumbRoot.text
-        enabled: crumbRoot.depth < crumbModel.count
 
         anchors.left: arrowSvg.right
+
+        text: crumbRoot.text
+        enabled: crumbRoot.depth < crumbModel.count
 
         onClicked: {
             if (crumbRoot.root) {
@@ -55,14 +57,16 @@ Item {
 
     PlasmaCore.SvgItem {
         id: arrowSvg
-        svg: PlasmaCore.Svg {
-            imagePath: "toolbar-icons/go"
-        }
-        elementId: "go-next"
+
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         height: crumbRoot.height / 2
         width: visible ? height : 0
+
+        svg: PlasmaCore.Svg {
+            imagePath: "toolbar-icons/go"
+        }
+        elementId: "go-next"
         visible: !crumbRoot.root
     }
-}
+} // crumbRoot

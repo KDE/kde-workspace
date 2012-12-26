@@ -24,14 +24,19 @@ import org.kde.plasma.kickoff 0.1 as Kickoff
 
 Item {
     id: appViewContainer
+
+    anchors.fill: parent
+
     objectName: "ApplicationsView"
 
     function decrementCurrentIndex() {
         applicationsView.decrementCurrentIndex();
     }
+
     function incrementCurrentIndex() {
         applicationsView.incrementCurrentIndex();
     }
+
     function activateCurrentIndex(start) {
         if (!applicationsView.currentItem.modelChildren)
             if (!start)
@@ -39,6 +44,7 @@ Item {
 
         applicationsView.currentItem.activate();
     }
+
     function deactivateCurrentIndex() {
         if (crumbModel.count > 0) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
             breadcrumbsElement.children[crumbModel.count-1].clickCrumb();
@@ -47,20 +53,20 @@ Item {
         return false;
     }
 
-    anchors.fill: parent
-
     ContextMenu {
         id: contextMenu
     }
 
     Item {
         id: crumbContainer
-        height: childrenRect.height
+
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
         }
+        height: childrenRect.height
+
         Flickable {
             anchors {
                 top: parent.top
@@ -68,9 +74,13 @@ Item {
                 right: parent.right
             }
             height: breadcrumbsElement.height
+
             contentWidth: breadcrumbsElement.width
+            contentX: contentWidth - width
+
             PlasmaComponents.ButtonRow {
                 id: breadcrumbsElement
+
                 exclusive: false
 
                 Breadcrumb {
@@ -83,14 +93,16 @@ Item {
                     model: ListModel {
                         id: crumbModel
                     }
+
                     Breadcrumb {
                         root: false
                         text: model.text
                     }
                 }
             }
-        }
-    }
+        } // Flickable
+    } // crumbContainer
+
     PlasmaExtras.ScrollArea {
         anchors {
             top: crumbContainer.bottom
@@ -98,20 +110,19 @@ Item {
             bottom: parent.bottom
             right: parent.right
         }
+
         ListView {
             id: applicationsView
-            focus: true
 
-            boundsBehavior: Flickable.StopAtBounds
-
-            function addBreadcrumb(modelIndex, title) {
-                crumbModel.append({"text": title, "modelIndex": modelIndex, "depth": crumbModel.count+1})
-            }
             anchors.fill: parent
+
+            focus: true
+            boundsBehavior: Flickable.StopAtBounds
+            highlight: PlasmaComponents.Highlight {}
+
             model: VisualDataModel {
                 id: vmodel
 
-                model: Kickoff.ApplicationModel {}
                 delegate: KickoffItem {
                     id: kickoffItem
                     PlasmaCore.SvgItem {
@@ -127,12 +138,19 @@ Item {
                         }
                     }
                 }
+
+                model: Kickoff.ApplicationModel {}
+            } // VisualDataModel
+
+            function addBreadcrumb(modelIndex, title) {
+                crumbModel.append({"text": title, "modelIndex": modelIndex, "depth": crumbModel.count+1})
             }
-            highlight: PlasmaComponents.Highlight {}
+
             PlasmaCore.Svg {
                 id: arrowSvg
+
                 imagePath: "toolbar-icons/go"
             }
-        }
-    }
-}
+        } // applicationsView
+    } // ScrollArea
+} // appViewContainer

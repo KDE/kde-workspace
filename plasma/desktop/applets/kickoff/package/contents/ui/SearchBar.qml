@@ -26,6 +26,7 @@ import org.kde.qtextracomponents 0.1
 
 Item {
     id: searchBar
+
     height: Math.max(searchIcon.height+4, searchField.height+4)
 
     property alias query: searchField.text
@@ -36,29 +37,32 @@ Item {
 
     QIconItem {
         id: searchIcon
-        icon: QIcon("system-search")
-        height: 32
-        width: 32
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
         }
+        height: 32
+        width: 32
+
+        icon: QIcon("system-search")
     }
 
     PlasmaComponents.Label {
         id: searchLabel
-        text: i18n("Search:")
+
         anchors {
             left: searchIcon.right
             verticalCenter: parent.verticalCenter
             leftMargin: y
         }
+
+        text: i18n("Search:")
     }
+
     PlasmaComponents.TextField {
         id: searchField
 
-        placeholderText: i18nc("Search field placeholder text", "Search")
-        clearButtonShown: true
         anchors {
             left: searchLabel.right
             right: parent.right
@@ -66,6 +70,10 @@ Item {
             leftMargin: y
             rightMargin: y
         }
+
+        placeholderText: i18nc("Search field placeholder text", "Search")
+        clearButtonShown: true
+
         onTextChanged: {
             if (root.state != "Search") {
                 root.previousState = root.state;
@@ -76,5 +84,5 @@ Item {
                 root.forceActiveFocus();
             }
         }
-    }
-}
+    } // searchField
+} // searchBar

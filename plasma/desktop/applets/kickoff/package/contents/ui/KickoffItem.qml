@@ -23,6 +23,7 @@ import org.kde.draganddrop 1.0
 
 Item {
     id: listItem
+
     width: ListView.view.width
     height: listItemDelegate.height + listItemDelegate.anchors.margins*2
 
@@ -42,6 +43,7 @@ Item {
 
     Item {
         id: listItemDelegate
+
         anchors {
             left: parent.left
             right: parent.right
@@ -50,75 +52,29 @@ Item {
         }
         height: Math.max(elementIcon.height, titleElement.height + subTitleElement.height)
 
-        QIconItem {
-            id: elementIcon
-            icon: decoration
-            width: theme.mediumIconSize
-            height: width
-            anchors {
-                left: parent.left
-                verticalCenter: parent.verticalCenter
-            }
-        }
-        PlasmaComponents.Label {
-            id: titleElement
-            // TODO: games should always show the by name...really?
-            text: {
-                if (hasModelChildren) {
-                    return display;
-                } else {
-                    kickoff.showAppsByName || display.length == 0 ? (subtitle == undefined ? display : subtitle) :
-                                                                    display
-                }
-            }
-            height: paintedHeight
-            anchors {
-                top: elementIcon.top
-                left: elementIcon.right
-                right: parent.right
-                leftMargin: 8
-            }
-        }
-        PlasmaComponents.Label {
-            id: subTitleElement
-            text: {
-                if (hasModelChildren) {
-                    return subtitle;
-                } else {
-                    kickoff.showAppsByName || subtitle == undefined ? (display.length != 0 ? display : subtitle) : subtitle;
-                }
-            }
-            opacity: 0.6
-            font.pointSize: theme.smallestFont.pointSize
-            elide: Text.ElideMiddle
-            height: paintedHeight
-            anchors {
-                left: elementIcon.right
-                right: parent.right
-                bottom: parent.bottom
-                top: titleElement.bottom
-                leftMargin: 8
-            }
-        }
-
-
         DragArea {
             anchors.fill: parent
             supportedActions: Qt.MoveAction | Qt.LinkAction
             delegateImage: decoration
-                mimeData {
-                    url: model["url"]
-                    source: parent
-                    text: index
-                }
+
+            mimeData {
+                url: model["url"]
+                source: parent
+                text: index
+            }
+
             MouseArea {
                 id: mouseArea
+
                 anchors.fill: parent
+
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
                 onEntered: {
                     listItem.ListView.view.currentIndex = index;
                 }
+
                 onClicked: {
                     if (mouse.button == Qt.LeftButton) {
                         activate();
@@ -134,5 +90,61 @@ Item {
                 }
             }
         }
-    }
-}
+
+        QIconItem {
+            id: elementIcon
+
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
+            width: theme.mediumIconSize
+            height: width
+
+            icon: decoration
+        }
+        PlasmaComponents.Label {
+            id: titleElement
+
+            anchors {
+                top: elementIcon.top
+                left: elementIcon.right
+                right: parent.right
+                leftMargin: 8
+            }
+            height: paintedHeight
+            // TODO: games should always show the by name!
+            text: {
+                if (hasModelChildren) {
+                    return display;
+                } else {
+                    kickoff.showAppsByName || display.length == 0 ? (subtitle == undefined ? display : subtitle) :
+                                                                    display
+                }
+            }
+        }
+        PlasmaComponents.Label {
+            id: subTitleElement
+
+            anchors {
+                left: elementIcon.right
+                right: parent.right
+                bottom: parent.bottom
+                top: titleElement.bottom
+                leftMargin: 8
+            }
+            height: paintedHeight
+
+            text: {
+                if (hasModelChildren) {
+                    return subtitle;
+                } else {
+                    kickoff.showAppsByName || subtitle == undefined ? (display.length != 0 ? display : subtitle) : subtitle;
+                }
+            }
+            opacity: 0.6
+            font.pointSize: theme.smallestFont.pointSize
+            elide: Text.ElideMiddle
+        }
+    } // listItemDelegate
+} // listItem

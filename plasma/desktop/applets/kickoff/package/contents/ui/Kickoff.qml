@@ -26,28 +26,28 @@ import org.kde.qtextracomponents 0.1
 
 Item {
     id: root
+
+    width: 400
+    height: 400
+
     property int minimumWidth: theme.defaultFont.mSize.width * 45
     property int minimumHeight: theme.defaultFont.mSize.height * 30
     property string previousState
     property bool switchTabsOnHover: kickoff.switchTabsOnHover
     property bool showAppsByName: kickoff.showAppsByName
+    property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
-    width: 400
-    height: 400
     state: "Normal"
     focus: true
-    onFocusChanged: {
-        root.focus = true;
-    }
-
-    Component.onCompleted: {
-        root.focus = true;
-    }
 
     PlasmaCore.DataSource {
         id: packagekitSource
         engine: "packagekit"
         connectedSources: ["Status"]
+    }
+
+    onFocusChanged: {
+        root.focus = true;
     }
 
     Kickoff.Launcher {
@@ -59,8 +59,19 @@ Item {
         imagePath: "widgets/line"
     }
 
+    Timer {
+        id: clickTimer
+
+        property Item pendingButton
+
+        interval: 250
+
+        onTriggered: pendingButton.clicked()
+    }
+
     SearchBar {
         id: searchBar
+
         anchors {
             top: {
                 switch (kickoff.location) {
@@ -89,10 +100,9 @@ Item {
 
     Footer {
         id: footer
+
         anchors.top: searchBar.bottom
     }
-
-    property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
     PlasmaComponents.TabGroup {
         id: mainStack
@@ -149,21 +159,15 @@ Item {
             when: root.state == "Search"
             source: Qt.resolvedUrl("SearchView.qml")
         }
-    }
+    } // mainStack
 
     Kickoff.FavoritesModel {
         id: favoritesModel
     }
 
-    Timer {
-        id: clickTimer
-        interval: 250
-        property Item pendingButton
-        onTriggered: pendingButton.clicked()
-    }
     PlasmaComponents.TabBar {
         id: tabBar
-        currentTab: bookmarkButton
+
         anchors {
             left: parent.left
             right: parent.right
@@ -186,6 +190,11 @@ Item {
                 }
             }
         }
+
+        currentTab: bookmarkButton
+
+        onCurrentTabChanged: root.forceActiveFocus();
+
         KickoffButton {
             id: bookmarkButton
             tab: favoritesPage
@@ -216,9 +225,7 @@ Item {
             iconSource: "system-shutdown"
             text: i18n("Leave")
         }
-
-        onCurrentTabChanged: root.forceActiveFocus();
-    }
+    } // tabBar
 
     Keys.forwardTo: [tabBar.layout]
 
@@ -300,5 +307,9 @@ Item {
                 currentTab: searchPage
             }
         }
-    ]
-}
+    ] // states
+
+    Component.onCompleted: {
+        root.focus = true;
+    }
+} // root

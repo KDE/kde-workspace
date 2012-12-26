@@ -23,35 +23,12 @@ import org.kde.qtextracomponents 0.1
 
 PlasmaComponents.TabButton {
     id: button
+
     property string iconSource
     property alias text: labelElement.text
+
     implicitHeight: iconElement.height + labelElement.implicitHeight + iconElement.anchors.topMargin + labelElement.anchors.topMargin + labelElement.anchors.bottomMargin
 
-    QIconItem {
-        id: iconElement
-        icon: QIcon(iconSource)
-        width: theme.largeIconSize
-        height: width
-        anchors {
-            topMargin: 5
-            top: parent.top
-            horizontalCenter: parent.horizontalCenter
-        }
-    }
-    PlasmaComponents.Label {
-        id: labelElement
-        horizontalAlignment: Text.AlignHCenter
-        elide: Text.ElideRight
-        font.pointSize: theme.smallestFont.pointSize
-        anchors {
-            bottom: parent.bottom
-            top: iconElement.bottom
-            left: parent.left
-            right: parent.right
-            topMargin: 5
-            bottomMargin: 5
-        }
-    }
     MouseArea {
         enabled: root.switchTabsOnHover
         anchors.fill: parent
@@ -63,4 +40,34 @@ PlasmaComponents.TabButton {
         onExited: clickTimer.running = false
         onClicked: button.clicked()
     }
-}
+
+    QIconItem {
+        id: iconElement
+
+        anchors {
+            topMargin: 5
+            top: parent.top
+            horizontalCenter: parent.horizontalCenter
+        }
+        width: theme.largeIconSize
+        height: width
+
+        icon: QIcon(iconSource)
+    }
+    PlasmaComponents.Label {
+        id: labelElement
+
+        anchors {
+            bottom: parent.bottom
+            top: iconElement.bottom
+            left: parent.left
+            right: parent.right
+            topMargin: 5
+            bottomMargin: 5
+        }
+
+        horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
+        font.pointSize: theme.smallestFont.pointSize
+    }
+} // button

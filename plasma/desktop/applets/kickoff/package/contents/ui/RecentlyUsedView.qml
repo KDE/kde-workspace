@@ -24,11 +24,16 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 BaseView {
     objectName: "RecentlyUsedView"
 
+    model: Kickoff.RecentlyUsedModel {
+        id: recentlyUsedModel
+    }
+
     ContextMenu {
         id: contextMenu
 
         PlasmaComponents.MenuItem {
             id: clearRecentApplications
+
             text: i18n("Clear Recent Applications")
             icon: QIcon("edit-clear-history")
             onClicked: recentlyUsedModel.clearRecentApplications();
@@ -36,14 +41,11 @@ BaseView {
         }
         PlasmaComponents.MenuItem {
             id: clearRecentDocuments
+
             text: i18n("Clear Recent Documents")
             icon: QIcon("edit-clear-history")
             onClicked: recentlyUsedModel.clearRecentDocuments();
             visible: !contextMenu.isApp
         }
-    }
-
-    model: Kickoff.RecentlyUsedModel {
-        id: recentlyUsedModel
     }
 }

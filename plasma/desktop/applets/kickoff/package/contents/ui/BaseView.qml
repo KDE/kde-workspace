@@ -30,21 +30,25 @@ Item {
     function decrementCurrentIndex() {
         kickoffListView.decrementCurrentIndex();
     }
+
     function incrementCurrentIndex() {
         kickoffListView.incrementCurrentIndex();
     }
+
     function activateCurrentIndex() {
         kickoffListView.currentItem.activate();
     }
 
     PlasmaExtras.ScrollArea {
         anchors.fill: parent
+
         ListView {
             id: kickoffListView
-            interactive: contentHeight > height
-            boundsBehavior: Flickable.StopAtBounds
 
             anchors.fill: parent
+
+            interactive: contentHeight > height
+            boundsBehavior: Flickable.StopAtBounds
             delegate: KickoffItem {}
 
             section {

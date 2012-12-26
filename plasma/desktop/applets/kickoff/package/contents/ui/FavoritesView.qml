@@ -26,14 +26,17 @@ import org.kde.draganddrop 1.0
 
 Item {
     anchors.fill: parent
+
     objectName: "FavoritesView"
 
     function decrementCurrentIndex() {
         kickoffListView.decrementCurrentIndex();
     }
+
     function incrementCurrentIndex() {
         kickoffListView.incrementCurrentIndex();
     }
+
     function activateCurrentIndex() {
         kickoffListView.currentItem.activate();
     }
@@ -43,20 +46,25 @@ Item {
 
         PlasmaComponents.MenuItem {
             id: actionsSeparator
+
             separator: true
         }
         PlasmaComponents.MenuItem {
             id: sortFavoritesAscending
+
             text: i18n("Sort Alphabetically (A to Z)")
             icon: QIcon("view-sort-ascending")
+
             onClicked: {
                 favoritesModel.sortFavoritesAscending();
             }
         }
         PlasmaComponents.MenuItem {
             id: sortFavoritesDescending
+
             text: i18n("Sort Alphabetically (Z to A)")
             icon: QIcon("view-sort-descending")
+
             onClicked: {
                 favoritesModel.sortFavoritesDescending();
             }
@@ -65,24 +73,28 @@ Item {
 
     PlasmaExtras.ScrollArea {
         id: scrollArea
+
         anchors.fill: parent
+
         ListView {
             id: kickoffListView
-            anchors.fill: parent
-            interactive: contentHeight > height
-            model: favoritesModel
 
+            anchors.fill: parent
+
+            interactive: contentHeight > height
             delegate: KickoffItem {}
+            highlight: PlasmaComponents.Highlight {}
+
+            model: favoritesModel
 
             section {
                 property: "group"
                 criteria: ViewSection.FullString
                 delegate: SectionDelegate {}
             }
-            highlight: PlasmaComponents.Highlight {
-            }
         }
     }
+
     DropArea {
         anchors.fill: scrollArea
 
@@ -123,9 +135,11 @@ Item {
 
         Rectangle {
             id: dropTarget
-            visible: false
+
             width: parent.width
             height: 2
+
+            visible: false
             color: theme.highlightColor
         }
     }

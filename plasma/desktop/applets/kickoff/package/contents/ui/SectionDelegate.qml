@@ -23,26 +23,30 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: sectionDelegate
+
     width: parent.width
     height: childrenRect.height
+
     PlasmaCore.SvgItem {
-        visible: sectionDelegate.y > 0
-        svg: lineSvg
-        elementId: "horizontal-line"
         anchors {
             left: parent.left
             right: parent.right
         }
         height: lineSvg.elementSize("horizontal-line").height
+
+        visible: sectionDelegate.y > 0
+        svg: lineSvg
+        elementId: "horizontal-line"
     }
     PlasmaComponents.Label {
-        y: 2
-        opacity: 0.6
-        text: section
-        horizontalAlignment: Text.AlignHCenter
         anchors {
             left: parent.left
             right: parent.right
         }
+
+        y: 2
+        opacity: 0.6
+        text: section
+        horizontalAlignment: Text.AlignHCenter
     }
-}
+} // sectionDelegate

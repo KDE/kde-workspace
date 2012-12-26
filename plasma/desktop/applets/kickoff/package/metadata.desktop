@@ -169,7 +169,7 @@ Type=Service
 X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
 
 X-Plasma-API=declarativeappletscript
-X-Plasma-MainScript=ui/kickoff.qml
+X-Plasma-MainScript=ui/Kickoff.qml
 X-Plasma-DefaultSize=400,400
 X-Plasma-RequiredExtensions=LaunchApp
 
