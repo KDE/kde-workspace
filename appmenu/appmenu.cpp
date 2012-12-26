@@ -158,17 +158,11 @@ void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const Q
         // Tell Kwin menu is available
         emit menuAvailable(id);
     }
-    if (service == "") { // We do not need to update importer
-        return;
-    }
 
     KDBusMenuImporter* importer = m_importers.take(id);
      if (importer) {
         delete importer;
     }
-
-    // Put importer in cache
-    getImporter(id);
 
     // Application already active so check if we need create menubar
     if ( m_menuStyle == "TopMenuBar" && id == KWindowSystem::self()->activeWindow()) {
@@ -238,12 +232,6 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     }
 
     QMenu *menu = importer->menu();
-
-    // Old code from plasma-widget-menubar
-    // Putting this here can make later menu->actions().length() make a segfault
-    // Putting this in WindowRegistered() can freeze plasma on startup
-    // Do not seems needed
-    //QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
 
     if(menu) {
         showMenuBar(menu);
@@ -349,6 +337,7 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id)
         importer = new KDBusMenuImporter(id, m_menuImporter->serviceForWindow(id), &m_icons,
                                              m_menuImporter->pathForWindow(id), this);
         if (importer) {
+            QMetaObject::invokeMethod(importer, "updateMenu", Qt::DirectConnection);
             connect(importer, SIGNAL(actionActivationRequested(QAction*)),
                     SLOT(slotActionActivationRequested(QAction*)));
             m_importers.insert(id, importer);
