@@ -61,8 +61,10 @@ TopMenuBar::~TopMenuBar()
 void TopMenuBar::enableMouseTracking(bool enable)
 {
     if (enable) {
-        if (! cursorInMenuBar()) {
+        if (!cursorInMenuBar()) {
             showGlowBar();
+        }
+        if (!isVisible()) {
             m_mouseTracker->start(250);
         }
     } else {
