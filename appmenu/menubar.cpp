@@ -67,15 +67,6 @@ MenuBar::MenuBar()
 
     setScene(m_scene);
 
-    // Add shadow for better readability
-    if (! Plasma::WindowEffects::isEffectAvailable(Plasma::WindowEffects::BlurBehind)) {
-        QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect();
-        shadow->setBlurRadius(5);
-        shadow->setOffset(QPointF(1, 1));
-        shadow->setColor(Plasma::Theme::defaultTheme()->color(Plasma::Theme::BackgroundColor));
-        setGraphicsEffect(shadow);
-    }
-
     m_background->getMargins(left, top, right, bottom);
     m_container->layout()->setContentsMargins(left, top, right, bottom);
     resize(sizeHint());
@@ -97,6 +88,16 @@ QSize MenuBar::sizeHint() const
 
 void MenuBar::show()
 {
+    // Add shadow for better readability
+    if (! Plasma::WindowEffects::isEffectAvailable(Plasma::WindowEffects::BlurBehind)) {
+        QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect();
+        shadow->setBlurRadius(5);
+        shadow->setOffset(QPointF(1, 1));
+        shadow->setColor(Plasma::Theme::defaultTheme()->color(Plasma::Theme::BackgroundColor));
+        setGraphicsEffect(shadow);
+    } else {
+            setGraphicsEffect(0);
+    }
     m_hideTimer->start(1000);
     QGraphicsView::show();
 
