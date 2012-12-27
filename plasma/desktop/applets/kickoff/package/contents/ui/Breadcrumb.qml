@@ -42,16 +42,17 @@ Item {
         enabled: crumbRoot.depth < crumbModel.count
 
         onClicked: {
-            if (crumbRoot.root) {
-                applicationsView.model.rootIndex = 0
-            } else {
-                applicationsView.model.rootIndex = model.modelIndex;
-            }
-
             while (crumbModel.count > 0 &&
                 crumbRoot.depth < crumbModel.get(crumbModel.count-1).depth) {
                 crumbModel.remove(crumbModel.count-1)
+                }
+
+            if (crumbRoot.root) {
+                applicationsView.newModelIndex = 0;
+            } else {
+                applicationsView.newModelIndex = model.modelIndex;
             }
+            appViewScrollArea.state = "OutgoingRight";
         }
     }
 

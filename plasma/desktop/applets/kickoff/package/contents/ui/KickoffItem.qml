@@ -77,7 +77,7 @@ Item {
 
                 onClicked: {
                     if (mouse.button == Qt.LeftButton) {
-                        activate();
+                        appViewScrollArea.state = "OutgoingLeft";
                     } else if (mouse.button == Qt.RightButton) {
                         // don't show a context menu for container
                         if (hasModelChildren || typeof(contextMenu) === "undefined") {

@@ -42,12 +42,13 @@ Item {
             if (!start)
                 return;
 
-        applicationsView.currentItem.activate();
+        appViewScrollArea.state = "OutgoingLeft";
     }
 
     function deactivateCurrentIndex() {
         if (crumbModel.count > 0) { // this is not the case when switching from the "Applications" to the "Favorites" tab using the "Left" key
             breadcrumbsElement.children[crumbModel.count-1].clickCrumb();
+            appViewScrollArea.state = "OutgoingRight";
             return true;
         }
         return false;
@@ -104,17 +105,29 @@ Item {
     } // crumbContainer
 
     PlasmaExtras.ScrollArea {
+        id: appViewScrollArea
+
         anchors {
             top: crumbContainer.bottom
-            left: parent.left
             bottom: parent.bottom
-            right: parent.right
+        }
+        width: parent.width
+
+        function moveRight() {
+            state = "";
+            applicationsView.currentItem.activate();
+        }
+
+        function moveLeft() {
+            state = "";
+            // newModelIndex set by clicked breadcrumb
+            applicationsView.model.rootIndex = applicationsView.newModelIndex;
         }
 
         ListView {
             id: applicationsView
 
-            anchors.fill: parent
+            property variant newModelIndex
 
             focus: true
             boundsBehavior: Flickable.StopAtBounds
@@ -125,17 +138,19 @@ Item {
 
                 delegate: KickoffItem {
                     id: kickoffItem
+
                     PlasmaCore.SvgItem {
-                        svg: arrowSvg
-                        elementId: "go-next"
-                        height: theme.smallIconSize
-                        width: height
-                        visible: hasModelChildren
                         anchors {
                             right: parent.right
                             verticalCenter: parent.verticalCenter
                             rightMargin: y
                         }
+                        height: theme.smallIconSize
+                        width: height
+
+                        svg: arrowSvg
+                        elementId: "go-next"
+                        visible: hasModelChildren
                     }
                 }
 
@@ -152,5 +167,41 @@ Item {
                 imagePath: "toolbar-icons/go"
             }
         } // applicationsView
-    } // ScrollArea
+
+        states: [
+            State {
+                name: "OutgoingLeft"
+                PropertyChanges {
+                    target: appViewScrollArea
+                    x: -parent.width
+                    opacity: 0.0
+                }
+            },
+            State {
+                name: "OutgoingRight"
+                PropertyChanges {
+                    target: appViewScrollArea
+                    x: parent.width
+                    opacity: 0.0
+                }
+            }
+        ]
+
+        transitions:  [
+            Transition {
+                to: "OutgoingLeft"
+                SequentialAnimation {
+                    NumberAnimation { properties: "x,opacity"; easing.type: Easing.InQuad; duration: 250 }
+                    ScriptAction { script: appViewScrollArea.moveRight() }
+                }
+            },
+            Transition {
+                to: "OutgoingRight"
+                SequentialAnimation {
+                    NumberAnimation { properties: "x,opacity"; easing.type: Easing.InQuad; duration: 250 }
+                    ScriptAction { script: appViewScrollArea.moveLeft() }
+                }
+            }
+        ]
+    } // appViewScrollArea
 } // appViewContainer
