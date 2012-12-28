@@ -6,6 +6,7 @@ Greeter=elarun.xml
 Name=Elarun
 Name[ca]=Elarun
 Name[da]=Elarun
+Name[et]=Elarun
 Name[ga]=Elarun
 Name[gl]=Elarun
 Name[hu]=Elarun
@@ -21,6 +22,8 @@ Name[sr@latin]=Elarun
 Name[sv]=Elarun
 Name[uk]=Еларан
 Name[x-test]=xxElarunxx
+Name[zh_CN]=Elarun
+Name[zh_TW]=Elarun
 
 Author=Roman Shtylman & Nuno Pinheiro
 Copyright=GPL 2010 Roman Shtylman | nuno@oxygen-icons.org, 2012 Nuno Pineheiro

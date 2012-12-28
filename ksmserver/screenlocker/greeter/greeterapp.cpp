@@ -138,21 +138,21 @@ void UnlockApp::initialize()
         QDeclarativeProperty sleepProperty(view->rootObject(), "suspendToRamSupported");
         sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
-            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(suspendToRam())) != -1) {
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToRam()")) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
         }
 
         QDeclarativeProperty hibernateProperty(view->rootObject(), "suspendToDiskSupported");
         hibernateProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
-            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(suspendToDisk())) != -1) {
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToDisk()")) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
         }
 
         QDeclarativeProperty shutdownProperty(view->rootObject(), "shutdownSupported");
         shutdownProperty.write(canLogout);
         if (canLogout &&
-            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(shutdown())) != -1) {
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("shutdown()")) != -1) {
             connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
         }
 
