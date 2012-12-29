@@ -1354,7 +1354,7 @@ Type=GESTURE
 [Data_1_13]
 Comment=Press, move up, move right, release.
 Comment[ar]=اضغط, تحرك إلى الأعلى, تحرك إلى اليمين, أفلت.
-Comment[ast]=Calca, xube, drecha, suelta.
+Comment[ast]=Calca, xube, derecha, suelta.
 Comment[be@latin]=Pryciśni, pasuń uvierch, pasuń uprava j adciśni.
 Comment[bg]=Натискане, движение нагоре, движение надясно, пускане.
 Comment[bs]=Pritisni, gore, desno, otpusti.
@@ -2472,7 +2472,7 @@ Type=GESTURE
 [Data_1_4]
 Comment=Press, move right, release.
 Comment[ar]=اضغط, تحرك إلى اليمين, أفلت.
-Comment[ast]=Calca, drecha, suelta.
+Comment[ast]=Calca, derecha, suelta.
 Comment[be@latin]=Pryciśni, pasuń uprava j adciśni.
 Comment[bg]=Натискане, движение надясно, пускане.
 Comment[bs]=Pritisni, pomjeri desno, otpusti
@@ -2732,7 +2732,7 @@ Type=GESTURE
 [Data_1_5]
 Comment=Press, move down, move half up, move right, move down, release.\n(Drawing a lowercase 'h'.)
 Comment[ar]=اضغط, تحرك إلى الأسفل, تحرك نصف المسافة إلى الأعلى, تحرك إلى اليمين, تحرك إلى الأسفل. أفلت.\n(ارسم حرف 'h' صغير)
-Comment[ast]=Calca, abaxo, mediu arriba, drecha, abaxo, suelta.\n(Dibuxando una «h» minúscula).
+Comment[ast]=Calca, abaxo, mediu arriba, derecha, abaxo, suelta.\n(Dibuxando una «h» minúscula).
 Comment[bg]=Натискане, движение надясно, полудвижение нагоре, движение надясно, движение надолу, пускане.\n(Пише се малка буква "h".)
 Comment[bs]=Pritisni, pomjeri dolje, pomjeri polu-gore, pomjeri desno, pomjeri dolje, otpusti.\n(Crtanje malog slova 'h'.)
 Comment[ca]=Premeu, moveu avall, moveu la meitat cap amunt, moveu a la dreta, deixeu anar.\n(Dibuixant una «h» minúscula)
@@ -2995,7 +2995,7 @@ Type=GESTURE
 [Data_1_6]
 Comment=Press, move right, move down, move right, release.\nMozilla-style: Press, move down, move right, release.
 Comment[ar]=اضغط, تحرك إلى اليمين, تحرك إلى الأسفل, تحرك إلى اليمين, تحرك إلى الأسفل, أفلت.\nنمط موزيريلا: اضغط, تحرك إلى الأسفل, تحرك إلى اليمين, أفلت.
-Comment[ast]=Calca drecha, abaxo, drecha, suelte\nEstilu Mozilla: Calca, abaxo, drecha, suelta.
+Comment[ast]=Calca derecha, abaxo, derecha, suelte\nEstilu Mozilla: Calca, abaxo, derecha, suelta.
 Comment[bg]=Натискане, движение надолу, движение нагоре, движение надолу, пускане.
 Comment[bs]=Pritisni, desno, dole, desno, otpusti.\nU stilu Mozile: pritisni, dole, desno, otpusti.
 Comment[ca]=Premeu, moveu a la dreta, moveu avall, moveu a la dreta, deixeu anar.\nEstil Mozilla: premeu, moveu avall, moveu a la dreta, deixeu anar.
