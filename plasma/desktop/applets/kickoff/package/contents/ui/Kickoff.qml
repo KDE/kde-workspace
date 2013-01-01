@@ -30,8 +30,8 @@ Item {
     width: 400
     height: 400
 
-    property int minimumWidth: theme.defaultFont.mSize.width * 45
-    property int minimumHeight: theme.defaultFont.mSize.height * 30
+    property int minimumWidth: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.implicitHeight : tabBar.implicitWidth
+    property int minimumHeight: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.implicitWidth : tabBar.implicitHeight
     property string previousState
     property bool switchTabsOnHover: kickoff.switchTabsOnHover
     property bool showAppsByName: kickoff.showAppsByName
@@ -75,22 +75,22 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return undefined;
-                // bottom
-                default:
-                    return parent.top;
+                    case Kickoff.Kickoff.TopEdge:
+                    case Kickoff.Kickoff.LeftEdge:
+                    case Kickoff.Kickoff.RightEdge:
+                        return undefined;
+                    default:
+                        return footer.bottom;
                 }
             }
-            /*top: kickoff.location == "TopEdge" ? undefined : parent.top
-            bottom: kickoff.location == "TopEdge" ? parent.bottom : undefined*/
             bottom: {
                 switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return parent.bottom;
-                // bottom
-                default:
-                    return undefined;
+                    case Kickoff.Kickoff.TopEdge:
+                    case Kickoff.Kickoff.LeftEdge:
+                    case Kickoff.Kickoff.RightEdge:
+                        return footer.top;
+                    default:
+                        return undefined;
                 }
             }
             right: parent.right
@@ -101,7 +101,30 @@ Item {
     Footer {
         id: footer
 
-        anchors.top: searchBar.bottom
+        anchors {
+            top: {
+                switch (kickoff.location) {
+                    case Kickoff.Kickoff.TopEdge:
+                    case Kickoff.Kickoff.LeftEdge:
+                    case Kickoff.Kickoff.RightEdge:
+                        return undefined;
+                    default:
+                        return parent.top;
+                }
+            }
+            bottom: {
+                switch (kickoff.location) {
+                    case Kickoff.Kickoff.TopEdge:
+                    case Kickoff.Kickoff.LeftEdge:
+                    case Kickoff.Kickoff.RightEdge:
+                        return parent.bottom;
+                    default:
+                        return undefined;
+                }
+            }
+            left: parent.left
+            right: parent.right
+        }
     }
 
     PlasmaComponents.TabGroup {
@@ -112,22 +135,27 @@ Item {
                 switch (kickoff.location) {
                 case Kickoff.Kickoff.TopEdge:
                     return tabBar.bottom;
-                // bottom
+                case Kickoff.Kickoff.LeftEdge:
+                case Kickoff.Kickoff.RightEdge:
+                    return parent.top;
                 default:
-                    return footer.bottom;
+                    return searchBar.bottom;
                 }
             }
-            left: parent.left
             bottom: {
                 switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return searchBar.top;
-                // bottom
-                default:
-                    return tabBar.top;
+                    case Kickoff.Kickoff.TopEdge:
+                    case Kickoff.Kickoff.LeftEdge:
+                    case Kickoff.Kickoff.RightEdge:
+                        return searchBar.top;
+                    default:
+                        return tabBar.top;
                 }
             }
-            right: parent.right
+            left: kickoff.location == Kickoff.Kickoff.LeftEdge ? parent.left : parent.left
+            right: kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.left : parent.right
+            leftMargin: kickoff.location == Kickoff.Kickoff.LeftEdge ? tabBar.height : undefined
+            rightMargin: kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.height : undefined
         }
 
         //pages
@@ -169,28 +197,32 @@ Item {
         id: tabBar
 
         anchors {
-            left: parent.left
-            right: parent.right
-            bottom: {
-                switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return undefined;
-                // bottom
-                default:
-                    return parent.bottom;
-                }
-            }
             top: {
                 switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
-                    return parent.top;
-                // bottom
-                default:
-                    return undefined;
+                    case Kickoff.Kickoff.TopEdge:
+                        return parent.top;
+                    default:
+                        return undefined;
                 }
             }
+            bottom: {
+                switch (kickoff.location) {
+                    case Kickoff.Kickoff.TopEdge:
+                    case Kickoff.Kickoff.LeftEdge:
+                    case Kickoff.Kickoff.RightEdge:
+                        return undefined;
+                    default:
+                        return parent.bottom;
+                }
+            }
+            left: kickoff.location == Kickoff.Kickoff.RightEdge || kickoff.location == Kickoff.Kickoff.LeftEdge ? undefined : parent.left
+            right: kickoff.location == Kickoff.Kickoff.RightEdge || kickoff.location == Kickoff.Kickoff.LeftEdge ? undefined : parent.right
         }
+        x: kickoff.location == Kickoff.Kickoff.LeftEdge ? height : (kickoff.location == Kickoff.Kickoff.RightEdge ? root.width : 0)
+        width: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? root.height - searchBar.height - footer.height : undefined
 
+        transformOrigin: Item.TopLeft
+        rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? 90 : 0
         currentTab: bookmarkButton
 
         onCurrentTabChanged: root.forceActiveFocus();
@@ -200,30 +232,35 @@ Item {
             tab: favoritesPage
             iconSource: "bookmarks"
             text: i18n("Favorites")
+            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: applicationButton
             tab: applicationsPage
             iconSource: "applications-other"
             text: i18n("Applications")
+            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: computerButton
             tab: systemPage
             iconSource: "computer" // TODO: could also be computer-laptop
             text: i18n("Computer")
+            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: usedButton
             tab: recentlyUsedPage
             iconSource: "document-open-recent"
             text: i18n("Recently Used")
+            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: leaveButton
             tab: leavePage
             iconSource: "system-shutdown"
             text: i18n("Leave")
+            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
         }
     } // tabBar
 
