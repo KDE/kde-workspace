@@ -1,4 +1,3 @@
-# TODO: Bump the requirements
 if (KFI_BUILD_STANDALONE)
     cmake_minimum_required(VERSION 2.6.4)
     find_package(KDE4 "4.6.0" REQUIRED)
@@ -7,6 +6,7 @@ if (KFI_BUILD_STANDALONE)
     find_package(Fontconfig REQUIRED)
     find_package(Strigi REQUIRED)
     find_package(X11 REQUIRED)
+    macro_log_feature(X11_Xft_FOUND "libxft" "X FreeType interface library" "http://www.x.org" FALSE "" "Font installer and font previews")
     include(KDE4Defaults)
 endif (KFI_BUILD_STANDALONE)
 
@@ -49,5 +49,3 @@ if (X11_Xft_FOUND)
     kde4_install_icons( ${ICON_INSTALL_DIR} )
 
 endif (X11_Xft_FOUND)
-
-macro_log_feature(X11_Xft_FOUND "libxft" "X FreeType interface library" "http://www.x.org" FALSE "" "Font installer and font previews")
