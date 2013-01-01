@@ -1,6 +1,10 @@
 
 macro_optional_find_package(Freetype)
-macro_log_feature(FREETYPE_FOUND "FreeType" "A font rendering engine" "http://www.freetype.org" FALSE "" "Needed to build kfontinst, a simple font installer.")
+set_package_properties(Freetype PROPERTIES DESCRIPTION "A font rendering engine"
+                       URL "http://www.freetype.org"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed to build kfontinst, a simple font installer."
+                      )
 
 
 set(libkxftconfig_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/fonts/kxftconfig.cpp )

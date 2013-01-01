@@ -1,4 +1,7 @@
 project(KDEBASE_WORKSPACE)
+# set_package_properties appeared in cmake 2.8.6
+# TODO: Remove when kdelibs >= 4.10 will be required
+cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
@@ -6,102 +9,178 @@ set(KDE4WORKSPACE_VERSION_MINOR 10)
 set(KDE4WORKSPACE_VERSION_PATCH 60)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
-
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH} )
 
 #search packages used by KDE
 set(QT_MIN_VERSION "4.7.0")
-set(KDE_MIN_VERSION "4.8.1")
 
-OPTION(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
-
-find_package(KDE4 ${KDE_MIN_VERSION} REQUIRED)
+find_package(KDE4 4.9.4 REQUIRED)
 include(KDE4Defaults)
 
-find_package(Strigi REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(KActivities 6.0.0 REQUIRED)
-find_package(DBusMenuQt 0.6.0 REQUIRED)
-find_package(QImageBlitz REQUIRED)
-find_package(KDeclarative REQUIRED)
-macro_optional_find_package(OpenGL)
-macro_optional_find_package(OpenGLES)
+option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
 
-macro_log_feature(KDeclarative_FOUND "libkdeclarative" "KDE Declarative (QML) support from kdelibs" "http://www.kde.org" TRUE "" "Required by ksmserver.")
+find_package(Strigi)
+set_package_properties(Strigi PROPERTIES DESCRIPTION "Desktop indexing and search support"
+                       URL "http://strigi.sourceforge.net"
+                       TYPE REQUIRED
+                      )
+
+find_package(ZLIB)
+set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed files and data streams"
+                       URL "http://www.zlib.net"
+                       TYPE REQUIRED
+                      )
+
+find_package(KActivities 6.0.0 CONFIG)
+set_package_properties(KActivities PROPERTIES DESCRIPTION "Interface library for the activity manager"
+                       URL "https://projects.kde.org/kactivities"
+                       TYPE REQUIRED
+                      )
+
+find_package(DBusMenuQt 0.6.0)
+set_package_properties(DBusMenuQt PROPERTIES DESCRIPTION "Support for notification area menus via the DBusMenu protocol"
+                       URL "https://launchpad.net/libdbusmenu-qt"
+                       TYPE REQUIRED
+                      )
+
+find_package(QImageBlitz)
+set_package_properties(QImageBlitz PROPERTIES DESCRIPTION "An image effects library"
+                       URL "http://sourceforge.net/projects/qimageblitz"
+                       TYPE REQUIRED
+                      )
+
+find_package(KDeclarative QUIET CONFIG)
+set_package_properties(KDeclarative PROPERTIES DESCRIPTION "KDE Declarative (QML) support from kdelibs"
+                       URL "http://www.kde.org"
+                       TYPE REQUIRED
+                       PURPOSE "Required for building ksmserver"
+                      )
+
+macro_optional_find_package(OpenGL)
+set_package_properties(OpenGL PROPERTIES DESCRIPTION "The OpenGL libraries"
+                       URL "http://www.opengl.org"
+                       TYPE OPTIONAL
+                      )
+macro_optional_find_package(OpenGLES)
+set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
+                       URL "http://www.khronos.org/opengles"
+                       TYPE OPTIONAL
+                      )
+
 
 if(Q_WS_X11)
   find_package(XCB REQUIRED)
-  find_package(X11XCB REQUIRED)
+  set_package_properties(XCB PROPERTIES DESCRIPTION "X protocol C-language Binding"
+                         URL "http://xcb.freedesktop.org"
+                         TYPE REQUIRED
+                        )
 
-  if(NOT X11_XTest_FOUND)
-    macro_log_feature(X11_XTest_FOUND "libXtst" "X11 Testing Resource extension library" "http://xorg.freedesktop.org" FALSE "" "useful for automated testing of X clients.")
-  endif(NOT X11_XTest_FOUND)
-  if(NOT X11_Xau_FOUND)
-    macro_log_feature(X11_Xau_FOUND "libXau" "X11 Authorization Protocol library" "http://xorg.freedesktop.org" FALSE "" "Needed by KDM.")
-  endif(NOT X11_Xau_FOUND)
-  if(NOT X11_Xdmcp_FOUND)
-    macro_log_feature(X11_Xdmcp_FOUND "libXdmcp" "X Display Manager Control Protocol library" "http://xorg.freedesktop.org" FALSE "" "Needed by KDM.")
-  endif(NOT X11_Xdmcp_FOUND)
-  # Other X11 libraries that are used unconditionally elsewhere
-  # without testing if they are found. With these log messages
-  # you get a nice complaint about missing required packages
-  # before the CMake error list of unused variables.
+  find_package(X11_XCB)
+  set_package_properties(X11_XCB PROPERTIES DESCRIPTION "XCB X11 protocol client library"
+                         TYPE REQUIRED
+                        )
+
+  add_feature_info("Automated testing of X clients" X11_XTest_FOUND
+                   "The X11 Testing Resource extension library is useful for automated testing of X clients")
+  add_feature_info("libXau" X11_Xau_FOUND "The X11 Authorization Protocol library may be used by KDM")
+  add_feature_info("LibXdmcp" X11_Xdmcp_FOUND "The X Display Manager Control Protocol library may be used by KDM")
   if(NOT X11_Xkbfile_FOUND)
-    macro_log_feature(X11_Xkbfile_FOUND "libXkbfile" "X11 keyboard layout library" "http://xorg.freedesktop.org" TRUE "" "Needed for keyboard modules.")
-  endif(NOT X11_Xkbfile_FOUND)
+    message(FATAL_ERROR "The X11 keyboard layout library was not found. Required for building keyboard modules.")
+  endif()
   if(NOT X11_Xcomposite_FOUND)
-    macro_log_feature(X11_Xcomposite_FOUND "libXcomposite" "X11 composite library" "http://xorg.freedesktop.org" TRUE "" "Needed for plasma tray and notifications.")
-  endif(NOT X11_Xcomposite_FOUND)
+    message(FATAL_ERROR "The X11 composite library was not found. Required for building the plasma tray and notifications widgets.")
+  endif()
   if(NOT X11_Xdamage_FOUND)
-    macro_log_feature(X11_Xdamage_FOUND "libXdamage" "X11 damaged region extension library" "http://xorg.freedesktop.org" TRUE "" "Needed for Compositing support in KWin.")
-  endif(NOT X11_Xdamage_FOUND)
+    message(FATAL_ERROR "The X11 damaged region extension library was not found. Required for compositing support in KWin.")
+  endif()
   if(NOT X11_Xrender_FOUND)
-    macro_log_feature(X11_Xrender_FOUND "libXrender" "X Rendering Extension client library" "http://xorg.freedesktop.org" TRUE "" "Needed for XRender Compositing backend in KWin.")
-  endif(NOT X11_Xrender_FOUND)
+    message(FATAL_ERROR " The X Rendering Extension client library was not found. Required for XRender Compositing backend in KWin.")
+  endif()
   if(NOT X11_Xfixes_FOUND)
-    macro_log_feature(X11_Xfixes_FOUND "libXfixes" "X11 miscellaneous 'fixes' extension library" "http://xorg.freedesktop.org" TRUE "" "Needed for XRender Compositing backend in KWin.")
-  endif(NOT X11_Xfixes_FOUND)
+    message(FATAL_ERROR "The X11 miscellaneous 'fixes' extension library was not found. Required for XRender Compositing backend in KWin.")
+  endif()
   if(NOT X11_Xrandr_FOUND)
-    macro_log_feature(X11_Xrandr_FOUND "libXrandr" "X11 RandR extension library" "http://xorg.freedesktop.org" TRUE "" "Needed for Multi Screen Support.")
-  endif(NOT X11_Xrandr_FOUND)
+    message(FATAL_ERROR "The X11 RandR extension library was not found. Required for Multi Screen Support.")
+  endif()
   if(NOT OPENGL_FOUND AND NOT OPENGLES_FOUND)
-    macro_log_feature(OPENGL_FOUND "OpenGL" "OpenGL" "http://www.opengl.org/" FALSE "" "Needed to build OpenGL Compositing backend in KWin")
-    macro_log_feature(OPENGLES_FOUND "OpenGL ES" "OpenGL ES 2.0" "http://www.khronos.org/opengles/" FALSE "" "Needed to build OpenGL ES 2.0 Compositing backend in KWin")
-    set(OPENGL_OR_ES_FOUND FALSE)
-    macro_log_feature(OPENGL_OR_ES_FOUND "OpenGL (ES)" "OpenGL (ES)" "http://mesa3d.org/" TRUE "" "Either OpenGL or OpenGL ES 2.0 are required for Compositing support in KWin.")
-  endif(NOT OPENGL_FOUND AND NOT OPENGLES_FOUND)
+    message(FATAL_ERROR "Either OpenGL or OpenGL ES 2.0 are required for Compositing support in KWin.")
+  endif()
   if(NOT X11_Xcursor_FOUND)
-    macro_log_feature(X11_Xcursor_FOUND "libXcursor" "X11 cursor management library" "http://xorg.freedesktop.org" TRUE "" "Needed for desktop effects support in KWin.")
-  endif(NOT X11_Xcursor_FOUND)
+    message(FATAL_ERROR "The X11 cursor management library was not found. Required for desktop effects support in KWin.")
+  endif()
 endif(Q_WS_X11)
 
-macro_optional_find_package(GLIB2)
-macro_log_feature(GLIB2_FOUND "glib2" "Low-level core library for data structure handling, portability wrappers, etc." "http://www.gtk.org" FALSE "2.x" "Needed to build the kxkb keyboard map control program and provide XMMS support in the Now Playing Plasma data engine")
+macro_optional_find_package(GLIB2 2.0)
+set_package_properties(GLIB2 PROPERTIES DESCRIPTION "Low-level core library for data structure handling, portability wrappers, etc."
+                       URL "http://www.gtk.org"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed to build the kxkb keyboard map control program and provide XMMS support in the Now Playing Plasma data engine"
+                      )
 
 macro_optional_find_package(Fontconfig)
-macro_log_feature(FONTCONFIG_FOUND "Fontconfig" "Font access configuration library" "http://www.freedesktop.org/wiki/Software/fontconfig" FALSE "" "Needed to build font configuration and installation tools")
+set_package_properties(Fontconfig PROPERTIES DESCRIPTION "Font access configuration library"
+                       URL "http://www.freedesktop.org/wiki/Software/fontconfig"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed to build font configuration and installation tools"
+                      )
 
-macro_optional_find_package(Googlegadgets)
-macro_log_feature(GOOGLEGADGETS_FOUND "GoogleGadgets" "Google Gadgets library" "http://code.google.com/p/google-gadgets-for-linux/" FALSE "0.11.0" "Needed to build plasma scriptengine for google gadgets")
+macro_optional_find_package(Googlegadgets 0.11.0)
+set_package_properties(Googlegadgets PROPERTIES DESCRIPTION "Google Gadgets library"
+                       URL "http://code.google.com/p/google-gadgets-for-linux"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed to build plasma scriptengine for google gadgets"
+                      )
 
 #### Python support ( plasma scriptengines ) ####
 macro_optional_find_package(PythonLibrary)
-macro_log_feature(PYTHONLIBRARY_FOUND "Python" "Python scripting language" "http://python.org" FALSE "" "Needed to build plasma scriptengine for python.")
+set_package_properties(PythonLibrary PROPERTIES DESCRIPTION "Python scripting language"
+                       URL "http://python.org"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed to build plasma scriptengine for python."
+                      )
 
-set(SOPRANO_MIN_VERSION "2.7.56")
-macro_optional_find_package(Soprano)
-macro_log_feature(Soprano_FOUND "Soprano" "Semantic Desktop Storing" "http://soprano.sourceforge.net" FALSE "${SOPRANO_MIN_VERSION}" "Required to build Nepomuk features.")
-macro_optional_find_package(NepomukCore)
-macro_log_feature(NepomukCore_FOUND "Nepomuk" "Nepomuk Core Library" "nepomuk-core" FALSE "" "Required to build Nepomuk features.")
-macro_optional_find_package(Boost)
-macro_log_feature(Boost_FOUND "Boost" "Boost C++ Libraries" "www.boost.org" FALSE "" "Required to build certain Plasma DataEngines (Akonadi, RSS, Calendar)")
-macro_optional_find_package(Akonadi)
-macro_log_feature(Akonadi_FOUND "Akonadi" "An extensible cross-desktop storage service for PIM data" "http://pim.kde.org/akonadi" FALSE "" "Required to build certain Plasma DataEngines (Akonadi, Calendar)")
-macro_optional_find_package(KdepimLibs 4.5.60)
-macro_log_feature(KdepimLibs_FOUND "KDE PIM Libs" "KDE Libraries for PIM" "http://pim.kde.org/" FALSE "4.5.60" "Required to build certain Plasma DataEngines (Akonadi, Calendar)")
+macro_optional_find_package(Soprano 2.7.56)
+set_package_properties(Soprano PROPERTIES DESCRIPTION "Semantic Desktop Storing"
+                       URL "http://soprano.sourceforge.net"
+                       TYPE OPTIONAL
+                       PURPOSE "Required to build Nepomuk features."
+                      )
+
+macro_optional_find_package(NepomukCore QUIET CONFIG)
+set_package_properties(NepomukCore PROPERTIES DESCRIPTION "Nepomuk Core Library"
+                       URL "https://projects.kde.org/nepomuk-core"
+                       TYPE OPTIONAL
+                       PURPOSE "Required to build Nepomuk features."
+                      )
+
+macro_optional_find_package(Boost 1.34.0 MODULE)
+set_package_properties(Boost PROPERTIES DESCRIPTION "Boost C++ Libraries"
+                       URL "http://www.boost.org"
+                       TYPE OPTIONAL
+                       PURPOSE "Required to build certain Plasma DataEngines (Akonadi, RSS, Calendar)"
+                      )
+
+macro_optional_find_package(Akonadi QUIET CONFIG)
+set_package_properties(Akonadi PROPERTIES DESCRIPTION "An extensible cross-desktop storage service for PIM data"
+                       URL "http://pim.kde.org/akonadi"
+                       TYPE OPTIONAL
+                       PURPOSE "Required to build certain Plasma DataEngines (Akonadi, Calendar)"
+                      )
+
+macro_optional_find_package(KdepimLibs 4.5.60 QUIET CONFIG)
+set_package_properties(KdepimLibs PROPERTIES DESCRIPTION "The KDEPIM libraries"
+                       URL "http://pim.kde.org"
+                       TYPE OPTIONAL
+                       PURPOSE "Required to build certain Plasma DataEngines (Akonadi, Calendar)"
+                      )
+
 macro_optional_find_package(QJSON)
-macro_log_feature(QJSON_FOUND "QJson" "Library to manage JSON objects with Qt" "http://qjson.sourceforge.net/" FALSE "" "Required to build Chrome/Chromium support for Plasma Bookmarks Runners")
+set_package_properties(QJSON PROPERTIES DESCRIPTION "Library to manage JSON objects with Qt"
+                       URL "http://qjson.sourceforge.net/"
+                       TYPE OPTIONAL
+                       PURPOSE "Required to build Chrome/Chromium support for Plasma Bookmarks Runners"
+                      )
 
 
 include(ConfigureChecks.cmake)
@@ -194,7 +273,7 @@ if(NOT WIN32)
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/startkde DESTINATION ${BIN_INSTALL_DIR})
 endif(NOT WIN32)
 
-macro_display_feature_log()
+feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 # make the libraries installed from kdebase/workspace available to other projects
 # by creating and installing a KDE4WorkspaceConfig.cmake file, which will
@@ -267,3 +346,5 @@ install(EXPORT kdeworkspaceLibraryTargets
         NAMESPACE ${KDE4WORKSPACE_TARGET_PREFIX}
         DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR}
         FILE KDE4WorkspaceLibraryTargets.cmake )
+
+

@@ -1,3 +1,4 @@
+# TODO: Bump the requirements
 if (KFI_BUILD_STANDALONE)
     cmake_minimum_required(VERSION 2.6.4)
     find_package(KDE4 "4.6.0" REQUIRED)
