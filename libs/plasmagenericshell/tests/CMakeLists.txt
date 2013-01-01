@@ -2,7 +2,7 @@ if (KDE4_BUILD_TESTS)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../widgetsexplorer)
 
-add_definitions(-DPLASMAGENERICSHELL_EXPORT="")
+add_definitions(-DPLASMAGENERICSHELL_EXPORT=)
 
 set(appletexplorer_SRCS
    ../widgetsexplorer/kcategorizeditemsviewmodels.cpp
