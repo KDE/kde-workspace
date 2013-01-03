@@ -680,6 +680,8 @@ void Clock::expandFontToMax(QFont &font, const QString &text)
 {
     bool first = true;
     const QRect rect = contentsRect().toRect();
+    int oldWidth = 0;
+    int oldHeight = 0;
 
     // Starting with the given font, increase its size until it'll fill the rect
     do {
@@ -691,6 +693,13 @@ void Clock::expandFontToMax(QFont &font, const QString &text)
 
         const QFontMetrics fm(font);
         QRect fr = fm.boundingRect(rect, Qt::TextSingleLine, text);
+        if (oldWidth == fr.width() && oldHeight == fr.height()) {
+            // Largest font size reached.
+            break;
+        }
+        oldWidth = fr.width();
+        oldHeight = fr.height();
+
         if (fr.width() >= rect.width() || fr.height() >= rect.height()) {
             break;
         }
