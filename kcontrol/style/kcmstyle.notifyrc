@@ -91,6 +91,7 @@ Name[zh_TW]=選單列已變更
 Comment=Settings changes will take effect only on application restart
 Comment[ca]=Els canvis d'arranjament només tindran efecte en reiniciar l'aplicació
 Comment[da]=Ændring af indstillinger vil først få virkning efter programmet genstartes
+Comment[de]=Änderungen der Einstellungen werden erst nach dem Neustart der Anwendung wirksam
 Comment[el]=Οι αλλαγές των ρυθμίσεων θα ενεργοποιηθούν μόνο με την επανεκκίνηση της εφαρμογής
 Comment[es]=Los cambios en las preferencias solo tendrán efecto cuando se reinicie la aplicación
 Comment[et]=Muudetud seadistused rakenduvad alles rakenduse taaskäivitamise järel
