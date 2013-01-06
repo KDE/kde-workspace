@@ -134,8 +134,6 @@ WId MenuImporter::recursiveMenuId(WId id)
 
 void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 {
-    bool changes = false;
-
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
     unsigned long mask = NET::AllTypesMask;
 
@@ -149,29 +147,15 @@ void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 
     QString service = message().service();
 
-    // Check if window already registered and if some changes happenned
-    // RegisterWindow happen on window mapping (unminimizing for ex)
-    if (m_menuServices.contains(id)) {
-        if (m_menuServices.value(id) != service ||
-            m_menuPaths.value(id) != path) {
-            changes = true;
-        }
-    } else {
-        changes = true; // First time
-    }
-
-    if (changes) {
-        KWindowInfo info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
-        QString classClass = info.windowClassClass();
-        m_windowClasses.insert(id, classClass);
-        m_menuServices.insert(id, service);
-        m_menuPaths.insert(id, path);
+    info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
+    QString classClass = info.windowClassClass();
+    m_windowClasses.insert(id, classClass);
+    m_menuServices.insert(id, service);
+    m_menuPaths.insert(id, path);
+    if (! m_serviceWatcher->watchedServices().contains(service)) {
         m_serviceWatcher->addWatchedService(service);
-        emit WindowRegistered(id, service, path);
-    } else {
-        // Importer do not need to be updated
-        emit WindowRegistered(id, "", QDBusObjectPath());
     }
+    emit WindowRegistered(id, service, path);
 }
 
 void MenuImporter::UnregisterWindow(WId id)
@@ -194,6 +178,7 @@ void MenuImporter::slotServiceUnregistered(const QString& service)
     WId id = m_menuServices.key(service);
     m_menuServices.remove(id);
     m_menuPaths.remove(id);
+    m_windowClasses.remove(id);
     emit WindowUnregistered(id);
     m_serviceWatcher->removeWatchedService(service);
 }

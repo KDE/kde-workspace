@@ -165,6 +165,7 @@ Comment[zh_CN]=配置会话管理器和注销设置
 Comment[zh_TW]=設定工作階段管理程式與登出設定值
 
 X-KDE-Keywords=ksmserver,session,logout,confirmation,save,restore
+X-KDE-Keywords[bs]=ksmserver,sesija,odjava,potvrda,snimanje,restore
 X-KDE-Keywords[ca]=ksmserver,sessió,sortida,confirmació,desa,restaura
 X-KDE-Keywords[ca@valencia]=ksmserver,sessió,eixida,confirmació,alça,restauració
 X-KDE-Keywords[da]=ksmserver,session,log ud,bekræftelse,gem,genskab
@@ -188,6 +189,7 @@ X-KDE-Keywords[pl]=ksmserver,sesja,wylogowanie,potwierdzenie,zapis,przywracanie
 X-KDE-Keywords[pt]=ksmserver,sessão,encerrar,confirmação,gravar,repor
 X-KDE-Keywords[pt_BR]=ksmserver,sessão,encerrar,confirmação,salvar,restaurar
 X-KDE-Keywords[ro]=ksmserver,sesiune,logout,confirmare,salvare,restabilire,ieșire
+X-KDE-Keywords[ru]=ksmserver,session,logout,confirmation,save,restore,сессия,выход,выход из системы,подтверждение,сохранить,восстановить
 X-KDE-Keywords[sk]=ksmserver,sedenie,odhlásenie,potvrdenie,uložiť,obnoviť
 X-KDE-Keywords[sl]=ksmserver,seja,seje,odjava,prijava,izklop,zaustavitev,potrditev,shranjevanje,obnavljanje
 X-KDE-Keywords[sr]=ksmserver,session,logout,confirmation,save,restore,КСМ‑сервер,сесија,одјављивање,потврда,сачувати,обновити

@@ -1,0 +1,35 @@
+# This is not really a .desktop file like the rest, but it is useful to treat
+# it as such
+
+[KdmGreeterTheme]
+Greeter=elarun.xml
+Name=Elarun
+Name[ca]=Elarun
+Name[da]=Elarun
+Name[de]=Elarun
+Name[el]=Elarun
+Name[es]=Elarun
+Name[et]=Elarun
+Name[ga]=Elarun
+Name[gl]=Elarun
+Name[hu]=Elarun
+Name[ia]=Elarun
+Name[kk]=Еларун
+Name[nl]=Elarun
+Name[pl]=Elarun
+Name[pt]=Elarun
+Name[pt_BR]=Elarun
+Name[sk]=Elarun
+Name[sr]=Еларун
+Name[sr@ijekavian]=Еларун
+Name[sr@ijekavianlatin]=Elarun
+Name[sr@latin]=Elarun
+Name[sv]=Elarun
+Name[uk]=Еларан
+Name[x-test]=xxElarunxx
+Name[zh_CN]=Elarun
+Name[zh_TW]=Elarun
+
+Author=Roman Shtylman & Nuno Pinheiro
+Copyright=GPL 2010 Roman Shtylman | nuno@oxygen-icons.org, 2012 Nuno Pineheiro
+Screenshot=screenshot.png

@@ -167,6 +167,7 @@ Comment[zh_CN]=配置登录管理器(KDM)
 Comment[zh_TW]=設定登入管理程式 (KDM)
 
 X-KDE-Keywords=kdm,display manager,xdm,users,login,greeting,Logo,styles,language,country,fonts,background,wallpapers,sessions,shutdown,restart
+X-KDE-Keywords[bs]=kdm,upravitelj ekrana,xdm,korisnici,prijava,pozdrav,logotip,stilovi,jezik,zemlja,slova,podloga,pozadina,sesije,zatvaranje,ponovno pokretanje
 X-KDE-Keywords[ca]=kdm,gestor de sessions,xdm,usuaris,connecta,benvinguda,Logo,estils,idioma,país,tipus de lletres,fons,fons d'escriptori,sessions,atura,reinicia
 X-KDE-Keywords[ca@valencia]=kdm,gestor de sessions,xdm,usuaris,connexió,benvinguda,Logo,estils,idioma,país,tipus de lletres,fons,fons d'escriptori,sessions,aturada,reinici
 X-KDE-Keywords[da]=kdm,display manager,xdm,brugere,login,log ind,velkomst,Logo,stile,sprog,land,skrifttyper,fonte,baggrund,baggrundsbilleder,sessioner,nedlukning,genstart
@@ -190,6 +191,7 @@ X-KDE-Keywords[pl]=kdm,menadżer wyświetlania,xdm,użytkownicy,logowanie,pozdro
 X-KDE-Keywords[pt]=kdm,gestor de autenticação,xdm,utilizadores,conta,saudação,logótipo,estilos,língua,país,tipos de letra,fundo,papéis de parede,sessões,desligar,encerrar,reiniciar
 X-KDE-Keywords[pt_BR]=kdm,gerenciador de autenticação,xdm,usuários,autenticação,saudação,logotipo,estilos,idioma,país,fontes,plano de fundo,papéis de parede,sessões,desligar,encerrar,reiniciar
 X-KDE-Keywords[ro]=kdm,gestionar de afișaj,xdm,utilizatori,autentificare,întîmpinare,logo,stiluri,limbă,țară,fonturi,fundal,tapete,sesiuni,oprire,repornire,oprește,repornește
+X-KDE-Keywords[ru]=kdm,display manager,xdm,users,login,greeting,Logo,styles,language,country,fonts,background,wallpapers,sessions,shutdown,restart,диспетчер сеанса,пользователи,логин,вход в систему,приветствие,логотип,лого,стили,язык,страна,шрифты,фон,обои,сессии,завершение работы,перезагрузка
 X-KDE-Keywords[sk]=kdm,display manager,xdm,používatelia,prihlásenie,uvítanie,Logo,štýly,jazyk,krajina,písma,pozadie,tapety,sedenia,vypnutie,reštart
 X-KDE-Keywords[sl]=kdm,upravljalnik zaslona,xdm,uporabniki,prijava,pozdrav,logotip,slogi,jezik,država,pisave,ozadje,ozadja,seje,zaustavitev,ponovni zagon,izklop
 X-KDE-Keywords[sr]=kdm,display manager,xdm,users,login,greeting,Logo,styles,language,country,fonts,background,wallpapers,sessions,shutdown,restart,КДМ,менаџер пријављивања,ИксДМ,корисници,пријава,поздравни,логотип,стилови,језик,држава,земља,фонтови,позадина,тапети,сесије,гашење,ресетовање

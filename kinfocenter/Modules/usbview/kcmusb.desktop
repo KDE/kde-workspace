@@ -187,6 +187,7 @@ Comment[zh_CN]=连接到该计算机的 USB 设备
 Comment[zh_TW]=查看連接到這台電腦的 USB 裝置
 
 X-KDE-Keywords=USB,devices,viewer,control
+X-KDE-Keywords[bs]=usb,uređaji,gledatelj,kontrola
 X-KDE-Keywords[ca]=USB,dispositius,visor,control
 X-KDE-Keywords[ca@valencia]=USB,dispositius,visor,control
 X-KDE-Keywords[da]=USB,enheder,fremviser,kontrol
@@ -211,6 +212,7 @@ X-KDE-Keywords[pl]=USB,urządzenia,przeglądarka,sterowanie
 X-KDE-Keywords[pt]=USB,dispositivos,visualizador,controlo
 X-KDE-Keywords[pt_BR]=USB,dispositivos,visualizador,controle
 X-KDE-Keywords[ro]=USB,dispozitive,vizualizator,control
+X-KDE-Keywords[ru]=USB,devices,viewer,control,устройства,просмотр,контроль,управление
 X-KDE-Keywords[sk]=USB,zariadenia,prehliadač,ovládanie
 X-KDE-Keywords[sl]=usb,naprave,krmilniki,pregledovalnik
 X-KDE-Keywords[sr]=USB,devices,viewer,control,УСБ,уређаји,приказивач,управљање

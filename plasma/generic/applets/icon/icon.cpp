@@ -51,14 +51,13 @@
 
 IconApplet::IconApplet(QObject *parent, const QVariantList &args)
     : Plasma::Applet(parent, args),
-      m_icon(0),
+      m_icon(new Plasma::IconWidget(this)),
       m_watcher(0),
       m_hasDesktopFile(false)
 {
     setAcceptDrops(true);
     setBackgroundHints(NoBackground);
     setHasConfigurationInterface(true);
-    m_icon = new Plasma::IconWidget(this);
 
     if (!args.isEmpty()) {
         setUrl(args.value(0).toString());
@@ -87,7 +86,6 @@ void IconApplet::init()
     }
 
     setDisplayLines(2);
-    registerAsDragHandle(m_icon);
     setAspectRatioMode(Plasma::ConstrainedSquare);
 
     connect(KGlobalSettings::self(), SIGNAL(iconChanged(int)),

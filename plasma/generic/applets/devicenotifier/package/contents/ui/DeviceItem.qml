@@ -116,7 +116,9 @@ Item {
                 left: deviceIcon.right
                 right: leftActionArea.left
                 leftMargin: padding.margins.left
+                rightMargin: padding.margins.right
             }
+
             PlasmaComponents.Label {
                 id: deviceLabel
                 height: paintedHeight
@@ -127,25 +129,6 @@ Item {
                 }
                 enabled: deviceItem.state == 0
             }
-
-            Item {
-                width:deviceStatus.width
-                height:deviceStatus.height
-                PlasmaComponents.Label {
-                    id: deviceStatus
-
-                    height: paintedHeight
-                    // FIXME: state changes do not reach the plasmoid if the
-                    // device was already attached when the plasmoid was
-                    // initialized
-                    text: deviceItem.state == 0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
-                    opacity: deviceItem.state != 0 || container.containsMouse || expanded ? 1 : 0;
-
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                    }
-               }
 
             Item {
                 height:freeSpaceBar.height
@@ -165,7 +148,26 @@ Item {
                     minimumValue: 0
                     maximumValue: 100
                     orientation: Qt.Horizontal
-               }
+                }
+            }
+
+            Item {
+                width:deviceStatus.width
+                height:deviceStatus.height
+                PlasmaComponents.Label {
+                    id: deviceStatus
+
+                    height: paintedHeight
+                    // FIXME: state changes do not reach the plasmoid if the
+                    // device was already attached when the plasmoid was
+                    // initialized
+                    text: deviceItem.state == 0 ? container.idleStatus() : (deviceItem.state==1 ? i18nc("Accessing is a less technical word for Mounting; translation should be short and mean \'Currently mounting this device\'", "Accessing...") : i18nc("Removing is a less technical word for Unmounting; translation shoud be short and mean \'Currently unmounting this device\'", "Removing..."))
+                    font.pointSize: theme.smallestFont.pointSize
+                    color: "#99"+(theme.textColor.toString().substr(1))
+                    opacity: deviceItem.state != 0 || container.containsMouse || expanded ? 1 : 0;
+
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                }
             }
         }
 
@@ -259,7 +261,7 @@ Item {
             anchors {
                 top: labelsColumn.bottom
                 left: deviceIcon.right
-                right: leftActionArea.right
+                right: leftActionArea.left
             }
             interactive: false
             model: hpSource.data[udi]["actions"]

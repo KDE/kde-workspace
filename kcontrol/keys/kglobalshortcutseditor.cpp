@@ -230,10 +230,16 @@ void KGlobalShortcutsEditor::addCollection(
         editor = new KShortcutsEditor(this, d->actionTypes);
         d->stack->addWidget(editor);
 
+        // try to find one appropriate icon ( allowing NULL pixmap to be returned)
+        QPixmap pixmap = KIconLoader::global()->loadIcon(id, KIconLoader::Small, 0,
+                                  KIconLoader::DefaultState, QStringList(), 0, true);
+        // if NULL pixmap is returned, use the F.D.O "system-run" icon
+        if (pixmap.isNull()) {
+            pixmap = KIconLoader::global()->loadIcon("system-run", KIconLoader::Small);
+        }
+
         // Add to the component combobox
-        d->ui.components->addItem(KIconLoader::global()->loadIcon(id, KIconLoader::Small, 0,
-                                  KIconLoader::DefaultState, QStringList(), 0, true) // so it returns a NULL pixmap if no icon found
-                                  , friendlyName);
+        d->ui.components->addItem(pixmap, friendlyName);
         d->ui.components->model()->sort(0);
 
         // Add to our component registry

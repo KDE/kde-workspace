@@ -1,6 +1,7 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=Hard Disk I/O Monitor
+Name[bs]=Hard Disk I/O Monitor
 Name[ca]=Controlador d'E/S de disc dur
 Name[cs]=Monitor I/O pevného disku
 Name[da]=Overvågning af harddisk-I/O
@@ -26,6 +27,7 @@ Name[pl]=Monitor WE/WY dysku twardego
 Name[pt]=Monitor de E/S do Disco
 Name[pt_BR]=Monitor de E/S do disco rígido
 Name[ro]=Monitor pentru utilizarea discului dur
+Name[ru]=Монитор ввода-вывода жестких дисков
 Name[sk]=Monitor I/O pevného disku
 Name[sl]=Nadzornik V/I trdega diska
 Name[sr]=Надгледање У/И‑ја хард‑диска
@@ -41,6 +43,7 @@ Name[zh_CN]=硬盘 I/O 监视器
 Name[zh_TW]=硬碟使用量 I/O 監視器
 
 Comment=An applet that monitors hard disk throughput and input/output
+Comment[bs]=Aplet koji prati hard disk protok ulaz / izlaz
 Comment[ca]=Una miniaplicació que controla la velocitat de transferència de dades del disc dur i l'entrada/sortida
 Comment[da]=En applet som overvåger gennemgang og input/output for harddisken
 Comment[el]=Μικροεφαρμογή που εποπτεύει τη ρυθμοαπόδοση και την είσοδο/έξοδο του σκληρού δίσκου
@@ -60,6 +63,7 @@ Comment[pa]=ਹਾਰਡ ਡਿਸਕ ਥਰੂਪੁੱਟ ਅਤੇ ਇੰਪ�
 Comment[pl]=Aplet, który monitoruje przepustowość wejścia/wyjścia dysku twardego
 Comment[pt]=Uma 'applet' que vigia o rendimento e o fluxo de entrada-saída do disco
 Comment[pt_BR]=Miniaplicativo que monitora o fluxo do disco rígido e a entrada/saída
+Comment[ru]=Мониторинг пропускной способности и процессов ввода/вывода жестких дисков
 Comment[sk]=Applet, ktorý monitoruje priepustnosť pevného disku a vstup/výstup
 Comment[sl]=Gradnik, ki nadzoruje prepustnost in vhod/izhod trdega diska
 Comment[sr]=Аплет за надгледање пропусности и улаза/излаза хард‑диска

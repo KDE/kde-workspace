@@ -45,7 +45,6 @@ TopMenuBar::TopMenuBar()
     m_hideGlowTimer(new QTimer(this)),
     m_glowBar(new GlowBar())
 {
-    m_glowBar->setWindowOpacity(glowBarOpacity());
     connect(this, SIGNAL(aboutToHide()), this, SLOT(slotAboutToHide()));
     connect(m_mouseTracker, SIGNAL(timeout()), this, SLOT(slotMouseTracker()));
     connect(m_hideGlowTimer, SIGNAL(timeout()), this, SLOT(slotHideGlowBar()));
@@ -62,8 +61,9 @@ TopMenuBar::~TopMenuBar()
 void TopMenuBar::enableMouseTracking(bool enable)
 {
     if (enable) {
-        showGlowBar();
-        m_glowBar->show();
+        if (!cursorInMenuBar()) {
+            showGlowBar();
+        }
         m_mouseTracker->start(250);
     } else {
         hideGlowBar();
@@ -73,10 +73,10 @@ void TopMenuBar::enableMouseTracking(bool enable)
 
 void TopMenuBar::updateSize()
 {
+    // Enable mouse tracking on resize if needed
     if (!m_mouseTracker->isActive() && !cursorInMenuBar()) {
         enableMouseTracking();
     }
-
     resize(sizeHint());
 }
 
@@ -100,9 +100,7 @@ bool TopMenuBar::cursorInMenuBar()
 
 void TopMenuBar::slotAboutToHide()
 {
-    if (!m_mouseTracker->isActive()) {
         enableMouseTracking();
-    }
 }
 
 void TopMenuBar::slotMouseTracker()
@@ -119,18 +117,17 @@ void TopMenuBar::slotMouseTracker()
         m_mouseTracker->stop();
         hideGlowBar();
         show();
-    } else if(m_glowBar && cursorPos != m_prevCursorPos) { // change glowbar opacity
+    } else if(cursorPos != m_prevCursorPos) { // change glowbar opacity
         qreal opacity = glowBarOpacity();
         QPropertyAnimation *anim = new QPropertyAnimation(m_glowBar, "windowOpacity");
         anim->setStartValue(m_glowBar->windowOpacity());
         anim->setEndValue(opacity);
         anim->setDuration(200);
         anim->start(QAbstractAnimation::DeleteWhenStopped);
+        // Show menubar if auto hidden
         if (!m_glowBar->isVisible()) {
             m_glowBar->show();
         }
-    } else if (cursorPos != m_prevCursorPos) { // create a new glow bar
-        showGlowBar();
     }
     m_prevCursorPos = cursorPos;
 }
@@ -148,6 +145,7 @@ void TopMenuBar::showGlowBar()
 {
     if (m_glowBar) {
         m_hideGlowTimer->start(10000);
+        m_glowBar->setWindowOpacity(glowBarOpacity());
         m_glowBar->show();
     }
 }

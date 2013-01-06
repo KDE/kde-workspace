@@ -30,9 +30,9 @@ PlasmaCore.Dialog {
 
     property variant savedPos
     property bool customPosition: false
-    onCustomPositionChanged: {
-        setAttribute(Qt.WA_X11NetWmWindowTypeToolTip, customPosition);
-    }
+
+    onHeightChanged:  setCustomPosition(lastNotificationPopup.savedPos, false)
+    onWidthChanged:   setCustomPosition(lastNotificationPopup.savedPos, false)
 
     function popup(notification)
     {
@@ -52,7 +52,7 @@ PlasmaCore.Dialog {
 
     function setCustomPosition(pos, writeConfig)
     {
-        var popupPos = lastNotificationPopup.popupPosition(notificationIcon)
+        var popupPos = lastNotificationPopup.popupPosition(notificationIcon, Qt.AlignCenter)
         var finalPos
 
         //custom
@@ -173,69 +173,100 @@ PlasmaCore.Dialog {
             }
             interactive: false
             delegate: Item {
-                width: notificationsView.width
                 height: notificationsView.height
-                QIconItem {
-                    id: appIconItem
-                    icon: model.appIcon
-                    width: theme.largeIconSize
-                    height: theme.largeIconSize
-                    visible: !imageItem.visible
-                    anchors {
-                        left: parent.left
-                        verticalCenter: parent.verticalCenter
-                        leftMargin: navigationButtonsColumn.width
-                    }
-                }
-                QImageItem {
-                    id: imageItem
-                    anchors.fill: appIconItem
-                    smooth: true
-                    image: model.image
-                    visible: nativeWidth > 0
-                }
+                width: notificationsView.width
                 PlasmaComponents.Label {
-                    id: lastNotificationText
-                    text: model.body
-                    anchors {
-                        left: appIconItem.right
-                        right: actionsColumn.left
-                        top: parent.top
-                        bottom: parent.bottom
-                        leftMargin: 6
-                        rightMargin: 6
-                    }
-                    //textFormat: Text.PlainText
-                    verticalAlignment: Text.AlignVCenter
+                    id: lastNotificationSummaryLabel
+                    text: model.summary
+                    font.weight: Font.Bold
+                    visible: model.summary.length > 0
+                    height: model.summary.length > 0 ? paintedHeight : 0
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
                     color: theme.textColor
-                    wrapMode: Text.Wrap
                     elide: Text.ElideRight
-                    maximumLineCount: 4
-                }
-                Column {
-                    id: actionsColumn
-                    spacing: 6
                     anchors {
-                        right: parent.right
-                        rightMargin: 6
-                        verticalCenter: parent.verticalCenter
+                        top: parent.top
+                        topMargin: 6
                     }
-                    Repeater {
-                        model: actions
-                        PlasmaComponents.Button {
-                            text: model.text
-                            width: theme.defaultFont.mSize.width * 8
-                            height: theme.defaultFont.mSize.width * 2
-                            onPressedChanged: {
-                                if (pressed) {
-                                    mainItem.buttonPressed = true
-                                } else {
-                                    mainItem.buttonPressed = false
+                }
+                Item {
+                    clip: true
+                    width: parent.width
+                    anchors {
+                        top: lastNotificationSummaryLabel.bottom
+                        bottom: parent.bottom
+                    }
+                    QIconItem {
+                        id: appIconItem
+                        icon: model.appIcon
+                        width: (model.appIcon.length > 0 || imageItem.visible) ? theme.largeIconSize : 0
+                        height: theme.largeIconSize
+                        visible: !imageItem.visible
+                        anchors {
+                            left: parent.left
+                            verticalCenter: parent.verticalCenter
+                            leftMargin: navigationButtonsColumn.width
+                        }
+                    }
+                    QImageItem {
+                        id: imageItem
+                        anchors.fill: appIconItem
+                        image: model.image
+                        smooth: true
+                        visible: nativeWidth > 0
+                    }
+                    /*
+                     * this extra item is for clip the overflowed body text
+                     * maximumLineCount cannot control the behavior of rich text,
+                     * so manual clip is required.
+                     */
+                    Item {
+                        clip: true
+                        height: Math.min(parent.height, lastNotificationText.height)
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: appIconItem.right
+                            right: actionsColumn.left
+                            leftMargin: 6
+                            rightMargin: 6
+                        }
+                        PlasmaComponents.Label {
+                            id: lastNotificationText
+                            text: model.body
+                            width: parent.width
+                            //textFormat: Text.PlainText
+                            color: theme.textColor
+                            wrapMode: Text.Wrap
+                            elide: Text.ElideRight
+                            maximumLineCount: 4
+                        }
+                    }
+                    Column {
+                        id: actionsColumn
+                        spacing: 6
+                        anchors {
+                            right: parent.right
+                            rightMargin: 6
+                            verticalCenter: parent.verticalCenter
+                        }
+                        Repeater {
+                            model: actions
+                            PlasmaComponents.Button {
+                                text: model.text
+                                width: theme.defaultFont.mSize.width * 8
+                                height: theme.defaultFont.mSize.width * 2
+                                onPressedChanged: {
+                                    if (pressed) {
+                                        mainItem.buttonPressed = true
+                                    } else {
+                                        mainItem.buttonPressed = false
+                                    }
                                 }
-                            }
-                            onClicked: {
-                                executeAction(source, model.id)
-                                actionsColumn.visible = false
+                                onClicked: {
+                                    executeAction(source, model.id)
+                                    actionsColumn.visible = false
+                                }
                             }
                         }
                     }

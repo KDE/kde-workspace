@@ -3,7 +3,7 @@ project(KDEBASE_WORKSPACE)
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
 set(KDE4WORKSPACE_VERSION_MINOR 9)
-set(KDE4WORKSPACE_VERSION_PATCH 95)
+set(KDE4WORKSPACE_VERSION_PATCH 97)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
 
@@ -171,8 +171,6 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
       macro_optional_add_subdirectory(kwrited)
       macro_optional_add_subdirectory(ksystraycmd)
       macro_optional_add_subdirectory(appmenu)
-      # data
-      macro_optional_add_subdirectory(cursors)
    endif(NOT WIN32)
 
    if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
@@ -181,6 +179,11 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
       message(STATUS "Xau lib or Xdmcp lib was missing. kdm will not compile")
    endif(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+
+if(NOT WIN32)
+    # data
+    macro_optional_add_subdirectory(cursors)
+endif(NOT WIN32)
 
 macro_optional_add_subdirectory(plasma)
 macro_optional_add_subdirectory(statusnotifierwatcher)
