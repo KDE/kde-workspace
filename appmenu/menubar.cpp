@@ -62,7 +62,6 @@ MenuBar::MenuBar()
     //Setup the widgets
     m_background->setImagePath("widgets/panel-background");
     m_background->setEnabledBorders(Plasma::FrameSvg::BottomBorder|Plasma::FrameSvg::LeftBorder|Plasma::FrameSvg::RightBorder);
-    m_background->resizeFrame(sizeHint());
 
     m_container->initLayout();
 
@@ -99,7 +98,7 @@ void MenuBar::show()
         shadow->setColor(Plasma::Theme::defaultTheme()->color(Plasma::Theme::BackgroundColor));
         setGraphicsEffect(shadow);
     } else {
-            setGraphicsEffect(0);
+        setGraphicsEffect(0);
     }
     m_hideTimer->start(1000);
     QGraphicsView::show();
