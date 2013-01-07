@@ -95,7 +95,9 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
                 }
             }
         }
-        XIFreeDeviceInfo(devices);
+        if (devices) {
+            XIFreeDeviceInfo(devices);
+        }
     } else {
         kWarning() << "Could not get atoms for 'Synaptics Off' or 'Device Enabled'. This should never happen, thus doing nothing. Please report a bug against ktouchpadenabler in http://bugs.kde.org";
     }
