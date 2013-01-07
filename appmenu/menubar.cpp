@@ -24,6 +24,7 @@
 */
 
 #include "menubar.h"
+#include "panelshadows.h"
 
 #include <QGraphicsLinearLayout>
 #include <QPainter>
@@ -43,6 +44,7 @@ MenuBar::MenuBar()
     : QGraphicsView(),
     m_hideTimer(new QTimer(this)),
     m_background(new Plasma::FrameSvg(this)),
+    m_shadows(new PanelShadows(this)),
     m_scene(new QGraphicsScene(this)),
     m_container(new MenuWidget(this))
 {
@@ -58,8 +60,9 @@ MenuBar::MenuBar()
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     //Setup the widgets
-    m_background->setImagePath("widgets/tooltip");
+    m_background->setImagePath("widgets/panel-background");
     m_background->setEnabledBorders(Plasma::FrameSvg::BottomBorder|Plasma::FrameSvg::LeftBorder|Plasma::FrameSvg::RightBorder);
+    m_background->resizeFrame(sizeHint());
 
     m_container->initLayout();
 
@@ -146,6 +149,9 @@ void MenuBar::resizeEvent(QResizeEvent*)
 
 void MenuBar::showEvent(QShowEvent *)
 {
-    Plasma::WindowEffects::overrideShadow(winId(), true);
-    Plasma::WindowEffects::enableBlurBehind(winId(), true, m_background->mask());
+    if (KWindowSystem::compositingActive()) {
+        Plasma::WindowEffects::overrideShadow(winId(), true);
+        m_shadows->addWindow(this);
+        Plasma::WindowEffects::enableBlurBehind(winId(), true, m_background->mask());
+    }
 }

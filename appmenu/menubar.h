@@ -31,12 +31,11 @@
 #include <QGraphicsView>
 
 class QMenu;
+class PanelShadows;
 
 namespace Plasma
 {
-class FrameSvg;
-class Label;
-class Meter;
+    class FrameSvg;
 }
 
 class MenuBar : public QGraphicsView
@@ -79,6 +78,7 @@ protected:
 private:
     QTimer* m_hideTimer;
     Plasma::FrameSvg* m_background;
+    PanelShadows *m_shadows;
     QGraphicsScene* m_scene;
     MenuWidget* m_container;
 };
