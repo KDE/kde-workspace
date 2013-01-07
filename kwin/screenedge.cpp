@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "options.h"
 #include "utils.h"
 #include "workspace.h"
+#include "virtualdesktops.h"
 
 // Qt
 #include <QtCore/QTimer>
@@ -48,6 +49,8 @@ ScreenEdge::ScreenEdge()
     : QObject(NULL)
     , m_screenEdgeWindows(ELECTRIC_COUNT, None)
     , m_screenEdgeReserved(ELECTRIC_COUNT, 0)
+    , m_virtualDesktopSwitching(Options::ElectricDisabled)
+    , m_virtualDesktopLayout(0)
 {
 }
 
@@ -127,6 +130,52 @@ void ScreenEdge::restoreSize(ElectricBorder border)
     };
     XMoveResizeWindow(display(), m_screenEdgeWindows[border],
                       xywh[border][0], xywh[border][1], xywh[border][2], xywh[border][3]);
+}
+
+void ScreenEdge::reconfigureVirtualDesktopSwitching()
+{
+    const int newMode = options->electricBorders();
+    if (m_virtualDesktopSwitching == newMode) {
+        return;
+    }
+    if (m_virtualDesktopSwitching == Options::ElectricAlways) {
+        reserveDesktopSwitching(false, m_virtualDesktopLayout);
+    }
+    m_virtualDesktopSwitching = newMode;
+    if (m_virtualDesktopSwitching == Options::ElectricAlways) {
+        reserveDesktopSwitching(true, m_virtualDesktopLayout);
+    }
+    update();
+}
+
+void ScreenEdge::reconfigure()
+{
+    reserveActions(true);
+    reconfigureVirtualDesktopSwitching();
+    updateLayout();
+    update();
+}
+
+void ScreenEdge::updateLayout()
+{
+    const QSize desktopMatrix = VirtualDesktopManager::self()->grid().size();
+    Qt::Orientations newLayout = 0;
+    if (desktopMatrix.width() > 1) {
+        newLayout |= Qt::Horizontal;
+    }
+    if (desktopMatrix.height() > 1) {
+        newLayout |= Qt::Vertical;
+    }
+    if (newLayout == m_virtualDesktopLayout) {
+        return;
+    }
+    if (m_virtualDesktopSwitching == Options::ElectricAlways) {
+        reserveDesktopSwitching(false, m_virtualDesktopLayout);
+    }
+    m_virtualDesktopLayout = newLayout;
+    if (m_virtualDesktopSwitching == Options::ElectricAlways) {
+        reserveDesktopSwitching(true, m_virtualDesktopLayout);
+    }
 }
 
 void ScreenEdge::reserveActions(bool isToReserve)
@@ -254,11 +303,11 @@ void ScreenEdge::check(const QPoint& pos, Time now, bool forceNoPushback)
             m_screenEdgeTimeLastTrigger = now;
             if (Workspace::self()->getMovingClient()) {
                 // If moving a client or have force doing the desktop switch
-                if (options->electricBorders() != Options::ElectricDisabled)
+                if (m_virtualDesktopSwitching != Options::ElectricDisabled)
                     switchDesktop(border, pos);
                 return; // Don't reset cursor position
             } else {
-                if (options->electricBorders() == Options::ElectricAlways &&
+                if (m_virtualDesktopSwitching == Options::ElectricAlways &&
                         (border == ElectricTop || border == ElectricRight ||
                          border == ElectricBottom || border == ElectricLeft)) {
                     // If desktop switching is always enabled don't apply it to the corners if
@@ -289,7 +338,7 @@ void ScreenEdge::check(const QPoint& pos, Time now, bool forceNoPushback)
                     if (effects && static_cast<EffectsHandlerImpl*>(effects)->borderActivated(border))
                         {} // Handled by effects
                     else {
-                        if (options->electricBorders() == Options::ElectricAlways) {
+                        if (m_virtualDesktopSwitching == Options::ElectricAlways) {
                             switchDesktop(border, pos);
                             return; // Don't reset cursor position
                         }
@@ -332,30 +381,31 @@ void ScreenEdge::check(const QPoint& pos, Time now, bool forceNoPushback)
 void ScreenEdge::switchDesktop(ElectricBorder border, const QPoint& _pos)
 {
     QPoint pos = _pos;
-    int desk = Workspace::self()->currentDesktop();
+    VirtualDesktopManager *vds = VirtualDesktopManager::self();
+    int desk = vds->current();
     const int OFFSET = 2;
     if (border == ElectricLeft || border == ElectricTopLeft || border == ElectricBottomLeft) {
-        desk = Workspace::self()->desktopToLeft(desk, options->isRollOverDesktops());
+        desk = vds->toLeft(desk, options->isRollOverDesktops());
         pos.setX(displayWidth() - 1 - OFFSET);
     }
     if (border == ElectricRight || border == ElectricTopRight || border == ElectricBottomRight) {
-        desk = Workspace::self()->desktopToRight(desk, options->isRollOverDesktops());
+        desk = vds->toRight(desk, options->isRollOverDesktops());
         pos.setX(OFFSET);
     }
     if (border == ElectricTop || border == ElectricTopLeft || border == ElectricTopRight) {
-        desk = Workspace::self()->desktopAbove(desk, options->isRollOverDesktops());
+        desk = vds->above(desk, options->isRollOverDesktops());
         pos.setY(displayHeight() - 1 - OFFSET);
     }
     if (border == ElectricBottom || border == ElectricBottomLeft || border == ElectricBottomRight) {
-        desk = Workspace::self()->desktopBelow(desk, options->isRollOverDesktops());
+        desk = vds->below(desk, options->isRollOverDesktops());
         pos.setY(OFFSET);
     }
     Client *c = Workspace::self()->getMovingClient();
     if (c && c->rules()->checkDesktop(desk) != desk)
         return; // user attempts to move a client to another desktop where it is ruleforced to not be
-    int desk_before = Workspace::self()->currentDesktop();
-    Workspace::self()->setCurrentDesktop(desk);
-    if (Workspace::self()->currentDesktop() != desk_before)
+    const uint desk_before = vds->current();
+    vds->setCurrent(desk);
+    if (vds->current() != desk_before)
         QCursor::setPos(pos);
 }
 

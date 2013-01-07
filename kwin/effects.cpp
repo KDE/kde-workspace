@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scripting/scriptedeffect.h"
 #endif
 #include "thumbnailitem.h"
+#include "virtualdesktops.h"
 #include "workspace.h"
 #include "kwinglutils.h"
 
@@ -54,6 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <assert.h>
 #include "composite.h"
+#include "xcbutils.h"
 
 
 namespace KWin
@@ -116,12 +118,13 @@ EffectsHandlerImpl::EffectsHandlerImpl(Compositor *compositor, Scene *scene)
     m_currentBuildQuadsIterator = m_activeEffects.end();
 
     Workspace *ws = Workspace::self();
+    VirtualDesktopManager *vds = VirtualDesktopManager::self();
     connect(ws, SIGNAL(currentDesktopChanged(int, KWin::Client*)), SLOT(slotDesktopChanged(int, KWin::Client*)));
     connect(ws, SIGNAL(clientAdded(KWin::Client*)), this, SLOT(slotClientAdded(KWin::Client*)));
     connect(ws, SIGNAL(unmanagedAdded(KWin::Unmanaged*)), this, SLOT(slotUnmanagedAdded(KWin::Unmanaged*)));
     connect(ws, SIGNAL(clientActivated(KWin::Client*)), this, SLOT(slotClientActivated(KWin::Client*)));
     connect(ws, SIGNAL(deletedRemoved(KWin::Deleted*)), this, SLOT(slotDeletedRemoved(KWin::Deleted*)));
-    connect(ws, SIGNAL(numberDesktopsChanged(int)), SIGNAL(numberDesktopsChanged(int)));
+    connect(vds, SIGNAL(countChanged(uint,uint)), SIGNAL(numberDesktopsChanged(uint)));
     connect(ws, SIGNAL(mouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)),
             SIGNAL(mouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)));
     connect(ws, SIGNAL(propertyNotify(long)), this, SLOT(slotPropertyNotify(long)));
@@ -150,8 +153,9 @@ EffectsHandlerImpl::~EffectsHandlerImpl()
         ungrabKeyboard();
     foreach (const EffectPair & ep, loaded_effects)
     unloadEffect(ep.first);
-    foreach (const InputWindowPair & pos, input_windows)
-    XDestroyWindow(display(), pos.second);
+    foreach (const InputWindowPair & pos, input_windows) {
+        xcb_destroy_window(connection(), pos.second);
+    }
 }
 
 void EffectsHandlerImpl::setupClientConnections(Client* c)
@@ -482,7 +486,7 @@ void EffectsHandlerImpl::slotTabRemoved(EffectWindow *w, EffectWindow* leaderOfF
 
 void EffectsHandlerImpl::slotDesktopChanged(int old, Client *c)
 {
-    const int newDesktop = Workspace::self()->currentDesktop();
+    const int newDesktop = VirtualDesktopManager::self()->current();
     if (old != 0 && newDesktop != old) {
         emit desktopChanged(old, newDesktop, c ? c->effectWindow() : 0);
         // TODO: remove in 4.10
@@ -623,6 +627,57 @@ void EffectsHandlerImpl::registerPropertyType(long atom, bool reg)
     }
 }
 
+xcb_atom_t EffectsHandlerImpl::announceSupportProperty(const QByteArray &propertyName, Effect *effect)
+{
+    PropertyEffectMap::iterator it = m_propertiesForEffects.find(propertyName);
+    if (it != m_propertiesForEffects.end()) {
+        // property has already been registered for an effect
+        // just append Effect and return the atom stored in m_managedProperties
+        if (!it.value().contains(effect)) {
+            it.value().append(effect);
+        }
+        return m_managedProperties.value(propertyName);
+    }
+    // get the atom for the propertyName
+    QScopedPointer<xcb_intern_atom_reply_t> atomReply(xcb_intern_atom_reply(connection(),
+        xcb_intern_atom_unchecked(connection(), false, propertyName.size(), propertyName.constData()),
+        NULL));
+    if (atomReply.isNull()) {
+        return XCB_ATOM_NONE;
+    }
+    // announce property on root window
+    unsigned char dummy = 0;
+    xcb_change_property(connection(), XCB_PROP_MODE_REPLACE, rootWindow(), atomReply->atom, atomReply->atom, 8, 1, &dummy);
+    // TODO: add to _NET_SUPPORTED
+    m_managedProperties.insert(propertyName, atomReply->atom);
+    m_propertiesForEffects.insert(propertyName, QList<Effect*>() << effect);
+    registerPropertyType(atomReply->atom, true);
+    return atomReply->atom;
+}
+
+void EffectsHandlerImpl::removeSupportProperty(const QByteArray &propertyName, Effect *effect)
+{
+    PropertyEffectMap::iterator it = m_propertiesForEffects.find(propertyName);
+    if (it == m_propertiesForEffects.end()) {
+        // property is not registered - nothing to do
+        return;
+    }
+    if (!it.value().contains(effect)) {
+        // property is not registered for given effect - nothing to do
+        return;
+    }
+    it.value().removeAll(effect);
+    if (!it.value().isEmpty()) {
+        // property still registered for another effect - nothing further to do
+        return;
+    }
+    // remove property from root window
+    const xcb_atom_t atom = m_managedProperties.take(propertyName);
+    deleteRootProperty(atom);
+    registerPropertyType(atom, false);
+    m_propertiesForEffects.remove(propertyName);
+}
+
 QByteArray EffectsHandlerImpl::readRootProperty(long atom, long type, int format) const
 {
     return readWindowProperty(rootWindow(), atom, type, format);
@@ -682,87 +737,90 @@ QString EffectsHandlerImpl::currentActivity() const
 
 int EffectsHandlerImpl::currentDesktop() const
 {
-    return Workspace::self()->currentDesktop();
+    return VirtualDesktopManager::self()->current();
 }
 
 int EffectsHandlerImpl::numberOfDesktops() const
 {
-    return Workspace::self()->numberOfDesktops();
+    return VirtualDesktopManager::self()->count();
 }
 
 void EffectsHandlerImpl::setCurrentDesktop(int desktop)
 {
-    Workspace::self()->setCurrentDesktop(desktop);
+    VirtualDesktopManager::self()->setCurrent(desktop);
 }
 
 void EffectsHandlerImpl::setNumberOfDesktops(int desktops)
 {
-    Workspace::self()->setNumberOfDesktops(desktops);
+    VirtualDesktopManager::self()->setCount(desktops);
 }
 
 QSize EffectsHandlerImpl::desktopGridSize() const
 {
-    return Workspace::self()->desktopGridSize();
+    return VirtualDesktopManager::self()->grid().size();
 }
 
 int EffectsHandlerImpl::desktopGridWidth() const
 {
-    return Workspace::self()->desktopGridWidth();
+    return desktopGridSize().width();
 }
 
 int EffectsHandlerImpl::desktopGridHeight() const
 {
-    return Workspace::self()->desktopGridHeight();
+    return desktopGridSize().height();
 }
 
 int EffectsHandlerImpl::workspaceWidth() const
 {
-    return Workspace::self()->workspaceWidth();
+    return desktopGridWidth() * displayWidth();
 }
 
 int EffectsHandlerImpl::workspaceHeight() const
 {
-    return Workspace::self()->workspaceHeight();
+    return desktopGridHeight() * displayHeight();
 }
 
 int EffectsHandlerImpl::desktopAtCoords(QPoint coords) const
 {
-    return Workspace::self()->desktopAtCoords(coords);
+    return VirtualDesktopManager::self()->grid().at(coords);
 }
 
 QPoint EffectsHandlerImpl::desktopGridCoords(int id) const
 {
-    return Workspace::self()->desktopGridCoords(id);
+    return VirtualDesktopManager::self()->grid().gridCoords(id);
 }
 
 QPoint EffectsHandlerImpl::desktopCoords(int id) const
 {
-    return Workspace::self()->desktopCoords(id);
+    QPoint coords = VirtualDesktopManager::self()->grid().gridCoords(id);
+    if (coords.x() == -1)
+        return QPoint(-1, -1);
+    return QPoint(coords.x() * displayWidth(), coords.y() * displayHeight());
 }
 
 int EffectsHandlerImpl::desktopAbove(int desktop, bool wrap) const
 {
-    return Workspace::self()->desktopAbove(desktop, wrap);
+    return getDesktop<DesktopAbove>(desktop, wrap);
 }
 
 int EffectsHandlerImpl::desktopToRight(int desktop, bool wrap) const
 {
-    return Workspace::self()->desktopToRight(desktop, wrap);
+    return getDesktop<DesktopRight>(desktop, wrap);
 }
 
 int EffectsHandlerImpl::desktopBelow(int desktop, bool wrap) const
 {
-    return Workspace::self()->desktopBelow(desktop, wrap);
+    return getDesktop<DesktopBelow>(desktop, wrap);
 }
 
 int EffectsHandlerImpl::desktopToLeft(int desktop, bool wrap) const
 {
-    return Workspace::self()->desktopToLeft(desktop, wrap);
+    return getDesktop<DesktopLeft>(desktop, wrap);
 }
 
 QString EffectsHandlerImpl::desktopName(int desktop) const
 {
-    return Workspace::self()->desktopName(desktop);
+    return VirtualDesktopManager::self()->name(desktop);
 }
 
 bool EffectsHandlerImpl::optionRollOverDesktops() const
@@ -962,7 +1020,7 @@ QRect EffectsHandlerImpl::clientArea(clientAreaOption opt, const EffectWindow* c
     if (const Client* cl = dynamic_cast< const Client* >(t))
         return Workspace::self()->clientArea(opt, cl);
     else
-        return Workspace::self()->clientArea(opt, t->geometry().center(), Workspace::self()->currentDesktop());
+        return Workspace::self()->clientArea(opt, t->geometry().center(), VirtualDesktopManager::self()->current());
 }
 
 QRect EffectsHandlerImpl::clientArea(clientAreaOption opt, const QPoint& p, int desktop) const
@@ -970,46 +1028,52 @@ QRect EffectsHandlerImpl::clientArea(clientAreaOption opt, const QPoint& p, int 
     return Workspace::self()->clientArea(opt, p, desktop);
 }
 
-Window EffectsHandlerImpl::createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor)
+xcb_window_t EffectsHandlerImpl::createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor)
 {
-    Window win = 0;
+    xcb_window_t win = XCB_WINDOW_NONE;
     QList<InputWindowPair>::iterator it = input_windows.begin();
     while (it != input_windows.end()) {
         if (it->first != e) {
             ++it;
             continue;
         }
-        XWindowAttributes attr;
-        if (!XGetWindowAttributes(display(), it->second, &attr)) {
+        Xcb::WindowAttributes attributes(it->second);
+        Xcb::WindowGeometry geometry(it->second);
+        if (!attributes) {
             // this is some random junk that certainly should no be here
             kDebug(1212) << "found input window that is NOT on the server, something is VERY broken here";
             Q_ASSERT(false); // exit in debug mode - for releases we'll be a bit more graceful
             it = input_windows.erase(it);
             continue;
         }
-        if (attr.x == x && attr.y == y && attr.width == w && attr.height == h) {
+        if (geometry.rect() == QRect(x, y, w, h)) {
             win = it->second; // re-use
             break;
-        } else if (attr.map_state == IsUnmapped) {
+        } else if (attributes->map_state == XCB_MAP_STATE_UNMAPPED) {
             // probably old one, likely no longer of interest
-            XDestroyWindow(display(), it->second);
+            xcb_destroy_window(connection(), it->second);
             it = input_windows.erase(it);
             continue;
         }
         ++it;
     }
-    if (!win) {
-        XSetWindowAttributes attrs;
-        attrs.override_redirect = True;
-        win = XCreateWindow(display(), rootWindow(), x, y, w, h, 0, 0, InputOnly, CopyFromParent,
-                                CWOverrideRedirect, &attrs);
+    if (win == XCB_WINDOW_NONE) {
+        win = xcb_generate_id(connection());
         // TODO keeping on top?
         // TODO enter/leave notify?
-        XSelectInput(display(), win, ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
-        XDefineCursor(display(), win, cursor.handle());
+        const uint32_t mask = XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_CURSOR;
+        const uint32_t values[] = {
+            true,
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
+            static_cast<uint32_t>(cursor.handle())
+        };
+        xcb_create_window(connection(), 0, win, rootWindow(), x, y, w, h, 0, XCB_WINDOW_CLASS_INPUT_ONLY,
+                          XCB_COPY_FROM_PARENT, mask, values);
         input_windows.append(qMakePair(e, win));
     }
-    XMapRaised(display(), win);
+    xcb_map_window(connection(), win);
+    const uint32_t values[] = { XCB_STACK_MODE_ABOVE };
+    xcb_configure_window(connection(), win, XCB_CONFIG_WINDOW_STACK_MODE, values);
     // Raise electric border windows above the input windows
     // so they can still be triggered.
 #ifdef KWIN_BUILD_SCREENEDGES
@@ -1021,11 +1085,11 @@ Window EffectsHandlerImpl::createInputWindow(Effect* e, int x, int y, int w, int
     return win;
 }
 
-void EffectsHandlerImpl::destroyInputWindow(Window w)
+void EffectsHandlerImpl::destroyInputWindow(xcb_window_t w)
 {
     foreach (const InputWindowPair & pos, input_windows) {
         if (pos.second == w) {
-            XUnmapWindow(display(), w);
+            xcb_unmap_window(connection(), w);
 #ifdef KWIN_BUILD_SCREENEDGES
             Workspace::self()->screenEdge()->raisePanelProxies();
 #endif
@@ -1080,16 +1144,28 @@ void EffectsHandlerImpl::checkInputWindowStacking()
 {
     if (input_windows.count() == 0)
         return;
-    Window* wins = new Window[input_windows.count()];
-    int pos = 0;
+    xcb_window_t* wins = new xcb_window_t[input_windows.count()];
+    QList<Xcb::WindowAttributes> attributes;
     foreach (const InputWindowPair &it, input_windows) {
-        XWindowAttributes attr;
-        if (XGetWindowAttributes(display(), it.second, &attr) && attr.map_state != IsUnmapped)
-            wins[pos++] = it.second;
+        attributes << Xcb::WindowAttributes(it.second);
+    }
+    int pos = 0;
+    for (QList<Xcb::WindowAttributes>::iterator it = attributes.begin(); it != attributes.end(); ++it) {
+        if (*it && (*it)->map_state != XCB_MAP_STATE_UNMAPPED) {
+            wins[pos++] = (*it).window();
+        }
     }
     if (pos) {
-        XRaiseWindow(display(), wins[0]);
-        XRestackWindows(display(), wins, pos);
+        const uint32_t values[] = { XCB_STACK_MODE_ABOVE };
+        xcb_configure_window(connection(), wins[0], XCB_CONFIG_WINDOW_STACK_MODE, values);
+        for (int i=1; i<pos; ++i) {
+            const uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
+            const uint32_t stackingValues[] = {
+                wins[i-1],
+                XCB_STACK_MODE_BELOW
+            };
+            xcb_configure_window(connection(), wins[i], mask, stackingValues);
+        }
     }
     delete[] wins;
     // Raise electric border windows above the input windows
@@ -1352,6 +1428,11 @@ void EffectsHandlerImpl::unloadEffect(const QString& name)
             kDebug(1212) << "EffectsHandler::unloadEffect : Unloading Effect : " << name;
             if (activeFullScreenEffect() == it.value().second) {
                 setActiveFullScreenEffect(0);
+            }
+            // remove support properties for the effect
+            const QList<QByteArray> properties = m_propertiesForEffects.keys();
+            foreach (const QByteArray &property, properties) {
+                removeSupportProperty(property, it.value().second);
             }
             delete it.value().second;
             effect_order.erase(it);

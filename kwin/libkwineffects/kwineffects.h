@@ -72,7 +72,6 @@ class ScreenPrePaintData;
 class ScreenPaintData;
 
 typedef QPair< QString, Effect* > EffectPair;
-typedef QPair< Effect*, Window > InputWindowPair;
 typedef QList< KWin::EffectWindow* > EffectWindowList;
 
 
@@ -634,10 +633,10 @@ public:
     // Functions for handling input - e.g. when an Expose-like effect is shown, an input window
     // covering the whole screen is created and all mouse events will be intercepted by it.
     // The effect's windowInputMouseEvent() will get called with such events.
-    virtual Window createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor) = 0;
-    Window createInputWindow(Effect* e, const QRect& r, const QCursor& cursor);
-    virtual Window createFullScreenInputWindow(Effect* e, const QCursor& cursor);
-    virtual void destroyInputWindow(Window w) = 0;
+    virtual xcb_window_t createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor) = 0;
+    xcb_window_t createInputWindow(Effect* e, const QRect& r, const QCursor& cursor);
+    virtual xcb_window_t createFullScreenInputWindow(Effect* e, const QCursor& cursor);
+    virtual void destroyInputWindow(xcb_window_t w) = 0;
     virtual QPoint cursorPos() const = 0;
     virtual bool grabKeyboard(Effect* effect) = 0;
     virtual void ungrabKeyboard() = 0;
@@ -807,6 +806,37 @@ public:
     virtual void registerPropertyType(long atom, bool reg) = 0;
     virtual QByteArray readRootProperty(long atom, long type, int format) const = 0;
     virtual void deleteRootProperty(long atom) const = 0;
+    /**
+     * @brief Announces support for the feature with the given name. If no other Effect
+     * has announced support for this feature yet, an X11 property will be installed on
+     * the root window.
+     *
+     * The Effect will be notified for events through the signal propertyNotify().
+     *
+     * To remove the support again use @link removeSupportProperty. When an Effect is
+     * destroyed it is automatically taken care of removing the support. It is not
+     * required to call @link removeSupportProperty in the Effect's cleanup handling.
+     *
+     * @param propertyName The name of the property to announce support for
+     * @param effect The effect which announces support
+     * @return xcb_atom_t The created X11 atom
+     * @see removeSupportProperty
+     * @since 4.11
+     **/
+    virtual xcb_atom_t announceSupportProperty(const QByteArray &propertyName, Effect *effect) = 0;
+    /**
+     * @brief Removes support for the feature with the given name. If there is no other Effect left
+     * which has announced support for the given property, the property will be removed from the
+     * root window.
+     *
+     * In case the Effect had not registered support, calling this function does not change anything.
+     *
+     * @param propertyName The name of the property to remove support for
+     * @param effect The effect which had registered the property.
+     * @see announceSupportProperty
+     * @since 4.11
+     **/
+    virtual void removeSupportProperty(const QByteArray &propertyName, Effect *effect) = 0;
 
     /**
      * Returns @a true if the active window decoration has shadow API hooks.
@@ -877,7 +907,7 @@ Q_SIGNALS:
     * @see EffectsHandler::numberOfDesktops.
     * @since 4.7
     */
-    void numberDesktopsChanged(int old);
+    void numberDesktopsChanged(uint old);
     /**
      * Signal emitted when a new window has been added to the Workspace.
      * @param w The added window
@@ -1130,7 +1160,6 @@ Q_SIGNALS:
 protected:
     QVector< EffectPair > loaded_effects;
     QHash< QString, KLibrary* > effect_libraries;
-    QList< InputWindowPair > input_windows;
     //QHash< QString, EffectFactory* > effect_factories;
     CompositingType compositing_type;
 };

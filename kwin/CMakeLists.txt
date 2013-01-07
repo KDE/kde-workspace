@@ -128,8 +128,8 @@ set(kwin_KDEINIT_SRCS
    deleted.cpp
    effects.cpp
    compositingprefs.cpp
-   desktoplayout.cpp
    paintredirector.cpp
+   virtualdesktops.cpp
    )
 
 if(KWIN_BUILD_SCRIPTING)
@@ -150,6 +150,7 @@ if(KWIN_BUILD_TABBOX)
         tabbox/tabbox.cpp
         tabbox/clientmodel.cpp
         tabbox/declarative.cpp
+        tabbox/desktopchain.cpp
         tabbox/desktopmodel.cpp
         tabbox/tabboxconfig.cpp
         tabbox/tabboxhandler.cpp

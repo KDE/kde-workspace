@@ -36,6 +36,7 @@ class KService;
 
 namespace KWin
 {
+typedef QPair< Effect*, xcb_window_t > InputWindowPair;
 
 class ThumbnailItem;
 
@@ -133,9 +134,9 @@ public:
     virtual double animationTimeFactor() const;
     virtual WindowQuadType newWindowQuadType();
 
-    virtual Window createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor);
+    virtual xcb_window_t createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor);
     using EffectsHandler::createInputWindow;
-    virtual void destroyInputWindow(Window w);
+    virtual void destroyInputWindow(xcb_window_t w);
     virtual bool checkInputWindowEvent(XEvent* e);
     virtual void checkInputWindowStacking();
 
@@ -149,6 +150,8 @@ public:
     virtual void registerPropertyType(long atom, bool reg);
     virtual QByteArray readRootProperty(long atom, long type, int format) const;
     virtual void deleteRootProperty(long atom) const;
+    virtual xcb_atom_t announceSupportProperty(const QByteArray& propertyName, Effect* effect);
+    virtual void removeSupportProperty(const QByteArray& propertyName, Effect* effect);
 
     virtual bool hasDecorationShadows() const;
 
@@ -235,8 +238,12 @@ private:
     QList< Effect* >::iterator m_currentPaintEffectFrameIterator;
     QList< Effect* >::iterator m_currentPaintScreenIterator;
     QList< Effect* >::iterator m_currentBuildQuadsIterator;
+    typedef QHash< QByteArray, QList< Effect*> > PropertyEffectMap;
+    PropertyEffectMap m_propertiesForEffects;
+    QHash<QByteArray, qulonglong> m_managedProperties;
     Compositor *m_compositor;
     Scene *m_scene;
+    QList< InputWindowPair > input_windows;
 };
 
 class EffectWindowImpl : public EffectWindow
