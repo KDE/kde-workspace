@@ -34,8 +34,6 @@
 
 #include <KWindowSystem>
 #include <Plasma/FrameSvg>
-#include <Plasma/Label>
-#include <Plasma/Meter>
 #include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 #include <KApplication>
