@@ -31,7 +31,7 @@
 #include <QGraphicsView>
 
 class QMenu;
-class PanelShadows;
+class Shadows;
 
 namespace Plasma
 {
@@ -78,7 +78,7 @@ protected:
 private:
     QTimer* m_hideTimer;
     Plasma::FrameSvg* m_background;
-    PanelShadows *m_shadows;
+    Shadows *m_shadows;
     QGraphicsScene* m_scene;
     MenuWidget* m_container;
 };

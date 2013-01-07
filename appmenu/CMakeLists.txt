@@ -3,8 +3,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}
     )
 
-include_directories(${DBUSMENUQT_INCLUDE_DIR}
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell)
+include_directories(${DBUSMENUQT_INCLUDE_DIR})
 
 set(kded_appmenu_SRCS
     appmenu.cpp
@@ -16,6 +15,7 @@ set(kded_appmenu_SRCS
     topmenubar.cpp
     glowbar.cpp
     verticalmenu.cpp
+    shadows.cpp
     )
 
 qt4_add_dbus_adaptor(kded_appmenu_SRCS com.canonical.AppMenu.Registrar.xml
@@ -26,7 +26,7 @@ qt4_add_dbus_adaptor(kded_appmenu_SRCS org.kde.kded.appmenu.xml
 
 kde4_add_plugin(kded_appmenu ${kded_appmenu_SRCS})
 
-target_link_libraries(kded_appmenu plasmagenericshell ${KDE4_KIO_LIBS} ${X11_LIBRARIES} ${DBUSMENUQT_LIBRARIES} ${KDE4_PLASMA_LIBS})
+target_link_libraries(kded_appmenu ${KDE4_KIO_LIBS} ${X11_LIBRARIES} ${DBUSMENUQT_LIBRARIES} ${KDE4_PLASMA_LIBS})
 
 install(TARGETS kded_appmenu  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
