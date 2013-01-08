@@ -99,6 +99,8 @@ public:
 
     QString token() const;
 
+    static const QSet<QString> &suffixes();
+
 signals:
     void backgroundsFound(const QStringList &paths, const QString &token);
 
@@ -109,6 +111,8 @@ private:
     Plasma::PackageStructure::Ptr m_structure;
     QStringList m_paths;
     QString m_token;
+
+    static QSet<QString> m_suffixes;
 };
 
 #endif // BACKGROUNDLISTMODEL_H
