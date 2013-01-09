@@ -18,8 +18,10 @@
 
 #include "krunnerdialog.h"
 
+#include <QDeclarativeContext>
+#include <QDeclarativeView>
+#include <QDesktopWidget>
 #include <QPainter>
-#include <QSvgRenderer>
 #include <QResizeEvent>
 #include <QMouseEvent>
 #ifdef Q_WS_X11
@@ -27,11 +29,12 @@
 #endif
 #include <QBitmap>
 #include <QTimer>
-#include <QDesktopWidget>
+#include <QVBoxLayout>
 
 #include <KDebug>
 #include <KWindowSystem>
 #include <KPluginInfo>
+#include <KStandardDirs>
 #ifdef Q_WS_X11
 #include <NETRootInfo>
 #endif
@@ -42,11 +45,11 @@
 
 #include <Plasma/AbstractRunner>
 #include <Plasma/FrameSvg>
-#include <Plasma/RunnerManager>
+#include <Plasma/Package>
 #include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 
-#include "configdialog.h"
+#include "interfaceApi.h"
 #include "krunnerapp.h"
 #include "krunnersettings.h"
 #include "panelshadows.h"
@@ -55,10 +58,8 @@
 #include <X11/Xlib.h>
 #endif
 
-KRunnerDialog::KRunnerDialog(Plasma::RunnerManager *runnerManager, QWidget *parent, Qt::WindowFlags f)
+KRunnerDialog::KRunnerDialog(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f),
-      m_runnerManager(runnerManager),
-      m_configWidget(0),
       m_shadows(new PanelShadows(this)),
       m_background(new Plasma::FrameSvg(this)),
       m_shownOnScreen(-1),
@@ -68,7 +69,9 @@ KRunnerDialog::KRunnerDialog(Plasma::RunnerManager *runnerManager, QWidget *pare
       m_rightResize(false),
       m_vertResize(false),
       m_runningTimer(false),
-      m_desktopWidget(qApp->desktop())
+      m_desktopWidget(qApp->desktop()),
+      m_interfacePackageStructure(Plasma::PackageStructure::load("Plasma/Generic")),
+      m_interfaceApi(new InterfaceApi(this))
 {
     setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
@@ -80,17 +83,28 @@ KRunnerDialog::KRunnerDialog(Plasma::RunnerManager *runnerManager, QWidget *pare
     pal.setColor(backgroundRole(), Qt::transparent);
     setPalette(pal);
 
-    m_iconSvg = new Plasma::Svg(this);
-    m_iconSvg->setImagePath(QLatin1String("widgets/configuration-icons"));
-
     connect(m_background, SIGNAL(repaintNeeded()), this, SLOT(themeUpdated()));
 
-    connect(m_desktopWidget, SIGNAL(resized(int)), this, SLOT(screenGeometryChanged(int)));
-    connect(m_desktopWidget, SIGNAL(screenCountChanged(int)), this, SLOT(screenGeometryChanged(int)));
+    connect(m_desktopWidget, SIGNAL(resized(int)), this, SLOT(screenGeometryChanged()));
+    connect(m_desktopWidget, SIGNAL(screenCountChanged(int)), this, SLOT(screenGeometryChanged()));
 
     connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SLOT(resetScreenPos()));
     connect(KWindowSystem::self(), SIGNAL(compositingChanged(bool)), this, SLOT(compositingChanged(bool)));
 
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    m_view = new QDeclarativeView(this);
+    m_view->setAttribute(Qt::WA_OpaquePaintEvent);
+    m_view->setAttribute(Qt::WA_NoSystemBackground);
+    m_view->viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
+    m_view->viewport()->setAttribute(Qt::WA_NoSystemBackground);
+    m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+
+    m_kdeclarative.setDeclarativeEngine(m_view->engine());
+    m_kdeclarative.initialize();
+    m_kdeclarative.setupBindings();
+    m_view->rootContext()->setContextProperty("App", m_interfaceApi);
+
+    layout->addWidget(m_view);
     setFreeFloating(KRunnerSettings::freeFloating());
 }
 
@@ -110,7 +124,7 @@ void KRunnerDialog::screenResized(int screen)
     }
 }
 
-void KRunnerDialog::screenGeometryChanged(int screenCount)
+void KRunnerDialog::screenGeometryChanged()
 {
     if (isVisible()) {
         positionOnScreen();
@@ -249,38 +263,81 @@ KRunnerDialog::ResizeMode KRunnerDialog::manualResizing() const
     }
 }
 
-void KRunnerDialog::setStaticQueryMode(bool staticQuery)
+void KRunnerDialog::clearHistory()
 {
-    Q_UNUSED(staticQuery)
+    m_interfaceApi->signalClearHistory();
 }
 
-void KRunnerDialog::toggleConfigDialog()
+void KRunnerDialog::display(const QString &query, const QString &singleRunnerId)
 {
-    if (m_configWidget) {
-        delete m_configWidget;
-        m_configWidget = 0;
-
-        if (!m_floating) {
-            KWindowSystem::setType(winId(), NET::Dock);
-        }
-    } else {
-        m_configWidget = new KRunnerConfigWidget(m_runnerManager, this);
-        connect(m_configWidget, SIGNAL(finished()), this, SLOT(configCompleted()));
-        setConfigWidget(m_configWidget);
-        KWindowSystem::setType(winId(), NET::Normal);
+    m_interfaceApi->setSingleRunnerId(singleRunnerId);
+    if (!query.isEmpty()) {
+        m_interfaceApi->query(query);
     }
+
+    show();
+}
+
+void KRunnerDialog::loadInterface()
+{
+    const QString interfaceName = KRunnerSettings::interfacePlugin();
+    if (interfaceName == interfaceName) {
+        return;
+    }
+
+    if (!interfaceName.isEmpty()) {
+        // FIXME: remove the existing interface
+        delete m_interfaceApi->package();
+        m_interfaceApi->setPackage(0);
+    }
+
+    /*
+       we have to check for the location ourselves anyways, so no point in using KServiceTypeTrader
+       with libplasma2, this will make sense to do, however, as PackageStructure can take it
+       from there
+
+    const QString constraint = QString("[X-KDE-PluginInfo-Name] == '%1'").arg(interfaceName);
+    KService::List offers = KServiceTypeTrader::self()->query("KRunner/Interface", constraint);
+
+    if (offers.isEmpty()) {
+        kDebug() << "Could not find requested interface:" << interfaceName;
+        return;
+    }
+    */
+
+    //TODO: with libplasma2, finding the package can be done by PackageStructure
+    QString path = KStandardDirs::locate("data", "interfaces/" + interfaceName + "/metadata.desktop");
+    if (path.isEmpty()) {
+        kDebug() << "Could not find requested interface:" << interfaceName;
+        return;
+    }
+
+    path.truncate(path.size() - QString("metadata.desktop").size());
+    kDebug() << "going to try and find the package at" << path;
+
+    Plasma::Package *package = new Plasma::Package(path, m_interfacePackageStructure);
+    const QString mainScript = package->filePath("mainscript");
+
+    if (mainScript.isEmpty()) {
+        kDebug() << path << "package malformed: no mainscript";
+        delete package;
+        return;
+    }
+
+    kDebug() << "our interface will start with" << mainScript;
+    m_interfaceApi->setPackage(package);
+    m_interfaceName = interfaceName;
+    m_view->setSource(mainScript);
+}
+
+void KRunnerDialog::toggleConfigInterface()
+{
+    //FIXME QML
 }
 
 void KRunnerDialog::configCompleted()
 {
-    if (m_configWidget) {
-        m_configWidget->deleteLater();
-        m_configWidget = 0;
-    }
-
-    if (!m_floating) {
-        KWindowSystem::setType(winId(), NET::Dock);
-    }
+    //FIXME QML
 }
 
 void KRunnerDialog::themeUpdated()
@@ -334,24 +391,18 @@ void KRunnerDialog::paintEvent(QPaintEvent *e)
 
 void KRunnerDialog::showEvent(QShowEvent *)
 {
+    //FIXME QML: prep the manager
     unsigned long state = NET::SkipTaskbar | NET::KeepAbove | NET::StaysOnTop;
     if (m_floating) {
         KWindowSystem::clearState(winId(), state);
     } else {
         KWindowSystem::setState(winId(), state);
     }
-    m_runnerManager->setupMatchSession();
 }
 
 void KRunnerDialog::hideEvent(QHideEvent *)
 {
-    // We delay the call to matchSessionComplete until next event cycle
-    // This is necessary since we might hide the dialog right before running
-    // a match, and the runner might still need to be prepped to
-    // succesfully run a match
-    QTimer::singleShot(0, m_runnerManager, SLOT(matchSessionComplete()));
-    delete m_configWidget;
-    m_configWidget = 0;
+    //FIXME QML: un-prep the manager
 }
 
 void KRunnerDialog::updateMask()

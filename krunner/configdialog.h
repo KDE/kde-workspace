@@ -49,7 +49,6 @@ Q_OBJECT
     private slots:
         void load();
         void save(QAbstractButton *pushed);
-        void previewInterface();
         void setInterface(int type);
         void updateRunner(const QByteArray& runnerName);
         void syncPalette();
@@ -61,7 +60,6 @@ Q_OBJECT
         KTabWidget *m_tabWidget;
         QDialogButtonBox *m_buttons;
         Plasma::RunnerManager *m_manager;
-        Ui::InterfaceOptions m_uiOptions;
 };
 
 #endif

@@ -47,12 +47,11 @@
 
 #include "appadaptor.h"
 #include "ksystemactivitydialog.h"
-#include "interfaces/default/interface.h"
-#include "interfaces/quicksand/qs_dialog.h"
 #ifdef Q_WS_X11
 #include "startupid.h"
 #endif
 #include "klaunchsettings.h"
+#include "krunnerdialog.h"
 #include "krunnersettings.h"
 
 #ifdef Q_WS_X11
@@ -75,6 +74,10 @@ KRunnerApp::KRunnerApp()
       m_startupId(NULL),
       m_firstTime(true)
 {
+    if (KAuthorized::authorize(QLatin1String("run_command"))) {
+        m_interface = new KRunnerDialog;
+    }
+
     initialize();
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanUp()));
 }
@@ -89,8 +92,6 @@ void KRunnerApp::cleanUp()
     kDebug() << "deleting interface";
     delete m_interface;
     m_interface = 0;
-    delete m_runnerManager;
-    m_runnerManager = 0;
 #ifndef Q_WS_WIN
     delete m_tasks;
     m_tasks = 0;
@@ -113,8 +114,6 @@ void KRunnerApp::initialize()
 
     connect(KRunnerSettings::self(), SIGNAL(configChanged()), this, SLOT(reloadConfig()));
 
-    m_runnerManager = new Plasma::RunnerManager;
-
     new AppAdaptor(this);
     QDBusConnection::sessionBus().registerObject(QLatin1String("/App"), this);
 
@@ -122,7 +121,7 @@ void KRunnerApp::initialize()
     m_actionCollection = new KActionCollection(this);
     KAction* a = 0;
 
-    if (KAuthorized::authorize(QLatin1String("run_command"))) {
+    if (m_interface) {
         a = m_actionCollection->addAction(QLatin1String("Run Command"));
         a->setText(i18n("Run Command"));
         a->setGlobalShortcut(KShortcut(Qt::ALT+Qt::Key_F2));
@@ -147,17 +146,8 @@ void KRunnerApp::initialize()
     }
 
     //Setup the interface after we have set up the actions
-    //TODO: if !KAuthorized::authorize("run_comand") (and !"switch_user" i suppose?)
-    //      then we probably don't need the interface at all. would be another place
-    //      for some small improvements in footprint in that case
-    switch (KRunnerSettings::interface()) {
-        default:
-        case KRunnerSettings::EnumInterface::CommandOriented:
-            m_interface = new Interface(m_runnerManager);
-            break;
-        case KRunnerSettings::EnumInterface::TaskOriented:
-            m_interface = new QsDialog(m_runnerManager);
-            break;
+    if (KAuthorized::authorize("run_comand")) {
+        m_interface->loadInterface();
     }
 
 #ifdef Q_WS_X11
@@ -172,12 +162,10 @@ void KRunnerApp::initialize()
 
 
     m_actionCollection->readSettings();
+    /*
+    FIXME: reimplement shortcuts
     if (KAuthorized::authorize(QLatin1String("run_command"))) {
-        //m_runnerManager->setAllowedRunners(QStringList() << "shell");
-        m_runnerManager->reloadConfiguration(); // pre-load the runners
-
         // Single runner mode actions shortcuts
-
         foreach (const QString &runnerId, m_runnerManager->singleModeAdvertisedRunnerIds()) {
             a = m_actionCollection->addAction(runnerId);
             a->setText(i18nc("Run krunner restricting the search only to runner %1", "Run Command (runner \"%1\" only)",
@@ -186,6 +174,7 @@ void KRunnerApp::initialize()
             connect(a, SIGNAL(triggered(bool)), SLOT(singleRunnerModeActionTriggered()));
         }
     }
+    */
 }
 
 void KRunnerApp::singleRunnerModeActionTriggered()
@@ -198,21 +187,9 @@ void KRunnerApp::singleRunnerModeActionTriggered()
 
 void KRunnerApp::querySingleRunner(const QString& runnerId, const QString &term)
 {
-    if (!KAuthorized::authorize(QLatin1String("run_command"))) {
-        return;
+    if (m_interface) {
+        m_interface->display(term, runnerId);
     }
-
-    m_runnerManager->setSingleModeRunnerId(runnerId);
-    m_runnerManager->setSingleMode(!runnerId.isEmpty());
-
-    if (m_runnerManager->singleMode()) {
-        m_interface->display(term);
-    }
-}
-
-QStringList KRunnerApp::singleModeAdvertisedRunnerIds() const
-{
-    return m_runnerManager->singleModeAdvertisedRunnerIds();
 }
 
 void KRunnerApp::initializeStartupNotification()
@@ -259,34 +236,22 @@ void KRunnerApp::showTaskManagerWithFilter(const QString &filterText)
 
 void KRunnerApp::display()
 {
-    if (!KAuthorized::authorize(QLatin1String("run_command"))) {
-        return;
+    if (m_interface) {
+        m_interface->display();
     }
-
-    m_runnerManager->setSingleMode(false);
-    m_interface->display();
 }
 
 void KRunnerApp::displaySingleRunner(const QString &runnerId)
 {
-    if (!KAuthorized::authorize(QLatin1String("run_command"))) {
-        return;
+    if (m_interface) {
+        m_interface->display(QString(), runnerId);
     }
-
-    m_runnerManager->setSingleModeRunnerId(runnerId);
-    m_runnerManager->setSingleMode(!runnerId.isEmpty());
-    m_interface->display();
 }
 
 void KRunnerApp::displayOrHide()
 {
-    if (!KAuthorized::authorize(QLatin1String("run_command"))) {
-        m_interface->hide();
+    if (!m_interface) {
         return;
-    }
-
-    if (!m_interface->isVisible()) {
-        m_runnerManager->setSingleMode(false);
     }
 
     if (m_interface->freeFloating()) {
@@ -304,25 +269,23 @@ void KRunnerApp::displayOrHide()
 
 void KRunnerApp::query(const QString &term)
 {
-    if (!KAuthorized::authorize(QLatin1String("run_command"))) {
-        return;
+    if (m_interface) {
+        m_interface->display(term);
     }
-
-    m_interface->display(term);
 }
 
 void KRunnerApp::displayWithClipboardContents()
 {
-    if (!KAuthorized::authorize(QLatin1String("run_command"))) {
-        return;
+    if (m_interface) {
+        QString clipboardData = QApplication::clipboard()->text(QClipboard::Selection);
+        m_interface->display(clipboardData);
     }
-
-    QString clipboardData = QApplication::clipboard()->text(QClipboard::Selection);
-    m_interface->display(clipboardData);
 }
 
 void KRunnerApp::switchUser()
 {
+    //FIXME: show a QML representation of user switching
+    /*
     const KService::Ptr service = KService::serviceByStorageId(QLatin1String("plasma-runner-sessions.desktop"));
     KPluginInfo info(service);
 
@@ -345,12 +308,14 @@ void KRunnerApp::switchUser()
             //TODO: ugh, magic strings. See sessions/sessionrunner.cpp
             m_runnerManager->launchQuery(QLatin1String("SESSIONS"), info.pluginName());
         }
-    }
+    }*/
 }
 
 void KRunnerApp::clearHistory()
 {
-    m_interface->clearHistory();
+    if (m_interface) {
+        m_interface->clearHistory();
+    }
 }
 
 void KRunnerApp::taskDialogFinished()
@@ -378,20 +343,13 @@ void KRunnerApp::reloadConfig()
     //Prevent Interface destructor from triggering this method
     disconnect(KRunnerSettings::self(), SIGNAL(configChanged()), this, SLOT(reloadConfig()));
 
-    const int interface = KRunnerSettings::interface();
-    if (!qobject_cast<QsDialog*>(m_interface) &&
-        interface == KRunnerSettings::EnumInterface::TaskOriented) {
-        m_interface->deleteLater();
-        m_interface = new QsDialog(m_runnerManager);
-    } else if (!qobject_cast<Interface*>(m_interface) &&
-               interface == KRunnerSettings::EnumInterface::CommandOriented) {
-        m_interface->deleteLater();
-        m_interface = new Interface(m_runnerManager);
+    if (m_interface) {
+        m_interface->loadInterface();
+        m_interface->setFreeFloating(KRunnerSettings::freeFloating());
+        display();
     }
 
-    m_interface->setFreeFloating(KRunnerSettings::freeFloating());
     connect(KRunnerSettings::self(), SIGNAL(configChanged()), this, SLOT(reloadConfig()));
-    display();
 }
 
 #include "krunnerapp.moc"

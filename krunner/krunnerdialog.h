@@ -20,25 +20,27 @@
 #define KRUNNERDIALOG_H
 
 #include <KDialog>
+#include <kdeclarative.h>
+
+#include <Plasma/PackageStructure>
 
 namespace Plasma
 {
-    class RunnerManager;
     class FrameSvg;
     class Svg;
 }
 
-class KRunnerConfigWidget;
+class InterfaceApi;
 class PanelShadows;
 class QDesktopWidget;
+class QDeclarativeView;
 
 class KRunnerDialog : public QWidget
 {
     Q_OBJECT
 
     public:
-        explicit KRunnerDialog(Plasma::RunnerManager *manager, QWidget *parent = 0,
-                               Qt::WindowFlags f =  Qt::Dialog | Qt::FramelessWindowHint);
+        explicit KRunnerDialog(QWidget *parent = 0, Qt::WindowFlags f =  Qt::Dialog | Qt::FramelessWindowHint);
         virtual ~KRunnerDialog();
 
         void setFreeFloating(bool floating);
@@ -46,11 +48,13 @@ class KRunnerDialog : public QWidget
 
         enum ResizeMode { NotResizing = 0, VerticalResizing, HorizontalResizing };
         ResizeMode manualResizing() const;
-        virtual void setConfigWidget(QWidget *w) = 0;
+
+        void loadInterface();
 
     public Q_SLOTS:
-        virtual void display(const QString &term = QString()) = 0;
-        virtual void clearHistory() = 0;
+        void display(const QString &term = QString(), const QString &singleRunnerId = QString());
+        void clearHistory();
+        void toggleConfigInterface();
 
     protected:
         void paintEvent(QPaintEvent *event);
@@ -64,10 +68,8 @@ class KRunnerDialog : public QWidget
         void moveEvent(QMoveEvent *);
 
         void positionOnScreen();
-        virtual void setStaticQueryMode(bool staticQuery);
 
     protected Q_SLOTS:
-        void toggleConfigDialog();
         void timerEvent(QTimerEvent *event);
 
         /**
@@ -92,17 +94,12 @@ class KRunnerDialog : public QWidget
          * React to screen changes
          */
         void screenResized(int screen);
-        void screenGeometryChanged(int screenCount);
+        void screenGeometryChanged();
         void resetScreenPos();
 
         void compositingChanged(bool);
 
-    protected:
-        Plasma::Svg *m_iconSvg;
-        Plasma::RunnerManager *m_runnerManager;
-
     private:
-        KRunnerConfigWidget *m_configWidget;
         PanelShadows *m_shadows;
         Plasma::FrameSvg *m_background;
         QPixmap *m_cachedBackground;
@@ -120,7 +117,11 @@ class KRunnerDialog : public QWidget
         bool m_vertResize : 1;
         bool m_runningTimer : 1;
         QDesktopWidget *m_desktopWidget;
-        QString m_singleRunnerId;
+        QString m_interfaceName;
+        Plasma::PackageStructure::Ptr m_interfacePackageStructure;
+        InterfaceApi *m_interfaceApi;
+        QDeclarativeView *m_view;
+        KDeclarative m_kdeclarative;
 };
 
 #endif

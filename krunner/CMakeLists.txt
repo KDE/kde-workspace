@@ -6,39 +6,20 @@ include(PkgConfigGetVar)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard
                     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processcore
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell)
+                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell
+                    ${KDECLARATIVE_INCLUDE_DIR})
 
 set(krunner_KCFG_SRCS kcfg/krunnersettings.kcfgc kcfg/klaunchsettings.kcfgc)
 set(krunner_dbusAppXML dbus/org.kde.krunner.App.xml)
 
 
-set(default_interface_SRCS
-    interfaces/default/interface.cpp
-    interfaces/default/resultitem.cpp
-    interfaces/default/resultscene.cpp
-    interfaces/default/resultview.cpp
-    interfaces/default/krunnerhistorycombobox.cpp
-    interfaces/default/selectionbar.cpp
-)
-
-set(quicksand_interface_SRCS
-   interfaces/quicksand/qs_completionbox.cpp
-   interfaces/quicksand/qs_dialog.cpp
-   interfaces/quicksand/qs_matchitem.cpp
-   interfaces/quicksand/qs_matchview.cpp
-   interfaces/quicksand/qs_queryactionitem.cpp
-   interfaces/quicksand/qs_querymatchitem.cpp
-   interfaces/quicksand/qs_statusbar.cpp)
-
 set(krunner_SRCS
+   interfaceApi.cpp
    krunnerdialog.cpp
-   configdialog.cpp
    krunnerapp.cpp
    main.cpp
-   ${default_interface_SRCS}
-   ${quicksand_interface_SRCS})
+   )
 
-kde4_add_ui_files(krunner_SRCS interfaceOptions.ui)
 kde4_add_kcfg_files(krunner_SRCS ${krunner_KCFG_SRCS})
 
 qt4_add_dbus_adaptor(krunner_SRCS ${krunner_dbusAppXML} krunnerapp.h KRunnerApp)
@@ -60,7 +41,7 @@ endif(NOT WIN32)
 
 kde4_add_kdeinit_executable(krunner ${krunner_SRCS})
 
-target_link_libraries(kdeinit_krunner kworkspace  plasmagenericshell ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBRARIES} ${KDE4_THREADWEAVER_LIBRARIES} ${KDE4_KDEUI_LIBS}  ${KDE4_KCMUTILS_LIBS} )
+target_link_libraries(kdeinit_krunner kworkspace  plasmagenericshell ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBRARIES} ${KDE4_THREADWEAVER_LIBRARIES} ${KDE4_KDEUI_LIBS}  ${KDE4_KCMUTILS_LIBS} ${QT_QTDECLARATIVE_LIBRARY} ${KDECLARATIVE_LIBRARIES})
 
 if(NOT WIN32)
   target_link_libraries(kdeinit_krunner processui  ${X11_Xrender_LIB} ${X11_LIBRARIES})
@@ -80,3 +61,5 @@ install(TARGETS krunner         ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(FILES krunner.desktop  DESTINATION  ${AUTOSTART_INSTALL_DIR})
 install(FILES kcfg/klaunch.kcfg  DESTINATION  ${KCFG_INSTALL_DIR})
 install(FILES ${krunner_dbusAppXML} DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
+
+add_subdirectory(interfaces)

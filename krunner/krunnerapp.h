@@ -24,11 +24,6 @@
 class KActionCollection;
 class KDialog;
 
-namespace Plasma
-{
-    class RunnerManager;
-}
-
 class KRunnerDialog;
 class KSystemActivityDialog;
 class StartupId;
@@ -78,8 +73,6 @@ public Q_SLOTS:
     /** Clear the search history */
     Q_SCRIPTABLE void clearHistory();
 
-    Q_SCRIPTABLE QStringList singleModeAdvertisedRunnerIds() const;
-
 private slots:
     /**
      * Called when the task dialog emits its finished() signal
@@ -94,7 +87,6 @@ private:
     KRunnerApp();
     void initialize();
 
-    Plasma::RunnerManager *m_runnerManager;
     KActionCollection *m_actionCollection;
     KRunnerDialog *m_interface;
     KSystemActivityDialog *m_tasks;

@@ -39,9 +39,7 @@
 #include <Plasma/RunnerManager>
 #include <Plasma/Theme>
 
-#include "interfaces/default/interface.h"
 #include "krunnersettings.h"
-#include "interfaces/quicksand/qs_dialog.h"
 
 KRunnerConfigWidget::KRunnerConfigWidget(Plasma::RunnerManager *manager, QWidget *parent)
     : QWidget(parent),
@@ -71,13 +69,7 @@ KRunnerConfigWidget::KRunnerConfigWidget(Plasma::RunnerManager *manager, QWidget
     displayButtons->addButton(m_uiOptions.commandButton, KRunnerSettings::EnumInterface::CommandOriented);
     displayButtons->addButton(m_uiOptions.taskButton, KRunnerSettings::EnumInterface::TaskOriented);
 
-    if (m_interfaceType == KRunnerSettings::EnumInterface::CommandOriented) {
-        m_uiOptions.commandButton->setChecked(true);
-    } else {
-        m_uiOptions.taskButton->setChecked(true);
-    }
-
-    connect(m_uiOptions.previewButton, SIGNAL(clicked()), this, SLOT(previewInterface()));
+    //FIXME QML: select the correct QML items
 
     m_tabWidget->addTab(m_generalSettings, i18n("User Interface"));
 
@@ -111,22 +103,6 @@ void KRunnerConfigWidget::syncPalette()
     p.setColor(QPalette::Normal, QPalette::Link, Plasma::Theme::defaultTheme()->color(Plasma::Theme::LinkColor));
     p.setColor(QPalette::Normal, QPalette::LinkVisited, Plasma::Theme::defaultTheme()->color(Plasma::Theme::VisitedLinkColor));
     setPalette(p);
-}
-
-void KRunnerConfigWidget::previewInterface()
-{
-    delete m_preview;
-    switch (m_interfaceType) {
-    case KRunnerSettings::EnumInterface::CommandOriented:
-        m_preview = new Interface(m_manager, this);
-        break;
-    default:
-        m_preview = new QsDialog(m_manager, this);
-        break;
-    }
-
-    m_preview->setFreeFloating(m_uiOptions.freeFloatingButton->isChecked());
-    m_preview->show();
 }
 
 void KRunnerConfigWidget::setInterface(int type)
