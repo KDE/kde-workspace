@@ -1,5 +1,6 @@
 /* This file is part of the Nepomuk Project
    Copyright (c) 2008 Sebastian Trueg <trueg@kde.org>
+   Copyright (c) 2012-13 Vishesh Handa <me@vhanda.in>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public
@@ -20,6 +21,7 @@
 
 #include <QMenu>
 #include <QMimeData>
+#include <QFile>
 
 #include <KIcon>
 #include <KRun>
@@ -123,7 +125,9 @@ void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
 
             Query::ResultIterator it( query );
             while( context.isValid() && it.next() ) {
-                context.addMatch(context.query(), convertToQueryMatch(it.result()));
+                Plasma::QueryMatch match = convertToQueryMatch( it.result() );
+                if( match.isValid() )
+                    context.addMatch(context.query(), match);
             }
         }
     }
@@ -279,9 +283,10 @@ Plasma::QueryMatch Nepomuk2::SearchRunner::convertToQueryMatch(const Nepomuk2::Q
     if (res.hasProperty(NIE::mimeType())) {
         mimetype = KMimeType::mimeType(res.property(NIE::mimeType()).toString());
     }
-    if (!mimetype && res.isFile() && res.toFile().url().isLocalFile()) {
-        const KUrl url(res.toFile().url());
-        mimetype = KMimeType::findByUrl(url);
+
+    const QUrl fileUrl = res.toFile().url();
+    if (!mimetype && res.isFile() && fileUrl.isLocalFile() ) {
+        mimetype = KMimeType::findByUrl(fileUrl);
     }
 
     if (mimetype) {
@@ -293,6 +298,15 @@ Plasma::QueryMatch Nepomuk2::SearchRunner::convertToQueryMatch(const Nepomuk2::Q
         type = Nepomuk2::Types::Class(res.type()).label();
         iconName = res.genericIcon();
     }
+
+    // HACK: Do not show non-existing files
+    if( fileUrl.isLocalFile() && !QFile::exists( fileUrl.toLocalFile() ) )
+        return Plasma::QueryMatch( 0 );
+
+    // HACK: Do not show resources which do not have a label
+    QString label = res.genericLabel();
+    if( label.startsWith(QLatin1String("nepomuk:/res")) )
+        return Plasma::QueryMatch( 0 );
 
     match.setText(res.genericLabel());
     match.setSubtext(type);
