@@ -122,7 +122,7 @@ void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
             query.setLimit(s_maxResults);
 
             Query::ResultIterator it( query );
-            while( it.next() ) {
+            while( context.isValid() && it.next() ) {
                 context.addMatch(context.query(), convertToQueryMatch(it.result()));
             }
         }
