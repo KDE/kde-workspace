@@ -76,6 +76,7 @@ KRunnerApp::KRunnerApp()
 {
     if (KAuthorized::authorize(QLatin1String("run_command"))) {
         m_interface = new KRunnerDialog;
+        m_interface->hide();
     }
 
     initialize();

@@ -75,7 +75,6 @@ KRunnerDialog::KRunnerDialog(QWidget *parent, Qt::WindowFlags f)
 {
     setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
-    //setButtons(0);
     setWindowTitle(i18nc("@title:window", "Run Command"));
     setWindowIcon(KIcon(QLatin1String("system-run")));
 
@@ -92,6 +91,9 @@ KRunnerDialog::KRunnerDialog(QWidget *parent, Qt::WindowFlags f)
     connect(KWindowSystem::self(), SIGNAL(compositingChanged(bool)), this, SLOT(compositingChanged(bool)));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+
     m_view = new QDeclarativeView(this);
     m_view->setAttribute(Qt::WA_OpaquePaintEvent);
     m_view->setAttribute(Qt::WA_NoSystemBackground);
@@ -276,6 +278,7 @@ void KRunnerDialog::display(const QString &query, const QString &singleRunnerId)
     }
 
     show();
+    KWindowSystem::forceActiveWindow(winId());
 }
 
 void KRunnerDialog::loadInterface()
@@ -398,6 +401,7 @@ void KRunnerDialog::showEvent(QShowEvent *)
     } else {
         KWindowSystem::setState(winId(), state);
     }
+    KWindowSystem::setOnAllDesktops(winId(), true);
 }
 
 void KRunnerDialog::hideEvent(QHideEvent *)
