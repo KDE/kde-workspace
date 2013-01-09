@@ -19,9 +19,9 @@
 #ifndef KRUNNERDIALOG_H
 #define KRUNNERDIALOG_H
 
-#include <KDialog>
 #include <kdeclarative.h>
 
+#include <Plasma/Dialog>
 #include <Plasma/PackageStructure>
 
 namespace Plasma
@@ -35,7 +35,7 @@ class PanelShadows;
 class QDesktopWidget;
 class QDeclarativeView;
 
-class KRunnerDialog : public QWidget
+class KRunnerDialog : public Plasma::Dialog
 {
     Q_OBJECT
 
@@ -57,8 +57,6 @@ class KRunnerDialog : public QWidget
         void toggleConfigInterface();
 
     protected:
-        void paintEvent(QPaintEvent *event);
-        void resizeEvent(QResizeEvent *event);
         void mousePressEvent(QMouseEvent *event);
         void mouseReleaseEvent(QMouseEvent *event);
         void mouseMoveEvent(QMouseEvent *event);
@@ -78,18 +76,9 @@ class KRunnerDialog : public QWidget
         void configCompleted();
 
     private:
-        void updatePresentation();
-        bool checkBorders(const QRect &screenGeom);
         bool checkCursor(const QPoint &pos);
-        void updateMask();
-        void paintBackground(QPainter* painter, const QRect &exposedRect);
 
     private Q_SLOTS:
-        /**
-         * React to theme changes
-         */
-        void themeUpdated();
-
         /**
          * React to screen changes
          */
@@ -97,18 +86,10 @@ class KRunnerDialog : public QWidget
         void screenGeometryChanged();
         void resetScreenPos();
 
-        void compositingChanged(bool);
-
     private:
-        PanelShadows *m_shadows;
-        Plasma::FrameSvg *m_background;
         QPixmap *m_cachedBackground;
         QPoint m_lastPressPos;
         QPoint m_customPos;
-        int m_topBorderHeight;
-        int m_leftBorderWidth;
-        int m_rightBorderWidth;
-        int m_bottomBorderHeight;
         int m_shownOnScreen;
         qreal m_offset;
         bool m_floating : 1;

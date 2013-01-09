@@ -41,7 +41,7 @@
 
 #include <QtCore/QStringBuilder> // % operator for QString
 
-#include "kworkspace/kdisplaymanager.h"
+#include <KIcon>
 
 #include <Plasma/AbstractRunner>
 #include <Plasma/FrameSvg>
@@ -49,19 +49,18 @@
 #include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 
+#include "kworkspace/kdisplaymanager.h"
+
 #include "interfaceApi.h"
 #include "krunnerapp.h"
 #include "krunnersettings.h"
-#include "panelshadows.h"
 
 #ifdef Q_WS_X11
 #include <X11/Xlib.h>
 #endif
 
 KRunnerDialog::KRunnerDialog(QWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent, f),
-      m_shadows(new PanelShadows(this)),
-      m_background(new Plasma::FrameSvg(this)),
+    : Plasma::Dialog(parent, f),
       m_shownOnScreen(-1),
       m_offset(.5),
       m_floating(!KRunnerSettings::freeFloating()),
@@ -82,13 +81,10 @@ KRunnerDialog::KRunnerDialog(QWidget *parent, Qt::WindowFlags f)
     pal.setColor(backgroundRole(), Qt::transparent);
     setPalette(pal);
 
-    connect(m_background, SIGNAL(repaintNeeded()), this, SLOT(themeUpdated()));
-
     connect(m_desktopWidget, SIGNAL(resized(int)), this, SLOT(screenGeometryChanged()));
     connect(m_desktopWidget, SIGNAL(screenCountChanged(int)), this, SLOT(screenGeometryChanged()));
 
     connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SLOT(resetScreenPos()));
-    connect(KWindowSystem::self(), SIGNAL(compositingChanged(bool)), this, SLOT(compositingChanged(bool)));
 
     KConfigGroup interfaceConfig(KGlobal::config(), "Interface");
     if (interfaceConfig.hasKey("Size")) {
@@ -182,11 +178,6 @@ void KRunnerDialog::positionOnScreen()
     y = qBound(r.top(), y, r.bottom() - height());
 
     move(x, y);
-
-    if (!m_floating) {
-        checkBorders(r);
-    }
-
     show();
 
     if (m_floating) {
@@ -221,42 +212,19 @@ void KRunnerDialog::setFreeFloating(bool floating)
     m_floating = floating;
     m_shownOnScreen = -1;
     unsetCursor();
-    updatePresentation();
-}
 
-void KRunnerDialog::updatePresentation()
-{
     if (m_floating) {
         KWindowSystem::setType(winId(), NET::Normal);
-
-        //m_shadows->setImagePath(QLatin1String("dialogs/krunner"));
-        m_background->setImagePath(QLatin1String("dialogs/krunner"));
-        m_background->setElementPrefix(QString());
-
-        themeUpdated();
     } else {
-        //m_shadows->setImagePath(QLatin1String("widgets/panel-background"));
-        m_background->setImagePath(QLatin1String("widgets/panel-background"));
-        m_background->resizeFrame(size());
-        m_background->setElementPrefix("north-mini");
         // load the positions for each screen from our config
         KConfigGroup cg(KGlobal::config(), "EdgePositions");
         m_offset = cg.readEntry(QLatin1String("Offset"), m_offset);
-        const QRect r = m_desktopWidget->screenGeometry(m_shownOnScreen);
-        checkBorders(r);
         KWindowSystem::setType(winId(), NET::Dock);
     }
 
     if (isVisible()) {
         positionOnScreen();
     }
-}
-
-void KRunnerDialog::compositingChanged(bool)
-{
-    updatePresentation();
-    updateMask();
-    adjustSize();
 }
 
 bool KRunnerDialog::freeFloating() const
@@ -287,7 +255,7 @@ void KRunnerDialog::display(const QString &query, const QString &singleRunnerId)
         m_interfaceApi->query(query);
     }
 
-    show();
+    positionOnScreen();
     KWindowSystem::forceActiveWindow(winId());
 }
 
@@ -353,55 +321,6 @@ void KRunnerDialog::configCompleted()
     //FIXME QML
 }
 
-void KRunnerDialog::themeUpdated()
-{
-    m_shadows->addWindow(this);
-
-    bool useShadowsForMargins = false;
-    if (m_floating) {
-        // recalc the contents margins
-        m_background->blockSignals(true);
-        if (KWindowSystem::compositingActive()) {
-            m_background->setEnabledBorders(Plasma::FrameSvg::NoBorder);
-            useShadowsForMargins = true;
-        } else {
-            m_background->setEnabledBorders(Plasma::FrameSvg::AllBorders);
-        }
-        m_background->blockSignals(false);
-    }
-
-    if (useShadowsForMargins) {
-        m_shadows->getMargins(m_topBorderHeight, m_rightBorderWidth, m_bottomBorderHeight, m_leftBorderWidth);
-    } else {
-        m_leftBorderWidth = qMax(0, int(m_background->marginSize(Plasma::LeftMargin)));
-        m_rightBorderWidth = qMax(0, int(m_background->marginSize(Plasma::RightMargin)));
-        m_bottomBorderHeight = qMax(0, int(m_background->marginSize(Plasma::BottomMargin)));
-        // the -1 in the non-floating case is not optimal, but it gives it a bit of a "more snug to the
-        // top" feel; best would be if we could tell exactly where the edge/shadow of the frame svg was
-        // but this works nicely
-        m_topBorderHeight = m_floating ? qMax(0, int(m_background->marginSize(Plasma::TopMargin)))
-                                       : Plasma::Theme::defaultTheme()->windowTranslucencyEnabled()
-                                            ? qMax(1, m_bottomBorderHeight / 2)
-                                            : qMax(1, m_bottomBorderHeight - 1);
-    }
-
-    kDebug() << m_leftBorderWidth << m_topBorderHeight << m_rightBorderWidth << m_bottomBorderHeight;
-    // the +1 gives us the extra mouseMoveEvent needed to always reset the resize cursor
-    setContentsMargins(m_leftBorderWidth + 1, m_topBorderHeight, m_rightBorderWidth + 1, m_bottomBorderHeight + 1);
-
-    update();
-}
-
-void KRunnerDialog::paintEvent(QPaintEvent *e)
-{
-    QPainter p(this);
-    p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.setClipRect(e->rect());
-    //kDebug() << "clip rect set to: " << e->rect();
-
-    m_background->paintFrame(&p);
-}
-
 void KRunnerDialog::showEvent(QShowEvent *)
 {
     //FIXME QML: prep the manager
@@ -419,52 +338,17 @@ void KRunnerDialog::hideEvent(QHideEvent *)
     //FIXME QML: un-prep the manager
 }
 
-void KRunnerDialog::updateMask()
-{
-    // Enable the mask only when compositing is disabled;
-    // As this operation is quite slow, it would be nice to find some
-    // way to workaround it for no-compositing users.
-
-    if (KWindowSystem::compositingActive()) {
-        clearMask();
-        const QRegion mask = m_background->mask();
-        Plasma::WindowEffects::enableBlurBehind(winId(), true, mask);
-        Plasma::WindowEffects::overrideShadow(winId(), true);
-    } else {
-        setMask(m_background->mask());
-    }
-}
-
-void KRunnerDialog::resizeEvent(QResizeEvent *e)
-{
-    m_background->resizeFrame(e->size());
-
-    bool maskDirty = true;
-    if (m_resizing && !m_vertResize) {
-        const QRect r = m_desktopWidget->screenGeometry(m_shownOnScreen);
-        //kDebug() << "if" << x() << ">" << r.left() << "&&" << r.right() << ">" << (x() + width());
-        const Plasma::FrameSvg::EnabledBorders borders = m_background->enabledBorders();
-        if (borders & Plasma::FrameSvg::LeftBorder) {
-            const int dx = x() + (e->oldSize().width() - width()) / 2 ;
-            const int dy = (m_floating ? pos().y() : r.top());
-            move(qBound(r.left(), dx, r.right() - width() + 1), dy);
-            maskDirty = m_floating || !checkBorders(r);
-        }
-    }
-
-    if (maskDirty) {
-        updateMask();
-    }
-}
-
 void KRunnerDialog::mousePressEvent(QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton) {
         m_lastPressPos = e->globalPos();
 
-        const bool leftResize = e->x() < qMax(5, m_leftBorderWidth);
-        m_rightResize = e->x() > width() - qMax(5, m_rightBorderWidth);
-        m_vertResize = e->y() > height() - qMax(5, m_bottomBorderHeight);
+        int leftMargin, topMargin, rightMargin, bottomMargin;
+        getContentsMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
+
+        const bool leftResize = e->x() < qMax(5, leftMargin);
+        m_rightResize = e->x() > width() - qMax(5, rightMargin);
+        m_vertResize = e->y() > height() - qMax(5, bottomMargin);
         kWarning() << "right:" << m_rightResize << "left:" << leftResize << "vert:" << m_vertResize;
         if (m_rightResize || m_vertResize || leftResize) {
             // let's do a resize! :)
@@ -497,30 +381,6 @@ void KRunnerDialog::mouseReleaseEvent(QMouseEvent *)
     }
 }
 
-bool KRunnerDialog::checkBorders(const QRect &screenGeom)
-{
-    Q_ASSERT(!m_floating);
-    Plasma::FrameSvg::EnabledBorders borders = Plasma::FrameSvg::BottomBorder;
-
-    if (x() > screenGeom.left()) {
-        borders |= Plasma::FrameSvg::LeftBorder;
-    }
-
-    if (x() + width() < screenGeom.right()) {
-        borders |= Plasma::FrameSvg::RightBorder;
-    }
-
-    if (borders != m_background->enabledBorders()) {
-        m_background->setEnabledBorders(borders);
-        themeUpdated();
-        updateMask();
-        update();
-        return true;
-    }
-
-    return false;
-}
-
 void KRunnerDialog::leaveEvent(QEvent *)
 {
     unsetCursor();
@@ -543,12 +403,15 @@ void KRunnerDialog::mouseMoveEvent(QMouseEvent *e)
             const int deltaX = (m_rightResize ? -1 : 1) * (m_lastPressPos.x() - e->globalX());
             int newWidth = width() + deltaX;
 
+            int leftMargin, topMargin, rightMargin, bottomMargin;
+            getContentsMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
+
             // don't let it grow beyond the opposite screen edge
             if (m_rightResize) {
-                if (m_leftBorderWidth > 0) {
+                if (leftMargin > 0) {
                     newWidth += qMin(deltaX, x() - r.left());
                 }
-            } else if (m_rightBorderWidth > 0) {
+            } else if (rightMargin > 0) {
                 newWidth += qMin(deltaX, r.right() - (x() + width() - 1));
             } else if (newWidth > minimumWidth() && newWidth < width()) {
                 move(r.right() - newWidth + 1, y());
@@ -570,7 +433,6 @@ void KRunnerDialog::mouseMoveEvent(QMouseEvent *e)
         }
 
         move(newX, y());
-        checkBorders(r);
     }
 }
 
@@ -587,9 +449,11 @@ void KRunnerDialog::timerEvent(QTimerEvent *event)
 
 bool KRunnerDialog::checkCursor(const QPoint &pos)
 {
-    //Plasma::FrameSvg borders = m_background->enabledBoders();
-    if ((m_leftBorderWidth > 0 && pos.x() < qMax(5, m_leftBorderWidth)) ||
-        (m_rightBorderWidth > 0 && pos.x() > width() - qMax(5, m_rightBorderWidth))) {
+    int leftMargin, topMargin, rightMargin, bottomMargin;
+    getContentsMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
+
+    if ((leftMargin > 0 && pos.x() < qMax(5, leftMargin)) ||
+        (rightMargin > 0 && pos.x() > width() - qMax(5, rightMargin))) {
         if (cursor().shape() != Qt::SizeHorCursor) {
             setCursor(Qt::SizeHorCursor);
             if (!m_runningTimer) {
@@ -600,7 +464,7 @@ bool KRunnerDialog::checkCursor(const QPoint &pos)
         }
 
         return true;
-    } else if ((pos.y() > height() - qMax(5, m_bottomBorderHeight)) && (pos.y() < height())) {
+    } else if ((pos.y() > height() - qMax(5, bottomMargin)) && (pos.y() < height())) {
         if (cursor().shape() != Qt::SizeVerCursor) {
             setCursor(Qt::SizeVerCursor);
             if (!m_runningTimer) {
