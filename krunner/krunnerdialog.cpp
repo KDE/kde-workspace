@@ -90,6 +90,13 @@ KRunnerDialog::KRunnerDialog(QWidget *parent, Qt::WindowFlags f)
     connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SLOT(resetScreenPos()));
     connect(KWindowSystem::self(), SIGNAL(compositingChanged(bool)), this, SLOT(compositingChanged(bool)));
 
+    KConfigGroup interfaceConfig(KGlobal::config(), "Interface");
+    if (interfaceConfig.hasKey("Size")) {
+        resize(interfaceConfig.readEntry("Size", size()));
+    } else {
+        //FIXME: sensible default size, based on the QML?
+    }
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -117,6 +124,9 @@ KRunnerDialog::~KRunnerDialog()
         KConfigGroup cg(KGlobal::config(), "EdgePositions");
         cg.writeEntry(QLatin1String("Offset"), m_offset);
     }
+
+    KConfigGroup interfaceConfig(KGlobal::config(), "Interface");
+    interfaceConfig.writeEntry("Size", size());
 }
 
 void KRunnerDialog::screenResized(int screen)
