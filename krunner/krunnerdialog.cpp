@@ -193,8 +193,10 @@ void KRunnerDialog::positionOnScreen()
     //kDebug() << "moving to" << m_screenPos[screen];
 }
 
-void KRunnerDialog::moveEvent(QMoveEvent *)
+void KRunnerDialog::moveEvent(QMoveEvent *e)
 {
+    Plasma::Dialog::moveEvent(e);
+
     if (m_floating) {
         m_customPos = pos();
     } else {
