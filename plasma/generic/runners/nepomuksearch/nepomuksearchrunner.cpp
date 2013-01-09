@@ -72,7 +72,8 @@ Nepomuk2::SearchRunner::SearchRunner( QObject* parent, const QString& serviceId 
 
 void Nepomuk2::SearchRunner::init()
 {
-    Nepomuk2::ResourceManager::instance()->init();
+    // Just constructing the instance initializes the ResourceManager
+    Nepomuk2::ResourceManager::instance();
 
     // we are pretty slow at times and use DBus calls
     setSpeed(SlowSpeed);
