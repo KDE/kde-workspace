@@ -149,7 +149,6 @@ Item {
         engine: "powermanagement"
         connectedSources: sources
         onDataChanged: {
-            Logic.updateCumulative();
             Logic.updateTooltip();
 
             var status = "PassiveStatus";
@@ -171,8 +170,12 @@ Item {
         dataSource: pmSource
         sourceFilter: "Battery[0-9]+"
 
+        onDataChanged: {
+             Logic.updateCumulative();
+        }
+
         property int cumulativePercent
-        property bool cumulativePluggedin
+        property bool cumulativePluggedin: count > 0
         // true  --> all batteries charged
         // false --> one of the batteries charging/discharging
         property bool allCharged

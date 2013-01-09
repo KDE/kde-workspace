@@ -23,13 +23,11 @@ var disk = 1
 
 function updateCumulative() {
     var sum = 0;
-    var haveBattery = false;
     var charged = true;
     for (var i=0; i<batteries.count; i++) {
         var b = batteries.get(i);
         if (b["Plugged in"]) {
             sum += b["Percent"];
-            haveBattery = true;
         }
         if (b["State"] != "NoCharge") {
             charged = false;
@@ -41,7 +39,6 @@ function updateCumulative() {
     } else {
         batteries.cumulativePercent = 0;
     }
-    batteries.cumulativePluggedin = haveBattery;
     batteries.allCharged = charged;
 }
 
