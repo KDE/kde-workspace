@@ -1,0 +1,16 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Simple
+Icon=krunner
+Type=Service
+ServiceTypes=KRunner/Interface
+
+X-KDE-PluginInfo-Author=Aaron Seigo
+X-KDE-PluginInfo-Email=aseigo@kde.org
+X-KDE-PluginInfo-Name=org.kde.krunner.simple
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=http://plasma.kde.org
+X-KDE-PluginInfo-Category=
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPLv2+
+X-KDE-PluginInfo-EnabledByDefault=true
