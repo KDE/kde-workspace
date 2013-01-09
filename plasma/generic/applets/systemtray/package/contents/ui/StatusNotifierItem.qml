@@ -79,47 +79,6 @@ Item {
     }
 
 
-    // Widget for icon =================================================================================================
-    PlasmaCore.IconItem {
-        id: icon_widget
-        property QtObject action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.id) : null
-        anchors.fill: parent
-        visible: false
-        active: mouse_area.containsMouse
-
-        Component.onDestruction: {
-            var act = icon_widget.action
-            icon_widget.action = null
-            plasmoid.destroyShortcutAction(act)
-        }
-    }
-
-    // Overlay icon ====================================================================================================
-    Image {
-        width: 10  // we fix size of an overlay icon
-        height: width
-        sourceSize.width: width
-        sourceSize.height: width
-        fillMode: Image.PreserveAspectFit
-        anchors { right: parent.right; bottom: parent.bottom }
-        smooth: true
-        source: "image://icon/" + __overlay_icon_name
-        visible: __overlay_icon_name
-        z: 2
-    }
-
-
-    // Animation (Movie icon) ==========================================================================================
-    AnimatedImage {
-        id: animation
-        anchors.fill: parent
-        playing: false
-        visible: false
-        smooth: true
-        source: __movie_path
-        z: 1
-    }
-
     // Timer for blink effect ==========================================================================================
     Timer {
         id: timer_blink
@@ -134,9 +93,6 @@ Item {
             is_att_icon = !is_att_icon
         }
     }
-
-    
-
     
 
     // TODO: remove wheel area in QtQuick 2.0
@@ -156,10 +112,52 @@ Item {
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             enabled: __has_task
             visible: __has_task
-            //z: -1
-            //z: 100
 
             onClicked: __processClick(mouse.button, mouse_area)
+
+            // Widget for icon if no animation is requested
+            PlasmaCore.IconItem {
+                id: icon_widget
+
+                anchors.fill: parent
+
+                property QtObject action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.id) : null
+
+                visible: false
+                active: mouse_area.containsMouse
+
+                // Overlay icon
+                Image {
+                    width: 10  // we fix size of an overlay icon
+                    height: width
+                    anchors { right: parent.right; bottom: parent.bottom }
+
+                    sourceSize.width: width
+                    sourceSize.height: width
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    source: "image://icon/" + __overlay_icon_name
+                    visible: __overlay_icon_name
+                }
+
+                Component.onDestruction: {
+                    var act = icon_widget.action
+                    icon_widget.action = null
+                    plasmoid.destroyShortcutAction(act)
+                }
+            }
+
+            // Animation (Movie icon)
+            AnimatedImage {
+                id: animation
+
+                anchors.fill: parent
+
+                playing: false
+                visible: false
+                smooth: true
+                source: __movie_path
+            }
         }
         onWheelMoved: {
             if (wheel.orientation === Qt.Horizontal)
