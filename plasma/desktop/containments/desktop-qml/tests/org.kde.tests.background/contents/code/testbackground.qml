@@ -1,0 +1,105 @@
+// -*- coding: iso-8859-1 -*-
+/*
+ *   Author: Sebastian Kügler <sebas@kde.org>
+ *   Date: Thu Jan 10 2013, 00:27:19
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU Library General Public License as
+ *   published by the Free Software Foundation; either version 2 or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details
+ *
+ *   You should have received a copy of the GNU Library General Public
+ *   License along with this program; if not, write to the
+ *   Free Software Foundation, Inc.,
+ *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+import QtQuick 1.1
+import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.extras 0.1 as PlasmaExtras
+import org.kde.plasma.core 0.1 as PlasmaCore
+
+Item {
+    id: root
+    width: 200
+    height: 300
+    clip: true
+
+    
+    Rectangle { 
+        color: "white"
+        opacity: 0.0
+        anchors.fill: parent
+    }
+    PlasmaExtras.Title {
+        id: title
+        anchors { top: parent.top; left: parent.left; right: parent.right; }
+        text: i18n("Test Applet")
+    }
+    PlasmaExtras.Paragraph {
+        id: para
+        anchors { top: title.bottom; left: parent.left; right: parent.right; }
+        text: {
+            var o = "x: " + root.x;
+            o += "<br />y: " + root.y;
+            o += "<br />w: " + root.width;
+            o += "<br />h: " + root.height;
+            //o += "<br /><br />s: " + plasmoid.availableScreenRect(screen[0]);
+            return o;
+        }
+    }
+
+    PlasmaComponents.ButtonColumn {
+        visible: false
+        anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter; }
+        spacing: 12
+        //anchors.fill: parent
+        PlasmaComponents.Button {
+            text: hint
+            iconSource: "view-refresh"
+            property string hint: "NoBackground"
+            checkable: true
+            checked: plasmoid.backgroundHints == hint
+            onClicked: plasmoid.backgroundHints = hint;
+        }
+        PlasmaComponents.Button {
+            text: hint
+            iconSource: "view-refresh"
+            property string hint: "TranslucentBackground"
+            checkable: true
+            checked: plasmoid.backgroundHints == hint
+            onClicked: plasmoid.backgroundHints = hint;
+        }
+        PlasmaComponents.Button {
+            text: hint
+            iconSource: "view-refresh"
+            property string hint: "NormalBackground"
+            checkable: true
+            checked: plasmoid.backgroundHints == hint
+            onClicked: plasmoid.backgroundHints = hint;
+        }
+        PlasmaComponents.Button {
+            text: hint
+            iconSource: "view-refresh"
+            property string hint: "DefaultBackground"
+            checkable: true
+            checked: plasmoid.backgroundHints == hint
+            onClicked: plasmoid.backgroundHints = hint;
+        }
+    }
+//     Item {
+//         anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter; }
+//         width: childrenRect.width
+//         height: childrenRect.height
+//     }
+
+    Component.onCompleted: {
+        //plasmoid.backgroundHints = "NoBackground"
+        plasmoid.backgroundHints = "TranslucentBackground"
+    }
+}

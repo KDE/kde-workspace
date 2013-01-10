@@ -1,0 +1,20 @@
+[Desktop Entry]
+Comment=Testing background settings in Plasma Quick Containments
+Encoding=UTF-8
+Icon=text-frame-link
+Keywords=
+Name=Background Test
+Type=Service
+X-KDE-ParentApp=
+X-KDE-PluginInfo-Author=Sebastian Kügler
+X-KDE-PluginInfo-Category=Utilities
+X-KDE-PluginInfo-Email=sebas@kde.org
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-Name=org.kde.tests.background
+X-KDE-PluginInfo-Version=1
+X-KDE-PluginInfo-Website=
+X-KDE-ServiceTypes=Plasma/Applet
+X-Plasma-API=declarativeappletscript
+X-Plasma-DefaultSize=200,100
+X-Plasma-MainScript=code/testbackground.qml
+X-Plasma-RemoteLocation=
