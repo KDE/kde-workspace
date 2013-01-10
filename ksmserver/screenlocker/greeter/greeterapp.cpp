@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "screensaverwindow.h"
 
 // workspace
-#include <kephal/screens.h>
 #include <kworkspace/kworkspace.h>
 // KDE
 #include <KDE/KAuthorized>
@@ -49,6 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusPendingCall>
 #include <QtGui/QKeyEvent>
+#include <QDesktopWidget>
 // X11
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -110,7 +110,7 @@ void UnlockApp::initialize()
         m_mainQmlPath = m_package->filePath("mainscript");
     }
 
-    for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
+    for (int i = 0; i < QApplication::desktop()->screenCount(); ++i) {
         // create the view
         QDeclarativeView *view = new QDeclarativeView();
         connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
@@ -186,7 +186,7 @@ void UnlockApp::prepareShow()
     // mark as our window
     Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
 
-    for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
+    for (int i = 0; i < QApplication::desktop()->screenCount(); ++i) {
         if (i == m_views.size()) {
             kError() << "Views and screens not in sync";
             return;
@@ -194,7 +194,7 @@ void UnlockApp::prepareShow()
         QDeclarativeView *view = m_views.at(i);
 
         XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
-        view->setGeometry(Kephal::Screens::self()->screen(i)->geom());
+        view->setGeometry(QApplication::desktop()->screenGeometry(i));
         view->show();
         view->activateWindow();
 
