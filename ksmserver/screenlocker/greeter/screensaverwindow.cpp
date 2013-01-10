@@ -46,6 +46,7 @@ ScreenSaverWindow::ScreenSaverWindow(QWidget *parent)
       m_forbidden(false),
       m_openGLVisual(false)
 {
+    setCursor(Qt::BlankCursor);
     m_reactivateTimer = new QTimer(this);
     m_reactivateTimer->setSingleShot(true);
     connect(m_reactivateTimer, SIGNAL(timeout()), this, SLOT(show()));
