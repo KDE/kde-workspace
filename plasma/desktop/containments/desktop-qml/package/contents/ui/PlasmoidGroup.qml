@@ -80,15 +80,32 @@ ItemGroup {
         interval: 250
         repeat: false
         running: false
-        onTriggered: {
-            hasBackground = (applet.backgroundHints != 0);
-            if (applet.backgroundHints == 1) {
-                plasmoidGroup.imagePath = "widgets/background"
+        onTriggered: updateBackgroundHints()
+    }
+    
+    function updateBackgroundHints() {
+            print(" %%%%%% Updating backgroundHints..." + applet.backgroundHints);
+            hasBackground = (applet.backgroundHints != "NoBackground");
+            if (applet.backgroundHints == -1) {
+                plasmoidGroup.imagePath = "widgets/background";
+                backgroundHints = "StandardBackground";
             } else if (applet.backgroundHints == 2) {
                 plasmoidGroup.imagePath = "widgets/translucentbackground"
+                backgroundHints = "TranslucentBackground";
+            } else if (applet.backgroundHints == 0) {
+                //plasmoidGroup.imagePath = "widgets/translucentbackground"
+                backgroundHints = "NoBackground";
+            } else {
+                backgroundHints = "DefaultBackground";
+                plasmoidGroup.imagePath = "widgets/background";
             }
             print(" @@@@@@@ Background: " + applet.name + " " + applet.backgroundHints + " " + hasBackground + " " + plasmoidGroup.imagePath);
-            applet.backgroundHints = "NoBackground"
-        }
+            print(" @@@@ hints saved as " + backgroundHints);
+            applet.backgroundHints = "NoBackground";
+    }
+    
+    Connections {
+        target: plasmoid
+        //onBackgroundHintsChanged: updateBackgroundHints();
     }
 }

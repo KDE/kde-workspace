@@ -34,6 +34,8 @@ Item {
     property string title
     property bool canResizeHeight: false
     property real controlsOpacity: plasmoid.immutable ? 0 : 1
+    property bool handleShown: !plasmoid.immutable
+    property string backgroundHints: "NoBackground"
     property bool hasBackground: false
     //property alias immutable: plasmoid.immutable
     //imagePath: "widgets/background"
@@ -47,8 +49,19 @@ Item {
     property alias imagePath: plasmoidBackground.imagePath
 
     PlasmaCore.FrameSvgItem {
+        id: noBackgroundHandle
+        //opacity: (plasmoid.backgroundHints == "NoBackground" && handleShown) ? 1 : 0
+        x: parent.width - appletHandleWidth
+        anchors {
+            top: parent.top
+            right: parent.right
+            bottom: parent.bottom
+        }
+    }
+
+    PlasmaCore.FrameSvgItem {
         id: plasmoidBackground
-        visible: hasBackground
+        visible: backgroundHints != "NoBackground"
         anchors.fill: parent
         anchors.rightMargin: (controlsOpacity * -24)
         imagePath: "widgets/background"
@@ -419,7 +432,7 @@ print(itemGroup.x+" "+itemGroup.y)
 //                 left: parent.left
 //                 right: parent.right
                 bottom: parent.bottom;
-                topMargin: parent.margins.top
+                topMargin: parent.anchors.topMargin
                 horizontalCenter: parent.horizontalCenter
 //                 leftMargin: height + 2
 //                 rightMargin: height + 2
