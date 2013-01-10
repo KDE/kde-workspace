@@ -210,9 +210,18 @@ void UnlockApp::prepareShow()
             screensaverWindow->setBackground(backgroundPix);
             screensaverWindow->show();
             screensaverWindow->activateWindow();
+            connect(screensaverWindow, SIGNAL(hidden()), this, SLOT(getFocus()));
         }
     }
+    QTimer::singleShot(0, this, SLOT(getFocus()));
     capsLocked();
+}
+
+void UnlockApp::getFocus()
+{
+    if (!m_views.isEmpty()) {
+        m_views.first()->activateWindow();
+    }
 }
 
 void UnlockApp::resetRequestIgnore()
@@ -294,6 +303,11 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
                 foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
                     screensaverWindow->show();
                 }
+            } else {
+                foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
+                    screensaverWindow->hide();
+                }
+                getFocus();
             }
         } else if (event->type() == QEvent::GraphicsSceneMousePress) {
             QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
