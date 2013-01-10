@@ -58,6 +58,8 @@ Item {
         LayoutManager.cellSize.height = main.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
         layoutTimer.restart()
     }
+    
+//     Rectangle { color: "black"; opacity: 0.8; anchors.fill: parent; }
 
 //     GridView {
 //         id: gridView
@@ -185,8 +187,8 @@ Item {
         id: mainFlickable
         anchors {
             fill: main
-            leftMargin: availScreenRect.x
-            rightMargin: parent.width - availScreenRect.x - availScreenRect.width
+            //leftMargin: availScreenRect.x
+            //rightMargin: parent.width - availScreenRect.x - availScreenRect.width
         }
         interactive: false
         contentWidth: mainFlickable.width
