@@ -179,13 +179,15 @@ void Pager::initDeclarativeUI()
 {
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
     m_declarativeWidget = new Plasma::DeclarativeWidget(this);
-    layout->addItem(m_declarativeWidget);
+    m_declarativeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     m_declarativeWidget->engine()->rootContext()->setContextProperty("pager", this);
 
     Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
     Plasma::Package package(QString(), "org.kde.pager", structure);
     m_declarativeWidget->setQmlPath(package.filePath("mainscript"));
+    layout->addItem(m_declarativeWidget);
+    setLayout(layout);
 }
 
 void Pager::setCurrentDesktop(int desktop)
@@ -240,7 +242,6 @@ void Pager::configChanged()
     if (changed || rows != m_rows) {
         recalculateGridSizes(rows);
         recalculateWindowRects();
-        update();
     }
 }
 
@@ -257,8 +258,9 @@ void Pager::constraintsEvent(Plasma::Constraints constraints)
 
             recalculateWindowRects();
         }
-
-        update();
+        else {
+            update();
+        }
     }
 
     if (constraints & Plasma::FormFactorConstraint) {
@@ -275,13 +277,10 @@ void Pager::constraintsEvent(Plasma::Constraints constraints)
 
         if (formFactor() == Plasma::Horizontal) {
             setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-            setMinimumSize(preferredSize().width(), 0);
         } else if (formFactor() == Plasma::Vertical) {
             setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-            setMinimumSize(0, preferredSize().height());
         } else {
             setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-            setMinimumSize(preferredSize());
         }
     }
 }
@@ -469,28 +468,21 @@ void Pager::updateSizes(bool allowResize)
     qreal preferredItemWidth;
 
     if (formFactor() == Plasma::Vertical) {
-        // work out the preferred size based on the width of the contentsRect
-        preferredItemWidth = (contentsRect().width() - leftMargin - rightMargin -
+        // work out the preferred size based on the width of the geometry
+        preferredItemWidth = (geometry().width() - leftMargin - rightMargin -
                               padding * (m_columns - 1)) / m_columns;
         preferredItemHeight = preferredItemWidth / ratio;
-        // make sure items of the new size actually fit in the current contentsRect
-        itemHeight = (contentsRect().height() - topMargin - bottomMargin -
+        // make sure items of the new size actually fit in the current geometry
+        itemHeight = (geometry().height() - topMargin - bottomMargin -
                       padding * (m_rows - 1)) / m_rows;
         if (itemHeight > preferredItemHeight) {
             itemHeight = preferredItemHeight;
         }
         itemWidth = itemHeight * ratio;
-
-        m_widthScaleFactor = itemWidth / m_desktopWidget->geometry().width();
-        m_heightScaleFactor = itemHeight / m_desktopWidget->geometry().height();
     } else {
-        // work out the preferred size based on the height of the contentsRect
-        if (formFactor() == Plasma::Horizontal) {
-            preferredItemHeight = (contentsRect().height() - topMargin - bottomMargin -
-                                   padding * (m_rows - 1)) / m_rows;
-        } else {
-            preferredItemHeight = (contentsRect().height() - padding * (m_rows - 1)) / m_rows;
-        }
+        // work out the preferred size based on the height of the geometry
+        preferredItemHeight = (geometry().height() - topMargin - bottomMargin -
+                               padding * (m_rows - 1)) / m_rows;
         preferredItemWidth = preferredItemHeight * ratio;
 
         if (m_displayedText == Name) {
@@ -505,13 +497,8 @@ void Pager::updateSizes(bool allowResize)
             }
         }
 
-        // make sure items of the new size actually fit in the current contentsRect
-        if (formFactor() == Plasma::Horizontal) {
-            itemWidth = (contentsRect().width() - leftMargin - rightMargin -
-                         padding * (m_columns - 1)) / m_columns;
-        } else {
-            itemWidth = (contentsRect().width() - padding * (m_columns - 1)) / m_columns;
-        }
+        itemWidth = (geometry().width() - leftMargin - rightMargin -
+                     padding * (m_columns - 1)) / m_columns;
         if (itemWidth > preferredItemWidth) {
             itemWidth = preferredItemWidth;
         }
@@ -519,17 +506,17 @@ void Pager::updateSizes(bool allowResize)
         if (itemWidth < itemHeight * ratio) {
             itemHeight = itemWidth / ratio;
         }
-
-        m_widthScaleFactor = itemWidth / m_desktopWidget->geometry().width();
-        m_heightScaleFactor = itemHeight / m_desktopWidget->geometry().height();
     }
+
+    m_widthScaleFactor = itemWidth / totalRect.width();
+    m_heightScaleFactor = itemHeight / totalRect.height();
 
     m_pagerModel->clearDesktopRects();
 
-    QRectF itemRect(QPoint(leftMargin, topMargin) , QSize(floor(itemWidth), floor(itemHeight)));
+    QRectF itemRect(QPointF(leftMargin, topMargin) , QSizeF(itemWidth, itemHeight));
     for (int i = 0; i < m_desktopCount; i++) {
-        itemRect.moveLeft(leftMargin + floor((i % m_columns)  * (itemWidth + padding)));
-        itemRect.moveTop(topMargin + floor((i / m_columns) * (itemHeight + padding)));
+        itemRect.moveLeft(leftMargin + (i % m_columns)  * (itemWidth + padding));
+        itemRect.moveTop(topMargin + (i / m_columns) * (itemHeight + padding));
 
         QString name = KWindowSystem::desktopName(i + 1);
         m_pagerModel->appendDesktopRect(mapToDeclarativeUI(itemRect), name);
@@ -547,14 +534,13 @@ void Pager::updateSizes(bool allowResize)
                                   ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) +
                                        topMargin + bottomMargin));
 
-        // make sure the minimum size is smaller than preferred
-        setMinimumSize(qMin(preferred.width(),  minimumSize().width()),
-                       qMin(preferred.height(), minimumSize().height()));
         setPreferredSize(preferred);
         emit sizeHintChanged(Qt::PreferredSize);
     }
 
     m_size = contentsRect().size();
+
+    layout()->activate();
 }
 
 void Pager::recalculateWindowRects()
