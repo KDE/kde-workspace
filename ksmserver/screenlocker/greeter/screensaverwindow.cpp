@@ -46,6 +46,7 @@ ScreenSaverWindow::ScreenSaverWindow(QWidget *parent)
       m_forbidden(false),
       m_openGLVisual(false)
 {
+    setCursor(Qt::BlankCursor);
     m_reactivateTimer = new QTimer(this);
     m_reactivateTimer->setSingleShot(true);
     connect(m_reactivateTimer, SIGNAL(timeout()), this, SLOT(show()));
@@ -125,6 +126,7 @@ void ScreenSaverWindow::mousePressEvent(QMouseEvent *event)
     //reappear in one minute
     m_reactivateTimer->start(1000 * 60);
     hide();
+    emit hidden();
 }
 
 
@@ -133,6 +135,7 @@ void ScreenSaverWindow::keyPressEvent(QKeyEvent *event)
     Q_UNUSED(event)
 
     hide();
+    emit hidden();
 }
 
 void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
@@ -143,6 +146,7 @@ void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
     if ((event->globalPos() - m_startMousePos).manhattanLength() > QApplication::startDragDistance()) {
         m_startMousePos = QPoint(-1, -1);
         hide();
+        emit hidden();
         //reappear in one minute
         m_reactivateTimer->start(1000 * 60);
     }
