@@ -7,6 +7,7 @@ X-KDE-Kded-phase=1
 
 Name=KDE TouchPad Enabler Daemon
 Name[ar]=مراقب تفعيل لوحة اللمس لكدي
+Name[bs]=Demon za omogućavanje dodirne ploće
 Name[ca]=Dimoni activador del ratolí tàctil del KDE
 Name[da]=KDE touchpad-aktiveringsdæmon
 Name[de]=Touchpad-Aktivierungsdienst für KDE
@@ -44,6 +45,7 @@ Name[zh_TW]=KDE 觸控板開啟伺服程式
 
 Comment=Toggles the enable status of the TouchPad
 Comment[ar]=تبديل حالة مراقب لوحة اللمس
+Comment[bs]=O(ne)mogućava dodirnu ploču
 Comment[ca]=Commuta l'activació de l'estat del ratolí tàctil
 Comment[cs]=Přepne stav zapnutí TouchPadu
 Comment[da]=Slår aktiveringsstatus for touchpad til/fra
