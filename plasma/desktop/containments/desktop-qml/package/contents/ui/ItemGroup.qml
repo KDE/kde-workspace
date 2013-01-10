@@ -20,21 +20,41 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.qtextracomponents 0.1 as QtExtras
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 // PlasmaCore.FrameSvgItem {
-Item {
+QtExtras.MouseEventListener {
     id: itemGroup
+    hoverEnabled: true
+    property int hoverDelay: 800
 
     width: LayoutManager.cellSize.width*2
     height: LayoutManager.cellSize.height
     z: 0
 
+    onContainsMouseChanged: {
+        print("Mouse is " + containsMouse);
+        if (containsMouse) {
+            hoverTracker.restart();
+        } else {
+            hoverTracker.stop();
+            showAppletHandle = false;
+        }
+    }
+
+    Timer {
+        id: hoverTracker
+        repeat: false
+        interval: hoverDelay
+        onTriggered: showAppletHandle = true;
+    }
     property string category
     property string title
     property bool canResizeHeight: false
-    property real controlsOpacity: plasmoid.immutable ? 0 : 1
-    property bool handleShown: !plasmoid.immutable
+    property bool showAppletHandle: false
+    property real controlsOpacity: (plasmoid.immutable || !showAppletHandle) ? 0 : 1
+    property bool handleShown: true
     property string backgroundHints: "NoBackground"
     property bool hasBackground: false
     //property alias immutable: plasmoid.immutable
@@ -50,12 +70,21 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: noBackgroundHandle
-        //opacity: (plasmoid.backgroundHints == "NoBackground" && handleShown) ? 1 : 0
-        x: parent.width - appletHandleWidth
+        opacity: (backgroundHints == "NoBackground" && itemGroup.handleShown) ? controlsOpacity : 0
+        width: appletHandleWidth + margins.left + margins.right - 4
+        imagePath: {
+            print("2 applet.backgroundHints " + backgroundHints);
+            
+            return backgroundHints == "NoBackground" ? "widgets/translucentbackground" : "";
+        }
         anchors {
             top: parent.top
             right: parent.right
             bottom: parent.bottom
+            rightMargin: -appletHandleWidth
+        }
+        Component.onCompleted: {
+            print("applet.backgroundHints " + applet.backgroundHints);
         }
     }
 
@@ -267,7 +296,8 @@ print(itemGroup.x+" "+itemGroup.y)
         anchors {
             right: parent.right
             bottom: parent.bottom
-            rightMargin: -16
+            //top: parent.top
+            //rightMargin: -16
         }
 
         property int startX
@@ -310,8 +340,6 @@ print(itemGroup.x+" "+itemGroup.y)
         id: appletHandle
         z: appletContainer.z + 1
         opacity: itemGroup.controlsOpacity
-        //imagePath: "widgets/extender-dragger"
-        //prefix: "root"
         width: 24
         anchors {
             //left: parent.left
@@ -323,9 +351,6 @@ print(itemGroup.x+" "+itemGroup.y)
             bottomMargin: parent.margins.bottom
             topMargin: parent.margins.top
         }
-        //height: categoryText.height + margins.top + margins.bottom
-
-        //Rectangle { color: "orange"; anchors.fill: parent; opacity: 0.5 }
 
         ActionButton {
             svg: configIconsSvg
@@ -367,12 +392,6 @@ print(itemGroup.x+" "+itemGroup.y)
                 backgroundVisible: false
                 //visible: action.enabled
                 //action: applet.action("configure")
-//                 anchors {
-//                     left: parent.left
-//                     right: parent.right
-//                     top: parent.top
-//                     bottomMargin: 4
-//                 }
                 Component.onCompleted: {
                     if (action && typeof(action) != "undefined") {
                         action.enabled = true
@@ -402,12 +421,6 @@ print(itemGroup.x+" "+itemGroup.y)
                 backgroundVisible: false
                 //visible: action.enabled
                 action: applet.action("configure")
-//                 anchors {
-//                     left: parent.left
-//                     right: parent.right
-//                     top: parent.top
-//                     bottomMargin: 4
-//                 }
                 Component.onCompleted: {
                     if (action && typeof(action) != "undefined") {
                         action.enabled = true
@@ -424,18 +437,13 @@ print(itemGroup.x+" "+itemGroup.y)
             id: shadowItem
             svg: buttonSvg
             elementId: "move"
-            width: iconSize+13//button.backgroundVisible?iconSize+8:iconSize
+            width: iconSize+13
             height: width
-            //visible: button.backgroundVisible
             anchors {
                 top: parent.top
-//                 left: parent.left
-//                 right: parent.right
                 bottom: parent.bottom;
                 topMargin: parent.anchors.topMargin
                 horizontalCenter: parent.horizontalCenter
-//                 leftMargin: height + 2
-//                 rightMargin: height + 2
             }
         }
     }

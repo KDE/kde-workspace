@@ -55,7 +55,7 @@ Item {
     }
 
     PlasmaComponents.ButtonColumn {
-        visible: false
+        visible: root.width + root.height > 500
         anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter; }
         spacing: 12
         //anchors.fill: parent
@@ -65,7 +65,7 @@ Item {
             property string hint: "NoBackground"
             checkable: true
             checked: plasmoid.backgroundHints == hint
-            onClicked: plasmoid.backgroundHints = hint;
+            onClicked: saveHints(hint);
         }
         PlasmaComponents.Button {
             text: hint
@@ -73,7 +73,7 @@ Item {
             property string hint: "TranslucentBackground"
             checkable: true
             checked: plasmoid.backgroundHints == hint
-            onClicked: plasmoid.backgroundHints = hint;
+            onClicked: saveHints(hint);
         }
         PlasmaComponents.Button {
             text: hint
@@ -81,7 +81,7 @@ Item {
             property string hint: "NormalBackground"
             checkable: true
             checked: plasmoid.backgroundHints == hint
-            onClicked: plasmoid.backgroundHints = hint;
+            onClicked: saveHints(hint);
         }
         PlasmaComponents.Button {
             text: hint
@@ -89,17 +89,56 @@ Item {
             property string hint: "DefaultBackground"
             checkable: true
             checked: plasmoid.backgroundHints == hint
-            onClicked: plasmoid.backgroundHints = hint;
+            onClicked: saveHints(hint);
         }
     }
-//     Item {
-//         anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter; }
-//         width: childrenRect.width
-//         height: childrenRect.height
-//     }
+
+    function saveHints(hint) {
+        print("writing to config: " + hint);
+        plasmoid.writeConfig("bgHints", hint);
+    }
+
+    function configChanged()
+    {
+//         //serviceUrl = plasmoid.readConfig("serviceUrl");
+//         var u = plasmoid.readConfig("userName");
+//         var s = plasmoid.readConfig("serviceUrl");
+//         print(" @@@@@@@@@@@@@@@@@@ configChanged()" + u + " s: " + s);
+// 
+//         if (u != "") {
+//             userName = u;
+//         }
+//         if (s != "") {
+//             serviceUrl = s;
+//             imageSourc    
+        var bgh = "DefaultBackground";
+        var _bgh = plasmoid.readConfig("bgHints");
+        print("-- " + _bgh);
+        if (_bgh != "") {
+            bgh = _bgh;
+        } else {
+            //bgh = ;
+            print("Default");
+        }
+//         if (typeof(bgh) == "undefined" || bgh == undefined || bgh == "") {
+//         }
+        print(" ----------? Read Background Hints from Config: " + bgh + " " + (typeof(_bgh)));
+
+        //plasmoid.backgroundHints = "DefaultBackground";
+        plasmoid.backgroundHints = "NoBackground";
+    }
+
+    Timer {
+        repeat: false
+        //running: true
+        interval: 100
+        //onTriggered: configChanged()
+    }
 
     Component.onCompleted: {
         //plasmoid.backgroundHints = "NoBackground"
-        plasmoid.backgroundHints = "TranslucentBackground"
+        //plasmoid.addEventListener('ConfigChanged', configChanged);
+        //plasmoid.configurationRequired = true
+        configChanged()
     }
 }
