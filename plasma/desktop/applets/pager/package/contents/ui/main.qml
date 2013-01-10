@@ -125,8 +125,9 @@ Item {
 
                         property int windowId: model.windowId
 
-                        x: model.x
-                        y: model.y
+                        /* since we move clipRect with 1, move it back */
+                        x: model.x - 1
+                        y: model.y - 1
                         width: model.width
                         height: model.height
                         color: {
