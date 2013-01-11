@@ -595,6 +595,8 @@ void Pager::recalculateWindowRects()
 
             bool active = (window == KWindowSystem::activeWindow());
             int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
+            int windowRectSize = qMin(windowRect.width(), windowRect.height());
+            windowIconSize = qMax(windowIconSize, windowRectSize / 2);
             QPixmap icon = KWindowSystem::icon(info.win(), windowIconSize, windowIconSize, true);
             m_pagerModel->appendWindowRect(i, window, windowRect, active, icon, info.visibleName());
         }
