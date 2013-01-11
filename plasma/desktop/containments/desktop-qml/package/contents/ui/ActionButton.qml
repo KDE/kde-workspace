@@ -20,6 +20,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
+//import org.kde.plasma.extras 0.1 as PlasmaExtras
 
 Item {
     id: button
@@ -30,6 +31,7 @@ Item {
     property QtObject action
     property bool backgroundVisible: true
     property int iconSize: 32
+    property int pressedOffset: 1
     property bool checked: false
     property bool toggle: false
     property string text
@@ -119,7 +121,9 @@ Item {
         preventStealing: true
         onPressed: {
             buttonItem.elementId = "pressed"
-            shadowItem.opacity = 0
+            shadowItem.opacity = 0;
+            button.x = button.x + button.pressedOffset;
+            button.y = button.y + button.pressedOffset;
         }
         onReleased: {
             if (button.checked || !button.toggle) {
@@ -129,6 +133,8 @@ Item {
             } else {
                 button.checked = true
             }
+            button.x = button.x - button.pressedOffset;
+            button.y = button.y - button.pressedOffset;
         }
         onClicked: {
             if (action) {

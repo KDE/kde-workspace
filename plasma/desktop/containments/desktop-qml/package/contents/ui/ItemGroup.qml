@@ -291,13 +291,14 @@ print(itemGroup.x+" "+itemGroup.y)
         id: resizeHandle
         width: 48
         height: 48
+        property bool resizeTop: false
         z: 9999
         opacity: controlsOpacity
         anchors {
             right: parent.right
-            bottom: parent.bottom
-            //top: parent.top
-            //rightMargin: -16
+            //bottom: parent.bottom
+            top: parent.top
+            rightMargin: -16
         }
 
         property int startX
@@ -317,7 +318,8 @@ print(itemGroup.x+" "+itemGroup.y)
         onPositionChanged: {
             itemGroup.width = Math.max(itemGroup.minimumWidth, itemGroup.width + mouse.x-startX)
             if (itemGroup.canResizeHeight) {
-                itemGroup.height = Math.max(itemGroup.minimumHeight, itemGroup.height + mouse.y-startY)
+                itemGroup.y = itemGroup.y + (mouse.y-startY);
+                itemGroup.height = Math.max(itemGroup.minimumHeight, itemGroup.height + startY-mouse.y)
             }
         }
         onReleased: {
@@ -338,7 +340,7 @@ print(itemGroup.x+" "+itemGroup.y)
 
     Item {
         id: appletHandle
-        z: appletContainer.z + 1
+        z: dragMouseArea.z + 1
         opacity: itemGroup.controlsOpacity
         width: 24
         anchors {

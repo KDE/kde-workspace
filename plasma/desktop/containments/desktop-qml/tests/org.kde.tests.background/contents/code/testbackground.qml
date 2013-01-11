@@ -125,7 +125,7 @@ Item {
         print(" ----------? Read Background Hints from Config: " + bgh + " " + (typeof(_bgh)));
 
         //plasmoid.backgroundHints = "DefaultBackground";
-        plasmoid.backgroundHints = "NoBackground";
+        plasmoid.backgroundHints = "NormalBackground";
     }
 
     Timer {
