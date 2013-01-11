@@ -341,8 +341,21 @@ Plasma::QueryMatch Nepomuk2::SearchRunner::convertToQueryMatch(const Nepomuk2::Q
         iconName = mimetype->iconName();
     }
 
-    if (type.isEmpty() ) {
+    if(type.isEmpty()) {
         type = Nepomuk2::Types::Class(res.type()).label();
+
+        // The Query engine should typically never return properties, classes or graphs.
+        // But this doesn't seem to be the case cause of certain bugs in virtuoso
+        // Earlier versions of Nepomuk avoided this by complex queries which resulted in many
+        // "Virtuoso is crazy" reports.
+        // For 4.10, we just try to cover it up and not show the results.
+        // See nepomuk-core/libnepomukcore/query/query.cpp for more details
+        //
+        if(type.contains(QLatin1String("property"), Qt::CaseInsensitive) ||
+           type.contains(QLatin1String("class"), Qt::CaseInsensitive) ||
+           type.contains(QLatin1String("graph"), Qt::CaseInsensitive)) {
+                return Plasma::QueryMatch( 0 );
+        }
         iconName = res.genericIcon();
     }
 
