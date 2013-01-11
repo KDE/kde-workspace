@@ -94,19 +94,20 @@ Item {
         id: buttonRow
         exclusive: false
         spacing: theme.defaultFont.mSize.width / 2
+        property bool showAccel: false
 
-        PlasmaComponents.Button {
+        AccelButton {
             id: activateSession
-            text: i18n("Activate")
+            label: i18n("Activate")
             iconSource: "fork"
             onClicked: {
                 sessions.activateSession(userSessionsView.currentIndex);
                 activateSession();
             }
         }
-        PlasmaComponents.Button {
+        AccelButton {
             id: newSession
-            text: i18n("Start New Session")
+            label: i18n("Start New Session")
             iconSource: "fork"
             visible: sessions.startNewSessionSupported
             onClicked: {
@@ -114,13 +115,33 @@ Item {
                 startNewSession();
             }
         }
-        PlasmaComponents.Button {
+        AccelButton {
             id: cancelSession
-            text: i18n("Cancel")
+            label: i18n("Cancel")
             iconSource: "dialog-cancel"
             onClicked: cancel()
         }
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: userSessionsUI.horizontalCenter
+    }
+
+    Keys.onPressed: {
+        var alt = (event.modifiers & Qt.AltModifier);
+        buttonRow.showAccel = alt;
+
+        if (alt) {
+            var buttons = [activateSession, newSession, cancelSession];
+            for (var b = 0; b < buttons.length; ++b) {
+                if (event.key == buttons[b].accelKey) {
+                    buttonRow.showAccel = false;
+                    buttons[b].clicked();
+                    break;
+                }
+            }
+        }
+    }
+
+    Keys.onReleased: {
+        buttonRow.showAccel = (event.modifiers & Qt.AltModifier)
     }
 }
