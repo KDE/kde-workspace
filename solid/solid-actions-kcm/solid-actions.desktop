@@ -82,7 +82,6 @@ Name[zh_CN]=设备动作
 Name[zh_TW]=裝置動作
 
 Comment=Manage actions available to the user when connecting new devices
-Comment[bs]=Upravljanje radnjama dostupnim korisniku pri povezivanju novih uređaja na računar.
 Comment[ca]=Gestiona les accions disponibles per a l'usuari en connectar dispositius nous
 Comment[cs]=Spravovat činnosti dostupné pro uživatele při připojení nových zařízení
 Comment[da]=Håndtér de handlinger som er tilgængelige for brugeren når nye enheder tilsluttes

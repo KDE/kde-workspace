@@ -12,7 +12,6 @@ X-KDE-System-Settings-Parent-Category=display
 X-KDE-Weight=70
 
 Name=Screen Locker
-Name[bs]=Zaključavanje ekrana
 Name[ca]=Bloqueig de pantalla
 Name[cs]=Zámek obrazovky
 Name[da]=Skærmlås
@@ -49,7 +48,6 @@ Name[zh_CN]=屏幕锁
 Name[zh_TW]=螢幕鎖定程式
 
 Comment=Screen Locker Settings
-Comment[bs]=Postavke zaključavanja ekrana
 Comment[ca]=Arranjament del bloqueig de pantalla
 Comment[cs]=Nastavení zámku obrazovky
 Comment[da]=Indstilling af skærmlås
@@ -86,7 +84,6 @@ Comment[zh_CN]=屏幕锁定程序设置
 Comment[zh_TW]=螢幕鎖定程式設定
 
 X-KDE-Keywords=screensavers,Priority,locking,security
-X-KDE-Keywords[bs]=čuvar ekrana,prioritet,zaključavanje,sigurnost
 X-KDE-Keywords[ca]=estalvis de pantalla,Prioritat,bloqueig,seguretat
 X-KDE-Keywords[cs]=spořiče obrazovky,priorita,zamykání,bezpečnost
 X-KDE-Keywords[da]=screensaver,pauseskærme,prioritet,lås,sikkerhed
