@@ -47,6 +47,7 @@
 #include <KColorScheme>
 #include <KStandardDirs>
 #include <knewstuff3/downloaddialog.h>
+#include <kdecoration.h>
 
 #include <QtCore/QFile>
 #include <QtCore/QSettings>
@@ -438,8 +439,8 @@ void KCMStyle::save()
     if (style == "ButtonVertical") {
         KConfig _kwinConfig("kwinrc", KConfig::NoGlobals);
         KConfigGroup kwinConfig(&_kwinConfig, "Style");
-        QString buttonsOnLeft = kwinConfig.readEntry("ButtonsOnLeft", "MS");
-        QString buttonsOnRight = kwinConfig.readEntry("ButtonsOnRight", "IMX");
+        QString buttonsOnLeft = kwinConfig.readEntry("ButtonsOnLeft", KDecorationOptions::defaultTitleButtonsLeft());
+        QString buttonsOnRight = kwinConfig.readEntry("ButtonsOnRight", KDecorationOptions::defaultTitleButtonsRight());
         qDebug() << buttonsOnLeft << buttonsOnRight;
         if (!buttonsOnLeft.contains("N") && !buttonsOnRight.contains("N")) {
             buttonsOnLeft = "N" + buttonsOnLeft;
