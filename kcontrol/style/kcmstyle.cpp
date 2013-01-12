@@ -47,7 +47,7 @@
 #include <KColorScheme>
 #include <KStandardDirs>
 #include <knewstuff3/downloaddialog.h>
-#include <kdecoration.h>
+#include <../../kwin/libkdecorations/kdecoration.h>
 
 #include <QtCore/QFile>
 #include <QtCore/QSettings>
