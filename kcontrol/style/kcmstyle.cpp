@@ -438,7 +438,7 @@ void KCMStyle::save()
     if (style == "ButtonVertical") {
         KConfig _kwinConfig("kwinrc", KConfig::NoGlobals);
         KConfigGroup kwinConfig(&_kwinConfig, "Style");
-        QString buttonsOnLeft = kwinConfig.readEntry("ButtonsOnLeft", "");
+        QString buttonsOnLeft = kwinConfig.readEntry("ButtonsOnLeft", "MS");
         QString buttonsOnRight = kwinConfig.readEntry("ButtonsOnRight", "IMX");
         qDebug() << buttonsOnLeft << buttonsOnRight;
         if (!buttonsOnLeft.contains("N") && !buttonsOnRight.contains("N")) {
