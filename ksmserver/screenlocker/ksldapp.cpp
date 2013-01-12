@@ -70,6 +70,7 @@ KSldApp::KSldApp(QObject * parent)
     , m_lockedTimer(QElapsedTimer())
     , m_idleId(0)
     , m_lockGrace(0)
+    , m_inGraceTime(false)
     , m_graceTimer(new QTimer(this))
     , m_inhibitCounter(0)
     , m_plasmaEnabled(false)
@@ -130,6 +131,7 @@ void KSldApp::initialize()
     connect(m_lockProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(lockProcessFinished(int,QProcess::ExitStatus)));
     m_lockedTimer.invalidate();
     m_graceTimer->setSingleShot(true);
+    connect(m_graceTimer, SIGNAL(timeout()), SLOT(endGraceTime()));
     // create our D-Bus interface
     new Interface(this);
 
@@ -315,7 +317,8 @@ void KSldApp::idleTimeout(int identifier)
         // there is at least one process blocking the auto lock of screen locker
         return;
     }
-    if (m_lockGrace) {
+    if (m_lockGrace) {  // short-circuit if grace time is zero
+        m_inGraceTime = true;
         m_graceTimer->start(m_lockGrace);
     }
     lock();
@@ -323,12 +326,17 @@ void KSldApp::idleTimeout(int identifier)
 
 bool KSldApp::isGraceTime() const
 {
-    return m_graceTimer->isActive();
+    return m_inGraceTime;
+}
+
+void KSldApp::endGraceTime()
+{
+    m_inGraceTime = false;
 }
 
 void KSldApp::unlock()
 {
-    if (!m_graceTimer->isActive()) {
+    if (!isGraceTime()) {
         return;
     }
     s_graceTimeKill = true;
