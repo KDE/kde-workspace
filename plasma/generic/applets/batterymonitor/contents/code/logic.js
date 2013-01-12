@@ -42,11 +42,6 @@ function updateCumulative() {
     batteries.allCharged = charged;
 }
 
-function resetBatteryData() {
-    dialogItem.batteryData = null;
-    dialogItem.batteryData = batteries;
-}
-
 function stringForState(batteryData) {
     var pluggedIn = batteryData["Plugged in"];
     var percent = batteryData["Percent"];
@@ -86,9 +81,21 @@ function updateTooltip() {
         text += "<br/>";
     }
 
-    text += i18nc("tooltip", "AC Adapter:") + " ";
-    text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "<b>Plugged in</b>") : i18nc("tooltip", "<b>Not plugged in</b>");
+    if (pmSource.data["AC Adapter"]) {
+        text += i18nc("tooltip", "AC Adapter:") + " ";
+        text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "<b>Plugged in</b>") : i18nc("tooltip", "<b>Not plugged in</b>");
+    }
     batteries.tooltipText = text;
+}
+
+function updateBrightness() {
+    // we don't want passive brightness change send setBrightness call
+    if (!pmSource.data["PowerDevil"]) {
+        return;
+    }
+    dialogItem.disableBrightnessUpdate = true;
+    dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
+    dialogItem.disableBrightnessUpdate = false;
 }
 
 function callForType(type) {
