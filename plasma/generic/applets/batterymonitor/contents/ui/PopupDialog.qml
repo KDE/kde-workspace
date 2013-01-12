@@ -26,7 +26,9 @@ Item {
     width: childrenRect.width+24
     height: childrenRect.height+24
 
-    property QtObject batteryData
+    property alias model: batteryLabels.model
+    property alias hasBattery: batteryIcon.hasBattery
+    property alias percent: batteryIcon.percent
     property bool pluggedIn
     property alias screenBrightness: brightnessSlider.value
     property int remainingMsec
@@ -38,8 +40,6 @@ Item {
     signal brightnessChanged(int screenBrightness)
     signal powermanagementChanged(bool checked)
 
-    property int batteryCount: batteryData==null ? 0 : batteryData.count
-
     Column {
         id: labels
         spacing: 6
@@ -50,9 +50,9 @@ Item {
         }
 
         Repeater {
-            model: batteryCount
+            model: model
             Components.Label {
-                text: batteryCount>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
+                text: model.count>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
                 width: labels.width
                 horizontalAlignment: Text.AlignRight
             }
@@ -94,13 +94,13 @@ Item {
             id: upperValues
             spacing: 6
             anchors {
-                left: labels.right
+                left: values.left
             }
 
             Repeater {
-                model: batteryCount
+                id: batteryLabels
                 Components.Label {
-                    text: batteryData==null ? "" : Logic.stringForState(batteryData.get(index))
+                    text: Logic.stringForState(model)
                     font.weight: Font.Bold
                 }
             }
@@ -124,7 +124,7 @@ Item {
             spacing: 6
             width: upperValues.width + batteryIcon.width * 2
             anchors {
-                left: labels.right
+                left: values.left
             }
             Components.CheckBox {
                 checked: true
@@ -182,8 +182,6 @@ Item {
     BatteryIcon {
         id: batteryIcon
         monochrome: false
-        hasBattery: batteryData==null ? true : batteryData.cumulativePluggedin
-        percent: batteryData==null ? 0 : batteryData.cumulativePercent
         pluggedIn: dialog.pluggedIn
         anchors {
             top: parent.top
