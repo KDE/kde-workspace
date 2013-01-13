@@ -32,6 +32,13 @@ Item {
         id: theme
     }
 
+    // if there's no image, have a near black background
+    Rectangle {
+        width: parent.width
+        height: parent.height
+        color: "#111"
+    }
+
     Image {
         id: background
         anchors.fill: parent
