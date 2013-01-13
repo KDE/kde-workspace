@@ -26,12 +26,33 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 // PlasmaCore.FrameSvgItem {
 QtExtras.MouseEventListener {
     id: itemGroup
-    hoverEnabled: true
+
     property int hoverDelay: 800
+    property string category
+    property string title
+    property bool canResizeHeight: false
+    property bool showAppletHandle: false
+    property real controlsOpacity: (plasmoid.immutable || !showAppletHandle) ? 0 : 1
+    property bool handleShown: true
+    property string backgroundHints: "NoBackground"
+    property bool hasBackground: false
+    property bool expandedHandle: (backgroundHints == "NoBackground" && itemGroup.handleShown)
+    property bool animationsEnabled: false
+    property int minimumWidth: LayoutManager.cellSize.width
+    property int minimumHeight: LayoutManager.cellSize.height
+    property int appletHandleWidth: appletHandle.width
+
+    property Item contents: contentsItem
+    property alias margins: plasmoidBackground.margins
+    property alias imagePath: plasmoidBackground.imagePath
 
     width: LayoutManager.cellSize.width*2
     height: LayoutManager.cellSize.height
+    anchors.rightMargin: itemGroup.state == "expandedhandle" ? -appletHandleWidth : 0
+
+    state: expandedHandle ? "expandedhandle" : "normal"
     z: 0
+    hoverEnabled: true
 
     onContainsMouseChanged: {
         print("Mouse is " + containsMouse);
@@ -49,24 +70,6 @@ QtExtras.MouseEventListener {
         interval: hoverDelay
         onTriggered: showAppletHandle = true;
     }
-    property string category
-    property string title
-    property bool canResizeHeight: false
-    property bool showAppletHandle: false
-    property real controlsOpacity: (plasmoid.immutable || !showAppletHandle) ? 0 : 1
-    property bool handleShown: true
-    property string backgroundHints: "NoBackground"
-    property bool hasBackground: false
-    //property alias immutable: plasmoid.immutable
-    //imagePath: "widgets/background"
-    property bool animationsEnabled: false
-    property int minimumWidth: LayoutManager.cellSize.width
-    property int minimumHeight: LayoutManager.cellSize.height
-    property int appletHandleWidth: appletHandle.width
-
-    property Item contents: contentsItem
-    property alias margins: plasmoidBackground.margins
-    property alias imagePath: plasmoidBackground.imagePath
 
     PlasmaCore.FrameSvgItem {
         id: noBackgroundHandle
@@ -74,7 +77,7 @@ QtExtras.MouseEventListener {
         width: appletHandleWidth + margins.left + margins.right - 4
         imagePath: {
             print("2 applet.backgroundHints " + backgroundHints);
-            
+
             return backgroundHints == "NoBackground" ? "widgets/translucentbackground" : "";
         }
         anchors {
@@ -91,10 +94,11 @@ QtExtras.MouseEventListener {
     PlasmaCore.FrameSvgItem {
         id: plasmoidBackground
         visible: backgroundHints != "NoBackground"
-        anchors.fill: parent
-        anchors.rightMargin: (controlsOpacity * -24)
         imagePath: "widgets/background"
-
+        anchors {
+            fill: parent
+            rightMargin: -24*controlsOpacity
+        }
     }
     Connections {
         target: plasmoid
@@ -125,42 +129,6 @@ QtExtras.MouseEventListener {
         }
     }
 
-    PinchArea {
-        anchors.fill: parent
-        property variant globalLastPoint1
-        property variant globalLastPoint2
-        property variant globalStartPoint1
-        property variant globalStartPoint2
-        onPinchStarted: {
-            LayoutManager.setSpaceAvailable(itemGroup.x, itemGroup.y, parent.width, parent.height, true)
-            globalLastPoint1 = mapToItem(main, pinch.point1.x, pinch.point1.y)
-            globalLastPoint2 = mapToItem(main, pinch.point2.x, pinch.point2.y)
-            globalStartPoint1 = globalLastPoint1
-            globalStartPoint2 = globalLastPoint2
-            dragMouseArea.enabled = false
-        }
-        onPinchUpdated: {
-            var globalPoint1 = mapToItem(main, pinch.point1.x, pinch.point1.y)
-            var globalPoint2 = mapToItem(main, pinch.point2.x, pinch.point2.y)
-
-            if (globalPoint1.x == globalPoint2.x) {
-                return
-            }
-            itemGroup.x -= (globalStartPoint2.x > globalStartPoint1.x) ? globalLastPoint1.x - globalPoint1.x : globalLastPoint2.x - globalPoint2.x
-            itemGroup.y -= (globalStartPoint2.y > globalStartPoint1.y) ? globalLastPoint1.y - globalPoint1.y : globalLastPoint2.y - globalPoint2.y
-print(itemGroup.x+" "+itemGroup.y)
-            itemGroup.width = Math.max(itemGroup.minimumWidth, itemGroup.width - (globalStartPoint2.x > globalStartPoint1.x ? 1 : -1)*((globalPoint1.x - globalPoint2.x) - (globalLastPoint1.x - globalLastPoint2.x)))
-            itemGroup.height = Math.max(itemGroup.minimumHeight, itemGroup.height - (globalStartPoint2.y > globalStartPoint1.y ? 1 : -1)*((globalPoint1.y - globalPoint2.y) - (globalLastPoint1.y - globalLastPoint2.y)))
-
-            globalLastPoint1 = globalPoint1
-            globalLastPoint2 = globalPoint2
-            placeHolder.syncWithItem(parent)
-        }
-        onPinchFinished: {
-            dragMouseArea.enabled = true
-            dragMouseArea.dragEnded()
-        }
-    }
     MouseArea {
         id: dragMouseArea
         anchors.fill: appletHandle

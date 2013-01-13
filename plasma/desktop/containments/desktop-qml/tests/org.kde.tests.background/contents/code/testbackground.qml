@@ -30,7 +30,6 @@ Item {
     height: 300
     clip: true
 
-    
     Rectangle { 
         color: "white"
         opacity: 0.0
