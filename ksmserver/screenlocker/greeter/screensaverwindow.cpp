@@ -27,6 +27,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QTimer>
+#include <QX11Info>
 
 #include <KDebug>
 #include <kmacroexpander.h>
@@ -36,6 +37,11 @@
 #include <KAuthorized>
 #include <KDesktopFile>
 #include <KStandardDirs>
+
+// X11
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <fixx11h.h>
 
 namespace ScreenLocker
 {
@@ -155,6 +161,9 @@ void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
 void ScreenSaverWindow::showEvent(QShowEvent *event)
 {
     m_reactivateTimer->stop();
+    static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
+    if (testAttribute(Qt::WA_WState_Created) && internalWinId())
+        XChangeProperty(QX11Info::display(), winId(), tag, tag, 32, PropModeReplace, 0, 0);
     startXScreenSaver();
 }
 
