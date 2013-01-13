@@ -125,8 +125,9 @@ Item {
 
                         property int windowId: model.windowId
 
-                        x: model.x
-                        y: model.y
+                        /* since we move clipRect with 1, move it back */
+                        x: model.x - 1
+                        y: model.y - 1
                         width: model.width
                         height: model.height
                         color: {
@@ -153,7 +154,7 @@ Item {
                             pixmap: model.icon
                             height: nativeHeight
                             width: nativeWidth
-                            visible: pager.showWindowIcons && (windowRect.width > icon.width) && (windowRect.height > icon.height)
+                            visible: pager.showWindowIcons && (windowRect.width >= icon.width) && (windowRect.height >= icon.height)
                         }
 
                         MouseArea {

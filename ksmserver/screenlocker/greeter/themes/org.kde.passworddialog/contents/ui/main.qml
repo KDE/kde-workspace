@@ -78,8 +78,13 @@ Item {
 
         Connections {
             onAccepted: lockScreen.unlockRequested()
-            onSwitchUserClicked: mainStack.push(userSessionsUI)
+            onSwitchUserClicked: { mainStack.push(userSessionsUI); userSessionsUI.forceActiveFocus(); }
         }
+    }
+
+    function returnToLogin() {
+        mainStack.pop();
+        unlockUI.resetFocus();
     }
 
     // TODO: loader
@@ -88,9 +93,9 @@ Item {
         visible: false
 
         Connections {
-            onCancel: mainStack.pop()
-            onActivateSession: mainStack.pop()
-            onStartNewSession: mainStack.pop()
+            onCancel: returnToLogin()
+            onActivateSession: returnToLogin()
+            onStartNewSession: returnToLogin()
         }
     }
 }

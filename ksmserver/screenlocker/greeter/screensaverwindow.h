@@ -48,6 +48,9 @@ protected:
     void paintEvent(QPaintEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
+Q_SIGNALS:
+    void hidden();
+
 private:
     bool startXScreenSaver();
     void stopXScreenSaver();

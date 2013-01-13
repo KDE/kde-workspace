@@ -54,6 +54,7 @@ private Q_SLOTS:
     void suspendToRam();
     void suspendToDisk();
     void shutdown();
+    void getFocus();
 
 private:
     void initialize();
