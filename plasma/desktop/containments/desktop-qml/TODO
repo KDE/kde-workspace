@@ -1,14 +1,33 @@
+Declarative Desktop for Plasma
 
 
-* drag input is blocked for folderview, debug.
+TODO:
+* mouse drag expands over handle
+    * move mouseventlistener into subitem to be able to manage its margins / position
+    * everything else under the mouse *has to be* parented to this one, still
+* minimum size for applethandle
+* switch handle appearance when minimumSize is reached during resize
+* implement rotation
+    * rotate item
+    * save rotation per item
+    * restore rotation per item
+* open associated app
+* hide handle after short timeout
+* rename main to root
+* rename itemgroup to AppletItem
+* meaningful name for plasmoidgroup or merge into AppletItem?
+
+BUGS:
+* drag input is blocked for folderview, debug. -- still valid? doesn't seem so...
 
 
+DONE:
 o ToolBox QML files move into their own package
 o ToolBox is put on top of the scene in DeclarativeAppletScript::qmlCreationFinished()
 o rename ToolBox.qml to ToolBoxItem.qml
 o ToolBox-visible name to the runtime is ToolBox
 
-
+OTHER:
 
 /** Action Mapping for ToolBox
 
