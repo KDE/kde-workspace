@@ -48,7 +48,7 @@ QtExtras.MouseEventListener {
 
     width: LayoutManager.cellSize.width*2
     height: LayoutManager.cellSize.height
-    anchors.rightMargin: itemGroup.state == "expandedhandle" ? -appletHandleWidth : 0
+    anchors.rightMargin: -24*controlsOpacity
 
     state: expandedHandle ? "expandedhandle" : "normal"
     z: 0
@@ -114,30 +114,15 @@ QtExtras.MouseEventListener {
         }
     }
 
-    Item {
-        id: contentsItem
-        anchors {
-            left: parent.left
-            top: parent.top
-            right: parent.right
-            bottom: parent.bottom
-            //topMargin: parent.margins.top+itemGroup.appletHandleWidth
-            topMargin: parent.margins.top
-            leftMargin: parent.margins.left
-            rightMargin: parent.margins.right
-            bottomMargin: parent.margins.bottom
-        }
-    }
-
     MouseArea {
         id: dragMouseArea
-        anchors.fill: appletHandle
-        anchors.topMargin: iconSize*1.5
-        anchors.bottomMargin: iconSize*1.5
+        anchors.fill: parent
+        //anchors.topMargin: iconSize*1.5
+        //anchors.bottomMargin: iconSize*1.5
         //Rectangle { color: "purple"; opacity: .3; anchors.fill: parent; }
         property int lastX
         property int lastY
-        z: appletContainer.z + 10
+        //z: appletContainer.z + 10
         onPressed: {
             //FIXME: this shouldn't be necessary
 //             mainFlickable.interactive = false
@@ -178,7 +163,23 @@ QtExtras.MouseEventListener {
             LayoutManager.save()
             //debugFlow.refresh()
         }
+        Rectangle { color: "yellow"; opacity: 0.2; visible: debug; anchors.fill: parent; }
     }
+    Item {
+        id: contentsItem
+        anchors {
+            left: parent.left
+            top: parent.top
+            right: parent.right
+            bottom: parent.bottom
+            //topMargin: parent.margins.top+itemGroup.appletHandleWidth
+            topMargin: parent.margins.top
+            leftMargin: parent.margins.left
+            rightMargin: parent.margins.right
+            bottomMargin: parent.margins.bottom
+        }
+    }
+
 
     Behavior on controlsOpacity {
         NumberAnimation {
@@ -242,6 +243,7 @@ QtExtras.MouseEventListener {
     }
 
     PlasmaCore.SvgItem {
+        id: resizeHandleSvg
         opacity: controlsOpacity
         svg: PlasmaCore.Svg {
             imagePath: plasmoid.file("images", "resize-handle.svgz")
@@ -254,26 +256,33 @@ QtExtras.MouseEventListener {
             rightMargin: itemGroup.margins.right
             bottomMargin: itemGroup.margins.bottom
         }
+        Rectangle { color: "white"; opacity: 0.4; visible: debug; anchors.fill: parent; }
     }
+
+    AppletHandle {
+        id: appletHandle
+        Rectangle { color: "green"; opacity: 0.4; visible: debug; anchors.fill: parent; }
+    }
+
     MouseArea {
         id: resizeHandle
         width: 48
         height: 48
         property bool resizeTop: false
-        z: 9999
-        opacity: controlsOpacity
+        z: itemGroup.z+1
+        visible: !plasmoid.immutable
         anchors {
             right: parent.right
             //bottom: parent.bottom
-            top: parent.top
-            rightMargin: -16
+            topMargin: itemGroup.margins.top
+            rightMargin: -(itemGroup.margins.right*controlsOpacity)
         }
-
+        //anchors.fill: resizeHandleSvg
         property int startX
         property int startY
 
         onPressed: {
-            itemGroup.z = 999
+            //itemGroup.z = 999
             mouse.accepted = true
             //FIXME: this shouldn't be necessary
 //             mainFlickable.interactive = false
@@ -298,14 +307,15 @@ QtExtras.MouseEventListener {
             LayoutManager.setSpaceAvailable(itemGroup.x, itemGroup.y, widthAnimation.to, heightAnimation.to, false)
             //debugFlow.refresh();
         }
+        Rectangle { color: "blue"; opacity: 0.4; visible: debug; anchors.fill: parent; }
     }
+
+    Rectangle { color: "orange"; opacity: 0.4; visible: debug; anchors.fill: parent; anchors.rightMargin: -24*controlsOpacity  }
+
     Component.onCompleted: {
         //width = Math.min(470, 32+itemsList.count*140)
         layoutTimer.running = true
         layoutTimer.restart()
         visible = false
-    }
-    AppletHandle {
-        id: appletHandle
     }
 }

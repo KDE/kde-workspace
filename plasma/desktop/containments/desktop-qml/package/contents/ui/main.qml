@@ -39,6 +39,8 @@ Item {
     signal preferredWidthChanged
     signal preferredHeightChanged
 
+    property bool debug: false
+
     property Item currentGroup
     property int currentIndex: -1
 
@@ -137,50 +139,9 @@ Item {
         imagePath: "widgets/extender-dragger"
     }
 
-    PlasmaExtras.ResourceInstance {
-        id: resourceInstance
-    }
-
-    PlasmaCore.Theme {
-        id: theme
-    }
-
     PlasmaCore.Svg {
         id: configIconsSvg
         imagePath: "widgets/configuration-icons"
-    }
-
-//     PlasmaComponents.ScrollBar {
-//         flickableItem: mainFlickable
-//         orientation: Qt.Vertical
-//         anchors {
-//             right: parent.right
-//             top: parent.top
-//             bottom: parent.bottom
-//         }
-//     }
-    QtExtras.QIconItem {
-        id: lockIcon
-        height: 128
-        width: 128
-        icon: "object-locked"
-        opacity: plasmoid.immutable ? 0.2 : 0
-        anchors { left: parent.left; bottom: parent.bottom; margins: 32; }
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 250
-                easing.type: Easing.InOutQuad
-            }
-        }
-    }
-
-    Connections {
-        target: plasmoid
-        onImmutableChanged: {
-//             print("plasmoid.immutable == " + plasmoid.immutable);
-            lockIcon.opacity = plasmoid.immutable ? 0.3 : 0.0;
-        }
-
     }
 
     Flickable {
@@ -200,7 +161,7 @@ Item {
             height: childrenRect.y+childrenRect.height
 
             onClicked: {
-                resourceInstance.uri = ""
+                //resourceInstance.uri = ""
                 main.currentIndex = -1
             }
 

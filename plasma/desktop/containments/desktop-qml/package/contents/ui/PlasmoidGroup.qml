@@ -82,7 +82,7 @@ ItemGroup {
         running: false
         onTriggered: updateBackgroundHints()
     }
-    
+
     function updateBackgroundHints() {
             print(" %%%%%% Updating backgroundHints..." + applet.backgroundHints);
             hasBackground = (applet.backgroundHints != "NoBackground");
