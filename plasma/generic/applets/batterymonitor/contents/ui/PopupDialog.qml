@@ -48,9 +48,8 @@ Item {
             left: parent.left
             margins: 12
         }
-
         Repeater {
-            model: model
+            model: dialog.model
             Components.Label {
                 text: model.count>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
                 width: labels.width
