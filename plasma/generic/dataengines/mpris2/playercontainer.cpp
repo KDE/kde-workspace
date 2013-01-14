@@ -117,7 +117,7 @@ PlayerContainer::PlayerContainer(const QString& busAddress, QObject* parent)
             this,         SLOT(propertiesChanged(QString,QVariantMap,QStringList)));
 
     connect(m_playerIface, SIGNAL(Seeked(qlonglong)),
-            this,          SLOT(seeked(qint64)));
+            this,          SLOT(seeked(qlonglong)));
 
     refresh();
 }
@@ -365,7 +365,7 @@ void PlayerContainer::propertiesChanged(
     checkForUpdate();
 }
 
-void PlayerContainer::seeked(qint64 position)
+void PlayerContainer::seeked(qlonglong position)
 {
     setData("Position", position);
     setData(POS_UPD_STRING, QDateTime::currentDateTimeUtc());

@@ -77,7 +77,7 @@ private slots:
     void propertiesChanged(const QString& interface,
                            const QVariantMap& changedProperties,
                            const QStringList& invalidatedProperties);
-    void seeked(qint64 position);
+    void seeked(qlonglong position);
 
 private:
     void copyProperty(const QString& propName, const QVariant& value, QVariant::Type expType, UpdateType updType);
