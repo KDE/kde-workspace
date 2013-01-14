@@ -127,12 +127,12 @@ void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
 
 void UnlockApp::desktopResized()
 {
-    const int nScreeens = QApplication::desktop()->screenCount();
+    const int nScreens = QApplication::desktop()->screenCount();
     // remove useless views and savers
-    while (m_views.count() > nScreeens) {
+    while (m_views.count() > nScreens) {
         m_views.takeLast()->deleteLater();
     }
-    while (m_screensaverWindows.count() > nScreeens) {
+    while (m_screensaverWindows.count() > nScreens) {
         m_screensaverWindows.takeLast()->deleteLater();
     }
 
@@ -141,7 +141,7 @@ void UnlockApp::desktopResized()
     // extend views and savers to current demand
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
-    for (int i = m_views.count(); i < nScreeens; ++i) {
+    for (int i = m_views.count(); i < nScreens; ++i) {
         // create the view
         QDeclarativeView *view = new QDeclarativeView();
         connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
@@ -198,7 +198,7 @@ void UnlockApp::desktopResized()
     }
 
     // update geometry of all views and savers
-    for (int i = 0; i < nScreeens; ++i) {
+    for (int i = 0; i < nScreens; ++i) {
         QDeclarativeView *view = m_views.at(i);
 
         view->setGeometry(QApplication::desktop()->screenGeometry(i));
