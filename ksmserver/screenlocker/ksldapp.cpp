@@ -243,6 +243,7 @@ void KSldApp::doUnlock()
     m_lockWindow = NULL;
     m_locked = false;
     m_lockedTimer.invalidate();
+    endGraceTime();
     KDisplayManager().setLock(false);
     emit unlocked();
     KNotification::event( QLatin1String("unlocked"));
@@ -331,6 +332,7 @@ bool KSldApp::isGraceTime() const
 
 void KSldApp::endGraceTime()
 {
+    m_graceTimer->stop();
     m_inGraceTime = false;
 }
 
