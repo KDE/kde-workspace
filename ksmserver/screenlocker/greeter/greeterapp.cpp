@@ -136,7 +136,7 @@ void UnlockApp::desktopResized()
         m_screensaverWindows.takeLast()->deleteLater();
     }
 
-    Q_ASSERT(m_views.count() == m_screensaverWindows.count() && m_views.count() == nScreens);
+    Q_ASSERT((!m_showScreenSaver || m_views.count() == m_screensaverWindows.count()));
 
     // extend views and savers to current demand
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
