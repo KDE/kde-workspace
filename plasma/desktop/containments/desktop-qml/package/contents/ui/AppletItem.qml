@@ -23,7 +23,7 @@ import org.kde.plasma.containments 0.1 as PlasmaContainments
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
-ItemGroup {
+AppletAppearance {
     id: plasmoidGroup
     title: applet.name
     minimumWidth: Math.max(LayoutManager.cellSize.width,

@@ -112,7 +112,7 @@ Item {
 
     function addApplet(applet, pos)
     {
-        var component = Qt.createComponent("PlasmoidGroup.qml");
+        var component = Qt.createComponent("AppletItem.qml");
         var e = component.errorString();
         if (e != "") {
             print("!!!!!! Error loading PlasmoidGroup.qml: " + component.errorString());
