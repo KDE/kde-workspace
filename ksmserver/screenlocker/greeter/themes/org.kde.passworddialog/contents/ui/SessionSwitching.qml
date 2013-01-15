@@ -25,7 +25,7 @@ import org.kde.kscreenlocker 1.0
 Item {
     property alias switchUserSupported: sessions.switchUserSupported
     implicitWidth: theme.defaultFont.mSize.width * 55
-    implicitHeight: Math.min(lockScreen.height, theme.defaultFont.mSize.height * 25)
+    implicitHeight: theme.defaultFont.mSize.height * 25
     signal activateSession()
     signal startNewSession()
     signal cancel()
