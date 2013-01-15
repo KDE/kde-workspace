@@ -24,24 +24,24 @@ import org.kde.plasma.containments 0.1 as PlasmaContainments
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 AppletAppearance {
-    id: plasmoidGroup
+    id: appletItem
     title: applet.name
     minimumWidth: Math.max(LayoutManager.cellSize.width,
                            appletContainer.minimumWidth +
-                           plasmoidGroup.contents.anchors.leftMargin +
-                           plasmoidGroup.contents.anchors.rightMargin)
+                           appletItem.contents.anchors.leftMargin +
+                           appletItem.contents.anchors.rightMargin)
 
     minimumHeight: Math.max(LayoutManager.cellSize.height,
                             appletContainer.minimumHeight +
-                            plasmoidGroup.contents.anchors.topMargin +
-                            plasmoidGroup.contents.anchors.bottomMargin)
+                            appletItem.contents.anchors.topMargin +
+                            appletItem.contents.anchors.bottomMargin)
 
     property alias applet: appletContainer.applet
 
 
     PlasmaContainments.AppletContainer {
         id: appletContainer
-        //anchors.fill: plasmoidGroup.contents
+        //anchors.fill: appletItem.contents
         x: contents.x
         y: contents.y
         width: contents.width
@@ -57,8 +57,8 @@ AppletAppearance {
             }
         }
         function appletDestroyed() {
-            LayoutManager.setSpaceAvailable(plasmoidGroup.x, plasmoidGroup.y, plasmoidGroup.width, plasmoidGroup.height, true)
-            plasmoidGroup.destroy()
+            LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+            appletItem.destroy()
         }
     }
 
@@ -75,19 +75,19 @@ AppletAppearance {
             print(" %%%%%% Updating backgroundHints..." + applet.backgroundHints);
             hasBackground = (applet.backgroundHints != "NoBackground");
             if (applet.backgroundHints == -1) {
-                plasmoidGroup.imagePath = "widgets/background";
+                appletItem.imagePath = "widgets/background";
                 backgroundHints = "StandardBackground";
             } else if (applet.backgroundHints == 2) {
-                plasmoidGroup.imagePath = "widgets/translucentbackground"
+                appletItem.imagePath = "widgets/translucentbackground"
                 backgroundHints = "TranslucentBackground";
             } else if (applet.backgroundHints == 0) {
-                //plasmoidGroup.imagePath = "widgets/translucentbackground"
+                //appletItem.imagePath = "widgets/translucentbackground"
                 backgroundHints = "NoBackground";
             } else {
                 backgroundHints = "DefaultBackground";
-                plasmoidGroup.imagePath = "widgets/background";
+                appletItem.imagePath = "widgets/background";
             }
-            print(" @@@@@@@ Background: " + applet.name + " " + applet.backgroundHints + " " + hasBackground + " " + plasmoidGroup.imagePath);
+            print(" @@@@@@@ Background: " + applet.name + " " + applet.backgroundHints + " " + hasBackground + " " + appletItem.imagePath);
             print(" @@@@ hints saved as " + backgroundHints);
             applet.backgroundHints = "NoBackground";
     }

@@ -117,12 +117,12 @@ Item {
         if (e != "") {
             print("!!!!!! Error loading PlasmoidGroup.qml: " + component.errorString());
         }
-        var plasmoidGroup = component.createObject(resultsFlow);
-        plasmoidGroup.width = LayoutManager.cellSize.width*2;
-        plasmoidGroup.height = LayoutManager.cellSize.height*2;
-        plasmoidGroup.applet = applet;
-        plasmoidGroup.category = "Applet-"+applet.id;
-        LayoutManager.itemGroups[plasmoidGroup.category] = plasmoidGroup;
+        var appletItem = component.createObject(resultsFlow);
+        appletItem.width = LayoutManager.cellSize.width*2;
+        appletItem.height = LayoutManager.cellSize.height*2;
+        appletItem.applet = applet;
+        appletItem.category = "Applet-"+applet.id;
+        LayoutManager.itemGroups[appletItem.category] = appletItem;
     }
 
     PlasmaCore.Svg {

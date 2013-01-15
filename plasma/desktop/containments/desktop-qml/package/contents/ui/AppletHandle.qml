@@ -28,7 +28,7 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 Item {
     id: appletHandle
     z: dragMouseArea.z + 1
-    opacity: itemGroup.controlsOpacity
+    opacity: appletAppearance.controlsOpacity
     width: 24
     anchors {
         //left: parent.left
@@ -36,15 +36,15 @@ Item {
         top: parent.top
         //leftMargin: parent.margins.left
         bottom: parent.bottom
-        rightMargin: itemGroup.margins.right
-        bottomMargin: itemGroup.margins.bottom
-        topMargin: itemGroup.margins.top
+        rightMargin: appletAppearance.margins.right
+        bottomMargin: appletAppearance.margins.bottom
+        topMargin: appletAppearance.margins.top
     }
 
     ActionButton {
         svg: configIconsSvg
         elementId: "close"
-        iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
+        iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
         backgroundVisible: false
         //visible: action.enabled
         action: applet.action("remove")
@@ -77,7 +77,7 @@ Item {
             svg: configIconsSvg
             z: dragMouseArea.z + 1000
             elementId: "size-diagonal-tr2bl"
-            iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
+            iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
             backgroundVisible: false
             //visible: action.enabled
             //action: applet.action("configure")
@@ -92,7 +92,7 @@ Item {
             svg: configIconsSvg
             z: dragMouseArea.z + 1000
             elementId: "rotate"
-            iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
+            iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
             backgroundVisible: false
             //visible: action.enabled
             //action: applet.action("rotate")
@@ -106,7 +106,7 @@ Item {
             svg: configIconsSvg
             z: dragMouseArea.z + 1000
             elementId: "configure"
-            iconSize: Math.max(16, plasmoidGroup.appletHandleWidth - 8)
+            iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
             backgroundVisible: false
             //visible: action.enabled
             action: applet.action("configure")

@@ -26,7 +26,7 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 // PlasmaCore.FrameSvgItem {
 //QtExtras.MouseEventListener {
 Item {
-    id: itemGroup
+    id: appletAppearance
 
     property int handleWidth: 24
     property int hoverDelay: 100
@@ -39,7 +39,7 @@ Item {
     property bool handleShown: true
     property string backgroundHints: "NoBackground"
     property bool hasBackground: false
-    property bool expandedHandle: (backgroundHints == "NoBackground" && itemGroup.handleShown)
+    property bool expandedHandle: (backgroundHints == "NoBackground" && appletAppearance.handleShown)
     property bool animationsEnabled: false
     property int minimumWidth: LayoutManager.cellSize.width
     property int minimumHeight: LayoutManager.cellSize.height
@@ -84,7 +84,7 @@ Item {
 
         PlasmaCore.FrameSvgItem {
             id: noBackgroundHandle
-            opacity: (backgroundHints == "NoBackground" && itemGroup.handleShown) ? controlsOpacity : 0
+            opacity: (backgroundHints == "NoBackground" && appletAppearance.handleShown) ? controlsOpacity : 0
             width: appletHandleWidth + margins.left + margins.right - 4
             imagePath: {
                 print("2 applet.backgroundHints " + backgroundHints);
@@ -122,7 +122,7 @@ Item {
             onImmutableChanged: {
                 //appletHandle.opacity = plasmoid.immutable ? 0 : 1;
                 dragMouseArea.visible = !plasmoid.immutable;
-                itemGroup.controlsOpacity = plasmoid.immutable ? 0 : 1;
+                appletAppearance.controlsOpacity = plasmoid.immutable ? 0 : 1;
                 //appletContainer.opacity = plasmoid.immutable ? 1.0 : 0.66;
                 //imagePath = plasmoid.immutable ? "" : "widgets/background";
                 //appletHandleWidth = plasmoid.immutable ? 0: appletHandle.height;
@@ -143,29 +143,29 @@ Item {
             onPressed: {
                 //FIXME: this shouldn't be necessary
     //             mainFlickable.interactive = false
-                itemGroup.z = 999
+                appletAppearance.z = 999
                 animationsEnabled = false
                 mouse.accepted = true
-                var x = Math.round(itemGroup.x/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
-                var y = Math.round(itemGroup.y/LayoutManager.cellSize.height)*LayoutManager.cellSize.height
-                LayoutManager.setSpaceAvailable(x, y, itemGroup.width, itemGroup.height, true)
+                var x = Math.round(appletAppearance.x/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
+                var y = Math.round(appletAppearance.y/LayoutManager.cellSize.height)*LayoutManager.cellSize.height
+                LayoutManager.setSpaceAvailable(x, y, appletAppearance.width, appletAppearance.height, true)
 
                 var globalMousePos = mapToItem(main, mouse.x, mouse.y)
                 lastX = globalMousePos.x
                 lastY = globalMousePos.y
 
                 //debugFlow.refresh();
-                placeHolder.syncWithItem(itemGroup)
+                placeHolder.syncWithItem(appletAppearance)
                 placeHolderPaint.opacity = 1
             }
             onPositionChanged: {
-                placeHolder.syncWithItem(itemGroup)
+                placeHolder.syncWithItem(appletAppearance)
 
                 var globalPos = mapToItem(main, x, y)
 
                 var globalMousePos = mapToItem(main, mouse.x, mouse.y)
-                itemGroup.x += (globalMousePos.x - lastX)
-                itemGroup.y += (globalMousePos.y - lastY)
+                appletAppearance.x += (globalMousePos.x - lastX)
+                appletAppearance.y += (globalMousePos.y - lastY)
 
                 lastX = globalMousePos.x
                 lastY = globalMousePos.y
@@ -176,7 +176,7 @@ Item {
                 repositionTimer.running = false
                 placeHolderPaint.opacity = 0
                 animationsEnabled = true
-                LayoutManager.positionItem(itemGroup)
+                LayoutManager.positionItem(appletAppearance)
                 LayoutManager.save()
                 //debugFlow.refresh()
             }
@@ -185,21 +185,21 @@ Item {
         Item {
             id: contentsItem
             z: parent.z+1
-            x: 0 + itemGroup.margins.left
-            y: 0 + itemGroup.margins.top
-            width: itemGroup.width - (itemGroup.margins.left + itemGroup.margins.right)
-            height: itemGroup.height - (itemGroup.margins.top + itemGroup.margins.bottom)
+            x: 0 + appletAppearance.margins.left
+            y: 0 + appletAppearance.margins.top
+            width: appletAppearance.width - (appletAppearance.margins.left + appletAppearance.margins.right)
+            height: appletAppearance.height - (appletAppearance.margins.top + appletAppearance.margins.bottom)
             Rectangle { color: "green"; opacity: 1; visible: debug; anchors.fill: parent; }
 //             anchors {
-//                 left: itemGroup.left
-//                 top: itemGroup.top
-//                 right: itemGroup.right
+//                 left: appletAppearance.left
+//                 top: appletAppearance.top
+//                 right: appletAppearance.right
 //                 bottom: parent.bottom
-//                 //topMargin: parent.margins.top+itemGroup.appletHandleWidth
-//                 topMargin: itemGroup.margins.top
-//                 leftMargin: itemGroup.margins.left
-//                 rightMargin: itemGroup.margins.right
-//                 bottomMargin: itemGroup.margins.bottom
+//                 //topMargin: parent.margins.top+appletAppearance.appletHandleWidth
+//                 topMargin: appletAppearance.margins.top
+//                 leftMargin: appletAppearance.margins.left
+//                 rightMargin: appletAppearance.margins.right
+//                 bottomMargin: appletAppearance.margins.bottom
 //             }
         }
 
@@ -216,8 +216,8 @@ Item {
 //             anchors {
 //                 right: parent.right
 //                 bottom: parent.bottom
-//                 rightMargin: itemGroup.margins.right
-//                 bottomMargin: itemGroup.margins.bottom
+//                 rightMargin: appletAppearance.margins.right
+//                 bottomMargin: appletAppearance.margins.bottom
 //             }
 //             Rectangle { color: "white"; opacity: 0.4; visible: debug; anchors.fill: parent; }
 //         }
@@ -228,24 +228,24 @@ Item {
 
         MouseArea {
             id: resizeHandle
-            width:  handleWidth+itemGroup.margins.right
+            width:  handleWidth+appletAppearance.margins.right
             height: width
             property bool resizeTop: false
-            z: itemGroup.z+1
+            z: appletAppearance.z+1
             visible: !plasmoid.immutable
             anchors {
                 right: parent.right
                 //bottom: parent.bottom
-                topMargin: itemGroup.margins.top
+                topMargin: appletAppearance.margins.top
                 //rightMargin: handleWidth
-                //rightMargin: -(itemGroup.margins.right*controlsOpacity)
+                //rightMargin: -(appletAppearance.margins.right*controlsOpacity)
             }
             //anchors.fill: resizeHandleSvg
             property int startX
             property int startY
 
             onPressed: {
-                //itemGroup.z = 999
+                //appletAppearance.z = 999
                 mouse.accepted = true
                 //FIXME: this shouldn't be necessary
     //             mainFlickable.interactive = false
@@ -253,22 +253,22 @@ Item {
                 animationsEnabled = false;
                 startX = mouse.x;
                 startY = mouse.y;
-                LayoutManager.setSpaceAvailable(itemGroup.x, itemGroup.y, itemGroup.width, itemGroup.height, true)
+                LayoutManager.setSpaceAvailable(appletAppearance.x, appletAppearance.y, appletAppearance.width, appletAppearance.height, true)
                 //debugFlow.refresh();
             }
             onPositionChanged: {
-                itemGroup.width = Math.max(itemGroup.minimumWidth, itemGroup.width + mouse.x-startX)
-                if (itemGroup.canResizeHeight) {
-                    itemGroup.y = itemGroup.y + (mouse.y-startY);
-                    itemGroup.height = Math.max(itemGroup.minimumHeight, itemGroup.height + startY-mouse.y)
+                appletAppearance.width = Math.max(appletAppearance.minimumWidth, appletAppearance.width + mouse.x-startX)
+                if (appletAppearance.canResizeHeight) {
+                    appletAppearance.y = appletAppearance.y + (mouse.y-startY);
+                    appletAppearance.height = Math.max(appletAppearance.minimumHeight, appletAppearance.height + startY-mouse.y)
                 }
             }
             onReleased: {
                 animationsEnabled = true
 
-                LayoutManager.positionItem(itemGroup)
+                LayoutManager.positionItem(appletAppearance)
                 LayoutManager.save()
-                LayoutManager.setSpaceAvailable(itemGroup.x, itemGroup.y, widthAnimation.to, heightAnimation.to, false)
+                LayoutManager.setSpaceAvailable(appletAppearance.x, appletAppearance.y, widthAnimation.to, heightAnimation.to, false)
                 //debugFlow.refresh();
                 plasmoidBackground.suspendAnimation = false;
             }
@@ -296,7 +296,7 @@ Item {
             easing.type: Easing.InOutQuad
             onRunningChanged: {
                 if (!running) {
-                    itemGroup.z = 0
+                    appletAppearance.z = 0
                 }
             }
         }
@@ -316,7 +316,7 @@ Item {
             easing.type: Easing.InOutQuad
             onRunningChanged: {
                 if (!running) {
-                    itemGroup.z = 0
+                    appletAppearance.z = 0
                 }
             }
         }
