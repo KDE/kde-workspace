@@ -112,13 +112,17 @@ Item {
 
     function addApplet(applet, pos)
     {
-        var component = Qt.createComponent("PlasmoidGroup.qml")
-        var plasmoidGroup = component.createObject(resultsFlow)
-        plasmoidGroup.width = LayoutManager.cellSize.width*2
-        plasmoidGroup.height = LayoutManager.cellSize.height*2
-        plasmoidGroup.applet = applet
-        plasmoidGroup.category = "Applet-"+applet.id
-        LayoutManager.itemGroups[plasmoidGroup.category] = plasmoidGroup
+        var component = Qt.createComponent("PlasmoidGroup.qml");
+        var e = component.errorString();
+        if (e != "") {
+            print("!!!!!! Error loading PlasmoidGroup.qml: " + component.errorString());
+        }
+        var plasmoidGroup = component.createObject(resultsFlow);
+        plasmoidGroup.width = LayoutManager.cellSize.width*2;
+        plasmoidGroup.height = LayoutManager.cellSize.height*2;
+        plasmoidGroup.applet = applet;
+        plasmoidGroup.category = "Applet-"+applet.id;
+        LayoutManager.itemGroups[plasmoidGroup.category] = plasmoidGroup;
     }
 
     PlasmaCore.Svg {
@@ -278,7 +282,7 @@ Item {
                         }
                     }
                 }
-                Rectangle {
+                Rectangle { // FIXME: use hoveritem
                     id: placeHolderPaint
                     x: placeHolder.x + 6
                     y: placeHolder.y + 6
@@ -288,7 +292,7 @@ Item {
                     opacity: 0
                     radius: 8
                     smooth: true
-                    color: Qt.rgba(1,1,1,0.15)
+                    color: Qt.rgba(1,1,1,0.10)
                     Behavior on opacity {
                         NumberAnimation {
                             duration: 250

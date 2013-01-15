@@ -17,7 +17,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.0
+import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.containments 0.1 as PlasmaContainments
 
@@ -25,9 +25,6 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 ItemGroup {
     id: plasmoidGroup
-    //scale: plasmoid.scale
-    //scale: 1.0
-    canResizeHeight: true
     title: applet.name
     minimumWidth: Math.max(LayoutManager.cellSize.width,
                            appletContainer.minimumWidth +
@@ -60,19 +57,6 @@ ItemGroup {
             plasmoidGroup.destroy()
         }
     }
-    Connections {
-        target: plasmoid
-        onImmutableChanged: {
-            print("Applet backgroundhints: "  + applet.name + " : "  + hasBackground + " " + applet.backgroundHints + " " + plasmoidGroup.imagePath);
-//             if (applet.backgroundHints != 0) {
-//                 plasmoidGroup.imagePath = "widgets/background"
-//             } else {
-//                 plasmoidGroup.imagePath = "widgets/translucentbackground"
-//             }
-//             applet.backgroundHints = "NoBackground"
-        }
-    }
-
 
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {
@@ -102,10 +86,5 @@ ItemGroup {
             print(" @@@@@@@ Background: " + applet.name + " " + applet.backgroundHints + " " + hasBackground + " " + plasmoidGroup.imagePath);
             print(" @@@@ hints saved as " + backgroundHints);
             applet.backgroundHints = "NoBackground";
-    }
-    
-    Connections {
-        target: plasmoid
-        //onBackgroundHintsChanged: updateBackgroundHints();
     }
 }

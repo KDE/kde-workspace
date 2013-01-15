@@ -91,6 +91,10 @@ Rectangle {
                 y: 0 + backgroundFrame.margins.top
                 width: applet.width - (backgroundFrame.margins.left + backgroundFrame.margins.right)
                 height: applet.width - (backgroundFrame.margins.top + backgroundFrame.margins.bottom)
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: print("Applet clicked.");
+                }
             }
         }
     }

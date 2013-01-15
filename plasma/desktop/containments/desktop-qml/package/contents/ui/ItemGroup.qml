@@ -30,7 +30,7 @@ QtExtras.MouseEventListener {
     property int hoverDelay: 800
     property string category
     property string title
-    property bool canResizeHeight: false
+    property bool canResizeHeight: true
     property bool showAppletHandle: false
     property real controlsOpacity: (plasmoid.immutable || !showAppletHandle) ? 0 : 1
     property bool handleShown: true
