@@ -17,6 +17,7 @@
 #include <QFile>
 #include <QPainter>
 #include <QStandardItemModel>
+#include <QUiLoader>
 
 #include <KColorScheme>
 #include <KDebug>
@@ -27,6 +28,7 @@
 #include <Plasma/Context>
 #include <Plasma/Corona>
 #include <Plasma/FrameSvg>
+#include <Plasma/Package>
 #include <Plasma/Wallpaper>
 #include <Plasma/View>
 
@@ -173,8 +175,9 @@ void WallpaperWidget::settingsChanged(bool isModified)
 class BackgroundDialogPrivate
 {
 public:
-    BackgroundDialogPrivate(Plasma::Containment* c, Plasma::View* v)
-     : containmentModel(0),
+    BackgroundDialogPrivate(BackgroundDialog* dialog, Plasma::Containment* c, Plasma::View* v)
+     : q(dialog),
+       containmentModel(0),
        wallpaper(0),
        view(v),
        containment(c),
@@ -187,6 +190,8 @@ public:
     {
     }
 
+    BackgroundDialog *q;
+
     Ui::BackgroundDialog backgroundDialogUi;
 
     QStandardItemModel* containmentModel;
@@ -198,12 +203,36 @@ public:
     KPageWidgetItem *appearanceItem;
     KPageWidgetItem *mouseItem;
     bool modified;
+
+    void createConfigurationInterfaceForPackage()
+    {
+        const QString uiFile = containment.data()->package()->filePath("mainconfigui");
+        if (uiFile.isEmpty()) {
+            kWarning() << "No ui file found for containment";
+            return;
+        }
+        Plasma::ConfigLoader *configScheme = containment.data()->configScheme();
+        if (!configScheme) {
+            kWarning() << "No configuration scheme found for containment";
+            return;
+        }
+
+        QFile f(uiFile);
+        QUiLoader loader;
+        QWidget *widget = loader.load(&f);
+        if (widget) {
+            q->addPage(widget, configScheme,
+                i18n("Settings"), containment.data()->icon(), i18n("%1 Settings", containment.data()->name()));
+        } else {
+            kWarning() << "Failed to load widget from" << uiFile;
+        }
+    }
 };
 
 BackgroundDialog::BackgroundDialog(const QSize& res, Plasma::Containment *c, Plasma::View* view,
                                    QWidget* parent, const QString &id, KConfigSkeleton *s)
     : KConfigDialog(parent, id, s),
-      d(new BackgroundDialogPrivate(c, view))
+      d(new BackgroundDialogPrivate(this, c, view))
 {
     setWindowIcon(KIcon("preferences-desktop-wallpaper"));
     setCaption(i18n("Desktop Settings"));
@@ -244,7 +273,11 @@ BackgroundDialog::BackgroundDialog(const QSize& res, Plasma::Containment *c, Pla
     d->mouseItem = addPage(m, i18n("Mouse Actions"), "input-mouse");
 
     if (d->containment && d->containment.data()->hasConfigurationInterface()) {
-        d->containment.data()->createConfigurationInterface(this);
+        if (d->containment.data()->package()) {
+            d->createConfigurationInterfaceForPackage();
+        } else {
+            d->containment.data()->createConfigurationInterface(this);
+        }
         connect(this, SIGNAL(applyClicked()), d->containment.data(), SLOT(configDialogFinished()));
         connect(this, SIGNAL(okClicked()), d->containment.data(), SLOT(configDialogFinished()));
     }
@@ -531,7 +564,11 @@ void BackgroundDialog::saveConfig()
 
             //add the new containment's config
             if (d->containment.data()->hasConfigurationInterface()) {
-                d->containment.data()->createConfigurationInterface(this);
+                if (d->containment.data()->package()) {
+                    d->createConfigurationInterfaceForPackage();
+                } else {
+                    d->containment.data()->createConfigurationInterface(this);
+                }
                 connect(this, SIGNAL(applyClicked()), d->containment.data(), SLOT(configDialogFinished()));
                 connect(this, SIGNAL(okClicked()), d->containment.data(), SLOT(configDialogFinished()));
             }
