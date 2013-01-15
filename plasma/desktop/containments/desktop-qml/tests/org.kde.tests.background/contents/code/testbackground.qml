@@ -1,7 +1,5 @@
-// -*- coding: iso-8859-1 -*-
 /*
- *   Author: Sebastian Kügler <sebas@kde.org>
- *   Date: Thu Jan 10 2013, 00:27:19
+ *   Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
