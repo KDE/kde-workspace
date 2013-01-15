@@ -131,7 +131,6 @@ void PowerDevilUPowerBackend::init()
         reply = m_login1Interface.data()->asyncCall("CanSuspend");
         reply = m_login1Interface.data()->asyncCall("CanHibernate");
         reply = m_login1Interface.data()->asyncCall("CanHybridSleep");
-
     } else {
         if (m_upowerInterface->canSuspend() && m_upowerInterface->SuspendAllowed()) {
             kDebug() << "Can suspend";
