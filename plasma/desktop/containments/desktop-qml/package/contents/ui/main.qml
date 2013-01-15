@@ -39,7 +39,7 @@ Item {
     signal preferredWidthChanged
     signal preferredHeightChanged
 
-    property bool debug: false
+    property bool debug: true
 
     property Item currentGroup
     property int currentIndex: -1
