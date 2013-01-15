@@ -41,7 +41,11 @@ AppletAppearance {
 
     PlasmaContainments.AppletContainer {
         id: appletContainer
-        anchors.fill: plasmoidGroup.contents
+        //anchors.fill: plasmoidGroup.contents
+        x: contents.x
+        y: contents.y
+        width: contents.width
+        height: contents.height
         onAppletChanged: {
             applet.appletDestroyed.connect(appletDestroyed)
             appletTimer.running = true

@@ -49,10 +49,8 @@ Rectangle {
              * is hoverable.
              */
             id: mouseListener
-            x: 0
-            y: 0
+            anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
             width: parent.width+w;
-            height: parent.height
             hoverEnabled: true
 
             onContainsMouseChanged: print("Mouse is " + containsMouse);

@@ -36,9 +36,9 @@ Item {
         top: parent.top
         //leftMargin: parent.margins.left
         bottom: parent.bottom
-        rightMargin: parent.margins.right - appletHandleWidth
-        bottomMargin: parent.margins.bottom
-        topMargin: parent.margins.top
+        rightMargin: itemGroup.margins.right
+        bottomMargin: itemGroup.margins.bottom
+        topMargin: itemGroup.margins.top
     }
 
     ActionButton {
