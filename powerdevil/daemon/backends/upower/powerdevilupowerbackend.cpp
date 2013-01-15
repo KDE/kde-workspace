@@ -2,7 +2,7 @@
     Copyright (C) 2006 Kevin Ottens <ervin@kde.org>
     Copyright (C) 2008-2010 Dario Freddi <drf@kde.org>
     Copyright (C) 2010 Alejandro Fiestas <alex@eyeos.org>
-    Copyright (C) 2010 Lukas Tinkl <ltinkl@redhat.com>
+    Copyright (C) 2010-2013 Lukáš Tinkl <ltinkl@redhat.com>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -31,14 +31,17 @@
 
 #include "xrandrbrightness.h"
 #include "upowersuspendjob.h"
+#include "login1suspendjob.h"
 
 #define HELPER_ID "org.kde.powerdevil.backlighthelper"
 
 PowerDevilUPowerBackend::PowerDevilUPowerBackend(QObject* parent)
     : BackendInterface(parent),
       m_brightnessControl(0),
+      m_suspendMethods(UnknownSuspendMethod),
       m_lidIsPresent(false), m_lidIsClosed(false), m_onBattery(false)
 {
+
 }
 
 PowerDevilUPowerBackend::~PowerDevilUPowerBackend()
@@ -80,11 +83,19 @@ bool PowerDevilUPowerBackend::isAvailable()
 void PowerDevilUPowerBackend::init()
 {
     // interfaces
+    if (!QDBusConnection::systemBus().interface()->isServiceRegistered(LOGIN1_SERVICE)) {
+        // Activate it.
+        QDBusConnection::systemBus().interface()->startService(LOGIN1_SERVICE);
+    }
+
     if (!QDBusConnection::systemBus().interface()->isServiceRegistered(UPOWER_SERVICE)) {
         // Activate it.
         QDBusConnection::systemBus().interface()->startService(UPOWER_SERVICE);
     }
 
+    if (QDBusConnection::systemBus().interface()->isServiceRegistered(LOGIN1_SERVICE)) {
+        m_login1Interface = new QDBusInterface(LOGIN1_SERVICE, "/org/freedesktop/login1", "org.freedesktop.login1.Manager", QDBusConnection::systemBus(), this);
+    }
     m_upowerInterface = new OrgFreedesktopUPowerInterface(UPOWER_SERVICE, "/org/freedesktop/UPower", QDBusConnection::systemBus(), this);
     m_kbdBacklight = new OrgFreedesktopUPowerKbdBacklightInterface(UPOWER_SERVICE, "/org/freedesktop/UPower/KbdBacklight", QDBusConnection::systemBus(), this);
     m_brightnessControl = new XRandrBrightness();
@@ -112,20 +123,34 @@ void PowerDevilUPowerBackend::init()
     }
 
     // Supported suspend methods
-    SuspendMethods supported = UnknownSuspendMethod;
-    {
+    if (m_login1Interface) {
+        QDBusPendingReply<QString> reply;
+        QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
+        connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(checkSuspendMethod(QDBusPendingCallWatcher*)));
+
+        reply = m_login1Interface.data()->asyncCall("CanSuspend");
+        reply = m_login1Interface.data()->asyncCall("CanHibernate");
+        reply = m_login1Interface.data()->asyncCall("CanHybridSleep");
+
+    } else {
         if (m_upowerInterface->canSuspend() && m_upowerInterface->SuspendAllowed()) {
             kDebug() << "Can suspend";
-            supported |= ToRam;
+            m_suspendMethods |= ToRam;
         }
 
         if (m_upowerInterface->canHibernate() && m_upowerInterface->HibernateAllowed()) {
             kDebug() << "Can hibernate";
-            supported |= ToDisk;
+            m_suspendMethods |= ToDisk;
         }
     }
 
-    connect(m_upowerInterface, SIGNAL(Resuming()), this, SIGNAL(resumeFromSuspend()));
+    // CHECKME if login1 indeed has the resuming signal, it doesn't yet :/
+    // "resuming" signal
+    if (m_login1Interface) {
+        connect(m_login1Interface.data(), SIGNAL(PrepareForSleep(bool)), this, SLOT(slotLogin1Resuming(bool)));
+    } else {
+        connect(m_upowerInterface, SIGNAL(Resuming()), this, SIGNAL(resumeFromSuspend()));
+    }
 
     // battery
     QList<RecallNotice> recallList;
@@ -148,7 +173,28 @@ void PowerDevilUPowerBackend::init()
         setRecallNotices(recallList);
 
     // backend ready
-    setBackendIsReady(controls, supported);
+    setBackendIsReady(controls, m_suspendMethods);
+}
+
+void PowerDevilUPowerBackend::checkSuspendMethod(QDBusPendingCallWatcher *watcher)
+{
+    const QDBusPendingReply<QString> reply = *watcher;
+    if (!reply.isError()) {
+        const QString method = reply.reply().member();
+        if (reply.value() != "no") {
+            if (method == "CanSuspend")
+                m_suspendMethods|= ToRam;
+            else if (method == "CanHibernate")
+                m_suspendMethods|= ToDisk;
+            else if (method == "CanHybridSleep")
+                m_suspendMethods |= HybridSuspend;
+        }
+    }
+    else {
+        kDebug() << "Unsupported suspend method" << reply.error().name() << reply.error().message();
+    }
+
+    watcher->deleteLater();
 }
 
 void PowerDevilUPowerBackend::brightnessKeyPressed(PowerDevil::BackendInterface::BrightnessKeyType type)
@@ -246,7 +292,11 @@ bool PowerDevilUPowerBackend::setBrightness(float brightnessValue, PowerDevil::B
 
 KJob* PowerDevilUPowerBackend::suspend(PowerDevil::BackendInterface::SuspendMethod method)
 {
-    return new UPowerSuspendJob(m_upowerInterface, method, supportedSuspendMethods());
+    if (m_login1Interface) {
+        return new Login1SuspendJob(m_login1Interface.data(), method, supportedSuspendMethods());
+    } else {
+        return new UPowerSuspendJob(m_upowerInterface, method, supportedSuspendMethods());
+    }
 }
 
 void PowerDevilUPowerBackend::enumerateDevices()
@@ -335,6 +385,13 @@ void PowerDevilUPowerBackend::slotPropertyChanged()
     }
 
     m_onBattery = onBattery;
+}
+
+void PowerDevilUPowerBackend::slotLogin1Resuming(bool active)
+{
+    if (!active) {
+        emit resumeFromSuspend();
+    }
 }
 
 #include "powerdevilupowerbackend.moc"
