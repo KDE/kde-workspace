@@ -30,6 +30,8 @@ public:
     virtual ~Browser() {}
     virtual QList<BookmarkMatch> match(const QString& term, bool addEveryThing) = 0;
     virtual void prepare() {}
+
+public Q_SLOTS:
     virtual void teardown() {}
 };
 
