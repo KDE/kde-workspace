@@ -143,13 +143,8 @@ void PowerDevilUPowerBackend::init()
         }
     }
 
-    // CHECKME if login1 indeed has the resuming signal, it doesn't yet :/
-    // "resuming" signal
-    if (m_login1Interface) {
-        connect(m_login1Interface.data(), SIGNAL(PrepareForSleep(bool)), this, SLOT(slotLogin1Resuming(bool)));
-    } else {
-        connect(m_upowerInterface, SIGNAL(Resuming()), this, SIGNAL(resumeFromSuspend()));
-    }
+    // TODO add the corresponding login1 signal once it's available
+    connect(m_upowerInterface, SIGNAL(Resuming()), this, SIGNAL(resumeFromSuspend()));
 
     // battery
     QList<RecallNotice> recallList;
