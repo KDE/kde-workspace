@@ -180,7 +180,7 @@ void PowerDevilUPowerBackend::checkSuspendMethod(QDBusPendingCallWatcher *watche
     const QDBusPendingReply<QString> reply = *watcher;
     if (!reply.isError()) {
         const QString method = reply.reply().member();
-        if (reply.value() != "no") {
+        if (reply.value() == "yes" || reply.value() == "challenge") {
             if (method == "CanSuspend")
                 m_suspendMethods|= ToRam;
             else if (method == "CanHibernate")
