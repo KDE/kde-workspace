@@ -55,16 +55,20 @@ Item {
     anchors.rightMargin: -handleWidth*controlsOpacity
 
     state: expandedHandle ? "expandedhandle" : "normal"
-    z: 0
     Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "white"; opacity: 0.5; visible: debug; anchors.fill: parent; }
 
+    z: 0
     QtExtras.MouseEventListener {
         id: mouseListener
+
         anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
         width: parent.width+handleWidth;
+        z: 9999
+
         hoverEnabled: true
 
         onContainsMouseChanged: {
+            animationsEnabled = true;
             print("Mouse is " + containsMouse);
             if (containsMouse) {
                 hoverTracker.restart();
@@ -109,6 +113,7 @@ Item {
             imagePath: "widgets/background"
             anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
             width: showAppletHandle ? parent.width : parent.width-handleWidth;
+            z: 0
             Behavior on width {
                 enabled: animationsEnabled
                 NumberAnimation {
@@ -142,15 +147,15 @@ Item {
             //z: appletContainer.z + 10
             onPressed: {
                 //FIXME: this shouldn't be necessary
-    //             mainFlickable.interactive = false
-                appletAppearance.z = 999
+    //             rootFlickable.interactive = false
+                //appletAppearance.z = 999
                 animationsEnabled = false
                 mouse.accepted = true
                 var x = Math.round(appletAppearance.x/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
                 var y = Math.round(appletAppearance.y/LayoutManager.cellSize.height)*LayoutManager.cellSize.height
                 LayoutManager.setSpaceAvailable(x, y, appletAppearance.width, appletAppearance.height, true)
 
-                var globalMousePos = mapToItem(main, mouse.x, mouse.y)
+                var globalMousePos = mapToItem(root, mouse.x, mouse.y)
                 lastX = globalMousePos.x
                 lastY = globalMousePos.y
 
@@ -161,9 +166,9 @@ Item {
             onPositionChanged: {
                 placeHolder.syncWithItem(appletAppearance)
 
-                var globalPos = mapToItem(main, x, y)
+                var globalPos = mapToItem(root, x, y)
 
-                var globalMousePos = mapToItem(main, mouse.x, mouse.y)
+                var globalMousePos = mapToItem(root, mouse.x, mouse.y)
                 appletAppearance.x += (globalMousePos.x - lastX)
                 appletAppearance.y += (globalMousePos.y - lastY)
 
@@ -184,7 +189,7 @@ Item {
         }
         Item {
             id: contentsItem
-            z: parent.z+1
+            z: mouseListener.z-1
             x: 0 + appletAppearance.margins.left
             y: 0 + appletAppearance.margins.top
             width: appletAppearance.width - (appletAppearance.margins.left + appletAppearance.margins.right)
@@ -248,7 +253,7 @@ Item {
                 //appletAppearance.z = 999
                 mouse.accepted = true
                 //FIXME: this shouldn't be necessary
-    //             mainFlickable.interactive = false
+    //             rootFlickable.interactive = false
                 //plasmoidBackground.suspendAnimation = true;
                 animationsEnabled = false;
                 startX = mouse.x;
@@ -329,8 +334,8 @@ Item {
             easing.type: Easing.InOutQuad
 //             onRunningChanged: {
 //                 if (!running) {
-//                     mainFlickable.interactive = contentItem.height>mainFlickable.height
-//                     if (!mainFlickable.interactive) {
+//                     rootFlickable.interactive = contentItem.height>rootFlickable.height
+//                     if (!rootFlickable.interactive) {
 //                         contentScrollTo0Animation.running = true
 //                     }
 //                 }

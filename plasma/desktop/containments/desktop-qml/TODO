@@ -2,9 +2,9 @@ Declarative Desktop for Plasma
 
 
 TODO:
-* mouse drag expands over handle
-    * move mouseventlistener into subitem to be able to manage its margins / position
-    * everything else under the mouse *has to be* parented to this one, still
+o mouse drag expands over handle
+    o move mouseventlistener into subitem to be able to manage its margins / position
+    o everything else under the mouse *has to be* parented to this one, still
 * minimum size for applethandle
 * switch handle appearance when minimumSize is reached during resize
 * implement rotation
@@ -14,8 +14,8 @@ TODO:
 * open associated app
 * hide handle after short timeout
 * rename main to root
-* rename itemgroup to AppletItem
-* meaningful name for plasmoidgroup or merge into AppletItem?
+o rename itemgroup to AppletItem
+o meaningful name for plasmoidgroup or merge into AppletItem?
 
 BUGS:
 * drag input is blocked for folderview, debug. -- still valid? doesn't seem so...

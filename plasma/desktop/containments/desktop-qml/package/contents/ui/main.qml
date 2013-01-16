@@ -28,7 +28,7 @@ import org.kde.qtextracomponents 0.1 as QtExtras
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 Item {
-    id: main
+    id: root
     width: 540
     height: 540
 
@@ -39,7 +39,7 @@ Item {
     signal preferredWidthChanged
     signal preferredHeightChanged
 
-    property bool debug: true
+    property bool debug: false
 
     property Item currentGroup
     property int currentIndex: -1
@@ -56,8 +56,8 @@ Item {
 
     function updateGridSize()
     {
-        LayoutManager.cellSize.width = main.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width
-        LayoutManager.cellSize.height = main.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
+        LayoutManager.cellSize.width = root.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width
+        LayoutManager.cellSize.height = root.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
         layoutTimer.restart()
     }
     
@@ -84,7 +84,7 @@ Item {
 //         ListModel {
 //             id: gridModel
 //             Component.onCompleted: {
-//                 var cells  = (main.width / gridView.cellWidth) * (main.height / gridView.cellHeight);
+//                 var cells  = (root.width / gridView.cellWidth) * (root.height / gridView.cellHeight);
 //                 print(" Got " + cells + " Cells. w: " + (availScreenRect.width / gridView.cellWidth) + " h: " + (availScreenRect.height / gridView.cellHeight));
 //                 for (i = 0; i < cells*3; i++) {
 //                     gridModel.append({"numbor": i, "name":"Jackfruit"});
@@ -149,24 +149,24 @@ Item {
     }
 
     Flickable {
-        id: mainFlickable
+        id: rootFlickable
         anchors {
-            fill: main
+            fill: root
             //leftMargin: availScreenRect.x
             //rightMargin: parent.width - availScreenRect.x - availScreenRect.width
         }
         interactive: false
-        contentWidth: mainFlickable.width
-        contentHeight: mainFlickable.height
+        contentWidth: rootFlickable.width
+        contentHeight: rootFlickable.height
 
         MouseArea {
             id: contentItem
-            width: mainFlickable.width
+            width: rootFlickable.width
             height: childrenRect.y+childrenRect.height
 
             onClicked: {
                 //resourceInstance.uri = ""
-                main.currentIndex = -1
+                root.currentIndex = -1
             }
 
             //FIXME: debug purposes only, remove asap

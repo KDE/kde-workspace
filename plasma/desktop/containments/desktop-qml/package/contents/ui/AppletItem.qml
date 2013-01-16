@@ -44,8 +44,10 @@ AppletAppearance {
         //anchors.fill: appletItem.contents
         x: contents.x
         y: contents.y
+        z: 500
         width: contents.width
         height: contents.height
+
         onAppletChanged: {
             applet.appletDestroyed.connect(appletDestroyed)
             appletTimer.running = true
