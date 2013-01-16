@@ -146,10 +146,14 @@ void ScreenSaverWindow::keyPressEvent(QKeyEvent *event)
 
 void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
 {
+    if (m_startMousePos == QPoint(-2, -2)) {
+        m_startMousePos = QPoint(-1, -1); // reset
+        return; // caused by show event
+    }
     if (m_startMousePos == QPoint(-1, -1)) {
         m_startMousePos = event->globalPos();
     }
-    if ((event->globalPos() - m_startMousePos).manhattanLength() > QApplication::startDragDistance()) {
+    else if ((event->globalPos() - m_startMousePos).manhattanLength() > QApplication::startDragDistance()) {
         m_startMousePos = QPoint(-1, -1);
         hide();
         emit hidden();
@@ -160,6 +164,7 @@ void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
 
 void ScreenSaverWindow::showEvent(QShowEvent *event)
 {
+    m_startMousePos = QPoint(-2, -2); // prevent mouse interpretation to cause an immediate hide
     m_reactivateTimer->stop();
     static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
     if (testAttribute(Qt::WA_WState_Created) && internalWinId())
