@@ -553,14 +553,10 @@ void Interface::delayedQueryLaunch()
 
     // we want to check if this is a new query or not for the later running of
     // the default item
-    const bool newQuery = !query.isEmpty() && m_runnerManager->query() != query;
     if (!query.isEmpty() || m_runnerManager->singleMode()) {
+        const bool newQuery = !query.isEmpty() && m_runnerManager->query() != query;
         m_queryRunning = m_queryRunning || newQuery || !runnerId.isEmpty();
         m_runnerManager->launchQuery(query, runnerId);
-    }
-
-    if (newQuery && m_delayedRun) {
-        runDefaultResultItem();
     }
 }
 
