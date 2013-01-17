@@ -39,7 +39,7 @@ Item {
     signal preferredWidthChanged
     signal preferredHeightChanged
 
-    property bool debug: true
+    property bool debug: false
 
     property Item currentGroup
     property int currentIndex: -1
@@ -112,10 +112,10 @@ Item {
 
     function addApplet(applet, pos)
     {
-        var component = Qt.createComponent("AppletItem.qml");
+        var component = Qt.createComponent("AppletAppearance.qml");
         var e = component.errorString();
         if (e != "") {
-            print("!!!!!! Error loading PlasmoidGroup.qml: " + component.errorString());
+            print("!!!!!! Error loading AppletAppearance.qml: " + component.errorString());
         }
         var appletItem = component.createObject(resultsFlow);
         appletItem.width = LayoutManager.cellSize.width*2;

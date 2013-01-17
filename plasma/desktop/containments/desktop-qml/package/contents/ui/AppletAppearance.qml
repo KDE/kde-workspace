@@ -21,6 +21,8 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1 as QtExtras
+import org.kde.plasma.containments 0.1 as PlasmaContainments
+
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 // PlasmaCore.FrameSvgItem {
@@ -41,10 +43,22 @@ Item {
     property bool hasBackground: false
     property bool expandedHandle: (backgroundHints == "NoBackground" && appletAppearance.handleShown)
     property bool animationsEnabled: false
-    property int minimumWidth: LayoutManager.cellSize.width
-    property int minimumHeight: LayoutManager.cellSize.height
+    //property int minimumWidth: LayoutManager.cellSize.width
+    //property int minimumHeight: LayoutManager.cellSize.height
     property int appletHandleWidth: appletHandle.width
 
+    property int minimumWidth: Math.max(LayoutManager.cellSize.width,
+                           appletContainer.minimumWidth +
+                           appletItem.contents.anchors.leftMargin +
+                           appletItem.contents.anchors.rightMargin)
+
+    property int minimumHeight: Math.max(LayoutManager.cellSize.height,
+                            appletContainer.minimumHeight +
+                            appletItem.contents.anchors.topMargin +
+                            appletItem.contents.anchors.bottomMargin)
+
+    property alias applet: appletContainer.applet
+    property alias appletItem: appletAppearance
 
     property Item contents: contentsItem
     property alias margins: plasmoidBackground.margins
@@ -55,6 +69,39 @@ Item {
     anchors.rightMargin: -handleWidth*controlsOpacity
 
     state: expandedHandle ? "expandedhandle" : "normal"
+
+
+    //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
+    Timer {
+        id: appletTimer
+        interval: 250
+        repeat: false
+        running: false
+        onTriggered: updateBackgroundHints()
+    }
+
+    function updateBackgroundHints() {
+            print(" %%%%%% Updating backgroundHints..." + applet.backgroundHints);
+            hasBackground = (applet.backgroundHints != "NoBackground");
+            if (applet.backgroundHints == -1) {
+                appletItem.imagePath = "widgets/background";
+                backgroundHints = "StandardBackground";
+            } else if (applet.backgroundHints == 2) {
+                appletItem.imagePath = "widgets/translucentbackground"
+                backgroundHints = "TranslucentBackground";
+            } else if (applet.backgroundHints == 0) {
+                //appletItem.imagePath = "widgets/translucentbackground"
+                backgroundHints = "NoBackground";
+            } else {
+                backgroundHints = "DefaultBackground";
+                appletItem.imagePath = "widgets/background";
+            }
+            print(" @@@@@@@ Background: " + applet.name + " " + applet.backgroundHints + " " + hasBackground + " " + appletItem.imagePath);
+            print(" @@@@ hints saved as " + backgroundHints);
+            applet.backgroundHints = "NoBackground";
+    }
+
+
     Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "white"; opacity: 0.5; visible: debug; anchors.fill: parent; }
 
     //z: 1000
@@ -206,6 +253,32 @@ Item {
 //                 rightMargin: appletAppearance.margins.right
 //                 bottomMargin: appletAppearance.margins.bottom
 //             }
+            PlasmaContainments.AppletContainer {
+                id: appletContainer
+                //anchors.fill: appletItem.contents
+//                 x: contents.x
+//                 y: contents.y
+//                 z: contents.z
+//                 width: contents.width
+//                 height: contents.height
+                anchors.fill: parent
+
+                onAppletChanged: {
+                    applet.appletDestroyed.connect(appletDestroyed)
+                    appletTimer.running = true
+                }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+                function appletDestroyed() {
+                    LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                    appletItem.destroy()
+                }
+                Rectangle { color: "green"; opacity: 1; visible: debug; anchors.fill: parent; }
+            }
         }
 
 
