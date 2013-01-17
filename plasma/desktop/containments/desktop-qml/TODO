@@ -13,7 +13,7 @@ o mouse drag expands over handle
     * restore rotation per item
 * open associated app
 * hide handle after short timeout
-* rename main to root
+o rename main to root
 o rename itemgroup to AppletItem
 o meaningful name for plasmoidgroup or merge into AppletItem?
 
