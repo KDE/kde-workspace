@@ -57,13 +57,13 @@ Item {
     state: expandedHandle ? "expandedhandle" : "normal"
     Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "white"; opacity: 0.5; visible: debug; anchors.fill: parent; }
 
-    z: 0
+    //z: 1000
     QtExtras.MouseEventListener {
         id: mouseListener
 
         anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
         width: parent.width+handleWidth;
-        z: 9999
+        z: 10
 
         hoverEnabled: true
 
@@ -113,11 +113,11 @@ Item {
             imagePath: "widgets/background"
             anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
             width: showAppletHandle ? parent.width : parent.width-handleWidth;
-            z: 0
+            z: -1
             Behavior on width {
                 enabled: animationsEnabled
                 NumberAnimation {
-                    duration: suspendAnimation? 0 : 250
+                    duration: !animationsEnabled ? 0 : 250
                     easing.type: Easing.InOutQuad
                 }
             }
@@ -127,7 +127,8 @@ Item {
             onImmutableChanged: {
                 //appletHandle.opacity = plasmoid.immutable ? 0 : 1;
                 dragMouseArea.visible = !plasmoid.immutable;
-                appletAppearance.controlsOpacity = plasmoid.immutable ? 0 : 1;
+                showZ();
+                //appletAppearance.controlsOpacity = plasmoid.immutable ? 0 : 1;
                 //appletContainer.opacity = plasmoid.immutable ? 1.0 : 0.66;
                 //imagePath = plasmoid.immutable ? "" : "widgets/background";
                 //appletHandleWidth = plasmoid.immutable ? 0: appletHandle.height;
@@ -144,11 +145,9 @@ Item {
             //Rectangle { color: "purple"; opacity: .3; anchors.fill: parent; }
             property int lastX
             property int lastY
-            //z: appletContainer.z + 10
+            z: contentsItem.z - 2
             onPressed: {
-                //FIXME: this shouldn't be necessary
-    //             rootFlickable.interactive = false
-                //appletAppearance.z = 999
+                showZ();
                 animationsEnabled = false
                 mouse.accepted = true
                 var x = Math.round(appletAppearance.x/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
@@ -189,12 +188,13 @@ Item {
         }
         Item {
             id: contentsItem
-            z: mouseListener.z-1
+            //visible: false
+            z: mouseListener.z+1
             x: 0 + appletAppearance.margins.left
             y: 0 + appletAppearance.margins.top
             width: appletAppearance.width - (appletAppearance.margins.left + appletAppearance.margins.right)
             height: appletAppearance.height - (appletAppearance.margins.top + appletAppearance.margins.bottom)
-            Rectangle { color: "green"; opacity: 1; visible: debug; anchors.fill: parent; }
+//             Rectangle { color: "green"; opacity: 1; visible: debug; anchors.fill: parent; }
 //             anchors {
 //                 left: appletAppearance.left
 //                 top: appletAppearance.top
@@ -236,30 +236,25 @@ Item {
             width:  handleWidth+appletAppearance.margins.right
             height: width
             property bool resizeTop: false
-            z: appletAppearance.z+1
+            z: dragMouseArea.z+1
             visible: !plasmoid.immutable
             anchors {
                 right: parent.right
-                //bottom: parent.bottom
                 topMargin: appletAppearance.margins.top
-                //rightMargin: handleWidth
-                //rightMargin: -(appletAppearance.margins.right*controlsOpacity)
             }
             //anchors.fill: resizeHandleSvg
             property int startX
             property int startY
 
             onPressed: {
-                //appletAppearance.z = 999
+                print("resize pressed");
                 mouse.accepted = true
-                //FIXME: this shouldn't be necessary
-    //             rootFlickable.interactive = false
-                //plasmoidBackground.suspendAnimation = true;
                 animationsEnabled = false;
                 startX = mouse.x;
                 startY = mouse.y;
                 LayoutManager.setSpaceAvailable(appletAppearance.x, appletAppearance.y, appletAppearance.width, appletAppearance.height, true)
                 //debugFlow.refresh();
+                showZ();
             }
             onPositionChanged: {
                 appletAppearance.width = Math.max(appletAppearance.minimumWidth, appletAppearance.width + mouse.x-startX)
@@ -275,7 +270,7 @@ Item {
                 LayoutManager.save()
                 LayoutManager.setSpaceAvailable(appletAppearance.x, appletAppearance.y, widthAnimation.to, heightAnimation.to, false)
                 //debugFlow.refresh();
-                plasmoidBackground.suspendAnimation = false;
+                //plasmoidBackground.suspendAnimation = false;
             }
             Rectangle { color: "blue"; opacity: 0.4; visible: debug; anchors.fill: parent; }
         }
@@ -334,13 +329,22 @@ Item {
             easing.type: Easing.InOutQuad
 //             onRunningChanged: {
 //                 if (!running) {
-//                     rootFlickable.interactive = contentItem.height>rootFlickable.height
+//                     rootFlickable.interactive = contentsItem.height>rootFlickable.height
 //                     if (!rootFlickable.interactive) {
 //                         contentScrollTo0Animation.running = true
 //                     }
 //                 }
 //             }
         }
+    }
+
+    function showZ() {
+        print(" - ZZZ ------------- ZZZ -");
+        print(" mouseListener:      " + mouseListener.z);
+        print(" dragMouseArea:      " + dragMouseArea.z);
+        print(" plasmoidBackground: " + plasmoidBackground.z);
+        print(" contentsItem:        " + contentsItem.z);
+
     }
     Component.onCompleted: {
         //width = Math.min(470, 32+itemsList.count*140)

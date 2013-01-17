@@ -1,5 +1,6 @@
 /*
  *   Copyright 2011 Marco Martin <mart@kde.org>
+ *   Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -44,7 +45,7 @@ AppletAppearance {
         //anchors.fill: appletItem.contents
         x: contents.x
         y: contents.y
-        z: 500
+        z: contents.z
         width: contents.width
         height: contents.height
 
@@ -62,6 +63,7 @@ AppletAppearance {
             LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
             appletItem.destroy()
         }
+        Rectangle { color: "green"; opacity: 1; visible: debug; anchors.fill: parent; }
     }
 
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
