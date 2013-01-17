@@ -20,43 +20,37 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1 as QtExtras
-import "plasmapackage:/code/LayoutManager.js" as LayoutManager
-
-
 
 Item {
     id: appletHandle
+
     z: dragMouseArea.z + 1
-    opacity: appletAppearance.controlsOpacity
-    width: 24
+    opacity: appletItem.controlsOpacity
+
     anchors {
-        //left: parent.left
         right: parent.right
         top: parent.top
-        //leftMargin: parent.margins.left
         bottom: parent.bottom
-        rightMargin: appletAppearance.margins.right
-        bottomMargin: appletAppearance.margins.bottom
-        topMargin: appletAppearance.margins.top
+        rightMargin: appletItem.margins.right
+        bottomMargin: appletItem.margins.bottom
+        topMargin: appletItem.margins.top
     }
 
     ActionButton {
         svg: configIconsSvg
         elementId: "close"
-        iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
-        backgroundVisible: false
-        //visible: action.enabled
+        iconSize: root.iconSize
+        visible: action.enabled
         action: applet.action("remove")
-        z: dragMouseArea.z + 1000
-        width: appletHandleWidth
+        z: dragMouseArea.z + 1
+        width: handleWidth
         anchors {
             bottom: parent.bottom
             bottomMargin: 6
             right: parent.right
             rightMargin: -6
         }
-//         Rectangle { color: "green"; opacity: 0.4; anchors.fill: parent; }
+
         Component.onCompleted: {
             if (action && typeof(action) != "undefined") {
                 action.enabled = true
@@ -66,7 +60,7 @@ Item {
 
     Column {
         id: buttonColumn
-        width: appletHandleWidth
+        width: handleWidth
         anchors {
             top: parent.top
             right: parent.right
@@ -75,11 +69,10 @@ Item {
         spacing: 12
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1000
+            z: dragMouseArea.z + 1
             elementId: "size-diagonal-tr2bl"
-            iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
-            backgroundVisible: false
-            //visible: action.enabled
+            iconSize: root.iconSize
+            visible: action.enabled
             //action: applet.action("configure")
             Component.onCompleted: {
                 if (action && typeof(action) != "undefined") {
@@ -87,15 +80,13 @@ Item {
                 }
             }
         }
-    //         Rectangle { color: "orange"; opacity: 0.4; anchors.fill: parent; }
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1000
+            z: dragMouseArea.z + 1
             elementId: "rotate"
-            iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
-            backgroundVisible: false
-            //visible: action.enabled
-            //action: applet.action("rotate")
+            iconSize: root.iconSize
+            visible: action.enabled
+            action: applet.action("rotate")
             Component.onCompleted: {
                 if (action && typeof(action) != "undefined") {
                     action.enabled = true
@@ -104,10 +95,9 @@ Item {
         }
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1000
+            z: dragMouseArea.z + 1
             elementId: "configure"
-            iconSize: Math.max(16, appletItem.appletHandleWidth - 8)
-            backgroundVisible: false
+            iconSize: root.iconSize
             //visible: action.enabled
             action: applet.action("configure")
             Component.onCompleted: {
@@ -120,19 +110,5 @@ Item {
     PlasmaCore.Svg {
         id: buttonSvg
         imagePath: "widgets/actionbutton"
-    }
-
-    PlasmaCore.SvgItem {
-        id: shadowItem
-        svg: buttonSvg
-        elementId: "move"
-        width: iconSize+13
-        height: width
-        anchors {
-            top: parent.top
-            bottom: parent.bottom;
-            topMargin: parent.anchors.topMargin
-            horizontalCenter: parent.horizontalCenter
-        }
     }
 }

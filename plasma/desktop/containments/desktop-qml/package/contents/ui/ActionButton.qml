@@ -30,7 +30,7 @@ Item {
     property QtObject svg
     property alias elementId: icon.elementId
     property QtObject action
-    property bool backgroundVisible: true
+    property bool backgroundVisible: false
     property int iconSize: 32
     property int pressedOffset: 1
     property bool checked: false
