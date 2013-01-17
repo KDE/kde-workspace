@@ -158,8 +158,10 @@ Item {
             anchors.fill: parent
             property int lastX
             property int lastY
+            property int zoffset: 1000
             z: contentsItem.z - 2
             onPressed: {
+                appletItem.z = appletItem.z + zoffset;
                 animationsEnabled = false
                 mouse.accepted = true
                 var x = Math.round(appletItem.x/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
@@ -186,6 +188,7 @@ Item {
                 lastY = globalMousePos.y
             }
             onReleased: {
+                appletItem.z = appletItem.z - zoffset;
                 repositionTimer.running = false
                 placeHolderPaint.opacity = 0
                 animationsEnabled = true
