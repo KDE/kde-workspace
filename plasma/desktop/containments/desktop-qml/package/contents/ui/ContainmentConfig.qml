@@ -51,6 +51,7 @@ Item {
         Row {
             anchors.fill: parent
             anchors.margins: parent.margins.top
+            anchors.margins.top: parent.margins.top * 2
             spacing: configFrame.margins.top/2
             Column {
                 width: parent.width / 2 - (configFrame.margins.top)
