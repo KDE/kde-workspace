@@ -47,7 +47,7 @@ Item {
 
     property int iconSize: 16
 
-    property int iconWidth: 16
+    property int iconWidth: iconSize
     property int iconHeight: iconWidth
 
     onIconHeightChanged: updateGridSize()
@@ -197,6 +197,7 @@ Item {
             height: placeHolder.height - 12
             z: 0
             opacity: 0
+            property int moveDuration: 100
             radius: 8
             smooth: true
             color: Qt.rgba(1,1,1,0.10)
@@ -209,24 +210,31 @@ Item {
             Behavior on x {
                 enabled: placeHolderPaint.opacity == 1
                 NumberAnimation {
-                    duration: 100
+                    duration: placeHolderPaint.moveDuration
                     easing.type: Easing.InOutQuad
                 }
             }
             Behavior on y {
                 enabled: placeHolderPaint.opacity == 1
                 NumberAnimation {
-                    duration: 100
+                    duration: placeHolderPaint.moveDuration
                     easing.type: Easing.InOutQuad
                 }
             }
             Behavior on width {
                 enabled: placeHolderPaint.opacity == 1
                 NumberAnimation {
-                    duration: 100
+                    duration: placeHolderPaint.moveDuration
                     easing.type: Easing.InOutQuad
                 }
             }
+        }
+    }
+
+    ContainmentConfig {
+        anchors {
+            top: parent.top
+            left: parent.left
         }
     }
 
