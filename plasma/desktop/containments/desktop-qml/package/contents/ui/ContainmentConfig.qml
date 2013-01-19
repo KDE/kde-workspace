@@ -34,7 +34,7 @@ Item {
     PlasmaComponents.ToolButton {
         id: cfgbutton
 
-        width: 24
+        width: root.iconSize
         height: width
 
         iconSource: "configure"
@@ -51,8 +51,9 @@ Item {
         Row {
             anchors.fill: parent
             anchors.margins: parent.margins.top
-            anchors.margins.top: parent.margins.top * 2
+
             spacing: configFrame.margins.top/2
+
             Column {
                 width: parent.width / 2 - (configFrame.margins.top)
                 spacing: configFrame.margins.top/2
@@ -75,6 +76,11 @@ Item {
                     width: parent.width
                     horizontalAlignment: Text.AlignRight
                     text: "Halo move duration:"
+                }
+                PlasmaComponents.Label {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignRight
+                    text: "Halo opacity:"
                 }
             }
 
@@ -106,6 +112,13 @@ Item {
                     onTextChanged: {
                         print("Set move duration to " + text);
                         placeHolderPaint.moveDuration = text;
+                    }
+                }
+                PlasmaComponents.TextField {
+                    text: root.haloOpacity
+                    onTextChanged: {
+                        print("Set halo opacity to " + text);
+                        root.haloOpacity = text;
                     }
                 }
             }

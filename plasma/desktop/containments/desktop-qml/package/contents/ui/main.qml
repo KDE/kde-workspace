@@ -41,7 +41,7 @@ Item {
 
     property bool debug: false
     property int handleDelay: 800
-
+    property real haloOpacity: 0.5
     property Item currentGroup
     property int currentIndex: -1
 
@@ -151,6 +151,7 @@ Item {
     Item {
         anchors.fill: resultsFlow
         z: 0
+
         Item {
             id: placeHolder
             property bool animationsEnabled
@@ -159,8 +160,8 @@ Item {
             property int minimumWidth
             property int minimumHeight
             property Item syncItem
-            function syncWithItem(item)
-            {
+
+            function syncWithItem(item) {
                 syncItem = item
                 minimumWidth = item.minimumWidth
                 minimumHeight = item.minimumHeight
@@ -169,8 +170,8 @@ Item {
                     placeHolder.delayedSyncWithItem()
                 }
             }
-            function delayedSyncWithItem()
-            {
+
+            function delayedSyncWithItem() {
                 placeHolder.x = placeHolder.syncItem.x
                 placeHolder.y = placeHolder.syncItem.y
                 placeHolder.width = placeHolder.syncItem.width
@@ -179,28 +180,32 @@ Item {
                 LayoutManager.positionItem(placeHolder)
                 LayoutManager.setSpaceAvailable(placeHolder.x, placeHolder.y, placeHolder.width, placeHolder.height, true)
             }
+
             Timer {
                 id: repositionTimer
+
                 interval: 100
                 repeat: false
                 running: false
+
                 onTriggered: {
                     placeHolder.delayedSyncWithItem()
                 }
             }
         }
-        Rectangle { // FIXME: use hoveritem
+
+        PlasmaComponents.Highlight {
             id: placeHolderPaint
-            x: placeHolder.x + 6
-            y: placeHolder.y + 6
-            width: placeHolder.width - 12
-            height: placeHolder.height - 12
+
+            x: placeHolder.x + (root.iconSize/2)
+            y: placeHolder.y + (root.iconSize/2)
+            width: placeHolder.width + (root.iconSize/2)
+            height: placeHolder.height - root.iconSize
             z: 0
             opacity: 0
-            property int moveDuration: 100
-            radius: 8
-            smooth: true
-            color: Qt.rgba(1,1,1,0.10)
+
+            property int moveDuration: 75
+
             Behavior on opacity {
                 NumberAnimation {
                     duration: 250
@@ -208,21 +213,21 @@ Item {
                 }
             }
             Behavior on x {
-                enabled: placeHolderPaint.opacity == 1
+                enabled: placeHolderPaint.opacity > 0
                 NumberAnimation {
                     duration: placeHolderPaint.moveDuration
                     easing.type: Easing.InOutQuad
                 }
             }
             Behavior on y {
-                enabled: placeHolderPaint.opacity == 1
+                enabled: placeHolderPaint.opacity > 0
                 NumberAnimation {
                     duration: placeHolderPaint.moveDuration
                     easing.type: Easing.InOutQuad
                 }
             }
             Behavior on width {
-                enabled: placeHolderPaint.opacity == 1
+                enabled: placeHolderPaint.opacity > 0
                 NumberAnimation {
                     duration: placeHolderPaint.moveDuration
                     easing.type: Easing.InOutQuad

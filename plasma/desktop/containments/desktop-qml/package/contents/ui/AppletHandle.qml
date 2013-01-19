@@ -28,7 +28,7 @@ Item {
     opacity: appletItem.controlsOpacity
 
     anchors {
-        right: parent.right
+        right: plasmoidBackground.right
         top: parent.top
         bottom: parent.bottom
         rightMargin: appletItem.margins.right

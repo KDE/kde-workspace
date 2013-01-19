@@ -28,7 +28,7 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 Item {
     id: appletItem
 
-    property int handleWidth: 24
+    property int handleWidth: iconSize + 8 // 4 pixels margins inside handle
     property string category
 
     property bool showAppletHandle: false
@@ -103,7 +103,7 @@ Item {
         onContainsMouseChanged: {
             animationsEnabled = true;
             //print("Mouse is " + containsMouse);
-            if (containsMouse) {
+            if (!plasmoid.immutable && containsMouse) {
                 hoverTracker.restart();
             } else {
                 hoverTracker.stop();
@@ -173,7 +173,7 @@ Item {
                 lastY = globalMousePos.y
 
                 placeHolder.syncWithItem(appletItem)
-                placeHolderPaint.opacity = 1
+                placeHolderPaint.opacity = root.haloOpacity;
             }
             onPositionChanged: {
                 placeHolder.syncWithItem(appletItem)
