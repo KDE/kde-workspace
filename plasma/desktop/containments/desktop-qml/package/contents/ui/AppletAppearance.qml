@@ -122,15 +122,16 @@ Item {
         PlasmaCore.FrameSvgItem {
             id: noBackgroundHandle
 
-            opacity: (backgroundHints == "NoBackground" && appletItem.handleShown) ? controlsOpacity : 0
             width: handleWidth + margins.left + margins.right - 4
-            imagePath: backgroundHints == "NoBackground" ? "widgets/translucentbackground" : ""
             anchors {
                 top: parent.top
-                right: parent.right
+                right: plasmoidBackground.right
                 bottom: parent.bottom
-                rightMargin: -handleWidth
+                rightMargin: parent.right
             }
+            opacity: (backgroundHints == "NoBackground" && appletItem.handleShown) ? controlsOpacity : 0
+
+            imagePath: backgroundHints == "NoBackground" ? "widgets/background" : ""
         }
 
         PlasmaCore.FrameSvgItem {
@@ -140,6 +141,7 @@ Item {
             anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
             width: showAppletHandle ? parent.width : parent.width-handleWidth;
             z: mouseListener.z-4
+
             Behavior on width {
                 enabled: animationsEnabled
                 NumberAnimation {
@@ -148,9 +150,13 @@ Item {
                 }
             }
         }
+
         Connections {
             target: plasmoid
-            onImmutableChanged: dragMouseArea.visible = !plasmoid.immutable;
+            onImmutableChanged: {
+                dragMouseArea.visible = !plasmoid.immutable;
+                showAppletHandle = false;
+            }
         }
 
         MouseArea {
