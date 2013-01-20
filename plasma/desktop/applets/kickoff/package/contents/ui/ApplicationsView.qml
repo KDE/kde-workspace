@@ -139,6 +139,8 @@ Item {
                 delegate: KickoffItem {
                     id: kickoffItem
 
+                    appView: true
+
                     PlasmaCore.SvgItem {
                         anchors {
                             right: parent.right

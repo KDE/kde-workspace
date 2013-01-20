@@ -29,6 +29,7 @@ Item {
 
     property bool dropEnabled: false
     property bool modelChildren: hasModelChildren
+    property bool appView: false
 
     function activate() {
         if (hasModelChildren) {
@@ -77,7 +78,12 @@ Item {
 
                 onClicked: {
                     if (mouse.button == Qt.LeftButton) {
-                        appViewScrollArea.state = "OutgoingLeft";
+                        if (appView) {
+                            appViewScrollArea.state = "OutgoingLeft";
+                        }
+                        else {
+                            listItem.activate();
+                        }
                     } else if (mouse.button == Qt.RightButton) {
                         // don't show a context menu for container
                         if (hasModelChildren || typeof(contextMenu) === "undefined") {
