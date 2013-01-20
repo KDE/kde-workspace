@@ -30,8 +30,8 @@ Item {
     width: 400
     height: 400
 
-    property int minimumWidth: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.implicitHeight : tabBar.implicitWidth
-    property int minimumHeight: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.implicitWidth : tabBar.implicitHeight
+    property int minimumWidth: theme.defaultFont.mSize.width * 45
+    property int minimumHeight: theme.defaultFont.mSize.height * 30
     property string previousState
     property bool switchTabsOnHover: kickoff.switchTabsOnHover
     property bool showAppsByName: kickoff.showAppsByName
