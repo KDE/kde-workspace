@@ -26,16 +26,12 @@ Item {
 
     z: dragMouseArea.z + 1
     opacity: appletItem.controlsOpacity
-//     height: appletAppearance.handleMerged ? appletItem.height : minimumHeight
-    //height: parent.height
     width: appletAppearance.handleWidth
 
     onHeightChanged: print("handleheight: " + height);
 
     property int buttonMargin: 6
     property int minimumHeight:  6 * (root.iconSize + buttonMargin)
-
-    Rectangle { color: "yellow"; anchors.fill: parent; }
 
     Column {
         id: buttonColumn
@@ -72,6 +68,54 @@ Item {
                 if (action && typeof(action) != "undefined") {
                     action.enabled = true
                 }
+            }
+            MouseArea {
+                id: resizeHandle
+
+//                 visible: !plasmoid.immutable
+//                 width:  handleWidth+appletItem.margins.right
+//                 height: width
+//                 z: dragMouseArea.z+1
+                anchors {
+                    fill: parent
+                    margins: -buttonMargin
+                }
+
+                property int startX
+                property int startY
+
+                onPressed: {
+//                     mouse.accepted = true
+//                     animationsEnabled = false;
+                    startX = mouse.x;
+                    startY = mouse.y;
+
+//                     LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                }
+                onPositionChanged: {
+                    var rot = appletItem.rotation;
+                    var snap = 4;
+                    var moved = ((mouse.x - startX)) % 360;// + startY - mouse.y;
+                    if (Math.abs(rot - moved) > 20) {
+                        return;
+                    }
+                    snapIt(0);
+                    snapIt(90);
+                    snapIt(180);
+                    snapIt(240);
+
+                    function snapIt(snapTo) {
+                        if (moved > (snapTo - snap) && moved < (snapTo + snap)) {
+                            moved = snapTo;
+                        }
+                    }
+                    print(" Moved :" + moved);
+                    appletItem.rotation = moved;
+                }
+                onReleased: {
+                    // save rotation
+                }
+                Rectangle { color: "red"; opacity: 0.6; visible: debug; anchors.fill: parent; }
             }
         }
         ActionButton {

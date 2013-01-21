@@ -39,8 +39,8 @@ Item {
     signal preferredWidthChanged
     signal preferredHeightChanged
 
-    property bool debug: true
-    property int handleDelay: 0 //800
+    property bool debug: false
+    property int handleDelay: 800
     property real haloOpacity: 0.5
     property Item currentGroup
     property int currentIndex: -1

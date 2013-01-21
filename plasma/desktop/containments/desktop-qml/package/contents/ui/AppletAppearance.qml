@@ -76,7 +76,7 @@ Item {
             appletHandle.anchors.right = appletHandle.parent.right;
             //appletHandle.anchors.rightMargin = 0;
         }
-        print("handleMerged : " + appletItem.handleMerged + " min, height " + mini + ", " + appletHandle.height);
+        //print("handleMerged : " + appletItem.handleMerged + " min, height " + mini + ", " + appletHandle.height);
     }
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {
@@ -149,7 +149,7 @@ Item {
 //                 top: parent.top
                 right: parent.right
 //                 bottom: parent.bottom
-                //rightMargin: parent.rightMargin
+                rightMargin: (1-controlsOpacity) * appletItem.handleWidth
             }
             opacity: (backgroundHints == "NoBackground" || !handleMerged) ? controlsOpacity : 0
 
@@ -184,11 +184,14 @@ Item {
 
         MouseArea {
             id: dragMouseArea
+
             anchors.fill: parent
+            z: contentsItem.z - 2
+
             property int lastX
             property int lastY
             property int zoffset: 1000
-            z: contentsItem.z - 2
+
             onPressed: {
                 appletItem.z = appletItem.z + zoffset;
                 animationsEnabled = false
@@ -225,8 +228,10 @@ Item {
                 LayoutManager.save()
             }
         }
+
         Item {
             id: contentsItem
+
             z: mouseListener.z+1
             x: 0 + appletItem.margins.left
             y: 0 + appletItem.margins.top
@@ -277,11 +282,7 @@ Item {
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: plasmoidBackground.right
-                //top: parent.top
-                //bottom: parent.bottom
                 rightMargin: appletItem.margins.right
-                //bottomMargin: appletItem.margins.bottom
-                //topMargin: appletItem.margins.top
             }
         }
 
@@ -293,8 +294,8 @@ Item {
             height: width
             z: dragMouseArea.z+1
             anchors {
+                top: appletHandle.top
                 right: parent.right
-                topMargin: appletItem.margins.top
             }
 
             property int startX
@@ -365,5 +366,6 @@ Item {
         layoutTimer.running = true
         layoutTimer.restart()
         visible = false
+        // restore rotation
     }
 }
