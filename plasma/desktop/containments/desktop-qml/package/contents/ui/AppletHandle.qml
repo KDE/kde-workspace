@@ -26,47 +26,28 @@ Item {
 
     z: dragMouseArea.z + 1
     opacity: appletItem.controlsOpacity
+//     height: appletAppearance.handleMerged ? appletItem.height : minimumHeight
+    //height: parent.height
+    width: appletAppearance.handleWidth
 
-    anchors {
-        right: plasmoidBackground.right
-        top: parent.top
-        bottom: parent.bottom
-        rightMargin: appletItem.margins.right
-        bottomMargin: appletItem.margins.bottom
-        topMargin: appletItem.margins.top
-    }
+    onHeightChanged: print("handleheight: " + height);
 
-    ActionButton {
-        svg: configIconsSvg
-        elementId: "close"
-        iconSize: root.iconSize
-        visible: action.enabled
-        action: applet.action("remove")
-        z: dragMouseArea.z + 1
-        width: handleWidth
-        anchors {
-            bottom: parent.bottom
-            bottomMargin: 6
-            right: parent.right
-            rightMargin: -6
-        }
+    property int buttonMargin: 6
+    property int minimumHeight:  6 * (root.iconSize + buttonMargin)
 
-        Component.onCompleted: {
-            if (action && typeof(action) != "undefined") {
-                action.enabled = true
-            }
-        }
-    }
+    Rectangle { color: "yellow"; anchors.fill: parent; }
 
     Column {
         id: buttonColumn
         width: handleWidth
         anchors {
             top: parent.top
+            topMargin: appletItem.margins.top
+            bottomMargin: appletItem.margins.bottom
             right: parent.right
-            rightMargin: -6
+            rightMargin: -buttonMargin
         }
-        spacing: 12
+        spacing: buttonMargin*2
         ActionButton {
             svg: configIconsSvg
             z: dragMouseArea.z + 1
@@ -107,6 +88,29 @@ Item {
             }
         }
     }
+
+    ActionButton {
+        svg: configIconsSvg
+        elementId: "close"
+        iconSize: root.iconSize
+        visible: action.enabled
+        action: applet.action("remove")
+        z: dragMouseArea.z + 1
+        width: handleWidth
+        anchors {
+            bottom: parent.bottom
+            bottomMargin: appletItem.margins.bottom
+            right: parent.right
+            rightMargin: -buttonMargin
+        }
+
+        Component.onCompleted: {
+            if (action && typeof(action) != "undefined") {
+                action.enabled = true
+            }
+        }
+    }
+
     PlasmaCore.Svg {
         id: buttonSvg
         imagePath: "widgets/actionbutton"

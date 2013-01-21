@@ -29,6 +29,7 @@ Item {
     id: appletItem
 
     property int handleWidth: iconSize + 8 // 4 pixels margins inside handle
+    property alias handleHeight: appletHandle.height
     property string category
 
     property bool showAppletHandle: false
@@ -36,7 +37,7 @@ Item {
     property bool handleShown: true
     property string backgroundHints: "NoBackground"
     property bool hasBackground: false
-    property bool expandedHandle: (backgroundHints == "NoBackground" && appletItem.handleShown)
+    property bool handleMerged: false
     property bool animationsEnabled: false
     //property int handleWidth: appletHandle.width
 
@@ -59,6 +60,24 @@ Item {
 
     anchors.rightMargin: -handleWidth*controlsOpacity
 
+    onHeightChanged: {
+        // Does the handle's height fit into the frame?
+        var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
+        if (height > mini) {
+            //     height: appletAppearance.handleMerged ? appletItem.height : minimumHeight
+            //var mrg = appletItem.margins.top - appletItem.margins.bottom;
+            appletHandle.height = height;
+            appletItem.handleMerged = true;
+            appletHandle.anchors.right = plasmoidBackground.right;
+            //appletHandle.anchors.rightMargin = appletItem.margins.right;
+        } else {
+            appletHandle.height = mini;
+            appletItem.handleMerged = false;
+            appletHandle.anchors.right = appletHandle.parent.right;
+            //appletHandle.anchors.rightMargin = 0;
+        }
+        print("handleMerged : " + appletItem.handleMerged + " min, height " + mini + ", " + appletHandle.height);
+    }
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {
         id: appletTimer
@@ -123,15 +142,19 @@ Item {
             id: noBackgroundHandle
 
             width: handleWidth + margins.left + margins.right - 4
-            anchors {
-                top: parent.top
-                right: plasmoidBackground.right
-                bottom: parent.bottom
-                rightMargin: parent.right
-            }
-            opacity: (backgroundHints == "NoBackground" && appletItem.handleShown) ? controlsOpacity : 0
+            height: appletItem.handleHeight
 
-            imagePath: backgroundHints == "NoBackground" ? "widgets/background" : ""
+            anchors {
+                verticalCenter: parent.verticalCenter
+//                 top: parent.top
+                right: parent.right
+//                 bottom: parent.bottom
+                //rightMargin: parent.rightMargin
+            }
+            opacity: (backgroundHints == "NoBackground" || !handleMerged) ? controlsOpacity : 0
+
+            imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
+            Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
         }
 
         PlasmaCore.FrameSvgItem {
@@ -139,7 +162,7 @@ Item {
             visible: backgroundHints != "NoBackground"
             imagePath: "widgets/background"
             anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
-            width: showAppletHandle ? parent.width : parent.width-handleWidth;
+            width: (showAppletHandle && handleMerged) ? parent.width : parent.width-handleWidth;
             z: mouseListener.z-4
 
             Behavior on width {
@@ -228,7 +251,7 @@ Item {
                     LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
                     appletItem.destroy()
                 }
-                Rectangle { color: "green"; opacity: 1; visible: debug; anchors.fill: parent; }
+                Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
             }
         }
 
@@ -251,6 +274,15 @@ Item {
 
         AppletHandle {
             id: appletHandle
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: plasmoidBackground.right
+                //top: parent.top
+                //bottom: parent.bottom
+                rightMargin: appletItem.margins.right
+                //bottomMargin: appletItem.margins.bottom
+                //topMargin: appletItem.margins.top
+            }
         }
 
         MouseArea {

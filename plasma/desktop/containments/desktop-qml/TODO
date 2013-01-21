@@ -5,8 +5,8 @@ TODO:
 o mouse drag expands over handle
     o move mouseventlistener into subitem to be able to manage its margins / position
     o everything else under the mouse *has to be* parented to this one, still
-* minimum size for applethandle
-* switch handle appearance when minimumSize is reached during resize
+o minimum size for applethandle
+o switch handle appearance when minimumSize is reached during resize
 * implement rotation
     * rotate item
     * save rotation per item
