@@ -130,6 +130,7 @@ Item {
                             child.y = rect.y
                             child.width = rect.width
                             child.height = rect.height
+                            child.rotation = rect.rotation
                         } else {
                             child.x = 0
                             child.y = 0

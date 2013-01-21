@@ -21,14 +21,14 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 
+import "plasmapackage:/code/LayoutManager.js" as LayoutManager
+
 Item {
     id: appletHandle
 
     z: dragMouseArea.z + 1
     opacity: appletItem.controlsOpacity
     width: appletAppearance.handleWidth
-
-    onHeightChanged: print("handleheight: " + height);
 
     property int buttonMargin: 6
     property int minimumHeight:  6 * (root.iconSize + buttonMargin)
@@ -83,37 +83,64 @@ Item {
 
                 property int startX
                 property int startY
+                property int startRotation
+                property int prevMove
+                property bool skipOne: false;
 
                 onPressed: {
 //                     mouse.accepted = true
 //                     animationsEnabled = false;
                     startX = mouse.x;
                     startY = mouse.y;
+                    startRotation = appletItem.rotation;
+                    prevMove = 0;
+                    resizeHandle.rotation = -appletItem.rotation;
+
 
 //                     LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
                 }
                 onPositionChanged: {
-                    var rot = appletItem.rotation;
-                    var snap = 4;
-                    var moved = ((mouse.x - startX)) % 360;// + startY - mouse.y;
-                    if (Math.abs(rot - moved) > 20) {
+                    if (skipOne) {
+                        skipOne = false;
                         return;
                     }
+                    var rot = startRotation%360;
+                    var snap = 4;
+                    var moved = Math.round(((startY - mouse.y)/1.5) % 360);// + startY - mouse.y;
+                    var newRotation = (rot - moved)%360;
+
+                    if (newRotation < 0) {
+                        newRotation = newRotation + 360;
+                    }
+                    if ((moved - prevMove) > 100) {
+                        print("skipped: " + prevMove + " " + moved + " " + (moved - prevMove));
+                        skipOne = true;
+                        //prevMove = moved;
+                        return;
+                    }
+//                     if (Math.abs(appletItem.rotation - newRotation) > 20) {
+//                         print("skipped " + Math.abs(appletItem.rotation) + " newRotation " + newRotation );
+//                         return;
+//                     }
                     snapIt(0);
                     snapIt(90);
                     snapIt(180);
                     snapIt(240);
 
                     function snapIt(snapTo) {
-                        if (moved > (snapTo - snap) && moved < (snapTo + snap)) {
-                            moved = snapTo;
+                        if (newRotation > (snapTo - snap) && newRotation < (snapTo + snap)) {
+                            newRotation = snapTo;
                         }
                     }
-                    print(" Moved :" + moved);
-                    appletItem.rotation = moved;
+                    print(" Moved :" + moved +" start: " + startRotation  + " new: " + newRotation);
+                    appletItem.rotation = newRotation;
+                    prevMove = moved;
+                    skipOne = true;
                 }
                 onReleased: {
                     // save rotation
+//                    print("saving...");
+                    LayoutManager.saveItem(appletItem);
                 }
                 Rectangle { color: "red"; opacity: 0.6; visible: debug; anchors.fill: parent; }
             }

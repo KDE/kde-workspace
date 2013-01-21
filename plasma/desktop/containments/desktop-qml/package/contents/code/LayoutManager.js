@@ -47,9 +47,10 @@ function restore()
             continue
         }
 
-        //array [x, y, width, height]
+        //array [x, y, width, height, rotation]
+        print("============================" + idConfig[1]);
         var rect = idConfig[1].split(",")
-        if (rect.length < 4) {
+        if (rect.length < 5) {
             continue
         }
         var geomObject = new Object()
@@ -57,6 +58,8 @@ function restore()
         geomObject.y = rect[1]
         geomObject.width = rect[2]
         geomObject.height = rect[3]
+        geomObject.rotation = parseFloat(rect[4])
+        print("xxxxx Rotation: " + geomObject.rotation + " " + rect[4]);
         itemsConfig[idConfig[0]] = geomObject
     }
 
@@ -68,7 +71,7 @@ function save()
 
     for (id in itemsConfig) {
         var rect = itemsConfig[id]
-        configString += id.replace(":", "%3A") + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + ";"
+        configString += id.replace(":", "%3A") + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";"
     }
 
     //print("saving "+configString)
@@ -250,14 +253,21 @@ function positionItem(item)
     item.width = width
     item.height = height
 
-    var rect = new Object()
+    saveItem(item);
+}
+
+function saveItem(item) {
+     var rect = new Object()
     rect.x = item.x
     rect.y = item.y
     rect.width = item.width
     rect.height = item.height
+    rect.rotation = item.rotation
+    //print("-- Saving rotation : " + rect.rotation);
     //save only things that actually have a category (exclude the placeholder)
     if (item.category) {
+        print("-- Saving rotation : " + rect.rotation);
         itemsConfig[item.category] = rect
     }
-}
 
+}
