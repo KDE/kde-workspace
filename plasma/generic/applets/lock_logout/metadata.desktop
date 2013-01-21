@@ -20,7 +20,7 @@ Name[eo]=Ŝloso/adiaŭo
 Name[es]=Bloquear/Terminar
 Name[et]=Lukustamine/väljalogimine
 Name[eu]=Blokeatu/Saiotik irten
-Name[fi]=Lukitus/Kirjaudu ulos
+Name[fi]=Lukitus/uloskirjautuminen
 Name[fr]=Verrouillage / Déconnexion
 Name[fy]=Beskoattelje/ôfmelde
 Name[ga]=Cuir Faoi Ghlas/Logáil Amach
@@ -177,6 +177,7 @@ Keywords[sr@latin]=Lock;Logout;Sleep;Hibernate;Switch User;zaključavanje;odjavl
 Keywords[sv]=Lås;Utloggning;Viloläge;Dvala;Byt användare;
 Keywords[uk]=Lock;Logout;Sleep;Hibernate;Switch User;блокування;вихід;присипляння;сон;перемикання;користувач
 Keywords[x-test]=xxLock; Logout; Sleep; Hibernate; Switch User;xx
+Keywords[zh_TW]=Lock; Logout; Sleep; Hibernate; Switch User;
 
 Type=Service
 Icon=system-shutdown
