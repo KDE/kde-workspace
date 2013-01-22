@@ -183,7 +183,7 @@ Item {
         width: handleWidth
         anchors {
             bottom: parent.bottom
-            bottomMargin: appletItem.margins.bottom
+            bottomMargin: appletItem.margins.bottom + 2
             right: parent.right
             rightMargin: -buttonMargin
         }
