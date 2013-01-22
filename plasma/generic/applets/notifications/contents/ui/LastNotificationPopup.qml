@@ -114,8 +114,10 @@ PlasmaCore.Dialog {
         onContainsMouseChanged: {
             if (containsMouse) {
                 mainItem.state = "controlsShown"
+                lastNotificationTimer.running = false
             } else {
                 mainItem.state = "controlsHidden"
+                lastNotificationTimer.restart()
             }
         }
         onPressed: {
@@ -130,10 +132,8 @@ PlasmaCore.Dialog {
             if ((navigationButtonsColumn.visible && mouse.x < navigationButtonsColumn.width) ||
                 buttonPressed ||
                 Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
-                lastNotificationTimer.restart()
             } else {
                 lastNotificationPopup.visible = false
-                lastNotificationTimer.running = false
             }
 
             setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(mouse.screenY - startY)), true)
@@ -142,7 +142,6 @@ PlasmaCore.Dialog {
             setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(0, mouse.screenY - startY)), false)
         }
         onWheelMoved: {
-            lastNotificationTimer.restart()
             if (notificationsView.moving) {
                 return
             }
@@ -297,7 +296,6 @@ PlasmaCore.Dialog {
                     }
                 }
                 onClicked: {
-                    lastNotificationTimer.restart()
                     notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
                 }
             }
@@ -316,7 +314,6 @@ PlasmaCore.Dialog {
                     }
                 }
                 onClicked: {
-                    lastNotificationTimer.restart()
                     notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
                 }
             }
