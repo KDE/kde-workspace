@@ -283,6 +283,11 @@ void UnlockApp::setTesting(bool enable)
     }
 }
 
+void UnlockApp::showSwitchUser()
+{
+    emit requestSwitchUserUI();
+}
+
 bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
 {
     Q_UNUSED(obj)

@@ -80,12 +80,17 @@ public:
      * @returns @c true if a new session can be started, @c false otherwise.
      **/
     bool isStartNewSessionSupported() const;
+
+Q_SIGNALS:
+    void showSwitchUser();
+
 public Q_SLOTS:
     /**
      * Invoke to start a new session if allowed.
      **/
     void startNewSession();
     void activateSession(int index);
+
 private:
     UserSessionsModel *m_sessionModel;
 };

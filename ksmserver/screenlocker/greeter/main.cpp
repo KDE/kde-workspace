@@ -53,15 +53,22 @@ int main(int argc, char* argv[])
     KCmdLineArgs::init(argc, argv, &aboutData);
     KCmdLineOptions options;
     options.add("testing", ki18n("Starts the greeter in testing mode"));
+    options.add("switchuser", ki18n("Immediately shows the switch user interface on launch"));
     KCmdLineArgs::addCmdLineOptions(options);
 
     ScreenLocker::UnlockApp app;
     KGlobal::locale()->insertCatalog(QLatin1String( "libkworkspace" ));
     app.disableSessionManagement(); // manually-started
+
     KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
     if (args->isSet("testing")) {
         app.setTesting(true);
     }
+
+    if (args->isSet("switchuser")) {
+        app.showSwitchUser();
+    }
+
     args->clear();
     return app.exec();
 }

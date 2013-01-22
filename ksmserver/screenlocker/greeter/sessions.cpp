@@ -20,6 +20,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "sessions.h"
+
+#include <QCoreApplication>
+
 // workspace
 #include <kdisplaymanager.h>
 // KDE
@@ -117,6 +120,8 @@ SessionSwitching::SessionSwitching(QObject *parent)
     : QObject (parent)
     , m_sessionModel(new UserSessionsModel(this))
 {
+    connect(QCoreApplication::instance(), SIGNAL(requestSwitchUserUI()),
+            this, SIGNAL(showSwitchUser()));
 }
 
 SessionSwitching::~SessionSwitching()

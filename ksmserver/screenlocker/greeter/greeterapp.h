@@ -43,6 +43,10 @@ public:
     virtual ~UnlockApp();
 
     void setTesting(bool enable);
+    void showSwitchUser();
+
+Q_SIGNALS:
+    void requestSwitchUserUI();
 
 protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
