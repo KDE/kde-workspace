@@ -285,31 +285,11 @@ void KRunnerApp::displayWithClipboardContents()
 
 void KRunnerApp::switchUser()
 {
-    //FIXME: show a QML representation of user switching
-    /*
-    const KService::Ptr service = KService::serviceByStorageId(QLatin1String("plasma-runner-sessions.desktop"));
-    KPluginInfo info(service);
-
-    if (info.isValid()) {
-        SessList sessions;
-        KDisplayManager dm;
-        dm.localSessions(sessions);
-
-        if (sessions.isEmpty()) {
-            // no sessions to switch between, let's just start up another session directly
-            Plasma::AbstractRunner *sessionRunner = m_runnerManager->runner(info.pluginName());
-            if (sessionRunner) {
-                Plasma::QueryMatch switcher(sessionRunner);
-                sessionRunner->run(*m_runnerManager->searchContext(), switcher);
-            }
-        } else {
-            m_runnerManager->setSingleModeRunnerId(info.pluginName());
-            m_runnerManager->setSingleMode(true);
-            m_interface->display();
-            //TODO: ugh, magic strings. See sessions/sessionrunner.cpp
-            m_runnerManager->launchQuery(QLatin1String("SESSIONS"), info.pluginName());
-        }
-    }*/
+    const QString interface("org.kde.ksmserver");
+    QDBusInterface sessionServer(interface, "/KSMServer");
+    if (sessionServer.isValid()) {
+        sessionServer.asyncCall("switchUser");
+    }
 }
 
 void KRunnerApp::clearHistory()
