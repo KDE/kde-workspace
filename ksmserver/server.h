@@ -197,7 +197,7 @@ private:
 
     // public dcop interface
 
- public Q_SLOTS: //public dcop interface
+ public Q_SLOTS: //public IPC interface
     void logout( int, int, int );
     bool canShutdown();
     QString currentSession();
@@ -208,6 +208,7 @@ private:
     void saveSubSession( const QString &name, QStringList saveAndClose,
                        QStringList saveOnly = QStringList() );
     void restoreSubSession( const QString &name );
+    void switchUser();
 
  Q_SIGNALS:
     void subSessionClosed();

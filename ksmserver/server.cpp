@@ -1072,3 +1072,11 @@ void KSMServer::rebootWithoutConfirmation()
 {
     shutdown(KWorkSpace::ShutdownConfirmNo, KWorkSpace::ShutdownTypeReboot, KWorkSpace::ShutdownModeDefault);
 }
+
+void KSMServer::switchUser()
+{
+#ifdef COMPILE_SCREEN_LOCKER
+    ScreenLocker::KSldApp::self()->switchUser();
+#endif
+}
+
