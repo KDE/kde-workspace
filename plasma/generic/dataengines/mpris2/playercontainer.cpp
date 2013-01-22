@@ -150,6 +150,26 @@ void PlayerContainer::refresh()
     ++m_fetchesPending;
 }
 
+static bool decodeUri(QVariantMap &map, const QString& entry) {
+    if (map.contains(entry)) {
+        QString urlString = map.value(entry).toString();
+        QUrl url = QUrl::fromEncoded(urlString.toAscii());
+        if (!url.isValid()) {
+            // try to be lenient
+            url = QUrl(urlString);
+        }
+        if (url.isValid()) {
+            map.insert(entry, QVariant(url));
+            return true;
+        } else {
+            map.remove(QLatin1String("mpris:artUrl"));
+            return false;
+        }
+    }
+    // count it as a success if it doesn't exist
+    return true;
+}
+
 void PlayerContainer::copyProperty(const QString& propName, const QVariant& _value, QVariant::Type expType, UpdateType updType)
 {
     QVariant value = _value;
@@ -162,9 +182,17 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
                     << "with the wrong type; it should be D-Bus type \"a{sv}\"";
                 return;
             }
-            QVariantMap metadata;
-            arg >> metadata;
-            value = QVariant(metadata);
+            QVariantMap map;
+            arg >> map;
+            if (propName == QLatin1String("Metadata")) {
+                if (!decodeUri(map, QLatin1String("mpris:artUrl"))) {
+                    kWarning() << m_dbusAddress << "has an invalid URL for the mpris:artUrl entry of the \"Metadata\" property";
+                }
+                if (!decodeUri(map, QLatin1String("xesam:url"))) {
+                    kWarning() << m_dbusAddress << "has an invalid URL for the xesam:url entry of the \"Metadata\" property";
+                }
+            }
+            value = QVariant(map);
         }
     }
     if (value.type() != expType) {

@@ -39,6 +39,7 @@
 #endif
 
 #include <KIcon>
+#include <KIconLoader>
 #include <KColorScheme>
 
 class ToolTipManager::Private
@@ -63,7 +64,7 @@ ToolTipManager::ToolTipManager(QAbstractItemView* parent)
 
     connect(parent, SIGNAL(viewportEntered()), this, SLOT(hideToolTip()));
     connect(parent, SIGNAL(entered(QModelIndex)), this, SLOT(requestToolTip(QModelIndex)));
-            
+
     d->timer = new QTimer(this);
     d->timer->setSingleShot(true);
     connect(d->timer, SIGNAL(timeout()), this, SLOT(prepareToolTip()));
@@ -96,7 +97,7 @@ bool ToolTipManager::eventFilter(QObject* watched, QEvent* event)
                 break;
         }
     }
-    
+
     return QObject::eventFilter(watched, event);
 }
 
@@ -106,7 +107,7 @@ void ToolTipManager::requestToolTip(const QModelIndex& index)
     // drag & drop operation is done (indicated by the left mouse button)
     if ( !(QApplication::mouseButtons() & Qt::LeftButton) ) {
         KToolTip::hideTip();
-        
+
         d->itemRect = d->view->visualRect(index);
         const QPoint pos = d->view->viewport()->mapToGlobal(d->itemRect.topLeft());
         d->itemRect.moveTo(pos);
@@ -180,15 +181,18 @@ void ToolTipManager::showToolTip( QModelIndex menuItem )
 
 QWidget * ToolTipManager::createTipContent( QModelIndex item )
 {
+    const QSize dialogIconSize = QSize(IconSize(KIconLoader::Dialog), IconSize(KIconLoader::Dialog));
+    const QSize toolbarIconSize = QSize(IconSize(KIconLoader::MainToolbar), IconSize(KIconLoader::MainToolbar));
+
     QWidget * tipContent = new QWidget();
     QGridLayout* tipLayout = new QGridLayout();
 
-    QLayout * primaryLine = generateToolTipLine( &item, tipContent, QSize(32,32), true );
+    QLayout * primaryLine = generateToolTipLine( &item, tipContent, dialogIconSize, true );
     tipLayout->addLayout( primaryLine, 0, 0 );
 
     for ( int done = 0; d->view->model()->rowCount( item ) > done; done = 1 + done ) {
         QModelIndex childItem = d->view->model()->index( done, 0, item );
-        QLayout * subLine = generateToolTipLine( &childItem, tipContent, QSize(24,24), false );
+        QLayout * subLine = generateToolTipLine( &childItem, tipContent, toolbarIconSize, false );
         tipLayout->addLayout( subLine, done + 2, 0 );
     }
 
@@ -209,7 +213,7 @@ QLayout * ToolTipManager::generateToolTipLine( QModelIndex * item, QWidget * too
     // Get MenuItem
     MenuItem * menuItem = d->view->model()->data( *item, Qt::UserRole ).value<MenuItem*>();
 
-    QString text = menuItem->name(); 
+    QString text = menuItem->name();
     if ( comment ) {
         text = QString( "<b>%1</b>" ).arg( menuItem->name() );
     }
@@ -227,18 +231,18 @@ QLayout * ToolTipManager::generateToolTipLine( QModelIndex * item, QWidget * too
     QLabel * textLabel = new QLabel( toolTip );
     textLabel->setForegroundRole(QPalette::ToolTipText);
     textLabel->setText( text );
-    
+
     // Get icon
     KIcon icon( menuItem->service()->icon() );
     QLabel * iconLabel = new QLabel( toolTip );
     iconLabel->setPixmap( icon.pixmap(iconSize) );
     iconLabel->setMaximumSize( iconSize );
-    
+
     // Generate layout
     QHBoxLayout * layout = new QHBoxLayout();
     layout->addWidget( iconLabel );
     layout->addWidget( textLabel );
-    
+
     return layout;
 }
 
