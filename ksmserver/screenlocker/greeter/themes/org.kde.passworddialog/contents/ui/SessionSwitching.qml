@@ -26,12 +26,19 @@ Item {
     property alias switchUserSupported: sessions.switchUserSupported
     implicitWidth: theme.defaultFont.mSize.width * 55
     implicitHeight: Math.min(lockScreen.height, theme.defaultFont.mSize.height * 25)
+    signal showRequested()
     signal activateSession()
     signal startNewSession()
     signal cancel()
     Sessions {
         id: sessions
     }
+
+    Connections {
+        target: sessions
+        onShowSwitchUser: showRequested()
+    }
+
     anchors {
         fill: parent
         margins: 6

@@ -91,6 +91,7 @@ Item {
             onCancel: mainStack.pop()
             onActivateSession: mainStack.pop()
             onStartNewSession: mainStack.pop()
+            onShowRequested: mainStack.push(userSessionsUI)
         }
     }
 }
