@@ -230,10 +230,9 @@ void UnlockApp::suspendToRam()
     m_resetRequestIgnoreTimer->start();
 
     QDBusInterface iface("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement",
-            "org.kde.Solid.PowerManagement");
+                         "/org/kde/Solid/PowerManagement",
+                         "org.kde.Solid.PowerManagement");
     iface.asyncCall("suspendToRam");
-
 }
 
 void UnlockApp::suspendToDisk()
@@ -246,8 +245,8 @@ void UnlockApp::suspendToDisk()
     m_resetRequestIgnoreTimer->start();
 
     QDBusInterface iface("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement",
-            "org.kde.Solid.PowerManagement");
+                         "/org/kde/Solid/PowerManagement",
+                         "org.kde.Solid.PowerManagement");
     iface.asyncCall("suspendToDisk");
 }
 
