@@ -28,6 +28,8 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 Item {
     id: appletItem
 
+    anchors.rightMargin: -handleWidth*controlsOpacity
+
     property int handleWidth: iconSize + 8 // 4 pixels margins inside handle
     property alias handleHeight: appletHandle.height
     property string category
@@ -57,8 +59,6 @@ Item {
     property Item contents: contentsItem
     property alias margins: plasmoidBackground.margins
     property alias imagePath: plasmoidBackground.imagePath
-
-    anchors.rightMargin: -handleWidth*controlsOpacity
 
     onHeightChanged: {
         // Does the handle's height fit into the frame?
@@ -152,6 +152,7 @@ Item {
                 rightMargin: (1-controlsOpacity) * appletItem.handleWidth
             }
             opacity: (backgroundHints == "NoBackground" || !handleMerged) ? controlsOpacity : 0
+            smooth: true
 
             imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
             Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
@@ -164,6 +165,7 @@ Item {
             anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
             width: (showAppletHandle && handleMerged) ? parent.width : parent.width-handleWidth;
             z: mouseListener.z-4
+            smooth: true
 
             Behavior on width {
                 enabled: animationsEnabled

@@ -158,6 +158,19 @@ Item {
                 }
             }
         }
+        ActionButton {
+            svg: configIconsSvg
+            z: dragMouseArea.z + 1
+            elementId: "maximize"
+            iconSize: root.iconSize
+            visible: action.enabled
+            action: applet.action("run associated application")
+            Component.onCompleted: {
+                if (action && typeof(action) != "undefined") {
+                    action.enabled = true
+                }
+            }
+        }
     }
 
     ActionButton {
