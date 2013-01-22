@@ -76,7 +76,8 @@ public:
 
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
-     void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void switchUser();
+    void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 Q_SIGNALS:
     void locked();
@@ -91,7 +92,7 @@ private:
     bool establishGrab();
     bool grabKeyboard();
     bool grabMouse();
-    bool startLockProcess();
+    bool startLockProcess(bool switchUser = false);
     void showLockWindow();
     void hideLockWindow();
     void doUnlock();

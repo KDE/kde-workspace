@@ -188,6 +188,11 @@ void KSldApp::lock()
     emit locked();
 }
 
+void KSldApp::switchUser()
+{
+    lock();
+}
+
 KActionCollection *KSldApp::actionCollection()
 {
     return m_actionCollection;
@@ -265,7 +270,7 @@ void KSldApp::lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     startLockProcess();
 }
 
-bool KSldApp::startLockProcess()
+bool KSldApp::startLockProcess(bool switchUser)
 {
     if (m_plasmaEnabled) {
         m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("plasma-overlay")));
@@ -273,6 +278,11 @@ bool KSldApp::startLockProcess()
     } else {
         m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")));
     }
+
+    if (switchUser) {
+        *m_lockProcess << QLatin1String("--switchUser");
+    }
+
     m_lockProcess->start();
     // we wait one minute
     if (!m_lockProcess->waitForStarted()) {
