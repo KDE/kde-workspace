@@ -34,7 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KDebug>
 #include <KDE/KIdleTime>
 #include <KDE/KLocalizedString>
-#include <KDE/KNotification>
 #include <KDE/KProcess>
 #include <KDE/KStandardDirs>
 // Qt
@@ -172,7 +171,6 @@ void KSldApp::lock()
         return;
     }
     KDisplayManager().setLock(true);
-    KNotification::event(QLatin1String( "locked" ));
 
     // blank the screen
     showLockWindow();
@@ -253,7 +251,6 @@ void KSldApp::doUnlock()
     m_lockedTimer.invalidate();
     KDisplayManager().setLock(false);
     emit unlocked();
-    KNotification::event( QLatin1String("unlocked"));
 }
 
 static bool s_graceTimeKill = false;
