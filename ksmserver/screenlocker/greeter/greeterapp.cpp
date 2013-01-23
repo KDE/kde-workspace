@@ -160,7 +160,9 @@ void UnlockApp::desktopResized()
         kdeclarative.initialize();
         kdeclarative.setupBindings();
         QDeclarativeContext *context = view->engine()->rootContext();
-        context->setContextProperty("kscreenlocker_userName", KUser().property(KUser::FullName).toString());
+        const KUser user;
+        const QString fullName = user.property(KUser::FullName).toString();
+        context->setContextProperty("kscreenlocker_userName", fullName.isEmpty() ? user.loginName() : fullName);
 
         view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
