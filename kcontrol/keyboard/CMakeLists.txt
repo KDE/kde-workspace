@@ -120,6 +120,7 @@ set(kcm_keyboard_PART_SRCS
   preview/keysymhelper.cpp
   preview/kbpreviewframe.cpp
   preview/keysym2ucs.cpp
+  preview/kbgeometry.cpp
 )
 
 

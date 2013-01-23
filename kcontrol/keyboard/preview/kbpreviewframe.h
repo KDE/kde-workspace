@@ -21,28 +21,36 @@
 #include "keyboardlayout.h"
 #include "keysymhelper.h"
 #include "keyaliases.h"
-
+#include "kbgeometry.h"
 #include <QPainter>
 #include <QtGui/QFrame>
+
+struct ToolTipText{
+	QPoint ttPoint;
+	QString ttString;
+};
 
 class KbPreviewFrame : public QFrame
 {
     Q_OBJECT
 private:
-	void paintTLDE(QPainter &painter,int &x,int &y);
-	void paintAERow(QPainter &painter,int &x,int &y);
-	void paintADRow(QPainter &painter,int &x,int &y);
-	void paintACRow(QPainter &painter,int &x,int &y);
-	void paintABRow(QPainter &painter,int &x,int &y);
-	void paintBottomRow(QPainter &painter,int &x,int &y);
-	void paintFnKeys(QPainter &painter,int &x,int &y);
+	int scalex,scaley;
+    void setScaleFactor(int width,int hieght);
+    void writeKeySym(QPainter &painter,KeyGm key);
+    void plotSym(QPainter &painter,KeyGm key,Keys sym);
+    void plotSym(QPainter &painter,KeyGm key,QString sym);
+    void getkeyboardlayout(QString country, QString layoutvariant);
 	KeySymHelper symbol;
 	Aliases alias;
 public:
+	QList<ToolTipText> toolTipList;
     explicit KbPreviewFrame(QWidget *parent = 0);
     void paintEvent(QPaintEvent *);
+    bool event(QEvent *event);
+    int keyAt(QPoint pos);
+    KbGeometry geometry;
     KeyboardLayout kblayout;
-    void generateKeyboardLayout(const QString &country, const QString &layoutvariant);
+    void generateKeyboardLayout(const QString &country, const QString &layoutvariant, const QString &model);
 
     
 };

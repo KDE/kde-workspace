@@ -27,7 +27,7 @@ class Keys
 {
 public:
     Keys();
-    QString keyname;
+    QString keyname,keyVal;
     QList<QString>klst;
     void setKey(QString opton);
 };

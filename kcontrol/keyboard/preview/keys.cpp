@@ -49,5 +49,7 @@ void Keys::setKey(QString a)
         du.remove("\t");
         du.remove("\n");
         klst[k]=du;
+        keyVal.append(du);
+        keyVal.append("\n");
     }
 }

@@ -36,9 +36,10 @@ class KeyboardPainter : public QDialog
 public:
     explicit KeyboardPainter();
     ~KeyboardPainter();
-    void generateKeyboardLayout(QString country, QString layoutvariant);
+    void generateKeyboardLayout(QString country, QString layoutvariant, QString model);
     
 private:
+	bool event(QEvent *event);
     Ui::keyboardpainter *ui;
     KbPreviewFrame *kbframe;
     QPushButton *exitButton;

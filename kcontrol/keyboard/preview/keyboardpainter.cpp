@@ -17,10 +17,12 @@
  */
 
 #include "keyboardpainter.h"
-#include "ui_keyboardpainter.h"
+#include "ui_KeyboardPainter.h"
 
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
+#include <QToolTip>
+#include <QHelpEvent>
 
 KeyboardPainter::KeyboardPainter() :
     ui(new Ui::keyboardpainter),
@@ -35,11 +37,28 @@ KeyboardPainter::KeyboardPainter() :
     vLayout->addWidget(kbframe);
     vLayout->addWidget(exitButton);
     setWindowTitle(kbframe->kblayout.getLayoutName());
+    setMouseTracking(true);
 }
 
-void KeyboardPainter::generateKeyboardLayout(QString country, QString variant)
+void KeyboardPainter::generateKeyboardLayout(QString country, QString variant,QString model)
 {
-    kbframe->generateKeyboardLayout(country,variant);
+    kbframe->generateKeyboardLayout(country,variant,model);
+}
+
+bool KeyboardPainter::event(QEvent *event){
+    if (event->type() == QEvent::ToolTip) {
+         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+         int index = kbframe->keyAt(helpEvent->pos());
+         if (index != -1) {
+             QToolTip::showText(helpEvent->globalPos(), kbframe->toolTipList[index].ttString);
+         } else {
+             QToolTip::hideText();
+             event->ignore();
+         }
+
+         return true;
+     }
+     return QWidget::event(event);
 }
 
 KeyboardPainter::~KeyboardPainter()
