@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KDebug>
 #include <KDE/KStandardDirs>
 #include <KDE/KUser>
+#include <KDE/KWindowSystem>
 #include <Solid/PowerManagement>
 #include <kdeclarative.h>
 //Plasma
@@ -51,6 +52,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <fixx11h.h>
+
+// this is usable to fake a "screensaver" installation for testing
+// *must* be "0" for every public commit!
+#define TEST_SCREENSAVER 0
 
 namespace ScreenLocker
 {
@@ -98,7 +103,11 @@ void UnlockApp::initialize()
     KCrash::setDrKonqiEnabled(false);
 
     KScreenSaverSettings::self()->readConfig();
+#if TEST_SCREENSAVER
+    m_showScreenSaver = true;
+#else
     m_showScreenSaver = KScreenSaverSettings::legacySaverEnabled();
+#endif
 
     m_structure = Plasma::PackageStructure::load("Plasma/Generic");
     m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), KScreenSaverSettings::greeterQML(), m_structure);
@@ -148,7 +157,6 @@ void UnlockApp::desktopResized()
                 this, SLOT(viewStatusChanged(QDeclarativeView::Status)));
         view->setWindowFlags(Qt::X11BypassWindowManagerHint);
         view->setFrameStyle(QFrame::NoFrame);
-        view->installEventFilter(this);
 
         // engine stuff
         KDeclarative kdeclarative;
@@ -232,11 +240,15 @@ void UnlockApp::desktopResized()
             ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
             screensaverWindow->setGeometry(view->geometry());
 
+#if TEST_SCREENSAVER
+            screensaverWindow->setAutoFillBackground(true);
+#else
             QPixmap backgroundPix(screensaverWindow->size());
             QPainter p(&backgroundPix);
             view->render(&p);
             p.end();
             screensaverWindow->setBackground(backgroundPix);
+#endif
             screensaverWindow->show();
             screensaverWindow->activateWindow();
             connect(screensaverWindow, SIGNAL(hidden()), this, SLOT(getFocus()));
@@ -244,14 +256,52 @@ void UnlockApp::desktopResized()
     }
     // random state update, actually rather required on init only
     QMetaObject::invokeMethod(this, "getFocus", Qt::QueuedConnection);
+    // getFocus on the next event cycle does not work as expected for multiple views
+    // if there's no screensaver, hiding it won't happen and thus not trigger getFocus either
+    // so we call it again in a few miliseconds - the value is nearly random but "must cross some event cycles"
+    // while 150ms worked for me, 250ms gets us a bit more padding without being notable to a human user
+    if (nScreens > 1 && m_screensaverWindows.isEmpty()) {
+        QTimer::singleShot(250, this, SLOT(getFocus()));
+    }
     capsLocked();
 }
 
 void UnlockApp::getFocus()
 {
-    if (!m_views.isEmpty()) {
-        m_views.first()->activateWindow();
+    if (m_views.isEmpty()) {
+        return;
     }
+    QWidget *w = 0;
+    // this loop is required to make the qml/graphicsscene properly handle the shared keyboard input
+    // ie. "type something into the box of every greeter"
+    foreach (QDeclarativeView *view, m_views) {
+        view->activateWindow();
+        view->grabKeyboard();
+        view->setFocus(Qt::OtherFocusReason);
+    }
+    // determine which window should actually be active and have the real input focus/grab
+    foreach (QDeclarativeView *view, m_views) {
+        if (view->underMouse()) {
+            w = view;
+            break;
+        }
+    }
+    if (!w) { // try harder
+        foreach (QDeclarativeView *view, m_views) {
+            if (view->geometry().contains(QCursor::pos())) {
+                w = view;
+                break;
+            }
+        }
+    }
+    if (!w) { // fallback solution
+        w = m_views.first();
+    }
+    // activate window and grab input to be sure it really ends up there.
+    // focus setting is still required for proper internal QWidget state (and eg. visual reflection)
+    w->grabKeyboard();
+    w->activateWindow();
+    w->setFocus(Qt::OtherFocusReason);
 }
 
 void UnlockApp::setLockedPropertyOnViews()
@@ -354,14 +404,15 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
 
     static bool ignoreNextEscape = false;
     if (event->type() == QEvent::KeyPress) { // react if saver is visible
-        bool saverVisible = false;
+        bool saverVisible = !m_screensaverWindows.isEmpty();
         foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
-            if (screensaverWindow->isVisible()) {
-                saverVisible = true;
+            if (!screensaverWindow->isVisible()) {
+                saverVisible = false;
                 break;
             }
         }
         if (!saverVisible) {
+            shareEvent(event, qobject_cast<QDeclarativeView*>(obj));
             return false; // we don't care
         }
         ignoreNextEscape = bool(static_cast<QKeyEvent *>(event)->key() == Qt::Key_Escape);
@@ -378,6 +429,7 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
             return false;
         }
         if (ke->key() != Qt::Key_Escape) {
+            shareEvent(event, qobject_cast<QDeclarativeView*>(obj));
             return false; // irrelevant
         }
         if (ignoreNextEscape) {
@@ -425,6 +477,34 @@ void UnlockApp::capsLocked()
         foreach (QDeclarativeView *view, m_views) {
             view->rootObject()->setProperty("capsLockOn", m_capsLocked);
         }
+    }
+}
+
+/*
+ * This function forwards an event from one greeter window to all others
+ * It's used to have the keyboard operate on all greeter windows (on every screen)
+ * at once so that the user gets visual feedback on the screen he's looking at -
+ * even if the focus is actually on a powered off screen.
+ */
+
+void UnlockApp::shareEvent(QEvent *e, QDeclarativeView *from)
+{
+    // from can be NULL any time (because the parameter is passed as qobject_cast)
+    // m_views.contains(from) is atm. supposed to be true but required if any further
+    // QDeclarativeViews are added (which are not part of m_views)
+    // this makes "from" an optimization (nullptr check aversion)
+    if (from && m_views.contains(from)) {
+        // NOTICE any recursion in the event sharing will prevent authentication on multiscreen setups!
+        // Any change in regarded event processing shall be tested thoroughly!
+        removeEventFilter(this); // prevent recursion!
+        const bool accepted = e->isAccepted(); // store state
+        foreach (QDeclarativeView *view, m_views) {
+            if (view != from) {
+                QApplication::sendEvent(view, e);
+                e->setAccepted(accepted);
+            }
+        }
+        installEventFilter(this);
     }
 }
 

@@ -63,6 +63,7 @@ private Q_SLOTS:
 private:
     void initialize();
     void capsLocked();
+    void shareEvent(QEvent *e, QDeclarativeView *from);
 
     QString m_mainQmlPath;
     QList<QDeclarativeView*> m_views;
