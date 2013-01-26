@@ -153,7 +153,7 @@ static bool decodeUri(QVariantMap &map, const QString& entry) {
             map.insert(entry, QVariant(url));
             return true;
         } else {
-            map.remove(QLatin1String("mpris:artUrl"));
+            map.remove(entry);
             return false;
         }
     }
