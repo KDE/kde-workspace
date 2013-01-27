@@ -27,6 +27,8 @@
 #define POS_UPD_STRING "Position last updated (UTC)"
 
 #include <KDebug>
+#include <KDesktopFile>
+#include <KStandardDirs>
 
 #include <QtDBus>
 #include <QDateTime>
@@ -250,6 +252,13 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
                 // only sensible value for a stopped track
                 setData("Position", static_cast<qint64>(0));
                 setData(POS_UPD_STRING, QDateTime::currentDateTimeUtc());
+            }
+        } else if (propName == QLatin1String("DesktopEntry")) {
+            QString filename = value.toString() + QLatin1String(".desktop");
+            KDesktopFile desktopFile("xdgdata-apps", filename);
+            QString iconName = desktopFile.readIcon();
+            if (!iconName.isEmpty()) {
+                setData("Desktop Icon Name", iconName);
             }
         }
         setData(propName, value);
