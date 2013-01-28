@@ -77,7 +77,7 @@ Item {
 
         PlasmaComponents.Label {
             id: lockMessage
-            text: kscreenlocker_userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
+            text: kscreenlocker_userName.length == 0 ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
@@ -119,7 +119,7 @@ Item {
 
             AccelButton {
                 id: switchUser
-                label: i18n("Switch Users")
+                label: i18n("&Switch Users")
                 iconSource: "fork"
                 visible: switchUserEnabled
                 onClicked: switchUserClicked()
@@ -127,7 +127,7 @@ Item {
 
             AccelButton {
                 id: unlock
-                label: i18n("Unlock")
+                label: i18n("Un&lock")
                 iconSource: "object-unlocked"
                 onClicked: greeter.verify()
             }
