@@ -1,7 +1,6 @@
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/kcheckpass
-    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kdm
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kworkspace
 )
