@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lockwindow.h"
 #include "autologout.h"
 #include "ksldapp.h"
-// workspace
-#include <kephal/kephal/screens.h>
 // KDE
 #include <KDE/KApplication>
 #include <KDE/KDebug>
@@ -508,22 +506,27 @@ bool LockWindow::isLockWindow(Window id)
 
 void LockWindow::autoLogoutTimeout()
 {
+    QDesktopWidget *desktop = QApplication::desktop();
+    QRect screenRect;
+    if (desktop->screenCount() > 1) {
+        screenRect = desktop->screenGeometry(desktop->screenNumber(QCursor::pos()));
+    } else {
+        screenRect = desktop->screenGeometry();
+    }
+
     QPointer<AutoLogout> dlg = new AutoLogout(this);
     dlg->adjustSize();
 
-    int screen = Kephal::ScreenUtils::primaryScreenId();
-    if (Kephal::ScreenUtils::numScreens() > 1) {
-        screen = Kephal::ScreenUtils::screenId(QCursor::pos());
-    }
-
-    const QRect screenRect = Kephal::ScreenUtils::screenGeometry(screen);
     QRect rect = dlg->geometry();
     rect.moveCenter(screenRect.center());
     dlg->move(rect.topLeft());
+
     Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
     XChangeProperty(QX11Info::display(), dlg->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+
     dlg->exec();
     delete dlg;
+
     // start the timer again - only if the window is still shown
     if (isVisible()) {
         m_autoLogoutTimer->start(KSldApp::self()->autoLogoutTimeout());
