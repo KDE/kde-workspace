@@ -205,7 +205,7 @@ void UnlockApp::desktopResized()
 
         view->setGeometry(desktop()->screenGeometry(i));
         view->show();
-        view->activateWindow();
+        view->raise();
 
         if (m_showScreenSaver) {
             ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
