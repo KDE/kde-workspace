@@ -69,8 +69,8 @@ UnlockApp::UnlockApp()
     , m_showScreenSaver(false)
 {
     initialize();
-    connect (desktop(), SIGNAL(resized(int)), SLOT(desktopResized()));
-    connect (desktop(), SIGNAL(screenCountChanged(int)), SLOT(desktopResized()));
+    connect(desktop(), SIGNAL(resized(int)), SLOT(desktopResized()));
+    connect(desktop(), SIGNAL(screenCountChanged(int)), SLOT(desktopResized()));
     QMetaObject::invokeMethod(this, "desktopResized", Qt::QueuedConnection);
 }
 
@@ -127,7 +127,7 @@ void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
 
 void UnlockApp::desktopResized()
 {
-    const int nScreens = QApplication::desktop()->screenCount();
+    const int nScreens = desktop()->screenCount();
     // remove useless views and savers
     while (m_views.count() > nScreens) {
         m_views.takeLast()->deleteLater();
@@ -203,7 +203,7 @@ void UnlockApp::desktopResized()
     for (int i = 0; i < nScreens; ++i) {
         QDeclarativeView *view = m_views.at(i);
 
-        view->setGeometry(QApplication::desktop()->screenGeometry(i));
+        view->setGeometry(desktop()->screenGeometry(i));
         view->show();
         view->activateWindow();
 
