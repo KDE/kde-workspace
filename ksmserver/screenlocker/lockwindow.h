@@ -49,6 +49,7 @@ protected:
 
 private Q_SLOTS:
     void autoLogoutTimeout();
+    void updateGeometry();
 
 private:
     void initialize();

@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lockwindow.h"
 #include "autologout.h"
 #include "ksldapp.h"
-// workspace
-#include <kephal/kephal/screens.h>
 // KDE
 #include <KDE/KApplication>
 #include <KDE/KDebug>
@@ -33,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Qt
 #include <QtCore/QTimer>
 #include <QtCore/QPointer>
+#include <QtGui/QDesktopWidget>
 #include <QtGui/QPainter>
 #include <QtGui/QX11Info>
 // X11
@@ -79,19 +78,19 @@ void LockWindow::initialize()
 {
     kapp->installX11EventFilter(this);
 
-    // Get root window size
     XWindowAttributes rootAttr;
     QX11Info info;
     XGetWindowAttributes(QX11Info::display(), RootWindow(QX11Info::display(),
                                                          info.screen()), &rootAttr);
-    kapp->desktop(); // make Qt set its event mask on the root window first
-    XSelectInput( QX11Info::display(), QX11Info::appRootWindow(),
-                  SubstructureNotifyMask | rootAttr.your_event_mask );
+    QApplication::desktop(); // make Qt set its event mask on the root window first
 #ifdef CHECK_XSELECTINPUT
     check_xselectinput = true;
 #endif
+    XSelectInput( QX11Info::display(), QX11Info::appRootWindow(),
+                  SubstructureNotifyMask | rootAttr.your_event_mask );
+    // Get root window size
+    updateGeometry();
 
-    setGeometry(0, 0, rootAttr.width, rootAttr.height);
     // virtual root property
     gXA_VROOT = XInternAtom (QX11Info::display(), "__SWM_VROOT", False);
     gXA_SCREENSAVER_VERSION = XInternAtom (QX11Info::display(), "_SCREENSAVER_VERSION", False);
@@ -116,6 +115,8 @@ void LockWindow::initialize()
     }
     m_autoLogoutTimer->setSingleShot(true);
     connect(m_autoLogoutTimer, SIGNAL(timeout()), SLOT(autoLogoutTimeout()));
+    connect(QApplication::desktop(), SIGNAL(resized(int)), SLOT(updateGeometry()));
+    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SLOT(updateGeometry()));
 }
 
 void LockWindow::showLockWindow()
@@ -146,11 +147,10 @@ void LockWindow::showLockWindow()
                             CWEventMask, &attr);
 
     QPalette p = palette();
-    p.setColor(backgroundRole(), Qt::transparent);
+    p.setColor(backgroundRole(), Qt::black);
     setPalette(p);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NoSystemBackground, false);
-    setAttribute(Qt::WA_PaintOutsidePaintEvent, true); // for bitBlt in resume()
 
     kDebug() << "Lock window Id: " << winId();
 
@@ -279,6 +279,7 @@ void LockWindow::removeVRoot(Window win)
 {
     XDeleteProperty (QX11Info::display(), win, gXA_VROOT);
 }
+
 static void fakeFocusIn( WId window )
 {
     // We have keyboard grab, so this application will
@@ -504,26 +505,37 @@ bool LockWindow::isLockWindow(Window id)
 
 void LockWindow::autoLogoutTimeout()
 {
+    QDesktopWidget *desktop = QApplication::desktop();
+    QRect screenRect;
+    if (desktop->screenCount() > 1) {
+        screenRect = desktop->screenGeometry(desktop->screenNumber(QCursor::pos()));
+    } else {
+        screenRect = desktop->screenGeometry();
+    }
+
     QPointer<AutoLogout> dlg = new AutoLogout(this);
     dlg->adjustSize();
 
-    int screen = Kephal::ScreenUtils::primaryScreenId();
-    if (Kephal::ScreenUtils::numScreens() > 1) {
-        screen = Kephal::ScreenUtils::screenId(QCursor::pos());
-    }
-
-    const QRect screenRect = Kephal::ScreenUtils::screenGeometry(screen);
     QRect rect = dlg->geometry();
     rect.moveCenter(screenRect.center());
     dlg->move(rect.topLeft());
+
     Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
     XChangeProperty(QX11Info::display(), dlg->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+
     dlg->exec();
     delete dlg;
+
     // start the timer again - only if the window is still shown
     if (isVisible()) {
         m_autoLogoutTimer->start(KSldApp::self()->autoLogoutTimeout());
     }
+}
+
+void LockWindow::updateGeometry()
+{
+    QDesktopWidget *desktop = QApplication::desktop();
+    setGeometry(desktop->geometry());
 }
 
 void LockWindow::paintEvent(QPaintEvent* )
