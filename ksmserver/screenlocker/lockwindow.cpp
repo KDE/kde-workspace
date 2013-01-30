@@ -147,7 +147,7 @@ void LockWindow::showLockWindow()
                             CWEventMask, &attr);
 
     QPalette p = palette();
-    p.setColor(backgroundRole(), Qt::transparent);
+    p.setColor(backgroundRole(), Qt::black);
     setPalette(p);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NoSystemBackground, false);
