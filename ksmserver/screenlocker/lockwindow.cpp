@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Qt
 #include <QtCore/QTimer>
 #include <QtCore/QPointer>
+#include <QtGui/QDesktopWidget>
 #include <QtGui/QPainter>
 #include <QtGui/QX11Info>
 // X11
@@ -79,19 +80,19 @@ void LockWindow::initialize()
 {
     kapp->installX11EventFilter(this);
 
-    // Get root window size
     XWindowAttributes rootAttr;
     QX11Info info;
     XGetWindowAttributes(QX11Info::display(), RootWindow(QX11Info::display(),
                                                          info.screen()), &rootAttr);
-    kapp->desktop(); // make Qt set its event mask on the root window first
-    XSelectInput( QX11Info::display(), QX11Info::appRootWindow(),
-                  SubstructureNotifyMask | rootAttr.your_event_mask );
+    QApplication::desktop(); // make Qt set its event mask on the root window first
 #ifdef CHECK_XSELECTINPUT
     check_xselectinput = true;
 #endif
+    XSelectInput( QX11Info::display(), QX11Info::appRootWindow(),
+                  SubstructureNotifyMask | rootAttr.your_event_mask );
+    // Get root window size
+    updateGeometry();
 
-    setGeometry(0, 0, rootAttr.width, rootAttr.height);
     // virtual root property
     gXA_VROOT = XInternAtom (QX11Info::display(), "__SWM_VROOT", False);
     gXA_SCREENSAVER_VERSION = XInternAtom (QX11Info::display(), "_SCREENSAVER_VERSION", False);
@@ -116,6 +117,8 @@ void LockWindow::initialize()
     }
     m_autoLogoutTimer->setSingleShot(true);
     connect(m_autoLogoutTimer, SIGNAL(timeout()), SLOT(autoLogoutTimeout()));
+    connect(QApplication::desktop(), SIGNAL(resized(int)), SLOT(updateGeometry()));
+    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SLOT(updateGeometry()));
 }
 
 void LockWindow::showLockWindow()
@@ -279,6 +282,7 @@ void LockWindow::removeVRoot(Window win)
 {
     XDeleteProperty (QX11Info::display(), win, gXA_VROOT);
 }
+
 static void fakeFocusIn( WId window )
 {
     // We have keyboard grab, so this application will
@@ -524,6 +528,12 @@ void LockWindow::autoLogoutTimeout()
     if (isVisible()) {
         m_autoLogoutTimer->start(KSldApp::self()->autoLogoutTimeout());
     }
+}
+
+void LockWindow::updateGeometry()
+{
+    QDesktopWidget *desktop = QApplication::desktop();
+    setGeometry(desktop->geometry());
 }
 
 void LockWindow::paintEvent(QPaintEvent* )
