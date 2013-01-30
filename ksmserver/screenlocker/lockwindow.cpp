@@ -151,7 +151,6 @@ void LockWindow::showLockWindow()
     setPalette(p);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NoSystemBackground, false);
-    setAttribute(Qt::WA_PaintOutsidePaintEvent, true); // for bitBlt in resume()
 
     kDebug() << "Lock window Id: " << winId();
 
