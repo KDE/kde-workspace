@@ -7,14 +7,14 @@
 
 <article id="screensaver" lang="&language;">
 <articleinfo>
-<title>Screen Saver</title>
+<title>Screen Locker</title>
 <authorgroup>
 <author>&Mike.McBride; &Mike.McBride.mail;</author>
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-09-25</date>
-<releaseinfo>&kde; 4.5</releaseinfo>
+<date>2012-11-17</date>
+<releaseinfo>&kde; 4.10</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -26,18 +26,44 @@
 
 <sect1 id="kcm_screensaver">
 
-<title>Screen Saver</title>
+<title>Screen Locker</title>
 
 <para>Using this module, you can choose your screen saver, determine
 how much time must pass before the screen saver is activated, and add
 or remove password protection to your screen saver.</para>
 
+<sect2 id="ss-options">
+<title>Setting the time, priority and passwords for screen
+savers.</title>
+
+<para>At the top is a check box to have the screen saver <guilabel>Start automatically after</guilabel>, 
+and a spin box which determines the period of inactivity before the screen saver should be started. 
+You can enter any positive number of minutes in this box.</para>
+
+<para>Below that is a check box labeled <guilabel>Require password 
+after</guilabel>.  If it is checked, when you click a key
+or click a mouse button to end the screen saver after the time in the spinbox and return to your
+work, you must enter a password.  The password used is the same
+password you used to login to your machine.  If there is no mark in
+the check box, no password is required to return to your
+desktop.</para>
+
+</sect2>
+
 <sect2 id="ss-choose">
 <title>Choosing the screen saver, and configuring its options</title>
 
-<para>Along the left side is a list of all available screen savers.  You can
-select a screen saver by simply clicking on its name.  Once
-you have selected a screen saver, you will see a small preview on the 
+<para>Use the <guilabel>Simple locker</guilabel> option for a basic unlock dialog that prompts for a password.</para>
+
+<para>If you would like to have some interactive widgets like notes or a player 
+on the locked screen saver, select <guilabel>Desktop Widgets</guilabel> 
+and click the <guibutton>Configure...</guibutton> button to select your 
+favorite widgets.
+</para>
+
+<para>To enable the selection of all available screen savers select the <guilabel>Screen 
+saver</guilabel> option. You can select a screen saver by simply clicking on its name.  
+Once you have selected a screen saver, you will see a small preview on the 
 monitor on the right.</para>
 
 <note><para>The preview monitor will often show the screen saver
@@ -67,28 +93,7 @@ screen saver <emphasis>exactly</emphasis> as it will appear.</para>
 
 </sect2>
 
-<sect2 id="ss-options">
-<title>Setting the time, priority and passwords for screen
-savers.</title>
-
-<para>Below the screensaver list is a check box to have the screen saver <guilabel>Start automatically after</guilabel>, and a spin box which determines the period of inactivity before the screen saver should be started.  You can enter any positive number of minutes in this box.</para>
-
-<para>Below that is a check box labeled <guilabel>Require password 
-after</guilabel>.  If it is checked, when you click a key
-or click a mouse button to end the screen saver after the time in the spinbox and return to your
-work, you must enter a password.  The password used is the same
-password you used to login to your machine.  If there is no mark in
-the check box, no password is required to return to your
-desktop.</para>
-
-<para>If you would like to have some interactive widgets like notes or a player 
-on the locked screen saver, enable <guilabel>Allow widgets on screen saver</guilabel> 
-and click the <guibutton>Configure Widgets...</guibutton> button to select your 
-favorite widgets.
-</para>
-
-</sect2>
-
+<!--FIXME still true in 4.10?-->
 <sect2 id="ss-other"><title>Using a non-&kde; screen saver</title> 
 
 <para>&kde; does not prevent another screen saver from working.  To use a
@@ -98,62 +103,7 @@ normally.  </para>
 
 </sect2>
 
-<sect2 id="screensaver-remove">
-<title>Removing and restoring a screen saver from your system</title>
-
-<para>If you want to remove a screen saver from the list in this
-&systemsettings; module, you will need to rename a file on your
-system.</para>
-
-<caution><para>Working as a <systemitem
-class="username">root</systemitem> user is a potentially dangerous
-situation.  While unlikely, it is entirely possible to do permanent
-damage to your system while working as
-<emphasis>root</emphasis>.</para>
-
-<para>Be very careful following the next set of
-directions</para></caution>
-
-<para>To delete a screen saver, type the following commands:</para>
-
-<screen>
-<prompt>bash$</prompt> <command>cd 
-$KDEDIR/kde4/services/ScreenSavers</command>
-<prompt>bash$</prompt> <command>ls</command>
-</screen> 
-
-<para>This will give you a list of files.  You will notice
-similarities between some of the file names and that of the screen saver you
-want to remove.  Simply rename the file of similarly named desktop
-file to a name which does not end in
-<emphasis>desktop</emphasis>.</para>
-
-<para>Example:</para>
-<screen>
-<prompt>bash$</prompt> <command>cd 
-$KDEDIR/share/kde4/services/ScreenSavers</command>
-<prompt>bash$</prompt> <command>mv krandom.desktop krandom.backup</command>
-</screen> 
-
-<para>Will remove the <quote>Random</quote> screen saver from the list</para>
-
-<note><para>You must close the &systemsettings; entirely and restart it before 
-the changes will be seen.</para></note>
-
-<para>To restore the disabled screen saver, simply rename the file back to its 
-original name:</para>
-
-<screen>
-<prompt>bash$</prompt> <command>cd 
-$KDEDIR/share/kde4/services/ScreenSavers</command>
-<prompt>bash$</prompt> <command>mv krandom.backup krandom.desktop</command>
-</screen> 
-
-<para>Restart the &systemsettings;, and the screen saver is back in the 
-list.</para>
-
-</sect2>
-
+ <!--FIXME remove this section?, what's the use case for Grace period? -->
 <sect2 id="grace">
 <title>Advanced Settings: Grace period</title>
 
@@ -182,7 +132,7 @@ load the <filename>kscreensaverrc</filename>.</para>
 <para>The value of the entity represents the duration of the grace period
 in milliseconds. An entry of 3000, would change the grace period to 3 seconds.
 You can set the value of the entry to any number between zero (no grace period) 
-and 300000 (5 minutes).
+and 600000 (10 minutes).
 </para>
 <para>If the entry does not exist, simply add the entry to the end of the 
 section.</para>
