@@ -139,7 +139,8 @@ PlasmaCore.Dialog {
             setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(mouse.screenY - startY)), true)
         }
         onPositionChanged: {
-            setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(0, mouse.screenY - startY)), false)
+            lastNotificationPopup.x = Math.max(0, mouse.screenX - startX)
+            lastNotificationPopup.y = Math.max(0, mouse.screenY - startY)
         }
         onWheelMoved: {
             if (notificationsView.moving) {
