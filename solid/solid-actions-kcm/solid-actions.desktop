@@ -83,6 +83,7 @@ Name[zh_TW]=裝置動作
 
 Comment=Manage actions available to the user when connecting new devices
 Comment[ca]=Gestiona les accions disponibles per a l'usuari en connectar dispositius nous
+Comment[ca@valencia]=Gestiona les accions disponibles per a l'usuari en connectar dispositius nous
 Comment[cs]=Spravovat činnosti dostupné pro uživatele při připojení nových zařízení
 Comment[da]=Håndtér de handlinger som er tilgængelige for brugeren når nye enheder tilsluttes
 Comment[de]=Einrichtung der Aktionen, die für den Anwender verfügbar sein sollen, wenn neue Geräte an den Rechner angeschlossen werden.

@@ -146,6 +146,7 @@ Name[zh_TW]=充電狀態
 # ctxt: battery plugged in
 Name=Plugged
 Name[ca]=Endollada
+Name[ca@valencia]=Endollada
 Name[cs]=Připojeno
 Name[da]=I stikkontakten
 Name[de]=Angeschlossen

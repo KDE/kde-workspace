@@ -2,6 +2,7 @@
 # ctxt: AC adapter plugged in
 Name=Plugged
 Name[ca]=Endollat
+Name[ca@valencia]=Endollat
 Name[cs]=Připojeno
 Name[da]=I stikkontakten
 Name[de]=Angeschlossen
