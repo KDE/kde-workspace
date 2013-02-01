@@ -571,6 +571,7 @@ ControllerWindow *PlasmaApp::showController(int screen, Plasma::Containment *con
         controller->showActivityManager();
     }
 
+    connect(m_corona->activityController(), SIGNAL(currentActivityChanged(QString)), controller, SLOT(close()));
     controller->show();
     Plasma::WindowEffects::slideWindow(controller, controller->location());
     QTimer::singleShot(0, controller, SLOT(activate()));
