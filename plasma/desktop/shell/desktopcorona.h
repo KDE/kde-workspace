@@ -88,6 +88,8 @@ public:
      */
     Activity* activity(const QString &id);
 
+    KActivities::Controller *activityController();
+
 public Q_SLOTS:
     QRect availableScreenRect(int id) const;
     void addPanel();

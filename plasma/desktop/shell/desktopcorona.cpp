@@ -681,7 +681,7 @@ void DesktopCorona::checkActivities()
 void DesktopCorona::currentActivityChanged(const QString &newActivity)
 {
     kDebug() << newActivity;
-    Activity *act =activity(newActivity);
+    Activity *act = activity(newActivity);
     if (act) {
         act->ensureActive();
     }
@@ -694,6 +694,11 @@ Activity* DesktopCorona::activity(const QString &id)
         activityAdded(id);
     }
     return m_activities.value(id);
+}
+
+KActivities::Controller *DesktopCorona::activityController()
+{
+    return m_activityController;
 }
 
 void DesktopCorona::activityAdded(const QString &id)
