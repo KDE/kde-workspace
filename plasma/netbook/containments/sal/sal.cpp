@@ -260,8 +260,7 @@ void SearchLaunch::configChanged()
 
     m_resultsView->setIconSize(config().readEntry("ResultsIconSize", (int)KIconLoader::SizeHuge));
 
-    QString packageManagerName = config().readEntry("PackageManager", "kpackagekit");
-
+    const QString packageManagerName = config().readEntry("PackageManager", "kpackagekit");
     if (!packageManagerName.isEmpty()) {
         m_packageManagerService = KService::serviceByDesktopName(packageManagerName);
 
@@ -275,6 +274,8 @@ void SearchLaunch::configChanged()
             connect(addApplicationsAction, SIGNAL(triggered()), this, SLOT(launchPackageManager()));
         }
     }
+
+    m_stripUninitialized = false;
 }
 
 void SearchLaunch::availableScreenRegionChanged()
