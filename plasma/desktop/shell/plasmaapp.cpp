@@ -527,7 +527,7 @@ void PlasmaApp::toggleActivityManager()
 
     QWeakPointer<ControllerWindow> controllerPtr = m_widgetExplorers.value(currentScreen);
     ControllerWindow *controller = controllerPtr.data();
-    if (controller) {
+    if (controller && controller->isVisible()) {
         controller->deleteLater();
         return;
     }
