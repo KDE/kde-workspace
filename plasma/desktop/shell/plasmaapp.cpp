@@ -519,11 +519,15 @@ ControllerWindow *PlasmaApp::showWidgetExplorer(int screen, Plasma::Containment 
 
 void PlasmaApp::toggleActivityManager()
 {
+    if (!m_corona) {
+        return;
+    }
+
     const int currentScreen = m_corona->screenId(QCursor::pos());
 
     QWeakPointer<ControllerWindow> controllerPtr = m_widgetExplorers.value(currentScreen);
     ControllerWindow *controller = controllerPtr.data();
-    if (controller) {
+    if (controller && controller->isVisible()) {
         controller->deleteLater();
         return;
     }
@@ -535,7 +539,6 @@ void PlasmaApp::toggleActivityManager()
     }
 
     Plasma::Containment *containment = m_corona->containmentForScreen(currentScreen, currentDesktop);
-
     showController(currentScreen, containment, false);
 }
 
@@ -568,6 +571,7 @@ ControllerWindow *PlasmaApp::showController(int screen, Plasma::Containment *con
         controller->showActivityManager();
     }
 
+    connect(m_corona->activityController(), SIGNAL(currentActivityChanged(QString)), controller, SLOT(close()));
     controller->show();
     Plasma::WindowEffects::slideWindow(controller, controller->location());
     QTimer::singleShot(0, controller, SLOT(activate()));
@@ -1251,11 +1255,15 @@ void PlasmaApp::configureContainment(Plasma::Containment *containment)
 
 void PlasmaApp::cloneCurrentActivity()
 {
-    KActivities::Controller controller;
+    if (!m_corona) {
+        return;
+    }
+
+    KActivities::Controller *controller = m_corona->activityController();
     //getting the current activity is *so* much easier than the current containment(s) :) :)
-    QString oldId = controller.currentActivity();
+    QString oldId = controller->currentActivity();
     Activity *oldActivity = m_corona->activity(oldId);
-    QString newId = controller.addActivity(i18nc("%1 is the activity name", "copy of %1", oldActivity->name()));
+    QString newId = controller->addActivity(i18nc("%1 is the activity name", "copy of %1", oldActivity->name()));
 
     QString file = "activities/";
     file += newId;
@@ -1266,7 +1274,7 @@ void PlasmaApp::cloneCurrentActivity()
     //kDebug() << "saved to" << file;
 
     //load the new one
-    controller.setCurrentActivity(newId);
+    controller->setCurrentActivity(newId);
 }
 
 //TODO accomodate activities
@@ -1448,20 +1456,28 @@ void PlasmaApp::plasmoidAccessFinished(Plasma::AccessAppletJob *job)
 
 void PlasmaApp::createActivity(const QString &plugin)
 {
-    KActivities::Controller controller;
-    QString id = controller.addActivity(i18nc("Default name for a new activity", "New Activity"));
+    if (!m_corona) {
+        return;
+    }
+
+    KActivities::Controller *controller = m_corona->activityController();
+    QString id = controller->addActivity(i18nc("Default name for a new activity", "New Activity"));
 
     Activity *a = m_corona->activity(id);
     Q_ASSERT(a);
     a->setDefaultPlugin(plugin);
 
-    controller.setCurrentActivity(id);
+    controller->setCurrentActivity(id);
 }
 
 void PlasmaApp::createActivityFromScript(const QString &script, const QString &name, const QString &icon, const QStringList &startupApps)
 {
-    KActivities::Controller controller;
-    m_loadingActivity = controller.addActivity(name);
+    if (!m_corona) {
+        return;
+    }
+
+    KActivities::Controller *controller = m_corona->activityController();
+    m_loadingActivity = controller->addActivity(name);
     Activity *a = m_corona->activity(m_loadingActivity);
     Q_ASSERT(a);
     a->setIcon(icon);
@@ -1470,7 +1486,7 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
     m_corona->evaluateScripts(QStringList() << script, false);
     //kDebug() << "$$$$$$$$$$$$$$$$ end script for" << m_loadingActivity;
 
-    controller.setCurrentActivity(m_loadingActivity);
+    controller->setCurrentActivity(m_loadingActivity);
     m_loadingActivity.clear();
 
     KListConfirmationDialog * confirmDialog = new KListConfirmationDialog(
