@@ -116,10 +116,11 @@ set(kcm_keyboard_PART_SRCS
   preview/keyaliases.cpp
   preview/keyboardlayout.cpp
   preview/keyboardpainter.cpp
-  preview/keysymbols.cpp
+  preview/keys.cpp
   preview/keysymhelper.cpp
   preview/kbpreviewframe.cpp
   preview/keysym2ucs.cpp
+  preview/kbgeometry.cpp
 )
 
 

@@ -17,37 +17,55 @@
  */
 
 #include "keyboardpainter.h"
+#include "ui_KeyboardPainter.h"
 
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
-#include <QtGui/QPushButton>
+#include <QToolTip>
+#include <QHelpEvent>
 
-#include <KLocale>
-
-
-KeyboardPainter::KeyboardPainter():
+KeyboardPainter::KeyboardPainter() :
+    previewDialog(new QDialog(this)),
     kbframe(new KbPreviewFrame(this)),
-    exitButton(new QPushButton(i18n("Close"),this))
+    exitButton(new QPushButton(tr("Close"),this))
 {
+    previewDialog->setFixedSize(1030,520);
     kbframe->setFixedSize( 1030, 490 );
-    exitButton->setFixedSize(120, 30);
-
-    QVBoxLayout* vLayout = new QVBoxLayout( this );
+    exitButton->setFixedSize(120,30);
+    connect(exitButton,SIGNAL(clicked()),this,SLOT(close()));
+    QVBoxLayout*const vLayout = new QVBoxLayout( this );
     vLayout->addWidget(kbframe);
     vLayout->addWidget(exitButton);
-
-    connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
-
-    setWindowTitle(kbframe->getLayoutName());
+    setWindowTitle(kbframe->kblayout.getLayoutName());
+    setMouseTracking(true);
 }
 
-void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant)
+void KeyboardPainter::generateKeyboardLayout(QString country, QString variant,QString model)
 {
-    kbframe->generateKeyboardLayout(layout, variant);
+    kbframe->generateKeyboardLayout(country,variant,model);
+    previewDialog->setFixedSize((2*kbframe->geometry.kbWidth+20),(2*kbframe->geometry.kbHieght+50));
+    kbframe->setFixedSize((2*kbframe->geometry.kbWidth+20),(2*kbframe->geometry.kbHieght));
+}
+
+bool KeyboardPainter::event(QEvent *event){
+    if (event->type() == QEvent::ToolTip) {
+         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+         int index = kbframe->keyAt(helpEvent->pos());
+         if (index != -1) {
+             QToolTip::showText(helpEvent->globalPos(), kbframe->toolTipList[index].ttString);
+         } else {
+             QToolTip::hideText();
+             event->ignore();
+         }
+
+         return true;
+     }
+     return QWidget::event(event);
 }
 
 KeyboardPainter::~KeyboardPainter()
 {
+    delete previewDialog;
     delete kbframe;
     delete exitButton;
 }
