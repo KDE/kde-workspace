@@ -48,6 +48,10 @@
 #include <sys/stat.h>
 #endif
 
+// We cannot rely on the $PATH environment variable, because D-Bus activation
+// clears it. So we have to use a reasonable default.
+static const QString exePath = QLatin1String("/usr/sbin:/usr/bin:/sbin:/bin");
+
 int ClockHelper::ntp( const QStringList& ntpServers, bool ntpEnabled,
                       const QString& ntpUtility )
 {
@@ -96,8 +100,9 @@ int ClockHelper::date( const QString& newdate, const QString& olddate )
         return DateError;
     }
 
-    if (!KStandardDirs::findExe("hwclock").isEmpty()) {
-        KProcess::execute("hwclock", QStringList() << "--systohc");
+    QString hwclock = KStandardDirs::findExe("hwclock", exePath);
+    if (!hwclock.isEmpty()) {
+        KProcess::execute(hwclock, QStringList() << "--systohc");
     }
     return 0;
 }
@@ -172,8 +177,9 @@ int ClockHelper::tz( const QString& selectedzone )
 #else
         QString tz = "/usr/share/zoneinfo/" + selectedzone;
 
-        if( !KStandardDirs::findExe( "zic" ).isEmpty()) {
-            KProcess::execute("zic", QStringList() << "-l" << selectedzone);
+        QString zic = KStandardDirs::findExe("zic", exePath);
+        if (!zic.isEmpty()) {
+            KProcess::execute(zic, QStringList() << "-l" << selectedzone);
         } else if (!QFile::remove("/etc/localtime")) {
           ret |= TimezoneError;
         } else if (!QFile::copy(tz, "/etc/localtime")) {
