@@ -4,7 +4,7 @@
 #include <kapplication.h>
 #include <kiconloader.h>
 #include <kworkspace/kworkspace.h>
-
+#include <Plasma/Theme>
 int
 main(int argc, char *argv[])
 {
@@ -14,6 +14,7 @@ main(int argc, char *argv[])
     KCmdLineOptions options;
     options.add("t");
     options.add("type <name>", ki18n("The type of shutdown to emulate: Default, None, Reboot, Halt or Logout"), "None");
+    options.add("theme <name>", ki18n("Theme name. List with 'plasmoidviewer --list-themes'"));
     KCmdLineArgs::addCmdLineOptions(options);
 
     KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
@@ -23,6 +24,11 @@ main(int argc, char *argv[])
     KSMShutdownFeedback::start();
 
     QString sdtypeOption = args->getOption("type").toLower();
+
+    if (args->isSet("theme")) {
+        Plasma::Theme::defaultTheme()->setUseGlobalSettings(false); //don't change every plasma theme!
+        Plasma::Theme::defaultTheme()->setThemeName(args->getOption("theme"));
+    }
 
     KWorkSpace::ShutdownType sdtype = KWorkSpace::ShutdownTypeDefault;
     if (sdtypeOption == "reboot") {
