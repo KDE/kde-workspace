@@ -179,18 +179,16 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
     t.start();
 #endif
     // Skip things we know we don't care about
-    if (device.isDeviceInterface(Solid::DeviceInterface::StorageDrive)) {
-        Solid::DeviceInterface *dev = device.asDeviceInterface(Solid::DeviceInterface::StorageDrive);
-        Solid::StorageDrive *drive = static_cast<Solid::StorageDrive *>(dev);
+    if (device.is<Solid::StorageDrive>()) {
+        Solid::StorageDrive *drive = device.as<Solid::StorageDrive>();
         if (!drive->isHotpluggable()) {
 #ifdef HOTPLUGENGINE_TIMING
             kDebug() << "storage, but not pluggable, returning" << t.restart();
 #endif
             return;
         }
-    } else if (device.isDeviceInterface(Solid::DeviceInterface::StorageVolume)) {
-        Solid::DeviceInterface *dev = device.asDeviceInterface(Solid::DeviceInterface::StorageVolume);
-        Solid::StorageVolume *volume = static_cast<Solid::StorageVolume *>(dev);
+    } else if (device.is<Solid::StorageVolume>()) {
+        Solid::StorageVolume *volume = device.as<Solid::StorageVolume>();
         Solid::StorageVolume::UsageType type = volume->usage();
         if ((type == Solid::StorageVolume::Unused ||
              type == Solid::StorageVolume::PartitionTable) && !device.is<Solid::OpticalDisc>()) {
