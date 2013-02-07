@@ -41,7 +41,7 @@ static const QString CURRENT_LAYOUT_ATTRIBUTE("currentLayout");
 static const char* OWNER_KEY_ATTRIBUTE = "ownerKey";
 static const char* LAYOUTS_ATTRIBUTE = "layouts";
 
-static const char* LIST_SEPARATOR = ",";
+static const char* LIST_SEPARATOR_LM = ",";
 
 static const char* REL_SESSION_FILE_PATH = "/session/keyboard/layout_memory.xml";
 
@@ -73,7 +73,7 @@ QString LayoutMemoryPersister::getLayoutMapAsString()
 			QString layoutSetString;
 			foreach(const LayoutUnit& layoutUnit, layoutMemory.layoutMap[key].layouts) {
 				if( ! layoutSetString.isEmpty() ) {
-					layoutSetString += LIST_SEPARATOR;
+					layoutSetString += LIST_SEPARATOR_LM;
 				}
 				layoutSetString += layoutUnit.toString();
 			}
@@ -169,7 +169,7 @@ public:
     			globalLayout = LayoutUnit(attributes.value(CURRENT_LAYOUT_ATTRIBUTE));
     		}
     		else {
-    		    QStringList layoutStrings = attributes.value(LAYOUTS_ATTRIBUTE).split(LIST_SEPARATOR);
+    		    QStringList layoutStrings = attributes.value(LAYOUTS_ATTRIBUTE).split(LIST_SEPARATOR_LM);
     			LayoutSet layoutSet;
     		    foreach(const QString& layoutString, layoutStrings) {
     		    	layoutSet.layouts.append(LayoutUnit(layoutString));
