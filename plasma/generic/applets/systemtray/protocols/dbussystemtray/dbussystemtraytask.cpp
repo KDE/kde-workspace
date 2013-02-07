@@ -216,12 +216,12 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
 {
     Q_UNUSED(taskName);
 
-    QString id = properties["Id"].toString();
-    bool become_valid = false;
+    const QString id = properties["Id"].toString();
+    bool becomeValid = false;
     if (!id.isEmpty() && id != m_typeId) {
         m_typeId = id;
         m_valid = true;
-        become_valid = true;
+        becomeValid = true;
         setObjectName(QString("SystemTray-%1").arg(m_typeId));
     }
 
@@ -235,7 +235,7 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         }
     }
 
-    if (properties["TitleChanged"].toBool() || become_valid) {
+    if (properties["TitleChanged"].toBool() || becomeValid) {
         QString title = properties["Title"].toString();
         if (!title.isEmpty()) {
             bool is_title_changed = (name() != title);
@@ -247,16 +247,16 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         }
     }
 
-    if (properties["IconsChanged"].toBool() || become_valid) {
+    if (properties["IconsChanged"].toBool() || becomeValid) {
         syncIcons(properties);
         emit changedIcons();
     }
 
-    if (properties["StatusChanged"].toBool() || become_valid) {
+    if (properties["StatusChanged"].toBool() || becomeValid) {
         syncStatus(properties["Status"].toString());
     }
 
-    if (properties["ToolTipChanged"].toBool() || become_valid) {
+    if (properties["ToolTipChanged"].toBool() || becomeValid) {
         syncToolTip(properties["ToolTipTitle"].toString(),
                     properties["ToolTipSubTitle"].toString(),
                     properties["ToolTipIcon"].value<QIcon>());
@@ -268,7 +268,7 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         emit changedIsMenu();
     }
 
-    if (become_valid) {
+    if (becomeValid) {
         DBusSystemTrayProtocol *protocol = qobject_cast<DBusSystemTrayProtocol*>(parent());
         if (protocol) {
             protocol->initedTask(this);
