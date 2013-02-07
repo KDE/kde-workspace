@@ -53,7 +53,7 @@ public:
     QStringList applets(Plasma::Applet *parent) const;
 
 private slots:
-    void cleanupTask(Plasma::Applet *host, const QString &typeId);
+    void cleanupTask(Plasma::Applet *host, const QString &taskId);
 
 private:
     QHash<Plasma::Applet *, QHash<QString, PlasmoidTask*> > m_tasks;

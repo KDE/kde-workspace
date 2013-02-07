@@ -42,7 +42,7 @@ namespace SystemTray
 DBusSystemTrayTask::DBusSystemTrayTask(const QString &serviceName, Plasma::DataEngine *dataEngine, QObject *parent)
     : Task(parent),
       m_serviceName(serviceName),
-      m_typeId(serviceName),
+      m_taskId(serviceName),
       m_customIconLoader(0),
       m_dataEngine(dataEngine),
       m_service(dataEngine->serviceForSource(serviceName)),
@@ -87,9 +87,9 @@ void DBusSystemTrayTask::setShortcut(QString text) {
 }
 
 
-QString DBusSystemTrayTask::typeId() const
+QString DBusSystemTrayTask::taskId() const
 {
-    return m_typeId;
+    return m_taskId;
 }
 
 QIcon DBusSystemTrayTask::icon() const
@@ -218,11 +218,11 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
 
     const QString id = properties["Id"].toString();
     bool becomeValid = false;
-    if (!id.isEmpty() && id != m_typeId) {
-        m_typeId = id;
+    if (!id.isEmpty() && id != m_taskId) {
+        m_taskId = id;
         m_valid = true;
         becomeValid = true;
-        setObjectName(QString("SystemTray-%1").arg(m_typeId));
+        setObjectName(QString("SystemTray-%1").arg(m_taskId));
     }
 
     QString cat = properties["Category"].toString();

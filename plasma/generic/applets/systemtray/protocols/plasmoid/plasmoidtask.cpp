@@ -38,7 +38,7 @@ namespace SystemTray
 PlasmoidTask::PlasmoidTask(const QString &appletname, int id, QObject *parent, Plasma::Applet *host)
     : Task(parent),
       m_appletName(appletname),
-      m_typeId(appletname),
+      m_taskId(appletname),
       m_host(host),
       m_takenByParent(false)
 {
@@ -49,7 +49,7 @@ PlasmoidTask::PlasmoidTask(const QString &appletname, int id, QObject *parent, P
 
 PlasmoidTask::~PlasmoidTask()
 {
-    emit taskDeleted(m_host, m_typeId);
+    emit taskDeleted(m_host, m_taskId);
 }
 
 
@@ -64,9 +64,9 @@ bool PlasmoidTask::isValid() const
 }
 
 
-QString PlasmoidTask::typeId() const
+QString PlasmoidTask::taskId() const
 {
-    return m_typeId;
+    return m_taskId;
 }
 
 

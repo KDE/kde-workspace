@@ -49,7 +49,7 @@ class Task : public QObject
     Q_OBJECT
 
     Q_PROPERTY(TaskType type READ type CONSTANT)
-    Q_PROPERTY(QString typeId READ typeId CONSTANT)
+    Q_PROPERTY(QString taskId READ taskId CONSTANT)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
@@ -128,7 +128,7 @@ public:
      *
      * The identifier is valid between restarts and so is safe to save
      **/
-    virtual QString typeId() const = 0;
+    virtual QString taskId() const = 0;
 
     /**
      * Returns an icon that can be associated with this task

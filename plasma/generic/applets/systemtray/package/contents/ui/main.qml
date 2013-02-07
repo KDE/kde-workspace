@@ -162,7 +162,7 @@ Item {
     // Funtions ========================================================================================================
     function getLocationForTask(task) {
         var loc = getDefaultLocationForTask(task);
-        if (loc === JS.LOCATION_TRAY && task.typeId == JS.TASK_NOTIFICATIONS_TYPEID) {
+        if (loc === JS.LOCATION_TRAY && task.taskId == JS.TASK_NOTIFICATIONS_TYPEID) {
             // redefine location for notifications applet
             return JS.LOCATION_NOTIFICATION;
         }

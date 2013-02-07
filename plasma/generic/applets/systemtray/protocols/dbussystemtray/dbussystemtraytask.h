@@ -69,7 +69,7 @@ public:
     QGraphicsWidget* createWidget(Plasma::Applet *host);
     bool isValid() const;
     bool isEmbeddable() const;
-    virtual QString typeId() const;
+    virtual QString taskId() const;
     virtual QIcon icon() const;
     virtual bool isWidget() const;
     virtual TaskType type() const { return TypeStatusItem; }
@@ -122,7 +122,7 @@ private Q_SLOTS:
 
 private:
     QString m_serviceName;
-    QString m_typeId;
+    QString m_taskId;
     QIcon m_icon;
     QString m_iconName;
     QIcon m_attentionIcon;
