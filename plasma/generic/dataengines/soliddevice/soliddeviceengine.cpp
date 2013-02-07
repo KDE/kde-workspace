@@ -21,6 +21,7 @@
 
 #include <QMetaEnum>
 #include <QDateTime>
+#include <Solid/GenericInterface>
 
 #include <KDebug>
 #include <KDiskFreeSpaceInfo>
@@ -126,6 +127,7 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
     setData(name, I18N_NOOP("Parent UDI"), device.parentUdi());
     setData(name, I18N_NOOP("Vendor"), device.vendor());
     setData(name, I18N_NOOP("Product"), device.product());
+    setData(name, I18N_NOOP("Description"), device.description());
     setData(name, I18N_NOOP("Icon"), device.icon());
     setData(name, I18N_NOOP("Emblems"), device.emblems());
     setData(name, I18N_NOOP("State"), Idle);
@@ -166,8 +168,8 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
 
         if (storageaccess->isAccessible()) {
             QVariant freeDiskVar;
-            qlonglong freeDisk = freeDiskSpace(storageaccess->filePath());
-            if ( freeDisk != -1 ) {
+            qulonglong freeDisk = freeDiskSpace(storageaccess->filePath());
+            if ( freeDisk != (qulonglong)-1 ) {
                 freeDiskVar.setValue( freeDisk );
             }
             if (!device.is<Solid::OpticalDisc>()) {
@@ -321,7 +323,6 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
             //TODO: compress the calls?
             forceUpdateAccessibility(containerUdi);
         }
-
     }
     if (device.is<Solid::OpticalDisc>()) {
         Solid::OpticalDisc *opticaldisc = device.as<Solid::OpticalDisc>();
@@ -576,6 +577,16 @@ void SolidDeviceEngine::deviceAdded(const QString& udi)
         }
     }
     else if (device.is<Solid::StorageVolume>()) {
+        // update the volume in case of 2-stage devices
+        if (m_devicemap.contains(udi) && query(udi).value(I18N_NOOP("Size")).toULongLong() == 0) {
+            Solid::GenericInterface * iface = device.as<Solid::GenericInterface>();
+            if (iface) {
+                iface->setProperty("udi", udi);
+                connect(iface, SIGNAL(propertyChanged(QMap<QString,int>)),
+                        this, SLOT(deviceChanged(QMap<QString,int>)));
+            }
+        }
+
         Solid::StorageAccess *access = device.as<Solid::StorageAccess>();
         if (access) {
             connect(access, SIGNAL(setupRequested(const QString&)),
@@ -625,13 +636,23 @@ void SolidDeviceEngine::setIdleState(Solid::ErrorType error, QVariant errorData,
     setData(udi, I18N_NOOP("File Path"), storageaccess->filePath());
 }
 
-qlonglong SolidDeviceEngine::freeDiskSpace(const QString &mountPoint)
+void SolidDeviceEngine::deviceChanged(const QMap<QString, int> &props)
+{
+    Solid::GenericInterface * iface = qobject_cast<Solid::GenericInterface *>(sender());
+    if (iface && iface->isValid() && props.contains("Size") && iface->property("Size").toInt() > 0) {
+        const QString udi = qobject_cast<QObject *>(iface)->property("udi").toString();
+        if (populateDeviceData(udi))
+            forceImmediateUpdateOfAllVisualizations();
+    }
+}
+
+qulonglong SolidDeviceEngine::freeDiskSpace(const QString &mountPoint)
 {
     KDiskFreeSpaceInfo info = KDiskFreeSpaceInfo::freeSpaceInfo(mountPoint);
     if (info.isValid()) {
         return info.available();
     }
-    return -1;
+    return (qulonglong)-1;
 }
 
 bool SolidDeviceEngine::updateFreeSpace(const QString &udi)
@@ -650,8 +671,8 @@ bool SolidDeviceEngine::updateFreeSpace(const QString &udi)
     }
 
     QVariant freeSpaceVar;
-    qlonglong freeSpace = freeDiskSpace(storageaccess->filePath());
-    if (freeSpace != -1) {
+    qulonglong freeSpace = freeDiskSpace(storageaccess->filePath());
+    if (freeSpace != (qulonglong)-1) {
         freeSpaceVar.setValue( freeSpace );
     }
     setData(udi, I18N_NOOP("Free Space"), freeSpaceVar );

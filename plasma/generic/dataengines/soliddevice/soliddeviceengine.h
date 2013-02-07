@@ -67,7 +67,7 @@ protected:
 
 private:
     bool populateDeviceData(const QString &name);
-    qlonglong freeDiskSpace(const QString &mountPoint);
+    qulonglong freeDiskSpace(const QString &mountPoint);
     bool updateFreeSpace(const QString &udi);
     bool updateHardDiskTemperature(const QString &udi);
     bool updateEmblems(const QString &udi);
@@ -94,6 +94,7 @@ private Q_SLOTS:
     void setMountingState(const QString &udi);
     void setUnmountingState(const QString &udi);
     void setIdleState(Solid::ErrorType error, QVariant errorData, const QString &udi);
+    void deviceChanged(const QMap<QString,int> & props);
 };
 
 #endif
