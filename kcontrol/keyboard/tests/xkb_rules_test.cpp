@@ -204,9 +204,23 @@ private Q_SLOTS:
     	Rules::readRules(rules10, QString("config/base.xml"), false);
     	QCOMPARE(rules10->version, QString("1.0"));
     	delete rules10;
+
     	Rules* rules11 = new Rules();
     	Rules::readRules(rules11, QString("config/base.1.1.xml"), false);
     	QCOMPARE(rules11->version, QString("1.1"));
+
+    	foreach(const LayoutInfo* layoutInfo, rules11->layoutInfos) {
+        	QVERIFY( layoutInfo != NULL);
+        	QVERIFY( ! layoutInfo->name.isEmpty() );
+        	QVERIFY( ! layoutInfo->description.isEmpty() );
+
+        	foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
+        		QVERIFY( variantInfo != NULL );
+        		QVERIFY( ! variantInfo->name.isEmpty() );
+        		QVERIFY( ! variantInfo->description.isEmpty() );
+        	}
+        }
+
     	delete rules11;
     }
 
