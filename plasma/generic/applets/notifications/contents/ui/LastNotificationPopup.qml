@@ -220,11 +220,13 @@ PlasmaCore.Dialog {
                 * so manual clip is required.
                 */
                 Item {
+                    id: bodyLabel
                     clip: true
-                    height: Math.min(parent.height, lastNotificationText.height)
+                    height: Math.min(parent.height - (titleLabel.height+titleLabel.y), lastNotificationText.height)
+                    property bool tallText: bodyLabel.height >= (bodyLabel.parent.height - (titleLabel.height+titleLabel.y)*2)
                     anchors {
-                        top: titleLabel.height > 0 ? titleLabel.bottom : undefined
-                        verticalCenter: titleLabel.height > 0 ? undefined : parent.verticalCenter
+                        top: tallText ? titleLabel.bottom : undefined
+                        verticalCenter: tallText ? undefined : parent.verticalCenter
                         left: appIconItem.right
                         right: actionsColumn.left
                         leftMargin: 6
