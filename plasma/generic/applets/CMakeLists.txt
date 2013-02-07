@@ -20,7 +20,7 @@ if(NOT WIN32)
    add_subdirectory(system-monitor)
    #notifications
    #should compile also on windows? (even if doesn't really make sense)
-   installPackage(notifications org.kde.notifications)
+   add_subdirectory(notifications)
    if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
       add_subdirectory(systemtray)
    endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
