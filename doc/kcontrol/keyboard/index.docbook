@@ -15,8 +15,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2011-06-29</date>
-<releaseinfo>&kde; 4.7</releaseinfo>
+<date>2013-02-08</date>
+<releaseinfo>&kde; 4.10</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -165,7 +165,14 @@ add and remove keyboard layouts in order to switch between them when you need.
 </para>
 <para>Clicking on <guibutton>Add</guibutton> will open a dialog where you
 will be able to choose the new keyboard layout you want to add as well as its
-variant.
+variant, label and shortcut.
+</para>
+<para>
+The list of languages right to the <guilabel>Layout</guilabel> label in the
+<guilabel>Add Layout</guilabel> dialog can be narrowed down using
+<guilabel>Limit selection by language</guilabel> drop-down list. You
+can click on <guibutton>Preview</guibutton> button to preview chosen layout
+in a separate window.
 </para>
 <para>You can order the layouts with the up and down buttons, the top one being
 the default one.
