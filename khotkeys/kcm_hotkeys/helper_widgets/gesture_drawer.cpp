@@ -14,6 +14,7 @@
 #include <QtGui/QPainter>
 #include <QtGui/QFrame>
 #include <QtGui/QPaintEvent>
+#include <QtGui/QGradient>
 
 #include "gesture_drawer.h"
 
@@ -80,7 +81,19 @@ void GestureDrawer::paintEvent(QPaintEvent *ev)
         double nextx = x_offset + _data[i+1].x * (l - 2*border);
         double nexty = y_offset + _data[i+1].y * (l - 2*border);
 
-        pen.setBrush(QColor(0,(1-_data[i].s)*255,_data[i].s*255));
+        QLinearGradient grad( x, y, nextx, nexty );
+        const int startRed   = 0;
+        const int startGreen = ( 1-_data[i].s ) * 255;
+        const int startBlue  = _data[i].s * 255;
+        const int endRed     = 0;
+        const int endGreen   = ( 1-_data[i+1].s ) * 255;
+        const int endBlue    = _data[i+1].s * 255;
+        QColor startColor( startRed, startGreen, startBlue );
+        QColor endColor( endRed, endGreen, endBlue );
+        grad.setColorAt( 0, startColor );
+        grad.setColorAt( 1, endColor );
+
+        pen.setBrush(grad);
         p.setPen(pen);
         p.drawLine(x, y, nextx, nexty);
 
