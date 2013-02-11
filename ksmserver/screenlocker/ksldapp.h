@@ -85,6 +85,7 @@ Q_SIGNALS:
 private Q_SLOTS:
     void cleanUp();
     void idleTimeout(int identifier);
+    void endGraceTime();
 
 private:
     void initialize();
@@ -112,7 +113,11 @@ private:
      **/
     int m_lockGrace;
     /**
-     * while this timer is active user activity may remove the lock. Only used after idle timeout.
+     * Controls whether user activity may remove the lock. Only enabled after idle timeout.
+     **/
+    bool m_inGraceTime;
+    /**
+     * Grace time ends when timer expires.
      **/
     QTimer *m_graceTimer;
     int m_inhibitCounter;
