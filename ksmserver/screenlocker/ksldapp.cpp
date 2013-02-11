@@ -150,12 +150,7 @@ void KSldApp::configure()
         // timeout stored in seconds
         m_idleId = KIdleTime::instance()->addIdleTimeout(timeout*1000);
     }
-    m_lockGrace = KScreenSaverSettings::lockGrace();
-    if (m_lockGrace < 0) {
-        m_lockGrace = 0;
-    } else if (m_lockGrace > 300000) {
-        m_lockGrace = 300000; // 5 minutes, keep the value sane
-    }
+    m_lockGrace = qBound(0, KScreenSaverSettings::lockGrace(), 300000);  // max 5 minutes, keep the value sane
     m_autoLogoutTimeout = KScreenSaverSettings::autoLogout() ? KScreenSaverSettings::autoLogoutTimeout() * 1000 : 0;
     m_plasmaEnabled = KScreenSaverSettings::plasmaEnabled();
 }
