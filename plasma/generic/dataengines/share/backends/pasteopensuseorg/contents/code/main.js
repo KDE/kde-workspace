@@ -29,7 +29,7 @@ function setup() {
     provider.addQueryItem("name", "KDE");
     provider.addQueryItem("title", "mypaste");
     provider.addQueryItem("lang", "text");
-    provider.addQueryItem("expiry", "1440");
+    provider.addQueryItem("expire", "1440");
     provider.addQueryItem("submit", "submit");
 }
 
