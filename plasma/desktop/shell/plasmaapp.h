@@ -129,6 +129,8 @@ public Q_SLOTS:
 
     void addRemotePlasmoid(const QString &location);
 
+    QString supportInformation() const;
+
 protected:
 #ifdef Q_WS_X11
     PanelView *findPanelForTrigger(WId trigger) const;

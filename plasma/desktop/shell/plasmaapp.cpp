@@ -94,6 +94,8 @@
 #include "toolbutton.h"
 #include "klistconfirmationdialog.h"
 
+#include "supportinformation.h"
+
 #ifdef Q_WS_X11
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrender.h>
@@ -1439,6 +1441,11 @@ void PlasmaApp::addRemotePlasmoid(const QString &location)
     }
 
     Plasma::AccessManager::self()->accessRemoteApplet(KUrl(location));
+}
+
+QString PlasmaApp::supportInformation() const
+{
+    return SupportInformation::generateSupportInformation(m_corona);
 }
 
 void PlasmaApp::plasmoidAccessFinished(Plasma::AccessAppletJob *job)
