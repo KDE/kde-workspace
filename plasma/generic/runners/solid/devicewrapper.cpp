@@ -93,9 +93,10 @@ void DeviceWrapper::dataUpdated(const QString &source, Plasma::DataEngine::Data 
     }
 
     m_emblems = m_device.emblems();
+    m_description = m_device.description();
+    m_iconName = m_device.icon();
 
     emit refreshMatch(m_udi);
-
 }
 
 QString DeviceWrapper::id() const {
@@ -107,7 +108,7 @@ Solid::Device DeviceWrapper::device() const {
 }
 
 KIcon DeviceWrapper::icon() const {
-    return KIcon(m_device.icon(), NULL, m_emblems);
+    return KIcon(m_iconName, NULL, m_emblems);
 }
 
 bool DeviceWrapper::isStorageAccess() const {
@@ -127,7 +128,7 @@ bool DeviceWrapper::isOpticalDisc() const {
 }
 
 QString DeviceWrapper::description() const {
-    return m_device.description();
+    return m_description;
 }
 
 void DeviceWrapper::setForceEject(bool force)

@@ -69,7 +69,7 @@ class DeviceWrapper : public QObject
     private:
 
     Solid::Device m_device;
-    KIcon m_icon;
+    QString m_iconName;
     bool m_isStorageAccess;
     bool m_isAccessible;
     bool m_isEncryptedContainer;
