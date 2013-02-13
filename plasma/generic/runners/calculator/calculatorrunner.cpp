@@ -33,10 +33,11 @@
 #include <Plasma/QueryMatch>
 
 CalculatorRunner::CalculatorRunner( QObject* parent, const QVariantList &args )
-    : Plasma::AbstractRunner(parent, args)
+    : Plasma::AbstractRunner(parent, args),
+      m_regExp("[a-zA-Z]")
 {
     Q_UNUSED(args)
- 
+
     #ifdef ENABLE_QALCULATE
     m_engine = new QalculateEngine;
     setSpeed(SlowSpeed);
@@ -227,6 +228,11 @@ void CalculatorRunner::match(Plasma::RunnerContext &context)
         cmd.remove(0, cmd.indexOf('=') + 1);
     } else if (cmd.endsWith('=')) {
         cmd.chop(1);
+    }
+
+    if (!toHex && cmd.contains(m_regExp)) {
+        // not just numbers and symbols, so we return
+        return;
     }
 
     if (cmd.isEmpty()) {
