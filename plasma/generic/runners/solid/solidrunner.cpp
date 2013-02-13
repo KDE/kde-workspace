@@ -24,7 +24,6 @@
 #include <QAction>
 
 //KDE
-#include <KDebug>
 #include <KIcon>
 
 //Plasma
@@ -98,7 +97,6 @@ QList<QAction*> SolidRunner::actionsForMatch(const Plasma::QueryMatch &match)
     DeviceWrapper* dev = m_deviceList.value(match.data().toString());
     if (dev) {
         QStringList actionIds = dev->actionIds();
-        kDebug() << actionIds;
         if (!actionIds.isEmpty()) {
             foreach (const QString& id, actionIds) {
                 actions << action(id);
@@ -196,7 +194,6 @@ void SolidRunner::createOrUpdateMatches(const QStringList &udiList)
     }
 
     if (!matches.isEmpty()) {
-        kDebug () << matches.count();
         m_currentContext.addMatches(term, matches);
     }
 }

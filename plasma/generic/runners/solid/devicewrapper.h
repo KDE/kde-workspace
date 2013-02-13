@@ -50,7 +50,7 @@ class DeviceWrapper : public QObject
     void runAction(QAction *) ;
     QStringList actionIds() const;
     void setForceEject(bool force);
-    
+
     signals:
     void registerAction(QString &id, QString icon, QString text, QString desktop);
     void refreshMatch(QString &id);
@@ -67,9 +67,9 @@ class DeviceWrapper : public QObject
     void dataUpdated(const QString &source, Plasma::DataEngine::Data data);
 
     private:
-    
+
     Solid::Device m_device;
-    KIcon m_icon;
+    QString m_iconName;
     bool m_isStorageAccess;
     bool m_isAccessible;
     bool m_isEncryptedContainer;
