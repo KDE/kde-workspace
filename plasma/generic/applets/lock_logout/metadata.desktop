@@ -162,6 +162,7 @@ Keywords=Lock;Logout;Sleep;Hibernate;Switch User;
 Keywords[ia]=Bloca;Claude session;Dormi; Hiberna;Cambia Usator;
 Keywords[mr]=कुलूप; बाहेर पडा; झोप; हायबरनेट; वापरकर्ता बदला;
 Keywords[pt_BR]=Bloquear;Encerrar;Suspender;Hibernar;Trocar usuário;
+Keywords[sv]=Lås;Utloggning;Viloläge;Dvala;Byt användare;
 Keywords[uk]=Lock;Logout;Sleep;Hibernate;Switch User;блокування;вихід;присипляння;сон;перемикання;користувач
 Keywords[x-test]=xxLock;Logout;Sleep;Hibernate;Switch User;xx
 
