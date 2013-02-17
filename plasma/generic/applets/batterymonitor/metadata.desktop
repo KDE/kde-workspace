@@ -159,6 +159,7 @@ Comment[zh_CN]=查看电池电源的状态
 Comment[zh_TW]=查看您的電池的電力狀態
 Encoding=UTF-8
 Keywords=Power Management;Battery;System;Energy;
+Keywords[ca]=Sistema de gestió d'energia;Bateria;Sistema;Energia;
 Keywords[cs]=Správa napájení;Baterie;Systém;Energie;
 Keywords[es]=Gestión de energía;Batería;Sistema;Energía;
 Keywords[ia]=Gestion de energia; Batteria;Systema; Energia;
