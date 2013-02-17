@@ -99,6 +99,7 @@ void ActivityManagerPrivate::init(Plasma::Location loc)
     structure->setPath(path);
 
     package = new Plasma::Package(path, pluginName, structure);
+    KGlobal::locale()->insertCatalog(pluginName);
 
     declarativeWidget = new Plasma::DeclarativeWidget(q);
     declarativeWidget->setInitializationDelayed(true);
