@@ -22,6 +22,7 @@
 #include "ion_noaa.h"
 
 #include <KIO/Job>
+#include <KLocalizedDate>
 
 #include <KUnitConversion/Converter>
 
@@ -904,7 +905,7 @@ void NOAAIon::readForecast(const QString& source, QXmlStreamReader& xml)
                         QDateTime date = QDateTime::fromString(data, Qt::ISODate);
 
                         WeatherData::Forecast forecast;
-                        forecast.day = QDate::shortDayName(date.date().dayOfWeek());
+                        forecast.day = KLocalizedDate(date.date()).formatDate(KLocale::DayName, KLocale::ShortName);
                         forecasts.append(forecast);
                         //kDebug() << forecast.day;
                     }

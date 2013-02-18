@@ -29,6 +29,7 @@
 #include "ion_wettercom.h"
 #include <KDebug>
 #include <KUnitConversion/Converter>
+#include <KLocalizedDate>
 
 /*
  * Initialization
@@ -710,10 +711,10 @@ void WetterComIon::updateWeather(const QString& source, bool parseError)
                 WeatherData::ForecastInfo weather = forecastPeriod->getWeather();
 
                 data.insert(QString::fromLatin1("Short Forecast Day %1").arg(i),
-                            QString::fromLatin1("%1|%2|%3|%4|%5|%6") \
-                            .arg(QDate::shortDayName(weather.period.date().dayOfWeek())) \
-                            .arg(weather.iconName).arg(weather.summary) \
-                            .arg(weather.tempHigh).arg(weather.tempLow) \
+                            QString::fromLatin1("%1|%2|%3|%4|%5|%6")
+                            .arg(KLocalizedDate(weather.period.date()).formatDate(KLocale::DayName, KLocale::ShortName))
+                            .arg(weather.iconName).arg(weather.summary)
+                            .arg(weather.tempHigh).arg(weather.tempLow)
                             .arg(weather.probability));
                 i++;
             } else {
