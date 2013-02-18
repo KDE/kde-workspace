@@ -31,6 +31,7 @@
 
 class QMenu;
 class QDropEvent;
+class QSignalMapper;
 
 class KActionCollection;
 class KDesktopFile;
@@ -40,12 +41,21 @@ class MenuEntryInfo;
 class MenuSeparatorInfo;
 class KShortcut;
 
+static const QString SORT_ACTION_NAME = "sort";
+static const QString SORT_BY_NAME_ACTION_NAME = "sort_by_name";
+static const QString SORT_BY_DESCRIPTION_ACTION_NAME = "sort_by_description";
+static const QString SORT_ALL_ACTION_NAME = "sort_all";
+static const QString SORT_ALL_BY_NAME_ACTION_NAME = "sort_all_by_name";
+static const QString SORT_ALL_BY_DESCRIPTION_ACTION_NAME = "sort_all_by_description";
+
 class TreeItem : public QTreeWidgetItem
 {
 public:
     TreeItem(QTreeWidgetItem *parent, QTreeWidgetItem *after, const QString &menuId, bool __init = false);
     TreeItem(QTreeWidget *parent, QTreeWidgetItem *after, const QString &menuId, bool __init = false);
     ~TreeItem();
+    static bool itemNameLessThan(QTreeWidgetItem *item1, QTreeWidgetItem *item2);
+    static bool itemDescriptionLessThan(QTreeWidgetItem *item1, QTreeWidgetItem *item2);
 
     QString menuId() const { return m_menuId; }
 
@@ -55,14 +65,17 @@ public:
     MenuFolderInfo *folderInfo() { return m_folderInfo; }
     void setMenuFolderInfo(MenuFolderInfo *folderInfo) { m_folderInfo = folderInfo; }
 
-    MenuEntryInfo *entryInfo() { return m_entryInfo; }
+    MenuEntryInfo *entryInfo() const { return m_entryInfo; }
     void setMenuEntryInfo(MenuEntryInfo *entryInfo) { m_entryInfo = entryInfo; }
 
     QString name() const { return m_name; }
     void setName(const QString &name);
 
+    QString description() const;
+
     bool isDirectory() const { return m_folderInfo; }
     bool isEntry() const { return m_entryInfo; }
+    bool isSeparator() const { return !isDirectory() && !isEntry(); }
 
     bool isHiddenInMenu() const { return m_hidden; }
     void setHiddenInMenu(bool b);
@@ -131,8 +144,16 @@ protected Q_SLOTS:
     void copy();
     void paste();
     void del();
+    void sort(const int sortCmd);
 
 protected:
+    enum SortType {
+    SortByName = 0,
+    SortByDescription,
+    SortAllByName,
+    SortAllByDescription
+    };
+
     void contextMenuEvent(QContextMenuEvent *event);
     void dropEvent(QDropEvent *event);
     void startDrag(Qt::DropActions supportedActions);
@@ -145,6 +166,8 @@ protected:
     void fill();
     void fillBranch(MenuFolderInfo *folderInfo, TreeItem *parent);
     QString findName(KDesktopFile *df, bool deleted);
+    void sortItem(TreeItem *item, const SortType& sortType);
+    void sortItemChildren(const QList<QTreeWidgetItem*>::iterator& begin, const QList<QTreeWidgetItem*>::iterator& end, const SortType& sortType);
 
     void closeAllItems(QTreeWidgetItem *item);
     TreeItem *expandPath(TreeItem *item, const QString &path);
@@ -183,6 +206,7 @@ private:
     bool               m_detailedMenuEntries;
     bool               m_detailedEntriesNamesFirst;
     QStringList        m_dropMimeTypes;
+    QSignalMapper     *m_sortSignalMapper;
 };
 
 class MenuItemMimeData : public QMimeData

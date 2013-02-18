@@ -23,6 +23,7 @@
 
 #include <KAction>
 #include <KActionCollection>
+#include <KActionMenu>
 #include <KConfig>
 #include <KDebug>
 #include <KGlobal>
@@ -85,6 +86,26 @@ void KMenuEdit::setupActions()
     action->setIcon(KIcon("menu_new_sep"));
     action->setText(i18n("New S&eparator"));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+    // "sort all" menu
+    KActionMenu* sortAllMenu = new KActionMenu(KIcon("view-sort-ascending"), i18n("&Sort All By ..."), this);
+    sortAllMenu->setDelayed(false);
+    actionCollection()->addAction(SORT_ALL_ACTION_NAME, sortAllMenu);
+    action = actionCollection()->addAction(SORT_ALL_BY_NAME_ACTION_NAME);
+    action->setText(i18n("&Name"));
+    sortAllMenu->addAction(action);
+    action = actionCollection()->addAction(SORT_ALL_BY_DESCRIPTION_ACTION_NAME);
+    action->setText(i18n("&Description"));
+    sortAllMenu->addAction(action);
+    // "sort selection" menu
+    KActionMenu* sortMenu = new KActionMenu(KIcon("view-sort-ascending"), i18n("&Sort By ..."), this);
+    sortMenu->setDelayed(false);
+    actionCollection()->addAction(SORT_ACTION_NAME, sortMenu);
+    action = actionCollection()->addAction(SORT_BY_NAME_ACTION_NAME);
+    action->setText(i18n("&Name"));
+    sortMenu->addAction(action);
+    action = actionCollection()->addAction(SORT_BY_DESCRIPTION_ACTION_NAME);
+    action->setText(i18n("&Description"));
+    sortMenu->addAction(action);
 
     actionCollection()->addAction(KStandardAction::Save, this, SLOT(slotSave()));
     actionCollection()->addAction(KStandardAction::Quit, this, SLOT(close()));
