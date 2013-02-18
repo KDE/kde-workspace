@@ -81,6 +81,12 @@ if(Q_WS_X11)
                          TYPE REQUIRED
                         )
 
+  find_package(X11 REQUIRED)
+  set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
+                         URL "http://www.x.org"
+                         TYPE REQUIRED
+                        )
+
   add_feature_info("Automated testing of X clients" X11_XTest_FOUND
                    "The X11 Testing Resource extension library is useful for automated testing of X clients")
   add_feature_info("libXau" X11_Xau_FOUND "The X11 Authorization Protocol library may be used by KDM")
