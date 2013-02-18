@@ -376,10 +376,10 @@ void WetterComIon::parseSearchResults(const QString& source, QXmlStreamReader& x
                 QString placeName;
 
                 if (quarter.isEmpty()) {
-                    placeName = i18nc("Geographical location: city, state, ISO-country-code", "%1, %2, %3", \
+                    placeName = i18nc("Geographical location: city, state, ISO-country-code", "%1, %2, %3",
                                       name, state, country);
                 } else {
-                    placeName = i18nc("Geographical location: quarter (city), state, ISO-country-code", \
+                    placeName = i18nc("Geographical location: quarter (city), state, ISO-country-code",
                                       "%1 (%2), %3, %4", quarter, name, state, country);
                 }
 
@@ -425,7 +425,7 @@ void WetterComIon::validate(const QString& source, bool parseError)
 
         if (m_place[invalidPlace[2]].name.isEmpty()) {
             setData(source, "validate",
-                    QString::fromLatin1("wettercom|invalid|multiple|%1") \
+                    QString::fromLatin1("wettercom|invalid|multiple|%1")
                     .arg(invalidPlace[2]));
         }
 
@@ -437,13 +437,13 @@ void WetterComIon::validate(const QString& source, bool parseError)
         foreach(const QString &place, m_locations) {
             // Extra data format: placeCode;displayName
             if (beginflag) {
-                placeList.append(QString::fromLatin1("%1|extra|%2;%3") \
-                                 .arg(place).arg(m_place[place].placeCode) \
+                placeList.append(QString::fromLatin1("%1|extra|%2;%3")
+                                 .arg(place).arg(m_place[place].placeCode)
                                  .arg(m_place[place].displayName));
                 beginflag = false;
             } else {
-                placeList.append(QString::fromLatin1("|place|%1|extra|%2;%3") \
-                                 .arg(place).arg(m_place[place].placeCode) \
+                placeList.append(QString::fromLatin1("|place|%1|extra|%2;%3")
+                                 .arg(place).arg(m_place[place].placeCode)
                                  .arg(m_place[place].displayName));
             }
         }
@@ -452,12 +452,12 @@ void WetterComIon::validate(const QString& source, bool parseError)
 
         if (m_locations.count() > 1) {
             setData(source, "validate",
-                    QString::fromLatin1("wettercom|valid|multiple|place|%1") \
+                    QString::fromLatin1("wettercom|valid|multiple|place|%1")
                     .arg(placeList));
         } else {
             placeList[0] = placeList[0].toUpper();
             setData(source, "validate",
-                    QString::fromLatin1("wettercom|valid|single|place|%1") \
+                    QString::fromLatin1("wettercom|valid|single|place|%1")
                     .arg(placeList));
         }
     }
@@ -484,7 +484,7 @@ void WetterComIon::fetchForecast(const QString& source)
     md5.addData(QString::fromLatin1(APIKEY).toUtf8());
     md5.addData(m_place[source].placeCode.toUtf8());
 
-    KUrl url = QString::fromLatin1(FORECAST_URL) \
+    KUrl url = QString::fromLatin1(FORECAST_URL)
                .arg(m_place[source].placeCode).arg(md5.result().toHex().data());
 
     m_job = KIO::get(url.url(), KIO::Reload, KIO::HideProgressInfo);
@@ -528,8 +528,8 @@ void WetterComIon::forecast_slotJobFinished(KJob *job)
 
     if (m_sourcesToReset.contains(source)) {
         m_sourcesToReset.removeAll(source);
-        const QString weatherSource = QString::fromLatin1("wettercom|weather|%1|%2;%3") \
-            .arg(source).arg(m_place[source].placeCode)                 \
+        const QString weatherSource = QString::fromLatin1("wettercom|weather|%1|%2;%3")
+            .arg(source).arg(m_place[source].placeCode)
             .arg(m_place[source].displayName);
 
         // so the weather engine updates it's data
@@ -692,8 +692,8 @@ void WetterComIon::updateWeather(const QString& source, bool parseError)
 {
     kDebug() << "Source:" << source;
 
-    QString weatherSource = QString::fromLatin1("wettercom|weather|%1|%2;%3") \
-                            .arg(source).arg(m_place[source].placeCode) \
+    QString weatherSource = QString::fromLatin1("wettercom|weather|%1|%2;%3")
+                            .arg(source).arg(m_place[source].placeCode)
                             .arg(m_place[source].displayName);
 
     Plasma::DataEngine::Data data;
@@ -721,20 +721,20 @@ void WetterComIon::updateWeather(const QString& source, bool parseError)
                 WeatherData::ForecastInfo dayWeather = forecastPeriod->getDayWeather();
 
                 data.insert(QString::fromLatin1("Short Forecast Day %1").arg(i),
-                            QString::fromLatin1("%1|%2|%3|%4|%5|%6") \
-                            .arg(i18n("Day")).arg(dayWeather.iconName) \
-                            .arg(dayWeather.summary).arg(dayWeather.tempHigh) \
+                            QString::fromLatin1("%1|%2|%3|%4|%5|%6")
+                            .arg(i18n("Day")).arg(dayWeather.iconName)
+                            .arg(dayWeather.summary).arg(dayWeather.tempHigh)
                             .arg(dayWeather.tempLow).arg(dayWeather.probability));
                 i++;
 
                 if (forecastPeriod->hasNightWeather()) {
                     WeatherData::ForecastInfo nightWeather = forecastPeriod->getNightWeather();
                     data.insert(QString::fromLatin1("Short Forecast Day %1").arg(i),
-                                QString::fromLatin1("%1 nt|%2|%3|%4|%5|%6") \
-                                .arg(i18n("Night")).arg(nightWeather.iconName) \
-                                .arg(nightWeather.summary) \
-                                .arg(nightWeather.tempHigh) \
-                                .arg(nightWeather.tempLow) \
+                                QString::fromLatin1("%1 nt|%2|%3|%4|%5|%6")
+                                .arg(i18n("Night")).arg(nightWeather.iconName)
+                                .arg(nightWeather.summary)
+                                .arg(nightWeather.tempHigh)
+                                .arg(nightWeather.tempLow)
                                 .arg(nightWeather.probability));
                     i++;
                 }
