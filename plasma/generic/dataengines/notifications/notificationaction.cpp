@@ -25,6 +25,7 @@ void NotificationAction::start()
 {
     //kDebug() << "Trying to perform the action " << operationName() << " on " << destination();
     //kDebug() << "actionId: " << parameters()["actionId"].toString();
+    //kDebug() << "params: " << parameters();
 
     if (!m_engine) {
         setErrorText(i18n("The notification dataEngine is not set."));
@@ -51,11 +52,12 @@ void NotificationAction::start()
     } else if (operationName() == "userClosed") {
         m_engine->userClosedNotification(id);
     } else if (operationName() == "createNotification") {
-        m_engine->createNotification(parameters().value("appName").toString(),
-                            parameters().value("appIcon").toString(),
-                            parameters().value("summary").toString(),
-                            parameters().value("body").toString(),
-                            parameters().value("timeout").toInt());
+        int rv = m_engine->createNotification(parameters().value("appName").toString(),
+                                              parameters().value("appIcon").toString(),
+                                              parameters().value("summary").toString(),
+                                              parameters().value("body").toString(),
+                                              parameters().value("timeout").toInt());
+        setResult(rv);
     }
 
     emitResult();
