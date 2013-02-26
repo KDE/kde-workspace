@@ -161,6 +161,7 @@ Encoding=UTF-8
 Keywords=Lock;Logout;Sleep;Hibernate;Switch User;
 Keywords[de]=Sperren;Abmeldung;Ruhezustand;Hibernate;Benutzer wechseln;
 Keywords[es]=Bloquear;Terminar la sesión;Dormir;Hibernar;Cambiar de usuario;
+Keywords[fi]=Lukitse;kirjaudu ulos;valmiustila;lepotila;vaihda käyttäjää;
 Keywords[ia]=Bloca;Claude session;Dormi; Hiberna;Cambia Usator;
 Keywords[kk]=Lock;Logout;Sleep;Hibernate;Switch User;
 Keywords[mr]=कुलूप; बाहेर पडा; झोप; हायबरनेट; वापरकर्ता बदला;
