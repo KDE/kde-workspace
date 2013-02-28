@@ -463,18 +463,18 @@ TreeItem *TreeView::expandPath(TreeItem *item, const QString &path)
    QString restMenu = path.mid(i+1);
 
    for (int i = 0; i < item->childCount(); ++i) {
-       TreeItem *item = dynamic_cast<TreeItem *>(item->child(i));
-       if (!item) {
+       TreeItem *childItem = dynamic_cast<TreeItem *>(item->child(i));
+       if (!childItem) {
            continue;
        }
 
-       MenuFolderInfo *folderInfo = item->folderInfo();
+       MenuFolderInfo *folderInfo = childItem->folderInfo();
        if (folderInfo && (folderInfo->id == subMenu)) {
-           item->setExpanded(true);
+           childItem->setExpanded(true);
            if (!restMenu.isEmpty()) {
                return expandPath(item, restMenu);
            } else {
-               return item;
+               return childItem;
            }
        }
    }
