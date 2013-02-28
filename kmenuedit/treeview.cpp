@@ -472,7 +472,7 @@ TreeItem *TreeView::expandPath(TreeItem *item, const QString &path)
        if (folderInfo && (folderInfo->id == subMenu)) {
            childItem->setExpanded(true);
            if (!restMenu.isEmpty()) {
-               return expandPath(item, restMenu);
+               return expandPath(childItem, restMenu);
            } else {
                return childItem;
            }
