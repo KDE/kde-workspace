@@ -20,18 +20,22 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.runnermodel 0.1 as RunnerModel
 
 Item {
     id: root
 
-    RunnerModels.RunnerModel {
+    PlasmaCore.RunnerModel {
         id: runnerModel
         runners: krunner.runners
         query: queryText.text
     }
 
     PlasmaComponents.TextField {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
         id: queryText
     }
 }
