@@ -26,6 +26,8 @@ Item {
     property string activeSource: "Status"
     property int minimumWidth: 16
     property int minimumHeight: 16
+    implicitWidth: theme.iconSizes["panel"]
+    implicitHeight: implicitWidth
 
     Component.onCompleted: {
         plasmoid.aspectRatioMode = "ConstrainedSquare"
