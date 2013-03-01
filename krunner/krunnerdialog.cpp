@@ -289,7 +289,7 @@ void KRunnerDialog::loadInterface()
     */
 
     //TODO: with libplasma2, finding the package can be done by PackageStructure
-    QString path = KStandardDirs::locate("data", "interfaces/" + interfaceName + "/metadata.desktop");
+    QString path = KStandardDirs::locate("appdata", "interfaces/" + interfaceName + "/metadata.desktop");
     if (path.isEmpty()) {
         kDebug() << "Could not find requested interface:" << interfaceName;
         return;
