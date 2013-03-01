@@ -49,7 +49,8 @@ Item {
     {
         id: icon
         svg: "widgets/activities"
-        anchors.fill: parent
+        width: parent.width
+        height: parent.height
         onClicked:
         {
             var service = dataSource.serviceForSource(activeSource)
