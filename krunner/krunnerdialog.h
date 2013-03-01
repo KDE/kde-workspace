@@ -98,7 +98,6 @@ class KRunnerDialog : public Plasma::Dialog
         bool m_vertResize : 1;
         bool m_runningTimer : 1;
         QDesktopWidget *m_desktopWidget;
-        QString m_interfaceName;
         Plasma::PackageStructure::Ptr m_interfacePackageStructure;
         InterfaceApi *m_interfaceApi;
         QDeclarativeView *m_view;

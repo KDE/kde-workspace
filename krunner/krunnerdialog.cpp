@@ -264,7 +264,7 @@ void KRunnerDialog::display(const QString &query, const QString &singleRunnerId)
 void KRunnerDialog::loadInterface()
 {
     const QString interfaceName = KRunnerSettings::interfacePlugin();
-    if (interfaceName == interfaceName) {
+    if (m_interfaceApi->package() && m_interfaceApi->package()->metadata().pluginName() == interfaceName) {
         return;
     }
 
@@ -291,25 +291,20 @@ void KRunnerDialog::loadInterface()
     //TODO: with libplasma2, finding the package can be done by PackageStructure
     QString path = KStandardDirs::locate("appdata", "interfaces/" + interfaceName + "/metadata.desktop");
     if (path.isEmpty()) {
-        kDebug() << "Could not find requested interface:" << interfaceName;
         return;
     }
 
     path.truncate(path.size() - QString("metadata.desktop").size());
-    kDebug() << "going to try and find the package at" << path;
 
     Plasma::Package *package = new Plasma::Package(path, m_interfacePackageStructure);
     const QString mainScript = package->filePath("mainscript");
 
     if (mainScript.isEmpty()) {
-        kDebug() << path << "package malformed: no mainscript";
         delete package;
         return;
     }
 
-    kDebug() << "our interface will start with" << mainScript;
     m_interfaceApi->setPackage(package);
-    m_interfaceName = interfaceName;
     m_view->setSource(mainScript);
 }
 
