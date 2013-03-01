@@ -65,6 +65,10 @@ void MenuWidget::setMenu(QMenu *menu)
         m_menu->removeEventFilter(this);
     }
     if (menu) {
+        if (m_mouseTimer->isActive()) {
+            m_mouseTimer->stop();
+        }
+        m_visibleMenu = 0;
         m_menu = menu;
         connect(m_menu, SIGNAL(destroyed()), SLOT(slotMenuDestroyed()), Qt::UniqueConnection);
         m_menu->installEventFilter(this);
@@ -184,8 +188,10 @@ void MenuWidget::slotMenuAboutToHide()
     if (m_currentButton) {
         m_currentButton->setDown(false);
     }
-    if (m_mouseTimer->isActive())
+
+    if (m_mouseTimer->isActive()) {
         m_mouseTimer->stop();
+    }
     m_visibleMenu = 0;
     emit aboutToHide();
 }
