@@ -21,7 +21,8 @@
 #include <Plasma/Package>
 
 InterfaceApi::InterfaceApi(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      m_package(0)
 {
 }
 
