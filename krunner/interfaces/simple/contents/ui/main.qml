@@ -20,9 +20,14 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.qtextracomponents 0.1
 
 Item {
     id: root
+
+    PlasmaCore.Theme {
+        id: theme
+    }
 
     PlasmaCore.RunnerModel {
         id: runnerModel
@@ -31,11 +36,51 @@ Item {
     }
 
     PlasmaComponents.TextField {
+        id: queryText
+
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
         }
-        id: queryText
+    }
+
+    ListView {
+        anchors {
+            top: queryText.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            topMargin: 3
+        }
+
+        clip: true
+        spacing: 3
+        model: runnerModel
+        delegate: Item {
+            height: theme.iconSizes.dialog
+            width: parent.width
+            QIconItem {
+                id: icon
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                    bottom: parent.bottom
+                }
+                width: theme.iconSizes.dialog
+                icon: display
+            }
+
+            Text {
+                anchors {
+                    top: parent.top
+                    left: icon.right
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+
+                text: label
+            }
+        }
     }
 }
