@@ -42,7 +42,7 @@ namespace SystemTray
 DBusSystemTrayTask::DBusSystemTrayTask(const QString &serviceName, Plasma::DataEngine *dataEngine, QObject *parent)
     : Task(parent),
       m_serviceName(serviceName),
-      m_typeId(serviceName),
+      m_taskId(serviceName),
       m_customIconLoader(0),
       m_dataEngine(dataEngine),
       m_service(dataEngine->serviceForSource(serviceName)),
@@ -87,9 +87,9 @@ void DBusSystemTrayTask::setShortcut(QString text) {
 }
 
 
-QString DBusSystemTrayTask::typeId() const
+QString DBusSystemTrayTask::taskId() const
 {
-    return m_typeId;
+    return m_taskId;
 }
 
 QIcon DBusSystemTrayTask::icon() const
@@ -216,13 +216,13 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
 {
     Q_UNUSED(taskName);
 
-    QString id = properties["Id"].toString();
-    bool become_valid = false;
-    if (!id.isEmpty() && id != m_typeId) {
-        m_typeId = id;
+    const QString id = properties["Id"].toString();
+    bool becomeValid = false;
+    if (!id.isEmpty() && id != m_taskId) {
+        m_taskId = id;
         m_valid = true;
-        become_valid = true;
-        setObjectName(QString("SystemTray-%1").arg(m_typeId));
+        becomeValid = true;
+        setObjectName(QString("SystemTray-%1").arg(m_taskId));
     }
 
     QString cat = properties["Category"].toString();
@@ -235,7 +235,7 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         }
     }
 
-    if (properties["TitleChanged"].toBool() || become_valid) {
+    if (properties["TitleChanged"].toBool() || becomeValid) {
         QString title = properties["Title"].toString();
         if (!title.isEmpty()) {
             bool is_title_changed = (name() != title);
@@ -247,16 +247,16 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         }
     }
 
-    if (properties["IconsChanged"].toBool() || become_valid) {
+    if (properties["IconsChanged"].toBool() || becomeValid) {
         syncIcons(properties);
         emit changedIcons();
     }
 
-    if (properties["StatusChanged"].toBool() || become_valid) {
+    if (properties["StatusChanged"].toBool() || becomeValid) {
         syncStatus(properties["Status"].toString());
     }
 
-    if (properties["ToolTipChanged"].toBool() || become_valid) {
+    if (properties["ToolTipChanged"].toBool() || becomeValid) {
         syncToolTip(properties["ToolTipTitle"].toString(),
                     properties["ToolTipSubTitle"].toString(),
                     properties["ToolTipIcon"].value<QIcon>());
@@ -268,7 +268,7 @@ void DBusSystemTrayTask::dataUpdated(const QString &taskName, const Plasma::Data
         emit changedIsMenu();
     }
 
-    if (become_valid) {
+    if (becomeValid) {
         DBusSystemTrayProtocol *protocol = qobject_cast<DBusSystemTrayProtocol*>(parent());
         if (protocol) {
             protocol->initedTask(this);

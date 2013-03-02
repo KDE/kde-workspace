@@ -42,7 +42,7 @@ class CloseWindowView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    CloseWindowView(QWidget* parent = 0);
+    explicit CloseWindowView(QWidget* parent = 0);
     void windowInputMouseEvent(QMouseEvent* e);
     virtual void drawBackground(QPainter* painter, const QRectF& rect);
 
@@ -137,8 +137,7 @@ public:
         WindowExitAction = 2, // Deactivates the effect without activating new window
         WindowToCurrentDesktopAction = 3, // Brings window to current desktop
         WindowToAllDesktopsAction = 4, // Brings window to all desktops
-        WindowMinimizeAction = 5, // Minimize the window
-        WindowCloseAction = 6 // Closes the window
+        WindowMinimizeAction = 5 // Minimize the window
     };
     enum DesktopMouseAction {
         DesktopNoAction = 0, // nothing
@@ -224,6 +223,7 @@ public slots:
 private slots:
     void closeWindow();
     void elevateCloseWindow();
+    void screenCountChanged();
 
 protected:
     // Window rearranging

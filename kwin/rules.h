@@ -46,7 +46,7 @@ class WindowRules
     : public KDecorationDefines
 {
 public:
-    WindowRules(const QVector< Rules* >& rules);
+    explicit WindowRules(const QVector< Rules* >& rules);
     WindowRules();
     void update(Client*, int selection);
     void discardTemporary();
@@ -99,7 +99,7 @@ class Rules
 {
 public:
     Rules();
-    Rules(const KConfigGroup&);
+    explicit Rules(const KConfigGroup&);
     Rules(const QString&, bool temporary);
     enum Type {
         Position = 1<<0, Size = 1<<1, Desktop = 1<<2,
@@ -160,7 +160,7 @@ private:
     bool matchWMClass(const QByteArray& match_class, const QByteArray& match_name) const;
     bool matchRole(const QByteArray& match_role) const;
     bool matchTitle(const QString& match_title) const;
-    bool matchClientMachine(const QByteArray& match_machine) const;
+    bool matchClientMachine(const QByteArray& match_machine, bool local) const;
     // All these values are saved to the cfg file, and are also used in kstart!
     enum {
         Unused = 0,

@@ -101,6 +101,7 @@ private:
 private:
     double zoom;
     double target_zoom;
+    double source_zoom;
     bool polling; // Mouse polling
     double zoomFactor;
     enum MouseTrackingType { MouseTrackingProportional = 0, MouseTrackingCentred = 1, MouseTrackingPush = 2, MouseTrackingDisabled = 3 };
@@ -115,8 +116,10 @@ private:
     QPoint prevPoint;
     QTime lastMouseEvent;
     QTime lastFocusEvent;
-    GLTexture* texture;
-    XRenderPicture* xrenderPicture;
+    QScopedPointer<GLTexture> texture;
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
+    QScopedPointer<XRenderPicture> xrenderPicture;
+#endif
     int imageWidth;
     int imageHeight;
     bool isMouseHidden;

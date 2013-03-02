@@ -4,7 +4,11 @@ KDE4_NO_ENABLE_FINAL(input)
 
 macro_optional_find_package(USB)
 macro_bool_to_01(LIBUSB_FOUND HAVE_LIBUSB)
-macro_log_feature(LIBUSB_FOUND "libusb" "User level access to USB devices" "http://libusb.sourceforge.net/" FALSE "" "Provides Logitech mouse support in KControl.")
+set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devices"
+                       URL "http://libusb.sourceforge.net"
+                       TYPE OPTIONAL
+                       PURPOSE "Provides Logitech mouse support in KControl."
+                      )
 
 configure_file (config-kcontrol-input.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kcontrol-input.h )
 

@@ -38,11 +38,11 @@ public:
         KWindowInfo info = KWindowSystem::windowInfo(winId, NET::WMName, NET::WM2WindowClass);
 
         // FIXME: This isn't unique
-        typeId = info.windowClassName();
+        taskId = info.windowClassName();
 
         name = info.name();
         if (name.isEmpty()) {
-            name = typeId;
+            name = taskId;
         }
 
         icon = KWindowSystem::icon(winId);
@@ -50,7 +50,7 @@ public:
 
     WId winId;
     QString name;
-    QString typeId;
+    QString taskId;
     QIcon icon;
     FdoGraphicsWidget *widget;
 };
@@ -79,9 +79,9 @@ bool FdoTask::isWidget() const {
     return true;
 }
 
-QString FdoTask::typeId() const
+QString FdoTask::taskId() const
 {
-    return d->typeId;
+    return d->taskId;
 }
 
 QIcon FdoTask::icon() const

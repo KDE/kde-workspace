@@ -43,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KWin
 #include "thumbnailitem.h"
 #include <kwindowsystem.h>
+#include "../effects.h"
 #include "../client.h"
 #include "../workspace.h"
 
@@ -63,15 +64,24 @@ QPixmap ImageProvider::requestPixmap(const QString &id, QSize *size, const QSize
     QStringList parts = id.split('/');
     const int row = parts.first().toInt(&ok);
     if (!ok) {
-        return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
+        return QPixmap();
     }
-    const QModelIndex index = m_model->index(row, 0);
+    QModelIndex parentIndex;
+    const int parentRow = parts.at(1).toInt(&ok);
+    if (ok) {
+        // we have parent index
+        parentIndex = m_model->index(parentRow, 0);
+        if (!parentIndex.isValid()) {
+            return QPixmap();
+        }
+    }
+    const QModelIndex index = m_model->index(row, 0, parentIndex);
     if (!index.isValid()) {
-        return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
+        return QPixmap();
     }
     TabBoxClient* client = static_cast< TabBoxClient* >(index.model()->data(index, ClientModel::ClientRole).value<void *>());
     if (!client) {
-        return QDeclarativeImageProvider::requestPixmap(id, size, requestedSize);
+        return QPixmap();
     }
 
     QSize s(32, 32);
@@ -91,14 +101,27 @@ QPixmap ImageProvider::requestPixmap(const QString &id, QSize *size, const QSize
     if (parts.size() > 2) {
         KIconEffect *effect = KIconLoader::global()->iconEffect();
         KIconLoader::States state = KIconLoader::DefaultState;
-        if (parts.at(2) == QLatin1String("selected")) {
+        if (parts.last() == QLatin1String("selected")) {
             state = KIconLoader::ActiveState;
-        } else if (parts.at(2) == QLatin1String("disabled")) {
+        } else if (parts.last() == QLatin1String("disabled")) {
             state = KIconLoader::DisabledState;
         }
         icon = effect->apply(icon, KIconLoader::Desktop, state);
     }
     return icon;
+}
+
+static bool compositing()
+{
+#ifndef TABBOX_KCM
+    if (!Workspace::self()->compositing() || !effects) {
+        return false;
+    }
+    if (!static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::Blur)) {
+        return false;
+    }
+#endif
+    return Plasma::Theme::defaultTheme()->currentThemeHasImage("translucent/dialogs/background");
 }
 
 DeclarativeView::DeclarativeView(QAbstractItemModel *model, TabBoxConfig::TabBoxMode mode, QWidget *parent)
@@ -131,6 +154,7 @@ DeclarativeView::DeclarativeView(QAbstractItemModel *model, TabBoxConfig::TabBox
     kdeclarative.setupBindings();
     qmlRegisterType<ThumbnailItem>("org.kde.kwin", 0, 1, "ThumbnailItem");
     rootContext()->setContextProperty("viewId", static_cast<qulonglong>(winId()));
+    rootContext()->setContextProperty("compositing", compositing());
     if (m_mode == TabBoxConfig::ClientTabBox) {
         rootContext()->setContextProperty("clientModel", model);
     } else if (m_mode == TabBoxConfig::DesktopTabBox) {
@@ -173,22 +197,37 @@ void DeclarativeView::showEvent(QShowEvent *event)
         item->setProperty("currentIndex", tabBox->first().row());
         connect(item, SIGNAL(currentIndexChanged(int)), SLOT(currentIndexChanged(int)));
     }
+    rootContext()->setContextProperty("compositing", compositing());
     slotUpdateGeometry();
     QGraphicsView::showEvent(event);
 }
 
 void DeclarativeView::resizeEvent(QResizeEvent *event)
 {
-    m_frame->resizeFrame(event->size());
-    if (Plasma::Theme::defaultTheme()->windowTranslucencyEnabled() && !tabBox->embedded()) {
-        // blur background
-        Plasma::WindowEffects::enableBlurBehind(winId(), true, m_frame->mask());
-        Plasma::WindowEffects::overrideShadow(winId(), true);
-    } else if (tabBox->embedded()) {
+    if (tabBox->embedded()) {
         Plasma::WindowEffects::enableBlurBehind(winId(), false);
     } else {
-        // do not trim to mask with compositing enabled, otherwise shadows are cropped
-        setMask(m_frame->mask());
+        const QString maskImagePath = rootObject()->property("maskImagePath").toString();
+        if (maskImagePath.isEmpty()) {
+            clearMask();
+            Plasma::WindowEffects::enableBlurBehind(winId(), false);
+        } else {
+            const double maskWidth = rootObject()->property("maskWidth").toDouble();
+            const double maskHeight = rootObject()->property("maskHeight").toDouble();
+            const int maskTopMargin = rootObject()->property("maskTopMargin").toInt();
+            const int maskLeftMargin = rootObject()->property("maskLeftMargin").toInt();
+            m_frame->setImagePath(maskImagePath);
+            m_frame->resizeFrame(QSizeF(maskWidth, maskHeight));
+            QRegion mask = m_frame->mask().translated(maskLeftMargin, maskTopMargin);
+            if (compositing()) {
+                // blur background
+                Plasma::WindowEffects::enableBlurBehind(winId(), true, mask);
+                clearMask();
+            } else {
+                // do not trim to mask with compositing enabled, otherwise shadows are cropped
+                setMask(mask);
+            }
+        }
     }
     QDeclarativeView::resizeEvent(event);
 }

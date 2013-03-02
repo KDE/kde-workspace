@@ -199,7 +199,7 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
         notificationData.insert("urgency", hints["urgency"].toInt());
     }
 
-    setData(source, notificationData );
+    setData(source, notificationData);
 
     if (timeout) {
         int timerId = startTimer(timeout);
@@ -262,7 +262,7 @@ QString NotificationsEngine::GetServerInformation(QString& vendor, QString& vers
     return "Plasma";
 }
 
-void NotificationsEngine::createNotification(const QString &appName, const QString &appIcon, const QString &summary, const QString &body, int timeout)
+int NotificationsEngine::createNotification(const QString &appName, const QString &appIcon, const QString &summary, const QString &body, int timeout)
 {
     const QString source = QString("notification %1").arg(++m_nextId);
     Plasma::DataEngine::Data notificationData;
@@ -273,7 +273,8 @@ void NotificationsEngine::createNotification(const QString &appName, const QStri
     notificationData.insert("body", body);
     notificationData.insert("expireTimeout", timeout);
 
-    setData(source, notificationData );
+    setData(source, notificationData);
+    return m_nextId;
 }
 
 K_EXPORT_PLASMA_DATAENGINE(notifications, NotificationsEngine)

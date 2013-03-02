@@ -49,11 +49,12 @@ protected:
 
 private Q_SLOTS:
     void viewStatusChanged(const QDeclarativeView::Status &status);
-    void prepareShow();
+    void desktopResized();
     void resetRequestIgnore();
     void suspendToRam();
     void suspendToDisk();
     void shutdown();
+    void getFocus();
 
 private:
     void initialize();

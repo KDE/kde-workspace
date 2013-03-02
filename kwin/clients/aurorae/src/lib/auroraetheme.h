@@ -42,7 +42,8 @@ enum AuroraeButtonType {
     KeepBelowButton,
     ShadeButton,
     HelpButton,
-    MenuButton
+    MenuButton,
+    AppMenuButton
 };
 
 enum DecorationPosition {
@@ -79,6 +80,7 @@ class /*LIBAURORAE_EXPORT*/ AuroraeTheme : public QObject
     Q_PROPERTY(int buttonWidthShade READ buttonWidthShade NOTIFY themeChanged)
     Q_PROPERTY(int buttonWidthHelp READ buttonWidthHelp NOTIFY themeChanged)
     Q_PROPERTY(int buttonWidthMenu READ buttonWidthMenu NOTIFY themeChanged)
+    Q_PROPERTY(int buttonWidthAppMenu READ buttonWidthAppMenu NOTIFY themeChanged)
     Q_PROPERTY(int buttonSpacing READ buttonSpacing NOTIFY themeChanged)
     Q_PROPERTY(int buttonMarginTop READ buttonMarginTop NOTIFY themeChanged)
     Q_PROPERTY(int explicitButtonSpacer READ explicitButtonSpacer NOTIFY themeChanged)
@@ -110,7 +112,7 @@ class /*LIBAURORAE_EXPORT*/ AuroraeTheme : public QObject
     Q_PROPERTY(QString defaultButtonsLeft READ defaultButtonsLeft NOTIFY themeChanged)
     Q_PROPERTY(QString defaultButtonsRight READ defaultButtonsRight NOTIFY themeChanged)
 public:
-    AuroraeTheme(QObject* parent = 0);
+    explicit AuroraeTheme(QObject* parent = 0);
     virtual ~AuroraeTheme();
     // TODO: KSharedConfigPtr
     void loadTheme(const QString &name, const KConfig &config);
@@ -138,6 +140,7 @@ public:
     int buttonWidthShade() const;
     int buttonWidthHelp() const;
     int buttonWidthMenu() const;
+    int buttonWidthAppMenu() const;
     int buttonHeight() const;
     int buttonSpacing() const;
     int buttonMarginTop() const;

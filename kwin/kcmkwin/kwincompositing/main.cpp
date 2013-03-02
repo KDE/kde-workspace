@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "main.h"
+#include "dbus.h"
 
 #include "kwin_interface.h"
 #include "kwinglobals.h"
@@ -76,22 +77,52 @@ ConfirmDialog::ConfirmDialog() :
 }
 
 
-KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList &)
+KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList &args)
     : KCModule(KWinCompositingConfigFactory::componentData(), parent)
     , mKWinConfig(KSharedConfig::openConfig("kwinrc"))
     , m_showConfirmDialog(false)
     , m_showDetailedErrors(new QAction(i18nc("Action to open a dialog showing detailed information why an effect could not be loaded",
                                              "Details"), this))
+    , m_dontShowAgain(new QAction(i18nc("Prevent warning from bein displayed again", "Don't show again!"), this))
 {
+    QDBusConnection::sessionBus().registerService("org.kde.kwinCompositingDialog");
+    QDBusConnection::sessionBus().registerObject("/CompositorSettings", this);
+    new MainAdaptor(this);
     KGlobal::locale()->insertCatalog("kwin_effects");
     ui.setupUi(this);
     layout()->setMargin(0);
+    layout()->activate();
     ui.tabWidget->setCurrentIndex(0);
     ui.statusTitleWidget->hide();
     ui.rearmGlSupport->hide();
-    ui.messageBox->setVisible(false);
-    ui.messageBox->addAction(m_showDetailedErrors);
     ui.messageBox->setMessageType(KMessageWidget::Warning);
+    ui.messageBox->addAction(m_dontShowAgain);
+    foreach (QWidget *w, m_dontShowAgain->associatedWidgets())
+        w->setVisible(false);
+    ui.messageBox->addAction(m_showDetailedErrors);
+
+    bool showMessage = false;
+    QString message, details, dontAgainKey;
+    if (args.count() > 1) {
+        for (int i = 0; i < args.count() - 1; ++i) {
+            if (args.at(i).toString() == "warn") {
+                showMessage = true;
+                message = QString::fromLocal8Bit(QByteArray::fromBase64(args.at(i+1).toByteArray()));
+            } else if (args.at(i).toString() == "details") {
+                showMessage = true;
+                details = QString::fromLocal8Bit(QByteArray::fromBase64(args.at(i+1).toByteArray()));
+            } else if (args.at(i).toString() == "dontagain") {
+                showMessage = true;
+                dontAgainKey = args.at(i+1).toString();
+            }
+        }
+    }
+
+    if (showMessage) {
+        ui.messageBox->setVisible(showMessage); // first show, animation is broken on init
+        warn(message, details, dontAgainKey);
+    } else
+        ui.messageBox->setVisible(false);
     ui.ghns->setIcon(KIcon("get-hot-new-stuff"));
 
     // For future use
@@ -132,6 +163,7 @@ KWinCompositingConfig::KWinCompositingConfig(QWidget *parent, const QVariantList
     connect(ui.glShaders, SIGNAL(toggled(bool)), this, SLOT(changed()));
     connect(ui.glColorCorrection, SIGNAL(toggled(bool)), this, SLOT(changed()));
     connect(m_showDetailedErrors, SIGNAL(triggered(bool)), SLOT(showDetailedEffectLoadingInformation()));
+    connect(m_dontShowAgain, SIGNAL(triggered(bool)), SLOT(blockFutureWarnings()));
     connect(ui.ghns, SIGNAL(clicked(bool)), SLOT(slotGHNS()));
 
     // Open the temporary config file
@@ -195,7 +227,7 @@ void KWinCompositingConfig::showConfirmDialog(bool reinitCompositing)
     bool revert = false;
     // Feel free to extend this to support several kwin instances (multihead) if you
     // think it makes sense.
-    OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+    OrgKdeKWinInterface kwin("org.kde.KWin", "/KWin", QDBusConnection::sessionBus());
     if (reinitCompositing ? !kwin.compositingActive().value() : !kwin.waitForCompositingSetup().value()) {
         KMessageBox::sorry(this, i18n(
                                "Failed to activate desktop effects using the given "
@@ -398,7 +430,7 @@ void KWinCompositingConfig::updateStatusUI(bool compositingIsPossible)
         ui.rearmGlSupport->hide();
     }
     else {
-        OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+        OrgKdeKWinInterface kwin("org.kde.KWin", "/KWin", QDBusConnection::sessionBus());
         ui.compositingOptionsContainer->hide();
         QString text = i18n("Desktop effects are not available on this system due to the following technical issues:");
         text += "<hr>";
@@ -415,7 +447,7 @@ void KWinCompositingConfig::load()
 {
     initEffectSelector();
     mKWinConfig->reparseConfiguration();
-    QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.kwin", "/KWin", "org.kde.KWin", "compositingPossible");
+    QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.KWin", "/KWin", "org.kde.KWin", "compositingPossible");
     QDBusConnection::sessionBus().callWithCallback(msg, this, SLOT(updateStatusUI(bool)));
 
     // Copy Plugins group to temp config file
@@ -526,7 +558,7 @@ bool KWinCompositingConfig::saveAdvancedTab()
 
 void KWinCompositingConfig::save()
 {
-    OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+    OrgKdeKWinInterface kwin("org.kde.KWin", "/KWin", QDBusConnection::sessionBus());
     if (ui.compositingType->currentIndex() == OPENGL_INDEX &&
         kwin.openGLIsBroken() && !ui.rearmGlSupport->isVisible())
     {
@@ -594,7 +626,7 @@ void KWinCompositingConfig::checkLoadedEffects()
 {
     // check for effects not supported by Backend or hardware
     // such effects are enabled but not returned by DBus method loadedEffects
-    OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+    OrgKdeKWinInterface kwin("org.kde.KWin", "/KWin", QDBusConnection::sessionBus());
     KConfigGroup effectConfig = KConfigGroup(mKWinConfig, "Compositing");
     bool enabledAfter = effectConfig.readEntry("Enabled", true);
 
@@ -614,10 +646,15 @@ void KWinCompositingConfig::checkLoadedEffects()
         }
         if (!disabledEffects.isEmpty()) {
             m_showDetailedErrors->setData(disabledEffects);
+            foreach (QWidget *w, m_showDetailedErrors->associatedWidgets())
+                w->setVisible(true);
             ui.messageBox->setText(i18ncp("Error Message shown when a desktop effect could not be loaded",
                                           "One desktop effect could not be loaded.",
                                           "%1 desktop effects could not be loaded.", disabledEffects.count()));
             ui.messageBox->animatedShow();
+        } else {
+            foreach (QWidget *w, m_showDetailedErrors->associatedWidgets())
+                w->setVisible(false);
         }
     }
 }
@@ -625,7 +662,7 @@ void KWinCompositingConfig::checkLoadedEffects()
 void KWinCompositingConfig::showDetailedEffectLoadingInformation()
 {
     QStringList disabledEffects = m_showDetailedErrors->data().toStringList();
-    OrgKdeKWinInterface kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+    OrgKdeKWinInterface kwin("org.kde.KWin", "/KWin", QDBusConnection::sessionBus());
     QDBusPendingReply< QString > pendingCompositingType = kwin.compositingType();
     QString compositingType = pendingCompositingType.isError() ? "none" : pendingCompositingType.value();
     KServiceTypeTrader* trader = KServiceTypeTrader::self();
@@ -652,7 +689,9 @@ void KWinCompositingConfig::showDetailedEffectLoadingInformation()
     label->setOpenExternalLinks(true);
     vboxLayout->addWidget(titleWidget);
     vboxLayout->addWidget(label);
-    if (compositingType != "none") {
+    if (!m_externErrorDetails.isNull()) {
+        label->setText(m_externErrorDetails);
+    } else if (compositingType != "none") {
         QString text;
         if (disabledEffects.count() > 1) {
             text = "<ul>";
@@ -713,6 +752,31 @@ void KWinCompositingConfig::showDetailedEffectLoadingInformation()
                              "Desktop effect system is not running."));
     }
     dialog->show();
+}
+
+void KWinCompositingConfig::warn(QString message, QString details, QString dontAgainKey)
+{
+    ui.messageBox->setText(message);
+    m_dontShowAgain->setData(dontAgainKey);
+    foreach (QWidget *w, m_dontShowAgain->associatedWidgets())
+        w->setVisible(!dontAgainKey.isEmpty());
+    m_externErrorDetails = details.isNull() ? "" : details;
+    foreach (QWidget *w, m_showDetailedErrors->associatedWidgets())
+        w->setVisible(!m_externErrorDetails.isEmpty());
+    ui.messageBox->animatedShow();
+}
+
+void KWinCompositingConfig::blockFutureWarnings() {
+    QString key;
+    if (QAction *act = qobject_cast<QAction*>(sender()))
+        key = act->data().toString();
+    if (key.isEmpty())
+        return;
+    QStringList l = key.split(':', QString::SkipEmptyParts);
+    KConfig cfg(l.count() > 1 ? l.at(0) : "kwin_dialogsrc");
+    KConfigGroup(&cfg, "Notification Messages").writeEntry(l.last(), false);
+    cfg.sync();
+    ui.messageBox->animatedHide();
 }
 
 void KWinCompositingConfig::configChanged(bool reinitCompositing)
@@ -778,4 +842,5 @@ void KWinCompositingConfig::slotGHNS()
 
 } // namespace
 
+#include "dbus.moc"
 #include "main.moc"

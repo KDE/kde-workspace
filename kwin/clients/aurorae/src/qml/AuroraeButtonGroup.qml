@@ -27,6 +27,9 @@ Item {
             } else if (buttons.charAt(i) == "M") {
                 Qt.createQmlObject("import QtQuick 1.1; MenuButton { width: auroraeTheme.buttonWidthMenu * auroraeTheme.buttonSizeFactor; height: auroraeTheme.buttonHeight * auroraeTheme.buttonSizeFactor }",
                     groupRow, "menuButton" + buttons + i);
+            } else if (buttons.charAt(i) == "N") {
+                Qt.createQmlObject("import QtQuick 1.1; AppMenuButton { width: auroraeTheme.buttonWidthAppMenu * auroraeTheme.buttonSizeFactor; height: auroraeTheme.buttonHeight * auroraeTheme.buttonSizeFactor }",
+                    groupRow, "appMenuButton" + buttons + i);
             } else if (buttons.charAt(i) == "A") {
                 var maximizeComponent = Qt.createComponent("AuroraeMaximizeButton.qml");
                 maximizeComponent.createObject(groupRow);
@@ -37,6 +40,7 @@ Item {
     }
     id: group
     property string buttons
+    property bool animate: false
 
     Row {
         id: groupRow
@@ -50,9 +54,10 @@ Item {
     }
     anchors {
         top: parent.top
-        topMargin: (decoration.maximized ? auroraeTheme.titleEdgeTopMaximized : auroraeTheme.titleEdgeTop + root.paddingTop) + auroraeTheme.buttonMarginTop
+        topMargin: (decoration.maximized ? auroraeTheme.titleEdgeTopMaximized : auroraeTheme.titleEdgeTop + root.padding.top) + auroraeTheme.buttonMarginTop
     }
     Behavior on anchors.topMargin {
+        enabled: group.animate
         NumberAnimation {
             duration: auroraeTheme.animationTime
         }

@@ -62,7 +62,7 @@ QVariant ClientModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
-    int clientIndex = index.row() * columnCount() + index.column();
+    int clientIndex = index.row();
     if (clientIndex >= m_clientList.count())
         return QVariant();
     QSharedPointer<TabBoxClient> client = m_clientList[ clientIndex ].toStrongRef();
@@ -98,7 +98,7 @@ QVariant ClientModel::data(const QModelIndex& index, int role) const
 QString ClientModel::longestCaption() const
 {
     QString caption;
-    foreach (QWeakPointer<TabBoxClient> clientPointer, m_clientList) {
+    foreach (const QWeakPointer<TabBoxClient> &clientPointer, m_clientList) {
         QSharedPointer<TabBoxClient> client = clientPointer.toStrongRef();
         if (!client) {
             continue;
@@ -118,7 +118,9 @@ int ClientModel::columnCount(const QModelIndex& parent) const
 
 int ClientModel::rowCount(const QModelIndex& parent) const
 {
-    Q_UNUSED(parent)
+    if (parent.isValid()) {
+        return 0;
+    }
     return m_clientList.count();
 }
 
@@ -130,11 +132,13 @@ QModelIndex ClientModel::parent(const QModelIndex& child) const
 
 QModelIndex ClientModel::index(int row, int column, const QModelIndex& parent) const
 {
-    Q_UNUSED(parent)
-    int index = row * columnCount() + column;
+    if (row < 0 || column != 0 || parent.isValid()) {
+        return QModelIndex();
+    }
+    int index = row * columnCount();
     if (index >= m_clientList.count() && !m_clientList.isEmpty())
         return QModelIndex();
-    return createIndex(row, column);
+    return createIndex(row, 0);
 }
 
 QModelIndex ClientModel::index(QWeakPointer<TabBoxClient> client) const
@@ -218,7 +222,7 @@ void ClientModel::createClientList(int desktop, bool partialReset)
         break;
     }
     }
-    foreach (QWeakPointer< TabBoxClient > c, stickyClients) {
+    foreach (const QWeakPointer< TabBoxClient > &c, stickyClients) {
         m_clientList.removeAll(c);
         m_clientList.prepend(c);
     }

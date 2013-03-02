@@ -104,7 +104,11 @@ void LocationsRunner::match(Plasma::RunnerContext &context)
 
         if (KProtocolInfo::isHelperProtocol(url.protocol())) {
             //kDebug() << "helper protocol" << url.protocol() <<"call external application" ;
-            match.setText(i18n("Launch with %1", KProtocolInfo::exec(url.protocol())));
+            if (url.protocol() == "mailto") {
+                match.setText(i18n("Send email to %1",url.path()));
+            } else {
+                match.setText(i18n("Launch with %1", KProtocolInfo::exec(url.protocol())));
+            }
         } else {
             //kDebug() << "protocol managed by browser" << url.protocol();
             match.setText(i18n("Go to %1", url.prettyUrl()));

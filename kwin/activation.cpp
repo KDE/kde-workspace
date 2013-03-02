@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "client.h"
+#include "cursor.h"
+#include "focuschain.h"
 #include "workspace.h"
 
 #include <fixx11h.h>
@@ -244,7 +246,7 @@ void Workspace::setActiveClient(Client* c, allowed_t)
     if (active_client != NULL)
         last_active_client = active_client;
     if (active_client) {
-        updateFocusChains(active_client, FocusChainMakeFirst);
+        FocusChain::self()->update(active_client, FocusChain::MakeFirst);
         active_client->demandAttention(false);
     }
     pending_take_activity = NULL;
@@ -285,7 +287,7 @@ void Workspace::activateClient(Client* c, bool force)
     raiseClient(c);
     if (!c->isOnCurrentDesktop()) {
         ++block_focus;
-        setCurrentDesktop(c->desktop());
+        VirtualDesktopManager::self()->setCurrent(c->desktop());
         --block_focus;
     }
 #ifdef KWIN_BUILD_ACTIVITIES
@@ -401,13 +403,6 @@ void Workspace::clientHidden(Client* c)
     activateNextClient(c);
 }
 
-static inline bool isUsableFocusCandidate(Client *c, Client *prev, bool respectScreen)
-{
-    return c != prev &&
-           c->isShown(false) && c->isOnCurrentDesktop() && c->isOnCurrentActivity() &&
-           (!respectScreen || c->isOnScreen(prev ? prev->screen() : Workspace::self()->activeScreen()));
-}
-
 Client *Workspace::clientUnderMouse(int screen) const
 {
     ToplevelList::const_iterator it = stackingOrder().constEnd();
@@ -423,7 +418,7 @@ Client *Workspace::clientUnderMouse(int screen) const
                 client->isOnCurrentActivity() && client->isOnScreen(screen)))
             continue;
 
-        if (client->geometry().contains(QCursor::pos())) {
+        if (client->geometry().contains(Cursor::pos())) {
             return client;
         }
     }
@@ -474,25 +469,20 @@ bool Workspace::activateNextClient(Client* c)
         }
     }
 
+    const int desktop = VirtualDesktopManager::self()->current();
+
     if (!get_focus) { // no suitable window under the mouse -> find sth. else
         // first try to pass the focus to the (former) active clients leader
-        if (c  && (get_focus = c->transientFor()) && isUsableFocusCandidate(get_focus, c, options->isSeparateScreenFocus())) {
+        if (c  && (get_focus = c->transientFor()) && FocusChain::self()->isUsableFocusCandidate(get_focus, c)) {
             raiseClient(get_focus);   // also raise - we don't know where it came from
         } else {
             // nope, ask the focus chain for the next candidate
-            get_focus = NULL; // reset from the inline assignment above
-            for (int i = focus_chain[ currentDesktop()].size() - 1; i >= 0; --i) {
-                Client* ci = focus_chain[ currentDesktop()].at(i);
-                if (isUsableFocusCandidate(ci, c, options->isSeparateScreenFocus())) {
-                    get_focus = ci;
-                    break; // we're done
-                }
-            }
+            get_focus = FocusChain::self()->nextForDesktop(c, desktop);
         }
     }
 
     if (get_focus == NULL)   // last chance: focus the desktop
-        get_focus = findDesktop(true, currentDesktop());
+        get_focus = findDesktop(true, desktop);
 
     if (get_focus != NULL)
         requestFocus(get_focus);
@@ -510,20 +500,10 @@ void Workspace::setCurrentScreen(int new_screen)
     if (!options->focusPolicyIsReasonable())
         return;
     closeActivePopup();
-    Client* get_focus = NULL;
-    for (int i = focus_chain[ currentDesktop()].count() - 1;
-            i >= 0;
-            --i) {
-        Client* ci = focus_chain[ currentDesktop()].at(i);
-        if (!ci->isShown(false) || !ci->isOnCurrentDesktop() || !ci->isOnCurrentActivity())
-            continue;
-        if (ci->screen() == new_screen) {
-            get_focus = ci;
-            break;
-        }
-    }
+    const int desktop = VirtualDesktopManager::self()->current();
+    Client *get_focus = FocusChain::self()->getForActivation(desktop, new_screen);
     if (get_focus == NULL)
-        get_focus = findDesktop(true, currentDesktop());
+        get_focus = findDesktop(true, desktop);
     if (get_focus != NULL && get_focus != mostRecentlyActivatedClient())
         requestFocus(get_focus);
     active_screen = new_screen;
@@ -893,7 +873,7 @@ void Client::startupIdChanged()
     // If the ASN contains desktop, move it to the desktop, otherwise move it to the current
     // desktop (since the new ASN should make the window act like if it's a new application
     // launched). However don't affect the window's desktop if it's set to be on all desktops.
-    int desktop = workspace()->currentDesktop();
+    int desktop = VirtualDesktopManager::self()->current();
     if (asn_data.desktop() != 0)
         desktop = asn_data.desktop();
     if (!isOnAllDesktops())

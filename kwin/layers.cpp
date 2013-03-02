@@ -78,6 +78,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utils.h"
 #include "client.h"
+#include "focuschain.h"
 #include "workspace.h"
 #include "tabbox.h"
 #include "group.h"
@@ -87,6 +88,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "effects.h"
 #include <QX11Info>
 #include "composite.h"
+#ifdef KWIN_BUILD_SCREENEDGES
+#include "screenedge.h"
+#endif
 
 namespace KWin
 {
@@ -131,6 +135,7 @@ void Workspace::updateStackingOrder(bool propagate_new_clients)
 #endif
     if (changed || propagate_new_clients) {
         propagateClients(propagate_new_clients);
+        emit stackingOrderChanged();
         if (m_compositor) {
             m_compositor->addRepaintFull();
         }
@@ -140,33 +145,44 @@ void Workspace::updateStackingOrder(bool propagate_new_clients)
     }
 }
 
+#ifdef KWIN_BUILD_SCREENEDGES
+/*!
+ * Some fullscreen effects have to raise the screenedge on top of an input window, thus all windows
+ * this function puts them back where they belong for regular use and is some cheap variant of
+ * the regular propagateClients function in that it completely ignores managed clients and everything
+ * else and also does not update the NETWM property.
+ * Called from Effects::destroyInputWindow so far.
+ */
+void Workspace::stackScreenEdgesUnderOverrideRedirect()
+{
+    Xcb::restackWindows(QVector<xcb_window_t>() << supportWindow->winId() << ScreenEdges::self()->windows());
+}
+#endif
+
 /*!
   Propagates the managed clients to the world.
   Called ONLY from updateStackingOrder().
  */
 void Workspace::propagateClients(bool propagate_new_clients)
 {
-    Window *cl; // MW we should not assume WId and Window to be compatible
-    // when passig pointers around.
-
     // restack the windows according to the stacking order
-    // 1 - supportWindow, 1 - topmenu_space, 8 - electric borders
-    QVector<Window*> newWindowStack;
+    // supportWindow > electric borders > clients > hidden clients
+    QVector<xcb_window_t> newWindowStack;
+
     // Stack all windows under the support window. The support window is
     // not used for anything (besides the NETWM property), and it's not shown,
     // but it was lowered after kwin startup. Stacking all clients below
     // it ensures that no client will be ever shown above override-redirect
     // windows (e.g. popups).
-    newWindowStack << (Window*)supportWindow->winId();
+    newWindowStack << supportWindow->winId();
+
 #ifdef KWIN_BUILD_SCREENEDGES
-    QVectorIterator<Window> it(m_screenEdge.windows());
-    while (it.hasNext()) {
-        if ((Window)it.next() != None) {
-            newWindowStack << (Window*)&it;
-        }
-    }
+    newWindowStack << ScreenEdges::self()->windows();
 #endif
-    for (int i = stacking_order.size() - 1; i >= 0; i--) {
+
+    newWindowStack.reserve(newWindowStack.size() + 2*stacking_order.size()); // *2 for inputWindow
+
+    for (int i = stacking_order.size() - 1; i >= 0; --i) {
         Client *client = qobject_cast<Client*>(stacking_order.at(i));
         if (!client || client->hiddenPreview()) {
             continue;
@@ -174,26 +190,27 @@ void Workspace::propagateClients(bool propagate_new_clients)
 
         if (client->inputId())
             // Stack the input window above the frame
-            newWindowStack << (Window*)client->inputId();
+            newWindowStack << client->inputId();
 
-        newWindowStack << (Window*)client->frameId();
+        newWindowStack << client->frameId();
     }
 
     // when having hidden previews, stack hidden windows below everything else
     // (as far as pure X stacking order is concerned), in order to avoid having
     // these windows that should be unmapped to interfere with other windows
-    for (int i = stacking_order.size() - 1; i >= 0; i--) {
+    for (int i = stacking_order.size() - 1; i >= 0; --i) {
         Client *client = qobject_cast<Client*>(stacking_order.at(i));
         if (!client || !client->hiddenPreview())
             continue;
-        newWindowStack << (Window*)client->frameId();
+        newWindowStack << client->frameId();
     }
     // TODO isn't it too inefficient to restack always all clients?
     // TODO don't restack not visible windows?
-    assert(newWindowStack.at(0) == (Window*)supportWindow->winId());
-    XRestackWindows(display(), (Window*)newWindowStack.data(), newWindowStack.count());
+    assert(newWindowStack.at(0) == supportWindow->winId());
+    Xcb::restackWindows(newWindowStack);
 
     int pos = 0;
+    Window *cl(NULL);
     if (propagate_new_clients) {
         cl = new Window[ desktops.count() + clients.count()];
         // TODO this is still not completely in the map order
@@ -282,7 +299,7 @@ void Workspace::raiseOrLowerClient(Client *c)
             most_recently_raised->isShown(true) && c->isOnCurrentDesktop())
         topmost = most_recently_raised;
     else
-        topmost = topClientOnDesktop(c->isOnAllDesktops() ? currentDesktop() : c->desktop(),
+        topmost = topClientOnDesktop(c->isOnAllDesktops() ? VirtualDesktopManager::self()->current() : c->desktop(),
                                      options->isSeparateScreenFocus() ? c->screen() : -1);
 
     if (c == topmost)
@@ -443,40 +460,7 @@ void Workspace::restack(Client* c, Client* under)
     }
 
     assert(unconstrained_stacking_order.contains(c));
-    for (int desktop = 1; desktop <= numberOfDesktops(); ++desktop) {
-        // do for every virtual desktop to handle the case of onalldesktop windows
-        if (c->wantsTabFocus() && c->isOnDesktop(desktop) && focus_chain[ desktop ].contains(under)) {
-            if (Client::belongToSameApplication(under, c)) {
-                // put it after the active window if it's the same app
-                focus_chain[ desktop ].removeAll(c);
-                focus_chain[ desktop ].insert(focus_chain[ desktop ].indexOf(under), c);
-            } else {
-                // put it in focus_chain[currentDesktop()] after all windows belonging to the active applicationa
-                focus_chain[ desktop ].removeAll(c);
-                for (int i = focus_chain[ desktop ].size() - 1; i >= 0; --i) {
-                    if (Client::belongToSameApplication(under, focus_chain[ desktop ].at(i))) {
-                        focus_chain[ desktop ].insert(i, c);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    // the same for global_focus_chain
-    if (c->wantsTabFocus() && global_focus_chain.contains(under)) {
-        if (Client::belongToSameApplication(under, c)) {
-            global_focus_chain.removeAll(c);
-            global_focus_chain.insert(global_focus_chain.indexOf(under), c);
-        } else {
-            global_focus_chain.removeAll(c);
-            for (int i = global_focus_chain.size() - 1; i >= 0; --i) {
-                if (Client::belongToSameApplication(under, global_focus_chain.at(i))) {
-                    global_focus_chain.insert(i, c);
-                    break;
-                }
-            }
-        }
-    }
+    FocusChain::self()->moveAfterClient(c, under);
     updateStackingOrder();
 }
 
@@ -756,8 +740,6 @@ void Client::restackWindow(Window above, int detail, NET::RequestSource src, Tim
         ToplevelList::const_iterator  it = workspace()->stackingOrder().constEnd(),
                                     begin = workspace()->stackingOrder().constBegin();
         while (--it != begin) {
-            if (*it == this)
-                return; // we're already above
 
             if (*it == other) { // the other one is top on stack
                 it = begin; // invalidate
@@ -893,7 +875,7 @@ bool Client::isActiveFullScreen() const
 
     // only raise fullscreen above docks if it's the topmost window in unconstrained stacking order,
     // i.e. the window set to be topmost by the user (also includes transients of the fullscreen window)
-    const Client* top = workspace()->topClientOnDesktop(workspace()->currentDesktop(), screen(), true, false);
+    const Client* top = workspace()->topClientOnDesktop(VirtualDesktopManager::self()->current(), screen(), true, false);
     if (!top)
         return false;
 

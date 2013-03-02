@@ -25,7 +25,7 @@
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusMessage>
 
-#include "powerdevilupowerbackend.h"
+#include "powerdevilbackendinterface.h"
 
 class OrgFreedesktopUPowerInterface;
 
@@ -34,8 +34,8 @@ class UPowerSuspendJob : public KJob
     Q_OBJECT
 public:
     UPowerSuspendJob(OrgFreedesktopUPowerInterface *upowerInterface,
-                  PowerDevil::BackendInterface::SuspendMethod method,
-                  PowerDevil::BackendInterface::SuspendMethods supported);
+                     PowerDevil::BackendInterface::SuspendMethod method,
+                     PowerDevil::BackendInterface::SuspendMethods supported);
     virtual ~UPowerSuspendJob();
 
     void start();

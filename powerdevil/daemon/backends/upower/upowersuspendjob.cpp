@@ -25,7 +25,6 @@
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusReply>
 #include <QTimer>
-#include <KConfig>
 #include <KDebug>
 #include <KLocale>
 
@@ -34,7 +33,7 @@ UPowerSuspendJob::UPowerSuspendJob(OrgFreedesktopUPowerInterface *upowerInterfac
                                    PowerDevil::BackendInterface::SuspendMethods supported)
     : KJob(), m_upowerInterface(upowerInterface)
 {
-    kDebug() << "Stancing Suspend job";
+    kDebug() << "Starting UPower suspend job";
     m_method = method;
     m_supported = supported;
 
@@ -63,9 +62,11 @@ void UPowerSuspendJob::doStart()
         switch(m_method)
         {
         case PowerDevil::BackendInterface::ToRam:
+            m_upowerInterface->AboutToSleep("suspend");
             m_upowerInterface->Suspend();
             break;
         case PowerDevil::BackendInterface::ToDisk:
+            m_upowerInterface->AboutToSleep("hibernate");
             m_upowerInterface->Hibernate();
             break;
         default:

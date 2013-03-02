@@ -1,5 +1,6 @@
 /* This file is part of the Nepomuk Project
    Copyright (c) 2008 Sebastian Trueg <trueg@kde.org>
+   Copyright (c) 2012-13 Vishesh Handa <me@vhanda.in>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public
@@ -20,20 +21,25 @@
 
 #include <QMenu>
 #include <QMimeData>
+#include <QFile>
 
 #include <KIcon>
 #include <KRun>
 #include <KDebug>
 #include <KUrl>
 
-#include <nepomuk2/nie.h>
-#include <nepomuk2/nfo.h>
 #include <Nepomuk2/File>
 #include <Nepomuk2/Resource>
 #include <Nepomuk2/Variant>
 #include <Nepomuk2/ResourceManager>
 #include <Nepomuk2/Query/ResultIterator>
 #include <Nepomuk2/Query/QueryParser>
+#include <Nepomuk2/Query/ResourceTerm>
+#include <Nepomuk2/Query/ComparisonTerm>
+
+#include <Nepomuk2/Vocabulary/NIE>
+#include <Nepomuk2/Vocabulary/NFO>
+#include <Soprano/Vocabulary/NAO>
 
 #include <KFileItemActions>
 #include <KFileItemList>
@@ -45,6 +51,7 @@
 #include <KService>
 
 using namespace Nepomuk2::Vocabulary;
+using namespace Soprano::Vocabulary;
 
 namespace {
     /**
@@ -72,7 +79,8 @@ Nepomuk2::SearchRunner::SearchRunner( QObject* parent, const QString& serviceId 
 
 void Nepomuk2::SearchRunner::init()
 {
-    Nepomuk2::ResourceManager::instance()->init();
+    // Just constructing the instance initializes the ResourceManager
+    Nepomuk2::ResourceManager::instance();
 
     // we are pretty slow at times and use DBus calls
     setSpeed(SlowSpeed);
@@ -121,13 +129,50 @@ void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
             query.setLimit(s_maxResults);
 
             Query::ResultIterator it( query );
-            while( it.next() ) {
-                context.addMatch(context.query(), convertToQueryMatch(it.result()));
+            while( context.isValid() && it.next() ) {
+                Plasma::QueryMatch match = convertToQueryMatch( it.result() );
+                if( match.isValid() )
+                    context.addMatch(context.query(), match);
             }
         }
     }
 }
 
+namespace {
+    // Copied from kde-runtime/nepomuk/kioslaves/kio_nepomuk.cpp
+    /**
+     * This function constructs the url the nepomuk kioslave would redirect to.
+     * We use this instead of just supplying the nepomuk kioslave with the url because
+     * applications like Dolphin display the url on the title bar even though the
+     * 'display name' would be set cause that would involve stating the file.
+     *
+     * Therefore, in order to avoid showing an ugly 'nepomuk:/res/uuid' to the user we
+     * redirect the url ourselves so we have a pretty representation.
+     */
+    KUrl redirectionUrl(const Nepomuk2::Resource& res) {
+        using namespace Nepomuk2;
+
+        // list tags by listing everything tagged with that tag
+        if (res.hasType(NAO::Tag())) {
+            Query::ComparisonTerm term(NAO::hasTag(), Query::ResourceTerm( res ), Query::ComparisonTerm::Equal);
+            KUrl url = Query::Query(term).toSearchUrl(i18n( "Things tagged '%1'", res.genericLabel()));
+            url.addQueryItem(QLatin1String("resource"), KUrl(res.uri()).url());
+            return url;
+        }
+
+        // list everything else besides files by querying things related to the resource in some way
+        // this works for music albums or artists but it would also work for tags
+        else if (!res.hasType(NFO::FileDataObject())) {
+            Query::ComparisonTerm term(QUrl(), Query::ResourceTerm(res), Query::ComparisonTerm::Equal);
+            KUrl url = Query::Query(term).toSearchUrl(res.genericLabel());
+            url.addQueryItem(QLatin1String("resource"), KUrl(res.uri()).url());
+            return url;
+        }
+
+        // no forwarding done
+        return KUrl();
+    }
+}
 
 void Nepomuk2::SearchRunner::run( const Plasma::RunnerContext&, const Plasma::QueryMatch& match )
 {
@@ -145,6 +190,13 @@ void Nepomuk2::SearchRunner::run( const Plasma::RunnerContext&, const Plasma::Qu
     KUrl nieUrl = res.property( NIE::url() ).toUrl();
     if( !nieUrl.isEmpty() )
         url = nieUrl;
+
+    // Redirect it in order to avoid showing the user an ugly URL
+    if(url.scheme() == QLatin1String("nepomuk")) {
+        KUrl newUrl = redirectionUrl(res);
+        if(newUrl.isValid())
+            url = newUrl;
+    }
 
     KService::Ptr preferredServicePtr;
     if (res.hasProperty(Nepomuk2::Vocabulary::NIE::mimeType()) &&
@@ -278,9 +330,10 @@ Plasma::QueryMatch Nepomuk2::SearchRunner::convertToQueryMatch(const Nepomuk2::Q
     if (res.hasProperty(NIE::mimeType())) {
         mimetype = KMimeType::mimeType(res.property(NIE::mimeType()).toString());
     }
-    if (!mimetype && res.isFile() && res.toFile().url().isLocalFile()) {
-        const KUrl url(res.toFile().url());
-        mimetype = KMimeType::findByUrl(url);
+
+    const QUrl fileUrl = res.toFile().url();
+    if (!mimetype && res.isFile() && fileUrl.isLocalFile() ) {
+        mimetype = KMimeType::findByUrl(fileUrl);
     }
 
     if (mimetype) {
@@ -288,10 +341,32 @@ Plasma::QueryMatch Nepomuk2::SearchRunner::convertToQueryMatch(const Nepomuk2::Q
         iconName = mimetype->iconName();
     }
 
-    if (type.isEmpty() ) {
+    if(type.isEmpty()) {
         type = Nepomuk2::Types::Class(res.type()).label();
+
+        // The Query engine should typically never return properties, classes or graphs.
+        // But this doesn't seem to be the case cause of certain bugs in virtuoso
+        // Earlier versions of Nepomuk avoided this by complex queries which resulted in many
+        // "Virtuoso is crazy" reports.
+        // For 4.10, we just try to cover it up and not show the results.
+        // See nepomuk-core/libnepomukcore/query/query.cpp for more details
+        //
+        if(type.contains(QLatin1String("property"), Qt::CaseInsensitive) ||
+           type.contains(QLatin1String("class"), Qt::CaseInsensitive) ||
+           type.contains(QLatin1String("graph"), Qt::CaseInsensitive)) {
+                return Plasma::QueryMatch( 0 );
+        }
         iconName = res.genericIcon();
     }
+
+    // HACK: Do not show non-existing files
+    if( fileUrl.isLocalFile() && !QFile::exists( fileUrl.toLocalFile() ) )
+        return Plasma::QueryMatch( 0 );
+
+    // HACK: Do not show resources which do not have a label
+    QString label = res.genericLabel();
+    if( label.startsWith(QLatin1String("nepomuk:/res")) )
+        return Plasma::QueryMatch( 0 );
 
     match.setText(res.genericLabel());
     match.setSubtext(type);

@@ -30,9 +30,9 @@ PlasmaCore.Dialog {
 
     property variant savedPos
     property bool customPosition: false
-    onCustomPositionChanged: {
-        setAttribute(Qt.WA_X11NetWmWindowTypeToolTip, customPosition);
-    }
+
+    onHeightChanged:  setCustomPosition(lastNotificationPopup.savedPos, false)
+    onWidthChanged:   setCustomPosition(lastNotificationPopup.savedPos, false)
 
     function popup(notification)
     {
@@ -52,7 +52,7 @@ PlasmaCore.Dialog {
 
     function setCustomPosition(pos, writeConfig)
     {
-        var popupPos = lastNotificationPopup.popupPosition(notificationIcon)
+        var popupPos = lastNotificationPopup.popupPosition(notificationIcon, Qt.AlignCenter)
         var finalPos
 
         //custom
@@ -99,7 +99,7 @@ PlasmaCore.Dialog {
         width: maximumWidth
         height: maximumHeight
         property int maximumWidth: theme.defaultFont.mSize.width * 35
-        property int maximumHeight: theme.defaultFont.mSize.width * 8
+        property int maximumHeight: theme.defaultFont.mSize.width * 10
         property int minimumWidth: maximumWidth
         property int minimumHeight: maximumHeight
 
@@ -114,8 +114,10 @@ PlasmaCore.Dialog {
         onContainsMouseChanged: {
             if (containsMouse) {
                 mainItem.state = "controlsShown"
+                lastNotificationTimer.running = false
             } else {
                 mainItem.state = "controlsHidden"
+                lastNotificationTimer.restart()
             }
         }
         onPressed: {
@@ -130,19 +132,17 @@ PlasmaCore.Dialog {
             if ((navigationButtonsColumn.visible && mouse.x < navigationButtonsColumn.width) ||
                 buttonPressed ||
                 Math.sqrt(Math.pow(startScreenX - mouse.screenX, 2) + Math.pow(startScreenY - mouse.screenY, 2)) > 4) {
-                lastNotificationTimer.restart()
             } else {
                 lastNotificationPopup.visible = false
-                lastNotificationTimer.running = false
             }
 
             setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(mouse.screenY - startY)), true)
         }
         onPositionChanged: {
-            setCustomPosition(QPoint(Math.max(0, mouse.screenX - startX), Math.max(0, mouse.screenY - startY)), false)
+            lastNotificationPopup.x = Math.max(0, mouse.screenX - startX)
+            lastNotificationPopup.y = Math.max(0, mouse.screenY - startY)
         }
         onWheelMoved: {
-            lastNotificationTimer.restart()
             if (notificationsView.moving) {
                 return
             }
@@ -173,12 +173,32 @@ PlasmaCore.Dialog {
             }
             interactive: false
             delegate: Item {
-                width: notificationsView.width
                 height: notificationsView.height
+                width: notificationsView.width
+
+                PlasmaComponents.Label {
+                    id: titleLabel
+                    text: model.summary
+                    //font.weight: Font.Bold
+                    visible: model.summary.length > 0
+                    height: model.summary.length > 0 ? paintedHeight : 0
+                    horizontalAlignment: Text.AlignHCenter
+                    color: theme.textColor
+                    elide: Text.ElideRight
+                    anchors {
+                        left: appIconItem.y > y + height ? parent.left : appIconItem.right
+                        right: parent.right
+                        rightMargin: closeButton.width
+                        top: parent.top
+                        topMargin: 6
+                        leftMargin: 6
+                    }
+                }
+
                 QIconItem {
                     id: appIconItem
                     icon: model.appIcon
-                    width: theme.largeIconSize
+                    width: (model.appIcon.length > 0 || imageItem.visible) ? theme.largeIconSize : 0
                     height: theme.largeIconSize
                     visible: !imageItem.visible
                     anchors {
@@ -190,27 +210,38 @@ PlasmaCore.Dialog {
                 QImageItem {
                     id: imageItem
                     anchors.fill: appIconItem
-                    smooth: true
                     image: model.image
+                    smooth: true
                     visible: nativeWidth > 0
                 }
-                PlasmaComponents.Label {
-                    id: lastNotificationText
-                    text: model.body
+               /*
+                * this extra item is for clip the overflowed body text
+                * maximumLineCount cannot control the behavior of rich text,
+                * so manual clip is required.
+                */
+                Item {
+                    id: bodyLabel
+                    clip: true
+                    height: Math.min(parent.height - (titleLabel.height+titleLabel.y), lastNotificationText.height)
+                    property bool tallText: bodyLabel.height >= (bodyLabel.parent.height - (titleLabel.height+titleLabel.y)*2)
                     anchors {
+                        top: tallText ? titleLabel.bottom : undefined
+                        verticalCenter: tallText ? undefined : parent.verticalCenter
                         left: appIconItem.right
                         right: actionsColumn.left
-                        top: parent.top
-                        bottom: parent.bottom
                         leftMargin: 6
                         rightMargin: 6
                     }
-                    //textFormat: Text.PlainText
-                    verticalAlignment: Text.AlignVCenter
-                    color: theme.textColor
-                    wrapMode: Text.Wrap
-                    elide: Text.ElideRight
-                    maximumLineCount: 4
+                    PlasmaComponents.Label {
+                        id: lastNotificationText
+                        text: model.body
+                        width: parent.width
+                        //textFormat: Text.PlainText
+                        color: theme.textColor
+                        wrapMode: Text.Wrap
+                        elide: Text.ElideRight
+                        maximumLineCount: 4
+                    }
                 }
                 Column {
                     id: actionsColumn
@@ -266,7 +297,6 @@ PlasmaCore.Dialog {
                     }
                 }
                 onClicked: {
-                    lastNotificationTimer.restart()
                     notificationsView.currentIndex = Math.min(notificationsView.count-1, notificationsView.currentIndex+1)
                 }
             }
@@ -285,7 +315,6 @@ PlasmaCore.Dialog {
                     }
                 }
                 onClicked: {
-                    lastNotificationTimer.restart()
                     notificationsView.currentIndex = Math.max(0, notificationsView.currentIndex-1)
                 }
             }

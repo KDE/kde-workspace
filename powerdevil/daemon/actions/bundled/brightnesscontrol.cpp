@@ -40,7 +40,7 @@ BrightnessControl::BrightnessControl(QObject* parent)
     setRequiredPolicies(PowerDevil::PolicyAgent::ChangeScreenSettings);
 
     connect(core()->backend(), SIGNAL(brightnessChanged(float,PowerDevil::BackendInterface::BrightnessControlType)),
-            this, SLOT(onBrightnessChangedFromBackend(float)));
+            this, SLOT(onBrightnessChangedFromBackend(float,PowerDevil::BackendInterface::BrightnessControlType)));
 }
 
 BrightnessControl::~BrightnessControl()
@@ -75,7 +75,7 @@ void BrightnessControl::onProfileLoad()
         m_defaultValue > core()->brightness()) {
         // We don't want to change anything here
         kDebug() << "Not changing brightness, the current one is lower and the profile is more conservative";
-    } else if (m_defaultValue > 0) {
+    } else if (m_defaultValue >= 0) {
         QVariantMap args;
         args["Value"] = QVariant::fromValue((float)m_defaultValue);
         trigger(args);
@@ -111,7 +111,7 @@ void BrightnessControl::showBrightnessOSD(int brightness)
 {
     // code adapted from KMix
     if (m_brightnessOSD.isNull()) {
-        m_brightnessOSD = new BrightnessOSDWidget();
+        m_brightnessOSD = new BrightnessOSDWidget(BackendInterface::Screen);
     }
 
     m_brightnessOSD.data()->setCurrentBrightness(brightness);
@@ -119,16 +119,19 @@ void BrightnessControl::showBrightnessOSD(int brightness)
     m_brightnessOSD.data()->activateOSD(); //Enable the hide timer
 
     //Center the OSD
-    QRect rect = KApplication::kApplication()->desktop()->screenGeometry(QCursor::pos());
+    QDesktopWidget * desktop = qApp->desktop();
+    QRect rect = desktop->screenGeometry(desktop->primaryScreen());
     QSize size = m_brightnessOSD.data()->sizeHint();
     int posX = rect.x() + (rect.width() - size.width()) / 2;
     int posY = rect.y() + 4 * rect.height() / 5;
     m_brightnessOSD.data()->setGeometry(posX, posY, size.width(), size.height());
 }
 
-void BrightnessControl::onBrightnessChangedFromBackend(float brightness)
+void BrightnessControl::onBrightnessChangedFromBackend(float brightness, PowerDevil::BackendInterface::BrightnessControlType type)
 {
-    showBrightnessOSD(brightness);
+    if (type == BackendInterface::Screen) {
+        showBrightnessOSD(brightness);
+    }
 }
 
 }

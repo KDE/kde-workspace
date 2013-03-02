@@ -34,6 +34,7 @@
 #include "upower_kbdbacklight_interface.h"
 
 #define UPOWER_SERVICE "org.freedesktop.UPower"
+#define LOGIN1_SERVICE "org.freedesktop.login1"
 
 class XRandrBrightness;
 
@@ -50,7 +51,7 @@ public:
 
     virtual float brightness(BrightnessControlType type = Screen) const;
 
-    virtual void brightnessKeyPressed(PowerDevil::BackendInterface::BrightnessKeyType type);
+    virtual void brightnessKeyPressed(PowerDevil::BackendInterface::BrightnessKeyType type, PowerDevil::BackendInterface::BrightnessControlType controlType);
     virtual bool setBrightness(float brightness, PowerDevil::BackendInterface::BrightnessControlType type = Screen);
     virtual KJob* suspend(PowerDevil::BackendInterface::SuspendMethod method);
 
@@ -63,16 +64,20 @@ private slots:
     void slotDeviceRemoved(const QString &);
     void slotDeviceChanged(const QString &);
     void slotPropertyChanged();
+    void slotLogin1Resuming(bool active);
 
 private:
     // upower devices
     QMap<QString, OrgFreedesktopUPowerDeviceInterface *> m_devices;
 
     // brightness
-    float m_cachedBrightness;
+    QMap<BrightnessControlType, float> m_cachedBrightnessMap;
     XRandrBrightness         *m_brightnessControl;
     OrgFreedesktopUPowerInterface *m_upowerInterface;
     OrgFreedesktopUPowerKbdBacklightInterface *m_kbdBacklight;
+
+    // login1 interface
+    QWeakPointer<QDBusInterface> m_login1Interface;
 
     // buttons
     bool m_lidIsPresent;

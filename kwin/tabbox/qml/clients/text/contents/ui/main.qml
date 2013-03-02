@@ -27,9 +27,14 @@ Item {
     property int screenHeight : 0
     property string longestCaption: ""
     property int optimalWidth: textListView.maxRowWidth
-    property int optimalHeight: textListView.rowHeight * textListView.count + background.margins.top + background.margins.bottom
+    property int optimalHeight: textListView.rowHeight * textListView.count + background.topMargin + background.bottomMargin
     property bool canStretchX: true
     property bool canStretchY: false
+    property string maskImagePath: background.maskImagePath
+    property double maskWidth: background.centerWidth
+    property double maskHeight: background.centerHeight
+    property int maskTopMargin: background.centerTopMargin
+    property int maskLeftMargin: background.centerLeftMargin
     width: Math.min(Math.max(screenWidth * 0.2, optimalWidth), screenWidth * 0.8)
     height: Math.min(Math.max(screenHeight * 0.2, optimalHeight), screenHeight * 0.8)
     focus: true
@@ -62,10 +67,9 @@ Item {
         visible: false
     }
 
-    PlasmaCore.FrameSvgItem {
+    ShadowedSvgItem {
         id: background
         anchors.fill: parent
-        imagePath: "dialogs/background"
     }
 
     // delegate
@@ -105,7 +109,7 @@ Item {
         function calculateMaxRowWidth() {
             var width = 0;
             var textElement = Qt.createQmlObject(
-                'import Qt 4.7;'
+                'import QtQuick 1.0;'
                 + 'Text {\n'
                 + '     text: "' + textTabBox.longestCaption + '"\n'
                 + '     visible: false\n'
@@ -113,7 +117,7 @@ Item {
                 textListView, "calculateMaxRowWidth");
             width = Math.max(textElement.width, width);
             textElement.destroy();
-            return width + hoverItem.margins.right + hoverItem.margins.left + background.margins.left + background.margins.right;
+            return width + hoverItem.margins.right + hoverItem.margins.left + background.leftMargin + background.rightMargin;
         }
         /**
         * Calculates the height of one row based on the text height and icon size.
@@ -121,7 +125,7 @@ Item {
         **/
         function calcRowHeight() {
             var textElement = Qt.createQmlObject(
-                'import Qt 4.7;'
+                'import QtQuick 1.0;'
                 + 'Text {\n'
                 + '     text: "Some Text"\n'
                 + '     visible: false\n'
@@ -142,10 +146,10 @@ Item {
         property int imageId: 0
         anchors {
             fill: parent
-            topMargin: background.margins.top
-            leftMargin: background.margins.left
-            rightMargin: background.margins.right
-            bottomMargin: background.margins.bottom
+            topMargin: background.topMargin
+            leftMargin: background.leftMargin
+            rightMargin: background.rightMargin
+            bottomMargin: background.bottomMargin
         }
         clip: true
         delegate: listDelegate

@@ -42,6 +42,7 @@ ThumbnailAsideEffect::ThumbnailAsideEffect()
     connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowGeometryShapeChanged(KWin::EffectWindow*,QRect)));
     connect(effects, SIGNAL(windowDamaged(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowDamaged(KWin::EffectWindow*,QRect)));
+    connect(effects, SIGNAL(screenLockingChanged(bool)), SLOT(repaintAll()));
     reconfigure(ReconfigureAll);
 }
 
@@ -57,9 +58,10 @@ void ThumbnailAsideEffect::reconfigure(ReconfigureFlags)
 
 void ThumbnailAsideEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
 {
+    painted = QRegion();
     effects->paintScreen(mask, region, data);
     foreach (const Data & d, windows) {
-        if (region.contains(d.rect)) {
+        if (painted.intersects(d.rect)) {
             WindowPaintData data(d.window);
             data.multiplyOpacity(opacity);
             QRect region;
@@ -68,6 +70,12 @@ void ThumbnailAsideEffect::paintScreen(int mask, QRegion region, ScreenPaintData
                                 region, data);
         }
     }
+}
+
+void ThumbnailAsideEffect::paintWindow(EffectWindow *w, int mask, QRegion region, WindowPaintData &data)
+{
+    effects->paintWindow(w, mask, region, data);
+    painted |= region;
 }
 
 void ThumbnailAsideEffect::slotWindowDamaged(EffectWindow* w, const QRect&)
@@ -175,7 +183,7 @@ void ThumbnailAsideEffect::repaintAll()
 
 bool ThumbnailAsideEffect::isActive() const
 {
-    return !windows.isEmpty();
+    return !windows.isEmpty() && !effects->isScreenLocked();
 }
 
 } // namespace

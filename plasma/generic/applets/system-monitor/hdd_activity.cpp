@@ -76,7 +76,7 @@ void Hdd_Activity::init()
 {
     KGlobal::locale()->insertCatalog("plasma_applet_system-monitor");
     setEngine(dataEngine("systemmonitor"));
-    setTitle(i18n("Disk Activity"), true);
+    setTitle(i18n("Disk Activity"));
 
     /* At the time this method is running, not all sources may be connected. */
     connect(engine(), SIGNAL(sourceAdded(QString)), this, SLOT(sourceChanged(QString)));

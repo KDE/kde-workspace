@@ -65,8 +65,8 @@ void ActivityRunner::serviceStatusChanged(KActivities::Consumer::ServiceStatus s
     m_enabled = active;
     QList<Plasma::RunnerSyntax> syntaxes;
     if (m_enabled) {
-        setDefaultSyntax(Plasma::RunnerSyntax(i18nc("KRunner keyword", "activity :q:"), i18n("Switches to activity :q:.")));
-        addSyntax(Plasma::RunnerSyntax(m_keywordi18n, i18n("Lists all activities currently available to be run.")));
+        setDefaultSyntax(Plasma::RunnerSyntax(m_keywordi18n, i18n("Lists all activities currently available to be run.")));
+        addSyntax(Plasma::RunnerSyntax(i18nc("KRunner keyword", "activity :q:"), i18n("Switches to activity :q:.")));
     }
 }
 

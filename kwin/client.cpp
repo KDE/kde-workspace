@@ -41,8 +41,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <signal.h>
 
 #include "bridge.h"
+#include "client_machine.h"
 #include "composite.h"
+#include "cursor.h"
 #include "group.h"
+#include "focuschain.h"
 #include "workspace.h"
 #include "atoms.h"
 #include "notifications.h"
@@ -50,6 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "shadow.h"
 #include "deleted.h"
 #include "paintredirector.h"
+#include "xcbutils.h"
 #ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
 #endif
@@ -106,6 +110,7 @@ Client::Client(Workspace* ws)
     , shade_below(NULL)
     , skip_switcher(false)
     , blocks_compositing(false)
+    , m_cursor(Qt::ArrowCursor)
     , autoRaiseTimer(NULL)
     , shadeHoverTimer(NULL)
     , delayedMoveResizeTimer(NULL)
@@ -139,7 +144,7 @@ Client::Client(Workspace* ws)
 #ifdef KWIN_BUILD_KAPPMENU
     , m_menuAvailable(false)
 #endif
-    , input_window(None)
+    , m_decoInputExtent()
 {
     // TODO: Do all as initialization
 #ifdef HAVE_XSYNC
@@ -210,6 +215,9 @@ Client::Client(Workspace* ws)
     connect(this, SIGNAL(clientStepUserMovedResized(KWin::Client*,QRect)), SIGNAL(geometryChanged()));
     connect(this, SIGNAL(clientStartUserMovedResized(KWin::Client*)), SIGNAL(moveResizedChanged()));
     connect(this, SIGNAL(clientFinishUserMovedResized(KWin::Client*)), SIGNAL(moveResizedChanged()));
+
+    connect(clientMachine(), SIGNAL(localhostChanged()), SLOT(updateCaption()));
+    connect(options, SIGNAL(condensedTitleChanged()), SLOT(updateCaption()));
 
     // SELI TODO: Initialize xsizehints??
 }
@@ -353,8 +361,22 @@ void Client::destroyClient()
     deleteClient(this, Allowed);
 }
 
+// DnD handling for input shaping is broken in the clients for all Qt versions before 4.8.3
+// NOTICE do not query the Qt version macro, this is a runtime problem!
+// TODO KDE5 remove this 
+static inline bool qtBefore483()
+{
+    QStringList l = QString(qVersion()).split(".");
+    // "4.x.y"
+    return l.at(1).toUInt() < 5 && l.at(1).toUInt() < 9 && l.at(2).toUInt() < 3;
+}
+
 void Client::updateInputWindow()
 {
+    static bool brokenQtInputHandling = qtBefore483();
+    if (brokenQtInputHandling)
+        return;
+
     QRegion region;
 
     if (!noBorder()) {
@@ -366,10 +388,7 @@ void Client::updateInputWindow()
     }
 
     if (region.isEmpty()) {
-        if (input_window) {
-            XDestroyWindow(display(), input_window);
-            input_window = None;
-        }
+        m_decoInputExtent.reset();
         return;
     }
 
@@ -382,23 +401,25 @@ void Client::updateInputWindow()
     // Move the region to input window coordinates
     region.translate(-input_offset);
 
-    if (!input_window) {
-        XSetWindowAttributes attr;
-        attr.event_mask = EnterWindowMask | LeaveWindowMask |
-                          ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
-        attr.override_redirect = True;
-
-        input_window = XCreateWindow(display(), rootWindow(), bounds.x(), bounds.y(),
-                                     bounds.width(), bounds.height(), 0, 0,
-                                     InputOnly, 0, CWEventMask | CWOverrideRedirect, &attr);
+    if (!m_decoInputExtent.isValid()) {
+        const uint32_t mask = XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK;
+        const uint32_t values[] = {true,
+            XCB_EVENT_MASK_ENTER_WINDOW   |
+            XCB_EVENT_MASK_LEAVE_WINDOW   |
+            XCB_EVENT_MASK_BUTTON_PRESS   |
+            XCB_EVENT_MASK_BUTTON_RELEASE |
+            XCB_EVENT_MASK_POINTER_MOTION
+        };
+        m_decoInputExtent.create(bounds, XCB_WINDOW_CLASS_INPUT_ONLY, mask, values);
         if (mapping_state == Mapped)
-            XMapWindow(display(), inputId());
+            m_decoInputExtent.map();
     } else {
-        XMoveResizeWindow(display(), input_window, bounds.x(), bounds.y(),
-                          bounds.width(), bounds.height());
+        m_decoInputExtent.setGeometry(bounds);
     }
 
-    XShapeCombineRegion(display(), input_window, ShapeInput, 0, 0, region.handle(), ShapeSet);
+    const QVector<xcb_rectangle_t> rects = Xcb::regionToRects(region);
+    xcb_shape_rectangles(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT, XCB_CLIP_ORDERING_UNSORTED,
+                         m_decoInputExtent, 0, 0, rects.count(), rects.constData());
 }
 
 void Client::updateDecoration(bool check_workspace_pos, bool force)
@@ -465,10 +486,7 @@ void Client::destroyDecoration()
             emit geometryShapeChanged(this, oldgeom);
         }
     }
-    if (inputId()) {
-        XDestroyWindow(display(), input_window);
-        input_window = None;
-    }
+    m_decoInputExtent.reset();
 }
 
 bool Client::checkBorderSizes(bool also_resize)
@@ -677,11 +695,12 @@ void Client::updateShape()
             noborder = rules()->checkNoBorder(true);
             updateDecoration(true);
         }
-        if (noBorder())
-            XShapeCombineShape(display(), frameId(), ShapeBounding,
-                           clientPos().x(), clientPos().y(), window(), ShapeBounding, ShapeSet);
+        if (noBorder()) {
+            xcb_shape_combine(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
+                              frameId(), clientPos().x(), clientPos().y(), window());
+        }
     } else if (app_noborder) {
-        XShapeCombineMask(display(), frameId(), ShapeBounding, 0, 0, None, ShapeSet);
+        xcb_shape_mask(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, frameId(), 0, 0, XCB_PIXMAP_NONE);
         detectNoBorder();
         app_noborder = noborder = rules()->checkNoBorder(noborder);
         updateDecoration(true);
@@ -697,13 +716,13 @@ void Client::updateShape()
     emit geometryShapeChanged(this, geometry());
 }
 
-static Window shape_helper_window = None;
+static Xcb::Window shape_helper_window(XCB_WINDOW_NONE);
 
 void Client::updateInputShape()
 {
     if (hiddenPreview())   // Sets it to none, don't change
         return;
-    if (Extensions::shapeInputAvailable()) {
+    if (Xcb::Extensions::self()->isShapeInputAvailable()) {
         // There appears to be no way to find out if a window has input
         // shape set or not, so always propagate the input shape
         // (it's the same like the bounding shape by default).
@@ -714,18 +733,18 @@ void Client::updateInputShape()
         // until the real shape of the client is added and that can make
         // the window lose focus (which is a problem with mouse focus policies)
         // TODO: It seems there is, after all - XShapeGetRectangles() - but maybe this is better
-        if (shape_helper_window == None)
-            shape_helper_window = XCreateSimpleWindow(display(), rootWindow(),
-                                  0, 0, 1, 1, 0, 0, 0);
-        XResizeWindow(display(), shape_helper_window, width(), height());
-        XShapeCombineShape(display(), shape_helper_window, ShapeInput, 0, 0,
-                           frameId(), ShapeBounding, ShapeSet);
-        XShapeCombineShape(display(), shape_helper_window, ShapeInput,
-                           clientPos().x(), clientPos().y(), window(), ShapeBounding, ShapeSubtract);
-        XShapeCombineShape(display(), shape_helper_window, ShapeInput,
-                           clientPos().x(), clientPos().y(), window(), ShapeInput, ShapeUnion);
-        XShapeCombineShape(display(), frameId(), ShapeInput, 0, 0,
-                           shape_helper_window, ShapeInput, ShapeSet);
+        if (!shape_helper_window.isValid())
+            shape_helper_window.create(QRect(0, 0, 1, 1));
+        shape_helper_window.resize(width(), height());
+        xcb_connection_t *c = connection();
+        xcb_shape_combine(c, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT, XCB_SHAPE_SK_BOUNDING,
+                          shape_helper_window, 0, 0, frameId());
+        xcb_shape_combine(c, XCB_SHAPE_SO_SUBTRACT, XCB_SHAPE_SK_INPUT, XCB_SHAPE_SK_BOUNDING,
+                          shape_helper_window, clientPos().x(), clientPos().y(), window());
+        xcb_shape_combine(c, XCB_SHAPE_SO_UNION, XCB_SHAPE_SK_INPUT, XCB_SHAPE_SK_INPUT,
+                          shape_helper_window, clientPos().x(), clientPos().y(), window());
+        xcb_shape_combine(c, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT, XCB_SHAPE_SK_INPUT,
+                          frameId(), 0, 0, shape_helper_window);
     }
 }
 
@@ -735,41 +754,41 @@ void Client::setMask(const QRegion& reg, int mode)
     if (_mask == r)
         return;
     _mask = r;
-    Window shape_window = frameId();
+    xcb_connection_t *c = connection();
+    xcb_window_t shape_window = frameId();
     if (shape()) {
         // The same way of applying a shape without strange intermediate states like above
-        if (shape_helper_window == None)
-            shape_helper_window = XCreateSimpleWindow(display(), rootWindow(),
-                                  0, 0, 1, 1, 0, 0, 0);
+        if (!shape_helper_window.isValid())
+            shape_helper_window.create(QRect(0, 0, 1, 1));
         shape_window = shape_helper_window;
     }
-    if (_mask.isEmpty())
-        XShapeCombineMask(display(), shape_window, ShapeBounding, 0, 0, None, ShapeSet);
-    else if (mode == X::Unsorted)
-        XShapeCombineRegion(display(), shape_window, ShapeBounding, 0, 0, _mask.handle(), ShapeSet);
-    else {
-        QVector< QRect > rects = _mask.rects();
-        XRectangle* xrects = new XRectangle[rects.count()];
+    if (_mask.isEmpty()) {
+        xcb_shape_mask(c, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, shape_window, 0, 0, XCB_PIXMAP_NONE);
+    } else {
+        const QVector< QRect > rects = _mask.rects();
+        QVector< xcb_rectangle_t > xrects(rects.count());
         for (int i = 0; i < rects.count(); ++i) {
-            xrects[i].x = rects[i].x();
-            xrects[i].y = rects[i].y();
-            xrects[i].width = rects[i].width();
-            xrects[i].height = rects[i].height();
+            const QRect &rect = rects.at(i);
+            xcb_rectangle_t xrect;
+            xrect.x = rect.x();
+            xrect.y = rect.y();
+            xrect.width = rect.width();
+            xrect.height = rect.height();
+            xrects[i] = xrect;
         }
-        XShapeCombineRectangles(display(), shape_window, ShapeBounding, 0, 0,
-                                xrects, rects.count(), ShapeSet, mode);
-        delete[] xrects;
+        xcb_shape_rectangles(c, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, mode, shape_window,
+                             0, 0, xrects.count(), xrects.constData());
     }
     if (shape()) {
-        // The rest of the applyign using a temporary window
-        XRectangle rec = { 0, 0, static_cast<unsigned short>(clientSize().width()),
-                           static_cast<unsigned short>(clientSize().height()) };
-        XShapeCombineRectangles(display(), shape_helper_window, ShapeBounding,
-                                clientPos().x(), clientPos().y(), &rec, 1, ShapeSubtract, Unsorted);
-        XShapeCombineShape(display(), shape_helper_window, ShapeBounding,
-                           clientPos().x(), clientPos().y(), window(), ShapeBounding, ShapeUnion);
-        XShapeCombineShape(display(), frameId(), ShapeBounding, 0, 0,
-                           shape_helper_window, ShapeBounding, ShapeSet);
+        // The rest of the applying using a temporary window
+        xcb_rectangle_t rec = { 0, 0, static_cast<uint16_t>(clientSize().width()),
+                           static_cast<uint16_t>(clientSize().height()) };
+        xcb_shape_rectangles(c, XCB_SHAPE_SO_SUBTRACT, XCB_SHAPE_SK_BOUNDING, XCB_CLIP_ORDERING_UNSORTED,
+                             shape_helper_window, clientPos().x(), clientPos().y(), 1, &rec);
+        xcb_shape_combine(c, XCB_SHAPE_SO_UNION, XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
+                          shape_helper_window, clientPos().x(), clientPos().y(), window());
+        xcb_shape_combine(c, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
+                          frameId(), 0, 0, shape_helper_window);
     }
     emit geometryShapeChanged(this, geometry());
     updateShape();
@@ -850,7 +869,7 @@ void Client::minimize(bool avoid_animation)
     updateAllowedActions();
     workspace()->updateMinimizedOfTransients(this);
     updateWindowRules(Rules::Minimize);
-    workspace()->updateFocusChains(this, Workspace::FocusChainMakeLast);
+    FocusChain::self()->update(this, FocusChain::MakeLast);
     // TODO: merge signal with s_minimized
     emit clientMinimized(this, !avoid_animation);
 
@@ -1078,7 +1097,8 @@ void Client::updateVisibility()
             internalHide(Allowed);
         return;
     }
-    resetShowingDesktop(true);
+    if (isManaged())
+        resetShowingDesktop(true);
     internalShow(Allowed);
 }
 
@@ -1127,8 +1147,7 @@ void Client::internalShow(allowed_t)
     if (old == Unmapped || old == Withdrawn)
         map(Allowed);
     if (old == Kept) {
-        if (inputId())
-            XMapWindow(display(), inputId());
+        m_decoInputExtent.map();
         updateHiddenPreview();
     }
     if (Compositor::isCreated()) {
@@ -1162,8 +1181,7 @@ void Client::internalKeep(allowed_t)
     mapping_state = Kept;
     if (old == Unmapped || old == Withdrawn)
         map(Allowed);
-    if (inputId())
-        XUnmapWindow(display(), inputId());
+    m_decoInputExtent.unmap();
     updateHiddenPreview();
     addWorkspaceRepaint(visibleRect());
     workspace()->clientHidden(this);
@@ -1190,8 +1208,7 @@ void Client::map(allowed_t)
     if (!isShade()) {
         XMapWindow(display(), wrapper);
         XMapWindow(display(), client);
-        if (inputId())
-            XMapWindow(display(), inputId());
+        m_decoInputExtent.map();
         exportMappingState(NormalState);
     } else
         exportMappingState(IconicState);
@@ -1212,8 +1229,7 @@ void Client::unmap(allowed_t)
     XUnmapWindow(display(), frameId());
     XUnmapWindow(display(), wrapper);
     XUnmapWindow(display(), client);
-    if (inputId())
-        XUnmapWindow(display(), inputId());
+    m_decoInputExtent.unmap();
     XSelectInput(display(), wrapper, ClientWinMask | SubstructureNotifyMask);
     if (decoration != NULL)
         decoration->widget()->hide(); // Not really necessary, but let it know the state
@@ -1235,8 +1251,10 @@ void Client::updateHiddenPreview()
 {
     if (hiddenPreview()) {
         workspace()->forceRestacking();
-        if (Extensions::shapeInputAvailable())
-            XShapeCombineRectangles(display(), frameId(), ShapeInput, 0, 0, NULL, 0, ShapeSet, Unsorted);
+        if (Xcb::Extensions::self()->isShapeInputAvailable()) {
+            xcb_shape_rectangles(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT,
+                                 XCB_CLIP_ORDERING_UNSORTED, frameId(), 0, 0, 0, NULL);
+        }
     } else {
         workspace()->forceRestacking();
         updateInputShape();
@@ -1359,21 +1377,20 @@ void Client::killProcess(bool ask, Time timestamp)
     if (m_killHelperPID && !::kill(m_killHelperPID, 0)) // means the process is alive
         return;
     Q_ASSERT(!ask || timestamp != CurrentTime);
-    QByteArray machine = wmClientMachine(true);
     pid_t pid = info->pid();
-    if (pid <= 0 || machine.isEmpty())  // Needed properties missing
+    if (pid <= 0 || clientMachine()->hostName().isEmpty())  // Needed properties missing
         return;
-    kDebug(1212) << "Kill process:" << pid << "(" << machine << ")";
+    kDebug(1212) << "Kill process:" << pid << "(" << clientMachine()->hostName() << ")";
     if (!ask) {
-        if (machine != "localhost") {
+        if (!clientMachine()->isLocal()) {
             QStringList lst;
-            lst << machine << "kill" << QString::number(pid);
+            lst << clientMachine()->hostName() << "kill" << QString::number(pid);
             QProcess::startDetached("xon", lst);
         } else
             ::kill(pid, SIGTERM);
     } else {
         QProcess::startDetached(KStandardDirs::findExe("kwin_killer_helper"),
-                                QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << machine
+                                QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << clientMachine()->hostName()
                                 << "--windowname" << caption()
                                 << "--applicationname" << resourceClass()
                                 << "--wid" << QString::number(window())
@@ -1395,8 +1412,8 @@ void Client::setSkipTaskbar(bool b, bool from_outside)
     info->setState(b ? NET::SkipTaskbar : 0, NET::SkipTaskbar);
     updateWindowRules(Rules::SkipTaskbar);
     if (was_wants_tab_focus != wantsTabFocus())
-        workspace()->updateFocusChains(this,
-                                       isActive() ? Workspace::FocusChainMakeFirst : Workspace::FocusChainUpdate);
+        FocusChain::self()->update(this,
+                                          isActive() ? FocusChain::MakeFirst : FocusChain::Update);
     emit skipTaskbarChanged();
 }
 
@@ -1434,9 +1451,10 @@ void Client::setModal(bool m)
 
 void Client::setDesktop(int desktop)
 {
+    const int numberOfDesktops = VirtualDesktopManager::self()->count();
     if (desktop != NET::OnAllDesktops)   // Do range check
-        desktop = qMax(1, qMin(workspace()->numberOfDesktops(), desktop));
-    desktop = qMin(workspace()->numberOfDesktops(), rules()->checkDesktop(desktop));
+        desktop = qMax(1, qMin(numberOfDesktops, desktop));
+    desktop = qMin(numberOfDesktops, rules()->checkDesktop(desktop));
     if (desk == desktop)
         return;
 
@@ -1466,7 +1484,7 @@ void Client::setDesktop(int desktop)
         c2->setDesktop(desktop);
     }
 
-    workspace()->updateFocusChains(this, Workspace::FocusChainMakeFirst);
+    FocusChain::self()->update(this, FocusChain::MakeFirst);
     updateVisibility();
     updateWindowRules(Rules::Desktop);
 
@@ -1501,6 +1519,8 @@ void Client::setOnActivity(const QString &activity, bool enable)
 /**
  * set exactly which activities this client is on
  */
+// cloned from kactivities/src/lib/core/consumer.cpp
+#define NULL_UUID "00000000-0000-0000-0000-000000000000"
 void Client::setOnActivities(QStringList newActivitiesList)
 {
     QString joinedActivitiesList = newActivitiesList.join(",");
@@ -1510,10 +1530,10 @@ void Client::setOnActivities(QStringList newActivitiesList)
     QStringList allActivities = workspace()->activityList();
     if ( newActivitiesList.isEmpty() ||
         (newActivitiesList.count() > 1 && newActivitiesList.count() == allActivities.count()) ||
-        (newActivitiesList.count() == 1 && newActivitiesList.at(0) == "ALL")) {
+        (newActivitiesList.count() == 1 && newActivitiesList.at(0) == NULL_UUID)) {
         activityList.clear();
         XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
-                        PropModeReplace, (const unsigned char *)"ALL", 3);
+                        PropModeReplace, (const unsigned char *)NULL_UUID, 36);
 
     } else {
         QByteArray joined = joinedActivitiesList.toAscii();
@@ -1538,7 +1558,7 @@ void Client::updateActivities(bool includeTransients)
         */
     if (includeTransients)
         workspace()->updateOnAllActivitiesOfTransients(this);
-    workspace()->updateFocusChains(this, Workspace::FocusChainMakeFirst);
+    FocusChain::self()->update(this, FocusChain::MakeFirst);
     updateVisibility();
     updateWindowRules(Rules::Activity);
 
@@ -1582,7 +1602,7 @@ void Client::setOnAllDesktops(bool b)
     if (b)
         setDesktop(NET::OnAllDesktops);
     else
-        setDesktop(workspace()->currentDesktop());
+        setDesktop(VirtualDesktopManager::self()->current());
 
     // Update states of all other windows in this group
     if (tabGroup())
@@ -1759,8 +1779,8 @@ void Client::setCaption(const QString& _s, bool force)
     cap_suffix.clear();
     QString machine_suffix;
     if (!options->condensedTitle()) { // machine doesn't qualify for "clean"
-        if (wmClientMachine(false) != "localhost" && !isLocalMachine(wmClientMachine(false)))
-            machine_suffix = QString(" <@") + wmClientMachine(true) + '>' + LRM;
+        if (clientMachine()->hostName() != ClientMachine::localhost() && !clientMachine()->isLocal())
+            machine_suffix = QString(" <@") + clientMachine()->hostName() + '>' + LRM;
     }
     QString shortcut_suffix = !shortcut().isEmpty() ? (" {" + shortcut().toString() + '}') : QString();
     cap_suffix = machine_suffix + shortcut_suffix;
@@ -1849,13 +1869,15 @@ bool Client::tabTo(Client *other, bool behind, bool activate)
     return true;
 }
 
-bool Client::untab(const QRect &toGeometry)
+bool Client::untab(const QRect &toGeometry, bool clientRemoved)
 {
     TabGroup *group = tab_group;
     if (group && group->remove(this)) { // remove sets the tabgroup to "0", therefore the pointer is cached
         if (group->isEmpty()) {
             delete group;
         }
+        if (clientRemoved)
+            return true; // there's been a broadcast signal that this client is now removed - don't touch it
         setClientShown(!(isMinimized() || isShade()));
         bool keepSize = toGeometry.size() == size();
         bool changedSize = false;
@@ -1870,7 +1892,7 @@ bool Client::untab(const QRect &toGeometry)
             }
             if (keepSize && changedSize) {
                 geom_restore = geometry(); // checkWorkspacePosition() invokes it
-                QPoint cpoint = QCursor::pos();
+                QPoint cpoint = Cursor::pos();
                 QPoint point = cpoint;
                 point.setX((point.x() - toGeometry.x()) * geom_restore.width() / toGeometry.width());
                 point.setY((point.y() - toGeometry.y()) * geom_restore.height() / toGeometry.height());
@@ -1931,12 +1953,12 @@ void Client::setClientShown(bool shown)
         map(Allowed);
         takeFocus(Allowed);
         autoRaise();
-        workspace()->updateFocusChains(this, Workspace::FocusChainMakeFirst);
+        FocusChain::self()->update(this, FocusChain::MakeFirst);
     } else {
         unmap(Allowed);
         // Don't move tabs to the end of the list when another tab get's activated
         if (isCurrentTab())
-            workspace()->updateFocusChains(this, Workspace::FocusChainMakeLast);
+            FocusChain::self()->update(this, FocusChain::MakeLast);
         addWorkspaceRepaint(visibleRect());
     }
 }
@@ -2096,7 +2118,7 @@ void Client::getWindowProtocols()
 void Client::getSyncCounter()
 {
 #ifdef HAVE_XSYNC
-    if (!Extensions::syncAvailable())
+    if (!Xcb::Extensions::self()->isSyncAvailable())
         return;
 
     Atom retType;
@@ -2213,7 +2235,7 @@ void Client::updateCursor()
     Position m = mode;
     if (!isResizable() || isShade())
         m = PositionCenter;
-    QCursor c;
+    Qt::CursorShape c = Qt::ArrowCursor;
     switch(m) {
     case PositionTopLeft:
     case PositionBottomRight:
@@ -2238,18 +2260,20 @@ void Client::updateCursor()
             c = Qt::ArrowCursor;
         break;
     }
-    if (c.handle() == cursor.handle())
+    if (c == m_cursor)
         return;
-    cursor = c;
+    m_cursor = c;
     if (decoration != NULL)
-        decoration->widget()->setCursor(cursor);
-    XDefineCursor(display(), frameId(), cursor.handle());
-    if (inputId())
-        XDefineCursor(display(), inputId(), cursor.handle());
-    if (moveResizeMode)   // XDefineCursor doesn't change cursor if there's pointer grab active
-        XChangeActivePointerGrab(display(),
-                                 ButtonPressMask | ButtonReleaseMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask,
-                                 cursor.handle(), xTime());
+        decoration->widget()->setCursor(m_cursor);
+    xcb_cursor_t nativeCursor = Cursor::x11Cursor(m_cursor);
+    Xcb::defineCursor(frameId(), nativeCursor);
+    if (m_decoInputExtent.isValid())
+        m_decoInputExtent.defineCursor(nativeCursor);
+    if (moveResizeMode) {
+        // changing window attributes doesn't change cursor if there's pointer grab active
+        xcb_change_active_pointer_grab(connection(), nativeCursor, xTime(),
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW);
+    }
 }
 
 void Client::updateCompositeBlocking(bool readProperty)
@@ -2326,8 +2350,7 @@ void Client::cancelAutoRaise()
 
 void Client::debug(QDebug& stream) const
 {
-    stream << "\'ID:" << window() << ";WMCLASS:" << resourceClass() << ":"
-           << resourceName() << ";Caption:" << caption() << "\'";
+    print<QDebug>(stream);
 }
 
 QPixmap* kwin_get_menu_pix_hack()
@@ -2343,7 +2366,7 @@ void Client::checkActivities()
     QStringList newActivitiesList;
     QByteArray prop = getStringProperty(window(), atoms->activities);
     activitiesDefined = !prop.isEmpty();
-    if (prop == "ALL") {
+    if (prop == NULL_UUID) {
         //copied from setOnAllActivities to avoid a redundant XChangeProperty.
         if (!activityList.isEmpty()) {
             activityList.clear();
@@ -2379,6 +2402,9 @@ void Client::checkActivities()
     }
     setOnActivities(newActivitiesList);
 }
+
+#undef NULL_UUID
+
 
 void Client::setSessionInteract(bool needed)
 {

@@ -5,7 +5,11 @@ if(CKCONNECTOR_FOUND)
   find_package(DBus REQUIRED)
 endif(CKCONNECTOR_FOUND)
 
-macro_log_feature(CKCONNECTOR_FOUND "ck-connector" "The ConsoleKit connector library" "http://freedesktop.org/wiki/Software/ConsoleKit" FALSE "" "Provides ConsoleKit integration in KDM")
+set_package_properties(CKConnector PROPERTIES DESCRIPTION "The ConsoleKit connector library"
+                       URL "http://freedesktop.org/wiki/Software/ConsoleKit"
+                       TYPE OPTIONAL
+                       PURPOSE "Provides ConsoleKit integration in KDM"
+                      )
 
 include(CheckCSourceRuns)
 include(CheckStructMember)

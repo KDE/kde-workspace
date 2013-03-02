@@ -41,10 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "plugins.h"
 #include "kdecoration.h"
 #include "kdecorationfactory.h"
-#ifdef KWIN_BUILD_SCREENEDGES
-#include "screenedge.h"
-#endif
 #include "sm.h"
+#include "killwindow.h"
 
 #include <X11/Xlib.h>
 
@@ -83,7 +81,7 @@ class Workspace : public QObject, public KDecorationDefines
 {
     Q_OBJECT
 public:
-    Workspace(bool restore = false);
+    explicit Workspace(bool restore = false);
     virtual ~Workspace();
 
     static Workspace* self() {
@@ -201,112 +199,15 @@ public:
     }
 
     Outline* outline();
+
 #ifdef KWIN_BUILD_SCREENEDGES
-    ScreenEdge* screenEdge();
+    void stackScreenEdgesUnderOverrideRedirect();
 #endif
 
-    //-------------------------------------------------
-    // Desktop layout
-
 public:
-    /**
-     * @returns Total number of desktops currently in existence.
-     */
-    int numberOfDesktops() const;
-    /**
-     * @returns The maximum number of desktops that KWin supports.
-     */
-    int maxNumberOfDesktops() const;
-    /**
-     * Set the number of available desktops to @a count. This function overrides any previous
-     * grid layout.
-     */
-    void setNumberOfDesktops(int count);
-    /**
-     * Called from within setNumberOfDesktops() to ensure the desktop layout is still valid.
-     */
-    void updateDesktopLayout();
-
-    /**
-     * @returns The size of desktop layout in grid units.
-     */
-    QSize desktopGridSize() const;
-    /**
-     * @returns The width of desktop layout in grid units.
-     */
-    int desktopGridWidth() const;
-    /**
-     * @returns The height of desktop layout in grid units.
-     */
-    int desktopGridHeight() const;
-    /**
-     * @returns The width of desktop layout in pixels. Equivalent to gridWidth() *
-     * ::displayWidth().
-     */
-    int workspaceWidth() const;
-    /**
-     * @returns The height of desktop layout in pixels. Equivalent to gridHeight() *
-     * ::displayHeight().
-     */
-    int workspaceHeight() const;
-
-    /**
-     * @returns The ID of the current desktop.
-     */
-    int currentDesktop() const;
-    /**
-     * Set the current desktop to @a current.
-     * @returns True on success, false otherwise.
-     */
-    bool setCurrentDesktop(int current);
-
-    /**
-     * Generate a desktop layout from EWMH _NET_DESKTOP_LAYOUT property parameters.
-     */
-    void setNETDesktopLayout(Qt::Orientation orientation, int width, int height, int startingCorner);
-
-    /**
-     * @returns The ID of the desktop at the point @a coords or 0 if no desktop exists at that
-     * point. @a coords is to be in grid units.
-     */
-    int desktopAtCoords(QPoint coords) const;
-    /**
-     * @returns The coords of desktop @a id in grid units.
-     */
-    QPoint desktopGridCoords(int id) const;
-    /**
-     * @returns The coords of the top-left corner of desktop @a id in pixels.
-     */
-    QPoint desktopCoords(int id) const;
-
-    /**
-     * @returns The ID of the desktop above desktop @a id. Wraps around to the bottom of
-     * the layout if @a wrap is set. If @a id is not set use the current one.
-     */
-    int desktopAbove(int id = 0, bool wrap = true) const;
-    /**
-     * @returns The ID of the desktop to the right of desktop @a id. Wraps around to the
-     * left of the layout if @a wrap is set. If @a id is not set use the current one.
-     */
-    int desktopToRight(int id = 0, bool wrap = true) const;
-    /**
-     * @returns The ID of the desktop below desktop @a id. Wraps around to the top of the
-     * layout if @a wrap is set. If @a id is not set use the current one.
-     */
-    int desktopBelow(int id = 0, bool wrap = true) const;
-    /**
-     * @returns The ID of the desktop to the left of desktop @a id. Wraps around to the
-     * right of the layout if @a wrap is set. If @a id is not set use the current one.
-     */
-    int desktopToLeft(int id = 0, bool wrap = true) const;
-
     QPoint cascadeOffset(const Client *c) const;
 
 private:
-    int desktopCount_;
-    QSize desktopGridSize_;
-    int* desktopGrid_;
-    int currentDesktop_;
     QString activity_;
     QStringList allActivities_, openActivities_;
 #ifdef KWIN_BUILD_ACTIVITIES
@@ -314,10 +215,6 @@ private:
 #endif
 
     Outline* m_outline;
-#ifdef KWIN_BUILD_SCREENEDGES
-    ScreenEdge m_screenEdge;
-    Qt::Orientations m_screenEdgeOrientation;
-#endif
     Compositor *m_compositor;
 
     //-------------------------------------------------
@@ -327,6 +224,7 @@ public:
     int activeScreen() const;
     int numScreens() const;
     void checkActiveScreen(const Client* c);
+    bool isOnCurrentHead();
     void setActiveScreenMouse(const QPoint& mousepos);
     QRect screenGeometry(int screen) const;
     int screenNumber(const QPoint& pos) const;
@@ -356,12 +254,6 @@ public:
 #endif
     bool hasTabBox() const;
 
-    const QVector<int> &desktopFocusChain() const {
-        return m_desktopFocusChain.value();
-    }
-    const ClientList &globalFocusChain() const {
-        return global_focus_chain;
-    }
     KActionCollection* actionCollection() const {
         return keys;
     }
@@ -450,8 +342,6 @@ public:
      * @todo: remove KDE5
      **/
     QList<int> decorationSupportedColors() const;
-    void nextDesktop();
-    void previousDesktop();
     bool waitForCompositingSetup();
     bool stopActivity(const QString &id);
     bool startActivity(const QString &id);
@@ -459,7 +349,6 @@ public:
 
     void setCurrentScreen(int new_screen);
 
-    QString desktopName(int desk) const;
     void setShowingDesktop(bool showing);
     void resetShowingDesktop(bool keep_hidden);
     bool showingDesktop() const;
@@ -483,12 +372,6 @@ public:
     bool checkStartupNotification(Window w, KStartupInfoId& id, KStartupInfoData& data);
 
     void focusToNull(); // SELI TODO: Public?
-    enum FocusChainChange {
-        FocusChainMakeFirst,
-        FocusChainMakeLast,
-        FocusChainUpdate
-    };
-    void updateFocusChains(Client* c, FocusChainChange change);
 
     bool forcedGlobalMouseGrab() const;
     void clientShortcutUpdated(Client* c);
@@ -496,8 +379,6 @@ public:
     bool globalShortcutsDisabled() const;
     void disableGlobalShortcuts(bool disable);
     void disableGlobalShortcutsForClient(bool disable);
-    QPoint cursorPos() const;
-    void checkCursorPos();
 
     void sessionSaveStarted();
     void sessionSaveDone();
@@ -519,16 +400,13 @@ public:
         return movingClient;
     }
 
+    /**
+     * @returns Whether we have a Compositor and it is active (Scene created)
+     **/
+    bool compositing() const;
+
 public slots:
     // Keybindings
-    void slotSwitchDesktopNext();
-    void slotSwitchDesktopPrevious();
-    void slotSwitchDesktopRight();
-    void slotSwitchDesktopLeft();
-    void slotSwitchDesktopUp();
-    void slotSwitchDesktopDown();
-
-    void slotSwitchToDesktop();
     //void slotSwitchToWindow( int );
     void slotWindowToDesktop();
 
@@ -625,12 +503,15 @@ private slots:
     void slotMenuHidden(qulonglong wid);
     void slotClearMenus();
 #endif
-    void resetCursorPosTime();
     void updateCurrentActivity(const QString &new_activity);
     void slotActivityRemoved(const QString &activity);
     void slotActivityAdded(const QString &activity);
     void reallyStopActivity(const QString &id);   //dbus deadlocks suck
     void handleActivityReply();
+    // virtual desktop handling
+    void moveClientsFromRemovedDesktops();
+    void slotDesktopCountChanged(uint previousCount, uint newCount);
+    void slotCurrentDesktopChanged(uint oldDesktop, uint newDesktop);
 
 Q_SIGNALS:
     /**
@@ -643,7 +524,6 @@ Q_SIGNALS:
 signals:
     void desktopPresenceChanged(KWin::Client*, int);
     void currentDesktopChanged(int, KWin::Client*);
-    void numberDesktopsChanged(int oldNumberOfDesktops);
     void clientAdded(KWin::Client*);
     void clientRemoved(KWin::Client*);
     void clientActivated(KWin::Client*);
@@ -651,9 +531,6 @@ signals:
     void groupAdded(KWin::Group*);
     void unmanagedAdded(KWin::Unmanaged*);
     void deletedRemoved(KWin::Deleted*);
-    void mouseChanged(const QPoint& pos, const QPoint& oldpos,
-                      Qt::MouseButtons buttons, Qt::MouseButtons oldbuttons,
-                      Qt::KeyboardModifiers modifiers, Qt::KeyboardModifiers oldmodifiers);
     void propertyNotify(long a);
     void configChanged();
     void reinitializeCompositing();
@@ -674,6 +551,11 @@ signals:
      * @param id id of the removed activity
      */
     void activityRemoved(const QString &id);
+    /**
+     * This signels is emitted when ever the stacking order is change, ie. a window is risen
+     * or lowered
+     */
+    void stackingOrderChanged();
 
 private:
     void init();
@@ -706,18 +588,14 @@ private:
 
     Window findSpecialEventWindow(XEvent* e);
 
-    // Desktop names and number of desktops
-    void loadDesktopSettings();
-    void saveDesktopSettings();
-
     //---------------------------------------------------------------------
 
     void closeActivePopup();
     void updateClientArea(bool force);
-
-    typedef QHash< QString, QVector<int> > DesktopFocusChains;
-    DesktopFocusChains::Iterator m_desktopFocusChain;
-    DesktopFocusChains m_activitiesDesktopFocusChain;
+    void resetClientAreas(uint desktopCount);
+    void updateClientVisibilityOnDesktopChange(uint oldDesktop, uint newDesktop);
+    void activateClientOnNewDesktop(uint desktop);
+    Client *findClientToActivateOnDesktop(uint desktop);
 
     QWidget* active_popup;
     Client* active_popup_client;
@@ -738,11 +616,6 @@ private:
     static const char* windowTypeToTxt(NET::WindowType type);
     static NET::WindowType txtToWindowType(const char* txt);
     static bool sessionInfoWindowTypeMatch(Client* c, SessionInfo* info);
-
-    /**
-     * @returns Whether we have a Compositor and it is active (Scene created)
-     **/
-    bool compositing() const;
 
     Client* active_client;
     Client* last_active_client;
@@ -766,8 +639,6 @@ private:
     bool force_restacking;
     mutable ToplevelList x_stacking; // From XQueryTree()
     mutable bool x_stacking_dirty;
-    QVector< ClientList > focus_chain; // Currently ative last
-    ClientList global_focus_chain; // This one is only for things like tabbox's MRU
     ClientList should_get_focus; // Last is most recent
     ClientList attention_chain;
 
@@ -850,6 +721,8 @@ private:
 
     Scripting *m_scripting;
 
+    QScopedPointer<KillWindow> m_windowKiller;
+
 private:
     friend bool performTransiencyCheck();
 };
@@ -860,7 +733,7 @@ private:
 class StackingUpdatesBlocker
 {
 public:
-    StackingUpdatesBlocker(Workspace* w)
+    explicit StackingUpdatesBlocker(Workspace* w)
         : ws(w) {
         ws->blockStackingUpdates(true);
     }
@@ -899,49 +772,6 @@ protected:
 private:
     Workspace* workspace;
 };
-
-//---------------------------------------------------------
-// Desktop layout
-
-inline int Workspace::numberOfDesktops() const
-{
-    return desktopCount_;
-}
-
-inline QSize Workspace::desktopGridSize() const
-{
-    return desktopGridSize_;
-}
-
-inline int Workspace::desktopGridWidth() const
-{
-    return desktopGridSize_.width();
-}
-
-inline int Workspace::desktopGridHeight() const
-{
-    return desktopGridSize_.height();
-}
-
-inline int Workspace::workspaceWidth() const
-{
-    return desktopGridSize_.width() * displayWidth();
-}
-
-inline int Workspace::workspaceHeight() const
-{
-    return desktopGridSize_.height() * displayHeight();
-}
-
-inline int Workspace::currentDesktop() const
-{
-    return currentDesktop_;
-}
-
-inline int Workspace::desktopAtCoords(QPoint coords) const
-{
-    return desktopGrid_[coords.y() * desktopGridSize_.width() + coords.x()];
-}
 
 //---------------------------------------------------------
 // Unsorted

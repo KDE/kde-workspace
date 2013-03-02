@@ -63,6 +63,11 @@ Item {
             processLastDevice()
         }
 
+        onNewData: {
+            last = sourceName;
+            processLastDevice();
+        }
+
         function processLastDevice() {
             if (last != "") {
                 if (devicesType == "all" ||
@@ -155,9 +160,9 @@ Item {
             tooltip["image"] = "device-notifier"
             tooltip["mainText"] = i18n("No devices available")
         } else if (sdSource.last != "") {
-            tooltip["image"] = hpSource.data[sdSource.last]["icon"]
+            tooltip["image"] = sdSource.data[sdSource.last]["Icon"]
             tooltip["mainText"] = i18n("Most recent device")
-            tooltip["subText"] = hpSource.data[sdSource.last]["text"]
+            tooltip["subText"] = sdSource.data[sdSource.last]["Description"]
         }
         plasmoid.popupIconToolTip = tooltip
     }
@@ -305,8 +310,8 @@ Item {
                 id: wrapper
                 width: notifierDialog.width
                 udi: DataEngineSource
-                icon: hpSource.data[udi]["icon"]
-                deviceName: hpSource.data[udi]["text"]
+                icon: sdSource.data[udi]["Icon"]
+                deviceName: sdSource.data[udi]["Description"]
                 emblemIcon: Emblems[0]
                 state: model["State"]
 

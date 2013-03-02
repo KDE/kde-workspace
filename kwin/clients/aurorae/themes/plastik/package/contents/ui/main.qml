@@ -22,26 +22,42 @@ Decoration {
     function readConfig() {
         switch (decoration.readConfig("BorderSize", DecorationOptions.BorderNormal)) {
         case DecorationOptions.BorderTiny:
-            root.borderSize = 3;
+            borders.setBorders(3);
+            extendedBorders.setAllBorders(0);
             break;
         case DecorationOptions.BorderLarge:
-            root.borderSize = 8;
+            borders.setBorders(8);
+            extendedBorders.setAllBorders(0);
             break;
         case DecorationOptions.BorderVeryLarge:
-            root.borderSize = 12;
+            borders.setBorders(12);
+            extendedBorders.setAllBorders(0);
             break;
         case DecorationOptions.BorderHuge:
-            root.borderSize = 18;
+            borders.setBorders(18);
+            extendedBorders.setAllBorders(0);
             break;
         case DecorationOptions.BorderVeryHuge:
-            root.borderSize = 27;
+            borders.setBorders(27);
+            extendedBorders.setAllBorders(0);
             break;
         case DecorationOptions.BorderOversized:
-            root.borderSize = 40;
+            borders.setBorders(40);
+            extendedBorders.setAllBorders(0);
+            break;
+        case DecorationOptions.BorderNoSides:
+            borders.setBorders(4);
+            borders.setSideBorders(1);
+            extendedBorders.setSideBorders(3);
+            break;
+        case DecorationOptions.BorderNone:
+            borders.setBorders(1);
+            extendedBorders.setBorders(3);
             break;
         case DecorationOptions.BorderNormal: // fall through to default
         default:
-            root.borderSize = 4;
+            borders.setBorders(4);
+            extendedBorders.setAllBorders(0);
             break;
         }
         var titleAlignLeft = decoration.readConfig("titleAlignLeft", true);
@@ -80,20 +96,7 @@ Decoration {
             duration: root.animationDuration
         }
     }
-    property int borderSize: 4
     id: root
-    borderLeft: borderSize
-    borderRight: borderSize
-    borderTop: top.normalHeight
-    borderBottom: borderSize
-    borderLeftMaximized: 0
-    borderRightMaximized: 0
-    borderBottomMaximized: 0
-    borderTopMaximized: top.maximizedHeight
-    paddingLeft: 0
-    paddingRight: 0
-    paddingBottom: 0
-    paddingTop: 0
     alpha: false
     Rectangle {
         color: root.titleBarColor
@@ -115,7 +118,7 @@ Decoration {
                 topMargin: 1
             }
             visible: !decoration.maximized
-            width: root.borderLeft
+            width: root.borders.left
             color: root.titleBarColor
             Rectangle {
                 width: 1
@@ -138,7 +141,7 @@ Decoration {
                 topMargin: 1
             }
             visible: !decoration.maximzied
-            width: root.borderRight -1
+            width: root.borders.right -1
             color: root.titleBarColor
             Rectangle {
                 width: 1
@@ -159,7 +162,7 @@ Decoration {
                 leftMargin: 1
                 rightMargin: 1
             }
-            height: root.borderBottom
+            height: root.borders.bottom
             visible: !decoration.maximzied
             color: root.titleBarColor
             Rectangle {
@@ -248,6 +251,7 @@ Decoration {
                     spacing: 1
                     explicitSpacer: root.buttonSize
                     menuButton: menuButtonComponent
+                    appMenuButton: appMenuButtonComponent
                     minimizeButton: minimizeButtonComponent
                     maximizeButton: maximizeButtonComponent
                     keepBelowButton: keepBelowButtonComponent
@@ -286,6 +290,7 @@ Decoration {
                     spacing: 1
                     explicitSpacer: root.buttonSize
                     menuButton: menuButtonComponent
+                    appMenuButton: appMenuButtonComponent
                     minimizeButton: minimizeButtonComponent
                     maximizeButton: maximizeButtonComponent
                     keepBelowButton: keepBelowButtonComponent
@@ -307,10 +312,10 @@ Decoration {
             id: innerBorder
             anchors {
                 fill: parent
-                leftMargin: root.borderLeft - 1
-                rightMargin: root.borderRight
-                topMargin: root.borderTop - 1
-                bottomMargin: root.borderBottom
+                leftMargin: root.borders.left - 1
+                rightMargin: root.borders.right
+                topMargin: root.borders.top - 1
+                bottomMargin: root.borders.bottom
             }
             border {
                 width: 1
@@ -383,7 +388,19 @@ Decoration {
             height: root.buttonSize
         }
     }
-    Component.onCompleted: readConfig()
+    Component {
+        id: appMenuButtonComponent
+        PlastikButton {
+            buttonType: "N"
+            size: root.buttonSize
+        }
+    }
+    Component.onCompleted: {
+        borders.setBorders(4);
+        borders.setTitle(top.normalHeight);
+        maximizedBorders.setTitle(top.maximizedHeight);
+        readConfig();
+    }
     Connections {
         target: decoration
         onConfigChanged: readConfig()

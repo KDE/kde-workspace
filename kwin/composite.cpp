@@ -17,26 +17,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-
-/*
- Code related to compositing (redirecting windows to pixmaps and tracking
- window damage).
-
- Docs:
-
- XComposite (the protocol, but the function calls map to it):
- http://gitweb.freedesktop.org/?p=xorg/proto/compositeproto.git;a=blob_plain;hb=HEAD;f=compositeproto.txt
-
- XDamage (again the protocol):
- http://gitweb.freedesktop.org/?p=xorg/proto/damageproto.git;a=blob_plain;hb=HEAD;f=damageproto.txt
-
- Paper including basics on compositing, XGL vs AIGLX, XRender vs OpenGL, etc.:
- http://www.vis.uni-stuttgart.de/~hopf/pub/LinuxTag2007_compiz_NextGenerationDesktop_Paper.pdf
-
- Composite HOWTO from Fredrik:
- http://ktown.kde.org/~fredrik/composite_howto.html
-
-*/
 #include "composite.h"
 #include "compositingadaptor.h"
 
@@ -57,6 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "useractions.h"
 #include "compositingprefs.h"
 #include "notifications.h"
+#include "xcbutils.h"
 
 #include <stdio.h>
 
@@ -73,15 +54,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <xcb/composite.h>
 #include <xcb/damage.h>
 
+Q_DECLARE_METATYPE(KWin::Compositor::SuspendReason)
+
 namespace KWin
 {
 
 Compositor *Compositor::s_compositor = NULL;
 extern int currentRefreshRate();
-
-//****************************************
-// Workspace
-//****************************************
 
 Compositor *Compositor::createCompositor(QObject *parent)
 {
@@ -92,8 +71,7 @@ Compositor *Compositor::createCompositor(QObject *parent)
 
 Compositor::Compositor(QObject* workspace)
     : QObject(workspace)
-    , m_suspended(!options->isUseCompositing())
-    , m_blocked(false)
+    , m_suspended(options->isUseCompositing() ? NoReasonSuspend : UserSuspend)
     , cm_selection(NULL)
     , vBlankInterval(0)
     , fpsInterval(0)
@@ -104,6 +82,7 @@ Compositor::Compositor(QObject* workspace)
     , m_nextFrameDelay(0)
     , m_scene(NULL)
 {
+    qRegisterMetaType<Compositor::SuspendReason>("Compositor::SuspendReason");
     new CompositingAdaptor(this);
     QDBusConnection dbus = QDBusConnection::sessionBus();
     dbus.registerObject("/Compositor", this);
@@ -111,7 +90,6 @@ Compositor::Compositor(QObject* workspace)
     connect(&unredirectTimer, SIGNAL(timeout()), SLOT(delayedCheckUnredirect()));
     connect(&compositeResetTimer, SIGNAL(timeout()), SLOT(restart()));
     connect(workspace, SIGNAL(configChanged()), SLOT(slotConfigChanged()));
-    connect(&mousePollingTimer, SIGNAL(timeout()), SLOT(performMousePoll()));
     unredirectTimer.setSingleShot(true);
     compositeResetTimer.setSingleShot(true);
     nextPaintReference.invalidate(); // Initialize the timer
@@ -131,6 +109,7 @@ Compositor::~Compositor()
 {
     finish();
     delete cm_selection;
+    s_compositor = NULL;
 }
 
 
@@ -139,7 +118,7 @@ void Compositor::setup()
     if (hasScene())
         return;
     if (m_suspended) {
-        kDebug(1212) << "Compositing is suspended";
+        kDebug(1212) << "Compositing is suspended, reason:" << m_suspended;
         return;
     } else if (!CompositingPrefs::compositingPossible()) {
         kError(1212) << "Compositing is not possible";
@@ -166,6 +145,8 @@ void Compositor::setup()
     }
 }
 
+extern int screen_number; // main.cpp
+
 void Compositor::slotCompositingOptionsInitialized()
 {
     char selection_name[ 100 ];
@@ -183,14 +164,15 @@ void Compositor::slotCompositingOptionsInitialized()
         // Some broken drivers crash on glXQuery() so to prevent constant KWin crashes:
         KSharedConfigPtr unsafeConfigPtr = KGlobal::config();
         KConfigGroup unsafeConfig(unsafeConfigPtr, "Compositing");
-        if (unsafeConfig.readEntry("OpenGLIsUnsafe", false))
+        const QString openGLIsUnsafe = "OpenGLIsUnsafe" + QString::number(screen_number);
+        if (unsafeConfig.readEntry(openGLIsUnsafe, false))
             kWarning(1212) << "KWin has detected that your OpenGL library is unsafe to use";
         else {
-            unsafeConfig.writeEntry("OpenGLIsUnsafe", true);
+            unsafeConfig.writeEntry(openGLIsUnsafe, true);
             unsafeConfig.sync();
 #ifndef KWIN_HAVE_OPENGLES
             if (!CompositingPrefs::hasGlx()) {
-                unsafeConfig.writeEntry("OpenGLIsUnsafe", false);
+                unsafeConfig.writeEntry(openGLIsUnsafe, false);
                 unsafeConfig.sync();
                 kDebug(1212) << "No glx extensions available";
                 break;
@@ -200,7 +182,7 @@ void Compositor::slotCompositingOptionsInitialized()
             m_scene = SceneOpenGL::createScene();
 
             // TODO: Add 30 second delay to protect against screen freezes as well
-            unsafeConfig.writeEntry("OpenGLIsUnsafe", false);
+            unsafeConfig.writeEntry(openGLIsUnsafe, false);
             unsafeConfig.sync();
 
             if (m_scene && !m_scene->initFailed())
@@ -246,12 +228,16 @@ void Compositor::slotCompositingOptionsInitialized()
     new EffectsHandlerImpl(this, m_scene);   // sets also the 'effects' pointer
     connect(effects, SIGNAL(screenGeometryChanged(QSize)), SLOT(addRepaintFull()));
     addRepaintFull();
-    foreach (Client * c, Workspace::self()->clientList())
+    foreach (Client * c, Workspace::self()->clientList()) {
         c->setupCompositing();
+        c->getShadow();
+    }
     foreach (Client * c,  Workspace::self()->desktopList())
         c->setupCompositing();
-    foreach (Unmanaged * c, Workspace::self()->unmanagedList())
+    foreach (Unmanaged * c, Workspace::self()->unmanagedList()) {
         c->setupCompositing();
+        c->getShadow();
+    }
 
     emit compositingToggled(true);
 
@@ -299,7 +285,6 @@ void Compositor::finish()
     delete m_scene;
     m_scene = NULL;
     compositeTimer.stop();
-    mousePollingTimer.stop();
     repaints_region = QRegion();
     for (ClientList::ConstIterator it = Workspace::self()->clientList().constBegin();
             it != Workspace::self()->clientList().constEnd();
@@ -377,14 +362,10 @@ void Compositor::slotReinitialize()
         return;
     }
 
-    // Update any settings that can be set in the compositing kcm.
-#ifdef KWIN_BUILD_SCREENEDGES
-    Workspace::self()->screenEdge()->update();
-#endif
     // Restart compositing
     finish();
     // resume compositing if suspended
-    m_suspended = false;
+    m_suspended = NoReasonSuspend;
     options->setCompositingInitialized(false);
     setup();
 
@@ -396,13 +377,17 @@ void Compositor::slotReinitialize()
 // for the shortcut
 void Compositor::slotToggleCompositing()
 {
-    setCompositing(m_suspended);
+    if (m_suspended) { // direct user call; clear all bits
+        resume(AllReasonSuspend);
+    } else { // but only set the user one (sufficient to suspend)
+        suspend(UserSuspend);
+    }
 }
 
 // for the dbus call
 void Compositor::toggleCompositing()
 {
-    slotToggleCompositing();
+    slotToggleCompositing(); // TODO only operate on script level here?
     if (m_suspended) {
         // when disabled show a shortcut how the user can get back compositing
         QString shortcut, message;
@@ -426,14 +411,11 @@ void Compositor::updateCompositeBlocking(Client *c)
 {
     if (c) { // if c == 0 we just check if we can resume
         if (c->isBlockingCompositing()) {
-            if (!m_blocked) // do NOT attempt to call suspend(true); from within the eventchain!
-                QMetaObject::invokeMethod(this, "suspend", Qt::QueuedConnection);
-            m_blocked = true;
+            if (!(m_suspended & BlockRuleSuspend)) // do NOT attempt to call suspend(true); from within the eventchain!
+                QMetaObject::invokeMethod(this, "suspend", Qt::QueuedConnection, Q_ARG(Compositor::SuspendReason, BlockRuleSuspend));
         }
     }
-    else if (m_blocked) {  // lost a client and we're blocked - can we resume?
-        // NOTICE do NOT check for "m_Suspended" or "!compositing()"
-        // only "resume" if it was really disabled for a block
+    else if (m_suspended & BlockRuleSuspend) {  // lost a client and we're blocked - can we resume?
         bool resume = true;
         for (ClientList::ConstIterator it = Workspace::self()->clientList().constBegin(); it != Workspace::self()->clientList().constEnd(); ++it) {
             if ((*it)->isBlockingCompositing()) {
@@ -442,38 +424,31 @@ void Compositor::updateCompositeBlocking(Client *c)
             }
         }
         if (resume) { // do NOT attempt to call suspend(false); from within the eventchain!
-            m_blocked = false;
-            if (m_suspended)
-                QMetaObject::invokeMethod(this, "resume", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(this, "resume", Qt::QueuedConnection, Q_ARG(Compositor::SuspendReason, BlockRuleSuspend));
         }
     }
 }
 
-void Compositor::suspend()
+void Compositor::suspend(Compositor::SuspendReason reason)
 {
-    if (m_suspended) {
-        return;
-    }
-    m_suspended = true;
+    Q_ASSERT(reason != NoReasonSuspend);
+    m_suspended |= reason;
     finish();
 }
 
-void Compositor::resume()
+void Compositor::resume(Compositor::SuspendReason reason)
 {
-    if (!m_suspended && hasScene()) {
-        return;
-    }
-    m_suspended = false;
-    // signal toggled is eventually emitted from within setup
-    setup();
+    Q_ASSERT(reason != NoReasonSuspend);
+    m_suspended &= ~reason;
+    setup(); // signal "toggled" is eventually emitted from within setup
 }
 
 void Compositor::setCompositing(bool active)
 {
     if (active) {
-        resume();
+        resume(ScriptSuspend);
     } else {
-        suspend();
+        suspend(ScriptSuspend);
     }
 }
 
@@ -606,11 +581,6 @@ void Compositor::performCompositing()
     scheduleRepaint();
 }
 
-void Compositor::performMousePoll()
-{
-    Workspace::self()->checkCursorPos();
-}
-
 bool Compositor::windowRepaintsPending() const
 {
     foreach (Toplevel * c, Workspace::self()->clientList())
@@ -670,16 +640,6 @@ void Compositor::setCompositeTimer()
         // "0" would be sufficient, but the compositor isn't the WMs only task
         m_nextFrameDelay = padding = (padding > fpsInterval) ? 1 : ((fpsInterval - padding) >> 10);
     compositeTimer.start(qMin(padding, 250u), this); // force 4fps minimum
-}
-
-void Compositor::startMousePolling()
-{
-    mousePollingTimer.start(20);   // 50Hz. TODO: How often do we really need to poll?
-}
-
-void Compositor::stopMousePolling()
-{
-    mousePollingTimer.stop();
 }
 
 bool Compositor::isActive()
@@ -897,8 +857,8 @@ xcb_pixmap_t Toplevel::createWindowPixmap()
     XServerGrabber grabber();
     xcb_pixmap_t pix = xcb_generate_id(connection());
     xcb_void_cookie_t namePixmapCookie = xcb_composite_name_window_pixmap_checked(connection(), frameId(), pix);
-    xcb_get_window_attributes_cookie_t attribsCookie = xcb_get_window_attributes(connection(), frameId());
-    xcb_get_geometry_cookie_t geometryCookie = xcb_get_geometry(connection(), frameId());
+    Xcb::WindowAttributes windowAttributes(frameId());
+    Xcb::WindowGeometry windowGeometry(frameId());
     if (xcb_generic_error_t *error = xcb_request_check(connection(), namePixmapCookie)) {
         kDebug(1212) << "Creating window pixmap failed: " << error->error_code;
         free(error);
@@ -906,16 +866,13 @@ xcb_pixmap_t Toplevel::createWindowPixmap()
     }
     // check that the received pixmap is valid and actually matches what we
     // know about the window (i.e. size)
-    ScopedCPointer<xcb_generic_error_t> error;
-    ScopedCPointer<xcb_get_window_attributes_reply_t> attribs(xcb_get_window_attributes_reply(connection(), attribsCookie, &error));
-    if (!error.isNull() || attribs.isNull() || attribs->map_state != XCB_MAP_STATE_VIEWABLE) {
+    if (!windowAttributes || windowAttributes->map_state != XCB_MAP_STATE_VIEWABLE) {
         kDebug(1212) << "Creating window pixmap failed: " << this;
         xcb_free_pixmap(connection(), pix);
         return XCB_PIXMAP_NONE;
     }
-    ScopedCPointer<xcb_get_geometry_reply_t> geometry(xcb_get_geometry_reply(connection(), geometryCookie, &error));
-    if (!error.isNull() || geometry.isNull() ||
-        geometry->width != width() || geometry->height != height()) {
+    if (!windowGeometry ||
+        windowGeometry->width != width() || windowGeometry->height != height()) {
         kDebug(1212) << "Creating window pixmap failed: " << this;
         xcb_free_pixmap(connection(), pix);
         return XCB_PIXMAP_NONE;
@@ -930,15 +887,14 @@ void Toplevel::damageNotifyEvent(XDamageNotifyEvent* e)
     m_isDamaged = true;
 
     // Note: The rect is supposed to specify the damage extents,
-    //       but we dont't know it at this point. No one who connects
+    //       but we don't know it at this point. No one who connects
     //       to this signal uses the rect however.
     emit damaged(this, QRect());
 }
 
 bool Toplevel::compositing() const
 {
-    Compositor *c = Compositor::self();
-    return c && c->hasScene();
+    return Workspace::self()->compositing();
 }
 
 void Client::damageNotifyEvent(XDamageNotifyEvent* e)
@@ -1203,8 +1159,9 @@ bool Unmanaged::shouldUnredirect() const
             )
         return false;
 // it must cover whole display or one xinerama screen, and be the topmost there
-    if (geometry() == workspace()->clientArea(FullArea, geometry().center(), workspace()->currentDesktop())
-            || geometry() == workspace()->clientArea(ScreenArea, geometry().center(), workspace()->currentDesktop())) {
+    const int desktop = VirtualDesktopManager::self()->current();
+    if (geometry() == workspace()->clientArea(FullArea, geometry().center(), desktop)
+            || geometry() == workspace()->clientArea(ScreenArea, geometry().center(), desktop)) {
         ToplevelList stacking = workspace()->xStackingOrder();
         for (int pos = stacking.count() - 1;
                 pos >= 0;

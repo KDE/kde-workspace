@@ -12,11 +12,12 @@ set(kwin_EFFECTSLIB_SRCS
 kde4_add_library(kwineffects SHARED ${kwin_EFFECTSLIB_SRCS})
 target_link_libraries(kwineffects ${KDE4_KDEUI_LIBS} ${QT_QTGUI_LIBRARY}
     ${X11_LIBRARIES}
-    ${X11_Xrender_LIB}
     ${X11_Xrandr_LIB}
-    ${X11_Xcomposite_LIB}
     ${X11_Xdamage_LIB}
-    ${X11_Xfixes_LIB}
+    ${XCB_XCB_LIBRARIES}
+    ${X11_XCB_LIBRARIES}
+    ${XCB_XFIXES_LIBRARIES}
+    ${XCB_RENDER_LIBRARIES}
 )
 set_target_properties(kwineffects PROPERTIES VERSION 1.0.0 SOVERSION 1 )
 set_target_properties(kwineffects PROPERTIES OUTPUT_NAME ${KWIN_NAME}effects)
@@ -38,7 +39,7 @@ macro( KWIN4_ADD_GLUTILS_BACKEND name glinclude )
         include_directories(${OPENGLES_EGL_INCLUDE_DIR})
     endif(OPENGL_EGL_FOUND)
     kde4_add_library(${name} SHARED ${kwin_GLUTILSLIB_SRCS})
-    target_link_libraries(${name} ${KDE4_KDEUI_LIBS} ${QT_QTGUI_LIBRARY} ${X11_LIBRARIES} kwineffects)
+    target_link_libraries(${name} ${KDE4_KDEUI_LIBS} ${QT_QTGUI_LIBRARY} ${X11_LIBRARIES} ${XCB_XCB_LIBRARIES} ${X11_XCB_LIBRARIES} kwineffects)
     if(OPENGL_EGL_FOUND)
         target_link_libraries(${name} ${OPENGLES_EGL_LIBRARY})
     endif(OPENGL_EGL_FOUND)

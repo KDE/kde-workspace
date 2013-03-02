@@ -28,9 +28,14 @@ Item {
     property bool allDesktops: true
     property string longestCaption: ""
     property int optimalWidth: listView.maxRowWidth
-    property int optimalHeight: listView.rowHeight * listView.count + background.margins.top + background.margins.bottom
+    property int optimalHeight: listView.rowHeight * listView.count + clientArea.height + 4 + background.topMargin + background.bottomMargin
     property bool canStretchX: true
     property bool canStretchY: false
+    property string maskImagePath: background.maskImagePath
+    property double maskWidth: background.centerWidth
+    property double maskHeight: background.centerHeight
+    property int maskTopMargin: background.centerTopMargin
+    property int maskLeftMargin: background.centerLeftMargin
     width: Math.min(Math.max(screenWidth * 0.2, optimalWidth), screenWidth * 0.8)
     height: Math.min(optimalHeight, screenHeight * 0.8)
 
@@ -42,7 +47,14 @@ Item {
 
     function setModel(model) {
         listView.model = model;
+        desktopClientModel.model = model;
+        desktopClientModel.imageId++;
         listView.maxRowWidth = listView.calculateMaxRowWidth();
+    }
+
+    function modelChanged() {
+        listView.currentIndex = -1;
+        desktopClientModel.imageId++;
     }
 
     PlasmaCore.Theme {
@@ -57,10 +69,9 @@ Item {
         visible: false
     }
 
-    PlasmaCore.FrameSvgItem {
+    ShadowedSvgItem {
         id: background
         anchors.fill: parent
-        imagePath: "dialogs/background"
     }
 
     // delegate
@@ -111,7 +122,7 @@ Item {
         function calculateMaxRowWidth() {
             var width = 0;
             var textElement = Qt.createQmlObject(
-                'import Qt 4.7;'
+                'import QtQuick 1.0;'
                 + 'Text {\n'
                 + '     text: "' + desktopTabBox.longestCaption + '"\n'
                 + '     font.bold: true\n'
@@ -120,7 +131,7 @@ Item {
                 listView, "calculateMaxRowWidth");
             width = Math.max(textElement.width, width);
             textElement.destroy();
-            return width + 32 + hoverItem.margins.right + hoverItem.margins.left + background.margins.left + background.margins.right;
+            return width + 32 + hoverItem.margins.right + hoverItem.margins.left + background.leftMargin + background.rightMargin;
         }
         /**
         * Calculates the height of one row based on the text height and icon size.
@@ -128,7 +139,7 @@ Item {
         **/
         function calcRowHeight() {
             var textElement = Qt.createQmlObject(
-                'import Qt 4.7;'
+                'import QtQuick 1.0;'
                 + 'Text {\n'
                 + '     text: "Some Text"\n'
                 + '     font.bold: true\n'
@@ -149,11 +160,14 @@ Item {
         // used for image provider URL to trick Qt into reloading icons when the model changes
         property int imageId: 0
         anchors {
-            fill: parent
-            topMargin: background.margins.top
-            leftMargin: background.margins.left
-            rightMargin: background.margins.right
-            bottomMargin: background.margins.bottom
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            bottom: clientArea.top
+            topMargin: background.topMargin
+            leftMargin: background.leftMargin
+            rightMargin: background.rightMargin
+            bottomMargin: clientArea.top
         }
         clip: true
         delegate: listDelegate
@@ -165,5 +179,56 @@ Item {
         }
         highlightMoveDuration: 250
         boundsBehavior: Flickable.StopAtBounds
+    }
+    Component {
+        id: clientIconDelegate
+        Image {
+            sourceSize {
+                width: 16
+                height: 16
+            }
+            width: 16
+            height: 16
+            Component.onCompleted: {
+                source = "image://client/" + index + "/" + listView.currentIndex + "/" + desktopClientModel.imagePathPrefix + "-" + desktopClientModel.imageId;
+            }
+        }
+    }
+    Item {
+        id: clientArea
+        VisualDataModel {
+            property alias desktopIndex: listView.currentIndex
+            property int imagePathPrefix: (new Date()).getTime()
+            property int imageId: 0
+            id: desktopClientModel
+            model: clientModel
+            delegate: clientIconDelegate
+            onDesktopIndexChanged: {
+                desktopClientModel.imageId++;
+                desktopClientModel.rootIndex = desktopClientModel.parentModelIndex();
+                desktopClientModel.rootIndex = desktopClientModel.modelIndex(desktopClientModel.desktopIndex);
+            }
+        }
+        ListView {
+            id: iconsListView
+            model: desktopClientModel
+            clip: true
+            orientation: ListView.Horizontal
+            spacing: 4
+            anchors {
+                fill: parent
+                leftMargin: 34
+            }
+        }
+        height: 18
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            topMargin: 2
+            leftMargin: background.leftMargin
+            rightMargin: background.rightMargin
+            bottomMargin: background.bottomMargin
+        }
     }
 }

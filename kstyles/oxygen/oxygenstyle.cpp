@@ -277,7 +277,10 @@ namespace Oxygen
 
         // enforce translucency for drag and drop window
         if( widget->testAttribute( Qt::WA_X11NetWmWindowTypeDND ) && helper().compositingActive() )
-        { widget->setAttribute( Qt::WA_TranslucentBackground ); }
+        {
+            widget->setAttribute( Qt::WA_TranslucentBackground );
+            widget->clearMask();
+        }
 
         if(
             qobject_cast<QAbstractItemView*>( widget )
@@ -8299,7 +8302,7 @@ namespace Oxygen
         if( qApp && !qApp->inherits( "KApplication" ) )
         {
             /*
-            for Qt, non-KDE applications, needs to explicitely activate KGlobalSettings.
+            for Qt, non-KDE applications, needs to explicitly activate KGlobalSettings.
             On the other hand, it is done internally in kApplication constructor,
             so no need to duplicate here.
             */

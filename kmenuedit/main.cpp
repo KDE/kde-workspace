@@ -30,7 +30,7 @@
 #endif
 
 static const char description[] = I18N_NOOP("KDE menu editor");
-static const char version[] = "0.8";
+static const char version[] = "0.9";
 
 static KMenuEdit *menuEdit = 0;
 

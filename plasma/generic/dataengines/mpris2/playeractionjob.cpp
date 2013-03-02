@@ -21,7 +21,10 @@
 
 #include "playercontrol.h"
 
-#include <QDBusInterface>
+#include <dbusproperties.h>
+#include <mprisplayer.h>
+#include <mprisroot.h>
+
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
 #include <QDBusVariant>
@@ -59,7 +62,7 @@ void PlayerActionJob::start()
         listenToCall(m_controller->playerInterface()->asyncCall(operation));
     } else if (operation == "Seek") {
         if (parameters().value("microseconds").type() == QVariant::LongLong) {
-            listenToCall(m_controller->playerInterface()->asyncCall(operation, parameters()["microseconds"]));
+            listenToCall(m_controller->playerInterface()->Seek(parameters()["microseconds"].toLongLong()));
         } else {
             setErrorText("microseconds");
             setError(MissingArgument);
@@ -67,9 +70,9 @@ void PlayerActionJob::start()
         }
     } else if (operation == "SetPosition") {
         if (parameters().value("microseconds").type() == QVariant::LongLong) {
-            listenToCall(m_controller->playerInterface()->asyncCall(operation,
-                         m_controller->trackId(),
-                         parameters()["microseconds"]));
+            listenToCall(m_controller->playerInterface()->SetPosition(
+                             m_controller->trackId(),
+                             parameters()["microseconds"].toLongLong()));
         } else {
             setErrorText("microseconds");
             setError(MissingArgument);
@@ -77,8 +80,8 @@ void PlayerActionJob::start()
         }
     } else if (operation == "OpenUri") {
         if (parameters().value("uri").canConvert<KUrl>()) {
-            listenToCall(m_controller->playerInterface()->asyncCall(operation,
-                         QString::fromLatin1(parameters()["uri"].toUrl().toEncoded())));
+            listenToCall(m_controller->playerInterface()->OpenUri(
+                             QString::fromLatin1(parameters()["uri"].toUrl().toEncoded())));
         } else {
             kDebug() << "uri was of type" << parameters().value("uri").userType();
             setErrorText("uri");
@@ -153,7 +156,7 @@ void PlayerActionJob::callFinished(QDBusPendingCallWatcher* watcher)
 void PlayerActionJob::setDBusProperty(const QString& iface, const QString& propName, const QDBusVariant& value)
 {
     listenToCall(
-        m_controller->propertiesInterface()->asyncCall("Set", iface, propName, QVariant::fromValue<QDBusVariant>(value))
+        m_controller->propertiesInterface()->Set(iface, propName, value)
     );
 }
 

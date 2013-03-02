@@ -33,7 +33,9 @@
 #include "faviconfromblob.h"
 
 Firefox::Firefox(QObject *parent) :
-    QObject(parent), m_favicon(new FallbackFavicon(this))
+    QObject(parent),
+    m_favicon(new FallbackFavicon(this)),
+    m_fetchsqlite(0)
 {
   reloadConfiguration();
   kDebug(kdbg_code) << "Loading Firefox Bookmarks Browser";

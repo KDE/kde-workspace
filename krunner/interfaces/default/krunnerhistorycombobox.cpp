@@ -87,12 +87,12 @@ void KrunnerHistoryComboBox::wheelEvent(QWheelEvent *e)
 
 void KrunnerHistoryComboBox::keyPressEvent(QKeyEvent *e)
 {
-    bool enterPressed = ( e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter );
-    if (enterPressed) {
+    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
         discardCompletion();
+        emit returnPressed();
+    } else {
+        KHistoryComboBox::keyPressEvent(e);
     }
-
-    KHistoryComboBox::keyPressEvent(e);
 
     int event_key = e->key() | e->modifiers();
     if (KStandardShortcut::rotateUp().contains(event_key) ||

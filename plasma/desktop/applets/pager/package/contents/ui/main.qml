@@ -18,6 +18,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.qtextracomponents 0.1 as QtExtraComponents
+import org.kde.draganddrop 1.0
 import "utils.js" as Utils
 
 Item {
@@ -29,8 +30,20 @@ Item {
     property bool dragging: false
     property int dragId
 
+    property int dragSwitchDesktopId: -1
+
     anchors.fill: parent
     visible: repeater.count > 1
+
+    Timer {
+        id: dragTimer
+        interval: 1000
+        onTriggered: {
+            if (dragSwitchDesktopId != -1 && dragSwitchDesktopId !== pager.currentDesktop-1) {
+                pager.changeDesktop(dragSwitchDesktopId);
+            }
+        }
+    }
 
     Repeater {
         id: repeater
@@ -58,6 +71,24 @@ Item {
                 onPrefixChanged: {
                     if (prefix == "hover")
                         pager.updateToolTip(desktopId);
+                }
+            }
+
+            DropArea {
+                id: droparea
+                anchors.fill: parent
+                onDragEnter: {
+                    root.dragSwitchDesktopId = desktop.desktopId;
+                    dragTimer.start();
+                }
+                onDragLeave: {
+                    root.dragSwitchDesktopId = -1;
+                    dragTimer.stop();
+                }
+                onDrop: {
+                    pager.dropMimeData(event.mimeData, desktop.desktopId);
+                    root.dragSwitchDesktopId = -1;
+                    dragTimer.stop();
                 }
             }
 
@@ -94,8 +125,9 @@ Item {
 
                         property int windowId: model.windowId
 
-                        x: model.x
-                        y: model.y
+                        /* since we move clipRect with 1, move it back */
+                        x: model.x - 1
+                        y: model.y - 1
                         width: model.width
                         height: model.height
                         color: {
@@ -122,7 +154,7 @@ Item {
                             pixmap: model.icon
                             height: nativeHeight
                             width: nativeWidth
-                            visible: pager.showWindowIcons
+                            visible: pager.showWindowIcons && (windowRect.width >= icon.width) && (windowRect.height >= icon.height)
                         }
 
                         MouseArea {
@@ -132,8 +164,8 @@ Item {
                             drag.axis: Drag.XandYAxis
                             drag.minimumX: -windowRect.width/2
                             drag.maximumX: root.width - windowRect.width/2
-                            drag.minimumY: -windowRect.height
-                            drag.maximumY: root.height - 2*windowRect.height
+                            drag.minimumY: -windowRect.height/2
+                            drag.maximumY: root.height - windowRect.height/2
 
                             // used to save the state of some properties before the dragging
                             QtObject {

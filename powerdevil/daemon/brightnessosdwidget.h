@@ -24,40 +24,34 @@
 #ifndef BRIGHTNESSOSDWIDGET__H
 #define BRIGHTNESSOSDWIDGET__H
 
-#include <QGraphicsView>
+#include "powerdevilbackendinterface.h"
 
 #include <QPixmap>
 
+#include <Plasma/Dialog>
+
 class QTimer;
-class QGraphicsWidget;
 
 namespace Plasma
 {
-class FrameSvg;
 class Label;
 class Meter;
 }
 
-class BrightnessOSDWidget : public QGraphicsView
+class BrightnessOSDWidget : public Plasma::Dialog
 {
 Q_OBJECT
 public:
-    BrightnessOSDWidget(QWidget * parent = 0);
+    BrightnessOSDWidget(PowerDevil::BackendInterface::BrightnessControlType type, QWidget * parent = 0);
 
     void setCurrentBrightness(int brightnessLevel);
     void activateOSD();
 
-    virtual QSize sizeHint() const;
-
-protected:
-    virtual void drawBackground(QPainter *painter, const QRectF &rectF);
-    virtual void resizeEvent(QResizeEvent *);
-    void showEvent(QShowEvent *event);
-
+protected slots:
     void themeUpdated();
 
 private:
-    Plasma::FrameSvg *m_background;
+    PowerDevil::BackendInterface::BrightnessControlType m_type;
     QGraphicsScene *m_scene;
     QGraphicsWidget *m_container;
     Plasma::Label *m_iconLabel;

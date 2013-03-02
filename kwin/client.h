@@ -44,6 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "rules.h"
 #include "toplevel.h"
 #include "tabgroup.h"
+#include "xcbutils.h"
 
 #ifdef HAVE_XSYNC
 #include <X11/extensions/sync.h>
@@ -281,10 +282,10 @@ class Client
      **/
     Q_PROPERTY(bool decorationHasAlpha READ decorationHasAlpha)
 public:
-    Client(Workspace* ws);
+    explicit Client(Workspace* ws);
     Window wrapperId() const;
     Window decorationId() const;
-    Window inputId() const { return input_window; }
+    xcb_window_t inputId() const { return m_decoInputExtent; }
 
     const Client* transientFor() const;
     Client* transientFor();
@@ -437,7 +438,7 @@ public:
     }
     void demandAttention(bool set = true);
 
-    void setMask(const QRegion& r, int mode = X::Unsorted);
+    void setMask(const QRegion& r, int mode = XCB_CLIP_ORDERING_UNSORTED);
     QRegion mask() const;
 
     void updateDecoration(bool check_workspace_pos, bool force = false);
@@ -499,7 +500,6 @@ public:
     void updateCompositeBlocking(bool readProperty = false);
 
     QString caption(bool full = true, bool stripped = false) const;
-    void updateCaption();
 
     void keyPressEvent(uint key_code);   // FRAME ??
     void updateMouseGrab();
@@ -556,7 +556,7 @@ public:
      * WARNING: non dynamic properties are ignored - you're not supposed to alter/update such explicitly
      */
     Q_INVOKABLE void syncTabGroupFor(QString property, bool fromThisClient = false);
-    Q_INVOKABLE bool untab(const QRect &toGeometry = QRect());
+    Q_INVOKABLE bool untab(const QRect &toGeometry = QRect(), bool clientRemoved = false);
     /**
      * Set tab group - this is to be invoked by TabGroup::add/remove(client) and NO ONE ELSE
      */
@@ -652,8 +652,12 @@ public:
     }
 #endif
 
+    template <typename T>
+    void print(T &stream) const;
+
 public slots:
     void closeWindow();
+    void updateCaption();
 
 private slots:
     void autoRaise();
@@ -919,7 +923,7 @@ private:
     QPixmap miniicon_pix;
     QPixmap bigicon_pix;
     QPixmap hugeicon_pix;
-    QCursor cursor;
+    Qt::CursorShape m_cursor;
     // DON'T reorder - Saved to config files !!!
     enum FullScreenMode {
         FullScreenNone,
@@ -992,7 +996,7 @@ private:
 #ifdef KWIN_BUILD_KAPPMENU
     bool m_menuAvailable;
 #endif
-    Window input_window;
+    Xcb::Window m_decoInputExtent;
     QPoint input_offset;
 };
 
@@ -1002,7 +1006,7 @@ private:
 class GeometryUpdatesBlocker
 {
 public:
-    GeometryUpdatesBlocker(Client* c)
+    explicit GeometryUpdatesBlocker(Client* c)
         : cl(c) {
         cl->blockGeometryUpdates(true);
     }
@@ -1275,6 +1279,13 @@ inline void Client::removeRule(Rules* rule)
 inline bool Client::hiddenPreview() const
 {
     return mapping_state == Kept;
+}
+
+template <typename T>
+inline void Client::print(T &stream) const
+{
+    stream << "\'ID:" << window() << ";WMCLASS:" << resourceClass() << ":"
+           << resourceName() << ";Caption:" << caption() << "\'";
 }
 
 KWIN_COMPARE_PREDICATE(WrapperIdMatchPredicate, Client, Window, cl->wrapperId() == value);

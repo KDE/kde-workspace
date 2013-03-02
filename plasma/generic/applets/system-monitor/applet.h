@@ -82,7 +82,7 @@ class SM_EXPORT Applet : public Plasma::Applet
         uint interval();
         void setInterval(uint interval);
         QString title();
-        void setTitle(const QString& title, bool spacer = false);
+        void setTitle(const QString& title);
         QHash<QString, QString> tooltips() const;
         void setToolTip(const QString &source, const QString &tipContent);
         Mode mode();
@@ -97,7 +97,6 @@ class SM_EXPORT Applet : public Plasma::Applet
         uint m_interval;
         qreal m_preferredItemHeight;
         QString m_title;
-        bool m_titleSpacer;
         Plasma::Frame* m_header;
         QStringList m_sources;
         QStringList m_connectedSources;

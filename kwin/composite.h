@@ -66,15 +66,14 @@ class Compositor : public QObject {
      **/
     Q_PROPERTY(QString compositingType READ compositingType)
 public:
+    enum SuspendReason { NoReasonSuspend = 0, UserSuspend = 1<<0, BlockRuleSuspend = 1<<1, ScriptSuspend = 1<<2, AllReasonSuspend = 0xff };
+    Q_DECLARE_FLAGS(SuspendReasons, SuspendReason)
     ~Compositor();
     // when adding repaints caused by a window, you probably want to use
     // either Toplevel::addRepaint() or Toplevel::addWorkspaceRepaint()
     void addRepaint(const QRect& r);
     void addRepaint(const QRegion& r);
     void addRepaint(int x, int y, int w, int h);
-    // Mouse polling
-    void startMousePolling();
-    void stopMousePolling();
     /**
      * Whether the Compositor is active. That is a Scene is present and the Compositor is
      * not shutting down itself.
@@ -139,7 +138,6 @@ public:
      * @see createCompositor
      **/
     static Compositor *self() {
-        Q_ASSERT(s_compositor);
         return s_compositor;
     }
     /**
@@ -187,7 +185,8 @@ public Q_SLOTS:
      * @see resume
      * @see isActive
      **/
-    Q_SCRIPTABLE void suspend();
+    Q_SCRIPTABLE inline void suspend() { suspend(ScriptSuspend); }
+    void suspend(Compositor::SuspendReason reason);
     /**
      * @brief Resumes the Compositor if it is currently suspended.
      *
@@ -205,7 +204,8 @@ public Q_SLOTS:
      * @see isCompositingPossible
      * @see isOpenGLBroken
      **/
-    Q_SCRIPTABLE void resume();
+    Q_SCRIPTABLE inline void resume() { resume(ScriptSuspend); }
+    void resume(Compositor::SuspendReason reason);
     /**
      * @brief Tries to suspend or resume the Compositor based on @p active.
      *
@@ -219,6 +219,10 @@ public Q_SLOTS:
      * Note: The starting of the Compositor can require some time and is partially done threaded.
      * After this method returns the setup may not have been completed.
      *
+     * Note: This function only impacts whether compositing is suspended or resumed by scripts
+     * or dbus calls. Compositing may be suspended for user will or a window rule - no matter how
+     * often you call this function!
+     *
      * @param active Whether the Compositor should be resumed (@c true) or suspended (@c false)
      * @return void
      * @see suspend
@@ -227,6 +231,8 @@ public Q_SLOTS:
      * @see isCompositingPossible
      * @see isOpenGLBroken
      **/
+    // NOTICE this is atm. for script usage *ONLY* and needs to be extended like resume / suspend are
+    // if intended to be used from within KWin code!
     Q_SCRIPTABLE void setCompositing(bool active);
     /**
      * Actual slot to perform the toggling compositing.
@@ -272,7 +278,6 @@ private Q_SLOTS:
     void restart();
     void fallbackToXRenderCompositing();
     void performCompositing();
-    void performMousePoll();
     void delayedCheckUnredirect();
     void slotConfigChanged();
     void releaseCompositorSelection();
@@ -290,20 +295,16 @@ private:
     void restartKWin(const QString &reason);
 
     /**
-     * Whether the Compositor is currently suspended.
+     * Whether the Compositor is currently suspended, 8 bits encoding the reason
      **/
-    bool m_suspended;
-    /**
-     * Whether the Compositor is currently blocked by at least one Client requesting full resources.
-     **/
-    bool m_blocked;
+    SuspendReasons m_suspended;
+
     QBasicTimer compositeTimer;
     KSelectionOwner* cm_selection;
     QTimer m_releaseSelectionTimer;
     uint vBlankInterval, fpsInterval;
     int m_xrrRefreshRate;
     QElapsedTimer nextPaintReference;
-    QTimer mousePollingTimer;
     QRegion repaints_region;
 
     QTimer unredirectTimer;

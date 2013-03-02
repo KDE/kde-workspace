@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "screensaverwindow.h"
 
 // workspace
-#include <kephal/screens.h>
 #include <kworkspace/kworkspace.h>
 // KDE
 #include <KDE/KAuthorized>
@@ -49,6 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusPendingCall>
 #include <QtGui/QKeyEvent>
+#include <QDesktopWidget>
 // X11
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -69,7 +69,9 @@ UnlockApp::UnlockApp()
     , m_showScreenSaver(false)
 {
     initialize();
-    QTimer::singleShot(0, this, SLOT(prepareShow()));
+    connect(desktop(), SIGNAL(resized(int)), SLOT(desktopResized()));
+    connect(desktop(), SIGNAL(screenCountChanged(int)), SLOT(desktopResized()));
+    QMetaObject::invokeMethod(this, "desktopResized", Qt::QueuedConnection);
 }
 
 UnlockApp::~UnlockApp()
@@ -98,9 +100,6 @@ void UnlockApp::initialize()
     KScreenSaverSettings::self()->readConfig();
     m_showScreenSaver = KScreenSaverSettings::legacySaverEnabled();
 
-    const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
-    const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
-
     m_structure = Plasma::PackageStructure::load("Plasma/Generic");
     m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), KScreenSaverSettings::greeterQML(), m_structure);
     m_mainQmlPath = m_package->filePath("mainscript");
@@ -108,61 +107,6 @@ void UnlockApp::initialize()
         delete m_package;
         m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), DEFAULT_MAIN_PACKAGE, m_structure);
         m_mainQmlPath = m_package->filePath("mainscript");
-    }
-
-    for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
-        // create the view
-        QDeclarativeView *view = new QDeclarativeView();
-        connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
-                this, SLOT(viewStatusChanged(QDeclarativeView::Status)));
-        view->setWindowFlags(Qt::X11BypassWindowManagerHint);
-        view->setFrameStyle(QFrame::NoFrame);
-
-        // engine stuff
-        foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-            view->engine()->addImportPath(importPath);
-        }
-
-        KDeclarative kdeclarative;
-        kdeclarative.setDeclarativeEngine(view->engine());
-        kdeclarative.initialize();
-        kdeclarative.setupBindings();
-        QDeclarativeContext *context = view->engine()->rootContext();
-        context->setContextProperty("kscreenlocker_userName", KUser().property(KUser::FullName).toString());
-
-        view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
-        view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-
-        connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
-
-        QDeclarativeProperty sleepProperty(view->rootObject(), "suspendToRamSupported");
-        sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
-        if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
-            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(suspendToRam())) != -1) {
-            connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
-        }
-
-        QDeclarativeProperty hibernateProperty(view->rootObject(), "suspendToDiskSupported");
-        hibernateProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
-        if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
-            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(suspendToDisk())) != -1) {
-            connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
-        }
-
-        QDeclarativeProperty shutdownProperty(view->rootObject(), "shutdownSupported");
-        shutdownProperty.write(canLogout);
-        if (canLogout &&
-            view->rootObject()->metaObject()->indexOfSignal(SIGNAL(shutdown())) != -1) {
-            connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
-        }
-
-        m_views << view;
-
-        if (m_showScreenSaver) {
-            ScreenSaverWindow *screensaverWindow = new ScreenSaverWindow;
-            screensaverWindow->setWindowFlags(Qt::X11BypassWindowManagerHint);
-            m_screensaverWindows << screensaverWindow;
-        }
     }
 
     installEventFilter(this);
@@ -181,27 +125,91 @@ void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
     }
 }
 
-void UnlockApp::prepareShow()
+void UnlockApp::desktopResized()
 {
-    // mark as our window
-    Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
+    const int nScreens = desktop()->screenCount();
+    // remove useless views and savers
+    while (m_views.count() > nScreens) {
+        m_views.takeLast()->deleteLater();
+    }
+    while (m_screensaverWindows.count() > nScreens) {
+        m_screensaverWindows.takeLast()->deleteLater();
+    }
 
-    for (int i = 0; i < Kephal::Screens::self()->screens().count(); ++i) {
-        if (i == m_views.size()) {
-            kError() << "Views and screens not in sync";
-            return;
+    Q_ASSERT((!m_showScreenSaver || m_views.count() == m_screensaverWindows.count()));
+
+    // extend views and savers to current demand
+    const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
+    const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
+    for (int i = m_views.count(); i < nScreens; ++i) {
+        // create the view
+        QDeclarativeView *view = new QDeclarativeView();
+        connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
+                this, SLOT(viewStatusChanged(QDeclarativeView::Status)));
+        view->setWindowFlags(Qt::X11BypassWindowManagerHint);
+        view->setFrameStyle(QFrame::NoFrame);
+        view->installEventFilter(this);
+
+        // engine stuff
+        foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
+            view->engine()->addImportPath(importPath);
         }
+
+        KDeclarative kdeclarative;
+        kdeclarative.setDeclarativeEngine(view->engine());
+        kdeclarative.initialize();
+        kdeclarative.setupBindings();
+        QDeclarativeContext *context = view->engine()->rootContext();
+        const KUser user;
+        const QString fullName = user.property(KUser::FullName).toString();
+        context->setContextProperty("kscreenlocker_userName", fullName.isEmpty() ? user.loginName() : fullName);
+
+        view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
+        view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+
+        connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
+
+        QDeclarativeProperty sleepProperty(view->rootObject(), "suspendToRamSupported");
+        sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
+        if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToRam()")) != -1) {
+            connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
+        }
+
+        QDeclarativeProperty hibernateProperty(view->rootObject(), "suspendToDiskSupported");
+        hibernateProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
+        if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToDisk()")) != -1) {
+            connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
+        }
+
+        QDeclarativeProperty shutdownProperty(view->rootObject(), "shutdownSupported");
+        shutdownProperty.write(canLogout);
+        if (canLogout &&
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("shutdown()")) != -1) {
+            connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
+        }
+
+        m_views << view;
+
+        if (m_showScreenSaver) {
+            ScreenSaverWindow *screensaverWindow = new ScreenSaverWindow;
+            screensaverWindow->setWindowFlags(Qt::X11BypassWindowManagerHint);
+            m_screensaverWindows << screensaverWindow;
+        }
+    }
+
+    // update geometry of all views and savers
+    for (int i = 0; i < nScreens; ++i) {
         QDeclarativeView *view = m_views.at(i);
 
-        XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
-        view->setGeometry(Kephal::Screens::self()->screen(i)->geom());
+        view->setGeometry(desktop()->screenGeometry(i));
         view->show();
-        view->activateWindow();
+        view->raise();
 
         if (m_showScreenSaver) {
             ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
             screensaverWindow->setGeometry(view->geometry());
-            XChangeProperty(QX11Info::display(), screensaverWindow->winId(), tag, tag, 32, PropModeReplace, 0, 0);
 
             QPixmap backgroundPix(screensaverWindow->size());
             QPainter p(&backgroundPix);
@@ -210,9 +218,19 @@ void UnlockApp::prepareShow()
             screensaverWindow->setBackground(backgroundPix);
             screensaverWindow->show();
             screensaverWindow->activateWindow();
+            connect(screensaverWindow, SIGNAL(hidden()), this, SLOT(getFocus()));
         }
     }
+    // random state update, actually rather required on init only
+    QMetaObject::invokeMethod(this, "getFocus", Qt::QueuedConnection);
     capsLocked();
+}
+
+void UnlockApp::getFocus()
+{
+    if (!m_views.isEmpty()) {
+        m_views.first()->activateWindow();
+    }
 }
 
 void UnlockApp::resetRequestIgnore()
@@ -286,26 +304,80 @@ void UnlockApp::setTesting(bool enable)
 
 bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
 {
-    Q_UNUSED(obj)
-        if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
-            capsLocked();
-            QKeyEvent *ke = static_cast<QKeyEvent *>(event);
-            if (ke->key() == Qt::Key_Escape) {
-                foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
-                    screensaverWindow->show();
-                }
-            }
-        } else if (event->type() == QEvent::GraphicsSceneMousePress) {
-            QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
-
-            foreach (QDeclarativeView *view, m_views) {
-                if (view->geometry().contains(me->screenPos())) {
-                    view->activateWindow();
-                    view->grabKeyboard();
-                    break;
-                }
+    if (obj != this && event->type() == QEvent::Show) {
+        QDeclarativeView *view(0);
+        foreach (QDeclarativeView *v, m_views) {
+            if (v == obj) {
+                view = v;
+                break;
             }
         }
+        if (view && view->testAttribute(Qt::WA_WState_Created) && view->internalWinId()) {
+            // showing greeter view window, set property
+            static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
+            XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+        }
+        // no further processing
+        return false;
+    }
+
+    static bool ignoreNextEscape = false;
+    if (event->type() == QEvent::KeyPress) { // react if saver is visible
+        bool saverVisible = false;
+        foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
+            if (screensaverWindow->isVisible()) {
+                saverVisible = true;
+                break;
+            }
+        }
+        if (!saverVisible) {
+            return false; // we don't care
+        }
+        ignoreNextEscape = bool(static_cast<QKeyEvent *>(event)->key() == Qt::Key_Escape);
+        capsLocked();
+        foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
+            screensaverWindow->hide();
+        }
+        getFocus();
+        return true; // do not pass the key
+    } else if (event->type() == QEvent::KeyRelease) { // conditionally reshow the saver
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+        if (ke->key() == Qt::Key_CapsLock) {
+            capsLocked();
+            return false;
+        }
+        if (ke->key() != Qt::Key_Escape) {
+            return false; // irrelevant
+        }
+        if (ignoreNextEscape) {
+            ignoreNextEscape = false;
+            return true; // it's Qt::Key_Escape;
+        }
+        bool saverVisible = true;
+        foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
+            if (!screensaverWindow->isVisible()) {
+                saverVisible = false;
+                break;
+            }
+        }
+        if (saverVisible) {
+            return false; // we don't care
+        }
+        foreach (ScreenSaverWindow *screensaverWindow, m_screensaverWindows) {
+            screensaverWindow->show();
+        }
+        return true; // don't pass
+    } else if (event->type() == QEvent::GraphicsSceneMousePress) {
+        QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
+
+        foreach (QDeclarativeView *view, m_views) {
+            if (view->geometry().contains(me->screenPos())) {
+                view->activateWindow();
+                view->grabKeyboard();
+                break;
+            }
+        }
+    }
 
     return false;
 }

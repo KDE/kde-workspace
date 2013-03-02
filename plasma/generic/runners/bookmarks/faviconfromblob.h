@@ -22,10 +22,9 @@
 #define CHROMEFAVICON_H
 
 #include <QIcon>
-#include <QSqlDatabase>
 #include "favicon.h"
+#include "fetchsqlite.h"
 
-class FetchSqlite;
 class FaviconFromBlob : public Favicon
 {
     Q_OBJECT
@@ -40,10 +39,9 @@ public slots:
     virtual void teardown();
 
 private:
-    FaviconFromBlob(const QString &profileName, const QString &query, const QString &blobColumn, FetchSqlite *fetchSqlite, QObject *parent = 0);
-    QSqlDatabase m_db;
+    FaviconFromBlob(const QString &profileName, BuildQuery *buildQuery, const QString &blobColumn, FetchSqlite *fetchSqlite, QObject *parent = 0);
     QString m_profileCacheDirectory;
-    QString const m_query;
+    BuildQuery *m_buildQuery;
     QString const m_blobcolumn;
     FetchSqlite *m_fetchsqlite;
     void cleanCacheDirectory();

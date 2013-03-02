@@ -35,6 +35,7 @@ Comment[kn]=ಕೆವಿನ್(KWin) ವಿಂಡೋ ವ್ಯವಸ್ಥಾಪ
 Comment[ko]=KWin 창 관리자
 Comment[lt]=KWin Langų tvarkyklė
 Comment[lv]=KWin logu pārvaldnieks
+Comment[mr]=के-विन चौकट व्यवस्थापक
 Comment[nb]=KWin vindusbehandler
 Comment[nds]=KWin-Finsterpleger
 Comment[nl]=KWin vensterbeheerder
@@ -3602,7 +3603,7 @@ Name[lv]=Loga aktivizēšana
 Name[mai]=विंडो सक्रिय करू
 Name[mk]=Активирај прозорец
 Name[ml]=സജീവമായ ജാലകം
-Name[mr]=चौकट सक्रीय करा
+Name[mr]=चौकट सक्रिय करा
 Name[ms]=Aktifkan Tetingkap
 Name[nb]=Velg vindu
 Name[nds]=Finster aktiev maken
@@ -3685,7 +3686,7 @@ Comment[lt]=Suaktyvintas kitas langas
 Comment[lv]=Cits logs ir aktivizēts
 Comment[mk]=Активиран е друг прозорец
 Comment[ml]=മറ്റൊരു ജാലകം സജീവമാക്കിയിരിക്കുന്നു
-Comment[mr]=इतर चौकट सक्रीय केले
+Comment[mr]=इतर चौकट सक्रिय केले
 Comment[ms]=Satu lagi tetingkap diaktifkan
 Comment[nb]=Et annet vindu er skrudd på
 Comment[nds]=En anner Finster wöör aktiev maakt
@@ -3777,7 +3778,7 @@ Name[lv]=Jauns logs
 Name[mai]=नवीन विंडो
 Name[mk]=Нов прозорец
 Name[ml]=പുതിയ ജാലകം
-Name[mr]=नविन चौकट
+Name[mr]=नवीन चौकट
 Name[ms]=Tetingkap Baru
 Name[nb]=Nytt vindu
 Name[nds]=Nieg Finster
@@ -3864,7 +3865,7 @@ Comment[lv]=Jauns logs
 Comment[mai]=नवीन विन्डो
 Comment[mk]=Нов прозорец
 Comment[ml]=പുതിയ ജാലകം
-Comment[mr]=नविन चौकट
+Comment[mr]=नवीन चौकट
 Comment[ms]=Tetingkap baru
 Comment[nb]=Nytt vindu
 Comment[nds]=Nieg Finster
@@ -3952,7 +3953,7 @@ Name[lt]=Pašalinti langą
 Name[lv]=Loga dzēšana
 Name[mk]=Избриши прозорец
 Name[ml]=ജാലകം നീക്കം ചെയ്യുക
-Name[mr]=चौकट काढूण टाका
+Name[mr]=चौकट काढून टाका
 Name[ms]=Hapuskan Tetingkap
 Name[nb]=Slett vindu
 Name[nds]=Finster wegdoon
@@ -4037,7 +4038,7 @@ Comment[lt]=Pašalinti langą
 Comment[lv]=Loga dzēšana
 Comment[mk]=Избриши прозорец
 Comment[ml]=ജാലകം നീക്കം ചെയ്യുക
-Comment[mr]=चौकट काढूण टाका
+Comment[mr]=चौकट काढून टाका
 Comment[ms]=Hapuskan tetingkap
 Comment[nb]=Slett vindu
 Comment[nds]=Finster wegdoon
@@ -4297,7 +4298,7 @@ Name[lt]=Rodyti pilnai
 Name[lv]=Logs saritināts
 Name[mk]=Засенчи нагоре
 Name[ml]=ജാലകം മുകളിലേയ്ക്കെടുക്കുക
-Name[mr]=चौकट रंगछटा
+Name[mr]=चौकट वर छाया करा
 Name[nb]=Vindu rulles opp
 Name[nds]=Finster inrullen
 Name[ne]=सञ्झ्यालमाथि छाँया लगाउनुहोस्
@@ -4375,7 +4376,7 @@ Comment[lt]=Langas rodomas pilnai
 Comment[lv]=Logs ir saritināts
 Comment[mk]=Прозорецот се засенчува нагоре
 Comment[ml]=ജാലകം മുകളിലേയ്ക്കുകൊണ്ടുവരുക
-Comment[mr]=चौकट रंगछटाकृत केले आहे
+Comment[mr]=चौकट वर छायांकित केली आहे
 Comment[nb]=Et vindu rulles opp
 Comment[nds]=En Finster warrt inrullt
 Comment[ne]=सञ्झ्यालमाथि छाँया लगाइएको छ
@@ -4460,6 +4461,7 @@ Name[lt]=Tik antraštės juosta
 Name[lv]=Loga atritināšana
 Name[mk]=Засенчи прозорец надолу
 Name[ml]=ജാലകം താഴേയ്ക്കുമാറ്റല്‍
+Name[mr]=चौकट खाली छाया करा
 Name[nb]=Vindu rulles ned
 Name[nds]=Finster utrullen
 Name[ne]=सञ्झ्यालतल छाँया लगाउनुहोस्
@@ -4537,6 +4539,7 @@ Comment[lt]=Rodoma tik lango antraštės juosta
 Comment[lv]=Logs ir atritināts
 Comment[mk]=Прозорецот е засенчен надолу
 Comment[ml]=ജാലകം താഴ്ത്തിയിരിക്കുന്നു.
+Comment[mr]=चौकट खाली छायांकित केली आहे
 Comment[nb]=Et vindu rulles ned
 Comment[nds]=En Finster warrt utrullt
 Comment[ne]=सञ्झ्याल तल छाँया लगाइएको छ
@@ -4789,7 +4792,7 @@ Name[lt]=Panaikinti lango sumažinimą
 Name[lv]=Loga atminimizēšana
 Name[mk]=Врати прозорец
 Name[ml]=ജാലകം ചെറുതാക്കിയത് ഒഴിവാക്കുക 
-Name[mr]=चौकट मुळ स्थितीत आणा
+Name[mr]=चौकट मूळ स्थितीत आणा
 Name[nb]=Vindu tilbakestilles
 Name[nds]=Finster wedderherstellen
 Name[ne]=सञ्झ्याललाई सानो नबनाउनुहोस्
@@ -4867,7 +4870,7 @@ Comment[lt]=Langas atstatytas
 Comment[lv]=Logs ir atjaunots
 Comment[mk]=Прозорецот се враќа
 Comment[ml]=ഒരു ജാലകം വീണ്ടെടുക്കുന്നു
-Comment[mr]=चौकट पुन्हस्थापीत केले
+Comment[mr]=चौकट पुन्हस्थापित केली
 Comment[nb]=Et vindu tilbakestilles
 Comment[nds]=En Finster warrt wedderherstellt
 Comment[ne]=सञ्झ्याल भण्डारण गरिएको छ
@@ -5124,7 +5127,7 @@ Name[lt]=Sumažinti langą
 Name[lv]=Loga atmaksimizēšana
 Name[mk]=Одрашири прозорец
 Name[ml]=ജാലകം വലുതാക്കിയതൊഴിവാക്കുക
-Name[mr]=चौकट मुळ स्थितीत आणा
+Name[mr]=चौकट मूळ स्थितीत आणा
 Name[nb]=Vindu ikke maksimert
 Name[nds]=Finster demaximeren
 Name[ne]=सञ्झ्याल ठूलो नबनाउनुहोस्
@@ -5617,7 +5620,7 @@ Name[lv]=Jauns dialogs
 Name[mai]=नवीन संवाद
 Name[mk]=Нов дијалог
 Name[ml]=പുതിയ കുഞ്ഞുജാലകം
-Name[mr]=नविन संवाद
+Name[mr]=नवीन संवाद
 Name[nb]=Ny dialog
 Name[nds]=Nieg Dialoog
 Name[ne]=नयाँ संवाद
@@ -5696,6 +5699,7 @@ Comment[lt]=Atsiranda laikinas langas (dialogas)
 Comment[lv]=Parādās īslaicīgais logs (dialogs)
 Comment[mk]=Се појавува преоден прозорец (дијалог)
 Comment[ml]=ക്ഷണിക ജാലകം (ഒരു കുഞ്ഞുജാലകം) പ്രത്യക്ഷമാകുമ്പോള്‍
+Comment[mr]=क्षणिक चौकट (एक संवाद) प्रदर्शित होते
 Comment[nb]=Et midlertidig vindu (en dialog) vises
 Comment[nds]=En temporeer Finster (en Dialoog) dukt op
 Comment[ne]=अस्थायी सञ्झ्याल (संवाद) देखा पर्दछ
@@ -5782,7 +5786,7 @@ Name[lt]=Pašalinti dialogą
 Name[lv]=Dialoga dzēšana
 Name[mk]=Избриши дијалог
 Name[ml]=കുഞ്ഞുജാലകം നീക്കം ചെയ്യുമ്പോള്‍
-Name[mr]=संवाद काढूण टाका
+Name[mr]=संवाद काढून टाका
 Name[nb]=Slett dialog
 Name[nds]=Wegmaken vun Dialoog
 Name[ne]=संवाद मेट्नुहोस्
@@ -5861,6 +5865,7 @@ Comment[lt]=Laikinas langas (dialogas) yra pašalintas
 Comment[lv]=Īslaicīgais logs (dialogs) ir noņemts
 Comment[mk]=Отстранет е преодниот прозорец (дијалог)
 Comment[ml]=ക്ഷണികജാലകം (ഒരു ഡയലോഗു്) നീക്കം ചെയ്യുമ്പോള്‍
+Comment[mr]=क्षणिक चौकट (एक संवाद) काढून टाकली आहे
 Comment[nb]=Et midlertidig vindu (en dialog) fjernes
 Comment[nds]=En temporeer Finster (en Dialoog) warrt wegmaakt
 Comment[ne]=अस्थायी सञ्झ्याल (संवाद) हटाइएको छ
@@ -6026,7 +6031,7 @@ Comment[lt]=Langas pradėjo judėti
 Comment[lv]=Logs ir sācis pārvietoties
 Comment[mk]=Прозорецот почнува да се преместува
 Comment[ml]=ജാലകം നീങ്ങിത്തുടങ്ങുമ്പോള്‍
-Comment[mr]=चौकट हलविणे सुरू झाले
+Comment[mr]=चौकट हलविणे सुरु झाले
 Comment[nb]=Et vindu har begynt å flytte seg
 Comment[nds]=En Finster warrt nu verschaven
 Comment[ne]=सञ्झ्याल चल्न सुरु भएको छ
@@ -6276,7 +6281,7 @@ Name[lt]=Lango dydžio keitimo pradžia
 Name[lv]=Sākas loga izmēra maiņa
 Name[mk]=Почеток на промена на големината на прозорец
 Name[ml]=ജാലകത്തിന്റെ വലിപ്പം മാറ്റാന്‍ തുടങ്ങുമ്പോള്‍
-Name[mr]=चौकट पुन्हआकार प्रारंभ
+Name[mr]=चौकट आकार बदल प्रारंभ
 Name[nb]=Vindu endrer størrelse
 Name[nds]=Topassen vun Finster fangt an
 Name[ne]=सञ्झ्याल रिसाइज सुरुआत
@@ -6356,7 +6361,7 @@ Comment[lt]=Lango dydis pradėtas keisti
 Comment[lv]=Loga izmēra maiņa sākusies
 Comment[mk]=Прозорецот започна да ја менува големината
 Comment[ml]=ജാലകം വലിപ്പം മാറ്റി തുടങ്ങുമ്പോള്‍
-Comment[mr]=चौकट पुन्हआकार सुरू झाले
+Comment[mr]=चौकट आकार बदलणे सुरु झाले
 Comment[nb]=Et vindu har begynt å endre størrelse
 Comment[nds]=En Finster sien Grött warrt nu topasst
 Comment[ne]=सञ्झ्यालले रिसाइज गर्न सुरु गरेको छ
@@ -6441,7 +6446,7 @@ Name[lt]=Lango dydžio keitimo pabaiga
 Name[lv]=Loga izmēra maiņa beigta
 Name[mk]=Крај на промена на големината на прозорец
 Name[ml]=ജാലകം വലിപ്പം മാറ്റിക്കഴിയുമ്പോള്‍
-Name[mr]=चौकट पुन्हआकार समाप्त
+Name[mr]=चौकट आकार बदल समाप्त
 Name[nb]=Vindu endret størrelse
 Name[nds]=Topassen vun Finster höllt op
 Name[ne]=सञ्झ्याल रिसाइज समाप्ति
@@ -6521,7 +6526,7 @@ Comment[lt]=Lango dydžio keitimas baigtas
 Comment[lv]=Logs ir beidzis izmēra maiņu
 Comment[mk]=Прозорецот заврши со менувањето на големината
 Comment[ml]=ജാലകം വലിപ്പം മാറ്റിത്തീരുമ്പോള്‍
-Comment[mr]=चौकट पुन्हआकार पूर्ण झाले
+Comment[mr]=चौकट आकार बदल पूर्ण झाले
 Comment[nb]=Et vindu har endret størrelse
 Comment[nds]=En Finster sien Grött warrt nich wieder topasst
 Comment[ne]=सञ्झ्यालले रिसाइज गराइलाई समाप्त गरेको छ
@@ -6828,7 +6833,7 @@ Comment[lt]=Langas neaktyviame virtualiame darbastalyje reikalauja dėmesio
 Comment[lv]=Logs uz neaktīvas virtuālās darbvirsmas pieprasa uzmanību
 Comment[mk]=Некој прозорец на неактивна виртуелна површина бара внимание
 Comment[ml]=മറ്റൊരു നിര്‍ജ്ജീവ വിര്‍ച്ച്വല്‍ പണിയിടത്തിലുള്ള ഒരു ജാലകം ശ്രദ്ധ ആവശ്യപ്പെടുമ്പോള്‍
-Comment[mr]=असक्रीय डेस्कटॉप वरील चौकटकडे लक्ष द्या
+Comment[mr]=असक्रिय डेस्कटॉप वरील चौकटकडे लक्ष द्या
 Comment[nb]=Et vIndu på et inaktivt virtuelt skrivebord vil ha oppmerksomhet
 Comment[nds]=En Finster op en nich aktiev Schriefdisch will de Acht hebben
 Comment[ne]=सञ्झ्यालले एउटा निष्क्रिय अवास्तविक डेस्कटपमा ध्यानाकर्षण माग गर्दछ
@@ -6900,6 +6905,7 @@ Name[lt]=Komponavimas buvo sustabdytas
 Name[lv]=Kompozitēšana ir apturēta
 Name[mai]=कंपोजिटिंग निलंबित कएल गेल अछि
 Name[ml]=കോമ്പോസിറ്റിങ്ങ് താല്‍കാലികമായി നിര്‍ത്തിയിരിക്കുന്നു
+Name[mr]=कंपोझिटींग अकार्यक्षम करण्यात आले आहे
 Name[nb]=Sammensetting er blitt suspendert
 Name[nds]=Dat Tosamensetten wöör utmaakt
 Name[nl]=Compositing is uitgesteld
@@ -6961,6 +6967,7 @@ Comment[ko]=다른 프로그램이 컴포지팅을 꺼 달라고 요청했습니
 Comment[lt]=Kita programa paprašė sustabdyti komponavimą
 Comment[lv]=Kāda programma pieprasīja apturēt kompozitēšanu.
 Comment[ml]=കമ്പോസിറ്റിംഗ് നിര്‍ത്തിവെയ്ക്കാന്‍ വേറൊരു പ്രയോഗം ആവശ്യപ്പെട്ടിട്ടുണ്ട്
+Comment[mr]=कंपोझिटींग अकार्यक्षम करण्याची विनंती वेगळ्या अनुप्रयोगाने केलेली आहे.
 Comment[nb]=Et annet program har bedt om at sammensetting skal suspenderes.
 Comment[nds]=En anner Programm will dat Tosamensetten utsetten.
 Comment[nl]=Een andere applicatie heeft verzocht compositing uit te stellen.
@@ -7030,6 +7037,7 @@ Name[lv]=Efekti nav atbalstīti
 Name[mai]=प्रभाव समर्थित नहि अछि
 Name[mk]=Ефектите не се поддржани
 Name[ml]=പ്രഭാവങ്ങള്ക്ക് പിതുണയില്ല
+Name[mr]=परिणाम समर्थीत नाहीत
 Name[nb]=Effekter ikke støttet
 Name[nds]=Effekten nich ünnerstütt
 Name[nl]=Effecten niet ondersteund
@@ -7095,6 +7103,7 @@ Comment[lv]=Dažiem efektiem nav vajadzīgā atbalsta aizmugurē vai aparatūrā
 Comment[mai]=किछु प्रभाव केँ बैकेंड या हार्डवेयरक द्वारा समर्थित नहि कएल गेल अछि.
 Comment[mk]=Некои ефекти не се поддржани од задниот крај или од хардверот.
 Comment[ml]=പിന്‍നിര അല്ലെങ്കില്‍ ഖരസാമാഗ്രി പ്രഭാവങ്ങളെ പിന്തുണയ്ക്കുന്നില്ല.
+Comment[mr]=बॅकएन्ड किंवा हार्डवेअर द्वारे परिणाम समर्थीत नाहीत.
 Comment[nb]=Noen effelter er ikke støttet i motorer eller maskinvare.
 Comment[nds]=Dat Hülpprogramm oder de Hardware doot en poor Effekten nich ünnerstütten.
 Comment[nl]=Sommige effecten worden niet ondersteund door deze backend of hardware.
@@ -7127,13 +7136,17 @@ Action=Popup
 Name=Window Fullscreen Set
 Name[bs]=Postavi preko cijelog ekrana
 Name[ca]=Estableix a pantalla completa
+Name[ca@valencia]=Estableix a pantalla completa
 Name[cs]=Okno nastaveno na celou obrazovku
 Name[da]=Fuldskærmsvindue sat
+Name[de]=Fenster in Vollbildmodus versetzt
 Name[el]=Ορίστηκε πλήρης οθόνη
 Name[es]=Ventana a pantalla completa activa
 Name[et]=Aken täisekraanirežiimis
 Name[fi]=Ikkunan koko näytön tila asetettu
+Name[fr]=Fenêtre placée en plein écran
 Name[gl]=Pór a xanela a pantalla completa
+Name[he]=חלון הפל למסך מלא
 Name[hu]=Ablak teljes képernyőre állítása
 Name[ia]=Fixation de fenestra a schermo plen
 Name[it]=Finestra a schermo pieno
@@ -7141,6 +7154,7 @@ Name[kk]=Толық экранды терезе
 Name[km]=កំណត់​បង្អួច​ពេញអេក្រង់
 Name[ko]=창이 전체 화면으로 설정됨
 Name[lt]=Lango per visą ekraną nustatymai
+Name[mr]=चौकट पूर्ण स्क्रीन वर स्थापीत झाले
 Name[nb]=Fullskjerm slått på
 Name[nl]=Venster in modus volledig scherm 
 Name[pa]=ਵਿੰਡੋ ਪੂਰੀਸਕਰੀਨ ਸੈੱਟ
@@ -7163,6 +7177,7 @@ Name[zh_TW]=已設定成全螢幕
 Comment=A window has been set to fullscreen
 Comment[bs]=Prozor je postavljen na cijeli ekran
 Comment[ca]=Una finestra s'ha definit a pantalla completa
+Comment[ca@valencia]=Una finestra s'ha definit a pantalla completa
 Comment[cs]=Okno bylo nastaveno na celou obrazovku
 Comment[da]=Et vindue er blevet sat til fuldskærm
 Comment[de]=Ein Fenster ist in den Vollbildmodus versetzt worden
@@ -7170,13 +7185,17 @@ Comment[el]=Ένα παράθυρο ορίστηκε σε πλήρης οθόν�
 Comment[es]=Una ventana se ha activado a pantalla completa
 Comment[et]=Aken on viidud täisekraani
 Comment[fi]=Ikkuna on asetettu koko näytön tilaan
+Comment[fr]=Une fenêtre a été mise en plein écran
 Comment[gl]=Unha xanela púxose a pantalla completa
+Comment[he]=חלון נהפך למסך מלא
 Comment[hu]=Az ablak teljes képernyőre lett állítva
 Comment[ia]=Un fenestra ha essite fixate al modo de schermo plen
 Comment[it]=La finestra è stata impostata a schermo pieno
 Comment[kk]=Толық экранды терезе орнатылды
 Comment[km]=បង្អួច​ត្រូវ​បាន​កំណត់​ទៅ​ពេញអេក្រង់
 Comment[ko]=창이 전체 화면으로 전환됨
+Comment[lt]=Lango nustatytas per visą ekraną
+Comment[mr]=चौकट पूर्ण स्क्रीन वर स्थापीत झाले
 Comment[nb]=Et vindu har blitt satt som fullskjermvindu
 Comment[nl]=Een venster is ingesteld op volledig scherm
 Comment[pa]=ਵਿੰਡੋ ਪੂਰੀ ਸਕਰੀਨ ਲਈ ਸੈੱਟ ਕੀਤੀ ਜਾ ਚੁੱਕੀ ਹੈ
@@ -7203,20 +7222,26 @@ Comment[zh_TW]=已將視窗設定成全螢幕
 Name=Window Fullscreen Restored
 Name[bs]=Obnoviti puni zaslon prozora
 Name[ca]=Finestra a pantalla completa restaurada
+Name[ca@valencia]=Finestra a pantalla completa restaurada
 Name[cs]=Okno obnoveno z celé obrazovky
 Name[da]=Fuldskærmsvindue gendannet
+Name[de]=Fenster aus Vollbildmodus wiederhergestellt
 Name[el]=Επαναφορά παραθύρου πλήρης οθόνης
 Name[es]=Ventana a pantalla completa restaurada
 Name[et]=Aken on täisekraanist taastatud
 Name[fi]=Ikkunan koko näytön tila palautettu
+Name[fr]=Fenêtre restaurée du plein écran
 Name[ga]=Athchóiríodh Fuinneog ón Mód Lánscáileáin
 Name[gl]=Restáurase unha xanela a pantalla completa
+Name[he]=חלון מוחזר לגודלו ממסך מלא
 Name[hu]=Az ablak teljes képernyőről visszaállítva
 Name[ia]=Fenestra de schermo plen restabilite
 Name[it]=Finestra a schermo pieno ripristinata
 Name[kk]=Кәдімгі (толық экранды емес) терезе
 Name[km]=បានស្ដារ​បង្អួច​ពេញអេក្រង់
 Name[ko]=창이 전체 화면에서 복원됨
+Name[lt]=Langas per visą ekraną atstatytas
+Name[mr]=चौकट पूर्ण स्क्रीन पुन्हस्थापित झाले
 Name[nb]=Fullskjerm slått av
 Name[nl]=Venster terug uit modus volledig scherm
 Name[pa]=ਵਿੰਡੋ ਪੂਰੀ ਸਕਰੀਨ ਰੀ-ਸਟੋਰ ਕੀਤੀ
@@ -7240,6 +7265,7 @@ Name[zh_TW]=已還原全螢幕
 Comment=A window has been restored from fullscreen
 Comment[bs]=Prozor je vraćen na puni zaslon
 Comment[ca]=Una finestra s'ha restaurat des de pantalla completa
+Comment[ca@valencia]=Una finestra s'ha restaurat des de pantalla completa
 Comment[cs]=Okno bylo obnoveno z celé obrazovky
 Comment[da]=Et vindue er blevet gendannet fra fuldskærm
 Comment[de]=Ein Fenster ist aus dem Vollbildmodus wiederhergestellt worden
@@ -7247,14 +7273,18 @@ Comment[el]=Ένα παράθυρο επανήλθε από πλήρης οθό�
 Comment[es]=Una ventana se ha restaurado desde pantalla completa
 Comment[et]=Aken on täisekraanist taastatud
 Comment[fi]=Ikkuna on palautettu koko näytön tilasta
+Comment[fr]=Une fenêtre a été restauré du mode plein écran
 Comment[ga]=Athchóiríodh fuinneog ón mód lánscáileáin
 Comment[gl]=Unha xanela deixou de estar a pantalla completa
+Comment[he]=חלון שוחזר לגודל המקורי שלי לאחר שהיה במסך מלא
 Comment[hu]=Az ablak vissza lett állítva a teljes képernyőről
 Comment[ia]=Un fenestra ha essite restabilite ab schermo plen
 Comment[it]=La finestra è stata ripristinata da schermo pieno
 Comment[kk]=Терезе толық экранды күйінен қайтарылды
 Comment[km]=បង្អួច​ត្រូវ​បាន​ស្ដារ​ពី​ទិដ្ឋភាព​ពេញអេក្រង់
 Comment[ko]=창이 전체 화면에서 복원됨
+Comment[lt]=Lango per visą ekraną buvo atstatytas
+Comment[mr]=पूर्ण स्क्रीन वरुन चौकट पुन्हस्थापित झाली
 Comment[nb]=Et vindu er tilbakestilt fra fullskjermvindu
 Comment[nl]=Een venster is teruggebracht uit de instelling volledig scherm
 Comment[pa]=ਵਿੰਡੋ ਨੂੰ ਪੂਰੀ ਸਕਰੀਨ ਨੂੰ ਮੁੜ ਕੇ ਸਟੋਰ ਕੀਤਾ ਗਿਆ

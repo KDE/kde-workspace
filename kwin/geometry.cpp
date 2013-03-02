@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "client.h"
 #include "composite.h"
+#include "cursor.h"
 #include "workspace.h"
 
 #include <kapplication.h>
@@ -40,6 +41,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "geometrytip.h"
 #include "rules.h"
 #include "effects.h"
+#ifdef KWIN_BUILD_SCREENEDGES
+#include "screenedge.h"
+#endif
 #include <QtGui/QDesktopWidget>
 #include <QPainter>
 #include <QVarLengthArray>
@@ -76,9 +80,12 @@ void Workspace::desktopResized()
 
     updateClientArea();
     saveOldScreenSizes(); // after updateClientArea(), so that one still uses the previous one
+
+    // TODO: emit a signal instead and remove the deep function calls into edges and effects
 #ifdef KWIN_BUILD_SCREENEDGES
-    m_screenEdge.update(true);
+    ScreenEdges::self()->recreateEdges();
 #endif
+
     if (effects) {
         static_cast<EffectsHandlerImpl*>(effects)->desktopResized(geom.size());
     }
@@ -109,10 +116,11 @@ void Workspace::saveOldScreenSizes()
 void Workspace::updateClientArea(bool force)
 {
     int nscreens = QApplication::desktop()->screenCount();
-    kDebug(1212) << "screens: " << nscreens << "desktops: " << numberOfDesktops();
-    QVector< QRect > new_wareas(numberOfDesktops() + 1);
-    QVector< StrutRects > new_rmoveareas(numberOfDesktops() + 1);
-    QVector< QVector< QRect > > new_sareas(numberOfDesktops() + 1);
+    const int numberOfDesktops = VirtualDesktopManager::self()->count();
+    kDebug(1212) << "screens: " << nscreens << "desktops: " << numberOfDesktops;
+    QVector< QRect > new_wareas(numberOfDesktops + 1);
+    QVector< StrutRects > new_rmoveareas(numberOfDesktops + 1);
+    QVector< QVector< QRect > > new_sareas(numberOfDesktops + 1);
     QVector< QRect > screens(nscreens);
     QRect desktopArea;
     for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
@@ -124,7 +132,7 @@ void Workspace::updateClientArea(bool force)
         screens [iS] = QApplication::desktop()->screenGeometry(iS);
     }
     for (int i = 1;
-            i <= numberOfDesktops();
+            i <= numberOfDesktops;
             ++i) {
         new_wareas[ i ] = desktopArea;
         new_sareas[ i ].resize(nscreens);
@@ -149,7 +157,7 @@ void Workspace::updateClientArea(bool force)
 
         if ((*it)->isOnAllDesktops()) {
             for (int i = 1;
-                    i <= numberOfDesktops();
+                    i <= numberOfDesktops;
                     ++i) {
                 if (!hasOffscreenXineramaStrut)
                     new_wareas[ i ] = new_wareas[ i ].intersected(r);
@@ -192,7 +200,7 @@ void Workspace::updateClientArea(bool force)
         changed = true;
 
     for (int i = 1;
-            !changed && i <= numberOfDesktops();
+            !changed && i <= numberOfDesktops;
             ++i) {
         if (workarea[ i ] != new_wareas[ i ])
             changed = true;
@@ -213,7 +221,7 @@ void Workspace::updateClientArea(bool force)
         restrictedmovearea = new_rmoveareas;
         screenarea = new_sareas;
         NETRect r;
-        for (int i = 1; i <= numberOfDesktops(); i++) {
+        for (int i = 1; i <= numberOfDesktops; i++) {
             r.pos.x = workarea[ i ].x();
             r.pos.y = workarea[ i ].y();
             r.size.width = workarea[ i ].width();
@@ -253,7 +261,7 @@ void Workspace::updateClientArea()
 QRect Workspace::clientArea(clientAreaOption opt, int screen, int desktop) const
 {
     if (desktop == NETWinInfo::OnAllDesktops || desktop == 0)
-        desktop = currentDesktop();
+        desktop = VirtualDesktopManager::self()->current();
     if (screen == -1)
         screen = activeScreen();
 
@@ -315,7 +323,7 @@ QRect Workspace::clientArea(clientAreaOption opt, const Client* c) const
 QRegion Workspace::restrictedMoveArea(int desktop, StrutAreas areas) const
 {
     if (desktop == NETWinInfo::OnAllDesktops || desktop == 0)
-        desktop = currentDesktop();
+        desktop = VirtualDesktopManager::self()->current();
     QRegion region;
     foreach (const StrutRect & rect, restrictedmovearea[desktop])
     if (areas & rect.area())
@@ -331,7 +339,7 @@ bool Workspace::inUpdateClientArea() const
 QRegion Workspace::previousRestrictedMoveArea(int desktop, StrutAreas areas) const
 {
     if (desktop == NETWinInfo::OnAllDesktops || desktop == 0)
-        desktop = currentDesktop();
+        desktop = VirtualDesktopManager::self()->current();
     QRegion region;
     foreach (const StrutRect & rect, oldrestrictedmovearea.at(desktop))
     if (areas & rect.area())
@@ -417,7 +425,7 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
             QList<Client *>::ConstIterator l;
             for (l = clients.constBegin(); l != clients.constEnd(); ++l) {
                 if ((((*l)->isOnDesktop(c->desktop()) && !(*l)->isMinimized())
-                        || (c->isOnDesktop(NET::OnAllDesktops) && (*l)->isOnDesktop(Workspace::currentDesktop())
+                        || (c->isOnDesktop(NET::OnAllDesktops) && (*l)->isOnDesktop(VirtualDesktopManager::self()->current())
                             && !(*l)->isMinimized()))
                         && (!(*l)->tabGroup() || (*l) == (*l)->tabGroup()->current())
                         && (*l) != c) {
@@ -612,7 +620,7 @@ QRect Workspace::adjustClientSize(Client* c, QRect moveResizeGeom, int mode)
             deltaY = int(snap);
             QList<Client *>::ConstIterator l;
             for (l = clients.constBegin(); l != clients.constEnd(); ++l) {
-                if ((*l)->isOnDesktop(currentDesktop()) &&
+                if ((*l)->isOnDesktop(VirtualDesktopManager::self()->current()) &&
                         !(*l)->isMinimized()
                         && (*l) != c) {
                     lx = (*l)->x() - 1;
@@ -1046,7 +1054,7 @@ void Client::checkWorkspacePosition(QRect oldGeometry, int oldDesktop)
             oldGeomTall = QRect(oldGeometry.x(), 0, oldGeometry.width(), workspace()->oldDisplayHeight());   // Full screen height
             oldGeomWide = QRect(0, oldGeometry.y(), workspace()->oldDisplayWidth(), oldGeometry.height());   // Full screen width
             int distance = INT_MAX;
-            foreach( QRect r, workspace()->previousScreenSizes()) {
+            foreach(const QRect &r, workspace()->previousScreenSizes()) {
                 int d = r.contains( oldGeometry.center()) ? 0 : ( r.center() - oldGeometry.center()).manhattanLength();
                 if( d < distance ) {
                     distance = d;
@@ -1389,6 +1397,7 @@ QSize Client::sizeForClientSize(const QSize& wsize, Sizemode mode, bool noframe)
 void Client::getWmNormalHints()
 {
     long msize;
+    const bool hadFixedAspect = xSizeHint.flags & PAspect;
     if (XGetWMNormalHints(display(), window(), &xSizeHint, &msize) == 0)
         xSizeHint.flags = 0;
     // set defined values for the fields, even if they're not in flags
@@ -1422,6 +1431,8 @@ void Client::getWmNormalHints()
         // no dividing by zero
         xSizeHint.min_aspect.y = qMax(xSizeHint.min_aspect.y, 1);
         xSizeHint.max_aspect.y = qMax(xSizeHint.max_aspect.y, 1);
+        if (!hadFixedAspect)
+            maximize(max_mode); // align to eventual new contraints
     } else {
         xSizeHint.min_aspect.x = 1;
         xSizeHint.min_aspect.y = INT_MAX;
@@ -1797,7 +1808,7 @@ bool Client::isMaximizable() const
         // isMovable() and isResizable() may be false for maximized windows
         // with moving/resizing maximized windows disabled
         TemporaryAssign< MaximizeMode > tmp(max_mode, MaximizeRestore);
-        if (!isMovable() || !isResizable() || isToolbar())  // SELI isToolbar() ?
+        if (!isResizable() || isToolbar())  // SELI isToolbar() ?
             return false;
     }
     if (rules()->checkMaximize(MaximizeRestore) == MaximizeRestore && rules()->checkMaximize(MaximizeFull) != MaximizeRestore)
@@ -1865,24 +1876,25 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force)
             if (!isResize() || syncRequest.counter == None)
 #endif
                 XMoveResizeWindow(display(), window(), 0, 0, cs.width(), cs.height());
+            // SELI - won't this be too expensive?
+            // THOMAS - yes, but gtk+ clients will not resize without ...
+            sendSyntheticConfigureNotify();
         }
         updateShape();
     } else {
-        if (moveResizeMode && compositing()) {
-            // Defer the X update until we leave this mode
-            needsXWindowMove = true;
+        if (moveResizeMode) {
+            if (compositing())  // Defer the X update until we leave this mode
+                needsXWindowMove = true;
+            else
+                XMoveWindow(display(), frameId(), x, y); // sendSyntheticConfigureNotify() on finish shall be sufficient
         } else {
             XMoveWindow(display(), frameId(), x, y);
+            sendSyntheticConfigureNotify();
         }
 
         // Unconditionally move the input window: it won't affect rendering
-        if (inputId()) {
-            const QPoint pos = QPoint(x, y) + inputPos();
-            XMoveWindow(display(), inputId(), pos.x(), pos.y());
-        }
+        m_decoInputExtent.move(QPoint(x, y) + inputPos());
     }
-    // SELI TODO won't this be too expensive?
-    sendSyntheticConfigureNotify();
     updateWindowRules(Rules::Position|Rules::Size);
 
     // keep track of old maximize mode
@@ -2100,9 +2112,15 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
         // isMovable() and isResizable() may be false for maximized windows
         // with moving/resizing maximized windows disabled
         TemporaryAssign< MaximizeMode > tmp(max_mode, MaximizeRestore);
-        if (!isMovable() || !isResizable() || isToolbar())  // SELI isToolbar() ?
+        if (!isResizable() || isToolbar())  // SELI isToolbar() ?
             return;
     }
+
+    QRect clientArea;
+    if (isElectricBorderMaximizing())
+        clientArea = workspace()->clientArea(MaximizeArea, cursorPos(), desktop());
+    else
+        clientArea = workspace()->clientArea(MaximizeArea, this);
 
     MaximizeMode old_mode = max_mode;
     // 'adjust == true' means to update the size only, e.g. after changing workspace size
@@ -2111,6 +2129,24 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
             max_mode = MaximizeMode(max_mode ^ MaximizeVertical);
         if (horizontal)
             max_mode = MaximizeMode(max_mode ^ MaximizeHorizontal);
+    }
+
+    // if the client insist on a fix aspect ratio, we check whether the maximizing will get us
+    // out of screen bounds and take that as a "full maximization with aspect check" then
+    if ((xSizeHint.flags & PAspect) && // fixed aspect
+        (max_mode == MaximizeVertical || max_mode == MaximizeHorizontal) && // ondimensional maximization
+        rules()->checkStrictGeometry(true)) { // obey aspect
+        if (max_mode == MaximizeVertical || (old_mode & MaximizeVertical)) {
+            const double fx = xSizeHint.min_aspect.x; // use doubles, because the values can be MAX_INT
+            const double fy = xSizeHint.max_aspect.y; // use doubles, because the values can be MAX_INT
+            if (fx*clientArea.height()/fy > clientArea.width()) // too big
+                max_mode = old_mode & MaximizeHorizontal ? MaximizeRestore : MaximizeFull;
+        } else { // max_mode == MaximizeHorizontal
+            const double fx = xSizeHint.max_aspect.x;
+            const double fy = xSizeHint.min_aspect.y;
+            if (fy*clientArea.width()/fx > clientArea.height()) // too big
+                max_mode = old_mode & MaximizeVertical ? MaximizeRestore : MaximizeFull;
+        }
     }
 
     max_mode = rules()->checkMaximize(max_mode);
@@ -2127,12 +2163,6 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
             || (old_mode == MaximizeHorizontal && max_mode == MaximizeVertical)) {
         changeMaximize(false, false, false);   // restore
     }
-
-    QRect clientArea;
-    if (isElectricBorderMaximizing())
-        clientArea = workspace()->clientArea(MaximizeArea, cursorPos(), desktop());
-    else
-        clientArea = workspace()->clientArea(MaximizeArea, this);
 
     // save sizes for restoring, if maximalizing
     QSize sz;
@@ -2201,8 +2231,10 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
                                   adjustedSize(QSize(geom_restore.width(), clientArea.height()), SizemodeFixedH)), geom_mode);
             }
         } else {
-            setGeometry(QRect(QPoint(x(), clientArea.top()),
-                              adjustedSize(QSize(width(), clientArea.height()), SizemodeFixedH)), geom_mode);
+            QRect r(x(), clientArea.top(), width(), clientArea.height());
+            r.setTopLeft(rules()->checkPosition(r.topLeft()));
+            r.setSize(adjustedSize(r.size(), SizemodeFixedH));
+            setGeometry(r, geom_mode);
         }
         info->setState(NET::MaxVert, NET::Max);
         break;
@@ -2219,8 +2251,10 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
                                   adjustedSize(QSize(clientArea.width(), geom_restore.height()), SizemodeFixedW)), geom_mode);
             }
         } else {
-            setGeometry(QRect(QPoint(clientArea.left(), y()),
-                              adjustedSize(QSize(clientArea.width(), height()), SizemodeFixedW)), geom_mode);
+            QRect r(clientArea.left(), y(), clientArea.width(), height());
+            r.setTopLeft(rules()->checkPosition(r.topLeft()));
+            r.setSize(adjustedSize(r.size(), SizemodeFixedW));
+            setGeometry(r, geom_mode);
         }
         info->setState(NET::MaxHoriz, NET::Max);
         break;
@@ -2252,6 +2286,9 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
                 restore.moveTop(geom_restore.y());
             geom_restore = restore; // relevant for mouse pos calculation, bug #298646
         }
+        if (xSizeHint.flags & PAspect) {
+            restore.setSize(adjustedSize(restore.size(), SizemodeAny));
+        }
         setGeometry(restore, geom_mode);
         if (!clientArea.contains(geom_restore.center()))    // Not restoring to the same screen
             Placement::self()->place(this, clientArea);
@@ -2260,13 +2297,15 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
     }
 
     case MaximizeFull: {
-        QSize adjSize = adjustedSize(clientArea.size(), SizemodeMax);
-        QRect r = QRect(clientArea.topLeft(), adjSize);
+        QRect r(clientArea);
+        r.setTopLeft(rules()->checkPosition(r.topLeft()));
+        r.setSize(adjustedSize(r.size(), SizemodeMax));
         if (r.size() != clientArea.size()) { // to avoid off-by-one errors...
             if (isElectricBorderMaximizing() && r.width() < clientArea.width())
-                r.moveLeft(QCursor::pos().x() - r.width()/2);
+                r.moveLeft(Cursor::pos().x() - r.width()/2);
             else
                 r.moveCenter(clientArea.center());
+            r.moveTopLeft(rules()->checkPosition(r.topLeft()));
         }
         setGeometry(r, geom_mode);
         info->setState(NET::Max, NET::Max);
@@ -2323,7 +2362,7 @@ void Client::setFullScreen(bool set, bool user)
     setShade(ShadeNone);
     bool was_fs = isFullScreen();
     if (was_fs)
-        workspace()->updateFocusMousePosition(QCursor::pos());
+        workspace()->updateFocusMousePosition(Cursor::pos());
     else
         geom_fs_restore = geometry();
     fullscreen_mode = set ? FullScreenNormal : FullScreenNone;
@@ -2493,7 +2532,7 @@ bool Client::startMoveResize()
     XMapRaised(display(), move_resize_grab_window);
     if (XGrabPointer(display(), move_resize_grab_window, False,
                     ButtonPressMask | ButtonReleaseMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask,
-                    GrabModeAsync, GrabModeAsync, move_resize_grab_window, cursor.handle(), xTime()) == Success)
+                    GrabModeAsync, GrabModeAsync, move_resize_grab_window, Cursor::x11Cursor(m_cursor), xTime()) == Success)
         has_grab = true;
     if (grabXKeyboard(frameId()))
         has_grab = move_resize_has_keyboard_grab = true;
@@ -2545,45 +2584,12 @@ bool Client::startMoveResize()
     Notify::raise(isResize() ? Notify::ResizeStart : Notify::MoveStart);
     emit clientStartUserMovedResized(this);
 #ifdef KWIN_BUILD_SCREENEDGES
-    if (options->electricBorders() == Options::ElectricMoveOnly ||
-            options->electricBorderMaximize() ||
-            options->electricBorderTiling())
-        workspace()->screenEdge()->reserveDesktopSwitching(true, Qt::Vertical|Qt::Horizontal);
+    if (ScreenEdges::self()->isDesktopSwitchingMovingClients())
+        ScreenEdges::self()->reserveDesktopSwitching(true, Qt::Vertical|Qt::Horizontal);
 #endif
     if (fakeMove) // fix geom_restore position - it HAS to happen at the end, ie. when all moving is set up. inline call will lock focus!!
-        handleMoveResize(QCursor::pos().x(), QCursor::pos().y(), QCursor::pos().x(), QCursor::pos().y());
+        handleMoveResize(Cursor::pos().x(), Cursor::pos().y(), Cursor::pos().x(), Cursor::pos().y());
     return true;
-}
-
-static ElectricBorder electricBorderFromMode(QuickTileMode mode)
-{
-    // special case, currently maxmizing is done from the electric top corner
-    if (mode == QuickTileMaximize)
-        return ElectricTop;
-
-    // sanitize the mode, ie. simplify "invalid" combinations
-    if ((mode & QuickTileHorizontal) == QuickTileHorizontal)
-        mode &= ~QuickTileHorizontal;
-    if ((mode & QuickTileVertical) == QuickTileVertical)
-        mode &= ~QuickTileVertical;
-
-    if (mode == QuickTileLeft)
-        return ElectricLeft;
-    if (mode == QuickTileRight)
-        return ElectricRight;
-    if (mode == (QuickTileTop|QuickTileLeft))
-        return ElectricTopLeft;
-    if (mode == (QuickTileTop|QuickTileRight))
-        return ElectricTopRight;
-    if (mode == (QuickTileBottom|QuickTileLeft))
-        return ElectricBottomLeft;
-    if (mode == (QuickTileBottom|QuickTileRight))
-        return ElectricBottomRight;
-    if (mode == QuickTileTop)
-        return ElectricTop;
-    if (mode == QuickTileBottom)
-        return ElectricBottom;
-    return ElectricNone;
 }
 
 void Client::finishMoveResize(bool cancel)
@@ -2613,14 +2619,6 @@ void Client::finishMoveResize(bool cancel)
 
     if (isElectricBorderMaximizing()) {
         setQuickTileMode(electricMode);
-        const ElectricBorder border = electricBorderFromMode(electricMode);
-        if (border == ElectricNone)
-            kDebug(1212) << "invalid electric mode" << electricMode << "leading to invalid array access,\
-                                                                        this should not have happened!";
-#ifdef KWIN_BUILD_SCREENEDGES
-        else
-            workspace()->screenEdge()->restoreSize(border);
-#endif
         electricMaximizing = false;
         workspace()->outline()->hide();
     } else if (!cancel) {
@@ -2646,6 +2644,8 @@ void Client::leaveMoveResize()
         XMoveWindow(display(), frameId(), geom.x(), geom.y());
         needsXWindowMove = false;
     }
+    if (!isResize())
+        sendSyntheticConfigureNotify(); // tell the client about it's new final position
     if (geometryTip) {
         geometryTip->hide();
         delete geometryTip;
@@ -2666,10 +2666,8 @@ void Client::leaveMoveResize()
     syncRequest.timeout = NULL;
 #endif
 #ifdef KWIN_BUILD_SCREENEDGES
-    if (options->electricBorders() == Options::ElectricMoveOnly ||
-            options->electricBorderMaximize() ||
-            options->electricBorderTiling())
-        workspace()->screenEdge()->reserveDesktopSwitching(false, Qt::Vertical|Qt::Horizontal);
+    if (ScreenEdges::self()->isDesktopSwitchingMovingClients())
+        ScreenEdges::self()->reserveDesktopSwitching(false, Qt::Vertical|Qt::Horizontal);
 #endif
 }
 
@@ -3026,18 +3024,18 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
             sendSyncRequest();
         } else {                            // for clients not supporting the XSYNC protocol, we
             syncRequest.isPending = true;   // limit the resizes to 30Hz to take pointless load from X11
-            syncRequest.timeout->start(33); // and the client, the mouse is still moved a full speed
+            syncRequest.timeout->start(33); // and the client, the mouse is still moved at full speed
         }                                   // and no human can control faster resizes anyway
         XMoveResizeWindow(display(), window(), 0, 0, moveResizeGeom.width() - (border_left + border_right), moveResizeGeom.height() - (border_top + border_bottom));
     } else
 #endif
         performMoveResize();
 
-    if (isMove()) {
 #ifdef KWIN_BUILD_SCREENEDGES
-        workspace()->screenEdge()->check(globalPos, xTime());
-#endif
+    if (isMove()) {
+        ScreenEdges::self()->check(globalPos, QDateTime::fromMSecsSinceEpoch(xTime()));
     }
+#endif
 }
 
 void Client::performMoveResize()

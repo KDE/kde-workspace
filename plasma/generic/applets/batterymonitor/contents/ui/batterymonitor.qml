@@ -33,6 +33,7 @@ Item {
     Component.onCompleted: {
         Logic.updateCumulative();
         Logic.updateTooltip();
+        Logic.updateBrightness();
         plasmoid.addEventListener('ConfigChanged', configChanged);
     }
 
@@ -149,8 +150,18 @@ Item {
         engine: "powermanagement"
         connectedSources: sources
         onDataChanged: {
-            Logic.updateCumulative();
             Logic.updateTooltip();
+            Logic.updateBrightness();
+        }
+    }
+
+    property QtObject batteries: PlasmaCore.DataModel {
+        id: batteries
+        dataSource: pmSource
+        sourceFilter: "Battery[0-9]+"
+
+        onDataChanged: {
+            Logic.updateCumulative();
 
             var status = "PassiveStatus";
             if (batteries.cumulativePluggedin) {
@@ -161,18 +172,10 @@ Item {
                 }
             }
             plasmoid.status = status;
-
-            Logic.resetBatteryData();
         }
-    }
-
-    property QtObject batteries: PlasmaCore.DataModel {
-        id: batteries
-        dataSource: pmSource
-        sourceFilter: "Battery[0-9]+"
 
         property int cumulativePercent
-        property bool cumulativePluggedin
+        property bool cumulativePluggedin: count > 0
         // true  --> all batteries charged
         // false --> one of the batteries charging/discharging
         property bool allCharged
@@ -181,11 +184,15 @@ Item {
 
     PopupDialog {
         id: dialogItem
+        property bool disableBrightnessUpdate: false
+        model: batteries
+        hasBattery: batteries.cumulativePluggedin
+        percent: batteries.cumulativePercent
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
-        screenBrightness: pmSource.data["PowerDevil"]["Screen Brightness"]
         remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
         showSuspendButton: Platform.shouldOfferSuspend(pmSource)
         showHibernateButton: Platform.shouldOfferHibernate(pmSource)
+
         onSuspendClicked: {
             plasmoid.togglePopup();
             service = pmSource.serviceForSource("PowerDevil");
@@ -194,6 +201,9 @@ Item {
             service.startOperationCall(operation);
         }
         onBrightnessChanged: {
+            if (disableBrightnessUpdate) {
+                return;
+            }
             service = pmSource.serviceForSource("PowerDevil");
             operation = service.operationDescription("setBrightness");
             operation.brightness = screenBrightness;

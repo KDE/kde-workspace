@@ -34,7 +34,6 @@ Applet::Applet(QObject *parent, const QVariantList &args)
    : Plasma::Applet(parent, args),
      m_interval(10000),
      m_preferredItemHeight(42),
-     m_titleSpacer(false),
      m_header(0),
      m_engine(0),
      m_orientation(Qt::Vertical),
@@ -88,10 +87,9 @@ void Applet::constraintsEvent(Plasma::Constraints constraints)
     }
 }
 
-void Applet::setTitle(const QString& title, bool spacer)
+void Applet::setTitle(const QString& title)
 {
     m_title = title;
-    m_titleSpacer = spacer;
     if (m_header) {
         m_header->setText(m_title);
     }
@@ -161,9 +159,6 @@ void Applet::connectToEngine()
         }
     }
 
-    if (m_titleSpacer) {
-        mainLayout()->addStretch();
-    }
     mainLayout()->activate();
     constraintsEvent(Plasma::SizeConstraint);
 }

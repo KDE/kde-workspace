@@ -24,6 +24,7 @@ set(plasma_SRCS
     desktopview.cpp
     interactiveconsole.cpp
     main.cpp
+    supportinformation.cpp
     panelcontroller.cpp
     panelview.cpp
     panelapplethandle.cpp

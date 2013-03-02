@@ -93,7 +93,10 @@ set(kwin_KDEINIT_SRCS
    workspace.cpp 
    dbusinterface.cpp
    client.cpp 
+   client_machine.cpp
+   cursor.cpp
    tabgroup.cpp
+   focuschain.cpp
    placement.cpp 
    atoms.cpp 
    utils.cpp 
@@ -128,8 +131,9 @@ set(kwin_KDEINIT_SRCS
    deleted.cpp
    effects.cpp
    compositingprefs.cpp
-   desktoplayout.cpp
    paintredirector.cpp
+   virtualdesktops.cpp
+   xcbutils.cpp
    )
 
 if(KWIN_BUILD_SCRIPTING)
@@ -150,6 +154,7 @@ if(KWIN_BUILD_TABBOX)
         tabbox/tabbox.cpp
         tabbox/clientmodel.cpp
         tabbox/declarative.cpp
+        tabbox/desktopchain.cpp
         tabbox/desktopmodel.cpp
         tabbox/tabboxconfig.cpp
         tabbox/tabboxhandler.cpp
@@ -167,16 +172,20 @@ if(KWIN_HAVE_EGL)
     set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} eglonxbackend.cpp)
 endif(KWIN_HAVE_EGL)
 
+kde4_add_kcfg_files(kwin_KDEINIT_SRCS settings.kcfgc)
+
 qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.KWin.xml dbusinterface.h KWin::DBusInterface )
 qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.kwin.Compositing.xml composite.h KWin::Compositor )
 qt4_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.kwin.Effects.xml effects.h KWin::EffectsHandlerImpl )
 
 qt4_add_dbus_interface( kwin_KDEINIT_SRCS
   ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml ksmserver_interface)
+qt4_add_dbus_interface( kwin_KDEINIT_SRCS
+    ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/dbus/org.freedesktop.ScreenSaver.xml screenlocker_interface)
 
 qt4_add_resources( kwin_KDEINIT_SRCS resources.qrc )
 
-set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTDECLARATIVE_LIBRARY} ${KDECLARATIVE_LIBRARIES} kdecorations kwineffects ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${X11_Xdamage_LIB} ${X11_Xrender_LIB} ${X11_Xfixes_LIB} ${XCB_XCB_LIBRARIES} ${X11_XCB_LIBRARIES} ${XCB_XFIXES_LIBRARIES} ${XCB_DAMAGE_LIBRARIES} ${XCB_COMPOSITE_LIBRARIES} ${XCB_SHAPE_LIBRARIES})
+set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTDECLARATIVE_LIBRARY} ${KDECLARATIVE_LIBRARIES} kdecorations kwineffects ${X11_LIBRARIES} ${X11_Xcursor_LIB} ${X11_Xrandr_LIB} ${X11_Xdamage_LIB} ${X11_Xrender_LIB} ${X11_Xfixes_LIB} ${XCB_XCB_LIBRARIES} ${X11_XCB_LIBRARIES} ${XCB_XFIXES_LIBRARIES} ${XCB_DAMAGE_LIBRARIES} ${XCB_COMPOSITE_LIBRARIES} ${XCB_SHAPE_LIBRARIES} ${XCB_SYNC_LIBRARIES} ${XCB_RENDER_LIBRARIES} ${XCB_RANDR_LIBRARIES} ${XCB_KEYSYMS_LIBRARIES})
 
 find_library(XF86VM_LIBRARY Xxf86vm)
 if (XF86VM_LIBRARY)

@@ -26,9 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDBus/QDBusConnection>
 #include <QtCore/QVarLengthArray>
 #include <QtGui/QPainter>
-
-#include <X11/extensions/Xfixes.h>
-#include <QX11Info>
+#include <xcb/xcb_image.h>
 
 namespace KWin
 {
@@ -55,59 +53,77 @@ ScreenShotEffect::~ScreenShotEffect()
     QDBusConnection::sessionBus().unregisterObject("/Screenshot");
     QDBusConnection::sessionBus().unregisterService("org.kde.kwin.Screenshot");
 }
+
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
+static QImage xPictureToImage(xcb_render_picture_t srcPic, const QRect &geometry, xcb_image_t **xImage)
+{
+    xcb_pixmap_t xpix = xcb_generate_id(connection());
+    xcb_create_pixmap(connection(), 32, xpix, rootWindow(), geometry.width(), geometry.height());
+    XRenderPicture pic(xpix, 32);
+    xcb_render_composite(connection(), XCB_RENDER_PICT_OP_SRC, srcPic, XCB_RENDER_PICTURE_NONE, pic,
+                         geometry.x(), geometry.y(), 0, 0, 0, 0, geometry.width(), geometry.height());
+    xcb_flush(connection());
+    *xImage = xcb_image_get(connection(), xpix, 0, 0, geometry.width(), geometry.height(), ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
+    QImage img((*xImage)->data, (*xImage)->width, (*xImage)->height, (*xImage)->stride, QImage::Format_ARGB32_Premultiplied);
+    // TODO: byte order might need swapping
+    xcb_free_pixmap(connection(), xpix);
+    return img;
+}
+#endif
+
 void ScreenShotEffect::postPaintScreen()
 {
     effects->postPaintScreen();
     if (m_scheduledScreenshot) {
-        int w = displayWidth();
-        int h = displayHeight();
-        bool validTarget = true;
-        GLTexture* offscreenTexture = 0;
-        GLRenderTarget* target = 0;
-        if (effects->isOpenGLCompositing()) {
-            if (!GLTexture::NPOTTextureSupported()) {
-                w = nearestPowerOfTwo(w);
-                h = nearestPowerOfTwo(h);
+        WindowPaintData d(m_scheduledScreenshot);
+        double left = 0;
+        double top = 0;
+        double right = m_scheduledScreenshot->width();
+        double bottom = m_scheduledScreenshot->height();
+        if (m_scheduledScreenshot->hasDecoration() && m_type & INCLUDE_DECORATION) {
+            foreach (const WindowQuad & quad, d.quads) {
+                // we need this loop to include the decoration padding
+                left   = qMin(left, quad.left());
+                top    = qMin(top, quad.top());
+                right  = qMax(right, quad.right());
+                bottom = qMax(bottom, quad.bottom());
             }
-            offscreenTexture = new GLTexture(w, h);
-            offscreenTexture->setFilter(GL_LINEAR);
-            offscreenTexture->setWrapMode(GL_CLAMP_TO_EDGE);
-            target = new GLRenderTarget(*offscreenTexture);
-            validTarget = target->valid();
-        }
-        if (validTarget) {
-            WindowPaintData d(m_scheduledScreenshot);
-            double left = 0;
-            double top = 0;
-            double right = m_scheduledScreenshot->width();
-            double bottom = m_scheduledScreenshot->height();
-            if (m_scheduledScreenshot->hasDecoration() && m_type & INCLUDE_DECORATION) {
-                foreach (const WindowQuad & quad, d.quads) {
-                    // we need this loop to include the decoration padding
+        } else if (m_scheduledScreenshot->hasDecoration()) {
+            WindowQuadList newQuads;
+            left = m_scheduledScreenshot->width();
+            top = m_scheduledScreenshot->height();
+            right = 0;
+            bottom = 0;
+            foreach (const WindowQuad & quad, d.quads) {
+                if (quad.type() == WindowQuadContents) {
+                    newQuads << quad;
                     left   = qMin(left, quad.left());
                     top    = qMin(top, quad.top());
                     right  = qMax(right, quad.right());
                     bottom = qMax(bottom, quad.bottom());
                 }
-            } else if (m_scheduledScreenshot->hasDecoration()) {
-                WindowQuadList newQuads;
-                left = m_scheduledScreenshot->width();
-                top = m_scheduledScreenshot->height();
-                right = 0;
-                bottom = 0;
-                foreach (const WindowQuad & quad, d.quads) {
-                    if (quad.type() == WindowQuadContents) {
-                        newQuads << quad;
-                        left   = qMin(left, quad.left());
-                        top    = qMin(top, quad.top());
-                        right  = qMax(right, quad.right());
-                        bottom = qMax(bottom, quad.bottom());
-                    }
-                }
-                d.quads = newQuads;
             }
-            int width = right - left;
-            int height = bottom - top;
+            d.quads = newQuads;
+        }
+        const int width = right - left;
+        const int height = bottom - top;
+        bool validTarget = true;
+        QScopedPointer<GLTexture> offscreenTexture;
+        QScopedPointer<GLRenderTarget> target;
+        if (effects->isOpenGLCompositing()) {
+            int w = width;
+            int h = height;
+            if (!GLTexture::NPOTTextureSupported()) {
+                w = nearestPowerOfTwo(w);
+                h = nearestPowerOfTwo(h);
+            }
+            offscreenTexture.reset(new GLTexture(w, h));
+            offscreenTexture->setFilter(GL_LINEAR);
+            offscreenTexture->setWrapMode(GL_CLAMP_TO_EDGE);
+            target.reset(new GLRenderTarget(*offscreenTexture));
+            validTarget = target->valid();
+        }
+        if (validTarget) {
             d.setXTranslation(-m_scheduledScreenshot->x() - left);
             d.setYTranslation(-m_scheduledScreenshot->y() - top);
 
@@ -115,23 +131,27 @@ void ScreenShotEffect::postPaintScreen()
             int mask = PAINT_WINDOW_TRANSFORMED | PAINT_WINDOW_TRANSLUCENT;
             QImage img;
             if (effects->isOpenGLCompositing()) {
-                GLRenderTarget::pushRenderTarget(target);
+                GLRenderTarget::pushRenderTarget(target.data());
                 glClearColor(0.0, 0.0, 0.0, 0.0);
                 glClear(GL_COLOR_BUFFER_BIT);
                 glClearColor(0.0, 0.0, 0.0, 1.0);
-                effects->drawWindow(m_scheduledScreenshot, mask, QRegion(0, 0, width, height), d);
+                setMatrix(offscreenTexture->width(), offscreenTexture->height());
+                effects->drawWindow(m_scheduledScreenshot, mask, infiniteRegion(), d);
+                restoreMatrix();
                 // copy content from framebuffer into image
                 img = QImage(QSize(width, height), QImage::Format_ARGB32);
-                glReadPixels(0, offscreenTexture->height() - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)img.bits());
+                glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)img.bits());
                 GLRenderTarget::popRenderTarget();
                 ScreenShotEffect::convertFromGLImage(img, width, height);
             }
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
+            xcb_image_t *xImage = NULL;
             if (effects->compositingType() == XRenderCompositing) {
                 setXRenderOffscreen(true);
                 effects->drawWindow(m_scheduledScreenshot, mask, QRegion(0, 0, width, height), d);
-                if (xRenderOffscreenTarget())
-                    img = xRenderOffscreenTarget()->toImage().copy(0, 0, width, height);
+                if (xRenderOffscreenTarget()) {
+                    img = xPictureToImage(xRenderOffscreenTarget(), QRect(0, 0, width, height), &xImage);
+                }
                 setXRenderOffscreen(false);
             }
 #endif
@@ -140,20 +160,68 @@ void ScreenShotEffect::postPaintScreen()
                 grabPointerImage(img, m_scheduledScreenshot->x() + left, m_scheduledScreenshot->y() + top);
             }
 
-            m_lastScreenshot = QPixmap::fromImage(img);
-            if (m_lastScreenshot.handle() == 0) {
-                Pixmap xpix = XCreatePixmap(display(), rootWindow(), m_lastScreenshot.width(),
-                                            m_lastScreenshot.height(), 32);
-                m_lastScreenshot = QPixmap::fromX11Pixmap(xpix, QPixmap::ExplicitlyShared);
-                QPainter p(&m_lastScreenshot);
-                p.setCompositionMode(QPainter::CompositionMode_Source);
-                p.drawImage(QPoint(0, 0), img);
+            const int depth = img.depth();
+            xcb_pixmap_t xpix = xcb_generate_id(connection());
+            xcb_create_pixmap(connection(), depth, xpix, rootWindow(), img.width(), img.height());
+
+            xcb_gcontext_t cid = xcb_generate_id(connection());
+            xcb_create_gc(connection(), cid, xpix, 0, NULL);
+            xcb_put_image(connection(), XCB_IMAGE_FORMAT_Z_PIXMAP, xpix, cid, img.width(), img.height(),
+                        0, 0, 0, depth, img.byteCount(), img.constBits());
+            xcb_free_gc(connection(), cid);
+            xcb_flush(connection());
+            emit screenshotCreated(xpix);
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
+            if (xImage) {
+                xcb_image_destroy(xImage);
             }
-            emit screenshotCreated(m_lastScreenshot.handle());
+#endif
         }
-        delete offscreenTexture;
-        delete target;
         m_scheduledScreenshot = NULL;
+    }
+}
+
+static QMatrix4x4 s_origProjection;
+static QMatrix4x4 s_origModelview;
+
+void ScreenShotEffect::setMatrix(int width, int height)
+{
+    QMatrix4x4 projection;
+    QMatrix4x4 identity;
+    projection.ortho(QRect(0, 0, width, height));
+    if (effects->compositingType() == OpenGL2Compositing) {
+        ShaderBinder binder(ShaderManager::GenericShader);
+        GLShader *shader = binder.shader();
+        s_origProjection = shader->getUniformMatrix4x4("projection");
+        s_origModelview = shader->getUniformMatrix4x4("modelview");
+        shader->setUniform(GLShader::ProjectionMatrix, projection);
+        shader->setUniform(GLShader::ModelViewMatrix, identity);
+    } else if (effects->compositingType() == OpenGL1Compositing) {
+#ifdef KWIN_HAVE_OPENGL_1
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        loadMatrix(projection);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+#endif
+    }
+}
+
+void ScreenShotEffect::restoreMatrix()
+{
+    if (effects->compositingType() == OpenGL2Compositing) {
+        ShaderBinder binder(ShaderManager::GenericShader);
+        GLShader *shader = binder.shader();
+        shader->setUniform(GLShader::ProjectionMatrix, s_origProjection);
+        shader->setUniform(GLShader::ModelViewMatrix, s_origModelview);
+    } else if (effects->compositingType() == OpenGL1Compositing) {
+#ifdef KWIN_HAVE_OPENGL_1
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+#endif
     }
 }
 
@@ -226,16 +294,12 @@ QString ScreenShotEffect::blitScreenshot(const QRect &geometry)
         ScreenShotEffect::convertFromGLImage(img, geometry.width(), geometry.height());
     }
 
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
+    xcb_image_t *xImage = NULL;
+#endif
     if (effects->compositingType() == XRenderCompositing) {
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
-        QPixmap buffer(geometry.size());
-        if (buffer.handle() == 0) {
-            Pixmap xpix = XCreatePixmap(display(), rootWindow(), geometry.width(), geometry.height(), 32);
-            buffer = QPixmap::fromX11Pixmap(xpix, QPixmap::ExplicitlyShared);
-        }
-        XRenderComposite(display(), PictOpSrc, effects->xrenderBufferPicture(), None, buffer.x11PictureHandle(),
-                                    0, 0, 0, 0, geometry.x(), geometry.y(), geometry.width(), geometry.height());
-        img = buffer.toImage();
+        img = xPictureToImage(effects->xrenderBufferPicture(), geometry, &xImage);
 #endif
     }
 
@@ -246,6 +310,11 @@ QString ScreenShotEffect::blitScreenshot(const QRect &geometry)
         return QString();
     }
     img.save(&temp);
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
+    if (xImage) {
+        xcb_image_destroy(xImage);
+    }
+#endif
     temp.close();
     return temp.fileName();
 #endif
@@ -254,24 +323,18 @@ QString ScreenShotEffect::blitScreenshot(const QRect &geometry)
 void ScreenShotEffect::grabPointerImage(QImage& snapshot, int offsetx, int offsety)
 // Uses the X11_EXTENSIONS_XFIXES_H extension to grab the pointer image, and overlays it onto the snapshot.
 {
-    XFixesCursorImage *xcursorimg = XFixesGetCursorImage(QX11Info::display());
-    if (!xcursorimg)
+    QScopedPointer<xcb_xfixes_get_cursor_image_reply_t, QScopedPointerPodDeleter> cursor(
+        xcb_xfixes_get_cursor_image_reply(connection(),
+                                          xcb_xfixes_get_cursor_image_unchecked(connection()),
+                                          NULL));
+    if (cursor.isNull())
         return;
 
-    //Annoyingly, xfixes specifies the data to be 32bit, but places it in an unsigned long *
-    //which can be 64 bit.  So we need to iterate over a 64bit structure to put it in a 32bit
-    //structure.
-    QVarLengthArray< quint32 > pixels(xcursorimg->width * xcursorimg->height);
-    for (int i = 0; i < xcursorimg->width * xcursorimg->height; ++i)
-        pixels[i] = xcursorimg->pixels[i] & 0xffffffff;
-
-    QImage qcursorimg((uchar *) pixels.data(), xcursorimg->width, xcursorimg->height,
+    QImage qcursorimg((uchar *) xcb_xfixes_get_cursor_image_cursor_image(cursor.data()), cursor->width, cursor->height,
                       QImage::Format_ARGB32_Premultiplied);
 
     QPainter painter(&snapshot);
-    painter.drawImage(QPointF(xcursorimg->x - xcursorimg->xhot - offsetx, xcursorimg->y - xcursorimg ->yhot - offsety), qcursorimg);
-
-    XFree(xcursorimg);
+    painter.drawImage(QPointF(cursor->x - cursor->xhot - offsetx, cursor->y - cursor ->yhot - offsety), qcursorimg);
 }
 
 void ScreenShotEffect::convertFromGLImage(QImage &img, int w, int h)
@@ -307,7 +370,7 @@ void ScreenShotEffect::convertFromGLImage(QImage &img, int w, int h)
 
 bool ScreenShotEffect::isActive() const
 {
-    return m_scheduledScreenshot != NULL;
+    return m_scheduledScreenshot != NULL && !effects->isScreenLocked();
 }
 
 void ScreenShotEffect::windowClosed( EffectWindow* w )

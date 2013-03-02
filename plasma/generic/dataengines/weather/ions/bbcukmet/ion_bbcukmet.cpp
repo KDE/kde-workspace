@@ -755,7 +755,6 @@ void UKMETIon::updateWeather(const QString& source)
 
     const double lati = periodLatitude(source);
     const double longi = periodLongitude(source);
-    const QDate today = QDate::currentDate();
     const Plasma::DataEngine::Data timeData = m_timeEngine->query(
             QString("Local|Solar|Latitude=%1|Longitude=%2|DateTime=%3")
                 .arg(lati).arg(longi).arg(m_dateFormat.toString(Qt::ISODate)));

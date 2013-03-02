@@ -110,7 +110,6 @@ PlasmaComponents.ListItem {
                 PlasmaComponents.Label {
                     id: summaryLabel
                     text: summary
-                    font.bold: true
                     height: paintedHeight
                     anchors {
                         left: parent.left

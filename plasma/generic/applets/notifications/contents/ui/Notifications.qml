@@ -134,23 +134,23 @@ Column {
 
         onNewData: {
             var actions = new Array()
-            if (notificationsSource.data[sourceName]["actions"].length%2 == 0) {
-                for (var i = 0; i < notificationsSource.data[sourceName]["actions"].length; i += 2) {
+            if (data["actions"] && data["actions"].length % 2 == 0) {
+                for (var i = 0; i < data["actions"].length; i += 2) {
                     var action = new Object()
-                    action["id"] = notificationsSource.data[sourceName]["actions"][i]
-                    action["text"] = notificationsSource.data[sourceName]["actions"][i+1]
+                    action["id"] = data["actions"][i]
+                    action["text"] = data["actions"][i+1]
                     actions.push(action)
                 }
             }
             notificationsRoot.addNotification(
                     sourceName,
-                    notificationsSource.data[sourceName]["appIcon"],
-                    notificationsSource.data[sourceName]["image"],
-                    notificationsSource.data[sourceName]["appName"],
-                    notificationsSource.data[sourceName]["summary"],
-                    notificationsSource.data[sourceName]["body"],
-                    notificationsSource.data[sourceName]["expireTimeout"],
-                    notificationsSource.data[sourceName]["urgency"],
+                    data["appIcon"],
+                    data["image"],
+                    data["appName"],
+                    data["summary"],
+                    data["body"],
+                    data["expireTimeout"],
+                    data["urgency"],
                     actions)
         }
 

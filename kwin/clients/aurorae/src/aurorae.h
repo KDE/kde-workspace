@@ -106,6 +106,7 @@ class AuroraeClient : public KDecorationUnstable
     Q_PROPERTY(bool keepBelow READ keepBelow WRITE setKeepBelow NOTIFY keepBelowChangedWrapper)
     Q_PROPERTY(bool maximized READ isMaximized NOTIFY maximizeChanged)
     Q_PROPERTY(bool providesContextHelp READ providesContextHelp)
+    Q_PROPERTY(bool appMenu READ menuAvailable NOTIFY appMenuAvailableChanged)
     Q_PROPERTY(QRect transparentRect READ transparentRect)
     Q_PROPERTY(int width READ width)
     Q_PROPERTY(qulonglong windowId READ windowId CONSTANT)
@@ -150,9 +151,11 @@ Q_SIGNALS:
      **/
     void configChanged();
     void fontChanged();
+    void appMenuAvailableChanged();
 
 public slots:
     void menuClicked();
+    void appMenuClicked();
     void toggleShade();
     void toggleKeepAbove();
     void toggleKeepBelow();
@@ -166,6 +169,8 @@ public slots:
     void titlebarDblClickOperation();
     void maximize(int button);
 
+    QRegion region(KDecorationDefines::Region r);
+
 private slots:
     void themeChanged();
     void doCloseWindow();
@@ -174,6 +179,7 @@ private slots:
     void slotAlphaChanged();
 
 private:
+    void sizesFromBorders(const QObject *borders, int &left, int &right, int &top, int &bottom) const;
     QGraphicsView *m_view;
     QGraphicsScene *m_scene;
     QDeclarativeItem *m_item;

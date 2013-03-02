@@ -37,12 +37,13 @@ class Workspace;
 class Client;
 namespace TabBox
 {
+class DesktopChainManager;
 class TabBoxConfig;
 class TabBox;
 class TabBoxHandlerImpl : public TabBoxHandler
 {
 public:
-    TabBoxHandlerImpl(TabBox* tabBox);
+    explicit TabBoxHandlerImpl(TabBox* tabBox);
     virtual ~TabBoxHandlerImpl();
 
     virtual int activeScreen() const;
@@ -63,7 +64,7 @@ public:
     virtual QWeakPointer< TabBoxClient > desktopClient() const;
     virtual void hideOutline();
     virtual void showOutline(const QRect &outline);
-    virtual QVector< Window > outlineWindowIds() const;
+    virtual QVector< xcb_window_t > outlineWindowIds() const;
     virtual void activateAndClose();
 
 private:
@@ -74,12 +75,13 @@ private:
     bool checkMultiScreen(TabBoxClient* client) const;
 
     TabBox* m_tabBox;
+    DesktopChainManager* m_desktopFocusChain;
 };
 
 class TabBoxClientImpl : public TabBoxClient
 {
 public:
-    TabBoxClientImpl(Client *client);
+    explicit TabBoxClientImpl(Client *client);
     virtual ~TabBoxClientImpl();
 
     virtual QString caption() const;
@@ -107,7 +109,7 @@ class TabBox : public QObject
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.kwin")
 public:
-    TabBox(QObject *parent = NULL);
+    explicit TabBox(QObject *parent = NULL);
     ~TabBox();
 
     Client* currentClient();
@@ -163,13 +165,8 @@ public:
 
     void initShortcuts(KActionCollection* keys);
 
-    Client* nextClientFocusChain(Client*) const;
-    Client* previousClientFocusChain(Client*) const;
-    Client* firstClientFocusChain() const;
     Client* nextClientStatic(Client*) const;
     Client* previousClientStatic(Client*) const;
-    int nextDesktopFocusChain(int iDesktop) const;
-    int previousDesktopFocusChain(int iDesktop) const;
     int nextDesktopStatic(int iDesktop) const;
     int previousDesktopStatic(int iDesktop) const;
     void keyPress(int key);

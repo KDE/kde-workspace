@@ -39,5 +39,8 @@
     <method name="addRemotePlasmoid">
       <arg name="location" type="s" direction="in"/>
     </method>
+    <method name="supportInformation">
+      <arg type="s" direction="out"/>
+    </method>
   </interface>
 </node>

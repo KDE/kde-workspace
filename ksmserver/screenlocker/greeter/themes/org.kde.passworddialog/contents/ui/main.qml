@@ -32,6 +32,13 @@ Item {
         id: theme
     }
 
+    // if there's no image, have a near black background
+    Rectangle {
+        width: parent.width
+        height: parent.height
+        color: "#111"
+    }
+
     Image {
         id: background
         anchors.fill: parent
@@ -78,8 +85,13 @@ Item {
 
         Connections {
             onAccepted: lockScreen.unlockRequested()
-            onSwitchUserClicked: mainStack.push(userSessionsUI)
+            onSwitchUserClicked: { mainStack.push(userSessionsUI); userSessionsUI.forceActiveFocus(); }
         }
+    }
+
+    function returnToLogin() {
+        mainStack.pop();
+        unlockUI.resetFocus();
     }
 
     // TODO: loader
@@ -88,9 +100,9 @@ Item {
         visible: false
 
         Connections {
-            onCancel: mainStack.pop()
-            onActivateSession: mainStack.pop()
-            onStartNewSession: mainStack.pop()
+            onCancel: returnToLogin()
+            onActivateSession: returnToLogin()
+            onStartNewSession: returnToLogin()
         }
     }
 }

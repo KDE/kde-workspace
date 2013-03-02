@@ -27,6 +27,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QTimer>
+#include <QX11Info>
 
 #include <KDebug>
 #include <kmacroexpander.h>
@@ -37,6 +38,11 @@
 #include <KDesktopFile>
 #include <KStandardDirs>
 
+// X11
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <fixx11h.h>
+
 namespace ScreenLocker
 {
 
@@ -46,6 +52,7 @@ ScreenSaverWindow::ScreenSaverWindow(QWidget *parent)
       m_forbidden(false),
       m_openGLVisual(false)
 {
+    setCursor(Qt::BlankCursor);
     m_reactivateTimer = new QTimer(this);
     m_reactivateTimer->setSingleShot(true);
     connect(m_reactivateTimer, SIGNAL(timeout()), this, SLOT(show()));
@@ -125,6 +132,7 @@ void ScreenSaverWindow::mousePressEvent(QMouseEvent *event)
     //reappear in one minute
     m_reactivateTimer->start(1000 * 60);
     hide();
+    emit hidden();
 }
 
 
@@ -133,16 +141,22 @@ void ScreenSaverWindow::keyPressEvent(QKeyEvent *event)
     Q_UNUSED(event)
 
     hide();
+    emit hidden();
 }
 
 void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
 {
+    if (m_startMousePos == QPoint(-2, -2)) {
+        m_startMousePos = QPoint(-1, -1); // reset
+        return; // caused by show event
+    }
     if (m_startMousePos == QPoint(-1, -1)) {
         m_startMousePos = event->globalPos();
     }
-    if ((event->globalPos() - m_startMousePos).manhattanLength() > QApplication::startDragDistance()) {
+    else if ((event->globalPos() - m_startMousePos).manhattanLength() > QApplication::startDragDistance()) {
         m_startMousePos = QPoint(-1, -1);
         hide();
+        emit hidden();
         //reappear in one minute
         m_reactivateTimer->start(1000 * 60);
     }
@@ -150,7 +164,11 @@ void ScreenSaverWindow::mouseMoveEvent(QMouseEvent *event)
 
 void ScreenSaverWindow::showEvent(QShowEvent *event)
 {
+    m_startMousePos = QPoint(-2, -2); // prevent mouse interpretation to cause an immediate hide
     m_reactivateTimer->stop();
+    static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
+    if (testAttribute(Qt::WA_WState_Created) && internalWinId())
+        XChangeProperty(QX11Info::display(), winId(), tag, tag, 32, PropModeReplace, 0, 0);
     startXScreenSaver();
 }
 

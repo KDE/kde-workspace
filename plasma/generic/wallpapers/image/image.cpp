@@ -40,7 +40,7 @@ K_EXPORT_PLASMA_WALLPAPER(image, Image)
 Image::Image(QObject *parent, const QVariantList &args)
     : Plasma::Wallpaper(parent, args),
       m_delay(10),
-      m_fileWatch(new KDirWatch(this)),
+      m_dirWatch(new KDirWatch(this)),
       m_configWidget(0),
       m_wallpaperPackage(0),
       m_currentSlide(-1),
@@ -48,14 +48,16 @@ Image::Image(QObject *parent, const QVariantList &args)
       m_animation(0),
       m_model(0),
       m_dialog(0),
-      m_randomize(true),
       m_nextWallpaperAction(0),
       m_openImageAction(0)
 {
     connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(updateBackground(QImage)));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
-    connect(m_fileWatch, SIGNAL(dirty(QString)), this, SLOT(imageFileAltered(QString)));
-    connect(m_fileWatch, SIGNAL(created(QString)), this, SLOT(imageFileAltered(QString)));
+
+    connect(m_dirWatch, SIGNAL(created(QString)), SLOT(pathCreated(QString)));
+    connect(m_dirWatch, SIGNAL(dirty(QString)),   SLOT(pathDirty(QString)));
+    connect(m_dirWatch, SIGNAL(deleted(QString)), SLOT(pathDeleted(QString)));
+    m_dirWatch->startScan();
 }
 
 Image::~Image()
@@ -84,10 +86,10 @@ void Image::init(const KConfigGroup &config)
 
     m_color = config.readEntry("wallpapercolor", QColor(Qt::black));
     m_usersWallpapers = config.readEntry("userswallpapers", QStringList());
-    m_dirs = config.readEntry("slidepaths", QStringList());
+    QStringList dirs = config.readEntry("slidepaths", QStringList());
 
-    if (m_dirs.isEmpty()) {
-        m_dirs << KStandardDirs::installPath("wallpaper");
+    if (dirs.isEmpty()) {
+        dirs << KStandardDirs::installPath("wallpaper");
     }
 
     setUsingRenderingCache(m_mode == "SingleImage");
@@ -101,6 +103,7 @@ void Image::init(const KConfigGroup &config)
         m_openImageAction = new QAction(KIcon("document-open"), i18n("Open Wallpaper Image"), this);
         connect(m_openImageAction, SIGNAL(triggered(bool)), this, SLOT(openSlide()));
         QTimer::singleShot(200, this, SLOT(startSlideshow()));
+        updateDirWatch(dirs);
         QList<QAction*> actions;
         actions.push_back(m_nextWallpaperAction);
         actions.push_back(m_openImageAction);
@@ -411,6 +414,23 @@ void Image::updateDirs()
     m_uiSlideshow.m_removeDir->setEnabled(m_uiSlideshow.m_dirlist->currentRow() != -1);
 }
 
+void Image::updateDirWatch(const QStringList &newDirs)
+{
+    foreach(const QString &oldDir, m_dirs) {
+        if(!newDirs.contains(oldDir)) {
+            m_dirWatch->removeDir(oldDir);
+        }
+    }
+
+    foreach(const QString &newDir, newDirs) {
+        if(!m_dirWatch->contains(newDir)) {
+            m_dirWatch->addDir(newDir, KDirWatch::WatchSubDirs | KDirWatch::WatchFiles);
+        }
+    }
+
+    m_dirs = newDirs;
+}
+
 void Image::setSingleImage()
 {
     if (m_wallpaper.isEmpty()) {
@@ -532,15 +552,19 @@ void Image::setWallpaper(const QString &path)
 
 void Image::startSlideshow()
 {
-    // populate background list
-    m_timer.stop();
-    m_slideshowBackgrounds.clear();
-    BackgroundFinder *finder = new BackgroundFinder(this, m_dirs);
-    m_findToken = finder->token();
-    connect(finder, SIGNAL(backgroundsFound(QStringList,QString)), this, SLOT(backgroundsFound(QStringList,QString)));
-    finder->start();
-    //TODO: what would be cool: paint on the wallpaper itself a busy widget and perhaps some text
-    //about loading wallpaper slideshow while the thread runs
+    if(m_findToken.isEmpty()) {
+        // populate background list
+        m_timer.stop();
+        m_slideshowBackgrounds.clear();
+        BackgroundFinder *finder = new BackgroundFinder(this, m_dirs);
+        m_findToken = finder->token();
+        connect(finder, SIGNAL(backgroundsFound(QStringList,QString)), this, SLOT(backgroundsFound(QStringList,QString)));
+        finder->start();
+        //TODO: what would be cool: paint on the wallpaper itself a busy widget and perhaps some text
+        //about loading wallpaper slideshow while the thread runs
+    } else {
+        m_scanDirty = true;
+    }
 }
 
 void Image::backgroundsFound(const QStringList &paths, const QString &token)
@@ -549,10 +573,21 @@ void Image::backgroundsFound(const QStringList &paths, const QString &token)
         return;
     }
 
+    m_findToken.clear();
+
+    if(m_scanDirty) {
+        m_scanDirty = false;
+        startSlideshow();
+        return;
+    }
+
     m_slideshowBackgrounds = paths;
     updateWallpaperActions();
     // start slideshow
     if (m_slideshowBackgrounds.isEmpty()) {
+        // no image has been found, which is quite weird... try again later (this is useful for events which
+        // are not detected by KDirWatch, like a NFS directory being mounted)
+        QTimer::singleShot(1000, this, SLOT(startSlideshow()));
         m_pixmap = QPixmap();
         emit update(boundingRect());
     } else {
@@ -713,11 +748,7 @@ void Image::nextSlide()
         previous = m_wallpaperPackage->filePath("preferred");
     }
 
-    if (m_randomize) {
-        m_currentSlide = KRandom::random() % m_slideshowBackgrounds.size();
-    } else if (++m_currentSlide >= m_slideshowBackgrounds.size()) {
-        m_currentSlide = 0;
-    }
+    m_currentSlide = KRandom::random() % m_slideshowBackgrounds.size();
 
     if (!m_wallpaperPackage) {
         m_wallpaperPackage = new Plasma::Package(m_slideshowBackgrounds.at(m_currentSlide),
@@ -767,10 +798,6 @@ void Image::openSlide()
 
 void Image::renderWallpaper(const QString& image)
 {
-    if (!m_img.isEmpty()) {
-        m_fileWatch->removeFile(m_img);
-    }
-
     if (!image.isEmpty()) {
         m_img = image;
     }
@@ -779,19 +806,38 @@ void Image::renderWallpaper(const QString& image)
         return;
     }
 
-    m_fileWatch->addFile(m_img);
     render(m_img, m_size, resizeMethodHint(), m_color);
 }
 
-void Image::imageFileAltered(const QString &path)
+void Image::pathCreated(const QString &path)
 {
-    if (path == m_img) {
-        renderWallpaper(path);
-    } else {
-        // somehow this got added to the dirwatch, but we don't care about it anymore
-        m_fileWatch->removeFile(path);
+    if(!m_slideshowBackgrounds.contains(path)) {
+        QFileInfo fileInfo(path);
+        if(fileInfo.isFile() && BackgroundFinder::suffixes().contains(fileInfo.suffix().toLower())) {
+            m_slideshowBackgrounds.append(path);
+            if(m_slideshowBackgrounds.count() == 1) {
+                nextSlide();
+            }
+        }
     }
 }
+
+void Image::pathDirty(const QString &path)
+{
+    if(path == m_img) {
+        renderWallpaper(path);
+    }
+}
+
+void Image::pathDeleted(const QString &path)
+{
+    if(m_slideshowBackgrounds.removeAll(path)) {
+        if(path == m_img) {
+            nextSlide();
+        }
+    }
+}
+
 void Image::updateBackground(const QImage &img)
 {
     m_oldPixmap = m_pixmap;

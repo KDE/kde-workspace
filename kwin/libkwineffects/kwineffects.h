@@ -72,7 +72,6 @@ class ScreenPrePaintData;
 class ScreenPaintData;
 
 typedef QPair< QString, Effect* > EffectPair;
-typedef QPair< Effect*, Window > InputWindowPair;
 typedef QList< KWin::EffectWindow* > EffectWindowList;
 
 
@@ -171,7 +170,7 @@ X-KDE-Library=kwin4_effect_cooleffect
 
 #define KWIN_EFFECT_API_MAKE_VERSION( major, minor ) (( major ) << 8 | ( minor ))
 #define KWIN_EFFECT_API_VERSION_MAJOR 0
-#define KWIN_EFFECT_API_VERSION_MINOR 200
+#define KWIN_EFFECT_API_VERSION_MINOR 220
 #define KWIN_EFFECT_API_VERSION KWIN_EFFECT_API_MAKE_VERSION( \
         KWIN_EFFECT_API_VERSION_MAJOR, KWIN_EFFECT_API_VERSION_MINOR )
 
@@ -324,7 +323,7 @@ public:
     };
 
     enum Feature {
-        Nothing = 0, Resize, GeometryTip, Outline, ScreenInversion
+        Nothing = 0, Resize, GeometryTip, Outline, ScreenInversion, Blur
     };
 
     /**
@@ -438,8 +437,6 @@ public:
     virtual void windowInputMouseEvent(Window w, QEvent* e);
     virtual void grabbedKeyboardEvent(QKeyEvent* e);
 
-    virtual bool borderActivated(ElectricBorder border);
-
     /**
      * Overwrite this method to indicate whether your effect will be doing something in
      * the next frame to be rendered. If the method returns @c false the effect will be
@@ -496,6 +493,9 @@ public:
      **/
     static void setPositionTransformations(WindowPaintData& data, QRect& region, EffectWindow* w,
                                            const QRect& r, Qt::AspectRatioMode aspect);
+
+public Q_SLOTS:
+    virtual bool borderActivated(ElectricBorder border);
 };
 
 
@@ -618,7 +618,7 @@ class KWIN_EXPORT EffectsHandler : public QObject
     Q_PROPERTY(QPoint cursorPos READ cursorPos)
     friend class Effect;
 public:
-    EffectsHandler(CompositingType type);
+    explicit EffectsHandler(CompositingType type);
     virtual ~EffectsHandler();
     // for use by effects
     virtual void prePaintScreen(ScreenPrePaintData& data, int time) = 0;
@@ -634,10 +634,11 @@ public:
     // Functions for handling input - e.g. when an Expose-like effect is shown, an input window
     // covering the whole screen is created and all mouse events will be intercepted by it.
     // The effect's windowInputMouseEvent() will get called with such events.
-    virtual Window createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor) = 0;
-    Window createInputWindow(Effect* e, const QRect& r, const QCursor& cursor);
-    virtual Window createFullScreenInputWindow(Effect* e, const QCursor& cursor);
-    virtual void destroyInputWindow(Window w) = 0;
+    virtual xcb_window_t createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor) = 0;
+    xcb_window_t createInputWindow(Effect* e, const QRect& r, const QCursor& cursor);
+    virtual xcb_window_t createFullScreenInputWindow(Effect* e, const QCursor& cursor);
+    virtual void destroyInputWindow(xcb_window_t w) = 0;
+    virtual void defineCursor(xcb_window_t w, Qt::CursorShape shape) = 0;
     virtual QPoint cursorPos() const = 0;
     virtual bool grabKeyboard(Effect* effect) = 0;
     virtual void ungrabKeyboard() = 0;
@@ -652,10 +653,8 @@ public:
     virtual void startMousePolling() = 0;
     virtual void stopMousePolling() = 0;
 
-    virtual void checkElectricBorder(const QPoint &pos, Time time) = 0;
-    virtual void reserveElectricBorder(ElectricBorder border) = 0;
-    virtual void unreserveElectricBorder(ElectricBorder border) = 0;
-    virtual void reserveElectricBorderSwitching(bool reserve, Qt::Orientations o) = 0;
+    virtual void reserveElectricBorder(ElectricBorder border, Effect *effect) = 0;
+    virtual void unreserveElectricBorder(ElectricBorder border, Effect *effect) = 0;
 
     // functions that allow controlling windows/desktop
     virtual void activateWindow(KWin::EffectWindow* c) = 0;
@@ -807,6 +806,37 @@ public:
     virtual void registerPropertyType(long atom, bool reg) = 0;
     virtual QByteArray readRootProperty(long atom, long type, int format) const = 0;
     virtual void deleteRootProperty(long atom) const = 0;
+    /**
+     * @brief Announces support for the feature with the given name. If no other Effect
+     * has announced support for this feature yet, an X11 property will be installed on
+     * the root window.
+     *
+     * The Effect will be notified for events through the signal propertyNotify().
+     *
+     * To remove the support again use @link removeSupportProperty. When an Effect is
+     * destroyed it is automatically taken care of removing the support. It is not
+     * required to call @link removeSupportProperty in the Effect's cleanup handling.
+     *
+     * @param propertyName The name of the property to announce support for
+     * @param effect The effect which announces support
+     * @return xcb_atom_t The created X11 atom
+     * @see removeSupportProperty
+     * @since 4.11
+     **/
+    virtual xcb_atom_t announceSupportProperty(const QByteArray &propertyName, Effect *effect) = 0;
+    /**
+     * @brief Removes support for the feature with the given name. If there is no other Effect left
+     * which has announced support for the given property, the property will be removed from the
+     * root window.
+     *
+     * In case the Effect had not registered support, calling this function does not change anything.
+     *
+     * @param propertyName The name of the property to remove support for
+     * @param effect The effect which had registered the property.
+     * @see announceSupportProperty
+     * @since 4.11
+     **/
+    virtual void removeSupportProperty(const QByteArray &propertyName, Effect *effect) = 0;
 
     /**
      * Returns @a true if the active window decoration has shadow API hooks.
@@ -847,6 +877,18 @@ public:
     virtual void reloadEffect(Effect *effect) = 0;
 
     /**
+     * Whether the screen is currently considered as locked.
+     * Note for technical reasons this is not always possible to detect. The screen will only
+     * be considered as locked if the screen locking process implements the
+     * org.freedesktop.ScreenSaver interface.
+     *
+     * @returns @c true if the screen is currently locked, @c false otherwise
+     * @see screenLockingChanged
+     * @since 4.11
+     **/
+    virtual bool isScreenLocked() const = 0;
+
+    /**
      * Sends message over DCOP to reload given effect.
      * @param effectname effect's name without "kwin4_effect_" prefix.
      * Can be called from effect's config module to apply config changes.
@@ -877,7 +919,7 @@ Q_SIGNALS:
     * @see EffectsHandler::numberOfDesktops.
     * @since 4.7
     */
-    void numberDesktopsChanged(int old);
+    void numberDesktopsChanged(uint old);
     /**
      * Signal emitted when a new window has been added to the Workspace.
      * @param w The added window
@@ -1126,11 +1168,35 @@ Q_SIGNALS:
      * @since 4.9
      */
     void activityRemoved(const QString &id);
+    /**
+     * This signal is emitted when the screen got locked or unlocked.
+     * @param locked @c true if the screen is now locked, @c false if it is now unlocked
+     * @since 4.11
+     **/
+    void screenLockingChanged(bool locked);
+
+    /**
+     * This signels is emitted when ever the stacking order is change, ie. a window is risen
+     * or lowered
+     * @since 4.10
+     */
+    void stackingOrderChanged();
+    /**
+     * This signal is emitted when the user starts to approach the @p border with the mouse.
+     * The @p factor describes how far away the mouse is in a relative mean. The values are in
+     * [0.0, 1.0] with 0.0 being emitted when first entered and on leaving. The value 1.0 means that
+     * the @p border is reached with the mouse. So the values are well suited for animations.
+     * The signal is always emitted when the mouse cursor position changes.
+     * @param border The screen edge which is being approached
+     * @param factor Value in range [0.0,1.0] to describe how close the mouse is to the border
+     * @param geometry The geometry of the edge which is being approached
+     * @since 4.11
+     **/
+    void screenEdgeApproaching(ElectricBorder border, qreal factor, const QRect &geometry);
 
 protected:
     QVector< EffectPair > loaded_effects;
     QHash< QString, KLibrary* > effect_libraries;
-    QList< InputWindowPair > input_windows;
     //QHash< QString, EffectFactory* > effect_factories;
     CompositingType compositing_type;
 };
@@ -1331,6 +1397,16 @@ class KWIN_EXPORT EffectWindow : public QObject
      * @since 4.10
      **/
     Q_PROPERTY(bool decorationHasAlpha READ decorationHasAlpha)
+    /**
+     * Whether the window is currently visible to the user, that is:
+     * <ul>
+     * <li>Not minimized</li>
+     * <li>On current desktop</li>
+     * <li>On current activity</li>
+     * </ul>
+     * @since 4.11
+     **/
+    Q_PROPERTY(bool visible READ isVisible)
 public:
     /**  Flags explaining why painting should be disabled  */
     enum {
@@ -1348,7 +1424,7 @@ public:
         PAINT_DISABLED_BY_ACTIVITY     = 1 << 5
     };
 
-    EffectWindow(QObject *parent = NULL);
+    explicit EffectWindow(QObject *parent = NULL);
     virtual ~EffectWindow();
 
     virtual void enablePainting(int reason) = 0;
@@ -1549,6 +1625,11 @@ public:
     bool isCurrentTab() const;
 
     /**
+     * @since 4.11
+     **/
+    bool isVisible() const;
+
+    /**
      * Can be used to by effects to store arbitrary data in the EffectWindow.
      */
     Q_SCRIPTABLE virtual void setData(int role, const QVariant &data) = 0;
@@ -1565,7 +1646,7 @@ public:
 class KWIN_EXPORT GlobalShortcutsEditor : public KShortcutsEditor
 {
 public:
-    GlobalShortcutsEditor(QWidget *parent);
+    explicit GlobalShortcutsEditor(QWidget *parent);
 };
 
 /**
@@ -1834,7 +1915,7 @@ private:
 class KWIN_EXPORT WindowPaintData : public PaintData
 {
 public:
-    WindowPaintData(EffectWindow* w);
+    explicit WindowPaintData(EffectWindow* w);
     WindowPaintData(const WindowPaintData &other);
     virtual ~WindowPaintData();
     /**
@@ -2047,7 +2128,7 @@ public:
     /**
      * Calls push().
      */
-    PaintClipper(const QRegion& allowed_area);
+    explicit PaintClipper(const QRegion& allowed_area);
     /**
      * Calls pop().
      */

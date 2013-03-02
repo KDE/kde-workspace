@@ -27,10 +27,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kglobal.h>
 #include <X11/extensions/shape.h>
 
+#include "cursor.h"
 #include "notifications.h"
 #include <QX11Info>
 #include "rules.h"
 #include "group.h"
+#include "xcbutils.h"
 
 namespace KWin
 {
@@ -109,7 +111,7 @@ bool Client::manage(Window w, bool isMapped)
     setupWindowRules(false);
     setCaption(cap_normal, true);
 
-    if (Extensions::shapeAvailable())
+    if (Xcb::Extensions::self()->isShapeAvailable())
         XShapeSelectInput(display(), window(), ShapeNotifyMask);
     detectShape(window());
     detectNoBorder();
@@ -183,7 +185,7 @@ bool Client::manage(Window w, bool isMapped)
             if (on_all)
                 desk = NET::OnAllDesktops;
             else if (on_current)
-                desk = workspace()->currentDesktop();
+                desk = VirtualDesktopManager::self()->current();
             else if (maincl != NULL)
                 desk = maincl->desktop();
 
@@ -207,10 +209,10 @@ bool Client::manage(Window w, bool isMapped)
     }
 
     if (desk == 0)   // Assume window wants to be visible on the current desktop
-        desk = isDesktop() ? NET::OnAllDesktops : workspace()->currentDesktop();
+        desk = isDesktop() ? static_cast<int>(NET::OnAllDesktops) : VirtualDesktopManager::self()->current();
     desk = rules()->checkDesktop(desk, !isMapped);
     if (desk != NET::OnAllDesktops)   // Do range check
-        desk = qMax(1, qMin(workspace()->numberOfDesktops(), desk));
+        desk = qBound(1, desk, static_cast<int>(VirtualDesktopManager::self()->count()));
     info->setDesktop(desk);
     workspace()->updateOnAllDesktopsOfTransients(this);   // SELI TODO
     //onAllDesktopsChange(); // Decoration doesn't exist here yet
@@ -218,7 +220,7 @@ bool Client::manage(Window w, bool isMapped)
     QString activitiesList;
     activitiesList = rules()->checkActivity(activitiesList, !isMapped);
     if (!activitiesList.isEmpty())
-        setOnActivities(activitiesList.split(","));
+        setOnActivities(activitiesList.split(','));
 
     QRect geom(attr.x, attr.y, attr.width, attr.height);
     bool placementDone = false;
@@ -385,20 +387,41 @@ bool Client::manage(Window w, bool isMapped)
         if (isMaximizable() && (width() >= area.width() || height() >= area.height())) {
             // Window is too large for the screen, maximize in the
             // directions necessary
-            if (width() >= area.width() && height() >= area.height()) {
-                dontKeepInArea = true;
-                maximize(Client::MaximizeFull);
-                geom_restore = QRect(); // Use placement when unmaximizing
-            } else if (width() >= area.width()) {
-                maximize(Client::MaximizeHorizontal);
-                geom_restore = QRect(); // Use placement when unmaximizing
-                geom_restore.setY(y());   // But only for horizontal direction
-                geom_restore.setHeight(height());
-            } else if (height() >= area.height()) {
-                maximize(Client::MaximizeVertical);
-                geom_restore = QRect(); // Use placement when unmaximizing
-                geom_restore.setX(x());   // But only for vertical direction
-                geom_restore.setWidth(width());
+            const QSize ss = workspace()->clientArea(ScreenArea, area.center(), desktop()).size();
+            const QSize fs = workspace()->clientArea(FullArea, geom.center(), desktop()).size();
+            const QSize cs = clientSize();
+            int pseudo_max = Client::MaximizeRestore;
+            if (width() >= area.width())
+                pseudo_max |=  Client::MaximizeHorizontal;
+            if (height() >= area.height())
+                pseudo_max |=  Client::MaximizeVertical;
+
+            // heuristics:
+            // if decorated client is smaller than the entire screen, the user might want to move it around (multiscreen)
+            // in this case, if the decorated client is bigger than the screen (+1), we don't take this as an
+            // attempt for maximization, but just constrain the size (the window simply wants to be bigger)
+            // NOTICE
+            // i intended a second check on cs < area.size() ("the managed client ("minus border") is smaller
+            // than the workspace") but gtk / gimp seems to store it's size including the decoration,
+            // thus a former maximized window wil become non-maximized
+            if (width() < fs.width() && (cs.width() > ss.width()+1))
+                pseudo_max &= ~Client::MaximizeHorizontal;
+            if (height() < fs.height() && (cs.height() > ss.height()+1))
+                pseudo_max &= ~Client::MaximizeVertical;
+
+            if (pseudo_max != Client::MaximizeRestore) {
+                maximize((MaximizeMode)pseudo_max);
+                // from now on, care about maxmode, since the maximization call will override mode for fix aspects
+                dontKeepInArea = (max_mode == Client::MaximizeFull);
+                geom_restore = QRect(); // Use placement when unmaximizing ...
+                if (!(max_mode & Client::MaximizeVertical)) {
+                    geom_restore.setY(y());   // ...but only for horizontal direction
+                    geom_restore.setHeight(height());
+                }
+                if (!(max_mode & Client::MaximizeHorizontal)) {
+                    geom_restore.setX(x());   // ...but only for vertical direction
+                    geom_restore.setWidth(width());
+                }
             }
         }
     }
@@ -551,7 +574,7 @@ bool Client::manage(Window w, bool isMapped)
             } else if (allow) {
                 // also force if activation is allowed
                 if (!isOnCurrentDesktop()) {
-                    workspace()->setCurrentDesktop(desktop());
+                    VirtualDesktopManager::self()->setCurrent(desktop());
                 }
                 /*if (!isOnCurrentActivity()) {
                     workspace()->setCurrentActivity( activities().first() );
@@ -633,8 +656,8 @@ void Client::embedClient(Window w, const XWindowAttributes& attr)
     const uint32_t cw_values[] = {
         0,                                // back_pixmap
         0,                                // border_pixel
-        attr.colormap,                    // colormap
-        QCursor(Qt::ArrowCursor).handle() // cursor
+        static_cast<uint32_t>(attr.colormap),                    // colormap
+        Cursor::x11Cursor(Qt::ArrowCursor)
     };
 
     const uint32_t cw_mask = XCB_CW_BACK_PIXMAP | XCB_CW_BORDER_PIXEL |

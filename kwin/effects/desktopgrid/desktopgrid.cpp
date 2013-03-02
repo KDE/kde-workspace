@@ -41,6 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGui/QVector2D>
 #include <Plasma/FrameSvg>
 #include <Plasma/PushButton>
+#include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 
 namespace KWin
@@ -79,7 +80,7 @@ DesktopGridEffect::DesktopGridEffect()
     connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
-    connect(effects, SIGNAL(numberDesktopsChanged(int)), this, SLOT(slotNumberDesktopsChanged(int)));
+    connect(effects, SIGNAL(numberDesktopsChanged(uint)), this, SLOT(slotNumberDesktopsChanged(uint)));
     connect(effects, SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowGeometryShapeChanged(KWin::EffectWindow*,QRect)));
 
     // Load all other configuration details
@@ -88,9 +89,6 @@ DesktopGridEffect::DesktopGridEffect()
 
 DesktopGridEffect::~DesktopGridEffect()
 {
-    foreach (ElectricBorder border, borderActivate) {
-        effects->unreserveElectricBorder(border);
-    }
     QHash< DesktopButtonsView*, EffectWindow* >::iterator i = m_desktopButtonsViews.begin();
     while (i != m_desktopButtonsViews.end()) {
         DesktopButtonsView *view = i.key();
@@ -104,12 +102,12 @@ void DesktopGridEffect::reconfigure(ReconfigureFlags)
     DesktopGridConfig::self()->readConfig();
 
     foreach (ElectricBorder border, borderActivate) {
-        effects->unreserveElectricBorder(border);
+        effects->unreserveElectricBorder(border, this);
     }
     borderActivate.clear();
     foreach (int i, DesktopGridConfig::borderActivate()) {
         borderActivate.append(ElectricBorder(i));
-        effects->reserveElectricBorder(ElectricBorder(i));
+        effects->reserveElectricBorder(ElectricBorder(i), this);
     }
 
     // TODO: rename zoomDuration to duration
@@ -523,7 +521,7 @@ void DesktopGridEffect::windowInputMouseEvent(Window, QEvent* e)
                     }
                     m_proxy->calculateWindowTransformations(manager.managedWindows(), windowMove->screen(), manager);
                 }
-                XDefineCursor(display(), input, QCursor(Qt::ClosedHandCursor).handle());
+                effects->defineCursor(input, Qt::ClosedHandCursor);
             }
             wasWindowMove = true;
             if (windowMove->isMovable() && !isUsingPresentWindows()) {
@@ -541,7 +539,7 @@ void DesktopGridEffect::windowInputMouseEvent(Window, QEvent* e)
         } else if ((me->buttons() & Qt::LeftButton) && !wasDesktopMove &&
                   (me->pos() - dragStartPos).manhattanLength() > KGlobalSettings::dndEventDelay()) {
             wasDesktopMove = true;
-            XDefineCursor(display(), input, QCursor(Qt::ClosedHandCursor).handle());
+            effects->defineCursor(input, Qt::ClosedHandCursor);
         }
         if (d != highlightedDesktop) { // Highlight desktop
             if ((me->buttons() & Qt::LeftButton) && isValidMove && !wasWindowMove && d <= effects->numberOfDesktops()) {
@@ -675,9 +673,9 @@ void DesktopGridEffect::windowInputMouseEvent(Window, QEvent* e)
             }
             effects->setElevatedWindow(windowMove, false);
             windowMove = NULL;
-            XDefineCursor(display(), input, QCursor(Qt::PointingHandCursor).handle());
+            effects->defineCursor(input, Qt::PointingHandCursor);
         } else if (wasDesktopMove)
-            XDefineCursor(display(), input, QCursor(Qt::PointingHandCursor).handle());
+            effects->defineCursor(input, Qt::PointingHandCursor);
         wasWindowMove = false;
         wasDesktopMove = false;
     }
@@ -1270,11 +1268,11 @@ void DesktopGridEffect::slotRemoveDesktop()
     effects->setNumberOfDesktops(effects->numberOfDesktops() - 1);
 }
 
-void DesktopGridEffect::slotNumberDesktopsChanged(int old)
+void DesktopGridEffect::slotNumberDesktopsChanged(uint old)
 {
     if (!activated)
         return;
-    const int desktop = effects->numberOfDesktops();
+    const uint desktop = effects->numberOfDesktops();
     bool enableAdd = desktop < 20;
     bool enableRemove = desktop > 1;
     for (QHash< DesktopButtonsView*, EffectWindow* >::iterator it = m_desktopButtonsViews.begin();
@@ -1418,7 +1416,11 @@ DesktopButtonsView::DesktopButtonsView(QWidget* parent)
     scene->addItem(form);
 
     m_frame = new Plasma::FrameSvg(this);
-    m_frame->setImagePath("dialogs/background");
+    if (Plasma::Theme::defaultTheme()->currentThemeHasImage("translucent/dialogs/background")) {
+        m_frame->setImagePath("translucent/dialogs/background");
+    } else {
+        m_frame->setImagePath("dialogs/background");
+    }
     m_frame->setCacheAllRenderedFrames(true);
     m_frame->setEnabledBorders(Plasma::FrameSvg::AllBorders);
     qreal left, top, right, bottom;
@@ -1427,7 +1429,6 @@ DesktopButtonsView::DesktopButtonsView(QWidget* parent)
     qreal height = form->size().height() + top + bottom;
     m_frame->resizeFrame(QSizeF(width, height));
     Plasma::WindowEffects::enableBlurBehind(winId(), true, m_frame->mask());
-    Plasma::WindowEffects::overrideShadow(winId(), true);
     form->setPos(left, top);
     scene->setSceneRect(QRectF(QPointF(0, 0), QSizeF(width, height)));
     setScene(scene);

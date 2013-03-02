@@ -23,6 +23,8 @@
 #include <QtCore/QStringList>
 
 
+static const int MAX_GROUPS_SUPPORTED = 4;
+
 KeySymbols::KeySymbols()
 {
 }
@@ -43,6 +45,10 @@ void KeySymbols::setKey(const QString& a)
     st=st.remove(" ");
     //QStringList klst;
     symbols=st.split(",");
+
+    if( symbols.size() > MAX_GROUPS_SUPPORTED ) {
+    	symbols = symbols.mid(0, MAX_GROUPS_SUPPORTED);
+    }
 
     for(int k=0;k<symbols.size();k++){
         QString du=symbols.at(k);

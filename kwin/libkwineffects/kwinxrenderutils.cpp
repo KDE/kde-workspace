@@ -21,41 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kwinxrenderutils.h"
 #include "kwinglobals.h"
 
-#ifdef KWIN_HAVE_XRENDER_COMPOSITING
-
 #include <QStack>
-#include <QVector>
 #include <QPixmap>
-#include <QPainter>
 #include <kdebug.h>
 
 namespace KWin
 {
 
-// Convert QRegion to XserverRegion. All code uses XserverRegion
-// only when really necessary as the shared implementation uses
-// QRegion.
-XserverRegion toXserverRegion(QRegion region)
-{
-    QVector< QRect > rects = region.rects();
-    XRectangle* xr = new XRectangle[ rects.count()];
-    for (int i = 0;
-            i < rects.count();
-            ++i) {
-        xr[ i ].x = rects[ i ].x();
-        xr[ i ].y = rects[ i ].y();
-        xr[ i ].width = rects[ i ].width();
-        xr[ i ].height = rects[ i ].height();
-    }
-    XserverRegion ret = XFixesCreateRegion(display(), xr, rects.count());
-    delete[] xr;
-    return ret;
-}
-
 // adapted from Qt, because this really sucks ;)
-XRenderColor preMultiply(const QColor &c, float opacity)
+xcb_render_color_t preMultiply(const QColor &c, float opacity)
 {
-    XRenderColor color;
+    xcb_render_color_t color;
     const uint A = c.alpha() * opacity,
                R = c.red(),
                G = c.green(),
@@ -67,157 +43,101 @@ XRenderColor preMultiply(const QColor &c, float opacity)
     return color;
 }
 
-XRenderPicture xRenderFill(const XRenderColor *xc)
+XRenderPicture xRenderFill(const xcb_render_color_t &c)
 {
-    Pixmap pixmap = XCreatePixmap(display(), rootWindow(), 1, 1, 32);
-    XRenderPictureAttributes pa; pa.repeat = True;
+    xcb_pixmap_t pixmap = xcb_generate_id(connection());
+    xcb_create_pixmap(connection(), 32, pixmap, rootWindow(), 1, 1);
     XRenderPicture fill(pixmap, 32);
-    XFreePixmap(display(), pixmap);
-    XRenderChangePicture(display(), fill, CPRepeat, &pa);
-    XRenderFillRectangle(display(), PictOpSrc, fill, xc, 0, 0, 1, 1);
+    xcb_free_pixmap(connection(), pixmap);
+
+    uint32_t values[] = {true};
+    xcb_render_change_picture(connection(), fill, XCB_RENDER_CP_REPEAT, values);
+
+    xcb_rectangle_t rect = {0, 0, 1, 1};
+    xcb_render_fill_rectangles(connection(), XCB_RENDER_PICT_OP_SRC, fill, c, 1, &rect);
     return fill;
 }
 
 XRenderPicture xRenderFill(const QColor &c)
 {
-    XRenderColor xc = preMultiply(c);
-    return xRenderFill(&xc);
+    return xRenderFill(preMultiply(c));
 }
 
-static XRenderPicture _blendPicture = X::None;
-static XRenderColor _blendColor;
 XRenderPicture xRenderBlendPicture(double opacity)
 {
-    _blendColor.alpha = ushort(opacity * 0xffff);
-    if (_blendPicture == X::None)
-        _blendPicture = xRenderFill(&_blendColor);
-    else
-        XRenderFillRectangle(display(), PictOpSrc, _blendPicture, &_blendColor, 0, 0, 1, 1);
-    return _blendPicture;
-}
-
-
-static XRenderPicture *_circle[4] = {NULL, NULL, NULL, NULL};
-
-#define DUMP_CNR(_SECT_, _W_, _H_, _XOFF_, _YOFF_)\
-    dump = QPixmap(_W_, _H_);\
-    dump.fill(Qt::transparent);\
-    p.begin(&dump);\
-    p.drawPixmap( 0, 0, tmp, _XOFF_, _YOFF_, _W_, _H_ );\
-    p.end();\
-    _circle[_SECT_] = new XRenderPicture(dump);
-
-#define CS 8
-
-static XRenderPicture *circle(int i)
-{
-    if (!_circle[0]) {
-        QPixmap tmp(2 * CS, 2 * CS);
-        tmp.fill(Qt::transparent);
-        QPainter p(&tmp);
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setPen(Qt::NoPen); p.setBrush(Qt::black);
-        p.drawEllipse(tmp.rect());
-        p.end();
-        QPixmap dump;
-        DUMP_CNR(0, CS, CS, 0, 0);
-        DUMP_CNR(1, CS, CS, CS, 0);
-        DUMP_CNR(2, CS, CS, CS, CS);
-        DUMP_CNR(3, CS, CS, 0, CS);
+    static XRenderPicture s_blendPicture(XCB_RENDER_PICTURE_NONE);
+    static xcb_render_color_t s_blendColor = {0, 0, 0, 0};
+    s_blendColor.alpha = uint16_t(opacity * 0xffff);
+    if (s_blendPicture == XCB_RENDER_PICTURE_NONE) {
+        s_blendPicture = xRenderFill(s_blendColor);
+    } else {
+        xcb_rectangle_t rect = {0, 0, 1, 1};
+        xcb_render_fill_rectangles(connection(), XCB_RENDER_PICT_OP_SRC, s_blendPicture, s_blendColor, 1, &rect);
     }
-    return _circle[i];
+    return s_blendPicture;
 }
 
-void xRenderRoundBox(Picture pict, const QRect &rect, int , const QColor &c)
+static xcb_render_picture_t createPicture(xcb_pixmap_t pix, int depth)
 {
-    XRenderPicture fill = xRenderFill(c);
-    int op = c.alpha() == 255 ? PictOpSrc : PictOpOver;
-    // TODO: implement second paramenter "roundness"
-    // so rather use ?? XRenderCompositeTriFan (dpy, op, src, dst, maskFormat, xSrc, ySrc,
-    //XPointFixed *points, npoint);
-    // this will require "points on a circle" calculation, however...
-
-    int s = qMin(CS, qMin(rect.height() / 2, rect.width() / 2));
-    int x, y, b, r;
-    rect.getCoords(&x, &y, &r, &b);
-    r -= (s - 1);
-    b -= (s - 1);
-    XRenderComposite(display(), PictOpOver, fill, *circle(0), pict, 0, 0, 0, 0, x, y, CS, CS);
-    XRenderComposite(display(), PictOpOver, fill, *circle(1), pict, 0, 0, CS - s, 0, r, y, s, s);
-    XRenderComposite(display(), PictOpOver, fill, *circle(2), pict, 0, 0, CS - s, CS - s, r, b, s, s);
-    XRenderComposite(display(), PictOpOver, fill, *circle(3), pict, 0, 0, 0, CS - s, x, b, s, s);
-    XRenderComposite(display(), op, fill, 0, pict, 0, 0, 0, 0, x + s, y, rect.width() - 2 * s, s);
-    XRenderComposite(display(), op, fill, 0, pict, 0, 0, 0, 0, x, y + s, rect.width(), rect.height() - 2 * s);
-    XRenderComposite(display(), op, fill, 0, pict, 0, 0, 0, 0, x + s, b, rect.width() - 2 * s, s);
-}
-
-#undef CS
-#undef DUMP_CNR
-
-// XRenderFind(Standard)Format() is a roundtrip, so cache the results
-static XRenderPictFormat* renderformats[ 33 ];
-
-static Picture createPicture(Pixmap pix, int depth)
-{
-    if (pix == None)
-        return None;
-    if (renderformats[ depth ] == NULL) {
-        switch(depth) {
-        case 1:
-            renderformats[ 1 ] = XRenderFindStandardFormat(display(), PictStandardA1);
-            break;
-        case 8:
-            renderformats[ 8 ] = XRenderFindStandardFormat(display(), PictStandardA8);
-            break;
-        case 24:
-            renderformats[ 24 ] = XRenderFindStandardFormat(display(), PictStandardRGB24);
-            break;
-        case 32:
-            renderformats[ 32 ] = XRenderFindStandardFormat(display(), PictStandardARGB32);
-            break;
-        default: {
-            XRenderPictFormat req;
-            long mask = PictFormatType | PictFormatDepth;
-            req.type = PictTypeDirect;
-            req.depth = depth;
-            renderformats[ depth ] = XRenderFindFormat(display(), mask, &req, 0);
-            break;
+    if (pix == XCB_PIXMAP_NONE)
+        return XCB_RENDER_PICTURE_NONE;
+    static QHash<int, xcb_render_pictformat_t> s_renderFormats;
+    if (!s_renderFormats.contains(depth)) {
+        xcb_render_query_pict_formats_reply_t *formats = xcb_render_query_pict_formats_reply(connection(), xcb_render_query_pict_formats_unchecked(connection()), NULL);
+        if (!formats) {
+            return XCB_RENDER_PICTURE_NONE;
         }
+        for (xcb_render_pictforminfo_iterator_t it = xcb_render_query_pict_formats_formats_iterator(formats);
+                it.rem;
+                xcb_render_pictforminfo_next(&it)) {
+            if (it.data->depth == depth) {
+                s_renderFormats.insert(depth, it.data->id);
+                break;
+            }
         }
-        if (renderformats[ depth ] == NULL) {
-            kWarning(1212) << "Could not find XRender format for depth" << depth;
-            return None;
-        }
+        free(formats);
     }
-    return XRenderCreatePicture(display(), pix, renderformats[ depth ], 0, NULL);
+    QHash<int, xcb_render_pictformat_t>::const_iterator it = s_renderFormats.constFind(depth);
+    if (it == s_renderFormats.constEnd()) {
+        kWarning(1212) << "Could not find XRender format for depth" << depth;
+        return XCB_RENDER_PICTURE_NONE;
+    }
+    xcb_render_picture_t pic = xcb_generate_id(connection());
+    xcb_render_create_picture(connection(), pic, pix, it.value(), 0, NULL);
+    return pic;
 }
 
 XRenderPicture::XRenderPicture(QPixmap pix)
 {
-    if (Extensions::nonNativePixmaps()) {
-        Pixmap xPix = XCreatePixmap(display(), rootWindow(), pix.width(), pix.height(), pix.depth());
-        QPixmap tempPix = QPixmap::fromX11Pixmap(xPix, QPixmap::ExplicitlyShared);
-        tempPix.fill(Qt::transparent);
-        QPainter p(&tempPix);
-        p.drawPixmap(QPoint(0, 0), pix);
-        p.end();
-        d = new XRenderPictureData(createPicture(tempPix.handle(), tempPix.depth()));
-        XFreePixmap(display(), xPix);
-    } else {
+    if (!Extensions::nonNativePixmaps()) {
         d = new XRenderPictureData(createPicture(pix.handle(), pix.depth()));
+        return;
     }
+    QImage img(pix.toImage());
+    const int depth = img.depth();
+    xcb_pixmap_t xpix = xcb_generate_id(connection());
+    xcb_create_pixmap(connection(), depth, xpix, rootWindow(), img.width(), img.height());
+
+    xcb_gcontext_t cid = xcb_generate_id(connection());
+    xcb_create_gc(connection(), cid, xpix, 0, NULL);
+    xcb_put_image(connection(), XCB_IMAGE_FORMAT_Z_PIXMAP, xpix, cid, img.width(), img.height(),
+                  0, 0, 0, depth, img.byteCount(), img.constBits());
+    xcb_free_gc(connection(), cid);
+
+    d = new XRenderPictureData(createPicture(xpix, depth));
+    xcb_free_pixmap(connection(), xpix);
 }
 
-XRenderPicture::XRenderPicture(Pixmap pix, int depth)
+XRenderPicture::XRenderPicture(xcb_pixmap_t pix, int depth)
     : d(new XRenderPictureData(createPicture(pix, depth)))
 {
 }
 
-static QPixmap *s_offscreenTarget = 0;
+static xcb_render_picture_t s_offscreenTarget = XCB_RENDER_PICTURE_NONE;
 static QStack<XRenderPicture*> s_scene_offscreenTargetStack;
 static int s_renderOffscreen = 0;
 
-void scene_setXRenderOffscreenTarget(QPixmap *pix)
+void scene_setXRenderOffscreenTarget(xcb_render_picture_t pix)
 {
     s_offscreenTarget = pix;
 }
@@ -257,11 +177,9 @@ bool xRenderOffscreen()
     return s_renderOffscreen;
 }
 
-QPixmap *xRenderOffscreenTarget()
+xcb_render_picture_t xRenderOffscreenTarget()
 {
     return s_offscreenTarget;
 }
 
 } // namespace
-
-#endif

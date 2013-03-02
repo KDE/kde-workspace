@@ -46,7 +46,7 @@ void Hdd::init()
     QString predicateString("IS StorageVolume");
     setEngine(dataEngine("soliddevice"));
 
-    setTitle(i18n("Disk Space"), true);
+    setTitle(i18n("Disk Space"));
 
     configChanged();
 }

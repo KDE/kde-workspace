@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // own
 #include "dbusinterface.h"
+
 // kwin
 // TODO: remove together with deprecated methods
 #include "client.h"
@@ -27,6 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "effects.h"
 #include "kwinadaptor.h"
 #include "workspace.h"
+#include "virtualdesktops.h"
+
+// Qt
+#include <QDBusServiceWatcher>
 
 namespace KWin
 {
@@ -38,7 +43,10 @@ DBusInterface::DBusInterface(QObject *parent)
 
     QDBusConnection dbus = QDBusConnection::sessionBus();
     dbus.registerObject("/KWin", this);
-    dbus.registerService("org.kde.KWin");
+    if (!dbus.registerService("org.kde.KWin")) {
+        QDBusServiceWatcher *dog = new QDBusServiceWatcher("org.kde.KWin", dbus, QDBusServiceWatcher::WatchForUnregistration, this);
+        connect (dog, SIGNAL(serviceUnregistered(const QString&)), SLOT(becomeKWinService(const QString&)));
+    }
     connect(Compositor::self(), SIGNAL(compositingToggled(bool)), SIGNAL(compositingToggled(bool)));
     dbus.connect(QString(), "/KWin", "org.kde.KWin", "reloadConfig",
                  Workspace::self(), SLOT(slotReloadConfig()));
@@ -46,23 +54,36 @@ DBusInterface::DBusInterface(QObject *parent)
                  Compositor::self(), SLOT(slotReinitialize()));
 }
 
+void DBusInterface::becomeKWinService(const QString &service)
+{
+    // TODO: this watchdog exists to make really safe that we at some point get the service
+    // but it's probably no longer needed since we explicitly unregister the service with the deconstructor
+    if (service == "org.kde.KWin" && QDBusConnection::sessionBus().registerService("org.kde.KWin") && sender()) {
+        sender()->deleteLater(); // bye doggy :'(
+    }
+}
+
 DBusInterface::~DBusInterface()
 {
+    QDBusConnection::sessionBus().unregisterService("org.kde.KWin"); // this is the long standing legal service
+    // KApplication automatically also grabs org.kde.kwin, so it's often been used externally - ensure to free it as well
+    QDBusConnection::sessionBus().unregisterService("org.kde.kwin");
 }
 
 void DBusInterface::circulateDesktopApplications()
 {
     Workspace *ws = Workspace::self();
+    const uint desktop = VirtualDesktopManager::self()->current();
     const QList<Client*> &desktops = ws->desktopList();
     if (desktops.count() > 1) {
         bool change_active = ws->activeClient()->isDesktop();
-        ws->raiseClient(ws->findDesktop(false, currentDesktop()));
+        ws->raiseClient(ws->findDesktop(false, desktop));
         if (change_active)   // if the previously topmost Desktop was active, activate this new one
-            ws->activateClient(ws->findDesktop(true, currentDesktop()));
+            ws->activateClient(ws->findDesktop(true, desktop));
     }
     // if there's no active client, make desktop the active one
     if (desktops.count() > 0 && ws->activeClient() == NULL && ws->mostRecentlyActivatedClient() == NULL)
-        ws->activateClient(ws->findDesktop(true, currentDesktop()));
+        ws->activateClient(ws->findDesktop(true, desktop));
 }
 
 // wrap void methods with no arguments to Workspace
@@ -73,8 +94,6 @@ void DBusInterface::name() \
 }
 
 WRAP(killWindow)
-WRAP(nextDesktop)
-WRAP(previousDesktop)
 WRAP(reconfigure)
 
 #undef WRAP
@@ -97,7 +116,6 @@ rettype DBusInterface::name( ) \
     return Workspace::self()->name(); \
 }
 
-WRAP(int, currentDesktop)
 WRAP(QList<int>, decorationSupportedColors)
 WRAP(QString, supportInformation)
 WRAP(bool, waitForCompositingSetup)
@@ -111,7 +129,6 @@ rettype DBusInterface::name( argtype arg ) \
     return Workspace::self()->name(arg); \
 }
 
-WRAP(bool, setCurrentDesktop, int)
 WRAP(bool, startActivity, const QString &)
 WRAP(bool, stopActivity, const QString &)
 
@@ -197,6 +214,26 @@ QString DBusInterface::supportInformationForEffect(const QString &name)
         static_cast< EffectsHandlerImpl* >(effects)->supportInformation(name);
     }
     return QString();
+}
+
+int DBusInterface::currentDesktop()
+{
+    return VirtualDesktopManager::self()->current();
+}
+
+bool DBusInterface::setCurrentDesktop(int desktop)
+{
+    return VirtualDesktopManager::self()->setCurrent(desktop);
+}
+
+void DBusInterface::nextDesktop()
+{
+    VirtualDesktopManager::self()->moveTo<DesktopNext>();
+}
+
+void DBusInterface::previousDesktop()
+{
+    VirtualDesktopManager::self()->moveTo<DesktopPrevious>();
 }
 
 } // namespace

@@ -28,7 +28,7 @@ QT4_ADD_DBUS_INTERFACE(ksld_SRCS ${powerdevilpolicyagent_xml} powerdevilpolicyag
 
 kde4_add_library(screenlocker_static STATIC ${ksld_SRCS})
 
-target_link_libraries(screenlocker_static kworkspace kephal ${KDE4_KDEUI_LIBS} ${KDE4_KIDLETIME_LIBS} ${X11_LIBRARIES})
+target_link_libraries(screenlocker_static kworkspace ${KDE4_KDEUI_LIBS} ${KDE4_KIDLETIME_LIBS} ${X11_LIBRARIES})
 
 # Needed to compile on Arm target.
 set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")

@@ -20,9 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "snaphelper.h"
 
-#include "kwinglutils.h"
+#include <kwinglutils.h>
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
-#include "kwinxrenderutils.h"
+#include <kwinxrenderutils.h>
+#include <xcb/render.h>
 #endif
 
 namespace KWin
@@ -39,20 +40,11 @@ SnapHelperEffect::SnapHelperEffect()
     connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowStartUserMovedResized(KWin::EffectWindow*)), this, SLOT(slotWindowStartUserMovedResized(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowFinishUserMovedResized(KWin::EffectWindow*)), this, SLOT(slotWindowFinishUserMovedResized(KWin::EffectWindow*)));
-
-    /*if ( effects->compositingType() == XRenderCompositing )
-        {
-        XGCValues gcattr;
-        // TODO: Foreground color
-        gcattr.line_width = 4;
-        m_gc = XCreateGC( display(), rootWindow(), GCLineWidth, &gcattr );
-        }*/
+    connect(effects, SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*, const QRect&)), this, SLOT(slotWindowResized(KWin::EffectWindow*, const QRect&)));
 }
 
 SnapHelperEffect::~SnapHelperEffect()
 {
-    //if ( effects->compositingType() == XRenderCompositing )
-    //    XFreeGC( display(), m_gc );
 }
 
 void SnapHelperEffect::reconfigure(ReconfigureFlags)
@@ -94,7 +86,7 @@ void SnapHelperEffect::postPaintScreen()
             glLineWidth(4.0);
             QVector<float> verts;
             verts.reserve(effects->numScreens() * 24);
-            for (int i = 0; i < effects->numScreens(); i++) {
+            for (int i = 0; i < effects->numScreens(); ++i) {
                 const QRect& rect = effects->clientArea(ScreenArea, i, 0);
                 int midX = rect.x() + rect.width() / 2;
                 int midY = rect.y() + rect.height() / 2 ;
@@ -126,14 +118,14 @@ void SnapHelperEffect::postPaintScreen()
         }
         if ( effects->compositingType() == XRenderCompositing ) {
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
-            for ( int i = 0; i < effects->numScreens(); i++ ) {
+            for (int i = 0; i < effects->numScreens(); ++i) {
                 const QRect& rect = effects->clientArea( ScreenArea, i, 0 );
                 int midX = rect.x() + rect.width() / 2;
                 int midY = rect.y() + rect.height() / 2 ;
                 int halfWidth = m_window->width() / 2;
                 int halfHeight = m_window->height() / 2;
 
-                XRectangle rects[6];
+                xcb_rectangle_t rects[6];
                 // Center lines
                 rects[0].x = rect.x() + rect.width() / 2 - 2;
                 rects[0].y = rect.y();
@@ -163,8 +155,8 @@ void SnapHelperEffect::postPaintScreen()
                 rects[5].width = 4;
                 rects[5].height = 2*halfHeight - 4;
 
-                XRenderColor c = preMultiply(QColor(128, 128, 128, m_timeline.currentValue()*128));
-                XRenderFillRectangles(display(), PictOpOver, effects->xrenderBufferPicture(), &c, rects, 6);
+                xcb_render_fill_rectangles(connection(), XCB_RENDER_PICT_OP_OVER, effects->xrenderBufferPicture(),
+                                           preMultiply(QColor(128, 128, 128, m_timeline.currentValue()*128)), 6, rects);
             }
 #endif
         }
@@ -198,6 +190,17 @@ void SnapHelperEffect::slotWindowFinishUserMovedResized(EffectWindow *w)
     if (m_active) {
         m_active = false;
         effects->addRepaintFull();
+    }
+}
+
+void SnapHelperEffect::slotWindowResized(KWin::EffectWindow *w, const QRect &oldRect)
+{
+    if (w == m_window) {
+        QRect r(oldRect);
+        for (int i = 0; i < effects->numScreens(); ++i) {
+            r.moveCenter(effects->clientArea( ScreenArea, i, 0 ).center());
+            effects->addRepaint(r);
+        }
     }
 }
 

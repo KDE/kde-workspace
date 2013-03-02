@@ -23,10 +23,10 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.kscreenlocker 1.0
 
 Item {
+    id: root
     signal accepted()
     signal switchUserClicked()
     signal canceled()
-    property alias cancelEnabled: cancelButton.visible
     property alias notification: message.text
     property bool switchUserEnabled
     property bool capsLockOn
@@ -36,6 +36,10 @@ Item {
     anchors {
         fill: parent
         margins: 6
+    }
+
+    function resetFocus() {
+        focusTimer.running = true;
     }
 
     Column {
@@ -73,7 +77,7 @@ Item {
 
         PlasmaComponents.Label {
             id: lockMessage
-            text: kscreenlocker_userName.empty ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
+            text: kscreenlocker_userName.length == 0 ? i18n("The session is locked") : i18n("The session has been locked by %1", kscreenlocker_userName)
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
@@ -96,6 +100,7 @@ Item {
                 }
             }
             Timer {
+                id: focusTimer
                 interval: 10
                 running: true
                 onTriggered: {
@@ -107,33 +112,52 @@ Item {
 
         PlasmaComponents.ButtonRow {
             id: buttonRow
+            property bool showAccel: false
             exclusive: false
             spacing: theme.defaultFont.mSize.width / 2
             anchors.horizontalCenter: parent.horizontalCenter
 
-            PlasmaComponents.Button {
+            AccelButton {
                 id: switchUser
-                text: i18n("Switch User")
+                label: i18n("&Switch Users")
                 iconSource: "fork"
                 visible: switchUserEnabled
                 onClicked: switchUserClicked()
             }
 
-            PlasmaComponents.Button {
+            AccelButton {
                 id: unlock
-                text: i18n("Unlock")
+                label: i18n("Un&lock")
                 iconSource: "object-unlocked"
                 onClicked: greeter.verify()
             }
+        }
+    }
 
-            PlasmaComponents.Button {
-                id: cancelButton
-                text: i18n("Cancel")
-                iconSource: "dialog-cancel"
-                onClicked: canceled()
-                visible: false
+    Keys.onPressed: {
+        var alt = (event.modifiers & Qt.AltModifier);
+        buttonRow.showAccel = alt;
+
+        if (alt) {
+            // focus munging is needed otherwise the greet (QWidget)
+            // eats all the key events, even if root is added to forwardTo
+            // qml property of greeter
+            greeter.focus = false;
+            root.forceActiveFocus();
+
+            var buttons = [switchUser, unlock]
+            for (var b = 0; b < buttons.length; ++b) {
+                if (event.key == buttons[b].accelKey) {
+                    buttonRow.showAccel = false;
+                    buttons[b].clicked();
+                    break;
+                }
             }
         }
+    }
+
+    Keys.onReleased: {
+        buttonRow.showAccel = (event.modifiers & Qt.AltModifier)
     }
 
     Connections {

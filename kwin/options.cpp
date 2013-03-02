@@ -38,6 +38,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "client.h"
 #include "compositingprefs.h"
+#include "settings.h"
+#include "xcbutils.h"
 #include <kwinglplatform.h>
 
 #include <X11/extensions/Xrandr.h>
@@ -72,7 +74,8 @@ int currentRefreshRate()
                     dotclock *= 2;
                 if (modeline.flags & 0x0020) // V_DBLSCAN
                     vtotal *= 2;
-                rate = 1000*dotclock/(modeline.htotal*vtotal); // WTF was wikipedia 1998 when I nedded it?
+                if (modeline.htotal*vtotal) // BUG 313996
+                    rate = 1000*dotclock/(modeline.htotal*vtotal); // WTF was wikipedia 1998 when I nedded it?
                 kDebug(1212) << "Vertical Refresh Rate (as detected by XF86VM): " << rate << "Hz";
             }
         }
@@ -98,7 +101,7 @@ int currentRefreshRate()
         }
     }
 #endif
-    else if (Extensions::randrAvailable()) {
+    else if (Xcb::Extensions::self()->isRandrAvailable()) {
         XRRScreenConfiguration *config = XRRGetScreenInfo(display(), rootWindow());
         rate = XRRConfigCurrentRate(config);
         XRRFreeScreenConfigInfo(config);
@@ -117,30 +120,31 @@ int currentRefreshRate()
 
 Options::Options(QObject *parent)
     : QObject(parent)
-    , m_focusPolicy(Options::defaultFocusPolicy())
-    , m_nextFocusPrefersMouse(Options::defaultNextFocusPrefersMouse())
-    , m_clickRaise(Options::defaultClickRaise())
-    , m_autoRaise(Options::defaultAutoRaise())
-    , m_autoRaiseInterval(Options::defaultAutoRaiseInterval())
-    , m_delayFocusInterval(Options::defaultDelayFocusInterval())
-    , m_shadeHover(Options::defaultShadeHover())
-    , m_shadeHoverInterval(Options::defaultShadeHoverInterval())
-    , m_separateScreenFocus(Options::defaultSeparateScreenFocus())
-    , m_activeMouseScreen(Options::defaultActiveMouseScreen())
-    , m_placement(Options::defaultPlacement())
-    , m_borderSnapZone(Options::defaultBorderSnapZone())
-    , m_windowSnapZone(Options::defaultWindowSnapZone())
-    , m_centerSnapZone(Options::defaultCenterSnapZone())
-    , m_snapOnlyWhenOverlapping(Options::defaultSnapOnlyWhenOverlapping())
-    , m_showDesktopIsMinimizeAll(Options::defaultShowDesktopIsMinimizeAll())
-    , m_rollOverDesktops(Options::defaultRollOverDesktops())
-    , m_focusStealingPreventionLevel(Options::defaultFocusStealingPreventionLevel())
-    , m_legacyFullscreenSupport(Options::defaultLegacyFullscreenSupport())
-    , m_killPingTimeout(Options::defaultKillPingTimeout())
-    , m_hideUtilityWindowsForInactive(Options::defaultHideUtilityWindowsForInactive())
-    , m_inactiveTabsSkipTaskbar(Options::defaultInactiveTabsSkipTaskbar())
-    , m_autogroupSimilarWindows(Options::defaultAutogroupSimilarWindows())
-    , m_autogroupInForeground(Options::defaultAutogroupInForeground())
+    , m_settings(new Settings(KGlobal::config()))
+    , m_focusPolicy(ClickToFocus)
+    , m_nextFocusPrefersMouse(false)
+    , m_clickRaise(false)
+    , m_autoRaise(false)
+    , m_autoRaiseInterval(0)
+    , m_delayFocusInterval(0)
+    , m_shadeHover(false)
+    , m_shadeHoverInterval(0)
+    , m_separateScreenFocus(false)
+    , m_activeMouseScreen(false)
+    , m_placement(Placement::NoPlacement)
+    , m_borderSnapZone(0)
+    , m_windowSnapZone(0)
+    , m_centerSnapZone(0)
+    , m_snapOnlyWhenOverlapping(false)
+    , m_showDesktopIsMinimizeAll(false)
+    , m_rollOverDesktops(false)
+    , m_focusStealingPreventionLevel(0)
+    , m_legacyFullscreenSupport(false)
+    , m_killPingTimeout(0)
+    , m_hideUtilityWindowsForInactive(false)
+    , m_inactiveTabsSkipTaskbar(false)
+    , m_autogroupSimilarWindows(false)
+    , m_autogroupInForeground(false)
     , m_compositingMode(Options::defaultCompositingMode())
     , m_useCompositing(Options::defaultUseCompositing())
     , m_compositingInitialized(Options::defaultCompositingInitialized())
@@ -174,26 +178,16 @@ Options::Options(QObject *parent)
     , CmdAll3(Options::defaultCommandAll3())
     , CmdAllWheel(Options::defaultCommandAllWheel())
     , CmdAllModKey(Options::defaultKeyCmdAllModKey())
-    , electric_border_top(Options::defaultElectricBorderTop())
-    , electric_border_top_right(Options::defaultElectricBorderTopRight())
-    , electric_border_right(Options::defaultElectricBorderRight())
-    , electric_border_bottom_right(Options::defaultElectricBorderBottomRight())
-    , electric_border_bottom(Options::defaultElectricBorderBottom())
-    , electric_border_bottom_left(Options::defaultElectricBorderBottomLeft())
-    , electric_border_left(Options::defaultElectricBorderLeft())
-    , electric_border_top_left(Options::defaultElectricBorderTopLeft())
-    , electric_borders(Options::defaultElectricBorders())
-    , electric_border_delay(Options::defaultElectricBorderDelay())
-    , electric_border_cooldown(Options::defaultElectricBorderCooldown())
-    , electric_border_pushback_pixels(Options::defaultElectricBorderPushbackPixels())
-    , electric_border_maximize(Options::defaultElectricBorderMaximize())
-    , electric_border_tiling(Options::defaultElectricBorderTiling())
-    , electric_border_corner_ratio(Options::defaultElectricBorderCornerRatio())
-    , borderless_maximized_windows(Options::defaultBorderlessMaximizedWindows())
-    , show_geometry_tip(Options::defaultShowGeometryTip())
-    , condensed_title(Options::defaultCondensedTitle())
+    , electric_border_maximize(false)
+    , electric_border_tiling(false)
+    , electric_border_corner_ratio(0.0)
+    , borderless_maximized_windows(false)
+    , show_geometry_tip(false)
+    , condensed_title(false)
     , animationSpeed(Options::defaultAnimationSpeed())
 {
+    m_settings->setDefaults();
+    syncFromKcfgc();
 }
 
 Options::~Options()
@@ -300,7 +294,7 @@ void Options::setSeparateScreenFocus(bool separateScreenFocus)
         return;
     }
     m_separateScreenFocus = separateScreenFocus;
-    emit separateScreenFocusChanged();
+    emit separateScreenFocusChanged(m_separateScreenFocus);
 }
 
 void Options::setActiveMouseScreen(bool activeMouseScreen)
@@ -372,7 +366,7 @@ void Options::setRollOverDesktops(bool rollOverDesktops)
         return;
     }
     m_rollOverDesktops = rollOverDesktops;
-    emit rollOverDesktopsChanged();
+    emit rollOverDesktopsChanged(m_rollOverDesktops);
 }
 
 void Options::setFocusStealingPreventionLevel(int focusStealingPreventionLevel)
@@ -547,33 +541,6 @@ void Options::setCondensedTitle(bool condensedTitle)
     }
     condensed_title = condensedTitle;
     emit condensedTitleChanged();
-}
-
-void Options::setElectricBorderDelay(int electricBorderDelay)
-{
-    if (electric_border_delay == electricBorderDelay) {
-        return;
-    }
-    electric_border_delay = electricBorderDelay;
-    emit electricBorderDelayChanged();
-}
-
-void Options::setElectricBorderCooldown(int electricBorderCooldown)
-{
-    if (electric_border_cooldown == electricBorderCooldown) {
-        return;
-    }
-    electric_border_cooldown = electricBorderCooldown;
-    emit electricBorderCooldownChanged();
-}
-
-void Options::setElectricBorderPushbackPixels(int electricBorderPushbackPixels)
-{
-    if (electric_border_pushback_pixels == electricBorderPushbackPixels) {
-        return;
-    }
-    electric_border_pushback_pixels = electricBorderPushbackPixels;
-    emit electricBorderPushbackPixelsChanged();
 }
 
 void Options::setElectricBorderMaximize(bool electricBorderMaximize)
@@ -801,15 +768,6 @@ void Options::setGlLegacy(bool glLegacy)
     emit glLegacyChanged();
 }
 
-void Options::setElectricBorders(int borders)
-{
-    if (electric_borders == borders) {
-        return;
-    }
-    electric_borders = borders;
-    emit electricBordersChanged();
-}
-
 void Options::reparseConfiguration()
 {
     KGlobal::config()->reparseConfiguration();
@@ -839,90 +797,18 @@ unsigned long Options::updateSettings()
 unsigned long Options::loadConfig()
 {
     KSharedConfig::Ptr _config = KGlobal::config();
+    m_settings->readConfig();
     unsigned long changed = 0;
-    changed |= KDecorationOptions::updateSettings(_config.data());   // read decoration settings
+    changed |= KDecorationOptions::updateSettings(m_settings->config());   // read decoration settings
 
-    KConfigGroup config(_config, "Windows");
-    setShowGeometryTip(config.readEntry("GeometryTip", Options::defaultShowGeometryTip()));
-    setCondensedTitle(config.readEntry("CondensedTitle", Options::defaultCondensedTitle()));
-
-    QString val;
-
-    val = config.readEntry("FocusPolicy", "ClickToFocus");
-    if (val == "FocusFollowsMouse") {
-        setFocusPolicy(FocusFollowsMouse);
-    } else if (val == "FocusUnderMouse") {
-        setFocusPolicy(FocusUnderMouse);
-    } else if (val == "FocusStrictlyUnderMouse") {
-        setFocusPolicy(FocusStrictlyUnderMouse);
-    } else {
-        setFocusPolicy(Options::defaultFocusPolicy());
-    }
-
-    setNextFocusPrefersMouse(config.readEntry("NextFocusPrefersMouse", Options::defaultNextFocusPrefersMouse()));
-
-    setSeparateScreenFocus(config.readEntry("SeparateScreenFocus", Options::defaultSeparateScreenFocus()));
-    setActiveMouseScreen(config.readEntry("ActiveMouseScreen", m_focusPolicy != ClickToFocus));
-
-    setRollOverDesktops(config.readEntry("RollOverDesktops", Options::defaultRollOverDesktops()));
-
-    setLegacyFullscreenSupport(config.readEntry("LegacyFullscreenSupport", Options::defaultLegacyFullscreenSupport()));
-
-    setFocusStealingPreventionLevel(config.readEntry("FocusStealingPreventionLevel", Options::defaultFocusStealingPreventionLevel()));
-
-#ifdef KWIN_BUILD_DECORATIONS
-    setPlacement(Placement::policyFromString(config.readEntry("Placement"), true));
-#else
-    setPlacement(Placement::Maximizing);
-#endif
-
-    setAutoRaise(config.readEntry("AutoRaise", Options::defaultAutoRaise()));
-    setAutoRaiseInterval(config.readEntry("AutoRaiseInterval", Options::defaultAutoRaiseInterval()));
-    setDelayFocusInterval(config.readEntry("DelayFocusInterval", Options::defaultDelayFocusInterval()));
-
-    setShadeHover(config.readEntry("ShadeHover", Options::defaultShadeHover()));
-    setShadeHoverInterval(config.readEntry("ShadeHoverInterval", Options::defaultShadeHoverInterval()));
-
-    setClickRaise(config.readEntry("ClickRaise", Options::defaultClickRaise()));
-
-    setBorderSnapZone(config.readEntry("BorderSnapZone", Options::defaultBorderSnapZone()));
-    setWindowSnapZone(config.readEntry("WindowSnapZone", Options::defaultWindowSnapZone()));
-    setCenterSnapZone(config.readEntry("CenterSnapZone", Options::defaultCenterSnapZone()));
-    setSnapOnlyWhenOverlapping(config.readEntry("SnapOnlyWhenOverlapping", Options::defaultSnapOnlyWhenOverlapping()));
+    syncFromKcfgc();
 
     // Electric borders
-    KConfigGroup borderConfig(_config, "ElectricBorders");
-    // TODO: add setters
-    electric_border_top = electricBorderAction(borderConfig.readEntry("Top", "None"));
-    electric_border_top_right = electricBorderAction(borderConfig.readEntry("TopRight", "None"));
-    electric_border_right = electricBorderAction(borderConfig.readEntry("Right", "None"));
-    electric_border_bottom_right = electricBorderAction(borderConfig.readEntry("BottomRight", "None"));
-    electric_border_bottom = electricBorderAction(borderConfig.readEntry("Bottom", "None"));
-    electric_border_bottom_left = electricBorderAction(borderConfig.readEntry("BottomLeft", "None"));
-    electric_border_left = electricBorderAction(borderConfig.readEntry("Left", "None"));
-    electric_border_top_left = electricBorderAction(borderConfig.readEntry("TopLeft", "None"));
-    setElectricBorders(config.readEntry("ElectricBorders", Options::defaultElectricBorders()));
-    setElectricBorderDelay(config.readEntry("ElectricBorderDelay", Options::defaultElectricBorderDelay()));
-    setElectricBorderCooldown(config.readEntry("ElectricBorderCooldown", Options::defaultElectricBorderCooldown()));
-    setElectricBorderPushbackPixels(config.readEntry("ElectricBorderPushbackPixels", Options::defaultElectricBorderPushbackPixels()));
-    setElectricBorderMaximize(config.readEntry("ElectricBorderMaximize", Options::defaultElectricBorderMaximize()));
-    setElectricBorderTiling(config.readEntry("ElectricBorderTiling", Options::defaultElectricBorderTiling()));
-    const float ebr = config.readEntry("ElectricBorderCornerRatio", Options::defaultElectricBorderCornerRatio());
-    setElectricBorderCornerRatio(qMin(qMax(ebr, 0.0f), 1.0f));
-
+    KConfigGroup config(_config, "Windows");
     OpTitlebarDblClick = windowOperation(config.readEntry("TitlebarDoubleClickCommand", "Maximize"), true);
     setOpMaxButtonLeftClick(windowOperation(config.readEntry("MaximizeButtonLeftClickCommand", "Maximize"), true));
     setOpMaxButtonMiddleClick(windowOperation(config.readEntry("MaximizeButtonMiddleClickCommand", "Maximize (vertical only)"), true));
     setOpMaxButtonRightClick(windowOperation(config.readEntry("MaximizeButtonRightClickCommand", "Maximize (horizontal only)"), true));
-
-    setKillPingTimeout(config.readEntry("KillPingTimeout", Options::defaultKillPingTimeout()));
-    setHideUtilityWindowsForInactive(config.readEntry("HideUtilityWindowsForInactive", Options::defaultHideUtilityWindowsForInactive()));
-    setInactiveTabsSkipTaskbar(config.readEntry("InactiveTabsSkipTaskbar", Options::defaultInactiveTabsSkipTaskbar()));
-    setAutogroupSimilarWindows(config.readEntry("AutogroupSimilarWindows", Options::defaultAutogroupSimilarWindows()));
-    setAutogroupInForeground(config.readEntry("AutogroupInForeground", Options::defaultAutogroupInForeground()));
-    setShowDesktopIsMinimizeAll(config.readEntry("ShowDesktopIsMinimizeAll", Options::defaultShowDesktopIsMinimizeAll()));
-
-    setBorderlessMaximizedWindows(config.readEntry("BorderlessMaximizedWindows", Options::defaultBorderlessMaximizedWindows()));
 
     // Mouse bindings
     config = KConfigGroup(_config, "MouseBindings");
@@ -951,6 +837,47 @@ unsigned long Options::loadConfig()
     setVBlankTime(config.readEntry("VBlankTime", Options::defaultVBlankTime()));
 
     return changed;
+}
+
+void Options::syncFromKcfgc()
+{
+    setShowGeometryTip(m_settings->geometryTip());
+    setCondensedTitle(m_settings->condensedTitle());
+    setFocusPolicy(m_settings->focusPolicy());
+    setNextFocusPrefersMouse(m_settings->nextFocusPrefersMouse());
+    setSeparateScreenFocus(m_settings->separateScreenFocus());
+    setActiveMouseScreen(m_settings->activeMouseScreen());
+    setRollOverDesktops(m_settings->rollOverDesktops());
+    setLegacyFullscreenSupport(m_settings->legacyFullscreenSupport());
+    setFocusStealingPreventionLevel(m_settings->focusStealingPreventionLevel());
+
+#ifdef KWIN_BUILD_DECORATIONS
+    setPlacement(m_settings->placement());
+#else
+    setPlacement(Placement::Maximizing);
+#endif
+
+    setAutoRaise(m_settings->autoRaise());
+    setAutoRaiseInterval(m_settings->autoRaiseInterval());
+    setDelayFocusInterval(m_settings->delayFocusInterval());
+    setShadeHover(m_settings->shadeHover());
+    setShadeHoverInterval(m_settings->shadeHoverInterval());
+    setClickRaise(m_settings->clickRaise());
+    setBorderSnapZone(m_settings->borderSnapZone());
+    setWindowSnapZone(m_settings->windowSnapZone());
+    setCenterSnapZone(m_settings->centerSnapZone());
+    setSnapOnlyWhenOverlapping(m_settings->snapOnlyWhenOverlapping());
+    setKillPingTimeout(m_settings->killPingTimeout());
+    setHideUtilityWindowsForInactive(m_settings->hideUtilityWindowsForInactive());
+    setInactiveTabsSkipTaskbar(m_settings->inactiveTabsSkipTaskbar());
+    setAutogroupSimilarWindows(m_settings->autogroupSimilarWindows());
+    setAutogroupInForeground(m_settings->autogroupInForeground());
+    setShowDesktopIsMinimizeAll(m_settings->showDesktopIsMinimizeAll());
+    setBorderlessMaximizedWindows(m_settings->borderlessMaximizedWindows());
+    setElectricBorderMaximize(m_settings->electricBorderMaximize());
+    setElectricBorderTiling(m_settings->electricBorderTiling());
+    setElectricBorderCornerRatio(m_settings->electricBorderCornerRatio());
+
 }
 
 bool Options::loadCompositingConfig (bool force)
@@ -1050,17 +977,6 @@ void Options::reloadCompositingSettings(bool force)
     animationSpeed = qBound(0, config.readEntry("AnimationSpeed", Options::defaultAnimationSpeed()), 6);
 }
 
-
-ElectricBorderAction Options::electricBorderAction(const QString& name)
-{
-    QString lowerName = name.toLower();
-    if (lowerName == "dashboard") return ElectricActionDashboard;
-    else if (lowerName == "showdesktop") return ElectricActionShowDesktop;
-    else if (lowerName == "lockscreen") return ElectricActionLockScreen;
-    else if (lowerName == "preventscreenlocking") return ElectricActionPreventScreenLocking;
-    return ElectricActionNone;
-}
-
 // restricted should be true for operations that the user may not be able to repeat
 // if the window is moved out of the workspace (e.g. if the user moves a window
 // by the titlebar, and moves it too high beneath Kicker at the top edge, they
@@ -1143,47 +1059,6 @@ bool Options::showGeometryTip() const
 bool Options::condensedTitle() const
 {
     return condensed_title;
-}
-
-ElectricBorderAction Options::electricBorderAction(ElectricBorder edge) const
-{
-    switch(edge) {
-    case ElectricTop:
-        return electric_border_top;
-    case ElectricTopRight:
-        return electric_border_top_right;
-    case ElectricRight:
-        return electric_border_right;
-    case ElectricBottomRight:
-        return electric_border_bottom_right;
-    case ElectricBottom:
-        return electric_border_bottom;
-    case ElectricBottomLeft:
-        return electric_border_bottom_left;
-    case ElectricLeft:
-        return electric_border_left;
-    case ElectricTopLeft:
-        return electric_border_top_left;
-    default:
-        // fallthrough
-        break;
-    }
-    return ElectricActionNone;
-}
-
-int Options::electricBorders() const
-{
-    return electric_borders;
-}
-
-int Options::electricBorderDelay() const
-{
-    return electric_border_delay;
-}
-
-int Options::electricBorderCooldown() const
-{
-    return electric_border_cooldown;
 }
 
 Options::MouseCommand Options::wheelToMouseCommand(MouseWheelCommand com, int delta) const

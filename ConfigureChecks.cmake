@@ -1,5 +1,9 @@
 include(UnixAuth)
-macro_log_feature(PAM_FOUND "libpam" "PAM Libraries" "https://www.kernel.org/pub/linux/libs/pam/" FALSE "" "Required for screen unlocking and optionally used by the KDM log in manager")
+set_package_properties(PAM PROPERTIES DESCRIPTION "PAM Libraries"
+                       URL "https://www.kernel.org/pub/linux/libs/pam/"
+                       TYPE OPTIONAL
+                       PURPOSE "Required for screen unlocking and optionally used by the KDM log in manager"
+                      )
 include(CheckTypeSize)
 include(FindPkgConfig)
 

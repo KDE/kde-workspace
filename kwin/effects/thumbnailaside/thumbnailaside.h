@@ -47,6 +47,7 @@ public:
     ThumbnailAsideEffect();
     virtual void reconfigure(ReconfigureFlags);
     virtual void paintScreen(int mask, QRegion region, ScreenPaintData& data);
+    virtual void paintWindow(EffectWindow *w, int mask, QRegion region, WindowPaintData &data);
 
     // for properties
     int configuredMaxWidth() const {
@@ -67,11 +68,11 @@ private slots:
     void slotWindowGeometryShapeChanged(KWin::EffectWindow *w, const QRect &old);
     void slotWindowDamaged(KWin::EffectWindow* w, const QRect& damage);
     virtual bool isActive() const;
+    void repaintAll();
 private:
     void addThumbnail(EffectWindow* w);
     void removeThumbnail(EffectWindow* w);
     void arrange();
-    void repaintAll();
     struct Data {
         EffectWindow* window; // the same like the key in the hash (makes code simpler)
         int index;
@@ -82,6 +83,7 @@ private:
     int spacing;
     double opacity;
     int screen;
+    QRegion painted;
 };
 
 } // namespace

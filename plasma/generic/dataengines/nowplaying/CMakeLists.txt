@@ -15,7 +15,7 @@ set(nowplaying_engine_SRCS
     playerinterface/mpris2/mpris2.cpp
 )
 
-QT4_ADD_DBUS_INTERFACE(nowplaying_engine_SRCS playerinterface/org.kde.juk.player.xml juk_interface)
+qt4_add_dbus_interface(nowplaying_engine_SRCS playerinterface/org.kde.juk.player.xml juk_interface)
 
 set(mpris_player_desc playerinterface/mpris/org.freedesktop.MediaPlayer.player.xml)
 set_source_files_properties(${mpris_player_desc} PROPERTIES
@@ -23,11 +23,15 @@ set_source_files_properties(${mpris_player_desc} PROPERTIES
    INCLUDE "playerinterface/mpris/mprisdbustypes.h"
    CLASSNAME MprisPlayer
 )
-QT4_ADD_DBUS_INTERFACE(nowplaying_engine_SRCS ${mpris_player_desc} mprisplayer)
+qt4_add_dbus_interface(nowplaying_engine_SRCS ${mpris_player_desc} mprisplayer)
 
 if(GLIB2_FOUND)
    macro_optional_find_package(Xmms)
-   macro_log_feature(XMMS_FOUND "XMMS" "X MultiMedia System development libraries" "http://www.xmms.org" FALSE "" "Support for XMMS in the Now Playing data engine")
+   set_package_properties(Xmms PROPERTIES DESCRIPTION "X MultiMedia System development libraries"
+                          URL "http://www.xmms.org"
+                          TYPE OPTIONAL
+                          PURPOSE "Support for XMMS in the Now Playing data engine"
+                         )
    if(XMMS_FOUND)
       include_directories(${XMMS_INCLUDE_DIRS})
       include_directories(${GLIB2_INCLUDE_DIR})

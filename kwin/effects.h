@@ -30,12 +30,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QHash>
 #include <Plasma/FrameSvg>
 
-
+class QDBusPendingCallWatcher;
+class QDBusServiceWatcher;
 class KService;
+class OrgFreedesktopScreenSaverInterface;
 
 
 namespace KWin
 {
+typedef QPair< Effect*, xcb_window_t > InputWindowPair;
 
 class ThumbnailItem;
 
@@ -43,6 +46,7 @@ class Client;
 class Compositor;
 class Deleted;
 class Unmanaged;
+class ScreenLockerWatcher;
 
 class EffectsHandlerImpl : public EffectsHandler
 {
@@ -133,22 +137,23 @@ public:
     virtual double animationTimeFactor() const;
     virtual WindowQuadType newWindowQuadType();
 
-    virtual Window createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor);
+    virtual xcb_window_t createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor);
     using EffectsHandler::createInputWindow;
-    virtual void destroyInputWindow(Window w);
+    virtual void destroyInputWindow(xcb_window_t w);
+    virtual void defineCursor(xcb_window_t w, Qt::CursorShape shape);
     virtual bool checkInputWindowEvent(XEvent* e);
     virtual void checkInputWindowStacking();
 
-    virtual void checkElectricBorder(const QPoint &pos, Time time);
-    virtual void reserveElectricBorder(ElectricBorder border);
-    virtual void unreserveElectricBorder(ElectricBorder border);
-    virtual void reserveElectricBorderSwitching(bool reserve, Qt::Orientations o);
+    virtual void reserveElectricBorder(ElectricBorder border, Effect *effect);
+    virtual void unreserveElectricBorder(ElectricBorder border, Effect *effect);
 
     virtual unsigned long xrenderBufferPicture();
     virtual void reconfigure();
     virtual void registerPropertyType(long atom, bool reg);
     virtual QByteArray readRootProperty(long atom, long type, int format) const;
     virtual void deleteRootProperty(long atom) const;
+    virtual xcb_atom_t announceSupportProperty(const QByteArray& propertyName, Effect* effect);
+    virtual void removeSupportProperty(const QByteArray& propertyName, Effect* effect);
 
     virtual bool hasDecorationShadows() const;
 
@@ -159,10 +164,10 @@ public:
     virtual EffectFrame* effectFrame(EffectFrameStyle style, bool staticSize, const QPoint& position, Qt::Alignment alignment) const;
 
     virtual QVariant kwinOption(KWinOption kwopt);
+    virtual bool isScreenLocked() const;
 
     // internal (used by kwin core or compositing code)
     void startPaint();
-    bool borderActivated(ElectricBorder border);
     void grabbedKeyboardEvent(QKeyEvent* e);
     bool hasKeyboardGrab() const;
     void desktopResized(const QSize &size);
@@ -223,7 +228,6 @@ protected:
     QMultiMap< int, EffectPair > effect_order;
     QHash< long, int > registered_atoms;
     int next_window_quad_type;
-    int mouse_poll_ref_count;
 
 private Q_SLOTS:
     void slotEffectsQueried();
@@ -235,15 +239,20 @@ private:
     QList< Effect* >::iterator m_currentPaintEffectFrameIterator;
     QList< Effect* >::iterator m_currentPaintScreenIterator;
     QList< Effect* >::iterator m_currentBuildQuadsIterator;
+    typedef QHash< QByteArray, QList< Effect*> > PropertyEffectMap;
+    PropertyEffectMap m_propertiesForEffects;
+    QHash<QByteArray, qulonglong> m_managedProperties;
     Compositor *m_compositor;
     Scene *m_scene;
+    QList< InputWindowPair > input_windows;
+    ScreenLockerWatcher *m_screenLockerWatcher;
 };
 
 class EffectWindowImpl : public EffectWindow
 {
     Q_OBJECT
 public:
-    EffectWindowImpl(Toplevel *toplevel);
+    explicit EffectWindowImpl(Toplevel *toplevel);
     virtual ~EffectWindowImpl();
 
     virtual void enablePainting(int reason);
@@ -295,7 +304,7 @@ class EffectWindowGroupImpl
     : public EffectWindowGroup
 {
 public:
-    EffectWindowGroupImpl(Group* g);
+    explicit EffectWindowGroupImpl(Group* g);
     virtual EffectWindowList members() const;
 private:
     Group* group;
@@ -380,6 +389,29 @@ private:
 
     Scene::EffectFrame* m_sceneFrame;
     GLShader* m_shader;
+};
+
+class ScreenLockerWatcher : public QObject
+{
+    Q_OBJECT
+public:
+    explicit ScreenLockerWatcher(QObject *parent = 0);
+    virtual ~ScreenLockerWatcher();
+    bool isLocked() const {
+        return m_locked;
+    }
+Q_SIGNALS:
+    void locked(bool locked);
+private Q_SLOTS:
+    void setLocked(bool activated);
+    void activeQueried(QDBusPendingCallWatcher *watcher);
+    void serviceOwnerChanged(const QString &serviceName, const QString &oldOwner, const QString &newOwner);
+    void serviceRegisteredQueried();
+    void serviceOwnerQueried();
+private:
+    OrgFreedesktopScreenSaverInterface *m_interface;
+    QDBusServiceWatcher *m_serviceWatcher;
+    bool m_locked;
 };
 
 inline
