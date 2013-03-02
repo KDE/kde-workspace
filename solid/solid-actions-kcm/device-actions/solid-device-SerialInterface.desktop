@@ -142,6 +142,7 @@ Name[zh_CN]=端口
 Name[zh_TW]=連接埠
 
 [Desktop Action serialType]
+# ctxt: The physical type of serial port (ie. USB, RS232, etc)
 Name=Serial Type
 Name[ar]=نوع التسلسل
 Name[ast]=Triba serie
