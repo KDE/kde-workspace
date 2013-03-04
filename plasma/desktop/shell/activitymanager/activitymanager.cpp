@@ -99,7 +99,7 @@ void ActivityManagerPrivate::init(Plasma::Location loc)
     structure->setPath(path);
 
     package = new Plasma::Package(path, pluginName, structure);
-    KGlobal::locale()->insertCatalog("plasma_package_org.kde.desktop.activitymanager");
+    KGlobal::locale()->insertCatalog("plasma_package_" + pluginName);
 
     declarativeWidget = new Plasma::DeclarativeWidget(q);
     declarativeWidget->setInitializationDelayed(true);
