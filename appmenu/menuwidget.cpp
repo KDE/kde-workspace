@@ -255,6 +255,9 @@ void MenuWidget::setActiveAction(QAction *action)
                 m_currentButton = button;
                 break;
             }
+            if (++i >= m_menu->actions().length()) {
+                break;
+            }
         }
     }
     m_currentButton->nativeWidget()->animateClick();
