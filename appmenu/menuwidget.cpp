@@ -42,6 +42,7 @@ MenuWidget::MenuWidget(QGraphicsView *view) :
     m_layout(new QGraphicsLinearLayout(this)),
     m_currentButton(0),
     m_contentBottomMargin(0),
+    m_mousePosition(-1, -1),
     m_visibleMenu(0),
     m_menu(0)
 {
@@ -166,11 +167,19 @@ void MenuWidget::slotCheckActiveItem()
     QPoint pos =  m_view->mapFromGlobal(QCursor::pos());
     QGraphicsItem* item = m_view->itemAt(pos);
 
-    if (item)
-        buttonBelow = qobject_cast<MenuButton*>(item->toGraphicsObject());
-
-    if (!buttonBelow)
+    if (pos == m_mousePosition) {
         return;
+    } else {
+        m_mousePosition = pos;
+    }
+
+    if (item) {
+        buttonBelow = qobject_cast<MenuButton*>(item->toGraphicsObject());
+    }
+
+    if (!buttonBelow) {
+        return;
+    }
 
     if (buttonBelow != m_currentButton) {
         if (m_currentButton) {
