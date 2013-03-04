@@ -58,7 +58,7 @@ MenuBar::MenuBar()
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     //Setup the widgets
-    m_background->setImagePath("widgets/panel-background");
+    m_background->setImagePath("widgets/tooltip");
     m_background->setEnabledBorders(Plasma::FrameSvg::BottomBorder|Plasma::FrameSvg::LeftBorder|Plasma::FrameSvg::RightBorder);
 
     m_container->initLayout();
