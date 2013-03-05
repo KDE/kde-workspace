@@ -525,16 +525,20 @@ void BackgroundDialog::saveConfig()
 
     const QString wallpaperPlugin = d->backgroundDialogUi.wallpaperMode->itemData(d->backgroundDialogUi.wallpaperMode->currentIndex()).value<WallpaperInfo>().first;
     const QString wallpaperMode = d->backgroundDialogUi.wallpaperMode->itemData(d->backgroundDialogUi.wallpaperMode->currentIndex()).value<WallpaperInfo>().second;
-    const QString containment = d->backgroundDialogUi.containmentComboBox->itemData(d->backgroundDialogUi.containmentComboBox->currentIndex(),
+    const QString containmentPlugin = d->backgroundDialogUi.containmentComboBox->itemData(d->backgroundDialogUi.containmentComboBox->currentIndex(),
                                                           AppletDelegate::PluginNameRole).toString();
 
     // Containment
-    if (isLayoutChangeable() && d->containment) {
-        if (d->containment.data()->pluginName() != containment) {
-            disconnect(d->containment.data(), SIGNAL(destroyed()), this, SLOT(close()));
-            disconnect(this, 0, d->containment.data(), 0);
+    if (isLayoutChangeable()) {
+        if (!d->containment || d->containment.data()->pluginName() != containmentPlugin) {
+            if (d->containment) {
+                disconnect(d->containment.data(), SIGNAL(destroyed()), this, SLOT(close()));
+                disconnect(this, 0, d->containment.data(), 0);
+            }
 
-            d->containment = d->view->swapContainment(d->containment.data(), containment);
+            Plasma::Containment *containment = d->view->swapContainment(d->containment.data(), containmentPlugin);
+            if (containment != d->containment.data()) {
+                d->containment = containment;
             emit containmentPluginChanged(d->containment.data());
 
             //remove all pages but our own
@@ -573,6 +577,7 @@ void BackgroundDialog::saveConfig()
                 connect(this, SIGNAL(okClicked()), d->containment.data(), SLOT(configDialogFinished()));
             }
             connect(d->containment.data(), SIGNAL(destroyed()), this, SLOT(close()));
+            }
         }
 
         // Wallpaper
