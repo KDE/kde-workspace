@@ -10,7 +10,6 @@ set(fakenetworktest_SRCS fakenetworktest.cpp )
 kde4_add_unit_test(fakenetworktest TESTNAME solid-control-fakenetworktest ${fakenetworktest_SRCS})
 
 target_link_libraries(fakenetworktest solid_fakenet_static solidcontrolifaces ${KDE4_KDECORE_LIBS} ${QT_QTTEST_LIBRARY} )
-add_definitions(-DTEST_DATA="\\"${CMAKE_CURRENT_SOURCE_DIR}/../fakenetworking.xml\\"")
 
 ########### install files ###############
 
