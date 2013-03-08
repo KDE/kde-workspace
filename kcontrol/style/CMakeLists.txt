@@ -5,6 +5,7 @@ include_directories( ${QIMAGEBLITZ_INCLUDES} )
 include_directories (
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/libkwineffects
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/libkdecorations
+    ${KDEBASE_WORKSPACE_BINARY_DIR}/kwin/libkwineffects
 )
 
 ########### next target ###############
