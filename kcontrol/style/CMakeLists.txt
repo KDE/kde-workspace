@@ -1,6 +1,11 @@
 KDE4_NO_ENABLE_FINAL(styles)
 
 include_directories( ${QIMAGEBLITZ_INCLUDES} )
+# needed for including kdecoration.h
+include_directories (
+    ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/libkwineffects
+    ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/libkdecorations
+)
 
 ########### next target ###############
 
