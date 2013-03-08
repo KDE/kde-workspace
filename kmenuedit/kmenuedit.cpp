@@ -106,6 +106,13 @@ void KMenuEdit::setupActions()
     action = actionCollection()->addAction(SORT_BY_DESCRIPTION_ACTION_NAME);
     action->setText(i18n("&Description"));
     sortMenu->addAction(action);
+    // move up/down
+    action = actionCollection()->addAction(MOVE_UP_ACTION_NAME);
+    action->setIcon(KIcon("go-up"));
+    action->setText(i18n("&Move Up"));
+    action = actionCollection()->addAction(MOVE_DOWN_ACTION_NAME);
+    action->setIcon(KIcon("go-down"));
+    action->setText(i18n("&Move Down"));
 
     actionCollection()->addAction(KStandardAction::Save, this, SLOT(slotSave()));
     actionCollection()->addAction(KStandardAction::Quit, this, SLOT(close()));

@@ -14,6 +14,9 @@
 </Menu>
 
 <Menu name="edit" noMerge="1"><text>&amp;Edit</text>
+ <Action name="move_up"/>
+ <Action name="move_down"/>
+ <Separator/>
  <Action name="edit_cut"/>
  <Action name="edit_copy"/>
  <Action name="edit_paste"/>
@@ -34,6 +37,9 @@
  <Action name="newitem"/>
  <Action name="newsubmenu"/>
  <Action name="newsep" />
+ <Separator/>
+ <Action name="move_up"/>
+ <Action name="move_down"/>
  <Separator/>
  <Action name="edit_cut"/>
  <Action name="edit_copy"/>

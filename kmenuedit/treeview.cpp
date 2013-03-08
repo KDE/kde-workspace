@@ -281,6 +281,10 @@ TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
     m_sortSignalMapper->setMapping(action, SortAllByDescription);
     connect(m_sortSignalMapper, SIGNAL(mapped(const int)), this, SLOT(sort(const int)));
 
+    // connect moving up/down actions
+    connect(m_ac->action(MOVE_UP_ACTION_NAME), SIGNAL(activated()), SLOT(moveUpItem()));
+    connect(m_ac->action(MOVE_DOWN_ACTION_NAME), SIGNAL(activated()), SLOT(moveDownItem()));
+
     m_menuFile = new MenuFile(KStandardDirs::locateLocal("xdgconf-menu", "applications-kmenuedit.menu"));
     m_rootFolder = new MenuFolderInfo;
     m_separator = new MenuSeparatorInfo;
@@ -300,6 +304,14 @@ void TreeView::setViewMode(bool showHidden)
     // setup rmb menu
     m_rmb = new QMenu(this);
     QAction *action;
+
+    action = m_ac->action(MOVE_UP_ACTION_NAME);
+    m_rmb->addAction( action );
+
+    action = m_ac->action(MOVE_DOWN_ACTION_NAME);
+    m_rmb->addAction( action );
+
+    m_rmb->addSeparator();
 
     action = m_ac->action("edit_cut");
     m_rmb->addAction( action );
@@ -646,12 +658,17 @@ void TreeView::selectMenuEntry(const QString &menuEntry)
 
 void TreeView::itemSelected(QTreeWidgetItem *item)
 {
+    // ensure the item is visible as selected
+    setItemSelected(item, true);
+
     TreeItem *_item = static_cast<TreeItem*>(item);
+    TreeItem *parentItem = 0;
     bool selected = false;
     bool dselected = false;
     if (_item) {
         selected = true;
         dselected = _item->isHiddenInMenu();
+        parentItem = getParentItem(_item);
     }
 
     // change actions activation
@@ -663,6 +680,8 @@ void TreeView::itemSelected(QTreeWidgetItem *item)
     }
     m_ac->action(SORT_ACTION_NAME)->setEnabled(selected && _item->isDirectory() && (_item->childCount() > 0));
     m_ac->action(SORT_ALL_ACTION_NAME)->setEnabled(true);
+    m_ac->action(MOVE_UP_ACTION_NAME)->setEnabled(selected && (parentItem->indexOfChild(_item) > 0));
+    m_ac->action(MOVE_DOWN_ACTION_NAME)->setEnabled(selected && (parentItem->indexOfChild(_item) < parentItem->childCount() - 1));
 
     if (!item) {
         emit disableAction();
@@ -1579,6 +1598,85 @@ void TreeView::sortItemChildren(const QList<QTreeWidgetItem*>::iterator& begin, 
     else if (sortType == SortByDescription) {
         qSort(begin, end, TreeItem::itemDescriptionLessThan);
     }
+}
+
+/**
+ * @brief Move up the selected item.
+ */
+void TreeView::moveUpItem() {
+    moveUpOrDownItem(true);
+}
+
+/**
+ * @brief Move down the selected item.
+ */
+void TreeView::moveDownItem() {
+    moveUpOrDownItem(false);
+}
+
+/**
+ * Move the selected item on desired direction (up or down).
+ *
+ * @brief Move up/down the selected item.
+ * @param isMovingUpAction True to move up, false to move down.
+ */
+void TreeView::moveUpOrDownItem(bool isMovingUpAction)
+{
+    // get the selected item and its parent
+    TreeItem *sourceItem = static_cast<TreeItem*>(selectedItem());
+    TreeItem *parentItem = getParentItem(sourceItem);
+
+    // get selected item index
+    int sourceItemIndex = parentItem->indexOfChild(sourceItem);
+
+    // find the second item to swap
+    TreeItem *destItem = 0;
+    int destIndex;
+    if (isMovingUpAction) {
+        destIndex = sourceItemIndex - 1;
+        destItem = static_cast<TreeItem*>(parentItem->child(destIndex));
+    }
+    else {
+        destIndex = sourceItemIndex + 1;
+        destItem = static_cast<TreeItem*>(parentItem->child(destIndex));
+    }
+
+    // swap items
+    parentItem->removeChild(sourceItem);
+    parentItem->insertChild(destIndex, sourceItem);
+
+    // recreate item widget for separators
+    if (sourceItem->isSeparator()) {
+        setItemWidget(sourceItem, 0, new SeparatorWidget);
+    }
+    if (destItem->isSeparator()) {
+        setItemWidget(destItem, 0, new SeparatorWidget);
+    }
+
+    // set the focus on the source item
+    setCurrentItem(sourceItem);
+
+    // flag parent item as dirty (if the parent is the root item, set the entire layout as dirty)
+    if (parentItem == invisibleRootItem()) {
+        parentItem = 0;
+    }
+    setLayoutDirty(parentItem);
+}
+
+/**
+ * For a given item, return its parent. For top items, return the invisible root item.
+ *
+ * @brief Get the parent item.
+ * @param item Item.
+ * @return Parent item.
+ */
+TreeItem* TreeView::getParentItem(QTreeWidgetItem *item) const
+{
+    QTreeWidgetItem *parentItem = item->parent();
+    if (!parentItem) {
+        parentItem = invisibleRootItem();
+    }
+    return static_cast<TreeItem*>(parentItem);
 }
 
 void TreeView::del()

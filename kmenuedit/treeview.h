@@ -47,6 +47,8 @@ static const QString SORT_BY_DESCRIPTION_ACTION_NAME = "sort_by_description";
 static const QString SORT_ALL_ACTION_NAME = "sort_all";
 static const QString SORT_ALL_BY_NAME_ACTION_NAME = "sort_all_by_name";
 static const QString SORT_ALL_BY_DESCRIPTION_ACTION_NAME = "sort_all_by_description";
+static const QString MOVE_UP_ACTION_NAME = "move_up";
+static const QString MOVE_DOWN_ACTION_NAME = "move_down";
 
 class TreeItem : public QTreeWidgetItem
 {
@@ -145,6 +147,8 @@ protected Q_SLOTS:
     void paste();
     void del();
     void sort(const int sortCmd);
+    void moveUpItem();
+    void moveDownItem();
 
 protected:
     enum SortType {
@@ -168,6 +172,8 @@ protected:
     QString findName(KDesktopFile *df, bool deleted);
     void sortItem(TreeItem *item, const SortType& sortType);
     void sortItemChildren(const QList<QTreeWidgetItem*>::iterator& begin, const QList<QTreeWidgetItem*>::iterator& end, const SortType& sortType);
+    TreeItem* getParentItem(QTreeWidgetItem *item) const;
+    void moveUpOrDownItem(bool isMovingUpAction);
 
     void closeAllItems(QTreeWidgetItem *item);
     TreeItem *expandPath(TreeItem *item, const QString &path);
