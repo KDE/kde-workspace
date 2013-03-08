@@ -1,5 +1,5 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="kmenuedit" version="10">
+<kpartgui name="kmenuedit" version="11">
 
 <MenuBar>
 
