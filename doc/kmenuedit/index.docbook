@@ -35,8 +35,8 @@
 
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2011-04-26</date>
-<releaseinfo>0.8 (&kde; 4.7)</releaseinfo>
+<date>2012-03-09</date>
+<releaseinfo>0.9 (&kde; 4.11)</releaseinfo>
 
 <abstract><para>&kmenuedit; allows editing one of the &kde; application launchers: &kickoff;, the classic &kmenu; or Lancelot Launcher.
 </para></abstract>
@@ -156,7 +156,7 @@ To see all options for an application launch <userinput><command><replaceable>ap
 </mediaobject>
 </screenshot></para>
 
-  <para>We choose the firefox icon from the list, and press return. Your finished screen should probably look something like the screenshot below.
+  <para>We choose the firefox icon from the list, and press &Enter;. Your finished screen should probably look something like the screenshot below.
 <screenshot>
 <screeninfo>Done screenshot</screeninfo>
 <mediaobject>
@@ -169,9 +169,9 @@ To see all options for an application launch <userinput><command><replaceable>ap
 </mediaobject>
 </screenshot></para>
 
+<para>The place of the new menu item can now be changed using <guibutton>Move Up</guibutton> and <guibutton>Move Down</guibutton> buttons on the &kmenuedit; toolbar.</para>
+
 <para>Click <menuchoice><guimenu>File</guimenu><guimenuitem>Save</guimenuitem></menuchoice>, wait for the <guilabel>Updating System Configuration</guilabel> dialog to get finished, you should find &firefox; in the application launcher <guisubmenu>Internet</guisubmenu> submenu!</para>
-
-
 
 </chapter>
 
