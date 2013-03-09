@@ -145,6 +145,7 @@ Name[zh_TW]=連接埠
 # ctxt: The physical type of serial port (ie. USB, RS232, etc)
 Name=Serial Type
 Name[cs]=Typ sériového portu
+Name[de]=Serieller Typ
 Name[es]=Tipo de puerto serie
 Name[fi]=Sarjaportin tyyppi
 Name[ia]=Typo serial
