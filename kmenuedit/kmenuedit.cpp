@@ -86,26 +86,25 @@ void KMenuEdit::setupActions()
     action->setIcon(KIcon("menu_new_sep"));
     action->setText(i18n("New S&eparator"));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
-    // "sort all" menu
-    KActionMenu* sortAllMenu = new KActionMenu(KIcon("view-sort-ascending"), i18n("&Sort All By ..."), this);
-    sortAllMenu->setDelayed(false);
-    actionCollection()->addAction(SORT_ALL_ACTION_NAME, sortAllMenu);
-    action = actionCollection()->addAction(SORT_ALL_BY_NAME_ACTION_NAME);
-    action->setText(i18n("&Name"));
-    sortAllMenu->addAction(action);
-    action = actionCollection()->addAction(SORT_ALL_BY_DESCRIPTION_ACTION_NAME);
-    action->setText(i18n("&Description"));
-    sortAllMenu->addAction(action);
+
     // "sort selection" menu
-    KActionMenu* sortMenu = new KActionMenu(KIcon("view-sort-ascending"), i18n("&Sort By ..."), this);
+    KActionMenu* sortMenu = new KActionMenu(KIcon("view-sort-ascending"), i18n("&Sort"), this);
     sortMenu->setDelayed(false);
     actionCollection()->addAction(SORT_ACTION_NAME, sortMenu);
     action = actionCollection()->addAction(SORT_BY_NAME_ACTION_NAME);
-    action->setText(i18n("&Name"));
+    action->setText(i18n("&Selection by Name"));
     sortMenu->addAction(action);
     action = actionCollection()->addAction(SORT_BY_DESCRIPTION_ACTION_NAME);
-    action->setText(i18n("&Description"));
+    action->setText(i18n("&Selection by Description"));
     sortMenu->addAction(action);
+    sortMenu->addSeparator();
+    action = actionCollection()->addAction(SORT_ALL_BY_NAME_ACTION_NAME);
+    action->setText(i18n("&All by Name"));
+    sortMenu->addAction(action);
+    action = actionCollection()->addAction(SORT_ALL_BY_DESCRIPTION_ACTION_NAME);
+    action->setText(i18n("&All by Description"));
+    sortMenu->addAction(action);
+
     // move up/down
     action = actionCollection()->addAction(MOVE_UP_ACTION_NAME);
     action->setIcon(KIcon("go-up"));

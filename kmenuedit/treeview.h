@@ -44,7 +44,6 @@ class KShortcut;
 static const QString SORT_ACTION_NAME = "sort";
 static const QString SORT_BY_NAME_ACTION_NAME = "sort_by_name";
 static const QString SORT_BY_DESCRIPTION_ACTION_NAME = "sort_by_description";
-static const QString SORT_ALL_ACTION_NAME = "sort_all";
 static const QString SORT_ALL_BY_NAME_ACTION_NAME = "sort_all_by_name";
 static const QString SORT_ALL_BY_DESCRIPTION_ACTION_NAME = "sort_all_by_description";
 static const QString MOVE_UP_ACTION_NAME = "move_up";

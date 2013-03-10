@@ -345,7 +345,6 @@ void TreeView::setViewMode(bool showHidden)
 
     action = m_ac->action(SORT_ACTION_NAME);
     m_rmb->addAction(action);
-    action->setEnabled(false);
 
     m_showHidden = showHidden;
     readMenuFolderInfo();
@@ -678,8 +677,10 @@ void TreeView::itemSelected(QTreeWidgetItem *item)
     if (m_ac->action("delete")) {
         m_ac->action("delete")->setEnabled(selected && !dselected);
     }
-    m_ac->action(SORT_ACTION_NAME)->setEnabled(selected && _item->isDirectory() && (_item->childCount() > 0));
-    m_ac->action(SORT_ALL_ACTION_NAME)->setEnabled(true);
+
+    m_ac->action(SORT_BY_NAME_ACTION_NAME)->setEnabled(selected && _item->isDirectory() && (_item->childCount() > 0));
+    m_ac->action(SORT_BY_DESCRIPTION_ACTION_NAME)->setEnabled(m_ac->action(SORT_BY_NAME_ACTION_NAME)->isEnabled());
+
     m_ac->action(MOVE_UP_ACTION_NAME)->setEnabled(selected && (parentItem->indexOfChild(_item) > 0));
     m_ac->action(MOVE_DOWN_ACTION_NAME)->setEnabled(selected && (parentItem->indexOfChild(_item) < parentItem->childCount() - 1));
 
