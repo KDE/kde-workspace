@@ -158,8 +158,14 @@ Name[nl]=Type serieel
 Name[pt]=Tipo de Série
 Name[pt_BR]=Tipo de serial
 Name[sk]=Typ portu
+Name[sr]=тип серијског
+Name[sr@ijekavian]=тип серијског
+Name[sr@ijekavianlatin]=tip serijskog
+Name[sr@latin]=tip serijskog
+Name[tr]=Seri Türü
 Name[uk]=Послідовний тип
 Name[x-test]=xxSerial Typexx
+Name[zh_TW]=序列類型
 
 [Desktop Entry]
 Actions=driverHandle;port;serialType;
