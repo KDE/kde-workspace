@@ -1263,12 +1263,11 @@ void PlasmaApp::cloneCurrentActivity()
 
     KActivities::Controller *controller = m_corona->activityController();
     //getting the current activity is *so* much easier than the current containment(s) :) :)
-    QString oldId = controller->currentActivity();
+    const QString oldId = controller->currentActivity();
     Activity *oldActivity = m_corona->activity(oldId);
-    QString newId = controller->addActivity(i18nc("%1 is the activity name", "copy of %1", oldActivity->name()));
+    const QString newId = controller->addActivity(i18nc("%1 is the activity name", "Copy of %1", oldActivity->name()));
 
-    QString file = "activities/";
-    file += newId;
+    const QString file = "activities/" + newId;
     KConfig external(file, KConfig::SimpleConfig, "appdata");
 
     //copy the old config to the new location
