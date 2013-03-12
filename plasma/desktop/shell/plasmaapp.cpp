@@ -1510,33 +1510,26 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
     connect(confirmDialog, SIGNAL(selected(QList<QVariant>)),
             this, SLOT(executeCommands(QList<QVariant>)));
 
-    foreach (const QString & exec, startupApps) {
-        QString realExec = exec;
+    foreach (QString exec, startupApps) {
+        exec = exec.replace("$desktop",   KGlobalSettings::desktopPath());
+        exec = exec.replace("$autostart", KGlobalSettings::autostartPath());
+        exec = exec.replace("$documents", KGlobalSettings::documentPath());
+        exec = exec.replace("$music",     KGlobalSettings::musicPath());
+        exec = exec.replace("$video",     KGlobalSettings::videosPath());
+        exec = exec.replace("$downloads", KGlobalSettings::downloadPath());
+        exec = exec.replace("$pictures",  KGlobalSettings::picturesPath());
 
-        #define LazyReplace(VAR, VAL) \
-            if (realExec.contains(VAR)) realExec = realExec.replace(VAR, VAL);
-
-        LazyReplace("$desktop",   KGlobalSettings::desktopPath());
-        LazyReplace("$autostart", KGlobalSettings::autostartPath());
-        LazyReplace("$documents", KGlobalSettings::documentPath());
-        LazyReplace("$music",     KGlobalSettings::musicPath());
-        LazyReplace("$video",     KGlobalSettings::videosPath());
-        LazyReplace("$downloads", KGlobalSettings::downloadPath());
-        LazyReplace("$pictures",  KGlobalSettings::picturesPath());
-
-        QString name = realExec.split(" ")[0];
+        QString name = exec.split(" ")[0];
 
         KService::Ptr service = KService::serviceByDesktopName(name);
 
         if (service) {
             confirmDialog->addItem(KIcon(service->icon()), service->name(),
-                    ((realExec == name) ? QString() : realExec), realExec, exec.split(" ").size() <= 2);
+                    ((exec == name) ? QString() : exec), exec, exec.split(" ").size() <= 2);
         } else {
             confirmDialog->addItem(KIcon("dialog-warning"), name,
-                    ((realExec == name) ? QString() : realExec), realExec, false);
+                    ((exec == name) ? QString() : exec), exec, false);
         }
-
-        #undef LazyReplace
     }
 
     confirmDialog->exec();
