@@ -20,5 +20,7 @@ install(TARGETS plasma-to-plasma-desktop DESTINATION ${LIB_INSTALL_DIR}/kconf_up
 install(FILES plasmarc-to-plasmadesktoprc.upd DESTINATION ${KCONF_UPDATE_INSTALL_DIR})
 install(FILES plasma-to-plasmadesktop-shortcuts.upd DESTINATION ${KCONF_UPDATE_INSTALL_DIR})
 
-install(FILES systray-to-notifications-widget.js DESTINATION ${DATA_INSTALL_DIR}/plasma-desktop/updates/ )
-install(FILES addShowActivitiesManagerPlasmoid.js DESTINATION ${DATA_INSTALL_DIR}/plasma-desktop/updates/ )
+install(FILES systray-to-notifications-widget.js
+              addShowActivitiesManagerPlasmoid.js
+              set-hidden-single-vd-pager.js
+        DESTINATION ${DATA_INSTALL_DIR}/plasma-desktop/updates/ )

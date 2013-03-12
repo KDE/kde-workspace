@@ -7,7 +7,8 @@ if (panelIds.length == 1) {
 panel.height = screenGeometry(panel.screen).height > 1024 ? 35 : 27
 panel.addWidget("launcher")
 panel.addWidget("org.kde.showActivityManager")
-panel.addWidget("pager")
+pager = panel.addWidget("pager")
+pager.writeConfig("hideWhenSingleDesktop", "true")
 tasks = panel.addWidget("tasks")
 panel.addWidget("systemtray")
 panel.addWidget("digital-clock")
