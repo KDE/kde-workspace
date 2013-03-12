@@ -92,17 +92,17 @@ void KMenuEdit::setupActions()
     sortMenu->setDelayed(false);
     actionCollection()->addAction(SORT_ACTION_NAME, sortMenu);
     action = actionCollection()->addAction(SORT_BY_NAME_ACTION_NAME);
-    action->setText(i18n("Selection by &Name"));
+    action->setText(i18n("&Sort selection by Name"));
     sortMenu->addAction(action);
     action = actionCollection()->addAction(SORT_BY_DESCRIPTION_ACTION_NAME);
-    action->setText(i18n("Selection by D&escription"));
+    action->setText(i18n("&Sort selection by Description"));
     sortMenu->addAction(action);
     sortMenu->addSeparator();
     action = actionCollection()->addAction(SORT_ALL_BY_NAME_ACTION_NAME);
-    action->setText(i18n("&All by Name"));
+    action->setText(i18n("&Sort all by Name"));
     sortMenu->addAction(action);
     action = actionCollection()->addAction(SORT_ALL_BY_DESCRIPTION_ACTION_NAME);
-    action->setText(i18n("A&ll by Description"));
+    action->setText(i18n("&Sort all by Description"));
     sortMenu->addAction(action);
 
     // move up/down
