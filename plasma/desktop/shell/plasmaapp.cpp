@@ -1486,7 +1486,9 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
     m_loadingActivity = controller->addActivity(name);
     Activity *a = m_corona->activity(m_loadingActivity);
     Q_ASSERT(a);
-    a->setIcon(icon);
+    if (!icon.isEmpty()) {
+        a->setIcon(icon);
+    }
 
     //kDebug() << "$$$$$$$$$$$$$$$$ begin script for" << m_loadingActivity;
     m_corona->evaluateScripts(QStringList() << script, false);
