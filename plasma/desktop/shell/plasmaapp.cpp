@@ -1497,6 +1497,10 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
     controller->setCurrentActivity(m_loadingActivity);
     m_loadingActivity.clear();
 
+    if (startupApps.isEmpty()) {
+        return;
+    }
+
     KListConfirmationDialog * confirmDialog = new KListConfirmationDialog(
             i18n("Run applications"),
             i18n("This activity template requests to run the following applications"),
