@@ -635,7 +635,7 @@ void DesktopCorona::checkActivities()
             }
 
             //create a new activity for the containment
-            QString id = m_activityController->addActivity(context->currentActivity());
+            const QString id = m_activityController->addActivity(context->currentActivity());
             context->setCurrentActivityId(id);
             newActivities << id;
             if (cont->screen() > -1) {
