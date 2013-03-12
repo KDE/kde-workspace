@@ -62,16 +62,17 @@ Pager::Pager(QObject *parent, const QVariantList &args)
     : Plasma::Applet(parent, args),
       m_displayedText(None),
       m_currentDesktopSelected(DoNothing),
-      m_showWindowIcons(false),
       m_rows(2),
       m_columns(0),
       m_currentDesktop(0),
-      m_desktopDown(false),
       m_addDesktopAction(0),
       m_removeDesktopAction(0),
       m_plasmaColorTheme(0),
+      m_showWindowIcons(false),
+      m_desktopDown(false),
       m_verticalFormFactor(false),
       m_ignoreNextSizeConstraint(false),
+      m_hideWhenSingleDesktop(false),
       m_configureDesktopsWidget(0),
       m_desktopWidget(qApp->desktop())
 {
@@ -211,22 +212,27 @@ void Pager::configChanged()
     KConfigGroup cg = config();
     bool changed = false;
 
-    DisplayedText displayedText = (DisplayedText) cg.readEntry("displayedText", (int) m_displayedText);
+    const DisplayedText displayedText = (DisplayedText) cg.readEntry("displayedText", (int) m_displayedText);
     if (displayedText != m_displayedText) {
         m_displayedText = displayedText;
         changed = true;
         emit showDesktopTextChanged();
     }
 
-    bool showWindowIcons = cg.readEntry("showWindowIcons", m_showWindowIcons);
+    const bool showWindowIcons = cg.readEntry("showWindowIcons", m_showWindowIcons);
     if (showWindowIcons != m_showWindowIcons) {
         setShowWindowIcons(showWindowIcons);
         changed = true;
     }
 
-    CurrentDesktopSelected currentDesktopSelected =
-        (CurrentDesktopSelected) cg.readEntry("currentDesktopSelected",
-                                              (int) m_currentDesktopSelected);
+    const bool hideWhenSingleDesktop = cg.readEntry("hideWhenSingleDesktop", false);
+    if (hideWhenSingleDesktop != m_hideWhenSingleDesktop) {
+        m_hideWhenSingleDesktop = hideWhenSingleDesktop;
+        changed = true;
+    }
+
+    const CurrentDesktopSelected currentDesktopSelected = static_cast<CurrentDesktopSelected>(cg.readEntry("currentDesktopSelected",
+                                                                                                           static_cast<int>(m_currentDesktopSelected)));
     if (currentDesktopSelected != m_currentDesktopSelected) {
         m_currentDesktopSelected = currentDesktopSelected;
         changed = true;
@@ -398,18 +404,17 @@ void Pager::recalculateGridSizes(int rows)
     if (m_desktopCount % rows > 0) {
         columns++;
     }
+
     rows = m_desktopCount / columns;
     if (m_desktopCount % columns > 0) {
         rows++;
     }
 
     // update the grid size
-    if (m_rows != rows || m_columns != columns) {
-        m_rows = rows;
-        m_columns = columns;
-    }
+    m_rows = rows;
+    m_columns = columns;
 
-    updateSizes(true);
+    updateSizes();
 }
 
 QRectF Pager::mapToDeclarativeUI(const QRectF &rect) const
@@ -418,7 +423,7 @@ QRectF Pager::mapToDeclarativeUI(const QRectF &rect) const
     return QRectF(p, rect.size());
 }
 
-void Pager::updateSizes(bool allowResize)
+void Pager::updateSizes(bool allowResize /* = true */)
 {
     int padding = 2; // Space between miniatures of desktops
     int textMargin = 3; // Space between name of desktop and border
@@ -524,22 +529,27 @@ void Pager::updateSizes(bool allowResize)
 
     // do not try to resize unless the caller has allowed it,
     // or the height has changed (or the width has changed in a vertical panel)
+    const Plasma::FormFactor f = formFactor();
     if (allowResize ||
-        (formFactor() != Plasma::Vertical && contentsRect().height() != m_size.height()) ||
-        (formFactor() == Plasma::Vertical && contentsRect().width()  != m_size.width())) {
+        (f != Plasma::Vertical && contentsRect().height() != m_size.height()) ||
+        (f == Plasma::Vertical && contentsRect().width()  != m_size.width())) {
 
         // this new size will have the same height/width as the horizontal/vertical panel has given it
-        QSizeF preferred = QSizeF(ceil(m_columns * preferredItemWidth + padding * (m_columns - 1) +
-                                       leftMargin + rightMargin),
-                                  ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) +
-                                       topMargin + bottomMargin));
+        QSizeF preferred;
+        if (m_hideWhenSingleDesktop && m_desktopCount == 1 && (f == Plasma::Vertical || f == Plasma::Horizontal)) {
+            const bool isVertical = f == Plasma::Vertical;
+            preferred = QSizeF(isVertical ? m_size.width() : 0,
+                               isVertical ? 0 : m_size.height());
+        } else {
+            preferred = QSizeF(ceil(m_columns * preferredItemWidth + padding * (m_columns - 1) + leftMargin + rightMargin),
+                        ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) + topMargin + bottomMargin));
+        }
 
         setPreferredSize(preferred);
         emit sizeHintChanged(Qt::PreferredSize);
     }
 
     m_size = contentsRect().size();
-
     layout()->activate();
 }
 
@@ -676,7 +686,7 @@ void Pager::numberOfDesktopsChanged(int num)
 void Pager::desktopNamesChanged()
 {
     m_pagerModel->clearDesktopRects();
-    updateSizes(true);
+    updateSizes();
     startTimer();
 }
 
@@ -693,7 +703,7 @@ void Pager::windowChanged(WId id, const unsigned long* dirty)
 void Pager::desktopsSizeChanged()
 {
     m_pagerModel->clearDesktopRects();
-    updateSizes(true);
+    updateSizes();
     startTimer();
 }
 
