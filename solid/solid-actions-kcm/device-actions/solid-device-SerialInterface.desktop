@@ -162,6 +162,7 @@ Name[sr@latin]=tip serijskog
 Name[tr]=Seri Türü
 Name[uk]=Тип послідовного інтерфейсу
 Name[x-test]=xxSerial Typexx
+Name[zh_TW]=序列類型
 
 [Desktop Entry]
 Actions=driverHandle;port;serialType;
