@@ -64,6 +64,7 @@ ScreenSaverWindow::ScreenSaverWindow(QWidget *parent)
 
 ScreenSaverWindow::~ScreenSaverWindow()
 {
+    stopXScreenSaver();
 }
 
 QPixmap ScreenSaverWindow::background() const
