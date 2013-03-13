@@ -165,6 +165,8 @@ void KSldApp::lock()
 {
     if (m_locked) {
         // already locked, no need to lock again
+        // but make sure it's really locked
+        endGraceTime();
         return;
     }
     kDebug() << "lock called";
