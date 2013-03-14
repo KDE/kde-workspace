@@ -71,7 +71,6 @@ UnlockApp::UnlockApp()
     initialize();
     connect(desktop(), SIGNAL(resized(int)), SLOT(desktopResized()));
     connect(desktop(), SIGNAL(screenCountChanged(int)), SLOT(desktopResized()));
-    QMetaObject::invokeMethod(this, "desktopResized", Qt::QueuedConnection);
 }
 
 UnlockApp::~UnlockApp()

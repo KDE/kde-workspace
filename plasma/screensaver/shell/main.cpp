@@ -21,6 +21,10 @@
 #include <KLocale>
 #include <KIcon>
 
+#include <QDateTime>
+
+#include <iostream>
+
 #include <config-workspace.h>
 #include "plasmaapp.h"
 
@@ -55,6 +59,9 @@ int main(int argc, char **argv)
     KGlobal::locale()->insertCatalog(QLatin1String( "libkworkspace" ));
     KGlobal::locale()->insertCatalog(QLatin1String( "kscreenlocker_greet" ));
     app->disableSessionManagement(); // I assume we'd never want a screensaver thing reppearing on login?
+    // This allow ksmserver to know when the applicaion has actually finished setting itself up.
+    // Crucial for blocking until it is ready, ensuring locking happens before sleep, e.g.
+    std::cout << "Locked at " << QDateTime::currentDateTime().toTime_t() << std::endl;
     int rc = app->exec();
     delete app;
     return rc;

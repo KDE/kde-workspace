@@ -277,10 +277,13 @@ bool KSldApp::startLockProcess()
     }
     m_lockProcess->start();
     // we wait one minute
-    if (!m_lockProcess->waitForStarted()) {
+    if (m_lockProcess->waitForStarted(60000)) {
+        m_lockProcess->waitForReadyRead(60000);
+    } else {
         m_lockProcess->kill();
         return false;
     }
+
     return true;
 }
 
