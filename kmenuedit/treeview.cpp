@@ -239,7 +239,7 @@ static QPixmap appIcon(const QString &iconName)
 
 
 TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
-    : QTreeWidget(parent), m_ac(ac), m_rmb(0), m_clipboard(0),
+    : QTreeWidget(parent), m_ac(ac), m_popupMenu(0), m_clipboard(0),
       m_clipboardFolderInfo(0), m_clipboardEntryInfo(0),
       m_layoutDirty(false),
       m_detailedMenuEntries(true), m_detailedEntriesNamesFirst(true)
@@ -257,15 +257,20 @@ TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
     setHeaderLabels(QStringList() << QString(""));
     header()->hide();
 
-    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-            SLOT(itemSelected(QTreeWidgetItem*)));
+    // listen for creation
+    connect(m_ac->action(NEW_ITEM_ACTION_NAME), SIGNAL(activated()), SLOT(newitem()));
+    connect(m_ac->action(NEW_SUBMENU_ACTION_NAME), SIGNAL(activated()), SLOT(newsubmenu()));
+    connect(m_ac->action(NEW_SEPARATOR_ACTION_NAME), SIGNAL(activated()), SLOT(newsep()));
 
-    // connect actions
-    connect(m_ac->action("newitem"), SIGNAL(activated()), SLOT(newitem()));
-    connect(m_ac->action("newsubmenu"), SIGNAL(activated()), SLOT(newsubmenu()));
-    connect(m_ac->action("newsep"), SIGNAL(activated()), SLOT(newsep()));
+    // listen for copy
+    connect(m_ac->action(CUT_ACTION_NAME), SIGNAL(activated()), SLOT(cut()));
+    connect(m_ac->action(COPY_ACTION_NAME), SIGNAL(activated()), SLOT(copy()));
+    connect(m_ac->action(PASTE_ACTION_NAME), SIGNAL(activated()), SLOT(paste()));
 
-    // map sorting actions
+    // listen for deleting
+    connect(m_ac->action(DELETE_ACTION_NAME), SIGNAL(activated()), SLOT(del()));
+
+    // listen for sorting
     m_sortSignalMapper = new QSignalMapper(this);
     QAction *action = m_ac->action(SORT_BY_NAME_ACTION_NAME);
     connect(action, SIGNAL(activated()), m_sortSignalMapper, SLOT(map()));
@@ -285,6 +290,10 @@ TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
     connect(m_ac->action(MOVE_UP_ACTION_NAME), SIGNAL(activated()), SLOT(moveUpItem()));
     connect(m_ac->action(MOVE_DOWN_ACTION_NAME), SIGNAL(activated()), SLOT(moveDownItem()));
 
+    // listen for selection
+    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+            SLOT(itemSelected(QTreeWidgetItem*)));
+
     m_menuFile = new MenuFile(KStandardDirs::locateLocal("xdgconf-menu", "applications-kmenuedit.menu"));
     m_rootFolder = new MenuFolderInfo;
     m_separator = new MenuSeparatorInfo;
@@ -299,52 +308,33 @@ TreeView::~TreeView()
 
 void TreeView::setViewMode(bool showHidden)
 {
-    delete m_rmb;
+    // setup popup menu
+    delete m_popupMenu;
+    m_popupMenu = new QMenu(this);
 
-    // setup rmb menu
-    m_rmb = new QMenu(this);
-    QAction *action;
+    // creation
+    m_popupMenu->addAction(m_ac->action(NEW_ITEM_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(NEW_SUBMENU_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(NEW_SEPARATOR_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    action = m_ac->action(MOVE_UP_ACTION_NAME);
-    m_rmb->addAction( action );
+    // copy
+    m_popupMenu->addAction(m_ac->action(CUT_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(COPY_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(PASTE_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    action = m_ac->action(MOVE_DOWN_ACTION_NAME);
-    m_rmb->addAction( action );
+    // delete
+    m_popupMenu->addAction( m_ac->action(DELETE_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    m_rmb->addSeparator();
+    // move
+    m_popupMenu->addAction(m_ac->action(MOVE_UP_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(MOVE_DOWN_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    action = m_ac->action("edit_cut");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(cut()));
-
-    action = m_ac->action("edit_copy");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(copy()));
-
-    action = m_ac->action("edit_paste");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(paste()));
-
-    m_rmb->addSeparator();
-
-    action = m_ac->action("delete");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(del()));
-
-    m_rmb->addSeparator();
-
-    m_rmb->addAction( m_ac->action("newitem") );
-    m_rmb->addAction( m_ac->action("newsubmenu") );
-    m_rmb->addAction( m_ac->action("newsep") );
-
-    m_rmb->addSeparator();
-
-    action = m_ac->action(SORT_ACTION_NAME);
-    m_rmb->addAction(action);
+    // sort
+    m_popupMenu->addAction(m_ac->action(SORT_ACTION_NAME));
 
     m_showHidden = showHidden;
     readMenuFolderInfo();
@@ -671,11 +661,12 @@ void TreeView::itemSelected(QTreeWidgetItem *item)
     }
 
     // change actions activation
-    m_ac->action("edit_cut")->setEnabled(selected);
-    m_ac->action("edit_copy")->setEnabled(selected);
+    m_ac->action(CUT_ACTION_NAME)->setEnabled(selected);
+    m_ac->action(COPY_ACTION_NAME)->setEnabled(selected);
+    m_ac->action(PASTE_ACTION_NAME)->setEnabled(m_clipboard != 0);
 
-    if (m_ac->action("delete")) {
-        m_ac->action("delete")->setEnabled(selected && !dselected);
+    if (m_ac->action(DELETE_ACTION_NAME)) {
+        m_ac->action(DELETE_ACTION_NAME)->setEnabled(selected && !dselected);
     }
 
     m_ac->action(SORT_BY_NAME_ACTION_NAME)->setEnabled(selected && _item->isDirectory() && (_item->childCount() > 0));
@@ -1123,8 +1114,8 @@ QTreeWidgetItem *TreeView::selectedItem()
 
 void TreeView::contextMenuEvent(QContextMenuEvent *event)
 {
-    if (m_rmb && itemAt(event->pos())) {
-        m_rmb->exec(event->globalPos());
+    if (m_popupMenu && itemAt(event->pos())) {
+        m_popupMenu->exec(event->globalPos());
     }
 }
 
@@ -1370,7 +1361,7 @@ void TreeView::copy( bool cutting )
            del(item, false);
     }
 
-    m_ac->action("edit_paste")->setEnabled(true);
+    m_ac->action(PASTE_ACTION_NAME)->setEnabled(true);
 }
 
 

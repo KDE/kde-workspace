@@ -74,15 +74,15 @@ void KMenuEdit::setupActions()
 {
     KAction *action = 0;
 
-    action = actionCollection()->addAction("newsubmenu");
+    action = actionCollection()->addAction(NEW_SUBMENU_ACTION_NAME);
     action->setIcon(KIcon("menu_new"));
     action->setText(i18n("&New Submenu..."));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N));
-    action = actionCollection()->addAction("newitem");
+    action = actionCollection()->addAction(NEW_ITEM_ACTION_NAME);
     action->setIcon(KIcon("document-new")) ;
     action->setText(i18n("New &Item..."));
     action->setShortcuts(KStandardShortcut::openNew());
-    action = actionCollection()->addAction("newsep");
+    action = actionCollection()->addAction(NEW_SEPARATOR_ACTION_NAME);
     action->setIcon(KIcon("menu_new_sep"));
     action->setText(i18n("New S&eparator"));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
@@ -197,7 +197,7 @@ void KMenuEdit::slotChangeView()
 
     delete m_actionDelete;
 
-    m_actionDelete = actionCollection()->addAction("delete");
+    m_actionDelete = actionCollection()->addAction(DELETE_ACTION_NAME);
     m_actionDelete->setIcon(KIcon("edit-delete"));
     m_actionDelete->setText(i18n("&Delete"));
     m_actionDelete->setShortcut(QKeySequence(Qt::Key_Delete));
