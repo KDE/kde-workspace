@@ -18,9 +18,9 @@
  */
 
 import QtQuick 2.0
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1 as QtExtras
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0 as QtExtras
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 Item {
