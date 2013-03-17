@@ -54,26 +54,35 @@ Item {
 
     function updateGridSize()
     {
+        print("Updategridsize");
+        //return; // FIXME
         LayoutManager.cellSize.width = root.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width
-        LayoutManager.cellSize.height = root.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
+        //LayoutManager.cellSize.height = root.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
+        LayoutManager.cellSize.height = root.iconHeight + theme.defaultFont.pixelSize + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
         layoutTimer.restart()
     }
 
     function addApplet(applet, pos)
     {
+        print("====================================>> addApplet");
+        //return; // FIXME
+        print("Adding...");
         var component = Qt.createComponent("AppletAppearance.qml");
+        print("Added...");
         var e = component.errorString();
         if (e != "") {
             print("Error loading AppletAppearance.qml: " + component.errorString());
+        } else {
+            print("AppletAppearance.qml loaded successfully.");
         }
-        var appletItem = component.createObject(resultsFlow);
+        //var appletItem = component.createObject(root);
+        var appletItem = component.createObject(resultsFlow); // FIXME
         appletItem.width = LayoutManager.cellSize.width*2;
         appletItem.height = LayoutManager.cellSize.height*2;
         appletItem.applet = applet;
         appletItem.category = "Applet-"+applet.id;
         LayoutManager.itemGroups[appletItem.category] = appletItem;
     }
-
     PlasmaCore.Svg {
         id: iconsSvg
         imagePath: "widgets/configuration-icons"
@@ -104,7 +113,7 @@ Item {
         //width: Math.floor(parent.width/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
         //height: childrenRect.y+childrenRect.height
         anchors.fill: parent
-        z: 900
+//         z: 900 // crashes?!?
 
         anchors {
             top: parent.top
@@ -120,6 +129,7 @@ Item {
             running: false
             interval: 100
             onTriggered: {
+                //return; // FIXME
                 LayoutManager.resetPositions()
                 for (var i=0; i<resultsFlow.children.length; ++i) {
                     child = resultsFlow.children[i]
@@ -147,8 +157,10 @@ Item {
         }
         Component.onCompleted: {
             LayoutManager.resultsFlow = resultsFlow
+            LayoutManager.plasmoid = plasmoid
         }
     }
+
     Item {
         anchors.fill: resultsFlow
         z: 0
@@ -203,7 +215,7 @@ Item {
             width: placeHolder.width + (root.iconSize/2)
             height: placeHolder.height - root.iconSize
             z: 0
-            opacity: 0
+//             opacity: 0 // FIXME: crashes.
 
             property int moveDuration: 75
 
@@ -236,7 +248,7 @@ Item {
             }
         }
     }
-
+    /*
     ContainmentConfig {
         anchors {
             top: parent.top
@@ -244,12 +256,17 @@ Item {
         }
     }
 
+    */
     Component.onCompleted: {
+        print("COntainment completed.");
+//         return
+        LayoutManager.plasmoid = plasmoid
         updateGridSize()
         plasmoid.containmentType = "CustomContainment"
         //plasmoid.containmentType = "DesktopContainment"
         plasmoid.appletAdded.connect(addApplet)
         LayoutManager.restore()
+        //return;
         for (var i = 0; i < plasmoid.applets.length; ++i) {
             var applet = plasmoid.applets[i]
             addApplet(applet, 0)

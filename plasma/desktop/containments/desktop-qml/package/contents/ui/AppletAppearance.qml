@@ -21,7 +21,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.qtextracomponents 2.0 as QtExtras
-import org.kde.plasma.containments 0.1 as PlasmaContainments
+//import org.kde.plasma.containments 2.0 as PlasmaContainments
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
@@ -240,9 +240,12 @@ Item {
             width: appletItem.width - (appletItem.margins.left + appletItem.margins.right)
             height: appletItem.height - (appletItem.margins.top + appletItem.margins.bottom)
 
-            PlasmaContainments.AppletContainer {
+            //PlasmaContainments.AppletContainer {
+            Item {
                 id: appletContainer
                 anchors.fill: parent
+
+                property Item applet
 
                 onAppletChanged: {
                     applet.appletDestroyed.connect(appletDestroyed)

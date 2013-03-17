@@ -26,7 +26,7 @@ cellSize.width = 24
 cellSize.height = 24
 
 var resultsFlow
-
+var plasmoid;
 var itemsConfig
 
 //bookkeeping for the item groups
@@ -36,7 +36,7 @@ function restore()
 {
     itemsConfig = new Object()
     var configString = String(plasmoid.readConfig("ItemsGeometries"))
-
+    print("COnfig read from configfile: " + configString);
     //array, a cell for encoded item geometry
     var itemsStrings = configString.split(";")
     for (var i=0; i<itemsStrings.length; i++) {
@@ -62,7 +62,7 @@ function restore()
         print("xxxxx Rotation: " + geomObject.rotation + " " + rect[4]);
         itemsConfig[idConfig[0]] = geomObject
     }
-
+    print("Restore done.");
 }
 
 function save()
