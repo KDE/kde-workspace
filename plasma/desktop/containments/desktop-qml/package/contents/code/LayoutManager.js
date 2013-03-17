@@ -69,9 +69,9 @@ function save()
 {
     var configString = String()
 
-    for (id in itemsConfig) {
-        var rect = itemsConfig[id]
-        configString += id.replace(":", "%3A") + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";"
+    for (var _id in itemsConfig) {
+        var rect = itemsConfig[_id]
+        configString += _id.replace(":", "%3A") + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";"
     }
 
     //print("saving "+configString)

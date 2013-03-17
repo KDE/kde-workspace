@@ -248,7 +248,7 @@ Item {
                 property Item applet
 
                 onAppletChanged: {
-                    applet.appletDestroyed.connect(appletDestroyed)
+                    //applet.appletDestroyed.connect(appletDestroyed) // FIXME
                     appletTimer.running = true
                 }
                 Behavior on opacity {

@@ -77,10 +77,13 @@ Item {
         }
         //var appletItem = component.createObject(root);
         var appletItem = component.createObject(resultsFlow); // FIXME
+        //appletItem.id = appletAppearance;
         appletItem.width = LayoutManager.cellSize.width*2;
         appletItem.height = LayoutManager.cellSize.height*2;
         appletItem.applet = applet;
+        print("Applet set...");
         appletItem.category = "Applet-"+applet.id;
+        print("Applet category..." + appletItem.category);
         LayoutManager.itemGroups[appletItem.category] = appletItem;
     }
     PlasmaCore.Svg {
@@ -132,7 +135,7 @@ Item {
                 //return; // FIXME
                 LayoutManager.resetPositions()
                 for (var i=0; i<resultsFlow.children.length; ++i) {
-                    child = resultsFlow.children[i]
+                    var child = resultsFlow.children[i]
                     if (child.enabled) {
                         if (LayoutManager.itemsConfig[child.category]) {
                             var rect = LayoutManager.itemsConfig[child.category]
