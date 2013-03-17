@@ -12,7 +12,7 @@
 
 <bookinfo>
 
-<title>The KDE Menu Editor Handbook</title>
+<title>The &kde; Menu Editor Handbook</title>
 
 <authorgroup>
 <author>&Milos.Prudek; &Milos.Prudek.mail;</author>
@@ -35,7 +35,7 @@
 
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2012-03-09</date>
+<date>2012-03-17</date>
 <releaseinfo>0.9 (&kde; 4.11)</releaseinfo>
 
 <abstract><para>&kmenuedit; allows editing one of the &kde; application launchers: &kickoff;, the classic &kmenu; or Lancelot Launcher.
@@ -170,6 +170,8 @@ To see all options for an application launch <userinput><command><replaceable>ap
 </screenshot></para>
 
 <para>The place of the new menu item can now be changed using <guibutton>Move Up</guibutton> and <guibutton>Move Down</guibutton> buttons on the &kmenuedit; toolbar.</para>
+
+ <para>The submenu items can be sorted using <guibutton>Sort</guibutton> button on the &kmenuedit; toolbar or <menuchoice><guimenu>Edit</guimenu><guisubmenu>Sort</guisubmenu></menuchoice> submenu items.</para>
 
 <para>Click <menuchoice><guimenu>File</guimenu><guimenuitem>Save</guimenuitem></menuchoice>, wait for the <guilabel>Updating System Configuration</guilabel> dialog to get finished, you should find &firefox; in the application launcher <guisubmenu>Internet</guisubmenu> submenu!</para>
 
@@ -332,6 +334,23 @@ action="simul">&Ctrl;<keycap>S</keycap></keycombo></shortcut>
 <listitem><para><action>Quits</action> &kmenuedit;.</para></listitem>
 </varlistentry>
 
+<varlistentry id="edit-move-up">
+<term><menuchoice>
+<guimenu>Edit</guimenu>
+<guimenuitem>Move Up</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Moves</action> the selected item up in its submenu.</para></listitem>
+</varlistentry>
+
+<varlistentry id="edit-move-down">
+<term><menuchoice>
+<guimenu>Edit</guimenu>
+<guimenuitem>Move Down</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Moves</action> the selected item down in its submenu.</para></listitem>
+</varlistentry>
+
+
 <varlistentry id="edit-cut">
 <term><menuchoice>
 <shortcut>
@@ -381,6 +400,14 @@ selected place in the <guimenu>Main</guimenu> menu. You must first use
 </menuchoice></term>
 <listitem><para><action>Deletes currently selected menu
 item.</action></para></listitem>
+</varlistentry>
+
+<varlistentry id="edit-sort">
+<term><menuchoice>
+<guimenu>Edit</guimenu>
+<guisubmenu>Sort</guisubmenu>
+</menuchoice></term>
+<listitem><para><action>Opens</action> submenu to sort selected submenu or all menu tree. There are two sorting methods implemented, namely, by the name and by the description.</para></listitem>
 </varlistentry>
 
 <varlistentry id="edit-restore">
@@ -483,11 +510,12 @@ system-level commands for your operating system.</para>
 and screen space, and at the same time gives you some useful
 information or provides a control shortcut. For instance the
 <application>Clock</application> applet shows current time and date
-(and even a month diary if you click it), and <application>System
-Monitor</application> applet shows how busy your machine currently is
+(and even a month diary if you click it), and &ksysguard;
+applet shows how busy your machine currently is
 in real-time.</para> </glossdef>
 </glossentry>
 
+<!--
 <glossentry id="gloss-legacy-application">
 <glossterm>Legacy Application</glossterm>
 <glossdef>
@@ -504,6 +532,7 @@ url="http://www.gnome.org">GNOME</ulink> applications may provide
 limited interoperability with the &kde;.</para></footnote>.</para>
 </glossdef>
 </glossentry>
+-->
 
 <glossentry id="gloss-console-application">
 <glossterm>Console Application</glossterm>
