@@ -84,7 +84,12 @@ Item {
         interval: 250
         repeat: false
         running: false
-        onTriggered: updateBackgroundHints()
+        onTriggered: {
+            updateBackgroundHints();
+                    applet.parent = appletContainer;
+                    //applet.width = appletContainer.width - 96;
+                    applet.anchors.fill = appletContainer;
+        }
     }
 
     function updateBackgroundHints() {
@@ -105,7 +110,7 @@ Item {
             backgroundHints = "DefaultBackground";
             appletItem.imagePath = "widgets/background";
         }
-        applet.backgroundHints = "NoBackground";
+        //applet.backgroundHints = "NoBackground";
     }
 
     Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "white"; opacity: 0.5; visible: debug; anchors.fill: parent; }
@@ -235,20 +240,46 @@ Item {
             id: contentsItem
 
             z: mouseListener.z+1
-            x: 0 + appletItem.margins.left
-            y: 0 + appletItem.margins.top
-            width: appletItem.width - (appletItem.margins.left + appletItem.margins.right)
-            height: appletItem.height - (appletItem.margins.top + appletItem.margins.bottom)
+//             x: 0 + appletItem.margins.left
+//             y: 0 + appletItem.margins.top
+//             width: appletItem.width - (appletItem.margins.left + appletItem.margins.right)
+//             height: appletItem.height - (appletItem.margins.top + appletItem.margins.bottom)
+            anchors {
+                fill: parent
+                    leftMargin: plasmoidBackground.margins.left
+                    rightMargin: plasmoidBackground.margins.right + handleWidth
+                    topMargin: plasmoidBackground.margins.top
+                    bottomMargin: plasmoidBackground.margins.bottom
+//                 leftMargin: 48
+//                 rightMargin: 48
+//                 topMargin: 48
+//                 bottomMargin: 48
+            }
 
             //PlasmaContainments.AppletContainer {
             Item {
                 id: appletContainer
-                anchors.fill: parent
+                anchors {
+                    fill: parent
+//                     leftMargin: plasmoidBackground.margins.left
+//                     rightMargin: plasmoidBackground.margins.right
+//                     topMargin: plasmoidBackground.margins.top
+//                     bottomMargin: plasmoidBackground.margins.bottom
+//                     leftMargin: 48
+//                     rightMargin: 48
+//                     topMargin: 48
+//                     bottomMargin: 48
+                }
 
                 property Item applet
 
                 onAppletChanged: {
                     //applet.appletDestroyed.connect(appletDestroyed) // FIXME
+                    print("Applet changed ... ");
+//                     applet.parent = appletContainer;
+//                     applet.width = appletContainer.width - 96;
+//                     //applet.anchors.fill = parent;
+
                     appletTimer.running = true
                 }
                 Behavior on opacity {

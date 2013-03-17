@@ -50,6 +50,8 @@ Item {
     property int iconWidth: iconSize
     property int iconHeight: iconWidth
 
+    property int appletId: 0
+
     onIconHeightChanged: updateGridSize()
 
     function updateGridSize()
@@ -75,16 +77,33 @@ Item {
         } else {
             print("AppletAppearance.qml loaded successfully.");
         }
+
+        var container = component.createObject(resultsFlow)
+        container.visible = true
+        print("Applet added: " + applet)
+        applet.parent = container
+        //container.category = "Applet-"+applet.id; // FIXME: undefined in Applet
+        container.category = "Applet-"+root.appletId; // FIXME: undefined in Applet
+        container.width = LayoutManager.cellSize.width*2;
+        container.height = LayoutManager.cellSize.height*2;
+        container.anchors.margins = 48;
+        applet.anchors.fill= applet.parent
+        container.applet = applet
+        applet.visible = true
+        root.appletId++;
+/*
         //var appletItem = component.createObject(root);
         var appletItem = component.createObject(resultsFlow); // FIXME
         //appletItem.id = appletAppearance;
+//         applet.parent =
         appletItem.width = LayoutManager.cellSize.width*2;
         appletItem.height = LayoutManager.cellSize.height*2;
         appletItem.applet = applet;
         print("Applet set...");
         appletItem.category = "Applet-"+applet.id;
-        print("Applet category..." + appletItem.category);
-        LayoutManager.itemGroups[appletItem.category] = appletItem;
+        */
+        print("Applet category..." + container.category);
+        LayoutManager.itemGroups[container.category] = container;
     }
     PlasmaCore.Svg {
         id: iconsSvg
@@ -218,7 +237,8 @@ Item {
             width: placeHolder.width + (root.iconSize/2)
             height: placeHolder.height - root.iconSize
             z: 0
-//             opacity: 0 // FIXME: crashes.
+            //opacity: 0.1 // FIXME: crashes.
+            visible: false
 
             property int moveDuration: 75
 
@@ -261,6 +281,8 @@ Item {
 
     */
     Component.onCompleted: {
+        placeHolderPaint.opacity = 0;
+        placeHolderPaint.visible = true;
         print("COntainment completed.");
 //         return
         LayoutManager.plasmoid = plasmoid
@@ -269,6 +291,7 @@ Item {
         //plasmoid.containmentType = "DesktopContainment"
         plasmoid.appletAdded.connect(addApplet)
         LayoutManager.restore()
+
         //return;
         for (var i = 0; i < plasmoid.applets.length; ++i) {
             var applet = plasmoid.applets[i]
