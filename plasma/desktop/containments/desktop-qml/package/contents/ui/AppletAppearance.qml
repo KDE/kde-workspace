@@ -20,6 +20,8 @@
 
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.qtextracomponents 2.0 as QtExtras
 //import org.kde.plasma.containments 2.0 as PlasmaContainments
 
@@ -250,7 +252,8 @@ Item {
 
             onAppletChanged: {
                 if (!applet) {
-                    appletDestroyed();
+                    killAnim.running = true;
+                    //appletDestroyed();
                 } else {
                     appletTimer.running = true;
                 }
@@ -260,6 +263,20 @@ Item {
                     duration: 250
                     easing.type: Easing.InOutQuad
                 }
+            }
+            PlasmaComponents.BusyIndicator {
+                id: busyIndicator
+                z: appletContainer.z + 1
+                visible: applet.busy
+                running: visible
+                anchors.centerIn: parent
+            }
+            SequentialAnimation {
+                id: killAnim
+                PlasmaExtras.DisappearAnimation {
+                    targetItem: plasmoidBackground
+                }
+                ScriptAction { script: appletContainer.appletDestroyed() }
             }
             function appletDestroyed() {
                 print("Applet DESTROYED!!!!!!!!!!!!");
@@ -324,7 +341,6 @@ Item {
             }
             onReleased: {
                 animationsEnabled = true
-
                 LayoutManager.positionItem(appletItem)
                 LayoutManager.save()
                 LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, widthAnimation.to, heightAnimation.to, false)
