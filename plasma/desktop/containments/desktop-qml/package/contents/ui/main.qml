@@ -50,8 +50,6 @@ Item {
     property int iconWidth: iconSize
     property int iconHeight: iconWidth
 
-    property int appletId: 0
-
     onIconHeightChanged: updateGridSize()
 
     function updateGridSize()
@@ -82,15 +80,13 @@ Item {
         container.visible = true
         print("Applet added: " + applet)
         applet.parent = container
-        //container.category = "Applet-"+applet.id; // FIXME: undefined in Applet
-        container.category = "Applet-"+root.appletId; // FIXME: undefined in Applet
+        container.category = "Applet-"+applet.id; // FIXME: undefined in Applet
         container.width = LayoutManager.cellSize.width*2;
         container.height = LayoutManager.cellSize.height*2;
         container.anchors.margins = 48;
         applet.anchors.fill= applet.parent
         container.applet = applet
         applet.visible = true
-        root.appletId++;
 /*
         //var appletItem = component.createObject(root);
         var appletItem = component.createObject(resultsFlow); // FIXME
