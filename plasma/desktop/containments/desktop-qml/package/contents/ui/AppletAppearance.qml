@@ -54,7 +54,7 @@ Item {
                             appletItem.contents.anchors.bottomMargin)
 
     property alias applet: appletContainer.applet
-    property alias appletItem: appletItem
+    //property alias appletItem: appletItem
 
     property Item contents: contentsItem
     property alias margins: plasmoidBackground.margins
@@ -81,14 +81,14 @@ Item {
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {
         id: appletTimer
-        interval: 250
+        interval: 10
         repeat: false
         running: false
         onTriggered: {
             updateBackgroundHints();
-                    applet.parent = appletContainer;
-                    //applet.width = appletContainer.width - 96;
-                    applet.anchors.fill = appletContainer;
+            applet.parent = appletContainer;
+            //applet.width = appletContainer.width - 96;
+            applet.anchors.fill = appletContainer;
         }
     }
 
@@ -271,16 +271,28 @@ Item {
 //                     bottomMargin: 48
                 }
 
-                property Item applet
+                property QtObject applet
 
                 onAppletChanged: {
-                    //applet.appletDestroyed.connect(appletDestroyed) // FIXME
-                    print("Applet changed ... ");
+                    print("======== Applet changed ... ");
+                    appletTimer.running = true
+                    if (applet) {
+                        print(" OK applet" + typeof(applet));
+                        for (var e in applet) {
+                            print(" member: " + e);
+                            //print(" member: " + e + " " + applet[e]);
+                        }
+                        //applet.destroyed.connect(appletDestroyed) // FIXME
+                    } else {
+                        print(" not applet __________________________");
+                        appletDestroyed();
+                    }
+                    //applet.destroyed.connect(appletDestroyed) // FIXME
+                    print("done======== Applet changed ... ");
 //                     applet.parent = appletContainer;
 //                     applet.width = appletContainer.width - 96;
 //                     //applet.anchors.fill = parent;
 
-                    appletTimer.running = true
                 }
                 Behavior on opacity {
                     NumberAnimation {
@@ -289,6 +301,8 @@ Item {
                     }
                 }
                 function appletDestroyed() {
+                    print("Applet DESTROYED!!!!!!!!!!!!");
+                    //return;
                     LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
                     appletItem.destroy()
                 }
