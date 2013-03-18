@@ -252,10 +252,16 @@ Item {
 
             onAppletChanged: {
                 if (!applet) {
-                    killAnim.running = true;
+                    //killAnim.running = true;
                     //appletDestroyed();
                 } else {
                     appletTimer.running = true;
+                }
+            }
+            Connections {
+                target: appletHandle
+                onRemoveApplet: {
+                    killAnim.running = true;
                 }
             }
             Behavior on opacity {
@@ -264,6 +270,23 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
+            SequentialAnimation {
+                id: killAnim
+                PlasmaExtras.DisappearAnimation {
+                    targetItem: appletItem
+                }
+                ScriptAction {
+                    script: appletContainer.appletDestroyed()
+
+                }
+            }
+            function appletDestroyed() {
+                print("Applet DESTROYED!!!!!!!!!!!!");
+                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                applet.action("remove").trigger();
+                appletItem.destroy()
+            }
+            Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
             PlasmaComponents.BusyIndicator {
                 id: busyIndicator
                 z: appletContainer.z + 1
@@ -271,19 +294,6 @@ Item {
                 running: visible
                 anchors.centerIn: parent
             }
-            SequentialAnimation {
-                id: killAnim
-                PlasmaExtras.DisappearAnimation {
-                    targetItem: plasmoidBackground
-                }
-                ScriptAction { script: appletContainer.appletDestroyed() }
-            }
-            function appletDestroyed() {
-                print("Applet DESTROYED!!!!!!!!!!!!");
-                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
-                appletItem.destroy()
-            }
-            Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
         }
 
 //     PlasmaCore.SvgItem {

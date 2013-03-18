@@ -34,6 +34,8 @@ Item {
     property int buttonMargin: 6
     property int minimumHeight:  6 * (root.iconSize + buttonMargin)
 
+    signal removeApplet
+
     Column {
         id: buttonColumn
         width: handleWidth
@@ -175,11 +177,6 @@ Item {
     }
 
     ActionButton {
-        svg: configIconsSvg
-        elementId: "close"
-        iconSize: root.iconSize
-        visible: (action && typeof(action) != "undefined") ? action.enabled : null
-        action: (applet) ? applet.action("remove") : null
         z: dragMouseArea.z + 1
         width: handleWidth
         anchors {
@@ -189,9 +186,25 @@ Item {
             rightMargin: -buttonMargin
         }
 
+        svg: configIconsSvg
+        elementId: "close"
+        iconSize: root.iconSize
+        visible: {
+            var a = plasmoid.action("remove");
+            return (a && typeof(a) != "undefined") ? a.enabled : false;
+        }
+        // we don't set action, since we want to catch the button click,
+        // animate, and then trigger the "remove" action
+        // Triggering the action is handled in the appletItem, we just
+        // emit a signal here to avoid the applet-gets-removed-before-we-
+        // can-animate it race condition.
+        onClicked: {
+            appletHandle.removeApplet();
+        }
         Component.onCompleted: {
-            if (action && typeof(action) != "undefined") {
-                action.enabled = true
+            var a = plasmoid.action("remove");
+            if (a && typeof(a) != "undefined") {
+                a.enabled = true
             }
         }
     }
