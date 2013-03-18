@@ -50,26 +50,26 @@ Item {
             z: dragMouseArea.z + 1
             elementId: "size-diagonal-tr2bl"
             iconSize: root.iconSize
-//             visible: action.enabled
-//             action: applet.action("configure")
-//             Component.onCompleted: {
-//                 if (action && typeof(action) != "undefined") {
-//                     action.enabled = true
-//                 }
-//             }
+            visible: action.enabled
+            action: applet.action("configure")
+            Component.onCompleted: {
+                if (action && typeof(action) != "undefined") {
+                    action.enabled = true
+                }
+            }
         }
         ActionButton {
             svg: configIconsSvg
             z: dragMouseArea.z + 1
             elementId: "rotate"
             iconSize: root.iconSize
-//             visible: action.enabled
-//             action: applet.action("rotate")
-//             Component.onCompleted: {
-//                 if (action && typeof(action) != "undefined") {
-//                     action.enabled = true
-//                 }
-//             }
+            visible: action.enabled
+            action: applet.action("rotate")
+            Component.onCompleted: {
+                if (action && typeof(action) != "undefined") {
+                    action.enabled = true
+                }
+            }
             MouseArea {
                 id: resizeHandle
 
@@ -151,26 +151,28 @@ Item {
             z: dragMouseArea.z + 1
             elementId: "configure"
             iconSize: root.iconSize
-            //visible: action.enabled
-//             action: applet.action("configure")
-//             Component.onCompleted: {
-//                 if (action && typeof(action) != "undefined") {
-//                     action.enabled = true
-//                 }
-//             }
+            visible: action.enabled
+            action: applet.action("configure")
+            Component.onCompleted: {
+                if (action && typeof(action) != "undefined") {
+                    action.enabled = true
+                } else {
+                    print("Action is broken? " + action.objectName);
+                }
+            }
         }
         ActionButton {
             svg: configIconsSvg
             z: dragMouseArea.z + 1
             elementId: "maximize"
             iconSize: root.iconSize
-//             visible: action.enabled
-//             action: applet.action("run associated application")
-//             Component.onCompleted: {
-//                 if (action && typeof(action) != "undefined") {
-//                     action.enabled = true
-//                 }
-//             }
+            visible: action.enabled
+            action: applet.action("run associated application")
+            Component.onCompleted: {
+                if (action && typeof(action) != "undefined") {
+                    action.enabled = true
+                }
+            }
         }
     }
 
@@ -178,8 +180,8 @@ Item {
         svg: configIconsSvg
         elementId: "close"
         iconSize: root.iconSize
-//         visible: action.enabled
-//         action: applet.action("remove")
+        visible: action.enabled
+        action: applet.action("remove")
         z: dragMouseArea.z + 1
         width: handleWidth
         anchors {
@@ -189,11 +191,11 @@ Item {
             rightMargin: -buttonMargin
         }
 
-//         Component.onCompleted: {
-//             if (action && typeof(action) != "undefined") {
-//                 action.enabled = true
-//             }
-//         }
+        Component.onCompleted: {
+            if (action && typeof(action) != "undefined") {
+                action.enabled = true
+            }
+        }
     }
 
     PlasmaCore.Svg {
