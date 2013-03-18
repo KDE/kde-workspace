@@ -274,25 +274,11 @@ Item {
                 property QtObject applet
 
                 onAppletChanged: {
-                    print("======== Applet changed ... ");
-                    appletTimer.running = true
-                    if (applet) {
-                        print(" OK applet" + typeof(applet));
-                        for (var e in applet) {
-                            print(" member: " + e);
-                            //print(" member: " + e + " " + applet[e]);
-                        }
-                        //applet.destroyed.connect(appletDestroyed) // FIXME
-                    } else {
-                        print(" not applet __________________________");
+                    if (!applet) {
                         appletDestroyed();
+                    } else {
+                        appletTimer.running = true;
                     }
-                    //applet.destroyed.connect(appletDestroyed) // FIXME
-                    print("done======== Applet changed ... ");
-//                     applet.parent = appletContainer;
-//                     applet.width = appletContainer.width - 96;
-//                     //applet.anchors.fill = parent;
-
                 }
                 Behavior on opacity {
                     NumberAnimation {
