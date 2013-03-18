@@ -56,7 +56,7 @@ Item {
     property alias applet: appletContainer.applet
     //property alias appletItem: appletItem
 
-    property Item contents: contentsItem
+    property Item contents: appletContainer
     property alias margins: plasmoidBackground.margins
     property alias imagePath: plasmoidBackground.imagePath
 
@@ -81,18 +81,17 @@ Item {
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {
         id: appletTimer
-        interval: 10
+        interval: 100
         repeat: false
         running: false
         onTriggered: {
             updateBackgroundHints();
             applet.parent = appletContainer;
-            //applet.width = appletContainer.width - 96;
             applet.anchors.fill = appletContainer;
         }
     }
 
-    function updateBackgroundHints() {
+    function updateBackgroundHints() { // FIXME
         // We save the applet's background hints in our own property,
         // then we tell the applet to not render a background, 'cause
         // we'll do it for the applet
@@ -193,7 +192,7 @@ Item {
             id: dragMouseArea
 
             anchors.fill: parent
-            z: contentsItem.z - 2
+            z: appletContainer.z - 2
 
             property int lastX
             property int lastY
@@ -237,63 +236,37 @@ Item {
         }
 
         Item {
-            id: contentsItem
-
-            z: mouseListener.z+1
-//             x: 0 + appletItem.margins.left
-//             y: 0 + appletItem.margins.top
-//             width: appletItem.width - (appletItem.margins.left + appletItem.margins.right)
-//             height: appletItem.height - (appletItem.margins.top + appletItem.margins.bottom)
+            id: appletContainer
             anchors {
                 fill: parent
-                    leftMargin: plasmoidBackground.margins.left
-                    rightMargin: plasmoidBackground.margins.right + handleWidth
-                    topMargin: plasmoidBackground.margins.top
-                    bottomMargin: plasmoidBackground.margins.bottom
-//                 leftMargin: 48
-//                 rightMargin: 48
-//                 topMargin: 48
-//                 bottomMargin: 48
+                leftMargin: plasmoidBackground.margins.left
+                rightMargin: plasmoidBackground.margins.right + handleWidth
+                topMargin: plasmoidBackground.margins.top
+                bottomMargin: plasmoidBackground.margins.bottom
             }
+            z: mouseListener.z+1
 
-            //PlasmaContainments.AppletContainer {
-            Item {
-                id: appletContainer
-                anchors {
-                    fill: parent
-//                     leftMargin: plasmoidBackground.margins.left
-//                     rightMargin: plasmoidBackground.margins.right
-//                     topMargin: plasmoidBackground.margins.top
-//                     bottomMargin: plasmoidBackground.margins.bottom
-//                     leftMargin: 48
-//                     rightMargin: 48
-//                     topMargin: 48
-//                     bottomMargin: 48
-                }
+            property QtObject applet
 
-                property QtObject applet
-
-                onAppletChanged: {
-                    if (!applet) {
-                        appletDestroyed();
-                    } else {
-                        appletTimer.running = true;
-                    }
+            onAppletChanged: {
+                if (!applet) {
+                    appletDestroyed();
+                } else {
+                    appletTimer.running = true;
                 }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                function appletDestroyed() {
-                    print("Applet DESTROYED!!!!!!!!!!!!");
-                    //return;
-                    LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
-                    appletItem.destroy()
-                }
-                Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
             }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 250
+                    easing.type: Easing.InOutQuad
+                }
+            }
+            function appletDestroyed() {
+                print("Applet DESTROYED!!!!!!!!!!!!");
+                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                appletItem.destroy()
+            }
+            Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
         }
 
 //     PlasmaCore.SvgItem {

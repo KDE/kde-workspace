@@ -156,8 +156,6 @@ Item {
             Component.onCompleted: {
                 if (action && typeof(action) != "undefined") {
                     action.enabled = true
-                } else {
-                    print("Action is broken? " + action.objectName);
                 }
             }
         }
