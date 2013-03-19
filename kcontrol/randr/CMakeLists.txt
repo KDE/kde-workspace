@@ -52,6 +52,10 @@ set(krandrtray_SRCS
    krandrpassivepopup.cpp ${randrinternal_PART_SRCS})
 
 
+kde4_add_ui_files(krandrtray_SRCS
+   randrconfigbase.ui
+   outputconfigbase.ui)
+
 kde4_add_executable(krandrtray ${krandrtray_SRCS})
 
 target_link_libraries(krandrtray ${KDE4_KCMUTILS_LIBS} ${X11_Xrandr_LIB} ${X11_LIBRARIES})
