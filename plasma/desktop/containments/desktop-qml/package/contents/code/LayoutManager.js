@@ -44,11 +44,11 @@ function restore()
         var idConfig = itemsStrings[i].split(":")
         idConfig[0] = idConfig[0].replace("%3A", ":")
         if (idConfig.length < 2) {
-            continue
+            continue;
         }
 
         //array [x, y, width, height, rotation]
-        print("============================" + idConfig[1]);
+        print("Restoring applet " + idConfig[0] + " at " + idConfig[1]);
         var rect = idConfig[1].split(",")
         if (rect.length < 5) {
             continue
@@ -59,7 +59,7 @@ function restore()
         geomObject.width = rect[2]
         geomObject.height = rect[3]
         geomObject.rotation = parseFloat(rect[4])
-        print("xxxxx Rotation: " + geomObject.rotation + " " + rect[4]);
+        //print("xxxxx Rotation: " + geomObject.rotation + " " + rect[4]);
         itemsConfig[idConfig[0]] = geomObject
     }
     print("Restore done.");
