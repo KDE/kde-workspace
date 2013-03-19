@@ -23,20 +23,23 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 PlasmaComponents.BusyIndicator {
     id: busyIndicator
+
+    anchors.centerIn: parent
     z: appletContainer.z + 1
     visible: applet.busy
+
     running: visible
-    anchors.centerIn: parent
+
+    function disappear() {
+        appearAnim.running = false;
+        disappearAnim.running = true;
+    }
 
     onRunningChanged: {
         if (running) {
             disappearAnim.running = false;
             appearAnim.running = true;
         }
-    }
-    function disappear() {
-        appearAnim.running = false;
-        disappearAnim.running = true;
     }
 
     PlasmaExtras.AppearAnimation {

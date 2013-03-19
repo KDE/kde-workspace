@@ -21,23 +21,12 @@
 
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.qtextracomponents 2.0 as QtExtras
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 Item {
     id: root
-    width: 540
-    height: 540
-
-//     signal minimumWidthChanged
-//     signal minimumHeightChanged
-//     signal maximumWidthChanged
-//     signal maximumHeightChanged
-//     signal preferredWidthChanged
-//     signal preferredHeightChanged
 
     property bool debug: false
     property int handleDelay: 800
@@ -149,10 +138,7 @@ Item {
                 LayoutManager.save()
             }
         }
-        Component.onCompleted: {
-            LayoutManager.resultsFlow = resultsFlow
-            //LayoutManager.plasmoid = plasmoid
-        }
+        Component.onCompleted: LayoutManager.resultsFlow = resultsFlow
     }
 
     Item {
@@ -161,10 +147,12 @@ Item {
 
         Item {
             id: placeHolder
+
             x: -10000
-            property bool animationsEnabled
             width: 100
             height: 100
+
+            property bool animationsEnabled
             property int minimumWidth
             property int minimumHeight
             property Item syncItem
@@ -191,14 +179,10 @@ Item {
 
             Timer {
                 id: repositionTimer
-
                 interval: 100
                 repeat: false
                 running: false
-
-                onTriggered: {
-                    placeHolder.delayedSyncWithItem()
-                }
+                onTriggered: placeHolder.delayedSyncWithItem()
             }
         }
 
@@ -210,7 +194,6 @@ Item {
             width: placeHolder.width + (root.iconSize/2)
             height: placeHolder.height - root.iconSize
             z: 0
-//             opacity: 0 // FIXME: crashes.
             visible: false
 
             property int moveDuration: 75
@@ -256,8 +239,7 @@ Item {
     Component.onCompleted: {
         placeHolderPaint.opacity = 0;
         placeHolderPaint.visible = true;
-        print("COntainment completed.");
-//         return
+        print("Containment completed.");
         LayoutManager.plasmoid = plasmoid
         updateGridSize()
         plasmoid.containmentType = "CustomContainment"
@@ -265,7 +247,6 @@ Item {
         plasmoid.appletAdded.connect(addApplet)
         LayoutManager.restore()
 
-        //return;
         for (var i = 0; i < plasmoid.applets.length; ++i) {
             var applet = plasmoid.applets[i]
             addApplet(applet, 0)

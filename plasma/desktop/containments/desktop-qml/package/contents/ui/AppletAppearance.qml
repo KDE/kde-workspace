@@ -23,7 +23,6 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.qtextracomponents 2.0 as QtExtras
-//import org.kde.plasma.containments 2.0 as PlasmaContainments
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
@@ -44,7 +43,6 @@ Item {
     property bool hasBackground: false
     property bool handleMerged: (height < minimumHandleHeight)
     property bool animationsEnabled: false
-    //property int handleWidth: appletHandle.width
 
     property int minimumWidth: Math.max(LayoutManager.cellSize.width,
                            appletContainer.minimumWidth +
@@ -57,7 +55,6 @@ Item {
                             appletItem.contents.anchors.bottomMargin)
 
     property alias applet: appletContainer.applet
-    //property alias appletItem: appletItem
 
     property Item contents: appletContainer
     property alias margins: plasmoidBackground.margins
@@ -253,6 +250,13 @@ Item {
 
             property QtObject applet
 
+            function appletDestroyed() {
+                print("Applet DESTROYED.");
+                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                applet.action("remove").trigger();
+                appletItem.destroy()
+            }
+
             onAppletChanged: {
                 if (applet) {
                     appletTimer.running = true;
@@ -279,50 +283,17 @@ Item {
                     script: appletContainer.appletDestroyed()
                 }
             }
-            function appletDestroyed() {
-                print("Applet DESTROYED.");
-                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
-                applet.action("remove").trigger();
-                appletItem.destroy()
-            }
-
-            Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
-//             PlasmaComponents.BusyIndicator {
-//                 id: busyIndicator
-//                 z: appletContainer.z + 1
-//                 visible: applet.busy
-//                 running: visible
-//                 anchors.centerIn: parent
-//             }
             Loader {
                 id: busyLoader
                 anchors.centerIn: parent
                 z: appletContainer.z + 1
-                //visible: applet.busy
             }
+            Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
             Component.onCompleted: PlasmaExtras.AppearAnimation {
                 targetItem: appletItem
             }
         }
 
-//     PlasmaCore.SvgItem {
-//         id: resizeHandleSvg
-//         opacity: controlsOpacity
-//         svg: PlasmaCore.Svg {
-//             imagePath: plasmoid.file("images", "resize-handle.svgz")
-//         }
-//         width: 24
-//         height: 24
-//         anchors {
-//             right: parent.right
-//             bottom: parent.bottom
-//             rightMargin: appletItem.margins.right
-//             bottomMargin: appletItem.margins.bottom
-//         }
-//         Rectangle { color: "white"; opacity: 0.4; visible: debug; anchors.fill: parent; }
-//     }
-
-        //AppletHandle {
         Loader {
             id: appletHandle
             z: appletContainer.z + 1
@@ -337,7 +308,7 @@ Item {
                 target: appletItem
                 onShowAppletHandleChanged: {
                     if (appletItem.showAppletHandle && appletHandle.source == "") {
-                        print("Loading applethandle ");
+                        //print("Loading applethandle ");
                         appletHandle.source = "AppletHandle.qml";
                     }
                 }
