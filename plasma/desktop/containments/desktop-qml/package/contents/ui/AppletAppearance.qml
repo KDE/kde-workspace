@@ -62,6 +62,8 @@ Item {
     property alias margins: plasmoidBackground.margins
     property alias imagePath: plasmoidBackground.imagePath
 
+    visible: false
+
     onHeightChanged: {
         // Does the handle's height fit into the frame?
         var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
@@ -277,15 +279,15 @@ Item {
                 }
                 ScriptAction {
                     script: appletContainer.appletDestroyed()
-
                 }
             }
             function appletDestroyed() {
-                print("Applet DESTROYED!!!!!!!!!!!!");
+                print("Applet DESTROYED.");
                 LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
                 applet.action("remove").trigger();
                 appletItem.destroy()
             }
+
             Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
             PlasmaComponents.BusyIndicator {
                 id: busyIndicator
@@ -293,6 +295,10 @@ Item {
                 visible: applet.busy
                 running: visible
                 anchors.centerIn: parent
+            }
+
+            Component.onCompleted: PlasmaExtras.AppearAnimation {
+                targetItem: appletItem
             }
         }
 

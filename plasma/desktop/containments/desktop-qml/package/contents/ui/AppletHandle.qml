@@ -91,16 +91,14 @@ Item {
                 property bool skipOne: false;
 
                 onPressed: {
-//                     mouse.accepted = true
-//                     animationsEnabled = false;
+                    mouse.accepted = true
+                    animationsEnabled = false;
                     startX = mouse.x;
                     startY = mouse.y;
                     startRotation = appletItem.rotation;
                     prevMove = 0;
                     resizeHandle.rotation = -appletItem.rotation;
-
-
-//                     LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                    LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
                 }
                 onPositionChanged: {
                     if (skipOne) {
@@ -116,7 +114,7 @@ Item {
                         newRotation = newRotation + 360;
                     }
                     if ((moved - prevMove) > 100) {
-                        print("skipped: " + prevMove + " " + moved + " " + (moved - prevMove));
+                        //print("skipped: " + prevMove + " " + moved + " " + (moved - prevMove));
                         skipOne = true;
                         //prevMove = moved;
                         return;
@@ -164,7 +162,8 @@ Item {
         ActionButton {
             svg: configIconsSvg
             z: dragMouseArea.z + 1
-            elementId: "maximize"
+            elementId: "size-diagonal-tr2bl" // FIXME should be maximize
+            //elementId: "maximize"
             iconSize: root.iconSize
             visible: (action && typeof(action) != "undefined") ? action.enabled : false
             action: (applet) ? applet.action("run associated application") : null

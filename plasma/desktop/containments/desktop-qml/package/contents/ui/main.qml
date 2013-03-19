@@ -32,12 +32,12 @@ Item {
     width: 540
     height: 540
 
-    signal minimumWidthChanged
-    signal minimumHeightChanged
-    signal maximumWidthChanged
-    signal maximumHeightChanged
-    signal preferredWidthChanged
-    signal preferredHeightChanged
+//     signal minimumWidthChanged
+//     signal minimumHeightChanged
+//     signal maximumWidthChanged
+//     signal maximumHeightChanged
+//     signal preferredWidthChanged
+//     signal preferredHeightChanged
 
     property bool debug: false
     property int handleDelay: 800
@@ -64,16 +64,12 @@ Item {
 
     function addApplet(applet, pos)
     {
-        print("====================================>> addApplet");
-        //return; // FIXME
-        print("Adding...");
         var component = Qt.createComponent("AppletAppearance.qml");
-        print("Added...");
         var e = component.errorString();
         if (e != "") {
             print("Error loading AppletAppearance.qml: " + component.errorString());
         } else {
-            print("AppletAppearance.qml loaded successfully.");
+            //print("AppletAppearance.qml loaded successfully.");
         }
 
         var container = component.createObject(resultsFlow)
@@ -84,22 +80,11 @@ Item {
         container.width = LayoutManager.cellSize.width*2;
         container.height = LayoutManager.cellSize.height*2;
         container.anchors.margins = 48;
-        applet.anchors.fill= applet.parent
-        container.applet = applet
-        applet.visible = true
-/*
-        //var appletItem = component.createObject(root);
-        var appletItem = component.createObject(resultsFlow); // FIXME
-        //appletItem.id = appletAppearance;
-//         applet.parent =
-        appletItem.width = LayoutManager.cellSize.width*2;
-        appletItem.height = LayoutManager.cellSize.height*2;
-        appletItem.applet = applet;
-        print("Applet set...");
-        appletItem.category = "Applet-"+applet.id;
-        */
-        print("Applet category..." + container.category);
+        container.applet = applet;
+        applet.anchors.fill = applet.parent;
+        applet.visible = true;
         LayoutManager.itemGroups[container.category] = container;
+        print("Applet " + container.category + " added.");
     }
     PlasmaCore.Svg {
         id: iconsSvg
