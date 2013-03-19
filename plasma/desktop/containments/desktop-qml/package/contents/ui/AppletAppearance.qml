@@ -286,11 +286,15 @@ Item {
                 id: busyLoader
                 anchors.centerIn: parent
                 z: appletContainer.z + 1
-                visible: applet.busy
+                //visible: applet.busy
                 Connections {
                     target: applet
                     onBusyChanged: {
-                        busyLoader.source = (applet.busy && busyLoader.source == "") ? "BusyOverlay.qml" : ""
+                        if (applet.busy) {
+                            busyLoader.source = "BusyOverlay.qml"
+                        } else if (busyLoader.item && typeof(busyLoader.item) != "undefined") {
+                            busyLoader.item.disappear();
+                        }
                     }
                 }
             }
