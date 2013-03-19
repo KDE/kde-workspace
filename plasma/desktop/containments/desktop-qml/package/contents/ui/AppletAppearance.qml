@@ -74,7 +74,7 @@ Item {
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {
         id: appletTimer
-        interval: 100
+        interval: 50
         repeat: false
         running: false
         onTriggered: {
@@ -84,25 +84,22 @@ Item {
         }
     }
 
-    function updateBackgroundHints() { // FIXME
-        // We save the applet's background hints in our own property,
-        // then we tell the applet to not render a background, 'cause
-        // we'll do it for the applet
+    function updateBackgroundHints() {
         hasBackground = (applet.backgroundHints != "NoBackground");
-        if (applet.backgroundHints == -1) {
+        if (applet.backgroundHints == 1) {
             appletItem.imagePath = "widgets/background";
             backgroundHints = "StandardBackground";
         } else if (applet.backgroundHints == 2) {
             appletItem.imagePath = "widgets/translucentbackground"
             backgroundHints = "TranslucentBackground";
         } else if (applet.backgroundHints == 0) {
-            //appletItem.imagePath = "widgets/translucentbackground"
+            appletItem.imagePath = ""
             backgroundHints = "NoBackground";
         } else {
             backgroundHints = "DefaultBackground";
             appletItem.imagePath = "widgets/background";
         }
-        //applet.backgroundHints = "NoBackground";
+        //print("Backgroundhints changed: " + appletItem.imagePath);
     }
 
     Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "white"; opacity: 0.5; visible: debug; anchors.fill: parent; }
@@ -178,6 +175,21 @@ Item {
             onImmutableChanged: {
                 dragMouseArea.visible = !plasmoid.immutable;
                 showAppletHandle = false;
+            }
+        }
+        Connections {
+            target: applet
+            onBusyChanged: {
+                if (applet.busy) {
+                    busyLoader.source = "BusyOverlay.qml"
+                } else if (busyLoader.item && typeof(busyLoader.item) != "undefined") {
+                    busyLoader.item.disappear();
+                }
+            }
+            onBackgroundHintsChanged: {
+                print("plasmoid.backgroundHintsChanged");
+                updateBackgroundHints();
+
             }
         }
 
@@ -287,16 +299,6 @@ Item {
                 anchors.centerIn: parent
                 z: appletContainer.z + 1
                 //visible: applet.busy
-                Connections {
-                    target: applet
-                    onBusyChanged: {
-                        if (applet.busy) {
-                            busyLoader.source = "BusyOverlay.qml"
-                        } else if (busyLoader.item && typeof(busyLoader.item) != "undefined") {
-                            busyLoader.item.disappear();
-                        }
-                    }
-                }
             }
             Component.onCompleted: PlasmaExtras.AppearAnimation {
                 targetItem: appletItem

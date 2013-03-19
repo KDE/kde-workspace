@@ -161,6 +161,7 @@ Item {
 
         Item {
             id: placeHolder
+            x: -10000
             property bool animationsEnabled
             width: 100
             height: 100
@@ -209,7 +210,7 @@ Item {
             width: placeHolder.width + (root.iconSize/2)
             height: placeHolder.height - root.iconSize
             z: 0
-            //opacity: 0.1 // FIXME: crashes.
+//             opacity: 0 // FIXME: crashes.
             visible: false
 
             property int moveDuration: 75
