@@ -34,7 +34,7 @@ Item {
 
     property int handleWidth: iconSize + 8 // 4 pixels margins inside handle
     property int minimumHandleHeight: 6 * (root.iconSize + 6)
-    property int handleHeight: (height < minimumHandleHeight) ? appletHandle.item.height : height
+    property int handleHeight: (height < minimumHandleHeight && appletHandle.source != "") ? appletHandle.item.height : height
     property string category
 
     property bool showAppletHandle: false
@@ -275,14 +275,25 @@ Item {
             }
 
             Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
-            PlasmaComponents.BusyIndicator {
-                id: busyIndicator
+//             PlasmaComponents.BusyIndicator {
+//                 id: busyIndicator
+//                 z: appletContainer.z + 1
+//                 visible: applet.busy
+//                 running: visible
+//                 anchors.centerIn: parent
+//             }
+            Loader {
+                id: busyLoader
+                anchors.centerIn: parent
                 z: appletContainer.z + 1
                 visible: applet.busy
-                running: visible
-                anchors.centerIn: parent
+                Connections {
+                    target: applet
+                    onBusyChanged: {
+                        busyLoader.source = (applet.busy && busyLoader.source == "") ? "BusyOverlay.qml" : ""
+                    }
+                }
             }
-
             Component.onCompleted: PlasmaExtras.AppearAnimation {
                 targetItem: appletItem
             }
