@@ -31,11 +31,8 @@ Item {
     property bool debug: false
     property int handleDelay: 800
     property real haloOpacity: 0.5
-    property Item currentGroup
-    property int currentIndex: -1
 
     property int iconSize: 16
-
     property int iconWidth: iconSize
     property int iconHeight: iconWidth
 
@@ -70,10 +67,6 @@ Item {
         LayoutManager.itemGroups[container.category] = container;
         print("Applet " + container.category + " added.");
     }
-    PlasmaCore.Svg {
-        id: iconsSvg
-        imagePath: "widgets/configuration-icons"
-    }
 
     PlasmaCore.Svg {
         id: toolBoxSvg
@@ -84,20 +77,13 @@ Item {
         property int leftBorder: elementSize("left").width
     }
     PlasmaCore.Svg {
-        id: draggerSvg
-        imagePath: "widgets/extender-dragger"
-    }
-
-    PlasmaCore.Svg {
         id: configIconsSvg
         imagePath: "widgets/configuration-icons"
     }
 
-
     Item {
         id: resultsFlow
         anchors.fill: parent
-//         z: 900 // crashes?!?
 
         anchors {
             top: parent.top
@@ -148,7 +134,7 @@ Item {
         Item {
             id: placeHolder
 
-            x: -10000
+            x: -10000 // move offscreen initially to avoid flickering
             width: 100
             height: 100
 
