@@ -26,7 +26,7 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 Item {
     id: appletHandle
 
-    z: dragMouseArea.z + 1
+    //z: dragMouseArea.z + 1
     opacity: appletItem.controlsOpacity
     width: appletItem.handleWidth
 //     property alias appletAppearance: Item {}
@@ -36,6 +36,25 @@ Item {
 
     signal removeApplet
 
+    function updateHeight() {
+        // Does the handle's height fit into the frame?
+        var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
+        if (height > mini) {
+            //     height: appletAppearance.handleMerged ? appletItem.height : minimumHeight
+            //var mrg = appletItem.margins.top - appletItem.margins.bottom;
+            appletHandle.height = height;
+            appletItem.handleMerged = true;
+            //appletHandle.anchors.right = plasmoidBackground.right;
+            //appletHandle.anchors.rightMargin = appletItem.margins.right;
+        } else {
+            appletHandle.height = mini;
+            appletItem.handleMerged = false;
+            appletHandle.anchors.right = appletHandle.parent.right;
+            //appletHandle.anchors.rightMargin = 0;
+        }
+
+    }
+
     Column {
         id: buttonColumn
         width: handleWidth
@@ -43,13 +62,12 @@ Item {
             top: parent.top
             topMargin: appletItem.margins.top
             bottomMargin: appletItem.margins.bottom
-            right: parent.right
+            right: appletHandle.right
             rightMargin: -buttonMargin
         }
         spacing: buttonMargin*2
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1
             elementId: "size-diagonal-tr2bl"
             iconSize: root.iconSize
             visible: (action && typeof(action) != "undefined") ? action.enabled : false
@@ -62,7 +80,6 @@ Item {
         }
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1
             elementId: "rotate"
             iconSize: root.iconSize
             visible: (action && typeof(action) != "undefined") ? action.enabled : false
@@ -148,7 +165,6 @@ Item {
         }
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1
             elementId: "configure"
             iconSize: root.iconSize
             visible: (action && typeof(action) != "undefined") ? action.enabled : false
@@ -161,7 +177,6 @@ Item {
         }
         ActionButton {
             svg: configIconsSvg
-            z: dragMouseArea.z + 1
             elementId: "size-diagonal-tr2bl" // FIXME should be maximize
             //elementId: "maximize"
             iconSize: root.iconSize
@@ -176,7 +191,6 @@ Item {
     }
 
     ActionButton {
-        z: dragMouseArea.z + 1
         width: handleWidth
         anchors {
             bottom: parent.bottom
@@ -212,4 +226,6 @@ Item {
         id: buttonSvg
         imagePath: "widgets/actionbutton"
     }
+
+    Component.onCompleted: updateHeight()
 }

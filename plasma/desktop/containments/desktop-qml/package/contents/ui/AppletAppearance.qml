@@ -33,7 +33,8 @@ Item {
     anchors.rightMargin: -handleWidth*controlsOpacity
 
     property int handleWidth: iconSize + 8 // 4 pixels margins inside handle
-    property alias handleHeight: appletHandle.height
+    property int minimumHandleHeight: 6 * (root.iconSize + 6)
+    property int handleHeight: (height < minimumHandleHeight) ? appletHandle.item.height : height
     property string category
 
     property bool showAppletHandle: false
@@ -41,7 +42,7 @@ Item {
     property bool handleShown: true
     property string backgroundHints: "NoBackground"
     property bool hasBackground: false
-    property bool handleMerged: false
+    property bool handleMerged: (height < minimumHandleHeight)
     property bool animationsEnabled: false
     //property int handleWidth: appletHandle.width
 
@@ -65,20 +66,8 @@ Item {
     visible: false
 
     onHeightChanged: {
-        // Does the handle's height fit into the frame?
-        var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
-        if (height > mini) {
-            //     height: appletAppearance.handleMerged ? appletItem.height : minimumHeight
-            //var mrg = appletItem.margins.top - appletItem.margins.bottom;
-            appletHandle.height = height;
-            appletItem.handleMerged = true;
-            appletHandle.anchors.right = plasmoidBackground.right;
-            //appletHandle.anchors.rightMargin = appletItem.margins.right;
-        } else {
-            appletHandle.height = mini;
-            appletItem.handleMerged = false;
-            appletHandle.anchors.right = appletHandle.parent.right;
-            //appletHandle.anchors.rightMargin = 0;
+        if (appletHandle.source != "") {
+            appletHandle.item.updateHeight();
         }
         //print("handleMerged : " + appletItem.handleMerged + " min, height " + mini + ", " + appletHandle.height);
     }
@@ -253,15 +242,12 @@ Item {
             property QtObject applet
 
             onAppletChanged: {
-                if (!applet) {
-                    //killAnim.running = true;
-                    //appletDestroyed();
-                } else {
+                if (applet) {
                     appletTimer.running = true;
                 }
             }
             Connections {
-                target: appletHandle
+                target: appletHandle.item
                 onRemoveApplet: {
                     killAnim.running = true;
                 }
@@ -319,12 +305,25 @@ Item {
 //         Rectangle { color: "white"; opacity: 0.4; visible: debug; anchors.fill: parent; }
 //     }
 
-        AppletHandle {
+        //AppletHandle {
+        Loader {
             id: appletHandle
+            z: appletContainer.z + 1
             anchors {
-                verticalCenter: parent.verticalCenter
+                verticalCenter: handleMerged ? undefined : parent.verticalCenter
+                top: handleMerged ? parent.top : undefined
+                bottom: handleMerged ? parent.bottom : undefined
                 right: plasmoidBackground.right
                 rightMargin: appletItem.margins.right
+            }
+            Connections {
+                target: appletItem
+                onShowAppletHandleChanged: {
+                    if (appletItem.showAppletHandle && appletHandle.source == "") {
+                        print("Loading applethandle ");
+                        appletHandle.source = "AppletHandle.qml";
+                    }
+                }
             }
         }
 
@@ -334,7 +333,7 @@ Item {
             visible: !plasmoid.immutable
             width:  handleWidth+appletItem.margins.right
             height: width
-            z: dragMouseArea.z+1
+            z: appletHandle.z+10
             anchors {
                 top: appletHandle.top
                 right: parent.right
