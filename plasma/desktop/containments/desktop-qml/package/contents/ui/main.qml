@@ -58,7 +58,7 @@ Item {
         //return; // FIXME
         LayoutManager.cellSize.width = root.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width
         //LayoutManager.cellSize.height = root.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
-        LayoutManager.cellSize.height = root.iconHeight + theme.defaultFont.pixelSize + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
+        LayoutManager.cellSize.height = root.iconHeight + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height;
         layoutTimer.restart()
     }
 
