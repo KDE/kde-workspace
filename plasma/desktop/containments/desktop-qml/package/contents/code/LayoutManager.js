@@ -266,7 +266,7 @@ function saveItem(item) {
     //print("-- Saving rotation : " + rect.rotation);
     //save only things that actually have a category (exclude the placeholder)
     if (item.category) {
-        print("-- Saving rotation : " + rect.rotation);
+        //print("-- Saving rotation : " + rect.rotation);
         itemsConfig[item.category] = rect
     }
 

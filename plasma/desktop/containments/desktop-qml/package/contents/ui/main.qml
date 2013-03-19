@@ -55,9 +55,7 @@ Item {
     function updateGridSize()
     {
         print("Updategridsize");
-        //return; // FIXME
         LayoutManager.cellSize.width = root.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width
-        //LayoutManager.cellSize.height = root.iconHeight + theme.defaultFont.mSize.height + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height + draggerSvg.elementSize("root-top").height + draggerSvg.elementSize("root-bottom").height
         LayoutManager.cellSize.height = root.iconHeight + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height;
         layoutTimer.restart()
     }
@@ -68,21 +66,18 @@ Item {
         var e = component.errorString();
         if (e != "") {
             print("Error loading AppletAppearance.qml: " + component.errorString());
-        } else {
-            //print("AppletAppearance.qml loaded successfully.");
         }
 
         var container = component.createObject(resultsFlow)
-        container.visible = true
-        print("Applet added: " + applet)
+
         applet.parent = container
+        applet.visible = true;
+
         container.category = "Applet-"+applet.id; // FIXME: undefined in Applet
         container.width = LayoutManager.cellSize.width*2;
         container.height = LayoutManager.cellSize.height*2;
-        container.anchors.margins = 48;
         container.applet = applet;
-        applet.anchors.fill = applet.parent;
-        applet.visible = true;
+
         LayoutManager.itemGroups[container.category] = container;
         print("Applet " + container.category + " added.");
     }
@@ -112,9 +107,6 @@ Item {
 
     Item {
         id: resultsFlow
-        //height: Math.min(300, childrenRect.height)
-        //width: Math.floor(parent.width/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
-        //height: childrenRect.y+childrenRect.height
         anchors.fill: parent
 //         z: 900 // crashes?!?
 
@@ -123,7 +115,6 @@ Item {
             topMargin: 5
             horizontalCenter: parent.horizontalCenter
         }
-
 
         //This is just for event compression when a lot of boxes are created one after the other
         Timer {
@@ -160,7 +151,7 @@ Item {
         }
         Component.onCompleted: {
             LayoutManager.resultsFlow = resultsFlow
-            LayoutManager.plasmoid = plasmoid
+            //LayoutManager.plasmoid = plasmoid
         }
     }
 
