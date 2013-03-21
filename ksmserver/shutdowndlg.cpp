@@ -259,6 +259,14 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     adjustSize();
 }
 
+bool KSMShutdownDlg::eventFilter ( QObject * watched, QEvent * event )
+{
+    if (watched == m_view && event->type() == QEvent::Resize) {
+        adjustSize();
+    }
+    return QDialog::eventFilter(watched, event);
+}
+
 void KSMShutdownDlg::resizeEvent(QResizeEvent *e)
 {
     QDialog::resizeEvent( e );
