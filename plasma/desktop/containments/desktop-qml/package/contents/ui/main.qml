@@ -220,8 +220,20 @@ Item {
             left: parent.left
         }
     }
-
     */
+    PlasmaCore.IconItem {
+        width: 24
+        height: 24
+        source: "list-add"
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                print("Add widgets ...");
+                plasmoid.action("add widgets").trigger();
+            }
+        }
+    }
+
     Component.onCompleted: {
         placeHolderPaint.opacity = 0;
         placeHolderPaint.visible = true;
