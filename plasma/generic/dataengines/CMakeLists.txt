@@ -24,6 +24,7 @@ add_subdirectory(share)
 
 if (NepomukCore_FOUND AND Soprano_FOUND)
     add_subdirectory(metadata)
+    add_subdirectory(nepomuk)
 endif ()
 
 if(Boost_FOUND AND KdepimLibs_FOUND)

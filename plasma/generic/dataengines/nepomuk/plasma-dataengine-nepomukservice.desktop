@@ -1,0 +1,18 @@
+[Desktop Entry]
+Name=Nepomuk Service DataEngine
+Comment=Enables to get information about the Nepomuk services / Indexer
+Type=Service
+Icon=nepomuk
+
+X-KDE-ServiceTypes=Plasma/DataEngine
+X-KDE-Library=plasma_dataengine_nepomukservice
+
+X-KDE-PluginInfo-Author=Jörg Ehrichs
+X-KDE-PluginInfo-Email=joerg.ehrichs@gmx.de
+X-KDE-PluginInfo-Name=nepomuk-serviceengine
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=http://plasma.kde.org/
+X-KDE-PluginInfo-Category=Nepomuk
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=BSD
+X-KDE-PluginInfo-EnabledByDefault=true

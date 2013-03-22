@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE kcfg SYSTEM
+    "http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+<kcfg>
+    <group name="settings">
+    </group>
+    <group name="enableAll">
+    </group>
+    <group name="disableAll">
+    </group>
+    <group name="suspendAll">
+    </group>
+    <group name="resumeAll">
+    </group>
+</kcfg>
