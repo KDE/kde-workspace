@@ -45,15 +45,16 @@ Item {
             print("separate handle");
             height = appletItem.handleMerged ? appletItem.height : minimumHeight
             print(" hegiht: " + height);
+            buttonColumn.anchors.right = appletHandle.right;
         } else {
             appletItem.handleMerged = false;
             print("separate handle");
             //appletHandle.anchors.right = appletHandle.parent.right;
+            buttonColumn.anchors.verticalCenter = appletItem.verticalCenter;
+            buttonColumn.anchors.top = noBackgroundHandle.top
+            buttonColumn.anchors.bottom = noBackgroundHandle.bottom
+            buttonColumn.anchors.right = noBackgroundHandle.right
         }
-        buttonColumn.anchors.verticalCenter = appletItem.handleMerged ? undefined : appletItem.verticalCenter
-        buttonColumn.anchors.top = appletItem.handleMerged ? parent.top : noBackgroundHandle.top
-        buttonColumn.anchors.bottom = appletItem.handleMerged ? parent.bottom : noBackgroundHandle.bottom
-        buttonColumn.anchors.right = appletItem.handleMerged ? plasmoidBackground.right : noBackgroundHandle.right
     }
     PlasmaCore.FrameSvgItem {
         id: noBackgroundHandle
@@ -61,6 +62,7 @@ Item {
         width: handleWidth + margins.left + margins.right - 4
         height: handleMerged ? appletItem.handleHeight + noBackgroundHandle.margins.top + noBackgroundHandle.margins.bottom : appletItem.handleHeight
         visible: opacity > 0
+        z: plasmoidBackground.z - 10
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -78,9 +80,9 @@ Item {
         width: handleWidth
         anchors {
             top: parent.top
-            topMargin: appletItem.margins.top
+            topMargin: (!appletItem.hasBackground) ? noBackgroundHandle.margins.top : appletItem.margins.top
             bottomMargin: appletItem.margins.bottom
-            right: appletHandle.right
+            right: appletItem.handleMerged ? parent.right : noBackgroundHandle.right
             rightMargin: appletItem.handleMerged ? -buttonMargin : noBackgroundHandle.margins.right - buttonMargin
         }
         spacing: buttonMargin*2
