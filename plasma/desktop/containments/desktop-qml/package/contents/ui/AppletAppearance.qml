@@ -32,8 +32,8 @@ Item {
     anchors.rightMargin: -handleWidth*controlsOpacity
 
     property int handleWidth: iconSize + 8 // 4 pixels margins inside handle
-    property int minimumHandleHeight: 6 * (root.iconSize + 6)
-    property int handleHeight: (height < minimumHandleHeight && appletHandle.source != "") ? appletHandle.item.height : height
+    property int minimumHandleHeight: 6 * (root.iconSize + 6) + margins.top + margins.bottom
+    property int handleHeight: (height < minimumHandleHeight) ? minimumHandleHeight : height
     property string category
 
     property bool showAppletHandle: false
@@ -128,26 +128,6 @@ Item {
             onTriggered: showAppletHandle = true;
         }
         Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "red"; opacity: 0.5; visible: debug; anchors.fill: parent; }
-
-        PlasmaCore.FrameSvgItem {
-            id: noBackgroundHandle
-
-            width: handleWidth + margins.left + margins.right - 4
-            height: appletItem.handleHeight
-
-            anchors {
-                verticalCenter: parent.verticalCenter
-//                 top: parent.top
-                right: parent.right
-//                 bottom: parent.bottom
-                rightMargin: (1-controlsOpacity) * appletItem.handleWidth
-            }
-            opacity: (backgroundHints == "NoBackground" || !handleMerged) ? controlsOpacity : 0
-            smooth: true
-
-            imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
-            Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
-        }
 
         PlasmaCore.FrameSvgItem {
             id: plasmoidBackground
@@ -298,9 +278,9 @@ Item {
             id: appletHandle
             z: appletContainer.z + 1
             anchors {
-                verticalCenter: handleMerged ? undefined : parent.verticalCenter
-                top: handleMerged ? parent.top : undefined
-                bottom: handleMerged ? parent.bottom : undefined
+                //verticalCenter: handleMerged ? undefined : parent.verticalCenter
+                top: parent.top
+                bottom: parent.bottom
                 right: plasmoidBackground.right
                 rightMargin: appletItem.margins.right
             }
@@ -312,7 +292,18 @@ Item {
                         appletHandle.source = "AppletHandle.qml";
                     }
                 }
+                onHandleMergedChanged: {
+                    print("handlemerged changed, correcting anchors" + appletItem.handleMerged)
+                    return
+                    if (appletHandle.item != null) {
+                        appletHandle.item.anchors.verticalCenter = appletItem.handleMerged ? undefined : appletItem.verticalCenter
+                        appletHandle.item.anchors.top = appletItem.handleMerged ? appletItem.top : undefined
+                        appletHandle.item.anchors.bottom = appletItem.handleMerged ? appletItem.bottom : undefined
+                        print("anchors corrected");
+                    }
+                }
             }
+
         }
 
         MouseArea {

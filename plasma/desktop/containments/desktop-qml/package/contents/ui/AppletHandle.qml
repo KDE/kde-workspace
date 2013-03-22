@@ -29,7 +29,7 @@ Item {
     //z: dragMouseArea.z + 1
     opacity: appletItem.controlsOpacity
     width: appletItem.handleWidth
-//     property alias appletAppearance: Item {}
+    height: appletItem.handleHeight
 
     property int buttonMargin: 6
     property int minimumHeight:  6 * (root.iconSize + buttonMargin)
@@ -39,20 +39,44 @@ Item {
     function updateHeight() {
         // Does the handle's height fit into the frame?
         var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
+        print(" = == = = == updateHeight mini:" + mini)
         if (height > mini) {
-            //     height: appletAppearance.handleMerged ? appletItem.height : minimumHeight
-            //var mrg = appletItem.margins.top - appletItem.margins.bottom;
-            appletHandle.height = height;
             appletItem.handleMerged = true;
-            //appletHandle.anchors.right = plasmoidBackground.right;
-            //appletHandle.anchors.rightMargin = appletItem.margins.right;
+            print("separate handle");
+            height = appletItem.handleMerged ? appletItem.height : minimumHeight
+            print(" hegiht: " + height);
         } else {
-            appletHandle.height = mini;
             appletItem.handleMerged = false;
-            appletHandle.anchors.right = appletHandle.parent.right;
-            //appletHandle.anchors.rightMargin = 0;
+            print("separate handle");
+            //appletHandle.anchors.right = appletHandle.parent.right;
         }
+        buttonColumn.anchors.verticalCenter = appletItem.handleMerged ? undefined : appletItem.verticalCenter
+        buttonColumn.anchors.top = appletItem.handleMerged ? parent.top : noBackgroundHandle.top
+        buttonColumn.anchors.bottom = appletItem.handleMerged ? parent.bottom : noBackgroundHandle.bottom
+        buttonColumn.anchors.right = appletItem.handleMerged ? plasmoidBackground.right : noBackgroundHandle.right
+//         height = 200;
 
+    }
+    PlasmaCore.FrameSvgItem {
+        id: noBackgroundHandle
+
+        width: handleWidth + margins.left + margins.right - 4
+        height: handleMerged ? appletItem.handleHeight + noBackgroundHandle.margins.top + noBackgroundHandle.margins.bottom : appletItem.handleHeight
+        //height: appletHandle.minimumHeight
+        visible: opacity > 0
+
+        anchors {
+            verticalCenter: parent.verticalCenter
+//                 top: parent.top
+            left: parent.right
+//                 bottom: parent.bottom
+            leftMargin: handleMerged ? ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth * 2 + 2 : ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth
+        }
+        opacity: (backgroundHints == "NoBackground" || !handleMerged) ? controlsOpacity : 0
+        smooth: true
+
+        imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
+        Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
     }
 
     Column {
@@ -63,7 +87,7 @@ Item {
             topMargin: appletItem.margins.top
             bottomMargin: appletItem.margins.bottom
             right: appletHandle.right
-            rightMargin: -buttonMargin
+            rightMargin: appletItem.handleMerged ? -buttonMargin : noBackgroundHandle.margins.right - buttonMargin
         }
         spacing: buttonMargin*2
         ActionButton {
@@ -193,10 +217,11 @@ Item {
     ActionButton {
         width: handleWidth
         anchors {
-            bottom: parent.bottom
+            bottom: appletItem.handleMerged ? parent.bottom : noBackgroundHandle.bottom
             bottomMargin: appletItem.margins.bottom + 2
-            right: parent.right
-            rightMargin: -buttonMargin
+            right: appletItem.handleMerged ? parent.right : noBackgroundHandle.right
+            rightMargin: appletItem.handleMerged ? -buttonMargin : noBackgroundHandle.margins.right - buttonMargin
+            //rightMargin: -buttonMargin
         }
 
         svg: configIconsSvg
