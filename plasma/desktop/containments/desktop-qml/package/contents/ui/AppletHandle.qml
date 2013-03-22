@@ -54,27 +54,21 @@ Item {
         buttonColumn.anchors.top = appletItem.handleMerged ? parent.top : noBackgroundHandle.top
         buttonColumn.anchors.bottom = appletItem.handleMerged ? parent.bottom : noBackgroundHandle.bottom
         buttonColumn.anchors.right = appletItem.handleMerged ? plasmoidBackground.right : noBackgroundHandle.right
-//         height = 200;
-
     }
     PlasmaCore.FrameSvgItem {
         id: noBackgroundHandle
 
         width: handleWidth + margins.left + margins.right - 4
         height: handleMerged ? appletItem.handleHeight + noBackgroundHandle.margins.top + noBackgroundHandle.margins.bottom : appletItem.handleHeight
-        //height: appletHandle.minimumHeight
         visible: opacity > 0
 
         anchors {
             verticalCenter: parent.verticalCenter
-//                 top: parent.top
             left: parent.right
-//                 bottom: parent.bottom
             leftMargin: handleMerged ? ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth * 2 + 2 : ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth
         }
         opacity: (backgroundHints == "NoBackground" || !handleMerged) ? controlsOpacity : 0
         smooth: true
-
         imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
         Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
     }

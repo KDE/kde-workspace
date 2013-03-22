@@ -166,7 +166,6 @@ Item {
             onBackgroundHintsChanged: {
                 print("plasmoid.backgroundHintsChanged");
                 updateBackgroundHints();
-
             }
         }
 
