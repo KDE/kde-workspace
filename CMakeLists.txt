@@ -131,13 +131,6 @@ set_package_properties(Fontconfig PROPERTIES DESCRIPTION "Font access configurat
                        PURPOSE "Needed to build font configuration and installation tools"
                       )
 
-macro_optional_find_package(Googlegadgets 0.11.0)
-set_package_properties(Googlegadgets PROPERTIES DESCRIPTION "Google Gadgets library"
-                       URL "http://code.google.com/p/google-gadgets-for-linux"
-                       TYPE OPTIONAL
-                       PURPOSE "Needed to build plasma scriptengine for google gadgets"
-                      )
-
 #### Python support ( plasma scriptengines ) ####
 macro_optional_find_package(PythonLibrary)
 set_package_properties(PythonLibrary PROPERTIES DESCRIPTION "Python scripting language"

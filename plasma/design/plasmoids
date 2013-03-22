@@ -9,7 +9,6 @@ The API of a widget is defined by the host "ScriptEngine", with the exception of
 
 * SuperKaramba's karambas
 * Enlightenment 17 edje content
-* Google Gadgets
 * MacOS dashboard widgets (though not all)
 
 These are loaded via host AppletScriptEngine plugins that bridge between the widget itself and Plasma's canvas.

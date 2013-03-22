@@ -29,7 +29,7 @@ Existing constraints/features:
 
 possible problems:
 -the API isn't designed for constraints changing at runtime. does anyone think that's likely to matter someday?
--I have no idea how this will affect alien widgets (google gadgets etc). personally I'd be fine with banning those from the screensaver until proper, full security can be implemented.
+-I have no idea how this will affect alien widgets. personally I'd be fine with banning those from the screensaver until proper, full security can be implemented.
 
 
 trust-based security
