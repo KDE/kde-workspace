@@ -42,9 +42,9 @@ Item {
         print(" = == = = == updateHeight mini:" + mini)
         if (height > mini) {
             appletItem.handleMerged = true;
-            print("separate handle");
+            print("merged handle");
             height = appletItem.handleMerged ? appletItem.height : minimumHeight
-            print(" hegiht: " + height);
+            print(" height: " + height);
             buttonColumn.anchors.right = appletHandle.right;
         } else {
             appletItem.handleMerged = false;
@@ -217,7 +217,6 @@ Item {
             bottomMargin: appletItem.margins.bottom + 2
             right: appletItem.handleMerged ? parent.right : noBackgroundHandle.right
             rightMargin: appletItem.handleMerged ? -buttonMargin : noBackgroundHandle.margins.right - buttonMargin
-            //rightMargin: -buttonMargin
         }
 
         svg: configIconsSvg
