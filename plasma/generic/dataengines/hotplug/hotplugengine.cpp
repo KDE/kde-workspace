@@ -227,13 +227,15 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
 
         QVariantList actions;
         foreach(const QString& desktop, interestingDesktopFiles) {
-            Plasma::DataEngine::Data action;
             QString actionUrl = KStandardDirs::locate("data", "solid/actions/" + desktop);
             QList<KServiceAction> services = KDesktopFileActions::userDefinedServices(actionUrl, true);
-            action.insert("predicate", desktop);
-            action.insert("text", services[0].text());
-            action.insert("icon", services[0].icon());
-            actions << action;
+            if (!services.isEmpty()) {
+                Plasma::DataEngine::Data action;
+                action.insert("predicate", desktop);
+                action.insert("text", services[0].text());
+                action.insert("icon", services[0].icon());
+                actions << action;
+            }
         }
         data.insert("actions", actions);
 
