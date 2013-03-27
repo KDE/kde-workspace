@@ -79,8 +79,14 @@ public:
     void init();
 
 private slots:
+    void nepomukDBusServiceCheck(QDBusPendingCallWatcher *call);
     void nepomukEnabled();
     void nepomukDisabled();
+
+    void fileWatcherDBusServiceCheck(QDBusPendingCallWatcher *call);
+    void fileIndexerDBusServiceCheck(QDBusPendingCallWatcher *call);
+    void akonadiFeederDBusServiceCheck(QDBusPendingCallWatcher *call);
+    void webMinerDBusServiceCheck(QDBusPendingCallWatcher *call);
 
     void fileWatcherEnabled();
     void fileWatcherDisabled();
@@ -153,22 +159,22 @@ private:
         STATUS_DISABLED = 50        /**< no dbus service available/service disabled also has ISAVAILABLE=false*/
     };
 
-    QDBusServiceWatcher* nepomukServerWatcher;
+    QDBusServiceWatcher* m_nepomukServerWatcher;
     QDBusInterface *m_dBusServer;
 
-    QDBusServiceWatcher* fileWatcherWatcher;
+    QDBusServiceWatcher* m_fileWatcherWatcher;
     QDBusInterface *m_dBusFileWatcher;
     QDBusInterface *m_serviceFileWatcher;
 
-    QDBusServiceWatcher* fileIndexerWatcher;
+    QDBusServiceWatcher* m_fileIndexerWatcher;
     QDBusInterface *m_dBusFileIndexer;
     QDBusInterface *m_serviceFileIndexer;
 
-    QDBusServiceWatcher* akonadiFeederWatcher;
+    QDBusServiceWatcher* m_akonadiFeederWatcher;
     QDBusInterface *m_dBusAkonadiFeeder;
     QDBusInterface *m_serviceAkonadiFeeder;
 
-    QDBusServiceWatcher* webMinerWatcher;
+    QDBusServiceWatcher* m_webMinerWatcher;
     QDBusInterface *m_dBusWebMiner;
     QDBusInterface *m_serviceWebMiner;
 

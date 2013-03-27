@@ -56,18 +56,18 @@ const int ACTIVITY_TIMEOUT = 1000 * 3;
 NepomukServiceEngine::NepomukServiceEngine(QObject *parent, const QVariantList &args)
     : Plasma::DataEngine(parent, args)
 
-    , nepomukServerWatcher(0)
+    , m_nepomukServerWatcher(0)
     , m_dBusServer(0)
-    , fileWatcherWatcher(0)
+    , m_fileWatcherWatcher(0)
     , m_dBusFileWatcher(0)
     , m_serviceFileWatcher(0)
-    , fileIndexerWatcher(0)
+    , m_fileIndexerWatcher(0)
     , m_dBusFileIndexer(0)
     , m_serviceFileIndexer(0)
-    , akonadiFeederWatcher(0)
+    , m_akonadiFeederWatcher(0)
     , m_dBusAkonadiFeeder(0)
     , m_serviceAkonadiFeeder(0)
-    , webMinerWatcher(0)
+    , m_webMinerWatcher(0)
     , m_dBusWebMiner(0)
     , m_serviceWebMiner(0)
     , m_fileWatcherActive(false)
@@ -106,7 +106,6 @@ void NepomukServiceEngine::init()
     setData(SERVICE_NEPOMUK, serverdata);
 
     //Default initialization of all other supported sources
-
     setData(SERVICE_FILEWATCH, DATA_I18NNAME, i18n("File Watcher"));
     setData(SERVICE_FILEWATCH, DATA_CANBESUSPENDED, false);
     setData(SERVICE_FILEWATCH, DATA_ISSUSPENDED, false);
@@ -123,26 +122,35 @@ void NepomukServiceEngine::init()
     setData(SERVICE_WEBMINER, DATA_CANBESUSPENDED, true);
     setData(SERVICE_WEBMINER, DATA_ISSUSPENDED, false);
 
-
     fileWatcherDisabled();
     fileIndexerDisabled();
     akonadiFeederDisabled();
     webMinerDisabled();
 
+    // async call to check if the dbus service is available
+    QDBusPendingCall async = QDBusConnection::sessionBus().interface()->asyncCall(QLatin1String("NameHasOwner"), QLatin1String("org.kde.NepomukServer"));
+    QDBusPendingCallWatcher *callWatcher = new QDBusPendingCallWatcher(async, this);
+    connect(callWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(nepomukDBusServiceCheck(QDBusPendingCallWatcher*)));
+}
+
+void NepomukServiceEngine::nepomukDBusServiceCheck(QDBusPendingCallWatcher*call)
+{
+    QDBusPendingReply<bool> reply = *call;
+    if ( !reply.isError() && reply.value() ) {
+        nepomukEnabled();
+    }
+    call->deleteLater();
+
+    // put the service watcher initialization here to avoid a race condition
     // watch if the nepomuk service is available in general
-    nepomukServerWatcher = new QDBusServiceWatcher( QLatin1String("org.kde.NepomukServer"), QDBusConnection::sessionBus(),
+    m_nepomukServerWatcher = new QDBusServiceWatcher( QLatin1String("org.kde.NepomukServer"), QDBusConnection::sessionBus(),
                                                     QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
                                                     this );
-    connect( nepomukServerWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( nepomukEnabled()) );
-    connect( nepomukServerWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( nepomukDisabled()) );
-
-    if ( QDBusConnection::sessionBus().interface()->isServiceRegistered( "org.kde.NepomukServer" ) ) {
-       nepomukEnabled();
-    }
+    connect( m_nepomukServerWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( nepomukEnabled()) );
+    connect( m_nepomukServerWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( nepomukDisabled()) );
 
     checkIsActive();
 }
-
 
 void NepomukServiceEngine::nepomukEnabled()
 {
@@ -158,93 +166,134 @@ void NepomukServiceEngine::nepomukEnabled()
 
     //#####################################
     // File Watcher
+    // async call to check if the dbus service is available
+    QDBusPendingCall asyncFW = QDBusConnection::sessionBus().interface()->asyncCall(QLatin1String("NameHasOwner"), QLatin1String("org.kde.nepomuk.services.nepomukfilewatch"));
+    QDBusPendingCallWatcher *callWatcherFW = new QDBusPendingCallWatcher(asyncFW, this);
+    connect(callWatcherFW, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(fileWatcherDBusServiceCheck(QDBusPendingCallWatcher*)));
+
+    //#####################################
+    // File indexer
+    // async call to check if the dbus service is available
+    QDBusPendingCall asyncFI = QDBusConnection::sessionBus().interface()->asyncCall(QLatin1String("NameHasOwner"), QLatin1String("org.kde.nepomuk.services.nepomukfileindexer"));
+    QDBusPendingCallWatcher *callWatcherFI = new QDBusPendingCallWatcher(asyncFI, this);
+    connect(callWatcherFI, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(fileIndexerDBusServiceCheck(QDBusPendingCallWatcher*)));
+
+     //#####################################
+     // Akonadi Feeder
+    // async call to check if the dbus service is available
+    QDBusPendingCall asyncAF = QDBusConnection::sessionBus().interface()->asyncCall(QLatin1String("NameHasOwner"), QLatin1String("org.freedesktop.Akonadi.Agent.akonadi_nepomuk_feeder"));
+    QDBusPendingCallWatcher *callWatcherAF = new QDBusPendingCallWatcher(asyncAF, this);
+    connect(callWatcherAF, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(akonadiFeederDBusServiceCheck(QDBusPendingCallWatcher*)));
+
+     //#####################################
+     // WebMiner
+    // async call to check if the dbus service is available
+    QDBusPendingCall asyncWM = QDBusConnection::sessionBus().interface()->asyncCall(QLatin1String("NameHasOwner"), QLatin1String("org.freedesktop.Akonadi.Agent.akonadi_nepomuk_feeder"));
+    QDBusPendingCallWatcher *callWatcherWM = new QDBusPendingCallWatcher(asyncWM, this);
+    connect(callWatcherWM, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(webMinerDBusServiceCheck(QDBusPendingCallWatcher*)));
+}
+
+void NepomukServiceEngine::fileWatcherDBusServiceCheck(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<bool> reply = *call;
+    if ( !reply.isError() && reply.value() ) {
+        fileWatcherEnabled();
+    }
+    else {
+        fileWatcherDisabled();
+    }
+    call->deleteLater();
+
+    // put the watcher initialization here to avoid a race condition
     m_serviceFileWatcher = new QDBusInterface(QLatin1String("org.kde.nepomuk.services.nepomukfilewatch"),
                                               QLatin1String("/servicecontrol"),
                                               QLatin1String("org.kde.nepomuk.ServiceControl"),
                                               QDBusConnection::sessionBus(), this);
 
     // watch for the file indexer service to come up and go down
-    fileWatcherWatcher = new QDBusServiceWatcher( m_serviceFileWatcher->service(), QDBusConnection::sessionBus(),
+    m_fileWatcherWatcher = new QDBusServiceWatcher( m_serviceFileWatcher->service(), QDBusConnection::sessionBus(),
                                                   QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
                                                   this );
-    connect( fileWatcherWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( fileWatcherEnabled()) );
-    connect( fileWatcherWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( fileWatcherDisabled()) );
+    connect( m_fileWatcherWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( fileWatcherEnabled()) );
+    connect( m_fileWatcherWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( fileWatcherDisabled()) );
+}
 
-     if ( QDBusConnection::sessionBus().interface()->isServiceRegistered( "org.kde.nepomuk.services.nepomukfilewatch" ) ) {
-        fileWatcherEnabled();
-     }
-     else {
-         fileWatcherDisabled();
-     }
+void NepomukServiceEngine::fileIndexerDBusServiceCheck(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<bool> reply = *call;
+    if ( !reply.isError() && reply.value() ) {
+        fileIndexerEnabled();
+    }
+    else {
+        fileIndexerDisabled();
+    }
+    call->deleteLater();
 
-    //#####################################
-    // File indexer
+    // put the watcher initialization here to avoid a race condition
     m_serviceFileIndexer = new QDBusInterface(QLatin1String("org.kde.nepomuk.services.nepomukfileindexer"),
                                               QLatin1String("/servicecontrol"),
                                               QLatin1String("org.kde.nepomuk.ServiceControl"),
                                               QDBusConnection::sessionBus(), this);
 
     // watch for the file indexer service to come up and go down
-    fileIndexerWatcher = new QDBusServiceWatcher( m_serviceFileIndexer->service(), QDBusConnection::sessionBus(),
+    m_fileIndexerWatcher = new QDBusServiceWatcher( m_serviceFileIndexer->service(), QDBusConnection::sessionBus(),
                                                   QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
                                                   this );
 
-    connect( fileIndexerWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( fileIndexerEnabled()) );
-    connect( fileIndexerWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( fileIndexerDisabled()) );
+    connect( m_fileIndexerWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( fileIndexerEnabled()) );
+    connect( m_fileIndexerWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( fileIndexerDisabled()) );
+}
 
-    if ( QDBusConnection::sessionBus().interface()->isServiceRegistered( "org.kde.nepomuk.services.nepomukfileindexer" ) ) {
-       fileIndexerEnabled();
+void NepomukServiceEngine::akonadiFeederDBusServiceCheck(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<bool> reply = *call;
+    if ( !reply.isError() && reply.value() ) {
+        akonadiFeederEnabled();
     }
     else {
-        fileIndexerDisabled();
+        akonadiFeederDisabled();
     }
+    call->deleteLater();
 
-     //#####################################
-     // Akonadi Feeder
-     m_serviceAkonadiFeeder = new QDBusInterface(QLatin1String("org.freedesktop.Akonadi.Agent.akonadi_nepomuk_feeder"),
-                                               QLatin1String("/"),
-                                               QLatin1String("org.freedesktop.Akonadi.Agent.Control"),
-                                               QDBusConnection::sessionBus(), this);
+    // put the watcher initialization here to avoid a race condition
+    m_serviceAkonadiFeeder = new QDBusInterface(QLatin1String("org.freedesktop.Akonadi.Agent.akonadi_nepomuk_feeder"),
+                                              QLatin1String("/"),
+                                              QLatin1String("org.freedesktop.Akonadi.Agent.Control"),
+                                              QDBusConnection::sessionBus(), this);
 
-     // watch for the akonadi feeder agent to come up and go down
-     akonadiFeederWatcher = new QDBusServiceWatcher( m_serviceAkonadiFeeder->service(),
-                                                     QDBusConnection::sessionBus(),
-                                                     QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
-                                                     this );
-     connect( akonadiFeederWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( akonadiFeederEnabled()) );
-     connect( akonadiFeederWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( akonadiFeederDisabled()) );
+    // watch for the akonadi feeder agent to come up and go down
+    m_akonadiFeederWatcher = new QDBusServiceWatcher( m_serviceAkonadiFeeder->service(),
+                                                    QDBusConnection::sessionBus(),
+                                                    QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
+                                                    this );
+    connect( m_akonadiFeederWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( akonadiFeederEnabled()) );
+    connect( m_akonadiFeederWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( akonadiFeederDisabled()) );
+}
 
-     // check if the agent is registered (this should always be the case if the Agent is installed)
-     if ( QDBusConnection::sessionBus().interface()->isServiceRegistered( "org.freedesktop.Akonadi.Agent.akonadi_nepomuk_feeder" ) ) {
-         akonadiFeederEnabled();
-     }
-     else {
-         akonadiFeederDisabled();
-     }
-
-
-     //#####################################
-     // WebMiner
-     m_serviceWebMiner = new QDBusInterface(QLatin1String("org.kde.nepomuk.services.nepomuk-webminerservice"),
-                                            QLatin1String("/servicecontrol"),
-                                            QLatin1String("org.kde.nepomuk.ServiceControl"),
-                                            QDBusConnection::sessionBus(), this);
-
-     // watch for the akonadi feeder agent to come up and go down
-     webMinerWatcher = new QDBusServiceWatcher( m_serviceWebMiner->service(),
-                                                     QDBusConnection::sessionBus(),
-                                                     QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
-                                                     this );
-     connect( webMinerWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( webMinerEnabled()) );
-     connect( webMinerWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( webMinerDisabled()) );
-
-     if ( QDBusConnection::sessionBus().interface()->isServiceRegistered( "org.kde.nepomuk.services.nepomuk-webminerservice" ) ) {
+void NepomukServiceEngine::webMinerDBusServiceCheck(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<bool> reply = *call;
+    if ( !reply.isError() && reply.value() ) {
         webMinerEnabled();
-     }
-     else {
-         webMinerDisabled();
-     }
+    }
+    else {
+        webMinerDisabled();
+    }
+    call->deleteLater();
 
+    // put the watcher initialization here to avoid a race condition
+    m_serviceWebMiner = new QDBusInterface(QLatin1String("org.kde.nepomuk.services.nepomuk-webminerservice"),
+                                           QLatin1String("/servicecontrol"),
+                                           QLatin1String("org.kde.nepomuk.ServiceControl"),
+                                           QDBusConnection::sessionBus(), this);
+
+    // watch for the akonadi feeder agent to come up and go down
+    m_webMinerWatcher = new QDBusServiceWatcher( m_serviceWebMiner->service(),
+                                                    QDBusConnection::sessionBus(),
+                                                    QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
+                                                    this );
+    connect( m_webMinerWatcher, SIGNAL( serviceRegistered( QString ) ), this, SLOT( webMinerEnabled()) );
+    connect( m_webMinerWatcher, SIGNAL( serviceUnregistered( QString ) ), this, SLOT( webMinerDisabled()) );
 }
 
 void NepomukServiceEngine::nepomukDisabled()
@@ -252,29 +301,29 @@ void NepomukServiceEngine::nepomukDisabled()
     setData(SERVICE_NEPOMUK, DATA_STATUSMSG, i18n("The Nepomuk Service is disabled"));
     setData(SERVICE_NEPOMUK, DATA_ISAVAILABLE, false);
 
-    delete fileWatcherWatcher;
-    fileWatcherWatcher = 0;
+    delete m_fileWatcherWatcher;
+    m_fileWatcherWatcher = 0;
     delete m_dBusFileWatcher;
     m_dBusFileWatcher = 0;
     delete m_serviceFileWatcher;
     m_serviceFileWatcher = 0;
 
-    delete fileIndexerWatcher;
-    fileIndexerWatcher = 0;
+    delete m_fileIndexerWatcher;
+    m_fileIndexerWatcher = 0;
     delete m_dBusFileIndexer;
     m_dBusFileIndexer = 0;
     delete m_serviceFileIndexer;
     m_serviceFileIndexer = 0;
 
-    delete akonadiFeederWatcher;
-    akonadiFeederWatcher = 0;
+    delete m_akonadiFeederWatcher;
+    m_akonadiFeederWatcher = 0;
     delete m_dBusAkonadiFeeder;
     m_dBusAkonadiFeeder= 0;
     delete m_serviceAkonadiFeeder;
     m_serviceAkonadiFeeder = 0;
 
-    delete webMinerWatcher;
-    webMinerWatcher = 0;
+    delete m_webMinerWatcher;
+    m_webMinerWatcher = 0;
     delete m_dBusWebMiner;
     m_dBusWebMiner= 0;
     delete m_serviceWebMiner;
