@@ -166,6 +166,7 @@ Keywords[de]=Sperren;Abmelden;Ruhezustand;Tiefschlaf;Benutzer wechseln;
 Keywords[es]=Bloquear;Terminar la sesión;Dormir;Hibernar;Cambiar de usuario;
 Keywords[fi]=Lukitse;kirjaudu ulos;valmiustila;lepotila;vaihda käyttäjää;
 Keywords[gl]=Trancar;saír;durmir;hibernar;trocar de usuario
+Keywords[hu]=Zárolás;Kijelentkezés;Alvó állapot;Hibernálás;Felhasználóváltás;
 Keywords[ia]=Bloca;Claude session;Dormi;Hiberna;Cambia Usator;
 Keywords[it]=Blocca;Esci;Sospendi;Iberna;Cambia utente;
 Keywords[kk]=Lock;Logout;Sleep;Hibernate;Switch User;
