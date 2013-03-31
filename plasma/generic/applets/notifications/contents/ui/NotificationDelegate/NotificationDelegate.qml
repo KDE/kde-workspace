@@ -203,6 +203,7 @@ PlasmaComponents.ListItem {
                         selectByMouse: true
                         readOnly: true
                         wrapMode: Text.Wrap
+                        textFormat: TextEdit.RichText
                     }
                 }
                 Column {
