@@ -6,15 +6,16 @@ include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs
 
 add_subdirectory(configupdates)
 
+if(KActivities_FOUND)
 set(activitymanager_SRCS
     activitymanager/activitymanager.cpp
     activitymanager/kidenticongenerator.cpp
 )
+endif(KActivities_FOUND)
 
 set(plasma_SRCS
     accessibility/accessiblefactory.cpp
     accessibility/accessibleplasmaview.cpp
-    activity.cpp
     scripting/desktopscriptengine.cpp
     scripting/panel.cpp
     checkbox.cpp
@@ -36,6 +37,9 @@ set(plasma_SRCS
     ${activitymanager_SRCS}
 )
 
+if(KActivities_FOUND)
+   set(plasma_SRCS activity.cpp ${plasma_SRCS})
+endif(KActivities_FOUND)
 kde4_add_kcfg_files(plasma_SRCS data/plasma-shell-desktop.kcfgc)
 
 if(WIN32)

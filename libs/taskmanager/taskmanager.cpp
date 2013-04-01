@@ -47,8 +47,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifdef Q_WS_WIN
 #include <windows.h>
 #endif
-
+#ifdef KACTIVITIES_AVAILABLE
 #include <KActivities/Consumer>
+#endif
 
 namespace TaskManager
 {
@@ -100,7 +101,9 @@ public:
     QList<Startup *> startups;
     WindowList skiptaskbarWindows;
     QSet<QUuid> trackGeometryTokens;
+#ifdef KACTIVITIES_AVAILABLE
     KActivities::Consumer activityConsumer;
+#endif
 };
 
 TaskManager::TaskManager()
@@ -118,13 +121,17 @@ TaskManager::TaskManager()
             this,       SLOT(currentDesktopChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(windowChanged(WId, const ulong*)),
             this,       SLOT(windowChanged(WId, const ulong*)));
+    #ifdef KACTIVITIES_AVAILABLE
     connect(&d->activityConsumer, SIGNAL(currentActivityChanged(QString)),
             this,       SIGNAL(activityChanged(QString)));
+    #endif
     if (QCoreApplication::instance()) {
         connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(onAppExitCleanup()));
     }
 
+    #ifdef KACTIVITIES_AVAILABLE
     emit activityChanged(d->activityConsumer.currentActivity());
+    #endif
 
     // register existing windows
     const QList<WId> windows = KWindowSystem::windows();
@@ -536,7 +543,11 @@ int TaskManager::currentDesktop() const
 
 QString TaskManager::currentActivity() const
 {
+#ifdef KACTIVITIES_AVAILABLE
     return d->activityConsumer.currentActivity();
+#else
+    return QLatin1String("NoActivity");
+#endif
 }
 
 } // TaskManager namespace

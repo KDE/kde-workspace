@@ -84,6 +84,7 @@ public:
         /**
      * create a new activity based on the active one
      */
+#ifdef KACTIVITIES_AVAILABLE
     void cloneCurrentActivity();
     /**
      * create a new blank activity with @p plugin containment type
@@ -93,6 +94,7 @@ public:
      * create a new activity from @p script
      */
     void createActivityFromScript(const QString &script, const QString &name = QString(), const QString &icon = QString(), const QStringList &startupApps = QStringList());
+#endif
     static bool isPanelContainment(Plasma::Containment *containment);
 
 #ifdef Q_WS_X11
@@ -124,9 +126,9 @@ public Q_SLOTS:
     void createWaitingPanels();
     void createWaitingDesktops();
     void createView(Plasma::Containment *containment);
-
+#ifdef KACTIVITIES_AVAILABLE
     void toggleActivityManager();
-
+#endif
     void addRemotePlasmoid(const QString &location);
 
     QString supportInformation() const;
@@ -186,7 +188,9 @@ private:
     bool m_ignoreDashboardClosures;
     bool m_pendingFixedDashboard;
     bool m_unlockCorona;
+#ifdef KACTIVITIES_AVAILABLE
     QString m_loadingActivity;
+#endif
 };
 
 #endif // multiple inclusion guard

@@ -75,13 +75,17 @@
 #include <Plasma/Wallpaper>
 #include <Plasma/WindowEffects>
 
+#ifdef KACTIVITIES_AVAILABLE
 #include <KActivities/Controller>
+#endif
 
 #include <kephal/screens.h>
 
 #include <plasmagenericshell/backgrounddialog.h>
 
+#ifdef KACTIVITIES_AVAILABLE
 #include "activity.h"
+#endif
 #include "appadaptor.h"
 #include "controllerwindow.h"
 #include "checkbox.h"
@@ -519,6 +523,7 @@ ControllerWindow *PlasmaApp::showWidgetExplorer(int screen, Plasma::Containment 
     return showController(screen, containment, true);
 }
 
+#ifdef KACTIVITIES_AVAILABLE
 void PlasmaApp::toggleActivityManager()
 {
     if (!m_corona) {
@@ -543,6 +548,7 @@ void PlasmaApp::toggleActivityManager()
     Plasma::Containment *containment = m_corona->containmentForScreen(currentScreen, currentDesktop);
     showController(currentScreen, containment, false);
 }
+#endif
 
 ControllerWindow *PlasmaApp::showController(int screen, Plasma::Containment *containment, bool widgetExplorerMode)
 {
@@ -567,13 +573,18 @@ ControllerWindow *PlasmaApp::showController(int screen, Plasma::Containment *con
 
     controller->setLocation(containment->location());
 
+#ifdef KACTIVITIES_AVAILABLE
     if (widgetExplorerMode) {
+#endif
         controller->showWidgetExplorer();
+    
+#ifdef KACTIVITIES_AVAILABLE
     } else {
         controller->showActivityManager();
     }
 
     connect(m_corona->activityController(), SIGNAL(currentActivityChanged(QString)), controller, SLOT(close()));
+#endif
     controller->show();
     Plasma::WindowEffects::slideWindow(controller, controller->location());
     QTimer::singleShot(0, controller, SLOT(activate()));
@@ -840,6 +851,7 @@ DesktopCorona* PlasmaApp::corona(bool createIfMissing)
         }
 
         //actions!
+#ifdef KACTIVITIES_AVAILABLE
         KAction *activityAction = c->addAction("manage activities");
         connect(activityAction, SIGNAL(triggered()), this, SLOT(toggleActivityManager()));
         activityAction->setText(i18n("Activities..."));
@@ -848,14 +860,16 @@ DesktopCorona* PlasmaApp::corona(bool createIfMissing)
         activityAction->setShortcut(KShortcut("alt+d, alt+a"));
         activityAction->setShortcutContext(Qt::ApplicationShortcut);
         activityAction->setGlobalShortcut(KShortcut(Qt::META + Qt::Key_Q));
-
+#endif
         c->updateShortcuts();
 
         m_corona = c;
         c->setItemIndexMethod(QGraphicsScene::NoIndex);
         c->initializeLayout();
         c->processUpdateScripts();
+#ifdef KACTIVITIES_AVAILABLE
         c->checkActivities();
+#endif
         c->checkScreens();
         foreach (Plasma::Containment *containment, c->containments()) {
             if (containment->screen() != -1 && containment->wallpaper()) {
@@ -1142,6 +1156,7 @@ void PlasmaApp::prepareContainment(Plasma::Containment *containment)
          containment->containmentType() == Plasma::Containment::CustomContainment)) {
         QAction *a = containment->action("remove");
         delete a; //activities handle removal now
+#ifdef KACTIVITIES_AVAILABLE
         if (!(m_loadingActivity.isEmpty() || m_corona->offscreenWidgets().contains(containment))) {
             Plasma::Context *context = containment->context();
             if (context->currentActivityId().isEmpty()) {
@@ -1152,7 +1167,7 @@ void PlasmaApp::prepareContainment(Plasma::Containment *containment)
                 activity->replaceContainment(containment);
             }
         }
-
+#endif
         if (containment->containmentType() == Plasma::Containment::DesktopContainment) {
             foreach (QAction *action, m_corona->actions()) {
                 containment->addToolBoxAction(action);
@@ -1241,10 +1256,12 @@ void PlasmaApp::configureContainment(Plasma::Containment *containment)
         if (isDashboardContainment) {
             configDialog->setLayoutChangeable(false);
         } else {
+#ifdef KACTIVITIES_AVAILABLE
             Activity *activity = m_corona->activity(containment->context()->currentActivityId());
             Q_ASSERT(activity);
             connect(configDialog, SIGNAL(containmentPluginChanged(Plasma::Containment*)),
                     activity, SLOT(replaceContainment(Plasma::Containment*)));
+#endif
         }
 
         connect(configDialog, SIGNAL(destroyed(QObject*)), nullManager, SLOT(deleteLater()));
@@ -1254,7 +1271,7 @@ void PlasmaApp::configureContainment(Plasma::Containment *containment)
     KWindowSystem::setOnDesktop(configDialog->winId(), KWindowSystem::currentDesktop());
     KWindowSystem::activateWindow(configDialog->winId());
 }
-
+#ifdef KACTIVITIES_AVAILABLE
 void PlasmaApp::cloneCurrentActivity()
 {
     if (!m_corona) {
@@ -1277,7 +1294,7 @@ void PlasmaApp::cloneCurrentActivity()
     //load the new one
     controller->setCurrentActivity(newId);
 }
-
+#endif
 //TODO accomodate activities
 void PlasmaApp::setPerVirtualDesktopViews(bool perDesktopViews)
 {
@@ -1419,6 +1436,7 @@ void PlasmaApp::remotePlasmoidAdded(Plasma::PackageMetadata metadata)
     // locked, but the user is able to unlock
     if (m_corona->immutability() == Plasma::UserImmutable) {
         m_unlockCorona = true;
+#warning change string
         notification->setActions(QStringList(i18n("Unlock and add to current activity")));
     } else {
         // immutability == Plasma::Mutable
@@ -1459,7 +1477,7 @@ void PlasmaApp::plasmoidAccessFinished(Plasma::AccessAppletJob *job)
         c->addApplet(job->applet(), QPointF(-1, -1), false);
     }
 }
-
+#ifdef KACTIVITIES_AVAILABLE
 void PlasmaApp::createActivity(const QString &plugin)
 {
     if (!m_corona) {
@@ -1534,7 +1552,7 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
 
     confirmDialog->exec();
 }
-
+#endif
 void PlasmaApp::executeCommands(const QList < QVariant > & commands)
 {
     foreach (const QVariant & command, commands) {

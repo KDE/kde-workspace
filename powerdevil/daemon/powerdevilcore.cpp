@@ -42,7 +42,9 @@
 #include <KServiceTypeTrader>
 #include <KStandardDirs>
 
+#ifdef KACTIVITIES_AVAILABLE
 #include <KActivities/Consumer>
+#endif
 
 #include <QtCore/QTimer>
 #include <QtDBus/QDBusConnection>
@@ -56,7 +58,9 @@ Core::Core(QObject* parent, const KComponentData &componentData)
     , m_backend(0)
     , m_applicationData(componentData)
     , m_criticalBatteryTimer(new QTimer(this))
+    #ifdef KACTIVITIES_AVAILABLE
     , m_activityConsumer(new KActivities::Consumer(this))
+    #endif
 {
 }
 
@@ -131,9 +135,10 @@ void Core::onBackendReady()
             this, SLOT(onKIdleTimeoutReached(int,int)));
     connect(KIdleTime::instance(), SIGNAL(resumingFromIdle()),
             this, SLOT(onResumingFromIdle()));
+    #ifdef KACTIVITIES_AVAILABLE
     connect(m_activityConsumer, SIGNAL(currentActivityChanged(QString)),
             this, SLOT(loadProfile()));
-
+    #endif
     // Set up the policy agent
     PowerDevil::PolicyAgent::instance()->init();
 
@@ -275,6 +280,7 @@ void Core::loadProfile(bool force)
 
     KConfigGroup config;
 
+    #ifdef KACTIVITIES_AVAILABLE
     // Check the activity in which we are in
     QString activity = m_activityConsumer->currentActivity();
     if (activity.isEmpty()) {
@@ -298,6 +304,7 @@ void Core::loadProfile(bool force)
     kDebug() << activityConfig.groupList() << activityConfig.keyList();
 
     // See if this activity has priority
+
     if (activityConfig.readEntry("mode", "None") == "SeparateSettings") {
         // Prioritize this profile over anything
         config = activityConfig.group("SeparateSettings");
@@ -312,7 +319,10 @@ void Core::loadProfile(bool force)
             profileId = activityConfig.readEntry("actLike", QString());
             kDebug() << "Activity is mirroring a different profile";
         }
-    } else {
+    } else 
+    #endif
+    {
+    
         // It doesn't, let's load the current state's profile
         if (m_loadedBatteriesUdi.isEmpty()) {
             kDebug() << "No batteries found, loading AC";
@@ -406,6 +416,7 @@ void Core::loadProfile(bool force)
     }
 
     // Now... any special behaviors we'd like to consider?
+    #ifdef KACTIVITIES_AVAILABLE
     if (activityConfig.readEntry("mode", "None") == "SpecialBehavior") {
         kDebug() << "Activity has special behaviors";
         KConfigGroup behaviorGroup = activityConfig.group("SpecialBehavior");
@@ -439,7 +450,7 @@ void Core::loadProfile(bool force)
             }
         }
     }
-
+    #endif
     // If the lid is closed, retrigger the lid close signal
     if (m_backend->isLidClosed()) {
         emit m_backend->buttonPressed(PowerDevil::BackendInterface::LidClose);

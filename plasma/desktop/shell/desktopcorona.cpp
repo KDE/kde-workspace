@@ -44,14 +44,18 @@
 #include <Plasma/DataEngineManager>
 #include <Plasma/Package>
 
+#ifdef KACTIVITIES_AVAILABLE
 #include <KActivities/Controller>
 #include <KActivities/Info>
+#endif
 
 #include <kephal/screens.h>
 
 #include <scripting/layouttemplatepackagestructure.h>
 
+#ifdef KACTIVITIES_AVAILABLE
 #include "activity.h"
+#endif
 #include "panelview.h"
 #include "plasmaapp.h"
 #include "plasma-shell-desktop.h"
@@ -64,7 +68,9 @@ DesktopCorona::DesktopCorona(QObject *parent)
       m_addPanelAction(0),
       m_addPanelsMenu(0),
       m_delayedUpdateTimer(new QTimer(this)),
+#ifdef KACTIVITIES_AVAILABLE
       m_activityController(new KActivities::Controller(this))
+#endif
 {
     init();
 }
@@ -124,10 +130,11 @@ void DesktopCorona::init()
             this, SLOT(updateImmutability(Plasma::ImmutabilityType)));
     connect(KSycoca::self(), SIGNAL(databaseChanged(QStringList)), this, SLOT(checkAddPanelAction(QStringList)));
 
+#ifdef KACTIVITIES_AVAILABLE
     connect(m_activityController, SIGNAL(currentActivityChanged(QString)), this, SLOT(currentActivityChanged(QString)));
     connect(m_activityController, SIGNAL(activityAdded(QString)), this, SLOT(activityAdded(QString)));
     connect(m_activityController, SIGNAL(activityRemoved(QString)), this, SLOT(activityRemoved(QString)));
-
+#endif
     // Everything will be repainted shortly after a screen resize was processed, but unfortunately that does not suffice:
     // When screen size is increased, parts of the newly uncovered area on the panel remain black for some reason. Also,
     // if compositing is disabled and the desktop background is a color, parts of the panel are left on the background.

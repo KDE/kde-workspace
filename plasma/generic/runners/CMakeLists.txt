@@ -1,4 +1,6 @@
+if(KActivities_FOUND)
 add_subdirectory(activities)
+endif(if(KActivities_FOUND))
 add_subdirectory(bookmarks)
 add_subdirectory(calculator)
 add_subdirectory(locations)
@@ -20,4 +22,3 @@ add_subdirectory(sessions)
 add_subdirectory(windows)
 add_subdirectory(kill)
 endif(NOT WIN32)
-

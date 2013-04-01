@@ -35,7 +35,7 @@ set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed 
 find_package(KActivities 6.0.0 CONFIG)
 set_package_properties(KActivities PROPERTIES DESCRIPTION "Interface library for the activity manager"
                        URL "https://projects.kde.org/kactivities"
-                       TYPE REQUIRED
+                       TYPE OPTIONAL
                       )
 
 find_package(DBusMenuQt 0.6.0)
@@ -299,6 +299,10 @@ macro(MAKE_INSTALL_PATH_ABSOLUTE out in)
       set(${out} "\${KDE4WORKSPACE_INSTALL_DIR}/${in}")
    endif (IS_ABSOLUTE "${in}")
 endmacro(MAKE_INSTALL_PATH_ABSOLUTE out in)
+
+if(KActivities_FOUND)
+    add_definitions(-DKACTIVITIES_AVAILABLE)
+endif(KActivities_FOUND)
 
 make_install_path_absolute(KDE4WORKSPACE_LIB_DIR     ${LIB_INSTALL_DIR})
 make_install_path_absolute(KDE4WORKSPACE_LIBEXEC_DIR ${LIBEXEC_INSTALL_DIR})
