@@ -560,25 +560,51 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     unknownItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     unknownItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     unknownItem->setData("ShowUnknown", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(unknownItem);
+    visibleItemsSourceModel->appendRow(unknownItem);
 
     QStringList ownApplets = s_manager->applets(this);
 
+    QMap<QString, KPluginInfo> sortedApplets;
     foreach (const KPluginInfo &info, Plasma::Applet::listAppletInfo()) {
         KService::Ptr service = info.service();
         if (service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
-            QStandardItem *item = new QStandardItem();
-            item->setText(service->name());
-            item->setIcon(KIcon(service->icon()));
-            item->setCheckable(true);
-            item->setCheckState(ownApplets.contains(info.pluginName()) ? Qt::Checked : Qt::Unchecked);
-            item->setData(i18nc("Extra items to be manually added in the systray, such as little Plasma widgets", "Extra Items"), KCategorizedSortFilterProxyModel::CategoryDisplayRole);
-            item->setData(info.pluginName(), Qt::UserRole+2);
-            m_visibleItemsSourceModel.data()->appendRow(item);
+            // if we already have a plugin with this exact name in it, then check if it is the
+            // same plugin and skip it if it is indeed already listed
+            if (sortedApplets.contains(info.name())) {
+
+                bool dupe = false;
+                // it is possible (though poor form) to have multiple applets
+                // with the same visible name but different plugins, so we hve to check all values
+                foreach (const KPluginInfo &existingInfo, sortedApplets.values(info.name())) {
+                    if (existingInfo.pluginName() == info.pluginName()) {
+                        dupe = true;
+                        break;
+                    }
+                }
+
+                if (dupe) {
+                    continue;
+                }
+            }
+
+            // insertMulti becase it is possible (though poor form) to have multiple applets
+            // with the same visible name but different plugins
+            sortedApplets.insertMulti(info.name(), info);
         }
     }
 
-    connect(m_visibleItemsSourceModel.data(), SIGNAL(itemChanged(QStandardItem*)), parent, SLOT(settingsModified()));
+    foreach  (const KPluginInfo &info, sortedApplets) {
+        QStandardItem *item = new QStandardItem();
+        item->setText(info.name());
+        item->setIcon(KIcon(info.icon()));
+        item->setCheckable(true);
+        item->setCheckState(ownApplets.contains(info.pluginName()) ? Qt::Checked : Qt::Unchecked);
+        item->setData(i18nc("Extra items to be manually added in the systray, such as little Plasma widgets", "Extra Items"), KCategorizedSortFilterProxyModel::CategoryDisplayRole);
+        item->setData(info.pluginName(), Qt::UserRole+2);
+        visibleItemsSourceModel->appendRow(item);
+    }
+
+    connect(visibleItemsSourceModel, SIGNAL(itemChanged(QStandardItem*)), parent, SLOT(settingsModified()));
 }
 
 //not always the corona lock action is available: netbook locks per-containment
