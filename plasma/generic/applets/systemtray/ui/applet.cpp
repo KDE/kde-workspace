@@ -435,10 +435,12 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
         m_visibleItemsUi.visibleItemsView->setModel(visibleItemsModel);
     }
 
+    QStandardItemModel *visibleItemsSourceModel = m_visibleItemsSourceModel.data();
+    // the lifespan of m_visibleItemsSourceModel is tied to the config UI, so it
+    // should always exist at this point
+    Q_ASSERT(visibleItemsSourceModel);
+    visibleItemsSourceModel->clear();
     m_autoHideUi.icons->clear();
-    if (m_visibleItemsSourceModel) {
-        m_visibleItemsSourceModel.data()->clear();
-    }
 
     QMultiMap<QString, Task *> sortedTasks;
     foreach (Task *task, s_manager->tasks()) {
@@ -518,7 +520,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     applicationStatusItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     applicationStatusItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     applicationStatusItem->setData("ShowApplicationStatus", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(applicationStatusItem);
+    visibleItemsSourceModel->appendRow(applicationStatusItem);
 
     QStandardItem *communicationsItem = new QStandardItem();
     communicationsItem->setText(i18nc("Items communication related, such as chat or email clients", "Communications"));
@@ -528,7 +530,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     communicationsItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     communicationsItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     communicationsItem->setData("ShowCommunications", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(communicationsItem);
+    visibleItemsSourceModel->appendRow(communicationsItem);
 
     QStandardItem *systemServicesItem = new QStandardItem();
     systemServicesItem->setText(i18nc("Items about the status of the system, such as a filesystem indexer", "System services"));
@@ -538,7 +540,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     systemServicesItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     systemServicesItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     systemServicesItem->setData("ShowSystemServices", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(systemServicesItem);
+    visibleItemsSourceModel->appendRow(systemServicesItem);
 
     QStandardItem *hardwareControlItem = new QStandardItem();
     hardwareControlItem->setText(i18nc("Items about hardware, such as battery or volume control", "Hardware control"));
@@ -548,7 +550,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     hardwareControlItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     hardwareControlItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     hardwareControlItem->setData("ShowHardware", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(hardwareControlItem);
+    visibleItemsSourceModel->appendRow(hardwareControlItem);
 
     QStandardItem *unknownItem = new QStandardItem();
     unknownItem->setText(i18nc("Other uncategorized systemtray items", "Miscellaneous"));
