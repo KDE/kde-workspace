@@ -255,7 +255,7 @@ class CalendarTablePrivate
 
             //starting from the first of the month, which is known to always be valid, add/subtract
             //number of days to get to the required cell
-            if (cal->setYMD(cellDate, selectedYear, selectedMonth, 1)) {
+            if (cal->setDate(cellDate, selectedYear, selectedMonth, 1)) {
                 cellDate = cal->addDays(cellDate, (weekRow * daysInWeek) + weekdayColumn - daysShownInPrevMonth);
             }
 
@@ -310,7 +310,7 @@ class CalendarTablePrivate
             Q_UNUSED(cellDate);
             QDate firstDayOfMonth;
             int weekday = -1;
-            if ( cal->setYMD(firstDayOfMonth, selectedYear, selectedMonth, 1)) {
+            if ( cal->setDate(firstDayOfMonth, selectedYear, selectedMonth, 1)) {
                 weekday = cal->dayOfWeek(firstDayOfMonth);
             }
             return weekday;
@@ -859,7 +859,6 @@ void CalendarTable::dataUpdated(const QString &source, const Plasma::DataEngine:
         Plasma::DataEngine::Data pimData = v.toHash();
         QString type = pimData.value("Type").toString();
         QString uid = pimData.value("UID").toString();
-        QDate startDate = pimData.value("StartDate").value<KDateTime>().date();
 
         d->pimEvents.insert(uid, pimData);
 
@@ -1108,7 +1107,7 @@ void CalendarTable::paintCell(QPainter *p, int cell, int weekRow, int weekdayCol
     p->setPen(numberColor);
     p->setFont(type & Event ? d->dateFontBold : d->dateFont);
     if (!(type & InvalidDate)) {
-        p->drawText(cellArea, Qt::AlignCenter, calendar()->dayString(cellDate, KCalendarSystem::ShortFormat), &cellArea); //draw number
+        p->drawText(cellArea, Qt::AlignCenter, calendar()->formatDate(cellDate, KLocale::Day, KLocale::ShortNumber), &cellArea); //draw number
     }
     p->setOpacity(1.0);
 }
@@ -1228,21 +1227,21 @@ void CalendarTable::paint(QPainter *p, const QStyleOptionGraphicsItem *option, Q
                 QString weekString;
                 QString accurateWeekString;
                 if (calendar()->isValid(cellDate)) {
-                    weekString = calendar()->weekNumberString(cellDate);
+                    weekString = calendar()->formatDate(cellDate, KLocale::Week, KLocale::LongNumber);
                     accurateWeekString = weekString;
                     if (calendar()->dayOfWeek(cellDate) != Qt::Monday) {
                         QDate nextWeekDate = calendar()->addDays(cellDate, d->daysInWeek);
                         if (calendar()->isValid(nextWeekDate)) {
                             if (layoutDirection() == Qt::RightToLeft) {
-                                accurateWeekString.prepend("/").prepend(calendar()->weekNumberString(nextWeekDate));
+                                accurateWeekString.prepend("/").prepend(calendar()->formatDate(nextWeekDate, KLocale::Week, KLocale::LongNumber));
                             } else {
-                                accurateWeekString.append("/").append(calendar()->weekNumberString(nextWeekDate));
+                                accurateWeekString.append("/").append(calendar()->formatDate(nextWeekDate, KLocale::Week, KLocale::LongNumber));
                             }
                         }
                         // ensure that weekString is the week number that has the most amout of days in the row
                         QDate middleWeekDate = calendar()->addDays(cellDate, floor(static_cast<float>(d->daysInWeek / 2)));
                         if (calendar()->isValid(middleWeekDate)) {
-                            QString middleWeekString = calendar()->weekNumberString(middleWeekDate);
+                            QString middleWeekString = calendar()->formatDate(middleWeekDate, KLocale::Week, KLocale::LongNumber);
                             if (weekString != middleWeekString) {
                                 weekString = middleWeekString;
                             }
