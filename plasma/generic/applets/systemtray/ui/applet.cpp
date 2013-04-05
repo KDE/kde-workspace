@@ -418,13 +418,13 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
         //to determine if this line is no longer needed in the future, comment it out, lock
         //widgets, then call up the configuration dialog for a system tray applet and click
         //on the "unlock widgets" button.
-        m_visibleItemsUi.visibleItemsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-        m_visibleItemsUi.visibleItemsView->setEnabled(immutability() == Plasma::Mutable);
         m_visibleItemsUi.unlockLabel->setVisible(visible);
         m_visibleItemsUi.unlockButton->setVisible(visible);
 
+        m_visibleItemsUi.visibleItemsView->setEnabled(immutability() == Plasma::Mutable);
         m_visibleItemsUi.visibleItemsView->setCategoryDrawer(new KCategoryDrawerV3(m_visibleItemsUi.visibleItemsView));
         m_visibleItemsUi.visibleItemsView->setMouseTracking(true);
+        m_visibleItemsUi.visibleItemsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         m_visibleItemsUi.visibleItemsView->setVerticalScrollMode(QListView::ScrollPerPixel);
 
         KCategorizedSortFilterProxyModel *visibleItemsModel = new KCategorizedSortFilterProxyModel(m_visibleItemsUi.visibleItemsView);
@@ -432,7 +432,6 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
 
         m_visibleItemsSourceModel = new QStandardItemModel(m_visibleItemsUi.visibleItemsView);
         visibleItemsModel->setSourceModel(m_visibleItemsSourceModel.data());
-
         m_visibleItemsUi.visibleItemsView->setModel(visibleItemsModel);
     }
 
