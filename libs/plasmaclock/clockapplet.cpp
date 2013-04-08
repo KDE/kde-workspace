@@ -95,6 +95,7 @@ public:
     int announceInterval;
     QTime lastTimeSeen;
     bool forceTzDisplay : 1;
+    bool kttsAvailable;
 
     QDate addTzToTipText(QString &subText, const Plasma::DataEngine::Data &data, const QDate &prevDate, bool highlight)
     {
@@ -371,27 +372,32 @@ void ClockApplet::createConfigurationInterface(KConfigDialog *parent)
 {
     createClockConfigurationInterface(parent);
 
-    QWidget *generalWidget = new QWidget();
-    d->generalUi.setupUi(generalWidget);
-    parent->addPage(generalWidget, i18nc("General configuration page", "General"), Applet::icon());
+    d->kttsAvailable = (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kttsd") || KService::serviceByDesktopName("kttsd"));
 
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Never"), QVariant(0));
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every minute"), QVariant(1));
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 2 minutes"), QVariant(2));
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 5 minutes"), QVariant(5));
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 10 minutes"), QVariant(10));
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 15 minutes"), QVariant(15));
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 30 minutes"), QVariant(30));
-    d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every hour"), QVariant(60));
-    
-    for (int i=0; i< d->generalUi.intervalCombo->count() ; i++) {
-        if (d->generalUi.intervalCombo->itemData(i).toInt() == d->announceInterval) {
-            d->generalUi.intervalCombo->setCurrentIndex(i);
-            break;
+    if (d->kttsAvailable) {
+        QWidget *generalWidget = new QWidget();
+        d->generalUi.setupUi(generalWidget);
+        parent->addPage(generalWidget, i18nc("General configuration page", "General"), Applet::icon());
+
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Never"), QVariant(0));
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every minute"), QVariant(1));
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 2 minutes"), QVariant(2));
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 5 minutes"), QVariant(5));
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 10 minutes"), QVariant(10));
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 15 minutes"), QVariant(15));
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every 30 minutes"), QVariant(30));
+        d->generalUi.intervalCombo->addItem(i18nc("@inmenu interval between speaking clock", "Every hour"), QVariant(60));
+
+        for (int i=0; i< d->generalUi.intervalCombo->count() ; i++) {
+            if (d->generalUi.intervalCombo->itemData(i).toInt() == d->announceInterval) {
+                d->generalUi.intervalCombo->setCurrentIndex(i);
+                break;
+            }
         }
+
+        connect(d->generalUi.intervalCombo, SIGNAL(currentIndexChanged(int)), parent, SLOT(settingsModified()));
     }
-    
-    
+
     if (d->calendarWidget) {
         d->calendarWidget->createConfigurationInterface(parent);
     }
@@ -414,7 +420,6 @@ void ClockApplet::createConfigurationInterface(KConfigDialog *parent)
     }
     d->timezonesUi.clockDefaultsTo->setCurrentIndex(defaultSelection);
 
-    connect(d->generalUi.intervalCombo, SIGNAL(currentIndexChanged(int)), parent, SLOT(settingsModified()));
     connect(d->timezonesUi.timeZones, SIGNAL(itemChanged(QTreeWidgetItem*,int)), parent, SLOT(settingsModified()));
     connect(d->timezonesUi.timeZones, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(updateClockDefaultsTo()));
     connect(d->timezonesUi.clockDefaultsTo,SIGNAL(activated(QString)), parent, SLOT(settingsModified()));
@@ -452,7 +457,7 @@ void ClockApplet::configChanged()
         constraintsEvent(Plasma::SizeConstraint);
         update();
     } else if (d->calendarWidget) {
-        // d->calendarWidget->configAccepted(cg); is called in configAccepted(), 
+        // d->calendarWidget->configAccepted(cg); is called in configAccepted(),
         // as is setCurrentTimezone
         // so we only need to do this in the case where the user hasn't been
         // configuring things
@@ -489,7 +494,11 @@ void ClockApplet::configAccepted()
         d->calendarWidget->configAccepted(cg);
     }
 
-    cg.writeEntry("announceInterval", d->generalUi.intervalCombo->itemData(d->generalUi.intervalCombo->currentIndex()));
+    if (d->kttsAvailable) {
+        cg.writeEntry("announceInterval", d->generalUi.intervalCombo->itemData(d->generalUi.intervalCombo->currentIndex()));
+    } else {
+        cg.writeEntry("announceInterval", 0);
+    }
 
     clockConfigAccepted();
 
