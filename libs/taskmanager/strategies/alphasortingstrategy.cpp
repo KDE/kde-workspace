@@ -54,16 +54,14 @@ void AlphaSortingStrategy::sortItems(ItemList &items)
     QMap<QString, AbstractGroupableItem*> launcherMap;
 
     foreach (AbstractGroupableItem * groupable, items) {
+        if (!groupable) {
+            continue;
+        }
+        
         if (groupable->itemType() == GroupItemType) {
-            if (!groupable) {
-                continue;
-            }
             map.insertMulti(groupable->name().toLower(), groupable);
             continue;
         } else if (groupable->itemType() == LauncherItemType) {
-            if (!groupable) {
-                continue;
-            }
             if (separateLaunchers) {
                 launcherMap.insertMulti(groupable->name().toLower(), groupable);
             } else {
