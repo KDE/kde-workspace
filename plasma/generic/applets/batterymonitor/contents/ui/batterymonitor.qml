@@ -153,6 +153,17 @@ Item {
             Logic.updateTooltip();
             Logic.updateBrightness();
         }
+        onSourceAdded: {
+            if (source == "Battery0") {
+		disconnectSource(source);
+                connectSource(source);
+            }
+        }
+        onSourceRemoved: {
+            if (source == "Battery0") {
+                disconnectSource(source);
+            }
+        }
     }
 
     property QtObject batteries: PlasmaCore.DataModel {
