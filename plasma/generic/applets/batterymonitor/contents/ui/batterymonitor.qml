@@ -201,9 +201,8 @@ Item {
         percent: batteries.cumulativePercent
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
-        showHybridSuspendButton: Platform.shouldOfferHybridSuspend(pmSource)
-        showSuspendButton: showHybridSuspendButton ? false : Platform.shouldOfferSuspend(pmSource)
-        showHibernateButton: showHybridSuspendButton ? false : Platform.shouldOfferHibernate(pmSource)
+        showSuspendButton: Platform.shouldOfferSuspend(pmSource)
+        showHibernateButton: Platform.shouldOfferHibernate(pmSource)
 
         onSuspendClicked: {
             plasmoid.togglePopup();
