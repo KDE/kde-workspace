@@ -259,7 +259,7 @@ CalendarTable *Calendar::calendarTable() const
     return d->calendarTable;
 }
 
-void Calendar::setCalendar(const QString &newCalendarType)
+void Calendar::setCalendar(int newCalendarType)
 {
     calendarTable()->setCalendar(newCalendarType);
     d->refreshWidgets();
@@ -334,7 +334,7 @@ bool Calendar::isAutomaticUpdateEnabled() const
 
 void Calendar::setCurrentDate(const QDate &date)
 {
-    calendarTable()->setCurrentDate(date);  
+    calendarTable()->setCurrentDate(date);
 }
 
 const QDate& Calendar::currentDate() const
