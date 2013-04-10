@@ -35,12 +35,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGui/QGraphicsLinearLayout>
 #include <Plasma/FrameSvg>
 #include <Plasma/PushButton>
+#include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 #include <netwm_def.h>
 
 #include <math.h>
 #include <assert.h>
 #include <limits.h>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QTimer>
 #include <QVector2D>
 #include <QVector4D>
@@ -66,15 +69,8 @@ PresentWindowsEffect::PresentWindowsEffect()
     , m_highlightedDropTarget(NULL)
     , m_dragToClose(false)
 {
-    m_atomDesktop = XInternAtom(display(), "_KDE_PRESENT_WINDOWS_DESKTOP", False);
-    m_atomWindows = XInternAtom(display(), "_KDE_PRESENT_WINDOWS_GROUP", False);
-    effects->registerPropertyType(m_atomDesktop, true);
-    effects->registerPropertyType(m_atomWindows, true);
-
-    // Announce support by creating a dummy version on the root window
-    unsigned char dummy = 0;
-    XChangeProperty(display(), rootWindow(), m_atomDesktop, m_atomDesktop, 8, PropModeReplace, &dummy, 1);
-    XChangeProperty(display(), rootWindow(), m_atomWindows, m_atomWindows, 8, PropModeReplace, &dummy, 1);
+    m_atomDesktop = effects->announceSupportProperty("_KDE_PRESENT_WINDOWS_DESKTOP", this);
+    m_atomWindows = effects->announceSupportProperty("_KDE_PRESENT_WINDOWS_GROUP", this);
 
     KActionCollection* actionCollection = new KActionCollection(this);
     KAction* a = (KAction*)actionCollection->addAction("Expose");
@@ -101,20 +97,12 @@ PresentWindowsEffect::PresentWindowsEffect()
     connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowGeometryShapeChanged(KWin::EffectWindow*,QRect)));
     connect(effects, SIGNAL(propertyNotify(KWin::EffectWindow*,long)), this, SLOT(slotPropertyNotify(KWin::EffectWindow*,long)));
+
+    connect (qApp->desktop(), SIGNAL(screenCountChanged(int)), SLOT(screenCountChanged()));
 }
 
 PresentWindowsEffect::~PresentWindowsEffect()
 {
-    XDeleteProperty(display(), rootWindow(), m_atomDesktop);
-    effects->registerPropertyType(m_atomDesktop, false);
-    XDeleteProperty(display(), rootWindow(), m_atomWindows);
-    effects->registerPropertyType(m_atomWindows, false);
-    foreach (ElectricBorder border, m_borderActivate) {
-        effects->unreserveElectricBorder(border);
-    }
-    foreach (ElectricBorder border, m_borderActivateAll) {
-        effects->unreserveElectricBorder(border);
-    }
     delete m_filterFrame;
     delete m_closeView;
 }
@@ -123,24 +111,24 @@ void PresentWindowsEffect::reconfigure(ReconfigureFlags)
 {
     PresentWindowsConfig::self()->readConfig();
     foreach (ElectricBorder border, m_borderActivate) {
-        effects->unreserveElectricBorder(border);
+        effects->unreserveElectricBorder(border, this);
     }
     foreach (ElectricBorder border, m_borderActivateAll) {
-        effects->unreserveElectricBorder(border);
+        effects->unreserveElectricBorder(border, this);
     }
     m_borderActivate.clear();
     m_borderActivateAll.clear();
     foreach (int i, PresentWindowsConfig::borderActivate()) {
         m_borderActivate.append(ElectricBorder(i));
-        effects->reserveElectricBorder(ElectricBorder(i));
+        effects->reserveElectricBorder(ElectricBorder(i), this);
     }
     foreach (int i, PresentWindowsConfig::borderActivateAll()) {
         m_borderActivateAll.append(ElectricBorder(i));
-        effects->reserveElectricBorder(ElectricBorder(i));
+        effects->reserveElectricBorder(ElectricBorder(i), this);
     }
     foreach (int i, PresentWindowsConfig::borderActivateClass()) {
         m_borderActivateClass.append(ElectricBorder(i));
-        effects->reserveElectricBorder(ElectricBorder(i));
+        effects->reserveElectricBorder(ElectricBorder(i), this);
     }
     m_layoutMode = PresentWindowsConfig::layoutMode();
     m_showCaptions = PresentWindowsConfig::drawWindowCaptions();
@@ -680,11 +668,6 @@ void PresentWindowsEffect::mouseActionWindow(WindowMouseAction& action)
                 m_highlightedWindow->unminimize();
             else
                 m_highlightedWindow->minimize();
-        }
-        break;
-    case WindowCloseAction:
-        if (m_highlightedWindow) {
-            m_highlightedWindow->closeWindow();
         }
         break;
     default:
@@ -1539,19 +1522,7 @@ void PresentWindowsEffect::setActive(bool active)
         m_hasKeyboardGrab = effects->grabKeyboard(this);
         effects->setActiveFullScreenEffect(this);
 
-        m_gridSizes.clear();
-        for (int i = 0; i < effects->numScreens(); ++i) {
-            m_gridSizes.append(GridSize());
-            if (m_dragToClose) {
-                const QRect screenRect = effects->clientArea(FullScreenArea, i, 1);
-                EffectFrame *frame = effects->effectFrame(EffectFrameNone, false);
-                KIcon icon("user-trash");
-                frame->setIcon(icon.pixmap(QSize(128, 128)));
-                frame->setPosition(QPoint(screenRect.x() + screenRect.width(), screenRect.y()));
-                frame->setAlignment(Qt::AlignRight | Qt::AlignTop);
-                m_dropTargets.append(frame);
-            }
-        }
+        screenCountChanged();
 
         rearrangeWindows();
         setHighlightedWindow(effects->activeWindow());
@@ -1929,6 +1900,29 @@ bool PresentWindowsEffect::isActive() const
     return m_activated || m_motionManager.managingWindows();
 }
 
+void PresentWindowsEffect::screenCountChanged()
+{
+    if (!isActive())
+        return;
+    while (!m_dropTargets.empty()) {
+        delete m_dropTargets.takeFirst();
+    }
+    m_gridSizes.clear();
+    for (int i = 0; i < effects->numScreens(); ++i) {
+        m_gridSizes.append(GridSize());
+        if (m_dragToClose) {
+            const QRect screenRect = effects->clientArea(FullScreenArea, i, 1);
+            EffectFrame *frame = effects->effectFrame(EffectFrameNone, false);
+            KIcon icon("user-trash");
+            frame->setIcon(icon.pixmap(QSize(128, 128)));
+            frame->setPosition(QPoint(screenRect.x() + screenRect.width(), screenRect.y()));
+            frame->setAlignment(Qt::AlignRight | Qt::AlignTop);
+            m_dropTargets.append(frame);
+        }
+    }
+    rearrangeWindows();
+}
+
 /************************************************
 * CloseWindowView
 ************************************************/
@@ -1961,7 +1955,11 @@ CloseWindowView::CloseWindowView(QWidget* parent)
     scene->addItem(form);
 
     m_frame = new Plasma::FrameSvg(this);
-    m_frame->setImagePath("dialogs/background");
+    if (Plasma::Theme::defaultTheme()->currentThemeHasImage("translucent/dialogs/background")) {
+        m_frame->setImagePath("translucent/dialogs/background");
+    } else {
+        m_frame->setImagePath("dialogs/background");
+    }
     m_frame->setCacheAllRenderedFrames(true);
     m_frame->setEnabledBorders(Plasma::FrameSvg::AllBorders);
     qreal left, top, right, bottom;
@@ -1970,7 +1968,6 @@ CloseWindowView::CloseWindowView(QWidget* parent)
     qreal height = form->size().height() + top + bottom;
     m_frame->resizeFrame(QSizeF(width, height));
     Plasma::WindowEffects::enableBlurBehind(winId(), true, m_frame->mask());
-    Plasma::WindowEffects::overrideShadow(winId(), true);
     form->setPos(left, top);
     scene->setSceneRect(QRectF(QPointF(0, 0), QSizeF(width, height)));
     setScene(scene);

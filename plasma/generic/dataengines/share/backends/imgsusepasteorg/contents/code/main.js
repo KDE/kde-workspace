@@ -30,7 +30,7 @@ function setup() {
     provider.addPostItem("title", "mypaste", "text/plain");
     provider.addPostItem("lang", "image", "text/plain");
     provider.addPostItem("submit", "submit", "text/plain");
-    provider.addPostItem("expiry","1440","text/plain");
+    provider.addPostItem("expire","1440","text/plain");
 }
  
 function handleResultData(data) {

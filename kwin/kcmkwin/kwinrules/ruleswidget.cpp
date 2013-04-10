@@ -137,7 +137,10 @@ RulesWidget::RulesWidget(QWidget* parent)
     foreach (const QString & activityId, activities.listActivities()) {
         activity->addItem(KActivities::Info::name(activityId), activityId);
     }
-    activity->addItem(i18n("All Activities"), QString::fromLatin1("ALL"));
+    // cloned from kactivities/src/lib/core/consumer.cpp
+    #define NULL_UUID "00000000-0000-0000-0000-000000000000"
+    activity->addItem(i18n("All Activities"), QString::fromLatin1(NULL_UUID));
+    #undef NULL_UUID
 }
 
 #undef SETUP
@@ -257,22 +260,6 @@ static QSize strToSize(const QString& str)
     if (!reg.exactMatch(str))
         return QSize();
     return QSize(reg.cap(1).toInt(), reg.cap(2).toInt());
-}
-
-//used for opacity settings
-static QString intToStr(const int& s)
-{
-    if (s < 1 || s > 100)
-        return QString();
-    return QString::number(s);
-}
-
-static int strToInt(const QString& str)
-{
-    int tmp = str.toInt();
-    if (tmp < 1 || tmp > 100)
-        return 100;
-    return tmp;
 }
 
 int RulesWidget::desktopToCombo(int d) const

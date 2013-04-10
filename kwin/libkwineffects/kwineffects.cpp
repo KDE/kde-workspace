@@ -43,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
 #include <X11/extensions/Xrender.h>
 #include <X11/extensions/Xfixes.h>
+#include <xcb/xfixes.h>
 #endif
 
 namespace KWin
@@ -595,12 +596,12 @@ EffectsHandler::~EffectsHandler()
     assert(loaded_effects.count() == 0);
 }
 
-Window EffectsHandler::createInputWindow(Effect* e, const QRect& r, const QCursor& cursor)
+xcb_window_t EffectsHandler::createInputWindow(Effect* e, const QRect& r, const QCursor& cursor)
 {
     return createInputWindow(e, r.x(), r.y(), r.width(), r.height(), cursor);
 }
 
-Window EffectsHandler::createFullScreenInputWindow(Effect* e, const QCursor& cursor)
+xcb_window_t EffectsHandler::createFullScreenInputWindow(Effect* e, const QCursor& cursor)
 {
     return createInputWindow(e, 0, 0, displayWidth(), displayHeight(), cursor);
 }
@@ -816,6 +817,13 @@ bool EffectWindow::isOnAllDesktops() const
 bool EffectWindow::hasDecoration() const
 {
     return contentsRect() != QRect(0, 0, width(), height());
+}
+
+bool EffectWindow::isVisible() const
+{
+    return !isMinimized()
+           && isOnCurrentDesktop()
+           && isOnCurrentActivity();
 }
 
 
@@ -1208,9 +1216,8 @@ PaintClipper::Iterator::Iterator()
     }
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
     if (clip() && effects->compositingType() == XRenderCompositing) {
-        XserverRegion region = toXserverRegion(paintArea());
-        XFixesSetPictureClipRegion(display(), effects->xrenderBufferPicture(), 0, 0, region);
-        XFixesDestroyRegion(display(), region);   // it's ref-counted
+        XFixesRegion region(paintArea());
+        xcb_xfixes_set_picture_clip_region(connection(), effects->xrenderBufferPicture(), region, 0, 0);
     }
 #endif
 }
@@ -1219,7 +1226,7 @@ PaintClipper::Iterator::~Iterator()
 {
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
     if (clip() && effects->compositingType() == XRenderCompositing)
-        XFixesSetPictureClipRegion(display(), effects->xrenderBufferPicture(), 0, 0, None);
+        xcb_xfixes_set_picture_clip_region(connection(), effects->xrenderBufferPicture(), XCB_XFIXES_REGION_NONE, 0, 0);
 #endif
     delete data;
 }

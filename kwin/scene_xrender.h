@@ -38,7 +38,7 @@ class SceneXrender
     Q_OBJECT
 public:
     class EffectFrame;
-    SceneXrender(Workspace* ws);
+    explicit SceneXrender(Workspace* ws);
     virtual ~SceneXrender();
     virtual bool initFailed() const;
     virtual CompositingType compositingType() const {
@@ -84,6 +84,7 @@ public:
     void discardAlpha();
     QRegion transformedShape() const;
     void setTransformedShape(const QRegion& shape);
+    static void cleanup();
 private:
     Picture picture();
     Picture alphaMask(double opacity);
@@ -95,8 +96,8 @@ private:
     Picture alpha;
     double alpha_cached_opacity;
     QRegion transformed_shape;
-    static QPixmap *temp_pixmap;
     static QRect temp_visibleRect;
+    static XRenderPicture *s_tempPicture;
 };
 
 class SceneXrender::EffectFrame
@@ -113,15 +114,18 @@ public:
     virtual void crossFadeIcon();
     virtual void crossFadeText();
     virtual void render(QRegion region, double opacity, double frameOpacity);
+    static void cleanup();
 
 private:
     void updatePicture();
     void updateTextPicture();
+    void renderUnstyled(xcb_render_picture_t pict, const QRect &rect, qreal opacity);
 
     XRenderPicture* m_picture;
     XRenderPicture* m_textPicture;
     XRenderPicture* m_iconPicture;
     XRenderPicture* m_selectionPicture;
+    static XRenderPicture* s_effectFrameCircle;
 };
 
 inline
@@ -153,7 +157,7 @@ class SceneXRenderShadow
     : public Shadow
 {
 public:
-    SceneXRenderShadow(Toplevel *toplevel);
+    explicit SceneXRenderShadow(Toplevel *toplevel);
     using Shadow::ShadowElements;
     using Shadow::ShadowElementTop;
     using Shadow::ShadowElementTopRight;

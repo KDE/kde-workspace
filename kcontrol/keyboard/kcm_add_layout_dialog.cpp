@@ -41,12 +41,13 @@ AddLayoutDialog::AddLayoutDialog(const Rules* rules_, Flags* flags_, bool showLa
     	QSet<QString> langs = QSet<QString>::fromList(layoutInfo->languages);
     	languages.unite( langs );
     }
-    IsoCodes isoCodes(IsoCodes::iso_639);
+    IsoCodes isoCodes(IsoCodes::iso_639_3);
     foreach(const QString& lang, languages) {
-    	const IsoCodeEntry* isoCodeEntry = isoCodes.getEntry(IsoCodes::attr_iso_639_2B_code, lang);
-    	if( isoCodeEntry == NULL ) {
-    		isoCodeEntry = isoCodes.getEntry(IsoCodes::attr_iso_639_2T_code, lang);
-    	}
+    	const IsoCodeEntry* isoCodeEntry = isoCodes.getEntry(IsoCodes::attr_iso_639_3_id, lang);
+//    	const IsoCodeEntry* isoCodeEntry = isoCodes.getEntry(IsoCodes::attr_iso_639_2B_code, lang);
+//    	if( isoCodeEntry == NULL ) {
+//    		isoCodeEntry = isoCodes.getEntry(IsoCodes::attr_iso_639_2T_code, lang);
+//    	}
     	QString name = isoCodeEntry != NULL ? i18n(isoCodeEntry->value(IsoCodes::attr_name).toUtf8()) : lang;
     	layoutDialogUi->languageComboBox->addItem(name, lang);
     }

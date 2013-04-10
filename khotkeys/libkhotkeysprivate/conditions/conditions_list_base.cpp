@@ -58,15 +58,15 @@ Condition_list_base::Condition_list_base( KConfigGroup& cfg_P, Condition_list_ba
 
 Condition_list_base::~Condition_list_base()
     {
-    qDeleteAll(*this);
-#if 0
-    while( !isEmpty())
+    // Carefully delete conditions in a manual loop. Something like qDeleteAll
+    // would crash because the conditions remove themselves from this list in
+    // their destructors.
+    while( !isEmpty() )
         {
         Condition* c = first();
         removeAll( c );
         delete c;
         }
-#endif
     }
 
 

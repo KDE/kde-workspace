@@ -29,6 +29,8 @@
 #include "backgrounddelegate.h"
 #include "image.h"
 
+QSet<QString> BackgroundFinder::m_suffixes;
+
 ImageSizeFinder::ImageSizeFinder(const QString &path, QObject *parent)
     : QObject(parent),
       m_path(path)
@@ -363,12 +365,20 @@ QString BackgroundFinder::token() const
     return m_token;
 }
 
+const QSet<QString> &BackgroundFinder::suffixes()
+{
+    if(m_suffixes.isEmpty()) {
+        m_suffixes << "png" << "jpeg" << "jpg" << "svg" << "svgz";
+    }
+
+    return m_suffixes;
+}
+
 void BackgroundFinder::run()
 {
     //QTime t;
     //t.start();
-    QSet<QString> suffixes;
-    suffixes << "png" << "jpeg" << "jpg" << "svg" << "svgz";
+    const QSet<QString> &fileSuffixes = suffixes();
 
     QStringList papersFound;
     //kDebug() << "starting with" << m_paths;
@@ -404,7 +414,7 @@ void BackgroundFinder::run()
 
                 // add this to the directories we should be looking at
                 m_paths.append(filePath);
-            } else if (suffixes.contains(wp.suffix().toLower())) {
+            } else if (fileSuffixes.contains(wp.suffix().toLower())) {
                 //kDebug() << "     adding image file" << wp.filePath();
                 papersFound << wp.filePath();
             }

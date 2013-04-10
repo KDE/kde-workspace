@@ -18,19 +18,18 @@ import QtQuick 1.1
 
 Item {
     signal alphaChanged()
-
-    property int paddingLeft
-    property int paddingRight
-    property int paddingTop
-    property int paddingBottom
-    property int borderLeft
-    property int borderRight
-    property int borderTop
-    property int borderBottom
-    property int borderLeftMaximized
-    property int borderRightMaximized
-    property int borderTopMaximized
-    property int borderBottomMaximized
+    property QtObject borders: Borders {
+        objectName: "borders"
+    }
+    property QtObject maximizedBorders: Borders {
+        objectName: "maximizedBorders"
+    }
+    property QtObject extendedBorders: Borders {
+        objectName: "extendedBorders"
+    }
+    property QtObject padding: Borders {
+        objectName: "padding"
+    }
     property bool alpha: true
     onAlphaChanged: alphaChanged()
 

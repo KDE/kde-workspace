@@ -41,6 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <signal.h>
 
 #include "bridge.h"
+#include "client_machine.h"
 #include "composite.h"
 #include "group.h"
 #include "workspace.h"
@@ -50,6 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "shadow.h"
 #include "deleted.h"
 #include "paintredirector.h"
+#include "xcbutils.h"
 #ifdef KWIN_BUILD_TABBOX
 #include "tabbox.h"
 #endif
@@ -139,7 +141,7 @@ Client::Client(Workspace* ws)
 #ifdef KWIN_BUILD_KAPPMENU
     , m_menuAvailable(false)
 #endif
-    , input_window(None)
+    , m_decoInputExtent()
 {
     // TODO: Do all as initialization
 #ifdef HAVE_XSYNC
@@ -210,6 +212,9 @@ Client::Client(Workspace* ws)
     connect(this, SIGNAL(clientStepUserMovedResized(KWin::Client*,QRect)), SIGNAL(geometryChanged()));
     connect(this, SIGNAL(clientStartUserMovedResized(KWin::Client*)), SIGNAL(moveResizedChanged()));
     connect(this, SIGNAL(clientFinishUserMovedResized(KWin::Client*)), SIGNAL(moveResizedChanged()));
+
+    connect(clientMachine(), SIGNAL(localhostChanged()), SLOT(updateCaption()));
+    connect(options, SIGNAL(condensedTitleChanged()), SLOT(updateCaption()));
 
     // SELI TODO: Initialize xsizehints??
 }
@@ -380,10 +385,7 @@ void Client::updateInputWindow()
     }
 
     if (region.isEmpty()) {
-        if (input_window) {
-            XDestroyWindow(display(), input_window);
-            input_window = None;
-        }
+        m_decoInputExtent.reset();
         return;
     }
 
@@ -396,23 +398,25 @@ void Client::updateInputWindow()
     // Move the region to input window coordinates
     region.translate(-input_offset);
 
-    if (!input_window) {
-        XSetWindowAttributes attr;
-        attr.event_mask = EnterWindowMask | LeaveWindowMask |
-                          ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
-        attr.override_redirect = True;
-
-        input_window = XCreateWindow(display(), rootWindow(), bounds.x(), bounds.y(),
-                                     bounds.width(), bounds.height(), 0, 0,
-                                     InputOnly, 0, CWEventMask | CWOverrideRedirect, &attr);
+    if (!m_decoInputExtent.isValid()) {
+        const uint32_t mask = XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK;
+        const uint32_t values[] = {true,
+            XCB_EVENT_MASK_ENTER_WINDOW   |
+            XCB_EVENT_MASK_LEAVE_WINDOW   |
+            XCB_EVENT_MASK_BUTTON_PRESS   |
+            XCB_EVENT_MASK_BUTTON_RELEASE |
+            XCB_EVENT_MASK_POINTER_MOTION
+        };
+        m_decoInputExtent.create(bounds, XCB_WINDOW_CLASS_INPUT_ONLY, mask, values);
         if (mapping_state == Mapped)
-            XMapWindow(display(), inputId());
+            m_decoInputExtent.map();
     } else {
-        XMoveResizeWindow(display(), input_window, bounds.x(), bounds.y(),
-                          bounds.width(), bounds.height());
+        m_decoInputExtent.setGeometry(bounds);
     }
 
-    XShapeCombineRegion(display(), input_window, ShapeInput, 0, 0, region.handle(), ShapeSet);
+    const QVector<xcb_rectangle_t> rects = Xcb::regionToRects(region);
+    xcb_shape_rectangles(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT, XCB_CLIP_ORDERING_UNSORTED,
+                         m_decoInputExtent, 0, 0, rects.count(), rects.constData());
 }
 
 void Client::updateDecoration(bool check_workspace_pos, bool force)
@@ -479,10 +483,7 @@ void Client::destroyDecoration()
             emit geometryShapeChanged(this, oldgeom);
         }
     }
-    if (inputId()) {
-        XDestroyWindow(display(), input_window);
-        input_window = None;
-    }
+    m_decoInputExtent.reset();
 }
 
 bool Client::checkBorderSizes(bool also_resize)
@@ -717,7 +718,7 @@ void Client::updateInputShape()
 {
     if (hiddenPreview())   // Sets it to none, don't change
         return;
-    if (Extensions::shapeInputAvailable()) {
+    if (Xcb::Extensions::self()->isShapeInputAvailable()) {
         // There appears to be no way to find out if a window has input
         // shape set or not, so always propagate the input shape
         // (it's the same like the bounding shape by default).
@@ -1142,8 +1143,7 @@ void Client::internalShow(allowed_t)
     if (old == Unmapped || old == Withdrawn)
         map(Allowed);
     if (old == Kept) {
-        if (inputId())
-            XMapWindow(display(), inputId());
+        m_decoInputExtent.map();
         updateHiddenPreview();
     }
     if (Compositor::isCreated()) {
@@ -1177,8 +1177,7 @@ void Client::internalKeep(allowed_t)
     mapping_state = Kept;
     if (old == Unmapped || old == Withdrawn)
         map(Allowed);
-    if (inputId())
-        XUnmapWindow(display(), inputId());
+    m_decoInputExtent.unmap();
     updateHiddenPreview();
     addWorkspaceRepaint(visibleRect());
     workspace()->clientHidden(this);
@@ -1205,8 +1204,7 @@ void Client::map(allowed_t)
     if (!isShade()) {
         XMapWindow(display(), wrapper);
         XMapWindow(display(), client);
-        if (inputId())
-            XMapWindow(display(), inputId());
+        m_decoInputExtent.map();
         exportMappingState(NormalState);
     } else
         exportMappingState(IconicState);
@@ -1227,8 +1225,7 @@ void Client::unmap(allowed_t)
     XUnmapWindow(display(), frameId());
     XUnmapWindow(display(), wrapper);
     XUnmapWindow(display(), client);
-    if (inputId())
-        XUnmapWindow(display(), inputId());
+    m_decoInputExtent.unmap();
     XSelectInput(display(), wrapper, ClientWinMask | SubstructureNotifyMask);
     if (decoration != NULL)
         decoration->widget()->hide(); // Not really necessary, but let it know the state
@@ -1250,7 +1247,7 @@ void Client::updateHiddenPreview()
 {
     if (hiddenPreview()) {
         workspace()->forceRestacking();
-        if (Extensions::shapeInputAvailable())
+        if (Xcb::Extensions::self()->isShapeInputAvailable())
             XShapeCombineRectangles(display(), frameId(), ShapeInput, 0, 0, NULL, 0, ShapeSet, Unsorted);
     } else {
         workspace()->forceRestacking();
@@ -1374,21 +1371,20 @@ void Client::killProcess(bool ask, Time timestamp)
     if (m_killHelperPID && !::kill(m_killHelperPID, 0)) // means the process is alive
         return;
     Q_ASSERT(!ask || timestamp != CurrentTime);
-    QByteArray machine = wmClientMachine(true);
     pid_t pid = info->pid();
-    if (pid <= 0 || machine.isEmpty())  // Needed properties missing
+    if (pid <= 0 || clientMachine()->hostName().isEmpty())  // Needed properties missing
         return;
-    kDebug(1212) << "Kill process:" << pid << "(" << machine << ")";
+    kDebug(1212) << "Kill process:" << pid << "(" << clientMachine()->hostName() << ")";
     if (!ask) {
-        if (machine != "localhost") {
+        if (!clientMachine()->isLocal()) {
             QStringList lst;
-            lst << machine << "kill" << QString::number(pid);
+            lst << clientMachine()->hostName() << "kill" << QString::number(pid);
             QProcess::startDetached("xon", lst);
         } else
             ::kill(pid, SIGTERM);
     } else {
         QProcess::startDetached(KStandardDirs::findExe("kwin_killer_helper"),
-                                QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << machine
+                                QStringList() << "--pid" << QByteArray().setNum(unsigned(pid)) << "--hostname" << clientMachine()->hostName()
                                 << "--windowname" << caption()
                                 << "--applicationname" << resourceClass()
                                 << "--wid" << QString::number(window())
@@ -1449,9 +1445,10 @@ void Client::setModal(bool m)
 
 void Client::setDesktop(int desktop)
 {
+    const int numberOfDesktops = VirtualDesktopManager::self()->count();
     if (desktop != NET::OnAllDesktops)   // Do range check
-        desktop = qMax(1, qMin(workspace()->numberOfDesktops(), desktop));
-    desktop = qMin(workspace()->numberOfDesktops(), rules()->checkDesktop(desktop));
+        desktop = qMax(1, qMin(numberOfDesktops, desktop));
+    desktop = qMin(numberOfDesktops, rules()->checkDesktop(desktop));
     if (desk == desktop)
         return;
 
@@ -1516,6 +1513,8 @@ void Client::setOnActivity(const QString &activity, bool enable)
 /**
  * set exactly which activities this client is on
  */
+// cloned from kactivities/src/lib/core/consumer.cpp
+#define NULL_UUID "00000000-0000-0000-0000-000000000000"
 void Client::setOnActivities(QStringList newActivitiesList)
 {
     QString joinedActivitiesList = newActivitiesList.join(",");
@@ -1525,10 +1524,10 @@ void Client::setOnActivities(QStringList newActivitiesList)
     QStringList allActivities = workspace()->activityList();
     if ( newActivitiesList.isEmpty() ||
         (newActivitiesList.count() > 1 && newActivitiesList.count() == allActivities.count()) ||
-        (newActivitiesList.count() == 1 && newActivitiesList.at(0) == "ALL")) {
+        (newActivitiesList.count() == 1 && newActivitiesList.at(0) == NULL_UUID)) {
         activityList.clear();
         XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
-                        PropModeReplace, (const unsigned char *)"ALL", 3);
+                        PropModeReplace, (const unsigned char *)NULL_UUID, 36);
 
     } else {
         QByteArray joined = joinedActivitiesList.toAscii();
@@ -1597,7 +1596,7 @@ void Client::setOnAllDesktops(bool b)
     if (b)
         setDesktop(NET::OnAllDesktops);
     else
-        setDesktop(workspace()->currentDesktop());
+        setDesktop(VirtualDesktopManager::self()->current());
 
     // Update states of all other windows in this group
     if (tabGroup())
@@ -1774,8 +1773,8 @@ void Client::setCaption(const QString& _s, bool force)
     cap_suffix.clear();
     QString machine_suffix;
     if (!options->condensedTitle()) { // machine doesn't qualify for "clean"
-        if (wmClientMachine(false) != "localhost" && !isLocalMachine(wmClientMachine(false)))
-            machine_suffix = QString(" <@") + wmClientMachine(true) + '>' + LRM;
+        if (clientMachine()->hostName() != ClientMachine::localhost() && !clientMachine()->isLocal())
+            machine_suffix = QString(" <@") + clientMachine()->hostName() + '>' + LRM;
     }
     QString shortcut_suffix = !shortcut().isEmpty() ? (" {" + shortcut().toString() + '}') : QString();
     cap_suffix = machine_suffix + shortcut_suffix;
@@ -2113,7 +2112,7 @@ void Client::getWindowProtocols()
 void Client::getSyncCounter()
 {
 #ifdef HAVE_XSYNC
-    if (!Extensions::syncAvailable())
+    if (!Xcb::Extensions::self()->isSyncAvailable())
         return;
 
     Atom retType;
@@ -2261,7 +2260,7 @@ void Client::updateCursor()
     if (decoration != NULL)
         decoration->widget()->setCursor(cursor);
     XDefineCursor(display(), frameId(), cursor.handle());
-    if (inputId())
+    if (m_decoInputExtent.isValid())
         XDefineCursor(display(), inputId(), cursor.handle());
     if (moveResizeMode)   // XDefineCursor doesn't change cursor if there's pointer grab active
         XChangeActivePointerGrab(display(),
@@ -2343,8 +2342,7 @@ void Client::cancelAutoRaise()
 
 void Client::debug(QDebug& stream) const
 {
-    stream << "\'ID:" << window() << ";WMCLASS:" << resourceClass() << ":"
-           << resourceName() << ";Caption:" << caption() << "\'";
+    print<QDebug>(stream);
 }
 
 QPixmap* kwin_get_menu_pix_hack()
@@ -2360,7 +2358,7 @@ void Client::checkActivities()
     QStringList newActivitiesList;
     QByteArray prop = getStringProperty(window(), atoms->activities);
     activitiesDefined = !prop.isEmpty();
-    if (prop == "ALL") {
+    if (prop == NULL_UUID) {
         //copied from setOnAllActivities to avoid a redundant XChangeProperty.
         if (!activityList.isEmpty()) {
             activityList.clear();
@@ -2396,6 +2394,9 @@ void Client::checkActivities()
     }
     setOnActivities(newActivitiesList);
 }
+
+#undef NULL_UUID
+
 
 void Client::setSessionInteract(bool needed)
 {

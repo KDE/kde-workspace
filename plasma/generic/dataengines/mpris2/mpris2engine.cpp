@@ -20,7 +20,6 @@
 
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
-#include <QDBusInterface>
 #include <QDBusServiceWatcher>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>

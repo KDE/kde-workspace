@@ -1,0 +1,2 @@
+installPackage(. org.kde.notifications)
+

@@ -23,46 +23,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kwinconfig.h>
 
-#ifdef KWIN_HAVE_XRENDER_COMPOSITING
-
 #include <QtCore/QSharedData>
-#include <QtGui/QColor>
+#include <QVector>
 #include <ksharedptr.h>
 
 #include <kwinglobals.h>
 
-#include <X11/extensions/Xfixes.h>
+// TODO: remove, currently only included to not break builds of effects
 #include <X11/extensions/Xrender.h>
+#include <xcb/xfixes.h>
+
+class QColor;
 
 /** @addtogroup kwineffects */
 /** @{ */
 
 namespace KWin
 {
-
 /**
- * Convert QRegion to XserverRegion.
+ * dumps a QColor into a xcb_render_color_t
  */
-KWIN_EXPORT XserverRegion toXserverRegion(QRegion region);
-/**
- * draws a round box on the renderscene
- */
-KWIN_EXPORT void xRenderRoundBox(Picture pict, const QRect &rect, int round, const QColor &c);
-/**
- * dumps a QColor into a XRenderColor
- */
-KWIN_EXPORT XRenderColor preMultiply(const QColor &c, float opacity = 1.0);
+KWIN_EXPORT xcb_render_color_t preMultiply(const QColor &c, float opacity = 1.0);
 
 /** @internal */
 class KWIN_EXPORT XRenderPictureData
     : public QSharedData
 {
 public:
-    XRenderPictureData(Picture pic = None);
+    explicit XRenderPictureData(xcb_render_picture_t pic = XCB_RENDER_PICTURE_NONE);
     ~XRenderPictureData();
-    Picture value();
+    xcb_render_picture_t value();
 private:
-    Picture picture;
+    xcb_render_picture_t picture;
     Q_DISABLE_COPY(XRenderPictureData)
 };
 
@@ -76,16 +68,28 @@ private:
 class KWIN_EXPORT XRenderPicture
 {
 public:
-    XRenderPicture(Picture pic = None);
-    XRenderPicture(QPixmap pix);
-    XRenderPicture(Pixmap pix, int depth);
-    operator Picture();
+    explicit XRenderPicture(xcb_render_picture_t pic = XCB_RENDER_PICTURE_NONE);
+    // TODO: Qt5 - replace QPixmap by QImage to make it more obvious that it uses PutImage
+    explicit XRenderPicture(QPixmap pix);
+    XRenderPicture(xcb_pixmap_t pix, int depth);
+    operator xcb_render_picture_t();
 private:
     KSharedPtr< XRenderPictureData > d;
 };
 
+class KWIN_EXPORT XFixesRegion
+{
+public:
+    explicit XFixesRegion(const QRegion &region);
+    virtual ~XFixesRegion();
+
+    operator xcb_xfixes_region_t();
+private:
+    xcb_xfixes_region_t m_region;
+};
+
 inline
-XRenderPictureData::XRenderPictureData(Picture pic)
+XRenderPictureData::XRenderPictureData(xcb_render_picture_t pic)
     : picture(pic)
 {
 }
@@ -93,26 +97,58 @@ XRenderPictureData::XRenderPictureData(Picture pic)
 inline
 XRenderPictureData::~XRenderPictureData()
 {
-    if (picture != None)
-        XRenderFreePicture(display(), picture);
+    if (picture != XCB_RENDER_PICTURE_NONE)
+        xcb_render_free_picture(connection(), picture);
 }
 
 inline
-Picture XRenderPictureData::value()
+xcb_render_picture_t XRenderPictureData::value()
 {
     return picture;
 }
 
 inline
-XRenderPicture::XRenderPicture(Picture pic)
+XRenderPicture::XRenderPicture(xcb_render_picture_t pic)
     : d(new XRenderPictureData(pic))
 {
 }
 
 inline
-XRenderPicture::operator Picture()
+XRenderPicture::operator xcb_render_picture_t()
 {
     return d->value();
+}
+
+inline
+XFixesRegion::XFixesRegion(const QRegion &region)
+{
+    m_region = xcb_generate_id(connection());
+    QVector< QRect > rects = region.rects();
+    QVector< xcb_rectangle_t > xrects(rects.count());
+    for (int i = 0;
+            i < rects.count();
+            ++i) {
+        const QRect &rect = rects.at(i);
+        xcb_rectangle_t xrect;
+        xrect.x = rect.x();
+        xrect.y = rect.y();
+        xrect.width = rect.width();
+        xrect.height = rect.height();
+        xrects[i] = xrect;
+    }
+    xcb_xfixes_create_region(connection(), m_region, xrects.count(), xrects.constData());
+}
+
+inline
+XFixesRegion::~XFixesRegion()
+{
+    xcb_xfixes_destroy_region(connection(), m_region);
+}
+
+inline
+XFixesRegion::operator xcb_xfixes_region_t()
+{
+    return m_region;
 }
 
 /**
@@ -123,7 +159,7 @@ KWIN_EXPORT XRenderPicture xRenderBlendPicture(double opacity);
 /**
  * Creates a 1x1 Picture filled with c
  */
-KWIN_EXPORT XRenderPicture xRenderFill(const XRenderColor *c);
+KWIN_EXPORT XRenderPicture xRenderFill(const xcb_render_color_t &c);
 KWIN_EXPORT XRenderPicture xRenderFill(const QColor &c);
 
 /**
@@ -150,21 +186,19 @@ KWIN_EXPORT bool xRenderOffscreen();
 /**
  * The offscreen buffer as set by the renderer because of setXRenderWindowOffscreen(true)
  */
-KWIN_EXPORT QPixmap *xRenderOffscreenTarget();
+KWIN_EXPORT xcb_render_picture_t xRenderOffscreenTarget();
 
 /**
  * NOTICE: HANDS OFF!!!
  * scene_setXRenderWindowOffscreenTarget() is ONLY to be used by the renderer - DO NOT TOUCH!
  */
-KWIN_EXPORT void scene_setXRenderOffscreenTarget(QPixmap *pix);
+KWIN_EXPORT void scene_setXRenderOffscreenTarget(xcb_render_picture_t pix);
 /**
  * scene_xRenderWindowOffscreenTarget() is used by the scene to figure the target set by an effect
  */
 KWIN_EXPORT XRenderPicture *scene_xRenderOffscreenTarget();
 
 } // namespace
-
-#endif
 
 /** @} */
 

@@ -465,15 +465,15 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
         listItem->setText(0, task->name());
         listItem->setIcon(0, task->icon());
         listItem->setFlags(Qt::ItemIsEnabled);
-        listItem->setData(0, Qt::UserRole, task->typeId());
+        listItem->setData(0, Qt::UserRole, task->taskId());
 
         itemCombo->addItem(i18nc("Item will be automatically shown or hidden from the systray", "Auto"));
         itemCombo->addItem(i18nc("Item is never visible in the systray", "Hidden"));
         itemCombo->addItem(i18nc("Item is always visible in the systray", "Always Visible"));
 
-        if (m_hiddenTypes.contains(task->typeId())) {
+        if (m_hiddenTypes.contains(task->taskId())) {
             itemCombo->setCurrentIndex(1);
-        } else if (m_alwaysShownTypes.contains(task->typeId())) {
+        } else if (m_alwaysShownTypes.contains(task->taskId())) {
             itemCombo->setCurrentIndex(2);
         } else {
             itemCombo->setCurrentIndex(0);
@@ -614,7 +614,7 @@ void Applet::configAccepted()
         Task *task = 0;
         //FIXME: terribly inefficient
         foreach (Task *candidateTask, s_manager->tasks()) {
-            if (candidateTask->typeId() == taskTypeId) {
+            if (candidateTask->taskId() == taskTypeId) {
                 task = candidateTask;
                 break;
             }
@@ -716,9 +716,9 @@ int Applet::getVisibilityPreference(QObject *task) const
     Task *t = qobject_cast<Task*>(task);
     if (!t)
         return AutoVisibility;
-    if ( m_hiddenTypes.contains(t->typeId()) ) {
+    if ( m_hiddenTypes.contains(t->taskId()) ) {
         return AlwaysHidden;
-    } else if ( m_alwaysShownTypes.contains(t->typeId()) ) {
+    } else if ( m_alwaysShownTypes.contains(t->taskId()) ) {
         return AlwaysShown;
     }
     return AutoVisibility;

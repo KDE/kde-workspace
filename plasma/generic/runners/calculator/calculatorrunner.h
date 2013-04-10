@@ -21,6 +21,7 @@
 #define CALCULATORRUNNER_H
 
 #include <QMimeData>
+#include <QRegExp>
 
 #ifdef ENABLE_QALCULATE
 class QalculateEngine;
@@ -49,7 +50,9 @@ class CalculatorRunner : public Plasma::AbstractRunner
         void userFriendlySubstitutions(QString& cmd);
         void powSubstitutions(QString& cmd);
         void hexSubstitutions(QString& cmd);
- 
+
+        QRegExp m_regExp;
+
         #ifdef ENABLE_QALCULATE
         QalculateEngine* m_engine;
         #endif

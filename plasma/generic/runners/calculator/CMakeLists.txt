@@ -2,14 +2,18 @@
 ########### next target ###############
 
 macro_optional_find_package(Qalculate)
-macro_log_feature(QALCULATE_FOUND "Qalculate!" "Qalculate Library" "http://qalculate.sourceforge.net/" FALSE "" "Needed to enable advanced features of the calculator runner")
+set_package_properties(Qalculate PROPERTIES DESCRIPTION "Qalculate Library"
+                       URL "http://qalculate.sourceforge.net"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed to enable advanced features of the calculator runner"
+                      )
 if ( QALCULATE_FOUND )
     add_definitions(-DENABLE_QALCULATE)
 
     set(qalculate_engine_SRCS
     qalculate_engine.cpp
     )
- 
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${KDE4_ENABLE_EXCEPTIONS} -Wno-deprecated")
 endif( QALCULATE_FOUND )
 

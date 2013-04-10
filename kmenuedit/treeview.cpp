@@ -33,6 +33,7 @@
 #include <QMenu>
 #include <QApplication>
 #include <QtDBus/QtDBus>
+#include <QSignalMapper>
 
 #include <KAction>
 #include <KActionCollection>
@@ -113,6 +114,55 @@ TreeItem::TreeItem(QTreeWidget *parent, QTreeWidgetItem *after, const QString& m
 
 TreeItem::~TreeItem()
 {
+}
+
+/**
+ * @brief Return the description.
+ * @return Description, or an empty string if none.
+ */
+QString TreeItem::description() const
+{
+    QString description;
+    if (isEntry()) {
+        description = entryInfo()->description;
+    }
+    return description;
+}
+
+/**
+ * @brief Compare two items using their names.
+ * @param item1 First item.
+ * @param item2 Second item.
+ * @return Integer less than, equal to, or greater than zero if item1 is less than, equal to, or greater than item2.
+ */
+bool TreeItem::itemNameLessThan(QTreeWidgetItem *item1, QTreeWidgetItem *item2)
+{
+    TreeItem *treeItem1 = static_cast<TreeItem*>(item1);
+    TreeItem *treeItem2 = static_cast<TreeItem*>(item2);
+    return treeItem1->name().toLower() < treeItem2->name().toLower();
+}
+
+/**
+ * @brief Compare two items using their descriptions. If both are empty, sort them by name.
+ * @param item1 First item.
+ * @param item2 Second item.
+ * @return Integer less than, equal to, or greater than zero if item1 is less than, equal to, or greater than item2.
+ */
+bool TreeItem::itemDescriptionLessThan(QTreeWidgetItem *item1, QTreeWidgetItem *item2)
+{
+    // extract descriptions in lower case
+    TreeItem *treeItem1 = static_cast<TreeItem*>(item1);
+    TreeItem *treeItem2 = static_cast<TreeItem*>(item2);
+    const QString description1 = treeItem1->description().toLower();
+    const QString description2 = treeItem2->description().toLower();
+
+    // if description is missing for both items, sort them using their names
+    if (description1.isEmpty() && description2.isEmpty()) {
+        return itemNameLessThan(item1, item2);
+    }
+    else {
+        return description1 < description2;
+    }
 }
 
 void TreeItem::setName(const QString &name)
@@ -215,6 +265,22 @@ TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
     connect(m_ac->action("newsubmenu"), SIGNAL(activated()), SLOT(newsubmenu()));
     connect(m_ac->action("newsep"), SIGNAL(activated()), SLOT(newsep()));
 
+    // map sorting actions
+    m_sortSignalMapper = new QSignalMapper(this);
+    QAction *action = m_ac->action(SORT_BY_NAME_ACTION_NAME);
+    connect(action, SIGNAL(activated()), m_sortSignalMapper, SLOT(map()));
+    m_sortSignalMapper->setMapping(action, SortByName);
+    action = m_ac->action(SORT_BY_DESCRIPTION_ACTION_NAME);
+    connect(action, SIGNAL(activated()), m_sortSignalMapper, SLOT(map()));
+    m_sortSignalMapper->setMapping(action, SortByDescription);
+    action = m_ac->action(SORT_ALL_BY_NAME_ACTION_NAME);
+    connect(action, SIGNAL(activated()), m_sortSignalMapper, SLOT(map()));
+    m_sortSignalMapper->setMapping(action, SortAllByName);
+    action = m_ac->action(SORT_ALL_BY_DESCRIPTION_ACTION_NAME);
+    connect(action, SIGNAL(activated()), m_sortSignalMapper, SLOT(map()));
+    m_sortSignalMapper->setMapping(action, SortAllByDescription);
+    connect(m_sortSignalMapper, SIGNAL(mapped(const int)), this, SLOT(sort(const int)));
+
     m_menuFile = new MenuFile(KStandardDirs::locateLocal("xdgconf-menu", "applications-kmenuedit.menu"));
     m_rootFolder = new MenuFolderInfo;
     m_separator = new MenuSeparatorInfo;
@@ -262,6 +328,12 @@ void TreeView::setViewMode(bool showHidden)
     m_rmb->addAction( m_ac->action("newitem") );
     m_rmb->addAction( m_ac->action("newsubmenu") );
     m_rmb->addAction( m_ac->action("newsep") );
+
+    m_rmb->addSeparator();
+
+    action = m_ac->action(SORT_ACTION_NAME);
+    m_rmb->addAction(action);
+    action->setEnabled(false);
 
     m_showHidden = showHidden;
     readMenuFolderInfo();
@@ -582,12 +654,15 @@ void TreeView::itemSelected(QTreeWidgetItem *item)
         dselected = _item->isHiddenInMenu();
     }
 
+    // change actions activation
     m_ac->action("edit_cut")->setEnabled(selected);
     m_ac->action("edit_copy")->setEnabled(selected);
 
     if (m_ac->action("delete")) {
         m_ac->action("delete")->setEnabled(selected && !dselected);
     }
+    m_ac->action(SORT_ACTION_NAME)->setEnabled(selected && _item->isDirectory() && (_item->childCount() > 0));
+    m_ac->action(SORT_ALL_ACTION_NAME)->setEnabled(true);
 
     if (!item) {
         emit disableAction();
@@ -1404,6 +1479,106 @@ void TreeView::paste()
       setCurrentItem(newItem);
    }
    setLayoutDirty(parentItem);
+}
+
+/**
+ * This slot is called from the signal mapper to sort children contained in an item.
+ * This item is determinated according to the chosen sort type.
+ *
+ * @brief Determine which item is to sort, and do it.
+ * @param sortCmd Sort type.
+ */
+void TreeView::sort(const int sortCmd)
+{
+    // determine the chosen sort type and the selected item
+    SortType sortType = (SortType) sortCmd;
+    TreeItem *itemToSort;
+    if (sortType == SortByName || sortType == SortByDescription) {
+        itemToSort = static_cast<TreeItem*>(selectedItem());
+    } else if (sortType == SortAllByName) {
+        sortType = SortByName;
+        itemToSort = static_cast<TreeItem*>(invisibleRootItem());
+    } else if (sortType == SortAllByDescription) {
+        sortType = SortByDescription;
+        itemToSort = static_cast<TreeItem*>(invisibleRootItem());
+    }
+
+    // proceed to the sorting
+    sortItem(itemToSort, sortType);
+}
+
+/**
+ * Sort children of the given item, according to the sort type.
+ * The sorting is done on children groups, splited by separator items.
+ *
+ * @brief Sort item children.
+ * @param item Item to sort.
+ * @param sortType Sort type.
+ */
+void TreeView::sortItem(TreeItem *item, const SortType& sortType)
+{
+    // sort the selected item only if contains children
+    if ( (!item->isDirectory()) || (item->childCount() == 0) ) {
+        return;
+    }
+
+    // remove contained children
+    QList<QTreeWidgetItem*> children = item->takeChildren();
+
+    // sort children groups, splited by separator items
+    QList<QTreeWidgetItem*>::iterator startIt = children.begin();
+    QList<QTreeWidgetItem*>::iterator currentIt = children.begin();
+    while (currentIt != children.end()) {
+        TreeItem *child = static_cast<TreeItem*>(*currentIt);
+        // if it's a separator, sort previous items and continue on following items
+        if (child->isSeparator() && startIt != currentIt) {
+            sortItemChildren(startIt, currentIt, sortType);
+            startIt = currentIt + 1;
+        }
+        ++currentIt;
+    }
+    sortItemChildren(startIt, currentIt, sortType);
+
+    // insert sorted children in the tree
+    item->addChildren(children);
+    foreach (QTreeWidgetItem *child, children) {
+        // recreate item widget for separators
+        TreeItem *treeItem = static_cast<TreeItem*>(child);
+        if (treeItem->isSeparator()) {
+            setItemWidget(treeItem, 0, new SeparatorWidget);
+        }
+
+        // try to sort sub-children
+        sortItem(static_cast<TreeItem*>(child), sortType);
+    }
+
+    // flag current item as dirty
+    TreeItem *itemToFlagAsDirty = item;
+    // if tree root item, set the entire layout as dirty
+    if (item == invisibleRootItem()) {
+        itemToFlagAsDirty = 0;
+    }
+    setLayoutDirty(itemToFlagAsDirty);
+}
+
+/**
+ * Sort a children range defined with two list iterators, according to the sort type.
+ *
+ * @brief Sort a children range.
+ * @param begin First child iterator.
+ * @param end Last child iterator (exclusive, pointed child won't be affected).
+ * @param sortType Sort type.
+ */
+void TreeView::sortItemChildren(const QList<QTreeWidgetItem*>::iterator& begin, const QList<QTreeWidgetItem*>::iterator& end, const SortType& sortType)
+{
+    // sort by name
+    if (sortType == SortByName) {
+        qSort(begin, end, TreeItem::itemNameLessThan);
+    }
+    // sort by description
+    else if (sortType == SortByDescription) {
+        qSort(begin, end, TreeItem::itemDescriptionLessThan);
+    }
 }
 
 void TreeView::del()

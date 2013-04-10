@@ -26,6 +26,7 @@
 #include <QtCore/QRegExp>
 #include <QtGui/QTextDocument> // for Qt::escape
 #include <QtXml/QXmlAttributes>
+#include <QtCore/QtConcurrentFilter>
 
 //#include <libintl.h>
 //#include <locale.h>
@@ -77,19 +78,17 @@ static QString translate_description(ConfigItem* item)
 			? item->name : translate_xml_item(item->description);
 }
 
-#define removeEmptyItems(list) ;
+static bool notEmpty(const ConfigItem* item)
+{
+  return ! item->name.isEmpty();
+}
 
-//TODO: this is tricky: we want a nice API but we don't want 6 functions to be created :(
-//template<class T>
-//void removeEmptyItems(QList<T*>& list)
-//{
-//	QList<T*>::iterator i;
-//	for (i = list.begin(); i != list.end(); ++i) {
-//		if( static_cast<ConfigItem*>(*i)->name.isEmpty() ) {
-//			list.erase(i);
-//		}
-//	}
-//}
+template<class T>
+void removeEmptyItems(QList<T*>& list)
+{
+  QtConcurrent::blockingFilter(list, notEmpty);
+}
+
 static
 void postProcess(Rules* rules)
 {

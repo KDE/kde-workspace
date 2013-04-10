@@ -1,5 +1,6 @@
-
-macro_log_feature(X11_Xinput_FOUND "libXinput" "X11 input library"  "http://xorg.freedesktop.org" TRUE "" "Needed for ktouchpadenabler")
+if(NOT X11_Xinput_FOUND)
+    message(FATAL_ERROR "The X11 input library is needed for ktouchpadenabler")
+endif()
 
 if (X11_Xinput_FOUND)
     include_directories (${X11_INCLUDE_DIR})

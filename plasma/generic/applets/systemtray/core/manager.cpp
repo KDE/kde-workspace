@@ -81,7 +81,7 @@ void Manager::addTask(Task *task)
     connect(task, SIGNAL(destroyed(SystemTray::Task*)), this, SLOT(removeTask(SystemTray::Task*)));
     connect(task, SIGNAL(changedStatus()), this, SIGNAL(taskStatusChanged()));
 
-    kDebug() << task->name() << "(" << task->typeId() << ")";
+    kDebug() << task->name() << "(" << task->taskId() << ")";
 
     d->tasks.append(task);
     emit taskAdded(task);

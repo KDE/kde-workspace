@@ -81,10 +81,13 @@ class Image : public Plasma::Wallpaper
         void newStuffFinished();
         void setConfigurationInterfaceModel();
         void updateDirs();
+        void updateDirWatch(const QStringList &newDirs);
         void addDirFromSelectionDialog();
         void systemCheckBoxToggled(bool);
         void downloadedCheckBoxToggled(bool);
-        void imageFileAltered(const QString &path);
+        void pathCreated(const QString &path);
+        void pathDirty(const QString &path);
+        void pathDeleted(const QString &path);
         void backgroundsFound(const QStringList &paths, const QString &token);
 
     protected:
@@ -105,7 +108,8 @@ class Image : public Plasma::Wallpaper
         QString m_wallpaper;
         QColor m_color;
         QStringList m_usersWallpapers;
-        KDirWatch *m_fileWatch;
+        KDirWatch *m_dirWatch;
+        bool m_scanDirty;
 
         QWidget* m_configWidget;
         Ui::ImageConfig m_uiImage;
@@ -125,7 +129,6 @@ class Image : public Plasma::Wallpaper
         QSize m_size;
         QString m_img;
         QDateTime m_previousModified;
-        bool m_randomize;
         QWeakPointer<KNS3::DownloadDialog> m_newStuffDialog;
         QString m_findToken;
 

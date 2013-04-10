@@ -174,7 +174,9 @@ void KWinDecorationModule::init()
 
 int KWinDecorationModule::itemWidth() const
 {
-    return m_ui->decorationList->rootObject()->property("width").toInt();
+    const int width = m_ui->decorationList->rootObject()->property("width").toInt();
+    const int sliderWidth = m_ui->decorationList->verticalScrollBar()->width();
+    return width - sliderWidth;
 }
 
 // This is the selection handler setting
@@ -377,6 +379,7 @@ void KWinDecorationModule::slotConfigureDecoration()
         dlg->setCaption(i18n("Decoration Options"));
         dlg->setButtons(KDialog::Ok | KDialog::Cancel);
         KWinAuroraeConfigForm *form = new KWinAuroraeConfigForm(dlg);
+        form->enableNoSideBorderSupport(index.data(DecorationModel::TypeRole).toInt() == DecorationModelData::QmlDecoration);
         dlg->setMainWidget(form);
         form->borderSizesCombo->setCurrentIndex(index.data(DecorationModel::BorderSizeRole).toInt());
         form->buttonSizesCombo->setCurrentIndex(index.data(DecorationModel::ButtonSizeRole).toInt());

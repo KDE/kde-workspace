@@ -126,11 +126,11 @@ void PlasmoidProtocol::removeApplet(const QString appletName, Plasma::Applet *pa
     }
 }
 
-void PlasmoidProtocol::cleanupTask(Plasma::Applet *host, const QString &typeId)
+void PlasmoidProtocol::cleanupTask(Plasma::Applet *host, const QString &taskId)
 {
-    kDebug() << "task with typeId" << typeId << "removed";
+    kDebug() << "task with taskId" << taskId << "removed";
     if (m_tasks.contains(host)) {
-        m_tasks[host].remove(typeId);
+        m_tasks[host].remove(taskId);
         if (m_tasks.value(host).isEmpty()) {
             m_tasks.remove(host);
         }

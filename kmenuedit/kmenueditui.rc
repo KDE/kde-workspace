@@ -20,6 +20,9 @@
  <Separator/>
  <Action name="delete"/>
  <Separator/>
+ <Action name="sort"/>
+ <Action name="sort_all"/>
+ <Separator/>
  <Action name="restore_system_menu"/>
 </Menu>
 
@@ -37,6 +40,9 @@
  <Action name="edit_paste"/>
  <Separator/>
  <Action name="delete"/>
+ <Separator/>
+ <Action name="sort"/>
+ <Action name="sort_all"/>
 </ToolBar>
 
 </kpartgui>

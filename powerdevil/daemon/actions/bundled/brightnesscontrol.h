@@ -22,6 +22,7 @@
 #define POWERDEVIL_BUNDLEDACTIONS_BRIGHTNESSCONTROL_H
 
 #include <powerdevilaction.h>
+#include <powerdevilbackendinterface.h>
 
 class BrightnessOSDWidget;
 
@@ -49,7 +50,7 @@ public:
 
 public Q_SLOTS:
     void showBrightnessOSD(int brightness);
-    void onBrightnessChangedFromBackend(float brightness);
+    void onBrightnessChangedFromBackend(float brightness, PowerDevil::BackendInterface::BrightnessControlType type);
 
 private:
     int m_defaultValue;

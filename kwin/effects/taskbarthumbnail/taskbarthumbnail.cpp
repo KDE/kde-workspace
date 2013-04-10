@@ -36,21 +36,16 @@ KWIN_EFFECT(taskbarthumbnail, TaskbarThumbnailEffect)
 
 TaskbarThumbnailEffect::TaskbarThumbnailEffect()
 {
-    atom = XInternAtom(display(), "_KDE_WINDOW_PREVIEW", False);
-    effects->registerPropertyType(atom, true);
-    // TODO hackish way to announce support, make better after 4.0
-    unsigned char dummy = 0;
-    XChangeProperty(display(), rootWindow(), atom, atom, 8, PropModeReplace, &dummy, 1);
+    atom = effects->announceSupportProperty("_KDE_WINDOW_PREVIEW", this);
     connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowDamaged(KWin::EffectWindow*,QRect)), this, SLOT(slotWindowDamaged(KWin::EffectWindow*,QRect)));
     connect(effects, SIGNAL(propertyNotify(KWin::EffectWindow*,long)), this, SLOT(slotPropertyNotify(KWin::EffectWindow*,long)));
+    connect(effects, SIGNAL(screenLockingChanged(bool)), SLOT(screenLockingChanged()));
 }
 
 TaskbarThumbnailEffect::~TaskbarThumbnailEffect()
 {
-    XDeleteProperty(display(), rootWindow(), atom);
-    effects->registerPropertyType(atom, false);
 }
 
 void TaskbarThumbnailEffect::prePaintScreen(ScreenPrePaintData& data, int time)
@@ -153,9 +148,16 @@ void TaskbarThumbnailEffect::slotPropertyNotify(EffectWindow* w, long a)
     }
 }
 
+void TaskbarThumbnailEffect::screenLockingChanged()
+{
+    foreach (EffectWindow *window, thumbnails.uniqueKeys()) {
+        window->addRepaintFull();
+    }
+}
+
 bool TaskbarThumbnailEffect::isActive() const
 {
-    return !thumbnails.isEmpty();
+    return !thumbnails.isEmpty() && !effects->isScreenLocked();
 }
 
 } // namespace

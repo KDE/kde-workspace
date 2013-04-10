@@ -21,51 +21,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-
-
-/*
- This is the OpenGL-based compositing code. It is the primary and most powerful
- compositing backend.
-
-Sources and other compositing managers:
-=======================================
-
-- http://opengl.org
-    - documentation
-        - OpenGL Redbook (http://opengl.org/documentation/red_book/ - note it's only version 1.1)
-        - GLX docs (http://opengl.org/documentation/specs/glx/glx1.4.pdf)
-        - extensions docs (http://www.opengl.org/registry/)
-
-- glcompmgr
-    - http://lists.freedesktop.org/archives/xorg/2006-July/017006.html ,
-    - http://www.mail-archive.com/compiz%40lists.freedesktop.org/msg00023.html
-    - simple and easy to understand
-    - works even without texture_from_pixmap extension
-    - claims to support several different gfx cards
-    - compile with something like
-      "gcc -Wall glcompmgr-0.5.c `pkg-config --cflags --libs glib-2.0` -lGL -lXcomposite -lXdamage -L/usr/X11R6/lib"
-
-- compiz
-    - git clone git://anongit.freedesktop.org/git/xorg/app/compiz
-    - the ultimate <whatever>
-    - glxcompmgr
-        - git clone git://anongit.freedesktop.org/git/xorg/app/glxcompgr
-        - a rather old version of compiz, but also simpler and as such simpler
-            to understand
-
-- beryl
-    - a fork of Compiz
-    - http://beryl-project.org
-    - git clone git://anongit.beryl-project.org/beryl/beryl-core (or beryl-plugins etc. ,
-        the full list should be at git://anongit.beryl-project.org/beryl/)
-
-- libcm (metacity)
-    - cvs -d :pserver:anonymous@anoncvs.gnome.org:/cvs/gnome co libcm
-    - not much idea about it, the model differs a lot from KWin/Compiz/Beryl
-    - does not seem to be very powerful or with that much development going on
-
-*/
-
 #include "scene_opengl.h"
 #ifdef KWIN_HAVE_EGL
 #include "eglonxbackend.h"
@@ -97,10 +52,17 @@ Sources and other compositing managers:
 #include <X11/extensions/Xcomposite.h>
 
 #include <qpainter.h>
+#include <QDBusConnection>
+#include <QDBusConnectionInterface>
+#include <QDBusInterface>
 #include <QDesktopWidget>
+#include <QStringList>
 #include <QVector2D>
 #include <QVector4D>
 #include <QMatrix4x4>
+
+#include <KLocale>
+#include <KProcess>
 
 namespace KWin
 {
@@ -152,6 +114,8 @@ SceneOpenGL::SceneOpenGL(Workspace* ws, OpenGLBackend *backend)
         init_ok = false;
         return;
     }
+    if (!viewportLimitsMatched(QSize(displayWidth(), displayHeight())))
+        return;
 
     // perform Scene specific checks
     GLPlatform *glPlatform = GLPlatform::instance();
@@ -434,8 +398,75 @@ SceneOpenGL::Texture *SceneOpenGL::createTexture(const QPixmap &pix, GLenum targ
     return new Texture(m_backend, pix, target);
 }
 
+bool SceneOpenGL::viewportLimitsMatched(const QSize &size) const {
+    GLint limit[2];
+    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, limit);
+    if (limit[0] < size.width() || limit[1] < size.height()) {
+        QMetaObject::invokeMethod(Compositor::self(), "suspend",
+                                  Qt::QueuedConnection, Q_ARG(Compositor::SuspendReason, Compositor::AllReasonSuspend));
+        const QString message = i18n("<h1>OpenGL desktop effects not possible</h1>"
+                                     "Your system cannot perform OpenGL Desktop Effects at the "
+                                     "current resolution<br><br>"
+                                     "You can try to select the XRender backend, but it "
+                                     "might be very slow for this resolution as well.<br>"
+                                     "Alternatively, lower the combined resolution of all screens "
+                                     "to %1x%2 ", limit[0], limit[1]);
+        const QString details = i18n("The demanded resolution exceeds the GL_MAX_VIEWPORT_DIMS "
+                                     "limitation of your GPU and is therefore not compatible "
+                                     "with the OpenGL compositor.<br>"
+                                     "XRender does not know such limitation, but the performance "
+                                     "will usually be impacted by the hardware limitations that "
+                                     "restrict the OpenGL viewport size.");
+        const int oldTimeout = QDBusConnection::sessionBus().interface()->timeout();
+        QDBusConnection::sessionBus().interface()->setTimeout(500);
+        if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kwinCompositingDialog").value()) {
+            QDBusInterface dialog( "org.kde.kwinCompositingDialog", "/CompositorSettings", "org.kde.kwinCompositingDialog" );
+            dialog.asyncCall("warn", message, details, "");
+        } else {
+            const QString args = "warn " + message.toLocal8Bit().toBase64() + " details " + details.toLocal8Bit().toBase64();
+            KProcess::startDetached("kcmshell4", QStringList() << "kwincompositing" << "--args" << args);
+        }
+        QDBusConnection::sessionBus().interface()->setTimeout(oldTimeout);
+        return false;
+    }
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, limit);
+    if (limit[0] < size.width() || limit[0] < size.height()) {
+        KConfig cfg("kwin_dialogsrc");
+
+        if (!KConfigGroup(&cfg, "Notification Messages").readEntry("max_tex_warning", true))
+            return true;
+
+        const QString message = i18n("<h1>OpenGL desktop effects might be unusable</h1>"
+                                     "OpenGL Desktop Effects at the current resolution are supported "
+                                     "but might be exceptionally slow.<br>"
+                                     "Also large windows will turn entirely black.<br><br>"
+                                     "Consider to suspend compositing, switch to the XRender backend "
+                                     "or lower the resolution to %1x%1." , limit[0]);
+        const QString details = i18n("The demanded resolution exceeds the GL_MAX_TEXTURE_SIZE "
+                                     "limitation of your GPU, thus windows of that size cannot be "
+                                     "assigned to textures and will be entirely black.<br>"
+                                     "Also this limit will often be a performance level barrier despite "
+                                     "below GL_MAX_VIEWPORT_DIMS, because the driver might fall back to "
+                                     "software rendering in this case.");
+        const int oldTimeout = QDBusConnection::sessionBus().interface()->timeout();
+        QDBusConnection::sessionBus().interface()->setTimeout(500);
+        if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kwinCompositingDialog").value()) {
+            QDBusInterface dialog( "org.kde.kwinCompositingDialog", "/CompositorSettings", "org.kde.kwinCompositingDialog" );
+            dialog.asyncCall("warn", message, details, "kwin_dialogsrc:max_tex_warning");
+        } else {
+            const QString args = "warn " + message.toLocal8Bit().toBase64() + " details " +
+                                 details.toLocal8Bit().toBase64() + " dontagain kwin_dialogsrc:max_tex_warning";
+            KProcess::startDetached("kcmshell4", QStringList() << "kwincompositing" << "--args" << args);
+        }
+        QDBusConnection::sessionBus().interface()->setTimeout(oldTimeout);
+    }
+    return true;
+}
+
 void SceneOpenGL::screenGeometryChanged(const QSize &size)
 {
+    if (!viewportLimitsMatched(size))
+        return;
     Scene::screenGeometryChanged(size);
     glViewport(0,0, size.width(), size.height());
     m_backend->screenGeometryChanged(size);
@@ -475,6 +506,7 @@ bool SceneOpenGL2::supported(OpenGLBackend *backend)
 
 SceneOpenGL2::SceneOpenGL2(OpenGLBackend *backend)
     : SceneOpenGL(Workspace::self(), backend)
+    , m_lanczosFilter(NULL)
     , m_colorCorrection(new ColorCorrection(this))
 {
     if (!init_ok) {
@@ -485,7 +517,8 @@ SceneOpenGL2::SceneOpenGL2(OpenGLBackend *backend)
     kDebug(1212) << "Color correction:" << options->isColorCorrected();
     m_colorCorrection->setEnabled(options->isColorCorrected());
     connect(m_colorCorrection, SIGNAL(changed()), Compositor::self(), SLOT(addRepaintFull()));
-    connect(options, SIGNAL(colorCorrectedChanged()), this, SLOT(slotColorCorrectedChanged()));
+    connect(m_colorCorrection, SIGNAL(errorOccured()), options, SLOT(setColorCorrected()), Qt::QueuedConnection);
+    connect(options, SIGNAL(colorCorrectedChanged()), this, SLOT(slotColorCorrectedChanged()), Qt::QueuedConnection);
 
     if (!ShaderManager::instance()->isValid()) {
         kDebug(1212) << "No Scene Shaders available";
@@ -536,7 +569,7 @@ SceneOpenGL::Window *SceneOpenGL2::createWindow(Toplevel *t)
 
 void SceneOpenGL2::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
 {
-    if (options->isColorCorrected()) {
+    if (m_colorCorrection->isEnabled()) {
         // Split the painting for separate screens
         int numScreens = Workspace::self()->numScreens();
         for (int screen = 0; screen < numScreens; ++ screen) {
@@ -555,15 +588,22 @@ void SceneOpenGL2::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region
 void SceneOpenGL2::performPaintWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data)
 {
     if (mask & PAINT_WINDOW_LANCZOS) {
-        if (m_lanczosFilter.isNull()) {
+        if (!m_lanczosFilter) {
             m_lanczosFilter = new LanczosFilter(this);
             // recreate the lanczos filter when the screen gets resized
-            connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), m_lanczosFilter.data(), SLOT(deleteLater()));
-            connect(QApplication::desktop(), SIGNAL(resized(int)), m_lanczosFilter.data(), SLOT(deleteLater()));
+            connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SLOT(resetLanczosFilter()));
+            connect(QApplication::desktop(), SIGNAL(resized(int)), SLOT(resetLanczosFilter()));
         }
-        m_lanczosFilter.data()->performPaint(w, mask, region, data);
+        m_lanczosFilter->performPaint(w, mask, region, data);
     } else
         w->sceneWindow()->performPaint(mask, region, data);
+}
+
+void SceneOpenGL2::resetLanczosFilter()
+{
+    // TODO: Qt5 - replace by a lambda slot
+    delete m_lanczosFilter;
+    m_lanczosFilter = NULL;
 }
 
 ColorCorrection *SceneOpenGL2::colorCorrection()
@@ -573,12 +613,13 @@ ColorCorrection *SceneOpenGL2::colorCorrection()
 
 void SceneOpenGL2::slotColorCorrectedChanged()
 {
-    m_colorCorrection->setEnabled(options->isColorCorrected());
-
-    // Reload all shaders
-    ShaderManager::cleanup();
-    ShaderManager::instance();
+    if (m_colorCorrection->setEnabled(options->isColorCorrected())) {
+        // Reload all shaders
+        ShaderManager::cleanup();
+        ShaderManager::instance();
+    }
 }
+
 
 //****************************************
 // SceneOpenGL1
@@ -1283,8 +1324,6 @@ void SceneOpenGL2Window::beginRenderWindow(int mask, const WindowPaintData &data
     }
 
     shader->setUniform(GLShader::WindowTransformation, transformation(mask, data));
-
-    static_cast<SceneOpenGL2*>(m_scene)->colorCorrection()->setupForOutput(data.screen());
 }
 
 void SceneOpenGL2Window::endRenderWindow(const WindowPaintData &data)
@@ -1313,15 +1352,11 @@ void SceneOpenGL2Window::prepareStates(TextureType type, qreal opacity, qreal br
     }
     if (!opaque) {
         glEnable(GL_BLEND);
-        if (options->isColorCorrected()) {
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        if (alpha) {
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         } else {
-            if (alpha) {
-                glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-            } else {
-                glBlendColor((float)opacity, (float)opacity, (float)opacity, (float)opacity);
-                glBlendFunc(GL_ONE, GL_ONE_MINUS_CONSTANT_ALPHA);
-            }
+            glBlendColor((float)opacity, (float)opacity, (float)opacity, (float)opacity);
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_CONSTANT_ALPHA);
         }
     }
     m_blendingEnabled = !opaque;

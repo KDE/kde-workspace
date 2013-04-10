@@ -79,6 +79,8 @@ public Q_SLOTS:
 protected:
     bool init_ok;
 private:
+    bool viewportLimitsMatched(const QSize &size) const;
+private:
     QHash< Toplevel*, Window* > windows;
     bool debug;
     OpenGLBackend *m_backend;
@@ -88,7 +90,7 @@ class SceneOpenGL2 : public SceneOpenGL
 {
     Q_OBJECT
 public:
-    SceneOpenGL2(OpenGLBackend *backend);
+    explicit SceneOpenGL2(OpenGLBackend *backend);
     virtual ~SceneOpenGL2();
     virtual CompositingType compositingType() const {
         return OpenGL2Compositing;
@@ -106,12 +108,13 @@ protected:
 
 private Q_SLOTS:
     void slotColorCorrectedChanged();
+    void resetLanczosFilter();
 
 private:
     void performPaintWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data);
 
 private:
-    QWeakPointer<LanczosFilter> m_lanczosFilter;
+    LanczosFilter *m_lanczosFilter;
     ColorCorrection *m_colorCorrection;
 };
 
@@ -119,7 +122,7 @@ private:
 class SceneOpenGL1 : public SceneOpenGL
 {
 public:
-    SceneOpenGL1(OpenGLBackend *backend);
+    explicit SceneOpenGL1(OpenGLBackend *backend);
     virtual ~SceneOpenGL1();
     virtual void screenGeometryChanged(const QSize &size);
     virtual int paint(QRegion damage, ToplevelList windows);
@@ -280,7 +283,7 @@ private:
 class SceneOpenGL2Window : public SceneOpenGL::Window
 {
 public:
-    SceneOpenGL2Window(Toplevel *c);
+    explicit SceneOpenGL2Window(Toplevel *c);
     virtual ~SceneOpenGL2Window();
 
 protected:
@@ -300,7 +303,7 @@ private:
 class SceneOpenGL1Window : public SceneOpenGL::Window
 {
 public:
-    SceneOpenGL1Window(Toplevel *c);
+    explicit SceneOpenGL1Window(Toplevel *c);
     virtual ~SceneOpenGL1Window();
 
 protected:
@@ -359,7 +362,7 @@ class SceneOpenGLShadow
     : public Shadow
 {
 public:
-    SceneOpenGLShadow(Toplevel *toplevel);
+    explicit SceneOpenGLShadow(Toplevel *toplevel);
     virtual ~SceneOpenGLShadow();
 
     GLTexture *shadowTexture() {

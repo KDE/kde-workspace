@@ -22,13 +22,12 @@
 #include "playeractionjob.h"
 #include "playercontainer.h"
 
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <KDebug>
+#include <dbusproperties.h>
+#include <mprisplayer.h>
+#include <mprisroot.h>
 
-#define MPRIS2_PATH "/org/mpris/MediaPlayer2"
-#define MPRIS2_IFACE "org.mpris.MediaPlayer2"
-#define MPRIS2_PLAYER_IFACE "org.mpris.MediaPlayer2.Player"
+#include <QDBusConnection>
+#include <KDebug>
 
 PlayerControl::PlayerControl(PlayerContainer* container, QObject* parent)
     : Plasma::Service(parent)
@@ -37,13 +36,6 @@ PlayerControl::PlayerControl(PlayerContainer* container, QObject* parent)
     setObjectName(container->objectName() + QLatin1String(" controller"));
     setName("mpris2");
     setDestination(container->objectName());
-
-    m_rootIface = new QDBusInterface(container->dbusAddress(),
-            MPRIS2_PATH, MPRIS2_IFACE,
-            QDBusConnection::sessionBus(), this);
-    m_playerIface = new QDBusInterface(container->dbusAddress(),
-            MPRIS2_PATH, MPRIS2_PLAYER_IFACE,
-            QDBusConnection::sessionBus(), this);
 
     connect(container, SIGNAL(dataUpdated(QString,Plasma::DataEngine::Data)),
             this,      SLOT(updateEnabledOperations()));
@@ -79,14 +71,9 @@ void PlayerControl::updateEnabledOperations()
     emit enabledOperationsChanged();
 }
 
-QDBusInterface* PlayerControl::propertiesInterface() const
+QDBusObjectPath PlayerControl::trackId() const
 {
-    return m_container->propertiesInterface();
-}
-
-QVariant PlayerControl::trackId() const
-{
-    return m_container->data().value("Metadata").toMap().value("mpris:trackid");
+    return m_container->data().value("Metadata").toMap().value("mpris:trackid").value<QDBusObjectPath>();
 }
 
 void PlayerControl::containerDestroyed()

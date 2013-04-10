@@ -122,9 +122,17 @@ Dtime::Dtime(QWidget * parent)
 
 void Dtime::currentZone()
 {
-    m_local->setText(i18n("Current local time zone: %1 (%2)",
-                          KTimeZoneWidget::displayName(KSystemTimeZones::local()),
-                          QString::fromUtf8(KSystemTimeZones::local().abbreviations().first())));
+    KTimeZone localZone = KSystemTimeZones::local();
+
+    if (localZone.abbreviations().isEmpty()) {
+        m_local->setText(i18nc("%1 is name of time zone", "Current local time zone: %1",
+                              KTimeZoneWidget::displayName(localZone)));
+    } else {
+        m_local->setText(i18nc("%1 is name of time zone, %2 is its abbreviation",
+                               "Current local time zone: %1 (%2)",
+                              KTimeZoneWidget::displayName(localZone),
+                              QString::fromUtf8(localZone.abbreviations().first())));
+    }
 }
 
 void Dtime::serverTimeCheck() {

@@ -20,9 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "snaphelper.h"
 
-#include "kwinglutils.h"
+#include <kwinglutils.h>
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
-#include "kwinxrenderutils.h"
+#include <kwinxrenderutils.h>
+#include <xcb/render.h>
 #endif
 
 namespace KWin
@@ -40,20 +41,10 @@ SnapHelperEffect::SnapHelperEffect()
     connect(effects, SIGNAL(windowStartUserMovedResized(KWin::EffectWindow*)), this, SLOT(slotWindowStartUserMovedResized(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowFinishUserMovedResized(KWin::EffectWindow*)), this, SLOT(slotWindowFinishUserMovedResized(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*, const QRect&)), this, SLOT(slotWindowResized(KWin::EffectWindow*, const QRect&)));
-
-    /*if ( effects->compositingType() == XRenderCompositing )
-        {
-        XGCValues gcattr;
-        // TODO: Foreground color
-        gcattr.line_width = 4;
-        m_gc = XCreateGC( display(), rootWindow(), GCLineWidth, &gcattr );
-        }*/
 }
 
 SnapHelperEffect::~SnapHelperEffect()
 {
-    //if ( effects->compositingType() == XRenderCompositing )
-    //    XFreeGC( display(), m_gc );
 }
 
 void SnapHelperEffect::reconfigure(ReconfigureFlags)
@@ -134,7 +125,7 @@ void SnapHelperEffect::postPaintScreen()
                 int halfWidth = m_window->width() / 2;
                 int halfHeight = m_window->height() / 2;
 
-                XRectangle rects[6];
+                xcb_rectangle_t rects[6];
                 // Center lines
                 rects[0].x = rect.x() + rect.width() / 2 - 2;
                 rects[0].y = rect.y();
@@ -164,8 +155,8 @@ void SnapHelperEffect::postPaintScreen()
                 rects[5].width = 4;
                 rects[5].height = 2*halfHeight - 4;
 
-                XRenderColor c = preMultiply(QColor(128, 128, 128, m_timeline.currentValue()*128));
-                XRenderFillRectangles(display(), PictOpOver, effects->xrenderBufferPicture(), &c, rects, 6);
+                xcb_render_fill_rectangles(connection(), XCB_RENDER_PICT_OP_OVER, effects->xrenderBufferPicture(),
+                                           preMultiply(QColor(128, 128, 128, m_timeline.currentValue()*128)), 6, rects);
             }
 #endif
         }

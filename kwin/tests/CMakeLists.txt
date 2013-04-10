@@ -18,3 +18,67 @@ set( testWindowPaintData_SRCS test_window_paint_data.cpp )
 kde4_add_unit_test( testWindowPaintData TESTNAME kwin-TestWindowPaintData ${testWindowPaintData_SRCS} )
 
 target_link_libraries( testWindowPaintData kwineffects ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTEST_LIBRARY} )
+
+########################################################
+# Test VirtualDesktopManager
+########################################################
+set( testVirtualDesktops_SRCS
+     test_virtual_desktops.cpp
+     ../virtualdesktops.cpp
+)
+kde4_add_unit_test( testVirtualDesktops TESTNAME kwin-TestVirtualDesktops ${testVirtualDesktops_SRCS} )
+
+target_link_libraries( testVirtualDesktops
+                       ${KDE4_KDEUI_LIBS}
+                       ${QT_QTCORE_LIBRARY}
+                       ${QT_QTTEST_LIBRARY}
+)
+
+########################################################
+# Test ClientMachine
+########################################################
+set( testClientMachine_SRCS
+     test_client_machine.cpp
+     ../client_machine.cpp
+)
+kde4_add_unit_test( testClientMachine TESTNAME kwin-TestClientMachine ${testClientMachine_SRCS} )
+
+target_link_libraries( testClientMachine
+                       ${QT_QTTEST_LIBRARY}
+                       ${QT_QTCORE_LIBRARY}
+                       ${KDE4_KDEUI_LIBS}
+                       ${XCB_XCB_LIBRARIES}
+                       ${X11_XCB_LIBRARIES}
+)
+
+########################################################
+# Test XcbWrapper
+########################################################
+set( testXcbWrapper_SRCS
+     test_xcb_wrapper.cpp
+)
+kde4_add_unit_test( testXcbWrapper TESTNAME kwin-TestXcbWrapper ${testXcbWrapper_SRCS} )
+
+target_link_libraries( testXcbWrapper
+                       ${QT_QTTEST_LIBRARY}
+                       ${QT_QTCORE_LIBRARY}
+                       ${QT_QTGUI_LIBRARY}
+                       ${XCB_XCB_LIBRARIES}
+                       ${X11_XCB_LIBRARIES}
+)
+
+########################################################
+# Test XcbWindow
+########################################################
+set( testXcbWindow_SRCS
+     test_xcb_window.cpp
+)
+kde4_add_unit_test( testXcbWindow TESTNAME kwin-TestXcbWindow ${testXcbWindow_SRCS} )
+
+target_link_libraries( testXcbWindow
+                       ${QT_QTTEST_LIBRARY}
+                       ${QT_QTCORE_LIBRARY}
+                       ${QT_QTGUI_LIBRARY}
+                       ${XCB_XCB_LIBRARIES}
+                       ${X11_XCB_LIBRARIES}
+)

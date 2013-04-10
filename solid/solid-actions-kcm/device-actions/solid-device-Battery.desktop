@@ -145,8 +145,8 @@ Name[zh_TW]=充電狀態
 [Desktop Action plugged]
 # ctxt: battery plugged in
 Name=Plugged
-Name[bs]=Utaknut
 Name[ca]=Endollada
+Name[ca@valencia]=Endollada
 Name[cs]=Připojeno
 Name[da]=I stikkontakten
 Name[de]=Angeschlossen
@@ -154,6 +154,7 @@ Name[el]=Σε σύνδεση
 Name[es]=Enchufado
 Name[et]=Ühendatud
 Name[fi]=Kytketty
+Name[fr]=Branchée
 Name[ga]=Plugáilte
 Name[gl]=Enchufada
 Name[he]=מחובר
@@ -178,6 +179,7 @@ Name[sr@ijekavian]=утакнута
 Name[sr@ijekavianlatin]=utaknuta
 Name[sr@latin]=utaknuta
 Name[sv]=Anslutet
+Name[tr]=Fişe takılı
 Name[uk]=З’єднано
 Name[x-test]=xxPluggedxx
 Name[zh_CN]=已插入

@@ -22,6 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "meta.h"
 #include "scriptingutils.h"
 #include "workspace_wrapper.h"
+#ifdef KWIN_BUILD_SCREENEDGES
+#include "../screenedge.h"
+#endif
 // KDE
 #include <KDE/KConfigGroup>
 #include <KDE/KDebug>
@@ -269,20 +272,10 @@ ScriptedEffect::ScriptedEffect()
     , m_scriptFile(QString())
 {
     connect(m_engine, SIGNAL(signalHandlerException(QScriptValue)), SLOT(signalHandlerException(QScriptValue)));
-#ifdef KWIN_BUILD_SCREENEDGES
-    connect(Workspace::self()->screenEdge(), SIGNAL(activated(ElectricBorder)), SLOT(slotBorderActivated(ElectricBorder)));
-#endif
 }
 
 ScriptedEffect::~ScriptedEffect()
 {
-#ifdef KWIN_BUILD_SCREENEDGES
-    for (QHash<int, QList<QScriptValue> >::const_iterator it = m_screenEdgeCallbacks.constBegin();
-            it != m_screenEdgeCallbacks.constEnd();
-            ++it) {
-        KWin::Workspace::self()->screenEdge()->unreserve(static_cast<KWin::ElectricBorder>(it.key()));
-    }
-#endif
 }
 
 bool ScriptedEffect::init(const QString &effectName, const QString &pathToScript)
@@ -407,9 +400,10 @@ void ScriptedEffect::globalShortcutTriggered()
     callGlobalShortcutCallback<KWin::ScriptedEffect*>(this, sender());
 }
 
-void ScriptedEffect::slotBorderActivated(ElectricBorder edge)
+bool ScriptedEffect::borderActivated(ElectricBorder edge)
 {
     screenEdgeActivated(this, edge);
+    return true;
 }
 
 QVariant ScriptedEffect::readConfig(const QString &key, const QVariant defaultValue)

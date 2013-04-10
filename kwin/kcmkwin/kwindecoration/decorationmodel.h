@@ -90,7 +90,7 @@ public:
         QmlMainScriptRole = Qt::UserRole + 14,
         CloseOnDblClickRole = Qt::UserRole + 15
     };
-    DecorationModel(KSharedConfigPtr config, QObject* parent = 0);
+    explicit DecorationModel(KSharedConfigPtr config, QObject* parent = 0);
     ~DecorationModel();
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
@@ -140,7 +140,6 @@ private:
     QString m_leftButtons;
     QString m_rightButtons;
     KSharedConfigPtr m_config;
-    QWidget* m_renderWidget;
     int m_nextPreviewIndex;
     int m_firstUpdateIndex;
     int m_lastUpdateIndex;

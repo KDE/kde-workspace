@@ -20,18 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "overlaywindow.h"
 
-#include <config-X11.h>
-
 #include "kwinglobals.h"
+#include "utils.h"
+#include "xcbutils.h"
 
 #include "assert.h"
 
 #include <QtCore/QVector>
 
-#include <X11/extensions/shape.h>
-
-#include <X11/extensions/Xcomposite.h>
-#if XCOMPOSITE_MAJOR > 0 || XCOMPOSITE_MINOR >= 3
+#include <xcb/composite.h>
+#include <xcb/shape.h>
+#if XCB_COMPOSITE_MAJOR_VERSION > 0 || XCB_COMPOSITE_MINOR_VERSION >= 3
 #define KWIN_HAVE_XCOMPOSITE_OVERLAY
 #endif
 
@@ -39,7 +38,7 @@ namespace KWin {
 OverlayWindow::OverlayWindow()
     : m_visible(true)
     , m_shown(false)
-    , m_window(None)
+    , m_window(XCB_WINDOW_NONE)
 {
 }
 
@@ -49,50 +48,66 @@ OverlayWindow::~OverlayWindow()
 
 bool OverlayWindow::create()
 {
-    assert(m_window == None);
-    if (!Extensions::compositeOverlayAvailable())
+    assert(m_window == XCB_WINDOW_NONE);
+    if (!Xcb::Extensions::self()->isCompositeOverlayAvailable())
         return false;
-    if (!Extensions::shapeInputAvailable())  // needed in setupOverlay()
+    if (!Xcb::Extensions::self()->isShapeInputAvailable())  // needed in setupOverlay()
         return false;
 #ifdef KWIN_HAVE_XCOMPOSITE_OVERLAY
-    m_window = XCompositeGetOverlayWindow(display(), rootWindow());
-    if (m_window == None)
+    Xcb::OverlayWindow overlay(rootWindow());
+    if (overlay.isNull()) {
         return false;
-    XResizeWindow(display(), m_window, displayWidth(), displayHeight());
+    }
+    m_window = overlay->overlay_win;
+    if (m_window == XCB_WINDOW_NONE)
+        return false;
+    resize(QSize(displayWidth(), displayHeight()));
     return true;
 #else
     return false;
 #endif
 }
 
-void OverlayWindow::setup(Window window)
+void OverlayWindow::setup(xcb_window_t window)
 {
-    assert(m_window != None);
-    assert(Extensions::shapeInputAvailable());
-    XSetWindowBackgroundPixmap(display(), m_window, None);
+    assert(m_window != XCB_WINDOW_NONE);
+    assert(Xcb::Extensions::self()->isShapeInputAvailable());
+    setNoneBackgroundPixmap(m_window);
     m_shape = QRegion();
     setShape(QRect(0, 0, displayWidth(), displayHeight()));
-    if (window != None) {
-        XSetWindowBackgroundPixmap(display(), window, None);
-        XShapeCombineRectangles(display(), window, ShapeInput, 0, 0, NULL, 0, ShapeSet, Unsorted);
+    if (window != XCB_WINDOW_NONE) {
+        setNoneBackgroundPixmap(window);
+        setupInputShape(window);
     }
-    XSelectInput(display(), m_window, VisibilityChangeMask);
+    const uint32_t eventMask = XCB_EVENT_MASK_VISIBILITY_CHANGE;
+    xcb_change_window_attributes(connection(), m_window, XCB_CW_EVENT_MASK, &eventMask);
+}
+
+void OverlayWindow::setupInputShape(xcb_window_t window)
+{
+    xcb_shape_rectangles(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT, XCB_CLIP_ORDERING_UNSORTED, window, 0, 0, 0, NULL);
+}
+
+void OverlayWindow::setNoneBackgroundPixmap(xcb_window_t window)
+{
+    const uint32_t mask = XCB_BACK_PIXMAP_NONE;
+    xcb_change_window_attributes(connection(), window, XCB_CW_BACK_PIXMAP, &mask);
 }
 
 void OverlayWindow::show()
 {
-    assert(m_window != None);
+    assert(m_window != XCB_WINDOW_NONE);
     if (m_shown)
         return;
-    XMapSubwindows(display(), m_window);
-    XMapWindow(display(), m_window);
+    xcb_map_subwindows(connection(), m_window);
+    xcb_map_window(connection(), m_window);
     m_shown = true;
 }
 
 void OverlayWindow::hide()
 {
-    assert(m_window != None);
-    XUnmapWindow(display(), m_window);
+    assert(m_window != XCB_WINDOW_NONE);
+    xcb_unmap_window(connection(), m_window);
     m_shown = false;
     setShape(QRect(0, 0, displayWidth(), displayHeight()));
 }
@@ -104,7 +119,7 @@ void OverlayWindow::setShape(const QRegion& reg)
     if (reg == m_shape)
         return;
     QVector< QRect > rects = reg.rects();
-    XRectangle* xrects = new XRectangle[ rects.count()];
+    xcb_rectangle_t *xrects = new xcb_rectangle_t[rects.count()];
     for (int i = 0;
             i < rects.count();
             ++i) {
@@ -113,17 +128,21 @@ void OverlayWindow::setShape(const QRegion& reg)
         xrects[ i ].width = rects[ i ].width();
         xrects[ i ].height = rects[ i ].height();
     }
-    XShapeCombineRectangles(display(), m_window, ShapeBounding, 0, 0,
-                            xrects, rects.count(), ShapeSet, Unsorted);
+    xcb_shape_rectangles(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, XCB_CLIP_ORDERING_UNSORTED,
+                         m_window, 0, 0, rects.count(), xrects);
     delete[] xrects;
-    XShapeCombineRectangles(display(), m_window, ShapeInput, 0, 0, NULL, 0, ShapeSet, Unsorted);
+    setupInputShape(m_window);
     m_shape = reg;
 }
 
 void OverlayWindow::resize(const QSize &size)
 {
-    assert(m_window != None);
-    XResizeWindow(display(), m_window, size.width(), size.height());
+    assert(m_window != XCB_WINDOW_NONE);
+    const uint32_t geometry[2] = {
+        static_cast<uint32_t>(size.width()),
+        static_cast<uint32_t>(size.height())
+    };
+    xcb_configure_window(connection(), m_window, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, geometry);
     setShape(QRegion(0, 0, size.width(), size.height()));
 }
 
@@ -139,20 +158,20 @@ void OverlayWindow::setVisibility(bool visible)
 
 void OverlayWindow::destroy()
 {
-    if (m_window == None)
+    if (m_window == XCB_WINDOW_NONE)
         return;
     // reset the overlay shape
-    XRectangle rec = { 0, 0, static_cast<unsigned short>(displayWidth()), static_cast<unsigned short>(displayHeight()) };
-    XShapeCombineRectangles(display(), m_window, ShapeBounding, 0, 0, &rec, 1, ShapeSet, Unsorted);
-    XShapeCombineRectangles(display(), m_window, ShapeInput, 0, 0, &rec, 1, ShapeSet, Unsorted);
+    xcb_rectangle_t rec = { 0, 0, static_cast<uint16_t>(displayWidth()), static_cast<uint16_t>(displayHeight()) };
+    xcb_shape_rectangles(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, XCB_CLIP_ORDERING_UNSORTED, m_window, 0, 0, 1, &rec);
+    xcb_shape_rectangles(connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT, XCB_CLIP_ORDERING_UNSORTED, m_window, 0, 0, 1, &rec);
 #ifdef KWIN_HAVE_XCOMPOSITE_OVERLAY
-    XCompositeReleaseOverlayWindow(display(), m_window);
+    xcb_composite_release_overlay_window(connection(), m_window);
 #endif
-    m_window = None;
+    m_window = XCB_WINDOW_NONE;
     m_shown = false;
 }
 
-Window OverlayWindow::window() const
+xcb_window_t OverlayWindow::window() const
 {
     return m_window;
 }

@@ -23,8 +23,10 @@
 #include <Plasma/DataContainer>
 #include <QFlags>
 
+class OrgFreedesktopDBusPropertiesInterface;
+class OrgMprisMediaPlayer2Interface;
+class OrgMprisMediaPlayer2PlayerInterface;
 class PlayerControl;
-class QDBusInterface;
 class QDBusPendingCallWatcher;
 
 class PlayerContainer : public Plasma::DataContainer
@@ -35,7 +37,9 @@ public:
     explicit PlayerContainer(const QString& busAddress, QObject* parent = 0);
 
     QString dbusAddress() const { return m_dbusAddress; }
-    QDBusInterface* propertiesInterface() const { return m_propsIface; }
+    OrgFreedesktopDBusPropertiesInterface* propertiesInterface() const { return m_propsIface; }
+    OrgMprisMediaPlayer2Interface* rootInterface() const { return m_rootIface; }
+    OrgMprisMediaPlayer2PlayerInterface* playerInterface() const { return m_playerIface; }
 
     enum Cap {
         NoCaps           = 0,
@@ -73,7 +77,7 @@ private slots:
     void propertiesChanged(const QString& interface,
                            const QVariantMap& changedProperties,
                            const QStringList& invalidatedProperties);
-    void seeked(qint64 position);
+    void seeked(qlonglong position);
 
 private:
     void copyProperty(const QString& propName, const QVariant& value, QVariant::Type expType, UpdateType updType);
@@ -81,11 +85,13 @@ private:
     void updatePosition();
     void recalculatePosition();
 
-    Caps            m_caps;
-    int             m_fetchesPending;
-    QString         m_dbusAddress;
-    QDBusInterface *m_propsIface;
-    double          m_currentRate;
+    Caps                                   m_caps;
+    int                                    m_fetchesPending;
+    QString                                m_dbusAddress;
+    OrgFreedesktopDBusPropertiesInterface *m_propsIface;
+    OrgMprisMediaPlayer2Interface         *m_rootIface;
+    OrgMprisMediaPlayer2PlayerInterface   *m_playerIface;
+    double                                 m_currentRate;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(PlayerContainer::Caps)

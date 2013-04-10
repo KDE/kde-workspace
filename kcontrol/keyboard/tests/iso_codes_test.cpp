@@ -31,7 +31,8 @@ class IsoCodesTest : public QObject
 
 private Q_SLOTS:
     void initTestCase() {
-    	isoCodes = new IsoCodes(IsoCodes::iso_639);
+//    	isoCodes = new IsoCodes(IsoCodes::iso_639);
+    	isoCodes = new IsoCodes(IsoCodes::iso_639_3);
     }
 
     void cleanupTestCase() {
@@ -41,17 +42,30 @@ private Q_SLOTS:
     void testIsoCodes() {
         QVERIFY( isoCodes != NULL );
         QVERIFY( ! isoCodes->getEntryList().isEmpty() );
-        const IsoCodeEntry* isoEntry = isoCodes->getEntry(IsoCodes::attr_iso_639_2T_code, "eng");
+//        const IsoCodeEntry* isoEntry = isoCodes->getEntry(IsoCodes::attr_iso_639_2T_code, "eng");
+        const IsoCodeEntry* isoEntry = isoCodes->getEntry(IsoCodes::attr_iso_639_3_id, "eng");
         QVERIFY( isoEntry != NULL );
         QVERIFY( ! isoEntry->empty() );
-        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_2T_code), QString("eng") );
-        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_2B_code), QString("eng") );
-        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_1_code), QString("en") );
+//        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_2T_code), QString("eng") );
+//        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_2B_code), QString("eng") );
+//        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_1_code), QString("en") );
+        QCOMPARE( isoEntry->value("name"), QString("English") );
+        QCOMPARE( isoEntry->value("status"), QString("Active") );
+    }
+
+    void testIso639_3_Codes() {
+        QVERIFY( isoCodes != NULL );
+        QVERIFY( ! isoCodes->getEntryList().isEmpty() );
+        const IsoCodeEntry* isoEntry = isoCodes->getEntry(IsoCodes::attr_iso_639_3_id, "fox");
+        QVERIFY( isoEntry != NULL );
+        QVERIFY( ! isoEntry->empty() );
+        QVERIFY( isoEntry->value("name") != QString("fox") );
+//        QCOMPARE( isoEntry->value("name"), QString("Formosan languages") );
     }
 
     void loadIsoCodesBenchmark() {
     	QBENCHMARK {
-    		IsoCodes* isoCodes = new IsoCodes(IsoCodes::iso_639);
+    		IsoCodes* isoCodes = new IsoCodes(IsoCodes::iso_639_3);
     		delete isoCodes;
     	}
     }

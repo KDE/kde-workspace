@@ -30,7 +30,23 @@
             <description>Cherokee2</description>
           </configItem>
         </variant>
+        <variant>
+            <name>bad</name>
+            <description>Bad Variant Missing configItem tag</description>
+            <languageList><iso639Id>chr</iso639Id></languageList>
+        </variant>
       </variantList>
+    </layout>
+    <layout>
+      <configItem>
+        <name>tw</name>
+
+        <shortDescription>zh</shortDescription>
+        <description>Taiwanese</description>
+        <languageList>
+          <iso639Id>fox</iso639Id>
+        </languageList>
+      </configItem>
     </layout>
   </layoutList>
   <optionList>

@@ -48,7 +48,7 @@ protected:
 
 protected Q_SLOTS:
     void newTask(const QString &service);
-    void cleanupTask(const QString &typeId);
+    void cleanupTask(const QString &taskId);
 
 private:
     void initedTask(DBusSystemTrayTask *task);

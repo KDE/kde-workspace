@@ -19,13 +19,16 @@
 
 #include "playercontainer.h"
 
+#include <dbusproperties.h>
+#include <mprisplayer.h>
+#include <mprisroot.h>
+
 #define MPRIS2_PATH "/org/mpris/MediaPlayer2"
-#define DBUS_PROPS_IFACE "org.freedesktop.DBus.Properties"
-#define MPRIS2_IFACE "org.mpris.MediaPlayer2"
-#define MPRIS2_PLAYER_IFACE "org.mpris.MediaPlayer2.Player"
 #define POS_UPD_STRING "Position last updated (UTC)"
 
 #include <KDebug>
+#include <KDesktopFile>
+#include <KStandardDirs>
 
 #include <QtDBus>
 #include <QDateTime>
@@ -100,33 +103,23 @@ PlayerContainer::PlayerContainer(const QString& busAddress, QObject* parent)
     Q_ASSERT(!busAddress.isEmpty());
     Q_ASSERT(busAddress.startsWith(QLatin1String("org.mpris.MediaPlayer2.")));
 
-    m_propsIface = new QDBusInterface(busAddress,
-            MPRIS2_PATH, DBUS_PROPS_IFACE,
+    m_propsIface = new OrgFreedesktopDBusPropertiesInterface(
+            busAddress, MPRIS2_PATH,
             QDBusConnection::sessionBus(), this);
 
-    QDBusConnection::sessionBus().connect(
-            busAddress,
-            MPRIS2_PATH,
-            DBUS_PROPS_IFACE,
-            "PropertiesChanged", /* signature, */
-            this,
-            SLOT(propertiesChanged(QString,QVariantMap,QStringList)));
+    m_playerIface = new OrgMprisMediaPlayer2PlayerInterface(
+            busAddress, MPRIS2_PATH,
+            QDBusConnection::sessionBus(), this);
 
-    QDBusConnection::sessionBus().connect(
-            busAddress,
-            MPRIS2_PATH,
-            DBUS_PROPS_IFACE,
-            "PropertiesChanged", /* signature, */
-            this,
-            SLOT(propertiesChanged(QString,QVariantMap,QStringList)));
+    m_rootIface = new OrgMprisMediaPlayer2Interface(
+            busAddress, MPRIS2_PATH,
+            QDBusConnection::sessionBus(), this);
 
-    QDBusConnection::sessionBus().connect(
-            busAddress,
-            MPRIS2_PATH,
-            MPRIS2_PLAYER_IFACE,
-            "Seeked", /* signature, */
-            this,
-            SLOT(seeked(qint64)));
+    connect(m_propsIface, SIGNAL(PropertiesChanged(QString,QVariantMap,QStringList)),
+            this,         SLOT(propertiesChanged(QString,QVariantMap,QStringList)));
+
+    connect(m_playerIface, SIGNAL(Seeked(qlonglong)),
+            this,          SLOT(seeked(qlonglong)));
 
     refresh();
 }
@@ -137,13 +130,13 @@ void PlayerContainer::refresh()
     // wrong order (eg: a stale GetAll response overwriting a more recent value
     // from a PropertiesChanged signal) due to D-Bus message ordering guarantees.
 
-    QDBusPendingCall async = m_propsIface->asyncCall("GetAll", MPRIS2_IFACE);
+    QDBusPendingCall async = m_propsIface->GetAll(OrgMprisMediaPlayer2Interface::staticInterfaceName());
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
     connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
             this,    SLOT(getPropsFinished(QDBusPendingCallWatcher*)));
     ++m_fetchesPending;
 
-    async = m_propsIface->asyncCall("GetAll", MPRIS2_PLAYER_IFACE);
+    async = m_propsIface->GetAll(OrgMprisMediaPlayer2PlayerInterface::staticInterfaceName());
     watcher = new QDBusPendingCallWatcher(async, this);
     connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
             this,    SLOT(getPropsFinished(QDBusPendingCallWatcher*)));
@@ -260,6 +253,13 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
                 setData("Position", static_cast<qint64>(0));
                 setData(POS_UPD_STRING, QDateTime::currentDateTimeUtc());
             }
+        } else if (propName == QLatin1String("DesktopEntry")) {
+            QString filename = value.toString() + QLatin1String(".desktop");
+            KDesktopFile desktopFile("xdgdata-apps", filename);
+            QString iconName = desktopFile.readIcon();
+            if (!iconName.isEmpty()) {
+                setData("Desktop Icon Name", iconName);
+            }
         }
         setData(propName, value);
     }
@@ -316,7 +316,9 @@ void PlayerContainer::getPropsFinished(QDBusPendingCallWatcher* watcher)
     }
 
     if (propsReply.isError()) {
-        kWarning() << m_dbusAddress << "does not implement " DBUS_PROPS_IFACE " correctly";
+        kWarning() << m_dbusAddress << "does not implement"
+            << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName()
+            << "correctly";
         kDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
         m_fetchesPending = 0;
         emit initialFetchFailed(this);
@@ -334,7 +336,7 @@ void PlayerContainer::getPropsFinished(QDBusPendingCallWatcher* watcher)
 
 void PlayerContainer::updatePosition()
 {
-    QDBusPendingCall async = m_propsIface->asyncCall("Get", MPRIS2_PLAYER_IFACE, "Position");
+    QDBusPendingCall async = m_propsIface->Get(OrgMprisMediaPlayer2PlayerInterface::staticInterfaceName(), "Position");
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
     connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
             this,    SLOT(getPositionFinished(QDBusPendingCallWatcher*)));
@@ -346,7 +348,9 @@ void PlayerContainer::getPositionFinished(QDBusPendingCallWatcher* watcher)
     watcher->deleteLater();
 
     if (propsReply.isError()) {
-        kWarning() << m_dbusAddress << "does not implement " DBUS_PROPS_IFACE " correctly";
+        kWarning() << m_dbusAddress << "does not implement"
+            << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName()
+            << "correctly";
         kDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
         return;
     }
@@ -370,7 +374,7 @@ void PlayerContainer::propertiesChanged(
     checkForUpdate();
 }
 
-void PlayerContainer::seeked(qint64 position)
+void PlayerContainer::seeked(qlonglong position)
 {
     setData("Position", position);
     setData(POS_UPD_STRING, QDateTime::currentDateTimeUtc());

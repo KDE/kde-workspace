@@ -4,8 +4,9 @@
 [KdmGreeterTheme]
 Greeter=elarun.xml
 Name=Elarun
-Name[bs]=Elarun
 Name[ca]=Elarun
+Name[ca@valencia]=Elarun
+Name[cs]=Elarun
 Name[da]=Elarun
 Name[de]=Elarun
 Name[el]=Elarun
@@ -14,6 +15,7 @@ Name[et]=Elarun
 Name[fi]=Elarun
 Name[ga]=Elarun
 Name[gl]=Elarun
+Name[he]=Elarun
 Name[hu]=Elarun
 Name[ia]=Elarun
 Name[kk]=Еларун
@@ -33,6 +35,7 @@ Name[sr@ijekavian]=Еларун
 Name[sr@ijekavianlatin]=Elarun
 Name[sr@latin]=Elarun
 Name[sv]=Elarun
+Name[tr]=Elarun
 Name[uk]=Еларан
 Name[x-test]=xxElarunxx
 Name[zh_CN]=Elarun

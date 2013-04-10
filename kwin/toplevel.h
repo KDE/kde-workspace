@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kdebug.h>
 
 #include "utils.h"
+#include "virtualdesktops.h"
 #include "workspace.h"
 
 #include <X11/extensions/Xdamage.h>
@@ -40,6 +41,7 @@ class NETWinInfo2;
 namespace KWin
 {
 
+class ClientMachine;
 class Workspace;
 class EffectWindowImpl;
 class Shadow;
@@ -165,7 +167,7 @@ class Toplevel
      **/
     Q_PROPERTY(bool shaped READ shape NOTIFY shapedChanged)
 public:
-    Toplevel(Workspace *ws);
+    explicit Toplevel(Workspace *ws);
     Window frameId() const;
     Window window() const;
     Workspace* workspace() const;
@@ -222,6 +224,7 @@ public:
     QByteArray resourceClass() const;
     QByteArray wmCommand();
     QByteArray wmClientMachine(bool use_localhost) const;
+    const ClientMachine *clientMachine() const;
     Window wmClientLeader() const;
     pid_t pid() const;
     static bool resourceMatch(const Toplevel* c1, const Toplevel* c2);
@@ -329,7 +332,7 @@ protected:
     void detectShape(Window id);
     virtual void propertyNotifyEvent(XPropertyEvent* e);
     virtual void damageNotifyEvent(XDamageNotifyEvent* e);
-    Pixmap createWindowPixmap();
+    xcb_pixmap_t createWindowPixmap();
     void discardWindowPixmap();
     void addDamageFull();
     void getWmClientLeader();
@@ -382,7 +385,7 @@ private:
     EffectWindowImpl* effect_window;
     QByteArray resource_name;
     QByteArray resource_class;
-    QByteArray client_machine;
+    ClientMachine *m_clientMachine;
     WId wmClientLeaderWin;
     QByteArray window_role;
     bool unredirect;
@@ -612,7 +615,7 @@ inline bool Toplevel::isOnActivity(const QString &activity) const
 
 inline bool Toplevel::isOnCurrentDesktop() const
 {
-    return isOnDesktop(workspace()->currentDesktop());
+    return isOnDesktop(VirtualDesktopManager::self()->current());
 }
 
 inline bool Toplevel::isOnCurrentActivity() const
@@ -645,6 +648,11 @@ inline bool Toplevel::unredirected() const
     return unredirect;
 }
 
+inline const ClientMachine *Toplevel::clientMachine() const
+{
+    return m_clientMachine;
+}
+
 QDebug& operator<<(QDebug& stream, const Toplevel*);
 QDebug& operator<<(QDebug& stream, const ToplevelList&);
 QDebug& operator<<(QDebug& stream, const ConstToplevelList&);
@@ -653,5 +661,6 @@ KWIN_COMPARE_PREDICATE(WindowMatchPredicate, Toplevel, Window, cl->window() == v
 KWIN_COMPARE_PREDICATE(FrameIdMatchPredicate, Toplevel, Window, cl->frameId() == value);
 
 } // namespace
+Q_DECLARE_METATYPE(KWin::Toplevel*)
 
 #endif

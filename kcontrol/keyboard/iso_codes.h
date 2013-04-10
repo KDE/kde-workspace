@@ -41,12 +41,14 @@ class IsoCodesPrivate;
 class IsoCodes
 {
 public:
-	static const char* iso_639;
+//	static const char* iso_639;
+	static const char* iso_639_3;
 
 	static const char* attr_name;
-	static const char* attr_iso_639_2B_code;
-	static const char* attr_iso_639_2T_code;
-	static const char* attr_iso_639_1_code;
+//	static const char* attr_iso_639_2B_code;
+//	static const char* attr_iso_639_2T_code;
+//	static const char* attr_iso_639_1_code;
+	static const char* attr_iso_639_3_id;
 
 	/**
 	 * @param isoCode Code for iso standard, i.e. "639", for convenience there's iso_* constants defined

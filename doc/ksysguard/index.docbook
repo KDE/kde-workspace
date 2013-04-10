@@ -492,8 +492,8 @@ bit set.</para></listitem>
 appreciated.</para>
 </chapter>
 
-<chapter id="credits-and-licenses">
-<title>Credits and Licenses</title>
+<chapter id="credits-and-license">
+<title>Credits and License</title>
 
 <para>&ksysguard; is currently developed and maintained by &John.Tapsell;
 &John.Tapsell.mail;. &ksysguard; is a rewrite of

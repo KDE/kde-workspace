@@ -43,7 +43,7 @@ class DesktopButtonsView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    DesktopButtonsView(QWidget* parent = 0);
+    explicit DesktopButtonsView(QWidget* parent = 0);
     void windowInputMouseEvent(QMouseEvent* e);
     void setAddDesktopEnabled(bool enable);
     void setRemoveDesktopEnabled(bool enable);
@@ -115,7 +115,7 @@ private slots:
     void slotWindowAdded(KWin::EffectWindow* w);
     void slotWindowClosed(KWin::EffectWindow *w);
     void slotWindowDeleted(KWin::EffectWindow *w);
-    void slotNumberDesktopsChanged(int old);
+    void slotNumberDesktopsChanged(uint old);
     void slotWindowGeometryShapeChanged(KWin::EffectWindow *w, const QRect &old);
 
 private:

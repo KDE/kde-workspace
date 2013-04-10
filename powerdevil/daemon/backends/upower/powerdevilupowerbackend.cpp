@@ -2,7 +2,7 @@
     Copyright (C) 2006 Kevin Ottens <ervin@kde.org>
     Copyright (C) 2008-2010 Dario Freddi <drf@kde.org>
     Copyright (C) 2010 Alejandro Fiestas <alex@eyeos.org>
-    Copyright (C) 2010 Lukas Tinkl <ltinkl@redhat.com>
+    Copyright (C) 2010-2013 Lukáš Tinkl <ltinkl@redhat.com>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -31,6 +31,7 @@
 
 #include "xrandrbrightness.h"
 #include "upowersuspendjob.h"
+#include "login1suspendjob.h"
 
 #define HELPER_ID "org.kde.powerdevil.backlighthelper"
 
@@ -39,6 +40,7 @@ PowerDevilUPowerBackend::PowerDevilUPowerBackend(QObject* parent)
       m_brightnessControl(0),
       m_lidIsPresent(false), m_lidIsClosed(false), m_onBattery(false)
 {
+
 }
 
 PowerDevilUPowerBackend::~PowerDevilUPowerBackend()
@@ -80,11 +82,19 @@ bool PowerDevilUPowerBackend::isAvailable()
 void PowerDevilUPowerBackend::init()
 {
     // interfaces
+    if (!QDBusConnection::systemBus().interface()->isServiceRegistered(LOGIN1_SERVICE)) {
+        // Activate it.
+        QDBusConnection::systemBus().interface()->startService(LOGIN1_SERVICE);
+    }
+
     if (!QDBusConnection::systemBus().interface()->isServiceRegistered(UPOWER_SERVICE)) {
         // Activate it.
         QDBusConnection::systemBus().interface()->startService(UPOWER_SERVICE);
     }
 
+    if (QDBusConnection::systemBus().interface()->isServiceRegistered(LOGIN1_SERVICE)) {
+        m_login1Interface = new QDBusInterface(LOGIN1_SERVICE, "/org/freedesktop/login1", "org.freedesktop.login1.Manager", QDBusConnection::systemBus(), this);
+    }
     m_upowerInterface = new OrgFreedesktopUPowerInterface(UPOWER_SERVICE, "/org/freedesktop/UPower", QDBusConnection::systemBus(), this);
     m_kbdBacklight = new OrgFreedesktopUPowerKbdBacklightInterface(UPOWER_SERVICE, "/org/freedesktop/UPower/KbdBacklight", QDBusConnection::systemBus(), this);
     m_brightnessControl = new XRandrBrightness();
@@ -102,18 +112,33 @@ void PowerDevilUPowerBackend::init()
     // Brightness Controls available
     BrightnessControlsList controls;
     controls.insert(QLatin1String("LVDS1"), Screen);
+    m_cachedBrightnessMap.insert(Screen, brightness(Screen));
+    kDebug() << "current screen brightness: " << m_cachedBrightnessMap.value(Screen);
 
-    if (m_kbdBacklight->isValid())
+    if (m_kbdBacklight->isValid()) {
         controls.insert(QLatin1String("KBD"), Keyboard);
-
-    if (!controls.isEmpty()) {
-        m_cachedBrightness = brightness(Screen);
-        kDebug() << "current screen brightness: " << m_cachedBrightness;
+        m_cachedBrightnessMap.insert(Keyboard, brightness(Keyboard));
+        kDebug() << "current keyboard backlight brightness: " << m_cachedBrightnessMap.value(Keyboard);
     }
 
     // Supported suspend methods
     SuspendMethods supported = UnknownSuspendMethod;
-    {
+    if (m_login1Interface) {
+        QDBusPendingReply<QString> canSuspend = m_login1Interface.data()->asyncCall("CanSuspend");
+        canSuspend.waitForFinished();
+        if (canSuspend.isValid() && (canSuspend.value() == "yes" || canSuspend.value() == "challenge"))
+            supported |= ToRam;
+
+        QDBusPendingReply<QString> canHibernate = m_login1Interface.data()->asyncCall("CanHibernate");
+        canHibernate.waitForFinished();
+        if (canHibernate.isValid() && (canHibernate.value() == "yes" || canHibernate.value() == "challenge"))
+            supported |= ToDisk;
+
+        QDBusPendingReply<QString> canHybridSleep = m_login1Interface.data()->asyncCall("CanHybridSleep");
+        canHybridSleep.waitForFinished();
+        if (canHybridSleep.isValid() && (canHybridSleep.value() == "yes" || canHybridSleep.value() == "challenge"))
+            supported |= HybridSuspend;
+    } else {
         if (m_upowerInterface->canSuspend() && m_upowerInterface->SuspendAllowed()) {
             kDebug() << "Can suspend";
             supported |= ToRam;
@@ -125,7 +150,16 @@ void PowerDevilUPowerBackend::init()
         }
     }
 
-    connect(m_upowerInterface, SIGNAL(Resuming()), this, SIGNAL(resumeFromSuspend()));
+    // "resuming" signal
+    QDBusInterface systemdIface("org.freedesktop.systemd1", "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager",
+                                QDBusConnection::systemBus(), this);
+    int version = systemdIface.property("Version").toString().section(' ', 1).toInt();
+
+    if (m_login1Interface && version > 197) {
+        connect(m_login1Interface.data(), SIGNAL(PrepareForSleep(bool)), this, SLOT(slotLogin1Resuming(bool)));
+    } else {
+        connect(m_upowerInterface, SIGNAL(Resuming()), this, SIGNAL(resumeFromSuspend()));
+    }
 
     // battery
     QList<RecallNotice> recallList;
@@ -151,28 +185,45 @@ void PowerDevilUPowerBackend::init()
     setBackendIsReady(controls, supported);
 }
 
-void PowerDevilUPowerBackend::brightnessKeyPressed(PowerDevil::BackendInterface::BrightnessKeyType type)
+void PowerDevilUPowerBackend::brightnessKeyPressed(PowerDevil::BackendInterface::BrightnessKeyType type, BrightnessControlType controlType)
 {
-    BrightnessControlsList controls = brightnessControlsAvailable();
-    QList<QString> screenControls = controls.keys(Screen);
+    BrightnessControlsList allControls = brightnessControlsAvailable();
+    QList<QString> controls = allControls.keys(controlType);
 
-    if (screenControls.isEmpty()) {
+    if (controls.isEmpty()) {
         return; // ignore as we are not able to determine the brightness level
     }
 
-    float currentBrightness = brightness(Screen);
+    if (type == Toggle && controlType == Screen) {
+        return; // ignore as we wont toggle the screen off
+    }
 
-    if (qFuzzyCompare(currentBrightness, m_cachedBrightness)) {
+    float currentBrightness = brightness(controlType);
+
+    int step = 10;
+    if (controlType == Keyboard) {
+        // In case the keyboard backlight has only 5 or less possible values,
+        // 10% are not enough to hit the next value. Lets use 30% because
+        // that jumps exactly one value for 2, 3, 4 and 5 possible steps
+        // when rounded.
+        if (m_kbdBacklight->GetMaxBrightness() < 6) {
+            step = 30;
+        }
+    }
+
+    if (qFuzzyCompare(currentBrightness, m_cachedBrightnessMap.value(controlType))) {
         float newBrightness;
         if (type == Increase) {
-            newBrightness = qMin(100.0f, currentBrightness + 10);
-        } else {
-            newBrightness = qMax(0.0f, currentBrightness - 10);
+            newBrightness = qMin(100.0f, currentBrightness + step);
+        } else if (type == Decrease) {
+            newBrightness = qMax(0.0f, currentBrightness - step);
+        } else { // Toggle On/off
+            newBrightness = currentBrightness > 0 ? 0 : 100;
         }
 
-        setBrightness(newBrightness, Screen);
+        setBrightness(newBrightness, controlType);
     } else {
-        m_cachedBrightness = currentBrightness;
+        m_cachedBrightnessMap[controlType] = currentBrightness;
     }
 }
 
@@ -200,7 +251,7 @@ float PowerDevilUPowerBackend::brightness(PowerDevil::BackendInterface::Brightne
         kDebug() << "Screen brightness: " << result;
     } else if (type == Keyboard) {
         kDebug() << "Kbd backlight brightness: " << m_kbdBacklight->GetBrightness();
-        result = m_kbdBacklight->GetBrightness() / m_kbdBacklight->GetMaxBrightness() * 100;
+        result = 1.0 * m_kbdBacklight->GetBrightness() / m_kbdBacklight->GetMaxBrightness() * 100;
     }
 
     return result;
@@ -231,12 +282,12 @@ bool PowerDevilUPowerBackend::setBrightness(float brightnessValue, PowerDevil::B
         m_kbdBacklight->SetBrightness(brightnessValue / 100 * m_kbdBacklight->GetMaxBrightness());
         success = true;
     }
-
+    
     if (success) {
-        float newBrightness = brightness(Screen);
-        if (!qFuzzyCompare(newBrightness, m_cachedBrightness)) {
-            m_cachedBrightness = newBrightness;
-            onBrightnessChanged(Screen, m_cachedBrightness);
+        float newBrightness = brightness(type);
+        if (!qFuzzyCompare(newBrightness, m_cachedBrightnessMap[type])) {
+              m_cachedBrightnessMap[type] = newBrightness;
+              onBrightnessChanged(type, m_cachedBrightnessMap[type]);
         }
         return true;
     }
@@ -246,7 +297,11 @@ bool PowerDevilUPowerBackend::setBrightness(float brightnessValue, PowerDevil::B
 
 KJob* PowerDevilUPowerBackend::suspend(PowerDevil::BackendInterface::SuspendMethod method)
 {
-    return new UPowerSuspendJob(m_upowerInterface, method, supportedSuspendMethods());
+    if (m_login1Interface) {
+        return new Login1SuspendJob(m_login1Interface.data(), method, supportedSuspendMethods());
+    } else {
+        return new UPowerSuspendJob(m_upowerInterface, method, supportedSuspendMethods());
+    }
 }
 
 void PowerDevilUPowerBackend::enumerateDevices()
@@ -335,6 +390,13 @@ void PowerDevilUPowerBackend::slotPropertyChanged()
     }
 
     m_onBattery = onBattery;
+}
+
+void PowerDevilUPowerBackend::slotLogin1Resuming(bool active)
+{
+    if (!active) {
+        emit resumeFromSuspend();
+    }
 }
 
 #include "powerdevilupowerbackend.moc"

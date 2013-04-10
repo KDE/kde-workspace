@@ -20,10 +20,14 @@
 #ifndef PLAYERCONTROL_H
 #define PLAYERCONTROL_H
 
-#include <Plasma/Service>
+#include "playercontainer.h"
 
-class PlayerContainer;
-class QDBusInterface;
+#include <Plasma/Service>
+#include <QDBusObjectPath>
+
+class OrgFreedesktopDBusPropertiesInterface;
+class OrgMprisMediaPlayer2Interface;
+class OrgMprisMediaPlayer2PlayerInterface;
 
 class PlayerControl : public Plasma::Service
 {
@@ -32,10 +36,13 @@ class PlayerControl : public Plasma::Service
 public:
     PlayerControl(PlayerContainer* container, QObject* parent);
 
-    QDBusInterface* rootInterface() const { return m_rootIface; }
-    QDBusInterface* playerInterface() const { return m_playerIface; }
-    QDBusInterface* propertiesInterface() const;
-    QVariant trackId() const;
+    OrgMprisMediaPlayer2Interface* rootInterface() const
+        { return m_container->rootInterface(); }
+    OrgMprisMediaPlayer2PlayerInterface* playerInterface() const
+        { return m_container->playerInterface(); }
+    OrgFreedesktopDBusPropertiesInterface* propertiesInterface() const
+        { return m_container->propertiesInterface(); }
+    QDBusObjectPath trackId() const;
 
     Plasma::ServiceJob* createJob(const QString& operation,
                                   QMap<QString,QVariant>& parameters);
@@ -49,8 +56,6 @@ private slots:
 
 private:
     PlayerContainer *m_container;
-    QDBusInterface  *m_rootIface;
-    QDBusInterface  *m_playerIface;
 };
 
 #endif // PLAYERCONTROL_H

@@ -40,7 +40,7 @@ BrightnessControl::BrightnessControl(QObject* parent)
     setRequiredPolicies(PowerDevil::PolicyAgent::ChangeScreenSettings);
 
     connect(core()->backend(), SIGNAL(brightnessChanged(float,PowerDevil::BackendInterface::BrightnessControlType)),
-            this, SLOT(onBrightnessChangedFromBackend(float)));
+            this, SLOT(onBrightnessChangedFromBackend(float,PowerDevil::BackendInterface::BrightnessControlType)));
 }
 
 BrightnessControl::~BrightnessControl()
@@ -111,7 +111,7 @@ void BrightnessControl::showBrightnessOSD(int brightness)
 {
     // code adapted from KMix
     if (m_brightnessOSD.isNull()) {
-        m_brightnessOSD = new BrightnessOSDWidget();
+        m_brightnessOSD = new BrightnessOSDWidget(BackendInterface::Screen);
     }
 
     m_brightnessOSD.data()->setCurrentBrightness(brightness);
@@ -126,9 +126,11 @@ void BrightnessControl::showBrightnessOSD(int brightness)
     m_brightnessOSD.data()->setGeometry(posX, posY, size.width(), size.height());
 }
 
-void BrightnessControl::onBrightnessChangedFromBackend(float brightness)
+void BrightnessControl::onBrightnessChangedFromBackend(float brightness, PowerDevil::BackendInterface::BrightnessControlType type)
 {
-    showBrightnessOSD(brightness);
+    if (type == BackendInterface::Screen) {
+        showBrightnessOSD(brightness);
+    }
 }
 
 }

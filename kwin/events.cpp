@@ -39,6 +39,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unmanaged.h"
 #include "useractions.h"
 #include "effects.h"
+#ifdef KWIN_BUILD_SCREENEDGES
+#include "screenedge.h"
+#endif
+#include "xcbutils.h"
 
 #include <QWhatsThis>
 #include <QApplication>
@@ -129,12 +133,12 @@ RootInfo::RootInfo(Workspace* ws, Display *dpy, Window w, const char *name, unsi
 
 void RootInfo::changeNumberOfDesktops(int n)
 {
-    workspace->setNumberOfDesktops(n);
+    VirtualDesktopManager::self()->setCount(n);
 }
 
 void RootInfo::changeCurrentDesktop(int d)
 {
-    workspace->setCurrentDesktop(d);
+    VirtualDesktopManager::self()->setCurrent(d);
 }
 
 void RootInfo::changeActiveWindow(Window w, NET::RequestSource src, Time timestamp, Window active_window)
@@ -232,9 +236,9 @@ bool Workspace::workspaceEvent(XEvent * e)
         unsigned long dirty[ NETRootInfo::PROPERTIES_SIZE ];
         rootInfo->event(e, dirty, NETRootInfo::PROPERTIES_SIZE);
         if (dirty[ NETRootInfo::PROTOCOLS ] & NET::DesktopNames)
-            saveDesktopSettings();
+            VirtualDesktopManager::self()->save();
         if (dirty[ NETRootInfo::PROTOCOLS2 ] & NET::WM2DesktopLayout)
-            updateDesktopLayout();
+            VirtualDesktopManager::self()->updateLayout();
     }
 
     // events that should be handled before Clients can get them
@@ -382,7 +386,7 @@ bool Workspace::workspaceEvent(XEvent * e)
                 QWhatsThis::leaveWhatsThisMode();
         }
 #ifdef KWIN_BUILD_SCREENEDGES
-        if (m_screenEdge.isEntered(e))
+        if (ScreenEdges::self()->isEntered(e))
             return true;
 #endif
         break;
@@ -436,7 +440,7 @@ bool Workspace::workspaceEvent(XEvent * e)
         return true; // always eat these, they would tell Qt that KWin is the active app
     case ClientMessage:
 #ifdef KWIN_BUILD_SCREENEDGES
-        if (m_screenEdge.isEntered(e))
+        if (ScreenEdges::self()->isEntered(e))
             return true;
 #endif
         break;
@@ -460,7 +464,7 @@ bool Workspace::workspaceEvent(XEvent * e)
         }
         break;
     default:
-        if (e->type == Extensions::randrNotifyEvent() && Extensions::randrAvailable()) {
+        if (e->type == Xcb::Extensions::self()->randrNotifyEvent() && Xcb::Extensions::self()->isRandrAvailable()) {
             XRRUpdateConfiguration(e);
             if (compositing()) {
                 // desktopResized() should take care of when the size or
@@ -470,7 +474,7 @@ bool Workspace::workspaceEvent(XEvent * e)
                     m_compositor->setCompositeResetTimer(0);
             }
 
-        } else if (e->type == Extensions::syncAlarmNotifyEvent() && Extensions::syncAvailable()) {
+        } else if (e->type == Xcb::Extensions::self()->syncAlarmNotifyEvent() && Xcb::Extensions::self()->isSyncAvailable()) {
 #ifdef HAVE_XSYNC
             foreach (Client * c, clients)
                 c->syncEvent(reinterpret_cast< XSyncAlarmNotifyEvent* >(e));
@@ -662,13 +666,13 @@ bool Client::windowEvent(XEvent* e)
         break;
     default:
         if (e->xany.window == window()) {
-            if (e->type == Extensions::shapeNotifyEvent()) {
+            if (e->type == Xcb::Extensions::self()->shapeNotifyEvent()) {
                 detectShape(window());  // workaround for #19644
                 updateShape();
             }
         }
         if (e->xany.window == frameId()) {
-            if (e->type == Extensions::damageNotifyEvent())
+            if (e->type == Xcb::Extensions::self()->damageNotifyEvent())
                 damageNotifyEvent(reinterpret_cast< XDamageNotifyEvent* >(e));
         }
         break;
@@ -889,7 +893,7 @@ void Client::enterNotifyEvent(XCrossingEvent* e)
         if (options->isAutoRaise() && !isDesktop() &&
                 !isDock() && workspace()->focusChangeEnabled() &&
                 currentPos != workspace()->focusMousePosition() &&
-                workspace()->topClientOnDesktop(workspace()->currentDesktop(),
+                workspace()->topClientOnDesktop(VirtualDesktopManager::self()->current(),
                                                 options->isSeparateScreenFocus() ? screen() : -1) != this) {
             delete autoRaiseTimer;
             autoRaiseTimer = new QTimer(this);
@@ -1000,7 +1004,7 @@ void Client::updateMouseGrab()
     if (workspace()->globalShortcutsDisabled()) {
         XUngrabButton(display(), AnyButton, AnyModifier, wrapperId());
         // keep grab for the simple click without modifiers if needed (see below)
-        bool not_obscured = workspace()->topClientOnDesktop(workspace()->currentDesktop(), -1, true, false) == this;
+        bool not_obscured = workspace()->topClientOnDesktop(VirtualDesktopManager::self()->current(), -1, true, false) == this;
         if (!(!options->isClickRaise() || not_obscured))
             grabButton(None);
         return;
@@ -1015,7 +1019,7 @@ void Client::updateMouseGrab()
         // is unobscured or if the user doesn't want click raise
         // (it is unobscured if it the topmost in the unconstrained stacking order, i.e. it is
         // the most recently raised window)
-        bool not_obscured = workspace()->topClientOnDesktop(workspace()->currentDesktop(), -1, true, false) == this;
+        bool not_obscured = workspace()->topClientOnDesktop(VirtualDesktopManager::self()->current(), -1, true, false) == this;
         if (!options->isClickRaise() || not_obscured)
             ungrabButton(None);
         else
@@ -1610,13 +1614,13 @@ bool Unmanaged::windowEvent(XEvent* e)
         propertyNotifyEvent(&e->xproperty);
         break;
     default: {
-        if (e->type == Extensions::shapeNotifyEvent()) {
+        if (e->type == Xcb::Extensions::self()->shapeNotifyEvent()) {
             detectShape(window());
             addRepaintFull();
             addWorkspaceRepaint(geometry());  // in case shape change removes part of this window
             emit geometryShapeChanged(this, geometry());
         }
-        if (e->type == Extensions::damageNotifyEvent())
+        if (e->type == Xcb::Extensions::self()->damageNotifyEvent())
             damageNotifyEvent(reinterpret_cast< XDamageNotifyEvent* >(e));
         break;
     }
