@@ -18,10 +18,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1 as QtExtras
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0 as QtExtras
 
 Item {
     id: main
@@ -64,7 +64,10 @@ Item {
             interval: 100
             repeat: false
             running: true
-            onTriggered: placeToolBox();
+            onTriggered: {
+                print("XXX PLacing toolbox");
+                placeToolBox();
+            }
         }
     }
 
@@ -93,6 +96,7 @@ Item {
 
     function placeToolBox() {
         //return;
+        print(" XXXXXXXXXXXX  placeToolBox");
         var ts = plasmoid.readConfig("ToolBoxButtonState")
         ts = "topright"; // FIXME: hardcoded for now, test config saving!
         if (ts) {
@@ -108,7 +112,7 @@ Item {
             } else if (ts == "bottomright") {
                 toolBoxButton.x = main.width - toolBoxButton.width;
                 toolBoxButton.y = main.height - toolBoxButton.height;
-
+                return;
             } else if (ts == "bottomleft") {
                 toolBoxButton.x = 0;
                 toolBoxButton.y = main.height - toolBoxButton.height;
@@ -121,9 +125,13 @@ Item {
 
         var ty = plasmoid.readConfig("ToolBoxButtonY")
         if (ty) ty = 0;
-        print("Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
+        print("XXX Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
         toolBoxButton.x = tx;
         toolBoxButton.y = ty;
 
+    }
+
+    Component.onCompleted: {
+        print(" XXXX TOolboxroot done");
     }
 }
