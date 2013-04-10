@@ -117,7 +117,7 @@ void WidgetItem::afterWidthChanged()
 
 void WidgetItem::afterHeightChanged()
 {
-    if (!m_applet) {
+    if (!m_applet || !m_task) {
         return;
     }
 
