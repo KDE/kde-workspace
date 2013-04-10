@@ -28,6 +28,8 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 Item {
     id: root
 
+    property Item toolBox
+
     property bool debug: false
     property int handleDelay: 800
     property real haloOpacity: 0.5
