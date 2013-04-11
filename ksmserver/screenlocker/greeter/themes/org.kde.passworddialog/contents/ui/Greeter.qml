@@ -91,6 +91,7 @@ Item {
 
                 Keys.onEnterPressed: verify()
                 Keys.onReturnPressed: verify()
+                Keys.onEscapePressed: clear()
             }
             KeyboardItem {
                 anchors {
