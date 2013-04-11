@@ -49,6 +49,7 @@ public:
 
 public Q_SLOTS:
     void verify();
+    void clear();
 
 private Q_SLOTS:
     void themeChanged();
@@ -60,6 +61,7 @@ Q_SIGNALS:
     void greeterAccepted();
 protected:
     virtual void focusInEvent(QFocusEvent *event);
+
 private:
     void init();
     QGraphicsProxyWidget *m_proxy;
@@ -141,6 +143,11 @@ public Q_SLOTS:
      * Invoke to perform an authentication through the greeter plugins.
      **/
     void verify();
+
+    /**
+     * Invoke to clear password field
+     */
+    void clear();
 
 private Q_SLOTS:
     void handleVerify();

@@ -114,6 +114,11 @@ void GreeterItem::verify()
     m_unlocker->verify();
 }
 
+void GreeterItem::clear()
+{
+    m_unlocker->clear();
+}
+
 void GreeterItem::focusInEvent(QFocusEvent *event)
 {
     QGraphicsItem::focusInEvent(event);
@@ -273,6 +278,11 @@ void Greeter::verify()
         return;
     }
     m_greet->next();
+}
+
+void Greeter::clear()
+{
+    m_greet->clear();
 }
 
 void Greeter::failedTimer()
