@@ -5,11 +5,11 @@ Type=Service
 Icon=nepomuk
 
 X-KDE-ServiceTypes=Plasma/DataEngine
-X-KDE-Library=plasma_dataengine_nepomukservice
+X-KDE-Library=plasma_engine_nepomukservice
 
 X-KDE-PluginInfo-Author=Jörg Ehrichs
 X-KDE-PluginInfo-Email=joerg.ehrichs@gmx.de
-X-KDE-PluginInfo-Name=nepomuk-serviceengine
+X-KDE-PluginInfo-Name=nepomukservice
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-KDE-PluginInfo-Category=Nepomuk

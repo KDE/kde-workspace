@@ -925,7 +925,7 @@ void NepomukServiceEngine::checkIsActive()
 
 
 // export the plugin; use the plugin name and the class name
-K_EXPORT_PLASMA_DATAENGINE(nepomuk-serviceengine, NepomukServiceEngine)
+K_EXPORT_PLASMA_DATAENGINE(nepomukservice, NepomukServiceEngine)
 
 // include the moc file so the build system makes it for us
 #include "nepomukserviceengine.moc"
