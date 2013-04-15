@@ -1195,7 +1195,7 @@ void PlasmaApp::containmentScreenOwnerChanged(int wasScreen, int isScreen, Plasm
 
 void PlasmaApp::configureContainment(Plasma::Containment *containment)
 {
-    const QString id = "plasma_containment_settings_" + QString::number(containment->id());
+    const QString id = QString::number(containment->id()) + "settings" + containment->name();
     BackgroundDialog *configDialog = qobject_cast<BackgroundDialog*>(KConfigDialog::exists(id));
 
     if (configDialog) {
