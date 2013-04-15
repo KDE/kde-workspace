@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=paste.kde.org
 Name[cs]=paste.kde.org
+Name[de]=paste.kde.org
 Name[es]=paste.kde.org
 Name[fi]=paste.kde.org
 Name[ia]=paste.kde.org
@@ -10,6 +11,10 @@ Name[nl]=paste.kde.org
 Name[pt]=paste.kde.org
 Name[pt_BR]=paste.kde.org
 Name[sk]=paste.kde.org
+Name[sr]=paste.kde.org
+Name[sr@ijekavian]=paste.kde.org
+Name[sr@ijekavianlatin]=paste.kde.org
+Name[sr@latin]=paste.kde.org
 Name[sv]=paste.kde.org
 Name[uk]=paste.kde.org
 Name[x-test]=xxpaste.kde.orgxx
