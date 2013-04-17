@@ -101,6 +101,11 @@ uint Interface::GetSessionIdleTime()
 void Interface::Lock()
 {
     m_daemon->lock();
+
+    if (calledFromDBus() && m_daemon->lockState() == KSldApp::AcquiringLock) {
+        m_lockReplies << message().createReply();
+        setDelayedReply(true);
+    }
 }
 
 bool Interface::SetActive (bool state)
@@ -182,11 +187,13 @@ void Interface::UnThrottle(uint cookie)
 
 void Interface::slotLocked()
 {
+    sendLockReplies();
     emit ActiveChanged(true);
 }
 
 void Interface::slotUnlocked()
 {
+    sendLockReplies();
     emit ActiveChanged(false);
 }
 
@@ -210,6 +217,15 @@ void Interface::setupPlasma()
 void Interface::saverLockReady()
 {
     // unused
+}
+
+void Interface::sendLockReplies()
+{
+    foreach (const QDBusMessage &reply, m_lockReplies) {
+        QDBusConnection::sessionBus().send(reply);
+    }
+
+    m_lockReplies.clear();
 }
 
 } // namespace
