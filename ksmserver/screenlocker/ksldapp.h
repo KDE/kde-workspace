@@ -28,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // forward declarations
 class KActionCollection;
-class KProcess;
 class QTimer;
 
 namespace ScreenLocker
@@ -83,7 +82,8 @@ public:
 
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
-     void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void lockProcessReady();
 
 Q_SIGNALS:
     void locked();
@@ -106,7 +106,7 @@ private:
 
     KActionCollection *m_actionCollection;
     LockState m_lockState;
-    KProcess *m_lockProcess;
+    QProcess *m_lockProcess;
     LockWindow *m_lockWindow;
     /**
      * Timer to measure how long the screen is locked.

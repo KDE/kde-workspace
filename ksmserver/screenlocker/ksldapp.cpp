@@ -127,8 +127,10 @@ void KSldApp::initialize()
     // idle support
     connect(KIdleTime::instance(), SIGNAL(timeoutReached(int)), SLOT(idleTimeout(int)));
 
-    m_lockProcess = new KProcess();
+    m_lockProcess = new QProcess();
+    m_lockProcess->setReadChannel(QProcess::StandardOutput);
     connect(m_lockProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(lockProcessFinished(int,QProcess::ExitStatus)));
+    connect(m_lockProcess, SIGNAL(readyReadStandardOutput()), SLOT(lockProcessReady()));
     m_lockedTimer.invalidate();
     m_graceTimer->setSingleShot(true);
     connect(m_graceTimer, SIGNAL(timeout()), SLOT(endGraceTime()));
@@ -185,13 +187,8 @@ void KSldApp::lock()
     // start unlock screen process
     if (!startLockProcess()) {
         doUnlock();
-        kError() << "Greeter Process not started in time";
-        return;
+        kError() << "Greeter Process not available";
     }
-
-    m_lockState = Locked;
-    m_lockedTimer.restart();
-    emit locked();
 }
 
 KActionCollection *KSldApp::actionCollection()
@@ -272,19 +269,23 @@ void KSldApp::lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     startLockProcess();
 }
 
+void KSldApp::lockProcessReady()
+{
+    m_lockState = Locked;
+    m_lockedTimer.restart();
+    emit locked();
+}
+
 bool KSldApp::startLockProcess()
 {
     if (m_plasmaEnabled) {
-        m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("plasma-overlay")));
-        *m_lockProcess << QLatin1String("--nofork");
+        m_lockProcess->start(KStandardDirs::findExe(QLatin1String("plasma-overlay")),
+                             QStringList() << QLatin1String("--nofork"));
     } else {
-        m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")));
+        m_lockProcess->start(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")));
     }
-    m_lockProcess->start();
     // we wait one minute
-    if (m_lockProcess->waitForStarted(60000)) {
-        m_lockProcess->waitForReadyRead(60000);
-    } else {
+    if (!m_lockProcess->waitForStarted(60000)) {
         m_lockProcess->kill();
         return false;
     }
