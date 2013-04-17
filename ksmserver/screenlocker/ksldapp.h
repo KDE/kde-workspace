@@ -40,8 +40,15 @@ class KSldApp : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.ksld.App")
+    Q_ENUMS(LockState)
 
 public:
+    enum LockState {
+        Unlocked,
+        AcquiringLock,
+        Locked
+    };
+
     static KSldApp* self();
 
     KSldApp(QObject * parent = 0);
@@ -50,8 +57,8 @@ public:
     // The action collection of the active widget
     KActionCollection* actionCollection();
 
-    bool isLocked() const {
-        return m_locked;
+    LockState lockState() const {
+        return m_lockState;
     }
 
     /**
@@ -98,7 +105,7 @@ private:
     void doUnlock();
 
     KActionCollection *m_actionCollection;
-    bool m_locked;
+    LockState m_lockState;
     KProcess *m_lockProcess;
     LockWindow *m_lockWindow;
     /**

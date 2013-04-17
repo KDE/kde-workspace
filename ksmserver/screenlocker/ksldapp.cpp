@@ -64,7 +64,7 @@ KSldApp* KSldApp::self()
 KSldApp::KSldApp(QObject * parent)
     : QObject(parent)
     , m_actionCollection(NULL)
-    , m_locked(false)
+    , m_lockState(Unlocked)
     , m_lockProcess(NULL)
     , m_lockWindow(NULL)
     , m_lockedTimer(QElapsedTimer())
@@ -163,8 +163,8 @@ void KSldApp::configure()
 
 void KSldApp::lock()
 {
-    if (m_locked) {
-        // already locked, no need to lock again
+    if (lockState() != Unlocked) {
+        // already locked or acquiring lock, no need to lock again
         // but make sure it's really locked
         endGraceTime();
         return;
@@ -180,13 +180,16 @@ void KSldApp::lock()
     // blank the screen
     showLockWindow();
 
+    m_lockState = AcquiringLock;
+
     // start unlock screen process
     if (!startLockProcess()) {
         doUnlock();
         kError() << "Greeter Process not started in time";
         return;
     }
-    m_locked  = true;
+
+    m_lockState = Locked;
     m_lockedTimer.restart();
     emit locked();
 }
@@ -247,7 +250,7 @@ void KSldApp::doUnlock()
     // delete the window again, to get rid of event filter
     delete m_lockWindow;
     m_lockWindow = NULL;
-    m_locked = false;
+    m_lockState = Unlocked;
     m_lockedTimer.invalidate();
     endGraceTime();
     KDisplayManager().setLock(false);
@@ -320,7 +323,7 @@ void KSldApp::idleTimeout(int identifier)
         // not our identifier
         return;
     }
-    if (isLocked()) {
+    if (lockState() != Unlocked) {
         return;
     }
     if (m_inhibitCounter) {

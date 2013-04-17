@@ -85,7 +85,7 @@ Interface::~Interface()
 
 bool Interface::GetActive()
 {
-    return m_daemon->isLocked();
+    return m_daemon->lockState() == KSldApp::Locked;
 }
 
 uint Interface::GetActiveTime()
