@@ -235,14 +235,6 @@ namespace Oxygen
         TileSetCache _scrollHoleCache;
         TileSetCache _selectionCache;
         TileSetCache _progressBarCache;
-
-        #ifdef Q_WS_X11
-
-        //! background gradient hint atom
-        Atom _compositingManagerAtom;
-
-        #endif
-
     };
 
     //____________________________________________________________________
