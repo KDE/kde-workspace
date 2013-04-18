@@ -112,6 +112,8 @@ void BlurEffect::updateBlurRegion(EffectWindow *w) const
             int h = cardinals[i++];
             region += QRect(x, y, w, h);
         }
+    } else if (w->isTooltip()) {
+        region = QRegion(0, 0, w->width(), w->height());
     }
 
     if (region.isEmpty() && !value.isNull()) {
