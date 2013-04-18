@@ -33,8 +33,7 @@ namespace Oxygen
 
     //______________________________________________________________________________
     StyleHelper::StyleHelper( const QByteArray &componentName ):
-        Helper( componentName ),
-        _debugArea( KDebug::registerArea( "Oxygen ( style )" ) )
+        Helper( componentName )
     {
     }
 
