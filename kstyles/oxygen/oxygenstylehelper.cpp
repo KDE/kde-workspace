@@ -28,11 +28,6 @@
 
 #include <math.h>
 
-#ifdef Q_WS_X11
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#endif
-
 namespace Oxygen
 {
 
@@ -41,18 +36,6 @@ namespace Oxygen
         Helper( componentName ),
         _debugArea( KDebug::registerArea( "Oxygen ( style )" ) )
     {
-
-        #ifdef Q_WS_X11
-        // get display
-        Display *display = QX11Info::display();
-
-        // create compositing screen
-        QByteArray buffer;
-        QTextStream( &buffer ) << "_NET_WM_CM_S" << DefaultScreen( display );
-        _compositingManagerAtom = XInternAtom( display, buffer.constData(), False);
-
-        #endif
-
     }
 
     //______________________________________________________________________________
@@ -648,13 +631,7 @@ namespace Oxygen
     //________________________________________________________________________________________________________
     bool StyleHelper::compositingActive( void ) const
     {
-        #ifdef Q_WS_X11
-        // direct call to X
-        return XGetSelectionOwner( QX11Info::display(), _compositingManagerAtom ) != None;
-        #else
-        // use KWindowSystem
         return KWindowSystem::compositingActive();
-        #endif
     }
 
     //________________________________________________________________________________________________________
