@@ -35,9 +35,9 @@
 #include <QtCore/QBasicTimer>
 #include <QtCore/QHash>
 #include <QtCore/QObject>
-#include <QtCore/QPointer>
 #include <QtCore/QSet>
 #include <QtCore/QTimerEvent>
+#include <QtCore/QWeakPointer>
 
 #include <QtGui/QDockWidget>
 #include <QtGui/QMenu>
@@ -149,7 +149,7 @@ namespace Oxygen
         bool _enabled;
 
         //! list of widgets for which blur region must be updated
-        typedef QPointer<QWidget> WidgetPointer;
+        typedef QWeakPointer<QWidget> WidgetPointer;
         typedef QHash<QWidget*, WidgetPointer> WidgetSet;
         WidgetSet _pendingWidgets;
 

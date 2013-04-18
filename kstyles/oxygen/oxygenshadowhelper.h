@@ -30,7 +30,6 @@
 #include "oxygentileset.h"
 
 #include <QtCore/QObject>
-#include <QtCore/QPointer>
 #include <QtCore/QMap>
 
 #ifdef Q_WS_X11
