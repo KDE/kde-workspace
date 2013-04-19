@@ -1390,6 +1390,8 @@ void PanelView::startAutoHide()
         disconnect(m_mousePollTimer, SIGNAL(timeout()), this, SLOT(startAutoHide()));
     }
 
+    updatePanelGeometry();
+
     if (m_visibilityMode == LetWindowsCover) {
         KWindowSystem::setState(winId(), NET::KeepBelow);
         KWindowSystem::lowerWindow(winId());
