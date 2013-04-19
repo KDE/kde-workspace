@@ -56,8 +56,6 @@ endmacro(_KDE4WORKSPACE_Set_Lib_Vars)
 
 _kde4workspace_set_lib_vars( TASKMANAGER        taskmanager)
 _kde4workspace_set_lib_vars( KWORKSPACE         kworkspace)
-_kde4workspace_set_lib_vars( SOLIDCONTROLIFACES solidcontrolifaces)
-_kde4workspace_set_lib_vars( SOLIDCONTROL       solidcontrol)
 _kde4workspace_set_lib_vars( PROCESSUI          processui)
 _kde4workspace_set_lib_vars( LSOFUI             lsofui)
 _kde4workspace_set_lib_vars( PLASMACLOCK        plasmaclock)
