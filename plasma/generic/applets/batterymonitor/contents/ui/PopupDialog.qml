@@ -30,6 +30,7 @@ Item {
     property alias hasBattery: batteryIcon.hasBattery
     property alias percent: batteryIcon.percent
     property bool pluggedIn
+    property bool isBrightnessAvailable
     property alias screenBrightness: brightnessSlider.value
     property int remainingMsec
     property alias showSuspendButton: suspendButton.visible
@@ -134,6 +135,7 @@ Item {
             Components.Slider {
                 id: brightnessSlider
                 width: lowerValues.width
+                visible: isBrightnessAvailable
                 minimumValue: 0
                 maximumValue: 100
                 stepSize: 10

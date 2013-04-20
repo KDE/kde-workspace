@@ -70,10 +70,11 @@ void PowermanagementEngine::init()
                                                    "brightnessChanged", this,
                                                    SLOT(screenBrightnessChanged(int)))) {
             kDebug() << "error connecting to Brightness changes via dbus";
-        }
-        else {
+            brightnessControlsAvailableChanged(false);
+        } else {
             sourceRequestEvent("PowerDevil");
             screenBrightnessChanged(0);
+            brightnessControlsAvailableChanged(true);
         }
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement",
@@ -307,6 +308,11 @@ void PowermanagementEngine::batteryRemainingTimeChanged(qulonglong time)
 {
     //kDebug() << "Remaining time 2:" << time;
     setData("Battery", "Remaining msec", time);
+}
+
+void PowermanagementEngine::brightnessControlsAvailableChanged(bool available)
+{
+    setData("PowerDevil", "Screen Brightness Available", available);
 }
 
 void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *watcher)
