@@ -65,15 +65,16 @@ void PowermanagementEngine::init()
 
     if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
-                                                   "/org/kde/Solid/PowerManagement",
-                                                   "org.kde.Solid.PowerManagement",
+                                                   "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                                    "brightnessChanged", this,
                                                    SLOT(screenBrightnessChanged(int)))) {
             kDebug() << "error connecting to Brightness changes via dbus";
-        }
-        else {
+            brightnessControlsAvailableChanged(false);
+        } else {
             sourceRequestEvent("PowerDevil");
             screenBrightnessChanged(0);
+            brightnessControlsAvailableChanged(true);
         }
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement",
@@ -181,8 +182,8 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         }
     } else if (name == "PowerDevil") {
         QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                          "/org/kde/Solid/PowerManagement",
-                                                          "org.kde.Solid.PowerManagement",
+                                                          "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                          "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                                           "brightness");
         QDBusPendingReply<int> reply = QDBusConnection::sessionBus().asyncCall(msg);
         QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
@@ -307,6 +308,11 @@ void PowermanagementEngine::batteryRemainingTimeChanged(qulonglong time)
 {
     //kDebug() << "Remaining time 2:" << time;
     setData("Battery", "Remaining msec", time);
+}
+
+void PowermanagementEngine::brightnessControlsAvailableChanged(bool available)
+{
+    setData("PowerDevil", "Screen Brightness Available", available);
 }
 
 void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *watcher)

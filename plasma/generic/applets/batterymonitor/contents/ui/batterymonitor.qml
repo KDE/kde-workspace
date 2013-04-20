@@ -199,6 +199,7 @@ Item {
         model: batteries
         hasBattery: batteries.cumulativePluggedin
         percent: batteries.cumulativePercent
+        isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"]
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
         showSuspendButton: Platform.shouldOfferSuspend(pmSource)
