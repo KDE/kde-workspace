@@ -65,8 +65,8 @@ void PowermanagementEngine::init()
 
     if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
-                                                   "/org/kde/Solid/PowerManagement",
-                                                   "org.kde.Solid.PowerManagement",
+                                                   "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                                    "brightnessChanged", this,
                                                    SLOT(screenBrightnessChanged(int)))) {
             kDebug() << "error connecting to Brightness changes via dbus";
@@ -181,8 +181,8 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         }
     } else if (name == "PowerDevil") {
         QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                          "/org/kde/Solid/PowerManagement",
-                                                          "org.kde.Solid.PowerManagement",
+                                                          "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                          "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                                           "brightness");
         QDBusPendingReply<int> reply = QDBusConnection::sessionBus().asyncCall(msg);
         QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
