@@ -21,6 +21,7 @@ include(KDE4Defaults)
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
 
 find_package(Strigi)
+
 set_package_properties(Strigi PROPERTIES DESCRIPTION "Desktop indexing and search support"
                        URL "http://strigi.sourceforge.net"
                        TYPE REQUIRED
@@ -66,6 +67,11 @@ macro_optional_find_package(OpenGLES)
 set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
                        URL "http://www.khronos.org/opengles"
                        TYPE OPTIONAL
+                      )
+macro_optional_find_package(UDev)
+set_package_properties(UDev PROPERTIES DESCRIPTION "The UDev Libraries"
+                       TYPE OPTIONAL
+                       PURPOSE "Allows support for UPower backend in PowerDevil - STRONGLY RECOMMENDED"
                       )
 
 
