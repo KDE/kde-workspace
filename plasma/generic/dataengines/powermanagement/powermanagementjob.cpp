@@ -103,8 +103,8 @@ void PowerManagementJob::start()
 bool PowerManagementJob::suspend(const SuspendType &type)
 {
     QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                      "/org/kde/Solid/PowerManagement",
-                                                      "org.kde.Solid.PowerManagement",
+                                                      "/org/kde/Solid/PowerManagement/Actions/SuspendSession",
+                                                      "org.kde.Solid.PowerManagement.Actions.SuspendSession",
                                                       callForType(type));
     QDBusConnection::sessionBus().asyncCall(msg);
     return true;
@@ -130,8 +130,8 @@ QString PowerManagementJob::callForType(const SuspendType &type)
 void PowerManagementJob::setScreenBrightness(int value)
 {
     QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                      "/org/kde/Solid/PowerManagement",
-                                                      "org.kde.Solid.PowerManagement",
+                                                      "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                      "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                                       "setBrightness");
     msg << value;
     QDBusConnection::sessionBus().asyncCall(msg);
