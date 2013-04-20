@@ -21,6 +21,7 @@ include(KDE4Defaults)
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
 
 find_package(Strigi)
+find_package(UDev)
 set_package_properties(Strigi PROPERTIES DESCRIPTION "Desktop indexing and search support"
                        URL "http://strigi.sourceforge.net"
                        TYPE REQUIRED
