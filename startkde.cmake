@@ -319,6 +319,9 @@ xprop -root -f KDE_SESSION_VERSION 32c -set KDE_SESSION_VERSION 4
 KDE_SESSION_UID=`id -ru`
 export KDE_SESSION_UID
 
+XDG_CURRENT_DESKTOP=KDE
+export XDG_CURRENT_DESKTOP
+
 # We set LD_BIND_NOW to increase the efficiency of kdeinit.
 # kdeinit unsets this variable before loading applications.
 LD_BIND_NOW=true @KDE4_LIBEXEC_INSTALL_DIR@/start_kdeinit_wrapper +kcminit_startup
