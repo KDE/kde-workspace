@@ -30,6 +30,7 @@
 #include <KService>
 #include <KToolInvocation>
 #include <KUrl>
+#include <Solid/PowerManagement>
 
 // KDE Base
 #include <kworkspace/kworkspace.h>
@@ -69,33 +70,13 @@ bool LeaveItemHandler::openUrl(const KUrl& url)
     m_logoutAction = url.path().remove('/');
 
     if (m_logoutAction == "sleep") {
-        // Check if KDE Power Management System is running, and use its methods to suspend if available
-        if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
-            kDebug() << "Using KDE Power Management System to suspend";
-            QDBusMessage call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                               "/org/kde/Solid/PowerManagement",
-                                                               "org.kde.Solid.PowerManagement",
-                                                               "suspendToRam");
-            QDBusConnection::sessionBus().asyncCall(call);
+        // decouple dbus call, otherwise we'll run into a dead-lock
+        QTimer::singleShot(0, this, SLOT(suspendRAM()));
             return true;
-        } else {
-            kDebug() << "KDE Power Management System not available, suspend failed";
-            return false;
-        }
     } else if (m_logoutAction == "hibernate") {
-        // Check if KDE Power Management System is running, and use its methods to hibernate if available
-        if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
-            kDebug() << "Using KDE Power Management System to hibernate";
-            QDBusMessage call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                               "/org/kde/Solid/PowerManagement",
-                                                               "org.kde.Solid.PowerManagement",
-                                                               "suspendToDisk");
-            QDBusConnection::sessionBus().asyncCall(call);
+        // decouple dbus call, otherwise we'll run into a dead-lock
+        QTimer::singleShot(0, this, SLOT(suspendDisk()));
             return true;
-        } else {
-            kDebug() << "KDE Power Management System not available, hibernate failed";
-            return false;
-        }
     } else if (m_logoutAction == "lock") {
         // decouple dbus call, otherwise we'll run into a dead-lock
         QTimer::singleShot(0, this, SLOT(lock()));
@@ -195,18 +176,10 @@ void LeaveItemHandler::standby()
 
 void LeaveItemHandler::suspendRAM()
 {
-    QDBusMessage call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                       "/org/kde/Solid/PowerManagement",
-                                                       "org.kde.Solid.PowerManagement",
-                                                       "suspendToRam");
-    QDBusConnection::sessionBus().asyncCall(call);
+    Solid::PowerManagement::requestSleep(Solid::PowerManagement::SuspendState, 0, 0);
 }
 
 void LeaveItemHandler::suspendDisk()
 {
-    QDBusMessage call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                       "/org/kde/Solid/PowerManagement",
-                                                       "org.kde.Solid.PowerManagement",
-                                                       "suspendToDisk");
-    QDBusConnection::sessionBus().asyncCall(call);
+    Solid::PowerManagement::requestSleep(Solid::PowerManagement::HibernateState, 0, 0);
 }

@@ -45,8 +45,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
-#include <QtDBus/QDBusInterface>
-#include <QtDBus/QDBusPendingCall>
 #include <QtGui/QKeyEvent>
 #include <QDesktopWidget>
 // X11
@@ -246,10 +244,7 @@ void UnlockApp::suspendToRam()
     m_ignoreRequests = true;
     m_resetRequestIgnoreTimer->start();
 
-    QDBusInterface iface("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement",
-            "org.kde.Solid.PowerManagement");
-    iface.asyncCall("suspendToRam");
+    Solid::PowerManagement::requestSleep(Solid::PowerManagement::SuspendState, 0, 0);
 
 }
 
@@ -262,10 +257,7 @@ void UnlockApp::suspendToDisk()
     m_ignoreRequests = true;
     m_resetRequestIgnoreTimer->start();
 
-    QDBusInterface iface("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement",
-            "org.kde.Solid.PowerManagement");
-    iface.asyncCall("suspendToDisk");
+    Solid::PowerManagement::requestSleep(Solid::PowerManagement::HibernateState, 0, 0);
 }
 
 void UnlockApp::shutdown()
