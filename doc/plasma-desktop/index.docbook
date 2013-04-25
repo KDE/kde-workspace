@@ -208,7 +208,7 @@ open the device in &dolphin; or another associated application.
 </para>
 
 <para>The <application>System Tray</application> normally holds some more entries like
-&klipper;, &kmix; &etc;.</para>
+&klipper;, &kmix; &etc;</para>
 
 <para>Some of the default entries in the <application>System Tray</application> are hidden
 to save space in the bar. To display these entries click on the small white triangle
