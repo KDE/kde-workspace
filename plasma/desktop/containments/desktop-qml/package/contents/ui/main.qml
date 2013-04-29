@@ -62,8 +62,8 @@ Item {
         applet.visible = true;
 
         container.category = "Applet-"+applet.id; // FIXME: undefined in Applet
-        container.width = LayoutManager.cellSize.width*2;
-        container.height = LayoutManager.cellSize.height*2;
+        container.width = LayoutManager.cellSize.width*6;
+        container.height = LayoutManager.cellSize.height*6;
         container.applet = applet;
 
         LayoutManager.itemGroups[container.category] = container;
