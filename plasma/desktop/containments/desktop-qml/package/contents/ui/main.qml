@@ -33,6 +33,7 @@ Item {
     property bool debug: false
     property int handleDelay: 800
     property real haloOpacity: 0.5
+    property bool pressAndHoldHandle: true
 
     property int iconSize: 16
     property int iconWidth: iconSize
@@ -61,7 +62,7 @@ Item {
         applet.parent = container
         applet.visible = true;
 
-        container.category = "Applet-"+applet.id; // FIXME: undefined in Applet
+        container.category = "Applet-"+applet.id;
         container.width = LayoutManager.cellSize.width*6;
         container.height = LayoutManager.cellSize.height*6;
         container.applet = applet;

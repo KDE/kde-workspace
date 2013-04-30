@@ -110,11 +110,21 @@ Item {
 
         hoverEnabled: true
 
+        onPressAndHold: {
+            //hoverTracker.interval = 400;
+            hoverTracker.restart();
+        }
+
         onContainsMouseChanged: {
+
+
             animationsEnabled = true;
             //print("Mouse is " + containsMouse);
             if (!plasmoid.immutable && containsMouse) {
-                hoverTracker.restart();
+                if (!root.pressAndHoldHandle) {
+                    hoverTracker.interval = root.handleDelay;
+                    hoverTracker.restart();
+                }
             } else {
                 hoverTracker.stop();
                 showAppletHandle = false;
