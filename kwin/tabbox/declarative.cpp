@@ -112,17 +112,20 @@ QPixmap ImageProvider::requestPixmap(const QString &id, QSize *size, const QSize
     return icon;
 }
 
-static bool compositing()
+// WARNING: this code exists to cover a bug in Qt which prevents plasma from detecting the state change
+// of the compositor through KWindowSystem.
+// once plasma uses (again) a KSelectionWatcher or Qt is fixed in this regard, the code can go.
+static QString plasmaThemeVariant()
 {
 #ifndef TABBOX_KCM
     if (!Workspace::self()->compositing() || !effects) {
-        return false;
+        return Plasma::Theme::defaultTheme()->currentThemeHasImage("opaque/dialogs/background") ? QLatin1String("opaque/") : QLatin1String("");
     }
-    if (!static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::Blur)) {
-        return false;
+    if (static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::Blur)) {
+        return Plasma::Theme::defaultTheme()->currentThemeHasImage("translucent/dialogs/background") ? QLatin1String("translucent/") : QLatin1String("");
     }
 #endif
-    return Plasma::Theme::defaultTheme()->currentThemeHasImage("translucent/dialogs/background");
+    return QLatin1String("");
 }
 
 DeclarativeView::DeclarativeView(QAbstractItemModel *model, TabBoxConfig::TabBoxMode mode, QWidget *parent)
@@ -153,9 +156,12 @@ DeclarativeView::DeclarativeView(QAbstractItemModel *model, TabBoxConfig::TabBox
     kdeclarative.setDeclarativeEngine(engine());
     kdeclarative.initialize();
     kdeclarative.setupBindings();
-    qmlRegisterType<ThumbnailItem>("org.kde.kwin", 0, 1, "ThumbnailItem");
+#ifndef TABBOX_KCM
+    qmlRegisterType<DesktopThumbnailItem>("org.kde.kwin", 0, 1, "DesktopThumbnailItem");
+#endif
+    qmlRegisterType<WindowThumbnailItem>("org.kde.kwin", 0, 1, "ThumbnailItem");
     rootContext()->setContextProperty("viewId", static_cast<qulonglong>(winId()));
-    rootContext()->setContextProperty("compositing", compositing());
+    rootContext()->setContextProperty("plasmaThemeVariant", plasmaThemeVariant());
     if (m_mode == TabBoxConfig::ClientTabBox) {
         rootContext()->setContextProperty("clientModel", model);
     } else if (m_mode == TabBoxConfig::DesktopTabBox) {
@@ -198,8 +204,10 @@ void DeclarativeView::showEvent(QShowEvent *event)
         item->setProperty("currentIndex", tabBox->first().row());
         connect(item, SIGNAL(currentIndexChanged(int)), SLOT(currentIndexChanged(int)));
     }
-    rootContext()->setContextProperty("compositing", compositing());
+    rootContext()->setContextProperty("plasmaThemeVariant", plasmaThemeVariant());
     slotUpdateGeometry();
+    QResizeEvent re(size(), size()); // to set mask and blurring.
+    resizeEvent(&re);
     QGraphicsView::showEvent(event);
 }
 
@@ -220,11 +228,15 @@ void DeclarativeView::resizeEvent(QResizeEvent *event)
             m_frame->setImagePath(maskImagePath);
             m_frame->resizeFrame(QSizeF(maskWidth, maskHeight));
             QRegion mask = m_frame->mask().translated(maskLeftMargin, maskTopMargin);
-            if (compositing()) {
-                // blur background
-                Plasma::WindowEffects::enableBlurBehind(winId(), true, mask);
+#ifndef TABBOX_KCM
+            // notice: this covers an issue with plasma detecting the compositing state. see plasmaThemeVariant()
+            if (Workspace::self()->compositing() && effects) {
+                // blur background?!
+                Plasma::WindowEffects::enableBlurBehind(winId(), static_cast<EffectsHandlerImpl*>(effects)->provides(Effect::Blur), mask);
                 clearMask();
-            } else {
+            } else
+#endif
+            {
                 // do not trim to mask with compositing enabled, otherwise shadows are cropped
                 setMask(mask);
             }
@@ -342,12 +354,26 @@ void DeclarativeView::updateQmlSource(bool force)
     if (!force && tabBox->config().layoutName() == m_currentLayout) {
         return;
     }
-    if (m_mode == TabBoxConfig::DesktopTabBox) {
-        m_currentLayout = tabBox->config().layoutName();
-        const QString file = KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + QLatin1String("/tabbox/desktop.qml"));
-        rootObject()->setProperty("source", QUrl(file));
+    const bool desktopMode = (m_mode == TabBoxConfig::DesktopTabBox);
+    m_currentLayout = tabBox->config().layoutName();
+    KService::Ptr service = desktopMode ? findDesktopSwitcher() : findWindowSwitcher();
+    if (service.isNull()) {
         return;
     }
+    if (service->property("X-Plasma-API").toString() != "declarativeappletscript") {
+        kDebug(1212) << "Window Switcher Layout is no declarativeappletscript";
+        return;
+    }
+    const QString file = desktopMode ? findDesktopSwitcherScriptFile(service) : findWindowSwitcherScriptFile(service);
+    if (file.isNull()) {
+        kDebug(1212) << "Could not find QML file for window switcher";
+        return;
+    }
+    rootObject()->setProperty("source", QUrl(file));
+}
+
+KService::Ptr DeclarativeView::findWindowSwitcher()
+{
     QString constraint = QString("[X-KDE-PluginInfo-Name] == '%1'").arg(tabBox->config().layoutName());
     KService::List offers = KServiceTypeTrader::self()->query("KWin/WindowSwitcher", constraint);
     if (offers.isEmpty()) {
@@ -356,23 +382,40 @@ void DeclarativeView::updateQmlSource(bool force)
         offers = KServiceTypeTrader::self()->query("KWin/WindowSwitcher", constraint);
         if (offers.isEmpty()) {
             kDebug(1212) << "could not find default window switcher layout";
-            return;
+            return KService::Ptr();
         }
     }
-    m_currentLayout = tabBox->config().layoutName();
-    KService::Ptr service = offers.first();
+    return offers.first();
+}
+
+KService::Ptr DeclarativeView::findDesktopSwitcher()
+{
+    QString constraint = QString("[X-KDE-PluginInfo-Name] == '%1'").arg(tabBox->config().layoutName());
+    KService::List offers = KServiceTypeTrader::self()->query("KWin/DesktopSwitcher", constraint);
+    if (offers.isEmpty()) {
+        // load default
+        constraint = QString("[X-KDE-PluginInfo-Name] == '%1'").arg("informative");
+        offers = KServiceTypeTrader::self()->query("KWin/DesktopSwitcher", constraint);
+        if (offers.isEmpty()) {
+            kDebug(1212) << "could not find default desktop switcher layout";
+            return KService::Ptr();
+        }
+    }
+    return offers.first();
+}
+
+QString DeclarativeView::findWindowSwitcherScriptFile(KService::Ptr service)
+{
     const QString pluginName = service->property("X-KDE-PluginInfo-Name").toString();
-    if (service->property("X-Plasma-API").toString() != "declarativeappletscript") {
-        kDebug(1212) << "Window Switcher Layout is no declarativeappletscript";
-        return;
-    }
     const QString scriptName = service->property("X-Plasma-MainScript").toString();
-    const QString file = KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + "/tabbox/" + pluginName + "/contents/" + scriptName);
-    if (file.isNull()) {
-        kDebug(1212) << "Could not find QML file for window switcher";
-        return;
-    }
-    rootObject()->setProperty("source", QUrl(file));
+    return KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + "/tabbox/" + pluginName + "/contents/" + scriptName);
+}
+
+QString DeclarativeView::findDesktopSwitcherScriptFile(KService::Ptr service)
+{
+    const QString pluginName = service->property("X-KDE-PluginInfo-Name").toString();
+    const QString scriptName = service->property("X-Plasma-MainScript").toString();
+    return KStandardDirs::locate("data", QLatin1String(KWIN_NAME) + "/desktoptabbox/" + pluginName + "/contents/" + scriptName);
 }
 
 void DeclarativeView::slotEmbeddedChanged(bool enabled)

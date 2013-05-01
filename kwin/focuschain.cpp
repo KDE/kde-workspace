@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "focuschain.h"
 #include "client.h"
+#include "screens.h"
 
 namespace KWin
 {
 
-FocusChain *FocusChain::s_manager = NULL;
+KWIN_SINGLETON_FACTORY_VARIABLE(FocusChain, s_manager)
 
 FocusChain::FocusChain(QObject *parent)
     : QObject(parent)
@@ -31,13 +32,6 @@ FocusChain::FocusChain(QObject *parent)
     , m_activeClient(NULL)
     , m_currentDesktop(0)
 {
-}
-
-FocusChain *FocusChain::create(QObject *parent)
-{
-    Q_ASSERT(!s_manager);
-    s_manager = new FocusChain(parent);
-    return s_manager;
 }
 
 FocusChain::~FocusChain()
@@ -67,7 +61,7 @@ void FocusChain::resize(uint previousSize, uint newSize)
 
 Client *FocusChain::getForActivation(uint desktop) const
 {
-    return getForActivation(desktop, Workspace::self()->activeScreen());
+    return getForActivation(desktop, screens()->current());
 }
 
 Client *FocusChain::getForActivation(uint desktop, int screen) const
@@ -219,7 +213,7 @@ bool FocusChain::isUsableFocusCandidate(Client *c, Client *prev) const
 {
     return c != prev &&
            c->isShown(false) && c->isOnCurrentDesktop() && c->isOnCurrentActivity() &&
-           (!m_separateScreenFocus || c->isOnScreen(prev ? prev->screen() : Workspace::self()->activeScreen()));
+           (!m_separateScreenFocus || c->isOnScreen(prev ? prev->screen() : screens()->current()));
 }
 
 Client *FocusChain::nextForDesktop(Client *reference, uint desktop) const

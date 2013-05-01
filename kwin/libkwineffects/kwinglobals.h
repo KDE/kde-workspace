@@ -84,19 +84,6 @@ enum ElectricBorder {
     ElectricNone
 };
 
-enum QuickTileFlag {
-    QuickTileNone = 0,
-    QuickTileLeft = 1,
-    QuickTileRight = 1<<1,
-    QuickTileTop = 1<<2,
-    QuickTileBottom = 1<<3,
-    QuickTileHorizontal = QuickTileLeft|QuickTileRight,
-    QuickTileVertical = QuickTileTop|QuickTileBottom,
-    QuickTileMaximize = QuickTileLeft|QuickTileRight|QuickTileTop|QuickTileBottom
-};
-
-Q_DECLARE_FLAGS(QuickTileMode, QuickTileFlag)
-
 // TODO: Hardcoding is bad, need to add some way of registering global actions to these.
 // When designing the new system we must keep in mind that we have conditional actions
 // such as "only when moving windows" desktop switching that the current global action
@@ -211,6 +198,27 @@ private:
 
 } // namespace
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWin::QuickTileMode)
+#define KWIN_SINGLETON_VARIABLE(ClassName, variableName) \
+public: \
+    static ClassName *create(QObject *parent = 0);\
+    static ClassName *self() { return variableName; }\
+protected: \
+    explicit ClassName(QObject *parent = 0); \
+private: \
+    static ClassName *variableName;
+
+#define KWIN_SINGLETON(ClassName) KWIN_SINGLETON_VARIABLE(ClassName, s_self)
+
+#define KWIN_SINGLETON_FACTORY_VARIABLE_FACTORED(ClassName, FactoredClassName, variableName) \
+ClassName *ClassName::variableName = 0; \
+ClassName *ClassName::create(QObject *parent) \
+{ \
+    Q_ASSERT(!variableName); \
+    variableName = new FactoredClassName(parent); \
+    return variableName; \
+}
+#define KWIN_SINGLETON_FACTORY_VARIABLE(ClassName, variableName) KWIN_SINGLETON_FACTORY_VARIABLE_FACTORED(ClassName, ClassName, variableName)
+#define KWIN_SINGLETON_FACTORY_FACTORED(ClassName, FactoredClassName) KWIN_SINGLETON_FACTORY_VARIABLE_FACTORED(ClassName, FactoredClassName, s_self)
+#define KWIN_SINGLETON_FACTORY(ClassName) KWIN_SINGLETON_FACTORY_VARIABLE(ClassName, s_self)
 
 #endif

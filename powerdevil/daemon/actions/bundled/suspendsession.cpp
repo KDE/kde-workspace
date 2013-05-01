@@ -22,6 +22,8 @@
 #include "powerdevilbackendinterface.h"
 #include "powerdevilcore.h"
 
+#include "suspendsessionadaptor.h"
+
 #include <KConfigGroup>
 #include <KLocalizedString>
 #include <KJob>
@@ -38,9 +40,16 @@ namespace BundledActions
 {
 
 SuspendSession::SuspendSession(QObject* parent)
-    : Action(parent)
+    : Action(parent),
+      m_dbusWatcher(0)
 {
+    // DBus
+    new SuspendSessionAdaptor(this);
+
     setRequiredPolicies(PowerDevil::PolicyAgent::InterruptSession);
+
+    connect(backend(), SIGNAL(resumeFromSuspend()),
+            this, SLOT(onResumeFromSuspend()));
 }
 
 SuspendSession::~SuspendSession()
@@ -73,7 +82,7 @@ void SuspendSession::onProfileLoad()
 
 void SuspendSession::triggerImpl(const QVariantMap& args)
 {
-    kDebug() << "Triggered with " << args["Type"].toString();
+    kDebug() << "Triggered with " << args["Type"].toString() << args["SkipLocking"].toBool();
 
     // Switch for screen lock
     QVariantMap recallArgs;
@@ -82,10 +91,12 @@ void SuspendSession::triggerImpl(const QVariantMap& args)
         case ToDiskMode:
         case SuspendHybridMode:
             // Do we want to lock the screen?
-            if (PowerDevilSettings::configLockScreen()) {
+            if (PowerDevilSettings::configLockScreen() && !args["SkipLocking"].toBool()) {
                 // Yeah, we do.
+                m_savedArgs = args;
                 recallArgs["Type"] = (uint)LockScreenMode;
                 triggerImpl(recallArgs);
+                return;
             }
             break;
         default:
@@ -128,7 +139,20 @@ void SuspendSession::lockScreenAndWait()
                                              "/ScreenSaver",
                                              QDBusConnection::sessionBus());
     QDBusPendingReply< void > reply = iface.Lock();
-    reply.waitForFinished();
+    m_dbusWatcher = new QDBusPendingCallWatcher(reply, this);
+    connect(m_dbusWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(lockCompleted()));
+}
+
+void SuspendSession::lockCompleted()
+{
+    QVariantMap args = m_savedArgs;
+
+    m_dbusWatcher->deleteLater();
+    m_dbusWatcher = 0;
+    m_savedArgs.clear();
+
+    args["SkipLocking"] = true;
+    triggerImpl(args);
 }
 
 bool SuspendSession::loadAction(const KConfigGroup& config)
@@ -140,6 +164,41 @@ bool SuspendSession::loadAction(const KConfigGroup& config)
     }
 
     return true;
+}
+
+void SuspendSession::suspendHybrid()
+{
+    triggerSuspendSession(SuspendHybridMode);
+}
+
+void SuspendSession::suspendToDisk()
+{
+    triggerSuspendSession(ToDiskMode);
+}
+
+void SuspendSession::suspendToRam()
+{
+    triggerSuspendSession(ToRamMode);
+}
+
+void SuspendSession::triggerSuspendSession(uint action)
+{
+    QVariantMap args;
+    args["Type"] = action;
+    args["Explicit"] = true;
+    trigger(args);
+}
+
+void SuspendSession::onResumeFromSuspend()
+{
+    // Notify the screensaver
+    OrgFreedesktopScreenSaverInterface iface("org.freedesktop.ScreenSaver",
+                                             "/ScreenSaver",
+                                             QDBusConnection::sessionBus());
+    iface.SimulateUserActivity();
+    PowerDevil::PolicyAgent::instance()->setupSystemdInhibition();
+
+    Q_EMIT resumingFromSuspend();
 }
 
 }

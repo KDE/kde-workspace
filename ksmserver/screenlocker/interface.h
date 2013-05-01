@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QObject>
 #include <QtDBus/QDBusContext>
+#include <QtDBus/QDBusMessage>
 
 class QDBusServiceWatcher;
 
@@ -115,10 +116,13 @@ private Q_SLOTS:
     void serviceUnregistered(const QString &name);
 
 private:
+    void sendLockReplies();
+
     KSldApp *m_daemon;
     QDBusServiceWatcher *m_serviceWatcher;
     QList<InhibitRequest> m_requests;
     uint m_next_cookie;
+    QList<QDBusMessage> m_lockReplies;
 };
 }
 

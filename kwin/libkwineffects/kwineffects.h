@@ -170,7 +170,7 @@ X-KDE-Library=kwin4_effect_cooleffect
 
 #define KWIN_EFFECT_API_MAKE_VERSION( major, minor ) (( major ) << 8 | ( minor ))
 #define KWIN_EFFECT_API_VERSION_MAJOR 0
-#define KWIN_EFFECT_API_VERSION_MINOR 221
+#define KWIN_EFFECT_API_VERSION_MINOR 222
 #define KWIN_EFFECT_API_VERSION KWIN_EFFECT_API_MAKE_VERSION( \
         KWIN_EFFECT_API_VERSION_MAJOR, KWIN_EFFECT_API_VERSION_MINOR )
 
@@ -453,6 +453,19 @@ public:
      * @since 4.8
      **/
     virtual bool isActive() const;
+
+    /**
+     * Reimplement this method to provide online debugging.
+     * This could be as trivial as printing specific detail informations about the effect state
+     * but could also be used to move the effect in and out of a special debug modes, clear bogus
+     * data, etc.
+     * Notice that the functions is const by intent! Whenever you alter the state of the object
+     * due to random user input, you should do so with greatest care, hence const_cast<> your
+     * object - signalling "let me alone, i know what i'm doing"
+     * @param parameter A freeform string user input for your effect to interpret.
+     * @since 4.11
+     */
+    virtual QString debug(const QString &parameter) const;
 
     static int displayWidth();
     static int displayHeight();
@@ -1122,22 +1135,6 @@ Q_SIGNALS:
      * @since 4.7
      */
     void propertyNotify(KWin::EffectWindow* w, long atom);
-    /**
-     * Requests to show an outline. An effect providing to show an outline should
-     * connect to the signal and render an outline.
-     * The outline should be shown till the signal is emitted again with a new
-     * geometry or the @link hideOutline signal is emitted.
-     * @param outline The geometry of the outline to render.
-     * @see hideOutline
-     * @since 4.7
-     **/
-    void showOutline(const QRect& outline);
-    /**
-     * Signal emitted when the outline should no longer be shown.
-     * @see showOutline
-     * @since 4.7
-     **/
-    void hideOutline();
 
     /**
      * Signal emitted after the screen geometry changed (e.g. add of a monitor).

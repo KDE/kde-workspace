@@ -96,7 +96,8 @@ void GlxBackend::init()
     initGL(GlxPlatformInterface);
     // Check whether certain features are supported
     haveSwapInterval = glXSwapIntervalMESA || glXSwapIntervalEXT || glXSwapIntervalSGI;
-    if (options->isGlVSync()) {
+    const bool wantSync = options->glPreferBufferSwap() != Options::NoSwapEncourage;
+    if (wantSync) {
         if (glXGetVideoSync && haveSwapInterval && glXIsDirect(display(), ctx)) {
             unsigned int sync;
             if (glXGetVideoSync(&sync) == 0) {
@@ -108,14 +109,16 @@ void GlxBackend::init()
                     // swapinterval (as of today) seems completely unsupported
                     setHasWaitSync(true);
                     setSwapInterval(1);
-                }
-                else
+                } else
                     qWarning() << "NO VSYNC! glXWaitVideoSync(1,0,&uint) isn't 0 but" << glXWaitVideoSync(1, 0, &sync);
             } else
                 qWarning() << "NO VSYNC! glXGetVideoSync(&uint) isn't 0 but" << glXGetVideoSync(&sync);
         } else
             qWarning() << "NO VSYNC! glXGetVideoSync, haveSwapInterval, glXIsDirect" <<
                         bool(glXGetVideoSync) << haveSwapInterval << glXIsDirect(display(), ctx);
+    } else {
+        // disable v-sync (if possible)
+        setSwapInterval(0);
     }
     if (glPlatform->isVirtualBox()) {
         // VirtualBox does not support glxQueryDrawable
@@ -391,49 +394,12 @@ void GlxBackend::present()
             // convert to OpenGL coordinates
             int y = displayHeight() - r.y() - r.height();
             glXCopySubBuffer(display(), glxWindow, r.x(), y, r.width(), r.height());
-         }
-    } else { // Copy Pixels
-        // if a shader is bound or the texture unit is enabled, copy pixels results in a black screen
-        // therefore unbind the shader and restore after copying the pixels
-        GLint shader = 0;
-        if (ShaderManager::instance()->isShaderBound()) {
-            glGetIntegerv(GL_CURRENT_PROGRAM, &shader);
-            glUseProgram(0);
         }
-        bool reenableTexUnit = false;
-        if (glIsEnabled(GL_TEXTURE_2D)) {
-            glDisable(GL_TEXTURE_2D);
-            reenableTexUnit = true;
-        }
-        // no idea why glScissor() is used, but Compiz has it and it doesn't seem to hurt
-        glEnable(GL_SCISSOR_TEST);
+    } else { // Copy Pixels (horribly slow on Mesa)
         glDrawBuffer(GL_FRONT);
         waitSync();
-        int xpos = 0;
-        int ypos = 0;
-        foreach (const QRect & r, lastDamage().rects()) {
-            // convert to OpenGL coordinates
-            int y = displayHeight() - r.y() - r.height();
-            // Move raster position relatively using glBitmap() rather
-            // than using glRasterPos2f() - the latter causes drawing
-            // artefacts at the bottom screen edge with some gfx cards
-            //glRasterPos2f( r.x(), r.y() + r.height());
-            glBitmap(0, 0, 0, 0, r.x() - xpos, y - ypos, NULL);
-            xpos = r.x();
-            ypos = y;
-            glScissor(r.x(), y, r.width(), r.height());
-            glCopyPixels(r.x(), y, r.width(), r.height(), GL_COLOR);
-        }
-        glBitmap(0, 0, 0, 0, -xpos, -ypos, NULL);   // move position back to 0,0
+        SceneOpenGL::copyPixels(lastDamage());
         glDrawBuffer(GL_BACK);
-        glDisable(GL_SCISSOR_TEST);
-        if (reenableTexUnit) {
-            glEnable(GL_TEXTURE_2D);
-        }
-        // rebind previously bound shader
-        if (ShaderManager::instance()->isShaderBound()) {
-            glUseProgram(shader);
-        }
     }
 
     glXWaitGL();

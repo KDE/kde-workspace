@@ -24,6 +24,7 @@
 #include <KLocale>
 #include <KIcon>
 #include <KDebug>
+#include <kdeversion.h>
 
 #include <QTime>
 
@@ -42,7 +43,6 @@
 #include "accessibility/accessiblefactory.h"
 
 static const char description[] = I18N_NOOP( "The KDE desktop, panels and widgets workspace application." );
-static const char version[] = "0.4";
 QString plasmaLocale;
 
 extern "C"
@@ -104,7 +104,7 @@ KDE_EXPORT int kdemain(int argc, char **argv)
     }
 
     KAboutData aboutData(appName, 0, ki18n("Plasma Desktop Shell"),
-                         version, ki18n(description), KAboutData::License_GPL,
+                         KDE_VERSION_STRING, ki18n(description), KAboutData::License_GPL,
                          ki18n("Copyright 2006-2009, The KDE Team"));
     aboutData.addAuthor(ki18n("Aaron J. Seigo"),
                         ki18n("Author and maintainer"),

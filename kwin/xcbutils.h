@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 
 #include <QRect>
+#include <QRegion>
+#include <QVector>
 
 #include <xcb/xcb.h>
 #include <xcb/composite.h>
@@ -178,6 +180,11 @@ public:
 
     inline WindowId *children() {
         return xcb_query_tree_children(data());
+    }
+    inline xcb_window_t parent() {
+        if (isNull())
+            return XCB_WINDOW_NONE;
+        return (*this)->parent;
     }
 };
 

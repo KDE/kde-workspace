@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "xcbutils.h"
 // kwin libs
 #include <kwinglplatform.h>
+// KDE
+#include <KDE/KDebug>
 
 namespace KWin
 {
@@ -73,21 +75,47 @@ void EglOnXBackend::init()
         return;
     }
 
-// TODO: activate once this is resolved. currently the explicit invocation seems pointless
-#if 0
-    // - internet rumors say: it doesn't work with TBDR
-    // - eglSwapInterval has no impact on intel GMA chips
-    has_waitSync = options->isGlVSync();
-    if (has_waitSync) {
-        has_waitSync = (eglSwapInterval(dpy, 1) == EGL_TRUE);
-        if (!has_waitSync)
-            kWarning(1212) << "Could not activate EGL v'sync on this system";
+    // check for EGL_NV_post_sub_buffer and whether it can be used on the surface
+    if (eglPostSubBufferNV) {
+        if (eglQuerySurface(dpy, surface, EGL_POST_SUB_BUFFER_SUPPORTED_NV, &surfaceHasSubPost) == EGL_FALSE) {
+            EGLint error = eglGetError();
+            if (error != EGL_SUCCESS && error != EGL_BAD_ATTRIBUTE) {
+                setFailed("query surface failed");
+                return;
+            } else {
+                surfaceHasSubPost = EGL_FALSE;
+            }
+        }
     }
-    if (!has_waitSync)
-        eglSwapInterval(dpy, 0); // deactivate syncing
-#endif
-}
+    if (surfaceHasSubPost) {
+        kDebug(1212) << "EGL implementation and surface support eglPostSubBufferNV, let's use it";
 
+        if (options->glPreferBufferSwap() != Options::NoSwapEncourage) {
+            // check if swap interval 1 is supported
+            EGLint val;
+            eglGetConfigAttrib(dpy, config, EGL_MAX_SWAP_INTERVAL, &val);
+            if (val >= 1) {
+                if (eglSwapInterval(dpy, 1)) {
+                    kDebug(1212) << "Enabled v-sync";
+                    setHasWaitSync(true);
+                }
+            } else {
+                kWarning(1212) << "Cannot enable v-sync as max. swap interval is" << val;
+            }
+        } else {
+            // disable v-sync
+            eglSwapInterval(dpy, 0);
+        }
+    } else {
+        /* In the GLX backend, we fall back to using glCopyPixels if we have no extension providing support for partial screen updates.
+         * However, that does not work in EGL - glCopyPixels with glDrawBuffer(GL_FRONT); does nothing.
+         * Hence we need EGL to preserve the backbuffer for us, so that we can draw the partial updates on it and call
+         * eglSwapBuffers() for each frame. eglSwapBuffers() then does the copy (no page flip possible in this mode),
+         * which means it is slow and not synced to the v-blank. */
+        kWarning(1212) << "eglPostSubBufferNV not supported, have to enable buffer preservation - which breaks v-sync and performance";
+        eglSurfaceAttrib(dpy, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
+    }
+}
 
 bool EglOnXBackend::initRenderingContext()
 {
@@ -113,18 +141,6 @@ bool EglOnXBackend::initRenderingContext()
         overlayWindow()->setup(None);
     }
     surface = eglCreateWindowSurface(dpy, config, overlayWindow()->window(), 0);
-
-    eglSurfaceAttrib(dpy, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
-
-    if (eglQuerySurface(dpy, surface, EGL_POST_SUB_BUFFER_SUPPORTED_NV, &surfaceHasSubPost) == EGL_FALSE) {
-        EGLint error = eglGetError();
-        if (error != EGL_SUCCESS && error != EGL_BAD_ATTRIBUTE) {
-            kError(1212) << "query surface failed";
-            return false;
-        } else {
-            surfaceHasSubPost = EGL_FALSE;
-        }
-    }
 
     const EGLint context_attribs[] = {
 #ifdef KWIN_HAVE_OPENGLES
@@ -199,13 +215,18 @@ void EglOnXBackend::present()
 {
     const QRegion displayRegion(0, 0, displayWidth(), displayHeight());
     const bool fullRepaint = (lastDamage() == displayRegion);
-    if (fullRepaint || !(surfaceHasSubPost && eglPostSubBufferNV)) {
+
+    if (fullRepaint || !surfaceHasSubPost) {
+        // the entire screen changed, or we cannot do partial updates (which implies we enabled surface preservation)
         eglSwapBuffers(dpy, surface);
     } else {
-        const QRect damageRect = lastDamage().boundingRect();
-        eglPostSubBufferNV(dpy, surface, damageRect.left(), displayHeight() - damageRect.bottom() - 1, damageRect.width(), damageRect.height());
+        // a part of the screen changed, and we can use eglPostSubBufferNV to copy the updated area
+        foreach (const QRect & r, lastDamage().rects()) {
+            eglPostSubBufferNV(dpy, surface, r.left(), displayHeight() - r.bottom() - 1, r.width(), r.height());
+        }
     }
 
+    setLastDamage(QRegion());
     eglWaitGL();
     xcb_flush(connection());
 }
@@ -226,6 +247,7 @@ void EglOnXBackend::prepareRenderingFrame()
 {
     if (!lastDamage().isEmpty())
         present();
+    eglWaitNative(EGL_CORE_NATIVE_ENGINE);
     startRenderTimer();
 }
 

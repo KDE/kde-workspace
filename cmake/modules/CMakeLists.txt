@@ -4,7 +4,6 @@
 # install e.g. FindLibKNotification-1.cmake
 set(cmakeFiles FindCkConnector.cmake
                FindDBus.cmake
-               FindGooglegadgets.cmake
                FindLibXKlavier.cmake
                FindOpenGLES.cmake
                FindPAM.cmake

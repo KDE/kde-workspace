@@ -13,7 +13,7 @@ set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH} )
 
 #search packages used by KDE
-set(QT_MIN_VERSION "4.7.0")
+set(QT_MIN_VERSION "4.8.0")
 
 find_package(KDE4 4.9.4 REQUIRED)
 include(KDE4Defaults)
@@ -21,6 +21,7 @@ include(KDE4Defaults)
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
 
 find_package(Strigi)
+
 set_package_properties(Strigi PROPERTIES DESCRIPTION "Desktop indexing and search support"
                        URL "http://strigi.sourceforge.net"
                        TYPE REQUIRED
@@ -66,6 +67,11 @@ macro_optional_find_package(OpenGLES)
 set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
                        URL "http://www.khronos.org/opengles"
                        TYPE OPTIONAL
+                      )
+macro_optional_find_package(UDev)
+set_package_properties(UDev PROPERTIES DESCRIPTION "The UDev Libraries"
+                       TYPE OPTIONAL
+                       PURPOSE "Allows support for UPower backend in PowerDevil - STRONGLY RECOMMENDED"
                       )
 
 
@@ -129,13 +135,6 @@ set_package_properties(Fontconfig PROPERTIES DESCRIPTION "Font access configurat
                        URL "http://www.freedesktop.org/wiki/Software/fontconfig"
                        TYPE OPTIONAL
                        PURPOSE "Needed to build font configuration and installation tools"
-                      )
-
-macro_optional_find_package(Googlegadgets 0.11.0)
-set_package_properties(Googlegadgets PROPERTIES DESCRIPTION "Google Gadgets library"
-                       URL "http://code.google.com/p/google-gadgets-for-linux"
-                       TYPE OPTIONAL
-                       PURPOSE "Needed to build plasma scriptengine for google gadgets"
                       )
 
 #### Python support ( plasma scriptengines ) ####
@@ -237,7 +236,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    macro_optional_add_subdirectory(klipper)
    macro_optional_add_subdirectory(kmenuedit)
    macro_optional_add_subdirectory(krunner)
-   macro_optional_add_subdirectory(solid)
+   macro_optional_add_subdirectory(solid-actions-kcm)
    macro_optional_add_subdirectory(kstartupconfig)
    macro_optional_add_subdirectory(freespacenotifier)
    macro_optional_add_subdirectory(kscreensaver)

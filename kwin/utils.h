@@ -22,29 +22,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_UTILS_H
 #define KWIN_UTILS_H
 
-class QLabel;
-
+// cmake stuff
 #include <config-X11.h>
 #include <config-kwin.h>
-
 #include <kwinconfig.h>
-
-#include <X11/Xlib.h>
-
-#include <fixx11h.h>
-
-#include <QWidget>
-#include <QScopedPointer>
-#include <kmanagerselection.h>
-#include <netwm_def.h>
-#include <kkeysequencewidget.h>
-#include <limits.h>
-#include <kdialog.h>
-
+// kwin
 #include <kwinglobals.h>
-
-// needed by the DBUS interface
-Q_DECLARE_METATYPE(QList<int>)
+// KDE
+#include <KDE/NET>
+#include <KDE/KSelectionWatcher>
+// Qt
+#include <QPoint>
+#include <QRect>
+#include <QScopedPointer>
+// X
+#include <X11/Xlib.h>
+#include <fixx11h.h>
+// system
+#include <limits.h>
 
 namespace KWin
 {
@@ -92,7 +87,6 @@ typedef QList< Group* > GroupList;
 typedef QList< const Group* > ConstGroupList;
 
 extern Options* options;
-extern bool initting; // whether kwin is starting up
 
 enum Layer {
     UnknownLayer = -1,
@@ -143,12 +137,6 @@ private:
 };
 typedef QVector<StrutRect> StrutRects;
 
-// Some KWin classes, mainly Client and Workspace, are very tighly coupled,
-// and some of the methods of one class may be called only from speficic places.
-// Those methods have additional allowed_t argument. If you pass Allowed
-// as an argument to any function, make sure you really know what you're doing.
-enum allowed_t { Allowed };
-
 // some enums to have more readable code, instead of using bools
 enum ForceGeometry_t { NormalGeometrySet, ForceGeometrySet };
 
@@ -175,11 +163,6 @@ enum HiddenPreviews {
     HiddenPreviewsAlways
 };
 
-// compile with XShape older than 1.0
-#ifndef ShapeInput
-const int ShapeInput = 2;
-#endif
-
 class Motif
 {
 public:
@@ -187,7 +170,7 @@ public:
     // property.  If it explicitly requests that decorations be shown
     // or hidden, 'got_noborder' is set to true and 'noborder' is set
     // appropriately.
-    static void readFlags(WId w, bool& got_noborder, bool& noborder,
+    static void readFlags(Window w, bool& got_noborder, bool& noborder,
                           bool& resize, bool& move, bool& minimize, bool& maximize,
                           bool& close);
     struct MwmHints {
@@ -252,7 +235,7 @@ public:
     ScopedCPointer(T *p = 0) : QScopedPointer<T, QScopedPointerPodDeleter>(p) {}
 };
 
-QByteArray getStringProperty(WId w, Atom prop, char separator = 0);
+QByteArray getStringProperty(Window w, Atom prop, char separator = 0);
 void updateXTime();
 void grabXServer();
 void ungrabXServer();
@@ -347,30 +330,6 @@ Qt::MouseButtons x11ToQtMouseButtons(int state);
 Qt::KeyboardModifiers x11ToQtKeyboardModifiers(int state);
 
 void checkNonExistentClients();
-
-#ifndef KCMRULES
-// Qt dialogs emit no signal when closed :(
-class ShortcutDialog
-    : public KDialog
-{
-    Q_OBJECT
-public:
-    explicit ShortcutDialog(const QKeySequence& cut);
-    virtual void accept();
-    QKeySequence shortcut() const;
-public Q_SLOTS:
-    void keySequenceChanged(const QKeySequence &seq);
-signals:
-    void dialogDone(bool ok);
-protected:
-    virtual void done(int r);
-private:
-    KKeySequenceWidget* widget;
-    QKeySequence _shortcut;
-    QLabel *warning;
-};
-
-#endif //KCMRULES
 
 } // namespace
 

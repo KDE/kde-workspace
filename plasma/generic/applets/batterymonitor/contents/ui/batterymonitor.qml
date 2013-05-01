@@ -153,6 +153,17 @@ Item {
             Logic.updateTooltip();
             Logic.updateBrightness();
         }
+        onSourceAdded: {
+            if (source == "Battery0") {
+		disconnectSource(source);
+                connectSource(source);
+            }
+        }
+        onSourceRemoved: {
+            if (source == "Battery0") {
+                disconnectSource(source);
+            }
+        }
     }
 
     property QtObject batteries: PlasmaCore.DataModel {
@@ -188,6 +199,7 @@ Item {
         model: batteries
         hasBattery: batteries.cumulativePluggedin
         percent: batteries.cumulativePercent
+        isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"]
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
         showSuspendButton: Platform.shouldOfferSuspend(pmSource)

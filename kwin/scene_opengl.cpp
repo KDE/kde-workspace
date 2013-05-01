@@ -42,6 +42,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lanczosfilter.h"
 #include "overlaywindow.h"
 #include "paintredirector.h"
+#include "screens.h"
+#include "workspace.h"
 
 #include <math.h>
 
@@ -56,7 +58,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDBusConnectionInterface>
 #include <QDBusInterface>
 #include <QGraphicsScale>
-#include <QDesktopWidget>
 #include <QStringList>
 #include <QVector2D>
 #include <QVector4D>
@@ -254,6 +255,46 @@ bool SceneOpenGL::initFailed() const
     return !init_ok;
 }
 
+#ifndef KWIN_HAVE_OPENGLES
+void SceneOpenGL::copyPixels(const QRegion &region)
+{
+    GLint shader = 0;
+    if (ShaderManager::instance()->isShaderBound()) {
+        glGetIntegerv(GL_CURRENT_PROGRAM, &shader);
+        glUseProgram(0);
+    }
+    bool reenableTexUnit = false;
+    if (glIsEnabled(GL_TEXTURE_2D)) {
+        glDisable(GL_TEXTURE_2D);
+        reenableTexUnit = true;
+    }
+    // no idea why glScissor() is used, but Compiz has it and it doesn't seem to hurt
+    glEnable(GL_SCISSOR_TEST);
+
+    int xpos = 0;
+    int ypos = 0;
+    foreach (const QRect &r, region.rects()) {
+        // convert to OpenGL coordinates
+        int y = displayHeight() - r.y() - r.height();
+        glBitmap(0, 0, 0, 0, r.x() - xpos, y - ypos, NULL); // not glRasterPos2f, see glxbackend.cpp
+        xpos = r.x();
+        ypos = y;
+        glScissor(r.x(), y, r.width(), r.height());
+        glCopyPixels(r.x(), y, r.width(), r.height(), GL_COLOR);
+    }
+
+    glBitmap(0, 0, 0, 0, -xpos, -ypos, NULL); // move position back to 0,0
+    glDisable(GL_SCISSOR_TEST);
+    if (reenableTexUnit) {
+        glEnable(GL_TEXTURE_2D);
+    }
+    // rebind previously bound shader
+    if (ShaderManager::instance()->isShaderBound()) {
+        glUseProgram(shader);
+    }
+}
+#endif
+
 int SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
 {
     // actually paint the frame, flushed with the NEXT frame
@@ -269,48 +310,14 @@ int SceneOpenGL::paint(QRegion damage, ToplevelList toplevels)
     checkGLError("Paint1");
 #endif
 
-    const QRegion displayRegion(0, 0, displayWidth(), displayHeight());
     paintScreen(&mask, &damage);   // call generic implementation
 #ifndef KWIN_HAVE_OPENGLES
+    const QRegion displayRegion(0, 0, displayWidth(), displayHeight());
     // copy dirty parts from front to backbuffer
     if (options->glPreferBufferSwap() == Options::CopyFrontBuffer && damage != displayRegion) {
-        GLint shader = 0;
-        if (ShaderManager::instance()->isShaderBound()) {
-            glGetIntegerv(GL_CURRENT_PROGRAM, &shader);
-            glUseProgram(0);
-        }
-        bool reenableTexUnit = false;
-        if (glIsEnabled(GL_TEXTURE_2D)) {
-            glDisable(GL_TEXTURE_2D);
-            reenableTexUnit = true;
-        }
-        // no idea why glScissor() is used, but Compiz has it and it doesn't seem to hurt
-        glEnable(GL_SCISSOR_TEST);
         glReadBuffer(GL_FRONT);
-
-        int xpos = 0;
-        int ypos = 0;
-        const QRegion dirty = displayRegion - damage;
-        foreach (const QRect &r, dirty.rects()) {
-            // convert to OpenGL coordinates
-            int y = displayHeight() - r.y() - r.height();
-            glBitmap(0, 0, 0, 0, r.x() - xpos, y - ypos, NULL); // not glRasterPos2f, see glxbackend.cpp
-            xpos = r.x();
-            ypos = y;
-            glScissor(r.x(), y, r.width(), r.height());
-            glCopyPixels(r.x(), y, r.width(), r.height(), GL_COLOR);
-        }
-
-        glBitmap(0, 0, 0, 0, -xpos, -ypos, NULL); // move position back to 0,0
+        copyPixels(displayRegion - damage);
         glReadBuffer(GL_BACK);
-        glDisable(GL_SCISSOR_TEST);
-        if (reenableTexUnit) {
-            glEnable(GL_TEXTURE_2D);
-        }
-        // rebind previously bound shader
-        if (ShaderManager::instance()->isShaderBound()) {
-            glUseProgram(shader);
-        }
         damage = displayRegion;
     }
 #endif
@@ -374,7 +381,6 @@ void SceneOpenGL::paintBackground(QRegion region)
 
 void SceneOpenGL::extendPaintRegion(QRegion &region, bool opaqueFullscreen)
 {
-#ifndef KWIN_HAVE_OPENGLES
     if (options->glPreferBufferSwap() == Options::ExtendDamage) { // only Extend "large" repaints
         const QRegion displayRegion(0, 0, displayWidth(), displayHeight());
         uint damagedPixels = 0;
@@ -395,10 +401,6 @@ void SceneOpenGL::extendPaintRegion(QRegion &region, bool opaqueFullscreen)
     } else if (options->glPreferBufferSwap() == Options::PaintFullScreen) { // forced full rePaint
         region = QRegion(0, 0, displayWidth(), displayHeight());
     }
-#else
-    Q_UNUSED(region);
-    Q_UNUSED(opaqueFullscreen);
-#endif
 }
 
 void SceneOpenGL::windowAdded(Toplevel* c)
@@ -546,6 +548,15 @@ void SceneOpenGL::screenGeometryChanged(const QSize &size)
     ShaderManager::instance()->resetAllShaders();
 }
 
+void SceneOpenGL::paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data)
+{
+    const QRect r = region.boundingRect();
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(r.x(), displayHeight() - r.y() - r.height(), r.width(), r.height());
+    KWin::Scene::paintDesktop(desktop, mask, region, data);
+    glDisable(GL_SCISSOR_TEST);
+}
+
 //****************************************
 // SceneOpenGL2
 //****************************************
@@ -622,6 +633,17 @@ void SceneOpenGL2::paintGenericScreen(int mask, ScreenPaintData data)
     Scene::paintGenericScreen(mask, data);
 }
 
+void SceneOpenGL2::paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data)
+{
+    ShaderBinder binder(ShaderManager::GenericShader);
+    GLShader *shader = binder.shader();
+    QMatrix4x4 screenTransformation = shader->getUniformMatrix4x4("screenTransformation");
+
+    KWin::SceneOpenGL::paintDesktop(desktop, mask, region, data);
+
+    shader->setUniform(GLShader::ScreenTransformation, screenTransformation);
+}
+
 void SceneOpenGL2::doPaintBackground(const QVector< float >& vertices)
 {
     GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
@@ -644,11 +666,11 @@ void SceneOpenGL2::finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region
 {
     if (m_colorCorrection->isEnabled()) {
         // Split the painting for separate screens
-        int numScreens = Workspace::self()->numScreens();
+        const int numScreens = screens()->count();
         for (int screen = 0; screen < numScreens; ++ screen) {
             QRegion regionForScreen(region);
             if (numScreens > 1)
-                regionForScreen = region.intersected(Workspace::self()->screenGeometry(screen));
+                regionForScreen = region.intersected(screens()->geometry(screen));
 
             data.setScreen(screen);
             performPaintWindow(w, mask, regionForScreen, data);
@@ -664,8 +686,7 @@ void SceneOpenGL2::performPaintWindow(EffectWindowImpl* w, int mask, QRegion reg
         if (!m_lanczosFilter) {
             m_lanczosFilter = new LanczosFilter(this);
             // recreate the lanczos filter when the screen gets resized
-            connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SLOT(resetLanczosFilter()));
-            connect(QApplication::desktop(), SIGNAL(resized(int)), SLOT(resetLanczosFilter()));
+            connect(screens(), SIGNAL(changed()), SLOT(resetLanczosFilter()));
         }
         m_lanczosFilter->performPaint(w, mask, region, data);
     } else
@@ -995,7 +1016,7 @@ void SceneOpenGL::Window::performPaint(int mask, QRegion region, WindowPaintData
     if (region.isEmpty())
         return;
 
-    bool hardwareClipping = region != infiniteRegion() && (mask & PAINT_WINDOW_TRANSFORMED);
+    bool hardwareClipping = region != infiniteRegion() && (mask & PAINT_WINDOW_TRANSFORMED) && !(mask & PAINT_SCREEN_TRANSFORMED);
     if (region != infiniteRegion() && !hardwareClipping) {
         WindowQuadList quads;
         const QRegion filterRegion = region.translated(-x(), -y());

@@ -29,10 +29,11 @@
 class SplashWindow;
 
 class SplashApp: public QApplication {
+    Q_OBJECT
 
 public:
-    SplashApp(Display * display, int &argc, char ** argv);
-    ~SplashApp();
+    explicit SplashApp(Display * display, int &argc, char ** argv);
+    virtual ~SplashApp();
 
     Display * display() const;
 
@@ -50,6 +51,10 @@ private:
     QList<SplashWindow *> m_windows;
     bool m_testing;
     QBasicTimer m_timer;
+    QDesktopWidget *m_desktop;
+
+private slots:
+    void screenGeometryChanged(int newCount);
 };
 
 #endif // SPLASH_APP_H_

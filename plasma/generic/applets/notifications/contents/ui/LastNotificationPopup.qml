@@ -339,6 +339,7 @@ PlasmaCore.Dialog {
             onClicked: {
                 lastNotificationPopup.visible = false
                 lastNotificationTimer.running = false
+                notificationsModel.remove((notificationsView.count-1)-notificationsView.currentIndex)
             }
         }
         states: [

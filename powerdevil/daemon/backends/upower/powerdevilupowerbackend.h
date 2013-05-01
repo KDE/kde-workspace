@@ -32,10 +32,13 @@
 #include "upower_device_interface.h"
 #include "upower_interface.h"
 #include "upower_kbdbacklight_interface.h"
+#include "udevqt.h"
 
 #define UPOWER_SERVICE "org.freedesktop.UPower"
 #define LOGIN1_SERVICE "org.freedesktop.login1"
 
+class UdevHelper;
+class XRandRX11Helper;
 class XRandrBrightness;
 
 class KDE_EXPORT PowerDevilUPowerBackend : public PowerDevil::BackendInterface
@@ -65,6 +68,9 @@ private slots:
     void slotDeviceChanged(const QString &);
     void slotPropertyChanged();
     void slotLogin1Resuming(bool active);
+    void slotScreenBrightnessChanged();
+    void onDeviceChanged(const UdevQt::Device &device);
+    void onKeyboardBrightnessChanged(int);
 
 private:
     // upower devices
@@ -73,8 +79,11 @@ private:
     // brightness
     QMap<BrightnessControlType, float> m_cachedBrightnessMap;
     XRandrBrightness         *m_brightnessControl;
+    XRandRX11Helper *m_randrHelper;
+
     OrgFreedesktopUPowerInterface *m_upowerInterface;
     OrgFreedesktopUPowerKbdBacklightInterface *m_kbdBacklight;
+    int m_kbdMaxBrightness;
 
     // login1 interface
     QWeakPointer<QDBusInterface> m_login1Interface;
@@ -83,6 +92,9 @@ private:
     bool m_lidIsPresent;
     bool m_lidIsClosed;
     bool m_onBattery;
+
+    //helper path
+    QString m_syspath;
 };
 
 #endif // POWERDEVILUPOWERBACKEND_H

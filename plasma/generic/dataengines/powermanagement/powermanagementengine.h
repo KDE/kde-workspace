@@ -61,6 +61,7 @@ private slots:
     void batteryRemainingTimeReply(QDBusPendingCallWatcher*);
     void screenBrightnessChanged(int brightness);
     void screenBrightnessReply(QDBusPendingCallWatcher *watcher);
+    void brightnessControlsAvailableChanged(bool available);
 
 private:
     QStringList basicSourceNames() const;

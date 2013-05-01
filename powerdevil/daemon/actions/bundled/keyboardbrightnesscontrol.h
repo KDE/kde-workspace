@@ -33,6 +33,7 @@ class KeyboardBrightnessControl : public PowerDevil::Action
 {
     Q_OBJECT
     Q_DISABLE_COPY(KeyboardBrightnessControl)
+    Q_CLASSINFO("D-Bus Interface", "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl")
 
 public:
     explicit KeyboardBrightnessControl(QObject* parent);
@@ -44,6 +45,7 @@ protected:
     virtual void onIdleTimeout(int msec);
     virtual void onProfileLoad();
     virtual void triggerImpl(const QVariantMap& args);
+    virtual bool isSupported();
 
 public:
     virtual bool loadAction(const KConfigGroup& config);
@@ -51,6 +53,17 @@ public:
 public Q_SLOTS:
     void showBrightnessOSD(int brightness);
     void onBrightnessChangedFromBackend(float brightness, PowerDevil::BackendInterface::BrightnessControlType type);
+
+    // DBus export
+    void increaseKeyboardBrightness();
+    void decreaseKeyboardBrightness();
+    void toggleKeyboardBacklight();
+
+    int keyboardBrightness() const;
+    void setKeyboardBrightness(int percent);
+
+Q_SIGNALS:
+    void keyboardBrightnessChanged(int percent);
 
 private:
     int m_defaultValue;

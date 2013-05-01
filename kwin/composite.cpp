@@ -36,7 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "shadow.h"
 #include "useractions.h"
 #include "compositingprefs.h"
-#include "notifications.h"
 #include "xcbutils.h"
 
 #include <stdio.h>
@@ -51,6 +50,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kactioncollection.h>
 #include <KDE/KGlobal>
 #include <KDE/KLocalizedString>
+#include <KDE/KNotification>
 
 #include <xcb/composite.h>
 #include <xcb/damage.h>
@@ -60,15 +60,9 @@ Q_DECLARE_METATYPE(KWin::Compositor::SuspendReason)
 namespace KWin
 {
 
-Compositor *Compositor::s_compositor = NULL;
 extern int currentRefreshRate();
 
-Compositor *Compositor::createCompositor(QObject *parent)
-{
-    Q_ASSERT(!s_compositor);
-    s_compositor = new Compositor(parent);
-    return s_compositor;
-}
+KWIN_SINGLETON_FACTORY_VARIABLE(Compositor, s_compositor)
 
 Compositor::Compositor(QObject* workspace)
     : QObject(workspace)
@@ -298,7 +292,7 @@ void Compositor::finish()
     }
     // discard all Deleted windows (#152914)
     while (!Workspace::self()->deletedList().isEmpty())
-        Workspace::self()->deletedList().first()->discard(Allowed);
+        Workspace::self()->deletedList().first()->discard();
     m_finishing = false;
     emit compositingToggled(false);
 }
@@ -398,7 +392,7 @@ void Compositor::toggleCompositing()
             // display notification only if there is the shortcut
             message = i18n("Desktop effects have been suspended by another application.<br/>"
                            "You can resume using the '%1' shortcut.", shortcut);
-            Notify::raise(Notify::CompositingSuspendedDbus, message);
+            KNotification::event("compositingsuspendeddbus", message);
         }
     }
 }
@@ -788,7 +782,7 @@ bool Toplevel::setupCompositing()
     if (!compositing())
         return false;
 
-    if (damage_handle != None)
+    if (damage_handle != XCB_NONE)
         return false;
 
     damage_handle = xcb_generate_id(connection());
@@ -813,7 +807,7 @@ bool Toplevel::setupCompositing()
 
 void Toplevel::finishCompositing()
 {
-    if (damage_handle == None)
+    if (damage_handle == XCB_NONE)
         return;
     Compositor::self()->checkUnredirect(true);
     if (effect_window->window() == this) { // otherwise it's already passed to Deleted, don't free data
@@ -871,10 +865,8 @@ xcb_pixmap_t Toplevel::createWindowPixmap()
     return pix;
 }
 
-void Toplevel::damageNotifyEvent(XDamageNotifyEvent* e)
+void Toplevel::damageNotifyEvent()
 {
-    Q_UNUSED(e)
-
     m_isDamaged = true;
 
     // Note: The rect is supposed to specify the damage extents,
@@ -888,7 +880,7 @@ bool Toplevel::compositing() const
     return Workspace::self()->compositing();
 }
 
-void Client::damageNotifyEvent(XDamageNotifyEvent* e)
+void Client::damageNotifyEvent()
 {
 #ifdef HAVE_XSYNC
     if (syncRequest.isPending && isResize()) {
@@ -906,7 +898,7 @@ void Client::damageNotifyEvent(XDamageNotifyEvent* e)
         setReadyForPainting();
 #endif
 
-    Toplevel::damageNotifyEvent(e);
+    Toplevel::damageNotifyEvent();
 }
 
 bool Toplevel::resetAndFetchDamage()
@@ -1065,19 +1057,25 @@ bool Toplevel::updateUnredirectedState()
     assert(compositing());
     bool should = shouldUnredirect() && !unredirectSuspend && !shape() && !hasAlpha() && opacity() == 1.0 &&
                   !static_cast<EffectsHandlerImpl*>(effects)->activeFullScreenEffect();
-    if (should && !unredirect) {
-        unredirect = true;
+    if (should == unredirect)
+        return false;
+    static QElapsedTimer lastUnredirect;
+    static const qint64 msecRedirectInterval = 100;
+    if (!lastUnredirect.hasExpired(msecRedirectInterval)) {
+        QTimer::singleShot(msecRedirectInterval, Compositor::self(), SLOT(checkUnredirect()));
+        return false;
+    }
+    lastUnredirect.start();
+    unredirect = should;
+    if (unredirect) {
         kDebug(1212) << "Unredirecting:" << this;
         xcb_composite_unredirect_window(connection(), frameId(), XCB_COMPOSITE_REDIRECT_MANUAL);
-        return true;
-    } else if (!should && unredirect) {
-        unredirect = false;
+    } else {
         kDebug(1212) << "Redirecting:" << this;
         xcb_composite_redirect_window(connection(), frameId(), XCB_COMPOSITE_REDIRECT_MANUAL);
         discardWindowPixmap();
-        return true;
     }
-    return false;
+    return true;
 }
 
 void Toplevel::suspendUnredirect(bool suspend)

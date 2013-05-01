@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "thumbnailitem.h"
 // KWin
 #include "client.h"
+#include "composite.h"
 #include "effects.h"
 #include "workspace.h"
 #include "composite.h"
@@ -33,12 +34,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KWin
 {
-ThumbnailItem::ThumbnailItem(QDeclarativeItem* parent)
+
+AbstractThumbnailItem::AbstractThumbnailItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
-    , m_wId(0)
     , m_clip(true)
     , m_parent(QWeakPointer<EffectWindowImpl>())
     , m_parentWindow(0)
+    , m_brightness(1.0)
+    , m_saturation(1.0)
 {
     setFlags(flags() & ~QGraphicsItem::ItemHasNoContents);
     Q_ASSERT(Compositor::isCreated());
@@ -47,11 +50,11 @@ ThumbnailItem::ThumbnailItem(QDeclarativeItem* parent)
     QTimer::singleShot(0, this, SLOT(init()));
 }
 
-ThumbnailItem::~ThumbnailItem()
+AbstractThumbnailItem::~AbstractThumbnailItem()
 {
 }
 
-void ThumbnailItem::compositingToggled()
+void AbstractThumbnailItem::compositingToggled()
 {
     m_parent.clear();
     if (effects) {
@@ -61,7 +64,7 @@ void ThumbnailItem::compositingToggled()
     }
 }
 
-void ThumbnailItem::init()
+void AbstractThumbnailItem::init()
 {
     findParentEffectWindow();
     if (!m_parent.isNull()) {
@@ -69,7 +72,7 @@ void ThumbnailItem::init()
     }
 }
 
-void ThumbnailItem::setParentWindow(qulonglong parentWindow)
+void AbstractThumbnailItem::setParentWindow(qulonglong parentWindow)
 {
     m_parentWindow = parentWindow;
     findParentEffectWindow();
@@ -78,7 +81,7 @@ void ThumbnailItem::setParentWindow(qulonglong parentWindow)
     }
 }
 
-void ThumbnailItem::findParentEffectWindow()
+void AbstractThumbnailItem::findParentEffectWindow()
 {
     if (effects) {
         if (m_parentWindow) {
@@ -104,19 +107,13 @@ void ThumbnailItem::findParentEffectWindow()
     }
 }
 
-void ThumbnailItem::setWId(qulonglong wId)
-{
-    m_wId = wId;
-    emit wIdChanged(wId);
-}
-
-void ThumbnailItem::setClip(bool clip)
+void AbstractThumbnailItem::setClip(bool clip)
 {
     m_clip = clip;
     emit clipChanged(clip);
 }
 
-void ThumbnailItem::effectWindowAdded()
+void AbstractThumbnailItem::effectWindowAdded()
 {
     // the window might be added before the EffectWindow is created
     // by using this slot we can register the thumbnail when it is finally created
@@ -128,7 +125,68 @@ void ThumbnailItem::effectWindowAdded()
     }
 }
 
-void ThumbnailItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void AbstractThumbnailItem::setBrightness(qreal brightness)
+{
+    if (qFuzzyCompare(brightness, m_brightness)) {
+        return;
+    }
+    m_brightness = brightness;
+    update();
+    emit brightnessChanged();
+}
+
+void AbstractThumbnailItem::setSaturation(qreal saturation)
+{
+    if (qFuzzyCompare(saturation, m_saturation)) {
+        return;
+    }
+    m_saturation = saturation;
+    update();
+    emit saturationChanged();
+}
+
+
+WindowThumbnailItem::WindowThumbnailItem(QDeclarativeItem* parent)
+    : AbstractThumbnailItem(parent)
+    , m_wId(0)
+    , m_client(NULL)
+{
+}
+
+WindowThumbnailItem::~WindowThumbnailItem()
+{
+}
+
+void WindowThumbnailItem::setWId(qulonglong wId)
+{
+    if (m_wId == wId) {
+        return;
+    }
+    m_wId = wId;
+    if (m_wId != 0) {
+        setClient(Workspace::self()->findClient(WindowMatchPredicate(m_wId)));
+    } else if (m_client) {
+        m_client = NULL;
+        emit clientChanged();
+    }
+    emit wIdChanged(wId);
+}
+
+void WindowThumbnailItem::setClient(Client *client)
+{
+    if (m_client == client) {
+        return;
+    }
+    m_client = client;
+    if (m_client) {
+        setWId(m_client->window());
+    } else {
+        setWId(0);
+    }
+    emit clientChanged();
+}
+
+void WindowThumbnailItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if (effects) {
         QDeclarativeItem::paint(painter, option, widget);
@@ -145,9 +203,46 @@ void ThumbnailItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
                         pixmap);
 }
 
-void ThumbnailItem::repaint(KWin::EffectWindow *w)
+void WindowThumbnailItem::repaint(KWin::EffectWindow *w)
 {
     if (static_cast<KWin::EffectWindowImpl*>(w)->window()->window() == m_wId) {
+        update();
+    }
+}
+
+DesktopThumbnailItem::DesktopThumbnailItem(QDeclarativeItem *parent)
+    : AbstractThumbnailItem(parent)
+    , m_desktop(0)
+{
+}
+
+DesktopThumbnailItem::~DesktopThumbnailItem()
+{
+}
+
+void DesktopThumbnailItem::setDesktop(int desktop)
+{
+    desktop = qBound<int>(1, desktop, VirtualDesktopManager::self()->count());
+    if (desktop == m_desktop) {
+        return;
+    }
+    m_desktop = desktop;
+    update();
+    emit desktopChanged(m_desktop);
+}
+
+void DesktopThumbnailItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    if (effects) {
+        QDeclarativeItem::paint(painter, option, widget);
+        return;
+    }
+    // TODO: render icon
+}
+
+void DesktopThumbnailItem::repaint(EffectWindow *w)
+{
+    if (w->isOnDesktop(m_desktop)) {
         update();
     }
 }

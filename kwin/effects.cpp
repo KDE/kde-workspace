@@ -22,6 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "effects.h"
 
 #include "effectsadaptor.h"
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
+#endif
+#include "decorations.h"
 #include "deleted.h"
 #include "client.h"
 #include "cursor.h"
@@ -38,6 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef KWIN_BUILD_SCRIPTING
 #include "scripting/scriptedeffect.h"
 #endif
+#include "screens.h"
 #include "thumbnailitem.h"
 #include "virtualdesktops.h"
 #include "workspace.h"
@@ -210,6 +215,8 @@ EffectsHandlerImpl::EffectsHandlerImpl(Compositor *compositor, Scene *scene)
     , m_compositor(compositor)
     , m_scene(scene)
     , m_screenLockerWatcher(new ScreenLockerWatcher(this))
+    , m_desktopRendering(false)
+    , m_currentRenderedDesktop(0)
 {
     new EffectsAdaptor(this);
     QDBusConnection dbus = QDBusConnection::sessionBus();
@@ -229,15 +236,19 @@ EffectsHandlerImpl::EffectsHandlerImpl(Compositor *compositor, Scene *scene)
     connect(Cursor::self(), SIGNAL(mouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)),
             SIGNAL(mouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)));
     connect(ws, SIGNAL(propertyNotify(long)), this, SLOT(slotPropertyNotify(long)));
-    connect(ws, SIGNAL(activityAdded(QString)), SIGNAL(activityAdded(QString)));
-    connect(ws, SIGNAL(activityRemoved(QString)), SIGNAL(activityRemoved(QString)));
-    connect(ws, SIGNAL(currentActivityChanged(QString)), SIGNAL(currentActivityChanged(QString)));
+#ifdef KWIN_BUILD_ACTIVITIES
+    Activities *activities = Activities::self();
+    connect(activities, SIGNAL(added(QString)), SIGNAL(activityAdded(QString)));
+    connect(activities, SIGNAL(removed(QString)), SIGNAL(activityRemoved(QString)));
+    connect(activities, SIGNAL(currentChanged(QString)), SIGNAL(currentActivityChanged(QString)));
+#endif
     connect(ws, SIGNAL(stackingOrderChanged()), SIGNAL(stackingOrderChanged()));
 #ifdef KWIN_BUILD_TABBOX
-    connect(ws->tabBox(), SIGNAL(tabBoxAdded(int)), SIGNAL(tabBoxAdded(int)));
-    connect(ws->tabBox(), SIGNAL(tabBoxUpdated()), SIGNAL(tabBoxUpdated()));
-    connect(ws->tabBox(), SIGNAL(tabBoxClosed()), SIGNAL(tabBoxClosed()));
-    connect(ws->tabBox(), SIGNAL(tabBoxKeyEvent(QKeyEvent*)), SIGNAL(tabBoxKeyEvent(QKeyEvent*)));
+    TabBox::TabBox *tabBox = TabBox::TabBox::self();
+    connect(tabBox, SIGNAL(tabBoxAdded(int)), SIGNAL(tabBoxAdded(int)));
+    connect(tabBox, SIGNAL(tabBoxUpdated()), SIGNAL(tabBoxUpdated()));
+    connect(tabBox, SIGNAL(tabBoxClosed()), SIGNAL(tabBoxClosed()));
+    connect(tabBox, SIGNAL(tabBoxKeyEvent(QKeyEvent*)), SIGNAL(tabBoxKeyEvent(QKeyEvent*)));
 #endif
 #ifdef KWIN_BUILD_SCREENEDGES
     connect(ScreenEdges::self(), SIGNAL(approaching(ElectricBorder,qreal,QRect)), SIGNAL(screenEdgeApproaching(ElectricBorder,qreal,QRect)));
@@ -364,6 +375,22 @@ void EffectsHandlerImpl::paintScreen(int mask, QRegion region, ScreenPaintData& 
         m_scene->finalPaintScreen(mask, region, data);
 }
 
+void EffectsHandlerImpl::paintDesktop(int desktop, int mask, QRegion region, ScreenPaintData &data)
+{
+    if (desktop < 1 || desktop > numberOfDesktops()) {
+        return;
+    }
+    m_currentRenderedDesktop = desktop;
+    m_desktopRendering = true;
+    // save the paint screen iterator
+    QList<Effect*>::iterator savedIterator = m_currentPaintScreenIterator;
+    m_currentPaintScreenIterator = m_activeEffects.begin();
+    effects->paintScreen(mask, region, data);
+    // restore the saved iterator
+    m_currentPaintScreenIterator = savedIterator;
+    m_desktopRendering = false;
+}
+
 void EffectsHandlerImpl::postPaintScreen()
 {
     if (m_currentPaintScreenIterator != m_activeEffects.end()) {
@@ -445,17 +472,17 @@ void EffectsHandlerImpl::buildQuads(EffectWindow* w, WindowQuadList& quadList)
 
 bool EffectsHandlerImpl::hasDecorationShadows() const
 {
-    return Workspace::self()->hasDecorationShadows();
+    return decorationPlugin()->hasShadows();
 }
 
 bool EffectsHandlerImpl::decorationsHaveAlpha() const
 {
-    return Workspace::self()->decorationHasAlpha();
+    return decorationPlugin()->hasAlpha();
 }
 
 bool EffectsHandlerImpl::decorationSupportsBlurBehind() const
 {
-    return Workspace::self()->decorationSupportsBlurBehind();
+    return decorationPlugin()->supportsBlurBehind();
 }
 
 // start another painting pass
@@ -824,7 +851,11 @@ void EffectsHandlerImpl::setShowingDesktop(bool showing)
 
 QString EffectsHandlerImpl::currentActivity() const
 {
-    return Workspace::self()->currentActivity();
+#ifdef KWIN_BUILD_ACTIVITIES
+    return Activities::self()->current();
+#else
+    return QString();
+#endif
 }
 
 int EffectsHandlerImpl::currentDesktop() const
@@ -969,10 +1000,7 @@ void EffectsHandlerImpl::setTabBoxWindow(EffectWindow* w)
 {
 #ifdef KWIN_BUILD_TABBOX
     if (Client* c = dynamic_cast< Client* >(static_cast< EffectWindowImpl* >(w)->window())) {
-
-        if (Workspace::self()->hasTabBox()) {
-            Workspace::self()->tabBox()->setCurrentClient(c);
-        }
+        TabBox::TabBox::self()->setCurrentClient(c);
     }
 #else
     Q_UNUSED(w)
@@ -982,9 +1010,7 @@ void EffectsHandlerImpl::setTabBoxWindow(EffectWindow* w)
 void EffectsHandlerImpl::setTabBoxDesktop(int desktop)
 {
 #ifdef KWIN_BUILD_TABBOX
-    if (Workspace::self()->hasTabBox()) {
-        Workspace::self()->tabBox()->setCurrentDesktop(desktop);
-    }
+    TabBox::TabBox::self()->setCurrentDesktop(desktop);
 #else
     Q_UNUSED(desktop)
 #endif
@@ -995,11 +1021,7 @@ EffectWindowList EffectsHandlerImpl::currentTabBoxWindowList() const
 #ifdef KWIN_BUILD_TABBOX
     EffectWindowList ret;
     ClientList clients;
-    if (Workspace::self()->hasTabBox()) {
-        clients = Workspace::self()->tabBox()->currentClientList();
-    } else {
-        clients = ClientList();
-    }
+    clients = TabBox::TabBox::self()->currentClientList();
     foreach (Client * c, clients)
     ret.append(c->effectWindow());
     return ret;
@@ -1011,36 +1033,28 @@ EffectWindowList EffectsHandlerImpl::currentTabBoxWindowList() const
 void EffectsHandlerImpl::refTabBox()
 {
 #ifdef KWIN_BUILD_TABBOX
-    if (Workspace::self()->hasTabBox()) {
-        Workspace::self()->tabBox()->reference();
-    }
+    TabBox::TabBox::self()->reference();
 #endif
 }
 
 void EffectsHandlerImpl::unrefTabBox()
 {
 #ifdef KWIN_BUILD_TABBOX
-    if (Workspace::self()->hasTabBox()) {
-        Workspace::self()->tabBox()->unreference();
-    }
+    TabBox::TabBox::self()->unreference();
 #endif
 }
 
 void EffectsHandlerImpl::closeTabBox()
 {
 #ifdef KWIN_BUILD_TABBOX
-    if (Workspace::self()->hasTabBox()) {
-        Workspace::self()->tabBox()->close();
-    }
+    TabBox::TabBox::self()->close();
 #endif
 }
 
 QList< int > EffectsHandlerImpl::currentTabBoxDesktopList() const
 {
 #ifdef KWIN_BUILD_TABBOX
-    if (Workspace::self()->hasTabBox()) {
-        return Workspace::self()->tabBox()->currentDesktopList();
-    }
+    return TabBox::TabBox::self()->currentDesktopList();
 #endif
     return QList< int >();
 }
@@ -1048,9 +1062,7 @@ QList< int > EffectsHandlerImpl::currentTabBoxDesktopList() const
 int EffectsHandlerImpl::currentTabBoxDesktop() const
 {
 #ifdef KWIN_BUILD_TABBOX
-    if (Workspace::self()->hasTabBox()) {
-        return Workspace::self()->tabBox()->currentDesktop();
-    }
+    return TabBox::TabBox::self()->currentDesktop();
 #endif
     return -1;
 }
@@ -1058,10 +1070,8 @@ int EffectsHandlerImpl::currentTabBoxDesktop() const
 EffectWindow* EffectsHandlerImpl::currentTabBoxWindow() const
 {
 #ifdef KWIN_BUILD_TABBOX
-    if (Workspace::self()->hasTabBox()) {
-        if (Client* c = Workspace::self()->tabBox()->currentClient())
+    if (Client* c = TabBox::TabBox::self()->currentClient())
         return c->effectWindow();
-    }
 #endif
     return NULL;
 }
@@ -1088,17 +1098,17 @@ void EffectsHandlerImpl::addRepaint(int x, int y, int w, int h)
 
 int EffectsHandlerImpl::activeScreen() const
 {
-    return Workspace::self()->activeScreen();
+    return screens()->current();
 }
 
 int EffectsHandlerImpl::numScreens() const
 {
-    return Workspace::self()->numScreens();
+    return screens()->count();
 }
 
 int EffectsHandlerImpl::screenNumber(const QPoint& pos) const
 {
-    return Workspace::self()->screenNumber(pos);
+    return screens()->number(pos);
 }
 
 QRect EffectsHandlerImpl::clientArea(clientAreaOption opt, int screen, int desktop) const
@@ -1594,7 +1604,7 @@ QVariant EffectsHandlerImpl::kwinOption(KWinOption kwopt)
 {
     switch (kwopt) {
     case CloseButtonCorner:
-        return Workspace::self()->decorationCloseButtonCorner();
+        return decorationPlugin()->closeButtonCorner();
 #ifdef KWIN_BUILD_SCREENEDGES
     case SwitchDesktopOnScreenEdge:
         return ScreenEdges::self()->isDesktopSwitching();
@@ -1604,16 +1614,6 @@ QVariant EffectsHandlerImpl::kwinOption(KWinOption kwopt)
     default:
         return QVariant(); // an invalid one
     }
-}
-
-void EffectsHandlerImpl::slotShowOutline(const QRect& geometry)
-{
-    emit showOutline(geometry);
-}
-
-void EffectsHandlerImpl::slotHideOutline()
-{
-    emit hideOutline();
 }
 
 QString EffectsHandlerImpl::supportInformation(const QString &name) const
@@ -1638,9 +1638,21 @@ QString EffectsHandlerImpl::supportInformation(const QString &name) const
     return QString();
 }
 
+
 bool EffectsHandlerImpl::isScreenLocked() const
 {
     return m_screenLockerWatcher->isLocked();
+}
+
+QString EffectsHandlerImpl::debug(const QString& name, const QString& parameter) const
+{
+    QString internalName = name.startsWith("kwin4_effect_") ? name : "kwin4_effect_" + name;
+    for (QVector< EffectPair >::const_iterator it = loaded_effects.constBegin(); it != loaded_effects.constEnd(); ++it) {
+        if ((*it).first == internalName) {
+            return it->second->debug(parameter);
+        }
+    }
+    return QString();
 }
 
 //****************************************
@@ -1785,27 +1797,37 @@ EffectWindow* effectWindow(Scene::Window* w)
     return ret;
 }
 
-void EffectWindowImpl::registerThumbnail(ThumbnailItem *item)
+void EffectWindowImpl::elevate(bool elevate)
 {
-    insertThumbnail(item);
-    connect(item, SIGNAL(destroyed(QObject*)), SLOT(thumbnailDestroyed(QObject*)));
-    connect(item, SIGNAL(wIdChanged(qulonglong)), SLOT(thumbnailTargetChanged()));
+    effects->setElevatedWindow(this, elevate);
+}
+
+void EffectWindowImpl::registerThumbnail(AbstractThumbnailItem *item)
+{
+    if (WindowThumbnailItem *thumb = qobject_cast<WindowThumbnailItem*>(item)) {
+        insertThumbnail(thumb);
+        connect(thumb, SIGNAL(destroyed(QObject*)), SLOT(thumbnailDestroyed(QObject*)));
+        connect(thumb, SIGNAL(wIdChanged(qulonglong)), SLOT(thumbnailTargetChanged()));
+    } else if (DesktopThumbnailItem *desktopThumb = qobject_cast<DesktopThumbnailItem*>(item)) {
+        m_desktopThumbnails.append(desktopThumb);
+        connect(desktopThumb, SIGNAL(destroyed(QObject*)), SLOT(desktopThumbnailDestroyed(QObject*)));
+    }
 }
 
 void EffectWindowImpl::thumbnailDestroyed(QObject *object)
 {
     // we know it is a ThumbnailItem
-    m_thumbnails.remove(static_cast<ThumbnailItem*>(object));
+    m_thumbnails.remove(static_cast<WindowThumbnailItem*>(object));
 }
 
 void EffectWindowImpl::thumbnailTargetChanged()
 {
-    if (ThumbnailItem *item = qobject_cast<ThumbnailItem*>(sender())) {
+    if (WindowThumbnailItem *item = qobject_cast<WindowThumbnailItem*>(sender())) {
         insertThumbnail(item);
     }
 }
 
-void EffectWindowImpl::insertThumbnail(ThumbnailItem *item)
+void EffectWindowImpl::insertThumbnail(WindowThumbnailItem *item)
 {
     EffectWindow *w = effects->findWindow(item->wId());
     if (w) {
@@ -1813,6 +1835,12 @@ void EffectWindowImpl::insertThumbnail(ThumbnailItem *item)
     } else {
         m_thumbnails.insert(item, QWeakPointer<EffectWindowImpl>());
     }
+}
+
+void EffectWindowImpl::desktopThumbnailDestroyed(QObject *object)
+{
+    // we know it is a DesktopThumbnailItem
+    m_desktopThumbnails.removeAll(static_cast<DesktopThumbnailItem*>(object));
 }
 
 //****************************************

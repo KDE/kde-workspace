@@ -23,36 +23,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_WORKSPACE_H
 #define KWIN_WORKSPACE_H
 
+// kwin
+#include <kdecoration.h>
+#include "sm.h"
+#include "utils.h"
+// Qt
 #include <QTimer>
 #include <QVector>
-#include <kshortcut.h>
-#include <QCursor>
-#include <netwm.h>
-#include <kxmessages.h>
-#include <QElapsedTimer>
-#include <kmanagerselection.h>
-
-// need to include utils.h before we use the ifdefs
-#include "utils.h"
-#ifdef KWIN_BUILD_ACTIVITIES
-#include <KActivities/Controller>
-#endif
-
-#include "plugins.h"
-#include "kdecoration.h"
-#include "kdecorationfactory.h"
-#include "sm.h"
-#include "killwindow.h"
-
+// X
 #include <X11/Xlib.h>
 
 // TODO: Cleanup the order of things in this .h file
 
-class QMenu;
-class QActionGroup;
 class QStringList;
 class KConfig;
 class KActionCollection;
+class KShortcut;
 class KStartupInfo;
 class KStartupInfoId;
 class KStartupInfoData;
@@ -60,21 +46,11 @@ class KStartupInfoData;
 namespace KWin
 {
 
-#ifdef KWIN_BUILD_TABBOX
-namespace TabBox
-{
-class TabBox;
-}
-#endif
-
 class Client;
-class Outline;
+class KillWindow;
 class RootInfo;
-class PluginMgr;
-class Rules;
-class Scripting;
+class ShortcutDialog;
 class UserActionsMenu;
-class WindowRules;
 class Compositor;
 
 class Workspace : public QObject, public KDecorationDefines
@@ -91,9 +67,6 @@ public:
     bool workspaceEvent(XEvent*);
     bool workspaceEvent(QEvent*);
 
-    KDecoration* createDecoration(KDecorationBridge* bridge);
-    bool hasDecorationPlugin() const;
-
     bool hasClient(const Client*);
 
     template<typename T> Client* findClient(T predicate) const;
@@ -108,15 +81,6 @@ public:
     QRect clientArea(clientAreaOption, int screen, int desktop) const;
 
     QRegion restrictedMoveArea(int desktop, StrutAreas areas = StrutAreaAll) const;
-
-    /**
-     * @internal
-     */
-    void killWindowId(Window window);
-
-    void killWindow() {
-        slotKillWindow();
-    }
 
     bool initializing() const;
 
@@ -198,8 +162,6 @@ public:
         return deleted;
     }
 
-    Outline* outline();
-
 #ifdef KWIN_BUILD_SCREENEDGES
     void stackScreenEdgesUnderOverrideRedirect();
 #endif
@@ -208,38 +170,13 @@ public:
     QPoint cascadeOffset(const Client *c) const;
 
 private:
-    QString activity_;
-    QStringList allActivities_, openActivities_;
-#ifdef KWIN_BUILD_ACTIVITIES
-    KActivities::Controller activityController_;
-#endif
-
-    Outline* m_outline;
     Compositor *m_compositor;
 
     //-------------------------------------------------
     // Unsorted
 
 public:
-    int activeScreen() const;
-    int numScreens() const;
-    void checkActiveScreen(const Client* c);
     bool isOnCurrentHead();
-    void setActiveScreenMouse(const QPoint& mousepos);
-    QRect screenGeometry(int screen) const;
-    int screenNumber(const QPoint& pos) const;
-    QString currentActivity() const {
-        return activity_;
-    }
-    QStringList activityList() const {
-        return allActivities_;
-    }
-    const QStringList &openActivities() const {
-        return openActivities_;
-    }
-#ifdef KWIN_BUILD_ACTIVITIES
-    void updateActivityList(bool running, bool updateCurrent, QObject *target = NULL, QString slot = QString());
-#endif
     // True when performing Workspace::updateClientArea().
     // The calls below are valid only in that case.
     bool inUpdateClientArea() const;
@@ -247,12 +184,6 @@ public:
     QVector< QRect > previousScreenSizes() const;
     int oldDisplayWidth() const;
     int oldDisplayHeight() const;
-
-    // Tab box
-#ifdef KWIN_BUILD_TABBOX
-    TabBox::TabBox *tabBox() const;
-#endif
-    bool hasTabBox() const;
 
     KActionCollection* actionCollection() const {
         return keys;
@@ -263,12 +194,6 @@ public:
     KActionCollection* clientKeys() const {
         return client_keys;
     }
-
-#ifdef KWIN_BUILD_SCRIPTING
-    Scripting *scripting() {
-        return m_scripting;
-    }
-#endif
 
     /**
      * Returns the list of clients sorted in stacking order, with topmost client
@@ -282,7 +207,6 @@ public:
                                bool only_normal = true) const;
     Client* findDesktop(bool topmost, int desktop) const;
     void sendClientToDesktop(Client* c, int desktop, bool dont_activate);
-    void toggleClientOnActivity(Client* c, const QString &activity, bool dont_activate);
     void windowToPreviousDesktop(Client* c);
     void windowToNextDesktop(Client* c);
     void sendClientToScreen(Client* c, int screen);
@@ -307,7 +231,6 @@ public:
 
     void updateMinimizedOfTransients(Client*);
     void updateOnAllDesktopsOfTransients(Client*);
-    void updateOnAllActivitiesOfTransients(Client*);
     void checkTransients(Window w);
 
     void performWindowOperation(Client* c, WindowOperation op);
@@ -315,31 +238,12 @@ public:
     void storeSession(KConfig* config, SMSavePhase phase);
     void storeClient(KConfigGroup &cg, int num, Client *c);
     void storeSubSession(const QString &name, QSet<QByteArray> sessionIds);
+    void loadSubSessionInfo(const QString &name);
 
     SessionInfo* takeSessionInfo(Client*);
-    WindowRules findWindowRules(const Client*, bool);
-    void rulesUpdated();
-    void discardUsedWindowRules(Client* c, bool withdraw);
-    void disableRulesUpdates(bool disable);
-    bool rulesUpdatesDisabled() const;
-
-    bool hasDecorationShadows() const;
-    Qt::Corner decorationCloseButtonCorner();
-    bool decorationHasAlpha() const;
-    bool decorationSupportsAnnounceAlpha() const;
-    bool decorationSupportsTabbing() const; // Returns true if the decoration supports tabs.
-    bool decorationSupportsFrameOverlap() const;
-    bool decorationSupportsBlurBehind() const;
 
     // D-Bus interface
-    /**
-     * @deprecated
-     * @todo: remove KDE5
-     **/
-    QList<int> decorationSupportedColors() const;
     bool waitForCompositingSetup();
-    bool stopActivity(const QString &id);
-    bool startActivity(const QString &id);
     QString supportInformation() const;
 
     void setCurrentScreen(int new_screen);
@@ -351,16 +255,16 @@ public:
     void sendPingToWindow(Window w, Time timestamp);   // Called from Client::pingWindow()
     void sendTakeActivity(Client* c, Time timestamp, long flags);   // Called from Client::takeActivity()
 
-    void removeClient(Client*, allowed_t);   // Only called from Client::destroyClient() or Client::releaseWindow()
-    void setActiveClient(Client*, allowed_t);
+    void removeClient(Client*);   // Only called from Client::destroyClient() or Client::releaseWindow()
+    void setActiveClient(Client*);
     Group* findGroup(Window leader) const;
-    void addGroup(Group* group, allowed_t);
-    void removeGroup(Group* group, allowed_t);
+    void addGroup(Group* group);
+    void removeGroup(Group* group);
     Group* findClientLeaderGroup(const Client* c) const;
 
-    void removeUnmanaged(Unmanaged*, allowed_t);   // Only called from Unmanaged::release()
-    void removeDeleted(Deleted*, allowed_t);
-    void addDeleted(Deleted*, Toplevel*, allowed_t);
+    void removeUnmanaged(Unmanaged*);   // Only called from Unmanaged::release()
+    void removeDeleted(Deleted*);
+    void addDeleted(Deleted*, Toplevel*);
 
     bool checkStartupNotification(Window w, KStartupInfoId& id, KStartupInfoData& data);
 
@@ -465,7 +369,6 @@ public slots:
 
     void reconfigure();
     void slotReconfigure();
-    void slotCompositingToggled();
 
     void slotKillWindow();
 
@@ -482,19 +385,11 @@ public slots:
 
 private slots:
     void desktopResized();
-    void screenChangeTimeout();
     void slotUpdateToolWindows();
     void delayFocus();
-    void gotTemporaryRulesMessage(const QString&);
-    void cleanupTemporaryRules();
-    void writeWindowRules();
     void slotBlockShortcuts(int data);
     void slotReloadConfig();
     void updateCurrentActivity(const QString &new_activity);
-    void slotActivityRemoved(const QString &activity);
-    void slotActivityAdded(const QString &activity);
-    void reallyStopActivity(const QString &id);   //dbus deadlocks suck
-    void handleActivityReply();
     // virtual desktop handling
     void moveClientsFromRemovedDesktops();
     void slotDesktopCountChanged(uint previousCount, uint newCount);
@@ -521,23 +416,6 @@ signals:
     void propertyNotify(long a);
     void configChanged();
     void reinitializeCompositing();
-    /**
-     * This signal is emitted when the global
-     * activity is changed
-     * @param id id of the new current activity
-     */
-    void currentActivityChanged(const QString &id);
-    /**
-     * This signal is emitted when a new activity is added
-     * @param id id of the new activity
-     */
-    void activityAdded(const QString &id);
-    /**
-     * This signal is emitted when the activity
-     * is removed
-     * @param id id of the removed activity
-     */
-    void activityRemoved(const QString &id);
     /**
      * This signels is emitted when ever the stacking order is change, ie. a window is risen
      * or lowered
@@ -569,9 +447,9 @@ private:
 
     /// This is the right way to create a new client
     Client* createClient(Window w, bool is_mapped);
-    void addClient(Client* c, allowed_t);
+    void addClient(Client* c);
     Unmanaged* createUnmanaged(Window w);
-    void addUnmanaged(Unmanaged* c, allowed_t);
+    void addUnmanaged(Unmanaged* c);
 
     Window findSpecialEventWindow(XEvent* e);
 
@@ -589,17 +467,8 @@ private:
 
     void loadSessionInfo();
     void addSessionInfo(KConfigGroup &cg);
-    void loadSubSessionInfo(const QString &name);
-
-    void loadWindowRules();
-    void editWindowRules(Client* c, bool whole_app);
 
     QList<SessionInfo*> session;
-    QList<Rules*> rules;
-    KXMessages temporaryRulesMessages;
-    QTimer rulesUpdatedTimer;
-    QTimer screenChangedTimer;
-    bool rules_updates_disabled;
     static const char* windowTypeToTxt(NET::WindowType type);
     static NET::WindowType txtToWindowType(const char* txt);
     static bool sessionInfoWindowTypeMatch(Client* c, SessionInfo* info);
@@ -609,7 +478,6 @@ private:
     Client* most_recently_raised; // Used ONLY by raiseOrLowerClient()
     Client* movingClient;
     Client* pending_take_activity;
-    int active_screen;
 
     // Delay(ed) window focus timer and client
     QTimer* delayFocusTimer;
@@ -642,10 +510,6 @@ private:
 
     int block_focus;
 
-#ifdef KWIN_BUILD_TABBOX
-    TabBox::TabBox* tab_box;
-#endif
-
     /**
      * Holds the menu containing the user actions which is shown
      * on e.g. right click the window decoration.
@@ -661,8 +525,6 @@ private:
     Client* client_keys_client;
     bool global_shortcuts_disabled;
     bool global_shortcuts_disabled_for_client;
-
-    PluginMgr* mgr;
 
     RootInfo* rootInfo;
     QWidget* supportWindow;
@@ -698,8 +560,6 @@ private:
     bool forced_global_mouse_grab;
     friend class StackingUpdatesBlocker;
 
-    Scripting *m_scripting;
-
     QScopedPointer<KillWindow> m_windowKiller;
 
 private:
@@ -724,34 +584,6 @@ private:
     Workspace* ws;
 };
 
-/**
- * NET WM Protocol handler class
- */
-class RootInfo : public NETRootInfo
-{
-private:
-    typedef KWin::Client Client;  // Because of NET::Client
-
-public:
-    RootInfo(Workspace* ws, Display* dpy, Window w, const char* name, unsigned long pr[],
-             int pr_num, int scr = -1);
-
-protected:
-    virtual void changeNumberOfDesktops(int n);
-    virtual void changeCurrentDesktop(int d);
-    virtual void changeActiveWindow(Window w, NET::RequestSource src, Time timestamp, Window active_window);
-    virtual void closeWindow(Window w);
-    virtual void moveResize(Window w, int x_root, int y_root, unsigned long direction);
-    virtual void moveResizeWindow(Window w, int flags, int x, int y, int width, int height);
-    virtual void gotPing(Window w, Time timestamp);
-    virtual void restackWindow(Window w, RequestSource source, Window above, int detail, Time timestamp);
-    virtual void gotTakeActivity(Window w, Time timestamp, long flags);
-    virtual void changeShowingDesktop(bool showing);
-
-private:
-    Workspace* workspace;
-};
-
 //---------------------------------------------------------
 // Unsorted
 
@@ -770,13 +602,13 @@ inline Client* Workspace::mostRecentlyActivatedClient() const
     return should_get_focus.count() > 0 ? should_get_focus.last() : active_client;
 }
 
-inline void Workspace::addGroup(Group* group, allowed_t)
+inline void Workspace::addGroup(Group* group)
 {
     emit groupAdded(group);
     groups.append(group);
 }
 
-inline void Workspace::removeGroup(Group* group, allowed_t)
+inline void Workspace::removeGroup(Group* group)
 {
     groups.removeAll(group);
 }
@@ -830,11 +662,6 @@ inline bool Workspace::showingDesktop() const
 inline bool Workspace::globalShortcutsDisabled() const
 {
     return global_shortcuts_disabled || global_shortcuts_disabled_for_client;
-}
-
-inline bool Workspace::rulesUpdatesDisabled() const
-{
-    return rules_updates_disabled;
 }
 
 inline void Workspace::forceRestacking()
@@ -905,70 +732,6 @@ KWIN_COMPARE_PREDICATE(ClientMatchPredicate, Client, const Client*, cl == value)
 inline bool Workspace::hasClient(const Client* c)
 {
     return findClient(ClientMatchPredicate(c));
-}
-
-inline bool Workspace::hasDecorationPlugin() const
-{
-    if (!mgr) {
-        return false;
-    }
-    return !mgr->hasNoDecoration();
-}
-
-inline bool Workspace::hasDecorationShadows() const
-{
-    if (!hasDecorationPlugin()) {
-        return false;
-    }
-    return mgr->factory()->supports(AbilityProvidesShadow);
-}
-
-inline Qt::Corner Workspace::decorationCloseButtonCorner()
-{
-    if (!hasDecorationPlugin()) {
-        return Qt::TopRightCorner;
-    }
-    return mgr->factory()->closeButtonCorner();
-}
-
-inline bool Workspace::decorationHasAlpha() const
-{
-    if (!hasDecorationPlugin()) {
-        return false;
-    }
-    return mgr->factory()->supports(AbilityUsesAlphaChannel);
-}
-
-inline bool Workspace::decorationSupportsAnnounceAlpha() const
-{
-    if (!hasDecorationPlugin()) {
-        return false;
-    }
-    return mgr->factory()->supports(AbilityAnnounceAlphaChannel);
-}
-
-inline bool Workspace::decorationSupportsTabbing() const
-{
-    if (!hasDecorationPlugin()) {
-        return false;
-    }
-    return mgr->factory()->supports(AbilityTabbing);
-}
-
-inline bool Workspace::decorationSupportsFrameOverlap() const
-{
-    if (!hasDecorationPlugin()) {
-        return false;
-    }
-    return mgr->factory()->supports(AbilityExtendIntoClientArea);
-}
-
-inline bool Workspace::decorationSupportsBlurBehind() const
-{
-    if (!hasDecorationPlugin()) {
-        return false;
-    }
-    return mgr->factory()->supports(AbilityUsesBlurBehind);
 }
 
 } // namespace

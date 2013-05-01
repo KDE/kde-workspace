@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "deleted.h"
 #include "xcbutils.h"
 
+#include <QDebug>
+
 #include <X11/extensions/shape.h>
 
 namespace KWin
@@ -55,6 +57,7 @@ bool Unmanaged::track(Window w)
     setWindowHandles(w, w);   // the window is also the frame
     XSelectInput(display(), w, attr.your_event_mask | StructureNotifyMask | PropertyChangeMask);
     geom = QRect(attr.x, attr.y, attr.width, attr.height);
+    checkScreen();
     vis = attr.visual;
     bit_depth = attr.depth;
     unsigned long properties[ 2 ];
@@ -95,15 +98,15 @@ void Unmanaged::release(bool on_shutdown)
         XSelectInput(display(), window(), NoEventMask);
     }
     if (!on_shutdown) {
-        workspace()->removeUnmanaged(this, Allowed);
+        workspace()->removeUnmanaged(this);
         addWorkspaceRepaint(del->visibleRect());
         disownDataPassedToDeleted();
         del->unrefWindow();
     }
-    deleteUnmanaged(this, Allowed);
+    deleteUnmanaged(this);
 }
 
-void Unmanaged::deleteUnmanaged(Unmanaged* c, allowed_t)
+void Unmanaged::deleteUnmanaged(Unmanaged* c)
 {
     delete c;
 }

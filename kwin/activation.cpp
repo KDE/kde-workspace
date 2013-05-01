@@ -29,7 +29,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "cursor.h"
 #include "focuschain.h"
+#include "netinfo.h"
 #include "workspace.h"
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
+#endif
 
 #include <fixx11h.h>
 #include <kxerrorhandler.h>
@@ -37,10 +41,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kstringhandler.h>
 #include <KDE/KLocalizedString>
 
-#include "notifications.h"
 #include "atoms.h"
 #include "group.h"
 #include "rules.h"
+#include "screens.h"
 #include "useractions.h"
 #include <QX11Info>
 
@@ -224,7 +228,7 @@ namespace KWin
   activeClient(). And of course, to propagate the active client to the
   world.
  */
-void Workspace::setActiveClient(Client* c, allowed_t)
+void Workspace::setActiveClient(Client* c)
 {
     if (active_client == c)
         return;
@@ -281,7 +285,7 @@ void Workspace::activateClient(Client* c, bool force)
 {
     if (c == NULL) {
         focusToNull();
-        setActiveClient(NULL, Allowed);
+        setActiveClient(NULL);
         return;
     }
     raiseClient(c);
@@ -294,7 +298,7 @@ void Workspace::activateClient(Client* c, bool force)
     if (!c->isOnCurrentActivity()) {
         ++block_focus;
         //DBUS!
-        activityController_.setCurrentActivity(c->activities().first());   //first isn't necessarily best, but it's easiest
+        Activities::self()->setCurrent(c->activities().first()); //first isn't necessarily best, but it's easiest
         --block_focus;
     }
 #endif
@@ -374,9 +378,9 @@ void Workspace::takeActivity(Client* c, int flags, bool handled)
         kWarning(1212) << "takeActivity: not shown" ;
         return;
     }
-    c->takeActivity(flags, handled, Allowed);
-    if (!c->isOnScreen(active_screen))
-        active_screen = c->screen();
+    c->takeActivity(flags, handled);
+    if (!c->isOnActiveScreen())
+        screens()->setCurrent(c->screen());
 }
 
 void Workspace::handleTakeActivity(Client* c, Time /*timestamp*/, int flags)
@@ -386,7 +390,7 @@ void Workspace::handleTakeActivity(Client* c, Time /*timestamp*/, int flags)
     if ((flags & ActivityRaise) != 0)
         raiseClient(c);
     if ((flags & ActivityFocus) != 0 && c->isShown(false))
-        c->takeFocus(Allowed);
+        c->takeFocus();
     pending_take_activity = NULL;
 }
 
@@ -436,7 +440,7 @@ bool Workspace::activateNextClient(Client* c)
 
     if (c != NULL) {
         if (c == active_client)
-            setActiveClient(NULL, Allowed);
+            setActiveClient(NULL);
         should_get_focus.removeAll(c);
     }
 
@@ -462,7 +466,7 @@ bool Workspace::activateNextClient(Client* c)
     }
 
     if (!get_focus && options->isNextFocusPrefersMouse()) {
-        get_focus = clientUnderMouse(c ? c->screen() : activeScreen());
+        get_focus = clientUnderMouse(c ? c->screen() : screens()->current());
         if (get_focus && (get_focus == c || get_focus->isDesktop())) {
             // should rather not happen, but it cannot get the focus. rest of usability is tested above
             get_focus = NULL;
@@ -495,7 +499,7 @@ bool Workspace::activateNextClient(Client* c)
 
 void Workspace::setCurrentScreen(int new_screen)
 {
-    if (new_screen < 0 || new_screen >= numScreens())
+    if (new_screen < 0 || new_screen >= screens()->count())
         return;
     if (!options->focusPolicyIsReasonable())
         return;
@@ -506,7 +510,7 @@ void Workspace::setCurrentScreen(int new_screen)
         get_focus = findDesktop(true, desktop);
     if (get_focus != NULL && get_focus != mostRecentlyActivatedClient())
         requestFocus(get_focus);
-    active_screen = new_screen;
+    screens()->setCurrent(new_screen);
 }
 
 void Workspace::gotFocusIn(const Client* c)
@@ -696,38 +700,9 @@ void Client::demandAttention(bool set)
     if (demands_attention == set)
         return;
     demands_attention = set;
-    if (demands_attention) {
-        // Demand attention flag is often set right from manage(), when focus stealing prevention
-        // steps in. At that time the window has no taskbar entry yet, so KNotify cannot place
-        // e.g. the passive popup next to it. So wait up to 1 second for the icon geometry
-        // to be set.
-        // Delayed call to KNotify also solves the problem of having X server grab in manage(),
-        // which may deadlock when KNotify (or KLauncher when launching KNotify) need to access X.
-
-        // Setting the demands attention state needs to be done directly in KWin, because
-        // KNotify would try to set it, resulting in a call to KNotify again, etc.
-
-        info->setState(set ? NET::DemandsAttention : 0, NET::DemandsAttention);
-
-        if (demandAttentionKNotifyTimer == NULL) {
-            demandAttentionKNotifyTimer = new QTimer(this);
-            demandAttentionKNotifyTimer->setSingleShot(true);
-            connect(demandAttentionKNotifyTimer, SIGNAL(timeout()), SLOT(demandAttentionKNotify()));
-        }
-        demandAttentionKNotifyTimer->start(1000);
-    } else
-        info->setState(set ? NET::DemandsAttention : 0, NET::DemandsAttention);
+    info->setState(set ? NET::DemandsAttention : 0, NET::DemandsAttention);
     workspace()->clientAttentionChanged(this, set);
     emit demandsAttentionChanged();
-}
-
-void Client::demandAttentionKNotify()
-{
-    Notify::Event e = isOnCurrentDesktop() ? Notify::DemandAttentionCurrent : Notify::DemandAttentionOther;
-    Notify::raise(e, i18n("Window '%1' demands attention.", KStringHandler::csqueeze(caption())), this);
-    demandAttentionKNotifyTimer->stop();
-    demandAttentionKNotifyTimer->deleteLater();
-    demandAttentionKNotifyTimer = NULL;
 }
 
 // TODO I probably shouldn't be lazy here and do it without the macro, so that people can read it
@@ -837,10 +812,7 @@ void Client::setActive(bool act)
                              ? rules()->checkOpacityActive(qRound(opacity() * 100.0))
                              : rules()->checkOpacityInactive(qRound(opacity() * 100.0));
     setOpacity(ruledOpacity / 100.0);
-    workspace()->setActiveClient(act ? this : NULL, Allowed);
-
-    if (active)
-        Notify::raise(Notify::Activate);
+    workspace()->setActiveClient(act ? this : NULL);
 
     if (!active)
         cancelAutoRaise();

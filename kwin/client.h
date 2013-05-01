@@ -22,39 +22,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_CLIENT_H
 #define KWIN_CLIENT_H
 
-#include <config-X11.h>
-
-#include "config-kwin.h"
-
-#include <QFrame>
-#include <QPixmap>
-#include <netwm.h>
-#include <kdebug.h>
-#include <assert.h>
-#include <kshortcut.h>
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <fixx11h.h>
-
-#include "utils.h"
+// kwin
 #include "options.h"
-#include "workspace.h"
-#include "kdecoration.h"
 #include "rules.h"
-#include "toplevel.h"
 #include "tabgroup.h"
+#include "toplevel.h"
 #include "xcbutils.h"
-
+// KDE
+#include <KDE/KShortcut>
+#include <KDE/NETWinInfo>
+// Qt
+#include <QPixmap>
+// X
 #ifdef HAVE_XSYNC
 #include <X11/extensions/sync.h>
 #endif
+#include <X11/Xutil.h>
+#include <fixx11h.h>
 
 // TODO: Cleanup the order of things in this .h file
 
-class QProcess;
 class QTimer;
 class KStartupInfoData;
+class KStartupInfoId;
 
 namespace KWin
 {
@@ -66,7 +56,6 @@ class TabBoxClientImpl;
 
 
 class Workspace;
-class Client;
 class Bridge;
 class PaintRedirector;
 
@@ -364,6 +353,7 @@ public:
     void setOnAllActivities(bool set);
     void setOnActivities(QStringList newActivitiesList);
     void updateActivities(bool includeTransients);
+    void blockActivityUpdates(bool b = true);
 
     /// Is not minimized and not hidden. I.e. normally visible on some virtual desktop.
     bool isShown(bool shaded_is_shown) const;
@@ -431,8 +421,8 @@ public:
     bool isMovableAcrossScreens() const;
     bool isCloseable() const; ///< May be closed by the user (May have a close button)
 
-    void takeActivity(int flags, bool handled, allowed_t);   // Takes ActivityFlags as arg (in utils.h)
-    void takeFocus(allowed_t);
+    void takeActivity(int flags, bool handled);   // Takes ActivityFlags as arg (in utils.h)
+    void takeFocus();
     bool isDemandingAttention() const {
         return demands_attention;
     }
@@ -520,7 +510,7 @@ public:
     bool hasUserTimeSupport() const;
 
     /// Does 'delete c;'
-    static void deleteClient(Client* c, allowed_t);
+    static void deleteClient(Client* c);
 
     static bool belongToSameApplication(const Client* c1, const Client* c2, bool active_hack = false);
     static bool sameAppWindowRoleMatch(const Client* c1, const Client* c2, bool active_hack);
@@ -615,6 +605,8 @@ public:
 
     bool decorationHasAlpha() const;
 
+    Position titlebarPosition();
+
     enum CoordinateMode {
         DecorationRelative, // Relative to the top left corner of the decoration
         WindowRelative      // Relative to the top left corner of the window
@@ -635,6 +627,8 @@ public:
     //sets whether the client should be treated as a SessionInteract window
     void setSessionInteract(bool needed);
     virtual bool isClient() const;
+    // a helper for the workspace window packing. tests for screen validity and updates since in maximization case as with normal moving
+    void packTo(int left, int top);
 
 #ifdef KWIN_BUILD_KAPPMENU
     // Used by workspace
@@ -688,7 +682,7 @@ private:
     void leaveNotifyEvent(XCrossingEvent* e);
     void focusInEvent(XFocusInEvent* e);
     void focusOutEvent(XFocusOutEvent* e);
-    virtual void damageNotifyEvent(XDamageNotifyEvent* e);
+    virtual void damageNotifyEvent();
 
     bool buttonPressEvent(Window w, int button, int state, int x, int y, int x_root, int y_root);
     bool buttonReleaseEvent(Window w, int button, int state, int x, int y, int x_root, int y_root);
@@ -709,7 +703,6 @@ private slots:
     void performMoveResize();
     void removeSyncSupport();
     void pingTimeout();
-    void demandAttentionKNotify();
 
     //Signals for the scripting interface
     //Signals make an excellent way for communication
@@ -820,11 +813,11 @@ private:
     void destroyDecoration();
     void updateFrameExtents();
 
-    void internalShow(allowed_t);
-    void internalHide(allowed_t);
-    void internalKeep(allowed_t);
-    void map(allowed_t);
-    void unmap(allowed_t);
+    void internalShow();
+    void internalHide();
+    void internalKeep();
+    void map();
+    void unmap();
     void updateHiddenPreview();
 
     void updateInputShape();
@@ -846,6 +839,8 @@ private:
     Bridge* bridge;
     int desk;
     QStringList activityList;
+    int m_activityUpdatesBlocked;
+    bool m_blockedActivityUpdatesRequireTransients;
     bool buttonDown;
     bool moveResizeMode;
     Window move_resize_grab_window;
@@ -977,7 +972,6 @@ private:
     friend struct FetchNameInternalPredicate;
     friend struct ResetupRulesProcedure;
     friend class GeometryUpdatesBlocker;
-    QTimer* demandAttentionKNotifyTimer;
     PaintRedirector* paintRedirector;
     QSharedPointer<TabBox::TabBoxClientImpl> m_tabBoxClient;
     bool m_firstInTabBox;
@@ -1016,26 +1010,6 @@ public:
 
 private:
     Client* cl;
-};
-
-/**
- * NET WM Protocol handler class
- */
-class WinInfo : public NETWinInfo2
-{
-private:
-    typedef KWin::Client Client; // Because of NET::Client
-
-public:
-    WinInfo(Client* c, Display * display, Window window,
-            Window rwin, const unsigned long pr[], int pr_size);
-    virtual void changeDesktop(int desktop);
-    virtual void changeFullscreenMonitors(NETFullscreenMonitors topology);
-    virtual void changeState(unsigned long state, unsigned long mask);
-    void disable();
-
-private:
-    Client * m_client;
 };
 
 inline Window Client::wrapperId() const
@@ -1156,9 +1130,9 @@ inline Client::MaximizeMode Client::maximizeMode() const
     return max_mode;
 }
 
-inline KWin::QuickTileMode Client::quickTileMode() const
+inline Client::QuickTileMode Client::quickTileMode() const
 {
-    return (KWin::QuickTileMode)quick_tile_mode;
+    return (Client::QuickTileMode)quick_tile_mode;
 }
 
 inline bool Client::skipTaskbar(bool from_outside) const

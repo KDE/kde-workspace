@@ -63,6 +63,13 @@ public:
     Texture *createTexture();
     Texture *createTexture(const QPixmap& pix, GLenum target = GL_TEXTURE_2D);
 
+#ifndef KWIN_HAVE_OPENGLES
+    /**
+     * Copy a region of pixels from the current read to the current draw buffer
+     */
+    static void copyPixels(const QRegion &region);
+#endif
+
     static SceneOpenGL *createScene();
 
 protected:
@@ -70,6 +77,7 @@ protected:
     virtual void paintBackground(QRegion region);
     virtual void extendPaintRegion(QRegion &region, bool opaqueFullscreen);
     QMatrix4x4 transformation(int mask, const ScreenPaintData &data) const;
+    virtual void paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data);
 
     virtual void doPaintBackground(const QVector<float> &vertices) = 0;
     virtual SceneOpenGL::Window *createWindow(Toplevel *t) = 0;
@@ -106,6 +114,7 @@ protected:
     virtual void doPaintBackground(const QVector< float >& vertices);
     virtual SceneOpenGL::Window *createWindow(Toplevel *t);
     virtual void finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data);
+    virtual void paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data);
 
 private Q_SLOTS:
     void slotColorCorrectedChanged();

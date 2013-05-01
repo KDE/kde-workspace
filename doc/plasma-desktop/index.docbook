@@ -208,7 +208,7 @@ open the device in &dolphin; or another associated application.
 </para>
 
 <para>The <application>System Tray</application> normally holds some more entries like
-&klipper;, &kmix; &etc;.</para>
+&klipper;, &kmix; &etc;</para>
 
 <para>Some of the default entries in the <application>System Tray</application> are hidden
 to save space in the bar. To display these entries click on the small white triangle
@@ -302,7 +302,7 @@ or desktop. You add &plasma; widgets by simply dragging them where you want them
 </screenshot>
 
 The <guibutton>Get New Widgets</guibutton> button allows you to add widgets
-you've previously downloaded; and download new &plasma; widgets or google gadgets.
+you've previously downloaded and download new &plasma; widgets.
 Currently it supports native &plasmagik; packages
 and some &Mac; OS&nbsp;X dashboard widgets. Widgets you install this way can then be
 accessed just like regular, preinstalled widgets.

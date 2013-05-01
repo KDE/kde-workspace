@@ -260,11 +260,18 @@ done
 
 echo 'startkde: Starting up...'  1>&2
 
-# Make sure that D-Bus is running
+# Make sure that the KDE prefix is first in XDG_DATA_DIRS and that it's set at all.
+# The spec allows XDG_DATA_DIRS to be not set, but X session startup scripts tend
+# to set it to a list of paths *not* including the KDE prefix if it's not /usr or
+# /usr/local.
 if test -z "$XDG_DATA_DIRS"; then
-    XDG_DATA_DIRS="`kde4-config --prefix`/share:/usr/share:/usr/local/share"
-    export XDG_DATA_DIRS
+    XDG_DATA_DIRS="@SHARE_INSTALL_PREFIX@:/usr/share:/usr/local/share"
+else
+    XDG_DATA_DIRS="@SHARE_INSTALL_PREFIX@:$XDG_DATA_DIRS"
 fi
+export XDG_DATA_DIRS
+
+# Make sure that D-Bus is running
 # D-Bus autolaunch is broken
 if test -z "$DBUS_SESSION_BUS_ADDRESS" ; then
     eval `dbus-launch --sh-syntax --exit-with-session`
@@ -311,6 +318,9 @@ xprop -root -f KDE_SESSION_VERSION 32c -set KDE_SESSION_VERSION 4
 
 KDE_SESSION_UID=`id -ru`
 export KDE_SESSION_UID
+
+XDG_CURRENT_DESKTOP=KDE
+export XDG_CURRENT_DESKTOP
 
 # We set LD_BIND_NOW to increase the efficiency of kdeinit.
 # kdeinit unsets this variable before loading applications.

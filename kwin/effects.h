@@ -40,7 +40,9 @@ namespace KWin
 {
 typedef QPair< Effect*, xcb_window_t > InputWindowPair;
 
-class ThumbnailItem;
+class AbstractThumbnailItem;
+class DesktopThumbnailItem;
+class WindowThumbnailItem;
 
 class Client;
 class Compositor;
@@ -60,6 +62,10 @@ public:
     virtual ~EffectsHandlerImpl();
     virtual void prePaintScreen(ScreenPrePaintData& data, int time);
     virtual void paintScreen(int mask, QRegion region, ScreenPaintData& data);
+    /**
+     * Special hook to perform a paintScreen but just with the windows on @p desktop.
+     **/
+    void paintDesktop(int desktop, int mask, QRegion region, ScreenPaintData& data);
     virtual void postPaintScreen();
     virtual void prePaintWindow(EffectWindow* w, WindowPrePaintData& data, int time);
     virtual void paintWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data);
@@ -179,12 +185,23 @@ public:
     QList<EffectWindow*> elevatedWindows() const;
     QStringList activeEffects() const;
 
+    /**
+     * @returns Whether we are currently in a desktop rendering process triggered by paintDesktop hook
+     **/
+    bool isDesktopRendering() const {
+        return m_desktopRendering;
+    }
+    /**
+     * @returns the desktop currently being rendered in the paintDesktop hook.
+     **/
+    int currentRenderedDesktop() const {
+        return m_currentRenderedDesktop;
+    }
+
 public Q_SLOTS:
     void slotCurrentTabAboutToChange(EffectWindow* from, EffectWindow* to);
     void slotTabAdded(EffectWindow* from, EffectWindow* to);
     void slotTabRemoved(EffectWindow* c, EffectWindow* newActiveWindow);
-    void slotShowOutline(const QRect &geometry);
-    void slotHideOutline();
 
     // slots for D-Bus interface
     Q_SCRIPTABLE void reconfigureEffect(const QString& name);
@@ -193,6 +210,7 @@ public Q_SLOTS:
     Q_SCRIPTABLE void unloadEffect(const QString& name);
     Q_SCRIPTABLE bool isEffectLoaded(const QString& name) const;
     Q_SCRIPTABLE QString supportInformation(const QString& name) const;
+    Q_SCRIPTABLE QString debug(const QString& name, const QString& parameter = QString()) const;
 
 protected Q_SLOTS:
     void slotDesktopChanged(int old, KWin::Client *withClient);
@@ -246,6 +264,8 @@ private:
     Scene *m_scene;
     QList< InputWindowPair > input_windows;
     ScreenLockerWatcher *m_screenLockerWatcher;
+    bool m_desktopRendering;
+    int m_currentRenderedDesktop;
 };
 
 class EffectWindowImpl : public EffectWindow
@@ -282,22 +302,29 @@ public:
     const Scene::Window* sceneWindow() const; // internal
     Scene::Window* sceneWindow(); // internal
 
+    void elevate(bool elevate);
+
     void setData(int role, const QVariant &data);
     QVariant data(int role) const;
 
-    void registerThumbnail(ThumbnailItem *item);
-    QHash<ThumbnailItem*, QWeakPointer<EffectWindowImpl> > const &thumbnails() const {
+    void registerThumbnail(AbstractThumbnailItem *item);
+    QHash<WindowThumbnailItem*, QWeakPointer<EffectWindowImpl> > const &thumbnails() const {
         return m_thumbnails;
+    }
+    QList<DesktopThumbnailItem*> const &desktopThumbnails() const {
+        return m_desktopThumbnails;
     }
 private Q_SLOTS:
     void thumbnailDestroyed(QObject *object);
     void thumbnailTargetChanged();
+    void desktopThumbnailDestroyed(QObject *object);
 private:
-    void insertThumbnail(ThumbnailItem *item);
+    void insertThumbnail(WindowThumbnailItem *item);
     Toplevel* toplevel;
     Scene::Window* sw; // This one is used only during paint pass.
     QHash<int, QVariant> dataMap;
-    QHash<ThumbnailItem*, QWeakPointer<EffectWindowImpl> > m_thumbnails;
+    QHash<WindowThumbnailItem*, QWeakPointer<EffectWindowImpl> > m_thumbnails;
+    QList<DesktopThumbnailItem*> m_desktopThumbnails;
 };
 
 class EffectWindowGroupImpl

@@ -27,11 +27,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kglobal.h>
 #include <X11/extensions/shape.h>
 
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
+#endif
 #include "cursor.h"
-#include "notifications.h"
 #include <QX11Info>
 #include "rules.h"
 #include "group.h"
+#include "netinfo.h"
+#include "screens.h"
+#include "workspace.h"
 #include "xcbutils.h"
 
 namespace KWin
@@ -196,6 +201,7 @@ bool Client::manage(Window w, bool isMapped)
             desk = info->desktop(); // Window had the initial desktop property, force it
         if (desktop() == 0 && asn_valid && asn_data.desktop() != 0)
             desk = asn_data.desktop();
+#ifdef KWIN_BUILD_ACTIVITIES
         if (!isMapped && !noborder && isNormalWindow() && !activitiesDefined) {
             //a new, regular window, when we're not recovering from a crash,
             //and it hasn't got an activity. let's try giving it the current one.
@@ -204,8 +210,9 @@ bool Client::manage(Window w, bool isMapped)
             //with a public API for setting windows to be on all activities.
             //something like KWindowSystem::setOnAllActivities or
             //KActivityConsumer::setOnAllActivities
-            setOnActivity(Workspace::self()->currentActivity(), true);
+            setOnActivity(Activities::self()->current(), true);
         }
+#endif
     }
 
     if (desk == 0)   // Assume window wants to be visible on the current desktop
@@ -233,9 +240,9 @@ bool Client::manage(Window w, bool isMapped)
     if (isMapped || session)
         area = workspace()->clientArea(FullArea, geom.center(), desktop());
     else {
-        int screen = asn_data.xinerama() == -1 ? workspace()->activeScreen() : asn_data.xinerama();
+        int screen = asn_data.xinerama() == -1 ? screens()->current() : asn_data.xinerama();
         screen = rules()->checkScreen(screen, !isMapped);
-        area = workspace()->clientArea(PlacementArea, workspace()->screenGeometry(screen).center(), desktop());
+        area = workspace()->clientArea(PlacementArea, screens()->geometry(screen).center(), desktop());
     }
 
     if (int type = checkFullScreenHack(geom)) {
@@ -281,7 +288,7 @@ bool Client::manage(Window w, bool isMapped)
         ; // Force using placement policy
     else
         usePosition = true;
-    if (!rules()->checkIgnoreGeometry(!usePosition)) {
+    if (!rules()->checkIgnoreGeometry(!usePosition, true)) {
         if (((xSizeHint.flags & PPosition)) ||
                 (xSizeHint.flags & USPosition)) {
             placementDone = true;
@@ -535,11 +542,6 @@ bool Client::manage(Window w, bool isMapped)
         ready_for_painting = true; // set to true in case compositing is turned on later. bug #160393
 
     if (isShown(true)) {
-        if (isDialog())
-            Notify::raise(Notify::TransNew);
-        if (isNormalWindow())
-            Notify::raise(Notify::New);
-
         bool allow;
         if (session)
             allow = session->active &&
@@ -611,7 +613,7 @@ bool Client::manage(Window w, bool isMapped)
 
     client_rules.discardTemporary();
     applyWindowRules(); // Just in case
-    workspace()->discardUsedWindowRules(this, false);   // Remove ApplyNow rules
+    RuleBook::self()->discardUsed(this, false);   // Remove ApplyNow rules
     updateWindowRules(Rules::All); // Was blocked while !isManaged()
 
     updateCompositeBlocking(true);

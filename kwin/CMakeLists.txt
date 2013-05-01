@@ -101,6 +101,7 @@ set(kwin_KDEINIT_SRCS
    cursor.cpp
    tabgroup.cpp
    focuschain.cpp
+   netinfo.cpp
    placement.cpp 
    atoms.cpp 
    utils.cpp 
@@ -108,16 +109,16 @@ set(kwin_KDEINIT_SRCS
    main.cpp 
    options.cpp 
    outline.cpp
-   plugins.cpp 
+   decorations.cpp
    events.cpp 
    killwindow.cpp 
    geometrytip.cpp 
+   screens.cpp
    shadow.cpp
    sm.cpp 
    group.cpp 
    bridge.cpp 
    manage.cpp 
-   notifications.cpp
    overlaywindow.cpp
    activation.cpp 
    useractions.cpp 
@@ -149,6 +150,7 @@ if(KWIN_BUILD_SCRIPTING)
         scripting/scriptedeffect.cpp
         scripting/scriptingutils.cpp
         scripting/timer.cpp
+        scripting/scripting_model.cpp
     )
 endif()
 
@@ -176,6 +178,13 @@ if(KWIN_BUILD_KAPPMENU)
     set(
         kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
         appmenu.cpp
+    )
+endif()
+
+if(KWIN_BUILD_ACTIVITIES)
+    set(
+        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+        activities.cpp
     )
 endif()
 

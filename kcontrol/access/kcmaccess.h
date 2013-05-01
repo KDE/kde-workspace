@@ -23,39 +23,6 @@ class QRadioButton;
 class KColorButton;
 class QSlider;
 
-class ExtendedIntNumInput : public KIntNumInput
-{
-	Q_OBJECT
-
-	public:
-    /**
-	  * Constructs an input control for integer values
-	  * with base 10 and initial value 0.
-	  */
-		ExtendedIntNumInput(QWidget *parent=0);
-
-    /**
-	  * Destructor
-	  */
-		virtual ~ExtendedIntNumInput();
-
-    /**
-	  * @param min  minimum value
-	  * @param max  maximum value
-	  * @param step step size for the QSlider
-	  * @param slider whether the slider is created or not
-	  */
-		void setRange(int min, int max, int step=1, bool slider=true);
-
-	private Q_SLOTS:
-		void slotSpinValueChanged(int);
-		void slotSliderValueChanged(int);
-
-	private:
-		int min, max;
-		int sliderMax;
-};
-
 class KAccessConfig : public KCModule
 {
   Q_OBJECT
@@ -87,14 +54,14 @@ private:
   QLineEdit *soundEdit;
   QPushButton *soundButton;
   KColorButton *colorButton;
-  ExtendedIntNumInput *durationSlider;
+  KDoubleNumInput *durationSlider;
 
   QCheckBox *stickyKeys, *stickyKeysLock, *stickyKeysAutoOff;
   QCheckBox *stickyKeysBeep, *toggleKeysBeep, *kNotifyModifiers;
   QPushButton *kNotifyModifiersButton;
 
   QCheckBox *slowKeys, *bounceKeys;
-  ExtendedIntNumInput *slowKeysDelay, *bounceKeysDelay;
+  KDoubleNumInput *slowKeysDelay, *bounceKeysDelay;
   QCheckBox *slowKeysPressBeep, *slowKeysAcceptBeep;
   QCheckBox *slowKeysRejectBeep, *bounceKeysRejectBeep;
 

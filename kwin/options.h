@@ -77,10 +77,6 @@ class Options : public QObject, public KDecorationOptions
      * whether to see Xinerama screens separately for focus (in Alt+Tab, when activating next client)
      **/
     Q_PROPERTY(bool separateScreenFocus READ isSeparateScreenFocus WRITE setSeparateScreenFocus NOTIFY separateScreenFocusChanged)
-    /**
-     * whether active Xinerama screen is the one with mouse (or with the active window)
-     **/
-    Q_PROPERTY(bool activeMouseScreen READ isActiveMouseScreen WRITE setActiveMouseScreen NOTIFY activeMouseScreenChanged)
     Q_PROPERTY(int placement READ placement WRITE setPlacement NOTIFY placementChanged)
     Q_PROPERTY(bool focusPolicyIsReasonable READ focusPolicyIsReasonable NOTIFY configChanged)
     /**
@@ -170,7 +166,6 @@ class Options : public QObject, public KDecorationOptions
      * -1 = auto
      **/
     Q_PROPERTY(int glSmoothScale READ glSmoothScale WRITE setGlSmoothScale NOTIFY glSmoothScaleChanged)
-    Q_PROPERTY(bool glVSync READ isGlVSync WRITE setGlVSync NOTIFY glVSyncChanged)
     Q_PROPERTY(bool colorCorrected READ isColorCorrected WRITE setColorCorrected NOTIFY colorCorrectedChanged)
     Q_PROPERTY(bool xrenderSmoothScale READ isXrenderSmoothScale WRITE setXrenderSmoothScale NOTIFY xrenderSmoothScaleChanged)
     Q_PROPERTY(uint maxFpsInterval READ maxFpsInterval WRITE setMaxFpsInterval NOTIFY maxFpsIntervalChanged)
@@ -281,10 +276,6 @@ public:
     // whether to see Xinerama screens separately for focus (in Alt+Tab, when activating next client)
     bool isSeparateScreenFocus() const {
         return m_separateScreenFocus;
-    }
-    // whether active Xinerama screen is the one with mouse (or with the active window)
-    bool isActiveMouseScreen() const {
-        return m_activeMouseScreen;
     }
 
     Placement::Policy placement() const {
@@ -517,9 +508,6 @@ public:
     int glSmoothScale() const {
         return m_glSmoothScale;
     }
-    bool isGlVSync() const {
-        return m_glVSync;
-    }
     bool isColorCorrected() const {
         return m_colorCorrected;
     }
@@ -566,7 +554,6 @@ public:
     void setShadeHover(bool shadeHover);
     void setShadeHoverInterval(int shadeHoverInterval);
     void setSeparateScreenFocus(bool separateScreenFocus);
-    void setActiveMouseScreen(bool activeMouseScreen);
     void setPlacement(int placement);
     void setBorderSnapZone(int borderSnapZone);
     void setWindowSnapZone(int windowSnapZone);
@@ -608,7 +595,6 @@ public:
     void setHiddenPreviews(int hiddenPreviews);
     void setUnredirectFullscreen(bool unredirectFullscreen);
     void setGlSmoothScale(int glSmoothScale);
-    void setGlVSync(bool glVSync);
     void setXrenderSmoothScale(bool xrenderSmoothScale);
     void setMaxFpsInterval(uint maxFpsInterval);
     void setRefreshRate(uint refreshRate);
@@ -692,9 +678,6 @@ public:
     static int defaultGlSmoothScale() {
         return 2;
     }
-    static bool defaultGlVSync() {
-        return true;
-    }
     static bool defaultColorCorrected() {
         return false;
     }
@@ -756,7 +739,6 @@ Q_SIGNALS:
     void shadeHoverChanged();
     void shadeHoverIntervalChanged();
     void separateScreenFocusChanged(bool);
-    void activeMouseScreenChanged();
     void placementChanged();
     void borderSnapZoneChanged();
     void windowSnapZoneChanged();
@@ -798,7 +780,6 @@ Q_SIGNALS:
     void hiddenPreviewsChanged();
     void unredirectFullscreenChanged();
     void glSmoothScaleChanged();
-    void glVSyncChanged();
     void colorCorrectedChanged();
     void xrenderSmoothScaleChanged();
     void maxFpsIntervalChanged();
@@ -826,7 +807,6 @@ private:
     bool m_shadeHover;
     int m_shadeHoverInterval;
     bool m_separateScreenFocus;
-    bool m_activeMouseScreen;
     Placement::Policy m_placement;
     int m_borderSnapZone;
     int m_windowSnapZone;
@@ -848,7 +828,6 @@ private:
     HiddenPreviews m_hiddenPreviews;
     bool m_unredirectFullscreen;
     int m_glSmoothScale;
-    bool m_glVSync;
     bool m_colorCorrected;
     bool m_xrenderSmoothScale;
     uint m_maxFpsInterval;

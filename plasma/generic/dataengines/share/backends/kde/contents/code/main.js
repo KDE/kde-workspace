@@ -22,7 +22,7 @@ function url() {
 }
 
 function method() {
-    return "GET";
+    return "POST";
 }
 
 function contentKey() {

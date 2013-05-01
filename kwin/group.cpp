@@ -208,7 +208,7 @@ Group::Group(Window leader_P, Workspace* workspace_P)
                                       properties, 2);
     }
     effect_group = new EffectWindowGroupImpl(this);
-    workspace()->addGroup(this, Allowed);
+    workspace()->addGroup(this);
 }
 
 Group::~Group()
@@ -285,7 +285,7 @@ void Group::removeMember(Client* member_P)
 // other members of the group (which would be however deleted already
 // if there were no other members)
     if (refcount == 0 && _members.isEmpty()) {
-        workspace()->removeGroup(this, Allowed);
+        workspace()->removeGroup(this);
         delete this;
     }
 }
@@ -298,7 +298,7 @@ void Group::ref()
 void Group::deref()
 {
     if (--refcount == 0 && _members.isEmpty()) {
-        workspace()->removeGroup(this, Allowed);
+        workspace()->removeGroup(this);
         delete this;
     }
 }
@@ -314,7 +314,7 @@ void Group::lostLeader()
     assert(!_members.contains(leader_client));
     leader_client = NULL;
     if (_members.isEmpty()) {
-        workspace()->removeGroup(this, Allowed);
+        workspace()->removeGroup(this);
         delete this;
     }
 }
@@ -415,19 +415,6 @@ void Workspace::updateOnAllDesktopsOfTransients(Client* c)
             ++it) {
         if ((*it)->isOnAllDesktops() != c->isOnAllDesktops())
             (*it)->setOnAllDesktops(c->isOnAllDesktops());
-    }
-}
-
-/*!
-  Sets the client \a c's transient windows' on_all_activities property to \a on_all_desktops.
- */
-void Workspace::updateOnAllActivitiesOfTransients(Client* c)
-{
-    for (ClientList::ConstIterator it = c->transients().constBegin();
-            it != c->transients().constEnd();
-            ++it) {
-        if ((*it)->isOnAllActivities() != c->isOnAllActivities())
-            (*it)->setOnAllActivities(c->isOnAllActivities());
     }
 }
 

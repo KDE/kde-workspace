@@ -64,7 +64,7 @@ KSldApp* KSldApp::self()
 KSldApp::KSldApp(QObject * parent)
     : QObject(parent)
     , m_actionCollection(NULL)
-    , m_locked(false)
+    , m_lockState(Unlocked)
     , m_lockProcess(NULL)
     , m_lockWindow(NULL)
     , m_lockedTimer(QElapsedTimer())
@@ -127,8 +127,10 @@ void KSldApp::initialize()
     // idle support
     connect(KIdleTime::instance(), SIGNAL(timeoutReached(int)), SLOT(idleTimeout(int)));
 
-    m_lockProcess = new KProcess();
+    m_lockProcess = new QProcess();
+    m_lockProcess->setReadChannel(QProcess::StandardOutput);
     connect(m_lockProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(lockProcessFinished(int,QProcess::ExitStatus)));
+    connect(m_lockProcess, SIGNAL(readyReadStandardOutput()), SLOT(lockProcessReady()));
     m_lockedTimer.invalidate();
     m_graceTimer->setSingleShot(true);
     connect(m_graceTimer, SIGNAL(timeout()), SLOT(endGraceTime()));
@@ -163,8 +165,10 @@ void KSldApp::configure()
 
 void KSldApp::lock()
 {
-    if (m_locked) {
-        // already locked, no need to lock again
+    if (lockState() != Unlocked) {
+        // already locked or acquiring lock, no need to lock again
+        // but make sure it's really locked
+        endGraceTime();
         return;
     }
     kDebug() << "lock called";
@@ -178,15 +182,13 @@ void KSldApp::lock()
     // blank the screen
     showLockWindow();
 
+    m_lockState = AcquiringLock;
+
     // start unlock screen process
     if (!startLockProcess()) {
         doUnlock();
-        kError() << "Greeter Process not started in time";
-        return;
+        kError() << "Greeter Process not available";
     }
-    m_locked  = true;
-    m_lockedTimer.restart();
-    emit locked();
 }
 
 KActionCollection *KSldApp::actionCollection()
@@ -245,7 +247,7 @@ void KSldApp::doUnlock()
     // delete the window again, to get rid of event filter
     delete m_lockWindow;
     m_lockWindow = NULL;
-    m_locked = false;
+    m_lockState = Unlocked;
     m_lockedTimer.invalidate();
     endGraceTime();
     KDisplayManager().setLock(false);
@@ -267,19 +269,23 @@ void KSldApp::lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     startLockProcess();
 }
 
+void KSldApp::lockProcessReady()
+{
+    m_lockState = Locked;
+    m_lockedTimer.restart();
+    emit locked();
+}
+
 bool KSldApp::startLockProcess()
 {
     if (m_plasmaEnabled) {
-        m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("plasma-overlay")));
-        *m_lockProcess << QLatin1String("--nofork");
+        m_lockProcess->start(KStandardDirs::findExe(QLatin1String("plasma-overlay")),
+                             QStringList() << QLatin1String("--nofork"));
     } else {
-        m_lockProcess->setProgram(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")));
+        m_lockProcess->start(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")));
     }
-    m_lockProcess->start();
     // we wait one minute
-    if (m_lockProcess->waitForStarted(60000)) {
-        m_lockProcess->waitForReadyRead(60000);
-    } else {
+    if (!m_lockProcess->waitForStarted(60000)) {
         m_lockProcess->kill();
         return false;
     }
@@ -318,7 +324,7 @@ void KSldApp::idleTimeout(int identifier)
         // not our identifier
         return;
     }
-    if (isLocked()) {
+    if (lockState() != Unlocked) {
         return;
     }
     if (m_inhibitCounter) {

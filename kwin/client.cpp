@@ -18,59 +18,49 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-
+// own
 #include "client.h"
-
-#include <QApplication>
-#include <QPainter>
-#include <QDateTime>
-#include <QProcess>
-#include <QPaintEngine>
-
-#ifdef KWIN_BUILD_SCRIPTING
-#include <QScriptEngine>
-#include <QScriptProgram>
-#endif
-
-#include <unistd.h>
-#include <kstandarddirs.h>
-#include <QWhatsThis>
-#include <kwindowsystem.h>
-#include <kiconloader.h>
-#include <stdlib.h>
-#include <signal.h>
-
-#include "bridge.h"
-#include "client_machine.h"
-#include "composite.h"
-#include "cursor.h"
-#include "group.h"
-#include "focuschain.h"
-#include "workspace.h"
-#include "atoms.h"
-#include "notifications.h"
-#include "rules.h"
-#include "shadow.h"
-#include "deleted.h"
-#include "paintredirector.h"
-#include "xcbutils.h"
-#ifdef KWIN_BUILD_TABBOX
-#include "tabbox.h"
+// kwin
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
 #endif
 #ifdef KWIN_BUILD_KAPPMENU
 #include "appmenu.h"
 #endif
-
-#include <X11/extensions/shape.h>
-
+#include "atoms.h"
+#include "bridge.h"
+#include "client_machine.h"
+#include "composite.h"
+#include "cursor.h"
+#include "decorations.h"
+#include "deleted.h"
+#include "focuschain.h"
+#include "group.h"
+#include "paintredirector.h"
+#include "shadow.h"
+#ifdef KWIN_BUILD_TABBOX
+#include "tabbox.h"
+#endif
+#include "workspace.h"
+// KDE
+#include <KDE/KIconLoader>
+#include <KDE/KStandardDirs>
+#include <KDE/KWindowSystem>
+// Qt
+#include <QApplication>
+#include <QProcess>
+#ifdef KWIN_BUILD_SCRIPTING
+#include <QScriptEngine>
+#include <QScriptProgram>
+#endif
+#include <QWhatsThis>
+// X
 #ifdef HAVE_XSYNC
 #include <X11/extensions/sync.h>
 #endif
-
-#ifdef HAVE_XRENDER
-#include <X11/extensions/Xrender.h>
-#endif
-
+// system
+#include <unistd.h>
+#include <signal.h>
 
 // Put all externs before the namespace statement to allow the linker
 // to resolve them properly
@@ -103,6 +93,8 @@ Client::Client(Workspace* ws)
     , wrapper(None)
     , decoration(NULL)
     , bridge(new Bridge(this))
+    , m_activityUpdatesBlocked(false)
+    , m_blockedActivityUpdatesRequireTransients(false)
     , move_resize_grab_window(None)
     , move_resize_has_keyboard_grab(false)
     , m_managed(false)
@@ -136,7 +128,6 @@ Client::Client(Workspace* ws)
     , padding_top(0)
     , padding_bottom(0)
     , sm_stacking_order(-1)
-    , demandAttentionKNotifyTimer(NULL)
     , paintRedirector(0)
     , m_firstInTabBox(false)
     , electricMaximizing(false)
@@ -217,6 +208,8 @@ Client::Client(Workspace* ws)
     connect(this, SIGNAL(clientStepUserMovedResized(KWin::Client*,QRect)), SIGNAL(geometryChanged()));
     connect(this, SIGNAL(clientStartUserMovedResized(KWin::Client*)), SIGNAL(moveResizedChanged()));
     connect(this, SIGNAL(clientFinishUserMovedResized(KWin::Client*)), SIGNAL(moveResizedChanged()));
+    connect(this, SIGNAL(clientStartUserMovedResized(KWin::Client*)), SLOT(removeCheckScreenConnection()));
+    connect(this, SIGNAL(clientFinishUserMovedResized(KWin::Client*)), SLOT(setupCheckScreenConnection()));
 
     connect(clientMachine(), SIGNAL(localhostChanged()), SLOT(updateCaption()));
     connect(options, SIGNAL(condensedTitleChanged()), SLOT(updateCaption()));
@@ -249,7 +242,7 @@ Client::~Client()
 }
 
 // Use destroyClient() or releaseWindow(), Client instances cannot be deleted directly
-void Client::deleteClient(Client* c, allowed_t)
+void Client::deleteClient(Client* c)
 {
     delete c;
 }
@@ -269,7 +262,7 @@ void Client::releaseWindow(bool on_shutdown)
         emit clientFinishUserMovedResized(this);
     emit windowClosed(this, del);
     finishCompositing();
-    workspace()->discardUsedWindowRules(this, true);   // Remove ForceTemporarily rules
+    RuleBook::self()->discardUsed(this, true);   // Remove ForceTemporarily rules
     StackingUpdatesBlocker blocker(workspace());
     if (moveResizeMode)
         leaveMoveResize();
@@ -289,7 +282,7 @@ void Client::releaseWindow(bool on_shutdown)
     destroyDecoration();
     cleanGrouping();
     if (!on_shutdown) {
-        workspace()->removeClient(this, Allowed);
+        workspace()->removeClient(this);
         // Only when the window is being unmapped, not when closing down KWin (NETWM sections 5.5,5.7)
         info->setDesktop(0);
         desk = 0;
@@ -320,7 +313,7 @@ void Client::releaseWindow(bool on_shutdown)
         del->unrefWindow();
     }
     checkNonExistentClients();
-    deleteClient(this, Allowed);
+    deleteClient(this);
     ungrabXServer();
 }
 
@@ -337,7 +330,7 @@ void Client::destroyClient()
         emit clientFinishUserMovedResized(this);
     emit windowClosed(this, del);
     finishCompositing();
-    workspace()->discardUsedWindowRules(this, true);   // Remove ForceTemporarily rules
+    RuleBook::self()->discardUsed(this, true);   // Remove ForceTemporarily rules
     StackingUpdatesBlocker blocker(workspace());
     if (moveResizeMode)
         leaveMoveResize();
@@ -350,7 +343,7 @@ void Client::destroyClient()
     workspace()->clientHidden(this);
     destroyDecoration();
     cleanGrouping();
-    workspace()->removeClient(this, Allowed);
+    workspace()->removeClient(this);
     client = None; // invalidate
     XDestroyWindow(display(), wrapper);
     wrapper = None;
@@ -360,7 +353,7 @@ void Client::destroyClient()
     disownDataPassedToDeleted();
     del->unrefWindow();
     checkNonExistentClients();
-    deleteClient(this, Allowed);
+    deleteClient(this);
 }
 
 // DnD handling for input shaping is broken in the clients for all Qt versions before 4.8.3
@@ -435,7 +428,11 @@ void Client::updateDecoration(bool check_workspace_pos, bool force)
         destroyDecoration();
     if (!noBorder()) {
         setMask(QRegion());  // Reset shape mask
-        decoration = workspace()->createDecoration(bridge);
+        if (decorationPlugin()->isDisabled()) {
+            decoration = NULL;
+        } else {
+            decoration = decorationPlugin()->createDecoration(bridge);
+        }
 #ifdef KWIN_BUILD_KAPPMENU
         connect(this, SIGNAL(showRequest()), decoration, SIGNAL(showRequest()));
         connect(this, SIGNAL(appMenuAvailable()), decoration, SIGNAL(appMenuAvailable()));
@@ -544,7 +541,7 @@ void Client::layoutDecorationRects(QRect &left, QRect &top, QRect &right, QRect 
     NETStrut strut = info->frameOverlap();
 
     // Ignore the overlap strut when compositing is disabled
-    if (!compositing() || !Workspace::self()->decorationSupportsFrameOverlap())
+    if (!compositing() || !decorationPlugin()->supportsFrameOverlap())
         strut.left = strut.top = strut.right = strut.bottom = 0;
     else if (strut.left == -1 && strut.top == -1 && strut.right == -1 && strut.bottom == -1) {
         top = QRect(r.x(), r.y(), r.width(), r.height() / 3);
@@ -577,7 +574,7 @@ QRect Client::transparentRect() const
 
     NETStrut strut = info->frameOverlap();
     // Ignore the strut when compositing is disabled or the decoration doesn't support it
-    if (!compositing() || !Workspace::self()->decorationSupportsFrameOverlap())
+    if (!compositing() || !decorationPlugin()->supportsFrameOverlap())
         strut.left = strut.top = strut.right = strut.bottom = 0;
     else if (strut.left == -1 && strut.top == -1 && strut.right == -1 && strut.bottom == -1)
         return QRect();
@@ -638,8 +635,8 @@ void Client::updateFrameExtents()
 /**
  * Resizes the decoration, and makes sure the decoration widget gets resize event
  * even if the size hasn't changed. This is needed to make sure the decoration
- * re-layouts (e.g. when options()->moveResizeMaximizedWindows() changes,
- * the decoration may turn on/off some borders, but the actual size
+ * re-layouts (e.g. when maximization state changes,
+ * the decoration may alter some borders, but the actual size
  * of the decoration stays the same).
  */
 void Client::resizeDecoration(const QSize& s)
@@ -662,7 +659,7 @@ void Client::resizeDecoration(const QSize& s)
 
 bool Client::noBorder() const
 {
-    return !workspace()->hasDecorationPlugin() || noborder || isFullScreen();
+    return decorationPlugin()->isDisabled() || noborder || isFullScreen();
 }
 
 bool Client::userCanSetNoBorder() const
@@ -863,8 +860,6 @@ void Client::minimize(bool avoid_animation)
     if (isShade()) // NETWM restriction - KWindowInfo::isMinimized() == Hidden && !Shaded
         info->setState(0, NET::Shaded);
 
-    Notify::raise(Notify::Minimize);
-
     minimized = true;
 
     updateVisibility();
@@ -893,7 +888,6 @@ void Client::unminimize(bool avoid_animation)
     if (isShade()) // NETWM restriction - KWindowInfo::isMinimized() == Hidden && !Shaded
         info->setState(NET::Shaded, NET::Shaded);
 
-    Notify::raise(Notify::UnMinimize);
     minimized = false;
     updateVisibility();
     updateAllowedActions();
@@ -960,14 +954,6 @@ void Client::setShade(ShadeMode mode)
         if (decoration != NULL)   // Decoration may want to update after e.g. hover-shade changes
             decoration->shadeChange();
         return; // No real change in shaded state
-    }
-
-    if (shade_mode == ShadeNormal) {
-        if (isShown(true) && isOnCurrentDesktop())
-            Notify::raise(Notify::ShadeUp);
-    } else if (shade_mode == ShadeNone) {
-        if (isShown(true) && isOnCurrentDesktop())
-            Notify::raise(Notify::ShadeDown);
     }
 
     assert(decoration != NULL);   // noborder windows can't be shaded
@@ -1071,9 +1057,9 @@ void Client::updateVisibility()
         info->setState(NET::Hidden, NET::Hidden);
         setSkipTaskbar(true, false);   // Also hide from taskbar
         if (compositing() && options->hiddenPreviews() == HiddenPreviewsAlways)
-            internalKeep(Allowed);
+            internalKeep();
         else
-            internalHide(Allowed);
+            internalHide();
         return;
     }
     if (isCurrentTab())
@@ -1081,29 +1067,29 @@ void Client::updateVisibility()
     if (minimized) {
         info->setState(NET::Hidden, NET::Hidden);
         if (compositing() && options->hiddenPreviews() == HiddenPreviewsAlways)
-            internalKeep(Allowed);
+            internalKeep();
         else
-            internalHide(Allowed);
+            internalHide();
         return;
     }
     info->setState(0, NET::Hidden);
     if (!isOnCurrentDesktop()) {
         if (compositing() && options->hiddenPreviews() != HiddenPreviewsNever)
-            internalKeep(Allowed);
+            internalKeep();
         else
-            internalHide(Allowed);
+            internalHide();
         return;
     }
     if (!isOnCurrentActivity()) {
         if (compositing() && options->hiddenPreviews() != HiddenPreviewsNever)
-            internalKeep(Allowed);
+            internalKeep();
         else
-            internalHide(Allowed);
+            internalHide();
         return;
     }
     if (isManaged())
         resetShowingDesktop(true);
-    internalShow(Allowed);
+    internalShow();
 }
 
 
@@ -1142,14 +1128,14 @@ void Client::exportMappingState(int s)
                     PropModeReplace, (unsigned char*)(data), 2);
 }
 
-void Client::internalShow(allowed_t)
+void Client::internalShow()
 {
     if (mapping_state == Mapped)
         return;
     MappingState old = mapping_state;
     mapping_state = Mapped;
     if (old == Unmapped || old == Withdrawn)
-        map(Allowed);
+        map();
     if (old == Kept) {
         m_decoInputExtent.map();
         updateHiddenPreview();
@@ -1159,14 +1145,14 @@ void Client::internalShow(allowed_t)
     }
 }
 
-void Client::internalHide(allowed_t)
+void Client::internalHide()
 {
     if (mapping_state == Unmapped)
         return;
     MappingState old = mapping_state;
     mapping_state = Unmapped;
     if (old == Mapped || old == Kept)
-        unmap(Allowed);
+        unmap();
     if (old == Kept)
         updateHiddenPreview();
     addWorkspaceRepaint(visibleRect());
@@ -1176,7 +1162,7 @@ void Client::internalHide(allowed_t)
     }
 }
 
-void Client::internalKeep(allowed_t)
+void Client::internalKeep()
 {
     assert(compositing());
     if (mapping_state == Kept)
@@ -1184,7 +1170,7 @@ void Client::internalKeep(allowed_t)
     MappingState old = mapping_state;
     mapping_state = Kept;
     if (old == Unmapped || old == Withdrawn)
-        map(Allowed);
+        map();
     m_decoInputExtent.unmap();
     updateHiddenPreview();
     addWorkspaceRepaint(visibleRect());
@@ -1199,7 +1185,7 @@ void Client::internalKeep(allowed_t)
  * not necessarily the client window itself (i.e. a shaded window is here
  * considered mapped, even though it is in IconicState).
  */
-void Client::map(allowed_t)
+void Client::map()
 {
     // XComposite invalidates backing pixmaps on unmap (minimize, different
     // virtual desktop, etc.).  We kept the last known good pixmap around
@@ -1221,7 +1207,7 @@ void Client::map(allowed_t)
 /**
  * Unmaps the client. Again, this is about the frame.
  */
-void Client::unmap(allowed_t)
+void Client::unmap()
 {
     // Here it may look like a race condition, as some other client might try to unmap
     // the window between these two XSelectInput() calls. However, they're supposed to
@@ -1306,7 +1292,6 @@ void Client::closeWindow()
     updateUserTime();
 
     if (Pdeletewindow) {
-        Notify::raise(Notify::Close);
         sendClientMessage(window(), atoms->wm_protocols, atoms->wm_delete_window);
         pingWindow();
     } else // Client will not react on wm_delete_window. We have not choice
@@ -1321,15 +1306,6 @@ void Client::closeWindow()
 void Client::killWindow()
 {
     kDebug(1212) << "Client::killWindow():" << caption();
-
-    // Not sure if we need an Notify::Kill or not.. until then, use
-    // Notify::Close
-    Notify::raise(Notify::Close);
-
-    if (isDialog())
-        Notify::raise(Notify::TransDelete);
-    if (isNormalWindow())
-        Notify::raise(Notify::Delete);
     killProcess(false);
     XKillClient(display(), window());  // Always kill this client at the server
     destroyClient();
@@ -1467,8 +1443,6 @@ void Client::setDesktop(int desktop)
     info->setDesktop(desktop);
     if ((was_desk == NET::OnAllDesktops) != (desktop == NET::OnAllDesktops)) {
         // onAllDesktops changed
-        if (isShown(true))
-            Notify::raise(isOnAllDesktops() ? Notify::OnAllDesktops : Notify::NotOnAllDesktops);
         workspace()->updateOnAllDesktopsOfTransients(this);
     }
     if (decoration != NULL)
@@ -1507,37 +1481,42 @@ void Client::setDesktop(int desktop)
  */
 void Client::setOnActivity(const QString &activity, bool enable)
 {
+#ifdef KWIN_BUILD_ACTIVITIES
     QStringList newActivitiesList = activities();
     if (newActivitiesList.contains(activity) == enable)   //nothing to do
         return;
     if (enable) {
-        QStringList allActivities = workspace()->activityList();
+        QStringList allActivities = Activities::self()->all();
         if (!allActivities.contains(activity))   //bogus ID
             return;
         newActivitiesList.append(activity);
     } else
         newActivitiesList.removeOne(activity);
     setOnActivities(newActivitiesList);
+#else
+    Q_UNUSED(activity)
+    Q_UNUSED(enable)
+#endif
 }
 
 /**
  * set exactly which activities this client is on
  */
-// cloned from kactivities/src/lib/core/consumer.cpp
-#define NULL_UUID "00000000-0000-0000-0000-000000000000"
 void Client::setOnActivities(QStringList newActivitiesList)
 {
+#ifdef KWIN_BUILD_ACTIVITIES
     QString joinedActivitiesList = newActivitiesList.join(",");
     joinedActivitiesList = rules()->checkActivity(joinedActivitiesList, false);
     newActivitiesList = joinedActivitiesList.split(',', QString::SkipEmptyParts);
 
-    QStringList allActivities = workspace()->activityList();
+    QStringList allActivities = Activities::self()->all();
     if ( newActivitiesList.isEmpty() ||
         (newActivitiesList.count() > 1 && newActivitiesList.count() == allActivities.count()) ||
-        (newActivitiesList.count() == 1 && newActivitiesList.at(0) == NULL_UUID)) {
+        (newActivitiesList.count() == 1 && newActivitiesList.at(0) == Activities::nullUuid())) {
         activityList.clear();
+        const QByteArray nullUuid = Activities::nullUuid().toUtf8();
         XChangeProperty(display(), window(), atoms->activities, XA_STRING, 8,
-                        PropModeReplace, (const unsigned char *)NULL_UUID, 36);
+                        PropModeReplace, (const unsigned char *)nullUuid.constData(), nullUuid.length());
 
     } else {
         QByteArray joined = joinedActivitiesList.toAscii();
@@ -1549,6 +1528,21 @@ void Client::setOnActivities(QStringList newActivitiesList)
     }
 
     updateActivities(false);
+#else
+    Q_UNUSED(newActivitiesList)
+#endif
+}
+
+void Client::blockActivityUpdates(bool b)
+{
+    if (b) {
+        ++m_activityUpdatesBlocked;
+    } else {
+        Q_ASSERT(m_activityUpdatesBlocked);
+        --m_activityUpdatesBlocked;
+        if (!m_activityUpdatesBlocked)
+            updateActivities(m_blockedActivityUpdatesRequireTransients);
+    }
 }
 
 /**
@@ -1556,12 +1550,12 @@ void Client::setOnActivities(QStringList newActivitiesList)
  */
 void Client::updateActivities(bool includeTransients)
 {
-    /* FIXME do I need this?
-    if ( decoration != NULL )
-        decoration->desktopChange();
-        */
-    if (includeTransients)
-        workspace()->updateOnAllActivitiesOfTransients(this);
+    if (m_activityUpdatesBlocked) {
+        m_blockedActivityUpdatesRequireTransients |= includeTransients;
+        return;
+    }
+    emit activitiesChanged(this);
+    m_blockedActivityUpdatesRequireTransients = false; // reset
     FocusChain::self()->update(this, FocusChain::MakeFirst);
     updateVisibility();
     updateWindowRules(Rules::Activity);
@@ -1619,25 +1613,26 @@ void Client::setOnAllDesktops(bool b)
  */
 void Client::setOnAllActivities(bool on)
 {
+#ifdef KWIN_BUILD_ACTIVITIES
     if (on == isOnAllActivities())
         return;
     if (on) {
         setOnActivities(QStringList());
 
     } else {
-        setOnActivity(Workspace::self()->currentActivity(), true);
-        workspace()->updateOnAllActivitiesOfTransients(this);
+        setOnActivity(Activities::self()->current(), true);
     }
+#endif
 }
 
 /**
  * Performs activation and/or raising of the window
  */
-void Client::takeActivity(int flags, bool handled, allowed_t)
+void Client::takeActivity(int flags, bool handled)
 {
     if (!handled || !Ptakeactivity) {
         if (flags & ActivityFocus)
-            takeFocus(Allowed);
+            takeFocus();
         if (flags & ActivityRaise)
             workspace()->raiseClient(this);
         return;
@@ -1663,7 +1658,7 @@ void Client::takeActivity(int flags, bool handled, allowed_t)
 /**
  * Performs the actual focusing of the window using XSetInputFocus and WM_TAKE_FOCUS
  */
-void Client::takeFocus(allowed_t)
+void Client::takeFocus()
 {
 #ifndef NDEBUG
     static Time previous_focus_timestamp;
@@ -1954,12 +1949,12 @@ void Client::setClientShown(bool shown)
     if (options->isInactiveTabsSkipTaskbar())
         setSkipTaskbar(hidden, false); // TODO: Causes reshuffle of the taskbar
     if (shown) {
-        map(Allowed);
-        takeFocus(Allowed);
+        map();
+        takeFocus();
         autoRaise();
         FocusChain::self()->update(this, FocusChain::MakeFirst);
     } else {
-        unmap(Allowed);
+        unmap();
         // Don't move tabs to the end of the list when another tab get's activated
         if (isCurrentTab())
             FocusChain::self()->update(this, FocusChain::MakeLast);
@@ -2367,10 +2362,11 @@ QPixmap* kwin_get_menu_pix_hack()
 
 void Client::checkActivities()
 {
+#ifdef KWIN_BUILD_ACTIVITIES
     QStringList newActivitiesList;
     QByteArray prop = getStringProperty(window(), atoms->activities);
     activitiesDefined = !prop.isEmpty();
-    if (prop == NULL_UUID) {
+    if (prop == Activities::nullUuid()) {
         //copied from setOnAllActivities to avoid a redundant XChangeProperty.
         if (!activityList.isEmpty()) {
             activityList.clear();
@@ -2393,7 +2389,7 @@ void Client::checkActivities()
         return; //expected change, it's ok.
 
     //otherwise, somebody else changed it. we need to validate before reacting
-    QStringList allActivities = workspace()->activityList();
+    QStringList allActivities = Activities::self()->all();
     if (allActivities.isEmpty()) {
         kDebug() << "no activities!?!?";
         //don't touch anything, there's probably something bad going on and we don't wanna make it worse
@@ -2406,10 +2402,8 @@ void Client::checkActivities()
         }
     }
     setOnActivities(newActivitiesList);
+#endif
 }
-
-#undef NULL_UUID
-
 
 void Client::setSessionInteract(bool needed)
 {
@@ -2423,6 +2417,16 @@ QRect Client::decorationRect() const
     } else {
         return QRect(0, 0, width(), height());
     }
+}
+
+KDecorationDefines::Position Client::titlebarPosition()
+{
+    Position titlePos = PositionCenter; // PositionTop is returned by the default implementation
+                                        // this will hint errors in the metaobject usage ;-)
+    if (decoration)
+        QMetaObject::invokeMethod(decoration, "titlebarPosition", Qt::DirectConnection,
+                                            Q_RETURN_ARG(KDecorationDefines::Position, titlePos));
+    return titlePos;
 }
 
 void Client::updateFirstInTabBox()
@@ -2490,11 +2494,11 @@ NET::WindowType Client::windowType(bool direct, int supportedTypes) const
 
 bool Client::decorationHasAlpha() const
 {
-    if (!decoration || !workspace()->decorationHasAlpha()) {
+    if (!decoration || !decorationPlugin()->hasAlpha()) {
         // either no decoration or decoration has alpha disabled
         return false;
     }
-    if (workspace()->decorationSupportsAnnounceAlpha()) {
+    if (decorationPlugin()->supportsAnnounceAlpha()) {
         return decoration->isAlphaEnabled();
     } else {
         // decoration has alpha enabled and does not support alpha announcement

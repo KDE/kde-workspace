@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kconfiggroup.h>
 #include "composite.h"
+#include "workspace.h"
 
 namespace KWin
 {
@@ -43,6 +44,7 @@ Bridge::Bridge(Client* cl)
 BRIDGE_HELPER(bool, isCloseable, , , const)
 BRIDGE_HELPER(bool, isMaximizable, , , const)
 BRIDGE_HELPER(Bridge::MaximizeMode, maximizeMode, , , const)
+BRIDGE_HELPER(Bridge::QuickTileMode, quickTileMode, , , const)
 BRIDGE_HELPER(bool, isMinimizable, , , const)
 BRIDGE_HELPER(bool, providesContextHelp, , , const)
 BRIDGE_HELPER(int, desktop, , , const)

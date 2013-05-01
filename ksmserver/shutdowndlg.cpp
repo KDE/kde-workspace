@@ -325,23 +325,15 @@ void KSMShutdownDlg::slotHalt()
 void KSMShutdownDlg::slotSuspend(int spdMethod)
 {
     m_bootOption.clear();
-    QDBusMessage call;
     switch (spdMethod) {
         case Solid::PowerManagement::StandbyState:
         case Solid::PowerManagement::SuspendState:
-            call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                  "/org/kde/Solid/PowerManagement",
-                                                  "org.kde.Solid.PowerManagement",
-                                                  "suspendToRam");
+            Solid::PowerManagement::requestSleep(Solid::PowerManagement::SuspendState, 0, 0);
             break;
         case Solid::PowerManagement::HibernateState:
-            call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                  "/org/kde/Solid/PowerManagement",
-                                                  "org.kde.Solid.PowerManagement",
-                                                  "suspendToDisk");
+            Solid::PowerManagement::requestSleep(Solid::PowerManagement::HibernateState, 0, 0);
             break;
     }
-    QDBusConnection::sessionBus().asyncCall(call);
     reject();
 }
 

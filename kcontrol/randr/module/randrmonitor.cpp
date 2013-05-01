@@ -277,7 +277,8 @@ bool RandrMonitorModule::isLidPresent()
 
 void RandrMonitorModule::checkResumeFromSuspend()
 {
-    QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement", "/org/kde/Solid/PowerManagement", "org.kde.Solid.PowerManagement", "resumingFromSuspend", this, SLOT(resumedFromSuspend()));
+    connect( Solid::PowerManagement::notifier(), SIGNAL(resumingFromSuspend()),
+             this, SLOT(resumedFromSuspend()) );
 }
 
 void RandrMonitorModule::switchDisplay()

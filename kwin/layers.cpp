@@ -79,10 +79,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 #include "client.h"
 #include "focuschain.h"
+#include "netinfo.h"
 #include "workspace.h"
 #include "tabbox.h"
 #include "group.h"
 #include "rules.h"
+#include "screens.h"
 #include "unmanaged.h"
 #include "deleted.h"
 #include "effects.h"
@@ -509,7 +511,7 @@ ToplevelList Workspace::constrainedStackingOrder()
         kDebug(1212) << (void*)(*it) << *it << ":" << (*it)->layer();
 #endif
     // build the order from layers
-    QVector< QMap<Group*, Layer> > minimum_layer(numScreens());
+    QVector< QMap<Group*, Layer> > minimum_layer(screens()->count());
     for (ToplevelList::ConstIterator it = unconstrained_stacking_order.constBegin(),
                                   end = unconstrained_stacking_order.constEnd(); it != end; ++it) {
         Layer l = (*it)->layer();

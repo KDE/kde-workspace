@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 #include "tabbox/tabboxhandler.h"
 
+class KActionCollection;
+class KConfigGroup;
 class QKeyEvent;
 
 namespace KWin
@@ -52,6 +54,7 @@ public:
     virtual int currentDesktop() const;
     virtual QString desktopName(TabBoxClient* client) const;
     virtual QString desktopName(int desktop) const;
+    virtual bool isKWinCompositing() const;
     virtual QWeakPointer< TabBoxClient > nextClientFocusChain(TabBoxClient* client) const;
     virtual QWeakPointer< TabBoxClient > firstClientFocusChain() const;
     virtual bool isInFocusChain (TabBoxClient* client) const;
@@ -63,9 +66,6 @@ public:
     virtual void restack(TabBoxClient *c, TabBoxClient *under);
     virtual QWeakPointer< TabBoxClient > clientToAddToList(KWin::TabBox::TabBoxClient* client, int desktop) const;
     virtual QWeakPointer< TabBoxClient > desktopClient() const;
-    virtual void hideOutline();
-    virtual void showOutline(const QRect &outline);
-    virtual QVector< xcb_window_t > outlineWindowIds() const;
     virtual void activateAndClose();
 
 private:
@@ -110,7 +110,6 @@ class TabBox : public QObject
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.kwin")
 public:
-    explicit TabBox(QObject *parent = NULL);
     ~TabBox();
 
     Client* currentClient();
@@ -173,6 +172,9 @@ public:
     void keyPress(int key);
     void keyRelease(const XKeyEvent& ev);
 
+    static TabBox *self();
+    static TabBox *create(QObject *parent);
+
 public slots:
     void show();
     /**
@@ -232,6 +234,8 @@ public slots:
 
     void handlerReady();
 
+    bool toggle(ElectricBorder eb);
+
 signals:
     void tabBoxAdded(int);
     Q_SCRIPTABLE void tabBoxClosed();
@@ -240,6 +244,7 @@ signals:
     void tabBoxKeyEvent(QKeyEvent*);
 
 private:
+    explicit TabBox(QObject *parent);
     void setCurrentIndex(QModelIndex index, bool notifyEffects = true);
     void loadConfig(const KConfigGroup& config, TabBoxConfig& tabBoxConfig);
 
@@ -293,7 +298,17 @@ private:
     KShortcut m_cutWalkThroughCurrentAppWindowsAlternative, m_cutWalkThroughCurrentAppWindowsAlternativeReverse;
     bool m_forcedGlobalMouseGrab;
     bool m_ready; // indicates whether the config is completely loaded
+    QList<ElectricBorder> m_borderActivate, m_borderAlternativeActivate;
+
+    static TabBox *s_self;
 };
+
+inline
+TabBox *TabBox::self()
+{
+    return s_self;
+}
+
 } // namespace TabBox
 } // namespace
 #endif

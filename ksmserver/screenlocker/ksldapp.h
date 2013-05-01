@@ -28,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // forward declarations
 class KActionCollection;
-class KProcess;
 class QTimer;
 
 namespace ScreenLocker
@@ -40,8 +39,15 @@ class KSldApp : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.ksld.App")
+    Q_ENUMS(LockState)
 
 public:
+    enum LockState {
+        Unlocked,
+        AcquiringLock,
+        Locked
+    };
+
     static KSldApp* self();
 
     KSldApp(QObject * parent = 0);
@@ -50,8 +56,8 @@ public:
     // The action collection of the active widget
     KActionCollection* actionCollection();
 
-    bool isLocked() const {
-        return m_locked;
+    LockState lockState() const {
+        return m_lockState;
     }
 
     /**
@@ -76,7 +82,8 @@ public:
 
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
-     void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void lockProcessReady();
 
 Q_SIGNALS:
     void locked();
@@ -98,8 +105,8 @@ private:
     void doUnlock();
 
     KActionCollection *m_actionCollection;
-    bool m_locked;
-    KProcess *m_lockProcess;
+    LockState m_lockState;
+    QProcess *m_lockProcess;
     LockWindow *m_lockWindow;
     /**
      * Timer to measure how long the screen is locked.

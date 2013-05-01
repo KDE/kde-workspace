@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "appmenu.h"
 #include "client.h"
+#include "workspace.h"
 // Qt
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusMessage>
@@ -32,14 +33,7 @@ static const char *KDED_SERVICE = "org.kde.kded";
 static const char *KDED_APPMENU_PATH = "/modules/appmenu";
 static const char *KDED_INTERFACE = "org.kde.kded";
 
-ApplicationMenu *ApplicationMenu::s_self = NULL;
-
-ApplicationMenu *ApplicationMenu::create(QObject *parent)
-{
-    Q_ASSERT(!s_self);
-    s_self = new ApplicationMenu(parent);
-    return s_self;
-}
+KWIN_SINGLETON_FACTORY(ApplicationMenu)
 
 ApplicationMenu::ApplicationMenu(QObject *parent)
     : QObject(parent)

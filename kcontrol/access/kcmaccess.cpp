@@ -47,67 +47,6 @@
 K_PLUGIN_FACTORY(KAccessConfigFactory, registerPlugin<KAccessConfig>();)
 K_EXPORT_PLUGIN(KAccessConfigFactory("kcmaccess"))
 
-ExtendedIntNumInput::ExtendedIntNumInput
-				(QWidget* parent)
-	: KIntNumInput(parent)
-{
-}
-
-ExtendedIntNumInput::~ExtendedIntNumInput () {
-}
-
-void ExtendedIntNumInput::setRange(int min, int max, int step, bool withSlider) {
-	KIntNumInput::setRange (min, max, step);
-	KIntNumInput::setSliderEnabled (withSlider);
-
-	if (withSlider) {
-		disconnect(slider(), SIGNAL(valueChanged(int)),
-					  spinBox(), SLOT(setValue(int)));
-		disconnect(spinBox(), SIGNAL(valueChanged(int)),
-					  this, SLOT(spinValueChanged(int)));
-
-		this->min = min;
-		this->max = max;
-		sliderMax = (int)floor (0.5
-				+ 2*(log((double)max)-log((double)min)) / (log((double)max)-log((double)max-1)));
-		slider()->setRange(0, sliderMax);
-		slider()->setSingleStep(step);
-		slider()->setPageStep(sliderMax/10);
-		slider()->setTickInterval(sliderMax/10);
-
-		double alpha  = sliderMax / (log((double)max) - log((double)min));
-		double logVal = alpha * (log((double)value())-log((double)min));
-		slider()->setValue ((int)floor (0.5 + logVal));
-
-		connect(slider(), SIGNAL(valueChanged(int)),
-				  this, SLOT(slotSliderValueChanged(int)));
-		connect(spinBox(), SIGNAL(valueChanged(int)),
-				   this, SLOT(slotSpinValueChanged(int)));
-	}
-}
-
-// Basically the slider values are logarithmic whereas
-// spinbox values are linear.
-
-void ExtendedIntNumInput::slotSpinValueChanged(int val)
-{
-
-	if(slider()) {
-		double alpha  = sliderMax / (log((double)max) - log((double)min));
-		double logVal = alpha * (log((double)val)-log((double)min));
-		slider()->setValue ((int)floor (0.5 + logVal));
-	}
-
-	emit valueChanged(val);
-}
-
-void ExtendedIntNumInput::slotSliderValueChanged(int val)
-{
-	double alpha  = sliderMax / (log((double)max) - log((double)min));
-	double linearVal = exp (val/alpha + log((double)min));
-	spinBox()->setValue ((int)floor(0.5 + linearVal));
-}
-
 QString mouseKeysShortcut (Display *display) {
   // Calculate the keycode
   KeySym sym = XK_MouseKeys_Enable;
@@ -328,8 +267,10 @@ KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
   vvbox->addLayout(hbox);
   hbox->addSpacing(24);
 
-  durationSlider = new ExtendedIntNumInput(grp);
+  durationSlider = new KDoubleNumInput(grp);
   durationSlider->setRange(100, 2000, 100);
+  durationSlider->setExponentRatio(2);
+  durationSlider->setDecimals(0);
   durationSlider->setLabel(i18n("Duration:"));
   durationSlider->setSuffix(i18n(" msec"));
   hbox->addWidget(durationSlider);
@@ -344,7 +285,7 @@ KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
   connect(invertScreen, SIGNAL(clicked()), this, SLOT(invertClicked()));
   connect(flashScreen, SIGNAL(clicked()), this, SLOT(flashClicked()));
 
-  connect(durationSlider, SIGNAL(valueChanged(int)), this, SLOT(configChanged()));
+  connect(durationSlider, SIGNAL(valueChanged(double)), this, SLOT(configChanged()));
 
   vbox->addStretch();
 
@@ -441,9 +382,11 @@ KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
   hbox = new QHBoxLayout();
   vvbox->addLayout(hbox);
   hbox->addSpacing(24);
-  slowKeysDelay = new ExtendedIntNumInput(grp);
-  slowKeysDelay->setSuffix(i18n(" msec"));
+  slowKeysDelay = new KDoubleNumInput(grp);
   slowKeysDelay->setRange(50, 10000, 100);
+  slowKeysDelay->setExponentRatio(2);
+  slowKeysDelay->setDecimals(0);
+  slowKeysDelay->setSuffix(i18n(" msec"));
   slowKeysDelay->setLabel(i18n("Acceptance dela&y:"), Qt::AlignVCenter|Qt::AlignLeft);
   hbox->addWidget(slowKeysDelay);
 
@@ -479,9 +422,11 @@ KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
   hbox = new QHBoxLayout();
   vvbox->addLayout(hbox);
   hbox->addSpacing(24);
-  bounceKeysDelay = new ExtendedIntNumInput(grp);
-  bounceKeysDelay->setSuffix(i18n(" msec"));
+  bounceKeysDelay = new KDoubleNumInput(grp);
   bounceKeysDelay->setRange(100, 5000, 100);
+  bounceKeysDelay->setExponentRatio(2);
+  bounceKeysDelay->setDecimals(0);
+  bounceKeysDelay->setSuffix(i18n(" msec"));
   bounceKeysDelay->setLabel(i18n("D&ebounce time:"), Qt::AlignVCenter|Qt::AlignLeft);;
   hbox->addWidget(bounceKeysDelay);
 
@@ -491,7 +436,7 @@ KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
   bounceKeysRejectBeep = new QCheckBox(i18n("Use the system bell whenever a key is rejected"), grp);
   hbox->addWidget(bounceKeysRejectBeep);
 
-  connect(slowKeysDelay, SIGNAL(valueChanged(int)), this, SLOT(configChanged()));
+  connect(slowKeysDelay, SIGNAL(valueChanged(double)), this, SLOT(configChanged()));
   connect(slowKeys, SIGNAL(clicked()), this, SLOT(configChanged()));
   connect(slowKeys, SIGNAL(clicked()), this, SLOT(checkAccess()));
 
@@ -499,7 +444,7 @@ KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
   connect(slowKeysAcceptBeep, SIGNAL(clicked()), this, SLOT(configChanged()));
   connect(slowKeysRejectBeep, SIGNAL(clicked()), this, SLOT(configChanged()));
 
-  connect(bounceKeysDelay, SIGNAL(valueChanged(int)), this, SLOT(configChanged()));
+  connect(bounceKeysDelay, SIGNAL(valueChanged(double)), this, SLOT(configChanged()));
   connect(bounceKeys, SIGNAL(clicked()), this, SLOT(configChanged()));
   connect(bounceKeysRejectBeep, SIGNAL(clicked()), this, SLOT(configChanged()));
   connect(bounceKeys, SIGNAL(clicked()), this, SLOT(checkAccess()));

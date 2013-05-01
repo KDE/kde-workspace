@@ -24,7 +24,7 @@ const int XFocusIn = FocusIn;
 int main( int argc, char *argv[] )
 {
   KAboutData aboutData( "ksystraycmd", 0, ki18n( "KSysTrayCmd" ),
-			"KSysTrayCmd 0.1",
+			"0.1",
 			ki18n( "Allows any application to be kept in the system tray" ),
 			KAboutData::License_GPL,
 			ki18n("(C) 2001-2002 Richard Moore (rich@kde.org)") );

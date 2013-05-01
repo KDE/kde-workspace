@@ -69,11 +69,14 @@ MenuBar::MenuBar()
 
     m_background->getMargins(left, top, right, bottom);
     m_container->layout()->setContentsMargins(left, top, right, bottom);
+
     resize(sizeHint());
 
     connect(m_container, SIGNAL(aboutToHide()), this, SLOT(slotAboutToHide()));
     connect(m_container, SIGNAL(needResize()), this, SIGNAL(needResize()));
     connect(m_hideTimer, SIGNAL(timeout()), this, SLOT(slotAboutToHide()));
+
+    connect(KWindowSystem::self(), SIGNAL(compositingChanged(bool)), this, SLOT(slotCompositingChanged(bool)));
 }
 
 MenuBar::~MenuBar()
@@ -122,6 +125,11 @@ void MenuBar::slotAboutToHide()
     }
 }
 
+void MenuBar::slotCompositingChanged(bool)
+{
+    updateMask();
+}
+
 bool MenuBar::cursorInMenuBar()
 {
     return QRect(pos(), size()).contains(QCursor::pos());
@@ -139,16 +147,20 @@ void MenuBar::resizeEvent(QResizeEvent*)
 {
     m_background->resizeFrame(size());
     m_scene->setSceneRect(0, 0, width(), height());
-    if (!KWindowSystem::compositingActive()) {
-        setMask(m_background->mask());
-    }
+    updateMask();
 }
 
-void MenuBar::showEvent(QShowEvent *)
+void MenuBar::updateMask()
 {
+    // Enable the mask only when compositing is disabled;
+    // As this operation is quite slow, it would be nice to find some
+    // way to workaround it for no-compositing users.
     if (KWindowSystem::compositingActive()) {
+        clearMask();
         Plasma::WindowEffects::overrideShadow(winId(), true);
-        m_shadows->addWindow(this, Plasma::FrameSvg::BottomBorder|Plasma::FrameSvg::LeftBorder|Plasma::FrameSvg::RightBorder);
         Plasma::WindowEffects::enableBlurBehind(winId(), true, m_background->mask());
+        m_shadows->addWindow(this, Plasma::FrameSvg::BottomBorder|Plasma::FrameSvg::LeftBorder|Plasma::FrameSvg::RightBorder);
+    } else {
+        setMask(m_background->mask());
     }
 }

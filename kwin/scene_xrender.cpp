@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "toplevel.h"
 #include "client.h"
+#include "decorations.h"
 #include "deleted.h"
 #include "effects.h"
 #include "overlaywindow.h"
@@ -43,27 +44,6 @@ namespace KWin
 //****************************************
 // SceneXrender
 //****************************************
-
-// kDebug() support for the XserverRegion type
-struct RegionDebug {
-    RegionDebug(XserverRegion r) : rr(r) {}
-    XserverRegion rr;
-};
-
-QDebug& operator<<(QDebug& stream, RegionDebug r)
-{
-    if (r.rr == None)
-        return stream << "EMPTY";
-    int num;
-    XRectangle* rects = XFixesFetchRegion(display(), r.rr, &num);
-    if (rects == NULL || num == 0)
-        return stream << "EMPTY";
-    for (int i = 0;
-            i < num;
-            ++i)
-        stream << "[" << rects[ i ].x << "+" << rects[ i ].y << " " << rects[ i ].width << "x" << rects[ i ].height << "]";
-    return stream;
-}
 
 xcb_render_picture_t SceneXrender::buffer = XCB_RENDER_PICTURE_NONE;
 ScreenPaintData SceneXrender::screen_paint;
@@ -242,6 +222,13 @@ void SceneXrender::paintGenericScreen(int mask, ScreenPaintData data)
 {
     screen_paint = data; // save, transformations will be done when painting windows
     Scene::paintGenericScreen(mask, data);
+}
+
+void SceneXrender::paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data)
+{
+    PaintClipper::push(region);
+    KWin::Scene::paintDesktop(desktop, mask, region, data);
+    PaintClipper::pop(region);
 }
 
 // fill the screen background
@@ -469,7 +456,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     Deleted *deleted = dynamic_cast<Deleted*>(toplevel);
     const QRect decorationRect = toplevel->decorationRect();
     if (((client && !client->noBorder()) || (deleted && !deleted->noBorder())) &&
-                                                        Workspace::self()->decorationHasAlpha()) {
+                                                        decorationPlugin()->hasAlpha()) {
         // decorated client
         transformed_shape = decorationRect;
         if (toplevel->shape()) {

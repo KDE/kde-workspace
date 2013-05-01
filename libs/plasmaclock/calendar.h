@@ -49,7 +49,7 @@ public:
 
     CalendarTable *calendarTable() const;
 
-    void setCalendar(const QString &newCalendarType = "locale");
+    void setCalendar(int newCalendarType = -1);
     void setCalendar(const KCalendarSystem *calendar);
     const KCalendarSystem *calendar() const;
 
