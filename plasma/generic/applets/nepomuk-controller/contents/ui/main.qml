@@ -47,7 +47,7 @@ Item {
 
     PlasmaCore.DataSource {
         id: nepomukSource
-        engine: "nepomuk-serviceengine"
+        engine: "nepomukservice"
         connectedSources: sources
         interval: 0
 
