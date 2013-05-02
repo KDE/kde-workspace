@@ -39,8 +39,9 @@ MouseArea {
     property int cell_size: icons_size + 2*icons_margins ///< [readonly] size of grid cell
 
     //Those properties are used by PlasmaCore.Dialog for size hints
-    property int minimumWidth:   layoutColumn.childrenRect.width ///< [readonly] minimum width of component required to show whole grid
-    property int minimumHeight:  layoutColumn.childrenRect.height ///< [readonly] minimum height of compontn required to show whole grid
+    property int extraHorizMargins: delegate_highlight.marginHints.right
+    property int minimumWidth: extraHorizMargins + layoutColumn.childrenRect.width ///< [readonly] minimum width of component required to show whole grid
+    property int minimumHeight:layoutColumn.childrenRect.height ///< [readonly] minimum height of compontn required to show whole grid
     property int maximumWidth: minimumWidth
     property int maximumHeight: minimumHeight
 
@@ -51,7 +52,7 @@ MouseArea {
 
         MouseRedirectArea {
             id: delegate_root_item
-            width: childrenRect.width
+            width: Math.max(minimumWidth - extraHorizMargins, childrenRect.width)
             height: childrenRect.height
 
             // we redirect some events to IconWidget or applet
@@ -111,14 +112,12 @@ MouseArea {
 
     }
 
-
-
-    PlasmaWidgets.ItemBackground {
+    PlasmaComponents.Highlight {
         id: delegate_highlight
         height: cell_size
         width: minimumWidth
-
         opacity: root_item.containsMouse
+
         Behavior on opacity {
             NumberAnimation {
                 duration: 150
@@ -141,5 +140,10 @@ MouseArea {
             id: repeater
             delegate: delegate_task
         }
+
+    }
+
+    Component.onCompleted: {
+        console.log("========================> " + " " + minimumWidth + " " + layoutColumn.childrenRect.width);
     }
 }
