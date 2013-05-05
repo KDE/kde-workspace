@@ -117,6 +117,7 @@ class Image : public Plasma::Wallpaper
         QString m_mode;
         Plasma::Package *m_wallpaperPackage;
         QStringList m_slideshowBackgrounds;
+        QStringList m_unseenSlideshowBackgrounds;
         QTimer m_timer;
         QPixmap m_pixmap;
         QPixmap m_oldPixmap;
@@ -128,7 +129,6 @@ class Image : public Plasma::Wallpaper
         KFileDialog *m_dialog;
         QSize m_size;
         QString m_img;
-        QDateTime m_previousModified;
         QWeakPointer<KNS3::DownloadDialog> m_newStuffDialog;
         QString m_findToken;
 
