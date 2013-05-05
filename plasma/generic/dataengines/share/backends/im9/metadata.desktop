@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=im9.eu
+Comment=Allows images to be shared using the im9.eu service
+Type=Service
+
+X-KDE-ServiceTypes=Plasma/ShareProvider
+X-KDE-Library=plasma_engine_share
+X-KDE-PlasmaShareProvider-MimeType=image/*
+
+X-KDE-PluginInfo-Name=im9
+X-KDE-PluginInfo-Author=Michał Dutkiewicz
+X-KDE-PluginInfo-Email=emdeck@gmail.com
+X-KDE-PluginInfo-Version=0.1
+X-KDE-PluginInfo-Website=http://plasma.kde.org/
+
