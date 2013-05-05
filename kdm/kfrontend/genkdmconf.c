@@ -2109,7 +2109,7 @@ upd_greeteruid(Entry *ce, Section *cs ATTR_UNUSED)
     if (!(pw = getpwnam(ce->value))) {
         uid = strtol(ce->value, &ok, 10);
         if (*ok || !(pw = getpwuid(uid))) {
-            if ((adduser = locate("useradd"))) {
+            if ((useradd = locate("useradd"))) {
                 const char *args[] = {
                     useradd, "--system", "--user-group",
                     "--home-dir", "/var", "--no-create-home",
