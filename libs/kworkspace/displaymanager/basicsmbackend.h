@@ -20,24 +20,33 @@
  *
  */
 
-#ifndef BASICDMBACKEND_H
-#define BASICDMBACKEND_H
+#ifndef BASICSMBACKEND_H
+#define BASICSMBACKEND_H
 
-#include <QByteArray>
-#include <QStringList>
+#include "../kworkspace.h"
+#include "../kdisplaymanager.h"
+
+#include <QString>
+
 class KDMBackendPrivate;
-
-class BasicDMBackend {
+/**
+ * Basic Session Manager Backend
+ * 
+ * Implements methods for user session management
+ */
+class BasicSMBackend {
 private:
-    KDMBackendPrivate * const d;
+    KDMBackendPrivate *d;
     enum { Dunno, NoDM, KDM, GDM, LightDM } DMType;
 public:
-    BasicDMBackend( KDMBackendPrivate* p );
-    virtual ~BasicDMBackend();
-    virtual int numReserve();
-    virtual void startReserve();
-    virtual bool bootOptions(QStringList &opts, int &dflt, int &curr);
+    BasicSMBackend(KDMBackendPrivate *p);
+    virtual ~BasicSMBackend();
+    virtual bool canShutdown();
+    virtual void shutdown(KWorkSpace::ShutdownType shutdownType, KWorkSpace::ShutdownMode shutdownMode, const QString &bootOption = QString());
     virtual void setLock(bool on);
+    virtual bool isSwitchable();
+    virtual bool localSessions(SessList &list);
+    virtual bool switchVT(int vt);
 };
 
-#endif // BASICDMBACKEND_H
+#endif // BASICSMBACKEND_H

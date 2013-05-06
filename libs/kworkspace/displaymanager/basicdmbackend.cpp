@@ -75,10 +75,6 @@ BasicDMBackend::BasicDMBackend(KDMBackendPrivate *p)
         else
             DMType = NoDM;
     }
-    switch (DMType) {
-    default:
-        return;
-    }
 }
 
 BasicDMBackend::~BasicDMBackend()
@@ -112,3 +108,38 @@ BasicDMBackend::startReserve()
         d->exec("reserve\n");
 }
 
+bool
+BasicDMBackend::bootOptions(QStringList &opts, int &defopt, int &current)
+{
+    if (DMType != KDM)
+        return false;
+
+    QByteArray re;
+    if (!d || !d->exec("listbootoptions\n", re))
+        return false;
+
+    opts = QString::fromLocal8Bit(re.data()).split('\t', QString::SkipEmptyParts);
+    if (opts.size() < 4)
+        return false;
+
+    bool ok;
+    defopt = opts[2].toInt(&ok);
+    if (!ok)
+        return false;
+    current = opts[3].toInt(&ok);
+    if (!ok)
+        return false;
+
+    opts = opts[1].split(' ', QString::SkipEmptyParts);
+    for (QStringList::Iterator it = opts.begin(); it != opts.end(); ++it)
+        (*it).replace("\\s", " ");
+
+    return true;
+}
+
+void
+BasicDMBackend::setLock(bool on)
+{
+    if (DMType == KDM)
+        d->exec(on ? "lock\n" : "unlock\n");
+}

@@ -1,6 +1,7 @@
 
 set(kworkspace_LIB_SRCS
                         displaymanager/support.cpp 
+                        displaymanager/basicsmbackend.cpp 
                         displaymanager/basicdmbackend.cpp
                         kdisplaymanager.cpp
                         kwindowlistmenu.cpp
