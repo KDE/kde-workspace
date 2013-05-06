@@ -27,6 +27,8 @@
 #include "../kdisplaymanager.h"
 
 #include <QString>
+#include <QList>
+#include <QtDBus>
 
 class KDMBackendPrivate;
 
@@ -63,6 +65,9 @@ public:
 };
 
 class Login1SMBackend : public BasicSMBackend {
+private:
+    bool getCurrentSeat(QDBusObjectPath *currentSession, QDBusObjectPath *currentSeat);
+    QList<QDBusObjectPath> getSessionsForSeat(const QDBusObjectPath &path);
 public:
     Login1SMBackend();
     virtual ~Login1SMBackend();
@@ -74,6 +79,19 @@ public:
     virtual bool switchVT(int vt);
 };
 
-
+class ConsoleKitSMBackend : public BasicSMBackend {
+private:
+    bool getCurrentSeat(QDBusObjectPath *currentSession, QDBusObjectPath *currentSeat);
+    QList<QDBusObjectPath> getSessionsForSeat(const QDBusObjectPath &path);
+public:
+    ConsoleKitSMBackend();
+    virtual ~ConsoleKitSMBackend();
+    virtual bool canShutdown();
+    virtual void shutdown(KWorkSpace::ShutdownType shutdownType, KWorkSpace::ShutdownMode shutdownMode, const QString &bootOption = QString());
+    virtual void setLock(bool on);
+    virtual bool isSwitchable();
+    virtual bool localSessions(SessList &list);
+    virtual bool switchVT(int vt);
+};
 
 #endif // BASICSMBACKEND_H

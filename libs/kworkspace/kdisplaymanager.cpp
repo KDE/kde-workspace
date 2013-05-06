@@ -64,7 +64,7 @@ KDisplayManager::KDisplayManager()
     }
     else if ((ctl = ::getenv("XDM_MANAGED")) && ctl[0] == '/') {
         KDMBackendPrivate *priv = new KDMBackendPrivate(dpy, ctl);
-        m_DMBackend = new BasicDMBackend(priv);
+        m_DMBackend = new DBusDMBackend(priv);
         if (!m_SMBackend)
             m_SMBackend = new BasicSMBackend(priv);
     }

@@ -56,6 +56,10 @@ public:
                 QDBusConnection::systemBus()) {}
 };
 
+DBusDMBackend::DBusDMBackend () 
+{
+
+}
 
 BasicDMBackend::BasicDMBackend(KDMBackendPrivate *p)
 : NullDMBackend()
@@ -69,13 +73,16 @@ BasicDMBackend::BasicDMBackend(KDMBackendPrivate *p)
             DMType = NoDM;
         else if ((ctl = ::getenv("DM_CONTROL")))
             DMType = KDM;
-        else if ((ctl = ::getenv("XDM_MANAGED")) && ctl[0] == '/')
-            DMType = LightDM;
         else if (::getenv("GDMSESSION"))
             DMType = GDM;
         else
             DMType = NoDM;
     }
+}
+
+DBusDMBackend::~DBusDMBackend() 
+{
+
 }
 
 BasicDMBackend::~BasicDMBackend()
@@ -85,15 +92,22 @@ BasicDMBackend::~BasicDMBackend()
 int
 BasicDMBackend::numReserve()
 {
-    if (DMType == GDM || DMType == LightDM)
+    if (DMType != KDM && DMType != Dunno && DMType != NoDM) // To avoid overriding
         return 1; /* Bleh */
 
     QByteArray re;
     int p = 0;
 
-    if (d && !(d->exec("caps\n", re) && (p = re.indexOf("\treserve ")) >= 0))
+    if (!d || !(d->exec("caps\n", re) && (p = re.indexOf("\treserve ")) >= 0))
         return -1;
     return atoi(re.data() + p + 9);
+}
+
+void 
+DBusDMBackend::startReserve() 
+{
+    LightDMDBus lightDM;
+    lightDM.call("SwitchToGreeter");
 }
 
 void
@@ -101,10 +115,6 @@ BasicDMBackend::startReserve()
 {
     if (DMType == GDM)
         GDMFactory().call(QLatin1String("CreateTransientDisplay"));
-    else if (DMType == LightDM) {
-        LightDMDBus lightDM;
-        lightDM.call("SwitchToGreeter");
-    }
     else if (d)
         d->exec("reserve\n");
 }

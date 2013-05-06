@@ -40,7 +40,7 @@ public:
 class BasicDMBackend : public NullDMBackend {
 private:
     KDMBackendPrivate * const d;
-    enum { Dunno, NoDM, KDM, GDM, LightDM } DMType;
+    enum { Dunno, NoDM, KDM, GDM } DMType;
 public:
     BasicDMBackend( KDMBackendPrivate* p );
     virtual ~BasicDMBackend();
@@ -48,6 +48,13 @@ public:
     virtual void startReserve();
     virtual bool bootOptions(QStringList &opts, int &dflt, int &curr);
     virtual void setLock(bool on);
+};
+
+class DBusDMBackend : public NullDMBackend {
+public:
+    DBusDMBackend();
+    virtual ~DBusDMBackend();
+    virtual void startReserve();
 };
 
 #endif // BASICDMBACKEND_H
