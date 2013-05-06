@@ -58,7 +58,8 @@ public:
 
 
 BasicDMBackend::BasicDMBackend(KDMBackendPrivate *p)
-: d(p)
+: NullDMBackend()
+, d(p)
 , DMType(Dunno)
 {
     const char *dpy;

@@ -27,7 +27,17 @@
 #include <QStringList>
 class KDMBackendPrivate;
 
-class BasicDMBackend {
+class NullDMBackend {
+public:
+    NullDMBackend() { }
+    virtual ~NullDMBackend() { }
+    virtual int numReserve() { return -1; }
+    virtual void startReserve() { }
+    virtual bool bootOptions(QStringList&, int&, int&) { return false; }
+    virtual void setLock(bool) { }
+};
+
+class BasicDMBackend : public NullDMBackend {
 private:
     KDMBackendPrivate * const d;
     enum { Dunno, NoDM, KDM, GDM, LightDM } DMType;

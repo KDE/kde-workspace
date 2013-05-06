@@ -31,6 +31,7 @@
 class KDMBackendPrivate;
 class BasicSMBackend;
 class BasicDMBackend;
+
 struct KWORKSPACE_EXPORT SessEnt {
     QString display, from, user, session;
     int vt;
@@ -39,12 +40,7 @@ struct KWORKSPACE_EXPORT SessEnt {
 
 typedef QList<SessEnt> SessList;
 
-
-
 class KWORKSPACE_EXPORT KDisplayManager {
-
-#ifdef Q_WS_X11
-
 public:
     KDisplayManager();
     ~KDisplayManager();
@@ -67,38 +63,9 @@ public:
 
     static QString sess2Str(const SessEnt &se);
     static void sess2Str2(const SessEnt &se, QString &user, QString &loc);
-
-private:
-    void GDMAuthenticate();
-
-#else // Q_WS_X11
-
-public:
-    KDisplayManager() {}
-
-    bool canShutdown() { return false; }
-    void shutdown(KWorkSpace::ShutdownType shutdownType,
-                  KWorkSpace::ShutdownMode shutdownMode,
-                  const QString &bootOption = QString()) {}
-
-    void setLock(bool) {}
-
-    bool isSwitchable() { return false; }
-    int numReserve() { return -1; }
-    void startReserve() {}
-    bool localSessions(SessList &list) { return false; }
-    void switchVT(int vt) {}
-
-    bool bootOptions(QStringList &opts, int &dflt, int &curr);
-
-#endif // Q_WS_X11
-
 private:
     BasicDMBackend *m_DMBackend;
     BasicSMBackend *m_SMBackend;
-#ifdef Q_WS_X11
-    KDMBackendPrivate *d;
-#endif // Q_WS_X11
 
 }; // class KDisplayManager
 

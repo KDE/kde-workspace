@@ -239,9 +239,18 @@ public:
     }
 };
 
+Login1SMBackend::Login1SMBackend() : BasicSMBackend(NULL) {
+
+}
+
+Login1SMBackend::~Login1SMBackend() {
+
+}
+
 
 BasicSMBackend::BasicSMBackend ( KDMBackendPrivate* p )
-: d(p)
+: NullSMBackend()
+, d(p)
 , DMType(Dunno)
 {
     const char *dpy;
@@ -332,13 +341,18 @@ static QList<QDBusObjectPath> getSessionsForSeat(const QDBusObjectPath &path)
 }
 
 #ifndef KDM_NO_SHUTDOWN
+bool 
+Login1SMBackend::canShutdown() {
+    QDBusReply<QString> canPowerOff = SystemdManager().call(QLatin1String("CanPowerOff"));
+    if (canPowerOff.isValid())
+        return canPowerOff.value() != QLatin1String("no");
+    return false;
+}
+
 bool
 BasicSMBackend::canShutdown()
 {
     if (DMType == GDM || DMType == NoDM || DMType == LightDM) {
-        QDBusReply<QString> canPowerOff = SystemdManager().call(QLatin1String("CanPowerOff"));
-        if (canPowerOff.isValid())
-            return canPowerOff.value() != QLatin1String("no");
         QDBusReply<bool> canStop = CKManager().call(QLatin1String("CanStop"));
         if (canStop.isValid())
             return canStop.value();
@@ -350,14 +364,32 @@ BasicSMBackend::canShutdown()
     return d && d->exec("caps\n", re) && re.indexOf("\tshutdown") >= 0;
 }
 
+void 
+Login1SMBackend::shutdown ( KWorkSpace::ShutdownType shutdownType, KWorkSpace::ShutdownMode shutdownMode, const QString& bootOption ) 
+{
+    if (!bootOption.isEmpty())
+        return;
+    // systemd supports only 2 modes:
+    // * interactive = true: brings up a PolicyKit prompt if other sessions are active
+    // * interactive = false: rejects the shutdown if other sessions are active
+    // There are no schedule or force modes.
+    // We try to map our 4 shutdown modes in the sanest way.
+    bool interactive = (shutdownMode == KWorkSpace::ShutdownModeInteractive
+                        || shutdownMode == KWorkSpace::ShutdownModeForceNow);
+    QDBusReply<QString> check = SystemdManager().call(QLatin1String(
+            shutdownType == KWorkSpace::ShutdownTypeReboot ? "Reboot" : "PowerOff"), interactive);
+    // if the login1 call fails, try the legacy way of turning the computer off
+    if (!check.isValid()) {
+        BasicSMBackend::shutdown(shutdownType, shutdownMode, bootOption);
+    }
+}
+
+
 void
 BasicSMBackend::shutdown(KWorkSpace::ShutdownType shutdownType,
                           KWorkSpace::ShutdownMode shutdownMode, /* NOT Default */
                           const QString &bootOption)
 {
-    if (shutdownType == KWorkSpace::ShutdownTypeNone || shutdownType == KWorkSpace::ShutdownTypeLogout)
-        return;
-
     bool cap_ask;
     if (DMType == KDM) {
         QByteArray re;
@@ -367,21 +399,10 @@ BasicSMBackend::shutdown(KWorkSpace::ShutdownType shutdownType,
             return;
 
         if (DMType == GDM || DMType == NoDM || DMType == LightDM) {
-            // systemd supports only 2 modes:
-            // * interactive = true: brings up a PolicyKit prompt if other sessions are active
-            // * interactive = false: rejects the shutdown if other sessions are active
-            // There are no schedule or force modes.
-            // We try to map our 4 shutdown modes in the sanest way.
-            bool interactive = (shutdownMode == KWorkSpace::ShutdownModeInteractive
-                                || shutdownMode == KWorkSpace::ShutdownModeForceNow);
-            QDBusReply<QString> check = SystemdManager().call(QLatin1String(
-                    shutdownType == KWorkSpace::ShutdownTypeReboot ? "Reboot" : "PowerOff"), interactive);
-            if (!check.isValid()) {
-                // FIXME: entirely ignoring shutdownMode
-                CKManager().call(QLatin1String(
-                        shutdownType == KWorkSpace::ShutdownTypeReboot ? "Restart" : "Stop"));
-                // if even CKManager call fails, there is nothing more to be done
-            }
+            // FIXME: entirely ignoring shutdownMode
+            CKManager().call(QLatin1String(
+                    shutdownType == KWorkSpace::ShutdownTypeReboot ? "Restart" : "Stop"));
+            // if even CKManager call fails, there is nothing more to be done
             return;
         }
 
@@ -407,6 +428,12 @@ BasicSMBackend::shutdown(KWorkSpace::ShutdownType shutdownType,
 }
 #endif // KDM_NO_SHUTDOWN
 
+void 
+Login1SMBackend::setLock ( bool  ) 
+{
+    
+}
+
 // This only tells KDM to not auto-re-login upon session crash
 void
 BasicSMBackend::setLock(bool on)
@@ -416,17 +443,26 @@ BasicSMBackend::setLock(bool on)
 }
 
 bool
+Login1SMBackend::isSwitchable() {
+    QDBusObjectPath currentSeat;
+    if (getCurrentSeat(0, &currentSeat)) {
+        SystemdSeat SDseat(currentSeat);
+        if (SDseat.isValid()) {
+            QVariant prop = SDseat.property("CanMultiSession");
+            if (prop.isValid())
+                return prop.toBool();
+        }
+    }
+    return false;
+}
+
+
+bool
 BasicSMBackend::isSwitchable()
 {
     if (DMType == GDM || DMType == LightDM) {
         QDBusObjectPath currentSeat;
         if (getCurrentSeat(0, &currentSeat)) {
-            SystemdSeat SDseat(currentSeat);
-            if (SDseat.isValid()) {
-                QVariant prop = SDseat.property("CanMultiSession");
-                if (prop.isValid())
-                    return prop.toBool();
-            }
             CKSeat CKseat(currentSeat);
             if (CKseat.isValid()) {
                 QDBusReply<bool> r = CKseat.call(QLatin1String("CanActivateSessions"));
@@ -443,41 +479,46 @@ BasicSMBackend::isSwitchable()
 }
 
 bool
+Login1SMBackend::localSessions ( SessList& list ) {
+    QDBusObjectPath currentSession, currentSeat;
+    if (getCurrentSeat(&currentSession, &currentSeat)) {
+        foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
+            SystemdSession lsess(sp);
+            if (lsess.isValid()) {
+                SessEnt se;
+                lsess.getSessionLocation(se);
+                if ((lsess.property("Class").toString() != QLatin1String("greeter")) &&
+                        (lsess.property("State").toString() == QLatin1String("online") ||
+                        lsess.property("State").toString() == QLatin1String("active"))) {
+                    NumberedDBusObjectPath numberedPath = lsess.getUser();
+                    se.display = lsess.property("Display").toString();
+                    se.vt = lsess.property("VTNr").toInt();
+                    se.user = KUser(K_UID(numberedPath.num)).loginName();
+                    /* TODO:
+                        * regarding the session name in this, it IS possible to find it out - logind tracks the session leader PID
+                        * the problem is finding out the name of the process, I could come only with reading /proc/PID/comm which
+                        * doesn't seem exactly... right to me --mbriza
+                        */
+                    se.session = "<unknown>";
+                    se.self = lsess.property("Display").toString() == ::getenv("DISPLAY"); /* Bleh once again */
+                    se.tty = !lsess.property("TTY").toString().isEmpty();
+                    list.append(se);
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+bool
 BasicSMBackend::localSessions(SessList &list)
 {
     if (DMType == GDM || DMType == LightDM) {
         QDBusObjectPath currentSession, currentSeat;
         if (getCurrentSeat(&currentSession, &currentSeat)) {
-            // we'll divide the code in two branches to reduce the overhead of calls to non-existent services
-            // systemd part // preferred
-            if (QDBusConnection::systemBus().interface()->isServiceRegistered(SYSTEMD_SERVICE)) {
-                foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
-                    SystemdSession lsess(sp);
-                    if (lsess.isValid()) {
-                        SessEnt se;
-                        lsess.getSessionLocation(se);
-                        if ((lsess.property("Class").toString() != QLatin1String("greeter")) &&
-                             (lsess.property("State").toString() == QLatin1String("online") ||
-                              lsess.property("State").toString() == QLatin1String("active"))) {
-                            NumberedDBusObjectPath numberedPath = lsess.getUser();
-                            se.display = lsess.property("Display").toString();
-                            se.vt = lsess.property("VTNr").toInt();
-                            se.user = KUser(K_UID(numberedPath.num)).loginName();
-                            /* TODO:
-                             * regarding the session name in this, it IS possible to find it out - logind tracks the session leader PID
-                             * the problem is finding out the name of the process, I could come only with reading /proc/PID/comm which
-                             * doesn't seem exactly... right to me --mbriza
-                             */
-                            se.session = "<unknown>";
-                            se.self = lsess.property("Display").toString() == ::getenv("DISPLAY"); /* Bleh once again */
-                            se.tty = !lsess.property("TTY").toString().isEmpty();
-                        }
-                        list.append(se);
-                    }
-                }
-            }
             // ConsoleKit part
-            else if (QDBusConnection::systemBus().interface()->isServiceRegistered("org.freedesktop.ConsoleKit")) {
+            if (QDBusConnection::systemBus().interface()->isServiceRegistered("org.freedesktop.ConsoleKit")) {
                 foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
                     CKSession lsess(sp);
                     if (lsess.isValid()) {
@@ -524,27 +565,34 @@ BasicSMBackend::localSessions(SessList &list)
 }
 
 bool
-BasicSMBackend::switchVT(int vt)
+Login1SMBackend::switchVT(int vt)
 {
-    if (DMType == GDM || DMType == LightDM) {
-        QDBusObjectPath currentSeat;
-        if (getCurrentSeat(0, &currentSeat)) {
-            // systemd part // preferred
-            if (QDBusConnection::systemBus().interface()->isServiceRegistered(SYSTEMD_SERVICE)) {
-                foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
-                    SystemdSession lsess(sp);
-                    if (lsess.isValid()) {
-                        SessEnt se;
-                        lsess.getSessionLocation(se);
-                        if (se.vt == vt) {
-                            lsess.call(SYSTEMD_SWITCH_CALL);
-                            return true;
-                        }
+    QDBusObjectPath currentSeat;
+    if (getCurrentSeat(0, &currentSeat)) {
+        if (QDBusConnection::systemBus().interface()->isServiceRegistered(SYSTEMD_SERVICE)) {
+            foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
+                SystemdSession lsess(sp);
+                if (lsess.isValid()) {
+                    SessEnt se;
+                    lsess.getSessionLocation(se);
+                    if (se.vt == vt) {
+                        lsess.call(SYSTEMD_SWITCH_CALL);
+                        return true;
                     }
                 }
             }
-            // ConsoleKit part
-            else if (QDBusConnection::systemBus().interface()->isServiceRegistered("org.freedesktop.ConsoleKit")) {
+        }
+    }
+    return false;
+}
+
+bool
+BasicSMBackend::switchVT(int vt)
+{
+    if (DMType == GDM || DMType == LightDM) {
+        QDBusObjectPath currentSession, currentSeat;
+        if (getCurrentSeat(&currentSession, &currentSeat)) {
+            if (QDBusConnection::systemBus().interface()->isServiceRegistered("org.freedesktop.ConsoleKit")) {
                 foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
                     CKSession lsess(sp);
                     if (lsess.isValid()) {

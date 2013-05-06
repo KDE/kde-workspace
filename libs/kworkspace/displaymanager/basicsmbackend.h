@@ -29,12 +29,25 @@
 #include <QString>
 
 class KDMBackendPrivate;
+
+class NullSMBackend {
+public:
+    NullSMBackend() { }
+    virtual ~NullSMBackend() { }
+    virtual bool canShutdown() { return false; }
+    virtual void shutdown(KWorkSpace::ShutdownType, KWorkSpace::ShutdownMode, const QString&) { }
+    virtual void setLock(bool) { }
+    virtual bool isSwitchable() { return false; }
+    virtual bool localSessions(SessList&) { return false; }
+    virtual bool switchVT(int) { return false; }
+};
+
 /**
  * Basic Session Manager Backend
  * 
  * Implements methods for user session management
  */
-class BasicSMBackend {
+class BasicSMBackend : public NullSMBackend {
 private:
     KDMBackendPrivate *d;
     enum { Dunno, NoDM, KDM, GDM, LightDM } DMType;
@@ -48,5 +61,19 @@ public:
     virtual bool localSessions(SessList &list);
     virtual bool switchVT(int vt);
 };
+
+class Login1SMBackend : public BasicSMBackend {
+public:
+    Login1SMBackend();
+    virtual ~Login1SMBackend();
+    virtual bool canShutdown();
+    virtual void shutdown(KWorkSpace::ShutdownType shutdownType, KWorkSpace::ShutdownMode shutdownMode, const QString &bootOption = QString());
+    virtual void setLock(bool on);
+    virtual bool isSwitchable();
+    virtual bool localSessions(SessList &list);
+    virtual bool switchVT(int vt);
+};
+
+
 
 #endif // BASICSMBACKEND_H

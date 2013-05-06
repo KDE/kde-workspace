@@ -45,6 +45,51 @@
 
 KDisplayManager::KDisplayManager()
 {
+#ifdef Q_WS_X11
+    if (QDBusConnection::systemBus().interface()->isServiceRegistered(QLatin1String("org.freedesktop.login1"))) {
+        m_SMBackend = new Login1SMBackend();
+    }
+    else if (QDBusConnection::systemBus().interface()->isServiceRegistered(QLatin1String("org.freedesktop.ConsoleKit"))) {
+        // for when CK is split away from the base
+        // m_SMBackend = new ConsoleKitSMBackend();
+    }
+    const char *dpy = NULL;
+    const char *ctl = NULL;
+    // yeah yeah yeah i know this is messy, it'll go away eventually
+    if (!(dpy = ::getenv("DISPLAY"))) {
+        KDMBackendPrivate *priv = new KDMBackendPrivate(dpy, ctl);
+        m_DMBackend = new BasicDMBackend(priv);
+        if (!m_SMBackend)
+            m_SMBackend = new BasicSMBackend(priv);
+    }
+    else if ((ctl = ::getenv("DM_CONTROL"))) {
+        KDMBackendPrivate *priv = new KDMBackendPrivate(dpy, ctl);
+        m_DMBackend = new BasicDMBackend(priv);
+        if (!m_SMBackend)
+            m_SMBackend = new BasicSMBackend(priv);
+    }
+    else if ((ctl = ::getenv("XDM_MANAGED")) && ctl[0] == '/') {
+        KDMBackendPrivate *priv = new KDMBackendPrivate(dpy, ctl);
+        m_DMBackend = new BasicDMBackend(priv);
+        if (!m_SMBackend)
+            m_SMBackend = new BasicSMBackend(priv);
+    }
+    else if (::getenv("GDMSESSION")) {
+        KDMBackendPrivate *priv = new KDMBackendPrivate(dpy, ctl);
+        m_DMBackend = new BasicDMBackend(priv);
+        if (!m_SMBackend)
+            m_SMBackend = new BasicSMBackend(priv);
+    }
+    else {
+        KDMBackendPrivate *priv = new KDMBackendPrivate(dpy, ctl);
+        m_DMBackend = new BasicDMBackend(priv);
+        if (!m_SMBackend)
+            m_SMBackend = new BasicSMBackend(priv);
+    }
+#else
+    m_SMBackend = new NullSMBackend();
+    m_DMBackend = new NullDMBackend();
+#endif
 }
 
 KDisplayManager::~KDisplayManager()
@@ -63,6 +108,9 @@ KDisplayManager::shutdown(KWorkSpace::ShutdownType shutdownType,
                           KWorkSpace::ShutdownMode shutdownMode, /* NOT Default */
                           const QString &bootOption)
 {
+    if (shutdownType == KWorkSpace::ShutdownTypeNone || shutdownType == KWorkSpace::ShutdownTypeLogout)
+        return;
+    
     m_SMBackend->shutdown(shutdownType, shutdownMode, bootOption);
 }
 
@@ -153,48 +201,4 @@ KDisplayManager::lockSwitchVT(int vt)
 
     switchVT(vt);
 }
-
-void
-KDisplayManager::GDMAuthenticate()
-{
-    FILE *fp;
-    const char *dpy, *dnum, *dne;
-    int dnl;
-    Xauth *xau;
-
-    dpy = DisplayString(QX11Info::display());
-    if (!dpy) {
-        dpy = ::getenv("DISPLAY");
-        if (!dpy)
-            return;
-    }
-    dnum = strchr(dpy, ':') + 1;
-    dne = strchr(dpy, '.');
-    dnl = dne ? dne - dnum : strlen(dnum);
-
-    /* XXX should do locking */
-    if (!(fp = fopen(XauFileName(), "r")))
-        return;
-
-    while ((xau = XauReadAuth(fp))) {
-        if (xau->family == FamilyLocal &&
-            xau->number_length == dnl && !memcmp(xau->number, dnum, dnl) &&
-            xau->data_length == 16 &&
-            xau->name_length == 18 && !memcmp(xau->name, "MIT-MAGIC-COOKIE-1", 18))
-        {
-            QString cmd("AUTH_LOCAL ");
-            for (int i = 0; i < 16; i++)
-                cmd += QString::number((uchar)xau->data[i], 16).rightJustified(2, '0');
-            cmd += '\n';
-            if (d && d->exec(cmd.toLatin1())) {
-                XauDisposeAuth(xau);
-                break;
-            }
-        }
-        XauDisposeAuth(xau);
-    }
-
-    fclose (fp);
-}
-
 #endif // Q_WS_X11

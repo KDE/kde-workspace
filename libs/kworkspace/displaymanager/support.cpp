@@ -31,7 +31,12 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
-KDMBackendPrivate::KDMBackendPrivate(const char *dpy, const char *ctl) {
+KDMBackendPrivate::KDMBackendPrivate(const char *dpy, const char *ctl) 
+: fd(-1)
+{
+    if (!dpy || !ctl)
+        return;
+
     const char *ptr;
     struct sockaddr_un sa;
     if ((fd = ::socket(PF_UNIX, SOCK_STREAM, 0)) < 0)
