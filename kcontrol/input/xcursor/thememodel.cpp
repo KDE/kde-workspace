@@ -26,7 +26,6 @@
 #include "thememodel.h"
 #include "thememodel.moc"
 #include "xcursortheme.h"
-#include "legacytheme.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xcursor/Xcursor.h>
@@ -362,13 +361,9 @@ void CursorThemeModel::insertThemes()
         }
     }
 
-    // Insert 'special' themes here
-    CursorTheme *legacy = new LegacyTheme();
-    list.append(legacy);
-
     // The theme Xcursor will end up using if no theme is configured
     if (defaultName.isNull() || !hasTheme(defaultName))
-        defaultName = legacy->name();
+        defaultName = QLatin1String("KDE_Classic");
 }
 
 

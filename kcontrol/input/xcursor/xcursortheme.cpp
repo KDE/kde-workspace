@@ -36,7 +36,7 @@
 QHash<QString, QString> XCursorTheme::alternatives;
 
 XCursorTheme::XCursorTheme(const QDir &themeDir)
-    : LegacyTheme(themeDir.dirName())
+    : CursorTheme(themeDir.dirName())
 {
     // Directory information
     setName(themeDir.dirName());
@@ -191,9 +191,8 @@ QCursor XCursorTheme::loadCursor(const QString &name, int size) const
     if (!images)
         images = xcLoadImages(findAlternative(name), size);
 
-    // Fall back to a legacy cursor
     if (!images)
-        return LegacyTheme::loadCursor(name);
+        return QCursor();
 
     // Create the cursor
     Cursor handle = XcursorImagesLoadCursor(QX11Info::display(), images);
@@ -216,9 +215,9 @@ QImage XCursorTheme::loadImage(const QString &name, int size) const
     if (!xcimage)
         xcimage = xcLoadImage(findAlternative(name), size);
 
-    // Fall back to a legacy cursor
-    if (!xcimage)
-        return LegacyTheme::loadImage(name);
+    if (!xcimage) {
+        return QImage();
+    }
 
     // Convert the XcursorImage to a QImage, and auto-crop it
     QImage image((uchar *)xcimage->pixels, xcimage->width, xcimage->height,
