@@ -1,5 +1,8 @@
 
-set(kworkspace_LIB_SRCS kdisplaymanager.cpp
+set(kworkspace_LIB_SRCS
+                        displaymanager/support.cpp 
+                        displaymanager/basicdmbackend.cpp
+                        kdisplaymanager.cpp
                         kwindowlistmenu.cpp
                         screenpreviewwidget.cpp
                         kworkspace.cpp
@@ -60,3 +63,5 @@ install( FILES kdisplaymanager.h
                kworkspace.h
                kworkspace_export.h
          DESTINATION ${INCLUDE_INSTALL_DIR}/kworkspace COMPONENT Devel )
+
+add_subdirectory(displaymanager)

@@ -26,7 +26,11 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QByteArray>
+#include <unistd.h>
 
+class KDMBackendPrivate;
+class BasicSMBackend;
+class BasicDMBackend;
 struct KWORKSPACE_EXPORT SessEnt {
     QString display, from, user, session;
     int vt;
@@ -34,6 +38,8 @@ struct KWORKSPACE_EXPORT SessEnt {
 };
 
 typedef QList<SessEnt> SessList;
+
+
 
 class KWORKSPACE_EXPORT KDisplayManager {
 
@@ -63,9 +69,6 @@ public:
     static void sess2Str2(const SessEnt &se, QString &user, QString &loc);
 
 private:
-    bool exec(const char *cmd, QByteArray &ret);
-    bool exec(const char *cmd);
-
     void GDMAuthenticate();
 
 #else // Q_WS_X11
@@ -91,9 +94,10 @@ public:
 #endif // Q_WS_X11
 
 private:
+    BasicDMBackend *m_DMBackend;
+    BasicSMBackend *m_SMBackend;
 #ifdef Q_WS_X11
-    class Private;
-    Private * const d;
+    KDMBackendPrivate *d;
 #endif // Q_WS_X11
 
 }; // class KDisplayManager
