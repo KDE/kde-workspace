@@ -22,17 +22,12 @@
 #include "displaymanager/support.h"
 #include "displaymanager/basicsmbackend.h"
 
-#ifdef Q_WS_X11
-
 #include <kapplication.h>
 #include <klocale.h>
 #include <kuser.h>
 
 #include <QtDBus/QtDBus>
 #include <QRegExp>
-
-#include <X11/Xauth.h>
-#include <X11/Xlib.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -50,8 +45,7 @@ KDisplayManager::KDisplayManager()
         m_SMBackend = new Login1SMBackend();
     }
     else if (QDBusConnection::systemBus().interface()->isServiceRegistered(QLatin1String("org.freedesktop.ConsoleKit"))) {
-        // for when CK is split away from the base
-        // m_SMBackend = new ConsoleKitSMBackend();
+        m_SMBackend = new ConsoleKitSMBackend();
     }
     const char *dpy = NULL;
     const char *ctl = NULL;
@@ -201,4 +195,3 @@ KDisplayManager::lockSwitchVT(int vt)
 
     switchVT(vt);
 }
-#endif // Q_WS_X11
