@@ -63,8 +63,6 @@ public:
     static void sess2Str2(const SessEnt &se, QString &user, QString &loc);
 
 private:
-    bool exec(const char *cmd, QByteArray &ret);
-    bool exec(const char *cmd);
 
     void GDMAuthenticate();
 

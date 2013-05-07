@@ -277,21 +277,105 @@ static const char *ctl, *dpy;
 
 class KDisplayManager::Private
 {
-public:
-    Private() : fd(-1) {}
-    ~Private() {
-        if (fd >= 0)
-            close(fd);
-    }
-
+private:
     int fd;
+public:
+    Private();
+    ~Private();
+    bool exec(const char *cmd);
+    /**
+    * Execute a KDM/GDM remote control command.
+    * @param cmd the command to execute. FIXME: undocumented yet.
+    * @param buf the result buffer.
+    * @return result:
+    *  @li If true, the command was successfully executed.
+    *   @p ret might contain addional results.
+    *  @li If false and @p ret is empty, a communication error occurred
+    *   (most probably KDM is not running).
+    *  @li If false and @p ret is non-empty, it contains the error message
+    *   from KDM.
+    */
+    bool exec(const char *cmd, QByteArray &buf);
 };
 
-KDisplayManager::KDisplayManager() : d(new Private)
-{
+KDisplayManager::Private::Private() : fd(-1) {
+    const char *dpy = ::getenv("DISPLAY");
+    const char *ctl = ::getenv("DM_CONTROL");
     const char *ptr;
     struct sockaddr_un sa;
 
+    if (!dpy || !ctl)
+        return;
+
+    if ((fd = ::socket(PF_UNIX, SOCK_STREAM, 0)) < 0)
+        return;
+    sa.sun_family = AF_UNIX;
+    if ((ptr = strchr(dpy, ':')))
+        ptr = strchr(ptr, '.');
+    snprintf(sa.sun_path, sizeof(sa.sun_path),
+                "%s/dmctl-%.*s/socket",
+                ctl, ptr ? int(ptr - dpy) : 512, dpy);
+    if (::connect(fd, (struct sockaddr *)&sa, sizeof(sa))) {
+        ::close(fd);
+        fd = -1;
+    }
+}
+
+KDisplayManager::Private::~Private() {
+    if (fd >= 0)
+        close(fd);
+}
+
+bool
+KDisplayManager::Private::exec ( const char* cmd )
+{
+    QByteArray buf;
+    return exec(cmd, buf);
+}
+
+bool
+KDisplayManager::Private::exec ( const char* cmd, QByteArray& buf )
+{
+    bool ret = false;
+    int tl;
+    int len = 0;
+
+    if (fd < 0)
+        goto busted;
+
+    tl = strlen(cmd);
+    if (::write(fd, cmd, tl) != tl) {
+    bust:
+        ::close(fd);
+        fd = -1;
+    busted:
+        buf.resize(0);
+        return false;
+    }
+    for (;;) {
+        if (buf.size() < 128)
+            buf.resize(128);
+        else if (buf.size() < len * 2)
+            buf.resize(len * 2);
+        if ((tl = ::read(fd, buf.data() + len, buf.size() - len)) <= 0) {
+            if (tl < 0 && errno == EINTR)
+                continue;
+            goto bust;
+        }
+        len += tl;
+        if (buf[len - 1] == '\n') {
+            buf[len - 1] = 0;
+            if (len > 2 && (buf[0] == 'o' || buf[0] == 'O') &&
+                (buf[1] == 'k' || buf[1] == 'K') && buf[2] <= ' ')
+                ret = true;
+            break;
+        }
+    }
+    return ret;
+}
+
+KDisplayManager::KDisplayManager() : d(new Private)
+{
     qDBusRegisterMetaType<NamedDBusObjectPath>();
     qDBusRegisterMetaType<QList<NamedDBusObjectPath> >();
     qDBusRegisterMetaType<NumberedDBusObjectPath>();
@@ -308,90 +392,11 @@ KDisplayManager::KDisplayManager() : d(new Private)
         else
             DMType = NoDM;
     }
-    switch (DMType) {
-    default:
-        return;
-    case KDM:
-        if ((d->fd = ::socket(PF_UNIX, SOCK_STREAM, 0)) < 0)
-            return;
-        sa.sun_family = AF_UNIX;
-        if ((ptr = strchr(dpy, ':')))
-            ptr = strchr(ptr, '.');
-        snprintf(sa.sun_path, sizeof(sa.sun_path),
-                    "%s/dmctl-%.*s/socket",
-                    ctl, ptr ? int(ptr - dpy) : 512, dpy);
-        if (::connect(d->fd, (struct sockaddr *)&sa, sizeof(sa))) {
-            ::close(d->fd);
-            d->fd = -1;
-        }
-        break;
-    }
 }
 
 KDisplayManager::~KDisplayManager()
 {
     delete d;
-}
-
-bool
-KDisplayManager::exec(const char *cmd)
-{
-    QByteArray buf;
-
-    return exec(cmd, buf);
-}
-
-/**
- * Execute a KDM/GDM remote control command.
- * @param cmd the command to execute. FIXME: undocumented yet.
- * @param buf the result buffer.
- * @return result:
- *  @li If true, the command was successfully executed.
- *   @p ret might contain addional results.
- *  @li If false and @p ret is empty, a communication error occurred
- *   (most probably KDM is not running).
- *  @li If false and @p ret is non-empty, it contains the error message
- *   from KDM.
- */
-bool
-KDisplayManager::exec(const char *cmd, QByteArray &buf)
-{
-    bool ret = false;
-    int tl;
-    int len = 0;
-
-    if (d->fd < 0)
-        goto busted;
-
-    tl = strlen(cmd);
-    if (::write(d->fd, cmd, tl) != tl) {
-      bust:
-        ::close(d->fd);
-        d->fd = -1;
-      busted:
-        buf.resize(0);
-        return false;
-    }
-    for (;;) {
-        if (buf.size() < 128)
-            buf.resize(128);
-        else if (buf.size() < len * 2)
-            buf.resize(len * 2);
-        if ((tl = ::read(d->fd, buf.data() + len, buf.size() - len)) <= 0) {
-            if (tl < 0 && errno == EINTR)
-                continue;
-            goto bust;
-        }
-        len += tl;
-        if (buf[len - 1] == '\n') {
-            buf[len - 1] = 0;
-            if (len > 2 && (buf[0] == 'o' || buf[0] == 'O') &&
-                (buf[1] == 'k' || buf[1] == 'K') && buf[2] <= ' ')
-                ret = true;
-            break;
-        }
-    }
-    return ret;
 }
 
 static bool getCurrentSeat(QDBusObjectPath *currentSession, QDBusObjectPath *currentSeat)
@@ -471,7 +476,7 @@ KDisplayManager::canShutdown()
 
     QByteArray re;
 
-    return exec("caps\n", re) && re.indexOf("\tshutdown") >= 0;
+    return d->exec("caps\n", re) && re.indexOf("\tshutdown") >= 0;
 }
 
 void
@@ -485,7 +490,7 @@ KDisplayManager::shutdown(KWorkSpace::ShutdownType shutdownType,
     bool cap_ask;
     if (DMType == KDM) {
         QByteArray re;
-        cap_ask = exec("caps\n", re) && re.indexOf("\tshutdown ask") >= 0;
+        cap_ask = d->exec("caps\n", re) && re.indexOf("\tshutdown ask") >= 0;
     } else {
         if (!bootOption.isEmpty())
             return;
@@ -526,7 +531,7 @@ KDisplayManager::shutdown(KWorkSpace::ShutdownType shutdownType,
                 "forcenow\n" :
                 shutdownMode == KWorkSpace::ShutdownModeTryNow ?
                 "trynow\n" : "schedule\n");
-    exec(cmd.data());
+    d->exec(cmd.data());
 }
 
 bool
@@ -536,7 +541,7 @@ KDisplayManager::bootOptions(QStringList &opts, int &defopt, int &current)
         return false;
 
     QByteArray re;
-    if (!exec("listbootoptions\n", re))
+    if (!d->exec("listbootoptions\n", re))
         return false;
 
     opts = QString::fromLocal8Bit(re.data()).split('\t', QString::SkipEmptyParts);
@@ -564,7 +569,7 @@ void
 KDisplayManager::setLock(bool on)
 {
     if (DMType == KDM)
-        exec(on ? "lock\n" : "unlock\n");
+        d->exec(on ? "lock\n" : "unlock\n");
 }
 
 bool
@@ -591,7 +596,7 @@ KDisplayManager::isSwitchable()
 
     QByteArray re;
 
-    return exec("caps\n", re) && re.indexOf("\tlocal") >= 0;
+    return d->exec("caps\n", re) && re.indexOf("\tlocal") >= 0;
 }
 
 int
@@ -603,7 +608,7 @@ KDisplayManager::numReserve()
     QByteArray re;
     int p;
 
-    if (!(exec("caps\n", re) && (p = re.indexOf("\treserve ")) >= 0))
+    if (!(d->exec("caps\n", re) && (p = re.indexOf("\treserve ")) >= 0))
         return -1;
     return atoi(re.data() + p + 9);
 }
@@ -618,7 +623,7 @@ KDisplayManager::startReserve()
         lightDM.call("SwitchToGreeter");
     }
     else
-        exec("reserve\n");
+        d->exec("reserve\n");
 }
 
 bool
@@ -685,7 +690,7 @@ KDisplayManager::localSessions(SessList &list)
 
     QByteArray re;
 
-    if (!exec("list\talllocal\n", re))
+    if (!d->exec("list\talllocal\n", re))
         return false;
     const QStringList sess = QString(re.data() + 3).split(QChar('\t'), QString::SkipEmptyParts);
     for (QStringList::ConstIterator it = sess.constBegin(); it != sess.constEnd(); ++it) {
@@ -776,7 +781,7 @@ KDisplayManager::switchVT(int vt)
         return false;
     }
 
-    return exec(QString("activate\tvt%1\n").arg(vt).toLatin1());
+    return d->exec(QString("activate\tvt%1\n").arg(vt).toLatin1());
 }
 
 void
@@ -821,7 +826,7 @@ KDisplayManager::GDMAuthenticate()
             for (int i = 0; i < 16; i++)
                 cmd += QString::number((uchar)xau->data[i], 16).rightJustified(2, '0');
             cmd += '\n';
-            if (exec(cmd.toLatin1())) {
+            if (d->exec(cmd.toLatin1())) {
                 XauDisposeAuth(xau);
                 break;
             }
