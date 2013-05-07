@@ -334,13 +334,13 @@ getSessionsForSeat(const QDBusObjectPath &path)
     return QList<QDBusObjectPath>();
 }
 
-class BasicDMBackend::Private
+class KDMSocketHelper
 {
 private:
     int fd;
 public:
-    Private();
-    ~Private();
+    KDMSocketHelper();
+    ~KDMSocketHelper();
     bool exec(const char *cmd);
     /**
     * Execute a KDM/GDM remote control command.
@@ -357,7 +357,7 @@ public:
     bool exec(const char *cmd, QByteArray &buf);
 };
 
-BasicDMBackend::Private::Private()
+KDMSocketHelper::KDMSocketHelper()
 : fd(-1)
 {
     const char *dpy = ::getenv("DISPLAY");
@@ -382,21 +382,21 @@ BasicDMBackend::Private::Private()
     }
 }
 
-BasicDMBackend::Private::~Private()
+KDMSocketHelper::~KDMSocketHelper()
 {
     if (fd >= 0)
         close(fd);
 }
 
 bool
-BasicDMBackend::Private::exec ( const char* cmd )
+KDMSocketHelper::exec ( const char* cmd )
 {
     QByteArray buf;
     return exec(cmd, buf);
 }
 
 bool
-BasicDMBackend::Private::exec ( const char* cmd, QByteArray& buf )
+KDMSocketHelper::exec ( const char* cmd, QByteArray& buf )
 {
     bool ret = false;
     int tl;
@@ -437,7 +437,7 @@ BasicDMBackend::Private::exec ( const char* cmd, QByteArray& buf )
 }
 
 BasicDMBackend::BasicDMBackend()
-: d(new Private())
+: d(new KDMSocketHelper())
 , DMType(Dunno)
 {
     const char *dpy;

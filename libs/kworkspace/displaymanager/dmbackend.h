@@ -43,10 +43,11 @@ public:
 };
 
 #ifdef Q_WS_X11
+class KDMSocketHelper;
+
 class BasicDMBackend : public NullDMBackend {
 private:
-    class Private;
-    Private *d;
+    KDMSocketHelper *d;
     enum { Dunno, NoDM, KDM, GDM, LightDM } DMType;
 
     void GDMAuthenticate();
