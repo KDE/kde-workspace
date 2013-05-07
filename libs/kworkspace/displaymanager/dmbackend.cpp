@@ -39,56 +39,6 @@
 #include <errno.h>
 #include <stdio.h>
 
-class CKManager : public QDBusInterface
-{
-public:
-    CKManager() :
-        QDBusInterface(
-                QLatin1String("org.freedesktop.ConsoleKit"),
-                QLatin1String("/org/freedesktop/ConsoleKit/Manager"),
-                QLatin1String("org.freedesktop.ConsoleKit.Manager"),
-                QDBusConnection::systemBus()) {}
-};
-
-class CKSeat : public QDBusInterface
-{
-public:
-    CKSeat(const QDBusObjectPath &path) :
-        QDBusInterface(
-                QLatin1String("org.freedesktop.ConsoleKit"),
-                path.path(),
-                QLatin1String("org.freedesktop.ConsoleKit.Seat"),
-                QDBusConnection::systemBus()) {}
-};
-
-class CKSession : public QDBusInterface
-{
-public:
-    CKSession(const QDBusObjectPath &path) :
-        QDBusInterface(
-                QLatin1String("org.freedesktop.ConsoleKit"),
-                path.path(),
-                QLatin1String("org.freedesktop.ConsoleKit.Session"),
-                QDBusConnection::systemBus()) {}
-    void getSessionLocation(SessEnt &se)
-    {
-        QString tty;
-        QDBusReply<QString> r = call(QLatin1String("GetX11Display"));
-        if (r.isValid() && !r.value().isEmpty()) {
-            QDBusReply<QString> r2 = call(QLatin1String("GetX11DisplayDevice"));
-            tty = r2.value();
-            se.display = r.value();
-            se.tty = false;
-        } else {
-            QDBusReply<QString> r2 = call(QLatin1String("GetDisplayDevice"));
-            tty = r2.value();
-            se.display = tty;
-            se.tty = true;
-        }
-        se.vt = tty.mid(strlen("/dev/tty")).toInt();
-    }
-};
-
 class GDMFactory : public QDBusInterface
 {
 public:
@@ -110,44 +60,6 @@ public:
                 QLatin1String("org.freedesktop.DisplayManager.Seat"),
                 QDBusConnection::systemBus()) {}
 };
-
-static bool
-getCurrentSeat(QDBusObjectPath *currentSession, QDBusObjectPath *currentSeat)
-{
-    CKManager man;
-    QDBusReply<QDBusObjectPath> r = man.call(QLatin1String("GetCurrentSession"));
-    if (r.isValid()) {
-        CKSession sess(r.value());
-        if (sess.isValid()) {
-            QDBusReply<QDBusObjectPath> r2 = sess.call(QLatin1String("GetSeatId"));
-            if (r2.isValid()) {
-                if (currentSession)
-                    *currentSession = r.value();
-                *currentSeat = r2.value();
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-static QList<QDBusObjectPath>
-getSessionsForSeat(const QDBusObjectPath &path)
-{
-    if (path.path().startsWith("/org/freedesktop/ConsoleKit")) {
-        CKSeat seat(path);
-        if (seat.isValid()) {
-            QDBusReply<QList<QDBusObjectPath> > r = seat.call(QLatin1String("GetSessions"));
-            if (r.isValid()) {
-                // This will contain only local sessions:
-                // - this is only ever called when isSwitchable() is true => local seat
-                // - remote logins into the machine are assigned to other seats
-                return r.value();
-            }
-        }
-    }
-    return QList<QDBusObjectPath>();
-}
 
 class KDMSocketHelper
 {
@@ -255,7 +167,14 @@ BasicSMBackend::BasicSMBackend (KDMSocketHelper* helper, DMType type)
 : d(helper)
 , m_DMType(type)
 {
-
+    switch (m_DMType) {
+        case GDM:
+        case LightDM:
+            m_DMType = NoDM; // These DMs aren't handled in this module
+            break;
+        default:
+            break;
+    }
 }
 
 BasicSMBackend::~BasicSMBackend() {
@@ -265,13 +184,6 @@ BasicSMBackend::~BasicSMBackend() {
 bool
 BasicSMBackend::canShutdown()
 {
-    if (m_DMType == GDM || m_DMType == NoDM || m_DMType == LightDM) {
-        QDBusReply<bool> canStop = CKManager().call(QLatin1String("CanStop"));
-        if (canStop.isValid())
-            return canStop.value();
-        return false;
-    }
-
     QByteArray re;
 
     return d->exec("caps\n", re) && re.indexOf("\tshutdown") >= 0;
@@ -285,17 +197,6 @@ BasicSMBackend::shutdown (KWorkSpace::ShutdownType shutdownType, KWorkSpace::Shu
         QByteArray re;
         cap_ask = d->exec("caps\n", re) && re.indexOf("\tshutdown ask") >= 0;
     } else {
-        if (!bootOption.isEmpty())
-            return;
-
-        if (m_DMType == GDM || m_DMType == NoDM || m_DMType == LightDM) {
-            // FIXME: entirely ignoring shutdownMode
-            CKManager().call(QLatin1String(
-                    shutdownType == KWorkSpace::ShutdownTypeReboot ? "Restart" : "Stop"));
-            // if even CKManager call fails, there is nothing more to be done
-            return;
-        }
-
         cap_ask = false;
     }
     if (!cap_ask && shutdownMode == KWorkSpace::ShutdownModeInteractive)
@@ -319,19 +220,6 @@ BasicSMBackend::shutdown (KWorkSpace::ShutdownType shutdownType, KWorkSpace::Shu
 bool
 BasicSMBackend::isSwitchable()
 {
-    if (m_DMType == GDM || m_DMType == LightDM) {
-        QDBusObjectPath currentSeat;
-        if (getCurrentSeat(0, &currentSeat)) {
-            CKSeat CKseat(currentSeat);
-            if (CKseat.isValid()) {
-                QDBusReply<bool> r = CKseat.call(QLatin1String("CanActivateSessions"));
-                if (r.isValid())
-                    return r.value();
-            }
-        }
-        return false;
-    }
-
     QByteArray re;
 
     return d->exec("caps\n", re) && re.indexOf("\tlocal") >= 0;
@@ -340,37 +228,6 @@ BasicSMBackend::isSwitchable()
 bool
 BasicSMBackend::localSessions (SessList& list)
 {
-    if (m_DMType == GDM || m_DMType == LightDM) {
-        QDBusObjectPath currentSession, currentSeat;
-        if (getCurrentSeat(&currentSession, &currentSeat)) {
-            // ConsoleKit part
-            if (QDBusConnection::systemBus().interface()->isServiceRegistered("org.freedesktop.ConsoleKit")) {
-                foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
-                    CKSession lsess(sp);
-                    if (lsess.isValid()) {
-                        SessEnt se;
-                        lsess.getSessionLocation(se);
-                        // "Warning: we haven't yet defined the allowed values for this property.
-                        // It is probably best to avoid this until we do."
-                        QDBusReply<QString> r = lsess.call(QLatin1String("GetSessionType"));
-                        if (r.value() != QLatin1String("LoginWindow")) {
-                            QDBusReply<unsigned> r2 = lsess.call(QLatin1String("GetUnixUser"));
-                            se.user = KUser(K_UID(r2.value())).loginName();
-                            se.session = "<unknown>";
-                        }
-                        se.self = (sp == currentSession);
-                        list.append(se);
-                    }
-                }
-            }
-            else {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
-
     QByteArray re;
 
     if (!d->exec("list\talllocal\n", re))
@@ -393,29 +250,6 @@ BasicSMBackend::localSessions (SessList& list)
 bool
 BasicSMBackend::switchVT (int vt)
 {
-    if (m_DMType == GDM || m_DMType == LightDM) {
-        QDBusObjectPath currentSeat;
-        if (getCurrentSeat(0, &currentSeat)) {
-            // ConsoleKit part
-            if (QDBusConnection::systemBus().interface()->isServiceRegistered("org.freedesktop.ConsoleKit")) {
-                foreach (const QDBusObjectPath &sp, getSessionsForSeat(currentSeat)) {
-                    CKSession lsess(sp);
-                    if (lsess.isValid()) {
-                        SessEnt se;
-                        lsess.getSessionLocation(se);
-                        if (se.vt == vt) {
-                            if (se.tty) // ConsoleKit simply ignores these
-                                return false;
-                            lsess.call(QLatin1String("Activate"));
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     return d->exec(QString("activate\tvt%1\n").arg(vt).toLatin1());
 }
 

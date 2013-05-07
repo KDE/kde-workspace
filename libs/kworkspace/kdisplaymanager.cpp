@@ -20,6 +20,7 @@
 #include "kdisplaymanager.h"
 #include "displaymanager/dmbackend.h"
 #include "displaymanager/login1smbackend.h"
+#include "displaymanager/consolekitsmbackend.h"
 
 #include <klocale.h>
 #include <QtDBus>
@@ -33,6 +34,8 @@ KDisplayManager::KDisplayManager()
 #ifdef Q_WS_X11
         if (QDBusConnection::systemBus().interface()->isServiceRegistered(QLatin1String("org.freedesktop.login1")))
             m_SMBackend = new Login1SMBackend();
+        else if (QDBusConnection::systemBus().interface()->isServiceRegistered(QLatin1String("org.freedesktop.ConsoleKit")))
+            m_SMBackend = new ConsoleKitSMBackend();
 
         m_DMBackend = new BasicDMBackend();
 
