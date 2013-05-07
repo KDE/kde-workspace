@@ -25,7 +25,7 @@
 
 class KDMSocketHelper;
 
-class KDMSMBackend : public NullSMBackend {
+class KDMSMBackend : public BasicSMBackend {
 public:
     KDMSMBackend(KDMSocketHelper *helper);
     virtual ~KDMSMBackend();

@@ -137,7 +137,8 @@ KDMSocketHelper::exec ( const char* cmd, QByteArray& buf )
 }
 
 KDMSMBackend::KDMSMBackend(KDMSocketHelper* helper)
-: d(helper)
+: BasicSMBackend()
+, d(helper)
 {
 
 }

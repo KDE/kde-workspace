@@ -27,7 +27,7 @@
 #include <displaymanager/dmbackend.h>
 #include <QtDBus>
 
-class Login1SMBackend : public NullSMBackend {
+class Login1SMBackend : public BasicSMBackend {
 private:
     bool getCurrentSeat(QDBusObjectPath *currentSession, QDBusObjectPath *currentSeat);
     QList<QDBusObjectPath> getSessionsForSeat(const QDBusObjectPath &path);
@@ -39,7 +39,6 @@ public:
     virtual bool isSwitchable();
     virtual bool localSessions(SessList &list);
     virtual bool switchVT(int vt);
-    virtual void lockSwitchVT(int vt);
 
 };
 

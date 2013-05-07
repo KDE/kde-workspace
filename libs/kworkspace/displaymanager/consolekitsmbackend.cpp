@@ -176,27 +176,6 @@ ConsoleKitSMBackend::switchVT(int vt)
     return false;
 }
 
-void
-ConsoleKitSMBackend::lockSwitchVT(int vt)
-{
-    QDBusInterface screensaver("org.freedesktop.ScreenSaver", "/ScreenSaver", "org.freedesktop.ScreenSaver");
-    if (screensaver.isValid()) {
-        screensaver.call("Lock");
-    }
-    else {
-        QDBusObjectPath currentSession;
-        QDBusObjectPath currentSeat;
-        if (getCurrentSeat(&currentSession, &currentSeat)) {
-            CKSession lsess(currentSession);
-            if (lsess.isValid()) {
-                lsess.call("Lock");
-            }
-        }
-    }
-
-    switchVT(vt);
-}
-
 bool
 ConsoleKitSMBackend::getCurrentSeat(QDBusObjectPath *currentSession, QDBusObjectPath *currentSeat)
 {

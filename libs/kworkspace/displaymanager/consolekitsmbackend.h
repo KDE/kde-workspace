@@ -26,7 +26,7 @@
 
 #include <QtDBus>
 
-class ConsoleKitSMBackend : public NullSMBackend {
+class ConsoleKitSMBackend : public BasicSMBackend {
 private:
     QList<QDBusObjectPath> getSessionsForSeat(const QDBusObjectPath &path);
     bool getCurrentSeat(QDBusObjectPath *currentSession, QDBusObjectPath *currentSeat);
@@ -38,7 +38,6 @@ public:
     virtual bool isSwitchable();
     virtual bool localSessions(SessList &list);
     virtual bool switchVT(int vt);
-    virtual void lockSwitchVT(int vt);
 };
 
 #endif // CONSOLEKITSMBACKEND_H

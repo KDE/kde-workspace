@@ -188,6 +188,7 @@ public:
 };
 
 Login1SMBackend::Login1SMBackend()
+: BasicSMBackend()
 {
     qDBusRegisterMetaType<NamedDBusObjectPath>();
     qDBusRegisterMetaType<QList<NamedDBusObjectPath> >();
@@ -327,25 +328,4 @@ Login1SMBackend::switchVT(int vt)
         }
     }
     return false;
-}
-
-void
-Login1SMBackend::lockSwitchVT(int vt)
-{
-    QDBusInterface screensaver("org.freedesktop.ScreenSaver", "/ScreenSaver", "org.freedesktop.ScreenSaver");
-    if (screensaver.isValid()) {
-        screensaver.call("Lock");
-    }
-    else {
-        QDBusObjectPath currentSession;
-        QDBusObjectPath currentSeat;
-        if (getCurrentSeat(&currentSession, &currentSeat)) {
-            Login1Session lsess(currentSession);
-            if (lsess.isValid()) {
-                lsess.call("Lock");
-            }
-        }
-    }
-
-    switchVT(vt);
 }
