@@ -53,36 +53,24 @@ public:
 #ifdef Q_WS_X11
 class KDMSocketHelper;
 
-enum DMType { Dunno, NoDM, KDM, GDM, LightDM };
+enum DMType { Dunno, NoDM, GDM, LightDM };
 
 class BasicSMBackend : public NullSMBackend {
 public:
-    BasicSMBackend(KDMSocketHelper *helper, DMType type);
+    BasicSMBackend();
     virtual ~BasicSMBackend();
-    virtual bool canShutdown();
-    virtual void shutdown(KWorkSpace::ShutdownType shutdownType, KWorkSpace::ShutdownMode shutdownMode, const QString &bootOption = QString());
-    virtual bool isSwitchable();
-    virtual bool localSessions(SessList &list);
-    virtual bool switchVT(int vt);
     virtual void lockSwitchVT(int vt);
-private:
-    QSharedPointer<KDMSocketHelper> d;
-    DMType m_DMType;
 };
 
 class BasicDMBackend : public NullDMBackend {
 public:
     BasicDMBackend();
     virtual ~BasicDMBackend();
-    virtual void setLock(bool on);
     virtual int numReserve();
     virtual void startReserve();
-    virtual bool bootOptions(QStringList &opts, int &dflt, int &curr);
     virtual BasicSMBackend *provideSM();
 private:
-    QSharedPointer<KDMSocketHelper> d;
     DMType m_DMType;
-    void GDMAuthenticate();
 };
 #endif // Q_WS_X11
 #endif // DMBACKEND_H

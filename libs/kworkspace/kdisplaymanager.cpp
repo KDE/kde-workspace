@@ -21,6 +21,7 @@
 #include "displaymanager/dmbackend.h"
 #include "displaymanager/login1smbackend.h"
 #include "displaymanager/consolekitsmbackend.h"
+#include "displaymanager/kdmbackends.h"
 
 #include <klocale.h>
 #include <QtDBus>
@@ -37,7 +38,10 @@ KDisplayManager::KDisplayManager()
         else if (QDBusConnection::systemBus().interface()->isServiceRegistered(QLatin1String("org.freedesktop.ConsoleKit")))
             m_SMBackend = new ConsoleKitSMBackend();
 
-        m_DMBackend = new BasicDMBackend();
+        if (::getenv("DM_CONTROL"))
+            m_DMBackend = new KDMBackend();
+        else
+            m_DMBackend = new BasicDMBackend();
 
         if (!m_SMBackend)
             m_SMBackend = m_DMBackend->provideSM();

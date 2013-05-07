@@ -1,5 +1,6 @@
 
 set(kworkspace_LIB_SRCS
+                        displaymanager/kdmbackends.cpp
                         displaymanager/consolekitsmbackend.cpp
                         displaymanager/login1smbackend.cpp
                         displaymanager/dmbackend.cpp
