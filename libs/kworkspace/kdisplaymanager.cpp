@@ -22,29 +22,35 @@
 
 #include <klocale.h>
 
-NullDMBackend *KDisplayManager::m_backend = NULL;
+NullDMBackend *KDisplayManager::m_DMBackend = NULL;
+NullSMBackend *KDisplayManager::m_SMBackend = NULL;
 
 KDisplayManager::KDisplayManager()
 {
-    if (!m_backend) {
+    if (!m_DMBackend) {
 #ifdef Q_WS_X11
-        m_backend = new BasicDMBackend();
+        m_DMBackend = new BasicDMBackend();
+
+        if (!m_SMBackend)
+            m_SMBackend = m_DMBackend->provideSM();
 #else
-        m_backend = new NullDMBackend();
+        m_DMBackend = new NullDMBackend();
+        m_SMBackend = m_DMBackend->provideSM();
 #endif
     }
 }
 
 KDisplayManager::~KDisplayManager()
 {
-    delete m_backend;
+    delete m_SMBackend;
+    delete m_DMBackend;
 }
 
 #ifndef KDM_NO_SHUTDOWN
 bool
 KDisplayManager::canShutdown()
 {
-    return m_backend->canShutdown();
+    return m_SMBackend->canShutdown();
 }
 
 void
@@ -55,13 +61,13 @@ KDisplayManager::shutdown(KWorkSpace::ShutdownType shutdownType,
     if (shutdownType == KWorkSpace::ShutdownTypeNone || shutdownType == KWorkSpace::ShutdownTypeLogout)
         return;
 
-    m_backend->shutdown(shutdownType, shutdownMode, bootOption);
+    m_SMBackend->shutdown(shutdownType, shutdownMode, bootOption);
 }
 
 bool
 KDisplayManager::bootOptions(QStringList &opts, int &defopt, int &current)
 {
-    return m_backend->bootOptions(opts, defopt, current);
+    return m_DMBackend->bootOptions(opts, defopt, current);
 }
 #endif // KDM_NO_SHUTDOWN
 
@@ -69,31 +75,31 @@ KDisplayManager::bootOptions(QStringList &opts, int &defopt, int &current)
 void
 KDisplayManager::setLock(bool on)
 {
-    m_backend->setLock(on);
+    m_DMBackend->setLock(on);
 }
 
 bool
 KDisplayManager::isSwitchable()
 {
-    return m_backend->isSwitchable();
+    return m_SMBackend->isSwitchable();
 }
 
 int
 KDisplayManager::numReserve()
 {
-    return m_backend->numReserve();
+    return m_DMBackend->numReserve();
 }
 
 void
 KDisplayManager::startReserve()
 {
-    m_backend->startReserve();
+    m_DMBackend->startReserve();
 }
 
 bool
 KDisplayManager::localSessions(SessList &list)
 {
-    return m_backend->localSessions(list);
+    return m_SMBackend->localSessions(list);
 }
 
 void
@@ -133,11 +139,11 @@ KDisplayManager::sess2Str(const SessEnt &se)
 bool
 KDisplayManager::switchVT(int vt)
 {
-    return m_backend->switchVT(vt);
+    return m_SMBackend->switchVT(vt);
 }
 
 void
 KDisplayManager::lockSwitchVT(int vt)
 {
-    m_backend->lockSwitchVT(vt);
+    m_SMBackend->lockSwitchVT(vt);
 }

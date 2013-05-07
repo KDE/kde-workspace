@@ -436,38 +436,21 @@ KDMSocketHelper::exec ( const char* cmd, QByteArray& buf )
     return ret;
 }
 
-BasicDMBackend::BasicDMBackend()
-: d(new KDMSocketHelper())
-, DMType(Dunno)
+BasicSMBackend::BasicSMBackend (KDMSocketHelper* helper, DMType type)
+: d(helper)
+, m_DMType(type)
 {
-    const char *dpy;
-    const char *ctl;
 
-    qDBusRegisterMetaType<NamedDBusObjectPath>();
-    qDBusRegisterMetaType<QList<NamedDBusObjectPath> >();
-    qDBusRegisterMetaType<NumberedDBusObjectPath>();
-
-    if (!(dpy = ::getenv("DISPLAY")))
-        DMType = NoDM;
-    else if ((ctl = ::getenv("DM_CONTROL")))
-        DMType = KDM;
-    else if (::getenv("XDG_SEAT_PATH") && LightDMDBus().isValid())
-        DMType = LightDM;
-    else if (::getenv("GDMSESSION"))
-        DMType = GDM;
-    else
-        DMType = NoDM;
 }
 
-BasicDMBackend::~BasicDMBackend()
-{
+BasicSMBackend::~BasicSMBackend() {
 
 }
 
 bool
-BasicDMBackend::canShutdown()
+BasicSMBackend::canShutdown()
 {
-    if (DMType == GDM || DMType == NoDM || DMType == LightDM) {
+    if (m_DMType == GDM || m_DMType == NoDM || m_DMType == LightDM) {
         QDBusReply<QString> canPowerOff = SystemdManager().call(QLatin1String("CanPowerOff"));
         if (canPowerOff.isValid())
             return canPowerOff.value() != QLatin1String("no");
@@ -483,17 +466,17 @@ BasicDMBackend::canShutdown()
 }
 
 void
-BasicDMBackend::shutdown (KWorkSpace::ShutdownType shutdownType, KWorkSpace::ShutdownMode shutdownMode, const QString& bootOption)
+BasicSMBackend::shutdown (KWorkSpace::ShutdownType shutdownType, KWorkSpace::ShutdownMode shutdownMode, const QString& bootOption)
 {
     bool cap_ask;
-    if (DMType == KDM) {
+    if (m_DMType == KDM) {
         QByteArray re;
         cap_ask = d->exec("caps\n", re) && re.indexOf("\tshutdown ask") >= 0;
     } else {
         if (!bootOption.isEmpty())
             return;
 
-        if (DMType == GDM || DMType == NoDM || DMType == LightDM) {
+        if (m_DMType == GDM || m_DMType == NoDM || m_DMType == LightDM) {
             // systemd supports only 2 modes:
             // * interactive = true: brings up a PolicyKit prompt if other sessions are active
             // * interactive = false: rejects the shutdown if other sessions are active
@@ -533,9 +516,9 @@ BasicDMBackend::shutdown (KWorkSpace::ShutdownType shutdownType, KWorkSpace::Shu
 }
 
 bool
-BasicDMBackend::isSwitchable()
+BasicSMBackend::isSwitchable()
 {
-    if (DMType == GDM || DMType == LightDM) {
+    if (m_DMType == GDM || m_DMType == LightDM) {
         QDBusObjectPath currentSeat;
         if (getCurrentSeat(0, &currentSeat)) {
             SystemdSeat SDseat(currentSeat);
@@ -560,9 +543,9 @@ BasicDMBackend::isSwitchable()
 }
 
 bool
-BasicDMBackend::localSessions (SessList& list)
+BasicSMBackend::localSessions (SessList& list)
 {
-    if (DMType == GDM || DMType == LightDM) {
+    if (m_DMType == GDM || m_DMType == LightDM) {
         QDBusObjectPath currentSession, currentSeat;
         if (getCurrentSeat(&currentSession, &currentSeat)) {
             // we'll divide the code in two branches to reduce the overhead of calls to non-existent services
@@ -641,9 +624,9 @@ BasicDMBackend::localSessions (SessList& list)
 }
 
 bool
-BasicDMBackend::switchVT (int vt)
+BasicSMBackend::switchVT (int vt)
 {
-    if (DMType == GDM || DMType == LightDM) {
+    if (m_DMType == GDM || m_DMType == LightDM) {
         QDBusObjectPath currentSeat;
         if (getCurrentSeat(0, &currentSeat)) {
             // systemd part // preferred
@@ -684,7 +667,7 @@ BasicDMBackend::switchVT (int vt)
 }
 
 void
-BasicDMBackend::lockSwitchVT (int vt)
+BasicSMBackend::lockSwitchVT (int vt)
 {
     // Lock first, otherwise the lock won't be able to kick in until the session is re-activated.
     QDBusInterface screensaver("org.freedesktop.ScreenSaver", "/ScreenSaver", "org.freedesktop.ScreenSaver");
@@ -693,17 +676,45 @@ BasicDMBackend::lockSwitchVT (int vt)
     switchVT(vt);
 }
 
+BasicDMBackend::BasicDMBackend()
+: d(new KDMSocketHelper())
+, m_DMType(Dunno)
+{
+    const char *dpy;
+    const char *ctl;
+
+    qDBusRegisterMetaType<NamedDBusObjectPath>();
+    qDBusRegisterMetaType<QList<NamedDBusObjectPath> >();
+    qDBusRegisterMetaType<NumberedDBusObjectPath>();
+
+    if (!(dpy = ::getenv("DISPLAY")))
+        m_DMType = NoDM;
+    else if ((ctl = ::getenv("DM_CONTROL")))
+        m_DMType = KDM;
+    else if (::getenv("XDG_SEAT_PATH") && LightDMDBus().isValid())
+        m_DMType = LightDM;
+    else if (::getenv("GDMSESSION"))
+        m_DMType = GDM;
+    else
+        m_DMType = NoDM;
+}
+
+BasicDMBackend::~BasicDMBackend()
+{
+
+}
+
 void
 BasicDMBackend::setLock (bool on)
 {
-    if (DMType == KDM)
+    if (m_DMType == KDM)
         d->exec(on ? "lock\n" : "unlock\n");
 }
 
 int
 BasicDMBackend::numReserve()
 {
-    if (DMType == GDM || DMType == LightDM)
+    if (m_DMType == GDM || m_DMType == LightDM)
         return 1; /* Bleh */
 
     QByteArray re;
@@ -717,9 +728,9 @@ BasicDMBackend::numReserve()
 void
 BasicDMBackend::startReserve()
 {
-    if (DMType == GDM)
+    if (m_DMType == GDM)
         GDMFactory().call(QLatin1String("CreateTransientDisplay"));
-    else if (DMType == LightDM) {
+    else if (m_DMType == LightDM) {
         LightDMDBus lightDM;
         lightDM.call("SwitchToGreeter");
     }
@@ -730,7 +741,7 @@ BasicDMBackend::startReserve()
 bool
 BasicDMBackend::bootOptions(QStringList &opts, int &dflt, int &curr)
 {
-    if (DMType != KDM)
+    if (m_DMType != KDM)
         return false;
 
     QByteArray re;
@@ -754,6 +765,10 @@ BasicDMBackend::bootOptions(QStringList &opts, int &dflt, int &curr)
         (*it).replace("\\s", " ");
 
     return true;
+}
+
+BasicSMBackend* BasicDMBackend::provideSM() {
+    return new BasicSMBackend(d.data(), m_DMType);
 }
 
 void

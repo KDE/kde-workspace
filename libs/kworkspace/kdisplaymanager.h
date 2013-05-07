@@ -26,6 +26,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 
+class NullSMBackend;
 class NullDMBackend;
 
 struct KWORKSPACE_EXPORT SessEnt {
@@ -61,7 +62,8 @@ public:
     static void sess2Str2(const SessEnt &se, QString &user, QString &loc);
 
 private:
-    static NullDMBackend *m_backend;
+    static NullDMBackend *m_DMBackend;
+    static NullSMBackend *m_SMBackend;
 }; // class KDisplayManager
 
 #endif // KDISPLAYMANAGER_H
