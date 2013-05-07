@@ -272,7 +272,7 @@ public:
                 QDBusConnection::systemBus()) {}
 };
 
-static enum { Dunno, NoDM, NewKDM, OldKDM, NewGDM, OldGDM, LightDM } DMType = Dunno;
+static enum { Dunno, NoDM, KDM, GDM, LightDM } DMType = Dunno;
 static const char *ctl, *dpy;
 
 class KDisplayManager::Private
@@ -300,52 +300,29 @@ KDisplayManager::KDisplayManager() : d(new Private)
         if (!(dpy = ::getenv("DISPLAY")))
             DMType = NoDM;
         else if ((ctl = ::getenv("DM_CONTROL")))
-            DMType = NewKDM;
-        else if ((ctl = ::getenv("XDM_MANAGED")) && ctl[0] == '/')
-            DMType = OldKDM;
+            DMType = KDM;
         else if (::getenv("XDG_SEAT_PATH") && LightDMDBus().isValid())
             DMType = LightDM;
         else if (::getenv("GDMSESSION"))
-            DMType = GDMFactory().isValid() ? NewGDM : OldGDM;
+            DMType = GDM;
         else
             DMType = NoDM;
     }
     switch (DMType) {
     default:
         return;
-    case NewKDM:
-    case OldGDM:
+    case KDM:
         if ((d->fd = ::socket(PF_UNIX, SOCK_STREAM, 0)) < 0)
             return;
         sa.sun_family = AF_UNIX;
-        if (DMType == OldGDM) {
-            strcpy(sa.sun_path, "/var/run/gdm_socket");
-            if (::connect(d->fd, (struct sockaddr *)&sa, sizeof(sa))) {
-                strcpy(sa.sun_path, "/tmp/.gdm_socket");
-                if (::connect(d->fd, (struct sockaddr *)&sa, sizeof(sa))) {
-                    ::close(d->fd);
-                    d->fd = -1;
-                    break;
-                }
-            }
-            GDMAuthenticate();
-        } else {
-            if ((ptr = strchr(dpy, ':')))
-                ptr = strchr(ptr, '.');
-            snprintf(sa.sun_path, sizeof(sa.sun_path),
-                     "%s/dmctl-%.*s/socket",
-                     ctl, ptr ? int(ptr - dpy) : 512, dpy);
-            if (::connect(d->fd, (struct sockaddr *)&sa, sizeof(sa))) {
-                ::close(d->fd);
-                d->fd = -1;
-            }
-        }
-        break;
-    case OldKDM:
-        {
-            QString tf(ctl);
-            tf.truncate(tf.indexOf(','));
-            d->fd = ::open(tf.toLatin1(), O_WRONLY);
+        if ((ptr = strchr(dpy, ':')))
+            ptr = strchr(ptr, '.');
+        snprintf(sa.sun_path, sizeof(sa.sun_path),
+                    "%s/dmctl-%.*s/socket",
+                    ctl, ptr ? int(ptr - dpy) : 512, dpy);
+        if (::connect(d->fd, (struct sockaddr *)&sa, sizeof(sa))) {
+            ::close(d->fd);
+            d->fd = -1;
         }
         break;
     }
@@ -394,10 +371,6 @@ KDisplayManager::exec(const char *cmd, QByteArray &buf)
       busted:
         buf.resize(0);
         return false;
-    }
-    if (DMType == OldKDM) {
-        buf.resize(0);
-        return true;
     }
     for (;;) {
         if (buf.size() < 128)
@@ -486,7 +459,7 @@ static QList<QDBusObjectPath> getSessionsForSeat(const QDBusObjectPath &path)
 bool
 KDisplayManager::canShutdown()
 {
-    if (DMType == NewGDM || DMType == NoDM || DMType == LightDM) {
+    if (DMType == GDM || DMType == NoDM || DMType == LightDM) {
         QDBusReply<QString> canPowerOff = SystemdManager().call(QLatin1String("CanPowerOff"));
         if (canPowerOff.isValid())
             return canPowerOff.value() != QLatin1String("no");
@@ -496,13 +469,7 @@ KDisplayManager::canShutdown()
         return false;
     }
 
-    if (DMType == OldKDM)
-        return strstr(ctl, ",maysd") != 0;
-
     QByteArray re;
-
-    if (DMType == OldGDM)
-        return exec("QUERY_LOGOUT_ACTION\n", re) && re.indexOf("HALT") >= 0;
 
     return exec("caps\n", re) && re.indexOf("\tshutdown") >= 0;
 }
@@ -516,14 +483,14 @@ KDisplayManager::shutdown(KWorkSpace::ShutdownType shutdownType,
         return;
 
     bool cap_ask;
-    if (DMType == NewKDM) {
+    if (DMType == KDM) {
         QByteArray re;
         cap_ask = exec("caps\n", re) && re.indexOf("\tshutdown ask") >= 0;
     } else {
         if (!bootOption.isEmpty())
             return;
 
-        if (DMType == NewGDM || DMType == NoDM || DMType == LightDM) {
+        if (DMType == GDM || DMType == NoDM || DMType == LightDM) {
             // systemd supports only 2 modes:
             // * interactive = true: brings up a PolicyKit prompt if other sessions are active
             // * interactive = false: rejects the shutdown if other sessions are active
@@ -548,31 +515,24 @@ KDisplayManager::shutdown(KWorkSpace::ShutdownType shutdownType,
         shutdownMode = KWorkSpace::ShutdownModeForceNow;
 
     QByteArray cmd;
-    if (DMType == OldGDM) {
-        cmd.append(shutdownMode == KWorkSpace::ShutdownModeForceNow ?
-                   "SET_LOGOUT_ACTION " : "SET_SAFE_LOGOUT_ACTION ");
-        cmd.append(shutdownType == KWorkSpace::ShutdownTypeReboot ?
-                   "REBOOT\n" : "HALT\n");
-    } else {
-        cmd.append("shutdown\t");
-        cmd.append(shutdownType == KWorkSpace::ShutdownTypeReboot ?
-                   "reboot\t" : "halt\t");
-        if (!bootOption.isEmpty())
-            cmd.append("=").append(bootOption.toLocal8Bit()).append("\t");
-        cmd.append(shutdownMode == KWorkSpace::ShutdownModeInteractive ?
-                   "ask\n" :
-                   shutdownMode == KWorkSpace::ShutdownModeForceNow ?
-                   "forcenow\n" :
-                   shutdownMode == KWorkSpace::ShutdownModeTryNow ?
-                   "trynow\n" : "schedule\n");
-    }
+    cmd.append("shutdown\t");
+    cmd.append(shutdownType == KWorkSpace::ShutdownTypeReboot ?
+                "reboot\t" : "halt\t");
+    if (!bootOption.isEmpty())
+        cmd.append("=").append(bootOption.toLocal8Bit()).append("\t");
+    cmd.append(shutdownMode == KWorkSpace::ShutdownModeInteractive ?
+                "ask\n" :
+                shutdownMode == KWorkSpace::ShutdownModeForceNow ?
+                "forcenow\n" :
+                shutdownMode == KWorkSpace::ShutdownModeTryNow ?
+                "trynow\n" : "schedule\n");
     exec(cmd.data());
 }
 
 bool
 KDisplayManager::bootOptions(QStringList &opts, int &defopt, int &current)
 {
-    if (DMType != NewKDM)
+    if (DMType != KDM)
         return false;
 
     QByteArray re;
@@ -603,14 +563,14 @@ KDisplayManager::bootOptions(QStringList &opts, int &defopt, int &current)
 void
 KDisplayManager::setLock(bool on)
 {
-    if (DMType == NewKDM || DMType == OldKDM)
+    if (DMType == KDM)
         exec(on ? "lock\n" : "unlock\n");
 }
 
 bool
 KDisplayManager::isSwitchable()
 {
-    if (DMType == NewGDM || DMType == LightDM) {
+    if (DMType == GDM || DMType == LightDM) {
         QDBusObjectPath currentSeat;
         if (getCurrentSeat(0, &currentSeat)) {
             SystemdSeat SDseat(currentSeat);
@@ -629,12 +589,6 @@ KDisplayManager::isSwitchable()
         return false;
     }
 
-    if (DMType == OldKDM)
-        return dpy[0] == ':';
-
-    if (DMType == OldGDM)
-        return exec("QUERY_VT\n");
-
     QByteArray re;
 
     return exec("caps\n", re) && re.indexOf("\tlocal") >= 0;
@@ -643,11 +597,8 @@ KDisplayManager::isSwitchable()
 int
 KDisplayManager::numReserve()
 {
-    if (DMType == NewGDM || DMType == OldGDM || DMType == LightDM)
+    if (DMType == GDM || DMType == LightDM)
         return 1; /* Bleh */
-
-    if (DMType == OldKDM)
-        return strstr(ctl, ",rsvd") ? 1 : -1;
 
     QByteArray re;
     int p;
@@ -660,10 +611,8 @@ KDisplayManager::numReserve()
 void
 KDisplayManager::startReserve()
 {
-    if (DMType == NewGDM)
+    if (DMType == GDM)
         GDMFactory().call(QLatin1String("CreateTransientDisplay"));
-    else if (DMType == OldGDM)
-        exec("FLEXI_XSERVER\n");
     else if (DMType == LightDM) {
         LightDMDBus lightDM;
         lightDM.call("SwitchToGreeter");
@@ -675,10 +624,7 @@ KDisplayManager::startReserve()
 bool
 KDisplayManager::localSessions(SessList &list)
 {
-    if (DMType == OldKDM)
-        return false;
-
-    if (DMType == NewGDM || DMType == LightDM) {
+    if (DMType == GDM || DMType == LightDM) {
         QDBusObjectPath currentSession, currentSeat;
         if (getCurrentSeat(&currentSession, &currentSeat)) {
             // we'll divide the code in two branches to reduce the overhead of calls to non-existent services
@@ -739,36 +685,19 @@ KDisplayManager::localSessions(SessList &list)
 
     QByteArray re;
 
-    if (DMType == OldGDM) {
-        if (!exec("CONSOLE_SERVERS\n", re))
-            return false;
-        const QStringList sess = QString(re.data() +3).split(QChar(';'), QString::SkipEmptyParts);
-        for (QStringList::ConstIterator it = sess.constBegin(); it != sess.constEnd(); ++it) {
-            QStringList ts = (*it).split(QChar(','));
-            SessEnt se;
-            se.display = ts[0];
-            se.user = ts[1];
-            se.vt = ts[2].toInt();
-            se.session = "<unknown>";
-            se.self = ts[0] == ::getenv("DISPLAY"); /* Bleh */
-            se.tty = false;
-            list.append(se);
-        }
-    } else {
-        if (!exec("list\talllocal\n", re))
-            return false;
-        const QStringList sess = QString(re.data() + 3).split(QChar('\t'), QString::SkipEmptyParts);
-        for (QStringList::ConstIterator it = sess.constBegin(); it != sess.constEnd(); ++it) {
-            QStringList ts = (*it).split(QChar(','));
-            SessEnt se;
-            se.display = ts[0];
-            se.vt = ts[1].mid(2).toInt();
-            se.user = ts[2];
-            se.session = ts[3];
-            se.self = (ts[4].indexOf('*') >= 0);
-            se.tty = (ts[4].indexOf('t') >= 0);
-            list.append(se);
-        }
+    if (!exec("list\talllocal\n", re))
+        return false;
+    const QStringList sess = QString(re.data() + 3).split(QChar('\t'), QString::SkipEmptyParts);
+    for (QStringList::ConstIterator it = sess.constBegin(); it != sess.constEnd(); ++it) {
+        QStringList ts = (*it).split(QChar(','));
+        SessEnt se;
+        se.display = ts[0];
+        se.vt = ts[1].mid(2).toInt();
+        se.user = ts[2];
+        se.session = ts[3];
+        se.self = (ts[4].indexOf('*') >= 0);
+        se.tty = (ts[4].indexOf('t') >= 0);
+        list.append(se);
     }
     return true;
 }
@@ -810,7 +739,7 @@ KDisplayManager::sess2Str(const SessEnt &se)
 bool
 KDisplayManager::switchVT(int vt)
 {
-    if (DMType == NewGDM || DMType == LightDM) {
+    if (DMType == GDM || DMType == LightDM) {
         QDBusObjectPath currentSeat;
         if (getCurrentSeat(0, &currentSeat)) {
             // systemd part // preferred
@@ -846,9 +775,6 @@ KDisplayManager::switchVT(int vt)
         }
         return false;
     }
-
-    if (DMType == OldGDM)
-        return exec(QString("SET_VT %1\n").arg(vt).toLatin1());
 
     return exec(QString("activate\tvt%1\n").arg(vt).toLatin1());
 }
