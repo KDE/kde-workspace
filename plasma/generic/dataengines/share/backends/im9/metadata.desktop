@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=im9.eu
 Name[de]=im9.eu
+Name[fi]=im9.eu
 Name[nl]=im9.eu
 Name[pt]=im9.eu
 Name[pt_BR]=im9.eu
@@ -10,6 +11,7 @@ Name[uk]=im9.eu
 Name[x-test]=xxim9.euxx
 Comment=Allows images to be shared using the im9.eu service
 Comment[de]=Ermöglicht die Veröffentlichung von Bildern über den im9.eu-Dienst
+Comment[fi]=Mahdollistaa kuvien jakamisen im9.eu-palvelussa
 Comment[nl]=Staat het delen van afbeeldingen toe met gebruik van de service im9.eu
 Comment[pt]=Permite a partilha de imagens com o serviço do 'im9.eu'
 Comment[pt_BR]=Permite o compartilhamento de imagens usando o serviço do im9.eu
