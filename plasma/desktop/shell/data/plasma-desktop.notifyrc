@@ -266,4 +266,4 @@ Comment[wa]=Ene novele ahesse est asteure disponibe sol rantoele.
 Comment[x-test]=xxA new widget has become available on the network.xx
 Comment[zh_CN]=网络上有了一个新的可用部件。
 Comment[zh_TW]=網路上已發布新的元件。
-Action=Popup
+Action=None
