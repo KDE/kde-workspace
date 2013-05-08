@@ -2111,8 +2111,8 @@ upd_greeteruid(Entry *ce, Section *cs ATTR_UNUSED)
         if (*ok || !(pw = getpwuid(uid))) {
             if ((useradd = locate("useradd"))) {
                 const char *args[] = {
-                    useradd, "--system", "--user-group",
-                    "--home-dir", "/var", "--no-create-home",
+                    useradd, "--system", "--user-group", "-s", "/bin/false",
+                    "--home-dir", "/var", "--no-create-home", "-c", "KDM Display Manager daemon",
                     ce->value, 0
                 };
                 if (runAndWait((char **)args)) {
