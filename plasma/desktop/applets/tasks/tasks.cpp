@@ -399,6 +399,7 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
     m_ui.sortingStrategy->addItem(i18n("Manually"),QVariant(TaskManager::GroupManager::ManualSorting));
     m_ui.sortingStrategy->addItem(i18n("Alphabetically"),QVariant(TaskManager::GroupManager::AlphaSorting));
     m_ui.sortingStrategy->addItem(i18n("By Desktop"),QVariant(TaskManager::GroupManager::DesktopSorting));
+    m_ui.sortingStrategy->addItem(i18n("By Activity"),QVariant(TaskManager::GroupManager::ActivitySorting));
 
 
     switch (m_groupManager->sortingStrategy()) {
@@ -413,6 +414,9 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
             break;
         case TaskManager::GroupManager::DesktopSorting:
             m_ui.sortingStrategy->setCurrentIndex(3);
+            break;
+        case TaskManager::GroupManager::ActivitySorting:
+            m_ui.sortingStrategy->setCurrentIndex(4);
             break;
         default:
              m_ui.sortingStrategy->setCurrentIndex(-1);

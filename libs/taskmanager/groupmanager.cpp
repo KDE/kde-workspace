@@ -41,6 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "taskitem.h"
 #include "taskgroup.h"
 #include "taskmanager.h"
+#include "strategies/activitysortingstrategy.h"
 #include "strategies/alphasortingstrategy.h"
 #include "strategies/desktopsortingstrategy.h"
 #include "strategies/programgroupingstrategy.h"
@@ -1305,6 +1306,10 @@ void GroupManager::setSortingStrategy(TaskSortingStrategy sortOrder)
 
     case DesktopSorting:
         d->abstractSortingStrategy = new DesktopSortingStrategy(this);
+        break;
+
+    case ActivitySorting:
+        d->abstractSortingStrategy = new ActivitySortingStrategy(this);
         break;
 
     case NoSorting: //manual and no grouping result both in non automatic grouping
