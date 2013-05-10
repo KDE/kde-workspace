@@ -17,7 +17,6 @@
 #include <QUuid>
 
 #include <KDebug>
-#include <KFileMetaInfo>
 #include <KGlobal>
 #include <KIO/PreviewJob>
 #include <KProgressDialog>
@@ -198,19 +197,12 @@ QSize BackgroundListModel::bestSize(Plasma::Package *package) const
         return QSize();
     }
 
-    KFileMetaInfo info(image, QString(), KFileMetaInfo::TechnicalInfo);
-    QSize size(info.item("http://freedesktop.org/standards/xesam/1.0/core#width").value().toInt(),
-               info.item("http://freedesktop.org/standards/xesam/1.0/core#height").value().toInt());
-    //backup solution if strigi does not work
-    if (size.width() == 0 || size.height() == 0) {
-//        kDebug() << "fall back to QImage, check your strigi";
-        ImageSizeFinder *finder = new ImageSizeFinder(image);
-        connect(finder, SIGNAL(sizeFound(QString,QSize)), this,
-                SLOT(sizeFound(QString,QSize)));
-        QThreadPool::globalInstance()->start(finder);
-        size = QSize(-1, -1);
-    }
+    ImageSizeFinder *finder = new ImageSizeFinder(image);
+    connect(finder, SIGNAL(sizeFound(QString,QSize)), this,
+            SLOT(sizeFound(QString,QSize)));
+    QThreadPool::globalInstance()->start(finder);
 
+    QSize size(-1, -1);
     const_cast<BackgroundListModel *>(this)->m_sizeCache.insert(package, size);
     return size;
 }
