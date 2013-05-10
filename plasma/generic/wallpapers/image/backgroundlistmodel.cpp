@@ -66,6 +66,8 @@ void BackgroundListModel::removeBackground(const QString &path)
         beginRemoveRows(QModelIndex(), index.row(), index.row());
         Plasma::Package *package = m_packages.at(index.row());
         m_packages.removeAt(index.row());
+        m_sizeCache.remove(package);
+        m_previews.remove(package);
         delete package;
         endRemoveRows();
     }
@@ -82,6 +84,8 @@ void BackgroundListModel::reload(const QStringList &selected)
         beginRemoveRows(QModelIndex(), 0, m_packages.count() - 1);
         qDeleteAll(m_packages);
         m_packages.clear();
+        m_sizeCache.clear();
+        m_previews.clear();
         endRemoveRows();
     }
 
