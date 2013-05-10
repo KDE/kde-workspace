@@ -651,8 +651,6 @@ void Image::pictureChanged(const QModelIndex &index)
     } else {
         m_wallpaper = b->path();
     }
-
-    setSingleImage();
 }
 
 void Image::positioningChanged(int index)
