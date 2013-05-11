@@ -589,8 +589,8 @@ void SolidDeviceEngine::deviceAdded(const QString& udi)
 
         Solid::StorageAccess *access = device.as<Solid::StorageAccess>();
         if (access) {
-            connect(access, SIGNAL(setupRequested(const QString&)),
-                    this, SLOT(setMountingState(const QString&)));
+            connect(access, SIGNAL(setupRequested(QString)),
+                    this, SLOT(setMountingState(QString)));
             connect(access, SIGNAL(setupDone(Solid::ErrorType,QVariant,QString)),
                     this, SLOT(setIdleState(Solid::ErrorType,QVariant,QString)));
             connect(access, SIGNAL(teardownRequested(QString)),

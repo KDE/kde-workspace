@@ -128,8 +128,8 @@ void ActivityEngine::enableRanking()
             ACTIVITYRANKING_OBJECT,
             QDBusConnection::sessionBus()
         );
-    connect(m_activityRankingClient, SIGNAL(rankingChanged(QStringList, ActivityDataList)),
-            this, SLOT(rankingChanged(QStringList, ActivityDataList)));
+    connect(m_activityRankingClient, SIGNAL(rankingChanged(QStringList,ActivityDataList)),
+            this, SLOT(rankingChanged(QStringList,ActivityDataList)));
 
     QDBusMessage msg = QDBusMessage::createMethodCall(ACTIVITYMANAGER_SERVICE,
                                                       ACTIVITYRANKING_OBJECT,
