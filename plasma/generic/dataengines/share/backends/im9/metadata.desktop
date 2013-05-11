@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=im9.eu
+Name[ca]=im9.eu
 Name[cs]=im9.eu
 Name[de]=im9.eu
 Name[es]=im9.eu
@@ -11,7 +12,9 @@ Name[sk]=im9.eu
 Name[sv]=im9.eu
 Name[uk]=im9.eu
 Name[x-test]=xxim9.euxx
+Name[zh_TW]=im9.eu
 Comment=Allows images to be shared using the im9.eu service
+Comment[ca]=Permet la compartició d'imatges utilitzant el servei im9.eu
 Comment[cs]=Povolí sdílení obrázků pomocí služby im9.eu
 Comment[de]=Ermöglicht die Veröffentlichung von Bildern über den im9.eu-Dienst
 Comment[es]=Permite compartir imágenes a través del servicio im9.eu
@@ -23,6 +26,7 @@ Comment[sk]=Povolí zdieľanie obrázkov pomocou služby im9.eu
 Comment[sv]=Tillåter att bilder delas genom att använda tjänsten im9.eu
 Comment[uk]=Уможливлює оприлюднення зображень за допомогою служби im9.eu
 Comment[x-test]=xxAllows images to be shared using the im9.eu servicexx
+Comment[zh_TW]=允許使用 im9.eu 服務分享影像
 Type=Service
 
 X-KDE-ServiceTypes=Plasma/ShareProvider
