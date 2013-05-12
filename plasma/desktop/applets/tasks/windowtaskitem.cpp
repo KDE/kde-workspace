@@ -217,12 +217,28 @@ void WindowTaskItem::updateToolTip()
                                 Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
+        QStringList subTextEntries;
         Plasma::ToolTipContent data(Qt::escape(m_task.data()->name()), QString(), p);
         if (m_task.data()->desktop() != 0 && 
             (!m_applet->groupManager().showOnlyCurrentDesktop() || !m_task.data()->isOnCurrentDesktop())) {
-            data.setSubText(i18nc("Which virtual desktop a window is currently on", "On %1",
-                                  KWindowSystem::desktopName(m_task.data()->desktop())));
+            subTextEntries << i18nc("Which virtual desktop a window is currently on", "On %1",
+                                    KWindowSystem::desktopName(m_task.data()->desktop()));
         }
+
+        if (m_task.data()->task() && m_task.data()->task()->isOnAllActivities()) {
+            subTextEntries << i18n("Available on all activities");
+        } else if (m_applet->groupManager().showOnlyCurrentActivity()) {
+            QStringList activityNames = m_task.data()->activityNames(false);
+            if (!activityNames.isEmpty()) {
+                subTextEntries << i18nc("Activities a window is currently on (appart from the current one)",
+                                        "Also available on %1", activityNames.join(", "));
+            }
+        } else {
+            subTextEntries << i18nc("Which activities a window is currently on", "Available on %1",
+                                    m_task.data()->activityNames().join(", "));
+        }
+
+        data.setSubText(subTextEntries.join("<br />"));
         data.setWindowsToPreview(QList<WId>() << m_task.data()->task()->window());
         data.setClickable(true);
         data.setInstantPopup(true);
