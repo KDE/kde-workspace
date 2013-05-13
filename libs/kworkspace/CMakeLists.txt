@@ -60,3 +60,5 @@ install( FILES kdisplaymanager.h
                kworkspace.h
                kworkspace_export.h
          DESTINATION ${INCLUDE_INSTALL_DIR}/kworkspace COMPONENT Devel )
+
+add_subdirectory(tests)
