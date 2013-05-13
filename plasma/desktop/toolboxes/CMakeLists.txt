@@ -32,5 +32,7 @@ install(FILES plasma-toolbox-paneltoolbox.desktop
 # Declarative ToolBox
 install(DIRECTORY declarativetoolbox/
         DESTINATION ${DATA_INSTALL_DIR}/plasma/packages/org.kde.toolbox)
+install(DIRECTORY declarativetoolbox/
+        DESTINATION ${DATA_INSTALL_DIR}/plasma/packages/org.kde.paneltoolbox)
 #install(FILES declarativetoolbox/metadata.desktop
 #       DESTINATION ${SERVICES_INSTALL_DIR} RENAME plasma-applet-org.kde.toolbox.desktop)
