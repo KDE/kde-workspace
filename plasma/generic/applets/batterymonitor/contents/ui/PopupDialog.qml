@@ -77,6 +77,7 @@ Item {
 
         Components.Label {
             text: i18n("Screen Brightness:")
+            visible: isBrightnessAvailable
             anchors.right: parent.right
         }
     }
