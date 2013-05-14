@@ -47,7 +47,10 @@
 #include <KColorScheme>
 #include <KStandardDirs>
 #include <knewstuff3/downloaddialog.h>
+#ifdef Q_WS_X11
 #include <../../kwin/libkdecorations/kdecoration.h>
+#endif
+
 
 #include <QtCore/QFile>
 #include <QtCore/QSettings>
@@ -435,6 +438,7 @@ void KCMStyle::save()
         notification->sendEvent();
     }
 
+#ifdef Q_WS_X11
     // If user select ButtonVertical, we add (if needed) a button to titlebar
     if (style == "ButtonVertical") {
         KConfig _kwinConfig("kwinrc", KConfig::NoGlobals);
@@ -448,6 +452,7 @@ void KCMStyle::save()
         kwinConfig.writeEntry("ButtonsOnLeft", buttonsOnLeft);
         kwinConfig.writeEntry("CustomButtonPositions", "true");
     }
+#endif
 
     args = QList<QVariant>() << "appmenu" << (style != "InApplication");
     method = QDBusMessage::createMethodCall("org.kde.kded",
