@@ -22,6 +22,10 @@
 #include "notificationsadaptor.h"
 
 #include <KDebug>
+#include <KConfigGroup>
+#include <KGlobal>
+#include <KNotifyConfigWidget>
+#include <KStandardDirs>
 
 #include <Plasma/DataContainer>
 #include <Plasma/Service>
@@ -177,6 +181,15 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
     notificationData.insert("actions", actions);
     notificationData.insert("expireTimeout", timeout);
 
+    QString appRealName;
+    bool configurable = false;
+    if (hints.contains("x-kde-appname")) {
+        appRealName = hints["x-kde-appname"].toString();
+        configurable = true;
+    }
+    notificationData.insert("appRealName", appRealName);
+    notificationData.insert("configurable", configurable);
+
     QImage image;
     if (hints.contains("image_data")) {
         QDBusArgument arg = hints["image_data"].value<QDBusArgument>();
@@ -262,7 +275,7 @@ QString NotificationsEngine::GetServerInformation(QString& vendor, QString& vers
     return "Plasma";
 }
 
-int NotificationsEngine::createNotification(const QString &appName, const QString &appIcon, const QString &summary, const QString &body, int timeout)
+int NotificationsEngine::createNotification(const QString &appName, const QString &appIcon, const QString &summary, const QString &body, int timeout, bool configurable, const QString &appRealName)
 {
     const QString source = QString("notification %1").arg(++m_nextId);
     Plasma::DataEngine::Data notificationData;
@@ -272,9 +285,16 @@ int NotificationsEngine::createNotification(const QString &appName, const QStrin
     notificationData.insert("summary", summary);
     notificationData.insert("body", body);
     notificationData.insert("expireTimeout", timeout);
+    notificationData.insert("configurable", configurable);
+    notificationData.insert("appRealName", appRealName);
 
     setData(source, notificationData);
     return m_nextId;
+}
+
+void NotificationsEngine::configureNotification(const QString &appName)
+{
+    KNotifyConfigWidget::configure(0, appName);
 }
 
 K_EXPORT_PLASMA_DATAENGINE(notifications, NotificationsEngine)

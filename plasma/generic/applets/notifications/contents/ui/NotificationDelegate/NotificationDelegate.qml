@@ -138,6 +138,23 @@ PlasmaComponents.ListItem {
                         right: parent.right
                     }
                 }
+
+                PlasmaComponents.ToolButton {
+                    id: configureButton
+                    iconSource: "configure"
+                    width: notificationItem.toolIconSize
+                    height: width
+                    visible: model.configurable
+                    onClicked: {
+                        plasmoid.hidePopup()
+                        configureNotification(model.appRealName)
+                    }
+                    anchors {
+                        top: parent.top
+                        right: closeButton.left
+                        rightMargin: 5
+                    }
+                }
             }
 
             Item {

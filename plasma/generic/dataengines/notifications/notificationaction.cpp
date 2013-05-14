@@ -56,8 +56,13 @@ void NotificationAction::start()
                                               parameters().value("appIcon").toString(),
                                               parameters().value("summary").toString(),
                                               parameters().value("body").toString(),
-                                              parameters().value("timeout").toInt());
+                                              parameters().value("timeout").toInt(),
+                                              false,
+                                              QString()
+                                             );
         setResult(rv);
+    } else if (operationName() == "configureNotification") {
+        m_engine->configureNotification(parameters()["appRealName"].toString());
     }
 
     emitResult();
