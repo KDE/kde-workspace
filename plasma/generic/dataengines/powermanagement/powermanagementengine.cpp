@@ -133,6 +133,9 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
                 updateBatteryChargeState(battery->chargeState(), deviceBattery.udi());
                 updateBatteryChargePercent(battery->chargePercent(), deviceBattery.udi());
                 updateBatteryPlugState(battery->isPlugged(), deviceBattery.udi());
+                updateBatteryPowerSupplyState(battery->isPowerSupply(), deviceBattery.udi());
+                setData(source, "Name", deviceBattery.product());
+                setData(source, "Type", batteryType(battery));
             }
         }
 
@@ -199,6 +202,37 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
     return true;
 }
 
+QString PowermanagementEngine::batteryType(const Solid::Battery* battery)
+{
+  switch(battery->type()) {
+      case Solid::Battery::PrimaryBattery:
+          return QString("Battery");
+          break;
+      case Solid::Battery::UpsBattery:
+          return QString("Ups");
+          break;
+      case Solid::Battery::MonitorBattery:
+          return QString("Monitor");
+          break;
+      case Solid::Battery::MouseBattery:
+          return QString("Mouse");
+          break;
+      case Solid::Battery::KeyboardBattery:
+          return QString("Keyboad");
+          break;
+      case Solid::Battery::PdaBattery:
+          return QString("Pda");
+          break;
+      case Solid::Battery::PhoneBattery:
+          return QString("Phone");
+          break;
+      default:
+          return QString("Unknown");
+  }
+
+  return QString("Unknown");
+}
+
 bool PowermanagementEngine::updateSourceEvent(const QString &source)
 {
     if (source == "UserActivity") {
@@ -242,6 +276,12 @@ void PowermanagementEngine::updateBatteryChargePercent(int newValue, const QStri
 {
     const QString source = m_batterySources[udi];
     setData(source, "Percent", newValue);
+}
+
+void PowermanagementEngine::updateBatteryPowerSupplyState(bool newState, const QString& udi)
+{
+    const QString source = m_batterySources[udi];
+    setData(source, "Is Power Supply", newState);
 }
 
 void PowermanagementEngine::updateAcPlugState(bool newState)
@@ -292,11 +332,17 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
                     SLOT(updateBatteryChargePercent(int,QString)));
             connect(battery, SIGNAL(plugStateChanged(bool,QString)), this,
                     SLOT(updateBatteryPlugState(bool,QString)));
+            connect(battery, SIGNAL(powerSupplyStateChanged(bool,QString)), this,
+                    SLOT(updateBatteryPowerSupplyState(bool,QString)));
 
             // Set initial values
             updateBatteryChargeState(battery->chargeState(), device.udi());
             updateBatteryChargePercent(battery->chargePercent(), device.udi());
             updateBatteryPlugState(battery->isPlugged(), device.udi());
+            updateBatteryPowerSupplyState(battery->isPowerSupply(), device.udi());
+
+            setData(source, "Name", device.product());
+            setData(source, "Type", batteryType(battery));
 
             setData("Battery", "Sources", sourceNames);
             setData("Battery", "Has Battery", !sourceNames.isEmpty());

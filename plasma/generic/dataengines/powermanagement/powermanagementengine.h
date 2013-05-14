@@ -54,6 +54,7 @@ private slots:
     void updateBatteryChargeState(int newState, const QString& udi);
     void updateBatteryPlugState(bool newState, const QString& udi);
     void updateBatteryChargePercent(int newValue, const QString& udi);
+    void updateBatteryPowerSupplyState(bool newState, const QString& udi);
     void updateAcPlugState(bool newState);
     void deviceRemoved(const QString& udi);
     void deviceAdded(const QString& udi);
@@ -64,6 +65,7 @@ private slots:
     void brightnessControlsAvailableChanged(bool available);
 
 private:
+    QString batteryType(const Solid::Battery *battery);
     QStringList basicSourceNames() const;
 
     QStringList m_sources;
