@@ -2,21 +2,30 @@ project(plasma-wallpaper-image)
 
 set(image_SRCS
     image.cpp
-    backgrounddelegate.cpp
+    imageplugin.cpp
+    wallpaperpackage.cpp
     backgroundlistmodel.cpp
-    removebuttonmanager.cpp
-    removebutton.cpp
-    itemsview.cpp
 )
-kde4_add_ui_files(image_SRCS imageconfig.ui slideshowconfig.ui)
 
 set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
 qt4_add_dbus_interface(image_SRCS ${ksmserver_xml} ksmserver_interface)
 
-kde4_add_plugin(plasma_wallpaper_image ${image_SRCS})
-target_link_libraries(plasma_wallpaper_image ${KDE4_PLASMA_LIBS} ${KDE4_KIO_LIBS} ${KDE4_KFILE_LIBS} ${KDE4_KNEWSTUFF3_LIBS} ${KDE4_THREADWEAVER_LIBRARY})
+add_library(plasma_wallpaper_imageplugin SHARED ${image_SRCS})
+target_link_libraries(plasma_wallpaper_imageplugin
+         plasma
+         ${Qt5Quick_LIBRARIES}
+         ${Qt5Qml_LIBRARIES}
+         ${KDE4_KIO_LIBS}
+         ${KDE4_KDEUI_LIBS}
+         ${KDE4_KFILE_LIBS}
+         ${KDE4_KNEWSTUFF3_LIBS}
+         ${KDE4_THREADWEAVER_LIBRARY}
+         ${kde4support_LIBRARY})
 
-install(TARGETS plasma_wallpaper_image DESTINATION ${PLUGIN_INSTALL_DIR})
-install(FILES plasma-wallpaper-image.desktop DESTINATION ${SERVICES_INSTALL_DIR})
+install(TARGETS plasma_wallpaper_imageplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/image)
+
+install(FILES qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/image)
 
 install(FILES wallpaper.knsrc DESTINATION ${CONFIG_INSTALL_DIR})
+
+installPackage(package org.kde.image plasma/wallpapers wallpaper)

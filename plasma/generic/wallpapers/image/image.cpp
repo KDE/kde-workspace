@@ -11,7 +11,9 @@
 */
 
 #include "image.h"
+#include "wallpaperpackage.h"
 
+#include <QAction>
 #include <QApplication>
 #include <QPainter>
 #include <QFile>
@@ -28,29 +30,26 @@
 #include <KIO/Job>
 #include <krun.h>
 #include <knewstuff3/downloaddialog.h>
+#include <klocalizedstring.h>
+#include <kicon.h>
+#include <KGlobal>
 
 #include <Plasma/Theme>
 #include "backgroundlistmodel.h"
-#include "backgrounddelegate.h"
-#include "removebuttonmanager.h"
 #include "ksmserver_interface.h"
 
-K_EXPORT_PLASMA_WALLPAPER(image, Image)
-
-Image::Image(QObject *parent, const QVariantList &args)
-    : Plasma::Wallpaper(parent, args),
+Image::Image(QObject *parent)
+    : QObject(parent),
       m_delay(10),
       m_dirWatch(new KDirWatch(this)),
-      m_configWidget(0),
-      m_wallpaperPackage(0),
       m_currentSlide(-1),
-      m_fadeValue(0),
-      m_animation(0),
       m_model(0),
       m_dialog(0),
       m_nextWallpaperAction(0),
       m_openImageAction(0)
 {
+    m_wallpaperPackage = Plasma::Package(new WallpaperPackage(this, this));
+
     connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(updateBackground(QImage)));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
 
@@ -58,33 +57,46 @@ Image::Image(QObject *parent, const QVariantList &args)
     connect(m_dirWatch, SIGNAL(dirty(QString)),   SLOT(pathDirty(QString)));
     connect(m_dirWatch, SIGNAL(deleted(QString)), SLOT(pathDeleted(QString)));
     m_dirWatch->startScan();
+    init(KConfigGroup(KSharedConfig::openConfig(), "ImageWallpaper"));
 }
 
 Image::~Image()
 {
-    delete m_animation;
+}
+
+QString Image::wallpaperPath() const
+{
+    return m_wallpaperPath;
+}
+
+void Image::addUrl(const QString &url)
+{
+    addUrl(QUrl(url), true);
+}
+
+void Image::addUrls(const QStringList &urls)
+{
+    addUrls(urls);
+}
+
+void Image::updateScreenshot(QPersistentModelIndex index)
+{
+    //TODO
 }
 
 void Image::init(const KConfigGroup &config)
 {
     m_timer.stop();
 
-    if (renderingMode().name().isEmpty()) {
-        m_mode = "SingleImage";
-    } else {
-        m_mode = renderingMode().name();
-    }
-
-    calculateGeometry();
+    //TODO: how to restore this?
+    m_mode = SingleImage;
 
     m_delay = config.readEntry("slideTimer", 10);
-    setResizeMethodHint((ResizeMethod)config.readEntry("wallpaperposition", (int)ScaledResize));
     m_wallpaper = config.readEntry("wallpaper", QString());
     if (m_wallpaper.isEmpty()) {
         useSingleImageDefaults();
     }
 
-    m_color = config.readEntry("wallpapercolor", QColor(Qt::black));
     m_usersWallpapers = config.readEntry("userswallpapers", QStringList());
     QStringList dirs = config.readEntry("slidepaths", QStringList());
 
@@ -92,268 +104,81 @@ void Image::init(const KConfigGroup &config)
         dirs << KStandardDirs::installPath("wallpaper");
     }
 
-    setUsingRenderingCache(m_mode == "SingleImage");
 
-    if (m_mode == "SingleImage") {
+    if (m_mode == SingleImage) {
         setSingleImage();
-        setContextualActions(QList<QAction*>());
     } else {
-        m_nextWallpaperAction = new QAction(KIcon("user-desktop"), i18n("Next Wallpaper Image"), this);
+        m_nextWallpaperAction = new QAction(KIcon(QString::fromLatin1("user-desktop")), i18n("Next Wallpaper Image"), this);
         connect(m_nextWallpaperAction, SIGNAL(triggered(bool)), this, SLOT(nextSlide()));
-        m_openImageAction = new QAction(KIcon("document-open"), i18n("Open Wallpaper Image"), this);
+        m_openImageAction = new QAction(KIcon(QString::fromLatin1("document-open")), i18n("Open Wallpaper Image"), this);
         connect(m_openImageAction, SIGNAL(triggered(bool)), this, SLOT(openSlide()));
         QTimer::singleShot(200, this, SLOT(startSlideshow()));
         updateDirWatch(dirs);
         QList<QAction*> actions;
         actions.push_back(m_nextWallpaperAction);
         actions.push_back(m_openImageAction);
-        setContextualActions(actions);
+        m_actions = actions;
         updateWallpaperActions();
     }
+}
 
-    m_animation = new QPropertyAnimation(this, "fadeValue");
-    m_animation->setProperty("easingCurve", QEasingCurve::InQuad);
-    m_animation->setProperty("duration", 500);
-    m_animation->setProperty("startValue", 0.0);
-    m_animation->setProperty("endValue", 1.0);
+Image::RenderingMode Image::renderingMode() const
+{
+    return m_mode;
+}
+
+void Image::setRenderingMode(RenderingMode mode)
+{
+    m_mode = mode;
+}
+
+Image::ResizeMethod Image::resizeMethod() const
+{
+    return m_resizeMethod;
+}
+
+void Image::setResizeMethod(ResizeMethod method)
+{
+    m_resizeMethod = method;
+}
+
+QSize Image::targetSize() const
+{
+    return m_targetSize;
+}
+
+void Image::setTargetSize(const QSize &size)
+{
+    m_targetSize = size;
+}
+
+Plasma::Package *Image::package()
+{
+    return &m_wallpaperPackage;
 }
 
 void Image::useSingleImageDefaults()
 {
-    m_wallpaper = Plasma::Theme::defaultTheme()->wallpaperPath();
-    int index = m_wallpaper.indexOf("/contents/images/");
+    Plasma::Theme theme;
+    m_wallpaper = theme.wallpaperPath();
+    int index = m_wallpaper.indexOf(QString::fromLatin1("/contents/images/"));
     if (index > -1) { // We have file from package -> get path to package
         m_wallpaper = m_wallpaper.left(index);
     }
 }
 
-void Image::save(KConfigGroup &config)
-{
-    config.writeEntry("slideTimer", m_delay);
-    config.writeEntry("wallpaperposition", (int)resizeMethodHint());
-    config.writeEntry("slidepaths", m_dirs);
-    config.writeEntry("wallpaper", m_wallpaper);
-    config.writeEntry("wallpapercolor", m_color);
-    config.writeEntry("userswallpapers", m_usersWallpapers);
-}
-
 void Image::configWidgetDestroyed()
 {
-    m_configWidget = 0;
     m_model = 0;
 }
 
-QWidget* Image::createConfigurationInterface(QWidget* parent)
+QAbstractItemModel* Image::wallpaperModel()
 {
-    m_configWidget = new QWidget(parent);
-    connect(m_configWidget, SIGNAL(destroyed(QObject*)), this, SLOT(configWidgetDestroyed()));
-
-    if (m_mode == "SingleImage") {
-        m_uiImage.setupUi(m_configWidget);
-
-        m_model = new BackgroundListModel(this, m_configWidget);
-        m_model->setResizeMethod(resizeMethodHint());
-        m_model->setWallpaperSize(m_size);
-        m_model->reload(m_usersWallpapers);
-        QTimer::singleShot(0, this, SLOT(setConfigurationInterfaceModel()));
-        m_uiImage.m_view->setItemDelegate(new BackgroundDelegate(m_uiImage.m_view));
-        //FIXME: setting the minimum width is rather ugly, but this gets us 3 columns of papers
-        //which looks quite good as a default. the magic number 7 at the end of the calculation is
-        //evidently making up for some other PM involved in the QListView that isn't being caught.
-        //if a cleaner way can be found to achieve all this, that would be great
-        m_uiImage.m_view->setMinimumWidth((BackgroundDelegate::SCREENSHOT_SIZE + BackgroundDelegate::MARGIN * 2 +
-                                           BackgroundDelegate::BLUR_INCREMENT) * 3 +
-                                           m_uiImage.m_view->spacing() * 4 +
-                                           QApplication::style()->pixelMetric(QStyle::PM_ScrollBarExtent) +
-                                           QApplication::style()->pixelMetric(QStyle::PM_DefaultFrameWidth) * 2 + 7);
-        m_uiImage.m_view->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-
-        RemoveButtonManager *rmManager = new RemoveButtonManager(m_uiImage.m_view, &m_usersWallpapers);
-        connect(rmManager, SIGNAL(removeClicked(QString)), this, SLOT(removeWallpaper(QString)));
-
-        m_uiImage.m_pictureUrlButton->setIcon(KIcon("document-open"));
-        connect(m_uiImage.m_pictureUrlButton, SIGNAL(clicked()), this, SLOT(showFileDialog()));
-
-        m_uiImage.m_resizeMethod->addItem(i18n("Scaled & Cropped"), ScaledAndCroppedResize);
-        m_uiImage.m_resizeMethod->addItem(i18n("Scaled"), ScaledResize);
-        m_uiImage.m_resizeMethod->addItem(i18n("Scaled, keep proportions"), MaxpectResize);
-        m_uiImage.m_resizeMethod->addItem(i18n("Centered"), CenteredResize);
-        m_uiImage.m_resizeMethod->addItem(i18n("Tiled"), TiledResize);
-        m_uiImage.m_resizeMethod->addItem(i18n("Center Tiled"), CenterTiledResize);
-        for (int i = 0; i < m_uiImage.m_resizeMethod->count(); ++i) {
-            if (resizeMethodHint() == m_uiImage.m_resizeMethod->itemData(i).value<int>()) {
-                m_uiImage.m_resizeMethod->setCurrentIndex(i);
-                break;
-            }
-        }
-        connect(m_uiImage.m_resizeMethod, SIGNAL(currentIndexChanged(int)),
-                this, SLOT(positioningChanged(int)));
-
-        m_uiImage.m_color->setColor(m_color);
-        //Color button is useless with some resize methods
-        m_uiImage.m_color->setEnabled(resizeMethodHint() == MaxpectResize || resizeMethodHint() == CenteredResize);
-        connect(m_uiImage.m_color, SIGNAL(changed(QColor)), this, SLOT(colorChanged(QColor)));
-
-        m_uiImage.m_newStuff->setIcon(KIcon("get-hot-new-stuff"));
-        connect(m_uiImage.m_newStuff, SIGNAL(clicked()), this, SLOT(getNewWallpaper()));
-
-        connect(m_uiImage.m_color, SIGNAL(changed(QColor)), this, SLOT(modified()));
-        connect(m_uiImage.m_resizeMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(modified()));
-        connect(m_uiImage.m_view, SIGNAL(clicked(QModelIndex)), this, SLOT(modified()));
-
-    } else {
-        m_uiSlideshow.setupUi(m_configWidget);
-        m_uiSlideshow.m_newStuff->setIcon(KIcon("get-hot-new-stuff"));
-        m_uiSlideshow.m_dirlist->clear();
-        m_uiSlideshow.m_systemCheckBox->setChecked(false);
-        m_uiSlideshow.m_downloadedCheckBox->setChecked(false);
-
-        QString systemPath = KStandardDirs::installPath("wallpaper");
-        QString localPath = KGlobal::dirs()->saveLocation("wallpaper");
-
-        foreach (const QString &dir, m_dirs) {
-            if (dir == KStandardDirs::installPath("wallpaper")) {
-                m_uiSlideshow.m_systemCheckBox->setChecked(true);
-            } else if (dir == localPath) {
-                m_uiSlideshow.m_downloadedCheckBox->setChecked(true);
-            } else {
-                m_uiSlideshow.m_dirlist->addItem(dir);
-            }
-        }
-        m_uiSlideshow.m_dirlist->setCurrentRow(0);
-        updateDirs();
-        m_uiSlideshow.m_addDir->setIcon(KIcon("list-add"));
-        connect(m_uiSlideshow.m_addDir, SIGNAL(clicked()), this, SLOT(addDir()));
-        m_uiSlideshow.m_removeDir->setIcon(KIcon("list-remove"));
-        connect(m_uiSlideshow.m_removeDir, SIGNAL(clicked()), this, SLOT(removeDir()));
-
-        QTime time(0, 0, 0);
-        time = time.addSecs(m_delay);
-        m_uiSlideshow.m_slideshowDelay->setTime(time);
-        m_uiSlideshow.m_slideshowDelay->setMinimumTime(QTime(0, 0, 10));
-        connect(m_uiSlideshow.m_slideshowDelay, SIGNAL(timeChanged(QTime)),
-                this, SLOT(timeChanged(QTime)));
-
-        m_uiSlideshow.m_resizeMethod->addItem(i18n("Scaled & Cropped"), ScaledAndCroppedResize);
-        m_uiSlideshow.m_resizeMethod->addItem(i18n("Scaled"), ScaledResize);
-        m_uiSlideshow.m_resizeMethod->addItem(i18n("Scaled, keep proportions"), MaxpectResize);
-        m_uiSlideshow.m_resizeMethod->addItem(i18n("Centered"), CenteredResize);
-        m_uiSlideshow.m_resizeMethod->addItem(i18n("Tiled"), TiledResize);
-        m_uiSlideshow.m_resizeMethod->addItem(i18n("Center Tiled"), CenterTiledResize);
-        for (int i = 0; i < m_uiSlideshow.m_resizeMethod->count(); ++i) {
-            if (resizeMethodHint() == m_uiSlideshow.m_resizeMethod->itemData(i).value<int>()) {
-                m_uiSlideshow.m_resizeMethod->setCurrentIndex(i);
-                break;
-            }
-        }
-        connect(m_uiSlideshow.m_resizeMethod, SIGNAL(currentIndexChanged(int)),
-                this, SLOT(positioningChanged(int)));
-
-        m_uiSlideshow.m_color->setColor(m_color);
-        //Color button is useless with some resize methods
-        m_uiSlideshow.m_color->setEnabled(resizeMethodHint() == MaxpectResize || resizeMethodHint() == CenteredResize);
-        connect(m_uiSlideshow.m_color, SIGNAL(changed(QColor)), this, SLOT(colorChanged(QColor)));
-        connect(m_uiSlideshow.m_newStuff, SIGNAL(clicked()), this, SLOT(getNewWallpaper()));
-
-        connect(m_uiSlideshow.m_systemCheckBox, SIGNAL(toggled(bool)),
-                this, SLOT(systemCheckBoxToggled(bool)));
-        connect(m_uiSlideshow.m_downloadedCheckBox, SIGNAL(toggled(bool)),
-                this, SLOT(downloadedCheckBoxToggled(bool)));
-        connect(m_uiSlideshow.m_color, SIGNAL(changed(QColor)), this, SLOT(modified()));
-        connect(m_uiSlideshow.m_resizeMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(modified()));
-        connect(m_uiSlideshow.m_addDir, SIGNAL(clicked()), this, SLOT(modified()));
-        connect(m_uiSlideshow.m_removeDir, SIGNAL(clicked()), this, SLOT(modified()));
-        connect(m_uiSlideshow.m_slideshowDelay, SIGNAL(dateTimeChanged(QDateTime)), this, SLOT(modified()));
-	connect(m_uiSlideshow.m_dirlist, SIGNAL(currentRowChanged(int)), SLOT(updateDirs()));
-    }
-
-    connect(this, SIGNAL(settingsChanged(bool)), parent, SLOT(settingsChanged(bool)));
-    return m_configWidget;
-}
-
-void Image::systemCheckBoxToggled(bool checked)
-{
-    if (checked) {
-        m_dirs << KStandardDirs::installPath("wallpaper");
-    } else {
-        m_dirs.removeAll(KStandardDirs::installPath("wallpaper"));
-    }
-    modified();
-}
-
-void Image::downloadedCheckBoxToggled(bool checked)
-{
-    if (checked) {
-        m_dirs << KGlobal::dirs()->saveLocation("wallpaper");
-    } else {
-        m_dirs.removeAll(KGlobal::dirs()->saveLocation("wallpaper"));
-    }
-    modified();
-}
-
-void Image::setConfigurationInterfaceModel()
-{
-    m_uiImage.m_view->setModel(m_model);
-    connect(m_uiImage.m_view->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(pictureChanged(QModelIndex)));
-
-    QModelIndex index = m_model->indexOf(m_wallpaper);
-    if (index.isValid()) {
-        m_uiImage.m_view->setCurrentIndex(index);
-    }
-}
-
-void Image::modified()
-{
-    emit settingsChanged(true);
-}
-
-void Image::calculateGeometry()
-{
-    m_size = boundingRect().size().toSize();
-
-    if (m_model) {
-        m_model->setWallpaperSize(m_size);
-    }
-}
-
-void Image::paint(QPainter *painter, const QRectF& exposedRect)
-{
-    // Check if geometry changed
-    //kDebug() << m_size << boundingRect().size().toSize();
-    if (m_size != boundingRect().size().toSize()) {
-        calculateGeometry();
-        if (!m_size.isEmpty() && !m_img.isEmpty()) { // We have previous image
-            painter->fillRect(exposedRect, QBrush(m_color));
-            renderWallpaper();
-            //kDebug() << "re-rendering";
-            return;
-        }
-    }
-
-    if (m_pixmap.isNull()) {
-        painter->fillRect(exposedRect, QBrush(m_color));
-        //kDebug() << "pixmap null";
-        return;
-    }
-
-    if (painter->worldMatrix() == QMatrix()) {
-        // draw the background untransformed when possible;(saves lots of per-pixel-math)
-        painter->resetTransform();
-    }
-
-    // blit the background (saves all the per-pixel-products that blending does)
-    painter->setCompositionMode(QPainter::CompositionMode_Source);
-
-    // for pixmaps we draw only the exposed part (untransformed since the
-    // bitmapBackground already has the size of the viewport)
-    painter->drawPixmap(exposedRect, m_pixmap, exposedRect.translated(-boundingRect().topLeft()));
-
-    if (!m_oldFadedPixmap.isNull()) {
-        // Put old faded image on top.
-        painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
-        painter->drawPixmap(exposedRect, m_oldFadedPixmap,
-                            exposedRect.translated(-boundingRect().topLeft()));
-    }
+    m_model = new BackgroundListModel(this, this);
+    m_model->setResizeMethod(ScaledResize);
+    m_model->setWallpaperSize(m_size);
+    m_model->reload(m_usersWallpapers);
+    return m_model;
 }
 
 void Image::timeChanged(const QTime& time)
@@ -366,69 +191,43 @@ void Image::timeChanged(const QTime& time)
 
 void Image::addDir()
 {
-    KUrl empty;
-    KDirSelectDialog *dialog = new KDirSelectDialog(empty, true, m_configWidget);
+    QUrl empty;
+    KDirSelectDialog *dialog = new KDirSelectDialog(empty, true);
     connect(dialog, SIGNAL(finished()), this, SLOT(addDirFromSelectionDialog()));
     dialog->show();
 }
 
-void Image::addDirFromSelectionDialog()
-{
-    KDirSelectDialog *dialog = qobject_cast<KDirSelectDialog *>(sender());
-    if (dialog) {
-        QString urlDir = dialog->url().path();
-        if (!urlDir.isEmpty() && m_uiSlideshow.m_dirlist->findItems(urlDir, Qt::MatchExactly).isEmpty()) {
-            m_uiSlideshow.m_dirlist->addItem(urlDir);
-            updateDirs();
-            startSlideshow();
-        }
-    }
-}
-
 void Image::removeDir()
 {
-    int row = m_uiSlideshow.m_dirlist->currentRow();
-    if (row != -1) {
-        m_uiSlideshow.m_dirlist->takeItem(row);
+    //TODO
+    int row = 0;
+    /*if (row != -1) {
+        m_dirlist->takeItem(row);
         updateDirs();
         startSlideshow();
-    }
-}
-
-void Image::updateDirs()
-{
-    m_dirs.clear();
-
-    if (m_uiSlideshow.m_systemCheckBox->isChecked()) {
-        m_dirs << KStandardDirs::installPath("wallpaper");
-    }
-    if (m_uiSlideshow.m_downloadedCheckBox->isChecked()) {
-        m_dirs << KGlobal::dirs()->saveLocation("wallpaper");
-    }
-
-    const int dirCount = m_uiSlideshow.m_dirlist->count();
-    for (int i = 0; i < dirCount; ++i) {
-        m_dirs.append(m_uiSlideshow.m_dirlist->item(i)->text());
-    }
-
-    m_uiSlideshow.m_removeDir->setEnabled(m_uiSlideshow.m_dirlist->currentRow() != -1);
+    }*/
 }
 
 void Image::updateDirWatch(const QStringList &newDirs)
 {
-    foreach(const QString &oldDir, m_dirs) {
+    Q_FOREACH(const QString &oldDir, m_dirs) {
         if(!newDirs.contains(oldDir)) {
             m_dirWatch->removeDir(oldDir);
         }
     }
 
-    foreach(const QString &newDir, newDirs) {
+    Q_FOREACH(const QString &newDir, newDirs) {
         if(!m_dirWatch->contains(newDir)) {
             m_dirWatch->addDir(newDir, KDirWatch::WatchSubDirs | KDirWatch::WatchFiles);
         }
     }
 
     m_dirs = newDirs;
+}
+
+void Image::addDirFromSelectionDialog()
+{
+    //TODO
 }
 
 void Image::setSingleImage()
@@ -440,23 +239,28 @@ void Image::setSingleImage()
     QString img;
 
     if (QDir::isAbsolutePath(m_wallpaper)) {
-        Plasma::Package b(m_wallpaper, packageStructure(this));
-        img = b.filePath("preferred");
+        m_wallpaperPackage.setPath(m_wallpaper);
+        img = m_wallpaperPackage.filePath("preferred");
+        m_wallpaperPath = m_wallpaperPackage.filePath("preferred");
         //kDebug() << img << m_wallpaper;
 
         if (img.isEmpty() && QFile::exists(m_wallpaper)) {
             img = m_wallpaper;
+            m_wallpaperPath = m_wallpaper;
         }
+        Q_EMIT wallpaperPathChanged();
     } else {
         //if it's not an absolute path, check if it's just a wallpaper name
-        const QString path = KStandardDirs::locate("wallpaper", m_wallpaper + "/metadata.desktop");
+        const QString path = KStandardDirs::locate("wallpaper", QString(m_wallpaper + QString::fromLatin1("/metadata.desktop")));
 
         if (!path.isEmpty()) {
             QDir dir(path);
             dir.cdUp();
 
-            Plasma::Package b(dir.path(), packageStructure(this));
-            img = b.filePath("preferred");
+            m_wallpaperPackage.setPath(m_wallpaper);
+            img = m_wallpaperPackage.filePath("preferred");
+            m_wallpaperPath = m_wallpaperPackage.filePath("preferred");
+            Q_EMIT wallpaperPathChanged();
         }
     }
 
@@ -469,23 +273,20 @@ void Image::setSingleImage()
             setSingleImage();
         }
     }
-
-    if (!m_size.isEmpty()) {
-        renderWallpaper(img);
-    }
+    qDebug()<<"Found wallpaper" << m_wallpaperPath;
 }
 
-void Image::addUrls(const KUrl::List &urls)
+void Image::addUrls(const QList<QUrl> &urls)
 {
     bool first = true;
-    foreach (const KUrl &url, urls) {
+    Q_FOREACH (const QUrl &url, urls) {
         // set the first drop as the current paper, just add the rest to the roll
         addUrl(url, first);
         first = false;
     }
 }
 
-void Image::addUrl(const KUrl &url, bool setAsCurrent)
+void Image::addUrl(const QUrl &url, bool setAsCurrent)
 {
     ///kDebug() << "droppage!" << url << url.isLocalFile();
     if (url.isLocalFile()) {
@@ -493,7 +294,7 @@ void Image::addUrl(const KUrl &url, bool setAsCurrent)
         if (setAsCurrent) {
             setWallpaper(path);
         } else {
-            if (m_mode != "SingleImage") {
+            if (m_mode != SingleImage) {
                 // it's a slide show, add it to the slide show
                 m_slideshowBackgrounds.append(path);
             }
@@ -504,10 +305,10 @@ void Image::addUrl(const KUrl &url, bool setAsCurrent)
             }
         }
     } else {
-        QString wallpaperPath = KGlobal::dirs()->locateLocal("wallpaper", url.fileName());
+        QString wallpaperPath = KGlobal::dirs()->locateLocal("wallpaper", url.path());
 
         if (!wallpaperPath.isEmpty()) {
-            KIO::FileCopyJob *job = KIO::file_copy(url, KUrl(wallpaperPath));
+            KIO::FileCopyJob *job = KIO::file_copy(url, QUrl(wallpaperPath));
             if (setAsCurrent) {
                 connect(job, SIGNAL(result(KJob*)), this, SLOT(setWallpaperRetrieved(KJob*)));
             } else {
@@ -535,7 +336,7 @@ void Image::addWallpaperRetrieved(KJob *job)
 
 void Image::setWallpaper(const QString &path)
 {
-    if (m_mode == "SingleImage") {
+    if (m_mode == SingleImage) {
         m_wallpaper = path;
         setSingleImage();
     } else {
@@ -588,8 +389,6 @@ void Image::backgroundsFound(const QStringList &paths, const QString &token)
         // no image has been found, which is quite weird... try again later (this is useful for events which
         // are not detected by KDirWatch, like a NFS directory being mounted)
         QTimer::singleShot(1000, this, SLOT(startSlideshow()));
-        m_pixmap = QPixmap();
-        emit update(boundingRect());
     } else {
         m_currentSlide = -1;
         nextSlide();
@@ -611,7 +410,7 @@ void Image::updateWallpaperActions()
 void Image::getNewWallpaper()
 {
     if (!m_newStuffDialog) {
-        m_newStuffDialog = new KNS3::DownloadDialog( "wallpaper.knsrc", m_configWidget );
+        m_newStuffDialog = new KNS3::DownloadDialog( QString::fromLatin1("wallpaper.knsrc") );
         connect(m_newStuffDialog.data(), SIGNAL(accepted()), SLOT(newStuffFinished()));
     }
     m_newStuffDialog.data()->show();
@@ -624,28 +423,22 @@ void Image::newStuffFinished()
     }
 }
 
-void Image::colorChanged(const QColor& color)
-{
-    m_color = color;
-    setSingleImage();
-}
-
 void Image::pictureChanged(const QModelIndex &index)
 {
     if (index.row() == -1 || !m_model) {
         return;
     }
 
-    Plasma::Package *b = m_model->package(index.row());
-    if (!b) {
+    Plasma::Package b = m_model->package(index.row());
+    if (!b.isValid()) {
         return;
     }
 
-    if (b->structure()->contentsPrefixPaths().isEmpty()) {
+    if (b.contentsPrefixPaths().isEmpty()) {
         // it's not a full package, but a single paper
-        m_wallpaper = b->filePath("preferred");
+        m_wallpaper = b.filePath("preferred");
     } else {
-        m_wallpaper = b->path();
+        m_wallpaper = b.path();
     }
 
     setSingleImage();
@@ -653,39 +446,28 @@ void Image::pictureChanged(const QModelIndex &index)
 
 void Image::positioningChanged(int index)
 {
-    if (m_mode == "SingleImage") {
-        setResizeMethodHint((ResizeMethod)m_uiImage.m_resizeMethod->itemData(index).value<int>());
+    if (m_mode == SingleImage) {
         setSingleImage();
     } else {
-        setResizeMethodHint((ResizeMethod)m_uiSlideshow.m_resizeMethod->itemData(index).value<int>());
         startSlideshow();
     }
 
-    //Color button is useless with some resize methods
-    const bool colorizable = resizeMethodHint() == MaxpectResize || resizeMethodHint() == CenteredResize;
-    if (m_mode == "SingleImage") {
-        m_uiImage.m_color->setEnabled(colorizable);
-    } else {
-        m_uiSlideshow.m_color->setEnabled(colorizable);
-    }
-
     if (m_model) {
-        m_model->setResizeMethod(resizeMethodHint());
+        m_model->setResizeMethod(ScaledResize);
     }
 }
 
 void Image::showFileDialog()
 {
     if (!m_dialog) {
-        KUrl baseUrl;
+        QUrl baseUrl;
         if(m_wallpaper.indexOf(QDir::homePath()) > -1){
-            baseUrl = KUrl(m_wallpaper);
+            baseUrl = QUrl(m_wallpaper);
         }
 
-        m_dialog = new KFileDialog(baseUrl, "*.png *.jpeg *.jpg *.xcf *.svg *.svgz *.bmp", m_configWidget);
+        m_dialog = new KFileDialog(baseUrl, QString::fromLatin1("*.png *.jpeg *.jpg *.xcf *.svg *.svgz *.bmp"), 0);
         m_dialog->setOperationMode(KFileDialog::Opening);
         m_dialog->setInlinePreviewShown(true);
-        m_dialog->setCaption(i18n("Select Wallpaper Image File"));
         m_dialog->setModal(false);
 
         connect(m_dialog, SIGNAL(okClicked()), this, SLOT(wallpaperBrowseCompleted()));
@@ -717,7 +499,6 @@ void Image::wallpaperBrowseCompleted()
     }
 
     if (m_model->contains(wallpaper)) {
-        m_uiImage.m_view->setCurrentIndex(m_model->indexOf(wallpaper));
         return;
     }
 
@@ -727,9 +508,7 @@ void Image::wallpaperBrowseCompleted()
     // select it
     QModelIndex index = m_model->indexOf(wallpaper);
     if (index.isValid()) {
-        m_uiImage.m_view->setCurrentIndex(index);
         pictureChanged(index);
-        modified();
     }
 
     // save it
@@ -744,20 +523,15 @@ void Image::nextSlide()
 
     QString previous;
     if (m_currentSlide >= 0 && m_currentSlide < m_slideshowBackgrounds.size()) {
-        m_wallpaperPackage->setPath(m_slideshowBackgrounds.at(m_currentSlide));
-        previous = m_wallpaperPackage->filePath("preferred");
+        m_wallpaperPackage.setPath(m_slideshowBackgrounds.at(m_currentSlide));
+        previous = m_wallpaperPackage.filePath("preferred");
     }
 
     m_currentSlide = KRandom::random() % m_slideshowBackgrounds.size();
 
-    if (!m_wallpaperPackage) {
-        m_wallpaperPackage = new Plasma::Package(m_slideshowBackgrounds.at(m_currentSlide),
-                                                 packageStructure(this));
-    } else {
-        m_wallpaperPackage->setPath(m_slideshowBackgrounds.at(m_currentSlide));
-    }
+    m_wallpaperPackage.setPath(m_slideshowBackgrounds.at(m_currentSlide));
 
-    QString current = m_wallpaperPackage->filePath("preferred");
+    QString current = m_wallpaperPackage.filePath("preferred");
     if (current == previous) {
         QFileInfo info(previous);
         if (m_previousModified == info.lastModified()) {
@@ -771,42 +545,30 @@ void Image::nextSlide()
                 m_currentSlide = 0;
             }
 
-            m_wallpaperPackage->setPath(m_slideshowBackgrounds.at(m_currentSlide));
-            current = m_wallpaperPackage->filePath("preferred");
+            m_wallpaperPackage.setPath(m_slideshowBackgrounds.at(m_currentSlide));
+            current = m_wallpaperPackage.filePath("preferred");
         }
     }
 
+    m_wallpaperPath = current;
+    Q_EMIT wallpaperPathChanged();
     QFileInfo info(current);
     m_previousModified = info.lastModified();
 
     m_timer.stop();
-    renderWallpaper(current);
     m_timer.start(m_delay * 1000);
 }
 
 void Image::openSlide()
 {
-    if (!m_wallpaperPackage) {
+    if (!m_wallpaperPackage.isValid()) {
         return;
     }
 
     // open in image viewer
-    KUrl filepath(m_wallpaperPackage->filePath("preferred"));
+    QUrl filepath(m_wallpaperPackage.filePath("preferred"));
     kDebug() << "opening file " << filepath.path();
     new KRun(filepath, NULL);
-}
-
-void Image::renderWallpaper(const QString& image)
-{
-    if (!image.isEmpty()) {
-        m_img = image;
-    }
-
-    if (m_img.isEmpty()) {
-        return;
-    }
-
-    render(m_img, m_size, resizeMethodHint(), m_color);
 }
 
 void Image::pathCreated(const QString &path)
@@ -822,13 +584,6 @@ void Image::pathCreated(const QString &path)
     }
 }
 
-void Image::pathDirty(const QString &path)
-{
-    if(path == m_img) {
-        renderWallpaper(path);
-    }
-}
-
 void Image::pathDeleted(const QString &path)
 {
     if(m_slideshowBackgrounds.removeAll(path)) {
@@ -836,56 +591,6 @@ void Image::pathDeleted(const QString &path)
             nextSlide();
         }
     }
-}
-
-void Image::updateBackground(const QImage &img)
-{
-    m_oldPixmap = m_pixmap;
-    m_oldFadedPixmap = m_oldPixmap;
-    m_pixmap = QPixmap::fromImage(img);
-
-    if (!m_oldPixmap.isNull()) {
-        m_animation->start();
-    } else {
-        emit update(boundingRect());
-    }
-}
-
-void Image::updateScreenshot(QPersistentModelIndex index)
-{
-    m_uiImage.m_view->update(index);
-}
-
-qreal Image::fadeValue() const
-{
-    return m_fadeValue;
-}
-
-void Image::setFadeValue(qreal value)
-{
-    m_fadeValue = value;
-
-    //If we are done, delete the pixmaps and don't draw.
-    if (qFuzzyCompare(m_fadeValue, qreal(1.0))) {
-        m_oldFadedPixmap = QPixmap();
-        m_oldPixmap = QPixmap();
-        emit update(boundingRect());
-        return;
-    }
-
-    //Create the faded image.
-    m_oldFadedPixmap.fill(Qt::transparent);
-
-    QPainter p;
-    p.begin(&m_oldFadedPixmap);
-    p.drawPixmap(0, 0, m_oldPixmap);
-
-    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-    p.fillRect(m_oldFadedPixmap.rect(), QColor(0, 0, 0, 254 * (1-m_fadeValue)));//255*((150 - m_fadeValue)/150)));
-
-    p.end();
-
-    emit update(boundingRect());
 }
 
 //FIXME: we have to save the configuration also when the dialog cancel button is clicked.
@@ -896,7 +601,7 @@ void Image::removeWallpaper(QString name)
         m_usersWallpapers.removeAt(wallpaperIndex);
         m_model->reload(m_usersWallpapers);
         //TODO: save the configuration in the right way
-	emit settingsChanged(true);
+	Q_EMIT settingsChanged(true);
     }
 }
 

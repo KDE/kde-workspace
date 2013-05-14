@@ -14,12 +14,11 @@
 #include <QTimer>
 #include <QPixmap>
 #include <QStringList>
+#include <QObject>
+#include <QPersistentModelIndex>
 
-#include <Plasma/Wallpaper>
 #include <Plasma/Package>
 
-#include "ui_imageconfig.h"
-#include "ui_slideshowconfig.h"
 
 class QPropertyAnimation;
 
@@ -33,32 +32,69 @@ namespace KNS3 {
 
 class BackgroundListModel;
 
-class Image : public Plasma::Wallpaper
+class Image : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(qreal fadeValue READ fadeValue WRITE setFadeValue)
+    Q_PROPERTY(RenderingMode renderingMode READ renderingMode WRITE setRenderingMode)
+    Q_PROPERTY(QString wallpaperPath READ wallpaperPath NOTIFY wallpaperPathChanged) 
 
     public:
-        Image(QObject* parent, const QVariantList& args);
+        /**
+         * Various resize modes supported by the built in image renderer
+         */
+        enum ResizeMethod {
+            ScaledResize /**< Scales the image to fit the full area*/,
+            CenteredResize /**< Centers the image within the area */,
+            ScaledAndCroppedResize /**< Scales and crops the image, preserving the aspect ratio */,
+            TiledResize /**< Tiles the image to fill the area */,
+            CenterTiledResize /**< Tiles the image to fill the area, starting with a centered tile */,
+            MaxpectResize /**< Best fit resize */,
+            LastResizeMethod = MaxpectResize
+        };
+        Q_ENUMS(ResizeMethod)
+
+        enum RenderingMode {
+            SingleImage,
+            SlideShow
+        };
+        Q_ENUMS(RenderingMode)
+
+        Image(QObject* parent = 0);
         ~Image();
 
-        virtual void save(KConfigGroup &config);
-        virtual void paint(QPainter* painter, const QRectF& exposedRect);
-        virtual QWidget* createConfigurationInterface(QWidget* parent);
+        QString wallpaperPath() const;
+
+        //this is for QML use
+        Q_INVOKABLE void addUrl(const QString &url);
+        Q_INVOKABLE void addUrls(const QStringList &urls);
+
+
         void updateScreenshot(QPersistentModelIndex index);
-        qreal fadeValue() const;
 
-    signals:
+        RenderingMode renderingMode() const;
+        void setRenderingMode(RenderingMode mode);
+
+        ResizeMethod resizeMethod() const;
+        void setResizeMethod(ResizeMethod method);
+
+        QSize targetSize() const;
+        void setTargetSize(const QSize &size);
+
+        Plasma::Package *package();
+
+        QAbstractItemModel* wallpaperModel();
+
+    Q_SIGNALS:
         void settingsChanged(bool);
+        void wallpaperPathChanged();
 
-    protected slots:
+    protected Q_SLOTS:
         void removeWallpaper(QString name);
         void timeChanged(const QTime& time);
         void positioningChanged(int index);
         void addDir();
         void removeDir();
         void getNewWallpaper();
-        void colorChanged(const QColor& color);
         void pictureChanged(const QModelIndex &);
         void wallpaperBrowseCompleted();
         void nextSlide();
@@ -66,35 +102,25 @@ class Image : public Plasma::Wallpaper
          * Open the current slide in the default image application
          */
         void openSlide();
-        void updateBackground(const QImage &img);
         void showFileDialog();
-        void setFadeValue(qreal value);
         void configWidgetDestroyed();
         void startSlideshow();
-        void modified();
         void fileDialogFinished();
-        void addUrl(const KUrl &url, bool setAsCurrent);
-        void addUrls(const KUrl::List &urls);
+        void addUrl(const QUrl &url, bool setAsCurrent);
+        void addUrls(const QList<QUrl> &urls);
         void setWallpaper(const QString &path);
         void setWallpaperRetrieved(KJob *job);
         void addWallpaperRetrieved(KJob *job);
         void newStuffFinished();
-        void setConfigurationInterfaceModel();
-        void updateDirs();
         void updateDirWatch(const QStringList &newDirs);
         void addDirFromSelectionDialog();
-        void systemCheckBoxToggled(bool);
-        void downloadedCheckBoxToggled(bool);
         void pathCreated(const QString &path);
-        void pathDirty(const QString &path);
         void pathDeleted(const QString &path);
         void backgroundsFound(const QStringList &paths, const QString &token);
 
     protected:
         void init(const KConfigGroup &config);
-        void renderWallpaper(const QString& image = QString());
         void suspendStartup(bool suspend); // for ksmserver
-        void calculateGeometry();
         void setSingleImage();
         void updateWallpaperActions();
         void useSingleImageDefaults();
@@ -106,24 +132,18 @@ class Image : public Plasma::Wallpaper
         int m_delay;
         QStringList m_dirs;
         QString m_wallpaper;
-        QColor m_color;
+        QString m_wallpaperPath;
         QStringList m_usersWallpapers;
         KDirWatch *m_dirWatch;
         bool m_scanDirty;
+        ResizeMethod m_resizeMethod;
+        QSize m_targetSize;
 
-        QWidget* m_configWidget;
-        Ui::ImageConfig m_uiImage;
-        Ui::SlideshowConfig m_uiSlideshow;
-        QString m_mode;
-        Plasma::Package *m_wallpaperPackage;
+        RenderingMode m_mode;
+        Plasma::Package m_wallpaperPackage;
         QStringList m_slideshowBackgrounds;
         QTimer m_timer;
-        QPixmap m_pixmap;
-        QPixmap m_oldPixmap;
-        QPixmap m_oldFadedPixmap;
         int m_currentSlide;
-        qreal m_fadeValue;
-        QPropertyAnimation *m_animation;
         BackgroundListModel *m_model;
         KFileDialog *m_dialog;
         QSize m_size;
@@ -131,6 +151,7 @@ class Image : public Plasma::Wallpaper
         QDateTime m_previousModified;
         QWeakPointer<KNS3::DownloadDialog> m_newStuffDialog;
         QString m_findToken;
+        QList<QAction *>m_actions;
 
         QAction* m_nextWallpaperAction;
         QAction* m_openImageAction;

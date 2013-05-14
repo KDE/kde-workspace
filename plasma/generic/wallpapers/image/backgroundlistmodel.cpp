@@ -25,8 +25,8 @@
 
 #include <Plasma/Package>
 #include <Plasma/PackageStructure>
+#include <Plasma/PluginLoader>
 
-#include "backgrounddelegate.h"
 #include "image.h"
 
 QSet<QString> BackgroundFinder::m_suffixes;
@@ -40,7 +40,7 @@ ImageSizeFinder::ImageSizeFinder(const QString &path, QObject *parent)
 void ImageSizeFinder::run()
 {
     QImage image(m_path);
-    emit sizeFound(m_path, image.size());
+    Q_EMIT sizeFound(m_path, image.size());
 }
 
 
@@ -48,7 +48,7 @@ BackgroundListModel::BackgroundListModel(Image *listener, QObject *parent)
     : QAbstractListModel(parent),
       m_structureParent(listener),
       m_size(0,0),
-      m_resizeMethod(Plasma::Wallpaper::ScaledResize)
+      m_resizeMethod(Image::ScaledResize)
 {
     connect(&m_dirwatch, SIGNAL(deleted(QString)), this, SLOT(removeBackground(QString)));
     m_previewUnavailablePix.fill(Qt::transparent);
@@ -57,7 +57,6 @@ BackgroundListModel::BackgroundListModel(Image *listener, QObject *parent)
 
 BackgroundListModel::~BackgroundListModel()
 {
-    qDeleteAll(m_packages);
 }
 
 void BackgroundListModel::removeBackground(const QString &path)
@@ -65,9 +64,7 @@ void BackgroundListModel::removeBackground(const QString &path)
     QModelIndex index;
     while ((index = indexOf(path)).isValid()) {
         beginRemoveRows(QModelIndex(), index.row(), index.row());
-        Plasma::Package *package = m_packages.at(index.row());
         m_packages.removeAt(index.row());
-        delete package;
         endRemoveRows();
     }
 }
@@ -81,7 +78,6 @@ void BackgroundListModel::reload(const QStringList &selected)
 {
     if (!m_packages.isEmpty()) {
         beginRemoveRows(QModelIndex(), 0, m_packages.count() - 1);
-        qDeleteAll(m_packages);
         m_packages.clear();
         endRemoveRows();
     }
@@ -94,7 +90,7 @@ void BackgroundListModel::reload(const QStringList &selected)
         processPaths(selected);
     }
 
-    const QStringList dirs = KGlobal::dirs()->findDirs("wallpaper", "");
+    const QStringList dirs = KGlobal::dirs()->findDirs("wallpaper", QString());
     kDebug() << "going looking in" << dirs;
     BackgroundFinder *finder = new BackgroundFinder(m_structureParent.data(), dirs);
     connect(finder, SIGNAL(backgroundsFound(QStringList,QString)), this, SLOT(backgroundsFound(QStringList,QString)));
@@ -115,23 +111,21 @@ void BackgroundListModel::processPaths(const QStringList &paths)
         return;
     }
 
-    QList<Plasma::Package *> newPackages;
-    foreach (const QString &file, paths) {
+    QList<Plasma::Package> newPackages;
+    Q_FOREACH (const QString &file, paths) {
         if (!contains(file) && QFile::exists(file)) {
-            Plasma::PackageStructure::Ptr structure = Plasma::Wallpaper::packageStructure(m_structureParent.data());
-            Plasma::Package *package  = new Plasma::Package(file, structure);
-            if (package->isValid()) {
+            Plasma::Package package = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
+            package.setPath(file);
+            if (package.isValid()) {
                 newPackages << package;
-            } else {
-                delete package;
             }
         }
     }
 
     // add new files to dirwatch
-    foreach (Plasma::Package *b, newPackages) {
-        if (!m_dirwatch.contains(b->path())) {
-            m_dirwatch.addFile(b->path());
+    Q_FOREACH (Plasma::Package b, newPackages) {
+        if (!m_dirwatch.contains(b.path())) {
+            m_dirwatch.addFile(b.path());
         }
     }
 
@@ -151,8 +145,8 @@ void BackgroundListModel::addBackground(const QString& path)
             m_dirwatch.addFile(path);
         }
         beginInsertRows(QModelIndex(), 0, 0);
-        Plasma::PackageStructure::Ptr structure = Plasma::Wallpaper::packageStructure(m_structureParent.data());
-        Plasma::Package *pkg = new Plasma::Package(path, structure);
+        Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
+        pkg.setPath(path);
         m_packages.prepend(pkg);
         endInsertRows();
     }
@@ -162,16 +156,16 @@ QModelIndex BackgroundListModel::indexOf(const QString &path) const
 {
     for (int i = 0; i < m_packages.size(); i++) {
         // packages will end with a '/', but the path passed in may not
-        QString package = m_packages[i]->path();
-        if (package.at(package.length() - 1) == '/') {
+        QString package = m_packages[i].path();
+        if (package.at(package.length() - 1) == QChar::fromLatin1('/')) {
             package.truncate(package.length() - 1);
         }
 
         if (path.startsWith(package)) {
             // FIXME: ugly hack to make a difference between local files in the same dir
             // package->path does not contain the actual file name
-            if ((!m_packages[i]->structure()->contentsPrefixPaths().isEmpty()) ||
-                (path == m_packages[i]->filePath("preferred"))) {
+            if ((!m_packages[i].contentsPrefixPaths().isEmpty()) ||
+                (path == m_packages[i].filePath("preferred"))) {
                 return index(i, 0);
             }
         }
@@ -189,20 +183,20 @@ int BackgroundListModel::rowCount(const QModelIndex &) const
     return m_packages.size();
 }
 
-QSize BackgroundListModel::bestSize(Plasma::Package *package) const
+QSize BackgroundListModel::bestSize(const Plasma::Package &package) const
 {
-    if (m_sizeCache.contains(package)) {
-        return m_sizeCache.value(package);
+    if (m_sizeCache.contains(package.path())) {
+        return m_sizeCache.value(package.path());
     }
 
-    const QString image = package->filePath("preferred");
+    const QString image = package.filePath("preferred");
     if (image.isEmpty()) {
         return QSize();
     }
 
     KFileMetaInfo info(image, QString(), KFileMetaInfo::TechnicalInfo);
-    QSize size(info.item("http://freedesktop.org/standards/xesam/1.0/core#width").value().toInt(),
-               info.item("http://freedesktop.org/standards/xesam/1.0/core#height").value().toInt());
+    QSize size(info.item(QString::fromLatin1("http://freedesktop.org/standards/xesam/1.0/core#width")).value().toInt(),
+               info.item(QString::fromLatin1("http://freedesktop.org/standards/xesam/1.0/core#height")).value().toInt());
     //backup solution if strigi does not work
     if (size.width() == 0 || size.height() == 0) {
 //        kDebug() << "fall back to QImage, check your strigi";
@@ -213,7 +207,7 @@ QSize BackgroundListModel::bestSize(Plasma::Package *package) const
         size = QSize(-1, -1);
     }
 
-    const_cast<BackgroundListModel *>(this)->m_sizeCache.insert(package, size);
+    const_cast<BackgroundListModel *>(this)->m_sizeCache.insert(package.path(), size);
     return size;
 }
 
@@ -225,8 +219,8 @@ void BackgroundListModel::sizeFound(const QString &path, const QSize &s)
 
     QModelIndex index = indexOf(path);
     if (index.isValid()) {
-        Plasma::Package *package = m_packages.at(index.row());
-        m_sizeCache.insert(package, s);
+        Plasma::Package package = m_packages.at(index.row());
+        m_sizeCache.insert(package.path(), s);
         m_structureParent.data()->updateScreenshot(index);
     }
 }
@@ -241,35 +235,35 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    Plasma::Package *b = package(index.row());
-    if (!b) {
+    Plasma::Package b = package(index.row());
+    if (!b.isValid()) {
         return QVariant();
     }
 
     switch (role) {
     case Qt::DisplayRole: {
-        QString title = b->metadata().name();
+        QString title = b.metadata().name();
 
         if (title.isEmpty()) {
-            return QFileInfo(b->filePath("preferred")).completeBaseName();
+            return QFileInfo(b.filePath("preferred")).completeBaseName();
         }
 
         return title;
     }
     break;
 
-    case BackgroundDelegate::ScreenshotRole: {
-        if (m_previews.contains(b)) {
-            return m_previews.value(b);
+    case ScreenshotRole: {
+        if (m_previews.contains(b.path())) {
+            return m_previews.value(b.path());
         }
 
-        KUrl file(b->filePath("preferred"));
+        QUrl file(b.filePath("preferred"));
         if (!m_previewJobs.contains(file) && file.isValid()) {
             KFileItemList list;
             list.append(KFileItem(file, QString(), 0));
             KIO::PreviewJob* job = KIO::filePreview(list,
-                                                    QSize(BackgroundDelegate::SCREENSHOT_SIZE,
-                                                    BackgroundDelegate::SCREENSHOT_SIZE/1.6));
+                                                    QSize(SCREENSHOT_SIZE,
+                                                    SCREENSHOT_SIZE/1.6));
             job->setIgnoreMaximumSize(true);
             connect(job, SIGNAL(gotPreview(KFileItem,QPixmap)),
                     this, SLOT(showPreview(KFileItem,QPixmap)));
@@ -278,20 +272,20 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
             const_cast<BackgroundListModel *>(this)->m_previewJobs.insert(file, QPersistentModelIndex(index));
         }
 
-        const_cast<BackgroundListModel *>(this)->m_previews.insert(b, m_previewUnavailablePix);
+        const_cast<BackgroundListModel *>(this)->m_previews.insert(b.path(), m_previewUnavailablePix);
         return m_previewUnavailablePix;
     }
     break;
 
-    case BackgroundDelegate::AuthorRole:
-        return b->metadata().author();
+    case AuthorRole:
+        return b.metadata().author();
     break;
 
-    case BackgroundDelegate::ResolutionRole:{
+    case ResolutionRole:{
         QSize size = bestSize(b);
 
         if (size.isValid()) {
-            return QString("%1x%2").arg(size.width()).arg(size.height());
+            return QString::fromLatin1("%1x%2").arg(size.width()).arg(size.height());
         }
 
         return QString();
@@ -317,12 +311,12 @@ void BackgroundListModel::showPreview(const KFileItem &item, const QPixmap &prev
         return;
     }
 
-    Plasma::Package *b = package(index.row());
-    if (!b) {
+    Plasma::Package b = package(index.row());
+    if (!b.isValid()) {
         return;
     }
 
-    m_previews.insert(b, preview);
+    m_previews.insert(b.path(), preview);
     //kDebug() << "preview size:" << preview.size();
     m_structureParent.data()->updateScreenshot(index);
 }
@@ -332,7 +326,7 @@ void BackgroundListModel::previewFailed(const KFileItem &item)
     m_previewJobs.remove(item.url());
 }
 
-Plasma::Package* BackgroundListModel::package(int index) const
+Plasma::Package BackgroundListModel::package(int index) const
 {
     return m_packages.at(index);
 }
@@ -342,14 +336,13 @@ void BackgroundListModel::setWallpaperSize(const QSize& size)
     m_size = size;
 }
 
-void BackgroundListModel::setResizeMethod(Plasma::Wallpaper::ResizeMethod resizeMethod)
+void BackgroundListModel::setResizeMethod(Image::ResizeMethod resizeMethod)
 {
     m_resizeMethod = resizeMethod;
 }
 
-BackgroundFinder::BackgroundFinder(Plasma::Wallpaper *structureParent, const QStringList &paths)
+BackgroundFinder::BackgroundFinder(Image *structureParent, const QStringList &paths)
     : QThread(structureParent),
-      m_structure(Plasma::Wallpaper::packageStructure(structureParent)),
       m_paths(paths),
       m_token(QUuid().toString())
 {
@@ -368,7 +361,7 @@ QString BackgroundFinder::token() const
 const QSet<QString> &BackgroundFinder::suffixes()
 {
     if(m_suffixes.isEmpty()) {
-        m_suffixes << "png" << "jpeg" << "jpg" << "svg" << "svgz";
+        m_suffixes << QString::fromLatin1("png") << QString::fromLatin1("jpeg") << QString::fromLatin1("jpg") << QString::fromLatin1("svg") << QString::fromLatin1("svgz");
     }
 
     return m_suffixes;
@@ -385,7 +378,7 @@ void BackgroundFinder::run()
 
     QDir dir;
     dir.setFilter(QDir::AllDirs | QDir::Files | QDir::Hidden | QDir::Readable);
-    Plasma::Package pkg(QString(), m_structure);
+    Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
 
     int i;
     for (i = 0; i < m_paths.count(); ++i) {
@@ -393,17 +386,17 @@ void BackgroundFinder::run()
         //kDebug() << "doing" << path;
         dir.setPath(path);
         const QFileInfoList files = dir.entryInfoList();
-        foreach (const QFileInfo &wp, files) {
+        Q_FOREACH (const QFileInfo &wp, files) {
             if (wp.isDir()) {
                 //kDebug() << "directory" << wp.fileName() << validPackages.contains(wp.fileName());
                 const QString name = wp.fileName();
-                if (name == "." || name == "..") {
+                if (name == QString::fromLatin1(".") || name == QString::fromLatin1("..")) {
                     // do nothing
                     continue;
                 }
 
                 const QString filePath = wp.filePath();
-                if (QFile::exists(filePath + "/metadata.desktop")) {
+                if (QFile::exists(filePath + QString::fromLatin1("/metadata.desktop"))) {
                     pkg.setPath(filePath);
                     if (pkg.isValid()) {
                         papersFound << pkg.path();
@@ -422,7 +415,7 @@ void BackgroundFinder::run()
     }
 
     //kDebug() << "background found!" << papersFound.size() << "in" << i << "dirs, taking" << t.elapsed() << "ms";
-    emit backgroundsFound(papersFound, m_token);
+    Q_EMIT backgroundsFound(papersFound, m_token);
     deleteLater();
 }
 
