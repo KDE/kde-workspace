@@ -74,7 +74,12 @@ set_package_properties(UDev PROPERTIES DESCRIPTION "The UDev Libraries"
                        PURPOSE "Allows support for UPower backend in PowerDevil - STRONGLY RECOMMENDED"
                       )
 
-
+macro_optional_find_package(Wayland)
+set_package_properties(Wayland PROPERTIES DESCRIPTION "The Wayland Client and Server libraries"
+                       URL "http://wayland.freedesktop.org"
+                       TYPE OPTIONAL
+                       PURPOSE "Required for building KWin with Wayland support"
+                      )
 if(Q_WS_X11)
   find_package(XCB REQUIRED)
   set_package_properties(XCB PROPERTIES DESCRIPTION "X protocol C-language Binding"
