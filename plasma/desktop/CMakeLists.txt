@@ -1,5 +1,5 @@
-add_subdirectory(applets)
+# add_subdirectory(applets)
 add_subdirectory(containments)
-add_subdirectory(runners)
-add_subdirectory(shell)
+# add_subdirectory(runners)
+# add_subdirectory(shell)
 add_subdirectory(toolboxes)

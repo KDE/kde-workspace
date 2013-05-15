@@ -7,12 +7,10 @@ set(image_SRCS
     backgroundlistmodel.cpp
 )
 
-set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
-qt4_add_dbus_interface(image_SRCS ${ksmserver_xml} ksmserver_interface)
 
 add_library(plasma_wallpaper_imageplugin SHARED ${image_SRCS})
 target_link_libraries(plasma_wallpaper_imageplugin
-         plasma
+         ${Plasma_LIBRARIES}
          ${Qt5Quick_LIBRARIES}
          ${Qt5Qml_LIBRARIES}
          ${KDE4_KIO_LIBS}

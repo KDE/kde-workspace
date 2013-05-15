@@ -36,7 +36,6 @@
 
 #include <Plasma/Theme>
 #include "backgroundlistmodel.h"
-#include "ksmserver_interface.h"
 
 Image::Image(QObject *parent)
     : QObject(parent),

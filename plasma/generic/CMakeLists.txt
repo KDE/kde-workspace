@@ -1,3 +1,4 @@
+if (0)
 if(NOT KDE_PLATFORM_FEATURE_DISABLE_DEPRECATED)
     add_subdirectory(animators)
 endif(NOT KDE_PLATFORM_FEATURE_DISABLE_DEPRECATED)
@@ -11,5 +12,7 @@ add_subdirectory(dataengines)
 add_subdirectory(runners)
 add_subdirectory(scriptengines)
 add_subdirectory(shells)
+endif (0)
+
 add_subdirectory(wallpapers)
 
