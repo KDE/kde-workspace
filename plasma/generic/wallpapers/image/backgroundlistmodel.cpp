@@ -61,6 +61,7 @@ BackgroundListModel::BackgroundListModel(Image *listener, QObject *parent)
     roleNames[AuthorRole] = "author";
     roleNames[ScreenshotRole] = "screenshot";
     roleNames[ResolutionRole] = "resolution";
+    roleNames[PathRole] = "path";
     setRoleNames(roleNames);
 }
 
@@ -300,6 +301,10 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
 
         return QString();
     }
+    break;
+
+    case PathRole: 
+        return QUrl::fromLocalFile(b.filePath("preferred"));
     break;
 
     default:

@@ -239,7 +239,6 @@ void Image::setSingleImage()
     }
 
     QString img;
-
     if (QDir::isAbsolutePath(m_wallpaper)) {
         m_wallpaperPackage.setPath(m_wallpaper);
         img = m_wallpaperPackage.filePath("preferred");

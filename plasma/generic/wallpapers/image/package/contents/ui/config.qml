@@ -25,6 +25,7 @@ import org.kde.qtextracomponents 2.0
 Column {
     id: root
     property alias cfg_Color: picker.color
+    property string cfg_Image
 
     Wallpaper.Image {
         id: imageWallpaper
@@ -198,14 +199,21 @@ Column {
         height: units.gridUnit * 30
         GridView {
             model: imageWallpaper.wallpaperModel
-            delegate: Column{
-                QPixmapItem {
-                    pixmap: model.screenshot
-                    width: 100
-                    height: 100
+            delegate: MouseArea {
+                width: childrenRect.width
+                height: childrenRect.height
+                Column {
+                    QPixmapItem {
+                        pixmap: model.screenshot
+                        width: 100
+                        height: 100
+                    }
+                    PlasmaComponents.Label {
+                        text: model.display
+                    }
                 }
-                PlasmaComponents.Label {
-                    text: model.display
+                onClicked: {
+                    cfg_Image = model.path
                 }
             }
         }

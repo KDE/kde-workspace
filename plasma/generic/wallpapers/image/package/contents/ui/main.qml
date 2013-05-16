@@ -22,6 +22,11 @@ import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
 Rectangle {
     id: root
     color: wallpaper.configuration.Color
+    property string configuredImage: wallpaper.configuration.Image
+
+    Component.onCompleted: {
+        imageWallpaper.addUrl(configuredImage)
+    }
 
     Behavior on color {
         ColorAnimation { duration: 250 }
@@ -30,6 +35,11 @@ Rectangle {
     Wallpaper.Image {
         id: imageWallpaper
     }
+
+    onConfiguredImageChanged: {
+        imageWallpaper.addUrl(configuredImage)
+    }
+
 
     Image {
         anchors.fill: parent

@@ -54,7 +54,8 @@ public:
     enum {
         AuthorRole = Qt::UserRole,
         ScreenshotRole,
-        ResolutionRole
+        ResolutionRole,
+        PathRole
     };
     static const int SCREENSHOT_SIZE = 128;
     static const int BLUR_INCREMENT = 9;
