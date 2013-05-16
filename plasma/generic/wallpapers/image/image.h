@@ -35,9 +35,13 @@ class BackgroundListModel;
 class Image : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(RenderingMode renderingMode READ renderingMode WRITE setRenderingMode)
+    Q_PROPERTY(RenderingMode renderingMode READ renderingMode WRITE setRenderingMode NOTIFY renderingModeChanged)
+    Q_PROPERTY(ResizeMethod resizeMethod READ resizeMethod NOTIFY resizeMethodChanged)
     Q_PROPERTY(QString wallpaperPath READ wallpaperPath NOTIFY wallpaperPathChanged)
     Q_PROPERTY(QAbstractItemModel *wallpaperModel READ wallpaperModel CONSTANT)
+    Q_PROPERTY(int slideTimer READ slideTimer WRITE setSlideTimer NOTIFY slideTimerChanged)
+    Q_PROPERTY(QStringList usersWallpapers READ usersWallpapers WRITE setUsersWallpapers NOTIFY usersWallpapersChanged)
+    Q_PROPERTY(QStringList slidePaths READ slidePaths WRITE setSlidePaths NOTIFY slidePathsChanged)
 
     public:
         /**
@@ -83,9 +87,23 @@ class Image : public QObject
 
         QAbstractItemModel* wallpaperModel();
 
+        int slideTimer() const;
+        void setSlideTimer(int time);
+
+        QStringList usersWallpapers() const;
+        void setUsersWallpapers(const QStringList &usersWallpapers);
+
+        QStringList slidePaths() const;
+        void setSlidePaths(const QStringList &slidePaths);
+
     Q_SIGNALS:
         void settingsChanged(bool);
         void wallpaperPathChanged();
+        void renderingModeChanged();
+        void slideTimerChanged();
+        void usersWallpapersChanged();
+        void slidePathsChanged();
+        void resizeMethodChanged();
 
     protected Q_SLOTS:
         void removeWallpaper(QString name);
@@ -138,6 +156,7 @@ class Image : public QObject
         RenderingMode m_mode;
         Plasma::Package m_wallpaperPackage;
         QStringList m_slideshowBackgrounds;
+        QStringList m_slidePaths;
         QTimer m_timer;
         int m_currentSlide;
         BackgroundListModel *m_model;

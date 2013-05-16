@@ -123,7 +123,17 @@ Image::RenderingMode Image::renderingMode() const
 
 void Image::setRenderingMode(RenderingMode mode)
 {
+    if (mode == m_mode) {
+        return;
+    }
+
     m_mode = mode;
+
+    if (m_mode == SlideShow) {
+        updateDirWatch(m_slidePaths);
+    }
+
+    emit renderingModeChanged();
 }
 
 Image::ResizeMethod Image::resizeMethod() const
@@ -133,7 +143,13 @@ Image::ResizeMethod Image::resizeMethod() const
 
 void Image::setResizeMethod(ResizeMethod method)
 {
+    if (m_resizeMethod == method) {
+        return;
+    }
+
     m_resizeMethod = method;
+
+    emit resizeMethodChanged();
 }
 
 QSize Image::targetSize() const
@@ -171,6 +187,65 @@ QAbstractItemModel* Image::wallpaperModel()
 
     return m_model;
 }
+
+int Image::slideTimer() const
+{
+    return m_delay;
+}
+
+void Image::setSlideTimer(int time)
+{
+    if (time == m_delay) {
+        return;
+    }
+
+    m_delay = time;
+
+    emit slideTimerChanged();
+}
+
+
+QStringList Image::usersWallpapers() const
+{
+    return m_usersWallpapers;
+}
+
+void Image::setUsersWallpapers(const QStringList &usersWallpapers)
+{
+    if (usersWallpapers == m_usersWallpapers) {
+        return;
+    }
+
+    m_usersWallpapers = usersWallpapers;
+
+    emit usersWallpapersChanged();
+}
+
+
+QStringList Image::slidePaths() const
+{
+    return m_slidePaths;
+}
+
+void Image::setSlidePaths(const QStringList &slidePaths)
+{
+    if (slidePaths == m_slidePaths) {
+        return;
+    }
+
+    m_slidePaths = slidePaths;
+
+    if (m_slidePaths.isEmpty()) {
+        m_slidePaths << KStandardDirs::installPath("wallpaper");
+    }
+
+    if (m_mode == SlideShow) {
+        updateDirWatch(m_slidePaths);
+    }
+
+    emit slidePathsChanged();
+}
+
 
 void Image::timeChanged(const QTime& time)
 {
