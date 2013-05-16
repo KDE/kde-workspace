@@ -20,6 +20,7 @@ import QtQuick 2.0
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
+import org.kde.qtextracomponents 2.0
 
 Column {
     id: root
@@ -198,9 +199,10 @@ Column {
         GridView {
             model: imageWallpaper.wallpaperModel
             delegate: Column{
-                Rectangle {
-                    width: 30
-                    height: 30
+                QPixmapItem {
+                    pixmap: model.screenshot
+                    width: 100
+                    height: 100
                 }
                 PlasmaComponents.Label {
                     text: model.display

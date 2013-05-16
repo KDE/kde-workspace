@@ -54,6 +54,14 @@ BackgroundListModel::BackgroundListModel(Image *listener, QObject *parent)
     connect(&m_dirwatch, SIGNAL(deleted(QString)), this, SLOT(removeBackground(QString)));
     m_previewUnavailablePix.fill(Qt::transparent);
     //m_previewUnavailablePix = KIcon("unknown").pixmap(m_previewUnavailablePix.size());
+
+    QHash<int, QByteArray>roleNames;
+    roleNames[Qt::DisplayRole] = "display";
+    roleNames[Qt::DecorationRole] = "decoration";
+    roleNames[AuthorRole] = "author";
+    roleNames[ScreenshotRole] = "screenshot";
+    roleNames[ResolutionRole] = "resolution";
+    setRoleNames(roleNames);
 }
 
 BackgroundListModel::~BackgroundListModel()
