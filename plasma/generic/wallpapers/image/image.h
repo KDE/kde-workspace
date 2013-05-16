@@ -133,7 +133,6 @@ class Image : public QObject
         void backgroundsFound(const QStringList &paths, const QString &token);
 
     protected:
-        void init(const KConfigGroup &config);
         void suspendStartup(bool suspend); // for ksmserver
         void setSingleImage();
         void updateWallpaperActions();

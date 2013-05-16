@@ -41,6 +41,8 @@ Image::Image(QObject *parent)
     : QObject(parent),
       m_delay(10),
       m_dirWatch(new KDirWatch(this)),
+      m_resizeMethod(ScaledResize),
+      m_mode(SingleImage),
       m_currentSlide(-1),
       m_model(0),
       m_dialog(0),
@@ -56,7 +58,9 @@ Image::Image(QObject *parent)
     connect(m_dirWatch, SIGNAL(dirty(QString)),   SLOT(pathDirty(QString)));
     connect(m_dirWatch, SIGNAL(deleted(QString)), SLOT(pathDeleted(QString)));
     m_dirWatch->startScan();
-    init(KConfigGroup(KSharedConfig::openConfig(), "ImageWallpaper"));
+
+    useSingleImageDefaults();
+    setSingleImage();
 }
 
 Image::~Image()
@@ -78,44 +82,6 @@ void Image::addUrls(const QStringList &urls)
     addUrls(urls);
 }
 
-void Image::init(const KConfigGroup &config)
-{
-    m_timer.stop();
-
-    //TODO: how to restore this?
-    m_mode = SingleImage;
-
-    m_delay = config.readEntry("slideTimer", 10);
-    m_wallpaper = config.readEntry("wallpaper", QString());
-    if (m_wallpaper.isEmpty()) {
-        useSingleImageDefaults();
-    }
-
-    m_usersWallpapers = config.readEntry("userswallpapers", QStringList());
-    QStringList dirs = config.readEntry("slidepaths", QStringList());
-
-    if (dirs.isEmpty()) {
-        dirs << KStandardDirs::installPath("wallpaper");
-    }
-
-
-    if (m_mode == SingleImage) {
-        setSingleImage();
-    } else {
-        m_nextWallpaperAction = new QAction(KIcon(QString::fromLatin1("user-desktop")), i18n("Next Wallpaper Image"), this);
-        connect(m_nextWallpaperAction, SIGNAL(triggered(bool)), this, SLOT(nextSlide()));
-        m_openImageAction = new QAction(KIcon(QString::fromLatin1("document-open")), i18n("Open Wallpaper Image"), this);
-        connect(m_openImageAction, SIGNAL(triggered(bool)), this, SLOT(openSlide()));
-        QTimer::singleShot(200, this, SLOT(startSlideshow()));
-        updateDirWatch(dirs);
-        QList<QAction*> actions;
-        actions.push_back(m_nextWallpaperAction);
-        actions.push_back(m_openImageAction);
-        m_actions = actions;
-        updateWallpaperActions();
-    }
-}
-
 Image::RenderingMode Image::renderingMode() const
 {
     return m_mode;
@@ -130,7 +96,21 @@ void Image::setRenderingMode(RenderingMode mode)
     m_mode = mode;
 
     if (m_mode == SlideShow) {
+        if (m_slidePaths.isEmpty()) {
+            m_slidePaths << KStandardDirs::installPath("wallpaper");
+        }
+
+        m_nextWallpaperAction = new QAction(KIcon(QString::fromLatin1("user-desktop")), i18n("Next Wallpaper Image"), this);
+        connect(m_nextWallpaperAction, SIGNAL(triggered(bool)), this, SLOT(nextSlide()));
+        m_openImageAction = new QAction(KIcon(QString::fromLatin1("document-open")), i18n("Open Wallpaper Image"), this);
+        connect(m_openImageAction, SIGNAL(triggered(bool)), this, SLOT(openSlide()));
+        QTimer::singleShot(200, this, SLOT(startSlideshow()));
         updateDirWatch(m_slidePaths);
+        QList<QAction*> actions;
+        actions.push_back(m_nextWallpaperAction);
+        actions.push_back(m_openImageAction);
+        m_actions = actions;
+        updateWallpaperActions();
     }
 
     emit renderingModeChanged();
