@@ -25,7 +25,7 @@ find_package(Qt5Transitional MODULE)
 find_package(Qt5Quick REQUIRED NO_MODULE)
 find_package(Qt5X11Extras REQUIRED NO_MODULE)
 find_package(kde4support REQUIRED NO_MODULE)
-find_package(Plasma REQUIRED NO_MODULE)
+#find_package(Plasma REQUIRED NO_MODULE)
 
 #search packages used by KDE
 set(QT_MIN_VERSION "5.0.0")
@@ -148,9 +148,6 @@ if(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
    set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/KDE4Workspace)
 endif(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfig.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake
-        DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR})
 
 ###################################################################################################
 
