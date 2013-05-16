@@ -48,7 +48,6 @@ void ImageSizeFinder::run()
 BackgroundListModel::BackgroundListModel(Image *listener, QObject *parent)
     : QAbstractListModel(parent),
       m_structureParent(listener),
-      m_size(0,0),
       m_resizeMethod(Image::ScaledResize)
 {
     connect(&m_dirwatch, SIGNAL(deleted(QString)), this, SLOT(removeBackground(QString)));
@@ -232,7 +231,7 @@ void BackgroundListModel::sizeFound(const QString &path, const QSize &s)
     if (index.isValid()) {
         Plasma::Package package = m_packages.at(index.row());
         m_sizeCache.insert(package.path(), s);
-        m_structureParent.data()->updateScreenshot(index);
+        emit dataChanged(index, index);
     }
 }
 
@@ -332,8 +331,8 @@ void BackgroundListModel::showPreview(const KFileItem &item, const QPixmap &prev
     }
 
     m_previews.insert(b.path(), preview);
+    emit dataChanged(index, index);
     //kDebug() << "preview size:" << preview.size();
-    m_structureParent.data()->updateScreenshot(index);
 }
 
 void BackgroundListModel::previewFailed(const KFileItem &item)
@@ -344,11 +343,6 @@ void BackgroundListModel::previewFailed(const KFileItem &item)
 Plasma::Package BackgroundListModel::package(int index) const
 {
     return m_packages.at(index);
-}
-
-void BackgroundListModel::setWallpaperSize(const QSize& size)
-{
-    m_size = size;
 }
 
 void BackgroundListModel::setResizeMethod(Image::ResizeMethod resizeMethod)

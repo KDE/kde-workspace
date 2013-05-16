@@ -78,11 +78,6 @@ void Image::addUrls(const QStringList &urls)
     addUrls(urls);
 }
 
-void Image::updateScreenshot(QPersistentModelIndex index)
-{
-    //TODO
-}
-
 void Image::init(const KConfigGroup &config)
 {
     m_timer.stop();
@@ -176,7 +171,6 @@ QAbstractItemModel* Image::wallpaperModel()
     if (!m_model) {
         m_model = new BackgroundListModel(this, this);
         m_model->setResizeMethod(ScaledResize);
-        m_model->setWallpaperSize(m_size);
         m_model->reload(m_usersWallpapers);
     }
 

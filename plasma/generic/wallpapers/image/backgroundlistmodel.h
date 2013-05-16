@@ -74,7 +74,6 @@ public:
     QModelIndex indexOf(const QString &path) const;
     virtual bool contains(const QString &bg) const;
 
-    void setWallpaperSize(const QSize& size);
     void setResizeMethod(Image::ResizeMethod resizeMethod);
 
 protected Q_SLOTS:
@@ -95,7 +94,6 @@ private:
     QHash<QUrl, QPersistentModelIndex> m_previewJobs;
     KDirWatch m_dirwatch;
 
-    QSize m_size;
     Image::ResizeMethod m_resizeMethod;
     QString m_findToken;
     QPixmap m_previewUnavailablePix;

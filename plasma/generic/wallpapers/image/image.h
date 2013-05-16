@@ -70,8 +70,6 @@ class Image : public QObject
         Q_INVOKABLE void addUrls(const QStringList &urls);
 
 
-        void updateScreenshot(QPersistentModelIndex index);
-
         RenderingMode renderingMode() const;
         void setRenderingMode(RenderingMode mode);
 
