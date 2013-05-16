@@ -90,11 +90,9 @@ class Image : public QObject
     protected Q_SLOTS:
         void removeWallpaper(QString name);
         void timeChanged(const QTime& time);
-        void positioningChanged(int index);
         void addDir();
         void removeDir();
         void getNewWallpaper();
-        void pictureChanged(const QModelIndex &);
         void wallpaperBrowseCompleted();
         void nextSlide();
         /**
@@ -102,7 +100,6 @@ class Image : public QObject
          */
         void openSlide();
         void showFileDialog();
-        void configWidgetDestroyed();
         void startSlideshow();
         void fileDialogFinished();
         void addUrl(const QUrl &url, bool setAsCurrent);

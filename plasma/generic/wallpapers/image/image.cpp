@@ -161,11 +161,6 @@ void Image::useSingleImageDefaults()
     }
 }
 
-void Image::configWidgetDestroyed()
-{
-    m_model = 0;
-}
-
 QAbstractItemModel* Image::wallpaperModel()
 {
     if (!m_model) {
@@ -418,40 +413,6 @@ void Image::newStuffFinished()
     }
 }
 
-void Image::pictureChanged(const QModelIndex &index)
-{
-    if (index.row() == -1 || !m_model) {
-        return;
-    }
-
-    Plasma::Package b = m_model->package(index.row());
-    if (!b.isValid()) {
-        return;
-    }
-
-    if (b.contentsPrefixPaths().isEmpty()) {
-        // it's not a full package, but a single paper
-        m_wallpaper = b.filePath("preferred");
-    } else {
-        m_wallpaper = b.path();
-    }
-
-    setSingleImage();
-}
-
-void Image::positioningChanged(int index)
-{
-    if (m_mode == SingleImage) {
-        setSingleImage();
-    } else {
-        startSlideshow();
-    }
-
-    if (m_model) {
-        m_model->setResizeMethod(ScaledResize);
-    }
-}
-
 void Image::showFileDialog()
 {
     if (!m_dialog) {
@@ -499,12 +460,6 @@ void Image::wallpaperBrowseCompleted()
 
     // add background to the model
     m_model->addBackground(wallpaper);
-
-    // select it
-    QModelIndex index = m_model->indexOf(wallpaper);
-    if (index.isValid()) {
-        pictureChanged(index);
-    }
 
     // save it
     m_usersWallpapers << wallpaper;
