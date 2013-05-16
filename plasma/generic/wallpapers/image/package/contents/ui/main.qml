@@ -23,9 +23,29 @@ Rectangle {
     id: root
     color: wallpaper.configuration.Color
     property string configuredImage: wallpaper.configuration.Image
+    property string modelImage: imageWallpaper.wallpaperPath
+    property Item currentImage: imageB
+    property Item otherImage: imageA
+
+    function fadeWallpaper() {
+        fadeAnim.running = false
+        if (currentImage == imageA) {
+            currentImage = imageB
+            otherImage = imageA
+        } else {
+            currentImage = imageA
+            otherImage = imageB
+        }
+        currentImage.source = modelImage
+        currentImage.opacity = 0
+        otherImage.z = 0
+        currentImage.z = 1
+        fadeAnim.running = true
+    }
 
     Component.onCompleted: {
         imageWallpaper.addUrl(configuredImage)
+        fadeWallpaper()
     }
 
     Behavior on color {
@@ -39,10 +59,31 @@ Rectangle {
     onConfiguredImageChanged: {
         imageWallpaper.addUrl(configuredImage)
     }
+    onModelImageChanged: {
+        fadeWallpaper()
+    }
 
+    SequentialAnimation {
+        id: fadeAnim
+        running: false
+        PropertyAnimation {
+            target: currentImage
+            properties: "opacity"
+            from: 0
+            to: 1
+            duration: 250
+        }
+        ScriptAction {
+            script: otherImage.opacity = 0
+        }
+    }
 
     Image {
+        id: imageA
         anchors.fill: parent
-        source: imageWallpaper.wallpaperPath
+    }
+    Image {
+        id: imageB
+        anchors.fill: parent
     }
 }
