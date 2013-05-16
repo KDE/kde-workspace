@@ -36,7 +36,8 @@ class Image : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(RenderingMode renderingMode READ renderingMode WRITE setRenderingMode)
-    Q_PROPERTY(QString wallpaperPath READ wallpaperPath NOTIFY wallpaperPathChanged) 
+    Q_PROPERTY(QString wallpaperPath READ wallpaperPath NOTIFY wallpaperPathChanged)
+    Q_PROPERTY(QAbstractItemModel *wallpaperModel READ wallpaperModel CONSTANT)
 
     public:
         /**

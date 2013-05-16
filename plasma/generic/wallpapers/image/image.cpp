@@ -173,10 +173,13 @@ void Image::configWidgetDestroyed()
 
 QAbstractItemModel* Image::wallpaperModel()
 {
-    m_model = new BackgroundListModel(this, this);
-    m_model->setResizeMethod(ScaledResize);
-    m_model->setWallpaperSize(m_size);
-    m_model->reload(m_usersWallpapers);
+    if (!m_model) {
+        m_model = new BackgroundListModel(this, this);
+        m_model->setResizeMethod(ScaledResize);
+        m_model->setWallpaperSize(m_size);
+        m_model->reload(m_usersWallpapers);
+    }
+
     return m_model;
 }
 

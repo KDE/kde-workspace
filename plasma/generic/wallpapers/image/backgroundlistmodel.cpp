@@ -28,6 +28,7 @@
 #include <Plasma/PluginLoader>
 
 #include "image.h"
+#include "wallpaperpackage.h"
 
 QSet<QString> BackgroundFinder::m_suffixes;
 
@@ -114,8 +115,9 @@ void BackgroundListModel::processPaths(const QStringList &paths)
     QList<Plasma::Package> newPackages;
     Q_FOREACH (const QString &file, paths) {
         if (!contains(file) && QFile::exists(file)) {
-            Plasma::Package package = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
+            Plasma::Package package = Plasma::Package(new WallpaperPackage(m_structureParent.data(), m_structureParent.data()));
             package.setPath(file);
+
             if (package.isValid()) {
                 newPackages << package;
             }
@@ -242,7 +244,7 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Qt::DisplayRole: {
-        QString title = b.metadata().name();
+        QString title = b.metadata().isValid() ? b.metadata().name() : QString();
 
         if (title.isEmpty()) {
             return QFileInfo(b.filePath("preferred")).completeBaseName();
@@ -378,7 +380,8 @@ void BackgroundFinder::run()
 
     QDir dir;
     dir.setFilter(QDir::AllDirs | QDir::Files | QDir::Hidden | QDir::Readable);
-    Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
+    //Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
+    Plasma::Package pkg = Plasma::Package(new WallpaperPackage(0, 0));
 
     int i;
     for (i = 0; i < m_paths.count(); ++i) {
@@ -389,6 +392,7 @@ void BackgroundFinder::run()
         Q_FOREACH (const QFileInfo &wp, files) {
             if (wp.isDir()) {
                 //kDebug() << "directory" << wp.fileName() << validPackages.contains(wp.fileName());
+
                 const QString name = wp.fileName();
                 if (name == QString::fromLatin1(".") || name == QString::fromLatin1("..")) {
                     // do nothing

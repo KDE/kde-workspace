@@ -18,10 +18,16 @@
 
 import QtQuick 2.0
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
 
 Column {
     id: root
     property alias cfg_Color: picker.color
+
+    Wallpaper.Image {
+        id: imageWallpaper
+    }
 
     PlasmaComponents.Label {
         text: "Color:"
@@ -178,6 +184,26 @@ Column {
                         color: "white"
                         width: 1
                     }
+                }
+            }
+        }
+    }
+
+    PlasmaExtras.ScrollArea {
+        anchors {
+            left: parent.left
+            right: parent.right
+        }
+        height: units.gridUnit * 30
+        GridView {
+            model: imageWallpaper.wallpaperModel
+            delegate: Column{
+                Rectangle {
+                    width: 30
+                    height: 30
+                }
+                PlasmaComponents.Label {
+                    text: model.display
                 }
             }
         }
