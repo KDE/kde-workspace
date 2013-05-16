@@ -52,7 +52,7 @@ Item {
         Repeater {
             model: dialog.model
             Components.Label {
-                text: model.count>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
+                text: model["Pretty Name"] + ':'
                 width: labels.width
                 horizontalAlignment: Text.AlignRight
             }

@@ -23,19 +23,24 @@ var disk = 1
 
 function updateCumulative() {
     var sum = 0;
+    var count = 0;
     var charged = true;
     for (var i=0; i<batteries.count; i++) {
         var b = batteries.get(i);
+        if (!b["Is Power Supply"]) {
+          continue;
+        }
         if (b["Plugged in"]) {
             sum += b["Percent"];
         }
         if (b["State"] != "NoCharge") {
             charged = false;
         }
+        count++;
     }
 
     if (batteries.count > 0) {
-        batteries.cumulativePercent = Math.round(sum/batteries.count);
+        batteries.cumulativePercent = Math.round(sum/count);
     } else {
         batteries.cumulativePercent = 0;
     }
@@ -46,34 +51,40 @@ function stringForState(batteryData) {
     var pluggedIn = batteryData["Plugged in"];
     var percent = batteryData["Percent"];
     var state = batteryData["State"];
+    var powerSupply = batteryData["Is Power Supply"];
 
+    var text="<b>";
     if (pluggedIn) {
-        if (state == "NoCharge") {
-            return i18n("<b>%1% (charged)</b>", percent);
-        } else if (state == "Discharging") {
-            return i18n("<b>%1% (discharging)</b>", percent);
-        } else {//charging
-            return i18n("<b>%1% (charging)</b>", percent);
+        // According to UPower spec, the chargeState is only valid for primary batteries
+        if (powerSupply) {
+            switch(state) {
+                case "NoCharge": text += i18n("%1% (charged)", percent); break;
+                case "Discharging": text += i18n("%1% (discharging)", percent); break;
+                default: text += i18n("%1% (charging)", percent);
+            }
+        } else {
+            text += i18n("%1%", percent);
         }
+    } else {
+        text += i18nc("Battery is not plugged in", "Not present");
     }
+    text += "</b>";
 
-    return i18nc("Battery is not plugged in", "<b>Not present</b>");
+    return text;
 }
 
 function updateTooltip() {
     var text="";
-    for (var i=0; i<batteries.count; i++) {
-        if (batteries.count == 1) {
-            text += i18n("Battery:");
-        } else {
-            if (text != "") {
-                text += "<br/>";
-            }
 
-            text += i18nc("tooltip: placeholder is the battery ID", "Battery %1:", i+1);
+    for (var i=0; i<batteries.count; i++) {
+        var b = batteries.get(i);
+        if (text != "") {
+            text += "<br/>";
         }
 
-        text += " ";
+        text += b["Pretty Name"];
+
+        text += ": ";
         text += stringForState(pmSource.data["Battery"+i]);
     }
 

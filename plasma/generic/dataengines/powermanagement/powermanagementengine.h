@@ -56,6 +56,8 @@ private slots:
     void updateBatteryChargePercent(int newValue, const QString& udi);
     void updateBatteryPowerSupplyState(bool newState, const QString& udi);
     void updateAcPlugState(bool newState);
+    void updateBatteryNames();
+
     void deviceRemoved(const QString& udi);
     void deviceAdded(const QString& udi);
     void batteryRemainingTimeChanged(qulonglong time);

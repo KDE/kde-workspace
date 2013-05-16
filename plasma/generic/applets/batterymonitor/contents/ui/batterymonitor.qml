@@ -49,13 +49,12 @@ Item {
             property int minimumHeight
 
             property bool showOverlay: false
-            property bool showMultipleBatteries: false
             property bool hasBattery: pmSource.data["Battery"]["Has Battery"]
 
             property QtObject pmSource: plasmoid.rootItem.pmSource
             property QtObject batteries: plasmoid.rootItem.batteries
 
-            property bool singleBattery: isConstrained() || !showMultipleBatteries || !hasBattery
+            property bool singleBattery: isConstrained() || !hasBattery
 
             model: singleBattery ? 1 : batteries
 
@@ -63,6 +62,7 @@ Item {
 
             anchors.fill: parent
             orientation: ListView.Horizontal
+            interactive: false
 
             function isConstrained() {
                 return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
@@ -78,7 +78,6 @@ Item {
 
             function configChanged() {
                 showOverlay = plasmoid.readConfig("showBatteryString");
-                showMultipleBatteries = plasmoid.readConfig("showMultipleBatteries");
             }
 
             delegate: Item {

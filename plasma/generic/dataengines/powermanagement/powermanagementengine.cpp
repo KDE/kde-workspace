@@ -134,10 +134,13 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
                 updateBatteryChargePercent(battery->chargePercent(), deviceBattery.udi());
                 updateBatteryPlugState(battery->isPlugged(), deviceBattery.udi());
                 updateBatteryPowerSupplyState(battery->isPowerSupply(), deviceBattery.udi());
+
                 setData(source, "Name", deviceBattery.product());
                 setData(source, "Type", batteryType(battery));
             }
         }
+
+        updateBatteryNames();
 
         setData("Battery", "Has Battery", !batterySources.isEmpty());
         if (!batterySources.isEmpty()) {
@@ -284,6 +287,27 @@ void PowermanagementEngine::updateBatteryPowerSupplyState(bool newState, const Q
     setData(source, "Is Power Supply", newState);
 }
 
+void PowermanagementEngine::updateBatteryNames()
+{
+    uint unnamedBatteries = 0;
+    foreach (QString source, m_batterySources) {
+        DataContainer *batteryDataContainer = containerForSource(source);
+        if (batteryDataContainer) {
+            const QString batteryName = batteryDataContainer->data()["Name"].toString();
+            if (!batteryName.isEmpty() && batteryName != "Unknown Battery") {
+                setData(source, "Pretty Name", batteryName);
+            } else {
+                ++unnamedBatteries;
+                if (unnamedBatteries > 1) {
+                    setData(source, "Pretty Name", i18nc("Placeholder is the battery number", "Battery %1", unnamedBatteries));
+                } else {
+                    setData(source, "Pretty Name", i18n("Battery"));
+                }
+            }
+        }
+    }
+}
+
 void PowermanagementEngine::updateAcPlugState(bool newState)
 {
     setData("AC Adapter", "Plugged in", newState);
@@ -346,6 +370,8 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
 
             setData("Battery", "Sources", sourceNames);
             setData("Battery", "Has Battery", !sourceNames.isEmpty());
+
+            updateBatteryNames();
         }
     }
 }
