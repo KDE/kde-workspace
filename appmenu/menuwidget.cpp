@@ -158,6 +158,8 @@ bool MenuWidget::subMenuEventFilter(QObject* object, QEvent* event)
 void MenuWidget::slotMenuDestroyed()
 {
     m_menu = 0;
+    m_visibleMenu = 0;
+    m_currentButton = 0;
 }
 
 void MenuWidget::slotCheckActiveItem()
@@ -222,6 +224,7 @@ void MenuWidget::slotUpdateActions()
     }
 
     m_actionTimer->stop();
+    m_currentButton = 0;
     foreach (MenuButton *button, m_buttons) {
         disconnect(button, SIGNAL(clicked()), this, SLOT(slotButtonClicked()));
         m_layout->removeItem(button);
