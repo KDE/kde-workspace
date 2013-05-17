@@ -52,7 +52,6 @@ MenuWidget::MenuWidget(QGraphicsView *view) :
 
 MenuWidget::~MenuWidget()
 {
-    delete m_mouseTimer;
     while (!m_buttons.isEmpty()) {
         delete m_buttons.front();
         m_buttons.pop_front();
