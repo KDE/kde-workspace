@@ -133,7 +133,8 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
             updateBatteryPlugState(battery->isPlugged(), deviceBattery.udi());
             updateBatteryPowerSupplyState(battery->isPowerSupply(), deviceBattery.udi());
 
-            setData(source, "Name", deviceBattery.product());
+            setData(source, "Vendor", deviceBattery.vendor());
+            setData(source, "Product", deviceBattery.product());
             setData(source, "Type", batteryType(battery));
         }
 
@@ -290,9 +291,14 @@ void PowermanagementEngine::updateBatteryNames()
     foreach (QString source, m_batterySources) {
         DataContainer *batteryDataContainer = containerForSource(source);
         if (batteryDataContainer) {
-            const QString batteryName = batteryDataContainer->data()["Name"].toString();
-            if (!batteryName.isEmpty() && batteryName != "Unknown Battery") {
-                setData(source, "Pretty Name", batteryName);
+            const QString batteryVendor = batteryDataContainer->data()["Vendor"].toString();
+            const QString batteryProduct = batteryDataContainer->data()["Product"].toString();
+            if (!batteryProduct.isEmpty() && batteryProduct != "Unknown Battery") {
+                if (!batteryVendor.isEmpty()) {
+                    setData(source, "Pretty Name", QString(batteryVendor + ' ' + batteryProduct));
+                } else {
+                    setData(source, "Pretty Name", batteryProduct);
+                }
             } else {
                 ++unnamedBatteries;
                 if (unnamedBatteries > 1) {
@@ -362,7 +368,8 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
             updateBatteryPlugState(battery->isPlugged(), device.udi());
             updateBatteryPowerSupplyState(battery->isPowerSupply(), device.udi());
 
-            setData(source, "Name", device.product());
+            setData(source, "Vendor", device.vendor());
+            setData(source, "Product", device.product());
             setData(source, "Type", batteryType(battery));
 
             setData("Battery", "Sources", sourceNames);
