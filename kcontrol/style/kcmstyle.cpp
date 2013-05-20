@@ -47,7 +47,10 @@
 #include <KColorScheme>
 #include <KStandardDirs>
 #include <knewstuff3/downloaddialog.h>
+#ifdef Q_WS_X11
 #include <kdecoration.h>
+#endif
+
 
 #include <QtCore/QFile>
 #include <QtCore/QSettings>
