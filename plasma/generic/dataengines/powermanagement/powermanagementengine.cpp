@@ -115,29 +115,26 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         foreach (const Solid::Device &deviceBattery, listBattery) {
             const Solid::Battery* battery = deviceBattery.as<Solid::Battery>();
 
-            if (battery && (battery->type() == Solid::Battery::PrimaryBattery ||
-                            battery->type() == Solid::Battery::UpsBattery)) {
-                const QString source = QString("Battery%1").arg(index++);
+            const QString source = QString("Battery%1").arg(index++);
 
-                batterySources << source;
-                m_batterySources[deviceBattery.udi()] = source;
+            batterySources << source;
+            m_batterySources[deviceBattery.udi()] = source;
 
-                connect(battery, SIGNAL(chargeStateChanged(int,QString)), this,
-                        SLOT(updateBatteryChargeState(int,QString)));
-                connect(battery, SIGNAL(chargePercentChanged(int,QString)), this,
-                        SLOT(updateBatteryChargePercent(int,QString)));
-                connect(battery, SIGNAL(plugStateChanged(bool,QString)), this,
-                        SLOT(updateBatteryPlugState(bool,QString)));
+            connect(battery, SIGNAL(chargeStateChanged(int,QString)), this,
+                    SLOT(updateBatteryChargeState(int,QString)));
+            connect(battery, SIGNAL(chargePercentChanged(int,QString)), this,
+                    SLOT(updateBatteryChargePercent(int,QString)));
+            connect(battery, SIGNAL(plugStateChanged(bool,QString)), this,
+                    SLOT(updateBatteryPlugState(bool,QString)));
 
-                // Set initial values
-                updateBatteryChargeState(battery->chargeState(), deviceBattery.udi());
-                updateBatteryChargePercent(battery->chargePercent(), deviceBattery.udi());
-                updateBatteryPlugState(battery->isPlugged(), deviceBattery.udi());
-                updateBatteryPowerSupplyState(battery->isPowerSupply(), deviceBattery.udi());
+            // Set initial values
+            updateBatteryChargeState(battery->chargeState(), deviceBattery.udi());
+            updateBatteryChargePercent(battery->chargePercent(), deviceBattery.udi());
+            updateBatteryPlugState(battery->isPlugged(), deviceBattery.udi());
+            updateBatteryPowerSupplyState(battery->isPowerSupply(), deviceBattery.udi());
 
-                setData(source, "Name", deviceBattery.product());
-                setData(source, "Type", batteryType(battery));
-            }
+            setData(source, "Name", deviceBattery.product());
+            setData(source, "Type", batteryType(battery));
         }
 
         updateBatteryNames();
