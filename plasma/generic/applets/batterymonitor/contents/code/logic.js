@@ -96,7 +96,7 @@ function updateTooltip() {
         text += i18nc("tooltip", "AC Adapter:") + " ";
         text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "<b>Plugged in</b>") : i18nc("tooltip", "<b>Not plugged in</b>");
     }
-    batteries.tooltipText = text;
+    batteries.tooltipText = "<p style='white-space: nowrap'>" + text + "</p>";
 }
 
 function updateBrightness() {
