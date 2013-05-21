@@ -341,8 +341,7 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
     if (device.isValid()) {
         const Solid::Battery* battery = device.as<Solid::Battery>();
 
-        if (battery && (battery->type() == Solid::Battery::PrimaryBattery ||
-                        battery->type() == Solid::Battery::UpsBattery)) {
+        if (battery) {
             int index = 0;
             QStringList sourceNames(m_batterySources.values());
             while (sourceNames.contains(QString("Battery%1").arg(index))) {
