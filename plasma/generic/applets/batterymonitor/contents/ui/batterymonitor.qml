@@ -154,7 +154,7 @@ Item {
         }
         onSourceAdded: {
             if (source == "Battery0") {
-		disconnectSource(source);
+                disconnectSource(source);
                 connectSource(source);
             }
         }
