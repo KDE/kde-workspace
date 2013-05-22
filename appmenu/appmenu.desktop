@@ -3,6 +3,7 @@ Type=Service
 Name=Application menus daemon
 Name[ca]=Dimoni de menús d'aplicació
 Name[ca@valencia]=Dimoni de menús d'aplicació
+Name[cs]=Démon nabídky aplikací
 Name[da]=Dæmon til programmenuer
 Name[de]=Dienst für Anwendungsmenüs
 Name[el]=Δαίμων για τα μενού των εφαρμογών
