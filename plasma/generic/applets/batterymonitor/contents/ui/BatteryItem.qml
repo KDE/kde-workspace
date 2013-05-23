@@ -27,7 +27,7 @@ import "plasmapackage:/code/logic.js" as Logic
 Item {
     id: batteryItem
     clip: true
-    width: parent.width
+    width: batteryColumn.width
     height: batteryIcon.height + padding.margins.top + padding.margins.bottom
 
     Behavior on height { PropertyAnimation {} }

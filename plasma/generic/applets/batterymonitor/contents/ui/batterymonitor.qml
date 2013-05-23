@@ -111,8 +111,8 @@ Item {
         showRemainingTime: show_remaining_time
         showSuspendButtons: show_suspend_buttons
 
-        isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"]
-        isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"]
+        isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
+        isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
         remainingMsec: Number(pmSource.data["Battery"]["Remaining msec"])
