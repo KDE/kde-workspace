@@ -73,6 +73,54 @@ function stringForState(batteryData) {
     return text;
 }
 
+function stringForBatteryState(batteryData) {
+    switch(batteryData["State"]) {
+        case "NoCharge": return i18n("Not Charging");
+        case "Discharging": return i18n("Discharging");
+        case "FullyCharged": return i18n("Fully Charged");
+        default: return i18n("Charging");
+    }
+}
+
+function iconForBattery(batteryData,pluggedIn) {
+    switch(batteryData["Type"]) {
+        case "Monitor":
+            return "video-display";
+        case "Mouse":
+            return "input-mouse";
+        case "Keyboard":
+            return "input-keyboard";
+        case "Pda":
+            return "pda";
+        case "Phone":
+            return "phone";
+        default: // Primary and UPS
+            p = batteryData["Percent"];
+            if (p >= 90) {
+                fill = "100";
+            } else if (p >= 70) {
+                fill = "080";
+            } else if (p >= 50) {
+                fill = "060";
+            } else if (p >= 30) {
+                fill = "040";
+            } else if (p >= 10) {
+                fill = "caution";
+            } else {
+                fill = "low";
+            }
+
+            if (pluggedIn) {
+                return "battery-charging-" + fill;
+            } else {
+                if (p < 5) {
+                    return "dialog-warning"
+                }
+                return "battery-" + fill;
+            }
+    }
+}
+
 function updateTooltip() {
     var text="";
 
@@ -106,6 +154,7 @@ function updateBrightness() {
     }
     dialogItem.disableBrightnessUpdate = true;
     dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
+    dialogItem.keyboardBrightness = pmSource.data["PowerDevil"]["Keyboard Brightness"];
     dialogItem.disableBrightnessUpdate = false;
 }
 
@@ -117,4 +166,18 @@ function callForType(type) {
     }
 
     return "suspendHybrid";
+}
+
+// TODO: give translated and formatted string with KGlobal::locale()->prettyFormatDuration(msec);
+function formatDuration(msec) {
+    if (msec==0)
+        return "";
+
+    var time = new Date(msec);
+    var hours = time.getUTCHours();
+    var minutes = time.getUTCMinutes();
+    var str = "";
+    if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
+    if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
+    return str;
 }

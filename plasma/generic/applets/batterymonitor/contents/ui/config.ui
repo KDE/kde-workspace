@@ -20,7 +20,17 @@
       <string/>
      </property>
      <property name="text">
-      <string>Show charge &amp;information</string>
+      <string>Show charge &amp;information overlay</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="kcfg_showSuspendButtons">
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="text">
+       <string>Show suspend and hibernate buttons</string>
      </property>
     </widget>
    </item>

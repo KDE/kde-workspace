@@ -21,12 +21,11 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
-    
     property bool monochrome
     property bool hasBattery
     property int percent
     property bool pluggedIn
-    
+
     PlasmaCore.Svg {
         id: svg
         imagePath: monochrome ? "icons/battery" : "widgets/battery-oxygen"

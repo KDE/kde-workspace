@@ -1,0 +1,146 @@
+diff --git a/plasma/generic/applets/batterymonitor/contents/code/logic.js b/plasma/generic/applets/batterymonitor/contents/code/logic.js
+index 974694a..d9f52f6 100644
+--- a/plasma/generic/applets/batterymonitor/contents/code/logic.js
++++ b/plasma/generic/applets/batterymonitor/contents/code/logic.js
+@@ -23,19 +23,24 @@ var disk = 1
+ 
+ function updateCumulative() {
+     var sum = 0;
++    var count = 0;
+     var charged = true;
+     for (var i=0; i<batteries.count; i++) {
+         var b = batteries.get(i);
++        if (!b["Is Power Supply"]) {
++          continue;
++        }
+         if (b["Plugged in"]) {
+             sum += b["Percent"];
+         }
+         if (b["State"] != "NoCharge") {
+             charged = false;
+         }
++        count++;
+     }
+ 
+     if (batteries.count > 0) {
+-        batteries.cumulativePercent = Math.round(sum/batteries.count);
++        batteries.cumulativePercent = Math.round(sum/count);
+     } else {
+         batteries.cumulativePercent = 0;
+     }
+@@ -46,34 +51,67 @@ function stringForState(batteryData) {
+     var pluggedIn = batteryData["Plugged in"];
+     var percent = batteryData["Percent"];
+     var state = batteryData["State"];
++    var powerSupply = batteryData["Is Power Supply"];
+ 
++    var text="<b>";
+     if (pluggedIn) {
+-        if (state == "NoCharge") {
+-            return i18n("<b>%1% (charged)</b>", percent);
+-        } else if (state == "Discharging") {
+-            return i18n("<b>%1% (discharging)</b>", percent);
+-        } else {//charging
+-            return i18n("<b>%1% (charging)</b>", percent);
++        // According to UPower spec, the chargeState is only valid for primary batteries
++        if (powerSupply) {
++            switch(state) {
++                case "NoCharge": text += i18n("%1% (charged)", percent); break;
++                case "Discharging": text += i18n("%1% (discharging)", percent); break;
++                default: text += i18n("%1% (charging)", percent);
++            }
++        } else {
++            text += i18n("%1%", percent);
+         }
++    } else {
++        text += i18nc("Battery is not plugged in", "Not present");
+     }
++    text += "</b>";
+ 
+-    return i18nc("Battery is not plugged in", "<b>Not present</b>");
++    return text;
+ }
+ 
+ function updateTooltip() {
+     var text="";
++    var displayCount = 1;
++
++    // First check if there are more than one unnamed batteries
++    // So we can just show "Battery" instead of "Battery 1" if there aren't
++    var showBatteryNumber = false;
++    var unnamedBatteries = 0;
++    for (var i=0; i<batteries.count; i++) {
++        var b = batteries.get(i);
++        if (!b["Name"] || b["Name"] == "Unknown Battery") { unnamedBatteries++; }
++        if (unnamedBatteries > 2) {
++          showBatteryNumber = true;
++          break;
++        }
++    }
++
+     for (var i=0; i<batteries.count; i++) {
++        var b = batteries.get(i);
+         if (batteries.count == 1) {
+-            text += i18n("Battery:");
++            text += i18n("Battery");
+         } else {
+             if (text != "") {
+                 text += "<br/>";
+             }
+ 
+-            text += i18nc("tooltip: placeholder is the battery ID", "Battery %1:", i+1);
++            if (b["Name"] && b["Name"] != "Unknown Battery") {
++                text += b["Name"];
++            } else {
++                if (showBatteryNumber) {
++                    text += i18nc("tooltip: placeholder is the battery ID", "Battery %1", displayCount);
++                    displayCount++;
++                } else {
++                    text += i18n("Battery");
++                }
++            }
+         }
+ 
+-        text += " ";
++        text += ": ";
+         text += stringForState(pmSource.data["Battery"+i]);
+     }
+ 
+diff --git a/plasma/generic/applets/batterymonitor/contents/config/main.xml b/plasma/generic/applets/batterymonitor/contents/config/main.xml
+index fc31b3e..fd0588c 100644
+--- a/plasma/generic/applets/batterymonitor/contents/config/main.xml
++++ b/plasma/generic/applets/batterymonitor/contents/config/main.xml
+@@ -10,7 +10,7 @@
+       <default>false</default>
+     </entry>
+     <entry name="showMultipleBatteries" type="Bool">
+-      <default>false</default>
++      <default>true</default>
+     </entry>
+     <entry name="showRemainingTime" type="Bool">
+       <default>false</default>
+diff --git a/plasma/generic/applets/batterymonitor/contents/ui/PopupDialog.qml b/plasma/generic/applets/batterymonitor/contents/ui/PopupDialog.qml
+index 3ffb15f..b8d0274 100644
+--- a/plasma/generic/applets/batterymonitor/contents/ui/PopupDialog.qml
++++ b/plasma/generic/applets/batterymonitor/contents/ui/PopupDialog.qml
+@@ -52,7 +52,7 @@ Item {
+         Repeater {
+             model: dialog.model
+             Components.Label {
+-                text: model.count>1 ? i18nc("Placeholder is the battery ID", "Battery %1:", index+1) : i18n("Battery:")
++                text: model["Name"] && model["Name"] != "Unknown Battery" ? model["Name"] + ":" : i18n("Battery:")
+                 width: labels.width
+                 horizontalAlignment: Text.AlignRight
+             }
+diff --git a/plasma/generic/applets/batterymonitor/contents/ui/batterymonitor.qml b/plasma/generic/applets/batterymonitor/contents/ui/batterymonitor.qml
+index c69c3a5..bfc68ba 100644
+--- a/plasma/generic/applets/batterymonitor/contents/ui/batterymonitor.qml
++++ b/plasma/generic/applets/batterymonitor/contents/ui/batterymonitor.qml
+@@ -63,6 +63,7 @@ Item {
+ 
+             anchors.fill: parent
+             orientation: ListView.Horizontal
++            interactive: false
+ 
+             function isConstrained() {
+                 return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);

@@ -166,7 +166,7 @@ Keywords[de]=Energieverwaltungssystem;Akku;System;Energie;
 Keywords[el]=Διαχείριση ισχύος·Μπαταρία·Σύστημα·Ενέργεια·
 Keywords[es]=Gestión de energía;Batería;Sistema;Energía;
 Keywords[fi]=Virranhallinta;Akku;Järjestelmä;Virransäästö;
-Keywords[fr]=Gestion de l'énergie, Batterie, Système, Énergie, 
+Keywords[fr]=Gestion de l'énergie, Batterie, Système, Énergie,
 Keywords[hu]=Energiakezelés;Akkumulátor;Rendszer;Energia;
 Keywords[ia]=Gestion de energia;Batteria;Systema; Energia;
 Keywords[kk]=Power Management;Battery;System;Energy;
@@ -195,7 +195,7 @@ Type=Service
 X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
 
 X-Plasma-API=declarativeappletscript
-X-Plasma-DefaultSize=100,100
+X-Plasma-DefaultSize=650,300
 X-Plasma-MainScript=ui/batterymonitor.qml
 X-Plasma-ConfigPlugins=powerdevilprofilesconfig,powerdevilactivitiesconfig,powerdevilglobalconfig
 X-Plasma-NotificationArea=true

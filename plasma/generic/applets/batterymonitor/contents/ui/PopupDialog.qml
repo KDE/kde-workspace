@@ -1,5 +1,6 @@
 /*
  *   Copyright 2011 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 Kai Uwe Broulik <kde@privat.broulik.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -18,34 +19,123 @@
  */
 
 import QtQuick 1.1
+import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
+import org.kde.qtextracomponents 0.1
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: dialog
-    width: childrenRect.width+24
-    height: childrenRect.height+24
+    property int actualHeight: batteryColumn.height + settingsColumn.height + separator.height + 10 // 10 = seprator margins
 
     property alias model: batteryLabels.model
-    property alias hasBattery: batteryIcon.hasBattery
-    property alias percent: batteryIcon.percent
+    //property alias hasBattery: batteryIcon.hasBattery
     property bool pluggedIn
+
     property bool isBrightnessAvailable
     property alias screenBrightness: brightnessSlider.value
-    property int remainingMsec
-    property alias showSuspendButton: suspendButton.visible
-    property alias showHibernateButton: hibernateButton.visible
 
+    property bool isKeyboardBrightnessAvailable
+    property alias keyboardBrightness: keyboardBrightnessSlider.value
+
+    property bool showRemainingTime
+    property int remainingMsec
+
+    property bool showSuspendButtons
+    property bool offerSuspend
+    property bool offerHibernate
 
     signal suspendClicked(int type)
     signal brightnessChanged(int screenBrightness)
+    signal keyboardBrightnessChanged(int keyboardBrightness)
     signal powermanagementChanged(bool checked)
+
+    PlasmaCore.FrameSvgItem {
+        id: padding
+        imagePath: "widgets/viewitem"
+        prefix: "hover"
+        opacity: 0
+    }
+
+    Column {
+        id: batteryColumn
+        spacing: 4
+        width: parent.width
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: plasmoid.location == BottomEdge ? parent.top : undefined
+            bottom: plasmoid.location == BottomEdge ? undefined : parent.bottom
+        }
+
+        Repeater {
+            id: batteryList
+            model: dialog.model
+            delegate: BatteryItem { }
+        }
+    }
+
+    Column {
+        id: settingsColumn
+        spacing: 0
+        width: parent.width
+
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: plasmoid.location == BottomEdge ? undefined : parent.top
+            bottom: plasmoid.location == BottomEdge ? parent.bottom : undefined
+        }
+
+        BrightnessItem {
+            id: brightnessSlider
+            icon: QIcon("video-display")
+            label: i18n("Display Brightness")
+            visible: isBrightnessAvailable
+            onChanged: brightnessChanged(value)
+
+        }
+
+        BrightnessItem {
+            id: keyboardBrightnessSlider
+            icon: QIcon("input-keyboard")
+            label: i18n("Keyboard Brightness")
+            visible: isKeyboardBrightnessAvailable
+            onChanged: keyboardBrightnessChanged(value)
+        }
+
+        PowerManagementItem {
+            id: pmSwitch
+            onEnabledChanged: powermanagementChanged(enabled)
+        }
+    }
+
+    PlasmaCore.SvgItem {
+        id: separator
+        svg: PlasmaCore.Svg {
+            id: lineSvg
+            imagePath: "widgets/line"
+        }
+        elementId: "horizontal-line"
+        height: lineSvg.elementSize("horizontal-line").height
+        width: parent.width
+        anchors {
+            top: plasmoid.location == BottomEdge ? undefined : settingsColumn.bottom
+            bottom: plasmoid.location == BottomEdge ? settingsColumn.top : undefined
+            leftMargin: padding.margins.left
+            rightMargin: padding.margins.right
+            topMargin: 5
+            bottomMargin: 5
+        }
+        /*anchors.top: plasmoid.location == BottomEdge ? settingsColumn.bottom : undefined
+        anchors.bottom: plasmoid.location == BottomEdge ? undefined : settingsColumn.top*/
+    }
 
     Column {
         id: labels
         spacing: 6
         anchors {
-            top: parent.top
+            top: parent.bottom // parent.top
             left: parent.left
             margins: 12
         }
@@ -80,13 +170,31 @@ Item {
             visible: isBrightnessAvailable
             anchors.right: parent.right
         }
+
+        //Row {
+            Components.ToolButton {
+                id: suspendButton
+                iconSource: "system-suspend"
+                text: i18nc("Suspend the computer to RAM; translation should be short", "Sleep")
+                visible: true//showSuspendButtons && offerSuspend
+                onClicked: suspendClicked(Logic.ram)
+            }
+
+            Components.ToolButton {
+                id: hibernateButton
+                iconSource: "system-suspend-hibernate"
+                text: i18nc("Suspend the computer to disk; translation should be short", "Hibernate")
+                visible: true//showSuspendButtons && offerHibernate
+                onClicked: suspendClicked(Logic.disk)
+            }
+        //}
     }
 
     Column {
         id: values
         spacing: 6
         anchors {
-            top: parent.top
+            top: parent.bottom // parent.top
             left: labels.right
             margins: 12
         }
@@ -114,7 +222,7 @@ Item {
 
             Components.Label {
                 id: remainingTime
-                text: formatDuration(remainingMsec);
+                text: Logic.formatDuration(remainingMsec);
                 font.weight: Font.Bold
                 visible: text!=""
             }
@@ -123,7 +231,7 @@ Item {
         Column {
             id: lowerValues
             spacing: 6
-            width: upperValues.width + batteryIcon.width * 2
+            width: upperValues.width// + batteryIcon.width * 2
             anchors {
                 left: values.left
             }
@@ -133,55 +241,22 @@ Item {
                 x: 1
             }
 
-            Components.Slider {
-                id: brightnessSlider
-                width: lowerValues.width
-                visible: isBrightnessAvailable
-                minimumValue: 0
-                maximumValue: 100
-                stepSize: 10
-                onValueChanged: brightnessChanged(value)
-            }
+
         }
-    }
-
-    // TODO: give translated and formatted string with KGlobal::locale()->prettyFormatDuration(msec);
-    function formatDuration(msec) {
-        if (msec==0)
-            return "";
-
-        var time = new Date(msec);
-        var hours = time.getUTCHours();
-        var minutes = time.getUTCMinutes();
-        var str = "";
-        if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
-        if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
-        return str;
     }
 
     Row {
         anchors {
-            top: values.bottom
+            //top: batteryView.bottom
+            bottom: parent.bottom
             margins: 12
-            right: values.right
+            right: parent.right
         }
 
-        Components.ToolButton {
-            id: suspendButton
-            iconSource: "system-suspend"
-            text: i18nc("Suspend the computer to RAM; translation should be short", "Sleep")
-            onClicked: suspendClicked(Logic.ram)
-        }
 
-        Components.ToolButton {
-            id: hibernateButton
-            iconSource: "system-suspend-hibernate"
-            text: i18nc("Suspend the computer to disk; translation should be short", "Hibernate")
-            onClicked: suspendClicked(Logic.disk)
-        }
     }
 
-    BatteryIcon {
+    /*BatteryIcon {
         id: batteryIcon
         monochrome: false
         pluggedIn: dialog.pluggedIn
@@ -192,5 +267,5 @@ Item {
         }
         width: height
         height: hibernateButton.height * 2
-    }
+    }*/
 }
