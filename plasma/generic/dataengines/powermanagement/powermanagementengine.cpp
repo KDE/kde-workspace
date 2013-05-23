@@ -34,6 +34,7 @@
 #include <KIdleTime>
 
 #include <QtDBus/QDBusConnectionInterface>
+#include <QtDBus/QDBusError>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusMetaType>
 #include <QtDBus/QDBusReply>
@@ -63,6 +64,7 @@ void PowermanagementEngine::init()
     connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceAdded(QString)),
             this,                              SLOT(deviceAdded(QString)));
 
+    // FIXME Nooooooooooooooo!
     if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
@@ -203,23 +205,27 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         QDBusMessage msg;
         QDBusPendingReply<int> reply;
 
-        msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                          "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-                                                          "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-                                                          "brightness");
-        reply = QDBusConnection::sessionBus().asyncCall(msg);
-        QDBusPendingCallWatcher *screenWatcher = new QDBusPendingCallWatcher(reply, this);
-        QObject::connect(screenWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
-                            this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
+        if (m_brightnessControlsAvailable) {
+          msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                            "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                            "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
+                                                            "brightness");
+          reply = QDBusConnection::sessionBus().asyncCall(msg);
+          QDBusPendingCallWatcher *screenWatcher = new QDBusPendingCallWatcher(reply, this);
+          QObject::connect(screenWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                              this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
+        }
 
-        msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                          "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
-                                                          "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
-                                                          "brightness");
-        reply = QDBusConnection::sessionBus().asyncCall(msg);
-        QDBusPendingCallWatcher *keyboardWatcher = new QDBusPendingCallWatcher(reply, this);
-        QObject::connect(keyboardWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
-                            this, SLOT(keyboardBrightnessReply(QDBusPendingCallWatcher*)));
+        if (m_keyboardBrightnessControlsAvailable) {
+          msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+                                                            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+                                                            "keyboardBrightness");
+          reply = QDBusConnection::sessionBus().asyncCall(msg);
+          QDBusPendingCallWatcher *keyboardWatcher = new QDBusPendingCallWatcher(reply, this);
+          QObject::connect(keyboardWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                              this, SLOT(keyboardBrightnessReply(QDBusPendingCallWatcher*)));
+        }
     //any info concerning lock screen/screensaver goes here
     } else if (name == "UserActivity") {
         setData("UserActivity", "IdleTime", KIdleTime::instance()->idleTime());
@@ -416,11 +422,13 @@ void PowermanagementEngine::batteryRemainingTimeChanged(qulonglong time)
 void PowermanagementEngine::brightnessControlsAvailableChanged(bool available)
 {
     setData("PowerDevil", "Screen Brightness Available", available);
+    m_brightnessControlsAvailable = available;
 }
 
 void PowermanagementEngine::keyboardBrightnessControlsAvailableChanged(bool available)
 {
     setData("PowerDevil", "Keyboard Brightness Available", available);
+    m_keyboardBrightnessControlsAvailable = available;
 }
 
 void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *watcher)
@@ -439,11 +447,13 @@ void PowermanagementEngine::screenBrightnessChanged(int brightness)
 {
     //kDebug() << "Screen brightness:" << time;
     setData("PowerDevil", "Screen Brightness", brightness);
+    kDebug() << "BRAITNESS DSCHÄIIIIIIIIINGTSCHT!!!!!!!" << brightness;
 }
 
 void PowermanagementEngine::keyboardBrightnessChanged(int brightness)
 {
     setData("PowerDevil", "Keyboard Brightness", brightness);
+    kDebug() << "KIEHBOHRT BRAITNESS DSCHÄIIIIIIIIINGTSCHT!!!!!!!" << brightness;
 }
 
 void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watcher)
@@ -451,6 +461,8 @@ void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watch
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
         kDebug() << "Error getting screen brightness: " << reply.error().message();
+        // FIXME Don't do it here, do it where it belongs (see above in the init function)
+        brightnessControlsAvailableChanged(false);
     } else {
         screenBrightnessChanged(reply.value());
     }
@@ -463,6 +475,8 @@ void PowermanagementEngine::keyboardBrightnessReply(QDBusPendingCallWatcher *wat
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
         kDebug() << "Error getting keyboard brightness: " << reply.error().message();
+        // FIXME Don't do it here, do it where it belongs (see above in the init function)
+        keyboardBrightnessControlsAvailableChanged(false);
     } else {
         keyboardBrightnessChanged(reply.value());
     }

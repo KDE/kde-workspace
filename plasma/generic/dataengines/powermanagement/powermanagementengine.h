@@ -77,6 +77,9 @@ private:
 
     QHash<QString, QString> m_batterySources;  // <udi, Battery0>
 
+    bool m_brightnessControlsAvailable;
+    bool m_keyboardBrightnessControlsAvailable;
+
 };
 
 
