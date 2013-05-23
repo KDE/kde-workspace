@@ -70,7 +70,7 @@ private slots:
     void keyboardBrightnessControlsAvailableChanged(bool available);
 
 private:
-    QString batteryType(const Solid::Battery *battery);
+    QLatin1String batteryType(const Solid::Battery *battery);
     QStringList basicSourceNames() const;
 
     QStringList m_sources;
