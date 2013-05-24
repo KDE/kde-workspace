@@ -39,10 +39,23 @@ function updateCumulative() {
         count++;
     }
 
-    if (batteries.count > 0) {
-        batteries.cumulativePercent = Math.round(sum/count);
+    if (count > 0) {
+      batteries.cumulativePercent = Math.round(sum/count);
     } else {
-        batteries.cumulativePercent = 0;
+        // We don't have any power supply batteries
+        // Use the lowest value from any battery
+        if (batteries.count > 0) {
+            var lowestPercent = 100;
+            for (var i=0; i<batteries.count; i++) {
+                var b = batteries.get(i);
+                if (b["Percent"] && b["Percent"] < lowestPercent) {
+                    lowestPercent = b["Percent"];
+                }
+            }
+            batteries.cumulativePercent = lowestPercent;
+        } else {
+            batteries.cumulativePercent = 0;
+        }
     }
     batteries.allCharged = charged;
 }
