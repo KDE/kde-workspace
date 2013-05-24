@@ -110,7 +110,7 @@ function iconForBattery(batteryData,pluggedIn) {
                 fill = "low";
             }
 
-            if (pluggedIn) {
+            if (pluggedIn && batteryData["Is Power Supply"]) {
                 return "battery-charging-" + fill;
             } else {
                 if (p < 5) {
