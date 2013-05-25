@@ -236,7 +236,7 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
     return true;
 }
 
-QLatin1String PowermanagementEngine::batteryType(const Solid::Battery* battery)
+QString PowermanagementEngine::batteryType(const Solid::Battery* battery)
 {
   switch(battery->type()) {
       case Solid::Battery::PrimaryBattery:
@@ -447,13 +447,11 @@ void PowermanagementEngine::screenBrightnessChanged(int brightness)
 {
     //kDebug() << "Screen brightness:" << time;
     setData("PowerDevil", "Screen Brightness", brightness);
-    kDebug() << "BRAITNESS DSCHÄIIIIIIIIINGTSCHT!!!!!!!" << brightness;
 }
 
 void PowermanagementEngine::keyboardBrightnessChanged(int brightness)
 {
     setData("PowerDevil", "Keyboard Brightness", brightness);
-    kDebug() << "KIEHBOHRT BRAITNESS DSCHÄIIIIIIIIINGTSCHT!!!!!!!" << brightness;
 }
 
 void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watcher)
