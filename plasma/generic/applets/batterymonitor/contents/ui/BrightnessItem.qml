@@ -27,7 +27,7 @@ Item {
     id: brightnessItem
     clip: true
     width: parent.width
-    height: brightnessIcon.height + padding.margins.top + padding.margins.bottom
+    height: Math.max(brightnessIcon.height, brightnessLabel.height + brightnessSlider.height) + padding.margins.top + padding.margins.bottom
 
     property alias icon: brightnessIcon.icon
     property alias label: brightnessLabel.text
@@ -40,8 +40,9 @@ Item {
         width: theme.iconSizes.dialog
         height: width
         anchors {
-            top: parent.top
+            verticalCenter: parent.verticalCenter
             topMargin: padding.margins.top
+            bottomMargin: padding.margins.bottom
             left: parent.left
             leftMargin: padding.margins.left
         }
@@ -50,7 +51,8 @@ Item {
     Components.Label {
         id: brightnessLabel
         anchors {
-            top: brightnessIcon.top
+            top: parent.top
+            topMargin: padding.margins.top
             left: brightnessIcon.right
             leftMargin: 6
         }
@@ -60,7 +62,8 @@ Item {
     Components.Slider {
         id: brightnessSlider
         anchors {
-            bottom: brightnessIcon.bottom
+            bottom: parent.bottom
+            bottomMargin: padding.margins.bottom
             left: brightnessIcon.right
             right: brightnessPercent.left
             leftMargin: 6

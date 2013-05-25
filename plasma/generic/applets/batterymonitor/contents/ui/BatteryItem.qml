@@ -28,7 +28,7 @@ Item {
     id: batteryItem
     clip: true
     width: batteryColumn.width
-    height: batteryIcon.height + padding.margins.top + padding.margins.bottom
+    height: batteryInfos.height + padding.margins.top + padding.margins.bottom
 
     Behavior on height { PropertyAnimation {} }
 
@@ -49,9 +49,9 @@ Item {
         }
 
         if (expanded) {
-          batteryItem.height = batteryIcon.height + padding.margins.top + padding.margins.bottom * 2 + actionRow.height;
+            batteryItem.height = batteryInfos.height + padding.margins.top + padding.margins.bottom * 2 + actionRow.height;
         } else {
-          batteryItem.height = batteryIcon.height + padding.margins.top + padding.margins.bottom;
+            batteryItem.height = batteryInfos.height + padding.margins.top + padding.margins.bottom;
         }
     }
 
@@ -81,92 +81,103 @@ Item {
         }
     }
 
-    QIconItem {
-        id: batteryIcon
-        width: theme.iconSizes.dialog
-        height: width
+    Item {
+        id: batteryInfos
+        height: Math.max(batteryIcon.height, batteryNameLabel.height + batteryPercentBar.height)
+
         anchors {
             top: parent.top
             topMargin: padding.margins.top
             left: parent.left
             leftMargin: padding.margins.left
-        }
-        icon: QIcon(Logic.iconForBattery(model,pluggedIn))
-    }
-
-    SequentialAnimation {
-      id: chargeAnimation
-      running: model["State"] == "Charging" ? true : false
-      alwaysRunToEnd: true
-      loops: Animation.Infinite
-
-      NumberAnimation {
-          target: batteryIcon
-          properties: "opacity"
-          from: 1.0
-          to: 0.5
-          duration: 750
-          easing.type: Easing.InQuad
-      }
-      NumberAnimation {
-          target: batteryIcon
-          properties: "opacity"
-          from: 0.5
-          to: 1.0
-          duration: 750
-          easing.type: Easing.OutQuad
-      }
-    }
-
-    Components.Label {
-        id: batteryNameLabel
-        anchors {
-            top: batteryIcon.top
-            left: batteryIcon.right
-            leftMargin: 6
-        }
-        height: paintedHeight
-        elide: Text.ElideRight
-        text: model["Pretty Name"]
-    }
-
-    Components.Label {
-        id: batteryStatusLabel
-        anchors {
-            top: batteryNameLabel.top
-            left: batteryNameLabel.right
-            leftMargin: 3
-        }
-        text: Logic.stringForBatteryState(model)
-        height: paintedHeight
-        visible: model["Is Power Supply"]
-        color: "#77"+(theme.textColor.toString().substr(1))
-    }
-
-    Components.ProgressBar {
-        id: batteryPercentBar
-        anchors {
-            bottom: batteryIcon.bottom
-            left: batteryIcon.right
-            leftMargin: 6
-            right: batteryPercent.left
-            rightMargin: 6
-        }
-        minimumValue: 0
-        maximumValue: 100
-        value: parseInt(model["Percent"])
-    }
-
-    Components.Label {
-        id: batteryPercent
-
-        anchors {
-            verticalCenter: batteryPercentBar.verticalCenter
             right: parent.right
             rightMargin: padding.margins.right
         }
 
-        text: i18nc("Placeholder is battery percentage", "%1%", model["Percent"])
+        QIconItem {
+            id: batteryIcon
+            width: theme.iconSizes.dialog
+            height: width
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: parent.left
+            }
+            icon: QIcon(Logic.iconForBattery(model,pluggedIn))
+        }
+
+        SequentialAnimation {
+          id: chargeAnimation
+          running: model["State"] == "Charging" ? true : false
+          alwaysRunToEnd: true
+          loops: Animation.Infinite
+
+          NumberAnimation {
+              target: batteryIcon
+              properties: "opacity"
+              from: 1.0
+              to: 0.5
+              duration: 750
+              easing.type: Easing.InQuad
+          }
+          NumberAnimation {
+              target: batteryIcon
+              properties: "opacity"
+              from: 0.5
+              to: 1.0
+              duration: 750
+              easing.type: Easing.OutQuad
+          }
+        }
+
+        Components.Label {
+            id: batteryNameLabel
+            anchors {
+                top: parent.top
+                left: batteryIcon.right
+                leftMargin: 6
+            }
+            height: paintedHeight
+            elide: Text.ElideRight
+            text: model["Pretty Name"]
+        }
+
+        Components.Label {
+            id: batteryStatusLabel
+            anchors {
+                top: batteryNameLabel.top
+                left: batteryNameLabel.right
+                leftMargin: 3
+            }
+            text: Logic.stringForBatteryState(model)
+            height: paintedHeight
+            visible: model["Is Power Supply"]
+            color: "#77"+(theme.textColor.toString().substr(1))
+        }
+
+        Components.ProgressBar {
+            id: batteryPercentBar
+            anchors {
+                bottom: parent.bottom
+                left: batteryIcon.right
+                leftMargin: 6
+                right: batteryPercent.left
+                rightMargin: 6
+            }
+            minimumValue: 0
+            maximumValue: 100
+            value: parseInt(model["Percent"])
+        }
+
+        Components.Label {
+            id: batteryPercent
+
+            anchors {
+                verticalCenter: batteryPercentBar.verticalCenter
+                right: parent.right
+            }
+
+            text: i18nc("Placeholder is battery percentage", "%1%", model["Percent"])
+        }
     }
 
     Column {
@@ -174,7 +185,7 @@ Item {
         opacity: expanded ? 1 : 0
         width: parent.width
         anchors {
-          top: batteryIcon.bottom
+          top: batteryInfos.bottom
           topMargin: padding.margins.bottom
           left: parent.left
           leftMargin: padding.margins.left

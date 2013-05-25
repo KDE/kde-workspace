@@ -27,7 +27,7 @@ Item {
     id: brightnessItem
     clip: true
     width: parent.width
-    height: pmIcon.height + padding.margins.top + padding.margins.bottom
+    height: Math.max(pmIcon.height, pmLabel.height + pmComment.height) + padding.margins.top + padding.margins.bottom
 
     property alias enabled: pmSwitch.checked
 
@@ -38,8 +38,9 @@ Item {
         width: theme.iconSizes.dialog
         height: width
         anchors {
-            top: parent.top
+            verticalCenter: parent.verticalCenter
             topMargin: padding.margins.top
+            bottomMargin: padding.margins.bottom
             left: parent.left
             leftMargin: padding.margins.left
         }
@@ -49,7 +50,8 @@ Item {
     Components.Label {
         id: pmLabel
         anchors {
-            top: pmIcon.top
+            top: parent.top
+            topMargin: padding.margins.top
             left: pmIcon.right
             leftMargin: 6
         }
@@ -60,7 +62,8 @@ Item {
     Components.Label {
         id: pmComment
         anchors {
-            bottom: pmIcon.bottom
+            bottom: parent.bottom
+            bottomMargin: padding.margins.bottom
             left: pmIcon.right
             right: pmSwitch.left
             leftMargin: 6
