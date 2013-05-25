@@ -28,7 +28,8 @@ Item {
     id: batteryItem
     clip: true
     width: batteryColumn.width
-    height: batteryInfos.height + padding.margins.top + padding.margins.bottom
+    height: expanded ? batteryInfos.height + padding.margins.top + padding.margins.bottom * 2 + actionRow.height
+                     : batteryInfos.height + padding.margins.top + padding.margins.bottom
 
     Behavior on height { PropertyAnimation {} }
 
@@ -46,12 +47,6 @@ Item {
             padding.opacity = 0.65;
         } else {
             padding.opacity = 0;
-        }
-
-        if (expanded) {
-            batteryItem.height = batteryInfos.height + padding.margins.top + padding.margins.bottom * 2 + actionRow.height;
-        } else {
-            batteryItem.height = batteryInfos.height + padding.margins.top + padding.margins.bottom;
         }
     }
 
