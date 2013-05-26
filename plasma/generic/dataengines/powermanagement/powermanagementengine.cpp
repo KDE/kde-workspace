@@ -59,10 +59,10 @@ PowermanagementEngine::~PowermanagementEngine()
 
 void PowermanagementEngine::init()
 {
-    connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceRemoved(QString)),
-            this,                              SLOT(deviceRemoved(QString)));
     connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceAdded(QString)),
             this,                              SLOT(deviceAdded(QString)));
+    connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceRemoved(QString)),
+            this,                              SLOT(deviceRemoved(QString)));
 
     // FIXME Nooooooooooooooo!
     if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
