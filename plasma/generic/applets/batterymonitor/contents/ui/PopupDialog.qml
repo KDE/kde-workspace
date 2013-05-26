@@ -26,11 +26,13 @@ import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: dialog
-    property int actualHeight: batteryColumn.height + settingsColumn.height + separator.height + 10 // 10 = seprator margins
+    property int actualHeight: batteryColumn.implicitHeight + settingsColumn.height + separator.height + 10 // 10 = separator margins
 
     property alias model: batteryLabels.model
     //property alias hasBattery: batteryIcon.hasBattery
     property bool pluggedIn
+
+    property bool popupShown // somehow plasmoid.popupShowing isn't working
 
     property bool isBrightnessAvailable
     property alias screenBrightness: brightnessSlider.value
@@ -71,7 +73,7 @@ Item {
         Repeater {
             id: batteryList
             model: dialog.model
-            delegate: BatteryItem { }
+            delegate: BatteryItem { showChargeAnimation: popupShown }
         }
     }
 

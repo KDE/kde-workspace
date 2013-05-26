@@ -40,11 +40,16 @@ Item {
         Logic.updateTooltip();
         Logic.updateBrightness();
         plasmoid.addEventListener('ConfigChanged', configChanged);
+        plasmoid.popupEvent.connect(popupEventSlot);
     }
 
     function configChanged() {
         show_remaining_time = plasmoid.readConfig("showRemainingTime");
         show_suspend_buttons = plasmoid.readConfig("showSuspendButtons");
+    }
+
+    function popupEventSlot(popped) {
+        dialogItem.popupShown = popped;
     }
 
     property Component compactRepresentation: CompactRepresentation {

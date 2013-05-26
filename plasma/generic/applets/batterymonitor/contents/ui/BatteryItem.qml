@@ -35,6 +35,7 @@ Item {
 
     property bool highlight
     property bool expanded
+    property bool showChargeAnimation
 
     function updateSelection() {
         var containsMouse = mouseArea.containsMouse;
@@ -102,7 +103,7 @@ Item {
 
         SequentialAnimation {
           id: chargeAnimation
-          running: model["State"] == "Charging" ? true : false
+          running: showChargeAnimation && model["State"] == "Charging"
           alwaysRunToEnd: true
           loops: Animation.Infinite
 
