@@ -113,7 +113,7 @@ Item {
               from: 1.0
               to: 0.5
               duration: 750
-              easing.type: Easing.InQuad
+              easing.type: Easing.InCubic
           }
           NumberAnimation {
               target: batteryIcon
@@ -121,7 +121,7 @@ Item {
               from: 0.5
               to: 1.0
               duration: 750
-              easing.type: Easing.OutQuad
+              easing.type: Easing.OutCubic
           }
         }
 
