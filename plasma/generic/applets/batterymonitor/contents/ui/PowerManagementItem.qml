@@ -27,63 +27,41 @@ Item {
     id: brightnessItem
     clip: true
     width: parent.width
-    height: Math.max(pmIcon.height, pmLabel.height + pmComment.height) + padding.margins.top + padding.margins.bottom
+    height: Math.max(pmCheckBox.height, pmLabel.height) + padding.margins.top + padding.margins.bottom
 
-    property alias enabled: pmSwitch.checked
+    property alias enabled: pmCheckBox.checked
 
     signal enabledChanged(bool checked)
 
-    QIconItem {
-        id: pmIcon
-        width: theme.iconSizes.dialog
-        height: width
+    Components.CheckBox {
+        id: pmCheckBox
         anchors {
             verticalCenter: parent.verticalCenter
+            left: parent.left
+            leftMargin: padding.margins.left + (theme.iconSizes.dialog - width)
             topMargin: padding.margins.top
             bottomMargin: padding.margins.bottom
-            left: parent.left
-            leftMargin: padding.margins.left
         }
-        icon: QIcon("preferences-system-power-management")
+        checked: true
+        onCheckedChanged: enabledChanged(checked)
     }
 
     Components.Label {
         id: pmLabel
         anchors {
-            top: parent.top
-            topMargin: padding.margins.top
-            left: pmIcon.right
+            verticalCenter: pmCheckBox.verticalCenter
+            left: pmCheckBox.right
             leftMargin: 6
         }
         height: paintedHeight
-        text: i18n("Power Management")
+        text: i18n("Enable Power Management")
     }
 
-    Components.Label {
-        id: pmComment
-        anchors {
-            bottom: parent.bottom
-            bottomMargin: padding.margins.bottom
-            left: pmIcon.right
-            right: pmSwitch.left
-            leftMargin: 6
-            rightMargin: 6
-        }
-        elide: Text.ElideRight
-        height: paintedHeight
-        text: pmSwitch.checked ? i18n("Screen will be turned off automatically") : i18n("Screen will not be turned off automatically")
-        color: "#77"+(theme.textColor.toString().substr(1))
-    }
+    MouseArea {
+        anchors.fill: parent
 
-    Components.Switch {
-        id: pmSwitch
-        anchors {
-            right: parent.right
-            rightMargin: padding.margins.right
-            verticalCenter: pmIcon.verticalCenter
-        }
-        checked: true
-        onCheckedChanged: enabledChanged(checked)
+        onReleased: pmCheckBox.released();
+        onPressed: pmCheckBox.forceActiveFocus();
     }
 }
 
