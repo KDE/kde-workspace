@@ -37,6 +37,8 @@ Item {
     property bool expanded
     property bool showChargeAnimation
 
+    property bool isPresent: !model["Is Power Supply"] || model["Plugged in"]
+
     function updateSelection() {
         var containsMouse = mouseArea.containsMouse;
 
@@ -128,7 +130,8 @@ Item {
         Components.Label {
             id: batteryNameLabel
             anchors {
-                top: parent.top
+                verticalCenter: isPresent ? undefined : batteryIcon.verticalCenter
+                top: isPresent ? parent.top : undefined
                 left: batteryIcon.right
                 leftMargin: 6
             }
@@ -161,17 +164,17 @@ Item {
             }
             minimumValue: 0
             maximumValue: 100
+            visible: isPresent
             value: parseInt(model["Percent"])
         }
 
         Components.Label {
             id: batteryPercent
-
             anchors {
                 verticalCenter: batteryPercentBar.verticalCenter
                 right: parent.right
             }
-
+            visible: isPresent
             text: i18nc("Placeholder is battery percentage", "%1%", model["Percent"])
         }
     }
