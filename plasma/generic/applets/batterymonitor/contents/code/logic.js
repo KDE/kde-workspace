@@ -18,9 +18,6 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-var ram = 0
-var disk = 1
-
 function updateCumulative() {
     var sum = 0;
     var count = 0;
@@ -70,7 +67,6 @@ function plasmoidStatus() {
             status = "NeedsAttentionStatus";
         }
     }
-    debug("NEUER STATUS IST JETZT " + status);
     return status;
 }
 
@@ -89,32 +85,6 @@ function lowestBattery() {
         }
     }
     return b;
-}
-
-function stringForState(batteryData) {
-    var pluggedIn = batteryData["Plugged in"];
-    var percent = batteryData["Percent"];
-    var state = batteryData["State"];
-    var powerSupply = batteryData["Is Power Supply"];
-
-    var text="<b>";
-    if (pluggedIn) {
-        // According to UPower spec, the chargeState is only valid for primary batteries
-        if (powerSupply) {
-            switch(state) {
-                case "NoCharge": text += i18n("%1% (charged)", percent); break;
-                case "Discharging": text += i18n("%1% (discharging)", percent); break;
-                default: text += i18n("%1% (charging)", percent);
-            }
-        } else {
-            text += i18n("%1%", percent);
-        }
-    } else {
-        text += i18nc("Battery is not plugged in", "Not present");
-    }
-    text += "</b>";
-
-    return text;
 }
 
 function stringForBatteryState(batteryData) {
@@ -201,33 +171,6 @@ function updateTooltip() {
     }
     batteries.tooltipText = text;
     batteries.tooltipImage = image;
-
-    return;
-    var text="";
-
-    for (var i=0; i<batteries.count; i++) {
-        var b = batteries.get(i);
-        if (text != "") {
-            text += "<br/>";
-        }
-
-        text += b["Pretty Name"];
-
-        text += ": ";
-        text += stringForState(pmSource.data["Battery"+i]);
-    }
-
-    if (text != "") {
-        text += "<br/>";
-    }
-
-    if (pmSource.data["AC Adapter"]) {
-        text += i18nc("tooltip", "AC Adapter:") + " ";
-        text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "<b>Plugged in</b>") : i18nc("tooltip", "<b>Not plugged in</b>");
-    }
-    batteries.tooltipText = "<p style='white-space: nowrap'>" + text + "</p>";
-
-    batteries.tooltipImage = "battery";
 }
 
 function updateBrightness() {
@@ -239,28 +182,4 @@ function updateBrightness() {
     dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
     dialogItem.keyboardBrightness = pmSource.data["PowerDevil"]["Keyboard Brightness"];
     dialogItem.disableBrightnessUpdate = false;
-}
-
-function callForType(type) {
-    if (type == ram) {
-        return "suspendToRam";
-    } else if (type == disk) {
-        return "suspendToDisk";
-    }
-
-    return "suspendHybrid";
-}
-
-// TODO: give translated and formatted string with KGlobal::locale()->prettyFormatDuration(msec);
-function formatDuration(msec) {
-    if (msec==0)
-        return "";
-
-    var time = new Date(msec);
-    var hours = time.getUTCHours();
-    var minutes = time.getUTCMinutes();
-    var str = "";
-    if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
-    if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
-    return str;
 }

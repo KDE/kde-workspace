@@ -22,7 +22,6 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import "plasmapackage:/code/logic.js" as Logic
-import "plasmapackage:/code/platform.js" as Platform
 
 ListView {
     id: view

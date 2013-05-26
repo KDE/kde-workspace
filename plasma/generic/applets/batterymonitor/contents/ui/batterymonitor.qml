@@ -22,15 +22,11 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import "plasmapackage:/code/logic.js" as Logic
-import "plasmapackage:/code/platform.js" as Platform
 
 Item {
     id: batterymonitor
     property int minimumWidth: 450
     property int minimumHeight: dialogItem.actualHeight
-
-    property bool show_remaining_time: false
-    property bool show_suspend_buttons: false
 
     PlasmaCore.Theme { id: theme }
 
@@ -40,13 +36,7 @@ Item {
         plasmoid.status = Logic.plasmoidStatus();
         Logic.updateTooltip();
         Logic.updateBrightness();
-        plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);
-    }
-
-    function configChanged() {
-        show_remaining_time = plasmoid.readConfig("showRemainingTime");
-        show_suspend_buttons = plasmoid.readConfig("showSuspendButtons");
     }
 
     function popupEventSlot(popped) {
@@ -107,26 +97,12 @@ Item {
         property bool disableBrightnessUpdate: false
         model: batteries
         anchors.fill: parent
-        //hasBattery: batteries.cumulativePluggedin
-        showRemainingTime: show_remaining_time
-        showSuspendButtons: show_suspend_buttons
 
         isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
         isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
-        remainingMsec: Number(pmSource.data["Battery"]["Remaining msec"])
 
-        offerSuspend: true//Platform.shouldOfferSuspend(pmSource)
-        offerHibernate: true//Platform.shouldOfferHibernate(pmSource)
-
-        onSuspendClicked: {
-            plasmoid.togglePopup();
-            service = pmSource.serviceForSource("PowerDevil");
-            var operationName = Logic.callForType(type);
-            operation = service.operationDescription(operationName);
-            service.startOperationCall(operation);
-        }
         onBrightnessChanged: {
             if (disableBrightnessUpdate) {
                 return;

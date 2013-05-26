@@ -28,8 +28,7 @@ Item {
     id: dialog
     property int actualHeight: batteryColumn.implicitHeight + settingsColumn.height + separator.height + 10 // 10 = separator margins
 
-    property alias model: batteryLabels.model
-    //property alias hasBattery: batteryIcon.hasBattery
+    property alias model: batteryList.model
     property bool pluggedIn
 
     property bool popupShown // somehow plasmoid.popupShowing isn't working
@@ -40,14 +39,6 @@ Item {
     property bool isKeyboardBrightnessAvailable
     property alias keyboardBrightness: keyboardBrightnessSlider.value
 
-    property bool showRemainingTime
-    property int remainingMsec
-
-    property bool showSuspendButtons
-    property bool offerSuspend
-    property bool offerHibernate
-
-    signal suspendClicked(int type)
     signal brightnessChanged(int screenBrightness)
     signal keyboardBrightnessChanged(int keyboardBrightness)
     signal powermanagementChanged(bool checked)
@@ -72,7 +63,6 @@ Item {
 
         Repeater {
             id: batteryList
-            model: dialog.model
             delegate: BatteryItem { showChargeAnimation: popupShown }
         }
     }
@@ -129,145 +119,5 @@ Item {
             topMargin: 5
             bottomMargin: 5
         }
-        /*anchors.top: plasmoid.location == BottomEdge ? settingsColumn.bottom : undefined
-        anchors.bottom: plasmoid.location == BottomEdge ? undefined : settingsColumn.top*/
     }
-
-    Column {
-        id: labels
-        spacing: 6
-        anchors {
-            top: parent.bottom // parent.top
-            left: parent.left
-            margins: 12
-        }
-        Repeater {
-            model: dialog.model
-            Components.Label {
-                text: model["Pretty Name"] + ':'
-                width: labels.width
-                horizontalAlignment: Text.AlignRight
-            }
-        }
-
-        Components.Label {
-            text: i18n("AC Adapter:")
-            anchors.right: parent.right
-            anchors.bottomMargin: 12
-        }
-
-        Components.Label {
-            text: i18nc("Label for remaining time", "Time Remaining:")
-            visible: remainingTime.visible
-            anchors.right: parent.right
-        }
-
-        Components.Label {
-            text: i18nc("Label for power management inhibition", "Power management enabled:")
-            anchors.right: parent.right
-        }
-
-        Components.Label {
-            text: i18n("Screen Brightness:")
-            visible: isBrightnessAvailable
-            anchors.right: parent.right
-        }
-
-        //Row {
-            Components.ToolButton {
-                id: suspendButton
-                iconSource: "system-suspend"
-                text: i18nc("Suspend the computer to RAM; translation should be short", "Sleep")
-                visible: true//showSuspendButtons && offerSuspend
-                onClicked: suspendClicked(Logic.ram)
-            }
-
-            Components.ToolButton {
-                id: hibernateButton
-                iconSource: "system-suspend-hibernate"
-                text: i18nc("Suspend the computer to disk; translation should be short", "Hibernate")
-                visible: true//showSuspendButtons && offerHibernate
-                onClicked: suspendClicked(Logic.disk)
-            }
-        //}
-    }
-
-    Column {
-        id: values
-        spacing: 6
-        anchors {
-            top: parent.bottom // parent.top
-            left: labels.right
-            margins: 12
-        }
-
-        Column {
-            id: upperValues
-            spacing: 6
-            anchors {
-                left: values.left
-            }
-
-            Repeater {
-                id: batteryLabels
-                Components.Label {
-                    text: Logic.stringForState(model)
-                    font.weight: Font.Bold
-                }
-            }
-
-            Components.Label {
-                text: dialog.pluggedIn ? i18n("Plugged in") : i18n("Not plugged in")
-                font.weight: Font.Bold
-                anchors.bottomMargin: 12
-            }
-
-            Components.Label {
-                id: remainingTime
-                text: Logic.formatDuration(remainingMsec);
-                font.weight: Font.Bold
-                visible: text!=""
-            }
-        }
-
-        Column {
-            id: lowerValues
-            spacing: 6
-            width: upperValues.width// + batteryIcon.width * 2
-            anchors {
-                left: values.left
-            }
-            Components.CheckBox {
-                checked: true
-                onClicked: powermanagementChanged(checked)
-                x: 1
-            }
-
-
-        }
-    }
-
-    Row {
-        anchors {
-            //top: batteryView.bottom
-            bottom: parent.bottom
-            margins: 12
-            right: parent.right
-        }
-
-
-    }
-
-    /*BatteryIcon {
-        id: batteryIcon
-        monochrome: false
-        pluggedIn: dialog.pluggedIn
-        anchors {
-            top: parent.top
-            right: values.right
-            topMargin: 12
-        }
-        width: height
-        height: hibernateButton.height * 2
-    }*/
 }
