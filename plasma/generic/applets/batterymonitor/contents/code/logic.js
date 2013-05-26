@@ -25,6 +25,7 @@ function updateCumulative() {
     var sum = 0;
     var count = 0;
     var charged = true;
+    var plugged = false;
     for (var i=0; i<batteries.count; i++) {
         var b = batteries.get(i);
         if (!b["Is Power Supply"]) {
@@ -32,6 +33,7 @@ function updateCumulative() {
         }
         if (b["Plugged in"]) {
             sum += b["Percent"];
+            plugged = true;
         }
         if (b["State"] != "NoCharge") {
             charged = false;
@@ -45,19 +47,48 @@ function updateCumulative() {
         // We don't have any power supply batteries
         // Use the lowest value from any battery
         if (batteries.count > 0) {
-            var lowestPercent = 100;
-            for (var i=0; i<batteries.count; i++) {
-                var b = batteries.get(i);
-                if (b["Percent"] && b["Percent"] < lowestPercent) {
-                    lowestPercent = b["Percent"];
-                }
-            }
-            batteries.cumulativePercent = lowestPercent;
+            var b = lowestBattery();
+            batteries.cumulativePercent = b["Percent"];
         } else {
             batteries.cumulativePercent = 0;
         }
     }
+    batteries.cumulativePluggedin = plugged;
     batteries.allCharged = charged;
+}
+
+function plasmoidStatus() {
+    var status = "PassiveStatus";
+    if (batteries.cumulativePluggedin) {
+        if (batteries.cumulativePercent <= 10) {
+            status = "NeedsAttentionStatus";
+        } else if (!batteries.allCharged) {
+            status = "ActiveStatus";
+        }
+    } else if (batteries.count > 0) { // in case your mouse gets low
+        if (batteries.cumulativePercent && batteries.cumulativePercent <= 10) {
+            status = "NeedsAttentionStatus";
+        }
+    }
+    debug("NEUER STATUS IST JETZT " + status);
+    return status;
+}
+
+function lowestBattery() {
+    if (batteries.count == 0) {
+        return;
+    }
+
+    var lowestPercent = 100;
+    var lowestBattery;
+    for(var i=0; i<batteries.count; i++) {
+        var b = batteries.get(i);
+        if (b["Percent"] && b["Percent"] < lowestPercent) {
+            lowestPercent = b["Percent"];
+            lowestBattery = b;
+        }
+    }
+    return b;
 }
 
 function stringForState(batteryData) {
@@ -87,11 +118,15 @@ function stringForState(batteryData) {
 }
 
 function stringForBatteryState(batteryData) {
-    switch(batteryData["State"]) {
-        case "NoCharge": return i18n("Not Charging");
-        case "Discharging": return i18n("Discharging");
-        case "FullyCharged": return i18n("Fully Charged");
-        default: return i18n("Charging");
+    if (batteryData["Plugged in"]) {
+        switch(batteryData["State"]) {
+            case "NoCharge": return i18n("Not Charging");
+            case "Discharging": return i18n("Discharging");
+            case "FullyCharged": return i18n("Fully Charged");
+            default: return i18n("Charging");
+        }
+    } else {
+        return i18nc("Battery is currently not present in the bay","Not present");
     }
 }
 
@@ -135,6 +170,39 @@ function iconForBattery(batteryData,pluggedIn) {
 }
 
 function updateTooltip() {
+    var image = "";
+    var text = "";
+    if (batteries.count == 0) {
+        image = "battery-missing";
+        text = i18n("No Batteries Available");
+    } else {
+        var hasPowerSupply = false;
+
+        text = "<table style='white-space: nowrap'>";
+        for(var i=0; i<batteries.count; i++) {
+            var b = batteries.get(i);
+            text += "<tr>";
+            text += "<td align='right'>" + i18nc("Placeholder is battery name", "%1:", b["Pretty Name"]) + " </td>";
+            text += "<td>" + i18nc("Placeholder is battery percentage", "%1%", b["Percent"]) + "</td>";
+            text += "</tr>";
+
+            if (b["Is Power Supply"]) { hasPowerSupply = true; }
+        }
+        text += "</table>";
+
+        if (hasPowerSupply) {
+            var b = [];
+            b["Percent"] = batteries.cumulativePercent;
+            image = iconForBattery(b, pmSource.data["AC Adapter"]["Plugged in"] ? true : false);
+        } else {
+            var b = lowestBattery();
+            image = iconForBattery(b, false);
+        }
+    }
+    batteries.tooltipText = text;
+    batteries.tooltipImage = image;
+
+    return;
     var text="";
 
     for (var i=0; i<batteries.count; i++) {
@@ -158,6 +226,8 @@ function updateTooltip() {
         text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "<b>Plugged in</b>") : i18nc("tooltip", "<b>Not plugged in</b>");
     }
     batteries.tooltipText = "<p style='white-space: nowrap'>" + text + "</p>";
+
+    batteries.tooltipImage = "battery";
 }
 
 function updateBrightness() {

@@ -37,6 +37,7 @@ Item {
     Component.onCompleted: {
         plasmoid.aspectRatioMode = IgnoreAspectRatio
         Logic.updateCumulative();
+        plasmoid.status = Logic.plasmoidStatus();
         Logic.updateTooltip();
         Logic.updateBrightness();
         plasmoid.addEventListener('ConfigChanged', configChanged);
@@ -64,6 +65,8 @@ Item {
         engine: "powermanagement"
         connectedSources: sources
         onDataChanged: {
+            Logic.updateCumulative();
+            plasmoid.status = Logic.plasmoidStatus();
             Logic.updateTooltip();
             Logic.updateBrightness();
         }
@@ -87,24 +90,16 @@ Item {
 
         onDataChanged: {
             Logic.updateCumulative();
-
-            var status = "PassiveStatus";
-            if (batteries.cumulativePluggedin) {
-                if (batteries.cumulativePercent <= 10) {
-                    status = "NeedsAttentionStatus";
-                } else if (!batteries.allCharged) {
-                    status = "ActiveStatus";
-                }
-            }
-            plasmoid.status = status;
+            plasmoid.status = Logic.plasmoidStatus();
         }
 
         property int cumulativePercent
-        property bool cumulativePluggedin: count > 0
+        property bool cumulativePluggedin
         // true  --> all batteries charged
         // false --> one of the batteries charging/discharging
         property bool allCharged
         property string tooltipText
+        property string tooltipImage
     }
 
     PopupDialog {

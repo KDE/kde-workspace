@@ -63,7 +63,7 @@ ListView {
     delegate: Item {
         id: batteryContainer
 
-        property bool hasBattery: view.singleBattery ? batteries.cumulativePluggedin : model["Plugged in"]
+        property bool hasBattery: view.singleBattery ? batteries.count : model["Plugged in"]
         property int percent: view.singleBattery ? batteries.cumulativePercent : model["Percent"]
         property bool pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
 
@@ -117,7 +117,7 @@ ListView {
         PlasmaCore.ToolTip {
             id: tooltip
             target: mouseArea
-            image: "battery"
+            image: batteries.tooltipImage
             subText: batteries.tooltipText
         }
     }
