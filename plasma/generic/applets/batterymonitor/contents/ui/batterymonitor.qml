@@ -25,9 +25,9 @@ import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: batterymonitor
-    property int minimumWidth: 450
-    property int minimumHeight
-    property int maximumHeight
+    property int minimumWidth: theme.iconSizes.dialog * 9
+    property int minimumHeight: dialogItem.actualHeight
+    property int maximumHeight: dialogItem.actualHeight
 
     property bool show_remaining_time: false
 
@@ -112,11 +112,6 @@ Item {
         showRemainingTime: show_remaining_time
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
-
-        onActualHeightChanged: {
-            batterymonitor.minimumHeight = dialogItem.actualHeight
-            batterymonitor.maximumHeight = dialogItem.actualHeight
-        }
 
         onBrightnessChanged: {
             if (disableBrightnessUpdate) {
