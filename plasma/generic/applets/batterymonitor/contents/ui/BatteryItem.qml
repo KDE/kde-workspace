@@ -219,6 +219,18 @@ Item {
                     onPaintedWidthChanged: {
                         if (paintedWidth > parent.width) { parent.width = paintedWidth; }
                     }
+                    text: model["State"] == "Charging" ? i18n("Time To Full:") : i18n("Time To Empty:")
+                    visible: remainingTimeLabel.visible
+                    font.pointSize: theme.smallestFont.pointSize
+                    color: "#99"+(theme.textColor.toString().substr(1))
+                }
+                Components.Label {
+                    height: paintedHeight
+                    width: parent.width
+                    horizontalAlignment: Text.AlignRight
+                    onPaintedWidthChanged: {
+                        if (paintedWidth > parent.width) { parent.width = paintedWidth; }
+                    }
                     text: i18n("Capacity:")
                     visible: capacityLabel.visible
                     font.pointSize: theme.smallestFont.pointSize
@@ -232,6 +244,7 @@ Item {
                         if (paintedWidth > parent.width) { parent.width = paintedWidth; }
                     }
                     text: i18n("Vendor:")
+                    visible: vendorLabel.visible
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
@@ -243,35 +256,50 @@ Item {
                         if (paintedWidth > parent.width) { parent.width = paintedWidth; }
                     }
                     text: i18n("Model:")
+                    visible: modelLabel.visible
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
             }
             Column {
                 width: parent.width - labelsColumn.width - parent.spacing * 2
+                Components.Label { // Remaining Time
+                    id: remainingTimeLabel
+                    height: paintedHeight
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: Logic.formatDuration(model["Remaining Time"])
+                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text
+                    font.pointSize: theme.smallestFont.pointSize
+                    color: "#99"+(theme.textColor.toString().substr(1))
+                }
                 Components.Label { // Capacity
                     id: capacityLabel
                     height: paintedHeight
                     width: parent.width
                     elide: Text.ElideRight
                     text: i18nc("Placeholder is battery capacity", "%1%", model["Capacity"])
-                    visible: model["Capacity"] != ""
+                    visible: model["Capacity"] != "" && model["Capacity"] !== undefined
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
                 Components.Label { // Vendor
+                    id: vendorLabel
                     height: paintedHeight
                     width: parent.width
                     elide: Text.ElideRight
                     text: model["Vendor"]
+                    visible: model["Vendor"] != "" && model["Vendor"] !== undefined
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
                 Components.Label { // Model
+                    id: modelLabel
                     height: paintedHeight
                     width: parent.width
                     elide: Text.ElideRight
                     text: model["Product"]
+                    visible: model["Product"] != "" && model["Product"] !== undefined
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }

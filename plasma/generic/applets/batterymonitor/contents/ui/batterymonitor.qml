@@ -29,6 +29,8 @@ Item {
     property int minimumHeight
     property int maximumHeight
 
+    property bool show_remaining_time: false
+
     PlasmaCore.Theme { id: theme }
 
     Component.onCompleted: {
@@ -37,7 +39,12 @@ Item {
         plasmoid.status = Logic.plasmoidStatus();
         Logic.updateTooltip();
         Logic.updateBrightness();
+        plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);
+    }
+
+    function configChanged() {
+        show_remaining_time = plasmoid.readConfig("showRemainingTime");
     }
 
     function popupEventSlot(popped) {
@@ -101,6 +108,8 @@ Item {
 
         isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
         isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
+
+        showRemainingTime: show_remaining_time
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
 

@@ -30,6 +30,7 @@ Item {
 
     property alias model: batteryList.model
     property bool pluggedIn
+    property bool showRemainingTime
 
     property bool popupShown // somehow plasmoid.popupShowing isn't working
 
