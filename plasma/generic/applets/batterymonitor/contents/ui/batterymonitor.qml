@@ -26,7 +26,8 @@ import "plasmapackage:/code/logic.js" as Logic
 Item {
     id: batterymonitor
     property int minimumWidth: 450
-    property int minimumHeight: dialogItem.actualHeight
+    property int minimumHeight
+    property int maximumHeight
 
     PlasmaCore.Theme { id: theme }
 
@@ -102,6 +103,11 @@ Item {
         isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
+
+        onActualHeightChanged: {
+            batterymonitor.minimumHeight = dialogItem.actualHeight
+            batterymonitor.maximumHeight = dialogItem.actualHeight
+        }
 
         onBrightnessChanged: {
             if (disableBrightnessUpdate) {
