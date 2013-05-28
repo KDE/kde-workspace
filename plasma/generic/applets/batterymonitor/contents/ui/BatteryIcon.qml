@@ -21,14 +21,13 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
-    property bool monochrome
     property bool hasBattery
     property int percent
     property bool pluggedIn
 
     PlasmaCore.Svg {
         id: svg
-        imagePath: monochrome ? "icons/battery" : "widgets/battery-oxygen"
+        imagePath: "icons/battery"
     }
 
     PlasmaCore.SvgItem {
@@ -42,7 +41,7 @@ Item {
         anchors.fill: parent
         svg: svg
         elementId: hasBattery ? fillElement(percent) : "Unavailable"
-        //visible: elementId != ""
+        visible: elementId != ""
     }
 
     function fillElement(p) {
@@ -51,7 +50,6 @@ Item {
         // If the Fill10 element is not found, it is likely that the theme doesn't support
         // that and we use the older method of obtaining the fill element.
         if (!svg.hasElement("Fill10")) {
-            debug("Using Läggäsie");
             if (p >= 90) {
                 return "Fill100";
             } else if (p >= 70) {
@@ -65,7 +63,6 @@ Item {
             }
             return "";
         } else {
-            debug("No läggäsie");
             if (p >= 95) {
                 return "Fill100";
             } else if (p >= 85) {
