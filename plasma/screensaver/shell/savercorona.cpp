@@ -96,9 +96,6 @@ void SaverCorona::init()
 
     // create the QML Component
     m_engine = new QDeclarativeEngine(this);
-    foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-        m_engine->addImportPath(importPath);
-    }
     KDeclarative kdeclarative;
     kdeclarative.setDeclarativeEngine(m_engine);
     kdeclarative.initialize();

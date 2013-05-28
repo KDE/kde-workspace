@@ -148,10 +148,6 @@ void UnlockApp::desktopResized()
         view->installEventFilter(this);
 
         // engine stuff
-        foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-            view->engine()->addImportPath(importPath);
-        }
-
         KDeclarative kdeclarative;
         kdeclarative.setDeclarativeEngine(view->engine());
         kdeclarative.initialize();

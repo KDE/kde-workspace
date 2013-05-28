@@ -232,9 +232,6 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // engine stuff
-    foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-        m_view->engine()->addImportPath(importPath);
-    }
     KDeclarative kdeclarative;
     kdeclarative.setDeclarativeEngine(m_view->engine());
     kdeclarative.initialize();
