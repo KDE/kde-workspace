@@ -73,7 +73,6 @@ ListView {
 
         BatteryIcon {
             id: batteryIcon
-            monochrome: true
             hasBattery: parent.hasBattery
             percent: parent.percent
             pluggedIn: parent.pluggedIn
