@@ -114,6 +114,9 @@ public:
     virtual QModelIndex parent(const QModelIndex &index) const;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
+    void setShowRecentlyInstalled(bool showRecentlyInstalled);
+    bool showRecentlyInstalled() const;
+
 public slots:
     void reloadMenu();
     void delayedReloadMenu();
@@ -124,6 +127,9 @@ private:
 
     friend class ApplicationModelPrivate;
     ApplicationModelPrivate *const d;
+
+    void createNewProgramList();
+    bool createNewProgramListForPath(const QString &relPath);
 
     Q_DISABLE_COPY(ApplicationModel)
 };

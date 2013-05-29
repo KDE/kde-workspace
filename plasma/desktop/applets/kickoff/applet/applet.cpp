@@ -165,9 +165,11 @@ void LauncherApplet::createConfigurationInterface(KConfigDialog *parent)
     d->ui.iconButton->setIcon(popupIcon());
     d->ui.switchOnHoverCheckBox->setChecked(d->launcher->switchTabsOnHover());
     d->ui.appsByNameCheckBox->setChecked(d->launcher->showAppsByName());
+    d->ui.showRecentlyInstalledCheckBox->setChecked(d->launcher->showRecentlyInstalled());
     connect(d->ui.iconButton, SIGNAL(iconChanged(QString)), parent, SLOT(settingsModified()));
     connect(d->ui.switchOnHoverCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
     connect(d->ui.appsByNameCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
+    connect(d->ui.showRecentlyInstalledCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
 }
 
 void LauncherApplet::popupEvent(bool show)
@@ -203,6 +205,7 @@ void LauncherApplet::configAccepted()
 {
     bool switchTabsOnHover = d->ui.switchOnHoverCheckBox->isChecked();
     bool showAppsByName = d->ui.appsByNameCheckBox->isChecked();
+    bool showRecentlyInstalled = d->ui.showRecentlyInstalledCheckBox->isChecked();
 
     const QString iconname = d->ui.iconButton->icon();
 
@@ -223,6 +226,7 @@ void LauncherApplet::configAccepted()
 
     d->launcher->setSwitchTabsOnHover(switchTabsOnHover);
     d->launcher->setShowAppsByName(showAppsByName);
+    d->launcher->setShowRecentlyInstalled(showRecentlyInstalled);
 }
 
 QList<QAction*> LauncherApplet::contextualActions()
