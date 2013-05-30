@@ -57,6 +57,7 @@ MMModemGsmNetworkInterface::~MMModemGsmNetworkInterface()
 
 void MMModemGsmNetworkInterface::propertiesChanged(const QString & interface, const QVariantMap & properties)
 {
+    Q_D(MMModemGsmNetworkInterface);
     kDebug(1441) << interface << properties.keys();
 
     if (interface == QString("org.freedesktop.ModemManager.Modem.Gsm.Network")) {
@@ -65,11 +66,13 @@ void MMModemGsmNetworkInterface::propertiesChanged(const QString & interface, co
 
         QVariantMap::const_iterator it = properties.find(allowedMode);
         if ( it != properties.end()) {
-            emit allowedModeChanged((Solid::Control::ModemInterface::AllowedMode) it->toInt());
+            d->allowedMode = (Solid::Control::ModemInterface::AllowedMode) it->toInt();
+            emit allowedModeChanged(d->allowedMode);
         }
         it = properties.find(accessTechnology);
         if ( it != properties.end()) {
-            emit accessTechnologyChanged((Solid::Control::ModemInterface::AccessTechnology) it->toInt());
+            d->accessTechnology = (Solid::Control::ModemInterface::AccessTechnology) it->toInt();
+            emit accessTechnologyChanged(d->accessTechnology);
         }
     }
 }
