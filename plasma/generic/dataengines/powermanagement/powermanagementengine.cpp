@@ -64,7 +64,7 @@ void PowermanagementEngine::init()
     connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceRemoved(QString)),
             this,                              SLOT(deviceRemoved(QString)));
 
-    // FIXME Nooooooooooooooo!
+    // FIXME This check doesn't work, connect seems to always return true, hence the hack below
     if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
@@ -459,7 +459,7 @@ void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watch
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
         kDebug() << "Error getting screen brightness: " << reply.error().message();
-        // FIXME Don't do it here, do it where it belongs (see above in the init function)
+        // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
         brightnessControlsAvailableChanged(false);
     } else {
         screenBrightnessChanged(reply.value());
@@ -473,7 +473,7 @@ void PowermanagementEngine::keyboardBrightnessReply(QDBusPendingCallWatcher *wat
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
         kDebug() << "Error getting keyboard brightness: " << reply.error().message();
-        // FIXME Don't do it here, do it where it belongs (see above in the init function)
+        // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
         keyboardBrightnessControlsAvailableChanged(false);
     } else {
         keyboardBrightnessChanged(reply.value());
