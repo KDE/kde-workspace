@@ -21,6 +21,7 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.components 0.1 as Components
 import "plasmapackage:/code/logic.js" as Logic
 
 ListView {
@@ -29,7 +30,6 @@ ListView {
     property int minimumWidth
     property int minimumHeight
 
-    property bool showOverlay: false
     property bool hasBattery
 
     property QtObject pmSource
@@ -49,14 +49,9 @@ ListView {
 
     Component.onCompleted: {
         if (!isConstrained()) {
-            minimumWidth = 32;
-            minimumHeight = 32;
+            minimumWidth = theme.iconSizes.dialog;
+            minimumHeight = theme.iconSizes.dialog;
         }
-        plasmoid.addEventListener('ConfigChanged', configChanged);
-    }
-
-    function configChanged() {
-        showOverlay = plasmoid.readConfig("showBatteryString");
     }
 
     delegate: Item {
@@ -69,40 +64,31 @@ ListView {
         width: view.width/view.count
         height: view.height
 
-        property real size: Math.min(width, height)
+        property real iconSize: Math.min(width, height)
 
-        BatteryIcon {
-            id: batteryIcon
-            hasBattery: parent.hasBattery
-            percent: parent.percent
-            pluggedIn: parent.pluggedIn
-            width: size; height: size
-            anchors.centerIn: parent
-        }
+        Column {
+            anchors.fill: parent
 
-        Rectangle {
-            id: labelRect
-            // should be 40 when size is 90
-            width: Math.max(parent.size*4/9, 35)
-            height: width/2
-            anchors.centerIn: parent
-            color: theme.backgroundColor
-            border.color: "grey"
-            border.width: 2
-            radius: 4
-            opacity: hasBattery ? (showOverlay ? 0.7 : (isConstrained() ? 0 : mouseArea.containsMouse*0.7)) : 0
+            BatteryIcon {
+                id: batteryIcon
+                anchors.centerIn: isConstrained() ? parent : undefined
+                anchors.horizontalCenter: isConstrained() ? undefined : parent.horizontalCenter
+                hasBattery: batteryContainer.hasBattery
+                percent: batteryContainer.percent
+                pluggedIn: batteryContainer.pluggedIn
+                height: isConstrained() ? batteryContainer.iconSize : batteryContainer.iconSize - batteryLabel.height
+                width: height
+            }
 
-            Behavior on opacity { NumberAnimation { duration: 100 } }
-        }
-
-        Text {
-            id: overlayText
-            text: i18nc("overlay on the battery, needs to be really tiny", "%1%", percent);
-            color: theme.textColor
-            font.pixelSize: Math.max(parent.size/8, 11)
-            anchors.centerIn: labelRect
-            // keep the opacity 1 when labelRect.opacity=0.7
-            opacity: labelRect.opacity/0.7
+            Components.Label {
+                id: batteryLabel
+                width: parent.width
+                height: paintedHeight
+                horizontalAlignment: Text.AlignHCenter
+                text: i18nc("battery percentage below battery icon", "%1%", percent)
+                font.pixelSize: Math.max(batteryContainer.iconSize/8, 10)
+                visible: !isConstrained()
+            }
         }
     }
 
