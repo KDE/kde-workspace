@@ -37,6 +37,7 @@ CalendarApplet::CalendarApplet(QObject *parent, const QVariantList &args)
     m_calendarWidget(0),
     m_theme(0)
 {
+    KGlobal::locale()->insertCatalog("libplasmaclock");
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
     setCacheMode(DeviceCoordinateCache);
     m_dateUpdater = new QTimer(this);
