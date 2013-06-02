@@ -14,8 +14,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-11-10</date>
-<releaseinfo>&kde; 4.6</releaseinfo>
+<date>2013-06-02</date>
+<releaseinfo>&kde; 4.11</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -208,6 +208,22 @@ of the button <emphasis>below</emphasis> the icon.</para>
 
 <tip><para>This option only specifies the <emphasis>default</emphasis> location.  
 Each application can override the setting used in this panel.</para></tip>
+</listitem> 
+</varlistentry> 
+
+<varlistentry> 
+<term><guilabel>Menubar style</guilabel></term>
+<listitem>
+<para><guilabel>In application</guilabel>: The classic menubar at the top of the application window.</para>
+<para><guilabel>Title bar button</guilabel>: The window has an additional menu button top left. 
+All changes will take effect only for newly started applications.</para>
+<para><guilabel>Top screen menubar</guilabel>: This will turn on a menubar at the top of the screen that 
+is hidden by default and revealed on mouse over or a menu button on the window decoration.
+This menubar will reflect the menu options of the active application.</para>
+<para><guilabel>Only export</guilabel>: for use by plasma runners + applets. 
+To use this feature you need a KRunner plugin like <guilabel>Appmenu action launcher</guilabel>.
+Select an application, press <keycombo action="simul">&Alt;<keycap>F2</keycap></keycombo> 
+and type the menu action you want to perform.</para>
 </listitem> 
 </varlistentry> 
 
