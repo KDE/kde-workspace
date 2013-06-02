@@ -14,8 +14,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2012-08-07</date>
-<releaseinfo>&kde; 4.9</releaseinfo>
+<date>2013-06-02</date>
+<releaseinfo>&kde; 4.11</releaseinfo>
 
 <abstract>
 <para>This is the documentation for the &kde; &systemsettings; module to 
@@ -44,6 +44,9 @@ Your system may need to be updated to support cursor themes.
 If you have additional cursor themes available, you can install and remove 
 them using the buttons right to the list box. Note that you cannot remove the default themes.
 </para>
+
+<para>Use the <guibutton>Get New Themes</guibutton> button to launch the <guilabel>Get Hot New Stuff</guilabel> dialog and 
+download additional themes from the Internet.</para>
 
 <para>Some themes allow to
 choose the cursor size using the combobox below to the label <guilabel>Size</guilabel>.
