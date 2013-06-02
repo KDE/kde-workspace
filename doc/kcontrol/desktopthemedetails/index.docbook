@@ -14,8 +14,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-06-22</date>
-<releaseinfo>&kde; 4.5</releaseinfo>
+<date>2013-06-02</date>
+<releaseinfo>&kde; 4.11</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -27,7 +27,7 @@
 </articleinfo>
 
 <sect1 id="kcm_desktoptheme">
-<title><guilabel>Theme</guilabel> tab</title>
+<title>Theme tab</title>
  
 <para>A list of available themes is displayed on this tab. Select a theme by clicking on an item in the list.</para>
 
@@ -37,7 +37,7 @@ download additional themes from the Internet.</para>
 </sect1>
 
 <sect1 id="kcm_desktopthemedetails">
-<title><guilabel>Details</guilabel> tab</title>
+<title>Details tab</title>
 
 <para>A &kde; plasma desktop theme is made up of several components or items,
 consisting mostly in svg backgrounds and colors schemes. This module allows you
@@ -93,15 +93,14 @@ Clicking the <guibutton>Apply</guibutton> will create a new theme named
 <title>Creating a custom theme</title>
 <para>When the module is opened, it will show items from the current desktop
 theme. If you would like to start customizing with a different theme, select it
-from 
-the drop box above the list of theme items. This theme from the drop box is the
+from the box above the list of theme items. This theme from the box is the
 starting theme, the base for your new customized desktop theme.</para>
 
 <para>
 In the list of items, for each item you would like to replace, select 
 replacement item from the drop list for that item.  You may select the 
-corresponding item from another theme, or you may select a file. Plasma 
-desktop theme items are svg files, except for the color scheme which is a KDE 
+corresponding item from another theme, or you may select a file. &plasma; 
+desktop theme items are svg files, except for the color scheme which is a &kde; 
 color scheme file.
 </para>
 
@@ -147,7 +146,7 @@ when done.
 <sect2 id="removing">
 <title>Removing a theme</title>
 <para>
-Select the theme you would like to remove from the drop box above the list of 
+Select the theme you would like to remove from the box above the list of 
 theme items. Click on the <guilabel>More</guilabel> check box. Click the
 <guibutton>Remove Theme</guibutton> button to 
 remove the selected theme.
@@ -158,7 +157,7 @@ remove the selected theme.
 <title>Exporting a theme to a file</title>
 <para>
 You can share your newly customized theme with the community by exporting the 
-theme to a file. Select your customized theme from the drop box above the list 
+theme to a file. Select your customized theme from the box above the list 
 of theme items.  Click on the <guilabel>More</guilabel> check box.  Click the
 <guibutton>Export Theme to 
 File...</guibutton>.  Enter the name of the zip file to which the theme will be
