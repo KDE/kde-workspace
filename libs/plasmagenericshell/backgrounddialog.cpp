@@ -78,13 +78,21 @@ void AppletDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
     bool leftToRight = (painter->layoutDirection() == Qt::LeftToRight);
     QIcon::Mode iconMode = QIcon::Normal;
 
-    QColor foregroundColor = (option.state.testFlag(QStyle::State_Selected)) ?
-        option.palette.color(QPalette::HighlightedText) : option.palette.color(QPalette::Text);
+    const QColor foregroundColor = (option.state.testFlag(QStyle::State_Selected)) ?
+                                    option.palette.color(QPalette::HighlightedText) :
+                                    option.palette.color(QPalette::Text);
 
-    // Painting main column
-    QFont titleFont = option.font;
-    titleFont.setBold(true);
-    titleFont.setPointSize(titleFont.pointSize() + 2);
+    // Borrowed from Dolphin for consistency and beauty.
+    // For the color of the additional info the inactive text color
+    // is not used as this might lead to unreadable text for some color schemes. Instead
+    // the text color is slightly mixed with the background color.
+    const QColor textColor = option.palette.text().color();
+    const QColor baseColor = option.palette.base().color();
+    const int p1 = 70;
+    const int p2 = 100 - p1;
+    const QColor detailsColor = QColor((textColor.red() * p1 + baseColor.red() * p2) / 100,
+                                       (textColor.green() * p1 + baseColor.green() * p2) / 100,
+                                       (textColor.blue() * p1 + baseColor.blue() * p2) /  100);
 
     QPixmap pixmap(width, height);
     pixmap.fill(Qt::transparent);
@@ -102,11 +110,10 @@ void AppletDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
     int textInner = 2 * UNIVERSAL_PADDING + MAIN_ICON_SIZE;
 
     p.setPen(foregroundColor);
-    p.setFont(titleFont);
     p.drawText(left + (leftToRight ? textInner : 0),
                top, width - textInner, height / 2,
                Qt::AlignBottom | Qt::AlignLeft, title);
-    p.setFont(option.font);
+    p.setPen(detailsColor);
     p.drawText(left + (leftToRight ? textInner : 0),
                top + height / 2,
                width - textInner, height / 2,
@@ -152,11 +159,7 @@ void AppletDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
 int AppletDelegate::calcItemHeight(const QStyleOptionViewItem& option) const
 {
     // Painting main column
-    QFont titleFont = option.font;
-    titleFont.setBold(true);
-    titleFont.setPointSize(titleFont.pointSize() + 2);
-
-    int textHeight = QFontInfo(titleFont).pixelSize() + QFontInfo(option.font).pixelSize();
+    int textHeight = QFontInfo(option.font).pixelSize() * 2;
     //kDebug() << textHeight << qMax(textHeight, MAIN_ICON_SIZE) + 2 * UNIVERSAL_PADDING;
     return qMax(textHeight, MAIN_ICON_SIZE) + 2 * UNIVERSAL_PADDING;
 }
@@ -281,6 +284,8 @@ BackgroundDialog::BackgroundDialog(const QSize& res, Plasma::Containment *c, Pla
         connect(this, SIGNAL(applyClicked()), d->containment.data(), SLOT(configDialogFinished()));
         connect(this, SIGNAL(okClicked()), d->containment.data(), SLOT(configDialogFinished()));
     }
+
+    d->backgroundDialogUi.wallpaperMode->setItemDelegate(new AppletDelegate());
 
     QSize dialogSize = QSize(650, 720).expandedTo(sizeHint());
     if (d->containment) {
