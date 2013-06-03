@@ -177,6 +177,7 @@ Name[x-test]=xxImagexx
 Name[zh_CN]=图像
 Name[zh_TW]=影像
 Icon=image-jpeg
+Comment=A single image
 # Dummy
 Exec=plasma
 
@@ -257,6 +258,7 @@ Name[wa]=Diaporama
 Name[x-test]=xxSlideshowxx
 Name[zh_CN]=幻灯显示
 Name[zh_TW]=投影播放
+Comment=Cycles through a set of images
 Icon=folder-image
 # Dummy
 Exec=plasma

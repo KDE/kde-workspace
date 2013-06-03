@@ -79,6 +79,7 @@ Name[wa]=Coleur
 Name[x-test]=xxColorxx
 Name[zh_CN]=颜色
 Name[zh_TW]=顏色
+Comment=A plain color or gradient
 Type=Service
 Icon=preferences-desktop-color
 ServiceTypes=Plasma/Wallpaper
