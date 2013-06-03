@@ -416,14 +416,18 @@ void Image::updateDirs()
 
 void Image::updateDirWatch(const QStringList &newDirs)
 {
-    foreach(const QString &oldDir, m_dirs) {
-        if(!newDirs.contains(oldDir)) {
+    if (isPreviewing()) {
+        return;
+    }
+
+    foreach (const QString &oldDir, m_dirs) {
+        if (!newDirs.contains(oldDir)) {
             m_dirWatch->removeDir(oldDir);
         }
     }
 
-    foreach(const QString &newDir, newDirs) {
-        if(!m_dirWatch->contains(newDir)) {
+    foreach (const QString &newDir, newDirs) {
+        if (!m_dirWatch->contains(newDir)) {
             m_dirWatch->addDir(newDir, KDirWatch::WatchSubDirs | KDirWatch::WatchFiles);
         }
     }
@@ -433,6 +437,10 @@ void Image::updateDirWatch(const QStringList &newDirs)
 
 void Image::setSingleImage()
 {
+    if (isPreviewing()) {
+        return;
+    }
+
     if (m_wallpaper.isEmpty()) {
         useSingleImageDefaults();
     }
@@ -554,7 +562,11 @@ void Image::setWallpaper(const QString &path)
 
 void Image::startSlideshow()
 {
-    if(m_findToken.isEmpty()) {
+    if (isPreviewing()) {
+        return;
+    }
+
+    if (m_findToken.isEmpty()) {
         // populate background list
         m_timer.stop();
         m_slideshowBackgrounds.clear();
