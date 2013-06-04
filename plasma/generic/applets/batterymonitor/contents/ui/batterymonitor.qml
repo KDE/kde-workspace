@@ -89,6 +89,7 @@ Item {
         onDataChanged: {
             Logic.updateCumulative();
             plasmoid.status = Logic.plasmoidStatus();
+            Logic.updateTooltip();
         }
 
         property int cumulativePercent
