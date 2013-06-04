@@ -29,9 +29,7 @@ Item {
     width: parent.width
     height: Math.max(pmCheckBox.height, pmLabel.height) + padding.margins.top + padding.margins.bottom
 
-    property alias enabled: pmCheckBox.checked
-
-    signal enabledChanged(bool checked)
+    property bool enabled: pmCheckBox.checked
 
     Components.CheckBox {
         id: pmCheckBox
@@ -43,7 +41,6 @@ Item {
             bottomMargin: padding.margins.bottom
         }
         checked: true
-        onCheckedChanged: enabledChanged(checked)
     }
 
     Components.Label {
