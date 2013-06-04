@@ -35,16 +35,22 @@ Item {
 
     Component.onCompleted: {
         plasmoid.aspectRatioMode = IgnoreAspectRatio
-        Logic.updateCumulative();
-        plasmoid.status = Logic.plasmoidStatus();
-        Logic.updateTooltip();
-        Logic.updateBrightness();
+        updateLogic(true);
         plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);
     }
 
     function configChanged() {
         show_remaining_time = plasmoid.readConfig("showRemainingTime");
+    }
+
+    function updateLogic(updateBrightness) {
+        Logic.updateCumulative();
+        plasmoid.status = Logic.plasmoidStatus();
+        Logic.updateTooltip();
+        if (updateBrightness) {
+            Logic.updateBrightness();
+        }
     }
 
     function popupEventSlot(popped) {
@@ -63,10 +69,7 @@ Item {
         engine: "powermanagement"
         connectedSources: sources
         onDataChanged: {
-            Logic.updateCumulative();
-            plasmoid.status = Logic.plasmoidStatus();
-            Logic.updateTooltip();
-            Logic.updateBrightness();
+            updateLogic(true);
         }
         onSourceAdded: {
             if (source == "Battery0") {
@@ -87,9 +90,7 @@ Item {
         sourceFilter: "Battery[0-9]+"
 
         onDataChanged: {
-            Logic.updateCumulative();
-            plasmoid.status = Logic.plasmoidStatus();
-            Logic.updateTooltip();
+            updateLogic()
         }
 
         property int cumulativePercent
@@ -168,6 +169,8 @@ Item {
                     cookie2 = job.result;
                 });
             }
+            Logic.powermanagementDisabled = !checked;
+            updateLogic();
         }
     }
 }

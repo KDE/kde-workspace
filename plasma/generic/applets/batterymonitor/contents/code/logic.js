@@ -18,6 +18,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+var powermanagementDisabled = false;
+
 function updateCumulative() {
     var sum = 0;
     var count = 0;
@@ -56,6 +58,10 @@ function updateCumulative() {
 
 function plasmoidStatus() {
     var status = "PassiveStatus";
+    if (powermanagementDisabled) {
+        status = "ActiveStatus";
+    }
+
     if (batteries.cumulativePluggedin) {
         if (batteries.cumulativePercent <= 10) {
             status = "NeedsAttentionStatus";
@@ -168,6 +174,10 @@ function updateTooltip() {
             var b = lowestBattery();
             image = iconForBattery(b, false);
         }
+    }
+
+    if (powermanagementDisabled) {
+        text += i18n("Power Management is disabled.");
     }
     batteries.tooltipText = text;
     batteries.tooltipImage = image;
