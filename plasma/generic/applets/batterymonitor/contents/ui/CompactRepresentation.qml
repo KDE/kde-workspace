@@ -63,7 +63,7 @@ ListView {
 
         property bool hasBattery: view.singleBattery ? batteries.count : model["Plugged in"]
         property int percent: view.singleBattery ? batteries.cumulativePercent : model["Percent"]
-        property bool pluggedIn: model["Is Power Supply"] && pmSource.data["AC Adapter"]["Plugged in"]
+        property bool pluggedIn: view.singleBattery ? pmSource.data["AC Adapter"]["Plugged in"] : pmSource.data["AC Adapter"]["Plugged in"] && model["Is Power Supply"]
 
         width: view.width/view.count
         height: view.height
