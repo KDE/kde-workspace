@@ -150,7 +150,9 @@ function updateTooltip() {
     var text = "";
     if (batteries.count == 0) {
         image = "battery-missing";
-        text = i18n("No Batteries Available");
+        if (!powermanagementDisabled) {
+            text = i18n("No batteries available");
+        }
     } else {
         var hasPowerSupply = false;
 
@@ -174,6 +176,7 @@ function updateTooltip() {
 
         if (hasPowerSupply) {
             var b = [];
+            b["Type"] = "Battery";
             b["Percent"] = batteries.cumulativePercent;
             image = iconForBattery(b, pmSource.data["AC Adapter"]["Plugged in"] ? true : false);
         } else {
@@ -183,7 +186,7 @@ function updateTooltip() {
     }
 
     if (powermanagementDisabled) {
-        text += i18n("Power Management is disabled.");
+        text += i18n("Power management is disabled");
     }
     batteries.tooltipText = text;
     batteries.tooltipImage = image;
