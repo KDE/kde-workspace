@@ -51,6 +51,10 @@ ListView {
         if (!isConstrained()) {
             minimumHeight = theme.iconSizes.dialog;
             minimumWidth = minimumHeight * view.count;
+        } else {
+            // NOTE: Keep in sync with systray
+            minimumHeight = 24;
+            minimumWidth = 24;
         }
     }
 
