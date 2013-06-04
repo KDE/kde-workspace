@@ -279,7 +279,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: i18nc("Placeholder is battery capacity", "%1%", model["Capacity"])
-                    visible: model["Capacity"] != "" && model["Capacity"] !== undefined
+                    visible: model["Is Power Supply"] &&  model["Capacity"] != "" && model["Capacity"] !== undefined
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
