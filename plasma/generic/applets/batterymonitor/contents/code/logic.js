@@ -179,8 +179,12 @@ function updateBrightness() {
         return;
     }
     dialogItem.disableBrightnessUpdate = true;
-    dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
-    dialogItem.keyboardBrightness = pmSource.data["PowerDevil"]["Keyboard Brightness"];
+    if (pmSource.data["PowerDevil"]["Screen Brightness"]) {
+        dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
+    }
+    if (pmSource.data["PowerDevil"]["Keyboard Brightness"]) {
+        dialogItem.keyboardBrightness = pmSource.data["PowerDevil"]["Keyboard Brightness"];
+    }
     dialogItem.disableBrightnessUpdate = false;
 }
 
