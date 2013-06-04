@@ -159,7 +159,13 @@ function updateTooltip() {
             var b = batteries.get(i);
             text += "<tr>";
             text += "<td align='right'>" + i18nc("Placeholder is battery name", "%1:", b["Pretty Name"]) + " </td>";
-            text += "<td>" + i18nc("Placeholder is battery percentage", "%1%", b["Percent"]) + "</td>";
+            text += "<td>";
+            if (b["Plugged in"]) {
+                text += i18nc("Placeholder is battery percentage", "%1%", b["Percent"]);
+            } else {
+                text += i18n("N/A")
+            }
+            text += "</td>";
             text += "</tr>";
 
             if (b["Is Power Supply"]) { hasPowerSupply = true; }
