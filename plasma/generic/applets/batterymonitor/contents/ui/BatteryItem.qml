@@ -37,7 +37,9 @@ Item {
     property bool expanded
     property bool showChargeAnimation
 
-    property bool isPresent: !model["Is Power Supply"] || model["Plugged in"]
+    // NOTE: According to the UPower spec this property is only valid for primary batteries, however
+    // UPower seems to set the Present property false when a device is added but not probed yet
+    property bool isPresent: model["Plugged in"]
 
     function updateSelection() {
         var containsMouse = mouseArea.containsMouse;
