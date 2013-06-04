@@ -49,9 +49,8 @@ ListView {
 
     Component.onCompleted: {
         if (!isConstrained()) {
-            minimumWidth = theme.iconSizes.dialog + Math.max(theme.iconSize.dialog/8, 10);
-            minimumHeight = minimumWidth;
-            plasmoid.aspectRatioMode = IgnoreAspectRatio;
+            minimumHeight = theme.iconSizes.dialog;
+            minimumWidth = minimumHeight * view.count;
         }
     }
 
