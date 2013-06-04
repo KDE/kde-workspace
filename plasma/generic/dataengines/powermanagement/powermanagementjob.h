@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Sebastian Kügler <sebas@kde.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Library General Public License version 2 as
  * published by the Free Software Foundation
@@ -41,6 +41,7 @@ class PowerManagementJob : public Plasma::ServiceJob
         void requestShutDown();
         QString callForType(const SuspendType &type);
         void setScreenBrightness(int value);
+        void setKeyboardBrightness(int value);
 };
 
 #endif // POWERMANAGEMENTJOB_H

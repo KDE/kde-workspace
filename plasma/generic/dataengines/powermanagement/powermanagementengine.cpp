@@ -34,6 +34,7 @@
 #include <KIdleTime>
 
 #include <QtDBus/QDBusConnectionInterface>
+#include <QtDBus/QDBusError>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusMetaType>
 #include <QtDBus/QDBusReply>
@@ -58,11 +59,12 @@ PowermanagementEngine::~PowermanagementEngine()
 
 void PowermanagementEngine::init()
 {
-    connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceRemoved(QString)),
-            this,                              SLOT(deviceRemoved(QString)));
     connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceAdded(QString)),
             this,                              SLOT(deviceAdded(QString)));
+    connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceRemoved(QString)),
+            this,                              SLOT(deviceRemoved(QString)));
 
+    // FIXME This check doesn't work, connect seems to always return true, hence the hack below
     if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
@@ -76,6 +78,20 @@ void PowermanagementEngine::init()
             screenBrightnessChanged(0);
             brightnessControlsAvailableChanged(true);
         }
+
+        if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
+                                                   "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+                                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+                                                   "keyboardBrightnessChanged", this,
+                                                   SLOT(keyboardBrightnessChanged(int)))) {
+            kDebug() << "error connecting to Keyboard Brightness changes via dbus";
+            keyboardBrightnessControlsAvailableChanged(false);
+        } else {
+            sourceRequestEvent("PowerDevil");
+            keyboardBrightnessChanged(0);
+            keyboardBrightnessControlsAvailableChanged(true);
+        }
+
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement",
                                                    "org.kde.Solid.PowerManagement",
@@ -135,6 +151,7 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
 
             setData(source, "Vendor", deviceBattery.vendor());
             setData(source, "Product", deviceBattery.product());
+            setData(source, "Capacity", battery->capacity());
             setData(source, "Type", batteryType(battery));
         }
 
@@ -185,14 +202,30 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
             //kDebug() << "Sleepstate \"" << sleepstate << "\" supported.";
         }
     } else if (name == "PowerDevil") {
-        QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                          "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-                                                          "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-                                                          "brightness");
-        QDBusPendingReply<int> reply = QDBusConnection::sessionBus().asyncCall(msg);
-        QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
-        QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
-                            this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
+        QDBusMessage msg;
+        QDBusPendingReply<int> reply;
+
+        if (m_brightnessControlsAvailable) {
+          msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                            "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                            "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
+                                                            "brightness");
+          reply = QDBusConnection::sessionBus().asyncCall(msg);
+          QDBusPendingCallWatcher *screenWatcher = new QDBusPendingCallWatcher(reply, this);
+          QObject::connect(screenWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                              this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
+        }
+
+        if (m_keyboardBrightnessControlsAvailable) {
+          msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+                                                            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+                                                            "keyboardBrightness");
+          reply = QDBusConnection::sessionBus().asyncCall(msg);
+          QDBusPendingCallWatcher *keyboardWatcher = new QDBusPendingCallWatcher(reply, this);
+          QObject::connect(keyboardWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                              this, SLOT(keyboardBrightnessReply(QDBusPendingCallWatcher*)));
+        }
     //any info concerning lock screen/screensaver goes here
     } else if (name == "UserActivity") {
         setData("UserActivity", "IdleTime", KIdleTime::instance()->idleTime());
@@ -207,31 +240,31 @@ QString PowermanagementEngine::batteryType(const Solid::Battery* battery)
 {
   switch(battery->type()) {
       case Solid::Battery::PrimaryBattery:
-          return QString("Battery");
+          return QLatin1String("Battery");
           break;
       case Solid::Battery::UpsBattery:
-          return QString("Ups");
+          return QLatin1String("Ups");
           break;
       case Solid::Battery::MonitorBattery:
-          return QString("Monitor");
+          return QLatin1String("Monitor");
           break;
       case Solid::Battery::MouseBattery:
-          return QString("Mouse");
+          return QLatin1String("Mouse");
           break;
       case Solid::Battery::KeyboardBattery:
-          return QString("Keyboad");
+          return QLatin1String("Keyboad");
           break;
       case Solid::Battery::PdaBattery:
-          return QString("Pda");
+          return QLatin1String("Pda");
           break;
       case Solid::Battery::PhoneBattery:
-          return QString("Phone");
+          return QLatin1String("Phone");
           break;
       default:
-          return QString("Unknown");
+          return QLatin1String("Unknown");
   }
 
-  return QString("Unknown");
+  return QLatin1String("Unknown");
 }
 
 bool PowermanagementEngine::updateSourceEvent(const QString &source)
@@ -293,7 +326,14 @@ void PowermanagementEngine::updateBatteryNames()
         if (batteryDataContainer) {
             const QString batteryVendor = batteryDataContainer->data()["Vendor"].toString();
             const QString batteryProduct = batteryDataContainer->data()["Product"].toString();
-            if (!batteryProduct.isEmpty() && batteryProduct != "Unknown Battery") {
+
+            // Don't show battery name for primary power supply batteries. They usually have cryptic serial number names.
+            const QString batteryType = batteryDataContainer->data()["Type"].toString();
+            bool batteryIsPowerSupply = batteryDataContainer->data()["Is Power Supply"].toBool();
+            bool showBatteryName = batteryType != QLatin1String("Battery") ||
+                                   (batteryType != QLatin1String("Battery") && !batteryIsPowerSupply);
+
+            if (!batteryProduct.isEmpty() && batteryProduct != "Unknown Battery" && showBatteryName) {
                 if (!batteryVendor.isEmpty()) {
                     setData(source, "Pretty Name", QString(batteryVendor + ' ' + batteryProduct));
                 } else {
@@ -369,6 +409,7 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
 
             setData(source, "Vendor", device.vendor());
             setData(source, "Product", device.product());
+            setData(source, "Capacity", battery->capacity());
             setData(source, "Type", batteryType(battery));
 
             setData("Battery", "Sources", sourceNames);
@@ -388,6 +429,13 @@ void PowermanagementEngine::batteryRemainingTimeChanged(qulonglong time)
 void PowermanagementEngine::brightnessControlsAvailableChanged(bool available)
 {
     setData("PowerDevil", "Screen Brightness Available", available);
+    m_brightnessControlsAvailable = available;
+}
+
+void PowermanagementEngine::keyboardBrightnessControlsAvailableChanged(bool available)
+{
+    setData("PowerDevil", "Keyboard Brightness Available", available);
+    m_keyboardBrightnessControlsAvailable = available;
 }
 
 void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *watcher)
@@ -408,13 +456,34 @@ void PowermanagementEngine::screenBrightnessChanged(int brightness)
     setData("PowerDevil", "Screen Brightness", brightness);
 }
 
+void PowermanagementEngine::keyboardBrightnessChanged(int brightness)
+{
+    setData("PowerDevil", "Keyboard Brightness", brightness);
+}
+
 void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watcher)
 {
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
         kDebug() << "Error getting screen brightness: " << reply.error().message();
+        // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
+        brightnessControlsAvailableChanged(false);
     } else {
         screenBrightnessChanged(reply.value());
+    }
+
+    watcher->deleteLater();
+}
+
+void PowermanagementEngine::keyboardBrightnessReply(QDBusPendingCallWatcher *watcher)
+{
+    QDBusPendingReply<int> reply = *watcher;
+    if (reply.isError()) {
+        kDebug() << "Error getting keyboard brightness: " << reply.error().message();
+        // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
+        keyboardBrightnessControlsAvailableChanged(false);
+    } else {
+        keyboardBrightnessChanged(reply.value());
     }
 
     watcher->deleteLater();

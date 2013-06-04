@@ -1,5 +1,6 @@
 /*
  *   Copyright 2011 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 Kai Uwe Broulik <kde@privat.broulik.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -18,179 +19,106 @@
  */
 
 import QtQuick 1.1
+import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
+import org.kde.qtextracomponents 0.1
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: dialog
-    width: childrenRect.width+24
-    height: childrenRect.height+24
+    property int actualHeight: batteryColumn.implicitHeight + settingsColumn.height + separator.height + 10 // 10 = separator margins
 
-    property alias model: batteryLabels.model
-    property alias hasBattery: batteryIcon.hasBattery
-    property alias percent: batteryIcon.percent
+    property alias model: batteryList.model
     property bool pluggedIn
+    property bool showRemainingTime
+
+    property bool popupShown // somehow plasmoid.popupShowing isn't working
+
     property bool isBrightnessAvailable
     property alias screenBrightness: brightnessSlider.value
-    property int remainingMsec
-    property alias showSuspendButton: suspendButton.visible
-    property alias showHibernateButton: hibernateButton.visible
 
+    property bool isKeyboardBrightnessAvailable
+    property alias keyboardBrightness: keyboardBrightnessSlider.value
 
-    signal suspendClicked(int type)
     signal brightnessChanged(int screenBrightness)
+    signal keyboardBrightnessChanged(int keyboardBrightness)
     signal powermanagementChanged(bool checked)
 
+    PlasmaCore.FrameSvgItem {
+        id: padding
+        imagePath: "widgets/viewitem"
+        prefix: "hover"
+        opacity: 0
+    }
+
     Column {
-        id: labels
-        spacing: 6
+        id: batteryColumn
+        spacing: 4
+        width: parent.width
         anchors {
-            top: parent.top
             left: parent.left
-            margins: 12
+            right: parent.right
+            top: plasmoid.location == BottomEdge ? parent.top : undefined
+            bottom: plasmoid.location == BottomEdge ? undefined : parent.bottom
         }
+
         Repeater {
-            model: dialog.model
-            Components.Label {
-                text: model["Pretty Name"] + ':'
-                width: labels.width
-                horizontalAlignment: Text.AlignRight
-            }
-        }
-
-        Components.Label {
-            text: i18n("AC Adapter:")
-            anchors.right: parent.right
-            anchors.bottomMargin: 12
-        }
-
-        Components.Label {
-            text: i18nc("Label for remaining time", "Time Remaining:")
-            visible: remainingTime.visible
-            anchors.right: parent.right
-        }
-
-        Components.Label {
-            text: i18nc("Label for power management inhibition", "Power management enabled:")
-            anchors.right: parent.right
-        }
-
-        Components.Label {
-            text: i18n("Screen Brightness:")
-            visible: isBrightnessAvailable
-            anchors.right: parent.right
+            id: batteryList
+            delegate: BatteryItem { showChargeAnimation: popupShown }
         }
     }
 
     Column {
-        id: values
-        spacing: 6
+        id: settingsColumn
+        spacing: 0
+        width: parent.width
+
         anchors {
-            top: parent.top
-            left: labels.right
-            margins: 12
+            left: parent.left
+            right: parent.right
+            top: plasmoid.location == BottomEdge ? undefined : parent.top
+            bottom: plasmoid.location == BottomEdge ? parent.bottom : undefined
         }
 
-        Column {
-            id: upperValues
-            spacing: 6
-            anchors {
-                left: values.left
-            }
+        BrightnessItem {
+            id: brightnessSlider
+            icon: QIcon("video-display")
+            label: i18n("Display Brightness")
+            visible: isBrightnessAvailable
+            onChanged: brightnessChanged(value)
 
-            Repeater {
-                id: batteryLabels
-                Components.Label {
-                    text: Logic.stringForState(model)
-                    font.weight: Font.Bold
-                }
-            }
-
-            Components.Label {
-                text: dialog.pluggedIn ? i18n("Plugged in") : i18n("Not plugged in")
-                font.weight: Font.Bold
-                anchors.bottomMargin: 12
-            }
-
-            Components.Label {
-                id: remainingTime
-                text: formatDuration(remainingMsec);
-                font.weight: Font.Bold
-                visible: text!=""
-            }
         }
 
-        Column {
-            id: lowerValues
-            spacing: 6
-            width: upperValues.width + batteryIcon.width * 2
-            anchors {
-                left: values.left
-            }
-            Components.CheckBox {
-                checked: true
-                onClicked: powermanagementChanged(checked)
-                x: 1
-            }
+        BrightnessItem {
+            id: keyboardBrightnessSlider
+            icon: QIcon("input-keyboard")
+            label: i18n("Keyboard Brightness")
+            visible: isKeyboardBrightnessAvailable
+            onChanged: keyboardBrightnessChanged(value)
+        }
 
-            Components.Slider {
-                id: brightnessSlider
-                width: lowerValues.width
-                visible: isBrightnessAvailable
-                minimumValue: 0
-                maximumValue: 100
-                stepSize: 10
-                onValueChanged: brightnessChanged(value)
-            }
+        PowerManagementItem {
+            id: pmSwitch
+            onEnabledChanged: powermanagementChanged(enabled)
         }
     }
 
-    // TODO: give translated and formatted string with KGlobal::locale()->prettyFormatDuration(msec);
-    function formatDuration(msec) {
-        if (msec==0)
-            return "";
-
-        var time = new Date(msec);
-        var hours = time.getUTCHours();
-        var minutes = time.getUTCMinutes();
-        var str = "";
-        if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
-        if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
-        return str;
-    }
-
-    Row {
+    PlasmaCore.SvgItem {
+        id: separator
+        svg: PlasmaCore.Svg {
+            id: lineSvg
+            imagePath: "widgets/line"
+        }
+        elementId: "horizontal-line"
+        height: lineSvg.elementSize("horizontal-line").height
+        width: parent.width
         anchors {
-            top: values.bottom
-            margins: 12
-            right: values.right
+            top: plasmoid.location == BottomEdge ? undefined : settingsColumn.bottom
+            bottom: plasmoid.location == BottomEdge ? settingsColumn.top : undefined
+            leftMargin: padding.margins.left
+            rightMargin: padding.margins.right
+            topMargin: 5
+            bottomMargin: 5
         }
-
-        Components.ToolButton {
-            id: suspendButton
-            iconSource: "system-suspend"
-            text: i18nc("Suspend the computer to RAM; translation should be short", "Sleep")
-            onClicked: suspendClicked(Logic.ram)
-        }
-
-        Components.ToolButton {
-            id: hibernateButton
-            iconSource: "system-suspend-hibernate"
-            text: i18nc("Suspend the computer to disk; translation should be short", "Hibernate")
-            onClicked: suspendClicked(Logic.disk)
-        }
-    }
-
-    BatteryIcon {
-        id: batteryIcon
-        monochrome: false
-        pluggedIn: dialog.pluggedIn
-        anchors {
-            top: parent.top
-            right: values.right
-            topMargin: 12
-        }
-        width: height
-        height: hibernateButton.height * 2
     }
 }

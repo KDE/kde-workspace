@@ -18,13 +18,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-var ram = 0
-var disk = 1
-
 function updateCumulative() {
     var sum = 0;
     var count = 0;
     var charged = true;
+    var plugged = false;
     for (var i=0; i<batteries.count; i++) {
         var b = batteries.get(i);
         if (!b["Is Power Supply"]) {
@@ -32,6 +30,7 @@ function updateCumulative() {
         }
         if (b["Plugged in"]) {
             sum += b["Percent"];
+            plugged = true;
         }
         if (b["State"] != "NoCharge") {
             charged = false;
@@ -39,64 +38,139 @@ function updateCumulative() {
         count++;
     }
 
-    if (batteries.count > 0) {
-        batteries.cumulativePercent = Math.round(sum/count);
+    if (count > 0) {
+      batteries.cumulativePercent = Math.round(sum/count);
     } else {
-        batteries.cumulativePercent = 0;
+        // We don't have any power supply batteries
+        // Use the lowest value from any battery
+        if (batteries.count > 0) {
+            var b = lowestBattery();
+            batteries.cumulativePercent = b["Percent"];
+        } else {
+            batteries.cumulativePercent = 0;
+        }
     }
+    batteries.cumulativePluggedin = plugged;
     batteries.allCharged = charged;
 }
 
-function stringForState(batteryData) {
-    var pluggedIn = batteryData["Plugged in"];
-    var percent = batteryData["Percent"];
-    var state = batteryData["State"];
-    var powerSupply = batteryData["Is Power Supply"];
+function plasmoidStatus() {
+    var status = "PassiveStatus";
+    if (batteries.cumulativePluggedin) {
+        if (batteries.cumulativePercent <= 10) {
+            status = "NeedsAttentionStatus";
+        } else if (!batteries.allCharged) {
+            status = "ActiveStatus";
+        }
+    } else if (batteries.count > 0) { // in case your mouse gets low
+        if (batteries.cumulativePercent && batteries.cumulativePercent <= 10) {
+            status = "NeedsAttentionStatus";
+        }
+    }
+    return status;
+}
 
-    var text="<b>";
-    if (pluggedIn) {
-        // According to UPower spec, the chargeState is only valid for primary batteries
-        if (powerSupply) {
-            switch(state) {
-                case "NoCharge": text += i18n("%1% (charged)", percent); break;
-                case "Discharging": text += i18n("%1% (discharging)", percent); break;
-                default: text += i18n("%1% (charging)", percent);
-            }
-        } else {
-            text += i18n("%1%", percent);
+function lowestBattery() {
+    if (batteries.count == 0) {
+        return;
+    }
+
+    var lowestPercent = 100;
+    var lowestBattery;
+    for(var i=0; i<batteries.count; i++) {
+        var b = batteries.get(i);
+        if (b["Percent"] && b["Percent"] < lowestPercent) {
+            lowestPercent = b["Percent"];
+            lowestBattery = b;
+        }
+    }
+    return b;
+}
+
+function stringForBatteryState(batteryData) {
+    if (batteryData["Plugged in"]) {
+        switch(batteryData["State"]) {
+            case "NoCharge": return i18n("Not Charging");
+            case "Discharging": return i18n("Discharging");
+            case "FullyCharged": return i18n("Fully Charged");
+            default: return i18n("Charging");
         }
     } else {
-        text += i18nc("Battery is not plugged in", "Not present");
+        return i18nc("Battery is currently not present in the bay","Not present");
     }
-    text += "</b>";
+}
 
-    return text;
+function iconForBattery(batteryData,pluggedIn) {
+    switch(batteryData["Type"]) {
+        case "Monitor":
+            return "video-display";
+        case "Mouse":
+            return "input-mouse";
+        case "Keyboard":
+            return "input-keyboard";
+        case "Pda":
+            return "pda";
+        case "Phone":
+            return "phone";
+        default: // Primary and UPS
+            p = batteryData["Percent"];
+            if (p >= 90) {
+                fill = "100";
+            } else if (p >= 70) {
+                fill = "080";
+            } else if (p >= 50) {
+                fill = "060";
+            } else if (p >= 30) {
+                fill = "040";
+            } else if (p >= 10) {
+                fill = "caution";
+            } else {
+                fill = "low";
+            }
+
+            if (pluggedIn && batteryData["Is Power Supply"]) {
+                return "battery-charging-" + fill;
+            } else {
+                if (p < 5) {
+                    return "dialog-warning"
+                }
+                return "battery-" + fill;
+            }
+    }
 }
 
 function updateTooltip() {
-    var text="";
+    var image = "";
+    var text = "";
+    if (batteries.count == 0) {
+        image = "battery-missing";
+        text = i18n("No Batteries Available");
+    } else {
+        var hasPowerSupply = false;
 
-    for (var i=0; i<batteries.count; i++) {
-        var b = batteries.get(i);
-        if (text != "") {
-            text += "<br/>";
+        text = "<table style='white-space: nowrap'>";
+        for(var i=0; i<batteries.count; i++) {
+            var b = batteries.get(i);
+            text += "<tr>";
+            text += "<td align='right'>" + i18nc("Placeholder is battery name", "%1:", b["Pretty Name"]) + " </td>";
+            text += "<td>" + i18nc("Placeholder is battery percentage", "%1%", b["Percent"]) + "</td>";
+            text += "</tr>";
+
+            if (b["Is Power Supply"]) { hasPowerSupply = true; }
         }
+        text += "</table>";
 
-        text += b["Pretty Name"];
-
-        text += ": ";
-        text += stringForState(pmSource.data["Battery"+i]);
+        if (hasPowerSupply) {
+            var b = [];
+            b["Percent"] = batteries.cumulativePercent;
+            image = iconForBattery(b, pmSource.data["AC Adapter"]["Plugged in"] ? true : false);
+        } else {
+            var b = lowestBattery();
+            image = iconForBattery(b, false);
+        }
     }
-
-    if (text != "") {
-        text += "<br/>";
-    }
-
-    if (pmSource.data["AC Adapter"]) {
-        text += i18nc("tooltip", "AC Adapter:") + " ";
-        text += pmSource.data["AC Adapter"]["Plugged in"] ? i18nc("tooltip", "<b>Plugged in</b>") : i18nc("tooltip", "<b>Not plugged in</b>");
-    }
-    batteries.tooltipText = "<p style='white-space: nowrap'>" + text + "</p>";
+    batteries.tooltipText = text;
+    batteries.tooltipImage = image;
 }
 
 function updateBrightness() {
@@ -106,15 +180,21 @@ function updateBrightness() {
     }
     dialogItem.disableBrightnessUpdate = true;
     dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
+    dialogItem.keyboardBrightness = pmSource.data["PowerDevil"]["Keyboard Brightness"];
     dialogItem.disableBrightnessUpdate = false;
 }
 
-function callForType(type) {
-    if (type == ram) {
-        return "suspendToRam";
-    } else if (type == disk) {
-        return "suspendToDisk";
-    }
+// TODO: give translated and formatted string with KGlobal::locale()->prettyFormatDuration(msec);
+function formatDuration(msec) {
+    if (msec == 0 || msec === undefined)
+        return "";
 
-    return "suspendHybrid";
+    var time = new Date(msec);
+    var hours = time.getUTCHours();
+    var minutes = time.getUTCMinutes();
+
+    var str = "";
+    if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
+    if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
+    return str;
 }

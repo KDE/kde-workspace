@@ -1,6 +1,7 @@
 /*
  *   Copyright 2011 Sebastian Kügler <sebas@kde.org>
  *   Copyright 2011 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 Kai Uwe Broulik <kde@privat.broulik.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -21,127 +22,40 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import "plasmapackage:/code/logic.js" as Logic
-import "plasmapackage:/code/platform.js" as Platform
 
 Item {
     id: batterymonitor
-    property int minimumWidth: dialogItem.width
-    property int minimumHeight: dialogItem.height
+    property int minimumWidth: theme.iconSizes.dialog * 9
+    property int minimumHeight: dialogItem.actualHeight
+    property int maximumHeight: dialogItem.actualHeight
 
     property bool show_remaining_time: false
 
+    PlasmaCore.Theme { id: theme }
+
     Component.onCompleted: {
+        plasmoid.aspectRatioMode = IgnoreAspectRatio
         Logic.updateCumulative();
+        plasmoid.status = Logic.plasmoidStatus();
         Logic.updateTooltip();
         Logic.updateBrightness();
         plasmoid.addEventListener('ConfigChanged', configChanged);
+        plasmoid.popupEvent.connect(popupEventSlot);
     }
 
     function configChanged() {
         show_remaining_time = plasmoid.readConfig("showRemainingTime");
     }
 
-    property Component compactRepresentation: Component {
-        ListView {
-            id: view
+    function popupEventSlot(popped) {
+        dialogItem.popupShown = popped;
+    }
 
-            property int minimumWidth
-            property int minimumHeight
-
-            property bool showOverlay: false
-            property bool hasBattery: pmSource.data["Battery"]["Has Battery"]
-
-            property QtObject pmSource: plasmoid.rootItem.pmSource
-            property QtObject batteries: plasmoid.rootItem.batteries
-
-            property bool singleBattery: isConstrained() || !hasBattery
-
-            model: singleBattery ? 1 : batteries
-
-            PlasmaCore.Theme { id: theme }
-
-            anchors.fill: parent
-            orientation: ListView.Horizontal
-            interactive: false
-
-            function isConstrained() {
-                return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
-            }
-
-            Component.onCompleted: {
-                if (!isConstrained()) {
-                    minimumWidth = 32;
-                    minimumHeight = 32;
-                }
-                plasmoid.addEventListener('ConfigChanged', configChanged);
-            }
-
-            function configChanged() {
-                showOverlay = plasmoid.readConfig("showBatteryString");
-            }
-
-            delegate: Item {
-                id: batteryContainer
-
-                property bool hasBattery: view.singleBattery ? batteries.cumulativePluggedin : model["Plugged in"]
-                property int percent: view.singleBattery ? batteries.cumulativePercent : model["Percent"]
-                property bool pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
-
-                width: view.width/view.count
-                height: view.height
-
-                property real size: Math.min(width, height)
-
-                BatteryIcon {
-                    id: batteryIcon
-                    monochrome: true
-                    hasBattery: parent.hasBattery
-                    percent: parent.percent
-                    pluggedIn: parent.pluggedIn
-                    width: size; height: size
-                    anchors.centerIn: parent
-                }
-
-                Rectangle {
-                    id: labelRect
-                    // should be 40 when size is 90
-                    width: Math.max(parent.size*4/9, 35)
-                    height: width/2
-                    anchors.centerIn: parent
-                    color: theme.backgroundColor
-                    border.color: "grey"
-                    border.width: 2
-                    radius: 4
-                    opacity: hasBattery ? (showOverlay ? 0.7 : (isConstrained() ? 0 : mouseArea.containsMouse*0.7)) : 0
-
-                    Behavior on opacity { NumberAnimation { duration: 100 } }
-                }
-
-                Text {
-                    id: overlayText
-                    text: i18nc("overlay on the battery, needs to be really tiny", "%1%", percent);
-                    color: theme.textColor
-                    font.pixelSize: Math.max(parent.size/8, 11)
-                    anchors.centerIn: labelRect
-                    // keep the opacity 1 when labelRect.opacity=0.7
-                    opacity: labelRect.opacity/0.7
-                }
-            }
-
-            MouseArea {
-                id: mouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: plasmoid.togglePopup()
-
-                PlasmaCore.ToolTip {
-                    id: tooltip
-                    target: mouseArea
-                    image: "battery"
-                    subText: batteries.tooltipText
-                }
-            }
-        }
+    property Component compactRepresentation: CompactRepresentation {
+        hasBattery: pmSource.data["Battery"]["Has Battery"]
+        pmSource: plasmoid.rootItem.pmSource
+        batteries: plasmoid.rootItem.batteries
+        singleBattery: isConstrained() || !hasBattery
     }
 
     property QtObject pmSource: PlasmaCore.DataSource {
@@ -149,6 +63,8 @@ Item {
         engine: "powermanagement"
         connectedSources: sources
         onDataChanged: {
+            Logic.updateCumulative();
+            plasmoid.status = Logic.plasmoidStatus();
             Logic.updateTooltip();
             Logic.updateBrightness();
         }
@@ -172,45 +88,31 @@ Item {
 
         onDataChanged: {
             Logic.updateCumulative();
-
-            var status = "PassiveStatus";
-            if (batteries.cumulativePluggedin) {
-                if (batteries.cumulativePercent <= 10) {
-                    status = "NeedsAttentionStatus";
-                } else if (!batteries.allCharged) {
-                    status = "ActiveStatus";
-                }
-            }
-            plasmoid.status = status;
+            plasmoid.status = Logic.plasmoidStatus();
         }
 
         property int cumulativePercent
-        property bool cumulativePluggedin: count > 0
+        property bool cumulativePluggedin
         // true  --> all batteries charged
         // false --> one of the batteries charging/discharging
         property bool allCharged
         property string tooltipText
+        property string tooltipImage
     }
 
     PopupDialog {
         id: dialogItem
         property bool disableBrightnessUpdate: false
         model: batteries
-        hasBattery: batteries.cumulativePluggedin
-        percent: batteries.cumulativePercent
-        isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"]
-        pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
-        remainingMsec: parent.show_remaining_time ? Number(pmSource.data["Battery"]["Remaining msec"]) : 0
-        showSuspendButton: Platform.shouldOfferSuspend(pmSource)
-        showHibernateButton: Platform.shouldOfferHibernate(pmSource)
+        anchors.fill: parent
 
-        onSuspendClicked: {
-            plasmoid.togglePopup();
-            service = pmSource.serviceForSource("PowerDevil");
-            var operationName = Logic.callForType(type);
-            operation = service.operationDescription(operationName);
-            service.startOperationCall(operation);
-        }
+        isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
+        isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
+
+        showRemainingTime: show_remaining_time
+
+        pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
+
         onBrightnessChanged: {
             if (disableBrightnessUpdate) {
                 return;
@@ -218,6 +120,15 @@ Item {
             service = pmSource.serviceForSource("PowerDevil");
             operation = service.operationDescription("setBrightness");
             operation.brightness = screenBrightness;
+            service.startOperationCall(operation);
+        }
+        onKeyboardBrightnessChanged: {
+            if (disableBrightnessUpdate) {
+                return;
+            }
+            service = pmSource.serviceForSource("PowerDevil");
+            operation = service.operationDescription("setKeyboardBrightness");
+            operation.brightness = keyboardBrightness;
             service.startOperationCall(operation);
         }
         property int cookie1: -1
