@@ -51,6 +51,7 @@ public:
     WindowList directMemberwinIds() const;
 
     AbstractGroupableItem *getMemberByWId(WId id);
+    AbstractGroupableItem *getMemberById(int id);
     //including subgroups
     int totalSize();
 

@@ -355,6 +355,11 @@ bool GroupManagerPrivate::addTask(::TaskManager::Task *task)
         abstractGroupingStrategy->handleItem(item);
     } else {
         currentRootGroup()->add(item);
+
+        if (abstractSortingStrategy) {
+            abstractSortingStrategy->handleItem(item);
+            abstractSortingStrategy->check(item);
+        }
     }
 
     if (showOnlyCurrentScreen) {

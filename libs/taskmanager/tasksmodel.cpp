@@ -1,6 +1,7 @@
 /*****************************************************************
 
-Copyright 2010 Aaron Seigo <aseigo@kde.org
+Copyright 2010 Aaron Seigo <aseigo@kde.org>
+Copyright 2012-2013 Eike Hein <hein@kde.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +74,8 @@ TasksModel::TasksModel(GroupManager *groupManager, QObject *parent)
         connect(groupManager, SIGNAL(reload()), this, SLOT(populateModel()));
     }
 
-    d->populateModel();
+    connect(this, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SIGNAL(countChanged()));
+    connect(this, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SIGNAL(countChanged()));
 }
 
 TasksModel::~TasksModel()
@@ -96,12 +98,53 @@ QVariant TasksModel::data(const QModelIndex &index, int role) const
         return item->name();
     } else if (role == Qt::DecorationRole) {
         return item->icon();
+    } else if (role == TasksModel::Id) {
+        return item->id();
+    } else if (role == TasksModel::GenericName) {
+        return item->genericName();
     } else if (role == TasksModel::IsStartup) {
         return item->isStartupItem();
+    } else if (role == TasksModel::IsLauncher) {
+        return item->itemType() == LauncherItemType;
     } else if (role == TasksModel::OnAllDesktops) {
         return item->isOnAllDesktops();
     } else if (role == TasksModel::Desktop) {
         return item->desktop();
+    } else if (role == TasksModel::DesktopName) {
+        return KWindowSystem::desktopName(item->desktop());
+    } else if (role == TasksModel::OnAllActivities) {
+        // FIXME: 2ac45a07d6 should have put isOnAllActivities() & co
+        // into AbstractGroupableItem to avoid this scaffolding; make
+        // that happen.
+        if (item->itemType() == TaskItemType) {
+            TaskItem *taskItem = static_cast<TaskItem *>(item);
+
+            if (taskItem->task()) {
+                return taskItem->task()->isOnAllActivities();
+            }
+        }
+
+        return false;
+    } else if (role == TasksModel::ActivityNames) {
+        QVariantList activities;
+
+        if (item->itemType() == TaskItemType) {
+            foreach(const QString &activity, static_cast<TaskItem *>(item)->activityNames()) {
+                activities << activity;
+            }
+        }
+
+        return activities;
+    } else if (role == TasksModel::OtherActivityNames) {
+        QVariantList activities;
+
+        if (item->itemType() == TaskItemType) {
+            foreach(const QString &activity, static_cast<TaskItem *>(item)->activityNames(false)) {
+                activities << activity;
+            }
+        }
+
+        return activities;
     } else if (role == TasksModel::Shaded) {
         return item->isShaded();
     } else if (role == TasksModel::Maximized) {
@@ -119,16 +162,74 @@ QVariant TasksModel::data(const QModelIndex &index, int role) const
     } else if (role == TasksModel::DemandsAttention) {
         return item->demandsAttention();
     } else if (role == TasksModel::LauncherUrl) {
-        return item->launcherUrl();
+        return QUrl(item->launcherUrl());
+    } else if (role == TasksModel::WindowList) {
+        QVariantList windows;
+
+        foreach(const qulonglong winId, item->winIds()) {
+            windows << winId;
+        }
+
+        return windows;
     }
 
     return QVariant();
 }
 
+int TasksModel::activeTaskId() const
+{
+    QList<int> taskIds;
+
+    foreach (AbstractGroupableItem *item, d->rootGroup->members()) {
+        if (item->itemType() == TaskItemType && static_cast<TaskItem *>(item)->task()->isActive()) {
+            return item->id();
+        } else {
+            if (item->itemType() == GroupItemType)
+            {
+                foreach(AbstractGroupableItem *subItem, static_cast<TaskGroup *>(item)->members()) {
+                    if (subItem->itemType() == TaskItemType && static_cast<TaskItem *>(subItem)->task()->isActive()) {
+                        return subItem->id();
+                    }
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
+QVariant TasksModel::taskIdList(const QModelIndex& parent, bool recursive) const
+{
+    QVariantList taskIds;
+
+    TaskGroup* parentGroup = d->rootGroup;
+
+    AbstractGroupableItem *parentItem = static_cast<AbstractGroupableItem *>(parent.internalPointer());
+
+    if (parent.isValid() && parentItem->itemType() == GroupItemType) {
+        parentGroup = static_cast<TaskGroup *>(parentItem);
+    }
+
+    foreach (AbstractGroupableItem *item, parentGroup->members()) {
+        if (item->itemType() == TaskItemType) {
+            taskIds << item->id();
+        } else if (recursive) {
+            if (item->itemType() == GroupItemType)
+            {
+                foreach(AbstractGroupableItem *subItem, static_cast<TaskGroup *>(item)->members()) {
+                    taskIds << subItem->id();
+                }
+            }
+        }
+    }
+
+    return taskIds;
+}
+
 QModelIndex TasksModel::index(int row, int column, const QModelIndex &parent) const
 {
     GroupManager *gm = d->groupManager.data();
-    if (!gm || row < 0 || column < 0) {
+    if (!gm || row < 0 || column < 0 || column > 0) {
         return QModelIndex();
     }
 
@@ -164,7 +265,7 @@ QModelIndex TasksModel::parent(const QModelIndex &idx) const
     }
 
     TaskGroup *group = item->parentGroup();
-    if (!group || group == gm->rootGroup()) {
+    if (!group || group == gm->rootGroup() || !group->parentGroup()) {
         return QModelIndex();
     }
 
@@ -203,12 +304,18 @@ int TasksModel::rowCount(const QModelIndex &parent) const
     }
 
     AbstractGroupableItem *item = static_cast<AbstractGroupableItem *>(parent.internalPointer());
-    if (item->itemType() == GroupItemType) {
+
+    if (item && item->itemType() == GroupItemType) {
         TaskGroup *group = static_cast<TaskGroup *>(item);
         return group->members().count();
     }
 
     return 0;
+}
+
+int TasksModel::launcherCount() const
+{
+    return d->groupManager.data()->launcherCount();
 }
 
 TasksModelPrivate::TasksModelPrivate(TasksModel *model, GroupManager *gm)
@@ -221,7 +328,7 @@ TasksModelPrivate::TasksModelPrivate(TasksModel *model, GroupManager *gm)
 void TasksModelPrivate::populateModel()
 {
     GroupManager *gm = groupManager.data();
-    kDebug() << gm;
+
     if (!gm) {
         rootGroup = 0;
         return;
@@ -234,7 +341,6 @@ void TasksModelPrivate::populateModel()
         }
 
         rootGroup = gm->rootGroup();
-        kDebug() << "root group connection" << rootGroup;
     }
 
     q->beginResetModel();
@@ -245,10 +351,6 @@ void TasksModelPrivate::populateModel()
 
 void TasksModelPrivate::populate(const QModelIndex &parent, TaskGroup *group)
 {
-    if (group->members().isEmpty()) {
-        return;
-    }
-
     QObject::connect(group, SIGNAL(itemAboutToBeAdded(AbstractGroupableItem*, int)),
                      q, SLOT(itemAboutToBeAdded(AbstractGroupableItem*, int)),
                      Qt::UniqueConnection);
@@ -267,6 +369,10 @@ void TasksModelPrivate::populate(const QModelIndex &parent, TaskGroup *group)
     QObject::connect(group, SIGNAL(itemPositionChanged(AbstractGroupableItem*)),
                      q, SLOT(itemMoved(AbstractGroupableItem*)),
                      Qt::UniqueConnection);
+
+    if (group->members().isEmpty()) {
+        return;
+    }
 
     typedef QPair<QModelIndex, TaskGroup *> idxGroupPair;
     QList<idxGroupPair> childGroups;
@@ -293,7 +399,9 @@ int TasksModelPrivate::indexOf(AbstractGroupableItem *item)
 {
     Q_ASSERT(item != rootGroup);
     int row = 0;
-    //kDebug() << item << item->parentGroup();
+
+    if (!item->parentGroup())
+        return -1;
 
     foreach (const AbstractGroupableItem * child, item->parentGroup()->members()) {
         if (child == item) {
@@ -314,12 +422,24 @@ void TasksModelPrivate::itemAboutToBeAdded(AbstractGroupableItem *item, int inde
         parentIdx = q->createIndex(indexOf(parent), 0, parent);
     }
 
+    QObject::connect(item, SIGNAL(changed(::TaskManager::TaskChanges)),
+                    q, SLOT(itemChanged(::TaskManager::TaskChanges)),
+                    Qt::UniqueConnection);
+
     q->beginInsertRows(parentIdx, index, index);
+
+    if (item->parentGroup() == rootGroup) {
+        QMetaObject::invokeMethod(q, "countChanged", Qt::QueuedConnection);
+    }
+
+    if (item->itemType() == LauncherItemType) {
+        QMetaObject::invokeMethod(q, "launcherCountChanged", Qt::QueuedConnection);
+    }
 }
 
 void TasksModelPrivate::itemAdded(AbstractGroupableItem *item)
 {
-    Q_UNUSED(item)
+    Q_UNUSED(item);
     q->endInsertRows();
 }
 
@@ -333,23 +453,36 @@ void TasksModelPrivate::itemAboutToBeRemoved(AbstractGroupableItem *item)
 
     const int index = indexOf(item);
     q->beginRemoveRows(parentIdx, index, index);
+
+    if (item->parentGroup() == rootGroup) {
+        QMetaObject::invokeMethod(q, "countChanged", Qt::QueuedConnection);
+    }
+
+    if (item->itemType() == LauncherItemType) {
+        QMetaObject::invokeMethod(q, "launcherCountChanged", Qt::QueuedConnection);
+    }
 }
 
 void TasksModelPrivate::itemRemoved(AbstractGroupableItem *item)
 {
-    Q_UNUSED(item)
+    Q_UNUSED(item);
     q->endRemoveRows();
 }
 
 void TasksModelPrivate::itemAboutToMove(AbstractGroupableItem *item, int currentIndex, int newIndex)
 {
     QModelIndex parentIdx;
+
     TaskGroup *parent = item->parentGroup();
     if (parent && parent->parentGroup()) {
         parentIdx = q->createIndex(indexOf(parent), 0, parent);
     }
 
-    q->beginMoveRows(parentIdx, currentIndex, currentIndex, parentIdx, newIndex + 1);
+    if (newIndex > currentIndex) {
+        newIndex++;
+    }
+
+    q->beginMoveRows(parentIdx, currentIndex, currentIndex, parentIdx, newIndex);
 }
 
 void TasksModelPrivate::itemMoved(AbstractGroupableItem *item)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Anton Kreuzkamp <akreuzkamp@web.de>             *
+ *   Copyright (C) 2012-2013 by Eike Hein <hein@kde.org>                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,47 +17,21 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
+import QtQuick 1.1
 
-#ifndef APPLAUNCHERITEM_H
-#define APPLAUNCHERITEM_H
+Flow {
+    property bool animating: false
 
-#include "abstracttaskitem.h"
-// Own
-#include <taskmanager/taskmanager.h>
-#include <taskmanager/launcheritem.h>
+    move: Transition {
+        SequentialAnimation {
+            PropertyAction { target: taskList; property: "animating"; value: true }
 
-/**
- * A launcheritem to quickly launch applications.
- */
-class AppLauncherItem : public AbstractTaskItem
-{
-    Q_OBJECT
+            NumberAnimation {
+                properties: "x, y"
+                easing.type: Easing.OutQuad
+            }
 
-public:
-    /** Constructs a new representation for a launcher. */
-    AppLauncherItem(QGraphicsWidget *parent, Tasks *applet, TaskManager::LauncherItem *launcher);
-
-    TaskManager::LauncherItem* launcher() { return m_launcher; }
-
-    virtual bool isWindowItem() const { return false; }
-    virtual bool isActive() const { return false; }
-    virtual void setAdditionalMimeData(QMimeData* mimeData);
-    virtual void close() {}
-    virtual void updateTask(TaskManager::TaskChanges) {}
-
-public slots:
-    virtual void activate() {}
-
-protected:
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-    void keyPressEvent(QKeyEvent *event);
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
-    void updateToolTip();
-
-
-private:
-    TaskManager::LauncherItem *m_launcher;
-
-};
-
-#endif
+            PropertyAction { target: taskList; property: "animating"; value: false }
+        }
+    }
+}

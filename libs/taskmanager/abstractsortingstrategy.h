@@ -55,11 +55,13 @@ public:
     /**Reimplement this to support manual sorting*/
     virtual bool manualSortingRequest(AbstractGroupableItem *item, int newIndex);
 
-protected Q_SLOTS:
+public Q_SLOTS:
     /** Handles a new item, is typically called after an item was added to a handled group*/
     virtual void handleItem(AbstractGroupableItem *);
     /** Checks if the order has to be updated. Must be connected to a AbstractGroupableItem* */
     void check(AbstractGroupableItem *item = 0);
+
+protected Q_SLOTS:
     void removeGroup(); //FIXME necessary?
 
 protected:

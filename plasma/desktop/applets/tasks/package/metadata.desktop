@@ -1,0 +1,19 @@
+[Desktop Entry]
+Name=Task Manager
+Comment=Switch between running applications
+Encoding=UTF-8
+Type=Service
+Icon=preferences-system-windows
+X-KDE-ServiceTypes=Plasma/Applet
+X-KDE-PluginInfo-Author=Eike Hein
+X-KDE-PluginInfo-Email=hein@kde.org
+X-KDE-PluginInfo-Name=org.kde.plasma.tasks
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=http://kde.org
+X-KDE-PluginInfo-Category=File System
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL v2+
+X-KDE-PluginInfo-EnabledByDefault=true
+X-Plasma-Package=org.kde.plasma.tasks
+X-Plasma-MainScript=ui/main.qml
+X-Plasma-DefaultSize=400,400
