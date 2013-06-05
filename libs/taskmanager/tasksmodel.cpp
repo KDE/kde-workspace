@@ -178,8 +178,6 @@ QVariant TasksModel::data(const QModelIndex &index, int role) const
 
 int TasksModel::activeTaskId() const
 {
-    QList<int> taskIds;
-
     foreach (AbstractGroupableItem *item, d->rootGroup->members()) {
         if (item->itemType() == TaskItemType && static_cast<TaskItem *>(item)->task()->isActive()) {
             return item->id();
