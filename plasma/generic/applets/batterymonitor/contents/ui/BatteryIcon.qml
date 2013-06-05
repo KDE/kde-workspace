@@ -1,5 +1,6 @@
 /*
  *   Copyright 2011 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 Kai Uwe Broulik <kde@privat.broulik.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -50,6 +51,7 @@ Item {
         // If the Fill10 element is not found, it is likely that the theme doesn't support
         // that and we use the older method of obtaining the fill element.
         if (!svg.hasElement("Fill10")) {
+            debug("No Fill10 element found in your theme's battery.svg - Using legacy 20% steps for battery icon");
             if (p >= 90) {
                 return "Fill100";
             } else if (p >= 70) {
