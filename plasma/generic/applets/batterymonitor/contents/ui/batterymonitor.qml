@@ -84,13 +84,19 @@ Item {
         }
     }
 
-    property QtObject batteries: PlasmaCore.DataModel {
+    property QtObject batteries: PlasmaCore.SortFilterModel {
         id: batteries
-        dataSource: pmSource
-        sourceFilter: "Battery[0-9]+"
+        filterRole: "Is Power Supply"
+        sortOrder: Qt.DescendingOrder
+        sourceModel: PlasmaCore.SortFilterModel {
+            sortRole: "Pretty Name"
+            sortOrder: Qt.AscendingOrder
+            sourceModel: PlasmaCore.DataModel {
+                dataSource: pmSource
+                sourceFilter: "Battery[0-9]+"
 
-        onDataChanged: {
-            updateLogic()
+                onDataChanged: updateLogic()
+            }
         }
 
         property int cumulativePercent
