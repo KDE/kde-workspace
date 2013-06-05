@@ -53,6 +53,8 @@
 // Local
 #include "core/models.h"
 
+#include <Plasma/Applet>
+
 template <> inline
 void KConfigGroup::writeEntry(const char *pKey,
                               const KGlobalSettings::Completion& aValue,
@@ -126,6 +128,7 @@ public:
     static QHash<QString, QString> iconNameMap();
 
     ApplicationModel *q;
+    QWeakPointer<Plasma::Applet> applet;
     AppNode *root;
     ApplicationModel::DuplicatePolicy duplicatePolicy;
     ApplicationModel::SystemApplicationPolicy systemApplicationPolicy;
@@ -316,7 +319,6 @@ ApplicationModel::ApplicationModel(QObject *parent, bool allowSeparators)
     QDBusConnection::sessionBus().registerObject("/kickoff", this);
     dbus.connect(QString(), "/kickoff", "org.kde.plasma", "reloadMenu", this, SLOT(reloadMenu()));
     connect(KSycoca::self(), SIGNAL(databaseChanged(QStringList)), this, SLOT(checkSycocaChange(QStringList)));
-    createNewProgramList();
 }
 
 ApplicationModel::~ApplicationModel()
@@ -585,14 +587,26 @@ ApplicationModel::SystemApplicationPolicy ApplicationModel::systemApplicationPol
     return d->systemApplicationPolicy;
 }
 
+void ApplicationModel::setApplet(Plasma::Applet *applet)
+{
+    if (d->applet.data() != applet) {
+        d->applet = applet;
+        createNewProgramList();
+    }
+}
+
 void ApplicationModel::createNewProgramList()
 {
+    if (!d->applet) {
+        return;
+    }
+
     d->newInstalledPrograms.clear();
     if (!d->showRecentlyInstalled) {
         return;
     }
 
-    KConfigGroup kickoffrc = Kickoff::componentData().config()->group("Seen Applications");
+    KConfigGroup kickoffrc = d->applet.data()->globalConfig();
     foreach (const QString &it, kickoffrc.keyList()) {
         d->seenPrograms.insert(it, QDate::fromString(kickoffrc.readEntry(it), Qt::ISODate));
     }

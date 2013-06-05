@@ -25,6 +25,11 @@
 #include "core/kickoffabstractmodel.h"
 #include "core/models.h"
 
+namespace Plasma
+{
+    class Applet;
+} // namespace Plasma
+
 namespace Kickoff
 {
 
@@ -114,6 +119,7 @@ public:
     virtual QModelIndex parent(const QModelIndex &index) const;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
+    void setApplet(Plasma::Applet *applet);
     void setShowRecentlyInstalled(bool showRecentlyInstalled);
     bool showRecentlyInstalled() const;
 

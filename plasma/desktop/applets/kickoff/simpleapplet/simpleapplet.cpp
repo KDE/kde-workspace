@@ -627,7 +627,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
         foreach(const QString &vtname, d->viewtypes) {
             if(vtname == "Applications") {
                 Kickoff::ApplicationModel *appModel = new Kickoff::ApplicationModel(menuview, true /*allow separators*/);
-
+                appModel->setApplet(this);
                 appModel->setDuplicatePolicy(Kickoff::ApplicationModel::ShowLatestOnlyPolicy);
                 if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription) {
                     appModel->setNameDisplayOrder(Kickoff::NameBeforeDescription);

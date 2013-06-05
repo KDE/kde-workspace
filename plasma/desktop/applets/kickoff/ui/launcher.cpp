@@ -746,6 +746,7 @@ void Launcher::setApplet(Plasma::Applet *applet)
 
     d->applet = applet;
     d->contextMenuFactory->setApplet(applet);
+    d->applicationModel->setApplet(applet);
 }
 
 void Launcher::reset()
