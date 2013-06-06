@@ -36,6 +36,7 @@
 
 #include "activitymanager/activitymanager.h"
 #include "desktopcorona.h"
+#include "paneldragoverlay.h"
 #include "panelview.h"
 #include "plasmaapp.h"
 #include "widgetsexplorer/widgetexplorer.h"
@@ -109,6 +110,7 @@ ControllerWindow::~ControllerWindow()
 
 void ControllerWindow::showEvent(QShowEvent * event)
 {
+    Q_UNUSED(event)
     m_panelShadow->addWindow(this);
 }
 
@@ -239,8 +241,6 @@ void ControllerWindow::syncToGraphicsWidget()
 {
     m_adjustViewTimer->stop();
     if (m_view && m_graphicsWidget) {
-        QSize prevSize = size();
-
         //set the sizehints correctly:
         int left, top, right, bottom;
         getContentsMargins(&left, &top, &right, &bottom);

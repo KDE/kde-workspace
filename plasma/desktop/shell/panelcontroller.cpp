@@ -386,8 +386,6 @@ void PanelController::syncToLocation()
         break;
     }
 
-    const QRect screenGeom = PlasmaApp::self()->corona()->screenGeometry(containment()->screen());
-
     switch (loc) {
     case Plasma::LeftEdge:
     case Plasma::RightEdge:

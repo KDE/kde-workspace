@@ -873,7 +873,7 @@ void PanelView::togglePanelController()
         connect(m_panelController, SIGNAL(panelVisibilityModeChanged(PanelView::VisibilityMode)), this, SLOT(setVisibilityMode(PanelView::VisibilityMode)));
 
         if (containment()->containmentType() == Plasma::Containment::PanelContainment && 
-	    dynamic_cast<QGraphicsLinearLayout*>(containment()->layout())) {
+            dynamic_cast<QGraphicsLinearLayout*>(containment()->layout())) {
             setTabOrder(0, m_panelController);
             QWidget *prior = m_panelController;
 
