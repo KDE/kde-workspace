@@ -275,7 +275,6 @@ void PanelAppletOverlay::mouseMoveEvent(QMouseEvent *event)
             return;
         }
 
-        QPointF pos = view->mapFromGlobal(event->globalPos());
         if (view != m_applet->view() && (event->buttons() & Qt::LeftButton)) {
             Plasma::Containment *c = view->containment();
             if (!c) {
