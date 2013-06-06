@@ -93,13 +93,15 @@ Item {
                 subTextEntries.push(i18nc("Which virtual desktop a window is currently on",
                     "Available on all activities"));
             } else if (tasks.showOnlyCurrentActivity) {
-                subTextEntries.push(i18nc("Activities a window is currently on (apart from the current one)",
-                    "Also available on %1",
-                    task.OtherActivityNames.join(", ")));
-            } else {
+                if (task.OtherActivityNames.length > 0) {
+                    subTextEntries.push(i18nc("Activities a window is currently on (apart from the current one)",
+                                              "Also available on %1",
+                                              task.OtherActivityNames.join(", ")));
+                }
+            } else if (task.ActivityNames.length > 0) {
                 subTextEntries.push(i18nc("Which activities a window is currently on",
-                    "Available on %1",
-                    task.ActivityNames.join(", ")));
+                                          "Available on %1",
+                                           task.ActivityNames.join(", ")));
             }
 
             return subTextEntries.join("<br />");
