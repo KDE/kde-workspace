@@ -68,7 +68,7 @@ DragArea {
                     toolTip.mainText = model.DisplayRole;
                     toolTip.image = model.DecorationRole;
                     toolTip.subText = model.IsLauncher ? model.GenericName
-                        : toolTip.generateSubText(model);
+                                                       : toolTip.generateSubText(model);
                     toolTip.windowsToPreview = model.WindowList;
                 } else {
                     // A bit sneaky, but this works well to hide the tooltip.

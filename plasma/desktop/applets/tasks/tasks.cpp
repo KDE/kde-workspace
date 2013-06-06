@@ -142,9 +142,9 @@ void Tasks::changeSizeHint()
 
 QSizeF Tasks::sizeHint(Qt::SizeHint which, const QSizeF &constraint) const
 {
-    if (which == Qt::PreferredSize) {
+    if (which == Qt::PreferredSize && m_declarativeWidget && m_declarativeWidget->rootObject()) {
         return QSizeF(m_declarativeWidget->rootObject()->property("preferredWidth").toReal(),
-            m_declarativeWidget->rootObject()->property("preferredHeight").toReal());
+                      m_declarativeWidget->rootObject()->property("preferredHeight").toReal());
     } else {
         return Plasma::Applet::sizeHint(which, constraint);
     }
