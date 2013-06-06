@@ -178,6 +178,9 @@ Name[zh_CN]=图像
 Name[zh_TW]=影像
 Icon=image-jpeg
 Comment=A single image
+Comment[pt]=Uma imagem simples
+Comment[uk]=Окреме зображення
+Comment[x-test]=xxA single imagexx
 # Dummy
 Exec=plasma
 
@@ -259,6 +262,9 @@ Name[x-test]=xxSlideshowxx
 Name[zh_CN]=幻灯显示
 Name[zh_TW]=投影播放
 Comment=Cycles through a set of images
+Comment[pt]=Percorre um conjunto de imagens
+Comment[uk]=Циклічне відтворення набору зображень
+Comment[x-test]=xxCycles through a set of imagesxx
 Icon=folder-image
 # Dummy
 Exec=plasma
