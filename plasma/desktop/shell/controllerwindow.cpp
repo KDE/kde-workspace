@@ -36,7 +36,6 @@
 
 #include "activitymanager/activitymanager.h"
 #include "desktopcorona.h"
-#include "paneldragoverlay.h"
 #include "panelview.h"
 #include "plasmaapp.h"
 #include "widgetsexplorer/widgetexplorer.h"
