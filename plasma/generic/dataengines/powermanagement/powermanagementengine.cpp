@@ -202,27 +202,24 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
             //kDebug() << "Sleepstate \"" << sleepstate << "\" supported.";
         }
     } else if (name == "PowerDevil") {
-        QDBusMessage msg;
-        QDBusPendingReply<int> reply;
-
         if (m_brightnessControlsAvailable) {
-          msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                            "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-                                                            "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-                                                            "brightness");
-          reply = QDBusConnection::sessionBus().asyncCall(msg);
-          QDBusPendingCallWatcher *screenWatcher = new QDBusPendingCallWatcher(reply, this);
+          QDBusMessage screenMsg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                                  "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                                  "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
+                                                                  "brightness");
+          QDBusPendingReply<int> screenReply = QDBusConnection::sessionBus().asyncCall(screenMsg);
+          QDBusPendingCallWatcher *screenWatcher = new QDBusPendingCallWatcher(screenReply, this);
           QObject::connect(screenWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
                               this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
         }
 
         if (m_keyboardBrightnessControlsAvailable) {
-          msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
-                                                            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
-                                                            "keyboardBrightness");
-          reply = QDBusConnection::sessionBus().asyncCall(msg);
-          QDBusPendingCallWatcher *keyboardWatcher = new QDBusPendingCallWatcher(reply, this);
+          QDBusMessage keyboardMsg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                                    "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+                                                                    "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+                                                                    "keyboardBrightness");
+          QDBusPendingReply<int> keyboardReply = QDBusConnection::sessionBus().asyncCall(keyboardMsg);
+          QDBusPendingCallWatcher *keyboardWatcher = new QDBusPendingCallWatcher(keyboardReply, this);
           QObject::connect(keyboardWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
                               this, SLOT(keyboardBrightnessReply(QDBusPendingCallWatcher*)));
         }
@@ -452,7 +449,6 @@ void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *w
 
 void PowermanagementEngine::screenBrightnessChanged(int brightness)
 {
-    //kDebug() << "Screen brightness:" << time;
     setData("PowerDevil", "Screen Brightness", brightness);
 }
 
