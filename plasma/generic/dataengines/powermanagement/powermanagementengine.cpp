@@ -74,8 +74,6 @@ void PowermanagementEngine::init()
             kDebug() << "error connecting to Brightness changes via dbus";
             brightnessControlsAvailableChanged(false);
         } else {
-            sourceRequestEvent("PowerDevil");
-            screenBrightnessChanged(0);
             brightnessControlsAvailableChanged(true);
         }
 
@@ -87,10 +85,10 @@ void PowermanagementEngine::init()
             kDebug() << "error connecting to Keyboard Brightness changes via dbus";
             keyboardBrightnessControlsAvailableChanged(false);
         } else {
-            sourceRequestEvent("PowerDevil");
-            keyboardBrightnessChanged(0);
             keyboardBrightnessControlsAvailableChanged(true);
         }
+
+        sourceRequestEvent("PowerDevil");
 
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement",
