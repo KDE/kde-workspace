@@ -2,7 +2,7 @@ set ( text_paint_LIB ${KDE4_PLASMA_LIBS} )
 
 MACRO(KEYBOARD_DAEMON_UNIT_TESTS _testname)
                kde4_add_unit_test(${_testname}_test TESTNAME kcm-keyboard-${_testname} NOGUI ${_testname}_test.cpp ../${_testname}.cpp)
-               target_link_libraries(${_testname}_test ${KDE4_KDEUI_LIBS} ${QT_QTXML_LIBRARY} ${QT_QTTEST_LIBRARY} ${X11_Xkbfile_LIB})
+               target_link_libraries(${_testname}_test ${KDE4_KDEUI_LIBS} ${QT_QTXML_LIBRARY} ${QT_QTTEST_LIBRARY} ${X11_Xkbfile_LIB} ${X11_LIBRARIES})
 ENDMACRO(KEYBOARD_DAEMON_UNIT_TESTS)
 
 MACRO(KEYBOARD_DAEMON_UNIT_TESTS2 _testname _src1 _src2 _src3)
