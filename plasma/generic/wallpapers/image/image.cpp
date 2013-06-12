@@ -31,7 +31,6 @@
 #include <krun.h>
 #include <knewstuff3/downloaddialog.h>
 #include <klocalizedstring.h>
-#include <kicon.h>
 #include <KGlobal>
 
 #include <Plasma/Theme>
@@ -100,9 +99,9 @@ void Image::setRenderingMode(RenderingMode mode)
             m_slidePaths << KStandardDirs::installPath("wallpaper");
         }
 
-        m_nextWallpaperAction = new QAction(KIcon(QString::fromLatin1("user-desktop")), i18n("Next Wallpaper Image"), this);
+        m_nextWallpaperAction = new QAction(QIcon::fromTheme("user-desktop"), i18n("Next Wallpaper Image"), this);
         connect(m_nextWallpaperAction, SIGNAL(triggered(bool)), this, SLOT(nextSlide()));
-        m_openImageAction = new QAction(KIcon(QString::fromLatin1("document-open")), i18n("Open Wallpaper Image"), this);
+        m_openImageAction = new QAction(QIcon::fromTheme("document-open"), i18n("Open Wallpaper Image"), this);
         connect(m_openImageAction, SIGNAL(triggered(bool)), this, SLOT(openSlide()));
         QTimer::singleShot(200, this, SLOT(startSlideshow()));
         updateDirWatch(m_slidePaths);
