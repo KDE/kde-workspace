@@ -182,6 +182,7 @@ Comment[de]=Ein einzelnes Bild
 Comment[es]=Una única imagen
 Comment[fi]=Yksi kuva
 Comment[gl]=Unha imaxe.
+Comment[ia]=Un imagine singule
 Comment[kk]=Жалғыз кескін
 Comment[nl]=Een enkele afbeelding
 Comment[pt]=Uma imagem simples
@@ -195,6 +196,7 @@ Comment[sr@latin]=Jedna slika
 Comment[sv]=En enda bild
 Comment[uk]=Окреме зображення
 Comment[x-test]=xxA single imagexx
+Comment[zh_TW]=單一影像
 # Dummy
 Exec=plasma
 
@@ -279,6 +281,7 @@ Comment=Cycles through a set of images
 Comment[es]=Repetir un conjunto de imágenes
 Comment[fi]=Käy läpi kuvasarjaa
 Comment[gl]=Mostra unha serie de imaxes unha detrás da outra.
+Comment[ia]=Il cycla trans un unsimul de imagines
 Comment[kk]=Кескін жиынын қайталай беру
 Comment[nl]=Circuleert door een set afbeeldingen
 Comment[pt]=Percorre um conjunto de imagens
@@ -292,6 +295,7 @@ Comment[sr@latin]=Kruženje kroz skup slika
 Comment[sv]=Går igenom en uppsättning bilder
 Comment[uk]=Циклічне відтворення набору зображень
 Comment[x-test]=xxCycles through a set of imagesxx
+Comment[zh_TW]=許多影像循環播放
 Icon=folder-image
 # Dummy
 Exec=plasma
