@@ -287,7 +287,7 @@ Item {
         Connections {
             target: toolBoxButton
             onStateChanged: {
-                s = toolBoxButton.state;
+                var s = toolBoxButton.state;
                 if (isCorner) {
                     buttonMouse.drag.axis = Drag.XAxis | Drag.YAxis;
                 } else if (s == "top" || s == "bottom" ) {

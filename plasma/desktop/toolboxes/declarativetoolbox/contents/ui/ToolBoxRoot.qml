@@ -26,8 +26,7 @@ import org.kde.qtextracomponents 2.0 as QtExtras
 Item {
     id: main
 
-    width: 540
-    height: 540
+    anchors.fill: parent
 
     signal minimumWidthChanged
     signal minimumHeightChanged
