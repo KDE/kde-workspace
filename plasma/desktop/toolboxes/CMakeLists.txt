@@ -1,6 +1,4 @@
 
-install(DIRECTORY declarativetoolbox/
-        DESTINATION ${DATA_INSTALL_DIR}/plasma/packages/org.kde.toolbox)
-install(DIRECTORY declarativetoolbox/
-        DESTINATION ${DATA_INSTALL_DIR}/plasma/packages/org.kde.paneltoolbox)
+installPackage(declarativetoolbox org.kde.toolbox plasma/packages package)
+installPackage(paneltoolbox org.kde.paneltoolbox plasma/packages package)
 
