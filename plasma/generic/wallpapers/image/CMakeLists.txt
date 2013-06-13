@@ -10,7 +10,7 @@ set(image_SRCS
 
 add_library(plasma_wallpaper_imageplugin SHARED ${image_SRCS})
 target_link_libraries(plasma_wallpaper_imageplugin
-         plasma
+         ${Plasma_LIBRARIES}
          ${Qt5Quick_LIBRARIES}
          ${Qt5Qml_LIBRARIES}
          ${KDE4_KIO_LIBS}
