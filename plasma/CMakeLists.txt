@@ -25,7 +25,6 @@ find_package(Qt5Transitional MODULE)
 find_package(Qt5Quick REQUIRED NO_MODULE)
 find_package(Qt5X11Extras REQUIRED NO_MODULE)
 find_package(kde4support REQUIRED NO_MODULE)
-#find_package(Plasma REQUIRED NO_MODULE)
 
 #search packages used by KDE
 set(QT_MIN_VERSION "5.0.0")
@@ -41,10 +40,10 @@ find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
                                             ki18n kguiaddons kservice kwidgets ItemViews KNotifications KCompletion KJobWidgets KConfigWidgets KIconThemes)
 #find_package(KF5Transitional REQUIRED)
 
-# those are not "done" yet:
 find_package(ki18n REQUIRED NO_MODULE)
 find_package(kio REQUIRED NO_MODULE)
 find_package(kguiaddons REQUIRED NO_MODULE)
+find_package(Plasma REQUIRED NO_MODULE)
 
 find_package(KDELibs4 REQUIRED NO_MODULE)
 
@@ -151,37 +150,7 @@ endif(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
 
 ###################################################################################################
 
-macro(installPackage dir component)
-   set(root ${ARGV2})
-   set(type ${ARGV3})
-   if(NOT root)
-      set(root plasma/plasmoids)
-   endif()
-   if(NOT type)
-      set(type applet)
-   endif()
-   install(DIRECTORY ${dir}/ DESTINATION ${DATA_INSTALL_DIR}/${root}/${component} PATTERN .svn EXCLUDE PATTERN CMakeLists.txt EXCLUDE PATTERN Messages.sh EXCLUDE)
-   install(FILES ${dir}/metadata.desktop DESTINATION ${SERVICES_INSTALL_DIR} RENAME plasma-${type}-${component}.desktop)
-endmacro()
-
 add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1204)
-
-if (0)
-MACRO(installPackage dir component)
-   SET(root ${ARGN})
-   IF(NOT root)
-      SET(root plasma/plasmoids)
-   ENDIF(NOT root)
-   install(DIRECTORY ${dir}/ DESTINATION ${DATA_INSTALL_DIR}/${root}/${component} PATTERN Messages.sh EXCLUDE PATTERN CMakeLists.txt EXCLUDE)
-   install(FILES ${dir}/metadata.desktop DESTINATION ${SERVICES_INSTALL_DIR} RENAME plasma-applet-${component}.desktop)
-ENDMACRO(installPackage)
-
-if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-   add_subdirectory(desktop)
-   add_subdirectory(netbook)
-   add_subdirectory(screensaver)
-endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-endif (0)
 
 add_subdirectory(desktop)
 add_subdirectory(generic)
