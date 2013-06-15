@@ -93,7 +93,6 @@ private:
 
     void addToCache(const AbstractGroupableItem *item) {
         QList<int> cacheEntry = getActivitiesIndexes(item);
-        bool debug = (qobject_cast<const TaskGroup*>(item) != 0);
         qSort(cacheEntry.begin(), cacheEntry.end());
         m_priorityCache[item->id()] = cacheEntry;
     }
