@@ -232,7 +232,18 @@ bool Task::isOnAllDesktops() const
 
 bool Task::isActive() const
 {
-    return d->active;
+    if (d->active) {
+        return true;
+    }
+
+    const WId activeWindow = KWindowSystem::activeWindow();
+    foreach (WId window, d->transients) {
+        if (activeWindow == window) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool Task::isOnTop() const
@@ -461,6 +472,7 @@ void Task::toggleMaximized()
 
 void Task::setIconified(bool iconify)
 {
+    kDebug() <<" going to iconify" << d->win;
     if (iconify) {
         KWindowSystem::minimizeWindow(d->win);
     } else {
@@ -524,7 +536,7 @@ void Task::activate()
 
 void Task::activateRaiseOrIconify()
 {
-    //kDebug() << isActive() << isIconified() << isOnTop();
+    kDebug() << isActive() << isIconified() << isOnTop();
     if (!isActive() || isIconified()) {
         activate();
     } else if (!isOnTop()) {

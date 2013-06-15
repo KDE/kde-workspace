@@ -47,10 +47,10 @@ bool Task::updateDemandsAttentionState(WId w)
     return empty != d->transientsDemandingAttention.isEmpty();
 }
 
-void Task::addTransient(WId w, const NETWinInfo& info)
+void Task::addTransient(WId w, const KWindowInfo &info)
 {
     d->transients.insert(w);
-    if (info.state() & NET::DemandsAttention) {
+    if (info.hasState(NET::DemandsAttention)) {
         d->transientsDemandingAttention.insert(w);
         emit changed(TransientsChanged | StateChanged | AttentionChanged);
     }

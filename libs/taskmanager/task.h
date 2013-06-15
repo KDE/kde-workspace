@@ -274,7 +274,7 @@ public:
     ::TaskManager::TaskChanges refresh(WindowProperties dirty);
     //* @internal
 #ifdef Q_WS_X11
-    void addTransient(WId w, const NETWinInfo& info);
+    void addTransient(WId w, const KWindowInfo &info);
 #endif
     //* @internal
     void removeTransient(WId w);
