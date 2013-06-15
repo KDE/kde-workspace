@@ -469,28 +469,31 @@ int TaskManager::numberOfDesktops() const
     return KWindowSystem::numberOfDesktops();
 }
 
-bool TaskManager::isOnTop(const Task* task) const
+bool TaskManager::isOnTop(const Task *task) const
 {
     if (!task) {
         return false;
     }
 
     QList<WId> list = KWindowSystem::stackingOrder();
-    QList<WId>::const_iterator begin(list.constBegin());
-    QList<WId>::const_iterator it = list.constBegin() + (list.size() - 1);
-    do {
-        Task *t = d->tasksByWId.value(*it);
-        if (t) {
-            if (t == task) {
-                return true;
-            }
-#ifndef Q_WS_WIN
-            if (!t->isIconified() && (t->isAlwaysOnTop() == task->isAlwaysOnTop())) {
-                return false;
-            }
-#endif
+    QListIterator<WId> it(list);
+    it.toBack();
+
+    while (it.hasPrevious()) {
+        Task *t = d->tasksByWId.value(it.previous());
+        if (!t) {
+            continue;
         }
-    } while (it-- != begin);
+
+        if (t == task) {
+            return true;
+        }
+#ifndef Q_WS_WIN
+        if (!t->isIconified() && (t->isAlwaysOnTop() == task->isAlwaysOnTop())) {
+            return false;
+        }
+#endif
+    }
 
     return false;
 }
