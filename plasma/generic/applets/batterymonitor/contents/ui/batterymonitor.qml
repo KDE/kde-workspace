@@ -118,6 +118,7 @@ Item {
         isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
 
         showRemainingTime: show_remaining_time
+        remainingTime: Number(pmSource.data["Battery"]["Remaining msec"])
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
 

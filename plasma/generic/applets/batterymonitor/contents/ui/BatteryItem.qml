@@ -41,6 +41,8 @@ Item {
     // UPower seems to set the Present property false when a device is added but not probed yet
     property bool isPresent: model["Plugged in"]
 
+    property int remainingTime
+
     function updateSelection() {
         var containsMouse = mouseArea.containsMouse;
 
@@ -221,7 +223,8 @@ Item {
                     onPaintedWidthChanged: {
                         if (paintedWidth > parent.width) { parent.width = paintedWidth; }
                     }
-                    text: model["State"] == "Charging" ? i18n("Time To Full:") : i18n("Time To Empty:")
+                    // FIXME Bound to AC adapter plugged in, not battery charging, see below
+                    text: pluggedIn ? i18n("Time To Full:") : i18n("Time To Empty:")
                     visible: remainingTimeLabel.visible
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
@@ -270,8 +273,9 @@ Item {
                     height: paintedHeight
                     width: parent.width
                     elide: Text.ElideRight
-                    text: Logic.formatDuration(model["Remaining Time"])
-                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text
+                    // FIXME Uses overall remaining time, not bound to individual battery
+                    text: Logic.formatDuration(dialogItem.remainingTime)
+                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != ""
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
