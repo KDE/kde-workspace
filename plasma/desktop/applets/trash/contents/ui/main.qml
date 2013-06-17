@@ -66,7 +66,13 @@ Column {
             Connections {
                 target: plasmoid
                 onFormFactorChanged: {
-                    plasmoid.formFactor()
+                    //plasmoid.formFactor()
+                    if(item.width>item.height) {
+                        Qt.Horizontal
+                    }
+                    else {
+                        Qt.Vertical
+                    }
                 }
             }
         }
