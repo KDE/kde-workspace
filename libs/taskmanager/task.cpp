@@ -113,13 +113,13 @@ void Task::refreshIcon()
     TaskChanges changes = TaskUnchanged;
 
     if (d->info.windowClassClass() != info.windowClassClass() ||
-            d->info.windowClassName() != info.windowClassName()) {
+        d->info.windowClassName() != info.windowClassName()) {
         changes |= ClassChanged;
     }
 
     if (d->info.visibleName() != info.visibleName() ||
-            d->info.visibleNameWithState() != info.visibleNameWithState() ||
-            d->info.name() != info.name()) {
+        d->info.visibleNameWithState() != info.visibleNameWithState() ||
+        d->info.name() != info.name()) {
         changes |= NameChanged;
     }
 
@@ -279,6 +279,27 @@ bool Task::demandsAttention() const
 bool Task::isOnScreen(int screen) const
 {
     return TaskManager::isOnScreen(screen, d->win);
+}
+
+int Task::screen() const
+{
+    int rv = -1;
+    if (!d->info.valid(true)) {
+        return rv;
+    }
+
+    QDesktopWidget *desktop = qApp->desktop();
+    int area = 0;
+
+    for (int i = 0; i < desktop->screenCount(); ++i) {
+        const QRect desktopGeometry = desktop->screenGeometry(i);
+        const QRect onScreen = desktopGeometry.intersected(d->info.geometry());
+        if (onScreen.height() * onScreen.width() > area) {
+            rv = i;
+        }
+    }
+
+    return rv;
 }
 
 bool Task::showInTaskbar() const
@@ -536,7 +557,7 @@ void Task::activate()
 
 void Task::activateRaiseOrIconify()
 {
-    kDebug() << isActive() << isIconified() << isOnTop();
+    //kDebug() << isActive() << isIconified() << isOnTop();
     if (!isActive() || isIconified()) {
         activate();
     } else if (!isOnTop()) {

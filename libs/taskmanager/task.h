@@ -239,6 +239,11 @@ public:
     bool isOnScreen(int screen) const;
 
     /**
+     * Returns the screen the largest part of this window is on (or -1 if not on any)
+     */
+    int screen() const;
+
+    /**
      * Returns true if the task should be shown in taskbar-like apps
      */
     bool showInTaskbar() const;
