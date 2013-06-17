@@ -8,12 +8,7 @@ Column {
     id:trash
     property int minimumWidth
     property int minimumHeight
-    property int minButtonSize: 16
-    property bool show_trash: true
-    property int visibleButtons: 1
     property int orientation: Qt.Vertical
-    onWidthChanged: checkLayout();
-    onHeightChanged: checkLayout();    
     DirModel {
         id:dirModel
         url: "trash:/"
@@ -21,75 +16,27 @@ Column {
     function action_open() {
         plasmoid.openUrl("trash:/");
     }
-    function action_empty() {	  
+    function action_empty() {
         plasmoid.runCommand("ktrash", ["--empty"]);
     }
     Component.onCompleted: { 
-        plasmoid.setBackgroundHints( 0 )		
-        plasmoid.action_open = function() { 
+        plasmoid.setBackgroundHints( 0 )
+        plasmoid.action_open = function() {
             plasmoid.openUrl("trash:/");
         }
-        plasmoid.setAction("open", i18n("Open"),"document-open");		
-        plasmoid.action_empty=function() {		  
-            plasmoid.runCommand("ktrash", ["--empty"]); 
+        plasmoid.setAction("open", i18n("Open"),"document-open");
+        plasmoid.action_empty=function() {
+        plasmoid.runCommand("ktrash", ["--empty"]);
         }
         plasmoid.setAction("empty",i18n("Empty"),"trash-empty");
-        plasmoid.popupIcon = QIcon("user-trash"); 
+        plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
-        plasmoid.addEventListener("ConfigChanged", configChanged);
     }
-    function checkLayout() {
-        switch(plasmoid.formFactor) {
-            case Vertical:
-                if (width >= minButtonSize*visibleButtons) {
-                    orientation = Qt.Horizontal;
-                    minimumHeight = width/visibleButtons - 1;
-                    plasmoid.setPreferredSize(width, width/visibleButtons);
-                } 
-                else {
-                    orientation = Qt.Vertical;
-                    minimumHeight = width*visibleButtons;
-                    plasmoid.setPreferredSize(width, width*visibleButtons);
-                }
-                break;
-            case Horizontal:
-                if (height < minButtonSize*visibleButtons) {
-                    orientation = Qt.Horizontal;
-                    minimumWidth = height*visibleButtons;
-                    plasmoid.setPreferredSize(height*visibleButtons, height);
-                } 
-                else {
-                    orientation = Qt.Vertical;
-                    minimumWidth = height/visibleButtons - 1;
-                    plasmoid.setPreferredSize(height/visibleButtons, height);
-                }
-                break;
-            default:
-                if (width > height) {
-                    orientation = Qt.Horizontal;
-                    minimumWidth = minButtonSize*visibleButtons;
-                    minimumHeight = minButtonSize;
-                }
-                else {
-                    orientation = Qt.Vertical;
-                    minimumWidth = minButtonSize;
-                    minimumHeight = minButtonSize*visibleButtons;
-                }
-                break;
-        }
-    }
-    function configChanged() {
-        show_trash = plasmoid.readConfig("show_trash");
-        visibleButtons = show_trash
-        showModel.get(0).show = show_trash;
-        checkLayout();
-     }
-    
     Item {
-        id:item    
-        visible: showModel.get(index).show
+        id:item
+        visible: true
         width: 100
-        height: 100    
+        height: 100
             PlasmaCore.IconItem {
                 id:iconButton
                 width:100
@@ -116,7 +63,6 @@ Column {
             }
         }
     } 
-    
 }
  
 
