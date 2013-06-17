@@ -1191,6 +1191,8 @@ void GroupManager::setOnlyGroupWhenFull(bool onlyGroupWhenFull)
         connect(d->currentRootGroup(), SIGNAL(itemAdded(AbstractGroupableItem*)), this, SLOT(checkIfFull()));
         connect(d->currentRootGroup(), SIGNAL(itemRemoved(AbstractGroupableItem*)), this, SLOT(checkIfFull()));
         d->checkIfFull();
+    } else {
+        setGroupingStrategy(d->groupingStrategy);
     }
 }
 
