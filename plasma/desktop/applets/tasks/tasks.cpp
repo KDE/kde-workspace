@@ -160,6 +160,7 @@ void Tasks::constraintsEvent(Plasma::Constraints constraints)
     }
 
     if (constraints & Plasma::FormFactorConstraint) {
+        m_declarativeWidget->rootObject()->setProperty("horizontal", formFactor() == Plasma::Horizontal);
         m_declarativeWidget->rootObject()->setProperty("vertical", formFactor() == Plasma::Vertical);
     }
 

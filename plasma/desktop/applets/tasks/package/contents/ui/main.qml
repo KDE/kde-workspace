@@ -33,6 +33,7 @@ Item {
 
     property int location: 0
     property bool vertical: false
+    property bool horizontal: false
     property int maxStripes: 2
     property bool forceStripes: false
     property bool showOnlyCurrentDesktop: false
@@ -47,6 +48,9 @@ Item {
 
     property int preferredWidth: taskList.width
     property int preferredHeight: taskList.height
+
+    property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
+    property int minimumHeight: tasks.horizontal ? 0 : Layout.preferredMinHeight()
 
     signal activateItem(int id, bool toggle)
     signal itemContextMenu(int id)
