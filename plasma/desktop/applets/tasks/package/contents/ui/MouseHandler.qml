@@ -35,7 +35,7 @@ Item {
 
         property variant hoveredItem
 
-        enabled: manualSorting && !target.animating
+        enabled: !target.animating
 
         onDragMove: {
             var above = target.childAt(event.x, event.y);
