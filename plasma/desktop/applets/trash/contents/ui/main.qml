@@ -9,6 +9,9 @@ Column {
     property int minimumWidth
     property int minimumHeight
     property int orientation: Qt.Vertical
+    PlasmaCore.Theme {
+        id: theme 
+    }
     DirModel {
         id:dirModel
         url: "trash:/"
@@ -57,9 +60,14 @@ Column {
             onReleased: plasmoid.openUrl("trash:/");
             PlasmaCore.ToolTip {
                 target: mouseArea
-                mainText: modelData.tooltip_mainText
-                subText: modelData.tooltip_subText
-                image: modelData.icon
+                mainText:"trash"
+                subText: dirModel.count
+                }
+            Connections {
+                target: plasmoid
+                onFormFactorChanged: {
+                    plasmoid.formFactor()
+                }
             }
         }
     } 
