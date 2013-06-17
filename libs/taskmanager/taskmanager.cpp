@@ -479,6 +479,11 @@ bool TaskManager::isOnTop(const Task *task) const
     QListIterator<WId> it(list);
     it.toBack();
 
+    const bool multiscreen = qApp->desktop()->screenCount() > 1;
+    // we only use taskScreen when there are multiple screens, so we
+    // only fetch the value in that case; still, do it outside the loop
+    const int taskScreen = multiscreen ? task->screen() : 0;
+
     while (it.hasPrevious()) {
         const WId top = it.previous();
         Task *t = d->tasksByWId.value(top);
@@ -501,6 +506,15 @@ bool TaskManager::isOnTop(const Task *task) const
             if (transient == top) {
                 return true;
             }
+        }
+
+        if (t->isFullScreen() && t->screen() != taskScreen) {
+            // it seems window managers always claim that fullscreen
+            // windows are stacked above everything else .. even when
+            // a window on a different physical screen has input focus
+            // so we work around this decision here by only paying attention
+            // to fullscreen windows that are on the same screen as us
+            continue;
         }
 
 #ifndef Q_WS_WIN
