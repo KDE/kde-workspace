@@ -22,19 +22,59 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 
 PlasmaCore.SvgItem {
+    id: arrow
     anchors {
-        bottom: parent.bottom
-        horizontalCenter: iconBox.horizontalCenter
+        bottom: {
+            if (tasks.location != TopEdge && tasks.location != LeftEdge &&  tasks.location != RightEdge) {
+                return parent.bottom;
+            } else {
+                return undefined;
+            }
+        }
+        horizontalCenter: {
+            if (tasks.location != LeftEdge && tasks.location != RightEdge) {
+                return iconBox.horizontalCenter;
+            } else {
+                return undefined;
+            }
+        }
+        verticalCenter: {
+            if (tasks.location == LeftEdge || tasks.location == RightEdge) {
+                return iconBox.verticalCenter;
+            } else {
+                return undefined;
+            }
+        }
+        top: {
+            if (tasks.location == TopEdge) {
+                return parent.top;
+            } else {
+                return undefined;
+            }
+        }
+        left: {
+            if (tasks.location == LeftEdge) {
+                return parent.left;
+            } else {
+                return undefined;
+            }
+        }
+        right: {
+            if (tasks.location == RightEdge) {
+                return parent.right;
+            } else {
+                return undefined;
+            }
+        }
     }
 
-    width: Math.min(theme.smallIconSize, iconBox.width)
-    height: width
+    implicitWidth: Math.min(theme.smallIconSize, iconBox.width)
+    implicitHeight: implicitWidth
 
     svg: arrows
     elementId: elementForLocation()
 
-    function elementForLocation()
-    {
+    function elementForLocation() {
         switch (tasks.location) {
             case LeftEdge:
                 return "right-arrow";
@@ -45,6 +85,14 @@ PlasmaCore.SvgItem {
             case BottomEdge:
             default:
                 return "up-arrow";
+        }
+    }
+
+    Connections {
+        target: tasks
+        onLocationChanged: {
+            arrow.width = arrow.implicitWidth
+            arrow.height = arrow.implicitHeight
         }
     }
 }
