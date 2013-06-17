@@ -295,6 +295,7 @@ int Task::screen() const
         const QRect desktopGeometry = desktop->screenGeometry(i);
         const QRect onScreen = desktopGeometry.intersected(d->info.geometry());
         if (onScreen.height() * onScreen.width() > area) {
+            area = onScreen.height() * onScreen.width();
             rv = i;
         }
     }
