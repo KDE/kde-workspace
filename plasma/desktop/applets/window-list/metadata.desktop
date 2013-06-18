@@ -1,0 +1,18 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Window list
+Icon=preferences-system-windows
+Type=Service
+X-KDE-ParentApp=
+X-KDE-PluginInfo-Author=Heena
+X-KDE-PluginInfo-Category=
+X-KDE-PluginInfo-Email=heena393@gmail.com
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-Name=Windowlist
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=plasma.kde.org
+X-KDE-ServiceTypes=Plasma/Applet
+X-Plasma-API=declarativeappletscript
+X-Plasma-DefaultSize=100,100
+X-Plasma-MainScript=qml/main.qml
+X-Plasma-RemoteLocation=
