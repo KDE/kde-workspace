@@ -8,7 +8,9 @@ Column {
     id:trash
     property int minimumWidth
     property int minimumHeight
-    property int orientation: Qt.Vertical
+    property int orientation: onPanel ? (plasmoid.formFactor==Horizontal ? Qt.Horizontal :
+    Qt.Vertical) : (width>height ? Qt.Horizontal : Qt.Vertical)
+    property bool onPanel: (plasmoid.formFactor==Horizontal || plasmoid.formFactor==Vertical)
     PlasmaCore.Theme {
         id: theme 
     }
@@ -67,11 +69,19 @@ Column {
                 target: plasmoid
                 onFormFactorChanged: {
                     //plasmoid.formFactor()
-                    if(item.width>item.height) {
+                    /*if(item.width>item.height) {
                         Qt.Horizontal
                     }
                     else {
                         Qt.Vertical
+                    }*/
+                    if(plasmoid.formFactor == Vertical) {
+                       item.width=minimumHeight;
+                       Qt.Vertical;
+                    }
+                    else {
+                        item.height=minimumWidth;
+                        Qt.Horizontal;
                     }
                 }
             }
