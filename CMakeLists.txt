@@ -1,13 +1,12 @@
 project(KDEBASE_WORKSPACE)
-# set_package_properties appeared in cmake 2.8.6
-# TODO: Remove when kdelibs >= 4.10 will be required
+
 cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
 set(QT_MIN_VERSION "5.0.0")
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
-set(KDE4WORKSPACE_VERSION_MINOR 10)
-set(KDE4WORKSPACE_VERSION_PATCH 60)
+set(KDE4WORKSPACE_VERSION_MINOR 90)
+set(KDE4WORKSPACE_VERSION_PATCH 1)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
@@ -17,17 +16,19 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 
 find_package(ECM 0.0.8 REQUIRED NO_MODULE)
 
+include(CMakePackageConfigHelpers)
+
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 find_package(Qt5Core REQUIRED NO_MODULE)
-
 find_package(Qt5Transitional MODULE)
 find_package(Qt5Quick REQUIRED NO_MODULE)
 find_package(Qt5X11Extras REQUIRED NO_MODULE)
+
 find_package(kde4support REQUIRED NO_MODULE)
 
-#search packages used by KDE
+#include(ConfigureChecks.cmake)
 
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 
@@ -42,12 +43,10 @@ find_package(ki18n REQUIRED NO_MODULE)
 find_package(kio REQUIRED NO_MODULE)
 #find_package(kguiaddons REQUIRED NO_MODULE)
 find_package(Plasma REQUIRED NO_MODULE)
-
-find_package(KDELibs4 REQUIRED NO_MODULE)
-
 find_package(kdeclarative REQUIRED NO_MODULE)
 
-
+# needed for set_package_properties macro
+find_package(KDELibs4 REQUIRED NO_MODULE)
 
 
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
@@ -89,12 +88,12 @@ set_package_properties(KDeclarative PROPERTIES DESCRIPTION "KDE Declarative (QML
                        PURPOSE "Required for building ksmserver"
                       )
 
-macro_optional_find_package(OpenGL)
+find_package(OpenGL)
 set_package_properties(OpenGL PROPERTIES DESCRIPTION "The OpenGL libraries"
                        URL "http://www.opengl.org"
                        TYPE OPTIONAL
                       )
-macro_optional_find_package(OpenGLES)
+find_package(OpenGLES)
 set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
                        URL "http://www.khronos.org/opengles"
                        TYPE OPTIONAL
@@ -149,21 +148,21 @@ if(Q_WS_X11)
   endif()
 endif(Q_WS_X11)
 
-macro_optional_find_package(GLIB2 2.0)
+find_package(GLIB2 2.0)
 set_package_properties(GLIB2 PROPERTIES DESCRIPTION "Low-level core library for data structure handling, portability wrappers, etc."
                        URL "http://www.gtk.org"
                        TYPE OPTIONAL
                        PURPOSE "Needed to build the kxkb keyboard map control program and provide XMMS support in the Now Playing Plasma data engine"
                       )
 
-macro_optional_find_package(Fontconfig)
+find_package(Fontconfig)
 set_package_properties(Fontconfig PROPERTIES DESCRIPTION "Font access configuration library"
                        URL "http://www.freedesktop.org/wiki/Software/fontconfig"
                        TYPE OPTIONAL
                        PURPOSE "Needed to build font configuration and installation tools"
                       )
 
-macro_optional_find_package(Googlegadgets 0.11.0)
+find_package(Googlegadgets 0.11.0)
 set_package_properties(Googlegadgets PROPERTIES DESCRIPTION "Google Gadgets library"
                        URL "http://code.google.com/p/google-gadgets-for-linux"
                        TYPE OPTIONAL
@@ -171,49 +170,49 @@ set_package_properties(Googlegadgets PROPERTIES DESCRIPTION "Google Gadgets libr
                       )
 
 #### Python support ( plasma scriptengines ) ####
-macro_optional_find_package(PythonLibrary)
+find_package(PythonLibrary)
 set_package_properties(PythonLibrary PROPERTIES DESCRIPTION "Python scripting language"
                        URL "http://python.org"
                        TYPE OPTIONAL
                        PURPOSE "Needed to build plasma scriptengine for python."
                       )
 
-macro_optional_find_package(Soprano 2.7.56)
+find_package(Soprano 2.7.56)
 set_package_properties(Soprano PROPERTIES DESCRIPTION "Semantic Desktop Storing"
                        URL "http://soprano.sourceforge.net"
                        TYPE OPTIONAL
                        PURPOSE "Required to build Nepomuk features."
                       )
 
-macro_optional_find_package(NepomukCore QUIET CONFIG)
+find_package(NepomukCore QUIET CONFIG)
 set_package_properties(NepomukCore PROPERTIES DESCRIPTION "Nepomuk Core Library"
                        URL "https://projects.kde.org/nepomuk-core"
                        TYPE OPTIONAL
                        PURPOSE "Required to build Nepomuk features."
                       )
 
-macro_optional_find_package(Boost 1.34.0 MODULE)
+find_package(Boost 1.34.0 MODULE)
 set_package_properties(Boost PROPERTIES DESCRIPTION "Boost C++ Libraries"
                        URL "http://www.boost.org"
                        TYPE OPTIONAL
                        PURPOSE "Required to build certain Plasma DataEngines (Akonadi, RSS, Calendar)"
                       )
 
-macro_optional_find_package(Akonadi QUIET CONFIG)
+find_package(Akonadi QUIET CONFIG)
 set_package_properties(Akonadi PROPERTIES DESCRIPTION "An extensible cross-desktop storage service for PIM data"
                        URL "http://pim.kde.org/akonadi"
                        TYPE OPTIONAL
                        PURPOSE "Required to build certain Plasma DataEngines (Akonadi, Calendar)"
                       )
 
-macro_optional_find_package(KdepimLibs 4.5.60 QUIET CONFIG)
+find_package(KdepimLibs 4.5.60 QUIET CONFIG)
 set_package_properties(KdepimLibs PROPERTIES DESCRIPTION "The KDEPIM libraries"
                        URL "http://pim.kde.org"
                        TYPE OPTIONAL
                        PURPOSE "Required to build certain Plasma DataEngines (Akonadi, Calendar)"
                       )
 
-macro_optional_find_package(QJSON)
+find_package(QJSON)
 set_package_properties(QJSON PROPERTIES DESCRIPTION "Library to manage JSON objects with Qt"
                        URL "http://qjson.sourceforge.net/"
                        TYPE OPTIONAL
@@ -222,15 +221,15 @@ set_package_properties(QJSON PROPERTIES DESCRIPTION "Library to manage JSON obje
 
 
 include(ConfigureChecks.cmake)
-# if(NOT WIN32)
-#   configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
-#   configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
-#   if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
-#     set(EXPORT_XCURSOR_PATH "XCURSOR_PATH=${CMAKE_INSTALL_PREFIX}/share/icons:$XCURSOR_PATH\":~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons\"; export XCURSOR_PATH")
-#   endif(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
-#   configure_file(startkde.cmake ${CMAKE_CURRENT_BINARY_DIR}/startkde  @ONLY)
-# endif(NOT WIN32)
-# configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h )
+if(NOT WIN32)
+  configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
+  configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
+  if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+    set(EXPORT_XCURSOR_PATH "XCURSOR_PATH=${CMAKE_INSTALL_PREFIX}/share/icons:$XCURSOR_PATH\":~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons\"; export XCURSOR_PATH")
+  endif(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+  configure_file(startkde.cmake ${CMAKE_CURRENT_BINARY_DIR}/startkde  @ONLY)
+endif(NOT WIN32)
+configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h )
 
 add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS} -DHAVE_CONFIG_H=1)
 add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
@@ -243,18 +242,18 @@ add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 # add_subdirectory(libs)
 #
 # # system settings (kcontrol replacement)
-# if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #    macro_optional_add_subdirectory( systemsettings )
-# endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #
 # # core apps
-# if(NOT WIN32)
+if(NOT WIN32)
 #    macro_optional_add_subdirectory( kcheckpass )
 #    macro_optional_add_subdirectory( kwin )
 #    macro_optional_add_subdirectory( ksmserver )
 #
-#    find_package(JPEG REQUIRED)
-#    find_package(PNG REQUIRED)
+   find_package(JPEG REQUIRED)
+   find_package(PNG REQUIRED)
 #    macro_optional_add_subdirectory( ksplash )
 #
 #    macro_optional_add_subdirectory( powerdevil )
@@ -262,9 +261,9 @@ add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 #    if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
 #       macro_optional_add_subdirectory( ksysguard )
 #    endif (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
-# endif(NOT WIN32)
+endif(NOT WIN32)
 #
-# if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #    macro_optional_add_subdirectory(kcontrol)
 #    macro_optional_add_subdirectory(klipper)
 #    macro_optional_add_subdirectory(kmenuedit)
@@ -277,39 +276,39 @@ add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 #    # data
 #    macro_optional_add_subdirectory(doc)
 #
-#    if (Q_WS_X11)
+   if (Q_WS_X11)
 #       macro_optional_add_subdirectory(kinfocenter)
 #       macro_optional_add_subdirectory(ktouchpadenabler)
-#    endif (Q_WS_X11)
-#
-#    if(NOT WIN32)
+   endif (Q_WS_X11)
+
+   if(NOT WIN32)
 #       macro_optional_add_subdirectory(kcminit)
 #       macro_optional_add_subdirectory(khotkeys)
 #       macro_optional_add_subdirectory(kwrited)
 #       macro_optional_add_subdirectory(ksystraycmd)
 #       macro_optional_add_subdirectory(appmenu)
-#    endif(NOT WIN32)
+   endif(NOT WIN32)
 #
-#    if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
+   if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
 #       macro_optional_add_subdirectory( kdm )
-#    else(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
+   else(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
 #       message(STATUS "Xau lib or Xdmcp lib was missing. kdm will not compile")
-#    endif(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
-# endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+   endif(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
+endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #
-# if(NOT WIN32)
+if(NOT WIN32)
 #     # data
 #     macro_optional_add_subdirectory(cursors)
-# endif(NOT WIN32)
+endif(NOT WIN32)
 #
 macro_optional_add_subdirectory(plasma)
 # macro_optional_add_subdirectory(statusnotifierwatcher)
 # macro_optional_add_subdirectory(kstyles)
 #
 # ########### install files ###############
-# if(NOT WIN32)
+if(NOT WIN32)
 #   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/startkde DESTINATION ${BIN_INSTALL_DIR})
-# endif(NOT WIN32)
+endif(NOT WIN32)
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
@@ -324,62 +323,64 @@ feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 # we need the absolute directories where stuff will be installed too
 # but since the variables which contain the destinations can be relative
 # or absolute paths, we need this macro to make them all absoulte, Alex
-# macro(MAKE_INSTALL_PATH_ABSOLUTE out in)
-#    if (IS_ABSOLUTE "${in}")    # IS_ABSOLUTE is new since cmake 2.4.8
-#       set(${out} "${in}")
-#    else (IS_ABSOLUTE "${in}")
-#       set(${out} "\${KDE4WORKSPACE_INSTALL_DIR}/${in}")
-#    endif (IS_ABSOLUTE "${in}")
-# endmacro(MAKE_INSTALL_PATH_ABSOLUTE out in)
-#
-# make_install_path_absolute(KDE4WORKSPACE_LIB_DIR     ${LIB_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_LIBEXEC_DIR ${LIBEXEC_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_INCLUDE_DIR ${INCLUDE_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_BIN_DIR     ${BIN_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_SBIN_DIR    ${SBIN_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_DATA_DIR    ${DATA_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_HTML_DIR    ${HTML_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_CONFIG_DIR  ${CONFIG_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_ICON_DIR    ${ICON_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_KCFG_DIR    ${KCFG_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_LOCALE_DIR  ${LOCALE_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_MIME_DIR    ${MIME_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_SOUND_DIR   ${SOUND_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_TEMPLATES_DIR    ${TEMPLATES_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_WALLPAPER_DIR    ${WALLPAPER_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_KCONF_UPDATE_DIR    ${KCONF_UPDATE_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_AUTOSTART_DIR    ${AUTOSTART_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_XDG_APPS_DIR        ${XDG_APPS_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_XDG_DIRECTORY_DIR   ${XDG_DIRECTORY_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_SYSCONF_DIR ${SYSCONF_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_MAN_DIR     ${MAN_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_INFO_DIR    ${INFO_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_DBUS_INTERFACES_DIR ${DBUS_INTERFACES_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_DBUS_SERVICES_DIR   ${DBUS_SERVICES_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_SERVICES_DIR ${SERVICES_INSTALL_DIR})
-# make_install_path_absolute(KDE4WORKSPACE_SERVICETYPES_DIR ${SERVICETYPES_INSTALL_DIR})
-#
-# set(KDE4WORKSPACE_TARGET_PREFIX KDE4Workspace__)
+macro(MAKE_INSTALL_PATH_ABSOLUTE out in)
+   if (IS_ABSOLUTE "${in}")    # IS_ABSOLUTE is new since cmake 2.4.8
+      set(${out} "${in}")
+   else (IS_ABSOLUTE "${in}")
+      set(${out} "\${KDE4WORKSPACE_INSTALL_DIR}/${in}")
+   endif (IS_ABSOLUTE "${in}")
+endmacro(MAKE_INSTALL_PATH_ABSOLUTE out in)
+
+make_install_path_absolute(KDE4WORKSPACE_LIB_DIR     ${LIB_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_LIBEXEC_DIR ${LIBEXEC_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_INCLUDE_DIR ${INCLUDE_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_BIN_DIR     ${BIN_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_SBIN_DIR    ${SBIN_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_DATA_DIR    ${DATA_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_HTML_DIR    ${HTML_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_CONFIG_DIR  ${CONFIG_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_ICON_DIR    ${ICON_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_KCFG_DIR    ${KCFG_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_LOCALE_DIR  ${LOCALE_INSTALL_DIR})
+#FIXME
+#make_install_path_absolute(KDE4WORKSPACE_MIME_DIR    ${MIME_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_SOUND_DIR   ${SOUND_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_TEMPLATES_DIR    ${TEMPLATES_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_WALLPAPER_DIR    ${WALLPAPER_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_KCONF_UPDATE_DIR    ${KCONF_UPDATE_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_AUTOSTART_DIR    ${AUTOSTART_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_XDG_APPS_DIR        ${XDG_APPS_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_XDG_DIRECTORY_DIR   ${XDG_DIRECTORY_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_SYSCONF_DIR ${SYSCONF_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_MAN_DIR     ${MAN_INSTALL_DIR})
+#FIXME
+#make_install_path_absolute(KDE4WORKSPACE_INFO_DIR    ${INFO_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_DBUS_INTERFACES_DIR ${DBUS_INTERFACES_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_DBUS_SERVICES_DIR   ${DBUS_SERVICES_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_SERVICES_DIR ${SERVICES_INSTALL_DIR})
+make_install_path_absolute(KDE4WORKSPACE_SERVICETYPES_DIR ${SERVICETYPES_INSTALL_DIR})
+
+set(KDE4WORKSPACE_TARGET_PREFIX KDE4Workspace__)
 #
 # configure_file(KDE4WorkspaceConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfig.cmake" @ONLY)
 
 # this file will be installed too and will be used by cmake when searching for the Config.cmake file to check the version of kdepimlibs, Alex
-# macro_write_basic_cmake_version_file(${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake
-#                                      ${KDE4WORKSPACE_VERSION_MAJOR} ${KDE4WORKSPACE_VERSION_MINOR} ${KDE4WORKSPACE_VERSION_PATCH})
-#
-# set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/KDE4Workspace/cmake)
-# # places where find_package() looks for FooConfig.cmake files:
-# # CMake >= 2.6.0 looks in lib/Foo*/cmake/, CMake >= 2.6.3 also looks in
-# # lib/cmake/Foo*/, which packagers prefer. So they can set the KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR
-# # option to have kdepimlibs install its Config file there. Alex
-# if(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
-#    set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/KDE4Workspace)
-# endif(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
-#
-# install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfig.cmake
-#               ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake
-#         DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR})
-#
+macro_write_basic_cmake_version_file(${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake
+                                     ${KDE4WORKSPACE_VERSION_MAJOR} ${KDE4WORKSPACE_VERSION_MINOR} ${KDE4WORKSPACE_VERSION_PATCH})
+
+set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/KDE4Workspace/cmake)
+# places where find_package() looks for FooConfig.cmake files:
+# CMake >= 2.6.0 looks in lib/Foo*/cmake/, CMake >= 2.6.3 also looks in
+# lib/cmake/Foo*/, which packagers prefer. So they can set the KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR
+# option to have kdepimlibs install its Config file there. Alex
+if(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
+   set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/KDE4Workspace)
+endif(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake
+        DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR})
+
 # install(EXPORT kdeworkspaceLibraryTargets
 #         NAMESPACE ${KDE4WORKSPACE_TARGET_PREFIX}
 #         DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR}
