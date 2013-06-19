@@ -300,11 +300,9 @@ Item {
         Connections {
             target: plasmoid
             onImmutableChanged: {
-                buttonMouse.drag.target = plasmoid.immutable ? undefined : toolBoxButton                //print("plasmoid.immutable == " + plasmoid.immutable);
+                buttonMouse.drag.target = plasmoid.immutable ? undefined : toolBoxButton
             }
-
         }
-
     }
     states: [
         State {

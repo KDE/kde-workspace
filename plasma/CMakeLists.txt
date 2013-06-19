@@ -1,84 +1,30 @@
-project(KDEBASE_WORKSPACE)
-# set_package_properties appeared in cmake 2.8.6
-# TODO: Remove when kdelibs >= 4.10 will be required
-cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
-
-# Used e.g. in KDE4WorkspaceConfig.cmake, Alex
-set(KDE4WORKSPACE_VERSION_MAJOR 4)
-set(KDE4WORKSPACE_VERSION_MINOR 60)
-set(KDE4WORKSPACE_VERSION_PATCH 0)
-set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
-
-# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH} )
-
-################# set KDE specific information #################
-
-find_package(ECM 0.0.8 REQUIRED NO_MODULE)
-
-# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
-
-find_package(Qt5Core REQUIRED NO_MODULE)
-
-find_package(Qt5Transitional MODULE)
-find_package(Qt5Quick REQUIRED NO_MODULE)
-find_package(Qt5X11Extras REQUIRED NO_MODULE)
-find_package(kde4support REQUIRED NO_MODULE)
-
-#search packages used by KDE
-set(QT_MIN_VERSION "5.0.0")
-
-find_package(kdeqt5staging REQUIRED NO_MODULE)
-
-add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
-
-# Load CMake, Compiler and InstallDirs settings from KF5 and the following are already somewhat "done" tier1/tier2 libs from kdelibs:
-find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
-                                            XmlGui KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
-                                            KConfig KAuth kjs
-                                            ki18n kguiaddons kservice kwidgets ItemViews KNotifications KCompletion KJobWidgets KConfigWidgets KIconThemes)
-#find_package(KF5Transitional REQUIRED)
-
-find_package(ki18n REQUIRED NO_MODULE)
-find_package(kio REQUIRED NO_MODULE)
-find_package(kguiaddons REQUIRED NO_MODULE)
-find_package(Plasma REQUIRED NO_MODULE)
-
-find_package(KDELibs4 REQUIRED NO_MODULE)
-
-find_package(kdeclarative REQUIRED NO_MODULE)
-
-option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
-
-
-add_definitions(${KDE4_DEFINITIONS})
+project(workspace-plasma)
 add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
-add_definitions(-DQT_NO_URL_CAST_FROM_STRING)
-
-remove_definitions(-DQT3_SUPPORT_WARNINGS -DQT3_SUPPORT)
+# add_definitions(-DQT_NO_URL_CAST_FROM_STRING)
+#
+# remove_definitions(-DQT3_SUPPORT_WARNINGS -DQT3_SUPPORT)
 remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_STRICT_ITERATORS -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_KEYWORDS)
-
-
-
-# if(NOT WIN32)
-#   configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
-#   configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
-#   if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
-#     set(EXPORT_XCURSOR_PATH "XCURSOR_PATH=${CMAKE_INSTALL_PREFIX}/share/icons:$XCURSOR_PATH\":~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons\"; export XCURSOR_PATH")
-#   endif(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
-#   configure_file(startkde.cmake ${CMAKE_CURRENT_BINARY_DIR}/startkde  @ONLY)
-# endif(NOT WIN32)
-#configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h )
-
-add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS} -DHAVE_CONFIG_H=1)
-add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES} ${KACTIVITIES_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/libs)
-
-add_definitions(-DDISABLE_NEPOMUK_LEGACY)
-
-
-feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
+#
+#
+#
+# # if(NOT WIN32)
+# #   configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
+# #   configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
+# #   if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+# #     set(EXPORT_XCURSOR_PATH "XCURSOR_PATH=${CMAKE_INSTALL_PREFIX}/share/icons:$XCURSOR_PATH\":~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons\"; export XCURSOR_PATH")
+# #   endif(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+# #   configure_file(startkde.cmake ${CMAKE_CURRENT_BINARY_DIR}/startkde  @ONLY)
+# # endif(NOT WIN32)
+# #configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h )
+#
+# add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS} -DHAVE_CONFIG_H=1)
+# add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
+# include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES} ${KACTIVITIES_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/libs)
+#
+# add_definitions(-DDISABLE_NEPOMUK_LEGACY)
+#
+#
+# feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 
 
