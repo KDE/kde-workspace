@@ -258,9 +258,9 @@ if(NOT WIN32)
 #
 #    macro_optional_add_subdirectory( powerdevil )
 #    macro_optional_add_subdirectory( qguiplatformplugin_kde )
-#    if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
+   if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
 #       macro_optional_add_subdirectory( ksysguard )
-#    endif (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
+   endif (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
 endif(NOT WIN32)
 #
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
@@ -369,6 +369,7 @@ macro_write_basic_cmake_version_file(${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceCo
                                      ${KDE4WORKSPACE_VERSION_MAJOR} ${KDE4WORKSPACE_VERSION_MINOR} ${KDE4WORKSPACE_VERSION_PATCH})
 
 set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/KDE4Workspace/cmake)
+
 # places where find_package() looks for FooConfig.cmake files:
 # CMake >= 2.6.0 looks in lib/Foo*/cmake/, CMake >= 2.6.3 also looks in
 # lib/cmake/Foo*/, which packagers prefer. So they can set the KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR
