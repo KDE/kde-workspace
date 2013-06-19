@@ -4,13 +4,10 @@ import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
 import "data.js" as Data
 import org.kde.dirmodel 0.1
-Column {
-    id:trash
-    property int minimumWidth
-    property int minimumHeight
-    property int orientation: onPanel ? (plasmoid.formFactor==Horizontal ? Qt.Horizontal :
-    Qt.Vertical) : (width>height ? Qt.Horizontal : Qt.Vertical)
-    property bool onPanel: (plasmoid.formFactor==Horizontal || plasmoid.formFactor==Vertical)
+Item {
+    id:root
+    property int minimumWidth: column.width
+    property int minimumHeight:column.height
     PlasmaCore.Theme {
         id: theme 
     }
@@ -37,57 +34,31 @@ Column {
         plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
-    Item {
-        id:item
-        visible: true
-        width: 100
-        height: 100
+    Row {
+        id:row
+        spacing:0
             PlasmaCore.IconItem {
-                id:iconButton
-                width:100
-                height:100
-                anchors.centerIn:parent
+                id:icon
+                width:root.width
+                height:width
                 source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
-	        Text { 
-                    id:text
-                    anchors.top:iconButton.bottom
-                    anchors.centerIn:parent
-                    text:"Trash \n " + dirModel.count
+                MouseArea {
+                    id: mouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onReleased: plasmoid.openUrl("trash:/");
                 }
             }
-        MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-            hoverEnabled: true
-            onReleased: plasmoid.openUrl("trash:/");
-            PlasmaCore.ToolTip {
-                target: mouseArea
-                mainText:"trash"
-                subText: dirModel.count
-                }
-            Connections {
-                target: plasmoid
-                onFormFactorChanged: {
-                    //plasmoid.formFactor()
-                    /*if(item.width>item.height) {
-                        Qt.Horizontal
-                    }
-                    else {
-                        Qt.Vertical
-                    }*/
-                    if(plasmoid.formFactor == Vertical) {
-                       item.width=minimumHeight;
-                       Qt.Vertical;
-                    }
-                    else {
-                        item.height=minimumWidth;
-                        Qt.Horizontal;
-                    }
+            Text {
+                id:text
+                color:theme.textColor
+                font.bold:false
+                font.pointSize:root.width/10
+                text:"Trash \n"+dirModel.count
+                anchors {
+                    horizontalCenter:icon.horizontalCenter
+                    top:icon.bottom
                 }
             }
-        }
-    } 
+    }
 }
- 
-
-
