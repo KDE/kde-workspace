@@ -6,14 +6,21 @@ import "data.js" as Data
 import org.kde.dirmodel 0.1
 Item {
     id:root
-    property int minimumWidth: column.width
-    property int minimumHeight:column.height
+    property int minimumWidth:formFactor == Horizontal ? height : 1
+    property int minimumHeight:formFactor == Vertical ? width  : 1
+    property int formFactor: plasmoid.formFactor
     PlasmaCore.Theme {
         id: theme 
     }
     DirModel {
         id:dirModel
         url: "trash:/"
+    }
+    Connections {
+        target: plasmoid
+            onFormFactorChanged: {
+                    root.formFactor = plasmoid.formFactor
+            }
     }
     function action_open() {
         plasmoid.openUrl("trash:/");
