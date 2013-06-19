@@ -323,10 +323,8 @@ void PowermanagementEngine::updateBatteryNames()
             const QString batteryProduct = batteryDataContainer->data()["Product"].toString();
 
             // Don't show battery name for primary power supply batteries. They usually have cryptic serial number names.
-            const QString batteryType = batteryDataContainer->data()["Type"].toString();
-            bool batteryIsPowerSupply = batteryDataContainer->data()["Is Power Supply"].toBool();
-            bool showBatteryName = batteryType != QLatin1String("Battery") ||
-                                   (batteryType != QLatin1String("Battery") && !batteryIsPowerSupply);
+            const bool showBatteryName = batteryDataContainer->data()["Type"].toString() != QLatin1String("Battery") ||
+                                         !batteryDataContainer->data()["Is Power Supply"].toBool();
 
             if (!batteryProduct.isEmpty() && batteryProduct != "Unknown Battery" && showBatteryName) {
                 if (!batteryVendor.isEmpty()) {
