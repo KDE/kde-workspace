@@ -35,7 +35,7 @@
 
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2012-03-17</date>
+<date>2013-06-19</date>
 <releaseinfo>0.9 (&kde; 4.11)</releaseinfo>
 
 <abstract><para>&kmenuedit; allows editing one of the &kde; application launchers: &kickoff;, the classic &kmenu; or Lancelot Launcher.
@@ -53,7 +53,6 @@
 </keywordset>
 
 </bookinfo>
-
 <chapter id="introduction">
 <title>Introduction</title>
 
@@ -417,43 +416,14 @@ item.</action></para></listitem>
 <listitem><para><action>This will restore the application launcher as it was as default and remove all your custom settings. A message box will ask you if you really want to do that.</action></para></listitem>
 </varlistentry>
 
-<varlistentry id="settings-hide-toolbar">
-<term><menuchoice>
-<guimenu>Settings</guimenu>
-<guimenuitem>Show Toolbar</guimenuitem>
-</menuchoice></term>
-<listitem><para><action>Show or hide the toolbar</action></para></listitem>
-</varlistentry>
-
-<varlistentry id="settings-configure-shortcuts">
-<term><menuchoice>
-<guimenu>Settings</guimenu><guimenuitem>Configure
-Shortcuts...</guimenuitem></menuchoice></term>
-<listitem>
-<para><action>Customize the keyboard shortcuts</action></para>
-</listitem>
-</varlistentry>
-
-<varlistentry id="settings-configure-toolbars">
-<term><menuchoice>
-<guimenu>Settings</guimenu><guimenuitem>Configure
-Toolbars...</guimenuitem></menuchoice></term>
-<listitem>
-<para><action>Customize the toolbar icons.</action></para>
-</listitem>
-</varlistentry>
-
-<varlistentry id="settings-configure-kmenuedit">
-<term><menuchoice>
-<guimenu>Settings</guimenu><guimenuitem>Configure
-&kde; Menu Editor...</guimenuitem></menuchoice></term>
-<listitem>
-<para><action>Open the Menu Editor settings dialog.</action></para>
-</listitem>
-</varlistentry>
 </variablelist>
 
-&help.menu.documentation;
+<para>
+&kmenuedit; has the common &kde; <guimenu>Settings</guimenu> and <guimenu>Help</guimenu>
+menu items, for more information read the sections about the <ulink url="help:/fundamentals/ui.html#menus-settings"
+>Settings Menu</ulink> and <ulink url="help:/fundamentals/ui.html#menus-help">Help Menu</ulink>
+of the &kde; Fundamentals.
+</para>
 
 </chapter>
 
@@ -493,46 +463,6 @@ Author</para>
 
 <glossary id="glossary">
 <title>Glossary</title>
-
-<glossentry id="gloss-terminal-emulator">
-<glossterm>Terminal emulator</glossterm>
-<glossdef>
-<para>Terminal emulator is simply a windowed shell; this is known as
-<quote>command line window</quote> in some other environments. If you
-want to use the shell, you should know at least a few of the
-system-level commands for your operating system.</para>
-</glossdef>
-</glossentry>
-
-<glossentry id="gloss-applet">
-<glossterm>Applet</glossterm>
-<glossdef><para>A small application that occupies very little memory
-and screen space, and at the same time gives you some useful
-information or provides a control shortcut. For instance the
-<application>Clock</application> applet shows current time and date
-(and even a month diary if you click it), and &ksysguard;
-applet shows how busy your machine currently is
-in real-time.</para> </glossdef>
-</glossentry>
-
-<!--
-<glossentry id="gloss-legacy-application">
-<glossterm>Legacy Application</glossterm>
-<glossdef>
-
-<para>An X-window application which was not written with &kde; in
-mind. Such applications run fine in &kde;. However, they are not
-warned automatically when you shut down your &kde; session. You
-therefore must not forget to save documents open in these applications
-before you log out from &kde;. </para> <para>Additionally, many of
-these applications do not support copying and pasting from
-&kde; compliant applications. &Netscape; 4.x browser is a prominent
-example of such application <footnote><para>Some <ulink
-url="http://www.gnome.org">GNOME</ulink> applications may provide
-limited interoperability with the &kde;.</para></footnote>.</para>
-</glossdef>
-</glossentry>
--->
 
 <glossentry id="gloss-console-application">
 <glossterm>Console Application</glossterm>
