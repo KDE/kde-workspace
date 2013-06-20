@@ -39,7 +39,8 @@ Item {
         plasmoid.openUrl("trash:/");
     }
     function action_empty() {
-        plasmoid.runCommand("ktrash", ["--empty"]);
+        emptyDialog=emptyDialogComponent.createObject(root);
+        emptyDialog.open();
     }
     Component.onCompleted: { 
         plasmoid.setBackgroundHints( 0 )
@@ -48,7 +49,8 @@ Item {
         }
         plasmoid.setAction("open", i18n("Open"),"document-open");
         plasmoid.action_empty=function() {
-            plasmoid.runCommand("ktrash", ["--empty"]);
+             emptyDialog=emptyDialogComponent.createObject(root);
+             emptyDialog.open();
         }
         plasmoid.setAction("empty",i18n("Empty"),"trash-empty");
         plasmoid.popupIcon = QIcon("user-trash");
@@ -85,6 +87,18 @@ Item {
                 mainText:"Trash"
                 subText: dirModel.count
                 image: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+        }
+    }
+    Component {
+        id:emptyDialogComponent
+        Components.QueryDialog {
+            id:queryDialog
+            titleIcon:"user-trash"
+            titleText:i18n("Empty Trash")
+            message:i18n("Do you really want to empty the trash ? All the items will be deleted.")
+            acceptButtonText:i18n("Empty Trash")
+            rejectButtonText:i18n("Cancel")
+            onAccepted:plasmoid.runCommand("ktrash", ["--empty"]);
         }
     }
 }
