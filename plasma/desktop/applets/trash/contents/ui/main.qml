@@ -80,5 +80,11 @@ Item {
                 }
             }
         }
+        PlasmaCore.ToolTip {
+                target: mouseArea
+                mainText:"Trash"
+                subText: dirModel.count
+                image: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+        }
     }
 }
