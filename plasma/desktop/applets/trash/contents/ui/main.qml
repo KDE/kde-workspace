@@ -25,9 +25,6 @@ Item {
     property int minimumWidth:formFactor == Horizontal ? height : 1
     property int minimumHeight:formFactor == Vertical ? width  : 1
     property int formFactor: plasmoid.formFactor
-    PlasmaCore.Theme {
-        id: theme 
-    }
     DirModel {
         id:dirModel
         url: "trash:/"
@@ -57,30 +54,30 @@ Item {
         plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
-    Row {
-        id:row
-        spacing:0
-        PlasmaCore.IconItem {
-            id:icon
-            width:root.width
-            height:width
-            source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
-            MouseArea {
-                id: mouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onReleased: plasmoid.openUrl("trash:/");
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        onReleased: plasmoid.openUrl("trash:/");
+        Row {
+            id:row
+            spacing:0
+            PlasmaCore.IconItem {
+                id:icon
+                width:root.width
+                height:width
+                source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
             }
-        }
-        Components.Label {
-            id:text
-            color:theme.textColor
-            font.bold:false
-            font.pointSize:root.width/10
-            text:"Trash \n"+dirModel.count
-            anchors {
-                horizontalCenter:icon.horizontalCenter
-                top:icon.bottom
+            Components.Label {
+                id:text
+                color:theme.textColor
+                font.bold:false
+                font.pointSize:root.width/10
+                text:"Trash \n"+dirModel.count
+                anchors {
+                    horizontalCenter:icon.horizontalCenter
+                    top:icon.bottom
+                }
             }
         }
     }
