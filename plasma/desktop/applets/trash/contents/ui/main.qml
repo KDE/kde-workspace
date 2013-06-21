@@ -89,7 +89,7 @@ Item {
             font.pointSize:root.width/10
             width: paintedWidth
             height:paintedHeight
-            text: (dirModel.count==0)?i18n("    Trash \n\n\n Empty"):(dirModel.count==1)?i18n("    Trash \n One item"):i18n("    Trash \n\n\n "+ dirModel.count +"items") 
+            text: (dirModel.count==0)?i18n("    Trash \n   Empty"):(dirModel.count==1)?i18n("    Trash \n One item"):i18n("    Trash \n "+ dirModel.count +"items") 
             anchors {
                 horizontalCenter:icon.horizontalCenter
                 top:icon.bottom
