@@ -66,40 +66,43 @@ Item {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        hoverEnabled: true
+        hoverEnabled: false
         onReleased: plasmoid.openUrl("trash:/");
-        
-            PlasmaCore.IconItem {
-                id:icon
-                width:root.width
-                height:width
-                source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
-                anchors {
-                    horizontalCenter:parent.horizontalCenter
-                    centerIn:parent
-                    topMargin:0
-                    bottom:text.top                    
-                }
+        PlasmaCore.IconItem {
+            id:icon
+            width:root.width-30
+            height:width
+            source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+            anchors {
+                horizontalCenter:parent.horizontalCenter
+                centerIn:parent
+                topMargin:0
+                bottom:text.top 
+                left:parent.left
+                right:parent.right
             }
-            Components.Label {
-                id:text
-                color:theme.textColor
-                font.bold:false
-                font.pointSize:root.width/10
-                width: paintedWidth
-                height:paintedHeight
-                text: (dirModel.count==0)?i18n("Trash \n\n\n Empty"):(dirModel.count==1)?i18n("Trash \n One item"):i18n("Trash \n\n\n "+ dirModel.count +"items") 
-                anchors {
-                  
-                    horizontalCenter:icon.horizontalCenter
-                    top:icon.bottom
-                }
+        }
+        Components.Label {
+            id:text
+            color:theme.textColor
+            font.bold:false
+            font.pointSize:root.width/10
+            width: paintedWidth
+            height:paintedHeight
+            text: (dirModel.count==0)?i18n("    Trash \n\n\n Empty"):(dirModel.count==1)?i18n("    Trash \n One item"):i18n("    Trash \n\n\n "+ dirModel.count +"items") 
+            anchors {
+                horizontalCenter:icon.horizontalCenter
+                top:icon.bottom
+                leftMargin:20
+                left:parent.left
+                right:parent.right
             }
+        }
         PlasmaCore.ToolTip {
-                target: mouseArea
-                mainText:"Trash"
-                subText: (dirModel.count==0)?i18n("Trash \n Empty"):(dirModel.count==1)?i18n("Trash \n One item"):i18n("Trash \n "+ dirModel.count +"items") 
-                image: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+            target: mouseArea
+            mainText:"Trash"
+            subText: (dirModel.count==0)?i18n("Trash \n Empty"):(dirModel.count==1)?i18n("Trash \n One item"):i18n("Trash \n "+ dirModel.count +"items") 
+            image: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
         }
     }
     
