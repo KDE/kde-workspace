@@ -36,9 +36,18 @@ Item {
         target: plasmoid
         onFormFactorChanged: {
             root.formFactor = plasmoid.formFactor
+           // plasmoid.setPreferredSize(minimumWidth,minimumHeight)
+           if(root.formFactor==Planar || root.formFactor == MediaCenter )
+           {
+               minimumWidth=32
+               minimumHeight=32
+           }
+           
         }
     }
-    
+    function isConstrained() {
+        return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
+    }
     function action_open() {
         plasmoid.openUrl("trash:/");
     }
@@ -81,6 +90,7 @@ Item {
                 top:icon.bottom
                 }
             horizontalAlignment:icon.AlignHCenter
+            opacity:isConstrained() ? 0 : 1
         }
         PlasmaCore.ToolTip {
             target: mouseArea
