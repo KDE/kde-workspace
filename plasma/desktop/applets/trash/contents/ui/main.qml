@@ -19,28 +19,35 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
 import org.kde.dirmodel 0.1
+
 Item {
     id:root
+    
     property int minimumWidth:formFactor == Horizontal ? height : 1
     property int minimumHeight:formFactor == Vertical ? width  : 1
     property int formFactor: plasmoid.formFactor
+    
     DirModel {
         id:dirModel
         url: "trash:/"
     }
+    
     Connections {
         target: plasmoid
         onFormFactorChanged: {
             root.formFactor = plasmoid.formFactor
         }
     }
+    
     function action_open() {
         plasmoid.openUrl("trash:/");
     }
+
     function action_empty() {
         emptyDialog=emptyDialogComponent.createObject(root);
         emptyDialog.open();
     }
+    
     Component.onCompleted: { 
         plasmoid.setBackgroundHints( 0 )
         plasmoid.action_open = function() {
@@ -55,39 +62,47 @@ Item {
         plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
+    
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         onReleased: plasmoid.openUrl("trash:/");
-        Row {
-            id:row
-            spacing:0
+        
             PlasmaCore.IconItem {
                 id:icon
                 width:root.width
                 height:width
                 source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+                anchors {
+                    horizontalCenter:parent.horizontalCenter
+                    centerIn:parent
+                    topMargin:0
+                    bottom:text.top                    
+                }
             }
             Components.Label {
                 id:text
                 color:theme.textColor
                 font.bold:false
                 font.pointSize:root.width/10
-                text:"Trash \n"+dirModel.count
+                width: paintedWidth
+                height:paintedHeight
+                text: (dirModel.count==0)?i18n("Trash \n\n\n Empty"):(dirModel.count==1)?i18n("Trash \n One item"):i18n("Trash \n\n\n "+ dirModel.count +"items") 
                 anchors {
+                  
                     horizontalCenter:icon.horizontalCenter
                     top:icon.bottom
                 }
             }
-        }
         PlasmaCore.ToolTip {
                 target: mouseArea
                 mainText:"Trash"
-                subText: dirModel.count
+                subText: (dirModel.count==0)?i18n("Trash \n Empty"):(dirModel.count==1)?i18n("Trash \n One item"):i18n("Trash \n "+ dirModel.count +"items") 
                 image: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
         }
     }
+    
     Component {
         id:emptyDialogComponent
         Components.QueryDialog {
