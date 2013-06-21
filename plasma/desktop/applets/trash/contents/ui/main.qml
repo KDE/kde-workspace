@@ -36,13 +36,11 @@ Item {
         target: plasmoid
         onFormFactorChanged: {
             root.formFactor = plasmoid.formFactor
-           // plasmoid.setPreferredSize(minimumWidth,minimumHeight)
-           if(root.formFactor==Planar || root.formFactor == MediaCenter )
-           {
+            if(root.formFactor==Planar || root.formFactor == MediaCenter )
+            {
                minimumWidth=32
                minimumHeight=32
-           }
-           
+            }
         }
     }
     function isConstrained() {
