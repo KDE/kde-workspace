@@ -14,75 +14,79 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import Qt 4.7
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.graphicslayouts 4.7 as GraphicsLayouts
+import org.kde.plasma.components 0.1 as Components
+import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+
 Component {
+  
     Item {
+    
         signal closeClicked(string wid)
         signal activateWindow(string wid)
-        width: tasks.width
+        width: task_list.width
         height: 32
         clip: true
         state: "unminized"
-    }
-    Row {
-        id: deskrow
-        spacing: 3
-        width: dialog.width - 32
-        PlasmaWidgets.IconWidget {
-	    id: listwidget
-	    maximumIconSize: "32x32"
-	    orientation: Qt.Horizontal
-	    icon: main.data[DataEngineSource]['icon']
-        }
-        Window_3 {
-	    id: fontstyle
-	    anchors.verticalCenter: parent.verticalCenter
-	    width: parent.width - 32 - 10
-	    smooth: true
-	    font.italic: { (minimized == true) ? true : false }
-	    text: name
+        
+    
+        Row {
+            id: taskRow
+            width: dialog.width 
+            
+            PlasmaWidgets.IconWidget {
+	        id: taskIconWidget
+	        maximumIconSize: "32x32"
+	        orientation: Qt.Horizontal
+	        icon: main.data[DataEngineSource]['icon']
+            }
+            Window_3 {
+                id: text_style
+                width: parent.width
+                smooth: true
+                font.italic: { (minimized == true) ? true : false }	    text: name
+            }
             Behavior on opacity {
-        	PropertyAnimation { duration: 300 }
+                PropertyAnimation { duration: 300 }
             }
         }
+
         MouseArea {
-            anchors.fill: deskrow
+            anchors.fill: taskRow
             hoverEnabled: true
             onEntered: {
 	        if (!closeIcon.visible) {
 	            closeIcon.visible = true
 	        }
-	    deskrow.opacity = 0.5
-	    print("Over" + name);
-	    fontstyle.startMarquee();
+	    taskRow.opacity = 0.5
             }
             onExited: {
-        	if (closeIcon.visible) {
+	        if (closeIcon.visible) {
 	            closeIcon.visible = false
 	        }
-	    fontstyle.reset();
-	    deskrow.opacity = 1
+	        taskRow.opacity = 1
             }
             onClicked: {
-	        main.activateWindow(DataEngineSource);
+                main.activateWindow(DataEngineSource);
             }
         }
+    
+    
         PlasmaCore.SvgItem {
             id: closeIcon
             anchors.verticalCenter: parent.verticalCenter
-            x: deskrow.width
+            x: taskRow.width
             width: main.closeIconSize
             height: main.closeIconSize
-            svg: popup
+            svg: winOperationSvg
             elementId: "close"
             visible: false
             Behavior on opacity {
 	        PropertyAnimation { duration: 300 }
             }
         }
+    
         MouseArea {
             anchors.fill: closeIcon
             hoverEnabled: true
@@ -95,12 +99,14 @@ Component {
 	        closeIcon.visible = false;
             }
             onClicked: {
-	        main.closeWindow(DataEngineSource);
+        	main.closeWindow(DataEngineSource);
             }
         }
+    
+    
         PlasmaCore.Svg {
-        id: popup
-        imagePath: "widgets/configuration-icons"
+            id: winOperationSvg
+            imagePath: "widgets/configuration-icons"
         }
     }
 }

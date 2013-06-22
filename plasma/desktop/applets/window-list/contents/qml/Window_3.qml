@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2013  Heena Mahour <heena393@gmail.com>
  *
@@ -20,7 +21,6 @@ import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
 Item {
     id: text_c
-    width: text_style.width
     height: text_style.height + padding
     clip: true
     property string text
@@ -28,6 +28,7 @@ Item {
     property int fontSize : 5
     property alias font: text_style.font
     property int interval : 40
+    
     Components.Label {
         id:text_style
         text:parent.text

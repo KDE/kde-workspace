@@ -14,95 +14,93 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import Qt 4.7
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.graphicslayouts 4.7 as GraphicsLayouts
-import org.kde.qtextracomponents 0.1 as QtExtra
-QGraphicsWidget {
-  id: mainWidget
-  preferredSize: "40x16"
-  minimumSize: "40x16"
+import org.kde.plasma.components 0.1 as Components
+import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+
     Item {
         id:main
-        width: mainWidget.width
-        height: mainWidget.height 
+        property int minimumWidth:formFactor == Horizontal ? height : 1
+        property int minimumHeight:formFactor == Vertical ? width  : 1
+        property int formFactor: plasmoid.formFactor
+        property bool constrained:formFactor==Vertical||formFactor==Horizontal
         property string activeWindowId: "";
         property string newWindowId: "";
         property bool activeWorkspace : false;
-        property int closeIconSize: 16
-        property int winsize: 16
-        property int appIconSize: 32
+        property int closeIconSize: 10
+        property int winOperationIconSize: 10
+        property int appIconSize: 10
         property alias data: tasksSource.data;
-        property alias connectedSources: tasksSource.connectedSources;    
+        property alias connectedSources: tasksSource.connectedSources;
         signal activeWindowChanged(string wid);
-        signal activeWindowMinimized;    
+        signal activeWindowMinimized;
         signal windowAdded(string wid);
         signal windowRemoved(string wid);
         signal windowStateChanged(string wid);
-        signal workspaceActivated;    
-        function close(id) {
-        if (!id)
-	    return;
+        signal workspaceActivated;
+        function closeWindow(id) {
+            if (!id)
+                return;
             var source = tasksSource.serviceForSource(id);
             var data = source.operationDescription("close");
             source.startOperationCall(data);
         }
-        function activate(id) {
+        function activateWindow(id) {
             var source = tasksSource.serviceForSource(id);
             var data = source.operationDescription("activate");
             source.startOperationCall(data);
         }
-        function maximizew(id, state) {
+        function setWindowMaximized(id, state) {
             if (!id)
-	        return;
+                return;
             var source = tasksSource.serviceForSource(id);
             var data = source.operationDescription("setMaximized");
             data['maximized'] = state;
             source.startOperationCall(data);
         }
-        function ifmaximize(id) {
+        function isMaximized(id) {
             print(id);
             if (!id)
-	        return false;
+                return false;
             return tasksSource.data[id]['maximized'];
         }
         function isMinimized(id) {
             if (!id) 
-	        return false;
+                return false;
             return tasksSource.data[id]['minimized'];
         }
-        function dialog_pos(dialogContainer, object) {
+        function getPopupPosition(dialogContainer, object) {
             var location = plasmoid.locoation;
             var pos = dialogContainer.popupPosition(object);
             print("Pos " + pos.x + "," + pos.y);
             switch(location) {
-	        case Floating: 
-	        case TopEdge: {
-	            pos.y += object.height;
-	            break;
-	        }
-	        case BottomEdge: {
-	            pos.y -= object.height;
-	        }
-	        case LeftEdge: {
-	            pos.x += object.width;
-	        }
-	        case RightEdge: {
-	            pos.x -= object.width
-	        }
-	        case FullScreen: {
-	        }
-	        default: {
-	        }
+                case Floating: 
+                case TopEdge: {
+                    pos.y += object.height;
+                    break;
+                }
+                case BottomEdge: {
+                    pos.y -= object.height;
+                }
+                case LeftEdge: {
+                    pos.x += object.width;
+                }
+                case RightEdge: {
+                    pos.x -= object.width
+                }
+                case FullScreen: {
+                }
+                default: {
+                }
             }
             return pos;
         }
-        function displayw(visibility) {
+        function makeWindow_2Visible(visibility) {
             dialogContainer.visible = visibility;
             dialog.visible = visibility;
         }
-        function adjustw(dy) {
+        function adjustWindow_2Height(dy) {
             dialogContainer.height += dy;
             dialog.height += dy;
         }
@@ -110,92 +108,72 @@ QGraphicsWidget {
             id: tasksSource
             engine: "tasks"
             onSourceAdded: {
-	    connectSource(source);
-	    main.newWindowId = source;
-	    main.windowAdded(source);
-	    print("onSourceAdded: " + source)
+                connectSource(source);
+		main.newWindowId = source;
+                main.windowAdded(source);
+                print("onSourceAdded: " + source)
             }
             onNewData: {
-	        if (data['minimized']) {
-		    if (main.activeWindowId == sourceName) {
-	                main.activeWindowMinimized();
-	                print("Minimizing " + sourceName)
-	            }
-	        }
+                if (data['minimized']) {
+                    if (main.activeWindowId == sourceName) {
+                        main.activeWindowMinimized();
+                        print("Minimizing " + sourceName)
+                    }
+                }
 		if (data['active']) {
-	            main.activeWorkspace = false;
-	            main.activeWindowId = sourceName;
-	            main.activeWindowChanged(sourceName);
-	        } else {
-	 	    workspaceTimer.start();
-	  	    main.activeWorkspace = true;
-	        }
+                    main.activeWorkspace = false;
+                    main.activeWindowId = sourceName;
+                    main.activeWindowChanged(sourceName);
+                } else {
+                    workspaceTimer.start();
+                    main.activeWorkspace = true;
+                }
             }
             onSourceRemoved: {
-	        main.windowRemoved(source);
+                main.windowRemoved(source);
             }
             Component.onCompleted: {
-	        connectedSources = sources;
+                connectedSources = sources;
 		for (var key in sources){
-	            var s = sources[key];
-	            print(s + " added");
-	            main.windowAdded(s);
-	        }
+                    var s = sources[key];
+                    print(s + " added");
+                    main.windowAdded(s);
+                }
             }
         }
         Window_1 {
-            id: activew
-            iconHeight: 10
-            iconWidth: 10
-            height: parent.height
-            width: parent.width
-            Rectangle{
-                width: activew.width; height:activew.height
-                color:"transparent"
-                Image  {
-                    width: activew.width; height:activew.height
-                    smooth: true
-                    source: "/usr/share/icons/oxygen/128x128/apps/preferences-system-windows.png"
+            id:active_win
+            width: main.width
+            height:width
+  
+            PlasmaCore.IconItem  {
+                width:main.width
+                height:width
+                smooth: true
+                source: "preferences-system-windows.png"
+                anchors {
+                    left:parent.left
+                    right:parent.right
+                    top:parent.top
+                    bottom:parent.bottom
+                    centerIn:parent
                 }
             }
         }
         Window_4 {
             id: listDelegate 
         }
-        Window_2 {
-            id: dialog
-            Item {
-                id: name
-                height: 20
-                width: parent.width  
-                Rectangle {
-                    id:rect
-                    width:300
-                    height:20
-                    border.color:"silver"
-                    border.width:1
-                    radius:7
-                    color:"silver"
-                    Text {
-                        id: text
-                        font.pixelSize: 15
-                        color: "black"  
-                        text: "Desktop" + "\n" 
-                        style:Text.Outline;styleColor:"gray"
-                    }
-                }
-            }
+        Window_2 { 
+            id: dialog 
         }
         Timer {
             id: workspaceTimer
             interval: 100
             onTriggered: {
-	        if (main.activeWorkspace) {
-	            main.workspaceActivated();
-                }
-	        else {
-	            workspaceTimer.stop(); 
-                }
+                if (main.activeWorkspace)
+                    main.workspaceActivated();
+                else
+                    workspaceTimer.stop();
             }
         }
         PlasmaCore.Dialog {
@@ -203,65 +181,74 @@ QGraphicsWidget {
             visible: false
             mainItem: dialog
             Component.onCompleted: {
-	        setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
+                setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
             }
         }
         Connections {
+            target: plasmoid
+            onFormFactorChanged: {
+                main.formFactor = plasmoid.formFactor
+                if(main.formFactor==Planar || main.formFactor == MediaCenter )
+                {
+                    minimumWidth=main.width/3.5
+                    minimumHeight=main.height/3.5
+                }
+            }
             onActiveWindowChanged: {
-	        print(activew.state)
-		if (main.newWindowId == wid)
-	            activew.state = "newWindowAdded";
-		print(activew.state)
-	        activew.state = main.ifmaximize(wid) ? "maximized" : "unmaximized"
-		print(activew.state)
-	        activew.text = tasksSource.data[wid]['name'];
-	        activew.icon = tasksSource.data[wid]['icon'];
-		main.newWindowId = "";
-		if (dialog.visible)
-	            main.displayw(false);
+                if (main.newWindowId == wid)
+                    active_win.state = "newWindowAdded";
+                print(active_win.state)
+                active_win.state = main.isMaximized(wid) ? "maximized" : "unmaximized"
+                main.newWindowId = "";
+                if (dialog.visible)
+                    main.makeWindow_2Visible(false);
             }
             onWindowAdded: {
-	        print("Adding window " + wid)
-	        var size = main.appIconSize + dialog.itemSpacing;
-		dialog.listView.anchors.top=name.bottom;
-	        dialog.listView.spacing=0
-	        dialog.listView.height += size
+                var size = main.appIconSize + dialog.itemSpacing;
+                dialog.listView.spacing=0
+                dialog.listView.height += size
+                dialog.listVIew.width+=size
             }
             onWindowRemoved: {
-	        print("Removing window " + wid)
-		var size = main.appIconSize + dialog.itemSpacing;
-	        dialog.listView.height -= size
+                var size = main.appIconSize + dialog.itemSpacing;
+                dialog.listView.spacing=0
+                dialog.listView.height -= size
+                dialog.listView.width-=size
             }
             onWorkspaceActivated: {
-	        if (dialog.visible)
-	            main.displayw(false);
-	  	main.activeWindowId = ""
-	        activew.state = "noWindow"
-                activew.setIcon("preferences-system-windows")
-                activew.setBackgroundHints(0)
+                if (dialog.visible)
+                    main.makeWindow_2Visible(false);
+                main.activeWindowId = ""
+                active_win.setIcon("preferences-system-windows")
+                active_win.setBackgroundHints(0)
+                active_win.state = "noWindow"
             }
+        }
+         PlasmaCore.ToolTip {
+            target: mouseArea
+            mainText:"Window list"
+            subText:"Show list of opened windows"
+            image:"preferences-system-windows"
         }
         Connections {
-            target: activew
+            target: active_win
             onCurrentAppWidgetClicked: {
-	        var pos = main.dialog_pos(dialogContainer, activew);
-	        dialogContainer.x = pos.x;
-	        dialogContainer.y = pos.y;
-        	if (dialogContainer.visible)
-	            main.displayw(false);
-	        else
-	            main.displayw(true);
+                var pos = main.getPopupPosition(dialogContainer, active_win);
+                dialogContainer.x = pos.x;
+                dialogContainer.y = pos.y;
+                if (dialogContainer.visible)
+                    main.makeWindow_2Visible(false);
+                else
+                    main.makeWindow_2Visible(true);
             }
             onMaximizeClicked: {
-	        main.maximizew(main.activeWindowId, true);
-	        print("Maximizing " + main.activeWindowId);
+                main.setWindowMaximized(main.activeWindowId, true);
             }
             onUnmaximizeClicked: {
-	        main.maximizew(main.activeWindowId, false);
+                main.setWindowMaximized(main.activeWindowId, false);
             }
             onCloseClicked: {
-	        main.close(main.activeWindowId);
+                main.closeWindow(main.activeWindowId);
             }
         }
-  }
-}
+    }

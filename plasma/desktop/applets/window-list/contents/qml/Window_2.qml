@@ -14,29 +14,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import Qt 4.7
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.graphicslayouts 4.7 as GraphicsLayouts
+import org.kde.plasma.components 0.1 as Components
 
-QGraphicsWidget {
-    id: listWidget
-    property alias listView: tasks
-    property int itemSpacing: 3
-    height: tasks.height
-    width: tasks.width
+
+Item {
+    id: listWidget  
+    property alias listView: task_list  
+    property int itemSpacing: 0  
+    height: task_list.height + padding
+    width: task_list.width
+    property int padding:10
     ListView {
-        id: tasks
+        id: task_list
         height: 12
-        width: 300
+        width: 500
         anchors.fill: parent
         model: PlasmaCore.DataModel { dataSource: tasksSource }
         delegate: listDelegate
         highlightRangeMode: ListView.StrictlyEnforceRange
-        highlight: Rectangle { color: "green"; radius: 5 }      
+        highlight: Rectangle { color: "grey"; radius: 5 }
         focus: true
         clip: true
-        spacing: listWidget.itemSpacing
+       
+      /* Components.Label {
+        id:text_style
+        text:"Desktop"
+        anchors {
+            bottom:model.top
+            left:parent.left
+            top:parent.top
+            right:parent.right
+        }
+        */
     }
 }
 
