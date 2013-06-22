@@ -14,28 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import Qt 4.7
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.graphicslayouts 4.7 as GraphicsLayouts
-import org.kde.qtextracomponents 0.1 as QtExtra
-
+import org.kde.plasma.components 0.1 as Components
+import org.kde.qtextracomponents 0.1
 Item {
-    id: fontsi
-    width: parent.width
-    height: fontstyle.height + padding
+    id: text_c
+    width: text_style.width
+    height: text_style.height + padding
     clip: true
     property string text
-    property int padding : 6
-    property int fontSize : 8
-    property alias font: fontstyle.font
+    property int padding :0
+    property int fontSize : 5
+    property alias font: text_style.font
     property int interval : 40
-    property color textColor: "black"
-        Text {
-	anchors.verticalCenter: parent.verticalCenter
-	id: fontstyle
-	font.pointSize: fontSize
-	color: textColor
-	text: parent.text
+    Components.Label {
+        id:text_style
+        text:parent.text
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left:parent.left
+            bottom:parent.bottom
+            right:parent.right
         }
+        opacity:constrained ? 0 : 1
+    }
 }
+
