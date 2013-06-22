@@ -28,8 +28,8 @@ Item {
     property int padding:10
     ListView {
         id: task_list
-        height: 12
-        width: 500
+        height: 200
+        width: 300
         anchors.fill: parent
         model: PlasmaCore.DataModel { dataSource: tasksSource }
         delegate: listDelegate
