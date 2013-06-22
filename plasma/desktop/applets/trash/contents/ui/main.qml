@@ -26,6 +26,7 @@ Item {
     property int minimumWidth:formFactor == Horizontal ? height : 1
     property int minimumHeight:formFactor == Vertical ? width  : 1
     property int formFactor: plasmoid.formFactor
+    property bool constrained:formFactor==Vertical||formFactor==Horizontal
     
     DirModel {
         id:dirModel
@@ -38,14 +39,12 @@ Item {
             root.formFactor = plasmoid.formFactor
             if(root.formFactor==Planar || root.formFactor == MediaCenter )
             {
-               minimumWidth=32
-               minimumHeight=32
+               minimumWidth=root.width/3.5
+               minimumHeight=root.height/3.5
             }
         }
     }
-    function isConstrained() {
-        return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
-    }
+
     function action_open() {
         plasmoid.openUrl("trash:/");
     }
@@ -74,21 +73,28 @@ Item {
         id: mouseArea
         hoverEnabled: true
         onReleased: plasmoid.openUrl("trash:/");
+        anchors.fill:parent
         PlasmaCore.IconItem {
             id:icon
-            width:root.width
-            height:width
             source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+            anchors{
+                left:parent.left
+                right:parent.right
+                top:parent.top
+                bottom:constrained?parent.bottom:text.top
+            }
+            active:mouseArea.containsMouse
         }
         Components.Label {
             id:text
             text: (dirModel.count==0)?i18n(" Trash\nEmpty"):(dirModel.count==1)?i18n(" Trash\nOne item"):i18n(" Trash\n"+ dirModel.count +"items")
             anchors {
-                horizontalCenter:icon.horizontalCenter
-                top:icon.bottom
-                }
-            horizontalAlignment:icon.AlignHCenter
-            opacity:isConstrained() ? 0 : 1
+                left:parent.left
+                bottom:parent.bottom
+                right:parent.right
+            }
+            horizontalAlignment:Text.AlignHCenter
+            opacity:constrained ? 0 : 1
         }
         PlasmaCore.ToolTip {
             target: mouseArea
