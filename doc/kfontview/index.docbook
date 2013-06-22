@@ -102,7 +102,7 @@ To install a font you downloaded from the Internet, click the
 <para>You can install the font for personal us only available to you or system-wide available
 for all users, the latter will require administrator privileges.</para>
 
-<para>Fonts are often provided in an archiv format like <literal role="extension">zip</literal>.
+<para>Fonts are often provided in an archive format like <literal role="extension">zip</literal>.
 Open these archives with &ark; which provides a simple previewer for fonts. 
 To make use of the extended capabilities of &kfontview; extract the fonts and open them in 
 &kfontview;.
