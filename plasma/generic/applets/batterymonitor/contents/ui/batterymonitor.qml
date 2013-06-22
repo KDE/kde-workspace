@@ -91,6 +91,7 @@ Item {
         sourceModel: PlasmaCore.SortFilterModel {
             sortRole: "Pretty Name"
             sortOrder: Qt.AscendingOrder
+            sortCaseSensitivity: Qt.CaseInsensitive
             sourceModel: PlasmaCore.DataModel {
                 dataSource: pmSource
                 sourceFilter: "Battery[0-9]+"
