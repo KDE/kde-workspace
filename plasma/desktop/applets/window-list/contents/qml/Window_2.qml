@@ -37,10 +37,10 @@ Item {
             radius:10
             border.color:"transparent"
             rotation: 360
-    gradient: Gradient {
-        GradientStop { position: 1.0; color: "lightgrey" }
-        GradientStop { position: 0.0; color: "grey" }
-    }
+            gradient: Gradient {
+                GradientStop { position: 1.0; color: "lightgrey" }
+                GradientStop { position: 0.0; color: "grey" }
+            }
             Components.Label {
                 id:text_style
                 text:"Desktop"
