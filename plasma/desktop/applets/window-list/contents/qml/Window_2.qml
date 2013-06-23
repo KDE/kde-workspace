@@ -63,6 +63,12 @@ Item {
                 }
                 horizontalAlignment:Text.AlignHCenter
             }
+            MouseArea {
+                id: mouse
+                hoverEnabled: true
+                onReleased: active_win.unmaximizeClicked()
+                anchors.fill:parent
+            }
         }
         Rectangle {
             width:400
@@ -75,6 +81,12 @@ Item {
                     left:parent.left
                 }
                 horizontalAlignment:Text.AlignHCenter
+            }
+            MouseArea {
+                id: mouseArea
+                hoverEnabled: true
+                onReleased:active_win.maximizeClicked()
+                anchors.fill:parent
             }
         }
         Rectangle {
@@ -93,13 +105,11 @@ Item {
                 id:text_style
                 text:"Desktop"
                 anchors {
-                    bottom:task_list.top
                     centerIn:parent
                 }
                 horizontalAlignment:Text.AlignHCenter
             }
         }
-       
         ListView {
             id: task_list
             height: 400
