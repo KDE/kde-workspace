@@ -29,6 +29,54 @@ Item {
     Column {
         id:col
         width:task_list.width
+        
+        Rectangle {
+            width:400
+            height:30
+            color:"lightgrey"
+            border.width:5
+            radius:10
+            border.color:"transparent"
+            rotation: 360
+            gradient: Gradient {
+                GradientStop { position: 1.0; color: "lightgrey" }
+                GradientStop { position: 0.0; color: "grey" }
+            }
+            Components.Label {
+                id:actions
+                text:"Actions"
+                anchors {
+                    centerIn:parent
+                }
+                horizontalAlignment:Text.AlignHCenter
+            }
+        }
+        Rectangle {
+            width:400
+            height:30
+            color:"transparent"
+            Components.Label {
+                id:unclutter
+                text:"Unclutter Windows"
+                anchors {
+                    left:parent.left
+                }
+                horizontalAlignment:Text.AlignHCenter
+            }
+        }
+        Rectangle {
+            width:400
+            height:30
+            color:"transparent"
+            Components.Label {
+                id:cascade
+                text:"Cascade Windows"
+                anchors {
+                    left:parent.left
+                }
+                horizontalAlignment:Text.AlignHCenter
+            }
+        }
         Rectangle {
             width:400
             height:30
@@ -51,9 +99,10 @@ Item {
                 horizontalAlignment:Text.AlignHCenter
             }
         }
+       
         ListView {
             id: task_list
-            height: 300
+            height: 400
             width: 400
             model: PlasmaCore.DataModel { dataSource: tasksSource }
             delegate: listDelegate
