@@ -25,29 +25,43 @@ Item {
     property int itemSpacing: 0  
     height: task_list.height + padding
     width: task_list.width
-    property int padding:10
-    ListView {
-        id: task_list
-        height: 200
-        width: 300
-        anchors.fill: parent
-        model: PlasmaCore.DataModel { dataSource: tasksSource }
-        delegate: listDelegate
-        highlightRangeMode: ListView.StrictlyEnforceRange
-        highlight: Rectangle { color: "grey"; radius: 5 }
-        focus: true
-        clip: true
-       
-      /* Components.Label {
-        id:text_style
-        text:"Desktop"
-        anchors {
-            bottom:model.top
-            left:parent.left
-            top:parent.top
-            right:parent.right
+    property int padding:0
+    Column {
+        id:col
+        width:task_list.width
+        Rectangle {
+            width:400
+            height:30
+            color:"lightgrey"
+            border.width:5
+            radius:10
+            border.color:"transparent"
+            rotation: 360
+    gradient: Gradient {
+        GradientStop { position: 1.0; color: "lightgrey" }
+        GradientStop { position: 0.0; color: "grey" }
+    }
+            Components.Label {
+                id:text_style
+                text:"Desktop"
+                anchors {
+                    bottom:task_list.top
+                    centerIn:parent
+                }
+                horizontalAlignment:Text.AlignHCenter
+            }
         }
-        */
+        ListView {
+            id: task_list
+            height: 300
+            width: 400
+            model: PlasmaCore.DataModel { dataSource: tasksSource }
+            delegate: listDelegate
+            highlightRangeMode: ListView.StrictlyEnforceRange
+            highlight: Rectangle { color: "grey"; radius: 5 }
+            focus: true
+            clip: true
+        }
     }
 }
 
