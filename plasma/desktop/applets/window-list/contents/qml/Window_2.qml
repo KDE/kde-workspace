@@ -66,8 +66,14 @@ Item {
             MouseArea {
                 id: mouse
                 hoverEnabled: true
-                onReleased: active_win.unmaximizeClicked()
-                anchors.fill:parent
+                onClicked: active_win.unmaximizeClicked()
+                anchors.fill:parent 
+                onEntered: {
+                    unclutter.opacity = 0.5
+                }
+                onExited: {
+                    unclutter.opacity = 1
+                }
             }
         }
         Rectangle {
@@ -87,6 +93,12 @@ Item {
                 hoverEnabled: true
                 onReleased:active_win.maximizeClicked()
                 anchors.fill:parent
+                onEntered: {
+                    cascade.opacity = 0.5
+                }
+                onExited: {
+                    cascade.opacity = 1
+                }
             }
         }
         Rectangle {
