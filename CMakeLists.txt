@@ -1,7 +1,7 @@
 project(KDEBASE_WORKSPACE)
 
 cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
-set(QT_MIN_VERSION "5.0.0")
+set(QT_MIN_VERSION "5.2.0")
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
@@ -36,7 +36,7 @@ find_package(kdeqt5staging REQUIRED NO_MODULE)
 # Load CMake, Compiler and InstallDirs settings from KF5 and the following are already somewhat "done" tier1/tier2 libs from kdelibs:
 find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
                                             XmlGui KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
-                                            KConfig KAuth kjs
+                                            KConfig KAuth kjs KWallet
                                             ki18n kguiaddons kservice kwidgets ItemViews KNotifications KCompletion KJobWidgets KConfigWidgets KIconThemes)
 
 find_package(ki18n REQUIRED NO_MODULE)
