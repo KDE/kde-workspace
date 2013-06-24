@@ -228,6 +228,9 @@ void Tasks::itemContextMenu(int id)
 
     TaskManager::BasicMenu* menu = 0;
 
+    Q_ASSERT(containment());
+    Q_ASSERT(containment()->corona());
+
     if (item->itemType() == TaskManager::TaskItemType && !item->isStartupItem()) {
         TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(item);
 /* FIXME (Un)collapse support is pending merge.
@@ -252,7 +255,8 @@ void Tasks::itemContextMenu(int id)
         }
         actionList.prepend(a);
 */
-        menu = new TaskManager::BasicMenu(0, taskGroup, m_groupManager, actionList);
+        const int maxWidth = 0.8 * containment()->corona()->screenGeometry(containment()->screen()).width();
+        menu = new TaskManager::BasicMenu(0, taskGroup, m_groupManager, actionList, QList <QAction*>(), maxWidth);
     } else if (item->itemType() == TaskManager::LauncherItemType) {
         menu = new TaskManager::BasicMenu(0, static_cast<TaskManager::LauncherItem*>(item),
             m_groupManager, actionList);
@@ -268,8 +272,6 @@ void Tasks::itemContextMenu(int id)
         menu->setMinimumWidth(declItem->implicitWidth());
     }
 
-    Q_ASSERT(containment());
-    Q_ASSERT(containment()->corona());
     menu->exec(containment()->corona()->popupPosition(declItem, menu->size()));
     menu->deleteLater();
 }
