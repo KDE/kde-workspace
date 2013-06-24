@@ -21,21 +21,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // kwin
 #include "options.h"
 #include "overlaywindow.h"
+#include "xcbutils.h"
 // kwin libs
 #include <kwinglplatform.h>
+// KDE
+#include <KDE/KDebug>
 
 namespace KWin
 {
 
 EglOnXBackend::EglOnXBackend()
     : OpenGLBackend()
+    , ctx(EGL_NO_CONTEXT)
     , surfaceHasSubPost(0)
 {
     init();
     // Egl is always direct rendering
     setIsDirectRendering(true);
-    // Egl is always double buffered
-    setDoubleBuffer(true);
 }
 
 EglOnXBackend::~EglOnXBackend()
@@ -50,6 +52,9 @@ EglOnXBackend::~EglOnXBackend()
         overlayWindow()->destroy();
     }
 }
+
+static bool gs_tripleBufferUndetected = true;
+static bool gs_tripleBufferNeedsDetection = false;
 
 void EglOnXBackend::init()
 {
@@ -74,30 +79,68 @@ void EglOnXBackend::init()
         return;
     }
 
-// TODO: activate once this is resolved. currently the explicit invocation seems pointless
-#if 0
-    // - internet rumors say: it doesn't work with TBDR
-    // - eglSwapInterval has no impact on intel GMA chips
-    has_waitSync = options->isGlVSync();
-    if (has_waitSync) {
-        has_waitSync = (eglSwapInterval(dpy, 1) == EGL_TRUE);
-        if (!has_waitSync)
-            kWarning(1212) << "Could not activate EGL v'sync on this system";
+    // check for EGL_NV_post_sub_buffer and whether it can be used on the surface
+    if (eglPostSubBufferNV) {
+        if (eglQuerySurface(dpy, surface, EGL_POST_SUB_BUFFER_SUPPORTED_NV, &surfaceHasSubPost) == EGL_FALSE) {
+            EGLint error = eglGetError();
+            if (error != EGL_SUCCESS && error != EGL_BAD_ATTRIBUTE) {
+                setFailed("query surface failed");
+                return;
+            } else {
+                surfaceHasSubPost = EGL_FALSE;
+            }
+        }
     }
-    if (!has_waitSync)
-        eglSwapInterval(dpy, 0); // deactivate syncing
-#endif
-}
+    setSyncsToVBlank(false);
+    setBlocksForRetrace(false);
+    gs_tripleBufferNeedsDetection = false;
+    m_swapProfiler.init();
+    if (surfaceHasSubPost) {
+        kDebug(1212) << "EGL implementation and surface support eglPostSubBufferNV, let's use it";
 
+        if (options->glPreferBufferSwap() != Options::NoSwapEncourage) {
+            // check if swap interval 1 is supported
+            EGLint val;
+            eglGetConfigAttrib(dpy, config, EGL_MAX_SWAP_INTERVAL, &val);
+            if (val >= 1) {
+                if (eglSwapInterval(dpy, 1)) {
+                    kDebug(1212) << "Enabled v-sync";
+                    setSyncsToVBlank(true);
+                    const QByteArray tripleBuffer = qgetenv("KWIN_TRIPLE_BUFFER");
+                    if (!tripleBuffer.isEmpty()) {
+                        setBlocksForRetrace(qstrcmp(tripleBuffer, "0") == 0);
+                        gs_tripleBufferUndetected = false;
+                    }
+                    gs_tripleBufferNeedsDetection = gs_tripleBufferUndetected;
+                }
+            } else {
+                kWarning(1212) << "Cannot enable v-sync as max. swap interval is" << val;
+            }
+        } else {
+            // disable v-sync
+            eglSwapInterval(dpy, 0);
+        }
+    } else {
+        /* In the GLX backend, we fall back to using glCopyPixels if we have no extension providing support for partial screen updates.
+         * However, that does not work in EGL - glCopyPixels with glDrawBuffer(GL_FRONT); does nothing.
+         * Hence we need EGL to preserve the backbuffer for us, so that we can draw the partial updates on it and call
+         * eglSwapBuffers() for each frame. eglSwapBuffers() then does the copy (no page flip possible in this mode),
+         * which means it is slow and not synced to the v-blank. */
+        kWarning(1212) << "eglPostSubBufferNV not supported, have to enable buffer preservation - which breaks v-sync and performance";
+        eglSurfaceAttrib(dpy, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
+    }
+}
 
 bool EglOnXBackend::initRenderingContext()
 {
     dpy = eglGetDisplay(display());
     if (dpy == EGL_NO_DISPLAY)
         return false;
+
     EGLint major, minor;
     if (eglInitialize(dpy, &major, &minor) == EGL_FALSE)
         return false;
+
 #ifdef KWIN_HAVE_OPENGLES
     eglBindAPI(EGL_OPENGL_ES_API);
 #else
@@ -106,49 +149,66 @@ bool EglOnXBackend::initRenderingContext()
         return false;
     }
 #endif
+
     initBufferConfigs();
+
     if (!overlayWindow()->create()) {
         kError(1212) << "Could not get overlay window";
         return false;
     } else {
         overlayWindow()->setup(None);
     }
+
     surface = eglCreateWindowSurface(dpy, config, overlayWindow()->window(), 0);
 
-    eglSurfaceAttrib(dpy, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
-
-    if (eglQuerySurface(dpy, surface, EGL_POST_SUB_BUFFER_SUPPORTED_NV, &surfaceHasSubPost) == EGL_FALSE) {
-        EGLint error = eglGetError();
-        if (error != EGL_SUCCESS && error != EGL_BAD_ATTRIBUTE) {
-            kError(1212) << "query surface failed";
-            return false;
-        } else {
-            surfaceHasSubPost = EGL_FALSE;
-        }
-    }
-
-    const EGLint context_attribs[] = {
 #ifdef KWIN_HAVE_OPENGLES
+    const EGLint context_attribs[] = {
         EGL_CONTEXT_CLIENT_VERSION, 2,
-#endif
         EGL_NONE
     };
 
     ctx = eglCreateContext(dpy, config, EGL_NO_CONTEXT, context_attribs);
+#else
+    const EGLint context_attribs_31_core[] = {
+        EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
+        EGL_CONTEXT_MINOR_VERSION_KHR, 1,
+        EGL_CONTEXT_FLAGS_KHR,         EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR,
+        EGL_NONE
+    };
+
+    const EGLint context_attribs_legacy[] = {
+        EGL_NONE
+    };
+
+    const QByteArray eglExtensions = eglQueryString(dpy, EGL_EXTENSIONS);
+    const QList<QByteArray> extensions = eglExtensions.split(' ');
+
+    // Try to create a 3.1 core context
+    if (options->glCoreProfile() && extensions.contains("EGL_KHR_create_context"))
+        ctx = eglCreateContext(dpy, config, EGL_NO_CONTEXT, context_attribs_31_core);
+
+    if (ctx == EGL_NO_CONTEXT)
+        ctx = eglCreateContext(dpy, config, EGL_NO_CONTEXT, context_attribs_legacy);
+#endif
+
     if (ctx == EGL_NO_CONTEXT) {
         kError(1212) << "Create Context failed";
         return false;
     }
+
     if (eglMakeCurrent(dpy, surface, surface, ctx) == EGL_FALSE) {
         kError(1212) << "Make Context Current failed";
         return false;
     }
+
     kDebug(1212) << "EGL version: " << major << "." << minor;
+
     EGLint error = eglGetError();
     if (error != EGL_SUCCESS) {
         kWarning(1212) << "Error occurred while creating context " << error;
         return false;
     }
+
     return true;
 }
 
@@ -176,7 +236,11 @@ bool EglOnXBackend::initBufferConfigs()
         return false;
     }
 
-    EGLint visualId = XVisualIDFromVisual((Visual*)QX11Info::appVisual());
+    Xcb::WindowAttributes attribs(rootWindow());
+    if (!attribs) {
+        kError(1212) << "Failed to get window attributes of root window";
+        return false;
+    }
 
     config = configs[0];
     for (int i = 0; i < count; i++) {
@@ -184,7 +248,7 @@ bool EglOnXBackend::initBufferConfigs()
         if (eglGetConfigAttrib(dpy, configs[i], EGL_NATIVE_VISUAL_ID, &val) == EGL_FALSE) {
             kError(1212) << "egl get config attrib failed";
         }
-        if (visualId == val) {
+        if (uint32_t(val) == attribs->visual) {
             config = configs[i];
             break;
         }
@@ -194,16 +258,36 @@ bool EglOnXBackend::initBufferConfigs()
 
 void EglOnXBackend::present()
 {
-    if (lastMask() & Scene::PAINT_SCREEN_REGION && surfaceHasSubPost && eglPostSubBufferNV) {
-        const QRect damageRect = lastDamage().boundingRect();
+    if (lastDamage().isEmpty())
+        return;
 
-        eglPostSubBufferNV(dpy, surface, damageRect.left(), displayHeight() - damageRect.bottom() - 1, damageRect.width(), damageRect.height());
-    } else {
+    const QRegion displayRegion(0, 0, displayWidth(), displayHeight());
+    const bool fullRepaint = (lastDamage() == displayRegion);
+
+    if (fullRepaint || !surfaceHasSubPost) {
+        if (gs_tripleBufferNeedsDetection) {
+            eglWaitGL();
+            m_swapProfiler.begin();
+        }
+        // the entire screen changed, or we cannot do partial updates (which implies we enabled surface preservation)
         eglSwapBuffers(dpy, surface);
+        if (gs_tripleBufferNeedsDetection) {
+            eglWaitGL();
+            if (char result = m_swapProfiler.end()) {
+                gs_tripleBufferUndetected = gs_tripleBufferNeedsDetection = false;
+                setBlocksForRetrace(result == 'd');
+            }
+        }
+    } else {
+        // a part of the screen changed, and we can use eglPostSubBufferNV to copy the updated area
+        foreach (const QRect & r, lastDamage().rects()) {
+            eglPostSubBufferNV(dpy, surface, r.left(), displayHeight() - r.bottom() - 1, r.width(), r.height());
+        }
     }
 
+    setLastDamage(QRegion());
     eglWaitGL();
-    XFlush(display());
+    xcb_flush(connection());
 }
 
 void EglOnXBackend::screenGeometryChanged(const QSize &size)
@@ -220,16 +304,18 @@ SceneOpenGL::TexturePrivate *EglOnXBackend::createBackendTexture(SceneOpenGL::Te
 
 void EglOnXBackend::prepareRenderingFrame()
 {
-    if (!lastDamage().isEmpty())
-        present();
+    present();
     startRenderTimer();
+    eglWaitNative(EGL_CORE_NATIVE_ENGINE);
 }
 
-void EglOnXBackend::endRenderingFrame(int mask, const QRegion &damage)
+void EglOnXBackend::endRenderingFrame(const QRegion &damage)
 {
     setLastDamage(damage);
-    setLastMask(mask);
     glFlush();
+    if (!blocksForRetrace()) {
+        present(); // this sets lastDamage emtpy and prevents execution from prepareRenderingFrame()
+    }
 
     if (overlayWindow()->window())  // show the window only after the first pass,
         overlayWindow()->show();   // since that pass may take long
@@ -295,6 +381,7 @@ bool EglTexture::loadTexture(const Pixmap &pix, const QSize &size, int depth)
     checkGLError("load texture");
     q->setYInverted(true);
     m_size = size;
+    updateMatrix();
     return true;
 }
 

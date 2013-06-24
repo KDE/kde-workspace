@@ -25,8 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "shadow.h"
 
 #ifdef KWIN_HAVE_XRENDER_COMPOSITING
-#include <X11/extensions/Xrender.h>
-#include <X11/extensions/Xfixes.h>
 
 namespace KWin
 {
@@ -44,17 +42,18 @@ public:
     virtual CompositingType compositingType() const {
         return XRenderCompositing;
     }
-    virtual int paint(QRegion damage, ToplevelList windows);
+    virtual qint64 paint(QRegion damage, ToplevelList windows);
     virtual void windowAdded(Toplevel*);
     virtual void windowDeleted(Deleted*);
     virtual void screenGeometryChanged(const QSize &size);
-    Picture bufferPicture();
+    xcb_render_picture_t bufferPicture();
     virtual OverlayWindow *overlayWindow() {
         return m_overlayWindow;
     }
 protected:
     virtual void paintBackground(QRegion region);
     virtual void paintGenericScreen(int mask, ScreenPaintData data);
+    virtual void paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data);
 public Q_SLOTS:
     virtual void windowOpacityChanged(KWin::Toplevel* c);
     virtual void windowGeometryShapeChanged(KWin::Toplevel* c);
@@ -63,9 +62,9 @@ private:
     void createBuffer();
     void present(int mask, QRegion damage);
     void initXRender(bool createOverlay);
-    XRenderPictFormat* format;
-    Picture front;
-    static Picture buffer;
+    xcb_render_pictformat_t format;
+    xcb_render_picture_t front;
+    static xcb_render_picture_t buffer;
     static ScreenPaintData screen_paint;
     class Window;
     QHash< Toplevel*, Window* > windows;
@@ -80,24 +79,33 @@ public:
     Window(Toplevel* c);
     virtual ~Window();
     virtual void performPaint(int mask, QRegion region, WindowPaintData data);
-    void discardPicture();
-    void discardAlpha();
     QRegion transformedShape() const;
     void setTransformedShape(const QRegion& shape);
     static void cleanup();
+protected:
+    virtual WindowPixmap* createWindowPixmap();
 private:
-    Picture picture();
-    Picture alphaMask(double opacity);
     QRect mapToScreen(int mask, const WindowPaintData &data, const QRect &rect) const;
     QPoint mapToScreen(int mask, const WindowPaintData &data, const QPoint &point) const;
     void prepareTempPixmap();
-    Picture _picture;
-    XRenderPictFormat* format;
-    Picture alpha;
+    void setPictureFilter(xcb_render_picture_t pic, ImageFilterType filter);
+    xcb_render_pictformat_t format;
     double alpha_cached_opacity;
     QRegion transformed_shape;
     static QRect temp_visibleRect;
     static XRenderPicture *s_tempPicture;
+};
+
+class XRenderWindowPixmap : public WindowPixmap
+{
+public:
+    explicit XRenderWindowPixmap(Scene::Window *window, xcb_render_pictformat_t format);
+    virtual ~XRenderWindowPixmap();
+    xcb_render_picture_t picture() const;
+    virtual void create();
+private:
+    xcb_render_picture_t m_picture;
+    xcb_render_pictformat_t m_format;
 };
 
 class SceneXrender::EffectFrame
@@ -129,7 +137,7 @@ private:
 };
 
 inline
-Picture SceneXrender::bufferPicture()
+xcb_render_picture_t SceneXrender::bufferPicture()
 {
     return buffer;
 }
@@ -144,6 +152,12 @@ inline
 void SceneXrender::Window::setTransformedShape(const QRegion& shape)
 {
     transformed_shape = shape;
+}
+
+inline
+xcb_render_picture_t XRenderWindowPixmap::picture() const
+{
+    return m_picture;
 }
 
 /**
@@ -175,12 +189,13 @@ public:
                            QRect& right, QRect& bottomRight,
                            QRect& bottom, QRect& bottomLeft,
                            QRect& Left, QRect& topLeft);
+    xcb_render_picture_t picture(ShadowElements element) const;
 
 protected:
     virtual void buildQuads();
-    virtual bool prepareBackend() {
-        return true;
-    };
+    virtual bool prepareBackend();
+private:
+    XRenderPicture* m_pictures[ShadowElementsCount];
 };
 
 } // namespace

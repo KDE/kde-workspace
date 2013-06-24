@@ -309,9 +309,6 @@ QModelIndex FlipScrollView::moveCursor(CursorAction cursorAction, Qt::KeyboardMo
         } else if (currentIndex().row() > 0) {
             index = currentIndex().sibling(currentIndex().row() - 1,
                                            currentIndex().column());
-        } else if (currentIndex().row() == 0) {
-            kDebug() << "we are in row 0, processing Key_Up";
-            emit focusNextViewLeft();
         }
         break;
     case MoveDown:
@@ -321,9 +318,6 @@ QModelIndex FlipScrollView::moveCursor(CursorAction cursorAction, Qt::KeyboardMo
                    model()->rowCount(currentIndex().parent()) - 1) {
             index = currentIndex().sibling(currentIndex().row() + 1,
                                            currentIndex().column());
-        } else {
-            kDebug() << "we are in Last row, processing Key_Down";
-            emit focusNextViewLeft();
         }
         break;
     case MoveLeft:
@@ -533,8 +527,6 @@ void FlipScrollView::paintEvent(QPaintEvent * event)
             d->flipAnimTimeLine->start();
         }
     }
-
-    QRectF eventRect = event->rect();
 
     // draw navigation
     QStyle::State state = 0;

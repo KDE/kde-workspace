@@ -1,0 +1,87 @@
+/***************************************************************************
+ *   Copyright (C) 2012-2013 by Eike Hein <hein@kde.org>                   *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
+ ***************************************************************************/
+
+import QtQuick 1.1
+
+import org.kde.draganddrop 1.0
+import org.kde.qtextracomponents 0.1
+
+import "../code/layout.js" as Layout
+import "../code/tools.js" as TaskTools
+
+Item {
+    property variant target
+
+    DropArea {
+        id: dropHandler
+
+        anchors.fill: parent
+
+        property variant hoveredItem
+
+        enabled: !target.animating
+
+        onDragMove: {
+            var above = target.childAt(event.x, event.y);
+
+            if (event.mimeData.source) {
+                if (above != event.mimeData.source && !event.mimeData.source.isLauncher) {
+                    var targetIndex = TaskTools.insertionIndexAt(event.x, event.y);
+
+                    itemMove(event.mimeData.source.itemId, targetIndex);
+                }
+            } else if (above && hoveredItem != above) {
+                hoveredItem = above;
+                activationTimer.start();
+            } else if (!above) {
+                hoveredItem = 0;
+                activationTimer.stop();
+            }
+        }
+
+        onDragLeave: {
+            dragItem = 0;
+            activationTimer.stop();
+        }
+
+        Timer {
+            id: activationTimer
+
+            interval: 250
+            repeat: false
+
+            onTriggered: {
+                if (parent.hoveredItem.isGroupParent) {
+                    groupDialog.target = parent.hoveredItem;
+                    groupDialog.visible = true;
+                } else {
+                    tasks.activateItem(parent.hoveredItem.itemId, false);
+                }
+            }
+        }
+    }
+
+    MouseEventListener {
+        id: wheelHandler
+
+        anchors.fill: parent
+
+        onWheelMoved: TaskTools.activateNextPrevTask(false, wheel.delta < 0)
+    }
+}

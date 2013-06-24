@@ -37,6 +37,7 @@ public:
     virtual ~HandleButtonEvents();
 
     virtual bool loadAction(const KConfigGroup& config);
+    virtual bool isSupported();
 
 protected:
     virtual void triggerImpl(const QVariantMap& args);
@@ -47,6 +48,9 @@ protected:
 
 private Q_SLOTS:
     void onButtonPressed(PowerDevil::BackendInterface::ButtonType type);
+    void powerOffButtonTriggered();
+    void suspendToRam();
+    void suspendToDisk();
 
 private:
     void processAction(uint action, bool isExplicit);
@@ -54,6 +58,8 @@ private:
 
     uint m_lidAction;
     uint m_powerButtonAction;
+    uint m_sleepButtonAction;
+    uint m_hibernateButtonAction;
 };
 
 }

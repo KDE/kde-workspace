@@ -43,6 +43,7 @@ Item {
         id: background
         anchors.fill: parent
         source: theme.wallpaperPathForSize(parent.width, parent.height)
+        smooth: true
     }
 
     PlasmaCore.FrameSvgItem {

@@ -24,15 +24,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 
 #include <QRect>
+#include <QRegion>
+#include <QVector>
 
 #include <xcb/xcb.h>
 #include <xcb/composite.h>
+#define class class_name //HACK: work around a non-C++ safe problem in xcb_iccm.h
+                         //where they put a variable called "class" in function signatures.
+                         //Needed at least for xcb v0.3.8
+#include <xcb/xcb_icccm.h>
+#undef class             //UNDO HACK
 
 namespace KWin {
 
 namespace Xcb {
 
 typedef xcb_window_t WindowId;
+
+// forward declaration of methods
+static void defineCursor(xcb_window_t window, xcb_cursor_t cursor);
+static void setInputFocus(xcb_window_t window, uint8_t revertTo = XCB_INPUT_FOCUS_POINTER_ROOT, xcb_timestamp_t time = xTime());
+static void moveWindow(xcb_window_t window, const QPoint &pos);
+static void moveWindow(xcb_window_t window, uint32_t x, uint32_t y);
 
 template <typename Reply,
     typename Cookie,
@@ -176,6 +189,11 @@ public:
     inline WindowId *children() {
         return xcb_query_tree_children(data());
     }
+    inline xcb_window_t parent() {
+        if (isNull())
+            return XCB_WINDOW_NONE;
+        return (*this)->parent;
+    }
 };
 
 inline xcb_get_input_focus_cookie_t get_input_focus(xcb_connection_t *c, xcb_window_t) {
@@ -190,6 +208,27 @@ public:
         if (isNull())
             return XCB_WINDOW_NONE;
         return (*this)->focus;
+    }
+};
+
+class TransientFor : public Wrapper<xcb_get_property_reply_t, xcb_get_property_cookie_t, &xcb_get_property_reply, &xcb_icccm_get_wm_transient_for_unchecked>
+{
+public:
+    explicit TransientFor(WindowId window) : Wrapper<xcb_get_property_reply_t, xcb_get_property_cookie_t, &xcb_get_property_reply, &xcb_icccm_get_wm_transient_for_unchecked>(window) {}
+
+    /**
+     * @brief Fill given window pointer with the WM_TRANSIENT_FOR property of a window.
+     * @param prop WM_TRANSIENT_FOR property value.
+     * @returns @c true on success, @c false otherwise
+     **/
+    inline bool getTransientFor(WindowId *prop) {
+        if (isNull()) {
+            return false;
+        }
+        if (xcb_icccm_get_wm_transient_for_from_reply(prop, const_cast<xcb_get_property_reply_t*>(data()))) {
+            return true;
+        }
+        return false;
     }
 };
 
@@ -232,6 +271,7 @@ public:
     bool isFixesAvailable() const {
         return m_fixes.version > 0;
     }
+    int fixesCursorNotifyEvent() const;
     bool isFixesRegionAvailable() const;
     bool isSyncAvailable() const {
         return m_sync.present;
@@ -335,6 +375,9 @@ public:
     void setGeometry(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
     void move(const QPoint &pos);
     void move(uint32_t x, uint32_t y);
+    void resize(const QSize &size);
+    void resize(uint32_t width, uint32_t height);
+    void raise();
     void map();
     void unmap();
     /**
@@ -342,6 +385,8 @@ public:
      **/
     void clear();
     void setBackgroundPixmap(xcb_pixmap_t pixmap);
+    void defineCursor(xcb_cursor_t cursor);
+    void focus(uint8_t revertTo = XCB_INPUT_FOCUS_POINTER_ROOT, xcb_timestamp_t time = xTime());
     operator xcb_window_t() const;
 private:
     Window(const Window &other);
@@ -455,9 +500,31 @@ void Window::move(uint32_t x, uint32_t y)
     if (!isValid()) {
         return;
     }
-    const uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y;
-    const uint32_t values[] = { x, y };
+    moveWindow(m_window, x, y);
+}
+
+inline
+void Window::resize(const QSize &size)
+{
+    resize(size.width(), size.height());
+}
+
+inline
+void Window::resize(uint32_t width, uint32_t height)
+{
+    if (!isValid()) {
+        return;
+    }
+    const uint16_t mask = XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
+    const uint32_t values[] = { width, height };
     xcb_configure_window(connection(), m_window, mask, values);
+}
+
+inline
+void Window::raise()
+{
+    const uint32_t values[] = { XCB_STACK_MODE_ABOVE };
+    xcb_configure_window(connection(), m_window, XCB_CONFIG_WINDOW_STACK_MODE, values);
 }
 
 inline
@@ -497,6 +564,18 @@ void Window::setBackgroundPixmap(xcb_pixmap_t pixmap)
     xcb_change_window_attributes(connection(), m_window, XCB_CW_BACK_PIXMAP, values);
 }
 
+inline
+void Window::defineCursor(xcb_cursor_t cursor)
+{
+    Xcb::defineCursor(m_window, cursor);
+}
+
+inline
+void Window::focus(uint8_t revertTo, xcb_timestamp_t time)
+{
+    setInputFocus(m_window, revertTo, time);
+}
+
 // helper functions
 static inline void moveResizeWindow(WindowId window, const QRect &geometry)
 {
@@ -507,6 +586,18 @@ static inline void moveResizeWindow(WindowId window, const QRect &geometry)
         static_cast<uint32_t>(geometry.width()),
         static_cast<uint32_t>(geometry.height())
     };
+    xcb_configure_window(connection(), window, mask, values);
+}
+
+static inline void moveWindow(xcb_window_t window, const QPoint& pos)
+{
+    moveWindow(window, pos.x(), pos.y());
+}
+
+static inline void moveWindow(xcb_window_t window, uint32_t x, uint32_t y)
+{
+    const uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y;
+    const uint32_t values[] = { x, y };
     xcb_configure_window(connection(), window, mask, values);
 }
 
@@ -582,6 +673,16 @@ static inline QVector<xcb_rectangle_t> regionToRects(const QRegion &region)
         rects[i] = Xcb::fromQt(regionRects.at(i));
     }
     return rects;
+}
+
+static inline void defineCursor(xcb_window_t window, xcb_cursor_t cursor)
+{
+    xcb_change_window_attributes(connection(), window, XCB_CW_CURSOR, &cursor);
+}
+
+static inline void setInputFocus(xcb_window_t window, uint8_t revertTo, xcb_timestamp_t time)
+{
+    xcb_set_input_focus(connection(), revertTo, window, time);
 }
 
 } // namespace X11

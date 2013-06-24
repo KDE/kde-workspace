@@ -42,11 +42,13 @@ public:
 
     bool CanHibernate();
     bool CanSuspend();
+    bool CanHybridSuspend();
 
     bool GetPowerSaveStatus();
 
     void Suspend();
     void Hibernate();
+    void HybridSuspend();
 
     bool HasInhibit();
 
@@ -57,6 +59,7 @@ public:
 Q_SIGNALS:
     void CanSuspendChanged(bool canSuspend);
     void CanHibernateChanged(bool canHibernate);
+    void CanHybridSuspendChanged(bool canHybridSuspend);
     void PowerSaveStatusChanged(bool savePower);
 
     void HasInhibitChanged(bool hasInhibit);
@@ -64,6 +67,7 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onAcAdapterStateChanged(PowerDevil::BackendInterface::AcAdapterState);
     void onUnavailablePoliciesChanged(PowerDevil::PolicyAgent::RequiredPolicies);
+    void triggerSuspendSession(uint action);
 
 private:
     PowerDevil::Core *m_core;

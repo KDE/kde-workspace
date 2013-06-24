@@ -142,7 +142,6 @@ public slots:
     void replaceContainment(Plasma::Containment* containment);
 
 private slots:
-    void updateActivityName(Plasma::Context *context);
     void containmentDestroyed(QObject *object);
     void activityChanged();
     void activityStateChanged(KActivities::Info::State);

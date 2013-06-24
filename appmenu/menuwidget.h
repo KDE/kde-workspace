@@ -135,6 +135,7 @@ private:
     QList<MenuButton*> m_buttons;
     MenuButton *m_currentButton;
     qreal m_contentBottomMargin;
+    QPoint m_mousePosition;
     QMenu *m_visibleMenu;
     QMenu *m_menu;
 };

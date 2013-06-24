@@ -22,25 +22,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kxerrorhandler.h>
 
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
+#endif
 #include "atoms.h"
 #include "client.h"
 #include "client_machine.h"
 #include "effects.h"
+#include "screens.h"
 #include "shadow.h"
 #include "xcbutils.h"
 
 namespace KWin
 {
 
-Toplevel::Toplevel(Workspace* ws)
+Toplevel::Toplevel()
     : vis(NULL)
     , info(NULL)
     , ready_for_painting(true)
     , m_isDamaged(false)
     , client(None)
     , frame(None)
-    , wspace(ws)
-    , window_pix(None)
     , damage_handle(None)
     , is_shape(false)
     , effect_window(NULL)
@@ -49,14 +51,17 @@ Toplevel::Toplevel(Workspace* ws)
     , unredirect(false)
     , unredirectSuspend(false)
     , m_damageReplyPending(false)
+    , m_screen(0)
 {
     connect(this, SIGNAL(damaged(KWin::Toplevel*,QRect)), SIGNAL(needsRepaint()));
+    connect(screens(), SIGNAL(changed()), SLOT(checkScreen()));
+    connect(screens(), SIGNAL(countChanged(int,int)), SLOT(checkScreen()));
+    setupCheckScreenConnection();
 }
 
 Toplevel::~Toplevel()
 {
     assert(damage_handle == None);
-    discardWindowPixmap();
     delete info;
 }
 
@@ -73,22 +78,6 @@ QDebug& operator<<(QDebug& stream, const ToplevelList& list)
     stream << "LIST:(";
     bool first = true;
     for (ToplevelList::ConstIterator it = list.begin();
-            it != list.end();
-            ++it) {
-        if (!first)
-            stream << ":";
-        first = false;
-        stream << *it;
-    }
-    stream << ")";
-    return stream;
-}
-
-QDebug& operator<<(QDebug& stream, const ConstToplevelList& list)
-{
-    stream << "LIST:(";
-    bool first = true;
-    for (ConstToplevelList::ConstIterator it = list.begin();
             it != list.end();
             ++it) {
         if (!first)
@@ -123,8 +112,6 @@ void Toplevel::copyToDeleted(Toplevel* c)
     info = c->info;
     client = c->client;
     frame = c->frame;
-    wspace = c->wspace;
-    window_pix = c->window_pix;
     ready_for_painting = c->ready_for_painting;
     damage_handle = None;
     damage_region = c->damage_region;
@@ -140,9 +127,7 @@ void Toplevel::copyToDeleted(Toplevel* c)
     wmClientLeaderWin = c->wmClientLeader();
     window_role = c->windowRole();
     opaque_region = c->opaqueRegion();
-    // this needs to be done already here, otherwise 'c' could very likely
-    // call discardWindowPixmap() in something called during cleanup
-    c->window_pix = None;
+    m_screen = c->m_screen;
 }
 
 // before being deleted, remove references to everything that's now
@@ -324,19 +309,48 @@ void Toplevel::deleteEffectWindow()
     effect_window = NULL;
 }
 
+void Toplevel::checkScreen()
+{
+    if (screens()->count() == 1) {
+        if (m_screen != 0) {
+            m_screen = 0;
+            emit screenChanged();
+        }
+        return;
+    }
+    const int s = screens()->number(geometry().center());
+    if (s != m_screen) {
+        m_screen = s;
+        emit screenChanged();
+    }
+}
+
+void Toplevel::setupCheckScreenConnection()
+{
+    connect(this, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), SLOT(checkScreen()));
+    connect(this, SIGNAL(geometryChanged()), SLOT(checkScreen()));
+    checkScreen();
+}
+
+void Toplevel::removeCheckScreenConnection()
+{
+    disconnect(this, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), this, SLOT(checkScreen()));
+    disconnect(this, SIGNAL(geometryChanged()), this, SLOT(checkScreen()));
+}
+
 int Toplevel::screen() const
 {
-    int s = workspace()->screenNumber(geometry().center());
-    if (s < 0) {
-        kDebug(1212) << "Invalid screen: Center" << geometry().center() << ", screen" << s;
-        return 0;
-    }
-    return s;
+    return m_screen;
 }
 
 bool Toplevel::isOnScreen(int screen) const
 {
-    return workspace()->screenGeometry(screen).intersects(geometry());
+    return screens()->geometry(screen).intersects(geometry());
+}
+
+bool Toplevel::isOnActiveScreen() const
+{
+    return isOnScreen(screens()->current());
 }
 
 void Toplevel::getShadow()
@@ -431,6 +445,28 @@ bool Toplevel::isClient() const
 bool Toplevel::isDeleted() const
 {
     return false;
+}
+
+bool Toplevel::isOnCurrentActivity() const
+{
+#ifdef KWIN_BUILD_ACTIVITIES
+    return isOnActivity(Activities::self()->current());
+#else
+    return true;
+#endif
+}
+
+void Toplevel::elevate(bool elevate)
+{
+    if (!effectWindow()) {
+        return;
+    }
+    effectWindow()->elevate(elevate);
+}
+
+pid_t Toplevel::pid() const
+{
+    return info->pid();
 }
 
 } // namespace

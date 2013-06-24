@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 
 class KConfig;
+class KXMessages;
 
 namespace KWin
 {
@@ -61,7 +62,7 @@ public:
     QSize checkMaxSize(QSize s) const;
     int checkOpacityActive(int s) const;
     int checkOpacityInactive(int s) const;
-    bool checkIgnoreGeometry(bool ignore) const;
+    bool checkIgnoreGeometry(bool ignore, bool init = false) const;
     int checkDesktop(int desktop, bool init = false) const;
     int checkScreen(int screen, bool init = false) const;
     QString checkActivity(QString activity, bool init = false) const;
@@ -86,12 +87,12 @@ public:
     bool checkStrictGeometry(bool strict) const;
     QString checkShortcut(QString s, bool init = false) const;
     bool checkDisableGlobalShortcuts(bool disable) const;
-    bool checkIgnorePosition(bool ignore) const;   // obsolete
 private:
     MaximizeMode checkMaximizeVert(MaximizeMode mode, bool init) const;
     MaximizeMode checkMaximizeHoriz(MaximizeMode mode, bool init) const;
     QVector< Rules* > rules;
 };
+
 #endif
 
 class Rules
@@ -127,7 +128,7 @@ public:
     bool applyMaxSize(QSize& s) const;
     bool applyOpacityActive(int& s) const;
     bool applyOpacityInactive(int& s) const;
-    bool applyIgnoreGeometry(bool& ignore) const;
+    bool applyIgnoreGeometry(bool& ignore, bool init) const;
     bool applyDesktop(int& desktop, bool init) const;
     bool applyScreen(int& desktop, bool init) const;
     bool applyActivity(QString& activity, bool init) const;
@@ -153,7 +154,6 @@ public:
     bool applyStrictGeometry(bool& strict) const;
     bool applyShortcut(QString& shortcut, bool init) const;
     bool applyDisableGlobalShortcuts(bool& disable) const;
-    bool applyIgnorePosition(bool& ignore) const;   // obsolete
 private:
 #endif
     bool matchType(NET::WindowType match_type) const;
@@ -223,8 +223,8 @@ private:
     ForceRule opacityactiverule;
     int opacityinactive;
     ForceRule opacityinactiverule;
-    bool ignoreposition;
-    ForceRule ignorepositionrule;
+    bool ignoregeometry;
+    SetRule ignoregeometryrule;
     int desktop;
     SetRule desktoprule;
     int screen;
@@ -279,6 +279,39 @@ private:
 };
 
 #ifndef KCMRULES
+class RuleBook : public QObject
+{
+    Q_OBJECT
+public:
+    virtual ~RuleBook();
+    WindowRules find(const Client*, bool);
+    void discardUsed(Client* c, bool withdraw);
+    void setUpdatesDisabled(bool disable);
+    bool areUpdatesDisabled() const;
+    void load();
+    void edit(Client* c, bool whole_app);
+    void requestDiskStorage();
+private Q_SLOTS:
+    void temporaryRulesMessage(const QString&);
+    void cleanupTemporaryRules();
+    void save();
+
+private:
+    void deleteAll();
+    QTimer *m_updateTimer;
+    bool m_updatesDisabled;
+    QList<Rules*> m_rules;
+    QScopedPointer<KXMessages> m_temporaryRulesMessages;
+
+    KWIN_SINGLETON(RuleBook)
+};
+
+inline
+bool RuleBook::areUpdatesDisabled() const
+{
+    return m_updatesDisabled;
+}
+
 inline
 bool Rules::checkSetRule(SetRule rule, bool init)
 {

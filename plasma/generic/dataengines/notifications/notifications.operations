@@ -28,4 +28,10 @@
     </entry>
   </group>
 
+  <group name="configureNotification">
+    <entry name="appRealName" type="String">
+      <label>The application name whose notifications are to be configured</label>
+    </entry>
+  </group>
+
 </kcfg>

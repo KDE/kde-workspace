@@ -24,26 +24,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "presentwindowsconfig.h"
 #include <kactioncollection.h>
 #include <kaction.h>
-#include <klocale.h>
+#include <KDE/KGlobal>
+#include <KDE/KIcon>
+#include <KDE/KLocalizedString>
+#include <KDE/KStandardDirs>
 #include <kdebug.h>
 #include <kglobalsettings.h>
+#include <kdeclarative.h>
 
 #include <kwinglutils.h>
 
 #include <QMouseEvent>
-#include <QtGui/QPainter>
-#include <QtGui/QGraphicsLinearLayout>
-#include <Plasma/FrameSvg>
-#include <Plasma/PushButton>
-#include <Plasma/Theme>
-#include <Plasma/WindowEffects>
 #include <netwm_def.h>
 
 #include <math.h>
 #include <assert.h>
 #include <limits.h>
 #include <QApplication>
+#include <QDeclarativeContext>
+#include <QDeclarativeEngine>
 #include <QDesktopWidget>
+#include <QGraphicsObject>
 #include <QTimer>
 #include <QVector2D>
 #include <QVector4D>
@@ -64,6 +65,7 @@ PresentWindowsEffect::PresentWindowsEffect()
     , m_highlightedWindow(NULL)
     , m_filterFrame(NULL)
     , m_closeView(NULL)
+    , m_closeWindow(NULL)
     , m_dragInProgress(false)
     , m_dragWindow(NULL)
     , m_highlightedDropTarget(NULL)
@@ -200,7 +202,7 @@ void PresentWindowsEffect::postPaintScreen()
 {
     if (m_motionManager.areWindowsMoving())
         effects->addRepaintFull();
-    else if (!m_activated && m_motionManager.managingWindows()) {
+    else if (!m_activated && m_motionManager.managingWindows() && !m_closeWindow) {
         // We have finished moving them back, stop processing
         m_motionManager.unmanageAll();
 
@@ -244,7 +246,7 @@ void PresentWindowsEffect::prePaintWindow(EffectWindow *w, WindowPrePaintData &d
 {
     // TODO: We should also check to see if any windows are fading just in case fading takes longer
     //       than moving the windows when the effect is deactivated.
-    if (m_activated || m_motionManager.areWindowsMoving()) {
+    if (m_activated || m_motionManager.areWindowsMoving() || m_closeWindow) {
         DataHash::iterator winData = m_windowData.find(w);
         if (winData == m_windowData.end()) {
             effects->prePaintWindow(w, data, time);
@@ -289,6 +291,9 @@ void PresentWindowsEffect::prePaintWindow(EffectWindow *w, WindowPrePaintData &d
                 // we have to keep the window in the list to prevent flickering
                 winData->referenced = false;
                 w->unrefWindow();
+                if (w == m_closeWindow) {
+                    m_closeWindow = NULL;
+                }
             } else
                 w->enablePainting(EffectWindow::PAINT_DISABLED_BY_DELETE);
         }
@@ -420,6 +425,15 @@ void PresentWindowsEffect::slotWindowAdded(EffectWindow *w)
         rearrangeWindows();
     }
     if (m_closeView && w == effects->findWindow(m_closeView->winId())) {
+        if (m_closeWindow != w) {
+            DataHash::iterator winDataIt = m_windowData.find(m_closeWindow);
+            if (winDataIt != m_windowData.end()) {
+                if (winDataIt->referenced) {
+                    m_closeWindow->unrefWindow();
+                }
+                m_windowData.erase(winDataIt);
+            }
+        }
         winData->visible = true;
         winData->highlight = 1.0;
         m_closeWindow = w;
@@ -435,13 +449,14 @@ void PresentWindowsEffect::slotWindowClosed(EffectWindow *w)
     if (winData == m_windowData.end())
         return;
     winData->deleted = true;
-    winData->referenced = true;
-    w->refWindow();
+    if (!winData->referenced) {
+        winData->referenced = true;
+        w->refWindow();
+    }
     if (m_highlightedWindow == w)
         setHighlightedWindow(findFirstWindow());
     if (m_closeWindow == w) {
-        m_closeWindow = 0;
-        return; // don't rearrange
+        return; // don't rearrange, get's nulled when unref'd
     }
     rearrangeWindows();
 
@@ -499,11 +514,8 @@ bool PresentWindowsEffect::borderActivated(ElectricBorder border)
     return true;
 }
 
-void PresentWindowsEffect::windowInputMouseEvent(Window w, QEvent *e)
+void PresentWindowsEffect::windowInputMouseEvent(QEvent *e)
 {
-    assert(w == m_input);
-    Q_UNUSED(w);
-
     QMouseEvent* me = static_cast< QMouseEvent* >(e);
     if (m_closeView && m_closeView->geometry().contains(me->pos())) {
         if (!m_closeView->isVisible()) {
@@ -559,7 +571,7 @@ void PresentWindowsEffect::windowInputMouseEvent(Window w, QEvent *e)
                     m_highlightedDropTarget = NULL;
                 }
                 effects->addRepaintFull();
-                XDefineCursor(display(), m_input, QCursor(Qt::PointingHandCursor).handle());
+                effects->defineCursor(Qt::PointingHandCursor);
                 return;
             }
             if (hovering) {
@@ -598,7 +610,7 @@ void PresentWindowsEffect::windowInputMouseEvent(Window w, QEvent *e)
             m_highlightedDropTarget->setIcon(icon.pixmap(QSize(128, 128), QIcon::Normal));
             m_highlightedDropTarget = NULL;
         }
-        XDefineCursor(display(), m_input, QCursor(Qt::PointingHandCursor).handle());
+        effects->defineCursor(Qt::PointingHandCursor);
     } else if (e->type() == QEvent::MouseButtonPress && me->button() == Qt::LeftButton && hovering && m_dragToClose) {
         m_dragStart = me->pos();
         m_dragWindow = m_highlightedWindow;
@@ -610,7 +622,7 @@ void PresentWindowsEffect::windowInputMouseEvent(Window w, QEvent *e)
     if (e->type() == QEvent::MouseMove && m_dragWindow) {
         if ((me->pos() - m_dragStart).manhattanLength() > KGlobalSettings::dndEventDelay() && !m_dragInProgress) {
             m_dragInProgress = true;
-            XDefineCursor(display(), m_input, QCursor(Qt::ForbiddenCursor).handle());
+            effects->defineCursor(Qt::ForbiddenCursor);
         }
         if (!m_dragInProgress) {
             return;
@@ -628,13 +640,13 @@ void PresentWindowsEffect::windowInputMouseEvent(Window w, QEvent *e)
             KIcon icon("user-trash");
             effects->addRepaint(m_highlightedDropTarget->geometry());
             m_highlightedDropTarget->setIcon(icon.pixmap(QSize(128, 128), QIcon::Active));
-            XDefineCursor(display(), m_input, QCursor(Qt::DragMoveCursor).handle());
+            effects->defineCursor(Qt::DragMoveCursor);
         } else if (!target && m_highlightedDropTarget) {
             KIcon icon("user-trash");
             effects->addRepaint(m_highlightedDropTarget->geometry());
             m_highlightedDropTarget->setIcon(icon.pixmap(QSize(128, 128), QIcon::Normal));
             m_highlightedDropTarget = NULL;
-            XDefineCursor(display(), m_input, QCursor(Qt::ForbiddenCursor).handle());
+            effects->defineCursor(Qt::ForbiddenCursor);
         }
     }
 }
@@ -1518,7 +1530,7 @@ void PresentWindowsEffect::setActive(bool active)
         }
 
         // Create temporary input window to catch mouse events
-        m_input = effects->createFullScreenInputWindow(this, Qt::PointingHandCursor);
+        effects->startMouseInterception(this, Qt::PointingHandCursor);
         m_hasKeyboardGrab = effects->grabKeyboard(this);
         effects->setActiveFullScreenEffect(this);
 
@@ -1561,7 +1573,7 @@ void PresentWindowsEffect::setActive(bool active)
         m_windowFilter.clear();
         m_selectedWindows.clear();
 
-        effects->destroyInputWindow(m_input);
+        effects->stopMouseInterception(this);
         if (m_hasKeyboardGrab)
             effects->ungrabKeyboard();
         m_hasKeyboardGrab = false;
@@ -1926,51 +1938,29 @@ void PresentWindowsEffect::screenCountChanged()
 /************************************************
 * CloseWindowView
 ************************************************/
-CloseWindowView::CloseWindowView(QWidget* parent)
-    : QGraphicsView(parent)
+CloseWindowView::CloseWindowView(QWidget *parent)
+    : QDeclarativeView(parent)
     , m_armTimer(new QTimer(this))
 {
     setWindowFlags(Qt::X11BypassWindowManagerHint);
     setAttribute(Qt::WA_TranslucentBackground);
-    setFrameShape(QFrame::NoFrame);
     QPalette pal = palette();
     pal.setColor(backgroundRole(), Qt::transparent);
     setPalette(pal);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    // setup the scene
-    QGraphicsScene* scene = new QGraphicsScene(this);
-    m_closeButton = new Plasma::PushButton();
-    m_closeButton->setIcon(KIcon("window-close"));
-    scene->addItem(m_closeButton);
-    connect(m_closeButton, SIGNAL(clicked()), SIGNAL(close()));
-
-    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout;
-    layout->addItem(m_closeButton);
-
-    QGraphicsWidget *form = new QGraphicsWidget;
-    form->setLayout(layout);
-    form->setGeometry(0, 0, 32, 32);
-    scene->addItem(form);
-
-    m_frame = new Plasma::FrameSvg(this);
-    if (Plasma::Theme::defaultTheme()->currentThemeHasImage("translucent/dialogs/background")) {
-        m_frame->setImagePath("translucent/dialogs/background");
-    } else {
-        m_frame->setImagePath("dialogs/background");
+    foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
+        engine()->addImportPath(importPath);
     }
-    m_frame->setCacheAllRenderedFrames(true);
-    m_frame->setEnabledBorders(Plasma::FrameSvg::AllBorders);
-    qreal left, top, right, bottom;
-    m_frame->getMargins(left, top, right, bottom);
-    qreal width = form->size().width() + left + right;
-    qreal height = form->size().height() + top + bottom;
-    m_frame->resizeFrame(QSizeF(width, height));
-    Plasma::WindowEffects::enableBlurBehind(winId(), true, m_frame->mask());
-    form->setPos(left, top);
-    scene->setSceneRect(QRectF(QPointF(0, 0), QSizeF(width, height)));
-    setScene(scene);
+    KDeclarative kdeclarative;
+    kdeclarative.setDeclarativeEngine(engine());
+    kdeclarative.initialize();
+    kdeclarative.setupBindings();
+
+    rootContext()->setContextProperty("armed", QVariant(false));
+
+    setSource(QUrl(KStandardDirs::locate("data", QLatin1String("kwin/effects/presentwindows/main.qml"))));
+    if (QObject *item = rootObject()->findChild<QObject*>("closeButton")) {
+        connect(item, SIGNAL(clicked()), SIGNAL(close()));
+    }
 
     // setup the timer - attempt to prevent accidental clicks
     m_armTimer->setSingleShot(true);
@@ -1978,9 +1968,9 @@ CloseWindowView::CloseWindowView(QWidget* parent)
     connect(m_armTimer, SIGNAL(timeout()), SLOT(arm()));
 }
 
-void CloseWindowView::windowInputMouseEvent(QMouseEvent* e)
+void CloseWindowView::windowInputMouseEvent(QMouseEvent *e)
 {
-    if (!isEnabled())
+    if (m_armTimer->isActive())
         return;
     if (e->type() == QEvent::MouseMove) {
         mouseMoveEvent(e);
@@ -1993,24 +1983,16 @@ void CloseWindowView::windowInputMouseEvent(QMouseEvent* e)
     }
 }
 
-void CloseWindowView::drawBackground(QPainter* painter, const QRectF& rect)
-{
-    Q_UNUSED(rect)
-    painter->setRenderHint(QPainter::Antialiasing);
-    m_frame->paintFrame(painter);
-}
-
 void CloseWindowView::arm()
 {
-    setEnabled(true);
+    rootContext()->setContextProperty("armed", QVariant(true));
 }
 
 void CloseWindowView::disarm()
 {
-    setEnabled(false);
+    rootContext()->setContextProperty("armed", QVariant(false));
     m_armTimer->start();
 }
-
 
 } // namespace
 

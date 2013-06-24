@@ -687,6 +687,18 @@ void Launcher::setShowAppsByName(bool showAppsByName)
     }
 }
 
+void Launcher::setShowRecentlyInstalled(bool showRecentlyInstalled)
+{
+    const bool wasShowRecentlyInstalled = d->applicationModel->showRecentlyInstalled();
+    if (d->applet && showRecentlyInstalled != wasShowRecentlyInstalled) {
+        KConfigGroup cg = d->applet->config();
+        cg.writeEntry("ShowRecentlyInstalled", showRecentlyInstalled);
+        emit configNeedsSaving();
+    }
+
+    d->applicationModel->setShowRecentlyInstalled(showRecentlyInstalled);
+}
+
 bool Launcher::switchTabsOnHover() const
 {
     return d->contentSwitcher->switchTabsOnHover();
@@ -695,6 +707,11 @@ bool Launcher::switchTabsOnHover() const
 bool Launcher::showAppsByName() const
 {
   return d->applicationModel->nameDisplayOrder() == Kickoff::NameBeforeDescription;
+}
+
+bool Launcher::showRecentlyInstalled() const
+{
+  return d->applicationModel->showRecentlyInstalled();
 }
 
 void Launcher::setVisibleItemCount(int count)
@@ -725,9 +742,11 @@ void Launcher::setApplet(Plasma::Applet *applet)
     cg = applet->config();
     setShowAppsByName(cg.readEntry("ShowAppsByName", showAppsByName()));
     setVisibleItemCount(cg.readEntry("VisibleItemsCount", visibleItemCount()));
+    setShowRecentlyInstalled(cg.readEntry("ShowRecentlyInstalled", showRecentlyInstalled()));
 
     d->applet = applet;
     d->contextMenuFactory->setApplet(applet);
+    d->applicationModel->setApplet(applet);
 }
 
 void Launcher::reset()

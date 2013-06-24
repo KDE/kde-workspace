@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Robert Knight <robertknight@gmail.com>          *
  *   Copyright (C) 2008 by Alexis Ménard <darktears31@gmail.com>           *
+ *   Copyright (C) 2012-2013 by Eike Hein <hein@kde.org>                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,121 +19,342 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-// Own
 #include "tasks.h"
-#include "windowtaskitem.h"
-#include "taskgroupitem.h"
-#include "ui_tasksConfig.h"
+#include "support/textlabel.h"
+#include "support/tooltip.h"
 
-//Taskmanager
+#include <Plasma/Containment>
+#include <Plasma/Corona>
+#include <Plasma/DeclarativeWidget>
+#include <Plasma/Package>
+#include <Plasma/WindowEffects>
+
+#include <KAuthorized>
+#include <KConfigDialog>
+
 #include <taskmanager/groupmanager.h>
+#include <taskmanager/abstractgroupableitem.h>
+#include <taskmanager/task.h>
+#include <taskmanager/taskactions.h>
 #include <taskmanager/taskgroup.h>
 #include <taskmanager/taskitem.h>
+#include <taskmanager/tasksmodel.h>
 
-// KDE
-#include <KConfigDialog>
-#include <KDebug>
-
-// Qt
-#include <QGraphicsScene>
-#include <QGraphicsLinearLayout>
-#include <QVariant>
-#include <QBuffer>
-#include <QIODevice>
-
-// Plasma
-#include <Plasma/Containment>
-#include <Plasma/FrameSvg>
-#include <Plasma/Theme>
+#include <QtDeclarative>
 
 class GroupManager : public TaskManager::GroupManager
 {
-public:
-    GroupManager(Plasma::Applet *applet)
-        : TaskManager::GroupManager(applet),
-          m_applet(applet)
-    {
-    }
+    public:
+        GroupManager(Plasma::Applet *applet)
+            : TaskManager::GroupManager(applet),
+            m_applet(applet)
+        {
+        }
 
-protected:
-    KConfigGroup config() const
-    {
-        return m_applet->config();
-    }
+    protected:
+        KConfigGroup config() const
+        {
+            return m_applet->config();
+        }
 
-private:
-    Plasma::Applet *m_applet;
+    private:
+        Plasma::Applet *m_applet;
 };
 
-Tasks::Tasks(QObject* parent, const QVariantList &arguments)
-     : Plasma::Applet(parent, arguments),
-       m_showTooltip(false),
-       m_highlightWindows(false),
-       m_arrows(0),
-       m_taskItemBackground(0),
-       m_leftMargin(0),
-       m_topMargin(0),
-       m_rightMargin(0),
-       m_bottomMargin(0),
-       m_offscreenLeftMargin(0),
-       m_offscreenTopMargin(0),
-       m_offscreenRightMargin(0),
-       m_offscreenBottomMargin(0),
-       m_rootGroupItem(0),
-       m_groupManager(0),
-       m_groupModifierKey(Qt::AltModifier)
+Tasks::Tasks(QObject *parent, const QVariantList &args)
+    : Plasma::Applet(parent, args),
+    m_groupManager(0),
+    m_declarativeWidget(0),
+    m_highlightWindows(false),
+    m_lastViewId(0)
 {
-    setHasConfigurationInterface(true);
     setAspectRatioMode(Plasma::IgnoreAspectRatio);
-    m_screenTimer.setSingleShot(true);
-    m_screenTimer.setInterval(300);
-    resize(500, 58);
-
-    setAcceptDrops(true);
-
+    setHasConfigurationInterface(true);
 }
 
 Tasks::~Tasks()
 {
-    delete m_rootGroupItem;
-    delete m_groupManager;
 }
 
 void Tasks::init()
 {
     m_groupManager = new GroupManager(this);
-    Plasma::Containment* appletContainment = containment();
-    if (appletContainment) {
-        m_groupManager->setScreen(appletContainment->screen());
-    }
-
-    connect(m_groupManager, SIGNAL(reload()), this, SLOT(reload()));
     connect(m_groupManager, SIGNAL(configChanged()), this, SIGNAL(configNeedsSaving()));
 
-    m_rootGroupItem = new TaskGroupItem(this, this);
-    m_rootGroupItem->expand();
-    m_rootGroupItem->setGroup(m_groupManager->rootGroup());
+    Plasma::Containment *c = containment();
 
-    /*
-    foreach (TaskManager::AbstractGroupableItem *item, m_groupManager->rootGroup()->members()) {
-        kDebug() << item->name();
+    if (c) {
+        m_groupManager->setScreen(c->screen());
     }
-    */
 
-    connect(m_rootGroupItem, SIGNAL(sizeHintChanged(Qt::SizeHint)), this, SLOT(changeSizeHint(Qt::SizeHint)));
+    m_tasksModel = new TaskManager::TasksModel(m_groupManager, this);
+
+    m_declarativeWidget = new Plasma::DeclarativeWidget(this);
+    QDeclarativeContext* rootContext = m_declarativeWidget->engine()->rootContext();
+
+    qmlRegisterType<TextLabel>( "Tasks", 0, 1, "TextLabel" );
+    qmlRegisterType<ToolTipProxy>( "Tasks", 0, 1, "ToolTip" );
+    rootContext->setContextProperty("tasksModel", QVariant::fromValue(static_cast<QObject *>(m_tasksModel)));
+
+    // NOTE: This can go away once Plasma::Location becomes available (i.e. once this is
+    // a pure-QML applet.)
+    rootContext->setContextProperty("LeftEdge", Plasma::LeftEdge);
+    rootContext->setContextProperty("TopEdge", Plasma::TopEdge);
+    rootContext->setContextProperty("RightEdge", Plasma::RightEdge);
+    rootContext->setContextProperty("BottomEdge", Plasma::BottomEdge);
+
+    Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
+    Plasma::Package *package = new Plasma::Package(QString(), "org.kde.plasma.tasks", structure);
+    m_declarativeWidget->setQmlPath(package->filePath("mainscript"));
+    delete package;
+
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addItem(m_declarativeWidget);
 
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     setMaximumSize(INT_MAX, INT_MAX);
 
-    layout = new QGraphicsLinearLayout(this);
-    layout->setContentsMargins(0,0,0,0);
-    layout->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    layout->setMaximumSize(INT_MAX, INT_MAX);
-    layout->setOrientation(Qt::Vertical);
-    layout->addItem(m_rootGroupItem);
-    setLayout(layout);
+    QDeclarativeProperty preferredWidth(m_declarativeWidget->rootObject(), "preferredWidth");
+    preferredWidth.connectNotifySignal(this, SLOT(changeSizeHint()));
+
+    QDeclarativeProperty preferredHeight(m_declarativeWidget->rootObject(), "preferredHeight");
+    preferredHeight.connectNotifySignal(this, SLOT(changeSizeHint()));
+
+    connect(m_declarativeWidget->rootObject(), SIGNAL(activateItem(int,bool)), this, SLOT(activateItem(int,bool)));
+    connect(m_declarativeWidget->rootObject(), SIGNAL(itemContextMenu(int)), this, SLOT(itemContextMenu(int)));
+    connect(m_declarativeWidget->rootObject(), SIGNAL(itemMove(int,int)), this, SLOT(itemMove(int,int)));
+    connect(m_declarativeWidget->rootObject(), SIGNAL(itemGeometryChanged(int,int,int,int,int)),
+        this, SLOT(itemGeometryChanged(int,int,int,int,int)));
+    connect(m_declarativeWidget->rootObject(), SIGNAL(itemNeedsAttention(bool)), this, SLOT(itemNeedsAttention(bool)));
+
+    connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(handleActiveWindowChanged(WId)));
 
     configChanged();
+}
+
+void Tasks::changeSizeHint()
+{
+    emit sizeHintChanged(Qt::PreferredSize);
+    adjustGroupingStrategy();
+}
+
+QSizeF Tasks::sizeHint(Qt::SizeHint which, const QSizeF &constraint) const
+{
+    if (which == Qt::PreferredSize && m_declarativeWidget && m_declarativeWidget->rootObject()) {
+        return QSizeF(m_declarativeWidget->rootObject()->property("preferredWidth").toReal(),
+                      m_declarativeWidget->rootObject()->property("preferredHeight").toReal());
+    } else {
+        return Plasma::Applet::sizeHint(which, constraint);
+    }
+}
+
+void Tasks::constraintsEvent(Plasma::Constraints constraints)
+{
+    if (m_groupManager && (constraints & Plasma::ScreenConstraint)) {
+        Plasma::Containment *c = containment();
+        if (c) {
+            m_groupManager->setScreen(c->screen());
+        }
+    }
+
+    if (constraints & Plasma::FormFactorConstraint) {
+        m_declarativeWidget->rootObject()->setProperty("horizontal", formFactor() == Plasma::Horizontal);
+        m_declarativeWidget->rootObject()->setProperty("vertical", formFactor() == Plasma::Vertical);
+    }
+
+    if (constraints & Plasma::LocationConstraint) {
+        m_declarativeWidget->rootObject()->setProperty("location", location());
+    }
+
+    if (constraints & Plasma::SizeConstraint) {
+        adjustGroupingStrategy();
+    }
+
+    setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+}
+
+void Tasks::adjustGroupingStrategy()
+{
+    m_groupManager->setFullLimit(m_declarativeWidget->rootObject()->property("optimumCapacity").toInt());
+}
+
+void Tasks::activateItem(int id, bool toggle)
+{
+    TaskManager::AbstractGroupableItem* item = m_groupManager->rootGroup()->getMemberById(id);
+
+    if (!item) {
+        return;
+    }
+
+    if (item->itemType() == TaskManager::TaskItemType && !item->isStartupItem()) {
+        TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(item);
+
+        if (toggle) {
+            taskItem->task()->activateRaiseOrIconify();
+        } else {
+            taskItem->task()->activate();
+        }
+    } else if (item->itemType() == TaskManager::LauncherItemType) {
+        static_cast<TaskManager::LauncherItem*>(item)->launch();
+    }
+}
+
+void Tasks::itemContextMenu(int id)
+{
+    TaskManager::AbstractGroupableItem* item = m_groupManager->rootGroup()->getMemberById(id);
+
+    QDeclarativeItem* declItem = 0;
+    QList<QDeclarativeItem*> declItems = m_declarativeWidget->rootObject()->findChildren<QDeclarativeItem*>();
+
+    foreach(QDeclarativeItem* obj, declItems) {
+        if (obj->property("itemId").toInt() == id) {
+            declItem = obj;
+            break;
+        }
+    }
+
+    if (!KAuthorized::authorizeKAction("kwin_rmb") || !item || !declItem) {
+        return;
+    }
+
+    QList <QAction*> actionList;
+
+    QAction *configAction = action("configure");
+    if (configAction && configAction->isEnabled()) {
+        actionList.append(configAction);
+    }
+
+    TaskManager::BasicMenu* menu = 0;
+
+    Q_ASSERT(containment());
+    Q_ASSERT(containment()->corona());
+
+    if (item->itemType() == TaskManager::TaskItemType && !item->isStartupItem()) {
+        TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(item);
+/* FIXME (Un)collapse support is pending merge.
+        QAction *a(0);
+        if (taskItem->isGrouped()) {
+            a = new QAction(i18n("Collapse Parent Group"), 0);
+            connect(a, SIGNAL(triggered()), taskItem->parentGroup(), SLOT(collapse()));
+            actionList.prepend(a);
+        }
+*/
+        menu = new TaskManager::BasicMenu(0, taskItem, m_groupManager, actionList);
+    } else if (item->itemType() == TaskManager::GroupItemType) {
+        TaskManager::TaskGroup* taskGroup = static_cast<TaskManager::TaskGroup*>(item);
+/* FIXME (Un)collapse support is pending merge.
+        QAction *a;
+        if (true) {
+            a = new QAction(i18n("Collapse Group"), this);
+            connect(a, SIGNAL(triggered()), taskGroup, SLOT(collapse()));
+        } else {
+            a = new QAction(i18n("Expand Group"), this);
+            connect(a, SIGNAL(triggered()), taskGroup, SLOT(expand()));
+        }
+        actionList.prepend(a);
+*/
+        const int maxWidth = 0.8 * containment()->corona()->screenGeometry(containment()->screen()).width();
+        menu = new TaskManager::BasicMenu(0, taskGroup, m_groupManager, actionList, QList <QAction*>(), maxWidth);
+    } else if (item->itemType() == TaskManager::LauncherItemType) {
+        menu = new TaskManager::BasicMenu(0, static_cast<TaskManager::LauncherItem*>(item),
+            m_groupManager, actionList);
+    }
+
+    if (!menu) {
+        return;
+    }
+
+    menu->adjustSize();
+
+    if (formFactor() != Plasma::Vertical) {
+        menu->setMinimumWidth(declItem->implicitWidth());
+    }
+
+    menu->exec(containment()->corona()->popupPosition(declItem, menu->size()));
+    menu->deleteLater();
+}
+
+void Tasks::itemHovered(int id, bool hovered)
+{
+    TaskManager::AbstractGroupableItem* item = m_groupManager->rootGroup()->getMemberById(id);
+
+    if (!item) {
+        return;
+    }
+
+    if (hovered && m_highlightWindows && view()) {
+        m_lastViewId = view()->winId();
+        Plasma::WindowEffects::highlightWindows(m_lastViewId, QList<WId>::fromSet(item->winIds()));
+    } else if (m_highlightWindows && m_lastViewId) {
+        Plasma::WindowEffects::highlightWindows(m_lastViewId, QList<WId>());
+    }
+}
+
+void Tasks::itemMove(int id, int newIndex)
+{
+    m_groupManager->manualSortingRequest(m_groupManager->rootGroup()->getMemberById(id), newIndex);
+}
+
+void Tasks::itemGeometryChanged(int id, int x, int y, int width, int height)
+{
+    TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(m_groupManager->rootGroup()->getMemberById(id));
+
+    if (!taskItem || !taskItem->task() || !scene())
+    {
+        return;
+    }
+
+    QGraphicsView *parentView = 0;
+    QGraphicsView *possibleParentView = 0;
+    // The following was taken from Plasma::Applet, it doesn't make sense to make the item an applet, and this was the easiest way around it.
+    foreach (QGraphicsView *view, scene()->views()) {
+        if (view->sceneRect().intersects(sceneBoundingRect()) ||
+            view->sceneRect().contains(scenePos())) {
+            if (view->isActiveWindow()) {
+                parentView = view;
+                break;
+            } else {
+                possibleParentView = view;
+            }
+        }
+    }
+
+    if (!parentView) {
+        parentView = possibleParentView;
+
+        if (!parentView) {
+            return;
+        }
+    }
+
+    QRect iconRect(x, y, width, height);
+    iconRect.moveTopLeft(parentView->mapFromScene(m_declarativeWidget->mapToScene(iconRect.topLeft())));
+    iconRect.moveTopLeft(parentView->mapToGlobal(iconRect.topLeft()));
+
+    taskItem->task()->publishIconGeometry(iconRect);
+}
+
+void Tasks::itemNeedsAttention(bool needs)
+{
+    if (needs) {
+        setStatus(Plasma::NeedsAttentionStatus);
+    } else {
+        foreach(TaskManager::AbstractGroupableItem *item, m_groupManager->rootGroup()->members()) {
+            if (item->demandsAttention()) {
+                // not time to go passive yet! :)
+                return;
+            }
+        }
+
+        setStatus(Plasma::PassiveStatus);
+    }
+}
+
+void Tasks::handleActiveWindowChanged(WId activeWindow)
+{
+    m_declarativeWidget->rootObject()->setProperty("activeWindowId", qulonglong(activeWindow));
 }
 
 void Tasks::configChanged()
@@ -145,12 +367,14 @@ void Tasks::configChanged()
     const bool showOnlyCurrentDesktop = cg.readEntry("showOnlyCurrentDesktop", false);
     if (showOnlyCurrentDesktop != m_groupManager->showOnlyCurrentDesktop()) {
         m_groupManager->setShowOnlyCurrentDesktop(showOnlyCurrentDesktop);
+        m_declarativeWidget->rootObject()->setProperty("showOnlyCurrentDesktop", showOnlyCurrentDesktop);
         changed = true;
     }
 
     const bool showOnlyCurrentActivity = cg.readEntry("showOnlyCurrentActivity", true);
     if (showOnlyCurrentActivity != m_groupManager->showOnlyCurrentActivity()) {
         m_groupManager->setShowOnlyCurrentActivity(showOnlyCurrentActivity);
+        m_declarativeWidget->rootObject()->setProperty("showOnlyCurrentActivity", showOnlyCurrentActivity);
         changed = true;
     }
 
@@ -163,6 +387,7 @@ void Tasks::configChanged()
     const bool showOnlyMinimized = cg.readEntry("showOnlyMinimized", false);
     if (showOnlyMinimized != m_groupManager->showOnlyMinimized()) {
         m_groupManager->setShowOnlyMinimized(showOnlyMinimized);
+        m_declarativeWidget->rootObject()->setProperty("showOnlyMinimized", showOnlyMinimized);
         changed = true;
     }
 
@@ -191,30 +416,38 @@ void Tasks::configChanged()
 
     if (sortingStrategy != m_groupManager->sortingStrategy()) {
         m_groupManager->setSortingStrategy(sortingStrategy);
+        m_declarativeWidget->rootObject()->setProperty("manualSorting",
+            (sortingStrategy == TaskManager::GroupManager::ManualSorting));
         changed = true;
     }
 
     const int maxRows = cg.readEntry("maxRows", 2);
-    if (maxRows != m_rootGroupItem->maxRows()) {
-        m_rootGroupItem->setMaxRows(maxRows);
+    if (maxRows != m_declarativeWidget->rootObject()->property("maxStripes").toInt()) {
+        m_declarativeWidget->rootObject()->setProperty("maxStripes", maxRows);
         changed = true;
     }
 
     const bool forceRows = cg.readEntry("forceRows", false);
-    if (forceRows != m_rootGroupItem->forceRows()) {
-        m_rootGroupItem->setForceRows(forceRows);
+    if (forceRows != m_declarativeWidget->rootObject()->property("forceStripes").toBool()) {
+        m_declarativeWidget->rootObject()->setProperty("forceStripes", forceRows);
         changed = true;
     }
 
-    const bool showTooltip = cg.readEntry("showTooltip", true);
-    if (showTooltip != m_showTooltip) {
-        m_showTooltip = showTooltip;
+    const bool showTooltip = cg.readEntry("showToolTip", true);
+    if (showTooltip != m_declarativeWidget->rootObject()->property("showToolTip").toBool()) {
+        m_declarativeWidget->rootObject()->setProperty("showToolTip", showTooltip);
         changed = true;
     }
 
     const bool highlightWindows = cg.readEntry("highlightWindows", false);
     if (highlightWindows != m_highlightWindows) {
         m_highlightWindows = highlightWindows;
+        m_declarativeWidget->rootObject()->setProperty("highlightWindows", m_highlightWindows);
+        if (m_highlightWindows) {
+            connect(m_declarativeWidget->rootObject(), SIGNAL(itemHovered(int,bool)), this, SLOT(itemHovered(int,bool)));
+        } else {
+            disconnect(m_declarativeWidget->rootObject(), SIGNAL(itemHovered(int,bool)), this, SLOT(itemHovered(int,bool)));
+        }
         changed = true;
     }
 
@@ -222,154 +455,24 @@ void Tasks::configChanged()
 
     if (changed) {
         emit settingsChanged();
-        update();
     }
-}
-
-void Tasks::reload()
-{
-    TaskGroup *newGroup = m_groupManager->rootGroup();
-    if (newGroup != m_rootGroupItem->abstractItem()) {
-        m_rootGroupItem->setGroup(newGroup);
-    } else {
-        m_rootGroupItem->reload();
-    }
-}
-
-TaskManager::GroupManager &Tasks::groupManager() const
-{
-    return *m_groupManager;
-}
-
-Qt::KeyboardModifiers Tasks::groupModifierKey() const
-{
-    return m_groupModifierKey;
-}
-
-void Tasks::constraintsEvent(Plasma::Constraints constraints)
-{
-    //kDebug();
-    if (m_groupManager && constraints & Plasma::ScreenConstraint) {
-        Plasma::Containment* appletContainment = containment();
-        if (appletContainment) {
-            m_groupManager->setScreen(appletContainment->screen());
-        }
-    }
-
-    if (constraints & Plasma::LocationConstraint) {
-        QTimer::singleShot(500, this, SLOT(publishIconGeometry()));
-    }
-
-    if (constraints & Plasma::SizeConstraint) {
-        adjustGroupingStrategy();
-    }
-
-    setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    emit constraintsChanged(constraints);
-}
-
-void Tasks::publishIconGeometry()
-{
-    foreach (AbstractTaskItem *item, m_rootGroupItem->members()) {
-        item->publishIconGeometry();
-    }
-}
-
-Plasma::Svg *Tasks::arrows()
-{
-    if (!m_arrows) {
-        m_arrows = new Plasma::Svg(this);
-        m_arrows->setImagePath("widgets/arrows");
-        m_arrows->setContainsMultipleImages(true);
-        m_arrows->resize(16, 16);
-    }
-
-    return m_arrows;
-}
-
-Plasma::FrameSvg *Tasks::itemBackground()
-{
-    if (!m_taskItemBackground) {
-        m_taskItemBackground = new Plasma::FrameSvg(this);
-        m_taskItemBackground->setImagePath("widgets/tasks");
-        m_taskItemBackground->setCacheAllRenderedFrames(true);
-    }
-
-    return m_taskItemBackground;
-}
-
-void Tasks::resizeItemBackground(const QSizeF &size)
-{
-  //kDebug();
-    if (!m_taskItemBackground) {
-        itemBackground();
-    }
-
-    if (m_taskItemBackground->frameSize() == size) {
-        //kDebug() << "Error2";
-        return;
-    }
-
-    m_taskItemBackground->resizeFrame(size);
-
-    QString oldPrefix = m_taskItemBackground->prefix();
-    m_taskItemBackground->setElementPrefix("normal");
-    //get the margins now
-    m_taskItemBackground->getMargins(m_leftMargin, m_topMargin, m_rightMargin, m_bottomMargin);
-
-    // the offscreen margins are always whatever the svg naturally is
-    m_offscreenLeftMargin = m_leftMargin;
-    m_offscreenTopMargin = m_topMargin;
-    m_offscreenRightMargin = m_rightMargin;
-    m_offscreenBottomMargin = m_bottomMargin;
-
-    //if the task height is too little shrink the top and bottom margins
-    if (size.height() - m_topMargin - m_bottomMargin < KIconLoader::SizeSmall) {
-        m_topMargin = m_bottomMargin = qMax(1, int((size.height() - KIconLoader::SizeSmall)/2));
-    }
-    m_taskItemBackground->setElementPrefix(oldPrefix);
-}
-
-QSizeF Tasks::sizeHint(Qt::SizeHint which, const QSizeF &constraint) const
-{
-    if (m_rootGroupItem && which == Qt::PreferredSize) {
-        return m_rootGroupItem->preferredSize();
-    } else {
-        return Plasma::Applet::sizeHint(which, constraint);
-    }
-}
-
-void Tasks::adjustGroupingStrategy()
-{
-    //FIXME: should use AbstractTaskItem::basicPreferredSize() but it seems to cause crashes
-    //QSize itemSize = QSize(300, 30);
-    //m_groupManager->setFullLimit(((size().width()*size().height()) / (itemSize.width()*itemSize.height())));
-    //kDebug() << ((size().width()*size().height()) / (itemSize.width()*itemSize.height()));
-
-    m_groupManager->setFullLimit(rootGroupItem()->optimumCapacity());
-}
-
-void Tasks::changeSizeHint(Qt::SizeHint which)
-{
-    emit sizeHintChanged(which);
-    adjustGroupingStrategy();
 }
 
 void Tasks::createConfigurationInterface(KConfigDialog *parent)
 {
-     QWidget *widget = new QWidget;
-     m_ui.setupUi(widget);
-     connect(parent, SIGNAL(applyClicked()), this, SLOT(configAccepted()));
-     connect(parent, SIGNAL(okClicked()), this, SLOT(configAccepted()));
-     parent->addPage(widget, i18n("General"), icon());
+    QWidget *widget = new QWidget;
+    m_ui.setupUi(widget);
+    connect(parent, SIGNAL(applyClicked()), this, SLOT(configAccepted()));
+    connect(parent, SIGNAL(okClicked()), this, SLOT(configAccepted()));
+    parent->addPage(widget, i18n("General"), icon());
 
-    m_ui.showTooltip->setChecked(m_showTooltip);
+    m_ui.showTooltip->setChecked(m_declarativeWidget->rootObject()->property("showToolTip").toBool());
     m_ui.highlightWindows->setChecked(m_highlightWindows);
     m_ui.showOnlyCurrentDesktop->setChecked(m_groupManager->showOnlyCurrentDesktop());
     m_ui.showOnlyCurrentActivity->setChecked(m_groupManager->showOnlyCurrentActivity());
     m_ui.showOnlyCurrentScreen->setChecked(m_groupManager->showOnlyCurrentScreen());
     m_ui.showOnlyMinimized->setChecked(m_groupManager->showOnlyMinimized());
-    m_ui.fillRows->setChecked(m_rootGroupItem->forceRows());
+    m_ui.fillRows->setChecked(m_declarativeWidget->rootObject()->property("forceStripes").toBool());
 
     m_ui.groupingStrategy->addItem(i18n("Do Not Group"),QVariant(TaskManager::GroupManager::NoGrouping));
     m_ui.groupingStrategy->addItem(i18n("Manually"),QVariant(TaskManager::GroupManager::ManualGrouping));
@@ -390,16 +493,14 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
         default:
              m_ui.groupingStrategy->setCurrentIndex(-1);
     }
-    kDebug() << m_groupManager->groupingStrategy();
 
     m_ui.groupWhenFull->setChecked(m_groupManager->onlyGroupWhenFull());
-
 
     m_ui.sortingStrategy->addItem(i18n("Do Not Sort"),QVariant(TaskManager::GroupManager::NoSorting));
     m_ui.sortingStrategy->addItem(i18n("Manually"),QVariant(TaskManager::GroupManager::ManualSorting));
     m_ui.sortingStrategy->addItem(i18n("Alphabetically"),QVariant(TaskManager::GroupManager::AlphaSorting));
     m_ui.sortingStrategy->addItem(i18n("By Desktop"),QVariant(TaskManager::GroupManager::DesktopSorting));
-
+    m_ui.sortingStrategy->addItem(i18n("By Activity"),QVariant(TaskManager::GroupManager::ActivitySorting));
 
     switch (m_groupManager->sortingStrategy()) {
         case TaskManager::GroupManager::NoSorting:
@@ -414,11 +515,14 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
         case TaskManager::GroupManager::DesktopSorting:
             m_ui.sortingStrategy->setCurrentIndex(3);
             break;
+        case TaskManager::GroupManager::ActivitySorting:
+            m_ui.sortingStrategy->setCurrentIndex(4);
+            break;
         default:
              m_ui.sortingStrategy->setCurrentIndex(-1);
     }
- //   kDebug() << m_groupManager->sortingStrategy();
-    m_ui.maxRows->setValue(m_rootGroupItem->maxRows());
+
+    m_ui.maxRows->setValue(m_declarativeWidget->rootObject()->property("maxStripes").toInt());
 
     connect(m_ui.fillRows, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
     connect(m_ui.showTooltip, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
@@ -440,8 +544,6 @@ void Tasks::dialogGroupingChanged(int index)
 
 void Tasks::configAccepted()
 {
-    // just write the config here, and it will get applied in configChanged(),
-    // which is called after this when the config dialog is accepted
     KConfigGroup cg = config();
 
     cg.writeEntry("showOnlyCurrentDesktop", m_ui.showOnlyCurrentDesktop->isChecked());
@@ -457,64 +559,10 @@ void Tasks::configAccepted()
     cg.writeEntry("maxRows", m_ui.maxRows->value());
     cg.writeEntry("forceRows", m_ui.fillRows->isChecked());
 
-    cg.writeEntry("showTooltip", m_ui.showTooltip->checkState() == Qt::Checked);
-    cg.writeEntry("highlightWindows", m_ui.highlightWindows->checkState() == Qt::Checked);
+    cg.writeEntry("showToolTip", m_ui.showTooltip->isChecked());
+    cg.writeEntry("highlightWindows", m_ui.highlightWindows->isChecked());
 
     emit configNeedsSaving();
 }
-
-bool Tasks::showToolTip() const
-{
-    return m_showTooltip;
-}
-
-bool Tasks::highlightWindows() const
-{
-    return m_highlightWindows;
-}
-
-void Tasks::needsVisualFocus(bool focus)
-{
-    if (focus) {
-        setStatus(Plasma::NeedsAttentionStatus);
-    } else {
-        foreach (AbstractTaskItem *item, m_rootGroupItem->members()) {
-            if (item->taskFlags() & AbstractTaskItem::TaskWantsAttention) {
-                // not time to go passive yet! :)
-                return;
-            }
-        }
-        setStatus(Plasma::PassiveStatus);
-    }
-}
-
-TaskGroupItem* Tasks::rootGroupItem()
-{
-    return m_rootGroupItem;
-}
-
-QWidget *Tasks::popupDialog() const
-{
-    return m_popupDialog.data();
-}
-
-bool Tasks::isPopupShowing() const
-{
-    return m_popupDialog;
-}
-
-void Tasks::setPopupDialog(bool status)
-{
-    Q_UNUSED(status)
-    QWidget *widget = qobject_cast<QWidget *>(sender());
-
-    if (status && widget->isVisible()) {
-        m_popupDialog = widget;
-    } else if (m_popupDialog.data() == widget) {
-        m_popupDialog.clear();
-    }
-}
-
-K_EXPORT_PLASMA_APPLET(tasks, Tasks)
 
 #include "tasks.moc"

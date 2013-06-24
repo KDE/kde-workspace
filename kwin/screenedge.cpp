@@ -32,17 +32,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KWin
 #include "atoms.h"
 #include "client.h"
+#include "cursor.h"
 #include "effects.h"
+#include "screens.h"
 #include "utils.h"
 #include "workspace.h"
 #include "virtualdesktops.h"
 // Qt
-#include <QtCore/QTimer>
-#include <QtCore/QVector>
-#include <QtCore/QTextStream>
+#include <QTimer>
+#include <QVector>
+#include <QTextStream>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusPendingCall>
-#include <QDesktopWidget>
 
 namespace KWin {
 
@@ -58,7 +59,7 @@ Edge::Edge(ScreenEdges *parent)
     , m_action(ElectricActionNone)
     , m_reserved(0)
     , m_approaching(false)
-    , m_lastApproachingFactor(0.0)
+    , m_lastApproachingFactor(0)
     , m_blocked(false)
 {
 }
@@ -255,7 +256,7 @@ void Edge::switchDesktop(const QPoint &cursorPos)
     }
     vds->setCurrent(desktop);
     if (vds->current() != oldDesktop) {
-        QCursor::setPos(pos);
+        Cursor::setPos(pos);
     }
 }
 
@@ -276,7 +277,7 @@ void Edge::pushCursorBack(const QPoint &cursorPos)
     if (isBottom()) {
         y -= distance.height();
     }
-    QCursor::setPos(x, y);
+    Cursor::setPos(x, y);
 }
 
 void Edge::setGeometry(const QRect &geometry)
@@ -289,8 +290,7 @@ void Edge::setGeometry(const QRect &geometry)
     int y = m_geometry.y();
     int width = m_geometry.width();
     int height = m_geometry.height();
-    // TODO: better not hard coded value
-    const int size = 20;
+    const int size = m_edges->cornerOffset();
     if (isCorner()) {
         if (isRight()) {
             x = x - size +1;
@@ -364,7 +364,7 @@ void Edge::startApproaching()
     }
     m_approaching = true;
     doStartApproaching();
-    m_lastApproachingFactor = 0.0;
+    m_lastApproachingFactor = 0;
     emit approaching(border(), 0.0, m_approachGeometry);
 }
 
@@ -379,7 +379,7 @@ void Edge::stopApproaching()
     }
     m_approaching = false;
     doStopApproaching();
-    m_lastApproachingFactor = 0.0;
+    m_lastApproachingFactor = 0;
     emit approaching(border(), 0.0, m_approachGeometry);
 }
 
@@ -390,42 +390,42 @@ void Edge::doStopApproaching()
 void Edge::updateApproaching(const QPoint &point)
 {
     if (approachGeometry().contains(point)) {
-        qreal factor = 0.0;
+        int factor = 0;
+        const int edgeDistance = m_edges->cornerOffset();
         // manhattan length for our edge
-        const qreal cornerDistance = 40.0;
-        const qreal edgeDistance = 20.0;
+        const int cornerDistance = 2*edgeDistance;
         switch (border()) {
         case ElectricTopLeft:
-            factor = point.manhattanLength() / cornerDistance;
+            factor = (point.manhattanLength()<<8) / cornerDistance;
             break;
         case ElectricTopRight:
-            factor = (point - approachGeometry().topRight()).manhattanLength() / cornerDistance;
+            factor = ((point - approachGeometry().topRight()).manhattanLength()<<8) / cornerDistance;
             break;
         case ElectricBottomRight:
-            factor = (point - approachGeometry().bottomRight()).manhattanLength() / cornerDistance;
+            factor = ((point - approachGeometry().bottomRight()).manhattanLength()<<8) / cornerDistance;
             break;
         case ElectricBottomLeft:
-            factor = (point - approachGeometry().bottomLeft()).manhattanLength() / cornerDistance;
+            factor = ((point - approachGeometry().bottomLeft()).manhattanLength()<<8) / cornerDistance;
             break;
         case ElectricTop:
-            factor = qAbs(point.y() - approachGeometry().y()) / edgeDistance;
+            factor = (qAbs(point.y() - approachGeometry().y())<<8) / edgeDistance;
             break;
         case ElectricRight:
-            factor = qAbs(point.x() - approachGeometry().right()) / edgeDistance;
+            factor = (qAbs(point.x() - approachGeometry().right())<<8) / edgeDistance;
             break;
         case ElectricBottom:
-            factor = qAbs(point.y() - approachGeometry().bottom()) / edgeDistance;
+            factor = (qAbs(point.y() - approachGeometry().bottom())<<8) / edgeDistance;
             break;
         case ElectricLeft:
-            factor = qAbs(point.x() - approachGeometry().x()) / edgeDistance;
+            factor = (qAbs(point.x() - approachGeometry().x())<<8) / edgeDistance;
             break;
         default:
             break;
         }
-        factor = 1.0 - factor;
+        factor = 256 - factor;
         if (m_lastApproachingFactor != factor) {
             m_lastApproachingFactor = factor;
-            emit approaching(border(), m_lastApproachingFactor, m_approachGeometry);
+            emit approaching(border(), m_lastApproachingFactor/256.0f, m_approachGeometry);
         }
     } else {
         stopApproaching();
@@ -503,14 +503,16 @@ void WindowBasedEdge::doGeometryUpdate()
 void WindowBasedEdge::doStartApproaching()
 {
     m_approachWindow.unmap();
-    connect(edges(), SIGNAL(mousePollingTimerEvent(QPoint)), SLOT(updateApproaching(QPoint)));
-    edges()->startMousePolling();
+    Cursor *cursor = Cursor::self();
+    connect(cursor, SIGNAL(posChanged(QPoint)), SLOT(updateApproaching(QPoint)));
+    cursor->startMousePolling();
 }
 
 void WindowBasedEdge::doStopApproaching()
 {
-    disconnect(edges(), SIGNAL(mousePollingTimerEvent(QPoint)), this, SLOT(updateApproaching(QPoint)));
-    edges()->stopMousePolling();
+    Cursor *cursor = Cursor::self();
+    disconnect(cursor, SIGNAL(posChanged(QPoint)), this, SLOT(updateApproaching(QPoint)));
+    cursor->stopMousePolling();
     m_approachWindow.map();
 }
 
@@ -531,14 +533,7 @@ void WindowBasedEdge::doUpdateBlocking()
 /**********************************************************
  * ScreenEdges
  *********************************************************/
-ScreenEdges *ScreenEdges::s_self = NULL;
-
-ScreenEdges *ScreenEdges::create(QObject *parent)
-{
-    Q_ASSERT(!s_self);
-    s_self = new ScreenEdges(parent);
-    return s_self;
-}
+KWIN_SINGLETON_FACTORY(ScreenEdges)
 
 ScreenEdges::ScreenEdges(QObject *parent)
     : QObject(parent)
@@ -555,10 +550,9 @@ ScreenEdges::ScreenEdges(QObject *parent)
     , m_actionBottom(ElectricActionNone)
     , m_actionBottomLeft(ElectricActionNone)
     , m_actionLeft(ElectricActionNone)
-    , m_mousePolling(0)
-    , m_mousePollingTimer(new QTimer(this))
 {
-    connect(m_mousePollingTimer, SIGNAL(timeout()), SLOT(performMousePoll()));
+    QWidget w;
+    m_cornerOffset = (w.physicalDpiX() + w.physicalDpiY() + 5) / 6;
 }
 
 ScreenEdges::~ScreenEdges()
@@ -683,8 +677,7 @@ void ScreenEdges::updateLayout()
 
 static bool isLeftScreen(const QRect &screen, const QRect &fullArea)
 {
-    const QDesktopWidget *desktop = QApplication::desktop();
-    if (desktop->screenCount() == 1) {
+    if (screens()->count() == 1) {
         return true;
     }
     if (screen.x() == fullArea.x()) {
@@ -692,8 +685,8 @@ static bool isLeftScreen(const QRect &screen, const QRect &fullArea)
     }
     // the screen is also on the left in case of a vertical layout with a second screen
     // more to the left. In that case no screen ends left of screen's x coord
-    for (int i=0; i<desktop->screenCount(); ++i) {
-        const QRect otherGeo = desktop->screenGeometry(i);
+    for (int i=0; i<screens()->count(); ++i) {
+        const QRect otherGeo = screens()->geometry(i);
         if (otherGeo == screen) {
             // that's our screen to test
             continue;
@@ -709,8 +702,7 @@ static bool isLeftScreen(const QRect &screen, const QRect &fullArea)
 
 static bool isRightScreen(const QRect &screen, const QRect &fullArea)
 {
-    const QDesktopWidget *desktop = QApplication::desktop();
-    if (desktop->screenCount() == 1) {
+    if (screens()->count() == 1) {
         return true;
     }
     if (screen.x() + screen.width() == fullArea.x() + fullArea.width()) {
@@ -718,8 +710,8 @@ static bool isRightScreen(const QRect &screen, const QRect &fullArea)
     }
     // the screen is also on the right in case of a vertical layout with a second screen
     // more to the right. In that case no screen starts right of this screen
-    for (int i=0; i<desktop->screenCount(); ++i) {
-        const QRect otherGeo = desktop->screenGeometry(i);
+    for (int i=0; i<screens()->count(); ++i) {
+        const QRect otherGeo = screens()->geometry(i);
         if (otherGeo == screen) {
             // that's our screen to test
             continue;
@@ -735,8 +727,7 @@ static bool isRightScreen(const QRect &screen, const QRect &fullArea)
 
 static bool isTopScreen(const QRect &screen, const QRect &fullArea)
 {
-    const QDesktopWidget *desktop = QApplication::desktop();
-    if (desktop->screenCount() == 1) {
+    if (screens()->count() == 1) {
         return true;
     }
     if (screen.y() == fullArea.y()) {
@@ -744,8 +735,8 @@ static bool isTopScreen(const QRect &screen, const QRect &fullArea)
     }
     // the screen is also top most in case of a horizontal layout with a second screen
     // more to the top. In that case no screen ends above screen's y coord
-    for (int i=0; i<desktop->screenCount(); ++i) {
-        const QRect otherGeo = desktop->screenGeometry(i);
+    for (int i=0; i<screens()->count(); ++i) {
+        const QRect otherGeo = screens()->geometry(i);
         if (otherGeo == screen) {
             // that's our screen to test
             continue;
@@ -761,8 +752,7 @@ static bool isTopScreen(const QRect &screen, const QRect &fullArea)
 
 static bool isBottomScreen(const QRect &screen, const QRect &fullArea)
 {
-    const QDesktopWidget *desktop = QApplication::desktop();
-    if (desktop->screenCount() == 1) {
+    if (screens()->count() == 1) {
         return true;
     }
     if (screen.y() + screen.height() == fullArea.y() + fullArea.height()) {
@@ -770,8 +760,8 @@ static bool isBottomScreen(const QRect &screen, const QRect &fullArea)
     }
     // the screen is also bottom most in case of a horizontal layout with a second screen
     // more below. In that case no screen starts below screen's y coord + height
-    for (int i=0; i<desktop->screenCount(); ++i) {
-        const QRect otherGeo = desktop->screenGeometry(i);
+    for (int i=0; i<screens()->count(); ++i) {
+        const QRect otherGeo = screens()->geometry(i);
         if (otherGeo == screen) {
             // that's our screen to test
             continue;
@@ -790,9 +780,8 @@ void ScreenEdges::recreateEdges()
     QList<WindowBasedEdge*> oldEdges(m_edges);
     m_edges.clear();
     const QRect fullArea(0, 0, displayWidth(), displayHeight());
-    const QDesktopWidget *desktop = QApplication::desktop();
-    for (int i=0; i<desktop->screenCount(); ++i) {
-        const QRect screen = desktop->screenGeometry(i);
+    for (int i=0; i<screens()->count(); ++i) {
+        const QRect screen = screens()->geometry(i);
         if (isLeftScreen(screen, fullArea)) {
             // left most screen
             createVerticalEdge(ElectricLeft, screen, fullArea);
@@ -841,15 +830,15 @@ void ScreenEdges::createVerticalEdge(ElectricBorder border, const QRect &screen,
     const int x = (border == ElectricLeft) ? screen.x() : screen.x() + screen.width() -1;
     if (isTopScreen(screen, fullArea)) {
         // also top most screen
-        height--;
-        y++;
+        height -= m_cornerOffset;
+        y += m_cornerOffset;
         // create top left/right edge
         const ElectricBorder edge = (border == ElectricLeft) ? ElectricTopLeft : ElectricTopRight;
         m_edges << createEdge(edge, x, screen.y(), 1, 1);
     }
     if (isBottomScreen(screen, fullArea)) {
         // also bottom most screen
-        height--;
+        height -= m_cornerOffset;
         // create bottom left/right edge
         const ElectricBorder edge = (border == ElectricLeft) ? ElectricBottomLeft : ElectricBottomRight;
         m_edges << createEdge(edge, x, screen.y() + screen.height() -1, 1, 1);
@@ -867,12 +856,12 @@ void ScreenEdges::createHorizontalEdge(ElectricBorder border, const QRect &scree
     int width = screen.width();
     if (isLeftScreen(screen, fullArea)) {
         // also left most - adjust only x and width
-        x++;
-        width--;
+        x += m_cornerOffset;
+        width -= m_cornerOffset;
     }
     if (isRightScreen(screen, fullArea)) {
         // also right most edge
-        width--;
+        width -= m_cornerOffset;
     }
     const int y = (border == ElectricTop) ? screen.y() : screen.y() + screen.height() - 1;
     m_edges << createEdge(border, x, y, width, 1);
@@ -1045,28 +1034,6 @@ bool ScreenEdges::handleDndNotify(xcb_window_t window, const QPoint &point)
 void ScreenEdges::ensureOnTop()
 {
     Xcb::restackWindowsWithRaise(windows());
-}
-
-void ScreenEdges::startMousePolling()
-{
-    m_mousePolling++;
-    if (m_mousePolling == 1) {
-        m_mousePollingTimer->start(100);   // TODO: How often do we really need to poll?
-    }
-}
-
-void ScreenEdges::stopMousePolling()
-{
-    m_mousePolling--;
-    if (m_mousePolling == 0) {
-        m_mousePollingTimer->stop();
-    }
-}
-
-void ScreenEdges::performMousePoll()
-{
-    Workspace::self()->checkCursorPos();
-    emit mousePollingTimerEvent(Workspace::self()->cursorPos());
 }
 
 QVector< xcb_window_t > ScreenEdges::windows() const

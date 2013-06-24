@@ -12,8 +12,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2011-11-21</date>
-<releaseinfo>&kde; 4.8</releaseinfo>
+<date>2013-03-09</date>
+<releaseinfo>&kde; 4.10</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -42,6 +42,22 @@
 <para>
 This page has three tabs with predefined settings for <guilabel>On AC Power</guilabel>, <guilabel>On Battery</guilabel> and 
 <guilabel>On Low Battery</guilabel> profiles.
+</para>
+<para>
+<screenshot>
+<screeninfo>Energy Saving Settings</screeninfo>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="energy.png" format="PNG"/>
+    </imageobject>
+    <textobject>
+      <phrase>Energy Saving Settings</phrase>
+    </textobject>
+    <caption>
+      <para>Energy Saving Settings</para>
+    </caption>
+  </mediaobject>
+</screenshot>
 </para>
 <para>
 There are a lot of options you can configure for each profile:
@@ -84,15 +100,6 @@ If you choose to activate it, set the timeouts in the spin boxes below.
 <para>Select actions to perform whenever the laptop lid is closed or a button is pressed.</para>
 </listitem>
 </varlistentry>
-<!-- not in 4.8
-<varlistentry><term><guilabel>Disable desktop effects</guilabel></term>
-<listitem>
-<para>
-&kwin; compositing will be disabled, if active. It will be re-enabled when a profile that does not have this option gets loaded.
-</para>
-</listitem>
-</varlistentry>
--->
 <varlistentry><term><guilabel>Run Script</guilabel></term>
 <listitem>
 <para>Activate this option to run a custom script when a profile is loaded, unloaded
@@ -106,22 +113,77 @@ or after a given amount of time.
 
 <sect2 id="activity-setting">
 <title>Activity Settings</title>
-<para>Here you can configure the Power Management settings per activity.</para>
-<!--
-Only enabled with defined activities?
-Don't use special settings
-Act like
-Define a special behavior
-Never shutdown the screen
-Never suspend or shutdown the computer
-Always  after x min
-Use separate settings (advanced users only)
--->
+<para>Here you can configure the Power Management settings per activity. The settings for each activity can be configured on its own tab.</para>
+<para>
+<screenshot>
+<screeninfo>Activity Settings</screeninfo>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="activity.png" format="PNG"/>
+    </imageobject>
+    <textobject>
+      <phrase>Activity Settings</phrase>
+    </textobject>
+    <caption>
+      <para>Activity Settings</para>
+    </caption>
+  </mediaobject>
+</screenshot>
+</para>
+<variablelist>
+<varlistentry>
+<term>Don't use special settings</term>
+<listitem>
+<para>
+Use the settings defined on <guilabel>Energy Saving</guilabel> page.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Act like</term>
+<listitem>
+<para>
+Here you can choose a predefined profile from the drop-down box: <guimenuitem>PC running on AC power</guimenuitem>, <guimenuitem>PC running on battery power</guimenuitem> or <guimenuitem>PC running on low battery</guimenuitem>.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Define a special behavior</term>
+<listitem>
+<para>
+If this option is chosen, a special behavior for activity can be chosen. If this is a presentation activity, you can check the <guilabel>Never shutdown the screen</guilabel> and <guilabel>Never suspend or shutdown the computer</guilabel> boxes. It is also possible to define the time interval for the computer to switch to a suspension mode for the power saving activities.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Use separate settings (advanced users only)</term>
+<listitem>
+<para>
+This option allows users to choose the detail power saving settings for a separate activity. The settings are similar to the settings from the <link linkend="energy-saving-setting">Energy Saving page</link>.
+</para>
+</listitem>
+</varlistentry>
+</variablelist>
 </sect2>
 
 <sect2 id="advanced-settings">
 <title>Advanced Settings</title>
-
+<para>
+<screenshot>
+<screeninfo>Advanced Settings</screeninfo>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="advanced.png" format="PNG"/>
+    </imageobject>
+    <textobject>
+      <phrase>Advanced Settings</phrase>
+    </textobject>
+    <caption>
+      <para>Advanced Settings</para>
+    </caption>
+  </mediaobject>
+</screenshot>
+</para>
 <variablelist>
 <varlistentry><term><guilabel>Battery is at low level at</guilabel></term>
 <listitem>
@@ -147,14 +209,20 @@ Defines the action that will be done when battery reaches the critical level.
 <varlistentry><term><guilabel>Lock screen on resume</guilabel></term>
 <listitem>
 <para>
-When this box is checked, every time the PC gets suspended, the screen will be locked when resuming.
+When this box is checked, every time the PC gets suspended, the screen will be locked when resuming. You will be asked for a password when resuming from sleep state.</para>
+</listitem>
+</varlistentry>
+<varlistentry><term><guilabel>Never prevent an action on lid close</guilabel></term>
+<listitem>
+<para>
+When this option is selected, applications will not be allowed to inhibit sleep when the lid is closed.
 </para>
 </listitem>
 </varlistentry>
 <varlistentry><term><guibutton>Configure Notifications</guibutton></term>
 <listitem>
 <para>
-If you want a deeper control over your notifications, you can refine them by clicking this button
+If you want a deeper control over your notifications, you can refine them by clicking this button.
 </para>
 </listitem>
 </varlistentry>
@@ -181,14 +249,6 @@ You can manually choose a profile using this keyword. All available profiles wil
 </para>
 </listitem>
 </varlistentry>
-<!-- not in 4.6
-varlistentry><term><guibutton>Power Governor</guibutton></term>
-<listitem>
-<para>
-This keyword lets you manually set the CPU frequency governor. Available governors will be shown as &krunner; matches.
-</para>
-</listitem>
-</varlistentry-->
 <varlistentry><term><guibutton>Power Scheme</guibutton></term>
 <listitem>
 <para>

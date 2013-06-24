@@ -72,6 +72,7 @@ MouseEventListener {
             data["subText"] = i18np("%1 running job", "%1 running jobs", jobs.count) + "<br/>" + i18np("%1 notification", "%1 notifications", notifications.count)
         }
         plasmoid.popupIconToolTip = data
+        plasmoid.passivePopup = jobs.count != 0
     }
 
     property Item notificationIcon
@@ -80,7 +81,6 @@ MouseEventListener {
         //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
         plasmoid.aspectRatioMode = "ConstrainedSquare"
         plasmoid.status = PassiveStatus
-        plasmoid.passivePopup = true
         allApplications = new Object
         plasmoid.addEventListener('ConfigChanged', configChanged);
         configChanged()

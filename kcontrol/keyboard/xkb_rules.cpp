@@ -137,7 +137,9 @@ QString Rules::getRulesName()
 
 	if (XkbRF_GetNamesProp(QX11Info::display(), &tmp, &vd) && tmp != NULL ) {
 		// 			qDebug() << "namesprop" << tmp ;
-		return QString(tmp);
+                const QString name(tmp);
+                XFree(tmp);
+		return name;
 	}
 
 	return QString::null;

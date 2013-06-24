@@ -73,29 +73,21 @@ Item {
             anchors.centerIn: parent
             PlasmaCore.SvgItem {
                 svg: notificationSvg
-                function updateElementId() {
+                elementId: {
                     switch (plasmoid.location) {
                     case TopEdge:
-                        elementId = "expander-top"
-                        break
+                        return "expander-top"
                     case LeftEdge:
-                        elementId = "expander-left"
-                        break
+                        return "expander-left"
                     case RightEdge:
-                        elementId = "expander-right"
-                        break
+                        return "expander-right"
                     default:
-                        elementId = "expander-bottom"
-                        break
+                        return "expander-bottom"
                     }
                 }
                 width: naturalSize.width
                 height: naturalSize.height
                 anchors.horizontalCenter: parent.horizontalCenter
-                Component.onCompleted: {
-                    plasmoid.locationChanged.connect(updateElementId)
-                    updateElementId()
-                }
             }
             PlasmaComponents.Label {
                 property int totalCount: notificationsApplet.totalCount

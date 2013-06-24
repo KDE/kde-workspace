@@ -22,6 +22,7 @@
 #include <kdebug.h>
 #include <KLocale>
 #include <KGlobal>
+#include <kdeversion.h>
 
 #include "krunnerapp.h"
 #ifdef Q_WS_X11
@@ -34,7 +35,6 @@
 #endif
 
 static const char description[] = I18N_NOOP( "KDE run command interface" );
-static const char version[] = "0.1";
 
 extern "C"
 KDE_EXPORT int kdemain(int argc, char* argv[])
@@ -46,7 +46,7 @@ KDE_EXPORT int kdemain(int argc, char* argv[])
 #endif
 
     KAboutData aboutData( "krunner", 0, ki18n( "Run Command Interface" ),
-                          version, ki18n(description), KAboutData::License_GPL,
+                          KDE_VERSION_STRING, ki18n(description), KAboutData::License_GPL,
                           ki18n("(c) 2006, Aaron Seigo") );
     aboutData.addAuthor( ki18n("Aaron J. Seigo"),
                          ki18n( "Author and maintainer" ),

@@ -31,7 +31,7 @@ Column {
         right: parent.right
     }
 
-    function addNotification(source, appIcon, image, appName, summary, body, expireTimeout, urgency, actions) {
+    function addNotification(source, appIcon, image, appName, summary, body, expireTimeout, urgency, appRealName, configurable, actions) {
         for (var i = 0; i < notificationsModel.count; ++i) {
             if (notificationsModel.get(i).source == source) {
                 notificationsModel.remove(i)
@@ -49,6 +49,8 @@ Column {
                 "body"    : body,
                 "expireTimeout": expireTimeout,
                 "urgency" : urgency,
+                "configurable": configurable,
+                "appRealName": appRealName,
                 "actions" : actions}
         notificationsModel.insert(0, notification);
         if (plasmoid.popupShowing) {
@@ -72,6 +74,13 @@ Column {
         } else if (source.indexOf("Job") !== -1) {
             plasmoid.openUrl(id)
         }
+    }
+
+    function configureNotification(appRealName) {
+      var service = notificationsSource.serviceForSource("notification")
+      var op = service.operationDescription("configureNotification")
+      op["appRealName"] = appRealName;
+      service.startOperationCall(op)
     }
 
     property QtObject lastNotificationPopup
@@ -151,6 +160,8 @@ Column {
                     data["body"],
                     data["expireTimeout"],
                     data["urgency"],
+                    data["appRealName"],
+                    data["configurable"],
                     actions)
         }
 

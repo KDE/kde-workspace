@@ -44,12 +44,14 @@ public:
 
     void setTesting(bool enable);
 
+public Q_SLOTS:
+    void desktopResized();
+
 protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
 
 private Q_SLOTS:
     void viewStatusChanged(const QDeclarativeView::Status &status);
-    void desktopResized();
     void resetRequestIgnore();
     void suspendToRam();
     void suspendToDisk();

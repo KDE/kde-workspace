@@ -41,12 +41,21 @@ class MenuEntryInfo;
 class MenuSeparatorInfo;
 class KShortcut;
 
+static const QString SAVE_ACTION_NAME = "file_save";
+static const QString NEW_ITEM_ACTION_NAME = "new_item";
+static const QString NEW_SUBMENU_ACTION_NAME = "new_submenu";
+static const QString NEW_SEPARATOR_ACTION_NAME = "new_separator";
+static const QString CUT_ACTION_NAME = "edit_cut";
+static const QString COPY_ACTION_NAME = "edit_copy";
+static const QString PASTE_ACTION_NAME = "edit_paste";
+static const QString DELETE_ACTION_NAME = "delete";
 static const QString SORT_ACTION_NAME = "sort";
 static const QString SORT_BY_NAME_ACTION_NAME = "sort_by_name";
 static const QString SORT_BY_DESCRIPTION_ACTION_NAME = "sort_by_description";
-static const QString SORT_ALL_ACTION_NAME = "sort_all";
 static const QString SORT_ALL_BY_NAME_ACTION_NAME = "sort_all_by_name";
 static const QString SORT_ALL_BY_DESCRIPTION_ACTION_NAME = "sort_all_by_description";
+static const QString MOVE_UP_ACTION_NAME = "move_up";
+static const QString MOVE_DOWN_ACTION_NAME = "move_down";
 
 class TreeItem : public QTreeWidgetItem
 {
@@ -145,6 +154,8 @@ protected Q_SLOTS:
     void paste();
     void del();
     void sort(const int sortCmd);
+    void moveUpItem();
+    void moveDownItem();
 
 protected:
     enum SortType {
@@ -168,6 +179,8 @@ protected:
     QString findName(KDesktopFile *df, bool deleted);
     void sortItem(TreeItem *item, const SortType& sortType);
     void sortItemChildren(const QList<QTreeWidgetItem*>::iterator& begin, const QList<QTreeWidgetItem*>::iterator& end, const SortType& sortType);
+    TreeItem* getParentItem(QTreeWidgetItem *item) const;
+    void moveUpOrDownItem(bool isMovingUpAction);
 
     void closeAllItems(QTreeWidgetItem *item);
     TreeItem *expandPath(TreeItem *item, const QString &path);
@@ -192,7 +205,7 @@ protected:
 
 private:
     KActionCollection *m_ac;
-    QMenu             *m_rmb;
+    QMenu             *m_popupMenu;
     int                m_clipboard;
     MenuFolderInfo    *m_clipboardFolderInfo;
     MenuEntryInfo     *m_clipboardEntryInfo;

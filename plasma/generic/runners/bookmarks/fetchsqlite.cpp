@@ -62,8 +62,14 @@ void FetchSqlite::teardown()
     m_db.close();
 }
 
+QList<QVariantMap> FetchSqlite::query(BuildQuery *buildQuery, QMap<QString, QVariant> bindObjects)
+{
+    return query(buildQuery->query(&m_db), bindObjects);
+}
+
 QList<QVariantMap> FetchSqlite::query(const QString &sql, QMap<QString, QVariant> bindObjects)
 {
+    kDebug(kdbg_code) << "query: " << sql;
     QSqlQuery query(m_db);
     query.prepare(sql);
     foreach(const QString &variableName, bindObjects.keys()) {

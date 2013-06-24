@@ -50,17 +50,17 @@ private Q_SLOTS:
 //        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_2B_code), QString("eng") );
 //        QCOMPARE( isoEntry->value(IsoCodes::attr_iso_639_1_code), QString("en") );
         QCOMPARE( isoEntry->value("name"), QString("English") );
-        QCOMPARE( isoEntry->value("status"), QString("Active") );
+//        QCOMPARE( isoEntry->value("status"), QString("Active") );
     }
 
     void testIso639_3_Codes() {
         QVERIFY( isoCodes != NULL );
         QVERIFY( ! isoCodes->getEntryList().isEmpty() );
-        const IsoCodeEntry* isoEntry = isoCodes->getEntry(IsoCodes::attr_iso_639_3_id, "fox");
+        const IsoCodeEntry* isoEntry = isoCodes->getEntry(IsoCodes::attr_iso_639_3_id, "ant");
         QVERIFY( isoEntry != NULL );
         QVERIFY( ! isoEntry->empty() );
-        QVERIFY( isoEntry->value("name") != QString("fox") );
-//        QCOMPARE( isoEntry->value("name"), QString("Formosan languages") );
+        QVERIFY( isoEntry->value("name") != QString("ant") );
+        QCOMPARE( isoEntry->value("name"), QString("Antakarinya") );
     }
 
     void loadIsoCodesBenchmark() {

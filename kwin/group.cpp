@@ -193,22 +193,21 @@ void checkNonExistentClients()
 // Group
 //********************************************
 
-Group::Group(Window leader_P, Workspace* workspace_P)
+Group::Group(Window leader_P)
     :   leader_client(NULL),
         leader_wid(leader_P),
-        _workspace(workspace_P),
         leader_info(NULL),
         user_time(-1U),
         refcount(0)
 {
     if (leader_P != None) {
-        leader_client = workspace_P->findClient(WindowMatchPredicate(leader_P));
+        leader_client = workspace()->findClient(WindowMatchPredicate(leader_P));
         unsigned long properties[ 2 ] = { 0, NET::WM2StartupId };
         leader_info = new NETWinInfo2(display(), leader_P, rootWindow(),
                                       properties, 2);
     }
     effect_group = new EffectWindowGroupImpl(this);
-    workspace()->addGroup(this, Allowed);
+    workspace()->addGroup(this);
 }
 
 Group::~Group()
@@ -285,7 +284,7 @@ void Group::removeMember(Client* member_P)
 // other members of the group (which would be however deleted already
 // if there were no other members)
     if (refcount == 0 && _members.isEmpty()) {
-        workspace()->removeGroup(this, Allowed);
+        workspace()->removeGroup(this);
         delete this;
     }
 }
@@ -298,7 +297,7 @@ void Group::ref()
 void Group::deref()
 {
     if (--refcount == 0 && _members.isEmpty()) {
-        workspace()->removeGroup(this, Allowed);
+        workspace()->removeGroup(this);
         delete this;
     }
 }
@@ -314,7 +313,7 @@ void Group::lostLeader()
     assert(!_members.contains(leader_client));
     leader_client = NULL;
     if (_members.isEmpty()) {
-        workspace()->removeGroup(this, Allowed);
+        workspace()->removeGroup(this);
         delete this;
     }
 }
@@ -323,7 +322,7 @@ void Group::lostLeader()
 // Workspace
 //***************************************
 
-Group* Workspace::findGroup(Window leader) const
+Group* Workspace::findGroup(xcb_window_t leader) const
 {
     assert(leader != None);
     for (GroupList::ConstIterator it = groups.constBegin();
@@ -418,21 +417,8 @@ void Workspace::updateOnAllDesktopsOfTransients(Client* c)
     }
 }
 
-/*!
-  Sets the client \a c's transient windows' on_all_activities property to \a on_all_desktops.
- */
-void Workspace::updateOnAllActivitiesOfTransients(Client* c)
-{
-    for (ClientList::ConstIterator it = c->transients().constBegin();
-            it != c->transients().constEnd();
-            ++it) {
-        if ((*it)->isOnAllActivities() != c->isOnAllActivities())
-            (*it)->setOnAllActivities(c->isOnAllActivities());
-    }
-}
-
 // A new window has been mapped. Check if it's not a mainwindow for some already existing transient window.
-void Workspace::checkTransients(Window w)
+void Workspace::checkTransients(xcb_window_t w)
 {
     TRANSIENCY_CHECK(NULL);
     for (ClientList::ConstIterator it = clients.constBegin();
@@ -602,26 +588,27 @@ bool Client::sameAppWindowRoleMatch(const Client* c1, const Client* c2, bool act
 void Client::readTransient()
 {
     TRANSIENCY_CHECK(this);
-    Window new_transient_for_id;
-    if (XGetTransientForHint(display(), window(), &new_transient_for_id)) {
-        original_transient_for_id = new_transient_for_id;
+    Xcb::TransientFor transientFor(window());
+    xcb_window_t new_transient_for_id = XCB_WINDOW_NONE;
+    if (transientFor.getTransientFor(&new_transient_for_id)) {
+        m_originalTransientForId = new_transient_for_id;
         new_transient_for_id = verifyTransientFor(new_transient_for_id, true);
     } else {
-        original_transient_for_id = None;
-        new_transient_for_id = verifyTransientFor(None, false);
+        m_originalTransientForId = XCB_WINDOW_NONE;
+        new_transient_for_id = verifyTransientFor(XCB_WINDOW_NONE, false);
     }
     setTransient(new_transient_for_id);
 }
 
-void Client::setTransient(Window new_transient_for_id)
+void Client::setTransient(xcb_window_t new_transient_for_id)
 {
     TRANSIENCY_CHECK(this);
-    if (new_transient_for_id != transient_for_id) {
+    if (new_transient_for_id != m_transientForId) {
         removeFromMainClients();
         transient_for = NULL;
-        transient_for_id = new_transient_for_id;
-        if (transient_for_id != None && !groupTransient()) {
-            transient_for = workspace()->findClient(WindowMatchPredicate(transient_for_id));
+        m_transientForId = new_transient_for_id;
+        if (m_transientForId != XCB_WINDOW_NONE && !groupTransient()) {
+            transient_for = workspace()->findClient(WindowMatchPredicate(m_transientForId));
             assert(transient_for != NULL);   // verifyTransient() had to check this
             transient_for->addTransient(this);
         } // checkGroup() will check 'check_active_modal'
@@ -769,18 +756,18 @@ void Client::checkGroupTransients()
 /*!
   Check that the window is not transient for itself, and similar nonsense.
  */
-Window Client::verifyTransientFor(Window new_transient_for, bool defined)
+xcb_window_t Client::verifyTransientFor(xcb_window_t new_transient_for, bool set)
 {
-    Window new_property_value = new_transient_for;
+    xcb_window_t new_property_value = new_transient_for;
     // make sure splashscreens are shown above all their app's windows, even though
     // they're in Normal layer
-    if (isSplash() && new_transient_for == None)
+    if (isSplash() && new_transient_for == XCB_WINDOW_NONE)
         new_transient_for = rootWindow();
-    if (new_transient_for == None) {
-        if (defined)   // sometimes WM_TRANSIENT_FOR is set to None, instead of root window
+    if (new_transient_for == XCB_WINDOW_NONE) {
+        if (set)   // sometimes WM_TRANSIENT_FOR is set to None, instead of root window
             new_property_value = new_transient_for = rootWindow();
         else
-            return None;
+            return XCB_WINDOW_NONE;
     }
     if (new_transient_for == window()) { // pointing to self
         // also fix the property itself
@@ -790,19 +777,15 @@ Window Client::verifyTransientFor(Window new_transient_for, bool defined)
 //  The transient_for window may be embedded in another application,
 //  so kwin cannot see it. Try to find the managed client for the
 //  window and fix the transient_for property if possible.
-    WId before_search = new_transient_for;
-    while (new_transient_for != None
+    xcb_window_t before_search = new_transient_for;
+    while (new_transient_for != XCB_WINDOW_NONE
             && new_transient_for != rootWindow()
             && !workspace()->findClient(WindowMatchPredicate(new_transient_for))) {
-        Window root_return, parent_return;
-        Window* wins = NULL;
-        unsigned int nwins;
-        int r = XQueryTree(display(), new_transient_for, &root_return, &parent_return, &wins, &nwins);
-        if (wins)
-            XFree((void *) wins);
-        if (r == 0)
+        Xcb::Tree tree(new_transient_for);
+        if (tree.isNull()) {
             break;
-        new_transient_for = parent_return;
+        }
+        new_transient_for = tree->parent;
     }
     if (Client* new_transient_for_client = workspace()->findClient(WindowMatchPredicate(new_transient_for))) {
         if (new_transient_for != before_search) {
@@ -816,12 +799,12 @@ Window Client::verifyTransientFor(Window new_transient_for, bool defined)
 // group transients cannot cause loops, because they're considered transient only for non-transient
 // windows in the group
     int count = 20;
-    Window loop_pos = new_transient_for;
-    while (loop_pos != None && loop_pos != rootWindow()) {
+    xcb_window_t loop_pos = new_transient_for;
+    while (loop_pos != XCB_WINDOW_NONE && loop_pos != rootWindow()) {
         Client* pos = workspace()->findClient(WindowMatchPredicate(loop_pos));
         if (pos == NULL)
             break;
-        loop_pos = pos->transient_for_id;
+        loop_pos = pos->m_transientForId;
         if (--count == 0 || pos == this) {
             kWarning(1216) << "Client " << this << " caused WM_TRANSIENT_FOR loop." ;
             new_transient_for = rootWindow();
@@ -832,8 +815,8 @@ Window Client::verifyTransientFor(Window new_transient_for, bool defined)
         // it's transient for a specific window, but that window is not mapped
         new_transient_for = rootWindow();
     }
-    if (new_property_value != original_transient_for_id)
-        XSetTransientForHint(display(), window(), new_property_value);
+    if (new_property_value != m_originalTransientForId)
+        xcb_icccm_set_wm_transient_for(connection(), window(), new_property_value);
     return new_transient_for;
 }
 
@@ -863,18 +846,18 @@ void Client::removeTransient(Client* cl)
     // cl is transient for this, but this is going away
     // make cl group transient
     if (cl->transientFor() == this) {
-        cl->transient_for_id = None;
+        cl->m_transientForId = XCB_WINDOW_NONE;
         cl->transient_for = NULL; // SELI
 // SELI       cl->setTransient( rootWindow());
-        cl->setTransient(None);
+        cl->setTransient(XCB_WINDOW_NONE);
     }
 }
 
 // A new window has been mapped. Check if it's not a mainwindow for this already existing window.
-void Client::checkTransient(Window w)
+void Client::checkTransient(xcb_window_t w)
 {
     TRANSIENCY_CHECK(this);
-    if (original_transient_for_id != w)
+    if (m_originalTransientForId != w)
         return;
     w = verifyTransientFor(w, true);
     setTransient(w);
@@ -972,15 +955,15 @@ void Client::checkGroup(Group* set_group, bool force)
             in_group = set_group;
             in_group->addMember(this);
         }
-    } else if (window_group != None) {
-        Group* new_group = workspace()->findGroup(window_group);
+    } else if (m_windowGroup != XCB_WINDOW_NONE) {
+        Group* new_group = workspace()->findGroup(m_windowGroup);
         if (transientFor() != NULL && transientFor()->group() != new_group) {
             // move the window to the right group (e.g. a dialog provided
             // by different app, but transient for this one, so make it part of that group)
             new_group = transientFor()->group();
         }
         if (new_group == NULL)   // doesn't exist yet
-            new_group = new Group(window_group, workspace());
+            new_group = new Group(m_windowGroup);
         if (new_group != in_group) {
             if (in_group != NULL)
                 in_group->removeMember(this);
@@ -1003,7 +986,7 @@ void Client::checkGroup(Group* set_group, bool force)
             // try creating group with other windows with the same client leader
             Group* new_group = workspace()->findClientLeaderGroup(this);
             if (new_group == NULL)
-                new_group = new Group(None, workspace());
+                new_group = new Group(None);
             if (new_group != in_group) {
                 if (in_group != NULL)
                     in_group->removeMember(this);
@@ -1020,7 +1003,7 @@ void Client::checkGroup(Group* set_group, bool force)
                 in_group = NULL;
             }
             if (new_group == NULL)
-                new_group = new Group(None, workspace());
+                new_group = new Group(None);
             if (in_group != new_group) {
                 in_group = new_group;
                 in_group->addMember(this);
@@ -1082,7 +1065,7 @@ void Client::changeClientLeaderGroup(Group* gr)
     if (transientFor() != NULL)
         return;
     // also don't change the group for window which have group set
-    if (window_group)
+    if (m_windowGroup)
         return;
     checkGroup(gr);   // change group
 }

@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KCmdLineArgs>
 #include <KDE/KLocale>
 #include <KDE/KGlobal>
+#include <QDateTime>
+
+#include <iostream>
 
 #include "greeterapp.h"
 
@@ -63,5 +66,10 @@ int main(int argc, char* argv[])
         app.setTesting(true);
     }
     args->clear();
+    app.desktopResized();
+
+    // This allow ksmserver to know when the applicaion has actually finished setting itself up.
+    // Crucial for blocking until it is ready, ensuring locking happens before sleep, e.g.
+    std::cout << "Locked at " << QDateTime::currentDateTime().toTime_t() << std::endl;
     return app.exec();
 }

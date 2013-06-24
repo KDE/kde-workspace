@@ -45,8 +45,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
-#include <QtDBus/QDBusInterface>
-#include <QtDBus/QDBusPendingCall>
 #include <QtGui/QKeyEvent>
 #include <QDesktopWidget>
 // X11
@@ -71,7 +69,6 @@ UnlockApp::UnlockApp()
     initialize();
     connect(desktop(), SIGNAL(resized(int)), SLOT(desktopResized()));
     connect(desktop(), SIGNAL(screenCountChanged(int)), SLOT(desktopResized()));
-    QMetaObject::invokeMethod(this, "desktopResized", Qt::QueuedConnection);
 }
 
 UnlockApp::~UnlockApp()
@@ -151,10 +148,6 @@ void UnlockApp::desktopResized()
         view->installEventFilter(this);
 
         // engine stuff
-        foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-            view->engine()->addImportPath(importPath);
-        }
-
         KDeclarative kdeclarative;
         kdeclarative.setDeclarativeEngine(view->engine());
         kdeclarative.initialize();
@@ -247,10 +240,7 @@ void UnlockApp::suspendToRam()
     m_ignoreRequests = true;
     m_resetRequestIgnoreTimer->start();
 
-    QDBusInterface iface("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement",
-            "org.kde.Solid.PowerManagement");
-    iface.asyncCall("suspendToRam");
+    Solid::PowerManagement::requestSleep(Solid::PowerManagement::SuspendState, 0, 0);
 
 }
 
@@ -263,10 +253,7 @@ void UnlockApp::suspendToDisk()
     m_ignoreRequests = true;
     m_resetRequestIgnoreTimer->start();
 
-    QDBusInterface iface("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement",
-            "org.kde.Solid.PowerManagement");
-    iface.asyncCall("suspendToDisk");
+    Solid::PowerManagement::requestSleep(Solid::PowerManagement::HibernateState, 0, 0);
 }
 
 void UnlockApp::shutdown()

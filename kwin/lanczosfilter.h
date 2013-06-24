@@ -3,7 +3,7 @@
  This file is part of the KDE project.
 
 Copyright (C) 2010 by Fredrik Höglund <fredrik@kde.org>
-Copyright (C) 2010 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2010 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace KWin
 {
 
+class EffectWindow;
 class EffectWindowImpl;
 class WindowPaintData;
 class GLTexture;
 class GLRenderTarget;
 class GLShader;
-class LanczosShader;
 
 class LanczosFilter
     : public QObject
@@ -55,39 +55,21 @@ protected:
 private:
     void init();
     void updateOffscreenSurfaces();
-    void prepareRenderStates(GLTexture* tex, double opacity, double brightness, double saturation);
-    void restoreRenderStates(GLTexture* tex, double opacity, double brightness, double saturation);
-    GLTexture *m_offscreenTex;
-    GLRenderTarget *m_offscreenTarget;
-    LanczosShader *m_shader;
-    QBasicTimer m_timer;
-    bool m_inited;
-};
-
-class LanczosShader
-    : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit LanczosShader(QObject* parent = 0);
-    virtual ~LanczosShader();
-    bool init();
-    void bind();
-    void unbind();
     void setUniforms();
+    void discardCacheTexture(EffectWindow *w);
 
     void createKernel(float delta, int *kernelSize);
     void createOffsets(int count, float width, Qt::Orientation direction);
-
-private:
-    GLShader *m_shader;
+    GLTexture *m_offscreenTex;
+    GLRenderTarget *m_offscreenTarget;
+    QBasicTimer m_timer;
+    bool m_inited;
+    QScopedPointer<GLShader> m_shader;
     int m_uTexUnit;
     int m_uOffsets;
     int m_uKernel;
     QVector2D m_offsets[16];
     QVector4D m_kernel[16];
-    uint m_arbProgram; // TODO: GLuint
 };
 
 } // namespace

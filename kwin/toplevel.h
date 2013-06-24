@@ -21,28 +21,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_TOPLEVEL_H
 #define KWIN_TOPLEVEL_H
 
-#include <config-X11.h>
-
-#include <assert.h>
-#include <QObject>
+// kwin libs
 #include <kdecoration.h>
-#include <kdebug.h>
-
+// kwin
 #include "utils.h"
 #include "virtualdesktops.h"
-#include "workspace.h"
-
-#include <X11/extensions/Xdamage.h>
-
+// KDE
+#include <KDE/NETWinInfo>
+// Qt
+#include <QObject>
+// xcb
+#include <xcb/damage.h>
 #include <xcb/xfixes.h>
-
-class NETWinInfo2;
+// system
+#include <assert.h>
 
 namespace KWin
 {
 
 class ClientMachine;
-class Workspace;
 class EffectWindowImpl;
 class Shadow;
 
@@ -57,7 +54,7 @@ class Toplevel
     Q_PROPERTY(int height READ height)
     Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity NOTIFY opacityChanged)
     Q_PROPERTY(QPoint pos READ pos)
-    Q_PROPERTY(int screen READ screen)
+    Q_PROPERTY(int screen READ screen NOTIFY screenChanged)
     Q_PROPERTY(QSize size READ size)
     Q_PROPERTY(int width READ width)
     Q_PROPERTY(qulonglong windowId READ window CONSTANT)
@@ -152,7 +149,7 @@ class Toplevel
      * See http://standards.freedesktop.org/wm-spec/wm-spec-latest.html .
      */
     Q_PROPERTY(int windowType READ windowType)
-    Q_PROPERTY(QStringList activities READ activities)
+    Q_PROPERTY(QStringList activities READ activities NOTIFY activitiesChanged)
     /**
      * Whether this Toplevel is managed by KWin (it has control over its placement and other
      * aspects, as opposed to override-redirect windows that are entirely handled by the application).
@@ -167,10 +164,9 @@ class Toplevel
      **/
     Q_PROPERTY(bool shaped READ shape NOTIFY shapedChanged)
 public:
-    explicit Toplevel(Workspace *ws);
+    explicit Toplevel();
     Window frameId() const;
     Window window() const;
-    Workspace* workspace() const;
     QRect geometry() const;
     QSize size() const;
     QPoint pos() const;
@@ -180,6 +176,7 @@ public:
     int width() const;
     int height() const;
     bool isOnScreen(int screen) const;   // true if it's at least partially there
+    bool isOnActiveScreen() const;
     int screen() const; // the screen where the center is
     virtual QPoint clientPos() const = 0; // inside of geometry()
     virtual QSize clientSize() const = 0;
@@ -229,7 +226,6 @@ public:
     pid_t pid() const;
     static bool resourceMatch(const Toplevel* c1, const Toplevel* c2);
 
-    Pixmap windowPixmap(bool allow_create = true);   // may return None (e.g. at a bad moment while resizing)
     bool readyForPainting() const; // true if the window has been already painted its contents
     Visual* visual() const;
     bool shape() const;
@@ -255,9 +251,14 @@ public:
     QRegion repaints() const;
     void resetRepaints();
     QRegion damage() const;
-    void resetDamage(const QRect& r);
+    void resetDamage();
     EffectWindowImpl* effectWindow();
     const EffectWindowImpl* effectWindow() const;
+    /**
+     * Window will be temporarily painted as if being at the top of the stack.
+     * Only available if Compositor is active, if not active, this method is a no-op.
+     **/
+    void elevate(bool elevate);
 
     /**
      * @returns Whether the Toplevel has a Shadow or not
@@ -325,14 +326,29 @@ signals:
      * schedule a repaint of the scene.
      **/
     void needsRepaint();
+    void activitiesChanged(KWin::Toplevel* toplevel);
+    /**
+     * Emitted whenever the Toplevel's screen changes. This can happen either in consequence to
+     * a screen being removed/added or if the Toplevel's geometry changes.
+     * @since 4.11
+     **/
+    void screenChanged();
+
+protected Q_SLOTS:
+    /**
+     * Checks whether the screen number for this Toplevel changed and updates if needed.
+     * Any method changing the geometry of the Toplevel should call this method.
+     **/
+    void checkScreen();
+    void setupCheckScreenConnection();
+    void removeCheckScreenConnection();
 
 protected:
     virtual ~Toplevel();
     void setWindowHandles(Window client, Window frame);
     void detectShape(Window id);
     virtual void propertyNotifyEvent(XPropertyEvent* e);
-    virtual void damageNotifyEvent(XDamageNotifyEvent* e);
-    xcb_pixmap_t createWindowPixmap();
+    virtual void damageNotifyEvent();
     void discardWindowPixmap();
     void addDamageFull();
     void getWmClientLeader();
@@ -377,9 +393,7 @@ private:
     // when adding new data members, check also copyToDeleted()
     Window client;
     Window frame;
-    Workspace* wspace;
-    Pixmap window_pix;
-    Damage damage_handle;
+    xcb_damage_damage_t damage_handle;
     QRegion damage_region; // damage is really damaged window (XDamage) and texture needs
     bool is_shape;
     EffectWindowImpl* effect_window;
@@ -393,6 +407,7 @@ private:
     bool m_damageReplyPending;
     QRegion opaque_region;
     xcb_xfixes_fetch_region_cookie_t m_regionCookie;
+    int m_screen;
     // when adding new data members, check also copyToDeleted()
 };
 
@@ -412,11 +427,6 @@ inline void Toplevel::setWindowHandles(Window w, Window f)
     client = w;
     assert(frame == None && f != None);
     frame = f;
-}
-
-inline Workspace* Toplevel::workspace() const
-{
-    return wspace;
 }
 
 inline QRect Toplevel::geometry() const
@@ -544,13 +554,6 @@ inline bool Toplevel::isDNDIcon() const
     return windowType() == NET::DNDIcon;
 }
 
-inline Pixmap Toplevel::windowPixmap(bool allow_create)
-{
-    if (window_pix == None && allow_create)
-        window_pix = createWindowPixmap();
-    return window_pix;
-}
-
 inline QRegion Toplevel::damage() const
 {
     return damage_region;
@@ -618,11 +621,6 @@ inline bool Toplevel::isOnCurrentDesktop() const
     return isOnDesktop(VirtualDesktopManager::self()->current());
 }
 
-inline bool Toplevel::isOnCurrentActivity() const
-{
-    return isOnActivity(Workspace::self()->currentActivity());
-}
-
 inline QByteArray Toplevel::resourceName() const
 {
     return resource_name; // it is always lowercase
@@ -638,11 +636,6 @@ inline QByteArray Toplevel::windowRole() const
     return window_role;
 }
 
-inline pid_t Toplevel::pid() const
-{
-    return info->pid();
-}
-
 inline bool Toplevel::unredirected() const
 {
     return unredirect;
@@ -655,7 +648,6 @@ inline const ClientMachine *Toplevel::clientMachine() const
 
 QDebug& operator<<(QDebug& stream, const Toplevel*);
 QDebug& operator<<(QDebug& stream, const ToplevelList&);
-QDebug& operator<<(QDebug& stream, const ConstToplevelList&);
 
 KWIN_COMPARE_PREDICATE(WindowMatchPredicate, Toplevel, Window, cl->window() == value);
 KWIN_COMPARE_PREDICATE(FrameIdMatchPredicate, Toplevel, Window, cl->frameId() == value);

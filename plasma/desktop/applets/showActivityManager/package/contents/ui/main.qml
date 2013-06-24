@@ -26,6 +26,8 @@ Item {
     property string activeSource: "Status"
     property int minimumWidth: 16
     property int minimumHeight: 16
+    implicitWidth: theme.iconSizes["panel"]
+    implicitHeight: implicitWidth
 
     Component.onCompleted: {
         plasmoid.aspectRatioMode = "ConstrainedSquare"
@@ -49,7 +51,8 @@ Item {
     {
         id: icon
         svg: "widgets/activities"
-        anchors.fill: parent
+        width: parent.width
+        height: parent.height
         onClicked:
         {
             var service = dataSource.serviceForSource(activeSource)

@@ -162,7 +162,6 @@ class Image : public QObject
         KFileDialog *m_dialog;
         QSize m_size;
         QString m_img;
-        QDateTime m_previousModified;
         QWeakPointer<KNS3::DownloadDialog> m_newStuffDialog;
         QString m_findToken;
         QList<QAction *>m_actions;

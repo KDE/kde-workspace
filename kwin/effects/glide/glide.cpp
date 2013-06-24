@@ -3,7 +3,7 @@
  This file is part of the KDE project.
 
 Copyright (C) 2007 Philip Falkner <philip.falkner@gmail.com>
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 Copyright (C) 2010 Alexandre Pereira <pereira.alex@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KConfigSkeleton
 #include "glideconfig.h"
 
-#include <QtCore/QTimeLine>
+#include <QTimeLine>
 
 // Effect is based on fade effect by Philip Falkner
 

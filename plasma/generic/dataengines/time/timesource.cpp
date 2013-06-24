@@ -152,6 +152,14 @@ QString TimeSource::parseName(const QString &name)
     // now parse out what we got handed in
     const QStringList list = name.split('|', QString::SkipEmptyParts);
 
+    // set initial values for latitude and longitude, if available
+    const KTimeZone timezone = ((list.at(0) == I18N_NOOP("Local")) ? KSystemTimeZones::local() : KSystemTimeZones::zone(list.at(0)));
+
+    if (timezone.isValid() && timezone.latitude() != KTimeZone::UNKNOWN) {
+        m_latitude = timezone.latitude();
+        m_longitude = timezone.longitude();
+    }
+
     const int listSize = list.size();
     for (int i = 1; i < listSize; ++i) {
         const QString arg = list[i];

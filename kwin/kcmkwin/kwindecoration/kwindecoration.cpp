@@ -4,7 +4,7 @@
     Copyright (c) 2001
         Karol Szwed <gallium@kde.org>
         http://gallium.n3.net/
-    Copyright 2009, 2010 Martin Gräßlin <kde@martin-graesslin.com>
+    Copyright 2009, 2010 Martin Gräßlin <mgraesslin@kde.org>
 
     Supports new kwin configuration plugins, and titlebar button position
     modification via dnd interface.
@@ -40,14 +40,14 @@
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtDeclarative/QDeclarativeItem>
 #include <QtDeclarative/QDeclarativeView>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QGraphicsObject>
-#include <QtGui/QScrollBar>
+#include <QSortFilterProxyModel>
+#include <QGraphicsObject>
+#include <QScrollBar>
 #include <QUiLoader>
 // KDE
 #include <KAboutData>
 #include <KDialog>
-#include <KLocale>
+#include <KDE/KLocalizedString>
 #include <KMessageBox>
 #include <KNS3/DownloadDialog>
 #include <KDE/KStandardDirs>
@@ -135,8 +135,13 @@ void KWinDecorationModule::init()
     m_proxyModel->setSourceModel(m_model);
     m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_ui->decorationList->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-    foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-        m_ui->decorationList->engine()->addImportPath(importPath);
+    /* use logic from KDeclarative::setupBindings():
+    "addImportPath adds the path at the beginning, so to honour user's
+     paths we need to traverse the list in reverse order" */
+    QStringListIterator paths(KGlobal::dirs()->findDirs("module", "imports"));
+    paths.toBack();
+    while (paths.hasPrevious()) {
+        m_ui->decorationList->engine()->addImportPath(paths.previous());
     }
     m_ui->decorationList->rootContext()->setContextProperty("decorationModel", m_proxyModel);
     m_ui->decorationList->rootContext()->setContextProperty("decorationBaseModel", m_model);
@@ -157,13 +162,15 @@ void KWinDecorationModule::init()
     connect(m_ui->configureButtonsButton, SIGNAL(clicked(bool)), this, SLOT(slotConfigureButtons()));
     connect(m_ui->ghnsButton, SIGNAL(clicked(bool)), SLOT(slotGHNSClicked()));
     connect(m_ui->searchEdit, SIGNAL(textChanged(QString)), m_proxyModel, SLOT(setFilterFixedString(QString)));
+    connect(m_ui->searchEdit, SIGNAL(textChanged(QString)), m_ui->decorationList->rootObject(), SLOT(returnToBounds()), Qt::QueuedConnection);
+    connect(m_ui->searchEdit, SIGNAL(textChanged(QString)), SLOT(updateScrollbarRange()), Qt::QueuedConnection);
     connect(m_ui->configureDecorationButton, SIGNAL(clicked(bool)), SLOT(slotConfigureDecoration()));
 
     m_ui->decorationList->disconnect(m_ui->decorationList->verticalScrollBar());
     m_ui->decorationList->verticalScrollBar()->disconnect(m_ui->decorationList);
     connect(m_ui->decorationList->rootObject(), SIGNAL(contentYChanged()), SLOT(updateScrollbarValue()));
     connect(m_ui->decorationList->rootObject(), SIGNAL(contentHeightChanged()), SLOT(updateScrollbarRange()));
-    connect(m_ui->decorationList->verticalScrollBar(), SIGNAL(rangeChanged(int, int )), SLOT(updateScrollbarRange()));
+    connect(m_ui->decorationList->verticalScrollBar(), SIGNAL(rangeChanged(int,int)), SLOT(updateScrollbarRange()));
     connect(m_ui->decorationList->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateViewPosition(int)));
 
     m_ui->decorationList->installEventFilter(this);
@@ -364,6 +371,8 @@ void KWinDecorationModule::slotGHNSClicked()
                 if (proxyIndex.isValid())
                     m_ui->decorationList->rootObject()->setProperty("currentIndex", proxyIndex.row());
             }
+            m_lastPreviewWidth = 0;
+            updatePreviews();
         }
     }
     delete downloadDialog;
@@ -526,8 +535,10 @@ void KWinDecorationModule::updatePreviewWidth()
 void KWinDecorationModule::updateScrollbarRange()
 {
     m_ui->decorationList->verticalScrollBar()->blockSignals(true);
+    const bool atMinimum = m_ui->decorationList->rootObject()->property("atYBeginning").toBool();
     const int h = m_ui->decorationList->rootObject()->property("contentHeight").toInt();
-    m_ui->decorationList->verticalScrollBar()->setRange(0, h - m_ui->decorationList->height());
+    const int y = atMinimum ? m_ui->decorationList->rootObject()->property("contentY").toInt() : 0;
+    m_ui->decorationList->verticalScrollBar()->setRange(y, y + h - m_ui->decorationList->height());
     m_ui->decorationList->verticalScrollBar()->setPageStep(m_ui->decorationList->verticalScrollBar()->maximum()/m_model->rowCount());
     m_ui->decorationList->verticalScrollBar()->blockSignals(false);
 }

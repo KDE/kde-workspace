@@ -1,6 +1,6 @@
 [Desktop Entry]
 Exec=plasma-desktop
-X-DBUS-StartupType=wait
+X-DBUS-StartupType=unique
 Name=Plasma Desktop Workspace
 Name[ar]=مساحة عمل بلازما
 Name[ast]=Espaciu de trabayu del escritoriu Plasma
@@ -50,12 +50,12 @@ Name[or]=ପ୍ଲାଜମା ଡ଼େସ୍କଟପ କାର୍ଯ୍ୟସ
 Name[pa]=ਪਲਾਜ਼ਮਾ ਡੈਸਕਟਾਪ ਵਰਕਸਪੇਸ
 Name[pl]=Przestrzeń pulpitu Plazmy
 Name[pt]=Espaço do Ecrã do Plasma
-Name[pt_BR]=Espaço de trabalho do Plasma
+Name[pt_BR]=Espaço de Trabalho Plasma
 Name[ro]=Spațiu de lucru Plasma al biroului
 Name[ru]=Рабочий стол Plasma
 Name[si]=ප්ලාස්මා වැඩතල වැඩබිම
 Name[sk]=Pracovná plocha Plasma
-Name[sl]=Delovno okolje Plasma Desktop
+Name[sl]=Delovni prostor Plasma Desktop
 Name[sr]=Плазма радни простор површи
 Name[sr@ijekavian]=Плазма радни простор површи
 Name[sr@ijekavianlatin]=Plasma radni prostor površi

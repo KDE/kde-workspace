@@ -163,7 +163,7 @@ qreal TopMenuBar::glowBarOpacity()
     QDesktopWidget *desktop = QApplication::desktop();
     int screen = desktop->screenNumber(cursorPos);
     QRect desktopRect = desktop->availableGeometry(screen);
-    return 1.0 - (cursorPos.y()/qreal(desktopRect.height())*2.0);
+    return 1.0 - ((cursorPos.y() - desktopRect.y())/qreal(desktopRect.height())*2.0);
 }
 
 QRect TopMenuBar::triggerRect()

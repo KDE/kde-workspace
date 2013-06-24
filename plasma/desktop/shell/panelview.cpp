@@ -873,7 +873,7 @@ void PanelView::togglePanelController()
         connect(m_panelController, SIGNAL(panelVisibilityModeChanged(PanelView::VisibilityMode)), this, SLOT(setVisibilityMode(PanelView::VisibilityMode)));
 
         if (containment()->containmentType() == Plasma::Containment::PanelContainment && 
-	    dynamic_cast<QGraphicsLinearLayout*>(containment()->layout())) {
+            dynamic_cast<QGraphicsLinearLayout*>(containment()->layout())) {
             setTabOrder(0, m_panelController);
             QWidget *prior = m_panelController;
 
@@ -1389,6 +1389,8 @@ void PanelView::startAutoHide()
         m_mousePollTimer->stop();
         disconnect(m_mousePollTimer, SIGNAL(timeout()), this, SLOT(startAutoHide()));
     }
+
+    updatePanelGeometry();
 
     if (m_visibilityMode == LetWindowsCover) {
         KWindowSystem::setState(winId(), NET::KeepBelow);

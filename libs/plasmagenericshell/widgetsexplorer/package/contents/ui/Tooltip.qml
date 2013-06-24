@@ -46,60 +46,80 @@ MouseArea {
         target: tooltipDialog
         onAppletDelegateChanged: {
             if (!tooltipDialog.appletDelegate) {
-                return
+                return;
             }
-            icon = tooltipDialog.appletDelegate.icon
-            title = tooltipDialog.appletDelegate.title
-            description = tooltipDialog.appletDelegate.description
-            author = tooltipDialog.appletDelegate.author
-            email = tooltipDialog.appletDelegate.email
-            license = tooltipDialog.appletDelegate.license
-            pluginName = tooltipDialog.appletDelegate.pluginName
-            local = tooltipDialog.appletDelegate.local
+
+            icon = tooltipDialog.appletDelegate.icon;
+            title = '<b>' + tooltipDialog.appletDelegate.title + '</b>';
+
+            if (tooltipDialog.appletDelegate.version.length > 0) {
+                title += ' v' + tooltipDialog.appletDelegate.version;
+            }
+
+            if (tooltipDialog.appletDelegate.description != tooltipDialog.appletDelegate.title) {
+                title += '<br>' + tooltipDialog.appletDelegate.description;
+            }
+            description = tooltipDialog.appletDelegate.description != tooltipDialog.appletDelegate.title ? tooltipDialog.appletDelegate.description : '';
+
+            author = tooltipDialog.appletDelegate.author;
+            if (tooltipDialog.appletDelegate.email.length > 0) {
+                author += ' <' + tooltipDialog.appletDelegate.email + '>';
+            }
+
+            license = tooltipDialog.appletDelegate.license;
+            pluginName = tooltipDialog.appletDelegate.pluginName;
+            local = tooltipDialog.appletDelegate.local;
         }
     }
-    QIconItem {
-        id: tooltipIconWidget
-        anchors.left: parent.left
-        anchors.top: parent.top
-        width: theme.hugeIconSize
-        height: width
-        icon: main.icon
-    }
-    Column {
-        id: nameColumn
-        spacing: 8
+
+    Grid {
         anchors {
-            left: tooltipIconWidget.right
-            leftMargin: 8
-            top: parent.top
-            right: parent.right
+            top: tooltipIconWidget.bottom
+            topMargin: 4
+        }
+
+        rows: 4
+        columns: 2
+        spacing: 4
+
+        QIconItem {
+            id: tooltipIconWidget
+            anchors.left: parent.left
+            anchors.top: parent.top
+            width: theme.hugeIconSize
+            height: width
+            icon: main.icon
+        }
+        PlasmaComponents.Label {
+            anchors {
+                left: tooltipIconWidget.right
+                leftMargin: parent.spacing
+                right: parent.right
+                topMargin: 4
+            }
+            text: title
+            wrapMode: Text.Wrap
         }
 
         PlasmaComponents.Label {
-            text: title
-            font.bold:true
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: paintedHeight
-            wrapMode: Text.Wrap
+            anchors {
+                right: authorText.left
+                rightMargin: parent.spacing
+            }
+            text: i18n("Author:")
         }
         PlasmaComponents.Label {
-            text: description
-            anchors.left: parent.left
-            anchors.right: parent.right
+            id: authorText
+            text: author
             wrapMode: Text.Wrap
         }
-    }
-    Grid {
-        anchors.top: tooltipIconWidget.bottom
-        anchors.topMargin: 16
-        anchors.bottom: uninstallButton.top
-        anchors.bottomMargin: 4
-        rows: 3
-        columns: 2
-        spacing: 4
+
         PlasmaComponents.Label {
+            id: licenseLabel
+            anchors {
+                right: licenseText.left
+                rightMargin: parent.spacing
+            }
             text: i18n("License:")
         }
         PlasmaComponents.Label {
@@ -107,36 +127,23 @@ MouseArea {
             text: license
             wrapMode: Text.Wrap
         }
-        PlasmaComponents.Label {
-            text: i18n("Author:")
-        }
-        PlasmaComponents.Label {
-            text: author
-            wrapMode: Text.Wrap
-        }
-        PlasmaComponents.Label {
-            text: i18n("Email:")
-        }
-        PlasmaComponents.Label {
-            text: email
-        }
-    }
 
-    PlasmaComponents.Button {
-        id: uninstallButton
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            bottom: parent.bottom
+        Item {
+            width: 1; height:1
+            // just here to push the button into the second column
         }
-        opacity: local ? 1 : 0
-        Behavior on opacity {
-            NumberAnimation { duration: 250 }
-        }
-        iconSource: "application-exit"
-        text: i18n("Uninstall")
-        onClicked: {
-            widgetExplorer.uninstall(pluginName)
-            tooltipDialog.visible = false
+        PlasmaComponents.Button {
+            id: uninstallButton
+            opacity: local ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation { duration: 250 }
+            }
+            iconSource: "application-exit"
+            text: i18n("Uninstall")
+            onClicked: {
+                widgetExplorer.uninstall(pluginName)
+                tooltipDialog.visible = false
+            }
         }
     }
 }

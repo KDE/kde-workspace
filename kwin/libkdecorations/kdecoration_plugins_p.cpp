@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <klocale.h>
 #include <klibrary.h>
 #include <kconfiggroup.h>
+#include <KDE/KLocalizedString>
+#include <KDE/KGlobal>
 #include <assert.h>
 
 #include <QDir>
@@ -86,6 +88,11 @@ bool KDecorationPlugins::reset(unsigned long changed)
 }
 
 KDecorationFactory* KDecorationPlugins::factory()
+{
+    return fact;
+}
+
+const KDecorationFactory *KDecorationPlugins::factory() const
 {
     return fact;
 }

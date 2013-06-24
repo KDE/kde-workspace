@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_DBUS_INTERFACE_H
 #define KWIN_DBUS_INTERFACE_H
 
-#include <QtCore/QObject>
+#include <QObject>
 #include <QtDBus/QtDBus>
 class QByteArray;
 template<class T> class QList;
@@ -65,6 +65,9 @@ public Q_SLOTS: // METHODS
     void circulateDesktopApplications();
     int currentDesktop();
     QList<int> decorationSupportedColors();
+    /**
+     * @deprecated
+     **/
     void doNotManage(const QString &name);
     Q_NOREPLY void killWindow();
     void nextDesktop();

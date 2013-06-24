@@ -4,7 +4,7 @@
 
 Copyright (C) 1999, 2000 Matthias Ettrich <ettrich@kde.org>
 Copyright (C) 2003 Lubos Lunak <l.lunak@kde.org>
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,8 +29,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tabbox/tabboxconfig.h"
 #include "tabbox/desktopchain.h"
 // kwin
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
+#endif
 #include "client.h"
 #include "effects.h"
+#include "focuschain.h"
+#ifdef KWIN_BUILD_SCREENEDGES
+#include "screenedge.h"
+#endif
+#include "screens.h"
+#include "unmanaged.h"
 #include "virtualdesktops.h"
 #include "workspace.h"
 // Qt
@@ -43,13 +52,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KConfigGroup>
 #include <KDE/KAction>
 #include <KDebug>
-#include <KLocale>
+#include <KDE/KIcon>
+#include <KDE/KGlobal>
+#include <KLocalizedString>
 #include <kkeyserver.h>
 // X11
 #include <fixx11h.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
-#include "outline.h"
 
 // specify externals before namespace
 
@@ -70,7 +80,9 @@ TabBoxHandlerImpl::TabBoxHandlerImpl(TabBox* tabBox)
     VirtualDesktopManager *vds = VirtualDesktopManager::self();
     connect(vds, SIGNAL(countChanged(uint,uint)), m_desktopFocusChain, SLOT(resize(uint,uint)));
     connect(vds, SIGNAL(currentChanged(uint,uint)), m_desktopFocusChain, SLOT(addDesktop(uint,uint)));
-    connect(Workspace::self(), SIGNAL(currentActivityChanged(QString)), m_desktopFocusChain, SLOT(useChain(QString)));
+#ifdef KWIN_BUILD_ACTIVITIES
+    connect(Activities::self(), SIGNAL(currentChanged(QString)), m_desktopFocusChain, SLOT(useChain(QString)));
+#endif
 }
 
 TabBoxHandlerImpl::~TabBoxHandlerImpl()
@@ -79,7 +91,7 @@ TabBoxHandlerImpl::~TabBoxHandlerImpl()
 
 int TabBoxHandlerImpl::activeScreen() const
 {
-    return Workspace::self()->activeScreen();
+    return screens()->current();
 }
 
 int TabBoxHandlerImpl::currentDesktop() const
@@ -104,7 +116,7 @@ QString TabBoxHandlerImpl::desktopName(int desktop) const
 QWeakPointer<TabBoxClient> TabBoxHandlerImpl::nextClientFocusChain(TabBoxClient* client) const
 {
     if (TabBoxClientImpl* c = static_cast< TabBoxClientImpl* >(client)) {
-        Client* next = Workspace::self()->tabBox()->nextClientFocusChain(c->client());
+        Client* next = FocusChain::self()->nextMostRecentlyUsed(c->client());
         if (next)
             return next->tabBoxClient();
     }
@@ -113,7 +125,7 @@ QWeakPointer<TabBoxClient> TabBoxHandlerImpl::nextClientFocusChain(TabBoxClient*
 
 QWeakPointer< TabBoxClient > TabBoxHandlerImpl::firstClientFocusChain() const
 {
-    if (Client *c = m_tabBox->firstClientFocusChain()) {
+    if (Client *c = FocusChain::self()->firstMostRecentlyUsed()) {
         return QWeakPointer<TabBoxClient>(c->tabBoxClient());
     } else {
         return QWeakPointer<TabBoxClient>();
@@ -123,7 +135,7 @@ QWeakPointer< TabBoxClient > TabBoxHandlerImpl::firstClientFocusChain() const
 bool TabBoxHandlerImpl::isInFocusChain(TabBoxClient *client) const
 {
     if (TabBoxClientImpl *c = static_cast<TabBoxClientImpl*>(client)) {
-        return Workspace::self()->globalFocusChain().contains(c->client());
+        return FocusChain::self()->contains(c->client());
     }
     return false;
 }
@@ -227,15 +239,14 @@ bool TabBoxHandlerImpl::checkMinimized(TabBoxClient* client) const
 bool TabBoxHandlerImpl::checkMultiScreen(TabBoxClient* client) const
 {
     Client* current = (static_cast< TabBoxClientImpl* >(client))->client();
-    Workspace* workspace = Workspace::self();
 
     switch (config().clientMultiScreenMode()) {
     case TabBoxConfig::IgnoreMultiScreen:
         return true;
     case TabBoxConfig::ExcludeCurrentScreenClients:
-        return current->screen() != workspace->activeScreen();
+        return current->screen() != screens()->current();
     default:       // TabBoxConfig::OnlyCurrentScreenClients
-        return current->screen() == workspace->activeScreen();
+        return current->screen() == screens()->current();
     }
 }
 
@@ -282,6 +293,10 @@ TabBoxClientList TabBoxHandlerImpl::stackingOrder() const
     return ret;
 }
 
+bool TabBoxHandlerImpl::isKWinCompositing() const {
+    return Workspace::self()->compositing();
+}
+
 void TabBoxHandlerImpl::raiseClient(TabBoxClient* c) const
 {
     Workspace::self()->raiseClient(static_cast<TabBoxClientImpl*>(c)->client());
@@ -295,13 +310,10 @@ void TabBoxHandlerImpl::restack(TabBoxClient *c, TabBoxClient *under)
 
 void TabBoxHandlerImpl::elevateClient(TabBoxClient *c, WId tabbox, bool b) const
 {
-    if (effects) {
-        const Client *cl = static_cast<TabBoxClientImpl*>(c)->client();
-        if (EffectWindow *w = static_cast<EffectsHandlerImpl*>(effects)->findWindow(cl->window()))
-            static_cast<EffectsHandlerImpl*>(effects)->setElevatedWindow(w, b);
-        if (EffectWindow *w = static_cast<EffectsHandlerImpl*>(effects)->findWindow(tabbox))
-            static_cast<EffectsHandlerImpl*>(effects)->setElevatedWindow(w, b);
-    }
+    Client *cl = static_cast<TabBoxClientImpl*>(c)->client();
+    cl->elevate(b);
+    if (Unmanaged *w = Workspace::self()->findUnmanaged(WindowMatchPredicate(tabbox)))
+        w->elevate(b);
 }
 
 
@@ -309,26 +321,11 @@ QWeakPointer<TabBoxClient> TabBoxHandlerImpl::desktopClient() const
 {
     foreach (Toplevel *toplevel, Workspace::self()->stackingOrder()) {
         Client *client = qobject_cast<Client*>(toplevel);
-        if (client && client->isDesktop() && client->isOnCurrentDesktop() && client->screen() == Workspace::self()->activeScreen()) {
+        if (client && client->isDesktop() && client->isOnCurrentDesktop() && client->screen() == screens()->current()) {
             return client->tabBoxClient();
         }
     }
     return QWeakPointer<TabBoxClient>();
-}
-
-void TabBoxHandlerImpl::showOutline(const QRect &outline)
-{
-    Workspace::self()->outline()->show(outline);
-}
-
-void TabBoxHandlerImpl::hideOutline()
-{
-    Workspace::self()->outline()->hide();
-}
-
-QVector< xcb_window_t > TabBoxHandlerImpl::outlineWindowIds() const
-{
-    return Workspace::self()->outline()->windowIds();
 }
 
 void TabBoxHandlerImpl::activateAndClose()
@@ -414,6 +411,15 @@ bool TabBoxClientImpl::isFirstInTabBox() const
 /*********************************************************
 * TabBox
 *********************************************************/
+TabBox *TabBox::s_self = NULL;
+
+TabBox *TabBox::create(QObject *parent)
+{
+    Q_ASSERT(!s_self);
+    s_self = new TabBox(parent);
+    return s_self;
+}
+
 TabBox::TabBox(QObject *parent)
     : QObject(parent)
     , m_displayRefcount(0)
@@ -474,6 +480,7 @@ TabBox::TabBox(QObject *parent)
 TabBox::~TabBox()
 {
     QDBusConnection::sessionBus().unregisterObject("/TabBox");
+    s_self = NULL;
 }
 
 void TabBox::handlerReady()
@@ -721,6 +728,31 @@ void TabBox::reconfigure()
 
     m_delayShow = config.readEntry<bool>("ShowDelay", true);
     m_delayShowTime = config.readEntry<int>("DelayTime", 90);
+
+    m_desktopConfig.setLayoutName(config.readEntry("DesktopLayout", "informative"));
+    m_desktopListConfig.setLayoutName(config.readEntry("DesktopListLayout", "informative"));
+
+#ifdef KWIN_BUILD_SCREENEDGES
+    QList<ElectricBorder> *borders = &m_borderActivate;
+    QString borderConfig = "BorderActivate";
+    for (int i = 0; i < 2; ++i) {
+        foreach (ElectricBorder border, *borders) {
+            ScreenEdges::self()->unreserve(border, this);
+        }
+        borders->clear();
+        QStringList list = config.readEntry(borderConfig, QStringList());
+        foreach (const QString &s, list) {
+            bool ok;
+            const int i = s.toInt(&ok);
+            if (!ok)
+                continue;
+            borders->append(ElectricBorder(i));
+            ScreenEdges::self()->reserve(ElectricBorder(i), this, "toggle");
+        }
+        borders = &m_borderAlternativeActivate;
+        borderConfig = "BorderAlternativeActivate";
+    }
+#endif
 }
 
 void TabBox::loadConfig(const KConfigGroup& config, TabBoxConfig& tabBoxConfig)
@@ -740,8 +772,6 @@ void TabBox::loadConfig(const KConfigGroup& config, TabBoxConfig& tabBoxConfig)
     tabBoxConfig.setClientSwitchingMode(TabBoxConfig::ClientSwitchingMode(
                                             config.readEntry<int>("SwitchingMode", TabBoxConfig::defaultSwitchingMode())));
 
-    tabBoxConfig.setShowOutline(config.readEntry<bool>("ShowOutline",
-                                TabBoxConfig::defaultShowOutline()));
     tabBoxConfig.setShowTabBox(config.readEntry<bool>("ShowTabBox",
                                TabBoxConfig::defaultShowTabBox()));
     tabBoxConfig.setHighlightWindows(config.readEntry<bool>("HighlightWindows",
@@ -1100,6 +1130,27 @@ void TabBox::modalActionsSwitch(bool enabled)
     foreach (KActionCollection * collection, collections)
     foreach (QAction * action, collection->actions())
     action->setEnabled(enabled);
+}
+
+bool TabBox::toggle(ElectricBorder eb)
+{
+    if (!options->focusPolicyIsReasonable())
+        return false; // not supported.
+    if (isDisplayed()) {
+        ungrabXKeyboard();
+        accept();
+        return true;
+    }
+    if (!grabXKeyboard())
+        return false;
+    m_noModifierGrab = m_tabGrab = true;
+    if (m_borderAlternativeActivate.contains(eb))
+        setMode(TabBoxWindowsAlternativeMode);
+    else
+        setMode(TabBoxWindowsMode);
+    reset();
+    show();
+    return true;
 }
 
 void TabBox::open(bool modal, const QString &layout)
@@ -1491,50 +1542,6 @@ int TabBox::previousDesktopStatic(int iDesktop) const
 {
     DesktopPrevious functor;
     return functor(iDesktop, true);
-}
-
-/*!
-  auxiliary functions to travers all clients according to the focus
-  order. Useful for kwms Alt-tab feature.
-*/
-Client* TabBox::nextClientFocusChain(Client* c) const
-{
-    const ClientList &globalFocusChain = Workspace::self()->globalFocusChain();
-    if (globalFocusChain.isEmpty())
-        return 0;
-    int pos = globalFocusChain.indexOf(c);
-    if (pos == -1)
-        return globalFocusChain.last();
-    if (pos == 0)
-        return globalFocusChain.last();
-    pos--;
-    return globalFocusChain[ pos ];
-}
-
-/*!
-  auxiliary functions to travers all clients according to the focus
-  order. Useful for kwms Alt-tab feature.
-*/
-Client* TabBox::previousClientFocusChain(Client* c) const
-{
-    const ClientList &globalFocusChain = Workspace::self()->globalFocusChain();
-    if (globalFocusChain.isEmpty())
-        return 0;
-    int pos = globalFocusChain.indexOf(c);
-    if (pos == -1)
-        return globalFocusChain.first();
-    pos++;
-    if (pos == globalFocusChain.count())
-        return globalFocusChain.first();
-    return globalFocusChain[ pos ];
-}
-
-Client *TabBox::firstClientFocusChain() const
-{
-    const ClientList &globalFocusChain = Workspace::self()->globalFocusChain();
-    if (globalFocusChain.isEmpty())
-        return NULL;
-    return globalFocusChain.first();
 }
 
 /*!

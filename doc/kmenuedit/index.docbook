@@ -12,7 +12,7 @@
 
 <bookinfo>
 
-<title>The KDE Menu Editor Handbook</title>
+<title>The &kde; Menu Editor Handbook</title>
 
 <authorgroup>
 <author>&Milos.Prudek; &Milos.Prudek.mail;</author>
@@ -35,8 +35,8 @@
 
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2011-04-26</date>
-<releaseinfo>0.8 (&kde; 4.7)</releaseinfo>
+<date>2013-06-19</date>
+<releaseinfo>0.9 (&kde; 4.11)</releaseinfo>
 
 <abstract><para>&kmenuedit; allows editing one of the &kde; application launchers: &kickoff;, the classic &kmenu; or Lancelot Launcher.
 </para></abstract>
@@ -53,7 +53,6 @@
 </keywordset>
 
 </bookinfo>
-
 <chapter id="introduction">
 <title>Introduction</title>
 
@@ -156,7 +155,7 @@ To see all options for an application launch <userinput><command><replaceable>ap
 </mediaobject>
 </screenshot></para>
 
-  <para>We choose the firefox icon from the list, and press return. Your finished screen should probably look something like the screenshot below.
+  <para>We choose the firefox icon from the list, and press &Enter;. Your finished screen should probably look something like the screenshot below.
 <screenshot>
 <screeninfo>Done screenshot</screeninfo>
 <mediaobject>
@@ -169,9 +168,11 @@ To see all options for an application launch <userinput><command><replaceable>ap
 </mediaobject>
 </screenshot></para>
 
+<para>The place of the new menu item can now be changed using <guibutton>Move Up</guibutton> and <guibutton>Move Down</guibutton> buttons on the &kmenuedit; toolbar.</para>
+
+ <para>The submenu items can be sorted using <guibutton>Sort</guibutton> button on the &kmenuedit; toolbar or <menuchoice><guimenu>Edit</guimenu><guisubmenu>Sort</guisubmenu></menuchoice> submenu items.</para>
+
 <para>Click <menuchoice><guimenu>File</guimenu><guimenuitem>Save</guimenuitem></menuchoice>, wait for the <guilabel>Updating System Configuration</guilabel> dialog to get finished, you should find &firefox; in the application launcher <guisubmenu>Internet</guisubmenu> submenu!</para>
-
-
 
 </chapter>
 
@@ -332,6 +333,23 @@ action="simul">&Ctrl;<keycap>S</keycap></keycombo></shortcut>
 <listitem><para><action>Quits</action> &kmenuedit;.</para></listitem>
 </varlistentry>
 
+<varlistentry id="edit-move-up">
+<term><menuchoice>
+<guimenu>Edit</guimenu>
+<guimenuitem>Move Up</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Moves</action> the selected item up in its submenu.</para></listitem>
+</varlistentry>
+
+<varlistentry id="edit-move-down">
+<term><menuchoice>
+<guimenu>Edit</guimenu>
+<guimenuitem>Move Down</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Moves</action> the selected item down in its submenu.</para></listitem>
+</varlistentry>
+
+
 <varlistentry id="edit-cut">
 <term><menuchoice>
 <shortcut>
@@ -383,6 +401,14 @@ selected place in the <guimenu>Main</guimenu> menu. You must first use
 item.</action></para></listitem>
 </varlistentry>
 
+<varlistentry id="edit-sort">
+<term><menuchoice>
+<guimenu>Edit</guimenu>
+<guisubmenu>Sort</guisubmenu>
+</menuchoice></term>
+<listitem><para><action>Opens</action> submenu to sort selected submenu or all menu tree. There are two sorting methods implemented, namely, by the name and by the description.</para></listitem>
+</varlistentry>
+
 <varlistentry id="edit-restore">
 <term><menuchoice>
 <guimenu>Edit</guimenu> <guimenuitem>Restore to System Menu</guimenuitem>
@@ -390,43 +416,14 @@ item.</action></para></listitem>
 <listitem><para><action>This will restore the application launcher as it was as default and remove all your custom settings. A message box will ask you if you really want to do that.</action></para></listitem>
 </varlistentry>
 
-<varlistentry id="settings-hide-toolbar">
-<term><menuchoice>
-<guimenu>Settings</guimenu>
-<guimenuitem>Show Toolbar</guimenuitem>
-</menuchoice></term>
-<listitem><para><action>Show or hide the toolbar</action></para></listitem>
-</varlistentry>
-
-<varlistentry id="settings-configure-shortcuts">
-<term><menuchoice>
-<guimenu>Settings</guimenu><guimenuitem>Configure
-Shortcuts...</guimenuitem></menuchoice></term>
-<listitem>
-<para><action>Customize the keyboard shortcuts</action></para>
-</listitem>
-</varlistentry>
-
-<varlistentry id="settings-configure-toolbars">
-<term><menuchoice>
-<guimenu>Settings</guimenu><guimenuitem>Configure
-Toolbars...</guimenuitem></menuchoice></term>
-<listitem>
-<para><action>Customize the toolbar icons.</action></para>
-</listitem>
-</varlistentry>
-
-<varlistentry id="settings-configure-kmenuedit">
-<term><menuchoice>
-<guimenu>Settings</guimenu><guimenuitem>Configure
-&kde; Menu Editor...</guimenuitem></menuchoice></term>
-<listitem>
-<para><action>Open the Menu Editor settings dialog.</action></para>
-</listitem>
-</varlistentry>
 </variablelist>
 
-&help.menu.documentation;
+<para>
+&kmenuedit; has the common &kde; <guimenu>Settings</guimenu> and <guimenu>Help</guimenu>
+menu items, for more information read the sections about the <ulink url="help:/fundamentals/ui.html#menus-settings"
+>Settings Menu</ulink> and <ulink url="help:/fundamentals/ui.html#menus-help">Help Menu</ulink>
+of the &kde; Fundamentals.
+</para>
 
 </chapter>
 
@@ -466,44 +463,6 @@ Author</para>
 
 <glossary id="glossary">
 <title>Glossary</title>
-
-<glossentry id="gloss-terminal-emulator">
-<glossterm>Terminal emulator</glossterm>
-<glossdef>
-<para>Terminal emulator is simply a windowed shell; this is known as
-<quote>command line window</quote> in some other environments. If you
-want to use the shell, you should know at least a few of the
-system-level commands for your operating system.</para>
-</glossdef>
-</glossentry>
-
-<glossentry id="gloss-applet">
-<glossterm>Applet</glossterm>
-<glossdef><para>A small application that occupies very little memory
-and screen space, and at the same time gives you some useful
-information or provides a control shortcut. For instance the
-<application>Clock</application> applet shows current time and date
-(and even a month diary if you click it), and <application>System
-Monitor</application> applet shows how busy your machine currently is
-in real-time.</para> </glossdef>
-</glossentry>
-
-<glossentry id="gloss-legacy-application">
-<glossterm>Legacy Application</glossterm>
-<glossdef>
-
-<para>An X-window application which was not written with &kde; in
-mind. Such applications run fine in &kde;. However, they are not
-warned automatically when you shut down your &kde; session. You
-therefore must not forget to save documents open in these applications
-before you log out from &kde;. </para> <para>Additionally, many of
-these applications do not support copying and pasting from
-&kde; compliant applications. &Netscape; 4.x browser is a prominent
-example of such application <footnote><para>Some <ulink
-url="http://www.gnome.org">GNOME</ulink> applications may provide
-limited interoperability with the &kde;.</para></footnote>.</para>
-</glossdef>
-</glossentry>
 
 <glossentry id="gloss-console-application">
 <glossterm>Console Application</glossterm>

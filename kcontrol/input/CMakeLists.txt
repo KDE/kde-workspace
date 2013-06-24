@@ -25,7 +25,6 @@ if(X11_Xcursor_FOUND)
     xcursor/themepage.cpp
     xcursor/thememodel.cpp
     xcursor/cursortheme.cpp
-    xcursor/legacytheme.cpp
     xcursor/xcursortheme.cpp
     xcursor/previewwidget.cpp
     xcursor/itemdelegate.cpp

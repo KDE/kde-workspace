@@ -18,8 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "../virtualdesktops.h"
-// for mocking
-#include "../notifications.h"
 // KDE
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
@@ -31,13 +29,6 @@ namespace KWin {
 
 int screen_number = 0;
 
-bool Notify::raise(Event e, const QString& message, Client* c)
-{
-    Q_UNUSED(e)
-    Q_UNUSED(message)
-    Q_UNUSED(c)
-    return false;
-}
 }
 
 Q_DECLARE_METATYPE(Qt::Orientation)
@@ -121,7 +112,7 @@ void TestVirtualDesktops::count()
     // start with a useful desktop count
     vds->setCount(s_countInitValue);
 
-    QSignalSpy spy(vds, SIGNAL(countChanged(uint, uint)));
+    QSignalSpy spy(vds, SIGNAL(countChanged(uint,uint)));
     QSignalSpy desktopsRemoved(vds, SIGNAL(desktopsRemoved(uint)));
 
     QFETCH(uint, request);
@@ -207,7 +198,7 @@ void TestVirtualDesktops::current()
     QVERIFY(vds->setCurrent(init));
     QCOMPARE(vds->current(), init);
 
-    QSignalSpy spy(vds, SIGNAL(currentChanged(uint, uint)));
+    QSignalSpy spy(vds, SIGNAL(currentChanged(uint,uint)));
 
     QFETCH(uint, request);
     QFETCH(uint, result);
@@ -249,7 +240,7 @@ void TestVirtualDesktops::currentChangeOnCountChange()
     vds->setCount(initCount);
     vds->setCurrent(initCurrent);
 
-    QSignalSpy spy(vds,  SIGNAL(currentChanged(uint, uint)));
+    QSignalSpy spy(vds,  SIGNAL(currentChanged(uint,uint)));
 
     QFETCH(uint, request);
     QFETCH(uint, current);
@@ -517,7 +508,7 @@ void TestVirtualDesktops::updateLayout_data()
 void TestVirtualDesktops::updateLayout()
 {
     VirtualDesktopManager *vds = VirtualDesktopManager::self();
-    QSignalSpy spy(vds, SIGNAL(layoutChanged(int, int)));
+    QSignalSpy spy(vds, SIGNAL(layoutChanged(int,int)));
     // call update layout - implicitly through setCount
     QFETCH(uint, desktop);
     QFETCH(QSize, result);

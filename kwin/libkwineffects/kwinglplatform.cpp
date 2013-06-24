@@ -525,14 +525,36 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
     m_renderer     = (const char*)glGetString(GL_RENDERER);
     m_version      = (const char*)glGetString(GL_VERSION);
 
-    const QByteArray extensions = (const char*)glGetString(GL_EXTENSIONS);
-    m_extensions = QSet<QByteArray>::fromList(extensions.split(' '));
-
     // Parse the OpenGL version
     const QList<QByteArray> versionTokens = m_version.split(' ');
     if (versionTokens.count() > 0) {
         const QByteArray version = QByteArray(m_version);
         m_glVersion = parseVersionString(version);
+    }
+
+#ifndef KWIN_HAVE_OPENGLES
+    if (m_glVersion >= kVersionNumber(3, 0)) {
+        PFNGLGETSTRINGIPROC glGetStringi;
+
+#ifdef KWIN_HAVE_EGL
+        if (platformInterface == EglPlatformInterface)
+            glGetStringi = (PFNGLGETSTRINGIPROC) eglGetProcAddress("glGetStringi");
+        else
+#endif
+            glGetStringi = (PFNGLGETSTRINGIPROC) glXGetProcAddress((const GLubyte *) "glGetStringi");
+
+        int count;
+        glGetIntegerv(GL_NUM_EXTENSIONS, &count);
+
+        for (int i = 0; i < count; i++) {
+            const char *name = (const char *) glGetStringi(GL_EXTENSIONS, i);
+            m_extensions.insert(name);
+        }
+    } else
+#endif
+    {
+        const QByteArray extensions = (const char *) glGetString(GL_EXTENSIONS);
+        m_extensions = QSet<QByteArray>::fromList(extensions.split(' '));
     }
 
     // Parse the Mesa version
@@ -548,10 +570,9 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
         m_supportsGLSL = true;
         m_textureNPOT = true;
 #else
-        m_supportsGLSL = m_extensions.contains("GL_ARB_shading_language_100") &&
-                        m_extensions.contains("GL_ARB_shader_objects") &&
-                        m_extensions.contains("GL_ARB_fragment_shader") &&
-                        m_extensions.contains("GL_ARB_vertex_shader");
+        m_supportsGLSL = m_extensions.contains("GL_ARB_shader_objects") &&
+                         m_extensions.contains("GL_ARB_fragment_shader") &&
+                         m_extensions.contains("GL_ARB_vertex_shader");
 
         m_textureNPOT = m_extensions.contains("GL_ARB_texture_non_power_of_two");
 #endif
@@ -560,10 +581,9 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
         GLXContext ctx = glXGetCurrentContext();
         m_directRendering = glXIsDirect(display(), ctx);
 
-        m_supportsGLSL = m_extensions.contains("GL_ARB_shading_language_100") &&
-                        m_extensions.contains("GL_ARB_shader_objects") &&
-                        m_extensions.contains("GL_ARB_fragment_shader") &&
-                        m_extensions.contains("GL_ARB_vertex_shader");
+        m_supportsGLSL = m_extensions.contains("GL_ARB_shader_objects") &&
+                         m_extensions.contains("GL_ARB_fragment_shader") &&
+                         m_extensions.contains("GL_ARB_vertex_shader");
 
         m_textureNPOT = m_extensions.contains("GL_ARB_texture_non_power_of_two");
 #endif

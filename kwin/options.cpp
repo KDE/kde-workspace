@@ -34,8 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kglobalsettings.h>
 #include <klocale.h>
 
-#include <QDesktopWidget>
-
 #include "client.h"
 #include "compositingprefs.h"
 #include "settings.h"
@@ -109,7 +107,7 @@ int currentRefreshRate()
 
     // 0Hz or less is invalid, so we fallback to a default rate
     if (rate <= 0)
-        rate = 50;
+        rate = 60;
     // QTimer gives us 1msec (1000Hz) at best, so we ignore anything higher;
     // however, additional throttling prevents very high rates from taking place anyway
     else if (rate > 1000)
@@ -130,7 +128,6 @@ Options::Options(QObject *parent)
     , m_shadeHover(false)
     , m_shadeHoverInterval(0)
     , m_separateScreenFocus(false)
-    , m_activeMouseScreen(false)
     , m_placement(Placement::NoPlacement)
     , m_borderSnapZone(0)
     , m_windowSnapZone(0)
@@ -151,7 +148,6 @@ Options::Options(QObject *parent)
     , m_hiddenPreviews(Options::defaultHiddenPreviews())
     , m_unredirectFullscreen(Options::defaultUnredirectFullscreen())
     , m_glSmoothScale(Options::defaultGlSmoothScale())
-    , m_glVSync(Options::defaultGlVSync())
     , m_colorCorrected(Options::defaultColorCorrected())
     , m_xrenderSmoothScale(Options::defaultXrenderSmoothScale())
     , m_maxFpsInterval(Options::defaultMaxFpsInterval())
@@ -161,6 +157,8 @@ Options::Options(QObject *parent)
     , m_glStrictBinding(Options::defaultGlStrictBinding())
     , m_glStrictBindingFollowsDriver(Options::defaultGlStrictBindingFollowsDriver())
     , m_glLegacy(Options::defaultGlLegacy())
+    , m_glCoreProfile(Options::defaultGLCoreProfile())
+    , m_glPreferBufferSwap(Options::defaultGlPreferBufferSwap())
     , OpTitlebarDblClick(Options::defaultOperationTitlebarDblClick())
     , CmdActiveTitlebar1(Options::defaultCommandActiveTitlebar1())
     , CmdActiveTitlebar2(Options::defaultCommandActiveTitlebar2())
@@ -294,16 +292,7 @@ void Options::setSeparateScreenFocus(bool separateScreenFocus)
         return;
     }
     m_separateScreenFocus = separateScreenFocus;
-    emit separateScreenFocusChanged();
-}
-
-void Options::setActiveMouseScreen(bool activeMouseScreen)
-{
-    if (m_activeMouseScreen == activeMouseScreen) {
-        return;
-    }
-    m_activeMouseScreen = activeMouseScreen;
-    emit activeMouseScreenChanged();
+    emit separateScreenFocusChanged(m_separateScreenFocus);
 }
 
 void Options::setPlacement(int placement)
@@ -678,15 +667,6 @@ void Options::setGlSmoothScale(int glSmoothScale)
     emit glSmoothScaleChanged();
 }
 
-void Options::setGlVSync(bool glVSync)
-{
-    if (m_glVSync == glVSync) {
-        return;
-    }
-    m_glVSync = glVSync;
-    emit glVSyncChanged();
-}
-
 void Options::setColorCorrected(bool colorCorrected)
 {
     if (m_colorCorrected == colorCorrected) {
@@ -705,7 +685,7 @@ void Options::setXrenderSmoothScale(bool xrenderSmoothScale)
     emit xrenderSmoothScaleChanged();
 }
 
-void Options::setMaxFpsInterval(uint maxFpsInterval)
+void Options::setMaxFpsInterval(qint64 maxFpsInterval)
 {
     if (m_maxFpsInterval == maxFpsInterval) {
         return;
@@ -723,7 +703,7 @@ void Options::setRefreshRate(uint refreshRate)
     emit refreshRateChanged();
 }
 
-void Options::setVBlankTime(uint vBlankTime)
+void Options::setVBlankTime(qint64 vBlankTime)
 {
     if (m_vBlankTime == vBlankTime) {
         return;
@@ -766,6 +746,33 @@ void Options::setGlLegacy(bool glLegacy)
     }
     m_glLegacy = glLegacy;
     emit glLegacyChanged();
+}
+
+void Options::setGLCoreProfile(bool value)
+{
+    if (m_glCoreProfile == value) {
+        return;
+    }
+    m_glCoreProfile = value;
+    emit glCoreProfileChanged();
+}
+
+void Options::setGlPreferBufferSwap(char glPreferBufferSwap)
+{
+    if (glPreferBufferSwap == 'a') {
+        // buffer cpying is very fast with the nvidia blob
+        // but due to restrictions in DRI2 *incredibly* slow for all MESA drivers
+        // see http://www.x.org/releases/X11R7.7/doc/dri2proto/dri2proto.txt, item 2.5
+        if (GLPlatform::instance()->driver() == Driver_NVidia)
+            glPreferBufferSwap = CopyFrontBuffer;
+        else
+            glPreferBufferSwap = ExtendDamage;
+    }
+    if (m_glPreferBufferSwap == (GlSwapStrategy)glPreferBufferSwap) {
+        return;
+    }
+    m_glPreferBufferSwap = (GlSwapStrategy)glPreferBufferSwap;
+    emit glPreferBufferSwapChanged();
 }
 
 void Options::reparseConfiguration()
@@ -832,9 +839,9 @@ unsigned long Options::loadConfig()
 
     // TODO: should they be moved into reloadCompositingSettings?
     config = KConfigGroup(_config, "Compositing");
-    setMaxFpsInterval(qRound(1000.0 / config.readEntry("MaxFPS", Options::defaultMaxFps())));
+    setMaxFpsInterval(1 * 1000 * 1000 * 1000 / config.readEntry("MaxFPS", Options::defaultMaxFps()));
     setRefreshRate(config.readEntry("RefreshRate", Options::defaultRefreshRate()));
-    setVBlankTime(config.readEntry("VBlankTime", Options::defaultVBlankTime()));
+    setVBlankTime(config.readEntry("VBlankTime", Options::defaultVBlankTime()) * 1000); // config in micro, value in nano resolution
 
     return changed;
 }
@@ -846,7 +853,6 @@ void Options::syncFromKcfgc()
     setFocusPolicy(m_settings->focusPolicy());
     setNextFocusPrefersMouse(m_settings->nextFocusPrefersMouse());
     setSeparateScreenFocus(m_settings->separateScreenFocus());
-    setActiveMouseScreen(m_settings->activeMouseScreen());
     setRollOverDesktops(m_settings->rollOverDesktops());
     setLegacyFullscreenSupport(m_settings->legacyFullscreenSupport());
     setFocusStealingPreventionLevel(m_settings->focusStealingPreventionLevel());
@@ -943,19 +949,29 @@ void Options::reloadCompositingSettings(bool force)
 
     // Compositing settings
     CompositingPrefs prefs;
-    prefs.detect();
+    if (compositingMode() == OpenGLCompositing) {
+        prefs.detect();
+    }
 
     KSharedConfig::Ptr _config = KGlobal::config();
     KConfigGroup config(_config, "Compositing");
 
     setGlDirect(prefs.enableDirectRendering());
-    setGlVSync(config.readEntry("GLVSync", Options::defaultGlVSync()));
     setGlSmoothScale(qBound(-1, config.readEntry("GLTextureFilter", Options::defaultGlSmoothScale()), 2));
     setGlStrictBindingFollowsDriver(!config.hasKey("GLStrictBinding"));
     if (!isGlStrictBindingFollowsDriver()) {
         setGlStrictBinding(config.readEntry("GLStrictBinding", Options::defaultGlStrictBinding()));
     }
     setGlLegacy(config.readEntry("GLLegacy", Options::defaultGlLegacy()));
+    setGLCoreProfile(config.readEntry("GLCore", Options::defaultGLCoreProfile()));
+
+    char c = 0;
+    const QString s = config.readEntry("GLPreferBufferSwap", QString(Options::defaultGlPreferBufferSwap()));
+    if (!s.isEmpty())
+        c = s.at(0).toAscii();
+    if (c != 'a' && c != 'c' && c != 'p' && c != 'e')
+        c = 0;
+    setGlPreferBufferSwap(c);
 
     setColorCorrected(config.readEntry("GLColorCorrection", Options::defaultColorCorrected()));
 

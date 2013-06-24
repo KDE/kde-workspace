@@ -124,9 +124,9 @@ class TASKMANAGER_EXPORT BasicMenu : public ToolTipMenu
     Q_OBJECT
 public:
     BasicMenu(QWidget *parent, GroupPtr task, GroupManager *strategy, QList <QAction*> visualizationActions = QList <QAction*>(),
-              QList <QAction*> appActions = QList <QAction*>());
+              QList <QAction*> appActions = QList <QAction*>(), int maxWidth = 0);
     BasicMenu(QWidget *parent, TaskItem* task, GroupManager *strategy, QList <QAction*> visualizationActions = QList <QAction*>(),
-              QList <QAction*> appActions = QList <QAction*>());
+              QList <QAction*> appActions = QList <QAction*>(), int maxWidth = 0);
     BasicMenu(QWidget *parent, LauncherItem* task, GroupManager *strategy, QList <QAction*> visualizationActions = QList <QAction*>(),
               QList <QAction*> appActions = QList <QAction*>());
 };

@@ -36,20 +36,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "shadow.h"
 #include "useractions.h"
 #include "compositingprefs.h"
-#include "notifications.h"
 #include "xcbutils.h"
 
 #include <stdio.h>
 
-#include <QtCore/QtConcurrentRun>
-#include <QtCore/QFutureWatcher>
+#include <QtConcurrentRun>
+#include <QFutureWatcher>
 #include <QMenu>
 #include <QTimerEvent>
 #include <QDateTime>
 #include <QDBusConnection>
 #include <kaction.h>
 #include <kactioncollection.h>
-#include <klocale.h>
+#include <KDE/KGlobal>
+#include <KDE/KLocalizedString>
+#include <KDE/KNotification>
+#include <KDE/KSelectionWatcher>
 
 #include <xcb/composite.h>
 #include <xcb/damage.h>
@@ -59,15 +61,22 @@ Q_DECLARE_METATYPE(KWin::Compositor::SuspendReason)
 namespace KWin
 {
 
-Compositor *Compositor::s_compositor = NULL;
 extern int currentRefreshRate();
 
-Compositor *Compositor::createCompositor(QObject *parent)
+CompositorSelectionOwner::CompositorSelectionOwner(const char *selection) : KSelectionOwner(selection), owning(false)
 {
-    Q_ASSERT(!s_compositor);
-    s_compositor = new Compositor(parent);
-    return s_compositor;
+    connect (this, SIGNAL(lostOwnership()), SLOT(looseOwnership()));
 }
+
+void CompositorSelectionOwner::looseOwnership()
+{
+    owning = false;
+}
+
+KWIN_SINGLETON_FACTORY_VARIABLE(Compositor, s_compositor)
+
+static inline qint64 milliToNano(int milli) { return milli * 1000 * 1000; }
+static inline qint64 nanoToMilli(int nano) { return nano / (1000*1000); }
 
 Compositor::Compositor(QObject* workspace)
     : QObject(workspace)
@@ -79,7 +88,6 @@ Compositor::Compositor(QObject* workspace)
     , forceUnredirectCheck(false)
     , m_finishing(false)
     , m_timeSinceLastVBlank(0)
-    , m_nextFrameDelay(0)
     , m_scene(NULL)
 {
     qRegisterMetaType<Compositor::SuspendReason>("Compositor::SuspendReason");
@@ -90,15 +98,21 @@ Compositor::Compositor(QObject* workspace)
     connect(&unredirectTimer, SIGNAL(timeout()), SLOT(delayedCheckUnredirect()));
     connect(&compositeResetTimer, SIGNAL(timeout()), SLOT(restart()));
     connect(workspace, SIGNAL(configChanged()), SLOT(slotConfigChanged()));
-    connect(&mousePollingTimer, SIGNAL(timeout()), SLOT(performMousePoll()));
     unredirectTimer.setSingleShot(true);
     compositeResetTimer.setSingleShot(true);
     nextPaintReference.invalidate(); // Initialize the timer
 
-    m_releaseSelectionTimer.setSingleShot(true);
     // 2 sec which should be enough to restart the compositor
-    m_releaseSelectionTimer.setInterval(2000);
+    static const int compositorLostMessageDelay = 2000;
+
+    m_releaseSelectionTimer.setSingleShot(true);
+    m_releaseSelectionTimer.setInterval(compositorLostMessageDelay);
     connect(&m_releaseSelectionTimer, SIGNAL(timeout()), SLOT(releaseCompositorSelection()));
+
+    m_unusedSupportPropertyTimer.setInterval(compositorLostMessageDelay);
+    m_unusedSupportPropertyTimer.setSingleShot(true);
+    connect(&m_unusedSupportPropertyTimer, SIGNAL(timeout()), SLOT(deleteUnusedSupportProperties()));
+
     // delay the call to setup by one event cycle
     // The ctor of this class is invoked from the Workspace ctor, that means before
     // Workspace is completely constructed, so calling Workspace::self() would result
@@ -109,6 +123,7 @@ Compositor::Compositor(QObject* workspace)
 Compositor::~Compositor()
 {
     finish();
+    deleteUnusedSupportProperties();
     delete cm_selection;
     s_compositor = NULL;
 }
@@ -147,17 +162,20 @@ void Compositor::setup()
 }
 
 extern int screen_number; // main.cpp
+extern bool is_multihead;
 
 void Compositor::slotCompositingOptionsInitialized()
 {
     char selection_name[ 100 ];
     sprintf(selection_name, "_NET_WM_CM_S%d", DefaultScreen(display()));
     if (!cm_selection) {
-        cm_selection = new KSelectionOwner(selection_name);
+        cm_selection = new CompositorSelectionOwner(selection_name);
         connect(cm_selection, SIGNAL(lostOwnership()), SLOT(finish()));
     }
-    cm_selection->claim(true);   // force claiming
-
+    if (!cm_selection->owning) {
+        cm_selection->claim(true);   // force claiming
+        cm_selection->owning = true;
+    }
     switch(options->compositingMode()) {
     case OpenGLCompositing: {
         kDebug(1212) << "Initializing OpenGL compositing";
@@ -165,7 +183,7 @@ void Compositor::slotCompositingOptionsInitialized()
         // Some broken drivers crash on glXQuery() so to prevent constant KWin crashes:
         KSharedConfigPtr unsafeConfigPtr = KGlobal::config();
         KConfigGroup unsafeConfig(unsafeConfigPtr, "Compositing");
-        const QString openGLIsUnsafe = "OpenGLIsUnsafe" + QString::number(screen_number);
+        const QString openGLIsUnsafe = "OpenGLIsUnsafe" + (is_multihead ? QString::number(screen_number) : "");
         if (unsafeConfig.readEntry(openGLIsUnsafe, false))
             kWarning(1212) << "KWin has detected that your OpenGL library is unsafe to use";
         else {
@@ -181,6 +199,7 @@ void Compositor::slotCompositingOptionsInitialized()
 #endif
 
             m_scene = SceneOpenGL::createScene();
+            connect(m_scene, SIGNAL(resetCompositing()), SLOT(restart()));
 
             // TODO: Add 30 second delay to protect against screen freezes as well
             unsafeConfig.writeEntry(openGLIsUnsafe, false);
@@ -204,6 +223,7 @@ void Compositor::slotCompositingOptionsInitialized()
     default:
         kDebug(1212) << "No compositing enabled";
         m_starting = false;
+        cm_selection->owning = false;
         cm_selection->release();
         return;
     }
@@ -213,17 +233,18 @@ void Compositor::slotCompositingOptionsInitialized()
         delete m_scene;
         m_scene = NULL;
         m_starting = false;
+        cm_selection->owning = false;
         cm_selection->release();
         return;
     }
     m_xrrRefreshRate = KWin::currentRefreshRate();
-    fpsInterval = (options->maxFpsInterval() << 10);
-    if (m_scene->waitSyncAvailable()) {  // if we do vsync, set the fps to the next multiple of the vblank rate
-        vBlankInterval = (1000 << 10) / m_xrrRefreshRate;
+    fpsInterval = options->maxFpsInterval();
+    if (m_scene->syncsToVBlank()) {  // if we do vsync, set the fps to the next multiple of the vblank rate
+        vBlankInterval = milliToNano(1000) / m_xrrRefreshRate;
         fpsInterval = qMax((fpsInterval / vBlankInterval) * vBlankInterval, vBlankInterval);
     } else
-        vBlankInterval = 1 << 10; // no sync - DO NOT set "0", would cause div-by-zero segfaults.
-    m_timeSinceLastVBlank = fpsInterval - 1; // means "start now" - we don't have even a slight idea when the first vsync will occur
+        vBlankInterval = milliToNano(1); // no sync - DO NOT set "0", would cause div-by-zero segfaults.
+    m_timeSinceLastVBlank = fpsInterval - (options->vBlankTime() + 1); // means "start now" - we don't have even a slight idea when the first vsync will occur
     scheduleRepaint();
     xcb_composite_redirect_subwindows(connection(), rootWindow(), XCB_COMPOSITE_REDIRECT_MANUAL);
     new EffectsHandlerImpl(this, m_scene);   // sets also the 'effects' pointer
@@ -286,7 +307,6 @@ void Compositor::finish()
     delete m_scene;
     m_scene = NULL;
     compositeTimer.stop();
-    mousePollingTimer.stop();
     repaints_region = QRegion();
     for (ClientList::ConstIterator it = Workspace::self()->clientList().constBegin();
             it != Workspace::self()->clientList().constEnd();
@@ -299,7 +319,7 @@ void Compositor::finish()
     }
     // discard all Deleted windows (#152914)
     while (!Workspace::self()->deletedList().isEmpty())
-        Workspace::self()->deletedList().first()->discard(Allowed);
+        Workspace::self()->deletedList().first()->discard();
     m_finishing = false;
     emit compositingToggled(false);
 }
@@ -322,7 +342,37 @@ void Compositor::releaseCompositorSelection()
         return;
     }
     kDebug(1212) << "Releasing compositor selection";
+    cm_selection->owning = false;
     cm_selection->release();
+}
+
+void Compositor::keepSupportProperty(xcb_atom_t atom)
+{
+    m_unusedSupportProperties.removeAll(atom);
+}
+
+void Compositor::removeSupportProperty(xcb_atom_t atom)
+{
+    m_unusedSupportProperties << atom;
+    m_unusedSupportPropertyTimer.start();
+}
+
+void Compositor::deleteUnusedSupportProperties()
+{
+    if (m_starting) {
+        // currently still starting the compositor
+        m_unusedSupportPropertyTimer.start();
+        return;
+    }
+    if (m_finishing) {
+        // still shutting down, a restart might follow
+        m_unusedSupportPropertyTimer.start();
+        return;
+    }
+    foreach (const xcb_atom_t &atom, m_unusedSupportProperties) {
+        // remove property from root window
+        XDeleteProperty(QX11Info::display(), rootWindow(), atom);
+    }
 }
 
 // OpenGL self-check failed, fallback to XRender
@@ -399,7 +449,7 @@ void Compositor::toggleCompositing()
             // display notification only if there is the shortcut
             message = i18n("Desktop effects have been suspended by another application.<br/>"
                            "You can resume using the '%1' shortcut.", shortcut);
-            Notify::raise(Notify::CompositingSuspendedDbus, message);
+            KNotification::event("compositingsuspendeddbus", message);
         }
     }
 }
@@ -503,8 +553,6 @@ void Compositor::timerEvent(QTimerEvent *te)
         QObject::timerEvent(te);
 }
 
-static int s_pendingFlushes = 0;
-
 void Compositor::performCompositing()
 {
     if (!isOverlayWindowVisible())
@@ -545,15 +593,7 @@ void Compositor::performCompositing()
         win->getDamageRegionReply();
     }
 
-    bool pending = !repaints_region.isEmpty() || windowRepaintsPending();
-    if (pending)
-        s_pendingFlushes = 3;
-    else if (m_scene->hasPendingFlush())
-        --s_pendingFlushes;
-    else
-        s_pendingFlushes = 0;
-    if (s_pendingFlushes < 1) {
-        s_pendingFlushes = 0;
+    if (repaints_region.isEmpty() && !windowRepaintsPending()) {
         m_scene->idle();
         // Note: It would seem here we should undo suspended unredirect, but when scenes need
         // it for some reason, e.g. transformations or translucency, the next pass that does not
@@ -583,11 +623,6 @@ void Compositor::performCompositing()
     scheduleRepaint();
 }
 
-void Compositor::performMousePoll()
-{
-    Workspace::self()->checkCursorPos();
-}
-
 bool Compositor::windowRepaintsPending() const
 {
     foreach (Toplevel * c, Workspace::self()->clientList())
@@ -615,9 +650,9 @@ void Compositor::setCompositeTimer()
     if (!hasScene())  // should not really happen, but there may be e.g. some damage events still pending
         return;
 
-    uint padding = m_timeSinceLastVBlank << 10;
+    uint waitTime = 1;
 
-    if (m_scene->waitSyncAvailable()) {
+    if (m_scene->blocksForRetrace()) {
 
         // TODO: make vBlankTime dynamic?!
         // It's required because glXWaitVideoSync will *likely* block a full frame if one enters
@@ -625,6 +660,7 @@ void Compositor::setCompositeTimer()
         // Now, my ooold 19" CRT can do such retrace so that 2ms are entirely sufficient,
         // while another ooold 15" TFT requires about 6ms
 
+        qint64 padding = m_timeSinceLastVBlank;
         if (padding > fpsInterval) {
             // we're at low repaints or spent more time in painting than the user wanted to wait for that frame
             padding = vBlankInterval - (padding%vBlankInterval); // -> align to next vblank
@@ -634,29 +670,16 @@ void Compositor::setCompositeTimer()
         }
 
         if (padding < options->vBlankTime()) { // we'll likely miss this frame
-            m_nextFrameDelay = (padding + vBlankInterval) >> 10;
-            padding = (padding + vBlankInterval - options->vBlankTime()) >> 10; // so we add one
-//             qDebug() << "WE LOST A FRAME";
+            waitTime = nanoToMilli(padding + vBlankInterval - options->vBlankTime()); // so we add one
         } else {
-            m_nextFrameDelay = padding >> 10;
-            padding = (padding - options->vBlankTime()) >> 10;
+            waitTime = nanoToMilli(padding - options->vBlankTime());
         }
     }
     else // w/o vsync we just jump to the next demanded tick
         // the "1" will ensure we don't block out the eventloop - the system's just not faster
         // "0" would be sufficient, but the compositor isn't the WMs only task
-        m_nextFrameDelay = padding = (padding > fpsInterval) ? 1 : ((fpsInterval - padding) >> 10);
-    compositeTimer.start(qMin(padding, 250u), this); // force 4fps minimum
-}
-
-void Compositor::startMousePolling()
-{
-    mousePollingTimer.start(20);   // 50Hz. TODO: How often do we really need to poll?
-}
-
-void Compositor::stopMousePolling()
-{
-    mousePollingTimer.stop();
+        waitTime = (m_timeSinceLastVBlank > fpsInterval) ? 1 : nanoToMilli(fpsInterval - m_timeSinceLastVBlank);
+    compositeTimer.start(qMin(waitTime, 250u), this); // force 4fps minimum
 }
 
 bool Compositor::isActive()
@@ -814,7 +837,7 @@ bool Toplevel::setupCompositing()
     if (!compositing())
         return false;
 
-    if (damage_handle != None)
+    if (damage_handle != XCB_NONE)
         return false;
 
     damage_handle = xcb_generate_id(connection());
@@ -839,7 +862,7 @@ bool Toplevel::setupCompositing()
 
 void Toplevel::finishCompositing()
 {
-    if (damage_handle == None)
+    if (damage_handle == XCB_NONE)
         return;
     Compositor::self()->checkUnredirect(true);
     if (effect_window->window() == this) { // otherwise it's already passed to Deleted, don't free data
@@ -858,49 +881,12 @@ void Toplevel::finishCompositing()
 void Toplevel::discardWindowPixmap()
 {
     addDamageFull();
-    if (window_pix == XCB_PIXMAP_NONE)
-        return;
-    xcb_free_pixmap(connection(), window_pix);
-    window_pix = XCB_PIXMAP_NONE;
     if (effectWindow() != NULL && effectWindow()->sceneWindow() != NULL)
         effectWindow()->sceneWindow()->pixmapDiscarded();
 }
 
-xcb_pixmap_t Toplevel::createWindowPixmap()
+void Toplevel::damageNotifyEvent()
 {
-    assert(compositing());
-    if (unredirected())
-        return XCB_PIXMAP_NONE;
-    XServerGrabber grabber();
-    xcb_pixmap_t pix = xcb_generate_id(connection());
-    xcb_void_cookie_t namePixmapCookie = xcb_composite_name_window_pixmap_checked(connection(), frameId(), pix);
-    Xcb::WindowAttributes windowAttributes(frameId());
-    Xcb::WindowGeometry windowGeometry(frameId());
-    if (xcb_generic_error_t *error = xcb_request_check(connection(), namePixmapCookie)) {
-        kDebug(1212) << "Creating window pixmap failed: " << error->error_code;
-        free(error);
-        return XCB_PIXMAP_NONE;
-    }
-    // check that the received pixmap is valid and actually matches what we
-    // know about the window (i.e. size)
-    if (!windowAttributes || windowAttributes->map_state != XCB_MAP_STATE_VIEWABLE) {
-        kDebug(1212) << "Creating window pixmap failed: " << this;
-        xcb_free_pixmap(connection(), pix);
-        return XCB_PIXMAP_NONE;
-    }
-    if (!windowGeometry ||
-        windowGeometry->width != width() || windowGeometry->height != height()) {
-        kDebug(1212) << "Creating window pixmap failed: " << this;
-        xcb_free_pixmap(connection(), pix);
-        return XCB_PIXMAP_NONE;
-    }
-    return pix;
-}
-
-void Toplevel::damageNotifyEvent(XDamageNotifyEvent* e)
-{
-    Q_UNUSED(e)
-
     m_isDamaged = true;
 
     // Note: The rect is supposed to specify the damage extents,
@@ -914,7 +900,7 @@ bool Toplevel::compositing() const
     return Workspace::self()->compositing();
 }
 
-void Client::damageNotifyEvent(XDamageNotifyEvent* e)
+void Client::damageNotifyEvent()
 {
 #ifdef HAVE_XSYNC
     if (syncRequest.isPending && isResize()) {
@@ -932,7 +918,7 @@ void Client::damageNotifyEvent(XDamageNotifyEvent* e)
         setReadyForPainting();
 #endif
 
-    Toplevel::damageNotifyEvent(e);
+    Toplevel::damageNotifyEvent();
 }
 
 bool Toplevel::resetAndFetchDamage()
@@ -1007,12 +993,9 @@ void Toplevel::addDamageFull()
     emit damaged(this, rect());
 }
 
-void Toplevel::resetDamage(const QRect& r)
+void Toplevel::resetDamage()
 {
-    damage_region -= r;
-    int damageArea = 0;
-    foreach (const QRect &r2, damage_region.rects())
-        damageArea += r2.width()*r2.height();
+    damage_region = QRegion();
 }
 
 void Toplevel::addRepaint(const QRect& r)
@@ -1091,19 +1074,25 @@ bool Toplevel::updateUnredirectedState()
     assert(compositing());
     bool should = shouldUnredirect() && !unredirectSuspend && !shape() && !hasAlpha() && opacity() == 1.0 &&
                   !static_cast<EffectsHandlerImpl*>(effects)->activeFullScreenEffect();
-    if (should && !unredirect) {
-        unredirect = true;
+    if (should == unredirect)
+        return false;
+    static QElapsedTimer lastUnredirect;
+    static const qint64 msecRedirectInterval = 100;
+    if (!lastUnredirect.hasExpired(msecRedirectInterval)) {
+        QTimer::singleShot(msecRedirectInterval, Compositor::self(), SLOT(checkUnredirect()));
+        return false;
+    }
+    lastUnredirect.start();
+    unredirect = should;
+    if (unredirect) {
         kDebug(1212) << "Unredirecting:" << this;
         xcb_composite_unredirect_window(connection(), frameId(), XCB_COMPOSITE_REDIRECT_MANUAL);
-        return true;
-    } else if (!should && unredirect) {
-        unredirect = false;
+    } else {
         kDebug(1212) << "Redirecting:" << this;
         xcb_composite_redirect_window(connection(), frameId(), XCB_COMPOSITE_REDIRECT_MANUAL);
         discardWindowPixmap();
-        return true;
     }
-    return false;
+    return true;
 }
 
 void Toplevel::suspendUnredirect(bool suspend)

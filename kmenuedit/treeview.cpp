@@ -239,7 +239,7 @@ static QPixmap appIcon(const QString &iconName)
 
 
 TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
-    : QTreeWidget(parent), m_ac(ac), m_rmb(0), m_clipboard(0),
+    : QTreeWidget(parent), m_ac(ac), m_popupMenu(0), m_clipboard(0),
       m_clipboardFolderInfo(0), m_clipboardEntryInfo(0),
       m_layoutDirty(false),
       m_detailedMenuEntries(true), m_detailedEntriesNamesFirst(true)
@@ -257,15 +257,20 @@ TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
     setHeaderLabels(QStringList() << QString(""));
     header()->hide();
 
-    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-            SLOT(itemSelected(QTreeWidgetItem*)));
+    // listen for creation
+    connect(m_ac->action(NEW_ITEM_ACTION_NAME), SIGNAL(activated()), SLOT(newitem()));
+    connect(m_ac->action(NEW_SUBMENU_ACTION_NAME), SIGNAL(activated()), SLOT(newsubmenu()));
+    connect(m_ac->action(NEW_SEPARATOR_ACTION_NAME), SIGNAL(activated()), SLOT(newsep()));
 
-    // connect actions
-    connect(m_ac->action("newitem"), SIGNAL(activated()), SLOT(newitem()));
-    connect(m_ac->action("newsubmenu"), SIGNAL(activated()), SLOT(newsubmenu()));
-    connect(m_ac->action("newsep"), SIGNAL(activated()), SLOT(newsep()));
+    // listen for copy
+    connect(m_ac->action(CUT_ACTION_NAME), SIGNAL(activated()), SLOT(cut()));
+    connect(m_ac->action(COPY_ACTION_NAME), SIGNAL(activated()), SLOT(copy()));
+    connect(m_ac->action(PASTE_ACTION_NAME), SIGNAL(activated()), SLOT(paste()));
 
-    // map sorting actions
+    // listen for deleting
+    connect(m_ac->action(DELETE_ACTION_NAME), SIGNAL(activated()), SLOT(del()));
+
+    // listen for sorting
     m_sortSignalMapper = new QSignalMapper(this);
     QAction *action = m_ac->action(SORT_BY_NAME_ACTION_NAME);
     connect(action, SIGNAL(activated()), m_sortSignalMapper, SLOT(map()));
@@ -281,6 +286,14 @@ TreeView::TreeView( KActionCollection *ac, QWidget *parent, const char *name )
     m_sortSignalMapper->setMapping(action, SortAllByDescription);
     connect(m_sortSignalMapper, SIGNAL(mapped(const int)), this, SLOT(sort(const int)));
 
+    // connect moving up/down actions
+    connect(m_ac->action(MOVE_UP_ACTION_NAME), SIGNAL(activated()), SLOT(moveUpItem()));
+    connect(m_ac->action(MOVE_DOWN_ACTION_NAME), SIGNAL(activated()), SLOT(moveDownItem()));
+
+    // listen for selection
+    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+            SLOT(itemSelected(QTreeWidgetItem*)));
+
     m_menuFile = new MenuFile(KStandardDirs::locateLocal("xdgconf-menu", "applications-kmenuedit.menu"));
     m_rootFolder = new MenuFolderInfo;
     m_separator = new MenuSeparatorInfo;
@@ -295,45 +308,33 @@ TreeView::~TreeView()
 
 void TreeView::setViewMode(bool showHidden)
 {
-    delete m_rmb;
+    // setup popup menu
+    delete m_popupMenu;
+    m_popupMenu = new QMenu(this);
 
-    // setup rmb menu
-    m_rmb = new QMenu(this);
-    QAction *action;
+    // creation
+    m_popupMenu->addAction(m_ac->action(NEW_ITEM_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(NEW_SUBMENU_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(NEW_SEPARATOR_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    action = m_ac->action("edit_cut");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(cut()));
+    // copy
+    m_popupMenu->addAction(m_ac->action(CUT_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(COPY_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(PASTE_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    action = m_ac->action("edit_copy");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(copy()));
+    // delete
+    m_popupMenu->addAction( m_ac->action(DELETE_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    action = m_ac->action("edit_paste");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(paste()));
+    // move
+    m_popupMenu->addAction(m_ac->action(MOVE_UP_ACTION_NAME));
+    m_popupMenu->addAction(m_ac->action(MOVE_DOWN_ACTION_NAME));
+    m_popupMenu->addSeparator();
 
-    m_rmb->addSeparator();
-
-    action = m_ac->action("delete");
-    m_rmb->addAction( action );
-    action->setEnabled(false);
-    connect(action, SIGNAL(activated()), SLOT(del()));
-
-    m_rmb->addSeparator();
-
-    m_rmb->addAction( m_ac->action("newitem") );
-    m_rmb->addAction( m_ac->action("newsubmenu") );
-    m_rmb->addAction( m_ac->action("newsep") );
-
-    m_rmb->addSeparator();
-
-    action = m_ac->action(SORT_ACTION_NAME);
-    m_rmb->addAction(action);
-    action->setEnabled(false);
+    // sort
+    m_popupMenu->addAction(m_ac->action(SORT_ACTION_NAME));
 
     m_showHidden = showHidden;
     readMenuFolderInfo();
@@ -535,18 +536,18 @@ TreeItem *TreeView::expandPath(TreeItem *item, const QString &path)
    QString restMenu = path.mid(i+1);
 
    for (int i = 0; i < item->childCount(); ++i) {
-       TreeItem *item = dynamic_cast<TreeItem *>(item->child(i));
-       if (!item) {
+       TreeItem *childItem = dynamic_cast<TreeItem *>(item->child(i));
+       if (!childItem) {
            continue;
        }
 
-       MenuFolderInfo *folderInfo = item->folderInfo();
+       MenuFolderInfo *folderInfo = childItem->folderInfo();
        if (folderInfo && (folderInfo->id == subMenu)) {
-           item->setExpanded(true);
+           childItem->setExpanded(true);
            if (!restMenu.isEmpty()) {
-               return expandPath(item, restMenu);
+               return expandPath(childItem, restMenu);
            } else {
-               return item;
+               return childItem;
            }
        }
    }
@@ -646,23 +647,33 @@ void TreeView::selectMenuEntry(const QString &menuEntry)
 
 void TreeView::itemSelected(QTreeWidgetItem *item)
 {
+    // ensure the item is visible as selected
+    setItemSelected(item, true);
+
     TreeItem *_item = static_cast<TreeItem*>(item);
+    TreeItem *parentItem = 0;
     bool selected = false;
     bool dselected = false;
     if (_item) {
         selected = true;
         dselected = _item->isHiddenInMenu();
+        parentItem = getParentItem(_item);
     }
 
     // change actions activation
-    m_ac->action("edit_cut")->setEnabled(selected);
-    m_ac->action("edit_copy")->setEnabled(selected);
+    m_ac->action(CUT_ACTION_NAME)->setEnabled(selected);
+    m_ac->action(COPY_ACTION_NAME)->setEnabled(selected);
+    m_ac->action(PASTE_ACTION_NAME)->setEnabled(m_clipboard != 0);
 
-    if (m_ac->action("delete")) {
-        m_ac->action("delete")->setEnabled(selected && !dselected);
+    if (m_ac->action(DELETE_ACTION_NAME)) {
+        m_ac->action(DELETE_ACTION_NAME)->setEnabled(selected && !dselected);
     }
-    m_ac->action(SORT_ACTION_NAME)->setEnabled(selected && _item->isDirectory() && (_item->childCount() > 0));
-    m_ac->action(SORT_ALL_ACTION_NAME)->setEnabled(true);
+
+    m_ac->action(SORT_BY_NAME_ACTION_NAME)->setEnabled(selected && _item->isDirectory() && (_item->childCount() > 0));
+    m_ac->action(SORT_BY_DESCRIPTION_ACTION_NAME)->setEnabled(m_ac->action(SORT_BY_NAME_ACTION_NAME)->isEnabled());
+
+    m_ac->action(MOVE_UP_ACTION_NAME)->setEnabled(selected && (parentItem->indexOfChild(_item) > 0));
+    m_ac->action(MOVE_DOWN_ACTION_NAME)->setEnabled(selected && (parentItem->indexOfChild(_item) < parentItem->childCount() - 1));
 
     if (!item) {
         emit disableAction();
@@ -1103,8 +1114,8 @@ QTreeWidgetItem *TreeView::selectedItem()
 
 void TreeView::contextMenuEvent(QContextMenuEvent *event)
 {
-    if (m_rmb && itemAt(event->pos())) {
-        m_rmb->exec(event->globalPos());
+    if (m_popupMenu && itemAt(event->pos())) {
+        m_popupMenu->exec(event->globalPos());
     }
 }
 
@@ -1350,7 +1361,7 @@ void TreeView::copy( bool cutting )
            del(item, false);
     }
 
-    m_ac->action("edit_paste")->setEnabled(true);
+    m_ac->action(PASTE_ACTION_NAME)->setEnabled(true);
 }
 
 
@@ -1495,11 +1506,11 @@ void TreeView::sort(const int sortCmd)
     TreeItem *itemToSort;
     if (sortType == SortByName || sortType == SortByDescription) {
         itemToSort = static_cast<TreeItem*>(selectedItem());
-    } else if (sortType == SortAllByName) {
-        sortType = SortByName;
-        itemToSort = static_cast<TreeItem*>(invisibleRootItem());
     } else if (sortType == SortAllByDescription) {
         sortType = SortByDescription;
+        itemToSort = static_cast<TreeItem*>(invisibleRootItem());
+    } else /* if (sortType == SortAllByName) */ {
+        sortType = SortByName;
         itemToSort = static_cast<TreeItem*>(invisibleRootItem());
     }
 
@@ -1579,6 +1590,85 @@ void TreeView::sortItemChildren(const QList<QTreeWidgetItem*>::iterator& begin, 
     else if (sortType == SortByDescription) {
         qSort(begin, end, TreeItem::itemDescriptionLessThan);
     }
+}
+
+/**
+ * @brief Move up the selected item.
+ */
+void TreeView::moveUpItem() {
+    moveUpOrDownItem(true);
+}
+
+/**
+ * @brief Move down the selected item.
+ */
+void TreeView::moveDownItem() {
+    moveUpOrDownItem(false);
+}
+
+/**
+ * Move the selected item on desired direction (up or down).
+ *
+ * @brief Move up/down the selected item.
+ * @param isMovingUpAction True to move up, false to move down.
+ */
+void TreeView::moveUpOrDownItem(bool isMovingUpAction)
+{
+    // get the selected item and its parent
+    TreeItem *sourceItem = static_cast<TreeItem*>(selectedItem());
+    TreeItem *parentItem = getParentItem(sourceItem);
+
+    // get selected item index
+    int sourceItemIndex = parentItem->indexOfChild(sourceItem);
+
+    // find the second item to swap
+    TreeItem *destItem = 0;
+    int destIndex;
+    if (isMovingUpAction) {
+        destIndex = sourceItemIndex - 1;
+        destItem = static_cast<TreeItem*>(parentItem->child(destIndex));
+    }
+    else {
+        destIndex = sourceItemIndex + 1;
+        destItem = static_cast<TreeItem*>(parentItem->child(destIndex));
+    }
+
+    // swap items
+    parentItem->removeChild(sourceItem);
+    parentItem->insertChild(destIndex, sourceItem);
+
+    // recreate item widget for separators
+    if (sourceItem->isSeparator()) {
+        setItemWidget(sourceItem, 0, new SeparatorWidget);
+    }
+    if (destItem->isSeparator()) {
+        setItemWidget(destItem, 0, new SeparatorWidget);
+    }
+
+    // set the focus on the source item
+    setCurrentItem(sourceItem);
+
+    // flag parent item as dirty (if the parent is the root item, set the entire layout as dirty)
+    if (parentItem == invisibleRootItem()) {
+        parentItem = 0;
+    }
+    setLayoutDirty(parentItem);
+}
+
+/**
+ * For a given item, return its parent. For top items, return the invisible root item.
+ *
+ * @brief Get the parent item.
+ * @param item Item.
+ * @return Parent item.
+ */
+TreeItem* TreeView::getParentItem(QTreeWidgetItem *item) const
+{
+    QTreeWidgetItem *parentItem = item->parent();
+    if (!parentItem) {
+        parentItem = invisibleRootItem();
+    }
+    return static_cast<TreeItem*>(parentItem);
 }
 
 void TreeView::del()

@@ -26,7 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kconfiggroup.h>
 #include <kdebug.h>
 #include <kxerrorhandler.h>
-#include <klocale.h>
+#include <KDE/KGlobal>
+#include <KDE/KLocalizedString>
 #include <kdeversion.h>
 #include <ksharedconfig.h>
 #include <kstandarddirs.h>
@@ -36,6 +37,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KWin
 {
+
+extern int screen_number; // main.cpp
+extern bool is_multihead;
 
 CompositingPrefs::CompositingPrefs()
     : mEnableDirectRendering(true)
@@ -48,15 +52,17 @@ CompositingPrefs::~CompositingPrefs()
 
 bool CompositingPrefs::openGlIsBroken()
 {
-    return KConfigGroup(KGlobal::config(), "Compositing").readEntry("OpenGLIsUnsafe", false);
+    const QString unsafeKey("OpenGLIsUnsafe" + (is_multihead ? QString::number(screen_number) : ""));
+    return KConfigGroup(KGlobal::config(), "Compositing").readEntry(unsafeKey, false);
 }
 
 bool CompositingPrefs::compositingPossible()
 {
     // first off, check whether we figured that we'll crash on detection because of a buggy driver
     KConfigGroup gl_workaround_group(KGlobal::config(), "Compositing");
+    const QString unsafeKey("OpenGLIsUnsafe" + (is_multihead ? QString::number(screen_number) : ""));
     if (gl_workaround_group.readEntry("Backend", "OpenGL") == "OpenGL" &&
-        gl_workaround_group.readEntry("OpenGLIsUnsafe", false))
+        gl_workaround_group.readEntry(unsafeKey, false))
         return false;
 
     if (!Xcb::Extensions::self()->isCompositeAvailable()) {
@@ -84,8 +90,9 @@ QString CompositingPrefs::compositingNotPossibleReason()
 {
     // first off, check whether we figured that we'll crash on detection because of a buggy driver
     KConfigGroup gl_workaround_group(KGlobal::config(), "Compositing");
+    const QString unsafeKey("OpenGLIsUnsafe" + (is_multihead ? QString::number(screen_number) : ""));
     if (gl_workaround_group.readEntry("Backend", "OpenGL") == "OpenGL" &&
-        gl_workaround_group.readEntry("OpenGLIsUnsafe", false))
+        gl_workaround_group.readEntry(unsafeKey, false))
         return i18n("<b>OpenGL compositing (the default) has crashed KWin in the past.</b><br>"
                     "This was most likely due to a driver bug."
                     "<p>If you think that you have meanwhile upgraded to a stable driver,<br>"
@@ -132,7 +139,9 @@ void CompositingPrefs::detect()
 #ifndef KWIN_HAVE_OPENGLES
     // HACK: This is needed for AIGLX
     const bool forceIndirect = qstrcmp(qgetenv("LIBGL_ALWAYS_INDIRECT"), "1") == 0;
-    if (!forceIndirect && qstrcmp(qgetenv("KWIN_DIRECT_GL"), "1") != 0) {
+    const bool forceEgl = qstrcmp(qgetenv("KWIN_OPENGL_INTERFACE"), "egl") == 0 ||
+            qstrcmp(qgetenv("KWIN_OPENGL_INTERFACE"), "egl_wayland") == 0;
+    if (!forceIndirect && !forceEgl && qstrcmp(qgetenv("KWIN_DIRECT_GL"), "1") != 0) {
         // Start an external helper program that initializes GLX and returns
         // 0 if we can use direct rendering, and 1 otherwise.
         // The reason we have to use an external program is that after GLX

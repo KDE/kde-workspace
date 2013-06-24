@@ -53,6 +53,8 @@
 // Local
 #include "core/models.h"
 
+#include <Plasma/Applet>
+
 template <> inline
 void KConfigGroup::writeEntry(const char *pKey,
                               const KGlobalSettings::Completion& aValue,
@@ -108,7 +110,8 @@ public:
               systemApplicationPolicy(ApplicationModel::ShowApplicationAndSystemPolicy),
               primaryNamePolicy(ApplicationModel::GenericNamePrimary),
               displayOrder(NameAfterDescription),
-              allowSeparators(_allowSeparators)
+              allowSeparators(_allowSeparators),
+              showRecentlyInstalled(true)
     {
         systemApplications = Kickoff::systemApplicationList();
         reloadTimer = new QTimer(qq);
@@ -125,6 +128,7 @@ public:
     static QHash<QString, QString> iconNameMap();
 
     ApplicationModel *q;
+    QWeakPointer<Plasma::Applet> applet;
     AppNode *root;
     ApplicationModel::DuplicatePolicy duplicatePolicy;
     ApplicationModel::SystemApplicationPolicy systemApplicationPolicy;
@@ -132,11 +136,34 @@ public:
     QStringList systemApplications;
     DisplayOrder displayOrder;
     bool allowSeparators;
+    bool showRecentlyInstalled;
     QTimer *reloadTimer;
+
+    QStringList newInstalledPrograms;
+    QHash<QString, QDate> seenPrograms;
 };
 
 void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
 {
+     if (_relPath=="new/") {
+        Q_FOREACH (const QString &it, newInstalledPrograms) {
+            KService::Ptr p = KService::serviceByStorageId(it);
+
+            if (p->noDisplay()) {
+                continue;
+            }
+
+            AppNode *newnode = new AppNode();
+            newnode->icon = KIcon(p->icon());
+            newnode->appName = p->name();
+            newnode->genericName = p->genericName();
+            newnode->desktopEntry = p->entryPath();
+            newnode->parent = node;
+            node->children.append(newnode);
+        }
+        return;
+    }
+
     KServiceGroup::Ptr root = KServiceGroup::group(_relPath);
 
     if (!root || !root->isValid()) {
@@ -261,6 +288,16 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
         }
     }
 
+    if (showRecentlyInstalled && _relPath.isEmpty() && !newInstalledPrograms.isEmpty()) {
+        AppNode *newnode = new AppNode();
+        newnode->icon = KIcon("chronometer");
+        newnode->appName = i18n("Recently Installed");
+        newnode->relPath = "new/";
+        newnode->isDir = true;
+        newnode->parent = node;
+        node->children.prepend(newnode);
+    }
+
     // set the subTitleMandatory field for nodes that do not provide a unique generic
     // name what may help us on display to show in such cases also the subtitle to
     // provide a hint to the user what the duplicate entries are about.
@@ -306,6 +343,19 @@ void ApplicationModel::setNameDisplayOrder(DisplayOrder displayOrder)
 DisplayOrder ApplicationModel::nameDisplayOrder() const
 {
    return d->displayOrder;
+}
+
+void ApplicationModel::setShowRecentlyInstalled(bool showRecentlyInstalled)
+{
+    if (d->showRecentlyInstalled != showRecentlyInstalled) {
+        d->showRecentlyInstalled = showRecentlyInstalled;
+        reloadMenu();
+    }
+}
+
+bool ApplicationModel::showRecentlyInstalled() const
+{
+   return d->showRecentlyInstalled;
 }
 
 int ApplicationModel::columnCount(const QModelIndex &parent) const
@@ -515,6 +565,7 @@ void ApplicationModel::reloadMenu()
 {
     delete d->root;
     d->root = new AppNode();
+    createNewProgramList();
     d->fillNode(QString(), d->root);
     reset();
 }
@@ -534,6 +585,103 @@ ApplicationModel::DuplicatePolicy ApplicationModel::duplicatePolicy() const
 ApplicationModel::SystemApplicationPolicy ApplicationModel::systemApplicationPolicy() const
 {
     return d->systemApplicationPolicy;
+}
+
+void ApplicationModel::setApplet(Plasma::Applet *applet)
+{
+    if (d->applet.data() != applet) {
+        d->applet = applet;
+        createNewProgramList();
+    }
+}
+
+void ApplicationModel::createNewProgramList()
+{
+    if (!d->applet) {
+        return;
+    }
+
+    d->newInstalledPrograms.clear();
+    if (!d->showRecentlyInstalled) {
+        return;
+    }
+
+    KConfigGroup kickoffrc = d->applet.data()->globalConfig();
+    foreach (const QString &it, kickoffrc.keyList()) {
+        d->seenPrograms.insert(it, QDate::fromString(kickoffrc.readEntry(it), Qt::ISODate));
+    }
+
+    bool initialize = (d->seenPrograms.isEmpty());
+
+    bool seenProgramsChanged = createNewProgramListForPath(QString());
+
+    if (initialize) {
+        // on first start, set all entries' dates to empty (means: they are not new)
+        for (QHash<QString, QDate>::Iterator it = d->seenPrograms.begin(); it != d->seenPrograms.end(); ++it)
+            *it = QDate();
+
+        d->newInstalledPrograms.clear();
+    }
+
+    if (seenProgramsChanged) {
+        for (QHash<QString, QDate>::Iterator it = d->seenPrograms.begin(); it != d->seenPrograms.end(); ++it) {
+            kickoffrc.writeEntry(it.key(), it.value().toString(Qt::ISODate));
+        }
+        kickoffrc.sync();
+    }
+}
+
+bool ApplicationModel::createNewProgramListForPath(const QString &relPath)
+{
+    bool seenProgramsChanged = false;
+
+    KServiceGroup::Ptr group = KServiceGroup::group(relPath);
+    if (!group || !group->isValid()) {
+        return false;
+    }
+
+    const KServiceGroup::List list = group->entries();
+
+    KServiceGroup::List::ConstIterator it = list.begin();
+    for (; it != list.end(); ++it) {
+        KSycocaEntry::Ptr e = (*it);
+
+        if (e->isType(KST_KServiceGroup)) {
+            KServiceGroup::Ptr g(KServiceGroup::Ptr::staticCast(e));
+            if (!g->noDisplay()) {
+                if (createNewProgramListForPath(g->relPath()))
+                    seenProgramsChanged = true;
+            }
+        } else if (e->isType(KST_KService)) {
+            KService::Ptr s(KService::Ptr::staticCast(e));
+            if (s->isApplication() && !s->noDisplay()) {
+                QString shortStorageId = s->storageId().remove(".desktop");
+                QHash<QString, QDate>::Iterator it_find = d->seenPrograms.find(shortStorageId);
+                if (it_find == d->seenPrograms.end()) {
+                    seenProgramsChanged = true;
+                    d->seenPrograms.insert(shortStorageId, QDate::currentDate());
+                    if (!d->newInstalledPrograms.contains(s->storageId())) {
+                        d->newInstalledPrograms += s->storageId();
+                    }
+                }
+                else {
+                    QDate date = it_find.value();
+                    if (date.isValid()) {
+                        if (date.daysTo(QDate::currentDate()) < 3) {
+                            if (!d->newInstalledPrograms.contains(s->storageId())) {
+                                 d->newInstalledPrograms += s->storageId();
+                            }
+                        }
+                        else {
+                            seenProgramsChanged = true;
+                            (*it_find) = QDate(); // this entry is not new anymore
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return seenProgramsChanged;
 }
 
 /**

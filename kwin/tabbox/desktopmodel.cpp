@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,6 +34,12 @@ namespace TabBox
 DesktopModel::DesktopModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
+    QHash<int, QByteArray> roleNames;
+    roleNames.insert(Qt::DisplayRole, "display");
+    roleNames.insert(DesktopNameRole, "caption");
+    roleNames.insert(DesktopRole, "desktop");
+    roleNames.insert(ClientModelRole, "client");
+    setRoleNames(roleNames);
 }
 
 DesktopModel::~DesktopModel()
@@ -42,10 +48,16 @@ DesktopModel::~DesktopModel()
 
 QVariant DesktopModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid() || index.column() != 0)
         return QVariant();
 
-    int desktopIndex = index.row() * columnCount() + index.column();
+    if (index.parent().isValid()) {
+        // parent is valid -> access to Client
+        ClientModel *model = m_clientModels[ m_desktopList[ index.internalId() - 1] ];
+        return model->data(model->index(index.row(), 0), role);
+    }
+
+    const int desktopIndex = index.row();
     if (desktopIndex >= m_desktopList.count())
         return QVariant();
     switch(role) {
@@ -69,21 +81,49 @@ int DesktopModel::columnCount(const QModelIndex& parent) const
 
 int DesktopModel::rowCount(const QModelIndex& parent) const
 {
-    Q_UNUSED(parent)
+    if (parent.isValid()) {
+        if (parent.internalId() != 0 || parent.row() >= m_desktopList.count()) {
+            return 0;
+        }
+        const int desktop = m_desktopList.at(parent.row());
+        const ClientModel *model = m_clientModels.value(desktop);
+        return model->rowCount();
+    }
     return m_desktopList.count();
 }
 
 QModelIndex DesktopModel::parent(const QModelIndex& child) const
 {
-    Q_UNUSED(child)
-    return QModelIndex();
+    if (!child.isValid() || child.internalId() == 0) {
+        return QModelIndex();
+    }
+    const int row = child.internalId() -1;
+    if (row >= m_desktopList.count()) {
+        return QModelIndex();
+    }
+    return createIndex(row, 0);
 }
 
 QModelIndex DesktopModel::index(int row, int column, const QModelIndex& parent) const
 {
-    Q_UNUSED(parent)
-    int index = row * columnCount() + column;
-    if (index > m_desktopList.count() || m_desktopList.isEmpty())
+    if (column != 0) {
+        return QModelIndex();
+    }
+    if (row < 0) {
+        return QModelIndex();
+    }
+    if (parent.isValid()) {
+        if (parent.row() < 0 || parent.row() >= m_desktopList.count() || parent.internalId() != 0) {
+            return QModelIndex();
+        }
+        const int desktop = m_desktopList.at(parent.row());
+        const ClientModel *model = m_clientModels.value(desktop);
+        if (row >= model->rowCount()) {
+            return QModelIndex();
+        }
+        return createIndex(row, column, parent.row() + 1);
+    }
+    if (row > m_desktopList.count() || m_desktopList.isEmpty())
         return QModelIndex();
     return createIndex(row, column);
 }
@@ -92,14 +132,12 @@ QModelIndex DesktopModel::desktopIndex(int desktop) const
 {
     if (desktop > m_desktopList.count())
         return QModelIndex();
-    int index = m_desktopList.indexOf(desktop);
-    int row = index / columnCount();
-    int column = index % columnCount();
-    return createIndex(row, column);
+    return createIndex(m_desktopList.indexOf(desktop), 0);
 }
 
 void DesktopModel::createDesktopList()
 {
+    beginResetModel();
     m_desktopList.clear();
     qDeleteAll(m_clientModels);
     m_clientModels.clear();
@@ -126,7 +164,7 @@ void DesktopModel::createDesktopList()
         break;
     }
     }
-    reset();
+    endResetModel();
 }
 
 } // namespace Tabbox

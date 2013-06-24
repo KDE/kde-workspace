@@ -18,9 +18,12 @@
  ***************************************************************************/
 
 
+#include <config-powerdevil.h>
 #include "powerdevilbackendloader.h"
 
+#ifdef HAVE_UDEV
 #include "backends/upower/powerdevilupowerbackend.h"
+#endif
 #include "backends/hal/powerdevilhalbackend.h"
 
 #include <KDebug>
@@ -30,6 +33,7 @@ namespace BackendLoader {
 
 BackendInterface* loadBackend(QObject *parent)
 {
+#ifdef HAVE_UDEV
     // Check UPower first
     kDebug() << "Loading UPower backend...";
     if (PowerDevilUPowerBackend::isAvailable()) {
@@ -38,6 +42,7 @@ BackendInterface* loadBackend(QObject *parent)
     }
 
     kDebug() << "Failed!";
+#endif
 
     // If we are here, try HAL
     kDebug() << "Loading HAL backend...";

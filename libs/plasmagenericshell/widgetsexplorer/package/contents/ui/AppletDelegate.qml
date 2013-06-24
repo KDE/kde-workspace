@@ -31,6 +31,7 @@ PlasmaCore.FrameSvgItem {
     property variant icon: decoration
     property string title: name
     property string description: model.description
+    property string version: model.version
     property string author: model.author
     property string email: model.email
     property string license: model.license

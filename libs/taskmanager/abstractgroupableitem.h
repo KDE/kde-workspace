@@ -63,6 +63,7 @@ public:
 
     virtual QIcon icon() const;
     virtual QString name() const;
+    virtual QString genericName() const;
 
     virtual WindowList winIds() const;
 

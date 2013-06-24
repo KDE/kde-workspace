@@ -34,15 +34,8 @@ SplashApp::SplashApp(Display * display, int &argc, char ** argv)
     m_kde_splash_progress = XInternAtom(m_display, "_KDE_SPLASH_PROGRESS", False);
     m_testing = arguments().contains("--test");
 
-    QDesktopWidget *desktop = QApplication::desktop();
-    int numScreens = desktop->screenCount();
-
-    for (int i = 0; i < numScreens; ++i) {
-        SplashWindow *w = new SplashWindow(m_testing);
-        w->setGeometry(desktop->availableGeometry(i));
-        w->show();
-        m_windows << w;
-    }
+    m_desktop = QApplication::desktop();
+    screenGeometryChanged(m_desktop->screenCount());
 
     setStage(1);
 
@@ -57,6 +50,9 @@ SplashApp::SplashApp(Display * display, int &argc, char ** argv)
     if (m_testing) {
         m_timer.start(TEST_STEP_INTERVAL, this);
     }
+    
+    connect(m_desktop, SIGNAL(screenCountChanged(int)), this, SLOT(screenGeometryChanged(int)));
+    connect(m_desktop, SIGNAL(workAreaResized(int)), this, SLOT(screenGeometryChanged(int)));
 }
 
 SplashApp::~SplashApp()
@@ -130,3 +126,24 @@ void SplashApp::setStage(int stage)
     }
 }
 
+void SplashApp::screenGeometryChanged(int)
+{
+    int i;
+    // first iterate over all the new and old ones to set sizes appropriately
+    for (i = 0; i < m_desktop->screenCount(); i++) {
+        if (i < m_windows.count()) {
+            m_windows[i]->setGeometry(m_desktop->availableGeometry(i));
+        }
+        else {
+            SplashWindow *w = new SplashWindow(m_testing);
+            w->setGeometry(m_desktop->availableGeometry(i));
+            w->setStage(m_stage);
+            w->show();
+            m_windows << w;
+        }
+    }
+    // then delete the rest, if there is any
+    m_windows.erase(m_windows.begin() + i, m_windows.end());
+}
+
+#include "SplashApp.moc"

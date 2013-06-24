@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kwineffects.h>
 
 #include <QtGui/QVector2D>
+#include <QGraphicsRotation>
+#include <QGraphicsScale>
 
 #include <QtTest/QtTest>
 
@@ -68,6 +70,8 @@ public:
     virtual void unrefWindow();
     virtual QRegion shape() const;
     virtual void setData(int role, const QVariant &data);
+    virtual void referencePreviousWindowPixmap() {}
+    virtual void unreferencePreviousWindowPixmap() {}
 };
 
 MockEffectWindow::MockEffectWindow(QObject *parent)

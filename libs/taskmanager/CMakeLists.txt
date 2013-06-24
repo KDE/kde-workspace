@@ -9,6 +9,7 @@ set(taskmanager_LIB_SRCS
    groupmanager.cpp
    launcheritem.cpp
    startup.cpp
+   strategies/activitysortingstrategy.cpp
    strategies/alphasortingstrategy.cpp
    strategies/desktopsortingstrategy.cpp
    strategies/programgroupingstrategy.cpp

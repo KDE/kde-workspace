@@ -33,6 +33,7 @@ namespace KWin
 class ColorCorrection;
 class LanczosFilter;
 class OpenGLBackend;
+class OpenGLPaintRedirector;
 
 class SceneOpenGL
     : public Scene
@@ -46,14 +47,17 @@ public:
     virtual ~SceneOpenGL();
     virtual bool initFailed() const;
     virtual bool hasPendingFlush() const;
-    virtual int paint(QRegion damage, ToplevelList windows);
+    virtual qint64 paint(QRegion damage, ToplevelList windows);
     virtual void windowAdded(Toplevel*);
     virtual void windowDeleted(Deleted*);
     virtual void screenGeometryChanged(const QSize &size);
     virtual OverlayWindow *overlayWindow();
-    virtual bool waitSyncAvailable() const;
+    virtual bool blocksForRetrace() const;
+    virtual bool syncsToVBlank() const;
 
     void idle();
+
+    bool debug() const { return m_debug; }
 
     /**
      * @brief Factory method to create a backend specific texture.
@@ -63,15 +67,30 @@ public:
     Texture *createTexture();
     Texture *createTexture(const QPixmap& pix, GLenum target = GL_TEXTURE_2D);
 
+#ifndef KWIN_HAVE_OPENGLES
+    /**
+     * Copy a region of pixels from the current read to the current draw buffer
+     */
+    static void copyPixels(const QRegion &region);
+#endif
+
     static SceneOpenGL *createScene();
 
 protected:
     SceneOpenGL(Workspace* ws, OpenGLBackend *backend);
     virtual void paintBackground(QRegion region);
+    virtual void extendPaintRegion(QRegion &region, bool opaqueFullscreen);
     QMatrix4x4 transformation(int mask, const ScreenPaintData &data) const;
+    virtual void paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data);
+
+    void handleGraphicsReset(GLenum status);
 
     virtual void doPaintBackground(const QVector<float> &vertices) = 0;
     virtual SceneOpenGL::Window *createWindow(Toplevel *t) = 0;
+
+Q_SIGNALS:
+    void resetCompositing();
+
 public Q_SLOTS:
     virtual void windowOpacityChanged(KWin::Toplevel* c);
     virtual void windowGeometryShapeChanged(KWin::Toplevel* c);
@@ -82,7 +101,7 @@ private:
     bool viewportLimitsMatched(const QSize &size) const;
 private:
     QHash< Toplevel*, Window* > windows;
-    bool debug;
+    bool m_debug;
     OpenGLBackend *m_backend;
 };
 
@@ -105,6 +124,7 @@ protected:
     virtual void doPaintBackground(const QVector< float >& vertices);
     virtual SceneOpenGL::Window *createWindow(Toplevel *t);
     virtual void finalDrawWindow(EffectWindowImpl* w, int mask, QRegion region, WindowPaintData& data);
+    virtual void paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data);
 
 private Q_SLOTS:
     void slotColorCorrectedChanged();
@@ -116,6 +136,7 @@ private:
 private:
     LanczosFilter *m_lanczosFilter;
     ColorCorrection *m_colorCorrection;
+    GLuint vao;
 };
 
 #ifdef KWIN_HAVE_OPENGL_1
@@ -125,7 +146,7 @@ public:
     explicit SceneOpenGL1(OpenGLBackend *backend);
     virtual ~SceneOpenGL1();
     virtual void screenGeometryChanged(const QSize &size);
-    virtual int paint(QRegion damage, ToplevelList windows);
+    virtual qint64 paint(QRegion damage, ToplevelList windows);
     virtual CompositingType compositingType() const {
         return OpenGL1Compositing;
     }
@@ -152,6 +173,7 @@ public:
     virtual void findTarget() = 0;
     virtual bool loadTexture(const Pixmap& pix, const QSize& size, int depth) = 0;
     virtual OpenGLBackend *backend() = 0;
+    virtual bool update(const QRegion &damage);
 
 protected:
     TexturePrivate();
@@ -174,6 +196,7 @@ public:
     virtual bool load(const QImage& image, GLenum target = GL_TEXTURE_2D);
     virtual bool load(const QPixmap& pixmap, GLenum target = GL_TEXTURE_2D);
     virtual void discard();
+    bool update(const QRegion &damage);
 
 protected:
     void findTarget();
@@ -186,7 +209,7 @@ protected:
 private:
     Q_DECLARE_PRIVATE(Texture)
 
-    friend class SceneOpenGL::Window;
+    friend class OpenGLWindowPixmap;
 };
 
 class SceneOpenGL::Window
@@ -194,50 +217,29 @@ class SceneOpenGL::Window
 {
 public:
     virtual ~Window();
-    virtual void performPaint(int mask, QRegion region, WindowPaintData data);
-    virtual void pixmapDiscarded();
+    bool beginRenderWindow(int mask, const QRegion &region, WindowPaintData &data);
+    virtual void performPaint(int mask, QRegion region, WindowPaintData data) = 0;
+    void endRenderWindow();
     bool bindTexture();
-    void discardTexture();
-    void checkTextureSize();
     void setScene(SceneOpenGL *scene) {
         m_scene = scene;
     }
 
 protected:
+    virtual WindowPixmap* createWindowPixmap();
     Window(Toplevel* c);
     enum TextureType {
         Content,
-        DecorationTop,
-        DecorationLeft,
-        DecorationRight,
-        DecorationBottom,
+        DecorationLeftRight,
+        DecorationTopBottom,
         Shadow
     };
 
     QMatrix4x4 transformation(int mask, const WindowPaintData &data) const;
-    void paintDecoration(const QPixmap* decoration, TextureType decorationType, const QRegion& region, const QRect& rect, const WindowPaintData& data, const WindowQuadList& quads, bool updateDeco, bool hardwareClipping);
-    void paintShadow(const QRegion &region, const WindowPaintData &data, bool hardwareClipping);
-    void makeDecorationArrays(const WindowQuadList& quads, const QRect &rect, Texture *tex) const;
-    void renderQuads(int, const QRegion& region, const WindowQuadList& quads, GLTexture* tex, bool normalized, bool hardwareClipping);
-    /**
-     * @brief Called from performPaint once it is determined whether the window will be painted.
-     * This method has to be implemented by the concrete sub class to perform operations for setting
-     * up the OpenGL state (e.g. pushing a matrix).
-     *
-     * @param mask The mask which is used to render the Window
-     * @param data The WindowPaintData for this frame
-     * @see performPaint
-     * @see endRenderWindow
-     **/
-    virtual void beginRenderWindow(int mask, const WindowPaintData &data) = 0;
-    /**
-     * @brief Called from performPaint once the window and decoration has been rendered.
-     * This method has to be implemented by the concrete sub class to perform operations for resetting
-     * the OpenGL state after rendering this window (e.g. pop matrix).
-     *
-     * @param data The WindowPaintData with which this window got rendered
-     **/
-    virtual void endRenderWindow(const WindowPaintData &data) = 0;
+    bool getDecorationTextures(GLTexture **textures) const;
+    void paintDecoration(GLTexture *texture, TextureType type, const QRegion &region, const WindowPaintData &data, const WindowQuadList &quads);
+    void paintShadow(const QRegion &region, const WindowPaintData &data);
+    void renderQuads(int, const QRegion& region, const WindowQuadList& quads, GLTexture* tex, bool normalized);
     /**
      * @brief Prepare the OpenGL rendering state before the texture with @p type will be rendered.
      *
@@ -267,28 +269,49 @@ protected:
      **/
     GLTexture *textureForType(TextureType type);
 
+    void paintDecorations(const WindowPaintData &data, const QRegion &region);
+
 protected:
     SceneOpenGL *m_scene;
+    bool m_hardwareClipping;
 
 private:
-    template<class T>
-    void paintDecorations(const WindowPaintData &data, const QRegion &region, bool hardwareClipping);
-    Texture *texture;
-    Texture *topTexture;
-    Texture *leftTexture;
-    Texture *rightTexture;
-    Texture *bottomTexture;
+    OpenGLPaintRedirector *paintRedirector() const;
 };
 
 class SceneOpenGL2Window : public SceneOpenGL::Window
 {
 public:
+    enum Leaf { ShadowLeaf = 0, LeftRightLeaf, TopBottomLeaf, ContentLeaf, PreviousContentLeaf, LeafCount };
+
+    struct LeafNode
+    {
+        LeafNode()
+            : texture(0),
+              firstVertex(0),
+              vertexCount(0),
+              opacity(1.0),
+              hasAlpha(false),
+              coordinateType(UnnormalizedCoordinates)
+        {
+        }
+
+        GLTexture *texture;
+        int firstVertex;
+        int vertexCount;
+        float opacity;
+        bool hasAlpha;
+        TextureCoordinateType coordinateType;
+    };
+
     explicit SceneOpenGL2Window(Toplevel *c);
     virtual ~SceneOpenGL2Window();
 
 protected:
-    virtual void beginRenderWindow(int mask, const WindowPaintData &data);
-    virtual void endRenderWindow(const WindowPaintData &data);
+    QVector4D modulate(float opacity, float brightness) const;
+    void setBlendEnabled(bool enabled);
+    void setupLeafNodes(LeafNode *nodes, const WindowQuadList *quads, const WindowPaintData &data);
+    virtual void performPaint(int mask, QRegion region, WindowPaintData data);
     virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
     virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
 
@@ -307,12 +330,26 @@ public:
     virtual ~SceneOpenGL1Window();
 
 protected:
-    virtual void beginRenderWindow(int mask, const WindowPaintData &data);
-    virtual void endRenderWindow(const WindowPaintData &data);
+    virtual void performPaint(int mask, QRegion region, WindowPaintData data);
     virtual void prepareStates(TextureType type, qreal opacity, qreal brightness, qreal saturation, int screen);
     virtual void restoreStates(TextureType type, qreal opacity, qreal brightness, qreal saturation);
+private:
+    void paintContent(SceneOpenGL::Texture* content, const QRegion& region, int mask, qreal opacity,
+                      const WindowPaintData& data, const WindowQuadList &contentQuads, bool normalized);
 };
 #endif
+
+class OpenGLWindowPixmap : public WindowPixmap
+{
+public:
+    explicit OpenGLWindowPixmap(Scene::Window *window, SceneOpenGL *scene);
+    virtual ~OpenGLWindowPixmap();
+    SceneOpenGL::Texture *texture() const;
+    bool bind();
+private:
+    SceneOpenGL *m_scene;
+    QScopedPointer<SceneOpenGL::Texture> m_texture;
+};
 
 class SceneOpenGL::EffectFrame
     : public Scene::EffectFrame
@@ -376,6 +413,27 @@ private:
 };
 
 /**
+ * @short Profiler to detect whether we have triple buffering
+ * The strategy is to start setBlocksForRetrace(false) but assume blocking and have the system prove that assumption wrong
+ **/
+class SwapProfiler
+{
+public:
+    SwapProfiler();
+    void init();
+    void begin();
+    /**
+     * @return char being 'd' for double, 't' for triple (or more - but non-blocking) buffering and
+     * 0 (NOT '0') otherwise, so you can act on "if (char result = SwapProfiler::end()) { fooBar(); }
+     **/
+    char end();
+private:
+    QElapsedTimer m_timer;
+    qint64  m_time;
+    int m_counter;
+};
+
+/**
  * @brief The OpenGLBackend creates and holds the OpenGL context and is responsible for Texture from Pixmap.
  *
  * The OpenGLBackend is an abstract base class used by the SceneOpenGL to abstract away the differences
@@ -399,7 +457,7 @@ public:
      * @see startRenderTimer
      **/
     qint64 renderTime() {
-        return m_renderTimer.elapsed();
+        return m_renderTimer.nsecsElapsed();
     }
     virtual void screenGeometryChanged(const QSize &size) = 0;
     virtual SceneOpenGL::TexturePrivate *createBackendTexture(SceneOpenGL::Texture *texture) = 0;
@@ -411,10 +469,9 @@ public:
     /**
      * @brief Backend specific code to handle the end of rendering a frame.
      *
-     * @param mask The rendering mask of this frame
      * @param damage The actual updated region in this frame
      **/
-    virtual void endRenderingFrame(int mask, const QRegion &damage) = 0;
+    virtual void endRenderingFrame(const QRegion &damage) = 0;
     /**
      * @brief Compositor is going into idle mode, flushes any pending paints.
      **/
@@ -456,8 +513,17 @@ public:
      *
      * @return bool @c true if VSync support is available, @c false otherwise
      **/
-    bool waitSyncAvailable() const {
-        return m_waitSync;
+    bool syncsToVBlank() const {
+        return m_syncsToVBlank;
+    }
+    /**
+     * @brief Whether VSync blocks execution until the screen is in the retrace
+     *
+     * Case for waitVideoSync and non triple buffering buffer swaps
+     *
+     **/
+    bool blocksForRetrace() const {
+        return m_blocksForRetrace;
     }
     /**
      * @brief Whether the backend uses direct rendering.
@@ -469,14 +535,6 @@ public:
      **/
     bool isDirectRendering() const {
         return m_directRendering;
-    }
-    /**
-     * @brief Whether the backend used double buffering.
-     *
-     * @return bool @c true if double buffered, @c false otherwise
-     **/
-    bool isDoubleBuffer() const {
-        return m_doubleBuffer;
     }
 protected:
     /**
@@ -499,8 +557,18 @@ protected:
      * If the subclass does not call this method, the backend defaults to @c false.
      * @param enabled @c true if VSync support available, @c false otherwise.
      **/
-    void setHasWaitSync(bool enabled) {
-        m_waitSync = enabled;
+    void setSyncsToVBlank(bool enabled) {
+        m_syncsToVBlank = enabled;
+    }
+    /**
+     * @brief Sets whether the VSync iplementation blocks
+     *
+     * Should be called by the concrete subclass once it is determined how VSync works.
+     * If the subclass does not call this method, the backend defaults to @c false.
+     * @param enabled @c true if VSync blocks, @c false otherwise.
+     **/
+    void setBlocksForRetrace(bool enabled) {
+        m_blocksForRetrace = enabled;
     }
     /**
      * @brief Sets whether the OpenGL context is direct.
@@ -515,18 +583,6 @@ protected:
         m_directRendering = direct;
     }
     /**
-     * @brief Sets whether the OpenGL context uses double buffering.
-     *
-     * Should be called by the concrete subclass once it is determined whether the OpenGL context
-     * uses double buffering.
-     * If the subclass does not call this method, the backend defaults to @c false.
-     *
-     * @param doubleBuffer @c true if double buffering, @c false otherwise
-     **/
-    void setDoubleBuffer(bool doubleBuffer) {
-        m_doubleBuffer = doubleBuffer;
-    }
-    /**
      * @return const QRegion& Damage of previously rendered frame
      **/
     const QRegion &lastDamage() const {
@@ -534,15 +590,6 @@ protected:
     }
     void setLastDamage(const QRegion &damage) {
         m_lastDamage = damage;
-    }
-    /**
-     * @return int Rendering mask of previously rendered frame
-     **/
-    int lastMask() const {
-        return m_lastMask;
-    }
-    void setLastMask(int mask) {
-        m_lastMask = mask;
     }
     /**
      * @brief Starts the timer for how long it takes to render the frame.
@@ -553,23 +600,25 @@ protected:
         m_renderTimer.start();
     }
 
+    SwapProfiler m_swapProfiler;
+
 private:
     /**
      * @brief The OverlayWindow used by this Backend.
      **/
     OverlayWindow *m_overlayWindow;
     /**
-     * @brief Whether VSync is available, defaults to @c false.
+     * @brief Whether VSync is available and used, defaults to @c false.
      **/
-    bool m_waitSync;
+    bool m_syncsToVBlank;
+    /**
+     * @brief Whether present() will block execution until the next vertical retrace @c false.
+     **/
+    bool m_blocksForRetrace;
     /**
      * @brief Whether direct rendering is used, defaults to @c false.
      **/
     bool m_directRendering;
-    /**
-     * @brief Whether double bufferering is available, defaults to @c false.
-     **/
-    bool m_doubleBuffer;
     /**
      * @brief Whether the initialization failed, of course default to @c false.
      **/
@@ -579,10 +628,6 @@ private:
      **/
     QRegion m_lastDamage;
     /**
-     * @brief Rendering mask of previously rendered frame.
-     **/
-    int m_lastMask;
-    /**
      * @brief Timer to measure how long a frame renders.
      **/
     QElapsedTimer m_renderTimer;
@@ -591,6 +636,11 @@ private:
 inline bool SceneOpenGL::hasPendingFlush() const
 {
     return m_backend->hasPendingFlush();
+}
+
+inline SceneOpenGL::Texture* OpenGLWindowPixmap::texture() const
+{
+    return m_texture.data();
 }
 
 } // namespace

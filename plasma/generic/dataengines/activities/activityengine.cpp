@@ -87,7 +87,7 @@ void ActivityEngine::insertActivity(const QString &id)
     setData(id, "Name", activity->name());
     setData(id, "Icon", activity->icon());
     setData(id, "Current", m_currentActivity == id);
-    setData(id, "Encrypted", activity->isEncrypted());
+    setData(id, "Encrypted", false);
 
     QString state;
     switch (activity->state()) {
@@ -128,8 +128,8 @@ void ActivityEngine::enableRanking()
             ACTIVITYRANKING_OBJECT,
             QDBusConnection::sessionBus()
         );
-    connect(m_activityRankingClient, SIGNAL(rankingChanged(QStringList, ActivityDataList)),
-            this, SLOT(rankingChanged(QStringList, ActivityDataList)));
+    connect(m_activityRankingClient, SIGNAL(rankingChanged(QStringList,ActivityDataList)),
+            this, SLOT(rankingChanged(QStringList,ActivityDataList)));
 
     QDBusMessage msg = QDBusMessage::createMethodCall(ACTIVITYMANAGER_SERVICE,
                                                       ACTIVITYRANKING_OBJECT,
@@ -213,7 +213,7 @@ void ActivityEngine::activityDataChanged()
     }
     setData(activity->id(), "Name", activity->name());
     setData(activity->id(), "Icon", activity->icon());
-    setData(activity->id(), "Encrypted", activity->isEncrypted());
+    setData(activity->id(), "Encrypted", false);
     setData(activity->id(), "Current", m_currentActivity == activity->id());
     setData(activity->id(), "Score", m_activityScores.value(activity->id()));
 }

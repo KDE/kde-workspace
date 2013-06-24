@@ -26,11 +26,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kwinconfig.h" // KWIN_HAVE_OPENGL
 #include "kwinglobals.h"
 
-#include <QtCore/QSize>
-#include <QtCore/QSharedData>
+#include <QSize>
+#include <QSharedData>
+#include <QImage>
 
 namespace KWin
 {
+// forward declarations
+class GLVertexBuffer;
 
 class KWIN_EXPORT GLTexturePrivate
     : public QSharedData
@@ -45,13 +48,16 @@ public:
 
     QImage convertToGLFormat(const QImage& img) const;
 
+    void updateMatrix();
+
     GLuint m_texture;
     GLenum m_target;
     GLenum m_filter;
     GLenum m_wrapMode;
     QSize m_size;
     QSizeF m_scale; // to un-normalize GL_TEXTURE_2D
-    bool m_yInverted; // texture has y inverted
+    QMatrix4x4 m_matrix[2];
+    bool m_yInverted; // texture is y-inverted
     bool m_canUseMipmaps;
     bool m_markedDirty;
     bool m_filterChanged;
@@ -67,6 +73,7 @@ public:
     static bool sNPOTTextureSupported;
     static bool sFramebufferObjectSupported;
     static bool sSaturationSupported;
+    static bool sTextureFormatBGRA;
 private:
     Q_DISABLE_COPY(GLTexturePrivate)
 };

@@ -157,7 +157,7 @@
        <item>
         <layout class="QHBoxLayout">
          <item>
-          <spacer name="spacer80">
+          <spacer name="spacer801">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -189,7 +189,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="spacer81">
+          <spacer name="spacer811">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>

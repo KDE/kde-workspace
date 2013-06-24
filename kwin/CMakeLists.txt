@@ -14,9 +14,9 @@ OPTION(KWIN_BUILD_OPENGL_1_COMPOSITING "Enable support for OpenGL 1.x, automatic
 OPTION(KWIN_BUILD_ACTIVITIES "Enable building of KWin with kactivities support" ON)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    OPTION(KWIN_PLASMA_ACTIVE "Enable building KWin for Plasma Active." OFF)
-else(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+else()
    OPTION(KWIN_PLASMA_ACTIVE "Enable building KWin for Plasma Active." On)
-endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+endif()
 
 # Binary name of KWin
 set(KWIN_NAME "kwin")
@@ -30,29 +30,33 @@ if(KWIN_PLASMA_ACTIVE)
     set(KWIN_MOBILE_EFFECTS ON)
     set(KWIN_BUILD_WITH_OPENGLES ON)
     set(KWIN_NAME "kwinactive")
-endif(KWIN_PLASMA_ACTIVE)
+endif()
 
 cmake_dependent_option(KWIN_BUILD_KAPPMENU "Build without appmenu support" ON "KWIN_BUILD_DECORATIONS" FALSE)
 
 # KWIN_HAVE_XRENDER_COMPOSITING - whether XRender-based compositing support is available: may be disabled
 if( KWIN_BUILD_XRENDER_COMPOSITING )
     set( KWIN_HAVE_XRENDER_COMPOSITING 1 )
-endif( KWIN_BUILD_XRENDER_COMPOSITING )
+endif()
 
 if(OPENGL_FOUND)
   include_directories(${OPENGL_INCLUDE_DIR})
-endif(OPENGL_FOUND)
+endif()
 
 if(OPENGL_EGL_FOUND)
     include_directories(${OPENGLES_EGL_INCLUDE_DIR})
     set(KWIN_HAVE_EGL 1)
-endif(OPENGL_EGL_FOUND)
+endif()
 
 if(OPENGLES_FOUND)
   include_directories(${OPENGLES_INCLUDE_DIR})
-endif(OPENGLES_FOUND)
+endif()
 
 include_directories(${XCB_INCLUDE_DIR})
+
+if(WAYLAND_FOUND AND KWIN_HAVE_EGL)
+    include_directories(${WAYLAND_INCLUDE_DIR})
+endif()
 
 # for things that are also used by kwin libraries
 configure_file(libkwineffects/kwinconfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libkwineffects/kwinconfig.h )
@@ -76,16 +80,20 @@ add_subdirectory( libkwineffects )
 add_subdirectory( killer )
 if(KWIN_BUILD_KCMS)
     add_subdirectory( kcmkwin )
-endif(KWIN_BUILD_KCMS)
+endif()
 
 if( KWIN_BUILD_DECORATIONS )
     add_subdirectory( clients )
-endif( KWIN_BUILD_DECORATIONS )
+endif()
 add_subdirectory( data )
 
 add_subdirectory( effects )
 add_subdirectory( scripts )
 add_subdirectory( tabbox )
+
+if(KWIN_BUILD_SCRIPTING)
+    add_subdirectory(scripting)
+endif()
 
 ########### next target ###############
 
@@ -94,7 +102,10 @@ set(kwin_KDEINIT_SRCS
    dbusinterface.cpp
    client.cpp 
    client_machine.cpp
+   cursor.cpp
    tabgroup.cpp
+   focuschain.cpp
+   netinfo.cpp
    placement.cpp 
    atoms.cpp 
    utils.cpp 
@@ -102,16 +113,16 @@ set(kwin_KDEINIT_SRCS
    main.cpp 
    options.cpp 
    outline.cpp
-   plugins.cpp 
+   decorations.cpp
    events.cpp 
    killwindow.cpp 
    geometrytip.cpp 
+   screens.cpp
    shadow.cpp
    sm.cpp 
    group.cpp 
    bridge.cpp 
    manage.cpp 
-   notifications.cpp
    overlaywindow.cpp
    activation.cpp 
    useractions.cpp 
@@ -143,8 +154,9 @@ if(KWIN_BUILD_SCRIPTING)
         scripting/scriptedeffect.cpp
         scripting/scriptingutils.cpp
         scripting/timer.cpp
+        scripting/scripting_model.cpp
     )
-endif(KWIN_BUILD_SCRIPTING)
+endif()
 
 if(KWIN_BUILD_TABBOX)
     set(
@@ -157,18 +169,36 @@ if(KWIN_BUILD_TABBOX)
         tabbox/tabboxconfig.cpp
         tabbox/tabboxhandler.cpp
   )
-endif(KWIN_BUILD_TABBOX)
+endif()
 
 if(KWIN_BUILD_SCREENEDGES)
     set(
         kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
         screenedge.cpp
     )
-endif(KWIN_BUILD_SCREENEDGES)
+endif()
+
+if(KWIN_BUILD_KAPPMENU)
+    set(
+        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+        appmenu.cpp
+    )
+endif()
+
+if(KWIN_BUILD_ACTIVITIES)
+    set(
+        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+        activities.cpp
+    )
+endif()
 
 if(KWIN_HAVE_EGL)
     set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} eglonxbackend.cpp)
-endif(KWIN_HAVE_EGL)
+endif()
+
+if(WAYLAND_FOUND AND KWIN_HAVE_EGL)
+    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} egl_wayland_backend.cpp)
+endif()
 
 kde4_add_kcfg_files(kwin_KDEINIT_SRCS settings.kcfgc)
 
@@ -183,26 +213,89 @@ qt4_add_dbus_interface( kwin_KDEINIT_SRCS
 
 qt4_add_resources( kwin_KDEINIT_SRCS resources.qrc )
 
-set(kwinLibs ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} ${QT_QTDECLARATIVE_LIBRARY} ${KDECLARATIVE_LIBRARIES} kdecorations kwineffects ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${X11_Xdamage_LIB} ${X11_Xrender_LIB} ${X11_Xfixes_LIB} ${XCB_XCB_LIBRARIES} ${X11_XCB_LIBRARIES} ${XCB_XFIXES_LIBRARIES} ${XCB_DAMAGE_LIBRARIES} ${XCB_COMPOSITE_LIBRARIES} ${XCB_SHAPE_LIBRARIES} ${XCB_SYNC_LIBRARIES} ${XCB_RENDER_LIBRARIES} ${XCB_RANDR_LIBRARIES})
+########### target link libraries ###############
+
+set(kwin_OWN_LIBS
+    kdecorations
+    kwineffects
+)
+
+set(kwin_QT_LIBS
+    ${QT_QTDECLARATIVE_LIBRARY}
+)
+
+set(kwin_KDE_LIBS
+    ${KDE4_KDEUI_LIBS}
+    ${KDE4_PLASMA_LIBS}
+    ${KDECLARATIVE_LIBRARIES}
+)
+
+set(kwin_XLIB_LIBS
+    ${X11_X11_LIB}
+    ${X11_Xext_LIB}
+    ${X11_ICE_LIB}
+    ${X11_SM_LIB}
+    ${X11_Xcursor_LIB}
+    ${X11_Xrandr_LIB}
+    ${X11_Xdamage_LIB}
+    ${X11_Xrender_LIB}
+    ${X11_Xfixes_LIB}
+)
+
+set(kwin_XCB_LIBS
+    ${XCB_XCB_LIBRARIES}
+    ${X11_XCB_LIBRARIES}
+    ${XCB_XFIXES_LIBRARIES}
+    ${XCB_DAMAGE_LIBRARIES}
+    ${XCB_COMPOSITE_LIBRARIES}
+    ${XCB_SHAPE_LIBRARIES}
+    ${XCB_SYNC_LIBRARIES}
+    ${XCB_RENDER_LIBRARIES}
+    ${XCB_RANDR_LIBRARIES}
+    ${XCB_KEYSYMS_LIBRARIES}
+    ${XCB_ICCCM_LIBRARIES}
+)
+
+set(kwin_WAYLAND_LIBS
+    ${WAYLAND_CLIENT_LIBRARIES}
+    ${WAYLAND_EGL_LIBRARIES}
+    ${XCB_SHM_LIBRARIES}
+    ${XCB_XTEST_LIBRARIES}
+)
+
+set(kwin_OPENGL_LIBS )
 
 find_library(XF86VM_LIBRARY Xxf86vm)
 if (XF86VM_LIBRARY)
-    set(kwinLibs ${kwinLibs} ${XF86VM_LIBRARY})
-else(XF86VM_LIBRARY)
+    set(kwin_XLIB_LIBS ${kwin_XLIB_LIBS} ${XF86VM_LIBRARY})
+else()
     add_definitions(-DKWIN_NO_XF86VM)
-endif(XF86VM_LIBRARY)
+endif()
 
 if(KWIN_BUILD_SCRIPTING)
-    set(kwinLibs ${kwinLibs} ${QT_QTSCRIPT_LIBRARY})
-endif(KWIN_BUILD_SCRIPTING)
+    set(kwin_QT_LIBS ${kwin_QT_LIBS} ${QT_QTSCRIPT_LIBRARY})
+endif()
 
 if(KWIN_BUILD_ACTIVITIES)
-    set(kwinLibs ${kwinLibs} ${KACTIVITIES_LIBRARY})
-endif(KWIN_BUILD_ACTIVITIES)
+    set(kwin_KDE_LIBS ${kwin_KDE_LIBS} ${KACTIVITIES_LIBRARY})
+endif()
 
 if(OPENGL_EGL_FOUND)
-    set(kwinLibs ${kwinLibs} ${OPENGLES_EGL_LIBRARY})
-endif(OPENGL_EGL_FOUND)
+    set(kwin_OPENGL_LIBS ${kwin_OPENGL_LIBS} ${OPENGLES_EGL_LIBRARY})
+endif()
+
+set(kwinLibs
+    ${kwin_OWN_LIBS}
+    ${kwin_QT_LIBS}
+    ${kwin_KDE_LIBS}
+    ${kwin_XLIB_LIBS}
+    ${kwin_XCB_LIBS}
+    ${kwin_OPENGL_LIBS}
+)
+
+if(WAYLAND_FOUND  AND KWIN_HAVE_EGL)
+    set(kwinLibs ${kwinLibs} ${kwin_WAYLAND_LIBS})
+endif()
 
 kde4_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
 
@@ -213,20 +306,20 @@ set_target_properties(kdeinit_kwin PROPERTIES OUTPUT_NAME kdeinit4_${KWIN_NAME})
 if(OPENGL_FOUND)
     if( KWIN_BUILD_OPENGL_1_COMPOSITING )
         set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS -DKWIN_HAVE_OPENGL_1)
-    endif( KWIN_BUILD_OPENGL_1_COMPOSITING )
+    endif()
   add_subdirectory(opengltest)
   target_link_libraries(kdeinit_kwin kwinglutils ${OPENGL_gl_LIBRARY})
   # -ldl used by OpenGL code
   find_library(DL_LIBRARY dl)
   if (DL_LIBRARY)
     target_link_libraries(kdeinit_kwin ${DL_LIBRARY})
-  endif(DL_LIBRARY)
+  endif()
   # must be after opengl, to be initialized first by the linker
   target_link_libraries(kdeinit_kwin kwinnvidiahack)
 elseif(OPENGLES_FOUND)
   target_link_libraries(kdeinit_kwin ${kwinLibs} kwinglesutils ${OPENGLES_LIBRARIES})
   set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGLES")
-endif(OPENGL_FOUND)
+endif()
 
 install(TARGETS kdeinit_kwin ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(TARGETS kwin         ${INSTALL_TARGETS_DEFAULT_ARGS} )
@@ -239,7 +332,7 @@ if(OPENGLES_FOUND)
   set_target_properties(kdeinit_kwin_gles PROPERTIES OUTPUT_NAME kdeinit4_${KWIN_NAME}_gles)
   install(TARGETS kdeinit_kwin_gles ${INSTALL_TARGETS_DEFAULT_ARGS} )
   install(TARGETS kwin_gles         ${INSTALL_TARGETS_DEFAULT_ARGS} )
-endif(OPENGLES_FOUND)
+endif()
 
 ########### next target ###############
 
@@ -262,7 +355,7 @@ install( FILES org.kde.KWin.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
 if( KWIN_BUILD_SCRIPTING )
     # Install the KWin/WindowSwitcher service type
     install( FILES scripting/kwinscript.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR} )
-endif( KWIN_BUILD_SCRIPTING )
+endif()
 
 kde4_install_icons( ${ICON_INSTALL_DIR} )
 

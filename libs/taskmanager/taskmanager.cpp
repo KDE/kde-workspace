@@ -232,8 +232,9 @@ Task *TaskManager::findTask(int desktop, const QPoint& p)
 void TaskManager::windowAdded(WId w)
 {
 #ifdef Q_WS_X11
-    NETWinInfo info(QX11Info::display(), w, QX11Info::appRootWindow(),
-                    NET::WMWindowType | NET::WMPid | NET::WMState);
+    KWindowInfo info(w,
+                     NET::WMWindowType | NET::WMPid | NET::WMState | NET::WMName,
+                     NET::WM2TransientFor);
 
     // ignore NET::Tool and other special window types
     NET::WindowType wType = info.windowType(NET::NormalMask | NET::DesktopMask | NET::DockMask |
@@ -241,30 +242,17 @@ void TaskManager::windowAdded(WId w)
                                             NET::OverrideMask | NET::TopMenuMask |
                                             NET::UtilityMask | NET::SplashMask);
 
-    if (wType != NET::Normal && wType != NET::Override && wType != NET::Unknown &&
-            wType != NET::Dialog && wType != NET::Utility) {
-        return;
-    }
-
-    // ignore windows that want to be ignored by the taskbar
-    if ((info.state() & NET::SkipTaskbar) != 0) {
-        d->skiptaskbarWindows.insert(w); // remember them though
-        return;
-    }
-
-    Window transient_for_tmp;
-    if (XGetTransientForHint(QX11Info::display(), (Window)w, &transient_for_tmp)) {
-        WId transient_for = (WId)transient_for_tmp;
+    if (info.transientFor() > 0) {
+        const WId transientFor = info.transientFor();
 
         // check if it's transient for a skiptaskbar window
-        if (d->skiptaskbarWindows.contains(transient_for)) {
+        if (d->skiptaskbarWindows.contains(transientFor)) {
             return;
         }
 
         // lets see if this is a transient for an existing task
-        if (transient_for != QX11Info::appRootWindow() &&
-                transient_for != 0 && wType != NET::Utility) {
-            Task *t = findTask(transient_for);
+        if (transientFor != QX11Info::appRootWindow()) {
+            Task *t = findTask(transientFor);
             if (t) {
                 if (t->window() != w) {
                     t->addTransient(w, info);
@@ -274,6 +262,18 @@ void TaskManager::windowAdded(WId w)
             }
         }
     }
+
+    if (wType != NET::Normal && wType != NET::Override && wType != NET::Unknown &&
+        wType != NET::Dialog && wType != NET::Utility) {
+        return;
+    }
+
+    // ignore windows that want to be ignored by the taskbar
+    if ((info.state() & NET::SkipTaskbar) != 0) {
+        d->skiptaskbarWindows.insert(w); // remember them though
+        return;
+    }
+
 #endif
 
     Task *t = new Task(w, 0);
@@ -469,28 +469,60 @@ int TaskManager::numberOfDesktops() const
     return KWindowSystem::numberOfDesktops();
 }
 
-bool TaskManager::isOnTop(const Task* task) const
+bool TaskManager::isOnTop(const Task *task) const
 {
     if (!task) {
         return false;
     }
 
     QList<WId> list = KWindowSystem::stackingOrder();
-    QList<WId>::const_iterator begin(list.constBegin());
-    QList<WId>::const_iterator it = list.constBegin() + (list.size() - 1);
-    do {
-        Task *t = d->tasksByWId.value(*it);
-        if (t) {
-            if (t == task) {
+    QListIterator<WId> it(list);
+    it.toBack();
+
+    const bool multiscreen = qApp->desktop()->screenCount() > 1;
+    // we only use taskScreen when there are multiple screens, so we
+    // only fetch the value in that case; still, do it outside the loop
+    const int taskScreen = multiscreen ? task->screen() : 0;
+
+    while (it.hasPrevious()) {
+        const WId top = it.previous();
+        Task *t = d->tasksByWId.value(top);
+
+        if (!t) {
+            foreach (const WId transient, task->transients()) {
+                if (transient == top) {
+                    return true;
+                }
+            }
+
+            continue;
+        }
+
+        if (t == task) {
+            return true;
+        }
+
+        foreach (const WId transient, task->transients()) {
+            if (transient == top) {
                 return true;
             }
-#ifndef Q_WS_WIN
-            if (!t->isIconified() && (t->isAlwaysOnTop() == task->isAlwaysOnTop())) {
-                return false;
-            }
-#endif
         }
-    } while (it-- != begin);
+
+        if (t->isFullScreen() && t->screen() != taskScreen) {
+            // it seems window managers always claim that fullscreen
+            // windows are stacked above everything else .. even when
+            // a window on a different physical screen has input focus
+            // so we work around this decision here by only paying attention
+            // to fullscreen windows that are on the same screen as us
+            continue;
+        }
+
+#ifndef Q_WS_WIN
+        if (!t->isIconified() && (t->isAlwaysOnTop() == task->isAlwaysOnTop())) {
+            return false;
+        }
+#endif
+    }
 
     return false;
 }

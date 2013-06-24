@@ -49,7 +49,7 @@ Item {
         property string last
         onSourceAdded: {
             last = source;
-            processLastDevice()
+            processLastDevice(true)
         }
 
         onSourceRemoved: {
@@ -60,21 +60,23 @@ Item {
         }
 
         onDataChanged: {
-            processLastDevice()
+            processLastDevice(true)
         }
 
         onNewData: {
             last = sourceName;
-            processLastDevice();
+            processLastDevice(false);
         }
 
-        function processLastDevice() {
+        function processLastDevice(expand) {
             if (last != "") {
                 if (devicesType == "all" ||
                     (devicesType == "removable" && data[last] && data[last]["Removable"] == true) ||
                     (devicesType == "nonRemovable" && data[last] && data[last]["Removable"] == false)) {
                     updateTooltip();
-                    expandDevice(last)
+                    if (expand) {
+                        expandDevice(last)
+                    }
                     last = "";
                 }
             }

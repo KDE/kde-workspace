@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tabgroup.h"
 
 #include "client.h"
+#include "decorations.h"
 #include "effects.h"
+#include "workspace.h"
 
 namespace KWin
 {
@@ -62,7 +64,7 @@ bool TabGroup::add(Client* c, Client *other, bool after, bool becomeVisible)
 {
     Q_ASSERT(!c->tabGroup());
 
-    if (!c->workspace()->decorationSupportsTabbing() || contains(c) || !contains(other))
+    if (!decorationPlugin()->supportsTabbing() || contains(c) || !contains(other))
         return false;
 
     // Tabbed windows MUST have a decoration
@@ -131,11 +133,11 @@ bool TabGroup::add(Client* c, Client *other, bool after, bool becomeVisible)
         if (!effects || c->readyForPainting()) {
             setCurrent(c);
             if (options->focusPolicyIsReasonable())
-                m_current->workspace()->requestFocus( c );
+                workspace()->requestFocus( c );
         }
         else {
             if (options->focusPolicyIsReasonable())
-                m_current->workspace()->requestFocus( m_current );
+                workspace()->requestFocus( m_current );
             m_current = c; // setCurrent will be called by Toplevel::setReadyForPainting()
         }
     }

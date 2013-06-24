@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ public:
     TabBoxConfigPrivate()
         : showTabBox(TabBoxConfig::defaultShowTabBox())
         , highlightWindows(TabBoxConfig::defaultHighlightWindow())
-        , showOutline(TabBoxConfig::defaultShowOutline())
         , tabBoxMode(TabBoxConfig::ClientTabBox)
         , clientDesktopMode(TabBoxConfig::defaultDesktopMode())
         , clientActivitiesMode(TabBoxConfig::defaultActivitiesMode())
@@ -46,7 +45,6 @@ public:
     }
     bool showTabBox;
     bool highlightWindows;
-    bool showOutline;
 
     TabBoxConfig::TabBoxMode tabBoxMode;
     TabBoxConfig::ClientDesktopMode clientDesktopMode;
@@ -74,7 +72,6 @@ TabBoxConfig& TabBoxConfig::operator=(const KWin::TabBox::TabBoxConfig& object)
 {
     d->showTabBox = object.isShowTabBox();
     d->highlightWindows = object.isHighlightWindows();
-    d->showOutline = object.isShowOutline();
     d->tabBoxMode = object.tabBoxMode();
     d->clientDesktopMode = object.clientDesktopMode();
     d->clientActivitiesMode = object.clientActivitiesMode();
@@ -96,16 +93,6 @@ void TabBoxConfig::setHighlightWindows(bool highlight)
 bool TabBoxConfig::isHighlightWindows() const
 {
     return d->highlightWindows;
-}
-
-void TabBoxConfig::setShowOutline(bool show)
-{
-    d->showOutline = show;
-}
-
-bool TabBoxConfig::isShowOutline() const
-{
-    return d->showOutline;
 }
 
 void TabBoxConfig::setShowTabBox(bool show)

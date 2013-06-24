@@ -18,70 +18,60 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-
-//#define QT_CLEAN_NAMESPACE
-
+// own
 #include "workspace.h"
-
-#include <kapplication.h>
-#include <kstartupinfo.h>
-#include <fixx11h.h>
-#include <kconfig.h>
-#include <kglobal.h>
-#include <klocale.h>
-#include <QtGui/QDesktopWidget>
-#include <QRegExp>
-#include <QPainter>
-#include <QBitmap>
-#include <QClipboard>
-#include <kmenubar.h>
-#include <kprocess.h>
-#include <kglobalaccel.h>
-#include <QToolButton>
-#include <kactioncollection.h>
-#include <kaction.h>
-#include <kconfiggroup.h>
-#include <kcmdlineargs.h>
-#include <kdeversion.h>
-#include <QtDBus/QtDBus>
-
-#include "client.h"
-#include "composite.h"
-#ifdef KWIN_BUILD_TABBOX
-#include "tabbox.h"
+// kwin libs
+#include <kdecorationfactory.h>
+#include <kwinglplatform.h>
+// kwin
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
+#endif
+#ifdef KWIN_BUILD_KAPPMENU
+#include "appmenu.h"
 #endif
 #include "atoms.h"
-#include "placement.h"
-#include "notifications.h"
-#include "outline.h"
-#include "group.h"
-#include "rules.h"
+#include "client.h"
+#include "composite.h"
+#include "cursor.h"
 #include "dbusinterface.h"
-#include "unmanaged.h"
+#include "decorations.h"
 #include "deleted.h"
 #include "effects.h"
-#include "overlaywindow.h"
-#include "useractions.h"
-#include "virtualdesktops.h"
-#include "xcbutils.h"
-#include <kwinglplatform.h>
-#include <kwinglutils.h>
+#include "focuschain.h"
+#include "group.h"
+#include "killwindow.h"
+#include "netinfo.h"
+#include "outline.h"
+#include "placement.h"
+#include "rules.h"
 #ifdef KWIN_BUILD_SCREENEDGES
 #include "screenedge.h"
 #endif
+#include "screens.h"
 #ifdef KWIN_BUILD_SCRIPTING
 #include "scripting/scripting.h"
 #endif
-
-#include <X11/extensions/shape.h>
-#include <X11/keysym.h>
-#include <X11/keysymdef.h>
-#include <X11/cursorfont.h>
-#include <QX11Info>
-#include <stdio.h>
-#include <kglobalsettings.h>
-#include <kwindowsystem.h>
-#include <kwindowinfo.h>
+#ifdef KWIN_BUILD_TABBOX
+#include "tabbox.h"
+#endif
+#include "unmanaged.h"
+#include "useractions.h"
+#include "virtualdesktops.h"
+#include "xcbutils.h"
+// KDE
+#include <kdeversion.h>
+#include <KDE/KActionCollection>
+#include <KDE/KCmdLineArgs>
+#include <KDE/KConfig>
+#include <KDE/KConfigGroup>
+#include <KDE/KGlobal>
+#include <KDE/KGlobalSettings>
+#include <KDE/KStartupInfo>
+#include <KDE/KWindowInfo>
+#include <KDE/KWindowSystem>
+// Qt
+#include <QtConcurrentRun>
 
 namespace KWin
 {
@@ -89,11 +79,30 @@ namespace KWin
 extern int screen_number;
 extern bool is_multihead;
 
-#ifdef KWIN_BUILD_KAPPMENU
-static const char *KDED_SERVICE = "org.kde.kded";
-static const char *KDED_APPMENU_PATH = "/modules/appmenu";
-static const char *KDED_INTERFACE = "org.kde.kded";
-#endif
+ColorMapper::ColorMapper(QObject *parent)
+    : QObject(parent)
+    , m_default(defaultScreen()->default_colormap)
+    , m_installed(defaultScreen()->default_colormap)
+{
+}
+
+ColorMapper::~ColorMapper()
+{
+}
+
+void ColorMapper::update()
+{
+    xcb_colormap_t cmap = m_default;
+    if (Client *c = Workspace::self()->activeClient()) {
+        if (c->colormap() != XCB_COLORMAP_NONE) {
+            cmap = c->colormap();
+        }
+    }
+    if (cmap != m_installed) {
+        xcb_install_colormap(connection(), cmap);
+        m_installed = cmap;
+    }
+}
 
 Workspace* Workspace::_self = 0;
 
@@ -103,14 +112,11 @@ Workspace::Workspace(bool restore)
     // Unsorted
     , active_popup(NULL)
     , active_popup_client(NULL)
-    , temporaryRulesMessages("_KDE_NET_WM_TEMPORARY_RULES", NULL, false)
-    , rules_updates_disabled(false)
     , active_client(0)
     , last_active_client(0)
     , most_recently_raised(0)
     , movingClient(0)
     , pending_take_activity(NULL)
-    , active_screen(0)
     , delayfocus_client(0)
     , force_restacking(false)
     , x_stacking_dirty(true)
@@ -119,37 +125,24 @@ Workspace::Workspace(bool restore)
     , was_user_interaction(false)
     , session_saving(false)
     , block_focus(0)
-#ifdef KWIN_BUILD_TABBOX
-    , tab_box(0)
-#endif
     , m_userActionsMenu(new UserActionsMenu(this))
     , keys(0)
     , client_keys(NULL)
     , disable_shortcuts_keys(NULL)
     , client_keys_dialog(NULL)
     , client_keys_client(NULL)
-    , global_shortcuts_disabled(false)
     , global_shortcuts_disabled_for_client(false)
     , workspaceInit(true)
     , startup(0)
     , set_active_client_recursion(0)
     , block_stacking_updates(0)
     , forced_global_mouse_grab(false)
-    , m_scripting(NULL)
 {
     // If KWin was already running it saved its configuration after loosing the selection -> Reread
     QFuture<void> reparseConfigFuture = QtConcurrent::run(options, &Options::reparseConfiguration);
 
 #ifdef KWIN_BUILD_KAPPMENU
-    QDBusConnection dbus = QDBusConnection::sessionBus();
-    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "showRequest",
-                 this, SLOT(slotShowRequest(qulonglong)));
-    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "menuAvailable",
-                 this, SLOT(slotMenuAvailable(qulonglong)));
-    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "menuHidden",
-                 this, SLOT(slotMenuHidden(qulonglong)));
-    dbus.connect(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "clearMenus",
-                 this, SLOT(slotClearMenus()));
+    ApplicationMenu::create(this);
 #endif
 
     _self = this;
@@ -158,18 +151,26 @@ Workspace::Workspace(bool restore)
     Extensions::init();
     Xcb::Extensions::self();
 
+    // start the cursor support
+    Cursor::create(this);
+
+    // get screen support
+    Screens *screens = Screens::create(this);
+    connect(screens, SIGNAL(changed()), SLOT(desktopResized()));
+
+#ifdef KWIN_BUILD_ACTIVITIES
+    Activities *activities = Activities::create(this);
+    connect(activities, SIGNAL(currentChanged(QString)), SLOT(updateCurrentActivity(QString)));
+#endif
+
     // PluginMgr needs access to the config file, so we need to wait for it for finishing
     reparseConfigFuture.waitForFinished();
     options->loadConfig();
     options->loadCompositingConfig(false);
-    mgr = new PluginMgr;
-    QX11Info info;
-    default_colormap = DefaultColormap(display(), info.screen());
-    installed_colormap = default_colormap;
+    DecorationPlugin::create(this);
+    ColorMapper *colormaps = new ColorMapper(this);
+    connect(this, SIGNAL(clientActivated(KWin::Client*)), colormaps, SLOT(update()));
 
-    connect(&temporaryRulesMessages, SIGNAL(gotMessage(QString)),
-            this, SLOT(gotTemporaryRulesMessage(QString)));
-    connect(&rulesUpdatedTimer, SIGNAL(timeout()), this, SLOT(writeWindowRules()));
     updateXTime(); // Needed for proper initialization of user_time in Client ctor
 
     delayFocusTimer = 0;
@@ -177,7 +178,7 @@ Workspace::Workspace(bool restore)
     if (restore)
         loadSessionInfo();
 
-    loadWindowRules();
+    RuleBook::create(this)->load();
 
     // Call this before XSelectInput() on the root window
     startup = new KStartupInfo(
@@ -205,12 +206,12 @@ Workspace::Workspace(bool restore)
 
 #ifdef KWIN_BUILD_TABBOX
     // need to create the tabbox before compositing scene is setup
-    tab_box = new TabBox::TabBox(this);
+    TabBox::TabBox::create(this);
 #endif
 
-    m_compositor = Compositor::createCompositor(this);
+    m_compositor = Compositor::create(this);
     connect(this, SIGNAL(currentDesktopChanged(int,KWin::Client*)), m_compositor, SLOT(addRepaintFull()));
-    connect(m_compositor, SIGNAL(compositingToggled(bool)), SLOT(slotCompositingToggled()));
+    connect(m_compositor, SIGNAL(compositingToggled(bool)), decorationPlugin(), SLOT(resetCompositing()));
 
     new DBusInterface(this);
 
@@ -230,37 +231,19 @@ Workspace::Workspace(bool restore)
 
     client_keys = new KActionCollection(this);
 
-    m_outline = new Outline();
+    Outline::create(this);
 
     initShortcuts();
 
     init();
-
-    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), &screenChangedTimer, SLOT(start()));
-    connect(QApplication::desktop(), SIGNAL(resized(int)), &screenChangedTimer, SLOT(start()));
-
-#ifdef KWIN_BUILD_ACTIVITIES
-    connect(&activityController_, SIGNAL(currentActivityChanged(QString)), SLOT(updateCurrentActivity(QString)));
-    connect(&activityController_, SIGNAL(activityRemoved(QString)), SLOT(slotActivityRemoved(QString)));
-    connect(&activityController_, SIGNAL(activityRemoved(QString)), SIGNAL(activityRemoved(QString)));
-    connect(&activityController_, SIGNAL(activityAdded(QString)), SLOT(slotActivityAdded(QString)));
-    connect(&activityController_, SIGNAL(activityAdded(QString)), SIGNAL(activityAdded(QString)));
-    connect(&activityController_, SIGNAL(currentActivityChanged(QString)), SIGNAL(currentActivityChanged(QString)));
-#endif
-
-    connect(&screenChangedTimer, SIGNAL(timeout()), SLOT(screenChangeTimeout()));
-    screenChangedTimer.setSingleShot(true);
-    screenChangedTimer.setInterval(100);
-}
-
-void Workspace::screenChangeTimeout()
-{
-    kDebug() << "It is time to call desktopResized";
-    desktopResized();
 }
 
 void Workspace::init()
 {
+    Screens *screens = Screens::self();
+    screens->setConfig(KGlobal::config());
+    screens->reconfigure();
+    connect(options, SIGNAL(configChanged()), screens, SLOT(reconfigure()));
 #ifdef KWIN_BUILD_SCREENEDGES
     ScreenEdges *screenEdges = ScreenEdges::self();
     screenEdges->setConfig(KGlobal::config());
@@ -270,100 +253,19 @@ void Workspace::init()
     connect(this, SIGNAL(clientActivated(KWin::Client*)), screenEdges, SIGNAL(checkBlocking()));
 #endif
 
-    supportWindow = new QWidget(NULL, Qt::X11BypassWindowManagerHint);
-    XLowerWindow(display(), supportWindow->winId());   // See usage in layers.cpp
+    FocusChain *focusChain = FocusChain::create(this);
+    connect(this, SIGNAL(clientRemoved(KWin::Client*)), focusChain, SLOT(remove(KWin::Client*)));
+    connect(this, SIGNAL(clientActivated(KWin::Client*)), focusChain, SLOT(setActiveClient(KWin::Client*)));
+    connect(VirtualDesktopManager::self(), SIGNAL(countChanged(uint,uint)), focusChain, SLOT(resize(uint,uint)));
+    connect(VirtualDesktopManager::self(), SIGNAL(currentChanged(uint,uint)), focusChain, SLOT(setCurrentDesktop(uint,uint)));
+    connect(options, SIGNAL(separateScreenFocusChanged(bool)), focusChain, SLOT(setSeparateScreenFocus(bool)));
+    focusChain->setSeparateScreenFocus(options->isSeparateScreenFocus());
 
-    XSetWindowAttributes attr;
-    attr.override_redirect = 1;
-    null_focus_window = XCreateWindow(display(), rootWindow(), -1, -1, 1, 1, 0, CopyFromParent,
-                                      InputOnly, CopyFromParent, CWOverrideRedirect, &attr);
-    XMapWindow(display(), null_focus_window);
+    const uint32_t nullFocusValues[] = {true};
+    m_nullFocus.reset(new Xcb::Window(QRect(-1, -1, 1, 1), XCB_WINDOW_CLASS_INPUT_ONLY, XCB_CW_OVERRIDE_REDIRECT, nullFocusValues));
+    m_nullFocus->map();
 
-    unsigned long protocols[5] = {
-        NET::Supported |
-        NET::SupportingWMCheck |
-        NET::ClientList |
-        NET::ClientListStacking |
-        NET::DesktopGeometry |
-        NET::NumberOfDesktops |
-        NET::CurrentDesktop |
-        NET::ActiveWindow |
-        NET::WorkArea |
-        NET::CloseWindow |
-        NET::DesktopNames |
-        NET::WMName |
-        NET::WMVisibleName |
-        NET::WMDesktop |
-        NET::WMWindowType |
-        NET::WMState |
-        NET::WMStrut |
-        NET::WMIconGeometry |
-        NET::WMIcon |
-        NET::WMPid |
-        NET::WMMoveResize |
-        NET::WMFrameExtents |
-        NET::WMPing
-        ,
-        NET::NormalMask |
-        NET::DesktopMask |
-        NET::DockMask |
-        NET::ToolbarMask |
-        NET::MenuMask |
-        NET::DialogMask |
-        NET::OverrideMask |
-        NET::UtilityMask |
-        NET::SplashMask |
-        // No compositing window types here unless we support them also as managed window types
-        0
-        ,
-        NET::Modal |
-        //NET::Sticky | // Large desktops not supported (and probably never will be)
-        NET::MaxVert |
-        NET::MaxHoriz |
-        NET::Shaded |
-        NET::SkipTaskbar |
-        NET::KeepAbove |
-        //NET::StaysOnTop | // The same like KeepAbove
-        NET::SkipPager |
-        NET::Hidden |
-        NET::FullScreen |
-        NET::KeepBelow |
-        NET::DemandsAttention |
-        0
-        ,
-        NET::WM2UserTime |
-        NET::WM2StartupId |
-        NET::WM2AllowedActions |
-        NET::WM2RestackWindow |
-        NET::WM2MoveResizeWindow |
-        NET::WM2ExtendedStrut |
-        NET::WM2KDETemporaryRules |
-        NET::WM2ShowingDesktop |
-        NET::WM2DesktopLayout |
-        NET::WM2FullPlacement |
-        NET::WM2FullscreenMonitors |
-        NET::WM2KDEShadow |
-        0
-        ,
-        NET::ActionMove |
-        NET::ActionResize |
-        NET::ActionMinimize |
-        NET::ActionShade |
-        //NET::ActionStick | // Sticky state is not supported
-        NET::ActionMaxVert |
-        NET::ActionMaxHoriz |
-        NET::ActionFullScreen |
-        NET::ActionChangeDesktop |
-        NET::ActionClose |
-        0
-        ,
-    };
-
-    if (hasDecorationPlugin() && mgr->factory()->supports(AbilityExtendIntoClientArea))
-        protocols[ NETRootInfo::PROTOCOLS2 ] |= NET::WM2FrameOverlap;
-
-    QX11Info info;
-    rootInfo = new RootInfo(this, display(), supportWindow->winId(), "KWin", protocols, 5, info.screen());
+    RootInfo *rootInfo = RootInfo::create();
 
     // create VirtualDesktopManager and perform dependency injection
     VirtualDesktopManager *vds = VirtualDesktopManager::self();
@@ -394,7 +296,7 @@ void Workspace::init()
     if (!VirtualDesktopManager::self()->setCurrent(initial_desktop))
         VirtualDesktopManager::self()->setCurrent(1);
 #ifdef KWIN_BUILD_ACTIVITIES
-    updateActivityList(false, true);
+    Activities::self()->update(false, true);
 #endif
 
     reconfigureTimer.setSingleShot(true);
@@ -465,8 +367,8 @@ void Workspace::init()
         rootInfo->setDesktopViewport(VirtualDesktopManager::self()->count(), *viewports);
         delete[] viewports;
         QRect geom;
-        for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
-            geom |= QApplication::desktop()->screenGeometry(i);
+        for (int i = 0; i < screens->count(); i++) {
+            geom |= screens->geometry(i);
         }
         NETSize desktop_geometry;
         desktop_geometry.width = geom.width();
@@ -494,7 +396,7 @@ void Workspace::init()
 
 
 #ifdef KWIN_BUILD_SCRIPTING
-    m_scripting = new Scripting(this);
+    Scripting::create(this);
 #endif
 
     // SELI TODO: This won't work with unreasonable focus policies,
@@ -532,25 +434,17 @@ Workspace::~Workspace()
     }
     for (UnmanagedList::iterator it = unmanaged.begin(), end = unmanaged.end(); it != end; ++it)
         (*it)->release(true);
-    delete m_outline;
     XDeleteProperty(display(), rootWindow(), atoms->kwin_running);
 
-    writeWindowRules();
+    delete RuleBook::self();
     KGlobal::config()->sync();
 
-    delete rootInfo;
-    delete supportWindow;
-    delete mgr;
+    RootInfo::destroy();
     delete startup;
     delete Placement::self();
     delete client_keys_dialog;
-    while (!rules.isEmpty()) {
-        delete rules.front();
-        rules.pop_front();
-    }
     foreach (SessionInfo * s, session)
     delete s;
-    XDestroyWindow(display(), null_focus_window);
 
     // TODO: ungrabXServer();
 
@@ -558,10 +452,10 @@ Workspace::~Workspace()
     _self = 0;
 }
 
-Client* Workspace::createClient(Window w, bool is_mapped)
+Client* Workspace::createClient(xcb_window_t w, bool is_mapped)
 {
     StackingUpdatesBlocker blocker(this);
-    Client* c = new Client(this);
+    Client* c = new Client();
     connect(c, SIGNAL(needsRepaint()), m_compositor, SLOT(scheduleRepaint()));
     connect(c, SIGNAL(activeChanged()), m_compositor, SLOT(checkUnredirect()));
     connect(c, SIGNAL(fullScreenChanged()), m_compositor, SLOT(checkUnredirect()));
@@ -572,29 +466,29 @@ Client* Workspace::createClient(Window w, bool is_mapped)
     connect(c, SIGNAL(clientFullScreenSet(KWin::Client*,bool,bool)), ScreenEdges::self(), SIGNAL(checkBlocking()));
 #endif
     if (!c->manage(w, is_mapped)) {
-        Client::deleteClient(c, Allowed);
+        Client::deleteClient(c);
         return NULL;
     }
-    addClient(c, Allowed);
+    addClient(c);
     return c;
 }
 
-Unmanaged* Workspace::createUnmanaged(Window w)
+Unmanaged* Workspace::createUnmanaged(xcb_window_t w)
 {
     if (m_compositor && m_compositor->checkForOverlayWindow(w))
         return NULL;
-    Unmanaged* c = new Unmanaged(this);
+    Unmanaged* c = new Unmanaged();
     if (!c->track(w)) {
-        Unmanaged::deleteUnmanaged(c, Allowed);
+        Unmanaged::deleteUnmanaged(c);
         return NULL;
     }
     connect(c, SIGNAL(needsRepaint()), m_compositor, SLOT(scheduleRepaint()));
-    addUnmanaged(c, Allowed);
+    addUnmanaged(c);
     emit unmanagedAdded(c);
     return c;
 }
 
-void Workspace::addClient(Client* c, allowed_t)
+void Workspace::addClient(Client* c)
 {
     Group* grp = findGroup(c->window());
 
@@ -610,7 +504,7 @@ void Workspace::addClient(Client* c, allowed_t)
         if (active_client == NULL && should_get_focus.isEmpty() && c->isOnCurrentDesktop())
             requestFocus(c);   // TODO: Make sure desktop is active after startup if there's no other window active
     } else {
-        updateFocusChains(c, FocusChainUpdate);   // Add to focus chain if not already there
+        FocusChain::self()->update(c, FocusChain::Update);
         clients.append(c);
     }
     if (!unconstrained_stacking_order.contains(c))
@@ -633,16 +527,16 @@ void Workspace::addClient(Client* c, allowed_t)
         updateToolWindows(true);
     checkNonExistentClients();
 #ifdef KWIN_BUILD_TABBOX
-    if (tabBox()->isDisplayed())
-        tab_box->reset(true);
+    if (TabBox::TabBox::self()->isDisplayed())
+        TabBox::TabBox::self()->reset(true);
 #endif
 #ifdef KWIN_BUILD_KAPPMENU
-        if (m_windowsMenu.removeOne(c->window()))
+        if (ApplicationMenu::self()->hasMenu(c->window()))
             c->setAppMenuAvailable();
 #endif
 }
 
-void Workspace::addUnmanaged(Unmanaged* c, allowed_t)
+void Workspace::addUnmanaged(Unmanaged* c)
 {
     unmanaged.append(c);
     x_stacking_dirty = true;
@@ -651,7 +545,7 @@ void Workspace::addUnmanaged(Unmanaged* c, allowed_t)
 /**
  * Destroys the client \a c
  */
-void Workspace::removeClient(Client* c, allowed_t)
+void Workspace::removeClient(Client* c)
 {
     emit clientRemoved(c);
 
@@ -670,14 +564,10 @@ void Workspace::removeClient(Client* c, allowed_t)
         clientShortcutUpdated(c);   // Needed, since this is otherwise delayed by setShortcut() and wouldn't run
     }
 
-    if (c->isDialog())
-        Notify::raise(Notify::TransDelete);
-    if (c->isNormalWindow())
-        Notify::raise(Notify::Delete);
-
 #ifdef KWIN_BUILD_TABBOX
-    if (tabBox()->isDisplayed() && tabBox()->currentClient() == c)
-        tab_box->nextPrev(true);
+    TabBox::TabBox *tabBox = TabBox::TabBox::self();
+    if (tabBox->isDisplayed() && tabBox->currentClient() == c)
+        tabBox->nextPrev(true);
 #endif
 
     Q_ASSERT(clients.contains(c) || desktops.contains(c));
@@ -685,9 +575,6 @@ void Workspace::removeClient(Client* c, allowed_t)
     clients.removeAll(c);
     desktops.removeAll(c);
     x_stacking_dirty = true;
-    for (uint i = 1; i <= VirtualDesktopManager::self()->count(); ++i)
-        focus_chain[i].removeAll(c);
-    global_focus_chain.removeAll(c);
     attention_chain.removeAll(c);
     showing_desktop_clients.removeAll(c);
     Group* group = findGroup(c->window());
@@ -712,21 +599,21 @@ void Workspace::removeClient(Client* c, allowed_t)
     }
 
 #ifdef KWIN_BUILD_TABBOX
-    if (tabBox()->isDisplayed())
-        tab_box->reset(true);
+    if (tabBox->isDisplayed())
+        tabBox->reset(true);
 #endif
 
     updateClientArea();
 }
 
-void Workspace::removeUnmanaged(Unmanaged* c, allowed_t)
+void Workspace::removeUnmanaged(Unmanaged* c)
 {
     assert(unmanaged.contains(c));
     unmanaged.removeAll(c);
     x_stacking_dirty = true;
 }
 
-void Workspace::addDeleted(Deleted* c, Toplevel *orig, allowed_t)
+void Workspace::addDeleted(Deleted* c, Toplevel *orig)
 {
     assert(!deleted.contains(c));
     deleted.append(c);
@@ -746,7 +633,7 @@ void Workspace::addDeleted(Deleted* c, Toplevel *orig, allowed_t)
     connect(c, SIGNAL(needsRepaint()), m_compositor, SLOT(scheduleRepaint()));
 }
 
-void Workspace::removeDeleted(Deleted* c, allowed_t)
+void Workspace::removeDeleted(Deleted* c)
 {
     assert(deleted.contains(c));
     emit deletedRemoved(c);
@@ -754,71 +641,6 @@ void Workspace::removeDeleted(Deleted* c, allowed_t)
     unconstrained_stacking_order.removeAll(c);
     stacking_order.removeAll(c);
     x_stacking_dirty = true;
-}
-
-void Workspace::updateFocusChains(Client* c, FocusChainChange change)
-{
-    if (!c->wantsTabFocus()) { // Doesn't want tab focus, remove
-        for (uint i = 1; i <= VirtualDesktopManager::self()->count(); ++i)
-            focus_chain[i].removeAll(c);
-        global_focus_chain.removeAll(c);
-        return;
-    }
-    if (c->desktop() == NET::OnAllDesktops) {
-        // Now on all desktops, add it to focus_chains it is not already in
-        for (uint i = 1; i <= VirtualDesktopManager::self()->count(); i++) {
-            // Making first/last works only on current desktop, don't affect all desktops
-            if (i == VirtualDesktopManager::self()->current()
-                    && (change == FocusChainMakeFirst || change == FocusChainMakeLast)) {
-                focus_chain[i].removeAll(c);
-                if (change == FocusChainMakeFirst)
-                    focus_chain[i].append(c);
-                else
-                    focus_chain[i].prepend(c);
-            } else if (!focus_chain[i].contains(c)) {
-                // Add it after the active one
-                if (active_client != NULL && active_client != c &&
-                        !focus_chain[i].isEmpty() && focus_chain[i].last() == active_client)
-                    focus_chain[i].insert(focus_chain[i].size() - 1, c);
-                else
-                    focus_chain[i].append(c);   // Otherwise add as the first one
-            }
-        }
-    } else { // Now only on desktop, remove it anywhere else
-        for (uint i = 1; i <= VirtualDesktopManager::self()->count(); i++) {
-            if (c->isOnDesktop(i)) {
-                if (change == FocusChainMakeFirst) {
-                    focus_chain[i].removeAll(c);
-                    focus_chain[i].append(c);
-                } else if (change == FocusChainMakeLast) {
-                    focus_chain[i].removeAll(c);
-                    focus_chain[i].prepend(c);
-                } else if (!focus_chain[i].contains(c)) {
-                    // Add it after the active one
-                    if (active_client != NULL && active_client != c &&
-                            !focus_chain[i].isEmpty() && focus_chain[i].last() == active_client)
-                        focus_chain[i].insert(focus_chain[i].size() - 1, c);
-                    else
-                        focus_chain[i].append(c);   // Otherwise add as the first one
-                }
-            } else
-                focus_chain[i].removeAll(c);
-        }
-    }
-    if (change == FocusChainMakeFirst) {
-        global_focus_chain.removeAll(c);
-        global_focus_chain.append(c);
-    } else if (change == FocusChainMakeLast) {
-        global_focus_chain.removeAll(c);
-        global_focus_chain.prepend(c);
-    } else if (!global_focus_chain.contains(c)) {
-        // Add it after the active one
-        if (active_client != NULL && active_client != c &&
-                !global_focus_chain.isEmpty() && global_focus_chain.last() == active_client)
-            global_focus_chain.insert(global_focus_chain.size() - 1, c);
-        else
-            global_focus_chain.append(c);   // Otherwise add as the first one
-    }
 }
 
 void Workspace::updateToolWindows(bool also_hide)
@@ -918,52 +740,11 @@ void Workspace::slotUpdateToolWindows()
     updateToolWindows(true);
 }
 
-/**
- * Updates the current colormap according to the currently active client
- */
-void Workspace::updateColormap()
-{
-    Colormap cmap = default_colormap;
-    if (activeClient() && activeClient()->colormap() != None)
-        cmap = activeClient()->colormap();
-    if (cmap != installed_colormap) {
-        XInstallColormap(display(), cmap);
-        installed_colormap = cmap;
-    }
-}
-
 void Workspace::slotReloadConfig()
 {
     reconfigure();
 }
-#ifdef KWIN_BUILD_KAPPMENU
-void Workspace::slotShowRequest(qulonglong wid)
-{
-    if (Client *c = findClient(WindowMatchPredicate(wid)))
-        c->emitShowRequest();
-}
 
-void Workspace::slotMenuAvailable(qulonglong wid)
-{
-    if (Client *c = findClient(WindowMatchPredicate(wid)))
-        c->setAppMenuAvailable();
-    else
-        m_windowsMenu.append(wid);
-}
-
-void Workspace::slotMenuHidden(qulonglong wid)
-{
-    if (Client *c = findClient(WindowMatchPredicate(wid)))
-        c->emitMenuHidden();
-}
-
-void Workspace::slotClearMenus()
-{
-    foreach (Client *c, clients) {
-       c->setAppMenuUnavailable();
-    }
-}
-#endif
 void Workspace::reconfigure()
 {
     reconfigureTimer.start(200);
@@ -1013,7 +794,8 @@ void Workspace::slotReconfigure()
     m_userActionsMenu->discard();
     updateToolWindows(true);
 
-    if (hasDecorationPlugin() && mgr->reset(changed)) {
+    DecorationPlugin *deco = DecorationPlugin::self();
+    if (!deco->isDisabled() && deco->reset(changed)) {
         // Decorations need to be recreated
 
         // This actually seems to make things worse now
@@ -1025,24 +807,24 @@ void Workspace::slotReconfigure()
         for (ClientList::ConstIterator it = clients.constBegin(); it != clients.constEnd(); ++it)
             (*it)->updateDecoration(true, true);
         // If the new decoration doesn't supports tabs then ungroup clients
-        if (!decorationSupportsTabbing()) {
+        if (!decorationPlugin()->supportsTabbing()) {
             foreach (Client * c, clients)
                 c->untab();
         }
-        mgr->destroyPreviousPlugin();
+        deco->destroyPreviousPlugin();
     } else {
         forEachClient(CheckBorderSizesProcedure());
         foreach (Client * c, clients)
             c->triggerDecorationRepaint();
     }
 
-    loadWindowRules();
+    RuleBook::self()->load();
     for (ClientList::Iterator it = clients.begin();
             it != clients.end();
             ++it) {
         (*it)->setupWindowRules(true);
         (*it)->applyWindowRules();
-        discardUsedWindowRules(*it, false);
+        RuleBook::self()->discardUsed(*it, false);
     }
 
     if (borderlessMaximizedWindows != options->borderlessMaximizedWindows() &&
@@ -1057,34 +839,11 @@ void Workspace::slotReconfigure()
         }
     }
 
-    if (hasDecorationPlugin()) {
-        rootInfo->setSupported(NET::WM2FrameOverlap, mgr->factory()->supports(AbilityExtendIntoClientArea));
+    if (!deco->isDisabled()) {
+        rootInfo()->setSupported(NET::WM2FrameOverlap, deco->factory()->supports(AbilityExtendIntoClientArea));
     } else {
-        rootInfo->setSupported(NET::WM2FrameOverlap, false);
+        rootInfo()->setSupported(NET::WM2FrameOverlap, false);
     }
-}
-
-/**
- * Avoids managing a window with title \a title
- */
-void Workspace::doNotManage(const QString& title)
-{
-    doNotManageList.append(title);
-}
-
-/**
- * Hack for java applets
- */
-bool Workspace::isNotManaged(const QString& title)
-{
-    for (QStringList::Iterator it = doNotManageList.begin(); it != doNotManageList.end(); ++it) {
-        QRegExp r((*it));
-        if (r.indexIn(title) != -1) {
-            doNotManageList.erase(it);
-            return true;
-        }
-    }
-    return false;
 }
 
 /**
@@ -1182,7 +941,7 @@ void Workspace::updateClientVisibilityOnDesktopChange(uint oldDesktop, uint newD
         }
     }
     // Now propagate the change, after hiding, before showing
-    rootInfo->setCurrentDesktop(VirtualDesktopManager::self()->current());
+    rootInfo()->setCurrentDesktop(VirtualDesktopManager::self()->current());
 
     if (movingClient && !movingClient->isOnDesktop(newDesktop)) {
         movingClient->setDesktop(newDesktop);
@@ -1217,7 +976,7 @@ void Workspace::activateClientOnNewDesktop(uint desktop)
         c = findDesktop(true, desktop);
 
     if (c != active_client)
-        setActiveClient(NULL, Allowed);
+        setActiveClient(NULL);
 
     if (c)
         requestFocus(c);
@@ -1230,7 +989,7 @@ void Workspace::activateClientOnNewDesktop(uint desktop)
 Client *Workspace::findClientToActivateOnDesktop(uint desktop)
 {
     if (movingClient != NULL && active_client == movingClient &&
-        focus_chain[desktop].contains(active_client) &&
+        FocusChain::self()->contains(active_client, desktop) &&
         active_client->isShown(true) && active_client->isOnCurrentDesktop()) {
         // A requestFocus call will fail, as the client is already active
         return active_client;
@@ -1245,99 +1004,18 @@ Client *Workspace::findClientToActivateOnDesktop(uint desktop)
             }
 
             if (!(client->isShown(false) && client->isOnDesktop(desktop) &&
-                client->isOnCurrentActivity() && client->isOnScreen(activeScreen())))
+                client->isOnCurrentActivity() && client->isOnActiveScreen()))
                 continue;
 
-            if (client->geometry().contains(QCursor::pos())) {
+            if (client->geometry().contains(Cursor::pos())) {
                 if (!client->isDesktop())
                     return client;
             break; // unconditional break  - we do not pass the focus to some client below an unusable one
             }
         }
     }
-    for (int i = focus_chain[desktop].size() - 1; i >= 0; --i) {
-        Client* tmp = focus_chain[desktop].at(i);
-        if (tmp->isShown(false) && tmp->isOnCurrentActivity()
-            && ( !options->isSeparateScreenFocus() || tmp->screen() == activeScreen() )) {
-            return tmp;
-        }
-    }
-    return NULL;
+    return FocusChain::self()->getForActivation(desktop);
 }
-
-#ifdef KWIN_BUILD_ACTIVITIES
-
-//BEGIN threaded activity list fetching
-typedef QPair<QStringList*, QStringList> AssignedList;
-typedef QPair<QString, QStringList> CurrentAndList;
-
-static AssignedList
-fetchActivityList(KActivities::Controller *controller, QStringList *target, bool running) // could be member function, but actually it's much simpler this way
-{
-    return AssignedList(target, running ? controller->listActivities(KActivities::Info::Running) :
-                                          controller->listActivities());
-}
-
-static CurrentAndList
-fetchActivityListAndCurrent(KActivities::Controller *controller)
-{
-    QStringList l   = controller->listActivities();
-    QString c       = controller->currentActivity();
-    return CurrentAndList(c, l);
-}
-
-void Workspace::updateActivityList(bool running, bool updateCurrent, QObject *target, QString slot)
-{
-    if (updateCurrent) {
-        QFutureWatcher<CurrentAndList>* watcher = new QFutureWatcher<CurrentAndList>;
-        connect( watcher, SIGNAL(finished()), SLOT(handleActivityReply()) );
-        if (!slot.isEmpty()) {
-            watcher->setProperty("activityControllerCallback", slot); // "activity reply trigger"
-            watcher->setProperty("activityControllerCallbackTarget", qVariantFromValue((void*)target));
-        }
-        watcher->setFuture(QtConcurrent::run(fetchActivityListAndCurrent, &activityController_ ));
-    } else {
-        QFutureWatcher<AssignedList>* watcher = new QFutureWatcher<AssignedList>;
-        connect(watcher, SIGNAL(finished()), SLOT(handleActivityReply()));
-        if (!slot.isEmpty()) {
-            watcher->setProperty("activityControllerCallback", slot); // "activity reply trigger"
-            watcher->setProperty("activityControllerCallbackTarget", qVariantFromValue((void*)target));
-        }
-        QStringList *target = running ? &openActivities_ : &allActivities_;
-        watcher->setFuture(QtConcurrent::run(fetchActivityList, &activityController_, target, running));
-    }
-}
-
-void Workspace::handleActivityReply()
-{
-    QObject *watcherObject = 0;
-    if (QFutureWatcher<AssignedList>* watcher = dynamic_cast< QFutureWatcher<AssignedList>* >(sender())) {
-        *(watcher->result().first) = watcher->result().second; // cool trick, ehh? :-)
-        watcherObject = watcher;
-    }
-
-    if (!watcherObject) {
-        if (QFutureWatcher<CurrentAndList>* watcher = dynamic_cast< QFutureWatcher<CurrentAndList>* >(sender())) {
-            allActivities_ = watcher->result().second;
-            updateCurrentActivity(watcher->result().first);
-            emit currentActivityChanged(currentActivity());
-            watcherObject = watcher;
-        }
-    }
-
-    if (watcherObject) {
-        QString slot = watcherObject->property("activityControllerCallback").toString();
-        QObject *target = static_cast<QObject*>(watcherObject->property("activityControllerCallbackTarget").value<void*>());
-        watcherObject->deleteLater(); // has done it's job
-        if (!slot.isEmpty())
-            QMetaObject::invokeMethod(target, slot.toAscii().data(), Qt::DirectConnection);
-    }
-}
-//END threaded activity list fetching
-
-#else // make gcc happy - stupd moc cannot handle preproc defs so we MUST define
-void Workspace::handleActivityReply() {}
-#endif // KWIN_BUILD_ACTIVITIES
 
 /**
  * Updates the current activity when it changes
@@ -1348,60 +1026,57 @@ void Workspace::handleActivityReply() {}
 
 void Workspace::updateCurrentActivity(const QString &new_activity)
 {
-
+#ifdef KWIN_BUILD_ACTIVITIES
     //closeActivePopup();
     ++block_focus;
     // TODO: Q_ASSERT( block_stacking_updates == 0 ); // Make sure stacking_order is up to date
     StackingUpdatesBlocker blocker(this);
 
-    if (new_activity != activity_) {
-        ++block_showing_desktop; //FIXME should I be using that?
-        // Optimized Desktop switching: unmapping done from back to front
-        // mapping done from front to back => less exposure events
-        //Notify::raise((Notify::Event) (Notify::DesktopChange+new_desktop));
+    ++block_showing_desktop; //FIXME should I be using that?
+    // Optimized Desktop switching: unmapping done from back to front
+    // mapping done from front to back => less exposure events
+    //Notify::raise((Notify::Event) (Notify::DesktopChange+new_desktop));
 
-        ObscuringWindows obs_wins;
+    ObscuringWindows obs_wins;
 
-        QString old_activity = activity_;
-        activity_ = new_activity;
+    const QString &old_activity = Activities::self()->previous();
 
-        for (ToplevelList::ConstIterator it = stacking_order.constBegin();
-                it != stacking_order.constEnd();
-                ++it) {
-            Client *c = qobject_cast<Client*>(*it);
-            if (!c) {
-                continue;
-            }
-            if (!c->isOnActivity(new_activity) && c != movingClient && c->isOnCurrentDesktop()) {
-                if (c->isShown(true) && c->isOnActivity(old_activity) && !compositing())
-                    obs_wins.create(c);
-                c->updateVisibility();
-            }
+    for (ToplevelList::ConstIterator it = stacking_order.constBegin();
+            it != stacking_order.constEnd();
+            ++it) {
+        Client *c = qobject_cast<Client*>(*it);
+        if (!c) {
+            continue;
         }
-
-        // Now propagate the change, after hiding, before showing
-        //rootInfo->setCurrentDesktop( currentDesktop() );
-
-        /* TODO someday enable dragging windows to other activities
-        if ( movingClient && !movingClient->isOnDesktop( new_desktop ))
-            {
-            movingClient->setDesktop( new_desktop );
-            */
-
-        for (int i = stacking_order.size() - 1; i >= 0 ; --i) {
-            Client *c = qobject_cast<Client*>(stacking_order.at(i));
-            if (!c) {
-                continue;
-            }
-            if (c->isOnActivity(new_activity))
-                c->updateVisibility();
+        if (!c->isOnActivity(new_activity) && c != movingClient && c->isOnCurrentDesktop()) {
+            if (c->isShown(true) && c->isOnActivity(old_activity) && !compositing())
+                obs_wins.create(c);
+            c->updateVisibility();
         }
-
-        --block_showing_desktop;
-        //FIXME not sure if I should do this either
-        if (showingDesktop())   // Do this only after desktop change to avoid flicker
-            resetShowingDesktop(false);
     }
+
+    // Now propagate the change, after hiding, before showing
+    //rootInfo->setCurrentDesktop( currentDesktop() );
+
+    /* TODO someday enable dragging windows to other activities
+    if ( movingClient && !movingClient->isOnDesktop( new_desktop ))
+        {
+        movingClient->setDesktop( new_desktop );
+        */
+
+    for (int i = stacking_order.size() - 1; i >= 0 ; --i) {
+        Client *c = qobject_cast<Client*>(stacking_order.at(i));
+        if (!c) {
+            continue;
+        }
+        if (c->isOnActivity(new_activity))
+            c->updateVisibility();
+    }
+
+    --block_showing_desktop;
+    //FIXME not sure if I should do this either
+    if (showingDesktop())   // Do this only after desktop change to avoid flicker
+        resetShowingDesktop(false);
 
     // Restore the focus on this desktop
     --block_focus;
@@ -1410,19 +1085,7 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
     //FIXME below here is a lot of focuschain stuff, probably all wrong now
     if (options->focusPolicyIsReasonable()) {
         // Search in focus chain
-        if (movingClient != NULL && active_client == movingClient &&
-                focus_chain[VirtualDesktopManager::self()->current()].contains(active_client) &&
-                active_client->isShown(true) && active_client->isOnCurrentDesktop())
-            c = active_client; // The requestFocus below will fail, as the client is already active
-        if (!c) {
-            for (int i = focus_chain[VirtualDesktopManager::self()->current()].size() - 1; i >= 0; --i) {
-                if (focus_chain[VirtualDesktopManager::self()->current()].at(i)->isShown(false) &&
-                        focus_chain[VirtualDesktopManager::self()->current()].at(i)->isOnCurrentActivity()) {
-                    c = focus_chain[VirtualDesktopManager::self()->current()].at(i);
-                    break;
-                }
-            }
-        }
+        c = FocusChain::self()->getForActivation(VirtualDesktopManager::self()->current());
     }
     // If "unreasonable focus policy" and active_client is on_all_desktops and
     // under mouse (Hence == old_active_client), conserve focus.
@@ -1434,7 +1097,7 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
         c = findDesktop(true, VirtualDesktopManager::self()->current());
 
     if (c != active_client)
-        setActiveClient(NULL, Allowed);
+        setActiveClient(NULL);
 
     if (c)
         requestFocus(c);
@@ -1449,29 +1112,9 @@ void Workspace::updateCurrentActivity(const QString &new_activity)
     //    static_cast<EffectsHandlerImpl*>( effects )->desktopChanged( old_desktop );
     if (compositing() && m_compositor)
         m_compositor->addRepaintFull();
-
-}
-
-/**
- * updates clients when an activity is destroyed.
- * this ensures that a client does not get 'lost' if the only activity it's on is removed.
- */
-void Workspace::slotActivityRemoved(const QString &activity)
-{
-    allActivities_.removeOne(activity);
-    foreach (Toplevel * toplevel, stacking_order) {
-        if (Client *client = qobject_cast<Client*>(toplevel)) {
-            client->setOnActivity(activity, false);
-        }
-    }
-    //toss out any session data for it
-    KConfigGroup cg(KGlobal::config(), QString("SubSession: ") + activity);
-    cg.deleteGroup();
-}
-
-void Workspace::slotActivityAdded(const QString &activity)
-{
-    allActivities_ << activity;
+#else
+    Q_UNUSED(new_activity)
+#endif
 }
 
 void Workspace::moveClientsFromRemovedDesktops()
@@ -1486,8 +1129,6 @@ void Workspace::slotDesktopCountChanged(uint previousCount, uint newCount)
 {
     Q_UNUSED(previousCount)
     Placement::self()->reinitCascading(0);
-    // Make it +1, so that it can be accessed as [1..numberofdesktops]
-    focus_chain.resize(newCount + 1);
 
     resetClientAreas(newCount);
 }
@@ -1543,70 +1184,6 @@ void Workspace::sendClientToDesktop(Client* c, int desk, bool dont_activate)
 }
 
 /**
- * Adds/removes client \a c to/from \a activity.
- *
- * Takes care of transients as well.
- */
-void Workspace::toggleClientOnActivity(Client* c, const QString &activity, bool dont_activate)
-{
-    //int old_desktop = c->desktop();
-    bool was_on_activity = c->isOnActivity(activity);
-    bool was_on_all = c->isOnAllActivities();
-    //note: all activities === no activities
-    bool enable = was_on_all || !was_on_activity;
-    c->setOnActivity(activity, enable);
-    if (c->isOnActivity(activity) == was_on_activity && c->isOnAllActivities() == was_on_all)   // No change
-        return;
-
-    if (c->isOnCurrentActivity()) {
-        if (c->wantsTabFocus() && options->focusPolicyIsReasonable() &&
-                !was_on_activity && // for stickyness changes
-                //FIXME not sure if the line above refers to the correct activity
-                !dont_activate)
-            requestFocus(c);
-        else
-            restackClientUnderActive(c);
-    } else
-        raiseClient(c);
-
-    //notifyWindowDesktopChanged( c, old_desktop );
-
-    ClientList transients_stacking_order = ensureStackingOrder(c->transients());
-    for (ClientList::ConstIterator it = transients_stacking_order.constBegin();
-            it != transients_stacking_order.constEnd();
-            ++it)
-        toggleClientOnActivity(*it, activity, dont_activate);
-    updateClientArea();
-}
-
-int Workspace::numScreens() const
-{
-    return QApplication::desktop()->screenCount();
-}
-
-int Workspace::activeScreen() const
-{
-    if (!options->isActiveMouseScreen()) {
-        if (activeClient() != NULL && !activeClient()->isOnScreen(active_screen))
-            return activeClient()->screen();
-        return active_screen;
-    }
-    return QApplication::desktop()->screenNumber(cursorPos());
-}
-
-/**
- * Check whether a client moved completely out of what's considered the active screen,
- * if yes, set a new active screen.
- */
-void Workspace::checkActiveScreen(const Client* c)
-{
-    if (!c->isActive())
-        return;
-    if (!c->isOnScreen(active_screen))
-        active_screen = c->screen();
-}
-
-/**
  * checks whether the X Window with the input focus is on our X11 screen
  * if the window cannot be determined or inspected, resturn depends on whether there's actually
  * more than one screen
@@ -1634,28 +1211,18 @@ bool Workspace::isOnCurrentHead()
     return rootWindow() == geometry->root;
 }
 
-/**
- * Called e.g. when a user clicks on a window, set active screen to be the screen
- * where the click occurred
- */
-void Workspace::setActiveScreenMouse(const QPoint& mousepos)
-{
-    active_screen = QApplication::desktop()->screenNumber(mousepos);
-}
-
-QRect Workspace::screenGeometry(int screen) const
-{
-    return QApplication::desktop()->screenGeometry(screen);
-}
-
-int Workspace::screenNumber(const QPoint& pos) const
-{
-    return QApplication::desktop()->screenNumber(pos);
-}
-
 void Workspace::sendClientToScreen(Client* c, int screen)
 {
     screen = c->rules()->checkScreen(screen);
+    if (c->isActive()) {
+        screens()->setCurrent(screen);
+        // might impact the layer of a fullscreen window
+        foreach (Client *cc, clientList()) {
+            if (cc->isFullScreen() && cc->screen() == screen) {
+                updateClientLayer(cc);
+            }
+        }
+    }
     if (c->screen() == screen)   // Don't use isOnScreen(), that's true even when only partially
         return;
     GeometryUpdatesBlocker blocker(c);
@@ -1681,44 +1248,16 @@ void Workspace::sendClientToScreen(Client* c, int screen)
             it != transients_stacking_order.constEnd();
             ++it)
         sendClientToScreen(*it, screen);
-    if (c->isActive())
-        active_screen = screen;
 }
 
-void Workspace::killWindowId(Window window_to_kill)
+void Workspace::sendPingToWindow(xcb_window_t window, xcb_timestamp_t timestamp)
 {
-    if (window_to_kill == None)
-        return;
-    Window window = window_to_kill;
-    Client* client = NULL;
-    for (;;) {
-        client = findClient(FrameIdMatchPredicate(window));
-        if (client != NULL)
-            break; // Found the client
-        Window parent, root;
-        Window* children;
-        unsigned int children_count;
-        XQueryTree(display(), window, &root, &parent, &children, &children_count);
-        if (children != NULL)
-            XFree(children);
-        if (window == root)   // We didn't find the client, probably an override-redirect window
-            break;
-        window = parent; // Go up
-    }
-    if (client != NULL)
-        client->killWindow();
-    else
-        XKillClient(display(), window_to_kill);
+    rootInfo()->sendPing(window, timestamp);
 }
 
-void Workspace::sendPingToWindow(Window window, Time timestamp)
+void Workspace::sendTakeActivity(KWin::Client *c, xcb_timestamp_t timestamp, long int flags)
 {
-    rootInfo->sendPing(window, timestamp);
-}
-
-void Workspace::sendTakeActivity(Client* c, Time timestamp, long flags)
-{
-    rootInfo->takeActivity(c->window(), timestamp, flags);
+    rootInfo()->takeActivity(c->window(), timestamp, flags);
     pending_take_activity = c;
 }
 
@@ -1747,34 +1286,7 @@ void Workspace::cancelDelayFocus()
     delayFocusTimer = 0;
 }
 
-KDecoration* Workspace::createDecoration(KDecorationBridge* bridge)
-{
-    if (!hasDecorationPlugin()) {
-        return NULL;
-    }
-    return mgr->createDecoration(bridge);
-}
-
-/**
- * Returns a list of all colors (KDecorationDefines::ColorType) the current
- * decoration supports
- */
-QList<int> Workspace::decorationSupportedColors() const
-{
-    QList<int> ret;
-    if (!hasDecorationPlugin()) {
-        return ret;
-    }
-    KDecorationFactory* factory = mgr->factory();
-    for (Ability ab = ABILITYCOLOR_FIRST;
-            ab < ABILITYCOLOR_END;
-            ab = static_cast<Ability>(ab + 1))
-        if (factory->supports(ab))
-            ret << ab;
-    return ret;
-}
-
-bool Workspace::checkStartupNotification(Window w, KStartupInfoId& id, KStartupInfoData& data)
+bool Workspace::checkStartupNotification(xcb_window_t w, KStartupInfoId &id, KStartupInfoData &data)
 {
     return startup->checkStartup(w, id, data) == KStartupInfo::Match;
 }
@@ -1785,12 +1297,12 @@ bool Workspace::checkStartupNotification(Window w, KStartupInfoId& id, KStartupI
  */
 void Workspace::focusToNull()
 {
-    XSetInputFocus(display(), null_focus_window, RevertToPointerRoot, xTime());
+    m_nullFocus->focus();
 }
 
 void Workspace::setShowingDesktop(bool showing)
 {
-    rootInfo->setShowingDesktop(showing);
+    rootInfo()->setShowingDesktop(showing);
     showing_desktop = showing;
     ++block_showing_desktop;
     if (showing_desktop) {
@@ -1843,7 +1355,7 @@ void Workspace::resetShowingDesktop(bool keep_hidden)
 {
     if (block_showing_desktop > 0)
         return;
-    rootInfo->setShowingDesktop(false);
+    rootInfo()->setShowingDesktop(false);
     showing_desktop = false;
     ++block_showing_desktop;
     if (!keep_hidden) {
@@ -1856,39 +1368,14 @@ void Workspace::resetShowingDesktop(bool keep_hidden)
     --block_showing_desktop;
 }
 
-/**
- * Activating/deactivating this feature works like this:
- * When nothing is active, and the shortcut is pressed, global shortcuts are disabled
- *     (using global_shortcuts_disabled)
- * When a window that has disabling forced is activated, global shortcuts are disabled.
- *     (using global_shortcuts_disabled_for_client)
- * When a shortcut is pressed and global shortcuts are disabled (either by a shortcut
- * or for a client), they are enabled again.
- */
-void Workspace::slotDisableGlobalShortcuts()
-{
-    if (global_shortcuts_disabled || global_shortcuts_disabled_for_client)
-        disableGlobalShortcuts(false);
-    else
-        disableGlobalShortcuts(true);
-}
-
 static bool pending_dfc = false;
 
 void Workspace::disableGlobalShortcutsForClient(bool disable)
 {
     if (global_shortcuts_disabled_for_client == disable)
         return;
-    if (!global_shortcuts_disabled) {
-        if (disable)
-            pending_dfc = true;
-        KGlobalSettings::self()->emitChange(KGlobalSettings::BlockShortcuts, disable);
-        // KWin will get the kipc message too
-    }
-}
-
-void Workspace::disableGlobalShortcuts(bool disable)
-{
+    if (disable)
+        pending_dfc = true;
     KGlobalSettings::self()->emitChange(KGlobalSettings::BlockShortcuts, disable);
     // KWin will get the kipc message too
 }
@@ -1899,7 +1386,6 @@ void Workspace::slotBlockShortcuts(int data)
         global_shortcuts_disabled_for_client = true;
         pending_dfc = false;
     } else {
-        global_shortcuts_disabled = data;
         global_shortcuts_disabled_for_client = false;
     }
     // Update also Alt+LMB actions etc.
@@ -1908,81 +1394,6 @@ void Workspace::slotBlockShortcuts(int data)
             ++it)
         (*it)->updateMouseGrab();
 }
-
-// Optimized version of QCursor::pos() that tries to avoid X roundtrips
-// by updating the value only when the X timestamp changes.
-static QPoint last_cursor_pos;
-static int last_buttons = 0;
-static Time last_cursor_timestamp = CurrentTime;
-static QTimer* last_cursor_timer;
-
-QPoint Workspace::cursorPos() const
-{
-    if (last_cursor_timestamp == CurrentTime ||
-            last_cursor_timestamp != QX11Info::appTime()) {
-        last_cursor_timestamp = QX11Info::appTime();
-        Window root;
-        Window child;
-        int root_x, root_y, win_x, win_y;
-        uint state;
-        XQueryPointer(display(), rootWindow(), &root, &child,
-                      &root_x, &root_y, &win_x, &win_y, &state);
-        last_cursor_pos = QPoint(root_x, root_y);
-        last_buttons = state;
-        if (last_cursor_timer == NULL) {
-            Workspace* ws = const_cast<Workspace*>(this);
-            last_cursor_timer = new QTimer(ws);
-            last_cursor_timer->setSingleShot(true);
-            connect(last_cursor_timer, SIGNAL(timeout()), ws, SLOT(resetCursorPosTime()));
-        }
-        last_cursor_timer->start(0);
-    }
-    return last_cursor_pos;
-}
-
-/**
- * Because of QTimer's and the impossibility to get events for all mouse
- * movements (at least I haven't figured out how) the position needs
- * to be also refetched after each return to the event loop.
- */
-void Workspace::resetCursorPosTime()
-{
-    last_cursor_timestamp = CurrentTime;
-}
-
-void Workspace::checkCursorPos()
-{
-    QPoint last = last_cursor_pos;
-    int lastb = last_buttons;
-    cursorPos(); // Update if needed
-    if (last != last_cursor_pos || lastb != last_buttons) {
-        emit mouseChanged(last_cursor_pos, last,
-            x11ToQtMouseButtons(last_buttons), x11ToQtMouseButtons(lastb),
-            x11ToQtKeyboardModifiers(last_buttons), x11ToQtKeyboardModifiers(lastb));
-    }
-}
-
-
-Outline* Workspace::outline()
-{
-    return m_outline;
-}
-
-bool Workspace::hasTabBox() const
-{
-#ifdef KWIN_BUILD_TABBOX
-    return (tab_box != NULL);
-#else
-    return false;
-#endif
-}
-
-#ifdef KWIN_BUILD_TABBOX
-TabBox::TabBox* Workspace::tabBox() const
-{
-    return tab_box;
-}
-#endif
 
 QString Workspace::supportInformation() const
 {
@@ -2044,9 +1455,9 @@ QString Workspace::supportInformation() const
     } else {
         support.append("no\n");
     }
-    support.append(QString("Number of Screens: %1\n").arg(QApplication::desktop()->screenCount()));
-    for (int i=0; i<QApplication::desktop()->screenCount(); ++i) {
-        const QRect geo = QApplication::desktop()->screenGeometry(i);
+    support.append(QString("Number of Screens: %1\n").arg(screens()->count()));
+    for (int i=0; i<screens()->count(); ++i) {
+        const QRect geo = screens()->geometry(i);
         support.append(QString("Screen %1 Geometry: %2,%3,%4x%5\n")
                               .arg(i)
                               .arg(geo.x())
@@ -2054,6 +1465,9 @@ QString Workspace::supportInformation() const
                               .arg(geo.width())
                               .arg(geo.height()));
     }
+    support.append("\nDecoration\n");
+    support.append(  "==========\n");
+    support.append(decorationPlugin()->supportInformation());
     support.append("\nCompositing\n");
     support.append(  "===========\n");
     support.append("Qt Graphics System: ");
@@ -2079,7 +1493,7 @@ QString Workspace::supportInformation() const
             support.append("OpenGL renderer string: " % platform->glRendererString() % '\n');
             support.append("OpenGL version string: " %  platform->glVersionString() % '\n');
 
-            if (platform->supports(LimitedGLSL))
+            if (platform->supports(LimitedGLSL) || platform->supports(GLSL))
                 support.append("OpenGL shading language version string: " % platform->glShadingLanguageVersionString() % '\n');
 
             support.append("Driver: " % GLPlatform::driverToString(platform->driver()) % '\n');
@@ -2090,7 +1504,7 @@ QString Workspace::supportInformation() const
 
             support.append("OpenGL version: " % GLPlatform::versionToString(platform->glVersion()) % '\n');
 
-            if (platform->supports(LimitedGLSL))
+            if (platform->supports(LimitedGLSL) || platform->supports(GLSL))
                 support.append("GLSL version: " % GLPlatform::versionToString(platform->glslVersion()) % '\n');
 
             if (platform->isMesaDriver())
@@ -2173,15 +1587,6 @@ QString Workspace::supportInformation() const
         support.append("Compositing is not active\n");
     }
     return support;
-}
-
-void Workspace::slotCompositingToggled()
-{
-    // notify decorations that composition state has changed
-    if (hasDecorationPlugin()) {
-        KDecorationFactory* factory = mgr->factory();
-        factory->reset(SettingCompositing);
-    }
 }
 
 void Workspace::slotToggleCompositing()

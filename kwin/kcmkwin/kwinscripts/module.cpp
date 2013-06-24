@@ -20,7 +20,7 @@
 #include "module.h"
 #include "ui_module.h"
 
-#include <QtCore/QStringList>
+#include <QStringList>
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusPendingCall>
@@ -53,6 +53,8 @@ Module::Module(QWidget *parent, const QVariantList &args) :
 
     about->addAuthor(ki18n("Tamás Krutki"));
     setAboutData(about);
+    KGlobal::locale()->insertCatalog("kwin_scripts");
+    KGlobal::locale()->insertCatalog("kwin_scripting");
 
     ui->setupUi(this);
     ui->ghnsButton->setIcon(KIcon("get-hot-new-stuff"));

@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
- Copyright (C) 2008, 2009 Martin Gräßlin <kde@martin-graesslin.com>
+ Copyright (C) 2008, 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,7 +42,6 @@ class FlipSwitchEffect
     Q_PROPERTY(qreal xPosition READ xPosition)
     Q_PROPERTY(qreal yPosition READ yPosition)
     Q_PROPERTY(bool windowTitle READ isWindowTitle)
-    // TODO: electric borders
 public:
     FlipSwitchEffect();
     ~FlipSwitchEffect();
@@ -53,9 +52,8 @@ public:
     virtual void postPaintScreen();
     virtual void prePaintWindow(EffectWindow *w, WindowPrePaintData &data, int time);
     virtual void paintWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data);
-    virtual bool borderActivated(ElectricBorder border);
     virtual void grabbedKeyboardEvent(QKeyEvent* e);
-    virtual void windowInputMouseEvent(Window w, QEvent* e);
+    virtual void windowInputMouseEvent(QEvent* e);
     virtual bool isActive() const;
 
     static bool supported();
@@ -130,15 +128,12 @@ private:
     bool m_stop;
     bool m_animation;
     bool m_hasKeyboardGrab;
-    Window m_input;
     FlipSwitchMode m_mode;
     EffectFrame* m_captionFrame;
     QFont m_captionFont;
     EffectWindowList m_flipOrderedWindows;
     QHash< const EffectWindow*, ItemInfo* > m_windows;
     // options
-    QList<ElectricBorder> m_borderActivate;
-    QList<ElectricBorder> m_borderActivateAll;
     bool m_tabbox;
     bool m_tabboxAlternative;
     float m_angle;

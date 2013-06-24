@@ -24,7 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtDeclarative/QDeclarativeItem>
-#include <QtGui/QGraphicsView>
+#include <QGraphicsView>
+#include <QPaintEngine>
 
 #include <KConfig>
 #include <KConfigGroup>
@@ -87,8 +88,13 @@ void AuroraeFactory::initAurorae(KConfig &conf, KConfigGroup &group)
     m_theme->setButtonSize((KDecorationDefines::BorderSize)themeGroup.readEntry<int>("ButtonSize", KDecorationDefines::BorderNormal));
     m_theme->setTabDragMimeType(tabDragMimeType());
     // setup the QML engine
-    foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-        m_engine->addImportPath(importPath);
+    /* use logic from KDeclarative::setupBindings():
+    "addImportPath adds the path at the beginning, so to honour user's
+     paths we need to traverse the list in reverse order" */
+    QStringListIterator paths(KGlobal::dirs()->findDirs("module", "imports"));
+    paths.toBack();
+    while (paths.hasPrevious()) {
+        m_engine->addImportPath(paths.previous());
     }
     m_component->loadUrl(QUrl(KStandardDirs::locate("data", "kwin/aurorae/aurorae.qml")));
     m_engine->rootContext()->setContextProperty("auroraeTheme", m_theme);
@@ -121,8 +127,13 @@ void AuroraeFactory::initQML(const KConfigGroup &group)
     }
     m_engineType = QMLEngine;
     // setup the QML engine
-    foreach (const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-        m_engine->addImportPath(importPath);
+    /* use logic from KDeclarative::setupBindings():
+    "addImportPath adds the path at the beginning, so to honour user's
+     paths we need to traverse the list in reverse order" */
+    QStringListIterator paths(KGlobal::dirs()->findDirs("module", "imports"));
+    paths.toBack();
+    while (paths.hasPrevious()) {
+        m_engine->addImportPath(paths.previous());
     }
     m_component->loadUrl(QUrl::fromLocalFile(file));
     m_themeName = themeName;
@@ -158,11 +169,8 @@ bool AuroraeFactory::reset(unsigned long changed)
     const QString themeName = group.readEntry("ThemeName", "example-deco");
     const KConfig config("aurorae/themes/" + themeName + '/' + themeName + "rc", KConfig::FullConfig, "data");
     const KConfigGroup themeGroup(&conf, themeName);
-    if (themeName != m_theme->themeName()) {
-        delete m_engine;
-        m_engine = new QDeclarativeEngine(this);
-        delete m_component;
-        m_component = new QDeclarativeComponent(m_engine, this);
+    if (themeName != m_themeName) {
+        m_engine->clearComponentCache();
         init();
         // recreate all decorations
         return true;
@@ -247,8 +255,10 @@ AuroraeClient::AuroraeClient(KDecorationBridge *bridge, KDecorationFactory *fact
 
 AuroraeClient::~AuroraeClient()
 {
-    m_item->setParent(NULL);
-    m_item->deleteLater();
+    if (m_item) {
+        m_item->setParent(NULL);
+        m_item->deleteLater();
+    }
     m_scene->setParent(NULL);
     m_scene->deleteLater();
     m_view->setParent(NULL);
@@ -281,7 +291,8 @@ void AuroraeClient::init()
     QPalette pal2 = widget()->palette();
     pal2.setColor(widget()->backgroundRole(), Qt::transparent);
     widget()->setPalette(pal2);
-    m_scene->addItem(m_item);
+    if (m_item)
+        m_scene->addItem(m_item);
     slotAlphaChanged();
 
     AuroraeFactory::instance()->theme()->setCompositingActive(compositingActive());
@@ -490,8 +501,9 @@ void AuroraeClient::titleMouseMoved(int button, int buttons)
 
 void AuroraeClient::titlePressed(Qt::MouseButton button, Qt::MouseButtons buttons)
 {
-    QMouseEvent *event = new QMouseEvent(QEvent::MouseButtonPress, widget()->mapFromGlobal(QCursor::pos()),
-                                         QCursor::pos(), button, buttons, Qt::NoModifier);
+    const QPoint cursor = QCursor::pos();
+    QMouseEvent *event = new QMouseEvent(QEvent::MouseButtonPress, widget()->mapFromGlobal(cursor),
+                                         cursor, button, buttons, Qt::NoModifier);
     processMousePressEvent(event);
     delete event;
     event = 0;
@@ -499,8 +511,9 @@ void AuroraeClient::titlePressed(Qt::MouseButton button, Qt::MouseButtons button
 
 void AuroraeClient::titleReleased(Qt::MouseButton button, Qt::MouseButtons buttons)
 {
-    QMouseEvent *event = new QMouseEvent(QEvent::MouseButtonRelease, widget()->mapFromGlobal(QCursor::pos()),
-                                         QCursor::pos(), button, buttons, Qt::NoModifier);
+    const QPoint cursor = QCursor::pos();
+    QMouseEvent *event = new QMouseEvent(QEvent::MouseButtonRelease, widget()->mapFromGlobal(cursor),
+                                         cursor, button, buttons, Qt::NoModifier);
     QApplication::sendEvent(widget(), event);
     delete event;
     event = 0;
@@ -508,8 +521,9 @@ void AuroraeClient::titleReleased(Qt::MouseButton button, Qt::MouseButtons butto
 
 void AuroraeClient::titleMouseMoved(Qt::MouseButton button, Qt::MouseButtons buttons)
 {
-    QMouseEvent *event = new QMouseEvent(QEvent::MouseMove, widget()->mapFromGlobal(QCursor::pos()),
-                                         QCursor::pos(), button, buttons, Qt::NoModifier);
+    const QPoint cursor = QCursor::pos();
+    QMouseEvent *event = new QMouseEvent(QEvent::MouseMove, widget()->mapFromGlobal(cursor),
+                                         cursor, button, buttons, Qt::NoModifier);
     QApplication::sendEvent(widget(), event);
     delete event;
     event = 0;
@@ -519,10 +533,12 @@ void AuroraeClient::themeChanged()
 {
     m_scene->clear();
     m_item = AuroraeFactory::instance()->createQmlDecoration(this);
-    if (m_item) {
-        m_item->setWidth(m_scene->sceneRect().width());
-        m_item->setHeight(m_scene->sceneRect().height());
+    if (!m_item) {
+        return;
     }
+
+    m_item->setWidth(m_scene->sceneRect().width());
+    m_item->setHeight(m_scene->sceneRect().height());
     m_scene->addItem(m_item);
     connect(m_item, SIGNAL(alphaChanged()), SLOT(slotAlphaChanged()));
     slotAlphaChanged();
@@ -579,6 +595,10 @@ QVariant AuroraeClient::readConfig(const QString &key, const QVariant &defaultVa
 
 void AuroraeClient::slotAlphaChanged()
 {
+    if (!m_item) {
+        setAlphaEnabled(false);
+        return;
+    }
     QVariant alphaProperty = m_item->property("alpha");
     if (alphaProperty.isValid() && alphaProperty.canConvert<bool>()) {
         setAlphaEnabled(alphaProperty.toBool());
@@ -615,6 +635,18 @@ QRegion AuroraeClient::region(KDecorationDefines::Region r)
     rect.translate(-paddingLeft, -paddingTop);
 
     return QRegion(rect.adjusted(-left, -top, right, bottom)).subtract(rect);
+}
+
+bool AuroraeClient::animationsSupported() const
+{
+    if (!compositingActive()) {
+        return false;
+    }
+    QPixmap pix(1,1);
+    QPainter p(&pix);
+    const bool raster = p.paintEngine()->type() == QPaintEngine::Raster;
+    p.end();
+    return raster;
 }
 
 } // namespace Aurorae

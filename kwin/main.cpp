@@ -67,6 +67,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sm.h"
 #include "utils.h"
 #include "effects.h"
+#include "workspace.h"
 #include "xcbutils.h"
 
 #define INT8 _X11INT8
@@ -93,6 +94,58 @@ bool initting = false;
  * and -rdynamic in CXXFLAGS for kBacktrace() to work.
  */
 static bool kwin_sync = false;
+
+//************************************
+// KWinSelectionOwner
+//************************************
+
+KWinSelectionOwner::KWinSelectionOwner(int screen_P)
+    : KSelectionOwner(make_selection_atom(screen_P), screen_P)
+{
+}
+
+Atom KWinSelectionOwner::make_selection_atom(int screen_P)
+{
+    if (screen_P < 0)
+        screen_P = DefaultScreen(display());
+    char tmp[ 30 ];
+    sprintf(tmp, "WM_S%d", screen_P);
+    return XInternAtom(display(), tmp, False);
+}
+
+void KWinSelectionOwner::getAtoms()
+{
+    KSelectionOwner::getAtoms();
+    if (xa_version == None) {
+        Atom atoms[ 1 ];
+        const char* const names[] =
+        { "VERSION" };
+        XInternAtoms(display(), const_cast< char** >(names), 1, False, atoms);
+        xa_version = atoms[ 0 ];
+    }
+}
+
+void KWinSelectionOwner::replyTargets(Atom property_P, Window requestor_P)
+{
+    KSelectionOwner::replyTargets(property_P, requestor_P);
+    Atom atoms[ 1 ] = { xa_version };
+    // PropModeAppend !
+    XChangeProperty(display(), requestor_P, property_P, XA_ATOM, 32, PropModeAppend,
+    reinterpret_cast< unsigned char* >(atoms), 1);
+}
+
+bool KWinSelectionOwner::genericReply(Atom target_P, Atom property_P, Window requestor_P)
+{
+    if (target_P == xa_version) {
+        long version[] = { 2, 0 };
+        XChangeProperty(display(), requestor_P, property_P, XA_INTEGER, 32,
+        PropModeReplace, reinterpret_cast< unsigned char* >(&version), 2);
+    } else
+        return KSelectionOwner::genericReply(target_P, property_P, requestor_P);
+    return true;
+}
+
+Atom KWinSelectionOwner::xa_version = None;
 
 // errorMessage is only used ifndef NDEBUG, and only in one place.
 // it might be worth reevaluating why this is used? I don't know.
@@ -486,7 +539,7 @@ KDE_EXPORT int kdemain(int argc, char * argv[])
     aboutData.addAuthor(ki18n("Cristian Tibirna"), KLocalizedString(), "tibirna@kde.org");
     aboutData.addAuthor(ki18n("Daniel M. Duley"), KLocalizedString(), "mosfet@kde.org");
     aboutData.addAuthor(ki18n("Luboš Luňák"), KLocalizedString(), "l.lunak@kde.org");
-    aboutData.addAuthor(ki18n("Martin Gräßlin"), ki18n("Maintainer"), "kde@martin-graesslin.com");
+    aboutData.addAuthor(ki18n("Martin Gräßlin"), ki18n("Maintainer"), "mgraesslin@kde.org");
 
     KCmdLineArgs::init(argc, argv, &aboutData);
 
@@ -515,6 +568,8 @@ KDE_EXPORT int kdemain(int argc, char * argv[])
     KWin::SessionManager weAreIndeed;
     KWin::SessionSaveDoneHelper helper;
     KGlobal::locale()->insertCatalog("kwin_effects");
+    KGlobal::locale()->insertCatalog("kwin_scripts");
+    KGlobal::locale()->insertCatalog("kwin_scripting");
 
     // Announce when KWIN_DIRECT_GL is set for above HACK
     if (qstrcmp(qgetenv("KWIN_DIRECT_GL"), "1") == 0)

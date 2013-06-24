@@ -418,13 +418,13 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
         //to determine if this line is no longer needed in the future, comment it out, lock
         //widgets, then call up the configuration dialog for a system tray applet and click
         //on the "unlock widgets" button.
-        m_visibleItemsUi.visibleItemsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-        m_visibleItemsUi.visibleItemsView->setEnabled(immutability() == Plasma::Mutable);
         m_visibleItemsUi.unlockLabel->setVisible(visible);
         m_visibleItemsUi.unlockButton->setVisible(visible);
 
+        m_visibleItemsUi.visibleItemsView->setEnabled(immutability() == Plasma::Mutable);
         m_visibleItemsUi.visibleItemsView->setCategoryDrawer(new KCategoryDrawerV3(m_visibleItemsUi.visibleItemsView));
         m_visibleItemsUi.visibleItemsView->setMouseTracking(true);
+        m_visibleItemsUi.visibleItemsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         m_visibleItemsUi.visibleItemsView->setVerticalScrollMode(QListView::ScrollPerPixel);
 
         KCategorizedSortFilterProxyModel *visibleItemsModel = new KCategorizedSortFilterProxyModel(m_visibleItemsUi.visibleItemsView);
@@ -432,14 +432,15 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
 
         m_visibleItemsSourceModel = new QStandardItemModel(m_visibleItemsUi.visibleItemsView);
         visibleItemsModel->setSourceModel(m_visibleItemsSourceModel.data());
-
         m_visibleItemsUi.visibleItemsView->setModel(visibleItemsModel);
     }
 
+    QStandardItemModel *visibleItemsSourceModel = m_visibleItemsSourceModel.data();
+    // the lifespan of m_visibleItemsSourceModel is tied to the config UI, so it
+    // should always exist at this point
+    Q_ASSERT(visibleItemsSourceModel);
+    visibleItemsSourceModel->clear();
     m_autoHideUi.icons->clear();
-    if (m_visibleItemsSourceModel) {
-        m_visibleItemsSourceModel.data()->clear();
-    }
 
     QMultiMap<QString, Task *> sortedTasks;
     foreach (Task *task, s_manager->tasks()) {
@@ -519,7 +520,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     applicationStatusItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     applicationStatusItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     applicationStatusItem->setData("ShowApplicationStatus", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(applicationStatusItem);
+    visibleItemsSourceModel->appendRow(applicationStatusItem);
 
     QStandardItem *communicationsItem = new QStandardItem();
     communicationsItem->setText(i18nc("Items communication related, such as chat or email clients", "Communications"));
@@ -529,7 +530,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     communicationsItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     communicationsItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     communicationsItem->setData("ShowCommunications", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(communicationsItem);
+    visibleItemsSourceModel->appendRow(communicationsItem);
 
     QStandardItem *systemServicesItem = new QStandardItem();
     systemServicesItem->setText(i18nc("Items about the status of the system, such as a filesystem indexer", "System services"));
@@ -539,7 +540,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     systemServicesItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     systemServicesItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     systemServicesItem->setData("ShowSystemServices", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(systemServicesItem);
+    visibleItemsSourceModel->appendRow(systemServicesItem);
 
     QStandardItem *hardwareControlItem = new QStandardItem();
     hardwareControlItem->setText(i18nc("Items about hardware, such as battery or volume control", "Hardware control"));
@@ -549,7 +550,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     hardwareControlItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     hardwareControlItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     hardwareControlItem->setData("ShowHardware", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(hardwareControlItem);
+    visibleItemsSourceModel->appendRow(hardwareControlItem);
 
     QStandardItem *unknownItem = new QStandardItem();
     unknownItem->setText(i18nc("Other uncategorized systemtray items", "Miscellaneous"));
@@ -559,25 +560,51 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
     unknownItem->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     unknownItem->setData(itemCategories, KCategorizedSortFilterProxyModel::CategoryDisplayRole);
     unknownItem->setData("ShowUnknown", Qt::UserRole+1);
-    m_visibleItemsSourceModel.data()->appendRow(unknownItem);
+    visibleItemsSourceModel->appendRow(unknownItem);
 
     QStringList ownApplets = s_manager->applets(this);
 
+    QMap<QString, KPluginInfo> sortedApplets;
     foreach (const KPluginInfo &info, Plasma::Applet::listAppletInfo()) {
         KService::Ptr service = info.service();
         if (service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
-            QStandardItem *item = new QStandardItem();
-            item->setText(service->name());
-            item->setIcon(KIcon(service->icon()));
-            item->setCheckable(true);
-            item->setCheckState(ownApplets.contains(info.pluginName()) ? Qt::Checked : Qt::Unchecked);
-            item->setData(i18nc("Extra items to be manually added in the systray, such as little Plasma widgets", "Extra Items"), KCategorizedSortFilterProxyModel::CategoryDisplayRole);
-            item->setData(info.pluginName(), Qt::UserRole+2);
-            m_visibleItemsSourceModel.data()->appendRow(item);
+            // if we already have a plugin with this exact name in it, then check if it is the
+            // same plugin and skip it if it is indeed already listed
+            if (sortedApplets.contains(info.name())) {
+
+                bool dupe = false;
+                // it is possible (though poor form) to have multiple applets
+                // with the same visible name but different plugins, so we hve to check all values
+                foreach (const KPluginInfo &existingInfo, sortedApplets.values(info.name())) {
+                    if (existingInfo.pluginName() == info.pluginName()) {
+                        dupe = true;
+                        break;
+                    }
+                }
+
+                if (dupe) {
+                    continue;
+                }
+            }
+
+            // insertMulti becase it is possible (though poor form) to have multiple applets
+            // with the same visible name but different plugins
+            sortedApplets.insertMulti(info.name(), info);
         }
     }
 
-    connect(m_visibleItemsSourceModel.data(), SIGNAL(itemChanged(QStandardItem*)), parent, SLOT(settingsModified()));
+    foreach  (const KPluginInfo &info, sortedApplets) {
+        QStandardItem *item = new QStandardItem();
+        item->setText(info.name());
+        item->setIcon(KIcon(info.icon()));
+        item->setCheckable(true);
+        item->setCheckState(ownApplets.contains(info.pluginName()) ? Qt::Checked : Qt::Unchecked);
+        item->setData(i18nc("Extra items to be manually added in the systray, such as little Plasma widgets", "Extra Items"), KCategorizedSortFilterProxyModel::CategoryDisplayRole);
+        item->setData(info.pluginName(), Qt::UserRole+2);
+        visibleItemsSourceModel->appendRow(item);
+    }
+
+    connect(visibleItemsSourceModel, SIGNAL(itemChanged(QStandardItem*)), parent, SLOT(settingsModified()));
 }
 
 //not always the corona lock action is available: netbook locks per-containment

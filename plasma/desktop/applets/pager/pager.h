@@ -86,7 +86,7 @@ class Pager : public Plasma::Applet
 
     public slots:
         void recalculateGridSizes(int rows);
-        void updateSizes(bool allowResize);
+        void updateSizes(bool allowResize = true);
         void recalculateWindowRects();
         void themeRefresh();
         void configChanged();
@@ -142,13 +142,11 @@ class Pager : public Plasma::Applet
 
         DisplayedText m_displayedText;
         CurrentDesktopSelected m_currentDesktopSelected;
-        bool m_showWindowIcons;
         int m_rows;
         int m_columns;
         int m_desktopCount;
         int m_currentDesktop;
         QString m_currentActivity;
-        bool m_desktopDown;
         qreal m_widthScaleFactor;
         qreal m_heightScaleFactor;
         QSizeF m_size;
@@ -158,9 +156,12 @@ class Pager : public Plasma::Applet
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
         KColorScheme *m_plasmaColorTheme;
-        bool m_verticalFormFactor;
 
+        bool m_showWindowIcons;
+        bool m_desktopDown;
+        bool m_verticalFormFactor;
         bool m_ignoreNextSizeConstraint;
+        bool m_hideWhenSingleDesktop;
 
         //embedded KCM module in the configuratoin dialog
         KCModuleProxy *m_configureDesktopsWidget;

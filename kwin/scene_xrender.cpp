@@ -4,6 +4,7 @@
 
 Copyright (C) 2006 Lubos Lunak <l.lunak@kde.org>
 Copyright (C) 2009 Fredrik Höglund <fredrik@kde.org>
+Copyright (C) 2013 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "toplevel.h"
 #include "client.h"
+#include "decorations.h"
 #include "deleted.h"
 #include "effects.h"
 #include "overlaywindow.h"
@@ -31,13 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "xcbutils.h"
 #include "kwinxrenderutils.h"
 
-#include <X11/extensions/Xcomposite.h>
 #include <xcb/xfixes.h>
 
-#include <kxerrorhandler.h>
-
 #include <QtGui/QPainter>
-#include <QtCore/qmath.h>
+#include <qmath.h>
 
 namespace KWin
 {
@@ -46,33 +45,49 @@ namespace KWin
 // SceneXrender
 //****************************************
 
-// kDebug() support for the XserverRegion type
-struct RegionDebug {
-    RegionDebug(XserverRegion r) : rr(r) {}
-    XserverRegion rr;
-};
-
-QDebug& operator<<(QDebug& stream, RegionDebug r)
-{
-    if (r.rr == None)
-        return stream << "EMPTY";
-    int num;
-    XRectangle* rects = XFixesFetchRegion(display(), r.rr, &num);
-    if (rects == NULL || num == 0)
-        return stream << "EMPTY";
-    for (int i = 0;
-            i < num;
-            ++i)
-        stream << "[" << rects[ i ].x << "+" << rects[ i ].y << " " << rects[ i ].width << "x" << rects[ i ].height << "]";
-    return stream;
-}
-
-Picture SceneXrender::buffer = None;
+xcb_render_picture_t SceneXrender::buffer = XCB_RENDER_PICTURE_NONE;
 ScreenPaintData SceneXrender::screen_paint;
+
+static xcb_render_pictformat_t findFormatForVisual(xcb_visualid_t visual)
+{
+    static QHash<xcb_visualid_t, xcb_render_pictformat_t> s_cache;
+
+    if (xcb_render_pictformat_t format = s_cache.value(visual, 0)) {
+        return format;
+    }
+    if (!s_cache.isEmpty()) {
+        return 0;
+    }
+
+    ScopedCPointer<xcb_render_query_pict_formats_reply_t> formats(xcb_render_query_pict_formats_reply(
+        connection(), xcb_render_query_pict_formats_unchecked(connection()), NULL));
+    if (!formats) {
+        return 0;
+    }
+    int screen = QX11Info::appScreen();
+    for (xcb_render_pictscreen_iterator_t sit = xcb_render_query_pict_formats_screens_iterator(formats.data());
+            sit.rem;
+            --screen, xcb_render_pictscreen_next(&sit)) {
+        if (screen != 0) {
+            continue;
+        }
+        for (xcb_render_pictdepth_iterator_t dit = xcb_render_pictscreen_depths_iterator(sit.data);
+                dit.rem;
+                xcb_render_pictdepth_next(&dit)) {
+            for (xcb_render_pictvisual_iterator_t vit = xcb_render_pictdepth_visuals_iterator(dit.data);
+                    vit.rem;
+                    xcb_render_pictvisual_next(&vit)) {
+                s_cache.insert(vit.data->visual, vit.data->format);
+            }
+        }
+    }
+    return s_cache.value(visual, 0);
+}
 
 SceneXrender::SceneXrender(Workspace* ws)
     : Scene(ws)
-    , front(None)
+    , format(0)
+    , front(XCB_RENDER_PICTURE_NONE)
     , m_overlayWindow(new OverlayWindow())
     , init_ok(false)
 {
@@ -96,9 +111,9 @@ SceneXrender::~SceneXrender()
     }
     SceneXrender::Window::cleanup();
     SceneXrender::EffectFrame::cleanup();
-    XRenderFreePicture(display(), front);
-    XRenderFreePicture(display(), buffer);
-    buffer = None;
+    xcb_render_free_picture(connection(), front);
+    xcb_render_free_picture(connection(), buffer);
+    buffer = XCB_RENDER_PICTURE_NONE;
     m_overlayWindow->destroy();
     foreach (Window * w, windows)
     delete w;
@@ -108,36 +123,36 @@ SceneXrender::~SceneXrender()
 void SceneXrender::initXRender(bool createOverlay)
 {
     init_ok = false;
-    if (front != None)
-        XRenderFreePicture(display(), front);
-    KXErrorHandler xerr;
-    bool haveOverlay = createOverlay ? m_overlayWindow->create() : (m_overlayWindow->window() != None);
+    if (front != XCB_RENDER_PICTURE_NONE)
+        xcb_render_free_picture(connection(), front);
+    bool haveOverlay = createOverlay ? m_overlayWindow->create() : (m_overlayWindow->window() != XCB_WINDOW_NONE);
     if (haveOverlay) {
-        m_overlayWindow->setup(None);
-        XWindowAttributes attrs;
-        XGetWindowAttributes(display(), m_overlayWindow->window(), &attrs);
-        format = XRenderFindVisualFormat(display(), attrs.visual);
-        if (format == NULL) {
+        m_overlayWindow->setup(XCB_WINDOW_NONE);
+        ScopedCPointer<xcb_get_window_attributes_reply_t> attribs(xcb_get_window_attributes_reply(connection(),
+            xcb_get_window_attributes_unchecked(connection(), m_overlayWindow->window()), NULL));
+        if (!attribs) {
+            kError(1212) << "Failed getting window attributes for overlay window";
+            return;
+        }
+        format = findFormatForVisual(attribs->visual);
+        if (format == 0) {
             kError(1212) << "Failed to find XRender format for overlay window";
             return;
         }
-        front = XRenderCreatePicture(display(), m_overlayWindow->window(), format, 0, NULL);
+        front = xcb_generate_id(connection());
+        xcb_render_create_picture(connection(), front, m_overlayWindow->window(), format, 0, NULL);
     } else {
         // create XRender picture for the root window
-        format = XRenderFindVisualFormat(display(), DefaultVisual(display(), DefaultScreen(display())));
-        if (format == NULL) {
+        format = findFormatForVisual(defaultScreen()->root_visual);
+        if (format == 0) {
             kError(1212) << "Failed to find XRender format for root window";
             return; // error
         }
-        XRenderPictureAttributes pa;
-        pa.subwindow_mode = IncludeInferiors;
-        front = XRenderCreatePicture(display(), rootWindow(), format, CPSubwindowMode, &pa);
+        front = xcb_generate_id(connection());
+        const uint32_t values[] = {XCB_SUBWINDOW_MODE_INCLUDE_INFERIORS};
+        xcb_render_create_picture(connection(), front, rootWindow(), format, XCB_RENDER_CP_SUBWINDOW_MODE, values);
     }
     createBuffer();
-    if (xerr.error(true)) {
-        kError(1212) << "XRender compositing setup failed";
-        return;
-    }
     init_ok = true;
 }
 
@@ -150,15 +165,17 @@ bool SceneXrender::initFailed() const
 // so it is done manually using this buffer,
 void SceneXrender::createBuffer()
 {
-    if (buffer != None)
-        XRenderFreePicture(display(), buffer);
-    Pixmap pixmap = XCreatePixmap(display(), rootWindow(), displayWidth(), displayHeight(), DefaultDepth(display(), DefaultScreen(display())));
-    buffer = XRenderCreatePicture(display(), pixmap, format, 0, 0);
-    XFreePixmap(display(), pixmap);   // The picture owns the pixmap now
+    if (buffer != XCB_RENDER_PICTURE_NONE)
+        xcb_render_free_picture(connection(), buffer);
+    xcb_pixmap_t pixmap = xcb_generate_id(connection());
+    xcb_create_pixmap(connection(), Xcb::defaultDepth(), pixmap, rootWindow(), displayWidth(), displayHeight());
+    buffer = xcb_generate_id(connection());
+    xcb_render_create_picture(connection(), buffer, pixmap, format, 0, NULL);
+    xcb_free_pixmap(connection(), pixmap);   // The picture owns the pixmap now
 }
 
 // the entry point for painting
-int SceneXrender::paint(QRegion damage, ToplevelList toplevels)
+qint64 SceneXrender::paint(QRegion damage, ToplevelList toplevels)
 {
     QElapsedTimer renderTimer;
     renderTimer.start();
@@ -178,7 +195,7 @@ int SceneXrender::paint(QRegion damage, ToplevelList toplevels)
     // do cleanup
     stacking_order.clear();
 
-    return renderTimer.elapsed();
+    return renderTimer.nsecsElapsed();
 }
 
 void SceneXrender::present(int mask, QRegion damage)
@@ -192,12 +209,12 @@ void SceneXrender::present(int mask, QRegion damage)
         xcb_render_composite(connection(), XCB_RENDER_PICT_OP_SRC, buffer, XCB_RENDER_PICTURE_NONE,
                              front, 0, 0, 0, 0, 0, 0, displayWidth(), displayHeight());
         xcb_xfixes_set_picture_clip_region(connection(), front, XCB_XFIXES_REGION_NONE, 0, 0);
-        XSync(display(), false);
+        xcb_flush(connection());
     } else {
         // copy composed buffer to the root window
         xcb_render_composite(connection(), XCB_RENDER_PICT_OP_SRC, buffer, XCB_RENDER_PICTURE_NONE,
                              front, 0, 0, 0, 0, 0, 0, displayWidth(), displayHeight());
-        XSync(display(), false);
+        xcb_flush(connection());
     }
 }
 
@@ -207,16 +224,19 @@ void SceneXrender::paintGenericScreen(int mask, ScreenPaintData data)
     Scene::paintGenericScreen(mask, data);
 }
 
+void SceneXrender::paintDesktop(int desktop, int mask, const QRegion &region, ScreenPaintData &data)
+{
+    PaintClipper::push(region);
+    KWin::Scene::paintDesktop(desktop, mask, region, data);
+    PaintClipper::pop(region);
+}
+
 // fill the screen background
 void SceneXrender::paintBackground(QRegion region)
 {
-    PaintClipper pc(region);
-    for (PaintClipper::Iterator iterator;
-            !iterator.isDone();
-            iterator.next()) {
-        XRenderColor col = { 0, 0, 0, 0xffff }; // black
-        XRenderFillRectangle(display(), PictOpSrc, buffer, &col, 0, 0, displayWidth(), displayHeight());
-    }
+    xcb_render_color_t col = { 0, 0, 0, 0xffff }; // black
+    const QVector<xcb_rectangle_t> &rects = Xcb::regionToRects(region);
+    xcb_render_fill_rectangles(connection(), XCB_RENDER_PICT_OP_SRC, buffer, col, rects.count(), rects.data());
 }
 
 void SceneXrender::windowGeometryShapeChanged(KWin::Toplevel* c)
@@ -224,17 +244,12 @@ void SceneXrender::windowGeometryShapeChanged(KWin::Toplevel* c)
     if (!windows.contains(c))    // this is ok, shape is not valid by default
         return;
     Window* w = windows[ c ];
-    w->discardPicture();
     w->discardShape();
-    w->discardAlpha();
 }
 
 void SceneXrender::windowOpacityChanged(KWin::Toplevel* c)
 {
-    if (!windows.contains(c))    // this is ok, alpha is created on demand
-        return;
-    Window* w = windows[ c ];
-    w->discardAlpha();
+    Q_UNUSED(c)
 }
 
 void SceneXrender::windowClosed(KWin::Toplevel* c, KWin::Deleted* deleted)
@@ -265,7 +280,6 @@ void SceneXrender::windowAdded(Toplevel* c)
 {
     assert(!windows.contains(c));
     windows[ c ] = new Window(c);
-    connect(c, SIGNAL(opacityChanged(KWin::Toplevel*,qreal)), SLOT(windowOpacityChanged(KWin::Toplevel*)));
     connect(c, SIGNAL(geometryShapeChanged(KWin::Toplevel*,QRect)), SLOT(windowGeometryShapeChanged(KWin::Toplevel*)));
     connect(c, SIGNAL(windowClosed(KWin::Toplevel*,KWin::Deleted*)), SLOT(windowClosed(KWin::Toplevel*,KWin::Deleted*)));
     c->effectWindow()->setSceneWindow(windows[ c ]);
@@ -282,17 +296,13 @@ QRect SceneXrender::Window::temp_visibleRect;
 
 SceneXrender::Window::Window(Toplevel* c)
     : Scene::Window(c)
-    , _picture(None)
-    , format(XRenderFindVisualFormat(display(), c->visual()))
-    , alpha(None)
+    , format(findFormatForVisual(c->visual()->visualid))
     , alpha_cached_opacity(0.0)
 {
 }
 
 SceneXrender::Window::~Window()
 {
-    discardPicture();
-    discardAlpha();
     discardShape();
 }
 
@@ -300,65 +310,6 @@ void SceneXrender::Window::cleanup()
 {
     delete s_tempPicture;
     s_tempPicture = NULL;
-}
-
-// Create XRender picture for the pixmap with the window contents.
-Picture SceneXrender::Window::picture()
-{
-    if (!toplevel->damage().isEmpty() && _picture != None) {
-        XRenderFreePicture(display(), _picture);
-        _picture = None;
-    }
-    if (_picture == None && format != NULL) {
-        // Get the pixmap with the window contents.
-        Pixmap pix = toplevel->windowPixmap();
-        if (pix == None)
-            return None;
-        _picture = XRenderCreatePicture(display(), pix, format, 0, 0);
-        toplevel->resetDamage(toplevel->rect());
-    }
-    return _picture;
-}
-
-
-void SceneXrender::Window::discardPicture()
-{
-    if (_picture != None)
-        XRenderFreePicture(display(), _picture);
-    _picture = None;
-}
-
-void SceneXrender::Window::discardAlpha()
-{
-    if (alpha != None)
-        XRenderFreePicture(display(), alpha);
-    alpha = None;
-}
-
-// Create XRender picture for the alpha mask.
-Picture SceneXrender::Window::alphaMask(double opacity)
-{
-    if (isOpaque() && qFuzzyCompare(opacity, 1.0))
-        return None;
-
-    bool created = false;
-    if (alpha == None) {
-        // Create a 1x1 8bpp pixmap containing the given opacity in the alpha channel.
-        Pixmap pixmap = XCreatePixmap(display(), rootWindow(), 1, 1, 8);
-        XRenderPictFormat* format = XRenderFindStandardFormat(display(), PictStandardA8);
-        XRenderPictureAttributes pa;
-        pa.repeat = True;
-        alpha = XRenderCreatePicture(display(), pixmap, format, CPRepeat, &pa);
-        XFreePixmap(display(), pixmap);
-        created = true;
-    }
-    if (created || !qFuzzyCompare(alpha_cached_opacity + 1.0, opacity + 1.0)) {
-        XRenderColor col;
-        col.alpha = int(opacity * 0xffff);
-        XRenderFillRectangle(display(), PictOpSrc, alpha, &col, 0, 0, 1, 1);
-        alpha_cached_opacity = opacity;
-    }
-    return alpha;
 }
 
 // Maps window coordinates to screen coordinates
@@ -451,9 +402,14 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
 
     if (region.isEmpty())
         return;
-    Picture pic = picture(); // get XRender picture
-    if (pic == None)   // The render format can be null for GL and/or Xv visuals
+    XRenderWindowPixmap *pixmap = windowPixmap<XRenderWindowPixmap>();
+    if (!pixmap || !pixmap->isValid()) {
         return;
+    }
+    xcb_render_picture_t pic = pixmap->picture();
+    if (pic == XCB_RENDER_PICTURE_NONE)   // The render format can be null for GL and/or Xv visuals
+        return;
+    toplevel->resetDamage();
     // set picture filter
     if (options->isXrenderSmoothScale()) { // only when forced, it's slow
         if (mask & PAINT_WINDOW_TRANSFORMED)
@@ -475,7 +431,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     Deleted *deleted = dynamic_cast<Deleted*>(toplevel);
     const QRect decorationRect = toplevel->decorationRect();
     if (((client && !client->noBorder()) || (deleted && !deleted->noBorder())) &&
-                                                        Workspace::self()->decorationHasAlpha()) {
+                                                        decorationPlugin()->hasAlpha()) {
         // decorated client
         transformed_shape = decorationRect;
         if (toplevel->shape()) {
@@ -489,21 +445,17 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     if (toplevel->hasShadow())
         transformed_shape |= toplevel->shadow()->shadowRegion();
 
-    XTransform xform = {{
-            { XDoubleToFixed(1), XDoubleToFixed(0), XDoubleToFixed(0) },
-            { XDoubleToFixed(0), XDoubleToFixed(1),  XDoubleToFixed(0) },
-            { XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1) }
-        }
+#define DOUBLE_TO_FIXED(d) ((xcb_render_fixed_t) ((d) * 65536))
+    xcb_render_transform_t xform = {
+        DOUBLE_TO_FIXED(1), DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(0),
+        DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(1), DOUBLE_TO_FIXED(0),
+        DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(1)
     };
-
-    static XTransform identity = {{
-            { XDoubleToFixed(1), XDoubleToFixed(0), XDoubleToFixed(0) },
-            { XDoubleToFixed(0), XDoubleToFixed(1),  XDoubleToFixed(0) },
-            { XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1) }
-        }
+    static xcb_render_transform_t identity = {
+        DOUBLE_TO_FIXED(1), DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(0),
+        DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(1), DOUBLE_TO_FIXED(0),
+        DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(0), DOUBLE_TO_FIXED(1)
     };
-
-    XRenderPictureAttributes attr;
 
     if (mask & PAINT_WINDOW_TRANSFORMED) {
         xscale = data.xScale();
@@ -515,8 +467,8 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     }
     if (!qFuzzyCompare(xscale, 1.0) || !qFuzzyCompare(yscale, 1.0)) {
         scaled = true;
-        xform.matrix[0][0] = XDoubleToFixed(1.0 / xscale);
-        xform.matrix[1][1] = XDoubleToFixed(1.0 / yscale);
+        xform.matrix11 = DOUBLE_TO_FIXED(1.0 / xscale);
+        xform.matrix22 = DOUBLE_TO_FIXED(1.0 / yscale);
 
         // transform the shape for clipping in paintTransformedScreen()
         QVector<QRect> rects = transformed_shape.rects();
@@ -527,6 +479,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         }
         transformed_shape.setRects(rects.constData(), rects.count());
     }
+#undef DOUBLE_TO_FIXED
 
     transformed_shape.translate(mapToScreen(mask, data, QPoint(0, 0)));
     PaintClipper pcreg(region);   // clip by the region to paint
@@ -544,7 +497,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     // it optimizes painting quite a bit
     const bool blitInTempPixmap = xRenderOffscreen() || (scaled && (wantShadow || (client && !client->noBorder()) || (deleted && !deleted->noBorder())));
 
-    Picture renderTarget = buffer;
+    xcb_render_picture_t renderTarget = buffer;
     if (blitInTempPixmap) {
         if (scene_xRenderOffscreenTarget()) {
             temp_visibleRect = toplevel->visibleRect().translated(-toplevel->pos());
@@ -554,9 +507,9 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
             renderTarget = *s_tempPicture;
         }
     } else {
-        XRenderSetPictureTransform(display(), pic, &xform);
+        xcb_render_set_picture_transform(connection(), pic, xform);
         if (filter == ImageFilterGood) {
-            XRenderSetPictureFilter(display(), pic, const_cast<char*>("good"), NULL, 0);
+            setPictureFilter(pic, KWin::Scene::ImageFilterGood);
         }
 
         //BEGIN OF STUPID RADEON HACK
@@ -571,8 +524,8 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         // Since we only scale the picture, we can work around this by setting
         // the repeat mode to RepeatPad.
         if (!window()->hasAlpha()) {
-            attr.repeat = RepeatPad;
-            XRenderChangePicture(display(), pic, CPRepeat, &attr);
+            const uint32_t values[] = {XCB_RENDER_REPEAT_PAD};
+            xcb_render_change_picture(connection(), pic, XCB_RENDER_CP_REPEAT, values);
         }
         //END OF STUPID RADEON HACK
     }
@@ -581,10 +534,10 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
 
     //BEGIN deco preparations
     bool noBorder = true;
-    const QPixmap *left = NULL;
-    const QPixmap *top = NULL;
-    const QPixmap *right = NULL;
-    const QPixmap *bottom = NULL;
+    xcb_render_picture_t left   = XCB_RENDER_PICTURE_NONE;
+    xcb_render_picture_t top    = XCB_RENDER_PICTURE_NONE;
+    xcb_render_picture_t right  = XCB_RENDER_PICTURE_NONE;
+    xcb_render_picture_t bottom = XCB_RENDER_PICTURE_NONE;
     PaintRedirector *redirector = NULL;
     QRect dtr, dlr, drr, dbr;
     if (client || deleted) {
@@ -600,10 +553,10 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         }
         if (redirector) {
             redirector->ensurePixmapsPainted();
-            left   = redirector->leftDecoPixmap();
-            top    = redirector->topDecoPixmap();
-            right  = redirector->rightDecoPixmap();
-            bottom = redirector->bottomDecoPixmap();
+            left   = redirector->leftDecoPixmap<xcb_render_picture_t>();
+            top    = redirector->topDecoPixmap<xcb_render_picture_t>();
+            right  = redirector->rightDecoPixmap<xcb_render_picture_t>();
+            bottom = redirector->bottomDecoPixmap<xcb_render_picture_t>();
         }
         if (!noBorder) {
             MAP_RECT_TO_TARGET(dtr);
@@ -643,7 +596,7 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
         }
     }
 
-    const int clientRenderOp = (opaque || blitInTempPixmap) ? PictOpSrc : PictOpOver;
+    const int clientRenderOp = (opaque || blitInTempPixmap) ? XCB_RENDER_PICT_OP_SRC : XCB_RENDER_PICT_OP_OVER;
     //END client preparations
 
 #undef MAP_RECT_TO_TARGET
@@ -651,12 +604,15 @@ void SceneXrender::Window::performPaint(int mask, QRegion region, WindowPaintDat
     for (PaintClipper::Iterator iterator; !iterator.isDone(); iterator.next()) {
 
 #define RENDER_SHADOW_TILE(_TILE_, _RECT_) \
-XRenderComposite(display(), PictOpOver, m_xrenderShadow->shadowPixmap(SceneXRenderShadow::ShadowElement##_TILE_).x11PictureHandle(), \
+xcb_render_composite(connection(), XCB_RENDER_PICT_OP_OVER, m_xrenderShadow->picture(SceneXRenderShadow::ShadowElement##_TILE_), \
                  shadowAlpha, renderTarget, 0, 0, 0, 0, _RECT_.x(), _RECT_.y(), _RECT_.width(), _RECT_.height())
 
         //shadow
         if (wantShadow) {
-            Picture shadowAlpha = opaque ? None : alphaMask(data.opacity());
+            xcb_render_picture_t shadowAlpha = XCB_RENDER_PICTURE_NONE;
+            if (!opaque) {
+                shadowAlpha = xRenderBlendPicture(data.opacity());
+            }
             RENDER_SHADOW_TILE(TopLeft, stlr);
             RENDER_SHADOW_TILE(Top, str);
             RENDER_SHADOW_TILE(TopRight, strr);
@@ -670,19 +626,22 @@ XRenderComposite(display(), PictOpOver, m_xrenderShadow->shadowPixmap(SceneXRend
 
         // Paint the window contents
         if (!(client && client->isShade())) {
-            Picture clientAlpha = opaque ? None : alphaMask(data.opacity());
-            XRenderComposite(display(), clientRenderOp, pic, clientAlpha, renderTarget, cr.x(), cr.y(), 0, 0, dr.x(), dr.y(), dr.width(), dr.height());
+            xcb_render_picture_t clientAlpha = XCB_RENDER_PICTURE_NONE;
+            if (!opaque) {
+                clientAlpha = xRenderBlendPicture(data.opacity());
+            }
+            xcb_render_composite(connection(), clientRenderOp, pic, clientAlpha, renderTarget, cr.x(), cr.y(), 0, 0, dr.x(), dr.y(), dr.width(), dr.height());
             if (!opaque)
                 transformed_shape = QRegion();
         }
 
 #define RENDER_DECO_PART(_PART_, _RECT_) \
-XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAlpha, renderTarget,\
+xcb_render_composite(connection(), XCB_RENDER_PICT_OP_OVER, _PART_, decorationAlpha, renderTarget,\
                  0, 0, 0, 0, _RECT_.x(), _RECT_.y(), _RECT_.width(), _RECT_.height())
 
         if (client || deleted) {
             if (!noBorder) {
-                Picture decorationAlpha = alphaMask(data.opacity() * data.decorationOpacity());
+                xcb_render_picture_t decorationAlpha = xRenderBlendPicture(data.opacity() * data.decorationOpacity());
                 RENDER_DECO_PART(top, dtr);
                 RENDER_DECO_PART(left, dlr);
                 RENDER_DECO_PART(right, drr);
@@ -715,30 +674,81 @@ XRenderComposite(display(), PictOpOver, _PART_->x11PictureHandle(), decorationAl
         }
         if (blitInTempPixmap) {
             const QRect r = mapToScreen(mask, data, temp_visibleRect);
-            XRenderSetPictureTransform(display(), *s_tempPicture, &xform);
-            XRenderSetPictureFilter(display(), *s_tempPicture, const_cast<char*>("good"), NULL, 0);
-            XRenderComposite(display(), PictOpOver, *s_tempPicture, None, buffer,
-                             0, 0, 0, 0, r.x(), r.y(), r.width(), r.height());
-            XRenderSetPictureTransform(display(), *s_tempPicture, &identity);
+            xcb_render_set_picture_transform(connection(), *s_tempPicture, xform);
+            setPictureFilter(*s_tempPicture, KWin::Scene::ImageFilterGood);
+            xcb_render_composite(connection(), XCB_RENDER_PICT_OP_OVER, *s_tempPicture,
+                                 XCB_RENDER_PICTURE_NONE, buffer,
+                                 0, 0, 0, 0, r.x(), r.y(), r.width(), r.height());
+            xcb_render_set_picture_transform(connection(), *s_tempPicture, identity);
         }
     }
     if (scaled && !blitInTempPixmap) {
-        XRenderSetPictureTransform(display(), pic, &identity);
+        xcb_render_set_picture_transform(connection(), pic, identity);
         if (filter == ImageFilterGood)
-            XRenderSetPictureFilter(display(), pic, const_cast<char*>("fast"), NULL, 0);
+            setPictureFilter(pic, KWin::Scene::ImageFilterFast);
         if (!window()->hasAlpha()) {
-            attr.repeat = RepeatNone;
-            XRenderChangePicture(display(), pic, CPRepeat, &attr);
+            const uint32_t values[] = {XCB_RENDER_REPEAT_NONE};
+            xcb_render_change_picture(connection(), pic, XCB_RENDER_CP_REPEAT, values);
         }
     }
     if (xRenderOffscreen())
         scene_setXRenderOffscreenTarget(*s_tempPicture);
 }
 
+void SceneXrender::Window::setPictureFilter(xcb_render_picture_t pic, Scene::ImageFilterType filter)
+{
+    QByteArray filterName;
+    switch (filter) {
+    case KWin::Scene::ImageFilterFast:
+        filterName = QByteArray("fast");
+        break;
+    case KWin::Scene::ImageFilterGood:
+        filterName = QByteArray("good");
+        break;
+    }
+    xcb_render_set_picture_filter(connection(), pic, filterName.length(), filterName.constData(), 0, NULL);
+}
+
+WindowPixmap* SceneXrender::Window::createWindowPixmap()
+{
+    return new XRenderWindowPixmap(this, format);
+}
+
 void SceneXrender::screenGeometryChanged(const QSize &size)
 {
     Scene::screenGeometryChanged(size);
     initXRender(false);
+}
+
+//****************************************
+// XRenderWindowPixmap
+//****************************************
+
+XRenderWindowPixmap::XRenderWindowPixmap(Scene::Window *window, xcb_render_pictformat_t format)
+    : WindowPixmap(window)
+    , m_picture(XCB_RENDER_PICTURE_NONE)
+    , m_format(format)
+{
+}
+
+XRenderWindowPixmap::~XRenderWindowPixmap()
+{
+    if (m_picture != XCB_RENDER_PICTURE_NONE) {
+        xcb_render_free_picture(connection(), m_picture);
+    }
+}
+
+void XRenderWindowPixmap::create()
+{
+    if (isValid()) {
+        return;
+    }
+    KWin::WindowPixmap::create();
+    if (!isValid()) {
+        return;
+    }
+    m_picture = xcb_generate_id(connection());
+    xcb_render_create_picture(connection(), m_picture, pixmap(), m_format, 0, NULL);
 }
 
 //****************************************
@@ -828,8 +838,9 @@ void SceneXrender::EffectFrame::render(QRegion region, double opacity, double fr
             qreal left, top, right, bottom;
             m_effectFrame->frame().getMargins(left, top, right, bottom);   // m_geometry is the inner geometry
             QRect geom = m_effectFrame->geometry().adjusted(-left, -top, right, bottom);
-            XRenderComposite(display(), PictOpOver, *m_picture, None, effects->xrenderBufferPicture(),
-                                0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
+            xcb_render_composite(connection(), XCB_RENDER_PICT_OP_OVER, *m_picture,
+                                 XCB_RENDER_PICTURE_NONE, effects->xrenderBufferPicture(),
+                                 0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
         }
     }
     if (!m_effectFrame->selection().isNull()) {
@@ -840,8 +851,9 @@ void SceneXrender::EffectFrame::render(QRegion region, double opacity, double fr
         }
         if (m_selectionPicture) {
             const QRect geom = m_effectFrame->selection();
-            XRenderComposite(display(), PictOpOver, *m_selectionPicture, None, effects->xrenderBufferPicture(),
-                                0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
+            xcb_render_composite(connection(), XCB_RENDER_PICT_OP_OVER, *m_selectionPicture,
+                                 XCB_RENDER_PICTURE_NONE, effects->xrenderBufferPicture(),
+                                 0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
         }
     }
 
@@ -854,8 +866,9 @@ void SceneXrender::EffectFrame::render(QRegion region, double opacity, double fr
         if (!m_iconPicture)   // lazy creation
             m_iconPicture = new XRenderPicture(m_effectFrame->icon());
         QRect geom = QRect(topLeft, m_effectFrame->iconSize());
-        XRenderComposite(display(), PictOpOver, *m_iconPicture, fill, effects->xrenderBufferPicture(),
-                         0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
+        xcb_render_composite(connection(), XCB_RENDER_PICT_OP_OVER, *m_iconPicture, fill,
+                             effects->xrenderBufferPicture(),
+                             0, 0, 0, 0, geom.x(), geom.y(), geom.width(), geom.height());
     }
 
     // Render text
@@ -863,7 +876,7 @@ void SceneXrender::EffectFrame::render(QRegion region, double opacity, double fr
         if (!m_textPicture) { // Lazy creation
             updateTextPicture();
         }
-        XRenderComposite(display(), PictOpOver, *m_textPicture, fill, effects->xrenderBufferPicture(),
+        xcb_render_composite(connection(), XCB_RENDER_PICT_OP_OVER, *m_textPicture, fill, effects->xrenderBufferPicture(),
                          0, 0, 0, 0, m_effectFrame->geometry().x(), m_effectFrame->geometry().y(),
                          m_effectFrame->geometry().width(), m_effectFrame->geometry().height());
     }
@@ -1010,10 +1023,16 @@ void SceneXrender::EffectFrame::updateTextPicture()
 SceneXRenderShadow::SceneXRenderShadow(Toplevel *toplevel)
     :Shadow(toplevel)
 {
+    for (int i=0; i<ShadowElementsCount; ++i) {
+        m_pictures[i] = NULL;
+    }
 }
 
 SceneXRenderShadow::~SceneXRenderShadow()
 {
+    for (int i=0; i<ShadowElementsCount; ++i) {
+        delete m_pictures[i];
+    }
 }
 
 void SceneXRenderShadow::layoutShadowRects(QRect& top, QRect& topRight,
@@ -1056,13 +1075,25 @@ void SceneXRenderShadow::buildQuads()
 
     QRect stlr, str, strr, srr, sbrr, sbr, sblr, slr;
     layoutShadowRects(str, strr, srr, sbrr, sbr, sblr, slr, stlr);
+}
 
-    XRenderPictureAttributes attr;
-    attr.repeat = True;
-    for (int i = 0; i < ShadowElementsCount; ++i) {
-        XRenderChangePicture(display(), shadowPixmap((Shadow::ShadowElements)i).x11PictureHandle(), CPRepeat, &attr);
+bool SceneXRenderShadow::prepareBackend()
+{
+    const uint32_t values[] = {XCB_RENDER_REPEAT_NORMAL};
+    for (int i=0; i<ShadowElementsCount; ++i) {
+        delete m_pictures[i];
+        m_pictures[i] = new XRenderPicture(shadowPixmap(ShadowElements(i)));
+        xcb_render_change_picture(connection(), *m_pictures[i], XCB_RENDER_CP_REPEAT, values);
     }
+    return true;
+}
 
+xcb_render_picture_t SceneXRenderShadow::picture(Shadow::ShadowElements element) const
+{
+    if (!m_pictures[element]) {
+        return XCB_RENDER_PICTURE_NONE;
+    }
+    return *m_pictures[element];
 }
 
 } // namespace

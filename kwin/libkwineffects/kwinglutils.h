@@ -22,16 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_GLUTILS_H
 #define KWIN_GLUTILS_H
 
-#include <kwinglutils_funcs.h>
-
-#include <QtGui/QPixmap>
-
-#include <QtGui/QImage>
-#include <QtCore/QSize>
-#include <QtCore/QSharedData>
-#include <QtCore/QStack>
-
+// kwin
+#include "kwinglutils_funcs.h"
 #include "kwingltexture.h"
+
+// Qt
+#include <QSize>
+#include <QStack>
 
 /** @addtogroup kwineffects */
 /** @{ */
@@ -47,8 +44,6 @@ template< class K, class V > class QHash;
 namespace KWin
 {
 
-
-class GLTexture;
 class GLVertexBuffer;
 class GLVertexBufferPrivate;
 
@@ -132,12 +127,22 @@ KWIN_EXPORT void popMatrix();
 class KWIN_EXPORT GLShader
 {
 public:
-    GLShader(const QString& vertexfile, const QString& fragmentfile);
+    enum Flags {
+        NoFlags         = 0,
+        ExplicitLinking = (1 << 0)
+    };
+
+    GLShader(const QString &vertexfile, const QString &fragmentfile, unsigned int flags = NoFlags);
     ~GLShader();
 
     bool isValid() const  {
         return mValid;
     }
+
+    void bindAttributeLocation(const char *name, int index);
+    void bindFragDataLocation(const char *name, int index);
+
+    bool link();
 
     int uniformLocation(const char* name);
 
@@ -191,7 +196,13 @@ public:
 
     enum IntUniform {
         AlphaToOne,     ///< @deprecated no longer used
+        ColorCorrectionLookupTextureUnit,
         IntUniformCount
+    };
+
+    enum ColorUniform {
+        Color,
+        ColorUniformCount
     };
 
     bool setUniform(MatrixUniform uniform, const QMatrix4x4 &matrix);
@@ -199,9 +210,11 @@ public:
     bool setUniform(Vec4Uniform uniform,   const QVector4D &value);
     bool setUniform(FloatUniform uniform,  float value);
     bool setUniform(IntUniform uniform,    int value);
+    bool setUniform(ColorUniform uniform,  const QVector4D &value);
+    bool setUniform(ColorUniform uniform,  const QColor &value);
 
 protected:
-    GLShader();
+    GLShader(unsigned int flags = NoFlags);
     bool loadFromFiles(const QString& vertexfile, const QString& fragmentfile);
     bool load(const QByteArray &vertexSource, const QByteArray &fragmentSource);
     const QByteArray prepareSource(GLenum shaderType, const QByteArray &sourceCode) const;
@@ -214,15 +227,18 @@ private:
     unsigned int mProgram;
     bool mValid:1;
     bool mLocationsResolved:1;
+    bool mExplicitLinking:1;
     int mMatrixLocation[MatrixCount];
     int mVec2Location[Vec2UniformCount];
     int mVec4Location[Vec4UniformCount];
     int mFloatLocation[FloatUniformCount];
     int mIntLocation[IntUniformCount];
+    int mColorLocation[ColorUniformCount];
 
     static bool sColorCorrect;
 
     friend class ColorCorrection;
+    friend class ColorCorrectionPrivate;
     friend class ShaderManager;
 };
 
@@ -234,7 +250,7 @@ private:
  * the shaders which have been bound. When a shader is unbound the previously bound shader
  * will be rebound.
  *
- * @author Martin Gräßlin <kde@martin-graesslin.com>
+ * @author Martin Gräßlin <mgraesslin@kde.org>
  * @since 4.7
  **/
 class KWIN_EXPORT ShaderManager
@@ -254,7 +270,7 @@ public:
          * The sampler uniform is @c sample and defaults to @c 0.
          * The shader uses two vertex attributes @c vertex and @c texCoord.
          **/
-        SimpleShader,
+        SimpleShader = 0,
         /**
          * A generic shader able to render transformed, textured geometries.
          * This shader is mostly needed by the scene and not of much interest for effects.
@@ -384,14 +400,15 @@ private:
 
     void initShaders();
     void resetShader(ShaderType type);
+    void bindFragDataLocations(GLShader *shader);
+    void bindAttributeLocations(GLShader *shader) const;
 
     QStack<GLShader*> m_boundShaders;
-    GLShader *m_orthoShader;
-    GLShader *m_genericShader;
-    GLShader *m_colorShader;
+    GLShader *m_shader[3];
     bool m_inited;
     bool m_valid;
     bool m_debug;
+    QByteArray m_shaderDir;
     static ShaderManager *s_shaderManager;
 };
 
@@ -571,6 +588,27 @@ private:
     GLuint mFramebuffer;
 };
 
+enum VertexAttributeType {
+    VA_Position = 0,
+    VA_TexCoord = 1,
+    VertexAttributeCount = 2
+};
+
+/**
+ * Describes the format of a vertex attribute stored in a buffer object.
+ *
+ * The attribute format consists of the attribute index, the number of
+ * vector components, the data type, and the offset of the first element
+ * relative to the start of the vertex data.
+ */
+struct GLVertexAttrib
+{
+    int index;            /** The attribute index */
+    int size;             /** The number of components [1..4] */
+    GLenum type;          /** The type (e.g. GL_FLOAT) */
+    int relativeOffset;   /** The relative offset of the attribute */
+};
+
 /**
  * @short Vertex Buffer Object
  *
@@ -581,7 +619,7 @@ private:
  * If VBOs are not supported on the used OpenGL profile this class falls back to legacy
  * rendering using client arrays. Therefore this class should always be used for rendering geometries.
  *
- * @author Martin Gräßlin <kde@martin-graesslin.com>
+ * @author Martin Gräßlin <mgraesslin@kde.org>
  * @since 4.6
  */
 class KWIN_EXPORT GLVertexBuffer
@@ -600,6 +638,43 @@ public:
     ~GLVertexBuffer();
 
     /**
+     * Specifies how interleaved vertex attributes are laid out in
+     * the buffer object.
+     *
+     * Note that the attributes and the stride should be 32 bit aligned
+     * or a performance penalty may be incurred.
+     *
+     * For some hardware the optimal stride is a multiple of 32 bytes.
+     *
+     * Example:
+     *
+     *     struct Vertex {
+     *         QVector3D position;
+     *         QVector2D texcoord;
+     *     };
+     *
+     *     const GLVertexAttrib attribs[] = {
+     *         { VA_Position, 3, GL_FLOAT, offsetof(Vertex, position) },
+     *         { VA_TexCoord, 2, GL_FLOAT, offsetof(Vertex, texcoord) }
+     *     };
+     *
+     *     Vertex vertices[6];
+     *     vbo->setAttribLayout(attribs, 2, sizeof(Vertex));
+     *     vbo->setData(vertices, sizeof(vertices));
+     */
+    void setAttribLayout(const GLVertexAttrib *attribs, int count, int stride);
+
+    /**
+     * Uploads data into the buffer object's data store.
+     */
+    void setData(const void *data, size_t sizeInBytes);
+
+    /**
+     * Sets the number of vertices that will be drawn by the render() method.
+     */
+    void setVertexCount(int count);
+
+    /**
      * Sets the vertex data.
      * @param numberVertices The number of vertices in the arrays
      * @param dim The dimension of the vertices: 2 for x/y, 3 for x/y/z
@@ -608,6 +683,52 @@ public:
      * Size must equal 2 * @a numberVertices.
      */
     void setData(int numberVertices, int dim, const float* vertices, const float* texcoords);
+
+    /**
+     * Maps an unused range of the data store into the client's address space.
+     *
+     * The data store will be reallocated if it is smaller than the given size.
+     *
+     * The buffer object is mapped for writing, not reading. Attempts to read from
+     * the mapped buffer range may result in system errors, including program
+     * termination. The data in the mapped region is undefined until it has been
+     * written to. If subsequent GL calls access unwritten memory, the results are
+     * undefined and system errors, including program termination, may occur.
+     *
+     * No GL calls that access the buffer object must be made while the buffer
+     * object is mapped. The returned pointer must not be passed as a parameter
+     * value to any GL function.
+     *
+     * It is assumed that the GL_ARRAY_BUFFER_BINDING will not be changed while
+     * the buffer object is mapped.
+     */
+    GLvoid *map(size_t size);
+
+    /**
+     * Flushes the mapped buffer range and unmaps the buffer.
+     */
+    void unmap();
+
+    /**
+     * Binds the vertex arrays to the context.
+     */
+    void bindArrays();
+
+    /**
+     * Disables the vertex arrays.
+     */
+    void unbindArrays();
+
+    /**
+     * Draws count vertices beginning with first.
+     */
+    void draw(GLenum primitiveMode, int first, int count);
+
+    /**
+     * Draws count vertices beginning with first.
+     */
+    void draw(const QRegion &region, GLenum primitiveMode, int first, int count, bool hardwareClipping = false);
+
     /**
      * Renders the vertex data in given @a primitiveMode.
      * Please refer to OpenGL documentation of glDrawArrays or glDrawElements for allowed
@@ -659,12 +780,23 @@ public:
      * @internal
      */
     static void initStatic();
+
+    /**
+     * @internal
+     */
+    static void cleanup();
+
     /**
      * Returns true if VBOs are supported, it is save to use this class even if VBOs are not
      * supported.
      * @returns true if vertex buffer objects are supported
      */
     static bool isSupported();
+
+    /**
+     * Returns true if indexed quad mode is supported, and false otherwise.
+     */
+    static bool supportsIndexedQuads();
 
     /**
      * @return A shared VBO for streaming data

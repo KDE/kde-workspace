@@ -232,9 +232,6 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // engine stuff
-    foreach(const QString &importPath, KGlobal::dirs()->findDirs("module", "imports")) {
-        m_view->engine()->addImportPath(importPath);
-    }
     KDeclarative kdeclarative;
     kdeclarative.setDeclarativeEngine(m_view->engine());
     kdeclarative.initialize();
@@ -257,6 +254,14 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     m_view->show();
     m_view->setFocus();
     adjustSize();
+}
+
+bool KSMShutdownDlg::eventFilter ( QObject * watched, QEvent * event )
+{
+    if (watched == m_view && event->type() == QEvent::Resize) {
+        adjustSize();
+    }
+    return QDialog::eventFilter(watched, event);
 }
 
 void KSMShutdownDlg::resizeEvent(QResizeEvent *e)
@@ -317,23 +322,15 @@ void KSMShutdownDlg::slotHalt()
 void KSMShutdownDlg::slotSuspend(int spdMethod)
 {
     m_bootOption.clear();
-    QDBusMessage call;
     switch (spdMethod) {
         case Solid::PowerManagement::StandbyState:
         case Solid::PowerManagement::SuspendState:
-            call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                  "/org/kde/Solid/PowerManagement",
-                                                  "org.kde.Solid.PowerManagement",
-                                                  "suspendToRam");
+            Solid::PowerManagement::requestSleep(Solid::PowerManagement::SuspendState, 0, 0);
             break;
         case Solid::PowerManagement::HibernateState:
-            call = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                  "/org/kde/Solid/PowerManagement",
-                                                  "org.kde.Solid.PowerManagement",
-                                                  "suspendToDisk");
+            Solid::PowerManagement::requestSleep(Solid::PowerManagement::HibernateState, 0, 0);
             break;
     }
-    QDBusConnection::sessionBus().asyncCall(call);
     reject();
 }
 

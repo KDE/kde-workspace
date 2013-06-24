@@ -154,11 +154,6 @@ void AppMenuModule::slotAboutToHide()
 // New window registered
 void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const QDBusObjectPath& path)
 {
-    if (m_menuStyle == "ButtonVertical") {
-        // Tell Kwin menu is available
-        emit menuAvailable(id);
-    }
-
     KDBusMenuImporter* importer = m_importers.take(id);
      if (importer) {
         delete importer;
@@ -167,7 +162,12 @@ void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const Q
     // Application already active so check if we need create menubar
     if ( m_menuStyle == "TopMenuBar" && id == KWindowSystem::self()->activeWindow()) {
         slotActiveWindowChanged(id);
+    } else if (m_menuStyle == "ButtonVertical") {
+        // Tell Kwin menu is available
+        emit menuAvailable(id);
+        getImporter(id);
     }
+
     // Send a signal on bus for others dbus interface registrars
     emit WindowRegistered(id, service, path);
 }

@@ -1195,7 +1195,7 @@ void PlasmaApp::containmentScreenOwnerChanged(int wasScreen, int isScreen, Plasm
 
 void PlasmaApp::configureContainment(Plasma::Containment *containment)
 {
-    const QString id = "plasma_containment_settings_" + QString::number(containment->id());
+    const QString id = QString::number(containment->id()) + "settings" + containment->name();
     BackgroundDialog *configDialog = qobject_cast<BackgroundDialog*>(KConfigDialog::exists(id));
 
     if (configDialog) {
@@ -1263,12 +1263,11 @@ void PlasmaApp::cloneCurrentActivity()
 
     KActivities::Controller *controller = m_corona->activityController();
     //getting the current activity is *so* much easier than the current containment(s) :) :)
-    QString oldId = controller->currentActivity();
+    const QString oldId = controller->currentActivity();
     Activity *oldActivity = m_corona->activity(oldId);
-    QString newId = controller->addActivity(i18nc("%1 is the activity name", "copy of %1", oldActivity->name()));
+    const QString newId = controller->addActivity(i18nc("%1 is the activity name", "Copy of %1", oldActivity->name()));
 
-    QString file = "activities/";
-    file += newId;
+    const QString file = "activities/" + newId;
     KConfig external(file, KConfig::SimpleConfig, "appdata");
 
     //copy the old config to the new location
@@ -1487,7 +1486,9 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
     m_loadingActivity = controller->addActivity(name);
     Activity *a = m_corona->activity(m_loadingActivity);
     Q_ASSERT(a);
-    a->setIcon(icon);
+    if (!icon.isEmpty()) {
+        a->setIcon(icon);
+    }
 
     //kDebug() << "$$$$$$$$$$$$$$$$ begin script for" << m_loadingActivity;
     m_corona->evaluateScripts(QStringList() << script, false);
@@ -1495,6 +1496,10 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
 
     controller->setCurrentActivity(m_loadingActivity);
     m_loadingActivity.clear();
+
+    if (startupApps.isEmpty()) {
+        return;
+    }
 
     KListConfirmationDialog * confirmDialog = new KListConfirmationDialog(
             i18n("Run applications"),
@@ -1505,33 +1510,26 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
     connect(confirmDialog, SIGNAL(selected(QList<QVariant>)),
             this, SLOT(executeCommands(QList<QVariant>)));
 
-    foreach (const QString & exec, startupApps) {
-        QString realExec = exec;
+    foreach (QString exec, startupApps) {
+        exec = exec.replace("$desktop",   KGlobalSettings::desktopPath());
+        exec = exec.replace("$autostart", KGlobalSettings::autostartPath());
+        exec = exec.replace("$documents", KGlobalSettings::documentPath());
+        exec = exec.replace("$music",     KGlobalSettings::musicPath());
+        exec = exec.replace("$video",     KGlobalSettings::videosPath());
+        exec = exec.replace("$downloads", KGlobalSettings::downloadPath());
+        exec = exec.replace("$pictures",  KGlobalSettings::picturesPath());
 
-        #define LazyReplace(VAR, VAL) \
-            if (realExec.contains(VAR)) realExec = realExec.replace(VAR, VAL);
-
-        LazyReplace("$desktop",   KGlobalSettings::desktopPath());
-        LazyReplace("$autostart", KGlobalSettings::autostartPath());
-        LazyReplace("$documents", KGlobalSettings::documentPath());
-        LazyReplace("$music",     KGlobalSettings::musicPath());
-        LazyReplace("$video",     KGlobalSettings::videosPath());
-        LazyReplace("$downloads", KGlobalSettings::downloadPath());
-        LazyReplace("$pictures",  KGlobalSettings::picturesPath());
-
-        QString name = realExec.split(" ")[0];
+        QString name = exec.split(" ")[0];
 
         KService::Ptr service = KService::serviceByDesktopName(name);
 
         if (service) {
             confirmDialog->addItem(KIcon(service->icon()), service->name(),
-                    ((realExec == name) ? QString() : realExec), realExec, exec.split(" ").size() <= 2);
+                    ((exec == name) ? QString() : exec), exec, exec.split(" ").size() <= 2);
         } else {
             confirmDialog->addItem(KIcon("dialog-warning"), name,
-                    ((realExec == name) ? QString() : realExec), realExec, false);
+                    ((exec == name) ? QString() : exec), exec, false);
         }
-
-        #undef LazyReplace
     }
 
     confirmDialog->exec();

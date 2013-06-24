@@ -91,7 +91,6 @@ static bool isRealKeyboard(const char* deviceName)
 	return strstr(deviceName, "Video Bus") == NULL
 		&& strstr(deviceName, "Sleep Button") == NULL
 		&& strstr(deviceName, "Power Button") == NULL
-		&& strstr(deviceName, "Webcam") == NULL
 		&& strstr(deviceName, "WMI hotkeys") == NULL;
 }
 

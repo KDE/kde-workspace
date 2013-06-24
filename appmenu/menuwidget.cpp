@@ -42,6 +42,7 @@ MenuWidget::MenuWidget(QGraphicsView *view) :
     m_layout(new QGraphicsLinearLayout(this)),
     m_currentButton(0),
     m_contentBottomMargin(0),
+    m_mousePosition(-1, -1),
     m_visibleMenu(0),
     m_menu(0)
 {
@@ -51,7 +52,6 @@ MenuWidget::MenuWidget(QGraphicsView *view) :
 
 MenuWidget::~MenuWidget()
 {
-    delete m_mouseTimer;
     while (!m_buttons.isEmpty()) {
         delete m_buttons.front();
         m_buttons.pop_front();
@@ -65,6 +65,10 @@ void MenuWidget::setMenu(QMenu *menu)
         m_menu->removeEventFilter(this);
     }
     if (menu) {
+        if (m_mouseTimer->isActive()) {
+            m_mouseTimer->stop();
+        }
+        m_visibleMenu = 0;
         m_menu = menu;
         connect(m_menu, SIGNAL(destroyed()), SLOT(slotMenuDestroyed()), Qt::UniqueConnection);
         m_menu->installEventFilter(this);
@@ -154,6 +158,8 @@ bool MenuWidget::subMenuEventFilter(QObject* object, QEvent* event)
 void MenuWidget::slotMenuDestroyed()
 {
     m_menu = 0;
+    m_visibleMenu = 0;
+    m_currentButton = 0;
 }
 
 void MenuWidget::slotCheckActiveItem()
@@ -162,11 +168,19 @@ void MenuWidget::slotCheckActiveItem()
     QPoint pos =  m_view->mapFromGlobal(QCursor::pos());
     QGraphicsItem* item = m_view->itemAt(pos);
 
-    if (item)
-        buttonBelow = qobject_cast<MenuButton*>(item->toGraphicsObject());
-
-    if (!buttonBelow)
+    if (pos == m_mousePosition) {
         return;
+    } else {
+        m_mousePosition = pos;
+    }
+
+    if (item) {
+        buttonBelow = qobject_cast<MenuButton*>(item->toGraphicsObject());
+    }
+
+    if (!buttonBelow) {
+        return;
+    }
 
     if (buttonBelow != m_currentButton) {
         if (m_currentButton) {
@@ -184,8 +198,10 @@ void MenuWidget::slotMenuAboutToHide()
     if (m_currentButton) {
         m_currentButton->setDown(false);
     }
-    if (m_mouseTimer->isActive())
+
+    if (m_mouseTimer->isActive()) {
         m_mouseTimer->stop();
+    }
     m_visibleMenu = 0;
     emit aboutToHide();
 }
@@ -208,6 +224,7 @@ void MenuWidget::slotUpdateActions()
     }
 
     m_actionTimer->stop();
+    m_currentButton = 0;
     foreach (MenuButton *button, m_buttons) {
         disconnect(button, SIGNAL(clicked()), this, SLOT(slotButtonClicked()));
         m_layout->removeItem(button);
@@ -238,6 +255,9 @@ void MenuWidget::setActiveAction(QAction *action)
             menu = m_menu->actions()[i]->menu();
             if (menu && menu == action->menu()) {
                 m_currentButton = button;
+                break;
+            }
+            if (++i >= m_menu->actions().length()) {
                 break;
             }
         }

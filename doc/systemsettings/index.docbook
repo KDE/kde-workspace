@@ -24,8 +24,8 @@
 </copyright>
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2012-11-08</date>
-<releaseinfo>1.0 (&kde; 4.10)</releaseinfo>
+<date>2013-05-17</date>
+<releaseinfo>1.0 (&kde; 4.11)</releaseinfo>
 
 <abstract>
 <para>
@@ -151,7 +151,7 @@ appears, explaining the purpose of the module.
 <listitem>
 <para><itemizedlist>
 <listitem><para>
-Account Details (Password &amp; User Account, Paths, KDE Secret Sync, KDE Wallet, Social Desktop, Web Shortcuts)
+Account Details (Password &amp; User Account, Paths, KDE Wallet, Social Desktop, Web Shortcuts)
 </para></listitem>
 <listitem><para>
 Application Appearance (Style, Colors, Icons, Fonts, Emoticons)
@@ -336,7 +336,7 @@ Individual modules can be run without running &systemsettings; using the command
 <title>The &kde; &systemsettings; Modules</title>
 
 <para>
-In order to make it as easy as possible, the &kde; &systemsettings; has organized options into five categories. Under each category, there are icons grouped together under subcategories. Each icon is called a module. When you click on a module icon, you will be presented with the options of the module in the main window.
+In order to make it as easy as possible, the &kde; &systemsettings; has organized options into five categories. Under each category, there are icons grouped together under subcategories. Each icon is called a module. When you double click on a module icon, you will be presented with the options of the module in the main window.
 </para>
 
 <para>

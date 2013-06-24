@@ -25,14 +25,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef KDECORATION_H
 #define KDECORATION_H
 
+#include <kwinglobals.h>
+
 #include <QtGui/QColor>
 #include <QtGui/QFont>
-#include <QtCore/QObject>
+#include <QObject>
 #include <QtGui/QIcon>
 #include <netwm_def.h>
 #include <QtGui/QMouseEvent>
-
-#define KWIN_EXPORT KDE_EXPORT
 
 #define KWIN_DECORATION_API_VERSION 1
 
@@ -46,6 +46,11 @@ DEALINGS IN THE SOFTWARE.
         KWIN_EXPORT KDecorationFactory* create_factory() { return new classname(); } \
         KWIN_EXPORT int decoration_version() { return KWIN_DECORATION_API_VERSION; } \
     }
+
+#define KWIN_DECORATION_BRIDGE_API_VERSION 1
+extern "C" {
+    int decoration_bridge_version();
+}
 
 class KConfig;
 
@@ -92,6 +97,19 @@ public:
         /// Equal to @p MaximizeVertical | @p MaximizeHorizontal
         MaximizeFull = MaximizeVertical | MaximizeHorizontal
     };
+
+    enum QuickTileFlag {
+        QuickTileNone = 0,
+        QuickTileLeft = 1,
+        QuickTileRight = 1<<1,
+        QuickTileTop = 1<<2,
+        QuickTileBottom = 1<<3,
+        QuickTileHorizontal = QuickTileLeft|QuickTileRight,
+        QuickTileVertical = QuickTileTop|QuickTileBottom,
+        QuickTileMaximize = QuickTileLeft|QuickTileRight|QuickTileTop|QuickTileBottom
+    };
+
+    Q_DECLARE_FLAGS(QuickTileMode, QuickTileFlag)
 
     enum WindowOperation {
         MaximizeOp = 5000,
@@ -414,11 +432,9 @@ public:
      */
     BorderSize preferredBorderSize(KDecorationFactory* factory) const;
 
-    /*
-    * When this functions returns false, moving and resizing of maximized windows
-    * is not allowed, and therefore the decoration is allowed to turn off (some of)
-    * its borders.
-    * The changed flags for this setting is SettingButtons.
+    /**
+     * This functions returns false
+     * @deprecated
     */
     bool moveResizeMaximizedWindows() const;
 
@@ -505,6 +521,13 @@ public:
     /**
      * Returns @a true if the decorated window can be minimized by the user.
      */
+
+    /**
+     * Returns the current quicktiling mode of the decorated window.
+     * (window is places into one of the corners or edges)
+     */
+    QuickTileMode quickTileMode() const;
+
     bool isMinimizable() const;
     /**
      * Return @a true if the decorated window can show context help
@@ -780,6 +803,8 @@ public:
      * used to keep the decorated window at least as large.
      */
     virtual QSize minimumSize() const = 0;
+
+public Q_SLOTS:
     /**
      * This function is called whenever the window either becomes or stops being active.
      * Use isActive() to find out the current state.
@@ -925,6 +950,13 @@ public:
      * Ungrabs X server (if the number of ungrab attempts matches the number of grab attempts).
      */
     void ungrabXServer();
+
+public: // invokables; runtime resolution
+    /**
+     * reimplement this invokable to signal the core where the titlebar is (usually PositionTop)
+     */
+    Q_INVOKABLE KDecorationDefines::Position titlebarPosition();
+
 public Q_SLOTS:
     // requests from decoration
 
@@ -993,10 +1025,12 @@ public Q_SLOTS:
     void setKeepBelow(bool set);
     /**
      * @internal
+     * TODO KF5: remove me
      */
     void emitKeepAboveChanged(bool above);
     /**
      * @internal
+     * TODO KF5: remove me
      */
     void emitKeepBelowChanged(bool below);
 
@@ -1183,5 +1217,7 @@ inline int KDecoration::height() const
 }
 
 /** @} */
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(KDecoration::QuickTileMode)
 
 #endif

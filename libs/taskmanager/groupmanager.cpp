@@ -41,6 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "taskitem.h"
 #include "taskgroup.h"
 #include "taskmanager.h"
+#include "strategies/activitysortingstrategy.h"
 #include "strategies/alphasortingstrategy.h"
 #include "strategies/desktopsortingstrategy.h"
 #include "strategies/programgroupingstrategy.h"
@@ -354,6 +355,11 @@ bool GroupManagerPrivate::addTask(::TaskManager::Task *task)
         abstractGroupingStrategy->handleItem(item);
     } else {
         currentRootGroup()->add(item);
+
+        if (abstractSortingStrategy) {
+            abstractSortingStrategy->handleItem(item);
+            abstractSortingStrategy->check(item);
+        }
     }
 
     if (showOnlyCurrentScreen) {
@@ -1185,6 +1191,8 @@ void GroupManager::setOnlyGroupWhenFull(bool onlyGroupWhenFull)
         connect(d->currentRootGroup(), SIGNAL(itemAdded(AbstractGroupableItem*)), this, SLOT(checkIfFull()));
         connect(d->currentRootGroup(), SIGNAL(itemRemoved(AbstractGroupableItem*)), this, SLOT(checkIfFull()));
         d->checkIfFull();
+    } else {
+        setGroupingStrategy(d->groupingStrategy);
     }
 }
 
@@ -1305,6 +1313,10 @@ void GroupManager::setSortingStrategy(TaskSortingStrategy sortOrder)
 
     case DesktopSorting:
         d->abstractSortingStrategy = new DesktopSortingStrategy(this);
+        break;
+
+    case ActivitySorting:
+        d->abstractSortingStrategy = new ActivitySortingStrategy(this);
         break;
 
     case NoSorting: //manual and no grouping result both in non automatic grouping

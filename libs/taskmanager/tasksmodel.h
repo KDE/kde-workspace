@@ -1,6 +1,7 @@
 /*****************************************************************
 
-Copyright 2010 Aaron Seigo <aseigo@kde.org
+Copyright 2010 Aaron Seigo <aseigo@kde.org>
+Copyright 2012-2013 Eike Hein <hein@kde.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,21 +39,31 @@ class TASKMANAGER_EXPORT TasksModel : public QAbstractItemModel
 {
     Q_OBJECT
     Q_ENUMS(DisplayRoles)
+    Q_PROPERTY(int count READ rowCount() NOTIFY countChanged())
+    Q_PROPERTY(int launcherCount READ launcherCount NOTIFY launcherCountChanged)
 
 public:
     enum DisplayRoles {
-        IsStartup = Qt::UserRole + 1,
-        OnAllDesktops = Qt::UserRole + 2,
-        Desktop = Qt::UserRole + 3,
-        Shaded = Qt::UserRole + 4,
-        Maximized = Qt::UserRole + 5,
-        Minimized = Qt::UserRole + 6,
-        FullScreen = Qt::UserRole + 7,
-        BelowOthers = Qt::UserRole + 8,
-        AlwaysOnTop = Qt::UserRole + 9,
-        Active = Qt::UserRole + 10,
-        DemandsAttention = Qt::UserRole + 11,
-        LauncherUrl = Qt::UserRole + 12
+        Id = Qt::UserRole + 1,
+        GenericName = Qt::UserRole + 2,
+        IsStartup = Qt::UserRole + 3,
+        IsLauncher = Qt::UserRole + 4,
+        OnAllDesktops = Qt::UserRole + 5,
+        Desktop = Qt::UserRole + 6,
+        DesktopName = Qt::UserRole + 7,
+        OnAllActivities = Qt::UserRole + 8,
+        ActivityNames = Qt::UserRole + 9,
+        OtherActivityNames = Qt::UserRole + 10,
+        Shaded = Qt::UserRole + 11,
+        Maximized = Qt::UserRole + 12,
+        Minimized = Qt::UserRole + 13,
+        FullScreen = Qt::UserRole + 14,
+        BelowOthers = Qt::UserRole + 15,
+        AlwaysOnTop = Qt::UserRole + 16,
+        Active = Qt::UserRole + 17,
+        DemandsAttention = Qt::UserRole + 18,
+        LauncherUrl = Qt::UserRole + 19,
+        WindowList = Qt::UserRole + 20
     };
 
     explicit TasksModel(GroupManager *groupManager, QObject *parent = 0);
@@ -62,7 +73,16 @@ public:
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &index) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+
+    Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    Q_INVOKABLE int launcherCount() const;
+
+    Q_INVOKABLE int activeTaskId() const;
+    Q_INVOKABLE QVariant taskIdList(const QModelIndex &parent = QModelIndex(), bool recursive = true) const;
+
+signals:
+    void countChanged();
+    void launcherCountChanged();
 
 private:
     friend class TasksModelPrivate;

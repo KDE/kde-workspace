@@ -22,10 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KWIN_DASHBOARD_H
 
 #include <kwineffects.h>
-#include <QtCore/QTimeLine>
-#include <QGraphicsView>
-#include <QGraphicsItem>
-#include <Plasma/WindowEffects>
+#include <QTimeLine>
 
 namespace KWin
 {

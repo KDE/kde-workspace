@@ -23,6 +23,8 @@
 
 #include <powerdevilaction.h>
 
+class QDBusPendingCallWatcher;
+
 namespace PowerDevil
 {
 namespace BundledActions
@@ -32,6 +34,7 @@ class SuspendSession : public PowerDevil::Action
 {
     Q_OBJECT
     Q_DISABLE_COPY(SuspendSession)
+    Q_CLASSINFO("D-Bus Interface", "org.kde.Solid.PowerManagement.Actions.SuspendSession")
 
 public:
     enum Mode {
@@ -57,8 +60,24 @@ protected:
     virtual void onProfileLoad();
     virtual void triggerImpl(const QVariantMap& args);
 
+public Q_SLOTS:
+    void suspendToRam();
+    void suspendToDisk();
+    void suspendHybrid();
+
+    void onResumeFromSuspend();
+
+Q_SIGNALS:
+    void resumingFromSuspend();
+
+private slots:
+    void lockCompleted();
+    void triggerSuspendSession(uint action);
+
 private:
     uint m_autoType;
+    QVariantMap m_savedArgs;
+    QDBusPendingCallWatcher *m_dbusWatcher;
 
     void lockScreenAndWait();
 };

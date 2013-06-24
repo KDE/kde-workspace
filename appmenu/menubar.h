@@ -64,6 +64,7 @@ public:
 
 private Q_SLOTS:
     void slotAboutToHide();
+    void slotCompositingChanged(bool);
 Q_SIGNALS:
     void needResize();
     void aboutToHide();
@@ -74,8 +75,8 @@ protected:
     virtual bool cursorInMenuBar();
     virtual void drawBackground(QPainter* painter, const QRectF &rectF);
     virtual void resizeEvent(QResizeEvent* event);
-    virtual void showEvent(QShowEvent* event);
 private:
+    void updateMask();
     QTimer* m_hideTimer;
     Plasma::FrameSvg* m_background;
     Shadows *m_shadows;

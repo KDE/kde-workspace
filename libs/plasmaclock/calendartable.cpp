@@ -82,7 +82,7 @@ class CalendarTablePrivate
 
         CalendarTablePrivate(CalendarTable *calTable, const QDate &initialDate = QDate::currentDate())
             : q(calTable),
-              calendarType("locale"),
+              calendarType(-1),
               calendar(0),
               displayEvents(false),
               displayHolidays(false),
@@ -130,10 +130,10 @@ class CalendarTablePrivate
             calendar = newCalendar;
 
             if (calendar == KGlobal::locale()->calendar()) {
-                calendarType = "locale";
+                calendarType = -1;
                 QObject::connect(KGlobalSettings::self(), SIGNAL(settingsChanged(int)), q, SLOT(settingsChanged(int)));
             } else {
-                calendarType = q->calendar()->calendarType();
+                calendarType = q->calendar()->calendarSystem();
                 QObject::disconnect(KGlobalSettings::self(), SIGNAL(settingsChanged(int)), q, SLOT(settingsChanged(int)));
             }
 
@@ -255,7 +255,7 @@ class CalendarTablePrivate
 
             //starting from the first of the month, which is known to always be valid, add/subtract
             //number of days to get to the required cell
-            if (cal->setYMD(cellDate, selectedYear, selectedMonth, 1)) {
+            if (cal->setDate(cellDate, selectedYear, selectedMonth, 1)) {
                 cellDate = cal->addDays(cellDate, (weekRow * daysInWeek) + weekdayColumn - daysShownInPrevMonth);
             }
 
@@ -310,7 +310,7 @@ class CalendarTablePrivate
             Q_UNUSED(cellDate);
             QDate firstDayOfMonth;
             int weekday = -1;
-            if ( cal->setYMD(firstDayOfMonth, selectedYear, selectedMonth, 1)) {
+            if ( cal->setDate(firstDayOfMonth, selectedYear, selectedMonth, 1)) {
                 weekday = cal->dayOfWeek(firstDayOfMonth);
             }
             return weekday;
@@ -378,7 +378,7 @@ class CalendarTablePrivate
         void settingsChanged(int category);
 
         CalendarTable *q;
-        QString calendarType;
+        int calendarType;
         const KCalendarSystem *calendar;
 
         QDate selectedDate;
@@ -465,16 +465,16 @@ CalendarTable::~CalendarTable()
     delete d;
 }
 
-void CalendarTable::setCalendar(const QString &newCalendarType)
+void CalendarTable::setCalendar(int newCalendarType)
 {
     if (newCalendarType == d->calendarType) {
         return;
     }
 
-    if (newCalendarType == "locale") {
+    if (newCalendarType == -1) {
         d->setCalendar(KGlobal::locale()->calendar());
     } else {
-        d->setCalendar(KCalendarSystem::create(newCalendarType));
+        d->setCalendar(KCalendarSystem::create(static_cast<KLocale::CalendarSystem>(newCalendarType)));
     }
 
     // Signal out date change so any dependents will update as well
@@ -859,7 +859,6 @@ void CalendarTable::dataUpdated(const QString &source, const Plasma::DataEngine:
         Plasma::DataEngine::Data pimData = v.toHash();
         QString type = pimData.value("Type").toString();
         QString uid = pimData.value("UID").toString();
-        QDate startDate = pimData.value("StartDate").value<KDateTime>().date();
 
         d->pimEvents.insert(uid, pimData);
 
@@ -885,7 +884,41 @@ void CalendarTable::dataUpdated(const QString &source, const Plasma::DataEngine:
 
 void CalendarTable::applyConfiguration(KConfigGroup cg)
 {
-    setCalendar(cg.readEntry("calendarType", "locale"));
+    // convert pre 4.11 value if needed
+    const QVariant oldCalendarTypeValue = cg.readEntry("calendarType", QVariant());
+
+    if (oldCalendarTypeValue.type() == QVariant::String) {
+        const QString oldCalendarType = oldCalendarTypeValue.toString();
+        int newCalendarType = -1;
+
+        if (oldCalendarType == "gregorian") {
+            newCalendarType = KLocale::GregorianCalendar;
+        } else if (oldCalendarType == "coptic") {
+            newCalendarType = KLocale::CopticCalendar;
+        } else if (oldCalendarType == "ethiopian") {
+            newCalendarType = KLocale::EthiopianCalendar;
+        } else if (oldCalendarType == "hebrew") {
+            newCalendarType = KLocale::HebrewCalendar;
+        } else if (oldCalendarType == "hijri") {
+            newCalendarType = KLocale::IslamicCivilCalendar;
+        } else if (oldCalendarType == "indian-national") {
+            newCalendarType = KLocale::IndianNationalCalendar;
+        } else if (oldCalendarType == "jalali") {
+            newCalendarType = KLocale::JalaliCalendar;
+        } else if (oldCalendarType == "japanese") {
+            newCalendarType = KLocale::JapaneseCalendar;
+        } else if (oldCalendarType == "julian") {
+            newCalendarType = KLocale::JulianCalendar;
+        } else if (oldCalendarType == "minguo") {
+            newCalendarType = KLocale::MinguoCalendar;
+        } else if (oldCalendarType == "thai") {
+            newCalendarType = KLocale::ThaiCalendar;
+        }
+
+        cg.writeEntry("calendarType", newCalendarType);
+    }
+
+    setCalendar(cg.readEntry("calendarType", -1));
     const bool holidays = cg.readEntry("displayHolidays", true);
     clearHolidaysRegions();
     if (holidays) {
@@ -918,10 +951,10 @@ void CalendarTable::createConfigurationInterface(KConfigDialog *parent)
     d->calendarConfigUi.setupUi(calendarConfigWidget);
     parent->addPage(calendarConfigWidget, i18n("Calendar"), "view-pim-calendar");
 
-    QStringList calendars = KCalendarSystem::calendarSystems();
-    d->calendarConfigUi.calendarComboBox->addItem( i18n("Local"), QVariant( "locale" ) );
-    foreach ( const QString &cal, calendars ) {
-        d->calendarConfigUi.calendarComboBox->addItem( KCalendarSystem::calendarLabel( cal ), QVariant( cal ) );
+    const QList<KLocale::CalendarSystem> calendars = KCalendarSystem::calendarSystemsList();
+    d->calendarConfigUi.calendarComboBox->addItem( i18n("Local"), QVariant( -1 ) );
+    for (int  i = 0; i < calendars.count(); ++i) {
+        d->calendarConfigUi.calendarComboBox->addItem( KCalendarSystem::calendarLabel( calendars.at(i) ), QVariant( calendars.at(i) ) );
     }
     d->calendarConfigUi.calendarComboBox->setCurrentIndex( d->calendarConfigUi.calendarComboBox->findData( QVariant( d->calendarType ) ) );
 
@@ -948,7 +981,7 @@ void CalendarTable::createConfigurationInterface(KConfigDialog *parent)
 
 void CalendarTable::configAccepted(KConfigGroup cg)
 {
-    setCalendar(d->calendarConfigUi.calendarComboBox->itemData(d->calendarConfigUi.calendarComboBox->currentIndex()).toString());
+    setCalendar(d->calendarConfigUi.calendarComboBox->itemData(d->calendarConfigUi.calendarComboBox->currentIndex()).toInt());
     setDisplayEvents(d->calendarConfigUi.displayEvents->isChecked());
 
 #ifdef HAVE_KDEPIMLIBS
@@ -1108,7 +1141,7 @@ void CalendarTable::paintCell(QPainter *p, int cell, int weekRow, int weekdayCol
     p->setPen(numberColor);
     p->setFont(type & Event ? d->dateFontBold : d->dateFont);
     if (!(type & InvalidDate)) {
-        p->drawText(cellArea, Qt::AlignCenter, calendar()->dayString(cellDate, KCalendarSystem::ShortFormat), &cellArea); //draw number
+        p->drawText(cellArea, Qt::AlignCenter, calendar()->formatDate(cellDate, KLocale::Day, KLocale::ShortNumber), &cellArea); //draw number
     }
     p->setOpacity(1.0);
 }
@@ -1228,21 +1261,21 @@ void CalendarTable::paint(QPainter *p, const QStyleOptionGraphicsItem *option, Q
                 QString weekString;
                 QString accurateWeekString;
                 if (calendar()->isValid(cellDate)) {
-                    weekString = calendar()->weekNumberString(cellDate);
+                    weekString = calendar()->formatDate(cellDate, KLocale::Week, KLocale::LongNumber);
                     accurateWeekString = weekString;
                     if (calendar()->dayOfWeek(cellDate) != Qt::Monday) {
                         QDate nextWeekDate = calendar()->addDays(cellDate, d->daysInWeek);
                         if (calendar()->isValid(nextWeekDate)) {
                             if (layoutDirection() == Qt::RightToLeft) {
-                                accurateWeekString.prepend("/").prepend(calendar()->weekNumberString(nextWeekDate));
+                                accurateWeekString.prepend("/").prepend(calendar()->formatDate(nextWeekDate, KLocale::Week, KLocale::LongNumber));
                             } else {
-                                accurateWeekString.append("/").append(calendar()->weekNumberString(nextWeekDate));
+                                accurateWeekString.append("/").append(calendar()->formatDate(nextWeekDate, KLocale::Week, KLocale::LongNumber));
                             }
                         }
                         // ensure that weekString is the week number that has the most amout of days in the row
                         QDate middleWeekDate = calendar()->addDays(cellDate, floor(static_cast<float>(d->daysInWeek / 2)));
                         if (calendar()->isValid(middleWeekDate)) {
-                            QString middleWeekString = calendar()->weekNumberString(middleWeekDate);
+                            QString middleWeekString = calendar()->formatDate(middleWeekDate, KLocale::Week, KLocale::LongNumber);
                             if (weekString != middleWeekString) {
                                 weekString = middleWeekString;
                             }

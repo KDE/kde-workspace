@@ -4,7 +4,7 @@
 
 Copyright (C) 1999, 2000 Matthias Ettrich <ettrich@kde.org>
 Copyright (C) 2003 Lubos Lunak <l.lunak@kde.org>
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,9 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QTimer>
 #include <QModelIndex>
+#include <KDE/KShortcut>
 #include "utils.h"
 #include "tabbox/tabboxhandler.h"
 
+class KActionCollection;
+class KConfigGroup;
 class QKeyEvent;
 
 namespace KWin
@@ -51,6 +54,7 @@ public:
     virtual int currentDesktop() const;
     virtual QString desktopName(TabBoxClient* client) const;
     virtual QString desktopName(int desktop) const;
+    virtual bool isKWinCompositing() const;
     virtual QWeakPointer< TabBoxClient > nextClientFocusChain(TabBoxClient* client) const;
     virtual QWeakPointer< TabBoxClient > firstClientFocusChain() const;
     virtual bool isInFocusChain (TabBoxClient* client) const;
@@ -62,9 +66,6 @@ public:
     virtual void restack(TabBoxClient *c, TabBoxClient *under);
     virtual QWeakPointer< TabBoxClient > clientToAddToList(KWin::TabBox::TabBoxClient* client, int desktop) const;
     virtual QWeakPointer< TabBoxClient > desktopClient() const;
-    virtual void hideOutline();
-    virtual void showOutline(const QRect &outline);
-    virtual QVector< xcb_window_t > outlineWindowIds() const;
     virtual void activateAndClose();
 
 private:
@@ -109,7 +110,6 @@ class TabBox : public QObject
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.kwin")
 public:
-    explicit TabBox(QObject *parent = NULL);
     ~TabBox();
 
     Client* currentClient();
@@ -165,15 +165,15 @@ public:
 
     void initShortcuts(KActionCollection* keys);
 
-    Client* nextClientFocusChain(Client*) const;
-    Client* previousClientFocusChain(Client*) const;
-    Client* firstClientFocusChain() const;
     Client* nextClientStatic(Client*) const;
     Client* previousClientStatic(Client*) const;
     int nextDesktopStatic(int iDesktop) const;
     int previousDesktopStatic(int iDesktop) const;
     void keyPress(int key);
     void keyRelease(const XKeyEvent& ev);
+
+    static TabBox *self();
+    static TabBox *create(QObject *parent);
 
 public slots:
     void show();
@@ -234,6 +234,8 @@ public slots:
 
     void handlerReady();
 
+    bool toggle(ElectricBorder eb);
+
 signals:
     void tabBoxAdded(int);
     Q_SCRIPTABLE void tabBoxClosed();
@@ -242,6 +244,7 @@ signals:
     void tabBoxKeyEvent(QKeyEvent*);
 
 private:
+    explicit TabBox(QObject *parent);
     void setCurrentIndex(QModelIndex index, bool notifyEffects = true);
     void loadConfig(const KConfigGroup& config, TabBoxConfig& tabBoxConfig);
 
@@ -295,7 +298,17 @@ private:
     KShortcut m_cutWalkThroughCurrentAppWindowsAlternative, m_cutWalkThroughCurrentAppWindowsAlternativeReverse;
     bool m_forcedGlobalMouseGrab;
     bool m_ready; // indicates whether the config is completely loaded
+    QList<ElectricBorder> m_borderActivate, m_borderAlternativeActivate;
+
+    static TabBox *s_self;
 };
+
+inline
+TabBox *TabBox::self()
+{
+    return s_self;
+}
+
 } // namespace TabBox
 } // namespace
 #endif

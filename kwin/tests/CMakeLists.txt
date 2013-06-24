@@ -40,6 +40,9 @@ target_link_libraries( testVirtualDesktops
 set( testClientMachine_SRCS
      test_client_machine.cpp
      ../client_machine.cpp
+     ../utils.cpp
+     ../atoms.cpp # needed by utils.cpp
+     ../cursor.cpp # needed by utils.cpp
 )
 kde4_add_unit_test( testClientMachine TESTNAME kwin-TestClientMachine ${testClientMachine_SRCS} )
 
@@ -48,7 +51,10 @@ target_link_libraries( testClientMachine
                        ${QT_QTCORE_LIBRARY}
                        ${KDE4_KDEUI_LIBS}
                        ${XCB_XCB_LIBRARIES}
+                       ${XCB_XFIXES_LIBRARIES}
                        ${X11_XCB_LIBRARIES}
+                       ${X11_X11_LIB} # to make jenkins happy
+                       ${X11_Xcursor_LIB}
 )
 
 ########################################################

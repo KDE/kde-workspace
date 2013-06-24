@@ -3,7 +3,7 @@
  This file is part of the KDE project.
 
 Copyright (C) 2007 Lubos Lunak <l.lunak@kde.org>
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 Copyright (C) 2009, 2010 Lucas Murray <lmurray@undefinedfire.com>
 
 This program is free software; you can redistribute it and/or modify
@@ -25,9 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "logoutconfig.h"
 
 #include "kwinglutils.h"
+#include "kwinglplatform.h"
 
 #include <math.h>
 #include <kdebug.h>
+#include <KDE/KGlobal>
 #include <KDE/KStandardDirs>
 
 #include <QtGui/QMatrix4x4>
@@ -294,8 +296,10 @@ void LogoutEffect::renderVignetting()
         return;
     }
     if (!m_vignettingShader) {
+        const char *shader = GLPlatform::instance()->glslVersion() >= kVersionNumber(1, 40) ?
+                                "kwin/vignetting-140.frag" : "kwin/vignetting.frag";
         m_vignettingShader = ShaderManager::instance()->loadFragmentShader(KWin::ShaderManager::ColorShader,
-                                                                           KGlobal::dirs()->findResource("data", "kwin/vignetting.frag"));
+                                                                           KGlobal::dirs()->findResource("data", shader));
         if (!m_vignettingShader->isValid()) {
             kDebug(1212) << "Vignetting Shader failed to load";
             return;
@@ -374,8 +378,10 @@ void LogoutEffect::renderBlurTexture()
         return;
     }
     if (!m_blurShader) {
+        const char *shader = GLPlatform::instance()->glslVersion() >= kVersionNumber(1, 40) ?
+                                "kwin/logout-blur-140.frag" : "kwin/logout-blur.frag";
         m_blurShader = ShaderManager::instance()->loadFragmentShader(KWin::ShaderManager::SimpleShader,
-                                                                     KGlobal::dirs()->findResource("data", "kwin/logout-blur.frag"));
+                                                                     KGlobal::dirs()->findResource("data", shader));
         if (!m_blurShader->isValid()) {
             kDebug(1212) << "Logout blur shader failed to load";
         }

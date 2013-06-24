@@ -15,8 +15,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2009-11-18</date>
-<releaseinfo>4.4</releaseinfo>
+<date>2013-06-02</date>
+<releaseinfo>4.11</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -73,11 +73,14 @@ Desktop.</para></listitem>
 <title><guilabel>Desktops</guilabel></title>
 
 <para>&kde; offers you the possibility to have several virtual
-desktops. In this tab you can configure the number of desktops as well
-as their names. Just use the input box to adjust the number of
+desktops. In this tab you can configure the number of desktops, the number of rows in the <guilabel>Pager</guilabel> icon
+as well as their names. Just use the input box to adjust the number of
 desktops. You can assign names to the desktops by entering text into the
 text fields below.</para> 
 
+<para>Enable <guilabel>Different widgets for each desktop</guilabel> 
+to use independent widgets and wallpapers on each individual desktop.
+</para>
 <!--not in kde4
 <para>If you enable <guilabel>Mouse wheel over desktop switches
 desktop</guilabel> then scrolling the wheel over an empty space on the
@@ -127,6 +130,10 @@ and allows you to edit them.
 </varlistentry>
 
 </variablelist>
+
+<para>Scrolling the mouse wheel over an empty space on the
+desktop or on the <guilabel>Pager</guilabel> icon in the panel will change to the next 
+virtual desktop numerically, in the direction you scrolled (either up or down).</para>
 
 </sect2>
 </sect1>

@@ -22,6 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <KDebug>
 
+QDebug operator<<(QDebug dbg, const KWin::AniData &a)
+{
+    dbg.nospace() << a.debugInfo();
+    return dbg.space();
+}
+
 using namespace KWin;
 static int Gaussian = 46;
 
@@ -30,11 +36,11 @@ AniData::AniData()
     attribute = AnimationEffect::Opacity;
     windowType = (NET::WindowTypeMask)0;
     duration = time = meta = startTime = 0;
-    waitAtSource = false;
+    waitAtSource = keepAtTarget = false;
 }
 
 AniData::AniData(AnimationEffect::Attribute a, int meta, int ms, const FPx2 &to,
-                 QEasingCurve curve, int delay, const FPx2 &from, bool waitAtSource )
+                 QEasingCurve curve, int delay, const FPx2 &from, bool waitAtSource, bool keepAtTarget )
 {
     attribute = a;
     this->from = from;
@@ -44,6 +50,7 @@ AniData::AniData(AnimationEffect::Attribute a, int meta, int ms, const FPx2 &to,
     time = 0;
     this->meta = meta;
     this->waitAtSource = waitAtSource;
+    this->keepAtTarget = keepAtTarget;
     startTime = AnimationEffect::clock() + delay;
 }
 
@@ -58,6 +65,8 @@ AniData::AniData(const AniData &other)
     customCurve = other.customCurve;
     windowType = other.windowType;
     meta = other.meta;
+    waitAtSource = other.waitAtSource;
+    keepAtTarget = other.keepAtTarget;
     startTime = other.startTime;
 }
 
@@ -75,8 +84,8 @@ static FPx2 fpx2(const QString &s, AnimationEffect::Attribute a)
         return FPx2();
     }
 
-    bool forced_align = false;
-    if ((forced_align = floats.count() < 2))
+    bool forced_align = (floats.count() < 2);
+    if (forced_align)
         f2 = f1;
     else {
         f2 = floats.at(1).toFloat(&ok);
@@ -155,6 +164,22 @@ AniData::AniData(const QString &str) // format: WindowMask:Attribute:Meta:Durati
     }
 }
 
+static QString attributeString(KWin::AnimationEffect::Attribute attribute)
+{
+    switch (attribute) {
+    case KWin::AnimationEffect::Opacity:      return "Opacity";
+    case KWin::AnimationEffect::Brightness:   return "Brightness";
+    case KWin::AnimationEffect::Saturation:   return "Saturation";
+    case KWin::AnimationEffect::Scale:        return "Scale";
+    case KWin::AnimationEffect::Translation:  return "Translation";
+    case KWin::AnimationEffect::Rotation:     return "Rotation";
+    case KWin::AnimationEffect::Position:     return "Position";
+    case KWin::AnimationEffect::Size:         return "Size";
+    case KWin::AnimationEffect::Clip:         return "Clip";
+    default:                                  return " ";
+    }
+}
+
 QList<AniData> AniData::list(const QString &str)
 {
     QList<AniData> newList;
@@ -169,21 +194,20 @@ QList<AniData> AniData::list(const QString &str)
 
 QString AniData::toString() const
 {
-    QString ret = QString::number((uint)windowType) + ':';
-    switch (attribute) {
-    case AnimationEffect::Opacity:      ret += "Opacity:"; break;
-    case AnimationEffect::Brightness:   ret += "Brightness:"; break;
-    case AnimationEffect::Saturation:   ret += "Saturation:"; break;
-    case AnimationEffect::Scale:        ret += "Scale:"; break;
-    case AnimationEffect::Translation:  ret += "Translation:"; break;
-    case AnimationEffect::Rotation:     ret += "Rotation:"; break;
-    case AnimationEffect::Position:     ret += "Position:"; break;
-    case AnimationEffect::Size:         ret += "Size:"; break;
-    case AnimationEffect::Clip:         ret += "Clip:"; break;
-    default:                            ret += ':';
-    }
-    ret +=  QString::number(meta) + ':' + QString::number(duration) + ':' +
-            to.toString() + ':' + QString::number(customCurve) + ':' +
-            QString::number(time) + ':' + from.toString();
+    QString ret =   QString::number((uint)windowType) + ':' + attributeString(attribute) + ':' +
+                    QString::number(meta) + ':' + QString::number(duration) + ':' +
+                    to.toString() + ':' + QString::number(customCurve) + ':' +
+                    QString::number(time) + ':' + from.toString();
     return ret;
+}
+
+QString AniData::debugInfo() const
+{
+    return "Animation: " + attributeString(attribute) + '\n' +
+           "     From: " + from.toString() + '\n' +
+           "       To: " + to.toString() + '\n' +
+           "  Started: " + QString::number(AnimationEffect::clock() - startTime) + "ms ago\n" +
+           " Duration: " + QString::number(duration) + "ms\n" +
+           "   Passed: " + QString::number(time) + "ms\n" +
+           " Applying: " + QString::number(windowType) + '\n';
 }

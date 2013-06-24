@@ -34,6 +34,7 @@
 #include <KIdleTime>
 
 #include <QtDBus/QDBusConnectionInterface>
+#include <QtDBus/QDBusError>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusMetaType>
 #include <QtDBus/QDBusReply>
@@ -58,23 +59,37 @@ PowermanagementEngine::~PowermanagementEngine()
 
 void PowermanagementEngine::init()
 {
-    connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceRemoved(QString)),
-            this,                              SLOT(deviceRemoved(QString)));
     connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceAdded(QString)),
             this,                              SLOT(deviceAdded(QString)));
+    connect(Solid::DeviceNotifier::instance(), SIGNAL(deviceRemoved(QString)),
+            this,                              SLOT(deviceRemoved(QString)));
 
+    // FIXME This check doesn't work, connect seems to always return true, hence the hack below
     if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.Solid.PowerManagement")) {
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
-                                                   "/org/kde/Solid/PowerManagement",
-                                                   "org.kde.Solid.PowerManagement",
+                                                   "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                                    "brightnessChanged", this,
                                                    SLOT(screenBrightnessChanged(int)))) {
             kDebug() << "error connecting to Brightness changes via dbus";
+            brightnessControlsAvailableChanged(false);
+        } else {
+            brightnessControlsAvailableChanged(true);
         }
-        else {
-            sourceRequestEvent("PowerDevil");
-            screenBrightnessChanged(0);
+
+        if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
+                                                   "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+                                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+                                                   "keyboardBrightnessChanged", this,
+                                                   SLOT(keyboardBrightnessChanged(int)))) {
+            kDebug() << "error connecting to Keyboard Brightness changes via dbus";
+            keyboardBrightnessControlsAvailableChanged(false);
+        } else {
+            keyboardBrightnessControlsAvailableChanged(true);
         }
+
+        sourceRequestEvent("PowerDevil");
+
         if (!QDBusConnection::sessionBus().connect("org.kde.Solid.PowerManagement",
                                                    "/org/kde/Solid/PowerManagement",
                                                    "org.kde.Solid.PowerManagement",
@@ -114,26 +129,31 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         foreach (const Solid::Device &deviceBattery, listBattery) {
             const Solid::Battery* battery = deviceBattery.as<Solid::Battery>();
 
-            if (battery && (battery->type() == Solid::Battery::PrimaryBattery ||
-                            battery->type() == Solid::Battery::UpsBattery)) {
-                const QString source = QString("Battery%1").arg(index++);
+            const QString source = QString("Battery%1").arg(index++);
 
-                batterySources << source;
-                m_batterySources[deviceBattery.udi()] = source;
+            batterySources << source;
+            m_batterySources[deviceBattery.udi()] = source;
 
-                connect(battery, SIGNAL(chargeStateChanged(int,QString)), this,
-                        SLOT(updateBatteryChargeState(int,QString)));
-                connect(battery, SIGNAL(chargePercentChanged(int,QString)), this,
-                        SLOT(updateBatteryChargePercent(int,QString)));
-                connect(battery, SIGNAL(plugStateChanged(bool,QString)), this,
-                        SLOT(updateBatteryPlugState(bool,QString)));
+            connect(battery, SIGNAL(chargeStateChanged(int,QString)), this,
+                    SLOT(updateBatteryChargeState(int,QString)));
+            connect(battery, SIGNAL(chargePercentChanged(int,QString)), this,
+                    SLOT(updateBatteryChargePercent(int,QString)));
+            connect(battery, SIGNAL(plugStateChanged(bool,QString)), this,
+                    SLOT(updateBatteryPlugState(bool,QString)));
 
-                // Set initial values
-                updateBatteryChargeState(battery->chargeState(), deviceBattery.udi());
-                updateBatteryChargePercent(battery->chargePercent(), deviceBattery.udi());
-                updateBatteryPlugState(battery->isPlugged(), deviceBattery.udi());
-            }
+            // Set initial values
+            updateBatteryChargeState(battery->chargeState(), deviceBattery.udi());
+            updateBatteryChargePercent(battery->chargePercent(), deviceBattery.udi());
+            updateBatteryPlugState(battery->isPlugged(), deviceBattery.udi());
+            updateBatteryPowerSupplyState(battery->isPowerSupply(), deviceBattery.udi());
+
+            setData(source, "Vendor", deviceBattery.vendor());
+            setData(source, "Product", deviceBattery.product());
+            setData(source, "Capacity", battery->capacity());
+            setData(source, "Type", batteryType(battery));
         }
+
+        updateBatteryNames();
 
         setData("Battery", "Has Battery", !batterySources.isEmpty());
         if (!batterySources.isEmpty()) {
@@ -180,14 +200,27 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
             //kDebug() << "Sleepstate \"" << sleepstate << "\" supported.";
         }
     } else if (name == "PowerDevil") {
-        QDBusMessage msg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
-                                                          "/org/kde/Solid/PowerManagement",
-                                                          "org.kde.Solid.PowerManagement",
-                                                          "brightness");
-        QDBusPendingReply<int> reply = QDBusConnection::sessionBus().asyncCall(msg);
-        QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
-        QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
-                            this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
+        if (m_brightnessControlsAvailable) {
+          QDBusMessage screenMsg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                                  "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                                                  "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
+                                                                  "brightness");
+          QDBusPendingReply<int> screenReply = QDBusConnection::sessionBus().asyncCall(screenMsg);
+          QDBusPendingCallWatcher *screenWatcher = new QDBusPendingCallWatcher(screenReply, this);
+          QObject::connect(screenWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                              this, SLOT(screenBrightnessReply(QDBusPendingCallWatcher*)));
+        }
+
+        if (m_keyboardBrightnessControlsAvailable) {
+          QDBusMessage keyboardMsg = QDBusMessage::createMethodCall("org.kde.Solid.PowerManagement",
+                                                                    "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+                                                                    "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+                                                                    "keyboardBrightness");
+          QDBusPendingReply<int> keyboardReply = QDBusConnection::sessionBus().asyncCall(keyboardMsg);
+          QDBusPendingCallWatcher *keyboardWatcher = new QDBusPendingCallWatcher(keyboardReply, this);
+          QObject::connect(keyboardWatcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                              this, SLOT(keyboardBrightnessReply(QDBusPendingCallWatcher*)));
+        }
     //any info concerning lock screen/screensaver goes here
     } else if (name == "UserActivity") {
         setData("UserActivity", "IdleTime", KIdleTime::instance()->idleTime());
@@ -196,6 +229,37 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
         return false;
     }
     return true;
+}
+
+QString PowermanagementEngine::batteryType(const Solid::Battery* battery)
+{
+  switch(battery->type()) {
+      case Solid::Battery::PrimaryBattery:
+          return QLatin1String("Battery");
+          break;
+      case Solid::Battery::UpsBattery:
+          return QLatin1String("Ups");
+          break;
+      case Solid::Battery::MonitorBattery:
+          return QLatin1String("Monitor");
+          break;
+      case Solid::Battery::MouseBattery:
+          return QLatin1String("Mouse");
+          break;
+      case Solid::Battery::KeyboardBattery:
+          return QLatin1String("Keyboad");
+          break;
+      case Solid::Battery::PdaBattery:
+          return QLatin1String("Pda");
+          break;
+      case Solid::Battery::PhoneBattery:
+          return QLatin1String("Phone");
+          break;
+      default:
+          return QLatin1String("Unknown");
+  }
+
+  return QLatin1String("Unknown");
 }
 
 bool PowermanagementEngine::updateSourceEvent(const QString &source)
@@ -243,6 +307,43 @@ void PowermanagementEngine::updateBatteryChargePercent(int newValue, const QStri
     setData(source, "Percent", newValue);
 }
 
+void PowermanagementEngine::updateBatteryPowerSupplyState(bool newState, const QString& udi)
+{
+    const QString source = m_batterySources[udi];
+    setData(source, "Is Power Supply", newState);
+}
+
+void PowermanagementEngine::updateBatteryNames()
+{
+    uint unnamedBatteries = 0;
+    foreach (QString source, m_batterySources) {
+        DataContainer *batteryDataContainer = containerForSource(source);
+        if (batteryDataContainer) {
+            const QString batteryVendor = batteryDataContainer->data()["Vendor"].toString();
+            const QString batteryProduct = batteryDataContainer->data()["Product"].toString();
+
+            // Don't show battery name for primary power supply batteries. They usually have cryptic serial number names.
+            const bool showBatteryName = batteryDataContainer->data()["Type"].toString() != QLatin1String("Battery") ||
+                                         !batteryDataContainer->data()["Is Power Supply"].toBool();
+
+            if (!batteryProduct.isEmpty() && batteryProduct != "Unknown Battery" && showBatteryName) {
+                if (!batteryVendor.isEmpty()) {
+                    setData(source, "Pretty Name", QString(batteryVendor + ' ' + batteryProduct));
+                } else {
+                    setData(source, "Pretty Name", batteryProduct);
+                }
+            } else {
+                ++unnamedBatteries;
+                if (unnamedBatteries > 1) {
+                    setData(source, "Pretty Name", i18nc("Placeholder is the battery number", "Battery %1", unnamedBatteries));
+                } else {
+                    setData(source, "Pretty Name", i18n("Battery"));
+                }
+            }
+        }
+    }
+}
+
 void PowermanagementEngine::updateAcPlugState(bool newState)
 {
     setData("AC Adapter", "Plugged in", newState);
@@ -273,8 +374,7 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
     if (device.isValid()) {
         const Solid::Battery* battery = device.as<Solid::Battery>();
 
-        if (battery && (battery->type() == Solid::Battery::PrimaryBattery ||
-                        battery->type() == Solid::Battery::UpsBattery)) {
+        if (battery) {
             int index = 0;
             QStringList sourceNames(m_batterySources.values());
             while (sourceNames.contains(QString("Battery%1").arg(index))) {
@@ -291,14 +391,24 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
                     SLOT(updateBatteryChargePercent(int,QString)));
             connect(battery, SIGNAL(plugStateChanged(bool,QString)), this,
                     SLOT(updateBatteryPlugState(bool,QString)));
+            connect(battery, SIGNAL(powerSupplyStateChanged(bool,QString)), this,
+                    SLOT(updateBatteryPowerSupplyState(bool,QString)));
 
             // Set initial values
             updateBatteryChargeState(battery->chargeState(), device.udi());
             updateBatteryChargePercent(battery->chargePercent(), device.udi());
             updateBatteryPlugState(battery->isPlugged(), device.udi());
+            updateBatteryPowerSupplyState(battery->isPowerSupply(), device.udi());
+
+            setData(source, "Vendor", device.vendor());
+            setData(source, "Product", device.product());
+            setData(source, "Capacity", battery->capacity());
+            setData(source, "Type", batteryType(battery));
 
             setData("Battery", "Sources", sourceNames);
             setData("Battery", "Has Battery", !sourceNames.isEmpty());
+
+            updateBatteryNames();
         }
     }
 }
@@ -307,6 +417,18 @@ void PowermanagementEngine::batteryRemainingTimeChanged(qulonglong time)
 {
     //kDebug() << "Remaining time 2:" << time;
     setData("Battery", "Remaining msec", time);
+}
+
+void PowermanagementEngine::brightnessControlsAvailableChanged(bool available)
+{
+    setData("PowerDevil", "Screen Brightness Available", available);
+    m_brightnessControlsAvailable = available;
+}
+
+void PowermanagementEngine::keyboardBrightnessControlsAvailableChanged(bool available)
+{
+    setData("PowerDevil", "Keyboard Brightness Available", available);
+    m_keyboardBrightnessControlsAvailable = available;
 }
 
 void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *watcher)
@@ -323,8 +445,12 @@ void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *w
 
 void PowermanagementEngine::screenBrightnessChanged(int brightness)
 {
-    //kDebug() << "Screen brightness:" << time;
     setData("PowerDevil", "Screen Brightness", brightness);
+}
+
+void PowermanagementEngine::keyboardBrightnessChanged(int brightness)
+{
+    setData("PowerDevil", "Keyboard Brightness", brightness);
 }
 
 void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watcher)
@@ -332,8 +458,24 @@ void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watch
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
         kDebug() << "Error getting screen brightness: " << reply.error().message();
+        // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
+        brightnessControlsAvailableChanged(false);
     } else {
         screenBrightnessChanged(reply.value());
+    }
+
+    watcher->deleteLater();
+}
+
+void PowermanagementEngine::keyboardBrightnessReply(QDBusPendingCallWatcher *watcher)
+{
+    QDBusPendingReply<int> reply = *watcher;
+    if (reply.isError()) {
+        kDebug() << "Error getting keyboard brightness: " << reply.error().message();
+        // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
+        keyboardBrightnessControlsAvailableChanged(false);
+    } else {
+        keyboardBrightnessChanged(reply.value());
     }
 
     watcher->deleteLater();

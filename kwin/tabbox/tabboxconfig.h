@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * @file
 * This file defines the class TabBoxConfig.
 *
-* @author Martin Gräßlin <kde@martin-graesslin.com>
+* @author Martin Gräßlin <mgraesslin@kde.org>
 * @since 4.4
 */
 
@@ -45,7 +45,7 @@ class TabBoxConfigPrivate;
 * Config sets and by setting a new config in the TabBoxHandler the behaviour
 * of the TabBox is changed immediately.
 *
-* @author Martin Gräßlin <kde@martin-graesslin.com>
+* @author Martin Gräßlin <mgraesslin@kde.org>
 * @since 4.4
 */
 class TabBoxConfig
@@ -148,13 +148,6 @@ public:
     */
     bool isHighlightWindows() const;
     /**
-    * @return If an outline of selected window should be shown
-    * This option does not apply for TabBoxMode DesktopTabBox.
-    * @see setShowOutline
-    * @see defaultShowOutline
-    */
-    bool isShowOutline() const;
-    /**
     * @return The current TabBoxMode
     * @see setTabBoxMode
     */
@@ -233,12 +226,6 @@ public:
     * @see isHighlightWindows
     */
     void setHighlightWindows(bool highlight);
-    /**
-    * @param show Show outline for current selected client.
-    * This option does not apply for TabBoxMode DesktopTabBox.
-    * @see isShowOutline
-    */
-    void setShowOutline(bool show);
     /**
     * @param mode The new TabBoxMode to be used.
     * @see tabBoxMode
@@ -321,9 +308,6 @@ public:
         return FocusChainSwitching;
     }
     static bool defaultShowTabBox() {
-        return true;
-    }
-    static bool defaultShowOutline() {
         return true;
     }
     static bool defaultHighlightWindow() {

@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "client.h"
 #include "composite.h"
+#include "cursor.h"
+#include "netinfo.h"
 #include "workspace.h"
 
 #include <kapplication.h>
@@ -36,14 +38,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kwindowsystem.h>
 
 #include "placement.h"
-#include "notifications.h"
 #include "geometrytip.h"
 #include "rules.h"
+#include "screens.h"
 #include "effects.h"
 #ifdef KWIN_BUILD_SCREENEDGES
 #include "screenedge.h"
 #endif
-#include <QtGui/QDesktopWidget>
+#include <QDesktopWidget>
 #include <QPainter>
 #include <QVarLengthArray>
 #include <QX11Info>
@@ -67,7 +69,7 @@ extern bool is_multihead;
 void Workspace::desktopResized()
 {
     QRect geom;
-    for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
+    for (int i = 0; i < screens()->count(); i++) {
         //do NOT use - QApplication::desktop()->screenGeometry(i) there could be a virtual geometry
         // see bug #302783
         geom |= QApplication::desktop()->screen(i)->geometry();
@@ -75,7 +77,7 @@ void Workspace::desktopResized()
     NETSize desktop_geometry;
     desktop_geometry.width = geom.width();
     desktop_geometry.height = geom.height();
-    rootInfo->setDesktopGeometry(-1, desktop_geometry);
+    rootInfo()->setDesktopGeometry(-1, desktop_geometry);
 
     updateClientArea();
     saveOldScreenSizes(); // after updateClientArea(), so that one still uses the previous one
@@ -88,6 +90,9 @@ void Workspace::desktopResized()
     if (effects) {
         static_cast<EffectsHandlerImpl*>(effects)->desktopResized(geom.size());
     }
+
+    //Update the shape of the overlay window to fix redrawing of unredirected windows. bug#305781
+    m_compositor->checkUnredirect(true);
 }
 
 void Workspace::saveOldScreenSizes()
@@ -95,9 +100,9 @@ void Workspace::saveOldScreenSizes()
     olddisplaysize = QSize( displayWidth(), displayHeight());
     oldscreensizes.clear();
     for( int i = 0;
-         i < numScreens();
+         i < screens()->count();
          ++i )
-        oldscreensizes.append( screenGeometry( i ));
+        oldscreensizes.append( screens()->geometry( i ));
 }
 
 /*!
@@ -114,7 +119,8 @@ void Workspace::saveOldScreenSizes()
 
 void Workspace::updateClientArea(bool force)
 {
-    int nscreens = QApplication::desktop()->screenCount();
+    const Screens *s = Screens::self();
+    int nscreens = s->count();
     const int numberOfDesktops = VirtualDesktopManager::self()->count();
     kDebug(1212) << "screens: " << nscreens << "desktops: " << numberOfDesktops;
     QVector< QRect > new_wareas(numberOfDesktops + 1);
@@ -122,13 +128,13 @@ void Workspace::updateClientArea(bool force)
     QVector< QVector< QRect > > new_sareas(numberOfDesktops + 1);
     QVector< QRect > screens(nscreens);
     QRect desktopArea;
-    for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
-        desktopArea |= QApplication::desktop()->screenGeometry(i);
+    for (int i = 0; i < nscreens; i++) {
+        desktopArea |= s->geometry(i);
     }
     for (int iS = 0;
             iS < nscreens;
             iS ++) {
-        screens [iS] = QApplication::desktop()->screenGeometry(iS);
+        screens [iS] = s->geometry(iS);
     }
     for (int i = 1;
             i <= numberOfDesktops;
@@ -225,7 +231,7 @@ void Workspace::updateClientArea(bool force)
             r.pos.y = workarea[ i ].y();
             r.size.width = workarea[ i ].width();
             r.size.height = workarea[ i ].height();
-            rootInfo->setWorkArea(i, r);
+            rootInfo()->setWorkArea(i, r);
         }
 
         for (ClientList::ConstIterator it = clients.constBegin();
@@ -262,7 +268,7 @@ QRect Workspace::clientArea(clientAreaOption opt, int screen, int desktop) const
     if (desktop == NETWinInfo::OnAllDesktops || desktop == 0)
         desktop = VirtualDesktopManager::self()->current();
     if (screen == -1)
-        screen = activeScreen();
+        screen = screens()->current();
 
     QRect sarea, warea;
 
@@ -270,15 +276,15 @@ QRect Workspace::clientArea(clientAreaOption opt, int screen, int desktop) const
         sarea = (!screenarea.isEmpty()
                    && screen < screenarea[ desktop ].size()) // screens may be missing during KWin initialization or screen config changes
                   ? screenarea[ desktop ][ screen_number ]
-                  : QApplication::desktop()->screenGeometry(screen_number);
+                  : screens()->geometry(screen_number);
         warea = workarea[ desktop ].isNull()
-                ? QApplication::desktop()->screenGeometry(screen_number)
+                ? screens()->geometry(screen_number)
                 : workarea[ desktop ];
     } else {
         sarea = (!screenarea.isEmpty()
                 && screen < screenarea[ desktop ].size()) // screens may be missing during KWin initialization or screen config changes
                 ? screenarea[ desktop ][ screen ]
-                : QApplication::desktop()->screenGeometry(screen);
+                : screens()->geometry(screen);
         warea = workarea[ desktop ].isNull()
                 ? QRect(0, 0, displayWidth(), displayHeight())
                 : workarea[ desktop ];
@@ -293,9 +299,9 @@ QRect Workspace::clientArea(clientAreaOption opt, int screen, int desktop) const
     case MovementArea:
     case ScreenArea:
         if (is_multihead)
-            return QApplication::desktop()->screenGeometry(screen_number);
+            return screens()->geometry(screen_number);
         else
-            return QApplication::desktop()->screenGeometry(screen);
+            return screens()->geometry(screen);
     case WorkArea:
         if (is_multihead)
             return sarea;
@@ -310,8 +316,7 @@ QRect Workspace::clientArea(clientAreaOption opt, int screen, int desktop) const
 
 QRect Workspace::clientArea(clientAreaOption opt, const QPoint& p, int desktop) const
 {
-    int screen = QApplication::desktop()->screenNumber(p);
-    return clientArea(opt, screen, desktop);
+    return clientArea(opt, screens()->number(p), desktop);
 }
 
 QRect Workspace::clientArea(clientAreaOption opt, const Client* c) const
@@ -372,12 +377,24 @@ int Workspace::oldDisplayHeight() const
  */
 QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted, double snapAdjust)
 {
-    //CT 16mar98, 27May98 - magics: BorderSnapZone, WindowSnapZone
-    //CT adapted for kwin on 25Nov1999
-    //aleXXX 02Nov2000 added second snapping mode
-    if (options->windowSnapZone() || options->borderSnapZone() || options->centerSnapZone()) {
+    QSize borderSnapZone(options->borderSnapZone(), options->borderSnapZone());
+    QRect maxRect;
+    if (c->maximizeMode() != MaximizeRestore) {
+        maxRect = clientArea(MovementArea, pos + c->rect().center(), c->desktop());
+        QRect geo = c->geometry();
+        if (c->maximizeMode() & MaximizeHorizontal && (geo.x() == maxRect.left() || geo.right() == maxRect.right())) {
+            borderSnapZone.setWidth(qMax(borderSnapZone.width() + 2, maxRect.width() / 16));
+        }
+        if (c->maximizeMode() & MaximizeVertical && (geo.y() == maxRect.top() || geo.bottom() == maxRect.bottom())) {
+            borderSnapZone.setHeight(qMax(borderSnapZone.height() + 2, maxRect.height() / 16));
+        }
+    }
+
+    if (options->windowSnapZone() || !borderSnapZone.isNull() || options->centerSnapZone()) {
+
         const bool sOWO = options->isSnapOnlyWhenOverlapping();
-        const QRect maxRect = clientArea(MovementArea, pos + c->rect().center(), c->desktop());
+        if (maxRect.isNull())
+            maxRect = clientArea(MovementArea, pos + c->rect().center(), c->desktop());
         const int xmin = maxRect.left();
         const int xmax = maxRect.right() + 1;             //desk size
         const int ymin = maxRect.top();
@@ -397,29 +414,45 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
         int lx, ly, lrx, lry; //coords and size for the comparison client, l
 
         // border snap
-        int snap = options->borderSnapZone() * snapAdjust; //snap trigger
-        if (snap) {
-            if ((sOWO ? (cx < xmin) : true) && (qAbs(xmin - cx) < snap)) {
-                deltaX = xmin - cx;
-                nx = xmin;
+        const int snapX = borderSnapZone.width() * snapAdjust; //snap trigger
+        const int snapY = borderSnapZone.height() * snapAdjust;
+        if (snapX || snapY) {
+            const QPoint cp = c->clientPos();
+            const QSize cs = c->geometry().size() - c->clientSize();
+            int padding[4] = { cp.x(), cs.width() - cp.x(), cp.y(), cs.height() - cp.y() };
+
+            // snap to titlebar
+            Position titlePos = c->titlebarPosition();
+            if (titlePos == PositionLeft || (c->maximizeMode() & MaximizeHorizontal))
+                padding[0] = 0;
+            if (titlePos == PositionRight || (c->maximizeMode() & MaximizeHorizontal))
+                padding[1] = 0;
+            if (titlePos == PositionTop || (c->maximizeMode() & MaximizeVertical))
+                padding[2] = 0;
+            if (titlePos == PositionBottom || (c->maximizeMode() & MaximizeVertical))
+                padding[3] = 0;
+
+            if ((sOWO ? (cx < xmin) : true) && (qAbs(xmin - cx) < snapX)) {
+                deltaX = xmin - (cx - padding[0]);
+                nx = xmin - padding[0];
             }
-            if ((sOWO ? (rx > xmax) : true) && (qAbs(rx - xmax) < snap) && (qAbs(xmax - rx) < deltaX)) {
-                deltaX = rx - xmax;
-                nx = xmax - cw;
+            if ((sOWO ? (rx > xmax) : true) && (qAbs(rx - xmax) < snapX) && (qAbs(xmax - rx) < deltaX)) {
+                deltaX = rx + padding[1] - xmax;
+                nx = xmax - cw + padding[1];
             }
 
-            if ((sOWO ? (cy < ymin) : true) && (qAbs(ymin - cy) < snap)) {
-                deltaY = ymin - cy;
-                ny = ymin;
+            if ((sOWO ? (cy < ymin) : true) && (qAbs(ymin - cy) < snapY)) {
+                deltaY = ymin - (cy - padding[2]);
+                ny = ymin - padding[2];
             }
-            if ((sOWO ? (ry > ymax) : true) && (qAbs(ry - ymax) < snap) && (qAbs(ymax - ry) < deltaY)) {
-                deltaY = ry - ymax;
-                ny = ymax - ch;
+            if ((sOWO ? (ry > ymax) : true) && (qAbs(ry - ymax) < snapY) && (qAbs(ymax - ry) < deltaY)) {
+                deltaY = ry + padding[3] - ymax;
+                ny = ymax - ch + padding[3];
             }
         }
 
         // windows snap
-        snap = options->windowSnapZone() * snapAdjust;
+        int snap = options->windowSnapZone() * snapAdjust;
         if (snap) {
             QList<Client *>::ConstIterator l;
             for (l = clients.constBegin(); l != clients.constEnd(); ++l) {
@@ -806,9 +839,9 @@ void Client::keepInArea(QRect area, bool partial)
         if (area.width() < width() || area.height() < height())
             resizeWithChecks(qMin(area.width(), width()), qMin(area.height(), height()));
     }
-    if (geometry().right() > area.right() && width() < area.width())
+    if (geometry().right() > area.right() && width() <= area.width())
         move(area.right() - width() + 1, y());
-    if (geometry().bottom() > area.bottom() && height() < area.height())
+    if (geometry().bottom() > area.bottom() && height() <= area.height())
         move(x(), area.bottom() - height() + 1);
     if (!area.contains(geometry().topLeft())) {
         int tx = x();
@@ -992,9 +1025,8 @@ bool Client::hasOffscreenXineramaStrut() const
     region += strutRect(StrutAreaLeft);
 
     // Remove all visible areas so that only the invisible remain
-    int numScreens = QApplication::desktop()->screenCount();
-    for (int i = 0; i < numScreens; i ++)
-        region -= QApplication::desktop()->screenGeometry(i);
+    for (int i = 0; i < screens()->count(); i ++)
+        region -= screens()->geometry(i);
 
     // If there's anything left then we have an offscreen strut
     return !region.isEmpty();
@@ -1032,155 +1064,153 @@ void Client::checkWorkspacePosition(QRect oldGeometry, int oldDesktop)
         return;
     }
 
-    if (!isShade()) { // TODO
-        // this can be true only if this window was mapped before KWin
-        // was started - in such case, don't adjust position to workarea,
-        // because the window already had its position, and if a window
-        // with a strut altering the workarea would be managed in initialization
-        // after this one, this window would be moved
-        if (workspace()->initializing())
-            return;
+    // this can be true only if this window was mapped before KWin
+    // was started - in such case, don't adjust position to workarea,
+    // because the window already had its position, and if a window
+    // with a strut altering the workarea would be managed in initialization
+    // after this one, this window would be moved
+    if (workspace()->initializing())
+        return;
 
-        // If the window was touching an edge before but not now move it so it is again.
-        // Old and new maximums have different starting values so windows on the screen
-        // edge will move when a new strut is placed on the edge.
-        QRect oldScreenArea;
-        QRect oldGeomTall;
-        QRect oldGeomWide;
-        if( workspace()->inUpdateClientArea()) {
-            // we need to find the screen area as it was before the change
-            oldScreenArea = QRect( 0, 0, workspace()->oldDisplayWidth(), workspace()->oldDisplayHeight());
-            oldGeomTall = QRect(oldGeometry.x(), 0, oldGeometry.width(), workspace()->oldDisplayHeight());   // Full screen height
-            oldGeomWide = QRect(0, oldGeometry.y(), workspace()->oldDisplayWidth(), oldGeometry.height());   // Full screen width
-            int distance = INT_MAX;
-            foreach(const QRect &r, workspace()->previousScreenSizes()) {
-                int d = r.contains( oldGeometry.center()) ? 0 : ( r.center() - oldGeometry.center()).manhattanLength();
-                if( d < distance ) {
-                    distance = d;
-                    oldScreenArea = r;
-                }
-            }
-        } else {
-            oldScreenArea = workspace()->clientArea(ScreenArea, oldGeometry.center(), oldDesktop);
-            oldGeomTall = QRect(oldGeometry.x(), 0, oldGeometry.width(), displayHeight());   // Full screen height
-            oldGeomWide = QRect(0, oldGeometry.y(), displayWidth(), oldGeometry.height());   // Full screen width
-        }
-        int oldTopMax = oldScreenArea.y();
-        int oldRightMax = oldScreenArea.x() + oldScreenArea.width();
-        int oldBottomMax = oldScreenArea.y() + oldScreenArea.height();
-        int oldLeftMax = oldScreenArea.x();
-        const QRect screenArea = workspace()->clientArea(ScreenArea, this);
-        int topMax = screenArea.y();
-        int rightMax = screenArea.x() + screenArea.width();
-        int bottomMax = screenArea.y() + screenArea.height();
-        int leftMax = screenArea.x();
-        QRect newGeom = geom_restore; // geometry();
-        const QRect newGeomTall = QRect(newGeom.x(), 0, newGeom.width(), displayHeight());   // Full screen height
-        const QRect newGeomWide = QRect(0, newGeom.y(), displayWidth(), newGeom.height());   // Full screen width
-        // Get the max strut point for each side where the window is (E.g. Highest point for
-        // the bottom struts bounded by the window's left and right sides).
-        if( workspace()->inUpdateClientArea()) {
-            // These 4 compute old bounds when the restricted areas themselves changed (Workspace::updateClientArea())
-            foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaTop).rects()) {
-                QRect rect = r & oldGeomTall;
-                if (!rect.isEmpty())
-                    oldTopMax = qMax(oldTopMax, rect.y() + rect.height());
-            }
-            foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaRight).rects()) {
-                QRect rect = r & oldGeomWide;
-                if (!rect.isEmpty())
-                    oldRightMax = qMin(oldRightMax, rect.x());
-            }
-            foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaBottom).rects()) {
-                QRect rect = r & oldGeomTall;
-                if (!rect.isEmpty())
-                    oldBottomMax = qMin(oldBottomMax, rect.y());
-            }
-            foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaLeft).rects()) {
-                QRect rect = r & oldGeomWide;
-                if (!rect.isEmpty())
-                    oldLeftMax = qMax(oldLeftMax, rect.x() + rect.width());
-            }
-        } else {
-            // These 4 compute old bounds when e.g. active desktop or screen changes
-            foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaTop).rects()) {
-                QRect rect = r & oldGeomTall;
-                if (!rect.isEmpty())
-                    oldTopMax = qMax(oldTopMax, rect.y() + rect.height());
-            }
-            foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaRight).rects()) {
-                QRect rect = r & oldGeomWide;
-                if (!rect.isEmpty())
-                    oldRightMax = qMin(oldRightMax, rect.x());
-            }
-            foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaBottom).rects()) {
-                QRect rect = r & oldGeomTall;
-                if (!rect.isEmpty())
-                    oldBottomMax = qMin(oldBottomMax, rect.y());
-            }
-            foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaLeft).rects()) {
-                QRect rect = r & oldGeomWide;
-                if (!rect.isEmpty())
-                    oldLeftMax = qMax(oldLeftMax, rect.x() + rect.width());
+    // If the window was touching an edge before but not now move it so it is again.
+    // Old and new maximums have different starting values so windows on the screen
+    // edge will move when a new strut is placed on the edge.
+    QRect oldScreenArea;
+    QRect oldGeomTall;
+    QRect oldGeomWide;
+    if( workspace()->inUpdateClientArea()) {
+        // we need to find the screen area as it was before the change
+        oldScreenArea = QRect( 0, 0, workspace()->oldDisplayWidth(), workspace()->oldDisplayHeight());
+        oldGeomTall = QRect(oldGeometry.x(), 0, oldGeometry.width(), workspace()->oldDisplayHeight());   // Full screen height
+        oldGeomWide = QRect(0, oldGeometry.y(), workspace()->oldDisplayWidth(), oldGeometry.height());   // Full screen width
+        int distance = INT_MAX;
+        foreach(const QRect &r, workspace()->previousScreenSizes()) {
+            int d = r.contains( oldGeometry.center()) ? 0 : ( r.center() - oldGeometry.center()).manhattanLength();
+            if( d < distance ) {
+                distance = d;
+                oldScreenArea = r;
             }
         }
-        // These 4 compute new bounds
-        foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaTop).rects()) {
-            QRect rect = r & newGeomTall;
-            if (!rect.isEmpty())
-                topMax = qMax(topMax, rect.y() + rect.height());
-        }
-        foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaRight).rects()) {
-            QRect rect = r & newGeomWide;
-            if (!rect.isEmpty())
-                rightMax = qMin(rightMax, rect.x());
-        }
-        foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaBottom).rects()) {
-            QRect rect = r & newGeomTall;
-            if (!rect.isEmpty())
-                bottomMax = qMin(bottomMax, rect.y());
-        }
-        foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaLeft).rects()) {
-            QRect rect = r & newGeomWide;
-            if (!rect.isEmpty())
-                leftMax = qMax(leftMax, rect.x() + rect.width());
-        }
-
-        // Check if the sides were inside or touching but are no longer
-        if ((oldGeometry.y() >= oldTopMax && newGeom.y() < topMax)
-            || (oldGeometry.y() == oldTopMax && newGeom.y() != topMax)) {
-            // Top was inside or touching before but isn't anymore
-            newGeom.moveTop(qMax(topMax, screenArea.y()));
-        }
-        if ((oldGeometry.y() + oldGeometry.height() <= oldBottomMax && newGeom.y() + newGeom.height() > bottomMax)
-            || (oldGeometry.y() + oldGeometry.height() == oldBottomMax && newGeom.y() + newGeom.height() != bottomMax)) {
-            // Bottom was inside or touching before but isn't anymore
-            newGeom.moveBottom(qMin(bottomMax - 1, screenArea.bottom()));
-            // If the other side was inside make sure it still is afterwards (shrink appropriately)
-            if (oldGeometry.y() >= oldTopMax && newGeom.y() < topMax)
-                newGeom.setTop(qMax(topMax, screenArea.y()));
-        }
-        if ((oldGeometry.x() >= oldLeftMax && newGeom.x() < leftMax)
-            || (oldGeometry.x() == oldLeftMax && newGeom.x() != leftMax)) {
-            // Left was inside or touching before but isn't anymore
-            newGeom.moveLeft(qMax(leftMax, screenArea.x()));
-        }
-        if ((oldGeometry.x() + oldGeometry.width() <= oldRightMax && newGeom.x() + newGeom.width() > rightMax)
-            || (oldGeometry.x() + oldGeometry.width() == oldRightMax && newGeom.x() + newGeom.width() != rightMax)) {
-            // Right was inside or touching before but isn't anymore
-            newGeom.moveRight(qMin(rightMax - 1, screenArea.right()));
-            // If the other side was inside make sure it still is afterwards (shrink appropriately)
-            if (oldGeometry.x() >= oldLeftMax && newGeom.x() < leftMax)
-                newGeom.moveRight(qMin(rightMax - 1, screenArea.right()));
-        }
-
-        checkOffscreenPosition(&newGeom, screenArea);
-        // Obey size hints. TODO: We really should make sure it stays in the right place
-        newGeom.setSize(adjustedSize(newGeom.size()));
-
-        if (newGeom != geometry())
-            setGeometry(newGeom);
+    } else {
+        oldScreenArea = workspace()->clientArea(ScreenArea, oldGeometry.center(), oldDesktop);
+        oldGeomTall = QRect(oldGeometry.x(), 0, oldGeometry.width(), displayHeight());   // Full screen height
+        oldGeomWide = QRect(0, oldGeometry.y(), displayWidth(), oldGeometry.height());   // Full screen width
     }
+    int oldTopMax = oldScreenArea.y();
+    int oldRightMax = oldScreenArea.x() + oldScreenArea.width();
+    int oldBottomMax = oldScreenArea.y() + oldScreenArea.height();
+    int oldLeftMax = oldScreenArea.x();
+    const QRect screenArea = workspace()->clientArea(ScreenArea, this);
+    int topMax = screenArea.y();
+    int rightMax = screenArea.x() + screenArea.width();
+    int bottomMax = screenArea.y() + screenArea.height();
+    int leftMax = screenArea.x();
+    QRect newGeom = geom_restore; // geometry();
+    const QRect newGeomTall = QRect(newGeom.x(), 0, newGeom.width(), displayHeight());   // Full screen height
+    const QRect newGeomWide = QRect(0, newGeom.y(), displayWidth(), newGeom.height());   // Full screen width
+    // Get the max strut point for each side where the window is (E.g. Highest point for
+    // the bottom struts bounded by the window's left and right sides).
+    if( workspace()->inUpdateClientArea()) {
+        // These 4 compute old bounds when the restricted areas themselves changed (Workspace::updateClientArea())
+        foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaTop).rects()) {
+            QRect rect = r & oldGeomTall;
+            if (!rect.isEmpty())
+                oldTopMax = qMax(oldTopMax, rect.y() + rect.height());
+        }
+        foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaRight).rects()) {
+            QRect rect = r & oldGeomWide;
+            if (!rect.isEmpty())
+                oldRightMax = qMin(oldRightMax, rect.x());
+        }
+        foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaBottom).rects()) {
+            QRect rect = r & oldGeomTall;
+            if (!rect.isEmpty())
+                oldBottomMax = qMin(oldBottomMax, rect.y());
+        }
+        foreach (const QRect & r, workspace()->previousRestrictedMoveArea(oldDesktop, StrutAreaLeft).rects()) {
+            QRect rect = r & oldGeomWide;
+            if (!rect.isEmpty())
+                oldLeftMax = qMax(oldLeftMax, rect.x() + rect.width());
+        }
+    } else {
+        // These 4 compute old bounds when e.g. active desktop or screen changes
+        foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaTop).rects()) {
+            QRect rect = r & oldGeomTall;
+            if (!rect.isEmpty())
+                oldTopMax = qMax(oldTopMax, rect.y() + rect.height());
+        }
+        foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaRight).rects()) {
+            QRect rect = r & oldGeomWide;
+            if (!rect.isEmpty())
+                oldRightMax = qMin(oldRightMax, rect.x());
+        }
+        foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaBottom).rects()) {
+            QRect rect = r & oldGeomTall;
+            if (!rect.isEmpty())
+                oldBottomMax = qMin(oldBottomMax, rect.y());
+        }
+        foreach (const QRect & r, workspace()->restrictedMoveArea(oldDesktop, StrutAreaLeft).rects()) {
+            QRect rect = r & oldGeomWide;
+            if (!rect.isEmpty())
+                oldLeftMax = qMax(oldLeftMax, rect.x() + rect.width());
+        }
+    }
+    // These 4 compute new bounds
+    foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaTop).rects()) {
+        QRect rect = r & newGeomTall;
+        if (!rect.isEmpty())
+            topMax = qMax(topMax, rect.y() + rect.height());
+    }
+    foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaRight).rects()) {
+        QRect rect = r & newGeomWide;
+        if (!rect.isEmpty())
+            rightMax = qMin(rightMax, rect.x());
+    }
+    foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaBottom).rects()) {
+        QRect rect = r & newGeomTall;
+        if (!rect.isEmpty())
+            bottomMax = qMin(bottomMax, rect.y());
+    }
+    foreach (const QRect & r, workspace()->restrictedMoveArea(desktop(), StrutAreaLeft).rects()) {
+        QRect rect = r & newGeomWide;
+        if (!rect.isEmpty())
+            leftMax = qMax(leftMax, rect.x() + rect.width());
+    }
+
+    // Check if the sides were inside or touching but are no longer
+    if ((oldGeometry.y() >= oldTopMax && newGeom.y() < topMax)
+        || (oldGeometry.y() == oldTopMax && newGeom.y() != topMax)) {
+        // Top was inside or touching before but isn't anymore
+        newGeom.moveTop(qMax(topMax, screenArea.y()));
+    }
+    if ((oldGeometry.y() + oldGeometry.height() <= oldBottomMax && newGeom.y() + newGeom.height() > bottomMax)
+        || (oldGeometry.y() + oldGeometry.height() == oldBottomMax && newGeom.y() + newGeom.height() != bottomMax)) {
+        // Bottom was inside or touching before but isn't anymore
+        newGeom.moveBottom(qMin(bottomMax - 1, screenArea.bottom()));
+        // If the other side was inside make sure it still is afterwards (shrink appropriately)
+        if (oldGeometry.y() >= oldTopMax && newGeom.y() < topMax)
+            newGeom.setTop(qMax(topMax, screenArea.y()));
+    }
+    if ((oldGeometry.x() >= oldLeftMax && newGeom.x() < leftMax)
+        || (oldGeometry.x() == oldLeftMax && newGeom.x() != leftMax)) {
+        // Left was inside or touching before but isn't anymore
+        newGeom.moveLeft(qMax(leftMax, screenArea.x()));
+    }
+    if ((oldGeometry.x() + oldGeometry.width() <= oldRightMax && newGeom.x() + newGeom.width() > rightMax)
+        || (oldGeometry.x() + oldGeometry.width() == oldRightMax && newGeom.x() + newGeom.width() != rightMax)) {
+        // Right was inside or touching before but isn't anymore
+        newGeom.moveRight(qMin(rightMax - 1, screenArea.right()));
+        // If the other side was inside make sure it still is afterwards (shrink appropriately)
+        if (oldGeometry.x() >= oldLeftMax && newGeom.x() < leftMax)
+            newGeom.setLeft(qMax(leftMax, screenArea.x()));
+    }
+
+    checkOffscreenPosition(&newGeom, screenArea);
+    // Obey size hints. TODO: We really should make sure it stays in the right place
+    newGeom.setSize(adjustedSize(newGeom.size()));
+
+    if (newGeom != geometry())
+        setGeometry(newGeom);
 }
 
 void Client::checkOffscreenPosition(QRect* geom, const QRect& screenArea)
@@ -1201,7 +1231,6 @@ void Client::checkOffscreenPosition(QRect* geom, const QRect& screenArea)
 QSize Client::adjustedSize(const QSize& frame, Sizemode mode) const
 {
     // first, get the window size for the given frame size s
-
     QSize wsize(frame.width() - (border_left + border_right),
                 frame.height() - (border_top + border_bottom));
     if (wsize.isEmpty())
@@ -1570,6 +1599,9 @@ const QPoint Client::calculateGravitation(bool invert, int gravity) const
 
 void Client::configureRequest(int value_mask, int rx, int ry, int rw, int rh, int gravity, bool from_tool)
 {
+    if (rules()->checkIgnoreGeometry(false))
+        return; // user said: "FU!"
+
     // "maximized" is a user setting -> we do not allow the client to resize itself
     // away from this & against the users explicit wish
     kDebug(1212) << this << bool(value_mask & (CWX|CWWidth|CWY|CWHeight)) <<
@@ -1614,7 +1646,7 @@ void Client::configureRequest(int value_mask, int rx, int ry, int rw, int rh, in
             nh = rh;
         QSize ns = sizeForClientSize(QSize(nw, nh));     // enforces size if needed
         new_pos = rules()->checkPosition(new_pos);
-        int newScreen = workspace()->screenNumber(QRect(new_pos, ns).center());
+        int newScreen = screens()->number(QRect(new_pos, ns).center());
         if (newScreen != rules()->checkScreen(newScreen))
             return; // not allowed by rule
 
@@ -1758,8 +1790,6 @@ bool Client::isMovable() const
         return false;
     if (isSpecialWindow() && !isSplash() && !isToolbar())  // allow moving of splashscreens :)
         return false;
-    if (maximizeMode() == MaximizeFull && !options->moveResizeMaximizedWindows())
-        return false;
     if (rules()->checkPosition(invalidPoint) != invalidPoint)     // forced position
         return false;
     return true;
@@ -1788,9 +1818,10 @@ bool Client::isResizable() const
         return false;
     if (isSpecialWindow() || isSplash() || isToolbar())
         return false;
-    if (maximizeMode() == MaximizeFull && !options->moveResizeMaximizedWindows())
-        return isMove();  // for quick tiling - maxmode will be unset if we tile
     if (rules()->checkSize(QSize()).isValid())   // forced size
+        return false;
+    if ((mode == PositionTop || mode == PositionTopLeft || mode == PositionTopRight ||
+         mode == PositionLeft || mode == PositionBottomLeft) && rules()->checkPosition(invalidPoint) != invalidPoint)
         return false;
 
     QSize min = tabGroup() ? tabGroup()->minSize() : minSize();
@@ -1898,7 +1929,7 @@ void Client::setGeometry(int x, int y, int w, int h, ForceGeometry_t force)
 
     // keep track of old maximize mode
     // to detect changes
-    workspace()->checkActiveScreen(this);
+    screens()->setCurrent(this);
     workspace()->updateStackingOrder();
 
     // need to regenerate decoration pixmaps when either
@@ -1971,7 +2002,7 @@ void Client::plainResize(int w, int h, ForceGeometry_t force)
 
     sendSyntheticConfigureNotify();
     updateWindowRules(Rules::Position|Rules::Size);
-    workspace()->checkActiveScreen(this);
+    screens()->setCurrent(this);
     workspace()->updateStackingOrder();
     discardWindowPixmap();
     emit geometryShapeChanged(this, geom_before_block);
@@ -2015,7 +2046,7 @@ void Client::move(int x, int y, ForceGeometry_t force)
     XMoveWindow(display(), frameId(), x, y);
     sendSyntheticConfigureNotify();
     updateWindowRules(Rules::Position);
-    workspace()->checkActiveScreen(this);
+    screens()->setCurrent(this);
     workspace()->updateStackingOrder();
     if (Compositor::isCreated()) {
         // TODO: move out of geometry.cpp, is this really needed here?
@@ -2031,6 +2062,7 @@ void Client::move(int x, int y, ForceGeometry_t force)
     // Update states of all other windows in this group
     if (tabGroup())
         tabGroup()->updateStates(this, TabGroup::Geometry);
+    emit geometryChanged();
 }
 
 void Client::blockGeometryUpdates(bool block)
@@ -2189,19 +2221,7 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
         changeMaximizeRecursion = false;
     }
 
-    if (!adjust) {
-        if ((vertical && !(old_mode & MaximizeVertical))
-                || (horizontal && !(old_mode & MaximizeHorizontal)))
-            Notify::raise(Notify::Maximize);
-        else
-            Notify::raise(Notify::UnMaximize);
-    }
-
-    ForceGeometry_t geom_mode = NormalGeometrySet;
-    if (decoration != NULL) { // decorations may turn off some borders when maximized
-        if (checkBorderSizes(false))    // only query, don't resize
-            geom_mode = ForceGeometrySet;
-    }
+    const ForceGeometry_t geom_mode = decoration && checkBorderSizes(false) ? ForceGeometrySet : NormalGeometrySet;
 
     // Conditional quick tiling exit points
     if (quick_tile_mode != QuickTileNone) {
@@ -2301,12 +2321,16 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
         r.setSize(adjustedSize(r.size(), SizemodeMax));
         if (r.size() != clientArea.size()) { // to avoid off-by-one errors...
             if (isElectricBorderMaximizing() && r.width() < clientArea.width())
-                r.moveLeft(QCursor::pos().x() - r.width()/2);
+                r.moveLeft(Cursor::pos().x() - r.width()/2);
             else
                 r.moveCenter(clientArea.center());
             r.moveTopLeft(rules()->checkPosition(r.topLeft()));
         }
         setGeometry(r, geom_mode);
+        if (options->electricBorderMaximize() && r.top() == clientArea.top())
+            quick_tile_mode = QuickTileMaximize;
+        else
+            quick_tile_mode = QuickTileNone;
         info->setState(NET::Max, NET::Max);
         break;
     }
@@ -2317,8 +2341,6 @@ void Client::changeMaximize(bool vertical, bool horizontal, bool adjust)
     syncer.syncNow(); // important because of window rule updates!
 
     updateAllowedActions();
-    if (decoration != NULL)
-        decoration->maximizeChange();
     updateWindowRules(Rules::MaximizeVert|Rules::MaximizeHoriz|Rules::Position|Rules::Size);
 }
 
@@ -2361,7 +2383,7 @@ void Client::setFullScreen(bool set, bool user)
     setShade(ShadeNone);
     bool was_fs = isFullScreen();
     if (was_fs)
-        workspace()->updateFocusMousePosition(QCursor::pos());
+        workspace()->updateFocusMousePosition(Cursor::pos());
     else
         geom_fs_restore = geometry();
     fullscreen_mode = set ? FullScreenNormal : FullScreenNone;
@@ -2397,18 +2419,13 @@ void Client::setFullScreen(bool set, bool user)
     if (was_fs != isFullScreen()) {
         emit clientFullScreenSet(this, set, user);
         emit fullScreenChanged();
-        if (isFullScreen()) {
-            Notify::raise(Notify::FullScreen);
-        } else {
-            Notify::raise(Notify::UnFullScreen);
-        }
     }
 }
 
 
 void Client::updateFullscreenMonitors(NETFullscreenMonitors topology)
 {
-    int nscreens = QApplication::desktop()->screenCount();
+    int nscreens = screens()->count();
 
 //    kDebug( 1212 ) << "incoming request with top: " << topology.top << " bottom: " << topology.bottom
 //                   << " left: " << topology.left << " right: " << topology.right
@@ -2436,10 +2453,10 @@ QRect Client::fullscreenMonitorsArea(NETFullscreenMonitors requestedTopology) co
 {
     QRect top, bottom, left, right, total;
 
-    top = QApplication::desktop()->screenGeometry(requestedTopology.top);
-    bottom = QApplication::desktop()->screenGeometry(requestedTopology.bottom);
-    left = QApplication::desktop()->screenGeometry(requestedTopology.left);
-    right = QApplication::desktop()->screenGeometry(requestedTopology.right);
+    top = screens()->geometry(requestedTopology.top);
+    bottom = screens()->geometry(requestedTopology.bottom);
+    left = screens()->geometry(requestedTopology.left);
+    right = screens()->geometry(requestedTopology.right);
     total = top.united(bottom.united(left.united(right)));
 
 //    kDebug( 1212 ) << "top: " << top << " bottom: " << bottom
@@ -2498,7 +2515,7 @@ void Client::positionGeometryTip()
         return; // some effect paints this for us
     if (options->showGeometryTip()) {
         if (!geometryTip) {
-            geometryTip = new GeometryTip(&xSizeHint, false);
+            geometryTip = new GeometryTip(&xSizeHint);
         }
         QRect wgeom(moveResizeGeom);   // position of the frame, size of the window itself
         wgeom.setWidth(wgeom.width() - (width() - clientSize().width()));
@@ -2524,50 +2541,32 @@ bool Client::startMoveResize()
     // This reportedly improves smoothness of the moveresize operation,
     // something with Enter/LeaveNotify events, looks like XFree performance problem or something *shrug*
     // (http://lists.kde.org/?t=107302193400001&r=1&w=2)
-    XSetWindowAttributes attrs;
     QRect r = workspace()->clientArea(FullArea, this);
-    move_resize_grab_window = XCreateWindow(display(), rootWindow(), r.x(), r.y(),
-                                            r.width(), r.height(), 0, CopyFromParent, InputOnly, CopyFromParent, 0, &attrs);
-    XMapRaised(display(), move_resize_grab_window);
-    if (XGrabPointer(display(), move_resize_grab_window, False,
-                    ButtonPressMask | ButtonReleaseMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask,
-                    GrabModeAsync, GrabModeAsync, move_resize_grab_window, cursor.handle(), xTime()) == Success)
+    m_moveResizeGrabWindow.create(r, XCB_WINDOW_CLASS_INPUT_ONLY, 0, NULL, rootWindow());
+    m_moveResizeGrabWindow.map();
+    m_moveResizeGrabWindow.raise();
+    const xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer_unchecked(connection(), false, m_moveResizeGrabWindow,
+        XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION |
+        XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW,
+        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, m_moveResizeGrabWindow, Cursor::x11Cursor(m_cursor), xTime());
+    ScopedCPointer<xcb_grab_pointer_reply_t> pointerGrab(xcb_grab_pointer_reply(connection(), cookie, NULL));
+    if (!pointerGrab.isNull() && pointerGrab->status == XCB_GRAB_STATUS_SUCCESS) {
         has_grab = true;
+    }
     if (grabXKeyboard(frameId()))
         has_grab = move_resize_has_keyboard_grab = true;
     if (!has_grab) { // at least one grab is necessary in order to be able to finish move/resize
-        XDestroyWindow(display(), move_resize_grab_window);
-        move_resize_grab_window = None;
+        m_moveResizeGrabWindow.reset();
         return false;
     }
 
     moveResizeMode = true;
     workspace()->setClientIsMoving(this);
 
-    // If we have quick maximization enabled then it's safe to automatically restore windows
-    // when starting a move as the user can undo their action by moving the window back to
-    // the top of the screen. When the setting is disabled then doing so is confusing.
-    bool fakeMove = false;
-    if (!isFullScreen()) { // xinerama move across screens -> window is FS, everything else is secondary and untouched
-        if (maximizeMode() != MaximizeRestore &&
-            (maximizeMode() != MaximizeFull || options->moveResizeMaximizedWindows())) {
-            // allow moveResize, but unset maximization state in resize case
-            if (mode != PositionCenter) { // means "isResize()" but moveResizeMode = true is set below
-                if (maximizeMode() == MaximizeFull) { // partial is cond. reset in finishMoveResize
-                    geom_restore = geometry(); // "restore" to current geometry
-                    setMaximize(false, false);
-                }
-            } else if (quick_tile_mode != QuickTileNone) // no longer now - we move, resize is handled below
-                setQuickTileMode(QuickTileNone); // otherwise we mess every second tile, bug #303937
-        } else if ((maximizeMode() == MaximizeFull && options->electricBorderMaximize()) ||
-                   (quick_tile_mode != QuickTileNone && isMovable() && mode == PositionCenter)) {
-            // Exit quick tile mode when the user attempts to move a tiled window, cannot use isMove() yet
-            const QRect before = geometry();
-            setQuickTileMode(QuickTileNone);
-            // Move the window so it's under the cursor
-            moveOffset = QPoint(double(moveOffset.x()) / double(before.width()) * double(geom_restore.width()),
-                                double(moveOffset.y()) / double(before.height()) * double(geom_restore.height()));
-            fakeMove = true;
+    if (mode != PositionCenter) { // means "isResize()" but moveResizeMode = true is set below
+        if (maximizeMode() == MaximizeFull) { // partial is cond. reset in finishMoveResize
+            geom_restore = geometry(); // "restore" to current geometry
+            setMaximize(false, false);
         }
     }
 
@@ -2580,14 +2579,11 @@ bool Client::startMoveResize()
     moveResizeStartScreen = screen();
     initialMoveResizeGeom = moveResizeGeom = geometry();
     checkUnrestrictedMoveResize();
-    Notify::raise(isResize() ? Notify::ResizeStart : Notify::MoveStart);
     emit clientStartUserMovedResized(this);
 #ifdef KWIN_BUILD_SCREENEDGES
     if (ScreenEdges::self()->isDesktopSwitchingMovingClients())
         ScreenEdges::self()->reserveDesktopSwitching(true, Qt::Vertical|Qt::Horizontal);
 #endif
-    if (fakeMove) // fix geom_restore position - it HAS to happen at the end, ie. when all moving is set up. inline call will lock focus!!
-        handleMoveResize(QCursor::pos().x(), QCursor::pos().y(), QCursor::pos().x(), QCursor::pos().y());
     return true;
 }
 
@@ -2604,14 +2600,15 @@ void Client::finishMoveResize(bool cancel)
                                     moveResizeGeom.width() != initialMoveResizeGeom.width();
             const bool restoreV = maximizeMode() == MaximizeVertical &&
                                     moveResizeGeom.height() != initialMoveResizeGeom.height();
-            if (restoreH || restoreV) // NOT setMaximize(restoreH, restoreV); !
-                setMaximize(false, false);
+            if (restoreH || restoreV) {
+                changeMaximize(restoreV, restoreH, false);
+            }
         }
         setGeometry(moveResizeGeom);
     }
-    const int newScreen = screen();
-    if (newScreen != moveResizeStartScreen) {
-        workspace()->sendClientToScreen(this, newScreen); // checks rule validity
+    checkScreen(); // needs to be done because clientFinishUserMovedResized has not yet re-activated online alignment
+    if (screen() != moveResizeStartScreen) {
+        workspace()->sendClientToScreen(this, screen()); // checks rule validity
         if (maximizeMode() != MaximizeRestore)
             checkWorkspacePosition();
     }
@@ -2619,7 +2616,8 @@ void Client::finishMoveResize(bool cancel)
     if (isElectricBorderMaximizing()) {
         setQuickTileMode(electricMode);
         electricMaximizing = false;
-        workspace()->outline()->hide();
+        outline()->hide();
+        elevate(false);
     } else if (!cancel) {
         if (!(maximizeMode() & MaximizeHorizontal)) {
             geom_restore.setX(geometry().x());
@@ -2632,7 +2630,6 @@ void Client::finishMoveResize(bool cancel)
     }
 // FRAME    update();
 
-    Notify::raise(isResize() ? Notify::ResizeEnd : Notify::MoveEnd);
     emit clientFinishUserMovedResized(this);
 }
 
@@ -2654,8 +2651,7 @@ void Client::leaveMoveResize()
         ungrabXKeyboard();
     move_resize_has_keyboard_grab = false;
     XUngrabPointer(display(), xTime());
-    XDestroyWindow(display(), move_resize_grab_window);
-    move_resize_grab_window = None;
+    m_moveResizeGrabWindow.reset();
     workspace()->setClientIsMoving(0);
     moveResizeMode = false;
 #ifdef HAVE_XSYNC
@@ -2929,7 +2925,7 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
         assert(mode == PositionCenter);
         if (!isMovable()) { // isMovableAcrossScreens() must have been true to get here
             // Special moving of maximized windows on Xinerama screens
-            int screen = workspace()->screenNumber(globalPos);
+            int screen = screens()->number(globalPos);
             if (isFullScreen())
                 moveResizeGeom = workspace()->clientArea(FullScreenArea, screen, 0);
             else {
@@ -2974,7 +2970,7 @@ void Client::handleMoveResize(int x, int y, int x_root, int y_root)
                     // by moving the window slightly downwards, but it won't stuck)
                     // see bug #274466
                     // and bug #301805 for why we can't just match the titlearea against the screen
-                    if (QApplication::desktop()->screenCount() > 1) { // optimization
+                    if (screens()->count() > 1) { // optimization
                         // TODO: could be useful on partial screen struts (half-width panels etc.)
                         int newTitleTop = -1;
                         foreach (const QRect &r, strut.rects()) {
@@ -3065,7 +3061,7 @@ void Client::setElectricBorderMode(QuickTileMode mode)
     electricMode = mode;
 }
 
-QuickTileMode Client::electricBorderMode() const
+Client::QuickTileMode Client::electricBorderMode() const
 {
     return electricMode;
 }
@@ -3079,9 +3075,10 @@ void Client::setElectricBorderMaximizing(bool maximizing)
 {
     electricMaximizing = maximizing;
     if (maximizing)
-        workspace()->outline()->show(electricBorderMaximizeGeometry(cursorPos(), desktop()));
+        outline()->show(electricBorderMaximizeGeometry(cursorPos(), desktop()));
     else
-        workspace()->outline()->hide();
+        outline()->hide();
+    elevate(maximizing);
 }
 
 QRect Client::electricBorderMaximizeGeometry(QPoint pos, int desktop)
@@ -3121,6 +3118,12 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
         else
         {
             setMaximize(true, true);
+            QRect clientArea = workspace()->clientArea(MaximizeArea, this);
+            if (geometry().top() != clientArea.top()) {
+                QRect r(geometry());
+                r.moveTop(clientArea.top());
+                setGeometry(r);
+            }
             quick_tile_mode = QuickTileMaximize;
         }
         return;
@@ -3141,10 +3144,13 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
 
         setMaximize(false, false);
 
-        // Temporary, so the maximize code doesn't get all confused
-        quick_tile_mode = QuickTileNone;
-        if (mode != QuickTileNone)
-            setGeometry(electricBorderMaximizeGeometry(keyboard ? geometry().center() : cursorPos(), desktop()));
+        if (mode != QuickTileNone) {
+            quick_tile_mode = mode;
+            // decorations may turn off some borders when tiled
+            const ForceGeometry_t geom_mode = decoration && checkBorderSizes(false) ? ForceGeometrySet : NormalGeometrySet;
+            quick_tile_mode = QuickTileNone; // Temporary, so the maximize code doesn't get all confused
+            setGeometry(electricBorderMaximizeGeometry(keyboard ? geometry().center() : cursorPos(), desktop()), geom_mode);
+        }
         // Store the mode change
         quick_tile_mode = mode;
 
@@ -3160,7 +3166,9 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
         // Untiling, so just restore geometry, and we're done.
         if (!geom_restore.isValid()) // invalid if we started maximized and wait for placement
             geom_restore = geometry();
-        setGeometry(geom_restore);
+        // decorations may turn off some borders when tiled
+        const ForceGeometry_t geom_mode = decoration && checkBorderSizes(false) ? ForceGeometrySet : NormalGeometrySet;
+        setGeometry(geom_restore, geom_mode);
         checkWorkspacePosition(); // Just in case it's a different screen
         return;
     } else {
@@ -3171,12 +3179,12 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
         // If trying to tile to the side that the window is already tiled to move the window to the next
         // screen if it exists, otherwise ignore the request to prevent corrupting geom_restore.
         if (quick_tile_mode == mode) {
-            const int numScreens = QApplication::desktop()->screenCount();
+            const int numScreens = screens()->count();
             const int curScreen = screen();
             int nextScreen = curScreen;
             QVarLengthArray<QRect> screens(numScreens);
             for (int i = 0; i < numScreens; ++i)   // Cache
-                screens[i] = QApplication::desktop()->screenGeometry(i);
+                screens[i] = Screens::self()->geometry(i);
             for (int i = 0; i < numScreens; ++i) {
                 if (i == curScreen)
                     continue;
@@ -3209,10 +3217,14 @@ void Client::setQuickTileMode(QuickTileMode mode, bool keyboard)
             geom_restore = geometry();
         }
 
-        // Temporary, so the maximize code doesn't get all confused
-        quick_tile_mode = QuickTileNone;
-        if (mode != QuickTileNone)
-            setGeometry(electricBorderMaximizeGeometry(whichScreen, desktop()));
+        if (mode != QuickTileNone) {
+            quick_tile_mode = mode;
+            // decorations may turn off some borders when tiled
+            const ForceGeometry_t geom_mode = decoration && checkBorderSizes(false) ? ForceGeometrySet : NormalGeometrySet;
+            // Temporary, so the maximize code doesn't get all confused
+            quick_tile_mode = QuickTileNone;
+            setGeometry(electricBorderMaximizeGeometry(whichScreen, desktop()), geom_mode);
+        }
 
         // Store the mode change
         quick_tile_mode = mode;

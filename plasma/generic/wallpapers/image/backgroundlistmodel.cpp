@@ -17,7 +17,6 @@
 #include <QUuid>
 
 #include <KDebug>
-#include <KFileMetaInfo>
 #include <KGlobal>
 #include <KIO/PreviewJob>
 #include <KProgressDialog>
@@ -88,6 +87,8 @@ void BackgroundListModel::reload(const QStringList &selected)
     if (!m_packages.isEmpty()) {
         beginRemoveRows(QModelIndex(), 0, m_packages.count() - 1);
         m_packages.clear();
+        m_sizeCache.clear();
+        m_previews.clear();
         endRemoveRows();
     }
 

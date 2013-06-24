@@ -383,7 +383,7 @@ PolicyAgent::RequiredPolicies PolicyAgent::requirePolicyCheck(PolicyAgent::Requi
         QDBusPendingReply< bool > rp = m_ckSessionInterface.data()->asyncCall("IsActive");
         rp.waitForFinished();
 
-        if (!rp.value() && !m_wasLastActiveSession) {
+        if (!(rp.isValid() && rp.value()) && !m_wasLastActiveSession) {
             return policies;
         }
     }
@@ -505,11 +505,10 @@ void PolicyAgent::ReleaseInhibition(uint cookie)
 {
     kDebug() << "Released inhibition with cookie " << cookie;
     m_cookieToAppName.remove(cookie);
-    if (m_cookieToBusService.contains(cookie)) {
-        if (!m_busWatcher.isNull()) {
-            m_busWatcher.data()->removeWatchedService(m_cookieToBusService[cookie]);
-        }
-        m_cookieToBusService.remove(cookie);
+    QString service = m_cookieToBusService.take(cookie);
+    if (!m_busWatcher.isNull() && !service.isEmpty() && !m_cookieToBusService.key(service)) {
+        // no cookies from service left
+        m_busWatcher.data()->removeWatchedService(service);
     }
 
     // Look through all of the inhibition types

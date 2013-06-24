@@ -64,6 +64,7 @@ ScreenSaverWindow::ScreenSaverWindow(QWidget *parent)
 
 ScreenSaverWindow::~ScreenSaverWindow()
 {
+    stopXScreenSaver();
 }
 
 QPixmap ScreenSaverWindow::background() const
@@ -167,8 +168,9 @@ void ScreenSaverWindow::showEvent(QShowEvent *event)
     m_startMousePos = QPoint(-2, -2); // prevent mouse interpretation to cause an immediate hide
     m_reactivateTimer->stop();
     static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
-    if (testAttribute(Qt::WA_WState_Created) && internalWinId())
+    if (testAttribute(Qt::WA_WState_Created) && internalWinId()) {
         XChangeProperty(QX11Info::display(), winId(), tag, tag, 32, PropModeReplace, 0, 0);
+    }
     startXScreenSaver();
 }
 
@@ -188,8 +190,7 @@ bool ScreenSaverWindow::startXScreenSaver()
     //QString m_saverExec("kannasaver.kss --window-id=%w");
     kDebug(1204) << "Starting hack:" << m_saverExec;
 
-    if (m_saverExec.isEmpty() || m_forbidden)
-    {
+    if (m_saverExec.isEmpty() || m_forbidden) {
         return false;
     }
 
@@ -198,8 +199,7 @@ bool ScreenSaverWindow::startXScreenSaver()
     m_ScreenSaverProcess << KShell::splitArgs(KMacroExpander::expandMacrosShellQuote(m_saverExec, keyMap));
 
     m_ScreenSaverProcess.start();
-    if (m_ScreenSaverProcess.waitForStarted())
-    {
+    if (m_ScreenSaverProcess.waitForStarted()) {
 #ifdef HAVE_SETPRIORITY
         setpriority(PRIO_PROCESS, m_ScreenSaverProcess.pid(), mPriority);
 #endif
@@ -213,11 +213,9 @@ bool ScreenSaverWindow::startXScreenSaver()
 //
 void ScreenSaverWindow::stopXScreenSaver()
 {
-    if (m_ScreenSaverProcess.state() != QProcess::NotRunning)
-    {
+    if (m_ScreenSaverProcess.state() != QProcess::NotRunning) {
         m_ScreenSaverProcess.terminate();
-        if (!m_ScreenSaverProcess.waitForFinished(10000))
-        {
+        if (!m_ScreenSaverProcess.waitForFinished(10000)) {
             m_ScreenSaverProcess.kill();
         }
     }

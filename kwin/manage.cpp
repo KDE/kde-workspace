@@ -27,10 +27,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kglobal.h>
 #include <X11/extensions/shape.h>
 
-#include "notifications.h"
+#ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
+#endif
+#include "cursor.h"
 #include <QX11Info>
 #include "rules.h"
 #include "group.h"
+#include "netinfo.h"
+#include "screens.h"
+#include "workspace.h"
 #include "xcbutils.h"
 
 namespace KWin
@@ -41,7 +47,7 @@ namespace KWin
  * reparenting, initial geometry, initial state, placement, etc.
  * Returns false if KWin is not going to manage this window.
  */
-bool Client::manage(Window w, bool isMapped)
+bool Client::manage(xcb_window_t w, bool isMapped)
 {
     StackingUpdatesBlocker stacking_blocker(workspace());
 
@@ -94,9 +100,9 @@ bool Client::manage(Window w, bool isMapped)
         NET::WM2FrameOverlap |
         0;
 
-    info = new WinInfo(this, display(), client, rootWindow(), properties, 2);
+    info = new WinInfo(this, display(), m_client, rootWindow(), properties, 2);
 
-    cmap = attr.colormap;
+    m_colormap = attr.colormap;
 
     getResourceClass();
     getWindowRole();
@@ -195,6 +201,7 @@ bool Client::manage(Window w, bool isMapped)
             desk = info->desktop(); // Window had the initial desktop property, force it
         if (desktop() == 0 && asn_valid && asn_data.desktop() != 0)
             desk = asn_data.desktop();
+#ifdef KWIN_BUILD_ACTIVITIES
         if (!isMapped && !noborder && isNormalWindow() && !activitiesDefined) {
             //a new, regular window, when we're not recovering from a crash,
             //and it hasn't got an activity. let's try giving it the current one.
@@ -203,8 +210,9 @@ bool Client::manage(Window w, bool isMapped)
             //with a public API for setting windows to be on all activities.
             //something like KWindowSystem::setOnAllActivities or
             //KActivityConsumer::setOnAllActivities
-            setOnActivity(Workspace::self()->currentActivity(), true);
+            setOnActivity(Activities::self()->current(), true);
         }
+#endif
     }
 
     if (desk == 0)   // Assume window wants to be visible on the current desktop
@@ -232,9 +240,9 @@ bool Client::manage(Window w, bool isMapped)
     if (isMapped || session)
         area = workspace()->clientArea(FullArea, geom.center(), desktop());
     else {
-        int screen = asn_data.xinerama() == -1 ? workspace()->activeScreen() : asn_data.xinerama();
+        int screen = asn_data.xinerama() == -1 ? screens()->current() : asn_data.xinerama();
         screen = rules()->checkScreen(screen, !isMapped);
-        area = workspace()->clientArea(PlacementArea, workspace()->screenGeometry(screen).center(), desktop());
+        area = workspace()->clientArea(PlacementArea, screens()->geometry(screen).center(), desktop());
     }
 
     if (int type = checkFullScreenHack(geom)) {
@@ -280,7 +288,7 @@ bool Client::manage(Window w, bool isMapped)
         ; // Force using placement policy
     else
         usePosition = true;
-    if (!rules()->checkIgnoreGeometry(!usePosition)) {
+    if (!rules()->checkIgnoreGeometry(!usePosition, true)) {
         if (((xSizeHint.flags & PPosition)) ||
                 (xSizeHint.flags & USPosition)) {
             placementDone = true;
@@ -461,13 +469,6 @@ bool Client::manage(Window w, bool isMapped)
     if (init_minimize)
         minimize(true);   // No animation
 
-
-    // SELI TODO: This seems to be mainly for kstart and ksystraycmd
-    // probably should be replaced by something better
-    bool doNotShow = false;
-    if (workspace()->isNotManaged(caption()))
-        doNotShow = true;
-
     // Other settings from the previous session
     if (session) {
         // Session restored windows are not considered to be new windows WRT rules,
@@ -522,8 +523,8 @@ bool Client::manage(Window w, bool isMapped)
     updateAllowedActions(true);
 
     // Set initial user time directly
-    user_time = readUserTimeMapTimestamp(asn_valid ? &asn_id : NULL, asn_valid ? &asn_data : NULL, session);
-    group()->updateUserTime(user_time);   // And do what Client::updateUserTime() does
+    m_userTime = readUserTimeMapTimestamp(asn_valid ? &asn_id : NULL, asn_valid ? &asn_data : NULL, session);
+    group()->updateUserTime(m_userTime);   // And do what Client::updateUserTime() does
 
     // This should avoid flicker, because real restacking is done
     // only after manage() finishes because of blocking, but the window is shown sooner
@@ -540,12 +541,7 @@ bool Client::manage(Window w, bool isMapped)
     else
         ready_for_painting = true; // set to true in case compositing is turned on later. bug #160393
 
-    if (isShown(true) && !doNotShow) {
-        if (isDialog())
-            Notify::raise(Notify::TransNew);
-        if (isNormalWindow())
-            Notify::raise(Notify::New);
-
+    if (isShown(true)) {
         bool allow;
         if (session)
             allow = session->active &&
@@ -596,19 +592,17 @@ bool Client::manage(Window w, bool isMapped)
             } else if (!session && !isSpecialWindow())
                 demandAttention();
         }
-    } else if (!doNotShow) // if ( !isShown( true ) && !doNotShow )
+    } else
         updateVisibility();
-    else // doNotShow
-        hideClient(true);   // SELI HACK !!!
     assert(mapping_state != Withdrawn);
     m_managed = true;
     blockGeometryUpdates(false);
 
-    if (user_time == CurrentTime || user_time == -1U) {
+    if (m_userTime == XCB_TIME_CURRENT_TIME || m_userTime == -1U) {
         // No known user time, set something old
-        user_time = xTime() - 1000000;
-        if (user_time == CurrentTime || user_time == -1U)   // Let's be paranoid
-            user_time = xTime() - 1000000 + 10;
+        m_userTime = xTime() - 1000000;
+        if (m_userTime == XCB_TIME_CURRENT_TIME || m_userTime == -1U)   // Let's be paranoid
+            m_userTime = xTime() - 1000000 + 10;
     }
 
     //sendSyntheticConfigureNotify(); // Done when setting mapping state
@@ -619,7 +613,7 @@ bool Client::manage(Window w, bool isMapped)
 
     client_rules.discardTemporary();
     applyWindowRules(); // Just in case
-    workspace()->discardUsedWindowRules(this, false);   // Remove ApplyNow rules
+    RuleBook::self()->discardUsed(this, false);   // Remove ApplyNow rules
     updateWindowRules(Rules::All); // Was blocked while !isManaged()
 
     updateCompositeBlocking(true);
@@ -632,12 +626,12 @@ bool Client::manage(Window w, bool isMapped)
 }
 
 // Called only from manage()
-void Client::embedClient(Window w, const XWindowAttributes& attr)
+void Client::embedClient(xcb_window_t w, const XWindowAttributes& attr)
 {
-    assert(client == None);
-    assert(frameId() == None);
-    assert(wrapper == None);
-    client = w;
+    assert(m_client == XCB_WINDOW_NONE);
+    assert(frameId() == XCB_WINDOW_NONE);
+    assert(m_wrapper == XCB_WINDOW_NONE);
+    m_client = w;
 
     const xcb_visualid_t visualid = XVisualIDFromVisual(attr.visual);
     const uint32_t zero_value = 0;
@@ -645,18 +639,18 @@ void Client::embedClient(Window w, const XWindowAttributes& attr)
     xcb_connection_t *conn = connection();
 
     // We don't want the window to be destroyed when we quit
-    xcb_change_save_set(conn, XCB_SET_MODE_INSERT, client);
+    xcb_change_save_set(conn, XCB_SET_MODE_INSERT, m_client);
 
-    xcb_change_window_attributes(conn, client, XCB_CW_EVENT_MASK, &zero_value);
-    xcb_unmap_window(conn, client);
-    xcb_configure_window(conn, client, XCB_CONFIG_WINDOW_BORDER_WIDTH, &zero_value);
+    xcb_change_window_attributes(conn, m_client, XCB_CW_EVENT_MASK, &zero_value);
+    xcb_unmap_window(conn, m_client);
+    xcb_configure_window(conn, m_client, XCB_CONFIG_WINDOW_BORDER_WIDTH, &zero_value);
 
     // Note: These values must match the order in the xcb_cw_t enum
     const uint32_t cw_values[] = {
         0,                                // back_pixmap
         0,                                // border_pixel
         static_cast<uint32_t>(attr.colormap),                    // colormap
-        static_cast<uint32_t>(QCursor(Qt::ArrowCursor).handle()) // cursor
+        Cursor::x11Cursor(Qt::ArrowCursor)
     };
 
     const uint32_t cw_mask = XCB_CW_BACK_PIXMAP | XCB_CW_BORDER_PIXEL |
@@ -684,21 +678,22 @@ void Client::embedClient(Window w, const XWindowAttributes& attr)
     xcb_create_window(conn, attr.depth, frame, rootWindow(), 0, 0, 1, 1, 0,
                       XCB_WINDOW_CLASS_INPUT_OUTPUT, visualid, cw_mask, cw_values);
 
-    setWindowHandles(client, frame);
+    setWindowHandles(m_client, frame);
 
     // Create the wrapper window
-    wrapper = xcb_generate_id(conn);
-    xcb_create_window(conn, attr.depth, wrapper, frame, 0, 0, 1, 1, 0,
+    xcb_window_t wrapperId = xcb_generate_id(conn);
+    xcb_create_window(conn, attr.depth, wrapperId, frame, 0, 0, 1, 1, 0,
                       XCB_WINDOW_CLASS_INPUT_OUTPUT, visualid, cw_mask, cw_values);
+    m_wrapper.reset(wrapperId);
 
-    xcb_reparent_window(conn, client, wrapper, 0, 0);
+    xcb_reparent_window(conn, m_client, m_wrapper, 0, 0);
 
     // We could specify the event masks when we create the windows, but the original
     // Xlib code didn't.  Let's preserve that behavior here for now so we don't end up
     // receiving any unexpected events from the wrapper creation or the reparenting.
     xcb_change_window_attributes(conn, frame,   XCB_CW_EVENT_MASK, &frame_event_mask);
-    xcb_change_window_attributes(conn, wrapper, XCB_CW_EVENT_MASK, &wrapper_event_mask);
-    xcb_change_window_attributes(conn, client,  XCB_CW_EVENT_MASK, &client_event_mask);
+    xcb_change_window_attributes(conn, m_wrapper, XCB_CW_EVENT_MASK, &wrapper_event_mask);
+    xcb_change_window_attributes(conn, m_client,  XCB_CW_EVENT_MASK, &client_event_mask);
 
     updateMouseGrab();
 }

@@ -32,9 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //////////////////////////////////////////////////////////////////////////////
 
 #include "useractions.h"
+#include "cursor.h"
 #include "client.h"
+#include "decorations.h"
 #include "workspace.h"
 #include "effects.h"
+#include "screens.h"
 #include "virtualdesktops.h"
 
 #ifdef KWIN_BUILD_SCRIPTING
@@ -42,9 +45,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #ifdef KWIN_BUILD_ACTIVITIES
+#include "activities.h"
 #include <KActivities/Info>
 #endif
 
+#include <KDE/KKeySequenceWidget>
 #include <KDE/KProcess>
 #include <KDE/KToolInvocation>
 
@@ -53,16 +58,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/extensions/xf86vmode.h>
 #endif
 #include <fixx11h.h>
+#include <QCheckBox>
 #include <QPushButton>
-#include <QSlider>
 
 #include <kglobalsettings.h>
+#include <KDE/KIcon>
 #include <kiconloader.h>
-#include <klocale.h>
+#include <KDE/KLocalizedString>
 #include <kconfig.h>
+#include <KDE/KGlobal>
+#include <KDE/KPushButton>
 #include <kglobalaccel.h>
 #include <kapplication.h>
 #include <QRegExp>
+#include <QLabel>
 #include <QMenu>
 #include <QVBoxLayout>
 #include <kauthorized.h>
@@ -74,20 +83,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tabbox.h"
 #endif
 
-#ifdef KWIN_BUILD_KAPPMENU
-#include <QDBusMessage>
-#include <QDBusConnection>
-#include <QDBusPendingCall>
-#endif
-
 namespace KWin
 {
-
-#ifdef KWIN_BUILD_KAPPMENU
-static const char *KDED_SERVICE = "org.kde.kded";
-static const char *KDED_APPMENU_PATH = "/modules/appmenu";
-static const char *KDED_INTERFACE = "org.kde.kded";
-#endif
 
 UserActionsMenu::UserActionsMenu(QObject *parent)
     : QObject(parent)
@@ -165,9 +162,14 @@ void UserActionsMenu::show(const QRect &pos, const QWeakPointer<Client> &cl)
     Workspace *ws = Workspace::self();
     int x = pos.left();
     int y = pos.bottom();
-    if (y == pos.top())
+    if (y == pos.top()) {
+        m_client.data()->blockActivityUpdates(true);
         m_menu->exec(QPoint(x, y));
+        if (!m_client.isNull())
+            m_client.data()->blockActivityUpdates(false);
+    }
     else {
+        m_client.data()->blockActivityUpdates(true);
         QRect area = ws->clientArea(ScreenArea, QPoint(x, y), VirtualDesktopManager::self()->current());
         menuAboutToShow(); // needed for sizeHint() to be correct :-/
         int popupHeight = m_menu->sizeHint().height();
@@ -175,6 +177,8 @@ void UserActionsMenu::show(const QRect &pos, const QWeakPointer<Client> &cl)
             m_menu->exec(QPoint(x, y));
         else
             m_menu->exec(QPoint(x, pos.top() - popupHeight));
+        if (!m_client.isNull())
+            m_client.data()->blockActivityUpdates(true);
     }
 }
 
@@ -358,7 +362,7 @@ void UserActionsMenu::init()
     m_menu->addSeparator();
 
     // Actions for window tabbing
-    if (Workspace::self()->decorationSupportsTabbing()) {
+    if (decorationPlugin()->supportsTabbing()) {
         m_removeFromTabGroup = m_menu->addAction(i18n("&Untab"));
         kaction = qobject_cast<KAction*>(keys->action("Untab"));
         if (kaction != 0)
@@ -378,7 +382,7 @@ void UserActionsMenu::init()
     m_menu->addSeparator();
 
     action = m_menu->addMenu(advancedMenu);
-    action->setText(i18n("More Actions"));
+    action->setText(i18n("&More Actions"));
 
     m_menu->addSeparator();
 
@@ -408,7 +412,6 @@ void UserActionsMenu::menuAboutToShow()
 {
     if (m_client.isNull() || !m_menu)
         return;
-    Workspace *ws = Workspace::self();
 
     if (VirtualDesktopManager::self()->count() == 1) {
         delete m_desktopMenu;
@@ -416,14 +419,14 @@ void UserActionsMenu::menuAboutToShow()
     } else {
         initDesktopPopup();
     }
-    if (ws->numScreens() == 1 || (!m_client.data()->isMovable() && !m_client.data()->isMovableAcrossScreens())) {
+    if (screens()->count() == 1 || (!m_client.data()->isMovable() && !m_client.data()->isMovableAcrossScreens())) {
         delete m_screenMenu;
         m_screenMenu = NULL;
     } else {
         initScreenPopup();
     }
 #ifdef KWIN_BUILD_ACTIVITIES
-    ws->updateActivityList(true, false, this, "showHideActivityMenu");
+    Activities::self()->update(true, false, this, "showHideActivityMenu");
 #endif
 
     m_resizeOperation->setEnabled(m_client.data()->isResizable());
@@ -441,7 +444,7 @@ void UserActionsMenu::menuAboutToShow()
     m_minimizeOperation->setEnabled(m_client.data()->isMinimizable());
     m_closeOperation->setEnabled(m_client.data()->isCloseable());
 
-    if (ws->decorationSupportsTabbing()) {
+    if (decorationPlugin()->supportsTabbing()) {
         initTabbingPopups();
     } else {
         delete m_addTabsMenu;
@@ -454,7 +457,7 @@ void UserActionsMenu::menuAboutToShow()
     m_scriptsMenu = NULL;
     // ask scripts whether they want to add entries for the given Client
     m_scriptsMenu = new QMenu(m_menu);
-    QList<QAction*> scriptActions = ws->scripting()->actionsForUserActionMenu(m_client.data(), m_scriptsMenu);
+    QList<QAction*> scriptActions = Scripting::self()->actionsForUserActionMenu(m_client.data(), m_scriptsMenu);
     if (!scriptActions.isEmpty()) {
         m_scriptsMenu->setFont(KGlobalSettings::menuFont());
         m_scriptsMenu->addActions(scriptActions);
@@ -473,7 +476,7 @@ void UserActionsMenu::menuAboutToShow()
 void UserActionsMenu::showHideActivityMenu()
 {
 #ifdef KWIN_BUILD_ACTIVITIES
-    const QStringList &openActivities_ = Workspace::self()->openActivities();
+    const QStringList &openActivities_ = Activities::self()->running();
     kDebug() << "activities:" << openActivities_.size();
     if (openActivities_.size() < 2) {
         delete m_activityMenu;
@@ -554,6 +557,8 @@ void UserActionsMenu::rebuildTabGroupPopup()
             continue;
         m_addTabsMenu->addAction(shortCaption((*i)->caption()))->setData(QVariant::fromValue(*i));
     }
+    if (m_addTabsMenu->actions().isEmpty())
+        m_addTabsMenu->addAction(i18nc("There's no window available to be attached as tab to this one", "None available"))->setEnabled(false);
 }
 
 void UserActionsMenu::initTabbingPopups()
@@ -574,7 +579,7 @@ void UserActionsMenu::initTabbingPopups()
     }
 
     if (!m_addTabsMenu) {
-        m_addTabsMenu = new QMenu(i18n("Attach as tab to"), m_menu);
+        m_addTabsMenu = new QMenu(i18n("&Attach as tab to"), m_menu);
         m_addTabsMenu->setFont(KGlobalSettings::menuFont());
         connect(m_addTabsMenu, SIGNAL(triggered(QAction*)), SLOT(entabPopupClient(QAction*)));
         connect(m_addTabsMenu, SIGNAL(aboutToShow()), SLOT(rebuildTabGroupPopup()));
@@ -686,7 +691,7 @@ void UserActionsMenu::screenPopupAboutToShow()
     m_screenMenu->clear();
     QActionGroup *group = new QActionGroup(m_screenMenu);
 
-    for (int i = 0; i<Workspace::self()->numScreens(); ++i) {
+    for (int i = 0; i<screens()->count(); ++i) {
         // TODO: retrieve the screen name?
         // assumption: there are not more than 9 screens attached.
         QAction *action = m_screenMenu->addAction(i18nc("@item:inmenu List of all Screens to send a window to",
@@ -715,17 +720,26 @@ void UserActionsMenu::activityPopupAboutToShow()
         action->setChecked(true);
     m_activityMenu->addSeparator();
 
-    foreach (const QString &id, Workspace::self()->openActivities()) {
+    foreach (const QString &id, Activities::self()->running()) {
         KActivities::Info activity(id);
         QString name = activity.name();
         name.replace('&', "&&");
-        action = m_activityMenu->addAction(KIcon(activity.icon()), name);
+        QWidgetAction *action = new QWidgetAction(m_activityMenu);
+        QCheckBox *box = new QCheckBox(name, m_activityMenu);
+        action->setDefaultWidget(box);
+        const QString icon = activity.icon();
+        if (!icon.isEmpty())
+            box->setIcon(KIcon(icon));
+        box->setBackgroundRole(m_activityMenu->backgroundRole());
+        box->setForegroundRole(m_activityMenu->foregroundRole());
+        box->setPalette(m_activityMenu->palette());
+        connect (box, SIGNAL(clicked(bool)), action, SIGNAL(triggered(bool)));
+        m_activityMenu->addAction(action);
         action->setData(id);
-        action->setCheckable(true);
 
         if (!m_client.isNull() &&
                 !m_client.data()->isOnAllActivities() && m_client.data()->isOnActivity(id))
-            action->setChecked(true);
+            box->setChecked(true);
     }
 #endif
 }
@@ -785,16 +799,16 @@ void UserActionsMenu::slotSendToScreen(QAction *action)
     if (m_client.isNull()) {
         return;
     }
-    Workspace *ws = Workspace::self();
-    if (screen >= ws->numScreens()) {
+    if (screen >= screens()->count()) {
         return;
     }
 
-    ws->sendClientToScreen(m_client.data(), screen);
+    Workspace::self()->sendClientToScreen(m_client.data(), screen);
 }
 
 void UserActionsMenu::slotToggleOnActivity(QAction *action)
 {
+#ifdef KWIN_BUILD_ACTIVITIES
     QString activity = action->data().toString();
     if (m_client.isNull())
         return;
@@ -804,7 +818,107 @@ void UserActionsMenu::slotToggleOnActivity(QAction *action)
         return;
     }
 
-    Workspace::self()->toggleClientOnActivity(m_client.data(), activity, false);
+    Activities::self()->toggleClientOnActivity(m_client.data(), activity, false);
+    if (m_activityMenu && m_activityMenu->isVisible() && m_activityMenu->actions().count()) {
+        m_activityMenu->actions().at(0)->setChecked(m_client.data()->isOnAllActivities());
+    }
+#endif
+}
+
+//****************************************
+// ShortcutDialog
+//****************************************
+ShortcutDialog::ShortcutDialog(const QKeySequence& cut)
+    : _shortcut(cut)
+{
+    QWidget *vBoxContainer = new QWidget(this);
+    vBoxContainer->setLayout(new QVBoxLayout(vBoxContainer));
+    vBoxContainer->layout()->addWidget(widget = new KKeySequenceWidget(vBoxContainer));
+    vBoxContainer->layout()->addWidget(warning = new QLabel(vBoxContainer));
+    warning->hide();
+    widget->setKeySequence(cut);
+
+    // To not check for conflicting shortcuts. The widget would use a message
+    // box which brings down kwin.
+    widget->setCheckForConflictsAgainst(KKeySequenceWidget::None);
+    // It's a global shortcut so don't allow multikey shortcuts
+    widget->setMultiKeyShortcutsAllowed(false);
+
+    // Listen to changed shortcuts
+    connect(
+        widget, SIGNAL(keySequenceChanged(QKeySequence)),
+        SLOT(keySequenceChanged(QKeySequence)));
+
+    setMainWidget(vBoxContainer);
+    widget->setFocus();
+
+    // make it a popup, so that it has the grab
+    XSetWindowAttributes attrs;
+    attrs.override_redirect = True;
+    XChangeWindowAttributes(display(), winId(), CWOverrideRedirect, &attrs);
+    setWindowFlags(Qt::Popup);
+}
+
+void ShortcutDialog::accept()
+{
+    QKeySequence seq = shortcut();
+    if (!seq.isEmpty()) {
+        if (seq[0] == Qt::Key_Escape) {
+            reject();
+            return;
+        }
+        if (seq[0] == Qt::Key_Space
+        || (seq[0] & Qt::KeyboardModifierMask) == 0) {
+            // clear
+            widget->clearKeySequence();
+            KDialog::accept();
+            return;
+        }
+    }
+    KDialog::accept();
+}
+
+void ShortcutDialog::done(int r)
+{
+    KDialog::done(r);
+    emit dialogDone(r == Accepted);
+}
+
+void ShortcutDialog::keySequenceChanged(const QKeySequence &seq)
+{
+    activateWindow(); // where is the kbd focus lost? cause of popup state?
+    if (_shortcut == seq)
+        return; // don't try to update the same
+
+    if (seq.isEmpty()) { // clear
+        _shortcut = seq;
+        return;
+    }
+
+    // Check if the key sequence is used currently
+    QString sc = seq.toString();
+    // NOTICE - seq.toString() & the entries in "conflicting" randomly get invalidated after the next call (if no sc has been set & conflicting isn't empty?!)
+    QList<KGlobalShortcutInfo> conflicting = KGlobalAccel::getGlobalShortcutsByKey(seq);
+    if (!conflicting.isEmpty()) {
+        const KGlobalShortcutInfo &conflict = conflicting.at(0);
+        warning->setText(i18nc("'%1' is a keyboard shortcut like 'ctrl+w'",
+        "<b>%1</b> is already in use", sc));
+        warning->setToolTip(i18nc("keyboard shortcut '%1' is used by action '%2' in application '%3'",
+        "<b>%1</b> is used by %2 in %3", sc, conflict.friendlyName(), conflict.componentFriendlyName()));
+        warning->show();
+        widget->setKeySequence(shortcut());
+    } else if (seq != _shortcut) {
+        warning->hide();
+        if (KPushButton *ok = button(KDialog::Ok))
+            ok->setFocus();
+    }
+
+    _shortcut = seq;
+}
+
+QKeySequence ShortcutDialog::shortcut() const
+{
+    return _shortcut;
 }
 
 //****************************************
@@ -855,9 +969,7 @@ void Workspace::initShortcuts()
 #define IN_KWIN
 #include "kwinbindings.cpp"
 #ifdef KWIN_BUILD_TABBOX
-    if (tab_box) {
-        tab_box->initShortcuts(actionCollection);
-    }
+    TabBox::TabBox::self()->initShortcuts(actionCollection);
 #endif
     VirtualDesktopManager::self()->initShortcuts(actionCollection);
     m_userActionsMenu->discard(); // so that it's recreated next time
@@ -898,7 +1010,7 @@ void Workspace::setupWindowShortcutDone(bool ok)
     client_keys_dialog = NULL;
     client_keys_client = NULL;
     if (active_client)
-        active_client->takeFocus(Allowed);
+        active_client->takeFocus();
 }
 
 void Workspace::clientShortcutUpdated(Client* c)
@@ -932,9 +1044,9 @@ void Workspace::performWindowOperation(Client* c, Options::WindowOperation op)
     if (!c)
         return;
     if (op == Options::MoveOp || op == Options::UnrestrictedMoveOp)
-        QCursor::setPos(c->geometry().center());
+        Cursor::setPos(c->geometry().center());
     if (op == Options::ResizeOp || op == Options::UnrestrictedResizeOp)
-        QCursor::setPos(c->geometry().bottomRight());
+        Cursor::setPos(c->geometry().bottomRight());
     switch(op) {
     case Options::MoveOp:
         c->performMouseCommand(Options::MouseMove, cursorPos());
@@ -999,10 +1111,10 @@ void Workspace::performWindowOperation(Client* c, Options::WindowOperation op)
         c->performMouseCommand(Options::MouseShade, cursorPos());
         break;
     case Options::WindowRulesOp:
-        editWindowRules(c, false);
+        RuleBook::self()->edit(c, false);
         break;
     case Options::ApplicationRulesOp:
-        editWindowRules(c, true);
+        RuleBook::self()->edit(c, true);
         break;
     case Options::SetupWindowShortcutOp:
         setupWindowShortcut(c);
@@ -1093,7 +1205,7 @@ bool Client::performMouseCommand(Options::MouseCommand command, const QPoint &gl
     case Options::MouseOperationsMenu:
         if (isActive() && options->isClickRaise())
             autoRaise();
-        workspace()->showWindowMenu(globalPos, this);
+        workspace()->showWindowMenu(QRect(globalPos, globalPos), this);
         break;
     case Options::MouseToggleRaiseAndLower:
         workspace()->raiseOrLowerClient(this);
@@ -1112,37 +1224,37 @@ bool Client::performMouseCommand(Options::MouseCommand command, const QPoint &gl
             }
         }
         workspace()->takeActivity(this, ActivityFocus | ActivityRaise, handled && replay);
-        workspace()->setActiveScreenMouse(globalPos);
+        screens()->setCurrent(globalPos);
         replay = replay || mustReplay;
         break;
     }
     case Options::MouseActivateAndLower:
         workspace()->requestFocus(this);
         workspace()->lowerClient(this);
-        workspace()->setActiveScreenMouse(globalPos);
+        screens()->setCurrent(globalPos);
         replay = replay || !rules()->checkAcceptFocus(input);
         break;
     case Options::MouseActivate:
         replay = isActive(); // for clickraise mode
         workspace()->takeActivity(this, ActivityFocus, handled && replay);
-        workspace()->setActiveScreenMouse(globalPos);
+        screens()->setCurrent(globalPos);
         replay = replay || !rules()->checkAcceptFocus(input);
         break;
     case Options::MouseActivateRaiseAndPassClick:
         workspace()->takeActivity(this, ActivityFocus | ActivityRaise, handled);
-        workspace()->setActiveScreenMouse(globalPos);
+        screens()->setCurrent(globalPos);
         replay = true;
         break;
     case Options::MouseActivateAndPassClick:
         workspace()->takeActivity(this, ActivityFocus, handled);
-        workspace()->setActiveScreenMouse(globalPos);
+        screens()->setCurrent(globalPos);
         replay = true;
         break;
     case Options::MouseActivateRaiseAndMove:
     case Options::MouseActivateRaiseAndUnrestrictedMove:
         workspace()->raiseClient(this);
         workspace()->requestFocus(this);
-        workspace()->setActiveScreenMouse(globalPos);
+        screens()->setCurrent(globalPos);
         // fallthrough
     case Options::MouseMove:
     case Options::MouseUnrestrictedMove: {
@@ -1245,22 +1357,6 @@ bool Client::performMouseCommand(Options::MouseCommand command, const QPoint &gl
     return replay;
 }
 
-// KDE4 remove me
-void Workspace::showWindowMenuAt(unsigned long, int, int)
-{
-    slotWindowOperations();
-}
-
-#ifdef KWIN_BUILD_KAPPMENU
-void Workspace::showApplicationMenu(const QPoint &p, const WId id)
-{
-    QList<QVariant> args = QList<QVariant>() << p.x() << p.y() << qulonglong(id);
-    QDBusMessage method = QDBusMessage::createMethodCall(KDED_SERVICE, KDED_APPMENU_PATH, KDED_INTERFACE, "showMenu");
-    method.setArguments(args);
-    QDBusConnection::sessionBus().asyncCall(method);
-}
-#endif
-
 void Workspace::slotActivateAttentionWindow()
 {
     if (attention_chain.count() > 0)
@@ -1292,8 +1388,21 @@ void Workspace::slotWindowToDesktop()
     }
 }
 
+static bool screenSwitchImpossible()
+{
+    if (!screens()->isCurrentFollowsMouse())
+        return false;
+    QStringList args;
+    args << "--passivepopup" << i18n("The window manager is configured to consider the screen with the mouse on it as active one.\n"
+                                     "Therefore it is not possible to switch to a screen explicitly.") << "20";
+    KProcess::startDetached("kdialog", args);
+    return true;
+}
+
 void Workspace::slotSwitchToScreen()
 {
+    if (screenSwitchImpossible())
+        return;
     const int i = senderValue(sender());
     if (i > -1)
         setCurrentScreen(i);
@@ -1301,7 +1410,16 @@ void Workspace::slotSwitchToScreen()
 
 void Workspace::slotSwitchToNextScreen()
 {
-    setCurrentScreen((activeScreen() + 1) % numScreens());
+    if (screenSwitchImpossible())
+        return;
+    setCurrentScreen((screens()->current() + 1) % screens()->count());
+}
+
+void Workspace::slotSwitchToPrevScreen()
+{
+    if (screenSwitchImpossible())
+        return;
+    setCurrentScreen((screens()->current() + screens()->count() - 1) % screens()->count());
 }
 
 void Workspace::slotWindowToScreen()
@@ -1310,7 +1428,7 @@ void Workspace::slotWindowToScreen()
         const int i = senderValue(sender());
         if (i < 0)
             return;
-        if (i >= 0 && i <= numScreens()) {
+        if (i >= 0 && i <= screens()->count()) {
             sendClientToScreen(active_client, i);
         }
     }
@@ -1319,7 +1437,13 @@ void Workspace::slotWindowToScreen()
 void Workspace::slotWindowToNextScreen()
 {
     if (USABLE_ACTIVE_CLIENT)
-        sendClientToScreen(active_client, (active_client->screen() + 1) % numScreens());
+        sendClientToScreen(active_client, (active_client->screen() + 1) % screens()->count());
+}
+
+void Workspace::slotWindowToPrevScreen()
+{
+    if (USABLE_ACTIVE_CLIENT)
+        sendClientToScreen(active_client, (active_client->screen() + screens()->count() - 1) % screens()->count());
 }
 
 /*!
@@ -1562,8 +1686,10 @@ void Workspace::slotUntab()
  */
 void Workspace::slotKillWindow()
 {
-    KillWindow kill(this);
-    kill.start();
+    if (m_windowKiller.isNull()) {
+        m_windowKiller.reset(new KillWindow());
+    }
+    m_windowKiller->start();
 }
 
 /*!
@@ -1674,7 +1800,7 @@ void Workspace::slotWindowOperations()
     if (!active_client)
         return;
     QPoint pos = active_client->pos() + active_client->clientPos();
-    showWindowMenu(pos.x(), pos.y(), active_client);
+    showWindowMenu(QRect(pos, pos), active_client);
 }
 
 void Workspace::showWindowMenu(const QRect &pos, Client* cl)
@@ -1795,8 +1921,8 @@ void Client::setShortcut(const QString& _cut)
         return setShortcutInternal(KShortcut());
 // Format:
 // base+(abcdef)<space>base+(abcdef)
-// E.g. Alt+Ctrl+(ABCDEF) Win+X,Win+(ABCDEF)
-    if (!cut.contains('(') && !cut.contains(')') && !cut.contains(' ')) {
+// E.g. Alt+Ctrl+(ABCDEF);Meta+X,Meta+(ABCDEF)
+    if (!cut.contains('(') && !cut.contains(')') && !cut.contains(" - ")) {
         if (workspace()->shortcutAvailable(KShortcut(cut), this))
             setShortcutInternal(KShortcut(cut));
         else
@@ -1804,7 +1930,7 @@ void Client::setShortcut(const QString& _cut)
         return;
     }
     QList< KShortcut > keys;
-    QStringList groups = cut.split(' ');
+    QStringList groups = cut.split(" - ");
     for (QStringList::ConstIterator it = groups.constBegin();
             it != groups.constEnd();
             ++it) {
@@ -1818,6 +1944,12 @@ void Client::setShortcut(const QString& _cut)
                 KShortcut c(base + list[ i ]);
                 if (!c.isEmpty())
                     keys.append(c);
+            }
+        } else {
+            // regexp doesn't match, so it should be a normal shortcut
+            KShortcut c(*it);
+            if (!c.isEmpty()) {
+                keys.append(c);
             }
         }
     }
@@ -1861,7 +1993,12 @@ void Client::delayedSetShortcut()
 
 bool Workspace::shortcutAvailable(const KShortcut& cut, Client* ignore) const
 {
-    // TODO check global shortcuts etc.
+
+    Q_FOREACH (const QKeySequence &seq, cut.toList()) {
+        if (!KGlobalAccel::getGlobalShortcutsByKey(seq).isEmpty()) {
+            return false;
+        }
+    }
     for (ClientList::ConstIterator it = clients.constBegin();
             it != clients.constEnd();
             ++it) {

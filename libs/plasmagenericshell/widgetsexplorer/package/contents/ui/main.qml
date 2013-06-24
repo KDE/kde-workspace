@@ -47,7 +47,7 @@ Item {
         model: widgetExplorer.filterModel
         delegate: PlasmaComponents.MenuItem {
             text: display
-            separator: model["separator"]
+            separator: model["separator"] ? model["separator"] : false
             onClicked: {
                 list.contentX = 0
                 list.contentY = 0

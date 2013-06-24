@@ -40,7 +40,6 @@ namespace KWin
 {
 
 KWIN_EFFECT(mouseclick, MouseClickEffect)
-KWIN_EFFECT_SUPPORTED(mouseclick, MouseClickEffect::supported())
 
 MouseClickEffect::MouseClickEffect()
 {
@@ -50,8 +49,8 @@ MouseClickEffect::MouseClickEffect()
     a->setText(i18n("Toggle Effect"));
     a->setGlobalShortcut(KShortcut(Qt::META + Qt::Key_Asterisk));
     connect(a, SIGNAL(triggered(bool)), this, SLOT(toggleEnabled()));
-    connect(effects, SIGNAL(mouseChanged(QPoint, QPoint, Qt::MouseButtons, Qt::MouseButtons, Qt::KeyboardModifiers, Qt::KeyboardModifiers)),
-            this, SLOT(slotMouseChanged(QPoint, QPoint, Qt::MouseButtons, Qt::MouseButtons, Qt::KeyboardModifiers, Qt::KeyboardModifiers)));
+    connect(effects, SIGNAL(mouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)),
+            this, SLOT(slotMouseChanged(QPoint,QPoint,Qt::MouseButtons,Qt::MouseButtons,Qt::KeyboardModifiers,Qt::KeyboardModifiers)));
     reconfigure(ReconfigureAll);
 
     m_buttons[0] = new MouseButton(i18n("Left"), Qt::LeftButton);
@@ -71,11 +70,6 @@ MouseClickEffect::~MouseClickEffect()
     for (int i = 0; i < BUTTON_COUNT; ++i) {
         delete m_buttons[i];
     }
-}
-
-bool MouseClickEffect::supported()
-{
-    return true;
 }
 
 void MouseClickEffect::reconfigure(ReconfigureFlags)
@@ -362,6 +356,11 @@ void MouseClickEffect::drawCircleXr(const QColor& color, float cx, float cy, flo
                           fill, effects->xrenderBufferPicture(), 0,
                           0, 0, strip.count(), strip.constData());
 #undef DOUBLE_TO_FIXED
+#else
+    Q_UNUSED(color)
+    Q_UNUSED(cx)
+    Q_UNUSED(cy)
+    Q_UNUSED(r)
 #endif
 }
 

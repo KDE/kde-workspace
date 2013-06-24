@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
- Copyright (C) 2008 Martin Gräßlin <ubuntu@martin-graesslin.com>
+ Copyright (C) 2008 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,8 +45,6 @@ class CoverSwitchEffect
     Q_PROPERTY(bool reflection READ isReflection)
     Q_PROPERTY(bool windowTitle READ isWindowTitle)
     Q_PROPERTY(qreal zPosition READ windowZPosition)
-    Q_PROPERTY(bool dynamicThumbnails READ isDynamicThumbnails)
-    Q_PROPERTY(int thumbnailWindows READ configurredThumbnailWindows)
     Q_PROPERTY(bool primaryTabBox READ isPrimaryTabBox)
     Q_PROPERTY(bool secondaryTabBox READ isSecondaryTabBox)
     // TODO: mirror colors
@@ -59,7 +57,7 @@ public:
     virtual void paintScreen(int mask, QRegion region, ScreenPaintData& data);
     virtual void postPaintScreen();
     virtual void paintWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data);
-    virtual void windowInputMouseEvent(Window w, QEvent* e);
+    virtual void windowInputMouseEvent(QEvent* e);
     virtual bool isActive() const;
 
     static bool supported();
@@ -85,12 +83,6 @@ public:
     }
     qreal windowZPosition() const {
         return zPosition;
-    }
-    bool isDynamicThumbnails() const {
-        return dynamicThumbnails;
-    }
-    int configurredThumbnailWindows() const {
-        return thumbnailWindows;
     }
     bool isPrimaryTabBox() const {
         return primaryTabBox;
@@ -139,7 +131,6 @@ private:
     bool startRequested;
     QTimeLine timeLine;
     QRect area;
-    Window input;
     float zPosition;
     float scaleFactor;
     enum Direction {
@@ -157,10 +148,6 @@ private:
 
     EffectFrame* captionFrame;
     QFont captionFont;
-
-    bool thumbnails;
-    bool dynamicThumbnails;
-    int thumbnailWindows;
 
     bool primaryTabBox;
     bool secondaryTabBox;

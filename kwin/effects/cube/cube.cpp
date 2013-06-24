@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
- Copyright (C) 2008 Martin Gräßlin <ubuntu@martin-graesslin.com>
+ Copyright (C) 2008 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,9 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kaction.h>
 #include <kactioncollection.h>
-#include <klocale.h>
+#include <KDE/KLocalizedString>
 #include <kwinconfig.h>
 #include <kdebug.h>
+#include <KDE/KGlobal>
 
 #include <QColor>
 #include <QRect>
@@ -92,16 +93,30 @@ CubeEffect::CubeEffect()
     , zOrderingFactor(0.0f)
     , mAddedHeightCoeff1(0.0f)
     , mAddedHeightCoeff2(0.0f)
+    , m_shadersDir("kwin/shaders/1.10/")
     , m_cubeCapBuffer(NULL)
     , m_proxy(this)
 {
     desktopNameFont.setBold(true);
     desktopNameFont.setPointSize(14);
 
-    const QString fragmentshader = KGlobal::dirs()->findResource("data", "kwin/cube-reflection.glsl");
-    m_reflectionShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, fragmentshader);
-    const QString capshader = KGlobal::dirs()->findResource("data", "kwin/cube-cap.glsl");
-    m_capShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, capshader);
+#ifdef KWIN_HAVE_OPENGLES
+    const qint64 coreVersionNumber = kVersionNumber(3, 0);
+#else
+    const qint64 coreVersionNumber = kVersionNumber(1, 40);
+#endif
+    if (GLPlatform::instance()->glslVersion() >= coreVersionNumber)
+        m_shadersDir = "kwin/shaders/1.40/";
+
+    if (effects->compositingType() == OpenGL2Compositing) {
+        const QString fragmentshader = KGlobal::dirs()->findResource("data", m_shadersDir + "cube-reflection.glsl");
+        m_reflectionShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, fragmentshader);
+        const QString capshader = KGlobal::dirs()->findResource("data", m_shadersDir + "cube-cap.glsl");
+        m_capShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, capshader);
+    } else {
+        m_reflectionShader = NULL;
+        m_capShader = NULL;
+    }
     m_textureMirrorMatrix.scale(1.0, -1.0, 1.0);
     m_textureMirrorMatrix.translate(0.0, -1.0, 0.0);
     connect(effects, SIGNAL(tabBoxAdded(int)), this, SLOT(slotTabBoxAdded(int)));
@@ -209,7 +224,7 @@ void CubeEffect::reconfigure(ReconfigureFlags)
     }
 
     // set the cap color on the shader
-    if (m_capShader->isValid()) {
+    if (m_capShader && m_capShader->isValid()) {
         ShaderBinder binder(m_capShader);
         m_capShader->setUniform("u_capColor", capColor);
     }
@@ -282,16 +297,14 @@ bool CubeEffect::loadShader()
     if (!(GLPlatform::instance()->supports(GLSL) &&
             (effects->compositingType() == OpenGL2Compositing)))
         return false;
-    QString fragmentshader       =  KGlobal::dirs()->findResource("data", "kwin/cylinder.frag");
-    QString cylinderVertexshader =  KGlobal::dirs()->findResource("data", "kwin/cylinder.vert");
-    QString sphereVertexshader   = KGlobal::dirs()->findResource("data", "kwin/sphere.vert");
-    if (fragmentshader.isEmpty() || cylinderVertexshader.isEmpty() || sphereVertexshader.isEmpty()) {
+    QString cylinderVertexshader =  KGlobal::dirs()->findResource("data", m_shadersDir + "cylinder.vert");
+    QString sphereVertexshader   = KGlobal::dirs()->findResource("data", m_shadersDir + "sphere.vert");
+    if (cylinderVertexshader.isEmpty() || sphereVertexshader.isEmpty()) {
         kError(1212) << "Couldn't locate shader files" << endl;
         return false;
     }
 
-    // TODO: use generic shader - currently it is failing in alpha/brightness manipulation
-    cylinderShader = new GLShader(cylinderVertexshader, fragmentshader);
+    cylinderShader = ShaderManager::instance()->loadVertexShader(ShaderManager::GenericShader, cylinderVertexshader);
     if (!cylinderShader->isValid()) {
         kError(1212) << "The cylinder shader failed to load!" << endl;
         return false;
@@ -320,8 +333,7 @@ bool CubeEffect::loadShader()
         QRect rect = effects->clientArea(FullArea, activeScreen, effects->currentDesktop());
         cylinderShader->setUniform("width", (float)rect.width() * 0.5f);
     }
-    // TODO: use generic shader - currently it is failing in alpha/brightness manipulation
-    sphereShader = new GLShader(sphereVertexshader, fragmentshader);
+    sphereShader = ShaderManager::instance()->loadVertexShader(ShaderManager::GenericShader, sphereVertexshader);
     if (!sphereShader->isValid()) {
         kError(1212) << "The sphere shader failed to load!" << endl;
         return false;
@@ -478,7 +490,7 @@ void CubeEffect::paintScreen(int mask, QRegion region, ScreenPaintData& data)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             ShaderManager *shaderManager = ShaderManager::instance();
-            if (shaderManager->isValid() && m_reflectionShader->isValid()) {
+            if (shaderManager->isValid() && m_reflectionShader && m_reflectionShader->isValid()) {
                 // ensure blending is enabled - no attribute stack
                 ShaderBinder binder(m_reflectionShader);
                 QMatrix4x4 windowTransformation;
@@ -764,7 +776,7 @@ void CubeEffect::paintCap(bool frontFirst, float zOffset)
     }
 
     bool capShader = false;
-    if (effects->compositingType() == OpenGL2Compositing && m_capShader->isValid()) {
+    if (effects->compositingType() == OpenGL2Compositing && m_capShader && m_capShader->isValid()) {
         capShader = true;
         ShaderManager::instance()->pushShader(m_capShader);
         float opacity = cubeOpacity;
@@ -1135,7 +1147,7 @@ void CubeEffect::postPaintScreen()
                 if (keyboard_grab)
                     effects->ungrabKeyboard();
                 keyboard_grab = false;
-                effects->destroyInputWindow(input);
+                effects->stopMouseInterception(this);
 
                 effects->setActiveFullScreenEffect(0);
 
@@ -1537,7 +1549,7 @@ void CubeEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPa
                     }
                 }
                 bool capShader = false;
-                if (effects->compositingType() == OpenGL2Compositing && m_capShader->isValid()) {
+                if (effects->compositingType() == OpenGL2Compositing && m_capShader && m_capShader->isValid()) {
                     capShader = true;
                     ShaderManager::instance()->pushShader(m_capShader);
                     m_capShader->setUniform("u_mirror", 0);
@@ -1895,8 +1907,7 @@ void CubeEffect::setActive(bool active)
         activated = true;
         activeScreen = effects->activeScreen();
         keyboard_grab = effects->grabKeyboard(this);
-        input = effects->createInputWindow(this, 0, 0, displayWidth(), displayHeight(),
-                                           Qt::OpenHandCursor);
+        effects->startMouseInterception(this, Qt::OpenHandCursor);
         frontDesktop = effects->currentDesktop();
         zoom = 0.0;
         zOrderingFactor = zPosition / (effects->stackingOrder().count() - 1);
@@ -1982,10 +1993,10 @@ void CubeEffect::slotMouseChanged(const QPoint& pos, const QPoint& oldpos, Qt::M
         }
     }
     if (!oldbuttons.testFlag(Qt::LeftButton) && buttons.testFlag(Qt::LeftButton)) {
-        XDefineCursor(display(), input, QCursor(Qt::ClosedHandCursor).handle());
+        effects->defineCursor(Qt::ClosedHandCursor);
     }
     if (oldbuttons.testFlag(Qt::LeftButton) && !buttons.testFlag(Qt::LeftButton)) {
-        XDefineCursor(display(), input, QCursor(Qt::OpenHandCursor).handle());
+        effects->defineCursor(Qt::OpenHandCursor);
         if (closeOnMouseRelease)
             setActive(false);
     }
@@ -1995,10 +2006,8 @@ void CubeEffect::slotMouseChanged(const QPoint& pos, const QPoint& oldpos, Qt::M
     }
 }
 
-void CubeEffect::windowInputMouseEvent(Window w, QEvent* e)
+void CubeEffect::windowInputMouseEvent(QEvent* e)
 {
-    assert(w == input);
-    Q_UNUSED(w);
     QMouseEvent *mouse = dynamic_cast< QMouseEvent* >(e);
     if (mouse && mouse->type() == QEvent::MouseButtonRelease) {
         if (mouse->button() == Qt::XButton1) {

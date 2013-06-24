@@ -45,7 +45,7 @@ public:
     virtual void screenGeometryChanged(const QSize &size);
     virtual SceneOpenGL::TexturePrivate *createBackendTexture(SceneOpenGL::Texture *texture);
     virtual void prepareRenderingFrame();
-    virtual void endRenderingFrame(int mask, const QRegion &damage);
+    virtual void endRenderingFrame(const QRegion &damage);
 
 protected:
     virtual void present();
@@ -56,18 +56,15 @@ private:
     bool initDrawableConfigs();
     void waitSync();
     bool initRenderingContext();
-    bool initBufferConfigs();
+    bool initFbConfig();
     void setSwapInterval(int interval);
 
-    GC gcroot;
-    Drawable buffer;
-    GLXFBConfig fbcbuffer_db;
-    GLXFBConfig fbcbuffer_nondb;
+    Window window;
     FBConfigInfo fbcdrawableinfo[ 32 + 1 ];
-    GLXFBConfig fbcbuffer;
-    GLXDrawable glxbuffer;
-    GLXContext ctxbuffer;
-    bool haveSwapInterval;
+    GLXFBConfig fbconfig;
+    GLXWindow glxWindow;
+    GLXContext ctx;
+    bool haveSwapInterval, haveWaitSync;
     friend class GlxTexture;
 };
 

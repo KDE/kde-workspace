@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kconfiggroup.h>
 #include "composite.h"
+#include "workspace.h"
 
 namespace KWin
 {
@@ -43,6 +44,7 @@ Bridge::Bridge(Client* cl)
 BRIDGE_HELPER(bool, isCloseable, , , const)
 BRIDGE_HELPER(bool, isMaximizable, , , const)
 BRIDGE_HELPER(Bridge::MaximizeMode, maximizeMode, , , const)
+BRIDGE_HELPER(Bridge::QuickTileMode, quickTileMode, , , const)
 BRIDGE_HELPER(bool, isMinimizable, , , const)
 BRIDGE_HELPER(bool, providesContextHelp, , , const)
 BRIDGE_HELPER(int, desktop, , , const)
@@ -69,13 +71,13 @@ bool Bridge::isActive() const
 void Bridge::setKeepAbove(bool set)
 {
     if (c->keepAbove() != set)
-        c->workspace()->performWindowOperation(c, KeepAboveOp);
+        workspace()->performWindowOperation(c, KeepAboveOp);
 }
 
 void Bridge::setKeepBelow(bool set)
 {
     if (c->keepBelow() != set)
-        c->workspace()->performWindowOperation(c, KeepBelowOp);
+        workspace()->performWindowOperation(c, KeepBelowOp);
 }
 
 NET::WindowType Bridge::windowType(unsigned long supported_types) const
@@ -97,7 +99,7 @@ bool Bridge::isSetShade() const
 
 void Bridge::showWindowMenu(const QPoint &p)
 {
-    c->workspace()->showWindowMenu(QRect(p,p), c);
+    workspace()->showWindowMenu(QRect(p,p), c);
 }
 
 void Bridge::showWindowMenu(const QPoint &p, long id)
@@ -105,12 +107,12 @@ void Bridge::showWindowMenu(const QPoint &p, long id)
     Client *cc = clientForId(id);
     if (!cc)
         cc = c;
-    cc->workspace()->showWindowMenu(QRect(p,p), cc);
+    workspace()->showWindowMenu(QRect(p,p), cc);
 }
 
 void Bridge::showWindowMenu(const QRect &p)
 {
-    c->workspace()->showWindowMenu(p, c);
+    workspace()->showWindowMenu(p, c);
 }
 
 void Bridge::showApplicationMenu(const QPoint &p)
@@ -131,7 +133,7 @@ bool Bridge::menuAvailable() const
 
 void Bridge::performWindowOperation(WindowOperation op)
 {
-    c->workspace()->performWindowOperation(c, op);
+    workspace()->performWindowOperation(c, op);
 }
 
 void Bridge::setMask(const QRegion& r, int mode)
@@ -157,7 +159,7 @@ WId Bridge::windowId() const
 
 void Bridge::titlebarDblClickOperation()
 {
-    c->workspace()->performWindowOperation(c, options->operationTitlebarDblClick());
+    workspace()->performWindowOperation(c, options->operationTitlebarDblClick());
 }
 
 void Bridge::titlebarMouseWheelOperation(int delta)
@@ -188,7 +190,7 @@ Qt::WFlags Bridge::initialWFlags() const
 QRegion Bridge::unobscuredRegion(const QRegion& r) const
 {
     QRegion reg(r);
-    const ToplevelList stacking_order = c->workspace()->stackingOrder();
+    const ToplevelList stacking_order = workspace()->stackingOrder();
     int pos = stacking_order.indexOf(c);
     ++pos;
     for (; pos < stacking_order.count(); ++pos) {
@@ -244,7 +246,7 @@ QRect Bridge::transparentRect() const
 Client *Bridge::clientForId(long id) const
 {
     Client* client = reinterpret_cast<Client*>(id);
-    if (!c->workspace()->hasClient(client)) {
+    if (!workspace()->hasClient(client)) {
         kWarning(1212) << "****** ARBITRARY CODE EXECUTION ATTEMPT DETECTED ******" << id;
         return 0;
     }
@@ -313,6 +315,7 @@ void Bridge::tab_A_before_B(long A, long B)
 
     if (Client *a = clientForId(A))
     if (Client *b = clientForId(B))
+    if (a != b)
         a->tabBefore(b, true);
 }
 
@@ -328,6 +331,7 @@ void Bridge::tab_A_behind_B(long A, long B)
 
     if (Client *a = clientForId(A))
     if (Client *b = clientForId(B))
+    if (a != b)
         a->tabBehind(b, true);
 }
 
@@ -338,8 +342,8 @@ void Bridge::untab(long id, const QRect& newGeom)
     if (Client* client = clientForId(id))
     if (client->untab(newGeom)) {
         if (options->focusPolicyIsReasonable())
-            c->workspace()->takeActivity(client, ActivityFocus | ActivityRaise, true);
-        c->workspace()->raiseClient(client);
+            workspace()->takeActivity(client, ActivityFocus | ActivityRaise, true);
+        workspace()->raiseClient(client);
     }
 }
 

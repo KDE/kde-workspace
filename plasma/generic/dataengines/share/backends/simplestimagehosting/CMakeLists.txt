@@ -3,5 +3,5 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/plasma-dataengine-share-addon-simplest
 install(FILES metadata.desktop
         DESTINATION ${DATA_INSTALL_DIR}/plasma/shareprovider/simplestimagehosting/)
 
-install(FILES contents/code/main.js
-        DESTINATION ${DATA_INSTALL_DIR}/plasma/shareprovider/simplestimagehosting/contents/code/)
+install(DIRECTORY contents
+        DESTINATION ${DATA_INSTALL_DIR}/plasma/shareprovider/simplestimagehosting)

@@ -31,24 +31,13 @@
 #include <KCalCore/Event>
 #include <KCalCore/Todo>
 #include <KCalCore/Journal>
-#include <kdescendantsproxymodel.h>
 
 #ifdef AKONADI_FOUND
-#include <Akonadi/ChangeRecorder>
-#include <Akonadi/Session>
-#include <Akonadi/Collection>
-#include <Akonadi/ItemFetchScope>
-#include <Akonadi/EntityDisplayAttribute>
-#include <Akonadi/EntityMimeTypeFilterModel>
-
-#include "akonadi/calendar.h"
-#include "akonadi/calendarmodel.h"
 #include "eventdatacontainer.h"
 #endif
 
 CalendarEngine::CalendarEngine(QObject* parent, const QVariantList& args)
-              : Plasma::DataEngine(parent),
-                m_calendar(0)
+              : Plasma::DataEngine(parent)
 {
     Q_UNUSED(args);
 }
@@ -310,46 +299,16 @@ bool CalendarEngine::akonadiCalendarSourceRequest(const QString& key, const QStr
         return false;
     }
 
-    // start akonadi etc if needed
-    initAkonadiCalendar();
+    if (!m_calendar) {
+        m_calendar = Akonadi::ETMCalendar::Ptr(new Akonadi::ETMCalendar());
+        m_calendar->setCollectionFilteringEnabled(false);
+    }
 
     // create the corresponding EventDataContainer
     addSource(new EventDataContainer(m_calendar, request, KDateTime(start, QTime(0, 0, 0)), KDateTime(end, QTime(23, 59, 59))));
     return true;
 }
 
-void CalendarEngine::initAkonadiCalendar()
-{
-    if (m_calendar != 0) {
-        // we have been initialized already
-        return;
-    }
-
-    // ask for akonadi events
-    Akonadi::Session *session = new Akonadi::Session("PlasmaCalendarEngine", this);
-    Akonadi::ChangeRecorder* monitor = new Akonadi::ChangeRecorder(this);
-    Akonadi::ItemFetchScope scope;
-    scope.fetchFullPayload(true);
-    scope.fetchAttribute<Akonadi::EntityDisplayAttribute>();
-
-    // setup what part of akonadi data we want (calendar incidences)
-    monitor->setSession(session);
-    monitor->setCollectionMonitored(Akonadi::Collection::root());
-    monitor->fetchCollection(true);
-    monitor->setItemFetchScope(scope);
-    monitor->setMimeTypeMonitored(KCalCore::Event::eventMimeType(), true);
-    monitor->setMimeTypeMonitored(KCalCore::Todo::todoMimeType(), true);
-    monitor->setMimeTypeMonitored(KCalCore::Journal::journalMimeType(), true);
-
-    // create the models that contain the data. they will be updated automatically from akonadi.
-    CalendarSupport::CalendarModel *calendarModel = new CalendarSupport::CalendarModel(monitor, this);
-    KDescendantsProxyModel *flatModel = new KDescendantsProxyModel(this);
-    flatModel->setSourceModel(calendarModel);
-    Akonadi::EntityMimeTypeFilterModel *mimeFilteredModel = new Akonadi::EntityMimeTypeFilterModel(this);
-    mimeFilteredModel->addMimeTypeExclusionFilter(Akonadi::Collection::mimeType());
-    mimeFilteredModel->setSourceModel(flatModel);
-    m_calendar = new CalendarSupport::Calendar(mimeFilteredModel, mimeFilteredModel, KSystemTimeZones::local());
-}
-#endif
+#endif // AKONADI_FOUND
 
 #include "calendarengine.moc"

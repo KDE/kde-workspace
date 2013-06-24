@@ -55,14 +55,7 @@ XRandrBrightness::XRandrBrightness()
         return;
     }
 
-#ifdef HAS_RANDR_1_3
-    if (minor > 2) {
-        m_resources = XRRGetScreenResourcesCurrent(QX11Info::display(), QX11Info::appRootWindow()); // version 1.3, faster version
-    } else
-#endif
-    {
-        m_resources = XRRGetScreenResources(QX11Info::display(), QX11Info::appRootWindow());
-    }
+    m_resources = XRRGetScreenResources(QX11Info::display(), QX11Info::appRootWindow());
 
     if (!m_resources)
     {
@@ -80,7 +73,18 @@ XRandrBrightness::~XRandrBrightness()
 
 bool XRandrBrightness::isSupported() const
 {
-    return (m_resources != 0);
+    if (!m_resources)
+        return false;
+
+    // Verify that there are outputs that actually support backlight control...
+    for (int o = 0; o < m_resources->noutput; o++)
+    {
+        if (backlight_get(m_resources->outputs[o]) != -1) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 float XRandrBrightness::brightness() const

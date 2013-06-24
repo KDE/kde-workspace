@@ -30,8 +30,8 @@
 
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2012-01-18</date>
-<releaseinfo>0.9.7 (&kde; 4.8)</releaseinfo>
+<date>2013-06-02</date>
+<releaseinfo>0.9.7 (&kde; 4.11)</releaseinfo>
 
 <abstract>
 <para>&klipper; is the &kde; clipboard cut &amp; paste utility.</para>
@@ -50,7 +50,8 @@
 <para>&klipper; is the &kde; clipboard utility. It stores clipboard
 history, and allows you to link clipboard contents to application
 actions. Please report any problems or feature requests to <ulink
-url="http://bugs.kde.org">KDEs bugzilla</ulink> or use the "report bug" feature.</para>
+url="http://bugs.kde.org">KDEs bugzilla</ulink> or use the <guimenuitem>Report Bug</guimenuitem> 
+item in the <guimenu>Help</guimenu> menu.</para>
 
 </chapter>
 
@@ -88,8 +89,14 @@ page.</para></note>
 you type. In case you're wondering how to use the accelerator keys in
 the &klipper; menu, just press &Alt; and the accelerator you want. For
 example, to clear the clipboard history when the &klipper; menu is
-open, press <keycombo action="simul">&Alt;<keycap>L</keycap>
-</keycombo>.</para>
+open, press &Alt; and the underlined letter in <guimenuitem>Clear Clipboard History</guimenuitem>
+.</para>
+
+<para>Select <guilabel>Show Barcode</guilabel> from the &klipper; popup menu to open a 
+dialog with a <ulink url="http://en.wikipedia.org/wiki/QR_Code">QRCode</ulink> and a 
+<ulink url="http://en.wikipedia.org/wiki/Datamatrix">DataMatrix</ulink> barcode. 
+Use &ksnapshot; to capture the barcodes and save them.
+</para>
 
 <para>To disable &klipper;, click on its icon and 
 from the menu that appears, select
@@ -185,7 +192,6 @@ contents of this clipboard.
 <sect2 id="changing-clipboard-modes">
 <title>Changing Clipboard/Selection Behavior</title>
 <para>
-<!-- this has changed in kde 4.4-->
 In order to change clipboard/selection behavior, select
 <guimenuitem>Configure &klipper;...</guimenuitem> from the &klipper; pop-up menu,
 and in the dialog box that appears, select the
@@ -233,19 +239,6 @@ below.</para>
 <title>General Options</title>
 
 <variablelist>
-
-<!-- not in 4.7, but action is back in 4.8
-http://commits.kde.org/kde-workspace/90944a8c6bb9e22e4089870f49f898eec083518d
-Fix regression in Klipper, which broke the "Show at mouse position" feature
-back in 4.5.
-
-varlistentry>
-<term><guilabel>Popup menu at mouse-cursor position</guilabel></term>
-<listitem><para>Make the &klipper; popup menus appear at the position of
-the mouse cursor, instead of their default position (in the &kde; Panel).
-Useful if you use the mouse more than the keyboard.</para></listitem>
-</varlistentry-->
-
 
 <varlistentry>
 <term><guilabel>Save clipboard contents on
@@ -346,6 +339,13 @@ cause an error.</para>
 </varlistentry>
 
 <varlistentry>
+<term><guilabel>Enable MIME-based actions</guilabel></term>
+<listitem><para>If selected, in addition to the actions you defined 
+a list of applications for the detected MIME type will appear in the popup menu.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>Editing Expressions/Actions</term>
 <listitem><para>On the <guilabel>Actions</guilabel> page, double-click
 the regular expression or action that you want to edit or select it and 
@@ -353,8 +353,6 @@ press the <guibutton>Edit Action</guibutton> button. A dialog will appear in whi
 expression text can be edited as you wish.</para></listitem>
 </varlistentry>
 
-<!--Enable MIME-based actions
-  -->
 <varlistentry>
 <term>Adding Expressions/Actions</term>
 <listitem><para>Click the <guibutton>Add Action</guibutton> button
@@ -368,7 +366,7 @@ expressions as you would use in <application>grep</application> or
 
 <note><para>You can find detailed information about the use of
 <classname>QRegExp</classname> regular expressions at <ulink
-url="http://doc.trolltech.com/qregexp.html#details">http://doc.trolltech.com/qregexp.html#details</ulink>.
+url="http://qt-project.org/doc/qt-4.8/qregexp.html#details">http://qt-project.org/doc/qt-4.8/qregexp.html#details</ulink>.
 Note that &klipper; does not support the wildcard mode mentioned on this
 page.</para></note> 
 
@@ -439,6 +437,11 @@ Now type the desired key combination on your keyboard, as in any &kde; applicati
 </varlistentry>
 </variablelist>
 
+<para>If you define a shortcut for <guilabel>Open Klipper at Mouse Position</guilabel> 
+pressing this shortcut will open the &klipper; popup menu at the position of
+the mouse cursor, instead of their default position (in the &kde; Panel).
+Useful if you use the mouse more than the keyboard.</para>
+
 </sect1>
 </chapter>
 
@@ -482,18 +485,6 @@ Documentation copyright 2000-2003, 2005 &Philip.Rodrigues;
 <sect1 id="compilation">
 <title>Compilation and Installation</title>
 &install.compile.documentation; 
-
-<screenshot>
-<screeninfo>&klipper; icon</screeninfo>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="screenshot.png" format="PNG"/>
-	  </imageobject>
-	  <textobject>
-	    <phrase>Screenshot</phrase>
-	  </textobject>
-	</mediaobject>
-</screenshot>
 
 <!--
 <para>To remove &klipper; from your panel, select <guimenuitem>Remove

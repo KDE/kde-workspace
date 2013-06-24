@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
- Copyright (C) 2008 Martin Gräßlin <ubuntu@martin-graesslin.com>
+ Copyright (C) 2008 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QFont>
 #include <QMatrix4x4>
 #include <QMouseEvent>
-#include <klocale.h>
+#include <KDE/KLocalizedString>
 #include <kapplication.h>
 #include <kcolorscheme.h>
 #include <kglobal.h>
@@ -33,12 +33,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KIcon>
 
 #include <kwinglutils.h>
+#include <kwinglplatform.h>
 
 #include <math.h>
 
 #include <kdebug.h>
-
-#include "../boxswitch/boxswitch_proxy.h"
 
 namespace KWin
 {
@@ -68,8 +67,20 @@ CoverSwitchEffect::CoverSwitchEffect()
     captionFont.setBold(true);
     captionFont.setPointSize(captionFont.pointSize() * 2);
 
-    const QString fragmentshader = KGlobal::dirs()->findResource("data", "kwin/coverswitch-reflection.glsl");
-    m_reflectionShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, fragmentshader);
+    if (effects->compositingType() == OpenGL2Compositing) {
+        QString shadersDir = "kwin/shaders/1.10/";
+#ifdef KWIN_HAVE_OPENGLES
+        const qint64 coreVersionNumber = kVersionNumber(3, 0);
+#else
+        const qint64 coreVersionNumber = kVersionNumber(1, 40);
+#endif
+        if (GLPlatform::instance()->glslVersion() >= coreVersionNumber)
+            shadersDir = "kwin/shaders/1.40/";
+        const QString fragmentshader = KGlobal::dirs()->findResource("data", shadersDir + "coverswitch-reflection.glsl");
+        m_reflectionShader = ShaderManager::instance()->loadFragmentShader(ShaderManager::GenericShader, fragmentshader);
+    } else {
+        m_reflectionShader = NULL;
+    }
     connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
     connect(effects, SIGNAL(tabBoxAdded(int)), this, SLOT(slotTabBoxAdded(int)));
     connect(effects, SIGNAL(tabBoxClosed()), this, SLOT(slotTabBoxClosed()));
@@ -98,9 +109,6 @@ void CoverSwitchEffect::reconfigure(ReconfigureFlags)
     reflection        = CoverSwitchConfig::reflection();
     windowTitle       = CoverSwitchConfig::windowTitle();
     zPosition         = CoverSwitchConfig::zPosition();
-    thumbnails        = CoverSwitchConfig::thumbnails();
-    dynamicThumbnails = CoverSwitchConfig::dynamicThumbnails();
-    thumbnailWindows  = CoverSwitchConfig::thumbnailWindows();
     timeLine.setCurveShape(QTimeLine::EaseInOutCurve);
     timeLine.setDuration(animationDuration);
 
@@ -269,9 +277,6 @@ void CoverSwitchEffect::paintScreen(int mask, QRegion region, ScreenPaintData& d
                 paintScene(frontWindow, leftWindows, rightWindows, true);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#ifndef KWIN_HAVE_OPENGLES
-            glPolygonMode(GL_FRONT, GL_FILL);
-#endif
             // we can use a huge scale factor (needed to calculate the rearground vertices)
             // as we restrict with a PaintClipper painting on the current screen
             float reflectionScaleFactor = 100000 * tan(60.0 * M_PI / 360.0f) / area.width();
@@ -308,7 +313,7 @@ void CoverSwitchEffect::paintScreen(int mask, QRegion region, ScreenPaintData& d
             glScissor(area.x(), y, area.width(), area.height());
             glEnable(GL_SCISSOR_TEST);
 
-            if (shaderManager->isValid() && m_reflectionShader->isValid()) {
+            if (shaderManager->isValid() && m_reflectionShader && m_reflectionShader->isValid()) {
                 shaderManager->pushShader(m_reflectionShader);
                 QMatrix4x4 windowTransformation;
                 windowTransformation.translate(area.x() + area.width() * 0.5f, 0.0, 0.0);
@@ -392,15 +397,6 @@ void CoverSwitchEffect::paintScreen(int mask, QRegion region, ScreenPaintData& d
             if (animation)
                 captionFrame->setCrossFadeProgress(timeLine.currentValue());
             captionFrame->render(region, opacity);
-        }
-
-        if ((thumbnails && (!dynamicThumbnails ||
-                           (dynamicThumbnails && currentWindowList.size() >= thumbnailWindows)))
-                && !(start || stop)) {
-            BoxSwitchEffectProxy *proxy =
-                static_cast<BoxSwitchEffectProxy*>(effects->getProxy("boxswitch"));
-            if (proxy)
-                proxy->paintWindowsBox(region);
         }
     }
 }
@@ -541,12 +537,8 @@ void CoverSwitchEffect::slotTabBoxAdded(int mode)
                 (mode == TabBoxCurrentAppWindowsMode && primaryTabBox) ||
                 (mode == TabBoxCurrentAppWindowsAlternativeMode && secondaryTabBox))
                 && effects->currentTabBoxWindowList().count() > 0) {
-            input = effects->createFullScreenInputWindow(this, Qt::ArrowCursor);
+            effects->startMouseInterception(this, Qt::ArrowCursor);
             activeScreen = effects->activeScreen();
-            BoxSwitchEffectProxy *proxy =
-                static_cast<BoxSwitchEffectProxy*>(effects->getProxy("boxswitch"));
-            if (proxy)
-                proxy->activate(mode, true, false, 0.05f);
             if (!stop && !stopRequested) {
                 effects->refTabBox();
                 effects->setActiveFullScreenEffect(this);
@@ -616,7 +608,7 @@ void CoverSwitchEffect::slotTabBoxClosed()
             effects->setActiveFullScreenEffect(0);
         mActivated = false;
         effects->unrefTabBox();
-        effects->destroyInputWindow(input);
+        effects->stopMouseInterception(this);
         effects->addRepaintFull();
     }
 }
@@ -909,10 +901,8 @@ void CoverSwitchEffect::paintWindows(const EffectWindowList& windows, bool left,
     }
 }
 
-void CoverSwitchEffect::windowInputMouseEvent(Window w, QEvent* e)
+void CoverSwitchEffect::windowInputMouseEvent(QEvent* e)
 {
-    assert(w == input);
-    Q_UNUSED(w);
     if (e->type() != QEvent::MouseButtonPress)
         return;
     // we don't want click events during animations
@@ -983,7 +973,7 @@ void CoverSwitchEffect::abort()
     // in this case the cleanup is already done (see bug 207554)
     if (mActivated) {
         effects->unrefTabBox();
-        effects->destroyInputWindow(input);
+        effects->stopMouseInterception(this);
     }
     effects->setActiveFullScreenEffect(0);
     mActivated = false;

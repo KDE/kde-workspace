@@ -83,7 +83,6 @@ TaskGroup::TaskGroup(GroupManager *parent)
 TaskGroup::~TaskGroup()
 {
     emit destroyed(this);
-    //kDebug() << name();
     delete d;
 }
 
@@ -127,6 +126,24 @@ AbstractGroupableItem *TaskGroup::getMemberByWId(WId id)
             }
             if (groupable->winIds().values().first() == id) {
                 return groupable;
+            }
+        }
+    }
+    //kDebug() << "item not found";
+    return 0;
+}
+
+AbstractGroupableItem *TaskGroup::getMemberById(int id)
+{
+    foreach (AbstractGroupableItem * groupable, d->members) {
+        if (groupable->id() == id) {
+            return groupable;
+        } else {
+            if (groupable->itemType() == GroupItemType) {
+                AbstractGroupableItem *item = static_cast<TaskGroup*>(groupable)->getMemberById(id);
+                if (item) {
+                    return item;
+                }
             }
         }
     }
@@ -308,6 +325,7 @@ void TaskGroup::remove(AbstractGroupableItem *item)
         kDebug() << "empty";
         emit empty(this);
     }*/
+
     emit itemRemoved(item);
 }
 

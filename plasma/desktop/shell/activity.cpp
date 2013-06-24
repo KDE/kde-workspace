@@ -255,8 +255,6 @@ void Activity::setName(const QString &name)
     }
 
     m_name = name;
-    KActivities::Controller().setActivityName(m_id, name);
-    emit infoChanged();
 
     foreach (Plasma::Containment *c, m_containments) {
         c->context()->setCurrentActivity(name);
@@ -270,18 +268,6 @@ void Activity::setIcon(const QString &icon)
     }
 
     m_icon = icon;
-
-    KActivities::Controller().setActivityIcon(m_id, icon);
-    emit infoChanged();
-}
-
-void Activity::updateActivityName(Plasma::Context *context)
-{
-    if (context->currentActivityId() != m_id) {
-        kDebug() << "can't happen!";
-        return;
-    }
-    setName(context->currentActivity());
 }
 
 void Activity::save(KConfig &external)
@@ -360,8 +346,6 @@ void Activity::insertContainment(Plasma::Containment* containment, int screen, i
     Plasma::Context *context = containment->context();
     context->setCurrentActivityId(m_id);
     context->setCurrentActivity(m_name);
-    //hack to keep the name in sync while KActivities::* are in kdebase
-    connect(context, SIGNAL(activityChanged(Plasma::Context*)), this, SLOT(updateActivityName(Plasma::Context*)), Qt::UniqueConnection);
 
     m_containments.insert(QPair<int,int>(screen, desktop), containment);
     connect(containment, SIGNAL(destroyed(QObject*)), this, SLOT(containmentDestroyed(QObject*)));
@@ -405,7 +389,6 @@ void Activity::opened()
                 //ensure it's hooked up (if something odd happened we don't want orphan containments)
                 Plasma::Context *context = newContainment->context();
                 context->setCurrentActivityId(m_id);
-                connect(context, SIGNAL(activityChanged(Plasma::Context*)), this, SLOT(updateActivityName(Plasma::Context*)), Qt::UniqueConnection);
             }
         }
 

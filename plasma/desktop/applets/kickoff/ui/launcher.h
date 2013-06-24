@@ -79,6 +79,10 @@ public:
     we don't display old searches and switch back to the favorite-view. */
     void reset();
 
+    /** Specifies whether 'Recently Installed' hierarchy shall be shown in application view */
+    void setShowRecentlyInstalled(bool showRecentlyInstalled);
+    bool showRecentlyInstalled() const;
+
 signals:
     void aboutToHide();
     void configNeedsSaving();

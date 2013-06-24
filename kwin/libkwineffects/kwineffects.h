@@ -26,16 +26,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kwinconfig.h>
 #include <kwinglobals.h>
 
-#include <QtCore/QPair>
-#include <QtCore/QSet>
-#include <QtCore/QRect>
-#include <QtGui/QGraphicsRotation>
+#include <QPair>
+#include <QSet>
+#include <QRect>
 #include <QtGui/QRegion>
+#include <QtGui/QVector2D>
+#include <QtGui/QVector3D>
 
-#include <QtCore/QVector>
-#include <QtCore/QList>
-#include <QtCore/QHash>
-#include <QtCore/QStack>
+#include <QVector>
+#include <QList>
+#include <QHash>
+#include <QStack>
 
 #include <KDE/KPluginFactory>
 #include <KDE/KShortcutsEditor>
@@ -48,8 +49,9 @@ class KLibrary;
 class KConfigGroup;
 class KActionCollection;
 class QFont;
+class QGraphicsScale;
 class QKeyEvent;
-class QVector2D;
+class QMatrix4x4;
 
 namespace KWin
 {
@@ -170,14 +172,15 @@ X-KDE-Library=kwin4_effect_cooleffect
 
 #define KWIN_EFFECT_API_MAKE_VERSION( major, minor ) (( major ) << 8 | ( minor ))
 #define KWIN_EFFECT_API_VERSION_MAJOR 0
-#define KWIN_EFFECT_API_VERSION_MINOR 220
+#define KWIN_EFFECT_API_VERSION_MINOR 224
 #define KWIN_EFFECT_API_VERSION KWIN_EFFECT_API_MAKE_VERSION( \
         KWIN_EFFECT_API_VERSION_MAJOR, KWIN_EFFECT_API_VERSION_MINOR )
 
 enum WindowQuadType {
     WindowQuadError, // for the stupid default ctor
     WindowQuadContents,
-    WindowQuadDecoration,
+    WindowQuadDecorationLeftRight,
+    WindowQuadDecorationTopBottom,
     // Shadow Quad types
     WindowQuadShadowTop,
     WindowQuadShadowTopRight,
@@ -434,7 +437,7 @@ public:
      **/
     virtual void buildQuads(EffectWindow* w, WindowQuadList& quadList);
 
-    virtual void windowInputMouseEvent(Window w, QEvent* e);
+    virtual void windowInputMouseEvent(QEvent* e);
     virtual void grabbedKeyboardEvent(QKeyEvent* e);
 
     /**
@@ -453,6 +456,19 @@ public:
      * @since 4.8
      **/
     virtual bool isActive() const;
+
+    /**
+     * Reimplement this method to provide online debugging.
+     * This could be as trivial as printing specific detail informations about the effect state
+     * but could also be used to move the effect in and out of a special debug modes, clear bogus
+     * data, etc.
+     * Notice that the functions is const by intent! Whenever you alter the state of the object
+     * due to random user input, you should do so with greatest care, hence const_cast<> your
+     * object - signalling "let me alone, i know what i'm doing"
+     * @param parameter A freeform string user input for your effect to interpret.
+     * @since 4.11
+     */
+    virtual QString debug(const QString &parameter) const;
 
     static int displayWidth();
     static int displayHeight();
@@ -631,16 +647,35 @@ public:
     virtual void drawWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data) = 0;
     virtual void buildQuads(EffectWindow* w, WindowQuadList& quadList) = 0;
     virtual QVariant kwinOption(KWinOption kwopt) = 0;
-    // Functions for handling input - e.g. when an Expose-like effect is shown, an input window
-    // covering the whole screen is created and all mouse events will be intercepted by it.
-    // The effect's windowInputMouseEvent() will get called with such events.
-    virtual xcb_window_t createInputWindow(Effect* e, int x, int y, int w, int h, const QCursor& cursor) = 0;
-    xcb_window_t createInputWindow(Effect* e, const QRect& r, const QCursor& cursor);
-    virtual xcb_window_t createFullScreenInputWindow(Effect* e, const QCursor& cursor);
-    virtual void destroyInputWindow(xcb_window_t w) = 0;
+    /**
+     * Sets the cursor while the mouse is intercepted.
+     * @see startMouseInterception
+     * @since 4.11
+     **/
+    virtual void defineCursor(Qt::CursorShape shape) = 0;
     virtual QPoint cursorPos() const = 0;
     virtual bool grabKeyboard(Effect* effect) = 0;
     virtual void ungrabKeyboard() = 0;
+    /**
+     * Ensures that all mouse events are sent to the @p effect.
+     * No window will get the mouse events. Only fullscreen effects providing a custom user interface should
+     * be using this method. The input events are delivered to Effect::windowInputMouseEvent.
+     *
+     * NOTE: this method does not perform an X11 mouse grab. On X11 a fullscreen input window is raised above
+     * all other windows, but no grab is performed.
+     *
+     * @param shape Sets the cursor to be used while the mouse is intercepted
+     * @see stopMouseInterception
+     * @see Effect::windowInputMouseEvent
+     * @since 4.11
+     **/
+    virtual void startMouseInterception(Effect *effect, Qt::CursorShape shape) = 0;
+    /**
+     * Releases the hold mouse interception for @p effect
+     * @see startMouseInterception
+     * @since 4.11
+     **/
+    virtual void stopMouseInterception(Effect *effect) = 0;
 
     /**
      * Retrieve the proxy class for an effect if it has one. Will return NULL if
@@ -1121,22 +1156,6 @@ Q_SIGNALS:
      * @since 4.7
      */
     void propertyNotify(KWin::EffectWindow* w, long atom);
-    /**
-     * Requests to show an outline. An effect providing to show an outline should
-     * connect to the signal and render an outline.
-     * The outline should be shown till the signal is emitted again with a new
-     * geometry or the @link hideOutline signal is emitted.
-     * @param outline The geometry of the outline to render.
-     * @see hideOutline
-     * @since 4.7
-     **/
-    void showOutline(const QRect& outline);
-    /**
-     * Signal emitted when the outline should no longer be shown.
-     * @see showOutline
-     * @since 4.7
-     **/
-    void hideOutline();
 
     /**
      * Signal emitted after the screen geometry changed (e.g. add of a monitor).
@@ -1603,7 +1622,7 @@ public:
 
     bool isModal() const;
     Q_SCRIPTABLE virtual KWin::EffectWindow* findModal() = 0;
-    Q_SCRIPTABLE virtual EffectWindowList mainWindows() const = 0;
+    Q_SCRIPTABLE virtual QList<KWin::EffectWindow*> mainWindows() const = 0;
 
     /**
     * Returns whether the window should be excluded from window switching effects.
@@ -1633,6 +1652,35 @@ public:
      */
     Q_SCRIPTABLE virtual void setData(int role, const QVariant &data) = 0;
     Q_SCRIPTABLE virtual QVariant data(int role) const = 0;
+
+    /**
+     * @brief References the previous window pixmap to prevent discarding.
+     *
+     * This method allows to reference the previous window pixmap in case that a window changed
+     * its size, which requires a new window pixmap. By referencing the previous (and then outdated)
+     * window pixmap an effect can for example cross fade the current window pixmap with the previous
+     * one. This allows for smoother transitions for window geometry changes.
+     *
+     * If an effect calls this method on a window it also needs to call @link unreferencePreviousWindowPixmap
+     * once it does no longer need the previous window pixmap.
+     *
+     * Note: the window pixmap is not kept forever even when referenced. If the geometry changes again, so that
+     * a new window pixmap is created, the previous window pixmap will be exchanged with the current one. This
+     * means it's still possible to have rendering glitches. An effect is supposed to track for itself the changes
+     * to the window's geometry and decide how the transition should continue in such a situation.
+     *
+     * @see unreferencePreviousWindowPixmap
+     * @since 4.11
+     */
+    virtual void referencePreviousWindowPixmap() = 0;
+    /**
+     * @brief Unreferences the previous window pixmap. Only relevant after @link referencePreviousWindowPixmap had
+     * been called.
+     *
+     * @see referencePreviousWindowPixmap
+     * @since 4.11
+     */
+    virtual void unreferencePreviousWindowPixmap() = 0;
 };
 
 class KWIN_EXPORT EffectWindowGroup
@@ -1648,6 +1696,20 @@ public:
     explicit GlobalShortcutsEditor(QWidget *parent);
 };
 
+
+struct GLVertex2D
+{
+    QVector2D position;
+    QVector2D texcoord;
+};
+
+struct GLVertex3D
+{
+    QVector3D position;
+    QVector2D texcoord;
+};
+
+
 /**
  * @short Vertex class
  *
@@ -1657,17 +1719,21 @@ public:
 class KWIN_EXPORT WindowVertex
 {
 public:
-    double x() const;
-    double y() const;
+    WindowVertex();
+    WindowVertex(double x, double y, double tx, double ty);
+
+    double x() const { return px; }
+    double y() const { return py; }
+    double u() const { return tx; }
+    double v() const { return ty; }
+    double originalX() const { return ox; }
+    double originalY() const { return oy; }
+    double textureX() const { return tx; }
+    double textureY() const { return ty; }
     void move(double x, double y);
     void setX(double x);
     void setY(double y);
-    double originalX() const;
-    double originalY() const;
-    double textureX() const;
-    double textureY() const;
-    WindowVertex();
-    WindowVertex(double x, double y, double tx, double ty);
+
 private:
     friend class WindowQuad;
     friend class WindowQuadList;
@@ -1685,6 +1751,7 @@ private:
 class KWIN_EXPORT WindowQuad
 {
 public:
+    explicit WindowQuad();
     explicit WindowQuad(WindowQuadType type, int id = -1);
     WindowQuad makeSubQuad(double x1, double y1, double x2, double y2) const;
     WindowVertex& operator[](int index);
@@ -1711,7 +1778,7 @@ private:
 };
 
 class KWIN_EXPORT WindowQuadList
-    : public QList< WindowQuad >
+    : public QVector<WindowQuad>
 {
 public:
     WindowQuadList splitAtX(double x) const;
@@ -1721,6 +1788,7 @@ public:
     WindowQuadList select(WindowQuadType type) const;
     WindowQuadList filterOut(WindowQuadType type) const;
     bool smoothNeeded() const;
+    void makeInterleavedArrays(unsigned int type, GLVertex2D *vertices, const QMatrix4x4 &matrix) const;
     void makeArrays(float** vertices, float** texcoords, const QSizeF &size, bool yInverted) const;
     bool isTransformed() const;
 };
@@ -2047,6 +2115,21 @@ public:
      * A value less than 0 will indicate that a default profile should be done.
      */
     void setScreen(int screen) const;
+    /**
+     * @brief Sets the cross fading @p factor to fade over with previously sized window.
+     * If @c 1.0 only the current window is used, if @c 0.0 only the previous window is used.
+     *
+     * By default only the current window is used. This factor can only make any visual difference
+     * if the previous window get referenced.
+     *
+     * @param factor The cross fade factor between @c 0.0 (previous window) and @c 1.0 (current window)
+     * @see crossFadeProgress
+     */
+    void setCrossFadeProgress(qreal factor);
+    /**
+     * @see setCrossFadeProgress
+     */
+    qreal crossFadeProgress() const;
     WindowQuadList quads;
     /**
      * Shader to be used for rendering, if any.
@@ -2582,42 +2665,6 @@ WindowVertex::WindowVertex(double _x, double _y, double _tx, double _ty)
 }
 
 inline
-double WindowVertex::x() const
-{
-    return px;
-}
-
-inline
-double WindowVertex::y() const
-{
-    return py;
-}
-
-inline
-double WindowVertex::originalX() const
-{
-    return ox;
-}
-
-inline
-double WindowVertex::originalY() const
-{
-    return oy;
-}
-
-inline
-double WindowVertex::textureX() const
-{
-    return tx;
-}
-
-inline
-double WindowVertex::textureY() const
-{
-    return ty;
-}
-
-inline
 void WindowVertex::move(double x, double y)
 {
     px = x;
@@ -2639,6 +2686,13 @@ void WindowVertex::setY(double y)
 /***************************************************************
  WindowQuad
 ***************************************************************/
+
+inline
+WindowQuad::WindowQuad()
+    : quadType(WindowQuadError)
+    , quadID(-1)
+{
+}
 
 inline
 WindowQuad::WindowQuad(WindowQuadType t, int id)
@@ -2678,7 +2732,8 @@ inline
 bool WindowQuad::decoration() const
 {
     assert(quadType != WindowQuadError);
-    return quadType == WindowQuadDecoration;
+    return quadType == WindowQuadDecorationLeftRight ||
+           quadType == WindowQuadDecorationTopBottom;
 }
 
 inline

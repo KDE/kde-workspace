@@ -76,31 +76,38 @@ float BlurShader::gaussian(float x, float sigma) const
            * std::exp(-((x * x) / (2.0 * sigma * sigma)));
 }
 
-QVector<float> BlurShader::gaussianKernel() const
+QList<KernelValue> BlurShader::gaussianKernel() const
 {
     int size = qMin(mRadius | 1, maxKernelSize());
     if (!(size & 0x1))
         size -= 1;
 
-    QVector<float> kernel(size);
+    QList<KernelValue> kernel;
     const int center = size / 2;
     const qreal sigma = (size - 1) / 2.5;
 
-    // Generate the gaussian kernel
-    kernel[center] = gaussian(0, sigma) * .5;
-    for (int i = 1; i <= center; i++) {
-        const float val = gaussian(1.5 + (i - 1) * 2.0, sigma);
-        kernel[center + i] = val;
-        kernel[center - i] = val;
+    kernel <<  KernelValue(0.0, gaussian(0.0, sigma));
+    float total = kernel[0].g;
+
+    for (int x = 1; x <= center; x++) {
+        const float fx = (x - 1) * 2 + 1.5;
+        const float g1 = gaussian(fx - 0.5, sigma);
+        const float g2 = gaussian(fx + 0.5, sigma);
+
+        // Offset taking the contribution of both pixels into account
+        const float offset = .5 - g1 / (g1 + g2);
+
+        kernel << KernelValue(fx + offset, g1 + g2);
+        kernel << KernelValue(-(fx + offset), g1 + g2);
+
+        total += (g1 + g2) * 2;
     }
 
-    // Normalize the kernel
-    qreal total = 0;
-    for (int i = 0; i < size; i++)
-        total += kernel[i];
+    qSort(kernel);
 
-    for (int i = 0; i < size; i++)
-        kernel[i] /= total;
+    // Normalize the kernel
+    for (int i = 0; i < kernel.count(); i++)
+        kernel[i].g /= total;
 
     return kernel;
 }
@@ -171,23 +178,24 @@ void GLSLBlurShader::setPixelDistance(float val)
         pixelSize.setX(val);
     else
         pixelSize.setY(val);
-    shader->setUniform("pixelSize", pixelSize);
+
+    shader->setUniform(pixelSizeLocation, pixelSize);
 }
 
 void GLSLBlurShader::setTextureMatrix(const QMatrix4x4 &matrix)
 {
-    if (!isValid()) {
+    if (!isValid())
         return;
-    }
-    shader->setUniform("u_textureMatrix", matrix);
+
+    shader->setUniform(textureMatrixLocation, matrix);
 }
 
 void GLSLBlurShader::setModelViewProjectionMatrix(const QMatrix4x4 &matrix)
 {
-    if (!isValid()) {
+    if (!isValid())
         return;
-    }
-    shader->setUniform("u_modelViewProjectionMatrix", matrix);
+
+    shader->setUniform(mvpMatrixLocation, matrix);
 }
 
 void GLSLBlurShader::bind()
@@ -219,48 +227,66 @@ int GLSLBlurShader::maxKernelSize() const
 #endif
 }
 
-
 void GLSLBlurShader::init()
 {
-    QVector<float> kernel = gaussianKernel();
+    QList<KernelValue> kernel = gaussianKernel();
     const int size = kernel.size();
     const int center = size / 2;
 
+    QList<QVector4D> offsets;
+    for (int i = 0; i < kernel.size(); i += 2) {
+        QVector4D vec4(0, 0, 0, 0);
+
+        vec4.setX(kernel[i].x);
+        vec4.setY(kernel[i].x);
+
+        if (i < kernel.size() - 1) {
+            vec4.setZ(kernel[i + 1].x);
+            vec4.setW(kernel[i + 1].x);
+        }
+
+        offsets << vec4;
+    }
+
+#ifdef KWIN_HAVE_OPENGLES
+    const bool glsl_140 = false;
+#else
+    const bool glsl_140 = GLPlatform::instance()->glslVersion() >= kVersionNumber(1, 40);
+#endif
+
     QByteArray vertexSource;
     QByteArray fragmentSource;
+
+    const QByteArray attribute   = glsl_140 ? "in"                : "attribute";
+    const QByteArray varying_in  = glsl_140 ? "noperspective in"  : "varying";
+    const QByteArray varying_out = glsl_140 ? "noperspective out" : "varying";
+    const QByteArray texture2D   = glsl_140 ? "texture"           : "texture2D";
+    const QByteArray fragColor   = glsl_140 ? "fragColor"         : "gl_FragColor";
 
     // Vertex shader
     // ===================================================================
     QTextStream stream(&vertexSource);
 
-    stream << "uniform mat4 u_modelViewProjectionMatrix;\n";
-    stream << "uniform mat4 u_textureMatrix;\n";
+    if (glsl_140)
+        stream << "#version 140\n\n";
+
+    stream << "uniform mat4 modelViewProjectionMatrix;\n";
+    stream << "uniform mat4 textureMatrix;\n";
     stream << "uniform vec2 pixelSize;\n\n";
-    stream << "attribute vec4 vertex;\n";
-    stream << "attribute vec4 texCoord;\n\n";
-    stream << "varying vec4 samplePos[" << std::ceil(size / 2.0) << "];\n";
+    stream << attribute << " vec4 vertex;\n\n";
+    stream << varying_out << " vec4 samplePos[" << std::ceil(size / 2.0) << "];\n";
     stream << "\n";
     stream << "void main(void)\n";
     stream << "{\n";
-    stream << "    vec4 center = vec4(u_textureMatrix * texCoord).stst;\n";
+    stream << "    vec4 center = vec4(textureMatrix * vertex).stst;\n";
     stream << "    vec4 ps = pixelSize.stst;\n\n";
-    for (int i = 0; i < size; i += 2) {
-        float offset1, offset2;
-        if (i < center) {
-            offset1 = -(1.5 + (center - i - 1) * 2.0);
-            offset2 = (i + 1) == center ? 0 : offset1 + 2;
-        } else if (i > center) {
-            offset1 = 1.5 + (i - center - 1) * 2.0;
-            offset2 = (i + 1) == size ? 0 : offset1 + 2;
-        } else {
-            offset1 = 0;
-            offset2 = 1.5;
-        }
-        stream << "    samplePos[" << i / 2 << "] = center + ps * vec4("
-               << offset1 << ", " << offset1 << ", " << offset2 << ", " << offset2 << ");\n";
+    for (int i = 0; i < offsets.size(); i++) {
+        stream << "    samplePos[" << i << "] = center + ps * vec4("
+               << offsets[i].x() << ", " << offsets[i].y() << ", "
+               << offsets[i].z() << ", " << offsets[i].w() << ");\n";
     }
     stream << "\n";
-    stream << "    gl_Position = u_modelViewProjectionMatrix * vertex;\n";
+    stream << "    gl_Position = modelViewProjectionMatrix * vertex;\n";
     stream << "}\n";
     stream.flush();
 
@@ -268,30 +294,40 @@ void GLSLBlurShader::init()
     // ===================================================================
     QTextStream stream2(&fragmentSource);
 
+    if (glsl_140)
+        stream2 << "#version 140\n\n";
+
     stream2 << "uniform sampler2D texUnit;\n";
-    stream2 << "varying vec4 samplePos[" << std::ceil(size / 2.0) << "];\n\n";
+    stream2 << varying_in << " vec4 samplePos[" << std::ceil(size / 2.0) << "];\n\n";
 
     for (int i = 0; i <= center; i++)
-        stream2 << "const vec4 kernel" << i << " = vec4(" << kernel[i] << ");\n";
+        stream2 << "const float kernel" << i << " = " << kernel[i].g << ";\n";
     stream2 << "\n";
+
+    if (glsl_140)
+        stream2 << "out vec4 fragColor;\n\n";
+
     stream2 << "void main(void)\n";
     stream2 << "{\n";
-    stream2 << "    vec4 sum = texture2D(texUnit, samplePos[0].st) * kernel0;\n";
-    for (int i = 1; i < size; i++)
-        stream2 << "    sum = sum + texture2D(texUnit, samplePos[" << i / 2 << ((i % 2) ? "].pq)" : "].st)")
-                << " * kernel" << (i > center ? size - i - 1 : i) << ";\n";
-    stream2 << "    gl_FragColor = sum;\n";
+    stream2 << "    vec4 sum = " << texture2D << "(texUnit, samplePos[0].st) * kernel0;\n";
+    for (int i = 1, j = -center + 1; i < size; i++, j++)
+        stream2 << "    sum = sum + " << texture2D << "(texUnit, samplePos[" << i / 2
+                << ((i % 2) ? "].pq)" : "].st)") << " * kernel" << center - qAbs(j) << ";\n";
+    stream2 << "    " << fragColor << " = sum;\n";
     stream2 << "}\n";
     stream2.flush();
 
     shader = ShaderManager::instance()->loadShaderFromCode(vertexSource, fragmentSource);
     if (shader->isValid()) {
+        pixelSizeLocation     = shader->uniformLocation("pixelSize");
+        textureMatrixLocation = shader->uniformLocation("textureMatrix");
+        mvpMatrixLocation     = shader->uniformLocation("modelViewProjectionMatrix");
+
         QMatrix4x4 modelViewProjection;
         modelViewProjection.ortho(0, displayWidth(), displayHeight(), 0, 0, 65535);
         ShaderManager::instance()->pushShader(shader);
-        shader->setUniform("texUnit", 0);
-        shader->setUniform("u_textureMatrix", QMatrix4x4());
-        shader->setUniform("u_modelViewProjectionMatrix", modelViewProjection);
+        shader->setUniform(textureMatrixLocation, QMatrix4x4());
+        shader->setUniform(mvpMatrixLocation, modelViewProjection);
         ShaderManager::instance()->popShader();
     }
 
@@ -409,7 +445,7 @@ int ARBBlurShader::maxKernelSize() const
 
 void ARBBlurShader::init()
 {
-    QVector<float> kernel = gaussianKernel();
+    QList<KernelValue> kernel = gaussianKernel();
     const int size = kernel.size();
     const int center = size / 2;
 
@@ -420,7 +456,7 @@ void ARBBlurShader::init()
 
     // The kernel values are hardcoded into the program
     for (int i = 0; i <= center; i++)
-        stream << "PARAM kernel" << i << " = " << kernel[center + i] << ";\n";
+        stream << "PARAM kernel" << i << " = " << kernel[center + i].g << ";\n";
 
     stream << "PARAM firstSample = program.local[0];\n"; // Distance from gl_TexCoord[0] to the next sample
     stream << "PARAM nextSample  = program.local[1];\n"; // Distance to the subsequent sample

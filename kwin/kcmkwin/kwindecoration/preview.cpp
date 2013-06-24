@@ -20,7 +20,7 @@
 #include "preview.h"
 
 #include <kapplication.h>
-#include <klocale.h>
+#include <KDE/KLocalizedString>
 #include <kconfig.h>
 #include <kglobal.h>
 #include <QLabel>
@@ -212,6 +212,11 @@ bool KDecorationPreviewBridge::isMaximizable() const
 KDecoration::MaximizeMode KDecorationPreviewBridge::maximizeMode() const
 {
     return KDecoration::MaximizeRestore;
+}
+
+KDecoration::QuickTileMode KDecorationPreviewBridge::quickTileMode() const
+{
+    return KDecoration::QuickTileNone;
 }
 
 bool KDecorationPreviewBridge::isMinimizable() const

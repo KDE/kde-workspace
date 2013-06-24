@@ -54,6 +54,7 @@ void set_repeatrate(int delay, double rate)
 		xkb->ctrls->repeat_delay = delay;
 		xkb->ctrls->repeat_interval = (int)floor(1000/rate + 0.5);
 		res = XkbSetControls(dpy, XkbRepeatKeysMask, xkb);
+                XkbFreeKeyboard(xkb, 0, true);
 		return;
 	}
 }

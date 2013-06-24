@@ -339,6 +339,31 @@ PlasmaCore.Dialog {
             onClicked: {
                 lastNotificationPopup.visible = false
                 lastNotificationTimer.running = false
+                notificationsModel.remove((notificationsView.count-1)-notificationsView.currentIndex)
+            }
+        }
+        PlasmaComponents.ToolButton {
+            id: settingsButton
+            opacity: 0
+            iconSource: "configure"
+            width: theme.smallMediumIconSize
+            height: width
+            visible: notificationsModel.get((notificationsView.count-1)-notificationsView.currentIndex).configurable
+            anchors {
+                right: closeButton.left
+                top: parent.top
+                rightMargin: 5
+            }
+            onPressedChanged: {
+                if (pressed) {
+                    mainItem.buttonPressed = true
+                } else {
+                    mainItem.buttonPressed = false
+                }
+            }
+            onClicked: {
+                lastNotificationPopup.visible = false
+                configureNotification(notificationsModel.get((notificationsView.count-1)-notificationsView.currentIndex).appRealName)
             }
         }
         states: [
@@ -352,6 +377,10 @@ PlasmaCore.Dialog {
                     target: closeButton
                     opacity: 1
                 }
+                PropertyChanges {
+                    target: settingsButton
+                    opacity: 1
+                }
             },
             State {
                 name: "controlsHidden"
@@ -361,6 +390,10 @@ PlasmaCore.Dialog {
                 }
                 PropertyChanges {
                     target: closeButton
+                    opacity: 0
+                }
+                PropertyChanges {
+                    target: settingsButton
                     opacity: 0
                 }
             }

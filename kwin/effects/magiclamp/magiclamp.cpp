@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
- Copyright (C) 2008 Martin Gräßlin <ubuntu@martin-graesslin.com>
+ Copyright (C) 2008 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kwinconfig.h>
 #include <kconfiggroup.h>
-#include <QtCore/QTimeLine>
+#include <QTimeLine>
 #include <QtDebug>
 
 namespace KWin
@@ -125,7 +125,7 @@ void MagicLampEffect::paintWindow(EffectWindow* w, int mask, QRegion region, Win
         // If there's no icon geometry, minimize to the center of the screen
         if (!icon.isValid()) {
             QRect extG = geo.adjusted(mShadowOffset[0], mShadowOffset[1], mShadowOffset[2], mShadowOffset[3]);
-            QPoint pt = QCursor::pos();
+            QPoint pt = cursorPos();
             // focussing inside the window is no good, leads to ugly artefacts, find nearest border
             if (extG.contains(pt)) {
                 const int d[2][2] = { {pt.x() - extG.x(), extG.right()  - pt.x()},

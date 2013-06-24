@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kwineffects.h>
 
-#include <klocale.h>
+#include <KDE/KLocalizedString>
 #include <kdebug.h>
 #include <kaction.h>
 #include <KActionCollection>
@@ -63,8 +63,8 @@ TrackMouseEffectConfig::TrackMouseEffectConfig(QWidget* parent, const QVariantLi
     a->setText(i18n("Track mouse"));
     a->setProperty("isConfigurationAction", true);
     a->setGlobalShortcut(KShortcut());
-    connect(m_ui->shortcut, SIGNAL(keySequenceChanged(const QKeySequence&)),
-                            SLOT(shortcutChanged(const QKeySequence&)));
+    connect(m_ui->shortcut, SIGNAL(keySequenceChanged(QKeySequence)),
+                            SLOT(shortcutChanged(QKeySequence)));
 
     load();
 }

@@ -8,7 +8,7 @@ set(ksplashqml_SRCS
     SplashWindow.cpp
    )
 
-add_executable(ksplashqml ${ksplashqml_SRCS})
+kde4_add_executable(ksplashqml ${ksplashqml_SRCS})
 
 target_link_libraries(ksplashqml
    ${X11_LIBRARIES}

@@ -1,5 +1,6 @@
 /*
  *   Copyright 2011 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 Kai Uwe Broulik <kde@privat.broulik.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -21,43 +22,98 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
-    
-    property bool monochrome
     property bool hasBattery
     property int percent
     property bool pluggedIn
-    
+
+    property bool animate // Pulse when battery is low
+
     PlasmaCore.Svg {
         id: svg
-        imagePath: monochrome ? "icons/battery" : "widgets/battery-oxygen"
+        imagePath: "icons/battery"
     }
 
     PlasmaCore.SvgItem {
+        id: batterySvg
         anchors.fill: parent
         svg: svg
         elementId: "Battery"
     }
 
+    SequentialAnimation {
+      running: percent < 5 && !pluggedIn && animate
+      alwaysRunToEnd: true
+      loops: Animation.Infinite
+
+      NumberAnimation {
+          target: batterySvg
+          properties: "opacity"
+          from: 1.0
+          to: 0.2
+          duration: 750
+          easing.type: Easing.InCubic
+      }
+      NumberAnimation {
+          target: batterySvg
+          properties: "opacity"
+          from: 0.2
+          to: 1.0
+          duration: 750
+          easing.type: Easing.OutCubic
+      }
+    }
+
     PlasmaCore.SvgItem {
+        id: fillSvg
         anchors.fill: parent
         svg: svg
         elementId: hasBattery ? fillElement(percent) : "Unavailable"
-        visible: percent>10 || !hasBattery
+        visible: elementId != ""
     }
 
     function fillElement(p) {
-        if (p >= 90) {
-            return "Fill100";
-        } else if (p >= 70) {
-            return "Fill80";
-        } else if (p >= 50) {
-            return "Fill60";
-        } else if (p > 20) {
-            return "Fill40";
-        } else if (p >= 10) {
-            return "Fill20";
+        // We switched from having steps of 20 for the battery percentage to a more accurate
+        // step of 10. This means we break other and older themes.
+        // If the Fill10 element is not found, it is likely that the theme doesn't support
+        // that and we use the older method of obtaining the fill element.
+        if (!svg.hasElement("Fill10")) {
+            debug("No Fill10 element found in your theme's battery.svg - Using legacy 20% steps for battery icon");
+            if (p >= 90) {
+                return "Fill100";
+            } else if (p >= 70) {
+                return "Fill80";
+            } else if (p >= 50) {
+                return "Fill60";
+            } else if (p > 20) {
+                return "Fill40";
+            } else if (p >= 10) {
+                return "Fill20";
+            }
+            return "";
+        } else {
+            if (p >= 95) {
+                return "Fill100";
+            } else if (p >= 85) {
+                return "Fill90";
+            } else if (p >= 75) {
+                return "Fill90";
+            } else if (p >= 65) {
+                return "Fill80";
+            } else if (p >= 55) {
+                return "Fill60";
+            } else if (p >= 45) {
+                return "Fill50";
+            } else if (p >= 35) {
+                return "Fill40";
+            } else if (p >= 25) {
+                return "Fill30";
+            } else if (p >= 15) {
+                return "Fill20";
+            } else if (p >= 5) {
+                return "Fill10";
+            }
+            return "";
         }
-        return "";
     }
 
     PlasmaCore.SvgItem {

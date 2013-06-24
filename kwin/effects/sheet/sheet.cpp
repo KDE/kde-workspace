@@ -3,7 +3,7 @@
  This file is part of the KDE project.
 
 Copyright (C) 2007 Philip Falkner <philip.falkner@gmail.com>
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,9 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #include "sheet.h"
+#include "sheetconfig.h"
 
-#include <kconfiggroup.h>
-#include <QtCore/QTimeLine>
+#include <QTimeLine>
+#include <QGraphicsRotation>
+#include <QVector3D>
 
 // Effect is based on fade effect by Philip Falkner
 
@@ -49,8 +51,8 @@ bool SheetEffect::supported()
 
 void SheetEffect::reconfigure(ReconfigureFlags)
 {
-    KConfigGroup conf = effects->effectConfig("Sheet");
-    duration = animationTime(conf, "AnimationTime", 500);
+    SheetConfig::self()->readConfig();
+    duration = animationTime(SheetConfig::animationTime() != 0 ? SheetConfig::animationTime() : 500);
 }
 
 void SheetEffect::prePaintScreen(ScreenPrePaintData& data, int time)

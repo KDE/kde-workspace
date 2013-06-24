@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KWIN_COLOR_CORRECTION_P_H_
 
 #include "kwinglcolorcorrection.h"
+#include "kwinglutils_funcs.h"
 
 #include <QDBusAbstractInterface>
 #include <QDBusMetaType>
@@ -91,6 +92,7 @@ public slots:
 public:
     bool m_enabled;
     bool m_hasError;
+    bool m_duringEnablingPhase;
     int m_ccTextureUnit;
 
     ColorServerInterface *m_csi;

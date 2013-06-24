@@ -78,10 +78,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utils.h"
 #include "client.h"
+#include "focuschain.h"
+#include "netinfo.h"
 #include "workspace.h"
 #include "tabbox.h"
 #include "group.h"
 #include "rules.h"
+#include "screens.h"
 #include "unmanaged.h"
 #include "deleted.h"
 #include "effects.h"
@@ -154,7 +157,7 @@ void Workspace::updateStackingOrder(bool propagate_new_clients)
  */
 void Workspace::stackScreenEdgesUnderOverrideRedirect()
 {
-    Xcb::restackWindows(QVector<xcb_window_t>() << supportWindow->winId() << ScreenEdges::self()->windows());
+    Xcb::restackWindows(QVector<xcb_window_t>() << rootInfo()->supportWindow() << ScreenEdges::self()->windows());
 }
 #endif
 
@@ -173,7 +176,7 @@ void Workspace::propagateClients(bool propagate_new_clients)
     // but it was lowered after kwin startup. Stacking all clients below
     // it ensures that no client will be ever shown above override-redirect
     // windows (e.g. popups).
-    newWindowStack << supportWindow->winId();
+    newWindowStack << rootInfo()->supportWindow();
 
 #ifdef KWIN_BUILD_SCREENEDGES
     newWindowStack << ScreenEdges::self()->windows();
@@ -205,7 +208,7 @@ void Workspace::propagateClients(bool propagate_new_clients)
     }
     // TODO isn't it too inefficient to restack always all clients?
     // TODO don't restack not visible windows?
-    assert(newWindowStack.at(0) == supportWindow->winId());
+    assert(newWindowStack.at(0) == rootInfo()->supportWindow());
     Xcb::restackWindows(newWindowStack);
 
     int pos = 0;
@@ -217,7 +220,7 @@ void Workspace::propagateClients(bool propagate_new_clients)
             cl[pos++] = (*it)->window();
         for (ClientList::ConstIterator it = clients.constBegin(); it != clients.constEnd(); ++it)
             cl[pos++] = (*it)->window();
-        rootInfo->setClientList(cl, pos);
+        rootInfo()->setClientList(cl, pos);
         delete [] cl;
     }
 
@@ -227,7 +230,7 @@ void Workspace::propagateClients(bool propagate_new_clients)
         if ((*it)->isClient())
             cl[pos++] = (*it)->window();
     }
-    rootInfo->setClientListStacking(cl, pos);
+    rootInfo()->setClientListStacking(cl, pos);
     delete [] cl;
 
     // Make the cached stacking order invalid here, in case we need the new stacking order before we get
@@ -417,7 +420,7 @@ void Workspace::raiseClientWithinApplication(Client* c)
     }
 }
 
-void Workspace::raiseClientRequest(Client* c, NET::RequestSource src, Time timestamp)
+void Workspace::raiseClientRequest(KWin::Client *c, NET::RequestSource src, xcb_timestamp_t timestamp)
 {
     if (src == NET::FromTool || allowFullClientRaising(c, timestamp))
         raiseClient(c);
@@ -427,7 +430,7 @@ void Workspace::raiseClientRequest(Client* c, NET::RequestSource src, Time times
     }
 }
 
-void Workspace::lowerClientRequest(Client* c, NET::RequestSource src, Time /*timestamp*/)
+void Workspace::lowerClientRequest(KWin::Client *c, NET::RequestSource src, xcb_timestamp_t /*timestamp*/)
 {
     // If the client has support for all this focus stealing prevention stuff,
     // do only lowering within the application, as that's the more logical
@@ -459,40 +462,7 @@ void Workspace::restack(Client* c, Client* under)
     }
 
     assert(unconstrained_stacking_order.contains(c));
-    for (uint desktop = 1; desktop <= VirtualDesktopManager::self()->count(); ++desktop) {
-        // do for every virtual desktop to handle the case of onalldesktop windows
-        if (c->wantsTabFocus() && c->isOnDesktop(desktop) && focus_chain[ desktop ].contains(under)) {
-            if (Client::belongToSameApplication(under, c)) {
-                // put it after the active window if it's the same app
-                focus_chain[ desktop ].removeAll(c);
-                focus_chain[ desktop ].insert(focus_chain[ desktop ].indexOf(under), c);
-            } else {
-                // put it in focus_chain[currentDesktop()] after all windows belonging to the active applicationa
-                focus_chain[ desktop ].removeAll(c);
-                for (int i = focus_chain[ desktop ].size() - 1; i >= 0; --i) {
-                    if (Client::belongToSameApplication(under, focus_chain[ desktop ].at(i))) {
-                        focus_chain[ desktop ].insert(i, c);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    // the same for global_focus_chain
-    if (c->wantsTabFocus() && global_focus_chain.contains(under)) {
-        if (Client::belongToSameApplication(under, c)) {
-            global_focus_chain.removeAll(c);
-            global_focus_chain.insert(global_focus_chain.indexOf(under), c);
-        } else {
-            global_focus_chain.removeAll(c);
-            for (int i = global_focus_chain.size() - 1; i >= 0; --i) {
-                if (Client::belongToSameApplication(under, global_focus_chain.at(i))) {
-                    global_focus_chain.insert(i, c);
-                    break;
-                }
-            }
-        }
-    }
+    FocusChain::self()->moveAfterClient(c, under);
     updateStackingOrder();
 }
 
@@ -541,7 +511,7 @@ ToplevelList Workspace::constrainedStackingOrder()
         kDebug(1212) << (void*)(*it) << *it << ":" << (*it)->layer();
 #endif
     // build the order from layers
-    QVector< QMap<Group*, Layer> > minimum_layer(numScreens());
+    QVector< QMap<Group*, Layer> > minimum_layer(screens()->count());
     for (ToplevelList::ConstIterator it = unconstrained_stacking_order.constBegin(),
                                   end = unconstrained_stacking_order.constEnd(); it != end; ++it) {
         Layer l = (*it)->layer();
@@ -730,10 +700,10 @@ ToplevelList Workspace::xStackingOrder() const
 // Client
 //*******************************
 
-void Client::restackWindow(Window above, int detail, NET::RequestSource src, Time timestamp, bool send_event)
+void Client::restackWindow(xcb_window_t above, int detail, NET::RequestSource src, xcb_timestamp_t timestamp, bool send_event)
 {
     Client *other = 0;
-    if (detail == Opposite) {
+    if (detail == XCB_STACK_MODE_OPPOSITE) {
         other = workspace()->findClient(WindowMatchPredicate(above));
         if (!other) {
             workspace()->raiseOrLowerClient(this);
@@ -743,22 +713,22 @@ void Client::restackWindow(Window above, int detail, NET::RequestSource src, Tim
                                     end = workspace()->stackingOrder().constEnd();
         while (it != end) {
             if (*it == this) {
-                detail = Above;
+                detail = XCB_STACK_MODE_ABOVE;
                 break;
             } else if (*it == other) {
-                detail = Below;
+                detail = XCB_STACK_MODE_BELOW;
                 break;
             }
             ++it;
         }
     }
-    else if (detail == TopIf) {
+    else if (detail == XCB_STACK_MODE_TOP_IF) {
         other = workspace()->findClient(WindowMatchPredicate(above));
         if (other && other->geometry().intersects(geometry()))
             workspace()->raiseClientRequest(this, src, timestamp);
         return;
     }
-    else if (detail == BottomIf) {
+    else if (detail == XCB_STACK_MODE_BOTTOM_IF) {
         other = workspace()->findClient(WindowMatchPredicate(above));
         if (other && other->geometry().intersects(geometry()))
             workspace()->lowerClientRequest(this, src, timestamp);
@@ -768,7 +738,7 @@ void Client::restackWindow(Window above, int detail, NET::RequestSource src, Tim
     if (!other)
         other = workspace()->findClient(WindowMatchPredicate(above));
 
-    if (other && detail == Above) {
+    if (other && detail == XCB_STACK_MODE_ABOVE) {
         ToplevelList::const_iterator  it = workspace()->stackingOrder().constEnd(),
                                     begin = workspace()->stackingOrder().constBegin();
         while (--it != begin) {
@@ -796,9 +766,9 @@ void Client::restackWindow(Window above, int detail, NET::RequestSource src, Tim
 
     if (other)
         workspace()->restack(this, other);
-    else if (detail == Below)
+    else if (detail == XCB_STACK_MODE_BELOW)
         workspace()->lowerClientRequest(this, src, timestamp);
-    else if (detail == Above)
+    else if (detail == XCB_STACK_MODE_ABOVE)
         workspace()->raiseClientRequest(this, src, timestamp);
 
     if (send_event)
@@ -818,15 +788,13 @@ void Client::setKeepAbove(bool b)
     }
     keep_above = b;
     info->setState(keepAbove() ? NET::KeepAbove : 0, NET::KeepAbove);
-    if (decoration != NULL)
-        decoration->emitKeepAboveChanged(keepAbove());
     workspace()->updateClientLayer(this);
     updateWindowRules(Rules::Above);
 
     // Update states of all other windows in this group
     if (tabGroup())
         tabGroup()->updateStates(this, TabGroup::Layer);
-    emit keepAboveChanged();
+    emit keepAboveChanged(keep_above);
 }
 
 void Client::setKeepBelow(bool b)
@@ -842,15 +810,13 @@ void Client::setKeepBelow(bool b)
     }
     keep_below = b;
     info->setState(keepBelow() ? NET::KeepBelow : 0, NET::KeepBelow);
-    if (decoration != NULL)
-        decoration->emitKeepBelowChanged(keepBelow());
     workspace()->updateClientLayer(this);
     updateWindowRules(Rules::Below);
 
     // Update states of all other windows in this group
     if (tabGroup())
         tabGroup()->updateStates(this, TabGroup::Layer);
-    emit keepBelowChanged();
+    emit keepBelowChanged(keep_below);
 }
 
 Layer Client::layer() const
@@ -900,22 +866,11 @@ bool Client::isActiveFullScreen() const
     if (!isFullScreen())
         return false;
 
-//     const Client* ac = workspace()->mostRecentlyActivatedClient(); // instead of activeClient() - avoids flicker
-//     if (!ac)
-//         return false;
-// not needed, for xinerama  -> && ( ac == this || this->group() == ac->group())
-
-    // only raise fullscreen above docks if it's the topmost window in unconstrained stacking order,
-    // i.e. the window set to be topmost by the user (also includes transients of the fullscreen window)
-    const Client* top = workspace()->topClientOnDesktop(VirtualDesktopManager::self()->current(), screen(), true, false);
-    if (!top)
-        return false;
-
-    // check whether we ...
-    if (top == this)
-        return true;
-    // ... or one of our transients is topmost
-    return rec_checkTransientOnTop(transients_list, top);
+    const Client* ac = workspace()->mostRecentlyActivatedClient(); // instead of activeClient() - avoids flicker
+    // according to NETWM spec implementation notes suggests
+    // "focused windows having state _NET_WM_STATE_FULLSCREEN" to be on the highest layer.
+    // we'll also take the screen into account
+    return ac && (ac == this || this->group() == ac->group() || ac->screen() != screen());
 }
 
 } // namespace

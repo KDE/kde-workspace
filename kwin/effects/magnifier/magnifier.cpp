@@ -87,6 +87,7 @@ void MagnifierEffect::destroyPixmap()
     m_picture.reset();
     if (m_pixmap != XCB_PIXMAP_NONE) {
         xcb_free_pixmap(connection(), m_pixmap);
+        m_pixmap = XCB_PIXMAP_NONE;
     }
 #endif
 }
@@ -255,7 +256,7 @@ void MagnifierEffect::zoomIn()
         effects->startMousePolling();
     }
     if (!m_texture) {
-        m_texture = new GLTexture(magnifier_size);
+        m_texture = new GLTexture(magnifier_size.width(), magnifier_size.height());
         m_texture->setYInverted(false);
         m_fbo = new GLRenderTarget(*m_texture);
     }
@@ -293,7 +294,7 @@ void MagnifierEffect::toggle()
             effects->startMousePolling();
         }
         if (!m_texture) {
-            m_texture = new GLTexture(magnifier_size);
+            m_texture = new GLTexture(magnifier_size.width(), magnifier_size.height());
             m_texture->setYInverted(false);
             m_fbo = new GLRenderTarget(*m_texture);
         }

@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KWIN_ZOOM_H
 
 #include <kwineffects.h>
-#include <QtCore/QTime>
-#include <QtCore/QTimeLine>
+#include <QTime>
+#include <QTimeLine>
 
 namespace KWin
 {
@@ -116,8 +116,10 @@ private:
     QPoint prevPoint;
     QTime lastMouseEvent;
     QTime lastFocusEvent;
-    GLTexture* texture;
-    XRenderPicture* xrenderPicture;
+    QScopedPointer<GLTexture> texture;
+#ifdef KWIN_HAVE_XRENDER_COMPOSITING
+    QScopedPointer<XRenderPicture> xrenderPicture;
+#endif
     int imageWidth;
     int imageHeight;
     bool isMouseHidden;

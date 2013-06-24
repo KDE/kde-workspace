@@ -2101,7 +2101,7 @@ static void
 upd_greeteruid(Entry *ce, Section *cs ATTR_UNUSED)
 {
     struct passwd *pw;
-    char *ok, *adduser;
+    char *ok, *useradd;
     int uid;
 
     if (use_destdir || !ce->active)
@@ -2109,11 +2109,10 @@ upd_greeteruid(Entry *ce, Section *cs ATTR_UNUSED)
     if (!(pw = getpwnam(ce->value))) {
         uid = strtol(ce->value, &ok, 10);
         if (*ok || !(pw = getpwuid(uid))) {
-            if (!access("/etc/debian_version", R_OK)
-                && (adduser = locate("adduser"))) {
+            if ((useradd = locate("useradd"))) {
                 const char *args[] = {
-                    adduser, "--system", "--group",
-                    "--home", "/var", "--no-create-home",
+                    useradd, "--system", "--user-group", "-s", "/bin/false",
+                    "--home-dir", "/var", "--no-create-home", "-c", "KDM Display Manager daemon",
                     ce->value, 0
                 };
                 if (runAndWait((char **)args)) {

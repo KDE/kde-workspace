@@ -86,6 +86,11 @@ QString AbstractGroupableItem::name() const
     return QString();
 }
 
+QString AbstractGroupableItem::genericName() const
+{
+    return QString();
+}
+
 int AbstractGroupableItem::id() const
 {
     return d->m_id;

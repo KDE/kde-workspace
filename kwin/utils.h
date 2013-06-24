@@ -22,30 +22,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_UTILS_H
 #define KWIN_UTILS_H
 
-class QLabel;
-
+// cmake stuff
 #include <config-X11.h>
 #include <config-kwin.h>
-
 #include <kwinconfig.h>
-
-#include <X11/Xlib.h>
-
-#include <fixx11h.h>
-
-#include <QWidget>
-#include <QScopedPointer>
-#include <kmanagerselection.h>
-#include <netwm_def.h>
-#include <kkeysequencewidget.h>
-#include <limits.h>
-#include <QX11Info>
-#include <kdialog.h>
-
+// kwin
 #include <kwinglobals.h>
-
-// needed by the DBUS interface
-Q_DECLARE_METATYPE(QList<int>)
+// KDE
+#include <KDE/NET>
+// Qt
+#include <QList>
+#include <QPoint>
+#include <QRect>
+#include <QScopedPointer>
+// X
+#include <X11/Xlib.h>
+#include <fixx11h.h>
+// system
+#include <limits.h>
 
 namespace KWin
 {
@@ -60,16 +54,16 @@ const int SUPPORTED_UNMANAGED_WINDOW_TYPES_MASK = NET::NormalMask | NET::Desktop
         | NET::UtilityMask | NET::SplashMask | NET::DropdownMenuMask | NET::PopupMenuMask
         | NET::TooltipMask | NET::NotificationMask | NET::ComboBoxMask | NET::DNDIconMask;
 
-const long ClientWinMask = KeyPressMask | KeyReleaseMask |
-                           ButtonPressMask | ButtonReleaseMask |
-                           KeymapStateMask |
-                           ButtonMotionMask |
-                           PointerMotionMask | // need this, too!
-                           EnterWindowMask | LeaveWindowMask |
-                           FocusChangeMask |
-                           ExposureMask |
-                           StructureNotifyMask |
-                           SubstructureRedirectMask;
+const long ClientWinMask = XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE |
+                           XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |
+                           XCB_EVENT_MASK_KEYMAP_STATE |
+                           XCB_EVENT_MASK_BUTTON_MOTION |
+                           XCB_EVENT_MASK_POINTER_MOTION | // need this, too!
+                           XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |
+                           XCB_EVENT_MASK_FOCUS_CHANGE |
+                           XCB_EVENT_MASK_EXPOSURE |
+                           XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+                           XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
 
 const QPoint invalidPoint(INT_MIN, INT_MIN);
 
@@ -81,19 +75,14 @@ class Group;
 class Options;
 
 typedef QList< Toplevel* > ToplevelList;
-typedef QList< const Toplevel* > ConstToplevelList;
 typedef QList< Client* > ClientList;
 typedef QList< const Client* > ConstClientList;
 typedef QList< Unmanaged* > UnmanagedList;
-typedef QList< const Unmanaged* > ConstUnmanagedList;
 typedef QList< Deleted* > DeletedList;
-typedef QList< const Deleted* > ConstDeletedList;
 
 typedef QList< Group* > GroupList;
-typedef QList< const Group* > ConstGroupList;
 
 extern Options* options;
-extern bool initting; // whether kwin is starting up
 
 enum Layer {
     UnknownLayer = -1,
@@ -144,12 +133,6 @@ private:
 };
 typedef QVector<StrutRect> StrutRects;
 
-// Some KWin classes, mainly Client and Workspace, are very tighly coupled,
-// and some of the methods of one class may be called only from speficic places.
-// Those methods have additional allowed_t argument. If you pass Allowed
-// as an argument to any function, make sure you really know what you're doing.
-enum allowed_t { Allowed };
-
 // some enums to have more readable code, instead of using bools
 enum ForceGeometry_t { NormalGeometrySet, ForceGeometrySet };
 
@@ -176,11 +159,6 @@ enum HiddenPreviews {
     HiddenPreviewsAlways
 };
 
-// compile with XShape older than 1.0
-#ifndef ShapeInput
-const int ShapeInput = 2;
-#endif
-
 class Motif
 {
 public:
@@ -188,7 +166,7 @@ public:
     // property.  If it explicitly requests that decorations be shown
     // or hidden, 'got_noborder' is set to true and 'noborder' is set
     // appropriately.
-    static void readFlags(WId w, bool& got_noborder, bool& noborder,
+    static void readFlags(xcb_window_t w, bool& got_noborder, bool& noborder,
                           bool& resize, bool& move, bool& minimize, bool& maximize,
                           bool& close);
     struct MwmHints {
@@ -209,21 +187,6 @@ public:
         MWM_FUNC_MAXIMIZE = (1L << 4),
         MWM_FUNC_CLOSE = (1L << 5)
     };
-};
-
-class KWinSelectionOwner
-    : public KSelectionOwner
-{
-    Q_OBJECT
-public:
-    explicit KWinSelectionOwner(int screen);
-protected:
-    virtual bool genericReply(Atom target, Atom property, Window requestor);
-    virtual void replyTargets(Atom property, Window requestor);
-    virtual void getAtoms();
-private:
-    Atom make_selection_atom(int screen);
-    static Atom xa_version;
 };
 
 // Class which saves original value of the variable, assigns the new value
@@ -253,12 +216,12 @@ public:
     ScopedCPointer(T *p = 0) : QScopedPointer<T, QScopedPointerPodDeleter>(p) {}
 };
 
-QByteArray getStringProperty(WId w, Atom prop, char separator = 0);
+QByteArray getStringProperty(xcb_window_t w, xcb_atom_t prop, char separator = 0);
 void updateXTime();
 void grabXServer();
 void ungrabXServer();
 bool grabbedXServer();
-bool grabXKeyboard(Window w = rootWindow());
+bool grabXKeyboard(xcb_window_t w = rootWindow());
 void ungrabXKeyboard();
 
 /**
@@ -327,13 +290,13 @@ Unmanaged* findUnmanagedInList(const UnmanagedList& list, T predicate)
 }
 
 inline
-int timestampCompare(Time time1, Time time2)   // like strcmp()
+int timestampCompare(xcb_timestamp_t time1, xcb_timestamp_t time2)   // like strcmp()
 {
     return NET::timestampCompare(time1, time2);
 }
 
 inline
-Time timestampDiff(Time time1, Time time2)   // returns time2 - time1
+xcb_timestamp_t timestampDiff(xcb_timestamp_t time1, xcb_timestamp_t time2)   // returns time2 - time1
 {
     return NET::timestampDiff(time1, time2);
 }
@@ -348,30 +311,6 @@ Qt::MouseButtons x11ToQtMouseButtons(int state);
 Qt::KeyboardModifiers x11ToQtKeyboardModifiers(int state);
 
 void checkNonExistentClients();
-
-#ifndef KCMRULES
-// Qt dialogs emit no signal when closed :(
-class ShortcutDialog
-    : public KDialog
-{
-    Q_OBJECT
-public:
-    explicit ShortcutDialog(const QKeySequence& cut);
-    virtual void accept();
-    QKeySequence shortcut() const;
-public Q_SLOTS:
-    void keySequenceChanged(const QKeySequence &seq);
-signals:
-    void dialogDone(bool ok);
-protected:
-    virtual void done(int r);
-private:
-    KKeySequenceWidget* widget;
-    QKeySequence _shortcut;
-    QLabel *warning;
-};
-
-#endif //KCMRULES
 
 } // namespace
 

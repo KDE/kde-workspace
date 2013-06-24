@@ -53,9 +53,11 @@ public:
 
     QString GetServerInformation(QString& vendor, QString& version, QString& specVersion);
 
-    int createNotification(const QString &appName, const QString &appIcon, const QString &summary, const QString &body, int timeout);
+    int createNotification(const QString &appName, const QString &appIcon, const QString &summary, const QString &body, int timeout, bool configurable, const QString &appRealName);
 
     void userClosedNotification(uint id);
+
+    void configureNotification(const QString &appName);
 
 signals:
     void NotificationClosed( uint id, uint reason );

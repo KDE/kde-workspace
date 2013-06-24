@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
- Copyright (C) 2008, 2009 Martin Gräßlin <kde@martin-graesslin.com>
+ Copyright (C) 2008, 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kdebug.h>
 #include <KAction>
 #include <KActionCollection>
-#include <KLocale>
+#include <KDE/KIcon>
+#include <KDE/KLocalizedString>
 
 #include <kwinglutils.h>
 
@@ -90,22 +91,6 @@ bool FlipSwitchEffect::supported()
 void FlipSwitchEffect::reconfigure(ReconfigureFlags)
 {
     FlipSwitchConfig::self()->readConfig();
-    foreach (ElectricBorder border, m_borderActivate) {
-        effects->unreserveElectricBorder(border, this);
-    }
-    foreach (ElectricBorder border, m_borderActivateAll) {
-        effects->unreserveElectricBorder(border, this);
-    }
-    m_borderActivate.clear();
-    m_borderActivateAll.clear();
-    foreach (int i, FlipSwitchConfig::borderActivate()) {
-        m_borderActivate.append(ElectricBorder(i));
-        effects->reserveElectricBorder(ElectricBorder(i), this);
-    }
-    foreach (int i, FlipSwitchConfig::borderActivateAll()) {
-        m_borderActivateAll.append(ElectricBorder(i));
-        effects->reserveElectricBorder(ElectricBorder(i), this);
-    }
     m_tabbox = FlipSwitchConfig::tabBox();
     m_tabboxAlternative = FlipSwitchConfig::tabBoxAlternative();
     const int duration = animationTime<FlipSwitchConfig>(200);
@@ -629,16 +614,16 @@ void FlipSwitchEffect::setActive(bool activate, FlipSwitchMode mode)
         switch(m_mode) {
         case TabboxMode:
             m_selectedWindow = effects->currentTabBoxWindow();
-            m_input = effects->createFullScreenInputWindow(this, Qt::ArrowCursor);
+            effects->startMouseInterception(this, Qt::ArrowCursor);
             break;
         case CurrentDesktopMode:
             m_selectedWindow = effects->activeWindow();
-            m_input = effects->createFullScreenInputWindow(this, Qt::BlankCursor);
+            effects->startMouseInterception(this, Qt::BlankCursor);
             m_hasKeyboardGrab = effects->grabKeyboard(this);
             break;
         case AllDesktopsMode:
             m_selectedWindow = effects->activeWindow();
-            m_input = effects->createFullScreenInputWindow(this, Qt::BlankCursor);
+            effects->startMouseInterception(this, Qt::BlankCursor);
             m_hasKeyboardGrab = effects->grabKeyboard(this);
             break;
         }
@@ -676,7 +661,7 @@ void FlipSwitchEffect::setActive(bool activate, FlipSwitchMode mode)
             }
         } else
             m_startStopTimeLine.setCurveShape(QTimeLine::EaseInOutCurve);
-        effects->destroyInputWindow(m_input);
+        effects->stopMouseInterception(this);
         if (m_hasKeyboardGrab) {
             effects->ungrabKeyboard();
             m_hasKeyboardGrab = false;
@@ -713,19 +698,6 @@ void FlipSwitchEffect::toggleActiveCurrent()
     } else {
         setActive(true, CurrentDesktopMode);
     }
-}
-
-bool FlipSwitchEffect::borderActivated(ElectricBorder border)
-{
-    if (!m_borderActivate.contains(border) && !m_borderActivateAll.contains(border))
-        return false;
-    if (effects->activeFullScreenEffect() && effects->activeFullScreenEffect() != this)
-        return true;
-    if (m_borderActivate.contains(border))
-        toggleActiveCurrent();
-    else
-        toggleActiveAllDesktops();
-    return true;
 }
 
 //*************************************************************
@@ -990,10 +962,8 @@ void FlipSwitchEffect::updateCaption()
 // Mouse handling
 //*************************************************************
 
-void FlipSwitchEffect::windowInputMouseEvent(Window w, QEvent* e)
+void FlipSwitchEffect::windowInputMouseEvent(QEvent* e)
 {
-    assert(w == m_input);
-    Q_UNUSED(w);
     if (e->type() != QEvent::MouseButtonPress)
         return;
     // we don't want click events during animations

@@ -31,25 +31,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/Xatom.h>
 
 #ifndef KCMRULES
-#include <QLabel>
-#include <QVBoxLayout>
 #include <assert.h>
 #include <kdebug.h>
-#include <kglobalaccel.h>
-#include <klocale.h>
-#include <kshortcut.h>
 #include <kkeyserver.h>
-#include <KPushButton>
 
 #include <X11/Xlib.h>
 #include <X11/extensions/shape.h>
 #include <QX11Info>
-#include <QtGui/QKeySequence>
 
 #include <stdio.h>
 
 #include "atoms.h"
-#include "notifications.h"
+#include "cursor.h"
 #include "workspace.h"
 
 #endif
@@ -79,7 +72,7 @@ StrutRect::StrutRect(const StrutRect& other)
 // Motif
 //************************************
 
-void Motif::readFlags(WId w, bool& got_noborder, bool& noborder,
+void Motif::readFlags(xcb_window_t w, bool& got_noborder, bool& noborder,
                       bool& resize, bool& move, bool& minimize, bool& maximize, bool& close)
 {
     Atom type;
@@ -125,84 +118,25 @@ void Motif::readFlags(WId w, bool& got_noborder, bool& noborder,
     }
 }
 
-//************************************
-// KWinSelectionOwner
-//************************************
-
-KWinSelectionOwner::KWinSelectionOwner(int screen_P)
-    : KSelectionOwner(make_selection_atom(screen_P), screen_P)
-{
-}
-
-Atom KWinSelectionOwner::make_selection_atom(int screen_P)
-{
-    if (screen_P < 0)
-        screen_P = DefaultScreen(display());
-    char tmp[ 30 ];
-    sprintf(tmp, "WM_S%d", screen_P);
-    return XInternAtom(display(), tmp, False);
-}
-
-void KWinSelectionOwner::getAtoms()
-{
-    KSelectionOwner::getAtoms();
-    if (xa_version == None) {
-        Atom atoms[ 1 ];
-        const char* const names[] =
-        { "VERSION" };
-        XInternAtoms(display(), const_cast< char** >(names), 1, False, atoms);
-        xa_version = atoms[ 0 ];
-    }
-}
-
-void KWinSelectionOwner::replyTargets(Atom property_P, Window requestor_P)
-{
-    KSelectionOwner::replyTargets(property_P, requestor_P);
-    Atom atoms[ 1 ] = { xa_version };
-    // PropModeAppend !
-    XChangeProperty(display(), requestor_P, property_P, XA_ATOM, 32, PropModeAppend,
-    reinterpret_cast< unsigned char* >(atoms), 1);
-}
-
-bool KWinSelectionOwner::genericReply(Atom target_P, Atom property_P, Window requestor_P)
-{
-    if (target_P == xa_version) {
-        long version[] = { 2, 0 };
-        XChangeProperty(display(), requestor_P, property_P, XA_INTEGER, 32,
-        PropModeReplace, reinterpret_cast< unsigned char* >(&version), 2);
-    } else
-        return KSelectionOwner::genericReply(target_P, property_P, requestor_P);
-    return true;
-}
-
-Atom KWinSelectionOwner::xa_version = None;
-
-
 #endif
 
-QByteArray getStringProperty(WId w, Atom prop, char separator)
+QByteArray getStringProperty(xcb_window_t w, xcb_atom_t prop, char separator)
 {
-    Atom type;
-    int format, status;
-    unsigned long nitems = 0;
-    unsigned long extra = 0;
-    unsigned char *data = 0;
-    QByteArray result = "";
-    KXErrorHandler handler; // ignore errors
-    status = XGetWindowProperty(display(), w, prop, 0, 10000,
-    false, XA_STRING, &type, &format,
-    &nitems, &extra, &data);
-    if (status == Success) {
-        if (data && separator) {
-            for (int i = 0; i < (int)nitems; i++)
-                if (!data[i] && i + 1 < (int)nitems)
-                    data[i] = separator;
-        }
-        if (data)
-            result = (const char*) data;
-        XFree(data);
+    const xcb_get_property_cookie_t c = xcb_get_property_unchecked(connection(), false, w, prop,
+                                                                   XCB_ATOM_STRING, 0, 10000);
+    ScopedCPointer<xcb_get_property_reply_t> property(xcb_get_property_reply(connection(), c, NULL));
+    if (property.isNull() || property->type == XCB_ATOM_NONE) {
+        return QByteArray();
     }
-    return result;
+    char *data = static_cast<char*>(xcb_get_property_value(property.data()));
+    if (data && separator) {
+        for (uint32_t i = 0; i < property->value_len; ++i) {
+            if (!data[i] && i + 1 < property->value_len) {
+                data[i] = separator;
+            }
+        }
+    }
+    return QByteArray(data, property->value_len);
 }
 
 #ifndef KCMRULES
@@ -276,16 +210,15 @@ static int server_grab_count = 0;
 void grabXServer()
 {
     if (++server_grab_count == 1)
-        XGrabServer(display());
+        xcb_grab_server(connection());
 }
 
 void ungrabXServer()
 {
     assert(server_grab_count > 0);
     if (--server_grab_count == 0) {
-        XUngrabServer(display());
-        XFlush(display());
-        Notify::sendPendingEvents();
+        xcb_ungrab_server(connection());
+        xcb_flush(connection());
     }
 }
 
@@ -296,7 +229,7 @@ bool grabbedXServer()
 
 static bool keyboard_grabbed = false;
 
-bool grabXKeyboard(Window w)
+bool grabXKeyboard(xcb_window_t w)
 {
     if (QWidget::keyboardGrabber() != NULL)
         return false;
@@ -304,11 +237,17 @@ bool grabXKeyboard(Window w)
         return false;
     if (qApp->activePopupWidget() != NULL)
         return false;
-    if (w == None)
+    if (w == XCB_WINDOW_NONE)
         w = rootWindow();
-    if (XGrabKeyboard(display(), w, False,
-    GrabModeAsync, GrabModeAsync, xTime()) != GrabSuccess)
+    const xcb_grab_keyboard_cookie_t c = xcb_grab_keyboard_unchecked(connection(), false, w, xTime(),
+                                                                     XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    ScopedCPointer<xcb_grab_keyboard_reply_t> grab(xcb_grab_keyboard_reply(connection(), c, NULL));
+    if (grab.isNull()) {
         return false;
+    }
+    if (grab->status != XCB_GRAB_STATUS_SUCCESS) {
+        return false;
+    }
     keyboard_grabbed = true;
     return true;
 }
@@ -320,12 +259,12 @@ void ungrabXKeyboard()
         kDebug(1212) << "ungrabXKeyboard() called but keyboard not grabbed!";
     }
     keyboard_grabbed = false;
-    XUngrabKeyboard(display(), CurrentTime);
+    xcb_ungrab_keyboard(connection(), XCB_TIME_CURRENT_TIME);
 }
 
 QPoint cursorPos()
 {
-    return Workspace::self()->cursorPos();
+    return Cursor::self()->pos();
 }
 
 // converting between X11 mouse/keyboard state mask and Qt button/keyboard states
@@ -333,25 +272,25 @@ QPoint cursorPos()
 int qtToX11Button(Qt::MouseButton button)
 {
     if (button == Qt::LeftButton)
-        return Button1;
+        return XCB_BUTTON_INDEX_1;
     else if (button == Qt::MidButton)
-        return Button2;
+        return XCB_BUTTON_INDEX_2;
     else if (button == Qt::RightButton)
-        return Button3;
-    return AnyButton; // 0
+        return XCB_BUTTON_INDEX_3;
+    return XCB_BUTTON_INDEX_ANY; // 0
 }
 
 Qt::MouseButton x11ToQtMouseButton(int button)
 {
-    if (button == Button1)
+    if (button == XCB_BUTTON_INDEX_1)
         return Qt::LeftButton;
-    if (button == Button2)
+    if (button == XCB_BUTTON_INDEX_2)
         return Qt::MidButton;
-    if (button == Button3)
+    if (button == XCB_BUTTON_INDEX_3)
         return Qt::RightButton;
-    if (button == Button4)
+    if (button == XCB_BUTTON_INDEX_4)
         return Qt::XButton1;
-    if (button == Button5)
+    if (button == XCB_BUTTON_INDEX_5)
         return Qt::XButton2;
     return Qt::NoButton;
 }
@@ -360,15 +299,15 @@ int qtToX11State(Qt::MouseButtons buttons, Qt::KeyboardModifiers modifiers)
 {
     int ret = 0;
     if (buttons & Qt::LeftButton)
-        ret |= Button1Mask;
+        ret |= XCB_KEY_BUT_MASK_BUTTON_1;
     if (buttons & Qt::MidButton)
-        ret |= Button2Mask;
+        ret |= XCB_KEY_BUT_MASK_BUTTON_2;
     if (buttons & Qt::RightButton)
-        ret |= Button3Mask;
+        ret |= XCB_KEY_BUT_MASK_BUTTON_3;
     if (modifiers & Qt::ShiftModifier)
-        ret |= ShiftMask;
+        ret |= XCB_KEY_BUT_MASK_SHIFT;
     if (modifiers & Qt::ControlModifier)
-        ret |= ControlMask;
+        ret |= XCB_KEY_BUT_MASK_CONTROL;
     if (modifiers & Qt::AltModifier)
         ret |= KKeyServer::modXAlt();
     if (modifiers & Qt::MetaModifier)
@@ -379,15 +318,15 @@ int qtToX11State(Qt::MouseButtons buttons, Qt::KeyboardModifiers modifiers)
 Qt::MouseButtons x11ToQtMouseButtons(int state)
 {
     Qt::MouseButtons ret = 0;
-    if (state & Button1Mask)
+    if (state & XCB_KEY_BUT_MASK_BUTTON_1)
         ret |= Qt::LeftButton;
-    if (state & Button2Mask)
+    if (state & XCB_KEY_BUT_MASK_BUTTON_2)
         ret |= Qt::MidButton;
-    if (state & Button3Mask)
+    if (state & XCB_KEY_BUT_MASK_BUTTON_3)
         ret |= Qt::RightButton;
-    if (state & Button4Mask)
+    if (state & XCB_KEY_BUT_MASK_BUTTON_4)
         ret |= Qt::XButton1;
-    if (state & Button5Mask)
+    if (state & XCB_KEY_BUT_MASK_BUTTON_5)
         ret |= Qt::XButton2;
     return ret;
 }
@@ -395,9 +334,9 @@ Qt::MouseButtons x11ToQtMouseButtons(int state)
 Qt::KeyboardModifiers x11ToQtKeyboardModifiers(int state)
 {
     Qt::KeyboardModifiers ret = 0;
-    if (state & ShiftMask)
+    if (state & XCB_KEY_BUT_MASK_SHIFT)
         ret |= Qt::ShiftModifier;
-    if (state & ControlMask)
+    if (state & XCB_KEY_BUT_MASK_CONTROL)
         ret |= Qt::ControlModifier;
     if (state & KKeyServer::modXAlt())
         ret |= Qt::AltModifier;
@@ -407,102 +346,6 @@ Qt::KeyboardModifiers x11ToQtKeyboardModifiers(int state)
 }
 
 #endif
-
-#ifndef KCMRULES
-ShortcutDialog::ShortcutDialog(const QKeySequence& cut)
-    : _shortcut(cut)
-{
-    QWidget *vBoxContainer = new QWidget(this);
-    vBoxContainer->setLayout(new QVBoxLayout(vBoxContainer));
-    vBoxContainer->layout()->addWidget(widget = new KKeySequenceWidget(vBoxContainer));
-    vBoxContainer->layout()->addWidget(warning = new QLabel(vBoxContainer));
-    warning->hide();
-    widget->setKeySequence(cut);
-
-    // To not check for conflicting shortcuts. The widget would use a message
-    // box which brings down kwin.
-    widget->setCheckForConflictsAgainst(KKeySequenceWidget::None);
-    // It's a global shortcut so don't allow multikey shortcuts
-    widget->setMultiKeyShortcutsAllowed(false);
-
-    // Listen to changed shortcuts
-    connect(
-        widget, SIGNAL(keySequenceChanged(QKeySequence)),
-        SLOT(keySequenceChanged(QKeySequence)));
-
-    setMainWidget(vBoxContainer);
-    widget->setFocus();
-
-    // make it a popup, so that it has the grab
-    XSetWindowAttributes attrs;
-    attrs.override_redirect = True;
-    XChangeWindowAttributes(display(), winId(), CWOverrideRedirect, &attrs);
-    setWindowFlags(Qt::Popup);
-}
-
-void ShortcutDialog::accept()
-{
-    QKeySequence seq = shortcut();
-    if (!seq.isEmpty()) {
-        if (seq[0] == Qt::Key_Escape) {
-            reject();
-            return;
-        }
-        if (seq[0] == Qt::Key_Space
-        || (seq[0] & Qt::KeyboardModifierMask) == 0) {
-            // clear
-            widget->clearKeySequence();
-            KDialog::accept();
-            return;
-        }
-    }
-    KDialog::accept();
-}
-
-void ShortcutDialog::done(int r)
-{
-    KDialog::done(r);
-    emit dialogDone(r == Accepted);
-}
-
-void ShortcutDialog::keySequenceChanged(const QKeySequence &seq)
-{
-    activateWindow(); // where is the kbd focus lost? cause of popup state?
-    if (_shortcut == seq)
-        return; // don't try to update the same
-
-    if (seq.isEmpty()) { // clear
-        _shortcut = seq;
-        return;
-    }
-
-    // Check if the key sequence is used currently
-    QString sc = seq.toString();
-    // NOTICE - seq.toString() & the entries in "conflicting" randomly get invalidated after the next call (if no sc has been set & conflicting isn't empty?!)
-    QList<KGlobalShortcutInfo> conflicting = KGlobalAccel::getGlobalShortcutsByKey(seq);
-    if (!conflicting.isEmpty()) {
-        const KGlobalShortcutInfo &conflict = conflicting.at(0);
-        warning->setText(i18nc("'%1' is a keyboard shortcut like 'ctrl+w'",
-        "<b>%1</b> is already in use", sc));
-        warning->setToolTip(i18nc("keyboard shortcut '%1' is used by action '%2' in application '%3'",
-        "<b>%1</b> is used by %2 in %3", sc, conflict.friendlyName(), conflict.componentFriendlyName()));
-        warning->show();
-        widget->setKeySequence(shortcut());
-    } else if (seq != _shortcut) {
-        warning->hide();
-        if (KPushButton *ok = button(KDialog::Ok))
-            ok->setFocus();
-    }
-
-    _shortcut = seq;
-}
-
-QKeySequence ShortcutDialog::shortcut() const
-{
-    return _shortcut;
-}
-
-#endif //KCMRULES
 } // namespace
 
 #ifndef KCMRULES

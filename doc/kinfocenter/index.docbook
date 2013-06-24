@@ -20,8 +20,8 @@
 </authorgroup>
 
 <legalnotice>&FDLNotice;</legalnotice>
-<date>2010-01-08</date>
-<releaseinfo>&kde; SC 4.4</releaseinfo>
+<date>2013-06-22</date>
+<releaseinfo>&kde; SC 4.11</releaseinfo>
 
 <abstract>
 <para>This documentation describes &kde;’s information center.</para>
@@ -129,8 +129,8 @@ now appear of the main panel of the &infocenter; window. Some items within the t
 will show the modules under the category.
 You can right click on the module listing to show the following options:
 <itemizedlist>
-  <listitem><para><guimenuitem>Collapse All</guimenuitem>: Collapses the tree to show only top level modules and categories.</para></listitem>
-  <listitem><para><guimenuitem>Expand All</guimenuitem>: Expands the tree to show modules.</para></listitem>
+  <listitem><para><guimenuitem>Collapse All Categories</guimenuitem>: Collapses the tree to show only top level modules and categories.</para></listitem>
+  <listitem><para><guimenuitem>Expand All Categories</guimenuitem>: Expands the tree to show modules.</para></listitem>
   <listitem><para><guimenuitem>Clear Search</guimenuitem>: This will clear any filter you have applied on the module listing via the search box</para></listitem>
 </itemizedlist>
 </para>
@@ -156,6 +156,7 @@ FreeBSD system, Version 4.4-RELEASE, on a Pentium.
 <title>The &infocenter; Toolbar</title>
 
 <para>This next section gives you a brief description of what each toolbar item does. </para>
+<!--FIXME not working in 4.11
 <sect2 id="info-center-export-file">
 <title>
 <guimenu>Export</guimenu> button
@@ -165,12 +166,12 @@ The export button allows you to export information from the current information 
 module allows this functionality. Clicking the export button will bring up a file dialog that will allow
 you to choose the location of the file.
 </para>
-
 </sect2>
+-->
 
 <sect2 id="info-center-module-help">
 <title>
-<guimenu>Module help</guimenu> button
+Module Help button
 </title>
 <para>
 This button opens khelpcenter with the current help page for the information module.
@@ -178,8 +179,13 @@ This button opens khelpcenter with the current help page for the information mod
 </sect2>
 
 <sect2 id="info-center-menu-help">
-<title><guimenu>Help</guimenu> Menu button</title>
-&help.menu.documentation;
+<title>Help Menu button</title>
+<para>
+&kinfocenter; has the common &kde; <guimenu>Help</guimenu>
+menu items, for more information read the section about the <ulink url="help:/fundamentals/ui.html#menus-help">Help Menu</ulink>
+of the &kde; Fundamentals.
+</para>
+
 </sect2>
 
 </sect1>
@@ -351,13 +357,12 @@ virtual memory.</para>
 <listitem><para>Virtual memory, or <guilabel>Swap Space</guilabel>.</para></listitem>
 </itemizedlist>
 
-<para>The green areas are free, and the red areas are used.</para>
-
+<para>The grey areas are free, and the blue and green areas are used.</para>
 <tip><para>The exact values of each type of memory are not critical, and
  they change regularly.  When you evaluate this page, look at
  trends.</para>
 
-<para>Does your computer have plenty of free space (green areas)?  If
+<para>Does your computer have plenty of free space (grey areas)?  If
  not, you can increase the swap size or increase the physical
  memory.</para>
 

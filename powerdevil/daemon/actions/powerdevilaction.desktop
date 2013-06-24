@@ -17,7 +17,7 @@ Comment[es]=Extensión de acción de gestión de energía
 Comment[et]=Toitehalduse laiendus
 Comment[eu]=Energia kudeatzeko ekintzen hedapena
 Comment[fi]=Virranhallinnan toimintolaajennus
-Comment[fr]=Extension d'action de gestion de l'énergie
+Comment[fr]=Extension des actions de gestion de l'énergie
 Comment[gl]=Extensión de accións de xestión da enerxía
 Comment[he]=Power Management Action Extension
 Comment[hr]=Proširenje radnje za upravljanje potrošnjom energije
@@ -59,6 +59,8 @@ Comment[zh_TW]=電源管理動作延伸
 [PropertyDef::X-KDE-PowerDevil-Action-ID]
 Type=QString
 [PropertyDef::X-KDE-PowerDevil-Action-IsBundled]
+Type=bool
+[PropertyDef::X-KDE-PowerDevil-Action-RegistersDBusInterface]
 Type=bool
 [PropertyDef::X-KDE-PowerDevil-Action-ForceInstantLoad]
 Type=bool

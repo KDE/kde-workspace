@@ -23,6 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDateTime>
 #include <QTimer>
+#include <QtDebug>
+#include <QVector3D>
+
+QDebug operator<<(QDebug dbg, const KWin::FPx2 &fpx2)
+{
+    dbg.nospace() << fpx2[0] << "," << fpx2[1] << QString(fpx2.isValid() ? " (valid)" : " (invalid)");
+    return dbg.space();
+}
 
 namespace KWin {
 
@@ -30,10 +38,10 @@ QElapsedTimer AnimationEffect::s_clock;
 
 struct AnimationEffectPrivate {
 public:
-    AnimationEffectPrivate() { m_animated = m_damageDirty = m_animationsTouched = false; }
+    AnimationEffectPrivate() { m_animated = m_damageDirty = m_animationsTouched = m_isInitialized = false; }
     AnimationEffect::AniMap m_animations;
     EffectWindowList m_zombies;
-    bool m_animated, m_damageDirty, m_needSceneRepaint, m_animationsTouched;
+    bool m_animated, m_damageDirty, m_needSceneRepaint, m_animationsTouched, m_isInitialized;
 };
 }
 
@@ -52,16 +60,16 @@ AnimationEffect::AnimationEffect() : d_ptr(new AnimationEffectPrivate())
 
 void AnimationEffect::init()
 {
+    Q_D(AnimationEffect);
+    if (d->m_isInitialized)
+        return; // not more than once, please
+    d->m_isInitialized = true;
     /* by connecting the signal from a slot AFTER the inheriting class constructor had the chance to
      * connect it we can provide auto-referencing of animated and closed windows, since at the time
      * our slot will be called, the slot of the subclass has been (SIGNAL/SLOT connections are FIFO)
      * and has pot. started an animation so we have the window in our hash :) */
     connect ( effects,  SIGNAL(windowClosed(KWin::EffectWindow*)), SLOT(_windowClosed(KWin::EffectWindow*)) );
     connect ( effects,  SIGNAL(windowDeleted(KWin::EffectWindow*)), SLOT(_windowDeleted(KWin::EffectWindow*)) );
-    connect ( effects,  SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*, const QRect&)),
-                        SLOT(_expandedGeometryChanged(KWin::EffectWindow*, const QRect&)) );
-    connect ( effects,  SIGNAL(windowPaddingChanged(KWin::EffectWindow*, const QRect&)),
-                        SLOT(_expandedGeometryChanged(KWin::EffectWindow*, const QRect&)) );
 }
 
 bool AnimationEffect::isActive() const
@@ -74,7 +82,7 @@ bool AnimationEffect::isActive() const
 #define RELATIVE_XY(_FIELD_) const bool relative[2] = { static_cast<bool>(metaData(Relative##_FIELD_##X, meta)), \
                                                         static_cast<bool>(metaData(Relative##_FIELD_##Y, meta)) }
 
-void AnimationEffect::animate( EffectWindow *w, Attribute a, uint meta, int ms, FPx2 to, QEasingCurve curve, int delay, FPx2 from )
+quint64 AnimationEffect::p_animate( EffectWindow *w, Attribute a, uint meta, int ms, FPx2 to, QEasingCurve curve, int delay, FPx2 from, bool keepAtTarget )
 {
     const bool waitAtSource = from.isValid();
     if (a < NonFloatBase) {
@@ -173,13 +181,32 @@ void AnimationEffect::animate( EffectWindow *w, Attribute a, uint meta, int ms, 
             to.set(1.0,1.0);
             setMetaData( TargetAnchor, metaData(SourceAnchor, meta), meta );
         }
+    } else if (a == CrossFadePrevious) {
+        if (!from.isValid()) {
+            from.set(0.0);
+        }
+        if (!to.isValid()) {
+            to.set(1.0);
+        }
+        w->referencePreviousWindowPixmap();
     }
 
     Q_D(AnimationEffect);
+    if (!d->m_isInitialized)
+        init(); // needs to ensure the window gets removed if deleted in the same event cycle
+    if (d->m_animations.isEmpty()) {
+        connect (effects,   SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*,QRect)),
+                            SLOT(_expandedGeometryChanged(KWin::EffectWindow*,QRect)));
+        connect (effects,   SIGNAL(windowStepUserMovedResized(KWin::EffectWindow*,QRect)),
+                            SLOT(_expandedGeometryChanged(KWin::EffectWindow*,QRect)));
+        connect (effects,   SIGNAL(windowPaddingChanged(KWin::EffectWindow*,QRect)),
+                            SLOT(_expandedGeometryChanged(KWin::EffectWindow*,QRect)));
+    }
     AniMap::iterator it = d->m_animations.find(w);
     if (it == d->m_animations.end())
         it = d->m_animations.insert(w, QPair<QList<AniData>, QRect>(QList<AniData>(), QRect()));
-    it->first.append(AniData(a, meta, ms, to, curve, delay, from, waitAtSource));
+    it->first.append(AniData(a, meta, ms, to, curve, delay, from, waitAtSource, keepAtTarget));
+    quint64 ret_id = quint64(&it->first.last());
     it->second = QRect();
 
     d->m_animationsTouched = true;
@@ -192,6 +219,31 @@ void AnimationEffect::animate( EffectWindow *w, Attribute a, uint meta, int ms, 
     else {
         triggerRepaint();
     }
+    return ret_id;
+}
+
+bool AnimationEffect::cancel(quint64 animationId)
+{
+    Q_D(AnimationEffect);
+    for (AniMap::iterator entry = d->m_animations.begin(), mapEnd = d->m_animations.end(); entry != mapEnd; ++entry) {
+        for (QList<AniData>::iterator anim = entry->first.begin(), animEnd = entry->first.end(); anim != animEnd; ++anim) {
+            if (quint64(&(*anim)) == animationId) {
+                entry->first.erase(anim); // remove the animation
+                if (entry->first.isEmpty()) { // no other animations on the window, release it.
+                    const int i = d->m_zombies.indexOf(entry.key());
+                    if ( i > -1 ) {
+                        d->m_zombies.removeAt( i );
+                        entry.key()->unrefWindow();
+                    }
+                    d->m_animations.erase(entry);
+                }
+                if (d->m_animations.isEmpty())
+                    disconnectGeometryChanges();
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void AnimationEffect::prePaintScreen( ScreenPrePaintData& data, int time )
@@ -221,7 +273,7 @@ void AnimationEffect::prePaintScreen( ScreenPrePaintData& data, int time )
                 anim->addTime(time);
             }
 
-            if (anim->time < anim->duration) {
+            if (anim->time < anim->duration || anim->keepAtTarget) {
 //                 if (anim->attribute != Brightness && anim->attribute != Saturation && anim->attribute != Opacity)
 //                     transformed = true;
                 d->m_animated = true;
@@ -230,6 +282,9 @@ void AnimationEffect::prePaintScreen( ScreenPrePaintData& data, int time )
             } else {
                 EffectWindow *oldW = entry.key();
                 AniData *aData = &(*anim);
+                if (aData->attribute == KWin::AnimationEffect::CrossFadePrevious) {
+                    oldW->unreferencePreviousWindowPixmap();
+                }
                 animationEnded(oldW, anim->attribute, anim->meta);
                 // NOTICE animationEnded is an external call and might have called "::animate"
                 // as a result our iterators could now point random junk on the heap
@@ -267,17 +322,14 @@ void AnimationEffect::prePaintScreen( ScreenPrePaintData& data, int time )
         }
     }
 
-    // NOTICE PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS and thus now no flag should be required
-    // ... unless we start to get glitches ;-)
-//     if ( transformed )
-//         data.mask |= PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS_WITHOUT_FULL_REPAINTS; //PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS;
-
     // janitorial...
-    if ( !(d->m_animations.count() || d->m_zombies.isEmpty()) )
-    {
-        foreach ( EffectWindow *w, d->m_zombies )
-            w->unrefWindow();
-        d->m_zombies.clear();
+    if (d->m_animations.isEmpty()) {
+        disconnectGeometryChanges();
+        if (!d->m_zombies.isEmpty()) { // this is actually not supposed to happen
+            foreach (EffectWindow *w, d->m_zombies)
+                w->unrefWindow();
+            d->m_zombies.clear();
+        }
     }
 
     effects->prePaintScreen(data, time);
@@ -365,6 +417,16 @@ void AnimationEffect::clipWindow(const EffectWindow *w, const AniData &anim, Win
     }
 }
 
+void AnimationEffect::disconnectGeometryChanges()
+{
+    disconnect (effects,SIGNAL(windowGeometryShapeChanged(KWin::EffectWindow*,QRect)),
+                this,   SLOT(_expandedGeometryChanged(KWin::EffectWindow*,QRect)));
+    disconnect (effects,SIGNAL(windowStepUserMovedResized(KWin::EffectWindow*,QRect)),
+                this,   SLOT(_expandedGeometryChanged(KWin::EffectWindow*,QRect)));
+    disconnect (effects,SIGNAL(windowPaddingChanged(KWin::EffectWindow*,QRect)),
+                this,   SLOT(_expandedGeometryChanged(KWin::EffectWindow*,QRect)));
+}
+
 
 void AnimationEffect::prePaintWindow( EffectWindow* w, WindowPrePaintData& data, int time )
 {
@@ -378,7 +440,7 @@ void AnimationEffect::prePaintWindow( EffectWindow* w, WindowPrePaintData& data,
                     continue;
 
                 isUsed = true;
-                if (anim->attribute == Opacity)
+                if (anim->attribute == Opacity || anim->attribute == DecorationOpacity || anim->attribute == CrossFadePrevious)
                     data.setTranslucent();
                 else if (!(anim->attribute == Brightness || anim->attribute == Saturation)) {
                     data.setTransformed();
@@ -425,6 +487,8 @@ void AnimationEffect::paintWindow( EffectWindow* w, int mask, QRegion region, Wi
                 switch (anim->attribute) {
                 case Opacity:
                     data.multiplyOpacity(interpolated(*anim)); break;
+                case DecorationOpacity:
+                    data.multiplyDecorationOpacity(interpolated(*anim)); break;
                 case Brightness:
                     data.multiplyBrightness(interpolated(*anim)); break;
                 case Saturation:
@@ -509,6 +573,9 @@ void AnimationEffect::paintWindow( EffectWindow* w, int mask, QRegion region, Wi
                 case Generic:
                     genericAnimation(w, data, progress(*anim), anim->meta);
                     break;
+                case CrossFadePrevious:
+                    data.setCrossFadeProgress(progress(*anim));
+                    break;
                 default:
                     break;
                 }
@@ -529,7 +596,19 @@ void AnimationEffect::postPaintScreen()
         } else {
             AniMap::const_iterator it = d->m_animations.constBegin(), end = d->m_animations.constEnd();
             for (; it != end; ++it) {
-                it.key()->addLayerRepaint(it->second);
+                bool addRepaint = false;
+                QList<AniData>::const_iterator anim = it->first.constBegin();
+                for (; anim != it->first.constEnd(); ++anim) {
+                    if (anim->startTime > clock())
+                        continue;
+                    if (anim->time < anim->duration) {
+                        addRepaint = true;
+                        break;
+                    }
+                }
+                if (addRepaint) {
+                    it.key()->addLayerRepaint(it->second);
+                }
             }
         }
     }
@@ -540,14 +619,18 @@ float AnimationEffect::interpolated( const AniData &a, int i ) const
 {
     if (a.startTime > clock())
         return a.from[i];
-    return a.from[i] + a.curve.valueForProgress( ((float)a.time)/a.duration )*(a.to[i] - a.from[i]);
+    if (a.time < a.duration)
+        return a.from[i] + a.curve.valueForProgress( ((float)a.time)/a.duration )*(a.to[i] - a.from[i]);
+    return a.to[i]; // we're done and "waiting" at the target value
 }
 
 float AnimationEffect::progress( const AniData &a ) const
 {
     if (a.startTime > clock())
         return 0.0;
-    return a.curve.valueForProgress( ((float)a.time)/a.duration );
+    if (a.time < a.duration)
+        return a.curve.valueForProgress( ((float)a.time)/a.duration );
+    return 1.0; // we're done and "waiting" at the target value
 }
 
 
@@ -621,8 +704,9 @@ void AnimationEffect::triggerRepaint()
         effects->addRepaintFull();
     } else {
         AniMap::const_iterator it = d->m_animations.constBegin(), end = d->m_animations.constEnd();
-        for (; it != end; ++it)
+        for (; it != end; ++it) {
             it.key()->addLayerRepaint(it->second);
+        }
     }
 }
 
@@ -661,8 +745,10 @@ void AnimationEffect::updateLayerRepaints()
                 continue;
             switch (anim->attribute) {
                 case Opacity:
+                case DecorationOpacity:
                 case Brightness:
                 case Saturation:
+                case CrossFadePrevious:
                     createRegion = true;
                     break;
                 case Rotation:
@@ -755,7 +841,6 @@ region_creation:
 
 void AnimationEffect::_expandedGeometryChanged(KWin::EffectWindow *w, const QRect &old)
 {
-    Q_UNUSED(old)
     Q_D(AnimationEffect);
     AniMap::const_iterator entry = d->m_animations.constFind(w);
     if (entry != d->m_animations.constEnd()) {
@@ -780,6 +865,28 @@ void AnimationEffect::_windowDeleted( EffectWindow* w )
     Q_D(AnimationEffect);
     d->m_zombies.removeAll( w ); // TODO this line is a workaround for a bug in KWin 4.8.0 & 4.8.1
     d->m_animations.remove( w );
+}
+
+
+QString AnimationEffect::debug(const QString &/*parameter*/) const
+{
+    Q_D(const AnimationEffect);
+    QString dbg;
+    if (d->m_animations.isEmpty())
+        dbg = "No window is animated";
+    else {
+        AniMap::const_iterator entry = d->m_animations.constBegin(), mapEnd = d->m_animations.constEnd();
+        for (; entry != mapEnd; ++entry) {
+            QString caption = entry.key()->isDeleted() ? "[Deleted]" : entry.key()->caption();
+            if (caption.isEmpty())
+                caption = "[Untitled]";
+            dbg += "Animating window: " + caption + '\n';
+            QList<AniData>::const_iterator anim = entry->first.constBegin(), animEnd = entry->first.constEnd();
+            for (; anim != animEnd; ++anim)
+                dbg += anim->debugInfo();
+        }
+    }
+    return dbg;
 }
 
 

@@ -2,7 +2,7 @@
  KWin - the KDE window manager
  This file is part of the KDE project.
 
-Copyright (C) 2009 Martin Gräßlin <kde@martin-graesslin.com>
+Copyright (C) 2009 Martin Gräßlin <mgraesslin@kde.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,8 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // TODO: remove with Qt 5, only for HTML escaping the caption
 #include <QTextDocument>
 #include <QTextStream>
-// KDE
-#include <KLocale>
 // other
 #include <math.h>
 
@@ -62,7 +60,7 @@ QVariant ClientModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
-    int clientIndex = index.row() * columnCount() + index.column();
+    int clientIndex = index.row();
     if (clientIndex >= m_clientList.count())
         return QVariant();
     QSharedPointer<TabBoxClient> client = m_clientList[ clientIndex ].toStrongRef();
@@ -118,7 +116,9 @@ int ClientModel::columnCount(const QModelIndex& parent) const
 
 int ClientModel::rowCount(const QModelIndex& parent) const
 {
-    Q_UNUSED(parent)
+    if (parent.isValid()) {
+        return 0;
+    }
     return m_clientList.count();
 }
 
@@ -130,11 +130,13 @@ QModelIndex ClientModel::parent(const QModelIndex& child) const
 
 QModelIndex ClientModel::index(int row, int column, const QModelIndex& parent) const
 {
-    Q_UNUSED(parent)
-    int index = row * columnCount() + column;
+    if (row < 0 || column != 0 || parent.isValid()) {
+        return QModelIndex();
+    }
+    int index = row * columnCount();
     if (index >= m_clientList.count() && !m_clientList.isEmpty())
         return QModelIndex();
-    return createIndex(row, column);
+    return createIndex(row, 0);
 }
 
 QModelIndex ClientModel::index(QWeakPointer<TabBoxClient> client) const

@@ -27,11 +27,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDBus/QtDBus>
 #include <QVariant>
 #include <QList>
-#include <QtCore/QTimeLine>
+#include <QTimeLine>
 #include <QtGui/QFontMetrics>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 #include <QtGui/QVector2D>
+#include <QGraphicsRotation>
+#include <QGraphicsScale>
 
 #include <kdebug.h>
 #include <ksharedconfig.h>
@@ -45,6 +47,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <X11/extensions/Xfixes.h>
 #include <xcb/xfixes.h>
 #endif
+
+#if defined(__GNUC__)
+#  define KWIN_ALIGN(n) __attribute((aligned(n)))
+#  if defined(__SSE2__)
+#    define HAVE_SSE2
+#  endif
+#elif defined(__INTEL_COMPILER)
+#  define KWIN_ALIGN(n) __declspec(align(n))
+#  define HAVE_SSE2
+#else
+#  define KWIN_ALIGN(n)
+#endif
+
+#ifdef HAVE_SSE2
+#  include <emmintrin.h>
+#endif
+
 
 namespace KWin
 {
@@ -213,6 +232,7 @@ public:
     qreal saturation;
     qreal brightness;
     int screen;
+    qreal crossFadeProgress;
 };
 
 WindowPaintData::WindowPaintData(EffectWindow* w)
@@ -226,6 +246,7 @@ WindowPaintData::WindowPaintData(EffectWindow* w)
     setSaturation(1.0);
     setBrightness(1.0);
     setScreen(0);
+    setCrossFadeProgress(1.0);
 }
 
 WindowPaintData::WindowPaintData(const WindowPaintData &other)
@@ -246,6 +267,7 @@ WindowPaintData::WindowPaintData(const WindowPaintData &other)
     setSaturation(other.saturation());
     setBrightness(other.brightness());
     setScreen(other.screen());
+    setCrossFadeProgress(other.crossFadeProgress());
 }
 
 WindowPaintData::~WindowPaintData()
@@ -301,6 +323,16 @@ void WindowPaintData::setBrightness(qreal brightness)
 void WindowPaintData::setScreen(int screen) const
 {
     d->screen = screen;
+}
+
+qreal WindowPaintData::crossFadeProgress() const
+{
+    return d->crossFadeProgress;
+}
+
+void WindowPaintData::setCrossFadeProgress(qreal factor)
+{
+    d->crossFadeProgress = qBound(0.0, factor, 1.0);
 }
 
 qreal WindowPaintData::multiplyDecorationOpacity(qreal factor)
@@ -467,7 +499,7 @@ void* Effect::proxy()
     return NULL;
 }
 
-void Effect::windowInputMouseEvent(Window, QEvent*)
+void Effect::windowInputMouseEvent(QEvent*)
 {
 }
 
@@ -523,6 +555,11 @@ bool Effect::provides(Feature)
 bool Effect::isActive() const
 {
     return true;
+}
+
+QString Effect::debug(const QString &) const
+{
+    return QString();
 }
 
 void Effect::drawWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data)
@@ -594,16 +631,6 @@ EffectsHandler::~EffectsHandler()
 {
     // All effects should already be unloaded by Impl dtor
     assert(loaded_effects.count() == 0);
-}
-
-xcb_window_t EffectsHandler::createInputWindow(Effect* e, const QRect& r, const QCursor& cursor)
-{
-    return createInputWindow(e, r.x(), r.y(), r.width(), r.height(), cursor);
-}
-
-xcb_window_t EffectsHandler::createFullScreenInputWindow(Effect* e, const QCursor& cursor)
-{
-    return createInputWindow(e, 0, 0, displayWidth(), displayHeight(), cursor);
 }
 
 CompositingType EffectsHandler::compositingType() const
@@ -1049,54 +1076,159 @@ WindowQuadList WindowQuadList::makeRegularGrid(int xSubdivisions, int ySubdivisi
     return ret;
 }
 
-void WindowQuadList::makeArrays(float** vertices, float** texcoords, const QSizeF& size, bool yInverted) const
-{
-    *vertices = new float[ count() * 6 * 2 ];
-    *texcoords = new float[ count() * 6 * 2 ];
-    float* vpos = *vertices;
-    float* tpos = *texcoords;
-    for (int i = 0;
-            i < count();
-            ++i) {
-        *vpos++ = at(i)[ 1 ].x();
-        *vpos++ = at(i)[ 1 ].y();
-        *vpos++ = at(i)[ 0 ].x();
-        *vpos++ = at(i)[ 0 ].y();
-        *vpos++ = at(i)[ 3 ].x();
-        *vpos++ = at(i)[ 3 ].y();
-        *vpos++ = at(i)[ 3 ].x();
-        *vpos++ = at(i)[ 3 ].y();
-        *vpos++ = at(i)[ 2 ].x();
-        *vpos++ = at(i)[ 2 ].y();
-        *vpos++ = at(i)[ 1 ].x();
-        *vpos++ = at(i)[ 1 ].y();
+#ifndef GL_TRIANGLES
+#  define GL_TRIANGLES      0x0004
+#endif
 
-        if (yInverted) {
-            *tpos++ = at(i)[ 1 ].tx / size.width();
-            *tpos++ = at(i)[ 1 ].ty / size.height();
-            *tpos++ = at(i)[ 0 ].tx / size.width();
-            *tpos++ = at(i)[ 0 ].ty / size.height();
-            *tpos++ = at(i)[ 3 ].tx / size.width();
-            *tpos++ = at(i)[ 3 ].ty / size.height();
-            *tpos++ = at(i)[ 3 ].tx / size.width();
-            *tpos++ = at(i)[ 3 ].ty / size.height();
-            *tpos++ = at(i)[ 2 ].tx / size.width();
-            *tpos++ = at(i)[ 2 ].ty / size.height();
-            *tpos++ = at(i)[ 1 ].tx / size.width();
-            *tpos++ = at(i)[ 1 ].ty / size.height();
-        } else {
-            *tpos++ = at(i)[ 1 ].tx / size.width();
-            *tpos++ = 1.0f - at(i)[ 1 ].ty / size.height();
-            *tpos++ = at(i)[ 0 ].tx / size.width();
-            *tpos++ = 1.0f - at(i)[ 0 ].ty / size.height();
-            *tpos++ = at(i)[ 3 ].tx / size.width();
-            *tpos++ = 1.0f - at(i)[ 3 ].ty / size.height();
-            *tpos++ = at(i)[ 3 ].tx / size.width();
-            *tpos++ = 1.0f - at(i)[ 3 ].ty / size.height();
-            *tpos++ = at(i)[ 2 ].tx / size.width();
-            *tpos++ = 1.0f - at(i)[ 2 ].ty / size.height();
-            *tpos++ = at(i)[ 1 ].tx / size.width();
-            *tpos++ = 1.0f - at(i)[ 1 ].ty / size.height();
+#ifndef GL_QUADS
+#  define GL_QUADS          0x0007
+#endif
+
+void WindowQuadList::makeInterleavedArrays(unsigned int type, GLVertex2D *vertices, const QMatrix4x4 &textureMatrix) const
+{
+    // Since we know that the texture matrix just scales and translates
+    // we can use this information to optimize the transformation
+    const QVector2D coeff(textureMatrix(0, 0), textureMatrix(1, 1));
+    const QVector2D offset(textureMatrix(0, 3), textureMatrix(1, 3));
+
+    GLVertex2D *vertex = vertices;
+
+    assert(type == GL_QUADS || type == GL_TRIANGLES);
+
+    switch (type)
+    {
+    case GL_QUADS:
+#ifdef HAVE_SSE2
+        if (!(intptr_t(vertex) & 0xf)) {
+            for (int i = 0; i < count(); i++) {
+                const WindowQuad &quad = at(i);
+                KWIN_ALIGN(16) GLVertex2D v[4];
+
+                for (int j = 0; j < 4; j++) {
+                    const WindowVertex &wv = quad[j];
+
+                    v[j].position = QVector2D(wv.x(), wv.y());
+                    v[j].texcoord = QVector2D(wv.u(), wv.v()) * coeff + offset;
+                }
+
+                const __m128i *srcP = (const __m128i *) &v;
+                __m128i *dstP = (__m128i *) vertex;
+
+                _mm_stream_si128(&dstP[0], _mm_load_si128(&srcP[0])); // Top-left
+                _mm_stream_si128(&dstP[1], _mm_load_si128(&srcP[1])); // Top-right
+                _mm_stream_si128(&dstP[2], _mm_load_si128(&srcP[2])); // Bottom-right
+                _mm_stream_si128(&dstP[3], _mm_load_si128(&srcP[3])); // Bottom-left
+
+                vertex += 4;
+            }
+        } else
+#endif // HAVE_SSE2
+        {
+            for (int i = 0; i < count(); i++) {
+                const WindowQuad &quad = at(i);
+
+                for (int j = 0; j < 4; j++) {
+                    const WindowVertex &wv = quad[j];
+
+                    GLVertex2D v;
+                    v.position = QVector2D(wv.x(), wv.y());
+                    v.texcoord = QVector2D(wv.u(), wv.v()) * coeff + offset;
+
+                    *(vertex++) = v;
+                }
+            }
+        }
+        break;
+
+    case GL_TRIANGLES:
+#ifdef HAVE_SSE2
+        if (!(intptr_t(vertex) & 0xf)) {
+            for (int i = 0; i < count(); i++) {
+                const WindowQuad &quad = at(i);
+                KWIN_ALIGN(16) GLVertex2D v[4];
+
+                for (int j = 0; j < 4; j++) {
+                    const WindowVertex &wv = quad[j];
+
+                    v[j].position = QVector2D(wv.x(), wv.y());
+                    v[j].texcoord = QVector2D(wv.u(), wv.v()) * coeff + offset;
+                }
+
+                const __m128i *srcP = (const __m128i *) &v;
+                __m128i *dstP = (__m128i *) vertex;
+
+                __m128i src[4];
+                src[0] = _mm_load_si128(&srcP[0]); // Top-left
+                src[1] = _mm_load_si128(&srcP[1]); // Top-right
+                src[2] = _mm_load_si128(&srcP[2]); // Bottom-right
+                src[3] = _mm_load_si128(&srcP[3]); // Bottom-left
+
+                // First triangle
+                _mm_stream_si128(&dstP[0], src[1]); // Top-right
+                _mm_stream_si128(&dstP[1], src[0]); // Top-left
+                _mm_stream_si128(&dstP[2], src[3]); // Bottom-left
+
+                // Second triangle
+                _mm_stream_si128(&dstP[3], src[3]); // Bottom-left
+                _mm_stream_si128(&dstP[4], src[2]); // Bottom-right
+                _mm_stream_si128(&dstP[5], src[1]); // Top-right
+
+                vertex += 6;
+            }
+        } else
+#endif // HAVE_SSE2
+        {
+            for (int i = 0; i < count(); i++) {
+                const WindowQuad &quad = at(i);
+                GLVertex2D v[4]; // Four unique vertices / quad
+
+                for (int j = 0; j < 4; j++) {
+                    const WindowVertex &wv = quad[j];
+
+                    v[j].position = QVector2D(wv.x(), wv.y());
+                    v[j].texcoord = QVector2D(wv.u(), wv.v()) * coeff + offset;
+                }
+
+                // First triangle
+                *(vertex++) = v[1]; // Top-right
+                *(vertex++) = v[0]; // Top-left
+                *(vertex++) = v[3]; // Bottom-left
+
+                // Second triangle
+                *(vertex++) = v[3]; // Bottom-left
+                *(vertex++) = v[2]; // Bottom-right
+                *(vertex++) = v[1]; // Top-right
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+void WindowQuadList::makeArrays(float **vertices, float **texcoords, const QSizeF &size, bool yInverted) const
+{
+    *vertices = new float[count() * 6 * 2];
+    *texcoords = new float[count() * 6 * 2];
+
+    float *vpos = *vertices;
+    float *tpos = *texcoords;
+
+     // Note: The positions in a WindowQuad are stored in clockwise order
+    const int index[] = { 1, 0, 3, 3, 2, 1 };
+
+    for (int i = 0; i < count(); i++) {
+        const WindowQuad &quad = at(i);
+
+        for (int j = 0; j < 6; j++) {
+            const WindowVertex &wv = quad[index[j]];
+
+            *vpos++ = wv.x();
+            *vpos++ = wv.y();
+
+            *tpos++ = wv.u() / size.width();
+            *tpos++ = yInverted ? (wv.v() / size.height()) : (1.0 - wv.v() / size.height());
         }
     }
 }

@@ -232,7 +232,7 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QComboBox" name="sortingStrategy">
-       <property name="minimumSize">
+      <property name="minimumSize">
         <size>
          <width>200</width>
          <height>0</height>

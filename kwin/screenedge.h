@@ -35,8 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KDE includes
 #include <KDE/KConfig>
 // Qt
-#include <QtCore/QObject>
-#include <QtCore/QVector>
+#include <QObject>
+#include <QVector>
 #include <QDateTime>
 
 namespace KWin {
@@ -106,7 +106,7 @@ private:
     QPoint m_triggeredPoint;
     QHash<QObject *, QByteArray> m_callBacks;
     bool m_approaching;
-    qreal m_lastApproachingFactor;
+    int m_lastApproachingFactor;
     bool m_blocked;
 };
 
@@ -198,7 +198,6 @@ class ScreenEdges : public QObject
     Q_PROPERTY(int actionBottomLeft READ actionBottomLeft)
     Q_PROPERTY(int actionLeft READ actionLeft)
 public:
-    explicit ScreenEdges(QObject *parent = 0);
     virtual ~ScreenEdges();
     /**
      * @internal
@@ -217,6 +216,10 @@ public:
      * @param forceNoPushBack needs to be called to workaround some DnD clients, don't use unless you want to chek on a DnD event
      */
     void check(const QPoint& pos, const QDateTime &now, bool forceNoPushBack = false);
+    /**
+     * The (dpi dependent) length, reserved for the active corners of each edge - 1/3"
+     */
+    int cornerOffset() const;
     /**
      * Mark the specified screen edge as reserved. This method is provided for external activation
      * like effects and scripts. When the effect/script does no longer need the edge it is supposed
@@ -282,22 +285,7 @@ public:
     ElectricBorderAction actionBottom() const;
     ElectricBorderAction actionBottomLeft() const;
     ElectricBorderAction actionLeft() const;
-    void startMousePolling();
-    void stopMousePolling();
 
-    /**
-     * Singleton getter for this manager.
-     *
-     * Does not create a new instance. If the manager has not been created yet a @c null pointer
-     * is returned.
-     * @see create
-     **/
-    static ScreenEdges *self();
-    /**
-     * Factory method to create the ScreenEdges.
-     * @see self
-     **/
-    static ScreenEdges *create(QObject *parent = NULL);
 public Q_SLOTS:
     void reconfigure();
     /**
@@ -317,11 +305,7 @@ Q_SIGNALS:
      * @c 0.0 meaning far away from the border, @c 1.0 in trigger distance.
      **/
     void approaching(ElectricBorder border, qreal factor, const QRect &geometry);
-    void mousePollingTimerEvent(QPoint cursorPos);
     void checkBlocking();
-
-private Q_SLOTS:
-    void performMousePoll();
 
 private:
     enum { ElectricDisabled = 0, ElectricMoveOnly = 1, ElectricAlways = 2 };
@@ -353,10 +337,9 @@ private:
     ElectricBorderAction m_actionBottom;
     ElectricBorderAction m_actionBottomLeft;
     ElectricBorderAction m_actionLeft;
-    int m_mousePolling;
-    QTimer *m_mousePollingTimer;
+    int m_cornerOffset;
 
-    static ScreenEdges *s_self;
+    KWIN_SINGLETON(ScreenEdges)
 };
 
 /**********************************************************
@@ -471,6 +454,10 @@ inline void ScreenEdges::setConfig(KSharedConfig::Ptr config)
     m_config = config;
 }
 
+inline int ScreenEdges::cornerOffset() const {
+    return m_cornerOffset;
+}
+
 inline const QSize &ScreenEdges::cursorPushBackDistance() const
 {
     return m_cursorPushBackDistance;
@@ -541,12 +528,6 @@ ACTION(actionBottomLeft)
 ACTION(actionLeft)
 
 #undef ACTION
-
-inline ScreenEdges *ScreenEdges::self()
-{
-    Q_ASSERT(s_self);
-    return s_self;
-}
 
 }
 #endif // KWIN_SCREENEDGE_H
