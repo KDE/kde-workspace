@@ -277,10 +277,6 @@ void Image::addDirFromSelectionDialog()
 
 void Image::setSingleImage()
 {
-    if (isPreviewing()) {
-        return;
-    }
-
     if (m_wallpaper.isEmpty()) {
         useSingleImageDefaults();
     }
@@ -345,7 +341,6 @@ void Image::addUrl(const QUrl &url, bool setAsCurrent)
             if (m_mode != SingleImage) {
                 // it's a slide show, add it to the slide show
                 m_slideshowBackgrounds.append(path);
-                m_unseenSlideshowBackgrounds.append(path);
             }
 
             // always add it to the user papers, though
@@ -390,8 +385,7 @@ void Image::setWallpaper(const QString &path)
         setSingleImage();
     } else {
         m_slideshowBackgrounds.append(path);
-        m_unseenSlideshowBackgrounds.clear();
-        m_currentSlide = -1;
+        m_currentSlide = m_slideshowBackgrounds.size() - 2;
         nextSlide();
         updateWallpaperActions();
     }
@@ -403,15 +397,10 @@ void Image::setWallpaper(const QString &path)
 
 void Image::startSlideshow()
 {
-    if (isPreviewing()) {
-        return;
-    }
-
-    if (m_findToken.isEmpty()) {
+    if(m_findToken.isEmpty()) {
         // populate background list
         m_timer.stop();
         m_slideshowBackgrounds.clear();
-        m_unseenSlideshowBackgrounds.clear();
         BackgroundFinder *finder = new BackgroundFinder(this, m_dirs);
         m_findToken = finder->token();
         connect(finder, SIGNAL(backgroundsFound(QStringList,QString)), this, SLOT(backgroundsFound(QStringList,QString)));
@@ -438,7 +427,6 @@ void Image::backgroundsFound(const QStringList &paths, const QString &token)
     }
 
     m_slideshowBackgrounds = paths;
-    m_unseenSlideshowBackgrounds.clear();
     updateWallpaperActions();
     // start slideshow
     if (m_slideshowBackgrounds.isEmpty()) {
@@ -543,8 +531,7 @@ void Image::nextSlide()
         previous = m_wallpaperPackage.filePath("preferred");
     }
 
-    if (m_unseenSlideshowBackgrounds.isEmpty()) {
-        m_unseenSlideshowBackgrounds = m_slideshowBackgrounds;
+    m_currentSlide = KRandom::random() % m_slideshowBackgrounds.size();
 
     m_wallpaperPackage.setPath(m_slideshowBackgrounds.at(m_currentSlide));
 
@@ -594,7 +581,6 @@ void Image::pathCreated(const QString &path)
         QFileInfo fileInfo(path);
         if(fileInfo.isFile() && BackgroundFinder::suffixes().contains(fileInfo.suffix().toLower())) {
             m_slideshowBackgrounds.append(path);
-            m_unseenSlideshowBackgrounds.append(path);
             if(m_slideshowBackgrounds.count() == 1) {
                 nextSlide();
             }
@@ -605,7 +591,6 @@ void Image::pathCreated(const QString &path)
 void Image::pathDeleted(const QString &path)
 {
     if(m_slideshowBackgrounds.removeAll(path)) {
-        m_unseenSlideshowBackgrounds.removeAll(path);
         if(path == m_img) {
             nextSlide();
         }
