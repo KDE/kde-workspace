@@ -239,7 +239,7 @@ add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 
 # libs
 # add_subdirectory(cmake)
-# add_subdirectory(libs)
+add_subdirectory(libs)
 #
 # # system settings (kcontrol replacement)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
