@@ -24,13 +24,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "kwindowlistmenu.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopWidget>
+#include <QApplication>
+#include <QtWidgets/QDesktopWidget>
 #include <QtGui/QPainter>
-#include <QtGui/QX11Info>
+#include <QtX11Extras/QX11Info>
 
 #include <QtDBus/QtDBus>
 #include <klocale.h>
+#include <KLocalizedString>
 #include <kstringhandler.h>
 #ifdef Q_WS_X11
 #include <fixx11h.h>
@@ -61,7 +62,7 @@ class KWindowListMenu::Private
 };
 
 KWindowListMenu::KWindowListMenu( QWidget *parent )
-  : KMenu( parent ), d( new Private )
+  : QMenu( parent ), d( new Private )
 {
 }
 
@@ -151,14 +152,15 @@ void KWindowListMenu::init()
 
         // ok, we have items on this desktop, let's show the title
         if ( items == 1 && numberOfDesktops > 1 ) {
-          if( !onAllDesktops )
-              addTitle( KWindowSystem::desktopName( j ) );
-          else
-              addTitle( i18n( "On All Desktops" ) );
+          if( !onAllDesktops ) {
+              //addTitle( KWindowSystem::desktopName( j ) );
+          } else {
+              //addTitle( i18n( "On All Desktops" ) );
+          }
         }
 
         // Avoid creating unwanted accelerators.
-        itemText.replace( '&', QLatin1String( "&&" ));
+        itemText.replace( QString::fromLatin1("&"), QString::fromLatin1("&&"));
 
         QAction* action = addAction( pm, itemText, this, SLOT( slotForceActiveWindow() ) );
         action->setData( (quintptr)info->win() );
@@ -218,13 +220,13 @@ void KWindowListMenu::selectActiveWindow()
 
 void KWindowListMenu::slotUnclutterWindows()
 {
-    org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+    org::kde::KWin kwin(QString::fromLatin1("org.kde.kwin"), QString::fromLatin1("/KWin"), QDBusConnection::sessionBus());
     kwin.unclutterDesktop();
 }
 
 void KWindowListMenu::slotCascadeWindows()
 {
-    org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+    org::kde::KWin kwin(QString::fromLatin1("org.kde.kwin"), QString::fromLatin1("/KWin"), QDBusConnection::sessionBus());
     kwin.cascadeDesktop();
 }
 

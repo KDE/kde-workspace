@@ -26,7 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define KWINDOWLISTMENU_H
 
 #include "kworkspace_export.h"
-#include <kmenu.h>
+#include <QMenu>
 
 /**
  * This class provides a menu which contains actions
@@ -34,7 +34,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * for example an accessable there via the menu button of
  * the window decoration.
  */
-class KWORKSPACE_EXPORT KWindowListMenu : public KMenu
+class KWORKSPACE_EXPORT KWindowListMenu : public QMenu
 {
     Q_OBJECT
 
