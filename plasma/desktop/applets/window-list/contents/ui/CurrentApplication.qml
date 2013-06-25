@@ -41,7 +41,7 @@ Item {
             height: 500
             icon: active_win.icon
         }
-        Window_3 {
+        TextStyle {
             id: text_style
             width: parent.width
             text: active_win.text

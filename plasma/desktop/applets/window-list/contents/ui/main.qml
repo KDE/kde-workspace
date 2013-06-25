@@ -96,11 +96,11 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
             }
             return pos;
         }
-        function makeWindow_2Visible(visibility) {
+        function makeTaskListVisible(visibility) {
             dialogContainer.visible = visibility;
             dialog.visible = visibility;
         }
-        function adjustWindow_2Height(dy) {
+        function adjustTaskListHeight(dy) {
             dialogContainer.height += dy;
             dialog.height += dy;
         }
@@ -141,7 +141,7 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
                 }
             }
         }
-        Window_1 {
+        CurrentApplication {
             id:active_win
             width: main.width
             height:width
@@ -160,10 +160,10 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
                 }
             }
         }
-        Window_4 {
+        TaskRow {
             id: listDelegate 
         }
-        Window_2 { 
+        TaskList { 
             id: dialog 
         }
         Timer {
@@ -197,11 +197,11 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
             onActiveWindowChanged: {
                 if (main.newWindowId == wid)
                     active_win.state = "newWindowAdded";
-                print(active_win.state)
+                
                 active_win.state = main.isMaximized(wid) ? "maximized" : "unmaximized"
                 main.newWindowId = "";
                 if (dialog.visible)
-                    main.makeWindow_2Visible(false);
+                    main.makeTaskListVisible(false);
             }
             onWindowAdded: {
                 var size = main.appIconSize + dialog.itemSpacing;
@@ -217,7 +217,7 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
             }
             onWorkspaceActivated: {
                 if (dialog.visible)
-                    main.makeWindow_2Visible(false);
+                    main.makeTaskListVisible(false);
                 main.activeWindowId = ""
                 active_win.setIcon("preferences-system-windows")
                 active_win.setBackgroundHints(0)
@@ -237,9 +237,9 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
                 dialogContainer.x = pos.x;
                 dialogContainer.y = pos.y;
                 if (dialogContainer.visible)
-                    main.makeWindow_2Visible(false);
+                    main.makeTaskListVisible(false);
                 else
-                    main.makeWindow_2Visible(true);
+                    main.makeTaskListVisible(true);
             }
             onMaximizeClicked: {
                 main.setWindowMaximized(main.activeWindowId, true);

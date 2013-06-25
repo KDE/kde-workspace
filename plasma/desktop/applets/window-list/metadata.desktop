@@ -14,5 +14,5 @@ X-KDE-PluginInfo-Website=plasma.kde.org
 X-KDE-ServiceTypes=Plasma/Applet
 X-Plasma-API=declarativeappletscript
 X-Plasma-DefaultSize=200,200
-X-Plasma-MainScript=qml/main.qml
+X-Plasma-MainScript=ui/main.qml
 X-Plasma-RemoteLocation=

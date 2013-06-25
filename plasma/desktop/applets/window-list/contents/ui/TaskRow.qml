@@ -41,7 +41,7 @@ Component {
 	        orientation: Qt.Horizontal
 	        icon: main.data[DataEngineSource]['icon']
             }
-            Window_3 {
+            TextStyle {
                 id: text_style
                 width: parent.width
                 smooth: true
