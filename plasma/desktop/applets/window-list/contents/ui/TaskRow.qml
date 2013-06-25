@@ -40,7 +40,8 @@ Component {
                 id: text_style
                 width: parent.width
                 smooth: true
-                font.italic: { (minimized == true) ? true : false }	    text: name
+                font.italic: { (minimized == true) ? true : false }	  
+                text: name
             }
             Behavior on opacity {
                 PropertyAnimation { duration: 300 }

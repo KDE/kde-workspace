@@ -37,7 +37,7 @@ Item {
             bottom:parent.bottom
             right:parent.right
         }
-        opacity:constrained ? 0 : 1
+        opacity:1
     }
 }
 

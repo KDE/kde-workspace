@@ -52,28 +52,29 @@ Item {
         source.startOperationCall(data);
     }
     function setWindowMaximized(id, state) {
-        if (!id)
+        if (!id) {
             return;
+        }
         var source = tasksSource.serviceForSource(id);
         var data = source.operationDescription("setMaximized");
         data['maximized'] = state;
         source.startOperationCall(data);
     }
     function isMaximized(id) {
-        print(id);
-        if (!id)
+        if (!id) {
             return false;
+        }
         return tasksSource.data[id]['maximized'];
     }
     function isMinimized(id) {
-        if (!id) 
+        if (!id) {
             return false;
+        }
         return tasksSource.data[id]['minimized'];
     }
     function getPopupPosition(dialogContainer, object) {
         var location = plasmoid.locoation;
         var pos = dialogContainer.popupPosition(object);
-        print("Pos " + pos.x + "," + pos.y);
         switch(location) {
             case Floating: 
             case TopEdge: {
@@ -128,7 +129,7 @@ Item {
         }
         Component.onCompleted: {
             connectedSources = sources;
-            for (var key in sources){
+            for (var key in sources) {
                 var s = sources[key];
                 main.windowAdded(s);
             }
@@ -163,10 +164,11 @@ Item {
         id: workspaceTimer
         interval: 100
         onTriggered: {
-            if (main.activeWorkspace)
+            if (main.activeWorkspace) {
                 main.workspaceActivated();
-            else
+            } else {
                 workspaceTimer.stop();
+            }
         }
     }
     PlasmaCore.Dialog {
@@ -189,33 +191,9 @@ Item {
                 minimumHeight=main.height/3.5
             }
         }
-        onActiveWindowChanged: {
-            if (main.newWindowId == wid)
-                active_win.state = "newWindowAdded";
-            active_win.state = main.isMaximized(wid) ? "maximized" : "unmaximized"
-            main.newWindowId = "";
-            if (dialog.visible)
-                main.makeTaskListVisible(false);
-        }
-        onWindowAdded: {
-            var size = main.appIconSize + dialog.itemSpacing;
-            dialog.listView.spacing=0
-        }
-        onWindowRemoved: {
-                var size = main.appIconSize + dialog.itemSpacing;
-                dialog.listView.spacing=0
-        }
-        onWorkspaceActivated: {
-            if (dialog.visible)
-                main.makeTaskListVisible(false);
-            main.activeWindowId = ""
-            active_win.setIcon("preferences-system-windows")
-            active_win.setBackgroundHints(0)
-            active_win.state = "noWindow"
-        }
     }
     PlasmaCore.ToolTip {
-        target: mouseArea
+        target: active_win
         mainText:"Window list"
         subText:"Show list of opened windows"
         image:"preferences-system-windows"
@@ -226,10 +204,12 @@ Item {
             var pos = main.getPopupPosition(dialogContainer, active_win);
             dialogContainer.x = pos.x;
             dialogContainer.y = pos.y;
-            if (dialogContainer.visible)
+            if (dialogContainer.visible) {
                 main.makeTaskListVisible(false);
-            else
+            }
+            else {
                 main.makeTaskListVisible(true);
+            }
         }
         onMaximizeClicked: {
             main.setWindowMaximized(main.activeWindowId, true);

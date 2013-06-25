@@ -18,11 +18,10 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 
-
 Item {
     id: listWidget  
-    property alias listView: task_list  
-    property int itemSpacing: 0  
+    property alias listView: task_list
+    property int itemSpacing: 0
     height: task_list.height + padding
     width: task_list.width
     property int padding:0

@@ -70,18 +70,22 @@ Item {
         anchors.fill: minMaximizeIcon
         hoverEnabled: true
         onEntered: {
-	    if (minMaximizeIcon.opacity == 1)
+	    if (minMaximizeIcon.opacity == 1) {
 	        minMaximizeIcon.opacity = .4
+            }
         }
         onExited: {
-            if (minMaximizeIcon.opacity != 0)
+            if (minMaximizeIcon.opacity != 0) {
 	        minMaximizeIcon.opacity = 1
+            }
         }
         onClicked: {
-            if (active_win.state == "maximized")
+            if (active_win.state == "maximized") {
 	        active_win.unmaximizeClicked()
-            if (active_win.state == "unmaximized") 
+            }
+            if (active_win.state == "unmaximized") {
 	        active_win.maximizeClicked()
+            }
         }
     }
     states: [
@@ -104,11 +108,6 @@ Item {
             PropertyChanges {
 	        target: minMaximizeIcon
 	        elementId: "maximize"
-	        opacity: 1
-	        visible: true
-            }
-            PropertyChanges {
-	        target: closeIcon
 	        opacity: 1
 	        visible: true
             }
