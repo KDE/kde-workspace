@@ -39,6 +39,7 @@ Item {
     signal windowRemoved(string wid);
     signal windowStateChanged(string wid);
     signal workspaceActivated;
+    
     function closeWindow(id) {
         if (!id)
             return;
@@ -46,11 +47,13 @@ Item {
         var data = source.operationDescription("close");
         source.startOperationCall(data);
     }
+    
     function activateWindow(id) {
         var source = tasksSource.serviceForSource(id);
         var data = source.operationDescription("activate");
         source.startOperationCall(data);
     }
+    
     function setWindowMaximized(id, state) {
         if (!id) {
             return;
@@ -60,18 +63,21 @@ Item {
         data['maximized'] = state;
         source.startOperationCall(data);
     }
+    
     function isMaximized(id) {
         if (!id) {
             return false;
         }
         return tasksSource.data[id]['maximized'];
     }
+    
     function isMinimized(id) {
         if (!id) {
             return false;
         }
         return tasksSource.data[id]['minimized'];
     }
+    
     function getPopupPosition(dialogContainer, object) {
         var location = plasmoid.locoation;
         var pos = dialogContainer.popupPosition(object);
@@ -97,10 +103,12 @@ Item {
         }
         return pos;
     }
+    
     function makeTaskListVisible(visibility) {
         dialogContainer.visible = visibility;
         dialog.visible = visibility;
     }
+    
     PlasmaCore.DataSource {
         id: tasksSource
         engine: "tasks"
@@ -135,6 +143,7 @@ Item {
             }
         }
     }
+    
     CurrentApplication {
         id:active_win
         width: main.width
@@ -154,12 +163,15 @@ Item {
             enabled:false
         }
     }
+    
     TaskRow {
         id: listDelegate
     }
+    
     TaskList { 
         id: dialog 
     }
+    
     Timer {
         id: workspaceTimer
         interval: 100
@@ -171,6 +183,7 @@ Item {
             }
         }
     }
+    
     PlasmaCore.Dialog {
         id: dialogContainer
         visible: false
@@ -181,6 +194,7 @@ Item {
             setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
         }
     }
+    
     Connections {
         target: plasmoid
         onFormFactorChanged: {
@@ -192,12 +206,14 @@ Item {
             }
         }
     }
+    
     PlasmaCore.ToolTip {
         target: active_win
         mainText:"Window list"
         subText:"Show list of opened windows"
         image:"preferences-system-windows"
     }
+    
     Connections {
         target: active_win
         onCurrentAppWidgetClicked: {
