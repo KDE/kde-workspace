@@ -100,10 +100,6 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
             dialogContainer.visible = visibility;
             dialog.visible = visibility;
         }
-        function adjustTaskListHeight(dy) {
-            dialogContainer.height += dy;
-            dialog.height += dy;
-        }
         PlasmaCore.DataSource {
             id: tasksSource
             engine: "tasks"
@@ -197,7 +193,6 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
             onActiveWindowChanged: {
                 if (main.newWindowId == wid)
                     active_win.state = "newWindowAdded";
-                
                 active_win.state = main.isMaximized(wid) ? "maximized" : "unmaximized"
                 main.newWindowId = "";
                 if (dialog.visible)
@@ -206,14 +201,10 @@ import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
             onWindowAdded: {
                 var size = main.appIconSize + dialog.itemSpacing;
                 dialog.listView.spacing=0
-                dialog.listView.height += size
-                dialog.listVIew.width+=size
             }
             onWindowRemoved: {
                 var size = main.appIconSize + dialog.itemSpacing;
                 dialog.listView.spacing=0
-                dialog.listView.height -= size
-                dialog.listView.width-=size
             }
             onWorkspaceActivated: {
                 if (dialog.visible)
