@@ -39,6 +39,7 @@ Item {
     signal windowRemoved(string wid);
     signal windowStateChanged(string wid);
     signal workspaceActivated;
+    state: "default"
     
     function closeWindow(id) {
         if (!id)
@@ -143,6 +144,28 @@ Item {
             }
         }
     }
+   /*property Component compactRepresentation: Component {
+            PlasmaCore.IconItem  {
+            width:main.width
+            height:width
+            smooth: true
+            source: "preferences-system-windows.png"
+            anchors {
+                left:parent.left
+                right:parent.right
+                top:parent.top
+                bottom:parent.bottom
+                centerIn:parent
+            }
+            enabled:
+           MouseArea {
+               anchors.fill:parent
+               onClicked: {
+                   plasmoid.togglePopup ()
+               }
+           }
+        }
+    }*/
     
     CurrentApplication {
         id:active_win
@@ -189,10 +212,13 @@ Item {
         visible: false
         mainItem: dialog
         Component.onCompleted: {
+            plasmoid.setMinimumSize(50, 50)
+           // plasmoid.popupIcon("preferences-system-windows.png")
             plasmoid.popupIcon = "preferences-system-windows.png"
             plasmoid.setBackgroundHints( 0 )
-            plasmoid.aspectRatioMode = IgnoreAspectRatio;
+            plasmoid.aspectRatioMode = "ConstrainedSquare"
             setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
+            plasmoid.status = PassiveStatus
         }
     }
     
