@@ -20,21 +20,16 @@ import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
 
 Component {
-  
     Item {
-    
         signal closeClicked(string wid)
         signal activateWindow(string wid)
         width: task_list.width
         height: 32
         clip: true
         state: "unminized"
-        
-    
         Row {
             id: taskRow
-            width: dialog.width 
-            
+            width: dialog.width
             PlasmaWidgets.IconWidget {
 	        id: taskIconWidget
 	        maximumIconSize: "32x32"
@@ -51,7 +46,6 @@ Component {
                 PropertyAnimation { duration: 300 }
             }
         }
-
         MouseArea {
             anchors.fill: taskRow
             hoverEnabled: true
@@ -71,8 +65,6 @@ Component {
                 main.activateWindow(DataEngineSource);
             }
         }
-    
-    
         PlasmaCore.SvgItem {
             id: closeIcon
             anchors.verticalCenter: parent.verticalCenter
@@ -86,7 +78,6 @@ Component {
 	        PropertyAnimation { duration: 300 }
             }
         }
-    
         MouseArea {
             anchors.fill: closeIcon
             hoverEnabled: true
@@ -102,8 +93,6 @@ Component {
         	main.closeWindow(DataEngineSource);
             }
         }
-    
-    
         PlasmaCore.Svg {
             id: winOperationSvg
             imagePath: "widgets/configuration-icons"

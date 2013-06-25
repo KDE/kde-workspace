@@ -29,7 +29,6 @@ Item {
     Column {
         id:col
         width:task_list.width
-        
         Rectangle {
             width:400
             height:30

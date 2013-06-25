@@ -28,7 +28,6 @@ Item {
     property int fontSize : 5
     property alias font: text_style.font
     property int interval : 40
-    
     Components.Label {
         id:text_style
         text:parent.text
