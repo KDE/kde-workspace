@@ -189,6 +189,7 @@ Item {
         visible: false
         mainItem: dialog
         Component.onCompleted: {
+            plasmoid.popupIcon = "preferences-system-windows.png"
             plasmoid.setBackgroundHints( 0 )
             plasmoid.aspectRatioMode = IgnoreAspectRatio;
             setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
