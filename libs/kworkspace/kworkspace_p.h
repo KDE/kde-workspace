@@ -37,7 +37,7 @@ class KRequestShutdownHelper
         KRequestShutdownHelper();
         virtual ~KRequestShutdownHelper();
         bool requestShutdown( ShutdownConfirm confirm );
-    private slots:
+    private Q_SLOTS:
         void processData();
     private:
 #ifdef Q_WS_X11

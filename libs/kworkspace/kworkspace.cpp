@@ -255,4 +255,4 @@ void propagateSessionManager()
 
 } // end namespace
 
-#include "kworkspace_p.moc"
+#include "kworkspace.moc"
