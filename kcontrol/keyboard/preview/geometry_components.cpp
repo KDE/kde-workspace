@@ -1,62 +1,56 @@
 #include "geometry_components.h"
 
-#include <iostream>
-
-cordinate::cordinate(){
-    x=0;
-    y=0;
-}
-
-cordinate::cordinate(int &a, int &b){
-    x=a;
-    y=b;
-}
+#include <QtCore/QString>
+#include <QtCore/QDebug>
+#include <QtCore/QPoint>
 
 Shape::Shape(){
     cordi_count = 0;
 }
 
-void Shape::setShape(std::string n){
+void Shape::setShape(QString n){
     sname = n;
 }
 
-void Shape::setCordinate(int &a, int &b){
-    cordii[cordi_count++] = cordinate(a,b);
+void Shape::setCordinate(double &a, double &b){
+    cordii[cordi_count++] = QPoint(a,b);
 }
 
-void Shape::setApprox(int &a, int &b){
-    approx = cordinate(a,b);
+void Shape::setApprox(double &a, double &b){
+    a-=approx.x();
+    b-=approx.y();
+    approx = QPoint(a,b);
 }
 
 void Shape::display(){
-    std::cout<<"shape: "<<sname<<"\n";
-    std::cout<<"( "<<approx.x<<", "<<approx.y<<"); ";
+    qDebug()<<"shape: "<<sname<<"\n";
+    qDebug()<<"( "<<approx.x()<<", "<<approx.y()<<"); ";
     for(int i=0;i<cordi_count;i++)
-            std::cout<<"( "<<cordii[i].x<<", "<<cordii[i].y<<"); ";
-    std::cout<<"\n";
+            qDebug()<<"( "<<cordii[i].x()<<", "<<cordii[i].y()<<"); ";
+    qDebug()<<"\n";
 }
 
-int Shape::size(){
-    if (approx.x == 0 && approx.y== 0)
-        return cordii[0].x;
+double Shape::size(){
+    if (approx.x() == 0 && approx.y() == 0)
+        return cordii[0].x();
     else
-        return approx.x;
+        return approx.x();
 }
 
 Key::Key(){
     offset = 0;
 }
-void Key::getKey(int &o){
+void Key::getKey(double &o){
     offset = o;
 }
 
-void Key::setKeyPosition(int &x, int &y){
-    position = cordinate(x,y);
+void Key::setKeyPosition(double &x, double &y){
+    position = QPoint(x,y);
 }
 
 void Key::showKey(){
-    std::cout<<"\n\tKey: "<<name<<"\tshape: "<<shapeName<<"\toffset: "<<offset;
-    std::cout<<"\tposition"<<position.x<<" , "<<position.y<<std::endl;
+    qDebug()<<"\n\tKey: "<<name<<"\tshape: "<<shapeName<<"\toffset: "<<offset;
+    qDebug()<<"\tposition"<<position.x()<<" , "<<position.y()<<"\n";
 }
 
 Row::Row(){
@@ -65,18 +59,18 @@ Row::Row(){
     keyCount = 0;
 }
 
-void Row::getRow(int t,int l){
+void Row::getRow(double t,double l){
     top = t;
     left = l;
 }
 
 void Row::addKey(){
-    std::cout<<"keyCount: "<<keyCount;
+    qDebug()<<"keyCount: "<<keyCount;
     keyCount++;
 }
 
 void Row::displayRow(){
-    std::cout<<"\nRow: "<<top<<","<<left<<std::endl;
+    qDebug()<<"\nRow: "<<top<<","<<left<<"\n";
     for(int i=0;i<keyCount;i++)
     keyList[i].showKey();
 }
@@ -88,19 +82,19 @@ Section::Section(){
     rowCount = 0;
 }
 
-void Section::getName(std::string n){
+void Section::getName(QString n){
     name = n;
 }
 
 void Section::addRow(){
-    std::cout<<"\nrowCount: "<<rowCount;
+    qDebug()<<"\nrowCount: "<<rowCount;
     rowCount++;
 }
 
 void Section::displaySection(){
-    std::cout<<"\nSection: "<<name<<"\n\tposition: ("<<left<<","<<top<<");"<<angle<<std::endl;
+    qDebug()<<"\nSection: "<<name<<"\n\tposition: ("<<left<<","<<top<<");"<<angle<<"\n";
     for(int i=0;i<rowCount;i++){
-            std::cout<<"\n\t";
+            qDebug()<<"\n\t";
             rowList[i].displayRow();
     }
 }
@@ -117,11 +111,11 @@ Geometry::Geometry(){
     sectionCount = 0;
 }
 
-void Geometry::getName(std::string n){
+void Geometry::getName(QString n){
     name = n;
 }
 
-void Geometry::getDescription(std::string n){
+void Geometry::getDescription(QString n){
     description = n;
 }
 
@@ -133,15 +127,15 @@ void Geometry::getHeight(int a){
     height = a;
 }
 
-void Geometry::getShapeName(std::string n){
+void Geometry::getShapeName(QString n){
     shapes[shape_count].setShape(n);
 }
 
-void Geometry::getShapeCord(int a, int b){
+void Geometry::getShapeCord(double a, double b){
     shapes[shape_count].setCordinate(a,b);
 }
 
-void Geometry::getShapeApprox(int a, int b){
+void Geometry::getShapeApprox(double a, double b){
     shapes[shape_count].setApprox(a,b);
 }
 
@@ -150,8 +144,8 @@ void Geometry::getShape(){
 }
 
 void Geometry::display(){
-    std::cout<<name<<"\n"<<description<<"\nwidth: "<<width<<"\nheight: "<<height<<"\n"<<"sectionTop: "<<sectionTop;
-    std::cout<<"\nsectionLeft: "<<sectionLeft<<"\nrowTop: "<<rowTop<<"\nrowLeft: "<<rowLeft<<"\nkeyGap: "<<keyGap<<"\nkeyShape: "<<keyShape<<std::endl;
+    qDebug()<<name<<"\n"<<description<<"\nwidth: "<<width<<"\nheight: "<<height<<"\n"<<"sectionTop: "<<sectionTop;
+    qDebug()<<"\nsectionLeft: "<<sectionLeft<<"\nrowTop: "<<rowTop<<"\nrowLeft: "<<rowLeft<<"\nkeyGap: "<<keyGap<<"\nkeyShape: "<<keyShape<<"\n";
     for (int i=0;i<shape_count;i++){
             shapes[i].display();
     }
@@ -160,11 +154,11 @@ void Geometry::display(){
 }
 
 void Geometry::addSection(){
-    std::cout<<"\nsectionCount: "<<sectionCount;
+    qDebug()<<"\nsectionCount: "<<sectionCount;
     sectionCount++;
 }
 
-Shape Geometry::findShape(std::string name){
+Shape Geometry::findShape(QString name){
     Shape l;
     for(int i=0;i<shape_count;i++){
             if (shapes[i].sname == name){

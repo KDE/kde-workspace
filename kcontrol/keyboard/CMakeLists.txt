@@ -100,6 +100,9 @@ install( TARGETS keyboard_layout_widget DESTINATION ${PLUGIN_INSTALL_DIR} )
 ### kcm keyboard ###
 include_directories("preview")
 
+set (CMAKE_CXX_FLAGS "-fexceptions")
+set (CMAKE_CXX_FLAGS "-fpermissive")
+
 set(kcm_keyboard_PART_SRCS 
   kcm_keyboard.cpp
   kcm_keyboard_widget.cpp
@@ -121,8 +124,8 @@ set(kcm_keyboard_PART_SRCS
   preview/kbpreviewframe.cpp
   preview/keysym2ucs.cpp
   preview/geometry_components.cpp
+  preview/geometry_parser.cpp
 )
-
 
 kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui)
 
