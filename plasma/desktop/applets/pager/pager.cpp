@@ -799,7 +799,7 @@ void Pager::changeDesktop(int newDesktop)
 
 QPixmap Pager::shadowText(const QString &text)
 {
-    QColor textColor = m_pagerStyle["textColor"].value<QColor>();
+    QColor textColor = Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor);
 
     return Plasma::PaintUtils::shadowText(text,
                                           KGlobalSettings::smallestReadableFont(),
