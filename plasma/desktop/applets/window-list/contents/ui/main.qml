@@ -28,9 +28,9 @@ Item {
     property string activeWindowId: "";
     property string newWindowId: "";
     property bool activeWorkspace : false;
-    property int closeIconSize: 10
-    property int winOperationIconSize: 10
-    property int appIconSize: 10
+    property int closeIconSize: 7
+    property int winOperationIconSize: 7
+    property int appIconSize: 7
     property alias data: tasksSource.data;
     property alias connectedSources: tasksSource.connectedSources;
     signal activeWindowChanged(string wid);
@@ -107,13 +107,11 @@ Item {
             connectSource(source);
             main.newWindowId = source;
             main.windowAdded(source);
-            print("onSourceAdded: " + source)
         }
         onNewData: {
             if (data['minimized']) {
                 if (main.activeWindowId == sourceName) {
                     main.activeWindowMinimized();
-                    print("Minimizing " + sourceName)
                 }
             }
             if (data['active']) {
@@ -132,7 +130,6 @@ Item {
             connectedSources = sources;
             for (var key in sources){
                 var s = sources[key];
-                print(s + " added");
                 main.windowAdded(s);
             }
         }
@@ -176,6 +173,7 @@ Item {
         visible: false
         mainItem: dialog
         Component.onCompleted: {
+            plasmoid.setBackgroundHints( 0 )
             setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
         }
     }

@@ -30,7 +30,7 @@ Item {
         id:col
         width:task_list.width
         Rectangle {
-            width:400
+            width: dialogContainer.width
             height:30
             color:"lightgrey"
             border.width:5
@@ -51,7 +51,7 @@ Item {
             }
         }
         Rectangle {
-            width:400
+            width: dialogContainer.width
             height:30
             color:"transparent"
             Components.Label {
@@ -76,7 +76,7 @@ Item {
             }
         }
         Rectangle {
-            width:400
+            width: dialogContainer.width
             height:30
             color:"transparent"
             Components.Label {
@@ -101,7 +101,7 @@ Item {
             }
         }
         Rectangle {
-            width:400
+            width: dialogContainer.width
             height:30
             color:"lightgrey"
             border.width:5
@@ -123,8 +123,8 @@ Item {
         }
         ListView {
             id: task_list
-            height: 400
-            width: 400
+            width: dialogContainer.width
+            height:dialogContainer.height
             model: PlasmaCore.DataModel { dataSource: tasksSource }
             delegate: listDelegate
             highlightRangeMode: ListView.StrictlyEnforceRange
