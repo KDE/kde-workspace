@@ -150,6 +150,7 @@ Item {
                 bottom:parent.bottom
                 centerIn:parent
             }
+            enabled:false
         }
     }
     TaskRow {
@@ -174,6 +175,7 @@ Item {
         mainItem: dialog
         Component.onCompleted: {
             plasmoid.setBackgroundHints( 0 )
+            plasmoid.aspectRatioMode = IgnoreAspectRatio;
             setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
         }
     }
