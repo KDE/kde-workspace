@@ -20,16 +20,9 @@ unset DYLD_FORCE_FLAT_NAMESPACE
 bindir=`echo "$0" | sed -n 's,^\(/.*\)/[^/][^/]*$,\1,p'`
 if [ -n "$bindir" ]; then
   qbindir=`$bindir/kde4-config --qt-binaries`
-  if [ -n "$qbindir" ]; then
-    case $PATH in
-      $qbindir|$qbindir:*|*:$qbindir|*:$qbindir:*) ;;
-      *) PATH=$qbindir:$PATH; export PATH;;
-    esac
-  fi
-  case $PATH in
-    $bindir|$bindir:*|*:$bindir|*:$bindir:*) ;;
-    *) PATH=$bindir:$PATH; export PATH;;
-  esac
+  qdbus=$qbindir/qdbus
+else
+  qdbus=qdbus
 fi
 
 # Check if a KDE session already is running and whether it's possible to connect to X
@@ -276,7 +269,7 @@ export XDG_DATA_DIRS
 if test -z "$DBUS_SESSION_BUS_ADDRESS" ; then
     eval `dbus-launch --sh-syntax --exit-with-session`
 fi
-if qdbus >/dev/null 2>/dev/null; then
+if $qdbus >/dev/null 2>/dev/null; then
     : # ok
 else
     echo 'startkde: Could not start D-Bus. Can you call qdbus?'  1>&2
@@ -362,13 +355,13 @@ if test x"$wait_drkonqi"x = x"true"x ; then
     # wait for remaining drkonqi instances with timeout (in seconds)
     wait_drkonqi_timeout=`kreadconfig --file startkderc --group WaitForDrKonqi --key Timeout --default 900`
     wait_drkonqi_counter=0
-    while qdbus | grep "^[^w]*org.kde.drkonqi" > /dev/null ; do
+    while $qdbus | grep "^[^w]*org.kde.drkonqi" > /dev/null ; do
         sleep 5
         wait_drkonqi_counter=$((wait_drkonqi_counter+5))
         if test "$wait_drkonqi_counter" -ge "$wait_drkonqi_timeout" ; then
             # ask remaining drkonqis to die in a graceful way
-            qdbus | grep 'org.kde.drkonqi-' | while read address ; do
-                qdbus "$address" "/MainApplication" "quit"
+            $qdbus | grep 'org.kde.drkonqi-' | while read address ; do
+                $qdbus "$address" "/MainApplication" "quit"
             done
             break
         fi
