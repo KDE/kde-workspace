@@ -41,7 +41,7 @@ Item {
     }
 
     SequentialAnimation {
-      running: percent < 5 && !pluggedIn && animate
+      running: percent <= 5 && !pluggedIn && animate
       alwaysRunToEnd: true
       loops: Animation.Infinite
 

@@ -137,7 +137,7 @@ function iconForBattery(batteryData,pluggedIn) {
             if (pluggedIn && batteryData["Is Power Supply"]) {
                 return "battery-charging-" + fill;
             } else {
-                if (p < 5) {
+                if (p <= 5) {
                     return "dialog-warning"
                 }
                 return "battery-" + fill;
