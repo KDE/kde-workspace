@@ -153,9 +153,9 @@ void KWindowListMenu::init()
         // ok, we have items on this desktop, let's show the title
         if ( items == 1 && numberOfDesktops > 1 ) {
           if( !onAllDesktops ) {
-              //addTitle( KWindowSystem::desktopName( j ) );
+              addSection( KWindowSystem::desktopName( j ) );
           } else {
-              //addTitle( i18n( "On All Desktops" ) );
+              addSection( i18n( "On All Desktops" ) );
           }
         }
 
