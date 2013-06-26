@@ -109,7 +109,7 @@ Item {
                 return "Fill30";
             } else if (p >= 15) {
                 return "Fill20";
-            } else if (p >= 5) {
+            } else if (p > 5) {
                 return "Fill10";
             }
             return "";
