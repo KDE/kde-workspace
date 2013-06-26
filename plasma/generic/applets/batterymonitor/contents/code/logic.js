@@ -192,17 +192,17 @@ function updateTooltip() {
     batteries.tooltipImage = image;
 }
 
-function updateBrightness() {
+function updateBrightness(source) {
     // we don't want passive brightness change send setBrightness call
-    if (!pmSource.data["PowerDevil"]) {
+    if (!source.data["PowerDevil"]) {
         return;
     }
     dialogItem.disableBrightnessUpdate = true;
-    if (pmSource.data["PowerDevil"]["Screen Brightness"]) {
-        dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
+    if (source.data["PowerDevil"]["Screen Brightness"]) {
+        dialogItem.screenBrightness = source.data["PowerDevil"]["Screen Brightness"];
     }
-    if (pmSource.data["PowerDevil"]["Keyboard Brightness"]) {
-        dialogItem.keyboardBrightness = pmSource.data["PowerDevil"]["Keyboard Brightness"];
+    if (source.data["PowerDevil"]["Keyboard Brightness"]) {
+        dialogItem.keyboardBrightness = source.data["PowerDevil"]["Keyboard Brightness"];
     }
     dialogItem.disableBrightnessUpdate = false;
 }

@@ -49,7 +49,7 @@ Item {
         plasmoid.status = Logic.plasmoidStatus();
         Logic.updateTooltip();
         if (updateBrightness) {
-            Logic.updateBrightness();
+            Logic.updateBrightness(pmSource);
         }
     }
 
