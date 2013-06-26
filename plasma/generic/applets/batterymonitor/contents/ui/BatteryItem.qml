@@ -109,7 +109,7 @@ Item {
 
         SequentialAnimation {
           id: chargeAnimation
-          running: showChargeAnimation && model["State"] == "Charging"
+          running: showChargeAnimation && model["State"] == "Charging" && model["Is Power Supply"]
           alwaysRunToEnd: true
           loops: Animation.Infinite
 
