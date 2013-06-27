@@ -114,6 +114,7 @@ Item {
         elementId: "horizontal-line"
         height: lineSvg.elementSize("horizontal-line").height
         width: parent.width
+        visible: model.count
         anchors {
             top: plasmoid.location == BottomEdge ? undefined : settingsColumn.bottom
             bottom: plasmoid.location == BottomEdge ? settingsColumn.top : undefined
