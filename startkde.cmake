@@ -21,6 +21,10 @@ bindir=`echo "$0" | sed -n 's,^\(/.*\)/[^/][^/]*$,\1,p'`
 if [ -n "$bindir" ]; then
   qbindir=`$bindir/kde4-config --qt-binaries`
   qdbus=$qbindir/qdbus
+  case $PATH in
+    $bindir|$bindir:*|*:$bindir|*:$bindir:*) ;;
+    *) PATH=$bindir:$PATH; export PATH;;
+  esac
 else
   qdbus=qdbus
 fi
