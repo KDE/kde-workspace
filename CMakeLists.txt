@@ -99,7 +99,7 @@ set_package_properties(EGL PROPERTIES
                        PURPOSE "Required to build KWin with EGL support"
                       )
 
-find_package(Wayland 1.2 COMPONENTS Client Egl)
+find_package(Wayland 1.2 COMPONENTS Client Egl Cursor)
 set_package_properties(Wayland PROPERTIES
                        TYPE OPTIONAL
                        PURPOSE "Required for building KWin with Wayland support"
