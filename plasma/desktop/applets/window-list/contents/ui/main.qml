@@ -20,13 +20,12 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: main
-    property int minimumWidth: 100
-    property int minimumHeight: 100
+    property int minimumWidth: Math.max(100, windowListMenu.implicitWidth) 
+    property int minimumHeight:  Math.max(100, windowListMenu.implicitHeight) 
     property int maximumWidth
     property int maximumHeight
     property variant desktopList: []
     property int iconSize: theme.smallMediumIconSize 
-    property int smallIconSize: theme.smallIconSize 
     property int defaultMargin:0
     property bool showDesktop: true
     
@@ -54,17 +53,13 @@ Item {
             windowListMenu.pageDown();
     }
     Component.onCompleted: {
-        if (plasmoid.formFactor == Horizontal || plasmoid.formFactor == Vertical) {
             var toolTipData = new Object;
             toolTipData["image"] = "preferences-system-window"; 
             toolTipData["mainText"] = i18n("Window List"); 
             toolTipData["subText"] = i18n("Show list of opened windows");
             plasmoid.popupIconToolTip = toolTipData;
-        }
-        plasmoid.popupIcon = QIcon("preferences-system-windows"); 
-        plasmoid.aspectRatioMode = IgnoreAspectRatio;
-        plasmoid.setMinimumSize(50, 50)
-        plasmoid.setBackgroundHints( 0 )
+            plasmoid.popupIcon = QIcon("preferences-system-windows"); 
+            plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
     PlasmaCore.DataSource {
         id: tasksSource
