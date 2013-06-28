@@ -283,6 +283,7 @@ Name[zh_CN]=幻灯显示
 Name[zh_TW]=投影播放
 Comment=Cycles through a set of images
 Comment[ca]=Passa a través d'un conjunt d'imatges
+Comment[de]=Durchläuft einen Satz Bilder
 Comment[es]=Repetir un conjunto de imágenes
 Comment[fi]=Käy läpi kuvasarjaa
 Comment[gl]=Mostra unha serie de imaxes unha detrás da outra.
