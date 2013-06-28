@@ -39,7 +39,6 @@ Item {
     signal windowRemoved(string wid);
     signal windowStateChanged(string wid);
     signal workspaceActivated;
-    state: "default"
     
     function closeWindow(id) {
         if (!id)
@@ -195,7 +194,6 @@ Item {
             plasmoid.setBackgroundHints( 0 )
             plasmoid.aspectRatioMode = "ConstrainedSquare"
             setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
-            plasmoid.status = PassiveStatus
         }
     }
     
