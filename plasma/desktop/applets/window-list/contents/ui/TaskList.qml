@@ -15,122 +15,96 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
+import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.qtextracomponents 0.1
 
 Item {
-    id: listWidget  
-    property alias listView: task_list
-    property int itemSpacing: 0
-    height: task_list.height + padding
-    width: task_list.width
-    property int padding:0
-    Column {
-        id:col
-        width:task_list.width
-        Rectangle {
-            width: dialogContainer.width
-            height:30
-            color:"lightgrey"
-            border.width:5
-            radius:10
-            border.color:"transparent"
-            rotation: 360
-            gradient: Gradient {
-                GradientStop { position: 1.0; color: "lightgrey" }
-                GradientStop { position: 0.0; color: "grey" }
+    id: menuItem
+    height: childrenRect.height
+    signal clicked()
+    signal entered()
+    signal executeJob(string jobName)
+    signal setOnDesktop(int desktop)
+    property alias name: label.text
+    property variant activities: []
+    property int desktop
+    property alias icon: iconItem.icon
+    property bool active: false
+    property bool minimized: false
+    property bool maximized: false
+    property bool shaded: false
+    property bool alwaysOnTop: false
+    property bool keptBelowOthers: false
+    property bool fullScreen: false
+    property int iconSize: theme.smallMediumIconSize
+    property int iconMargin: 6
+    property bool showDesktop: true
+    property variant desktopItems: []
+    QtObject {
+        id: internal
+        function defineDesktopSubLabel() {
+            if (showDesktop) {
+                var desktopString = i18n("Desktops:");
+                desktopString += desktop <= 0 ? "all" : main.desktopList[desktop-1];
+                subLabelDesktop.text = desktopString;
             }
-            Components.Label {
-                id:actions
-                text:"Actions"
-                anchors {
-                    centerIn:parent
-                }
-                horizontalAlignment:Text.AlignHCenter
-            }
-        }
-        Rectangle {
-            width: dialogContainer.width
-            height:30
-            color:"transparent"
-            Components.Label {
-                id:unclutter
-                text:"Unclutter Windows"
-                anchors {
-                    left:parent.left
-                }
-                horizontalAlignment:Text.AlignHCenter
-            }
-            MouseArea {
-                id: mouse
-                hoverEnabled: true
-                onClicked: active_win.unmaximizeClicked()
-                anchors.fill:parent 
-                onEntered: {
-                    unclutter.opacity = 0.5
-                }
-                onExited: {
-                    unclutter.opacity = 1
-                }
-            }
-        }
-        Rectangle {
-            width: dialogContainer.width
-            height:30
-            color:"transparent"
-            Components.Label {
-                id:cascade
-                text:"Cascade Windows"
-                anchors {
-                    left:parent.left
-                }
-                horizontalAlignment:Text.AlignHCenter
-            }
-            MouseArea {
-                id: mouseArea
-                hoverEnabled: true
-                onReleased:active_win.maximizeClicked()
-                anchors.fill:parent
-                onEntered: {
-                    cascade.opacity = 0.5
-                }
-                onExited: {
-                    cascade.opacity = 1
-                }
-            }
-        }
-        Rectangle {
-            width: dialogContainer.width
-            height:30
-            color:"lightgrey"
-            border.width:5
-            radius:10
-            border.color:"transparent"
-            rotation: 360
-            gradient: Gradient {
-                GradientStop { position: 1.0; color: "lightgrey" }
-                GradientStop { position: 0.0; color: "grey" }
-            }
-            Components.Label {
-                id:text_style
-                text:"Desktop"
-                anchors {
-                    centerIn:parent
-                }
-                horizontalAlignment:Text.AlignHCenter
-            }
-        }
-        ListView {
-            id: task_list
-            width: dialogContainer.width
-            height:dialogContainer.height
-            model: PlasmaCore.DataModel { dataSource: tasksSource }
-            delegate: listDelegate
-            highlightRangeMode: ListView.StrictlyEnforceRange
-            highlight: Rectangle { color: "grey"; radius: 5 }
-            focus: true
-            clip: true
         }
     }
+    onDesktopChanged: internal.defineDesktopSubLabel();
+    TaskRow {
+        id: contextMenu
+        desktop: menuItem.desktop
+        minimized: menuItem.minimized
+        maximized: menuItem.maximized
+        shaded: menuItem.shaded
+        alwaysOnTop: menuItem.alwaysOnTop
+        keptBelowOthers: menuItem.keptBelowOthers
+        fullScreen: menuItem.fullScreen
+        onExecuteJob: menuItem.executeJob(jobName);
+        onSetOnDesktop: menuItem.setOnDesktop(desktop);
+    }
+    Item {
+        id: row
+        width: parent.width
+        height: Math.max(iconItem.height, label.height ) + 4 * menuItem.iconMargin 
+        QIconItem {
+            id: iconItem
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: menuItem.iconMargin
+            width: menuItem.iconSize
+            height: menuItem.iconSize
+        }
+        Column {
+            id: column
+            anchors.left: iconItem.right
+            anchors.right: parent.right
+            anchors.verticalCenter: iconItem.verticalCenter
+            anchors.leftMargin: menuItem.iconMargin
+            PlasmaComponents.Label {
+                id: label
+                width: menuItem.width -  menuItem.iconMargin - iconItem.width
+                height: theme.defaultFont.mSize.height
+                elide: Text.ElideMiddle
+                font.weight: menuItem.active ? Font.Bold : Font.Normal
+                font.italic: { (minimized == true) ? true : false }
+            }
+        }
+    }
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: {
+            if (mouse.button == Qt.LeftButton) {
+                menuItem.clicked();
+            }
+            else if (mouse.button == Qt.RightButton) {
+                    contextMenu.populate();
+                    var mapPos = menuItem.mapToItem(menuItem, mouse.x, mouse.y);
+                    contextMenu.open(mapPos.x, mapPos.y);
+                }
+            }
+        onEntered: menuItem.entered();
+    }
 }
-

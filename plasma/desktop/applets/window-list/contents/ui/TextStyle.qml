@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2013  Heena Mahour <heena393@gmail.com>
  *
@@ -17,27 +16,18 @@
  */
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
-import org.kde.qtextracomponents 0.1
+import org.kde.plasma.components 0.1 as PlasmaComponents
+
 Item {
-    id: text_c
-    height: text_style.height + padding
-    clip: true
-    property string text
-    property int padding :0
-    property int fontSize : 5
-    property alias font: text_style.font
-    property int interval : 40
-    Components.Label {
-        id:text_style
-        text:parent.text
-        anchors {
-            verticalCenter: parent.verticalCenter
-            left:parent.left
-            bottom:parent.bottom
-            right:parent.right
-        }
-        opacity:1
+    id: menuSection
+    height: childrenRect.height
+    property alias text: sectionLabel.text
+    PlasmaComponents.Label {
+        id: sectionLabel	
+        horizontalAlignment: Text.AlignLeft
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font.weight: Font.Bold
+        font.italic: { (minimized == true) ? true : false }
     }
 }
-

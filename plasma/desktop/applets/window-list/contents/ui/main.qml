@@ -16,227 +16,190 @@
  */
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
-    id:main
-    property int minimumWidth:formFactor == Horizontal ? height : 1
-    property int minimumHeight:formFactor == Vertical ? width  : 1
-    property int formFactor: plasmoid.formFactor
-    property bool constrained:formFactor==Vertical||formFactor==Horizontal
-    property string activeWindowId: "";
-    property string newWindowId: "";
-    property bool activeWorkspace : false;
-    property int closeIconSize: 7
-    property int winOperationIconSize: 7
-    property int appIconSize: 7
-    property alias data: tasksSource.data;
-    property alias connectedSources: tasksSource.connectedSources;
-    signal activeWindowChanged(string wid);
-    signal activeWindowMinimized;
-    signal windowAdded(string wid);
-    signal windowRemoved(string wid);
-    signal windowStateChanged(string wid);
-    signal workspaceActivated;
+    id: main
+    property int minimumWidth: 100
+    property int minimumHeight: 100
+    property int maximumWidth
+    property int maximumHeight
+    property variant desktopList: []
+    property int iconSize: theme.smallMediumIconSize 
+    property int smallIconSize: theme.smallIconSize 
+    property int defaultMargin:0
+    property bool showDesktop: true
     
-    function closeWindow(id) {
-        if (!id)
-            return;
-        var source = tasksSource.serviceForSource(id);
-        var data = source.operationDescription("close");
-        source.startOperationCall(data);
+    function executeJob(operationName, source) {
+        var service = tasksSource.serviceForSource(source);
+        var operation = service.operationDescription(operationName);
+        service.startOperationCall(operation);
     }
     
-    function activateWindow(id) {
-        var source = tasksSource.serviceForSource(id);
-        var data = source.operationDescription("activate");
-        source.startOperationCall(data);
+    function setOnDesktop(source, desktop) {
+        var service = tasksSource.serviceForSource(source);
+        var operation = service.operationDescription("toDesktop");
+        operation.desktop = desktop;
+        service.startOperationCall(operation);
     }
     
-    function setWindowMaximized(id, state) {
-        if (!id) {
-            return;
+    Keys.onDownPressed: windowListMenu.incrementCurrentIndex();
+    Keys.onUpPressed: windowListMenu.decrementCurrentIndex();
+    Keys.onReturnPressed: windowListMenu.selectCurrentItem();
+    Keys.onEnterPressed: windowListMenu.selectCurrentItem();
+    Keys.onPressed: {
+        if (event.key == Qt.Key_PageUp)
+            windowListMenu.pageUp();
+        else if (event.key == Qt.Key_PageDown)
+            windowListMenu.pageDown();
+    }
+    Component.onCompleted: {
+        if (plasmoid.formFactor == Horizontal || plasmoid.formFactor == Vertical) {
+            var toolTipData = new Object;
+            toolTipData["image"] = "preferences-system-window"; 
+            toolTipData["mainText"] = i18n("Window List"); 
+            toolTipData["subText"] = i18n("Show list of opened windows");
+            plasmoid.popupIconToolTip = toolTipData;
         }
-        var source = tasksSource.serviceForSource(id);
-        var data = source.operationDescription("setMaximized");
-        data['maximized'] = state;
-        source.startOperationCall(data);
+        plasmoid.popupIcon = QIcon("preferences-system-windows"); 
+        plasmoid.aspectRatioMode = IgnoreAspectRatio;
+        plasmoid.setMinimumSize(50, 50)
+        plasmoid.setBackgroundHints( 0 )
     }
-    
-    function isMaximized(id) {
-        if (!id) {
-            return false;
-        }
-        return tasksSource.data[id]['maximized'];
-    }
-    
-    function isMinimized(id) {
-        if (!id) {
-            return false;
-        }
-        return tasksSource.data[id]['minimized'];
-    }
-    
-    function getPopupPosition(dialogContainer, object) {
-        var location = plasmoid.locoation;
-        var pos = dialogContainer.popupPosition(object);
-        switch(location) {
-            case Floating: 
-            case TopEdge: {
-                pos.y += object.height;
-                break;
-            }
-            case BottomEdge: {
-                pos.y -= object.height;
-            }
-            case LeftEdge: {
-                pos.x += object.width;
-            }
-            case RightEdge: {
-                pos.x -= object.width
-            }
-            case FullScreen: {
-            }
-            default: {
-            }
-        }
-        return pos;
-    }
-    
-    function makeTaskListVisible(visibility) {
-        dialogContainer.visible = visibility;
-        dialog.visible = visibility;
-    }
-    
     PlasmaCore.DataSource {
         id: tasksSource
         engine: "tasks"
         onSourceAdded: {
             connectSource(source);
-            main.newWindowId = source;
-            main.windowAdded(source);
-        }
-        onNewData: {
-            if (data['minimized']) {
-                if (main.activeWindowId == sourceName) {
-                    main.activeWindowMinimized();
-                }
-            }
-            if (data['active']) {
-                main.activeWorkspace = false;
-                main.activeWindowId = sourceName;
-                main.activeWindowChanged(sourceName);
-            } else {
-                workspaceTimer.start();
-                main.activeWorkspace = true;
-            }
-        }
-        onSourceRemoved: {
-            main.windowRemoved(source);
         }
         Component.onCompleted: {
             connectedSources = sources;
-            for (var key in sources) {
-                var s = sources[key];
-                main.windowAdded(s);
+            connectSource("virtualDesktops");
+            main.desktopList = tasksSource.data["virtualDesktops"]["names"];
+        }
+    }
+    PlasmaCore.SortFilterModel {
+        id: tasksModelSortedByDesktop
+        sortRole: "desktop"
+        sourceModel: tasksModel
+    }
+    PlasmaCore.SortFilterModel { 
+        id: tasksModel
+        sourceModel: PlasmaCore.DataModel {
+            dataSource: tasksSource
+        }
+    }
+    Menu {
+        id: windowListMenu
+        anchors.top:parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: main.defaultMargin
+        clip: true;
+        model: tasksModelSortedByDesktop
+        section.property: "desktop"
+        section.criteria: ViewSection.FullString
+        section.delegate: TextStyle {
+            width: parent.width
+            text: tasksSource.data[section]["Name"]
+        }
+        iconSize: main.iconSize
+        showDesktop: main.showDesktop
+        onItemSelected: main.executeJob("activate", source);
+        onExecuteJob: main.executeJob(jobName, source);
+        onSetOnDesktop: main.setOnDesktop(source, desktop);
+        Column {
+            spacing:0
+            Rectangle {
+                width: windowListMenu.width
+                height:20
+                color:"lightgrey"
+                border.width:5
+                radius:10
+                border.color:"transparent"
+                rotation: 360
+                gradient: Gradient {
+                    GradientStop { position: 1.0; color: "lightgrey" }
+                    GradientStop { position: 0.0; color: "grey" }
+                }
+                PlasmaComponents.Label {
+                    id:actions
+                    text:"Actions"
+                    anchors {
+                        centerIn:parent
+                    }
+                }
             }
-        }
-    }
-    
-    CurrentApplication {
-        id:active_win
-        width: main.width
-        height:width
-        PlasmaCore.IconItem  {
-            width:main.width
-            height:width
-            smooth: true
-            source: "preferences-system-windows.png"
-            anchors {
-                left:parent.left
-                right:parent.right
-                top:parent.top
-                bottom:parent.bottom
-                centerIn:parent
+            Rectangle {
+                width: windowListMenu.width
+                height:20
+                color:"transparent"
+                PlasmaComponents.Label {
+                    id:unclutter
+                    text:"Unclutter Windows"
+                    anchors {
+                        left:parent.left
+                    }
+                }
+                MouseArea {
+                    id: mouse
+                    hoverEnabled: true
+                    onClicked:main.executeJob("activate",tasksSource);
+                    anchors.fill:parent 
+                    onEntered: {
+                        unclutter.opacity = 0.5
+                    }
+                    onExited: {
+                        unclutter.opacity = 1
+                    }
+                }
             }
-            enabled:false
-        }
-    }
-    
-    TaskRow {
-        id: listDelegate
-    }
-    
-    TaskList { 
-        id: dialog 
-    }
-    
-    Timer {
-        id: workspaceTimer
-        interval: 100
-        onTriggered: {
-            if (main.activeWorkspace) {
-                main.workspaceActivated();
-            } else {
-                workspaceTimer.stop();
+            Rectangle {
+                width: windowListMenu.width
+                height:20
+                color:"transparent"
+                PlasmaComponents.Label {
+                    id:cascade
+                    text:"Cascade Windows"
+                    anchors {
+                        left:parent.left
+                    }
+                }
+                MouseArea {
+                    id: mouseArea
+                    hoverEnabled: true
+                    onReleased:menuListView.currentItem.clicked();//menu.itemSelected(menuListView.currentItem.source);               // onReleased:active_win.maximizeClicked()
+                    anchors.fill:parent
+                    onEntered: {
+                        cascade.opacity = 0.5
+                    }
+                    onExited: {
+                        cascade.opacity = 1
+                    }
+                }
             }
-        }
-    }
-    
-    PlasmaCore.Dialog {
-        id: dialogContainer
-        visible: false
-        mainItem: dialog
-        Component.onCompleted: {
-            plasmoid.setMinimumSize(50, 50)
-            plasmoid.popupIcon = "preferences-system-windows.png"
-            plasmoid.setBackgroundHints( 0 )
-            plasmoid.aspectRatioMode = "ConstrainedSquare"
-            setAttribute(Qt.WA_X11NetWmWindowTypeDock, true);
-        }
-    }
-    
-    Connections {
-        target: plasmoid
-        onFormFactorChanged: {
-            main.formFactor = plasmoid.formFactor
-            if(main.formFactor==Planar || main.formFactor == MediaCenter )
-            {
-                minimumWidth=main.width/3.5
-                minimumHeight=main.height/3.5
+            Rectangle {
+                id:rect1
+                width: windowListMenu.width
+                height:20
+                color:"lightgrey"
+                border.width:5
+                radius:10
+                border.color:"transparent"
+                rotation: 360
+                gradient: Gradient {
+                    GradientStop { position: 1.0; color: "lightgrey" }
+                    GradientStop { position: 0.0; color: "grey" }
+                }
+                PlasmaComponents.Label {
+                    id: subLabelDesktop
+                    height: label.height
+                    font.pointSize: theme.smallestFont.pointSize
+                    visible: showDesktop
+                    anchors.centerIn:parent
+                }
             }
-        }
-    }
-    
-    PlasmaCore.ToolTip {
-        target: active_win
-        mainText:"Window list"
-        subText:"Show list of opened windows"
-        image:"preferences-system-windows"
-    }
-    
-    Connections {
-        target: active_win
-        onCurrentAppWidgetClicked: {
-            var pos = main.getPopupPosition(dialogContainer, active_win);
-            dialogContainer.x = pos.x;
-            dialogContainer.y = pos.y;
-            if (dialogContainer.visible) {
-                main.makeTaskListVisible(false);
-            }
-            else {
-                main.makeTaskListVisible(true);
-            }
-        }
-        onMaximizeClicked: {
-            main.setWindowMaximized(main.activeWindowId, true);
-        }
-        onUnmaximizeClicked: {
-            main.setWindowMaximized(main.activeWindowId, false);
-        }
-        onCloseClicked: {
-            main.closeWindow(main.activeWindowId);
         }
     }
 }
