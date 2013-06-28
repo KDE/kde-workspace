@@ -1,0 +1,24 @@
+[Desktop Entry]
+Name=trash
+Type=Service
+Icon=user-trash
+X-KDE-ServiceTypes=Plasma/Applet
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/main.qml
+X-Plasma-DefaultSize=100,130
+X-Plasma-RequiredExtensions=LaunchApp,localio
+X-Plasma-OptionalExtensions=LaunchApp
+X-Plasma-ConfigPlugins=kcmtrash
+X-KDE-Library=plasma_applet_trash
+X-KDE-PluginInfo-Author=Heena
+X-KDE-PluginInfo-Email=heena393@gmail.com
+X-KDE-PluginInfo-Name=trash
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=http://plasma.kde.org/
+X-KDE-PluginInfo-Category=File System
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=Gpl
+X-KDE-PluginInfo-EnabledByDefault=true
+X-Plasma-Requires-FileDialog=Unused
+X-Plasma-Requires-LaunchApp=Required
+X-Plasma-Requires-KRun=true
