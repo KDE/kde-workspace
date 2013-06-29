@@ -38,6 +38,7 @@ AuthReturn Authenticate(const char *method,
         const char *login, char *(*conv) (ConvRequest, const char *))
 {
   char *passwd;
+  char *crpt_passwd;
   char c2passwd[256];
 
   if (strcmp(method, "classic"))
@@ -52,7 +53,7 @@ AuthReturn Authenticate(const char *method,
   if (!(passwd = conv(ConvGetHidden, 0)))
     return AuthAbort;
 
-  if (!strcmp(c2passwd, osf1c2crypt(passwd, c2passwd))) {
+  if ((crpt_passwd = osf1c2crypt(passwd, c2passwd)) && !strcmp(c2passwd, crpt_passwd)) {
     dispose(passwd);
     return AuthOk; /* Success */
   }

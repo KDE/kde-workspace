@@ -69,7 +69,7 @@ AuthReturn Authenticate(const char *method,
   crpt_passwd = crypt(typed_in_password, password);
 #endif
 
-  if (!strcmp(password, crpt_passwd )) {
+  if (crpt_passwd && !strcmp(password, crpt_passwd )) {
     dispose(typed_in_password);
     return AuthOk; /* Success */
   }
