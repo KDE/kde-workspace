@@ -16,6 +16,7 @@
  */
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
+import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
     id: menu
@@ -26,6 +27,7 @@ Item {
     signal itemSelected(string source)
     signal executeJob(string jobName, string source)
     signal setOnDesktop(string source, int desktop)
+
     ListView {
         id: menuListView
         width: menu.width
@@ -34,10 +36,15 @@ Item {
         anchors.bottom: menu.bottom
         anchors.margins: 0
         spacing: 0
-        highlightMoveDuration: 250
+        highlightMoveDuration: 50
         highlight: PlasmaComponents.Highlight {
-            hover: menu.focus
-            width: menuListView.width - 2 * menuListView.anchors.leftMargin
+            PlasmaCore.FrameSvgItem {
+                id:background
+                imagePath:"widgets/viewitem"
+                prefix:"selected+hover"
+                height:50
+                width: menuListView.width - 2 * menuListView.anchors.leftMargin
+            }
         }
         delegate: TaskList {
             id: menuItemDelegate

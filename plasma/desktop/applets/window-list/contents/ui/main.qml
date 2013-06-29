@@ -104,7 +104,6 @@ Item {
         onItemSelected: main.executeJob("activate", source);
         onExecuteJob: main.executeJob(jobName, source);
         onSetOnDesktop: main.setOnDesktop(source, desktop);
-     
         Column {
             spacing:0
             Rectangle {

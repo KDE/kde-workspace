@@ -17,6 +17,7 @@
 import QtQuick 1.1
 import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.qtextracomponents 0.1
+import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
     id: menuItem
@@ -66,7 +67,7 @@ Item {
     Item {
         id: row
         width: parent.width
-        height: Math.max(iconItem.height, label.height ) + 4 * menuItem.iconMargin 
+        height: Math.max(iconItem.height, label.height ) + 4 * menuItem.iconMargin
         QIconItem {
             id: iconItem
             anchors.left: parent.left
