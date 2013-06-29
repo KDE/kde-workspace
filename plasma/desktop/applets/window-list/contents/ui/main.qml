@@ -104,20 +104,23 @@ Item {
         onItemSelected: main.executeJob("activate", source);
         onExecuteJob: main.executeJob(jobName, source);
         onSetOnDesktop: main.setOnDesktop(source, desktop);
+     
         Column {
             spacing:0
             Rectangle {
                 width: windowListMenu.width
                 height:20
                 color:"lightgrey"
+                PlasmaCore.FrameSvgItem {
+                    id:background2
+                    imagePath:"widgets/viewitem"
+                    prefix:"selected+hover"
+                    width: windowListMenu.width
+                    height:20
+                }
                 border.width:5
                 radius:10
                 border.color:"transparent"
-                rotation: 360
-                gradient: Gradient {
-                    GradientStop { position: 1.0; color: "lightgrey" }
-                    GradientStop { position: 0.0; color: "grey" }
-                }
                 PlasmaComponents.Label {
                     id:actions
                     text:"Actions"
@@ -179,14 +182,16 @@ Item {
                 width: windowListMenu.width
                 height:20
                 color:"lightgrey"
+                PlasmaCore.FrameSvgItem {
+                    id:background1
+                    imagePath:"widgets/viewitem"
+                    prefix:"selected+hover"
+                    width: windowListMenu.width
+                    height:20
+                }
                 border.width:5
                 radius:10
                 border.color:"transparent"
-                rotation: 360
-                gradient: Gradient {
-                    GradientStop { position: 1.0; color: "lightgrey" }
-                    GradientStop { position: 0.0; color: "grey" }
-                }
                 PlasmaComponents.Label {
                     id: subLabelDesktop
                     height: label.height
