@@ -26,7 +26,6 @@ Item {
     property int maximumWidth
     property int maximumHeight
     property alias data: tasksSource.data;
-    property int k
     property variant desktopList: []
     property int iconSize: theme.smallMediumIconSize 
     property int defaultMargin:0
@@ -93,7 +92,7 @@ Item {
         }
         iconSize: main.iconSize
         showDesktop: main.showDesktop
-        onItemSelected: {main.executeJob("activate", source);k:1;}
+        onItemSelected: main.executeJob("activate", source);
         onExecuteJob: main.executeJob(jobName, source);
         onSetOnDesktop: main.setOnDesktop(source, desktop);
                 highlight: PlasmaComponents.Highlight {

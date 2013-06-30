@@ -23,6 +23,7 @@ Item {
     property alias model: menuListView.model
     property alias section: menuListView.section
     property int iconSize: theme.smallMediumIconSize 
+    property alias highlight:menuListView.highlight
     property bool showDesktop: true
     signal itemSelected(string source)
     signal executeJob(string jobName, string source)
