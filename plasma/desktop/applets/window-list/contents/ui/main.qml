@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 1.1
+import Qt 4.7
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
@@ -24,6 +25,8 @@ Item {
     property int minimumHeight:  Math.max(100, windowListMenu.implicitHeight) 
     property int maximumWidth
     property int maximumHeight
+    property alias data: tasksSource.data;
+    property int k
     property variant desktopList: []
     property int iconSize: theme.smallMediumIconSize 
     property int defaultMargin:0
@@ -40,17 +43,6 @@ Item {
         var operation = service.operationDescription("toDesktop");
         operation.desktop = desktop;
         service.startOperationCall(operation);
-    }
-    
-    Keys.onDownPressed: windowListMenu.incrementCurrentIndex();
-    Keys.onUpPressed: windowListMenu.decrementCurrentIndex();
-    Keys.onReturnPressed: windowListMenu.selectCurrentItem();
-    Keys.onEnterPressed: windowListMenu.selectCurrentItem();
-    Keys.onPressed: {
-        if (event.key == Qt.Key_PageUp)
-            windowListMenu.pageUp();
-        else if (event.key == Qt.Key_PageDown)
-            windowListMenu.pageDown();
     }
     Component.onCompleted: {
             var toolTipData = new Object;
@@ -101,9 +93,18 @@ Item {
         }
         iconSize: main.iconSize
         showDesktop: main.showDesktop
-        onItemSelected: main.executeJob("activate", source);
+        onItemSelected: {main.executeJob("activate", source);k:1;}
         onExecuteJob: main.executeJob(jobName, source);
         onSetOnDesktop: main.setOnDesktop(source, desktop);
+                highlight: PlasmaComponents.Highlight {
+            PlasmaCore.FrameSvgItem {
+                id:background4
+                imagePath:"widgets/viewitem"
+                prefix:"selected+hover"
+                height:50
+                width:  windowListMenu.width - 2 *  windowListMenu.anchors.leftMargin
+            }
+        }
         Column {
             spacing:0
             Rectangle {
@@ -142,7 +143,14 @@ Item {
                 MouseArea {
                     id: mouse
                     hoverEnabled: true
-                    onClicked:main.executeJob("activate",tasksSource);
+                    onClicked: {
+                        if (data['active']) {
+                            var unclutterId = tasksSource["DataEngineSource"]
+                            var service = tasksSource.serviceForSource("unclutterId")
+                            var operation = service.operationDescription("restore")
+                            service.startOperationCall(operation)
+                        }
+                    }
                     anchors.fill:parent 
                     onEntered: {
                         unclutter.opacity = 0.5
@@ -166,7 +174,14 @@ Item {
                 MouseArea {
                     id: mouseArea
                     hoverEnabled: true
-                    onReleased:menuListView.currentItem.clicked();//menu.itemSelected(menuListView.currentItem.source);               // onReleased:active_win.maximizeClicked()
+                    onClicked: {
+                        if (data['active']) {
+                            var cascadeId = tasksSource["DataEngineSource"]
+                            var service = tasksSource.serviceForSource("cascadeId")
+                            var operation = service.operationDescription("raise")
+                            service.startOperationCall(operation)
+                        }
+                    }
                     anchors.fill:parent
                     onEntered: {
                         cascade.opacity = 0.5
