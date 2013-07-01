@@ -70,6 +70,12 @@ void TaskJob::start()
         kDebug() << "couldn't connect to kwin! ";
         setResult(true);
         return;
+    } else if (operation == "unclutter") {
+        QDBusInterface  *kwinInterface = new QDBusInterface("org.kde.kwin", "/KWin", "org.kde.KWin");
+        QDBusPendingCall pcall = kwinInterface->asyncCall("unclutterDesktop");
+        kDebug() << "couldn't connect to kwin! ";
+        setResult(true);
+        return;
     } else if (operation == "setShaded") {
         m_source->task()->setShaded(parameters().value("shaded").toBool());
         setResult(true);
