@@ -23,6 +23,12 @@
 #include <Plasma/DataEngine>
 #include <Plasma/Service>
 
+#include <QtDBus/QDBusConnectionInterface>
+#include <QtDBus/QDBusError>
+#include <QtDBus/QDBusInterface>
+#include <QtDBus/QDBusMetaType>
+#include <QtDBus/QDBusReply>
+#include <QtDBus/QDBusPendingCallWatcher>
 // libtaskmanager
 #include <taskmanager/taskmanager.h>
 
@@ -67,6 +73,10 @@ class TasksEngine : public Plasma::DataEngine
         void startupRemoved(::TaskManager::Startup *startup);
         void taskAdded(::TaskManager::Task *task);
         void taskRemoved(::TaskManager::Task *task);
+       void cascade ();
+       void cascade(QDBusPendingCallWatcher*);
+       void unclutter ();
+       void unclutter(QDBusPendingCallWatcher*);
 
     private:
         friend class TaskSource;

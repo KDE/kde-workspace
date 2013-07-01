@@ -17,6 +17,12 @@
  */
 
 #include "taskjob.h"
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusMessage>
+#include <QDBusPendingReply>
+
+#include <KAuthorized>
 
 TaskJob::TaskJob(TaskSource *source, const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent) :
     ServiceJob(source->objectName(), operation, parameters, parent),
@@ -73,10 +79,14 @@ void TaskJob::start()
         setResult(true);
         return;
     } else if (operation == "cascade") {
+         org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+         kwin.cascadeDesktop();
         m_source->task()->cascade();
         setResult(true);
         return;
     } else if (operation == "unclutter") {
+        org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+        kwin.unclutterDesktop();
         m_source->task()->unclutter();
         setResult(true);
     } else if (operation == "toggleFullScreen") {
