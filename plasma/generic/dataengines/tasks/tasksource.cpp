@@ -89,6 +89,8 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("visibleNameWithState", taskPtr->visibleNameWithState());
             setData("maximized", taskPtr->isMaximized());
             setData("minimized", taskPtr->isMinimized());
+            setData("cascade",taskPtr->isCascade());
+            setData("unclutter",taskPtr->isUnclutter());
             setData("shaded", taskPtr->isShaded());
             setData("fullScreen", taskPtr->isFullScreen());
             setData("alwaysOnTop", taskPtr->isAlwaysOnTop());
@@ -106,6 +108,8 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("actionMaximize", taskPtr->info().actionSupported(NET::ActionMax));
             setData("actionShade", taskPtr->info().actionSupported(NET::ActionShade));
             setData("actionResize", taskPtr->info().actionSupported(NET::ActionResize));
+            setData("actionCascade", taskPtr->info().actionSupported(NET::ActionCascade));
+            setData("actionUnclutter", taskPtr->info().actionSupported(NET::ActionUnclutter));
             setData("actionMove", taskPtr->info().actionSupported(NET::ActionMove));
             setData("actionClose", taskPtr->info().actionSupported(NET::ActionClose));
             setData("actionChangeDesktop", taskPtr->info().actionSupported(NET::ActionChangeDesktop));
@@ -148,6 +152,8 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("actionClose", taskPtr->info().actionSupported(NET::ActionClose));
             setData("actionChangeDesktop", taskPtr->info().actionSupported(NET::ActionChangeDesktop));
             setData("actionFullScreen", taskPtr->info().actionSupported(NET::ActionFullScreen));
+            setData("actionCascade", taskPtr->info().actionSupported(NET::ActionCascade));
+            setData("actionUnclutter", taskPtr->info().actionSupported(NET::ActionUnclutter));
             break;
         default:
             break;

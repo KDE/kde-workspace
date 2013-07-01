@@ -151,6 +151,10 @@ QVariant TasksModel::data(const QModelIndex &index, int role) const
         return item->isMaximized();
     } else if (role == TasksModel::Minimized) {
         return item->isMinimized();
+    } else if (role == TaskModel::Cascade) {
+        return item->isCascade();
+    } else if (role == TaskModel::Unclutter) {
+        return item->isUnclutter();
     } else if (role == TasksModel::FullScreen) {
         return item->isFullScreen();
     } else if (role == TasksModel::BelowOthers) {

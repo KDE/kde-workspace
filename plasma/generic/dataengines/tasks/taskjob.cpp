@@ -72,6 +72,13 @@ void TaskJob::start()
         m_source->task()->toggleShaded();
         setResult(true);
         return;
+    } else if (operation == "cascade") {
+        m_source->task()->cascade();
+        setResult(true);
+        return;
+    } else if (operation == "unclutter") {
+        m_source->task()->unclutter();
+        setResult(true);
     } else if (operation == "toggleFullScreen") {
         m_source->task()->toggleFullScreen();
         setResult(true);

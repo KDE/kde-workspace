@@ -25,6 +25,8 @@
     <group name="toggleFullScreen" />
     <group name="toggleAlwaysOnTop" />
     <group name="toggleKeptBelowOthers" />
+    <group name="cascade" />
+    <group name="unclutter" />
     <group name="restore" />
     <group name="resize" />
     <group name="move" />
