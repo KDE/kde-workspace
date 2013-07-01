@@ -30,6 +30,12 @@ Item {
     property int iconSize: theme.smallMediumIconSize 
     property int defaultMargin:0
     property bool showDesktop: true
+    function performOperation(op) {
+          var id = tasksSource["DataEngineSource"]
+        var service = dataEngine.serviceForSource("id");
+        var operation = service.operationDescription(op);
+        service.startOperationCall(operation);
+    }
     
     function executeJob(operationName, source) {
         var service = tasksSource.serviceForSource(source);
@@ -106,6 +112,7 @@ Item {
         }
         Column {
             spacing:0
+     
             Rectangle {
                 width: windowListMenu.width
                 height:20
@@ -142,15 +149,17 @@ Item {
                 MouseArea {
                     id: mouse
                     hoverEnabled: true
+                    anchors.fill:parent
                     onClicked: {
-                        if (data['active']) {
+                        performOperation("unclutter");
+
+                      /*  if (data['active']) {
                             var unclutterId = tasksSource["DataEngineSource"]
                             var service = tasksSource.serviceForSource("unclutterId")
                             var operation = service.operationDescription("restore")
                             service.startOperationCall(operation)
-                        }
+                        }*/
                     }
-                    anchors.fill:parent 
                     onEntered: {
                         unclutter.opacity = 0.5
                     }
@@ -173,15 +182,16 @@ Item {
                 MouseArea {
                     id: mouseArea
                     hoverEnabled: true
-                    onClicked: {
-                        if (data['active']) {
+                    anchors.fill:parent
+                    onClicked: { 
+                        performOperation("cascade");
+                        /*  if (data['active']) {
                             var cascadeId = tasksSource["DataEngineSource"]
                             var service = tasksSource.serviceForSource("cascadeId")
                             var operation = service.operationDescription("raise")
                             service.startOperationCall(operation)
-                        }
+                        }*/
                     }
-                    anchors.fill:parent
                     onEntered: {
                         cascade.opacity = 0.5
                     }
