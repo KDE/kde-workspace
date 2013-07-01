@@ -74,7 +74,7 @@ void TasksEngine::init()
     connect(manager, SIGNAL(taskAdded(::TaskManager::Task*)), this, SLOT(taskAdded(::TaskManager::Task*)));
     connect(manager, SIGNAL(taskRemoved(::TaskManager::Task*)), this, SLOT(taskRemoved(::TaskManager::Task*)));
     // org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
-    if(QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kwin")) {
+  /*  if(QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kwin")) {
         if(!QDBusConnection::sessionBus().connect("org.kde.kwin","/kwin","org.kde.kwin",cascade,this,slotCascadeWindows())) {
             kDebug()<<"error connecting to dbus";
         }
@@ -82,7 +82,7 @@ void TasksEngine::init()
         if(!QDBusConnection::sessionBus().connect("org.kde.kwin","/kwin","org.kde.kwin",unclutter,this,slotUnclutterWindows())) {
             kDebug<<"error connecting to dbus";
         }
-    }
+    }*/
 }
 
 void TasksEngine::startupRemoved(::TaskManager::Startup *startup)

@@ -73,10 +73,7 @@ class TasksEngine : public Plasma::DataEngine
         void startupRemoved(::TaskManager::Startup *startup);
         void taskAdded(::TaskManager::Task *task);
         void taskRemoved(::TaskManager::Task *task);
-       void cascade ();
-       void cascade(QDBusPendingCallWatcher*);
-       void unclutter ();
-       void unclutter(QDBusPendingCallWatcher*);
+     
 
     private:
         friend class TaskSource;

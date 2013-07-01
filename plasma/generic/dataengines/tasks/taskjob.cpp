@@ -21,6 +21,20 @@
 #include <QDBusInterface>
 #include <QDBusMessage>
 #include <QDBusPendingReply>
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusPendingCallWatcher>
+#include <QtCore/QFutureWatcher>
+#include <QtCore/QSettings>
+#include <QtCore/QtConcurrentRun>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeView>
+#include <QtDeclarative/qdeclarative.h>
+#include <QtGui/QMenu>
+#include <QtScript/QScriptEngine>
+#include <QtScript/QScriptValue>
+
 
 #include <KAuthorized>
 
@@ -48,6 +62,12 @@ void TaskJob::start()
         return;
     } else if (operation == "setMinimized") {
         m_source->task()->setIconified(parameters().value("minimized").toBool());
+        setResult(true);
+        return;
+    } else if (operation == "cascade") {
+        QDBusInterface  *kwinInterface = new QDBusInterface("org.kde.kwin", "/KWin", "org.kde.KWin");
+        QDBusPendingCall pcall = kwinInterface->asyncCall("cascadeDesktop");
+        kDebug() << "couldn't connect to kwin! ";
         setResult(true);
         return;
     } else if (operation == "setShaded") {
@@ -78,18 +98,7 @@ void TaskJob::start()
         m_source->task()->toggleShaded();
         setResult(true);
         return;
-    } else if (operation == "cascade") {
-         org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
-         kwin.cascadeDesktop();
-        m_source->task()->cascade();
-        setResult(true);
-        return;
-    } else if (operation == "unclutter") {
-        org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
-        kwin.unclutterDesktop();
-        m_source->task()->unclutter();
-        setResult(true);
-    } else if (operation == "toggleFullScreen") {
+    }  else if (operation == "toggleFullScreen") {
         m_source->task()->toggleFullScreen();
         setResult(true);
         return;
