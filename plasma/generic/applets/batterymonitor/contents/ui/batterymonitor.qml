@@ -31,8 +31,6 @@ Item {
 
     property bool show_remaining_time: false
 
-    PlasmaCore.Theme { id: theme }
-
     Component.onCompleted: {
         plasmoid.aspectRatioMode = IgnoreAspectRatio
         updateLogic(true);
