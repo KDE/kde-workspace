@@ -33,6 +33,8 @@
 
 // more information about the limit https://bugs.freedesktop.org/show_bug.cgi?id=19501
 int X11Helper::MAX_GROUP_COUNT = 4;
+int X11Helper::ARTIFICIAL_GROUP_LIMIT_COUNT = 8;
+
 const char* X11Helper::LEFT_VARIANT_STR = "(";
 const char* X11Helper::RIGHT_VARIANT_STR = ")";
 
