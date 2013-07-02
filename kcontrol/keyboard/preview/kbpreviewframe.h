@@ -21,6 +21,8 @@
 #include "keyboardlayout.h"
 #include "keysymhelper.h"
 #include "keyaliases.h"
+#include "geometry_parser.h"
+#include "geometry_components.h"
 
 #include <QtGui/QPainter>
 #include <QtGui/QFrame>
@@ -37,14 +39,16 @@ private:
 	void paintABRow(QPainter &painter, int &x, int &y);
 	void paintBottomRow(QPainter &painter, int &x, int &y);
 	void paintFnKeys(QPainter &painter, int &x, int &y);
-
+	float scaleFactor;
+    void drawShape(QPainter &painter, GShape s, int x, int y, int i, QString name);
 	KeySymHelper symbol;
 	Aliases alias;
     KeyboardLayout keyboardLayout;
 	
 public:
+    Geometry geometry;
+    int *width,*height;
     explicit KbPreviewFrame(QWidget *parent = 0);
-
     void paintEvent(QPaintEvent * event);
     void generateKeyboardLayout(const QString &country, const QString &layoutVariant);
     QString getLayoutName() const {

@@ -18,12 +18,16 @@
 
 
 #include "kbpreviewframe.h"
+#include "geometry_parser.h"
 
 #include <QtCore/QFile>
 #include <QtGui/QFont>
+#include <QFileDialog>
+#include <math.h>
 
 #include <KApplication>
 #include <KLocale>
+
 
 
 static const QColor keyBorderColor("#d4d4d4");
@@ -255,27 +259,111 @@ void KbPreviewFrame::paintFnKeys(QPainter &painter,int &x,int &y)
     }
 }
 
+void KbPreviewFrame::drawShape(QPainter &painter,GShape s,int x,int y,int i,QString name){
+    if(geometry.sectionList[i].angle==0){
+        if (s.cordi_count == 1){
+            int width = s.cordii[0].x();
+            int height = s.cordii[0].y();
+            painter.drawRoundedRect(scaleFactor*x+2,scaleFactor*y,scaleFactor*width,scaleFactor*height,4,4);
+            painter.drawText(scaleFactor*x+5,scaleFactor*y+20,name);
+        }
+        else{
+            QPoint temp[s.cordi_count];
+            for(int i=0;i<s.cordi_count;i++){
+                temp[i].setX(scaleFactor*(s.cordii[i].x()+x+1));
+                temp[i].setY(scaleFactor*(s.cordii[i].y()+y+1));
+            }
+            painter.drawPolygon(temp,s.cordi_count);
+            painter.drawText(temp[0].x()+5,temp[0].y()+20,name);
+        }
+    }
+    else{
+        QPoint temp[s.cordi_count == 1 ? 4 : s.cordi_count];
+        int size;
+        if(s.cordi_count== 1){
+            temp[0]=QPoint(x,y);
+            temp[1]=QPoint(s.cordii[0].x()+x,y);
+            temp[2]=QPoint(s.cordii[0].x()+x,s.cordii[0].y()+y);
+            temp[3]=QPoint(x,s.cordii[0].y()+y);
+            size = 4;
+        }
+        else{
+            size = s.cordi_count;
+            for(int i=0;i<s.cordi_count;i++){
+                temp[i].setX((s.cordii[i].x()+x+1));
+                temp[i].setY((s.cordii[i].y()+y+1));
+            }
+        }
+        double refX,refY;
+        refX = geometry.sectionList[i].left;
+        refY = geometry.sectionList[i].top;
+        //qDebug()<<"\ntransform";
+        for(int j=0;j<size;j++){
+            double x = temp[j].x()-refX;
+            double y = temp[j].y()-refY;
+            //qDebug()<<"("<<x<<","<<y<<")->";
+            float theta = ( 3.1459 * geometry.sectionList[i].angle )/180;
+            double x_ = x*cos(theta)-y*sin(theta);
+            //qDebug()<<"x_= "<<x<<"*"<<cos(theta)<<"-"<<y<<"*"<<sin(theta);
+            double y_ = x*sin(theta)+y*cos(theta);
+            //qDebug()<<"\ny_= "<<x<<"*"<<sin(theta)<<"+"<<y<<"*"<<cos(theta);
+            //qDebug()<<"("<<x_<<","<<y_<<")\n";
+            temp[j]=QPoint(scaleFactor*(x_+refX),scaleFactor*(y_+refY));
+        }
+        /*for(int i=0;i<size;i++){
+            qDebug()<<temp[i];
+        }*/
+        painter.drawPolygon(temp,size);
+        painter.drawText(temp[0].x()+5,temp[0].y()+20,name);
+    }
+
+}
+
+
 void KbPreviewFrame::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
     QFont kbfont;
-    kbfont.setPointSize(12);
+    kbfont.setPointSize(9);
 
     painter.setFont(kbfont);
-    painter.setBrush(QBrush(Qt::darkGray));
+    painter.setBrush(QBrush("#C3C8CB"));
 
-    const int strtx=0,strty=0,endx=1390,endy=490,kszy=70;
-    const int row1x=10,row1y=30,row2x=10,row2y=90,row5x=10,row5y=330,row3x=10,row3y=170,shifx=10,shify=60,row4x=10,row4y=250,row6x=110,row6y=410;
-    const int shiftsz=155;
+    const int strtx=0,strty=0,endx=geometry.width,endy=geometry.height,kszy=70;
+    //const int row1x=10,row1y=30,row2x=10,row2y=90,row5x=10,row5y=330,row3x=10,row3y=170,shifx=10,shify=60,row4x=10,row4y=250,row6x=110,row6y=410;
+    //const int shiftsz=155;
 
-    painter.setPen(keyBorderColor);
-    painter.drawRect(strtx, strty, endx, endy);
+    painter.setPen("#EDEEF2");
+    scaleFactor = 1030/endx;
+    if(scaleFactor<1)
+        scaleFactor=1;
+    qDebug()<<"scaleFactor = "<<scaleFactor;
+    scaleFactor = 2;
+    painter.drawRect(strtx, strty, scaleFactor*endx+60,scaleFactor*endy+60);
 
-    painter.setPen(lev12color);
-    painter.setBrush(QBrush(Qt::black));
-
-    int x, y;
+    painter.setPen(Qt::black);
+    painter.setBrush(QBrush("#EDEEF2"));
+    for(int i=0;i<geometry.sectionCount;i++){
+        painter.setPen(Qt::black);
+        for(int j=0;j<geometry.sectionList[i].rowCount;j++){
+            int keyn = geometry.sectionList[i].rowList[j].keyCount;
+            for(int k=0;k<keyn;k++){
+                Key temp = geometry.sectionList[i].rowList[j].keyList[k];
+                int x = temp.position.x();
+                int y = temp.position.y();
+                GShape s;
+                s = geometry.findShape(temp.shapeName);
+                int width = s.cordii[0].x();
+                int height = s.cordii[0].y();
+                QString name = temp.name;
+                //painter.drawRoundedRect(2*x+2,2*y,2*width,2*height,4,4);
+                drawShape(painter,s,x,y,i,name);
+                //painter.drawText(scaleFactor*x+width/3,scaleFactor*y+3*height/2,name);
+            }
+        }
+    }
+    /*int x, y;
     x=row1x;
     y=row1y;
 
@@ -316,7 +404,7 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
     y=row6y;
 
     paintBottomRow(painter,x, y);
-
+*/
     if( symbol.isFailed() ) {
         painter.setPen(keyBorderColor);
         painter.drawRect(strtx, strty, endx, endy);
@@ -338,6 +426,8 @@ void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString content = file.readAll();
     file.close();
+
+    geometry = grammar::parseGeometry();
 
     QList<QString> symstr = content.split("xkb_symbols ");
 
@@ -363,5 +453,7 @@ void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString
             }
         }
     }
+
+
 }
 

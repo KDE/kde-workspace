@@ -4,25 +4,25 @@
 #include <QtCore/QDebug>
 #include <QtCore/QPoint>
 
-Shape::Shape(){
+GShape::GShape(){
     cordi_count = 0;
 }
 
-void Shape::setShape(QString n){
+void GShape::setShape(QString n){
     sname = n;
 }
 
-void Shape::setCordinate(double &a, double &b){
+void GShape::setCordinate(double &a, double &b){
     cordii[cordi_count++] = QPoint(a,b);
 }
 
-void Shape::setApprox(double &a, double &b){
+void GShape::setApprox(double &a, double &b){
     a-=approx.x();
     b-=approx.y();
     approx = QPoint(a,b);
 }
 
-void Shape::display(){
+void GShape::display(){
     qDebug()<<"shape: "<<sname<<"\n";
     qDebug()<<"( "<<approx.x()<<", "<<approx.y()<<"); ";
     for(int i=0;i<cordi_count;i++)
@@ -30,7 +30,7 @@ void Shape::display(){
     qDebug()<<"\n";
 }
 
-double Shape::size(){
+double GShape::size(){
     if (approx.x() == 0 && approx.y() == 0)
         return cordii[0].x();
     else
@@ -105,7 +105,7 @@ Geometry::Geometry(){
     rowTop = 0;
     rowLeft = 0;
     keyGap = 0;
-    shape_count=-1;
+    shape_count=0;
     width=0;
     height=0;
     sectionCount = 0;
@@ -119,11 +119,11 @@ void Geometry::getDescription(QString n){
     description = n;
 }
 
-void Geometry::getWidth(int a){
+void Geometry::getWidth(double a){
     width = a;
 }
 
-void Geometry::getHeight(int a){
+void Geometry::getHeight(double a){
     height = a;
 }
 
@@ -158,8 +158,8 @@ void Geometry::addSection(){
     sectionCount++;
 }
 
-Shape Geometry::findShape(QString name){
-    Shape l;
+GShape Geometry::findShape(QString name){
+    GShape l;
     for(int i=0;i<shape_count;i++){
             if (shapes[i].sname == name){
                     return shapes[i];

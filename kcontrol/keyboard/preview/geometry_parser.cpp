@@ -1,7 +1,10 @@
 #include "geometry_parser.h"
 #include "geometry_components.h"
+
 #include <QtCore/QString>
 #include <QtCore/QDebug>
+#include <QFileDialog>
+#include <QFile>
 
 namespace grammar{
 keywords::keywords(){
@@ -60,12 +63,12 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
             >>'}'
             ;
 
-    description = lit("description")>>'='>>name[phx::bind(&Geometry::getDescription,&geom,_1)]>>';';
+    description = lit("description")>>'='>>name[phx::bind(&Geometry_parser::getDescription,this,_1)]>>';';
 
-    cornerRadius = lit("cornerRadius")>>'='>>double_;
+    cornerRadius = (lit("cornerRadius")||lit("corner"))>>'='>>double_;
 
     shapeDef = lit("shape")
-            >>name[phx::bind(&Geometry::getShapeName,&geom,_1)]
+            >>name[phx::bind(&Geometry_parser::getShapeName,this,_1)]
             >>'{'
             >>*(lit("approx")>>'='>>setap[phx::bind(&Geometry_parser::setApprox,this)]>>','||cornerRadius>>',')
             >>seta
@@ -97,7 +100,7 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
             >>*((*lit(',')>>keyDesc[phx::bind(&Geometry_parser::setKeyCordi,this)]>>*lit(','))||comments)
             >>lit("};");
 
-    geomShape = lit("key.shape")>>'='>>name[phx::ref(geom.keyShape)=_1]>>';';
+    geomShape = lit("key.shape")>>'='>>name[phx::bind(&Geometry_parser::setGeomShape,this,_1)]>>';';
     geomLeft = lit("section.left")>>'='>>double_[phx::ref(geom.sectionLeft)=_1]>>';';
     geomTop = lit("section.top")>>'='>>double_[phx::ref(geom.sectionTop)=_1]>>';';
     geomRowTop = lit("row.top")>>'='>>double_[phx::ref(geom.rowTop)=_1]>>';';
@@ -123,6 +126,8 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
 
     localShape = lit("key.shape")>>'='>>name[_val=_1]>>';';
     localColor = lit("key.color")>>'='>>name>>';';
+    localDimension = (lit("height")||lit("width"))>>'='>>double_>>';';
+    priority = lit("priority")>>'='>>double_>>';';
 
     section = lit("section")[phx::bind(&Geometry_parser::sectioninit,this)]
             >>name[phx::bind(&Geometry_parser::sectionName,this,_1)]
@@ -134,6 +139,8 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
             ||localShape[phx::bind(&Geometry_parser::setSectionShape,this,_1)]
             ||geomAtt
             ||localColor
+            ||localDimension
+            ||priority
             ||comments)
             >>lit("};");
 
@@ -147,17 +154,17 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
           ||height
           ||comments
           ||ignore
+          ||description
           ||(char_-kw-'}'
           ||shape[phx::bind(&Geometry::getShape,&geom)]
-          ||description
           ||section[phx::bind(&Geometry::addSection,&geom)]
           ||geomAtt
           ||geomShape
           ))
           >>'}';
 
-          width = lit("width")>>'='>>int_[phx::bind(&Geometry::getWidth,&geom,_1)]>>";";
-          height = lit("height")>>'='>>int_[phx::bind(&Geometry::getHeight,&geom,_1)]>>";";
+          width = lit("width")>>'='>>double_[phx::bind(&Geometry::getWidth,&geom,_1)]>>";";
+          height = lit("height")>>'='>>double_[phx::bind(&Geometry::getHeight,&geom,_1)]>>";";
 
 
           info = in;
@@ -165,7 +172,7 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
 
           start %= *(lit("default"))
                  >>lit("xkb_geometry")
-                 >>name[phx::bind(&Geometry::getName,&geom,_1)]
+                 >>name[phx::bind(&Geometry_parser::getName,this,_1)]
                  >>info
                  >>';';
 
@@ -179,12 +186,33 @@ template<typename Iterator>
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionShape(std::string n){
-        geom.sectionList[geom.sectionCount].shapeName = n;
+        geom.sectionList[geom.sectionCount].shapeName = QString::fromUtf8(n.data(), n.size());
+}
+
+template<typename Iterator>
+    void Geometry_parser<Iterator>::getName(std::string n){
+        geom.getName(QString::fromUtf8(n.data(), n.size()));
+}
+template<typename Iterator>
+    void Geometry_parser<Iterator>::getDescription(std::string n){
+        geom.getDescription( QString::fromUtf8(n.data(), n.size()));
+}
+
+template<typename Iterator>
+    void Geometry_parser<Iterator>::getShapeName(std::string n){
+        geom.getShapeName( QString::fromUtf8(n.data(), n.size()));
+}
+
+
+
+template<typename Iterator>
+    void Geometry_parser<Iterator>::setGeomShape(std::string n){
+        geom.keyShape = QString::fromUtf8(n.data(), n.size());
 }
 
 template<typename Iterator>
 void Geometry_parser<Iterator>::setRowShape(std::string n){
-    geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].shapeName =  n;
+    geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].shapeName =  QString::fromUtf8(n.data(), n.size() );
 }
 
 template<typename Iterator>
@@ -201,7 +229,7 @@ template<typename Iterator>
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectionName(std::string n){
-        geom.sectionList[geom.sectionCount].getName(QString(n));
+        geom.sectionList[geom.sectionCount].getName(QString::fromUtf8(n.data(), n.size()));
 }
 
 
@@ -255,21 +283,21 @@ template<typename Iterator>
         int rown = geom.sectionList[secn].rowCount;
         int keyn = geom.sectionList[secn].rowList[rown].keyCount;
         qDebug()<<"\nsC: "<<secn<<"\trC: "<<rown<<"\tkn: "<<keyn;
-        geom.sectionList[secn].rowList[rown].keyList[keyn].name = n;
+        geom.sectionList[secn].rowList[rown].keyList[keyn].name = QString::fromUtf8(n.data(), n.size());
      }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyShape(std::string n){
         int secn = geom.sectionCount;
         int rown = geom.sectionList[secn].rowCount;
         int keyn = geom.sectionList[secn].rowList[rown].keyCount;
-        geom.sectionList[secn].rowList[rown].keyList[keyn].shapeName = n;
+        geom.sectionList[secn].rowList[rown].keyList[keyn].shapeName = QString::fromUtf8(n.data(), n.size());
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyNameandShape(std::string n){
         int secn = geom.sectionCount;
         int rown = geom.sectionList[secn].rowCount;
         setKeyName(n);
-        setKeyShape(geom.sectionList[secn].rowList[rown].shapeName);
+        setKeyShape(geom.sectionList[secn].rowList[rown].shapeName.toUtf8().constData());
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyOffset(){
@@ -289,12 +317,51 @@ template<typename Iterator>
         QString s = geom.sectionList[secn].rowList[rown].keyList[keyn].shapeName;
         if (s=="")
                 s = geom.keyShape;
-        Shape t = geom.findShape(s);
+        GShape t = geom.findShape(s);
         int a = t.size();
-        cx+=a;
+        cx+=a+geom.keyGap;
         geom.sectionList[secn].rowList[rown].addKey();
     }
 
+    Geometry parseGeometry(){
+        using boost::spirit::ascii::space;
+        typedef std::string::const_iterator iterator_type;
+        typedef grammar::Geometry_parser<iterator_type> Geometry_parser;
+        Geometry_parser g;
+
+        QString geometryfile = QFileDialog::getOpenFileName();
+
+        QFile gfile(geometryfile);
+         if (!gfile.open(QIODevice::ReadOnly | QIODevice::Text)){
+             qDebug()<<"unable to open the file";
+             return g.geom;
+        }
+        QString gcontent = gfile.readAll();
+        //qDebug()<<gcontent;
+        std::string xyz = gcontent.toUtf8().constData();
+
+        gfile.close();
+
+        std::string::const_iterator iter = xyz.begin();
+        std::string::const_iterator end = xyz.end();
+
+        bool r = phrase_parse(iter, end, g, space);
+        if (r && iter == end){
+              std::cout << "-------------------------\n";
+               std::cout << "Parsing succeeded\n";
+               g.geom.display();
+               std::cout << "\n-------------------------\n";
+               return g.geom;
+       }
+       else{
+               std::cout << "-------------------------\n";
+               std::cout << "Parsing failed\n";
+               std::cout << "-------------------------\n";
+               g.geom.display();
+               return g.geom;
+       }
+
+    }
 
 
 }

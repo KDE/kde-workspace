@@ -22,10 +22,12 @@ namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 namespace phx = boost::phoenix;
 
+
 namespace grammar{
+  
   struct keywords : qi::symbols<char, int>{
     keywords();
-  }kw;
+  };
   
   template<typename Iterator>
   struct Geometry_parser :qi::grammar<Iterator, ascii::space_type>{
@@ -45,6 +47,7 @@ namespace grammar{
     qi::rule<Iterator, std::string(), ascii::space_type>localShape;
     qi::rule<Iterator, std::string(), ascii::space_type>localColor;
     qi::rule<Iterator, std::string(), ascii::space_type>comments,ignore;
+    qi::rule<Iterator, double(), ascii::space_type>localDimension,priority;
     qi::rule<Iterator, double(), ascii::space_type>keygap;
     qi::rule<Iterator, int(), ascii::space_type>cordinatea;
     qi::rule<Iterator, int(), ascii::space_type>geomTop;
@@ -67,6 +70,7 @@ namespace grammar{
     qi::rule<Iterator, int(), ascii::space_type>cornerRadius;
     qi::rule<Iterator, ascii::space_type>start;
     Geometry geom;
+    keywords kw;
     double x,y,ax,ay,cx,cy,off;
     Geometry_parser();
     void setCord();
@@ -87,8 +91,14 @@ namespace grammar{
     void setKeyNameandShape(std::string n);
     void setKeyOffset();
     void setKeyCordi();
+    void setGeomShape(std::string n);
+    void getName(std::string n);
+    void getDescription(std::string n);
+    void getShapeName(std::string n);
 		
   };
+  
+  Geometry parseGeometry();
   
 }
 

@@ -37,6 +37,7 @@ public:
     void generateKeyboardLayout(const QString& layout, const QString& variant);
     
 private:
+    QDialog *kbDialog;
     KbPreviewFrame *kbframe;
     QPushButton *exitButton;
 };

@@ -26,9 +26,11 @@
 
 
 KeyboardPainter::KeyboardPainter():
+    kbDialog(new QDialog(this)),
     kbframe(new KbPreviewFrame(this)),
     exitButton(new QPushButton(i18n("Close"),this))
 {
+    kbDialog->setFixedSize( 1030, 490);
     kbframe->setFixedSize( 1030, 490 );
     exitButton->setFixedSize(120, 30);
 
@@ -44,6 +46,8 @@ KeyboardPainter::KeyboardPainter():
 void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant)
 {
     kbframe->generateKeyboardLayout(layout, variant);
+    kbDialog->setFixedSize((2*kbframe->geometry.width+20),(2*kbframe->geometry.height+50));
+    kbframe->setFixedSize((2*kbframe->geometry.width+20),(2*kbframe->geometry.height));
 }
 
 KeyboardPainter::~KeyboardPainter()
