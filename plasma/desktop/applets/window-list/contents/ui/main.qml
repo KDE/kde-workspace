@@ -30,9 +30,9 @@ Item {
     property int iconSize: theme.smallMediumIconSize 
     property int defaultMargin:0
     property bool showDesktop: true
-    
     function performOperation(op) {
-        var service = dataEngine.serviceForSource("");
+      //    var id = tasksSource["DataEngineSource"]
+        var service =tasksSource.serviceForSource("");
         var operation = service.operationDescription(op);
         service.startOperationCall(operation);
     }
@@ -92,10 +92,6 @@ Item {
         model: tasksModelSortedByDesktop
         section.property: "desktop"
         section.criteria: ViewSection.FullString
-        section.delegate: TextStyle {
-            width: parent.width
-            text: tasksSource.data[section]["Name"]
-        }
         iconSize: main.iconSize
         showDesktop: main.showDesktop
         onItemSelected: main.executeJob("activate", source);
@@ -152,6 +148,12 @@ Item {
                     anchors.fill:parent
                     onClicked: {
                         performOperation("unclutter");
+                      /*  if (data['active']) {
+                            var unclutterId = tasksSource["DataEngineSource"]
+                            var service = tasksSource.serviceForSource("unclutterId")
+                            var operation = service.operationDescription("restore")
+                            service.startOperationCall(operation)
+                        }*/
                     }
                     onEntered: {
                         unclutter.opacity = 0.5
@@ -204,8 +206,6 @@ Item {
                 border.color:"transparent"
                 PlasmaComponents.Label {
                     id: subLabelDesktop
-                    height: label.height
-                    font.pointSize: theme.smallestFont.pointSize
                     visible: showDesktop
                     anchors.centerIn:parent
                 }
