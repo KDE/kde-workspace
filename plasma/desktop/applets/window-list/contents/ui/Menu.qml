@@ -51,7 +51,7 @@ Item {
             id: menuItemDelegate
             width: menuListView.width - 2 * menuListView.anchors.leftMargin
             property string source: DataEngineSource
-            name: model["visibleName"]
+            name: model["visibleNameWithState"]
             desktop: model["desktop"]
             icon: model["icon"]
             active: model["active"]

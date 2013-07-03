@@ -30,6 +30,7 @@ Item {
     property variant activities: []
     property int desktop
     property alias icon: iconItem.icon
+
     property bool active: false
     property bool minimized: false
     property bool maximized: false
@@ -90,20 +91,21 @@ Item {
                 font.weight: menuItem.active ? Font.Bold : Font.Normal
                 font.italic: { (minimized == true) ? true : false }
             }
+            
         }
     }
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: {
+        onClicked: {if(menuItem.active) {var id = tasksSource["virtualDesktops"];print(id);}
             if (mouse.button == Qt.LeftButton) {
-                menuItem.clicked();
+                menuItem.clicked();if(menuItem.active) {var id = tasksSource["name"];print(id);}
             }
             else if (mouse.button == Qt.RightButton) {
                     contextMenu.populate();
                     var mapPos = menuItem.mapToItem(menuItem, mouse.x, mouse.y);
-                    contextMenu.open(mapPos.x, mapPos.y);
+                    contextMenu.open(mapPos.x, mapPos.y);if(menuItem.active) {var id = tasksSource["virtualDesktops"];print(id);}
                 }
             }
         onEntered: menuItem.entered();

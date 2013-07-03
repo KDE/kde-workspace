@@ -26,13 +26,15 @@ Item {
     property int maximumWidth
     property int maximumHeight
     property alias data: tasksSource.data;
+    property variant id 
     property variant desktopList: []
     property int iconSize: theme.smallMediumIconSize 
     property int defaultMargin:0
     property bool showDesktop: true
+    
     function performOperation(op) {
-      //    var id = tasksSource["DataEngineSource"]
-        var service =tasksSource.serviceForSource("");
+        print(id);
+        var service =tasksSource.serviceForSource(id);
         var operation = service.operationDescription(op);
         service.startOperationCall(operation);
     }
@@ -63,6 +65,7 @@ Item {
         engine: "tasks"
         onSourceAdded: {
             connectSource(source);
+            id = source ;
         }
         Component.onCompleted: {
             connectedSources = sources;
@@ -148,12 +151,6 @@ Item {
                     anchors.fill:parent
                     onClicked: {
                         performOperation("unclutter");
-                      /*  if (data['active']) {
-                            var unclutterId = tasksSource["DataEngineSource"]
-                            var service = tasksSource.serviceForSource("unclutterId")
-                            var operation = service.operationDescription("restore")
-                            service.startOperationCall(operation)
-                        }*/
                     }
                     onEntered: {
                         unclutter.opacity = 0.5
