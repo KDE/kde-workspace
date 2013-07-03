@@ -128,21 +128,22 @@ void DBusSystemTrayTask::activateHorzScroll(int delta) const
 bool static hasm_svgIcon(QVariant source)
 {
     // Set up compat envrionment, afterwards it is 100% copy'n'pastable.
-    QVariant m_source = source;
+    const QString element = source.toString();
+    const QString filename = element.split("-").first();
     Plasma::Svg svgIcon;
     Plasma::Svg *m_svgIcon = &svgIcon;
 
     //try as a svg toolbar icon
-    m_svgIcon->setImagePath("toolbar-icons/" + source.toString().split("-").first());
+    m_svgIcon->setImagePath("toolbar-icons/" + filename);
 
     //try as a svg normal icon (like systray)
-    if (!m_svgIcon->isValid() || !m_svgIcon->hasElement(m_source.toString())) {
-        m_svgIcon->setImagePath("icons/" + source.toString().split("-").first());
+    if (!m_svgIcon->isValid() || !m_svgIcon->hasElement(element)) {
+        m_svgIcon->setImagePath("icons/" + filename);
     }
     m_svgIcon->setContainsMultipleImages(true);
 
     //success?
-    if (m_svgIcon->isValid() && m_svgIcon->hasElement(m_source.toString())) {
+    if (m_svgIcon->isValid() && m_svgIcon->hasElement(element)) {
         return true;
     }
     return false;
