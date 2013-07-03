@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 1.1
-import org.kde.plasma.components 0.1 as PlasmaComponents
 import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
@@ -37,15 +36,11 @@ Item {
         anchors.bottom: menu.bottom
         anchors.margins: 0
         spacing: 0
-        highlightMoveDuration: 50
-        highlight: PlasmaComponents.Highlight {
-            PlasmaCore.FrameSvgItem {
+        highlight: PlasmaCore.FrameSvgItem {
                 id:background
                 imagePath:"widgets/viewitem"
                 prefix:"selected+hover"
-                height:50
                 width: menuListView.width - 2 * menuListView.anchors.leftMargin
-            }
         }
         delegate: TaskList {
             id: menuItemDelegate
@@ -63,8 +58,8 @@ Item {
             fullScreen: model["fullScreen"]
             iconSize: menu.iconSize
             showDesktop: menu.showDesktop
-            onClicked: menu.itemSelected(source);
-            onEntered: menuListView.currentIndex = index;
+            onClicked:{ menu.itemSelected(source); var id=source;}
+            onEntered: menuListView.currentIndex = index; 
             onExecuteJob: menu.executeJob(jobName, source);
             onSetOnDesktop: menu.setOnDesktop(source, desktop);
         }

@@ -15,14 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 1.1
-import Qt 4.7
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: main
-    property int minimumWidth: Math.max(100, windowListMenu.implicitWidth) 
-    property int minimumHeight:  Math.max(100, windowListMenu.implicitHeight) 
+    property int minimumWidth: Math.max(200, windowListMenu.implicitWidth) 
+    property int minimumHeight:  Math.max(400, windowListMenu.implicitHeight) 
     property int maximumWidth
     property int maximumHeight
     property alias data: tasksSource.data;
@@ -33,7 +32,7 @@ Item {
     property bool showDesktop: true
     
     function performOperation(op) {
-        print(id);
+        print("id =" +id);
         var service =tasksSource.serviceForSource(id);
         var operation = service.operationDescription(op);
         service.startOperationCall(operation);
@@ -100,18 +99,9 @@ Item {
         onItemSelected: main.executeJob("activate", source);
         onExecuteJob: main.executeJob(jobName, source);
         onSetOnDesktop: main.setOnDesktop(source, desktop);
-                highlight: PlasmaComponents.Highlight {
-            PlasmaCore.FrameSvgItem {
-                id:background4
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
-                height:50
-                width:  windowListMenu.width - 2 *  windowListMenu.anchors.leftMargin
-            }
-        }
         Column {
+            id:col
             spacing:0
-     
             Rectangle {
                 width: windowListMenu.width
                 height:20
@@ -129,6 +119,7 @@ Item {
                 PlasmaComponents.Label {
                     id:actions
                     text:"Actions"
+                    font.weight:Font.Bold
                     anchors {
                         centerIn:parent
                     }
@@ -191,6 +182,7 @@ Item {
                 width: windowListMenu.width
                 height:20
                 color:"lightgrey"
+                anchors.bottom:row.top
                 PlasmaCore.FrameSvgItem {
                     id:background1
                     imagePath:"widgets/viewitem"
@@ -204,7 +196,10 @@ Item {
                 PlasmaComponents.Label {
                     id: subLabelDesktop
                     visible: showDesktop
-                    anchors.centerIn:parent
+                    font.weight:Font.Bold
+                    anchors {
+                        centerIn:parent
+                    }
                 }
             }
         }

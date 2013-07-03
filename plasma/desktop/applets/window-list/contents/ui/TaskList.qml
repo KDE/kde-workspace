@@ -30,29 +30,30 @@ Item {
     property variant activities: []
     property int desktop
     property alias icon: iconItem.icon
-
-    property bool active: false
+    property bool active: true
     property bool minimized: false
     property bool maximized: false
     property bool shaded: false
     property bool alwaysOnTop: false
     property bool keptBelowOthers: false
     property bool fullScreen: false
-    property int iconSize: theme.smallMediumIconSize
-    property int iconMargin: 6
+    property int iconSize: theme.smallIconSize
+    property int iconMargin: 10
     property bool showDesktop: true
     property variant desktopItems: []
+    
     QtObject {
         id: internal
         function defineDesktopSubLabel() {
             if (showDesktop) {
-                var desktopString = i18n("Desktops:");
+                var desktopString = i18n("Desktops: ");
                 desktopString += desktop <= 0 ? "all" : main.desktopList[desktop-1];
                 subLabelDesktop.text = desktopString;
             }
         }
     }
     onDesktopChanged: internal.defineDesktopSubLabel();
+    
     TaskRow {
         id: contextMenu
         desktop: menuItem.desktop
@@ -65,49 +66,41 @@ Item {
         onExecuteJob: menuItem.executeJob(jobName);
         onSetOnDesktop: menuItem.setOnDesktop(desktop);
     }
+    
     Item {
         id: row
         width: parent.width
-        height: Math.max(iconItem.height, label.height ) + 4 * menuItem.iconMargin
-        QIconItem {
-            id: iconItem
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: menuItem.iconMargin
-            width: menuItem.iconSize
-            height: menuItem.iconSize
-        }
+        height: Math.max(iconItem.height, label.height ) + 4* menuItem.iconMargin
         Column {
-            id: column
-            anchors.left: iconItem.right
-            anchors.right: parent.right
-            anchors.verticalCenter: iconItem.verticalCenter
-            anchors.leftMargin: menuItem.iconMargin
+            QIconItem {
+                id: iconItem
+                anchors.verticalCenter: parent.verticalCenter
+                width: menuItem.iconSize
+                height: menuItem.iconSize
+            }
             PlasmaComponents.Label {
                 id: label
                 width: menuItem.width -  menuItem.iconMargin - iconItem.width
-                height: theme.defaultFont.mSize.height
-                elide: Text.ElideMiddle
                 font.weight: menuItem.active ? Font.Bold : Font.Normal
                 font.italic: { (minimized == true) ? true : false }
+                anchors.left: iconItem.right
+                anchors.verticalCenter: iconItem.verticalCenter
             }
-            
         }
     }
+    
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: {if(menuItem.active) {var id = tasksSource["virtualDesktops"];print(id);}
+        onClicked: {
             if (mouse.button == Qt.LeftButton) {
-                menuItem.clicked();if(menuItem.active) {var id = tasksSource["name"];print(id);}
+                menuItem.clicked();
+            } else if (mouse.button == Qt.RightButton) {
+                contextMenu.populate();     
+                var mapPos = menuItem.mapToItem(menuItem, mouse.x, mouse.y);                    contextMenu.open(mapPos.x, mapPos.y);
             }
-            else if (mouse.button == Qt.RightButton) {
-                    contextMenu.populate();
-                    var mapPos = menuItem.mapToItem(menuItem, mouse.x, mouse.y);
-                    contextMenu.open(mapPos.x, mapPos.y);if(menuItem.active) {var id = tasksSource["virtualDesktops"];print(id);}
-                }
-            }
+        }
         onEntered: menuItem.entered();
     }
 }
