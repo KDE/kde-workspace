@@ -329,6 +329,7 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 
     painter.setFont(kbfont);
     painter.setBrush(QBrush("#C3C8CB"));
+    painter.setRenderHint(QPainter::Antialiasing);
 
     const int strtx=0,strty=0,endx=geometry.width,endy=geometry.height,kszy=70;
     //const int row1x=10,row1y=30,row2x=10,row2y=90,row5x=10,row5y=330,row3x=10,row3y=170,shifx=10,shify=60,row4x=10,row4y=250,row6x=110,row6y=410;
@@ -339,7 +340,7 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
     if(scaleFactor<1)
         scaleFactor=1;
     qDebug()<<"scaleFactor = "<<scaleFactor;
-    scaleFactor = 2;
+    scaleFactor = 2.5;
     painter.drawRect(strtx, strty, scaleFactor*endx+60,scaleFactor*endy+60);
 
     painter.setPen(Qt::black);

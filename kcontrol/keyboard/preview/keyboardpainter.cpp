@@ -46,8 +46,8 @@ KeyboardPainter::KeyboardPainter():
 void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant)
 {
     kbframe->generateKeyboardLayout(layout, variant);
-    kbDialog->setFixedSize((2*kbframe->geometry.width+20),(2*kbframe->geometry.height+50));
-    kbframe->setFixedSize((2*kbframe->geometry.width+20),(2*kbframe->geometry.height));
+    kbDialog->setFixedSize((2.5*kbframe->geometry.width+20),(2.5*kbframe->geometry.height+50));
+    kbframe->setFixedSize((2.5*kbframe->geometry.width+20),(2.5*kbframe->geometry.height));
 }
 
 KeyboardPainter::~KeyboardPainter()

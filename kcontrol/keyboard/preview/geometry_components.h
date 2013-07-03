@@ -14,7 +14,7 @@ class GShape{
     void setCordinate(double &a, double &b);
     void setApprox(double &a, double &b);
     void display();
-    double size();
+    double size(int vertical);
 };
 
 class Key{
@@ -31,9 +31,9 @@ public:
 class Row{
 public:
   double top,left;
-  int keyCount;
+  int keyCount,vertical;
   QString shapeName;
-  Key keyList[30];
+  Key keyList[50];
   Row();
   void getRow(double t,double l);
   void addKey();
@@ -44,7 +44,7 @@ class Section{
 public:
   QString name,shapeName;
   double top,left,angle;
-  int rowCount;
+  int rowCount,vertical;
   Row rowList[20];
   Section();
   void getName(QString n);
@@ -55,7 +55,7 @@ public:
 class Geometry{
 public:
   QString name,description,keyShape;
-  int shape_count;
+  int shape_count,vertical;
   double width,height,sectionTop,sectionLeft,rowTop,rowLeft,keyGap;
   int sectionCount;
   GShape shapes[40];

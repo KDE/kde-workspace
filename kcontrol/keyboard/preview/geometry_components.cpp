@@ -26,15 +26,23 @@ void GShape::display(){
     qDebug()<<"shape: "<<sname<<"\n";
     qDebug()<<"( "<<approx.x()<<", "<<approx.y()<<"); ";
     for(int i=0;i<cordi_count;i++)
-            qDebug()<<"( "<<cordii[i].x()<<", "<<cordii[i].y()<<"); ";
+        qDebug()<<cordii[i];
     qDebug()<<"\n";
 }
 
-double GShape::size(){
-    if (approx.x() == 0 && approx.y() == 0)
-        return cordii[0].x();
+double GShape::size(int vertical){
+    if(vertical == 0){
+        if (approx.x() == 0 && approx.y() == 0)
+            return cordii[0].x();
+        else
+            return approx.x();
+    }
     else
-        return approx.x();
+        if (approx.x() == 0 && approx.y() == 0)
+            return cordii[0].y();
+        else
+            return approx.y();
+
 }
 
 Key::Key(){
@@ -50,13 +58,14 @@ void Key::setKeyPosition(double &x, double &y){
 
 void Key::showKey(){
     qDebug()<<"\n\tKey: "<<name<<"\tshape: "<<shapeName<<"\toffset: "<<offset;
-    qDebug()<<"\tposition"<<position.x()<<" , "<<position.y()<<"\n";
+    qDebug()<<"\tposition"<<position<<"\n";
 }
 
 Row::Row(){
     top = 0;
     left = 0;
     keyCount = 0;
+    vertical = 0;
 }
 
 void Row::getRow(double t,double l){
@@ -70,7 +79,8 @@ void Row::addKey(){
 }
 
 void Row::displayRow(){
-    qDebug()<<"\nRow: "<<top<<","<<left<<"\n";
+    qDebug()<<"\nRow: ("<<left<<","<<top<<")\n";
+    qDebug()<<"vertical: "<<vertical;
     for(int i=0;i<keyCount;i++)
     keyList[i].showKey();
 }
@@ -80,6 +90,7 @@ Section::Section(){
     left = 0;
     angle = 0;
     rowCount = 0;
+    vertical = 0;
 }
 
 void Section::getName(QString n){
@@ -93,6 +104,7 @@ void Section::addRow(){
 
 void Section::displaySection(){
     qDebug()<<"\nSection: "<<name<<"\n\tposition: ("<<left<<","<<top<<");"<<angle<<"\n";
+    qDebug()<<"vertical: "<<vertical;
     for(int i=0;i<rowCount;i++){
             qDebug()<<"\n\t";
             rowList[i].displayRow();
@@ -109,6 +121,8 @@ Geometry::Geometry(){
     width=0;
     height=0;
     sectionCount = 0;
+    vertical = 0;
+    keyShape = QString("NORM");
 }
 
 void Geometry::getName(QString n){
@@ -146,6 +160,7 @@ void Geometry::getShape(){
 void Geometry::display(){
     qDebug()<<name<<"\n"<<description<<"\nwidth: "<<width<<"\nheight: "<<height<<"\n"<<"sectionTop: "<<sectionTop;
     qDebug()<<"\nsectionLeft: "<<sectionLeft<<"\nrowTop: "<<rowTop<<"\nrowLeft: "<<rowLeft<<"\nkeyGap: "<<keyGap<<"\nkeyShape: "<<keyShape<<"\n";
+    qDebug()<<"vertical: "<<vertical;
     for (int i=0;i<shape_count;i++){
             shapes[i].display();
     }

@@ -34,9 +34,10 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
     using qi::double_;
     using qi::eol;
 
+
     name = '"'>>+(char_-'"')>>'"';
 
-    ignore =lit("outline")>>*(char_-lit("};"))>>lit("};")
+    ignore =(lit("outline")||lit("overlay")||lit("text"))>>*(char_-lit("};"))>>lit("};")
             ||lit("solid")>>*(char_-lit("};"))>>lit("};")
             ||lit("indicator")>>*(char_-';'-'{')>>';'||'{'>>*(char_-lit("};"))>>lit("};")
             ||lit("indicator")>>'.'>>lit("shape")>>'='>>name>>';';
@@ -70,7 +71,7 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
     shapeDef = lit("shape")
             >>name[phx::bind(&Geometry_parser::getShapeName,this,_1)]
             >>'{'
-            >>*(lit("approx")>>'='>>setap[phx::bind(&Geometry_parser::setApprox,this)]>>','||cornerRadius>>',')
+            >>*(lit("approx")>>'='>>setap[phx::bind(&Geometry_parser::setApprox,this)]>>','||cornerRadius>>','||comments)
             >>seta
             >>*((','>>(set||lit("approx")>>'='>>setap[phx::bind(&Geometry_parser::setApprox,this)]||cornerRadius)||comments))
             >>lit("};")
@@ -78,7 +79,7 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
 
     keyName = '<'>>+(char_-'>')>>'>';
 
-    keyShape = lit("shape")>>'='>>name[phx::bind(&Geometry_parser::setKeyShape,this,_1)]
+    keyShape = *(lit("key."))>>lit("shape")>>'='>>name[phx::bind(&Geometry_parser::setKeyShape,this,_1)]
             ||name[phx::bind(&Geometry_parser::setKeyShape,this,_1)];
 
     keyColor = lit("color")>>'='>>name;
@@ -86,9 +87,12 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
     keygap = lit("gap")>>'='>>double_[phx::ref(off)=_1]||double_[phx::ref(off)=_1];
 
     keyDesc = keyName[phx::bind(&Geometry_parser::setKeyNameandShape,this,_1)]
-            ||'{'>>keyName[phx::bind(&Geometry_parser::setKeyNameandShape,this,_1)]
+            ||'{'>>(keyName[phx::bind(&Geometry_parser::setKeyNameandShape,this,_1)]||keyShape
+                   ||keygap[phx::bind(&Geometry_parser::setKeyOffset,this)]
+                   ||keyColor)
             >>*((','
-            >>(keyShape
+            >>(keyName
+            ||keyShape
             ||keygap[phx::bind(&Geometry_parser::setKeyOffset,this)]
             ||keyColor))
             ||comments)
@@ -100,13 +104,13 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
             >>*((*lit(',')>>keyDesc[phx::bind(&Geometry_parser::setKeyCordi,this)]>>*lit(','))||comments)
             >>lit("};");
 
-    geomShape = lit("key.shape")>>'='>>name[phx::bind(&Geometry_parser::setGeomShape,this,_1)]>>';';
+    geomShape = ((lit("key.shape")>>'='>>name[phx::bind(&Geometry_parser::setGeomShape,this,_1)])||(lit("key.color")>>'='>>name))>>';';
     geomLeft = lit("section.left")>>'='>>double_[phx::ref(geom.sectionLeft)=_1]>>';';
     geomTop = lit("section.top")>>'='>>double_[phx::ref(geom.sectionTop)=_1]>>';';
     geomRowTop = lit("row.top")>>'='>>double_[phx::ref(geom.rowTop)=_1]>>';';
     geomRowLeft = lit("row.left")>>'='>>double_[phx::ref(geom.rowLeft)=_1]>>';';
     geomGap = lit("key.gap")>>'='>>double_[phx::ref(geom.keyGap)=_1]>>';';
-
+    geomVertical = *lit("row.")>>lit("vertical")>>'='>>(lit("True")||lit("true"))>>';';
     geomAtt = geomLeft||geomTop||geomRowTop||geomRowLeft||geomGap;
 
     top = lit("top")>>'='>>double_>>';';
@@ -118,9 +122,11 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
             ||left[phx::bind(&Geometry_parser::setRowLeft,this,_1)]
             ||localShape[phx::bind(&Geometry_parser::setRowShape,this,_1)]
             ||localColor
-            ||comments)
-            >>keys
-            >>lit("};");
+            ||comments
+            ||geomVertical[phx::bind(&Geometry_parser::setVerticalRow,this)]
+            ||keys
+            )
+            >>lit("};")||ignore||geomVertical[phx::bind(&Geometry_parser::setVerticalSection,this)];
 
     angle = lit("angle")>>'='>>double_>>';';
 
@@ -142,7 +148,7 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
             ||localDimension
             ||priority
             ||comments)
-            >>lit("};");
+            >>lit("};")||geomVertical[phx::bind(&Geometry_parser::setVerticalGeometry,this)];
 
     shapeC = lit("shape")>>'.'>>cornerRadius>>';';
 
@@ -240,6 +246,7 @@ template<typename Iterator>
         geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].shapeName =  geom.sectionList[geom.sectionCount].shapeName;
         cx = geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].left;
         cy = geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].top;
+        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].vertical = geom.sectionList[geom.sectionCount].vertical;
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectioninit(){
@@ -248,6 +255,7 @@ template<typename Iterator>
         cx = geom.sectionList[geom.sectionCount].left;
         cy = geom.sectionList[geom.sectionCount].top;
         geom.sectionList[geom.sectionCount].shapeName = geom.keyShape;
+        geom.sectionList[geom.sectionCount].vertical = geom.vertical;
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setRowTop(double a){
@@ -277,6 +285,19 @@ template<typename Iterator>
         qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.sectionCount].angle = a;
     }
+template<typename Iterator>
+    void Geometry_parser<Iterator>::setVerticalRow(){
+        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].vertical = 1;
+    }
+template<typename Iterator>
+    void Geometry_parser<Iterator>::setVerticalSection(){
+         geom.sectionList[geom.sectionCount].vertical = 1;
+    }
+template<typename Iterator>
+    void Geometry_parser<Iterator>::setVerticalGeometry(){
+         geom.vertical = 1;
+    }
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyName(std::string n){
         int secn = geom.sectionCount;
@@ -312,14 +333,21 @@ template<typename Iterator>
         int secn = geom.sectionCount;
         int rown = geom.sectionList[secn].rowCount;
         int keyn = geom.sectionList[secn].rowList[rown].keyCount;
-        cx+=geom.sectionList[secn].rowList[rown].keyList[keyn].offset;
+        int vertical = geom.sectionList[secn].rowList[rown].vertical;
+        if(vertical == 0)
+            cx+=geom.sectionList[secn].rowList[rown].keyList[keyn].offset;
+        else
+            cy+=geom.sectionList[secn].rowList[rown].keyList[keyn].offset;
         geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyPosition(cx,cy);
         QString s = geom.sectionList[secn].rowList[rown].keyList[keyn].shapeName;
         if (s=="")
                 s = geom.keyShape;
         GShape t = geom.findShape(s);
-        int a = t.size();
-        cx+=a+geom.keyGap;
+        int a = t.size(vertical);
+        if(vertical == 0)
+            cx+=a+geom.keyGap;
+        else
+            cy+=a+geom.keyGap;
         geom.sectionList[secn].rowList[rown].addKey();
     }
 

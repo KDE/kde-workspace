@@ -50,7 +50,7 @@ namespace grammar{
     qi::rule<Iterator, double(), ascii::space_type>localDimension,priority;
     qi::rule<Iterator, double(), ascii::space_type>keygap;
     qi::rule<Iterator, int(), ascii::space_type>cordinatea;
-    qi::rule<Iterator, int(), ascii::space_type>geomTop;
+    qi::rule<Iterator, int(), ascii::space_type>geomTop,geomVertical;
     qi::rule<Iterator, int(), ascii::space_type>geomLeft;
     qi::rule<Iterator, int(), ascii::space_type>geomRowTop;
     qi::rule<Iterator, int(), ascii::space_type>geomRowLeft;
@@ -95,6 +95,9 @@ namespace grammar{
     void getName(std::string n);
     void getDescription(std::string n);
     void getShapeName(std::string n);
+    void setVerticalRow();
+    void setVerticalSection();
+    void setVerticalGeometry();
 		
   };
   
