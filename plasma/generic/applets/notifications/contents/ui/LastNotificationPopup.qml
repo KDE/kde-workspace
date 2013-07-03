@@ -185,6 +185,7 @@ PlasmaCore.Dialog {
                     horizontalAlignment: Text.AlignHCenter
                     color: theme.textColor
                     elide: Text.ElideRight
+                    textFormat: Text.RichText
                     anchors {
                         left: appIconItem.y > y + height ? parent.left : appIconItem.right
                         right: parent.right
