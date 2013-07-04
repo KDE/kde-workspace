@@ -22,7 +22,6 @@
     <group name="toggleMaximized" />
     <group name="toggleMinimized" />
     <group name="toggleShaded" />
-   <group name="cascade" />
     <group name="toggleFullScreen" />
     <group name="toggleAlwaysOnTop" />
     <group name="toggleKeptBelowOthers" />

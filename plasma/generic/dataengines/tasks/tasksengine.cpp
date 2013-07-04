@@ -36,17 +36,25 @@ TasksEngine::TasksEngine(QObject *parent, const QVariantList &args) :
 TasksEngine::~TasksEngine()
 {
 }
-Plasma::Service *TasksEngine::serviceForSource(const QString &name)
+ /*
+Plasma::Service *TasksEngine::windowserviceForSource(const QString &n) {
+   static TaskSource *source=qobject_cast<TaskSource*>(containerForSource(n));        Plasma::Service *windowservice = source->createWindowService();        windowservice->setParent(this);
+   return windowservice;
+   qDebug() << "Error in code";
+}*/
+
+Plasma::Service *TasksEngine::serviceForSource(const QString &name )
 {
     TaskSource *source = qobject_cast<TaskSource*>(containerForSource(name));
-    if(name.isEmpty() || !source){
-        //TaskSource* pt = reinterpret_cast<TaskSource*>(&source);
-        //  Plasma::Service *service = pt->createWindowService();
-        Plasma::Service *service =source->createWindowService();
-        service->setParent(this);
-        return service;
+    if(name.isEmpty()){
+        kDebug() << "couldn't connect to kwin! ";
+         Plasma::Service *service = source->createWindowService();service->setParent(this);
+       //return new WindowService(source,this);}
+         return service;
     }
-     if ( !source->task() ) {
+    //service->setParent(this);
+    //return service;}
+     else if (!source->task() ) {
         return Plasma::DataEngine::serviceForSource(name);
     } 
    Plasma::Service *service = source->createService();
@@ -77,6 +85,16 @@ void TasksEngine::init()
     connect(manager, SIGNAL(startupRemoved(::TaskManager::Startup*)), this, SLOT(startupRemoved(::TaskManager::Startup*)));
     connect(manager, SIGNAL(taskAdded(::TaskManager::Task*)), this, SLOT(taskAdded(::TaskManager::Task*)));
     connect(manager, SIGNAL(taskRemoved(::TaskManager::Task*)), this, SLOT(taskRemoved(::TaskManager::Task*)));
+    // org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
+  /*  if(QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kwin")) {
+        if(!QDBusConnection::sessionBus().connect("org.kde.kwin","/kwin","org.kde.kwin",cascade,this,slotCascadeWindows())) {
+            kDebug()<<"error connecting to dbus";
+        }
+        //sourceRequestEvent("cascade");
+        if(!QDBusConnection::sessionBus().connect("org.kde.kwin","/kwin","org.kde.kwin",unclutter,this,slotUnclutterWindows())) {
+            kDebug<<"error connecting to dbus";
+        }
+    }*/
 }
 
 void TasksEngine::startupRemoved(::TaskManager::Startup *startup)

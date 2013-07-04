@@ -60,7 +60,7 @@ class TasksEngine : public Plasma::DataEngine
     public:
         TasksEngine(QObject *parent, const QVariantList &args);
         ~TasksEngine();
-        Plasma::Service *serviceForSource(const QString &name );
+        Plasma::Service *serviceForSource(const QString &name);
 
     protected:
         static const QString getStartupName(::TaskManager::Startup *startup);

@@ -53,7 +53,7 @@ void TaskWindowJob::start()
    /* if (!m_source->task()) {
         return;
     }*/
-     if(m_source == NULL) {
+     
     // only a subset of task operations are exported
     const QString operation = operationName();
     if (operation == "cascade") {
@@ -69,8 +69,8 @@ void TaskWindowJob::start()
         setResult(true);
         return;
     } 
-     }
-    setResult(false);
+     
+    //setResult(false);
 }
 
 #include "taskwindowjob.moc"
