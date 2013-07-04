@@ -44,8 +44,6 @@ enum GroupableAction { MaximizeAction = 0,
                        ToDesktopAction,
                        ShadeAction,
                        CloseAction,
-                       CascadeAction,
-                       UnclutterAction,
                        ViewFullscreenAction,
                        KeepBelowAction,
                        ToggleLauncherAction, // adds/removes Launcher for the task
@@ -53,8 +51,6 @@ enum GroupableAction { MaximizeAction = 0,
                      };
 
 enum TaskAction { ResizeAction = 0,
-                  CascadeAction,
-                  UnclutterAction,
                   MoveAction
                 };
 
