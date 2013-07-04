@@ -41,7 +41,8 @@ class TaskSource : public Plasma::DataContainer
         TaskSource(::TaskManager::Startup *startup, QObject *parent);
         TaskSource(::TaskManager::Task *task, QObject *parent);
         ~TaskSource();
-
+     //   Plasma::WindowManagementService *createWindowManagementService();
+Plasma::Service *createWindowService();
         Plasma::Service *createService();
         ::TaskManager::Task *task();
 

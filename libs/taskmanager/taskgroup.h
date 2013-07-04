@@ -80,6 +80,8 @@ public:
     bool isMaximized() const;
     bool isMinimized() const;
     bool isFullScreen() const;
+    bool isCascade() const;
+    bool isUnclutter() const;
     bool isKeptBelowOthers() const;
     bool isAlwaysOnTop() const;
     bool isActionSupported(NET::Action) const;

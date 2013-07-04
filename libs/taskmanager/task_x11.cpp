@@ -127,6 +127,32 @@ void Task::resize()
                          geom.bottomRight().y(), NET::BottomRight);
 }
 
+void Task::cascade()
+{
+   CascadeActionImpl::CascadeActionImpl(QObject *parent, AbstractGroupableItem *item)
+    : QAction(parent)
+    {
+        connect(this, SIGNAL(triggered()),item, SLOT(slotCascadeWindows()));
+        setText(i18n("Ca&scade"));
+        setCheckable(true);
+        setChecked(item->isCascade());
+        setEnabled(item->isActionSupported(NET::ActionCascade));
+    }
+}
+
+void Task::unclutter()
+{
+    UnclutterActionImpl::UnclutterActionImpl(QObject *parent, AbstractGroupableItem *item)
+    : QAction(parent)
+    {
+        connect(this, SIGNAL(triggered()),item, SLOT(slotUnclutterWindows()));
+        setText(i18n("Un&clutter"));
+        setCheckable(true);
+        setChecked(item->isUnclutter());
+        setEnabled(item->isActionSupported(NET::ActionUnclutter));
+    }
+}
+
 void Task::setMaximized(bool maximize)
 {
     KWindowInfo info = KWindowSystem::windowInfo(d->win, NET::WMState | NET::XAWMState | NET::WMDesktop);

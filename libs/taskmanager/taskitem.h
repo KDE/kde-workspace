@@ -75,6 +75,8 @@ public:
     bool isShaded() const;
     bool isMaximized() const;
     bool isMinimized() const;
+    bool isCascade() const;
+    bool isUnclutter() const;
     bool isFullScreen() const;
     bool isKeptBelowOthers() const;
     bool isAlwaysOnTop() const;

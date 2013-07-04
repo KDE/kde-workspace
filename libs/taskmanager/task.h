@@ -170,6 +170,8 @@ public:
      * Returns true if the task's window is minimized(iconified).
      */
     bool isIconified() const;
+    bool isCascade() const;
+    bool isUnclutter() const;
 
     /**
      * Returns true if the task's window is shaded.
@@ -364,6 +366,11 @@ public Q_SLOTS:
       * Activate the task's window.
       */
     void activate();
+    
+    void cascade();
+    
+    void unclutter();
+    
 
     /**
      * Perform the action that is most appropriate for this task. If it

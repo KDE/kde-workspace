@@ -17,6 +17,26 @@
  */
 
 #include "taskjob.h"
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusMessage>
+#include <QDBusPendingReply>
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusPendingCallWatcher>
+#include <QtCore/QFutureWatcher>
+#include <QtCore/QSettings>
+#include <QtCore/QtConcurrentRun>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeView>
+#include <QtDeclarative/qdeclarative.h>
+#include <QtGui/QMenu>
+#include <QtScript/QScriptEngine>
+#include <QtScript/QScriptValue>
+
+
+#include <KAuthorized>
 
 TaskJob::TaskJob(TaskSource *source, const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent) :
     ServiceJob(source->objectName(), operation, parameters, parent),
@@ -42,6 +62,18 @@ void TaskJob::start()
         return;
     } else if (operation == "setMinimized") {
         m_source->task()->setIconified(parameters().value("minimized").toBool());
+        setResult(true);
+        return;
+    } else if (operation == "cascade") {
+        QDBusInterface  *kwinInterface = new QDBusInterface("org.kde.kwin", "/KWin", "org.kde.KWin");
+        QDBusPendingCall pcall = kwinInterface->asyncCall("cascadeDesktop");
+        kDebug() << "couldn't connect to kwin! ";
+        setResult(true);
+        return;
+    } else if (operation == "unclutter") {
+        QDBusInterface  *kwinInterface = new QDBusInterface("org.kde.kwin", "/KWin", "org.kde.KWin");
+        QDBusPendingCall pcall = kwinInterface->asyncCall("unclutterDesktop");
+        kDebug() << "couldn't connect to kwin! ";
         setResult(true);
         return;
     } else if (operation == "setShaded") {
@@ -72,7 +104,7 @@ void TaskJob::start()
         m_source->task()->toggleShaded();
         setResult(true);
         return;
-    } else if (operation == "toggleFullScreen") {
+    }  else if (operation == "toggleFullScreen") {
         m_source->task()->toggleFullScreen();
         setResult(true);
         return;

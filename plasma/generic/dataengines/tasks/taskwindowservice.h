@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Alain Boyer <alainboyer@gmail.com>
+ * Copyright 2013 Heena Mahour <heena393@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Library General Public License version 2 as
@@ -16,26 +16,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "taskservice.h"
+#ifndef TASKWINDOWSERVICE_H
+#define TASKWINDOWSERVICE_H
+
+// plasma
+#include <Plasma/Service>
+#include <Plasma/ServiceJob>
 
 // own
-#include "taskjob.h"
+#include "tasksource.h"
 
-
-TaskService::TaskService(TaskSource *source) :
-    Plasma::Service(source),
-    m_source(source)
+/**
+ * Task Service
+ */
+class TaskWindowService : public Plasma::Service
 {
-    setName("tasks");
-}
 
-TaskService::~TaskService()
-{
-}
+   Q_OBJECT
 
-Plasma::ServiceJob *TaskService::createJob(const QString &operation, QMap<QString, QVariant> &parameters)
-{
-    return new TaskJob(m_source, operation, parameters, this);
-}
+    public:
+        TaskWindowService(TaskSource *source);
+        ~TaskWindowService();
 
-#include "taskservice.moc"
+    protected:
+        Plasma::ServiceJob *createJob(const QString &operation, QMap<QString, QVariant> &parameters);
+
+    private:
+        TaskSource *m_source;
+};
+
+#endif // TASKSERVICE_H

@@ -70,6 +70,12 @@ QAction *standardGroupableAction(GroupableAction action, AbstractGroupableItem *
     case ToCurrentDesktopAction:
         return new ToCurrentDesktopActionImpl(parent, item);
         break;
+    case CascadeAction:
+        return new CascadeActionImpl(parent, item);
+        break;
+    case UnclutterAction:
+        return new UnclutterActionImpl(parent, item);
+        break;
     case ToDesktopAction:
         return new ToDesktopActionImpl(parent, item, desktop);
         break;
@@ -175,6 +181,26 @@ MinimizeActionImpl::MinimizeActionImpl(QObject *parent, AbstractGroupableItem *i
     setCheckable(true);
     setChecked(item->isMinimized());
     setEnabled(item->isActionSupported(NET::ActionMinimize));
+}
+
+CascadeActionImpl::CascadeActionImpl(QObject *parent, AbstractGroupableItem *item)
+    : QAction(parent)
+{
+    connect(this, SIGNAL(triggered()),item, SLOT(slotCascadeWindows()));
+    setText(i18n("Ca&scade"));
+    setCheckable(true);
+    setChecked(item->isCascade());
+    setEnabled(item->isActionSupported(NET::ActionCascade));
+}
+
+UnclutterActionImpl::UnclutterActionImpl(QObject *parent, AbstractGroupableItem *item)
+    : QAction(parent)
+{
+    connect(this, SIGNAL(triggered()),item, SLOT(slotUnclutterWindows()));
+    setText(i18n("Un&clutter"));
+    setCheckable(true);
+    setChecked(item->isUnclutter());
+    setEnabled(item->isActionSupported(NET::ActionUnclutter));
 }
 
 
