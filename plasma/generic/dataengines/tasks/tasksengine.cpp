@@ -36,19 +36,23 @@ TasksEngine::TasksEngine(QObject *parent, const QVariantList &args) :
 TasksEngine::~TasksEngine()
 {
 }
-
 Plasma::Service *TasksEngine::serviceForSource(const QString &name)
 {
-    TaskSource *source = dynamic_cast<TaskSource*>(containerForSource(name));
-    // if source does not exist or it represents a startup task, return a null service
-    if (!source || !source->task()) {
-        return Plasma::DataEngine::serviceForSource(name);
+    TaskSource *source = qobject_cast<TaskSource*>(containerForSource(name));
+    if(name.isEmpty() || !source){
+        //TaskSource* pt = reinterpret_cast<TaskSource*>(&source);
+        //  Plasma::Service *service = pt->createWindowService();
+        Plasma::Service *service =source->createWindowService();
+        service->setParent(this);
+        return service;
     }
-
-    // if source represent a proper task, return task service
-    Plasma::Service *service = source->createService();
+     if ( !source->task() ) {
+        return Plasma::DataEngine::serviceForSource(name);
+    } 
+   Plasma::Service *service = source->createService();
     service->setParent(this);
     return service;
+   
 }
 
 const QString TasksEngine::getStartupName(::TaskManager::Startup *startup)
@@ -73,16 +77,6 @@ void TasksEngine::init()
     connect(manager, SIGNAL(startupRemoved(::TaskManager::Startup*)), this, SLOT(startupRemoved(::TaskManager::Startup*)));
     connect(manager, SIGNAL(taskAdded(::TaskManager::Task*)), this, SLOT(taskAdded(::TaskManager::Task*)));
     connect(manager, SIGNAL(taskRemoved(::TaskManager::Task*)), this, SLOT(taskRemoved(::TaskManager::Task*)));
-    // org::kde::KWin kwin("org.kde.kwin", "/KWin", QDBusConnection::sessionBus());
-  /*  if(QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kwin")) {
-        if(!QDBusConnection::sessionBus().connect("org.kde.kwin","/kwin","org.kde.kwin",cascade,this,slotCascadeWindows())) {
-            kDebug()<<"error connecting to dbus";
-        }
-        //sourceRequestEvent("cascade");
-        if(!QDBusConnection::sessionBus().connect("org.kde.kwin","/kwin","org.kde.kwin",unclutter,this,slotUnclutterWindows())) {
-            kDebug<<"error connecting to dbus";
-        }
-    }*/
 }
 
 void TasksEngine::startupRemoved(::TaskManager::Startup *startup)
@@ -131,10 +125,12 @@ void TasksEngine::taskAdded(::TaskManager::Task *task)
 
 bool TasksEngine::sourceRequestEvent(const QString &source)
 {
-    if (source == "virtualDesktops") {
+    if (source == "virtualDesktops" ) {
         addSource(new VirtualDesktopsSource);
         return true;
-    } 
+    } else if (source =="") {
+        return true ;
+    }
     return false;
 }
 
