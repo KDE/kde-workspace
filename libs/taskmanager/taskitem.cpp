@@ -368,22 +368,6 @@ bool TaskItem::isFullScreen() const
     return d->task.data()->isFullScreen();
 }
 
-bool TaskItem::isCascade() const
-{
-    if (!d->task) {
-        return false;
-    }
-    return d->task.data()->isCascade();
-}
-
-bool TaskItem::isUnclutter() const
-{
-    if (!d->task) {
-        return false;
-    }
-    return d->task.data()->isUnclutter();
-}
-
 void TaskItem::setKeptBelowOthers(bool state)
 {
     if (!d->task) {

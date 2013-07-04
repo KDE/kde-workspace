@@ -533,24 +533,6 @@ int TaskGroup::desktop() const
     }
     return desk;
 }
-bool TaskGroup::isCascade() const
-{
-    foreach (AbstractGroupableItem * item, d->members) {
-        if (!item->isCascade()) {
-            return false;
-        }
-    }
-    return true;
-}
-bool TaskGroup::isUnclutter() const
-{
-    foreach (AbstractGroupableItem * item, d->members) {
-        if (!item->isUnclutter()) {
-            return false;
-        }
-    }
-    return true;
-}
 void TaskGroup::setMaximized(bool state)
 {
     foreach (AbstractGroupableItem * item, d->members) {

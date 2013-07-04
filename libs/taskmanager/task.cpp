@@ -524,16 +524,6 @@ void Task::raise()
     KWindowSystem::raiseWindow(d->win);
 }
 
-void Task::cascade()
-{
-    KWindowSystem::cascadeWindow(d->win);
-}
-
-void Task::unclutter()
-{
-    KWindowSystem::unclutterWindow(d->win);
-}
-
 void Task::lower()
 {
 //    kDebug(1210) << "Task::lower(): " << name();

@@ -366,13 +366,7 @@ public Q_SLOTS:
       * Activate the task's window.
       */
     void activate();
-    
-    void cascade();
-    
-    void unclutter();
-    
-
-    /**
+       /**
      * Perform the action that is most appropriate for this task. If it
      * is not active, activate it. Else if it is not the top window, raise
      * it. Otherwise, iconify it.
