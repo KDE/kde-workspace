@@ -26,6 +26,7 @@
 #include <QtDBus/QDBusPendingCallWatcher>
 // own
 #include "tasksource.h"
+#include "taskwindowservice.h"
 
 TasksEngine::TasksEngine(QObject *parent, const QVariantList &args) :
     Plasma::DataEngine(parent, args)
@@ -46,21 +47,18 @@ Plasma::Service *TasksEngine::windowserviceForSource(const QString &n) {
 Plasma::Service *TasksEngine::serviceForSource(const QString &name )
 {
     TaskSource *source = qobject_cast<TaskSource*>(containerForSource(name));
-    if(name.isEmpty()){
-        kDebug() << "couldn't connect to kwin! ";
-         Plasma::Service *service = source->createWindowService();service->setParent(this);
-       //return new WindowService(source,this);}
-         return service;
+    
+    Plasma::Service *service;
+    if (source && source->task()) {
+        service = source->createService();
+    } else if (name.isEmpty()) {
+        service = new TaskWindowService();
+    } else {
+        service = Plasma::DataEngine::serviceForSource(name);
     }
-    //service->setParent(this);
-    //return service;}
-     else if (!source->task() ) {
-        return Plasma::DataEngine::serviceForSource(name);
-    } 
-   Plasma::Service *service = source->createService();
+    
     service->setParent(this);
     return service;
-   
 }
 
 const QString TasksEngine::getStartupName(::TaskManager::Startup *startup)
