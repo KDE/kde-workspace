@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Heena <heena393@gmail.com>
+ * Copyright 2013 Heena Mahour<heena393@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Library General Public License version 2 as
@@ -38,9 +38,9 @@
 
 #include <KAuthorized>
 
-TaskWindowJob::TaskWindowJob(TaskSource *source, const QString &operation , QMap<QString, QVariant> &parameters, QObject *parent) :
-    ServiceJob(source->objectName(), operation, parameters, parent),
-    m_source(source)
+TaskWindowJob::TaskWindowJob(const QString &source, const QString &operation , QMap<QString, QVariant> &parameters, QObject *parent) :
+    ServiceJob(source, operation, parameters, parent),
+    m_id(source)
 {
 }
 
@@ -50,11 +50,6 @@ TaskWindowJob::~TaskWindowJob()
 
 void TaskWindowJob::start()
 {
-   /* if (!m_source->task()) {
-        return;
-    }*/
-     
-    // only a subset of task operations are exported
     const QString operation = operationName();
     if (operation == "cascade") {
         QDBusInterface  *kwinInterface = new QDBusInterface("org.kde.kwin", "/KWin", "org.kde.KWin");
@@ -69,8 +64,6 @@ void TaskWindowJob::start()
         setResult(true);
         return;
     } 
-     
-    //setResult(false);
 }
 
 #include "taskwindowjob.moc"

@@ -21,13 +21,11 @@
 // own
 #include "taskwindowjob.h"
 
-
-TaskWindowService::TaskWindowService(TaskSource *source) :
-    Plasma::Service(source),
-    m_source(source)
+TaskWindowService::TaskWindowService( const QString &source)  :   m_id(source)
 {
     setName("windowtasks");
 }
+
 
 TaskWindowService::~TaskWindowService()
 {
@@ -35,7 +33,7 @@ TaskWindowService::~TaskWindowService()
 
 Plasma::ServiceJob *TaskWindowService::createJob(const QString &operation, QMap<QString, QVariant> &parameters)
 {
-    return new TaskWindowJob(m_source, operation, parameters, this);
+    return new TaskWindowJob(m_id,operation, parameters, this);
 }
 
 #include "taskwindowservice.moc"

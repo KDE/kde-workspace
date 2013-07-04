@@ -26,23 +26,20 @@
 // own
 #include "tasksource.h"
 
-/**
- * Task Service
- */
 class TaskWindowService : public Plasma::Service
 {
 
    Q_OBJECT
 
     public:
-        TaskWindowService(TaskSource *source);
+        TaskWindowService( const QString &source);
         ~TaskWindowService();
 
     protected:
         Plasma::ServiceJob *createJob(const QString &operation, QMap<QString, QVariant> &parameters);
 
     private:
-        TaskSource *m_source;
+        QString m_id;
 };
 
 #endif // TASKSERVICE_H

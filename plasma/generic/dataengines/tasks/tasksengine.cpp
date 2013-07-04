@@ -37,12 +37,6 @@ TasksEngine::TasksEngine(QObject *parent, const QVariantList &args) :
 TasksEngine::~TasksEngine()
 {
 }
- /*
-Plasma::Service *TasksEngine::windowserviceForSource(const QString &n) {
-   static TaskSource *source=qobject_cast<TaskSource*>(containerForSource(n));        Plasma::Service *windowservice = source->createWindowService();        windowservice->setParent(this);
-   return windowservice;
-   qDebug() << "Error in code";
-}*/
 
 Plasma::Service *TasksEngine::serviceForSource(const QString &name )
 {
@@ -52,7 +46,7 @@ Plasma::Service *TasksEngine::serviceForSource(const QString &name )
     if (source && source->task()) {
         service = source->createService();
     } else if (name.isEmpty()) {
-        service = new TaskWindowService();
+        service = new TaskWindowService(name);
     } else {
         service = Plasma::DataEngine::serviceForSource(name);
     }

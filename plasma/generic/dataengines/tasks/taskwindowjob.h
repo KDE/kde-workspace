@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Heena <heena393@gmail.com>
+ * Copyright 2013 Heena Mahour <heena393@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Library General Public License version 2 as
@@ -26,7 +26,7 @@
 #include "tasksource.h"
 
 /**
- * Task Job
+ * Task Window Job
  */
 class TaskWindowJob : public Plasma::ServiceJob
 {
@@ -34,14 +34,14 @@ class TaskWindowJob : public Plasma::ServiceJob
     Q_OBJECT
 
     public:
-        TaskWindowJob(TaskSource *source, const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent = NULL);
+        TaskWindowJob(const QString &source, const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent = NULL);
         ~TaskWindowJob();
 
     protected:
         void start();
 
     private:
-        TaskSource *m_source;
+        QString m_id;
 
 };
 

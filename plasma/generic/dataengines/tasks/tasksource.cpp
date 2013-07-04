@@ -48,20 +48,12 @@ TaskSource::TaskSource(::TaskManager::Task *task, QObject *parent)
 TaskSource::~TaskSource()
 {
 }
-/*
-Plasma::WindowManagementService *TaskSource::createWindowManagementService()
-{
-    return new TaskWindowManagementService(this);
-}
-*/
+
 Plasma::Service *TaskSource::createService()
 {
     return new TaskService(this);
 }
-Plasma::Service *TaskSource::createWindowService()
-{ 
-    return new TaskWindowService(this);
-}
+
 ::TaskManager::Task *TaskSource::task()
 {
     return m_task.data();
