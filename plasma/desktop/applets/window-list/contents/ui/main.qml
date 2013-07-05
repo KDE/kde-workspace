@@ -226,6 +226,19 @@ Item {
                     centerIn:parent
                 }
             }
+            MouseArea {
+                hoverEnabled: true
+                anchors.fill:parent
+                onClicked: { 
+                    action_task.visible=false
+                }
+                onEntered: {
+                     action_task.visible=false
+                }
+                onExited: {
+                    action_task.visible=false
+                }
+            }
         } 
     }
 }
