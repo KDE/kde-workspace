@@ -21,7 +21,7 @@
 // own
 #include "taskwindowjob.h"
 
-TaskWindowService::TaskWindowService( const QString &source)  :   m_id(source)
+TaskWindowService::TaskWindowService()//  :   m_id(source)
 {
     setName("windowtasks");
 }

@@ -17,26 +17,8 @@
  */
 
 #include "taskwindowjob.h"
-#include <QDBusConnection>
 #include <QDBusInterface>
-#include <QDBusMessage>
-#include <QDBusPendingReply>
-#include <QtDBus/QDBusConnection>
-#include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusPendingCallWatcher>
-#include <QtCore/QFutureWatcher>
-#include <QtCore/QSettings>
-#include <QtCore/QtConcurrentRun>
-#include <QtDeclarative/QDeclarativeContext>
-#include <QtDeclarative/QDeclarativeEngine>
-#include <QtDeclarative/QDeclarativeView>
-#include <QtDeclarative/qdeclarative.h>
-#include <QtGui/QMenu>
-#include <QtScript/QScriptEngine>
-#include <QtScript/QScriptValue>
-
-
-#include <KAuthorized>
 
 TaskWindowJob::TaskWindowJob(const QString &source, const QString &operation , QMap<QString, QVariant> &parameters, QObject *parent) :
     ServiceJob(source, operation, parameters, parent),
@@ -54,13 +36,13 @@ void TaskWindowJob::start()
     if (operation == "cascade") {
         QDBusInterface  *kwinInterface = new QDBusInterface("org.kde.kwin", "/KWin", "org.kde.KWin");
         QDBusPendingCall pcall = kwinInterface->asyncCall("cascadeDesktop");
-        kDebug() << "couldn't connect to kwin! ";
+        kDebug() << " connected to kwin interface! ";
         setResult(true);
         return;
     } else if (operation == "unclutter") {
         QDBusInterface  *kwinInterface = new QDBusInterface("org.kde.kwin", "/KWin", "org.kde.KWin");
         QDBusPendingCall pcall = kwinInterface->asyncCall("unclutterDesktop");
-        kDebug() << "couldn't connect to kwin! ";
+        kDebug() << "connected to kwin interface! ";
         setResult(true);
         return;
     } 

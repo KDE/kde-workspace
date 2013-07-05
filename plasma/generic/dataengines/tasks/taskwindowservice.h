@@ -32,7 +32,7 @@ class TaskWindowService : public Plasma::Service
    Q_OBJECT
 
     public:
-        TaskWindowService( const QString &source);
+        TaskWindowService();
         ~TaskWindowService();
 
     protected:
@@ -42,4 +42,4 @@ class TaskWindowService : public Plasma::Service
         QString m_id;
 };
 
-#endif // TASKSERVICE_H
+#endif // TASKWINDOWSERVICE_H
