@@ -27,7 +27,6 @@ Item {
     signal executeJob(string jobName)
     signal setOnDesktop(int desktop)
     property alias name: label.text
-    property variant activities: []
     property int desktop
     property alias icon: iconItem.icon
     property bool active: true
@@ -38,7 +37,6 @@ Item {
     property bool keptBelowOthers: false
     property bool fullScreen: false
     property int iconSize: theme.smallIconSize
-    property int iconMargin: 10
     property bool showDesktop: true
     property variant desktopItems: []
     
@@ -53,54 +51,53 @@ Item {
         }
     }
     onDesktopChanged: internal.defineDesktopSubLabel();
-    
-    TaskRow {
-        id: contextMenu
-        desktop: menuItem.desktop
-        minimized: menuItem.minimized
-        maximized: menuItem.maximized
-        shaded: menuItem.shaded
-        alwaysOnTop: menuItem.alwaysOnTop
-        keptBelowOthers: menuItem.keptBelowOthers
-        fullScreen: menuItem.fullScreen
-        onExecuteJob: menuItem.executeJob(jobName);
-        onSetOnDesktop: menuItem.setOnDesktop(desktop);
-    }
-    
-    Item {
+
+    Row {
         id: row
         width: parent.width
-        height: Math.max(iconItem.height, label.height ) + 4* menuItem.iconMargin
-        Column {
-            QIconItem {
-                id: iconItem
-                anchors.verticalCenter: parent.verticalCenter
-                width: menuItem.iconSize
-                height: menuItem.iconSize
-            }
+        height: Math.max(iconItem.height, label.height )
+        QIconItem {
+            id: iconItem
+            anchors.verticalCenter: row.verticalCenter
+            width: menuItem.iconSize
+            height: menuItem.iconSize
+        }
+        Rectangle {
+            width : menuItem.width -  menuItem.iconMargin - iconItem.width
+            height:20
+            color:"transparent"
+            anchors.left: iconItem.right
+            anchors.leftMargin:iconItem.width
+            anchors.verticalCenter: iconItem.verticalCenter
+            PlasmaCore.FrameSvgItem {
+                id: action_task
+                imagePath:"widgets/viewitem"
+                prefix:"selected+hover"
+                width: windowListMenu.width
+                height:20
+                visible:false
+            } 
             PlasmaComponents.Label {
                 id: label
-                width: menuItem.width -  menuItem.iconMargin - iconItem.width
                 font.weight: menuItem.active ? Font.Bold : Font.Normal
-                font.italic: { (minimized == true) ? true : false }
-                anchors.left: iconItem.right
-                anchors.verticalCenter: iconItem.verticalCenter
+                font.italic: (minimized == true) ? true : false
             }
         }
     }
-    
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: {
-            if (mouse.button == Qt.LeftButton) {
-                menuItem.clicked();
-            } else if (mouse.button == Qt.RightButton) {
-                contextMenu.populate();     
-                var mapPos = menuItem.mapToItem(menuItem, mouse.x, mouse.y);                    contextMenu.open(mapPos.x, mapPos.y);
-            }
+            action_task.visible=true
+            menuItem.clicked();
         }
-        onEntered: menuItem.entered();
+        onEntered:{
+            action_task.visible=true
+            menuItem.entered();
+        }
+        onExited: {
+             action_task.visible=false
+        }
     }
 }

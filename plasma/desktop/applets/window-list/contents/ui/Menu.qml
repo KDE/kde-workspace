@@ -22,7 +22,6 @@ Item {
     property alias model: menuListView.model
     property alias section: menuListView.section
     property int iconSize: theme.smallMediumIconSize 
-    property alias highlight:menuListView.highlight
     property bool showDesktop: true
     signal itemSelected(string source)
     signal executeJob(string jobName, string source)
@@ -31,20 +30,13 @@ Item {
     ListView {
         id: menuListView
         width: menu.width
-        anchors.top: menu.top
-        anchors.left: menu.left
-        anchors.bottom: menu.bottom
-        anchors.margins: 0
-        spacing: 0
-        highlight: PlasmaCore.FrameSvgItem {
-                id:background
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
-                width: menuListView.width - 2 * menuListView.anchors.leftMargin
-        }
+        anchors.topMargin:0
+        anchors.top: windowListMenu.top
+        anchors.left: windowListMenu.left
+        anchors.bottom:windowListMenu.bottom
         delegate: TaskList {
             id: menuItemDelegate
-            width: menuListView.width - 2 * menuListView.anchors.leftMargin
+            width: menuListView.width
             property string source: DataEngineSource
             name: model["visibleNameWithState"]
             desktop: model["desktop"]
@@ -58,7 +50,7 @@ Item {
             fullScreen: model["fullScreen"]
             iconSize: menu.iconSize
             showDesktop: menu.showDesktop
-            onClicked:{ menu.itemSelected(source); var id=source;}
+            onClicked: menu.itemSelected(source);
             onEntered: menuListView.currentIndex = index; 
             onExecuteJob: menu.executeJob(jobName, source);
             onSetOnDesktop: menu.setOnDesktop(source, desktop);
