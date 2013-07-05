@@ -21,7 +21,8 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
     id: menuItem
-    height: childrenRect.height
+    height: row.height
+    anchors.top:col.bottom
     signal clicked()
     signal entered()
     signal executeJob(string jobName)
@@ -29,13 +30,9 @@ Item {
     property alias name: label.text
     property int desktop
     property alias icon: iconItem.icon
-    property bool active: true
+    property bool active: false
     property bool minimized: false
-    property bool maximized: false
-    property bool shaded: false
-    property bool alwaysOnTop: false
-    property bool keptBelowOthers: false
-    property bool fullScreen: false
+    property bool maximized: false 
     property int iconSize: theme.smallIconSize
     property bool showDesktop: true
     property variant desktopItems: []
@@ -52,7 +49,7 @@ Item {
     }
     onDesktopChanged: internal.defineDesktopSubLabel();
 
-    Row {
+    Item {
         id: row
         width: parent.width
         height: Math.max(iconItem.height, label.height )
@@ -63,7 +60,7 @@ Item {
             height: menuItem.iconSize
         }
         Rectangle {
-            width : menuItem.width -  menuItem.iconMargin - iconItem.width
+            width : menuItem.width 
             height:20
             color:"transparent"
             anchors.left: iconItem.right
@@ -87,7 +84,6 @@ Item {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: {
             action_task.visible=true
             menuItem.clicked();

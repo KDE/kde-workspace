@@ -50,13 +50,13 @@ Item {
     }
     
     Component.onCompleted: {
-            var toolTipData = new Object;
-            toolTipData["image"] = "preferences-system-window"; 
-            toolTipData["mainText"] = i18n("Window List"); 
-            toolTipData["subText"] = i18n("Show list of opened windows");
-            plasmoid.popupIconToolTip = toolTipData;
-            plasmoid.popupIcon = QIcon("preferences-system-windows"); 
-            plasmoid.aspectRatioMode = ConstrainedSquare;
+        var toolTipData = new Object;
+        toolTipData["image"] = "preferences-system-window"; 
+        toolTipData["mainText"] = i18n("Window List"); 
+        toolTipData["subText"] = i18n("Show list of opened windows");
+        plasmoid.popupIconToolTip = toolTipData;
+        plasmoid.popupIcon = QIcon("preferences-system-windows"); 
+        plasmoid.aspectRatioMode = ConstrainedSquare;
     }
     
     PlasmaCore.DataSource {
@@ -87,10 +87,12 @@ Item {
     
     Menu {
         id: windowListMenu
-        anchors.top:col.bottom
+        anchors.topMargin:64
+        anchors.top:col.top
         anchors.left: parent.left
-       anchors.right: parent.right
-       anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins:main.defaultMargin
         clip: true;
         model: tasksModelSortedByDesktop
         section.property: "desktop"
@@ -104,9 +106,8 @@ Item {
     
     Column {
         id:col
-        spacing:0
+        spacing:2
         Rectangle {
-            id:delegate
             width: windowListMenu.width
             height:20
             color:"transparent"

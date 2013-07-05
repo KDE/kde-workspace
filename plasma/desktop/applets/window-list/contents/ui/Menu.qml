@@ -31,23 +31,21 @@ Item {
         id: menuListView
         width: menu.width
         anchors.topMargin:0
-        anchors.top: windowListMenu.top
-        anchors.left: windowListMenu.left
-        anchors.bottom:windowListMenu.bottom
+        anchors.top: menu.top
+        anchors.left: menu.left
+        anchors.bottom:menu.bottom
+        anchors.margins:0
+        spacing:0
         delegate: TaskList {
             id: menuItemDelegate
             width: menuListView.width
             property string source: DataEngineSource
-            name: model["visibleNameWithState"]
+            name: model["name"]
             desktop: model["desktop"]
             icon: model["icon"]
             active: model["active"]
             minimized: model["minimized"]
             maximized: model["maximized"]
-            shaded: model["shaded"]
-            alwaysOnTop: model["alwaysOnTop"]
-            keptBelowOthers: model["keptBelowOthers"]
-            fullScreen: model["fullScreen"]
             iconSize: menu.iconSize
             showDesktop: menu.showDesktop
             onClicked: menu.itemSelected(source);
