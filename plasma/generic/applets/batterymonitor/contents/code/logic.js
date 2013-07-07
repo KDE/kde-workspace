@@ -198,10 +198,10 @@ function updateBrightness(source) {
         return;
     }
     dialogItem.disableBrightnessUpdate = true;
-    if (source.data["PowerDevil"]["Screen Brightness"]) {
+    if (typeof source.data["PowerDevil"]["Screen Brightness"] === 'number') {
         dialogItem.screenBrightness = source.data["PowerDevil"]["Screen Brightness"];
     }
-    if (source.data["PowerDevil"]["Keyboard Brightness"]) {
+    if (typeof source.data["PowerDevil"]["Keyboard Brightness"] === 'number') {
         dialogItem.keyboardBrightness = source.data["PowerDevil"]["Keyboard Brightness"];
     }
     dialogItem.disableBrightnessUpdate = false;
