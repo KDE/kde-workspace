@@ -285,7 +285,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: i18nc("Placeholder is battery capacity", "%1%", model["Capacity"])
-                    visible: model["Is Power Supply"] &&  model["Capacity"] != "" && model["Capacity"] !== undefined
+                    visible: model["Is Power Supply"] &&  model["Capacity"] != "" && typeof model["Capacity"] == 'number'
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
@@ -295,7 +295,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: model["Vendor"]
-                    visible: model["Vendor"] != "" && model["Vendor"] !== undefined
+                    visible: model["Vendor"] != "" && typeof model["Vendor"] == 'string'
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
@@ -305,7 +305,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: model["Product"]
-                    visible: model["Product"] != "" && model["Product"] !== undefined
+                    visible: model["Product"] != "" && typeof model["Product"] == 'string'
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
