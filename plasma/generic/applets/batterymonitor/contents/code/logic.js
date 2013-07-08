@@ -206,18 +206,3 @@ function updateBrightness(source) {
     }
     dialogItem.disableBrightnessUpdate = false;
 }
-
-// TODO: give translated and formatted string with KGlobal::locale()->prettyFormatDuration(msec);
-function formatDuration(msec) {
-    if (msec == 0 || msec === undefined)
-        return "";
-
-    var time = new Date(msec);
-    var hours = time.getUTCHours();
-    var minutes = time.getUTCMinutes();
-
-    var str = "";
-    if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
-    if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
-    return str;
-}

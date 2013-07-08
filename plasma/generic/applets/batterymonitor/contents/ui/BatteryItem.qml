@@ -22,6 +22,7 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
+import org.kde.locale 0.1 as KLocale
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
@@ -42,6 +43,8 @@ Item {
     property bool isPresent: model["Plugged in"]
 
     property int remainingTime
+
+    KLocale.Locale { id: locale }
 
     function updateSelection() {
         var containsMouse = mouseArea.containsMouse;
@@ -274,7 +277,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     // FIXME Uses overall remaining time, not bound to individual battery
-                    text: Logic.formatDuration(dialogItem.remainingTime)
+                    text: locale.prettyFormatDuration(dialogItem.remainingTime)
                     visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != ""
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
