@@ -16,6 +16,7 @@
  */
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: menu
@@ -33,6 +34,9 @@ Item {
         anchors.top: menu.top
         anchors.left: menu.left
         anchors.bottom:menu.bottom
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        section.property:desktop
         delegate: TaskList {
             id: menuItemDelegate
             width: menuListView.width
@@ -41,8 +45,6 @@ Item {
             desktop: model["desktop"]
             icon: model["icon"]
             active: model["active"]
-            minimized: model["minimized"]
-            maximized: model["maximized"]
             iconSize: menu.iconSize
             showDesktop: menu.showDesktop
             onClicked: menu.itemSelected(source);

@@ -115,17 +115,14 @@ Item {
             border.width:5
             radius:10
             border.color:"transparent"
-            PlasmaCore.FrameSvgItem {
-                id:back
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
+            PlasmaComponents.Highlight {
+                hover:menu.focus
                 width: windowListMenu.width
                 height:30
             }
             PlasmaComponents.Label {
                 id:actions
                 text:"Actions"
-                font.weight:Font.Bold
                 anchors {
                     centerIn:parent
                 }
@@ -135,13 +132,12 @@ Item {
             width: windowListMenu.width
             height:30
             color:"transparent"
-            PlasmaCore.FrameSvgItem {
-                id: action_2
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
+            PlasmaComponents.Highlight {
+                hover:menu.focus
                 width: windowListMenu.width
                 height:30
-                visible:false
+                id: action_2
+                opacity:0
             }
             PlasmaComponents.Label {
                 id:unclutter
@@ -155,15 +151,21 @@ Item {
                 hoverEnabled: true
                 anchors.fill:parent
                 onClicked: {
-                    action_2.visible=true
+                    action_2.opacity=1
                     performOperation("unclutter");
                 }
                 onEntered: {
-                    action_2.visible=true
+                    action_2.opacity=1
                 }
                 onExited: {
-                    action_2.visible=false
+                    action_2.opacity=0
                 }
+                                Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.OutQuad
+            }
+        }
             }
         }
         Rectangle {
@@ -171,13 +173,12 @@ Item {
             width: windowListMenu.width
             height:30
             color:"transparent"
-            PlasmaCore.FrameSvgItem {
-                id:action_1
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
+            PlasmaComponents.Highlight {
+                hover:menu.focus
                 width: windowListMenu.width
                 height:30
-                visible:false
+                id:action_1
+                opacity:0
             }
             PlasmaComponents.Label {
                 id:cascade
@@ -191,15 +192,21 @@ Item {
                 hoverEnabled: true
                 anchors.fill:parent
                 onClicked: { 
-                    action_1.visible=true
+                     action_1.opacity=1
                     performOperation("cascade");
                 }
                 onEntered: {
-                    action_1.visible=true
+                     action_1.opacity=1
                 }
                 onExited: {
-                    action_1.visible=false
+                    action_1.opacity=0
                 }
+                                Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.OutQuad
+            }
+        }
             }
         }
         Rectangle {
@@ -208,13 +215,12 @@ Item {
             height:30
             anchors.bottom:row.top
             color:"transparent"
-            PlasmaCore.FrameSvgItem {
-                id:background1
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
+            PlasmaComponents.Highlight {
+                hover:menu.focus
                 width: windowListMenu.width
                 height:30
-                visible:true
+                id:background1
+                opacity:1
             }
             border.width:5
             radius:10
@@ -222,7 +228,6 @@ Item {
             PlasmaComponents.Label {
                 id: subLabelDesktop
                 visible: showDesktop
-                font.weight:Font.Bold
                 anchors {
                     centerIn:parent
                 }
@@ -231,13 +236,13 @@ Item {
                 hoverEnabled: true
                 anchors.fill:parent
                 onClicked: { 
-                    action_task.visible=false
+                    action_task.opacity=0
                 }
                 onEntered: {
-                     action_task.visible=false
+                     action_task.opacity=0
                 }
                 onExited: {
-                    action_task.visible=false
+                     action_task.opacity=0
                 }
             }
         } 

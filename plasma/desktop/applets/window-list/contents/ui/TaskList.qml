@@ -30,9 +30,7 @@ Item {
     property alias name: label.text
     property int desktop
     property alias icon: iconItem.icon
-    property bool active: false
-    property bool minimized: false
-    property bool maximized: false 
+    property bool active:true
     property int iconSize: theme.smallIconSize
     property bool showDesktop: true
     property variant desktopItems: []
@@ -60,14 +58,21 @@ Item {
             height:30
             color:"transparent"
             anchors.verticalCenter: row.verticalCenter
-            PlasmaCore.FrameSvgItem {
-                id: action_task
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
+            PlasmaComponents.Highlight {
+                id:action_task
+                hover:menu.focus
                 width: windowListMenu.width
                 height:30
-                visible:false
-            } 
+                visible:true
+                opacity:0
+            }
+            PlasmaComponents.Highlight {
+                hover:menu.focus
+                width: windowListMenu.width
+                height:30
+                visible:true
+                opacity:menuItem.active?1:0
+            }
             QIconItem {
                 id: iconItem
                 anchors.leftMargin:10
@@ -78,6 +83,7 @@ Item {
             }
             PlasmaComponents.Label {
                 id: label
+                clip:true
                 font.italic: (minimized == true) ? true : false
                 anchors.left: iconItem.right
                 anchors.leftMargin:iconItem.width
@@ -89,15 +95,21 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         onClicked: {
-            action_task.visible=true
+            action_task.opacity=1
             menuItem.clicked();
         }
         onEntered:{
-            action_task.visible=true
+            action_task.opacity=1
             menuItem.entered();
         }
         onExited: {
-             action_task.visible=false
+            action_task.opacity=0
+        }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.OutQuad
+            }
         }
     }
 }
