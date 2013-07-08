@@ -28,6 +28,7 @@ Item {
     property variant desktopList: []
     property int iconSize: theme.smallMediumIconSize 
     property int defaultMargin:0
+    property int topMargin:90
     property bool showDesktop: true
     
     function performOperation(op) {
@@ -87,8 +88,8 @@ Item {
     
     Menu {
         id: windowListMenu
-        anchors.topMargin:64
         anchors.top:col.top
+        anchors.topMargin:main.topMargin
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -106,10 +107,10 @@ Item {
     
     Column {
         id:col
-        spacing:2
+        spacing:0
         Rectangle {
             width: windowListMenu.width
-            height:20
+            height:30
             color:"transparent"
             border.width:5
             radius:10
@@ -119,7 +120,7 @@ Item {
                 imagePath:"widgets/viewitem"
                 prefix:"selected+hover"
                 width: windowListMenu.width
-                height:20
+                height:30
             }
             PlasmaComponents.Label {
                 id:actions
@@ -132,14 +133,14 @@ Item {
         }
         Rectangle {
             width: windowListMenu.width
-            height:20
+            height:30
             color:"transparent"
             PlasmaCore.FrameSvgItem {
                 id: action_2
                 imagePath:"widgets/viewitem"
                 prefix:"selected+hover"
                 width: windowListMenu.width
-                height:20
+                height:30
                 visible:false
             }
             PlasmaComponents.Label {
@@ -168,14 +169,14 @@ Item {
         Rectangle {
             id:rect_1
             width: windowListMenu.width
-            height:20
+            height:30
             color:"transparent"
             PlasmaCore.FrameSvgItem {
                 id:action_1
                 imagePath:"widgets/viewitem"
                 prefix:"selected+hover"
                 width: windowListMenu.width
-                height:20
+                height:30
                 visible:false
             }
             PlasmaComponents.Label {
@@ -204,7 +205,7 @@ Item {
         Rectangle {
             id:rect1
             width: windowListMenu.width
-            height:20
+            height:30
             anchors.bottom:row.top
             color:"transparent"
             PlasmaCore.FrameSvgItem {
@@ -212,7 +213,7 @@ Item {
                 imagePath:"widgets/viewitem"
                 prefix:"selected+hover"
                 width: windowListMenu.width
-                height:20
+                height:30
                 visible:true
             }
             border.width:5

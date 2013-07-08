@@ -21,7 +21,7 @@ Item {
     id: menu
     property alias model: menuListView.model
     property alias section: menuListView.section
-    property int iconSize: theme.smallMediumIconSize 
+    property int iconSize: theme.smallIconSize 
     property bool showDesktop: true
     signal itemSelected(string source)
     signal executeJob(string jobName, string source)
@@ -30,12 +30,9 @@ Item {
     ListView {
         id: menuListView
         width: menu.width
-        anchors.topMargin:0
         anchors.top: menu.top
         anchors.left: menu.left
         anchors.bottom:menu.bottom
-        anchors.margins:0
-        spacing:0
         delegate: TaskList {
             id: menuItemDelegate
             width: menuListView.width

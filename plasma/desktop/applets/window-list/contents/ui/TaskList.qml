@@ -52,32 +52,36 @@ Item {
     Item {
         id: row
         width: parent.width
-        height: Math.max(iconItem.height, label.height )
-        QIconItem {
-            id: iconItem
-            anchors.verticalCenter: row.verticalCenter
-            width: menuItem.iconSize
-            height: menuItem.iconSize
-        }
+        height: Math.max(iconItem.height, label.height )+6
+        anchors.top:col.bottom
         Rectangle {
+            id:highlight
             width : menuItem.width 
-            height:20
+            height:30
             color:"transparent"
-            anchors.left: iconItem.right
-            anchors.leftMargin:iconItem.width
-            anchors.verticalCenter: iconItem.verticalCenter
+            anchors.verticalCenter: row.verticalCenter
             PlasmaCore.FrameSvgItem {
                 id: action_task
                 imagePath:"widgets/viewitem"
                 prefix:"selected+hover"
                 width: windowListMenu.width
-                height:20
+                height:30
                 visible:false
             } 
+            QIconItem {
+                id: iconItem
+                anchors.leftMargin:10
+                anchors.left:highlight.left
+                anchors.verticalCenter:action_task.verticalCenter
+                width: menuItem.iconSize
+                height: menuItem.iconSize
+            }
             PlasmaComponents.Label {
                 id: label
-                font.weight: menuItem.active ? Font.Bold : Font.Normal
                 font.italic: (minimized == true) ? true : false
+                anchors.left: iconItem.right
+                anchors.leftMargin:iconItem.width
+                anchors.verticalCenter: iconItem.verticalCenter
             }
         }
     }
