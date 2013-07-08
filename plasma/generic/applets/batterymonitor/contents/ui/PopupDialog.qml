@@ -38,9 +38,11 @@ Item {
 
     property bool isBrightnessAvailable
     property alias screenBrightness: brightnessSlider.value
+    property alias screenBrightnessPercentage: brightnessSlider.percentage
 
     property bool isKeyboardBrightnessAvailable
     property alias keyboardBrightness: keyboardBrightnessSlider.value
+    property alias keyboardBrightnessPercentage: keyboardBrightnessSlider.percentage
 
     signal brightnessChanged(int screenBrightness)
     signal keyboardBrightnessChanged(int keyboardBrightness)

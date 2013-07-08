@@ -32,6 +32,7 @@ Item {
     property alias icon: brightnessIcon.icon
     property alias label: brightnessLabel.text
     property alias value: brightnessSlider.value
+    property int percentage: 0
 
     signal changed(int screenBrightness)
 
@@ -83,7 +84,7 @@ Item {
             verticalCenter: brightnessSlider.verticalCenter
         }
         height: paintedHeight
-        text: i18nc("Placeholder is brightness percentage", "%1%", brightnessSlider.value)
+        text: i18nc("Placeholder is brightness percentage", "%1%", percentage)
     }
 }
 
