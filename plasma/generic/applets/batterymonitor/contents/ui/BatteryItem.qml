@@ -35,7 +35,6 @@ Item {
     Behavior on height { PropertyAnimation {} }
 
     property bool expanded
-    property bool showChargeAnimation
 
     // NOTE: According to the UPower spec this property is only valid for primary batteries, however
     // UPower seems to set the Present property false when a device is added but not probed yet
@@ -106,7 +105,7 @@ Item {
 
         SequentialAnimation {
           id: chargeAnimation
-          running: showChargeAnimation && model["State"] == "Charging" && model["Is Power Supply"]
+          running: dialog.popupShown && model["State"] == "Charging" && model["Is Power Supply"]
           alwaysRunToEnd: true
           loops: Animation.Infinite
 

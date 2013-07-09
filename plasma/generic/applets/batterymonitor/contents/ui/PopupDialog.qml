@@ -72,9 +72,7 @@ FocusScope {
 
             property int activeIndex
 
-            delegate: BatteryItem {
-                showChargeAnimation: popupShown
-            }
+            delegate: BatteryItem { }
             KeyNavigation.tab: brightnessSlider
             KeyNavigation.backtab: pmSwitch
 
