@@ -34,7 +34,6 @@ Item {
 
     Behavior on height { PropertyAnimation {} }
 
-    property bool highlight
     property bool expanded
     property bool showChargeAnimation
 
@@ -47,13 +46,14 @@ Item {
     KLocale.Locale { id: locale }
 
     function updateSelection() {
+        var hasFocus = batteryList.activeFocus && batteryList.activeIndex == index;
         var containsMouse = mouseArea.containsMouse;
 
-        if (highlight || expanded && containsMouse) {
+        if (expanded && (hasFocus || containsMouse)) {
             padding.opacity = 1;
         } else if (expanded) {
             padding.opacity = 0.8;
-        } else if (containsMouse) {
+        } else if (hasFocus || containsMouse) {
             padding.opacity = 0.65;
         } else {
             padding.opacity = 0;
@@ -69,21 +69,15 @@ Item {
         anchors.fill: parent
     }
 
+    onExpandedChanged: updateSelection()
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         onEntered: updateSelection()
         onExited: updateSelection()
-        onClicked: {
-            if (expanded) {
-                expanded = false;
-            } else {
-                expanded = true;
-                batteryItem.forceActiveFocus();
-            }
-            updateSelection();
-        }
+        onClicked: expanded = !expanded
     }
 
     Item {

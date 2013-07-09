@@ -53,6 +53,9 @@ Item {
 
     function popupEventSlot(popped) {
         dialogItem.popupShown = popped;
+        if (popped) {
+            dialogItem.forceActiveFocus();
+        }
     }
 
     property Component compactRepresentation: CompactRepresentation {
@@ -109,9 +112,11 @@ Item {
 
     PopupDialog {
         id: dialogItem
-        property bool disableBrightnessUpdate: false
         model: batteries
         anchors.fill: parent
+        focus: true
+
+        property bool disableBrightnessUpdate: false
 
         isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
         isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
