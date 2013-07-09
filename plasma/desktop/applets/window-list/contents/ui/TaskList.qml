@@ -35,17 +35,17 @@ Item {
     property bool showDesktop: true
     property variant desktopItems: []
     
-    QtObject {
+  /*  QtObject {
         id: internal
         function defineDesktopSubLabel() {
             if (showDesktop) {
                 var desktopString = i18n("Desktops: ");
-                desktopString += desktop <= 0 ? "all" : main.desktopList[desktop-1];
+                desktopString += desktop <= 1 ? "all" : main.desktopList[desktop-1];
                 subLabelDesktop.text = desktopString;
             }
         }
     }
-    onDesktopChanged: internal.defineDesktopSubLabel();
+    onDesktopChanged: internal.defineDesktopSubLabel();*/
 
     Item {
         id: row
@@ -76,7 +76,7 @@ Item {
                 hover:menu.focus
                 width: windowListMenu.width
                 height:30
-                visible:true
+                visible:menu.active?true:false
                 opacity:menuItem.active?1:0
             }
             QIconItem {
@@ -89,7 +89,6 @@ Item {
             }
             PlasmaComponents.Label {
                 id: label
-                clip:true
                 font.italic: (minimized == true) ? true : false
                 anchors.left: iconItem.right
                 anchors.leftMargin:iconItem.width

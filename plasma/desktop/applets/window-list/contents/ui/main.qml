@@ -221,7 +221,7 @@ Item {
                 }
             }
         }
-        Rectangle {
+      /*  Rectangle {
             id:rect1
             width: windowListMenu.width
             height:30
@@ -257,6 +257,6 @@ Item {
                      action_task.opacity=0
                 }
             }
-        } 
+        }*/ 
     }
 }

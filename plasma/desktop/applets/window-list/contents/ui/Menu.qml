@@ -27,6 +27,29 @@ Item {
     signal itemSelected(string source)
     signal executeJob(string jobName, string source)
     signal setOnDesktop(string source, int desktop)
+    
+    Component {
+        id:sectionheader
+        Rectangle {
+            width:menu.width
+            height:30
+            color:"transparent"
+            border.width:5
+            radius:10
+            border.color:"transparent"
+            PlasmaComponents.Highlight {
+                hover:menu.focus
+                width:menu.width
+                height:30
+            }
+            PlasmaComponents.Label {
+                text:section>0?i18n("Desktop %1 " ,section):i18n("On all desktops")
+                anchors {
+                    centerIn:parent
+                }
+            }
+        }
+    }
 
     ListView {
         id: menuListView
@@ -38,7 +61,7 @@ Item {
         boundsBehavior: Flickable.StopAtBounds
         section.property:desktop
         section.criteria:ViewSection.FullString
-        section.delegate:received
+        section.delegate: sectionheader
         delegate: TaskList {
             id: menuItemDelegate
             width: menuListView.width
