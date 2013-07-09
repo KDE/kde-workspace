@@ -37,6 +37,8 @@ Item {
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         section.property:desktop
+        section.criteria:ViewSection.FullString
+        section.delegate:received
         delegate: TaskList {
             id: menuItemDelegate
             width: menuListView.width

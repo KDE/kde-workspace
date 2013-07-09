@@ -65,6 +65,12 @@ Item {
                 height:30
                 visible:true
                 opacity:0
+                PlasmaCore.FrameSvgItem {
+                    width: windowListMenu.width
+                    height:30
+                    imagePath:"widgets/viewitem"
+                    prefix:"selected+hover"
+                }
             }
             PlasmaComponents.Highlight {
                 hover:menu.focus
@@ -104,12 +110,6 @@ Item {
         }
         onExited: {
             action_task.opacity=0
-        }
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 250
-                easing.type: Easing.OutQuad
-            }
         }
     }
 }

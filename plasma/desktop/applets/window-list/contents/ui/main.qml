@@ -109,6 +109,7 @@ Item {
         id:col
         spacing:0
         Rectangle {
+            id:a2
             width: windowListMenu.width
             height:30
             color:"transparent"
@@ -129,6 +130,7 @@ Item {
             }
         }
         Rectangle {
+            id:action1
             width: windowListMenu.width
             height:30
             color:"transparent"
@@ -138,12 +140,20 @@ Item {
                 height:30
                 id: action_2
                 opacity:0
+                PlasmaCore.FrameSvgItem {
+                    width: windowListMenu.width
+                    height:30
+                    imagePath:"widgets/viewitem"
+                    prefix:"selected+hover"
+                }
             }
             PlasmaComponents.Label {
                 id:unclutter
                 text:"Unclutter Windows"
                 anchors {
-                    left:parent.left
+                    leftMargin:10
+                    left:action1.left
+                    verticalCenter:action_2.verticalCenter
                 }
             }
             MouseArea {
@@ -160,12 +170,12 @@ Item {
                 onExited: {
                     action_2.opacity=0
                 }
-                                Behavior on opacity {
-            NumberAnimation {
-                duration: 250
-                easing.type: Easing.OutQuad
-            }
-        }
+                /*Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.OutQuad
+                    }
+                }*/
             }
         }
         Rectangle {
@@ -179,12 +189,20 @@ Item {
                 height:30
                 id:action_1
                 opacity:0
+                PlasmaCore.FrameSvgItem {
+                    width: windowListMenu.width
+                    height:30
+                    imagePath:"widgets/viewitem"
+                    prefix:"selected+hover"
+                }
             }
             PlasmaComponents.Label {
                 id:cascade
                 text:"Cascade Windows"
                 anchors {
                     left:parent.left
+                    leftMargin:10
+                    verticalCenter:action_1.verticalCenter
                 }
             }
             MouseArea {
@@ -201,12 +219,6 @@ Item {
                 onExited: {
                     action_1.opacity=0
                 }
-                                Behavior on opacity {
-            NumberAnimation {
-                duration: 250
-                easing.type: Easing.OutQuad
-            }
-        }
             }
         }
         Rectangle {
