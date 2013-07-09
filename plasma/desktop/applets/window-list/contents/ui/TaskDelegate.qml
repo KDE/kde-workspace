@@ -30,23 +30,11 @@ Item {
     property alias name: label.text
     property int desktop
     property alias icon: iconItem.icon
-    property bool active:true
+    property bool active:false
     property int iconSize: theme.smallIconSize
     property bool showDesktop: true
     property variant desktopItems: []
     
-  /*  QtObject {
-        id: internal
-        function defineDesktopSubLabel() {
-            if (showDesktop) {
-                var desktopString = i18n("Desktops: ");
-                desktopString += desktop <= 1 ? "all" : main.desktopList[desktop-1];
-                subLabelDesktop.text = desktopString;
-            }
-        }
-    }
-    onDesktopChanged: internal.defineDesktopSubLabel();*/
-
     Item {
         id: row
         width: parent.width
@@ -76,7 +64,7 @@ Item {
                 hover:menu.focus
                 width: windowListMenu.width
                 height:30
-                visible:menu.active?true:false
+                visible:true
                 opacity:menuItem.active?1:0
             }
             QIconItem {
@@ -89,6 +77,7 @@ Item {
             }
             PlasmaComponents.Label {
                 id: label
+                clip:true
                 font.italic: (minimized == true) ? true : false
                 anchors.left: iconItem.right
                 anchors.leftMargin:iconItem.width
@@ -110,5 +99,12 @@ Item {
         onExited: {
             action_task.opacity=0
         }
+          Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.OutCubic
+                    }
+                    SmoothedAnimation { velocity: 200 }
+                }
     }
 }

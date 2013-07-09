@@ -100,7 +100,7 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("onTop", taskPtr->isOnTop());
             setData("onCurrentDesktop", taskPtr->isOnCurrentDesktop());
             setData("onAllDesktops", taskPtr->isOnAllDesktops());
-            setData("desktop", taskPtr->desktop());
+            setData("desktop",qMax(0,taskPtr->desktop()));
             setData("onCurrentActivity", taskPtr->isOnCurrentActivity());
             setData("onAllActivities", taskPtr->isOnAllActivities());
             setData("activities", taskPtr->activities());

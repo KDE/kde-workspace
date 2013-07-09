@@ -28,7 +28,7 @@ Item {
     property variant desktopList: []
     property int iconSize: theme.smallMediumIconSize 
     property int defaultMargin:0
-    property int topMargin:90
+    property int topMargin:60
     property bool showDesktop: true
     
     function performOperation(op) {
@@ -170,12 +170,13 @@ Item {
                 onExited: {
                     action_2.opacity=0
                 }
-                /*Behavior on opacity {
+                Behavior on opacity {
                     NumberAnimation {
                         duration: 250
-                        easing.type: Easing.OutQuad
+                        easing.type: Easing.OutCubic
                     }
-                }*/
+                    SmoothedAnimation { velocity: 200 }
+                }
             }
         }
         Rectangle {
@@ -219,44 +220,14 @@ Item {
                 onExited: {
                     action_1.opacity=0
                 }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.OutCubic
+                    }
+                    SmoothedAnimation { velocity: 200 }
+                }
             }
         }
-      /*  Rectangle {
-            id:rect1
-            width: windowListMenu.width
-            height:30
-            anchors.bottom:row.top
-            color:"transparent"
-            PlasmaComponents.Highlight {
-                hover:menu.focus
-                width: windowListMenu.width
-                height:30
-                id:background1
-                opacity:1
-            }
-            border.width:5
-            radius:10
-            border.color:"transparent"
-            PlasmaComponents.Label {
-                id: subLabelDesktop
-                visible: showDesktop
-                anchors {
-                    centerIn:parent
-                }
-            }
-            MouseArea {
-                hoverEnabled: true
-                anchors.fill:parent
-                onClicked: { 
-                    action_task.opacity=0
-                }
-                onEntered: {
-                     action_task.opacity=0
-                }
-                onExited: {
-                     action_task.opacity=0
-                }
-            }
-        }*/ 
     }
 }

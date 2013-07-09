@@ -62,7 +62,7 @@ Item {
         section.property:desktop
         section.criteria:ViewSection.FullString
         section.delegate: sectionheader
-        delegate: TaskList {
+        delegate: TaskDelegate {
             id: menuItemDelegate
             width: menuListView.width
             property string source: DataEngineSource
