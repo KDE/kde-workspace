@@ -76,7 +76,10 @@ Item {
         hoverEnabled: true
         onEntered: updateSelection()
         onExited: updateSelection()
-        onClicked: expanded = !expanded
+        onClicked: {
+            expanded = !expanded
+            batteryList.forceActiveFocus()
+        }
     }
 
     Item {
