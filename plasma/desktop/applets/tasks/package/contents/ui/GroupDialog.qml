@@ -62,6 +62,7 @@ PlasmaCore.Dialog {
         } else {
             groupRepeater.model = undefined;
             groupFilter.model = undefined;
+            groupFilter.rootIndex = undefined;
         }
     }
 
