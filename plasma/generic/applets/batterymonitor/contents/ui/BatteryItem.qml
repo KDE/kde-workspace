@@ -77,8 +77,11 @@ Item {
         onEntered: updateSelection()
         onExited: updateSelection()
         onClicked: {
-            expanded = !expanded
+            oldIndex = batteryList.activeIndex
             batteryList.forceActiveFocus()
+            batteryList.activeIndex = index
+            batteryList.updateSelection(oldIndex,index)
+            expanded = !expanded
         }
     }
 
