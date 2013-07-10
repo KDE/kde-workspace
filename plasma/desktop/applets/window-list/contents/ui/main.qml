@@ -139,12 +139,24 @@ Item {
                 width: windowListMenu.width
                 height:30
                 id: action_2
-                opacity:0
+                opacity:mouse.containsMouse
                 PlasmaCore.FrameSvgItem {
                     width: windowListMenu.width
                     height:30
                     imagePath:"widgets/viewitem"
                     prefix:"selected+hover"
+                }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 150
+                        easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 250
+                        easing: Easing.InOutQuad
+                    }
                 }
             }
             PlasmaComponents.Label {
@@ -161,21 +173,7 @@ Item {
                 hoverEnabled: true
                 anchors.fill:parent
                 onClicked: {
-                    action_2.opacity=1
                     performOperation("unclutter");
-                }
-                onEntered: {
-                    action_2.opacity=1
-                }
-                onExited: {
-                    action_2.opacity=0
-                }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.OutCubic
-                    }
-                    SmoothedAnimation { velocity: 200 }
                 }
             }
         }
@@ -189,12 +187,24 @@ Item {
                 width: windowListMenu.width
                 height:30
                 id:action_1
-                opacity:0
+                opacity:mouseArea.containsMouse
                 PlasmaCore.FrameSvgItem {
                     width: windowListMenu.width
                     height:30
                     imagePath:"widgets/viewitem"
                     prefix:"selected+hover"
+                }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 150
+                        easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 250
+                        easing: Easing.InOutQuad
+                    }
                 }
             }
             PlasmaComponents.Label {
@@ -211,21 +221,7 @@ Item {
                 hoverEnabled: true
                 anchors.fill:parent
                 onClicked: { 
-                     action_1.opacity=1
                     performOperation("cascade");
-                }
-                onEntered: {
-                     action_1.opacity=1
-                }
-                onExited: {
-                    action_1.opacity=0
-                }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.OutCubic
-                    }
-                    SmoothedAnimation { velocity: 200 }
                 }
             }
         }

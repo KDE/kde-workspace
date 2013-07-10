@@ -52,12 +52,24 @@ Item {
                 width: windowListMenu.width
                 height:30
                 visible:true
-                opacity:0
+                opacity:root_item.containsMouse
                 PlasmaCore.FrameSvgItem {
                     width: windowListMenu.width
                     height:30
                     imagePath:"widgets/viewitem"
                     prefix:"selected+hover"
+                }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 150
+                        easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 250
+                        easing: Easing.InOutQuad
+                    }
                 }
             }
             PlasmaComponents.Highlight {
@@ -86,25 +98,14 @@ Item {
         }
     }
     MouseArea {
+        id:root_item
         anchors.fill: parent
         hoverEnabled: true
         onClicked: {
-            action_task.opacity=1
             menuItem.clicked();
         }
         onEntered:{
-            action_task.opacity=1
             menuItem.entered();
         }
-        onExited: {
-            action_task.opacity=0
-        }
-          Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.OutCubic
-                    }
-                    SmoothedAnimation { velocity: 200 }
-                }
     }
 }
