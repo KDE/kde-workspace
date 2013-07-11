@@ -40,61 +40,66 @@ Item {
         width: parent.width
         height: Math.max(iconItem.height, label.height )+6
         anchors.top:col.bottom
-        Rectangle {
-            id:highlight
-            width : menuItem.width 
+        PlasmaComponents.Highlight {
+            id:action_task
+            hover:menu.focus
+            width: windowListMenu.width
             height:30
-            color:"transparent"
-            anchors.verticalCenter: row.verticalCenter
-            PlasmaComponents.Highlight {
-                id:action_task
-                hover:menu.focus
+            visible:true
+            //  y:-height
+            opacity:root_item.containsMouse
+            PlasmaCore.FrameSvgItem {
+                id:b
                 width: windowListMenu.width
                 height:30
-                visible:true
-                opacity:root_item.containsMouse
-                PlasmaCore.FrameSvgItem {
-                    width: windowListMenu.width
-                    height:30
-                    imagePath:"widgets/viewitem"
-                    prefix:"selected+hover"
-                }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 150
-                        easing: Easing.InOutQuad
-                    }
-                }
-                Behavior on y {
-                    NumberAnimation {
-                        duration: 250
-                        easing: Easing.InOutQuad
-                    }
+                imagePath:"widgets/viewitem"
+                prefix:"selected+hover"
+            }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 1
+                    easing: Easing.InOutQuad
                 }
             }
-            PlasmaComponents.Highlight {
-                hover:menu.focus
-                width: windowListMenu.width
-                height:30
-                visible:true
-                opacity:menuItem.active?1:0
+            Behavior on y { 
+                SmoothedAnimation { 
+                    velocity: 1500
+                } 
             }
-            QIconItem {
-                id: iconItem
-                anchors.leftMargin:10
-                anchors.left:highlight.left
-                anchors.verticalCenter:action_task.verticalCenter
-                width: menuItem.iconSize
-                height: menuItem.iconSize
+            Behavior on y {
+                NumberAnimation {
+                    duration: 8000
+                    easing: Easing.InOutQuad
+                }
             }
-            PlasmaComponents.Label {
-                id: label
-                clip:true
-                font.italic: (minimized == true) ? true : false
-                anchors.left: iconItem.right
-                anchors.leftMargin:iconItem.width
-                anchors.verticalCenter: iconItem.verticalCenter
+            Behavior on height {
+                SmoothedAnimation { 
+                    duration: 1500
+                }
             }
+        }
+        PlasmaComponents.Highlight {
+            hover:menu.focus
+            width: windowListMenu.width
+            height:30
+            visible:true
+            opacity:menuItem.active?1:0
+        }
+        QIconItem {
+            id: iconItem
+            anchors.leftMargin:10
+            anchors.left:action_task.left
+            anchors.verticalCenter:action_task.verticalCenter
+            width: menuItem.iconSize
+            height: menuItem.iconSize
+        }
+        PlasmaComponents.Label {
+            id: label
+            clip:true
+            font.italic: (minimized == true) ? true : false
+            anchors.left: iconItem.right
+            anchors.leftMargin:iconItem.width
+            anchors.verticalCenter: iconItem.verticalCenter
         }
     }
     MouseArea {
@@ -103,9 +108,24 @@ Item {
         hoverEnabled: true
         onClicked: {
             menuItem.clicked();
+            action_task.y = root_item.y
         }
-        onEntered:{
+        onEntered:{ 
+            action_task.y = root_item.y
             menuItem.entered();
         }
     }
+        /*  SequentialAnimation {
+     *                    NumberAnimation {
+     *                        target:action_task
+     *                        duration:600
+     *                        property:"y"
+     *                        to:0
+                        }
+                        NumberAnimation {
+                            target:action_task
+                            duration:600
+                            property:"y"
+                            to:-action_task.height}
+        }*/
 }

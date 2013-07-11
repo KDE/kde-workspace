@@ -22,8 +22,6 @@ Item {
     id: main
     property int minimumWidth: Math.max(200, windowListMenu.implicitWidth) 
     property int minimumHeight:  Math.max(400, windowListMenu.implicitHeight)
-    property int maximumWidth
-    property int maximumHeight
     property alias data: tasksSource.data;
     property variant desktopList: []
     property int iconSize: theme.smallMediumIconSize 
@@ -108,19 +106,10 @@ Item {
     Column {
         id:col
         spacing:0
-        Rectangle {
-            id:a2
+        PlasmaComponents.Highlight {
+            hover:menu.focus
             width: windowListMenu.width
             height:30
-            color:"transparent"
-            border.width:5
-            radius:10
-            border.color:"transparent"
-            PlasmaComponents.Highlight {
-                hover:menu.focus
-                width: windowListMenu.width
-                height:30
-            }
             PlasmaComponents.Label {
                 id:actions
                 text:"Actions"
@@ -148,14 +137,24 @@ Item {
                 }
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 150
+                        duration: 1
                         easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on y { 
+                    SmoothedAnimation { 
+                        velocity: 1500
                     }
                 }
                 Behavior on y {
                     NumberAnimation {
-                        duration: 250
+                        duration: 8000
                         easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on height {
+                    SmoothedAnimation { 
+                        duration: 1500
                     }
                 }
             }
@@ -196,14 +195,24 @@ Item {
                 }
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 150
+                        duration: 1
                         easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on y { 
+                    SmoothedAnimation { 
+                        velocity: 1500
                     }
                 }
                 Behavior on y {
                     NumberAnimation {
-                        duration: 250
+                        duration: 8000
                         easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on height {
+                    SmoothedAnimation { 
+                        duration: 1500
                     }
                 }
             }
