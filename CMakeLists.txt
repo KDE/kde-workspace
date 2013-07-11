@@ -303,7 +303,7 @@ endif(NOT WIN32)
 #
 macro_optional_add_subdirectory(plasma)
 # macro_optional_add_subdirectory(statusnotifierwatcher)
-# macro_optional_add_subdirectory(kstyles)
+macro_optional_add_subdirectory(kstyles)
 #
 # ########### install files ###############
 if(NOT WIN32)
