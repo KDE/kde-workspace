@@ -17,7 +17,7 @@
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
-import org.kde.locale 0.1
+import org.kde.locale 0.1 as Locale
 
 Rectangle {
     id: listWidget
@@ -29,6 +29,7 @@ Rectangle {
     property int daysInMonth: new Date(showDate.getFullYear(), showDate.getMonth() + 1, 0).getDate()
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
     property date clickedDate: new Date()
+    property int weeknumber:( Qt.formatDateTime(clickedDate, "dd")/8)+1
 
     Item {
         id:title
@@ -179,13 +180,13 @@ Rectangle {
                 }
             }
         }*/
-        Components.ToolButton {
+        Components.TextField{
             id:yearleft
             text: Qt.formatDateTime(showDate, "yyyy")
-            width:24
+            width:45
             height:24
             anchors.left:month.right
-            anchors.leftMargin:20
+            anchors.leftMargin:10
             Components.ToolButton {
                 id:increase
                 text:"^"
@@ -289,6 +290,7 @@ Rectangle {
         }
         Components.TextField {
             id: weekField;
+            text:weeknumber
             anchors {
                 left: dateField.right;
                 right: parent.right;
@@ -313,7 +315,7 @@ Rectangle {
                         id:rect
                         property bool highLighted: false
                         property color normalColor
-                        border.color:"transparent"
+                        border.color:dateMouse.containsMouse?"black":"transparent"
                         normalColor:"#eeeeee" 
                         Component.onCompleted: {
                             if (index < firstDay) {
@@ -336,8 +338,9 @@ Rectangle {
                             id: dateMouse
                             enabled: index >= firstDay
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: {
-                                rect.border.color=isToday(index-firstDay)?"blue":"black"
+                             //  rect.border.color=isToday(index-firstDay)?"blue":"black"
                                 clickedDate = new Date( showDate.getFullYear(), showDate.getMonth() + 1, index + 1 - firstDay)
                                 console.log(Qt.formatDate(clickedDate, "dd/MM/yyyy"))
                                 if (dateGrid.currentActive != -1) {
@@ -348,11 +351,19 @@ Rectangle {
                                     dateGrid.currentActive = index
                                 }
                             }
+                          /*  onPressed : {
+                                rect.border.color="black"
+                            }
+                            onDoubleClicked: {
+                                rect.border.color="transparent"
+                            }*/
                             onEntered : {
                                 dateText.opacity=0.5
+                                // rect.border.color="black"
                             }
                             onExited: { 
                                 dateText.opacity=1
+                              //     rect.border.color="transparent"
                               //  rect.border.color=rect.border.color==black?"transparent":"blue"
                             }
                         }
