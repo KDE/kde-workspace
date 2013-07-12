@@ -28,33 +28,137 @@ Rectangle {
     property date showDate: new Date()
     property int daysInMonth: new Date(showDate.getFullYear(), showDate.getMonth() + 1, 0).getDate()
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
- 
+    property date clickedDate: new Date()
+
     Item {
         id:title
         anchors.top: parent.top
         anchors.right:parent.right
         anchors.left:parent.left
-        anchors.topMargin: 10
+        anchors.topMargin: 5
         width: parent.width
         height: childrenRect.height 
-       Image {
-            id:monthright
-            source: "previous.png"
-            anchors.left: parent.left
-            anchors.leftMargin: 10 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
+        Components.ToolButton {
+        flat: true;
+        text: "<";
+        width: 24;
+        height: 24;
+        id:monthright
+        anchors.left: parent.left
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
                     showDate = new Date(showDate.getFullYear(), showDate.getMonth(), 0)
                 }
             }
         }
-        Components.Label  {
+        Components.ToolButton {
             id:month
-            text: Qt.formatDateTime(showDate, "MMMM")
+            width:24
+            height:24
             anchors.left:monthright.right
+            anchors.leftMargin:70
+            text:Qt.formatDateTime(showDate, "MMMM")
+            onClicked: {
+                sectionScroll = sectionScrollComponent.createObject(month)
+                sectionScroll.open()
+            }
+            Components.Label {
+                text:Qt.formatDateTime(showDate, "M")
+                id:presentmonth
+                visible:false
+            }
+            Component {
+                id: sectionScrollComponent
+                Components.ContextMenu {
+                    id: sectionScroll
+                    visualParent:month
+                    Components.MenuItem {
+                        text:"January"
+                        onClicked:{//Made an algorithm to find out month wise date as shown below ---> 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+1 , -(presentmonth.text-1));                                        close ();
+                        }
+                    }
+                    Components.MenuItem {
+                        text:"February"
+                        onClicked:{ 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+2, -(presentmonth.text-1)+1);
+                            close ();
+                        }
+                    }
+                    Components.MenuItem {
+                        text:"March"
+                        onClicked: { 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+3, -(presentmonth.text-1)+2);                                        close ();
+                        }
+                    }
+                    Components.MenuItem {
+                        text:"April"
+                        onClicked: {
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+4 , -(presentmonth.text-1)+3);                                        close ();
+                        }
+                    }
+                    Components.MenuItem {
+                        text:"May"
+                        onClicked: { 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+5 , -(presentmonth.text-1)+4)
+                            close ()
+                        }
+                    }
+                    Components.MenuItem {
+                        text: "June"
+                        onClicked: { 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+6, -(presentmonth.text-1)+5)
+                            close ()
+                        }
+                    }
+                    Components.MenuItem {
+                        text:"July"
+                        onClicked: { 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+7 , -(presentmonth.text-1)+6)
+                            close ()
+                        }
+                    }
+                    Components.MenuItem {
+                        text:"August"
+                        onClicked: { 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+8, -(presentmonth.text-1)+7)
+                            close ()
+                        }
+                    }
+                    Components.MenuItem {
+                        text: "September"
+                        onClicked: { 
+                            showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+9 , -(presentmonth.text-1)+8)
+                            close ()
+                        }
+                    }
+                    Components.MenuItem {
+                        text:"October"
+                        onClicked: { 
+                                        showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+10 , -(presentmonth.text-1)+9)
+                                        close ()
+                                    }
+                    }
+                    Components.MenuItem {
+                        text:"November"
+                        onClicked: { 
+                                        showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+11 , -(presentmonth.text-1)+10)
+                                        close ()
+                                    }
+                    }
+                    Components.MenuItem {
+                        text:"December"
+                        onClicked: { 
+                                        showDate = new Date( showDate.getFullYear(), showDate.getMonth()-(presentmonth.text-1)+12, -(presentmonth.text-1)+11)
+                                        close ()
+                                    }
+                    }
+                }
+            }
         }
-        Image {
+        /* Image {
+            id:n
             source: "next.png"
             anchors.left:month.right
             MouseArea {
@@ -72,25 +176,58 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: {
                     showDate = new Date(showDate.getFullYear()-1,0)
-                    console.log(showDate) 
+                }
+            }
+        }*/
+        Components.ToolButton {
+            id:yearleft
+            text: Qt.formatDateTime(showDate, "yyyy")
+            width:24
+            height:24
+            anchors.left:month.right
+            anchors.leftMargin:20
+            Components.ToolButton {
+                id:increase
+                text:"^"
+                width:12
+                height:12
+                anchors.left:yearleft.right
+                MouseArea {
+                    anchors.fill:parent
+                    onClicked:
+                    {
+                         showDate = new Date(showDate.getFullYear()+1,showDate.getMonth(),1)
+                    }
+                }
+            }
+            Components.ToolButton {
+                id:decrease
+                text:"v"
+                width:12
+                height:12
+                anchors.left:yearleft.right
+                anchors.top:increase.bottom
+                MouseArea {
+                    anchors.fill:parent
+                    onClicked:
+                    {
+                         showDate = new Date(showDate.getFullYear()-1,0)
+                    }
                 }
             }
         }
-        Components.Label  {
-            id:yearleft
-            text: Qt.formatDateTime(showDate, "yyyy")
-            anchors.right:year.left
-        } 
-        Image {
+        Components.ToolButton {
+            flat: true;
+            text: ">";
+            width: 24;
+            height: 24;
             id:year
-            source: "next.png"
             anchors.right: parent.right
-            anchors.rightMargin: 10 
             MouseArea {
                 anchors.fill: parent
                 onClicked:
                 {
-                    showDate = new Date(showDate.getFullYear()+1, 1)
+                    showDate = new Date(showDate.getFullYear(),showDate.getMonth() + 1, 1)
                 }
             }
         }
@@ -100,7 +237,6 @@ Rectangle {
             return false;
         if (today.getMonth() != showDate.getMonth())
             return false;
- 
         return (index === today.getDate() - 1)
     } 
     Item {
@@ -110,14 +246,14 @@ Rectangle {
         anchors.right: parent.right
         anchors.margins: 10 
         height: listWidget.height - title.height - 20 - title.anchors.topMargin
-        property int rows: 6
+        property int rows: 7
         Item {
             id: dayLabels
             width: parent.width
             height: childrenRect.height 
             Grid {
                 columns: 7
-                spacing: 5 
+                spacing: 10
                 Repeater {
                     model: 7 
                     Rectangle {
@@ -133,6 +269,32 @@ Rectangle {
                 }
             }
         }
+        Components.ToolButton {
+            id: currentDateButton;
+            text: "#";
+            width: 24;
+            height: 24;
+            anchors {
+                left: parent.left;
+                bottom: parent.bottom;
+            }
+        }
+        Components.TextField {
+            id: dateField;
+            text:Qt.formatDate(clickedDate, "dd/MM/yyyy")
+            anchors {
+                left: currentDateButton.right;
+                bottom: parent.bottom;
+            }
+        }
+        Components.TextField {
+            id: weekField;
+            anchors {
+                left: dateField.right;
+                right: parent.right;
+                bottom: parent.bottom;
+            }
+        }
         Item {
             id: dateGrid
             width: parent.width
@@ -141,7 +303,7 @@ Rectangle {
             anchors.bottom: parent.bottom
             property int currentActive: -1
             Grid {
-                columns: 7
+                columns: 8
                 rows: dateLabels.rows
                 spacing: 10 
                 Repeater {
@@ -167,16 +329,16 @@ Rectangle {
                             id: dateText
                             anchors.centerIn: parent
                             text: index + 1 - firstDay
-                            opacity: (index < firstDay) ? 0 : 1
-                            font.bold: isToday(index - firstDay)  || highLighted
+                            opacity: (index < firstDay) ? 0.5 : 1
+                           // font.bold: isToday(index - firstDay)  || highLighted
                         } 
                         MouseArea {
                             id: dateMouse
                             enabled: index >= firstDay
                             anchors.fill: parent
                             onClicked: {
-                                rect.border.color="black"
-                                var clickedDate = new Date( showDate.getFullYear(), showDate.getMonth() + 1, index + 1 - firstDay)
+                                rect.border.color=isToday(index-firstDay)?"blue":"black"
+                                clickedDate = new Date( showDate.getFullYear(), showDate.getMonth() + 1, index + 1 - firstDay)
                                 console.log(Qt.formatDate(clickedDate, "dd/MM/yyyy"))
                                 if (dateGrid.currentActive != -1) {
                                     repeater.itemAt(dateGrid.currentActive).highLighted = false;
@@ -191,6 +353,7 @@ Rectangle {
                             }
                             onExited: { 
                                 dateText.opacity=1
+                              //  rect.border.color=rect.border.color==black?"transparent":"blue"
                             }
                         }
                     }

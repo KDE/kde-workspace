@@ -80,8 +80,72 @@ Item {
     
     CurrentApplication {
         id:active_win
-        width: main.width
-        height:width
+        anchors.left:parent.left
+        anchors.top:parent.top
+        anchors.right:parent.right
+        anchors.bottom:parent.bottom
+        anchors.horizontalCenter: main.horizontalCenter
+        Rectangle {
+            id:currentApp
+            width:main.width
+            height:width
+            anchors.centerIn:parent
+            color:"transparent"
+            Components.Label  {
+                id: time
+                //That will be used in cased .ui file is used but in plasma2 ui will not be used so I have to look for alter means -->
+                /*  font.family:textFont
+                 *        font.bold: bold?true:false
+                 *        style:  shadow?Text.Raised:Text.Normal
+                 *        styleColor:shadowcolor? shadowColor: "transparent"
+                 *        font.italic:italic?true:false
+                 *        color: textColor*/
+                font.pointSize:main.width/8
+                text : (Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm ap" )).toString().slice(0,-2)
+                horizontalAlignment:main.AlignHCenter
+                anchors {
+                    left:parent.left
+                   leftMargin:5
+                    top:parent.top
+                    bottom:parent.bottom
+                }
+                style: Text.Raised; styleColor: "grey" 
+                font.bold:true
+            }
+            Components.Label  {
+                id: ampm
+                /*  font.family:textFont
+                 *        font.bold: bold?true:false
+                 *         font.italic:italic?true:false
+                 *           style:  shadow?Text.Outline:Text.Normal
+                 *        styleColor:shadow? shadowColor: "transparent"*/
+                // opacity: 0.5
+                font.pointSize:main.width/8
+                color: textColor
+                opacity:0.5
+                text : Qt.formatTime( dataSource.data["Local"]["Time"],"ap" )
+                anchors {
+                    top:parent.top
+                    bottom:parent.bottom
+                    left:time.right
+                }
+                style: Text.Raised; styleColor: "grey" 
+            }
+            /*   Components.Label  {
+                id: date
+                // font.family:textFont
+                // font.bold: bold?true:false
+                //  font.italic:italic?true:false
+                //  style:  shadow?Text.Outline:Text.Normal
+                //   styleColor:shadowcolor? shadowColor: "transparent"
+                //  color: textColor
+                // opacity: 0.5
+                text : Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM dd" )
+                /* anchors {
+                 *                   // top: time.bottom;
+                 *                  //  left: parent.left;
+                 *                   // right:parent.right*/ 
+        }
     }
     
     Calendar { 
