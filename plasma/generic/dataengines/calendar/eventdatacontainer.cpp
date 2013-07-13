@@ -26,8 +26,6 @@
 #include <KCalCore/Journal>
 #include <KCalUtils/Stringify>
 
-#include <QDebug>
-
 using namespace Akonadi;
 
 EventDataContainer::EventDataContainer(const Akonadi::ETMCalendar::Ptr &calendar, const QString& name, const KDateTime& start, const KDateTime& end, QObject* parent)
@@ -37,7 +35,6 @@ EventDataContainer::EventDataContainer(const Akonadi::ETMCalendar::Ptr &calendar
                     m_startDate(start),
                     m_endDate(end)
 {
-    qDebug() << "DEBUG1";
     // name under which this dataEngine source appears
     setObjectName(name);
 
