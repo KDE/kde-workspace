@@ -144,6 +144,7 @@ Name[zh_TW]=連接埠
 [Desktop Action serialType]
 # ctxt: The physical type of serial port (ie. USB, RS232, etc)
 Name=Serial Type
+Name[bs]=Tip serijskog porta
 Name[ca]=Tipus de sèrie
 Name[cs]=Typ sériového portu
 Name[da]=Serialtype
