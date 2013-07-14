@@ -1,6 +1,7 @@
 [Global]
 IconName=show-menu
 Name=Menubar manager
+Name[bs]=Menadžer menija
 Name[ca]=Gestor de barra de menús
 Name[ca@valencia]=Gestor de barra de menús
 Name[cs]=Správce hlavní nabídky
@@ -41,6 +42,7 @@ Name[x-test]=xxMenubar managerxx
 Name[zh_CN]=Menubar manager,菜单栏管理器
 Name[zh_TW]=選單列管理程式
 Comment=Menubar exporter
+Comment[bs]=Izvoz menija
 Comment[ca]=Exportador de barra de menús
 Comment[ca@valencia]=Exportador de barra de menús
 Comment[cs]=Export hlavní nabídky
@@ -82,6 +84,7 @@ Comment[zh_TW]=選單列匯出器
 
 [Event/reload]
 Name=Menubar changed
+Name[bs]=Meni promijenjen
 Name[ca]=La barra de menús ha canviat
 Name[ca@valencia]=La barra de menús ha canviat
 Name[cs]=Hlavní nabídka změněna
@@ -122,6 +125,7 @@ Name[x-test]=xxMenubar changedxx
 Name[zh_CN]=菜单栏设置更改
 Name[zh_TW]=選單列已變更
 Comment=Settings changes will take effect only on application restart
+Comment[bs]=Postavke će imati efekta samo pri ponovnom startu programa
 Comment[ca]=Els canvis d'arranjament només tindran efecte en reiniciar l'aplicació
 Comment[ca@valencia]=Els canvis d'arranjament només tindran efecte en reiniciar l'aplicació
 Comment[cs]=Změny se projeví až po opětovném spuštění aplikace

@@ -145,6 +145,7 @@ Name[zh_TW]=充電狀態
 [Desktop Action plugged]
 # ctxt: battery plugged in
 Name=Plugged
+Name[bs]=Utaknut
 Name[ca]=Endollada
 Name[ca@valencia]=Endollada
 Name[cs]=Připojeno
