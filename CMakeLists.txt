@@ -26,8 +26,6 @@ find_package(Qt5Transitional MODULE)
 find_package(Qt5Quick REQUIRED NO_MODULE)
 find_package(Qt5X11Extras REQUIRED NO_MODULE)
 
-find_package(kde4support REQUIRED NO_MODULE)
-
 #include(ConfigureChecks.cmake)
 
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
@@ -35,18 +33,17 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 find_package(kdeqt5staging REQUIRED NO_MODULE)
 # Load CMake, Compiler and InstallDirs settings from KF5 and the following are already somewhat "done" tier1/tier2 libs from kdelibs:
 find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
-                                            XmlGui KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
-					    KConfig KAuth kjs KWallet KIconThemes KDBusAddons Sonnet
-                                            ki18n kguiaddons kservice kwidgets ItemViews KNotifications KCompletion KJobWidgets KConfigWidgets KIconThemes)
+    KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
+    KConfig KAuth kjs KWallet KDBusAddons Sonnet
+    KI18n KGuiAddons KService KWidgets ItemViews KNotifications KIconThemes KCompletion KJobWidgets KConfigWidgets ktextwidgets XmlGui KCrash)
 
-find_package(ki18n REQUIRED NO_MODULE)
 find_package(kio REQUIRED NO_MODULE)
-find_package(ktextwidgets REQUIRED NO_MODULE)
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(kdeclarative REQUIRED NO_MODULE)
 
 # needed for set_package_properties macro
 find_package(KDELibs4 REQUIRED NO_MODULE)
+find_package(KDE4Support REQUIRED NO_MODULE)
 
 
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
@@ -69,6 +66,13 @@ set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed 
 #                        TYPE REQUIRED
 #                       )
 
+# TODO remove it in future
+find_package(LibAttica NO_MODULE)
+set_package_properties(LibAttica PROPERTIES DESCRIPTION "Support for Get Hot New Stuff related stuff"
+                       URL "https://projects.kde.org/attica"
+                       TYPE REQUIRED
+                      )
+
 find_package(DBusMenuQt 0.6.0)
 set_package_properties(DBusMenuQt PROPERTIES DESCRIPTION "Support for notification area menus via the DBusMenu protocol"
                        URL "https://launchpad.net/libdbusmenu-qt"
@@ -81,7 +85,7 @@ set_package_properties(QImageBlitz PROPERTIES DESCRIPTION "An image effects libr
                        TYPE REQUIRED
                       )
 
-find_package(KDeclarative QUIET CONFIG)
+# find_package(KDeclarative QUIET CONFIG)
 set_package_properties(KDeclarative PROPERTIES DESCRIPTION "KDE Declarative (QML) support from kdelibs"
                        URL "http://www.kde.org"
                        TYPE REQUIRED

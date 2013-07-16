@@ -19,7 +19,7 @@ target_link_libraries(plasma_wallpaper_imageplugin
          ${KDE4_KFILE_LIBS}
          ${KDE4_KNEWSTUFF3_LIBS}
          ${KDE4_THREADWEAVER_LIBRARY}
-         KDE4__kde4support)
+         ${KDE4Support_LIBRARIES})
 
 install(TARGETS plasma_wallpaper_imageplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/image)
 
