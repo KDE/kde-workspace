@@ -63,13 +63,6 @@ Item {
         section.property:desktop
         section.criteria:ViewSection.FullString
         section.delegate: sectionheader
-       // highlightMoveDuration: 250
-       /* highlight: PlasmaComponents.Highlight {
-                    id:action_task
-                    hover: menu.focus
-                    width: menuListView.width - 2 * menuListView.anchors.leftMargin 
-                    opacity:root_item.containsMouse
-        }*/
         delegate: TaskDelegate {
             id: menuItemDelegate
             width: menuListView.width
@@ -79,18 +72,14 @@ Item {
             icon: model["icon"]
             active: model["active"]
             iconSize: menu.iconSize
-                               // 
-                              
-                               // highlightMoveSpeed: 400
-                               // highlightMoveDuration: 150
             showDesktop: menu.showDesktop
             onClicked: menu.itemSelected(source);
             onEntered: menuListView.currentIndex = index; 
             onExecuteJob: menu.executeJob(jobName, source);
             onSetOnDesktop: menu.setOnDesktop(source, desktop);
         }
-                                Behavior on y {
-                                NumberAnimation { duration: 300; easing.type: Easing.Linear }
-                        }
+        Behavior on y {
+            NumberAnimation { duration: 300; easing.type: Easing.Linear }
+        }
     }
 }
