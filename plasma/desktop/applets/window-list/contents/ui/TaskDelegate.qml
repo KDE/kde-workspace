@@ -46,7 +46,6 @@ Item {
             width: windowListMenu.width
             height:30
             visible:true
-            //  y:-height
             opacity:root_item.containsMouse
             PlasmaCore.FrameSvgItem {
                 id:b
@@ -57,24 +56,24 @@ Item {
             }
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 1
+                    duration: 0
                     easing: Easing.InOutQuad
                 }
             }
             Behavior on y { 
                 SmoothedAnimation { 
-                    velocity: 1500
+                    velocity: 250
                 } 
             }
             Behavior on y {
                 NumberAnimation {
-                    duration: 8000
+                    duration: 250
                     easing: Easing.InOutQuad
                 }
             }
             Behavior on height {
                 SmoothedAnimation { 
-                    duration: 1500
+                    duration: 250
                 }
             }
         }
@@ -115,17 +114,4 @@ Item {
             menuItem.entered();
         }
     }
-        /*  SequentialAnimation {
-     *                    NumberAnimation {
-     *                        target:action_task
-     *                        duration:600
-     *                        property:"y"
-     *                        to:0
-                        }
-                        NumberAnimation {
-                            target:action_task
-                            duration:600
-                            property:"y"
-                            to:-action_task.height}
-        }*/
 }

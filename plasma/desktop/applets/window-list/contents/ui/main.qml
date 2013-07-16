@@ -137,24 +137,24 @@ Item {
                 }
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 1
+                        duration: 0
                         easing: Easing.InOutQuad
                     }
                 }
                 Behavior on y { 
                     SmoothedAnimation { 
-                        velocity: 1500
+                        velocity: 250
                     }
                 }
                 Behavior on y {
                     NumberAnimation {
-                        duration: 8000
+                        duration: 250
                         easing: Easing.InOutQuad
                     }
                 }
                 Behavior on height {
                     SmoothedAnimation { 
-                        duration: 1500
+                        duration: 250
                     }
                 }
             }
@@ -195,24 +195,24 @@ Item {
                 }
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 1
+                        duration: 0
                         easing: Easing.InOutQuad
                     }
                 }
                 Behavior on y { 
                     SmoothedAnimation { 
-                        velocity: 1500
+                        velocity: 250
                     }
                 }
                 Behavior on y {
                     NumberAnimation {
-                        duration: 8000
+                        duration: 250
                         easing: Easing.InOutQuad
                     }
                 }
                 Behavior on height {
                     SmoothedAnimation { 
-                        duration: 1500
+                        duration: 250
                     }
                 }
             }
