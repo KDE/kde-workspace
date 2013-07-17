@@ -47,15 +47,14 @@ Item {
             id: time
             font.pointSize:main.width/8
             width: Math.max(paintedWidth,time.paintedWidth)
-            text :Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm:ss AP" );             horizontalAlignment:main.AlignHCenter
+            text :Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm:ss AP" );
+            horizontalAlignment:main.AlignHCenter
             anchors {
                 left:parent.left
                 leftMargin:5
                 top:parent.top
                 bottom:parent.bottom
             }
-            //style: Text.Raised; styleColor: "grey" 
-            //font.bold:true
         }
         MouseArea {
             id: mouseArea
