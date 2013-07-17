@@ -43,6 +43,8 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins:main.defaultMargin
+        width:600
+        height:600
         clip: true;
     }
     

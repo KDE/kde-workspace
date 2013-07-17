@@ -6,6 +6,7 @@ Item {
     id:root
     width: parent.width
     height: parent.height
+    property string date ;
     CalendarData {
         id: calendar
         startDate: "2013-01-01"
@@ -35,9 +36,11 @@ Item {
                 id:rect1
                 height: parent.height/7
                 width: parent.width
-                color: "transparent"
+                color: "red"
                 Row {
-                    // anchors.centerIn: parent
+                    anchors {
+                        fill:parent
+                    }
                     Components.ToolButton {
                         flat: true;
                         text: "<";
@@ -45,19 +48,16 @@ Item {
                         height: 24;
                         id:monthright
                         anchors.left: col.left
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                monthComponent.previous()
-                            }
+                        onClicked: {
+                            monthComponent.previous()
                         }
                     }
                     Components.ToolButton {
                         id:month
                         width:50
                         height:24
-                        anchors.leftMargin:30
-                        anchors.rightMargin:20
+                        anchors.leftMargin:rect1.width/7
+                        anchors.rightMargin:rect1.width/3
                         anchors.left:monthright.right
                         text:monthComponent.monthName
                         onClicked: {
@@ -147,8 +147,8 @@ Item {
                         height:24
                         text:monthComponent.year
                         anchors.left:month.right
-                        anchors.leftMargin:10
-                        anchors.rightMargin:10
+                        anchors.leftMargin:rect1.width/7
+                        anchors.rightMargin:rect1.width/3
                         Components.ToolButton {
                             id:increase
                             text:"^"
@@ -180,7 +180,7 @@ Item {
                         width: 24;
                         height: 24;
                         anchors.left:year.right
-                        anchors.leftMargin:40
+                        anchors.leftMargin:rect1.height*2.6
                         anchors.right: col.right
                         MouseArea {
                             id:mouse
@@ -194,45 +194,45 @@ Item {
                         anchors {
                             top:monthright.bottom
                             left:parent.left
-                            bottom:rect1.bottom
                             right:rect1.right
+                            leftMargin:gv.cellWidth/2;
                         }
-                        spacing :parent.width/24
+                        spacing:gv.cellWidth/2;
                         Components.Label {
-                            font.pointSize:rect1.width/30
+                            font.pointSize:rect1.height/5
                             text : monthComponent.dayName(7)
                             horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.width/30
+                            font.pointSize:rect1.height/5
+                            anchors.leftMargin:gv.cellWidth/2;
                             text:monthComponent.dayName(1)
-                            horizontalAlignment:Text.AlignHCenter
+                           horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.width/30
+                            font.pointSize:rect1.height/5
                             text : monthComponent.dayName(2)
                             horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.width/30
+                            font.pointSize:rect1.height/5
                             text : monthComponent.dayName(3)
-                            horizontalAlignment:Text.AlignHCenter
+                           horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.width/30
+                            font.pointSize:rect1.height/5
                             text : monthComponent.dayName(4)
-                            horizontalAlignment:Text.AlignHCenter
+                           horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.width/30
+                            font.pointSize:rect1.height/5
                             text : monthComponent.dayName(5)
-                            horizontalAlignment:Text.AlignHCenter
+                           horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.width/30
+                            font.pointSize:rect1.height/5
                             text : monthComponent.dayName(6)
-                            horizontalAlignment:Text.AlignHCenter
-                            anchors.right:rect1.right
+                           horizontalAlignment:Text.AlignHCenter
                         }
                     }
                 }
@@ -242,43 +242,85 @@ Item {
                 width:rect1.width
                 height:parent.height-rect1.height
                 color: "transparent"
-                GridView {
-                    id: gv
-                    width: grid.width
-                    height: grid.height/1.5
-                    cellWidth: width / monthComponent.days
-                    cellHeight: height / monthComponent.weeks
-                    anchors {
-                        fill:parent
-                    }
-                    highlight:highlight
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    highlightFollowsCurrentItem:false
-                    focus:true
-                    model: monthComponent.daysModel
-                    delegate: Rectangle {
-                        width: gv.cellWidth
-                        height: gv.cellHeight
-                        color: (containsEventItems) ? "purple" : "white"
-                        border.color:"black"
-                        Components.Label {
-                            id:label
-                            anchors.centerIn: parent
-                            text: dayNumber
-                            opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
+                Column {
+                    id:bot
+                    width: parent.width
+                    height: parent.height-riw.height
+                    GridView {
+                        id: gv
+                        width: parent.width
+                        height: parent.height
+                        cellWidth: grid.width / monthComponent.days
+                        cellHeight: grid.height / monthComponent.weeks
+                        anchors {
+                            fill:parent
                         }
-                        MouseArea {
-                            id:dateMouse
-                            anchors.fill:parent
-                            hoverEnabled:true
-                            onClicked:label.color="red"
+                        highlight:highlight
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        highlightFollowsCurrentItem:false
+                        focus:true
+                        model: monthComponent.daysModel
+                        delegate: Rectangle {
+                            width: gv.cellWidth
+                            height: gv.cellHeight
+                            color: (containsEventItems) ? "purple" : "#eeeeee"
+                            border.color:"black"
+                            Components.Label {
+                                id:label
+                                anchors.centerIn: parent
+                                text: dayNumber
+                                font.bold:(containsEventItems) ? true:false
+                                opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
+                            }
+                            MouseArea {
+                                id:dateMouse
+                                anchors.fill:parent
+                                hoverEnabled:true
+                                onClicked:{//tests here ----> 
+                                    label.color="red";                                date=dayNumber+"/"+monthComponent.month()+"/"+monthComponent.year
+                                }
+                            }
+                        }
+                    }
+                    Rectangle {
+                        id:test
+                        width:parent.width
+                        height:20
+                        color:"transparent"
+                        Row {
+                            id:riw
+                            width:rect1.width
+                            height:20
+                            spacing:rect1.width/10
+                            anchors {
+                                left:test.left
+                                right:test.right
+                                verticalCenter:test.verticalCenter
+                            }
+                            Components.ToolButton {
+                                id:currentDate
+                                text:"#"
+                                width:24
+                                height:24
+                            }
+                            Components.TextField {
+                                id:dateField
+                                text: date
+                                width:rect1.width/3
+                            }
+                            Components.TextField {
+                                id:weekField
+                                text:"week"
+                                width:rect1.width/3
+                            }
                         }
                     }
                 }
             }
         }
         Rectangle {
+            id:rig
             height: parent.height
             width: parent.width / 4
             color: "transparent"
