@@ -277,7 +277,7 @@ Item {
                     elide: Text.ElideRight
                     // FIXME Uses overall remaining time, not bound to individual battery
                     text: locale.prettyFormatDuration(dialogItem.remainingTime)
-                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != ""
+                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != "" && dialogItem.remainingTime > 0
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
