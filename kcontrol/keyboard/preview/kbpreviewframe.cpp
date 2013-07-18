@@ -31,12 +31,12 @@
 
 
 static const QColor keyBorderColor("#d4d4d4");
-static const QColor lev12color("#d4d4d4");
+static const QColor lev12color(Qt::black);
 static const QColor lev34color("#FF3300");
 static const int sz=20, kszx=70, kszy=70;
 
-static const int xOffset[] = {15, 15, 40, 40 };
-static const int yOffset[] = {10, 40, 10, 40 };
+static const int xOffset[] = {10, 10, -15, -15 };
+static const int yOffset[] = {5, -20, 5, -20 };
 static const QColor color[] = { lev12color, lev12color, lev34color, lev34color };
 
 
@@ -158,7 +158,7 @@ void KbPreviewFrame::paintACRow(QPainter &painter,int &x,int &y)
 
         for(int level=0; level<symbols.size(); level++) {
         	painter.setPen(color[level]);
-        	painter.drawText(x+xOffset[level], y+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(symbols.at(level)));
+            painter.drawText(x+xOffset[level], y+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(symbols.at(level)));
         }
 
         x+=kszx;
@@ -173,21 +173,66 @@ void KbPreviewFrame::paintACRow(QPainter &painter,int &x,int &y)
     painter.drawText(x+shify,y+lvl2x,i18n("Enter"));
 }
 
-void KbPreviewFrame::paintABRow(QPainter &painter,int &x,int &y)
+void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[],GShape s,QString name)
 {
-    const int noABk=10;
-    for(int i=0; i<noABk; i++) {
-        painter.setPen(keyBorderColor);
-        painter.drawRect(x, y,kszx,kszy);
-
-        QList<QString> symbols = keyboardLayout.AB[i].symbols;
-
-        for(int level=0; level<symbols.size(); level++) {
-        	painter.setPen(color[level]);
-        	painter.drawText(x+xOffset[level], y+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(symbols.at(level)));
+    QList<QString> symbols;
+    int symbolset = 0;
+    if (name == "TLDE"){
+        symbols = keyboardLayout.TLDE.symbols;
+        symbolset = 1;
+    }
+    if (name == "BKSL"){
+        symbols = keyboardLayout.BKSL.symbols;
+        symbolset = 1;
+    }
+    if (name.startsWith("AE")){
+        for(int i = 0 ; i < 12 ; i++){
+            if (name == keyboardLayout.AE[i].keyname){
+                symbols = keyboardLayout.AE[i].symbols;
+                symbolset = 1;
+                break;
+            }
         }
+    }
+    if (name.startsWith("AD")){
+        for(int i = 0 ; i < 12 ; i++){
+            if (name == keyboardLayout.AD[i].keyname){
+                symbols = keyboardLayout.AD[i].symbols;
+                symbolset = 1;
+                break;
+            }
+        }
+    }
+    if (name.startsWith("AC")){
+        for(int i = 0 ; i < 11 ; i++){
+            if (name == keyboardLayout.AC[i].keyname){
+                symbols = keyboardLayout.AC[i].symbols;
+                symbolset = 1;
+                break;
+            }
+        }
+    }
+    if (name.startsWith("AB")){
+        for(int i = 0 ; i < 11 ; i++){
+            if (name == keyboardLayout.AB[i].keyname){
+                symbols = keyboardLayout.AB[i].symbols;
+                symbolset = 1;
+                break;
+            }
+        }
+    }
 
-        x+=kszx;
+    int sz = 20;
+    int cordinate[] = {0, 3, 1, 2};
+    if(symbolset == 1){
+        for(int level=0; level<symbols.size(); level++) {
+            painter.setPen(color[level]);
+            painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(symbols.at(level)));
+        }
+    }
+    else{
+        painter.setPen(Qt::black);
+        painter.drawText(temp[0].x()+s.size(0)-10,temp[0].y()+3*s.size(1)/2,name);
     }
 }
 
@@ -260,12 +305,18 @@ void KbPreviewFrame::paintFnKeys(QPainter &painter,int &x,int &y)
 }
 
 void KbPreviewFrame::drawShape(QPainter &painter,GShape s,int x,int y,int i,QString name){
+    painter.setPen(Qt::black);
     if(geometry.sectionList[i].angle==0){
         if (s.cordi_count == 1){
             int width = s.cordii[0].x();
             int height = s.cordii[0].y();
             painter.drawRoundedRect(scaleFactor*x+2,scaleFactor*y,scaleFactor*width,scaleFactor*height,4,4);
-            painter.drawText(scaleFactor*x+5,scaleFactor*y+20,name);
+            QPoint temp[4];
+            temp[0]=QPoint(scaleFactor*x,scaleFactor*y);
+            temp[1]=QPoint(scaleFactor*(s.cordii[0].x()+x),scaleFactor*y);
+            temp[2]=QPoint(scaleFactor*(s.cordii[0].x()+x),scaleFactor*(s.cordii[0].y()+y));
+            temp[3]=QPoint(scaleFactor*(x),scaleFactor*(s.cordii[0].y()+y));
+            drawKeySymbols(painter,temp,s,name);
         }
         else{
             QPoint temp[s.cordi_count];
@@ -274,7 +325,7 @@ void KbPreviewFrame::drawShape(QPainter &painter,GShape s,int x,int y,int i,QStr
                 temp[i].setY(scaleFactor*(s.cordii[i].y()+y+1));
             }
             painter.drawPolygon(temp,s.cordi_count);
-            painter.drawText(temp[0].x()+5,temp[0].y()+20,name);
+            drawKeySymbols(painter,temp,s,name);
         }
     }
     else{
@@ -314,7 +365,7 @@ void KbPreviewFrame::drawShape(QPainter &painter,GShape s,int x,int y,int i,QStr
             qDebug()<<temp[i];
         }*/
         painter.drawPolygon(temp,size);
-        painter.drawText(temp[0].x()+5,temp[0].y()+20,name);
+        drawKeySymbols(painter,temp,s,name);
     }
 
 }
@@ -418,7 +469,7 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 }
 
 
-void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString& layoutVariant)
+void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString& layoutVariant,QString model)
 {
     QString filename = keyboardLayout.findSymbolBaseDir();
     filename.append(layout);
@@ -428,7 +479,7 @@ void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString
     QString content = file.readAll();
     file.close();
 
-    geometry = grammar::parseGeometry();
+    geometry = grammar::parseGeometry(model);
 
     QList<QString> symstr = content.split("xkb_symbols ");
 

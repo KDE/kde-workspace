@@ -2,6 +2,7 @@
 #include "geometry_components.h"
 
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QDebug>
 #include <QFileDialog>
 #include <QFile>
@@ -180,7 +181,7 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
                  >>lit("xkb_geometry")
                  >>name[phx::bind(&Geometry_parser::getName,this,_1)]
                  >>info
-                 >>';';
+                 >>';'>>*(comments||char_-lit("xkb_geometry"));
 
 
 }
@@ -269,20 +270,20 @@ template<typename Iterator>
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionTop(double a){
-        qDebug()<<"\nsectionCount"<<geom.sectionCount;
+        //qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.sectionCount].top = a + geom.sectionTop;
         cy = geom.sectionList[geom.sectionCount].top;
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionLeft(double a){
-        qDebug()<<"\nsectionCount"<<geom.sectionCount;
+        //qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.sectionCount].left = a + geom.sectionLeft;
         cx = geom.sectionList[geom.sectionCount].left;
 
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionAngle(double a){
-        qDebug()<<"\nsectionCount"<<geom.sectionCount;
+        //qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.sectionCount].angle = a;
     }
 template<typename Iterator>
@@ -303,7 +304,7 @@ template<typename Iterator>
         int secn = geom.sectionCount;
         int rown = geom.sectionList[secn].rowCount;
         int keyn = geom.sectionList[secn].rowList[rown].keyCount;
-        qDebug()<<"\nsC: "<<secn<<"\trC: "<<rown<<"\tkn: "<<keyn;
+        //qDebug()<<"\nsC: "<<secn<<"\trC: "<<rown<<"\tkn: "<<keyn;
         geom.sectionList[secn].rowList[rown].keyList[keyn].name = QString::fromUtf8(n.data(), n.size());
      }
 template<typename Iterator>
@@ -322,7 +323,7 @@ template<typename Iterator>
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyOffset(){
-        qDebug()<<"\nhere\n";
+        //qDebug()<<"\nhere\n";
         int secn = geom.sectionCount;
         int rown = geom.sectionList[secn].rowCount;
         int keyn = geom.sectionList[secn].rowList[rown].keyCount;
@@ -351,47 +352,137 @@ template<typename Iterator>
         geom.sectionList[secn].rowList[rown].addKey();
     }
 
-    Geometry parseGeometry(){
+    QString mapModelToGeometry(QString model){
+        QStringList pcmodels;
+        QStringList msmodels;
+        QStringList nokiamodels;
+        QStringList pcgeometries;
+        QStringList macbooks;
+        QStringList applealu;
+        QStringList macs;
+        pcmodels<<"pc101"<< "pc102"<< "pc104"<< "pc105";
+        msmodels<<"microsoft"<< "microsoft4000"<< "microsoft7000"<< "microsoftpro"<< "microsoftprousb"<< "microsoftprose";
+        nokiamodels<<"nokiasu8w"<< "nokiarx44"<< "nokiarx51";
+        pcgeometries<<"latitude";
+        macbooks<<"macbook78"<< "macbook79";
+        applealu<<"applealu_ansi"<< "applealu_iso"<< "applealu_jis";
+        macs<<"macintosh"<< "macintosh_old"<< "ibook"<< "powerbook"<< "macbook78"<< "macbook79";
+
+        if (model == "thinkpad     us"){
+            return("thinkpad|us");
+        }
+        if (model == "microsoftelite"){
+            return("microsoft|elite");
+        }
+        if (msmodels.contains(model)){
+            return("microsoft|natural");
+        }
+        if (model == "dell101"){
+            return("dell|dell101");
+        }
+        if (model == "dellm65"){
+            return("dell|dellm65");
+        }
+        if (model == "latitude"){
+            return("dell|latitude");
+        }
+        if (model == "flexpro"){
+            return("keytronic|FlexPro");
+        }
+        if(model == "hp6000"|| model == "hpmini110"){
+            return("hp|mini110");
+        }
+        if(model == "hpdv5"){
+            return("hp|dv5");
+        }
+        if(model == "omnikey101"){
+            return("northgate|omnikey101");
+        }
+        if(model == "sanwaskbkg3"){
+            return("sanwa|sanwaskbkg3");
+        }
+        if(pcmodels.contains(model)||pcgeometries.contains(model)){
+            return("pc|"+model);
+        }
+        if(model == "everex"){
+            return("everex|STEPnote");
+        }
+        if(model.contains("thinkpad")){
+            return("thinkpad|60");
+        }
+        if(model == "winbook"){
+            return("winbook|XP5");
+        }
+        if(model == "pc98"){
+            return("nec|pc98");
+        }
+        if(model == "hhk"){
+            return("hhk|basic");
+        }
+        if(model == "kinesis"){
+            return("kinesis|model100");
+        }
+        if(nokiamodels.contains(model)){
+            return("nokia|"+model);
+        }
+        if(macs.contains(model)||macbooks.contains(model)||applealu.contains(model)){
+            return("macintosh|"+model);
+        }
+
+        return("pc|pc104");
+    }
+
+
+
+    Geometry parseGeometry(QString model){
         using boost::spirit::ascii::space;
         typedef std::string::const_iterator iterator_type;
         typedef grammar::Geometry_parser<iterator_type> Geometry_parser;
         Geometry_parser g;
 
-        QString geometryfile = QFileDialog::getOpenFileName();
-
+        QString geometry = mapModelToGeometry(model);
+        qDebug()<<geometry;
+        QStringList mapedModel = geometry.split('|');
+        QString geometryfile = mapedModel.at(0);
+        QString geometryName = mapedModel.at(1);
+        geometryfile.prepend("/usr/share/X11/xkb/geometry/");
         QFile gfile(geometryfile);
          if (!gfile.open(QIODevice::ReadOnly | QIODevice::Text)){
              qDebug()<<"unable to open the file";
              return g.geom;
         }
         QString gcontent = gfile.readAll();
-        //qDebug()<<gcontent;
-        std::string xyz = gcontent.toUtf8().constData();
-
         gfile.close();
+        QStringList gcontentList = gcontent.split("xkb_geometry");
+        int i = 1;
+        while(g.geom.name!=geometryName){
+            g.geom = Geometry();
+            QString input = gcontentList.at(i);
+            input.prepend("xkb_geometry");
+            //qDebug()<<input;
+            std::string xyz = input.toUtf8().constData();
 
-        std::string::const_iterator iter = xyz.begin();
-        std::string::const_iterator end = xyz.end();
+            std::string::const_iterator iter = xyz.begin();
+            std::string::const_iterator end = xyz.end();
 
-        bool r = phrase_parse(iter, end, g, space);
-        if (r && iter == end){
-              std::cout << "-------------------------\n";
-               std::cout << "Parsing succeeded\n";
-               g.geom.display();
-               std::cout << "\n-------------------------\n";
-               return g.geom;
-       }
-       else{
-               std::cout << "-------------------------\n";
-               std::cout << "Parsing failed\n";
-               std::cout << "-------------------------\n";
-               g.geom.display();
-               return g.geom;
-       }
+            bool r = phrase_parse(iter, end, g, space);
+            if (r && iter == end){
+                std::cout << "-------------------------\n";
+                std::cout << "Parsing succeeded\n";
+                std::cout << "\n-------------------------\n";
+            }
+            else{
+                std::cout << "-------------------------\n";
+                std::cout << "Parsing failed\n";
+                std::cout << "-------------------------\n";
+            }
+            i++;
+
+        }
+        g.geom.display();
+        return g.geom;
 
     }
-
-
 }
 
 

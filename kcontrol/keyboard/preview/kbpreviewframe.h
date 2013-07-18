@@ -36,7 +36,7 @@ private:
 	void paintAERow(QPainter &painter, int &x, int &y);
 	void paintADRow(QPainter &painter, int &x, int &y);
 	void paintACRow(QPainter &painter, int &x, int &y);
-	void paintABRow(QPainter &painter, int &x, int &y);
+    void drawKeySymbols(QPainter &painter,QPoint temp[],GShape s,QString name);
 	void paintBottomRow(QPainter &painter, int &x, int &y);
 	void paintFnKeys(QPainter &painter, int &x, int &y);
 	float scaleFactor;
@@ -50,7 +50,7 @@ public:
     int *width,*height;
     explicit KbPreviewFrame(QWidget *parent = 0);
     void paintEvent(QPaintEvent * event);
-    void generateKeyboardLayout(const QString &country, const QString &layoutVariant);
+    void generateKeyboardLayout(const QString &country, const QString &layoutVariant, QString model);
     QString getLayoutName() const {
     	return keyboardLayout.getLayoutName();
     }

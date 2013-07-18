@@ -43,9 +43,9 @@ KeyboardPainter::KeyboardPainter():
     setWindowTitle(kbframe->getLayoutName());
 }
 
-void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant)
+void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant,QString model)
 {
-    kbframe->generateKeyboardLayout(layout, variant);
+    kbframe->generateKeyboardLayout(layout, variant, model);
     kbDialog->setFixedSize((2.5*kbframe->geometry.width+20),(2.5*kbframe->geometry.height+50));
     kbframe->setFixedSize((2.5*kbframe->geometry.width+20),(2.5*kbframe->geometry.height));
 }
