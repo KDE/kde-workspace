@@ -183,20 +183,22 @@ void MenuWidget::slotCheckActiveItem()
     }
 
     if (buttonBelow != m_currentButton) {
-        if (m_currentButton) {
+        if (m_currentButton && m_currentButton->nativeWidget()) {
             m_currentButton->nativeWidget()->setDown(false);
             m_currentButton->setHovered(false);
-            m_currentButton = buttonBelow;
-            m_currentButton->nativeWidget()->setDown(true);
-            m_visibleMenu = showMenu();
         }
+        m_currentButton = buttonBelow;
+        if (m_currentButton->nativeWidget()) {
+            m_currentButton->nativeWidget()->setDown(true);
+        }
+        m_visibleMenu = showMenu();
     }
 }
 
 void MenuWidget::slotMenuAboutToHide()
 {
-    if (m_currentButton) {
-        m_currentButton->setDown(false);
+    if (m_currentButton && m_currentButton->nativeWidget()) {
+        m_currentButton->nativeWidget()->setDown(false);
     }
 
     if (m_mouseTimer->isActive()) {
@@ -210,7 +212,9 @@ void MenuWidget::slotButtonClicked()
 {
     m_currentButton = qobject_cast<MenuButton*>(sender());
 
-    m_currentButton->nativeWidget()->setDown(true);
+    if (m_currentButton && m_currentButton->nativeWidget()) {
+        m_currentButton->nativeWidget()->setDown(true);
+    }
     m_visibleMenu = showMenu();
     // Start auto navigation after click
     if (!m_mouseTimer->isActive())
@@ -356,9 +360,13 @@ void MenuWidget::showLeftRightMenu(bool next)
         index = (index == 0 ? m_buttons.count() : index) - 1;
     }
 
-    m_currentButton->setDown(false);
+    if (m_currentButton && m_currentButton->nativeWidget()) {
+        m_currentButton->nativeWidget()->setDown(false);
+    }
     m_currentButton = m_buttons.at(index);
-    m_currentButton->nativeWidget()->setDown(true);
+    if (m_currentButton && m_currentButton->nativeWidget()) {
+        m_currentButton->nativeWidget()->setDown(true);
+    }
     m_visibleMenu = showMenu();
 }
 
