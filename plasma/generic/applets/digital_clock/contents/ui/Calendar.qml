@@ -282,7 +282,7 @@ Item {
                                 hoverEnabled:true
                                 onClicked:{//tests here ----> 
                                     label.color="red";                                date=dayNumber+"/"+monthComponent.month()+"/"+monthComponent.year
-                                    print(week);
+                                    print(monthComponent.weekNumber(date));
                                 }
                             }
                         }
@@ -315,7 +315,7 @@ Item {
                             }
                             Components.TextField {
                                 id:weekField
-                                text:"week"
+                                text:monthComponent.weekNumber(date);
                                 width:rect1.width/3
                             }
                         }
