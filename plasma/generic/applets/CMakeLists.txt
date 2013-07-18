@@ -9,7 +9,7 @@ add_subdirectory(analog-clock)
 add_subdirectory(batterymonitor)
 add_subdirectory(calendar)
 add_subdirectory(devicenotifier)
-add_subdirectory(digital-clock)
+add_subdirectory(digital_clock)
 add_subdirectory(quicklaunch)
 
 if(QT_QTWEBKIT_FOUND)

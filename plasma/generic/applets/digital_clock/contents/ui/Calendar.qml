@@ -71,71 +71,74 @@ Item {
                                 visualParent:month
                                 Components.MenuItem {
                                     text:"January"
+                                    onClicked: {
+                                        mouse.onClicked= monthComponent.monthChanged(1)
+                                    }
                                 }
                                 Components.MenuItem {
                                     text:"February"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(2)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"March"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(3)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"April"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(4)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"May"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(5)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"June"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(6)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"July"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(7)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"August"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(8)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"September" 
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(9)
                                     } 
                                 }
                                 Components.MenuItem {
                                     text:"October"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(10)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"November"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(11)
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"December"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.next()
+                                        mouse.onClicked= monthComponent.monthChanged(12)
                                     }
                                 }
                             }
@@ -279,6 +282,7 @@ Item {
                                 hoverEnabled:true
                                 onClicked:{//tests here ----> 
                                     label.color="red";                                date=dayNumber+"/"+monthComponent.month()+"/"+monthComponent.year
+                                    print(week);
                                 }
                             }
                         }
