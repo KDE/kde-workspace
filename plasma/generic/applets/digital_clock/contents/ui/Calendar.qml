@@ -7,6 +7,12 @@ Item {
     width: parent.width
     height: parent.height
     property string date ;
+     
+    function isToday(date) {
+        if(date==Qt.formatDateTime(new Date(), "dd/M/yyyy")) 
+            return true ;
+        else return false;
+    } 
     CalendarData {
         id: calendar
         startDate: "2013-01-01"
@@ -36,7 +42,7 @@ Item {
                 id:rect1
                 height: parent.height/7
                 width: parent.width
-                color: "red"
+                color: "transparent"
                 Row {
                     anchors {
                         fill:parent
@@ -243,82 +249,88 @@ Item {
             Rectangle {
                 id:grid
                 width:rect1.width
-                height:parent.height-rect1.height
+                height:parent.height-rect1.height-riw.height
                 color: "transparent"
-                Column {
-                    id:bot
-                    width: parent.width
-                    height: parent.height-riw.height
                     GridView {
                         id: gv
                         width: parent.width
                         height: parent.height
-                        cellWidth: grid.width / monthComponent.days
-                        cellHeight: grid.height / monthComponent.weeks
+                        cellWidth: (grid.width )/ monthComponent.days
+                        cellHeight: (grid.height) / monthComponent.weeks
                         anchors {
                             fill:parent
                         }
-                        highlight:highlight
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
-                        highlightFollowsCurrentItem:false
                         focus:true
                         model: monthComponent.daysModel
                         delegate: Rectangle {
                             width: gv.cellWidth
                             height: gv.cellHeight
-                            color: (containsEventItems) ? "purple" : "#eeeeee"
-                            border.color:"black"
-                            Components.Label {
-                                id:label
-                                anchors.centerIn: parent
-                                text: dayNumber
-                                font.bold:(containsEventItems) ? true:false
-                                opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
-                            }
-                            MouseArea {
-                                id:dateMouse
-                                anchors.fill:parent
-                                hoverEnabled:true
-                                onClicked:{//tests here ----> 
-                                    label.color="red";                                date=dayNumber+"/"+monthComponent.month()+"/"+monthComponent.year
-                                    print(monthComponent.weekNumber(date));
+                            color: (containsEventItems) ? "purple" : "transparent"
+                            Rectangle {
+                                id:outer
+                                width: gv.cellWidth-5
+                                height: gv.cellHeight-5
+                                color:"transparent"
+                                border.color:(dateMouse.containsMouse)?"black":"transparent"
+                                Rectangle {
+                                    width: gv.cellWidth
+                                    height: gv.cellHeight
+                                    color:"transparent"
+                                    opacity:isToday(label.text+"/"+monthComponent.month()+"/"+monthComponent.year)?true:false   ;                                anchors.fill:parent
+                                    border.color:"blue"
+                                }
+                                Components.Label {
+                                    id:label
+                                    anchors.centerIn: parent
+                                    text: dayNumber
+                                    font.bold:(containsEventItems) ? true:false
+                                    opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
+                                }
+                                MouseArea {
+                                    id:dateMouse
+                                    anchors.fill:parent
+                                    hoverEnabled:true
+                                    onClicked:{//tests here ----> 
+                                        //   label.color="red"; 
+                                        date=dayNumber+"/"+monthComponent.month()+"/"+monthComponent.year
+                                    }
                                 }
                             }
                         }
                     }
-                    Rectangle {
-                        id:test
-                        width:parent.width
-                        height:20
-                        color:"transparent"
-                        Row {
-                            id:riw
-                            width:rect1.width
-                            height:20
-                            spacing:rect1.width/10
-                            anchors {
-                                left:test.left
-                                right:test.right
-                                verticalCenter:test.verticalCenter
-                            }
-                            Components.ToolButton {
-                                id:currentDate
-                                text:"#"
-                                width:24
-                                height:24
-                            }
-                            Components.TextField {
-                                id:dateField
-                                text: date
-                                width:rect1.width/3
-                            }
-                            Components.TextField {
-                                id:weekField
-                                text:monthComponent.weekNumber(date);
-                                width:rect1.width/3
-                            }
-                        }
+            }
+            Rectangle {
+                id:test
+                width:parent.width
+                height:20
+                color:"transparent"
+                Row {
+                    id:riw
+                    width:rect1.width
+                    height:20
+                    spacing:rect1.width/10
+                    anchors {
+                        left:test.left
+                        right:test.right
+                        verticalCenter:test.verticalCenter
+                    }
+                    Components.ToolButton {
+                        id:currentDate
+                        text:"#"
+                        width:24
+                        height:24
+                    }
+                    Components.TextField {
+                        id:dateField
+                        text: date
+                        width:rect1.width/3
+                    }
+                    Components.TextField {
+                        id:weekField
+                        text:monthComponent.weekNumber(date);
+                        width:rect1.width/3
                     }
                 }
             }
