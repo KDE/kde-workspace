@@ -70,7 +70,7 @@ Item {
                 if (parent.hoveredItem.isGroupParent) {
                     groupDialog.target = parent.hoveredItem;
                     groupDialog.visible = true;
-                } else {
+                } else if (!parent.hoveredItem.isLauncher) {
                     tasks.activateItem(parent.hoveredItem.itemId, false);
                 }
             }
