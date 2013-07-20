@@ -12,7 +12,10 @@ Item {
         if(date==Qt.formatDateTime(new Date(), "dd/M/yyyy")) 
             return true ;
         else return false;
-    } 
+    }
+    function isTodayMonth() {
+        return Qt.formatDateTime(new Date(), "M")
+    }
     CalendarData {
         id: calendar
         startDate: "2013-01-01"
@@ -204,7 +207,6 @@ Item {
                             top:monthright.bottom
                             left:parent.left
                             right:rect1.right
-                            leftMargin:gv.cellWidth/2;
                         }
                         spacing:gv.cellWidth/2;
                         Components.Label {
@@ -278,7 +280,7 @@ Item {
                                     width: gv.cellWidth
                                     height: gv.cellHeight
                                     color:"transparent"
-                                    opacity:isToday(label.text+"/"+monthComponent.month()+"/"+monthComponent.year)?true:false   ;                                anchors.fill:parent
+                                    opacity:isToday(label.text+"/"+monthComponent.month()+"/"+monthComponent.year)?true:false;                                   anchors.fill:parent
                                     border.color:"blue"
                                 }
                                 Components.Label {
@@ -318,9 +320,22 @@ Item {
                     }
                     Components.ToolButton {
                         id:currentDate
-                        text:"#"
+                       iconSource:"view-pim-calendar"
                         width:24
                         height:24
+                          MouseArea {
+                            id:mouse2
+                            hoverEnabled:true
+                            anchors.fill: parent
+                            onClicked: {
+                                monthComponent.monthChanged(isTodayMonth());
+                            }
+                            PlasmaCore.ToolTip {
+                                id: tool
+                                target: mouse2
+                                mainText:"Select Today"
+                            }
+                        }
                     }
                     Components.TextField {
                         id:dateField
