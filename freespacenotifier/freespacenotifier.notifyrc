@@ -127,7 +127,7 @@ Name[uk]=Замало місця на диску
 Name[vi]=Dung lượng đĩa trống thấp
 Name[wa]=Pus bråmint d' plaece sol plake
 Name[x-test]=xxLow Disk Spacexx
-Name[zh_CN]=低磁盘空间
+Name[zh_CN]=磁盘空间低
 Name[zh_TW]=磁碟空間過低
 
 [Context/warningnot]
