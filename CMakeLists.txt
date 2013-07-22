@@ -34,10 +34,10 @@ find_package(kdeqt5staging REQUIRED NO_MODULE)
 # Load CMake, Compiler and InstallDirs settings from KF5 and the following are already somewhat "done" tier1/tier2 libs from kdelibs:
 find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
-    KConfig KAuth kjs KWallet KDBusAddons Sonnet
-    KI18n KGuiAddons KService KWidgets ItemViews KNotifications KIconThemes KCompletion KJobWidgets KConfigWidgets ktextwidgets XmlGui KCrash)
+    KConfig KAuth KJS KWallet KDBusAddons Sonnet
+    KI18n KGuiAddons KService KWidgets ItemViews KNotifications KIconThemes KCompletion KJobWidgets KConfigWidgets KTextWidgets XmlGui KCrash)
 
-find_package(kio REQUIRED NO_MODULE)
+find_package(KIO REQUIRED NO_MODULE)
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(kdeclarative REQUIRED NO_MODULE)
 
