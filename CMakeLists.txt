@@ -22,8 +22,10 @@ include(CMakePackageConfigHelpers)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 find_package(Qt5Core REQUIRED NO_MODULE)
+find_package(Qt5DBus REQUIRED NO_MODULE)
 find_package(Qt5Transitional MODULE)
 find_package(Qt5Quick REQUIRED NO_MODULE)
+find_package(Qt5Widgets REQUIRED NO_MODULE)
 find_package(Qt5X11Extras REQUIRED NO_MODULE)
 
 #include(ConfigureChecks.cmake)
