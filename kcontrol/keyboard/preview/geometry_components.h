@@ -3,16 +3,18 @@
 
 #include <QtCore/QString>
 #include <QtCore/QPoint>
+#include <QtCore/QList>
 
 class GShape{
   public:
     QString sname;
-    QPoint cordii[20],approx;
+    static const int maxShapeCordinates = 20;
+    QPoint approx,cordii[maxShapeCordinates];
     int cordi_count;
+    
     GShape();
-    void setShape(QString n);
-    void setCordinate(double &a, double &b);
-    void setApprox(double &a, double &b);
+    void setCordinate(double a, double b);
+    void setApprox(double a, double b);
     void display();
     double size(int vertical);
 };
@@ -22,9 +24,9 @@ public:
   QString name,shapeName;
   double offset;
   QPoint position;
+  
   Key();
-  void getKey(double &o);
-  void setKeyPosition(double &x,double &y);
+  void setKeyPosition(double x,double y);
   void showKey();
 };
 
@@ -33,9 +35,10 @@ public:
   double top,left;
   int keyCount,vertical;
   QString shapeName;
-  Key keyList[50];
+  static const int maxKeys = 50;
+  Key keyList[maxKeys];
+  
   Row();
-  void getRow(double t,double l);
   void addKey();
   void displayRow();
 };
@@ -45,9 +48,11 @@ public:
   QString name,shapeName;
   double top,left,angle;
   int rowCount,vertical;
-  Row rowList[20];
+  static const int maxRows = 50;
+  Row rowList[maxRows];
+  
+  
   Section();
-  void getName(QString n);
   void addRow();
   void displaySection();
 };
@@ -58,11 +63,11 @@ public:
   int shape_count,vertical;
   double width,height,sectionTop,sectionLeft,rowTop,rowLeft,keyGap;
   int sectionCount;
-  GShape shapes[40];
-  Section sectionList[20];
+  static const int maxShapes = 50, maxSections = 20;
+  GShape shapes[maxShapes];
+  Section sectionList[maxSections];
+  
   Geometry();
-  void getName(QString n);
-  void getDescription(QString n);
   void getWidth(double a);
   void getHeight(double a);
   void getShapeName(QString n);

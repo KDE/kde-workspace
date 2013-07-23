@@ -7,6 +7,14 @@
 #include <QFileDialog>
 #include <QFile>
 
+#include <QtGui/QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/XKBlib.h>
+#include <X11/extensions/XKBrules.h>
+#include <fixx11h.h>
+#include <config-workspace.h>
+
 namespace grammar{
 keywords::keywords(){
     add
@@ -198,11 +206,11 @@ template<typename Iterator>
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::getName(std::string n){
-        geom.getName(QString::fromUtf8(n.data(), n.size()));
+        geom.name = (QString::fromUtf8(n.data(), n.size()));
 }
 template<typename Iterator>
     void Geometry_parser<Iterator>::getDescription(std::string n){
-        geom.getDescription( QString::fromUtf8(n.data(), n.size()));
+        geom.description = ( QString::fromUtf8(n.data(), n.size()));
 }
 
 template<typename Iterator>
@@ -236,7 +244,7 @@ template<typename Iterator>
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectionName(std::string n){
-        geom.sectionList[geom.sectionCount].getName(QString::fromUtf8(n.data(), n.size()));
+        geom.sectionList[geom.sectionCount].name = QString::fromUtf8(n.data(), n.size());
 }
 
 
@@ -327,7 +335,7 @@ template<typename Iterator>
         int secn = geom.sectionCount;
         int rown = geom.sectionList[secn].rowCount;
         int keyn = geom.sectionList[secn].rowList[rown].keyCount;
-        geom.sectionList[secn].rowList[rown].keyList[keyn].getKey(off);
+        geom.sectionList[secn].rowList[rown].keyList[keyn].offset = off;
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyCordi(){
@@ -360,13 +368,13 @@ template<typename Iterator>
         QStringList macbooks;
         QStringList applealu;
         QStringList macs;
-        pcmodels<<"pc101"<< "pc102"<< "pc104"<< "pc105";
-        msmodels<<"microsoft"<< "microsoft4000"<< "microsoft7000"<< "microsoftpro"<< "microsoftprousb"<< "microsoftprose";
-        nokiamodels<<"nokiasu8w"<< "nokiarx44"<< "nokiarx51";
-        pcgeometries<<"latitude";
-        macbooks<<"macbook78"<< "macbook79";
-        applealu<<"applealu_ansi"<< "applealu_iso"<< "applealu_jis";
-        macs<<"macintosh"<< "macintosh_old"<< "ibook"<< "powerbook"<< "macbook78"<< "macbook79";
+        pcmodels << "pc101" << "pc102" << "pc104" << "pc105";
+        msmodels << "microsoft" << "microsoft4000" << "microsoft7000" << "microsoftpro" << "microsoftprousb" << "microsoftprose";
+        nokiamodels << "nokiasu8w" << "nokiarx44" << "nokiarx51";
+        pcgeometries << "latitude";
+        macbooks << "macbook78" << "macbook79";
+        applealu << "applealu_ansi" << "applealu_iso" << "applealu_jis";
+        macs << "macintosh" << "macintosh_old" << "ibook" << "powerbook" << "macbook78" << "macbook79";
 
         if (model == "thinkpad     us"){
             return("thinkpad|us");
@@ -445,7 +453,8 @@ template<typename Iterator>
         QStringList mapedModel = geometry.split('|');
         QString geometryfile = mapedModel.at(0);
         QString geometryName = mapedModel.at(1);
-        geometryfile.prepend("/usr/share/X11/xkb/geometry/");
+        QString xkbParentDir = findGeometryBaseDir();
+        geometryfile.prepend(xkbParentDir);
         QFile gfile(geometryfile);
          if (!gfile.open(QIODevice::ReadOnly | QIODevice::Text)){
              qDebug()<<"unable to open the file";
@@ -483,6 +492,34 @@ template<typename Iterator>
         return g.geom;
 
     }
+
+
+
+    QString findGeometryBaseDir()
+    {
+        QString xkbParentDir;
+
+        QString base(XLIBDIR);
+        if( base.count('/') >= 3 ) {
+            // .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
+            QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
+            QDir baseDir(base + delta);
+            if( baseDir.exists() ) {
+                xkbParentDir = baseDir.absolutePath();
+            }
+            else {
+                QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
+                if( baseDir.exists() ) {
+                    xkbParentDir = baseDir.absolutePath();
+                }
+            }
+        }
+
+        if( xkbParentDir.isEmpty() ) {
+            xkbParentDir = "/usr/share/X11";
+        }
+
+        return QString("%1/xkb/geometry/").arg(xkbParentDir);
+    }
+
 }
-
-

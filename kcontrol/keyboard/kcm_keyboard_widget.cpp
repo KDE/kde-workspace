@@ -370,6 +370,9 @@ void KCMKeyboardWidget::previewLayout(){
     QString country=uiWidget->layoutsTableView->model()->data(idcountry).toString();
     QModelIndex idvariant = index.sibling(index.row(),2) ;
     QString variant=uiWidget->layoutsTableView->model()->data(idvariant).toString();
+    QString model = keyboardConfig->keyboardModel;
+    q.setText(model);
+    q.exec();
     if(index.row()==-1 || index.column()==-1){
         q.setText(i18n("No layout selected "));
         q.exec();
@@ -383,7 +386,7 @@ void KCMKeyboardWidget::previewLayout(){
                 break;
             }
         }
-        layoutPreview->generateKeyboardLayout(country,variant);
+        layoutPreview->generateKeyboardLayout(country,variant,model);
         layoutPreview->exec();
         layoutPreview->setModal(true);
     }

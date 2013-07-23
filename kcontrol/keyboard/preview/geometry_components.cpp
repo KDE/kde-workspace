@@ -8,15 +8,11 @@ GShape::GShape(){
     cordi_count = 0;
 }
 
-void GShape::setShape(QString n){
-    sname = n;
-}
-
-void GShape::setCordinate(double &a, double &b){
+void GShape::setCordinate(double a, double b){
     cordii[cordi_count++] = QPoint(a,b);
 }
 
-void GShape::setApprox(double &a, double &b){
+void GShape::setApprox(double a, double b){
     a-=approx.x();
     b-=approx.y();
     approx = QPoint(a,b);
@@ -48,11 +44,8 @@ double GShape::size(int vertical){
 Key::Key(){
     offset = 0;
 }
-void Key::getKey(double &o){
-    offset = o;
-}
 
-void Key::setKeyPosition(double &x, double &y){
+void Key::setKeyPosition(double x, double y){
     position = QPoint(x,y);
 }
 
@@ -68,19 +61,15 @@ Row::Row(){
     vertical = 0;
 }
 
-void Row::getRow(double t,double l){
-    top = t;
-    left = l;
-}
 
 void Row::addKey(){
-    qDebug()<<"keyCount: "<<keyCount;
+    qDebug() << "keyCount: "<<keyCount;
     keyCount++;
 }
 
 void Row::displayRow(){
-    qDebug()<<"\nRow: ("<<left<<","<<top<<")\n";
-    qDebug()<<"vertical: "<<vertical;
+    qDebug() << "\nRow: ("<<left<<","<<top<<")\n";
+    qDebug() << "vertical: "<<vertical;
     for(int i=0;i<keyCount;i++)
     keyList[i].showKey();
 }
@@ -91,10 +80,6 @@ Section::Section(){
     angle = 0;
     rowCount = 0;
     vertical = 0;
-}
-
-void Section::getName(QString n){
-    name = n;
 }
 
 void Section::addRow(){
@@ -125,14 +110,6 @@ Geometry::Geometry(){
     keyShape = QString("NORM");
 }
 
-void Geometry::getName(QString n){
-    name = n;
-}
-
-void Geometry::getDescription(QString n){
-    description = n;
-}
-
 void Geometry::getWidth(double a){
     width = a;
 }
@@ -142,7 +119,7 @@ void Geometry::getHeight(double a){
 }
 
 void Geometry::getShapeName(QString n){
-    shapes[shape_count].setShape(n);
+    shapes[shape_count].sname = n;
 }
 
 void Geometry::getShapeCord(double a, double b){
