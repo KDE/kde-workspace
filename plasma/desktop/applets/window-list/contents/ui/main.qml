@@ -164,7 +164,7 @@ Item {
                 onEntered: {
                     print(action_task_1.marginHints.top);
                   //  action_tasks_1.marginHints.left:40
-                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-action_task_1.marginHints.right
+                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-1.5*action_task_1.marginHints.left+action_task_1.marginHints.top
                 }
             }
         }
@@ -190,7 +190,7 @@ Item {
                     performOperation("cascade");
                 }
                 onEntered: {
-                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-action_task_1.marginHints.top
+                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y+action_task_1.marginHints.top-1.5*action_task_1.marginHints.left
                 }
             }
         }
