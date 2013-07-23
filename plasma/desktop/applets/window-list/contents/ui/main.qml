@@ -33,7 +33,7 @@ Item {
         hover:menu.focus
         width: windowListMenu.width
         x:0
-        y:0
+        y:action_task_1.marginHints.top
         height:30
         visible:true
         opacity:1
@@ -162,9 +162,8 @@ Item {
                     performOperation("unclutter");
                 }
                 onEntered: {
-                    print(action_task_1.marginHints.top);
-                  //  action_tasks_1.marginHints.left:40
-                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-1.5*action_task_1.marginHints.left+action_task_1.marginHints.top
+                    print(action_task_1.marginHints.bottom);
+                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)
                 }
             }
         }
@@ -190,7 +189,7 @@ Item {
                     performOperation("cascade");
                 }
                 onEntered: {
-                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y+action_task_1.marginHints.top-1.5*action_task_1.marginHints.left
+                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)
                 }
             }
         }

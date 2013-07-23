@@ -38,7 +38,7 @@ Item {
     Item {
         id: row
         width: parent.width
-        height: Math.max(iconItem.height, label.height )+6
+        height: Math.max(iconItem.height, label.height )+action_task_1.marginHints.top
         anchors.top:col.bottom
         PlasmaComponents.Highlight {
             hover:menu.focus
@@ -51,7 +51,6 @@ Item {
             id: iconItem
             anchors.leftMargin:10
             anchors.left:action_task_1.left
-            anchors.verticalCenter:action_task_1.verticalCenter
             width: menuItem.iconSize
             height: menuItem.iconSize
         }
@@ -61,7 +60,6 @@ Item {
             font.italic: (minimized == true) ? true : false
             anchors.left: iconItem.right
             anchors.leftMargin:iconItem.width
-            anchors.verticalCenter: action_task_1.verticalCenter
         }
     }
     MouseArea {
@@ -72,7 +70,9 @@ Item {
             menuItem.clicked();
         }
         onEntered:{
-            action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-1.5*action_task_1.marginHints.left+action_task_1.marginHints.top
+            print("pppppppp");
+            print(action_task_1.marginHints.bottom-action_task_1.marginHints.top);
+            action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)//-action_task_1.marginHints.bottom
             menuItem.entered();
         }
     }
