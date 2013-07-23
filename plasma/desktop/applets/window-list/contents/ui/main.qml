@@ -161,7 +161,7 @@ Item {
                 }
                 onEntered: {
                     print(action_task_1.marginHints.bottom);
-                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)
+                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y - action_task_1.marginHints.top
                 }
                 onExited: {
                     highlight=false
@@ -190,7 +190,7 @@ Item {
                     performOperation("cascade");
                 }
                 onEntered: {
-                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)
+                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y- action_task_1.marginHints.top
                 }
                 onExited: {
                     highlight=false

@@ -35,7 +35,6 @@ Item {
     property int iconSize: theme.smallIconSize
     property bool showDesktop: true
     property variant desktopItems: []
-   // property alias highlight:highlight
     
     PlasmaComponents.Highlight {
         hover:menu.focus
@@ -73,7 +72,6 @@ Item {
             action_task_1.height = menuItem.height
             menuItem.entered();
             highlight=true
-            print(highlight);
         }
         onExited: {
             highlight=false
