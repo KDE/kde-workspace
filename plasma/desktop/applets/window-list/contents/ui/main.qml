@@ -28,22 +28,17 @@ Item {
     property int defaultMargin:0
     property int topMargin:60
     property bool showDesktop: true
+
     PlasmaComponents.Highlight {
-        id:action_task_1
-        hover:menu.focus
+        id: action_task_1
+        hover: true
         width: windowListMenu.width
-        x:0
-        y:action_task_1.marginHints.top
-        height:30
-        visible:true
-        opacity:1
-        PlasmaCore.FrameSvgItem {
-            id:b1
-            width: windowListMenu.width
-            height:30
-            imagePath:"widgets/viewitem"
-            prefix:"selected+hover"
-        }
+        x: 0
+        y: action_task_1.marginHints.top
+        height: 30
+        visible: true
+        opacity: 1
+
         Behavior on y {
             NumberAnimation {
                 duration: 250
@@ -51,6 +46,8 @@ Item {
             }
         }
     }
+
+    
     function performOperation(op) {
         var service =tasksSource.serviceForSource("");
         var operation = service.operationDescription(op);
