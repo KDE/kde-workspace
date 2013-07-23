@@ -71,8 +71,8 @@ Item {
         onClicked: {
             menuItem.clicked();
         }
-        onEntered:{ 
-            action_task_1.y = menuItem.y+58
+        onEntered:{
+            action_task_1.y=mapToItem(main,mouse.x,mouse.y).y
             menuItem.entered();
         }
     }
