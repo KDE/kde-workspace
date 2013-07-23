@@ -28,6 +28,7 @@ Item {
     property int defaultMargin:0
     property int topMargin:60
     property bool showDesktop: true
+    property bool highlight:false
 
     PlasmaComponents.Highlight {
         id: action_task_1
@@ -36,8 +37,8 @@ Item {
         x: 0
         y: action_task_1.marginHints.top
         height: 30
-        visible: true
-        opacity: 1
+        visible: mouse.containsMouse||mouseArea.containsMouse||highlight
+        opacity: mouse.containsMouse||mouseArea.containsMouse||highlight
 
         Behavior on y {
             NumberAnimation {
@@ -162,6 +163,9 @@ Item {
                     print(action_task_1.marginHints.bottom);
                     action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)
                 }
+                onExited: {
+                    highlight=false
+                }
             }
         }
         Rectangle {
@@ -187,6 +191,9 @@ Item {
                 }
                 onEntered: {
                         action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)
+                }
+                onExited: {
+                    highlight=false
                 }
             }
         }
