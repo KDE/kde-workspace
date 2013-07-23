@@ -162,7 +162,7 @@ Item {
                     performOperation("unclutter");
                 }
                 onEntered: {
-                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y
+                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2
                 }
             }
         }
@@ -188,8 +188,7 @@ Item {
                     performOperation("cascade");
                 }
                 onEntered: {
-                      print(mapToItem(main,mouse.x,mouse.y).y);
-                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y
+                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2
                 }
             }
         }
