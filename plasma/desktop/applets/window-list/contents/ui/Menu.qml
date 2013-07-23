@@ -50,7 +50,6 @@ Item {
             }
         }
     }
-
     ListView {
         id: menuListView
         width: menu.width
@@ -77,9 +76,6 @@ Item {
             onEntered: menuListView.currentIndex = index; 
             onExecuteJob: menu.executeJob(jobName, source);
             onSetOnDesktop: menu.setOnDesktop(source, desktop);
-        }
-        Behavior on y {
-            NumberAnimation { duration: 300; easing.type: Easing.Linear }
         }
     }
 }

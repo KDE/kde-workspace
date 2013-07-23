@@ -41,43 +41,6 @@ Item {
         height: Math.max(iconItem.height, label.height )+6
         anchors.top:col.bottom
         PlasmaComponents.Highlight {
-            id:action_task
-            hover:menu.focus
-            width: windowListMenu.width
-            height:30
-            visible:true
-            opacity:root_item.containsMouse
-            PlasmaCore.FrameSvgItem {
-                id:b
-                width: windowListMenu.width
-                height:30
-                imagePath:"widgets/viewitem"
-                prefix:"selected+hover"
-            }
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 0
-                    easing: Easing.InOutQuad
-                }
-            }
-            Behavior on y { 
-                SmoothedAnimation { 
-                    velocity: 250
-                } 
-            }
-            Behavior on y {
-                NumberAnimation {
-                    duration: 250
-                    easing: Easing.InOutQuad
-                }
-            }
-            Behavior on height {
-                SmoothedAnimation { 
-                    duration: 250
-                }
-            }
-        }
-        PlasmaComponents.Highlight {
             hover:menu.focus
             width: windowListMenu.width
             height:30
@@ -87,8 +50,8 @@ Item {
         QIconItem {
             id: iconItem
             anchors.leftMargin:10
-            anchors.left:action_task.left
-            anchors.verticalCenter:action_task.verticalCenter
+            anchors.left:action_task_1.left
+            anchors.verticalCenter:action_task_1.verticalCenter
             width: menuItem.iconSize
             height: menuItem.iconSize
         }
@@ -98,7 +61,7 @@ Item {
             font.italic: (minimized == true) ? true : false
             anchors.left: iconItem.right
             anchors.leftMargin:iconItem.width
-            anchors.verticalCenter: iconItem.verticalCenter
+            anchors.verticalCenter: action_task_1.verticalCenter
         }
     }
     MouseArea {
@@ -107,10 +70,9 @@ Item {
         hoverEnabled: true
         onClicked: {
             menuItem.clicked();
-            action_task.y = root_item.y
         }
         onEntered:{ 
-            action_task.y = root_item.y
+            action_task_1.y = menuItem.y+58
             menuItem.entered();
         }
     }

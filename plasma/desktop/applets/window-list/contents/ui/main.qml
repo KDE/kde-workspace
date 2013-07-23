@@ -28,7 +28,29 @@ Item {
     property int defaultMargin:0
     property int topMargin:60
     property bool showDesktop: true
-    
+    PlasmaComponents.Highlight {
+        id:action_task_1
+        hover:menu.focus
+        width: windowListMenu.width
+        x:0
+        y:0
+        height:30
+        visible:true
+        opacity:1
+        PlasmaCore.FrameSvgItem {
+            id:b1
+            width: windowListMenu.width
+            height:30
+            imagePath:"widgets/viewitem"
+            prefix:"selected+hover"
+        }
+        Behavior on y {
+            NumberAnimation {
+                duration: 250
+                easing: Easing.InOutQuad
+            }
+        }
+    }
     function performOperation(op) {
         var service =tasksSource.serviceForSource("");
         var operation = service.operationDescription(op);
@@ -123,48 +145,13 @@ Item {
             width: windowListMenu.width
             height:30
             color:"transparent"
-            PlasmaComponents.Highlight {
-                hover:menu.focus
-                width: windowListMenu.width
-                height:30
-                id: action_2
-                opacity:mouse.containsMouse
-                PlasmaCore.FrameSvgItem {
-                    width: windowListMenu.width
-                    height:30
-                    imagePath:"widgets/viewitem"
-                    prefix:"selected+hover"
-                }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 0
-                        easing: Easing.InOutQuad
-                    }
-                }
-                Behavior on y { 
-                    SmoothedAnimation { 
-                        velocity: 250
-                    }
-                }
-                Behavior on y {
-                    NumberAnimation {
-                        duration: 250
-                        easing: Easing.InOutQuad
-                    }
-                }
-                Behavior on height {
-                    SmoothedAnimation { 
-                        duration: 250
-                    }
-                }
-            }
             PlasmaComponents.Label {
                 id:unclutter
                 text:"Unclutter Windows"
                 anchors {
                     leftMargin:10
                     left:action1.left
-                    verticalCenter:action_2.verticalCenter
+                    verticalCenter:action_task_1.verticalCenter
                 }
             }
             MouseArea {
@@ -174,6 +161,9 @@ Item {
                 onClicked: {
                     performOperation("unclutter");
                 }
+                onEntered: {
+                    action_task_1.y=action1.y
+                }
             }
         }
         Rectangle {
@@ -181,48 +171,13 @@ Item {
             width: windowListMenu.width
             height:30
             color:"transparent"
-            PlasmaComponents.Highlight {
-                hover:menu.focus
-                width: windowListMenu.width
-                height:30
-                id:action_1
-                opacity:mouseArea.containsMouse
-                PlasmaCore.FrameSvgItem {
-                    width: windowListMenu.width
-                    height:30
-                    imagePath:"widgets/viewitem"
-                    prefix:"selected+hover"
-                }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 0
-                        easing: Easing.InOutQuad
-                    }
-                }
-                Behavior on y { 
-                    SmoothedAnimation { 
-                        velocity: 250
-                    }
-                }
-                Behavior on y {
-                    NumberAnimation {
-                        duration: 250
-                        easing: Easing.InOutQuad
-                    }
-                }
-                Behavior on height {
-                    SmoothedAnimation { 
-                        duration: 250
-                    }
-                }
-            }
             PlasmaComponents.Label {
                 id:cascade
                 text:"Cascade Windows"
                 anchors {
                     left:parent.left
                     leftMargin:10
-                    verticalCenter:action_1.verticalCenter
+                    verticalCenter:action_task_1.verticalCenter
                 }
             }
             MouseArea {
@@ -231,6 +186,9 @@ Item {
                 anchors.fill:parent
                 onClicked: { 
                     performOperation("cascade");
+                }
+                onEntered: {
+                    action_task_1.y=rect_1.y
                 }
             }
         }
