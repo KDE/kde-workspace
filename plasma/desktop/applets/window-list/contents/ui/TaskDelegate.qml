@@ -72,7 +72,7 @@ Item {
             menuItem.clicked();
         }
         onEntered:{
-            action_task_1.y=mapToItem(main,mouse.x,mouse.y).y/1.015
+            action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-action_task_1.marginHints.right
             menuItem.entered();
         }
     }
