@@ -7,11 +7,7 @@
 #include <QFileDialog>
 #include <QFile>
 
-#include <QtGui/QX11Info>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/XKBlib.h>
-#include <X11/extensions/XKBrules.h>
+
 #include <fixx11h.h>
 #include <config-workspace.h>
 
