@@ -21,7 +21,8 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 
 Item {
     id: menuItem
-    height: row.height
+    width: parent.width
+    height: Math.max(iconItem.height, label.height )+action_task_1.marginHints.top
     anchors.top:col.bottom
     signal clicked()
     signal entered()
@@ -35,33 +36,30 @@ Item {
     property bool showDesktop: true
     property variant desktopItems: []
     
-    Item {
-        id: row
-        width: parent.width
-        height: Math.max(iconItem.height, label.height )+action_task_1.marginHints.top
-        anchors.top:col.bottom
-        PlasmaComponents.Highlight {
-            hover:menu.focus
-            width: windowListMenu.width
-            height:30
-            visible:true
-            opacity:menuItem.active?1:0
-        }
-        QIconItem {
-            id: iconItem
-            anchors.leftMargin:10
-            anchors.left:action_task_1.left
-            width: menuItem.iconSize
-            height: menuItem.iconSize
-        }
-        PlasmaComponents.Label {
-            id: label
-            clip:true
-            font.italic: (minimized == true) ? true : false
-            anchors.left: iconItem.right
-            anchors.leftMargin:iconItem.width
-        }
+    PlasmaComponents.Highlight {
+        hover:menu.focus
+        width: windowListMenu.width
+        height:30
+        visible:true
+        opacity:menuItem.active?1:0
     }
+    
+    QIconItem {
+        id: iconItem
+        anchors.leftMargin: action_task_1.marginHints.bottom
+        anchors.left:action_task_1.left
+        width: menuItem.iconSize
+        height: menuItem.iconSize
+    }
+    
+    PlasmaComponents.Label {
+        id: label
+        clip:true
+        font.italic: (minimized == true) ? true : false
+        anchors.left: iconItem.right
+        anchors.leftMargin:iconItem.width
+    }
+    
     MouseArea {
         id:root_item
         anchors.fill: parent
@@ -70,10 +68,9 @@ Item {
             menuItem.clicked();
         }
         onEntered:{
-            print("pppppppp");
-            print(action_task_1.marginHints.bottom-action_task_1.marginHints.top);
-            action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)//-action_task_1.marginHints.bottom
+            action_task_1.y=mapToItem(main,mouse.x,mouse.y).y-2*(action_task_1.marginHints.bottom-action_task_1.marginHints.top)
             menuItem.entered();
         }
     }
 }
+
