@@ -7,6 +7,7 @@ Item {
     width: parent.width
     height: parent.height
     property string date ;
+    property int monthNo;
      
     function isToday(date) {
         if(date==Qt.formatDateTime(new Date(), "dd/M/yyyy")) 
@@ -14,20 +15,19 @@ Item {
         else return false;
     }
     function isTodayMonth() {
-        return Qt.formatDateTime(new Date(), "M")
-    }
-    CalendarData {
-        id: calendar
-        startDate: "2013-01-01"
-        endDate: "2014-12-31"
-        types: Calendar.Event | Calendar.Todo
+        return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
     Calendar {
         id: monthComponent
         days: 7
         weeks: 5
         startDay:1
-        startDate: "2013-01-01"
+        startDate: "2013-07-01"
+        onStartDateChanged: {
+            console.log("-->start date changed ")
+            month.text=monthName
+            year.text=year
+        }
     }
     Row {
         anchors {
@@ -81,73 +81,73 @@ Item {
                                 Components.MenuItem {
                                     text:"January"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(1)
+                                        monthComponent.startDate="2013-01-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"February"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(2)
+                                        monthComponent.startDate="2013-02-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"March"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(3)
+                                        monthComponent.startDate="2013-03-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"April"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(4)
+                                        monthComponent.startDate="2013-04-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"May"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(5)
+                                        monthComponent.startDate="2013-05-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"June"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(6)
+                                        monthComponent.startDate="2013-06-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"July"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(7)
+                                        monthComponent.startDate="2013-07-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"August"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(8)
+                                        monthComponent.startDate="2013-08-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"September" 
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(9)
+                                        monthComponent.startDate="2013-09-01"
                                     } 
                                 }
                                 Components.MenuItem {
                                     text:"October"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(10)
+                                        monthComponent.startDate="2013-10-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"November"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(11)
+                                        monthComponent.startDate="2013-11-01"
                                     }
                                 }
                                 Components.MenuItem {
                                     text:"December"
                                     onClicked: {
-                                        mouse.onClicked= monthComponent.monthChanged(12)
+                                        monthComponent.startDate="2013-12-01"
                                     }
                                 }
                             }
@@ -265,11 +265,11 @@ Item {
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
                         focus:true
-                        model: monthComponent.daysModel
+                        model: monthComponent.model
                         delegate: Rectangle {
                             width: gv.cellWidth
                             height: gv.cellHeight
-                            color: (containsEventItems) ? "purple" : "transparent"
+                            color: "transparent"
                             Rectangle {
                                 id:outer
                                 width: gv.cellWidth-5
@@ -280,7 +280,7 @@ Item {
                                     width: gv.cellWidth
                                     height: gv.cellHeight
                                     color:"transparent"
-                                    opacity:isToday(label.text+"/"+monthComponent.month()+"/"+monthComponent.year)?true:false;                                   anchors.fill:parent
+                                    opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?true:false;                                   anchors.fill:parent
                                     border.color:"blue"
                                 }
                                 Components.Label {
@@ -294,9 +294,9 @@ Item {
                                     id:dateMouse
                                     anchors.fill:parent
                                     hoverEnabled:true
-                                    onClicked:{//tests here ----> 
-                                        //   label.color="red"; 
-                                        date=dayNumber+"/"+monthComponent.month()+"/"+monthComponent.year
+                                    onClicked:{
+                                        monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);                                         console.log("Month name/number: " + monthComponent.startDate.getMonth());
+                                        date=dayNumber+"/"+monthNumber+"/"+yearNumber
                                     }
                                 }
                             }
@@ -328,7 +328,8 @@ Item {
                             hoverEnabled:true
                             anchors.fill: parent
                             onClicked: {
-                                monthComponent.monthChanged(isTodayMonth());
+                                monthComponent.startDate=isTodayMonth();
+                              //  monthComponent.monthChanged(isTodayMonth());
                             }
                             PlasmaCore.ToolTip {
                                 id: tool
@@ -362,41 +363,44 @@ Item {
             ListView {
                 id:list
                 height: parent.height
-                width: parent.width / 4
-                model: calendar.model
+                width: (parent.width / 4)-(scrollBar.visible ? scrollBar.width : 0)
+                model:monthComponent.selectedDayModel
                 delegate: Rectangle {
-                    width: parent.width/1.009
-                    height: 25
+                    width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
+                    height: 40
                     color: "transparent"
                     Column {
-                        anchors.fill: parent
+                        spacing:0
                         Components.Label {
                             text: summary
-                            font.bold: true
-                            font.pointSize:rect1.width/30
                         }
                         Components.Label {
+                            id:desc
                             text: description
-                            font.pointSize:rect1.width/30
                         }
                     }
-                }
-                anchors {
-                    fill:parent
                 }
                 section.property: "mimeType"
                 section.delegate: Rectangle {
                     id:sect
-                    width: parent.width/1.009
+                    width: (parent.width/1.009)-(scrollBar.visible ? scrollBar.width : 0)
                     height: 20
-                    color: "grey"
+                    color: "transparent"
                     Components.Label {
                         id:sec_l
                         text: section
-                        font.pointSize:rect1.width/30
+                        font.weight:Font.Bold
                         anchors.verticalCenter: sect.verticalCenter
                     }
                 }
+            }
+            Components.ScrollBar {
+                id: scrollBar
+                orientation: Qt.Vertical
+                flickableItem:list
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
             }
         }
     }
