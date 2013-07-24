@@ -37,8 +37,8 @@ Item {
         x: 0
         y: highlightItem.marginHints.top
         height: 30
-        visible: mouse.containsMouse||mouseArea.containsMouse||highlight
-        opacity: 1
+        visible: true
+        opacity: mouse.containsMouse||mouseArea.containsMouse||highlight?1:0
 
         Behavior on y {
             NumberAnimation {
