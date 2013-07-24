@@ -39,7 +39,12 @@ Item {
         height: 30
         visible: true
         opacity: mouse.containsMouse||mouseArea.containsMouse||highlight?1:0
-
+        Behavior on opacity {
+            NumberAnimation {
+                duration:250
+                easing:Easing.InOutQuad
+            }
+        }
         Behavior on y {
             NumberAnimation {
                 duration: 250
