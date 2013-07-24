@@ -7,7 +7,8 @@ Item {
     width: parent.width
     height: parent.height
     property string date ;
-    property int monthNo;
+    property bool flag:false
+    property int week;
      
     function isToday(date) {
         if(date==Qt.formatDateTime(new Date(), "dd/M/yyyy")) 
@@ -20,7 +21,7 @@ Item {
     Calendar {
         id: monthComponent
         days: 7
-        weeks: 5
+        weeks: 6
         startDay:1
         startDate: "2013-07-01"
         onStartDateChanged: {
@@ -58,7 +59,7 @@ Item {
                         id:monthright
                         anchors.left: col.left
                         onClicked: {
-                            monthComponent.previous()
+                            monthComponent.previousMonth()
                         }
                     }
                     Components.ToolButton {
@@ -198,7 +199,7 @@ Item {
                             id:mouse
                             anchors.fill: parent
                             onClicked: {
-                                monthComponent.next()
+                                monthComponent.nextMonth()
                             }
                         }
                     }
@@ -248,20 +249,33 @@ Item {
                     }
                 }
             }
-            Rectangle {
+            Row {
                 id:grid
                 width:rect1.width
                 height:parent.height-rect1.height-riw.height
-                color: "transparent"
+                ListView {
+                    width: 20
+                    height: parent.height
+                    model: monthComponent.weeksModel
+                    delegate: Rectangle {
+                        width: parent.width
+                        height: grid.height / monthComponent.weeks
+                        color: "transparent"
+                        Components.Label {
+                            id:weekNumber
+                            anchors.centerIn: parent
+                            text: modelData
+                            opacity:0.5
+                        }
+                    }
+                }
+
                     GridView {
                         id: gv
                         width: parent.width
                         height: parent.height
-                        cellWidth: (grid.width )/ monthComponent.days
+                        cellWidth: (grid.width -20)/ monthComponent.days
                         cellHeight: (grid.height) / monthComponent.weeks
-                        anchors {
-                            fill:parent
-                        }
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
                         focus:true
@@ -295,7 +309,8 @@ Item {
                                     anchors.fill:parent
                                     hoverEnabled:true
                                     onClicked:{
-                                        monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);                                         console.log("Month name/number: " + monthComponent.startDate.getMonth());
+                                        var rowNumber = Math.floor(index / 7)  ;                                         week=monthComponent.weeksModel[rowNumber];
+                                        monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);
                                         date=dayNumber+"/"+monthNumber+"/"+yearNumber
                                     }
                                 }
@@ -329,7 +344,6 @@ Item {
                             anchors.fill: parent
                             onClicked: {
                                 monthComponent.startDate=isTodayMonth();
-                              //  monthComponent.monthChanged(isTodayMonth());
                             }
                             PlasmaCore.ToolTip {
                                 id: tool
@@ -345,7 +359,7 @@ Item {
                     }
                     Components.TextField {
                         id:weekField
-                        text:monthComponent.weekNumber(date);
+                        text:week
                         width:rect1.width/3
                     }
                 }
