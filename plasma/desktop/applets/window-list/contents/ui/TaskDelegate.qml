@@ -57,6 +57,8 @@ Item {
         font.italic: (minimized == true) ? true : false
         anchors.left: iconItem.right
         anchors.leftMargin: highlightItem.marginHints.left
+        elide:Text.ElideLeft
+        width:parent.width
     }
     
     MouseArea {
