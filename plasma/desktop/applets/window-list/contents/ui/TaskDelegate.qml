@@ -22,7 +22,7 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 Item {
     id: menuItem
     width: parent.width
-    height: Math.max(iconItem.height, label.height) + action_task_1.marginHints.top + action_task_1.marginHints.bottom
+    height: Math.max(iconItem.height, label.height) + highlightItem.marginHints.top + highlightItem.marginHints.bottom
     anchors.top:col.bottom
     signal clicked()
     signal entered()
@@ -46,7 +46,7 @@ Item {
     
     QIconItem {
         id: iconItem
-        x: action_task_1.marginHints.left
+        x: highlightItem.marginHints.left
         width: menuItem.iconSize
         height: menuItem.iconSize
     }
@@ -56,7 +56,7 @@ Item {
         clip:true
         font.italic: (minimized == true) ? true : false
         anchors.left: iconItem.right
-        anchors.leftMargin: action_task_1.marginHints.left
+        anchors.leftMargin: highlightItem.marginHints.left
     }
     
     MouseArea {
@@ -67,9 +67,9 @@ Item {
             menuItem.clicked();
         }
         onEntered:{
-            action_task_1.y = mapToItem(main,mouse.x,mouse.y).y - action_task_1.marginHints.top
-            action_task_1.width = menuItem.width
-            action_task_1.height = menuItem.height
+            highlightItem.y = mapToItem(main,mouse.x,mouse.y).y - highlightItem.marginHints.top
+            highlightItem.width = menuItem.width
+            highlightItem.height = menuItem.height
             menuItem.entered();
             highlight=true
         }

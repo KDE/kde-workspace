@@ -31,14 +31,14 @@ Item {
     property bool highlight:false
 
     PlasmaComponents.Highlight {
-        id: action_task_1
+        id: highlightItem
         hover: true
         width: windowListMenu.width
         x: 0
-        y: action_task_1.marginHints.top
+        y: highlightItem.marginHints.top
         height: 30
         visible: mouse.containsMouse||mouseArea.containsMouse||highlight
-        opacity: mouse.containsMouse||mouseArea.containsMouse||highlight
+        opacity: 1
 
         Behavior on y {
             NumberAnimation {
@@ -149,7 +149,6 @@ Item {
                 anchors {
                     leftMargin:10
                     left:action1.left
-                    verticalCenter:action_task_1.verticalCenter
                 }
             }
             MouseArea {
@@ -160,8 +159,7 @@ Item {
                     performOperation("unclutter");
                 }
                 onEntered: {
-                    print(action_task_1.marginHints.bottom);
-                    action_task_1.y=mapToItem(main,mouse.x,mouse.y).y - action_task_1.marginHints.top
+                    highlightItem.y=mapToItem(main,mouse.x,mouse.y).y - highlightItem.marginHints.top
                 }
                 onExited: {
                     highlight=false
@@ -179,7 +177,7 @@ Item {
                 anchors {
                     left:parent.left
                     leftMargin:10
-                    verticalCenter:action_task_1.verticalCenter
+                    verticalCenter:highlightItem.verticalCenter
                 }
             }
             MouseArea {
@@ -190,7 +188,7 @@ Item {
                     performOperation("cascade");
                 }
                 onEntered: {
-                        action_task_1.y=mapToItem(main,mouse.x,mouse.y).y- action_task_1.marginHints.top
+                        highlightItem.y=mapToItem(main,mouse.x,mouse.y).y- highlightItem.marginHints.top
                 }
                 onExited: {
                     highlight=false
