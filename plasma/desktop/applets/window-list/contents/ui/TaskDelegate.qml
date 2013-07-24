@@ -57,8 +57,10 @@ Item {
         font.italic: (minimized == true) ? true : false
         anchors.left: iconItem.right
         anchors.leftMargin: highlightItem.marginHints.left
-        elide:Text.ElideLeft
-        width:parent.width
+        elide:Text.ElideRight
+        wrapMode:Text.Wrap
+        width:menuItem.width
+        maximumLineCount:1
     }
     
     MouseArea {
