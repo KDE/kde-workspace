@@ -17,9 +17,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 find_package(ECM 0.0.8 REQUIRED NO_MODULE)
 
 include(CMakePackageConfigHelpers)
+include(FeatureSummary)
+include(WriteBasicConfigVersionFile)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
+
+include(ECMOptionalAddSubdirectory)
 
 find_package(Qt5Core REQUIRED NO_MODULE)
 find_package(Qt5DBus REQUIRED NO_MODULE)
@@ -37,9 +41,9 @@ find_package(kdeqt5staging REQUIRED NO_MODULE)
 find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
     KConfig KAuth KJS KWallet KDBusAddons Sonnet
-    KI18n KGuiAddons KService KWidgets ItemViews KNotifications KIconThemes KCompletion KJobWidgets KConfigWidgets KTextWidgets XmlGui KCrash)
+    KI18n KGuiAddons KService KWidgets ItemViews KNotifications KIconThemes KCompletion KJobWidgets KConfigWidgets KTextWidgets XmlGui KCrash
+    KIO KUnitConversion KDE4Attic)
 
-find_package(KIO REQUIRED NO_MODULE)
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(kdeclarative REQUIRED NO_MODULE)
 
@@ -257,7 +261,7 @@ endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 # # core apps
 if(NOT WIN32)
 #    macro_optional_add_subdirectory( kcheckpass )
-   macro_optional_add_subdirectory( kwin )
+   ecm_optional_add_subdirectory( kwin )
 #    macro_optional_add_subdirectory( ksmserver )
 #
    find_package(JPEG REQUIRED)
@@ -309,9 +313,9 @@ if(NOT WIN32)
 #     macro_optional_add_subdirectory(cursors)
 endif(NOT WIN32)
 #
-macro_optional_add_subdirectory(plasma)
+ecm_optional_add_subdirectory(plasma)
 # macro_optional_add_subdirectory(statusnotifierwatcher)
-macro_optional_add_subdirectory(kstyles)
+ecm_optional_add_subdirectory(kstyles)
 #
 # ########### install files ###############
 if(NOT WIN32)
@@ -373,8 +377,8 @@ set(KDE4WORKSPACE_TARGET_PREFIX KDE4Workspace__)
 configure_file(KDE4WorkspaceConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfig.cmake" @ONLY)
 
 # this file will be installed too and will be used by cmake when searching for the Config.cmake file to check the version of kdepimlibs, Alex
-macro_write_basic_cmake_version_file(${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake
-                                     ${KDE4WORKSPACE_VERSION_MAJOR} ${KDE4WORKSPACE_VERSION_MINOR} ${KDE4WORKSPACE_VERSION_PATCH})
+write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake VERSION
+                                     ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} COMPATIBILITY AnyNewerVersion)
 
 set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/KDE4Workspace/cmake)
 
