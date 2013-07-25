@@ -31,6 +31,9 @@ Item {
 
     property bool show_remaining_time: false
 
+    LayoutMirroring.enabled: true
+    LayoutMirroring.childrenInherit: true
+
     Component.onCompleted: {
         plasmoid.aspectRatioMode = IgnoreAspectRatio
         updateLogic(true);
