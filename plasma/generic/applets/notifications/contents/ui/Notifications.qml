@@ -93,6 +93,12 @@ Column {
       service.startOperationCall(op)
     }
 
+    function closeNotification(source) {
+      var service = notificationsSource.serviceForSource(source)
+      var op = service.operationDescription("userClosed")
+      service.startOperationCall(op)
+    }
+
     property QtObject lastNotificationPopup
     Component {
         id: lastNotificationPopupComponent

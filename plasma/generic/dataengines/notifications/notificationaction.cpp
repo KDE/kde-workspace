@@ -50,7 +50,8 @@ void NotificationAction::start()
         //kDebug() << "invoking action on " << id;
         emit m_engine->ActionInvoked(id, parameters()["actionId"].toString());
     } else if (operationName() == "userClosed") {
-        m_engine->userClosedNotification(id);
+        //userClosedNotification deletes the job, so we have to invoke it queued, in this case emitResult() can be called
+        m_engine->metaObject()->invokeMethod(m_engine, "userClosedNotification", Qt::QueuedConnection, Q_ARG(uint, id));
     } else if (operationName() == "createNotification") {
         int rv = m_engine->createNotification(parameters().value("appName").toString(),
                                               parameters().value("appIcon").toString(),
