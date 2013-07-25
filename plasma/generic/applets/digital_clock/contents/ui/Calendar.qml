@@ -2,6 +2,7 @@ import QtQuick 1.1
 import org.kde.pim.calendar 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
+import org.kde.plasma.extras 0.1 as PlasmaExtras
 Item {
     id:root
     width: parent.width
@@ -25,7 +26,6 @@ Item {
         startDay:1
         startDate: "2013-07-01"
         onStartDateChanged: {
-            console.log("-->start date changed ")
             month.text=monthName
             year.text=year
         }
@@ -254,7 +254,7 @@ Item {
                 width:rect1.width
                 height:parent.height-rect1.height-riw.height
                 ListView {
-                    width: 20
+                    width: 40
                     height: parent.height
                     model: monthComponent.weeksModel
                     delegate: Rectangle {
@@ -269,13 +269,15 @@ Item {
                         }
                     }
                 }
-
+PlasmaExtras.ScrollArea {
+    anchors.fill:parent
                     GridView {
                         id: gv
                         width: parent.width
                         height: parent.height
-                        cellWidth: (grid.width -20)/ monthComponent.days
+                        cellWidth: (grid.width -40)/ monthComponent.days
                         cellHeight: (grid.height) / monthComponent.weeks
+                        
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
                         focus:true
@@ -301,7 +303,7 @@ Item {
                                     id:label
                                     anchors.centerIn: parent
                                     text: dayNumber
-                                    font.bold:(containsEventItems) ? true:false
+                                    font.bold:(containsEventItems)||containsTodoItems ? true:false
                                     opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
                                 }
                                 MouseArea {
@@ -312,11 +314,13 @@ Item {
                                         var rowNumber = Math.floor(index / 7)  ;                                         week=monthComponent.weeksModel[rowNumber];
                                         monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);
                                         date=dayNumber+"/"+monthNumber+"/"+yearNumber
+                                        print(containsTodoItems);
                                     }
                                 }
                             }
                         }
                     }
+            }
             }
             Rectangle {
                 id:test
@@ -394,10 +398,10 @@ Item {
                         }
                     }
                 }
-                section.property: "mimeType"
+                section.property: "startDate"
                 section.delegate: Rectangle {
                     id:sect
-                    width: (parent.width/1.009)-(scrollBar.visible ? scrollBar.width : 0)
+                    width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
                     height: 20
                     color: "transparent"
                     Components.Label {
