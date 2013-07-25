@@ -130,6 +130,7 @@ PlasmaComponents.ListItem {
                         if (notificationsModel.count > 1) {
                             removeAnimation.running = true
                         } else {
+                            closeNotification(model.source)
                             notificationsModel.remove(index)
                         }
                     }
