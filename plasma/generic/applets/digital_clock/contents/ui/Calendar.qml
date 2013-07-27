@@ -8,7 +8,7 @@ Item {
     width: parent.width
     height: parent.height
     property string date ;
-    property bool flag:false
+    property string date1;
     property int week;
      
     function isToday(date) {
@@ -16,9 +16,11 @@ Item {
             return true ;
         else return false;
     }
+    
     function isTodayMonth() {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
+    
     Calendar {
         id: monthComponent
         days: 7
@@ -30,13 +32,14 @@ Item {
             year.text=year
         }
     }
+    
     Row {
         anchors {
             fill:root
         }
         Column {
             id:col
-            height: rect.height
+            height: parent.height
             width: parent.width / 2
             anchors {
                 top:parent.top
@@ -44,13 +47,17 @@ Item {
             }
             Rectangle {
                 id:rect1
-                height: parent.height/7
+                height: parent.height/10
                 width: parent.width
                 color: "transparent"
+                anchors {
+                    right:grid.right
+                }
                 Row {
-                    anchors {
-                        fill:parent
-                    }
+                    id:r1
+                   // anchors.bottom:r2.top
+                   //anchors.fill:parent
+                 //   anchors.centerIn:parent
                     Components.ToolButton {
                         flat: true;
                         text: "<";
@@ -58,6 +65,7 @@ Item {
                         height: 24;
                         id:monthright
                         anchors.left: col.left
+                       // anchors.centerIn:parent
                         onClicked: {
                             monthComponent.previousMonth()
                         }
@@ -194,7 +202,7 @@ Item {
                         height: 24;
                         anchors.left:year.right
                         anchors.leftMargin:rect1.height*2.6
-                        anchors.right: col.right
+                        anchors.right: rig.left
                         MouseArea {
                             id:mouse
                             anchors.fill: parent
@@ -203,124 +211,134 @@ Item {
                             }
                         }
                     }
-                    Row {
+                 Row {
+                        id:r2
                         anchors {
                             top:monthright.bottom
-                            left:parent.left
-                            right:rect1.right
+                            left:col.left
+                           // right:col.right
                         }
-                        spacing:gv.cellWidth/2;
+                        spacing:gv.cellWidth/2
                         Components.Label {
-                            font.pointSize:rect1.height/5
+                            font.pointSize:rect1.height/8
                             text : monthComponent.dayName(7)
-                            horizontalAlignment:Text.AlignHCenter
+                           // horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.height/5
-                            anchors.leftMargin:gv.cellWidth/2;
+                            font.pointSize:rect1.height/8
+                        //    anchors.leftMargin:gv.cellWidth/2;
                             text:monthComponent.dayName(1)
                            horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.height/5
+                            font.pointSize:rect1.height/8
                             text : monthComponent.dayName(2)
-                            horizontalAlignment:Text.AlignHCenter
+                           // horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.height/5
+                            font.pointSize:rect1.height/8
                             text : monthComponent.dayName(3)
                            horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.height/5
+                            font.pointSize:rect1.height/8
                             text : monthComponent.dayName(4)
-                           horizontalAlignment:Text.AlignHCenter
+                           //horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.height/5
+                            font.pointSize:rect1.height/8
                             text : monthComponent.dayName(5)
-                           horizontalAlignment:Text.AlignHCenter
+                         //  horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
-                            font.pointSize:rect1.height/5
+                            font.pointSize:rect1.height/8
                             text : monthComponent.dayName(6)
-                           horizontalAlignment:Text.AlignHCenter
+                         //  horizontalAlignment:Text.AlignHCenter
                         }
                     }
                 }
             }
             Row {
                 id:grid
-                width:rect1.width
+                width:col.width
                 height:parent.height-rect1.height-riw.height
+                anchors {
+                    top:rect.bottom
+                    right:rig.left
+                }
                 ListView {
-                    width: 40
+                    id:list_week
+                    width: grid.width/8
                     height: parent.height
                     model: monthComponent.weeksModel
+                   // header:listHeader
                     delegate: Rectangle {
-                        width: parent.width
-                        height: grid.height / monthComponent.weeks
+                        id:r
+                        width: grid.width/8
+                        height: gv.cellHeight//grid.height / monthComponent.weeks
                         color: "transparent"
                         Components.Label {
                             id:weekNumber
                             anchors.centerIn: parent
-                            text: modelData
+                            text: modelData + 1
                             opacity:0.5
+                        }
+                        anchors {
+                            top:header.bottom
+                            right:gv.left
                         }
                     }
                 }
-PlasmaExtras.ScrollArea {
-    anchors.fill:parent
-                    GridView {
-                        id: gv
-                        width: parent.width
-                        height: parent.height
-                        cellWidth: (grid.width -40)/ monthComponent.days
-                        cellHeight: (grid.height) / monthComponent.weeks
-                        
-                        clip: true
-                        boundsBehavior: Flickable.StopAtBounds
-                        focus:true
-                        model: monthComponent.model
-                        delegate: Rectangle {
-                            width: gv.cellWidth
-                            height: gv.cellHeight
-                            color: "transparent"
+                GridView {
+                    id: gv
+                    width: grid.width*7/8
+                    height: parent.height
+                    cellWidth:(grid.width*7/8)/monthComponent.days
+                    cellHeight: (grid.height) / monthComponent.weeks
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    interactive:false
+                    focus:true
+                    model: monthComponent.model
+                    delegate: Rectangle {
+                        width: gv.cellWidth
+                        height: gv.cellHeight
+                        color: "transparent"
+                        Rectangle {
+                            id:outer
+                            width: gv.cellWidth-5
+                            height: gv.cellHeight-5
+                            color:"transparent"
+                            border.color:(dateMouse.containsMouse)?"black":"transparent"
                             Rectangle {
-                                id:outer
-                                width: gv.cellWidth-5
-                                height: gv.cellHeight-5
+                                width: gv.cellWidth
+                                height: gv.cellHeight
                                 color:"transparent"
-                                border.color:(dateMouse.containsMouse)?"black":"transparent"
-                                Rectangle {
-                                    width: gv.cellWidth
-                                    height: gv.cellHeight
-                                    color:"transparent"
-                                    opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?true:false;                                   anchors.fill:parent
-                                    border.color:"blue"
-                                }
-                                Components.Label {
-                                    id:label
-                                    anchors.centerIn: parent
-                                    text: dayNumber
-                                    font.bold:(containsEventItems)||containsTodoItems ? true:false
-                                    opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
-                                }
-                                MouseArea {
-                                    id:dateMouse
-                                    anchors.fill:parent
-                                    hoverEnabled:true
-                                    onClicked:{
-                                        var rowNumber = Math.floor(index / 7)  ;                                         week=monthComponent.weeksModel[rowNumber];
-                                        monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);
-                                        date=dayNumber+"/"+monthNumber+"/"+yearNumber
-                                        print(containsTodoItems);
-                                    }
+                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?true:false;                                   anchors.fill:parent
+                                border.color:"blue"
+                            }
+                            Components.Label {
+                                id:label
+                                anchors.centerIn: parent
+                                text: dayNumber
+                                font.bold:(containsEventItems)||containsTodoItems ? true:false
+                                opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
+                            }
+                            MouseArea {
+                                id:dateMouse
+                                anchors.fill:parent
+                                hoverEnabled:true
+                                onClicked: {
+                                    var rowNumber = Math.floor(index / 7)   ;
+                                    week=monthComponent.weeksModel[rowNumber];
+                                    monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);
+                                    date=dayNumber+"/"+monthNumber+"/"+yearNumber
+                                    date1=yearNumber+"-"+monthNumber+"-"+dayNumber
                                 }
                             }
                         }
                     }
-            }
+                }
             }
             Rectangle {
                 id:test
@@ -369,32 +387,52 @@ PlasmaExtras.ScrollArea {
                 }
             }
         }
-        Rectangle {
+        Column {
             id:rig
             height: parent.height
-            width: parent.width / 4
-            color: "transparent"
-            anchors {
-                right:parent.right
-                left:col.right
+            width: parent.width / 2
+           // color: "transparent"
+           anchors.left:grid.right
+            Rectangle {
+                width:parent.width
+                height:50
+                color:"transparent"
+                Components.Label {
+                    id:error
+                    text: "No event for this date"
+                    visible:list.count==0
+                    font.italic:true
+                }
             }
             ListView {
                 id:list
                 height: parent.height
                 width: (parent.width / 4)-(scrollBar.visible ? scrollBar.width : 0)
-                model:monthComponent.selectedDayModel
+                model: monthComponent.selectedDayModel
+                anchors.left:grid.right
                 delegate: Rectangle {
                     width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
                     height: 40
                     color: "transparent"
                     Column {
                         spacing:0
+                        anchors {
+                            left:grid.right
+                          //  right:parent.right
+                        }
                         Components.Label {
-                            text: summary
+                            id:sum
+                            text: "Summary :"+summary
                         }
                         Components.Label {
                             id:desc
-                            text: description
+                            text: "Description :"+description
+                        }
+                        Rectangle {
+                            id:sec
+                            width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
+                            height: 20
+                            color: "transparent"
                         }
                     }
                 }
