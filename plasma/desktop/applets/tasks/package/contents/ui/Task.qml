@@ -31,8 +31,8 @@ import "../code/tools.js" as TaskTools
 DragArea {
     id: task
 
-    width:  inPopup ? groupDialog.mainItem.width : Layout.taskWidth()
-    height: inPopup ? Layout.preferredMinHeight() : Layout.taskHeight()
+    width: groupDialog.mainItem.width
+    height: Layout.preferredMinHeight()
 
     property int itemIndex: index
     property int itemId: model.Id
@@ -48,6 +48,18 @@ DragArea {
     mimeData {
         source: task
         url: model.LauncherUrl
+    }
+
+    onItemIndexChanged: {
+        if (!inPopup && !tasks.vertical && Layout.calculateStripes() > 1) {
+            var newWidth = Layout.taskWidth();
+
+            if (index == tasksModel.launcherCount) {
+                newWidth += Layout.launcherLayoutWidthDiff();
+            }
+
+            width = newWidth;
+        }
     }
 
     onDemandsAttentionChanged: {
@@ -173,7 +185,7 @@ DragArea {
             bottomMargin: taskFrame.margins.bottom
         }
 
-        visible: parent.width - anchors.leftMargin - anchors.rightMargin >= (theme.defaultFont.mSize.width * 3)
+        visible: !model.IsLauncher && (parent.width - anchors.leftMargin - anchors.rightMargin) >= (theme.defaultFont.mSize.width * 3)
 
         enabled: !model.Minimized
         backgroundPrefix: frame.prefix
@@ -189,7 +201,7 @@ DragArea {
 
             PropertyChanges {
                 target: frame
-                prefix: "normal"
+                visible: false
             }
         },
         State {
