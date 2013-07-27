@@ -36,6 +36,9 @@ DragArea {
 
     visible: false
 
+    LayoutMirroring.enabled: (Qt.application.layoutDirection == Qt.RightToLeft)
+    LayoutMirroring.childrenInherit: (Qt.application.layoutDirection == Qt.RightToLeft)
+
     property int itemIndex: index
     property int itemId: model.Id
     property bool inPopup: false

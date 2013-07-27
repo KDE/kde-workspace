@@ -22,6 +22,8 @@ import QtQuick 1.1
 Flow {
     property bool animating: false
 
+    layoutDirection: Qt.application.layoutDirection
+
     move: Transition {
         SequentialAnimation {
             PropertyAction { target: taskList; property: "animating"; value: true }
