@@ -164,5 +164,6 @@ function layout(container) {
 
         item.width = adjustedWidth;
         item.height = height;
+        item.visible = true;
     }
 }

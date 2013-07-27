@@ -107,6 +107,9 @@ PlasmaCore.Dialog {
 
     VisualDataModel {
         id: groupFilter
-        delegate: Task { inPopup: true }
+        delegate: Task {
+            visible: true
+            inPopup: true
+        }
     }
 }

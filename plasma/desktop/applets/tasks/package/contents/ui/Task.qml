@@ -34,6 +34,8 @@ DragArea {
     width: groupDialog.mainItem.width
     height: Layout.preferredMinHeight()
 
+    visible: false
+
     property int itemIndex: index
     property int itemId: model.Id
     property bool inPopup: false
