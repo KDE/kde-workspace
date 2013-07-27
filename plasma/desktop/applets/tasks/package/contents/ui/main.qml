@@ -138,6 +138,9 @@ Item {
         width: Layout.layoutWidth()
         height: Layout.layoutHeight()
 
+        onWidthChanged: Layout.layout(taskRepeater)
+        onHeightChanged: Layout.layout(taskRepeater)
+
         flow: tasks.vertical ? Flow.TopToBottom : Flow.LeftToRight
 
         onAnimatingChanged: {
@@ -146,7 +149,13 @@ Item {
             }
         }
 
-        Repeater { model: visualModel }
+        Repeater {
+            id: taskRepeater
+
+            model: visualModel
+
+            onCountChanged: Layout.layout(taskRepeater)
+        }
     }
 
     GroupDialog { id: groupDialog }

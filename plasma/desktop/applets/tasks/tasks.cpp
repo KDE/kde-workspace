@@ -397,6 +397,10 @@ void Tasks::configChanged()
                          static_cast<int>(TaskManager::GroupManager::ProgramGrouping))
         );
     if (groupingStrategy != m_groupManager->groupingStrategy()) {
+        // FIXME: Add back support for manual grouping.
+        if (groupingStrategy == TaskManager::GroupManager::ManualGrouping) {
+            groupingStrategy = TaskManager::GroupManager::ProgramGrouping;
+        }
         m_groupManager->setGroupingStrategy(groupingStrategy);
         changed = true;
     }
@@ -475,7 +479,8 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
     m_ui.fillRows->setChecked(m_declarativeWidget->rootObject()->property("forceStripes").toBool());
 
     m_ui.groupingStrategy->addItem(i18n("Do Not Group"),QVariant(TaskManager::GroupManager::NoGrouping));
-    m_ui.groupingStrategy->addItem(i18n("Manually"),QVariant(TaskManager::GroupManager::ManualGrouping));
+    // FIXME: Add back support for manual grouping.
+    // m_ui.groupingStrategy->addItem(i18n("Manually"),QVariant(TaskManager::GroupManager::ManualGrouping));
     m_ui.groupingStrategy->addItem(i18n("By Program Name"),QVariant(TaskManager::GroupManager::ProgramGrouping));
 
     connect(m_ui.groupingStrategy, SIGNAL(currentIndexChanged(int)), this, SLOT(dialogGroupingChanged(int)));
@@ -484,11 +489,13 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
         case TaskManager::GroupManager::NoGrouping:
             m_ui.groupingStrategy->setCurrentIndex(0);
             break;
+/* FIXME: Add back support for manual grouping.
         case TaskManager::GroupManager::ManualGrouping:
             m_ui.groupingStrategy->setCurrentIndex(1);
             break;
+*/
         case TaskManager::GroupManager::ProgramGrouping:
-            m_ui.groupingStrategy->setCurrentIndex(2);
+            m_ui.groupingStrategy->setCurrentIndex(1);
             break;
         default:
              m_ui.groupingStrategy->setCurrentIndex(-1);
