@@ -111,8 +111,10 @@ Item {
         hoverEnabled: true
 
         onPressAndHold: {
-            //hoverTracker.interval = 400;
-            hoverTracker.restart();
+            if (root.pressAndHoldHandle) {
+                //hoverTracker.interval = 400;
+                hoverTracker.restart();
+            }
         }
 
         onContainsMouseChanged: {

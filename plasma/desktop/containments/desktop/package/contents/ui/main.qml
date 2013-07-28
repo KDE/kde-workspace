@@ -33,7 +33,7 @@ Item {
     property bool debug: false
     property int handleDelay: 800
     property real haloOpacity: 0.5
-    property bool pressAndHoldHandle: true
+    property bool pressAndHoldHandle: false
 
     property int iconSize: 16
     property int iconWidth: iconSize
