@@ -333,7 +333,7 @@ Item {
                                 onClicked: {
                                     monthComponent.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);                                   gv.selectedItem=myRectangle
                                     var rowNumber = Math.floor(index / 7)   ;
-                                    week=monthComponent.weeksModel[rowNumber];
+                                    week=1+monthComponent.weeksModel[rowNumber];
                                     date=dayNumber+"/"+monthNumber+"/"+yearNumber
                                     date1=yearNumber+"-"+monthNumber+"-"+dayNumber
                                 }
