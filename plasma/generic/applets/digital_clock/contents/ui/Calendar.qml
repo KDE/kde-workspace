@@ -10,7 +10,7 @@ Item {
     property string date ;
     property string date1;
     property int week;
-     
+
     function isToday(date) {
         if(date==Qt.formatDateTime(new Date(), "dd/M/yyyy")) 
             return true ;
@@ -20,19 +20,20 @@ Item {
     function isTodayMonth() {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
-    
+
     Calendar {
         id: monthComponent
         days: 7
         weeks: 6
         startDay:1
+        sorting:Calendar.Ascending
         startDate: "2013-07-01"
         onStartDateChanged: {
             month.text=monthName
             year.text=year
         }
     }
-    
+
     Row {
         anchors {
             fill:root
@@ -47,6 +48,7 @@ Item {
             }
             Rectangle {
                 id:rect1
+                clip:true
                 height: parent.height/10
                 width: parent.width
                 color: "transparent"
@@ -55,17 +57,12 @@ Item {
                 }
                 Row {
                     id:r1
-                   // anchors.bottom:r2.top
-                   //anchors.fill:parent
-                 //   anchors.centerIn:parent
                     Components.ToolButton {
                         flat: true;
                         text: "<";
                         width: 24;
                         height: 24;
                         id:monthright
-                        anchors.left: col.left
-                       // anchors.centerIn:parent
                         onClicked: {
                             monthComponent.previousMonth()
                         }
@@ -201,7 +198,7 @@ Item {
                         width: 24;
                         height: 24;
                         anchors.left:year.right
-                        anchors.leftMargin:rect1.height*2.6
+                        anchors.leftMargin:rect1.height
                         anchors.right: rig.left
                         MouseArea {
                             id:mouse
@@ -211,49 +208,45 @@ Item {
                             }
                         }
                     }
-                 Row {
+                    Row {
                         id:r2
                         anchors {
                             top:monthright.bottom
-                            left:col.left
-                           // right:col.right
+                            left:parent.left
+                            right:rig.left
+                            bottom:grid.top
+                            leftMargin:grid.width/5
                         }
-                        spacing:gv.cellWidth/2
+                        clip:true
+                        spacing:gv.cellWidth/1.5
                         Components.Label {
                             font.pointSize:rect1.height/8
                             text : monthComponent.dayName(7)
-                           // horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
                             font.pointSize:rect1.height/8
-                        //    anchors.leftMargin:gv.cellWidth/2;
                             text:monthComponent.dayName(1)
-                           horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
                             font.pointSize:rect1.height/8
                             text : monthComponent.dayName(2)
-                           // horizontalAlignment:Text.AlignHCenter
+
                         }
                         Components.Label {
                             font.pointSize:rect1.height/8
                             text : monthComponent.dayName(3)
-                           horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
                             font.pointSize:rect1.height/8
                             text : monthComponent.dayName(4)
-                           //horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
                             font.pointSize:rect1.height/8
                             text : monthComponent.dayName(5)
-                         //  horizontalAlignment:Text.AlignHCenter
                         }
                         Components.Label {
                             font.pointSize:rect1.height/8
                             text : monthComponent.dayName(6)
-                         //  horizontalAlignment:Text.AlignHCenter
                         }
                     }
                 }
@@ -271,7 +264,6 @@ Item {
                     width: grid.width/8
                     height: parent.height
                     model: monthComponent.weeksModel
-                   // header:listHeader
                     delegate: Rectangle {
                         id:r
                         width: grid.width/8
@@ -300,7 +292,9 @@ Item {
                     interactive:false
                     focus:true
                     model: monthComponent.model
+                    property Item selectedItem
                     delegate: Rectangle {
+                        id:myRectangle
                         width: gv.cellWidth
                         height: gv.cellHeight
                         color: "transparent"
@@ -308,30 +302,38 @@ Item {
                             id:outer
                             width: gv.cellWidth-5
                             height: gv.cellHeight-5
-                            color:"transparent"
-                            border.color:(dateMouse.containsMouse)?"black":"transparent"
+                            color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
+                            border.color: gv.selectedItem == myRectangle ? "black" : "transparent"
                             Rectangle {
                                 width: gv.cellWidth
                                 height: gv.cellHeight
                                 color:"transparent"
-                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?true:false;                                   anchors.fill:parent
+                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?true:false; 
+                                anchors.fill:parent
                                 border.color:"blue"
                             }
                             Components.Label {
                                 id:label
                                 anchors.centerIn: parent
                                 text: dayNumber
-                                font.bold:(containsEventItems)||containsTodoItems ? true:false
+                                font.bold:(containsEventItems)||(containsTodoItems) ? true:false
                                 opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
                             }
                             MouseArea {
                                 id:dateMouse
                                 anchors.fill:parent
                                 hoverEnabled:true
+                                onEntered: {
+                                    monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);                                     list.model=monthComponent.selectedDayModel
+                                    if(list.count==0) {
+                                       // error.visible=true
+                                        list.model=monthComponent.upcomingEventsModel
+                                    }
+                                }
                                 onClicked: {
+                                    monthComponent.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);                                   gv.selectedItem=myRectangle
                                     var rowNumber = Math.floor(index / 7)   ;
                                     week=monthComponent.weeksModel[rowNumber];
-                                    monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);
                                     date=dayNumber+"/"+monthNumber+"/"+yearNumber
                                     date1=yearNumber+"-"+monthNumber+"-"+dayNumber
                                 }
@@ -391,8 +393,7 @@ Item {
             id:rig
             height: parent.height
             width: parent.width / 2
-           // color: "transparent"
-           anchors.left:grid.right
+            anchors.left:grid.right
             Rectangle {
                 width:parent.width
                 height:50
@@ -408,35 +409,43 @@ Item {
                 id:list
                 height: parent.height
                 width: (parent.width / 4)-(scrollBar.visible ? scrollBar.width : 0)
-                model: monthComponent.selectedDayModel
+                model: monthComponent.upcomingEventsModel//monthComponent.selectedDayModel
                 anchors.left:grid.right
                 delegate: Rectangle {
                     width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
                     height: 40
                     color: "transparent"
-                    Column {
-                        spacing:0
-                        anchors {
-                            left:grid.right
-                          //  right:parent.right
-                        }
-                        Components.Label {
-                            id:sum
-                            text: "Summary :"+summary
-                        }
-                        Components.Label {
-                            id:desc
-                            text: "Description :"+description
+                    Row {
+                        spacing:4
+                        width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
+                        height:50
+                        Rectangle {
+                            id:circle1
+                            width:6
+                            height:6
+                            color:"black"
+                            border.width:1
+                            radius:width*0.5
+                            anchors.verticalCenter:incidence.verticalCenter
                         }
                         Rectangle {
-                            id:sec
+                            id:incidence
                             width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
-                            height: 20
-                            color: "transparent"
+                            height:20
+                            color:"transparent"
+                            Components.Label {
+                                id:sum
+                                text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
+                                font.capitalization:Font.Capitalize
+                                font.italic:true
+                                anchors {
+                                    left:circle1.right
+                                }
+                            }
                         }
                     }
                 }
-                section.property: "startDate"
+                section.property:"startDate"
                 section.delegate: Rectangle {
                     id:sect
                     width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
