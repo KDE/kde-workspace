@@ -46,6 +46,7 @@ class KDE_EXPORT KeyboardDaemon : public KDEDModule
     LayoutTrayIcon* layoutTrayIcon;
     LayoutMemory layoutMemory;
     LayoutUnit currentLayout;
+    LayoutUnit oldLayout;
     const Rules* rules;
 
     void registerListeners();
@@ -53,6 +54,7 @@ class KDE_EXPORT KeyboardDaemon : public KDEDModule
     void unregisterListeners();
     void unregisterShortcut();
     void setupTrayIcon();
+    void setupCursorIcon();
 
 private Q_SLOTS:
 	void switchToNextLayout();

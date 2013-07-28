@@ -30,7 +30,18 @@ set( kded_keyboard_SRCS
     layouts_menu.cpp
     flags.cpp
     xkb_rules.cpp
+    ../input/xcursor/cursortheme.cpp  
+    ../input/xcursor/itemdelegate.cpp  
+    ../input/xcursor/previewwidget.cpp  
+    ../input/xcursor/sortproxymodel.cpp  
+    ../input/xcursor/thememodel.cpp  
+    ../input/xcursor/themepage.cpp  
+    ../input/xcursor/xcursortheme.cpp
+    ../krdb/krdb.cpp
 )
+
+kde4_add_ui_files( kded_keyboard_SRCS ../input/xcursor/themepage.ui )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../input/xcursor/ )
 
 kde4_add_plugin(kded_keyboard ${kded_keyboard_SRCS})
 
@@ -39,6 +50,19 @@ target_link_libraries(kded_keyboard
     ${text_paint_LIB}
     ${QT_QTXML_LIBRARY} ${X11_Xkbfile_LIB}
  )
+
+target_link_libraries(kded_keyboard ${KDE4_KIO_LIBS} ${X11_LIBRARIES})
+if (LIBUSB_FOUND)
+   target_link_libraries(kded_keyboard ${LIBUSB_LIBRARIES})
+endif (LIBUSB_FOUND)
+if (X11_Xcursor_FOUND)
+   target_link_libraries(kded_keyboard ${X11_Xcursor_LIB})
+endif (X11_Xcursor_FOUND)
+if (X11_Xfixes_FOUND)
+   target_link_libraries(kded_keyboard ${X11_Xfixes_LIB})
+endif (X11_Xfixes_FOUND)
+target_link_libraries(kded_keyboard ${KDE4_KNEWSTUFF3_LIBS})
+
 
 if(X11_XTest_FOUND)
   target_link_libraries(kded_keyboard ${X11_XTest_LIB})
@@ -143,4 +167,4 @@ add_subdirectory( pics )
 
 # Unit tests
 
-add_subdirectory( tests )
+#add_subdirectory( tests )

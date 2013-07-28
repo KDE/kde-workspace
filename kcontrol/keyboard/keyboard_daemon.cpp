@@ -42,6 +42,22 @@
 #include "layouts_menu.h"
 
 
+/* Victor Polevoy GSOC 2013 */
+#include <xcursortheme.h>
+#include <QDir>
+#include <QX11Info>
+
+#include <config-X11.h>
+#include <X11/Xlib.h>
+#include <X11/Xcursor/Xcursor.h>
+#ifdef HAVE_XFIXES
+#  include <X11/extensions/Xfixes.h>
+#endif
+#include <KGlobalSettings>
+
+#include "../../krdb/krdb.h"
+/* END VICTOR POLEVOY GSOC 2013 */
+
 K_PLUGIN_FACTORY(KeyboardFactory, registerPlugin<KeyboardDaemon>();)
 K_EXPORT_PLUGIN(KeyboardFactory("keyboard", "kxkb"))
 
@@ -70,6 +86,8 @@ KeyboardDaemon::KeyboardDaemon(QObject *parent, const QList<QVariant>&)
 			X11Helper::setLayout(layoutMemoryPersister.getGlobalLayout());
 		}
 	}
+	
+	
 }
 
 KeyboardDaemon::~KeyboardDaemon()
@@ -99,8 +117,11 @@ void KeyboardDaemon::configureKeyboard()
 	keyboardConfig.load();
 	XkbHelper::initializeKeyboardLayouts(keyboardConfig);
 	layoutMemory.configChanged();
+	
+	oldLayout.layout = "";
 
 	setupTrayIcon();
+	setupCursorIcon();
 
 	unregisterShortcut();
 	registerShortcut();
@@ -125,6 +146,27 @@ void KeyboardDaemon::setupTrayIcon()
 		delete layoutTrayIcon;
 		layoutTrayIcon = NULL;
 	}
+}
+
+void KeyboardDaemon::setupCursorIcon()
+{
+    //TODO: get cursor theme from kde settings class
+    runRdb(0);
+    
+    QDir cursorDirectory("/usr/share/icons/oxy-black");
+    
+    XCursorTheme xCursorTheme(cursorDirectory);
+    
+    KGlobalSettings::self()->emitChange(KGlobalSettings::CursorChanged);
+        
+    QString cursorName 		= "ibeam_" + currentLayout.layout;
+    QString oldCursorName 	= "ibeam";    
+    
+    if(oldLayout.layout.length() != 0)
+	oldCursorName = "ibeam_" + oldLayout.layout;
+    
+    QCursor cursor = xCursorTheme.loadCursor(cursorName, 0);
+    XFixesChangeCursorByName(QX11Info().display(), cursor.handle(), QFile::encodeName(oldCursorName));
 }
 
 void KeyboardDaemon::registerShortcut()
@@ -188,19 +230,21 @@ void KeyboardDaemon::globalSettingsChanged(int category)
 }
 
 void KeyboardDaemon::layoutChanged()
-{
-	//TODO: pass newLayout into layoutTrayIcon?
-	LayoutUnit newLayout = X11Helper::getCurrentLayout();
+{   
+    //TODO: pass newLayout into layoutTrayIcon?
+    LayoutUnit newLayout = X11Helper::getCurrentLayout();        
+    
+    layoutMemory.layoutChanged();
+    if( layoutTrayIcon != NULL ) {
+	    layoutTrayIcon->layoutChanged();
+    }
 
-	layoutMemory.layoutChanged();
-	if( layoutTrayIcon != NULL ) {
-		layoutTrayIcon->layoutChanged();
-	}
-
-	if( newLayout != currentLayout ) {
-		currentLayout = newLayout;
-		emit currentLayoutChanged(newLayout.toString());
-	}
+    if( newLayout != currentLayout ) {
+	    oldLayout = currentLayout;
+	    currentLayout = newLayout;
+	    setupCursorIcon();
+	    emit currentLayoutChanged(newLayout.toString());
+    }
 }
 
 void KeyboardDaemon::layoutMapChanged()
