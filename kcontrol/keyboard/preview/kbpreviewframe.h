@@ -21,36 +21,47 @@
 #include "keyboardlayout.h"
 #include "keysymhelper.h"
 #include "keyaliases.h"
-#include "geometry_parser.h"
-#include "geometry_components.h"
 
 #include <QtGui/QPainter>
 #include <QtGui/QFrame>
 
+#ifdef NEW_GEOMETRY
+#include "geometry_parser.h"
+#include "geometry_components.h"
+#endif
 class KbPreviewFrame : public QFrame
 {
     Q_OBJECT
     
 private:
-	void paintTLDE(QPainter &painter, int &x, int &y);
-	void paintAERow(QPainter &painter, int &x, int &y);
-	void paintADRow(QPainter &painter, int &x, int &y);
-	void paintACRow(QPainter &painter, int &x, int &y);
+    KeySymHelper symbol;
+    Aliases alias;
+    KeyboardLayout keyboardLayout;
+#ifdef NEW_GEOMETRY
     void drawKeySymbols(QPainter &painter,QPoint temp[],GShape s,QString name);
-	void paintBottomRow(QPainter &painter, int &x, int &y);
-	void paintFnKeys(QPainter &painter, int &x, int &y);
 	float scaleFactor;
     void drawShape(QPainter &painter, GShape s, int x, int y, int i, QString name);
-	KeySymHelper symbol;
-	Aliases alias;
-    KeyboardLayout keyboardLayout;
+#else
+    void paintTLDE(QPainter &painter, int &x, int &y);
+    void paintAERow(QPainter &painter, int &x, int &y);
+    void paintADRow(QPainter &painter, int &x, int &y);
+    void paintACRow(QPainter &painter, int &x, int &y);
+    void paintABRow(QPainter &painter, int &x, int &y);
+    void paintBottomRow(QPainter &painter, int &x, int &y);
+    void paintFnKeys(QPainter &painter, int &x, int &y);
+#endif
 	
 public:
+#ifdef NEW_GEOMETRY
     Geometry geometry;
-    int *width,*height;
+#endif
     explicit KbPreviewFrame(QWidget *parent = 0);
     void paintEvent(QPaintEvent * event);
+#ifdef NEW_GEOMETRY
     void generateKeyboardLayout(const QString &country, const QString &layoutVariant, QString model);
+#else
+    void generateKeyboardLayout(const QString &country, const QString &layoutVariant);
+#endif
     QString getLayoutName() const {
     	return keyboardLayout.getLayoutName();
     }

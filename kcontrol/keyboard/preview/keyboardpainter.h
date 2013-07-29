@@ -33,9 +33,11 @@ class KeyboardPainter : public QDialog
 public:
     explicit KeyboardPainter();
     ~KeyboardPainter();
-
+#ifdef NEW_GEOMETRY
     void generateKeyboardLayout(const QString& layout, const QString& variant, QString model);
-    
+#else
+    void generateKeyboardLayout(const QString& layout, const QString& variant);
+#endif
 private:
     QDialog *kbDialog;
     KbPreviewFrame *kbframe;

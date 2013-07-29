@@ -158,7 +158,11 @@ void AddLayoutDialog::preview(){
     int index = layoutDialogUi->variantComboBox->currentIndex();
     QString variant = layoutDialogUi->variantComboBox->itemData(index).toString();
     KeyboardPainter* layoutPreview = new KeyboardPainter();
+#ifdef NEW_GEOMETRY
     layoutPreview->generateKeyboardLayout(selectedLayout, variant,"pc104");
+#else
+    layoutPreview->generateKeyboardLayout(selectedLayout, variant);
+#endif;
     layoutPreview->setModal(true);
     layoutPreview->exec();
     delete layoutPreview;

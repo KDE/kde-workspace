@@ -386,7 +386,11 @@ void KCMKeyboardWidget::previewLayout(){
                 break;
             }
         }
+#ifdef NEW_GEOMETRY
         layoutPreview->generateKeyboardLayout(country,variant,model);
+#else
+        layoutPreview->generateKeyboardLayout(country,variant);
+#endif
         layoutPreview->exec();
         layoutPreview->setModal(true);
     }

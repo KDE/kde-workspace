@@ -103,30 +103,54 @@ include_directories("preview")
 set (CMAKE_CXX_FLAGS "-fexceptions")
 set (CMAKE_CXX_FLAGS "-fpermissive")
 
-set(kcm_keyboard_PART_SRCS 
-  kcm_keyboard.cpp
-  kcm_keyboard_widget.cpp
-  kcm_view_models.cpp
-  kcm_add_layout_dialog.cpp
-  keyboard_config.cpp
-  x11_helper.cpp
-  xkb_helper.cpp
-  xkb_rules.cpp
-  flags.cpp
-  iso_codes.cpp
-  kcmmisc.cpp
-  bindings.cpp
-  preview/keyaliases.cpp
-  preview/keyboardlayout.cpp
-  preview/keyboardpainter.cpp
-  preview/keysymbols.cpp
-  preview/keysymhelper.cpp
-  preview/kbpreviewframe.cpp
-  preview/keysym2ucs.cpp
-  preview/geometry_components.cpp
-  preview/geometry_parser.cpp
-)
-
+if(Boost_FOUND)
+  ADD_DEFINITIONS(-DNEW_GEOMETRY=1)
+  set(kcm_keyboard_PART_SRCS
+    kcm_keyboard.cpp
+    kcm_keyboard_widget.cpp
+    kcm_view_models.cpp
+    kcm_add_layout_dialog.cpp
+    keyboard_config.cpp
+    x11_helper.cpp
+    xkb_helper.cpp
+    xkb_rules.cpp
+    flags.cpp
+    iso_codes.cpp
+    kcmmisc.cpp
+    bindings.cpp
+    preview/keyaliases.cpp
+    preview/keyboardlayout.cpp
+    preview/keyboardpainter.cpp
+    preview/keysymbols.cpp
+    preview/keysymhelper.cpp
+    preview/kbpreviewframe.cpp
+    preview/keysym2ucs.cpp
+    preview/geometry_components.cpp
+    preview/geometry_parser.cpp)
+else(Boost_FOUND)
+  message("Boost not found, Install Boost Libraries to enable keyboard geometry preview.")
+  set(kcm_keyboard_PART_SRCS 
+    kcm_keyboard.cpp
+    kcm_keyboard_widget.cpp
+    kcm_view_models.cpp
+    kcm_add_layout_dialog.cpp
+    keyboard_config.cpp
+    x11_helper.cpp
+    xkb_helper.cpp
+    xkb_rules.cpp
+    flags.cpp
+    iso_codes.cpp
+    kcmmisc.cpp
+    bindings.cpp
+    preview/keyaliases.cpp
+    preview/keyboardlayout.cpp
+    preview/keyboardpainter.cpp
+    preview/keysymbols.cpp
+    preview/keysymhelper.cpp
+    preview/kbpreviewframe.cpp
+    preview/keysym2ucs.cpp
+  )	
+endif(Boost_FOUND)
 kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui)
 
 kde4_add_plugin(kcm_keyboard ${kcm_keyboard_PART_SRCS})

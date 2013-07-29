@@ -167,15 +167,15 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
           ||ignore
           ||description
           ||(char_-kw-'}'
-          ||shape[phx::bind(&Geometry::getShape,&geom)]
+          ||shape[phx::bind(&Geometry::addShape,&geom)]
           ||section[phx::bind(&Geometry::addSection,&geom)]
           ||geomAtt
           ||geomShape
           ))
           >>'}';
 
-          width = lit("width")>>'='>>double_[phx::bind(&Geometry::getWidth,&geom,_1)]>>";";
-          height = lit("height")>>'='>>double_[phx::bind(&Geometry::getHeight,&geom,_1)]>>";";
+          width = lit("width")>>'='>>double_[phx::bind(&Geometry::setWidth,&geom,_1)]>>";";
+          height = lit("height")>>'='>>double_[phx::bind(&Geometry::setHeight,&geom,_1)]>>";";
 
 
           info = in;
@@ -192,161 +192,163 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setCord(){
-        geom.getShapeCord(x,y);
+        geom.setShapeCord(x,y);
     }
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionShape(std::string n){
-        geom.sectionList[geom.sectionCount].shapeName = QString::fromUtf8(n.data(), n.size());
+    geom.sectionList[geom.getSectionCount()].setShapeName( QString::fromUtf8(n.data(), n.size()));
 }
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::getName(std::string n){
-        geom.name = (QString::fromUtf8(n.data(), n.size()));
+        geom.setName(QString::fromUtf8(n.data(), n.size()));
 }
 template<typename Iterator>
     void Geometry_parser<Iterator>::getDescription(std::string n){
-        geom.description = ( QString::fromUtf8(n.data(), n.size()));
+        geom.setDescription( QString::fromUtf8(n.data(), n.size()));
 }
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::getShapeName(std::string n){
-        geom.getShapeName( QString::fromUtf8(n.data(), n.size()));
+        geom.setShapeName( QString::fromUtf8(n.data(), n.size()));
 }
 
 
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setGeomShape(std::string n){
-        geom.keyShape = QString::fromUtf8(n.data(), n.size());
+        geom.setKeyShape(QString::fromUtf8(n.data(), n.size()));
 }
 
 template<typename Iterator>
 void Geometry_parser<Iterator>::setRowShape(std::string n){
-    geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].shapeName =  QString::fromUtf8(n.data(), n.size() );
+    geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setShapeName(QString::fromUtf8(n.data(), n.size() ));
 }
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setApprox(){
-        geom.getShapeApprox(ax,ay);
+        geom.setShapeApprox(ax,ay);
 }
 
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::addRow(){
-        geom.sectionList[geom.sectionCount].addRow();
+        geom.sectionList[geom.getSectionCount()].addRow();
 }
 
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectionName(std::string n){
-        geom.sectionList[geom.sectionCount].name = QString::fromUtf8(n.data(), n.size());
+        geom.sectionList[geom.getSectionCount()].setName(QString::fromUtf8(n.data(), n.size()));
 }
 
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::rowinit(){
-        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].top = geom.sectionList[geom.sectionCount].top;
-        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].left =  geom.sectionList[geom.sectionCount].left;
-        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].shapeName =  geom.sectionList[geom.sectionCount].shapeName;
-        cx = geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].left;
-        cy = geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].top;
-        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].vertical = geom.sectionList[geom.sectionCount].vertical;
+        geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setTop(geom.sectionList[geom.getSectionCount()].getTop());
+        geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setLeft(geom.sectionList[geom.getSectionCount()].getLeft());
+        geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setShapeName(geom.sectionList[geom.getSectionCount()].getShapeName());
+        cx = geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].getLeft();
+        cy = geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].getTop();
+        geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setVertical(geom.sectionList[geom.getSectionCount()].getVertical());
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectioninit(){
-        geom.sectionList[geom.sectionCount].top = geom.sectionTop;
-        geom.sectionList[geom.sectionCount].left = geom.sectionLeft;
-        cx = geom.sectionList[geom.sectionCount].left;
-        cy = geom.sectionList[geom.sectionCount].top;
-        geom.sectionList[geom.sectionCount].shapeName = geom.keyShape;
-        geom.sectionList[geom.sectionCount].vertical = geom.vertical;
+        geom.sectionList[geom.getSectionCount()].setTop(geom.sectionTop);
+        geom.sectionList[geom.getSectionCount()].setLeft(geom.sectionLeft);
+        cx = geom.sectionList[geom.getSectionCount()].getLeft();
+        cy = geom.sectionList[geom.getSectionCount()].getTop();
+        geom.sectionList[geom.getSectionCount()].setShapeName(geom.getKeyShape());
+        geom.sectionList[geom.getSectionCount()].setVertical(geom.getVertical());
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setRowTop(double a){
-        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].top = a + geom.sectionList[geom.sectionCount].top;
-        cy = geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].top;
+        geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setTop(a + geom.sectionList[geom.getSectionCount()].getTop());
+        cy = geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].getTop();
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setRowLeft(double a){
-        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].left = a + geom.sectionList[geom.sectionCount].left;
-        cx = geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].left;
+        geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setLeft(a + geom.sectionList[geom.getSectionCount()].getLeft());
+        cx = geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].getLeft();
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionTop(double a){
         //qDebug()<<"\nsectionCount"<<geom.sectionCount;
-        geom.sectionList[geom.sectionCount].top = a + geom.sectionTop;
-        cy = geom.sectionList[geom.sectionCount].top;
+        geom.sectionList[geom.getSectionCount()].setTop(a + geom.sectionTop);
+        cy = geom.sectionList[geom.getSectionCount()].getTop();
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionLeft(double a){
         //qDebug()<<"\nsectionCount"<<geom.sectionCount;
-        geom.sectionList[geom.sectionCount].left = a + geom.sectionLeft;
-        cx = geom.sectionList[geom.sectionCount].left;
+        geom.sectionList[geom.getSectionCount()].setLeft(a + geom.sectionLeft);
+        cx = geom.sectionList[geom.getSectionCount()].getLeft();
 
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionAngle(double a){
         //qDebug()<<"\nsectionCount"<<geom.sectionCount;
-        geom.sectionList[geom.sectionCount].angle = a;
+        geom.sectionList[geom.getSectionCount()].setAngle(a);
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setVerticalRow(){
-        geom.sectionList[geom.sectionCount].rowList[geom.sectionList[geom.sectionCount].rowCount].vertical = 1;
+        geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setVertical(1);
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setVerticalSection(){
-         geom.sectionList[geom.sectionCount].vertical = 1;
+        geom.sectionList[geom.getSectionCount()].setVertical(1);
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setVerticalGeometry(){
-         geom.vertical = 1;
+        geom.setVertical(1);
     }
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyName(std::string n){
-        int secn = geom.sectionCount;
-        int rown = geom.sectionList[secn].rowCount;
-        int keyn = geom.sectionList[secn].rowList[rown].keyCount;
+        int secn = geom.getSectionCount();
+        int rown = geom.sectionList[secn].getRowCount();
+        int keyn = geom.sectionList[secn].rowList[rown].getKeyCount();
         //qDebug()<<"\nsC: "<<secn<<"\trC: "<<rown<<"\tkn: "<<keyn;
-        geom.sectionList[secn].rowList[rown].keyList[keyn].name = QString::fromUtf8(n.data(), n.size());
+        geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyName(QString::fromUtf8(n.data(), n.size()));
      }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyShape(std::string n){
-        int secn = geom.sectionCount;
-        int rown = geom.sectionList[secn].rowCount;
-        int keyn = geom.sectionList[secn].rowList[rown].keyCount;
-        geom.sectionList[secn].rowList[rown].keyList[keyn].shapeName = QString::fromUtf8(n.data(), n.size());
+        int secn = geom.getSectionCount();
+        int rown = geom.sectionList[secn].getRowCount();
+        int keyn = geom.sectionList[secn].rowList[rown].getKeyCount();
+        //qDebug()<<"\nsC: "<<secn<<"\trC: "<<rown<<"\tkn: "<<keyn;
+        geom.sectionList[secn].rowList[rown].keyList[keyn].setShapeName(QString::fromUtf8(n.data(), n.size()));
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyNameandShape(std::string n){
-        int secn = geom.sectionCount;
-        int rown = geom.sectionList[secn].rowCount;
+        int secn = geom.getSectionCount();
+        int rown = geom.sectionList[secn].getRowCount();
         setKeyName(n);
-        setKeyShape(geom.sectionList[secn].rowList[rown].shapeName.toUtf8().constData());
+        setKeyShape(geom.sectionList[secn].rowList[rown].getShapeName().toUtf8().constData());
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyOffset(){
         //qDebug()<<"\nhere\n";
-        int secn = geom.sectionCount;
-        int rown = geom.sectionList[secn].rowCount;
-        int keyn = geom.sectionList[secn].rowList[rown].keyCount;
-        geom.sectionList[secn].rowList[rown].keyList[keyn].offset = off;
+        int secn = geom.getSectionCount();
+        int rown = geom.sectionList[secn].getRowCount();
+        int keyn = geom.sectionList[secn].rowList[rown].getKeyCount();
+        //qDebug()<<"\nsC: "<<secn<<"\trC: "<<rown<<"\tkn: "<<keyn;
+        geom.sectionList[secn].rowList[rown].keyList[keyn].setOffset(off);
     }
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyCordi(){
-        int secn = geom.sectionCount;
-        int rown = geom.sectionList[secn].rowCount;
-        int keyn = geom.sectionList[secn].rowList[rown].keyCount;
-        int vertical = geom.sectionList[secn].rowList[rown].vertical;
+        int secn = geom.getSectionCount();
+        int rown = geom.sectionList[secn].getRowCount();
+        int keyn = geom.sectionList[secn].rowList[rown].getKeyCount();
+        int vertical = geom.sectionList[secn].rowList[rown].getVertical();
         if(vertical == 0)
-            cx+=geom.sectionList[secn].rowList[rown].keyList[keyn].offset;
+            cx+=geom.sectionList[secn].rowList[rown].keyList[keyn].getOffset();
         else
-            cy+=geom.sectionList[secn].rowList[rown].keyList[keyn].offset;
+            cy+=geom.sectionList[secn].rowList[rown].keyList[keyn].getOffset();
         geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyPosition(cx,cy);
-        QString s = geom.sectionList[secn].rowList[rown].keyList[keyn].shapeName;
+        QString s = geom.sectionList[secn].rowList[rown].keyList[keyn].getShapeName();
         if (s=="")
-                s = geom.keyShape;
+            s = geom.getKeyShape();
         GShape t = geom.findShape(s);
         int a = t.size(vertical);
         if(vertical == 0)
@@ -460,7 +462,7 @@ template<typename Iterator>
         gfile.close();
         QStringList gcontentList = gcontent.split("xkb_geometry");
         int i = 1;
-        while(g.geom.name!=geometryName){
+        while(g.geom.getName()!=geometryName){
             g.geom = Geometry();
             QString input = gcontentList.at(i);
             input.prepend("xkb_geometry");
