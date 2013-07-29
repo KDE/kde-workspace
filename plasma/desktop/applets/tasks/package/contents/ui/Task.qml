@@ -32,7 +32,7 @@ DragArea {
     id: task
 
     width: groupDialog.mainItem.width
-    height: Layout.preferredMinHeight()
+    height: theme.smallIconSize + Layout.verticalMargins()
 
     visible: false
 
@@ -137,7 +137,8 @@ DragArea {
         }
 
         width: inPopup ? theme.smallIconSize : Math.min(height, parent.width - Layout.horizontalMargins())
-        height: Math.min(theme.hugeIconSize, parent.height - Layout.verticalMargins())
+        height: Math.min(theme.hugeIconSize,
+                         parent.height - (parent.height - Layout.verticalMargins() < theme.smallIconSize ? 4 : Layout.verticalMargins()))
 
         PlasmaCore.IconItem {
             id: icon
