@@ -41,7 +41,8 @@ Item {
             var above = target.childAt(event.x, event.y);
 
             if (event.mimeData.source) {
-                if (above != event.mimeData.source && !event.mimeData.source.isLauncher) {
+                if (above != event.mimeData.source
+                    && !(event.mimeData.source.isLauncher || above.isLauncher)) {
                     var targetIndex = TaskTools.insertionIndexAt(event.x, event.y);
 
                     itemMove(event.mimeData.source.itemId, targetIndex);
