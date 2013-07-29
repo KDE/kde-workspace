@@ -39,16 +39,16 @@ Item {
     function updateHeight() {
         // Does the handle's height fit into the frame?
         var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
-        print(" = == = = == updateHeight mini:" + mini)
+        //print(" = == = = == updateHeight mini:" + mini)
         if (height > mini) {
             appletItem.handleMerged = true;
-            print("merged handle");
+//             print("merged handle");
             height = appletItem.handleMerged ? appletItem.height : minimumHeight
-            print(" height: " + height);
+            //print(" height: " + height);
             buttonColumn.anchors.right = appletHandle.right;
         } else {
             appletItem.handleMerged = false;
-            print("separate handle");
+//             print("separate handle");
             //appletHandle.anchors.right = appletHandle.parent.right;
             buttonColumn.anchors.verticalCenter = appletItem.verticalCenter;
             buttonColumn.anchors.top = noBackgroundHandle.top
