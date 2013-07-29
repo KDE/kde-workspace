@@ -138,7 +138,8 @@ DragArea {
 
         width: inPopup ? theme.smallIconSize : Math.min(height, parent.width - Layout.horizontalMargins())
         height: Math.min(theme.hugeIconSize,
-                         parent.height - (parent.height - Layout.verticalMargins() < theme.smallIconSize ? 4 : Layout.verticalMargins()))
+                         parent.height - (parent.height - Layout.verticalMargins() < theme.smallIconSize ?
+                                          Math.min(9, Layout.verticalMargins()) : Layout.verticalMargins()))
 
         PlasmaCore.IconItem {
             id: icon
