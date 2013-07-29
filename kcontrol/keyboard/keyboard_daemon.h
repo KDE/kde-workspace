@@ -26,6 +26,7 @@
 #include "layout_memory.h"
 #include "keyboard_dbus.h"
 #include "bindings.h"
+#include <thememodel.h>
 
 
 class KActionCollection;
@@ -34,6 +35,8 @@ class LayoutTrayIcon;
 class KeyboardConfig;
 class KAction;
 class Rules;
+class CursorThemeModel;
+class CursorTheme;
 
 class KDE_EXPORT KeyboardDaemon : public KDEDModule
 {
@@ -47,6 +50,7 @@ class KDE_EXPORT KeyboardDaemon : public KDEDModule
     LayoutMemory layoutMemory;
     LayoutUnit currentLayout;
     LayoutUnit oldLayout;
+    CursorThemeModel cursorThemeModel;
     const Rules* rules;
 
     void registerListeners();
@@ -55,6 +59,7 @@ class KDE_EXPORT KeyboardDaemon : public KDEDModule
     void unregisterShortcut();
     void setupTrayIcon();
     void setupCursorIcon();
+    const CursorTheme* getCurrentCursorTheme();
 
 private Q_SLOTS:
 	void switchToNextLayout();

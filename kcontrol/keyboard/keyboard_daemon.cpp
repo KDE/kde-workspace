@@ -44,6 +44,7 @@
 
 /* Victor Polevoy GSOC 2013 */
 #include <xcursortheme.h>
+#include <thememodel.h>
 #include <QDir>
 #include <QX11Info>
 
@@ -54,6 +55,8 @@
 #  include <X11/extensions/Xfixes.h>
 #endif
 #include <KGlobalSettings>
+#include <KConfig>
+#include <KConfigGroup>
 
 #include "../../krdb/krdb.h"
 /* END VICTOR POLEVOY GSOC 2013 */
@@ -85,9 +88,7 @@ KeyboardDaemon::KeyboardDaemon(QObject *parent, const QList<QVariant>&)
 		if( layoutMemoryPersister.getGlobalLayout().isValid() ) {
 			X11Helper::setLayout(layoutMemoryPersister.getGlobalLayout());
 		}
-	}
-	
-	
+	}	
 }
 
 KeyboardDaemon::~KeyboardDaemon()
@@ -148,14 +149,24 @@ void KeyboardDaemon::setupTrayIcon()
 	}
 }
 
+const CursorTheme* KeyboardDaemon::getCurrentCursorTheme()
+{
+    QString currentTheme = XcursorGetTheme(QX11Info().display());
+    
+    // Get the name of the theme KDE is configured to use
+    KConfig c("kcminputrc");
+    KConfigGroup cg(&c, "Mouse");
+    currentTheme = cg.readEntry("cursorTheme", currentTheme);
+    
+    return cursorThemeModel.theme(cursorThemeModel.findIndex(currentTheme));
+}
+
 void KeyboardDaemon::setupCursorIcon()
 {
     //TODO: get cursor theme from kde settings class
     runRdb(0);
     
-    QDir cursorDirectory("/usr/share/icons/oxy-black");
-    
-    XCursorTheme xCursorTheme(cursorDirectory);
+    const CursorTheme* cursorTheme = getCurrentCursorTheme();
     
     KGlobalSettings::self()->emitChange(KGlobalSettings::CursorChanged);
         
@@ -165,7 +176,7 @@ void KeyboardDaemon::setupCursorIcon()
     if(oldLayout.layout.length() != 0)
 	oldCursorName = "ibeam_" + oldLayout.layout;
     
-    QCursor cursor = xCursorTheme.loadCursor(cursorName, 0);
+    QCursor cursor = cursorTheme->loadCursor(cursorName, 0);
     XFixesChangeCursorByName(QX11Info().display(), cursor.handle(), QFile::encodeName(oldCursorName));
 }
 
