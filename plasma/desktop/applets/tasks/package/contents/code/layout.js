@@ -103,7 +103,8 @@ function preferredMaxWidth() {
 }
 
 function preferredMinHeight() {
-    return verticalMargins() + Math.max(theme.smallIconSize, theme.defaultFont.mSize.height);
+    // TODO: Port to proper font metrics for descenders once we have access to them.
+    return theme.defaultFont.mSize.height + 4;
 }
 
 function preferredMaxHeight() {
