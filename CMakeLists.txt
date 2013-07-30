@@ -225,7 +225,7 @@ set_package_properties(QJSON PROPERTIES DESCRIPTION "Library to manage JSON obje
                       )
 
 
-include(ConfigureChecks.cmake)
+#include(ConfigureChecks.cmake)
 if(NOT WIN32)
   configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
   configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
@@ -328,7 +328,7 @@ feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 # by creating and installing a KDE4WorkspaceConfig.cmake file, which will
 # be searched and found by kdelibs/cmake/modules/FindKDE4Workspace.cmake. Alex
 
-# now create the KDE4WorkspaceConfig.cmake file, which will be loaded by 
+# now create the KDE4WorkspaceConfig.cmake file, which will be loaded by
 # kdelibs/cmake/modules/FindKDE4Workspace.cmake and which has to contain all information
 # about the libraries installed from kdebase/workspace/libs/ anybody would like to have. Alex
 
