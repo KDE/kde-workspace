@@ -20,7 +20,7 @@ void GShape::setApprox(double a, double b){
 }
 
 
-QPoint GShape :: getCordii(int i){
+QPoint GShape :: getCordii(int i) const{
     if(i < cordi_count)
         return cordii[i];
     else
@@ -36,7 +36,7 @@ void GShape::display(){
     qDebug()<<"\n";
 }
 
-double GShape::size(int vertical){
+double GShape::size(int vertical) const{
     if(vertical == 0){
         if (approx.x() == 0 && approx.y() == 0)
             return cordii[0].x();

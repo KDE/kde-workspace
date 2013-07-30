@@ -17,6 +17,9 @@
  */
 
 #include "keyboardpainter.h"
+#ifdef NEW_GEOMETRY
+#include "geometry_components.h"
+#endif
 
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
@@ -42,19 +45,17 @@ KeyboardPainter::KeyboardPainter():
 
     setWindowTitle(kbframe->getLayoutName());
 }
-#ifdef NEW_GEOMETRY
-void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant,QString model)
+
+
+void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model)
 {
     kbframe->generateKeyboardLayout(layout, variant, model);
-    kbDialog->setFixedSize((2.5*kbframe->geometry.width+20),(2.5*kbframe->geometry.height+50));
-    kbframe->setFixedSize((2.5*kbframe->geometry.width+20),(2.5*kbframe->geometry.height));
-}
-#else
-void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant)
-{
-    kbframe->generateKeyboardLayout(layout, variant);
-}
+#ifdef NEW_GEOMETRY
+    kbDialog->setFixedSize((2.5 * kbframe->getWidth() + 20), (2.5 *  kbframe->getHeight() + 50));
+    kbframe->setFixedSize((2.5 * kbframe->getWidth() + 20), (2.5 * kbframe->getHeight() ));
 #endif
+}
+
 
 KeyboardPainter::~KeyboardPainter()
 {

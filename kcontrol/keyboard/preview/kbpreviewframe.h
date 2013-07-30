@@ -26,9 +26,11 @@
 #include <QtGui/QFrame>
 
 #ifdef NEW_GEOMETRY
-#include "geometry_parser.h"
-#include "geometry_components.h"
+class Geometry;
+class GShape;
 #endif
+
+
 class KbPreviewFrame : public QFrame
 {
     Q_OBJECT
@@ -38,9 +40,10 @@ private:
     Aliases alias;
     KeyboardLayout keyboardLayout;
 #ifdef NEW_GEOMETRY
-    void drawKeySymbols(QPainter &painter,QPoint temp[],GShape s,QString name);
-	float scaleFactor;
-    void drawShape(QPainter &painter, GShape s, int x, int y, int i, QString name);
+    Geometry& geometry;
+    void drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name);
+    float scaleFactor;
+    void drawShape(QPainter &painter, const GShape& s, int x, int y, int i, const QString& name);
 #else
     void paintTLDE(QPainter &painter, int &x, int &y);
     void paintAERow(QPainter &painter, int &x, int &y);
@@ -52,16 +55,17 @@ private:
 #endif
 	
 public:
+
 #ifdef NEW_GEOMETRY
-    Geometry geometry;
+//    Geometry& geometry;
+    int getWidth() const;
+    int getHeight() const;
 #endif
+
     explicit KbPreviewFrame(QWidget *parent = 0);
+    virtual ~KbPreviewFrame();
     void paintEvent(QPaintEvent * event);
-#ifdef NEW_GEOMETRY
-    void generateKeyboardLayout(const QString &country, const QString &layoutVariant, QString model);
-#else
-    void generateKeyboardLayout(const QString &country, const QString &layoutVariant);
-#endif
+    void generateKeyboardLayout(const QString &country, const QString &layoutVariant, const QString& model);
     QString getLayoutName() const {
     	return keyboardLayout.getLayoutName();
     }

@@ -15,15 +15,15 @@ class GShape{
     GShape();
     void setCordinate(double a, double b);
     void setApprox(double a, double b);
-    QPoint getCordii(int i);
+    QPoint getCordii(int i) const;
     void display();
-    double size(int vertical);
+    double size(int vertical) const;
 
     void setShapeName(QString n){
         sname  = n;
     }
 
-    QPoint getApprox(){
+    QPoint getApprox() const{
         return approx;
     }
 
@@ -31,7 +31,7 @@ class GShape{
         return sname;
     }
 
-    int getCordi_count(){
+    int getCordi_count() const{
         return cordi_count;
     }
 };
