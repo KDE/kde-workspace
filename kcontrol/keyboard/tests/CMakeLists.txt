@@ -14,6 +14,18 @@ ENDMACRO(KEYBOARD_DAEMON_UNIT_TESTS2)
 KEYBOARD_DAEMON_UNIT_TESTS(xkb_rules)
 KEYBOARD_DAEMON_UNIT_TESTS(iso_codes)
 
+if(Boost_FOUND)
+    include_directories("../preview")
+
+    set (CMAKE_CXX_FLAGS "-fexceptions")
+    set (CMAKE_CXX_FLAGS "-fpermissive")
+
+    ADD_DEFINITIONS(-DNEW_GEOMETRY=1)
+
+    kde4_add_unit_test(geometry_parser_test TESTNAME geometry_parser NOGUI ../preview/geometry_parser.cpp ../preview/geometry_components.cpp geometry_parser_test.cpp)
+    target_link_libraries(geometry_parser_test ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${X11_LIBRARIES})
+endif(Boost_FOUND)
+
 kde4_add_unit_test(flags_test TESTNAME kcm-keyboard-flags_test NOGUI flags_test.cpp ../flags.cpp ../x11_helper.cpp ../keyboard_config.cpp ../xkb_rules.cpp)
 target_link_libraries(flags_test ${KDE4_KDEUI_LIBS} ${QT_QTXML_LIBRARY} ${QT_QTTEST_LIBRARY} ${X11_Xkbfile_LIB} ${X11_LIBRARIES} ${text_paint_LIB})
 
