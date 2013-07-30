@@ -79,7 +79,7 @@ set_package_properties(LibAttica PROPERTIES DESCRIPTION "Support for Get Hot New
                        TYPE REQUIRED
                       )
 
-find_package(DBusMenuQt 0.6.0)
+find_package(DBusMenuQt5)
 set_package_properties(DBusMenuQt PROPERTIES DESCRIPTION "Support for notification area menus via the DBusMenu protocol"
                        URL "https://launchpad.net/libdbusmenu-qt"
                        TYPE REQUIRED
