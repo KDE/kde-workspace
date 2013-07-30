@@ -211,15 +211,15 @@ void TaskGroup::add(AbstractGroupableItem *item, int insertIndex)
             if (item->itemType() == LauncherItemType) {
                 KUrl lUrl = item->launcherUrl();
                 int urlIdx = d->groupManager->launcherIndex(lUrl);
-                if (urlIdx >= 0) {
-                    index = urlIdx;
-                } else {
-                    // insert launchers together at the head of the list, but still
-                    // in the order they appear
-                    for (index = 0; index < d->members.count(); ++index) {
-                        if (d->members.at(index)->itemType() != LauncherItemType) {
-                            break;
-                        }
+
+                int maxIndex = urlIdx;
+                if(maxIndex < 0) {
+                    maxIndex = d->members.count();
+                }
+
+                for (index = 0; index < maxIndex; ++index) {
+                    if (d->members.at(index)->itemType() != LauncherItemType) {
+                        break;
                     }
                 }
             }
