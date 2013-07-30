@@ -142,13 +142,14 @@ function launcherWidth() {
 function layout(container) {
     var item;
     var stripes = calculateStripes();
+    var taskCount = tasksModel.count - tasksModel.launcherCount;
     var width = taskWidth();
     var adjustedWidth = width;
     var height = taskHeight();
 
-    if (!tasks.vertical && stripes == 1 && tasksModel.count - tasksModel.launcherCount)
+    if (!tasks.vertical && stripes == 1 && taskCount)
     {
-        width += Math.floor(launcherLayoutWidthDiff() / (tasksModel.count - tasksModel.launcherCount));
+        width = Math.min(width + Math.floor(launcherLayoutWidthDiff() / taskCount), preferredMaxWidth());
     }
 
     for (var i = 0; i < container.count; ++i) {
