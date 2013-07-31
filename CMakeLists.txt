@@ -109,19 +109,25 @@ set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
                        TYPE OPTIONAL
                       )
 
+find_package(X11)
+if (X11_FOUND)
+   set (HAVE_X11 1)
+else ()
+   set (HAVE_X11 0)
+endif ()
+set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
+                        URL "http://www.x.org"
+                        TYPE OPTIONAL
+                        PURPOSE "Required for building the X11 based workspace"
+                    )
 
-if(Q_WS_X11)
+if(HAVE_X11)
   find_package(XCB REQUIRED)
   set_package_properties(XCB PROPERTIES DESCRIPTION "X protocol C-language Binding"
                          URL "http://xcb.freedesktop.org"
                          TYPE REQUIRED
                         )
 
-  find_package(X11 REQUIRED)
-  set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
-                         URL "http://www.x.org"
-                         TYPE REQUIRED
-                        )
 
   add_feature_info("Automated testing of X clients" X11_XTest_FOUND
                    "The X11 Testing Resource extension library is useful for automated testing of X clients")
@@ -151,7 +157,7 @@ if(Q_WS_X11)
   if(NOT X11_Xcursor_FOUND)
     message(FATAL_ERROR "The X11 cursor management library was not found. Required for desktop effects support in KWin.")
   endif()
-endif(Q_WS_X11)
+endif()
 
 find_package(GLIB2 2.0)
 set_package_properties(GLIB2 PROPERTIES DESCRIPTION "Low-level core library for data structure handling, portability wrappers, etc."
