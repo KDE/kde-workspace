@@ -109,7 +109,7 @@ TouchpadEnablerDaemonPrivate::TouchpadEnablerDaemonPrivate()
             m_keyCode[OffKey] = XKeysymToKeycode(m_display, XF86XK_TouchpadOff);
             for (int i = 0; i < nKeys; ++i) {
                 if (m_keyCode[i] != 0) {
-                    const int grabResult = XGrabKey(m_display, m_keyCode[i], 0 /* No modifiers */, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
+                    const int grabResult = XGrabKey(m_display, m_keyCode[i], AnyModifier, QX11Info::appRootWindow(), False, GrabModeAsync, GrabModeAsync);
                     if (grabResult == BadAccess || grabResult == BadValue || grabResult == BadWindow) {
                         kDebug() << "Could not grab ktouchpadenabler key index" << i <<". You probably have some other program grabbig it, if you are sure you don't have any, please report a bug against ktouchpadenabler in http://bugs.kde.org";
                         m_keyCode[i] = 0;
