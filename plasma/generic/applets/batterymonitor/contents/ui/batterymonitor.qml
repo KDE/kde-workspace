@@ -31,7 +31,7 @@ Item {
 
     property bool show_remaining_time: false
 
-    LayoutMirroring.enabled: true
+    LayoutMirroring.enabled: Qt.application.layoutDirection == Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
     Component.onCompleted: {
