@@ -119,6 +119,7 @@ PlasmaComponents.ListItem {
                     }
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
+                    onLinkActivated: plasmoid.openUrl(link)
                 }
 
                 PlasmaComponents.ToolButton {
@@ -222,6 +223,7 @@ PlasmaComponents.ListItem {
                         readOnly: true
                         wrapMode: Text.Wrap
                         textFormat: TextEdit.RichText
+                        onLinkActivated: plasmoid.openUrl(link)
                     }
                 }
                 Column {
