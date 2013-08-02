@@ -262,6 +262,7 @@ Item {
                             height:parent.height
                             color:"transparent"
                             Components.Label {
+                                anchors.centerIn:parent
                                 font.pointSize:rect1.height/5
                                 text : monthComponent.dayName(2)
                             }
@@ -271,6 +272,7 @@ Item {
                             height:parent.height
                             color:"transparent"
                             Components.Label {
+                                anchors.centerIn:parent
                                 font.pointSize:rect1.height/5
                                 text : monthComponent.dayName(3)
                             }
@@ -280,6 +282,7 @@ Item {
                             height:parent.height
                             color:"transparent"
                             Components.Label {
+                                anchors.centerIn:parent
                                 font.pointSize:rect1.height/5
                                 text : monthComponent.dayName(4)
                             }
@@ -289,6 +292,7 @@ Item {
                             height:parent.height
                             color:"transparent"
                             Components.Label {
+                                anchors.centerIn:parent
                                 font.pointSize:rect1.height/5
                                 text : monthComponent.dayName(5)
                             }
@@ -298,6 +302,7 @@ Item {
                             height:parent.height
                             color:"transparent"
                             Components.Label {
+                                anchors.centerIn:parent
                                 font.pointSize:rect1.height/5
                                 text : monthComponent.dayName(6)
                             }
