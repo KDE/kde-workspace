@@ -45,7 +45,7 @@ Item {
         startDate: "2013-07-01"
         onStartDateChanged: {
             month.text=monthName
-            year.text=year
+            monthYear.text=year
         }
     }
 
@@ -86,8 +86,8 @@ Item {
                         id:month
                         width:50
                         height:24
-                        anchors.leftMargin:rect1.width/7
-                        anchors.rightMargin:rect1.width/3
+                        anchors.leftMargin:rect1.width/3
+                        anchors.rightMargin:rect1.width/5
                         anchors.left:monthright.right
                         text:monthComponent.monthName
                         onClicked: {
@@ -175,7 +175,7 @@ Item {
                         }
                     }
                     Components.ToolButton {
-                        id:year
+                        id:monthYear
                         width:24
                         height:24
                         text:monthComponent.year
@@ -187,7 +187,7 @@ Item {
                             text:"^"
                             width:12
                             height:12
-                            anchors.left:year.right
+                            anchors.left:monthYear.right
                             MouseArea {
                                 anchors.fill:parent
                                 onClicked:monthComponent.nextYear()
@@ -198,7 +198,7 @@ Item {
                             text:"v"
                             width:12
                             height:12
-                            anchors.left:year.right
+                            anchors.left:monthYear.right
                             anchors.top:increase.bottom
                             MouseArea {
                                 anchors.fill:parent
