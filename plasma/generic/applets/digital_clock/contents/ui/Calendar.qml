@@ -24,7 +24,6 @@ Item {
     width: parent.width
     height: parent.height
     property string date ;
-    property string date1;
     property int week;
 
     function isToday(date) {
@@ -190,7 +189,7 @@ Item {
                             height:12
                             anchors.left:year.right
                             MouseArea {
-                               // anchors.fill:parent
+                                anchors.fill:parent
                                 onClicked:monthComponent.nextYear()
                             }
                         }
@@ -202,7 +201,7 @@ Item {
                             anchors.left:year.right
                             anchors.top:increase.bottom
                             MouseArea {
-                             //   anchors.fill:parent
+                                anchors.fill:parent
                                 onClicked:monthComponent.previousYear()
                             }
                         }
@@ -213,57 +212,95 @@ Item {
                         text: ">";
                         width: 24;
                         height: 24;
-                        anchors.left:year.right
-                        anchors.leftMargin:rect1.height
-                        anchors.right: rig.left
+                        anchors.right: r2.right
                         MouseArea {
                             id:mouse
-                           // anchors.fill: parent
+                            anchors.fill: parent
                             onClicked: {
                                 monthComponent.nextMonth()
                             }
                         }
                     }
                     
-                    Row {
+                   Row {
                         id:r2
+                        width:grid.width
+                        height:parent.height
                         anchors {
                             top:monthright.bottom
                             left:parent.left
-                          //  right:rig.left
-                        //    bottom:grid.top
-                            leftMargin:grid.width/5
+                            right:gv.right
                         }
                         clip:true
-                        spacing:gv.cellWidth/1.5
-                        Components.Label {
-                            font.pointSize:rect1.height/8
-                            text : monthComponent.dayName(7)
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
                         }
-                        Components.Label {
-                            font.pointSize:rect1.height/8
-                            text:monthComponent.dayName(1)
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
+                            Components.Label {
+                                anchors.centerIn:parent
+                                font.pointSize:rect1.height/5
+                                text : monthComponent.dayName(7)
+                            }
                         }
-                        Components.Label {
-                            font.pointSize:rect1.height/8
-                            text : monthComponent.dayName(2)
-
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
+                            Components.Label {
+                                anchors.centerIn:parent
+                                font.pointSize:rect1.height/5
+                                text:monthComponent.dayName(1)
+                            }
                         }
-                        Components.Label {
-                            font.pointSize:rect1.height/8
-                            text : monthComponent.dayName(3)
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
+                            Components.Label {
+                                font.pointSize:rect1.height/5
+                                text : monthComponent.dayName(2)
+                            }
                         }
-                        Components.Label {
-                            font.pointSize:rect1.height/8
-                            text : monthComponent.dayName(4)
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
+                            Components.Label {
+                                font.pointSize:rect1.height/5
+                                text : monthComponent.dayName(3)
+                            }
                         }
-                        Components.Label {
-                            font.pointSize:rect1.height/8
-                            text : monthComponent.dayName(5)
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
+                            Components.Label {
+                                font.pointSize:rect1.height/5
+                                text : monthComponent.dayName(4)
+                            }
                         }
-                        Components.Label {
-                            font.pointSize:rect1.height/8
-                            text : monthComponent.dayName(6)
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
+                            Components.Label {
+                                font.pointSize:rect1.height/5
+                                text : monthComponent.dayName(5)
+                            }
+                        }
+                        Rectangle {
+                            width: grid.width/8
+                            height:parent.height
+                            color:"transparent"
+                            Components.Label {
+                                font.pointSize:rect1.height/5
+                                text : monthComponent.dayName(6)
+                            }
                         }
                     }
                 }
@@ -273,6 +310,7 @@ Item {
                 id:grid
                 width:col.width
                 height:parent.height-rect1.height-riw.height
+                
                 ListView {
                     id:list_week
                     width: grid.width/8
@@ -281,7 +319,7 @@ Item {
                     delegate: Rectangle {
                         id:r
                         width: grid.width/8
-                        height: gv.cellHeight
+                        height:grid.height/monthComponent.weeks
                         color: "transparent"
                         Components.Label {
                             id:weekNumber
@@ -291,33 +329,27 @@ Item {
                         }
                     }
                 }
-                
-                GridView {
-                    id: gv
-                    width: grid.width*7/8
-                    height: parent.height
-                    cellWidth:(grid.width*7/8)/monthComponent.days
-                    cellHeight: (grid.height) / monthComponent.weeks
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    interactive:false
-                    focus:true
-                    model: monthComponent.model
+
+                Grid {
+                    id:gv
+                    columns:monthComponent.days
+                    rows:monthComponent.weeks+1
+                    width:grid.width
+                    height:parent.height
+                    spacing:0
                     property Item selectedItem
-                    delegate: Rectangle {
-                        id:myRectangle
-                        width: gv.cellWidth
-                        height: gv.cellHeight
-                        color: "transparent"
+                    Repeater {
+                        id:repeater
+                        model:monthComponent.model
                         Rectangle {
-                            id:outer
-                            width: gv.cellWidth-5
-                            height: gv.cellHeight-5
+                            id:myRectangle
+                            width:(grid.width*7/8)/monthComponent.days
+                            height:grid.height/monthComponent.weeks
                             color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
                             border.color: gv.selectedItem == myRectangle ? "black" : "transparent"
                             Rectangle {
-                                width: gv.cellWidth
-                                height: gv.cellHeight
+                                width: 10
+                                height:10
                                 color:"transparent"
                                 opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?1:0; 
                                 anchors.fill:parent
@@ -326,7 +358,7 @@ Item {
                             Components.Label {
                                 id:label
                                 anchors.centerIn: parent
-                                text: dayNumber
+                                text:dayNumber
                                 font.bold:(containsEventItems)||(containsTodoItems) ? true:false
                                 opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
                             }
@@ -341,11 +373,11 @@ Item {
                                     }
                                 }
                                 onClicked: {
-                                    monthComponent.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);                                   gv.selectedItem=myRectangle
+                                    monthComponent.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);
                                     var rowNumber = Math.floor(index / 7)   ;
                                     week=1+monthComponent.weeksModel[rowNumber];
                                     date=dayNumber+"/"+monthNumber+"/"+yearNumber
-                                    date1=yearNumber+"-"+monthNumber+"-"+dayNumber
+                                    gv.selectedItem=myRectangle
                                 }
                             }
                         }
