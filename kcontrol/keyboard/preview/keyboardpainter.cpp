@@ -50,12 +50,26 @@ KeyboardPainter::KeyboardPainter():
 void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model)
 {
     kbframe->generateKeyboardLayout(layout, variant, model);
-#ifdef NEW_GEOMETRY
-    kbDialog->setFixedSize((2.5 * kbframe->getWidth() + 20), (2.5 *  kbframe->getHeight() + 50));
-    kbframe->setFixedSize((2.5 * kbframe->getWidth() + 20), (2.5 * kbframe->getHeight() ));
-#endif
+    kbDialog->setFixedSize(getWidth(), getHeight());
+    kbframe->setFixedSize(getWidth(),getHeight());
 }
 
+
+int KeyboardPainter::getHeight(){
+   int height = kbframe->getHeight();
+#ifdef NEW_GEOMETRY
+   height = 2.5 * height + 50;
+#endif
+   return height;
+}
+
+int KeyboardPainter::getWidth(){
+   int width = kbframe->getWidth();
+#ifdef NEW_GEOMETRY
+   width = 2.5 * width + 20;
+#endif
+   return width;
+}
 
 KeyboardPainter::~KeyboardPainter()
 {

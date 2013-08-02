@@ -39,6 +39,7 @@ private:
     KeySymHelper symbol;
     Aliases alias;
     KeyboardLayout keyboardLayout;
+    static const int width = 1100, height = 490;
 #ifdef NEW_GEOMETRY
     Geometry& geometry;
     void drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name);
@@ -56,11 +57,9 @@ private:
 	
 public:
 
-#ifdef NEW_GEOMETRY
-//    Geometry& geometry;
     int getWidth() const;
     int getHeight() const;
-#endif
+
 
     explicit KbPreviewFrame(QWidget *parent = 0);
     virtual ~KbPreviewFrame();

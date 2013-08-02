@@ -34,6 +34,8 @@ public:
     explicit KeyboardPainter();
     ~KeyboardPainter();
     void generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model);
+    int getHeight();
+    int getWidth();
     
 private:
     QDialog *kbDialog;

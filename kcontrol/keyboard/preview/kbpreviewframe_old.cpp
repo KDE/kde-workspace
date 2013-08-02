@@ -18,6 +18,7 @@
 
 
 #include "kbpreviewframe.h"
+#include "kbpreviewframe.moc"
 
 #include <QtCore/QFile>
 #include <QtGui/QFont>
@@ -37,8 +38,12 @@ KbPreviewFrame::KbPreviewFrame(QWidget *parent) :
 }
 
 
-KbPreviewFrame::~KbPreviewFrame(QWidget *parent) {
+KbPreviewFrame::~KbPreviewFrame() {
+
 }
+
+int KbPreviewFrame :: getWidth() const {return width;}
+int KbPreviewFrame :: getHeight() const {return height;}
 
 static const int keygap = 4, cornerRadius = 7;
 static const QColor keyBorderColor("#d4d4d4");
@@ -281,6 +286,8 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 
     painter.setFont(kbfont);
     painter.setBrush(QBrush(Qt::darkGray));
+
+    painter.setRenderHint(QPainter::Antialiasing);
 
     const int strtx=0,strty=0,endx=1390,endy=490,kszy=70;
     const int row1x=10,row1y=30,row2x=10,row2y=90,row5x=10,row5y=330,row3x=10,row3y=170,shifx=10,shify=60,row4x=10,row4y=250,row6x=110,row6y=410;
