@@ -59,6 +59,9 @@ Item {
     signal itemGeometryChanged(int id, int x, int y, int width, int height)
     signal itemNeedsAttention(bool needs)
 
+    onWidthChanged: { taskList.width = Layout.layoutWidth(); }
+    onHeightChanged: { taskList.height = Layout.layoutHeight(); }
+
     onActiveWindowIdChanged: {
         if (activeWindowId != groupDialog.windowId) {
             groupDialog.visible = false;
@@ -135,9 +138,6 @@ Item {
             top: parent.top
         }
 
-        width: Layout.layoutWidth()
-        height: Layout.layoutHeight()
-
         onWidthChanged: Layout.layout(taskRepeater)
         onHeightChanged: Layout.layout(taskRepeater)
 
@@ -154,7 +154,14 @@ Item {
 
             model: visualModel
 
-            onCountChanged: Layout.layout(taskRepeater)
+            onCountChanged: {
+                if (tasks.forceStripes) {
+                    taskList.width = Layout.layoutWidth();
+                    taskList.height = Layout.layoutHeight();
+                }
+
+                Layout.layout(taskRepeater);
+            }
         }
     }
 
