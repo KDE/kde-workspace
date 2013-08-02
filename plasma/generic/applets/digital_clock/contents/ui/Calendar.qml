@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013  Heena Mahour <heena393@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 import QtQuick 1.1
 import org.kde.pim.calendar 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
@@ -12,7 +28,7 @@ Item {
     property int week;
 
     function isToday(date) {
-        if(date==Qt.formatDateTime(new Date(), "dd/M/yyyy")) 
+        if(date==Qt.formatDateTime(new Date(), "d/M/yyyy")) 
             return true ;
         else return false;
     }
@@ -38,6 +54,7 @@ Item {
         anchors {
             fill:root
         }
+        
         Column {
             id:col
             height: parent.height
@@ -46,15 +63,14 @@ Item {
                 top:parent.top
                 bottom:parent.bottom
             }
+            
             Rectangle {
                 id:rect1
                 clip:true
                 height: parent.height/10
                 width: parent.width
                 color: "transparent"
-                anchors {
-                    right:grid.right
-                }
+                
                 Row {
                     id:r1
                     Components.ToolButton {
@@ -174,7 +190,7 @@ Item {
                             height:12
                             anchors.left:year.right
                             MouseArea {
-                                anchors.fill:parent
+                               // anchors.fill:parent
                                 onClicked:monthComponent.nextYear()
                             }
                         }
@@ -186,7 +202,7 @@ Item {
                             anchors.left:year.right
                             anchors.top:increase.bottom
                             MouseArea {
-                                anchors.fill:parent
+                             //   anchors.fill:parent
                                 onClicked:monthComponent.previousYear()
                             }
                         }
@@ -202,19 +218,20 @@ Item {
                         anchors.right: rig.left
                         MouseArea {
                             id:mouse
-                            anchors.fill: parent
+                           // anchors.fill: parent
                             onClicked: {
                                 monthComponent.nextMonth()
                             }
                         }
                     }
+                    
                     Row {
                         id:r2
                         anchors {
                             top:monthright.bottom
                             left:parent.left
-                            right:rig.left
-                            bottom:grid.top
+                          //  right:rig.left
+                        //    bottom:grid.top
                             leftMargin:grid.width/5
                         }
                         clip:true
@@ -251,14 +268,11 @@ Item {
                     }
                 }
             }
+            
             Row {
                 id:grid
                 width:col.width
                 height:parent.height-rect1.height-riw.height
-                anchors {
-                    top:rect.bottom
-                    right:rig.left
-                }
                 ListView {
                     id:list_week
                     width: grid.width/8
@@ -267,7 +281,7 @@ Item {
                     delegate: Rectangle {
                         id:r
                         width: grid.width/8
-                        height: gv.cellHeight//grid.height / monthComponent.weeks
+                        height: gv.cellHeight
                         color: "transparent"
                         Components.Label {
                             id:weekNumber
@@ -275,12 +289,9 @@ Item {
                             text: modelData + 1
                             opacity:0.5
                         }
-                        anchors {
-                            top:header.bottom
-                            right:gv.left
-                        }
                     }
                 }
+                
                 GridView {
                     id: gv
                     width: grid.width*7/8
@@ -308,7 +319,7 @@ Item {
                                 width: gv.cellWidth
                                 height: gv.cellHeight
                                 color:"transparent"
-                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?true:false; 
+                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?1:0; 
                                 anchors.fill:parent
                                 border.color:"blue"
                             }
@@ -326,7 +337,6 @@ Item {
                                 onEntered: {
                                     monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);                                     list.model=monthComponent.selectedDayModel
                                     if(list.count==0) {
-                                       // error.visible=true
                                         list.model=monthComponent.upcomingEventsModel
                                     }
                                 }
@@ -342,11 +352,13 @@ Item {
                     }
                 }
             }
+            
             Rectangle {
                 id:test
                 width:parent.width
                 height:20
                 color:"transparent"
+                
                 Row {
                     id:riw
                     width:rect1.width
@@ -389,11 +401,12 @@ Item {
                 }
             }
         }
+        
         Column {
             id:rig
             height: parent.height
             width: parent.width / 2
-            anchors.left:grid.right
+
             Rectangle {
                 width:parent.width
                 height:50
@@ -405,16 +418,17 @@ Item {
                     font.italic:true
                 }
             }
+            
             ListView {
                 id:list
                 height: parent.height
                 width: (parent.width / 4)-(scrollBar.visible ? scrollBar.width : 0)
-                model: monthComponent.upcomingEventsModel//monthComponent.selectedDayModel
-                anchors.left:grid.right
+                model: monthComponent.upcomingEventsModel
                 delegate: Rectangle {
                     width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
                     height: 40
                     color: "transparent"
+                    
                     Row {
                         spacing:4
                         width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
@@ -438,9 +452,6 @@ Item {
                                 text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
                                 font.capitalization:Font.Capitalize
                                 font.italic:true
-                                anchors {
-                                    left:circle1.right
-                                }
                             }
                         }
                     }

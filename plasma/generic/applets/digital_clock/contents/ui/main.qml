@@ -26,6 +26,13 @@ Item {
    // property int minimumWidth:height
     //property int minimumHeight:width
     
+    PlasmaCore.DataSource {
+        id: dataSource
+        engine: "time"
+        connectedSources: ["Local"]
+        interval: 500
+    }
+    
     Component.onCompleted: {
         var toolTipData = new Object;
         toolTipData["image"] = "preferences-system-time"; 
@@ -38,12 +45,10 @@ Item {
     Calendar {
         id:calendar
         anchors.top:parent.top
-        anchors.topMargin:main.topMargin
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins:main.defaultMargin
-           clip: true;
+        clip: true;
     }
     
     property Component compactRepresentation: CompactRepresentation {
