@@ -59,8 +59,21 @@ Item {
     signal itemGeometryChanged(int id, int x, int y, int width, int height)
     signal itemNeedsAttention(bool needs)
 
-    onWidthChanged: { taskList.width = Layout.layoutWidth(); }
-    onHeightChanged: { taskList.height = Layout.layoutHeight(); }
+    onWidthChanged: {
+        taskList.width = Layout.layoutWidth();
+
+        if (tasks.forceStripes) {
+            taskList.height = Layout.layoutHeight();
+        }
+    }
+
+    onHeightChanged: {
+        if (tasks.forceStripes) {
+            taskList.width = Layout.layoutWidth();
+        }
+
+        taskList.height = Layout.layoutHeight();
+    }
 
     onActiveWindowIdChanged: {
         if (activeWindowId != groupDialog.windowId) {
