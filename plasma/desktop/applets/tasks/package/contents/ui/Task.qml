@@ -44,6 +44,7 @@ DragArea {
     property bool inPopup: false
     property bool isGroupParent: model.hasModelChildren
     property bool isLauncher: model.IsLauncher
+    property bool isStartup: model.IsStartup
     property bool demandsAttention: model.DemandsAttention
     property int textWidth: label.implicitWidth
     property Item busyIndicator
@@ -64,6 +65,12 @@ DragArea {
             }
 
             width = newWidth;
+        }
+    }
+
+    onIsStartupChanged: {
+        if (!isStartup) {
+            tasks.itemGeometryChanged(itemId, x, y, width, height);
         }
     }
 
