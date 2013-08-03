@@ -35,6 +35,13 @@ Item {
     function isTodayMonth() {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
+    
+    function visible () {
+          list.model=monthComponent.selectedDayModel
+                                    if(list.count==0)
+                                        return true;
+                                    else return false;
+    }
 
     Calendar {
         id: monthComponent
@@ -338,8 +345,8 @@ Item {
                 Grid {
                     id:gv
                     columns:monthComponent.days
-                    rows:monthComponent.weeks+1
-                    width:grid.width
+                    rows:monthComponent.weeks
+                    width:grid.width*7/8
                     height:parent.height
                     spacing:0
                     property Item selectedItem
@@ -351,13 +358,12 @@ Item {
                             width:(grid.width*7/8)/monthComponent.days
                             height:grid.height/monthComponent.weeks
                             color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
-                            border.color: gv.selectedItem == myRectangle ? "black" : "transparent"
-                            Rectangle {
-                                width: 10
-                                height:10
+                            border.color:gv.selectedItem == myRectangle ? "black" : "transparent"
+                           Rectangle {
+                                width: (grid.width*7/8)/monthComponent.days
+                                height:grid.height/monthComponent.weeks
                                 color:"transparent"
-                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?1:0; 
-                                anchors.fill:parent
+                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?1:0;
                                 border.color:"blue"
                             }
                             Components.Label {
@@ -367,18 +373,21 @@ Item {
                                 font.bold:(containsEventItems)||(containsTodoItems) ? true:false
                                 opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
                             }
+                            
                             MouseArea {
                                 id:dateMouse
                                 anchors.fill:parent
                                 hoverEnabled:true
                                 onEntered: {
-                                    monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);                                     list.model=monthComponent.selectedDayModel
+                                    monthComponent.setSelectedDay(yearNumber, monthNumber, dayNumber);
+                                    list.model=monthComponent.selectedDayModel
                                     if(list.count==0) {
                                         list.model=monthComponent.upcomingEventsModel
                                     }
                                 }
                                 onClicked: {
                                     monthComponent.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);
+                                    errorl.text=(containsEventItems)||(containsTodoItems)?"":"No events found on this day "
                                     var rowNumber = Math.floor(index / 7)   ;
                                     week=1+monthComponent.weeksModel[rowNumber];
                                     date=dayNumber+"/"+monthNumber+"/"+yearNumber
@@ -439,23 +448,36 @@ Item {
             }
         }
         
+        PlasmaCore.SvgItem {
+            svg: PlasmaCore.Svg {
+                id: lineSvg
+                imagePath: "widgets/line"
+            }
+            elementId: "vertical-line"
+            height: parent.height
+            width: lineSvg.elementSize("vertical-line").width
+            anchors {
+                left:grid.right
+                right:rig.left
+            }
+        }
+
         Column {
             id:rig
             height: parent.height
             width: parent.width / 2
-
             Rectangle {
+                id:error
                 width:parent.width
                 height:50
                 color:"transparent"
                 Components.Label {
-                    id:error
-                    text: "No event for this date"
-                    visible:list.count==0
+                    id:errorl
+                    text: ""
+                    visible: true
                     font.italic:true
                 }
             }
-            
             ListView {
                 id:list
                 height: parent.height
