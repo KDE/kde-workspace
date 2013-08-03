@@ -36,13 +36,6 @@ Item {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
     
-    function visible () {
-          list.model=monthComponent.selectedDayModel
-                                    if(list.count==0)
-                                        return true;
-                                    else return false;
-    }
-
     Calendar {
         id: monthComponent
         days: 7
