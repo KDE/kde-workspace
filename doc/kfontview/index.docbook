@@ -75,7 +75,7 @@ So you can get a good idea of what it will look like.
 From the drop down box in the toolbar you can choose additional preview types:
 <itemizedlist>
 <listitem><para><guilabel>All Characters</guilabel> displays all characters
-provided by the font in one size. Use the zoom buttons to change the font size.</para></listitem>
+provided by the font in one size. </para></listitem>
 <listitem><para>Unicode Block: The Unicode standard arranges groups of characters 
 together in blocks</para></listitem>
 <listitem><para>Unicode Script: In Unicode, a script is a collection of letters 
@@ -86,7 +86,7 @@ String</guilabel> dialog where you can insert a user defined text.
 This feature enables you to check that a font supports the characters you need.
 </para></listitem>
 </itemizedlist></para>
-
+<para>You can use the zoom buttons or the mousewheel to change the font size in all preview types.</para>
 <para>In <guilabel>Unicode Block</guilabel> and <guilabel>Unicode Script</guilabel> 
 preview mode additional tooltip info's are displayed hovering a character with the 
 mouse pointer: 
