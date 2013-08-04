@@ -36,6 +36,11 @@ Item {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
     
+    function eventDate(yearNumber,monthNumber,dayNumber) {
+         var d = new Date(yearNumber, monthNumber, dayNumber); return Qt.formatDate(d, "dddd dd MMM yyyy");
+      //  return Qt.formatDate(date,"yyyy");
+    }
+    
     Calendar {
         id: monthComponent
         days: 7
@@ -380,10 +385,11 @@ Item {
                                 }
                                 onClicked: {
                                     monthComponent.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);
-                                    errorl.text=(containsEventItems)||(containsTodoItems)?"":"No events found on this day "
                                     var rowNumber = Math.floor(index / 7)   ;
                                     week=1+monthComponent.weeksModel[rowNumber];
                                     date=dayNumber+"/"+monthNumber+"/"+yearNumber
+                                    error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
+                                    errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
                                     gv.selectedItem=myRectangle
                                 }
                             }
@@ -459,17 +465,18 @@ Item {
             id:rig
             height: parent.height
             width: parent.width / 2
-            Rectangle {
+            Components.Label {
                 id:error
-                width:parent.width
-                height:50
-                color:"transparent"
-                Components.Label {
-                    id:errorl
-                    text: ""
-                    visible: true
-                    font.italic:true
-                }
+                text: ""
+                visible: true
+                font.weight:Font.Bold
+                font.bold:true
+            }
+            Components.Label {
+                id:errorl
+                text: ""
+                visible: true
+                font.italic:true
             }
             ListView {
                 id:list
