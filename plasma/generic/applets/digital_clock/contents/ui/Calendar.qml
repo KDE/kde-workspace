@@ -38,15 +38,9 @@ Item {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
     
-    function week(yearNumber,monthNumber,dayNumber) {
-        var d = new Date(yearNumber, monthNumber, dayNumber);
-        return Qt.formatDate(d, "dddd ");
-    }
-    
     function eventDate(yearNumber,monthNumber,dayNumber) {
-         var d = new Date(yearNumber, monthNumber, dayNumber);
-         return Qt.formatDate(d, "dddd dd MMM yyyy");
-      //  return Qt.formatDate(date,"yyyy");
+        var d = new Date(yearNumber, monthNumber, dayNumber);
+        return Qt.formatDate(d, "dddd dd MMM yyyy");
     }
     
     Calendar {
@@ -227,7 +221,7 @@ Item {
                         height: 24;
                         anchors.left:monthYear.right
                         anchors.right:rect1.right
-                      anchors.leftMargin:grid.width/4
+                        anchors.leftMargin:grid.width/4
                         MouseArea {
                             id:mouse
                             anchors.fill: parent
@@ -236,49 +230,38 @@ Item {
                             }
                         }
                     }
-
-
                     Grid {
-                                id:dayLabels
+                        id:dayLabels
                         width:grid.width
                         height:parent.height
                            anchors {
                             top:monthright.bottom
                             left:parent.left
-                           right:gv.right
-                           leftMargin:grid.width/8
+                            right:gv.right
+                            leftMargin:grid.width/8
                         }
-
-columns: monthComponent.days
-spacing: 0
-
-Repeater {
-model: monthComponent.days
-
-Rectangle {
-color: "transparent"
-width:grid.width/8
-height: 20
-
-Text {
-
-// Qt dates (for formatting) and JavaScript dates use different ranges
-// (1-7 and 0-6 respectively), so we add 1 to the day number.
-text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
-anchors.horizontalCenter: parent.horizontalCenter
-}
-}
-}
-}
-                    //}
+                        columns: monthComponent.days
+                        spacing: 0
+                        Repeater {
+                            model: monthComponent.days
+                            Rectangle {
+                                color: "transparent"
+                                width:grid.width/8
+                                height: 20
+                                Components.Label {
+                                    text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                }
+                            }
+                        }
+                    }
                 }
             }
             
             Row {
                 id:grid
                 width:col.width
-                height:parent.height-rect1.height-riw.height
-                
+                height:parent.height-rect1.height-riw.height                
                 ListView {
                     id:list_week
                     width: grid.width/8
@@ -297,11 +280,10 @@ anchors.horizontalCenter: parent.horizontalCenter
                         }
                     }
                 }
-
                 Grid {
                     id:gv
                     columns:monthComponent.days
-                    rows:dayLabels.rows//monthComponent.weeks
+                    rows:dayLabels.rows
                     width:grid.width*7/8
                     height:parent.height
                     spacing:0
@@ -349,8 +331,6 @@ anchors.horizontalCenter: parent.horizontalCenter
                                     error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
                                     errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
                                     gv.selectedItem=myRectangle
-                                    print(Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd"));
-
                                 }
                             }
                         }
