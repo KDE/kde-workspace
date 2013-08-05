@@ -24,7 +24,9 @@ Item {
     width: parent.width
     height: parent.height
     property string date ;
+    property date showDate: new Date()
     property int week;
+    property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
 
     function isToday(date) {
         if(date==Qt.formatDateTime(new Date(), "d/M/yyyy")) 
@@ -36,8 +38,14 @@ Item {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
     
+    function week(yearNumber,monthNumber,dayNumber) {
+        var d = new Date(yearNumber, monthNumber, dayNumber);
+        return Qt.formatDate(d, "dddd ");
+    }
+    
     function eventDate(yearNumber,monthNumber,dayNumber) {
-         var d = new Date(yearNumber, monthNumber, dayNumber); return Qt.formatDate(d, "dddd dd MMM yyyy");
+         var d = new Date(yearNumber, monthNumber, dayNumber);
+         return Qt.formatDate(d, "dddd dd MMM yyyy");
       //  return Qt.formatDate(date,"yyyy");
     }
     
@@ -217,7 +225,9 @@ Item {
                         text: ">";
                         width: 24;
                         height: 24;
-                        anchors.right: r2.right
+                        anchors.left:monthYear.right
+                        anchors.right:rect1.right
+                      anchors.leftMargin:grid.width/4
                         MouseArea {
                             id:mouse
                             anchors.fill: parent
@@ -226,93 +236,41 @@ Item {
                             }
                         }
                     }
-                    
-                   Row {
-                        id:r2
+
+
+                    Grid {
+                                id:dayLabels
                         width:grid.width
                         height:parent.height
-                        anchors {
+                           anchors {
                             top:monthright.bottom
                             left:parent.left
-                            right:gv.right
+                           right:gv.right
+                           leftMargin:grid.width/8
                         }
-                        clip:true
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                        }
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                            Components.Label {
-                                anchors.centerIn:parent
-                                font.pointSize:rect1.height/5
-                                text : monthComponent.dayName(7)
-                            }
-                        }
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                            Components.Label {
-                                anchors.centerIn:parent
-                                font.pointSize:rect1.height/5
-                                text:monthComponent.dayName(1)
-                            }
-                        }
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                            Components.Label {
-                                anchors.centerIn:parent
-                                font.pointSize:rect1.height/5
-                                text : monthComponent.dayName(2)
-                            }
-                        }
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                            Components.Label {
-                                anchors.centerIn:parent
-                                font.pointSize:rect1.height/5
-                                text : monthComponent.dayName(3)
-                            }
-                        }
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                            Components.Label {
-                                anchors.centerIn:parent
-                                font.pointSize:rect1.height/5
-                                text : monthComponent.dayName(4)
-                            }
-                        }
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                            Components.Label {
-                                anchors.centerIn:parent
-                                font.pointSize:rect1.height/5
-                                text : monthComponent.dayName(5)
-                            }
-                        }
-                        Rectangle {
-                            width: grid.width/8
-                            height:parent.height
-                            color:"transparent"
-                            Components.Label {
-                                anchors.centerIn:parent
-                                font.pointSize:rect1.height/5
-                                text : monthComponent.dayName(6)
-                            }
-                        }
-                    }
+
+columns: monthComponent.days
+spacing: 0
+
+Repeater {
+model: monthComponent.days
+
+Rectangle {
+color: "transparent"
+width:grid.width/8
+height: 20
+
+Text {
+
+// Qt dates (for formatting) and JavaScript dates use different ranges
+// (1-7 and 0-6 respectively), so we add 1 to the day number.
+text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
+anchors.horizontalCenter: parent.horizontalCenter
+}
+}
+}
+}
+                    //}
                 }
             }
             
@@ -343,7 +301,7 @@ Item {
                 Grid {
                     id:gv
                     columns:monthComponent.days
-                    rows:monthComponent.weeks
+                    rows:dayLabels.rows//monthComponent.weeks
                     width:grid.width*7/8
                     height:parent.height
                     spacing:0
@@ -391,6 +349,8 @@ Item {
                                     error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
                                     errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
                                     gv.selectedItem=myRectangle
+                                    print(Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd"));
+
                                 }
                             }
                         }
@@ -448,6 +408,7 @@ Item {
         }
         
         PlasmaCore.SvgItem {
+            id:line
             svg: PlasmaCore.Svg {
                 id: lineSvg
                 imagePath: "widgets/line"
