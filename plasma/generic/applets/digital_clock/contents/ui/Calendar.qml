@@ -73,6 +73,7 @@ Item {
                 id:rect1
                 height: parent.height/10
                 width: parent.width
+                clip:true
                 Components.ToolButton {
                     flat: true;
                     text: "<";
