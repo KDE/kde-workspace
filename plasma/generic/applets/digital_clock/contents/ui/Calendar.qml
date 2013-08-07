@@ -214,6 +214,30 @@ Item {
                         monthCalendar.nextMonth()
                     }
                 }
+                Row {
+                    id:r2
+                    width:grid.width
+                    height:parent.height
+                    anchors {
+                        top:monthright.bottom
+                        left:parent.left
+                        right:gv.right 
+                        leftMargin:grid.width/8
+                    }
+                    clip:true
+                    Repeater {
+                        model: monthCalendar.days
+                        Rectangle {
+                            color: "transparent"
+                            width:grid.width/8
+                            height: 10
+                            Components.Label {
+                                text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                        }
+                    }
+                }
             }
             Row {
                 id:grid
@@ -243,23 +267,12 @@ Item {
                 Grid {
                     id:gv
                     columns:monthCalendar.days
-                    rows:monthCalendar.weeks//dayLabels.rows
+                    rows:1+monthCalendar.weeks//dayLabels.rows
                     width:grid.width*7/8
                     height:parent.height
                     spacing:0
                     property Item selectedItem
-                    Repeater {
-                        model: monthCalendar.days
-                        Rectangle {
-                            color: "transparent"
-                            width:grid.width/8
-                            height: 20
-                            Components.Label {
-                                text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                        }
-                    }
+           
                     Repeater {
                         id:repeater
                         model:monthCalendar.model
