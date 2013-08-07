@@ -71,7 +71,7 @@ ListView {
         // When we should show only a single battery (eg. constrained in tray) such batteries will
         // only be shown when there are no primary batteries (eg. on a desktop) and there a potentially
         // failing keyboard or mouse is an urgent situation
-        property bool animate: view.singleBattery ? true : model["Is Power Supply"]
+        property bool animate: view.singleBattery ? batteries.cumulativePluggedin : model["Is Power Supply"]
 
         width: view.width/view.count
         height: view.height

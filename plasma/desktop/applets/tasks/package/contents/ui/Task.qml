@@ -31,14 +31,20 @@ import "../code/tools.js" as TaskTools
 DragArea {
     id: task
 
-    width:  inPopup ? groupDialog.mainItem.width : Layout.taskWidth()
-    height: inPopup ? Layout.preferredMinHeight() : Layout.taskHeight()
+    width: groupDialog.mainItem.width
+    height: theme.smallIconSize + Layout.verticalMargins()
+
+    visible: false
+
+    LayoutMirroring.enabled: (Qt.application.layoutDirection == Qt.RightToLeft)
+    LayoutMirroring.childrenInherit: (Qt.application.layoutDirection == Qt.RightToLeft)
 
     property int itemIndex: index
     property int itemId: model.Id
     property bool inPopup: false
     property bool isGroupParent: model.hasModelChildren
     property bool isLauncher: model.IsLauncher
+    property bool isStartup: model.IsStartup
     property bool demandsAttention: model.DemandsAttention
     property int textWidth: label.implicitWidth
     property Item busyIndicator
@@ -48,6 +54,24 @@ DragArea {
     mimeData {
         source: task
         url: model.LauncherUrl
+    }
+
+    onItemIndexChanged: {
+        if (!inPopup && !tasks.vertical && Layout.calculateStripes() > 1) {
+            var newWidth = Layout.taskWidth();
+
+            if (index == tasksModel.launcherCount) {
+                newWidth += Layout.launcherLayoutWidthDiff();
+            }
+
+            width = newWidth;
+        }
+    }
+
+    onIsStartupChanged: {
+        if (!isStartup) {
+            tasks.itemGeometryChanged(itemId, x, y, width, height);
+        }
     }
 
     onDemandsAttentionChanged: {
@@ -120,7 +144,9 @@ DragArea {
         }
 
         width: inPopup ? theme.smallIconSize : Math.min(height, parent.width - Layout.horizontalMargins())
-        height: Math.min(theme.hugeIconSize, parent.height - Layout.verticalMargins())
+        height: Math.min(theme.hugeIconSize,
+                         parent.height - (parent.height - Layout.verticalMargins() < theme.smallIconSize ?
+                                          Math.min(9, Layout.verticalMargins()) : Layout.verticalMargins()))
 
         PlasmaCore.IconItem {
             id: icon
@@ -173,7 +199,7 @@ DragArea {
             bottomMargin: taskFrame.margins.bottom
         }
 
-        visible: parent.width - anchors.leftMargin - anchors.rightMargin >= (theme.defaultFont.mSize.width * 3)
+        visible: !model.IsLauncher && (parent.width - anchors.leftMargin - anchors.rightMargin) >= (theme.defaultFont.mSize.width * 3)
 
         enabled: !model.Minimized
         backgroundPrefix: frame.prefix
@@ -189,7 +215,7 @@ DragArea {
 
             PropertyChanges {
                 target: frame
-                prefix: "normal"
+                visible: false
             }
         },
         State {

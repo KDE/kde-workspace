@@ -137,7 +137,7 @@ function iconForBattery(batteryData,pluggedIn) {
             if (pluggedIn && batteryData["Is Power Supply"]) {
                 return "battery-charging-" + fill;
             } else {
-                if (p < 5) {
+                if (p <= 5) {
                     return "dialog-warning"
                 }
                 return "battery-" + fill;
@@ -192,32 +192,19 @@ function updateTooltip() {
     batteries.tooltipImage = image;
 }
 
-function updateBrightness() {
+function updateBrightness(source) {
     // we don't want passive brightness change send setBrightness call
-    if (!pmSource.data["PowerDevil"]) {
+    if (!source.data["PowerDevil"]) {
         return;
     }
     dialogItem.disableBrightnessUpdate = true;
-    if (pmSource.data["PowerDevil"]["Screen Brightness"]) {
-        dialogItem.screenBrightness = pmSource.data["PowerDevil"]["Screen Brightness"];
+    if (typeof source.data["PowerDevil"]["Screen Brightness"] === 'number') {
+        dialogItem.screenBrightness = source.data["PowerDevil"]["Screen Brightness"];
+        dialogItem.screenBrightnessPercentage = source.data["PowerDevil"]["Screen Brightness"];
     }
-    if (pmSource.data["PowerDevil"]["Keyboard Brightness"]) {
-        dialogItem.keyboardBrightness = pmSource.data["PowerDevil"]["Keyboard Brightness"];
+    if (typeof source.data["PowerDevil"]["Keyboard Brightness"] === 'number') {
+        dialogItem.keyboardBrightness = source.data["PowerDevil"]["Keyboard Brightness"];
+        dialogItem.keyboardBrightnessPercentage = source.data["PowerDevil"]["Keyboard Brightness"];
     }
     dialogItem.disableBrightnessUpdate = false;
-}
-
-// TODO: give translated and formatted string with KGlobal::locale()->prettyFormatDuration(msec);
-function formatDuration(msec) {
-    if (msec == 0 || msec === undefined)
-        return "";
-
-    var time = new Date(msec);
-    var hours = time.getUTCHours();
-    var minutes = time.getUTCMinutes();
-
-    var str = "";
-    if (hours > 0) str += i18np("1 hour ", "%1 hours ", hours);
-    if (minutes > 0) str += i18np("1 minute", "%1 minutes", minutes);
-    return str;
 }

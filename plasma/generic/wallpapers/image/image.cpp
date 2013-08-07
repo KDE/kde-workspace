@@ -238,7 +238,7 @@ void Image::addDir()
 {
     QUrl empty;
     KDirSelectDialog *dialog = new KDirSelectDialog(empty, true);
-    connect(dialog, SIGNAL(finished()), this, SLOT(addDirFromSelectionDialog()));
+    connect(dialog, SIGNAL(accepted()), this, SLOT(addDirFromSelectionDialog()));
     dialog->show();
 }
 

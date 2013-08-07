@@ -540,6 +540,9 @@ verify(GConvFunc gconv, int rootok)
 # if defined(HAVE_STRUCT_PASSWD_PW_EXPIRE) || defined(USESHADOW)
     int tim, expir, warntime, quietlog;
 # endif
+# if !defined(ultrix) && !defined(__ultrix__) && (defined(HAVE_PW_ENCRYPT) || defined(HAVE_CRYPT))
+    char *crpt_passwd;
+# endif
 #endif
 
     debug("verify ...\n");
@@ -752,9 +755,9 @@ verify(GConvFunc gconv, int rootok)
 # if defined(ultrix) || defined(__ultrix__)
     if (authenticate_user(p, curpass, 0) < 0)
 # elif defined(HAVE_PW_ENCRYPT)
-    if (strcmp(pw_encrypt(curpass, p->pw_passwd), p->pw_passwd))
+    if (!(crpt_passwd = pw_encrypt(curpass, p->pw_passwd)) || strcmp(crpt_passwd, p->pw_passwd))
 # elif defined(HAVE_CRYPT)
-    if (strcmp(crypt(curpass, p->pw_passwd), p->pw_passwd))
+    if (!(crpt_passwd = crypt(curpass, p->pw_passwd)) || strcmp(crpt_passwd, p->pw_passwd))
 # else
     if (strcmp(curpass, p->pw_passwd))
 # endif

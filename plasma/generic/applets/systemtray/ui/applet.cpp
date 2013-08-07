@@ -598,6 +598,7 @@ void Applet::createConfigurationInterface(KConfigDialog *parent)
         item->setText(info.name());
         item->setIcon(KIcon(info.icon()));
         item->setCheckable(true);
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
         item->setCheckState(ownApplets.contains(info.pluginName()) ? Qt::Checked : Qt::Unchecked);
         item->setData(i18nc("Extra items to be manually added in the systray, such as little Plasma widgets", "Extra Items"), KCategorizedSortFilterProxyModel::CategoryDisplayRole);
         item->setData(info.pluginName(), Qt::UserRole+2);

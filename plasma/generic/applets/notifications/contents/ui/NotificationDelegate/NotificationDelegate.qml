@@ -119,6 +119,7 @@ PlasmaComponents.ListItem {
                     }
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
+                    onLinkActivated: plasmoid.openUrl(link)
                 }
 
                 PlasmaComponents.ToolButton {
@@ -130,6 +131,7 @@ PlasmaComponents.ListItem {
                         if (notificationsModel.count > 1) {
                             removeAnimation.running = true
                         } else {
+                            closeNotification(model.source)
                             notificationsModel.remove(index)
                         }
                     }
@@ -221,6 +223,7 @@ PlasmaComponents.ListItem {
                         readOnly: true
                         wrapMode: Text.Wrap
                         textFormat: TextEdit.RichText
+                        onLinkActivated: plasmoid.openUrl(link)
                     }
                 }
                 Column {

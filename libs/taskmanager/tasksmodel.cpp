@@ -313,7 +313,19 @@ int TasksModel::rowCount(const QModelIndex &parent) const
 
 int TasksModel::launcherCount() const
 {
-    return d->groupManager.data()->launcherCount();
+    if (!d->rootGroup) {
+        return 0;
+    }
+
+    int launcherCount = 0;
+
+    foreach (AbstractGroupableItem *item, d->rootGroup->members()) {
+        if (item->itemType() == LauncherItemType) {
+            ++launcherCount;
+        }
+    }
+
+    return launcherCount;
 }
 
 TasksModelPrivate::TasksModelPrivate(TasksModel *model, GroupManager *gm)

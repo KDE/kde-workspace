@@ -22,6 +22,7 @@ import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
+import org.kde.locale 0.1 as KLocale
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
@@ -33,9 +34,7 @@ Item {
 
     Behavior on height { PropertyAnimation {} }
 
-    property bool highlight
     property bool expanded
-    property bool showChargeAnimation
 
     // NOTE: According to the UPower spec this property is only valid for primary batteries, however
     // UPower seems to set the Present property false when a device is added but not probed yet
@@ -43,14 +42,17 @@ Item {
 
     property int remainingTime
 
+    KLocale.Locale { id: locale }
+
     function updateSelection() {
+        var hasFocus = batteryList.activeFocus && batteryList.activeIndex == index;
         var containsMouse = mouseArea.containsMouse;
 
-        if (highlight || expanded && containsMouse) {
+        if (expanded && (hasFocus || containsMouse)) {
             padding.opacity = 1;
         } else if (expanded) {
             padding.opacity = 0.8;
-        } else if (containsMouse) {
+        } else if (hasFocus || containsMouse) {
             padding.opacity = 0.65;
         } else {
             padding.opacity = 0;
@@ -66,6 +68,8 @@ Item {
         anchors.fill: parent
     }
 
+    onExpandedChanged: updateSelection()
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -73,13 +77,11 @@ Item {
         onEntered: updateSelection()
         onExited: updateSelection()
         onClicked: {
-            if (expanded) {
-                expanded = false;
-            } else {
-                expanded = true;
-                batteryItem.forceActiveFocus();
-            }
-            updateSelection();
+            oldIndex = batteryList.activeIndex
+            batteryList.forceActiveFocus()
+            batteryList.activeIndex = index
+            batteryList.updateSelection(oldIndex,index)
+            expanded = !expanded
         }
     }
 
@@ -109,7 +111,7 @@ Item {
 
         SequentialAnimation {
           id: chargeAnimation
-          running: showChargeAnimation && model["State"] == "Charging"
+          running: dialog.popupShown && model["State"] == "Charging" && model["Is Power Supply"]
           alwaysRunToEnd: true
           loops: Animation.Infinite
 
@@ -274,8 +276,8 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     // FIXME Uses overall remaining time, not bound to individual battery
-                    text: Logic.formatDuration(dialogItem.remainingTime)
-                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != ""
+                    text: locale.prettyFormatDuration(dialogItem.remainingTime)
+                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != "" && dialogItem.remainingTime > 0
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
@@ -285,7 +287,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: i18nc("Placeholder is battery capacity", "%1%", model["Capacity"])
-                    visible: model["Is Power Supply"] &&  model["Capacity"] != "" && model["Capacity"] !== undefined
+                    visible: model["Is Power Supply"] &&  model["Capacity"] != "" && typeof model["Capacity"] == 'number'
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
@@ -295,7 +297,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: model["Vendor"]
-                    visible: model["Vendor"] != "" && model["Vendor"] !== undefined
+                    visible: model["Vendor"] != "" && typeof model["Vendor"] == 'string'
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }
@@ -305,7 +307,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: model["Product"]
-                    visible: model["Product"] != "" && model["Product"] !== undefined
+                    visible: model["Product"] != "" && typeof model["Product"] == 'string'
                     font.pointSize: theme.smallestFont.pointSize
                     color: "#99"+(theme.textColor.toString().substr(1))
                 }

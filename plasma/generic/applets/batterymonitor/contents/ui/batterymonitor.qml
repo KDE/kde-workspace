@@ -31,7 +31,8 @@ Item {
 
     property bool show_remaining_time: false
 
-    PlasmaCore.Theme { id: theme }
+    LayoutMirroring.enabled: Qt.application.layoutDirection == Qt.RightToLeft
+    LayoutMirroring.childrenInherit: true
 
     Component.onCompleted: {
         plasmoid.aspectRatioMode = IgnoreAspectRatio
@@ -49,12 +50,15 @@ Item {
         plasmoid.status = Logic.plasmoidStatus();
         Logic.updateTooltip();
         if (updateBrightness) {
-            Logic.updateBrightness();
+            Logic.updateBrightness(pmSource);
         }
     }
 
     function popupEventSlot(popped) {
         dialogItem.popupShown = popped;
+        if (popped) {
+            dialogItem.forceActiveFocus();
+        }
     }
 
     property Component compactRepresentation: CompactRepresentation {
@@ -111,9 +115,11 @@ Item {
 
     PopupDialog {
         id: dialogItem
-        property bool disableBrightnessUpdate: false
         model: batteries
         anchors.fill: parent
+        focus: true
+
+        property bool disableBrightnessUpdate: false
 
         isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
         isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false

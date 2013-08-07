@@ -23,7 +23,7 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
 
-Item {
+FocusScope {
     id: brightnessItem
     clip: true
     width: parent.width
@@ -40,6 +40,7 @@ Item {
             topMargin: padding.margins.top
             bottomMargin: padding.margins.bottom
         }
+        focus: true
         checked: true
     }
 

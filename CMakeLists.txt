@@ -328,7 +328,7 @@ if(NOT WIN32)
 #   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/startkde DESTINATION ${BIN_INSTALL_DIR})
 endif(NOT WIN32)
 
-feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
+feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 # make the libraries installed from kdebase/workspace available to other projects
 # by creating and installing a KDE4WorkspaceConfig.cmake file, which will

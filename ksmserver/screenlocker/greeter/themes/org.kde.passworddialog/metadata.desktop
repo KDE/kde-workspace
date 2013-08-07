@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Password dialog
+Name[bs]=Dijalog za lozinku
 Name[ca]=Diàleg de contrasenya
 Name[ca@valencia]=Diàleg de contrasenya
 Name[cs]=Dialog hesla
@@ -35,11 +36,13 @@ Name[sr@ijekavianlatin]=Dijalog za lozinku
 Name[sr@latin]=Dijalog za lozinku
 Name[sv]=Lösenordsdialogruta
 Name[tr]=Parola iletişim kutusu
+Name[ug]=ئىم سۆزلەشكۈسى
 Name[uk]=Вікно для вводу пароля
 Name[x-test]=xxPassword dialogxx
 Name[zh_CN]=密码对话框
 Name[zh_TW]=密碼對話框
 Comment=Screen locker that provides a password dialog and an interface to switch the current user
+Comment[bs]=Zaključavanje ekrana koje pruža dijaloški prozor za lozinku i interfejs za promjenutrenutnog korisnika
 Comment[ca]=Bloqueig de pantalla que proporciona una diàleg de contrasenya i una interfície per commutar l'usuari actual
 Comment[ca@valencia]=Bloqueig de pantalla que proporciona una diàleg de contrasenya i una interfície per commutar l'usuari actual
 Comment[cs]=Zámek obrazovky poskytující dialog s heslem a rozhraní pro přepínání uživatelů

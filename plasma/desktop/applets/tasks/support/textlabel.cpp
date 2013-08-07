@@ -179,7 +179,7 @@ void TextLabel::drawTextLayout(QPainter *painter, const QTextLayout &layout, con
         return;
     }
 
-    QPixmap pixmap(rect.size());
+    QPixmap pixmap(rect.size() + QSize(0, 8));
     pixmap.fill(Qt::transparent);
 
     QPainter p(&pixmap);
@@ -199,7 +199,7 @@ void TextLabel::drawTextLayout(QPainter *painter, const QTextLayout &layout, con
     QFontMetrics fm(layout.font());
     int textHeight = layout.lineCount() * fm.lineSpacing();
 
-    QPointF position(0, (rect.height() - textHeight) / 2 + (fm.tightBoundingRect("M").height() - fm.xHeight())/2);
+    QPointF position(0, 4 + (rect.height() - textHeight) / 2);
     QList<QRect> fadeRects;
     int fadeWidth = 30;
 
@@ -247,11 +247,11 @@ void TextLabel::drawTextLayout(QPainter *painter, const QTextLayout &layout, con
     }
 
     if (shadowColor == Qt::white) {
-        painter->drawPixmap(rect.topLeft(), m_cachedShadow);
+        painter->drawPixmap(rect.topLeft() - QPoint(0, 4), m_cachedShadow);
     } else {
-        painter->drawPixmap(rect.topLeft() + QPoint(1,2), m_cachedShadow);
+        painter->drawPixmap(rect.topLeft() + QPoint(1, 2 - 4), m_cachedShadow);
     }
-    painter->drawPixmap(rect.topLeft(), pixmap);
+    painter->drawPixmap(rect.topLeft() - QPoint(0, 4), pixmap);
 }
 
 void TextLabel::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)

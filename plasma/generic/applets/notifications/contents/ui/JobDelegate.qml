@@ -38,7 +38,7 @@ PlasmaComponents.ListItem {
     property string label0: getData(jobsSource.data, "label0", '')
     property string labelName1: getData(jobsSource.data, "labelName1", '')
     property string label1: getData(jobsSource.data, "label1", '')
-    property string state: getData(jobsSource.data, "state", '')
+    property string jobstate: getData(jobsSource.data, "state", '')
     property int eta: getData(jobsSource.data, "eta", 0)
     property string speed: getData(jobsSource.data, "speed", '')
 
@@ -138,11 +138,11 @@ PlasmaComponents.ListItem {
                         id: pauseButton
                         width: notificationItem.toolIconSize
                         height: width
-                        iconSource: state == "suspended" ? "media-playback-start" : "media-playback-pause"
+                        iconSource: jobstate == "suspended" ? "media-playback-start" : "media-playback-pause"
                         flat: false
                         onClicked: {
                             var operationName = "suspend"
-                            if (state == "suspended") {
+                            if (jobstate == "suspended") {
                                 operationName = "resume"
                             }
                             var service = jobsSource.serviceForSource(modelData)
