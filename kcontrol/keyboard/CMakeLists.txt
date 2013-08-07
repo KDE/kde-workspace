@@ -110,14 +110,16 @@ if(Boost_FOUND)
   set(preview_SRCS
     preview/geometry_components.cpp
     preview/geometry_parser.cpp
-    preview/kbpreviewframe.cpp)
+    preview/kbpreviewframe.cpp
+    preview/keyboardlayout_new.cpp
+    preview/symbol_parser.cpp)
   
 else(Boost_FOUND)
-  
   message("Boost not found, Install Boost Libraries to enable keyboard geometry preview.")
   set(preview_SRCS
   preview/kbpreviewframe_old.cpp)
   
+
 endif(Boost_FOUND)
 
 

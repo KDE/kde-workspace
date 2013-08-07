@@ -486,7 +486,7 @@ template<typename Iterator>
             i++;
 
         }
-        g.geom.display();
+        //g.geom.display();
         return g.geom;
 
     }

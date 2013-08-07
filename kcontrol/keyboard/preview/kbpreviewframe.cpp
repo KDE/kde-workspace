@@ -21,6 +21,8 @@
 
 #include "geometry_parser.h"
 #include "geometry_components.h"
+#include "keyboardlayout_new.h"
+#include "symbol_parser.h"
 
 #include <QtCore/QFile>
 #include <QtGui/QFont>
@@ -249,14 +251,14 @@ void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString
 {
     QString filename = keyboardLayout.findSymbolBaseDir();
     filename.append(layout);
-
+    KbLayout lt;
     QFile file(filename);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString content = file.readAll();
     file.close();
 
     geometry = grammar::parseGeometry(model);
-
+    lt = grammar::parseSymbols();
     QList<QString> symstr = content.split("xkb_symbols ");
 
     if( layoutVariant.isEmpty() ) {
