@@ -342,18 +342,11 @@ Item {
                        iconSource:"view-pim-calendar"
                         width:24
                         height:24
-                          MouseArea {
-                            id:mouse2
-                            hoverEnabled:true
-                            anchors.fill: parent
-                            onClicked: {
-                                monthCalendar.startDate=isTodayMonth();
-                            }
-                            PlasmaCore.ToolTip {
-                                id: tool
-                                target: mouse2
-                                mainText:"Select Today"
-                            }
+                        onClicked: monthCalendar.startDate=isTodayMonth();
+                        PlasmaCore.ToolTip {
+                            id: tool
+                            target: currentDate
+                            mainText:"Select Today"
                         }
                     }
                     Components.TextField {
