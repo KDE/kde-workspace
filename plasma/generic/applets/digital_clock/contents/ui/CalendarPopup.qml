@@ -25,9 +25,9 @@ Item {
     height: parent.height
     property string date ;
     property date showDate: new Date()
+    property Item selectedItem
     property int week;
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
-
     function isToday(date) {
         if(date==Qt.formatDateTime(new Date(), "d/M/yyyy")) 
             return true ;
@@ -217,153 +217,59 @@ Item {
                 }
                 Row {
                     id:r2
-                    width:grid.width
-                    height:parent.height
+                    spacing:grid.width/16
+                    clip:true
                     anchors {
                         top:monthright.bottom
                         left:parent.left
                         right:gv.right 
-                        leftMargin:grid.width/8
+                        leftMargin:grid.width/15+grid.width/8
                     }
-                    clip:true
                     Repeater {
                         model: monthCalendar.days
-                        Rectangle {
-                            color: "transparent"
-                            width:grid.width/8
-                            height: 10
-                            Components.Label {
-                                text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
+                        Components.Label {
+                            text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
+                            anchors.horizontalCenter: label.horizontalCenter
+                            anchors.leftMargin:5
                         }
                     }
                 }
+            }
+            DaysCalendar {
+                id:grid
+                property Item selectedItem
             }
             Row {
-                id:grid
-                width:col.width
-                height:parent.height-rect1.height-riw.height
-                Column {
-                    width: grid.width/8
-                    height: parent.height
-                    Repeater {
-                        width: grid.width/8
-                        height: parent.height
-                        model: monthCalendar.weeksModel
-                        Rectangle {
-                            id:r
-                            width: grid.width/8
-                            height:grid.height/monthCalendar.weeks
-                            color: "transparent"
-                            Components.Label {
-                                id:weekNumber
-                                anchors.centerIn: parent
-                                text: modelData + 1
-                                opacity:0.5
-                            }
-                        }
-                    }
-                }
-                Grid {
-                    id:gv
-                    columns:monthCalendar.days
-                    rows:1+monthCalendar.weeks//dayLabels.rows
-                    width:grid.width*7/8
-                    height:parent.height
-                    spacing:0
-                    property Item selectedItem
-           
-                    Repeater {
-                        id:repeater
-                        model:monthCalendar.model
-                        Rectangle {
-                            id:myRectangle
-                            width:(grid.width*7/8)/monthCalendar.days
-                            height:grid.height/monthCalendar.weeks
-                            color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
-                            border.color:gv.selectedItem == myRectangle ? "black" : "transparent"
-                            Rectangle {
-                                width: (grid.width*7/8)/monthCalendar.days
-                                height:grid.height/monthCalendar.weeks
-                                color:"transparent"
-                                opacity:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?1:0;
-                                border.color:"blue"
-                            }
-                            Components.Label {
-                                id:label
-                                anchors.centerIn: parent
-                                text:dayNumber
-                                font.bold:(containsEventItems)||(containsTodoItems) ? true:false
-                                opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
-                            }
-                            MouseArea {
-                                id:dateMouse
-                                anchors.fill:parent
-                                hoverEnabled:true
-                                onEntered: {
-                                    monthCalendar.setSelectedDay(yearNumber, monthNumber, dayNumber);
-                                    list.model=monthCalendar.selectedDayModel
-                                    if(list.count==0) {
-                                        list.model=monthCalendar.upcomingEventsModel
-                                    }
-                                }
-                                onClicked: {
-                                    monthCalendar.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);
-                                    var rowNumber = Math.floor(index / 7)   ;
-                                    week=1+monthCalendar.weeksModel[rowNumber];
-                                    date=dayNumber+"/"+monthNumber+"/"+yearNumber
-                                    error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
-                                    errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
-                                    gv.selectedItem=myRectangle
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            Rectangle {
-                id:test
-                width:parent.width
+                id:riw
+                width:rect1.width
                 height:20
-                color:"transparent"
-                Row {
-                    id:riw
-                    width:rect1.width
-                    height:20
-                    spacing:rect1.width/10
-                    anchors {
-                        left:test.left
-                        right:test.right
-                        verticalCenter:test.verticalCenter
+                spacing:rect1.width/15
+                clip:true
+                focus:true
+                Components.ToolButton {
+                    id:currentDate
+                    iconSource:"view-pim-calendar"
+                    width:24
+                    height:24
+                    onClicked:monthCalendar.startDate=isTodayMonth();
+                    PlasmaCore.ToolTip {
+                        id: tool
+                        target: currentDate
+                        mainText:"Select Today"
                     }
-                    Components.ToolButton {
-                        id:currentDate
-                       iconSource:"view-pim-calendar"
-                        width:24
-                        height:24
-                        onClicked: monthCalendar.startDate=isTodayMonth();
-                        PlasmaCore.ToolTip {
-                            id: tool
-                            target: currentDate
-                            mainText:"Select Today"
-                        }
-                    }
-                    Components.TextField {
-                        id:dateField
-                        text: date
-                        width:rect1.width/3
-                    }
-                    Components.TextField {
-                        id:weekField
-                        text:week
-                        width:rect1.width/3
-                    }
+                }
+                Components.TextField {
+                    id:dateField
+                    text: date
+                    width:rect1.width/3
+                }
+                Components.TextField {
+                    id:weekField
+                    text:week
+                    width:rect1.width/3
                 }
             }
         }
-        
         PlasmaCore.SvgItem {
             id:line
             svg: PlasmaCore.Svg {
@@ -378,83 +284,7 @@ Item {
                 right:rig.left
             }
         }
-
-        Column {
-            id:rig
-            height: parent.height
-            width: parent.width / 2
-            Components.Label {
-                id:error
-                text: ""
-                visible: true
-                font.weight:Font.Bold
-                font.bold:true
-            }
-            Components.Label {
-                id:errorl
-                text: ""
-                visible: true
-                font.italic:true
-            }
-            ListView {
-                id:list
-                height: parent.height
-                width: (parent.width / 4)-(scrollBar.visible ? scrollBar.width : 0)
-                model: monthCalendar.upcomingEventsModel
-                delegate: Rectangle {
-                    width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
-                    height: 40
-                    color: "transparent"
-                    
-                    Row {
-                        spacing:4
-                        width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
-                        height:50
-                        Rectangle {
-                            id:circle1
-                            width:6
-                            height:6
-                            color:"black"
-                            border.width:1
-                            radius:width*0.5
-                            anchors.verticalCenter:incidence.verticalCenter
-                        }
-                        Rectangle {
-                            id:incidence
-                            width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
-                            height:20
-                            color:"transparent"
-                            Components.Label {
-                                id:sum
-                                text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
-                                font.capitalization:Font.Capitalize
-                                font.italic:true
-                            }
-                        }
-                    }
-                }
-                section.property:"startDate"
-                section.delegate: Rectangle {
-                    id:sect
-                    width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
-                    height: 20
-                    color: "transparent"
-                    Components.Label {
-                        id:sec_l
-                        text: section
-                        font.weight:Font.Bold
-                        anchors.verticalCenter: sect.verticalCenter
-                    }
-                }
-            }
-            Components.ScrollBar {
-                id: scrollBar
-                orientation: Qt.Vertical
-                flickableItem:list
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-            }
+        EventList {
         }
     }
 }

@@ -42,7 +42,7 @@ Item {
         plasmoid.aspectRatioMode = ConstrainedSquare;
     }
     
-    Calendar {
+    CalendarPopup {
         id:calendar
         anchors.top:parent.top
         anchors.left: parent.left
