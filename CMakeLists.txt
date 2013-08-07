@@ -41,7 +41,7 @@ find_package(kdeqt5staging REQUIRED NO_MODULE)
 find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
     KConfig KAuth KJS KWallet KDBusAddons Sonnet
-    KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KCompletion KJobWidgets KTextWidgets XmlGui KCrash KStyle
+    KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KCompletion KJobWidgets KTextWidgets XmlGui KCrash
     KIO KUnitConversion KDE4Attic)
 
 find_package(Plasma REQUIRED NO_MODULE)
