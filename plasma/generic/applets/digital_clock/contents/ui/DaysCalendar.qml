@@ -78,7 +78,6 @@ Row {
                         var rowNumber = Math.floor(index / 7)   ;
                         week=1+monthCalendar.weeksModel[rowNumber];
                         date=dayNumber+"/"+monthNumber+"/"+yearNumber
-                        todayWeek=isTodayWeek(date,rowNumber);
                         // error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
                         //  errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
                         calendarDays.selectedItem=myRectangle
