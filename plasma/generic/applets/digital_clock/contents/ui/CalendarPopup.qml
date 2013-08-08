@@ -62,7 +62,7 @@ Item {
         }
         
         Column {
-            id:col
+            id:calendarColumn
             height: parent.height
             width: parent.width / 2
             anchors {
@@ -70,7 +70,7 @@ Item {
                 bottom:parent.bottom
             }
             Row {
-                id:rect1
+                id:calendarRow
                 height: parent.height/10
                 width: parent.width
                 clip:true
@@ -88,8 +88,8 @@ Item {
                     id:month
                     width:50
                     height:24
-                    anchors.leftMargin:rect1.width/3
-                    anchors.rightMargin:rect1.width/5
+                    anchors.leftMargin:calendarRow.width/3
+                    anchors.rightMargin:calendarRow.width/5
                     anchors.left:monthright.right
                     text:monthCalendar.monthName
                     onClicked: {
@@ -182,8 +182,8 @@ Item {
                     height:24
                     text:monthCalendar.year
                     anchors.left:month.right
-                    anchors.leftMargin:rect1.width/7
-                    anchors.rightMargin:rect1.width/3
+                    anchors.leftMargin:calendarRow.width/7
+                    anchors.rightMargin:calendarRow.width/3
                     Components.ToolButton {
                         id:increase
                         text:"^"
@@ -203,27 +203,25 @@ Item {
                     }
                 }
                 Components.ToolButton {
-                    id:next1
                     flat: true;
                     text: ">";
                     width: 24;
                     height: 24;
                     anchors.left:monthYear.right
-                    anchors.right:rect1.right
-                    anchors.leftMargin:grid.width/4
+                    anchors.right:calendarRow.right
+                    anchors.leftMargin:calendarGrid.width/4
                     onClicked: {
                         monthCalendar.nextMonth()
                     }
                 }
                 Row {
-                    id:r2
-                    spacing:grid.width/16
+                    spacing:calendarGrid.width/16
                     clip:true
                     anchors {
                         top:monthright.bottom
                         left:parent.left
-                        right:gv.right 
-                        leftMargin:grid.width/15+grid.width/8
+                        right:calendarDays.right 
+                        leftMargin:calendarGrid.width/15+calendarGrid.width/8
                     }
                     Repeater {
                         model: monthCalendar.days
@@ -236,14 +234,14 @@ Item {
                 }
             }
             DaysCalendar {
-                id:grid
+                id:calendarGrid
                 property Item selectedItem
             }
             Row {
-                id:riw
-                width:rect1.width
+                id:calendarToolbar
+                width:calendarRow.width
                 height:20
-                spacing:rect1.width/15
+                spacing:calendarRow.width/15
                 clip:true
                 focus:true
                 Components.ToolButton {
@@ -261,12 +259,12 @@ Item {
                 Components.TextField {
                     id:dateField
                     text: date
-                    width:rect1.width/3
+                    width:calendarRow.width/3
                 }
                 Components.TextField {
                     id:weekField
                     text:week
-                    width:rect1.width/3
+                    width:calendarRow.width/3
                 }
             }
         }
@@ -280,11 +278,12 @@ Item {
             height: parent.height
             width: lineSvg.elementSize("vertical-line").width
             anchors {
-                left:grid.right
-                right:rig.left
+                left:calendarGrid.right
+                right:eventColumn.left
             }
         }
         EventList {
+
         }
     }
 }

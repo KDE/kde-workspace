@@ -20,7 +20,7 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 Column {
-    id:rig
+    id:eventColumn
     height: parent.height
     width: parent.width / 2
     Components.Label {

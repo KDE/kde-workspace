@@ -20,13 +20,13 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 Row {
-    id:grid
-    width:col.width
-    height:parent.height-rect1.height-riw.height
+    id:calendarGrid
+    width:calendarColumn.width
+    height:parent.height-calendarRow.height-calendarToolbar.height
     Column {
-        width: grid.width/8
+        width: calendarGrid.width/8
         height: parent.height
-        spacing:grid.width/12
+        spacing:calendarGrid.width/12
         clip:true
         focus:true
         Repeater { 
@@ -39,10 +39,10 @@ Row {
         }
     }
     Grid {
-        id:gv
+        id:calendarDays
         columns:monthCalendar.days
         rows:1+monthCalendar.weeks//dayLabels.rows
-        width:grid.width*7/8
+        width:calendarGrid.width*7/8
         height:parent.height
         spacing:0
         property Item selectedItem
@@ -51,10 +51,10 @@ Row {
             model:monthCalendar.model
             Rectangle {
                 id:myRectangle
-                width:(grid.width*7/8)/monthCalendar.days
-                height:grid.height/monthCalendar.weeks
+                width:(calendarGrid.width*7/8)/monthCalendar.days
+                height:calendarGrid.height/monthCalendar.weeks
                 color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
-                border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":gv.selectedItem == myRectangle ? "black" : "transparent"
+                border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":calendarDays.selectedItem == myRectangle ? "black" : "transparent"
                 Components.Label {
                     id:label
                     anchors.centerIn: parent
@@ -80,7 +80,7 @@ Row {
                         date=dayNumber+"/"+monthNumber+"/"+yearNumber
                         // error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
                         //  errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
-                        gv.selectedItem=myRectangle
+                        calendarDays.selectedItem=myRectangle
                     }
                 }
             }
