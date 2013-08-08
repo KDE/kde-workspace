@@ -45,7 +45,7 @@ TimeEngine::TimeEngine(QObject *parent, const QVariantList &args)
 
     // To have translated timezone names
     // (effectively a noop if the catalog is already present).
-    KGlobal::locale()->insertCatalog("timezones4");
+    //KGlobal::locale()->insertCatalog("timezones4");
 }
 
 TimeEngine::~TimeEngine()
@@ -64,7 +64,7 @@ void TimeEngine::init()
 
 void TimeEngine::clockSkewed()
 {
-    kDebug() << "Time engine Clock skew signaled";
+    qDebug() << "Time engine Clock skew signaled";
     updateAllSources();
     forceImmediateUpdateOfAllVisualizations();
 }
@@ -99,13 +99,15 @@ bool TimeEngine::updateSourceEvent(const QString &tz)
 
     if (s) {
         s->updateTime();
-        scheduleSourcesUpdated();
+        //scheduleSourcesUpdated();
         return true;
     }
 
     return false;
 }
 
+// FIXME: Enable json once kservice_desktop_to_json macro is merged in kdelibs
+//K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(time, TimeEngine, "plasma-dataengine-time.json")
 K_EXPORT_PLASMA_DATAENGINE(time, TimeEngine)
 
 #include "timeengine.moc"

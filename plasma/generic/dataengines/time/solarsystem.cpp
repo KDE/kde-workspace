@@ -17,7 +17,6 @@
 
 #include "solarsystem.h"
 #include <math.h>
-#include <KDebug>
 
 /*
  *   Mathematics, ideas, public domain code used for these classes from:
