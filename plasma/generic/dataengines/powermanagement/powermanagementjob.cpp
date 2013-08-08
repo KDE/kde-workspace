@@ -30,8 +30,6 @@
 
 #include "powermanagementjob.h"
 
-#include <kdebug.h>
-
 #include <Solid/PowerManagement>
 
 PowerManagementJob::PowerManagementJob(const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent) :
@@ -46,7 +44,7 @@ PowerManagementJob::~PowerManagementJob()
 void PowerManagementJob::start()
 {
     const QString operation = operationName();
-    //kDebug() << "starting operation  ... " << operation;
+    //qDebug() << "starting operation  ... " << operation;
 
     if (operation == "lockScreen") {
         if (KAuthorized::authorizeKAction("lock_screen")) {
@@ -56,7 +54,7 @@ void PowerManagementJob::start()
             setResult(true);
             return;
         }
-        kDebug() << "operation denied " << operation;
+        qDebug() << "operation denied " << operation;
         setResult(false);
         return;
     } else if (operation == "suspend" || operation == "suspendToRam") {
@@ -100,7 +98,7 @@ void PowerManagementJob::start()
         return;
     }
 
-    kDebug() << "don't know what to do with " << operation;
+    qDebug() << "don't know what to do with " << operation;
     setResult(false);
 }
 
@@ -153,7 +151,8 @@ void PowerManagementJob::setKeyboardBrightness(int value)
 
 void PowerManagementJob::requestShutDown()
 {
-    KWorkSpace::requestShutDown();
+#warning Enable KWorkSpace::requestShutDown(); once libkworkspace is ported
+    //KWorkSpace::requestShutDown();
 }
 
 #include "powermanagementjob.moc"

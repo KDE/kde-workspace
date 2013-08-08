@@ -28,10 +28,12 @@
 #include <solid/battery.h>
 #include <solid/powermanagement.h>
 
-#include <KDebug>
 #include <KLocale>
+#include <klocalizedstring.h>
 #include <KStandardDirs>
 #include <KIdleTime>
+
+#include <QDebug>
 
 #include <QtDBus/QDBusConnectionInterface>
 #include <QtDBus/QDBusError>
@@ -71,7 +73,7 @@ void PowermanagementEngine::init()
                                                    "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                                    "brightnessChanged", this,
                                                    SLOT(screenBrightnessChanged(int)))) {
-            kDebug() << "error connecting to Brightness changes via dbus";
+            qDebug() << "error connecting to Brightness changes via dbus";
             brightnessControlsAvailableChanged(false);
         } else {
             brightnessControlsAvailableChanged(true);
@@ -82,7 +84,7 @@ void PowermanagementEngine::init()
                                                    "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
                                                    "keyboardBrightnessChanged", this,
                                                    SLOT(keyboardBrightnessChanged(int)))) {
-            kDebug() << "error connecting to Keyboard Brightness changes via dbus";
+            qDebug() << "error connecting to Keyboard Brightness changes via dbus";
             keyboardBrightnessControlsAvailableChanged(false);
         } else {
             keyboardBrightnessControlsAvailableChanged(true);
@@ -95,7 +97,7 @@ void PowermanagementEngine::init()
                                                    "org.kde.Solid.PowerManagement",
                                                    "batteryRemainingTimeChanged", this,
                                                    SLOT(batteryRemainingTimeChanged(qulonglong)))) {
-            kDebug() << "error connecting to remaining time changes";
+            qDebug() << "error connecting to remaining time changes";
         }
     }
 }
@@ -197,7 +199,7 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
             } else if (sleepstate == Solid::PowerManagement::HibernateState) {
                 setData("Sleep States", "Hibernate", true);
             }
-            //kDebug() << "Sleepstate \"" << sleepstate << "\" supported.";
+            //qDebug() << "Sleepstate \"" << sleepstate << "\" supported.";
         }
     } else if (name == "PowerDevil") {
         if (m_brightnessControlsAvailable) {
@@ -225,7 +227,7 @@ bool PowermanagementEngine::sourceRequestEvent(const QString &name)
     } else if (name == "UserActivity") {
         setData("UserActivity", "IdleTime", KIdleTime::instance()->idleTime());
     } else {
-        kDebug() << "Data for '" << name << "' not found";
+        qDebug() << "Data for '" << name << "' not found";
         return false;
     }
     return true;
@@ -415,7 +417,7 @@ void PowermanagementEngine::deviceAdded(const QString& udi)
 
 void PowermanagementEngine::batteryRemainingTimeChanged(qulonglong time)
 {
-    //kDebug() << "Remaining time 2:" << time;
+    //qDebug() << "Remaining time 2:" << time;
     setData("Battery", "Remaining msec", time);
 }
 
@@ -435,7 +437,7 @@ void PowermanagementEngine::batteryRemainingTimeReply(QDBusPendingCallWatcher *w
 {
     QDBusPendingReply<qulonglong> reply = *watcher;
     if (reply.isError()) {
-        kDebug() << "Error getting battery remaining time: " << reply.error().message();
+        qDebug() << "Error getting battery remaining time: " << reply.error().message();
     } else {
         batteryRemainingTimeChanged(reply.value());
     }
@@ -457,7 +459,7 @@ void PowermanagementEngine::screenBrightnessReply(QDBusPendingCallWatcher *watch
 {
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
-        kDebug() << "Error getting screen brightness: " << reply.error().message();
+        qDebug() << "Error getting screen brightness: " << reply.error().message();
         // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
         brightnessControlsAvailableChanged(false);
     } else {
@@ -471,7 +473,7 @@ void PowermanagementEngine::keyboardBrightnessReply(QDBusPendingCallWatcher *wat
 {
     QDBusPendingReply<int> reply = *watcher;
     if (reply.isError()) {
-        kDebug() << "Error getting keyboard brightness: " << reply.error().message();
+        qDebug() << "Error getting keyboard brightness: " << reply.error().message();
         // FIXME Because the above check doesn't work, we unclaim backlight support as soon as it fails
         keyboardBrightnessControlsAvailableChanged(false);
     } else {
@@ -481,6 +483,8 @@ void PowermanagementEngine::keyboardBrightnessReply(QDBusPendingCallWatcher *wat
     watcher->deleteLater();
 }
 
+// FIXME: Enable json once kservice_desktop_to_json macro is merged in kdelibs
+//K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(powermanagement, PowermanagementEngine, "plasma-dataengine-powermanagement.json")
 K_EXPORT_PLASMA_DATAENGINE(powermanagement, PowermanagementEngine)
 
 #include "powermanagementengine.moc"

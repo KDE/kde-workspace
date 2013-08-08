@@ -50,7 +50,7 @@ protected:
     bool updateSourceEvent(const QString &source);
     void init();
 
-private slots:
+private Q_SLOTS:
     void updateBatteryChargeState(int newState, const QString& udi);
     void updateBatteryPlugState(bool newState, const QString& udi);
     void updateBatteryChargePercent(int newValue, const QString& udi);
