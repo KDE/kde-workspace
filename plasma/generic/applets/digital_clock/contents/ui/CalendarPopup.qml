@@ -28,6 +28,7 @@ Item {
     property Item selectedItem
     property int week;
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
+    
     function isToday(date) {
         if(date==Qt.formatDateTime(new Date(), "d/M/yyyy")) 
             return true ;
@@ -70,7 +71,7 @@ Item {
                 bottom:parent.bottom
             }
             Row {
-                id:calendarRow
+                id:calendarOperations
                 height: parent.height/10
                 width: parent.width
                 clip:true
@@ -88,8 +89,8 @@ Item {
                     id:month
                     width:50
                     height:24
-                    anchors.leftMargin:calendarRow.width/3
-                    anchors.rightMargin:calendarRow.width/5
+                    anchors.leftMargin:calendarOperations.width/3
+                    anchors.rightMargin:calendarOperations.width/5
                     anchors.left:monthright.right
                     text:monthCalendar.monthName
                     onClicked: {
@@ -182,8 +183,8 @@ Item {
                     height:24
                     text:monthCalendar.year
                     anchors.left:month.right
-                    anchors.leftMargin:calendarRow.width/7
-                    anchors.rightMargin:calendarRow.width/3
+                    anchors.leftMargin:calendarOperations.width/7
+                    anchors.rightMargin:calendarOperations.width/3
                     Components.ToolButton {
                         id:increase
                         text:"^"
@@ -208,7 +209,7 @@ Item {
                     width: 24;
                     height: 24;
                     anchors.left:monthYear.right
-                    anchors.right:calendarRow.right
+                    anchors.right:calendarOperations.right
                     anchors.leftMargin:calendarGrid.width/4
                     onClicked: {
                         monthCalendar.nextMonth()
@@ -239,9 +240,9 @@ Item {
             }
             Row {
                 id:calendarToolbar
-                width:calendarRow.width
+                width:calendarOperations.width
                 height:20
-                spacing:calendarRow.width/15
+                spacing:calendarOperations.width/15
                 clip:true
                 focus:true
                 Components.ToolButton {
@@ -258,13 +259,13 @@ Item {
                 }
                 Components.TextField {
                     id:dateField
-                    text: date
-                    width:calendarRow.width/3
+                    text: date==""?Qt.formatDateTime(new Date(), "d/M/yyyy"):date
+                    width:calendarOperations.width/3
                 }
                 Components.TextField {
                     id:weekField
-                    text:week
-                    width:calendarRow.width/3
+                    text:week==0?monthCalendar.currentWeek():week
+                    width:calendarOperations.width/3
                 }
             }
         }

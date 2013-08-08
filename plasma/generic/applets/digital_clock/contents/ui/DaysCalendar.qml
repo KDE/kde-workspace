@@ -22,7 +22,7 @@ import org.kde.plasma.extras 0.1 as PlasmaExtras
 Row {
     id:calendarGrid
     width:calendarColumn.width
-    height:parent.height-calendarRow.height-calendarToolbar.height
+    height:parent.height-calendarOperations.height-calendarToolbar.height
     Column {
         width: calendarGrid.width/8
         height: parent.height
@@ -78,6 +78,7 @@ Row {
                         var rowNumber = Math.floor(index / 7)   ;
                         week=1+monthCalendar.weeksModel[rowNumber];
                         date=dayNumber+"/"+monthNumber+"/"+yearNumber
+                        todayWeek=isTodayWeek(date,rowNumber);
                         // error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
                         //  errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
                         calendarDays.selectedItem=myRectangle

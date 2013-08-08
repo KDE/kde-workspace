@@ -23,6 +23,7 @@ Column {
     id:eventColumn
     height: parent.height
     width: parent.width / 2
+    /*property alias text: error.text
     Components.Label {
         id:error
         text: ""
@@ -35,37 +36,32 @@ Column {
         text: ""
         visible: true
         font.italic:true
-    }
-    ListView {
-        id:list
-        height: parent.height
-        width: (parent.width / 4)-(scrollBar.visible ? scrollBar.width : 0)
-        model: monthCalendar.upcomingEventsModel
-        delegate:Row {
-            spacing:4
-            width: parent.width-(scrollBar.visible ? scrollBar.width : 0)
-            height:50
-            Components.Label {
-                id:sum
-                text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
-                font.capitalization:Font.Capitalize
-                font.italic:true
+    }*/
+    PlasmaExtras.ScrollArea {
+        anchors.fill:parent
+        ListView {
+            id:list
+            height: parent.height
+            width: (parent.width / 4)
+            model: monthCalendar.upcomingEventsModel
+            delegate:Row {
+                spacing:4
+                width: parent.width
+                height:50
+                Components.Label {
+                    id:sum
+                    text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
+                    font.capitalization:Font.Capitalize
+                    font.italic:true
+                }
+            }
+            section.property:"startDate"
+            section.delegate:Components.Label {
+                id:sec_l
+                text: section
+                font.weight:Font.Bold
+                anchors.verticalCenter: sect.verticalCenter
             }
         }
-        section.property:"startDate"
-        section.delegate:Components.Label {
-            id:sec_l
-            text: section
-            font.weight:Font.Bold
-            anchors.verticalCenter: sect.verticalCenter
-        }
-    }
-    Components.ScrollBar {
-        id: scrollBar
-        orientation: Qt.Vertical
-        flickableItem:list
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
     }
 }
