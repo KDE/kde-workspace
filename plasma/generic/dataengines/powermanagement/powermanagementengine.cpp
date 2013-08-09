@@ -483,8 +483,6 @@ void PowermanagementEngine::keyboardBrightnessReply(QDBusPendingCallWatcher *wat
     watcher->deleteLater();
 }
 
-// FIXME: Enable json once kservice_desktop_to_json macro is merged in kdelibs
-//K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(powermanagement, PowermanagementEngine, "plasma-dataengine-powermanagement.json")
-K_EXPORT_PLASMA_DATAENGINE(powermanagement, PowermanagementEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(powermanagement, PowermanagementEngine, "plasma-dataengine-powermanagement.json")
 
 #include "powermanagementengine.moc"
