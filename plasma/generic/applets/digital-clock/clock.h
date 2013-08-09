@@ -46,11 +46,11 @@ class Clock : public ClockApplet
         void init();
         void paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect);
 
-    public slots:
+    public Q_SLOTS:
         void dataUpdated(const QString &name, const Plasma::DataEngine::Data &data);
         void updateColors();
 
-    protected slots:
+    protected Q_SLOTS:
         void clockConfigAccepted();
         void clockConfigChanged();
         void constraintsEvent(Plasma::Constraints constraints);
@@ -61,7 +61,7 @@ class Clock : public ClockApplet
         void createClockConfigurationInterface(KConfigDialog *parent);
         void changeEngineTimezone(const QString &oldTimezone, const QString &newTimezone);
 
-    private slots:
+    private Q_SLOTS:
         void configDrawShadowToggled(bool value);
         void launchDateKcm();
 

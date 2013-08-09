@@ -56,7 +56,7 @@ class TextLabel : public QDeclarativeItem
 
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
-    signals:
+    Q_SIGNALS:
         void textChanged(const QString& text);
 
     protected:

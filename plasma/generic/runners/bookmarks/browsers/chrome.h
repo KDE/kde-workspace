@@ -37,7 +37,7 @@ public:
     Chrome(FindProfile *findProfile, QObject* parent = 0);
     ~Chrome();
     virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing);
-public slots:
+public Q_SLOTS:
     virtual void prepare();
     virtual void teardown();
 private:

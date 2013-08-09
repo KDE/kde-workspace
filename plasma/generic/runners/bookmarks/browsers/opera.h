@@ -34,7 +34,7 @@ Q_OBJECT
 public:
     Opera(QObject* parent = 0);
     virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
-public slots:
+public Q_SLOTS:
     virtual void prepare();
     virtual void teardown();
 private:

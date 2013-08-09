@@ -54,7 +54,7 @@ public:
 Q_SIGNALS:
     void doMatch(Plasma::RunnerContext *context);
 
-private slots:
+private Q_SLOTS:
     void setupComplete(QModelIndex, bool);
 
 private:

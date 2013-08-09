@@ -40,10 +40,10 @@ class SystemMonitor : public Plasma::PopupApplet
         virtual QGraphicsWidget *graphicsWidget();
         virtual void constraintsEvent(Plasma::Constraints constraints);
 
-    public slots:
+    public Q_SLOTS:
         void checkGeometry();
 
-    protected slots:
+    protected Q_SLOTS:
         void toggled(bool toggled);
         void appletRemoved(QObject *object);
 

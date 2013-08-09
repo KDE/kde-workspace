@@ -49,7 +49,7 @@ public:
 
     QWidget *widget();
 
-public slots:
+public Q_SLOTS:
     void switchMenuStyle();
     void startMenuEditor();
     void toolTipAboutToShow();
@@ -61,7 +61,7 @@ public slots:
     void saveConfigurationFromSimpleLauncher(const KConfigGroup & configGroup,
                                              const KConfigGroup & globalConfigGroup);
 
-protected slots:
+protected Q_SLOTS:
     void configAccepted();
     //void toggleMenu();
     //void toggleMenu(bool pressed);

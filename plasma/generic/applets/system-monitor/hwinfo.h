@@ -38,11 +38,11 @@ class HWInfo : public SM::Applet
         virtual void init();
         virtual bool addVisualization(const QString&);
 
-    public slots:
+    public Q_SLOTS:
         void dataUpdated(const QString &name,
                          const Plasma::DataEngine::Data &data);
 
-    private slots:
+    private Q_SLOTS:
         void updateHtml();
 
     protected:

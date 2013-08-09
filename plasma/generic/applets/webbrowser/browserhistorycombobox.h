@@ -117,7 +117,7 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
     void changeEvent(QEvent *event);
 
-private slots:
+private Q_SLOTS:
     void setAnimationUpdate(qreal progress);
     qreal animationUpdate() const;
 

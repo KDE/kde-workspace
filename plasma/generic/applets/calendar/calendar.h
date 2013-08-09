@@ -46,14 +46,14 @@ class CalendarApplet : public Plasma::PopupApplet
          */
         QGraphicsWidget *graphicsWidget();
 
-    public slots:
+    public Q_SLOTS:
         void configChanged();
 
     protected:
         void createConfigurationInterface(KConfigDialog *parent);
         void focusInEvent(QFocusEvent * event);
 
-    protected slots:
+    protected Q_SLOTS:
         void configAccepted();
         void updateDate();
         void paintIcon();

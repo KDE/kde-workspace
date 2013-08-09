@@ -54,7 +54,7 @@ signals:
 protected:
     bool x11Event(XEvent *event);
 
-private slots:
+private Q_SLOTS:
     void initSelection();
     void cleanupTask(WId winId);
 

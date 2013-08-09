@@ -64,7 +64,7 @@ protected:
     void enterEvent(QEvent *event);
     void leaveEvent(QEvent *event);
 
-protected slots:
+protected Q_SLOTS:
     void appletDestroyed();
     void delaySyncGeometry();
     void syncGeometry();

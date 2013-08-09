@@ -43,7 +43,7 @@ class ServiceRunner : public Plasma::AbstractRunner
         void match(Plasma::RunnerContext &context);
         void run(const Plasma::RunnerContext &context, const Plasma::QueryMatch &action);
 
-    protected slots:
+    protected Q_SLOTS:
         QMimeData * mimeDataForMatch(const Plasma::QueryMatch *match);
 
     protected:

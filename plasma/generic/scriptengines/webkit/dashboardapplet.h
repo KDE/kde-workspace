@@ -43,7 +43,7 @@ public:
 protected:
     virtual QByteArray dataFor(const QString &str);
 
-protected slots:
+protected Q_SLOTS:
     virtual void loadFinished(bool success);
     virtual void initJsObjects();
     virtual void constraintsEvent(Plasma::Constraints constraints);

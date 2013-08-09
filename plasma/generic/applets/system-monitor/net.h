@@ -42,7 +42,7 @@ class Net : public Applet
         virtual bool addVisualization(const QString&);
         virtual void createConfigurationInterface(KConfigDialog *parent);
 
-    public slots:
+    public Q_SLOTS:
         void configAccepted();
         void configChanged();
         void dataUpdated(const QString &name,

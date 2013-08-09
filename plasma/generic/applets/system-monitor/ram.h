@@ -40,7 +40,7 @@ class Ram : public Applet
         virtual bool addVisualization(const QString&);
         virtual void createConfigurationInterface(KConfigDialog *parent);
 
-    public slots:
+    public Q_SLOTS:
         void dataUpdated(const QString &name,
                          const Plasma::DataEngine::Data &data);
         void sourceAdded(const QString &name);

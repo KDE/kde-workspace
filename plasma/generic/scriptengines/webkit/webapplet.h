@@ -53,7 +53,7 @@ protected:
     QWebPage *page();
     bool loaded();
 
-protected slots:
+protected Q_SLOTS:
     void connectFrame(QWebFrame *);
     virtual void loadFinished(bool);
     virtual void initJsObjects();

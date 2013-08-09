@@ -40,7 +40,7 @@ public:
 
     void updateContainer(X11EmbedContainer *container);
 
-private slots:
+private Q_SLOTS:
     void performUpdates();
     void removeContainer(QObject *container);
 

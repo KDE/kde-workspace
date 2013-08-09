@@ -37,7 +37,7 @@ class SwitchActivity : public Plasma::ContainmentActions
         void wheelEvent(QGraphicsSceneWheelEvent *event);
         QList<QAction*> contextualActions();
 
-    private slots:
+    private Q_SLOTS:
         void switchTo(QAction *action);
         void makeMenu();
 

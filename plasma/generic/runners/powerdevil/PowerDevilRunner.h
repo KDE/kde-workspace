@@ -36,7 +36,7 @@ class PowerDevilRunner : public Plasma::AbstractRunner
         void match( Plasma::RunnerContext &context );
         void run( const Plasma::RunnerContext &context, const Plasma::QueryMatch &action );
 
-    private slots:
+    private Q_SLOTS:
         void updateStatus();
 
     private:

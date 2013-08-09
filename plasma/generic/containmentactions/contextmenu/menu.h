@@ -40,7 +40,7 @@ public:
     void configurationAccepted();
     void save(KConfigGroup &config);
 
-public slots:
+public Q_SLOTS:
     void runCommand();
     void lockScreen();
     void startLogout();

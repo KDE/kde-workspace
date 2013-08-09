@@ -78,20 +78,20 @@ class Pager : public Plasma::Applet
         Q_INVOKABLE void updateToolTip(int hoverDesktopId);
         Q_INVOKABLE void dropMimeData(QObject* mime, int desktop);
 
-    signals:
+    Q_SIGNALS:
         void styleChanged();
         void currentDesktopChanged();
         void showWindowIconsChanged();
         void showDesktopTextChanged();
 
-    public slots:
+    public Q_SLOTS:
         void recalculateGridSizes(int rows);
         void updateSizes(bool allowResize = true);
         void recalculateWindowRects();
         void themeRefresh();
         void configChanged();
 
-    protected slots:
+    protected Q_SLOTS:
         virtual void wheelEvent(QGraphicsSceneWheelEvent *);
 
         void configAccepted();

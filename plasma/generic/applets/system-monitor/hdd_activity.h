@@ -46,7 +46,7 @@ public:
     virtual bool addVisualization(const QString &source);
     virtual void createConfigurationInterface(KConfigDialog *parent);
 
-public slots:
+public Q_SLOTS:
     void dataUpdated(const QString &name, const Plasma::DataEngine::Data &data);
     void sourceChanged(const QString &name);
     void sourcesChanged();

@@ -40,7 +40,7 @@ public:
 
     void init();
 
-public slots:
+public Q_SLOTS:
     void showMenu(bool onlyCurrentDesktop = false);
     void triggered(QAction *action);
 

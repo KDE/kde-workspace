@@ -61,7 +61,7 @@ public:
     Plasma::Containment *dashboardContainment() const;
     void setDashboardContainment(Plasma::Containment *containment);
 
-public slots:
+public Q_SLOTS:
     void toggleDashboard();
     void showDashboard(bool show);
 

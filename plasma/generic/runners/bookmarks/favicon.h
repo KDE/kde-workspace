@@ -37,7 +37,7 @@ protected:
 private:
     KIcon const m_default_icon;
 
-public slots:
+public Q_SLOTS:
     virtual void prepare() {}
     virtual void teardown() {}
     

@@ -68,7 +68,7 @@ public:
     QString ondragstop() const;
     void setOndragstop(const QString &ondragstop);
 
-public slots:
+public Q_SLOTS:
     void hello(int test);
 
     /**

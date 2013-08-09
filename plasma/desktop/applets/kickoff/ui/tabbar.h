@@ -70,7 +70,7 @@ protected:
     bool isHorizontal() const;
     bool isVertical() const;
 
-protected slots:
+protected Q_SLOTS:
     void switchToHoveredTab();
     void animationFinished();
     void startAnimation();

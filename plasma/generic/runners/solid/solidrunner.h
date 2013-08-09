@@ -44,13 +44,13 @@ class SolidRunner : public Plasma::AbstractRunner
     protected:
         QList<QAction*> actionsForMatch(const Plasma::QueryMatch &match);
 
-    protected slots:
+    protected Q_SLOTS:
 
         void init();
         void onSourceAdded(const QString &name);
         void onSourceRemoved(const QString &name);
    
-    private slots:
+    private Q_SLOTS:
         void registerAction(QString &id, QString icon, QString text, QString desktop);
         void refreshMatch(QString &id);
 

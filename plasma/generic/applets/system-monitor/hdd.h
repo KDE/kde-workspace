@@ -42,7 +42,7 @@ class Hdd : public SM::Applet
         virtual void init();
         virtual void createConfigurationInterface(KConfigDialog *parent);
 
-    public slots:
+    public Q_SLOTS:
         void configChanged();
         void dataUpdated(const QString &name, const Plasma::DataEngine::Data &data);
 
@@ -55,7 +55,7 @@ class Hdd : public SM::Applet
         bool isValidDevice(const QString& uuid, Plasma::DataEngine::Data* data);
         void applyTheme(Plasma::Meter *w);
 
-    protected slots:
+    protected Q_SLOTS:
         void configAccepted();
         void themeChanged();
 

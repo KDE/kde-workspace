@@ -51,7 +51,7 @@ class SM_EXPORT Plotter : public QGraphicsWidget
         void setScale(qreal scale);
         void setStackPlots(bool stack);
 
-    protected slots:
+    protected Q_SLOTS:
         void themeChanged();
 
     protected:

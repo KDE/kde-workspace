@@ -34,7 +34,7 @@ public:
     ~FaviconFromBlob();
     virtual QIcon iconFor(const QString &url);
 
-public slots:
+public Q_SLOTS:
     virtual void prepare();
     virtual void teardown();
 

@@ -43,7 +43,7 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
 
-private slots:
+private Q_SLOTS:
     void ensureValidSize();
 
 private:

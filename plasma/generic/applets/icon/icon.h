@@ -48,7 +48,7 @@ class IconApplet : public Plasma::Applet
         int displayLines();
         QPainterPath shape() const;
 
-    public slots:
+    public Q_SLOTS:
         void openUrl();
         void updateDesktopFile();
         void configChanged();
@@ -59,7 +59,7 @@ class IconApplet : public Plasma::Applet
         void showConfigurationInterface();
         QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const;
 
-    private slots:
+    private Q_SLOTS:
         void acceptedPropertiesDialog();
         void cancelledPropertiesDialog();
         void delayedDestroy();

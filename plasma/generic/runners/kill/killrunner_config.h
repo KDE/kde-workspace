@@ -48,7 +48,7 @@ public:
     /** Possibilities to sort */
     enum Sort {NONE = 0, CPU, CPUI};
 
-public slots:
+public Q_SLOTS:
     void save();
     void load();
     void defaults();

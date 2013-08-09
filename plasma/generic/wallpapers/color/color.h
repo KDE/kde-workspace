@@ -44,10 +44,10 @@ class Color : public Plasma::Wallpaper
     protected:
         virtual void init(const KConfigGroup &config);
 
-    protected slots:
+    protected Q_SLOTS:
         void backgroundModeChanged(const QModelIndex &index);
 
-    private slots:
+    private Q_SLOTS:
         void widgetChanged();
 
     private:

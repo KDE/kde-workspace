@@ -47,7 +47,7 @@ class SwitchWindow : public Plasma::ContainmentActions
     private:
         void makeMenu();
 
-    private slots:
+    private Q_SLOTS:
         void clearWindowsOrder();
         void switchTo(QAction *action);
 

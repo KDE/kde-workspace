@@ -112,7 +112,7 @@ signals:
     void stateChanged();
     void currentStatusChanged();
 
-public slots:
+public Q_SLOTS:
     void setName(const QString &name);
     void setIcon(const QString &icon);
 
@@ -141,7 +141,7 @@ public slots:
      */
     void replaceContainment(Plasma::Containment* containment);
 
-private slots:
+private Q_SLOTS:
     void containmentDestroyed(QObject *object);
     void activityChanged();
     void activityStateChanged(KActivities::Info::State);

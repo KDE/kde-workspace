@@ -38,10 +38,10 @@ Q_OBJECT
         RunnersConfig(Plasma::RunnerManager *manager, QWidget *parent = 0);
         ~RunnersConfig();
 
-    public slots:
+    public Q_SLOTS:
         void accept();
 
-    private slots:
+    private Q_SLOTS:
         void updateRunner(const QByteArray& runnerName);
 
     private:

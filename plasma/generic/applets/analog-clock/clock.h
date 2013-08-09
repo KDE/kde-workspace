@@ -54,14 +54,14 @@ class Clock : public ClockApplet
         QPainterPath shape() const;
         void paintInterface(QPainter *painter, const QStyleOptionGraphicsItem *option, const QRect &contentsRect);
 
-    public slots:
+    public Q_SLOTS:
         void dataUpdated(const QString &name, const Plasma::DataEngine::Data &data);
 
     protected:
         void createClockConfigurationInterface(KConfigDialog *parent);
         void changeEngineTimezone(const QString &oldTimezone, const QString &newTimezone);
 
-    protected slots:
+    protected Q_SLOTS:
         void clockConfigAccepted();
         void clockConfigChanged();
         void repaintNeeded();

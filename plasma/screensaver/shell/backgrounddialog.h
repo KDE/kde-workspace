@@ -32,13 +32,13 @@ public:
 
     void reloadConfig();
 
-public slots:
+public Q_SLOTS:
     void saveConfig();
 
 private:
     KConfigGroup wallpaperConfig(const QString &plugin);
 
-private slots:
+private Q_SLOTS:
     void changeBackgroundMode(int mode);
     void cleanup();
 

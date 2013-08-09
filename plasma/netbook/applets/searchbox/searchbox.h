@@ -41,7 +41,7 @@ public:
 
     QGraphicsWidget *graphicsWidget();
 
-public slots:
+public Q_SLOTS:
     void delayedQuery();
     void query();
 

@@ -42,7 +42,7 @@ protected:
                        const QStyleOptionGraphicsItem *option,
                        QWidget *widget = 0);
 
-private slots:
+private Q_SLOTS:
     void highlight();
 
 private:

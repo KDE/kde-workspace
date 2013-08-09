@@ -30,7 +30,7 @@ class CheckBox: public QCheckBox
 public:
     CheckBox(QWidget *parent);
 
-public slots:
+public Q_SLOTS:
     void updateStyle();
 
 protected:

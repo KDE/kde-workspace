@@ -39,7 +39,7 @@ class AppLauncher : public Plasma::ContainmentActions
         //returns true if something (other than a separator) was successfully added
         bool addApp(QMenu *menu, const QString &source);
 
-    public slots:
+    public Q_SLOTS:
         void switchTo(QAction *action);
 
     protected:

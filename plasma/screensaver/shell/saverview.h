@@ -48,7 +48,7 @@ protected:
     void drawBackground(QPainter *painter, const QRectF & rect);
     void paintEvent(QPaintEvent *event);
 
-public slots:
+public Q_SLOTS:
     void showView();
     void hideView();
     void adjustSize(int screen);
@@ -65,7 +65,7 @@ public slots:
     void enableSetupMode();
     void disableSetupMode();
 
-protected slots:
+protected Q_SLOTS:
     void showWidgetExplorer(); //FIXME actually this is toggle
     void suppressShowTimeout();
     void openToolBox();

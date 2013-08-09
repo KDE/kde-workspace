@@ -55,7 +55,7 @@ public:
     int formFactor() const;
     int location() const;
 
-public slots:
+public Q_SLOTS:
     QStringList listAllDataEngines();
     QObject* dataEngine(const QString& name);
     QObject* config();
@@ -96,7 +96,7 @@ protected:
     QVariant callJsFunction(const QString &func, const QVariantList &args = QVariantList());
     void constraintsEvent(Plasma::Constraints constraints);
 
-protected slots:
+protected Q_SLOTS:
     virtual void loadFinished(bool success);
     virtual void initJsObjects();
 

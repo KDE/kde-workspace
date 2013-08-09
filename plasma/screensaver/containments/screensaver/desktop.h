@@ -42,7 +42,7 @@ public:
     ~SaverDesktop();
     void init();
 
-private slots:
+private Q_SLOTS:
     void newApplet(Plasma::Applet *applet, const QPointF &pos);
 
 private:

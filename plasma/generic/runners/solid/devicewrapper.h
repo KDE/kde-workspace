@@ -51,11 +51,11 @@ class DeviceWrapper : public QObject
     QStringList actionIds() const;
     void setForceEject(bool force);
 
-    signals:
+    Q_SIGNALS:
     void registerAction(QString &id, QString icon, QString text, QString desktop);
     void refreshMatch(QString &id);
 
-    protected slots:
+    protected Q_SLOTS:
 
     /**
     * slot called when a source of the hotplug engine is updated

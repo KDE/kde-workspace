@@ -34,7 +34,7 @@ public:
     void constraintsEvent(Plasma::Constraints constraints);
     QList<QAction*> contextualActions();
 
-public slots:
+public Q_SLOTS:
     void configChanged();
 
 private Q_SLOTS:

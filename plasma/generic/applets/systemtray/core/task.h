@@ -222,7 +222,7 @@ protected:
      **/
     virtual QGraphicsWidget* createWidget(Plasma::Applet *host) = 0;
 
-private slots:
+private Q_SLOTS:
     void widgetDeleted();
     void emitChanged();
 

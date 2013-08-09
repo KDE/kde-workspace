@@ -123,7 +123,7 @@ public:
     void setShowRecentlyInstalled(bool showRecentlyInstalled);
     bool showRecentlyInstalled() const;
 
-public slots:
+public Q_SLOTS:
     void reloadMenu();
     void delayedReloadMenu();
     void checkSycocaChange(const QStringList &changes);

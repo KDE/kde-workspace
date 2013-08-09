@@ -34,13 +34,13 @@ public:
 
 	QString lastResult() const { return m_lastResult; }
 
-public slots:
+public Q_SLOTS:
 	QString evaluate(const QString& expression);
 	void updateExchangeRates();
 
 	void copyToClipboard(bool flag = true);
 
-protected slots:
+protected Q_SLOTS:
         void updateResult(KJob*);
 
 signals:

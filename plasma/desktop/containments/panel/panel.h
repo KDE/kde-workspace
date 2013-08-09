@@ -60,7 +60,7 @@ protected:
     void saveContents(KConfigGroup &group) const;
     void restore(KConfigGroup &group);
 
-private slots:
+private Q_SLOTS:
     void backgroundChanged();
     void layoutApplet(Plasma::Applet* applet, const QPointF &pos);
     void appletWasRemoved(Plasma::Applet* applet);

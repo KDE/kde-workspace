@@ -52,7 +52,7 @@ public:
     void removeApplet(const QString appletName, Plasma::Applet *parent);
     QStringList applets(Plasma::Applet *parent) const;
 
-private slots:
+private Q_SLOTS:
     void cleanupTask(Plasma::Applet *host, const QString &taskId);
 
 private:

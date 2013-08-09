@@ -86,7 +86,7 @@ signals:
      **/
     void taskRemoved(SystemTray::Task *task);
 
-private slots:
+private Q_SLOTS:
     void addTask(SystemTray::Task *task);
     void removeTask(SystemTray::Task *task);
 

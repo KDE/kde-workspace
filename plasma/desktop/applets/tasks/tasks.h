@@ -48,17 +48,17 @@ class Tasks : public Plasma::Applet
 
         void constraintsEvent(Plasma::Constraints constraints);
 
-    signals:
+    Q_SIGNALS:
         void settingsChanged();
 
-    public slots:
+    public Q_SLOTS:
         void configChanged();
 
     protected:
         void createConfigurationInterface(KConfigDialog *parent);
         QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const;
 
-    private slots:
+    private Q_SLOTS:
         void activateItem(int id, bool toggle);
         void itemContextMenu(int id);
         void itemHovered(int id, bool hovered);

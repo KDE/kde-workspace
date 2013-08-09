@@ -61,7 +61,7 @@ class Trash : public Plasma::Applet
         void updateIcon();
         QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const;
 
-    protected slots:
+    protected Q_SLOTS:
         void popup();
         void open();
         void empty();
@@ -72,7 +72,7 @@ class Trash : public Plasma::Applet
         void emptyTrash();
         void emptyFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
-    private slots:
+    private Q_SLOTS:
         void iconSizeChanged(int group);
 
     private:

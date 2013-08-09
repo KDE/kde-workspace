@@ -34,7 +34,7 @@ public:
     explicit Firefox(QObject *parent = 0);
     virtual ~Firefox();
     virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
-public slots:
+public Q_SLOTS:
     virtual void teardown();
     virtual void prepare();
 private:

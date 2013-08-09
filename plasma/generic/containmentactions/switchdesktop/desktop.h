@@ -40,7 +40,7 @@ class SwitchDesktop : public Plasma::ContainmentActions
     private:
         void makeMenu();
 
-    private slots:
+    private Q_SLOTS:
         void switchTo(QAction *action);
 
     private:
