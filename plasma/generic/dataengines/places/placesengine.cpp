@@ -117,7 +117,7 @@ void PlacesEngine::sendData(int start, int end)
     }
 }
 
-K_EXPORT_PLASMA_DATAENGINE(places, PlacesEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(places, PlacesEngine, "plasma-dataengine-places.json")
 
 #include "placesengine.moc"
 

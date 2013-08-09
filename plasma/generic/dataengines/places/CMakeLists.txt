@@ -7,6 +7,8 @@ set(places_engine_SRCS
 
 set(CMAKE_AUTOMOC TRUE)
 
+kservice_desktop_to_json(plasma-dataengine-places.desktop)
+
 plasma_add_plugin(plasma_engine_places ${places_engine_SRCS})
 
 target_link_libraries(plasma_engine_places
