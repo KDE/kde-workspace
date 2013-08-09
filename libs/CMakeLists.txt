@@ -13,7 +13,7 @@ endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 
 if(NOT WIN32)
     if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
-        #add_subdirectory(ksysguard)
+        add_subdirectory(ksysguard)
     endif (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
 endif(NOT WIN32)
 
