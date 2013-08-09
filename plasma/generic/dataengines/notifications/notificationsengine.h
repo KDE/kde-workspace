@@ -60,7 +60,7 @@ public:
 public Q_SLOTS:
     void userClosedNotification(uint id);
 
-signals:
+Q_SIGNALS:
     void NotificationClosed( uint id, uint reason );
     void ActionInvoked( uint id, const QString& actionKey );
 

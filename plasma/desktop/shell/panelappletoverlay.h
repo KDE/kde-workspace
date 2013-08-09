@@ -51,7 +51,7 @@ public:
     void syncIndex();
     Plasma::Applet *applet() const;
 
-signals:
+Q_SIGNALS:
     void removedWithApplet(PanelAppletOverlay*);
     void moved(PanelAppletOverlay*);
 

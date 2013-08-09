@@ -34,7 +34,7 @@ public:
 
     void update();
 
-signals:
+Q_SIGNALS:
     void dataReady(const Plasma::DataEngine::Data& data);
 
 protected:

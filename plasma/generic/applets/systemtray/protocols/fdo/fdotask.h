@@ -43,7 +43,7 @@ public:
     virtual bool isWidget() const;
     virtual TaskType type() const { return TypeX11Task; }
 
-signals:
+Q_SIGNALS:
     void taskDeleted(WId winId);
 
 protected:

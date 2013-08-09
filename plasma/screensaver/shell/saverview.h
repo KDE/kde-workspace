@@ -41,7 +41,7 @@ public:
 
     bool eventFilter(QObject *watched, QEvent *event);
 
-signals:
+Q_SIGNALS:
     void hidden();
 
 protected:

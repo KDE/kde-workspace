@@ -39,7 +39,7 @@ public:
     void removePlayer(const QString &name);
     PlayerContainer *activePlayer() const;
 
-signals:
+Q_SIGNALS:
     void activePlayerChanged(PlayerContainer *container);
 
 private Q_SLOTS:

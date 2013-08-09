@@ -39,7 +39,7 @@ public:
     FdoNotification(WId winId, QObject *parent = 0);
     ~FdoNotification();
 
-signals:
+Q_SIGNALS:
     void notificationDeleted(WId winId);
 
 private:

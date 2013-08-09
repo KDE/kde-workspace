@@ -43,7 +43,7 @@ public Q_SLOTS:
 protected Q_SLOTS:
         void updateResult(KJob*);
 
-signals:
+Q_SIGNALS:
 	void resultReady(const QString&);
 	void formattedResultReady(const QString&);
 

@@ -47,7 +47,7 @@ public:
     Plasma::ServiceJob* createJob(const QString& operation,
                                   QMap<QString,QVariant>& parameters);
 
-signals:
+Q_SIGNALS:
     void enabledOperationsChanged();
 
 private Q_SLOTS:

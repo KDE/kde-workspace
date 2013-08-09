@@ -69,7 +69,7 @@ public:
 
     QStringList applets(Plasma::Applet *parent) const;
 
-signals:
+Q_SIGNALS:
     /**
      * Emitted when a new task has been added
      **/

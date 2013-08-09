@@ -107,7 +107,7 @@ public:
      */
     const KActivities::Info * info() const;
 
-signals:
+Q_SIGNALS:
     void infoChanged();
     void stateChanged();
     void currentStatusChanged();

@@ -95,7 +95,7 @@ public:
     Q_INVOKABLE void activateHorzScroll(int delta) const;
     Q_INVOKABLE QVariant customIcon(QVariant variant) const;
 
-signals:
+Q_SIGNALS:
     void changedIcons(); // if icons, icon names, movie path are changed
     void changedIconName(); // if icon name changed
     void changedAttIconName(); // if attention icon name is changed

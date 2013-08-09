@@ -66,7 +66,7 @@ public:
 
     void refresh();
 
-signals:
+Q_SIGNALS:
     void initialFetchFinished(PlayerContainer* self);
     void initialFetchFailed(PlayerContainer* self);
     void capsChanged(Caps newCaps);

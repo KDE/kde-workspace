@@ -83,7 +83,7 @@ public:
     void setShowRecentlyInstalled(bool showRecentlyInstalled);
     bool showRecentlyInstalled() const;
 
-signals:
+Q_SIGNALS:
     void aboutToHide();
     void configNeedsSaving();
 

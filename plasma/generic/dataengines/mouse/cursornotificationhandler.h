@@ -34,7 +34,7 @@ public:
 
     QString cursorName();
 
-signals:
+Q_SIGNALS:
     void cursorNameChanged(const QString &name);
 
 protected:

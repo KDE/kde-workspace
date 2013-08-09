@@ -47,7 +47,7 @@ public:
     void removeDamageWatch(QWidget *container);
     bool haveComposite() const;
 
-signals:
+Q_SIGNALS:
     void taskCreated(SystemTray::Task *task);
     void notificationCreated(SystemTray::Notification *notification);
 

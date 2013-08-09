@@ -51,7 +51,7 @@ public:
 
     virtual void init() = 0;
 
-signals:
+Q_SIGNALS:
     /**
      * Signals that a new task has been created
      **/

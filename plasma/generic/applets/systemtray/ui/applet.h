@@ -116,7 +116,7 @@ protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
 
-signals:
+Q_SIGNALS:
     void formFactorChanged();
     void locationChanged();
     void visibilityPreferenceChanged();  ///< If user has changed his preference on visibility of tasks

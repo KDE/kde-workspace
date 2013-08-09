@@ -61,7 +61,7 @@ public:
     QObject *applet() const { return m_applet; }
     void setApplet(QObject *applet);
 
-signals:
+Q_SIGNALS:
     void changedTask();
 
 private Q_SLOTS:
