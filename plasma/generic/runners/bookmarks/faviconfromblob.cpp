@@ -53,7 +53,7 @@ class ChromeQuery : public BuildQuery {
 public:
     ChromeQuery() {}
     virtual QString query(QSqlDatabase *database) const {
-      kDebug(kdbg_code) << "tables: " << database->tables();
+      //qDebug() << "tables: " << database->tables();
       if(database->tables().contains("favicon_bitmaps"))
 	return "SELECT * FROM favicons " \
             "inner join icon_mapping on icon_mapping.icon_id = favicons.id " \
@@ -91,7 +91,7 @@ FaviconFromBlob::FaviconFromBlob(const QString &profileName, BuildQuery *buildQu
     m_profileCacheDirectory = QString("%1/KRunner-Favicons-%2")
             .arg(KStandardDirs::locateLocal("cache", ""))
             .arg(profileName);
-    kDebug(kdbg_code) << "got cache directory: " << m_profileCacheDirectory;
+    //qDebug() << "got cache directory: " << m_profileCacheDirectory;
     cleanCacheDirectory();
     QDir().mkpath(m_profileCacheDirectory);
 }
@@ -115,7 +115,7 @@ void FaviconFromBlob::teardown()
 void FaviconFromBlob::cleanCacheDirectory()
 {
     foreach(QFileInfo file, QDir(m_profileCacheDirectory).entryInfoList(QDir::NoDotAndDotDot)) {
-        kDebug(kdbg_code) << "Removing file " << file.absoluteFilePath() << ": " <<
+        //qDebug() << "Removing file " << file.absoluteFilePath() << ": " <<
                              QFile(file.absoluteFilePath()).remove();
     }
     QDir().rmdir(m_profileCacheDirectory);
@@ -123,7 +123,7 @@ void FaviconFromBlob::cleanCacheDirectory()
 
 QIcon FaviconFromBlob::iconFor(const QString &url)
 {
-    kDebug(kdbg_code) << "got url: " << url;
+    //qDebug() << "got url: " << url;
     QString fileChecksum = QString("%1").arg(qChecksum(url.toAscii(), url.toAscii().size()));
     QFile iconFile( m_profileCacheDirectory + QDir::separator() + fileChecksum + "_favicon" );
     if(iconFile.size() == 0)
@@ -135,7 +135,7 @@ QIcon FaviconFromBlob::iconFor(const QString &url)
         if(!faviconFound.size()>0) return defaultIcon();
 
         QByteArray iconData = faviconFound.first().value(m_blobcolumn).toByteArray();
-        kDebug(kdbg_code) << "Favicon found: " << iconData.size() << " bytes";
+        //qDebug() << "Favicon found: " << iconData.size() << " bytes";
 	if(iconData.size() <=0)
             return defaultIcon();
 

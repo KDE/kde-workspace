@@ -36,8 +36,8 @@ FetchSqlite::FetchSqlite(const QString &originalFilePath, const QString &copyTo,
     QFile(copyTo).remove();
     bool couldCopy = originalFile.copy(copyTo);
     if(!couldCopy) {
-        kDebug(kdbg_code) << "error copying favicon database from " << originalFile.fileName() << " to " << copyTo;
-        kDebug(kdbg_code) << originalFile.errorString();
+        //qDebug() << "error copying favicon database from " << originalFile.fileName() << " to " << copyTo;
+        //qDebug() << originalFile.errorString();
     }
 }
 
@@ -51,9 +51,9 @@ void FetchSqlite::prepare()
 {
     m_db.setDatabaseName(m_databaseFile);
     bool ok = m_db.open();
-    kDebug(kdbg_code) << "Sqlite Database " << m_databaseFile << " was opened: " << ok;
+    //qDebug() << "Sqlite Database " << m_databaseFile << " was opened: " << ok;
     if(!ok) {
-        kDebug(kdbg_code) << "Error: " << m_db.lastError().text();
+        //qDebug() << "Error: " << m_db.lastError().text();
     }
 }
 
@@ -69,18 +69,18 @@ QList<QVariantMap> FetchSqlite::query(BuildQuery *buildQuery, QMap<QString, QVar
 
 QList<QVariantMap> FetchSqlite::query(const QString &sql, QMap<QString, QVariant> bindObjects)
 {
-    kDebug(kdbg_code) << "query: " << sql;
+    //qDebug() << "query: " << sql;
     QSqlQuery query(m_db);
     query.prepare(sql);
     foreach(const QString &variableName, bindObjects.keys()) {
         query.bindValue(variableName, bindObjects.value(variableName));
-        kDebug(kdbg_code) << "* Bound " << variableName << " to " << query.boundValue(variableName);
+        //qDebug() << "* Bound " << variableName << " to " << query.boundValue(variableName);
     }
 
     if(!query.exec()) {
         QSqlError error = m_db.lastError();
-        kDebug(kdbg_code) << "query failed: " << error.text() << " (" << error.type() << ", " << error.number() << ")";
-        kDebug(kdbg_code) << query.lastQuery();
+        //qDebug() << "query failed: " << error.text() << " (" << error.type() << ", " << error.number() << ")";
+        //qDebug() << query.lastQuery();
     }
 
     QList<QVariantMap> result;

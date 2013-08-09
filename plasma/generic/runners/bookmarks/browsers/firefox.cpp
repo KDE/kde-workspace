@@ -38,7 +38,7 @@ Firefox::Firefox(QObject *parent) :
     m_fetchsqlite(0)
 {
   reloadConfiguration();
-  kDebug(kdbg_code) << "Loading Firefox Bookmarks Browser";
+  //qDebug() << "Loading Firefox Bookmarks Browser";
 }
 
 
@@ -47,10 +47,10 @@ Firefox::~Firefox()
     if (!m_dbCacheFile.isEmpty()) {
         QFile db_CacheFile(m_dbCacheFile);
         if (db_CacheFile.exists()) {
-            kDebug(kdbg_code) << "Cache file was removed: " << db_CacheFile.remove();
+            //qDebug() << "Cache file was removed: " << db_CacheFile.remove();
         }
     }
-    kDebug(kdbg_code) << "Deleted Firefox Bookmarks Browser";
+    //qDebug() << "Deleted Firefox Bookmarks Browser";
 }
 
 void Firefox::prepare()
@@ -75,7 +75,7 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
     if (!m_fetchsqlite) {
         return matches;
     }
-    kDebug(kdbg_code) << "Firefox bookmark: match " << term;
+    //qDebug() << "Firefox bookmark: match " << term;
 
     QString tmpTerm = term;
     QString query;
@@ -97,7 +97,7 @@ QList< BookmarkMatch > Firefox::match(const QString& term, bool addEverything)
         const QUrl url = result.value("url").toUrl();
         if (url.scheme().contains("place")) {
             //Don't use bookmarks with empty title, url or Firefox intern url
-            kDebug(kdbg_code) << "element " << url << " was not added";
+            //qDebug() << "element " << url << " was not added";
             continue;
         }
 
@@ -152,15 +152,15 @@ void Firefox::reloadConfiguration()
             }
 
             if (profilePath.isEmpty()) {
-                kDebug(kdbg_code) << "No default firefox profile found";
+                //qDebug() << "No default firefox profile found";
                 return;
             }
-	    kDebug(kdbg_code) << "Profile " << profilePath << " found";
+	    //qDebug() << "Profile " << profilePath << " found";
             profilePath.prepend(QString("%1/.mozilla/firefox/").arg(QDir::homePath()));
             m_dbFile = profilePath + "/places.sqlite";
             grp.writeEntry("dbfile", m_dbFile);
         }
     } else {
-        kDebug(kdbg_code) << "SQLITE driver isn't available";
+        //qDebug() << "SQLITE driver isn't available";
     }
 }

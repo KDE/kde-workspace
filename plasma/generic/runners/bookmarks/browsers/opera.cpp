@@ -74,14 +74,14 @@ void Opera::prepare()
         QString operaBookmarksFilePath = QDir::homePath() + "/.opera/bookmarks.adr";
         QFile operaBookmarksFile(operaBookmarksFilePath);
         if (!operaBookmarksFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            kDebug(kdbg_code) << "Could not open Operas Bookmark File " + operaBookmarksFilePath;
+            //qDebug() << "Could not open Operas Bookmark File " + operaBookmarksFilePath;
             return;
         }
 
         // check format
         QString firstLine = operaBookmarksFile.readLine();
         if (firstLine.compare("Opera Hotlist version 2.0\n")) {
-            kDebug(kdbg_code) << "Format of Opera Bookmarks File might have changed.";
+            //qDebug() << "Format of Opera Bookmarks File might have changed.";
         }
         operaBookmarksFile.readLine(); // skip options line ("Options: encoding = utf8, version=3")
         operaBookmarksFile.readLine(); // skip empty line

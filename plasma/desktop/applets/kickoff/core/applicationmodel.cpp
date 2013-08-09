@@ -248,7 +248,7 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
                 continue;
             }
 
-            kDebug(250) << "Service group" << serviceGroup->entryPath() << serviceGroup->icon()
+            //qDebug() << "Service group" << serviceGroup->entryPath() << serviceGroup->icon()
             << serviceGroup->relPath() << serviceGroup->directoryEntryPath();
 
             icon = serviceGroup->icon();

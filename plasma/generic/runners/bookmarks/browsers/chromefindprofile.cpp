@@ -47,7 +47,7 @@ QList<Profile> FindChromeProfile::find()
 
   QVariantMap localState = parser.parse(&localStateFile, &ok).toMap();
   if(!ok) {
-      kDebug(kdbg_code) << "error opening " << QFileInfo(localStateFile).absoluteFilePath();
+      //qDebug() << "error opening " << QFileInfo(localStateFile).absoluteFilePath();
       return profiles;
   }
 
