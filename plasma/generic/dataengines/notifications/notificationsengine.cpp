@@ -21,7 +21,7 @@
 #include "notificationservice.h"
 #include "notificationsadaptor.h"
 
-#include <KDebug>
+#include <QDebug>
 #include <KConfigGroup>
 #include <KGlobal>
 #include <KNotifyConfigWidget>
@@ -80,7 +80,7 @@ static QImage decodeNotificationSpecImageHint(const QDBusArgument& arg)
     arg.beginStructure();
     arg >> width >> height >> rowStride >> hasAlpha >> bitsPerSample >> channels >> pixels;
     arg.endStructure();
-    //kDebug() << width << height << rowStride << hasAlpha << bitsPerSample << channels;
+    //qDebug() << width << height << rowStride << hasAlpha << bitsPerSample << channels;
 
     #define SANITY_CHECK(condition) \
     if (!(condition)) { \

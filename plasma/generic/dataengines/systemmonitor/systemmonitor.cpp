@@ -21,7 +21,7 @@
 #include <QTimer>
 #include <QProcess>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 
 #include <Plasma/DataContainer>
@@ -105,7 +105,7 @@ void SystemMonitorEngine::answerReceived(int id, const QList<QByteArray> &answer
 {
     if (id < -1) {
         if (answer.isEmpty() || m_sensors.count() <= (-id - 2)) {
-            kDebug() << "sensor info answer was empty, (" << answer.isEmpty() << ") or sensors does not exist to us ("
+            qDebug() << "sensor info answer was empty, (" << answer.isEmpty() << ") or sensors does not exist to us ("
                      << (m_sensors.count() < (-id - 2)) << ") for index" << (-id - 2);
             return;
         }
@@ -116,10 +116,10 @@ void SystemMonitorEngine::answerReceived(int id, const QList<QByteArray> &answer
         const QStringList newSensorInfo = QString::fromUtf8(answer[0]).split('\t');
 
         if (newSensorInfo.count() < 4) {
-            kDebug() << "bad sensor info, only" << newSensorInfo.count()
+            qDebug() << "bad sensor info, only" << newSensorInfo.count()
                      << "entries, and we were expecting 4. Answer was " << answer;
             if(it != sources.constEnd())
-                kDebug() << "value =" << it.value()->data()["value"] << "type=" << it.value()->data()["type"];
+                qDebug() << "value =" << it.value()->data()["value"] << "type=" << it.value()->data()["type"];
             return;
         }
 

@@ -22,7 +22,7 @@
 
 #include <QStringList>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 
 #include "playerinterface/player.h"
@@ -83,7 +83,7 @@ Plasma::Service* NowPlayingEngine::serviceForSource(const QString& source)
 
 bool NowPlayingEngine::sourceRequestEvent(const QString& source)
 {
-    kDebug() << "Source" << source << "was requested";
+    qDebug() << "Source" << source << "was requested";
     if (source == "help") {
         setData(source, "Use 'players' to get a list of players.\n"
                         "Use 'properties' to get a list of all properties that may be returned."
@@ -119,7 +119,7 @@ bool NowPlayingEngine::sourceRequestEvent(const QString& source)
 
 void NowPlayingEngine::addPlayer(Player::Ptr player)
 {
-    kDebug() << "Adding player" << player->name();
+    qDebug() << "Adding player" << player->name();
     Plasma::DataContainer *container = containerForSource("players");
     QStringList players;
     if (container) {
@@ -134,7 +134,7 @@ void NowPlayingEngine::addPlayer(Player::Ptr player)
 
 void NowPlayingEngine::removePlayer(Player::Ptr player)
 {
-    kDebug() << "Player" << player->name() << "disappeared";
+    qDebug() << "Player" << player->name() << "disappeared";
     Plasma::DataContainer *container = containerForSource("players");
     if (container) {
         QStringList players = container->data()["players"].toStringList();

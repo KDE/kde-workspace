@@ -19,7 +19,7 @@
 #include "dictengine.h"
 #include <iostream>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <ktcpsocket.h>
 
@@ -162,7 +162,7 @@ void DictEngine::getDicts()
             tmp1 = curr.section(' ', 0, 0);
             tmp2 = curr.section(' ', 1);
   //          theHash.insert(tmp1, tmp2);
-            //kDebug() << tmp1 + "  " + tmp2;
+            //qDebug() << tmp1 + "  " + tmp2;
             setData("list-dictionaries", tmp1, tmp2);
         }
     }

@@ -20,7 +20,7 @@
 
 #include <QtCore/QString>
 
-#include <KDebug>
+#include <QDebug>
 #include <KDiskFreeSpaceInfo>
 
 #include "placeservice.h"
@@ -56,7 +56,7 @@ void PlacesEngine::placesAdded(const QModelIndex&, int start, int end)
 
 void PlacesEngine::placesRemoved(const QModelIndex&, int start, int end)
 {
-    kDebug() << "Places" << start << "through" << end << "removed";
+    qDebug() << "Places" << start << "through" << end << "removed";
     for (int index = start; index <= end; index++) {
         removeSource(QString::number(index));
     }

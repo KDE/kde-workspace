@@ -23,7 +23,7 @@
 
 void PlayerActionJob::start()
 {
-    kDebug() << "Trying to perform the action" << operationName();
+    qDebug() << "Trying to perform the action" << operationName();
     if (!m_player) {
         setErrorText(i18n("The player '%1' cannot be found.", destination()));
         setError(-1);
@@ -106,7 +106,7 @@ void PlayerActionJob::start()
         }
     }
     if (error()) {
-        kDebug() << "Failed with error" << errorText();
+        qDebug() << "Failed with error" << errorText();
     }
     emitResult();
 }

@@ -31,7 +31,7 @@ const QDBusArgument &operator<<(QDBusArgument &argument, const KDbusImageStruct 
     argument.endStructure();
     return argument;
 }
-#include <KDebug>
+#include <QDebug>
 
 // Retrieve the ImageStruct data from the D-BUS argument
 const QDBusArgument &operator>>(const QDBusArgument &argument, KDbusImageStruct &icon)
@@ -42,13 +42,13 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, KDbusImageStruct 
 
     if (argument.currentType() == QDBusArgument::StructureType) {
         argument.beginStructure();
-        //kDebug() << "begun structure";
+        //qDebug() << "begun structure";
         argument >> width;
-        //kDebug() << width;
+        //qDebug() << width;
         argument >> height;
-        //kDebug() << height;
+        //qDebug() << height;
         argument >> data;
-        //kDebug() << data.size();
+        //qDebug() << data.size();
         argument.endStructure();
     }
 

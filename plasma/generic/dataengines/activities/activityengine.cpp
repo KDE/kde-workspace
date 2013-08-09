@@ -145,7 +145,7 @@ void ActivityEngine::activityScoresReply(QDBusPendingCallWatcher *watcher)
 {
     QDBusPendingReply<ActivityDataList> reply = *watcher;
     if (reply.isError()) {
-        kDebug() << "Error getting activity scores: " << reply.error().message();
+        qDebug() << "Error getting activity scores: " << reply.error().message();
     } else {
         setActivityScores(reply.value());
     }

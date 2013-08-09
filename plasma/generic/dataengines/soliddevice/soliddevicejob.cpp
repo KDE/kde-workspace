@@ -24,7 +24,7 @@
 #include <solid/storageaccess.h>
 #include <solid/opticaldrive.h>
 
-#include <KDebug>
+#include <QDebug>
 
 void SolidDeviceJob::start()
 {

@@ -23,7 +23,7 @@
 #include <QCoreApplication>
 #include <QTimer>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KSycoca>
 
@@ -105,7 +105,7 @@ void WeatherEngine::init()
     connect(KSycoca::self(), SIGNAL(databaseChanged(QStringList)), this, SLOT(updateIonList()));
 
     updateIonList();
-    kDebug() << "init()";
+    qDebug() << "init()";
 }
 
 void WeatherEngine::updateIonList(const QStringList &changedResources)
@@ -130,7 +130,7 @@ void WeatherEngine::newIonSource(const QString& source)
         return;
     }
 
-    kDebug() << "newIonSource()";
+    qDebug() << "newIonSource()";
     ion->connectSource(source, this);
 }
 
@@ -147,7 +147,7 @@ void WeatherEngine::removeIonSource(const QString& source)
             unloadIon(ionNameForSource(source));
         }
     }
-    kDebug() << "removeIonSource()";
+    qDebug() << "removeIonSource()";
 }
 
 /**
@@ -155,7 +155,7 @@ void WeatherEngine::removeIonSource(const QString& source)
  */
 void WeatherEngine::dataUpdated(const QString& source, Plasma::DataEngine::Data data)
 {
-    kDebug() << "dataUpdated()";
+    qDebug() << "dataUpdated()";
     setData(source, data);
 }
 
@@ -186,7 +186,7 @@ bool WeatherEngine::sourceRequestEvent(const QString &source)
     // is down. when it comes up again, then it will be refreshed
     ion->connectSource(source, this);
 
-    kDebug() << "sourceRequestEvent(): Network is: " << m_networkAvailable;
+    qDebug() << "sourceRequestEvent(): Network is: " << m_networkAvailable;
     if (!m_networkAvailable) {
         setData(source, Data());
         return true;
@@ -209,7 +209,7 @@ bool WeatherEngine::updateSourceEvent(const QString& source)
         return false;
     }
 
-    kDebug() << "updateSourceEvent(): Network is: " << m_networkAvailable;
+    qDebug() << "updateSourceEvent(): Network is: " << m_networkAvailable;
     if (!m_networkAvailable) {
         return false;
     }
@@ -219,7 +219,7 @@ bool WeatherEngine::updateSourceEvent(const QString& source)
 
 void WeatherEngine::networkStatusChanged(Solid::Networking::Status status)
 {
-    kDebug();
+    qDebug();
     m_networkAvailable = status == Solid::Networking::Connected || status == Solid::Networking::Unknown;
     if (m_networkAvailable) {
         // allow the network to settle down and actually come up
@@ -231,7 +231,7 @@ void WeatherEngine::startReconnect()
 {
     foreach (const QString &i, m_ions) {
         IonInterface * ion = qobject_cast<IonInterface *>(Plasma::DataEngineManager::self()->engine(i));
-        kDebug() << "resetting" << ion;
+        qDebug() << "resetting" << ion;
         if (ion) {
             ion->reset();
         }
@@ -243,10 +243,10 @@ void WeatherEngine::forceUpdate(IonInterface *i, const QString &source)
     const QString actualSource(i->pluginName() + '|' + source);
     Plasma::DataContainer *container = containerForSource(source);
     if (container) {
-        kDebug() << "immediate update of" << source;
+        qDebug() << "immediate update of" << source;
         container->forceImmediateUpdate();
     } else {
-        kDebug() << "innexplicable failure of" << source;
+        qDebug() << "innexplicable failure of" << source;
     }
 }
 

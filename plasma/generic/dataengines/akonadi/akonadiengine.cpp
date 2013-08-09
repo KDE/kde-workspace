@@ -104,18 +104,18 @@ void AkonadiEngine::fetchEmailCollectionsDone(KJob* job)
 {
     // called when the job fetching email collections from Akonadi emits result()
     if ( job->error() ) {
-        kDebug() << "Job Error:" << job->errorString();
+        qDebug() << "Job Error:" << job->errorString();
     } else {
         CollectionFetchJob* cjob = static_cast<CollectionFetchJob*>( job );
         int i = 0;
         foreach( const Collection &collection, cjob->collections() ) {
             if (collection.contentMimeTypes().contains("message/rfc822")) {
-                //kDebug() << "EmailCollection setting data:" << collection.name() << collection.url() << collection.contentMimeTypes();
+                //qDebug() << "EmailCollection setting data:" << collection.name() << collection.url() << collection.contentMimeTypes();
                 i++;
                 setData("EmailCollections", QString("EmailCollection-%1").arg(collection.id()), collection.name());
             }
         }
-        kDebug() << i << "Email collections are in now";
+        qDebug() << i << "Email collections are in now";
         scheduleSourcesUpdated();
     }
 }
@@ -124,18 +124,18 @@ void AkonadiEngine::fetchContactCollectionsDone(KJob* job)
 {
     // called when the job fetching contact collections from Akonadi emits result()
     if ( job->error() ) {
-        kDebug() << "Job Error:" << job->errorString();
+        qDebug() << "Job Error:" << job->errorString();
     } else {
         CollectionFetchJob* cjob = static_cast<CollectionFetchJob*>( job );
         int i = 0;
         foreach( const Collection &collection, cjob->collections() ) {
             if (collection.contentMimeTypes().contains("text/directory")) {
-                //kDebug() << "ContactCollection setting data:" << collection.name() << collection.url() << collection.contentMimeTypes();
+                //qDebug() << "ContactCollection setting data:" << collection.name() << collection.url() << collection.contentMimeTypes();
                 i++;
                 setData("ContactCollections", QString("ContactCollection-%1").arg(collection.id()), collection.name());
             }
         }
-        kDebug() << i << "Contact collections are in now";
+        qDebug() << i << "Contact collections are in now";
         scheduleSourcesUpdated();
     }
 }
@@ -144,25 +144,25 @@ void AkonadiEngine::fetchMicroBlogCollectionsDone(KJob* job)
 {
     // called when the job fetching microblog collections from Akonadi emits result()
     if ( job->error() ) {
-        kDebug() << "Job Error:" << job->errorString();
+        qDebug() << "Job Error:" << job->errorString();
     } else {
         CollectionFetchJob* cjob = static_cast<CollectionFetchJob*>( job );
         int i = 0;
         foreach( const Collection &collection, cjob->collections() ) {
             if (collection.contentMimeTypes().contains("application/x-vnd.kde.microblog")) {
-                kDebug() << "Microblog setting data:" << collection.name() << collection.url() << collection.contentMimeTypes();
+                qDebug() << "Microblog setting data:" << collection.name() << collection.url() << collection.contentMimeTypes();
                 i++;
                 setData("MicroblogCollection", QString("MicroBlog-%1").arg(collection.id()), collection.name());
             }
         }
-        kDebug() << i << "MicroBlog collections are in now";
+        qDebug() << i << "MicroBlog collections are in now";
         scheduleSourcesUpdated();
     }
 }
 
 bool AkonadiEngine::sourceRequestEvent(const QString &name)
 {
-    kDebug() << "Source requested:" << name << sources();
+    qDebug() << "Source requested:" << name << sources();
 
     if (name == "EmailCollections") {
         Collection emailCollection(Collection::root());
@@ -223,7 +223,7 @@ bool AkonadiEngine::sourceRequestEvent(const QString &name)
         return true;
 
     } else if (name.startsWith(QString("Contact-"))) {
-        kDebug() << "Fetching contact" << name;
+        qDebug() << "Fetching contact" << name;
         qlonglong id = name.split('-')[1].toLongLong();
         ItemFetchJob *fetch = new ItemFetchJob( Item( id ), this );
         if (!m_contactMonitor) {
@@ -245,7 +245,7 @@ bool AkonadiEngine::sourceRequestEvent(const QString &name)
 
     } else if (name.startsWith(QString("MicroBlog-"))) {
         qlonglong id = name.split('-')[1].toLongLong();
-        kDebug() << "MicroBlog ID" << id << " requested" << name;
+        qDebug() << "MicroBlog ID" << id << " requested" << name;
         ItemFetchJob *fetch = new ItemFetchJob( Akonadi::Collection( id ));
         if (!m_microBlogMonitor) {
             initMicroBlogMonitor();
@@ -257,7 +257,7 @@ bool AkonadiEngine::sourceRequestEvent(const QString &name)
         return true;
     }
     // We don't understand the request.
-    kDebug() << "Don't know what to do with:" << name;
+    qDebug() << "Don't know what to do with:" << name;
     return false;
 }
 
@@ -267,7 +267,7 @@ void AkonadiEngine::stopMonitor(const QString &name)
         // Stop monitoring this one
         qlonglong id = name.split('-')[1].toLongLong();
         m_emailMonitor->setCollectionMonitored( Collection( id ), false);
-        kDebug() << "Removed monitor from:" << name << id;
+        qDebug() << "Removed monitor from:" << name << id;
     }
 }
 
@@ -287,7 +287,7 @@ void AkonadiEngine::emailItemAdded(const Akonadi::Item &item, const QString &col
     if (msg) {
         QString source = QString::number( item.id() );
         source = "Email-" + source;
-        //kDebug() << "new source adding:" << source << item.url() << msg->subject()->asUnicodeString();
+        //qDebug() << "new source adding:" << source << item.url() << msg->subject()->asUnicodeString();
 
         setData( source, "Id", item.id() );
         setData( source, "Collection", collection);
@@ -300,7 +300,7 @@ void AkonadiEngine::emailItemAdded(const Akonadi::Item &item, const QString &col
         setData( source, "Bcc", msg->bcc()->asUnicodeString() );
         setData( source, "Body", QString(msg->mainBodyPart()->body()));
         // Flags
-        //kDebug() << item.flags();
+        //qDebug() << item.flags();
         setData( source, "Flag-New", !item.hasFlag("\\Seen") );
         setData( source, "Flag-Task", item.hasFlag("\\Task") ); // not in Akonadi!
         setData( source, "Flag-Important", item.hasFlag("important") );
@@ -322,22 +322,22 @@ void AkonadiEngine::emailItemAdded(const Akonadi::Item &item, const QString &col
 void AkonadiEngine::printMessage(const MessagePtr msg)
 {
     return;
-    kDebug() << "sub" << msg->subject()->asUnicodeString();
+    qDebug() << "sub" << msg->subject()->asUnicodeString();
     return;
-    kDebug() << "=============== New Item" << msg->from()->asUnicodeString() << msg->subject()->asUnicodeString();
-    kDebug() << "sub" << msg->subject()->asUnicodeString();
-    kDebug() << "from" << msg->from()->asUnicodeString();
-    kDebug() << "date" << msg->date()->dateTime().date();
-    kDebug() << "to" << msg->to()->asUnicodeString();
-    kDebug() << "cc" << msg->cc()->asUnicodeString();
-    kDebug() << "bcc" << msg->bcc()->asUnicodeString();
-    kDebug() << "body" << msg->mainBodyPart()->body();
+    qDebug() << "=============== New Item" << msg->from()->asUnicodeString() << msg->subject()->asUnicodeString();
+    qDebug() << "sub" << msg->subject()->asUnicodeString();
+    qDebug() << "from" << msg->from()->asUnicodeString();
+    qDebug() << "date" << msg->date()->dateTime().date();
+    qDebug() << "to" << msg->to()->asUnicodeString();
+    qDebug() << "cc" << msg->cc()->asUnicodeString();
+    qDebug() << "bcc" << msg->bcc()->asUnicodeString();
+    qDebug() << "body" << msg->mainBodyPart()->body();
 }
 
 void AkonadiEngine::fetchEmailCollectionDone(KJob* job)
 {
     if ( job->error() ) {
-        kDebug() << "Job Error:" << job->errorString();
+        qDebug() << "Job Error:" << job->errorString();
         return;
     }
     const QString col = m_jobCollections[job];
@@ -363,10 +363,10 @@ void AkonadiEngine::fetchContactCollectionDone(KJob* job)
 void AkonadiEngine::fetchMicroBlogDone(KJob* job)
 {
     if (job->error()) {
-        kDebug() << "Microblog job failed:" << job->errorString();
+        qDebug() << "Microblog job failed:" << job->errorString();
     } else {
         Item::List items = static_cast<ItemFetchJob*>( job )->items();
-        kDebug() << "Adding microblogs" << items.count();
+        qDebug() << "Adding microblogs" << items.count();
         foreach (const Item &item, items) {
             microBlogItemAdded(item);
         }
@@ -378,11 +378,11 @@ void AkonadiEngine::microBlogItemAdded(const Akonadi::Item &item)
 {
     // Get the Akonadi::Item's XML payload and parse that, then
     // put it into the DataEngine's Data
-    kDebug() << "Checking one item";
+    qDebug() << "Checking one item";
     if (item.hasPayload<Microblog::StatusItem>()) {
         Microblog::StatusItem s = item.payload<Microblog::StatusItem>();
         const QString source = QString("MicroBlog-%1").arg(s.id());
-        kDebug() << "Adding" << source << s.keys();
+        qDebug() << "Adding" << source << s.keys();
         setData(source, "Date", s.date());
         setData(source, "Foo", "Bar");
         foreach (const QString &key, s.keys()) {
@@ -390,44 +390,44 @@ void AkonadiEngine::microBlogItemAdded(const Akonadi::Item &item)
         }
         scheduleSourcesUpdated();
     } else {
-        kDebug() << "Wrong payload (not a StatusItem)";
+        qDebug() << "Wrong payload (not a StatusItem)";
     }
 }
 
 void AkonadiEngine::printContact(const QString &source, const KABC::Addressee &a)
 {
-    kDebug() << "-----------------------------------";
-    kDebug() << source;
-    kDebug() << "name" << a.name();
-    kDebug() << "formattedName" << a.formattedName();
-    kDebug() << "nameLabel" << a.nameLabel();
-    kDebug() << "given" << a.givenName();
-    kDebug() << "familyName" << a.familyName();
-    kDebug() << "realName" << a.realName();
-    kDebug() << "organization" << a.organization();
-    kDebug() << "department" << a.department();
-    kDebug() << "role" << a.role();
-    kDebug() << "emails" << a.emails();
-    kDebug() << "fullEmail" << a.fullEmail();
-    kDebug() << "photoUrl" << a.photo().url();
-    kDebug() << "note" << a.note();
+    qDebug() << "-----------------------------------";
+    qDebug() << source;
+    qDebug() << "name" << a.name();
+    qDebug() << "formattedName" << a.formattedName();
+    qDebug() << "nameLabel" << a.nameLabel();
+    qDebug() << "given" << a.givenName();
+    qDebug() << "familyName" << a.familyName();
+    qDebug() << "realName" << a.realName();
+    qDebug() << "organization" << a.organization();
+    qDebug() << "department" << a.department();
+    qDebug() << "role" << a.role();
+    qDebug() << "emails" << a.emails();
+    qDebug() << "fullEmail" << a.fullEmail();
+    qDebug() << "photoUrl" << a.photo().url();
+    qDebug() << "note" << a.note();
 
     QStringList phoneNumbers;
     foreach (const KABC::PhoneNumber &pn, a.phoneNumbers()) {
         const QString key = QString("Phone-%1").arg(pn.typeLabel());
-        kDebug() << key << a.phoneNumber(pn.type()).number();
+        qDebug() << key << a.phoneNumber(pn.type()).number();
         phoneNumbers << a.phoneNumber(pn.type()).number();
     }
-    kDebug() << "phoneNumbers" << phoneNumbers;
+    qDebug() << "phoneNumbers" << phoneNumbers;
 
-    kDebug() << "additionalName" << a.additionalName();
+    qDebug() << "additionalName" << a.additionalName();
 
 }
 
 void AkonadiEngine::contactItemAdded( const Akonadi::Item &item )
 {
     if (item.hasPayload<KABC::Addressee>()) {
-        //kDebug() << item.id() << "item has payload ...";
+        //qDebug() << item.id() << "item has payload ...";
         KABC::Addressee a = item.payload<KABC::Addressee>();
         if (!a.isEmpty()) {
             const QString source = QString("Contact-%1").arg(item.id());

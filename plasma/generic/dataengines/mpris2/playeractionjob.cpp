@@ -43,7 +43,7 @@ void PlayerActionJob::start()
 {
     const QString operation(operationName());
 
-    kDebug() << "Trying to perform the action" << operationName();
+    qDebug() << "Trying to perform the action" << operationName();
     if (!m_controller->isOperationEnabled(operation)) {
         setError(Denied);
         emitResult();
@@ -83,7 +83,7 @@ void PlayerActionJob::start()
             listenToCall(m_controller->playerInterface()->OpenUri(
                              QString::fromLatin1(parameters()["uri"].toUrl().toEncoded())));
         } else {
-            kDebug() << "uri was of type" << parameters().value("uri").userType();
+            qDebug() << "uri was of type" << parameters().value("uri").userType();
             setErrorText("uri");
             setError(MissingArgument);
             emitResult();

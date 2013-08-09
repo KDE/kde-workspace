@@ -166,7 +166,7 @@ void NOAAIon::getXMLSetup() const
                 SLOT(setup_slotDataArrived(KIO::Job*,QByteArray)));
         connect(job, SIGNAL(result(KJob*)), this, SLOT(setup_slotJobFinished(KJob*)));
     } else {
-        kDebug() << "Could not create place name list transfer job";
+        qDebug() << "Could not create place name list transfer job";
     }
 }
 
@@ -461,7 +461,7 @@ void NOAAIon::updateWeather(const QString& source)
     // Real weather - Current conditions
     data.insert("Observation Period", observationTime(source));
     data.insert("Current Conditions", conditionI18n(source));
-    kDebug() << "i18n condition string: " << qPrintable(conditionI18n(source));
+    qDebug() << "i18n condition string: " << qPrintable(conditionI18n(source));
 
     // Determine the weather icon based on the current time and computed sunrise/sunset time.
     const Plasma::DataEngine::Data timeData = m_timeEngine->query(
@@ -478,13 +478,13 @@ void NOAAIon::updateWeather(const QString& source)
         QString weather = condition(source).toLower();
         ConditionIcons condition = getConditionIcon(weather, true);
         data.insert("Condition Icon", getWeatherIcon(condition));
-        kDebug() << "Using daytime icons\n";
+        qDebug() << "Using daytime icons\n";
     } else {
         // Night
         QString weather = condition(source).toLower();
         ConditionIcons condition = getConditionIcon(weather, false);
         data.insert("Condition Icon", getWeatherIcon(condition));
-        kDebug() << "Using nighttime icons\n";
+        qDebug() << "Using nighttime icons\n";
     }
 
     dataFields = temperature(source);
@@ -907,7 +907,7 @@ void NOAAIon::readForecast(const QString& source, QXmlStreamReader& xml)
                         WeatherData::Forecast forecast;
                         forecast.day = KLocalizedDate(date.date()).formatDate(KLocale::DayName, KLocale::ShortName);
                         forecasts.append(forecast);
-                        //kDebug() << forecast.day;
+                        //qDebug() << forecast.day;
                     }
                 }
 
@@ -922,7 +922,7 @@ void NOAAIon::readForecast(const QString& source, QXmlStreamReader& xml)
 
                     if (xml.name() == "value") {
                         forecasts[i].high = xml.readElementText();
-                        //kDebug() << forecasts[i].high;
+                        //qDebug() << forecasts[i].high;
                         i++;
                     }
                 }
@@ -937,7 +937,7 @@ void NOAAIon::readForecast(const QString& source, QXmlStreamReader& xml)
 
                     if (xml.name() == "value") {
                         forecasts[i].low = xml.readElementText();
-                        //kDebug() << forecasts[i].low;
+                        //qDebug() << forecasts[i].low;
                         i++;
                     }
                 }
@@ -953,8 +953,8 @@ void NOAAIon::readForecast(const QString& source, QXmlStreamReader& xml)
                     if (xml.name() == "weather-conditions" && xml.isStartElement()) {
                         QString summary = xml.attributes().value("weather-summary").toString();
                         forecasts[i].summary = summary;
-                        //kDebug() << forecasts[i].summary;
-			kDebug() << "i18n summary string: "
+                        //qDebug() << forecasts[i].summary;
+			qDebug() << "i18n summary string: "
                                  << qPrintable(i18nc("weather forecast", forecasts[i].summary.toUtf8()));
                         i++;
                     }

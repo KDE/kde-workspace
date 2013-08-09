@@ -49,7 +49,7 @@ CalendarEngine::~CalendarEngine()
 
 bool CalendarEngine::sourceRequestEvent(const QString &request)
 {
-    kDebug() << "Request = " << request << '\n';
+    qDebug() << "Request = " << request << '\n';
 
     if (request.isEmpty()) {
         return false;

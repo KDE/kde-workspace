@@ -20,7 +20,7 @@
 #include "appsengine.h"
 #include "appservice.h"
 
-#include <KDebug>
+#include <QDebug>
 
 AppSource::AppSource(KServiceGroup::Ptr group, QObject *parent) :
     Plasma::DataContainer(parent),
@@ -81,7 +81,7 @@ void AppSource::updateGroup()
         } else if (p->isType(KST_KServiceSeparator)) {
             entries << "---";
         } else {
-            kDebug() << "unexpected object in entry list";
+            qDebug() << "unexpected object in entry list";
         }
     }
     setData("entries", entries);

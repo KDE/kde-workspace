@@ -19,7 +19,7 @@
 
 #include <limits.h>
 
-#include <KDebug>
+#include <QDebug>
 #include <KServiceTypeTrader>
 
 static const char SOURCE[] = "location";
@@ -55,7 +55,7 @@ void Geolocation::init()
             connect(plugin, SIGNAL(availabilityChanged(GeolocationProvider*)),
                     this, SLOT(pluginAvailabilityChanged(GeolocationProvider*)));
         } else {
-            kDebug() << "Failed to load GeolocationProvider:" << error;
+            qDebug() << "Failed to load GeolocationProvider:" << error;
         }
     }
 }
@@ -72,7 +72,7 @@ QStringList Geolocation::sources() const
 
 bool Geolocation::updateSourceEvent(const QString &name)
 {
-    //kDebug() << name;
+    //qDebug() << name;
     if (name == SOURCE) {
         return updatePlugins(GeolocationProvider::SourceEvent);
     }
@@ -97,7 +97,7 @@ bool Geolocation::updatePlugins(GeolocationProvider::UpdateTriggers triggers)
 
 bool Geolocation::sourceRequestEvent(const QString &name)
 {
-    kDebug() << name;
+    qDebug() << name;
     if (name == SOURCE) {
         updatePlugins(GeolocationProvider::ForcedUpdate);
         setData(SOURCE, m_data);
@@ -109,7 +109,7 @@ bool Geolocation::sourceRequestEvent(const QString &name)
 
 void Geolocation::networkStatusChanged()
 {
-    kDebug() << "network status changed";
+    qDebug() << "network status changed";
     m_networkStatus = Solid::Networking::status();
     if ((m_networkStatus == Solid::Networking::Connected) ||
         (m_networkStatus == Solid::Networking::Unknown)) {

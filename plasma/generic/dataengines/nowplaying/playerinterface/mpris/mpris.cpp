@@ -356,7 +356,7 @@ void Mpris::seek(int time)
 
 void Mpris::trackChanged(const QVariantMap& metadata)
 {
-    //kDebug() << m_playerName << "metadata:" << metadata;
+    //qDebug() << m_playerName << "metadata:" << metadata;
     const QString oldArt = m_metadata.value("arturl").toString();
     m_metadata = metadata;
     if (m_artworkLoaded) {
@@ -366,7 +366,7 @@ void Mpris::trackChanged(const QVariantMap& metadata)
 
 void Mpris::stateChanged(MprisDBusStatus state)
 {
-    kDebug() << m_playerName << "state:" << state.play;
+    qDebug() << m_playerName << "state:" << state.play;
     switch (state.play) {
         case MprisDBusStatus::Playing:
             m_state = Playing;
@@ -378,13 +378,13 @@ void Mpris::stateChanged(MprisDBusStatus state)
             m_state = Stopped;
             break;
         default:
-            kDebug() << m_playerName << "unexpected state" << state.play;
+            qDebug() << m_playerName << "unexpected state" << state.play;
     }
 }
 
 void Mpris::capsChanged(int caps)
 {
-    kDebug() << m_playerName << "capabilities:" << caps;
+    qDebug() << m_playerName << "capabilities:" << caps;
     m_caps = (DBusCaps)caps;
     if (!(caps & CAN_PROVIDE_METADATA)) {
         m_metadata.clear();

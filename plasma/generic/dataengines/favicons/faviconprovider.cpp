@@ -28,7 +28,7 @@
 #include <KIO/Job>
 #include <KIO/StoredTransferJob>
 #include <KMimeType>
-#include <KDebug>
+#include <QDebug>
 #include <kstandarddirs.h>
 
 class FaviconProvider::Private

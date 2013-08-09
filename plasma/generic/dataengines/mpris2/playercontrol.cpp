@@ -27,7 +27,7 @@
 #include <mprisroot.h>
 
 #include <QDBusConnection>
-#include <KDebug>
+#include <QDebug>
 
 PlayerControl::PlayerControl(PlayerContainer* container, QObject* parent)
     : Plasma::Service(parent)

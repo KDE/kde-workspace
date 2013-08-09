@@ -43,7 +43,7 @@ Player::Ptr XmmsFactory::create(const QVariantList& args)
     }
     if (xmms_remote_is_running(session)) {
         Xmms* player = new Xmms(session, this);
-        kDebug() << "Creating a player for XMMS session" << session;
+        qDebug() << "Creating a player for XMMS session" << session;
         return Player::Ptr(player);
     }
     return Player::Ptr(0);

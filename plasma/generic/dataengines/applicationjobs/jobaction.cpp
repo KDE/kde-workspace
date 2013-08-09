@@ -23,7 +23,7 @@
 
 void JobAction::start()
 {
-    kDebug() << "Trying to perform the action" << operationName();
+    qDebug() << "Trying to perform the action" << operationName();
 
     if (!m_jobView) {
         setErrorText(i18nc("%1 is the subject (can be anything) upon which the job is performed",

@@ -20,7 +20,7 @@
 #include "playerfactory.h"
 
 #include <QtDBus>
-#include <KDebug>
+#include <QDebug>
 
 DBusWatcher::DBusWatcher(QObject* parent)
     : QObject(parent),
@@ -56,7 +56,7 @@ void DBusWatcher::addFactory(DBusPlayerFactory* factory)
                     kWarning() << "Two factories tried to claim the same service:" << name;
                 } else if (ownerReply.isValid()) {
                     QString owner = ownerReply.value();
-                    kDebug() << "Service" << name << "has owner" << owner;
+                    qDebug() << "Service" << name << "has owner" << owner;
                     if (!m_owners.contains(owner)) {
                         QVariantList args;
                         args << QVariant(name);
@@ -66,7 +66,7 @@ void DBusWatcher::addFactory(DBusPlayerFactory* factory)
                             m_owners << owner;
                             emit(newPlayer(player));
                         } else {
-                            kDebug() << "Failed to get player" << name;
+                            qDebug() << "Failed to get player" << name;
                         }
                     }
                 }
@@ -82,9 +82,9 @@ void DBusWatcher::serviceChange(const QString& name,
                                 const QString& newOwner)
 {
     if (oldOwner.isEmpty() && !newOwner.isEmpty()) {
-        kDebug() << "Service" << name << "has owner" << newOwner;
+        qDebug() << "Service" << name << "has owner" << newOwner;
         if (m_owners.contains(newOwner)) {
-            kDebug() << "Owner" << newOwner << "is already being dealt with";
+            qDebug() << "Owner" << newOwner << "is already being dealt with";
             // something is already dealing with this media player
             return;
         }
@@ -102,7 +102,7 @@ void DBusWatcher::serviceChange(const QString& name,
                         m_owners << newOwner;
                         emit(newPlayer(player));
                     } else {
-                        kDebug() << "Failed to get player" << name << "; trying other factories";
+                        qDebug() << "Failed to get player" << name << "; trying other factories";
                     }
                 }
             }
@@ -117,7 +117,7 @@ void DBusWatcher::serviceChange(const QString& name,
         }
     } else if (!oldOwner.isEmpty() && !newOwner.isEmpty()) {
         if (m_owners.removeAll(oldOwner) > 0) {
-            kDebug() << "Service" << name << "had owner" << oldOwner << "and is now owned by" << newOwner;
+            qDebug() << "Service" << name << "had owner" << oldOwner << "and is now owned by" << newOwner;
             m_owners << newOwner;
         }
     }

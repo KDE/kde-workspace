@@ -31,9 +31,9 @@ PlayerControl::PlayerControl(QObject* parent, Player::Ptr player)
     if (m_player) {
         setDestination(m_player->name());
         setObjectName( QLatin1String("nowplaying controller for" ) + m_player->name());
-        kDebug() << "Created a player control for" << m_player->name();
+        qDebug() << "Created a player control for" << m_player->name();
     } else {
-        kDebug() << "Created a dead player control";
+        qDebug() << "Created a dead player control";
     }
     updateEnabledOperations();
 }
@@ -42,7 +42,7 @@ void PlayerControl::updateEnabledOperations()
 {
     if (m_player) {
         /*
-        kDebug() << "Updating operations:"
+        qDebug() << "Updating operations:"
                  << "\n    Play:" << m_player->canPlay()
                  << "\n    Pause:" << m_player->canPause()
                  << "\n    Stop:" << m_player->canStop()
@@ -59,14 +59,14 @@ void PlayerControl::updateEnabledOperations()
         setOperationEnabled("volume", m_player->canSetVolume());
         setOperationEnabled("seek", m_player->canSeek());
     } else {
-        kDebug() << "No player";
+        qDebug() << "No player";
     }
 }
 
 Plasma::ServiceJob* PlayerControl::createJob(const QString& operation,
                                              QMap<QString,QVariant>& parameters)
 {
-    kDebug() << "Job" << operation << "with arguments" << parameters << "requested";
+    qDebug() << "Job" << operation << "with arguments" << parameters << "requested";
     return new PlayerActionJob(m_player, operation, parameters, this);
 }
 

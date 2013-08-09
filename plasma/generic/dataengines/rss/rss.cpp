@@ -22,7 +22,7 @@
 #include "rss.h"
 
 //KDE
-#include <KDebug>
+#include <QDebug>
 #include <KUrl>
 #include <KStandardDirs>
 #include <Solid/Networking>
@@ -74,7 +74,7 @@ RssEngine::~RssEngine()
 void RssEngine::networkStatusChanged(Solid::Networking::Status status)
 {
     if (status == Solid::Networking::Connected || status == Solid::Networking::Unknown) {
-        kDebug() << "network connected, force refreshing feeds in 3 seconds";
+        qDebug() << "network connected, force refreshing feeds in 3 seconds";
         // The forced update needs to happen after the new feeds are in,
         // so remember to force the update in processRss()
         m_forceUpdate = true;
@@ -104,7 +104,7 @@ bool RssEngine::updateSourceEvent(const QString &name)
         // traffic.
         if (QDateTime::currentDateTime() >
             m_feedTimes[source.toLower()].addSecs(CACHE_TIMEOUT)){
-            kDebug() << "Cache from " << source <<
+            qDebug() << "Cache from " << source <<
                         " older than 60 seconds, refreshing...";
 
             Syndication::Loader * loader = Syndication::Loader::create();
@@ -119,7 +119,7 @@ bool RssEngine::updateSourceEvent(const QString &name)
             m_sourceMap.insert(loader, name);
             loader->loadFrom(source);
         } else {
-            kDebug() << "Recent cached version of " << source <<
+            qDebug() << "Recent cached version of " << source <<
                         " found. Skipping...";
 
             // We might want to update the source:
@@ -161,7 +161,7 @@ void RssEngine::slotIconChanged(bool isHost, const QString& hostOrURL,
     foreach (const QString& source, m_sourceMap) {
         if (source.contains(url, Qt::CaseInsensitive) &&
             cachesUpToDate(source)) {
-            kDebug() << "all caches from source " << source <<
+            qDebug() << "all caches from source " << source <<
                         " up to date, updating...";
             updateFeeds(source, m_feedTitles[ source ] );
         }
@@ -170,7 +170,7 @@ void RssEngine::slotIconChanged(bool isHost, const QString& hostOrURL,
 
 void RssEngine::timeout(const QString & source)
 {
-    kDebug() << "timout fired, updating source";
+    qDebug() << "timout fired, updating source";
     updateFeeds(source, m_feedTitles[ source ] );
     m_signalMapper->removeMappings(m_timerMap[source]);
 }
@@ -193,7 +193,7 @@ void RssEngine::processRss(Syndication::Loader* loader,
     KUrl u(url);
 
     if (error != Syndication::Success) {
-        kDebug() << "Syndication did not work out... url = " << url;
+        qDebug() << "Syndication did not work out... url = " << url;
         title = i18n("Syndication did not work out");
         setData(source, "title", i18n("Fetching feed failed."));
         setData(source, "link", url);
@@ -260,7 +260,7 @@ void RssEngine::processRss(Syndication::Loader* loader,
         // we maybe want to delay updating the feeds untill either
         // timeout, or all feeds are up to date.
         if (cachesUpToDate(source)) {
-            kDebug() << "all caches from source " << source
+            qDebug() << "all caches from source " << source
                      << " up to date, updating...";
             updateFeeds(source, title);
             if (m_forceUpdate) {
@@ -272,7 +272,7 @@ void RssEngine::processRss(Syndication::Loader* loader,
                 return;
             }
         } else {
-            kDebug() << "not all caches from source " << source
+            qDebug() << "not all caches from source " << source
                      << ", delaying update.";
         }
         scheduleSourcesUpdated();

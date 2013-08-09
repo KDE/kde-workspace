@@ -19,7 +19,7 @@
  */
 
 #include "location_ip.h"
-#include <KDebug>
+#include <QDebug>
 #include <KJob>
 #include <KIO/Job>
 #include <KIO/TransferJob>
@@ -85,12 +85,12 @@ void Ip::update()
                                          KIO::NoReload, KIO::HideProgressInfo);
 
     if (datajob) {
-        kDebug() << "Fetching http://api.hostip.info/get_html.php?position=true";
+        qDebug() << "Fetching http://api.hostip.info/get_html.php?position=true";
         connect(datajob, SIGNAL(data(KIO::Job*,QByteArray)), this,
                 SLOT(readData(KIO::Job*,QByteArray)));
         connect(datajob, SIGNAL(result(KJob*)), this, SLOT(result(KJob*)));
     } else {
-        kDebug() << "Could not create job";
+        qDebug() << "Could not create job";
     }
 }
 
@@ -111,7 +111,7 @@ void Ip::result(KJob* job)
     if(job && !job->error()) {
         d->populateDataEngineData(outd);
     } else {
-        kDebug() << "error" << job->errorString();
+        qDebug() << "error" << job->errorString();
     }
 
     setData(outd);

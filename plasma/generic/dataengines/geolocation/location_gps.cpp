@@ -56,11 +56,11 @@ void Gpsd::run()
 #else
         if (gps_poll(m_gpsdata) != -1) {
 #endif
-            //kDebug() << "poll ok";
+            //qDebug() << "poll ok";
             if (m_gpsdata->online) {
-                //kDebug() << "online";
+                //qDebug() << "online";
                 if (m_gpsdata->status != STATUS_NO_FIX) {
-                    //kDebug() << "fix";
+                    //qDebug() << "fix";
                     d["accuracy"] = 30;
                     d["latitude"] = QString::number(m_gpsdata->fix.latitude);
                     d["longitude"] = QString::number(m_gpsdata->fix.longitude);
@@ -88,12 +88,12 @@ Gps::Gps(QObject* parent, const QVariantList& args)
     gps_data_t* m_gpsdata = gps_open("localhost", DEFAULT_GPSD_PORT);
     if (m_gpsdata) {
 #endif
-        kDebug() << "gpsd found.";
+        qDebug() << "gpsd found.";
         m_gpsd = new Gpsd(m_gpsdata);
         connect(m_gpsd, SIGNAL(dataReady(Plasma::DataEngine::Data)),
                 this, SIGNAL(setData(Plasma::DataEngine::Data)));
     } else {
-        kDebug() << "gpsd not found";
+        qDebug() << "gpsd not found";
     }
 
     setIsAvailable(m_gpsd);

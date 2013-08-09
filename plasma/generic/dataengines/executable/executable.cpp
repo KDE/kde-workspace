@@ -17,7 +17,7 @@
  */
 
 #include "executable.h"
-#include <KDebug>
+#include <QDebug>
 #include <KProcess>
 ExecutableContainer::ExecutableContainer(const QString& command, QObject* parent)
     : Plasma::DataContainer(parent), m_process(0)
@@ -34,7 +34,7 @@ ExecutableContainer::~ExecutableContainer()
 
 void ExecutableContainer::finished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    //kDebug() << objectName();
+    //qDebug() << objectName();
     setData("exit code", exitCode);
     setData("exit status", exitStatus);
     setData("stdout", QString::fromLocal8Bit(m_process->readAllStandardOutput()));
@@ -44,7 +44,7 @@ void ExecutableContainer::finished(int exitCode, QProcess::ExitStatus exitStatus
 
 void ExecutableContainer::exec()
 {
-    //kDebug() << objectName();
+    //qDebug() << objectName();
     if (!m_process) {
         m_process = new KProcess();
         connect(m_process, SIGNAL(finished(int,QProcess::ExitStatus)),
@@ -56,7 +56,7 @@ void ExecutableContainer::exec()
     if (m_process->state() == QProcess::NotRunning) {
         m_process->start();
     } else {
-        kDebug() << "Process" << objectName() << "already running. Pid:" << m_process->pid();
+        qDebug() << "Process" << objectName() << "already running. Pid:" << m_process->pid();
     }
 }
 
@@ -69,7 +69,7 @@ ExecutableEngine::ExecutableEngine(QObject* parent, const QVariantList& args)
 
 bool ExecutableEngine::sourceRequestEvent(const QString& source)
 {
-    //kDebug() << source;
+    //qDebug() << source;
     addSource(new ExecutableContainer(source, this));
     return true;
 }

@@ -25,7 +25,7 @@
 #include <QDBusPendingReply>
 #include <QStringList>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 
 #include "playercontrol.h"
@@ -89,7 +89,7 @@ void Mpris2Engine::serviceOwnerChanged(
     QString sourceName = serviceName.mid(23);
 
     if (!oldOwner.isEmpty()) {
-        kDebug() << "MPRIS service" << serviceName << "just went offline";
+        qDebug() << "MPRIS service" << serviceName << "just went offline";
         if (m_multiplexer) {
             m_multiplexer.data()->removePlayer(sourceName);
         }
@@ -97,7 +97,7 @@ void Mpris2Engine::serviceOwnerChanged(
     }
 
     if (!newOwner.isEmpty()) {
-        kDebug() << "MPRIS service" << serviceName << "just came online";
+        qDebug() << "MPRIS service" << serviceName << "just came online";
         addMediaPlayer(serviceName, sourceName);
     }
 }
@@ -128,7 +128,7 @@ bool Mpris2Engine::sourceRequestEvent(const QString& source)
 
 void Mpris2Engine::initialFetchFinished(PlayerContainer* container)
 {
-    kDebug() << "Props fetch for" << container->objectName() << "finished; adding";
+    qDebug() << "Props fetch for" << container->objectName() << "finished; adding";
     addSource(container);
     if (m_multiplexer) {
         m_multiplexer.data()->addPlayer(container);
@@ -156,7 +156,7 @@ void Mpris2Engine::serviceNameFetchFinished(QDBusPendingCallWatcher* watcher)
     } else {
         foreach (const QString& serviceName, propsReply.value()) {
             if (serviceName.startsWith("org.mpris.MediaPlayer2.")) {
-                kDebug() << "Found MPRIS2 service" << serviceName;
+                qDebug() << "Found MPRIS2 service" << serviceName;
                 // watch out for race conditions; the media player could
                 // have appeared between starting the service watcher and
                 // this call being dealt with
@@ -165,7 +165,7 @@ void Mpris2Engine::serviceNameFetchFinished(QDBusPendingCallWatcher* watcher)
                 QString sourceName = serviceName.mid(23);
                 PlayerContainer *container = qobject_cast<PlayerContainer*>(containerForSource(sourceName));
                 if (!container) {
-                    kDebug() << "Haven't already seen" << serviceName;
+                    qDebug() << "Haven't already seen" << serviceName;
                     addMediaPlayer(serviceName, sourceName);
                 }
             }

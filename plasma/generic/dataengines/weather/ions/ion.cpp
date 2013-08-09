@@ -20,7 +20,7 @@
 #include "ion.h"
 #include "ion.moc"
 
-#include <KDebug>
+#include <QDebug>
 
 class IonInterface::Private
 {
@@ -49,7 +49,7 @@ IonInterface::~IonInterface()
  */
 bool IonInterface::sourceRequestEvent(const QString &source)
 {
-    kDebug() << "sourceRequested(): " << source;
+    qDebug() << "sourceRequested(): " << source;
 
     // init anyway the data as it's going to be used
     // sooner or later (doesnt depend upon initialization
@@ -70,9 +70,9 @@ bool IonInterface::sourceRequestEvent(const QString &source)
  */
 bool IonInterface::updateSourceEvent(const QString& source)
 {
-    kDebug() << "updateSource(" << source << ")";
+    qDebug() << "updateSource(" << source << ")";
     if (d->initialized) {
-        kDebug() << "Calling updateIonSource(" << source << ")";
+        qDebug() << "Calling updateIonSource(" << source << ")";
         return updateIonSource(source);
     }
 

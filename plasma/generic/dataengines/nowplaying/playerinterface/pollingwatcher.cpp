@@ -2,7 +2,7 @@
 
 #include <QTimer>
 
-#include <KDebug>
+#include <QDebug>
 
 #include "player.h"
 #include "playerfactory.h"

@@ -23,9 +23,9 @@
 
 void NotificationAction::start()
 {
-    //kDebug() << "Trying to perform the action " << operationName() << " on " << destination();
-    //kDebug() << "actionId: " << parameters()["actionId"].toString();
-    //kDebug() << "params: " << parameters();
+    //qDebug() << "Trying to perform the action " << operationName() << " on " << destination();
+    //qDebug() << "actionId: " << parameters()["actionId"].toString();
+    //qDebug() << "params: " << parameters();
 
     if (!m_engine) {
         setErrorText(i18n("The notification dataEngine is not set."));
@@ -47,7 +47,7 @@ void NotificationAction::start()
     }
 
     if (operationName() == "invokeAction") {
-        //kDebug() << "invoking action on " << id;
+        //qDebug() << "invoking action on " << id;
         emit m_engine->ActionInvoked(id, parameters()["actionId"].toString());
     } else if (operationName() == "userClosed") {
         //userClosedNotification deletes the job, so we have to invoke it queued, in this case emitResult() can be called

@@ -29,7 +29,7 @@
 #include <QStringList>
 #include <QNetworkAddressEntry>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <kio/global.h>
 #include <Plasma/DataContainer>

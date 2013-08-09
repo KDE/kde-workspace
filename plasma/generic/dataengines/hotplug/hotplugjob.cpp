@@ -22,7 +22,7 @@
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusReply>
 
-#include <KDebug>
+#include <QDebug>
 
 void HotplugJob::start()
 {

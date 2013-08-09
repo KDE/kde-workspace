@@ -21,7 +21,7 @@
 #include <QXmlStreamReader>
 
 #include <krandom.h>
-#include <KDebug>
+#include <QDebug>
 #include <KDE/KIO/MimetypeJob>
 #include <KDE/KIO/FileJob>
 

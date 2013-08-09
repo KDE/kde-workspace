@@ -19,7 +19,7 @@
 #include "activityjob.h"
 
 #include <KActivities/Controller>
-#include <KDebug>
+#include <QDebug>
 
 #include <QDBusConnection>
 #include <QDBusMessage>

@@ -20,7 +20,7 @@
 #include "placeservice.h"
 #include "jobs.h"
 
-#include <KDebug>
+#include <QDebug>
 
 
 PlaceService::PlaceService(QObject* parent,
@@ -34,16 +34,16 @@ PlaceService::PlaceService(QObject* parent,
     if (m_index.isValid()) {
         Q_ASSERT(m_index.model() == model);
         setDestination(QString::number(m_index.row()));
-        kDebug() << "Created a place service for" << destination();
+        qDebug() << "Created a place service for" << destination();
     } else {
-        kDebug() << "Created a dead place service";
+        qDebug() << "Created a dead place service";
     }
 }
 
 Plasma::ServiceJob* PlaceService::createJob(const QString& operation,
                                             QMap<QString,QVariant>& parameters)
 {
-    kDebug() << "Job" << operation << "with arguments" << parameters << "requested";
+    qDebug() << "Job" << operation << "with arguments" << parameters << "requested";
     if (operation == "Add") {
         return new AddEditPlaceJob(m_model, m_index, parameters, this);
     } else if (operation == "Edit") {

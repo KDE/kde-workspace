@@ -22,7 +22,7 @@
 #include "statusnotifieritem_engine.h"
 #include "statusnotifieritemsource.h"
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <iostream>
 
@@ -70,7 +70,7 @@ void StatusNotifierItemEngine::init()
 
 void StatusNotifierItemEngine::serviceChange(const QString& name, const QString& oldOwner, const QString& newOwner)
 {
-    kDebug()<< "Service" << name << "status change, old owner:" << oldOwner << "new:" << newOwner;
+    qDebug()<< "Service" << name << "status change, old owner:" << oldOwner << "new:" << newOwner;
 
     if (newOwner.isEmpty()) {
         //unregistered
@@ -83,7 +83,7 @@ void StatusNotifierItemEngine::serviceChange(const QString& name, const QString&
 
 void StatusNotifierItemEngine::registerWatcher(const QString& service)
 {
-    kDebug()<<"service appeared"<<service;
+    qDebug()<<"service appeared"<<service;
     if (service == s_watcherServiceName) {
         delete m_statusNotifierWatcher;
 
@@ -103,7 +103,7 @@ void StatusNotifierItemEngine::registerWatcher(const QString& service)
         } else {
             delete m_statusNotifierWatcher;
             m_statusNotifierWatcher = 0;
-            kDebug()<<"System tray daemon not reachable";
+            qDebug()<<"System tray daemon not reachable";
         }
     }
 }
@@ -111,7 +111,7 @@ void StatusNotifierItemEngine::registerWatcher(const QString& service)
 void StatusNotifierItemEngine::unregisterWatcher(const QString& service)
 {
     if (service == s_watcherServiceName) {
-        kDebug()<< s_watcherServiceName << "disappeared";
+        qDebug()<< s_watcherServiceName << "disappeared";
 
         disconnect(m_statusNotifierWatcher, SIGNAL(StatusNotifierItemRegistered(QString)), this, SLOT(serviceRegistered(QString)));
         disconnect(m_statusNotifierWatcher, SIGNAL(StatusNotifierItemUnregistered(QString)), this, SLOT(serviceUnregistered(QString)));
@@ -125,7 +125,7 @@ void StatusNotifierItemEngine::unregisterWatcher(const QString& service)
 
 void StatusNotifierItemEngine::serviceRegistered(const QString &service)
 {
-    kDebug() << "Registering"<<service;
+    qDebug() << "Registering"<<service;
     newItem(service);
 }
 

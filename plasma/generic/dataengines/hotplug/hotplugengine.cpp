@@ -24,7 +24,7 @@
 
 #include <KDirWatch>
 #include <KConfigGroup>
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KStandardDirs>
 #include <KDesktopFile>
@@ -111,7 +111,7 @@ void HotplugEngine::findPredicates()
     foreach (const QString &path, KGlobal::dirs()->findAllResources("data", "solid/actions/")) {
         KDesktopFile cfg(path);
         const QString string_predicate = cfg.desktopGroup().readEntry("X-KDE-Solid-Predicate");
-        //kDebug() << path << string_predicate;
+        //qDebug() << path << string_predicate;
         m_predicates.insert(KUrl(path).fileName(), Solid::Predicate::fromString(string_predicate));
     }
 
@@ -153,11 +153,11 @@ QStringList HotplugEngine::predicatesForDevice(Solid::Device &device) const
     QStringList interestingDesktopFiles;
     //search in all desktop configuration file if the device inserted is a correct device
     QHashIterator<QString, Solid::Predicate> it(m_predicates);
-    //kDebug() << "=================" << udi;
+    //qDebug() << "=================" << udi;
     while (it.hasNext()) {
         it.next();
         if (it.value().matches(device)) {
-            //kDebug() << "     hit" << it.key();
+            //qDebug() << "     hit" << it.key();
             interestingDesktopFiles << it.key();
         }
     }
@@ -173,7 +173,7 @@ void HotplugEngine::onDeviceAdded(const QString &udi)
 
 void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
 {
-    //kDebug() << "adding" << device.udi();
+    //qDebug() << "adding" << device.udi();
 #ifdef HOTPLUGENGINE_TIMING
     QTime t;
     t.start();
@@ -183,7 +183,7 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
         Solid::StorageDrive *drive = device.as<Solid::StorageDrive>();
         if (!drive->isHotpluggable()) {
 #ifdef HOTPLUGENGINE_TIMING
-            kDebug() << "storage, but not pluggable, returning" << t.restart();
+            qDebug() << "storage, but not pluggable, returning" << t.restart();
 #endif
             return;
         }
@@ -193,7 +193,7 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
         if ((type == Solid::StorageVolume::Unused ||
              type == Solid::StorageVolume::PartitionTable) && !device.is<Solid::OpticalDisc>()) {
 #ifdef HOTPLUGENGINE_TIMING
-            kDebug() << "storage volume, but not of interest" << t.restart();
+            qDebug() << "storage volume, but not of interest" << t.restart();
 #endif
             return;
         }
@@ -209,9 +209,9 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
     const bool isEncryptedContainer = m_encryptedPredicate.matches(device);
 
     if (!interestingDesktopFiles.isEmpty() || isEncryptedContainer) {
-        //kDebug() << device.product();
-        //kDebug() << device.vendor();
-        //kDebug() << "number of interesting desktop file : " << interestingDesktopFiles.size();
+        //qDebug() << device.product();
+        //qDebug() << device.vendor();
+        //qDebug() << "number of interesting desktop file : " << interestingDesktopFiles.size();
         Plasma::DataEngine::Data data;
         data.insert("added", added);
         data.insert("udi", device.udi());
@@ -242,17 +242,17 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
         data.insert("isEncryptedContainer", isEncryptedContainer);
 
         setData(device.udi(), data);
-        //kDebug() << "add hardware solid : " << udi;
+        //qDebug() << "add hardware solid : " << udi;
     }
 
 #ifdef HOTPLUGENGINE_TIMING
-    kDebug() << "total time" << t.restart();
+    qDebug() << "total time" << t.restart();
 #endif
 }
 
 void HotplugEngine::onDeviceRemoved(const QString &udi)
 {
-    //kDebug() << "remove hardware:" << udi;
+    //qDebug() << "remove hardware:" << udi;
 
     if (m_startList.contains(udi)) {
         m_startList.remove(udi);

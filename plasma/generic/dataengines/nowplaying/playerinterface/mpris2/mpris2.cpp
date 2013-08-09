@@ -111,7 +111,7 @@ static QVariantMap demarshallMetadata(const QVariant &value)
     if (!value.canConvert<QDBusArgument>()) {
         const char * gotTypeCh = QDBusMetaType::typeToSignature(value.userType());
         QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
-        kDebug() << "Expected variant containing a QDBusArgument, got ready-demarshalled item of type" << gotType;
+        qDebug() << "Expected variant containing a QDBusArgument, got ready-demarshalled item of type" << gotType;
         return QVariantMap();
     }
     QVariantMap metadata;
@@ -124,7 +124,7 @@ void Mpris2::updatePosition(qreal rate)
 {
     QDBusReply<QDBusVariant> reply = propsIface->call("Get", MPRIS2_PLAYER_IFACE, "Position");
     if (!reply.isValid()) {
-        kDebug() << DBUS_PROPS_IFACE ".Get(\"" MPRIS2_PLAYER_IFACE "\", \"Position\") failed at "
+        qDebug() << DBUS_PROPS_IFACE ".Get(\"" MPRIS2_PLAYER_IFACE "\", \"Position\") failed at "
                     MPRIS2_PATH " on" << m_playerName << " with error " <<
                     reply.error().name();
         m_pos = position();
@@ -140,20 +140,20 @@ bool Mpris2::getAllProps()
 {
     QDBusReply<QDBusVariant> identityReply = propsIface->call("Get", MPRIS2_ROOT_IFACE, "Identity");
     if (!identityReply.isValid()) {
-        kDebug() << DBUS_PROPS_IFACE ".Get(\"" MPRIS2_ROOT_IFACE "\", \"Identity\") failed at "
+        qDebug() << DBUS_PROPS_IFACE ".Get(\"" MPRIS2_ROOT_IFACE "\", \"Identity\") failed at "
                     MPRIS2_PATH " on" << m_playerName << " with error " <<
                     identityReply.error().name();
         return false;
     }
     m_identity = identityReply.value().variant().toString();
     if (m_identity.isEmpty()) {
-        kDebug() << "Empty player identity; giving up";
+        qDebug() << "Empty player identity; giving up";
         return false;
     }
 
     QDBusReply<QVariantMap> playerPropsReply = propsIface->call("GetAll", MPRIS2_PLAYER_IFACE);
     if (!playerPropsReply.isValid()) {
-        kDebug() << DBUS_PROPS_IFACE ".GetAll(\"" MPRIS2_PLAYER_IFACE "\") failed at "
+        qDebug() << DBUS_PROPS_IFACE ".GetAll(\"" MPRIS2_PLAYER_IFACE "\") failed at "
                     MPRIS2_PATH " on" << m_playerName << " with error " <<
                     playerPropsReply.error().name();
         return false;
@@ -401,12 +401,12 @@ bool Mpris2::canSeek()
 void Mpris2::seek(int time)
 {
     if (!m_metadata.contains("mpris:trackid")) {
-        kDebug() << "No mpris:trackid; aborting seek";
+        qDebug() << "No mpris:trackid; aborting seek";
         return;
     }
     QDBusObjectPath trackid = m_metadata.value("mpris:trackid").value<QDBusObjectPath>();
     if (trackid.path().isEmpty()) {
-        kDebug() << "Empty path for mpris:trackid; aborting seek";
+        qDebug() << "Empty path for mpris:trackid; aborting seek";
         return;
     }
     playerIface->asyncCall("SetPosition",
@@ -418,7 +418,7 @@ QVariant Mpris2::getPlayerProp(const QString& prop)
 {
     QDBusReply<QDBusVariant> reply = propsIface->call("Get", MPRIS2_PLAYER_IFACE, prop);
     if (!reply.isValid()) {
-        kDebug() << DBUS_PROPS_IFACE ".Get( \"" MPRIS2_PLAYER_IFACE "\","
+        qDebug() << DBUS_PROPS_IFACE ".Get( \"" MPRIS2_PLAYER_IFACE "\","
                  << prop
                  << ") failed at " MPRIS2_PATH " on"
                  << m_playerName
@@ -435,11 +435,11 @@ bool Mpris2::updateBoolProp(const QString &name,
                             bool  currentVal)
 {
     if (changedProperties.contains(name)) {
-        kDebug() << "Property" << name << "changed from" << currentVal << "to" << changedProperties.value(name).toBool();
+        qDebug() << "Property" << name << "changed from" << currentVal << "to" << changedProperties.value(name).toBool();
         return changedProperties.value(name).toBool();
     } else if (invalidatedProperties.contains(name)) {
         bool newVal = getPlayerProp(name).toBool();
-        kDebug() << "Property" << name << "changed (inv) from" << currentVal << "to" << newVal;
+        qDebug() << "Property" << name << "changed (inv) from" << currentVal << "to" << newVal;
         return newVal;
     }
     return currentVal;

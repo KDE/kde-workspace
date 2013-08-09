@@ -19,7 +19,7 @@
 
 #include "multiplexer.h"
 
-#include <KDebug>
+#include <QDebug>
 
 // the '@' at the start is not valid for D-Bus names, so it will
 // never interfere with an actual MPRIS2 player

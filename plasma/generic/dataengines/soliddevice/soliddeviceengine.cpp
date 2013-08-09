@@ -23,7 +23,7 @@
 #include <QDateTime>
 #include <Solid/GenericInterface>
 
-#include <KDebug>
+#include <QDebug>
 #include <KDiskFreeSpaceInfo>
 #include <KLocale>
 
@@ -106,7 +106,7 @@ bool SolidDeviceEngine::sourceRequestEvent(const QString &name)
         }
     }
 
-    kDebug() << "Source is not a predicate or a device.";
+    qDebug() << "Source is not a predicate or a device.";
     return false;
 }
 

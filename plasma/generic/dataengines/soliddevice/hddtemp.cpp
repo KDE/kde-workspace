@@ -23,7 +23,7 @@
 
 #include <QTimerEvent>
 
-#include <KDebug>
+#include <QDebug>
 
 HddTemp::HddTemp(QObject* parent)
     : QObject(parent),
@@ -69,7 +69,7 @@ bool HddTemp::updateData()
                 if (data.length() > 0) {
                     break;
                 } else {
-                    //kDebug() << socket.errorString();
+                    //qDebug() << socket.errorString();
                     return false;
                 }
             }
@@ -80,7 +80,7 @@ bool HddTemp::updateData()
         m_failCount = 0;
     } else {
         m_failCount++;
-        //kDebug() << socket.errorString();
+        //qDebug() << socket.errorString();
         return false;
     }
     const QStringList list = data.split('|');

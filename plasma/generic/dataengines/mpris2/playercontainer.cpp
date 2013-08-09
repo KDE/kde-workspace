@@ -26,7 +26,7 @@
 #define MPRIS2_PATH "/org/mpris/MediaPlayer2"
 #define POS_UPD_STRING "Position last updated (UTC)"
 
-#include <KDebug>
+#include <QDebug>
 #include <KDesktopFile>
 #include <KStandardDirs>
 
@@ -294,10 +294,10 @@ void PlayerContainer::updateFromMap(const QVariantMap& map, UpdateType updType)
         // fake the CanStop capability
         if (cap == CanControl || i.key() == QLatin1String("PlaybackStatus")) {
             if ((m_caps & CanControl) && i.value().toString() != QLatin1String("Stopped")) {
-                kDebug() << "Enabling stop action";
+                qDebug() << "Enabling stop action";
                 m_caps |= CanStop;
             } else {
-                kDebug() << "Disabling stop action";
+                qDebug() << "Disabling stop action";
                 m_caps &= ~CanStop;
             }
         }
@@ -319,7 +319,7 @@ void PlayerContainer::getPropsFinished(QDBusPendingCallWatcher* watcher)
         kWarning() << m_dbusAddress << "does not implement"
             << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName()
             << "correctly";
-        kDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
+        qDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
         m_fetchesPending = 0;
         emit initialFetchFailed(this);
         return;
@@ -351,7 +351,7 @@ void PlayerContainer::getPositionFinished(QDBusPendingCallWatcher* watcher)
         kWarning() << m_dbusAddress << "does not implement"
             << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName()
             << "correctly";
-        kDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
+        qDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
         return;
     }
 

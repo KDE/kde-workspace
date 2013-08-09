@@ -693,7 +693,7 @@ void UKMETIon::parseFiveDayForecast(const QString& source, QXmlStreamReader& xml
             forecast->period = period;
             forecast->iconName = getWeatherIcon(dayIcons(), summary.toLower());
             forecast->summary = i18nc("weather forecast", summary.toUtf8());
-            kDebug() << "i18n summary string: " << qPrintable(forecast->summary);
+            qDebug() << "i18n summary string: " << qPrintable(forecast->summary);
             forecast->tempHigh = high.cap(0).toInt();
             forecast->tempLow = low.cap(0).toInt();
             m_weatherData[source].forecasts.append(forecast);
@@ -751,7 +751,7 @@ void UKMETIon::updateWeather(const QString& source)
     data.insert("Station", station(source));
     data.insert("Observation Period", observationTime(source));
     data.insert("Current Conditions", i18nc("weather condition", condition(source).toUtf8()));
-    kDebug() << "i18n condition string: " << qPrintable(i18nc("weather condition", condition(source).toUtf8()));
+    qDebug() << "i18n condition string: " << qPrintable(i18nc("weather condition", condition(source).toUtf8()));
 
     const double lati = periodLatitude(source);
     const double longi = periodLongitude(source);
@@ -761,7 +761,7 @@ void UKMETIon::updateWeather(const QString& source)
 
     // Tell applet which icon to use for conditions and provide mapping for condition type to the icons to display
     if (timeData["Corrected Elevation"].toDouble() >= 0.0) {
-        //kDebug() << "Using daytime icons\n";
+        //qDebug() << "Using daytime icons\n";
         data.insert("Condition Icon", getWeatherIcon(dayIcons(), condition(source)));
     } else {
         data.insert("Condition Icon", getWeatherIcon(nightIcons(), condition(source)));

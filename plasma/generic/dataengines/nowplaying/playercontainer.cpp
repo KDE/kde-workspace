@@ -19,7 +19,7 @@
 
 #include "playercontainer.h"
 
-#include <KDebug>
+#include <QDebug>
 
 #include "playercontrol.h"
 
@@ -37,7 +37,7 @@ PlayerContainer::PlayerContainer(Player::Ptr player, QObject* parent)
 
 Plasma::Service* PlayerContainer::service(QObject* parent)
 {
-    kDebug() << "Creating controller";
+    qDebug() << "Creating controller";
     Plasma::Service *controller = new PlayerControl(parent, m_player);
     connect(this, SIGNAL(updateRequested(DataContainer*)),
             controller, SLOT(updateEnabledOperations()));
@@ -47,7 +47,7 @@ Plasma::Service* PlayerContainer::service(QObject* parent)
 void PlayerContainer::updateInfo()
 {
     if (!m_player->isRunning()) {
-        kDebug() << objectName() << "isn't running";
+        qDebug() << objectName() << "isn't running";
         return;
     }
 
