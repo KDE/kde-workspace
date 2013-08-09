@@ -20,6 +20,7 @@
 #define JOBS_H
 
 #include "modeljob.h"
+#include <KUrl>
 
 class AddEditPlaceJob : public ModelJob
 {

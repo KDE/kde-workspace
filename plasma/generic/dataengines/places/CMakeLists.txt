@@ -2,17 +2,19 @@ set(places_engine_SRCS
     placesengine.cpp
     placeservice.cpp
     setupdevicejob.cpp
+    modeljob.h
 )
 
-AUTOMOC4_MOC_HEADERS(plasma_engine_places modeljob.h)
+set(CMAKE_AUTOMOC TRUE)
 
-kde4_add_plugin(plasma_engine_places ${places_engine_SRCS})
+plasma_add_plugin(plasma_engine_places ${places_engine_SRCS})
 
 target_link_libraries(plasma_engine_places
-    plasma
+	${Plasma_LIBRARIES}
     ${KDE4_KIO_LIBS}
     ${KDE4_KFILE_LIBS}
-    ${KDE4_SOLID_LIBS}
+    ${Solid_LIBRARIES}
+    ${KDE4Support_LIBRARIES}
 )
 
 install(TARGETS plasma_engine_places

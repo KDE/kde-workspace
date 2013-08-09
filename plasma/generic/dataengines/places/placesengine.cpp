@@ -19,7 +19,7 @@
 #include "placesengine.h"
 
 #include <QtCore/QString>
-
+#include <QIcon>
 #include <QDebug>
 #include <KDiskFreeSpaceInfo>
 
