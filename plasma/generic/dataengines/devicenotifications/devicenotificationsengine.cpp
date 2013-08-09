@@ -22,7 +22,7 @@
 
 #include <Plasma/DataContainer>
 
-#include <KDebug>
+#include <QDebug>
 
 DeviceNotificationsEngine::DeviceNotificationsEngine( QObject* parent, const QVariantList& args )
     : Plasma::DataEngine( parent, args ),
@@ -47,7 +47,7 @@ void DeviceNotificationsEngine::init()
 
 void DeviceNotificationsEngine::notify(int solidError, const QString& error, const QString& errorDetails, const QString &udi)
 {
-    kDebug() << error << errorDetails << udi;
+    qDebug() << error << errorDetails << udi;
     const QString source = QString("notification %1").arg(m_id++);
 
     Plasma::DataEngine::Data notificationData;

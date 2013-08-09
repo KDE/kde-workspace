@@ -42,7 +42,7 @@ public:
      *  This function implements part of Notifications DBus interface.
      *  Once called, will add notification source to the engine
      */
-public slots:
+public Q_SLOTS:
      void notify(int solidError, const QString& error, const QString& errorDetails, const QString &udi);
 
 private:
