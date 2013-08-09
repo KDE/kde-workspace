@@ -1,7 +1,8 @@
 project(plasma-statusnotifieritem_engine)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/statusnotifierwatcher)
-include_directories(${DBUSMENUQT_INCLUDE_DIR} ) # doesn't work?
+include_directories(${DBUSMENUQT_INCLUDE_DIR} ${DBusMenuQt5_INCLUDES}) # none of these work?
+
 
 # We add our source code here
 set(statusnotifieritem_engine_SRCS
