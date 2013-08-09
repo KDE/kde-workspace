@@ -17,6 +17,8 @@ target_link_libraries(plasma_engine_powermanagement
     ${Solid_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KIdleTime_LIBRARIES}
+    KF5::KI18n
+    KF5::KService
 ) # todo: add kworkspace once ported, renable shutdown request
 
 install(TARGETS plasma_engine_powermanagement DESTINATION ${PLUGIN_INSTALL_DIR})

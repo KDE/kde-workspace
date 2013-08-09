@@ -13,7 +13,9 @@ add_library(plasma_engine_devicenotifications MODULE ${device_notifications_engi
 set_target_properties(plasma_engine_devicenotifications PROPERTIES PREFIX "")
 
 target_link_libraries(plasma_engine_devicenotifications 
-    ${KCore_LIBRARIES} 
+    ${Qt5DBus_LIBRARIES}
+    KF5::KService
+    ${KCore_LIBRARIES}
     #${Solid_LIBRARIES} 
     ${Plasma_LIBRARIES} 
     #${KDE4_KIDLETIME_LIBRARY} 
