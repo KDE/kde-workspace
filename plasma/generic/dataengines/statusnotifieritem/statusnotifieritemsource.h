@@ -25,6 +25,7 @@
 #include <Plasma/DataContainer>
 #include <QString>
 #include <QDBusPendingCallWatcher>
+#include <QtWidgets/QMenu>
 
 #include "statusnotifieritem_interface.h"
 
@@ -50,7 +51,7 @@ public:
 Q_SIGNALS:
     void contextMenuReady(QMenu *menu);
 
-private slots:
+private Q_SLOTS:
     void contextMenuReady();
     void refreshTitle();
     void refreshIcons();

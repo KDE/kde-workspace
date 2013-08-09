@@ -20,6 +20,9 @@
 #ifndef STATUSNOTIFIERITEMJOB_H
 #define STATUSNOTIFIERITEMJOB_H
 
+// Qt
+#include <QtWidgets/QMenu>
+
 // own
 #include "statusnotifieritemsource.h"
 
