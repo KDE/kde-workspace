@@ -19,47 +19,27 @@ import org.kde.pim.calendar 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
-
-  //  property alias list:list
-   // property alias text: error.text
-  //  property alias text: error.text
-    /*Components.Label {
-        id:error
-        text: (containsEventItems)||(containsTodoItems)?"blakk":eventDate(yearNumber,monthNumber,dayNumber)
-        visible: true
-        font.weight:Font.Bold
-        font.bold:true
-    }
-    Components.Label {
-        id:errorl
-        text: ""
-        visible: true
-        font.italic:true
-    }*/
-    //Header to be used here I think for above 
- 
-        ListView {
-            id:list
-            height: parent.height
-            width: (parent.width / 4)
-            model: monthCalendar.upcomingEventsModel
-            delegate:Row {
-                spacing:4
-                width: parent.width
-                height:50
-                Components.Label {
-                    id:sum
-                    text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
-                    font.capitalization:Font.Capitalize
-                    font.italic:true
-                }
-            }
-            section.property:"startDate"
-            section.delegate:Components.Label {
-                id:sec_l
-                text: section
-                font.weight:Font.Bold
-               // anchors.verticalCenter: sect.verticalCenter
-            }
+ListView {
+    id:list
+    height: parent.height
+    width: (parent.width / 4)
+    model: monthCalendar.upcomingEventsModel
+    delegate:Row {
+        spacing:4
+        width: parent.width
+        height:50
+        Components.Label {
+            id:sum
+            text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
+            font.capitalization:Font.Capitalize
+            font.italic:true
         }
+    }
+    section.property:"startDate"
+    section.delegate:Components.Label {
+        id:sec_l
+        text: section
+        font.weight:Font.Bold
+    }
+}
     

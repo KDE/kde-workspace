@@ -23,27 +23,31 @@ Row {
     id:calendarGrid
     width:calendarColumn.width
     height:parent.height*9/10
-    
-    Column {
+    property alias days:days
+    Item {
         width: calendarGrid.width/8
         height: parent.height*0.9
-        spacing:calendarGrid.width/12
-        anchors.topMargin:70
-         anchors.verticalCenter: parent.verticalCenter
-        
-        clip:true
-        Repeater { 
-            model: monthCalendar.weeksModel
-            Components.Label {
-                id:weekNumber
-                text: modelData + 1
-                opacity:0.5
-              //  horizontalAlignment: Text.AlignRight
+        Column {
+            width: calendarGrid.width/8
+            height: parent.height*0.9
+            spacing:calendarGrid.width/15
+            clip:true
+            anchors.top:days.bottom
+            anchors.left:parent.left
+            anchors.right:parent.right
+            anchors.bottom:parent.bottom
+            anchors.horizontalCenter:days.horizontalCenter
+            Repeater { 
+                model: monthCalendar.weeksModel
+                width:(calendarGrid.width*7/8)/monthCalendar.days
+                height:0.93*calendarGrid.height/monthCalendar.weeks
+                Components.Label {
+                    id:weekNumber
+                    text: modelData + 1
+                    opacity:0.5
+                    horizontalAlignment: Text.AlignRight
+                }
             }
-            
-        }
-        anchors {
-            top:repeator.top
         }
     }
     Grid {
