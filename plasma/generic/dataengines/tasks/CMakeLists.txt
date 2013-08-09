@@ -1,3 +1,4 @@
+
 set(tasks_engine_SRCS
     tasksengine.cpp
     tasksource.cpp
@@ -5,6 +6,8 @@ set(tasks_engine_SRCS
     taskjob.cpp
     virtualdesktopssource.cpp
 )
+
+kservice_desktop_to_json(plasma-dataengine-tasks.desktop)
 
 plasma_add_plugin(plasma_engine_tasks ${tasks_engine_SRCS})
 target_link_libraries(plasma_engine_tasks ${KDE4_KDEUI_LIBS} ${Plasma_LIBRARIES} taskmanager)

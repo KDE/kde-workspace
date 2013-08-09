@@ -124,6 +124,6 @@ bool TasksEngine::sourceRequestEvent(const QString &source)
     return false;
 }
 
-K_EXPORT_PLASMA_DATAENGINE(tasks, TasksEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(tasks, TasksEngine, "plasma-dataengine-tasks.json")
 
 #include "tasksengine.moc"
