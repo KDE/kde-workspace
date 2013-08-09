@@ -54,7 +54,7 @@ class AppsEngine : public Plasma::DataEngine
     protected:
         virtual void init();
 
-    private slots:
+    private Q_SLOTS:
         void sycocaChanged(const QStringList &changes);
 
     private:

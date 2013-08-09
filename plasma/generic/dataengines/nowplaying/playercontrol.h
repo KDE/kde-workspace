@@ -31,7 +31,7 @@ class PlayerControl : public Plasma::Service
 public:
     PlayerControl(QObject* parent, Player::Ptr player);
 
-public slots:
+public Q_SLOTS:
     void updateEnabledOperations();
 
 protected:

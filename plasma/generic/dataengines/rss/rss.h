@@ -52,7 +52,7 @@ class RssEngine : public Plasma::DataEngine
         bool sourceRequestEvent(const QString &name);
         bool updateSourceEvent(const QString& name);
 
-    protected slots:
+    protected Q_SLOTS:
         void processRss(Syndication::Loader* loader,
                         Syndication::FeedPtr feed,
                         Syndication::ErrorCode error);

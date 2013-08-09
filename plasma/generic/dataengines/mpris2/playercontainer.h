@@ -71,7 +71,7 @@ signals:
     void initialFetchFailed(PlayerContainer* self);
     void capsChanged(Caps newCaps);
 
-private slots:
+private Q_SLOTS:
     void getPropsFinished(QDBusPendingCallWatcher* watcher);
     void getPositionFinished(QDBusPendingCallWatcher* watcher);
     void propertiesChanged(const QString& interface,

@@ -42,7 +42,7 @@ class Geolocation : public Plasma::DataEngine
         bool updateSourceEvent(const QString& name);
         bool updatePlugins(GeolocationProvider::UpdateTriggers triggers);
 
-    protected slots:
+    protected Q_SLOTS:
         void networkStatusChanged();
         void pluginAvailabilityChanged(GeolocationProvider *provider);
         void pluginUpdated();

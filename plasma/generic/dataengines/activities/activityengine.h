@@ -49,7 +49,7 @@ public:
     Plasma::Service *serviceForSource(const QString &source);
     void init();
 
-public slots:
+public Q_SLOTS:
     void activityAdded(const QString &id);
     void activityRemoved(const QString &id);
     void currentActivityChanged(const QString &id);

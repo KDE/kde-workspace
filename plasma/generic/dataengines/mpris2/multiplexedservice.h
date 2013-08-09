@@ -38,7 +38,7 @@ protected:
     Plasma::ServiceJob *createJob(const QString &operation,
                                   QMap<QString,QVariant> &parameters);
 
-private slots:
+private Q_SLOTS:
     void updateEnabledOperations();
     void activePlayerChanged(PlayerContainer *container);
 

@@ -45,7 +45,7 @@ public:
 protected:
     bool sourceRequestEvent(const QString &source);
 
-private slots:
+private Q_SLOTS:
     void addPlayer(Player::Ptr player);
     void removePlayer(Player::Ptr player);
 

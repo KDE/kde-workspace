@@ -44,7 +44,7 @@ protected:
     virtual bool sourceRequestEvent(const QString& source);
     virtual bool updateSourceEvent(const QString& source);
 
-private slots:
+private Q_SLOTS:
     void serviceOwnerChanged(
             const QString& serviceName,
             const QString& oldOwner,

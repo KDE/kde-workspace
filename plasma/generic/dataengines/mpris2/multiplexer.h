@@ -42,7 +42,7 @@ public:
 signals:
     void activePlayerChanged(PlayerContainer *container);
 
-private slots:
+private Q_SLOTS:
     void playerUpdated(const QString &name, const Plasma::DataEngine::Data &data);
 
 private:

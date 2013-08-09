@@ -41,7 +41,7 @@ public:
         m_model->requestSetup(m_index);
     }
 
-private slots:
+private Q_SLOTS:
     void setupDone(const QModelIndex& index, bool success);
     void setupError(const QString& message);
 };

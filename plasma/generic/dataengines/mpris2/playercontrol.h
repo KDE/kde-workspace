@@ -50,7 +50,7 @@ public:
 signals:
     void enabledOperationsChanged();
 
-private slots:
+private Q_SLOTS:
     void updateEnabledOperations();
     void containerDestroyed();
 

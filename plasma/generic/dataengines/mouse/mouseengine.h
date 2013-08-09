@@ -40,7 +40,7 @@ protected:
     void init();
     void timerEvent(QTimerEvent*);
 
-private slots:
+private Q_SLOTS:
     void updateCursorName(const QString &name);
 
 private:

@@ -47,7 +47,7 @@ class SystemMonitorEngine : public Plasma::DataEngine, public KSGRD::SensorClien
         virtual void sensorLost( int );
         virtual bool updateSourceEvent(const QString &sensorName);
 
-    protected slots:
+    protected Q_SLOTS:
         void updateSensors();
         void updateMonitorsList();
 

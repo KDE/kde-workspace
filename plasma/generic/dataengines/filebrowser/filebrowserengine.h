@@ -39,7 +39,7 @@ protected:
     bool sourceRequestEvent(const QString &path);
     void init();
 
-protected slots:
+protected Q_SLOTS:
     void dirDirty (const QString &path);
     void dirCreated(const QString &path);
     void dirDeleted(const QString &path);

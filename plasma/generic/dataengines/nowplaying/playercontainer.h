@@ -35,7 +35,7 @@ public:
 
     Plasma::Service* service(QObject* parent = 0);
 
-public slots:
+public Q_SLOTS:
     void updateInfo();
 
 private:

@@ -47,7 +47,7 @@ class AkonadiEngine : public Plasma::DataEngine
     protected:
         bool sourceRequestEvent(const QString &name);
 
-    private slots:
+    private Q_SLOTS:
 
         void stopMonitor(const QString &name);
 

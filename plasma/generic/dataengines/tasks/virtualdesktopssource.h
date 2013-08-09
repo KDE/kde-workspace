@@ -33,7 +33,7 @@ class VirtualDesktopsSource : public Plasma::DataContainer
 
         ~VirtualDesktopsSource();
 
-    private slots:
+    private Q_SLOTS:
 
         void updateDesktopNumber(int desktop);
 

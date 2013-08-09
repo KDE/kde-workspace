@@ -61,7 +61,7 @@ public:
 
     virtual QString errorString() const;
 
-private slots:
+private Q_SLOTS:
     void callFinished(QDBusPendingCallWatcher*);
     void setDBusProperty(const QString& iface, const QString& propName, const QDBusVariant& value);
 

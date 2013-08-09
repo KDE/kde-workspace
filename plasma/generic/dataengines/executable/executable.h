@@ -30,7 +30,7 @@ class ExecutableContainer : public Plasma::DataContainer
         explicit ExecutableContainer(const QString& command, QObject *parent = 0);
         virtual ~ExecutableContainer();
 
-    protected slots:
+    protected Q_SLOTS:
         void finished(int exitCode, QProcess::ExitStatus exitStatus);
         void exec();
 

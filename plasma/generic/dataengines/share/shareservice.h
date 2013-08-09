@@ -56,7 +56,7 @@ public:
     ~ShareJob();
     void start();
 
-public slots:
+public Q_SLOTS:
     void publish();
     void showResult(const QString &url);
     void showError(const QString &msg);

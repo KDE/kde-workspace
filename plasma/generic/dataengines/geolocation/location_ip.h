@@ -34,7 +34,7 @@ public:
 
     virtual void update();
 
-protected slots:
+protected Q_SLOTS:
     void readData(KIO::Job *, const QByteArray& data);
     void result(KJob* job);
 

@@ -45,7 +45,7 @@ class TaskSource : public Plasma::DataContainer
         Plasma::Service *createService();
         ::TaskManager::Task *task();
 
-    private slots:
+    private Q_SLOTS:
         void updateStartup(::TaskManager::TaskChanges startupChanges);
         void updateTask(::TaskManager::TaskChanges taskChanges);
         void updateDesktop();

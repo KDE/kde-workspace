@@ -43,7 +43,7 @@ class AppSource : public Plasma::DataContainer
         KService::Ptr getApp();
         bool isApp() const;
 
-    private slots:
+    private Q_SLOTS:
         void updateGroup();
         void updateApp();
 

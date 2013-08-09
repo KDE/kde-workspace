@@ -62,7 +62,7 @@ class TasksEngine : public Plasma::DataEngine
         virtual void init();
         bool sourceRequestEvent(const QString &source);
 
-    private slots:
+    private Q_SLOTS:
         void startupAdded(::TaskManager::Startup *startup);
         void startupRemoved(::TaskManager::Startup *startup);
         void taskAdded(::TaskManager::Task *task);

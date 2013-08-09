@@ -36,7 +36,7 @@ protected:
     void init();
     bool sourceRequestEvent(const QString& name);
 
-protected slots:
+protected Q_SLOTS:
     bool updateSourceEvent(const QString& source);
 
 private:

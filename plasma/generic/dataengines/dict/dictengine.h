@@ -38,7 +38,7 @@ class DictEngine: public Plasma::DataEngine
     protected:
         bool sourceRequestEvent(const QString &word);
 
-    private slots:
+    private Q_SLOTS:
         void getDefinition();
         void socketClosed();
         void getDicts();
