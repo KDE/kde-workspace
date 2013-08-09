@@ -25,6 +25,8 @@ set_source_files_properties(${statusnotifieritem_xml} PROPERTIES
 )
 QT4_ADD_DBUS_INTERFACE(statusnotifieritem_engine_SRCS ${statusnotifieritem_xml} statusnotifieritem_interface)
 
+kservice_desktop_to_json(plasma_engine_statusnotifieritem.desktop)
+
 plasma_add_plugin(plasma_engine_statusnotifieritem ${statusnotifieritem_engine_SRCS})
 target_link_libraries(plasma_engine_statusnotifieritem ${KDE4_KDEUI_LIBS} ${Plasma_LIBRARIES} ${DBUSMENUQT_LIBRARIES})
 
