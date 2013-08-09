@@ -23,7 +23,7 @@
 #include <QFile>
 #include <QTimer>
 
-#include <kdebug.h>
+#include <QDebug>
 #include <KIO/NetAccess>
 
 #define MPRIS2_PATH "/org/mpris/MediaPlayer2"

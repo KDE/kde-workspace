@@ -19,7 +19,7 @@
 #include "notificationaction.h"
 #include "notificationsengine.h"
 
-#include <kdebug.h>
+#include <QDebug>
 
 void NotificationAction::start()
 {

@@ -19,7 +19,7 @@
 
 #include "playeractionjob.h"
 
-#include <kdebug.h>
+#include <QDebug>
 
 void PlayerActionJob::start()
 {

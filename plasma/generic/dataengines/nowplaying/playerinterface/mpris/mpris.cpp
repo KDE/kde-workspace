@@ -23,7 +23,7 @@
 #include <QtDBus>
 #include <QFile>
 
-#include <kdebug.h>
+#include <QDebug>
 #include <KIO/NetAccess>
 
 

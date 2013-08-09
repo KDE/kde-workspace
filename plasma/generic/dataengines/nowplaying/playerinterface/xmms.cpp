@@ -22,7 +22,7 @@
 #include "xmms.h"
 #include "xmms_p.h"
 
-#include <kdebug.h>
+#include <QDebug>
 
 #include <xmmsctrl.h>
 

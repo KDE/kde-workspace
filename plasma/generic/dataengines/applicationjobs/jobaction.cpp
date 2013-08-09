@@ -19,7 +19,7 @@
 #include "jobaction.h"
 #include "kuiserverengine.h"
 
-#include <kdebug.h>
+#include <QDebug>
 
 void JobAction::start()
 {

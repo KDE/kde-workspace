@@ -29,7 +29,7 @@
 #include <QDBusPendingReply>
 #include <QDBusVariant>
 
-#include <kdebug.h>
+#include <QDebug>
 
 PlayerActionJob::PlayerActionJob(const QString& operation,
                                  QMap<QString,QVariant>& parameters,

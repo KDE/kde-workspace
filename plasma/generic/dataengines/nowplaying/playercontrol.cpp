@@ -20,7 +20,7 @@
 #include "playercontrol.h"
 #include "playeractionjob.h"
 
-#include <kdebug.h>
+#include <QDebug>
 
 PlayerControl::PlayerControl(QObject* parent, Player::Ptr player)
     : Plasma::Service(parent),
