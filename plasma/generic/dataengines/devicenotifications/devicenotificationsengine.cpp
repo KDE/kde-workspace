@@ -59,6 +59,6 @@ void DeviceNotificationsEngine::notify(int solidError, const QString& error, con
     setData(source, notificationData );
 }
 
-K_EXPORT_PLASMA_DATAENGINE(devicenotifications, DeviceNotificationsEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(devicenotifications, DeviceNotificationsEngine, "plasma-dataengine-devicenotifications.json")
 
 #include "devicenotificationsengine.moc"
