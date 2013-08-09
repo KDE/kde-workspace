@@ -106,8 +106,6 @@ bool TimeEngine::updateSourceEvent(const QString &tz)
     return false;
 }
 
-// FIXME: Enable json once kservice_desktop_to_json macro is merged in kdelibs
-//K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(time, TimeEngine, "plasma-dataengine-time.json")
-K_EXPORT_PLASMA_DATAENGINE(time, TimeEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(time, TimeEngine, "plasma-dataengine-time.json")
 
 #include "timeengine.moc"

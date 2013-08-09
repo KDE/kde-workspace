@@ -7,6 +7,8 @@ set(time_engine_SRCS
     solarsystem.cpp
 )
 
+kservice_desktop_to_json(plasma-dataengine-time.desktop)
+
 plasma_add_plugin(plasma_engine_time ${time_engine_SRCS})
 
 #add_library(plasma_engine_time SHARED ${time_engine_SRCS})
