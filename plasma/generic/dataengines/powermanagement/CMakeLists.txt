@@ -13,8 +13,12 @@ QT4_ADD_DBUS_INTERFACE(powermanagement_engine_SRCS ${krunner_xml} krunner_interf
 add_library(plasma_engine_powermanagement MODULE ${powermanagement_engine_SRCS} )
 set_target_properties(plasma_engine_powermanagement PROPERTIES PREFIX "")
 
-
-target_link_libraries(plasma_engine_powermanagement ${KCore_LIBRARIES} ${Solid_LIBRARIES} ${Plasma_LIBRARIES} ${KDE4_KIDLETIME_LIBRARY} ) # add kworkspace
+target_link_libraries(plasma_engine_powermanagement
+    ${KCore_LIBRARIES}
+    ${Solid_LIBRARIES}
+    ${Plasma_LIBRARIES}
+    ${KDE4_KIDLETIME_LIBRARY}
+) # todo: add kworkspace once ported, renable shutdown request
 
 install(TARGETS plasma_engine_powermanagement DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-dataengine-powermanagement.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
