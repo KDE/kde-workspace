@@ -1,4 +1,5 @@
 add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1204)
+remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_NO_CAST_FROM_BYTEARRAY)
 
 ########### next target ###############
 
@@ -35,21 +36,33 @@ endif(WIN32)
 
 kde4_add_library(taskmanager SHARED ${taskmanager_LIB_SRCS})
 
-target_link_libraries(taskmanager processcore ${KACTIVITIES_LIBRARY} ${KDE4_KDEUI_LIBS} ${KDE4_KIO_LIBS} ${X11_LIBRARIES})
-if (X11_Xfixes_FOUND)
-  target_link_libraries(taskmanager ${X11_Xfixes_LIB})
-endif (X11_Xfixes_FOUND)
-if (X11_Xrender_FOUND)
-  target_link_libraries(taskmanager ${X11_Xrender_LIB})
-endif (X11_Xrender_FOUND)
-if (X11_Xcomposite_FOUND)
-  target_link_libraries(taskmanager ${X11_Xcomposite_LIB})
-endif (X11_Xcomposite_FOUND)
+target_link_libraries(taskmanager
+    processcore
+    ${KDE4Support_LIBRARIES}
+    ${KDE4_KIO_LIBRARY} #KRun
+    KF5::KConfigCore
+    KF5::KI18n
+    KF5::KIOCore
+    KF5::KService
+    KF5::KWindowSystem
+)
+if (HAVE_X11)
+    target_link_libraries(taskmanager ${Qt5X11Extras_LIBRARIES} ${X11_LIBRARIES})
+    if (X11_Xfixes_FOUND)
+    target_link_libraries(taskmanager ${X11_Xfixes_LIB})
+    endif (X11_Xfixes_FOUND)
+    if (X11_Xrender_FOUND)
+    target_link_libraries(taskmanager ${X11_Xrender_LIB})
+    endif (X11_Xrender_FOUND)
+    if (X11_Xcomposite_FOUND)
+    target_link_libraries(taskmanager ${X11_Xcomposite_LIB})
+    endif (X11_Xcomposite_FOUND)
+endif()
 
-if (NOT KDE_PLATFORM_FEATURE_BINARY_COMPATIBLE_FEATURE_REDUCTION)
-    include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal)
-    target_link_libraries(taskmanager kephal)
- endif (NOT KDE_PLATFORM_FEATURE_BINARY_COMPATIBLE_FEATURE_REDUCTION)
+# if (NOT KDE_PLATFORM_FEATURE_BINARY_COMPATIBLE_FEATURE_REDUCTION)
+#     include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal)
+#     target_link_libraries(taskmanager kephal)
+#  endif (NOT KDE_PLATFORM_FEATURE_BINARY_COMPATIBLE_FEATURE_REDUCTION)
 
 set_target_properties(taskmanager PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} )
 install(TARGETS taskmanager EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )

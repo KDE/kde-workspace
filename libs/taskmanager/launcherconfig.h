@@ -24,7 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef LAUNCHER_CONFIG_H
 #define LAUNCHER_CONFIG_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "ui_launcherconfig.h"
 
 class KConfigDialog;

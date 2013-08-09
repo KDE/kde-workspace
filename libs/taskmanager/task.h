@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Qt
 #include <QtGui/QDrag>
 #include <QtGui/QPixmap>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <QtGui/QIcon>
 
 // KDE
@@ -278,7 +278,7 @@ public:
     //* @internal
     ::TaskManager::TaskChanges refresh(WindowProperties dirty);
     //* @internal
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
     void addTransient(WId w, const KWindowInfo &info);
 #endif
     //* @internal

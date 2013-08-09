@@ -864,9 +864,9 @@ void GroupManager::readLauncherConfig(const KConfigGroup &cg)
         QStringList item = conf.readEntry(key, QStringList());
         if (item.length() >= 4) {
             KUrl url(item.at(0));
-            KIcon icon;
+            QIcon icon;
             if (!item.at(1).isEmpty()) {
-                icon = KIcon(item.at(1));
+                icon = QIcon::fromTheme(item.at(1));
             } else if (item.length() >= 5) {
                 QPixmap pixmap;
                 QByteArray bytes = QByteArray::fromBase64(item.at(4).toAscii());
@@ -1400,4 +1400,4 @@ void GroupManager::setGroupingStrategy(TaskGroupingStrategy strategy)
 
 } // TaskManager namespace
 
-#include "groupmanager.moc"
+#include "moc_groupmanager.cpp"

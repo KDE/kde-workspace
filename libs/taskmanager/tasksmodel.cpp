@@ -512,5 +512,5 @@ void TasksModelPrivate::itemChanged(::TaskManager::TaskChanges changes)
 
 }
 
-#include "tasksmodel.moc"
+#include "moc_tasksmodel.cpp"
 

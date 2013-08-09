@@ -25,11 +25,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDE/KOpenWithDialog>
 #include <KDE/KDebug>
 #include <KDE/KDesktopFile>
+#include <KDE/KIcon>
 #include <KDE/KLocale>
+#include <KDE/KUrl>
 #include <KDE/KWindowInfo>
 #include <KDE/KWindowSystem>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QX11Info>
+#include <QtX11Extras/QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>

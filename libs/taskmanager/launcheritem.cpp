@@ -26,6 +26,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KConfigGroup>
 #include <KDebug>
 #include <KDesktopFile>
+#include <KFileItem>
+#include <KGlobal>
 #include <KMimeType>
 #include <QMimeData>
 #include <KMimeTypeTrader>
@@ -230,7 +232,7 @@ void LauncherItem::launch()
         if (desktopFile.isNull()) {
             desktopFile = KStandardDirs::locate("apps", service->entryPath());
         }
-        new KRun(desktopFile, 0);
+        new KRun(QUrl::fromLocalFile(desktopFile), 0);
     } else {
         new KRun(d->url, 0);
     }
@@ -382,7 +384,8 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
             d->url = KUrl();
         }
     } else {
-        d->icon = KIcon(KMimeType::iconNameForUrl(d->url));
+        const KFileItem fileItem(d->url);
+        d->icon = KIcon(fileItem.iconName());
     }
 
     if (d->name.isEmpty()) {
@@ -503,4 +506,4 @@ void LauncherItem::close()
 
 } // TaskManager namespace
 
-#include "launcheritem.moc"
+#include "moc_launcheritem.cpp"

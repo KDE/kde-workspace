@@ -48,7 +48,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <windows.h>
 #endif
 
+#if 0
 #include <KActivities/Consumer>
+#endif
 
 namespace TaskManager
 {
@@ -100,14 +102,15 @@ public:
     QList<Startup *> startups;
     WindowList skiptaskbarWindows;
     QSet<QUuid> trackGeometryTokens;
+#if 0
     KActivities::Consumer activityConsumer;
+#endif
 };
 
 TaskManager::TaskManager()
     : QObject(),
       d(new Private(this))
 {
-    KGlobal::locale()->insertCatalog("libtaskmanager");
     connect(KWindowSystem::self(), SIGNAL(windowAdded(WId)),
             this,       SLOT(windowAdded(WId)));
     connect(KWindowSystem::self(), SIGNAL(windowRemoved(WId)),
@@ -118,13 +121,17 @@ TaskManager::TaskManager()
             this,       SLOT(currentDesktopChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(windowChanged(WId, const ulong*)),
             this,       SLOT(windowChanged(WId, const ulong*)));
+#if 0
     connect(&d->activityConsumer, SIGNAL(currentActivityChanged(QString)),
             this,       SIGNAL(activityChanged(QString)));
+#endif
     if (QCoreApplication::instance()) {
         connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(onAppExitCleanup()));
     }
 
+#if 0
     emit activityChanged(d->activityConsumer.currentActivity());
+#endif
 
     // register existing windows
     const QList<WId> windows = KWindowSystem::windows();
@@ -156,7 +163,6 @@ TaskManager::~TaskManager()
     d->startups.clear();
     qDeleteAll(startups);
 
-    KGlobal::locale()->removeCatalog("libtaskmanager");
     delete d;
 }
 
@@ -568,10 +574,14 @@ int TaskManager::currentDesktop() const
 
 QString TaskManager::currentActivity() const
 {
+#if 0
     return d->activityConsumer.currentActivity();
+#else
+    return QString();
+#endif
 }
 
 } // TaskManager namespace
 
 
-#include "taskmanager.moc"
+#include "moc_taskmanager.cpp"

@@ -7,7 +7,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    #add_subdirectory(kdm)
    #add_subdirectory(plasmagenericshell)
    if(NOT WIN32)
-        #add_subdirectory(taskmanager)
+        add_subdirectory(taskmanager)
    endif(NOT WIN32)
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 

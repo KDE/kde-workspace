@@ -34,7 +34,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // KDE
 #include <kicon.h>
-#include <klocale.h>
+#include <KLocalizedString>
 #include <KDebug>
 #include <KService>
 #include <KServiceTypeTrader>
@@ -45,7 +45,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <QtCore/QMap>
 #include <QtGui/QHelpEvent>
-#include <QtGui/QToolTip>
+#include <QtWidgets/QToolTip>
 #include <QX11Info>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -722,5 +722,5 @@ GroupPopupMenu::GroupPopupMenu(QWidget *parent, TaskGroup *group, GroupManager *
 } // TaskManager namespace
 
 #include "taskactions.moc"
-#include "taskactions_p.moc"
+#include "moc_taskactions_p.cpp"
 

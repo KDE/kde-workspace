@@ -710,4 +710,4 @@ bool TaskGroup::moveItem(int oldIndex, int newIndex)
 
 } // TaskManager namespace
 
-#include "taskgroup.moc"
+#include "moc_taskgroup.cpp"

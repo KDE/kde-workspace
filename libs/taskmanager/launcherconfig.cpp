@@ -27,9 +27,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDE/KConfig>
 #include <KDE/KConfigDialog>
 #include <KDE/KConfigGroup>
+#include <KDE/KIcon>
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
-#include <QtGui/QWhatsThis>
+#include <KDE/KUrl>
+#include <QtWidgets/QWhatsThis>
 
 namespace TaskManager
 {

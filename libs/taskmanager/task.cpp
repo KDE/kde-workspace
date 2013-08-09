@@ -35,7 +35,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // KDE
 #include <KDebug>
 #include <KIconLoader>
-#include <KLocale>
+#include <KLocalizedString>
 
 #include "taskmanager.h"
 

@@ -80,7 +80,7 @@ public:
     Q_INVOKABLE int activeTaskId() const;
     Q_INVOKABLE QVariant taskIdList(const QModelIndex &parent = QModelIndex(), bool recursive = true) const;
 
-signals:
+Q_SIGNALS:
     void countChanged();
     void launcherCountChanged();
 

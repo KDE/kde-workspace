@@ -24,7 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QWeakPointer>
 
 #include <KDebug>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KConfig>
 #include <KConfigGroup>
 
