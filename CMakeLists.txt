@@ -173,13 +173,6 @@ set_package_properties(Fontconfig PROPERTIES DESCRIPTION "Font access configurat
                        PURPOSE "Needed to build font configuration and installation tools"
                       )
 
-find_package(Googlegadgets 0.11.0)
-set_package_properties(Googlegadgets PROPERTIES DESCRIPTION "Google Gadgets library"
-                       URL "http://code.google.com/p/google-gadgets-for-linux"
-                       TYPE OPTIONAL
-                       PURPOSE "Needed to build plasma scriptengine for google gadgets"
-                      )
-
 #### Python support ( plasma scriptengines ) ####
 find_package(PythonLibrary)
 set_package_properties(PythonLibrary PROPERTIES DESCRIPTION "Python scripting language"
@@ -221,13 +214,6 @@ set_package_properties(KdepimLibs PROPERTIES DESCRIPTION "The KDEPIM libraries"
                        URL "http://pim.kde.org"
                        TYPE OPTIONAL
                        PURPOSE "Required to build certain Plasma DataEngines (Akonadi, Calendar)"
-                      )
-
-find_package(QJSON)
-set_package_properties(QJSON PROPERTIES DESCRIPTION "Library to manage JSON objects with Qt"
-                       URL "http://qjson.sourceforge.net/"
-                       TYPE OPTIONAL
-                       PURPOSE "Required to build Chrome/Chromium support for Plasma Bookmarks Runners"
                       )
 
 
