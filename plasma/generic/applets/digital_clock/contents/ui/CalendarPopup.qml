@@ -25,6 +25,9 @@ Item {
     height: parent.height
     property string date ;
     property date showDate: new Date()
+    property alias list:list
+    property alias text:error.text
+    property alias text_event:noEvent.text
     property Item selectedItem
     property int week;
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
@@ -66,13 +69,10 @@ Item {
             id:calendarColumn
             height: parent.height
             width: parent.width / 2
-            anchors {
-                top:parent.top
-                bottom:parent.bottom
-            }
+         
             Row {
                 id:calendarOperations
-                height: parent.height/10
+                height: parent.height/20
                 width: parent.width
                 clip:true
                 Components.ToolButton {
@@ -215,24 +215,6 @@ Item {
                         monthCalendar.nextMonth()
                     }
                 }
-                Row {
-                    spacing:calendarGrid.width/16
-                    clip:true
-                    anchors {
-                        top:monthright.bottom
-                        left:parent.left
-                        right:calendarDays.right 
-                        leftMargin:calendarGrid.width/15+calendarGrid.width/8
-                    }
-                    Repeater {
-                        model: monthCalendar.days
-                        Components.Label {
-                            text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
-                            anchors.horizontalCenter: label.horizontalCenter
-                            anchors.leftMargin:5
-                        }
-                    }
-                }
             }
             DaysCalendar {
                 id:calendarGrid
@@ -241,7 +223,7 @@ Item {
             Row {
                 id:calendarToolbar
                 width:calendarOperations.width
-                height:20
+                height:parent.height/20
                 spacing:calendarOperations.width/15
                 clip:true
                 focus:true
@@ -283,8 +265,30 @@ Item {
                 right:eventColumn.left
             }
         }
-        EventList {
-
+        Column {
+            id:eventColumn
+            height: parent.height
+            width: parent.width / 2
+            Components.Label {
+                id:error
+                text:""
+                visible: true
+                font.weight:Font.Bold
+                font.bold:true
+            }
+            Components.Label {
+                id:noEvent
+                text: ""
+                visible: true
+                font.italic:true
+            }
+            PlasmaExtras.ScrollArea {
+                anchors.fill:parent
+                anchors.topMargin:40
+                EventList {
+                    id:list
+                }
+            }
         }
     }
 }

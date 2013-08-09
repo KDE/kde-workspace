@@ -22,20 +22,28 @@ import org.kde.plasma.extras 0.1 as PlasmaExtras
 Row {
     id:calendarGrid
     width:calendarColumn.width
-    height:parent.height-calendarOperations.height-calendarToolbar.height
+    height:parent.height*9/10
+    
     Column {
         width: calendarGrid.width/8
-        height: parent.height
+        height: parent.height*0.9
         spacing:calendarGrid.width/12
+        anchors.topMargin:70
+         anchors.verticalCenter: parent.verticalCenter
+        
         clip:true
-        focus:true
         Repeater { 
             model: monthCalendar.weeksModel
             Components.Label {
                 id:weekNumber
                 text: modelData + 1
                 opacity:0.5
+              //  horizontalAlignment: Text.AlignRight
             }
+            
+        }
+        anchors {
+            top:repeator.top
         }
     }
     Grid {
@@ -43,16 +51,28 @@ Row {
         columns:monthCalendar.days
         rows:1+monthCalendar.weeks//dayLabels.rows
         width:calendarGrid.width*7/8
-        height:parent.height
+        height:parent.height*9/10
         spacing:0
         property Item selectedItem
+       
+        Repeater {
+            id:days
+            model: monthCalendar.days
+            Components.Label {
+                text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
+                horizontalAlignment: Text.AlignHCenter
+               // anchors.horizontalCenter: myRectangle.horizontalCenter
+            }
+           // anchors.leftMargin:30
+            // anchors.horizontalCenter: parent.horizontalCenter
+        }
         Repeater {
             id:repeater
             model:monthCalendar.model
             Rectangle {
                 id:myRectangle
                 width:(calendarGrid.width*7/8)/monthCalendar.days
-                height:calendarGrid.height/monthCalendar.weeks
+                height:0.93*calendarGrid.height/monthCalendar.weeks
                 color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
                 border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":calendarDays.selectedItem == myRectangle ? "black" : "transparent"
                 Components.Label {
@@ -72,14 +92,15 @@ Row {
                         if(list.count==0) {
                             list.model=monthCalendar.upcomingEventsModel
                         }
+                        
                     }
                     onClicked: {
                         monthCalendar.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);
                         var rowNumber = Math.floor(index / 7)   ;
                         week=1+monthCalendar.weeksModel[rowNumber];
                         date=dayNumber+"/"+monthNumber+"/"+yearNumber
-                        // error.text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
-                        //  errorl.text=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
+                        text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
+                        text_event=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
                         calendarDays.selectedItem=myRectangle
                     }
                 }

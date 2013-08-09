@@ -19,14 +19,13 @@ import org.kde.pim.calendar 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
-Column {
-    id:eventColumn
-    height: parent.height
-    width: parent.width / 2
-    /*property alias text: error.text
-    Components.Label {
+
+  //  property alias list:list
+   // property alias text: error.text
+  //  property alias text: error.text
+    /*Components.Label {
         id:error
-        text: ""
+        text: (containsEventItems)||(containsTodoItems)?"blakk":eventDate(yearNumber,monthNumber,dayNumber)
         visible: true
         font.weight:Font.Bold
         font.bold:true
@@ -37,8 +36,8 @@ Column {
         visible: true
         font.italic:true
     }*/
-    PlasmaExtras.ScrollArea {
-        anchors.fill:parent
+    //Header to be used here I think for above 
+ 
         ListView {
             id:list
             height: parent.height
@@ -60,8 +59,7 @@ Column {
                 id:sec_l
                 text: section
                 font.weight:Font.Bold
-                anchors.verticalCenter: sect.verticalCenter
+               // anchors.verticalCenter: sect.verticalCenter
             }
         }
-    }
-}
+    
