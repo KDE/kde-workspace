@@ -74,7 +74,7 @@ void Temperature::configChanged()
 void Temperature::sourceAdded(const QString& name)
 {
     if (m_rx.indexIn(name) != -1) {
-        //kDebug() << m_rx.cap(1);
+        //qDebug() << m_rx.cap(1);
         m_sources << name;
         if (!m_sourceTimer.isActive()) {
             m_sourceTimer.start(0);

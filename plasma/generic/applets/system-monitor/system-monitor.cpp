@@ -20,7 +20,7 @@
 #include "monitorbutton.h"
 #include "applet.h"
 #include <QGraphicsLinearLayout>
-#include <KDebug>
+#include <QDebug>
 #include <KPushButton>
 #include <Plasma/Containment>
 #include <Plasma/Corona>
@@ -192,7 +192,7 @@ void SystemMonitor::appletRemoved(QObject *object)
 
     foreach (MonitorButton* button, m_monitorButtons) {
         if (!running.contains(button->objectName())) {
-            kDebug() << "unchecking" << button->objectName();
+            qDebug() << "unchecking" << button->objectName();
             button->setChecked(false);
         }
     }
@@ -202,10 +202,10 @@ void SystemMonitor::checkGeometry()
 {
     QSizeF margins = size() - contentsRect().size();
     qreal minHeight = m_buttons->minimumHeight();
-    //kDebug() << minHeight;
+    //qDebug() << minHeight;
 
     foreach (SM::Applet *applet, m_applets) {
-        //kDebug() << applet->minSize() << applet->minimumSize()
+        //qDebug() << applet->minSize() << applet->minimumSize()
         //         << applet->metaObject()->className() << applet->size() - applet->contentsRect().size();
         minHeight += applet->preferredSize().height() + m_layout->spacing();
     }
@@ -213,12 +213,12 @@ void SystemMonitor::checkGeometry()
 
     update();
     /*
-    kDebug() << m_widget->size().height() << m_layout->geometry().height();
+    qDebug() << m_widget->size().height() << m_layout->geometry().height();
     foreach (SM::Applet *applet, m_applets) {
-        kDebug() << applet->metaObject()->className() << applet->size().height();
+        qDebug() << applet->metaObject()->className() << applet->size().height();
     }
     for (int i = 0; i < m_layout->count(); ++i) {
-        kDebug() << m_layout->itemAt(i)->geometry().top() << m_layout->itemAt(i)->geometry().height();
+        qDebug() << m_layout->itemAt(i)->geometry().top() << m_layout->itemAt(i)->geometry().height();
     }
     */
 }

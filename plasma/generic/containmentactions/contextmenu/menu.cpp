@@ -27,7 +27,7 @@
 #include <QSignalMapper>
 
 #include <KAuthorized>
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KMenu>
 

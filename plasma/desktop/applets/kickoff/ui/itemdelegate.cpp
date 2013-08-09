@@ -28,7 +28,7 @@
 #include <QStyleOptionViewItem>
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KGlobal>
 #include <kcapacitybar.h>
 

@@ -26,7 +26,7 @@
 
 // KDE
 #include <KConfigGroup>
-#include <KDebug>
+#include <QDebug>
 
 // Local
 #include "core/models.h"
@@ -79,7 +79,7 @@ public:
         // if this service is already in the list then remove the existing
         // queue entry (so that there are no duplicates in the queue)
         if (serviceInfo.contains(id)) {
-            kDebug() << "Duplicate entry added.  Removing existing entry from queue.";
+            qDebug() << "Duplicate entry added.  Removing existing entry from queue.";
             serviceQueue.erase(serviceInfo[id].queueIter);
         }
 
@@ -93,7 +93,7 @@ public:
         // remove the least recently used service
         while (serviceQueue.count() > maxServices) {
             QString removeId = serviceQueue.takeFirst();
-            kDebug() << "More than the maximal " << maxServices << " services added.  Removing" << removeId << "from queue.";
+            qDebug() << "More than the maximal " << maxServices << " services added.  Removing" << removeId << "from queue.";
             serviceInfo.remove(removeId);
             emit instance.applicationRemoved(KService::serviceByStorageId(removeId));
         }
@@ -179,7 +179,7 @@ void RecentApplications::add(KService::Ptr service)
 
     privateSelf->addEntry(info.storageId, info);
 
-    kDebug() << "Recent app added" << info.storageId << info.startCount;
+    qDebug() << "Recent app added" << info.storageId << info.startCount;
     emit applicationAdded(service, info.startCount);
 
     privateSelf->removeExpiredEntries();

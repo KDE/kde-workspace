@@ -33,7 +33,7 @@
 
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KGlobalSettings>
 #include <KIconLoader>
 #include <KColorScheme>
@@ -88,7 +88,7 @@ public:
             if (q->model()->hasChildren(child)) {
                 QSize childSize = calculateHeaderSize(child);
                 QRect rect(QPoint(ItemDelegate::HEADER_LEFT_MARGIN, verticalOffset), childSize);
-                //kDebug() << "header rect for" << child.data(Qt::DisplayRole) << "is" << rect;
+                //qDebug() << "header rect for" << child.data(Qt::DisplayRole) << "is" << rect;
                 itemRects.insert(child, rect);
 
                 if (childSize.isValid()) {
@@ -101,7 +101,7 @@ public:
                 visualColumn = 0;
             } else {
                 QSize childSize = calculateItemSize(child);
-                //kDebug() << "item rect for" << child.data(Qt::DisplayRole) << "is" << QRect(QPoint(horizontalOffset,verticalOffset), childSize);
+                //qDebug() << "item rect for" << child.data(Qt::DisplayRole) << "is" << QRect(QPoint(horizontalOffset,verticalOffset), childSize);
 
                 itemRects.insert(child, QRect(QPoint(horizontalOffset, verticalOffset),
                                               childSize));
@@ -195,9 +195,9 @@ public:
 
         QModelIndex prevHeader = index.sibling(index.row() - 1, index.column());
         while (prevHeader.isValid()) {
-            //kDebug() << "checking" << prevHeader.data(Qt::DisplayRole).value<QString>();
+            //qDebug() << "checking" << prevHeader.data(Qt::DisplayRole).value<QString>();
             if (q->model()->hasChildren(prevHeader)) {
-                //kDebug() << "it has children";
+                //qDebug() << "it has children";
                 return false;
             }
 
@@ -638,7 +638,7 @@ void UrlItemView::dragMoveEvent(QDragMoveEvent *event)
 void UrlItemView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions)
-    //kDebug() << "Starting UrlItemView drag with actions" << supportedActions;
+    //qDebug() << "Starting UrlItemView drag with actions" << supportedActions;
 
     if (!d->watchedIndexForDrag.isValid()) {
         return;
@@ -703,7 +703,7 @@ void UrlItemView::leaveEvent(QEvent *event)
 {
     Q_UNUSED(event)
 
-    //kDebug() << "UrlItemView leave event";
+    //qDebug() << "UrlItemView leave event";
 
     d->hoveredIndex = QModelIndex();
     setCurrentIndex(QModelIndex());

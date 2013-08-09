@@ -27,7 +27,7 @@
 #include <KDirWatch>
 #include <KRecentDocument>
 #include <KUrl>
-#include <KDebug>
+#include <QDebug>
 
 // Local
 #include "core/recentapplications.h"
@@ -54,7 +54,7 @@ public:
         }
 
         QStandardItem *existingItem = itemsByPath[path];
-        kDebug() << "Removing existing item" << existingItem;
+        qDebug() << "Removing existing item" << existingItem;
         Q_ASSERT(existingItem->parent());
         existingItem->parent()->removeRow(existingItem->row());
         itemsByPath.remove(path);
@@ -95,7 +95,7 @@ public:
         documentItem->setData(true, Kickoff::SubTitleMandatoryRole);
         itemsByPath.insert(desktopPath, documentItem);
 
-        //kDebug() << "Document item" << documentItem << "text" << documentItem->text() << "url" << documentUrl.url();
+        //qDebug() << "Document item" << documentItem << "text" << documentItem->text() << "url" << documentUrl.url();
         if (append) {
             recentDocumentItem->appendRow(documentItem);
         } else {
@@ -221,12 +221,12 @@ DisplayOrder RecentlyUsedModel::nameDisplayOrder() const
 
 void RecentlyUsedModel::recentDocumentAdded(const QString& path)
 {
-    kDebug() << "Recent document added" << path;
+    qDebug() << "Recent document added" << path;
     d->addRecentDocument(path, false);
 }
 void RecentlyUsedModel::recentDocumentRemoved(const QString& path)
 {
-    kDebug() << "Recent document removed" << path;
+    qDebug() << "Recent document removed" << path;
     d->removeExistingItem(path);
 }
 

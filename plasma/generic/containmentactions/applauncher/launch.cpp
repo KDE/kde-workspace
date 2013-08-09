@@ -22,7 +22,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KMenu>
 
@@ -92,12 +92,12 @@ bool AppLauncher::addApp(QMenu *menu, const QString &source)
     Plasma::DataEngine::Data app = dataEngine("apps")->query(source);
 
     if (!app.value("display").toBool()) {
-        kDebug() << "hidden entry" << source;
+        qDebug() << "hidden entry" << source;
         return false;
     }
     QString name = app.value("name").toString();
     if (name.isEmpty()) {
-        kDebug() << "failed source" << source;
+        qDebug() << "failed source" << source;
         return false;
     }
 
@@ -125,7 +125,7 @@ bool AppLauncher::addApp(QMenu *menu, const QString &source)
 void AppLauncher::switchTo(QAction *action)
 {
     QString source = action->data().toString();
-    kDebug() << source;
+    qDebug() << source;
     Plasma::Service *service = dataEngine("apps")->serviceForSource(source);
     if (service) {
         Plasma::ServiceJob *job = service->startOperationCall(service->operationDescription("launch"));

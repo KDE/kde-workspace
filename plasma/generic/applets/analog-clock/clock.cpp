@@ -31,7 +31,7 @@
 #include <QPushButton>
 
 #include <KConfigDialog>
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KIcon>
 #include <KIconLoader>
@@ -236,7 +236,7 @@ void Clock::repaintNeeded()
 
 void Clock::moveSecondHand()
 {
-    //kDebug() << "moving second hand";
+    //qDebug() << "moving second hand";
     update();
 }
 
@@ -301,7 +301,7 @@ void Clock::paintInterface(QPainter *p, const QStyleOptionGraphicsItem *option, 
             }
 
             if (m_animateSeconds && !m_secondHandUpdateTimer->isActive()) {
-                //kDebug() << "starting second hand movement";
+                //qDebug() << "starting second hand movement";
                 m_secondHandUpdateTimer->start(50);
                 m_animationStart = QTime::currentTime().msec();
             } else {

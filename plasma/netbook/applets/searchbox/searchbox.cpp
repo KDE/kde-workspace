@@ -28,7 +28,7 @@
 #include <Plasma/Service>
 #include <Plasma/ServiceJob>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KLineEdit>
 #include <KIconLoader>

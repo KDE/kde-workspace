@@ -28,7 +28,7 @@
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeEngine>
 
-#include <KDebug>
+#include <QDebug>
 #include <KDialog>
 #include <KStandardDirs>
 #include <KIcon>
@@ -75,7 +75,7 @@ void SaverCorona::init()
 
     QAction *lock = action("lock widgets");
     if (lock) {
-        kDebug() << "unlock action";
+        qDebug() << "unlock action";
         //rename the lock action so that corona doesn't mess with it
         addAction("unlock widgets", lock);
         //rewire the action so we can check for a password
@@ -108,7 +108,7 @@ void SaverCorona::init()
 
 void SaverCorona::loadDefaultLayout()
 {
-    //kDebug();
+    //qDebug();
     QDesktopWidget *desktop = QApplication::desktop();
 
     // create a containment for the screens
@@ -116,7 +116,7 @@ void SaverCorona::loadDefaultLayout()
     for(int screen = 0; screen < m_numScreens; ++screen)
     {
         QRect g = desktop->screenGeometry(screen);
-        kDebug() << "     screen" << screen << "geometry is" << g;
+        qDebug() << "     screen" << screen << "geometry is" << g;
         c = addContainment("saverdesktop");
         if (c) {
             c->setScreen(screen);
@@ -165,7 +165,7 @@ void SaverCorona::toggleLock()
     //require a password to unlock
     if (immutability() == Plasma::Mutable) {
         setImmutability(Plasma::UserImmutable);
-        kDebug() << "locking up!";
+        qDebug() << "locking up!";
     } else if (immutability() == Plasma::UserImmutable) {
         // show a greeter
         if (!m_greeterItem) {

@@ -29,7 +29,7 @@ THE SOFTWARE.
 #include <QWebPage>
 #include <QFile>
 
-#include <KDebug>
+#include <QDebug>
 
 #include <Plasma/Applet>
 #include <Plasma/Package>
@@ -91,14 +91,14 @@ bool WebApplet::init()
     webpage = package()->filePath("mainscript");
 
     if (webpage.isEmpty()) {
-        kDebug() << "fail! no page";
+        qDebug() << "fail! no page";
         delete d->view;
         d->view = 0;
         return false;
     }
 
     KUrl url(package()->filePath("html"));
-    kDebug() << webpage << package()->path() << url;
+    qDebug() << webpage << package()->path() << url;
     d->view->mainFrame()->setHtml(dataFor(webpage), url);
     return true;
 }

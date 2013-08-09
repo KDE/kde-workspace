@@ -31,7 +31,7 @@
 
 // KDE
 #include <KService>
-#include <KDebug>
+#include <QDebug>
 #include <Plasma/AbstractRunner>
 #include <Plasma/RunnerManager>
 

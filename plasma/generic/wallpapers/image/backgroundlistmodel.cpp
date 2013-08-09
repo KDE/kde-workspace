@@ -16,7 +16,7 @@
 #include <QThreadPool>
 #include <QUuid>
 
-#include <KDebug>
+#include <QDebug>
 #include <KFileMetaInfo>
 #include <KGlobal>
 #include <KIO/PreviewJob>
@@ -100,7 +100,7 @@ void BackgroundListModel::reload(const QStringList &selected)
     }
 
     const QStringList dirs = KGlobal::dirs()->findDirs("wallpaper", QString());
-    kDebug() << "going looking in" << dirs;
+    qDebug() << "going looking in" << dirs;
     BackgroundFinder *finder = new BackgroundFinder(m_structureParent.data(), dirs);
     connect(finder, SIGNAL(backgroundsFound(QStringList,QString)), this, SLOT(backgroundsFound(QStringList,QString)));
     m_findToken = finder->token();
@@ -145,7 +145,7 @@ void BackgroundListModel::processPaths(const QStringList &paths)
         m_packages.append(newPackages);
         endInsertRows();
     }
-    //kDebug() << t.elapsed();
+    //qDebug() << t.elapsed();
 }
 
 void BackgroundListModel::addBackground(const QString& path)
@@ -209,7 +209,7 @@ QSize BackgroundListModel::bestSize(const Plasma::Package &package) const
                info.item(QString::fromLatin1("http://freedesktop.org/standards/xesam/1.0/core#height")).value().toInt());
     //backup solution if strigi does not work
     if (size.width() == 0 || size.height() == 0) {
-//        kDebug() << "fall back to QImage, check your strigi";
+//        qDebug() << "fall back to QImage, check your strigi";
         ImageSizeFinder *finder = new ImageSizeFinder(image);
         connect(finder, SIGNAL(sizeFound(QString,QSize)), this,
                 SLOT(sizeFound(QString,QSize)));
@@ -333,7 +333,7 @@ void BackgroundListModel::showPreview(const KFileItem &item, const QPixmap &prev
 
     m_previews.insert(b.path(), preview);
     emit dataChanged(index, index);
-    //kDebug() << "preview size:" << preview.size();
+    //qDebug() << "preview size:" << preview.size();
 }
 
 void BackgroundListModel::previewFailed(const KFileItem &item)
@@ -384,7 +384,7 @@ void BackgroundFinder::run()
     const QSet<QString> &fileSuffixes = suffixes();
 
     QStringList papersFound;
-    //kDebug() << "starting with" << m_paths;
+    //qDebug() << "starting with" << m_paths;
 
     QDir dir;
     dir.setFilter(QDir::AllDirs | QDir::Files | QDir::Hidden | QDir::Readable);
@@ -394,12 +394,12 @@ void BackgroundFinder::run()
     int i;
     for (i = 0; i < m_paths.count(); ++i) {
         const QString path = m_paths.at(i);
-        //kDebug() << "doing" << path;
+        //qDebug() << "doing" << path;
         dir.setPath(path);
         const QFileInfoList files = dir.entryInfoList();
         Q_FOREACH (const QFileInfo &wp, files) {
             if (wp.isDir()) {
-                //kDebug() << "directory" << wp.fileName() << validPackages.contains(wp.fileName());
+                //qDebug() << "directory" << wp.fileName() << validPackages.contains(wp.fileName());
 
                 const QString name = wp.fileName();
                 if (name == QString::fromLatin1(".") || name == QString::fromLatin1("..")) {
@@ -413,20 +413,20 @@ void BackgroundFinder::run()
                     if (pkg.isValid()) {
                         papersFound << pkg.path();
                         continue;
-                        //kDebug() << "gots a" << wp.filePath();
+                        //qDebug() << "gots a" << wp.filePath();
                     }
                 }
 
                 // add this to the directories we should be looking at
                 m_paths.append(filePath);
             } else if (fileSuffixes.contains(wp.suffix().toLower())) {
-                //kDebug() << "     adding image file" << wp.filePath();
+                //qDebug() << "     adding image file" << wp.filePath();
                 papersFound << wp.filePath();
             }
         }
     }
 
-    //kDebug() << "background found!" << papersFound.size() << "in" << i << "dirs, taking" << t.elapsed() << "ms";
+    //qDebug() << "background found!" << papersFound.size() << "in" << i << "dirs, taking" << t.elapsed() << "ms";
     Q_EMIT backgroundsFound(papersFound, m_token);
     deleteLater();
 }

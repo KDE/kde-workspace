@@ -21,7 +21,7 @@ THE SOFTWARE.
 */ 
 
 #include "dashboardjs.h"
-#include <kdebug.h>
+#include <QDebug>
 
 #include <KRun>
 #include <KConfigGroup>
@@ -44,7 +44,7 @@ DashboardJs::DashboardJs(QWebFrame *frame, QObject *parent, Plasma::Applet *appl
 DashboardJs::~DashboardJs()
 {
     if(m_frame){
-        kDebug() << "deconstructor calles javascript: " << m_onremove;
+        qDebug() << "deconstructor calles javascript: " << m_onremove;
         m_frame->evaluateJavaScript(m_onremove);
     }
 }
@@ -52,7 +52,7 @@ DashboardJs::~DashboardJs()
 void DashboardJs::openApplication(QString name)
 {
     //STUB
-    kDebug() << "not implemented: open application" << name;
+    qDebug() << "not implemented: open application" << name;
 
     //WARNING: this might be dangerous and exploited (or not)
     /* create list of applications:
@@ -81,7 +81,7 @@ QVariant DashboardJs::preferenceForKey(QString key)
 void DashboardJs::prepareForTransition(QString transition)
 {
     //STUB
-    kDebug() << "not implemented: transition with name" << transition;
+    qDebug() << "not implemented: transition with name" << transition;
     //TODO:freeze widget drawing. possible?
     //not really needed for things to work, but would be prettier
 }
@@ -90,19 +90,19 @@ void DashboardJs::performTransition()
 {
     //STUB
     //TODO: enable widget drawing again, perform nice animation.
-    kDebug() << "not implemented: perform transition";
+    qDebug() << "not implemented: perform transition";
     //not really needed for things to work, but would be prettier
 }
 
 void DashboardJs::setCloseBoxOffset(int x, int y)
 {
     //STUB, not needed, plasma has its own close box
-    kDebug() << "not implemented: close box offset" << x << y;
+    qDebug() << "not implemented: close box offset" << x << y;
 }
 
 void DashboardJs::setPreferenceForKey(QString value, QString key)
 {
-    kDebug() << "save key" << key << value;
+    qDebug() << "save key" << key << value;
     KConfigGroup conf = m_applet->config();
     conf.writeEntry(key, value);
 }
@@ -111,7 +111,7 @@ void DashboardJs::system(QString command, QString handler)
 {
     //WARNING: this might be dangerous and exploited. 
     //STUB
-    kDebug() << "not implemented: system command:" << command << handler;
+    qDebug() << "not implemented: system command:" << command << handler;
 }
 
 //Property sets and gets
@@ -174,6 +174,6 @@ void DashboardJs::setOndragstop(const QString &value)
 //TODO: remove when not needed anymore
 void DashboardJs::hello(int test)
 {
-    kDebug() << "hello world" << test;
+    qDebug() << "hello world" << test;
 }
 

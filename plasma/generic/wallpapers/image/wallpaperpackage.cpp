@@ -91,7 +91,7 @@ void WallpaperPackage::pathChanged(Plasma::Package *package)
         // dirty trick to support having a file passed in instead of a directory
         package->addFileDefinition("preferred", info.fileName(), i18n("Recommended wallpaper file"));
         package->setContentsPrefixPaths(QStringList());
-        //kDebug() << "changing" << path() << "to" << info.path();
+        //qDebug() << "changing" << path() << "to" << info.path();
         package->setPath(info.path());
     }
 
@@ -118,7 +118,7 @@ void WallpaperPackage::findBestPaper(Plasma::Package *package)
         return;
     }
 
-    //kDebug() << "wanted" << size;
+    //qDebug() << "wanted" << size;
 
     // choose the nearest resolution
     float best = FLT_MAX;
@@ -131,18 +131,18 @@ void WallpaperPackage::findBestPaper(Plasma::Package *package)
         }
 
         double dist = distance(candidate, m_targetSize, m_resizeMethod);
-        //kDebug() << "candidate" << candidate << "distance" << dist;
+        //qDebug() << "candidate" << candidate << "distance" << dist;
         if (bestImage.isEmpty() || dist < best) {
             bestImage = entry;
             best = dist;
-            //kDebug() << "best" << bestImage;
+            //qDebug() << "best" << bestImage;
             if (dist == 0) {
                 break;
             }
         }
     }
 
-    //kDebug() << "best image" << bestImage;
+    //qDebug() << "best image" << bestImage;
     package->removeDefinition("preferred");
     package->addFileDefinition("preferred", "images/" + bestImage, i18n("Recommended wallpaper file"));
 }

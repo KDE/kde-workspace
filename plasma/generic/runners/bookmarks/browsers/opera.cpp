@@ -19,7 +19,7 @@
  */
 
 #include "opera.h"
-#include <KDebug>
+#include <QDebug>
 #include "bookmarksrunner_defs.h"
 #include <QDir>
 #include <QFile>

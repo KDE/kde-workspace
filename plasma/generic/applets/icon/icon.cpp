@@ -26,7 +26,7 @@
 #include <QGraphicsItem>
 #include <QGraphicsLinearLayout>
 
-#include <KDebug>
+#include <QDebug>
 #include <KDesktopFile>
 #include <KGlobalSettings>
 #include <KIconLoader>
@@ -64,7 +64,7 @@ IconApplet::IconApplet(QObject *parent, const QVariantList &args)
     }
 
     resize(m_icon->sizeFromIconSize(IconSize(KIconLoader::Desktop)));
-    //kDebug() << "sized to:" << geometry();
+    //qDebug() << "sized to:" << geometry();
 }
 
 void IconApplet::init()
@@ -232,7 +232,7 @@ void IconApplet::setUrl(const KUrl& url, bool fromConfigDialog)
         Plasma::ToolTipManager::self()->setContent(m_icon, data);
     }
 
-    //kDebug() << "url was" << url << "and is" << m_url;
+    //qDebug() << "url was" << url << "and is" << m_url;
 }
 
 void IconApplet::delayedDestroy()
@@ -465,8 +465,8 @@ void IconApplet::dropUrls(const KUrl::List& urls,
                           const KUrl& destination,
                           Qt::KeyboardModifiers modifier)
 {
-    kDebug() << "Source" << urls;
-    kDebug() << "Destination:" << destination;
+    qDebug() << "Source" << urls;
+    qDebug() << "Destination:" << destination;
 
     Qt::DropAction action = Qt::CopyAction;
 

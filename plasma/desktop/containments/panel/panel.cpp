@@ -29,7 +29,7 @@
 #include <QTimer>
 #include <QPainter>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KIconLoader>
 
@@ -367,7 +367,7 @@ void Panel::updateSize()
         }
     }
 
-    //kDebug() << "resize to" << preferredSize() << delta << ", was" << size();
+    //qDebug() << "resize to" << preferredSize() << delta << ", was" << size();
     resize(preferredSize());
 
     //for a while we won't execute updateSize() again
@@ -380,7 +380,7 @@ void Panel::updateBorders(const QRect &geom, bool inPaintEvent)
     FrameSvg::EnabledBorders enabledBorders = FrameSvg::AllBorders;
 
     int s = screen();
-    //kDebug() << loc << s << formFactor() << geometry();
+    //qDebug() << loc << s << formFactor() << geometry();
 
     qreal topHeight = m_background->marginSize(Plasma::TopMargin);
     qreal bottomHeight = m_background->marginSize(Plasma::BottomMargin);
@@ -410,7 +410,7 @@ void Panel::updateBorders(const QRect &geom, bool inPaintEvent)
             rightWidth = 0;
         }
 
-        //kDebug() << "top/bottom: Width:" << width << ", height:" << height;
+        //qDebug() << "top/bottom: Width:" << width << ", height:" << height;
     } else if (loc == LeftEdge || loc == RightEdge) {
         QRect r = Kephal::ScreenUtils::screenGeometry(s);
 
@@ -432,9 +432,9 @@ void Panel::updateBorders(const QRect &geom, bool inPaintEvent)
             bottomHeight = 0;
         }
 
-        //kDebug() << "left/right: Width:" << width << ", height:" << height;
+        //qDebug() << "left/right: Width:" << width << ", height:" << height;
     } else {
-        kDebug() << "no location!?";
+        qDebug() << "no location!?";
     }
 
     //activate borders and fetch sizes again
@@ -603,20 +603,20 @@ void Panel::setFormFactorFromLocation(Plasma::Location loc) {
     switch (loc) {
         case BottomEdge:
         case TopEdge:
-            //kDebug() << "setting horizontal form factor";
+            //qDebug() << "setting horizontal form factor";
             setFormFactor(Plasma::Horizontal);
             break;
         case RightEdge:
         case LeftEdge:
-            //kDebug() << "setting vertical form factor";
+            //qDebug() << "setting vertical form factor";
             setFormFactor(Plasma::Vertical);
             break;
         case Floating:
             //TODO: implement a form factor for floating panels
-            kDebug() << "Floating is unimplemented.";
+            qDebug() << "Floating is unimplemented.";
             break;
         default:
-            kDebug() << "invalid location!!";
+            qDebug() << "invalid location!!";
     }
 }
 

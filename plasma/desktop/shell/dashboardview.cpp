@@ -180,7 +180,7 @@ void DashboardView::paintEvent(QPaintEvent *event)
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setFont(f);
-    //kDebug() << "******************** painting from" << centered << boundingBox << rect() << event->rect();
+    //qDebug() << "******************** painting from" << centered << boundingBox << rect() << event->rect();
     QColor highlight = palette().highlight().color();
     highlight.setAlphaF(0.7);
     painter.setPen(highlight.darker());
@@ -241,7 +241,7 @@ void DashboardView::showDashboard(bool showDashboard)
         }
 
         if (m_suppressShow) {
-            //kDebug() << "DashboardView::toggleVisibility but show was suppressed";
+            //qDebug() << "DashboardView::toggleVisibility but show was suppressed";
             return;
         }
 
@@ -252,7 +252,7 @@ void DashboardView::showDashboard(bool showDashboard)
         Plasma::WindowEffects::markAsDashboard(winId());
 
         if (AppSettings::perVirtualDesktopViews()) {
-            //kDebug() << "pvdv dashboard, setting" << winId() << "on desktop" << m_view->desktop() + 1;
+            //qDebug() << "pvdv dashboard, setting" << winId() << "on desktop" << m_view->desktop() + 1;
             KWindowSystem::setOnDesktop(winId(), m_view->desktop() + 1);
         } else {
             KWindowSystem::setOnAllDesktops(winId(), true);
@@ -342,7 +342,7 @@ void DashboardView::hideView()
 
 void DashboardView::suppressShowTimeout()
 {
-    //kDebug() << "DashboardView::suppressShowTimeout";
+    //qDebug() << "DashboardView::suppressShowTimeout";
     m_suppressShow = false;
 }
 

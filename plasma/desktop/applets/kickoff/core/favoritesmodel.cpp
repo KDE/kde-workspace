@@ -30,7 +30,7 @@
 #include <KConfigGroup>
 #include <KService>
 #include <KDesktopFile>
-#include <kdebug.h>
+#include <QDebug>
 
 using namespace Kickoff;
 
@@ -74,7 +74,7 @@ public:
                                            url, -1,
                                            Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive));
 
-        kDebug() << "Removing item matches" << matches;
+        qDebug() << "Removing item matches" << matches;
 
         foreach (const QModelIndex& index, matches) {
             QStandardItem *item = q->itemFromIndex(index);

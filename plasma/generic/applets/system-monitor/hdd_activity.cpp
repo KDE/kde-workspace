@@ -20,7 +20,7 @@
 #include "monitoricon.h"
 #include "plotter.h"
 
-#include <KDebug>
+#include <QDebug>
 #include <KConfigDialog>
 #include <KColorUtils>
 
@@ -91,8 +91,8 @@ void Hdd_Activity::init()
 
 void Hdd_Activity::sourceChanged(const QString& name)
 {
-    //kDebug() << "######## sourceChanged name: " << name;
-    //kDebug() << "###### regexp captures: " << m_regexp.capturedTexts();
+    //qDebug() << "######## sourceChanged name: " << name;
+    //qDebug() << "###### regexp captures: " << m_regexp.capturedTexts();
 
     if (m_regexp.indexIn(name) != -1) {
         m_possibleHdds.append(name);
@@ -209,7 +209,7 @@ void Hdd_Activity::createConfigurationInterface(KConfigDialog *parent)
 
 void Hdd_Activity::configChanged()
 {
-    //kDebug() << "#### configChanged m_hdds:" << m_hdds;
+    //qDebug() << "#### configChanged m_hdds:" << m_hdds;
 
     KConfigGroup cg = config();
     QStringList default_hdds = m_possibleHdds;
@@ -265,7 +265,7 @@ bool Hdd_Activity::addVisualization(const QString& source)
         QString hdd = source;
         hdd = hdd.remove("rblk");
 
-        //kDebug() << "#### ADD VIS hdd: " << hdd;
+        //qDebug() << "#### ADD VIS hdd: " << hdd;
 
         SM::Plotter *plotter = new SM::Plotter(this);
         plotter->setTitle(hdd);

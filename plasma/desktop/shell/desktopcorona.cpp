@@ -28,7 +28,7 @@
 #include <QSignalMapper>
 
 #include <KAction>
-#include <KDebug>
+#include <QDebug>
 #include <KDialog>
 #include <KGlobal>
 #include <KGlobalSettings>
@@ -81,7 +81,7 @@ void DesktopCorona::init()
     setPreferredToolBoxPlugin(Plasma::Containment::PanelContainment, "org.kde.paneltoolbox");
     setPreferredToolBoxPlugin(Plasma::Containment::CustomPanelContainment, "org.kde.paneltoolbox");
 
-    kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "DesktopCorona init start" << "(line:" << __LINE__ << ")";
+    qDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "DesktopCorona init start" << "(line:" << __LINE__ << ")";
     Kephal::Screens *screens = Kephal::Screens::self();
     connect(screens, SIGNAL(screenAdded(Kephal::Screen*)), SLOT(screenAdded(Kephal::Screen*)));
     connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SIGNAL(availableScreenRegionChanged()));
@@ -139,7 +139,7 @@ void DesktopCorona::init()
 
     mapAnimation(Plasma::Animator::AppearAnimation, Plasma::Animator::ZoomAnimation);
     mapAnimation(Plasma::Animator::DisappearAnimation, Plasma::Animator::ZoomAnimation);
-    kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "DesktopCorona init end" << "(line:" << __LINE__ << ")";
+    qDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "DesktopCorona init end" << "(line:" << __LINE__ << ")";
 }
 
 void DesktopCorona::checkAddPanelAction(const QStringList &sycocaChanges)
@@ -168,7 +168,7 @@ void DesktopCorona::checkAddPanelAction(const QStringList &sycocaChanges)
         m_addPanelAction = m_addPanelsMenu->menuAction();
         m_addPanelAction->setText(i18n("Add Panel"));
         m_addPanelAction->setData(Plasma::AbstractToolBox::AddTool);
-        kDebug() << "populateAddPanelsMenu" << panelContainmentPlugins.count();
+        qDebug() << "populateAddPanelsMenu" << panelContainmentPlugins.count();
         connect(m_addPanelsMenu, SIGNAL(aboutToShow()), this, SLOT(populateAddPanelsMenu()));
         connect(m_addPanelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(addPanel(QAction*)));
     }
@@ -384,7 +384,7 @@ void DesktopCorona::evaluateScripts(const QStringList &scripts, bool isStartup)
         QFile file(script);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
             QString code = file.readAll();
-            kDebug() << "evaluating startup script:" << script;
+            qDebug() << "evaluating startup script:" << script;
             scriptEngine.evaluateScript(code);
         }
     }
@@ -397,7 +397,7 @@ void DesktopCorona::printScriptError(const QString &error)
 
 void DesktopCorona::printScriptMessage(const QString &error)
 {
-    kDebug() << "Startup script: " << error;
+    qDebug() << "Startup script: " << error;
 }
 
 void DesktopCorona::loadDefaultLayout()
@@ -406,7 +406,7 @@ void DesktopCorona::loadDefaultLayout()
     if (containments().isEmpty()) {
         QString defaultConfig = KStandardDirs::locate("appdata", "plasma-default-layoutrc");
         if (!defaultConfig.isEmpty()) {
-            kDebug() << "attempting to load the default layout from:" << defaultConfig;
+            qDebug() << "attempting to load the default layout from:" << defaultConfig;
             loadLayout(defaultConfig);
             QTimer::singleShot(1000, this, SLOT(saveDefaultSetup()));
         }
@@ -444,7 +444,7 @@ Plasma::Applet *DesktopCorona::loadDefaultApplet(const QString &pluginName, Plas
 
 void DesktopCorona::screenAdded(Kephal::Screen *s)
 {
-    kDebug() << s->id();
+    qDebug() << s->id();
     checkScreen(s->id(), true);
 }
 
@@ -532,7 +532,7 @@ void DesktopCorona::addPanel(const QString &plugin)
     panel->setScreen(screen);
 
     QList<Plasma::Location> freeEdges = DesktopCorona::freeEdges(screen);
-    //kDebug() << freeEdges;
+    //qDebug() << freeEdges;
     Plasma::Location destination;
     if (freeEdges.contains(Plasma::TopEdge)) {
         destination = Plasma::TopEdge;
@@ -584,13 +584,13 @@ void DesktopCorona::addPanel(const QString &plugin)
 
 void DesktopCorona::checkActivities()
 {
-    kDebug() << "containments to start with" << containments().count();
+    qDebug() << "containments to start with" << containments().count();
 
     KActivities::Consumer::ServiceStatus status = m_activityController->serviceStatus();
-    //kDebug() << "$%$%$#%$%$%Status:" << status;
+    //qDebug() << "$%$%$#%$%$%Status:" << status;
     if (status == KActivities::Consumer::NotRunning) {
         //panic and give up - better than causing a mess
-        kDebug() << "No ActivityManager? Help, I've fallen and I can't get up!";
+        qDebug() << "No ActivityManager? Help, I've fallen and I can't get up!";
         return;
     }
 
@@ -617,7 +617,7 @@ void DesktopCorona::checkActivities()
                 if (existingActivities.contains(oldId)) {
                     continue; //it's already claimed
                 }
-                kDebug() << "invalid id" << oldId;
+                qDebug() << "invalid id" << oldId;
                 //byebye
                 cont->destroy(false);
                 continue;
@@ -641,11 +641,11 @@ void DesktopCorona::checkActivities()
             if (cont->screen() > -1) {
                 newCurrentActivity = id;
             }
-            kDebug() << "migrated" << cont->id() << context->currentActivityId() << context->currentActivity();
+            qDebug() << "migrated" << cont->id() << context->currentActivityId() << context->currentActivity();
         }
     }
 
-    kDebug() << "migrated?" << !newActivities.isEmpty() << containments().count();
+    qDebug() << "migrated?" << !newActivities.isEmpty() << containments().count();
     if (!newActivities.isEmpty()) {
         requestConfigSync();
     }
@@ -657,15 +657,15 @@ void DesktopCorona::checkActivities()
 
     //ensure the current activity is initialized
     if (m_activityController->currentActivity().isEmpty()) {
-        kDebug() << "guessing at current activity";
+        qDebug() << "guessing at current activity";
         if (existingActivities.isEmpty()) {
             if (newCurrentActivity.isEmpty()) {
                 if (newActivities.isEmpty()) {
-                    kDebug() << "no activities!?! Bad activitymanager, no cookie!";
+                    qDebug() << "no activities!?! Bad activitymanager, no cookie!";
                     QString id = m_activityController->addActivity(i18nc("Default name for a new activity", "New Activity"));
                     activityAdded(id);
                     m_activityController->setCurrentActivity(id);
-                    kDebug() << "created emergency activity" << id;
+                    qDebug() << "created emergency activity" << id;
                 } else {
                     m_activityController->setCurrentActivity(newActivities.first());
                 }
@@ -680,7 +680,7 @@ void DesktopCorona::checkActivities()
 
 void DesktopCorona::currentActivityChanged(const QString &newActivity)
 {
-    kDebug() << newActivity;
+    qDebug() << newActivity;
     Activity *act = activity(newActivity);
     if (act) {
         act->ensureActive();
@@ -705,7 +705,7 @@ void DesktopCorona::activityAdded(const QString &id)
 {
     //TODO more sanity checks
     if (m_activities.contains(id)) {
-        kDebug() << "you're late." << id;
+        qDebug() << "you're late." << id;
         return;
     }
 

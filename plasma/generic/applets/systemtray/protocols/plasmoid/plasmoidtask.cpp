@@ -142,7 +142,7 @@ void PlasmoidTask::setupApplet(const QString &plugin, int id)
     m_applet = applet;
 
     if (!m_applet) {
-        kDebug() << "Could not load applet" << plugin;
+        qDebug() << "Could not load applet" << plugin;
         return;
     }
 

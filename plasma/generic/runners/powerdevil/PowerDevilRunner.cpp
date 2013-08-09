@@ -27,7 +27,7 @@
 
 #include <KIcon>
 #include <KLocale>
-#include <KDebug>
+#include <QDebug>
 #include <KStandardDirs>
 #include <KRun>
 
@@ -114,13 +114,13 @@ void PowerDevilRunner::initUpdateTriggers()
                           "/org/kde/Solid/PowerManagement",
                           "org.kde.Solid.PowerManagement",
                           "profileChanged", this, SLOT(updateStatus()))) {
-            kDebug() << "error!";
+            qDebug() << "error!";
         }
         if (!dbus.connect("org.kde.Solid.PowerManagement",
                           "/org/kde/Solid/PowerManagement",
                           "org.kde.Solid.PowerManagement",
                           "configurationReloaded", this, SLOT(updateStatus()))) {
-            kDebug() << "error!";
+            qDebug() << "error!";
         }
     }
 }
@@ -137,14 +137,14 @@ void PowerDevilRunner::updateStatus()
         reply.waitForFinished();
 
         if (!reply.isValid()) {
-            kDebug() << "Error contacting the daemon!";
+            qDebug() << "Error contacting the daemon!";
             return;
         }
 
         m_availableProfiles = reply.value();
 
         if (m_availableProfiles.isEmpty()) {
-            kDebug() << "No available profiles!";
+            qDebug() << "No available profiles!";
             return;
         }
 

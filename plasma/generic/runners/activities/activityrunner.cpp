@@ -18,7 +18,7 @@
 
 #include "activityrunner.h"
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KLocale>
 

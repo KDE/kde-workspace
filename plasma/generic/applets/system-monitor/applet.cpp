@@ -25,7 +25,7 @@
 #include <Plasma/IconWidget>
 #include <Plasma/ToolTipManager>
 #include <KIcon>
-#include <KDebug>
+#include <QDebug>
 #include <QGraphicsLinearLayout>
 
 namespace SM {
@@ -196,7 +196,7 @@ void Applet::checkGeometry()
             // Reset margins
             setBackgroundHints(NoBackground);
         }
-        //kDebug() << minSize << m_preferredItemHeight << height
+        //qDebug() << minSize << m_preferredItemHeight << height
         //         << m_minimumHeight << metaObject()->className();
 
         setAspectRatioMode(Plasma::IgnoreAspectRatio);
@@ -223,7 +223,7 @@ void Applet::checkGeometry()
     setMinimumSize(min);
     setPreferredSize(pref);
     setMaximumSize(max);
-    //kDebug() << min << pref << max << metaObject()->className();
+    //qDebug() << min << pref << max << metaObject()->className();
     emit geometryChecked();
 }
 

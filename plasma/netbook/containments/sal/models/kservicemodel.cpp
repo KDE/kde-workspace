@@ -28,7 +28,7 @@
 // KDE
 #include <KService>
 #include <KIcon>
-#include <KDebug>
+#include <QDebug>
 #include <KRun>
 #include <KServiceTypeTrader>
 #include <KSycocaEntry>

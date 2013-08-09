@@ -26,7 +26,7 @@
 //KDE
 #include <KCModuleProxy>
 #include <KConfigDialog>
-#include <KDebug>
+#include <QDebug>
 #include <KFilePlacesModel>
 #include <KGlobalSettings>
 #include <KIconLoader>

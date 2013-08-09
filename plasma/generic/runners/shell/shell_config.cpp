@@ -22,7 +22,7 @@
 
 
 #include <KConfigGroup>
-#include <KDebug>
+#include <QDebug>
 #include <KPluginFactory>
 #include <KPluginLoader>
 

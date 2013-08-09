@@ -177,7 +177,7 @@ void SaverView::paintEvent(QPaintEvent *event)
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setFont(f);
-    //kDebug() << "******************** painting from" << centered << boundingBox << rect() << event->rect();
+    //qDebug() << "******************** painting from" << centered << boundingBox << rect() << event->rect();
     QColor highlight = palette().highlight().color();
     highlight.setAlphaF(0.7);
     painter.setPen(highlight.darker());
@@ -205,7 +205,7 @@ void SaverView::showView()
 {
     if (isHidden()) {
         if (m_suppressShow) {
-            kDebug() << "show was suppressed";
+            qDebug() << "show was suppressed";
             return;
         }
 
@@ -265,19 +265,19 @@ void SaverView::hideView()
 
 void SaverView::suppressShowTimeout()
 {
-    kDebug() << "SaverView::suppressShowTimeout";
+    qDebug() << "SaverView::suppressShowTimeout";
     m_suppressShow = false;
 }
 
 void SaverView::openToolBox()
 {
-    kDebug() << "close toolbox";
+    qDebug() << "close toolbox";
     containment()->openToolBox();
 }
 
 void SaverView::closeToolBox()
 {
-    kDebug() << "close toolbox";
+    qDebug() << "close toolbox";
     containment()->closeToolBox();
 }
 

@@ -25,7 +25,7 @@
 
 // KDE
 #include <KUrl>
-#include <KDebug>
+#include <QDebug>
 
 // Local
 #include "core/models.h"

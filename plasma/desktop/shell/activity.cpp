@@ -71,7 +71,7 @@ Activity::Activity(const QString &id, QObject *parent)
         }
     }
 
-    //kDebug() << m_containments.size();
+    //qDebug() << m_containments.size();
 }
 
 Activity::~Activity()
@@ -138,7 +138,7 @@ void Activity::removed()
 {
     if (! m_containments.isEmpty()) {
         //FIXME only PlasmaApp::self()->corona() has authority to remove properly
-        kDebug() << "!!!!! if your widgets are locked you've hit a BUG now";
+        qDebug() << "!!!!! if your widgets are locked you've hit a BUG now";
         foreach (Plasma::Containment *c, m_containments) {
             c->destroy(false);
         }
@@ -153,7 +153,7 @@ Plasma::Containment* Activity::containmentForScreen(int screen, int desktop)
     Plasma::Containment *containment = m_containments.value(QPair<int,int>(screen, desktop));
 
     if (!containment) {
-        kDebug() << "adding containment for" << screen << desktop;
+        qDebug() << "adding containment for" << screen << desktop;
         // first look to see if there are any unnasigned containments that are candidates for
         // being sucked into this Activity
         foreach (Plasma::Containment *c, PlasmaApp::self()->corona()->containments()) {
@@ -307,7 +307,7 @@ void Activity::closed()
 
     //hrm, shouldn't the containments' deleted signals have done this for us?
     if (!m_containments.isEmpty()) {
-        kDebug() << "isn't close supposed to *remove* containments??";
+        qDebug() << "isn't close supposed to *remove* containments??";
         m_containments.clear();
     }
 }
@@ -322,17 +322,17 @@ void Activity::insertContainment(Plasma::Containment* cont, bool force)
     int screen = cont->lastScreen();
     int desktop = cont->lastDesktop();
 
-    kDebug() << screen << desktop;
+    qDebug() << screen << desktop;
     if (screen == -1) {
         //the migration can't set lastScreen, so maybe we need to assign the containment here
-        kDebug() << "found a lost one";
+        qDebug() << "found a lost one";
         screen = 0;
     }
 
     if (!force && m_containments.contains(QPair<int,int>(screen, desktop))) {
         //this almost certainly means someone has been meddling where they shouldn't
         //but we should protect them from harm anyways
-        kDebug() << "@!@!@!@!@!@@@@rejecting containment!!!";
+        qDebug() << "@!@!@!@!@!@@@@rejecting containment!!!";
         cont->context()->setCurrentActivityId(QString());
         return;
     }
@@ -374,12 +374,12 @@ void Activity::open()
 void Activity::opened()
 {
     if (!m_containments.isEmpty()) {
-        kDebug() << "already open!";
+        qDebug() << "already open!";
         return;
     }
 
     const QString fileName = KGlobal::dirs()->locateLocal("appdata", "activities/" + m_id);
-    kDebug() << "&&&&&&&&&&&&&&&" << fileName;
+    qDebug() << "&&&&&&&&&&&&&&&" << fileName;
     if (QFile::exists(fileName)) {
         {
             KConfig external(fileName, KConfig::SimpleConfig);
@@ -397,7 +397,7 @@ void Activity::opened()
 
     if (m_containments.isEmpty()) {
         //TODO check if we need more for screens/desktops
-        kDebug() << "open failed (bad file?). creating new containment";
+        qDebug() << "open failed (bad file?). creating new containment";
         checkScreens();
     }
 

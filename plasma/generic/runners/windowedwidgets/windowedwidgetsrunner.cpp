@@ -23,7 +23,7 @@
 
 #include <KIcon>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KService>
 
@@ -76,7 +76,7 @@ void WindowedWidgetsRunner::match(Plasma::RunnerContext &context)
             }
             matches << match;
 
-            kDebug() << service;
+            qDebug() << service;
         }
     }
 

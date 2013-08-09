@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include <QFile>
 #include <QXmlStreamReader>
 
-#include <KDebug>
+#include <QDebug>
 
 #include <KIO/CopyJob>
 #include <KIO/Job>
@@ -291,7 +291,7 @@ bool Bundle::parsePlist(const QString &loc)
 
     QMap<QString, QString>::const_iterator itr;
     for (itr = infoMap.constBegin(); itr != infoMap.constEnd(); ++itr) {
-        kDebug() << itr.key() << itr.value();
+        qDebug() << itr.key() << itr.value();
         if (itr.key() == QLatin1String("CFBundleIdentifier")) {
             m_bundleId = itr.value();
         } else if (itr.key() == QLatin1String("CFBundleName")) {
@@ -316,7 +316,7 @@ bool Bundle::parsePlist(const QString &loc)
         }
     }
     m_iconLocation = QString("%1Icon.png").arg(path());
-    kDebug() << path();
+    qDebug() << path();
     addDirectoryDefinition("root", "/", i18n("Root HTML directory"));
 
     //qDebug()<<"name = "<<m_name;
@@ -329,7 +329,7 @@ bool Bundle::parsePlist(const QString &loc)
 
 bool Bundle::installPackage(const QString &archivePath, const QString &packageRoot)
 {
-    //kDebug() << "??????????????" << archivePath << packageRoot;
+    //qDebug() << "??????????????" << archivePath << packageRoot;
     QFile f(archivePath);
     f.open(QIODevice::ReadOnly);
     m_data = f.readAll();
@@ -339,12 +339,12 @@ bool Bundle::installPackage(const QString &archivePath, const QString &packageRo
     if (m_isValid) {
         m_tempDir->setAutoRemove(false);
         QString pluginName = "dashboard_" + m_bundleId;
-        //kDebug() << "valid, so going to move it in to" << pluginName;
+        //qDebug() << "valid, so going to move it in to" << pluginName;
         KIO::CopyJob* job = KIO::move(m_tempDir->name(), QString(packageRoot + pluginName), KIO::HideProgressInfo);
         m_isValid = job->exec();
 
         if (m_isValid) {
-            //kDebug() << "still so good ... registering";
+            //qDebug() << "still so good ... registering";
             Plasma::PackageMetadata data;
             data.setName(m_name);
             data.setDescription(m_description);

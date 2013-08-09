@@ -20,7 +20,7 @@
 
 #include <QTimer>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KWindowSystem>
 

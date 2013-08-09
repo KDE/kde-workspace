@@ -32,7 +32,7 @@
 #include <QtGui/QGraphicsSceneMouseEvent>
 #include <QtCore/QDate>
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KSharedConfig>
 #include <KColorScheme>
@@ -158,7 +158,7 @@ void Clock::updateSize()
     if (f == Plasma::Horizontal) {
         // We have a fixed height, set some sensible width
         setMinimumSize(QSize(w, 0));
-        //kDebug() << "DR" << m_dateRect.width() << "CR" << contentsRect().height() * aspect;
+        //qDebug() << "DR" << m_dateRect.width() << "CR" << contentsRect().height() * aspect;
         // kDebug(96669) << contentsRect();
     } else {
         // We have a fixed width, set some sensible height
@@ -183,7 +183,7 @@ void Clock::clockConfigChanged()
     KConfigGroup cg = config();
     m_showTimezone = cg.readEntry("showTimezone", !isLocalTimezone());
 
-    kDebug() << "showTimezone:" << m_showTimezone;
+    qDebug() << "showTimezone:" << m_showTimezone;
 
     if (cg.hasKey("showDate")) {    //legacy config entry as of 2011-1-4
         m_dateStyle = cg.readEntry("showDate", false) ? 2 : 0; //short date : no date
@@ -509,7 +509,7 @@ void Clock::paintInterface(QPainter *p, const QStyleOptionGraphicsItem *option, 
         QFontMetrics fm(smallFont);
 
         if (contentsRect.height() > contentsRect.width() * 2) {
-            //kDebug() << Plasma::Vertical << contentsRect.height() <<contentsRect.width() * 2;
+            //qDebug() << Plasma::Vertical << contentsRect.height() <<contentsRect.width() * 2;
             QRect dateRect = contentsRect;
             dateRect.setHeight(dateRect.width());
             smallFont.setPixelSize(qMax(dateRect.height() / 2, fm.ascent()));
@@ -581,7 +581,7 @@ void Clock::paintInterface(QPainter *p, const QStyleOptionGraphicsItem *option, 
     if (!m_dateString.isEmpty()) {
         if (m_dateTimezoneBesides) {
             QFontMetrics fm(m_plainClockFont);
-            //kDebug() << dateRect << m_timeRect << fm.boundingRect(m_timeRect, Qt::AlignCenter, timeString);
+            //qDebug() << dateRect << m_timeRect << fm.boundingRect(m_timeRect, Qt::AlignCenter, timeString);
             QRect br = fm.boundingRect(m_timeRect, Qt::AlignCenter, timeString);
 
             QFontMetrics smallfm(smallFont);

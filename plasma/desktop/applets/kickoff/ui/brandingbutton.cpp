@@ -22,7 +22,7 @@
 #include <QtGui/QPainter>
 
 #include <KConfigGroup>
-#include <KDebug>
+#include <QDebug>
 #include <KStandardDirs>
 #include <KRun>
 
@@ -75,7 +75,7 @@ void BrandingButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
     if (!m_doingBranding) {
-        //kDebug() << "bad branding svg!";
+        //qDebug() << "bad branding svg!";
         return;
     }
 

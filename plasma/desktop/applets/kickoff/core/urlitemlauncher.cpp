@@ -27,7 +27,7 @@
 
 // KDE
 #include <KAuthorized>
-#include <KDebug>
+#include <QDebug>
 #include <KRun>
 #include <KUrl>
 #include <Solid/Device>
@@ -73,7 +73,7 @@ public:
     static GenericItemHandler genericHandler;
 
     static bool openUrl(const QString &urlString) {
-        kDebug() << "Opening item with URL" << urlString;
+        qDebug() << "Opening item with URL" << urlString;
 
         KUrl url(urlString);
         HandlerInfo protocolHandler = globalHandlers[url.scheme()];
@@ -122,7 +122,7 @@ bool UrlItemLauncher::openItem(const QModelIndex& index)
             }
         }
 
-        kDebug() << "Item" << index.data(Qt::DisplayRole) << "has no URL to open.";
+        qDebug() << "Item" << index.data(Qt::DisplayRole) << "has no URL to open.";
         return false;
     }
 

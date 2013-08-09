@@ -35,7 +35,7 @@
 #include <QPropertyAnimation>
 #include <QAction>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIconLoader>
 #include <KIcon>
 
@@ -527,11 +527,11 @@ int ItemContainer::rowForPosition(const QPointF &point)
     int row = qMin(nRows-1, (int)round(point.y()/m_cellSize.height()));
     int column = qMin(nColumns-1, (int)round(point.x()/m_cellSize.width()));
 
-    kDebug() << "The item will be put at" << row;
+    qDebug() << "The item will be put at" << row;
 
     int modelRow = qMin(m_model->rowCount(), row*nColumns + qBound(0, column, nColumns));
 
-    kDebug() << "Corresponding to the model row" << modelRow;
+    qDebug() << "Corresponding to the model row" << modelRow;
 
     return modelRow;
 }

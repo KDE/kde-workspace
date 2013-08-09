@@ -23,7 +23,7 @@
 #include <QThread>
 #include <QTimer>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KRun>
 #include <KUrl>
@@ -53,11 +53,11 @@ void PlacesRunner::match(Plasma::RunnerContext &context)
 {
     if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
         // from the main thread
-        //kDebug() << "calling";
+        //qDebug() << "calling";
         m_helper->match(&context);
     } else {
         // from the non-gui thread
-        //kDebug() << "emitting";
+        //qDebug() << "emitting";
         emit doMatch(&context);
     }
     //m_helper->match(c);
@@ -160,7 +160,7 @@ void PlacesRunner::run(const Plasma::RunnerContext &context, const Plasma::Query
 void PlacesRunner::setupComplete(QModelIndex index, bool success)
 {
     KFilePlacesModel *places = qobject_cast<KFilePlacesModel*>(sender());
-    //kDebug() << "setup complete" << places << sender();
+    //qDebug() << "setup complete" << places << sender();
     if (success && places) {
         new KRun(places->url(index), 0);
         places->deleteLater();

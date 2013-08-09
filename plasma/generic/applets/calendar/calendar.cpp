@@ -24,7 +24,7 @@
 #include <QPainter>
 #include <QTimer>
 
-#include <KDebug>
+#include <QDebug>
 #include <KSystemTimeZones>
 #include <KConfigDialog>
 #include <KConfigGroup>
@@ -138,7 +138,7 @@ void CalendarApplet::updateDate()
         // update once an hour
         m_dateUpdater->setInterval(60 * 60 * 1000);
     }
-    //kDebug() << "updating in" << m_dateUpdater->interval();
+    //qDebug() << "updating in" << m_dateUpdater->interval();
     m_dateUpdater->start();
     paintIcon();
 }

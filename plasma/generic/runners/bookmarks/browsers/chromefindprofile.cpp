@@ -23,7 +23,7 @@
 #include <QDir>
 #include <qjson/parser.h>
 #include <QVariantMap>
-#include <KDebug>
+#include <QDebug>
 #include "bookmarksrunner_defs.h"
 #include "faviconfromblob.h"
 #include <QFileInfo>

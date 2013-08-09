@@ -47,7 +47,7 @@
 #include <QtDeclarative/qdeclarative.h>
 
 //#include <KCrash>
-#include <KDebug>
+#include <QDebug>
 #include <KCmdLineArgs>
 #include <KWindowSystem>
 
@@ -113,8 +113,8 @@ void checkComposite()
 
     composite = KWindowSystem::compositingActive() && colormap;
 
-    kDebug() << (colormap ? "Plasma has an argb visual" : "Plasma lacks an argb visual") << visual << colormap;
-    kDebug() << ((KWindowSystem::compositingActive() && colormap) ? "Plasma can use COMPOSITE for effects"
+    qDebug() << (colormap ? "Plasma has an argb visual" : "Plasma lacks an argb visual") << visual << colormap;
+    qDebug() << ((KWindowSystem::compositingActive() && colormap) ? "Plasma can use COMPOSITE for effects"
                                                                     : "Plasma is COMPOSITE-less") << "on" << dpy;
 }
 
@@ -201,7 +201,7 @@ PlasmaApp::PlasmaApp(Display* display, Qt::HANDLE visual, Qt::HANDLE colormap)
         cacheSize = memorySize / 100;
     }
 
-    kDebug() << "Setting the pixmap cache size to" << cacheSize << "kilobytes";
+    qDebug() << "Setting the pixmap cache size to" << cacheSize << "kilobytes";
     QPixmapCache::setCacheLimit(cacheSize);
 
     KConfigGroup cg(KGlobal::config(), "General");
@@ -290,7 +290,7 @@ void PlasmaApp::createWaitingViews()
             connect(this, SIGNAL(closeToolBox()), view, SLOT(closeToolBox()));
             connect(QApplication::desktop(), SIGNAL(resized(int)), view, SLOT(adjustSize(int)));
             emit(openToolBox());
-            kDebug() << "view created";
+            qDebug() << "view created";
         }
     }
     //activate the new views (yes, this is a lazy way to do it)
@@ -323,7 +323,7 @@ Plasma::Corona* PlasmaApp::corona()
         connect(m_corona, SIGNAL(screenOwnerChanged(int,int,Plasma::Containment*)),
                 this, SLOT(containmentScreenOwnerChanged(int,int,Plasma::Containment*)));
         connect(m_corona, SIGNAL(configSynced()), SLOT(syncConfig()));
-        //kDebug() << "connected to containmentAdded";
+        //qDebug() << "connected to containmentAdded";
         /*
         foreach (DesktopView *view, m_desktops) {
             connect(c, SIGNAL(screenOwnerChanged(int,int,Plasma::Containment*)),
@@ -336,7 +336,7 @@ Plasma::Corona* PlasmaApp::corona()
         //we want this *after* init so that we ignore any lock/unlock spasms that might happen then
         connect(m_corona, SIGNAL(immutabilityChanged(Plasma::ImmutabilityType)), this, SLOT(immutabilityChanged(Plasma::ImmutabilityType)));
 
-        //kDebug() << "layout should exist";
+        //qDebug() << "layout should exist";
         //c->checkScreens();
     }
 
@@ -359,7 +359,7 @@ void PlasmaApp::containmentScreenOwnerChanged(int wasScreen, int isScreen, Plasm
 
 void PlasmaApp::setup(bool setupMode)
 {
-    kDebug() << "setup mode:" << setupMode;
+    qDebug() << "setup mode:" << setupMode;
 
     if (setupMode) {
         emit enableSetupMode();
@@ -368,14 +368,14 @@ void PlasmaApp::setup(bool setupMode)
         }
         setActive(true);
     } else {
-        kDebug() << "checking lockprocess is still around";
+        qDebug() << "checking lockprocess is still around";
         QDBusInterface lockprocess("org.kde.screenlocker", "/LockProcess",
                 "org.kde.screenlocker.LockProcess", QDBusConnection::sessionBus(), this);
         if (lockprocess.isValid()) {
-            kDebug() << "success!";
+            qDebug() << "success!";
             setActive(false);
         } else {
-            kDebug() << "bailing out";
+            qDebug() << "bailing out";
             qApp->quit(); //this failed once. why?
         }
     }
@@ -403,7 +403,7 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
                     //now we're *really* fucking with things
                     //we force-disable window management and frames to cut off access to wm-y stuff
                     //and to make it easy to check the tag (frames are a pain)
-                    kDebug() << "!!!!!!!setting flags on!!!!!" << widget;
+                    qDebug() << "!!!!!!!setting flags on!!!!!" << widget;
                     QDesktopWidget *desktop = QApplication::desktop();
                     if (qobject_cast<Plasma::Dialog*>(widget)) {
                         //this is a terrible horrible hack that breaks extenders but it mostly works
@@ -426,7 +426,7 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
                     }
                     widget->show(); //setting the flags hid it :(
                     //qApp->setActiveWindow(widget); //gives kbd but not mouse events
-                    //kDebug() << "parent" << widget->parentWidget();
+                    //qDebug() << "parent" << widget->parentWidget();
                     //FIXME why can I only activate these dialogs from this exact line?
                     widget->activateWindow(); //gives keyboard focus
                     return false; //we'll be back when we get the new show event
@@ -437,7 +437,7 @@ bool PlasmaApp::eventFilter(QObject *obj, QEvent *event)
 
             XChangeProperty(QX11Info::display(), widget->effectiveWinId(), tag, tag, 8, PropModeReplace, &data, 1);
             XChangeProperty(QX11Info::display(), widget->effectiveWinId(), tag2, tag2, 32, PropModeReplace, 0, 0);
-            kDebug() << "tagged" << widget << widget->effectiveWinId() << "as" << data;
+            qDebug() << "tagged" << widget << widget->effectiveWinId() << "as" << data;
         }
     }
     return false;
@@ -455,7 +455,7 @@ void PlasmaApp::dialogDestroyed(QObject *obj)
     /*} else { failed attempt to fix kbd input after a subdialog closes
         QWidget *top = m_dialogs.last();
         top->activateWindow();
-        kDebug() << top;*/
+        qDebug() << top;*/
     //}
 }
 
@@ -480,7 +480,7 @@ void PlasmaApp::configureContainment(Plasma::Containment *containment)
 
 void PlasmaApp::lock()
 {
-    kDebug() << "lock";
+    qDebug() << "lock";
     if (corona() && corona()->immutability() == Plasma::Mutable) {
         corona()->setImmutability(Plasma::UserImmutable);
     }

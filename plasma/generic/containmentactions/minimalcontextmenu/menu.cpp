@@ -23,7 +23,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 
-#include <KDebug>
+#include <QDebug>
 #include <KMenu>
 
 #include <Plasma/Containment>

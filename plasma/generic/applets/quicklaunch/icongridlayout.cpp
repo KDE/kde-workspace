@@ -29,7 +29,7 @@
 #include <QtGui/QSizePolicy>
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KIconLoader>
 
 // stdlib

@@ -27,7 +27,7 @@
 #include <QDir>
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KConfigGroup>
 #include <KDesktopFile>
 #include <KIcon>

@@ -32,7 +32,7 @@
 #include <QClipboard>
 
 #include <KProtocolManager>
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KIO/Job>
 #include <KIO/NetAccess>
@@ -74,7 +74,7 @@ void QalculateEngine::updateExchangeRates()
 void QalculateEngine::updateResult(KJob* job)
 {
     if (job->error()) {
-        kDebug() << i18n("The exchange rates could not be updated. The following error has been reported: %1",job->errorString());
+        qDebug() << i18n("The exchange rates could not be updated. The following error has been reported: %1",job->errorString());
     } else {
         // the exchange rates have been successfully updated, now load them
         CALCULATOR->loadExchangeRates();

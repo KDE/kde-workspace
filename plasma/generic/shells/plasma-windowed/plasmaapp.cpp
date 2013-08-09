@@ -27,7 +27,7 @@
 
 #include <KCrash>
 #include <KColorUtils>
-#include <KDebug>
+#include <QDebug>
 #include <KCmdLineArgs>
 #include <KWindowSystem>
 
@@ -237,7 +237,7 @@ void PlasmaApp::storeApplet(Plasma::Applet *applet)
     cg = KConfigGroup(&cg, "Applets");
     cg = KConfigGroup(&cg, QString::number(applet->id()));
     delete applet;
-//    kDebug() << "storing" << applet->name() << applet->id() << "to" << storage.name() << ", applet config is" << cg.name();
+//    qDebug() << "storing" << applet->name() << applet->id() << "to" << storage.name() << ", applet config is" << cg.name();
     cg.reparent(&storage);
 }
 

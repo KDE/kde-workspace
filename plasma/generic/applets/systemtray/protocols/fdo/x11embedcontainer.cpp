@@ -24,7 +24,7 @@
 #include "fdoselectionmanager.h"
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 
 // Qt
 #include <QtGui/QPainter>
@@ -127,9 +127,9 @@ void X11EmbedContainer::embedSystemTrayClient(WId clientId)
         XCompositeRedirectSubwindows(display, winId, CompositeRedirectManual);
         FdoSelectionManager::manager()->addDamageWatch(this, clientId);
 
-        //kDebug() << "Embedded client uses an ARGB visual -> compositing.";
+        //qDebug() << "Embedded client uses an ARGB visual -> compositing.";
     } else {
-        //kDebug() << "Embedded client is not using an ARGB visual.";
+        //qDebug() << "Embedded client is not using an ARGB visual.";
     }
 #endif
 

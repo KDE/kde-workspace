@@ -33,7 +33,7 @@
 #include <QtGui/QToolTip>
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KUrl>
 #include <KIconLoader>
 
@@ -423,7 +423,7 @@ bool MenuView::isValidIndex(const QModelIndex& index) const
 
 void MenuView::rowsInserted(const QModelIndex& parent, int start, int end)
 {
-    kDebug() << start << end;
+    qDebug() << start << end;
 
     Q_ASSERT(parent.isValid());
     Q_ASSERT(parent.model());
@@ -440,7 +440,7 @@ void MenuView::rowsInserted(const QModelIndex& parent, int start, int end)
     for (int row = start; row <= end; row++) {
         QModelIndex index = model->index(row, d->column, parent);
         QAction *newAction = d->createActionForIndex(model, index, menu);
-        kDebug()<<"new action="<<newAction->text();
+        qDebug()<<"new action="<<newAction->text();
         newActions << newAction;
     }
 
@@ -481,7 +481,7 @@ void MenuView::rowsInserted(const QModelIndex& parent, int start, int end)
 
 void MenuView::rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end)
 {
-    kDebug() << start << end;
+    qDebug() << start << end;
     Q_UNUSED(parent);
     Q_UNUSED(start);
     Q_UNUSED(end);
@@ -501,14 +501,14 @@ void MenuView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottom
 
     for (int row = topLeft.row(); row <= bottomRight.row() && row < actions.count(); ++row) {
         QModelIndex index = model->index(row, d->column, topLeft.parent());
-        kDebug()<<row<<index.data(Qt::DisplayRole).value<QString>();
+        qDebug()<<row<<index.data(Qt::DisplayRole).value<QString>();
         updateAction(model, actions[row], index);
     }
 }
 
 void MenuView::modelReset()
 {
-    kDebug();
+    qDebug();
     deleteLater(); // we need to force clearance of the menu and rebuild from scratch
 }
 

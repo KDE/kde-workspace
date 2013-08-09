@@ -226,7 +226,7 @@ void PlasmaWebApplet::constraintsEvent(Plasma::Constraints constraints)
         applet()->getContentsMargins(&left, &top, &right, &bottom);
         view()->setPos(QPointF(left, top));
         view()->resize(WebApplet::size() - QSizeF(left + right, top + bottom));
-        //kDebug() << WebApplet::size() << left << right << top << bottom << page()->size();
+        //qDebug() << WebApplet::size() << left << right << top << bottom << page()->size();
     }
     callJsFunction("constraintsEvent", QVariantList() << (int)constraints);
 }
@@ -347,7 +347,7 @@ QVariant PlasmaWebApplet::callJsFunction(const QString& func, const QVariantList
             }
         }
         cmd += ") }";
-        //kDebug() << cmd;
+        //qDebug() << cmd;
         return page()->mainFrame()->evaluateJavaScript(cmd);
     }
     return QVariant();

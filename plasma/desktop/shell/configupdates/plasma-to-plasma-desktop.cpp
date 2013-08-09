@@ -22,7 +22,7 @@
 #include <KComponentData>
 #include <KConfig>
 #include <KConfigGroup>
-#include <KDebug>
+#include <QDebug>
 #include <KStandardDirs>
 
 #include <KIO/Job>
@@ -32,18 +32,18 @@ void migrateAppletsrc()
     QString oldRc = KStandardDirs::locateLocal("config", "plasma-appletsrc");
 
     if (oldRc.isEmpty() || !QFile::exists(oldRc)) {
-        //kDebug() << oldRc << "doesn't exist!";
+        //qDebug() << oldRc << "doesn't exist!";
         return;
     }
 
     QString newRc = KStandardDirs::locateLocal("config", "plasma-desktop-appletsrc");
 
     if (QFile::exists(newRc)) {
-        //kDebug() << newRc << "exists!";
+        //qDebug() << newRc << "exists!";
         return;
     }
 
-    //kDebug() << "move" << oldRc << "to" << newRc;
+    //qDebug() << "move" << oldRc << "to" << newRc;
     KIO::FileCopyJob *job = KIO::file_move(oldRc, newRc);
     job->exec();
 }
@@ -53,24 +53,24 @@ void migratePlasmarc()
     QString oldRc = KStandardDirs::locateLocal("config", "plasmarc");
 
     if (oldRc.isEmpty() || !QFile::exists(oldRc)) {
-        //kDebug() << oldRc << "doesn't exist!";
+        //qDebug() << oldRc << "doesn't exist!";
         return;
     }
 
     QString newRc = KStandardDirs::locateLocal("config", "plasma-desktoprc");
 
     if (QFile::exists(newRc)) {
-        //kDebug() << newRc << "exists!";
+        //qDebug() << newRc << "exists!";
         return;
     }
 
     KIO::FileCopyJob *job = KIO::file_copy(oldRc, newRc);
     job->exec();
-    //kDebug() << "opening up" << oldRc << "for" << newRc;
+    //qDebug() << "opening up" << oldRc << "for" << newRc;
     KConfig newConfig("plasma-desktoprc", KConfig::NoGlobals);
 
     foreach (const QString &group, newConfig.groupList()) {
-        //kDebug() << group;
+        //qDebug() << group;
         if (group.startsWith("Theme") || group == "CachePolicies") {
             KConfigGroup newGroup(&newConfig, group);
             newGroup.deleteGroup();

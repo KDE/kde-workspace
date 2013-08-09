@@ -29,7 +29,7 @@
 // KDE
 #include <KService>
 #include <KIcon>
-#include <KDebug>
+#include <QDebug>
 #include <KRun>
 
 //Plasma
@@ -60,7 +60,7 @@ Plasma::RunnerManager *FavouritesModel::runnerManager()
 
 void FavouritesModel::restore(KConfigGroup &cg)
 {
-    kDebug() << "----------------> Restoring Stuff...";
+    qDebug() << "----------------> Restoring Stuff...";
 
     KConfigGroup stripGroup(&cg, "stripwidget");
 
@@ -187,7 +187,7 @@ void FavouritesModel::add(const QUrl &url, const QModelIndex &before)
 
 void FavouritesModel::save(KConfigGroup &cg)
 {
-    kDebug() << "----------------> Saving Stuff...";
+    qDebug() << "----------------> Saving Stuff...";
 
     // erase the old stuff before saving the new one
     KConfigGroup oldGroup(&cg, "stripwidget");

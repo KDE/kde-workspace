@@ -33,7 +33,7 @@
 
 
 #include <KAction>
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 
 #include <Plasma/Corona>
@@ -56,7 +56,7 @@ Panel::Panel(QObject *parent, const QVariantList &args)
     setContainmentType(Containment::PanelContainment);
 
     QSize size = QSize(args.count() ? args[0].toInt() : 1024, 22);
-    kDebug() << "**********" << size;
+    qDebug() << "**********" << size;
     resize(size);
     setMinimumSize(size);
     setMaximumSize(size);
@@ -205,7 +205,7 @@ void Panel::updateBorders()
 {
     FrameSvg::EnabledBorders enabledBorders = FrameSvg::AllBorders;
 
-    kDebug() << "!!!!!!!!!!!!!!!! location be:" << location();
+    qDebug() << "!!!!!!!!!!!!!!!! location be:" << location();
     switch (location()) {
         case BottomEdge:
             enabledBorders = FrameSvg::TopBorder;
@@ -281,7 +281,7 @@ void Panel::updateBorders()
 
 void Panel::constraintsEvent(Plasma::Constraints constraints)
 {
-    kDebug() << "constraints updated with" << constraints << "!!!!!!";
+    qDebug() << "constraints updated with" << constraints << "!!!!!!";
 
     if (constraints & Plasma::FormFactorConstraint) {
         Plasma::FormFactor form = formFactor();
@@ -456,20 +456,20 @@ void Panel::setFormFactorFromLocation(Plasma::Location loc) {
     switch (loc) {
         case BottomEdge:
         case TopEdge:
-            //kDebug() << "setting horizontal form factor";
+            //qDebug() << "setting horizontal form factor";
             setFormFactor(Plasma::Horizontal);
             break;
         case RightEdge:
         case LeftEdge:
-            //kDebug() << "setting vertical form factor";
+            //qDebug() << "setting vertical form factor";
             setFormFactor(Plasma::Vertical);
             break;
         case Floating:
             //TODO: implement a form factor for floating panels
-            kDebug() << "Floating is unimplemented.";
+            qDebug() << "Floating is unimplemented.";
             break;
         default:
-            kDebug() << "invalid location!!";
+            qDebug() << "invalid location!!";
     }
 }
 

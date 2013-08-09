@@ -26,7 +26,7 @@
 
 // KDE
 #include <KAuthorized>
-#include <KDebug>
+#include <QDebug>
 #include <KDiskFreeSpaceInfo>
 #include <KIcon>
 #include <KUrl>

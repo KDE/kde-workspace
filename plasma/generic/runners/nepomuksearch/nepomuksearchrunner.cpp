@@ -25,7 +25,7 @@
 
 #include <KIcon>
 #include <KRun>
-#include <KDebug>
+#include <QDebug>
 #include <KUrl>
 
 #include <Nepomuk2/File>
@@ -101,7 +101,7 @@ Nepomuk2::SearchRunner::~SearchRunner()
 
 void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
 {
-    //kDebug() << &context << context.query();
+    //qDebug() << &context << context.query();
 
     if( ResourceManager::instance()->initialized() ) {
         // This method needs to be thread-safe since KRunner does simply start new threads whenever
@@ -116,7 +116,7 @@ void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
         m_mutex.unlock();
 
         if (!context.isValid()) {
-            //kDebug() << "deprecated search:" << context.query();
+            //qDebug() << "deprecated search:" << context.query();
             // we are no longer the latest call
             return;
         }
@@ -125,7 +125,7 @@ void Nepomuk2::SearchRunner::match( Plasma::RunnerContext& context )
         // We use a default length of 4 characters cause virtuoso has a min length requirement of 4
         // leading characters. This way we avoid using the expensive regex search
         if( context.query().length() >= 4 ) {
-            //kDebug() << "got through" << context.query();
+            //qDebug() << "got through" << context.query();
             Query::Query query = Query::QueryParser::parseQuery(context.query());
             query.setLimit(s_maxResults);
 
@@ -299,7 +299,7 @@ QMimeData * Nepomuk2::SearchRunner::mimeDataForMatch(const Plasma::QueryMatch *m
     QMimeData *result = new QMimeData();
     QList<QUrl> urls;
     urls << url;
-    kDebug() << urls;
+    qDebug() << urls;
     result->setUrls(urls);
     return result;
 }

@@ -627,7 +627,7 @@ void Applet::configAccepted()
     for (int i = 0; i < hiddenList->topLevelItemCount(); ++i) {
         QTreeWidgetItem *item = hiddenList->topLevelItem(i);
         KComboBox *itemCombo = static_cast<KComboBox *>(hiddenList->itemWidget(item, 1));
-        //kDebug() << (item->checkState() == Qt::Checked) << item->data(Qt::UserRole).toString();
+        //qDebug() << (item->checkState() == Qt::Checked) << item->data(Qt::UserRole).toString();
         const QString taskTypeId = item->data(0, Qt::UserRole).toString();
         if (itemCombo->currentIndex() == 1) {
             //Always hidden

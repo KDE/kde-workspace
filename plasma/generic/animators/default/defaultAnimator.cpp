@@ -22,7 +22,7 @@
 #include <QGraphicsItem>
 #include <QPainter>
 
-#include <KDebug>
+#include <QDebug>
 
 DefaultAnimator::DefaultAnimator(QObject *parent, const QVariantList& list)
     : Plasma::AnimationDriver(parent)
@@ -58,7 +58,7 @@ int DefaultAnimator::elementAnimationFps(Plasma::Animator::Animation animation) 
 
 void DefaultAnimator::itemAppear(qreal progress, QGraphicsItem* item)
 {
-    //kDebug() << "DefaultAnimator::appear(" << progress << ", " << item << ")";
+    //qDebug() << "DefaultAnimator::appear(" << progress << ", " << item << ")";
     if (progress >= 1) {
         item->resetTransform();
         return;
@@ -83,7 +83,7 @@ void DefaultAnimator::itemDisappear(qreal progress, QGraphicsItem* item)
 
 QPixmap DefaultAnimator::elementAppear(qreal progress, const QPixmap& pixmap)
 {
-    //kDebug() << progress;
+    //qDebug() << progress;
     QPixmap pix = pixmap;
 
     if (progress < 1) {
@@ -100,7 +100,7 @@ QPixmap DefaultAnimator::elementAppear(qreal progress, const QPixmap& pixmap)
 
 QPixmap DefaultAnimator::elementDisappear(qreal progress, const QPixmap& pixmap)
 {
-    //kDebug() << progress;
+    //qDebug() << progress;
     QPixmap pix = pixmap;
 
     if (progress > 0) {

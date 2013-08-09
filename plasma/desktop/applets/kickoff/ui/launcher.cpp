@@ -36,7 +36,7 @@
 #include <QVBoxLayout>
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KGlobalSettings>
 #include <KIcon>
 #include <kuser.h>
@@ -808,7 +808,7 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
             // left/right should Nav the tabbar, unless ApplicationView is receiving them.
             if (keyEvent->modifiers() == Qt::NoModifier &&
                         (keyEvent->key() == Qt::Key_Left || keyEvent->key() == Qt::Key_Right)) {
-                kDebug() << "launcher, at filter #2";
+                qDebug() << "launcher, at filter #2";
                 if (d->applicationView->isVisible() && appViewIsReceivingKeyEvents()) {
                     QCoreApplication::sendEvent(d->applicationView, event);
                     return true;
@@ -824,9 +824,9 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
             // Next: Up/Down should ALWAYS go into the ApplicationView, if it is visible.
             if (keyEvent->modifiers() == Qt::NoModifier &&
                         (keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down)) {
-                kDebug() << "launcher, at filter #3A";
+                qDebug() << "launcher, at filter #3A";
                 if (d->applicationView->isVisible()) {
-                    kDebug() << "launcher, at filter #3B";
+                    qDebug() << "launcher, at filter #3B";
                     setAppViewIsReceivingKeyEvents(true);
                     QCoreApplication::sendEvent(d->applicationView, event);
                     return true;
@@ -838,7 +838,7 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
                         keyEvent->key() == Qt::Key_Down ||
                         keyEvent->key() == Qt::Key_Enter ||
                         keyEvent->key() == Qt::Key_Return) {
-                kDebug() << "launcher, at filter #3";
+                qDebug() << "launcher, at filter #3";
                 if (d->applicationView->isVisible()) {
                     if (appViewIsReceivingKeyEvents()) {
                         QCoreApplication::sendEvent(d->applicationView, event);
@@ -852,7 +852,7 @@ bool Launcher::eventFilter(QObject *object, QEvent *event)
                 if (!d->searchView->initializeSelection()
                         || keyEvent->key() == Qt::Key_Return
                         || keyEvent->key() == Qt::Key_Enter) {
-                    kDebug() << "Passing the event to the search view" << event;
+                    qDebug() << "Passing the event to the search view" << event;
                     QCoreApplication::sendEvent(d->searchView, event);
                 }
                 return true;

@@ -29,7 +29,7 @@
 #include <X11/extensions/shape.h>
 #endif
 
-#include <KDebug>
+#include <QDebug>
 #include <KIdleTime>
 #include <KWindowSystem>
 
@@ -90,7 +90,7 @@ public:
                 break;
         }
 
-        //kDebug() << "glow geom is" << glowGeom << "from" << triggerZone;
+        //qDebug() << "glow geom is" << glowGeom << "from" << triggerZone;
         setGeometry(glowGeom);
         m_buffer = QPixmap(size());
     }
@@ -290,7 +290,7 @@ PanelView::~PanelView()
 
 void PanelView::setContainment(Plasma::Containment *containment)
 {
-    kDebug() << "Panel geometry is" << containment->geometry();
+    qDebug() << "Panel geometry is" << containment->geometry();
 
     Plasma::Containment *oldContainment = this->containment();
     if (oldContainment) {
@@ -330,7 +330,7 @@ void PanelView::setContainment(Plasma::Containment *containment)
     m_lastMin = containment->minimumSize();
     m_lastMax = containment->maximumSize();
 
-    kDebug() << "about to set the containment" << (QObject*)containment;
+    qDebug() << "about to set the containment" << (QObject*)containment;
 
     updateStruts();
 
@@ -405,7 +405,7 @@ void PanelView::setLocation(Plasma::Location location)
         formFactor = Plasma::Vertical;
     }
 
-    //kDebug() << "!!!!!!!!!!!!!!!!!! about to set to" << location << panelHeight << formFactor;
+    //qDebug() << "!!!!!!!!!!!!!!!!!! about to set to" << location << panelHeight << formFactor;
     disconnect(this, SIGNAL(sceneRectAboutToChange()), this, SLOT(pinchContainmentToCurrentScreen()));
     c->setFormFactor(formFactor);
     c->setLocation(location);
@@ -487,7 +487,7 @@ void PanelView::updatePanelGeometry()
         return;
     }
 
-    kDebug() << "New panel geometry is" << c->geometry();
+    qDebug() << "New panel geometry is" << c->geometry();
 
     QSize size = c->size().expandedTo(c->minimumSize()).toSize();
     QRect geom(QPoint(0,0), size);
@@ -610,7 +610,7 @@ void PanelView::updatePanelGeometry()
         break;
     }
 
-    kDebug() << (QObject*)this << "thinks its panel is at " << geom << "was" << geometry();
+    qDebug() << (QObject*)this << "thinks its panel is at " << geom << "was" << geometry();
     if (geom == geometry()) {
         // our geometry is the same, but the panel moved around
         // so make sure our struts are still valid
@@ -662,14 +662,14 @@ bool PanelView::isHorizontal() const
 
 void PanelView::pinchContainmentToCurrentScreen()
 {
-    kDebug() << "pinching to current screen";
+    qDebug() << "pinching to current screen";
     const QRect screenRect = PlasmaApp::self()->corona()->screenGeometry(containment()->screen());
     pinchContainment(screenRect);
 }
 
 void PanelView::pinchContainment(const QRect &screenGeom)
 {
-    kDebug() << "**************************** pinching" << screenGeom << m_lastSeenSize;
+    qDebug() << "**************************** pinching" << screenGeom << m_lastSeenSize;
     disconnect(this, SIGNAL(sceneRectAboutToChange()), this, SLOT(pinchContainmentToCurrentScreen()));
     bool horizontal = isHorizontal();
 
@@ -700,7 +700,7 @@ void PanelView::pinchContainment(const QRect &screenGeom)
             KConfigGroup thisSize(&sizes, last);
 
             /*
-            kDebug() << "has saved properties..." << last
+            qDebug() << "has saved properties..." << last
                      << thisSize.readEntry("min", min)
                      << thisSize.readEntry("max", max)
                      << thisSize.readEntry("size", c->geometry().size())
@@ -717,7 +717,7 @@ void PanelView::pinchContainment(const QRect &screenGeom)
                    (horizontal ? c->geometry().width() :
                                  c->geometry().height()) >= m_lastSeenSize) {
             // we are moving from a smaller space where we are 100% to a larger one
-            kDebug() << "we are moving from a smaller space where we are 100% to a larger one";
+            qDebug() << "we are moving from a smaller space where we are 100% to a larger one";
             c->setMinimumSize(0, 0);
             c->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 
@@ -737,10 +737,10 @@ void PanelView::pinchContainment(const QRect &screenGeom)
         } else if (m_lastSeenSize > (horizontal ? sw : sh) &&
                     (m_offset + (horizontal ? c->geometry().width() :
                                  c->geometry().height())) > (horizontal ? sw : sh)) {
-            kDebug() << "we are moving from a bigger space to a smaller one where the panel won't fit!!";
+            qDebug() << "we are moving from a bigger space to a smaller one where the panel won't fit!!";
             if ((horizontal ? c->geometry().width() :
                                  c->geometry().height()) > (horizontal ? sw : sh)) {
-                kDebug() << "panel is larger than screen, adjusting panel size";
+                qDebug() << "panel is larger than screen, adjusting panel size";
                 setOffset(0);
                 c->setMinimumSize(0, 0);
                 c->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
@@ -759,7 +759,7 @@ void PanelView::pinchContainment(const QRect &screenGeom)
                     }
                 }
             } else {
-                kDebug() << "reducing offset so the panel fits in screen";
+                qDebug() << "reducing offset so the panel fits in screen";
                 setOffset((horizontal ? sw : sh) -
                           (horizontal ? c->geometry().width() : c->geometry().height()));
             }
@@ -772,7 +772,7 @@ void PanelView::pinchContainment(const QRect &screenGeom)
     // give us enough room, we limit the size of the panel itself by setting
     // the minimum and maximum sizes.
 
-    //kDebug() << "checking panel" << c->geometry() << "against" << screenGeom;
+    //qDebug() << "checking panel" << c->geometry() << "against" << screenGeom;
 
     // resize to max if for some reason the size is empty
     // otherwise its not possible to interact with the panel at all
@@ -803,7 +803,7 @@ void PanelView::pinchContainment(const QRect &screenGeom)
 
     connect(this, SIGNAL(sceneRectAboutToChange()), this, SLOT(pinchContainmentToCurrentScreen()));
     recreateUnhideTrigger();
-    kDebug() << "Done pinching, containment's geom" << c->geometry() << "own geom" << geometry();
+    qDebug() << "Done pinching, containment's geom" << c->geometry() << "own geom" << geometry();
 }
 
 void PanelView::setOffset(int newOffset)
@@ -849,7 +849,7 @@ void PanelView::immutabilityChanged(Plasma::ImmutabilityType immutability)
 
 void PanelView::togglePanelController()
 {
-    //kDebug();
+    //qDebug();
     m_editing = false;
     if (containment()->immutability() != Plasma::Mutable) {
         delete m_panelController;
@@ -892,7 +892,7 @@ void PanelView::togglePanelController()
                 moveOverlay->show();
                 moveOverlay->raise();
                 m_appletOverlays << moveOverlay;
-                //kDebug() << moveOverlay << moveOverlay->geometry();
+                //qDebug() << moveOverlay << moveOverlay->geometry();
                 setTabOrder(prior, moveOverlay);
                 prior = moveOverlay;
             }
@@ -914,14 +914,14 @@ void PanelView::togglePanelController()
         m_panelController->resize(m_panelController->sizeHint());
         m_panelController->move(m_panelController->positionForPanelGeometry(geometry()));
         Plasma::WindowEffects::slideWindow(m_panelController, location());
-        kDebug() << "showing panel controller!" << m_panelController->geometry();
+        qDebug() << "showing panel controller!" << m_panelController->geometry();
         m_panelController->show();
     }
 }
 
 void PanelView::editingComplete()
 {
-    //kDebug();
+    //qDebug();
     m_panelController = 0;
     m_editing = false;
     qDeleteAll(m_appletOverlays);
@@ -1019,7 +1019,7 @@ void PanelView::updateStruts()
         int rightOffset = wholeScreen.right() - thisScreen.right();
         int bottomOffset = wholeScreen.bottom() - thisScreen.bottom();
         int topOffset = wholeScreen.top() - thisScreen.top();
-        kDebug() << "screen l/r/b/t offsets are:" << leftOffset << rightOffset << bottomOffset << topOffset << location();
+        qDebug() << "screen l/r/b/t offsets are:" << leftOffset << rightOffset << bottomOffset << topOffset << location();
 
         switch (location())
         {
@@ -1033,7 +1033,7 @@ void PanelView::updateStruts()
                 strut.bottom_width = height() + bottomOffset;
                 strut.bottom_start = x();
                 strut.bottom_end = x() + width() - 1;
-                //kDebug() << "setting bottom edge to" << strut.bottom_width
+                //qDebug() << "setting bottom edge to" << strut.bottom_width
                 //         << strut.bottom_start << strut.bottom_end;
                 break;
 
@@ -1050,7 +1050,7 @@ void PanelView::updateStruts()
                 break;
 
             default:
-                //kDebug() << "where are we?";
+                //qDebug() << "where are we?";
             break;
         }
     }
@@ -1139,7 +1139,7 @@ void PanelView::moveEvent(QMoveEvent *event)
 
 void PanelView::resizeEvent(QResizeEvent *event)
 {
-    //kDebug() << event->oldSize() << event->size();
+    //qDebug() << event->oldSize() << event->size();
     Plasma::View::resizeEvent(event);
     recreateUnhideTrigger();
     m_strutsTimer->stop();
@@ -1190,14 +1190,14 @@ bool PanelView::hintOrUnhide(const QPoint &point, bool dueToDnd)
     }
 
     if (!shouldHintHide()) {
-        //kDebug() << "should not hint hide";
+        //qDebug() << "should not hint hide";
         unhide(!dueToDnd);
         return true;
     }
 
-    //kDebug() << point << m_triggerZone;
+    //qDebug() << point << m_triggerZone;
     if (m_triggerZone.contains(point)) {
-        //kDebug() << "unhide!" << point;
+        //qDebug() << "unhide!" << point;
         unhide(!dueToDnd);
         return true;
     } else if (!m_glowBar) {
@@ -1223,7 +1223,7 @@ bool PanelView::hintOrUnhide(const QPoint &point, bool dueToDnd)
 
 void PanelView::hideHinter()
 {
-    //kDebug() << "hide the glow";
+    //qDebug() << "hide the glow";
     if (m_mousePollTimer) {
         m_mousePollTimer->stop();
         disconnect(m_mousePollTimer, SIGNAL(timeout()), this, SLOT(updateHinter()));
@@ -1298,48 +1298,48 @@ void PanelView::statusUpdated(Plasma::ItemStatus newStatus)
 
 void PanelView::checkUnhide(Plasma::ItemStatus newStatus)
 {
-    //kDebug() << "================= got a status: " << newStatus << Plasma::ActiveStatus;
+    //qDebug() << "================= got a status: " << newStatus << Plasma::ActiveStatus;
     m_respectStatus = true;
 
     if (newStatus > Plasma::ActiveStatus) {
         unhide();
         if (newStatus == Plasma::NeedsAttentionStatus) {
-            //kDebug() << "starting the timer!";
+            //qDebug() << "starting the timer!";
             // start our rehide timer, so that the panel doesn't stay up and stuck forever and a day
             m_rehideAfterAutounhideTimer->start(AUTOUNHIDE_CHECK_DELAY);
         }
     } else {
-        //kDebug() << "new status, just autohiding";
+        //qDebug() << "new status, just autohiding";
         startAutoHide();
     }
 }
 
 void PanelView::checkAutounhide()
 {
-    //kDebug() << "***************************" << KIdleTime::instance()->idleTime();
+    //qDebug() << "***************************" << KIdleTime::instance()->idleTime();
     if (KIdleTime::instance()->idleTime() >= AUTOUNHIDE_CHECK_DELAY) {
         // the user is idle .. let's not hige the panel on them quite yet, but rather given them a
         // chance to see this thing!
         connect(KIdleTime::instance(), SIGNAL(resumingFromIdle()), this, SLOT(checkAutounhide()),
                 Qt::UniqueConnection);
         KIdleTime::instance()->catchNextResumeEvent();
-        //kDebug() << "exit 1 ***************************";
+        //qDebug() << "exit 1 ***************************";
         return;
     }
 
     m_respectStatus = false;
-    //kDebug() << "in to check ... who's resonsible?" << sender() << KIdleTime::instance();
+    //qDebug() << "in to check ... who's resonsible?" << sender() << KIdleTime::instance();
     if (sender() == KIdleTime::instance()) {
-        //kDebug() << "doing a 2s wait";
+        //qDebug() << "doing a 2s wait";
         QTimer::singleShot(2000, this, SLOT(startAutoHide()));
     } else {
-        //kDebug() << "just starting autohide!";
+        //qDebug() << "just starting autohide!";
         startAutoHide();
     }
 
     // this line must come after the check on sender() as it *clears* that value!
     disconnect(KIdleTime::instance(), SIGNAL(resumingFromIdle()), this, SLOT(checkAutounhide()));
-    //kDebug() << "exit 0 ***************************";
+    //qDebug() << "exit 0 ***************************";
 }
 
 void PanelView::unhide()
@@ -1355,11 +1355,11 @@ void PanelView::resetTriggerEnteredSuppression()
 void PanelView::startAutoHide()
 {
     /*
-    kDebug() << m_editing << (containment() ? containment()->status() : 0) << Plasma::ActiveStatus
+    qDebug() << m_editing << (containment() ? containment()->status() : 0) << Plasma::ActiveStatus
              << geometry().adjusted(-10, -10, 10, 10).contains(QCursor::pos()) << hasPopup();
     if (containment() && containment()->status() > Plasma::ActiveStatus) {
         foreach (Plasma::Applet *applet, containment()->applets()) {
-            kDebug() << "     " << applet->name() << applet->status();
+            qDebug() << "     " << applet->name() << applet->status();
         }
     }
     */
@@ -1487,7 +1487,7 @@ void PanelView::recreateUnhideTrigger()
 void PanelView::createUnhideTrigger()
 {
 #ifdef Q_WS_X11
-    //kDebug() << m_unhideTrigger << None;
+    //qDebug() << m_unhideTrigger << None;
     if (m_unhideTrigger != None) {
         return;
     }
@@ -1571,7 +1571,7 @@ void PanelView::createUnhideTrigger()
     m_unhideTriggerGeom = QRect(triggerPoint, QSize(triggerWidth, triggerHeight));
     m_triggerZone = QRect(actualTriggerPoint, QSize(actualWidth, actualHeight));
 #endif
-    //kDebug() << m_unhideTrigger;
+    //qDebug() << m_unhideTrigger;
     PlasmaApp::self()->panelHidden(true);
 }
 
@@ -1582,13 +1582,13 @@ void PanelView::destroyUnhideTrigger()
         return;
     }
 
-    //kDebug();
+    //qDebug();
     XDestroyWindow(QX11Info::display(), m_unhideTrigger);
     m_unhideTrigger = None;
     m_triggerZone = m_unhideTriggerGeom = QRect();
 #endif
 
-    //kDebug();
+    //qDebug();
     PlasmaApp::self()->panelHidden(false);
 }
 

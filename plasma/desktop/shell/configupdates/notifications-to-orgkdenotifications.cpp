@@ -22,7 +22,7 @@
 #include <KConfigGroup>
 #include <KStandardDirs>
 
-#include <KDebug>
+#include <QDebug>
 int main()
 {
     KComponentData cd("notifications-to-orgkdenotifications-update");

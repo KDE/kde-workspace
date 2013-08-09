@@ -18,7 +18,7 @@
 
 #include "webshortcutrunner.h"
 
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KMimeType>
 #include <KServiceTypeTrader>
@@ -70,12 +70,12 @@ void WebshortcutRunner::loadSyntaxes()
         m_delimiter = filterData.searchTermSeparator();
     }
 
-    //kDebug() << "keyword delimiter:" << m_delimiter;
-    //kDebug() << "search providers:" << filterData.preferredSearchProviders();
+    //qDebug() << "keyword delimiter:" << m_delimiter;
+    //qDebug() << "search providers:" << filterData.preferredSearchProviders();
 
     QList<Plasma::RunnerSyntax> syns;
     Q_FOREACH (const QString &provider, filterData.preferredSearchProviders()) {
-        //kDebug() << "checking out" << provider;
+        //qDebug() << "checking out" << provider;
         Plasma::RunnerSyntax s(filterData.queryForPreferredSearchProvider(provider), /*":q:",*/
                               i18n("Opens \"%1\" in a web browser with the query :q:.", provider));
         syns << s;
@@ -86,7 +86,7 @@ void WebshortcutRunner::loadSyntaxes()
 
 void WebshortcutRunner::resetState()
 {
-    kDebug();
+    qDebug();
     m_lastFailedKey.clear();
     m_lastProvider.clear();
     m_lastKey.clear();
@@ -99,7 +99,7 @@ void WebshortcutRunner::match(Plasma::RunnerContext &context)
     if (term.length() < 3 || !term.contains(m_delimiter))
         return;
 
-    // kDebug() << "checking term" << term;
+    // qDebug() << "checking term" << term;
 
     const int delimIndex = term.indexOf(m_delimiter);
     if (delimIndex == term.length() - 1)
@@ -112,7 +112,7 @@ void WebshortcutRunner::match(Plasma::RunnerContext &context)
     }
 
     if (!context.isValid()) {
-        kDebug() << "invalid context";
+        qDebug() << "invalid context";
         return;
     }
 
@@ -148,10 +148,10 @@ void WebshortcutRunner::run(const Plasma::RunnerContext &context, const Plasma::
 {
     QString location;
 
-    //kDebug() << "filter before run?" << m_filterBeforeRun;
+    //qDebug() << "filter before run?" << m_filterBeforeRun;
     if (m_filterBeforeRun) {
         m_filterBeforeRun = false;
-        //kDebug() << "look up webshortcut:" << context.query();
+        //qDebug() << "look up webshortcut:" << context.query();
         KUriFilterData filterData (context.query());
         if (KUriFilter::self()->filterSearchUri(filterData, KUriFilter::WebShortcutFilter))
             location = filterData.uri().url();
@@ -159,7 +159,7 @@ void WebshortcutRunner::run(const Plasma::RunnerContext &context, const Plasma::
         location = match.data().toString();
     }
 
-    //kDebug() << location;
+    //qDebug() << location;
     if (!location.isEmpty()) {
         KToolInvocation::invokeBrowser(location);
     }

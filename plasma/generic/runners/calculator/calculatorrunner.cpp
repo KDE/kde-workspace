@@ -28,7 +28,7 @@
 #endif
 
 #include <KIcon>
-#include <KDebug>
+#include <QDebug>
 
 #include <Plasma/QueryMatch>
 
@@ -90,7 +90,7 @@ void CalculatorRunner::powSubstitutions(QString& cmd)
         while (preIndex != 0) {
             QChar current = cmd.at(preIndex);
             QChar next = cmd.at(preIndex-1);
-            //kDebug() << "index " << preIndex << " char " << current;
+            //qDebug() << "index " << preIndex << " char " << current;
             if (current == ')') {
                 count++;
             } else if (current == '(') {
@@ -144,7 +144,7 @@ void CalculatorRunner::powSubstitutions(QString& cmd)
         cmd.insert(preIndex,"pow(");
         // +1 +4 == next position to the last number after we add 4 new characters pow(
         cmd.insert(postIndex + 1 + 4, ')');
-        //kDebug() << "from" << preIndex << " to " << postIndex << " got: " << cmd;
+        //qDebug() << "from" << preIndex << " to " << postIndex << " got: " << cmd;
     }
 }
 
@@ -268,12 +268,12 @@ QString CalculatorRunner::calculate(const QString& term)
     try {
         result = m_engine->evaluate(term);
     } catch(std::exception& e) {
-        kDebug() << "qalculate error: " << e.what();
+        qDebug() << "qalculate error: " << e.what();
     }
 
     return result.replace('.', KGlobal::locale()->decimalSymbol(), Qt::CaseInsensitive);
     #else
-    //kDebug() << "calculating" << term;
+    //qDebug() << "calculating" << term;
     QScriptEngine eng;
     QScriptValue result = eng.evaluate(" var result ="+term+"; result");
 
@@ -304,7 +304,7 @@ QString CalculatorRunner::calculate(const QString& term)
 
 QMimeData * CalculatorRunner::mimeDataForMatch(const Plasma::QueryMatch *match)
 {
-    //kDebug();
+    //qDebug();
     QMimeData *result = new QMimeData();
     result->setText(match->text());
     return result;

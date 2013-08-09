@@ -23,7 +23,7 @@
 #include <QSignalMapper>
 #include <QMap>
 
-#include <KDebug>
+#include <QDebug>
 
 #include <solid/devicenotifier.h>
 #include <solid/device.h>

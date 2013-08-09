@@ -30,7 +30,7 @@
 #include <QTimeLine>
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KGlobalSettings>
 #include <KIconLoader>
 #include <KColorScheme>
@@ -75,7 +75,7 @@ public:
     {
         if (previousRootIndices.isEmpty() || previousRootIndices.top() != index) {
             // we're entering into a submenu
-            //kDebug() << "pushing" << currentRootIndex.data(Qt::DisplayRole).value<QString>();
+            //qDebug() << "pushing" << currentRootIndex.data(Qt::DisplayRole).value<QString>();
             animLeftToRight = true;
             hoveredIndex = QModelIndex();
             previousRootIndices.push(currentRootIndex);
@@ -85,12 +85,12 @@ public:
             q->verticalScrollBar()->setValue(0);
         } else {
             // we're exiting to the parent menu
-            //kDebug() << "popping" << previousRootIndices.top().data(Qt::DisplayRole).value<QString>();
+            //qDebug() << "popping" << previousRootIndices.top().data(Qt::DisplayRole).value<QString>();
             animLeftToRight = false;
             hoveredIndex = currentRootIndex;
             previousRootIndices.pop();
             //if (!previousRootIndices.isEmpty()) {
-            //    kDebug() << "now the previos root is" << previousRootIndices.top().data(Qt::DisplayRole).value<QString>();
+            //    qDebug() << "now the previos root is" << previousRootIndices.top().data(Qt::DisplayRole).value<QString>();
             //}
             currentRootIndex = index;
             updateScrollBarRange();
@@ -301,7 +301,7 @@ QRegion FlipScrollView::visualRegionForSelection(const QItemSelection& selection
 QModelIndex FlipScrollView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers)
 {
     QModelIndex index = currentIndex();
-    // kDebug() << "Moving cursor with current index" << index.data(Qt::DisplayRole);
+    // qDebug() << "Moving cursor with current index" << index.data(Qt::DisplayRole);
     switch (cursorAction) {
     case MoveUp:
         if (!currentIndex().isValid()) {
@@ -343,7 +343,7 @@ QModelIndex FlipScrollView::moveCursor(CursorAction cursorAction, Qt::KeyboardMo
     update(d->hoveredIndex);
     d->hoveredIndex = index;
 
-    //kDebug() << "New index after move" << index.data(Qt::DisplayRole);
+    //qDebug() << "New index after move" << index.data(Qt::DisplayRole);
     return index;
 }
 
@@ -418,7 +418,7 @@ void FlipScrollView::keyPressEvent(QKeyEvent *event)
             return;
         } else {
             // we are already in the leftmost column.
-            kDebug() << "we are in Left-Most column, processing Key_Left";
+            qDebug() << "we are in Left-Most column, processing Key_Left";
             event->accept();
             emit focusNextViewLeft();
             return;
@@ -437,7 +437,7 @@ void FlipScrollView::leaveEvent(QEvent *event)
 void FlipScrollView::paintItems(QPainter &painter, QPaintEvent *event, QModelIndex &root)
 {
     const int rows = model()->rowCount(root);
-    //kDebug() << "painting" << rows << "items";
+    //qDebug() << "painting" << rows << "items";
 
     for (int i = 0; i < rows; ++i) {
         QModelIndex index = model()->index(i, 0, root);
@@ -513,14 +513,14 @@ void FlipScrollView::paintEvent(QPaintEvent * event)
     // draw items
     QModelIndex currentRoot = d->currentRoot();
     QModelIndex previousRoot = d->animLeftToRight ? d->previousRoot() : (QModelIndex)d->hoveredIndex;
-    //kDebug() << "current root is" << currentRoot.data(Qt::DisplayRole).value<QString>();
+    //qDebug() << "current root is" << currentRoot.data(Qt::DisplayRole).value<QString>();
 
     paintItems(painter, event, currentRoot);
 
     const qreal timerValue = d->flipAnimTimeLine->currentValue();
 
     if (timerValue < 1.0) {
-        //kDebug() << "previous root is" << previousRoot.data(Qt::DisplayRole).value<QString>();
+        //qDebug() << "previous root is" << previousRoot.data(Qt::DisplayRole).value<QString>();
         paintItems(painter, event, previousRoot);
 
         if (d->flipAnimTimeLine->state() != QTimeLine::Running) {
@@ -546,7 +546,7 @@ void FlipScrollView::paintEvent(QPaintEvent * event)
 
 void FlipScrollView::startDrag(Qt::DropActions supportedActions)
 {
-    kDebug() << "Starting UrlItemView drag with actions" << supportedActions;
+    qDebug() << "Starting UrlItemView drag with actions" << supportedActions;
 
     if (!d->watchedIndexForDrag.isValid()) {
         return;

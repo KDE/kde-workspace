@@ -37,7 +37,7 @@
 #include <QVBoxLayout>
 
 #include <KAction>
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KIconLoader>
 #include <KService>
@@ -452,7 +452,7 @@ void SearchLaunch::appletRemoved(Plasma::Applet* applet)
 
 void SearchLaunch::constraintsEvent(Plasma::Constraints constraints)
 {
-    //kDebug() << "constraints updated with" << constraints << "!!!!!!";
+    //qDebug() << "constraints updated with" << constraints << "!!!!!!";
 
     if (constraints & Plasma::FormFactorConstraint ||
         constraints & Plasma::StartupCompletedConstraint) {
@@ -552,12 +552,12 @@ void SearchLaunch::setFormFactorFromLocation(Plasma::Location loc)
     switch (loc) {
     case Plasma::BottomEdge:
     case Plasma::TopEdge:
-        //kDebug() << "setting horizontal form factor";
+        //qDebug() << "setting horizontal form factor";
         setFormFactor(Plasma::Horizontal);
         break;
     case Plasma::RightEdge:
     case Plasma::LeftEdge:
-        //kDebug() << "setting vertical form factor";
+        //qDebug() << "setting vertical form factor";
         setFormFactor(Plasma::Vertical);
         break;
     default:

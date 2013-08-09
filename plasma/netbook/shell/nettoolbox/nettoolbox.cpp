@@ -501,7 +501,7 @@ void NetToolBox::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 
 void NetToolBox::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    //kDebug() << event->pos() << event->scenePos()
+    //qDebug() << event->pos() << event->scenePos()
     //         << d->toolBacker->rect().contains(event->scenePos().toPoint());
     if (!m_hovering || isShowing()) {
         QGraphicsWidget::hoverLeaveEvent(event);

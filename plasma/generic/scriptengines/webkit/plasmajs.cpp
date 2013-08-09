@@ -33,7 +33,7 @@ ConfigGroupWrapper::ConfigGroupWrapper(const KConfigGroup &config)
 
 void ConfigGroupWrapper::setConfig(const KConfigGroup &config)
 {
-    //kDebug() << config.config()->name() << config.name();
+    //qDebug() << config.config()->name() << config.name();
     m_config = config;
 }
 
@@ -42,7 +42,7 @@ QVariant ConfigGroupWrapper::readEntry(const QString &key, const QVariant &aDefa
     // Should KConfig do this?
     // There is readEntry(key, QVariant) but it does not seem to work
     // (if writeEntry was not QVariant??)
-    // kDebug() << aDefault.typeName();
+    // qDebug() << aDefault.typeName();
     if (aDefault.type() == QVariant::Int) {
         return m_config.readEntry(key, aDefault.toInt());
     } else if (aDefault.type() == QVariant::Double) {

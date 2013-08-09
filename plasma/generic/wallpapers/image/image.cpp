@@ -21,7 +21,7 @@
 #include <QPropertyAnimation>
 #include <QTimer>
 
-#include <KDebug>
+#include <QDebug>
 #include <KDirSelectDialog>
 #include <KDirWatch>
 #include <KFileDialog>
@@ -286,7 +286,7 @@ void Image::setSingleImage()
         m_wallpaperPackage.setPath(m_wallpaper);
         img = m_wallpaperPackage.filePath("preferred");
         m_wallpaperPath = m_wallpaperPackage.filePath("preferred");
-        //kDebug() << img << m_wallpaper;
+        //qDebug() << img << m_wallpaper;
 
         if (img.isEmpty() && QFile::exists(m_wallpaper)) {
             img = m_wallpaper;
@@ -332,7 +332,7 @@ void Image::addUrls(const QList<QUrl> &urls)
 
 void Image::addUrl(const QUrl &url, bool setAsCurrent)
 {
-    ///kDebug() << "droppage!" << url << url.isLocalFile();
+    ///qDebug() << "droppage!" << url << url.isLocalFile();
     if (url.isLocalFile()) {
         const QString path = url.toLocalFile();
         if (setAsCurrent) {
@@ -571,7 +571,7 @@ void Image::openSlide()
 
     // open in image viewer
     QUrl filepath(m_wallpaperPackage.filePath("preferred"));
-    kDebug() << "opening file " << filepath.path();
+    qDebug() << "opening file " << filepath.path();
     new KRun(filepath, NULL);
 }
 

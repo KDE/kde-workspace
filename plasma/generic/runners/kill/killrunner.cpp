@@ -21,7 +21,7 @@
 
 #include <QAction>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KProcess>
 #include <KUser>
@@ -159,7 +159,7 @@ void KillRunner::match(Plasma::RunnerContext &context)
         matches << match;
     }
 
-    kDebug() << "match count is" << matches.count();
+    qDebug() << "match count is" << matches.count();
     context.addMatches(term, matches);
 }
 
@@ -216,7 +216,7 @@ QString KillRunner::getUserName(qlonglong uid)
     if (user.isValid()) {
         return user.loginName();
     }
-    kDebug() << QString("No user with UID %1 was found").arg(uid);
+    qDebug() << QString("No user with UID %1 was found").arg(uid);
     return "root";//No user with UID uid was found, so root is used
 }
 

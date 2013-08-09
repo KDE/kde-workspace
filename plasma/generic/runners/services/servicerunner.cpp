@@ -21,7 +21,7 @@
 #include <QMimeData>
 
 #include <KIcon>
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KRun>
 #include <KService>
@@ -59,7 +59,7 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
         KService::List services = KServiceTypeTrader::self()->query("Application", query);
 
         if (!services.isEmpty()) {
-            //kDebug() << service->name() << "is an exact match!" << service->storageId() << service->exec();
+            //qDebug() << service->name() << "is an exact match!" << service->storageId() << service->exec();
             foreach (const KService::Ptr &service, services) {
                 if (!service->noDisplay() && service->property("NotShowIn", QVariant::String) != "KDE") {
                     Plasma::QueryMatch match(this);
@@ -94,7 +94,7 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
     KService::List services = KServiceTypeTrader::self()->query("Application", query);
     services += KServiceTypeTrader::self()->query("KCModule", query);
 
-    //kDebug() << "got " << services.count() << " services from " << query;
+    //qDebug() << "got " << services.count() << " services from " << query;
     foreach (const KService::Ptr &service, services) {
         if (!context.isValid()) {
             return;
@@ -109,11 +109,11 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
         const QString exec = service->exec();
 
         if (seen.contains(id) || seen.contains(exec)) {
-            //kDebug() << "already seen" << id << exec;
+            //qDebug() << "already seen" << id << exec;
             continue;
         }
 
-        //kDebug() << "haven't seen" << id << "so processing now";
+        //qDebug() << "haven't seen" << id << "so processing now";
         seen.insert(id);
         seen.insert(exec);
 
@@ -145,9 +145,9 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
         }
 
         if (service->categories().contains("KDE") || service->serviceTypes().contains("KCModule")) {
-            //kDebug() << "found a kde thing" << id << match.subtext() << relevance;
+            //qDebug() << "found a kde thing" << id << match.subtext() << relevance;
             if (id.startsWith("kde-")) {
-                //kDebug() << "old" << service->type();
+                //qDebug() << "old" << service->type();
                 if (!service->isApplication()) {
                     // avoid showing old kcms and what not
                     continue;
@@ -166,7 +166,7 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
             }
         }
 
-        //kDebug() << service->name() << "is this relevant:" << relevance;
+        //qDebug() << service->name() << "is this relevant:" << relevance;
         match.setRelevance(relevance);
         matches << match;
     }
@@ -175,7 +175,7 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
     query = QString("exist Exec and (exist Categories and '%1' ~subin Categories)").arg(term);
     services = KServiceTypeTrader::self()->query("Application", query);
 
-    //kDebug() << service->name() << "is an exact match!" << service->storageId() << service->exec();
+    //qDebug() << service->name() << "is an exact match!" << service->storageId() << service->exec();
     foreach (const KService::Ptr &service, services) {
         if (!context.isValid()) {
             return;
@@ -185,7 +185,7 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
             QString id = service->storageId();
             QString exec = service->exec();
             if (seen.contains(id) || seen.contains(exec)) {
-                //kDebug() << "already seen" << id << exec;
+                //qDebug() << "already seen" << id << exec;
                 continue;
             }
             Plasma::QueryMatch match(this);
@@ -244,7 +244,7 @@ QMimeData * ServiceRunner::mimeDataForMatch(const Plasma::QueryMatch *match)
         QMimeData * result = new QMimeData();
         QList<QUrl> urls;
         urls << KUrl(service->entryPath());
-        kDebug() << urls;
+        qDebug() << urls;
         result->setUrls(urls);
         return result;
     }

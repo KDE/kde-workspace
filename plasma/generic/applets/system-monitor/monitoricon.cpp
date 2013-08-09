@@ -18,7 +18,7 @@
  */
 
 #include "monitoricon.h"
-#include <kdebug.h>
+#include <QDebug>
 #include <QPainter>
 #include <KIcon>
 #include <KIconLoader>

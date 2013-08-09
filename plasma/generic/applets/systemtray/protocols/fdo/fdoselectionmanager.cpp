@@ -23,7 +23,7 @@
 #include "fdotask.h"
 #include "x11embedpainter.h"
 
-#include <KDebug>
+#include <QDebug>
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QHash>
@@ -265,7 +265,7 @@ void FdoSelectionManager::initSelection()
     if (selectionOwner != winId()) {
         // FIXME: Hmmm... Reading the docs on XSetSelectionOwner,
         // this should not be possible.
-        kDebug() << "Tried to set selection owner to" << winId() << "but it is set to" << selectionOwner;
+        qDebug() << "Tried to set selection owner to" << winId() << "but it is set to" << selectionOwner;
         return;
     }
 
@@ -321,7 +321,7 @@ void FdoSelectionManagerPrivate::handleRequestDock(const XClientMessageEvent &ev
     const WId winId = (WId)event.data.l[2];
 
     if (tasks.contains(winId)) {
-        kDebug() << "got a dock request from an already existing task";
+        qDebug() << "got a dock request from an already existing task";
         return;
     }
 
@@ -361,7 +361,7 @@ void FdoSelectionManagerPrivate::handleMessageData(const XClientMessageEvent &ev
     const char *messageData = event.data.b;
 
     if (!messageRequests.contains(winId)) {
-        kDebug() << "Unexpected message data from" << winId;
+        qDebug() << "Unexpected message data from" << winId;
         return;
     }
 
@@ -380,7 +380,7 @@ void FdoSelectionManagerPrivate::handleMessageData(const XClientMessageEvent &ev
 void FdoSelectionManagerPrivate::createNotification(WId winId)
 {
     if (!tasks.contains(winId)) {
-        kDebug() << "message request from unknown task" << winId;
+        qDebug() << "message request from unknown task" << winId;
         return;
     }
 
@@ -409,7 +409,7 @@ void FdoSelectionManagerPrivate::createNotification(WId winId)
         QObject::connect(job, SIGNAL(finished(KJob*)), service, SLOT(deleteLater()));
     } else {
         delete service;
-        kDebug() << "invalid operation";
+        qDebug() << "invalid operation";
     }
 }
 

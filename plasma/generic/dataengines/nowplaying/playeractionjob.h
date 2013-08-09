@@ -24,7 +24,7 @@
 #include <QTimer>
 #include "playerinterface/player.h"
 
-#include <kdebug.h>
+#include <QDebug>
 
 class PlayerActionJob : public Plasma::ServiceJob
 {

@@ -21,7 +21,7 @@
 
 #include "notificationsengine.h"
 
-#include <kdebug.h>
+#include <QDebug>
 
 #include <Plasma/ServiceJob>
 

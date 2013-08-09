@@ -30,7 +30,7 @@
 #include <KToolInvocation>
 #include <KUrl>
 #include <KStandardDirs>
-#include <KDebug>
+#include <QDebug>
 #include "bookmarkmatch.h"
 #include "browserfactory.h"
 #include "bookmarksrunner_defs.h"

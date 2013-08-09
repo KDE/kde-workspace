@@ -23,7 +23,7 @@
 #include <KGlobalSettings>
 #include <KLocale>
 #include <KIcon>
-#include <KDebug>
+#include <QDebug>
 #include <kdeversion.h>
 
 #include <QTime>
@@ -48,7 +48,7 @@ QString plasmaLocale;
 extern "C"
 KDE_EXPORT int kdemain(int argc, char **argv)
 {
-    kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "START" << "(line:" << __LINE__ << ")";
+    qDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "START" << "(line:" << __LINE__ << ")";
   
     plasmaLocale = KLocale("libplasma").language();
     // dual head support

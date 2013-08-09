@@ -20,7 +20,7 @@
 
 #include "newspaper.h"
 
-#include <KDebug>
+#include <QDebug>
 
 #include <Plasma/Corona>
 #include <Plasma/Containment>

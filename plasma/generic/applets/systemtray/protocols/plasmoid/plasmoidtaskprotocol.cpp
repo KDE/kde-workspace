@@ -24,7 +24,7 @@
 #include "plasmoidtask.h"
 #include "plasmoidtaskprotocol.h"
 
-#include <KDebug>
+#include <QDebug>
 
 #include <Plasma/Applet>
 
@@ -98,7 +98,7 @@ void PlasmoidProtocol::addApplet(const QString appletName, const int id, Plasma:
         return;
     }
 
-    kDebug() << "Registering task with the manager" << appletName;
+    qDebug() << "Registering task with the manager" << appletName;
     task = new PlasmoidTask(appletName, id, this, parent);
 
     if (!task->isValid()) {
@@ -128,7 +128,7 @@ void PlasmoidProtocol::removeApplet(const QString appletName, Plasma::Applet *pa
 
 void PlasmoidProtocol::cleanupTask(Plasma::Applet *host, const QString &taskId)
 {
-    kDebug() << "task with taskId" << taskId << "removed";
+    qDebug() << "task with taskId" << taskId << "removed";
     if (m_tasks.contains(host)) {
         m_tasks[host].remove(taskId);
         if (m_tasks.value(host).isEmpty()) {

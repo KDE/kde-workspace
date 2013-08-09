@@ -20,7 +20,7 @@
 
 #include "faviconfromblob.h"
 
-#include <KDebug>
+#include <QDebug>
 #include <QPixmap>
 #include <QFile>
 #include <QFileInfo>

@@ -26,7 +26,7 @@
 // KDE
 #include <KAuthorized>
 #include <KConfigGroup>
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <Solid/PowerManagement>
 #include <kworkspace/kworkspace.h>

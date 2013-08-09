@@ -290,7 +290,7 @@ bool Hdd::isValidDevice(const QString& uuid, Plasma::DataEngine::Data* data)
     if (engine) {
         *data = engine->query(uuid);
         /*
-        kDebug() << uuid << data->value("Device").toString() <<
+        qDebug() << uuid << data->value("Device").toString() <<
                             data->value("Usage").toString() <<
                             data->value("File System Type").toString() <<
                             data->value("Size").toString();

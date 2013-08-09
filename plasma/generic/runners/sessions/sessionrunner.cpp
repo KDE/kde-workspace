@@ -20,7 +20,7 @@
 
 
 #include <KAuthorized>
-#include <KDebug>
+#include <QDebug>
 #include <KLocale>
 #include <KMessageBox>
 
@@ -150,7 +150,7 @@ void SessionRunner::match(Plasma::RunnerContext &context)
         }
     }
 
-    //kDebug() << "session switching to" << (listAll ? "all sessions" : term);
+    //qDebug() << "session switching to" << (listAll ? "all sessions" : term);
     bool switchUser = listAll ||
                       term.compare(i18n("switch user"), Qt::CaseInsensitive) == 0 ||
                       term.compare(i18n("new session"), Qt::CaseInsensitive) == 0;

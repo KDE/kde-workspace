@@ -23,7 +23,7 @@
 #include <QPainter>
 #include <QTimeLine>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KPushButton>
 

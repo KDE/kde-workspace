@@ -24,7 +24,7 @@
 #include <QNetworkReply>
 #include <QTextDocument>
 
-#include <kdebug.h>
+#include <QDebug>
 #include <kio/global.h>
 #include <KIconLoader>
 #include <KLocale>

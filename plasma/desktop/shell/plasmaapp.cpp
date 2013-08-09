@@ -52,7 +52,7 @@
 #include <KAction>
 #include <KAuthorized>
 #include <KCrash>
-#include <KDebug>
+#include <QDebug>
 #include <KCmdLineArgs>
 #include <KGlobalAccel>
 #include <KGlobalSettings>
@@ -122,7 +122,7 @@ PlasmaApp::PlasmaApp()
       m_pendingFixedDashboard(false),
       m_unlockCorona(false)
 {
-    kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "plasma app ctor start" << "(line:" << __LINE__ << ")";
+    qDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "plasma app ctor start" << "(line:" << __LINE__ << ")";
     suspendStartup(true);
 
     if (KGlobalSettings::isMultiHead()) {
@@ -259,7 +259,7 @@ PlasmaApp::PlasmaApp()
         cacheSize = memorySize / 100;
     }
 
-    kDebug() << "Setting the pixmap cache size to" << cacheSize << "kilobytes";
+    qDebug() << "Setting the pixmap cache size to" << cacheSize << "kilobytes";
     QPixmapCache::setCacheLimit(cacheSize);
 
     KAction *showAction = new KAction(this);
@@ -283,7 +283,7 @@ PlasmaApp::PlasmaApp()
     Plasma::AuthorizationManager::self()->setAuthorizationPolicy(Plasma::AuthorizationManager::PinPairing);
 
     QTimer::singleShot(0, this, SLOT(setupDesktop()));
-    kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "plasma app ctor end" << "(line:" << __LINE__ << ")";
+    qDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "plasma app ctor end" << "(line:" << __LINE__ << ")";
 }
 
 PlasmaApp::~PlasmaApp()
@@ -329,7 +329,7 @@ void PlasmaApp::setupDesktop()
     desktop()->setPalette(palette);
 
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(cleanup()));
-    kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "Plasma App SetupDesktop()" << "(line:" << __LINE__ << ")";
+    qDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "Plasma App SetupDesktop()" << "(line:" << __LINE__ << ")";
 
     // now connect up the creation timers and start them to get the views created
     connect(&m_panelViewCreationTimer, SIGNAL(timeout()), this, SLOT(createWaitingPanels()));
@@ -493,14 +493,14 @@ void PlasmaApp::panelHidden(bool hidden)
 {
     if (hidden) {
         ++m_panelHidden;
-        //kDebug() << "panel hidden" << m_panelHidden;
+        //qDebug() << "panel hidden" << m_panelHidden;
     } else {
         --m_panelHidden;
         if (m_panelHidden < 0) {
-            kDebug() << "panelHidden(false) called too many times!";
+            qDebug() << "panelHidden(false) called too many times!";
             m_panelHidden = 0;
         }
-        //kDebug() << "panel unhidden" << m_panelHidden;
+        //qDebug() << "panel unhidden" << m_panelHidden;
     }
 }
 
@@ -547,7 +547,7 @@ void PlasmaApp::toggleActivityManager()
 ControllerWindow *PlasmaApp::showController(int screen, Plasma::Containment *containment, bool widgetExplorerMode)
 {
     if (!containment) {
-        kDebug() << "no containment";
+        qDebug() << "no containment";
         return 0;
     }
 
@@ -555,7 +555,7 @@ ControllerWindow *PlasmaApp::showController(int screen, Plasma::Containment *con
     ControllerWindow *controller = controllerPtr.data();
 
     if (!controller) {
-        //kDebug() << "controller not found for screen" << screen;
+        //qDebug() << "controller not found for screen" << screen;
         controllerPtr = controller = new ControllerWindow(0);
         m_widgetExplorers.insert(screen, controllerPtr);
     }
@@ -609,7 +609,7 @@ bool PlasmaApp::x11EventFilter(XEvent *event)
 
         /*
         if (event->type == ClientMessage) {
-            kDebug() << "client message with" << event->xclient.message_type << m_XdndEnterAtom << event->xcrossing.window;
+            qDebug() << "client message with" << event->xclient.message_type << m_XdndEnterAtom << event->xcrossing.window;
         }
         */
 
@@ -620,16 +620,16 @@ bool PlasmaApp::x11EventFilter(XEvent *event)
             if (!dndEnter) {
                 dndPosition = event->xclient.message_type == m_XdndPositionAtom;
                 if (!dndPosition) {
-                    //kDebug() << "FAIL!";
+                    //qDebug() << "FAIL!";
                     return KUniqueApplication::x11EventFilter(event);
                 }
             } else {
-                //kDebug() << "on enter" << event->xclient.data.l[0];
+                //qDebug() << "on enter" << event->xclient.data.l[0];
             }
         }
 
         PanelView *panel = findPanelForTrigger(event->xcrossing.window);
-        //kDebug() << "panel?" << panel << ((dndEnter || dndPosition) ? "Drag and drop op" : "Mouse move op");
+        //qDebug() << "panel?" << panel << ((dndEnter || dndPosition) ? "Drag and drop op" : "Mouse move op");
         if (panel) {
             if (dndEnter || dndPosition) {
                 QPoint p;
@@ -662,14 +662,14 @@ bool PlasmaApp::x11EventFilter(XEvent *event)
                 XSendEvent(QX11Info::display(), l[0], False, NoEventMask, (XEvent*)&response);
             } else if (event->type == EnterNotify) {
                 panel->hintOrUnhide(QPoint(-1, -1));
-                //kDebug() << "entry";
+                //qDebug() << "entry";
             //FIXME: this if it was possible to avoid the polling
             /*} else if (event->type == LeaveNotify) {
                 panel->unhintHide();
             */
             } else if (event->type == MotionNotify) {
                 XMotionEvent *motion = (XMotionEvent*)event;
-                //kDebug() << "motion" << motion->x << motion->y << panel->location();
+                //qDebug() << "motion" << motion->x << motion->y << panel->location();
                 panel->hintOrUnhide(QPoint(motion->x_root, motion->y_root));
             }
         }
@@ -681,14 +681,14 @@ bool PlasmaApp::x11EventFilter(XEvent *event)
 
 void PlasmaApp::screenRemoved(int id)
 {
-    kDebug() << "@@@@" << id;
+    qDebug() << "@@@@" << id;
     QMutableListIterator<DesktopView *> it(m_desktops);
     while (it.hasNext()) {
         DesktopView *view = it.next();
         if (view->screen() == id) {
             // the screen was removed, so we'll destroy the
             // corresponding view
-            kDebug() << "@@@@removing the view for screen" << id;
+            qDebug() << "@@@@removing the view for screen" << id;
             view->setContainment(0);
             it.remove();
             delete view;
@@ -793,9 +793,9 @@ bool PlasmaApp::canRelocatePanel(PanelView * view, Kephal::Screen *screen)
             break;
     }
 
-    kDebug() << "testing:" << screen->id() << view << view->geometry() << view->location() << newGeom;
+    qDebug() << "testing:" << screen->id() << view << view->geometry() << view->location() << newGeom;
     foreach (PanelView *pv, m_panels) {
-        kDebug() << pv << pv->screen() << pv->screen() << pv->location() << pv->geometry();
+        qDebug() << pv << pv->screen() << pv->screen() << pv->location() << pv->geometry();
         if (pv != view &&
             pv->screen() == screen->id() &&
             pv->location() == view->location() &&
@@ -812,7 +812,7 @@ DesktopView* PlasmaApp::viewForScreen(int screen, int desktop) const
 {
     foreach (DesktopView *view, m_desktops) {
         if (view->containment()) {
-            kDebug() << "comparing" << view->containment()->screen() << screen;
+            qDebug() << "comparing" << view->containment()->screen() << screen;
         }
         if (view->containment() && view->containment()->screen() == screen && (desktop < 0 || view->containment()->desktop() == desktop)) {
             return view;
@@ -865,7 +865,7 @@ DesktopCorona* PlasmaApp::corona(bool createIfMissing)
         }
 
         QTimer::singleShot(5000, this, SLOT(wallpaperCheckInTimeout()));
-        kDebug() << " ------------------------------------------>" << t.elapsed() << m_startupSuspendWaitCount;
+        qDebug() << " ------------------------------------------>" << t.elapsed() << m_startupSuspendWaitCount;
     }
 
     return m_corona;
@@ -929,8 +929,8 @@ bool PlasmaApp::isPanelContainment(Plasma::Containment *containment)
 
 void PlasmaApp::createView(Plasma::Containment *containment)
 {
-    kDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "Plasma App createView() start" << "(line:" << __LINE__ << ")";
-    kDebug() << "Containment name:" << containment->name()
+    qDebug() << "!!{} STARTUP TIME" << QTime().msecsTo(QTime::currentTime()) << "Plasma App createView() start" << "(line:" << __LINE__ << ")";
+    qDebug() << "Containment name:" << containment->name()
              << "| type" << containment->containmentType()
              <<  "| screen:" << containment->screen()
              <<  "| desktop:" << containment->desktop()
@@ -1073,25 +1073,25 @@ void PlasmaApp::createWaitingDesktops()
 
             const int desktop = AppSettings::perVirtualDesktopViews() ? containment->desktop() : -1;
             if (desktop >= KWindowSystem::numberOfDesktops()) {
-                kDebug() << "not creating a view on desktop" << desktop << " as it does not exist";
+                qDebug() << "not creating a view on desktop" << desktop << " as it does not exist";
                 continue;
             }
 
             const int screen = containment->screen();
             if (screen >= m_corona->numScreens() || screen < 0) {
-                kDebug() << "not creating a view on screen" << screen << "as it does not exist";
+                qDebug() << "not creating a view on screen" << screen << "as it does not exist";
                 continue;
             }
 
             DesktopView *view = viewForScreen(screen, desktop);
 
             if (view) {
-                kDebug() << "already had a view for" << containment->screen() << containment->desktop();
+                qDebug() << "already had a view for" << containment->screen() << containment->desktop();
                 // we already have a view for this screen
                 continue;
             }
 
-            kDebug() << "creating a new view for" << containment->screen() << containment->desktop()
+            qDebug() << "creating a new view for" << containment->screen() << containment->desktop()
                      << "and we have" << m_corona->numScreens() << "screens";
 
             // we have a new screen. neat.
@@ -1115,7 +1115,7 @@ void PlasmaApp::containmentAdded(Plasma::Containment *containment)
     if (isPanelContainment(containment)) {
         foreach (PanelView * panel, m_panels) {
             if (panel->containment() == containment) {
-                kDebug() << "not creating second PanelView with existing Containment!!";
+                qDebug() << "not creating second PanelView with existing Containment!!";
                 return;
             }
         }
@@ -1145,8 +1145,8 @@ void PlasmaApp::prepareContainment(Plasma::Containment *containment)
         if (!(m_loadingActivity.isEmpty() || m_corona->offscreenWidgets().contains(containment))) {
             Plasma::Context *context = containment->context();
             if (context->currentActivityId().isEmpty()) {
-                //kDebug() << "@#$%@#$%@#$%@#$%#@$#@%@$#^%$&^$^$%#%$";
-                //kDebug() << "script->containment->activity";
+                //qDebug() << "@#$%@#$%@#$%@#$%#@$#@%@$#^%$&^$^$%#%$";
+                //qDebug() << "script->containment->activity";
                 Activity *activity = m_corona->activity(m_loadingActivity);
                 Q_ASSERT(activity);
                 activity->replaceContainment(containment);
@@ -1168,27 +1168,27 @@ void PlasmaApp::prepareContainment(Plasma::Containment *containment)
 void PlasmaApp::containmentScreenOwnerChanged(int wasScreen, int isScreen, Plasma::Containment *containment)
 {
     Q_UNUSED(wasScreen)
-    kDebug() << "@@@was" << wasScreen << "is" << isScreen << (QObject*)containment << m_desktops.count();
+    qDebug() << "@@@was" << wasScreen << "is" << isScreen << (QObject*)containment << m_desktops.count();
 
     if (isScreen < 0) {
-        kDebug() << "@@@screen<0";
+        qDebug() << "@@@screen<0";
         return;
     }
 
     if (isPanelContainment(containment)) {
-        kDebug() << "@@@isPanel";
+        qDebug() << "@@@isPanel";
         return;
     }
 
     bool pvd = AppSettings::perVirtualDesktopViews();
     foreach (DesktopView *view, m_desktops) {
         if (view->screen() == isScreen && (!pvd || view->desktop() == containment->desktop())) {
-            kDebug() << "@@@@found view" << view;
+            qDebug() << "@@@@found view" << view;
             return;
         }
     }
 
-    kDebug() << "@@@@appending";
+    qDebug() << "@@@@appending";
     m_desktopsWaiting.append(containment);
     m_desktopViewCreationTimer.start();
 }
@@ -1272,7 +1272,7 @@ void PlasmaApp::cloneCurrentActivity()
 
     //copy the old config to the new location
     oldActivity->save(external);
-    //kDebug() << "saved to" << file;
+    //qDebug() << "saved to" << file;
 
     //load the new one
     controller->setCurrentActivity(newId);
@@ -1319,7 +1319,7 @@ bool PlasmaApp::perVirtualDesktopViews() const
 
 void PlasmaApp::checkVirtualDesktopViews(int numDesktops)
 {
-    kDebug() << numDesktops;
+    qDebug() << numDesktops;
     if (AppSettings::perVirtualDesktopViews()) {
         QMutableListIterator<DesktopView *> it(m_desktops);
         while (it.hasNext()) {
@@ -1396,13 +1396,13 @@ void PlasmaApp::panelRemoved(QObject *panel)
 
 void PlasmaApp::remotePlasmoidAdded(Plasma::PackageMetadata metadata)
 {
-    //kDebug();
+    //qDebug();
     if (m_desktops.isEmpty()) {
         return;
     }
 
     if (m_corona->immutability() == Plasma::SystemImmutable) {
-        kDebug() << "Corona is system locked";
+        qDebug() << "Corona is system locked";
         return;
     }
 
@@ -1428,7 +1428,7 @@ void PlasmaApp::remotePlasmoidAdded(Plasma::PackageMetadata metadata)
     m_mapper->setMapping(notification, metadata.remoteLocation().prettyUrl());
     connect(notification, SIGNAL(action1Activated()), m_mapper, SLOT(map()));
 
-    kDebug() << "firing notification";
+    qDebug() << "firing notification";
     notification->sendEvent();
 }
 
@@ -1455,7 +1455,7 @@ void PlasmaApp::plasmoidAccessFinished(Plasma::AccessAppletJob *job)
 
     Plasma::Containment *c = m_desktops.at(0)->containment();
     if (c) {
-        kDebug() << "adding applet";
+        qDebug() << "adding applet";
         c->addApplet(job->applet(), QPointF(-1, -1), false);
     }
 }
@@ -1490,9 +1490,9 @@ void PlasmaApp::createActivityFromScript(const QString &script, const QString &n
         a->setIcon(icon);
     }
 
-    //kDebug() << "$$$$$$$$$$$$$$$$ begin script for" << m_loadingActivity;
+    //qDebug() << "$$$$$$$$$$$$$$$$ begin script for" << m_loadingActivity;
     m_corona->evaluateScripts(QStringList() << script, false);
-    //kDebug() << "$$$$$$$$$$$$$$$$ end script for" << m_loadingActivity;
+    //qDebug() << "$$$$$$$$$$$$$$$$ end script for" << m_loadingActivity;
 
     controller->setCurrentActivity(m_loadingActivity);
     m_loadingActivity.clear();

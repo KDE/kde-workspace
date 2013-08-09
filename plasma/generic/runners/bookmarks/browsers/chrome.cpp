@@ -24,7 +24,7 @@
 #include "browsers/findprofile.h"
 #include <qjson/parser.h>
 #include <QFileInfo>
-#include <KDebug>
+#include <QDebug>
 #include "bookmarksrunner_defs.h"
 #include <QFileInfo>
 #include <QDir>

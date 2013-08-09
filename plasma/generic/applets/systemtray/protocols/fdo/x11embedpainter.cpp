@@ -25,7 +25,7 @@
 #include <QtCore/QTime>
 #include <QtCore/QTimer>
 
-#include <KDebug>
+#include <QDebug>
 
 
 #define MAX_PAINTS_PER_SEC 20
@@ -85,7 +85,7 @@ void X11EmbedPainter::updateContainer(X11EmbedContainer *container)
         if (msecsToNextPaint > 0 && msecsToNextPaint < MIN_TIME_BETWEEN_PAINTS) {
             ++d->fastPaints;
             if (d->fastPaints > 2) {
-                //kDebug() << "Delaying paint by" << msecsToNextPaint << "msecs";
+                //qDebug() << "Delaying paint by" << msecsToNextPaint << "msecs";
                 d->delayedPaintTimer.start(msecsToNextPaint);
             } else {
                 d->delayedPaintTimer.start(0);

@@ -27,7 +27,7 @@
 #include <QtOpenGL/QtOpenGL>
 #endif
 
-#include <KDebug>
+#include <QDebug>
 #include <KWindowSystem>
 
 #include <Plasma/Applet>
@@ -201,7 +201,7 @@ bool NetView::event(QEvent *e)
 
 void NetView::screenOwnerChanged(int wasScreen, int isScreen, Plasma::Containment* containment)
 {
-    kDebug() << "was, is, containment:" << wasScreen << isScreen << (QObject*)containment;
+    qDebug() << "was, is, containment:" << wasScreen << isScreen << (QObject*)containment;
     if (containment->containmentType() == Plasma::Containment::PanelContainment) {
         // we don't care about panel containments changing screens on us
         return;
@@ -233,7 +233,7 @@ void NetView::updateGeometry()
         return;
     }
 
-    kDebug() << "New containment geometry is" << c->geometry();
+    qDebug() << "New containment geometry is" << c->geometry();
 
     switch (c->location()) {
     case Plasma::TopEdge:
@@ -267,7 +267,7 @@ void NetView::grabContainment()
 
     NetCorona *corona = qobject_cast<NetCorona*>(scene());
     if (!corona) {
-        kDebug() << "no corona :(";
+        qDebug() << "no corona :(";
         return;
     }
 

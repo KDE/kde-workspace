@@ -22,7 +22,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 
-#include <KDebug>
+#include <QDebug>
 #include <KMenu>
 #include <KWindowSystem>
 
@@ -97,7 +97,7 @@ void SwitchDesktop::switchTo(QAction *action)
 
 void SwitchDesktop::wheelEvent(QGraphicsSceneWheelEvent *event)
 {
-    kDebug() << event->orientation() << event->delta();
+    qDebug() << event->orientation() << event->delta();
     const int numDesktops = KWindowSystem::numberOfDesktops();
     const int currentDesktop = KWindowSystem::currentDesktop();
 

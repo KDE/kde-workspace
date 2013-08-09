@@ -23,7 +23,7 @@
 #include <QGraphicsLinearLayout>
 #include <QGraphicsSceneMouseEvent>
 
-#include <KDebug>
+#include <QDebug>
 #include <KWindowSystem>
 #include <KIcon>
 
@@ -64,7 +64,7 @@ void ActivityBar::init()
         m_engine = dataEngine("org.kde.activities");
         Plasma::DataEngine::Data data = m_engine->query("Status");
         QStringList activities = data["Running"].toStringList();
-        //kDebug() << "$$$$$$$$$$$$# sources:" << activities.size();
+        //qDebug() << "$$$$$$$$$$$$# sources:" << activities.size();
         foreach (const QString &id, activities) {
             insertActivity(id);
         }
@@ -78,7 +78,7 @@ void ActivityBar::init()
             Plasma::Corona *c = containment()->corona();
 
             if (!c) {
-                kDebug() << "No corona, can't happen";
+                qDebug() << "No corona, can't happen";
                 setFailedToLaunch(true);
                 return;
             }
@@ -147,7 +147,7 @@ void ActivityBar::insertContainment(Plasma::Containment *cont)
 void ActivityBar::insertActivity(const QString &id)
 {
     //assumption: activities are always added at the end of the list
-    //kDebug() << "activity" << id;
+    //qDebug() << "activity" << id;
     m_activities.append(id);
     m_tabBar->addTab(QString()); //name will be added on dataUpdated
 }
@@ -328,7 +328,7 @@ void ActivityBar::contextChanged(Plasma::Context *context)
 
 void ActivityBar::dataUpdated(const QString &source, const Plasma::DataEngine::Data &data)
 {
-    //kDebug() << "$$$$$$$$$$$$$$$$$$$" << source;
+    //qDebug() << "$$$$$$$$$$$$$$$$$$$" << source;
     if (source == "Status") {
         //special source, not used yet
         return;

@@ -22,7 +22,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 
-#include <KDebug>
+#include <QDebug>
 
 Paste::Paste(QObject *parent, const QVariantList &args)
     : Plasma::ContainmentActions(parent, args)

@@ -30,7 +30,7 @@
 #include <QStyleOptionViewItem>
 
 // KDE
-#include <KDebug>
+#include <QDebug>
 #include <KColorScheme>
 #include <KIcon>
 #include <KIconLoader>

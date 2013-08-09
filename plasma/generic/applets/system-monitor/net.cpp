@@ -64,7 +64,7 @@ void SM::Net::configChanged()
 void SM::Net::sourceAdded(const QString& name)
 {
     if (m_rx.indexIn(name) != -1) {
-        //kDebug() << m_rx.cap(1);
+        //qDebug() << m_rx.cap(1);
         if (m_rx.cap(1) != "lo") {
             m_interfaces << name;
             if (!m_sourceTimer.isActive()) {

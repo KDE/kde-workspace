@@ -16,7 +16,7 @@
 
 #include "panelview.h"
 
-#include <KDebug>
+#include <QDebug>
 
 #include "panelcontroller.h"
 

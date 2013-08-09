@@ -20,7 +20,7 @@
 
 #include <QMimeData>
 
-#include <KDebug>
+#include <QDebug>
 #include <KRun>
 #include <KLocale>
 #include <KMimeType>
@@ -75,7 +75,7 @@ void LocationsRunner::match(Plasma::RunnerContext &context)
         }
         context.addMatch(term, match);
     } else if (type == Plasma::RunnerContext::Help) {
-        //kDebug() << "Locations matching because of" << type;
+        //qDebug() << "Locations matching because of" << type;
         Plasma::QueryMatch match(this);
         match.setType(Plasma::QueryMatch::ExactMatch);
         match.setText(i18n("Open %1", term));
@@ -103,14 +103,14 @@ void LocationsRunner::match(Plasma::RunnerContext &context)
         match.setData(url.url());
 
         if (KProtocolInfo::isHelperProtocol(url.protocol())) {
-            //kDebug() << "helper protocol" << url.protocol() <<"call external application" ;
+            //qDebug() << "helper protocol" << url.protocol() <<"call external application" ;
             if (url.protocol() == "mailto") {
                 match.setText(i18n("Send email to %1",url.path()));
             } else {
                 match.setText(i18n("Launch with %1", KProtocolInfo::exec(url.protocol())));
             }
         } else {
-            //kDebug() << "protocol managed by browser" << url.protocol();
+            //qDebug() << "protocol managed by browser" << url.protocol();
             match.setText(i18n("Go to %1", url.prettyUrl()));
         }
 
@@ -138,8 +138,8 @@ void LocationsRunner::run(const Plasma::RunnerContext &context, const Plasma::Qu
         return;
     }
 
-    //kDebug() << "command: " << context.query();
-    //kDebug() << "url: " << location << data;
+    //qDebug() << "command: " << context.query();
+    //qDebug() << "url: " << location << data;
 
     KUrl urlToRun(KUriFilter::self()->filteredUri(location, QStringList() << QLatin1String("kshorturifilter")));
 

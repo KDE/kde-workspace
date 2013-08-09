@@ -21,7 +21,7 @@
 
 #include <QAction>
 
-#include <KDebug>
+#include <QDebug>
 
 #include <Plasma/Corona>
 #include <Plasma/Theme>

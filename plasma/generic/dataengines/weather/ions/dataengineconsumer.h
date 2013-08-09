@@ -24,7 +24,7 @@
 
 #include <QtCore/QSet>
 
-#include <kdebug.h>
+#include <QDebug>
 
 #include "plasma/dataenginemanager.h"
 

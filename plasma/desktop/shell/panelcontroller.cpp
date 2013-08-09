@@ -589,7 +589,7 @@ void PanelController::mouseMoveFilter(QMouseEvent *event)
             //move panel to new screen if dragged there
             int targetScreen = corona->screenId(event->globalPos());
 
-            //kDebug() << "Moving panel from screen" << containment()->screen() << "to screen" << targetScreen;
+            //qDebug() << "Moving panel from screen" << containment()->screen() << "to screen" << targetScreen;
             containment()->setScreen(targetScreen);
             return;
         }
@@ -606,7 +606,7 @@ void PanelController::mouseMoveFilter(QMouseEvent *event)
         QPoint offset = QPoint(screenGeom.width()*dzFactor,screenGeom.height()*dzFactor);
         QRect deadzone = QRect(screenGeom.topLeft()+offset, screenGeom.bottomRight()-offset);
         if (deadzone.contains(event->globalPos())) {
-            //kDebug() << "In the deadzone:" << deadzone;
+            //qDebug() << "In the deadzone:" << deadzone;
             return;
         }
 

@@ -22,7 +22,7 @@
 
 #include <QPushButton>
 
-#include <KDebug>
+#include <QDebug>
 #include <KGlobal>
 #include <KPluginInfo>
 #include <KServiceTypeTrader>

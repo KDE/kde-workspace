@@ -21,7 +21,7 @@
 #include "firefox.h"
 #include <KJob>
 #include <KStandardDirs>
-#include <KDebug>
+#include <QDebug>
 #include "bookmarksrunner_defs.h"
 #include <QFile>
 #include <QDir>

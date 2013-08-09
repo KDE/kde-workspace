@@ -31,7 +31,7 @@
 // KDE
 #include <KAuthorized>
 #include <KIcon>
-#include <KDebug>
+#include <QDebug>
 #include <KConfigDialog>
 #include <KProcess>
 

@@ -200,7 +200,7 @@ InteractiveConsole::~InteractiveConsole()
     KConfigGroup cg(KGlobal::config(), "InteractiveConsole");
     saveDialogSize(cg);
     cg.writeEntry("SplitterState", m_splitter->saveState());
-    kDebug();
+    qDebug();
 }
 
 void InteractiveConsole::setMode(ConsoleMode mode)
@@ -490,7 +490,7 @@ void InteractiveConsole::reenableEditor(KJob* job)
 
 void InteractiveConsole::evaluateScript()
 {
-    //kDebug() << "evaluating" << m_editor->toPlainText();
+    //qDebug() << "evaluating" << m_editor->toPlainText();
     const QString path = KStandardDirs::locateLocal("appdata", s_autosaveFileName);
     saveScript(path);
 

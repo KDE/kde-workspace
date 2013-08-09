@@ -22,7 +22,7 @@
 #include <QPushButton>
 
 #include <KAuthorized>
-#include <KDebug>
+#include <QDebug>
 #ifdef Q_OS_UNIX
 #include <KDE/SuProcess>
 #endif
@@ -85,7 +85,7 @@ void ShellRunner::run(const Plasma::RunnerContext &context, const Plasma::QueryM
 
     if (m_enabled) {
 #ifdef Q_OS_UNIX
-        //kDebug() << m_asOtherUser << m_username << m_password;
+        //qDebug() << m_asOtherUser << m_username << m_password;
         if (m_asOtherUser && !m_username.isEmpty()) {
             //TODO: provide some user feedback on failure
             QString exec;

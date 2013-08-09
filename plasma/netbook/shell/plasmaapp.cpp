@@ -28,7 +28,7 @@
 #include <QtDBus/QtDBus>
 
 #include <KCrash>
-#include <KDebug>
+#include <QDebug>
 #include <KCmdLineArgs>
 #include <KStandardAction>
 #include <KWindowSystem>
@@ -109,7 +109,7 @@ public:
                 break;
         }
 
-        //kDebug() << "glow geom is" << glowGeom << "from" << triggerZone;
+        //qDebug() << "glow geom is" << glowGeom << "from" << triggerZone;
         setGeometry(glowGeom);
         m_buffer = QPixmap(size());
     }
@@ -721,7 +721,7 @@ void PlasmaApp::createView(Plasma::Containment *containment)
     int id = viewIds.readEntry(QString::number(containment->id()), defaultId);
 
 
-    kDebug() << "new containment" << (QObject*)containment << containment->id() << "view id" << id;
+    qDebug() << "new containment" << (QObject*)containment << containment->id() << "view id" << id;
 
     //is it a desktop -and- is it active?
     if ((m_mainView && id == NetView::mainViewId()) ||
@@ -967,7 +967,7 @@ void PlasmaApp::configureContainment(Plasma::Containment *containment)
 {
     const QString id = QString::number(containment->id()) + "settings" + containment->name();
     BackgroundDialog *configDialog = qobject_cast<BackgroundDialog*>(KConfigDialog::exists(id));
-    kDebug() << configDialog;
+    qDebug() << configDialog;
 
     if (configDialog) {
         configDialog->reloadConfig();
@@ -1201,7 +1201,7 @@ void PlasmaApp::unhideHintMousePoll()
     m_glowBar->updateStrength(mousePos);
 
     if (!m_unhideTriggerGeom.contains(mousePos)) {
-        //kDebug() << "hide the glow";
+        //qDebug() << "hide the glow";
         if (m_mousePollTimer) {
             m_mousePollTimer->stop();
             disconnect(m_mousePollTimer, SIGNAL(timeout()), this, SLOT(unhideHintMousePoll()));
@@ -1219,7 +1219,7 @@ void PlasmaApp::unhideHintMousePoll()
 void PlasmaApp::createUnhideTrigger()
 {
 #ifdef Q_WS_X11
-    //kDebug() << m_unhideTrigger << None;
+    //qDebug() << m_unhideTrigger << None;
     if (!m_autoHideControlBar || m_unhideTrigger != None || !m_controlBar || m_controlBar->isVisible()) {
         return;
     }

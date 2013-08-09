@@ -19,7 +19,7 @@
 #ifndef DEVICE_SIGNALMAP_MANAGER_H
 #define DEVICE_SIGNALMAP_MANAGER_H
 
-#include <KDebug>
+#include <QDebug>
 
 #include "devicesignalmapper.h"
 

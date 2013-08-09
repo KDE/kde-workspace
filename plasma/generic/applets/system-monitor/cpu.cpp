@@ -18,7 +18,7 @@
  */
 
 #include "cpu.h"
-#include <KDebug>
+#include <QDebug>
 #include <Plasma/Theme>
 #include <KConfigDialog>
 #include <QTimer>
@@ -57,7 +57,7 @@ void SM::Cpu::init()
 void SM::Cpu::sourceChanged(const QString& name)
 {
     if (m_rx.indexIn(name) != -1) {
-        //kDebug() << m_rx.cap(1);
+        //qDebug() << m_rx.cap(1);
         //kWarning() << name; // debug
         m_cpus << name;
         if (!m_sourceTimer.isActive()) {

@@ -25,7 +25,7 @@
 
 // KDE
 #include <KAuthorized>
-#include <KDebug>
+#include <QDebug>
 #include <KJob>
 #include <KService>
 #include <KToolInvocation>
@@ -132,9 +132,9 @@ void LeaveItemHandler::logout()
     if (m_logoutAction == "logout" || m_logoutAction == "logoutonly") {
         type = KWorkSpace::ShutdownTypeNone;
     } else if (m_logoutAction == "lock") {
-        kDebug() << "Locking screen";
+        qDebug() << "Locking screen";
     } else if (m_logoutAction == "switch") {
-        kDebug() << "Switching user";
+        qDebug() << "Switching user";
     } else if (m_logoutAction == "restart") {
         type = KWorkSpace::ShutdownTypeReboot;
     } else if (m_logoutAction == "shutdown") {

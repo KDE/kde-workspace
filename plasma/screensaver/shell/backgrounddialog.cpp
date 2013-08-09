@@ -15,7 +15,7 @@
 //#include <QAbstractItemView>
 //#include <QStandardItemModel>
 
-#include <KDebug>
+#include <QDebug>
 //#include <KStandardDirs>
 //#include <KDesktopFile>
 //#include <KColorScheme>
@@ -140,7 +140,7 @@ void BackgroundDialog::reloadConfig()
 
 void BackgroundDialog::changeBackgroundMode(int mode)
 {
-    kDebug();
+    qDebug();
     QWidget* w = 0;
     WallpaperInfo wallpaperInfo = m_wallpaperMode->itemData(mode).value<WallpaperInfo>();
 
@@ -168,7 +168,7 @@ void BackgroundDialog::changeBackgroundMode(int mode)
     if (m_wallpaper) {
         m_wallpaper->setRenderingMode(wallpaperInfo.second);
         KConfigGroup cfg = wallpaperConfig(wallpaperInfo.first);
-        kDebug() << "making a" << wallpaperInfo.first << "in mode" << wallpaperInfo.second;
+        qDebug() << "making a" << wallpaperInfo.first << "in mode" << wallpaperInfo.second;
         m_wallpaper->restore(cfg);
         w = m_wallpaper->createConfigurationInterface(m_wallpaperConfig);
     }

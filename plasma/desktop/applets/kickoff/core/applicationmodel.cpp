@@ -44,7 +44,7 @@
 #include <kmimetype.h>
 #include <kservicegroup.h>
 #include <ksycoca.h>
-#include <kdebug.h>
+#include <QDebug>
 
 #include <assert.h>
 #include <stdlib.h>

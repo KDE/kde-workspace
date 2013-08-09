@@ -23,7 +23,7 @@
 
 #include <KConfig>
 #include <KConfigGroup>
-#include <KDebug>
+#include <QDebug>
 #include <KDirWatch>
 #include <KIcon>
 #include <KRun>
@@ -52,7 +52,7 @@ RecentDocuments::~RecentDocuments()
 
 void RecentDocuments::loadRecentDocuments()
 {
-    //kDebug() << "Refreshing recent documents.";
+    //qDebug() << "Refreshing recent documents.";
     m_recentdocuments = KRecentDocument::recentDocuments();
 }
 
@@ -93,7 +93,7 @@ void RecentDocuments::run(const Plasma::RunnerContext &context, const Plasma::Qu
 {
     Q_UNUSED(context)
     QString url = match.data().toString();
-    kDebug() << "Opening Recent Document" << url;
+    qDebug() << "Opening Recent Document" << url;
     new KRun(url, 0);
 }
 

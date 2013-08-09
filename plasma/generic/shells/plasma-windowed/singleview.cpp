@@ -23,7 +23,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include <KDebug>
+#include <QDebug>
 #include <KStandardAction>
 #include <KAction>
 #include <KIconLoader>
@@ -56,7 +56,7 @@ SingleView::SingleView(Plasma::Corona *corona, Plasma::Containment *containment,
     }
 
     if (!m_applet) {
-        kDebug() << "failed to load" << pluginName;
+        qDebug() << "failed to load" << pluginName;
         return;
     }
 
@@ -140,7 +140,7 @@ void SingleView::updateGeometry()
         return;
     }
 
-    //kDebug() << "New applet geometry is" << m_applet->geometry();
+    //qDebug() << "New applet geometry is" << m_applet->geometry();
 
     if (m_applet) {
         if (m_applet->size().toSize() != size()) {

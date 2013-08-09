@@ -127,7 +127,7 @@ void DesktopView::checkDesktopAffiliation()
 {
     if (AppSettings::perVirtualDesktopViews()) {
         m_desktop = containment() ? containment()->desktop() + 1 : -1;
-        kDebug() << "setting to desktop" << m_desktop;
+        qDebug() << "setting to desktop" << m_desktop;
         KWindowSystem::setOnDesktop(winId(), m_desktop);
     } else {
         m_desktop = -1;
@@ -137,12 +137,12 @@ void DesktopView::checkDesktopAffiliation()
 
 void DesktopView::toggleDashboard()
 {
-    kDebug() << "toggling dashboard for screen" << screen() << "and destop" << desktop() <<
+    qDebug() << "toggling dashboard for screen" << screen() << "and destop" << desktop() <<
         (m_dashboard ? (m_dashboard->isVisible() ? "visible" : "hidden") : "non-existent");
     prepDashboard();
     if (m_dashboard) {
         m_dashboard->toggleVisibility();
-        kDebug() << "toggling dashboard for screen" << screen() << "and destop" << desktop() << m_dashboard->isVisible();
+        qDebug() << "toggling dashboard for screen" << screen() << "and destop" << desktop() << m_dashboard->isVisible();
     }
 }
 
@@ -233,7 +233,7 @@ void DesktopView::setDashboardContainment(Plasma::Containment *containment)
 void DesktopView::screenResized(Kephal::Screen *s)
 {
     if (s->id() == screen()) {
-        kDebug() << screen();
+        qDebug() << screen();
         adjustSize();
     }
 }
@@ -241,7 +241,7 @@ void DesktopView::screenResized(Kephal::Screen *s)
 void DesktopView::screenMoved(Kephal::Screen *s)
 {
     if (s->id() == screen()) {
-        kDebug() << screen();
+        qDebug() << screen();
         adjustSize();
     }
 }
@@ -250,18 +250,18 @@ void DesktopView::adjustSize()
 {
     // adapt to screen resolution changes
     QRect geom = PlasmaApp::self()->corona()->screenGeometry(screen());
-    kDebug() << "screen" << screen() << "geom" << geom;
+    qDebug() << "screen" << screen() << "geom" << geom;
     setGeometry(geom);
     if (containment()) {
         containment()->resize(geom.size());
-        kDebug() << "Containment's geom after resize" << containment()->geometry();
+        qDebug() << "Containment's geom after resize" << containment()->geometry();
     }
 
     if (m_dashboard) {
         m_dashboard->setGeometry(geom);
     }
 
-    kDebug() << "Done" << screen() << geometry();
+    qDebug() << "Done" << screen() << geometry();
 }
 
 bool DesktopView::isDashboardVisible() const
@@ -278,7 +278,7 @@ void DesktopView::setContainment(Plasma::Containment *containment)
 {
     Plasma::Containment *oldContainment = this->containment();
     if (m_init && containment == oldContainment) {
-        //kDebug() << "initialized and containment is the same, aborting";
+        //qDebug() << "initialized and containment is the same, aborting";
         return;
     }
 
@@ -366,7 +366,7 @@ void DesktopView::screenOwnerChanged(int wasScreen, int isScreen, Plasma::Contai
     }
 
     /*
-    kDebug() << "was:" << wasScreen << "is:" << isScreen << "my screen:" << screen()
+    qDebug() << "was:" << wasScreen << "is:" << isScreen << "my screen:" << screen()
              << "containment:" << (QObject *)newContainment << newContainment->activity()
              << "current containment" << (QObject *)containment() 
              << "myself:" << (QObject *)this
@@ -376,13 +376,13 @@ void DesktopView::screenOwnerChanged(int wasScreen, int isScreen, Plasma::Contai
     if (containment() == newContainment &&
         wasScreen == screen() &&
         (isScreen != wasScreen || AppSettings::perVirtualDesktopViews())) {
-        //kDebug() << "nulling out containment";
+        //qDebug() << "nulling out containment";
         setContainment(0);
     }
 
     if (isScreen > -1 && isScreen == screen() &&
         (!AppSettings::perVirtualDesktopViews() || newContainment->desktop() == m_desktop - 1) ) {
-        //kDebug() << "setting new containment";
+        //qDebug() << "setting new containment";
         setContainment(newContainment);
     }
 }

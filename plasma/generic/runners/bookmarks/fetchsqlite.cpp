@@ -20,7 +20,7 @@
 
 #include "fetchsqlite.h"
 #include <QFile>
-#include <KDebug>
+#include <QDebug>
 #include "bookmarksrunner_defs.h"
 #include <QSqlQuery>
 #include <QSqlError>

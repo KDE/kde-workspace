@@ -167,7 +167,7 @@ bool NetPanelController::eventFilter(QObject *watched, QEvent *event)
         if (!screenGeom.contains(me->screenPos())) {
             //move panel to new screen if dragged there
             int targetScreen = Kephal::ScreenUtils::screenId(me->screenPos());
-            //kDebug() << "Moving panel from screen" << containment()->screen() << "to screen" << targetScreen;
+            //qDebug() << "Moving panel from screen" << containment()->screen() << "to screen" << targetScreen;
             m_containment->setScreen(targetScreen);
             return false;
         }
@@ -177,7 +177,7 @@ bool NetPanelController::eventFilter(QObject *watched, QEvent *event)
         QPoint offset = QPoint(screenGeom.width()*dzFactor,screenGeom.height()*dzFactor);
         QRect deadzone = QRect(screenGeom.topLeft()+offset, screenGeom.bottomRight()-offset);
         if (deadzone.contains(me->screenPos())) {
-            //kDebug() << "In the deadzone:" << deadzone;
+            //qDebug() << "In the deadzone:" << deadzone;
             return false;
         }
 

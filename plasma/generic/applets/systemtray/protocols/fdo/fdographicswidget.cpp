@@ -101,7 +101,7 @@ void FdoGraphicsWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 
     QWidget *widget = d->widget.data();
     if (widget->parentWidget() != parentView) {
-        //kDebug() << "embedding into" << parentView->metaObject()->className() << "(" << d->winId << ")";
+        //qDebug() << "embedding into" << parentView->metaObject()->className() << "(" << d->winId << ")";
         widget->setParent(parentView);
     }
 
@@ -179,7 +179,7 @@ void FdoGraphicsWidget::updateWidgetBackground()
 
 void FdoGraphicsWidget::handleClientEmbedded()
 {
-    //kDebug() << "client embedded (" << d->winId << ")";
+    //qDebug() << "client embedded (" << d->winId << ")";
     d->clientEmbedded = true;
     update();
 }
@@ -188,7 +188,7 @@ void FdoGraphicsWidget::handleClientEmbedded()
 void FdoGraphicsWidget::handleClientClosed()
 {
     emit clientClosed();
-    //kDebug() << "client closed (" << d->winId << ")";
+    //qDebug() << "client closed (" << d->winId << ")";
 }
 
 
@@ -196,7 +196,7 @@ void FdoGraphicsWidget::handleClientError(QX11EmbedContainer::Error error)
 {
     Q_UNUSED(error);
 
-    //kDebug() << "client error (" << d->winId << ")";
+    //qDebug() << "client error (" << d->winId << ")";
     emit clientClosed();
 }
 

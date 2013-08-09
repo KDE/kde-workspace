@@ -25,7 +25,7 @@
 #include <Plasma/ToolTipManager>
 #include <Plasma/Theme>
 #include <KTextBrowser>
-#include <KDebug>
+#include <QDebug>
 #include <KStandardDirs>
 #include <KIcon>
 #include <QGraphicsLinearLayout>

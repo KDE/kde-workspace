@@ -23,7 +23,7 @@
 #include <QGraphicsSceneWheelEvent>
 #include <QTimer>
 
-#include <KDebug>
+#include <QDebug>
 #include <KMenu>
 #include <KWindowSystem>
 
@@ -116,7 +116,7 @@ void SwitchWindow::makeMenu()
     foreach (const QString &source, tasks->sources()) {
         Plasma::DataEngine::Data window = tasks->query(source);
         if (window.value("startup").toBool()) {
-            //kDebug() << "skipped fake task" << source;
+            //qDebug() << "skipped fake task" << source;
             continue;
         }
         if (!window.value("onCurrentActivity").toBool()) {
@@ -125,7 +125,7 @@ void SwitchWindow::makeMenu()
 
         QString name = window.value("visibleNameWithState").toString();
         if (name.isEmpty()) {
-            kDebug() << "failed source" << source;
+            qDebug() << "failed source" << source;
             continue;
         }
 
@@ -196,7 +196,7 @@ QList<QAction*> SwitchWindow::contextualActions()
 void SwitchWindow::switchTo(QAction *action)
 {
     QString source = action->data().toString();
-    kDebug() << source;
+    qDebug() << source;
     Plasma::Service *service = dataEngine("tasks")->serviceForSource(source);
     if (service) {
         service->startOperationCall(service->operationDescription("activateRaiseOrIconify"));
@@ -205,7 +205,7 @@ void SwitchWindow::switchTo(QAction *action)
 
 void SwitchWindow::clearWindowsOrder()
 {
-    kDebug() << "CLEARING>.......................";
+    qDebug() << "CLEARING>.......................";
     m_windowsOrder.clear();
 }
 

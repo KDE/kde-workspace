@@ -21,7 +21,7 @@
 
 #include <kbookmarkmanager.h>
 #include <kicon.h>
-#include <kdebug.h>
+#include <QDebug>
 
 BookmarkItem::BookmarkItem(KBookmark &bookmark)
     : QStandardItem(),

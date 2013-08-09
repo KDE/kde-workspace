@@ -206,7 +206,7 @@ void ActivityManager::downloadActivityScripts()
 
 void ActivityManager::setContainment(Plasma::Containment *containment)
 {
-    kDebug() << "Setting containment to" << containment;
+    qDebug() << "Setting containment to" << containment;
     if (d->containment != containment) {
         if (d->containment) {
             d->containment->disconnect(this);

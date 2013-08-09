@@ -26,7 +26,7 @@
 #include <QGraphicsLayout>
 #include <QFile>
 
-#include <KDebug>
+#include <QDebug>
 #include <KStandardDirs>
 #include <KIcon>
 
@@ -88,7 +88,7 @@ void NetCorona::loadDefaultLayout()
 
     QString defaultConfig = KStandardDirs::locate("appdata", "plasma-default-layoutrc");
     if (!defaultConfig.isEmpty()) {
-        kDebug() << "attempting to load the default layout from:" << defaultConfig;
+        qDebug() << "attempting to load the default layout from:" << defaultConfig;
 
         // gcc bug 36490: KConfig's copy constructor is private, so passing it as a
         // temporary to importLayout, ie importLayout(KConfig(defaultConfig)) fails
@@ -213,7 +213,7 @@ void NetCorona::evaluateScripts(const QStringList &scripts)
         QFile file(script);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
             QString code = file.readAll();
-            kDebug() << "evaluating startup script:" << script;
+            qDebug() << "evaluating startup script:" << script;
             scriptEngine.evaluateScript(code);
         }
     }
@@ -226,7 +226,7 @@ void NetCorona::printScriptError(const QString &error)
 
 void NetCorona::printScriptMessage(const QString &error)
 {
-    kDebug() << "Startup script: " << error;
+    qDebug() << "Startup script: " << error;
 }
 
 

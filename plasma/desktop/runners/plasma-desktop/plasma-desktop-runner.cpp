@@ -22,7 +22,7 @@
 #include <QDBusServiceWatcher>
 #include <QDBusConnectionInterface>
 
-#include <KDebug>
+#include <QDebug>
 #include <KIcon>
 #include <KLocale>
 #include <KRun>
