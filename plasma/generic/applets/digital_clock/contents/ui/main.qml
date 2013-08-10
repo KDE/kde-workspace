@@ -20,11 +20,11 @@ import org.kde.plasma.components 0.1 as PlasmaComponents
 
 Item {
     id: main
-     property int minimumWidth: units.gridUnit * 80
+    property int minimumWidth: units.gridUnit * 80
     property int minimumHeight: units.gridUnit * 40
     property int formFactor: plasmoid.formFactor
-   // property int minimumWidth:height
-    //property int minimumHeight:width
+ //   property int minimumWidth
+ //   property int minimumHeight
     
     PlasmaCore.DataSource {
         id: dataSource

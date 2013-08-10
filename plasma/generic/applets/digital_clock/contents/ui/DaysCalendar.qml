@@ -22,7 +22,7 @@ import org.kde.plasma.extras 0.1 as PlasmaExtras
 Row {
     id:calendarGrid
     width:calendarColumn.width
-    height:parent.height*9/10
+    height:(parent.height*9/10)
     property alias days:days
     Item {
         width: calendarGrid.width/8
@@ -30,22 +30,24 @@ Row {
         Column {
             width: calendarGrid.width/8
             height: parent.height*0.9
-            spacing:calendarGrid.width/15
+            spacing:0
             clip:true
-            anchors.top:days.bottom
-            anchors.left:parent.left
-            anchors.right:parent.right
-            anchors.bottom:parent.bottom
-            anchors.horizontalCenter:days.horizontalCenter
+            anchors.fill:parent
+            anchors.topMargin:10
             Repeater { 
                 model: monthCalendar.weeksModel
                 width:(calendarGrid.width*7/8)/monthCalendar.days
-                height:0.93*calendarGrid.height/monthCalendar.weeks
-                Components.Label {
-                    id:weekNumber
-                    text: modelData + 1
-                    opacity:0.5
-                    horizontalAlignment: Text.AlignRight
+                height:0.95*calendarGrid.height/monthCalendar.weeks
+                Item {
+                    width:(calendarGrid.width*7/8)/monthCalendar.days
+                    height:0.95*calendarGrid.height/monthCalendar.weeks
+                    Components.Label {
+                        id:weekNumber
+                        text: modelData + 1
+                        opacity:0.5
+                        horizontalAlignment: Text.AlignRight
+                        anchors.centerIn:parent
+                    }
                 }
             }
         }
@@ -53,22 +55,21 @@ Row {
     Grid {
         id:calendarDays
         columns:monthCalendar.days
-        rows:1+monthCalendar.weeks//dayLabels.rows
-        width:calendarGrid.width*7/8
-        height:parent.height*9/10
+        rows:1+monthCalendar.weeks
         spacing:0
         property Item selectedItem
-       
         Repeater {
             id:days
             model: monthCalendar.days
-            Components.Label {
-                text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
-                horizontalAlignment: Text.AlignHCenter
-               // anchors.horizontalCenter: myRectangle.horizontalCenter
+            Item {
+                width:calendarGrid.width*1/8
+                height:10
+                Components.Label {
+                    text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
+                    horizontalAlignment: Text.AlignHCenter
+                    anchors.centerIn:parent
+                }
             }
-           // anchors.leftMargin:30
-            // anchors.horizontalCenter: parent.horizontalCenter
         }
         Repeater {
             id:repeater
@@ -76,7 +77,7 @@ Row {
             Rectangle {
                 id:myRectangle
                 width:(calendarGrid.width*7/8)/monthCalendar.days
-                height:0.93*calendarGrid.height/monthCalendar.weeks
+                height:0.95*calendarGrid.height/monthCalendar.weeks
                 color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
                 border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":calendarDays.selectedItem == myRectangle ? "black" : "transparent"
                 Components.Label {
@@ -96,7 +97,6 @@ Row {
                         if(list.count==0) {
                             list.model=monthCalendar.upcomingEventsModel
                         }
-                        
                     }
                     onClicked: {
                         monthCalendar.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);

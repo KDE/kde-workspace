@@ -26,6 +26,7 @@ Item {
     property string date ;
     property date showDate: new Date()
     property alias list:list
+    property alias calendarGrid:calendarGrid
     property alias text:error.text
     property alias text_event:noEvent.text
     property Item selectedItem
@@ -75,12 +76,16 @@ Item {
                 height: parent.height/20
                 width: parent.width
                 clip:true
+                focus:true
+                spacing:10
                 Components.ToolButton {
                     flat: true;
                     text: "<";
                     width: 24;
                     height: 24;
                     id:monthright
+                    anchors.left:parent.left
+                    clip:true
                     onClicked: {
                         monthCalendar.previousMonth()
                     }
@@ -89,9 +94,7 @@ Item {
                     id:month
                     width:50
                     height:24
-                    anchors.leftMargin:calendarOperations.width/3
-                    anchors.rightMargin:calendarOperations.width/5
-                    anchors.left:monthright.right
+                    anchors.right:monthYear.left
                     text:monthCalendar.monthName
                     onClicked: {
                         sectionScroll = sectionScrollComponent.createObject(month)
@@ -182,9 +185,7 @@ Item {
                     width:24
                     height:24
                     text:monthCalendar.year
-                    anchors.left:month.right
-                    anchors.leftMargin:calendarOperations.width/7
-                    anchors.rightMargin:calendarOperations.width/3
+                    anchors.centerIn:parent
                     Components.ToolButton {
                         id:increase
                         text:"^"
@@ -208,9 +209,7 @@ Item {
                     text: ">";
                     width: 24;
                     height: 24;
-                    anchors.left:monthYear.right
-                    anchors.right:calendarOperations.right
-                    anchors.leftMargin:calendarGrid.width/4
+                    anchors.right:parent.right
                     onClicked: {
                         monthCalendar.nextMonth()
                     }
@@ -238,16 +237,25 @@ Item {
                         target: currentDate
                         mainText:"Select Today"
                     }
+                    anchors {
+                        left:parent.left
+                    }
                 }
                 Components.TextField {
                     id:dateField
                     text: date==""?Qt.formatDateTime(new Date(), "d/M/yyyy"):date
                     width:calendarOperations.width/3
+                    anchors {
+                        centerIn:parent
+                    }
                 }
                 Components.TextField {
                     id:weekField
                     text:week==0?monthCalendar.currentWeek():week
-                    width:calendarOperations.width/3
+                    width:calendarOperations.width/10
+                    anchors {
+                        right:parent.right
+                    }
                 }
             }
         }
