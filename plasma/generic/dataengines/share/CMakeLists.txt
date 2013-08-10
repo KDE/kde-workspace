@@ -6,10 +6,10 @@ set(share_engine_SRCS
         shareservice.cpp
         share_package.cpp)
 
-kde4_add_plugin(plasma_engine_share ${share_engine_SRCS})
+plasma_add_plugin(plasma_engine_share ${share_engine_SRCS})
 target_link_libraries(plasma_engine_share
-                      ${KDE4_KDECORE_LIBS}
-                      ${KDE4_PLASMA_LIBS}
+                      ${KCore_LIBRARIES}
+                      ${Plasma_LIBRARIES}
                       ${KDE4_KIO_LIBS}
                       ${KDE4_KROSSCORE_LIBS})
 
@@ -32,10 +32,10 @@ set(sharepackage_SRCS
 
 add_subdirectory(backends)
 
-kde4_add_plugin(plasma_packagestructure_share
+plasma_add_plugin(plasma_packagestructure_share
         ${sharepackage_SRCS})
 target_link_libraries(plasma_packagestructure_share
-        ${KDE4_PLASMA_LIBS})
+        ${Plasma_LIBRARIES})
 
 install(TARGETS plasma_packagestructure_share
                  DESTINATION ${PLUGIN_INSTALL_DIR})
