@@ -115,6 +115,7 @@ Plasma::Service *ShareEngine::serviceForSource(const QString &source)
     return service;
 }
 
+K_EXPORT_PLASMA_DATAENGINE(share, ShareEngine)
+
 #include "shareengine.moc"
 
-K_EXPORT_PLASMA_DATAENGINE(share, ShareEngine)

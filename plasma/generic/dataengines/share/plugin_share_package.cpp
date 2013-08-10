@@ -20,4 +20,4 @@
 #include "plasma/package.h"
 #include "share_package.h"
 
-K_EXPORT_PLASMA_PACKAGESTRUCTURE(share, SharePackage)
+K_EXPORT_PLASMA_PACKAGE(share, SharePackage)

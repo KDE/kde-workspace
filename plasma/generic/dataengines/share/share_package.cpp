@@ -17,24 +17,24 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-#include "plasma/applet.h"
-#include "plasma/package.h"
+#include <KLocalizedString>
+#include <Plasma/Applet>
+#include <Plasma/Package>
 
 #include "share_package.h"
 
 
-SharePackage::SharePackage(QObject *parent, QVariantList args)
-    : Plasma::PackageStructure(parent, "Plasma/ShareProvider")
+void SharePackage::initPackage(Plasma::Package* package)
 {
-    Q_UNUSED(args)
-
-    addDirectoryDefinition("scripts", "code", i18n("Executable Scripts"));
+//    Plasma::PackageStructure::initPackage(package);
+    package->addDirectoryDefinition("scripts", "code", i18n("Executable Scripts"));
     QStringList mimetypes;
     mimetypes << "text/*";
-    setMimetypes( "scripts", mimetypes );
+    package->setMimeTypes( "scripts", mimetypes );
 
-    addFileDefinition("mainscript", "code/main.js", i18n("Main Script File"));
-    setDefaultPackageRoot("plasma/shareprovider/");
-    setServicePrefix("plasma-share-");
+    package->addFileDefinition("mainscript", "code/main.js", i18n("Main Script File"));
+    package->setDefaultPackageRoot("plasma/shareprovider/");
+    package->setServicePrefix("plasma-share-");
 }
+
 

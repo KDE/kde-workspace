@@ -11,7 +11,9 @@ target_link_libraries(plasma_engine_share
                       ${KCore_LIBRARIES}
                       ${Plasma_LIBRARIES}
                       ${KDE4_KIO_LIBS}
-                      ${KDE4_KROSSCORE_LIBS})
+                      ${KDE4_KROSSCORE_LIBS}
+                      ${KDE4Support_LIBRARIES}
+)
 
 install(TARGETS plasma_engine_share
         DESTINATION ${PLUGIN_INSTALL_DIR})

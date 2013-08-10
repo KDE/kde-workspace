@@ -28,7 +28,7 @@
 #include "shareprovider.h"
 #include "share_package.h"
 
-Plasma::PackageStructure::Ptr ShareProvider::m_packageStructure(0);
+Plasma::PackageStructure* ShareProvider::m_packageStructure(0);
 
 
 ShareProvider::ShareProvider(QObject *parent)
@@ -298,7 +298,7 @@ void ShareProvider::publish()
             tf->addMetaData("content-type", "Content-Type: application/x-www-form-urlencoded");
         } else {
             QString url = QString("%1?%2").arg(m_service.url(), QString(m_url.encodedQuery()));
-            tf = KIO::get(url);
+            tf = KIO::get(QUrl(url));
         }
     }
 
@@ -337,7 +337,7 @@ void ShareProvider::error(const QString &msg)
     emit finishedError(msg);
 }
 
-Plasma::PackageStructure::Ptr ShareProvider::packageStructure()
+Plasma::PackageStructure* ShareProvider::packageStructure()
 {
     if (!m_packageStructure) {
         m_packageStructure = new SharePackage();

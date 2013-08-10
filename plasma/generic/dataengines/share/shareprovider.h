@@ -23,6 +23,8 @@
 #include <QObject>
 #include <kio/global.h>
 #include <KDE/KIO/Job>
+#include <KUrl>
+#include <KLocalizedString>
 
 #include <Plasma/PackageStructure>
 
@@ -33,7 +35,7 @@ class ShareProvider : public QObject
 
 public:
     ShareProvider(QObject *parent =0);
-    static Plasma::PackageStructure::Ptr packageStructure();
+    static Plasma::PackageStructure* packageStructure();
 
     QString method() const;
     void setMethod(const QString &method);
@@ -67,7 +69,7 @@ public Q_SLOTS:
     void redirected(KIO::Job *job, const KUrl &from);
 
 protected Q_SLOTS:
-    // slots for kio
+    // Q_SLOTS for kio
     void mimetypeJobFinished(KJob *job);
     void openFile(KIO::Job *job);
     void finishedContentData(KIO::Job *job, const QByteArray &data);
@@ -92,7 +94,7 @@ private:
     QByteArray m_buffer;
     QByteArray m_boundary;
 
-    static Plasma::PackageStructure::Ptr m_packageStructure;
+    static Plasma::PackageStructure *m_packageStructure;
 };
 
 #endif // SHAREPROVIDER

@@ -25,7 +25,7 @@
 class SharePackage : public Plasma::PackageStructure
 {
 public:
-    explicit SharePackage(QObject *parent = 0, QVariantList args = QVariantList());
+    void initPackage(Plasma::Package *package);
 };
 
 #endif

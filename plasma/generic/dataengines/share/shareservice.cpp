@@ -76,9 +76,10 @@ void ShareJob::start()
         return;
     }
 
-    m_package = new Plasma::Package(path, ShareProvider::packageStructure());
+    m_package = new Plasma::Package(ShareProvider::packageStructure());
+    m_package->setPath(path);
     if (m_package->isValid()) {
-        const QString mainscript =
+        const QString mainscript = 
             m_package->path() + m_package->structure()->contentsPrefixPaths().at(0) +
             m_package->structure()->path("mainscript");
 
