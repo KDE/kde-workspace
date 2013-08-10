@@ -94,6 +94,8 @@ Row {
                     onEntered: {
                         monthCalendar.setSelectedDay(yearNumber, monthNumber, dayNumber);
                         list.model=monthCalendar.selectedDayModel
+                        text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
+                        text_event=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
                         if(list.count==0) {
                             list.model=monthCalendar.upcomingEventsModel
                         }
