@@ -62,59 +62,14 @@ int KbPreviewFrame::getHeight() const { return geometry.height; }
 
 void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShape& s, const QString& name)
 {
-    QList<QString> symbols;
-    int symbolset = 0;
-    if (name == "TLDE"){
-        symbols = keyboardLayout.TLDE.symbols;
-        symbolset = 1;
-    }
-    if (name == "BKSL"){
-        symbols = keyboardLayout.BKSL.symbols;
-        symbolset = 1;
-    }
-    if (name.startsWith("AE")){
-        for(int i = 0 ; i < 12 ; i++){
-            if (name == keyboardLayout.AE[i].keyname){
-                symbols = keyboardLayout.AE[i].symbols;
-                symbolset = 1;
-                break;
-            }
-        }
-    }
-    if (name.startsWith("AD")){
-        for(int i = 0 ; i < 12 ; i++){
-            if (name == keyboardLayout.AD[i].keyname){
-                symbols = keyboardLayout.AD[i].symbols;
-                symbolset = 1;
-                break;
-            }
-        }
-    }
-    if (name.startsWith("AC")){
-        for(int i = 0 ; i < 11 ; i++){
-            if (name == keyboardLayout.AC[i].keyname){
-                symbols = keyboardLayout.AC[i].symbols;
-                symbolset = 1;
-                break;
-            }
-        }
-    }
-    if (name.startsWith("AB")){
-        for(int i = 0 ; i < 11 ; i++){
-            if (name == keyboardLayout.AB[i].keyname){
-                symbols = keyboardLayout.AB[i].symbols;
-                symbolset = 1;
-                break;
-            }
-        }
-    }
-
+    int keyindex = keyboardLayout.findKey(name);
     int sz = 20;
     int cordinate[] = {0, 3, 1, 2};
-    if(symbolset == 1){
-        for(int level=0; level<symbols.size(); level++) {
+    if(keyindex != -1){
+        KbKey key = keyboardLayout.keyList.at(keyindex);
+        for(int level=0; level< (key.getSymbolCount() < 4 ? key.getSymbolCount() : 4); level++) {
             painter.setPen(color[level]);
-            painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(symbols.at(level)));
+            painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(key.getSymbol(level)));
         }
     }
     else{
@@ -249,40 +204,9 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 
 void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString& layoutVariant, const QString& model)
 {
-    QString filename = keyboardLayout.findSymbolBaseDir();
-    filename.append(layout);
-    KbLayout lt;
-    QFile file(filename);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    QString content = file.readAll();
-    file.close();
 
     geometry = grammar::parseGeometry(model);
-    lt = grammar::parseSymbols();
-    QList<QString> symstr = content.split("xkb_symbols ");
-
-    if( layoutVariant.isEmpty() ) {
-        keyboardLayout.generateLayout(symstr.at(1), layout);
-    }
-    else {
-        for(int i=1;i<symstr.size();i++) {
-            QString h=symstr.at(i);
-            int k=h.indexOf("\"");
-            h=h.mid(k);
-            k=h.indexOf("{");
-            h=h.left(k);
-            h=h.remove(" ");
-            QString f="\"";
-            f.append(layoutVariant);
-            f.append("\"");
-            f=f.remove(" ");
-
-            if(h==f){
-                keyboardLayout.generateLayout(symstr.at(i), layout);
-                break;
-            }
-        }
-    }
+    keyboardLayout = grammar::parseSymbols(layout, layoutVariant);
 
 
 }

@@ -17,6 +17,7 @@
 #include <QtCore/QDebug>
 
 #include "keyboardlayout_new.h"
+#include "keyaliases.h"
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
@@ -47,6 +48,7 @@ namespace grammar {
         KbLayout layout;
         int keyIndex, newKey;
         symbol_keywords skw;
+        Aliases alias;
 
         void getSymbol(std::string n);
         void addKeyName(std::string n);
@@ -56,8 +58,8 @@ namespace grammar {
 
     };
 
-    KbLayout parseSymbols();
-
+    KbLayout parseSymbols(const QString& layout, const QString& layoutVariant);
+    QString findSymbolBaseDir();
 }
 
 #endif //SYMBOL_PARSER_H

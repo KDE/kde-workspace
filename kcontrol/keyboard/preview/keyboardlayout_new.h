@@ -48,14 +48,12 @@ class KbLayout{
     int keyCount, includeCount;
 public:
     QList <KbKey> keyList;
+    QString country;
 
     KbLayout();
     void setName(QString n);
     void addInclude(QString n);
     void addKey();
-    QString getName(){
-        return name;
-    }
 
     int getKeyCount(){
         return keyCount;
@@ -63,6 +61,10 @@ public:
 
     int getIncludeCount(){
         return includeCount;
+    }
+
+    QString getLayoutName() const {
+        return name;
     }
 
     QString getInclude(int i);

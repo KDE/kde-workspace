@@ -18,7 +18,12 @@
 #ifndef KBPREVIEWFRAME_H
 #define KBPREVIEWFRAME_H
 
+#ifdef NEW_GEOMETRY
+#include "keyboardlayout_new.h"
+#else
 #include "keyboardlayout.h"
+#endif
+
 #include "keysymhelper.h"
 #include "keyaliases.h"
 
@@ -38,14 +43,17 @@ class KbPreviewFrame : public QFrame
 private:
     KeySymHelper symbol;
     Aliases alias;
-    KeyboardLayout keyboardLayout;
+
     static const int width = 1100, height = 490;
 #ifdef NEW_GEOMETRY
     Geometry& geometry;
     void drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name);
     float scaleFactor;
+    KbLayout keyboardLayout;
     void drawShape(QPainter &painter, const GShape& s, int x, int y, int i, const QString& name);
 #else
+    KeyboardLayout keyboardLayout;
+
     void paintTLDE(QPainter &painter, int &x, int &y);
     void paintAERow(QPainter &painter, int &x, int &y);
     void paintADRow(QPainter &painter, int &x, int &y);
