@@ -44,7 +44,7 @@ Item {
     }
     
     function eventDate(yearNumber,monthNumber,dayNumber) {
-        var d = new Date(yearNumber, monthNumber, dayNumber);
+        var d = new Date(yearNumber, monthNumber-1, dayNumber);
         return Qt.formatDate(d, "dddd dd MMM yyyy");
     }
     
