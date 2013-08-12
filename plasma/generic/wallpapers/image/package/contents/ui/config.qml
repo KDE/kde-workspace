@@ -17,12 +17,12 @@
  */
 
 import QtQuick 2.0
-import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.plasma.extras 2.0 as PlasmaExtras
+import QtQuick.Controls 1.0 as QtControls
+import QtQuick.Layouts 1.0
 import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
 import org.kde.qtextracomponents 2.0
 
-Column {
+ColumnLayout {
     id: root
     property alias cfg_Color: picker.color
     property string cfg_Image
@@ -31,9 +31,7 @@ Column {
         id: imageWallpaper
     }
 
-    PlasmaComponents.Label {
-        text: "Color:"
-    }
+
     Column {
         id: picker
 
@@ -79,17 +77,21 @@ Column {
                 picker.color = Qt.hsla(picker.hue, picker.saturation, picker.lightness, 1)
             }
         }
-        Rectangle {
-            /*anchors {
-                left: parent.left
-                right: parent.right
-            }*/
-            width: 200
-            height: 30
-            color: Qt.hsla(picker.hue, picker.saturation, picker.lightness, 1)
-            MouseArea {
-                anchors.fill: parent
-                onClicked: pickerRow.height = (pickerRow.height == 0 ? pickerRow.implicitHeight : 0)
+        Row {
+            spacing: 10
+            QtControls.Label {
+                anchors.verticalCenter: colorRect.verticalCenter
+                text: "Color:"
+            }
+            Rectangle {
+                id: colorRect
+                width: 200
+                height: 30
+                color: Qt.hsla(picker.hue, picker.saturation, picker.lightness, 1)
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: pickerRow.height = (pickerRow.height == 0 ? pickerRow.implicitHeight : 0)
+                }
             }
         }
         Row {
@@ -191,25 +193,45 @@ Column {
         }
     }
 
-    PlasmaExtras.ScrollArea {
+    QtControls.ScrollView {
+        Layout.fillHeight: true;
         anchors {
             left: parent.left
             right: parent.right
         }
         height: units.gridUnit * 30
+
+        frameVisible: true;
+        highlightOnFocus: true;
+
         GridView {
+            id: wallpapersGrid
             model: imageWallpaper.wallpaperModel
+
             delegate: MouseArea {
-                width: childrenRect.width
-                height: childrenRect.height
+                id: wallpaperDelegate
+                width: wallpapersGrid.cellWidth
+                height: wallpapersGrid.cellHeight
+
                 Column {
-                    QPixmapItem {
-                        pixmap: model.screenshot
-                        width: 100
-                        height: 100
+                    anchors {
+                        left: parent.left
+                        right: parent.right
                     }
-                    PlasmaComponents.Label {
+                    QPixmapItem {
+                        height: wallpaperDelegate.height - wallpaperName.height
+                        width: height
+                        pixmap: model.screenshot
+                    }
+                    QtControls.Label {
+                        id: wallpaperName
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
                         text: model.display
+                        wrapMode: Text.Wrap
+                        horizontalAlignment: Text.AlignHCenter
                     }
                 }
                 onClicked: {
