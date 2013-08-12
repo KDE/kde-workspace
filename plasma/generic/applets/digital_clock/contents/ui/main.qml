@@ -25,14 +25,14 @@ Item {
     property int formFactor: plasmoid.formFactor
  //   property int minimumWidth
  //   property int minimumHeight
-    
+
     PlasmaCore.DataSource {
         id: dataSource
         engine: "time"
         connectedSources: ["Local"]
         interval: 500
     }
-    
+
     Component.onCompleted: {
         var toolTipData = new Object;
         toolTipData["image"] = "preferences-system-time"; 
@@ -41,16 +41,16 @@ Item {
         plasmoid.popupIconToolTip = toolTipData;
         plasmoid.aspectRatioMode = ConstrainedSquare;
     }
-    
+
     CalendarPopup {
-        id:calendar
+        id: calendar
         anchors.top:parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         clip: true;
     }
-    
+
     property Component compactRepresentation: CompactRepresentation {
     }
 

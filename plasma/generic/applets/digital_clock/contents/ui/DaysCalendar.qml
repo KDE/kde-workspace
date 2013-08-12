@@ -20,13 +20,15 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 Row {
-    id:calendarGrid
+    id: calendarGrid
     width:calendarColumn.width
     height:(parent.height*9/10)
     property alias days:days
+
     Item {
         width: calendarGrid.width/8
         height: parent.height*0.9
+
         Column {
             width: calendarGrid.width/8
             height: parent.height*0.9
@@ -34,15 +36,18 @@ Row {
             clip:true
             anchors.fill:parent
             anchors.topMargin:10
+
             Repeater { 
                 model: monthCalendar.weeksModel
                 width:(calendarGrid.width*7/8)/monthCalendar.days
                 height:0.95*calendarGrid.height/monthCalendar.weeks
+
                 Item {
                     width:(calendarGrid.width*7/8)/monthCalendar.days
                     height:0.95*calendarGrid.height/monthCalendar.weeks
+
                     Components.Label {
-                        id:weekNumber
+                        id: weekNumber
                         text: modelData + 1
                         opacity:0.5
                         horizontalAlignment: Text.AlignRight
@@ -52,18 +57,22 @@ Row {
             }
         }
     }
+
     Grid {
-        id:calendarDays
+        id: calendarDays
         columns:monthCalendar.days
         rows:1+monthCalendar.weeks
         spacing:0
         property Item selectedItem
+
         Repeater {
-            id:days
+            id: days
             model: monthCalendar.days
+
             Item {
                 width:calendarGrid.width*1/8
                 height:10
+
                 Components.Label {
                     text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
                     horizontalAlignment: Text.AlignHCenter
@@ -71,24 +80,28 @@ Row {
                 }
             }
         }
+
         Repeater {
-            id:repeater
+            id: repeater
             model:monthCalendar.model
+
             Rectangle {
-                id:myRectangle
+                id: myRectangle
                 width:(calendarGrid.width*7/8)/monthCalendar.days
                 height:0.95*calendarGrid.height/monthCalendar.weeks
                 color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
                 border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":calendarDays.selectedItem == myRectangle ? "black" : "transparent"
+
                 Components.Label {
-                    id:label
+                    id: label
                     anchors.centerIn: parent
                     text:dayNumber
                     font.bold:(containsEventItems)||(containsTodoItems) ? true:false
                     opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
                 }
+
                 MouseArea {
-                    id:dateMouse
+                    id: dateMouse
                     anchors.fill:parent
                     hoverEnabled:true
                     onEntered: {

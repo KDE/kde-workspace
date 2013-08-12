@@ -19,25 +19,26 @@ import org.kde.pim.calendar 1.0
 import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
+
 ListView {
-    id:list
+    id: list
     height: parent.height
     width: (parent.width / 4)
     model: monthCalendar.upcomingEventsModel
-    delegate:Row {
-        spacing:4
+    delegate: Row {
+       // spacing:4
         width: parent.width
-        height:50
+        height:10
         Components.Label {
             id:sum
-            text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
+            text:  mimeType.split('.')[mimeType.split('.').length - 1] // + ": \n"+ summary 
             font.capitalization:Font.Capitalize
             font.italic:true
         }
     }
     section.property:"startDate"
     section.delegate:Components.Label {
-        id:sec_l
+        id: sec_l
         text: section
         font.weight:Font.Bold
     }

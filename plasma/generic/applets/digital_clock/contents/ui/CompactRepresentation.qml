@@ -20,7 +20,7 @@ import org.kde.plasma.components 0.1 as Components
 import org.kde.locale 0.1
 
 Item {
-    id:main
+    id: main
     property int minimumWidth:formFactor == Horizontal ? height : 1
     property int minimumHeight:formFactor == Vertical ? width  : 1
     property int formFactor: plasmoid.formFactor
@@ -38,11 +38,12 @@ Item {
     }
     
     Rectangle {
-        id:currentApp
+        id: currentApp
         width:main.width
         height:width
         anchors.centerIn:parent
         color:"transparent"
+
         Components.Label  {
             id: time
             font.pointSize:main.width/8
@@ -56,11 +57,13 @@ Item {
                 bottom:parent.bottom
             }
         }
+
         MouseArea {
             id: mouseArea
             anchors.fill: parent
             hoverEnabled: true
             onClicked: plasmoid.togglePopup()
+
             PlasmaCore.ToolTip {
                 id: tooltip
                 target: mouseArea

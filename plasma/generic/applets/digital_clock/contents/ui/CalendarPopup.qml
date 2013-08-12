@@ -20,7 +20,7 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 Item {
-    id:root
+    id: root
     width: parent.width
     height: parent.height
     property string date ;
@@ -32,22 +32,22 @@ Item {
     property Item selectedItem
     property int week;
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
-    
+
     function isToday(date) {
         if(date==Qt.formatDateTime(new Date(), "d/M/yyyy")) 
             return true ;
         else return false;
     }
-    
+
     function isTodayMonth() {
         return Qt.formatDateTime(new Date(), "yyyy-MM-dd")
     }
-    
+
     function eventDate(yearNumber,monthNumber,dayNumber) {
         var d = new Date(yearNumber, monthNumber-1, dayNumber);
         return Qt.formatDate(d, "dddd dd MMM yyyy");
     }
-    
+
     Calendar {
         id: monthCalendar
         days: 7
@@ -65,19 +65,20 @@ Item {
         anchors {
             fill:root
         }
-        
+
         Column {
-            id:calendarColumn
+            id: calendarColumn
             height: parent.height
             width: parent.width / 2
-         
+
             Row {
-                id:calendarOperations
+                id: calendarOperations
                 height: parent.height/20
                 width: parent.width
                 clip:true
                 focus:true
                 spacing:10
+
                 Components.ToolButton {
                     flat: true;
                     text: "<";
@@ -90,8 +91,9 @@ Item {
                         monthCalendar.previousMonth()
                     }
                 }
+
                 Components.ToolButton {
-                    id:month
+                    id: month
                     width:50
                     height:24
                     anchors.right:monthYear.left
@@ -101,7 +103,7 @@ Item {
                         sectionScroll.open()
                     }
                     Component {
-                        id:sectionScrollComponent
+                        id: sectionScrollComponent
                         Components.ContextMenu {
                             id:sectionScroll
                             visualParent:month
@@ -180,14 +182,15 @@ Item {
                         }
                     }
                 }
+
                 Components.ToolButton {
-                    id:monthYear
+                    id: monthYear
                     width:24
                     height:24
                     text:monthCalendar.year
                     anchors.centerIn:parent
                     Components.ToolButton {
-                        id:increase
+                        id: increase
                         text:"^"
                         width:12
                         height:12
@@ -195,7 +198,7 @@ Item {
                         onClicked:monthCalendar.nextYear()
                     }
                     Components.ToolButton {
-                        id:decrease
+                        id: decrease
                         text:"v"
                         width:12
                         height:12
@@ -204,6 +207,7 @@ Item {
                         onClicked:monthCalendar.previousYear()
                     }
                 }
+
                 Components.ToolButton {
                     flat: true;
                     text: ">";
@@ -215,19 +219,22 @@ Item {
                     }
                 }
             }
+
             DaysCalendar {
-                id:calendarGrid
+                id: calendarGrid
                 property Item selectedItem
             }
+
             Row {
-                id:calendarToolbar
+                id: calendarToolbar
                 width:calendarOperations.width
                 height:parent.height/20
                 spacing:calendarOperations.width/15
                 clip:true
                 focus:true
+
                 Components.ToolButton {
-                    id:currentDate
+                    id: currentDate
                     iconSource:"view-pim-calendar"
                     width:24
                     height:24
@@ -241,16 +248,18 @@ Item {
                         left:parent.left
                     }
                 }
+
                 Components.TextField {
-                    id:dateField
+                    id: dateField
                     text: date==""?Qt.formatDateTime(new Date(), "d/M/yyyy"):date
                     width:calendarOperations.width/3
                     anchors {
                         centerIn:parent
                     }
                 }
+
                 Components.TextField {
-                    id:weekField
+                    id: weekField
                     text:week==0?monthCalendar.currentWeek():week
                     width:calendarOperations.width/10
                     anchors {
@@ -259,8 +268,9 @@ Item {
                 }
             }
         }
+
         PlasmaCore.SvgItem {
-            id:line
+            id: line
             svg: PlasmaCore.Svg {
                 id: lineSvg
                 imagePath: "widgets/line"
@@ -273,23 +283,27 @@ Item {
                 right:eventColumn.left
             }
         }
+
         Column {
-            id:eventColumn
+            id: eventColumn
             height: parent.height
             width: parent.width / 2
+
             Components.Label {
-                id:error
+                id: error
                 text:""
                 visible: true
                 font.weight:Font.Bold
                 font.bold:true
             }
+
             Components.Label {
                 id:noEvent
                 text: ""
                 visible: true
                 font.italic:true
             }
+
             PlasmaExtras.ScrollArea {
                 anchors.fill:parent
                 anchors.topMargin:40
