@@ -82,8 +82,7 @@ Item {
                 Components.ToolButton {
                     flat: true;
                     text: "<";
-                    width: 24;
-                    height: 24;
+                    width: height;
                     id:monthright
                     anchors.left:parent.left
                     clip:true
@@ -211,8 +210,7 @@ Item {
                 Components.ToolButton {
                     flat: true;
                     text: ">";
-                    width: 24;
-                    height: 24;
+                    width: height;
                     anchors.right:parent.right
                     onClicked: {
                         monthCalendar.nextMonth()
