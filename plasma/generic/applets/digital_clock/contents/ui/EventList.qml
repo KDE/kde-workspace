@@ -26,12 +26,12 @@ ListView {
     width: (parent.width / 4)
     model: monthCalendar.upcomingEventsModel
     delegate: Row {
-       // spacing:4
+        spacing:4
         width: parent.width
-        height:10
+        height:50
         Components.Label {
             id:sum
-            text:  mimeType.split('.')[mimeType.split('.').length - 1] // + ": \n"+ summary 
+            text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
             font.capitalization:Font.Capitalize
             font.italic:true
         }

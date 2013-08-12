@@ -25,18 +25,18 @@ Item {
     property int minimumHeight:formFactor == Vertical ? width  : 1
     property int formFactor: plasmoid.formFactor
     property bool constrained:formFactor==Vertical||formFactor==Horizontal
-    
+
     PlasmaCore.DataSource {
         id: dataSource
         engine: "time"
         connectedSources: ["Local"]
         interval: 500
     }
-   
+
     Locale {
         id: locale
     }
-    
+
     Rectangle {
         id: currentApp
         width:main.width
