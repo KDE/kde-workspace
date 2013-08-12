@@ -30,7 +30,6 @@
 #include <QtDBus/QtDBus>
 #include <stdlib.h> // getenv()
 #include <ksmserver_interface.h>
-#include <kdefakes.h>
 #include <QSocketNotifier>
 
 #ifdef Q_WS_X11
