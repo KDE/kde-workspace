@@ -1,2 +1,2 @@
-installPackage(. org.kde.notifications)
+plasma_install_package(. org.kde.notifications)
 

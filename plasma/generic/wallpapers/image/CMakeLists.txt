@@ -27,4 +27,4 @@ install(FILES qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/im
 
 install(FILES wallpaper.knsrc DESTINATION ${CONFIG_INSTALL_DIR})
 
-installPackage(package org.kde.image plasma/wallpapers wallpaper)
+plasma_install_package(package org.kde.image plasma/wallpapers wallpaper)
