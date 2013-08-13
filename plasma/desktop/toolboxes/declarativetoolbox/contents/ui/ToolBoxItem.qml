@@ -27,8 +27,8 @@ Item {
     id: toolBoxItem
 
     property QtObject proxy: plasmoid.toolBox
-    property bool showing: false
-    property int expandedWidth: 320
+    property bool showing: state != "collapsed"
+    property int expandedWidth: 240
     property int expandedHeight: 240
 
     width: childrenRect.width
@@ -53,7 +53,8 @@ Item {
         }
     }
 
-    state: "collapsed"
+    //state: "collapsed"
+    state: "expanded"
 
     PlasmaCore.DataSource {
         id: dataEngine
@@ -62,7 +63,7 @@ Item {
     }
 
     onShowingChanged: {
-        print("showing changed to " + showing);
+        print("TB showing changed to " + showing);
         var qmlFile = (!showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
         var component = Qt.createComponent(qmlFile);
         if (component.status == Component.Ready) {
@@ -79,13 +80,33 @@ Item {
     }
 
     function lockScreen() {
-        print(" locking...");
+        print("TB locking...");
         performOperation("lockScreen");
     }
 
+    function lockWidgets(lock) {
+        plasmoid.lockWidgets(lock);
+    }
+
     function logout() {
-        print(" shutdown...");
+        print("TB shutdown...");
         performOperation("requestShutDown");
+    }
+
+    function containmentSettings() {
+        plasmoid.action("configure").trigger();
+    }
+
+    function shortcutSettings() {
+
+    }
+
+    function showWidgetsExplorer() {
+        plasmoid.action("add widgets").trigger();
+    }
+
+    function showActivities() {
+        print("TB FIXME: Show Activity Manager");
     }
 
 
@@ -121,6 +142,43 @@ Item {
                     actionIcon: icon
                     objectName: modelData.objectName
                 }
+            }
+
+            /* // These should come from plugins
+            ActionDelegate {
+                label: i18n("Activities")
+                actionIcon: "preferences-activities"
+                objectName: "lock screen"
+                onTriggered: showActivities();
+            }
+
+            ActionDelegate {
+                label: i18n("Shortcut Settings")
+                actionIcon: "configure-shortcuts"
+                objectName: "shortcut settings"
+                onTriggered: containmentSettings();
+            }
+            */
+            ActionDelegate {
+                label: i18n("Desktop Settings")
+                actionIcon: "configure"
+                objectName: "containment settings"
+                onTriggered: containmentSettings();
+            }
+
+            ActionDelegate {
+                label: plasmoid.immutable ? i18n("Unlock Widgets") : i18n("Lock Widgets")
+                actionIcon: plasmoid.immutable ? "object-unlocked" : "object-locked"
+                objectName: "lock widgets"
+                onTriggered: lockWidgets(!plasmoid.immutable);
+            }
+
+            ActionDelegate {
+                label: i18n("Add Widgets")
+                actionIcon: "list-add"
+                objectName: "lock screen"
+                visible: !plasmoid.immutable
+                onTriggered: showWidgetsExplorer();
             }
 
             ActionDelegate {

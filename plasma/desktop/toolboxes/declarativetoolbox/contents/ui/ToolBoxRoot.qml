@@ -133,4 +133,10 @@ Item {
     Component.onCompleted: {
         print(" XXXX TOolboxroot done");
     }
+
+    function i18n(msg) {
+        print("FIXME: i18n() is screwed in ToolBoxRoot.qml")
+        return msg;
+
+    }
 }

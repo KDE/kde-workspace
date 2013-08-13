@@ -111,14 +111,13 @@ Item {
         hoverEnabled: true
 
         onPressAndHold: {
-            if (root.pressAndHoldHandle) {
+            if (root.pressAndHoldHandle && !plasmoid.immutable) {
                 //hoverTracker.interval = 400;
                 hoverTracker.restart();
             }
         }
 
         onContainsMouseChanged: {
-
 
             animationsEnabled = true;
             //print("Mouse is " + containsMouse);
@@ -162,6 +161,7 @@ Item {
         Connections {
             target: plasmoid
             onImmutableChanged: {
+                print(" TB dragMouseArea.visible: " + plasmoid.immutable)
                 dragMouseArea.visible = !plasmoid.immutable;
                 showAppletHandle = false;
             }
