@@ -27,7 +27,7 @@ Item {
     signal triggered
     property int iconSize: 22
     property Item view: unlockedList
-    property string label: text.replace("&", "")
+    property alias label: textLabel.text
     property alias actionIcon: iconItem.icon
     height: toolBoxDelegate.iconSize + 14
     width: parent ? parent.width : 200
