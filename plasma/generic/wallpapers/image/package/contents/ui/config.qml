@@ -79,16 +79,18 @@ ColumnLayout {
             }
         }
         Row {
-            spacing: 10
+            x: formAlignment - colorRect.x
+            spacing: 4
             QtControls.Label {
                 anchors.verticalCenter: colorRect.verticalCenter
                 text: "Color:"
             }
             Rectangle {
                 id: colorRect
-                width: 200
-                height: 30
+                width: 128
+                height: 24
                 color: Qt.hsla(picker.hue, picker.saturation, picker.lightness, 1)
+                radius: 3
                 MouseArea {
                     anchors.fill: parent
                     onClicked: pickerRow.height = (pickerRow.height == 0 ? pickerRow.implicitHeight : 0)
