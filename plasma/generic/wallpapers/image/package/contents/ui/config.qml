@@ -225,9 +225,11 @@ ColumnLayout {
                     anchors {
                         left: parent.left
                         right: parent.right
+                        verticalCenter: parent.verticalCenter
                     }
                     QPixmapItem {
-                        height: wallpaperDelegate.height - wallpaperName.height
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        height: wallpaperDelegate.height - wallpaperName.height -20
                         width: height
                         pixmap: model.screenshot
                     }

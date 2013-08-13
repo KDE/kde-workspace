@@ -259,8 +259,9 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
             return m_previews.value(b.path());
         }
 
-        QUrl file(b.filePath("preferred"));
+        QUrl file(QString("file://") + b.filePath("preferred"));
         if (!m_previewJobs.contains(file) && file.isValid()) {
+
             KFileItemList list;
             list.append(KFileItem(file, QString(), 0));
             KIO::PreviewJob* job = KIO::filePreview(list,
