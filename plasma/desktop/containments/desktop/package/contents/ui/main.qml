@@ -223,7 +223,7 @@ Item {
             left: parent.left
         }
     }
-    */
+    * /
     PlasmaCore.IconItem {
         width: 24
         height: 24
@@ -236,7 +236,7 @@ Item {
             }
         }
     }
-
+    */
     Component.onCompleted: {
         placeHolderPaint.opacity = 0;
         placeHolderPaint.visible = true;
