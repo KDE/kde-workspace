@@ -68,7 +68,7 @@ Item {
             PlasmaCore.IconItem {
                 anchors.fill: parent
                 source: "plasma"
-                active: mouseArea.containsMouse
+                enabled: mouseArea.containsMouse
             }
         }
     }
