@@ -53,8 +53,7 @@ Item {
         }
     }
 
-    //state: "collapsed"
-    state: "expanded"
+    state: "collapsed"
 
     PlasmaCore.DataSource {
         id: dataEngine

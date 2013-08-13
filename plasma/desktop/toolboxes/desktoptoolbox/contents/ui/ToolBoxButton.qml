@@ -212,7 +212,7 @@ Item {
         anchors { top: parent.top; right: parent.right; margins: 4; topMargin: 12; }
         width: iconSize
         height: iconSize
-        enabled: buttonMouse.containsMouse
+        enabled: buttonMouse.containsMouse || toolBoxItem.showing
         source: "plasma"
         Connections {
             target: toolBoxButton
