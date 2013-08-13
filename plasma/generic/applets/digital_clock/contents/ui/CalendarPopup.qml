@@ -73,7 +73,7 @@ Item {
 
             Row {
                 id: calendarOperations
-                height: parent.height/20
+                height: parent.height/15
                 width: parent.width
                 clip:true
                 focus:true

@@ -115,6 +115,7 @@ Row {
                     }
                     onClicked: {
                         monthCalendar.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);
+                        console.log("Year: "+yearNumber+ ", month: " +monthNumber+ ", day: " +dayNumber)
                         var rowNumber = Math.floor(index / 7)   ;
                         week=1+monthCalendar.weeksModel[rowNumber];
                         date=dayNumber+"/"+monthNumber+"/"+yearNumber

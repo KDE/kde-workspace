@@ -21,42 +21,24 @@ import org.kde.locale 0.1
 
 Item {
     id: main
-    property int minimumWidth:formFactor == Horizontal ? height : 1
-    property int minimumHeight:formFactor == Vertical ? width  : 1
+    property int minimumWidth:formFactor == Horizontal ? width : 1
+    property int minimumHeight:formFactor == Vertical ? height  : 1
     property int formFactor: plasmoid.formFactor
     property bool constrained:formFactor==Vertical||formFactor==Horizontal
-
-    PlasmaCore.DataSource {
-        id: dataSource
-        engine: "time"
-        connectedSources: ["Local"]
-        interval: 500
-    }
 
     Locale {
         id: locale
     }
 
-    Rectangle {
-        id: currentApp
-        width:main.width
-        height:width
-        anchors.centerIn:parent
-        color:"transparent"
-
-        Components.Label  {
-            id: time
-            font.pointSize:main.width/8
-            width: Math.max(paintedWidth,time.paintedWidth)
-            text :Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm:ss AP" );
-            horizontalAlignment:main.AlignHCenter
-            anchors {
-                left:parent.left
-                leftMargin:5
-                top:parent.top
-                bottom:parent.bottom
+    Components.Label  {
+        id: time
+        font.pointSize:main.width/8
+        width: Math.max(paintedWidth,time.paintedWidth)
+        text :locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds )
+        horizontalAlignment:main.AlignHCenter
+        anchors {
+            centerIn:parent
             }
-        }
 
         MouseArea {
             id: mouseArea
