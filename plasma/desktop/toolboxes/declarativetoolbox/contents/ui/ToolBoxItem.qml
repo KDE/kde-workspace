@@ -75,6 +75,10 @@ Item {
 
     function performOperation(what) {
         var service = dataEngine.serviceForSource("PowerDevil");
+        print("========================== " + what);
+        for (var _k in service) {
+            print(" ++ key: " + _k);
+        }
         var operation = service.operationDescription(what);
         return service.startOperationCall(operation);
     }
@@ -119,6 +123,13 @@ Item {
         property Item currentItem: null
 
         imagePath: "widgets/toolbox"
+
+        Behavior on height {
+            NumberAnimation {
+                duration: 50
+                easing.type: Easing.OutQuad
+            }
+        }
 
         Timer {
             id: exitTimer
