@@ -66,7 +66,7 @@ ColumnLayout {
         onLightnessChanged: redrawTimer.restart()
         Timer {
             id: redrawTimer
-            interval: 10
+            interval: 4
             onTriggered: {
                 hsCanvas.requestPaint();
                 vCanvas.requestPaint();
