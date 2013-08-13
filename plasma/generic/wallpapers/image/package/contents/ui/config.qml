@@ -31,6 +31,7 @@ ColumnLayout {
         id: imageWallpaper
     }
 
+    SystemPalette {id: syspal}
 
     Column {
         id: picker
@@ -207,7 +208,12 @@ ColumnLayout {
         GridView {
             id: wallpapersGrid
             model: imageWallpaper.wallpaperModel
+            currentIndex: -1
 
+            highlight: Rectangle {
+                radius: 3
+                color: syspal.highlight
+            }
             delegate: MouseArea {
                 id: wallpaperDelegate
                 width: wallpapersGrid.cellWidth
@@ -232,10 +238,27 @@ ColumnLayout {
                         text: model.display
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
+                        color: (wallpapersGrid.currentIndex == index) ? syspal.highlightedText : syspal.text
                     }
                 }
                 onClicked: {
                     cfg_Image = model.path
+                    wallpapersGrid.currentIndex = index
+                }
+                Component.onCompleted: {
+                    if (cfg_Image == model.path) {
+                        makeCurrentTimer.pendingIndex = model.index
+                        makeCurrentTimer.restart()
+                    }
+                }
+            }
+            Timer {
+                id: makeCurrentTimer
+                interval: 100
+                repeat: false
+                property string pendingIndex
+                onTriggered: {
+                    wallpapersGrid.currentIndex = pendingIndex
                 }
             }
         }
