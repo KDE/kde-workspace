@@ -243,7 +243,6 @@ Item {
         print("Containment completed.");
         LayoutManager.plasmoid = plasmoid
         updateGridSize()
-        plasmoid.containmentType = "CustomContainment"
         //plasmoid.containmentType = "DesktopContainment"
         plasmoid.appletAdded.connect(addApplet)
         LayoutManager.restore()

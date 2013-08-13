@@ -207,12 +207,13 @@ Item {
         }
     }
 
-    QtExtras.QIconItem {
+    PlasmaCore.IconItem {
         id: toolBoxIcon
         anchors { top: parent.top; right: parent.right; margins: 4; topMargin: 12; }
         width: iconSize
         height: iconSize
-        icon: "plasma"
+        enabled: buttonMouse.containsMouse
+        source: "plasma"
         Connections {
             target: toolBoxButton
             onStateChanged: {
@@ -278,6 +279,8 @@ Item {
         drag.maximumX: container.width - toolBoxButton.width
         drag.minimumY: 0
         drag.maximumY: container.height - toolBoxButton.height
+
+        hoverEnabled: true
 
         onClicked: {
             print ("click state now: " + toolBoxItem.state);
