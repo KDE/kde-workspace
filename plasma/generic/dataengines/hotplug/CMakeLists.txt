@@ -4,8 +4,17 @@ set(hotplug_engine_SRCS
     hotplugjob.cpp
 )
 
-kde4_add_plugin(plasma_engine_hotplug ${hotplug_engine_SRCS})
-target_link_libraries(plasma_engine_hotplug ${KDE4_PLASMA_LIBS} ${KDE4_KDECORE_LIBS} ${KDE4_SOLID_LIBS} ${KDE4_KIO_LIBS})
+kservice_desktop_to_json(plasma-dataengine-hotplug.desktop)
+
+plasma_add_plugin(plasma_engine_hotplug ${hotplug_engine_SRCS})
+target_link_libraries(plasma_engine_hotplug
+                Qt5::DBus
+                ${KCore_LIBRARIES}
+                ${Plasma_LIBRARIES}
+                ${Solid_LIBRARIES}
+                ${KService_LIBRARIES}
+                ${KDE4_KIO_LIBS} #FIXME WHEN KRUN MOVES TO KF5
+                )
 
 install(TARGETS plasma_engine_hotplug DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-dataengine-hotplug.desktop DESTINATION ${SERVICES_INSTALL_DIR} )

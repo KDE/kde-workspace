@@ -21,12 +21,13 @@
 #include "hotplugservice.h"
 
 #include <QTimer>
+#include <QStandardPaths>
+
 
 #include <KDirWatch>
 #include <KConfigGroup>
 #include <QDebug>
 #include <KLocale>
-#include <KStandardDirs>
 #include <KDesktopFile>
 #include <kdesktopfileactions.h>
 #include <Plasma/DataContainer>
@@ -45,7 +46,9 @@ HotplugEngine::HotplugEngine(QObject* parent, const QVariantList& args)
     : Plasma::DataEngine(parent, args),
       m_dirWatch(new KDirWatch(this))
 {
-    QStringList folders = KGlobal::dirs()->findDirs("data", "solid/actions/");
+    QStringList folders = QStandardPaths::locateAll(QStandardPaths::DataLocation,
+                                                 "solid/actions/",
+                                                 QStandardPaths::LocateDirectory);
     foreach (const QString &folder, folders) {
         m_dirWatch->addDir(folder, KDirWatch::WatchFiles);
     }
@@ -108,11 +111,13 @@ void HotplugEngine::findPredicates()
 {
     m_predicates.clear();
 
-    foreach (const QString &path, KGlobal::dirs()->findAllResources("data", "solid/actions/")) {
+    foreach (const QString &path, QStandardPaths::locateAll(QStandardPaths::DataLocation,
+                                                            "solid/actions/",
+                                                            QStandardPaths::LocateDirectory)) {
         KDesktopFile cfg(path);
         const QString string_predicate = cfg.desktopGroup().readEntry("X-KDE-Solid-Predicate");
         //qDebug() << path << string_predicate;
-        m_predicates.insert(KUrl(path).fileName(), Solid::Predicate::fromString(string_predicate));
+        m_predicates.insert(QUrl(path).fileName(), Solid::Predicate::fromString(string_predicate));
     }
 
     if (m_predicates.isEmpty()) {
@@ -143,7 +148,6 @@ void HotplugEngine::updatePredicates(const QString &path)
             }
         } else if (!m_encryptedPredicate.matches(device) && sources().contains(udi)) {
             removeSource(udi);
-            scheduleSourcesUpdated();
         }
     }
 }
@@ -227,7 +231,7 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
 
         QVariantList actions;
         foreach(const QString& desktop, interestingDesktopFiles) {
-            QString actionUrl = KStandardDirs::locate("data", "solid/actions/" + desktop);
+            QString actionUrl = QStandardPaths::locate(QStandardPaths::DataLocation, "solid/actions/" + desktop);
             QList<KServiceAction> services = KDesktopFileActions::userDefinedServices(actionUrl, true);
             if (!services.isEmpty()) {
                 Plasma::DataEngine::Data action;
@@ -261,9 +265,8 @@ void HotplugEngine::onDeviceRemoved(const QString &udi)
 
     m_devices.remove(udi);
     removeSource(udi);
-    scheduleSourcesUpdated();
 }
 
-K_EXPORT_PLASMA_DATAENGINE(hotplug, HotplugEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(hotplug, HotplugEngine, "plasma-dataengine-hotplug.json")
 
 #include "hotplugengine.moc"
