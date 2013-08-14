@@ -60,6 +60,6 @@ private:
     QButtonGroup *m_buttons;
 };
 
-K_EXPORT_PLASMA_CONTAINMENTACTIONS(contextmenu, ContextMenu)
+//K_EXPORT_PLASMA_CONTAINMENTACTIONS(contextmenu, ContextMenu)
 
 #endif

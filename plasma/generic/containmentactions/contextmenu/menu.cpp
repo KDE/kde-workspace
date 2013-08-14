@@ -26,14 +26,15 @@
 #include <QVBoxLayout>
 #include <QSignalMapper>
 
+#include <KActionCollection>
 #include <KAuthorized>
 #include <QDebug>
-#include <KIcon>
-#include <KMenu>
+#include <QIcon>
+#include <QMenu>
+#include <KLocalizedString>
 
 #include <Plasma/Containment>
 #include <Plasma/Corona>
-#include <Plasma/Wallpaper>
 
 #include "kworkspace/kworkspace.h"
 #include "krunner_interface.h"
@@ -69,8 +70,8 @@ void ContextMenu::init(const KConfigGroup &config)
     QHash<QString, bool> actions;
     QSet<QString> disabled;
 
-    if (c->containmentType() == Plasma::Containment::PanelContainment ||
-        c->containmentType() == Plasma::Containment::CustomPanelContainment) {
+    if (c->containmentType() == Plasma::Types::PanelContainment ||
+        c->containmentType() == Plasma::Types::CustomPanelContainment) {
         m_actionOrder << "add widgets" << "_add panel" << "lock widgets" << "_context" << "remove";
     } else {
         actions.insert("configure shortcuts", false);
@@ -92,20 +93,20 @@ void ContextMenu::init(const KConfigGroup &config)
     }
 
     // everything below should only happen once, so check for it
-    if (c->containmentType() == Plasma::Containment::PanelContainment ||
-        c->containmentType() == Plasma::Containment::CustomPanelContainment) {
+    if (c->containmentType() == Plasma::Types::PanelContainment ||
+        c->containmentType() == Plasma::Types::CustomPanelContainment) {
         //FIXME: panel does its own config action atm...
     } else if (!m_runCommandAction) {
         m_runCommandAction = new QAction(i18n("Run Command..."), this);
-        m_runCommandAction->setIcon(KIcon("system-run"));
+        m_runCommandAction->setIcon(QIcon::fromTheme("system-run"));
         connect(m_runCommandAction, SIGNAL(triggered(bool)), this, SLOT(runCommand()));
 
         m_lockScreenAction = new QAction(i18n("Lock Screen"), this);
-        m_lockScreenAction->setIcon(KIcon("system-lock-screen"));
+        m_lockScreenAction->setIcon(QIcon::fromTheme("system-lock-screen"));
         connect(m_lockScreenAction, SIGNAL(triggered(bool)), this, SLOT(lockScreen()));
 
         m_logoutAction = new QAction(i18n("Leave..."), this);
-        m_logoutAction->setIcon(KIcon("system-shutdown"));
+        m_logoutAction->setIcon(QIcon::fromTheme("system-shutdown"));
         connect(m_logoutAction, SIGNAL(triggered(bool)), this, SLOT(startLogout()));
 
         m_separator1 = new QAction(this);
@@ -124,10 +125,10 @@ void ContextMenu::contextEvent(QEvent *event)
         return;
     }
 
-    KMenu desktopMenu;
+    QMenu desktopMenu;
     desktopMenu.addActions(actions);
     desktopMenu.adjustSize();
-    desktopMenu.exec(popupPosition(desktopMenu.size(), event));
+//    desktopMenu.exec(popupPosition(desktopMenu.size(), event));
 }
 
 QList<QAction*> ContextMenu::contextualActions()
@@ -143,8 +144,8 @@ QList<QAction*> ContextMenu::contextualActions()
         if (name == "_context") {
             actions << c->contextualActions();
         } if (name == "_wallpaper") {
-            if (c->wallpaper()) {
-                actions << c->wallpaper()->contextualActions();
+            if (!c->wallpaper().isEmpty()) {
+                //actions << c->wallpaper()->contextualActions();
             }
         } else if (QAction *a = action(name)) {
             actions << a;
@@ -165,8 +166,8 @@ QAction *ContextMenu::action(const QString &name)
     } else if (name == "_sep3") {
         return m_separator3;
     } else if (name == "_add panel") {
-        if (c->corona() && c->corona()->immutability() == Plasma::Mutable) {
-            return c->corona()->action("add panel");
+        if (c->corona() && c->corona()->immutability() == Plasma::Types::Mutable) {
+            return c->corona()->actions()->action("add panel");
         }
     } else if (name == "_run_command") {
         if (KAuthorized::authorizeKAction("run_command")) {
@@ -182,11 +183,11 @@ QAction *ContextMenu::action(const QString &name)
         }
     } else if (name == "manage activities") {
         if (c->corona()) {
-            return c->corona()->action("manage activities");
+            return c->corona()->actions()->action("manage activities");
         }
     } else {
         //FIXME: remove action: make removal of current activity possible
-        return c->action(name);
+        return c->actions()->action(name);
     }
     return 0;
 }
@@ -264,7 +265,7 @@ QWidget* ContextMenu::createConfigurationInterface(QWidget* parent)
         } else if (name == "_wallpaper") {
             item = new QCheckBox(widget);
             item->setText(i18n("Wallpaper Actions"));
-            item->setIcon(KIcon("user-desktop"));
+            item->setIcon(QIcon::fromTheme("user-desktop"));
         } else if (name == "_sep1" || name =="_sep2" || name == "_sep3") {
             item = new QCheckBox(widget);
             item->setText(i18n("[Separator]"));
@@ -309,5 +310,6 @@ void ContextMenu::save(KConfigGroup &config)
     }
 }
 
+K_EXPORT_PLASMA_CONTAINMENTACTIONS_WITH_JSON(contextmenu, ContextMenu, "plasma-containmentactions-contextmenu.json")
 
 #include "menu.moc"
