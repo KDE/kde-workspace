@@ -63,7 +63,9 @@ public:
         Active = Qt::UserRole + 17,
         DemandsAttention = Qt::UserRole + 18,
         LauncherUrl = Qt::UserRole + 19,
-        WindowList = Qt::UserRole + 20
+        WindowList = Qt::UserRole + 20,
+        MimeType = Qt::UserRole + 21,
+        MimeData = Qt::UserRole + 22
     };
 
     explicit TasksModel(GroupManager *groupManager, QObject *parent = 0);
