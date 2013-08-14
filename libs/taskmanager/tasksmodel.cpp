@@ -193,24 +193,26 @@ QVariant TasksModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-int TasksModel::activeTaskId() const
+int TasksModel::activeTaskId(TaskGroup *group) const
 {
-    foreach (AbstractGroupableItem *item, d->rootGroup->members()) {
-        if (item->itemType() == TaskItemType && static_cast<TaskItem *>(item)->task()->isActive()) {
-            return item->id();
-        } else {
-            if (item->itemType() == GroupItemType)
-            {
-                foreach(AbstractGroupableItem *subItem, static_cast<TaskGroup *>(item)->members()) {
-                    if (subItem->itemType() == TaskItemType && static_cast<TaskItem *>(subItem)->task()->isActive()) {
-                        return subItem->id();
-                    }
-                }
+    group = group ? group : d->rootGroup;
+    int id = -1;
+
+    foreach (AbstractGroupableItem *item, group->members()) {
+        if (item->itemType() == TaskItemType) {
+            TaskItem *taskItem = static_cast<TaskItem *>(item);
+
+            if (taskItem && taskItem->task() && taskItem->task()->isActive()) {
+                id = item->id();
+
+                break;
             }
+        } else if (item->itemType() == GroupItemType) {
+            id = activeTaskId(static_cast<TaskGroup *>(item));
         }
     }
 
-    return -1;
+    return id;
 }
 
 QVariant TasksModel::taskIdList(const QModelIndex& parent, bool recursive) const
