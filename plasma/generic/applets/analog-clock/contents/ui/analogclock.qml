@@ -37,7 +37,6 @@ Item {
     Component.onCompleted: {
         plasmoid.backgroundHints = "NoBackground";
         plasmoid.addEventListener("dataUpdated", dataUpdated);
-        plasmoid.addEventListener("ConfigChanged", configChanged);
         dataEngine("time").connectSource("Local", analogclock, 1000);
     }
 
@@ -50,8 +49,8 @@ Item {
     }
 
     function configChanged() {
-        showSecondsHand = plasmoid.readConfig("showSecondHand");
-        showTimezone = plasmoid.readConfig("showTimezoneString");
+        showSecondsHand = plasmoid.configuration.showSecondHand;
+        showTimezone = plasmoid.configuration.showTimezoneString;
     }
 
     PlasmaCore.Svg {
