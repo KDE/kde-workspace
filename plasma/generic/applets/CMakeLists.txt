@@ -5,7 +5,8 @@
 #    add_subdirectory(panelspacer)
 # endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #
-# add_subdirectory(analog-clock)
+plasma_install_package(analog-clock org.kde.analogclock)
+
 # add_subdirectory(batterymonitor)
 # add_subdirectory(calendar)
 # add_subdirectory(devicenotifier)

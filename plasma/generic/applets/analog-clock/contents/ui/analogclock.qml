@@ -18,8 +18,9 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import Qt 4.7
-import org.kde.plasma.core 0.1 as PlasmaCore
+import QtQuick 2.0
+
+import org.kde.plasma.core 2.0 as PlasmaCore
 import "logic.js" as Logic
 
 Item {
@@ -144,13 +145,13 @@ Item {
     PlasmaCore.Dialog {
         id: calendar
         windowFlags: Qt.Popup
-        mainItem: Calendar {
-            firstDayOfMonth: 4
-            today: "2011-12-07"
-            year: Logic.getYear(today)
-            month: Logic.getMonth(today)
-            day: Logic.getDate(today)
-        }
+//         mainItem: Calendar {
+//             firstDayOfMonth: 4
+//             today: "2011-12-07"
+//             year: Logic.getYear(today)
+//             month: Logic.getMonth(today)
+//             day: Logic.getDate(today)
+//         }
     }
 
     MouseArea {
