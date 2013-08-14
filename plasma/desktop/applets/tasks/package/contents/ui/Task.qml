@@ -56,6 +56,10 @@ DragArea {
         url: model.LauncherUrl
     }
 
+    onDragStarted: {
+        mimeData.setData(model.MimeType, model.MimeData);
+    }
+
     onItemIndexChanged: {
         if (!inPopup && !tasks.vertical && Layout.calculateStripes() > 1) {
             var newWidth = Layout.taskWidth();

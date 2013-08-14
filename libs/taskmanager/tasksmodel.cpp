@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tasksmodel.h"
 
 #include <QMetaEnum>
+#include <QMimeData>
 
 #include <KDebug>
 
@@ -171,6 +172,22 @@ QVariant TasksModel::data(const QModelIndex &index, int role) const
         }
 
         return windows;
+    } else if (role == TasksModel::MimeType) {
+        if (item->itemType() == TaskItemType) {
+            return Task::mimetype();
+        } else if (item->itemType() == GroupItemType) {
+            return Task::groupMimetype();
+        }
+    } else if (role == TasksModel::MimeData) {
+        QMimeData mimeData;
+
+        item->addMimeData(&mimeData);
+
+        if (item->itemType() == TaskItemType) {
+            return QVariant::fromValue(mimeData.data(Task::mimetype()));
+        } else if (item->itemType() == GroupItemType) {
+            return QVariant::fromValue(mimeData.data(Task::groupMimetype()));
+        }
     }
 
     return QVariant();
