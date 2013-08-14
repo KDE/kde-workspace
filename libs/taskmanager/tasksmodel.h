@@ -33,6 +33,7 @@ namespace TaskManager
 {
 
 class GroupManager;
+class TaskGroup;
 class TasksModelPrivate;
 
 class TASKMANAGER_EXPORT TasksModel : public QAbstractItemModel
@@ -79,7 +80,7 @@ public:
     Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
     Q_INVOKABLE int launcherCount() const;
 
-    Q_INVOKABLE int activeTaskId() const;
+    Q_INVOKABLE int activeTaskId(TaskGroup *group = 0) const;
     Q_INVOKABLE QVariant taskIdList(const QModelIndex &parent = QModelIndex(), bool recursive = true) const;
 
 signals:
