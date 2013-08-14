@@ -61,7 +61,7 @@ ContextMenu::~ContextMenu()
 {
 }
 
-void ContextMenu::init(const KConfigGroup &config)
+void ContextMenu::restore(const KConfigGroup &config)
 {
     Plasma::Containment *c = containment();
     Q_ASSERT(c);

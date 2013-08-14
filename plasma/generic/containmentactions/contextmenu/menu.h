@@ -30,7 +30,7 @@ public:
     ContextMenu(QObject* parent, const QVariantList& args);
     ~ContextMenu();
 
-    void init(const KConfigGroup&);
+    void restore(const KConfigGroup&);
 
     void contextEvent(QEvent *event);
     QList<QAction*> contextualActions();
@@ -59,7 +59,5 @@ private:
     QStringList m_actionOrder;
     QButtonGroup *m_buttons;
 };
-
-//K_EXPORT_PLASMA_CONTAINMENTACTIONS(contextmenu, ContextMenu)
 
 #endif
