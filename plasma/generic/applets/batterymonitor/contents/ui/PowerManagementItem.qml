@@ -30,6 +30,7 @@ FocusScope {
     height: Math.max(pmCheckBox.height, pmLabel.height) + padding.margins.top + padding.margins.bottom
 
     property bool enabled: pmCheckBox.checked
+    property int implicitWidth: theme.iconSizes.dialog + pmCheckBox.implicitWidth + 6 + pmLabel.paintedWidth
 
     Components.CheckBox {
         id: pmCheckBox
