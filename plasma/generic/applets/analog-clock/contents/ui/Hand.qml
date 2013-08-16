@@ -26,9 +26,10 @@ PlasmaCore.SvgItem {
     id: secondHand
 
     property alias rotation: rotation.angle
+    property double svgScale
 
-    width: naturalSize.width
-    height: naturalSize.height
+    width: naturalSize.width * svgScale
+    height: naturalSize.height * svgScale
     anchors.top: clock.verticalCenter
     anchors.horizontalCenter: clock.horizontalCenter
     svg: clockSvg
@@ -36,7 +37,10 @@ PlasmaCore.SvgItem {
     transform: Rotation {
         id: rotation
         angle: 0
-        origin.x: secondHand.naturalSize.width/2; origin.y: 0;
+        origin {
+            x: width/2
+            y: 0
+        }
         Behavior on angle {
             SpringAnimation { spring: 2; damping: 0.2; modulus: 360 }
         }

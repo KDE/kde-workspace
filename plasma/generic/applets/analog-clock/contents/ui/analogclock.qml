@@ -78,17 +78,20 @@ Item {
 
         PlasmaCore.SvgItem {
             id: center
-            width: naturalSize.width
-            height: naturalSize.height
+            width: naturalSize.width * face.width / face.naturalSize.width
+            height: naturalSize.height * face.width / face.naturalSize.width
             anchors.centerIn: face
             svg: clockSvg
             elementId: "HandCenterScrew"
+            z: 1000
         }
 
         PlasmaCore.SvgItem {
             anchors.fill: face
             svg: clockSvg
             elementId: "Glass"
+            width: naturalSize.width * face.width / face.naturalSize.width
+            height: naturalSize.height * face.width / face.naturalSize.width
         }
     }
 
@@ -96,20 +99,25 @@ Item {
         anchors.topMargin: 3
         elementId: "HourHandShdow"
         rotation: 180 + hours * 30 + (minutes/2)
+        svgScale: face.width / face.naturalSize.width
+
     }
     Hand {
         elementId: "HourHand"
         rotation: 180 + hours * 30 + (minutes/2)
+        svgScale: face.width / face.naturalSize.width
     }
 
     Hand {
         anchors.topMargin: 3
         elementId: "MinuteHandShadow"
         rotation: 180 + minutes * 6
+        svgScale: face.width / face.naturalSize.width
     }
     Hand {
         elementId: "MinuteHand"
         rotation: 180 + minutes * 6
+        svgScale: face.width / face.naturalSize.width
     }
 
     Hand {
@@ -117,11 +125,13 @@ Item {
         elementId: "SecondHandShadow"
         rotation: 180 + seconds * 6
         visible: showSecondsHand
+        svgScale: face.width / face.naturalSize.width
     }
     Hand {
         elementId: "SecondHand"
         rotation: 180 + seconds * 6
         visible: showSecondsHand
+        svgScale: face.width / face.naturalSize.width
     }
 
     PlasmaCore.FrameSvgItem {
@@ -157,13 +167,13 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: {
-            if (!calendar.visible) {
-                var pos = calendar.popupPosition(analogclock, Qt.AlignCenter);
-                calendar.x = pos.x;
-                calendar.y = pos.y;
-            }
-            calendar.visible = !calendar.visible;
-        }
+//         onClicked: {
+//             if (!calendar.visible) {
+//                 var pos = calendar.popupPosition(analogclock, Qt.AlignCenter);
+//                 calendar.x = pos.x;
+//                 calendar.y = pos.y;
+//             }
+//             calendar.visible = !calendar.visible;
+//         }
     }
 }
