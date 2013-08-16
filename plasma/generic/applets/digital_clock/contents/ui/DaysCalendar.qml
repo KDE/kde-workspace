@@ -25,8 +25,11 @@ Row {
     property alias days: days
     property Item selectedItem
 
+    property real cellWidth: rootRow.width/8
+    property real cellHeight: rootRow.height/7
+
     Column {
-        width: rootRow.width/8
+        width: cellWidth
         spacing: 0
         anchors.bottom: calendarDays.bottom
 
@@ -36,8 +39,8 @@ Row {
             Components.Label {
                 id: weekNumber
 
-                width: rootRow.width/8
-                height: rootRow.height/7
+                width: cellWidth
+                height: cellHeight
 
                 text: modelData + 1
                 opacity: 0.5
@@ -59,8 +62,8 @@ Row {
             model: monthCalendar.days
 
             Item {
-                width: rootRow.width/8
-                height: rootRow.height/7
+                width: cellWidth
+                height: cellHeight
 
                 Components.Label {
                     text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
@@ -76,8 +79,8 @@ Row {
 
             Rectangle {
                 id: myRectangle
-                width: rootRow.width/8
-                height: rootRow.height/7
+                width: cellWidth
+                height: cellHeight
 
                 color: (dateMouse.containsMouse)?"#eeeeee":"transparent"
                 border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":calendarDays.selectedItem == myRectangle ? "black" : "transparent"
