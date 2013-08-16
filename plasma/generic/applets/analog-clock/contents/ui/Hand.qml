@@ -1,6 +1,6 @@
 /*
- *   Author: Marco Martin <mart@kde.org>
- *   Date: Mon Dec 6 2010, 19:01:32
+ *   Copyright 2012 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 David Edmundson <davidedmundson@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as

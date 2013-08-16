@@ -1,6 +1,6 @@
 /*
- *   Author: Marco Martin <mart@kde.org>
- *   Date: Mon Dec 6 2010, 19:01:32
+ *   Copyright 2012 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 David Edmundson <davidedmundson@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -25,32 +25,33 @@ import "logic.js" as Logic
 
 Item {
     id: analogclock
-    property int minimumWidth: 250
-    property int minimumHeight: 250
+    property int minimumWidth: 20
+    property int minimumHeight: 20
 
     property int hours
     property int minutes
     property int seconds
-    property bool showSecondsHand: false
-    property bool showTimezone: false
+    property bool showSecondsHand: plasmoid.configuration.showSecondHand
+    property bool showTimezone: plasmoid.configuration.showTimezoneString
+
+
+    PlasmaCore.DataSource {
+        id: dataSource
+        engine: "time"
+        connectedSources: "Local"
+        interval: 1000
+        onDataChanged: {
+            var date = new Date(data["Local"]["Time"]);
+            hours = date.getHours();
+            minutes = date.getMinutes();
+            seconds = date.getSeconds();
+            timezoneText.text = data["Local"]["Timezone"];
+        }
+    }
 
     Component.onCompleted: {
         plasmoid.backgroundHints = "NoBackground";
-        plasmoid.addEventListener("dataUpdated", dataUpdated);
-        dataEngine("time").connectSource("Local", analogclock, 1000);
-    }
 
-    function dataUpdated(source, data) {
-        var date = new Date("January 1, 1971 "+data.Time);
-        hours = date.getHours();
-        minutes = date.getMinutes();
-        seconds = date.getSeconds();
-        timezoneText.text = data.Timezone;
-    }
-
-    function configChanged() {
-        showSecondsHand = plasmoid.configuration.showSecondHand;
-        showTimezone = plasmoid.configuration.showTimezoneString;
     }
 
     PlasmaCore.Svg {
@@ -144,6 +145,7 @@ Item {
     PlasmaCore.Dialog {
         id: calendar
         windowFlags: Qt.Popup
+        //FIXME Temporarily disabled until Calendar becomes available
 //         mainItem: Calendar {
 //             firstDayOfMonth: 4
 //             today: "2011-12-07"

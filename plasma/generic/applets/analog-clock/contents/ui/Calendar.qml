@@ -1,6 +1,6 @@
 /*
- *   Author: Viranch Mehta <viranch.mehta@gmail.com>
- *   Date: Mon Dec 7 2011
+ *   Copyright 2012 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2013 David Edmundson <davidedmundson@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
