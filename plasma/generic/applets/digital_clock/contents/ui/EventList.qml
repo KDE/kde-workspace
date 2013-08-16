@@ -26,21 +26,21 @@ ListView {
     width: (parent.width / 4)
     model: monthCalendar.upcomingEventsModel
     delegate: Row {
-        spacing:4
+        spacing: 4
         width: parent.width
         height:50
         Components.Label {
-            id:sum
-            text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n"+ summary 
-            font.capitalization:Font.Capitalize
-            font.italic:true
+            id: sum
+            text:  mimeType.split('.')[mimeType.split('.').length - 1]  + ": \n" + summary 
+            font.capitalization: Font.Capitalize
+            font.italic: true
         }
     }
-    section.property:"startDate"
+    section.property: "startDate"
     section.delegate:Components.Label {
         id: sec_l
         text: section
-        font.weight:Font.Bold
+        font.weight: Font.Bold
     }
 }
     

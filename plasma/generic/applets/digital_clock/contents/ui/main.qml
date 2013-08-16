@@ -30,25 +30,20 @@ Item {
         id: dataSource
         engine: "time"
         connectedSources: ["Local"]
-        interval: 500
+        interval: 300000
     }
 
     Component.onCompleted: {
         var toolTipData = new Object;
         toolTipData["image"] = "preferences-system-time"; 
         toolTipData["mainText"] ="Current Time"
-        toolTipData["subText"] = Qt.formatDate( dataSource.data["Local"]["Date"],"dddd dd MMM yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm:ss AP" )
+        toolTipData["subText"] = Qt.formatDate( dataSource.data["Local"]["Date"],"dddd dd MMM yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm AP" )
         plasmoid.popupIconToolTip = toolTipData;
         plasmoid.aspectRatioMode = ConstrainedSquare;
     }
 
     CalendarPopup {
         id: calendar
-        anchors.top:parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        clip: true;
     }
 
     property Component compactRepresentation: CompactRepresentation {

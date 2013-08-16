@@ -235,11 +235,10 @@ Item {
                     bottom: parent.bottom
                 }
                 spacing: 4
-                focus: true
 
                 Components.ToolButton {
                     id: currentDate
-                    iconSource:"view-pim-calendar"
+                    iconSource: "view-pim-calendar"
                     width: height
                     onClicked: {
                         monthCalendar.startDate = isTodayMonth();
@@ -247,7 +246,7 @@ Item {
                     PlasmaCore.ToolTip {
                         id: tool
                         target: currentDate
-                        mainText:"Select Today"
+                        mainText: "Select Today"
                     }
                     anchors {
                         left: parent.left
@@ -256,7 +255,7 @@ Item {
 
                 Components.TextField {
                     id: dateField
-                    text: date==""?Qt.formatDateTime(new Date(), "d/M/yyyy"):date
+                    text: date == "" ? Qt.formatDateTime ( new Date(), "d/M/yyyy" ) : date
                     width: calendarOperations.width/3
                     anchors {
                         centerIn:parent
@@ -265,7 +264,7 @@ Item {
 
                 Components.TextField {
                     id: weekField
-                    text:week==0?monthCalendar.currentWeek():week
+                    text: week == 0 ? monthCalendar.currentWeek() : week
                     width: calendarOperations.width/10
                     anchors {
                         right:parent.right
@@ -299,14 +298,14 @@ Item {
                 text: ""
                 visible: true
                 font.weight: Font.Bold
-                font.bold:true
+                font.bold: true
             }
 
             Components.Label {
                 id: noEvent
                 text: ""
                 visible: true
-                font.italic:true
+                font.italic: true
             }
 
             PlasmaExtras.ScrollArea {
@@ -315,7 +314,7 @@ Item {
                     right: parent.right
                 }
                 EventList {
-                    id:list
+                    id: list
                 }
             }
         }

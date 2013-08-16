@@ -68,53 +68,52 @@ Row {
                 Components.Label {
                     text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
                     horizontalAlignment: Text.AlignHCenter
-                    anchors.centerIn:parent
+                    anchors.centerIn: parent
                 }
             }
         }
 
         Repeater {
             id: repeater
-            model:monthCalendar.model
+            model: monthCalendar.model
 
             Rectangle {
                 id: myRectangle
                 width: cellWidth
                 height: cellHeight
 
-                color: (dateMouse.containsMouse)?"#eeeeee":"transparent"
-                border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":calendarDays.selectedItem == myRectangle ? "black" : "transparent"
+                color: (dateMouse.containsMouse) ? "#eeeeee" : "transparent"
+                border.color: isToday(dayNumber+"/"+monthNumber+"/"+yearNumber) ? "blue" : calendarDays.selectedItem == myRectangle ? "black" : "transparent"
 
                 Components.Label {
                     id: label
                     anchors.centerIn: parent
-                    text:dayNumber
-                    font.bold:(containsEventItems)||(containsTodoItems) ? true:false
+                    text: dayNumber
+                    font.bold: (containsEventItems)||(containsTodoItems) ? true : false
                     opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5 : 1.0
                 }
 
                 MouseArea {
                     id: dateMouse
-                    anchors.fill:parent
-                    hoverEnabled:true
+                    anchors.fill: parent
+                    hoverEnabled: true
                     onEntered: {
                         monthCalendar.setSelectedDay(yearNumber, monthNumber, dayNumber);
-                        list.model=monthCalendar.selectedDayModel
-                        text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
-                        text_event=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
-                        if(list.count==0) {
-                            list.model=monthCalendar.upcomingEventsModel
+                        list.model = monthCalendar.selectedDayModel
+                        text = (containsEventItems) || (containsTodoItems) ? "" : eventDate(yearNumber,monthNumber,dayNumber)
+                        text_event = (containsEventItems) || (containsTodoItems) ? "" : " No events found on this day " ;
+                        if ( list.count == 0 ) {
+                            list.model = monthCalendar.upcomingEventsModel
                         }
                     }
                     onClicked: {
                         monthCalendar.upcommingEventsFromDay(yearNumber, monthNumber, dayNumber);
-                        console.log("Year: "+yearNumber+ ", month: " +monthNumber+ ", day: " +dayNumber)
-                        var rowNumber = Math.floor(index / 7)   ;
-                        week=1+monthCalendar.weeksModel[rowNumber];
-                        date=dayNumber+"/"+monthNumber+"/"+yearNumber
-                        text=(containsEventItems)||(containsTodoItems)?"":eventDate(yearNumber,monthNumber,dayNumber)
-                        text_event=(containsEventItems)||(containsTodoItems)?"":" No events found on this day ";
-                        calendarDays.selectedItem=myRectangle
+                        var rowNumber = Math.floor ( index / 7)   ;
+                        week = 1+monthCalendar.weeksModel[rowNumber];
+                        date = dayNumber + "/" + monthNumber + "/" + yearNumber
+                        text = (containsEventItems) || (containsTodoItems) ? "" : eventDate(yearNumber,monthNumber,dayNumber)
+                        text_event = (containsEventItems) || (containsTodoItems) ? "" : " No events found on this day ";
+                        calendarDays.selectedItem = myRectangle
                     }
                 }
             }

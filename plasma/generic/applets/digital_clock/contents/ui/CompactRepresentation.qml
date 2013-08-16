@@ -32,13 +32,13 @@ Item {
 
     Components.Label  {
         id: time
-        font.pointSize:main.width/8
+        font.pointSize: main.width/8
         width: Math.max(paintedWidth,time.paintedWidth)
-        text :locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds )
-        horizontalAlignment:main.AlignHCenter
+        text : locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds )
+        horizontalAlignment: main.AlignHCenter
         anchors {
-            centerIn:parent
-            }
+            centerIn: parent
+        }
 
         MouseArea {
             id: mouseArea
@@ -50,8 +50,8 @@ Item {
                 id: tooltip
                 target: mouseArea
                 mainText:"Current Time"
-                subText: Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm:ss AP" )
-                image:"preferences-system-time"
+                subText: Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d yyyy" ) + "\n" + Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm AP" )
+                image: "preferences-system-time"
             }
         }
     }
