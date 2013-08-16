@@ -67,16 +67,15 @@ Item {
             fill:root
         }
 
-        Column {
-            id: calendarColumn
+        Item {
             height: parent.height
             width: parent.width / 2
-            spacing: 4
 
             Row {
                 id: calendarOperations
                 anchors {
                     left: parent.left
+                    top: parent.top
                     right: parent.right
                 }
                 spacing: 4
@@ -217,7 +216,15 @@ Item {
 
             DaysCalendar {
                 id: calendarGrid
-                property Item selectedItem
+
+                anchors {
+                    left: parent.left
+                    top: calendarOperations.bottom
+                    topMargin: 4
+                    right: parent.right
+                    bottom: calendarToolbar.top
+                    bottomMargin: 4
+                }
             }
 
             Row {
@@ -225,6 +232,7 @@ Item {
                 anchors {
                     left: parent.left
                     right: parent.right
+                    bottom: parent.bottom
                 }
                 spacing: 4
                 focus: true

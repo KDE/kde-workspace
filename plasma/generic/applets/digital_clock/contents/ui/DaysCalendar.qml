@@ -20,49 +20,38 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.plasma.extras 0.1 as PlasmaExtras
 Row {
-    id: calendarGrid
-    width:calendarColumn.width
-    height:(parent.height*9/10)
-    property alias days:days
+    id: rootRow
 
-    Item {
-        width: calendarGrid.width/8
-        height: parent.height*0.9
+    property alias days: days
+    property Item selectedItem
 
-        Column {
-            width: calendarGrid.width/8
-            height: parent.height*0.9
-            spacing:0
-            clip:true
-            anchors.fill:parent
-            anchors.topMargin:10
+    Column {
+        width: rootRow.width/8
+        spacing: 0
+        anchors.bottom: calendarDays.bottom
 
-            Repeater { 
-                model: monthCalendar.weeksModel
-                width:(calendarGrid.width*7/8)/monthCalendar.days
-                height:0.95*calendarGrid.height/monthCalendar.weeks
+        Repeater {
+            model: monthCalendar.weeksModel
 
-                Item {
-                    width:(calendarGrid.width*7/8)/monthCalendar.days
-                    height:0.95*calendarGrid.height/monthCalendar.weeks
+            Components.Label {
+                id: weekNumber
 
-                    Components.Label {
-                        id: weekNumber
-                        text: modelData + 1
-                        opacity:0.5
-                        horizontalAlignment: Text.AlignRight
-                        anchors.centerIn:parent
-                    }
-                }
+                width: rootRow.width/8
+                height: rootRow.height/7
+
+                text: modelData + 1
+                opacity: 0.5
+                horizontalAlignment: Text.AlignHCenter
             }
         }
     }
 
+
     Grid {
         id: calendarDays
-        columns:monthCalendar.days
-        rows:1+monthCalendar.weeks
-        spacing:0
+        columns: monthCalendar.days
+        rows: 1 + monthCalendar.weeks
+        spacing: 0
         property Item selectedItem
 
         Repeater {
@@ -70,8 +59,8 @@ Row {
             model: monthCalendar.days
 
             Item {
-                width:calendarGrid.width*1/8
-                height:10
+                width: rootRow.width/8
+                height: rootRow.height/7
 
                 Components.Label {
                     text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
@@ -87,9 +76,10 @@ Row {
 
             Rectangle {
                 id: myRectangle
-                width:(calendarGrid.width*7/8)/monthCalendar.days
-                height:0.95*calendarGrid.height/monthCalendar.weeks
-                color:(dateMouse.containsMouse)?"#eeeeee":"transparent"
+                width: rootRow.width/8
+                height: rootRow.height/7
+
+                color: (dateMouse.containsMouse)?"#eeeeee":"transparent"
                 border.color:isToday(dayNumber+"/"+monthNumber+"/"+yearNumber)?"blue":calendarDays.selectedItem == myRectangle ? "black" : "transparent"
 
                 Components.Label {
