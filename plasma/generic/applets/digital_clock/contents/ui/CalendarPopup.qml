@@ -34,8 +34,9 @@ Item {
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
 
     function isToday(date) {
-        if(date==Qt.formatDateTime(new Date(), "d/M/yyyy")) 
-            return true ;
+        if (date == Qt.formatDateTime(new Date(), "d/M/yyyy")) {
+            return true;
+        }
         else return false;
     }
 
@@ -52,12 +53,12 @@ Item {
         id: monthCalendar
         days: 7
         weeks: 6
-        startDay:1
-        sorting:Calendar.Ascending
+        startDay: 1
+        sorting: Calendar.Ascending
         startDate: "2013-07-01"
         onStartDateChanged: {
-            month.text=monthName
-            monthYear.text=year
+            month.text = monthName
+            monthYear.text = year
         }
     }
 
@@ -70,22 +71,22 @@ Item {
             id: calendarColumn
             height: parent.height
             width: parent.width / 2
+            spacing: 4
 
             Row {
                 id: calendarOperations
-                height: parent.height/15
-                width: parent.width
-                clip:true
-                focus:true
-                spacing:10
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+                spacing: 4
 
                 Components.ToolButton {
+                    id: monthright
                     flat: true;
                     text: "<";
                     width: height;
-                    id:monthright
                     anchors.left:parent.left
-                    clip:true
                     onClicked: {
                         monthCalendar.previousMonth()
                     }
@@ -93,8 +94,6 @@ Item {
 
                 Components.ToolButton {
                     id: month
-                    width:50
-                    height:24
                     anchors.right:monthYear.left
                     text:monthCalendar.monthName
                     onClicked: {
@@ -184,10 +183,8 @@ Item {
 
                 Components.ToolButton {
                     id: monthYear
-                    width:24
-                    height:24
-                    text:monthCalendar.year
-                    anchors.centerIn:parent
+                    text: monthCalendar.year
+                    anchors.centerIn: parent
                     Components.ToolButton {
                         id: increase
                         text:"^"
@@ -225,32 +222,34 @@ Item {
 
             Row {
                 id: calendarToolbar
-                width:calendarOperations.width
-                height:parent.height/20
-                spacing:calendarOperations.width/15
-                clip:true
-                focus:true
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+                spacing: 4
+                focus: true
 
                 Components.ToolButton {
                     id: currentDate
                     iconSource:"view-pim-calendar"
-                    width:24
-                    height:24
-                    onClicked:monthCalendar.startDate=isTodayMonth();
+                    width: height
+                    onClicked: {
+                        monthCalendar.startDate = isTodayMonth();
+                    }
                     PlasmaCore.ToolTip {
                         id: tool
                         target: currentDate
                         mainText:"Select Today"
                     }
                     anchors {
-                        left:parent.left
+                        left: parent.left
                     }
                 }
 
                 Components.TextField {
                     id: dateField
                     text: date==""?Qt.formatDateTime(new Date(), "d/M/yyyy"):date
-                    width:calendarOperations.width/3
+                    width: calendarOperations.width/3
                     anchors {
                         centerIn:parent
                     }
@@ -259,7 +258,7 @@ Item {
                 Components.TextField {
                     id: weekField
                     text:week==0?monthCalendar.currentWeek():week
-                    width:calendarOperations.width/10
+                    width: calendarOperations.width/10
                     anchors {
                         right:parent.right
                     }
@@ -277,8 +276,8 @@ Item {
             height: parent.height
             width: lineSvg.elementSize("vertical-line").width
             anchors {
-                left:calendarGrid.right
-                right:eventColumn.left
+                left: calendarGrid.right
+                right: eventColumn.left
             }
         }
 
@@ -289,22 +288,24 @@ Item {
 
             Components.Label {
                 id: error
-                text:""
+                text: ""
                 visible: true
-                font.weight:Font.Bold
+                font.weight: Font.Bold
                 font.bold:true
             }
 
             Components.Label {
-                id:noEvent
+                id: noEvent
                 text: ""
                 visible: true
                 font.italic:true
             }
 
             PlasmaExtras.ScrollArea {
-                anchors.fill:parent
-                anchors.topMargin:40
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
                 EventList {
                     id:list
                 }
