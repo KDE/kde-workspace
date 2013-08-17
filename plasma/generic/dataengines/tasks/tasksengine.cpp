@@ -18,9 +18,9 @@
 
 #include "tasksengine.h"
 #include "virtualdesktopssource.h"
-
 // own
 #include "tasksource.h"
+#include "taskwindowservice.h"
 
 TasksEngine::TasksEngine(QObject *parent, const QVariantList &args) :
     Plasma::DataEngine(parent, args)
@@ -35,14 +35,17 @@ TasksEngine::~TasksEngine()
 
 Plasma::Service *TasksEngine::serviceForSource(const QString &name)
 {
-    TaskSource *source = dynamic_cast<TaskSource*>(containerForSource(name));
-    // if source does not exist or it represents a startup task, return a null service
-    if (!source || !source->task()) {
-        return Plasma::DataEngine::serviceForSource(name);
+       TaskSource *source = qobject_cast<TaskSource*>(containerForSource(name));
+    
+    Plasma::Service *service;
+    if (source && source->task()) {
+        service = source->createService();
+    } else if (name.isEmpty()) {
+        service = new TaskWindowService();
+    } else {
+        service = Plasma::DataEngine::serviceForSource(name);
     }
-
-    // if source represent a proper task, return task service
-    Plasma::Service *service = source->createService();
+    
     service->setParent(this);
     return service;
 }
@@ -120,6 +123,8 @@ bool TasksEngine::sourceRequestEvent(const QString &source)
     if (source == "virtualDesktops") {
         addSource(new VirtualDesktopsSource);
         return true;
+    } else if (source =="") {
+        return true ;
     }
 
     return false;

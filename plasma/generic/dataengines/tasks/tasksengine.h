@@ -70,6 +70,7 @@ class TasksEngine : public Plasma::DataEngine
 
     private:
         friend class TaskSource;
+         friend class TaskWindowService;
 };
 
 #endif // TASKSENGINE_H
