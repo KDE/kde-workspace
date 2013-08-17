@@ -183,7 +183,7 @@ QString findLayout(const QString& layout, const QString& layoutVariant){
 }
 
 KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
-    using boost::spirit::ascii::space;
+    using boost::spirit::iso8859_1::space;
     typedef std::string::const_iterator iterator_type;
     typedef grammar::Symbol_parser<iterator_type> Symbol_parser;
     Symbol_parser s;

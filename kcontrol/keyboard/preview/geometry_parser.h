@@ -12,6 +12,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/spirit/home/support/char_encoding/iso8859_1.hpp>
 
 #include <iostream>
 #include <QtCore/QDebug>
@@ -21,6 +22,7 @@
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 namespace phx = boost::phoenix;
+namespace iso = boost::spirit::iso8859_1;
 
 
 namespace grammar{
@@ -30,45 +32,45 @@ namespace grammar{
   };
   
   template<typename Iterator>
-  struct Geometry_parser :qi::grammar<Iterator, ascii::space_type>{
-    qi::rule<Iterator, std::string(), ascii::space_type>name;
-    qi::rule<Iterator, std::string(), ascii::space_type>description;
-    qi::rule<Iterator, std::string(), ascii::space_type>in;
-    qi::rule<Iterator, int(), ascii::space_type>setap;
-    qi::rule<Iterator, std::string(), ascii::space_type>info;
-    qi::rule<Iterator, std::string(), ascii::space_type>keyName;
-    qi::rule<Iterator, std::string(), ascii::space_type>keyShape;
-    qi::rule<Iterator, std::string(), ascii::space_type>keyColor;
-    qi::rule<Iterator, std::string(), ascii::space_type>keyDesc;
-    qi::rule<Iterator, std::string(), ascii::space_type>keys;
-    qi::rule<Iterator, std::string(), ascii::space_type>row;
-    qi::rule<Iterator, std::string(), ascii::space_type>geomShape;
-    qi::rule<Iterator, std::string(), ascii::space_type>section;
-    qi::rule<Iterator, std::string(), ascii::space_type>localShape;
-    qi::rule<Iterator, std::string(), ascii::space_type>localColor;
-    qi::rule<Iterator, std::string(), ascii::space_type>comments,ignore;
-    qi::rule<Iterator, double(), ascii::space_type>localDimension,priority;
-    qi::rule<Iterator, double(), ascii::space_type>keygap;
-    qi::rule<Iterator, int(), ascii::space_type>cordinatea;
-    qi::rule<Iterator, int(), ascii::space_type>geomTop,geomVertical;
-    qi::rule<Iterator, int(), ascii::space_type>geomLeft;
-    qi::rule<Iterator, int(), ascii::space_type>geomRowTop;
-    qi::rule<Iterator, int(), ascii::space_type>geomRowLeft;
-    qi::rule<Iterator, int(), ascii::space_type>geomGap;
-    qi::rule<Iterator, int(), ascii::space_type>geomAtt;
-    qi::rule<Iterator, int(), ascii::space_type>angle;
-    qi::rule<Iterator, int(), ascii::space_type>top;
-    qi::rule<Iterator, int(), ascii::space_type>left;
-    qi::rule<Iterator, int(), ascii::space_type>width;
-    qi::rule<Iterator, int(), ascii::space_type>height;
-    qi::rule<Iterator, int(), ascii::space_type>cordinates;
-    qi::rule<Iterator, int(), ascii::space_type>set;
-    qi::rule<Iterator, int(), ascii::space_type>seta;
-    qi::rule<Iterator, int(), ascii::space_type>shape;
-    qi::rule<Iterator, int(), ascii::space_type>shapeDef;
-    qi::rule<Iterator, int(), ascii::space_type>shapeC;
-    qi::rule<Iterator, int(), ascii::space_type>cornerRadius;
-    qi::rule<Iterator, ascii::space_type>start;
+  struct Geometry_parser :qi::grammar<Iterator, iso::space_type>{
+    qi::rule<Iterator, std::string(), iso::space_type>name;
+    qi::rule<Iterator, std::string(), iso::space_type>description;
+    qi::rule<Iterator, std::string(), iso::space_type>in;
+    qi::rule<Iterator, int(), iso::space_type>setap;
+    qi::rule<Iterator, std::string(), iso::space_type>info;
+    qi::rule<Iterator, std::string(), iso::space_type>keyName;
+    qi::rule<Iterator, std::string(), iso::space_type>keyShape;
+    qi::rule<Iterator, std::string(), iso::space_type>keyColor;
+    qi::rule<Iterator, std::string(), iso::space_type>keyDesc;
+    qi::rule<Iterator, std::string(), iso::space_type>keys;
+    qi::rule<Iterator, std::string(), iso::space_type>row;
+    qi::rule<Iterator, std::string(), iso::space_type>geomShape;
+    qi::rule<Iterator, std::string(), iso::space_type>section;
+    qi::rule<Iterator, std::string(), iso::space_type>localShape;
+    qi::rule<Iterator, std::string(), iso::space_type>localColor;
+    qi::rule<Iterator, std::string(), iso::space_type>comments,ignore;
+    qi::rule<Iterator, double(), iso::space_type>localDimension,priority;
+    qi::rule<Iterator, double(), iso::space_type>keygap;
+    qi::rule<Iterator, int(), iso::space_type>cordinatea;
+    qi::rule<Iterator, int(), iso::space_type>geomTop,geomVertical;
+    qi::rule<Iterator, int(), iso::space_type>geomLeft;
+    qi::rule<Iterator, int(), iso::space_type>geomRowTop;
+    qi::rule<Iterator, int(), iso::space_type>geomRowLeft;
+    qi::rule<Iterator, int(), iso::space_type>geomGap;
+    qi::rule<Iterator, int(), iso::space_type>geomAtt;
+    qi::rule<Iterator, int(), iso::space_type>angle;
+    qi::rule<Iterator, int(), iso::space_type>top;
+    qi::rule<Iterator, int(), iso::space_type>left;
+    qi::rule<Iterator, int(), iso::space_type>width;
+    qi::rule<Iterator, int(), iso::space_type>height;
+    qi::rule<Iterator, int(), iso::space_type>cordinates;
+    qi::rule<Iterator, int(), iso::space_type>set;
+    qi::rule<Iterator, int(), iso::space_type>seta;
+    qi::rule<Iterator, int(), iso::space_type>shape;
+    qi::rule<Iterator, int(), iso::space_type>shapeDef;
+    qi::rule<Iterator, int(), iso::space_type>shapeC;
+    qi::rule<Iterator, int(), iso::space_type>cornerRadius;
+    qi::rule<Iterator, iso::space_type>start;
     Geometry geom;
     keywords kw;
     double x,y,ax,ay,cx,cy,off;

@@ -441,7 +441,7 @@ template<typename Iterator>
 
 
     Geometry parseGeometry(QString model){
-        using boost::spirit::ascii::space;
+        using boost::spirit::iso8859_1::space;
         typedef std::string::const_iterator iterator_type;
         typedef grammar::Geometry_parser<iterator_type> Geometry_parser;
         Geometry_parser g;

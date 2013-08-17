@@ -12,6 +12,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/spirit/home/support/char_encoding/iso8859_1.hpp>
 
 #include <iostream>
 #include <QtCore/QDebug>
@@ -22,6 +23,7 @@
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 namespace phx = boost::phoenix;
+namespace iso = boost::spirit::iso8859_1;
 
 namespace grammar {
 
@@ -30,20 +32,20 @@ namespace grammar {
     };
 
     template<typename Iterator>
-    struct Symbol_parser : qi::grammar<Iterator, ascii::space_type>{
+    struct Symbol_parser : qi::grammar<Iterator, iso::space_type>{
 
         Symbol_parser();
-        qi::rule<Iterator, std::string(), ascii::space_type>name;
-        qi::rule<Iterator, std::string(), ascii::space_type>keyName;
-        qi::rule<Iterator, std::string(), ascii::space_type>symbols;
-        qi::rule<Iterator, std::string(), ascii::space_type>key;
-        qi::rule<Iterator, std::string(), ascii::space_type>type;
-        qi::rule<Iterator, std::string(), ascii::space_type>group;
-        qi::rule<Iterator, std::string(), ascii::space_type>symbol;
-        qi::rule<Iterator,  ascii::space_type>start;
-        qi::rule<Iterator, std::string(), ascii::space_type>comments;
-        qi::rule<Iterator, std::string(), ascii::space_type>ee;
-        qi::rule<Iterator, std::string(), ascii::space_type>include;
+        qi::rule<Iterator, std::string(), iso::space_type>name;
+        qi::rule<Iterator, std::string(), iso::space_type>keyName;
+        qi::rule<Iterator, std::string(), iso::space_type>symbols;
+        qi::rule<Iterator, std::string(), iso::space_type>key;
+        qi::rule<Iterator, std::string(), iso::space_type>type;
+        qi::rule<Iterator, std::string(), iso::space_type>group;
+        qi::rule<Iterator, std::string(), iso::space_type>symbol;
+        qi::rule<Iterator,  iso::space_type>start;
+        qi::rule<Iterator, std::string(), iso::space_type>comments;
+        qi::rule<Iterator, std::string(), iso::space_type>ee;
+        qi::rule<Iterator, std::string(), iso::space_type>include;
 
         KbLayout layout;
         int keyIndex, newKey;
