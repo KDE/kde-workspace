@@ -40,7 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KStandardDirs>
 #include <NETWinInfo>
 
-#ifdef Q_WS_X11
+#if HAVE_X11
 #include <QX11Info>
 #endif
 
@@ -237,7 +237,7 @@ Task *TaskManager::findTask(int desktop, const QPoint& p)
 
 void TaskManager::windowAdded(WId w)
 {
-#ifdef Q_WS_X11
+#if HAVE_X11
     KWindowInfo info(w,
                      NET::WMWindowType | NET::WMPid | NET::WMState | NET::WMName,
                      NET::WM2TransientFor);
@@ -333,7 +333,7 @@ void TaskManager::windowRemoved(WId w)
 
 void TaskManager::windowChanged(WId w, const unsigned long *dirty)
 {
-#ifdef Q_WS_X11
+#if HAVE_X11
     if (dirty[NETWinInfo::PROTOCOLS] & NET::WMState) {
         NETWinInfo info(QX11Info::display(), w, QX11Info::appRootWindow(),
                         NET::WMState | NET::XAWMState);
