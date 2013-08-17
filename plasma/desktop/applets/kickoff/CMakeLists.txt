@@ -1,12 +1,6 @@
 #######################################################################################
 # Kickoff Library
 
-if(STRIGI_STRIGIQTDBUSCLIENT_LIBRARY)
-    set(HAVE_STRIGIDBUS 1)
-endif(STRIGI_STRIGIQTDBUSCLIENT_LIBRARY)
-
-configure_file(core/config-kickoff-applets.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kickoff-applets.h)
-
 set(libkickoff_SRCS
     core/kickoffmodel.cpp
     core/kickoffabstractmodel.cpp
@@ -34,11 +28,6 @@ set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInt
 QT4_ADD_DBUS_INTERFACE(libkickoff_SRCS ${ksmserver_xml} ksmserver_interface)
 
 set(Kickoff_LIBS ${KDE4_KIO_LIBS} ${KDE4_KFILE_LIBS} ${KDE4_SOLID_LIBS} kworkspace)
-if(HAVE_STRIGIDBUS)
-     set ( Kickoff_LIBS ${Kickoff_LIBS} ${STRIGI_STRIGIQTDBUSCLIENT_LIBRARY} )
-endif(HAVE_STRIGIDBUS)
-
-include_directories( ${STRIGI_INCLUDE_DIR} )
 
 kde4_add_library(kickoff SHARED ${libkickoff_SRCS})
 target_link_libraries(kickoff ${KDE4_PLASMA_LIBS} ${Kickoff_LIBS})
