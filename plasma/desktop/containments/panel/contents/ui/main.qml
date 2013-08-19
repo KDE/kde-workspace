@@ -64,15 +64,23 @@ Item {
             id: container
             visible: false
 
-            Layout.preferredWidth: Math.min(root.width, root.height)
-            Layout.preferredHeight: Layout.preferredWidth
+            Layout.fillWidth: applet && applet.fillWidth
+            Layout.fillHeight: applet && applet.fillHeight
 
+            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.minimumWidth > 0 ? applet.minimumWidth : root.height) : root.width
+            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.minimumHeight > 0 ? applet.minimumHeight : root.width) : root.height
+
+            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.implicitWidth > 0 ? applet.implicitWidth : root.height) : root.width
+            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.implicitHeight > 0 ? applet.implicitHeight : root.width) : root.height
+
+            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : root.height) : root.width
+            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : root.width) : root.height
 
             property Item applet
 
             PlasmaComponents.BusyIndicator {
                 z: 1000
-                visible: applet && applet.length > 0 && applet[0].busy
+                visible: applet && applet.busy
                 running: visible
                 anchors.centerIn: parent
             }
