@@ -30,9 +30,12 @@ Item {
 
     property Item toolBox
 
+    property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
+
     Connections {
         target: plasmoid
         onAppletAdded: {
+            lastSpacer.parent = root
             var container = appletContainerComponent.createObject((plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row)
             print("Applet added in test panel: " + applet)
             applet.parent = container
@@ -40,20 +43,25 @@ Item {
             applet.anchors.fill = applet.parent
             applet.visible = true
             container.visible = true
+            lastSpacer.parent = currentLayout
         }
         onFormFactorChanged: {
+            lastSpacer.parent = root
+
             if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
                 for (var container in row.children) {
                     var item = row.children[0];
                     item.parent = column
-                    item.width = column.width
                 }
+                lastSpacer.parent = column
+
             } else {
+                lastSpacer.parent = row
                 for (var container in column.children) {
                     var item = column.children[0];
                     item.parent = row
-                    item.height = row.height
                 }
+                lastSpacer.parent = row
             }
         }
     }
@@ -67,14 +75,14 @@ Item {
             Layout.fillWidth: applet && applet.fillWidth
             Layout.fillHeight: applet && applet.fillHeight
 
-            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.minimumWidth > 0 ? applet.minimumWidth : root.height) : root.width
-            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.minimumHeight > 0 ? applet.minimumHeight : root.width) : root.height
+            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.minimumWidth > 0 ? applet.minimumWidth : root.height) : root.width)
+            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.minimumHeight > 0 ? applet.minimumHeight : root.width) : root.height)
 
-            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.implicitWidth > 0 ? applet.implicitWidth : root.height) : root.width
-            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.implicitHeight > 0 ? applet.implicitHeight : root.width) : root.height
+            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.implicitWidth > 0 ? applet.implicitWidth : root.height) : root.width)
+            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.implicitHeight > 0 ? applet.implicitHeight : root.width) : root.height)
 
-            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : root.height) : root.width
-            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : root.width) : root.height
+            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : root.height) : root.width)
+            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : root.width) : root.height)
 
             property Item applet
 
@@ -87,20 +95,25 @@ Item {
         }
     }
 
+    Item {
+        id: lastSpacer
+
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+    }
+
     RowLayout {
         id: row
         anchors {
-            top: parent.top
-            bottom: parent.bottom
-            left: parent.left
+            fill: parent
+            rightMargin: toolBox.width
         }
     }
     ColumnLayout {
         id: column
         anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
+            fill: parent
+            bottomMargin: toolBox.height
         }
     }
 
