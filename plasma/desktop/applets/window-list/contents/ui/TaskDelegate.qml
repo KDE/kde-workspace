@@ -23,7 +23,7 @@ Item {
     id: menuItem
     width: parent.width
     height: Math.max(iconItem.height, label.height) + highlightItem.marginHints.top + highlightItem.marginHints.bottom
-    anchors.top:col.bottom
+
     signal clicked()
     signal entered()
     signal executeJob(string jobName)
@@ -71,7 +71,7 @@ Item {
             menuItem.clicked();
         }
         onEntered:{
-            highlightItem.y = mapToItem(main,mouse.x,mouse.y).y - highlightItem.marginHints.top
+            highlightItem.trackingItem = menuItem
             highlightItem.width = menuItem.width
             highlightItem.height = menuItem.height
             menuItem.entered();

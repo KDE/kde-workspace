@@ -12,14 +12,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http: //www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
-Item {
+PlasmaExtras.ScrollArea {
     id: menu
+
     property alias model: menuListView.model
     property alias section: menuListView.section
     property int iconSize: theme.smallIconSize 
@@ -27,41 +29,30 @@ Item {
     signal itemSelected(string source)
     signal executeJob(string jobName, string source)
     signal setOnDesktop(string source, int desktop)
-    
-    Component {
-        id:sectionheader
-        Rectangle {
-            width:menu.width
-            height:30
-            color:"transparent"
-            border.width:5
-            radius:10
-            border.color:"transparent"
-            PlasmaComponents.Highlight {
-                hover:menu.focus
-                width:menu.width
-                height:30
-            }
+
+    ListView {
+        id: menuListView
+        anchors.top: menu.top
+        anchors.left: menu.left
+        anchors.bottom: menu.bottom
+        focus: true
+        boundsBehavior: Flickable.StopAtBounds
+        section.property: desktop
+        section.criteria: ViewSection.FullString
+
+        section.delegate: PlasmaComponents.Highlight {
+            hover: menu.focus
+            width: menu.width
+            height: childrenRect.height
+
             PlasmaComponents.Label {
-                text:section>0?"Desktop "+section:"On all desktops"
+                text: section > 0 ? "Desktop " + section : "On all desktops"
                 anchors {
-                    centerIn:parent
+                    centerIn: parent
                 }
             }
         }
-    }
-    ListView {
-        id: menuListView
-        width: menu.width
-        anchors.top: menu.top
-        anchors.left: menu.left
-        anchors.bottom:menu.bottom
-        clip: true
-        focus:true
-        boundsBehavior: Flickable.StopAtBounds
-        section.property:desktop
-        section.criteria:ViewSection.FullString
-        section.delegate: sectionheader
+
         delegate: TaskDelegate {
             id: menuItemDelegate
             width: menuListView.width
