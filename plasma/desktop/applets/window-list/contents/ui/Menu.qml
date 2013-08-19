@@ -39,11 +39,12 @@ PlasmaExtras.ScrollArea {
         boundsBehavior: Flickable.StopAtBounds
         section.property: desktop
         section.criteria: ViewSection.FullString
+        spacing:0
 
         section.delegate: PlasmaComponents.Highlight {
             hover: menu.focus
             width: menu.width
-            height: childrenRect.height
+            height: 30
 
             PlasmaComponents.Label {
                 text: section > 0 ? "Desktop " + section : "On all desktops"

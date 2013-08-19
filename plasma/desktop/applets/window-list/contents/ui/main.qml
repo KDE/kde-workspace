@@ -122,7 +122,7 @@ Item {
 
     Column {
         id: col
-        spacing: 0
+        spacing: 5
         PlasmaComponents.Highlight {
             hover: menu.focus
             width: windowListMenu.width
