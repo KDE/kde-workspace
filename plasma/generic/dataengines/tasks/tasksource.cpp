@@ -15,13 +15,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
+ 
 #include "tasksource.h"
-
+ 
 // own
 #include "tasksengine.h"
 #include "taskservice.h"
-
+#include "taskwindowservice.h"
+ 
 TaskSource::TaskSource(::TaskManager::Startup *startup, QObject *parent)
     : Plasma::DataContainer(parent),
       m_startup(startup)
@@ -31,7 +32,7 @@ TaskSource::TaskSource(::TaskManager::Startup *startup, QObject *parent)
     setData("task", false);
     updateStartup(TaskManager::TaskUnchanged);
 }
-
+ 
 TaskSource::TaskSource(::TaskManager::Task *task, QObject *parent)
     : Plasma::DataContainer(parent),
       m_task(task)
@@ -43,28 +44,28 @@ TaskSource::TaskSource(::TaskManager::Task *task, QObject *parent)
     setData("classClass", task->classClass());
     updateTask(TaskManager::EverythingChanged);
 }
-
+ 
 TaskSource::~TaskSource()
 {
 }
-
+ 
 Plasma::Service *TaskSource::createService()
 {
     return new TaskService(this);
 }
-
+ 
 ::TaskManager::Task *TaskSource::task()
 {
     return m_task.data();
 }
-
+ 
 void TaskSource::updateStartup(::TaskManager::TaskChanges startupChanges)
 {
     ::TaskManager::Startup *startup = m_startup.data();
     if (!startup) {
         return;
     }
-
+ 
     switch (startupChanges) {
         case TaskManager::TaskUnchanged:
             setData("text", startup->text());
@@ -73,14 +74,14 @@ void TaskSource::updateStartup(::TaskManager::TaskChanges startupChanges)
     }
     checkForUpdate();
 }
-
+ 
 void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
 {
     ::TaskManager::Task *taskPtr = m_task.data();
     if (!taskPtr) {
         return;
     }
-
+ 
     // only a subset of task information is exported
     switch (taskChanges) {
         case TaskManager::EverythingChanged:
@@ -89,6 +90,8 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("visibleNameWithState", taskPtr->visibleNameWithState());
             setData("maximized", taskPtr->isMaximized());
             setData("minimized", taskPtr->isMinimized());
+           // setData("cascade",taskPtr->isCascade());
+           // setData("unclutter",taskPtr->isUnclutter());
             setData("shaded", taskPtr->isShaded());
             setData("fullScreen", taskPtr->isFullScreen());
             setData("alwaysOnTop", taskPtr->isAlwaysOnTop());
@@ -97,7 +100,7 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("onTop", taskPtr->isOnTop());
             setData("onCurrentDesktop", taskPtr->isOnCurrentDesktop());
             setData("onAllDesktops", taskPtr->isOnAllDesktops());
-            setData("desktop", taskPtr->desktop());
+            setData("desktop",qMax(0,taskPtr->desktop()));
             setData("onCurrentActivity", taskPtr->isOnCurrentActivity());
             setData("onAllActivities", taskPtr->isOnAllActivities());
             setData("activities", taskPtr->activities());
@@ -106,6 +109,8 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("actionMaximize", taskPtr->info().actionSupported(NET::ActionMax));
             setData("actionShade", taskPtr->info().actionSupported(NET::ActionShade));
             setData("actionResize", taskPtr->info().actionSupported(NET::ActionResize));
+           // setData("actionCascade", taskPtr->info().actionSupported(NET::ActionCascade));
+          //            setData("actionUnclutter", taskPtr->info().actionSupported(NET::ActionUnclutter));
             setData("actionMove", taskPtr->info().actionSupported(NET::ActionMove));
             setData("actionClose", taskPtr->info().actionSupported(NET::ActionClose));
             setData("actionChangeDesktop", taskPtr->info().actionSupported(NET::ActionChangeDesktop));
@@ -148,37 +153,40 @@ void TaskSource::updateTask(::TaskManager::TaskChanges taskChanges)
             setData("actionClose", taskPtr->info().actionSupported(NET::ActionClose));
             setData("actionChangeDesktop", taskPtr->info().actionSupported(NET::ActionChangeDesktop));
             setData("actionFullScreen", taskPtr->info().actionSupported(NET::ActionFullScreen));
+           // setData("actionCascade", taskPtr->info().actionSupported(NET::ActionCascade));
+         //   setData("actionUnclutter", taskPtr->info().actionSupported(NET::ActionUnclutter));
             break;
         default:
             break;
     }
     checkForUpdate();
 }
-
+ 
 void TaskSource::updateDesktop()
 {
     if (!m_task) {
         return;
     }
-
+ 
     const bool onCurrentDesktop = m_task.data()->isOnCurrentDesktop();
     if (data()["onCurrentDesktop"].toBool() != onCurrentDesktop) {
         setData("onCurrentDesktop", onCurrentDesktop);
         checkForUpdate();
     }
 }
-
+ 
 void TaskSource::updateActivity()
 {
     if (!m_task) {
         return;
     }
-
+ 
     const bool onCurrentActivity = m_task.data()->isOnCurrentActivity();
     if (data()["onCurrentActivity"].toBool() != onCurrentActivity) {
         setData("onCurrentActivity", onCurrentActivity);
         checkForUpdate();
     }
 }
-
+ 
 #include "tasksource.moc"
+ 
