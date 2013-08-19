@@ -27,6 +27,7 @@
 #include <QtCore/QFile>
 #include <QtGui/QFont>
 #include <QFileDialog>
+#include <QHelpEvent>
 #include <math.h>
 
 #include <KApplication>
@@ -48,6 +49,7 @@ KbPreviewFrame::KbPreviewFrame(QWidget *parent) :
 {
      setFrameStyle( QFrame::Box );
      setFrameShadow(QFrame::Sunken);
+     setMouseTracking(true);
 }
 
 KbPreviewFrame::~KbPreviewFrame() {
@@ -67,10 +69,22 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
     int cordinate[] = {0, 3, 1, 2};
     if(keyindex != -1){
         KbKey key = keyboardLayout.keyList.at(keyindex);
+        float tooltipX = 0, toolTipY = 0;
+        QString tip;
         for(int level=0; level< (key.getSymbolCount() < 4 ? key.getSymbolCount() : 4); level++) {
             painter.setPen(color[level]);
             painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(key.getSymbol(level)));
+            tip.append(key.getSymbol(level)+"\n");
         }
+        for(int i = 0 ; i < 4; i++){
+            tooltipX += temp[i].x();
+            toolTipY += temp[i].y();
+        }
+        tooltipX = tooltipX/4;
+        toolTipY = toolTipY/4;
+        QPoint tooltipPoint = QPoint(tooltipX, toolTipY);
+        tooltip.append(tip);
+        tipPoint.append(tooltipPoint);
     }
     else{
         painter.setPen(Qt::black);
@@ -146,6 +160,22 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,in
 
 }
 
+bool KbPreviewFrame::event(QEvent* event){
+    if (event->type() == QEvent::ToolTip) {
+        QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+        int index = itemAt(helpEvent->pos());
+        if (index != -1) {
+            QToolTip::showText(helpEvent->globalPos(), tooltip.at(index));
+        }
+        else {
+             QToolTip::hideText();
+             event->ignore();
+        }
+
+        return true;
+    }
+    return QWidget::event(event);
+}
 
 void KbPreviewFrame::paintEvent(QPaintEvent *)
 {
@@ -209,4 +239,20 @@ void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString
     keyboardLayout = grammar::parseSymbols(layout, layoutVariant);
 
 
+}
+
+int KbPreviewFrame::itemAt(const QPoint& pos){
+    int distance =  10000;
+    int closest = 0;
+    for(int i = 0; i < tipPoint.size(); i++){
+        int temp = sqrt((pos.x()-tipPoint.at(i).x())*(pos.x()-tipPoint.at(i).x()) + (pos.y()-tipPoint.at(i).y())*(pos.y()-tipPoint.at(i).y()));
+        if(distance > temp){
+            distance = temp;
+            closest = i;
+        }
+    }
+    if(distance < 100)
+        return closest;
+    else
+        return -1;
 }

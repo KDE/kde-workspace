@@ -29,6 +29,8 @@
 
 #include <QtGui/QPainter>
 #include <QtGui/QFrame>
+#include <QtCore/QHash>
+#include <QtGui/QToolTip>
 
 #ifdef NEW_GEOMETRY
 class Geometry;
@@ -43,7 +45,8 @@ class KbPreviewFrame : public QFrame
 private:
     KeySymHelper symbol;
     Aliases alias;
-
+    QStringList tooltip;
+    QList <QPoint> tipPoint;
     static const int width = 1100, height = 490;
 #ifdef NEW_GEOMETRY
     Geometry& geometry;
@@ -63,6 +66,14 @@ private:
     void paintFnKeys(QPainter &painter, int &x, int &y);
 #endif
 	
+    int itemAt(const QPoint &pos);
+
+
+protected:
+
+    bool event(QEvent *event);
+
+
 public:
 
     int getWidth() const;
