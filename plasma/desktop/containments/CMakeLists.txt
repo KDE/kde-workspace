@@ -1,2 +1,2 @@
 add_subdirectory(desktop)
-#add_subdirectory(panel)
+plasma_install_package(panel org.kde.panel plasma/plasmoids containment)
