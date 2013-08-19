@@ -48,6 +48,4 @@ class ExecutableEngine : public Plasma::DataEngine
         virtual bool sourceRequestEvent(const QString& source);
 };
 
-K_EXPORT_PLASMA_DATAENGINE(executable, ExecutableEngine)
-
 #endif
