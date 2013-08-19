@@ -32,6 +32,23 @@ Item {
 
     property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
 
+    function insertItemAt(item, position) {
+        var removedItems = new Array();
+
+        lastSpacer.parent = root;
+        for (var i = position; i < currentLayout.children.length; ++i) {
+            var child = currentLayout.children[0];
+            child.parent = root;
+            removedItems.push(child);
+        }
+
+        item.parent = currentLayout;
+        for (var i in removedItems) {
+            removedItems[i].parent = currentLayout;
+        }
+        lastSpacer.parent = currentLayout;
+    }
+
     Connections {
         target: plasmoid
         onAppletAdded: {
