@@ -1,4 +1,4 @@
-#add_subdirectory(kickoff)
+add_subdirectory(kickoff)
 #add_subdirectory(showActivityManager)
 #add_subdirectory(trash)
 

@@ -32,6 +32,8 @@
 #include <KDesktopFile>
 #include <KIcon>
 #include <KMimeType>
+#include <KLocalizedString>
+#include <KGlobal>
 #include <KUrl>
 #include <Solid/Device>
 #include <Solid/StorageAccess>
@@ -104,7 +106,8 @@ QStandardItem *StandardItemFactory::createItemForUrl(const QString& urlString, D
         }
 
         item->setText(basename);
-        item->setIcon(KIcon(KMimeType::iconNameForUrl(url)));
+        //FIXME
+//         item->setIcon(KIcon(KMimeType::iconNameForUrl(url)));
         item->setData(url.url(), Kickoff::UrlRole);
         item->setData(subTitle, Kickoff::SubTitleRole);
 

@@ -33,6 +33,7 @@
 #include <KUrl>
 #include <KSycoca>
 #include <KFilePlacesModel>
+#include <KLocalizedString>
 #include <Solid/Device>
 #include <Solid/DeviceInterface>
 #include <Solid/DeviceNotifier>
@@ -158,7 +159,7 @@ QModelIndex SystemModel::index(int row, int column, const QModelIndex &parent) c
         ++count;
     }
     if (row <= count) {
-        return createIndex(row, column, 0);
+        return createIndex(row, column);
     }
     // find the source
     for (int i=0; i<d->placesModel->rowCount(); ++i) {

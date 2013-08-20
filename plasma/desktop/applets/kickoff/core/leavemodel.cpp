@@ -26,6 +26,7 @@
 // KDE
 #include <KAuthorized>
 #include <KConfigGroup>
+#include <KLocalizedString>
 #include <QDebug>
 #include <KIcon>
 #include <Solid/PowerManagement>

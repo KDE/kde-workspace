@@ -31,6 +31,8 @@
 // KDE
 #include <KService>
 #include <KStandardDirs>
+#include <KLocalizedString>
+#include <KUrl>
 #include <Plasma/AbstractRunner>
 #include <Plasma/RunnerManager>
 

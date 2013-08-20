@@ -26,12 +26,16 @@
 #include <QList>
 #include <QMimeData>
 #include <QFileInfo>
+#include <QDebug>
 
 // KDE
 #include <KConfigGroup>
 #include <KService>
 #include <KDesktopFile>
-#include <QDebug>
+#include <KLocalizedString>
+#include <KUrl>
+
+
 
 using namespace Kickoff;
 

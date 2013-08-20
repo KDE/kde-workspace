@@ -27,6 +27,7 @@
 #include <KDesktopFile>
 #include <KDirWatch>
 #include <KRecentDocument>
+#include <KLocalizedString>
 #include <KUrl>
 #include <QDebug>
 
@@ -56,10 +57,10 @@ public:
         }
 
         QStandardItem *existingItem = itemsByPath[path];
-        kDebug() << "Removing existing item" << existingItem;
+        qDebug() << "Removing existing item" << existingItem;
         QModelIndex index = q->indexFromItem(existingItem);
         if (!index.isValid()) {
-            kDebug() << "Now Index for our existing item";
+            qDebug() << "Now Index for our existing item";
             return false;
         }
         q->takeRow(index.row());

@@ -24,6 +24,7 @@
 
 // KDE
 #include <KService>
+#include <KComponentData>
 
 class QStandardItem;
 class KUrl;

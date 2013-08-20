@@ -23,10 +23,7 @@
 
 // Qt
 #include <QtCore/QtAlgorithms>
-#include <QtCore/QList>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QCheckBox>
+#include <QDebug>
 
 // KDE
 #include <kauthorized.h>
@@ -44,7 +41,9 @@
 #include <kmimetype.h>
 #include <kservicegroup.h>
 #include <ksycoca.h>
-#include <QDebug>
+#include <kglobalsettings.h>
+#include <KLocalizedString>
+#include <KIcon>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -108,7 +107,7 @@ public:
               root(new AppNode()),
               duplicatePolicy(ApplicationModel::ShowDuplicatesPolicy),
               systemApplicationPolicy(ApplicationModel::ShowApplicationAndSystemPolicy),
-              primaryNamePolicy(ApplicationModel::GenericNamePrimary),
+//               primaryNamePolicy(ApplicationModel::GenericNamePrimary),
               displayOrder(NameAfterDescription),
               allowSeparators(_allowSeparators),
               showRecentlyInstalled(true)
@@ -247,8 +246,7 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
                 continue;
             }
 
-            //qDebug() << "Service group" << serviceGroup->entryPath() << serviceGroup->icon()
-            << serviceGroup->relPath() << serviceGroup->directoryEntryPath();
+            qDebug() << "Service group" << serviceGroup->entryPath() << serviceGroup->icon() << serviceGroup->relPath() << serviceGroup->directoryEntryPath();
 
             icon = serviceGroup->icon();
             if (iconNameMap().contains(icon)) {
@@ -263,7 +261,7 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
         } else if (p->isType(KST_KServiceSeparator)) {
             isSeparator = true;
         } else {
-            kWarning(250) << "KServiceGroup: Unexpected object in list!";
+            qWarning() << "KServiceGroup: Unexpected object in list!";
             continue;
         }
 
@@ -344,16 +342,15 @@ bool ApplicationModel::canFetchMore(const QModelIndex &parent) const
     return node->isDir && !node->fetched;
 }
 
-<<<<<<< HEAD
-void ApplicationModel::setNameDisplayOrder(DisplayOrder displayOrder) 
-{
-    d->displayOrder = displayOrder;
-}
-
-DisplayOrder ApplicationModel::nameDisplayOrder() const
-{
-   return d->displayOrder;
-}
+// void ApplicationModel::setNameDisplayOrder(DisplayOrder displayOrder)
+// {
+//     d->displayOrder = displayOrder;
+// }
+//
+// DisplayOrder ApplicationModel::nameDisplayOrder() const
+// {
+//    return d->displayOrder;
+// }
 
 void ApplicationModel::setShowRecentlyInstalled(bool showRecentlyInstalled)
 {

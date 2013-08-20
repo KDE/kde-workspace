@@ -42,29 +42,3 @@ kde4_add_library(kickoff SHARED ${libkickoff_SRCS})
 target_link_libraries(kickoff ${QT_QTCORE_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY} ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBRARY} ${KDE4_KIO_LIBS} ${KDE4_KFILE_LIBS} ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBS} kworkspace)
 install(TARGETS kickoff ${INSTALL_TARGETS_DEFAULT_ARGS})
 
-#######################################################################################
-# Kickoff Plasma Applet
-
-set(Applet_SRCS
-    applet/applet.cpp
-)
-kde4_add_ui_files(Applet_SRCS applet/kickoffConfig.ui )
-kde4_add_plugin(plasma_applet_launcher ${Applet_SRCS})
-target_link_libraries(plasma_applet_launcher ${KDE4_PLASMA_LIBS} ${Kickoff_LIBS} ${QT_QTDECLARATIVE_LIBRARY}  ${KDE4_KIO_LIBS} kickoff )
-install(TARGETS plasma_applet_launcher DESTINATION ${PLUGIN_INSTALL_DIR})
-install(FILES applet/plasma-applet-launcher.desktop DESTINATION ${SERVICES_INSTALL_DIR})
-
-#######################################################################################
-# Kickoff Simple KMenu Plasma Applet
-
-set(SimpleApplet_SRCS
-    simpleapplet/contextmenufactory.cpp
-    simpleapplet/menuview.cpp
-    simpleapplet/simpleapplet.cpp
-)
-kde4_add_plugin(plasma_applet_simplelauncher ${SimpleApplet_SRCS})
-target_link_libraries(plasma_applet_simplelauncher ${KDE4_KCMUTILS_LIBS} ${KDE4_KIO_LIBS} ${KDE4_SOLID_LIBS} ${KDE4_PLASMA_LIBS} ${Kickoff_LIBS} kworkspace kickoff)
-install(TARGETS plasma_applet_simplelauncher DESTINATION ${PLUGIN_INSTALL_DIR})
-install(FILES simpleapplet/plasma-applet-simplelauncher.desktop DESTINATION ${SERVICES_INSTALL_DIR})
-
-

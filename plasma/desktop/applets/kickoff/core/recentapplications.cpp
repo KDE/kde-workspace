@@ -26,6 +26,8 @@
 
 // KDE
 #include <KConfigGroup>
+#include <KGlobal>
+
 #include <QDebug>
 
 // Local
