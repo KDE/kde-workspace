@@ -21,6 +21,7 @@ import QtQuick.Layouts 1.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
 
 
 Item {
@@ -31,6 +32,8 @@ Item {
     property Item toolBox
 
     property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
+
+    property Item dragOverlay
 
     function insertItemAt(item, position) {
         var removedItems = new Array();
@@ -51,6 +54,7 @@ Item {
 
     Connections {
         target: plasmoid
+
         onAppletAdded: {
             lastSpacer.parent = root
             var container = appletContainerComponent.createObject((plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row)
@@ -62,6 +66,7 @@ Item {
             container.visible = true
             lastSpacer.parent = currentLayout
         }
+
         onFormFactorChanged: {
             lastSpacer.parent = root
 
@@ -79,6 +84,14 @@ Item {
                     item.parent = row
                 }
                 lastSpacer.parent = row
+            }
+        }
+
+        onUserConfiguringChanged: {
+            if (plasmoid.userConfiguring) {
+                dragOverlay = appletMoveHandleComponent.createObject(root);
+            } else {
+                dragOverlay.destroy()
             }
         }
     }
@@ -136,10 +149,57 @@ Item {
 
     Component {
         id: appletMoveHandleComponent
-        Rectangle {
-            color: theme.backgroundColor
-            radius: 3
-            opacity: 0.4
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            property Item currentApplet
+            onPositionChanged: {
+                if (dragOverlay && currentLayout.childAt(mouse.x, mouse.y)) {
+                    dragOverlay.currentApplet = currentLayout.childAt(mouse.x, mouse.y);
+                }
+            }
+            onCurrentAppletChanged: {
+                handle.x = currentApplet.x
+                handle.y = currentApplet.y
+                handle.width = currentApplet.width
+                handle.height = currentApplet.height
+            }
+            Rectangle {
+                id: handle
+                color: theme.backgroundColor
+                radius: 3
+                opacity: 0.5
+                PlasmaCore.IconItem {
+                    source: "transform-move"
+                    width: Math.min(parent.width, parent.height)
+                    height: width
+                    anchors.centerIn: parent
+                }
+                Behavior on x {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+                Behavior on height {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+            }
         }
     }
 
