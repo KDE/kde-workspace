@@ -140,11 +140,7 @@ Item {
         PlasmaComponents.Label {
             id: unclutter
             text: "Unclutter Windows"
-            anchors {
-                leftMargin: 10
-                left: parent.left
-                verticalCenter: highlightItem.verticalCenter
-            }
+            verticalAlignment:Text.AlignBottom
             MouseArea {
                 id: mouse
                 hoverEnabled: true
@@ -164,11 +160,7 @@ Item {
         PlasmaComponents.Label {
             id: cascade
             text: "Cascade Windows"
-            anchors {
-                left: parent.left
-                leftMargin: 10
-                verticalCenter: highlightItem.verticalCenter
-            }
+            verticalAlignment:Text.AlignBottom
             MouseArea {
                 id: mouseArea
                 hoverEnabled: true
