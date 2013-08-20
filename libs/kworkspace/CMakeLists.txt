@@ -55,7 +55,7 @@ set_target_properties(kworkspace PROPERTIES
                       )
 
 # kdeui is needed for KWindowInfo
-target_link_libraries(kworkspace ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES} ${Plasma_LIBRARIES})
+target_link_libraries(kworkspace Qt5::DBus KF5::KI18n KF5::KWindowSystem ${X11_LIBRARIES} ${Plasma_LIBRARIES})
 
 #set_target_properties(kworkspace PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} DEFINE_SYMBOL MAKE_KWORKSPACE_LIB)
 install(TARGETS kworkspace EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )

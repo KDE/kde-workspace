@@ -41,6 +41,8 @@ target_link_libraries(taskmanager
     ${KDE4Support_LIBRARIES}
     ${KDE4_KIO_LIBRARY} #KRun
     KF5::KConfigCore
+    KF5::KConfigWidgets
+    KF5::KIconThemes
     KF5::KI18n
     KF5::KIOCore
     KF5::KService

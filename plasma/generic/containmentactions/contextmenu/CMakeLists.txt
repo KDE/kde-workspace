@@ -14,7 +14,13 @@ QT4_ADD_DBUS_INTERFACE(contextmenu_SRCS ${screensaver_xml} screensaver_interface
 
 
 kde4_add_plugin(plasma_containmentactions_contextmenu ${contextmenu_SRCS})
-target_link_libraries(plasma_containmentactions_contextmenu ${Plasma_LIBRARIES} ${KDE4_KIO_LIBS} kworkspace)
+target_link_libraries(plasma_containmentactions_contextmenu
+                      Qt5::DBus
+                      KF5::KI18n
+                      KF5::plasma
+                      KF5::XmlGui
+                      ${KDE4_KIO_LIBS}
+                      kworkspace)
 
 install(TARGETS plasma_containmentactions_contextmenu DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-containmentactions-contextmenu.desktop DESTINATION ${SERVICES_INSTALL_DIR})
