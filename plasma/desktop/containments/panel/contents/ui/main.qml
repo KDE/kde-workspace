@@ -134,6 +134,15 @@ Item {
         }
     }
 
+    Component {
+        id: appletMoveHandleComponent
+        Rectangle {
+            color: theme.backgroundColor
+            radius: 3
+            opacity: 0.4
+        }
+    }
+
     Component.onCompleted: {
         print("Test Panel loaded")
         print(plasmoid)
