@@ -26,14 +26,14 @@
 #include "systemmodel.h"
 #include "urlitemlauncher.h"
 
-#include <QtDeclarative>
+#include <QtQml>
 
 void KickoffPlugin::registerTypes (const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("org.kde.plasma.kickoff"));
     qmlRegisterType<Kickoff::ApplicationModel>(uri, 0, 1, "ApplicationModel");
     qmlRegisterType<Kickoff::FavoritesModel>(uri, 0, 1, "FavoritesModel");
-    qmlRegisterType<Kickoff::KRunnerModel>(uri, 0, 1, "KRunnerModel");
+//     qmlRegisterType<Kickoff::KRunnerModel>(uri, 0, 1, "KRunnerModel");
     qmlRegisterType<Kickoff::LeaveModel>(uri, 0, 1, "LeaveModel");
     qmlRegisterType<Kickoff::RecentlyUsedModel>(uri, 0, 1, "RecentlyUsedModel");
     qmlRegisterType<Kickoff::SystemModel>(uri, 0, 1, "SystemModel");

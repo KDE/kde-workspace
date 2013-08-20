@@ -1,8 +1,7 @@
 
 #######################################################################################
 # Package
-install(DIRECTORY package/
-        DESTINATION ${DATA_INSTALL_DIR}/plasma/packages/org.kde.kickoff)
+plasma_install_package(package org.kde.kickoff)
 
 
 #######################################################################################
@@ -17,6 +16,7 @@ set(libkickoff_SRCS
     core/kickoffabstractmodel.cpp
     core/kickoffmodel.cpp
     core/kickoffproxymodel.cpp
+    core/kickoffplugin.cpp
 #     core/krunnermodel.cpp
     core/leavemodel.cpp
     core/models.cpp
@@ -38,9 +38,10 @@ QT4_ADD_DBUS_INTERFACE(libkickoff_SRCS ${krunner_xml} krunner_interface)
 set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
 QT4_ADD_DBUS_INTERFACE(libkickoff_SRCS ${ksmserver_xml} ksmserver_interface)
 
-kde4_add_library(kickoff SHARED ${libkickoff_SRCS})
+install(FILES core/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/kickoff)
+add_library(kickoff SHARED ${libkickoff_SRCS})
 target_link_libraries(kickoff ${QT_QTCORE_LIBRARY}
-                              ${QT_QTDECLARATIVE_LIBRARY}
+                              ${Qt5Qml_LIBRARIES}
                               ${QT_QTGUI_LIBRARY}
                               ${KDE4_KDEUI_LIBRARY}
                               ${KDE4_KIO_LIBS}

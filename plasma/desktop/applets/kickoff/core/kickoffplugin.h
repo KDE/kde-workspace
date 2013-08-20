@@ -20,16 +20,16 @@
 #ifndef KICKOFFPLUGIN_H
 #define KICKOFFPLUGIN_H
 
-#include <QtDeclarative/QDeclarativeExtensionPlugin>
+#include <QQmlEngine>
+#include <QQmlExtensionPlugin>
 
 
-class KickoffPlugin : public QDeclarativeExtensionPlugin
+class KickoffPlugin : public QQmlExtensionPlugin
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
 public:
     virtual void registerTypes(const char *uri);
 };
-
-Q_EXPORT_PLUGIN2(kickoffplugin, KickoffPlugin)
 
 #endif // KICKOFFPLUGIN_H
