@@ -45,7 +45,7 @@ PlasmaComponents.ContextMenu {
 
         text: contextMenu.title
         icon: contextMenu.model.decoration
-        font.bold: true
+//         font.bold: true //FIXME?
         checkable: false
         enabled: false
     }

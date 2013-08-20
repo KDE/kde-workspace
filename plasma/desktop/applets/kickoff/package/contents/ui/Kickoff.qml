@@ -30,15 +30,22 @@ Item {
     width: 400
     height: 400
 
-    property int minimumWidth: theme.defaultFont.mSize.width * 45
-    property int minimumHeight: theme.defaultFont.mSize.height * 30
+    property int minimumWidth: 400 //theme.defaultFont.mSize.width * 45
+    property int minimumHeight: 400 //theme.defaultFont.mSize.height * 30
     property string previousState
-    property bool switchTabsOnHover: kickoff.switchTabsOnHover
-    property bool showAppsByName: kickoff.showAppsByName
+    property bool switchTabsOnHover: true //FIXME
+//     kickoff.switchTabsOnHover
+    property bool showAppsByName: true //FIXME
+//     kickoff.showAppsByName
     property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
     state: "Normal"
     focus: true
+
+    Item { //HACK
+        id: kickoff
+        property int location: 0
+    }
 
     PlasmaCore.DataSource {
         id: packagekitSource
@@ -75,9 +82,9 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                    case Kickoff.Kickoff.LeftEdge:
-                    case Kickoff.Kickoff.RightEdge:
+                    case PlasmaCore.Types.TopEdge:
+                    case PlasmaCore.Types.LeftEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return undefined;
                     default:
                         return footer.bottom;
@@ -85,9 +92,9 @@ Item {
             }
             bottom: {
                 switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                    case Kickoff.Kickoff.LeftEdge:
-                    case Kickoff.Kickoff.RightEdge:
+                    case Kickoff.TopEdge:
+                    case Kickoff.LeftEdge:
+                    case Kickoff.RightEdge:
                         return footer.top;
                     default:
                         return undefined;
@@ -104,9 +111,9 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                    case Kickoff.Kickoff.LeftEdge:
-                    case Kickoff.Kickoff.RightEdge:
+                    case PlasmaCore.Types.TopEdge:
+                    case PlasmaCore.Types.LeftEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return undefined;
                     default:
                         return parent.top;
@@ -114,9 +121,9 @@ Item {
             }
             bottom: {
                 switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                    case Kickoff.Kickoff.LeftEdge:
-                    case Kickoff.Kickoff.RightEdge:
+                    case PlasmaCore.Types.TopEdge:
+                    case PlasmaCore.Types.LeftEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return parent.bottom;
                     default:
                         return undefined;
@@ -133,10 +140,10 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                case Kickoff.Kickoff.TopEdge:
+                case PlasmaCore.Types.TopEdge:
                     return tabBar.bottom;
-                case Kickoff.Kickoff.LeftEdge:
-                case Kickoff.Kickoff.RightEdge:
+                case PlasmaCore.Types.LeftEdge:
+                case PlasmaCore.Types.RightEdge:
                     return parent.top;
                 default:
                     return searchBar.bottom;
@@ -144,18 +151,18 @@ Item {
             }
             bottom: {
                 switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                    case Kickoff.Kickoff.LeftEdge:
-                    case Kickoff.Kickoff.RightEdge:
+                    case PlasmaCore.Types.TopEdge:
+                    case PlasmaCore.Types.LeftEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return searchBar.top;
                     default:
                         return tabBar.top;
                 }
             }
-            left: kickoff.location == Kickoff.Kickoff.LeftEdge ? parent.left : parent.left
-            right: kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.left : parent.right
-            leftMargin: kickoff.location == Kickoff.Kickoff.LeftEdge ? tabBar.height : undefined
-            rightMargin: kickoff.location == Kickoff.Kickoff.RightEdge ? tabBar.height : undefined
+            left: kickoff.location == PlasmaCore.Types.LeftEdge ? parent.left : parent.left
+            right: kickoff.location == PlasmaCore.Types.RightEdge ? tabBar.left : parent.right
+            leftMargin: kickoff.location == PlasmaCore.Types.LeftEdge ? tabBar.height : undefined
+            rightMargin: kickoff.location == PlasmaCore.Types.RightEdge ? tabBar.height : undefined
         }
 
         //pages
@@ -199,7 +206,7 @@ Item {
         anchors {
             top: {
                 switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
+                    case PlasmaCore.Types.TopEdge:
                         return parent.top;
                     default:
                         return undefined;
@@ -207,22 +214,22 @@ Item {
             }
             bottom: {
                 switch (kickoff.location) {
-                    case Kickoff.Kickoff.TopEdge:
-                    case Kickoff.Kickoff.LeftEdge:
-                    case Kickoff.Kickoff.RightEdge:
+                    case PlasmaCore.Types.TopEdge:
+                    case PlasmaCore.Types.LeftEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return undefined;
                     default:
                         return parent.bottom;
                 }
             }
-            left: kickoff.location == Kickoff.Kickoff.RightEdge || kickoff.location == Kickoff.Kickoff.LeftEdge ? undefined : parent.left
-            right: kickoff.location == Kickoff.Kickoff.RightEdge || kickoff.location == Kickoff.Kickoff.LeftEdge ? undefined : parent.right
+            left: kickoff.location == PlasmaCore.Types.RightEdge || kickoff.location == PlasmaCore.Types.LeftEdge ? undefined : parent.left
+            right: kickoff.location == PlasmaCore.Types.RightEdge || kickoff.location == PlasmaCore.Types.LeftEdge ? undefined : parent.right
         }
-        x: kickoff.location == Kickoff.Kickoff.LeftEdge ? height : (kickoff.location == Kickoff.Kickoff.RightEdge ? root.width : 0)
-        width: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? root.height - searchBar.height - footer.height : undefined
+        x: kickoff.location == PlasmaCore.Types.LeftEdge ? height : (kickoff.location == PlasmaCore.Types.RightEdge ? root.width : 0)
+        width: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? root.height - searchBar.height - footer.height : undefined
 
         transformOrigin: Item.TopLeft
-        rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? 90 : 0
+        rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? 90 : 0
         currentTab: bookmarkButton
 
         onCurrentTabChanged: root.forceActiveFocus();
@@ -232,35 +239,35 @@ Item {
             tab: favoritesPage
             iconSource: "bookmarks"
             text: i18n("Favorites")
-            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
+            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: applicationButton
             tab: applicationsPage
             iconSource: "applications-other"
             text: i18n("Applications")
-            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
+            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: computerButton
             tab: systemPage
             iconSource: "computer" // TODO: could also be computer-laptop
             text: i18n("Computer")
-            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
+            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: usedButton
             tab: recentlyUsedPage
             iconSource: "document-open-recent"
             text: i18n("Recently Used")
-            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
+            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: leaveButton
             tab: leavePage
             iconSource: "system-shutdown"
             text: i18n("Leave")
-            rotation: kickoff.location == Kickoff.Kickoff.LeftEdge || kickoff.location == Kickoff.Kickoff.RightEdge ? -90 : 0
+            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
     } // tabBar
 
