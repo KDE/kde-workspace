@@ -23,6 +23,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0
 
+import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 Item {
     id: root
@@ -32,6 +33,9 @@ Item {
     property Item toolBox
 
     property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
+    onCurrentLayoutChanged: {
+        LayoutManager.layout = currentLayout
+    }
 
     property Item dragOverlay
 
@@ -59,6 +63,7 @@ Item {
             lastSpacer.parent = root
             var container = appletContainerComponent.createObject((plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row)
             print("Applet added in test panel: " + applet)
+            LayoutManager.positions[container] = currentLayout.children.count
             applet.parent = container
             container.applet = applet
             applet.anchors.fill = applet.parent
@@ -150,25 +155,89 @@ Item {
     Component {
         id: appletMoveHandleComponent
         MouseArea {
-            anchors.fill: parent
+            id: configurationArea
+            z: 1000
+            anchors {
+                fill: parent
+                rightMargin: toolBox.width
+            }
             hoverEnabled: true
+
             property Item currentApplet
+
+            property int lastX
+            property int lastY
+
             onPositionChanged: {
-                if (dragOverlay && currentLayout.childAt(mouse.x, mouse.y)) {
-                    dragOverlay.currentApplet = currentLayout.childAt(mouse.x, mouse.y);
+                if (pressed) {
+                    currentApplet.x += (mouse.x - lastX);
+                    handle.x = currentApplet.x;
+                    lastX = mouse.x;
+                    lastY = mouse.y;
+                    
+                    var item = currentLayout.childAt(mouse.x, mouse.y);
+                    
+                    if (item && item !== placeHolder) {
+                        placeHolder.width = item.width;
+                        placeHolder.height = item.height;
+                        placeHolder.parent = configurationArea;
+                        var posInItem = mapToItem(item, mouse.x, mouse.y);
+                        if (posInItem.x < item.width/2) {
+                            LayoutManager.insertBefore(item, placeHolder);
+                        } else {
+                            LayoutManager.insertAfter(item, placeHolder);
+                        }
+                    }
+                } else {
+                    var item = currentLayout.childAt(mouse.x, mouse.y);
+                    if (dragOverlay && item && item !== lastSpacer) {
+                        dragOverlay.currentApplet = item;
+                    } else {
+                        dragOverlay.currentApplet = null;
+                    }
                 }
             }
             onCurrentAppletChanged: {
-                handle.x = currentApplet.x
-                handle.y = currentApplet.y
-                handle.width = currentApplet.width
-                handle.height = currentApplet.height
+                if (!dragOverlay.currentApplet) {
+                    return;
+                }
+
+                handle.x = currentApplet.x;
+                handle.y = currentApplet.y;
+                handle.width = currentApplet.width;
+                handle.height = currentApplet.height;
             }
+            onPressed: {
+                if (!dragOverlay.currentApplet) {
+                    return;
+                }
+
+                lastX = mouse.x;
+                lastY = mouse.y;
+                placeHolder.width = currentApplet.width;
+                placeHolder.height = currentApplet.height;
+                LayoutManager.insertBefore(currentApplet, placeHolder);
+                currentApplet.parent = root;
+                currentApplet.z = 900;
+            }
+            onReleased: {
+                if (!dragOverlay.currentApplet) {
+                    return;
+                }
+                LayoutManager.insertBefore(placeHolder, currentApplet);
+                placeHolder.parent = configurationArea;
+                currentApplet.z = 1;
+                handle.x = currentApplet.x;
+            }
+            Item {
+                id: placeHolder
+            }
+
             Rectangle {
                 id: handle
                 color: theme.backgroundColor
                 radius: 3
-                opacity: 0.5
+                opacity: currentApplet ? 0.5 : 0
                 PlasmaCore.IconItem {
                     source: "transform-move"
                     width: Math.min(parent.width, parent.height)
@@ -176,12 +245,14 @@ Item {
                     anchors.centerIn: parent
                 }
                 Behavior on x {
+                    enabled: !configurationArea.pressed
                     NumberAnimation {
                         duration: 250
                         easing.type: Easing.InOutQuad
                     }
                 }
                 Behavior on y {
+                    enabled: !configurationArea.pressed
                     NumberAnimation {
                         duration: 250
                         easing.type: Easing.InOutQuad
@@ -199,12 +270,20 @@ Item {
                         easing.type: Easing.InOutQuad
                     }
                 }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250
+                        easing.type: Easing.InOutQuad
+                    }
+                }
             }
         }
     }
 
     Component.onCompleted: {
-        print("Test Panel loaded")
-        print(plasmoid)
+        LayoutManager.plasmoid = plasmoid;
+        LayoutManager.root = root;
+        LayoutManager.layout = currentLayout;
+        LayoutManager.restore();
     }
 }
