@@ -17,7 +17,7 @@ set(libkickoff_SRCS
     core/kickoffabstractmodel.cpp
     core/kickoffmodel.cpp
     core/kickoffproxymodel.cpp
-    core/krunnermodel.cpp
+#     core/krunnermodel.cpp
     core/leavemodel.cpp
     core/models.cpp
     core/recentapplications.cpp
@@ -39,6 +39,16 @@ set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInt
 QT4_ADD_DBUS_INTERFACE(libkickoff_SRCS ${ksmserver_xml} ksmserver_interface)
 
 kde4_add_library(kickoff SHARED ${libkickoff_SRCS})
-target_link_libraries(kickoff ${QT_QTCORE_LIBRARY} ${QT_QTDECLARATIVE_LIBRARY} ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBRARY} ${KDE4_KIO_LIBS} ${KDE4_KFILE_LIBS} ${KDE4_PLASMA_LIBS} ${KDE4_SOLID_LIBS} kworkspace)
+target_link_libraries(kickoff ${QT_QTCORE_LIBRARY}
+                              ${QT_QTDECLARATIVE_LIBRARY}
+                              ${QT_QTGUI_LIBRARY}
+                              ${KDE4_KDEUI_LIBRARY}
+                              ${KDE4_KIO_LIBS}
+                              ${KDE4_KFILE_LIBS}
+                              ${PLASMA_LIBRARIES}
+                              ${KSERVICE_LIBRARIES}
+                              ${KDE4Support_LIBRARIES}
+                              ${KDE4_SOLID_LIBS}
+                              kworkspace)
 install(TARGETS kickoff ${INSTALL_TARGETS_DEFAULT_ARGS})
 

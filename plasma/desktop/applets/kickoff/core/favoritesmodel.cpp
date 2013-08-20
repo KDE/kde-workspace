@@ -170,23 +170,24 @@ FavoritesModel::~FavoritesModel()
 
 void FavoritesModel::add(const QString& url)
 {
-    QString handledUrl;
-    KService::Ptr service = Kickoff::serviceForUrl(url);
-    if (service) {
-        handledUrl = service->entryPath();
-    } else {
-        handledUrl = url;
-    }
-
-    Private::globalFavoriteList << handledUrl;
-    Private::globalFavoriteSet << handledUrl;
-
-    foreach (FavoritesModel* model, Private::models) {
-        model->d->addFavoriteItem(handledUrl);
-    }
-
-    // save after each add in case we crash
-    Private::saveFavorites();
+    //FIXME
+//     QString handledUrl;
+//     KService::Ptr service = Kickoff::serviceForUrl(url);
+//     if (service) {
+//         handledUrl = service->entryPath();
+//     } else {
+//         handledUrl = url;
+//     }
+//
+//     Private::globalFavoriteList << handledUrl;
+//     Private::globalFavoriteSet << handledUrl;
+//
+//     foreach (FavoritesModel* model, Private::models) {
+//         model->d->addFavoriteItem(handledUrl);
+//     }
+//
+//     // save after each add in case we crash
+//     Private::saveFavorites();
 }
 
 void FavoritesModel::move(int startRow, int destRow)
@@ -218,14 +219,16 @@ void FavoritesModel::remove(const QString& url)
 bool FavoritesModel::isFavorite(const QString& url)
 {
     QString handledUrl;
-    KService::Ptr service = Kickoff::serviceForUrl(url);
-    if (service) {
-        handledUrl = service->entryPath();
-    } else {
-        handledUrl = url;
-    }
-
-    return Private::globalFavoriteSet.contains(handledUrl);
+    //FIXME
+    return false;
+// //     KService::Ptr service = Kickoff::serviceForUrl(url);
+//     if (service) {
+//         handledUrl = service->entryPath();
+//     } else {
+//         handledUrl = url;
+//     }
+//
+//     return Private::globalFavoriteSet.contains(handledUrl);
 }
 
 int FavoritesModel::numberOfFavorites()
