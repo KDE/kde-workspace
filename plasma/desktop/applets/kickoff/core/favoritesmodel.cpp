@@ -18,7 +18,8 @@
 */
 
 //Own
-#include "core/favoritesmodel.h"
+#include "favoritesmodel.h"
+#include "krunnermodel.h"
 
 // Qt
 #include <QHash>
@@ -46,14 +47,13 @@ public:
 
     void init()
     {
-        headerItem = new QStandardItem(i18n("Favorites"));
-        q->appendRow(headerItem);
     }
 
     void addFavoriteItem(const QString& url)
     {
         QStandardItem *item = StandardItemFactory::createItemForUrl(url, displayOrder);
-        headerItem->appendRow(item);
+        item->setData(i18n("Favorites"), Kickoff::GroupNameRole);
+        q->appendRow(item);
     }
 
     void moveFavoriteItem(int startRow, int destRow)
@@ -62,14 +62,14 @@ public:
             return;
         }
 
-        QStandardItem *item = headerItem->takeChild(startRow);
-
-        headerItem->removeRow(startRow);
-        headerItem->insertRow(destRow, item);
+        QStandardItem *item = q->takeItem(startRow);
+        q->removeRow(startRow);
+        q->insertRow(destRow, item);
     }
 
     void removeFavoriteItem(const QString& url)
     {
+        Q_UNUSED(url)
         QModelIndexList matches = q->match(q->index(0, 0), UrlRole,
                                            url, -1,
                                            Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive));
@@ -131,7 +131,6 @@ public:
     static QSet<FavoritesModel*> models;
 
     FavoritesModel * const q;
-    QStandardItem *headerItem;
     DisplayOrder displayOrder;
 };
 
@@ -167,11 +166,19 @@ FavoritesModel::~FavoritesModel()
 
 void FavoritesModel::add(const QString& url)
 {
-    Private::globalFavoriteList << url;
-    Private::globalFavoriteSet << url;
+    QString handledUrl;
+    KService::Ptr service = Kickoff::serviceForUrl(url);
+    if (service) {
+        handledUrl = service->entryPath();
+    } else {
+        handledUrl = url;
+    }
+
+    Private::globalFavoriteList << handledUrl;
+    Private::globalFavoriteSet << handledUrl;
 
     foreach (FavoritesModel* model, Private::models) {
-        model->d->addFavoriteItem(url);
+        model->d->addFavoriteItem(handledUrl);
     }
 
     // save after each add in case we crash
@@ -206,13 +213,21 @@ void FavoritesModel::remove(const QString& url)
 
 bool FavoritesModel::isFavorite(const QString& url)
 {
-    return Private::globalFavoriteSet.contains(url);
+    QString handledUrl;
+    KService::Ptr service = Kickoff::serviceForUrl(url);
+    if (service) {
+        handledUrl = service->entryPath();
+    } else {
+        handledUrl = url;
+    }
+
+    return Private::globalFavoriteSet.contains(handledUrl);
 }
 
 int FavoritesModel::numberOfFavorites()
 {
     foreach (FavoritesModel* model, Private::models) {
-        return model->d->headerItem->rowCount() - 1;
+        return model->d->q->rowCount() - 1;
     }
 
     return 0;
@@ -225,7 +240,7 @@ void FavoritesModel::sortFavorites(Qt::SortOrder order)
     }
 
     foreach (FavoritesModel *model, Private::models) {
-        model->d->headerItem->sortChildren(0, order);
+        model->d->q->sort(0, order);
     }
 
     Private::globalFavoriteList.clear();
@@ -233,10 +248,9 @@ void FavoritesModel::sortFavorites(Qt::SortOrder order)
     FavoritesModel *model = *Private::models.begin();
     QStandardItem *childData;
     for (int i = 0; i <= numberOfFavorites(); i++) {
-        childData = model->d->headerItem->child(i, 0);
+        childData = model->d->q->item(i, 0);
         Private::globalFavoriteList.append(childData->data(Kickoff::UrlRole).toString());
     }
-
     Private::saveFavorites();
 }
 
@@ -250,16 +264,16 @@ void FavoritesModel::sortFavoritesDescending()
     sortFavorites(Qt::DescendingOrder);
 }
 
-bool FavoritesModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
-                                  int row, int column, const QModelIndex & parent)
+bool FavoritesModel::dropMimeData(const QString& text, const QVariantList& urls,
+                                  int row, int column)
 {
-    Q_UNUSED(parent);
-
+    // FIXME: pass DropAction by qml
+    Qt::DropAction action = Qt::MoveAction;
     if (action == Qt::IgnoreAction) {
         return true;
     }
 
-    if (column > 0) {
+    if (column > 0 || row > numberOfFavorites()) {
         return false;
     }
 
@@ -267,26 +281,19 @@ bool FavoritesModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
         QModelIndex modelIndex;
         QStandardItem *startItem;
         int startRow = -1;
-
         int destRow = row;
 
         // look for the favorite that was dragged
-        for (int i = 0; i < d->headerItem->rowCount(); i++) {
-            startItem = d->headerItem->child(i, 0);
-            if (QFileInfo(startItem->data(Kickoff::UrlRole).toString()).completeBaseName()
-                    == QFileInfo(data->text()).completeBaseName()) {
-                startRow = i;
-                break;
-            }
-        }
+        bool conv = false;
+        startRow = text.toInt(&conv, 10);
 
-        if (startRow < 0) {
+        if (!conv) {
             bool dropped = false;
-            foreach (const QUrl &url, data->urls()) {
-                if (!url.isValid()) {
+            foreach (const QVariant &varUrl, urls) {
+                if (!varUrl.value<QUrl>().isValid()) {
                     continue;
                 }
-                const QString path = url.toLocalFile();
+                const QString path = varUrl.value<QUrl>().toLocalFile();
                 if (!KDesktopFile::isDesktopFile(path)) {
                     continue;
                 }
@@ -326,7 +333,7 @@ QVariant FavoritesModel::headerData(int section, Qt::Orientation orientation, in
     }
 }
 
-void FavoritesModel::setNameDisplayOrder(DisplayOrder displayOrder) 
+void FavoritesModel::setNameDisplayOrder(DisplayOrder displayOrder)
 {
     if (d->displayOrder == displayOrder) {
         return;

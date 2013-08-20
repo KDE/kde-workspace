@@ -36,8 +36,26 @@ namespace Plasma
 class LauncherApplet : public Plasma::PopupApplet
 {
     Q_OBJECT
+    Q_PROPERTY(bool switchTabsOnHover READ switchTabsOnHover WRITE setSwitchTabsOnHover NOTIFY switchTabsOnHoverChanged)
+    Q_PROPERTY(bool showAppsByName READ showAppsByName WRITE setShowAppsByName NOTIFY showAppsByNameChanged)
+    Q_PROPERTY(Location location READ plasmoidLocation NOTIFY locationChanged)
+    Q_PROPERTY(QString footerText READ footerText NOTIFY footerTextChanged)
 
 public:
+    enum Location {
+        Floating = 0, /**< Free floating. Neither geometry or z-ordering
+                        is described precisely by this value. */
+        Desktop,      /**< On the planar desktop layer, extending across
+                        the full screen from edge to edge */
+        FullScreen,   /**< Full screen */
+        TopEdge,      /**< Along the top of the screen*/
+        BottomEdge,   /**< Along the bottom of the screen*/
+        LeftEdge,     /**< Along the left side of the screen */
+        RightEdge     /**< Along the right side of the screen */
+    };
+    Q_ENUMS(Location)
+
+
     LauncherApplet(QObject *parent, const QVariantList &args);
     virtual ~LauncherApplet();
 
@@ -47,9 +65,24 @@ public:
 
     virtual QList<QAction*> contextualActions();
 
-    QWidget *widget();
+    QGraphicsWidget *graphicsWidget();
 
-public Q_SLOTS:
+    bool switchTabsOnHover() const;
+    void setSwitchTabsOnHover(bool on);
+
+    bool showAppsByName() const;
+    void setShowAppsByName(bool on);
+
+    Location plasmoidLocation() const;
+    QString footerText() const;
+
+Q_SIGNALS:
+    void switchTabsOnHoverChanged(bool switchTabsOnHover);
+    void showAppsByNameChanged(bool showAppsByName);
+    void locationChanged(Location location);
+    void footerTextChanged(QString footerText);
+
+protected Q_SLOTS:
     void switchMenuStyle();
     void startMenuEditor();
     void toolTipAboutToShow();
@@ -61,7 +94,6 @@ public Q_SLOTS:
     void saveConfigurationFromSimpleLauncher(const KConfigGroup & configGroup,
                                              const KConfigGroup & globalConfigGroup);
 
-protected Q_SLOTS:
     void configAccepted();
     //void toggleMenu();
     //void toggleMenu(bool pressed);

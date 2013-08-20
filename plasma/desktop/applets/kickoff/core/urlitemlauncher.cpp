@@ -34,8 +34,7 @@
 #include <Solid/StorageAccess>
 
 // Local
-#include "core/models.h"
-#include "core/urlitemlauncher.h"
+#include "models.h"
 
 // DBus
 #include "krunner_interface.h"

@@ -21,9 +21,9 @@
 #define RECENTLYUSEDMODEL_H
 
 // Qt
-#include "core/kickoff_export.h"
-#include "core/kickoffmodel.h"
-#include "core/models.h"
+#include "kickoff_export.h"
+#include "kickoffmodel.h"
+#include "models.h"
 
 // KDE
 #include <KService>

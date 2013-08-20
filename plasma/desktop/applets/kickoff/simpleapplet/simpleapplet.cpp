@@ -72,7 +72,7 @@
 #include "core/recentapplications.h"
 #include "core/leavemodel.h"
 #include "core/urlitemlauncher.h"
-#include "ui/contextmenufactory.h"
+#include "contextmenufactory.h"
 
 #ifndef KDE_USE_FINAL
 Q_DECLARE_METATYPE(QPersistentModelIndex)
@@ -114,14 +114,12 @@ public:
     MenuLauncherApplet::FormatType formattype;
     int maxRecentApps;
     bool showMenuTitles;
-    bool showRecentlyInstalled;
 
     QListWidget *view;
     KIconButton *iconButton;
     KComboBox *formatComboBox;
     QSpinBox *recentApplicationsSpinBox;
     QCheckBox *showMenuTitlesCheckBox;
-    QCheckBox *showRecentlyInstalledCheckBox;
 
     QList<QAction*> actions;
     QAction* switcher;
@@ -139,7 +137,6 @@ public:
               iconButton(0),
               formatComboBox(0),
               showMenuTitlesCheckBox(0),
-              showRecentlyInstalledCheckBox(0),
               switcher(0),
               contextMenuFactory(0)
     {}
@@ -488,13 +485,7 @@ void MenuLauncherApplet::createConfigurationInterface(KConfigDialog *parent)
     d->showMenuTitlesCheckBox->setChecked(d->showMenuTitles);
     grid->addWidget(d->showMenuTitlesCheckBox, 3, 1);
 
-    QLabel *showMenuRecentlyInstalledLabel = new QLabel(i18n("Show 'Recently Installed':"), p);
-    grid->addWidget(showMenuRecentlyInstalledLabel, 4, 0, Qt::AlignRight);
-    d->showRecentlyInstalledCheckBox = new QCheckBox(p);
-    d->showRecentlyInstalledCheckBox->setChecked(d->showRecentlyInstalled);
-    grid->addWidget(d->showRecentlyInstalledCheckBox, 4, 1);
-
-    grid->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding), 5, 0, 1, 3);
+    grid->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding), 4, 0, 1, 3);
     parent->addPage(p, i18n("Options"), "configure");
 
     connect(parent, SIGNAL(applyClicked()), this, SLOT(configAccepted()));
@@ -503,8 +494,7 @@ void MenuLauncherApplet::createConfigurationInterface(KConfigDialog *parent)
     connect(d->formatComboBox, SIGNAL(currentIndexChanged(QString)), parent, SLOT(settingsModified()));
     connect(d->recentApplicationsSpinBox, SIGNAL(valueChanged(int)), parent, SLOT(settingsModified()));
     connect(d->showMenuTitlesCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(d->showRecentlyInstalledCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(d->view, SIGNAL(currentTextChanged(QString)), parent, SLOT(settingsModified()));    
+    connect(d->view, SIGNAL(currentTextChanged(QString)), parent, SLOT(settingsModified()));
 }
 
 void MenuLauncherApplet::configAccepted()
@@ -560,13 +550,6 @@ void MenuLauncherApplet::configAccepted()
         needssaving = true;
         d->showMenuTitles = showMenuTitles;
         cg.writeEntry("showMenuTitles", showMenuTitles);
-    }
-
-    const bool showRecentlyInstalled = d->showRecentlyInstalledCheckBox->isChecked();
-    if (showRecentlyInstalled != d->showRecentlyInstalled) {
-        needssaving = true;
-        d->showRecentlyInstalled = showRecentlyInstalled;
-        cg.writeEntry("showRecentlyInstalled", showRecentlyInstalled);
     }
 
     if (needssaving) {
@@ -627,14 +610,10 @@ void MenuLauncherApplet::showMenu(bool pressed)
         foreach(const QString &vtname, d->viewtypes) {
             if(vtname == "Applications") {
                 Kickoff::ApplicationModel *appModel = new Kickoff::ApplicationModel(menuview, true /*allow separators*/);
-                appModel->setApplet(this);
+
                 appModel->setDuplicatePolicy(Kickoff::ApplicationModel::ShowLatestOnlyPolicy);
-                if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription) {
-                    appModel->setNameDisplayOrder(Kickoff::NameBeforeDescription);
-                    appModel->setPrimaryNamePolicy(Kickoff::ApplicationModel::AppNamePrimary);
-                }
+
                 appModel->setSystemApplicationPolicy(Kickoff::ApplicationModel::ShowApplicationAndSystemPolicy);
-                appModel->setShowRecentlyInstalled(d->showRecentlyInstalled);
 
                 menuview->addModel(appModel, Kickoff::MenuView::None, d->relativePath);
 
@@ -651,7 +630,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
                 if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription) {
                     favoritesModel->setNameDisplayOrder(Kickoff::NameBeforeDescription);
                 }
-                d->addModel(favoritesModel, Favorites);
+                d->addModel(favoritesModel, Favorites, Kickoff::MenuView::None);
             } else if(vtname == "Computer") {
                 d->addModel(new Kickoff::SystemModel(menuview), Computer);
             } else if(vtname == "RecentlyUsed") {
@@ -666,7 +645,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
                     if (d->formattype == Name || d->formattype == NameDescription || d->formattype == NameDashDescription) {
                         recentModel->setNameDisplayOrder(Kickoff::NameBeforeDescription);
                     }
-                    menuview->addModel(recentModel, Kickoff::MenuView::MergeFirstLevel);
+                    menuview->addModel(recentModel);
 
                     if (d->showMenuTitles) {
                         menuview->setModelTitleVisible(recentModel, true);
@@ -762,7 +741,7 @@ void MenuLauncherApplet::showMenu(bool pressed)
             } else if(vtname == "Leave") {
                 Kickoff::LeaveModel *leavemodel = new Kickoff::LeaveModel(menuview);
                 leavemodel->updateModel();
-                d->addModel(leavemodel, Leave, Kickoff::MenuView::MergeFirstLevel, Kickoff::MenuView::Name);
+                d->addModel(leavemodel, Leave, Kickoff::MenuView::None, Kickoff::MenuView::Name);
             } else {
 #ifndef Q_WS_WIN
                 QSet< Solid::PowerManagement::SleepState > spdMethods = Solid::PowerManagement::supportedSleepStates();
@@ -836,7 +815,7 @@ void MenuLauncherApplet::iconSizeChanged(int group)
 QSizeF MenuLauncherApplet::sizeHint(Qt::SizeHint which, const QSizeF & constraint) const
 {
     if (which == Qt::PreferredSize) {
-        int iconSize;
+        int iconSize = 0;
 
         switch (formFactor()) {
             case Plasma::Planar:
@@ -891,7 +870,6 @@ void MenuLauncherApplet::configChanged()
 
     d->setMaxRecentApps(cg.readEntry("maxRecentApps", qMin(5, Kickoff::RecentApplications::self()->maximum())));
     d->showMenuTitles = cg.readEntry("showMenuTitles", false);
-    d->showRecentlyInstalled = cg.readEntry("showRecentlyInstalled", true);
 
     d->icon->setIcon(KIcon(cg.readEntry("icon", d->iconname)));
 

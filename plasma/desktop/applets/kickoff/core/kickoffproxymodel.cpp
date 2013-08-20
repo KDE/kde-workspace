@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/kickoffproxymodel.h"
+#include "kickoffproxymodel.h"
 
 // Qt
 #include <QMimeData>
@@ -28,7 +28,7 @@
 #include <QDebug>
 
 // Local
-#include "core/models.h"
+#include "models.h"
 
 using namespace Kickoff;
 

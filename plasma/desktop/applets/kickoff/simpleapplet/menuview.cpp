@@ -33,7 +33,7 @@
 #include <QtGui/QToolTip>
 
 // KDE
-#include <QDebug>
+#include <KDebug>
 #include <KUrl>
 #include <KIconLoader>
 
@@ -140,7 +140,6 @@ public:
     QPoint mousePressPos;
     QList<QStandardItem*> items;
     QHash<QAbstractItemModel*, QAction*> modelsHeader;
-    QList<QWeakPointer<QAbstractItemModel> > models;
 };
 
 MenuView::MenuView(QWidget *parent, const QString &title, const QIcon &icon)
@@ -160,11 +159,12 @@ MenuView::MenuView(QWidget *parent, const QString &title, const QIcon &icon)
 
 MenuView::~MenuView()
 {
-    QListIterator<QWeakPointer<QAbstractItemModel> > it(d->models);
-    while (it.hasNext()) {
-        QAbstractItemModel *model = it.next().data();
-        if (model) {
+    // delete all the models before we are; we can't let ~QObject do this
+    // for us since by that point it is too late and we'll get all 
+    foreach (QObject *child, children()) {
+        if (QAbstractItemModel *model = qobject_cast<QAbstractItemModel *>(child)) {
             model->disconnect(this);
+            delete model;
         }
     }
 
@@ -189,34 +189,43 @@ void MenuView::updateAction(QAbstractItemModel *model, QAction *action, const QM
     //    Qt::DisplayRole returns appName,
     //    Kickoff::SubTitleRole returns genericName.
 
-    QString mainText = index.data(Qt::DisplayRole).value<QString>().replace('&', "&&");
-    QString altText = index.data(Kickoff::SubTitleRole).value<QString>().replace('&', "&&");
+    QString descText = index.data(Qt::DisplayRole).value<QString>().replace('&', "&&");
+    QString nameText = index.data(Kickoff::SubTitleRole).value<QString>().replace('&', "&&");
+    if (descText.isEmpty()) {
+        descText = nameText;
+    }
     if (action->menu() != 0) { // if it is an item with sub-menuitems, we probably like to thread them another way...
-        action->setText(mainText);
+        action->setText(descText);
     } else {
         switch (d->formattype) {
-        case Name:
+        case Name: {
+            action->setText(nameText);
+            action->setToolTip(descText);
+        } break;
         case Description: {
-            action->setText(mainText);
-            action->setToolTip(altText);
+            action->setText(descText);
+            action->setToolTip(nameText);
         } break;
         case NameDescription: // fall through
         case NameDashDescription: // fall through
         case DescriptionName: {
-            if (!mainText.isEmpty()) { // seems we have a program, but some of them don't define a name at all
-                if (mainText.contains(altText, Qt::CaseInsensitive)) { // sometimes the description contains also the name
-                    action->setText(mainText);
-                } else if (altText.contains(mainText, Qt::CaseInsensitive)) { // and sometimes the name also contains the description
-                    action->setText(altText);
+            if (!descText.isEmpty()) { // seems we have a program, but some of them don't define a name at all
+                if (descText.contains(nameText, Qt::CaseInsensitive)) { // sometimes the description contains also the name
+                    action->setText(descText);
+                } else if (nameText.contains(descText, Qt::CaseInsensitive)) { // and sometimes the name also contains the description
+                    action->setText(nameText);
                 } else { // seems we have a perfect desktop-file (likely a KDE one, heh) and name+description are clear separated
                     if (d->formattype == NameDashDescription) {
-                        action->setText(QString("%1 - %2").arg(mainText).arg(altText));
+                        action->setText(QString("%1 - %2").arg(nameText).arg(descText));
+                    } else if (d->formattype == NameDescription) {
+                        action->setText(QString("%1 (%2)").arg(nameText).arg(descText));
+                    //DescriptionName
                     } else {
-                        action->setText(QString("%1 (%2)").arg(mainText).arg(altText));
+                        action->setText(QString("%1 (%2)").arg(descText).arg(nameText));
                     }
                 }
             } else { // if there is no name, let's just use the describing text
-                action->setText(altText);
+                action->setText(nameText);
             }
         } break;
         }
@@ -277,33 +286,23 @@ bool MenuView::eventFilter(QObject *watched, QEvent *event)
 
             return true;
         }
-
-        break;
-    }
-
+    } break;
     case QEvent::MouseButtonPress: {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
         QMenu *watchedMenu = qobject_cast<QMenu*>(watched);
         if (watchedMenu) {
             d->mousePressPos = mouseEvent->pos();
         }
-
-        break;
-    }
-
+    } break;
     case QEvent::MouseButtonRelease: {
         QMenu *watchedMenu = qobject_cast<QMenu*>(watched);
         if (watchedMenu) {
             d->mousePressPos = QPoint();
         }
-
-        break;
-    }
-
+    } break;
     case QEvent::Hide: {
         emit afterBeingHidden();
-        break;
-    }
+    } break;
 
     case QEvent::ToolTip: {
         bool hide = true;
@@ -318,20 +317,17 @@ bool MenuView::eventFilter(QObject *watched, QEvent *event)
                 if ((toolTip != watchedMenu->activeAction()->text()) && (watchedMenu->activeAction()->menu() == 0)) {
                 QToolTip::showText(helpEvent->globalPos(), toolTip);
                 hide = false ;
-                }
-            }
-        }
+		}
+	    }
+	} 
 
-        if (hide) {
-            QToolTip::hideText();
-            event->ignore();
-        }
-
-        break;
-    }
-
-    default:
-        break;
+   if (hide) {
+         QToolTip::hideText();
+         event->ignore();
+   }
+    } break;
+    
+    default: break;
     }
 
     return KMenu::eventFilter(watched, event);
@@ -345,19 +341,17 @@ void MenuView::addModel(QAbstractItemModel *model, MenuView::ModelOptions option
     header->setVisible(false);
 
     d->modelsHeader.insert(model, header);
-    d->models.append(model);
 
-    if (options & MergeFirstLevel) {
+    if(options & MergeFirstLevel) {
         const int count = model->rowCount();
-        for (int row = 0; row < count; ++row) {
+        for(int row = 0; row < count; ++row) {
             QModelIndex index = model->index(row, 0, QModelIndex());
             Q_ASSERT(index.isValid());
 
             const QString title = index.data(Qt::DisplayRole).value<QString>();
-            if (count > 1 && ! title.isEmpty() && model->rowCount(index) > 0) {
+            if (count > 1 && ! title.isEmpty() && model->rowCount(index) > 0)
                 addTitle(title);
-            }
-
+            
             model->blockSignals(true);
             model->setData(index, qVariantFromValue(this->menuAction()), Private::ActionRole);
             model->blockSignals(false);
@@ -372,6 +366,7 @@ void MenuView::addModel(QAbstractItemModel *model, MenuView::ModelOptions option
         d->buildBranch(this, model, root);
     }
 
+//connect(model, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), this, SLOT(rowsInserted(QModelIndex,int,int)));
     connect(model, SIGNAL(rowsInserted(QModelIndex,int,int)), this, SLOT(rowsInserted(QModelIndex,int,int)));
     connect(model, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)), this, SLOT(rowsAboutToBeRemoved(QModelIndex,int,int)));
     connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(dataChanged(QModelIndex,QModelIndex)));
@@ -402,10 +397,8 @@ QModelIndex MenuView::indexForAction(QAction *action) const
 
 QAction *MenuView::actionForIndex(const QModelIndex& index) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid())
         return this->menuAction();
-    }
-
     const QAbstractItemModel *model = index.model();
     Q_ASSERT(model);
     QVariant v = model->data(index, Private::ActionRole);
@@ -423,24 +416,18 @@ bool MenuView::isValidIndex(const QModelIndex& index) const
 
 void MenuView::rowsInserted(const QModelIndex& parent, int start, int end)
 {
-    qDebug() << start << end;
+    kDebug()<<start<<end;
 
-    Q_ASSERT(parent.isValid());
-    Q_ASSERT(parent.model());
-
-    //Q_ASSERT( ! isValidIndex(parent) );
     QMenu *menu = isValidIndex(parent) ? actionForIndex(parent)->menu() : this;
 
-    QAbstractItemModel *model = const_cast<QAbstractItemModel*>(parent.model());
-    if (!model) {
-        return;
-    }
+    QAbstractItemModel *model = qobject_cast<QAbstractItemModel*>(sender());
+    Q_ASSERT(model);
 
     QList<QAction*> newActions;
     for (int row = start; row <= end; row++) {
         QModelIndex index = model->index(row, d->column, parent);
         QAction *newAction = d->createActionForIndex(model, index, menu);
-        qDebug()<<"new action="<<newAction->text();
+        kDebug()<<"new action="<<newAction->text();
         newActions << newAction;
     }
 
@@ -462,30 +449,49 @@ void MenuView::rowsInserted(const QModelIndex& parent, int start, int end)
     }
 
     if (lastidx >= 0) {
-        if (offset < start) {
+        if (offset < start)
             lastidx++; // insert action the item right after the last valid index
-        }
-
-        if (lastidx < menu->actions().count()) {
+        if (lastidx < menu->actions().count())
             menu->insertActions(menu->actions()[lastidx], newActions);
-        } else {
+        else
             lastidx = -1;
-        }
     }
-
-    if (lastidx < 0) {
-        // just append the action
+    if (lastidx < 0) // just append the action
         menu->addActions(newActions);
-    }
 }
 
 void MenuView::rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end)
 {
-    qDebug() << start << end;
+    kDebug()<<start<<end;
+#if 0
+    Q_ASSERT(parent.isValid());
+    Q_ASSERT(parent.model());
+    QAbstractItemModel *model = const_cast<QAbstractItemModel*>(parent.model());
+    Q_ASSERT(model);
+    for (int row = end; row >= start; --row) {
+        QModelIndex index = model->index(row, d->column, parent);
+        QAction *action = actionForIndex(index);
+        Q_ASSERT(action);
+        QMenu *menu = dynamic_cast<QMenu*>(action->parent());
+        Q_ASSERT(menu);
+        menu->removeAction(action);
+    }
+    /*
+    QAction *menuAction = 0;
+    if(parent.model()->data(parent, Private::ActionRole).isValid()) menuAction = actionForIndex(parent);
+    Q_ASSERT(menuAction);
+    QMenu *menu = menuAction->menu();
+    Q_ASSERT(menu);
+    QList<QAction*> actions = menu->actions();
+    Q_ASSERT(end < actions.count());
+    for (int row = end; row >= start; row--) menu->removeAction(actions[row]);
+    */
+#else
     Q_UNUSED(parent);
     Q_UNUSED(start);
     Q_UNUSED(end);
     modelReset();
+#endif
 }
 
 void MenuView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -501,14 +507,14 @@ void MenuView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottom
 
     for (int row = topLeft.row(); row <= bottomRight.row() && row < actions.count(); ++row) {
         QModelIndex index = model->index(row, d->column, topLeft.parent());
-        qDebug()<<row<<index.data(Qt::DisplayRole).value<QString>();
+        kDebug()<<row<<index.data(Qt::DisplayRole).value<QString>();
         updateAction(model, actions[row], index);
     }
 }
 
 void MenuView::modelReset()
 {
-    qDebug();
+    kDebug();
     deleteLater(); // we need to force clearance of the menu and rebuild from scratch
 }
 
@@ -548,7 +554,7 @@ void MenuView::actionTriggered(QAction *action)
         d->launcher->openUrl(url.url());
     } else {
         QModelIndex index = indexForAction(action);
-        if (index.isValid()) {
+        if(index.isValid()) {
             d->launcher->openItem(index);
         } else {
             kWarning()<<"Invalid action objectName="<<action->objectName()<<"text="<<action->text()<<"parent="<<(action->parent()?action->parent()->metaObject()->className():"NULL");
@@ -556,9 +562,9 @@ void MenuView::actionTriggered(QAction *action)
     }
 }
 
-void MenuView::contextMenuRequested(const QPoint &pos)
+void MenuView::contextMenuRequested(const QPoint& pos)
 {
-    KMenu *menu = qobject_cast<KMenu *>(sender());
+    KMenu* menu = qobject_cast<KMenu*>(sender());
     emit customContextMenuRequested(menu, pos);
 }
 

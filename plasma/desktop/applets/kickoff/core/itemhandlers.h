@@ -22,8 +22,8 @@
 
 #include <QtCore/QObject>
 
-#include "core/kickoff_export.h"
-#include "core/urlitemlauncher.h"
+#include "kickoff_export.h"
+#include "urlitemlauncher.h"
 
 namespace Kickoff
 {
@@ -37,6 +37,7 @@ class KICKOFF_EXPORT LeaveItemHandler : public QObject, public UrlItemHandler
 {
     Q_OBJECT
 public:
+    explicit LeaveItemHandler(QObject *parent = 0);
     virtual bool openUrl(const KUrl& url);
 
 private Q_SLOTS:

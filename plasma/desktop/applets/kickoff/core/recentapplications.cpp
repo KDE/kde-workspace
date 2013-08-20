@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/recentapplications.h"
+#include "recentapplications.h"
 
 // Qt
 #include <QtCore/QHash>
@@ -29,7 +29,7 @@
 #include <QDebug>
 
 // Local
-#include "core/models.h"
+#include "models.h"
 
 using namespace Kickoff;
 

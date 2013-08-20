@@ -21,7 +21,7 @@
 #ifndef URLITEMLAUNCHER_H
 #define URLITEMLAUNCHER_H
 
-#include "core/kickoff_export.h"
+#include "kickoff_export.h"
 
 #include <QObject>
 #include <solid/storageaccess.h>

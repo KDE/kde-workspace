@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "core/krunnermodel.h"
+#include "krunnermodel.h"
 
 // Qt
 #include <QBasicTimer>
@@ -35,7 +35,7 @@
 #include <Plasma/RunnerManager>
 
 // Local
-#include "core/recentapplications.h"
+#include "recentapplications.h"
 
 #define DELAY_TIME 50
 
@@ -89,7 +89,7 @@ Plasma::RunnerManager * runnerManager() {
     return _runnerManager;
 }
 
-KService::Ptr serviceForUrl(const KUrl & url)
+KService::Ptr Kickoff::serviceForUrl(const KUrl & url)
 {
     QString runner = url.host();
     QString id = url.path();
@@ -174,6 +174,8 @@ KRunnerModel::KRunnerModel(QObject *parent)
             SIGNAL(matchesChanged(QList<Plasma::QueryMatch>)),
             this,
             SLOT(matchesChanged(QList<Plasma::QueryMatch>)));
+
+    UrlItemLauncher::addGlobalHandler(UrlItemLauncher::ProtocolHandler, "krunner", new KRunnerItemHandler);
 }
 
 KRunnerModel::~KRunnerModel()
@@ -225,7 +227,7 @@ void KRunnerModel::matchesChanged(const QList< Plasma::QueryMatch > & m)
 
     while (matches.size()) {
         Plasma::QueryMatch match = matches.takeLast();
-
+        qDebug() << "matches " << QString("krunner://") + match.runner()->id() + "/" + match.id();
         appendRow(
             StandardItemFactory::createItem(
                 match.icon(),

@@ -20,14 +20,16 @@
 #ifndef KRUNNERMODEL_H
 #define KRUNNERMODEL_H
 
-#include "core/models.h"
-#include "core/kickoff_export.h"
-#include "core/kickoffmodel.h"
-#include "core/urlitemlauncher.h"
+#include "models.h"
+#include "kickoff_export.h"
+#include "kickoffmodel.h"
+#include "urlitemlauncher.h"
 
 #include <Plasma/QueryMatch>
 
 namespace Kickoff {
+
+    KService::Ptr serviceForUrl(const KUrl & url);
 
 class KICKOFF_EXPORT KRunnerItemHandler : public UrlItemHandler {
 public:
@@ -39,7 +41,7 @@ class KICKOFF_EXPORT KRunnerModel : public KickoffModel
     Q_OBJECT
 
 public:
-    KRunnerModel(QObject *parent);
+    KRunnerModel(QObject *parent = NULL);
     virtual ~KRunnerModel();
     void setNameDisplayOrder(DisplayOrder displayOrder);
     DisplayOrder nameDisplayOrder() const;

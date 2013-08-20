@@ -19,7 +19,7 @@
 */
 
 // Own
-#include "ui/contextmenufactory.h"
+#include "contextmenufactory.h"
 
 // Qt
 #include <QAbstractItemView>
