@@ -19,8 +19,7 @@
 import QtQuick 2.0
 import org.kde.plasma.kickoff 0.1 as Kickoff
 import org.kde.plasma.components 2.0 as PlasmaComponents
-
-
+import org.kde.qtextracomponents 2.0
 
 PlasmaComponents.ContextMenu {
     id: contextMenu

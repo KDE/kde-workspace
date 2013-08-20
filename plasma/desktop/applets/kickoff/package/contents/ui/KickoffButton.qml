@@ -52,7 +52,7 @@ PlasmaComponents.TabButton {
         width: theme.largeIconSize
         height: width
 
-        icon: QIcon(iconSource)
+        icon: iconSource
     }
     PlasmaComponents.Label {
         id: labelElement

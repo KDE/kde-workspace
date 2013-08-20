@@ -42,9 +42,12 @@ Item {
     state: "Normal"
     focus: true
 
+    function i18n(q) {return q;} //HACK REMOVE THIS
+
     Item { //HACK
         id: kickoff
         property int location: 0
+        property string footerText: ""
     }
 
     PlasmaCore.DataSource {
