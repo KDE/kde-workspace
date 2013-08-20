@@ -93,6 +93,10 @@ Item {
         }
 
         onUserConfiguringChanged: {
+            if (plasmoid.immutable) {
+                return;
+            }
+
             if (plasmoid.userConfiguring) {
                 dragOverlay = appletMoveHandleComponent.createObject(root);
             } else {
