@@ -1,5 +1,6 @@
 /*
  *   Copyright 2012 Viranch Mehta <viranch.mehta@gmail.com>
+ *   Copyright 2012 Marco Martin <mart@kde.org>
  *   Copyright 2013 David Edmundson <davidedmundson@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
