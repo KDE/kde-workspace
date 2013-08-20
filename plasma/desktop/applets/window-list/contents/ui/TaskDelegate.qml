@@ -39,7 +39,7 @@ Item {
     PlasmaComponents.Highlight {
         hover:menu.focus
         width: windowListMenu.width
-        height:30
+        height:menuItem.height/1.3
         visible:true
         opacity:menuItem.active?1:0
     }

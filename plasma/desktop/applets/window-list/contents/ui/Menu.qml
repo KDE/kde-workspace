@@ -44,7 +44,7 @@ PlasmaExtras.ScrollArea {
         section.delegate: PlasmaComponents.Highlight {
             hover: menu.focus
             width: menu.width
-            height: 30
+            height: main.height/12
 
             PlasmaComponents.Label {
                 text: section > 0 ? "Desktop " + section : "On all desktops"

@@ -33,14 +33,14 @@ Item {
 
         property Item trackingItem
         onTrackingItemChanged: {
-            y = trackingItem.mapToItem(main, 0, 0).y - highlightItem.marginHints.top
+            y = trackingItem.mapToItem(main, 0, 5).y - highlightItem.marginHints.top
         }
 
         hover: true
         width: windowListMenu.width
         x: 0
         y: 0
-        height: 30
+        height: main.height/12.5
         visible: true
         opacity: trackingItem && (mouse.containsMouse || mouseArea.containsMouse || highlight) ? 1 : 0
 
@@ -112,7 +112,7 @@ Item {
         sortRole: "desktop"
         sourceModel: tasksModel
     }
-    
+
     PlasmaCore.SortFilterModel { 
         id: tasksModel
         sourceModel: PlasmaCore.DataModel {
@@ -122,7 +122,8 @@ Item {
 
     Column {
         id: col
-        spacing: 5
+        spacing:5
+
         PlasmaComponents.Highlight {
             hover: menu.focus
             width: windowListMenu.width
@@ -135,18 +136,14 @@ Item {
                 }
             }
         }
-        Rectangle {
-            id: action1
-            width: windowListMenu.width
-            height: 30
-            color: "transparent"
-            PlasmaComponents.Label {
-                id: unclutter
-                text: "Unclutter Windows"
-                anchors {
-                    leftMargin: 10
-                    left: action1.left
-                }
+
+        PlasmaComponents.Label {
+            id: unclutter
+            text: "Unclutter Windows"
+            anchors {
+                leftMargin: 10
+                left: parent.left
+                verticalCenter: highlightItem.verticalCenter
             }
             MouseArea {
                 id: mouse
@@ -156,26 +153,21 @@ Item {
                     performOperation("unclutter");
                 }
                 onEntered: {
-                    highlightItem.trackingItem = action1
+                    highlightItem.trackingItem = unclutter
                 }
                 onExited: {
                     highlight=false
                 }
             }
         }
-        Rectangle {
-            id: rect_1
-            width: windowListMenu.width
-            height: 30
-            color: "transparent"
-            PlasmaComponents.Label {
-                id: cascade
-                text: "Cascade Windows"
-                anchors {
-                    left: parent.left
-                    leftMargin: 10
-                    verticalCenter: highlightItem.verticalCenter
-                }
+
+        PlasmaComponents.Label {
+            id: cascade
+            text: "Cascade Windows"
+            anchors {
+                left: parent.left
+                leftMargin: 10
+                verticalCenter: highlightItem.verticalCenter
             }
             MouseArea {
                 id: mouseArea
@@ -185,7 +177,8 @@ Item {
                     performOperation("cascade");
                 }
                 onEntered: {
-                    highlightItem.trackingItem = rect_1
+                    print(main.height);
+                    highlightItem.trackingItem = cascade
                 }
                 onExited: {
                     highlight=false
