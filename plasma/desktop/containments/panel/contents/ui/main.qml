@@ -63,7 +63,7 @@ Item {
             lastSpacer.parent = root
             var container = appletContainerComponent.createObject((plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row)
             print("Applet added in test panel: " + applet)
-            LayoutManager.positions[container] = currentLayout.children.count
+
             applet.parent = container
             container.applet = applet
             applet.anchors.fill = applet.parent

@@ -19,7 +19,7 @@
 
 .pragma library
 
-var positions = new Object()
+var order = new Array();
 
 
 var layout;
@@ -28,13 +28,18 @@ var plasmoid;
 
 
 function restore() {
-    var configString = String(plasmoid.readConfig("ItemsOrder"))
+    var configString = String(plasmoid.configuration.AppletOrder)
 
     //array, a cell for encoded item orger
-    var itemsStrings = configString.split(";")
+    var itemsStrings = configString.split(";");
+
     for (var i = 0; i < itemsStrings.length; i++) {
         
     }
+}
+
+function save() {
+    plasmoid.configuration.AppletOrder = order.join(';');
 }
 
 function insertBefore(item1, item2) {
