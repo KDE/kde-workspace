@@ -43,6 +43,16 @@
 
 
 /* Victor Polevoy GSOC 2013 */
+#include <klauncher_iface.h>
+#include <KLocale>
+#include <KToolInvocation>
+
+#include <kstandarddirs.h>
+
+#include <QImage>
+#include <QPainter>
+#include "flags.h"
+
 #include <xcursortheme.h>
 #include <thememodel.h>
 #include <QDir>
@@ -154,30 +164,40 @@ const CursorTheme* KeyboardDaemon::getCurrentCursorTheme()
     QString currentTheme = XcursorGetTheme(QX11Info().display());
     
     // Get the name of the theme KDE is configured to use
-    KConfig c("kcminputrc");
-    KConfigGroup cg(&c, "Mouse");
-    currentTheme = cg.readEntry("cursorTheme", currentTheme);
+    KConfig inputConfiguration("kcminputrc");
+    KConfigGroup mouseConfig(&inputConfiguration, "Mouse");
+    currentTheme = mouseConfig.readEntry("cursorTheme", currentTheme);
     
     return cursorThemeModel.theme(cursorThemeModel.findIndex(currentTheme));
 }
 
 void KeyboardDaemon::setupCursorIcon()
-{
-    //TODO: get cursor theme from kde settings class
+{   
+    KGlobalSettings::self()->emitChange(KGlobalSettings::CursorChanged);
     runRdb(0);
     
     const CursorTheme* cursorTheme = getCurrentCursorTheme();
     
-    KGlobalSettings::self()->emitChange(KGlobalSettings::CursorChanged);
-        
-    QString cursorName 		= "ibeam_" + currentLayout.layout;
-    QString oldCursorName 	= "ibeam";    
+    QImage cursorDefaultImage = cursorTheme->loadImage("ibeam", 0);
     
-    if(oldLayout.layout.length() != 0)
-	oldCursorName = "ibeam_" + oldLayout.layout;
+    Flags flags;
+    QImage flagImage = flags.getIcon(currentLayout.layout).pixmap(24, 24).toImage();
     
-    QCursor cursor = cursorTheme->loadCursor(cursorName, 0);
-    XFixesChangeCursorByName(QX11Info().display(), cursor.handle(), QFile::encodeName(oldCursorName));
+    QImage cursorImage(48, 24, QImage::Format_ARGB32);
+    
+    cursorImage.fill(Qt::transparent);
+    
+    QPainter painter;
+    painter.begin(&cursorImage);
+    painter.drawImage(24, 0, cursorDefaultImage);
+    painter.drawImage(24, 0, flagImage);
+    painter.end();
+    
+    QCursor cursor(QPixmap::fromImage(cursorImage));
+    
+    XFixesSetCursorName(QX11Info::display(), cursor.handle(), QFile::encodeName("ibeam"));
+    
+    XFixesChangeCursorByName(QX11Info().display(), cursor.handle(), QFile::encodeName("ibeam"));
 }
 
 void KeyboardDaemon::registerShortcut()
