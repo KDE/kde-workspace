@@ -98,7 +98,9 @@ Item {
             }
 
             if (plasmoid.userConfiguring) {
-                dragOverlay = appletMoveHandleComponent.createObject(root);
+                var component = Qt.createComponent("ConfigOverlay.qml");
+                dragOverlay = component.createObject(root);
+                component.destroy();
             } else {
                 dragOverlay.destroy()
             }
@@ -156,133 +158,7 @@ Item {
         }
     }
 
-    Component {
-        id: appletMoveHandleComponent
-        MouseArea {
-            id: configurationArea
-            z: 1000
-            anchors {
-                fill: parent
-                rightMargin: toolBox.width
-            }
-            hoverEnabled: true
 
-            property Item currentApplet
-
-            property int lastX
-            property int lastY
-
-            onPositionChanged: {
-                if (pressed) {
-                    currentApplet.x += (mouse.x - lastX);
-                    handle.x = currentApplet.x;
-                    lastX = mouse.x;
-                    lastY = mouse.y;
-                    
-                    var item = currentLayout.childAt(mouse.x, mouse.y);
-                    
-                    if (item && item !== placeHolder) {
-                        placeHolder.width = item.width;
-                        placeHolder.height = item.height;
-                        placeHolder.parent = configurationArea;
-                        var posInItem = mapToItem(item, mouse.x, mouse.y);
-                        if (posInItem.x < item.width/2) {
-                            LayoutManager.insertBefore(item, placeHolder);
-                        } else {
-                            LayoutManager.insertAfter(item, placeHolder);
-                        }
-                    }
-                } else {
-                    var item = currentLayout.childAt(mouse.x, mouse.y);
-                    if (dragOverlay && item && item !== lastSpacer) {
-                        dragOverlay.currentApplet = item;
-                    } else {
-                        dragOverlay.currentApplet = null;
-                    }
-                }
-            }
-            onCurrentAppletChanged: {
-                if (!dragOverlay.currentApplet) {
-                    return;
-                }
-
-                handle.x = currentApplet.x;
-                handle.y = currentApplet.y;
-                handle.width = currentApplet.width;
-                handle.height = currentApplet.height;
-            }
-            onPressed: {
-                if (!dragOverlay.currentApplet) {
-                    return;
-                }
-
-                lastX = mouse.x;
-                lastY = mouse.y;
-                placeHolder.width = currentApplet.width;
-                placeHolder.height = currentApplet.height;
-                LayoutManager.insertBefore(currentApplet, placeHolder);
-                currentApplet.parent = root;
-                currentApplet.z = 900;
-            }
-            onReleased: {
-                if (!dragOverlay.currentApplet) {
-                    return;
-                }
-                LayoutManager.insertBefore(placeHolder, currentApplet);
-                placeHolder.parent = configurationArea;
-                currentApplet.z = 1;
-                handle.x = currentApplet.x;
-            }
-            Item {
-                id: placeHolder
-            }
-
-            Rectangle {
-                id: handle
-                color: theme.backgroundColor
-                radius: 3
-                opacity: currentApplet ? 0.5 : 0
-                PlasmaCore.IconItem {
-                    source: "transform-move"
-                    width: Math.min(parent.width, parent.height)
-                    height: width
-                    anchors.centerIn: parent
-                }
-                Behavior on x {
-                    enabled: !configurationArea.pressed
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                Behavior on y {
-                    enabled: !configurationArea.pressed
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                Behavior on width {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                Behavior on height {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 250
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-            }
-        }
-    }
 
     Component.onCompleted: {
         LayoutManager.plasmoid = plasmoid;
