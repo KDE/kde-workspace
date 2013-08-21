@@ -4,17 +4,17 @@ set(kwin_effect_OWN_LIBS
 
 set(kwin_effect_KDE_LIBS
     ${KDE4Support_LIBRARIES}
-    ${KDE4_KDEUI_LIBRARY} # KGlobalSettings::dndEventDelay() in PW and DG
-    ${KDE4_KDECORE_LIBS} # kdebug
+    KF5::KI18n
     KF5::KWindowSystem
     KF5::plasma # screenedge effect
     KF5::KDE4Attic # windowgeometry effect using KLocale
+    KF5::KIconThemes
 )
 
 set(kwin_effect_QT_LIBS
-    ${Qt5Quick_LIBRARIES}
-    ${Qt5X11Extras_LIBRARIES}
-    ${Qt5DBus_LIBRARIES}
+    Qt5::DBus
+    Qt5::Quick
+    Qt5::X11Extras
 )
 
 set(kwin_effect_XLIB_LIBS
@@ -88,12 +88,13 @@ macro( KWIN4_ADD_EFFECT_CONFIG name )
     endif()
     target_link_libraries( kcm_kwin4_effect_${name}
         kwineffects
-        ${Qt5Widgets_LIBRARIES}
+        Qt5::Widgets
         ${KDE4Support_LIBRARIES}
         ${KDE4_KIO_LIBRARY} # KUrlRequester
         KF5::KCoreAddons
         KF5::KConfigWidgets
         KF5::KI18n
+        KF5::XmlGui
         )
     install( TARGETS kcm_kwin4_effect_${name} DESTINATION ${PLUGIN_INSTALL_DIR} )
 endmacro()

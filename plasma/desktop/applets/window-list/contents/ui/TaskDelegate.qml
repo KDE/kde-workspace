@@ -31,6 +31,7 @@ Item {
     property alias name: label.text
     property int desktop
     property alias icon: iconItem.icon
+    property alias label: label
     property bool active:false
     property int iconSize: theme.smallIconSize
     property bool showDesktop: true
@@ -39,16 +40,18 @@ Item {
     PlasmaComponents.Highlight {
         hover:menu.focus
         width: windowListMenu.width
-        height:30
+        height:menuItem.height/1.3
         visible:true
         opacity:menuItem.active?1:0
+
     }
     
     QIconItem {
         id: iconItem
         x: highlightItem.marginHints.left
         width: menuItem.iconSize
-        height: menuItem.iconSize
+        height: menuItem.iconSize/1.1
+        anchors.bottom:label.bottom
     }
     
     PlasmaComponents.Label {
@@ -57,6 +60,7 @@ Item {
         font.italic: (minimized == true) ? true : false
         anchors.left: iconItem.right
         anchors.leftMargin: highlightItem.marginHints.left
+        verticalAlignment:Text.AlignBottom
         elide:Text.ElideRight
         wrapMode:Text.Wrap
         width:menuItem.width

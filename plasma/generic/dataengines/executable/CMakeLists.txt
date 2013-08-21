@@ -10,6 +10,7 @@ target_link_libraries(plasma_engine_executable
     ${KCore_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KService_LIBRARIES}
+    KF5::KCoreAddons
 )
 
 install(TARGETS plasma_engine_executable DESTINATION ${PLUGIN_INSTALL_DIR})

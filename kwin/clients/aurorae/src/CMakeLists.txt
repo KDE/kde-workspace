@@ -17,8 +17,7 @@ target_link_libraries(kwin3_aurorae
     KF5::KConfigCore
     KF5::KService
     ${KDE4Support_LIBRARIES} # KGlobal
-    ${KDE4_KDECORE_LIBS} # needed for KDebug
-    ${Qt5Declarative_LIBRARIES}
+    Qt5::Declarative
     kdecorations
 )
 
@@ -32,9 +31,10 @@ set(decoration_plugin_SRCS
 
 add_library(decorationplugin SHARED ${decoration_plugin_SRCS})
 target_link_libraries(decorationplugin
-    ${KDE4_KDEUI_LIBRARY} # KGlobalSettings
-    ${Qt5Declarative_LIBRARIES}
+    ${KDE4Support_LIBRARIES} # KGlobalSettings
+    Qt5::Declarative
     kdecorations
+    KF5::KConfigWidgets
 )
 install(TARGETS decorationplugin DESTINATION ${IMPORTS_INSTALL_DIR}/org/kde/kwin/decoration)
 

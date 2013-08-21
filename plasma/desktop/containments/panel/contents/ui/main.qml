@@ -21,7 +21,9 @@ import QtQuick.Layouts 1.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
 
+import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
 Item {
     id: root
@@ -31,37 +33,42 @@ Item {
     property Item toolBox
 
     property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
-
-    function insertItemAt(item, position) {
-        var removedItems = new Array();
-
-        lastSpacer.parent = root;
-        for (var i = position; i < currentLayout.children.length; ++i) {
-            var child = currentLayout.children[0];
-            child.parent = root;
-            removedItems.push(child);
-        }
-
-        item.parent = currentLayout;
-        for (var i in removedItems) {
-            removedItems[i].parent = currentLayout;
-        }
-        lastSpacer.parent = currentLayout;
+    onCurrentLayoutChanged: {
+        LayoutManager.layout = currentLayout
     }
+
+    property Item dragOverlay
+
 
     Connections {
         target: plasmoid
+
         onAppletAdded: {
-            lastSpacer.parent = root
-            var container = appletContainerComponent.createObject((plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row)
-            print("Applet added in test panel: " + applet)
-            applet.parent = container
-            container.applet = applet
-            applet.anchors.fill = applet.parent
-            applet.visible = true
-            container.visible = true
-            lastSpacer.parent = currentLayout
+            var container = appletContainerComponent.createObject(root)
+            print("Applet added in test panel: " + applet);
+
+            applet.parent = container;
+            container.applet = applet;
+            applet.anchors.fill = container;
+            applet.visible = true;
+            container.visible = true;
+            container.intendedPos = LayoutManager.order[applet.id] ? LayoutManager.order[applet.id] : 0;
+
+            var position = 0;
+            for (var i = 0; i < currentLayout.children.length; ++i) {
+                if (currentLayout.children[i].intendedPos !== undefined &&
+                    currentLayout.children[i].intendedPos <= container.intendedPos) {
+                    position = i+1;
+                }
+            }
+
+            LayoutManager.insertAt(container, position);
         }
+
+        onAppletRemoved: {
+            LayoutManager.save();
+        }
+
         onFormFactorChanged: {
             lastSpacer.parent = root
 
@@ -81,6 +88,20 @@ Item {
                 lastSpacer.parent = row
             }
         }
+
+        onUserConfiguringChanged: {
+            if (plasmoid.immutable) {
+                return;
+            }
+
+            if (plasmoid.userConfiguring) {
+                var component = Qt.createComponent("ConfigOverlay.qml");
+                dragOverlay = component.createObject(root);
+                component.destroy();
+            } else {
+                dragOverlay.destroy()
+            }
+        }
     }
 
     Component {
@@ -88,6 +109,7 @@ Item {
         Item {
             id: container
             visible: false
+            property int intendedPos: 0
 
             Layout.fillWidth: applet && applet.fillWidth
             Layout.fillHeight: applet && applet.fillHeight
@@ -114,6 +136,7 @@ Item {
 
     Item {
         id: lastSpacer
+        parent: currentLayout
 
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -134,8 +157,12 @@ Item {
         }
     }
 
+
+
     Component.onCompleted: {
-        print("Test Panel loaded")
-        print(plasmoid)
+        LayoutManager.plasmoid = plasmoid;
+        LayoutManager.root = root;
+        LayoutManager.layout = currentLayout;
+        LayoutManager.restore();
     }
 }

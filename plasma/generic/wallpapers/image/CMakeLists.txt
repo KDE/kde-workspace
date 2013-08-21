@@ -15,11 +15,12 @@ target_link_libraries(plasma_wallpaper_imageplugin
          ${Qt5Quick_LIBRARIES}
          ${Qt5Qml_LIBRARIES}
          ${KDE4_KIO_LIBS}
-         ${KDE4_KDEUI_LIBS}
          ${KDE4_KFILE_LIBS}
          ${KDE4_KNEWSTUFF3_LIBS}
          ${KDE4_THREADWEAVER_LIBRARY}
-         ${KDE4Support_LIBRARIES})
+         ${KDE4Support_LIBRARIES}
+         KF5::KI18n
+         )
 
 install(TARGETS plasma_wallpaper_imageplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/image)
 

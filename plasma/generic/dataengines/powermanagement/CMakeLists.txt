@@ -19,8 +19,10 @@ target_link_libraries(plasma_engine_powermanagement
     ${Solid_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KIdleTime_LIBRARIES}
+    KF5::KCoreAddons
     KF5::KI18n
     KF5::KService
+    Qt5::DBus
     kworkspace
 )
 
