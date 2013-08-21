@@ -19,7 +19,7 @@
 
 .pragma library
 
-var order = new Array();
+var order = new Object();
 
 
 var layout;
@@ -31,15 +31,23 @@ function restore() {
     var configString = String(plasmoid.configuration.AppletOrder)
 
     //array, a cell for encoded item orger
-    var itemsStrings = configString.split(";");
+    var itemsArray = configString.split(";");
 
-    for (var i = 0; i < itemsStrings.length; i++) {
-        
+    for (var i = 0; i < itemsArray.length; i++) {
+        order[itemsArray[i]] = i;
     }
 }
 
 function save() {
-    plasmoid.configuration.AppletOrder = order.join(';');
+    var ids = new Array();
+    for (var i = 0; i < layout.children.length; ++i) {
+        var child = layout.children[i];
+
+        if (child.applet) {
+            ids.push(child.applet.id);
+        }
+    }
+    plasmoid.configuration.AppletOrder = ids.join(';');
 }
 
 function insertBefore(item1, item2) {
@@ -90,4 +98,23 @@ function insertAfter(item1, item2) {
     for (var j = removed.length - 1; j >= 0; --j) {
         removed[j].parent = layout;
     }
+}
+
+function insertAt(item, position) {
+    var removedItems = new Array();
+
+    //TODO: check if it's actually a spacer
+    var spacer = layout.children[layout.children.length - 1];
+    spacer.parent = root;
+    for (var i = position; i < layout.children.length; ++i) {
+        var child = layout.children[0];
+        child.parent = root;
+        removedItems.push(child);
+    }
+
+    item.parent = layout;
+    for (var i in removedItems) {
+        removedItems[i].parent = layout;
+    }
+    spacer.parent = layout;
 }

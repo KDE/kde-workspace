@@ -39,37 +39,34 @@ Item {
 
     property Item dragOverlay
 
-    function insertItemAt(item, position) {
-        var removedItems = new Array();
-
-        lastSpacer.parent = root;
-        for (var i = position; i < currentLayout.children.length; ++i) {
-            var child = currentLayout.children[0];
-            child.parent = root;
-            removedItems.push(child);
-        }
-
-        item.parent = currentLayout;
-        for (var i in removedItems) {
-            removedItems[i].parent = currentLayout;
-        }
-        lastSpacer.parent = currentLayout;
-    }
 
     Connections {
         target: plasmoid
 
         onAppletAdded: {
-            lastSpacer.parent = root
-            var container = appletContainerComponent.createObject((plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row)
-            print("Applet added in test panel: " + applet)
+            var container = appletContainerComponent.createObject(root)
+            print("Applet added in test panel: " + applet);
 
-            applet.parent = container
-            container.applet = applet
-            applet.anchors.fill = applet.parent
-            applet.visible = true
-            container.visible = true
-            lastSpacer.parent = currentLayout
+            applet.parent = container;
+            container.applet = applet;
+            applet.anchors.fill = container;
+            applet.visible = true;
+            container.visible = true;
+            container.intendedPos = LayoutManager.order[applet.id] ? LayoutManager.order[applet.id] : 0;
+
+            var position = 0;
+            for (var i = 0; i < currentLayout.children.length; ++i) {
+                if (currentLayout.children[i].intendedPos !== undefined &&
+                    currentLayout.children[i].intendedPos <= container.intendedPos) {
+                    position = i+1;
+                }
+            }
+
+            LayoutManager.insertAt(container, position);
+        }
+
+        onAppletRemoved: {
+            LayoutManager.save();
         }
 
         onFormFactorChanged: {
@@ -112,6 +109,7 @@ Item {
         Item {
             id: container
             visible: false
+            property int intendedPos: 0
 
             Layout.fillWidth: applet && applet.fillWidth
             Layout.fillHeight: applet && applet.fillHeight
@@ -138,6 +136,7 @@ Item {
 
     Item {
         id: lastSpacer
+        parent: currentLayout
 
         Layout.fillWidth: true
         Layout.fillHeight: true

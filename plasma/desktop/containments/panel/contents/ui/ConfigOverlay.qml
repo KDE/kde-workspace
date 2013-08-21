@@ -100,6 +100,7 @@ MouseArea {
         placeHolder.parent = configurationArea;
         currentApplet.z = 1;
         handle.x = currentApplet.x;
+        LayoutManager.save();
     }
     Item {
         id: placeHolder
