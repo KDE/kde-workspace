@@ -42,11 +42,11 @@ install(FILES core/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/kickoff)
 add_library(kickoffplugin SHARED ${libkickoff_SRCS})
 target_link_libraries(kickoffplugin ${QT_QTCORE_LIBRARY}
                               ${Qt5Qml_LIBRARIES}
-                              ${QT_QTGUI_LIBRARY}
-                              ${KDE4_KDEUI_LIBRARY}
+                              Qt5::DBus
                               ${KDE4_KIO_LIBS}
                               ${KDE4_KFILE_LIBS}
-                              ${PLASMA_LIBRARIES}
+                              ${KI18n_LIBRARIES}
+                              ${Plasma_LIBRARIES}
                               ${KSERVICE_LIBRARIES}
                               ${KDE4Support_LIBRARIES}
                               ${KDE4_SOLID_LIBS}

@@ -574,7 +574,7 @@ void ApplicationModel::createNewProgramList()
     }
 
     //FIXME
-    KConfigGroup kickoffrc; // = d->applet.data()->globalConfig();
+    KConfigGroup kickoffrc = d->applet.data()->config();
     foreach (const QString &it, kickoffrc.keyList()) {
         d->seenPrograms.insert(it, QDate::fromString(kickoffrc.readEntry(it), Qt::ISODate));
     }
