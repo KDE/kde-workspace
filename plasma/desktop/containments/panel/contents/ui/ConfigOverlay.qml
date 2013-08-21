@@ -30,7 +30,8 @@ MouseArea {
     z: 1000
     anchors {
         fill: parent
-        rightMargin: toolBox.width
+        rightMargin: (plasmoid.formFactor !== PlasmaCore.Types.Vertical) ? toolBox.width : 0
+        bottomMargin: (plasmoid.formFactor === PlasmaCore.Types.Vertical) ? toolBox.height : 0
     }
     hoverEnabled: true
 
@@ -41,8 +42,14 @@ MouseArea {
 
     onPositionChanged: {
         if (pressed) {
-            currentApplet.x += (mouse.x - lastX);
-            handle.x = currentApplet.x;
+            if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+                currentApplet.y += (mouse.y - lastY);
+                handle.y = currentApplet.y;
+            } else {
+                currentApplet.x += (mouse.x - lastX);
+                handle.x = currentApplet.x;
+            }
+
             lastX = mouse.x;
             lastY = mouse.y;
 
@@ -53,7 +60,9 @@ MouseArea {
                 placeHolder.height = item.height;
                 placeHolder.parent = configurationArea;
                 var posInItem = mapToItem(item, mouse.x, mouse.y);
-                if (posInItem.x < item.width/2) {
+
+                if ((plasmoid.formFactor === PlasmaCore.Types.Vertical && posInItem.y < item.height/2) ||
+                    (plasmoid.formFactor !== PlasmaCore.Types.Vertical && posInItem.x < item.width/2)) {
                     LayoutManager.insertBefore(item, placeHolder);
                 } else {
                     LayoutManager.insertAfter(item, placeHolder);
@@ -96,10 +105,16 @@ MouseArea {
         if (!root.dragOverlay.currentApplet) {
             return;
         }
+
         LayoutManager.insertBefore(placeHolder, currentApplet);
         placeHolder.parent = configurationArea;
         currentApplet.z = 1;
-        handle.x = currentApplet.x;
+
+        if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+            handle.y = currentApplet.y;
+        } else {
+            handle.x = currentApplet.x;
+        }
         LayoutManager.save();
     }
     Item {
