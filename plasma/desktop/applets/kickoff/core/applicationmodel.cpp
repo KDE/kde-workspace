@@ -37,7 +37,6 @@
 #include <kstringhandler.h>
 #include <kmimetypetrader.h>
 #include <kurlcompletion.h>
-#include <kurlrequester.h>
 #include <kmimetype.h>
 #include <kservicegroup.h>
 #include <ksycoca.h>

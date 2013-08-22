@@ -83,7 +83,7 @@ Item {
 
         anchors {
             top: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                     case PlasmaCore.Types.TopEdge:
                     case PlasmaCore.Types.LeftEdge:
                     case PlasmaCore.Types.RightEdge:
@@ -93,7 +93,7 @@ Item {
                 }
             }
             bottom: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                     case Kickoff.TopEdge:
                     case Kickoff.LeftEdge:
                     case Kickoff.RightEdge:
@@ -112,7 +112,7 @@ Item {
 
         anchors {
             top: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                     case PlasmaCore.Types.TopEdge:
                     case PlasmaCore.Types.LeftEdge:
                     case PlasmaCore.Types.RightEdge:
@@ -122,7 +122,7 @@ Item {
                 }
             }
             bottom: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                     case PlasmaCore.Types.TopEdge:
                     case PlasmaCore.Types.LeftEdge:
                     case PlasmaCore.Types.RightEdge:
@@ -141,7 +141,7 @@ Item {
 
         anchors {
             top: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                 case PlasmaCore.Types.TopEdge:
                     return tabBar.bottom;
                 case PlasmaCore.Types.LeftEdge:
@@ -152,7 +152,7 @@ Item {
                 }
             }
             bottom: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                     case PlasmaCore.Types.TopEdge:
                     case PlasmaCore.Types.LeftEdge:
                     case PlasmaCore.Types.RightEdge:
@@ -161,10 +161,10 @@ Item {
                         return tabBar.top;
                 }
             }
-            left: kickoff.location == PlasmaCore.Types.LeftEdge ? parent.left : parent.left
-            right: kickoff.location == PlasmaCore.Types.RightEdge ? tabBar.left : parent.right
-            leftMargin: kickoff.location == PlasmaCore.Types.LeftEdge ? tabBar.height : undefined
-            rightMargin: kickoff.location == PlasmaCore.Types.RightEdge ? tabBar.height : undefined
+            left: plasmoid.location == PlasmaCore.Types.LeftEdge ? parent.left : parent.left
+            right: plasmoid.location == PlasmaCore.Types.RightEdge ? tabBar.left : parent.right
+            leftMargin: plasmoid.location == PlasmaCore.Types.LeftEdge ? tabBar.height : undefined
+            rightMargin: plasmoid.location == PlasmaCore.Types.RightEdge ? tabBar.height : undefined
         }
 
         //pages
@@ -207,7 +207,7 @@ Item {
 
         anchors {
             top: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                     case PlasmaCore.Types.TopEdge:
                         return parent.top;
                     default:
@@ -215,7 +215,7 @@ Item {
                 }
             }
             bottom: {
-                switch (kickoff.location) {
+                switch (plasmoid.location) {
                     case PlasmaCore.Types.TopEdge:
                     case PlasmaCore.Types.LeftEdge:
                     case PlasmaCore.Types.RightEdge:
@@ -224,14 +224,14 @@ Item {
                         return parent.bottom;
                 }
             }
-            left: kickoff.location == PlasmaCore.Types.RightEdge || kickoff.location == PlasmaCore.Types.LeftEdge ? undefined : parent.left
-            right: kickoff.location == PlasmaCore.Types.RightEdge || kickoff.location == PlasmaCore.Types.LeftEdge ? undefined : parent.right
+            left: plasmoid.location == PlasmaCore.Types.RightEdge || plasmoid.location == PlasmaCore.Types.LeftEdge ? undefined : parent.left
+            right: plasmoid.location == PlasmaCore.Types.RightEdge || plasmoid.location == PlasmaCore.Types.LeftEdge ? undefined : parent.right
         }
-        x: kickoff.location == PlasmaCore.Types.LeftEdge ? height : (kickoff.location == PlasmaCore.Types.RightEdge ? root.width : 0)
-        width: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? root.height - searchBar.height - footer.height : undefined
+        x: plasmoid.location == PlasmaCore.Types.LeftEdge ? height : (plasmoid.location == PlasmaCore.Types.RightEdge ? root.width : 0)
+        width: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? root.height - searchBar.height - footer.height : undefined
 
         transformOrigin: Item.TopLeft
-        rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? 90 : 0
+        rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? 90 : 0
         currentTab: bookmarkButton
 
         onCurrentTabChanged: root.forceActiveFocus();
@@ -241,35 +241,35 @@ Item {
             tab: favoritesPage
             iconSource: "bookmarks"
             text: i18n("Favorites")
-            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
+            rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: applicationButton
             tab: applicationsPage
             iconSource: "applications-other"
             text: i18n("Applications")
-            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
+            rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: computerButton
             tab: systemPage
             iconSource: "computer" // TODO: could also be computer-laptop
             text: i18n("Computer")
-            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
+            rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: usedButton
             tab: recentlyUsedPage
             iconSource: "document-open-recent"
             text: i18n("Recently Used")
-            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
+            rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
         KickoffButton {
             id: leaveButton
             tab: leavePage
             iconSource: "system-shutdown"
             text: i18n("Leave")
-            rotation: kickoff.location == PlasmaCore.Types.LeftEdge || kickoff.location == PlasmaCore.Types.RightEdge ? -90 : 0
+            rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
         }
     } // tabBar
 
