@@ -2,6 +2,7 @@
     Copyright (C) 2011  Martin Gräßlin <mgraesslin@kde.org>
     Copyright (C) 2012  Gregor Taetzner <gregor@freenet.de>
     Copyright (C) 2012  Marco Martin <mart@kde.org>
+    Copyright (C) 2013  David Edmundson <davidedmundson@kde.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,11 +28,11 @@ import org.kde.qtextracomponents 2.0
 Item {
     id: root
 
-    width: 400
-    height: 400
+    width: minimumWidth
+    height: minimumHeight
 
-    property int minimumWidth: 400 //theme.defaultFont.mSize.width * 45
-    property int minimumHeight: 400 //theme.defaultFont.mSize.height * 30
+    property int minimumWidth: theme.mSize(theme.defaultFont).width * 45
+    property int minimumHeight: theme.mSize(theme.defaultFont).height * 30
     property string previousState
     property bool switchTabsOnHover: true //FIXME
 //     kickoff.switchTabsOnHover
