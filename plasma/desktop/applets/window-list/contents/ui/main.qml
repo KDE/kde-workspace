@@ -110,12 +110,8 @@ Item {
     PlasmaCore.SortFilterModel {
         id: tasksModelSortedByDesktop
         sortRole: "desktop"
-        sourceModel: tasksModel
-    }
-
-    PlasmaCore.SortFilterModel { 
-        id: tasksModel
         sourceModel: PlasmaCore.DataModel {
+            id: tasksModel
             dataSource: tasksSource
         }
     }

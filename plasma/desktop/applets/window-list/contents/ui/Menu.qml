@@ -36,7 +36,6 @@ PlasmaExtras.ScrollArea {
         anchors.left: menu.left
         anchors.bottom: menu.bottom
         focus: true
-        boundsBehavior: Flickable.StopAtBounds
         section.property: desktop
         section.criteria: ViewSection.FullString
         spacing:0
@@ -44,13 +43,12 @@ PlasmaExtras.ScrollArea {
         section.delegate: PlasmaComponents.Highlight {
             hover: menu.focus
             width: menu.width
-            height: main.height/12
+            height: childrenRect.height + marginHints.top + marginHints.bottom
 
             PlasmaComponents.Label {
-                text: section > 0 ? "Desktop " + section : "On all desktops"
-                anchors {
-                    centerIn: parent
-                }
+                text: section > 0 ? i18n("Desktop") + section : i18n("On all desktops")
+                height: implicitHeight
+                anchors.centerIn: parent
             }
         }
 
