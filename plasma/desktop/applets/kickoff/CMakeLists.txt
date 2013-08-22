@@ -38,7 +38,7 @@ QT4_ADD_DBUS_INTERFACE(libkickoff_SRCS ${krunner_xml} krunner_interface)
 set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
 QT4_ADD_DBUS_INTERFACE(libkickoff_SRCS ${ksmserver_xml} ksmserver_interface)
 
-install(FILES core/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/kickoff)
+install(FILES core/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/kickoff)
 add_library(kickoffplugin SHARED ${libkickoff_SRCS})
 target_link_libraries(kickoffplugin ${QT_QTCORE_LIBRARY}
                               ${Qt5Qml_LIBRARIES}
@@ -51,5 +51,5 @@ target_link_libraries(kickoffplugin ${QT_QTCORE_LIBRARY}
                               ${KDE4Support_LIBRARIES}
                               ${KDE4_SOLID_LIBS}
                               kworkspace)
-install(TARGETS kickoffplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/kickoff)
+install(TARGETS kickoffplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/kickoff)
 
