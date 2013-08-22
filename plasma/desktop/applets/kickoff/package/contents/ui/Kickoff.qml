@@ -34,10 +34,8 @@ Item {
     property int minimumWidth: theme.mSize(theme.defaultFont).width * 45
     property int minimumHeight: theme.mSize(theme.defaultFont).height * 30
     property string previousState
-    property bool switchTabsOnHover: true //FIXME
-//     kickoff.switchTabsOnHover
-    property bool showAppsByName: true //FIXME
-//     kickoff.showAppsByName
+    property bool switchTabsOnHover: plasmoid.configuration.switchTabsOnHover
+    property bool showAppsByName: plasmoid.configuration.switchTabsOnHover
     property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
     state: "Normal"
