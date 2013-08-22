@@ -145,7 +145,7 @@ Item {
                 if (hasModelChildren) {
                     return subtitle;
                 } else {
-                    plasmoid.configuration..showAppsByName || subtitle == undefined ? (display.length != 0 ? display : subtitle) : subtitle;
+                    plasmoid.configuration.showAppsByName || subtitle == undefined ? (display.length != 0 ? display : subtitle) : subtitle;
                 }
             }
             opacity: 0.6
