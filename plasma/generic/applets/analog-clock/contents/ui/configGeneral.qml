@@ -23,12 +23,6 @@ import QtQuick.Controls 1.0 as QtControls
 //FIXME this causes a crash in Oxygen style
 //QtControls.GroupBox {
 Item {
-
-//FIXME i18n is broken currently
-//when fixed delete this
-function i18n(arg) {
-    return arg;
-}
     width: childrenRect.width
     height: childrenRect.height
 
