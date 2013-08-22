@@ -18,7 +18,7 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
-Item {
+MouseArea {
     id: main
     property int minimumWidth: Math.max(200, windowListMenu.implicitWidth) 
     property int minimumHeight:  Math.max(400, windowListMenu.implicitHeight)
@@ -42,7 +42,7 @@ Item {
         y: 0
         height: trackingItem.height
         visible: true
-        opacity: trackingItem && (mouse.containsMouse || mouseArea.containsMouse || highlight) ? 1 : 0
+        opacity: highlight ? 1 : 0
 
         Behavior on opacity {
             NumberAnimation {
@@ -64,26 +64,26 @@ Item {
         }
     }
 
-    
+
     function performOperation(op) {
         var service =tasksSource.serviceForSource("");
         var operation = service.operationDescription(op);
         service.startOperationCall(operation);
     }
-    
+
     function executeJob(operationName, source) {
         var service = tasksSource.serviceForSource(source);
         var operation = service.operationDescription(operationName);
         service.startOperationCall(operation);
     }
-    
+
     function setOnDesktop(source, desktop) {
         var service = tasksSource.serviceForSource(source);
         var operation = service.operationDescription("toDesktop");
         operation.desktop = desktop;
         service.startOperationCall(operation);
     }
-    
+
     Component.onCompleted: {
         var toolTipData = new Object;
         toolTipData["image"] = "preferences-system-window"; 
@@ -93,7 +93,7 @@ Item {
         plasmoid.popupIcon = QIcon("preferences-system-windows"); 
         plasmoid.aspectRatioMode = ConstrainedSquare;
     }
-    
+
     PlasmaCore.DataSource {
         id: tasksSource
         engine: "tasks"
@@ -106,7 +106,7 @@ Item {
             main.desktopList = tasksSource.data["virtualDesktops"]["names"];
         }
     }
-    
+
     PlasmaCore.SortFilterModel {
         id: tasksModelSortedByDesktop
         sortRole: "desktop"
@@ -118,7 +118,6 @@ Item {
 
     Column {
         id: col
-        spacing:5
 
         PlasmaComponents.Highlight {
             hover: menu.focus
@@ -126,52 +125,19 @@ Item {
             height: actions.height + marginHints.top + marginHints.bottom
             PlasmaComponents.Label {
                 id: actions
-                text: "Actions"
+                text: i18n("Actions")
                 anchors.centerIn: parent
             }
         }
 
-        PlasmaComponents.Label {
-            id: unclutter
-            text: "Unclutter Windows"
-            x: highlightItem.marginHints.left
-            verticalAlignment:Text.AlignBottom
-            MouseArea {
-                id: mouse
-                hoverEnabled: true
-                anchors.fill: parent
-                onClicked: {
-                    performOperation("unclutter");
-                }
-                onEntered: {
-                    highlightItem.trackingItem = unclutter
-                }
-                onExited: {
-                    highlight = false
-                }
-            }
+        TaskDelegate {
+            name: i18n("Unclutter Windows")
+            onClicked: performOperation("unclutter")
         }
 
-        PlasmaComponents.Label {
-            id: cascade
-            text: "Cascade Windows"
-            verticalAlignment:Text.AlignBottom
-            x: highlightItem.marginHints.left
-            MouseArea {
-                id: mouseArea
-                hoverEnabled: true
-                anchors.fill: parent
-                onClicked: { 
-                    performOperation("cascade");
-                }
-                onEntered: {
-                    print(main.height);
-                    highlightItem.trackingItem = cascade
-                }
-                onExited: {
-                    highlight = false
-                }
-            }
+        TaskDelegate {
+            name: i18n("Cascade Windows")
+            onClicked: performOperation("cascade")
         }
     }
 
