@@ -43,29 +43,38 @@ PlasmaExtras.ScrollArea {
         section.delegate: PlasmaComponents.Highlight {
             hover: menu.focus
             width: menu.width
-            height: childrenRect.height + marginHints.top + marginHints.bottom
+            height: sectionDelegateLabel.height + marginHints.top + marginHints.bottom
 
             PlasmaComponents.Label {
+                id: sectionDelegateLabel
                 text: section > 0 ? i18n("Desktop") + section : i18n("On all desktops")
-                height: implicitHeight
                 anchors.centerIn: parent
             }
+        }
+
+        highlight: PlasmaComponents.Highlight {
+            hover: false
+            width: menuListView.width
         }
 
         delegate: TaskDelegate {
             id: menuItemDelegate
             width: menuListView.width
             property string source: DataEngineSource
-            name: model["name"]
-            desktop: model["desktop"]
-            icon: model["icon"]
-            active: model["active"]
+            name: model.name
+            desktop: model.desktop
+            icon: model.icon
+            active: model.active
             iconSize: menu.iconSize
             showDesktop: menu.showDesktop
             onClicked: menu.itemSelected(source);
-            onEntered: menuListView.currentIndex = index; 
             onExecuteJob: menu.executeJob(jobName, source);
             onSetOnDesktop: menu.setOnDesktop(source, desktop);
+            onActiveChanged: {
+                if (active) {
+                    menuListView.currentIndex = index
+                }
+            }
         }
     }
 }

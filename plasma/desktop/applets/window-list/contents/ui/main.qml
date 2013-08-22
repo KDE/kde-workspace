@@ -33,14 +33,14 @@ Item {
 
         property Item trackingItem
         onTrackingItemChanged: {
-            y = trackingItem.mapToItem(main, 0, 5).y - highlightItem.marginHints.top
+            y = trackingItem.mapToItem(main, 0, 0).y
         }
 
         hover: true
         width: windowListMenu.width
         x: 0
         y: 0
-        height: main.height/12.5
+        height: trackingItem.height
         visible: true
         opacity: trackingItem && (mouse.containsMouse || mouseArea.containsMouse || highlight) ? 1 : 0
 
@@ -123,13 +123,11 @@ Item {
         PlasmaComponents.Highlight {
             hover: menu.focus
             width: windowListMenu.width
-            height: 30
+            height: actions.height + marginHints.top + marginHints.bottom
             PlasmaComponents.Label {
                 id: actions
                 text: "Actions"
-                anchors {
-                    centerIn: parent
-                }
+                anchors.centerIn: parent
             }
         }
 
@@ -149,7 +147,7 @@ Item {
                     highlightItem.trackingItem = unclutter
                 }
                 onExited: {
-                    highlight=false
+                    highlight = false
                 }
             }
         }
@@ -171,7 +169,7 @@ Item {
                     highlightItem.trackingItem = cascade
                 }
                 onExited: {
-                    highlight=false
+                    highlight = false
                 }
             }
         }
