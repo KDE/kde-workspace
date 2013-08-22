@@ -124,7 +124,7 @@ Item {
                 if (hasModelChildren) {
                     return display;
                 } else {
-                    kickoff.showAppsByName || display.length == 0 ? (subtitle == undefined ? display : subtitle) :
+                    plasmoid.configuration.showAppsByName || display.length == 0 ? (subtitle == undefined ? display : subtitle) :
                                                                     display
                 }
             }
@@ -145,7 +145,7 @@ Item {
                 if (hasModelChildren) {
                     return subtitle;
                 } else {
-                    kickoff.showAppsByName || subtitle == undefined ? (display.length != 0 ? display : subtitle) : subtitle;
+                    plasmoid.configuration..showAppsByName || subtitle == undefined ? (display.length != 0 ? display : subtitle) : subtitle;
                 }
             }
             opacity: 0.6
