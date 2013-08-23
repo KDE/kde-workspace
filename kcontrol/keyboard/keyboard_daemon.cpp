@@ -160,12 +160,12 @@ void KeyboardDaemon::setupTrayIcon()
 }
 
 const CursorTheme* KeyboardDaemon::getCurrentCursorTheme()
-{
-    QString currentTheme = XcursorGetTheme(QX11Info().display());
-    
-    // Get the name of the theme KDE is configured to use
+{    
     KConfig inputConfiguration("kcminputrc");
     KConfigGroup mouseConfig(&inputConfiguration, "Mouse");
+    
+    QString currentTheme = XcursorGetTheme(QX11Info().display());
+    
     currentTheme = mouseConfig.readEntry("cursorTheme", currentTheme);
     
     return cursorThemeModel.theme(cursorThemeModel.findIndex(currentTheme));
@@ -173,15 +173,26 @@ const CursorTheme* KeyboardDaemon::getCurrentCursorTheme()
 
 void KeyboardDaemon::setupCursorIcon()
 {   
+    kDebug() << "Changing cursor icon";
+    
     KGlobalSettings::self()->emitChange(KGlobalSettings::CursorChanged);
     runRdb(0);
     
     const CursorTheme* cursorTheme = getCurrentCursorTheme();
     
+    if(cursorTheme == NULL || cursorTheme->name().isEmpty())
+	kError() << "Error: failed to get cursor theme";
+    
     QImage cursorDefaultImage = cursorTheme->loadImage("ibeam", 0);
+    
+    if(cursorDefaultImage.isNull())	
+	kError() << "Error: cursor image is null";
     
     Flags flags;
     QImage flagImage = flags.getIcon(currentLayout.layout).pixmap(24, 24).toImage();
+    
+    if(flagImage.isNull())	
+	kError() << "Error: flag image is null";
     
     QImage cursorImage(48, 24, QImage::Format_ARGB32);
     
@@ -189,7 +200,7 @@ void KeyboardDaemon::setupCursorIcon()
     
     QPainter painter;
     painter.begin(&cursorImage);
-    painter.drawImage(24, 0, cursorDefaultImage);
+    painter.drawImage(24, 24 - cursorDefaultImage.height(), cursorDefaultImage);
     painter.drawImage(24, 0, flagImage);
     painter.end();
     
