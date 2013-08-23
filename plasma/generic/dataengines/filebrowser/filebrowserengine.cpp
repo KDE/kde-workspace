@@ -148,8 +148,6 @@ void FileBrowserEngine::updateData(const QString &path, EventType event)
         }
     };
 
-    scheduleSourcesUpdated();
-
 }
 
 void FileBrowserEngine::clearData(const QString &path)
@@ -167,5 +165,7 @@ void FileBrowserEngine::clearData(const QString &path)
         }
     }
 }
+
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(filebrowser, FileBrowserEngine, "plasma-dataengine-filebrowser.json")
 
 #include "filebrowserengine.moc"
