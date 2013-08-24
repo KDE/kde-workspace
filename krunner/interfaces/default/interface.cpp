@@ -498,7 +498,12 @@ void Interface::run(ResultItem *item)
     }
 
     //TODO: check if run is succesful before adding the term to history
-    m_searchTerm->addToHistory(m_searchTerm->currentText().trimmed());
+    if ((item->group() == Plasma::QueryMatch::CompletionMatch) ||
+         (item->group() == Plasma::QueryMatch::PossibleMatch)) {
+        m_searchTerm->addToHistory(item->name());
+    } else {
+        m_searchTerm->addToHistory(m_searchTerm->currentText().trimmed());
+    }
 
     m_running = true;
     // must run the result first before clearing the interface
