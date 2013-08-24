@@ -516,6 +516,7 @@ void ResultItem::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
         emit activated(this);
     } else {
+        event->ignore();
         QGraphicsWidget::keyPressEvent(event);
     }
 }
