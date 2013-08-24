@@ -84,6 +84,7 @@ class Interface : public KRunnerDialog
         void resetAndClose();
         void delayedQueryLaunch();
         void updateSystemActivityToolTip();
+        void saveCurrentDialogSize();
 
     private:
         void saveDialogSize(KConfigGroup &group);
@@ -94,6 +95,7 @@ class Interface : public KRunnerDialog
 
         QTimer m_hideResultsTimer;
         QTimer m_reenableHoverEventsTimer;
+        QTimer m_saveDialogSizeTimer;
 
         QWidget *m_buttonContainer;
         QVBoxLayout* m_layout;
