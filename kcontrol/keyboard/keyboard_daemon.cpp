@@ -189,19 +189,24 @@ void KeyboardDaemon::setupCursorIcon()
 	kError() << "Error: cursor image is null";
     
     Flags flags;
-    QImage flagImage = flags.getIcon(currentLayout.layout).pixmap(24, 24).toImage();
+    QImage flagImage = flags.getIconWithText(currentLayout, this->keyboardConfig).pixmap(24, 24).toImage();
     
     if(flagImage.isNull())	
 	kError() << "Error: flag image is null";
+
+    /* Cursor ibeam-image needs to be in the middle of the result icon */
+    /* 4 is the margins before and after */
+    long resultImageWidth = 2 * flagImage.width() + 4 + cursorDefaultImage.width();
+    long resultImageHeight = cursorDefaultImage.height();
     
-    QImage cursorImage(48, 24, QImage::Format_ARGB32);
+    QImage cursorImage(resultImageWidth, resultImageHeight, QImage::Format_ARGB32);
     
     cursorImage.fill(Qt::transparent);
     
     QPainter painter;
     painter.begin(&cursorImage);
-    painter.drawImage(24, 24 - cursorDefaultImage.height(), cursorDefaultImage);
-    painter.drawImage(24, 0, flagImage);
+    painter.drawImage(flagImage.width() + 2, 0, cursorDefaultImage);
+    painter.drawImage(resultImageWidth - flagImage.width(), 0, flagImage);
     painter.end();
     
     QCursor cursor(QPixmap::fromImage(cursorImage));
