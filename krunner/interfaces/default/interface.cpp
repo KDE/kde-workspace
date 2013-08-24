@@ -219,6 +219,10 @@ Interface::Interface(Plasma::RunnerManager *runnerManager, QWidget *parent)
     m_delayedQueryTimer.setInterval(50);
     connect(&m_delayedQueryTimer, SIGNAL(timeout()), this, SLOT(delayedQueryLaunch()));
 
+    m_saveDialogSizeTimer.setSingleShot(true);
+    m_saveDialogSizeTimer.setInterval(1000);
+    connect(&m_saveDialogSizeTimer, SIGNAL(timeout()), SLOT(saveCurrentDialogSize()));
+
     QTimer::singleShot(0, this, SLOT(resetInterface()));
 }
 
@@ -252,7 +256,7 @@ bool Interface::eventFilter(QObject *obj, QEvent *event)
 
 void Interface::saveDialogSize(KConfigGroup &group)
 {
-    group.writeEntry("Size", size());
+    group.writeEntry("Size", m_defaultSize);
 }
 
 void Interface::restoreDialogSize(KConfigGroup &group)
@@ -314,11 +318,18 @@ void Interface::resizeEvent(QResizeEvent *event)
         } else {
             m_defaultSize = QSize(m_defaultSize.width(), size().height());
         }
+        m_saveDialogSizeTimer.start();
     }
 
     m_resultsView->resize(m_buttonContainer->width(), m_resultsView->height());
     m_resultsScene->setWidth(m_resultsView->width());
     KRunnerDialog::resizeEvent(event);
+}
+
+void Interface::saveCurrentDialogSize()
+{
+    KConfigGroup interfaceConfig(KGlobal::config(), "Interface");
+    saveDialogSize(interfaceConfig);
 }
 
 Interface::~Interface()
@@ -330,7 +341,7 @@ Interface::~Interface()
     // Before saving the size we resize to the default size, with the results container shown.
     resize(m_defaultSize);
     KConfigGroup interfaceConfig(KGlobal::config(), "Interface");
-    saveDialogSize(interfaceConfig);
+    saveCurrentDialogSize();
     KGlobal::config()->sync();
 }
 
