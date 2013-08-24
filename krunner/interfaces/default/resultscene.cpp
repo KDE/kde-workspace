@@ -30,6 +30,7 @@
 #include <QtGui/QGraphicsGridLayout>
 #include <QtGui/QGraphicsWidget>
 #include <QtGui/QGraphicsProxyWidget>
+#include <QtCore/QCoreApplication>
 
 #include <KDE/KDebug>
 #include <KDE/KIconLoader>
@@ -321,6 +322,14 @@ void ResultScene::keyPressEvent(QKeyEvent * keyEvent)
         default:
             // pass the event to the item
             QGraphicsScene::keyPressEvent(keyEvent);
+            if (!keyEvent->isAccepted() && m_focusBase &&
+                    (keyEvent->key() != Qt::Key_Tab) &&
+                    (keyEvent->key() != Qt::Key_PageUp) &&
+                    (keyEvent->key() != Qt::Key_PageDown) &&
+                    (keyEvent->modifiers() == Qt::NoModifier)) {
+                m_focusBase->setFocus();
+                QCoreApplication::sendEvent(m_focusBase, keyEvent);
+            }
             return;
         break;
     }
