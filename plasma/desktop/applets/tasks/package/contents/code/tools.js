@@ -100,7 +100,7 @@ function publishIconGeometries(taskItems) {
             for (j = 0; j < taskIdList.length; ++j) {
                 tasks.itemGeometryChanged(taskIdList[j].itemId, task.x, task.y, task.width, task.height);
             }
-        } else {
+        } else if (!task.isLauncher) {
             tasks.itemGeometryChanged(task.itemId, task.x, task.y, task.width, task.height);
         }
     }
