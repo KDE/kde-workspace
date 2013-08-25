@@ -299,10 +299,16 @@ void Tasks::itemMove(int id, int newIndex)
 
 void Tasks::itemGeometryChanged(int id, int x, int y, int width, int height)
 {
-    TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(m_groupManager->rootGroup()->getMemberById(id));
+    TaskManager:: AbstractGroupableItem *item = m_groupManager->rootGroup()->getMemberById(id);
 
-    if (!taskItem || !taskItem->task() || !scene())
+    if (!item || item->itemType() != TaskManager::TaskItemType || !scene())
     {
+        return;
+    }
+
+    TaskManager::TaskItem *taskItem = static_cast<TaskManager::TaskItem *>(item);
+
+    if (!taskItem->task()) {
         return;
     }
 
