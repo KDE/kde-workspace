@@ -298,6 +298,6 @@ void NotificationsEngine::configureNotification(const QString &appName)
     KNotifyConfigWidget::configure(0, appName);
 }
 
-K_EXPORT_PLASMA_DATAENGINE(notifications, NotificationsEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(notifications, NotificationsEngine, "plasma-dataengine-notifications.json")
 
 #include "notificationsengine.moc"
