@@ -18,12 +18,12 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1
-import org.kde.plasma.extras 0.1 as PlasmaExtras
-import org.kde.locale 0.1 as KLocale
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
+import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.locale 2.0 as KLocale
 
 import "plasmapackage:/ui/uiproperties.js" as UiProperties
 
@@ -79,10 +79,10 @@ MouseEventListener {
 
     Component.onCompleted: {
         //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
-        plasmoid.aspectRatioMode = "ConstrainedSquare"
-        plasmoid.status = PassiveStatus
-        allApplications = new Object
-        plasmoid.addEventListener('ConfigChanged', configChanged);
+        //plasmoid.aspectRatioMode = "ConstrainedSquare"
+        //plasmoid.status = PassiveStatus // FIXME
+        var allApplications = new Object
+        //plasmoid.addEventListener('ConfigChanged', configChanged);
         configChanged()
     }
 
@@ -113,8 +113,8 @@ MouseEventListener {
     PlasmaExtras.ScrollArea {
         id: mainScrollArea
         anchors.fill: parent
-        implicitWidth: theme.defaultFont.mSize.width * 40
-        implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 6, contentsColumn.height))
+        implicitWidth: theme.mSize.width * 40
+        implicitHeight: Math.min(theme.mSize.height * 40, Math.max(theme.mSize.height * 6, contentsColumn.height))
         state: ""
 
         states: [

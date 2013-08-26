@@ -17,11 +17,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.0
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+//import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import org.kde.qtextracomponents 2.0
 
 PlasmaComponents.ListItem {
     id: notificationItem
@@ -233,6 +233,7 @@ PlasmaComponents.ListItem {
                         anchors.left: parent.left
                         visible: text != ""
                     }
+/* FIXME: find a way to plot the signal
                     PlasmaWidgets.SignalPlotter {
                         id: plotter
                         width: parent.width
@@ -248,6 +249,7 @@ PlasmaComponents.ListItem {
                             plotter.addSample([jobsSource.data[modelData]["numericSpeed"]/1000])
                         }
                     }
+*/
                 }
             }
 
