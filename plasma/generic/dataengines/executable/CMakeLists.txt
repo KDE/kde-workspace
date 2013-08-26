@@ -7,7 +7,6 @@ kservice_desktop_to_json(plasma-dataengine-executable.desktop)
 plasma_add_plugin(plasma_engine_executable ${executable_engine_SRCS})
 
 target_link_libraries(plasma_engine_executable
-    ${KCore_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KService_LIBRARIES}
     KF5::KCoreAddons
