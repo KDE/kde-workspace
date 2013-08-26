@@ -22,18 +22,17 @@
 
 #include <QtCore/QObject>
 
-#include "kickoff_export.h"
 #include "urlitemlauncher.h"
 
 namespace Kickoff
 {
 
-class KICKOFF_EXPORT ServiceItemHandler : public UrlItemHandler
+class ServiceItemHandler : public UrlItemHandler
 {
 public:
     virtual bool openUrl(const KUrl& url);
 };
-class KICKOFF_EXPORT LeaveItemHandler : public QObject, public UrlItemHandler
+class LeaveItemHandler : public QObject, public UrlItemHandler
 {
     Q_OBJECT
 public:

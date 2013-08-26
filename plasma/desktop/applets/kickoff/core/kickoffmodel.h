@@ -20,8 +20,6 @@
 #ifndef KICKOFFMODEL_H
 #define KICKOFFMODEL_H
 
-#include "kickoff_export.h"
-
 // Qt
 #include <QStandardItemModel>
 
@@ -33,7 +31,7 @@ namespace Kickoff
 /**
  * Base model for Kickoff models based on QStandardItemModel, enables drag and drop support
  */
-class KICKOFF_EXPORT KickoffModel : public QStandardItemModel
+class KickoffModel : public QStandardItemModel
 {
     Q_OBJECT
 

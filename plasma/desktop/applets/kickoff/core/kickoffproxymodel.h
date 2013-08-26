@@ -20,8 +20,6 @@
 #ifndef KICKOFFPROXYMODEL_H
 #define KICKOFFPROXYMODEL_H
 
-#include "kickoff_export.h"
-
 // Qt
 #include <QAbstractProxyModel>
 
@@ -33,7 +31,7 @@ namespace Kickoff
 /**
  * Base model for Kickoff models based on QAbstractProxyModel, enables drag and drop support
  */
-class KICKOFF_EXPORT KickoffProxyModel : public QAbstractProxyModel
+class KickoffProxyModel : public QAbstractProxyModel
 {
     Q_OBJECT
 

@@ -21,7 +21,6 @@
 #ifndef SYSTEMMODEL_H
 #define SYSTEMMODEL_H
 
-#include "kickoff_export.h"
 #include "kickoffproxymodel.h"
 
 #include <QThread>
@@ -61,7 +60,7 @@ private:
  * Model which provides a tree of items for important system setup tools (eg. System Settings) ,
  * folders (eg. the user's home folder and the local network) and fixed and removable storage.
  */
-class KICKOFF_EXPORT SystemModel : public KickoffProxyModel
+class  SystemModel : public KickoffProxyModel
 {
     Q_OBJECT
 

@@ -21,7 +21,6 @@
 #define KRUNNERMODEL_H
 
 #include "models.h"
-#include "kickoff_export.h"
 #include "kickoffmodel.h"
 #include "urlitemlauncher.h"
 
@@ -31,12 +30,12 @@ namespace Kickoff {
 
     KService::Ptr serviceForUrl(const KUrl & url);
 
-class KICKOFF_EXPORT KRunnerItemHandler : public UrlItemHandler {
+class KRunnerItemHandler : public UrlItemHandler {
 public:
     virtual bool openUrl(const KUrl& url);
 };
 
-class KICKOFF_EXPORT KRunnerModel : public KickoffModel
+class KRunnerModel : public KickoffModel
 {
     Q_OBJECT
 
