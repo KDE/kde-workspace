@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <KConfigGroup>
 #include <KGlobal>
+#include <klocalizedstring.h>
 #include <KNotifyConfigWidget>
 #include <KStandardDirs>
 
@@ -84,7 +85,7 @@ static QImage decodeNotificationSpecImageHint(const QDBusArgument& arg)
 
     #define SANITY_CHECK(condition) \
     if (!(condition)) { \
-        kWarning() << "Sanity check failed on" << #condition; \
+        qWarning() << "Sanity check failed on" << #condition; \
         return QImage(); \
     }
 
@@ -108,7 +109,7 @@ static QImage decodeNotificationSpecImageHint(const QDBusArgument& arg)
         }
     }
     if (format == QImage::Format_Invalid) {
-        kWarning() << "Unsupported image format (hasAlpha:" << hasAlpha << "bitsPerSample:" << bitsPerSample << "channels:" << channels << ")";
+        qWarning() << "Unsupported image format (hasAlpha:" << hasAlpha << "bitsPerSample:" << bitsPerSample << "channels:" << channels << ")";
         return QImage();
     }
 
@@ -117,7 +118,7 @@ static QImage decodeNotificationSpecImageHint(const QDBusArgument& arg)
     end = ptr + pixels.length();
     for (int y=0; y<height; ++y, ptr += rowStride) {
         if (ptr + channels * width > end) {
-            kWarning() << "Image data is incomplete. y:" << y << "height:" << height;
+            qWarning() << "Image data is incomplete. y:" << y << "height:" << height;
             break;
         }
         fcn((QRgb*)image.scanLine(y), ptr, width);
@@ -130,7 +131,7 @@ static QString findImageForSpecImagePath(const QString &_path)
 {
     QString path = _path;
     if (path.startsWith(QLatin1String("file:"))) {
-        KUrl url(path);
+        QUrl url(path);
         path = url.toLocalFile();
     }
     return KIconLoader::global()->iconPath(path, -KIconLoader::SizeHuge,

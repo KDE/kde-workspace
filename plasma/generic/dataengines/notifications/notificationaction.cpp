@@ -19,6 +19,8 @@
 #include "notificationaction.h"
 #include "notificationsengine.h"
 
+#include <klocalizedstring.h>
+
 #include <QDebug>
 
 void NotificationAction::start()
