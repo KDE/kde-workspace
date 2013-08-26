@@ -33,7 +33,9 @@ MouseArea {
 
         property Item trackingItem
         onTrackingItemChanged: {
-            y = trackingItem.mapToItem(main, 0, 0).y
+            if (trackingItem) {
+                y = trackingItem.mapToItem(main, 0, 0).y
+            }
         }
 
         hover: true
@@ -113,6 +115,7 @@ MouseArea {
         sourceModel: PlasmaCore.DataModel {
             id: tasksModel
             dataSource: tasksSource
+            sourceFilter: "\\d+"
         }
     }
 
