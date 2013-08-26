@@ -3,7 +3,7 @@
 #add_subdirectory(activities)
 add_subdirectory(apps)
 add_subdirectory(devicenotifications)
-#add_subdirectory(dict)
+add_subdirectory(dict)
 add_subdirectory(executable)
 #add_subdirectory(favicons)
 add_subdirectory(filebrowser)

@@ -21,7 +21,7 @@
 
 #include <QDebug>
 #include <KLocale>
-#include <ktcpsocket.h>
+#include <QTcpSocket>
 
 #include <Plasma/DataContainer>
 
@@ -221,7 +221,7 @@ bool DictEngine::sourceRequestEvent(const QString &query)
         setData(m_currentWord, m_dictName, QString());
     } else {
         setData(m_currentWord, m_dictName, QString());
-        m_tcpSocket = new KTcpSocket(this);
+        m_tcpSocket = new QTcpSocket(this);
         m_tcpSocket->abort();
         connect(m_tcpSocket, SIGNAL(disconnected()), this, SLOT(socketClosed()));
 
@@ -236,5 +236,7 @@ bool DictEngine::sourceRequestEvent(const QString &query)
 
     return true;
 }
+
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(dict, DictEngine , "plasma-dataengine-dict.json")
 
 #include "dictengine.moc"
