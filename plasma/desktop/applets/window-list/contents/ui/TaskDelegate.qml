@@ -30,59 +30,61 @@ Item {
     signal setOnDesktop(int desktop)
     property alias name: label.text
     property int desktop
-    property alias icon: iconItem.icon
-    property alias label: label
-    property bool active:false
+    property alias icon: iconItem.source
+    property alias label: label.text
+    property bool active: false
     property int iconSize: theme.smallIconSize
     property bool showDesktop: true
     property variant desktopItems: []
-    
-    PlasmaComponents.Highlight {
-        hover:menu.focus
-        width: windowListMenu.width
-        height:menuItem.height/1.3
-        visible:true
-        opacity:menuItem.active?1:0
 
-    }
-    
-    QIconItem {
+    PlasmaCore.IconItem {
         id: iconItem
-        x: highlightItem.marginHints.left
+
         width: menuItem.iconSize
-        height: menuItem.iconSize/1.1
-        anchors.bottom:label.bottom
+        height: width
+
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            leftMargin: highlightItem.marginHints.left
+        }
     }
-    
+
     PlasmaComponents.Label {
         id: label
-        clip:true
+
+        height: implicitHeight
+        anchors {
+            left: iconItem.right
+            leftMargin: highlightItem.marginHints.left
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
+
         font.italic: (minimized == true) ? true : false
-        anchors.left: iconItem.right
-        anchors.leftMargin: highlightItem.marginHints.left
-        verticalAlignment:Text.AlignBottom
-        elide:Text.ElideRight
-        wrapMode:Text.Wrap
-        width:menuItem.width
-        maximumLineCount:1
+
+        elide: Text.ElideRight
     }
-    
+
     MouseArea {
         id:root_item
         anchors.fill: parent
         hoverEnabled: true
+
         onClicked: {
             menuItem.clicked();
         }
+
         onEntered:{
             highlightItem.trackingItem = menuItem
             highlightItem.width = menuItem.width
             highlightItem.height = menuItem.height
             menuItem.entered();
-            highlight=true
+            highlight = true
         }
+
         onExited: {
-            highlight=false
+            highlight = false
         }
     }
 }

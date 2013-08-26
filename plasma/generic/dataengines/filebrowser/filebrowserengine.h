@@ -55,6 +55,4 @@ private:
     //QMap < QString, QStringList > m_regiteredListeners;
 };
 
-K_EXPORT_PLASMA_DATAENGINE(filebrowser, FileBrowserEngine)
-
 #endif

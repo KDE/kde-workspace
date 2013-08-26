@@ -36,7 +36,6 @@ PlasmaExtras.ScrollArea {
         anchors.left: menu.left
         anchors.bottom: menu.bottom
         focus: true
-        boundsBehavior: Flickable.StopAtBounds
         section.property: desktop
         section.criteria: ViewSection.FullString
         spacing:0
@@ -44,30 +43,38 @@ PlasmaExtras.ScrollArea {
         section.delegate: PlasmaComponents.Highlight {
             hover: menu.focus
             width: menu.width
-            height: main.height/12
+            height: sectionDelegateLabel.height + marginHints.top + marginHints.bottom
 
             PlasmaComponents.Label {
-                text: section > 0 ? "Desktop " + section : "On all desktops"
-                anchors {
-                    centerIn: parent
-                }
+                id: sectionDelegateLabel
+                text: section > 0 ? i18n("Desktop") + section : i18n("On all desktops")
+                anchors.centerIn: parent
             }
+        }
+
+        highlight: PlasmaComponents.Highlight {
+            hover: false
+            width: menuListView.width
         }
 
         delegate: TaskDelegate {
             id: menuItemDelegate
             width: menuListView.width
             property string source: DataEngineSource
-            name: model["name"]
-            desktop: model["desktop"]
-            icon: model["icon"]
-            active: model["active"]
+            name: model.name
+            desktop: model.desktop
+            icon: model.icon
+            active: model.active
             iconSize: menu.iconSize
             showDesktop: menu.showDesktop
             onClicked: menu.itemSelected(source);
-            onEntered: menuListView.currentIndex = index; 
             onExecuteJob: menu.executeJob(jobName, source);
             onSetOnDesktop: menu.setOnDesktop(source, desktop);
+            onActiveChanged: {
+                if (active) {
+                    menuListView.currentIndex = index
+                }
+            }
         }
     }
 }

@@ -19,6 +19,7 @@
 #include <QDebug>
 #include <KGlobal>
 #include <KIO/PreviewJob>
+#include <KLocalizedString>
 #include <KProgressDialog>
 #include <KStandardDirs>
 
@@ -281,7 +282,11 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
     break;
 
     case AuthorRole:
-        return b.metadata().author();
+        if (b.metadata().isValid()) {
+            return b.metadata().author();
+        } else {
+            return i18nc("Unknown Author", "Unknown");
+        }
     break;
 
     case ResolutionRole:{
