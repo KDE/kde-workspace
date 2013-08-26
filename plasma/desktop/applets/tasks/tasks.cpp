@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "tasks.h"
+#include "support/draghelper.h"
 #include "support/textlabel.h"
 #include "support/tooltip.h"
 
@@ -95,6 +96,7 @@ void Tasks::init()
     qmlRegisterType<TextLabel>( "Tasks", 0, 1, "TextLabel" );
     qmlRegisterType<ToolTipProxy>( "Tasks", 0, 1, "ToolTip" );
     rootContext->setContextProperty("tasksModel", QVariant::fromValue(static_cast<QObject *>(m_tasksModel)));
+    rootContext->setContextProperty("dragHelper", QVariant::fromValue(static_cast<QObject *>(new DragHelper(this))));
 
     // NOTE: This can go away once Plasma::Location becomes available (i.e. once this is
     // a pure-QML applet.)

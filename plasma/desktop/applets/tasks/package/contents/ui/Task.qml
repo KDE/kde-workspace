@@ -28,7 +28,7 @@ import Tasks 0.1 as Tasks
 import "../code/layout.js" as Layout
 import "../code/tools.js" as TaskTools
 
-DragArea {
+MouseEventListener {
     id: task
 
     width: groupDialog.mainItem.width
@@ -47,18 +47,12 @@ DragArea {
     property bool isStartup: model.IsStartup
     property bool demandsAttention: model.DemandsAttention
     property int textWidth: label.implicitWidth
+    property bool holding: false
+    property int oldX: -1
+    property int oldY: -1
     property Item busyIndicator
 
-    enabled: tasks.manualSorting
-    delegateImage: model.DecorationRole
-    mimeData {
-        source: task
-        url: model.LauncherUrl
-    }
-
-    onDragStarted: {
-        mimeData.setData(model.MimeType, model.MimeData);
-    }
+    hoverEnabled: true
 
     onItemIndexChanged: {
         if (!inPopup && !tasks.vertical && Layout.calculateStripes() > 1) {
@@ -82,52 +76,67 @@ DragArea {
         tasks.itemNeedsAttention(demandsAttention);
     }
 
-    MouseEventListener {
-        id: mouseArea
-
-        anchors.fill: parent
-
-        hoverEnabled: true
-
-        onContainsMouseChanged:  {
-            if (!inPopup && containsMouse) {
-                if (tasks.showToolTip) {
-                    toolTip.target = mouseArea;
-                    toolTip.mainText = model.DisplayRole;
-                    toolTip.image = model.DecorationRole;
-                    toolTip.subText = model.IsLauncher ? model.GenericName
-                                                       : toolTip.generateSubText(model);
-                    toolTip.windowsToPreview = model.WindowList;
-                } else {
-                    // A bit sneaky, but this works well to hide the tooltip.
-                    toolTip.target = taskFrame;
-                }
-            }
-
-            tasks.itemHovered(model.Id, containsMouse);
-        }
-
-        onClicked: {
-            if (isGroupParent) {
-                groupDialog.target = task;
-                groupDialog.visible = true;
+    onContainsMouseChanged:  {
+        if (containsMouse) {
+            if (!inPopup && tasks.showToolTip) {
+                toolTip.target = frame;
+                toolTip.mainText = model.DisplayRole;
+                toolTip.image = model.DecorationRole;
+                toolTip.subText = model.IsLauncher ? model.GenericName
+                    : toolTip.generateSubText(model);
+                toolTip.windowsToPreview = model.WindowList;
             } else {
-               tasks.activateItem(model.Id, true);
+                // A bit sneaky, but this works well to hide the tooltip.
+                toolTip.target = taskFrame;
             }
+        } else {
+            holding = false;
         }
 
-        onPressed: {
-            if (mouse.buttons & Qt.RightButton) {
-                if (tasks.showToolTip) {
-                    toolTip.hide();
-                }
-
-                tasks.itemContextMenu(model.Id);
-            }
-        }
-
-        onWheelMoved: TaskTools.activateNextPrevTask(task, wheel.delta < 0)
+        tasks.itemHovered(model.Id, containsMouse);
     }
+
+    onClicked: {
+        if (isGroupParent) {
+            groupDialog.target = task;
+            groupDialog.visible = true;
+        } else {
+            tasks.activateItem(model.Id, true);
+        }
+    }
+
+    onPressed: {
+        if (mouse.buttons & Qt.LeftButton) {
+            holding = true;
+        } else if (mouse.buttons & Qt.RightButton) {
+            if (tasks.showToolTip) {
+                toolTip.hide();
+            }
+
+            tasks.itemContextMenu(model.Id);
+        }
+    }
+
+    onReleased: {
+        holding = false;
+    }
+
+    onPositionChanged: {
+        if (holding && tasks.manualSorting) {
+            if (oldX != -1 && dragHelper.isDrag(oldX, oldY, mouse.x, mouse.y)) {
+                tasks.dragSource = task;
+                dragHelper.startDrag(model.MimeType, model.MimeData, model.LauncherUrl, model.DecorationRole);
+                holding = false;
+
+                return;
+            }
+
+            oldX = mouse.x;
+            oldY = mouse.y;
+        }
+    }
+
+    onWheelMoved: TaskTools.activateNextPrevTask(task, wheel.delta < 0)
 
     PlasmaCore.FrameSvgItem {
         id: frame
@@ -159,7 +168,7 @@ DragArea {
 
             visible: !model.IsStartup
 
-            active: mouseArea.containsMouse
+            active: task.containsMouse
             enabled: !(model.Minimized && !tasks.showOnlyMinimized)
 
             source: model.DecorationRole
@@ -219,12 +228,12 @@ DragArea {
 
             PropertyChanges {
                 target: frame
-                visible: false
+                prefix: ""
             }
         },
         State {
             name: "hovered"
-            when: mouseArea.containsMouse
+            when: containsMouse
 
             PropertyChanges {
                 target: frame
