@@ -40,12 +40,12 @@ Item {
         onDragMove: {
             var above = target.childAt(event.x, event.y);
 
-            if (event.mimeData.source) {
-                if (above != event.mimeData.source
-                    && !(event.mimeData.source.isLauncher || above.isLauncher)) {
+            if (tasks.dragSource) {
+                if (above != tasks.dragSource
+                    && !(tasks.dragSource.isLauncher || above.isLauncher)) {
                     var targetIndex = TaskTools.insertionIndexAt(event.x, event.y);
 
-                    itemMove(event.mimeData.source.itemId, targetIndex);
+                    itemMove(tasks.dragSource.itemId, targetIndex);
                 }
             } else if (above && hoveredItem != above) {
                 hoveredItem = above;

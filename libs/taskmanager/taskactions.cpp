@@ -415,7 +415,7 @@ ToggleLauncherActionImpl::ToggleLauncherActionImpl(QObject *parent, AbstractGrou
         setChecked(false);
     } else {
         m_url = m_abstractItem->launcherUrl();
-        connect(this, SIGNAL(triggered()), this, SLOT(toggleLauncher()));
+        connect(this, SIGNAL(triggered()), this, SLOT(toggleLauncher()), Qt::QueuedConnection);
 
         switch (m_abstractItem->itemType()) {
         case LauncherItemType:

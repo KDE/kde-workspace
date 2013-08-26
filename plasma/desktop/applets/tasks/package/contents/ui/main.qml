@@ -42,6 +42,7 @@ Item {
     property bool showToolTip: true
     property bool highlightWindows: false
     property bool manualSorting: false
+
     property int activeWindowId: 0
 
     property int optimumCapacity: Layout.optimumCapacity()
@@ -51,6 +52,8 @@ Item {
 
     property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
     property int minimumHeight: tasks.horizontal ? 0 : Layout.preferredMinHeight()
+
+    property Item dragSource: null
 
     signal activateItem(int id, bool toggle)
     signal itemContextMenu(int id)
@@ -179,4 +182,12 @@ Item {
     }
 
     GroupDialog { id: groupDialog }
+
+    function resetDragSource() {
+        dragSource = null;
+    }
+
+    Component.onCompleted: {
+        dragHelper.dropped.connect(resetDragSource);
+    }
 }

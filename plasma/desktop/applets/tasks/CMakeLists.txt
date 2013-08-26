@@ -2,6 +2,7 @@ project(plasma-tasks)
 
 set(tasks_SRCS
     tasks.cpp
+    support/draghelper.cpp
     support/textlabel.cpp
     support/declarativeitemcontainer.cpp
     support/tooltip.cpp)
