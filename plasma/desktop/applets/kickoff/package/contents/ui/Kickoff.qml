@@ -27,10 +27,6 @@ import org.kde.qtextracomponents 2.0
 
 Item {
     id: root
-
-    width: minimumWidth
-    height: minimumHeight
-
     property int minimumWidth: theme.mSize(theme.defaultFont).width * 45
     property int minimumHeight: theme.mSize(theme.defaultFont).height * 30
     property string previousState
