@@ -17,7 +17,7 @@ set(libkickoff_SRCS
     core/kickoffmodel.cpp
     core/kickoffproxymodel.cpp
     core/kickoffplugin.cpp
-#     core/krunnermodel.cpp
+    core/krunnermodel.cpp
     core/leavemodel.cpp
     core/models.cpp
     core/recentapplications.cpp
