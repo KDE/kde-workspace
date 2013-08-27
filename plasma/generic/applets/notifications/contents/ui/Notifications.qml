@@ -169,7 +169,6 @@ Column {
                 print( " __ " + _d + " " + nd);
             }
             var actions = new Array()
-            /*
             if (data["actions"] && data["actions"].length % 2 == 0) {
                 for (var i = 0; i < data["actions"].length; i += 2) {
                     var action = new Object()
@@ -178,7 +177,7 @@ Column {
                     actions.push(action)
                 }
             }
-            */
+
             notificationsRoot.addNotification(
                     sourceName,
                     _data["appIcon"],
