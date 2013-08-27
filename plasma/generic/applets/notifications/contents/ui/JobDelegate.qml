@@ -240,7 +240,7 @@ PlasmaComponents.ListItem {
                         useAutoRange: true
                         showVerticalLines: false
                         unit: i18n("KiB/s")
-                        height: theme.defaultFont.mSize.height * 5
+                        height: theme.mSize.height * 5
                         Component.onCompleted: plotter.addPlot(theme.highlightColor)
                     }
                     Connections {

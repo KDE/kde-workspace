@@ -33,8 +33,11 @@ MouseEventListener {
     state: "default"
     width: 32
     height: 32
-    property int minimumWidth: mainScrollArea.implicitWidth
-    property int minimumHeight: mainScrollArea.implicitHeight
+
+    //property int minimumWidth: mainScrollArea.implicitWidth
+    //property int minimumHeight: mainScrollArea.implicitHeight
+    property int minimumWidth: 256 // FIXME: use above
+    property int minimumHeight: 256
     property int maximumWidth: -1
     property int maximumHeight: mainScrollArea.implicitHeight
 
@@ -43,7 +46,7 @@ MouseEventListener {
 
     property real globalProgress: 0
 
-    property bool showNotifications: false
+    property bool showNotifications: true
     property bool showJobs: false
 
     property Item notifications: notificationsLoader.item
@@ -52,11 +55,13 @@ MouseEventListener {
     //notifications + jobs
     property int totalCount: (notifications ? notifications.count : 0) + (jobs ? jobs.count : 0)
     onTotalCountChanged: {
+        print(" totalCountChanged " + totalCount)
         if (totalCount > 0) {
             state = "new-notifications"
         } else {
             state = "default"
-            plasmoid.hidePopup()
+            //plasmoid.hidePopup()
+            plasmoid.expanded = false;
         }
 
         var data = new Object
@@ -81,7 +86,7 @@ MouseEventListener {
         //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
         //plasmoid.aspectRatioMode = "ConstrainedSquare"
         //plasmoid.status = PassiveStatus // FIXME
-        var allApplications = new Object
+        //var allApplications = new Object
         //plasmoid.addEventListener('ConfigChanged', configChanged);
         configChanged()
     }
@@ -108,6 +113,15 @@ MouseEventListener {
         }
     }
 
+//     property Component compactRepresentation: Component {
+//         Rectangle {
+//             MouseArea {
+//                 anchors.fill: parent
+//                 onClicked: plasmoid.expanded = !plasmoid.expanded
+//             }
+//         }
+//     }
+
     hoverEnabled: !UiProperties.touchInput
 
     PlasmaExtras.ScrollArea {
@@ -117,6 +131,8 @@ MouseEventListener {
         implicitHeight: Math.min(theme.mSize.height * 40, Math.max(theme.mSize.height * 6, contentsColumn.height))
         state: ""
 
+        onImplicitWidthChanged: print(" implicitWidth: " + implicitWidth);
+        onImplicitHeightChanged: print(" implicitHeight: " + implicitHeight);
         states: [
             State {
                 name: "underMouse"
@@ -131,7 +147,7 @@ MouseEventListener {
                 when: !notificationsApplet.containsMouse
                 PropertyChanges {
                     target: mainScrollArea
-                    implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 6, contentsColumn.height))
+                    implicitHeight: Math.min(theme.mSize.height * 40, Math.max(theme.mSize.height * 6, contentsColumn.height))
                 }
             }
         ]

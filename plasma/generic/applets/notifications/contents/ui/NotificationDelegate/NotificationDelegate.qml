@@ -164,7 +164,7 @@ PlasmaComponents.ListItem {
                 width: parent.width
                 QIconItem {
                     id: appIconItem
-                    icon: QIcon(appIcon)
+                    icon: appIcon
                     width: theme.largeIconSize
                     height: theme.largeIconSize
                     visible: !imageItem.visible
@@ -176,7 +176,7 @@ PlasmaComponents.ListItem {
                 QImageItem {
                     id: imageItem
                     anchors.fill: appIconItem
-                    image: model.image
+                    image: image
                     smooth: true
                     visible: nativeWidth > 0
                 }
@@ -238,8 +238,8 @@ PlasmaComponents.ListItem {
                         model: actions
                         PlasmaComponents.Button {
                             text: model.text
-                            width: theme.defaultFont.mSize.width * 8
-                            height: theme.defaultFont.mSize.width * 2
+                            width: theme.mSize.width * 8
+                            height: theme.mSize.width * 2
                             onClicked: {
                                 executeAction(source, model.id)
                                 actionsColumn.visible = false

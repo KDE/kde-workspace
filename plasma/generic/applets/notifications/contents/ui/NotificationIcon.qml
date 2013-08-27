@@ -33,6 +33,7 @@ Item {
         anchors.centerIn: parent
         width: Math.min(parent.width, parent.height)
         height: width
+
         state: notificationsApplet.state
 
         PlasmaCore.Svg {
@@ -75,11 +76,11 @@ Item {
                 svg: notificationSvg
                 elementId: {
                     switch (plasmoid.location) {
-                    case TopEdge:
+                    case PlasmaCore.Types.TopEdge:
                         return "expander-top"
-                    case LeftEdge:
+                    case PlasmaCore.Types.LeftEdge:
                         return "expander-left"
-                    case RightEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return "expander-right"
                     default:
                         return "expander-bottom"
@@ -145,9 +146,9 @@ Item {
             anchors.fill: parent
             onClicked: {
                 if (notificationsApplet.totalCount > 0) {
-                    plasmoid.togglePopup()
+                    plasmoid.expanded = !plasmoid.expanded;
                 } else {
-                    plasmoid.hidePopup()
+                    plasmoid.expanded = false;
                 }
             }
         }
@@ -183,6 +184,10 @@ Item {
                 }
             }
         ]
+    }
+
+    Component.onCompleted: {
+        print(" NOTificationsIcon.qml loaded");
     }
 }
 
