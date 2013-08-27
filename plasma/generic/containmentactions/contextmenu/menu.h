@@ -32,7 +32,6 @@ public:
 
     void restore(const KConfigGroup&);
 
-    void contextEvent(QEvent *event);
     QList<QAction*> contextualActions();
     QAction* action(const QString &name);
 
