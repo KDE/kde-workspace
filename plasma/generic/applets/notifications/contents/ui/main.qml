@@ -18,12 +18,12 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1
-import org.kde.plasma.extras 0.1 as PlasmaExtras
-import org.kde.locale 0.1 as KLocale
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
+import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.locale 2.0 as KLocale
 
 import "plasmapackage:/ui/uiproperties.js" as UiProperties
 
@@ -33,8 +33,11 @@ MouseEventListener {
     state: "default"
     width: 32
     height: 32
-    property int minimumWidth: mainScrollArea.implicitWidth
-    property int minimumHeight: mainScrollArea.implicitHeight
+
+    //property int minimumWidth: mainScrollArea.implicitWidth
+    //property int minimumHeight: mainScrollArea.implicitHeight
+    property int minimumWidth: 256 // FIXME: use above
+    property int minimumHeight: 256
     property int maximumWidth: -1
     property int maximumHeight: mainScrollArea.implicitHeight
 
@@ -43,7 +46,7 @@ MouseEventListener {
 
     property real globalProgress: 0
 
-    property bool showNotifications: false
+    property bool showNotifications: true
     property bool showJobs: false
 
     property Item notifications: notificationsLoader.item
@@ -52,11 +55,13 @@ MouseEventListener {
     //notifications + jobs
     property int totalCount: (notifications ? notifications.count : 0) + (jobs ? jobs.count : 0)
     onTotalCountChanged: {
+        print(" totalCountChanged " + totalCount)
         if (totalCount > 0) {
             state = "new-notifications"
         } else {
             state = "default"
-            plasmoid.hidePopup()
+            //plasmoid.hidePopup()
+            plasmoid.expanded = false;
         }
 
         var data = new Object
@@ -79,10 +84,10 @@ MouseEventListener {
 
     Component.onCompleted: {
         //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
-        plasmoid.aspectRatioMode = "ConstrainedSquare"
-        plasmoid.status = PassiveStatus
-        allApplications = new Object
-        plasmoid.addEventListener('ConfigChanged', configChanged);
+        //plasmoid.aspectRatioMode = "ConstrainedSquare"
+        //plasmoid.status = PassiveStatus // FIXME
+        //var allApplications = new Object
+        //plasmoid.addEventListener('ConfigChanged', configChanged);
         configChanged()
     }
 
@@ -108,15 +113,26 @@ MouseEventListener {
         }
     }
 
+//     property Component compactRepresentation: Component {
+//         Rectangle {
+//             MouseArea {
+//                 anchors.fill: parent
+//                 onClicked: plasmoid.expanded = !plasmoid.expanded
+//             }
+//         }
+//     }
+
     hoverEnabled: !UiProperties.touchInput
 
     PlasmaExtras.ScrollArea {
         id: mainScrollArea
         anchors.fill: parent
-        implicitWidth: theme.defaultFont.mSize.width * 40
-        implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 6, contentsColumn.height))
+        implicitWidth: theme.mSize.width * 40
+        implicitHeight: Math.min(theme.mSize.height * 40, Math.max(theme.mSize.height * 6, contentsColumn.height))
         state: ""
 
+        onImplicitWidthChanged: print(" implicitWidth: " + implicitWidth);
+        onImplicitHeightChanged: print(" implicitHeight: " + implicitHeight);
         states: [
             State {
                 name: "underMouse"
@@ -131,7 +147,7 @@ MouseEventListener {
                 when: !notificationsApplet.containsMouse
                 PropertyChanges {
                     target: mainScrollArea
-                    implicitHeight: Math.min(theme.defaultFont.mSize.height * 40, Math.max(theme.defaultFont.mSize.height * 6, contentsColumn.height))
+                    implicitHeight: Math.min(theme.mSize.height * 40, Math.max(theme.mSize.height * 6, contentsColumn.height))
                 }
             }
         ]

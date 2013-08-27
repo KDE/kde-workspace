@@ -10,7 +10,6 @@ kservice_desktop_to_json(plasma-dataengine-apps.desktop)
 plasma_add_plugin(plasma_engine_apps ${apps_engine_SRCS})
 
 target_link_libraries(plasma_engine_apps
-    ${KCore_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KService_LIBRARIES}
     ${KDE4_KIO_LIBS} #FIXME WHEN KRUN MOVES TO KF5

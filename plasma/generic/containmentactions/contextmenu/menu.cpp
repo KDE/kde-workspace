@@ -30,7 +30,6 @@
 #include <KAuthorized>
 #include <QDebug>
 #include <QIcon>
-#include <QMenu>
 #include <KLocalizedString>
 
 #include <Plasma/Containment>
@@ -67,6 +66,7 @@ void ContextMenu::restore(const KConfigGroup &config)
     Q_ASSERT(c);
 
     m_actions.clear();
+    m_actionOrder.clear();
     QHash<QString, bool> actions;
     QSet<QString> disabled;
 
@@ -116,19 +116,6 @@ void ContextMenu::restore(const KConfigGroup &config)
         m_separator3 = new QAction(this);
         m_separator3->setSeparator(true);
     }
-}
-
-void ContextMenu::contextEvent(QEvent *event)
-{
-    QList<QAction *> actions = contextualActions();
-    if (actions.isEmpty()) {
-        return;
-    }
-
-    QMenu desktopMenu;
-    desktopMenu.addActions(actions);
-    desktopMenu.adjustSize();
-//    desktopMenu.exec(popupPosition(desktopMenu.size(), event));
 }
 
 QList<QAction*> ContextMenu::contextualActions()

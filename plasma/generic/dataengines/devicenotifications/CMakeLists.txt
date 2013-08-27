@@ -12,7 +12,6 @@ plasma_add_plugin(plasma_engine_devicenotifications ${device_notifications_engin
 target_link_libraries(plasma_engine_devicenotifications 
     ${Qt5DBus_LIBRARIES}
     ${KService_LIBRARIES}
-    ${KCore_LIBRARIES}
     #${Solid_LIBRARIES}
     ${Plasma_LIBRARIES}
     #${KDE4_KIDLETIME_LIBRARY} 

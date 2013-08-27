@@ -15,7 +15,6 @@ kservice_desktop_to_json(plasma-dataengine-powermanagement.desktop)
 plasma_add_plugin(plasma_engine_powermanagement ${powermanagement_engine_SRCS})
 
 target_link_libraries(plasma_engine_powermanagement
-    ${KCore_LIBRARIES}
     ${Solid_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KIdleTime_LIBRARIES}

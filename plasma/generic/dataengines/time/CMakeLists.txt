@@ -13,7 +13,6 @@ plasma_add_plugin(plasma_engine_time ${time_engine_SRCS})
 
 #add_library(plasma_engine_time SHARED ${time_engine_SRCS})
 target_link_libraries(plasma_engine_time
-    ${KCore_LIBRARIES}
     ${Solid_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KDE4Attic_LIBRARIES}

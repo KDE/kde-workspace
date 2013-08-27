@@ -18,11 +18,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1
-import org.kde.plasma.extras 0.1 as PlasmaExtras
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 
 PlasmaCore.Dialog {
@@ -98,8 +98,8 @@ PlasmaCore.Dialog {
         id: mainItem
         width: maximumWidth
         height: maximumHeight
-        property int maximumWidth: theme.defaultFont.mSize.width * 35
-        property int maximumHeight: theme.defaultFont.mSize.width * 10
+        property int maximumWidth: theme.mSize.width * 35
+        property int maximumHeight: theme.mSize.width * 10
         property int minimumWidth: maximumWidth
         property int minimumHeight: maximumHeight
 
@@ -258,8 +258,8 @@ PlasmaCore.Dialog {
                         model: actions
                         PlasmaComponents.Button {
                             text: model.text
-                            width: theme.defaultFont.mSize.width * 8
-                            height: theme.defaultFont.mSize.width * 2
+                            width: theme.mSize.width * 8
+                            height: theme.mSize.width * 2
                             onPressedChanged: {
                                 if (pressed) {
                                     mainItem.buttonPressed = true

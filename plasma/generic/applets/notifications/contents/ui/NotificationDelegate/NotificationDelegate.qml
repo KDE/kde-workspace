@@ -17,10 +17,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
 
 PlasmaComponents.ListItem {
     id: notificationItem
@@ -164,7 +164,7 @@ PlasmaComponents.ListItem {
                 width: parent.width
                 QIconItem {
                     id: appIconItem
-                    icon: QIcon(appIcon)
+                    icon: appIcon
                     width: theme.largeIconSize
                     height: theme.largeIconSize
                     visible: !imageItem.visible
@@ -176,7 +176,7 @@ PlasmaComponents.ListItem {
                 QImageItem {
                     id: imageItem
                     anchors.fill: appIconItem
-                    image: model.image
+                    image: image
                     smooth: true
                     visible: nativeWidth > 0
                 }
@@ -238,8 +238,8 @@ PlasmaComponents.ListItem {
                         model: actions
                         PlasmaComponents.Button {
                             text: model.text
-                            width: theme.defaultFont.mSize.width * 8
-                            height: theme.defaultFont.mSize.width * 2
+                            width: theme.mSize.width * 8
+                            height: theme.mSize.width * 2
                             onClicked: {
                                 executeAction(source, model.id)
                                 actionsColumn.visible = false

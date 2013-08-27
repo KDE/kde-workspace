@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <KConfigGroup>
 #include <KGlobal>
+#include <klocalizedstring.h>
 #include <KNotifyConfigWidget>
 #include <KStandardDirs>
 
@@ -40,8 +41,9 @@ NotificationsEngine::NotificationsEngine( QObject* parent, const QVariantList& a
     new NotificationsAdaptor(this);
 
     QDBusConnection dbus = QDBusConnection::sessionBus();
-    dbus.registerService( "org.freedesktop.Notifications" );
-    dbus.registerObject( "/org/freedesktop/Notifications", this );
+    bool so = dbus.registerService( "org.freedesktop.Notifications" );
+    bool ro = dbus.registerObject( "/org/freedesktop/Notifications", this );
+    qDebug() << "Are we the only client? (Both have to be true) " << so << ro;
 }
 
 NotificationsEngine::~NotificationsEngine()
@@ -84,7 +86,7 @@ static QImage decodeNotificationSpecImageHint(const QDBusArgument& arg)
 
     #define SANITY_CHECK(condition) \
     if (!(condition)) { \
-        kWarning() << "Sanity check failed on" << #condition; \
+        qWarning() << "Sanity check failed on" << #condition; \
         return QImage(); \
     }
 
@@ -108,7 +110,7 @@ static QImage decodeNotificationSpecImageHint(const QDBusArgument& arg)
         }
     }
     if (format == QImage::Format_Invalid) {
-        kWarning() << "Unsupported image format (hasAlpha:" << hasAlpha << "bitsPerSample:" << bitsPerSample << "channels:" << channels << ")";
+        qWarning() << "Unsupported image format (hasAlpha:" << hasAlpha << "bitsPerSample:" << bitsPerSample << "channels:" << channels << ")";
         return QImage();
     }
 
@@ -117,7 +119,7 @@ static QImage decodeNotificationSpecImageHint(const QDBusArgument& arg)
     end = ptr + pixels.length();
     for (int y=0; y<height; ++y, ptr += rowStride) {
         if (ptr + channels * width > end) {
-            kWarning() << "Image data is incomplete. y:" << y << "height:" << height;
+            qWarning() << "Image data is incomplete. y:" << y << "height:" << height;
             break;
         }
         fcn((QRgb*)image.scanLine(y), ptr, width);
@@ -130,7 +132,7 @@ static QString findImageForSpecImagePath(const QString &_path)
 {
     QString path = _path;
     if (path.startsWith(QLatin1String("file:"))) {
-        KUrl url(path);
+        QUrl url(path);
         path = url.toLocalFile();
     }
     return KIconLoader::global()->iconPath(path, -KIconLoader::SizeHuge,
@@ -141,6 +143,7 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
                                  const QString &app_icon, const QString &summary, const QString &body,
                                  const QStringList &actions, const QVariantMap &hints, int timeout)
 {
+    qDebug() << " New Notification: " << summary << body;
     uint id = 0;
     id = replaces_id ? replaces_id : m_nextId++;
 
@@ -270,7 +273,7 @@ QStringList NotificationsEngine::GetCapabilities()
 QString NotificationsEngine::GetServerInformation(QString& vendor, QString& version, QString& specVersion)
 {
     vendor = "KDE";
-    version = "1.0"; // FIXME
+    version = "2.0"; // FIXME
     specVersion = "1.1";
     return "Plasma";
 }
@@ -297,6 +300,6 @@ void NotificationsEngine::configureNotification(const QString &appName)
     KNotifyConfigWidget::configure(0, appName);
 }
 
-K_EXPORT_PLASMA_DATAENGINE(notifications, NotificationsEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(notifications, NotificationsEngine, "plasma-dataengine-notifications.json")
 
 #include "notificationsengine.moc"

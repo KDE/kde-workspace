@@ -18,11 +18,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1
-import org.kde.plasma.extras 0.1 as PlasmaExtras
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 
 Item {
@@ -33,6 +33,7 @@ Item {
         anchors.centerIn: parent
         width: Math.min(parent.width, parent.height)
         height: width
+
         state: notificationsApplet.state
 
         PlasmaCore.Svg {
@@ -75,11 +76,11 @@ Item {
                 svg: notificationSvg
                 elementId: {
                     switch (plasmoid.location) {
-                    case TopEdge:
+                    case PlasmaCore.Types.TopEdge:
                         return "expander-top"
-                    case LeftEdge:
+                    case PlasmaCore.Types.LeftEdge:
                         return "expander-left"
-                    case RightEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return "expander-right"
                     default:
                         return "expander-bottom"
@@ -145,9 +146,9 @@ Item {
             anchors.fill: parent
             onClicked: {
                 if (notificationsApplet.totalCount > 0) {
-                    plasmoid.togglePopup()
+                    plasmoid.expanded = !plasmoid.expanded;
                 } else {
-                    plasmoid.hidePopup()
+                    plasmoid.expanded = false;
                 }
             }
         }
@@ -183,6 +184,10 @@ Item {
                 }
             }
         ]
+    }
+
+    Component.onCompleted: {
+        print(" NOTificationsIcon.qml loaded");
     }
 }
 

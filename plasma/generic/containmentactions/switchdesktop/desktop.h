@@ -23,7 +23,9 @@
 #include <plasma/containmentactions.h>
 
 class QAction;
-class KMenu;
+class QMenu;
+class QMouseEvent;
+class QWheelEvent;
 
 class SwitchDesktop : public Plasma::ContainmentActions
 {
@@ -32,22 +34,17 @@ class SwitchDesktop : public Plasma::ContainmentActions
         SwitchDesktop(QObject* parent, const QVariantList& args);
         ~SwitchDesktop();
 
-        void contextEvent(QEvent *event);
-        void contextEvent(QGraphicsSceneMouseEvent *event);
-        void wheelEvent(QGraphicsSceneWheelEvent *event);
         QList<QAction*> contextualActions();
 
-    private:
-        void makeMenu();
+        void performNextAction();
+        void performPreviousAction();
 
     private Q_SLOTS:
-        void switchTo(QAction *action);
+        void switchTo();
 
     private:
-        KMenu *m_menu;
-        QAction *m_action;
+        QHash<int, QAction *> m_actions;
 };
 
-K_EXPORT_PLASMA_CONTAINMENTACTIONS(switchdesktop, SwitchDesktop)
 
 #endif

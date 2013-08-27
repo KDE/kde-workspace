@@ -20,7 +20,7 @@
 #define DICTENGINE_H
 #include <Plasma/DataEngine>
 #include <QMap>
-class KTcpSocket;
+class QTcpSocket;
 
 /**
  * This class evaluates the basic expressions given in the interface.
@@ -48,14 +48,12 @@ class DictEngine: public Plasma::DataEngine
         void setServer(const QString &server);
 
         QHash<QString, QString> m_dictNameToDictCode;
-        KTcpSocket *m_tcpSocket;
+        QTcpSocket *m_tcpSocket;
         QString m_currentWord;
         QString m_currentQuery;
         QString m_dictName;
         QString m_serverName;
 
 };
-
-K_EXPORT_PLASMA_DATAENGINE(dict, DictEngine)
 
 #endif
