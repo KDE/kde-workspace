@@ -74,10 +74,6 @@ Item {
 
     function performOperation(what) {
         var service = dataEngine.serviceForSource("PowerDevil");
-        print("========================== " + what);
-        for (var _k in service) {
-            print(" ++ key: " + _k);
-        }
         var operation = service.operationDescription(what);
         return service.startOperationCall(operation);
     }
@@ -101,7 +97,7 @@ Item {
     }
 
     function shortcutSettings() {
-
+        print("FIXME: implement shortcut settings");
     }
 
     function showWidgetsExplorer() {
@@ -118,6 +114,7 @@ Item {
 
         width: expandedWidth
         height: actionList.height + toolBoxSvg.topBorder + toolBoxSvg.bottomBorder
+        //opacity: toolBoxItem.showing ? 1 : 0
 
         property Item currentItem: null
 
@@ -237,11 +234,11 @@ Item {
     states: [
         State {
             name: "expanded"
-            PropertyChanges { target: toolBoxFrame; opacity: 1.0 }
+            PropertyChanges { target: toolBoxFrame; opacity: 1.0; visible: true; }
         },
         State {
             name: "collapsed"
-            PropertyChanges { target: toolBoxFrame; opacity: 0 }
+            PropertyChanges { target: toolBoxFrame; opacity: 0; visible: false; }
         }
     ]
 }

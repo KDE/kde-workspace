@@ -64,7 +64,6 @@ Item {
             repeat: false
             running: true
             onTriggered: {
-                print("XXX PLacing toolbox");
                 placeToolBox();
             }
         }
@@ -72,7 +71,6 @@ Item {
 
     ToolBoxItem {
         id: toolBoxItem
-        //anchors { top: parent.top; right: parent.right; margins: 16; }
         property int margin: 22
         x: {
             var maxX = main.width - toolBoxItem.width - margin
@@ -94,8 +92,6 @@ Item {
     }
 
     function placeToolBox() {
-        //return;
-        print(" XXXXXXXXXXXX  placeToolBox");
         var ts = plasmoid.readConfig("ToolBoxButtonState")
         ts = "topright"; // FIXME: hardcoded for now, test config saving!
         if (ts) {
@@ -124,19 +120,9 @@ Item {
 
         var ty = plasmoid.readConfig("ToolBoxButtonY")
         if (ty) ty = 0;
-        print("XXX Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
+        //print("XXX Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
         toolBoxButton.x = tx;
         toolBoxButton.y = ty;
-
-    }
-
-    Component.onCompleted: {
-        print(" XXXX TOolboxroot done");
-    }
-
-    function i18n(msg) {
-        print("FIXME: i18n() is screwed in ToolBoxRoot.qml")
-        return msg;
 
     }
 }
