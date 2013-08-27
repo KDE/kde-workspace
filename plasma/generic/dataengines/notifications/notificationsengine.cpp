@@ -41,8 +41,9 @@ NotificationsEngine::NotificationsEngine( QObject* parent, const QVariantList& a
     new NotificationsAdaptor(this);
 
     QDBusConnection dbus = QDBusConnection::sessionBus();
-    dbus.registerService( "org.freedesktop.Notifications" );
-    dbus.registerObject( "/org/freedesktop/Notifications", this );
+    bool so = dbus.registerService( "org.freedesktop.Notifications" );
+    bool ro = dbus.registerObject( "/org/freedesktop/Notifications", this );
+    qDebug() << "Are we the only client? (Both have to be true) " << so << ro;
 }
 
 NotificationsEngine::~NotificationsEngine()
@@ -142,6 +143,7 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
                                  const QString &app_icon, const QString &summary, const QString &body,
                                  const QStringList &actions, const QVariantMap &hints, int timeout)
 {
+    qDebug() << " New Notification: " << summary << body;
     uint id = 0;
     id = replaces_id ? replaces_id : m_nextId++;
 
@@ -271,7 +273,7 @@ QStringList NotificationsEngine::GetCapabilities()
 QString NotificationsEngine::GetServerInformation(QString& vendor, QString& version, QString& specVersion)
 {
     vendor = "KDE";
-    version = "1.0"; // FIXME
+    version = "2.0"; // FIXME
     specVersion = "1.1";
     return "Plasma";
 }
