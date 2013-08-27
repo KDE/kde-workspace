@@ -67,6 +67,7 @@ void ContextMenu::restore(const KConfigGroup &config)
     Q_ASSERT(c);
 
     m_actions.clear();
+    m_actionOrder.clear();
     QHash<QString, bool> actions;
     QSet<QString> disabled;
 
