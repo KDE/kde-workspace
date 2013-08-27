@@ -34,8 +34,10 @@ class SwitchDesktop : public Plasma::ContainmentActions
         SwitchDesktop(QObject* parent, const QVariantList& args);
         ~SwitchDesktop();
 
-        void wheelEvent(QWheelEvent *event);
         QList<QAction*> contextualActions();
+
+        void performNextAction();
+        void performPreviousAction();
 
     private Q_SLOTS:
         void switchTo();

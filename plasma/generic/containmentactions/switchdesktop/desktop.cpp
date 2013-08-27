@@ -81,17 +81,18 @@ void SwitchDesktop::switchTo()
     KWindowSystem::setCurrentDesktop(desktop);
 }
 
-void SwitchDesktop::wheelEvent(QWheelEvent *event)
+void SwitchDesktop::performNextAction()
 {
-    qDebug() << event->orientation() << event->delta();
     const int numDesktops = KWindowSystem::numberOfDesktops();
     const int currentDesktop = KWindowSystem::currentDesktop();
+    KWindowSystem::setCurrentDesktop(currentDesktop % numDesktops + 1);
+}
 
-    if (event->delta() < 0) {
-        KWindowSystem::setCurrentDesktop(currentDesktop % numDesktops + 1);
-    } else {
-        KWindowSystem::setCurrentDesktop((numDesktops + currentDesktop - 2) % numDesktops + 1);
-    }
+void SwitchDesktop::performPreviousAction()
+{
+    const int numDesktops = KWindowSystem::numberOfDesktops();
+    const int currentDesktop = KWindowSystem::currentDesktop();
+    KWindowSystem::setCurrentDesktop((numDesktops + currentDesktop - 2) % numDesktops + 1);
 }
 
 K_EXPORT_PLASMA_CONTAINMENTACTIONS_WITH_JSON(switchdesktop, SwitchDesktop, "plasma-containmentactions-switchdesktop.json")
