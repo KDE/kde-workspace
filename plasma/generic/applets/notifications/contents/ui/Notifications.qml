@@ -159,15 +159,7 @@ Column {
         }
 
         onNewData: {
-            //var _data = notificationsSource.data[sourceName];
-            print("\n sourceName: " + sourceName);
-            print("new data" + data);
-
             var _data = data; // Temp copy to avoid lots of context switching
-            for (var _d in _data) {
-                var nd = data[_d];
-                print( " __ " + _d + " " + nd);
-            }
             var actions = new Array()
             if (data["actions"] && data["actions"].length % 2 == 0) {
                 for (var i = 0; i < data["actions"].length; i += 2) {
@@ -177,7 +169,6 @@ Column {
                     actions.push(action)
                 }
             }
-
             notificationsRoot.addNotification(
                     sourceName,
                     _data["appIcon"],
