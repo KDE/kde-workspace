@@ -127,8 +127,8 @@ MouseEventListener {
     PlasmaExtras.ScrollArea {
         id: mainScrollArea
         anchors.fill: parent
-        implicitWidth: theme.mSize(theme.defaultFont).width * 40
-        implicitHeight: Math.min(theme.mSize(theme.defaultFont).height * 40, Math.max(theme.mSize(theme.defaultFont).height * 6, contentsColumn.height))
+        implicitWidth: theme.mSize(theme.defaultFont)(theme.defaultFont).width * 40
+        implicitHeight: Math.min(theme.mSize(theme.defaultFont)(theme.defaultFont).height * 40, Math.max(theme.mSize(theme.defaultFont)(theme.defaultFont).height * 6, contentsColumn.height))
         state: ""
 
         onImplicitWidthChanged: print(" implicitWidth: " + implicitWidth);
@@ -147,7 +147,7 @@ MouseEventListener {
                 when: !notificationsApplet.containsMouse
                 PropertyChanges {
                     target: mainScrollArea
-                    implicitHeight: Math.min(theme.mSize(theme.defaultFont).height * 40, Math.max(theme.mSize(theme.defaultFont).height * 6, contentsColumn.height))
+                    implicitHeight: Math.min(theme.mSize(theme.defaultFont)(theme.defaultFont).height * 40, Math.max(theme.mSize(theme.defaultFont)(theme.defaultFont).height * 6, contentsColumn.height))
                 }
             }
         ]

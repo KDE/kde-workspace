@@ -238,8 +238,8 @@ PlasmaComponents.ListItem {
                         model: actions
                         PlasmaComponents.Button {
                             text: model.text
-                            width: theme.mSize(theme.defaultFont).width * 8
-                            height: theme.mSize(theme.defaultFont).width * 2
+                            width: theme.mSize(theme.defaultFont)(theme.defaultFont).width * 8
+                            height: theme.mSize(theme.defaultFont)(theme.defaultFont).width * 2
                             onClicked: {
                                 executeAction(source, model.id)
                                 actionsColumn.visible = false
