@@ -41,13 +41,19 @@ DragDrop.DropArea {
     property Item dragOverlay
 
     onDragEnter: {
-        LayoutManager.insertBefore(currentLayout.childAt(event.x, event.y), dndSpacer)
+        var child = currentLayout.childAt(event.x, event.y);
+        dndSpacer.intendedPos = child && child.intendedPos ? child.intendedPos : currentLayout.children.length-1;
+        LayoutManager.insertBefore(child, dndSpacer);
     }
 
     onDragMove: {
-        print(event.x)
+        var child = currentLayout.childAt(event.x, event.y);
+        if (child === dndSpacer) {
+            return;
+        }
         dndSpacer.parent = root;
-        LayoutManager.insertBefore(currentLayout.childAt(event.x, event.y), dndSpacer)
+        dndSpacer.intendedPos = child && child.intendedPos ? child.intendedPos : currentLayout.children.length-1;
+        LayoutManager.insertBefore(child, dndSpacer);
     }
     
     onDragLeave: {
@@ -63,15 +69,22 @@ DragDrop.DropArea {
         target: plasmoid
 
         onAppletAdded: {
+            var appletX = applet.x;
+            var appletY = applet.y;
             var container = appletContainerComponent.createObject(root)
-            print("Applet added in test panel: " + applet);
+            print("Applet added in test panel: " + applet + " at: " + appletX + ", " + appletY);
 
             applet.parent = container;
             container.applet = applet;
             applet.anchors.fill = container;
             applet.visible = true;
             container.visible = true;
-            container.intendedPos = LayoutManager.order[applet.id] ? LayoutManager.order[applet.id] : 0;
+            container.intendedPos = LayoutManager.order[applet.id] ? LayoutManager.order[applet.id] : -1;
+            if (container.intendedPos < 0) {
+                var child = currentLayout.childAt(appletX, appletY)
+                container.intendedPos = child && child.intendedPos ? child.intendedPos : currentLayout.children.length-1;
+            }
+            print("We want to insert the new applet in position " + container.intendedPos)
 
             var position = 0;
             for (var i = 0; i < currentLayout.children.length; ++i) {
@@ -143,6 +156,11 @@ DragDrop.DropArea {
             Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : root.width) : root.height)
 
             property Item applet
+            onAppletChanged: {
+                if (!applet) {
+                    destroy();
+                }
+            }
 
             PlasmaComponents.BusyIndicator {
                 z: 1000
@@ -161,8 +179,10 @@ DragDrop.DropArea {
         Layout.fillHeight: true
     }
 
-    Item {
+    Rectangle {
+        color: "red"
         id: dndSpacer
+        property int intendedPos
         width: 50
         height: 50
     }
@@ -171,14 +191,14 @@ DragDrop.DropArea {
         id: row
         anchors {
             fill: parent
-            rightMargin: toolBox.width
+            rightMargin: toolBox ? toolBox.width : 0
         }
     }
     ColumnLayout {
         id: column
         anchors {
             fill: parent
-            bottomMargin: toolBox.height
+            bottomMargin: toolBox ? toolBox.height : 0
         }
     }
 
