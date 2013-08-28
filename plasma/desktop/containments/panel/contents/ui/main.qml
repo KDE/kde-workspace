@@ -22,10 +22,11 @@ import QtQuick.Layouts 1.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0
+import org.kde.draganddrop 2.0 as DragDrop
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
-Item {
+DragDrop.DropArea {
     id: root
     width: 640
     height: 48
@@ -39,6 +40,24 @@ Item {
 
     property Item dragOverlay
 
+    onDragEnter: {
+        LayoutManager.insertBefore(currentLayout.childAt(event.x, event.y), dndSpacer)
+    }
+
+    onDragMove: {
+        print(event.x)
+        dndSpacer.parent = root;
+        LayoutManager.insertBefore(currentLayout.childAt(event.x, event.y), dndSpacer)
+    }
+    
+    onDragLeave: {
+        dndSpacer.parent = root;
+    }
+
+    onDrop: {
+        dndSpacer.parent = root;
+        plasmoid.processMimeData(event.mimeData, event.x, event.y);
+    }
 
     Connections {
         target: plasmoid
@@ -140,6 +159,12 @@ Item {
 
         Layout.fillWidth: true
         Layout.fillHeight: true
+    }
+
+    Item {
+        id: dndSpacer
+        width: 50
+        height: 50
     }
 
     RowLayout {
