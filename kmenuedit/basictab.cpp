@@ -51,22 +51,53 @@ BasicTab::BasicTab( QWidget *parent )
     _menuFolderInfo = 0;
     _menuEntryInfo = 0;
 
-    // general group
-    QWidget *general_group = new QWidget();
-    QGridLayout *grid = new QGridLayout(general_group);
-    grid->setMargin( KDialog::marginHint() );
-    grid->setSpacing( KDialog::spacingHint() );
+    initGeneralTab();
+    initAdvancedTab();
+    initConnections();
 
-    general_group->setAcceptDrops(false);
+#ifndef Q_WS_WIN
+    if (!KHotKeys::present())
+        _keyBindingGroup->hide();
+#endif
+    slotDisableAction();
+}
 
-    // setup line inputs
-    _nameEdit = new KLineEdit(general_group);
+void BasicTab::initGeneralTab() {
+    // general tab
+    QWidget *generalTab = new QWidget();
+    QGridLayout *generalTabLayout = new QGridLayout(generalTab);
+    generalTabLayout->setMargin( KDialog::marginHint() );
+    generalTabLayout->setSpacing( KDialog::spacingHint() );
+    generalTab->setAcceptDrops(false);
+
+    // name
+    _nameLabel = new QLabel(i18n("&Name:"));
+    generalTabLayout->addWidget(_nameLabel, 0, 0);
+    _nameEdit = new KLineEdit();
     _nameEdit->setAcceptDrops(false);
-    _descriptionEdit = new KLineSpellChecking(general_group);
+    _nameLabel->setBuddy(_nameEdit);
+    generalTabLayout->addWidget(_nameEdit, 0, 1, 1, 1);
+
+    // description
+    _descriptionLabel = new QLabel(i18n("&Description:"));
+    generalTabLayout->addWidget(_descriptionLabel, 1, 0);
+    _descriptionEdit = new KLineSpellChecking();
     _descriptionEdit->setAcceptDrops(false);
-    _commentEdit = new KLineSpellChecking(general_group);
+    _descriptionLabel->setBuddy(_descriptionEdit);
+    generalTabLayout->addWidget(_descriptionEdit, 1, 1, 1, 1);
+
+    // comment
+    _commentLabel = new QLabel(i18n("&Comment:"));
+    generalTabLayout->addWidget(_commentLabel, 2, 0);
+    _commentEdit = new KLineSpellChecking();
     _commentEdit->setAcceptDrops(false);
-    _execEdit = new KUrlRequester(general_group);
+    _commentLabel->setBuddy(_commentEdit);
+    generalTabLayout->addWidget(_commentEdit, 2, 1, 1, 2);
+
+    // command
+    _execLabel = new QLabel(i18n("Co&mmand:"));
+    generalTabLayout->addWidget(_execLabel, 3, 0);
+    _execEdit = new KUrlRequester();
     _execEdit->lineEdit()->setAcceptDrops(false);
     _execEdit->setWhatsThis(i18n(
                                 "Following the command, you can have several place holders which will be replaced "
@@ -80,165 +111,137 @@ BasicTab::BasicTab( QWidget *parent )
                                 "%i - the icon\n"
                                 "%m - the mini-icon\n"
                                 "%c - the caption"));
-
-    _launchCB = new QCheckBox(i18n("Enable &launch feedback"), general_group);
-    _systrayCB = new QCheckBox(i18n("&Place in system tray"), general_group);
-    _onlyShowInKdeCB = new QCheckBox( i18n( "Only show in KDE" ), general_group );
-    _hiddenEntryCB = new QCheckBox( i18n( "Hidden entry" ), general_group );
-    _hiddenEntryCB->hide();
-
-    // setup labels
-    _nameLabel = new QLabel(i18n("&Name:"),general_group);
-    _nameLabel->setBuddy(_nameEdit);
-    _descriptionLabel = new QLabel(i18n("&Description:"),general_group);
-    _descriptionLabel->setBuddy(_descriptionEdit);
-    _commentLabel = new QLabel(i18n("&Comment:"),general_group);
-    _commentLabel->setBuddy(_commentEdit);
-    _execLabel = new QLabel(i18n("Co&mmand:"),general_group);
     _execLabel->setBuddy(_execEdit);
-    grid->addWidget(_nameLabel, 0, 0);
-    grid->addWidget(_descriptionLabel, 1, 0);
-    grid->addWidget(_commentLabel, 2, 0);
-    grid->addWidget(_execLabel, 3, 0);
+    generalTabLayout->addWidget(_execEdit, 3, 1, 1, 2);
 
-    // connect line inputs
-    connect(_nameEdit, SIGNAL(textChanged(QString)),
-            SLOT(slotChanged()));
-    connect(_descriptionEdit, SIGNAL(textChanged(QString)),
-            SLOT(slotChanged()));
-    connect(_commentEdit, SIGNAL(textChanged(QString)),
-            SLOT(slotChanged()));
-    connect(_execEdit, SIGNAL(textChanged(QString)),
-            SLOT(slotChanged()));
-    connect(_execEdit, SIGNAL(urlSelected(KUrl)),
-            SLOT(slotExecSelected()));
-    connect(_launchCB, SIGNAL(clicked()), SLOT(launchcb_clicked()));
-    connect(_systrayCB, SIGNAL(clicked()), SLOT(systraycb_clicked()));
-    connect(_onlyShowInKdeCB, SIGNAL(clicked()), SLOT(onlyshowcb_clicked()) );
-    connect( _hiddenEntryCB, SIGNAL(clicked()), SLOT(hiddenentrycb_clicked()) );
-    // add line inputs to the grid
-    grid->addWidget(_nameEdit, 0, 1, 1, 1);
-    grid->addWidget(_descriptionEdit, 1, 1, 1, 1);
-    grid->addWidget(_commentEdit, 2, 1, 1, 2);
-    grid->addWidget(_execEdit, 3, 1, 1, 2);
-    grid->addWidget(_launchCB, 4, 0, 1, 3 );
-    grid->addWidget(_systrayCB, 5, 0, 1, 3 );
-    grid->addWidget(_onlyShowInKdeCB, 6, 0, 1, 3 );
-    grid->addWidget(_hiddenEntryCB, 7, 0, 1, 3 );
+    // launch feedback
+    _launchCB = new QCheckBox(i18n("Enable &launch feedback"));
+    generalTabLayout->addWidget(_launchCB, 4, 0, 1, 3 );
 
-    // setup icon button
-    _iconButton = new KIconButton(general_group);
+    // systray
+    _systrayCB = new QCheckBox(i18n("&Place in system tray"));
+    generalTabLayout->addWidget(_systrayCB, 5, 0, 1, 3 );
+
+    // KDE visibility
+    _onlyShowInKdeCB = new QCheckBox(i18n("Only show in KDE"));
+    generalTabLayout->addWidget(_onlyShowInKdeCB, 6, 0, 1, 3 );
+
+    // hidden entry
+    _hiddenEntryCB = new QCheckBox(i18n("Hidden entry"));
+    _hiddenEntryCB->hide();
+    generalTabLayout->addWidget(_hiddenEntryCB, 7, 0, 1, 3 );
+
+    // icon
+    _iconButton = new KIconButton();
     _iconButton->setFixedSize(56,56);
     _iconButton->setIconSize(32);
-    connect(_iconButton, SIGNAL(iconChanged(QString)), SLOT(slotChanged()));
-    grid->addWidget(_iconButton, 0, 2, 2, 1);
-    grid->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding), 8, 0, 1, 3);
+    generalTabLayout->addWidget(_iconButton, 0, 2, 2, 1);
+    generalTabLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding), 8, 0, 1, 3);
 
-    // add the general group to the main layout
-    addTab(general_group, i18n("General"));
+    // add the general group
+    addTab(generalTab, i18n("General"));
+}
 
-    QWidget *advanced = new QWidget();
-    QVBoxLayout *advancedLayout = new QVBoxLayout(advanced);
+void BasicTab::initAdvancedTab() {
+    // advanced tab
+    QWidget *advancedTab = new QWidget();
+    QVBoxLayout *advancedTabLayout = new QVBoxLayout(advancedTab);
 
-    // path group
-    _path_group = new QGroupBox(this);
-    QHBoxLayout *hboxLayout1 = new QHBoxLayout(_path_group);
-    hboxLayout1->setSpacing(KDialog::spacingHint());
-    hboxLayout1->setMargin(KDialog::marginHint());
-
-    _pathLabel = new QLabel(i18n("&Work path:"), _path_group);
-    hboxLayout1->addWidget(_pathLabel);
-    _pathEdit = new KUrlRequester(_path_group);
-    hboxLayout1->addWidget(_pathEdit);
+    // work path
+    _workPathGroup = new QGroupBox();
+    QHBoxLayout *workPathGroupLayout = new QHBoxLayout(_workPathGroup);
+    workPathGroupLayout->setSpacing(KDialog::spacingHint());
+    workPathGroupLayout->setMargin(KDialog::marginHint());
+    _pathLabel = new QLabel(i18n("&Work path:"));
+    workPathGroupLayout->addWidget(_pathLabel);
+    _pathEdit = new KUrlRequester();
     _pathEdit->setMode(KFile::Directory | KFile::LocalOnly);
     _pathEdit->lineEdit()->setAcceptDrops(false);
-
     _pathLabel->setBuddy(_pathEdit);
+    workPathGroupLayout->addWidget(_pathEdit);
+    advancedTabLayout->addWidget(_workPathGroup);
 
-    connect(_pathEdit, SIGNAL(textChanged(QString)),
-            SLOT(slotChanged()));
-    advancedLayout->addWidget(_path_group);
+    // terminal CB
+    _terminalGroup = new QGroupBox();
+    QVBoxLayout *terminalGroupLayout = new QVBoxLayout(_terminalGroup);
+    terminalGroupLayout->setMargin(KDialog::marginHint());
+    terminalGroupLayout->setSpacing(KDialog::spacingHint());
+    _terminalCB = new QCheckBox(i18n("Run in term&inal"));
+    terminalGroupLayout->addWidget(_terminalCB);
+    // terminal options
+    QWidget *terminalOptionsGroup = new QWidget();
+    QHBoxLayout *terminalOptionsGroupLayout = new QHBoxLayout(terminalOptionsGroup);
+    terminalOptionsGroupLayout->setSpacing(KDialog::spacingHint());
+    _terminalOptionsLabel = new QLabel(i18n("Terminal &options:"));
+    terminalOptionsGroupLayout->addWidget(_terminalOptionsLabel);
+    _terminalOptionsEdit = new KLineEdit();
+    _terminalOptionsEdit->setAcceptDrops(false);
+    _terminalOptionsEdit->setEnabled(false);
+    _terminalOptionsLabel->setBuddy(_terminalOptionsEdit);
+    terminalOptionsGroupLayout->addWidget(_terminalOptionsEdit);
+    terminalGroupLayout->addWidget(terminalOptionsGroup);
+    advancedTabLayout->addWidget(_terminalGroup);
 
-    // terminal group
-    _term_group = new QGroupBox(this);
-    QVBoxLayout *vbox = new QVBoxLayout(_term_group);
-    vbox->setMargin(KDialog::marginHint());
-    vbox->setSpacing(KDialog::spacingHint());
+    // user name CB
+    _userGroup = new QGroupBox();
+    QVBoxLayout *userGroupLayout = new QVBoxLayout(_userGroup);
+    userGroupLayout->setMargin(KDialog::marginHint());
+    userGroupLayout->setSpacing(KDialog::spacingHint());
+    _userCB = new QCheckBox(i18n("&Run as a different user"));
+    userGroupLayout->addWidget(_userCB);
+    // user name
+    QWidget *userNameGroup = new QWidget();
+    QHBoxLayout *userNameGroupLayout = new QHBoxLayout(userNameGroup);
+    userNameGroupLayout->setSpacing(KDialog::spacingHint());
+    _userNameLabel = new QLabel(i18n("&Username:"));
+    userNameGroupLayout->addWidget(_userNameLabel);
+    _userNameEdit = new KLineEdit();
+    _userNameEdit->setAcceptDrops(false);
+    _userNameEdit->setEnabled(false);
+    _userNameLabel->setBuddy(_userNameEdit);
+    userNameGroupLayout->addWidget(_userNameEdit);
+    userGroupLayout->addWidget(userNameGroup);
+    advancedTabLayout->addWidget(_userGroup);
 
-    _terminalCB = new QCheckBox(i18n("Run in term&inal"), _term_group);
+    // key binding
+    _keyBindingGroup = new QGroupBox();
+    QHBoxLayout *keyBindingGroupLayout = new QHBoxLayout(_keyBindingGroup);
+    keyBindingGroupLayout->setMargin(KDialog::marginHint() );
+    keyBindingGroupLayout->setSpacing(KDialog::spacingHint());
+    _keyBindingLabel = new QLabel(i18n("Current shortcut &key:"));
+    keyBindingGroupLayout->addWidget(_keyBindingLabel);
+    _keyBindingEdit = new KKeySequenceWidget();
+    _keyBindingEdit->setMultiKeyShortcutsAllowed(false);
+    _keyBindingLabel->setBuddy(_keyBindingEdit);
+    keyBindingGroupLayout->addWidget(_keyBindingEdit);
+    advancedTabLayout->addWidget(_keyBindingGroup);
+
+    // push components to the top
+    advancedTabLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding));
+    // add the general group
+    addTab(advancedTab, i18n("Advanced"));
+}
+
+void BasicTab::initConnections() {
+    // general tab's components
+    connect(_nameEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
+    connect(_descriptionEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
+    connect(_commentEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
+    connect(_execEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
+    connect(_execEdit, SIGNAL(urlSelected(KUrl)), SLOT(slotExecSelected()));
+    connect(_launchCB, SIGNAL(clicked()), SLOT(launchcb_clicked()));
+    connect(_systrayCB, SIGNAL(clicked()), SLOT(systraycb_clicked()));
+    connect(_onlyShowInKdeCB, SIGNAL(clicked()), SLOT(onlyshowcb_clicked()));
+    connect(_hiddenEntryCB, SIGNAL(clicked()), SLOT(hiddenentrycb_clicked()));
+    connect(_iconButton, SIGNAL(iconChanged(QString)), SLOT(slotChanged()));
+
+    // advanced tab's components
+    connect(_pathEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
     connect(_terminalCB, SIGNAL(clicked()), SLOT(termcb_clicked()));
-    vbox->addWidget(_terminalCB);
-
-    QWidget *hbox = new QWidget(_term_group);
-    QHBoxLayout *hboxLayout2 = new QHBoxLayout(hbox);
-    hbox->setLayout(hboxLayout2);
-    hboxLayout2->setSpacing(KDialog::spacingHint());
-    _termOptLabel = new QLabel(i18n("Terminal &options:"), hbox);
-    hboxLayout2->addWidget(_termOptLabel);
-    _termOptEdit = new KLineEdit(hbox);
-    hboxLayout2->addWidget(_termOptEdit);
-    _termOptEdit->setAcceptDrops(false);
-    _termOptLabel->setBuddy(_termOptEdit);
-
-    connect(_termOptEdit, SIGNAL(textChanged(QString)),
-            SLOT(slotChanged()));
-    vbox->addWidget(hbox);
-    advancedLayout->addWidget(_term_group);
-
-    _termOptEdit->setEnabled(false);
-
-    // uid group
-    _uid_group = new QGroupBox(this);
-    vbox = new QVBoxLayout(_uid_group);
-    vbox->setMargin(KDialog::marginHint());
-    vbox->setSpacing(KDialog::spacingHint());
-
-    _uidCB = new QCheckBox(i18n("&Run as a different user"), _uid_group);
-    connect(_uidCB, SIGNAL(clicked()), SLOT(uidcb_clicked()));
-    vbox->addWidget(_uidCB);
-
-    hbox = new QWidget(_uid_group);
-    QHBoxLayout *hboxLayout3 = new QHBoxLayout(hbox);
-    hbox->setLayout(hboxLayout3);
-    hboxLayout3->setSpacing(KDialog::spacingHint());
-    _uidLabel = new QLabel(i18n("&Username:"), hbox);
-    hboxLayout3->addWidget(_uidLabel);
-    _uidEdit = new KLineEdit(hbox);
-    hboxLayout3->addWidget(_uidEdit);
-    _uidEdit->setAcceptDrops(false);
-    _uidLabel->setBuddy(_uidEdit);
-
-    connect(_uidEdit, SIGNAL(textChanged(QString)),
-            SLOT(slotChanged()));
-    vbox->addWidget(hbox);
-    advancedLayout->addWidget(_uid_group);
-
-    _uidEdit->setEnabled(false);
-
-    // key binding group
-    general_group_keybind = new QGroupBox(this);
-    QHBoxLayout *keybindLayout = new QHBoxLayout(general_group_keybind);
-    keybindLayout->setMargin( KDialog::marginHint() );
-    keybindLayout->setSpacing( KDialog::spacingHint());
-
-    _keyEdit = new KKeySequenceWidget(general_group_keybind);
-    _keyEdit->setMultiKeyShortcutsAllowed(false);
-    QLabel *l = new QLabel( i18n("Current shortcut &key:"), general_group_keybind);
-    l->setBuddy( _keyEdit );
-    keybindLayout->addWidget(l);
-    connect( _keyEdit, SIGNAL(keySequenceChanged(QKeySequence)),
-             this, SLOT(slotCapturedKeySequence(QKeySequence)));
-    keybindLayout->addWidget(_keyEdit);
-    advancedLayout->addWidget( general_group_keybind );
-
-    advancedLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding));
-
-    addTab(advanced, i18n("Advanced"));
-#ifndef Q_WS_WIN
-    if (!KHotKeys::present())
-        general_group_keybind->hide();
-#endif
-    slotDisableAction();
+    connect(_terminalOptionsEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
+    connect(_userCB, SIGNAL(clicked()), SLOT(uidcb_clicked()));
+    connect(_userNameEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
+    connect(_keyBindingEdit, SIGNAL(keySequenceChanged(QKeySequence)), this, SLOT(slotCapturedKeySequence(QKeySequence)));
 }
 
 void BasicTab::slotDisableAction()
@@ -257,12 +260,12 @@ void BasicTab::slotDisableAction()
     _descriptionLabel->setEnabled(false);
     _commentLabel->setEnabled(false);
     _execLabel->setEnabled(false);
-    _path_group->setEnabled(false);
-    _term_group->setEnabled(false);
-    _uid_group->setEnabled(false);
+    _workPathGroup->setEnabled(false);
+    _terminalGroup->setEnabled(false);
+    _userGroup->setEnabled(false);
     _iconButton->setEnabled(false);
     // key binding part
-    general_group_keybind->setEnabled( false );
+    _keyBindingGroup->setEnabled( false );
 }
 
 void BasicTab::enableWidgets(bool isDF, bool isDeleted)
@@ -282,16 +285,16 @@ void BasicTab::enableWidgets(bool isDF, bool isDeleted)
     _commentLabel->setEnabled(!isDeleted);
     _execLabel->setEnabled(isDF && !isDeleted);
 
-    _path_group->setEnabled(isDF && !isDeleted);
-    _term_group->setEnabled(isDF && !isDeleted);
-    _uid_group->setEnabled(isDF && !isDeleted);
-    general_group_keybind->setEnabled( isDF && !isDeleted );
+    _workPathGroup->setEnabled(isDF && !isDeleted);
+    _terminalGroup->setEnabled(isDF && !isDeleted);
+    _userGroup->setEnabled(isDF && !isDeleted);
+    _keyBindingGroup->setEnabled( isDF && !isDeleted );
 
-    _termOptEdit->setEnabled(isDF && !isDeleted && _terminalCB->isChecked());
-    _termOptLabel->setEnabled(isDF && !isDeleted && _terminalCB->isChecked());
+    _terminalOptionsEdit->setEnabled(isDF && !isDeleted && _terminalCB->isChecked());
+    _terminalOptionsLabel->setEnabled(isDF && !isDeleted && _terminalCB->isChecked());
 
-    _uidEdit->setEnabled(isDF && !isDeleted && _uidCB->isChecked());
-    _uidLabel->setEnabled(isDF && !isDeleted && _uidCB->isChecked());
+    _userNameEdit->setEnabled(isDF && !isDeleted && _userCB->isChecked());
+    _userNameLabel->setEnabled(isDF && !isDeleted && _userCB->isChecked());
 }
 
 void BasicTab::setFolderInfo(MenuFolderInfo *folderInfo)
@@ -310,15 +313,15 @@ void BasicTab::setFolderInfo(MenuFolderInfo *folderInfo)
     // clean all disabled fields and return
     _execEdit->lineEdit()->clear();
     _pathEdit->lineEdit()->clear();
-    _termOptEdit->clear();
-    _uidEdit->clear();
+    _terminalOptionsEdit->clear();
+    _userNameEdit->clear();
     _launchCB->setChecked(false);
     _systrayCB->setChecked(false);
     _terminalCB->setChecked(false);
     _onlyShowInKdeCB->setChecked( false );
     _hiddenEntryCB->setChecked( false );
-    _uidCB->setChecked(false);
-    _keyEdit->clearKeySequence();
+    _userCB->setChecked(false);
+    _keyBindingEdit->clearKeySequence();
 
     enableWidgets(false, folderInfo->hidden);
     blockSignals(false);
@@ -338,7 +341,7 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
        _iconButton->setIcon( QString() );
 
        // key binding part
-       _keyEdit->clearKeySequence();
+       _keyBindingEdit->clearKeySequence();
 
        _execEdit->lineEdit()->clear();
        _systrayCB->setChecked(false);
@@ -346,12 +349,12 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
        _hiddenEntryCB->setChecked( false );
 
        _pathEdit->lineEdit()->clear();
-       _termOptEdit->clear();
-       _uidEdit->clear();
+       _terminalOptionsEdit->clear();
+       _userNameEdit->clear();
 
        _launchCB->setChecked(false);
        _terminalCB->setChecked(false);
-       _uidCB->setChecked(false);
+       _userCB->setChecked(false);
        enableWidgets(true, true);
        blockSignals(false);
        return;
@@ -371,9 +374,9 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
     if( KHotKeys::present())
     {
         if ( !entryInfo->shortcut().isEmpty() )
-            _keyEdit->setKeySequence( entryInfo->shortcut().primary() );
+            _keyBindingEdit->setKeySequence( entryInfo->shortcut().primary() );
         else
-            _keyEdit->clearKeySequence();
+            _keyBindingEdit->clearKeySequence();
     }
 #endif
     QString temp = df->desktopGroup().readEntry("Exec");
@@ -389,8 +392,8 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
     }
 
     _pathEdit->lineEdit()->setText(df->readPath());
-    _termOptEdit->setText(df->desktopGroup().readEntry("TerminalOptions"));
-    _uidEdit->setText(df->desktopGroup().readEntry("X-KDE-Username"));
+    _terminalOptionsEdit->setText(df->desktopGroup().readEntry("TerminalOptions"));
+    _userNameEdit->setText(df->desktopGroup().readEntry("X-KDE-Username"));
 
     if( df->desktopGroup().hasKey( "StartupNotify" ))
         _launchCB->setChecked(df->desktopGroup().readEntry("StartupNotify", true));
@@ -409,7 +412,7 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
     else
         _terminalCB->setChecked(false);
 
-    _uidCB->setChecked(df->desktopGroup().readEntry("X-KDE-SubstituteUID", false));
+    _userCB->setChecked(df->desktopGroup().readEntry("X-KDE-SubstituteUID", false));
 
     enableWidgets(true, entryInfo->hidden);
     blockSignals(false);
@@ -439,9 +442,9 @@ void BasicTab::apply()
         else
             dg.writeEntry("Terminal", 0);
 
-        dg.writeEntry("TerminalOptions", _termOptEdit->text());
-        dg.writeEntry("X-KDE-SubstituteUID", _uidCB->isChecked());
-        dg.writeEntry("X-KDE-Username", _uidEdit->text());
+        dg.writeEntry("TerminalOptions", _terminalOptionsEdit->text());
+        dg.writeEntry("X-KDE-SubstituteUID", _userCB->isChecked());
+        dg.writeEntry("X-KDE-Username", _userNameEdit->text());
         dg.writeEntry("StartupNotify", _launchCB->isChecked());
         dg.writeEntry( "NoDisplay", _hiddenEntryCB->isChecked() );
 
@@ -501,15 +504,15 @@ void BasicTab::hiddenentrycb_clicked()
 
 void BasicTab::termcb_clicked()
 {
-    _termOptEdit->setEnabled(_terminalCB->isChecked());
-    _termOptLabel->setEnabled(_terminalCB->isChecked());
+    _terminalOptionsEdit->setEnabled(_terminalCB->isChecked());
+    _terminalOptionsLabel->setEnabled(_terminalCB->isChecked());
     slotChanged();
 }
 
 void BasicTab::uidcb_clicked()
 {
-    _uidEdit->setEnabled(_uidCB->isChecked());
-    _uidLabel->setEnabled(_uidCB->isChecked());
+    _userNameEdit->setEnabled(_userCB->isChecked());
+    _userNameLabel->setEnabled(_userCB->isChecked());
     slotChanged();
 }
 
@@ -533,7 +536,7 @@ void BasicTab::slotCapturedKeySequence(const QKeySequence& seq)
     else
     {
        // We will not assign the shortcut so reset the visible key sequence
-       _keyEdit->setKeySequence(QKeySequence());
+       _keyBindingEdit->setKeySequence(QKeySequence());
     }
 #endif
     if (_menuEntryInfo)
