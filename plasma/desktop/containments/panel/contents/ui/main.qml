@@ -41,19 +41,11 @@ DragDrop.DropArea {
     property Item dragOverlay
 
     onDragEnter: {
-        var child = currentLayout.childAt(event.x, event.y);
-        dndSpacer.intendedPos = child && child.intendedPos ? child.intendedPos : currentLayout.children.length-1;
-        LayoutManager.insertBefore(child, dndSpacer);
+        LayoutManager.insertAtCoordinates(dndSpacer, event.x, event.y)
     }
 
     onDragMove: {
-        var child = currentLayout.childAt(event.x, event.y);
-        if (child === dndSpacer) {
-            return;
-        }
-        dndSpacer.parent = root;
-        dndSpacer.intendedPos = child && child.intendedPos ? child.intendedPos : currentLayout.children.length-1;
-        LayoutManager.insertBefore(child, dndSpacer);
+        LayoutManager.insertAtCoordinates(dndSpacer, event.x, event.y)
     }
     
     onDragLeave: {
@@ -79,22 +71,26 @@ DragDrop.DropArea {
             applet.anchors.fill = container;
             applet.visible = true;
             container.visible = true;
-            container.intendedPos = LayoutManager.order[applet.id] ? LayoutManager.order[applet.id] : -1;
+            container.intendedPos = LayoutManager.order[applet.id] !== undefined ? LayoutManager.order[applet.id] : -1;
+            //is not in the saved positions, try with applet coordinates
             if (container.intendedPos < 0) {
-                var child = currentLayout.childAt(appletX, appletY)
-                container.intendedPos = child && child.intendedPos ? child.intendedPos : currentLayout.children.length-1;
-            }
-            print("We want to insert the new applet in position " + container.intendedPos)
+                var index = LayoutManager.insertAtCoordinates(container, appletX, appletY);
+                print("Applet " + applet.id + " " + applet.title + " was added in position " + index)
+                container.intendedPos = index;
+            } else {
+                print("We want to insert the new applet " + applet.id + " " + applet.title + " in position " + container.intendedPos)
 
-            var position = 0;
-            for (var i = 0; i < currentLayout.children.length; ++i) {
-                if (currentLayout.children[i].intendedPos !== undefined &&
-                    currentLayout.children[i].intendedPos <= container.intendedPos) {
-                    position = i+1;
+                var position = 0;
+                for (var i = 0; i < currentLayout.children.length; ++i) {
+                    if (currentLayout.children[i].intendedPos !== undefined &&
+                        container.intendedPos <= currentLayout.children[i].intendedPos) {
+                        LayoutManager.insertBefore(currentLayout.children[i], container);
+                        return;
+                    }
                 }
+                //if not found, enqueue
+                LayoutManager.insertBefore(lastSpacer, container);
             }
-
-            LayoutManager.insertAt(container, position);
         }
 
         onAppletRemoved: {
@@ -172,11 +168,13 @@ DragDrop.DropArea {
                 anchors.centerIn: parent
             }
             onXChanged: {
+                //FIXME: causes problems in dnd
+                return
                 if (parent !== currentLayout) {
                     return;
                 }
                 translation.x = oldX - x
-                translation.y = oldX - y
+                translation.y = oldY - y
                 translAnim.running = true
                 oldX = x
                 oldY = y
@@ -206,7 +204,6 @@ DragDrop.DropArea {
 
     Item {
         id: dndSpacer
-        property int intendedPos
         width: 50
         height: 50
     }

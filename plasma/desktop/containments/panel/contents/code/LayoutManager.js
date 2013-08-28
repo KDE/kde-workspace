@@ -58,7 +58,8 @@ function insertBefore(item1, item2) {
 
     var child;
 
-    for (var i = layout.children.length - 1; i >= 0; --i) {
+    var i;
+    for (i = layout.children.length - 1; i >= 0; --i) {
         child = layout.children[i];
         removed.push(child);
         child.parent = root;
@@ -73,6 +74,7 @@ function insertBefore(item1, item2) {
     for (var j = removed.length - 1; j >= 0; --j) {
         removed[j].parent = layout;
     }
+    return i;
 }
 
 function insertAfter(item1, item2) {
@@ -83,7 +85,8 @@ function insertAfter(item1, item2) {
 
     var child;
 
-    for (var i = layout.children.length - 1; i >= 0; --i) {
+    var i;
+    for (i = layout.children.length - 1; i >= 0; --i) {
         child = layout.children[i];
         if (child === item1) {
             break;
@@ -98,16 +101,14 @@ function insertAfter(item1, item2) {
     for (var j = removed.length - 1; j >= 0; --j) {
         removed[j].parent = layout;
     }
+    return i;
 }
 
-function insertAt(item, position) {
+function insertAtIndex(item, position) {
     var removedItems = new Array();
 
-    //TODO: check if it's actually a spacer
-    var spacer = layout.children[layout.children.length - 1];
-    spacer.parent = root;
     for (var i = position; i < layout.children.length; ++i) {
-        var child = layout.children[0];
+        var child = layout.children[position];
         child.parent = root;
         removedItems.push(child);
     }
@@ -116,5 +117,21 @@ function insertAt(item, position) {
     for (var i in removedItems) {
         removedItems[i].parent = layout;
     }
-    spacer.parent = layout;
+}
+
+function insertAtCoordinates(item, x, y) {
+    var child = layout.childAt(x, y);
+
+    if (!child || child === item) {
+        return -1;
+    }
+    item.parent = root;
+
+    //PlasmaCore.Types.Vertical = 3
+    if ((plasmoid.formFactor === 3 && y < child.y + child.height/2) ||
+        (plasmoid.formFactor !== 3 && x < child.x + child.width/2)) {
+        return insertBefore(child, item);
+    } else {
+        return insertAfter(child, item);
+    }
 }
