@@ -179,8 +179,7 @@ DragDrop.DropArea {
         Layout.fillHeight: true
     }
 
-    Rectangle {
-        color: "red"
+    Item {
         id: dndSpacer
         property int intendedPos
         width: 50
