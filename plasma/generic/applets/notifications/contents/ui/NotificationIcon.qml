@@ -165,7 +165,7 @@ Item {
                 }
                 PropertyChanges {
                     target: plasmoid
-                    status: Plasma.Types.PassiveStatus
+                    status: PlasmaCore.Types.PassiveStatus
                 }
             },
             State {
