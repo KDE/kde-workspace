@@ -19,7 +19,7 @@
 
 #include "keystate.h"
 
-
+#include <klocalizedstring.h>
 #include <kmodifierkeyinfo.h>
 #include "keyservice.h"
 
@@ -42,6 +42,7 @@ KeyStatesEngine::KeyStatesEngine(QObject *parent, const QVariantList &args)
     m_buttons.insert(Qt::MidButton, I18N_NOOP("Middle Button"));
     m_buttons.insert(Qt::XButton1, I18N_NOOP("First X Button"));
     m_buttons.insert(Qt::XButton2, I18N_NOOP("Second X Button"));
+    init();
 }
 
 KeyStatesEngine::~KeyStatesEngine()
@@ -138,6 +139,6 @@ void KeyStatesEngine::keyRemoved(Qt::Key key)
     }
 }
 
-K_EXPORT_PLASMA_DATAENGINE(keystate, KeyStatesEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(keystate, KeyStatesEngine, "plasma-dataengine-keystate.json")
 
 #include "keystate.moc"
