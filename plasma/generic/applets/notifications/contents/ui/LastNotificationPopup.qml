@@ -98,8 +98,8 @@ PlasmaCore.Dialog {
         id: mainItem
         width: maximumWidth
         height: maximumHeight
-        property int maximumWidth: theme.defaultFont.mSize.width * 35
-        property int maximumHeight: theme.defaultFont.mSize.width * 10
+        property int maximumWidth: theme.mSize(theme.defaultFont).width * 35
+        property int maximumHeight: theme.mSize(theme.defaultFont).width * 10
         property int minimumWidth: maximumWidth
         property int minimumHeight: maximumHeight
 
@@ -258,8 +258,8 @@ PlasmaCore.Dialog {
                         model: actions
                         PlasmaComponents.Button {
                             text: model.text
-                            width: theme.defaultFont.mSize.width * 8
-                            height: theme.defaultFont.mSize.width * 2
+                            width: theme.mSize(theme.defaultFont).width * 8
+                            height: theme.mSize(theme.defaultFont).width * 2
                             onPressedChanged: {
                                 if (pressed) {
                                     mainItem.buttonPressed = true
