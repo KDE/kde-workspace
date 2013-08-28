@@ -155,6 +155,9 @@ DragDrop.DropArea {
             Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : root.height) : root.width)
             Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : root.width) : root.height)
 
+            property int oldX: x
+            property int oldY: y
+
             property Item applet
             onAppletChanged: {
                 if (!applet) {
@@ -168,6 +171,28 @@ DragDrop.DropArea {
                 running: visible
                 anchors.centerIn: parent
             }
+            onXChanged: {
+                if (parent !== currentLayout) {
+                    return;
+                }
+                translation.x = oldX - x
+                translation.y = oldX - y
+                translAnim.running = true
+                oldX = x
+                oldY = y
+            }
+            transform: Translate {
+                id: translation
+            }
+            NumberAnimation {
+                id: translAnim
+                duration: 250
+                easing.type: Easing.InOutQuad
+                target: translation
+                properties: "x,y"
+                to: 0
+            }
+            
         }
     }
 
