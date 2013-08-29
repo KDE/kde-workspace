@@ -1,0 +1,18 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Digital_clock
+Icon=preferences-system-time
+Type=Service
+X-KDE-ParentApp=
+X-KDE-PluginInfo-Author=Heena
+X-KDE-PluginInfo-Email=heena393@gmail.com
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-Name=Digital_clock
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=plasma.kde.org
+X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
+X-Plasma-API=declarativeappletscript
+X-Plasma-DefaultSize=500,500
+X-Plasma-MainScript=ui/main.qml
+X-Plasma-RemoteLocation=
+X-KDE-PluginInfo-Category=
