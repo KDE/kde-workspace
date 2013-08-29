@@ -242,14 +242,6 @@ include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES} ${K
 
 add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 
-message("FIXME: plasma_add_plugin() macro is defined temporary here, remove once everybody has updated plasma-framework")
-macro(plasma_add_plugin plugin)
-    set(plugin_sources ${ARGN} )
-    add_library(${plugin} MODULE ${plugin_sources} )
-    set_target_properties(${plugin} PROPERTIES PREFIX "")
-endmacro()
-
-
 # libs
 # add_subdirectory(cmake)
 add_subdirectory(libs)
