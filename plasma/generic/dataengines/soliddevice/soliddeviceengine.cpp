@@ -22,6 +22,7 @@
 #include <QMetaEnum>
 #include <QDateTime>
 #include <Solid/GenericInterface>
+#include <klocalizedstring.h>
 
 #include <QDebug>
 #include <KDiskFreeSpaceInfo>
@@ -174,7 +175,7 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
             }
             if (!device.is<Solid::OpticalDisc>()) {
                 setData(name, I18N_NOOP("Free Space"), freeDiskVar );
-                setData(name, I18N_NOOP("Free Space Text"), KGlobal::locale()->formatByteSize(freeDisk));
+                setData(name, I18N_NOOP("Free Space Text"), KLocale::global()->formatByteSize(freeDisk));
             }
         }
 
@@ -578,7 +579,7 @@ void SolidDeviceEngine::deviceAdded(const QString& udi)
     }
     else if (device.is<Solid::StorageVolume>()) {
         // update the volume in case of 2-stage devices
-        if (m_devicemap.contains(udi) && query(udi).value(I18N_NOOP("Size")).toULongLong() == 0) {
+        if (m_devicemap.contains(udi) && containerForSource(udi)->data().value(I18N_NOOP("Size")).toULongLong() == 0) {
             Solid::GenericInterface * iface = device.as<Solid::GenericInterface>();
             if (iface) {
                 iface->setProperty("udi", udi);
@@ -678,7 +679,7 @@ bool SolidDeviceEngine::updateFreeSpace(const QString &udi)
         freeSpaceVar.setValue( freeSpace );
     }
     setData(udi, I18N_NOOP("Free Space"), freeSpaceVar );
-    setData(udi, I18N_NOOP("Free Space Text"), KGlobal::locale()->formatByteSize(freeSpace));
+    setData(udi, I18N_NOOP("Free Space Text"), KLocale::global()->formatByteSize(freeSpace));
     return true;
 }
 
@@ -801,6 +802,6 @@ void SolidDeviceEngine::deviceChanged(const QString& udi, const QString &propert
     updateSourceEvent(udi);
 }
 
-K_EXPORT_PLASMA_DATAENGINE(soliddevice, SolidDeviceEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(soliddevice, SolidDeviceEngine, "plasma-dataengine-soliddevice.json")
 
 #include "soliddeviceengine.moc"

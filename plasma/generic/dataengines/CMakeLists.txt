@@ -17,7 +17,7 @@ add_subdirectory(notifications)
 #add_subdirectory(nowplaying)
 add_subdirectory(places)
 add_subdirectory(powermanagement)
-#add_subdirectory(soliddevice)
+add_subdirectory(soliddevice)
 
 add_subdirectory(time)
 #add_subdirectory(weather)
