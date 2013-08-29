@@ -19,6 +19,7 @@
 #include "jobaction.h"
 #include "kuiserverengine.h"
 
+#include <klocalizedstring.h>
 #include <QDebug>
 
 void JobAction::start()

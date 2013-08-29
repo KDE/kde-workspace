@@ -24,6 +24,8 @@
 #include <QDBusConnection>
 
 #include <KJob>
+#include <KLocale>
+#include <klocalizedstring.h>
 
 #include <Plasma/DataEngine>
 
@@ -229,7 +231,7 @@ void JobView::setSpeed(qlonglong bytesPerSecond)
 
 QString JobView::speedString() const
 {
-    return i18nc("Byes per second", "%1/s", KGlobal::locale()->formatByteSize(m_speed));
+    return i18nc("Byes per second", "%1/s", KLocale::global()->formatByteSize(m_speed));
 }
 
 void JobView::setInfoMessage(const QString &infoMessage)
@@ -320,6 +322,7 @@ KuiserverEngine::KuiserverEngine(QObject* parent, const QVariantList& args)
     m_pendingJobsTimer.setSingleShot(true);
     m_pendingJobsTimer.setInterval(500);
     connect(&m_pendingJobsTimer, SIGNAL(timeout()), this, SLOT(processPendingJobs()));
+    init();
 }
 
 KuiserverEngine::~KuiserverEngine()
@@ -375,6 +378,6 @@ void KuiserverEngine::init()
     interface.asyncCall(QLatin1String("registerService"), QDBusConnection::sessionBus().baseService(), "/DataEngine/applicationjobs/JobWatcher");
 }
 
-K_EXPORT_PLASMA_DATAENGINE(kuiserver, KuiserverEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(kuiserver, KuiserverEngine, "plasma-dataengine-applicationjobs.json")
 
 #include "kuiserverengine.moc"

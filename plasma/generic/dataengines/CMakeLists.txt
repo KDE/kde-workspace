@@ -1,5 +1,5 @@
 
-#add_subdirectory(applicationjobs)
+add_subdirectory(applicationjobs)
 #add_subdirectory(activities)
 add_subdirectory(apps)
 add_subdirectory(devicenotifications)
