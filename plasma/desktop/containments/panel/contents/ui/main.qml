@@ -66,6 +66,9 @@ DragDrop.DropArea {
             var container = appletContainerComponent.createObject(root)
             print("Applet added in test panel: " + applet + " at: " + appletX + ", " + appletY);
 
+            if (applet.fillWidth) {
+                lastSpacer.parent = root;
+            }
             applet.parent = container;
             container.applet = applet;
             applet.anchors.fill = container;
@@ -94,6 +97,17 @@ DragDrop.DropArea {
         }
 
         onAppletRemoved: {
+            var flexibleFound = false;
+            for (var i = 0; i < currentLayout.children.length; ++i) {
+                if (currentLayout.children[i].applet.fillWidth) {
+                    flexibleFound = true;
+                    break
+                }
+            }
+            if (!flexibleFound) {
+                lastSpacer.parent = currentLayout;
+            }
+
             LayoutManager.save();
         }
 
@@ -148,8 +162,8 @@ DragDrop.DropArea {
             Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.implicitWidth > 0 ? applet.implicitWidth : root.height) : root.width)
             Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.implicitHeight > 0 ? applet.implicitHeight : root.width) : root.height)
 
-            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : root.height) : root.width)
-            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : root.width) : root.height)
+            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : (Layout.fillWidth ? -1 : root.height)) : (Layout.fillHeight ? -1 : root.width))
+            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : (Layout.fillHeight ? -1 : root.width)) : (Layout.fillWidth ? -1 : root.height))
 
             property int oldX: x
             property int oldY: y
@@ -190,7 +204,6 @@ DragDrop.DropArea {
                 properties: "x,y"
                 to: 0
             }
-            
         }
     }
 
