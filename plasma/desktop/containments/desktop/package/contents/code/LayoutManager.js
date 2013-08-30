@@ -235,7 +235,8 @@ function positionItem(item)
         }
         backX -= cellSize.width
         if (backX < 0) {
-            backX = resultsFlow.width - item.width
+            print("RUN Warning: resultsFlow.width not taken into account due to crash"); // FIXME reenable
+            //backX = resultsFlow.width - item.width
             backY -= cellSize.height
         }
     }
@@ -246,10 +247,10 @@ function positionItem(item)
                           Math.round(Math.min(avail.height, item.height)/cellSize.height)*cellSize.height)
 
     setSpaceAvailable(x, y, width, height, false)
-    item.x = x
-    item.y = y
     //resultsFlow.height = Math.max(resultsFlow.height, y+cellSize.height)
 
+    item.x = x
+    item.y = y
     item.width = width
     item.height = height
 

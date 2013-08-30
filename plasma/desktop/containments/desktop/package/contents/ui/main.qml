@@ -101,7 +101,6 @@ Item {
             running: false
             interval: 100
             onTriggered: {
-                //return; // FIXME
                 LayoutManager.resetPositions()
                 for (var i=0; i<resultsFlow.children.length; ++i) {
                     var child = resultsFlow.children[i]
