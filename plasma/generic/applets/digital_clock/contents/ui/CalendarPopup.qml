@@ -27,7 +27,7 @@ Item {
     property date showDate: new Date()
   
     property alias calendarGrid:calendarGrid
-    property real cellWidth: root.width/7.5
+    property real cellWidth: root.width/7
     property real cellHeight: root.height/7.5
  
     property Item selectedItem
@@ -86,6 +86,7 @@ Item {
                     text: "<";
                     width: height;
                     anchors.left:parent.left
+                    anchors.rightMargin:20
                     onClicked: {
                         monthCalendar.previousMonth()
                     }
@@ -93,97 +94,28 @@ Item {
 
                 Components.ToolButton {
                     id: month
+                    anchors.left:monthright.right
                     anchors.right:monthYear.left
-                    text:monthCalendar.monthName
+                    anchors.leftMargin: 20
+                    Loader {
+                        id: menuLoader
+                    }
                     onClicked: {
-                        sectionScroll = sectionScrollComponent.createObject(month)
-                        sectionScroll.open()
-                    }
-                    Component {
-                        id: sectionScrollComponent
-                        Components.ContextMenu {
-                            id:sectionScroll
-                            visualParent:month
-                            Components.MenuItem {
-                                text:"January"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-01-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"February"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-02-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"March"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-03-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"April"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-04-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"May"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-05-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"June"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-06-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"July"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-07-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"August"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-08-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"September"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-09-01"
-                                } 
-                            }
-                            Components.MenuItem {
-                                text:"October"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-10-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"November"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-11-01"
-                                }
-                            }
-                            Components.MenuItem {
-                                text:"December"
-                                onClicked: {
-                                    monthCalendar.startDate="2013-12-01"
-                                }
-                            }
+                        if (menuLoader.source == "") {
+                            menuLoader.source = "MonthMenu.qml"
+                        } else {
+                            //menuLoader.source = ""
                         }
+                        menuLoader.item.open(0, height);
                     }
+                    text:monthCalendar.monthName
                 }
 
                 Components.ToolButton {
                     id: monthYear
                     text: monthCalendar.year
-                    anchors.centerIn: parent
+                    anchors.leftMargin: 20
+                    anchors.left : month.right
                     Components.ToolButton {
                         id: increase
                         text:"^"
@@ -204,6 +136,7 @@ Item {
                 }
 
                 Components.ToolButton {
+                    id: previous
                     flat: true;
                     text: ">";
                     width: height;
@@ -213,6 +146,7 @@ Item {
                     }
                 }
             }
+            
 
             DaysCalendar {
                 id: calendarGrid
@@ -225,15 +159,14 @@ Item {
                 }
             }
 
-            Row {
+            Item {
                 id: calendarToolbar
                 anchors {
                     left: parent.left
                     right: parent.right
+                    bottomMargin: 20
                     bottom: parent.bottom
-                    top:calendarGrid.top
                 }
-                spacing: 4
 
                 Components.ToolButton {
                     id: currentDate
@@ -257,7 +190,10 @@ Item {
                     text: date == "" ? Qt.formatDateTime ( new Date(), "d/M/yyyy" ) : date
                     width: calendarOperations.width/3
                     anchors {
-                        centerIn:parent
+                        leftMargin: 20
+                        rightMargin: 30
+                        left: currentDate.right
+                        right: weekField.left
                     }
                 }
 

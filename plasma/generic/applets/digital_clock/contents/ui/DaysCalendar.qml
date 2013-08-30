@@ -20,6 +20,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 /*Row {
+ 
     id: rootRow
 
     property alias days: days
