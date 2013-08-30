@@ -19,38 +19,55 @@
 
 #include "paste.h"
 
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneWheelEvent>
+#include <QGuiApplication>
+#include <QClipboard>
+#include <QMimeData>
 
+#include <Plasma/Containment>
+
+#include <QAction>
 #include <QDebug>
 
 Paste::Paste(QObject *parent, const QVariantList &args)
     : Plasma::ContainmentActions(parent, args)
 {
+    m_action = new QAction(this);
+    QObject::connect(m_action, &QAction::triggered, this, &Paste::doPaste);
 }
 
-void Paste::contextEvent(QEvent *event)
+QList<QAction*> Paste::contextualActions()
 {
-    QPointF scenePos;
-    QPoint screenPos;
-    switch (event->type()) {
-        case QEvent::GraphicsSceneMousePress:
-            event->accept();
-            return;
-        case QEvent::GraphicsSceneMouseRelease: {
-            QGraphicsSceneMouseEvent *e = static_cast<QGraphicsSceneMouseEvent*>(event);
-            scenePos = e->scenePos();
-            screenPos = e->screenPos();
-            break; }
-        case QEvent::GraphicsSceneWheel: {
-            QGraphicsSceneWheelEvent *e = static_cast<QGraphicsSceneWheelEvent*>(event);
-            scenePos = e->scenePos();
-            screenPos = e->screenPos();
-            break; }
-        default: //can't get the pos
-            return;
-    }
-    paste(scenePos, screenPos);
+    QList<QAction*> actions;
+    actions << m_action;
+
+    return actions;
 }
+
+void Paste::doPaste()
+{
+    qWarning() << "Paste at" << m_action->data();
+
+    if (!m_action->data().canConvert<QPoint>()) {
+        return;
+    }
+
+    QPoint pos = m_action->data().value<QPoint>();
+    Plasma::Containment *c = containment();
+    Q_ASSERT(c);
+
+    //get the actual graphic object of the containment
+    QObject *graphicObject = c->property("graphicObject").value<QObject *>();
+    if (!graphicObject) {
+        return;
+    }
+
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    QMimeData *mimeData = const_cast<QMimeData *>(clipboard->mimeData(QClipboard::Selection));
+    //TODO if that's not supported (ie non-linux) should we try clipboard instead of selection?
+
+    graphicObject->metaObject()->invokeMethod(graphicObject, "processMimeData", Qt::DirectConnection, Q_ARG( QMimeData *, mimeData), Q_ARG(int, pos.x()), Q_ARG(int, pos.y()));
+}
+
+K_EXPORT_PLASMA_CONTAINMENTACTIONS_WITH_JSON(paste, Paste, "plasma-containmentactions-paste.json")
 
 #include "paste.moc"
