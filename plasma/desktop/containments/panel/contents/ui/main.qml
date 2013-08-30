@@ -61,10 +61,8 @@ DragDrop.DropArea {
         target: plasmoid
 
         onAppletAdded: {
-            var appletX = applet.x;
-            var appletY = applet.y;
             var container = appletContainerComponent.createObject(root)
-            print("Applet added in test panel: " + applet + " at: " + appletX + ", " + appletY);
+            print("Applet added in test panel: " + applet + " at: " + x + ", " + y);
 
             if (applet.fillWidth) {
                 lastSpacer.parent = root;
@@ -77,9 +75,10 @@ DragDrop.DropArea {
             container.intendedPos = LayoutManager.order[applet.id] !== undefined ? LayoutManager.order[applet.id] : -1;
             //is not in the saved positions, try with applet coordinates
             if (container.intendedPos < 0) {
-                var index = LayoutManager.insertAtCoordinates(container, appletX, appletY);
+                var index = LayoutManager.insertAtCoordinates(container, x, y);
                 print("Applet " + applet.id + " " + applet.title + " was added in position " + index)
                 container.intendedPos = index;
+
             } else {
                 print("We want to insert the new applet " + applet.id + " " + applet.title + " in position " + container.intendedPos)
 
