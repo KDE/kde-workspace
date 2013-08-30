@@ -158,7 +158,8 @@ void KCMKeyboardWidget::uiChanged()
 	if( uiUpdating )
 		return;
 
-	keyboardConfig->showIndicator = uiWidget->showIndicatorChk->isChecked();
+	keyboardConfig->showTrayLayoutIndicator = uiWidget->showIndicatorChk->isChecked();
+	keyboardConfig->showCursorLayoutIndicator = uiWidget->showCursorIndicatorChk->isChecked();
 	keyboardConfig->showSingle = uiWidget->showSingleChk->isChecked();
 
 	keyboardConfig->configureLayouts = uiWidget->layoutsGroupBox->isChecked();
@@ -353,6 +354,7 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->layoutsGroupBox, SIGNAL(toggled(bool)), this, SLOT(configureLayoutsChanged()));
 
 	connect(uiWidget->showIndicatorChk, SIGNAL(clicked(bool)), this, SLOT(uiChanged()));
+	connect(uiWidget->showCursorIndicatorChk, SIGNAL(clicked(bool)), this, SLOT(uiChanged()));
 	connect(uiWidget->showIndicatorChk, SIGNAL(toggled(bool)), uiWidget->showSingleChk, SLOT(setEnabled(bool)));
 	connect(uiWidget->showFlagRadioBtn, SIGNAL(clicked(bool)), this, SLOT(uiChanged()));
 	connect(uiWidget->showLabelRadioBtn, SIGNAL(clicked(bool)), this, SLOT(uiChanged()));
@@ -646,7 +648,8 @@ void KCMKeyboardWidget::updateXkbOptionsUI()
 
 void KCMKeyboardWidget::updateLayoutsUI() {
 	uiWidget->layoutsGroupBox->setChecked(keyboardConfig->configureLayouts);
-	uiWidget->showIndicatorChk->setChecked(keyboardConfig->showIndicator);
+	uiWidget->showIndicatorChk->setChecked(keyboardConfig->showTrayLayoutIndicator);
+	uiWidget->showCursorIndicatorChk->setChecked(keyboardConfig->showCursorLayoutIndicator);
 	uiWidget->showSingleChk->setChecked(keyboardConfig->showSingle);
 	uiWidget->showFlagRadioBtn->setChecked(keyboardConfig->indicatorType == KeyboardConfig::SHOW_FLAG);
 	uiWidget->showLabelRadioBtn->setChecked(keyboardConfig->indicatorType == KeyboardConfig::SHOW_LABEL);

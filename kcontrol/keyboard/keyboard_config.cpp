@@ -70,9 +70,10 @@ void KeyboardConfig::setDefaults()
 //	stickySwitchingDepth = 2;
 
 	// display options
-	showIndicator = true;
-	indicatorType = SHOW_LABEL;
-	showSingle = false;
+	showCursorLayoutIndicator       = false;
+	showTrayLayoutIndicator         = true;
+	indicatorType           = SHOW_LABEL;
+	showSingle              = false;
 }
 
 static
@@ -119,7 +120,8 @@ void KeyboardConfig::load()
 	QString layoutMode = config.readEntry("SwitchMode", "Global");
 	switchingPolicy = static_cast<SwitchingPolicy>(findStringIndex(SWITCHING_POLICIES, layoutMode, SWITCH_POLICY_GLOBAL));
 
-	showIndicator = config.readEntry("ShowLayoutIndicator", true);
+	showTrayLayoutIndicator = config.readEntry("ShowLayoutIndicator", true);
+	showCursorLayoutIndicator = config.readEntry("ShowCursorLayoutIndicator", false);
 
 	bool showFlag = config.readEntry("ShowFlag", false);
 	bool showLabel = config.readEntry("ShowLabel", true);
@@ -177,8 +179,9 @@ void KeyboardConfig::save()
     config.writeEntry("LayoutLoopCount", layoutLoopCount);
 
 	config.writeEntry("SwitchMode", SWITCHING_POLICIES[switchingPolicy]);
-
-	config.writeEntry("ShowLayoutIndicator", showIndicator);
+	
+	config.writeEntry("ShowCursorLayoutIndicator", showCursorLayoutIndicator);
+	config.writeEntry("ShowLayoutIndicator", showTrayLayoutIndicator);
 	config.writeEntry("ShowFlag", indicatorType == SHOW_FLAG || indicatorType == SHOW_LABEL_ON_FLAG);
 	config.writeEntry("ShowLabel", indicatorType == SHOW_LABEL || indicatorType == SHOW_LABEL_ON_FLAG);
 	config.writeEntry("ShowSingle", showSingle);

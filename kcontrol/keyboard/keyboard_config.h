@@ -66,7 +66,8 @@ public:
 //	int stickySwitchingDepth;
 
 	// display options
-	bool showIndicator;
+	bool showTrayLayoutIndicator;
+	bool showCursorLayoutIndicator;
 	IndicatorType indicatorType;
 	bool showSingle;
 

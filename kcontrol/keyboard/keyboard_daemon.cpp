@@ -42,34 +42,7 @@
 #include "layouts_menu.h"
 
 
-/* Victor Polevoy GSOC 2013 */
-#include <klauncher_iface.h>
-#include <KLocale>
-#include <KToolInvocation>
-
-#include <kstandarddirs.h>
-
-#include <QImage>
-#include <QPainter>
-#include "flags.h"
-
-#include <xcursortheme.h>
-#include <thememodel.h>
-#include <QDir>
-#include <QX11Info>
-
-#include <config-X11.h>
-#include <X11/Xlib.h>
-#include <X11/Xcursor/Xcursor.h>
-#ifdef HAVE_XFIXES
-#  include <X11/extensions/Xfixes.h>
-#endif
-#include <KGlobalSettings>
-#include <KConfig>
-#include <KConfigGroup>
-
-#include "../../krdb/krdb.h"
-/* END VICTOR POLEVOY GSOC 2013 */
+#include <cursorlayoutindicatorfactory.h>
 
 K_PLUGIN_FACTORY(KeyboardFactory, registerPlugin<KeyboardDaemon>();)
 K_EXPORT_PLUGIN(KeyboardFactory("keyboard", "kxkb"))
@@ -79,6 +52,7 @@ KeyboardDaemon::KeyboardDaemon(QObject *parent, const QList<QVariant>&)
 	  actionCollection(NULL),
 	  xEventNotifier(NULL),
 	  layoutTrayIcon(NULL),
+	  cursorLayoutIndicator(NULL),
 	  layoutMemory(keyboardConfig),
 	  rules(Rules::readRules(Rules::READ_EXTRAS))
 {
@@ -118,6 +92,7 @@ KeyboardDaemon::~KeyboardDaemon()
 	delete xEventNotifier;
 	delete layoutTrayIcon;
 	delete rules;
+	delete cursorLayoutIndicator;
 }
 
 void KeyboardDaemon::configureKeyboard()
@@ -129,10 +104,8 @@ void KeyboardDaemon::configureKeyboard()
 	XkbHelper::initializeKeyboardLayouts(keyboardConfig);
 	layoutMemory.configChanged();
 	
-	oldLayout.layout = "";
-
 	setupTrayIcon();
-	setupCursorIcon();
+	setupCursorLayoutIndicator();
 
 	unregisterShortcut();
 	registerShortcut();
@@ -147,7 +120,7 @@ void KeyboardDaemon::configureMouse()
 
 void KeyboardDaemon::setupTrayIcon()
 {
-	bool show = keyboardConfig.showIndicator
+	bool show = keyboardConfig.showTrayLayoutIndicator
 			&& ( keyboardConfig.showSingle || X11Helper::getLayoutsList().size() > 1 );
 
 	if( show && ! layoutTrayIcon ) {
@@ -159,61 +132,18 @@ void KeyboardDaemon::setupTrayIcon()
 	}
 }
 
-const CursorTheme* KeyboardDaemon::getCurrentCursorTheme()
+void KeyboardDaemon::setupCursorLayoutIndicator()
 {    
-    KConfig inputConfiguration("kcminputrc");
-    KConfigGroup mouseConfig(&inputConfiguration, "Mouse");
-    
-    QString currentTheme = XcursorGetTheme(QX11Info().display());
-    
-    currentTheme = mouseConfig.readEntry("cursorTheme", currentTheme);
-    
-    return cursorThemeModel.theme(cursorThemeModel.findIndex(currentTheme));
+    if(keyboardConfig.showCursorLayoutIndicator == true) {
+        cursorLayoutIndicator = CursorLayoutIndicatorFactory::CreateCursorLayoutIndicator();
+    }
 }
 
-void KeyboardDaemon::setupCursorIcon()
-{   
-    kDebug() << "Changing cursor icon";
-    
-    KGlobalSettings::self()->emitChange(KGlobalSettings::CursorChanged);
-    runRdb(0);
-    
-    const CursorTheme* cursorTheme = getCurrentCursorTheme();
-    
-    if(cursorTheme == NULL || cursorTheme->name().isEmpty())
-	kError() << "Error: failed to get cursor theme";
-    
-    QImage cursorDefaultImage = cursorTheme->loadImage("ibeam", 0);
-    
-    if(cursorDefaultImage.isNull())	
-	kError() << "Error: cursor image is null";
-    
-    Flags flags;
-    QImage flagImage = flags.getIconWithText(currentLayout, this->keyboardConfig).pixmap(24, 24).toImage();
-    
-    if(flagImage.isNull())	
-	kError() << "Error: flag image is null";
-
-    /* Cursor ibeam-image needs to be in the middle of the result icon */
-    /* 4 is the margins before and after */
-    long resultImageWidth = 2 * flagImage.width() + 4 + cursorDefaultImage.width();
-    long resultImageHeight = cursorDefaultImage.height();
-    
-    QImage cursorImage(resultImageWidth, resultImageHeight, QImage::Format_ARGB32);
-    
-    cursorImage.fill(Qt::transparent);
-    
-    QPainter painter;
-    painter.begin(&cursorImage);
-    painter.drawImage(flagImage.width() + 2, 0, cursorDefaultImage);
-    painter.drawImage(resultImageWidth - flagImage.width(), 0, flagImage);
-    painter.end();
-    
-    QCursor cursor(QPixmap::fromImage(cursorImage));
-    
-    XFixesSetCursorName(QX11Info::display(), cursor.handle(), QFile::encodeName("ibeam"));
-    
-    XFixesChangeCursorByName(QX11Info().display(), cursor.handle(), QFile::encodeName("ibeam"));
+void KeyboardDaemon::updateCursorLayoutIndicator()
+{    
+    if(keyboardConfig.showCursorLayoutIndicator == true && cursorLayoutIndicator != NULL) {
+        cursorLayoutIndicator->setLayoutIndicator(CursorInfo::IBEAM, currentLayout, keyboardConfig);
+    }
 }
 
 void KeyboardDaemon::registerShortcut()
@@ -287,9 +217,8 @@ void KeyboardDaemon::layoutChanged()
     }
 
     if( newLayout != currentLayout ) {
-	    oldLayout = currentLayout;
 	    currentLayout = newLayout;
-	    setupCursorIcon();
+	    updateCursorLayoutIndicator();
 	    emit currentLayoutChanged(newLayout.toString());
     }
 }

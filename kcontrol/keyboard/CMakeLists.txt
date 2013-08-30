@@ -14,7 +14,7 @@ set ( text_paint_LIB ${KDE4_PLASMA_LIBS} )
 
 ### kded daemon ###
 
-set( kded_keyboard_SRCS
+set( kded_keyboard_SRCS 
     keyboard_daemon.cpp
     layout_memory.cpp
     layout_memory_persister.cpp
@@ -30,6 +30,7 @@ set( kded_keyboard_SRCS
     layouts_menu.cpp
     flags.cpp
     xkb_rules.cpp
+# next are temporary for Victor Polevoy GSOC 2013 project
     ../input/xcursor/cursortheme.cpp  
     ../input/xcursor/itemdelegate.cpp  
     ../input/xcursor/previewwidget.cpp  
@@ -38,6 +39,13 @@ set( kded_keyboard_SRCS
     ../input/xcursor/themepage.cpp  
     ../input/xcursor/xcursortheme.cpp
     ../krdb/krdb.cpp
+# next are Victor Polevoy GSOC 2013 files
+    imagecombiner.cpp
+    x11cursorimagecombiner.cpp
+    icursorlayoutindicator.cpp
+    cursorlayoutindicator.cpp
+    x11cursorlayoutindicator.cpp 
+    cursorlayoutindicatorfactory.cpp
 )
 
 kde4_add_ui_files( kded_keyboard_SRCS ../input/xcursor/themepage.ui )
@@ -101,7 +109,7 @@ install( FILES plasma_applet_keyboard.desktop DESTINATION ${SERVICES_INSTALL_DIR
 
 ### widget lib ###
 
-set( keyboard_layout_widget_SRCS
+set( keyboard_layout_widget_SRCS 
     layout_widget.cpp
     keyboard_config.cpp
     flags.cpp

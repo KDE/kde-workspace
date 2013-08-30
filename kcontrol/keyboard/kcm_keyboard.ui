@@ -78,7 +78,16 @@
        </size>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
       </layout>
@@ -106,31 +115,38 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="showSingleChk">
-           <property name="text">
-            <string>Show for single layout</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QRadioButton" name="showFlagRadioBtn">
-           <property name="text">
-            <string>Show flag</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QRadioButton" name="showLabelRadioBtn">
            <property name="text">
             <string>Show label</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
+         <item row="3" column="0">
+          <widget class="QRadioButton" name="showFlagRadioBtn">
+           <property name="text">
+            <string>Show flag</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="showSingleChk">
+           <property name="text">
+            <string>Show for single layout</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
           <widget class="QRadioButton" name="showLabelOnFlagRadioBtn">
            <property name="text">
             <string>Show label on flag</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="showCursorIndicatorChk">
+           <property name="text">
+            <string>Show cursor layout indicator</string>
            </property>
           </widget>
          </item>
@@ -260,11 +276,11 @@
           </widget>
          </item>
          <item row="2" column="1" colspan="2">
-          <widget class="KKeySequenceWidget" name="kdeKeySequence">
+          <widget class="KKeySequenceWidget" name="kdeKeySequence" native="true">
            <property name="whatsThis">
             <string>This is a shortcut for switching layouts which is handled by KDE. It does not support modifier-only shortcuts and also may not work in some situations (e.g. if popup is active or from screensaver).</string>
            </property>
-           <property name="multiKeyShortcutsAllowed">
+           <property name="multiKeyShortcutsAllowed" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
