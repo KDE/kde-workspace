@@ -30,6 +30,7 @@
 #include <KIcon>
 #include <KIconLoader>
 #include <KStandardDirs>
+#include <KGlobal>
 #include <QPainter>
 #include <QDBusMessage>
 #include <QDBusPendingCall>
@@ -87,7 +88,7 @@ StatusNotifierItemSource::StatusNotifierItemSource(const QString &notifierItemId
 
     int slash = notifierItemId.indexOf('/');
     if (slash == -1) {
-        kError() << "Invalid notifierItemId:" << notifierItemId;
+        qWarning() << "Invalid notifierItemId:" << notifierItemId;
         m_valid = false;
         m_statusNotifierItemInterface = 0;
         return;
@@ -226,9 +227,9 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
                     // adding all application dirs to KIconLoader::global(), to
                     // avoid potential icon name clashes between application
                     // icons
-                    m_customIconLoader = new KIconLoader(appName, 0 /* dirs */, this);
+                    m_customIconLoader = new KIconLoader(appName, QStringList() /* dirs */, this);
                 } else {
-                    kWarning() << "Wrong IconThemePath" << path << ": too short or does not end with 'icons'";
+                    qWarning() << "Wrong IconThemePath" << path << ": too short or does not end with 'icons'";
                 }
             }
         }
@@ -339,7 +340,7 @@ void StatusNotifierItemSource::refreshCallback(QDBusPendingCallWatcher *call)
                     // This is a hack to make it possible to disable DBusMenu in an
                     // application. The string "/NO_DBUSMENU" must be the same as in
                     // KStatusNotifierItem::setContextMenu().
-                    kWarning() << "DBusMenu disabled for this application";
+                    qWarning() << "DBusMenu disabled for this application";
                 } else {
                     m_menuImporter = new PlasmaDBusMenuImporter(m_statusNotifierItemInterface->service(), menuObjectPath, iconLoader(), this);
 #if DBUSMENUQT_VERSION >= 0x000400
@@ -475,7 +476,7 @@ void StatusNotifierItemSource::contextMenu(int x, int y)
         QMetaObject::invokeMethod(menu, "aboutToShow");
     #endif
     } else {
-        kWarning() << "Could not find DBusMenu interface, falling back to calling ContextMenu()";
+        qWarning() << "Could not find DBusMenu interface, falling back to calling ContextMenu()";
         if (m_statusNotifierItemInterface && m_statusNotifierItemInterface->isValid()) {
             m_statusNotifierItemInterface->call(QDBus::NoBlock, "ContextMenu", x, y);
         }
