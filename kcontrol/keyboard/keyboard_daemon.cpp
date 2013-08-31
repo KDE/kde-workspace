@@ -42,7 +42,7 @@
 #include "layouts_menu.h"
 
 
-#include <cursorlayoutindicatorfactory.h>
+#include "cursorlayoutindicator/cursorlayoutindicatorfactory.h"
 
 K_PLUGIN_FACTORY(KeyboardFactory, registerPlugin<KeyboardDaemon>();)
 K_EXPORT_PLUGIN(KeyboardFactory("keyboard", "kxkb"))
@@ -134,14 +134,14 @@ void KeyboardDaemon::setupTrayIcon()
 
 void KeyboardDaemon::setupCursorLayoutIndicator()
 {    
-    if(keyboardConfig.showCursorLayoutIndicator == true) {
+    if (keyboardConfig.showCursorLayoutIndicator == true) {
         cursorLayoutIndicator = CursorLayoutIndicatorFactory::CreateCursorLayoutIndicator();
     }
 }
 
 void KeyboardDaemon::updateCursorLayoutIndicator()
 {    
-    if(keyboardConfig.showCursorLayoutIndicator == true && cursorLayoutIndicator != NULL) {
+    if (keyboardConfig.showCursorLayoutIndicator == true && cursorLayoutIndicator != NULL) {
         cursorLayoutIndicator->setLayoutIndicator(CursorInfo::IBEAM, currentLayout, keyboardConfig);
     }
 }

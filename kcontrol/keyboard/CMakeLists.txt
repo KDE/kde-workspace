@@ -30,7 +30,7 @@ set( kded_keyboard_SRCS
     layouts_menu.cpp
     flags.cpp
     xkb_rules.cpp
-# next are temporary for Victor Polevoy GSOC 2013 project
+# next are temporary for cursor layout indicator
     ../input/xcursor/cursortheme.cpp  
     ../input/xcursor/itemdelegate.cpp  
     ../input/xcursor/previewwidget.cpp  
@@ -39,13 +39,10 @@ set( kded_keyboard_SRCS
     ../input/xcursor/themepage.cpp  
     ../input/xcursor/xcursortheme.cpp
     ../krdb/krdb.cpp
-# next are Victor Polevoy GSOC 2013 files
-    imagecombiner.cpp
-    x11cursorimagecombiner.cpp
-    icursorlayoutindicator.cpp
-    cursorlayoutindicator.cpp
-    x11cursorlayoutindicator.cpp 
-    cursorlayoutindicatorfactory.cpp
+# cursor layout indicator realization
+    cursorlayoutindicator/x11cursorimagecombiner.cpp
+    cursorlayoutindicator/x11cursorlayoutindicator.cpp 
+    cursorlayoutindicator/cursorlayoutindicatorfactory.cpp
 )
 
 kde4_add_ui_files( kded_keyboard_SRCS ../input/xcursor/themepage.ui )
