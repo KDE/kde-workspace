@@ -18,11 +18,7 @@
 #ifndef KBPREVIEWFRAME_H
 #define KBPREVIEWFRAME_H
 
-#ifdef NEW_GEOMETRY
-#include "keyboardlayout_new.h"
-#else
 #include "keyboardlayout.h"
-#endif
 
 #include "keysymhelper.h"
 #include "keyaliases.h"
@@ -32,10 +28,9 @@
 #include <QtCore/QHash>
 #include <QtGui/QToolTip>
 
-#ifdef NEW_GEOMETRY
 class Geometry;
 class GShape;
-#endif
+
 
 
 class KbPreviewFrame : public QFrame
@@ -48,23 +43,13 @@ private:
     QStringList tooltip;
     QList <QPoint> tipPoint;
     static const int width = 1100, height = 490;
-#ifdef NEW_GEOMETRY
+
     Geometry& geometry;
     void drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name);
     float scaleFactor;
     KbLayout keyboardLayout;
     void drawShape(QPainter &painter, const GShape& s, int x, int y, int i, const QString& name);
-#else
-    KeyboardLayout keyboardLayout;
 
-    void paintTLDE(QPainter &painter, int &x, int &y);
-    void paintAERow(QPainter &painter, int &x, int &y);
-    void paintADRow(QPainter &painter, int &x, int &y);
-    void paintACRow(QPainter &painter, int &x, int &y);
-    void paintABRow(QPainter &painter, int &x, int &y);
-    void paintBottomRow(QPainter &painter, int &x, int &y);
-    void paintFnKeys(QPainter &painter, int &x, int &y);
-#endif
 	
     int itemAt(const QPoint &pos);
 

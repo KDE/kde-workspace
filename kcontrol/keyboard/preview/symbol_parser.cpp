@@ -1,5 +1,5 @@
 #include "symbol_parser.h"
-#include "keyboardlayout_new.h"
+#include "keyboardlayout.h"
 #include "keyaliases.h"
 
 #include <QtCore/QString>
@@ -12,6 +12,8 @@
 #include <fixx11h.h>
 #include <config-workspace.h>
 
+
+
 namespace grammar{
 
 symbol_keywords :: symbol_keywords(){
@@ -22,6 +24,7 @@ symbol_keywords :: symbol_keywords(){
             ("*/",4)
         ;
 }
+
 template<typename Iterator>
 Symbol_parser<Iterator>::Symbol_parser():Symbol_parser::base_type(start){
     using qi::lexeme;
@@ -73,48 +76,54 @@ Symbol_parser<Iterator>::Symbol_parser():Symbol_parser::base_type(start){
         >>*(comments||char_);
 }
 
+
 template<typename Iterator>
 void Symbol_parser<Iterator>::getSymbol(std::string n){
     int index = layout.keyList[keyIndex].getSymbolCount();
     layout.keyList[keyIndex].addSymbol(QString::fromUtf8(n.data(), n.size()), index);
-    qDebug()<<"adding symbol: "<<QString::fromUtf8(n.data(), n.size());
-    qDebug()<<"added symbol: "<<layout.keyList[keyIndex].getSymbol(index)<<" in "<<keyIndex<<" at "<<index;
+    //qDebug()<<"adding symbol: "<<QString::fromUtf8(n.data(), n.size());
+    //qDebug()<<"added symbol: "<<layout.keyList[keyIndex].getSymbol(index)<<" in "<<keyIndex<<" at "<<index;
 }
+
+
 template<typename Iterator>
 void Symbol_parser<Iterator>::addKeyName(std::string n){
     QString kname = QString::fromUtf8(n.data(), n.size());
     if(kname.startsWith("Lat"))
         kname = alias.getAlias(layout.country, kname);
     keyIndex = layout.findKey(kname);
-    qDebug()<<layout.getKeyCount();
+    //qDebug()<<layout.getKeyCount();
     if (keyIndex == -1){
         layout.keyList[layout.getKeyCount()].keyName = kname;
         keyIndex = layout.getKeyCount();
         newKey = 1;
     }
-    else
-        qDebug()<<"key at"<<keyIndex;
+       // qDebug()<<"key at"<<keyIndex;
 }
+
 
 template<typename Iterator>
 void Symbol_parser<Iterator>::addKey(){
     if(newKey == 1){
         layout.addKey();
         newKey = 0;
-        qDebug()<<"new key";
+        //qDebug()<<"new key";
     }
 }
+
 
 template<typename Iterator>
 void Symbol_parser<Iterator>::getInclude(std::string n){
     layout.addInclude(QString::fromUtf8(n.data(), n.size()));
 }
 
+
 template<typename Iterator>
 void Symbol_parser<Iterator>::setName(std::string n){
     layout.setName(QString::fromUtf8(n.data(), n.size()));
-    qDebug() << layout.getLayoutName();
+    //qDebug() << layout.getLayoutName();
 }
+
 
 QString findSymbolBaseDir()
 {
@@ -144,36 +153,45 @@ QString findSymbolBaseDir()
 }
 
 
+
 QString findLayout(const QString& layout, const QString& layoutVariant){
+
     QString symbolBaseDir = findSymbolBaseDir();
     QString symbolFile = symbolBaseDir.append(layout);
 
     QFile sfile(symbolFile);
     if (!sfile.open(QIODevice::ReadOnly | QIODevice::Text)){
-         qDebug()<<"unable to open the file";
+         //qDebug()<<"unable to open the file";
          return QString();
     }
+
     QString scontent = sfile.readAll();
     sfile.close();
     QStringList scontentList = scontent.split("xkb_symbols");
 
     QString variant;
     QString input;
+
     if(layoutVariant.isEmpty()){
         input = scontentList.at(1);
         input.prepend("xkb_symbols");
     }
+
     else{
         int i = 1;
+
         while (layoutVariant != variant && i < scontentList.size()) {
             input = scontentList.at(i);
+
             QString h = scontentList.at(i);
+
             int k = h.indexOf("\"");
             h = h.mid(k);
             k = h.indexOf("{");
             h = h.left(k);
             h = h.remove(" ");
             variant = h.remove("\"");
+
             input.prepend("xkb_symbols");
             i++;
         }
@@ -183,9 +201,11 @@ QString findLayout(const QString& layout, const QString& layoutVariant){
 }
 
 KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
+
     using boost::spirit::iso8859_1::space;
     typedef std::string::const_iterator iterator_type;
     typedef grammar::Symbol_parser<iterator_type> Symbol_parser;
+
     Symbol_parser s;
 
     s.layout.country = layout;
@@ -197,7 +217,8 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
     std::string::const_iterator end = xyz.end();
 
     bool r = phrase_parse(iter, end, s, space);
-    if (r && iter == end){
+
+    /*if (r && iter == end){
         std::cout << "-------------------------\n";
         std::cout << "Parsing succeeded\n";
         std::cout << "\n-------------------------\n";
@@ -207,7 +228,7 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
         std::cout << "Parsing failed\n";
         std::cout << "-------------------------\n";
         qDebug()<<input;
-    }
+    }*/
 
 
     for(int j = 0; j < s.layout.getIncludeCount(); j++){
@@ -220,17 +241,20 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
             input = findLayout(l,lv);
 
         }
+
         else{
             QString a = QString();
             input = findLayout(includeFile.at(0),a);
         }
+
         xyz = input.toUtf8().constData();
 
         std::string::const_iterator iter = xyz.begin();
         std::string::const_iterator end = xyz.end();
 
         bool r = phrase_parse(iter, end, s, space);
-        if (r && iter == end){
+
+        /*if (r && iter == end){
             std::cout << "-------------------------\n";
             std::cout << "Parsing succeeded\n";
             std::cout << "\n-------------------------\n";
@@ -240,10 +264,11 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
             std::cout << "Parsing failed\n";
             std::cout << "-------------------------\n";
             qDebug()<<input;
-        }
+        }*/
     }
 
-    s.layout.display();
+    //s.layout.display();
+
     return s.layout;
 }
 

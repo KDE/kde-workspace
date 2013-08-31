@@ -15,36 +15,61 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
-#ifndef KEYBOARDLAYOUT_H
-#define KEYBOARDLAYOUT_H
 
-#include "keysymbols.h"
+#ifndef KEYBOARDLAYOUT_NEW_H
+#define KEYBOARDLAYOUT_NEW_H
+
 #include "keyaliases.h"
+#include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtCore/QList>
 
-#include <QtGui/QApplication>
+class KbKey{
+    QList<QString> symbols;
+    int symbolCount;
+public :
+    QString keyName;
 
-class KeyboardLayout
-{
-    QString layoutName;
-    Aliases alias;
-    
-public:
-    KeyboardLayout();
-
-    KeySymbols TLDE;
-    KeySymbols BKSL;
-    KeySymbols AE[12];
-    KeySymbols AD[12];
-    KeySymbols AC[11];
-    KeySymbols AB[11];
-
-    void generateLayout(QString a, const QString &cname);
-    QString findSymbolBaseDir();
-    void includeSymbol(QString a, const QString &cname);
-    QString getLayoutName() const {
-    	return layoutName;
+    KbKey();
+    void setKeyName(QString n);
+    void addSymbol(QString n,int i);
+    QString getSymbol(int i);
+    int getSymbolCount(){
+        return symbolCount;
     }
+
+    void display();
 };
 
-#endif // KEYBOARDLAYOUT_H
+
+class KbLayout{
+    QList<QString> include;
+    QString name;
+    int keyCount, includeCount;
+public:
+    QList <KbKey> keyList;
+    QString country;
+
+    KbLayout();
+    void setName(QString n);
+    void addInclude(QString n);
+    void addKey();
+
+    int getKeyCount(){
+        return keyCount;
+    }
+
+    int getIncludeCount(){
+        return includeCount;
+    }
+
+    QString getLayoutName() const {
+        return name;
+    }
+
+    QString getInclude(int i);
+    int findKey(QString n);
+    void display();
+};
+
+#endif //KEYBOARDLAYOUT_NEW_H

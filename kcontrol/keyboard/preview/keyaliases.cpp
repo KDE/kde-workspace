@@ -89,7 +89,7 @@ QString Aliases::getAlias(const QString& cname, const QString& name)
 {
     QMessageBox q;
     QString a=name;
-    if(cname=="ma"){
+    if(cname=="ma" || cname == "be" || cname == "fr"){
         a=azerty.value(name);
     }
     else{

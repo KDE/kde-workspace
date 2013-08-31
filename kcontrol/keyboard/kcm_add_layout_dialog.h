@@ -43,8 +43,9 @@ public:
 public Q_SLOTS:
 	void languageChanged(int langIdx);
 	void layoutChanged(int layoutIdx);
-	void preview();
-
+#ifdef NEW_GEOMETRY
+    void preview();
+#endif
 private:
 	const Rules* rules;
 	Flags* flags;

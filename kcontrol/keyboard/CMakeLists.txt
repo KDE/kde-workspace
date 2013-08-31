@@ -111,13 +111,17 @@ if(Boost_FOUND)
     preview/geometry_components.cpp
     preview/geometry_parser.cpp
     preview/kbpreviewframe.cpp
-    preview/keyboardlayout_new.cpp
-    preview/symbol_parser.cpp)
+    preview/keyboardlayout.cpp
+    preview/symbol_parser.cpp
+    preview/keyaliases.cpp
+    preview/keyboardlayout.cpp
+    preview/keyboardpainter.cpp
+    preview/keysymbols.cpp
+    preview/keysymhelper.cpp
+    preview/keysym2ucs.cpp)
   
 else(Boost_FOUND)
   message("Boost not found, Install Boost Libraries to enable keyboard geometry preview.")
-  set(preview_SRCS
-  preview/kbpreviewframe_old.cpp)
   
 
 endif(Boost_FOUND)
@@ -136,12 +140,6 @@ set(kcm_keyboard_PART_SRCS
     iso_codes.cpp
     kcmmisc.cpp
     bindings.cpp
-    preview/keyaliases.cpp
-    preview/keyboardlayout.cpp
-    preview/keyboardpainter.cpp
-    preview/keysymbols.cpp
-    preview/keysymhelper.cpp
-    preview/keysym2ucs.cpp
     ${preview_SRCS} )
 
 

@@ -33,7 +33,9 @@
 #include <QtGui/QX11Info>
 
 #include "keyboard_config.h"
+#ifdef NEW_GEOMETRY
 #include "preview/keyboardpainter.h"
+#endif
 #include "xkb_rules.h"
 #include "flags.h"
 #include "x11_helper.h"
@@ -336,7 +338,9 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->moveUpBtn, SIGNAL(clicked(bool)), this, SLOT(moveUp()));
 	connect(uiWidget->moveDownBtn, SIGNAL(clicked(bool)), this, SLOT(moveDown()));
 
+#ifdef NEW_GEOMETRY
     connect(uiWidget->previewbutton,SIGNAL(clicked(bool)),this,SLOT(previewLayout()));
+#endif
 
 	connect(uiWidget->xkbGrpClearBtn, SIGNAL(clicked(bool)), this, SLOT(clearGroupShortcuts()));
 	connect(uiWidget->xkb3rdLevelClearBtn, SIGNAL(clicked(bool)), this, SLOT(clear3rdLevelShortcuts()));
@@ -362,7 +366,7 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->layoutLoopingCheckBox, SIGNAL(clicked(bool)), this, SLOT(uiChanged()));
 	connect(uiWidget->layoutLoopCountSpinBox, SIGNAL(valueChanged(int)), this, SLOT(uiChanged()));
 }
-
+#ifdef NEW_GEOMETRY
 void KCMKeyboardWidget::previewLayout(){
     QMessageBox q;
     QModelIndex index = uiWidget->layoutsTableView->currentIndex() ;
@@ -392,7 +396,7 @@ void KCMKeyboardWidget::previewLayout(){
         layoutPreview->setModal(true);
     }
 }
-
+#endif
 void KCMKeyboardWidget::configureLayoutsChanged()
 {
 	if( uiWidget->layoutsGroupBox->isChecked()	&& keyboardConfig->layouts.isEmpty() ) {
@@ -421,8 +425,12 @@ void KCMKeyboardWidget::layoutSelectionChanged()
 	uiWidget->removeLayoutBtn->setEnabled( ! selected.isEmpty() );
 	QPair<int, int> rowsRange( getSelectedRowRange(selected) );
 	uiWidget->moveUpBtn->setEnabled( ! selected.isEmpty() && rowsRange.first > 0);
+#ifdef NEW_GEOMETRY
     uiWidget->previewbutton->setEnabled(! selected.isEmpty());
-	uiWidget->moveDownBtn->setEnabled( ! selected.isEmpty() && rowsRange.second < keyboardConfig->layouts.size()-1 );
+#else
+    uiWidget->previewbutton->setEnabled(false);
+#endif
+    uiWidget->moveDownBtn->setEnabled( ! selected.isEmpty() && rowsRange.second < keyboardConfig->layouts.size()-1 );
 }
 
 void KCMKeyboardWidget::removeLayout()

@@ -21,7 +21,7 @@
 
 #include "geometry_parser.h"
 #include "geometry_components.h"
-#include "keyboardlayout_new.h"
+#include "keyboardlayout.h"
 #include "symbol_parser.h"
 
 #include <QtCore/QFile>
@@ -96,48 +96,70 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
 void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,int i, const QString& name){
     painter.setPen(Qt::black);
     int cordi_count = s.getCordi_count();
+
     if(geometry.sectionList[i].getAngle()==0){
         if (cordi_count == 1){
+
             int width = s.getCordii(0).x();
             int height = s.getCordii(0).y();
+
             painter.drawRoundedRect(scaleFactor*x+2,scaleFactor*y,scaleFactor*width,scaleFactor*height,4,4);
+
             QPoint temp[4];
+
             temp[0]=QPoint(scaleFactor*x,scaleFactor*y);
             temp[1]=QPoint(scaleFactor*(s.getCordii(0).x()+x),scaleFactor*y);
             temp[2]=QPoint(scaleFactor*(s.getCordii(0).x()+x),scaleFactor*(s.getCordii(0).y()+y));
             temp[3]=QPoint(scaleFactor*(x),scaleFactor*(s.getCordii(0).y()+y));
+
             drawKeySymbols(painter,temp,s,name);
+
         }
+
         else{
+
             QPoint temp[cordi_count];
+
             for(int i=0;i<cordi_count;i++){
                 temp[i].setX(scaleFactor*(s.getCordii(i).x()+x+1));
                 temp[i].setY(scaleFactor*(s.getCordii(i).y()+y+1));
             }
+
             painter.drawPolygon(temp,cordi_count);
             drawKeySymbols(painter,temp,s,name);
         }
     }
+
     else{
+
         QPoint temp[cordi_count == 1 ? 4 : cordi_count];
         int size;
+
         if(cordi_count== 1){
+
             temp[0]=QPoint(x,y);
             temp[1]=QPoint(s.getCordii(0).x()+x,y);
             temp[2]=QPoint(s.getCordii(0).x()+x,s.getCordii(0).y()+y);
             temp[3]=QPoint(x,s.getCordii(0).y()+y);
             size = 4;
+
         }
+
         else{
+
             size = cordi_count;
+
             for(int i=0;i<cordi_count;i++){
                 temp[i].setX((s.getCordii(i).x()+x+1));
                 temp[i].setY((s.getCordii(i).y()+y+1));
             }
         }
+
         double refX,refY;
+
         refX = geometry.sectionList[i].getLeft();
         refY = geometry.sectionList[i].getTop();
+
         //qDebug()<<"\ntransform";
         for(int j=0;j<size;j++){
             double x = temp[j].x()-refX;
@@ -151,22 +173,29 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,in
             //qDebug()<<"("<<x_<<","<<y_<<")\n";
             temp[j]=QPoint(scaleFactor*(x_+refX),scaleFactor*(y_+refY));
         }
+
         /*for(int i=0;i<size;i++){
             qDebug()<<temp[i];
         }*/
+
         painter.drawPolygon(temp,size);
         drawKeySymbols(painter,temp,s,name);
     }
 
+
 }
 
 bool KbPreviewFrame::event(QEvent* event){
+
     if (event->type() == QEvent::ToolTip) {
+
         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
         int index = itemAt(helpEvent->pos());
+
         if (index != -1) {
             QToolTip::showText(helpEvent->globalPos(), tooltip.at(index));
         }
+
         else {
              QToolTip::hideText();
              event->ignore();
@@ -176,6 +205,7 @@ bool KbPreviewFrame::event(QEvent* event){
     }
     return QWidget::event(event);
 }
+
 
 void KbPreviewFrame::paintEvent(QPaintEvent *)
 {
@@ -196,7 +226,7 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
     scaleFactor = 1030/endx;
     if(scaleFactor<1)
         scaleFactor=1;
-    qDebug()<<"scaleFactor = "<<scaleFactor;
+    //qDebug()<<"scaleFactor = "<<scaleFactor;
     scaleFactor = 2.5;
     painter.drawRect(strtx, strty, scaleFactor*endx+60,scaleFactor*endy+60);
 

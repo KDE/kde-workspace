@@ -14,8 +14,8 @@ void GShape::setCordinate(double a, double b){
 }
 
 void GShape::setApprox(double a, double b){
-    a-=approx.x();
-    b-=approx.y();
+    a -= approx.x();
+    b -= approx.y();
     approx = QPoint(a,b);
 }
 
@@ -33,7 +33,6 @@ void GShape::display(){
     qDebug()<<"( "<<approx.x()<<", "<<approx.y()<<"); ";
     for(int i=0;i<cordi_count;i++)
         qDebug()<<cordii[i];
-    qDebug()<<"\n";
 }
 
 double GShape::size(int vertical) const{
@@ -61,7 +60,7 @@ void Key::setKeyPosition(double x, double y){
 
 void Key::showKey(){
     qDebug()<<"\n\tKey: "<<name<<"\tshape: "<<shapeName<<"\toffset: "<<offset;
-    qDebug()<<"\tposition"<<position<<"\n";
+    qDebug()<<"\tposition"<<position;
 }
 
 
@@ -75,7 +74,7 @@ Row::Row(){
 
 
 void Row::addKey(){
-    qDebug() << "keyCount: "<<keyCount;
+    //qDebug() << "keyCount: "<<keyCount;
     keyCount++;
     keyList << Key();
 }
@@ -100,14 +99,14 @@ Section::Section(){
 }
 
 void Section::addRow(){
-    qDebug()<<"\nrowCount: "<<rowCount;
+    //qDebug()<<"\nrowCount: "<<rowCount;
     rowCount++;
     rowList << Row();
 }
 
 void Section::displaySection(){
-    qDebug()<<"\nSection: "<<name<<"\n\tposition: ("<<left<<","<<top<<");"<<angle<<"\n";
-    qDebug()<<"vertical: "<<vertical;
+    //qDebug()<<"\nSection: "<<name<<"\n\tposition: ("<<left<<","<<top<<");"<<angle<<"\n";
+    //qDebug()<<"vertical: "<<vertical;
     for(int i=0;i<rowCount;i++){
             qDebug()<<"\n\t";
             rowList[i].displayRow();
@@ -160,7 +159,7 @@ void Geometry::display(){
 }
 
 void Geometry::addSection(){
-    qDebug()<<"\nsectionCount: "<<sectionCount;
+    //qDebug()<<"\nsectionCount: "<<sectionCount;
     sectionCount++;
     sectionList << Section();
 }

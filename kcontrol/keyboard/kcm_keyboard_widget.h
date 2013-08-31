@@ -68,7 +68,9 @@ private Q_SLOTS:
     void moveDown();
     void configureLayoutsChanged();
     void configureXkbOptionsChanged();
+#ifdef NEW_GEOMETRY
     void previewLayout();
+#endif
 
 private:
     Rules *rules;
