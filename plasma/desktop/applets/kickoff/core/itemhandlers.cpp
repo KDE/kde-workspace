@@ -54,7 +54,7 @@ bool ServiceItemHandler::openUrl(const KUrl& url)
     if (result == 0) {
         KService::Ptr service = KService::serviceByDesktopPath(url.pathOrUrl());
 
-        if (!service.isNull()) {
+        if (service) {
             RecentApplications::self()->add(service);
         } else {
             qWarning() << "Failed to find service for" << url;

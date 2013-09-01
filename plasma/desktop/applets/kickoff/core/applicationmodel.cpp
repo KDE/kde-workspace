@@ -189,7 +189,7 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
         const KSycocaEntry::Ptr p = (*it);
 
         if (p->isType(KST_KService)) {
-            const KService::Ptr service = KService::Ptr::staticCast(p);
+            const KService::Ptr service = p;
 
             if (service->noDisplay()) {
                 continue;
@@ -239,7 +239,7 @@ void ApplicationModelPrivate::fillNode(const QString &_relPath, AppNode *node)
 
             existingServices[appName] = service;
         } else if (p->isType(KST_KServiceGroup)) {
-            const KServiceGroup::Ptr serviceGroup = KServiceGroup::Ptr::staticCast(p);
+            const KServiceGroup::Ptr serviceGroup = p;
 
             if (serviceGroup->noDisplay() || serviceGroup->childCount() == 0) {
                 continue;
@@ -614,13 +614,13 @@ bool ApplicationModel::createNewProgramListForPath(const QString &relPath)
         KSycocaEntry::Ptr e = (*it);
 
         if (e->isType(KST_KServiceGroup)) {
-            KServiceGroup::Ptr g(KServiceGroup::Ptr::staticCast(e));
+            KServiceGroup::Ptr g(e);
             if (!g->noDisplay()) {
                 if (createNewProgramListForPath(g->relPath()))
                     seenProgramsChanged = true;
             }
         } else if (e->isType(KST_KService)) {
-            KService::Ptr s(KService::Ptr::staticCast(e));
+            KService::Ptr s(e);
             if (s->isApplication() && !s->noDisplay()) {
                 QString shortStorageId = s->storageId().remove(".desktop");
                 QHash<QString, QDate>::Iterator it_find = d->seenPrograms.find(shortStorageId);

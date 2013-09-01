@@ -73,10 +73,10 @@ void AppSource::updateGroup()
     QStringList entries;
     foreach (KSycocaEntry::Ptr p, m_group->entries(true, false, true)) {
         if (p->isType(KST_KService)) {
-            const KService::Ptr service = KService::Ptr::staticCast(p);
+            const KService::Ptr service = p;
             entries << service->storageId();
         } else if (p->isType(KST_KServiceGroup)) {
-            const KServiceGroup::Ptr service = KServiceGroup::Ptr::staticCast(p);
+            const KServiceGroup::Ptr service = p;
             entries << service->entryPath();
         } else if (p->isType(KST_KServiceSeparator)) {
             entries << "---";
