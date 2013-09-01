@@ -39,7 +39,7 @@ Item {
 
     Components.Label  {
         id: time
-        font.pointSize: main.width/8
+        font.pixelSize: Math.min(main.width/6, main.height)
         width: Math.max(paintedWidth,time.paintedWidth)
         text : locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds )
         horizontalAlignment: main.AlignHCenter
@@ -55,9 +55,9 @@ Item {
 
             PlasmaCore.ToolTip {
                 id: tooltip
-                target: mouseArea
+                target: time
                 mainText:"Current Time"
-                subText: Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d yyyy" ) + "\n" + Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm AP" )
+                subText: Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d yyyy" ) + "\n" + locale.formatLocaleTime(dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds)
                 image: "preferences-system-time"
             }
         }

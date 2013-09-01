@@ -1,6 +1,6 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Digital_clock
+Name=Digital Clock
 Icon=preferences-system-time
 Type=Service
 X-KDE-ParentApp=
@@ -10,9 +10,9 @@ X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-Name=Digital_clock
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=plasma.kde.org
-X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
+X-KDE-ServiceTypes=Plasma/Applet
 X-Plasma-API=declarativeappletscript
-X-Plasma-DefaultSize=500,500
+X-Plasma-DefaultSize=256,32
 X-Plasma-MainScript=ui/main.qml
 X-Plasma-RemoteLocation=
 X-KDE-PluginInfo-Category=
