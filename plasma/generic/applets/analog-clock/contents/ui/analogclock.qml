@@ -73,16 +73,6 @@ Item {
         }
 
         PlasmaCore.SvgItem {
-            id: center
-            width: naturalSize.width * face.width / face.naturalSize.width
-            height: naturalSize.height * face.width / face.naturalSize.width
-            anchors.centerIn: face
-            svg: clockSvg
-            elementId: "HandCenterScrew"
-            z: 1000
-        }
-
-        PlasmaCore.SvgItem {
             anchors.fill: face
             svg: clockSvg
             elementId: "Glass"
@@ -128,6 +118,16 @@ Item {
         rotation: 180 + seconds * 6
         visible: showSecondsHand
         svgScale: face.width / face.naturalSize.width
+    }
+
+    PlasmaCore.SvgItem {
+        id: center
+        width: naturalSize.width * face.width / face.naturalSize.width
+        height: naturalSize.height * face.width / face.naturalSize.width
+        anchors.centerIn: clock
+        svg: clockSvg
+        elementId: "HandCenterScrew"
+        z: 1000
     }
 
     PlasmaCore.FrameSvgItem {

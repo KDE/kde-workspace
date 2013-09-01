@@ -22,15 +22,21 @@
 
 #include <plasma/containmentactions.h>
 
+class QAction;
+
 class Paste : public Plasma::ContainmentActions
 {
     Q_OBJECT
     public:
         Paste(QObject* parent, const QVariantList& args);
 
-        void contextEvent(QEvent *event);
-};
+        QList<QAction*> contextualActions();
 
-K_EXPORT_PLASMA_CONTAINMENTACTIONS(paste, Paste)
+    private Q_SLOTS:
+        void doPaste();
+
+    private:
+        QAction *m_action;
+};
 
 #endif

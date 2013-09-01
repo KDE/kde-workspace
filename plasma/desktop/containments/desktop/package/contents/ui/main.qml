@@ -22,10 +22,11 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.draganddrop 2.0 as DragDrop
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
-Item {
+DragDrop.DropArea {
     id: root
 
     property Item toolBox
@@ -49,7 +50,7 @@ Item {
         layoutTimer.restart()
     }
 
-    function addApplet(applet, pos)
+    function addApplet(applet, x, y)
     {
         var component = Qt.createComponent("AppletAppearance.qml");
         var e = component.errorString();
@@ -66,10 +67,21 @@ Item {
         container.width = LayoutManager.cellSize.width*6;
         container.height = LayoutManager.cellSize.height*6;
         container.applet = applet;
+        container.x = x
+        container.y = y
 
         LayoutManager.itemGroups[container.category] = container;
-        print("Applet " + container.category + " added.");
+        print("Applet " + container.category + applet.title + " added at" + container.x + " " + container.y);
+
+        if (x > 0 && y > 0) {
+            LayoutManager.positionItem(container);
+        }
     }
+
+    onDrop: {
+        plasmoid.processMimeData(event.mimeData, event.x, event.y);
+    }
+
 
     PlasmaCore.Svg {
         id: toolBoxSvg
@@ -104,6 +116,8 @@ Item {
                 LayoutManager.resetPositions()
                 for (var i=0; i<resultsFlow.children.length; ++i) {
                     var child = resultsFlow.children[i]
+                    print("BBBB"+child+child.applet.title+child.x+child.enabled)
+                    print("CCC"+LayoutManager.itemsConfig[child.category])
                     if (child.enabled) {
                         if (LayoutManager.itemsConfig[child.category]) {
                             var rect = LayoutManager.itemsConfig[child.category]
@@ -248,7 +262,7 @@ Item {
 
         for (var i = 0; i < plasmoid.applets.length; ++i) {
             var applet = plasmoid.applets[i]
-            addApplet(applet, 0)
+            addApplet(applet, 0, 0)
         }
     }
 }

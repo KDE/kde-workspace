@@ -25,6 +25,7 @@ AppsEngine::AppsEngine(QObject *parent, const QVariantList &args) :
     Plasma::DataEngine(parent, args)
 {
     Q_UNUSED(args);
+    init();
 }
 
 AppsEngine::~AppsEngine()

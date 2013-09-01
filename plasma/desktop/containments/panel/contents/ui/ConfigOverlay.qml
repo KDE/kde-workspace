@@ -119,6 +119,8 @@ MouseArea {
     }
     Item {
         id: placeHolder
+        Layout.fillWidth: currentApplet ? currentApplet.Layout.fillWidth : false
+        Layout.fillHeight: currentApplet ? currentApplet.Layout.fillHeight : false
     }
 
     Rectangle {

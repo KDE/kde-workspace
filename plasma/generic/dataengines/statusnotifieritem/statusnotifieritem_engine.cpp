@@ -33,6 +33,7 @@ StatusNotifierItemEngine::StatusNotifierItemEngine(QObject *parent, const QVaria
       m_statusNotifierWatcher(0)
 {
     Q_UNUSED(args);
+    init();
 }
 
 StatusNotifierItemEngine::~StatusNotifierItemEngine()
@@ -140,6 +141,6 @@ void StatusNotifierItemEngine::newItem(const QString &service)
     addSource(itemSource);
 }
 
-K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(statusnotifieritem, StatusNotifierItemEngine, "plasma_engine_statusnotifieritem.json")
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(statusnotifieritem, StatusNotifierItemEngine,"plasma-engine-statusnotifieritem.json")
 
 #include "statusnotifieritem_engine.moc"

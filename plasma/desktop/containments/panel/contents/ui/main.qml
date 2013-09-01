@@ -47,13 +47,12 @@ DragDrop.DropArea {
     onDragMove: {
         LayoutManager.insertAtCoordinates(dndSpacer, event.x, event.y)
     }
-    
+
     onDragLeave: {
         dndSpacer.parent = root;
     }
 
     onDrop: {
-        dndSpacer.parent = root;
         plasmoid.processMimeData(event.mimeData, event.x, event.y);
     }
 
@@ -61,10 +60,8 @@ DragDrop.DropArea {
         target: plasmoid
 
         onAppletAdded: {
-            var appletX = applet.x;
-            var appletY = applet.y;
             var container = appletContainerComponent.createObject(root)
-            print("Applet added in test panel: " + applet + " at: " + appletX + ", " + appletY);
+            print("Applet added in test panel: " + applet + " at: " + x + ", " + y);
 
             if (applet.fillWidth) {
                 lastSpacer.parent = root;
@@ -76,10 +73,16 @@ DragDrop.DropArea {
             container.visible = true;
             container.intendedPos = LayoutManager.order[applet.id] !== undefined ? LayoutManager.order[applet.id] : -1;
             //is not in the saved positions, try with applet coordinates
-            if (container.intendedPos < 0) {
-                var index = LayoutManager.insertAtCoordinates(container, appletX, appletY);
+            if (dndSpacer.parent === currentLayout) {
+                LayoutManager.insertBefore(dndSpacer, container);
+                dndSpacer.parent = root;
+                return;
+
+            } else if (container.intendedPos < 0) {
+                var index = LayoutManager.insertAtCoordinates(container, x, y);
                 print("Applet " + applet.id + " " + applet.title + " was added in position " + index)
                 container.intendedPos = index;
+
             } else {
                 print("We want to insert the new applet " + applet.id + " " + applet.title + " in position " + container.intendedPos)
 
@@ -182,9 +185,8 @@ DragDrop.DropArea {
                 anchors.centerIn: parent
             }
             onXChanged: {
-                //FIXME: causes problems in dnd
-                return
-                if (parent !== currentLayout) {
+                //as long as currentLayout.children.count < LayoutManager.order.length means loading is not done yet
+                if (currentLayout.children.count < LayoutManager.order.length || parent !== currentLayout) {
                     return;
                 }
                 translation.x = oldX - x
@@ -217,8 +219,8 @@ DragDrop.DropArea {
 
     Item {
         id: dndSpacer
-        width: 50
-        height: 50
+        width: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? currentLayout.width : theme.mSize(theme.defaultFont).width * 10
+        height: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ?  theme.mSize(theme.defaultFont).width * 10 : currentLayout.height
     }
 
     RowLayout {
