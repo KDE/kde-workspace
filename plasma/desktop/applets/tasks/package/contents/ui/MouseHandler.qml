@@ -35,29 +35,30 @@ Item {
 
         property variant hoveredItem
 
-        enabled: !target.animating
-
         onDragMove: {
+            if (target.animating) {
+                return;
+            }
+
             var above = target.childAt(event.x, event.y);
 
-            if (tasks.dragSource) {
-                if (above != tasks.dragSource
-                    && !(tasks.dragSource.isLauncher || above.isLauncher)) {
-                    var targetIndex = TaskTools.insertionIndexAt(event.x, event.y);
-
-                    itemMove(tasks.dragSource.itemId, targetIndex);
+            if (above) {
+                if (tasks.dragSource) {
+                    if (tasks.dragSource != above && !tasks.dragSource.isLauncher && !above.isLauncher) {
+                        itemMove(tasks.dragSource.itemId, TaskTools.insertionIndexAt(event.x, event.y));
+                    }
+                } else if (hoveredItem != above) {
+                    hoveredItem = above;
+                    activationTimer.start();
                 }
-            } else if (above && hoveredItem != above) {
-                hoveredItem = above;
-                activationTimer.start();
-            } else if (!above) {
+            } else {
                 hoveredItem = 0;
                 activationTimer.stop();
             }
         }
 
         onDragLeave: {
-            dragItem = 0;
+            hoveredItem = 0;
             activationTimer.stop();
         }
 
