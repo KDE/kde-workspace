@@ -1,6 +1,6 @@
 add_subdirectory(kickoff)
 #add_subdirectory(showActivityManager)
-#add_subdirectory(trash)
+plasma_install_package(trash org.kde.trash plasma/plasmoids applet)
 
 if(NOT WIN32)
     #task and windowlist depend on libs/taskmanager
