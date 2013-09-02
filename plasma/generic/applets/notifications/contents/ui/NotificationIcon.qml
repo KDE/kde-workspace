@@ -63,7 +63,7 @@ Item {
         }
         PlasmaComponents.BusyIndicator {
             anchors.fill: parent
-            visible: jobs.count > 0
+            visible: jobs ? jobs.count > 0 : false
             running: visible
         }
 
