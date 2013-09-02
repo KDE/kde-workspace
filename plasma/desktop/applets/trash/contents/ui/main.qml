@@ -65,7 +65,9 @@ Item {
     MouseArea {
         id: mouseArea
         hoverEnabled: true
-        onReleased: Qt.openUrlExternally("trash:/");//plasmoid.openUrl("trash:/");
+        onClicked: {
+            Qt.openUrlExternally("trash:/");
+        }
         anchors.fill:parent
         PlasmaCore.IconItem {
             id:icon
