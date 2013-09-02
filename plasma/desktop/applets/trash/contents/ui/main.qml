@@ -54,16 +54,9 @@ Item {
         emptyDialog.open();
     }
     
-    Component.onCompleted: { 
+    Component.onCompleted: {
         plasmoid.backgroundHints = 0;
-        plasmoid.action_open = function() {
-            Qt.openUrlExternally("trash:/");//plasmoid.openUrl("trash:/");
-        }
         plasmoid.setAction("open", "Open","document-open");
-        plasmoid.action_empty=function() {
-           //  emptyDialog=emptyDialogComponent.createObject(root);
-          //   emptyDialog.open();
-        }
         plasmoid.setAction("empty","Empty","trash-empty");
         plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
