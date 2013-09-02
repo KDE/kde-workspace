@@ -26,6 +26,7 @@
 #include <KLocale>
 #include <KConfigGroup>
 #include <sonnet/configwidget.h>
+#include "configurationmanager.h"
 
 PreferencesDialog::PreferencesDialog( QWidget *parent )
     : KPageDialog( parent )
@@ -83,15 +84,12 @@ MiscPage::MiscPage( QWidget *parent )
     pageLayout->addStretch();
 
     // update displayed config
-    KConfigGroup group( KGlobal::config(), "General" );
-    m_showHiddenEntries->setChecked(  group.readEntry( "ShowHidden", false ) );
+    m_showHiddenEntries->setChecked(ConfigurationManager::getInstance()->hiddenEntriesVisible());
 }
 
 void MiscPage::saveOptions()
 {
-    KConfigGroup group( KGlobal::config(), "General" );
-    group.writeEntry( "ShowHidden", m_showHiddenEntries->isChecked() );
-    group.sync();
+    ConfigurationManager::getInstance()->setHiddenEntriesVisible(m_showHiddenEntries->isChecked());
 }
 
 #include "preferencesdlg.moc"

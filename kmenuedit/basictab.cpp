@@ -62,7 +62,8 @@ BasicTab::BasicTab( QWidget *parent )
     slotDisableAction();
 }
 
-void BasicTab::initGeneralTab() {
+void BasicTab::initGeneralTab()
+{
     // general tab
     QWidget *generalTab = new QWidget();
     QGridLayout *generalTabLayout = new QGridLayout(generalTab);
@@ -142,7 +143,8 @@ void BasicTab::initGeneralTab() {
     addTab(generalTab, i18n("General"));
 }
 
-void BasicTab::initAdvancedTab() {
+void BasicTab::initAdvancedTab()
+{
     // advanced tab
     QWidget *advancedTab = new QWidget();
     QVBoxLayout *advancedTabLayout = new QVBoxLayout(advancedTab);
@@ -222,7 +224,8 @@ void BasicTab::initAdvancedTab() {
     addTab(advancedTab, i18n("Advanced"));
 }
 
-void BasicTab::initConnections() {
+void BasicTab::initConnections()
+{
     // general tab's components
     connect(_nameEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
     connect(_descriptionEdit, SIGNAL(textChanged(QString)), SLOT(slotChanged()));
