@@ -17,149 +17,159 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
-MouseArea {
-    id: main
-    property int minimumWidth: Math.max(200, windowListMenu.implicitWidth) 
-    property int minimumHeight:  Math.max(400, windowListMenu.implicitHeight)
-    property alias data: tasksSource.data;
-    property variant desktopList: []
-    property int iconSize: theme.smallMediumIconSize 
-    property bool showDesktop: true
-    property bool highlight: false
+PlasmaExtras.ConditionalLoader {
+    property int minimumWidth: Math.max(200, item ? item.implicitWidth : 0) 
+    property int minimumHeight:  Math.max(400, item ? item.implicitHeight : 0)
+    when: plasmoid.expanded
 
-    PlasmaComponents.Highlight {
-        id: highlightItem
+    source: Component {
+        MouseArea {
+            id: main
+            anchors.fill: parent
+            implicitWidth: windowListMenu.implicitWidth
+            implicitHeight: windowListMenu.implicitHeight
+            property alias data: tasksSource.data;
+            property variant desktopList: []
+            property int iconSize: theme.smallMediumIconSize 
+            property bool showDesktop: true
+            property bool highlight: false
 
-        property Item trackingItem
-        onTrackingItemChanged: {
-            if (trackingItem) {
-                y = trackingItem.mapToItem(main, 0, 0).y
+            PlasmaComponents.Highlight {
+                id: highlightItem
+
+                property Item trackingItem
+                onTrackingItemChanged: {
+                    if (trackingItem) {
+                        y = trackingItem.mapToItem(main, 0, 0).y
+                    }
+                }
+
+                hover: true
+                width: windowListMenu.width
+                x: 0
+                y: 0
+                height: trackingItem.height
+                visible: true
+                opacity: highlight ? 1 : 0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250
+                        easing: Easing.InOutQuad
+                    }
+                }
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 250
+                        easing: Easing.InOutQuad
+                    }
+                }
+            }
+            Connections {
+                target: windowListMenu.flickableItem
+                onContentYChanged: {
+                    highlightItem.trackingItem = null
+                }
+            }
+
+
+            function performOperation(op) {
+                var service =tasksSource.serviceForSource("");
+                var operation = service.operationDescription(op);
+                service.startOperationCall(operation);
+            }
+
+            function executeJob(operationName, source) {
+                var service = tasksSource.serviceForSource(source);
+                var operation = service.operationDescription(operationName);
+                service.startOperationCall(operation);
+            }
+
+            function setOnDesktop(source, desktop) {
+                var service = tasksSource.serviceForSource(source);
+                var operation = service.operationDescription("toDesktop");
+                operation.desktop = desktop;
+                service.startOperationCall(operation);
+            }
+
+            Component.onCompleted: {
+                var toolTipData = new Object;
+                toolTipData["image"] = "preferences-system-window"; 
+                toolTipData["mainText"] = i18n("Window List"); 
+                toolTipData["subText"] = i18n("Show list of opened windows");
+                plasmoid.popupIconToolTip = toolTipData;
+                plasmoid.popupIcon = QIcon("preferences-system-windows"); 
+                plasmoid.aspectRatioMode = ConstrainedSquare;
+            }
+
+            PlasmaCore.DataSource {
+                id: tasksSource
+                engine: "tasks"
+                onSourceAdded: {
+                    connectSource(source);
+                }
+                Component.onCompleted: {
+                    connectedSources = sources;
+                    connectSource("virtualDesktops");
+                    main.desktopList = tasksSource.data["virtualDesktops"]["names"];
+                }
+            }
+
+            PlasmaCore.SortFilterModel {
+                id: tasksModelSortedByDesktop
+                sortRole: "desktop"
+                sourceModel: PlasmaCore.DataModel {
+                    id: tasksModel
+                    dataSource: tasksSource
+                    sourceFilter: "\\d+"
+                }
+            }
+
+            Column {
+                id: col
+
+                PlasmaComponents.Highlight {
+                    hover: menu.focus
+                    width: windowListMenu.width
+                    height: actions.height + marginHints.top + marginHints.bottom
+                    PlasmaComponents.Label {
+                        id: actions
+                        text: i18n("Actions")
+                        anchors.centerIn: parent
+                    }
+                }
+
+                TaskDelegate {
+                    name: i18n("Unclutter Windows")
+                    onClicked: performOperation("unclutter")
+                }
+
+                TaskDelegate {
+                    name: i18n("Cascade Windows")
+                    onClicked: performOperation("cascade")
+                }
+            }
+
+            Menu {
+                id: windowListMenu
+                anchors {
+                    top: col.bottom
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+
+                model: tasksModelSortedByDesktop
+                section.property: "desktop"
+                section.criteria: ViewSection.FullString
+                iconSize: main.iconSize
+                showDesktop: main.showDesktop
+                onItemSelected: main.executeJob("activate", source);
+                onExecuteJob: main.executeJob(jobName, source);
+                onSetOnDesktop: main.setOnDesktop(source, desktop);
             }
         }
-
-        hover: true
-        width: windowListMenu.width
-        x: 0
-        y: 0
-        height: trackingItem.height
-        visible: true
-        opacity: highlight ? 1 : 0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 250
-                easing: Easing.InOutQuad
-            }
-        }
-        Behavior on y {
-            NumberAnimation {
-                duration: 250
-                easing: Easing.InOutQuad
-            }
-        }
-    }
-    Connections {
-        target: windowListMenu.flickableItem
-        onContentYChanged: {
-            highlightItem.trackingItem = null
-        }
-    }
-
-
-    function performOperation(op) {
-        var service =tasksSource.serviceForSource("");
-        var operation = service.operationDescription(op);
-        service.startOperationCall(operation);
-    }
-
-    function executeJob(operationName, source) {
-        var service = tasksSource.serviceForSource(source);
-        var operation = service.operationDescription(operationName);
-        service.startOperationCall(operation);
-    }
-
-    function setOnDesktop(source, desktop) {
-        var service = tasksSource.serviceForSource(source);
-        var operation = service.operationDescription("toDesktop");
-        operation.desktop = desktop;
-        service.startOperationCall(operation);
-    }
-
-    Component.onCompleted: {
-        var toolTipData = new Object;
-        toolTipData["image"] = "preferences-system-window"; 
-        toolTipData["mainText"] = i18n("Window List"); 
-        toolTipData["subText"] = i18n("Show list of opened windows");
-        plasmoid.popupIconToolTip = toolTipData;
-        plasmoid.popupIcon = QIcon("preferences-system-windows"); 
-        plasmoid.aspectRatioMode = ConstrainedSquare;
-    }
-
-    PlasmaCore.DataSource {
-        id: tasksSource
-        engine: "tasks"
-        onSourceAdded: {
-            connectSource(source);
-        }
-        Component.onCompleted: {
-            connectedSources = sources;
-            connectSource("virtualDesktops");
-            main.desktopList = tasksSource.data["virtualDesktops"]["names"];
-        }
-    }
-
-    PlasmaCore.SortFilterModel {
-        id: tasksModelSortedByDesktop
-        sortRole: "desktop"
-        sourceModel: PlasmaCore.DataModel {
-            id: tasksModel
-            dataSource: tasksSource
-            sourceFilter: "\\d+"
-        }
-    }
-
-    Column {
-        id: col
-
-        PlasmaComponents.Highlight {
-            hover: menu.focus
-            width: windowListMenu.width
-            height: actions.height + marginHints.top + marginHints.bottom
-            PlasmaComponents.Label {
-                id: actions
-                text: i18n("Actions")
-                anchors.centerIn: parent
-            }
-        }
-
-        TaskDelegate {
-            name: i18n("Unclutter Windows")
-            onClicked: performOperation("unclutter")
-        }
-
-        TaskDelegate {
-            name: i18n("Cascade Windows")
-            onClicked: performOperation("cascade")
-        }
-    }
-
-    Menu {
-        id: windowListMenu
-        anchors {
-            top: col.bottom
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-
-        model: tasksModelSortedByDesktop
-        section.property: "desktop"
-        section.criteria: ViewSection.FullString
-        iconSize: main.iconSize
-        showDesktop: main.showDesktop
-        onItemSelected: main.executeJob("activate", source);
-        onExecuteJob: main.executeJob(jobName, source);
-        onSetOnDesktop: main.setOnDesktop(source, desktop);
     }
 }
