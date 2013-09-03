@@ -22,7 +22,8 @@
 
 #include <QTimer>
 #include <QStandardPaths>
-
+#include <QDir>
+#include <QDirIterator>
 
 #include <KDirWatch>
 #include <KConfigGroup>
@@ -46,9 +47,8 @@ HotplugEngine::HotplugEngine(QObject* parent, const QVariantList& args)
     : Plasma::DataEngine(parent, args),
       m_dirWatch(new KDirWatch(this))
 {
-    QStringList folders = QStandardPaths::locateAll(QStandardPaths::DataLocation,
-                                                 "solid/actions/",
-                                                 QStandardPaths::LocateDirectory);
+    const QStringList folders = QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "solid/actions", QStandardPaths::LocateDirectory);
+
     foreach (const QString &folder, folders) {
         m_dirWatch->addDir(folder, KDirWatch::WatchFiles);
     }
@@ -111,10 +111,16 @@ void HotplugEngine::processNextStartupDevice()
 void HotplugEngine::findPredicates()
 {
     m_predicates.clear();
-
-    foreach (const QString &path, QStandardPaths::locateAll(QStandardPaths::DataLocation,
-                                                            "solid/actions/",
-                                                            QStandardPaths::LocateDirectory)) {
+    QStringList files;
+    const QStringList dirs = QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "solid/actions", QStandardPaths::LocateDirectory);
+    Q_FOREACH (const QString& dir, dirs) {
+        QDirIterator it(dir, QStringList() << QStringLiteral("*.desktop"));
+        while (it.hasNext()) {
+            files.prepend(it.next());
+        }
+    }
+    qDebug() << files;
+    foreach (const QString &path, files) {
         KDesktopFile cfg(path);
         const QString string_predicate = cfg.desktopGroup().readEntry("X-KDE-Solid-Predicate");
         //qDebug() << path << string_predicate;
@@ -232,7 +238,8 @@ void HotplugEngine::onDeviceAdded(Solid::Device &device, bool added)
 
         QVariantList actions;
         foreach(const QString& desktop, interestingDesktopFiles) {
-            QString actionUrl = QStandardPaths::locate(QStandardPaths::DataLocation, "solid/actions/" + desktop);
+            const QString actionUrl = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "solid/actions/" + desktop);
+	    qDebug() << actionUrl;
             QList<KServiceAction> services = KDesktopFileActions::userDefinedServices(actionUrl, true);
             if (!services.isEmpty()) {
                 Plasma::DataEngine::Data action;
