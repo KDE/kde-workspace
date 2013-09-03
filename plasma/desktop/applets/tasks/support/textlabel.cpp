@@ -78,7 +78,7 @@ void TextLabel::setText(const QString& text)
         m_text = text;
         m_cachedShadow = QPixmap();
         updateImplicitSize();
-        update();
+        update(boundingRect().adjusted(0, -4, 0, 4));
         emit textChanged(text);
     }
 }
