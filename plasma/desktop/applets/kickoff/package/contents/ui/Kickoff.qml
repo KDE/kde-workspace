@@ -37,8 +37,6 @@ Item {
     state: "Normal"
     focus: true
 
-    function i18n(q) {return q;} //HACK REMOVE THIS
-
     PlasmaCore.DataSource {
         id: packagekitSource
         engine: "packagekit"
@@ -87,9 +85,9 @@ Item {
                     case Kickoff.TopEdge:
                     case Kickoff.LeftEdge:
                     case Kickoff.RightEdge:
-                        return footer.top;
-                    default:
                         return undefined;
+                    default:
+                        return footer.top;
                 }
             }
             right: parent.right
