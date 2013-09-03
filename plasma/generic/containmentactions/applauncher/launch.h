@@ -20,10 +20,14 @@
 #ifndef SWITCHWINDOW_HEADER
 #define SWITCHWINDOW_HEADER
 
+#include <QMenu>
+
+#include <KServiceGroup>
+
 #include <plasma/containmentactions.h>
 
 class QAction;
-class KMenu;
+class QMenu;
 
 class AppLauncher : public Plasma::ContainmentActions
 {
@@ -34,22 +38,15 @@ class AppLauncher : public Plasma::ContainmentActions
 
         void init(const KConfigGroup &config);
 
-        void contextEvent(QEvent *event);
         QList<QAction*> contextualActions();
-        //returns true if something (other than a separator) was successfully added
-        bool addApp(QMenu *menu, const QString &source);
-
-    public Q_SLOTS:
-        void switchTo(QAction *action);
 
     protected:
-        void makeMenu();
+        void makeMenu(QMenu *menu, const KServiceGroup::Ptr group);
 
     private:
-        KMenu *m_menu;
-        QAction *m_action;
+        KServiceGroup::Ptr m_group;
+        QList<QAction *> m_actions;
 };
 
-K_EXPORT_PLASMA_CONTAINMENTACTIONS(applauncher, AppLauncher)
 
 #endif

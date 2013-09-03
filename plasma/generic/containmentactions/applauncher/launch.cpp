@@ -23,114 +23,73 @@
 #include <QGraphicsSceneWheelEvent>
 
 #include <QDebug>
-#include <KIcon>
-#include <KMenu>
 
-#include <Plasma/DataEngine>
-#include <Plasma/Containment>
-#include <Plasma/ServiceJob>
+#include <Plasma/PluginLoader>
+#include <KRun>
 
 AppLauncher::AppLauncher(QObject *parent, const QVariantList &args)
     : Plasma::ContainmentActions(parent, args),
-      m_action(new QAction(this))
+      m_group(new KServiceGroup("/"))
 {
-    m_menu = new KMenu();
-    connect(m_menu, SIGNAL(triggered(QAction*)), this, SLOT(switchTo(QAction*)));
-
-    m_action->setMenu(m_menu);
 }
 
 AppLauncher::~AppLauncher()
 {
-    delete m_menu;
 }
 
 void AppLauncher::init(const KConfigGroup &)
 {
 }
 
-void AppLauncher::contextEvent(QEvent *event)
-{
-    makeMenu();
-    m_menu->adjustSize();
-    m_menu->exec(popupPosition(m_menu->size(), event));
-}
-
 QList<QAction*> AppLauncher::contextualActions()
 {
-    makeMenu();
+    qDeleteAll(m_actions);
+    m_actions.clear();
+    makeMenu(0, m_group);
 
-    QList<QAction*> list;
-    list << m_action;
-    return list;
+    return m_actions;
 }
 
-void AppLauncher::makeMenu()
+void AppLauncher::makeMenu(QMenu *menu, const KServiceGroup::Ptr group)
 {
-    Plasma::DataEngine *apps = dataEngine("apps");
-    if (!apps->isValid()) {
-        return;
-    }
-
-    m_menu->clear();
-
-    //add the whole kmenu
-    Plasma::DataEngine::Data app = dataEngine("apps")->query("/");
-    const QStringList sources = app.value("entries").toStringList();
-    foreach (const QString &source, sources) {
-        addApp(m_menu, source);
-    }
-}
-
-bool AppLauncher::addApp(QMenu *menu, const QString &source)
-{
-    if (source == "---") {
-        menu->addSeparator();
-        return false;
-    }
-
-    Plasma::DataEngine::Data app = dataEngine("apps")->query(source);
-
-    if (!app.value("display").toBool()) {
-        qDebug() << "hidden entry" << source;
-        return false;
-    }
-    QString name = app.value("name").toString();
-    if (name.isEmpty()) {
-        qDebug() << "failed source" << source;
-        return false;
-    }
-
-    name.replace("&", "&&"); //escaping
-    KIcon icon(app.value("iconName").toString());
-
-    if (app.value("isApp").toBool()) {
-        QAction *action = menu->addAction(icon, name);
-        action->setData(source);
-    } else { //ooh, it's actually a group!
-        QMenu *subMenu = menu->addMenu(icon, name);
-        bool hasEntries = false;
-        foreach (const QString &source, app.value("entries").toStringList()) {
-            hasEntries = addApp(subMenu, source) || hasEntries;
-        }
-
-        if (!hasEntries) {
-            delete subMenu;
-            return false;
+    foreach (KSycocaEntry::Ptr p, group->entries(true, false, true)) {
+        if (p->isType(KST_KService)) {
+            const KService::Ptr service = p;
+            QAction *action = new QAction(QIcon::fromTheme(service->icon()), service->genericName().isEmpty() ? service->name() : service->genericName(), this);
+            connect(action, &QAction::triggered, [action](){
+                KService::Ptr service = KService::serviceByStorageId(action->data().toString());
+                new KRun(QUrl("file://"+service->entryPath()), 0);
+            });
+            action->setData(service->storageId());
+            if (menu) {
+                menu->addAction(action);
+            } else {
+                m_actions << action;
+            }
+        } else if (p->isType(KST_KServiceGroup)) {
+            const KServiceGroup::Ptr service = p;
+            if (service->childCount() == 0) {
+                continue;
+            }
+            QAction *action = new QAction(QIcon::fromTheme(service->icon()), service->caption(), this);
+            QMenu *subMenu = new QMenu();
+            makeMenu(subMenu, service);
+            action->setMenu(subMenu);
+            if (menu) {
+                menu->addAction(action);
+            } else {
+                m_actions << action;
+            }
+        } else if (p->isType(KST_KServiceSeparator)) {
+            if (menu) {
+                menu->addSeparator();
+            }
         }
     }
-    return true;
 }
 
-void AppLauncher::switchTo(QAction *action)
-{
-    QString source = action->data().toString();
-    qDebug() << source;
-    Plasma::Service *service = dataEngine("apps")->serviceForSource(source);
-    if (service) {
-        Plasma::ServiceJob *job = service->startOperationCall(service->operationDescription("launch"));
-        connect(job, SIGNAL(finished(KJob*)), service, SLOT(deleteLater()));
-    }
-}
+
+K_EXPORT_PLASMA_CONTAINMENTACTIONS_WITH_JSON(applauncher, AppLauncher, "plasma-containmentactions-applauncher.json")
+
 
 #include "launch.moc"
