@@ -93,14 +93,6 @@ protected:
     ConfigurationManager();
     ConfigurationManager(const ConfigurationManager &); // hide copy constructor
     ConfigurationManager& operator=(const ConfigurationManager &); // hide assign op
-
-Q_SIGNALS:
-    
-
-public Q_SLOTS:
-    
-    
-
 };
 
 #endif
