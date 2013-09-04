@@ -18,10 +18,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.0
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.plasma.extras 0.1 as PlasmaExtras
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
     id: devicenotifier
@@ -29,10 +29,6 @@ Item {
     property int minimumHeight: 340
     property string devicesType: "removable"
     property string expandedDevice
-
-    PlasmaCore.Theme {
-        id: theme
-    }
 
     PlasmaCore.DataSource {
         id: hpSource
@@ -106,7 +102,7 @@ Item {
             if (last != "") {
                 statusBar.setData(data[last]["error"], data[last]["errorDetails"], data[last]["udi"]);
                 plasmoid.status = "NeedsAttentionStatus";
-                plasmoid.showPopup(2500)
+                plasmoid.expanded = true;
             }
         }
     }
@@ -114,7 +110,6 @@ Item {
     Component.onCompleted: {
         plasmoid.addEventListener ('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);
-        plasmoid.aspectRatioMode = IgnoreAspectRatio;
 
         if (notifierDialog.count == 0) {
             plasmoid.status = "PassiveStatus"
@@ -151,7 +146,7 @@ Item {
         notifierDialog.itemClicked = false;
 
         plasmoid.setPopupIconByName("preferences-desktop-notification")
-        plasmoid.showPopup(7500)
+        plasmoid.expanded = true;
         popupIconTimer.restart()
     }
 
@@ -178,7 +173,7 @@ Item {
     Timer {
         id: passiveTimer
         interval: 2500
-        onTriggered: plasmoid.status = "PassiveStatus"
+        onTriggered: plasmoid.status = PlasmaCore.Types.PassiveStatus
     }
 
     MouseArea {
@@ -257,13 +252,13 @@ Item {
                 function itemHovered()
                 {
                     // prevent autohide from catching us!
-                    plasmoid.showPopup(0);
+                    plasmoid.expanded = true;
                 }
 
                 function itemUnhovered()
                 {
                     if (!itemClicked) {
-                        plasmoid.showPopup(1000);
+                        plasmoid.expanded = true;
                     }
                 }
 
@@ -272,7 +267,7 @@ Item {
                     if (!itemClicked) {
                         // prevent autohide from catching us!
                         itemClicked = true;
-                        plasmoid.showPopup(0)
+                        plasmoid.expanded = true;
                     }
                 }
 
@@ -325,9 +320,9 @@ Item {
                 }
                 leftActionIcon: {
                     if (mounted) {
-                        return QIcon("media-eject");
+                        return "media-eject";
                     } else {
-                        return QIcon("emblem-mounted");
+                        return "emblem-mounted";
                     }
                 }
                 mounted: model["Accessible"]

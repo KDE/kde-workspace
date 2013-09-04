@@ -153,7 +153,7 @@ Comment[zh_TW]=通知與存取新裝置
 
 Icon=device-notifier
 Type=Service
-X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
+X-KDE-ServiceTypes=Plasma/Applet
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/devicenotifier.qml

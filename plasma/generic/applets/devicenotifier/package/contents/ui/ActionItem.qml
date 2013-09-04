@@ -18,10 +18,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import Qt 4.7
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1
-import org.kde.plasma.components 0.1 as PlasmaComponents
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.qtextracomponents 2.0
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
     property string icon
@@ -32,7 +32,7 @@ Item {
 
     PlasmaCore.IconItem {
         id: actionIcon
-        source: QIcon (parent.icon)
+        source: parent.icon
         height: actionsList.actionIconHeight
         width: actionsList.actionIconHeight
         anchors {

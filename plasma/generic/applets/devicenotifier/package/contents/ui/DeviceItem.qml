@@ -18,10 +18,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import Qt 4.7
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0
 
 Item {
     id: deviceItem
@@ -87,7 +87,7 @@ Item {
             width: theme.iconSizes.dialog
             height: width
             z: 900
-            source: QIcon(deviceItem.icon)
+            source: deviceItem.icon
             enabled: deviceItem.state == 0
             anchors {
                 left: parent.left
@@ -98,7 +98,7 @@ Item {
                 id: emblem
                 width: theme.iconSizes.dialog * 0.5
                 height: width
-                source: deviceItem.state == 0 ? QIcon(emblemIcon) : QIcon();
+                source: deviceItem.state == 0 ? emblemIcon : undefined;
                 anchors {
                     left: parent.left
                     bottom: parent.bottom
