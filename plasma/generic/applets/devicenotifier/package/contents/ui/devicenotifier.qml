@@ -119,8 +119,8 @@ Item {
 
     function configChanged()
     {
-        var all = plasmoid.readConfig("allDevices");
-        var removable = plasmoid.readConfig("removableDevices");
+        var all = plasmoid.configuration.allDevices;
+        var removable = plasmoid.configuration.removableDevices;
         if (all == true) {
             devicesType = "all";
             filterModel.filterRegExp = "";
@@ -225,7 +225,20 @@ Item {
                         dataSource: sdSource
                     }
                     filterRole: "Removable"
-                    filterRegExp: "true"
+                    filterRegExp: {
+		      var all = plasmoid.configuration.allDevices;
+		      var removable = plasmoid.configuration.removableDevices;
+		      if (all == true) {
+			  devicesType = "all";
+			  return "";
+		      } else if (removable == true) {
+			  devicesType = "removable";
+			  return "true";
+		      } else {
+			  devicesType = "nonRemovable";
+			  return "false";
+		      }
+		    }
                     sortRole: "Timestamp"
                     sortOrder: Qt.DescendingOrder
                 }
