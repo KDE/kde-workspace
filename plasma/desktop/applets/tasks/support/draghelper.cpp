@@ -34,7 +34,7 @@ DragHelper::~DragHelper()
 {
 }
 
-bool DragHelper::isDrag(int oldX, int oldY, int newY, int newX) const
+bool DragHelper::isDrag(int oldX, int oldY, int newX, int newY) const
 {
     return ((QPoint(oldX, oldY) - QPoint(newX, newY)).manhattanLength() >= QApplication::startDragDistance());
 }
