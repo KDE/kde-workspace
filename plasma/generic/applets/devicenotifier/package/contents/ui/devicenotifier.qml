@@ -101,7 +101,7 @@ Item {
         onDataChanged: {
             if (last != "") {
                 statusBar.setData(data[last]["error"], data[last]["errorDetails"], data[last]["udi"]);
-                plasmoid.status = "NeedsAttentionStatus";
+                plasmoid.status = PlasmaCore.Types.NeedsAttentionStatus;
                 plasmoid.expanded = true;
             }
         }
@@ -112,7 +112,7 @@ Item {
         plasmoid.popupEvent.connect(popupEventSlot);
 
         if (notifierDialog.count == 0) {
-            plasmoid.status = "PassiveStatus"
+            plasmoid.status = PlasmaCore.Types.PassiveStatus;
         }
         updateTooltip()
     }

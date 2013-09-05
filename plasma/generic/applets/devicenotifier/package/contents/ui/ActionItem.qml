@@ -71,8 +71,8 @@ Item {
             actionsList.highlightItem.opacity = 0;
         }
         onClicked: {
-            service = hpSource.serviceForSource(udi);
-            operation = service.operationDescription("invokeAction");
+            var service = hpSource.serviceForSource(udi);
+            var operation = service.operationDescription("invokeAction");
             operation.predicate = predicate;
             service.startOperationCall(operation);
             notifierDialog.currentExpanded = -1;
