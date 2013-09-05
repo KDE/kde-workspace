@@ -15,10 +15,21 @@ namespace grammar{
 
 symbol_keywords :: symbol_keywords(){
     add
-            ("key",2)
-            ("include",1)
-            ("//",3)
-            ("*/",4)
+            ("key", 2)
+            ("include", 1)
+            ("//", 3)
+            ("*/", 4)
+        ;
+}
+
+levels ::levels(){
+    add
+            ("ONE", 1)
+            ("TWO", 2)
+            ("THREE", 3)
+            ("FOUR", 4)
+            ("SIX", 6)
+            ("EIGHT", 8)
         ;
 }
 
@@ -37,13 +48,18 @@ Symbol_parser<Iterator>::Symbol_parser():Symbol_parser::base_type(start){
 
 
     name %= '"'>>+(char_-'"')>>'"';
+
+
     group = lit("Group")>>int_;
 
     comments =lexeme[ lit("//")>>*(char_-eol||skw-eol)>>eol||lit("/*")>>*(char_-lit("*/")||skw-lit("*/"))>>lit("*/") ];
 
     include = lit("include")>>name[phx::bind(&Symbol_parser::getInclude,this,_1)];
-    type = lit("type")>>'['>>group>>lit(']')>>lit('=')>>name;
+
+    type = lit("type")>>'['>>group>>lit(']')>>lit('=')>>lit("\"")>>*(char_ - lvl)>>*lvl[phx::bind(&Symbol_parser::setLevel, this, _1)]>>*(char_ - lvl - '"')>>lit("\"");
+
     symbol = +(char_-','-']');
+
     symbols = *(lit("symbols")
         >>'['>>group>>lit(']')>>lit('='))
         >>'['>>symbol[phx::bind(&Symbol_parser::getSymbol,this,_1)]
@@ -51,11 +67,12 @@ Symbol_parser<Iterator>::Symbol_parser():Symbol_parser::base_type(start){
 
     keyName = '<'>>*(char_-'>')>>'>';
 
-    key = lit("key")>>keyName[phx::bind(&Symbol_parser::addKeyName,this,_1)]
+    key = (lit("key")>>keyName[phx::bind(&Symbol_parser::addKeyName,this,_1)]
         >>'{'>>*(type>>',')
         >>symbols
         >>*(','>>type)
-        >>lit("};");
+       >>lit("};"))
+       ||lit("key")>>lit(".")>>type>>lit(";");
 
     ee = *(char_ - skw - '{')>>'{'>>*(char_-'}'-';')>>lit("};");
 
@@ -119,6 +136,14 @@ template<typename Iterator>
 void Symbol_parser<Iterator>::setName(std::string n){
     layout.setName(QString::fromUtf8(n.data(), n.size()));
     //qDebug() << layout.getLayoutName();
+}
+
+template<typename Iterator>
+void Symbol_parser<Iterator> :: setLevel(int lvl){
+    if(lvl > layout.getLevel()){
+        layout.setLevel(lvl);
+        qDebug()<< lvl;
+    }
 }
 
 
@@ -230,7 +255,7 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
 
         bool r = phrase_parse(iter, end, s, space);
 
-        /*if (r && iter == end){
+        if (r && iter == end){
             std::cout << "-------------------------\n";
             std::cout << "Parsing succeeded\n";
             std::cout << "\n-------------------------\n";
@@ -240,10 +265,10 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
             std::cout << "Parsing failed\n";
             std::cout << "-------------------------\n";
             qDebug()<<input;
-        }*/
+        }
     }
 
-    //s.layout.display();
+    s.layout.display();
 
     return s.layout;
 }

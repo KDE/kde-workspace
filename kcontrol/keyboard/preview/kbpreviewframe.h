@@ -43,6 +43,7 @@ private:
     QStringList tooltip;
     QList <QPoint> tipPoint;
     static const int width = 1100, height = 490;
+    int l_id;
 
     Geometry& geometry;
     void drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name);
@@ -64,6 +65,14 @@ public:
     int getWidth() const;
     int getHeight() const;
 
+    int getLevel(){
+        return keyboardLayout.getLevel();
+    }
+
+    void setL_id(int lId){
+        l_id = lId;
+        repaint();
+    }
 
     explicit KbPreviewFrame(QWidget *parent = 0);
     virtual ~KbPreviewFrame();

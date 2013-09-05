@@ -15,9 +15,11 @@ void KbKey::setKeyName(QString n){
 }
 
 void KbKey::addSymbol(QString n, int i){
-    symbols[i] = n;
-    symbolCount++;
-    symbols << QString();
+    if( !symbols.contains(n)){
+        symbols[i] = n;
+        symbolCount++;
+        symbols << QString();
+    }
 }
 
 
@@ -38,6 +40,7 @@ void KbKey::display(){
 KbLayout::KbLayout(){
     keyCount = 0;
     includeCount = 0;
+    level = 4;
     keyList << KbKey();
     include << QString();
 }

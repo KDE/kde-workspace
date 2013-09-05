@@ -42,6 +42,7 @@ static const QColor unknownSymbolColor("#FF3300");
 static const int xOffset[] = {10, 10, -15, -15 };
 static const int yOffset[] = {5, -20, 5, -20 };
 static const QColor color[] = { lev12color, lev12color, lev34color, lev34color };
+static const int keyLevel[3][4] = { { 0, 1, 2, 3}, { 0, 1, 4, 5}, { 0, 1, 6, 7} };
 
 
 KbPreviewFrame::KbPreviewFrame(QWidget *parent) :
@@ -51,6 +52,7 @@ KbPreviewFrame::KbPreviewFrame(QWidget *parent) :
      setFrameStyle( QFrame::Box );
      setFrameShadow(QFrame::Sunken);
      setMouseTracking(true);
+     l_id = 0;
 }
 
 KbPreviewFrame::~KbPreviewFrame() {
@@ -68,16 +70,25 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
     int keyindex = keyboardLayout.findKey(name);
     int sz = 20;
     int cordinate[] = {0, 3, 1, 2};
+    float tooltipX = 0, toolTipY = 0;
+    QString tip;
     if(keyindex != -1){
         KbKey key = keyboardLayout.keyList.at(keyindex);
-        float tooltipX = 0, toolTipY = 0;
-        QString tip;
+
         for(int level=0; level< (key.getSymbolCount() < 4 ? key.getSymbolCount() : 4); level++) {
-            QString txt = symbol.getKeySymbol(key.getSymbol(level));
+            if(keyLevel[1][level] < key.getSymbolCount()){
+            QString txt = symbol.getKeySymbol(key.getSymbol(keyLevel[l_id][level]));
             QColor txtColor = txt[0] == -1 ? unknownSymbolColor : color[level];
             painter.setPen(txtColor);
             painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, txt);
-            tip.append(key.getSymbol(level)+"\n");
+
+            QString currentSymbol = key.getSymbol(keyLevel[l_id][level]);
+            currentSymbol = currentSymbol.size() < 3 ? currentSymbol.append("\t") : currentSymbol;
+            if(level == 0)
+                tip.append(currentSymbol);
+            else
+                tip.append("\n" + currentSymbol);
+            }
         }
         for(int i = 0 ; i < 4; i++){
             tooltipX += temp[i].x();
@@ -92,6 +103,18 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
     else{
         painter.setPen(Qt::black);
         painter.drawText(temp[0].x()+s.size(0)-10,temp[0].y()+3*s.size(1)/2,name);
+
+        tip = name;
+        for(int i = 0 ; i < 4; i++){
+            tooltipX += temp[i].x();
+            toolTipY += temp[i].y();
+        }
+
+        tooltipX = tooltipX/4;
+        toolTipY = toolTipY/4;
+        QPoint tooltipPoint = QPoint(tooltipX, toolTipY);
+        tooltip.append(tip);
+        tipPoint.append(tooltipPoint);
     }
 }
 
@@ -284,7 +307,7 @@ int KbPreviewFrame::itemAt(const QPoint& pos){
             closest = i;
         }
     }
-    if(distance < 100)
+    if(distance < 25)
         return closest;
     else
         return -1;

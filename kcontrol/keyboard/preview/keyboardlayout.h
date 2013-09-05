@@ -32,7 +32,7 @@ public :
 
     KbKey();
     void setKeyName(QString n);
-    void addSymbol(QString n,int i);
+    void addSymbol(QString n, int i);
     QString getSymbol(int i);
     int getSymbolCount(){
         return symbolCount;
@@ -45,7 +45,7 @@ public :
 class KbLayout{
     QList<QString> include;
     QString name;
-    int keyCount, includeCount;
+    int keyCount, includeCount, level;
 public:
     QList <KbKey> keyList;
     QString country;
@@ -54,6 +54,14 @@ public:
     void setName(QString n);
     void addInclude(QString n);
     void addKey();
+
+    void setLevel(int lvl){
+        level = lvl;
+    }
+
+    int getLevel(){
+        return level;
+    }
 
     int getKeyCount(){
         return keyCount;

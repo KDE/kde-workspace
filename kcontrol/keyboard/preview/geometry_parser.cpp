@@ -25,6 +25,7 @@
 #include <QtCore/QDebug>
 #include <QFileDialog>
 #include <QFile>
+#include <QtCore/QPair>
 
 
 #include <fixx11h.h>
@@ -416,7 +417,7 @@ template<typename Iterator>
     }
 
 
-    QString mapModelToGeometry(QString model){
+    QPair <QString, QString> mapModelToGeometry(QString model){
         QStringList pcmodels;
         QStringList msmodels;
         QStringList nokiamodels;
@@ -433,67 +434,67 @@ template<typename Iterator>
         macs << "macintosh" << "macintosh_old" << "ibook" << "powerbook" << "macbook78" << "macbook79";
 
         if (model == "thinkpad     us"){
-            return("thinkpad|us");
+            return(QPair<QString, QString> ("thinkpad", "us"));
         }
         if (model == "microsoftelite"){
-            return("microsoft|elite");
+            return(QPair<QString, QString> ("microsoft", "elite"));
         }
         if (msmodels.contains(model)){
-            return("microsoft|natural");
+            return(QPair<QString, QString> ("microsoft", "natural"));
         }
         if (model == "dell101"){
-            return("dell|dell101");
+            return(QPair<QString, QString> ("dell", "dell101"));
         }
         if (model == "dellm65"){
-            return("dell|dellm65");
+            return(QPair<QString, QString> ("dell", "dellm65"));
         }
         if (model == "latitude"){
-            return("dell|latitude");
+            return(QPair<QString, QString> ("dell", "latitude"));
         }
         if (model == "flexpro"){
-            return("keytronic|FlexPro");
+            return(QPair<QString, QString> ("keytronic", "FlexPro"));
         }
-        if(model == "hp6000"|| model == "hpmini110"){
-            return("hp|mini110");
+        if(model == "hp6000" || model == "hpmini110"){
+            return(QPair<QString, QString> ("hp", "mini110"));
         }
         if(model == "hpdv5"){
-            return("hp|dv5");
+            return(QPair<QString, QString> ("hp", "dv5"));
         }
         if(model == "omnikey101"){
-            return("northgate|omnikey101");
+            return(QPair<QString, QString> ("northgate", "omnikey101"));
         }
         if(model == "sanwaskbkg3"){
-            return("sanwa|sanwaskbkg3");
+            return(QPair<QString, QString> ("sanwa", "sanwaskbkg3"));
         }
-        if(pcmodels.contains(model)||pcgeometries.contains(model)){
-            return("pc|"+model);
+        if(pcmodels.contains(model) || pcgeometries.contains(model)){
+            return(QPair<QString, QString> ("pc", model));
         }
         if(model == "everex"){
-            return("everex|STEPnote");
+            return(QPair<QString, QString> ("everex", "STEPnote"));
         }
         if(model.contains("thinkpad")){
-            return("thinkpad|60");
+            return(QPair<QString, QString> ("thinkpad", "60"));
         }
         if(model == "winbook"){
-            return("winbook|XP5");
+            return(QPair<QString, QString> ("winbook", "XP5"));
         }
         if(model == "pc98"){
-            return("nec|pc98");
+            return(QPair<QString, QString> ("nec", "pc98"));
         }
         if(model == "hhk"){
-            return("hhk|basic");
+            return(QPair<QString, QString> ("hhk", "basic"));
         }
         if(model == "kinesis"){
-            return("kinesis|model100");
+            return(QPair<QString, QString> ("kinesis", "model100"));
         }
         if(nokiamodels.contains(model)){
-            return("nokia|"+model);
+            return(QPair<QString, QString> ("nokia", "+model"));
         }
-        if(macs.contains(model)||macbooks.contains(model)||applealu.contains(model)){
-            return("macintosh|"+model);
+        if(macs.contains(model) || macbooks.contains(model) || applealu.contains(model)){
+            return(QPair<QString, QString> ("macintosh", "+model"));
         }
 
-        return("pc|pc104");
+        return(QPair<QString, QString> ("pc", "pc104"));
     }
 
 
@@ -504,14 +505,14 @@ template<typename Iterator>
         typedef grammar::Geometry_parser<iterator_type> Geometry_parser;
         Geometry_parser g;
 
-        QString geometry = mapModelToGeometry(model);
+        QPair<QString, QString> geometry = mapModelToGeometry(model);
         //qDebug()<<geometry;
-        QStringList mapedModel = geometry.split('|');
-        QString geometryfile = mapedModel.at(0);
-        QString geometryName = mapedModel.at(1);
+        QString geometryFile = geometry.first;
+        QString geometryName = geometry.second;
+        //qDebug()<< geometryFile << geometryName;
         QString xkbParentDir = findGeometryBaseDir();
-        geometryfile.prepend(xkbParentDir);
-        QFile gfile(geometryfile);
+        geometryFile.prepend(xkbParentDir);
+        QFile gfile(geometryFile);
          if (!gfile.open(QIODevice::ReadOnly | QIODevice::Text)){
              qDebug()<<"unable to open the file";
              return g.geom;

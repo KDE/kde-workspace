@@ -131,7 +131,7 @@ namespace grammar{
   };
   
   Geometry parseGeometry(QString model);
-  QString mapModelToGeometry(QString model);
+  QPair<QString, QString> mapModelToGeometry(QString model);
   QString findGeometryBaseDir();
   
 }

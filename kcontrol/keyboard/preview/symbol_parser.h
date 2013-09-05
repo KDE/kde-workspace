@@ -33,6 +33,10 @@ namespace grammar {
         symbol_keywords();
     };
 
+    struct levels : qi::symbols<char, int>{
+        levels();
+    };
+
     template<typename Iterator>
     struct Symbol_parser : qi::grammar<Iterator, iso::space_type>{
 
@@ -52,6 +56,7 @@ namespace grammar {
         KbLayout layout;
         int keyIndex, newKey;
         symbol_keywords skw;
+        levels lvl;
         Aliases alias;
 
         void getSymbol(std::string n);
@@ -59,6 +64,7 @@ namespace grammar {
         void getInclude(std::string n);
         void addKey();
         void setName(std::string n);
+        void setLevel(int lvl);
 
     };
 

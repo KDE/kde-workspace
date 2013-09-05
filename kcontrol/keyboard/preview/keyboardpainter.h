@@ -25,6 +25,7 @@
 #include <QtGui/QDialog>
 
 class QPushButton;
+class QComboBox;
 
 class KeyboardPainter : public QDialog
 {
@@ -36,11 +37,15 @@ public:
     void generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model);
     int getHeight();
     int getWidth();
+
+public Q_SLOTS:
+    void levelChanged(int l_id);
     
 private:
     QDialog *kbDialog;
     KbPreviewFrame *kbframe;
     QPushButton *exitButton;
+    QComboBox *levelBox;
 };
 
 #endif // KEYBOARDPAINTER_H
