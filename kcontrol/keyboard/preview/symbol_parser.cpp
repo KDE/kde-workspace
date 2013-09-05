@@ -1,16 +1,13 @@
 #include "symbol_parser.h"
 #include "keyboardlayout.h"
 #include "keyaliases.h"
+#include "x11_helper.h"
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QDebug>
 #include <QFileDialog>
 #include <QFile>
-
-
-#include <fixx11h.h>
-#include <config-workspace.h>
 
 
 
@@ -127,29 +124,8 @@ void Symbol_parser<Iterator>::setName(std::string n){
 
 QString findSymbolBaseDir()
 {
-    QString xkbParentDir;
-
-    QString base(XLIBDIR);
-    if( base.count('/') >= 3 ) {
-        // .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
-        QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
-        QDir baseDir(base + delta);
-        if( baseDir.exists() ) {
-            xkbParentDir = baseDir.absolutePath();
-        }
-        else {
-            QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
-            if( baseDir.exists() ) {
-                xkbParentDir = baseDir.absolutePath();
-            }
-        }
-    }
-
-    if( xkbParentDir.isEmpty() ) {
-        xkbParentDir = "/usr/share/X11";
-    }
-
-    return QString("%1/xkb/symbols/").arg(xkbParentDir);
+    QString xkbDir = X11Helper::findXkbDir();
+    return QString("%1/symbols/").arg(xkbDir);
 }
 
 

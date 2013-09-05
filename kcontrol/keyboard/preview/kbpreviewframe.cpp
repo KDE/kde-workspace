@@ -37,7 +37,8 @@
 
 static const QColor keyBorderColor("#d4d4d4");
 static const QColor lev12color(Qt::black);
-static const QColor lev34color("#FF3300");
+static const QColor lev34color("#0033FF");
+static const QColor unknownSymbolColor("#FF3300");
 static const int xOffset[] = {10, 10, -15, -15 };
 static const int yOffset[] = {5, -20, 5, -20 };
 static const QColor color[] = { lev12color, lev12color, lev34color, lev34color };
@@ -72,8 +73,10 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
         float tooltipX = 0, toolTipY = 0;
         QString tip;
         for(int level=0; level< (key.getSymbolCount() < 4 ? key.getSymbolCount() : 4); level++) {
-            painter.setPen(color[level]);
-            painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, symbol.getKeySymbol(key.getSymbol(level)));
+            QString txt = symbol.getKeySymbol(key.getSymbol(level));
+            QColor txtColor = txt[0] == -1 ? unknownSymbolColor : color[level];
+            painter.setPen(txtColor);
+            painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, txt);
             tip.append(key.getSymbol(level)+"\n");
         }
         for(int i = 0 ; i < 4; i++){

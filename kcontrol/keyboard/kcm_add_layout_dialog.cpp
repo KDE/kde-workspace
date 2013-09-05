@@ -68,9 +68,10 @@ AddLayoutDialog::AddLayoutDialog(const Rules* rules_, Flags* flags_, bool showLa
     connect(layoutDialogUi->layoutComboBox, SIGNAL(activated(int)), this, SLOT(layoutChanged(int)));
 
 #ifdef NEW_GEOMETRY
-    connect(layoutDialogUi->prevbutton,SIGNAL(clicked()),this,SLOT(preview()));
+    connect(layoutDialogUi->prevbutton, SIGNAL(clicked()), this, SLOT(preview()));
+#else
+    layoutDialogUi->prevbutton->setVisible(false);
 #endif
-    layoutDialogUi->prevbutton->setEnabled(false);
 
 }
 
@@ -159,7 +160,8 @@ void AddLayoutDialog::accept()
 }
 
 #ifdef NEW_GEOMETRY
-void AddLayoutDialog::preview(){
+void AddLayoutDialog::preview()
+{
     int index = layoutDialogUi->variantComboBox->currentIndex();
     QString variant = layoutDialogUi->variantComboBox->itemData(index).toString();
     KeyboardPainter* layoutPreview = new KeyboardPainter();

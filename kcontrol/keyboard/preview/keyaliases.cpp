@@ -17,6 +17,8 @@
  */
 
 #include "keyaliases.h"
+#include "x11_helper.h"
+
 #include <QtCore/QString>
 #include <QtCore/QMap>
 #include <QtGui/QMessageBox>
@@ -88,40 +90,20 @@ Aliases::Aliases()
 QString Aliases::getAlias(const QString& cname, const QString& name)
 {
     QMessageBox q;
-    QString a=name;
+    QString a = name;
+
     if(cname=="ma" || cname == "be" || cname == "fr"){
         a=azerty.value(name);
     }
     else{
         a=qwerty.value(name);
     }
+
     return a;
 }
 
-QString Aliases::findaliasdir(){
-
-    QString aliasdir;
-    QString xkbParentDir;
-
-    QString base(XLIBDIR);
-    if( base.count('/') >= 3 ) {
-        // .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
-        QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
-        QDir baseDir(base + delta);
-        if( baseDir.exists() ) {
-            xkbParentDir = baseDir.absolutePath();
-        }
-        else {
-            QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
-            if( baseDir.exists() ) {
-                xkbParentDir = baseDir.absolutePath();
-            }
-        }
-    }
-
-    if( xkbParentDir.isEmpty() ) {
-        xkbParentDir = "/usr/share/X11";
-    }
-    aliasdir=QString("%1/xkb/keycodes/aliases").arg(xkbParentDir);
-    return(aliasdir);
+QString Aliases::findaliasdir()
+{
+    QString xkbDir = X11Helper::findXkbDir();
+    return QString("%1/keycodes/aliases").arg(xkbDir);
 }

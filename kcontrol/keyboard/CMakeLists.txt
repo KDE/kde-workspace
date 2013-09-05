@@ -121,8 +121,8 @@ if(Boost_FOUND)
     preview/keysym2ucs.cpp)
   
 else(Boost_FOUND)
-  message("Boost not found, Install Boost Libraries to enable keyboard geometry preview.")
-  
+
+  message("Boost not found, install Boost libraries to enable keyboard geometry preview")
 
 endif(Boost_FOUND)
 

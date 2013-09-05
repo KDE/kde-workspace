@@ -1,5 +1,24 @@
+/*
+ *  Copyright (C) 2013 Shivam Makkar (amourphious1992@gmail.com)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include "geometry_parser.h"
 #include "geometry_components.h"
+#include "x11_helper.h"
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -530,33 +549,10 @@ template<typename Iterator>
 
     }
 
-
-
     QString findGeometryBaseDir()
     {
-        QString xkbParentDir;
-
-        QString base(XLIBDIR);
-        if( base.count('/') >= 3 ) {
-            // .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
-            QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
-            QDir baseDir(base + delta);
-            if( baseDir.exists() ) {
-                xkbParentDir = baseDir.absolutePath();
-            }
-            else {
-                QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
-                if( baseDir.exists() ) {
-                    xkbParentDir = baseDir.absolutePath();
-                }
-            }
-        }
-
-        if( xkbParentDir.isEmpty() ) {
-            xkbParentDir = "/usr/share/X11";
-        }
-
-        return QString("%1/xkb/geometry/").arg(xkbParentDir);
+        QString xkbDir = X11Helper::findXkbDir();
+        return QString("%1/geometry/").arg(xkbDir);
     }
 
 }
