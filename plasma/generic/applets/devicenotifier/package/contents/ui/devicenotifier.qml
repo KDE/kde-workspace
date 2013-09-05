@@ -341,9 +341,9 @@ Item {
                 mounted: model["Accessible"]
 
                 onLeftActionTriggered: {
-                    operationName = mounted ? "unmount" : "mount";
-                    service = sdSource.serviceForSource(udi);
-                    operation = service.operationDescription(operationName);
+                    var operationName = mounted ? "unmount" : "mount";
+                    var service = sdSource.serviceForSource(udi);
+                    var operation = service.operationDescription(operationName);
                     service.startOperationCall(operation);
                 }
                 property bool isLast: (expandedDevice == udi)
