@@ -31,6 +31,11 @@ DragDrop.DropArea {
     width: 640
     height: 48
 
+    property int minimumWidth: currentLayout.Layout.minimumWidth
+    property int maximumWidth: currentLayout.Layout.maximumWidth
+    implicitWidth: currentLayout.implicitWidth
+
+    
     property Item toolBox
 
     property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
