@@ -44,6 +44,7 @@ find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KStyle KCompletion KJobWidgets KTextWidgets XmlGui KCrash
     KIO KUnitConversion KDE4Attic)
 
+find_package(KBookmarks REQUIRED NO_MODULE)
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(kdeclarative REQUIRED NO_MODULE)
 find_package(KInterProcessWindowing REQUIRED NO_MODULE)
