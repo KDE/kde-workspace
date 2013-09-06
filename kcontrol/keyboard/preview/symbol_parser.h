@@ -41,6 +41,7 @@ namespace grammar {
     struct Symbol_parser : qi::grammar<Iterator, iso::space_type>{
 
         Symbol_parser();
+
         qi::rule<Iterator,  iso::space_type>start;
         qi::rule<Iterator, std::string(), iso::space_type>name;
         qi::rule<Iterator, std::string(), iso::space_type>keyName;

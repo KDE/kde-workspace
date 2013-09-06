@@ -42,10 +42,14 @@ Aliases::Aliases()
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString content = file.readAll();
     file.close();
+
     QList<QString>als;
     als=content.split("xkb_keycodes");
-    for(int i=1;i<als.size();i++){
+
+    for(int i=1; i<als.size(); i++){
+
         QString temp=als.at(i);
+
         temp=temp.remove(" ");
         temp=temp.remove("\n");
         temp=temp.remove("\"");
@@ -54,38 +58,57 @@ Aliases::Aliases()
         temp=temp.remove(";");
         temp=temp.remove("}");
         temp=temp.remove("{");
+
         QList<QString>alskeys;
+
         alskeys=temp.split("alias");
+
         if(temp.startsWith("qwerty")){
+
             for(int k=1;k<alskeys.size();k++){
+
                 QString tmp=alskeys.at(k);
                 int inofeq=tmp.indexOf("=");
+
                 QString lat=tmp.left(inofeq);
                 QString key=tmp.mid(inofeq+1);
+
                 qwerty[lat]=key;
             }
         }
+
         if(temp.startsWith("azerty")){
+
             for(int k=1;k<alskeys.size();k++){
                 QString tmp=alskeys.at(k);
+
                 int inofeq=tmp.indexOf("=");
+
                 QString lat=tmp.left(inofeq);
                 QString key=tmp.mid(inofeq+1);
+
                 azerty[lat]=key;
             }
       }
-       if(temp.startsWith("qwertz")){
+
+        if(temp.startsWith("qwertz")){
             for(int k=1;k<alskeys.size();k++){
-                 QString tmp=alskeys.at(k);
-                 int inofeq=tmp.indexOf("=");
-                 QString lat=tmp.left(inofeq);
+
+                QString tmp=alskeys.at(k);
+
+                int inofeq=tmp.indexOf("=");
+
+                QString lat=tmp.left(inofeq);
                  QString key=tmp.mid(inofeq+1);
+
                  qwertz[lat]=key;
             }
        }
    }
 
 }
+
+
 
 QString Aliases::getAlias(const QString& cname, const QString& name)
 {

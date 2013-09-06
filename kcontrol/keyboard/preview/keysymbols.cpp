@@ -29,6 +29,7 @@ KeySymbols::KeySymbols()
 {
 }
 
+
 void KeySymbols::setKey(const QString& a)
 {
     int i=a.indexOf("<");
@@ -50,7 +51,7 @@ void KeySymbols::setKey(const QString& a)
     	symbols = symbols.mid(0, MAX_GROUPS_SUPPORTED);
     }
 
-    for(int k=0;k<symbols.size();k++){
+    for(int k=0; k<symbols.size(); k++){
         QString du=symbols.at(k);
         du.remove(" ");
         du.remove("\t");

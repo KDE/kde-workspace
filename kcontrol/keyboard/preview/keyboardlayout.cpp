@@ -5,14 +5,17 @@
 #include <QString>
 #include <QList>
 
+
 KbKey::KbKey(){
     symbolCount = 0;
     symbols << QString();
 }
 
+
 void KbKey::setKeyName(QString n){
         keyName = n;
 }
+
 
 void KbKey::addSymbol(QString n, int i){
     if( !symbols.contains(n)){
@@ -23,12 +26,14 @@ void KbKey::addSymbol(QString n, int i){
 }
 
 
+
 QString KbKey::getSymbol(int i){
     if(i < symbolCount)
         return symbols[i];
     else
         return QString();
 }
+
 
 void KbKey::display(){
     qDebug()<<keyName<<" : ";
@@ -45,9 +50,11 @@ KbLayout::KbLayout(){
     include << QString();
 }
 
+
 void KbLayout::setName(QString n){
     name = n;
 }
+
 
 void KbLayout::addInclude(QString n){
     if(!include.contains(n)){
@@ -58,10 +65,12 @@ void KbLayout::addInclude(QString n){
 }
 
 
+
 void KbLayout :: addKey(){
     keyCount++;
     keyList << KbKey();
 }
+
 
 QString KbLayout :: getInclude(int i){
     if(i < includeCount)
@@ -69,6 +78,8 @@ QString KbLayout :: getInclude(int i){
     else
         return QString();
 }
+
+
 
 int KbLayout :: findKey(QString n){
     for(int i = 0 ; i < keyCount ; i++){
@@ -78,6 +89,8 @@ int KbLayout :: findKey(QString n){
     }
     return -1;
 }
+
+
 
 void KbLayout::display(){
     qDebug()<< name <<"\n";

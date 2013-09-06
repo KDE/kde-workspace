@@ -44,7 +44,7 @@ class Key{
 
 public:
   Key();
-  void setKeyPosition(double x,double y);
+  void setKeyPosition(double x, double y);
 
   void setOffset(double o){
       offset = o;
@@ -79,8 +79,8 @@ public:
 
 class Row{
 private:
-  double top,left;
-  int keyCount,vertical;
+  double top, left;
+  int keyCount, vertical;
   QString shapeName;
 
 public :
@@ -130,9 +130,9 @@ public :
 
 class Section{
 private:
-  QString name,shapeName;
-  double top,left,angle;
-  int rowCount,vertical;
+  QString name, shapeName;
+  double top, left, angle;
+  int rowCount, vertical;
 
 public:
   QList <Row> rowList;
@@ -198,14 +198,14 @@ public:
 
 class Geometry{
 private:
-  QString name,description,keyShape;
-  int shape_count,vertical;
+  QString name, description, keyShape;
+  int shape_count, vertical;
   int sectionCount;
 
 public:
   QList <GShape> shapes;
   QList <Section> sectionList;
-  double width,height,sectionTop,sectionLeft,rowTop,rowLeft,keyGap;
+  double width, height, sectionTop, sectionLeft, rowTop, rowLeft, keyGap;
 
   Geometry();
 

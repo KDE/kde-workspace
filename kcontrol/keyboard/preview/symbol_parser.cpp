@@ -255,7 +255,7 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
 
         bool r = phrase_parse(iter, end, s, space);
 
-        if (r && iter == end){
+        /*if (r && iter == end){
             std::cout << "-------------------------\n";
             std::cout << "Parsing succeeded\n";
             std::cout << "\n-------------------------\n";
@@ -265,7 +265,7 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
             std::cout << "Parsing failed\n";
             std::cout << "-------------------------\n";
             qDebug()<<input;
-        }
+        }*/
     }
 
     s.layout.display();

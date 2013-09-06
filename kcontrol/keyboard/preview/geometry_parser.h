@@ -88,7 +88,7 @@ namespace grammar{
     qi::rule<Iterator, iso::space_type>start;
     Geometry geom;
     keywords kw;
-    double x,y,ax,ay,cx,cy,off;
+    double x, y, ax, ay, cx, cy, off;
     Geometry_parser();
 
     //funcions for shape
@@ -131,7 +131,9 @@ namespace grammar{
   };
   
   Geometry parseGeometry(QString model);
+
   QPair<QString, QString> mapModelToGeometry(QString model);
+
   QString findGeometryBaseDir();
   
 }

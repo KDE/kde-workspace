@@ -17,9 +17,7 @@
  */
 
 #include "keyboardpainter.h"
-#ifdef NEW_GEOMETRY
 #include "geometry_components.h"
-#endif
 
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
@@ -33,16 +31,16 @@
 KeyboardPainter::KeyboardPainter():
     kbDialog(new QDialog(this)),
     kbframe(new KbPreviewFrame(this)),
-    exitButton(new QPushButton(i18n("Close"),this)),
+    exitButton(new QPushButton(i18n("Close"), this)),
     levelBox(new QComboBox(this))
 {
-    kbDialog->setFixedSize( 1100, 490);
+    kbDialog->setFixedSize( 1100, 490 );
     kbframe->setFixedSize( 1100, 490 );
-    exitButton->setFixedSize(120, 30);
-    levelBox->setFixedSize(360, 30);
+    exitButton->setFixedSize( 120, 30 );
+    levelBox->setFixedSize( 360, 30 );
 
     QVBoxLayout* vLayout = new QVBoxLayout( this );
-    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    QHBoxLayout* hLayout = new QHBoxLayout( this );
 
     hLayout->addWidget(exitButton, 0, Qt::AlignLeft);
     hLayout->addWidget(levelBox, 0, Qt::AlignRight);
@@ -62,17 +60,17 @@ void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QStrin
 {
     kbframe->generateKeyboardLayout(layout, variant, model);
     kbDialog->setFixedSize(getWidth(), getHeight());
-    kbframe->setFixedSize(getWidth(),getHeight());
+    kbframe->setFixedSize(getWidth(), getHeight());
 
     setWindowTitle(layout + ":" + variant);
 
     int level = kbframe->getLevel();
 
     if(level > 4){
-        levelBox->addItem("Level 3,4");
-        levelBox->addItem("Level 5,6");
+        levelBox->addItem( i18n("Level 3, 4") );
+        levelBox->addItem( i18n("Level 5, 6") );
         if(level > 6)
-            levelBox->addItem("Level 7,8");
+            levelBox->addItem( i18n("Level 7,8") );
     }
     else
         levelBox->setVisible(false);
@@ -84,17 +82,13 @@ void KeyboardPainter :: levelChanged(int l_id){
 
 int KeyboardPainter::getHeight(){
    int height = kbframe->getHeight();
-#ifdef NEW_GEOMETRY
    height = 2.5 * height + 50;
-#endif
    return height;
 }
 
 int KeyboardPainter::getWidth(){
    int width = kbframe->getWidth();
-#ifdef NEW_GEOMETRY
    width = 2.5 * width + 20;
-#endif
    return width;
 }
 
@@ -102,4 +96,5 @@ KeyboardPainter::~KeyboardPainter()
 {
     delete kbframe;
     delete exitButton;
+    delete levelBox;
 }

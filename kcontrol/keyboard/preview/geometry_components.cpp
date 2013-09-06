@@ -16,7 +16,7 @@ void GShape::setCordinate(double a, double b){
 void GShape::setApprox(double a, double b){
     a -= approx.x();
     b -= approx.y();
-    approx = QPoint(a,b);
+    approx = QPoint(a, b);
 }
 
 
@@ -42,6 +42,7 @@ double GShape::size(int vertical) const{
         else
             return approx.x();
     }
+
     else
         if (approx.x() == 0 && approx.y() == 0)
             return cordii[0].y();
@@ -50,18 +51,22 @@ double GShape::size(int vertical) const{
 
 }
 
+
 Key::Key(){
     offset = 0;
 }
+
 
 void Key::setKeyPosition(double x, double y){
     position = QPoint(x,y);
 }
 
+
 void Key::showKey(){
     qDebug()<<"\n\tKey: "<<name<<"\tshape: "<<shapeName<<"\toffset: "<<offset;
     qDebug()<<"\tposition"<<position;
 }
+
 
 
 Row::Row(){
@@ -73,6 +78,7 @@ Row::Row(){
 }
 
 
+
 void Row::addKey(){
     //qDebug() << "keyCount: "<<keyCount;
     keyCount++;
@@ -81,10 +87,11 @@ void Row::addKey(){
 
 
 
+
 void Row::displayRow(){
     qDebug() << "\nRow: ("<<left<<","<<top<<")\n";
     qDebug() << "vertical: "<<vertical;
-    for(int i=0;i<keyCount;i++)
+    for(int i=0; i<keyCount; i++)
     keyList[i].showKey();
 }
 
@@ -104,10 +111,12 @@ void Section::addRow(){
     rowList << Row();
 }
 
+
+
 void Section::displaySection(){
     //qDebug()<<"\nSection: "<<name<<"\n\tposition: ("<<left<<","<<top<<");"<<angle<<"\n";
     //qDebug()<<"vertical: "<<vertical;
-    for(int i=0;i<rowCount;i++){
+    for(int i=0; i<rowCount; i++){
             qDebug()<<"\n\t";
             rowList[i].displayRow();
     }
@@ -151,12 +160,16 @@ void Geometry::display(){
     qDebug()<<name<<"\n"<<description<<"\nwidth: "<<width<<"\nheight: "<<height<<"\n"<<"sectionTop: "<<sectionTop;
     qDebug()<<"\nsectionLeft: "<<sectionLeft<<"\nrowTop: "<<rowTop<<"\nrowLeft: "<<rowLeft<<"\nkeyGap: "<<keyGap<<"\nkeyShape: "<<keyShape<<"\n";
     qDebug()<<"vertical: "<<vertical;
+
     for (int i=0;i<shape_count;i++){
             shapes[i].display();
     }
+
     for (int j=0;j<sectionCount;j++)
             sectionList[j].displaySection();
 }
+
+
 
 void Geometry::addSection(){
     //qDebug()<<"\nsectionCount: "<<sectionCount;
@@ -164,8 +177,11 @@ void Geometry::addSection(){
     sectionList << Section();
 }
 
+
+
 GShape Geometry::findShape(QString name){
     GShape l;
+
     for(int i=0;i<shape_count;i++){
         if (shapes[i].getShapeName() == name){
                     return shapes[i];

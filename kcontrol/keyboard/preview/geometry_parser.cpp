@@ -1,4 +1,4 @@
-/*
+ /*
  *  Copyright (C) 2013 Shivam Makkar (amourphious1992@gmail.com)
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -34,19 +34,23 @@
 namespace grammar{
 keywords::keywords(){
     add
-       ("shape",1)
-       ("height",2)
-       ("width",3)
-       ("description",4)
-       ("keys",5)
-       ("row",6)
-       ("section",7)
-       ("key",8)
-       ("//",9)
-       ("/*",10)
+       ("shape", 1)
+       ("height", 2)
+       ("width", 3)
+       ("description", 4)
+       ("keys", 5)
+       ("row", 6)
+       ("section", 7)
+       ("key", 8)
+       ("//", 9)
+       ("/*", 10)
        ;
 
 }
+
+
+
+
 
 template<typename Iterator>
 Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
@@ -213,22 +217,36 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setCord(){
-        geom.setShapeCord(x,y);
+        geom.setShapeCord(x, y);
     }
+
+
+
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionShape(std::string n){
     geom.sectionList[geom.getSectionCount()].setShapeName( QString::fromUtf8(n.data(), n.size()));
 }
 
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::getName(std::string n){
         geom.setName(QString::fromUtf8(n.data(), n.size()));
 }
+
+
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::getDescription(std::string n){
         geom.setDescription( QString::fromUtf8(n.data(), n.size()));
 }
+
+
+
 
 template<typename Iterator>
     void Geometry_parser<Iterator>::getShapeName(std::string n){
@@ -237,20 +255,29 @@ template<typename Iterator>
 
 
 
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setGeomShape(std::string n){
         geom.setKeyShape(QString::fromUtf8(n.data(), n.size()));
 }
+
+
+
 
 template<typename Iterator>
 void Geometry_parser<Iterator>::setRowShape(std::string n){
     geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setShapeName(QString::fromUtf8(n.data(), n.size() ));
 }
 
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setApprox(){
-        geom.setShapeApprox(ax,ay);
+        geom.setShapeApprox(ax, ay);
 }
+
+
 
 
 template<typename Iterator>
@@ -259,10 +286,15 @@ template<typename Iterator>
 }
 
 
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectionName(std::string n){
         geom.sectionList[geom.getSectionCount()].setName(QString::fromUtf8(n.data(), n.size()));
 }
+
+
+
 
 
 template<typename Iterator>
@@ -276,6 +308,9 @@ template<typename Iterator>
     }
 
 
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectioninit(){
         geom.sectionList[geom.getSectionCount()].setTop(geom.sectionTop);
@@ -287,11 +322,18 @@ template<typename Iterator>
     }
 
 
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setRowTop(double a){
         geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setTop(a + geom.sectionList[geom.getSectionCount()].getTop());
         cy = geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].getTop();
     }
+
+
+
+
 
 
 
@@ -303,12 +345,18 @@ template<typename Iterator>
 
 
 
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionTop(double a){
         //qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.getSectionCount()].setTop(a + geom.sectionTop);
         cy = geom.sectionList[geom.getSectionCount()].getTop();
     }
+
+
+
 
 
 
@@ -322,11 +370,18 @@ template<typename Iterator>
 
 
 
+
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionAngle(double a){
         //qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.getSectionCount()].setAngle(a);
     }
+
+
+
 
 
 
@@ -336,6 +391,9 @@ template<typename Iterator>
     }
 
 
+
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setVerticalSection(){
         geom.sectionList[geom.getSectionCount()].setVertical(1);
@@ -343,10 +401,14 @@ template<typename Iterator>
 
 
 
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setVerticalGeometry(){
         geom.setVertical(1);
     }
+
+
+
 
 
 template<typename Iterator>
@@ -357,6 +419,9 @@ template<typename Iterator>
         //qDebug()<<"\nsC: "<<secn<<"\trC: "<<rown<<"\tkn: "<<keyn;
         geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyName(QString::fromUtf8(n.data(), n.size()));
      }
+
+
+
 
 
 
@@ -371,6 +436,8 @@ template<typename Iterator>
 
 
 
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyNameandShape(std::string n){
         int secn = geom.getSectionCount();
@@ -378,6 +445,8 @@ template<typename Iterator>
         setKeyName(n);
         setKeyShape(geom.sectionList[secn].rowList[rown].getShapeName().toUtf8().constData());
     }
+
+
 
 
 
@@ -393,6 +462,8 @@ template<typename Iterator>
 
 
 
+
+
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyCordi(){
         int secn = geom.getSectionCount();
@@ -403,7 +474,7 @@ template<typename Iterator>
             cx+=geom.sectionList[secn].rowList[rown].keyList[keyn].getOffset();
         else
             cy+=geom.sectionList[secn].rowList[rown].keyList[keyn].getOffset();
-        geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyPosition(cx,cy);
+        geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyPosition(cx, cy);
         QString s = geom.sectionList[secn].rowList[rown].keyList[keyn].getShapeName();
         if (s=="")
             s = geom.getKeyShape();
@@ -532,7 +603,7 @@ template<typename Iterator>
             std::string::const_iterator end = xyz.end();
 
             bool r = phrase_parse(iter, end, g, space);
-            if (r && iter == end){
+            /*if (r && iter == end){
                 std::cout << "-------------------------\n";
                 std::cout << "Parsing succeeded\n";
                 std::cout << "\n-------------------------\n";
@@ -541,7 +612,7 @@ template<typename Iterator>
                 std::cout << "-------------------------\n";
                 std::cout << "Parsing failed\n";
                 std::cout << "-------------------------\n";
-            }
+            }*/
             i++;
 
         }

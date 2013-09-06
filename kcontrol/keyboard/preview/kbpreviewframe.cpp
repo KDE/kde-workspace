@@ -76,35 +76,45 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
         KbKey key = keyboardLayout.keyList.at(keyindex);
 
         for(int level=0; level< (key.getSymbolCount() < 4 ? key.getSymbolCount() : 4); level++) {
-            if(keyLevel[1][level] < key.getSymbolCount()){
-            QString txt = symbol.getKeySymbol(key.getSymbol(keyLevel[l_id][level]));
-            QColor txtColor = txt[0] == -1 ? unknownSymbolColor : color[level];
-            painter.setPen(txtColor);
-            painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, txt);
 
-            QString currentSymbol = key.getSymbol(keyLevel[l_id][level]);
-            currentSymbol = currentSymbol.size() < 3 ? currentSymbol.append("\t") : currentSymbol;
-            if(level == 0)
-                tip.append(currentSymbol);
-            else
-                tip.append("\n" + currentSymbol);
+            if(keyLevel[l_id][level] < key.getSymbolCount()){
+
+                QString txt = symbol.getKeySymbol(key.getSymbol(keyLevel[l_id][level]));
+
+                QColor txtColor = txt[0] == -1 ? unknownSymbolColor : color[level];
+
+                painter.setPen(txtColor);
+                painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, txt);
+
+                QString currentSymbol = key.getSymbol(keyLevel[l_id][level]);
+                currentSymbol = currentSymbol.size() < 3 ? currentSymbol.append("\t") : currentSymbol;
+
+                if(level == 0)
+                    tip.append(currentSymbol);
+                else
+                    tip.append("\n" + currentSymbol);
             }
         }
+
         for(int i = 0 ; i < 4; i++){
             tooltipX += temp[i].x();
             toolTipY += temp[i].y();
         }
+
         tooltipX = tooltipX/4;
         toolTipY = toolTipY/4;
         QPoint tooltipPoint = QPoint(tooltipX, toolTipY);
+
         tooltip.append(tip);
         tipPoint.append(tooltipPoint);
     }
     else{
+
         painter.setPen(Qt::black);
-        painter.drawText(temp[0].x()+s.size(0)-10,temp[0].y()+3*s.size(1)/2,name);
+        painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*s.size(1)/2, name);
 
         tip = name;
+
         for(int i = 0 ; i < 4; i++){
             tooltipX += temp[i].x();
             toolTipY += temp[i].y();
@@ -113,13 +123,14 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
         tooltipX = tooltipX/4;
         toolTipY = toolTipY/4;
         QPoint tooltipPoint = QPoint(tooltipX, toolTipY);
+
         tooltip.append(tip);
         tipPoint.append(tooltipPoint);
     }
 }
 
 
-void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,int i, const QString& name){
+void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y, int i, const QString& name){
     painter.setPen(Qt::black);
     int cordi_count = s.getCordi_count();
 
@@ -129,16 +140,16 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,in
             int width = s.getCordii(0).x();
             int height = s.getCordii(0).y();
 
-            painter.drawRoundedRect(scaleFactor*x+2,scaleFactor*y,scaleFactor*width,scaleFactor*height,4,4);
+            painter.drawRoundedRect(scaleFactor*x+2, scaleFactor*y, scaleFactor*width, scaleFactor*height, 4, 4);
 
             QPoint temp[4];
 
-            temp[0]=QPoint(scaleFactor*x,scaleFactor*y);
-            temp[1]=QPoint(scaleFactor*(s.getCordii(0).x()+x),scaleFactor*y);
-            temp[2]=QPoint(scaleFactor*(s.getCordii(0).x()+x),scaleFactor*(s.getCordii(0).y()+y));
-            temp[3]=QPoint(scaleFactor*(x),scaleFactor*(s.getCordii(0).y()+y));
+            temp[0]=QPoint(scaleFactor*x, scaleFactor*y);
+            temp[1]=QPoint(scaleFactor*(s.getCordii(0).x()+x), scaleFactor*y);
+            temp[2]=QPoint(scaleFactor*(s.getCordii(0).x()+x), scaleFactor*(s.getCordii(0).y()+y));
+            temp[3]=QPoint(scaleFactor*(x), scaleFactor*(s.getCordii(0).y()+y));
 
-            drawKeySymbols(painter,temp,s,name);
+            drawKeySymbols(painter, temp, s, name);
 
         }
 
@@ -151,8 +162,8 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,in
                 temp[i].setY(scaleFactor*(s.getCordii(i).y()+y+1));
             }
 
-            painter.drawPolygon(temp,cordi_count);
-            drawKeySymbols(painter,temp,s,name);
+            painter.drawPolygon(temp, cordi_count);
+            drawKeySymbols(painter, temp, s, name);
         }
     }
 
@@ -163,10 +174,10 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,in
 
         if(cordi_count== 1){
 
-            temp[0]=QPoint(x,y);
-            temp[1]=QPoint(s.getCordii(0).x()+x,y);
-            temp[2]=QPoint(s.getCordii(0).x()+x,s.getCordii(0).y()+y);
-            temp[3]=QPoint(x,s.getCordii(0).y()+y);
+            temp[0]=QPoint(x, y);
+            temp[1]=QPoint(s.getCordii(0).x()+x, y);
+            temp[2]=QPoint(s.getCordii(0).x()+x, s.getCordii(0).y()+y);
+            temp[3]=QPoint(x, s.getCordii(0).y()+y);
             size = 4;
 
         }
@@ -181,31 +192,37 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s,int x,int y,in
             }
         }
 
-        double refX,refY;
+        double refX, refY;
 
         refX = geometry.sectionList[i].getLeft();
         refY = geometry.sectionList[i].getTop();
 
         //qDebug()<<"\ntransform";
-        for(int j=0;j<size;j++){
+        for(int j=0; j<size; j++){
             double x = temp[j].x()-refX;
             double y = temp[j].y()-refY;
+
             //qDebug()<<"("<<x<<","<<y<<")->";
+
             float theta = ( 3.1459 * geometry.sectionList[i].getAngle() )/180;
-            double x_ = x*cos(theta)-y*sin(theta);
+            double x_ = x*cos(theta) - y*sin(theta);
+
             //qDebug()<<"x_= "<<x<<"*"<<cos(theta)<<"-"<<y<<"*"<<sin(theta);
-            double y_ = x*sin(theta)+y*cos(theta);
+
+            double y_ = x*sin(theta) + y*cos(theta);
+
             //qDebug()<<"\ny_= "<<x<<"*"<<sin(theta)<<"+"<<y<<"*"<<cos(theta);
             //qDebug()<<"("<<x_<<","<<y_<<")\n";
-            temp[j]=QPoint(scaleFactor*(x_+refX),scaleFactor*(y_+refY));
+
+            temp[j]=QPoint(scaleFactor*(x_+refX), scaleFactor*(y_+refY));
         }
 
         /*for(int i=0;i<size;i++){
             qDebug()<<temp[i];
         }*/
 
-        painter.drawPolygon(temp,size);
-        drawKeySymbols(painter,temp,s,name);
+        painter.drawPolygon(temp, size);
+        drawKeySymbols(painter, temp, s, name);
     }
 
 
@@ -244,34 +261,42 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
     painter.setBrush(QBrush("#C3C8CB"));
     painter.setRenderHint(QPainter::Antialiasing);
 
-    const int strtx=0,strty=0,endx=geometry.getWidth(),endy=geometry.getHeight(),kszy=70;
+    const int strtx=0, strty=0, endx=geometry.getWidth(), endy=geometry.getHeight();
     //const int row1x=10,row1y=30,row2x=10,row2y=90,row5x=10,row5y=330,row3x=10,row3y=170,shifx=10,shify=60,row4x=10,row4y=250,row6x=110,row6y=410;
     //const int shiftsz=155;
 
     painter.setPen("#EDEEF2");
-    scaleFactor = 1030/endx;
-    if(scaleFactor<1)
-        scaleFactor=1;
+
     //qDebug()<<"scaleFactor = "<<scaleFactor;
     scaleFactor = 2.5;
-    painter.drawRect(strtx, strty, scaleFactor*endx+60,scaleFactor*endy+60);
+
+    painter.drawRect(strtx, strty, scaleFactor*endx+60, scaleFactor*endy+60);
 
     painter.setPen(Qt::black);
     painter.setBrush(QBrush("#EDEEF2"));
+
     for(int i=0;i<geometry.getSectionCount();i++){
+
         painter.setPen(Qt::black);
+
         for(int j=0;j<geometry.sectionList[i].getRowCount();j++){
+
             int keyn = geometry.sectionList[i].rowList[j].getKeyCount();
+
             for(int k=0;k<keyn;k++){
+
                 Key temp = geometry.sectionList[i].rowList[j].keyList[k];
+
                 int x = temp.getPosition().x();
                 int y = temp.getPosition().y();
+
                 GShape s;
+
                 s = geometry.findShape(temp.getShapeName());
                 QString name = temp.getName();
-                //painter.drawRoundedRect(2*x+2,2*y,2*width,2*height,4,4);
+
                 drawShape(painter,s,x,y,i,name);
-                //painter.drawText(scaleFactor*x+width/3,scaleFactor*y+3*height/2,name);
+
             }
         }
     }
@@ -288,11 +313,11 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 }
 
 
-void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString& layoutVariant, const QString& model)
+void KbPreviewFrame :: generateKeyboardLayout(const QString& layout, const QString& layoutVariant, const QString& model)
 {
 
-    geometry = grammar::parseGeometry(model);
-    keyboardLayout = grammar::parseSymbols(layout, layoutVariant);
+    geometry = grammar :: parseGeometry(model);
+    keyboardLayout = grammar :: parseSymbols(layout, layoutVariant);
 
 
 }
@@ -301,12 +326,15 @@ int KbPreviewFrame::itemAt(const QPoint& pos){
     int distance =  10000;
     int closest = 0;
     for(int i = 0; i < tipPoint.size(); i++){
+
         int temp = sqrt((pos.x()-tipPoint.at(i).x())*(pos.x()-tipPoint.at(i).x()) + (pos.y()-tipPoint.at(i).y())*(pos.y()-tipPoint.at(i).y()));
+
         if(distance > temp){
             distance = temp;
             closest = i;
         }
     }
+
     if(distance < 25)
         return closest;
     else

@@ -24,6 +24,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QList>
 
+
 class KbKey{
     QList<QString> symbols;
     int symbolCount;
@@ -31,9 +32,11 @@ public :
     QString keyName;
 
     KbKey();
+
     void setKeyName(QString n);
     void addSymbol(QString n, int i);
     QString getSymbol(int i);
+
     int getSymbolCount(){
         return symbolCount;
     }
@@ -43,17 +46,23 @@ public :
 
 
 class KbLayout{
+
     QList<QString> include;
     QString name;
     int keyCount, includeCount, level;
+
 public:
+
     QList <KbKey> keyList;
     QString country;
 
     KbLayout();
+
     void setName(QString n);
     void addInclude(QString n);
     void addKey();
+    QString getInclude(int i);
+    int findKey(QString n);
 
     void setLevel(int lvl){
         level = lvl;
@@ -75,8 +84,6 @@ public:
         return name;
     }
 
-    QString getInclude(int i);
-    int findKey(QString n);
     void display();
 };
 
