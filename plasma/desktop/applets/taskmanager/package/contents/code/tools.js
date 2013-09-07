@@ -21,16 +21,16 @@ function activateNextPrevTask(parentItem, next) {
     var taskIdList;
 
     if (parentItem && parentItem.isGroupParent) {
-         taskIdList = tasksModel.taskIdList(visualModel.modelIndex(parentItem.itemIndex));
+         taskIdList = backend.tasksModel.taskIdList(visualModel.modelIndex(parentItem.itemIndex));
     } else {
-        taskIdList = tasksModel.taskIdList();
+        taskIdList = backend.tasksModel.taskIdList();
     }
 
     if (!taskIdList.length) {
         return;
     }
 
-    var activeTaskId = tasksModel.activeTaskId();
+    var activeTaskId = backend.tasksModel.activeTaskId();
     var target = taskIdList[0];
 
     for (var i = 0; i < taskIdList.length; ++i) {
@@ -95,13 +95,13 @@ function publishIconGeometries(taskItems) {
         var task = taskItems[i];
 
         if (task.isGroupParent) {
-            var taskIdList = tasksModel.taskIdList(visualModel.modelIndex(task.itemIndex));
+            var taskIdList = backend.tasksModel.taskIdList(visualModel.modelIndex(task.itemIndex));
 
             for (j = 0; j < taskIdList.length; ++j) {
-                tasks.itemGeometryChanged(taskIdList[j].itemId, task.x, task.y, task.width, task.height);
+                tasks.itemGeometryChanged(task, taskIdList[j].itemId);
             }
-        } else {
-            tasks.itemGeometryChanged(task.itemId, task.x, task.y, task.width, task.height);
+        } else if (!task.isLauncher) {
+            tasks.itemGeometryChanged(task, task.itemId);
         }
     }
 }

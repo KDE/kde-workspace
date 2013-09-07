@@ -17,18 +17,18 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
+import QtQuick 2.0
 
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.draganddrop 1.0
-import org.kde.qtextracomponents 0.1
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.draganddrop 2.0
+import org.kde.qtextracomponents 2.0
 
-import Tasks 0.1 as Tasks
+import org.kde.plasma.private.taskmanager 0.1 as TaskManager
 
 import "../code/layout.js" as Layout
 import "../code/tools.js" as TaskTools
 
-DragArea {
+MouseEventListener {
     id: task
 
     width: groupDialog.mainItem.width
@@ -47,24 +47,18 @@ DragArea {
     property bool isStartup: model.IsStartup
     property bool demandsAttention: model.DemandsAttention
     property int textWidth: label.implicitWidth
+    property int pressX: -1
+    property int pressY: -1
     property Item busyIndicator
 
-    enabled: tasks.manualSorting
-    delegateImage: model.DecorationRole
-    mimeData {
-        source: task
-        url: model.LauncherUrl
-    }
-
-    onDragStarted: {
-        mimeData.setData(model.MimeType, model.MimeData);
-    }
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
+    hoverEnabled: true
 
     onItemIndexChanged: {
         if (!inPopup && !tasks.vertical && Layout.calculateStripes() > 1) {
             var newWidth = Layout.taskWidth();
 
-            if (index == tasksModel.launcherCount) {
+            if (index == backend.tasksModel.launcherCount) {
                 newWidth += Layout.launcherLayoutWidthDiff();
             }
 
@@ -79,55 +73,72 @@ DragArea {
     }
 
     onDemandsAttentionChanged: {
-        tasks.itemNeedsAttention(demandsAttention);
+        tasks.updateStatus(demandsAttention);
     }
 
-    MouseEventListener {
-        id: mouseArea
-
-        anchors.fill: parent
-
-        hoverEnabled: true
-
-        onContainsMouseChanged:  {
-            if (!inPopup && containsMouse) {
-                if (tasks.showToolTip) {
-                    toolTip.target = mouseArea;
-                    toolTip.mainText = model.DisplayRole;
-                    toolTip.image = model.DecorationRole;
-                    toolTip.subText = model.IsLauncher ? model.GenericName
-                                                       : toolTip.generateSubText(model);
-                    toolTip.windowsToPreview = model.WindowList;
-                } else {
-                    // A bit sneaky, but this works well to hide the tooltip.
-                    toolTip.target = taskFrame;
-                }
-            }
-
-            tasks.itemHovered(model.Id, containsMouse);
-        }
-
-        onClicked: {
-            if (isGroupParent) {
-                groupDialog.target = task;
-                groupDialog.visible = true;
+    onContainsMouseChanged:  {
+        if (containsMouse) {
+            if (!inPopup && plasmoid.configuration.showToolTips) {
+                toolTip.target = frame;
+                toolTip.mainText = model.DisplayRole;
+                //FIXME TODO: toolTip.image = model.DecorationRole;
+                toolTip.subText = model.IsLauncher ? model.GenericName
+                    : toolTip.generateSubText(model);
+                //FIXME TODO: toolTip.windowsToPreview = model.WindowList;
             } else {
-               tasks.activateItem(model.Id, true);
+                // A bit sneaky, but this works well to hide the tooltip.
+                toolTip.target = taskFrame;
             }
         }
 
-        onPressed: {
-            if (mouse.buttons & Qt.RightButton) {
-                if (tasks.showToolTip) {
-                    toolTip.hide();
-                }
-
-                tasks.itemContextMenu(model.Id);
-            }
-        }
-
-        onWheelMoved: TaskTools.activateNextPrevTask(task, wheel.delta < 0)
+        tasks.itemHovered(model.Id, containsMouse);
     }
+
+    onClicked: {
+        if (!mouse.buttons & Qt.LeftButton) {
+            return;
+        }
+
+        if (isGroupParent) {
+            groupDialog.target = task;
+            groupDialog.visible = true;
+        } else {
+            tasks.activateItem(model.Id, true);
+        }
+    }
+
+    onPressed: {
+        if (mouse.buttons & Qt.LeftButton) {
+            pressX = mouse.x;
+            pressY = mouse.y;
+        } else if (mouse.buttons & Qt.RightButton) {
+            if (plasmoid.configuration.showToolTips) {
+                toolTip.hide();
+            }
+
+            tasks.itemContextMenu(task, model.Id, plasmoid.action("configure"));
+        }
+    }
+
+    onReleased: {
+        pressX = -1;
+        pressY = -1;
+    }
+
+    onPositionChanged: {
+        if (plasmoid.configuration.sortingStrategy == 1 && pressX != -1
+            && dragHelper.isDrag(pressX, pressY, mouse.x, mouse.y)) {
+            tasks.dragSource = task;
+            dragHelper.startDrag(task, model.MimeType, model.MimeData,
+                model.LauncherUrl, model.DecorationRole);
+            pressX = -1;
+            pressY = -1;
+
+            return;
+        }
+    }
+
+    onWheelMoved: TaskTools.activateNextPrevTask(task, wheel.delta < 0)
 
     PlasmaCore.FrameSvgItem {
         id: frame
@@ -159,8 +170,8 @@ DragArea {
 
             visible: !model.IsStartup
 
-            active: mouseArea.containsMouse
-            enabled: !(model.Minimized && !tasks.showOnlyMinimized)
+            active: task.containsMouse
+            enabled: !(model.Minimized && !plasmoid.configuration.showOnlyMinimized)
 
             source: model.DecorationRole
 
@@ -192,7 +203,7 @@ DragArea {
         ]
     }
 
-    Tasks.TextLabel {
+    TaskManager.TextLabel {
         id: label
 
         anchors {
@@ -203,12 +214,12 @@ DragArea {
             bottomMargin: taskFrame.margins.bottom
         }
 
-        visible: !model.IsLauncher && (parent.width - anchors.leftMargin - anchors.rightMargin) >= (theme.defaultFont.mSize.width * 3)
+        visible: !model.IsLauncher && (parent.width - anchors.leftMargin - anchors.rightMargin) >= (theme.mSize(theme.defaultFont).width * 3)
 
         enabled: !model.Minimized
-        backgroundPrefix: frame.prefix
 
         text: model.DisplayRole
+        color: theme.textColor
         elide: !inPopup
     }
 
@@ -219,12 +230,12 @@ DragArea {
 
             PropertyChanges {
                 target: frame
-                visible: false
+                prefix: ""
             }
         },
         State {
             name: "hovered"
-            when: mouseArea.containsMouse
+            when: containsMouse
 
             PropertyChanges {
                 target: frame
@@ -262,7 +273,7 @@ DragArea {
 
     Component.onCompleted: {
         if (model.IsStartup) {
-            busyIndicator = Qt.createQmlObject('import org.kde.plasma.components 0.1 as PlasmaComponents; ' +
+            busyIndicator = Qt.createQmlObject('import org.kde.plasma.components 2.0 as PlasmaComponents; ' +
                 'PlasmaComponents.BusyIndicator { anchors.fill: parent; running: true }', iconBox);
         }
 

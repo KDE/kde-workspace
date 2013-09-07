@@ -17,11 +17,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
+import QtQuick 2.0
 
-import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.core 2.0 as PlasmaCore
 
-import Tasks 0.1 as Tasks
+import org.kde.plasma.private.taskmanager 0.1 as TaskManager
 
 import "../code/layout.js" as Layout
 import "../code/tools.js" as TaskTools
@@ -31,55 +31,116 @@ Item {
 
     anchors.fill: parent
 
-    property int location: 0
-    property bool vertical: false
-    property bool horizontal: false
-    property int maxStripes: 2
-    property bool forceStripes: false
-    property bool showOnlyCurrentDesktop: false
-    property bool showOnlyCurrentActivity: false
-    property bool showOnlyMinimized: false
-    property bool showToolTip: true
-    property bool highlightWindows: false
-    property bool manualSorting: false
-    property int activeWindowId: 0
+    property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property int optimumCapacity: Layout.optimumCapacity()
+    property bool onlyGroupWhenFull: plasmoid.configuration.onlyGroupWhenFull
+    property int optimumCapacity
 
+    property bool fillWidth: true
+    property bool fillHeight:true
+    property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
+    property int minimumHeight: !tasks.vertical ? 0 : Layout.preferredMinHeight()
     property int preferredWidth: taskList.width
     property int preferredHeight: taskList.height
 
-    property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
-    property int minimumHeight: tasks.horizontal ? 0 : Layout.preferredMinHeight()
+    property Item dragSource: null
 
     signal activateItem(int id, bool toggle)
-    signal itemContextMenu(int id)
+    signal itemContextMenu(Item item, int id, QtObject configAction)
     signal itemHovered(int id, bool hovered)
     signal itemMove(int id, int newIndex)
-    signal itemGeometryChanged(int id, int x, int y, int width, int height)
-    signal itemNeedsAttention(bool needs)
+    signal itemGeometryChanged(Item item, int id)
 
     onWidthChanged: {
         taskList.width = Layout.layoutWidth();
 
-        if (tasks.forceStripes) {
+        if (plasmoid.configuration.forceStripes) {
             taskList.height = Layout.layoutHeight();
         }
+
+        optimumCapacity = Layout.optimumCapacity();
     }
 
     onHeightChanged: {
-        if (tasks.forceStripes) {
+        if (plasmoid.configuration.forceStripes) {
             taskList.width = Layout.layoutWidth();
         }
 
         taskList.height = Layout.layoutHeight();
+
+        optimumCapacity = Layout.optimumCapacity();
     }
 
-    onActiveWindowIdChanged: {
-        if (activeWindowId != groupDialog.windowId) {
-            groupDialog.visible = false;
+    onOnlyGroupWhenFullChanged: {
+        optimumCapacity = Layout.optimumCapacity();
+    }
+
+    TaskManager.Backend {
+        id: backend
+
+        taskManagerItem: tasks
+        highlightWindows: plasmoid.configuration.highlightWindows
+
+        groupingStrategy: plasmoid.configuration.groupingStrategy
+        sortingStrategy: plasmoid.configuration.sortingStrategy
+
+        onActiveWindowIdChanged: {
+            if (activeWindowId != groupDialog.windowId) {
+                groupDialog.visible = false;
+            }
         }
     }
+
+    Binding {
+        target: backend.groupManager
+        property: "screen"
+        value: plasmoid.screen
+    }
+
+    Binding {
+        target: backend.groupManager
+        property: "onlyGroupWhenFull"
+        value: plasmoid.configuration.onlyGroupWhenFull
+    }
+
+    Connections {
+        target: plasmoid.configuration
+        onOnlyGroupWhenFullChanged: {
+            optimumCapacity = Layout.optimumCapacity();
+        }
+    }
+
+    Binding {
+        target: backend.groupManager
+        property: "fullLimit"
+        value: optimumCapacity
+    }
+
+    Binding {
+        target: backend.groupManager
+        property: "showOnlyCurrentScreen"
+        value: plasmoid.configuration.showOnlyCurrentScreen
+    }
+
+    Binding {
+        target: backend.groupManager
+        property: "showOnlyCurrentDesktop"
+        value: plasmoid.configuration.showOnlyCurrentDesktop
+    }
+
+    Binding {
+        target: backend.groupManager
+        property: "showOnlyCurrentActivity"
+        value: plasmoid.configuration.showOnlyCurrentActivity
+    }
+
+    Binding {
+        target: backend.groupManager
+        property: "showOnlyMinimized"
+        value: plasmoid.configuration.showOnlyMinimized
+    }
+
+    TaskManager.DragHelper { id: dragHelper }
 
     PlasmaCore.FrameSvgItem {
         id: taskFrame
@@ -97,22 +158,22 @@ Item {
         size: "16x16"
     }
 
-    Tasks.ToolTip {
+    PlasmaCore.ToolTip {
         id: toolTip
 
-        highlightWindows: tasks.highlightWindows
+        //FIXME TODO: highlightWindows: plasmoid.configuration.highlightWindows
 
         function generateSubText(task) {
             var subTextEntries = new Array();
 
-            if (!tasks.showOnlyCurrentDesktop) {
+            if (!plasmoid.configuration.showOnlyCurrentDesktop) {
                 subTextEntries.push(i18n("On %1", task.DesktopName));
             }
 
             if (task.OnAllActivities) {
                 subTextEntries.push(i18nc("Which virtual desktop a window is currently on",
                     "Available on all activities"));
-            } else if (tasks.showOnlyCurrentActivity) {
+            } else if (plasmoid.configuration.showOnlyCurrentActivity) {
                 if (task.OtherActivityNames.length > 0) {
                     subTextEntries.push(i18nc("Activities a window is currently on (apart from the current one)",
                                               "Also available on %1",
@@ -139,7 +200,7 @@ Item {
     VisualDataModel {
         id: visualModel
 
-        model: tasksModel
+        model: backend.tasksModel
         delegate: Task {}
     }
 
@@ -168,15 +229,33 @@ Item {
             model: visualModel
 
             onCountChanged: {
-                if (tasks.forceStripes) {
-                    taskList.width = Layout.layoutWidth();
-                    taskList.height = Layout.layoutHeight();
-                }
-
+                taskList.width = Layout.layoutWidth();
+                taskList.height = Layout.layoutHeight();
                 Layout.layout(taskRepeater);
             }
         }
     }
 
     GroupDialog { id: groupDialog }
+
+    function updateStatus(demandsAttention) {
+        if (demandsAttention) {
+            plasmoid.status = PlasmaCore.Types.NeedsAttentionStatus;
+        } else if (!backend.anyTaskNeedsAttention) {
+            plasmoid.status = PlasmaCore.Types.PassiveStatus;
+        }
+    }
+
+    function resetDragSource() {
+        dragSource = null;
+    }
+
+    Component.onCompleted: {
+        tasks.activateItem.connect(backend.activateItem);
+        tasks.itemContextMenu.connect(backend.itemContextMenu);
+        tasks.itemHovered.connect(backend.itemHovered);
+        tasks.itemMove.connect(backend.itemMove);
+        tasks.itemGeometryChanged.connect(backend.itemGeometryChanged);
+        dragHelper.dropped.connect(resetDragSource);
+    }
 }

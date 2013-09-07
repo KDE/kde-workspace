@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright 2011 Marco Martin <mart@kde.org>                            *
+ *   Copyright (C) 2013 by Eike Hein <hein@kde.org>                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,43 +17,29 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-#ifndef DECLARATIVEITEMCONTAINER_P
-#define DECLARATIVEITEMCONTAINER_P
+#ifndef DRAGHELPER_H
+#define DRAGHELPER_H
 
-#include <QDeclarativeItem>
-#include <QGraphicsObject>
-#include <QGraphicsWidget>
-#include <QGraphicsSceneResizeEvent>
+#include <QObject>
 
+class QIcon;
+class QQuickItem;
+class QUrl;
 
-class DeclarativeItemContainer : public QGraphicsWidget
+class DragHelper : public QObject
 {
     Q_OBJECT
 
-public:
-    DeclarativeItemContainer(QGraphicsItem *parent = 0);
-    ~DeclarativeItemContainer();
+    public:
+        DragHelper(QObject *parent = 0);
+        ~DragHelper();
 
-    void setDeclarativeItem(QDeclarativeItem *item, bool reparent = true);
-    QDeclarativeItem *declarativeItem() const;
+        Q_INVOKABLE bool isDrag(int oldX, int oldY, int newX, int newY) const;
+        Q_INVOKABLE void startDrag(QQuickItem* item, const QString &mimeType,
+            const QVariant &mimeData, const QUrl &url, const QIcon &icon) const;
 
-protected:
-    void resizeEvent(QGraphicsSceneResizeEvent *event);
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-
-protected Q_SLOTS:
-    void widthChanged();
-    void heightChanged();
-
-    void minimumWidthChanged();
-    void minimumHeightChanged();
-    void maximumWidthChanged();
-    void maximumHeightChanged();
-    void preferredWidthChanged();
-    void preferredHeightChanged();
-
-private:
-    QWeakPointer<QDeclarativeItem> m_declarativeItem;
+    Q_SIGNALS:
+        void dropped() const;
 };
 
 #endif

@@ -595,9 +595,11 @@ void GroupManagerPrivate::taskChanged(::TaskManager::Task *task, ::TaskManager::
 
 void GroupManager::setScreen(int screen)
 {
-    //kDebug() << "new Screen: " << screen;
-    d->currentScreen = screen;
-    d->reloadTasks();
+    if (screen != d->currentScreen) {
+        d->currentScreen = screen;
+        d->reloadTasks();
+        emit screenChanged(screen);
+    }
 }
 
 int GroupManager::screen() const
@@ -1194,14 +1196,26 @@ void GroupManager::setOnlyGroupWhenFull(bool onlyGroupWhenFull)
     } else {
         setGroupingStrategy(d->groupingStrategy);
     }
+
+    emit onlyGroupWhenFullChanged(onlyGroupWhenFull);
+}
+
+int GroupManager::fullLimit() const
+{
+    return d->groupIsFullLimit;
 }
 
 void GroupManager::setFullLimit(int limit)
 {
     //kDebug() << limit;
-    d->groupIsFullLimit = limit;
-    if (d->onlyGroupWhenFull) {
-        d->checkIfFull();
+    if (!d->groupIsFullLimit != limit) {
+        d->groupIsFullLimit = limit;
+
+        if (d->onlyGroupWhenFull) {
+            d->checkIfFull();
+        }
+
+        emit fullLimitChanged(limit);
     }
 }
 
@@ -1242,8 +1256,11 @@ bool GroupManager::showOnlyCurrentScreen() const
 
 void GroupManager::setShowOnlyCurrentScreen(bool showOnlyCurrentScreen)
 {
-    d->showOnlyCurrentScreen = showOnlyCurrentScreen;
-    reconnect();
+    if (showOnlyCurrentScreen != d->showOnlyCurrentScreen) {
+        d->showOnlyCurrentScreen = showOnlyCurrentScreen;
+        reconnect();
+        emit showOnlyCurrentScreenChanged(showOnlyCurrentScreen);
+    }
 }
 
 bool GroupManager::showOnlyCurrentDesktop() const
@@ -1253,8 +1270,11 @@ bool GroupManager::showOnlyCurrentDesktop() const
 
 void GroupManager::setShowOnlyCurrentDesktop(bool showOnlyCurrentDesktop)
 {
-    d->showOnlyCurrentDesktop = showOnlyCurrentDesktop;
-    reconnect();
+    if (showOnlyCurrentDesktop != d->showOnlyCurrentDesktop) {
+        d->showOnlyCurrentDesktop = showOnlyCurrentDesktop;
+        reconnect();
+        emit showOnlyCurrentDesktopChanged(showOnlyCurrentDesktop);
+    }
 }
 
 bool GroupManager::showOnlyCurrentActivity() const
@@ -1264,8 +1284,11 @@ bool GroupManager::showOnlyCurrentActivity() const
 
 void GroupManager::setShowOnlyCurrentActivity(bool showOnlyCurrentActivity)
 {
-    d->showOnlyCurrentActivity = showOnlyCurrentActivity;
-    reconnect();
+    if (showOnlyCurrentActivity != d->showOnlyCurrentActivity) {
+        d->showOnlyCurrentActivity = showOnlyCurrentActivity;
+        reconnect();
+        emit showOnlyCurrentActivityChanged(showOnlyCurrentActivity);
+    }
 }
 
 bool GroupManager::showOnlyMinimized() const
@@ -1275,8 +1298,11 @@ bool GroupManager::showOnlyMinimized() const
 
 void GroupManager::setShowOnlyMinimized(bool showOnlyMinimized)
 {
-    d->showOnlyMinimized = showOnlyMinimized;
-    reconnect();
+    if (showOnlyMinimized != d->showOnlyMinimized) {
+        d->showOnlyMinimized = showOnlyMinimized;
+        reconnect();
+        emit showOnlyMinimizedChanged(showOnlyMinimized);
+    }
 }
 
 GroupManager::TaskSortingStrategy GroupManager::sortingStrategy() const
@@ -1291,8 +1317,6 @@ AbstractSortingStrategy* GroupManager::taskSorter() const
 
 void GroupManager::setSortingStrategy(TaskSortingStrategy sortOrder)
 {
-    //kDebug() << sortOrder;
-
     if (d->abstractSortingStrategy) {
         if (d->abstractSortingStrategy->type() == sortOrder) {
             return;
@@ -1336,6 +1360,8 @@ void GroupManager::setSortingStrategy(TaskSortingStrategy sortOrder)
 
     d->sortingStrategy = sortOrder;
     reconnect();
+
+    emit sortingStrategyChanged(sortOrder);
 }
 
 GroupManager::TaskGroupingStrategy GroupManager::groupingStrategy() const
@@ -1396,6 +1422,8 @@ void GroupManager::setGroupingStrategy(TaskGroupingStrategy strategy)
     }
 
     d->changingGroupingStrategy = false;
+
+    emit groupingStrategyChanged(strategy);
 }
 
 } // TaskManager namespace

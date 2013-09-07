@@ -17,50 +17,50 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
+import QtQuick 2.0
 
-import org.kde.plasma.core 0.1 as PlasmaCore
+import org.kde.plasma.core 2.0 as PlasmaCore
 
 PlasmaCore.SvgItem {
     id: arrow
     anchors {
         bottom: {
-            if (tasks.location != TopEdge && tasks.location != LeftEdge &&  tasks.location != RightEdge) {
+            if (plasmoid.location != PlasmaCore.Types.TopEdge && plasmoid.location != PlasmaCore.Types.LeftEdge &&  plasmoid.location != PlasmaCore.Types.RightEdge) {
                 return parent.bottom;
             } else {
                 return undefined;
             }
         }
         horizontalCenter: {
-            if (tasks.location != LeftEdge && tasks.location != RightEdge) {
+            if (plasmoid.location != PlasmaCore.Types.LeftEdge && plasmoid.location != PlasmaCore.Types.RightEdge) {
                 return iconBox.horizontalCenter;
             } else {
                 return undefined;
             }
         }
         verticalCenter: {
-            if (tasks.location == LeftEdge || tasks.location == RightEdge) {
+            if (plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge) {
                 return iconBox.verticalCenter;
             } else {
                 return undefined;
             }
         }
         top: {
-            if (tasks.location == TopEdge) {
+            if (plasmoid.location == PlasmaCore.Types.TopEdge) {
                 return parent.top;
             } else {
                 return undefined;
             }
         }
         left: {
-            if (tasks.location == LeftEdge) {
+            if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
                 return parent.left;
             } else {
                 return undefined;
             }
         }
         right: {
-            if (tasks.location == RightEdge) {
+            if (plasmoid.location == PlasmaCore.Types.RightEdge) {
                 return parent.right;
             } else {
                 return undefined;
@@ -75,21 +75,21 @@ PlasmaCore.SvgItem {
     elementId: elementForLocation()
 
     function elementForLocation() {
-        switch (tasks.location) {
-            case LeftEdge:
+        switch (plasmoid.location) {
+            case PlasmaCore.Types.LeftEdge:
                 return "right-arrow";
-            case TopEdge:
+            case PlasmaCore.Types.TopEdge:
                 return "down-arrow";
-            case RightEdge:
+            case PlasmaCore.Types.RightEdge:
                 return "left-arrow";
-            case BottomEdge:
+            case PlasmaCore.Types.BottomEdge:
             default:
                 return "up-arrow";
         }
     }
 
     Connections {
-        target: tasks
+        target: plasmoid.configuration
         onLocationChanged: {
             arrow.width = arrow.implicitWidth
             arrow.height = arrow.implicitHeight

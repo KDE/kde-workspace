@@ -40,7 +40,7 @@ class TASKMANAGER_EXPORT TasksModel : public QAbstractItemModel
 {
     Q_OBJECT
     Q_ENUMS(DisplayRoles)
-    Q_PROPERTY(int count READ rowCount() NOTIFY countChanged())
+    Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
     Q_PROPERTY(int launcherCount READ launcherCount NOTIFY launcherCountChanged)
 
 public:

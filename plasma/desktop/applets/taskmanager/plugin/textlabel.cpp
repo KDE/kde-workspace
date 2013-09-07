@@ -1,4 +1,5 @@
 /***************************************************************************
+ *   Copyright (C) 2007 Jani Huhtanen <jani.huhtanen@tut.fi>               *
  *   Copyright (C) 2007 by Robert Knight <robertknight@gmail.com>          *
  *   Copyright (C) 2008 by Alexis Ménard <darktears31@gmail.com>           *
  *   Copyright (C) 2008 by Marco Martin <notmart@gmail.com>                *
@@ -21,21 +22,16 @@
  ***************************************************************************/
 
 #include "textlabel.h"
+#include "blur.cpp"
 
 #include <QApplication>
 #include <QPainter>
 #include <QStyle>
 
-#include <KGlobalSettings>
-
-#include <Plasma/PaintUtils>
-#include <Plasma/Theme>
-
-TextLabel::TextLabel(QDeclarativeItem* parent) : QDeclarativeItem(parent),
+TextLabel::TextLabel(QQuickItem* parent) : QQuickPaintedItem(parent),
     m_enabled(true),
     m_elide(false)
 {
-    setFlag(QGraphicsItem::ItemHasNoContents, false);
 }
 
 TextLabel::~TextLabel()
@@ -55,17 +51,6 @@ void TextLabel::setEnabled(bool enabled)
     }
 }
 
-QString TextLabel::backgroundPrefix() const
-{
-    return m_backgroundPrefix;
-}
-
-void TextLabel::setBackgroundPrefix(const QString& backgroundPrefix)
-{
-    m_backgroundPrefix = backgroundPrefix;
-    update();
-}
-
 QString TextLabel::text() const
 {
     return m_text;
@@ -82,6 +67,22 @@ void TextLabel::setText(const QString& text)
         emit textChanged(text);
     }
 }
+
+QColor TextLabel::color() const
+{
+    return m_color;
+}
+
+void TextLabel::setColor(const QColor& color)
+{
+    if (color != m_color)
+    {
+        m_color = color;
+        m_cachedShadow = QPixmap();
+        update();
+    }
+}
+
 
 bool TextLabel::elide() const
 {
@@ -101,7 +102,7 @@ void TextLabel::updateImplicitSize()
         setImplicitWidth(0);
         setImplicitHeight(0);
     } else {
-        QFontMetrics fm(KGlobalSettings::taskbarFont());
+        QFontMetrics fm(QFontDatabase::systemFont(QFontDatabase::GeneralFont));
 
         setImplicitWidth(fm.width(m_text));
         setImplicitHeight(fm.height());
@@ -117,9 +118,7 @@ void TextLabel::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeom
 
 QColor TextLabel::textColor() const
 {
-    Plasma::Theme *theme = Plasma::Theme::defaultTheme();
-
-    QColor color(theme->color(Plasma::Theme::TextColor));
+    QColor color(m_color);
 
     if (!m_enabled) {
         color.setAlphaF(0.5);
@@ -179,7 +178,7 @@ void TextLabel::drawTextLayout(QPainter *painter, const QTextLayout &layout, con
         return;
     }
 
-    QPixmap pixmap(rect.size() + QSize(0, 8));
+    QPixmap pixmap(rect.size());
     pixmap.fill(Qt::transparent);
 
     QPainter p(&pixmap);
@@ -199,7 +198,7 @@ void TextLabel::drawTextLayout(QPainter *painter, const QTextLayout &layout, con
     QFontMetrics fm(layout.font());
     int textHeight = layout.lineCount() * fm.lineSpacing();
 
-    QPointF position(0, 4 + (rect.height() - textHeight) / 2);
+    QPointF position(0, (rect.height() - textHeight) / 2);
     QList<QRect> fadeRects;
     int fadeWidth = 30;
 
@@ -239,7 +238,11 @@ void TextLabel::drawTextLayout(QPainter *painter, const QTextLayout &layout, con
 
     if (m_cachedShadow.isNull()) {
         QImage shadow = pixmap.toImage();
-        Plasma::PaintUtils::shadowBlur(shadow, 1, shadowColor);
+        expblur<16, 7>(shadow, 1);
+        QPainter p(&shadow);
+        p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        p.fillRect(shadow.rect(), shadowColor);
+        p.end();
         m_cachedShadow = QPixmap(shadow.size());
         m_cachedShadow.fill(Qt::transparent);
         QPainter buffPainter(&m_cachedShadow);
@@ -247,25 +250,22 @@ void TextLabel::drawTextLayout(QPainter *painter, const QTextLayout &layout, con
     }
 
     if (shadowColor == Qt::white) {
-        painter->drawPixmap(rect.topLeft() - QPoint(0, 4), m_cachedShadow);
+        painter->drawPixmap(rect.topLeft(), m_cachedShadow);
     } else {
-        painter->drawPixmap(rect.topLeft() + QPoint(1, 2 - 4), m_cachedShadow);
+        painter->drawPixmap(rect.topLeft() + QPoint(1, 2), m_cachedShadow);
     }
-    painter->drawPixmap(rect.topLeft() - QPoint(0, 4), pixmap);
+    painter->drawPixmap(rect.topLeft(), pixmap);
 }
 
-void TextLabel::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void TextLabel::paint(QPainter* painter)
 {
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-
     painter->setPen(QPen(textColor(), 1.0));
 
-    if (KGlobalSettings::taskbarFont() != m_layout.font()) {
+    if (QFontDatabase::systemFont(QFontDatabase::GeneralFont) != m_layout.font()) {
         m_cachedShadow = QPixmap();
     }
 
-    m_layout.setFont(KGlobalSettings::taskbarFont());
+    m_layout.setFont(QFontDatabase::systemFont(QFontDatabase::GeneralFont));
     m_layout.setTextOption(textOption());
 
     layoutText(m_layout, text(), boundingRect().toRect().size());

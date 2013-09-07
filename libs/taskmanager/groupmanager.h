@@ -51,6 +51,17 @@ class TASKMANAGER_EXPORT GroupManager: public QObject
 {
 
     Q_OBJECT
+
+    Q_PROPERTY(int screen READ screen WRITE setScreen NOTIFY screenChanged)
+    Q_PROPERTY(TaskGroupingStrategy groupingStrategy READ groupingStrategy WRITE setGroupingStrategy NOTIFY groupingStrategyChanged)
+    Q_PROPERTY(bool onlyGroupWhenFull READ onlyGroupWhenFull WRITE setOnlyGroupWhenFull NOTIFY onlyGroupWhenFullChanged)
+    Q_PROPERTY(int fullLimit READ fullLimit WRITE setFullLimit NOTIFY fullLimitChanged)
+    Q_PROPERTY(TaskSortingStrategy sortingStrategy READ sortingStrategy WRITE setSortingStrategy NOTIFY sortingStrategyChanged)
+    Q_PROPERTY(bool showOnlyCurrentScreen READ showOnlyCurrentScreen WRITE setShowOnlyCurrentScreen NOTIFY showOnlyCurrentScreenChanged)
+    Q_PROPERTY(bool showOnlyCurrentDesktop READ showOnlyCurrentDesktop WRITE setShowOnlyCurrentDesktop NOTIFY showOnlyCurrentDesktopChanged)
+    Q_PROPERTY(bool showOnlyCurrentActvity READ showOnlyCurrentActivity WRITE setShowOnlyCurrentActivity NOTIFY showOnlyCurrentActivityChanged)
+    Q_PROPERTY(bool showOnlyMinimized READ showOnlyMinimized WRITE setShowOnlyMinimized NOTIFY showOnlyMinimizedChanged)
+
 public:
     GroupManager(QObject *parent);
     ~GroupManager();
@@ -108,6 +119,10 @@ public:
     * setFullLimit(int). This is currently limited to ProgramGrouping.
     */
     void setOnlyGroupWhenFull(bool state);
+    /**
+     * @return the currently set limit when the taskbar is considered as full
+     */
+    int fullLimit() const;
     /**
     * Set the limit when the taskbar is considered as full
     */
@@ -206,6 +221,16 @@ Q_SIGNALS:
 
     /** Signal that the order of launchers has changed */
     void launchersChanged();
+
+    void screenChanged(int);
+    void groupingStrategyChanged(TaskGroupingStrategy);
+    void onlyGroupWhenFullChanged(bool);
+    void fullLimitChanged(int);
+    void sortingStrategyChanged(TaskSortingStrategy);
+    void showOnlyCurrentScreenChanged(bool);
+    void showOnlyCurrentDesktopChanged(bool);
+    void showOnlyCurrentActivityChanged(bool);
+    void showOnlyMinimizedChanged(bool);
 
 private:
     Q_PRIVATE_SLOT(d, void currentDesktopChanged(int))

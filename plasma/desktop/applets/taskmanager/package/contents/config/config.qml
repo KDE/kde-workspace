@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2012-2013 by Eike Hein <hein@kde.org>                   *
+ *   Copyright (C) 2013 by Eike Hein <hein@kde.org>                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,23 +17,14 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
+import QtQuick 2.0
 
-Flow {
-    property bool animating: false
+import org.kde.plasma.configuration 2.0
 
-    layoutDirection: Qt.application.layoutDirection
-
-    move: Transition {
-        SequentialAnimation {
-            PropertyAction { target: taskList; property: "animating"; value: true }
-
-            NumberAnimation {
-                properties: "x, y"
-                easing.type: Easing.OutQuad
-            }
-
-            PropertyAction { target: taskList; property: "animating"; value: false }
-        }
+ConfigModel {
+    ConfigCategory {
+         name: "General"
+         icon: "preferences-system-windows"
+         source: "ConfigGeneral.qml"
     }
 }

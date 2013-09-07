@@ -26,28 +26,28 @@ function verticalMargins() {
 }
 
 function launcherLayoutTasks() {
-    return Math.round(tasksModel.launcherCount / Math.floor(preferredMinWidth() / launcherWidth()));
+    return Math.round(backend.tasksModel.launcherCount / Math.floor(preferredMinWidth() / launcherWidth()));
 }
 
 function launcherLayoutWidthDiff() {
-    return (launcherLayoutTasks() * taskWidth()) - (tasksModel.launcherCount * launcherWidth());
+    return (launcherLayoutTasks() * taskWidth()) - (backend.tasksModel.launcherCount * launcherWidth());
 }
 
 function logicalTaskCount() {
-    var count = (tasksModel.count - tasksModel.launcherCount) + launcherLayoutTasks();
+    var count = (backend.tasksModel.count - backend.tasksModel.launcherCount) + launcherLayoutTasks();
 
-    return Math.max(tasksModel.count ? 1 : 0, count);
+    return Math.max(backend.tasksModel.count ? 1 : 0, count);
 }
 
 function maxStripes() {
     var length = tasks.vertical ? taskList.width : taskList.height;
     var minimum = tasks.vertical ? preferredMinWidth() : preferredMinHeight();
 
-    return Math.min(tasks.maxStripes, Math.max(1, Math.floor(length / minimum)));
+    return Math.min(plasmoid.configuration.maxStripes, Math.max(1, Math.floor(length / minimum)));
 }
 
 function tasksPerStripe() {
-    if (tasks.forceStripes) {
+    if (plasmoid.configuration.forceStripes) {
         return Math.ceil(logicalTaskCount() / maxStripes());
     } else {
         var length = tasks.vertical ? taskList.height : taskList.width;
@@ -58,7 +58,7 @@ function tasksPerStripe() {
 }
 
 function calculateStripes() {
-    var stripes = tasks.forceStripes ? tasks.maxStripes : Math.min(tasks.maxStripes, Math.ceil(logicalTaskCount() / tasksPerStripe()));
+    var stripes = plasmoid.configuration.forceStripes ? plasmoid.configuration.maxStripes : Math.min(plasmoid.configuration.maxStripes, Math.ceil(logicalTaskCount() / tasksPerStripe()));
 
     return Math.min(stripes, maxStripes());
 }
@@ -75,7 +75,7 @@ function optimumCapacity() {
 }
 
 function layoutWidth() {
-    if (tasks.forceStripes && !tasks.vertical) {
+    if (plasmoid.configuration.forceStripes && !tasks.vertical) {
         return Math.min(tasks.width, Math.max(preferredMaxWidth(), tasksPerStripe() * preferredMaxWidth()));
     } else {
         return tasks.width;
@@ -83,7 +83,7 @@ function layoutWidth() {
 }
 
 function layoutHeight() {
-    if (tasks.forceStripes && tasks.vertical) {
+    if (plasmoid.configuration.forceStripes && tasks.vertical) {
         return Math.min(tasks.height, Math.max(preferredMaxHeight(), tasksPerStripe() * preferredMaxHeight()));
     } else {
         return tasks.height;
@@ -94,7 +94,7 @@ function preferredMinWidth() {
     if (tasks.vertical) {
         return horizontalMargins() + theme.smallIconSize;
     } else {
-        return horizontalMargins() + theme.smallIconSize + 3 + (theme.defaultFont.mSize.width * 12);
+        return horizontalMargins() + theme.smallIconSize + 3 + (theme.mSize(theme.defaultFont).width * 12);
     }
 }
 
@@ -103,12 +103,12 @@ function preferredMaxWidth() {
 }
 
 function preferredMinHeight() {
-    // TODO: Port to proper font metrics for descenders once we have access to them.
-    return theme.defaultFont.mSize.height + 4;
+    // TODO FIXME UPSTREAM: Port to proper font metrics for descenders once we have access to them.
+    return theme.mSize(theme.defaultFont).height + 4;
 }
 
 function preferredMaxHeight() {
-    return verticalMargins() + Math.min(theme.smallIconSize * 3, theme.defaultFont.mSize.height * 3);
+    return verticalMargins() + Math.min(theme.smallIconSize * 3, theme.mSize(theme.defaultFont).height * 3);
 }
 
 function taskWidth() {
@@ -142,7 +142,7 @@ function launcherWidth() {
 function layout(container) {
     var item;
     var stripes = calculateStripes();
-    var taskCount = tasksModel.count - tasksModel.launcherCount;
+    var taskCount = backend.tasksModel.count - backend.tasksModel.launcherCount;
     var width = taskWidth();
     var adjustedWidth = width;
     var height = taskHeight();
@@ -159,7 +159,7 @@ function layout(container) {
         if (!tasks.vertical) {
             if (item.isLauncher) {
                 adjustedWidth = launcherWidth();
-            } else if (stripes > 1 && i == tasksModel.launcherCount) {
+            } else if (stripes > 1 && i == backend.tasksModel.launcherCount) {
                 adjustedWidth += launcherLayoutWidthDiff();
             }
         }

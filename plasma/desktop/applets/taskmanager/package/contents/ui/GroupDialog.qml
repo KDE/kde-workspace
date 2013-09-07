@@ -17,10 +17,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
+import QtQuick 2.0
 
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.draganddrop 1.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.draganddrop 2.0
 
 import "../code/layout.js" as Layout
 
@@ -28,7 +28,6 @@ PlasmaCore.Dialog {
     property Item target
 
     visible: false
-    location: tasks.location
     windowFlags: Qt.Popup
 
     mainItem: Item {
@@ -52,6 +51,16 @@ PlasmaCore.Dialog {
             }
         }
     }
+
+    data: [
+        VisualDataModel {
+            id: groupFilter
+            delegate: Task {
+                visible: true
+                inPopup: true
+            }
+        }
+    ]
 
     onVisibleChanged: {
         if (visible && target) {
@@ -102,14 +111,6 @@ PlasmaCore.Dialog {
             // TODO: Properly derive limits from work area size (screen size sans struts).
             mainItem.width = Math.min(maxWidth, (tasks.vertical ? 640 - tasks.width : Math.max(tasks.width, 640)) - 20);
             mainItem.height = groupRepeater.count * (Layout.verticalMargins() + theme.smallIconSize);
-        }
-    }
-
-    VisualDataModel {
-        id: groupFilter
-        delegate: Task {
-            visible: true
-            inPopup: true
         }
     }
 }

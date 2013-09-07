@@ -17,47 +17,47 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-import QtQuick 1.1
+import QtQuick 2.0
 
-import org.kde.draganddrop 1.0
-import org.kde.qtextracomponents 0.1
+import org.kde.draganddrop 2.0
+import org.kde.qtextracomponents 2.0
 
 import "../code/layout.js" as Layout
 import "../code/tools.js" as TaskTools
 
 Item {
-    property variant target
+    property Item target
 
     DropArea {
         id: dropHandler
 
         anchors.fill: parent
 
-        property variant hoveredItem
-
-        enabled: !target.animating
+        property Item hoveredItem
 
         onDragMove: {
+            if (target.animating) {
+                return;
+            }
+
             var above = target.childAt(event.x, event.y);
 
-            if (event.mimeData.source) {
-                if (above != event.mimeData.source
-                    && !(event.mimeData.source.isLauncher || above.isLauncher)) {
-                    var targetIndex = TaskTools.insertionIndexAt(event.x, event.y);
-
-                    itemMove(event.mimeData.source.itemId, targetIndex);
+            if (tasks.dragSource) {
+                if (tasks.dragSource != above && !tasks.dragSource.isLauncher
+                    && !(above && "isLauncher" in above && above.isLauncher)) {
+                    itemMove(tasks.dragSource.itemId, TaskTools.insertionIndexAt(event.x, event.y));
                 }
             } else if (above && hoveredItem != above) {
                 hoveredItem = above;
                 activationTimer.start();
             } else if (!above) {
-                hoveredItem = 0;
+                hoveredItem = null;
                 activationTimer.stop();
             }
         }
 
         onDragLeave: {
-            dragItem = 0;
+            hoveredItem = null;
             activationTimer.stop();
         }
 

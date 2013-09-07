@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Robert Knight <robertknight@gmail.com>          *
  *   Copyright (C) 2008 by Alexis Ménard <darktears31@gmail.com>           *
+ *   Copyright (C) 2008 by Marco Martin <notmart@gmail.com>                *
  *   Copyright (C) 2012-2013 by Eike Hein <hein@kde.org>                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,73 +20,61 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-#ifndef TASKS_H
-#define TASKS_H
+#ifndef TEXTLABEL_H
+#define TEXTLABEL_H
 
-#include "ui_tasksConfig.h"
+#include <QQuickPaintedItem>
+#include <QColor>
+#include <QPixmap>
+#include <QTextLayout>
+#include <QTextOption>
 
-#include <Plasma/Applet>
-
-namespace Plasma {
-    class DeclarativeWidget;
-}
-
-namespace TaskManager {
-    class TasksModel;
-}
-
-class GroupManager;
-
-class Tasks : public Plasma::Applet
+class TextLabel : public QQuickPaintedItem
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool enabled READ enabled WRITE setEnabled)
+    Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
+    Q_PROPERTY(QColor color READ color WRITE setColor)
+    Q_PROPERTY(bool elide READ elide WRITE setElide)
+
     public:
-        Tasks(QObject *parent, const QVariantList &args);
-        ~Tasks();
+        TextLabel(QQuickItem *parent = 0);
+        ~TextLabel();
 
-        void init();
+        bool enabled() const;
+        void setEnabled(bool enabled);
 
-        void constraintsEvent(Plasma::Constraints constraints);
+        QString text() const;
+        void setText(const QString& text);
+
+        QColor color() const;
+        void setColor(const QColor& color);
+
+        bool elide() const;
+        void setElide(bool elide);
+
+        void paint(QPainter *painter);
 
     Q_SIGNALS:
-        void settingsChanged();
-
-    public Q_SLOTS:
-        void configChanged();
+        void textChanged(const QString& text);
 
     protected:
-        void createConfigurationInterface(KConfigDialog *parent);
-        QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const;
-
-    private Q_SLOTS:
-        void activateItem(int id, bool toggle);
-        void itemContextMenu(int id);
-        void itemHovered(int id, bool hovered);
-        void itemMove(int id, int newIndex);
-        void itemGeometryChanged(int id, int x, int y, int width, int height);
-        void itemNeedsAttention(bool needs);
-
-        void handleActiveWindowChanged(WId activeWindow);
-
-        void changeSizeHint();
-        void configAccepted();
-        void dialogGroupingChanged(int index);
+        void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);
 
     private:
-        void adjustGroupingStrategy();
+        void updateImplicitSize();
+        QColor textColor() const;
+        QTextOption textOption() const;;
+        void layoutText(QTextLayout &layout, const QString &text,  const QSize &constraints);
+        void drawTextLayout(QPainter *painter, const QTextLayout &layout, const QRect &rect);
 
-        GroupManager *m_groupManager;
-        TaskManager::TasksModel *m_tasksModel;
-
-        Plasma::DeclarativeWidget *m_declarativeWidget;
-
-        Ui::tasksConfig m_ui;
-
-        bool m_highlightWindows;
-        WId m_lastViewId;
+        bool m_enabled;
+        QString m_text;
+        QColor m_color;
+        bool m_elide;
+        QTextLayout m_layout;
+        QPixmap m_cachedShadow;
 };
-
-K_EXPORT_PLASMA_APPLET(tasks, Tasks)
 
 #endif
