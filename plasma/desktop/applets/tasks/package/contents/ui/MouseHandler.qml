@@ -26,14 +26,14 @@ import "../code/layout.js" as Layout
 import "../code/tools.js" as TaskTools
 
 Item {
-    property variant target
+    property Item target
 
     DropArea {
         id: dropHandler
 
         anchors.fill: parent
 
-        property variant hoveredItem
+        property Item hoveredItem
 
         onDragMove: {
             if (target.animating) {
@@ -42,23 +42,22 @@ Item {
 
             var above = target.childAt(event.x, event.y);
 
-            if (above) {
-                if (tasks.dragSource) {
-                    if (tasks.dragSource != above && !tasks.dragSource.isLauncher && !above.isLauncher) {
-                        itemMove(tasks.dragSource.itemId, TaskTools.insertionIndexAt(event.x, event.y));
-                    }
-                } else if (hoveredItem != above) {
-                    hoveredItem = above;
-                    activationTimer.start();
+            if (tasks.dragSource) {
+                if (tasks.dragSource != above && !tasks.dragSource.isLauncher
+                    && !(above && "isLauncher" in above && above.isLauncher)) {
+                    itemMove(tasks.dragSource.itemId, TaskTools.insertionIndexAt(event.x, event.y));
                 }
-            } else {
-                hoveredItem = 0;
+            } else if (above && hoveredItem != above) {
+                hoveredItem = above;
+                activationTimer.start();
+            } else if (!above) {
+                hoveredItem = null;
                 activationTimer.stop();
             }
         }
 
         onDragLeave: {
-            hoveredItem = 0;
+            hoveredItem = null;
             activationTimer.stop();
         }
 

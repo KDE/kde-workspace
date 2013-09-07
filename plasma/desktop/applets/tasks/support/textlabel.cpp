@@ -55,17 +55,6 @@ void TextLabel::setEnabled(bool enabled)
     }
 }
 
-QString TextLabel::backgroundPrefix() const
-{
-    return m_backgroundPrefix;
-}
-
-void TextLabel::setBackgroundPrefix(const QString& backgroundPrefix)
-{
-    m_backgroundPrefix = backgroundPrefix;
-    update();
-}
-
 QString TextLabel::text() const
 {
     return m_text;
