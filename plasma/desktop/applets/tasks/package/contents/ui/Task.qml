@@ -47,9 +47,8 @@ MouseEventListener {
     property bool isStartup: model.IsStartup
     property bool demandsAttention: model.DemandsAttention
     property int textWidth: label.implicitWidth
-    property bool holding: false
-    property int oldX: -1
-    property int oldY: -1
+    property int pressX: -1
+    property int pressY: -1
     property Item busyIndicator
 
     hoverEnabled: true
@@ -90,7 +89,8 @@ MouseEventListener {
                 toolTip.target = taskFrame;
             }
         } else {
-            holding = false;
+            pressX = -1;
+            pressY = -1;
         }
 
         tasks.itemHovered(model.Id, containsMouse);
@@ -107,7 +107,8 @@ MouseEventListener {
 
     onPressed: {
         if (mouse.buttons & Qt.LeftButton) {
-            holding = true;
+            pressX = mouse.x;
+            pressY = mouse.y;
         } else if (mouse.buttons & Qt.RightButton) {
             if (tasks.showToolTip) {
                 toolTip.hide();
@@ -118,21 +119,18 @@ MouseEventListener {
     }
 
     onReleased: {
-        holding = false;
+        pressX = -1;
+        pressY = -1;
     }
 
     onPositionChanged: {
-        if (holding && tasks.manualSorting) {
-            if (oldX != -1 && dragHelper.isDrag(oldX, oldY, mouse.x, mouse.y)) {
-                tasks.dragSource = task;
-                dragHelper.startDrag(model.MimeType, model.MimeData, model.LauncherUrl, model.DecorationRole);
-                holding = false;
+        if (tasks.manualSorting && pressX != -1 && dragHelper.isDrag(pressX, pressY, mouse.x, mouse.y)) {
+            tasks.dragSource = task;
+            dragHelper.startDrag(model.MimeType, model.MimeData, model.LauncherUrl, model.DecorationRole);
+            pressX = -1;
+            pressY = -1;
 
-                return;
-            }
-
-            oldX = mouse.x;
-            oldY = mouse.y;
+            return;
         }
     }
 
