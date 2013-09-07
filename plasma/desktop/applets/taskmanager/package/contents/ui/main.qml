@@ -46,7 +46,7 @@ Item {
     property Item dragSource: null
 
     signal activateItem(int id, bool toggle)
-    signal itemContextMenu(Item item, int id, QtObject configAction)
+    signal itemContextMenu(Item item, QtObject configAction)
     signal itemHovered(int id, bool hovered)
     signal itemMove(int id, int newIndex)
     signal itemGeometryChanged(Item item, int id)

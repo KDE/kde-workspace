@@ -144,7 +144,7 @@ void Backend::activateItem(int id, bool toggle)
 }
 
 
-void Backend::itemContextMenu(QQuickItem *item, int id, QObject *configAction)
+void Backend::itemContextMenu(QQuickItem *item, QObject *configAction)
 {
     TaskManager::AbstractGroupableItem* agItem = m_groupManager->rootGroup()->getMemberById(item->property("itemId").toInt());
 

@@ -116,7 +116,7 @@ MouseEventListener {
                 toolTip.hide();
             }
 
-            tasks.itemContextMenu(task, model.Id, plasmoid.action("configure"));
+            tasks.itemContextMenu(task, plasmoid.action("configure"));
         }
     }
 
