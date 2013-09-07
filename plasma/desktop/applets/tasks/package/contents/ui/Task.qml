@@ -213,7 +213,6 @@ MouseEventListener {
         visible: !model.IsLauncher && (parent.width - anchors.leftMargin - anchors.rightMargin) >= (theme.defaultFont.mSize.width * 3)
 
         enabled: !model.Minimized
-        backgroundPrefix: frame.prefix
 
         text: model.DisplayRole
         elide: !inPopup
