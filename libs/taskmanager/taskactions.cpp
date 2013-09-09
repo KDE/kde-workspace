@@ -415,6 +415,12 @@ ToggleLauncherActionImpl::ToggleLauncherActionImpl(QObject *parent, AbstractGrou
         setChecked(false);
     } else {
         m_url = m_abstractItem->launcherUrl();
+        // FIXME TODO: This signal delivery is queued to allow QGraphicsView to perform an ungrab
+        // on the launcher item after the popup menu closes before removing the launcher destroys
+        // the item, avoiding a crash. The trade-of is that it requires more care when using the
+        // TaskManager::BasicMenu class, since the menu can no longer be deleted directly after
+        // exec() returns. The QML 2 scene graph may be smarter than trying to perform an ungrab
+        // on a destroyed item, so reinvestigate whether this is chicanery is still needed.
         connect(this, SIGNAL(triggered()), this, SLOT(toggleLauncher()), Qt::QueuedConnection);
 
         switch (m_abstractItem->itemType()) {
