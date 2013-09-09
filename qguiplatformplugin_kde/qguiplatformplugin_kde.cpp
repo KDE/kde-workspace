@@ -28,6 +28,7 @@
 #include <KDE/KFileDialog>
 #include <KDE/KColorDialog>
 #include <QtCore/QHash>
+#include <QtCore/QTimer>
 #include <QtGui/QFileDialog>
 #include <QtGui/QColorDialog>
 #include <QtGui/QApplication>
@@ -153,9 +154,7 @@ class KQGuiPlatformPlugin : public QGuiPlatformPlugin
 public:
     KQGuiPlatformPlugin()
     {
-        connect(KIconLoader::global(), SIGNAL(iconLoaderSettingsChanged()), this, SLOT(updateToolbarIcons()));
-        connect(KGlobalSettings::self(), SIGNAL(toolbarAppearanceChanged(int)), this, SLOT(updateToolbarStyle()));
-        connect(KGlobalSettings::self(), SIGNAL(kdisplayStyleChanged()), this, SLOT(updateWidgetStyle()));
+        QMetaObject::invokeMethod(this, "init", Qt::QueuedConnection);
     }
 
     virtual QStringList keys() const { return QStringList() << QLatin1String("kde"); }
@@ -340,6 +339,13 @@ public: // ColorDialog
     }
 
 private slots:
+    void init()
+    {
+        connect(KIconLoader::global(), SIGNAL(iconLoaderSettingsChanged()), this, SLOT(updateToolbarIcons()));
+        connect(KGlobalSettings::self(), SIGNAL(toolbarAppearanceChanged(int)), this, SLOT(updateToolbarStyle()));
+        connect(KGlobalSettings::self(), SIGNAL(kdisplayStyleChanged()), this, SLOT(updateWidgetStyle()));
+    }
+
     void updateToolbarStyle()
     {
         //from gtksymbol.cpp
