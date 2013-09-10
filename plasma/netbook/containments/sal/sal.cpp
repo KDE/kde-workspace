@@ -279,6 +279,7 @@ void SearchLaunch::configChanged()
     if (m_serviceModel) {
         m_serviceModel->setPath("/");
     }
+    restoreStrip();
     m_stripUninitialized = false;
 }
 
@@ -573,7 +574,7 @@ void SearchLaunch::restoreStrip()
 {
     KConfigGroup cg = config();
     m_stripWidget->restore(cg);
-    reset();
+    //reset();
 }
 
 void SearchLaunch::updateConfigurationMode(bool config)
