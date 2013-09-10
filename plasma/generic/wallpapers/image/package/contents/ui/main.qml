@@ -27,6 +27,17 @@ Rectangle {
     property Item currentImage: imageB
     property Item otherImage: imageA
 
+    //public API, the C++ part will look for those
+    function setUrl(url) {
+        print("Url dropped: " + url)
+        wallpaper.configuration.Image = url
+    }
+    
+    function action_open() {
+        Qt.openUrlExternally(imageWallpaper.wallpaperPath);
+    }
+
+    //private
     function fadeWallpaper() {
         fadeAnim.running = false
         if (currentImage == imageA) {
@@ -41,10 +52,6 @@ Rectangle {
         otherImage.z = 0
         currentImage.z = 1
         fadeAnim.running = true
-    }
-
-    function action_open() {
-        Qt.openUrlExternally(imageWallpaper.wallpaperPath);
     }
 
     Component.onCompleted: {
