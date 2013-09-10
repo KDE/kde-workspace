@@ -43,8 +43,13 @@ Rectangle {
         fadeAnim.running = true
     }
 
+    function action_open() {
+        Qt.openUrlExternally(imageWallpaper.wallpaperPath);
+    }
+
     Component.onCompleted: {
         imageWallpaper.addUrl(configuredImage)
+        wallpaper.setAction("open", i18n("Open Wallpaper Image"),"document-open");
         fadeWallpaper()
     }
 

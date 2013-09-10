@@ -21,8 +21,6 @@
 
 #include <QAction>
 #include <QCheckBox>
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneWheelEvent>
 #include <QVBoxLayout>
 #include <QSignalMapper>
 
@@ -132,7 +130,10 @@ QList<QAction*> ContextMenu::contextualActions()
             actions << c->contextualActions();
         } if (name == "_wallpaper") {
             if (!c->wallpaper().isEmpty()) {
-                //actions << c->wallpaper()->contextualActions();
+                QObject *wallpaperGraphicsObject = c->property("wallpaperGraphicsObject").value<QObject *>();
+                if (wallpaperGraphicsObject) {
+                    actions << wallpaperGraphicsObject->property("contextualActions").value<QList<QAction *> >();
+                }
             }
         } else if (QAction *a = action(name)) {
             actions << a;
