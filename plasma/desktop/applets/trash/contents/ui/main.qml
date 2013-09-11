@@ -29,13 +29,13 @@ Item {
     property bool constrained: false//vertical is not referenced in plasma2 ..formFactor==Vertical||formFactor==Horizontal
     
     DirModel {
-        id:dirModel
-        url: "trash:/"
+        id : dirModel
+        url : "trash:/"
     }
     
     Connections {
-        target: plasmoid
-        onFormFactorChanged: {
+        target : plasmoid
+        onFormFactorChanged : {
             root.formFactor = plasmoid.formFactor
             if(root.formFactor==Planar || root.formFactor == MediaCenter )
             {
@@ -46,69 +46,70 @@ Item {
     }
 
     function action_open() {
-        Qt.openUrlExternally("trash:/");//plasmoid.openUrl("trash:/");
+        Qt.openUrlExternally("trash:/");
     }
 
     function action_empty() {
-        emptyDialog=emptyDialogComponent.createObject(root);
-        emptyDialog.open();
+        queryDialog.open();
     }
     
-    Component.onCompleted: {
+    Component.onCompleted: { 
         plasmoid.backgroundHints = 0;
+        plasmoid.action_open = function() {
+            Qt.openUrlExternally("trash:/");
+        }
         plasmoid.setAction("open", "Open","document-open");
+        plasmoid.action_empty=function() {
+            queryDialog.open();
+        }
         plasmoid.setAction("empty","Empty","trash-empty");
         plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
     
     MouseArea {
-        id: mouseArea
-        hoverEnabled: true
-        onClicked: {
-            Qt.openUrlExternally("trash:/");
-        }
-        anchors.fill:parent
+        id : mouseArea
+        hoverEnabled : true
+        onReleased : Qt.openUrlExternally("trash:/");
+        anchors.fill : parent
         PlasmaCore.IconItem {
             id:icon
             source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
             anchors{
-                left:parent.left
-                right:parent.right
-                top:parent.top
-                bottom:constrained?parent.bottom:text.top
+                left : parent.left
+                right : parent.right
+                top : parent.top
+                bottom : constrained ? parent.bottom : text.top
             }
-            active:mouseArea.containsMouse
+            active: mouseArea.containsMouse
         }
         Components.Label {
-            id:text
-            text: (dirModel.count==0)?" Trash\nEmpty":(dirModel.count==1)?" Trash\nOne item":" Trash\n"+ dirModel.count +"items"
+            id : text
+            text : (dirModel.count==0) ? " Trash\nEmpty":(dirModel.count==1)? " Trash\nOne item":" Trash\n"+ dirModel.count + "items"
             anchors {
-                left:parent.left
-                bottom:parent.bottom  
-                right:parent.right
+                left : parent.left
+                bottom : parent.bottom  
+                right : parent.right
             }
-            horizontalAlignment:Text.AlignHCenter
-            opacity:constrained ? 0 : 1
+            horizontalAlignment : Text.AlignHCenter
+            opacity : constrained ? 0 : 1
         }
         PlasmaCore.ToolTip {
-            target: mouseArea
-            mainText:"Trash"
-            subText: (dirModel.count==0)?"Trash \n Empty":(dirModel.count==1)?"Trash \n One item":"Trash \n "+ dirModel.count +"items"
-            image: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+            target : mouseArea
+            mainText :"Trash"
+            subText : (dirModel.count==0) ? "Trash \n Empty" :(dirModel.count==1) ? "Trash \n One item" : "Trash \n " + dirModel.count + "items"
+            image : (dirModel.count > 0) ? "user-trash-full" : "user-trash"
         }
     }
-    
-    Component {
-        id:emptyDialogComponent
-        Components.QueryDialog {
-            id:queryDialog
-            titleIcon:"user-trash"
-            titleText:"Empty Trash"
-            message:"Do you really want to empty the trash ? All the items will be deleted."
-            acceptButtonText:"Empty Trash"
-            rejectButtonText:"Cancel"
-            onAccepted:plasmoid.runCommand("ktrash", ["--empty"]);
-        }
+
+    Components.QueryDialog {
+        id : queryDialog
+        titleIcon : "user-trash"
+        titleText : "Empty Trash"
+        message : "Do you really want to empty the trash ? All the items will be deleted."
+        acceptButtonText : "Empty Trash"
+        rejectButtonText : "Cancel"
+        onAccepted : plasmoid.runCommand("ktrash", ["--empty"]);
+        visualParent : root
     }
 }
