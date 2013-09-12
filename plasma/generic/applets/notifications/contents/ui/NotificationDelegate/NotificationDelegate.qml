@@ -115,7 +115,7 @@ PlasmaComponents.ListItem {
                         left: parent.left
                         right: parent.right
                         leftMargin: closeButton.width
-                        rightMargin: closeButton.width
+                        rightMargin: settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
                     }
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
@@ -142,7 +142,7 @@ PlasmaComponents.ListItem {
                 }
 
                 PlasmaComponents.ToolButton {
-                    id: configureButton
+                    id: settingsButton
                     iconSource: "configure"
                     width: notificationItem.toolIconSize
                     height: width
