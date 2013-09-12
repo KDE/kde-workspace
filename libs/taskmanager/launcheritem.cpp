@@ -228,6 +228,10 @@ void LauncherItem::launch()
     if (d->url.protocol() == "preferred") {
         KService::Ptr service = KService::serviceByStorageId(defaultApplication());
 
+        if (!service) {
+            return;
+        }
+
         QString desktopFile = KStandardDirs::locate("xdgdata-apps", service->entryPath());
         if (desktopFile.isNull()) {
             desktopFile = KStandardDirs::locate("apps", service->entryPath());
