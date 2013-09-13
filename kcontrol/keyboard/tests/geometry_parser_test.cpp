@@ -43,6 +43,7 @@ private Q_SLOTS:
         QVERIFY( geometry.getWidth() > 0 );
         QVERIFY( geometry.getShapeCount() > 0 );
 //        QVERIFY( ! geometry.getName().isEmpty() );
+        QVERIFY( !geometry.getDescription().isEmpty() );
 
         QCOMPARE( geometry.getName(), QString("pc104") );
     }

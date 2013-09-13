@@ -1,3 +1,22 @@
+/*
+ *  Copyright (C) 2012 Shivam Makkar (amourphious1992@gmail.com)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+
 #include "geometry_components.h"
 
 #include <QtCore/QString>
@@ -36,19 +55,21 @@ void GShape::display(){
 }
 
 double GShape::size(int vertical) const{
-    if(vertical == 0){
-        if (approx.x() == 0 && approx.y() == 0)
-            return cordii[0].x();
+    if( !cordii.isEmpty() ){
+        if(vertical == 0){
+            if (approx.x() == 0 && approx.y() == 0)
+                return cordii[0].x();
+            else
+                return approx.x();
+        }
+
         else
-            return approx.x();
+            if (approx.x() == 0 && approx.y() == 0)
+                return cordii[0].y();
+            else
+                return approx.y();
     }
-
-    else
-        if (approx.x() == 0 && approx.y() == 0)
-            return cordii[0].y();
-        else
-            return approx.y();
-
+    return 0;
 }
 
 

@@ -116,7 +116,6 @@ if(Boost_FOUND)
     preview/keyaliases.cpp
     preview/keyboardlayout.cpp
     preview/keyboardpainter.cpp
-    preview/keysymbols.cpp
     preview/keysymhelper.cpp
     preview/keysym2ucs.cpp)
   

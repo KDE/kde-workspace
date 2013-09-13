@@ -1,3 +1,22 @@
+/*
+ *  Copyright (C) 2012 Shivam Makkar (amourphious1992@gmail.com)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+
 #ifndef GEOMETRY_PARSER_H
 #define GEOMETRY_PARSER_H
 
@@ -16,6 +35,7 @@
 
 #include <iostream>
 #include <QtCore/QDebug>
+#include <QtCore/QStringList>
 
 #include "geometry_components.h"
 
@@ -91,7 +111,7 @@ namespace grammar{
     double x, y, ax, ay, cx, cy, off;
     Geometry_parser();
 
-    //funcions for shape
+    //functions for shape
     void getShapeName(std::string n);
     void setCord();
     void setApprox();
@@ -104,7 +124,7 @@ namespace grammar{
     void setSectionAngle(double a);
     void sectioninit();
 
-    //funtions for row
+    //functions for row
     void setRowShape(std::string n);
     void setRowTop(double a);
     void setRowLeft(double a);
@@ -129,10 +149,42 @@ namespace grammar{
     void setVerticalGeometry();
 		
   };
+
+  class ModelToGeometry{
+
+      static QStringList pcmodels;
+      static QStringList msmodels;
+      static QStringList nokiamodels;
+      static QStringList pcgeometries;
+      static QStringList macbooks;
+      static QStringList applealu;
+      static QStringList macs;
+
+      QString geometryName;
+      QString geometryFile;
+      QString kbModel;
+
+  public :
+
+      ModelToGeometry();
+      ModelToGeometry(QString model);
+
+      QString getGeometryFile(){
+          return geometryFile;
+      }
+
+      QString getGeometryName(){
+          return geometryName;
+      }
+
+      QString getModel(){
+          return kbModel;
+      }
+
+  };
   
   Geometry parseGeometry(QString model);
 
-  QPair<QString, QString> mapModelToGeometry(QString model);
 
   QString findGeometryBaseDir();
   

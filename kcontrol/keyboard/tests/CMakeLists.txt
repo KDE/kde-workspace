@@ -24,7 +24,12 @@ if(Boost_FOUND)
     include_directories(..)
 
     kde4_add_unit_test(geometry_parser_test TESTNAME geometry_parser NOGUI ../preview/geometry_parser.cpp ../preview/geometry_components.cpp geometry_parser_test.cpp ../x11_helper.cpp)
+    
+    kde4_add_unit_test(symbol_parser_test TESTNAME symbol_parser NOGUI ../preview/symbol_parser.cpp ../preview/keyboardlayout.cpp symbol_parser_test.cpp ../x11_helper.cpp ../preview/keyaliases.cpp)
+    
     target_link_libraries(geometry_parser_test ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${X11_LIBRARIES})
+    target_link_libraries(symbol_parser_test ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${X11_LIBRARIES})
+    
 endif(Boost_FOUND)
 
 kde4_add_unit_test(flags_test TESTNAME kcm-keyboard-flags_test NOGUI flags_test.cpp ../flags.cpp ../x11_helper.cpp ../keyboard_config.cpp ../xkb_rules.cpp)

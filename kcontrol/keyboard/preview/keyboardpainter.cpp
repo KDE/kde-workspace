@@ -23,7 +23,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QPushButton>
 #include <QtGui/QComboBox>
-#include <QtGui/QHBoxLayout>
+
 
 #include <KLocale>
 
@@ -67,10 +67,10 @@ void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QStrin
     int level = kbframe->getLevel();
 
     if(level > 4){
-        levelBox->addItem( i18n("Level 3, 4") );
-        levelBox->addItem( i18n("Level 5, 6") );
+        levelBox->addItem( "Level 3, 4" );
+        levelBox->addItem( "Level 5, 6" );
         if(level > 6)
-            levelBox->addItem( i18n("Level 7,8") );
+            levelBox->addItem( "Level 7,8" );
     }
     else
         levelBox->setVisible(false);

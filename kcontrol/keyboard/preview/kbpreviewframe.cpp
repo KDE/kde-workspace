@@ -65,6 +65,8 @@ int KbPreviewFrame::getWidth() const { return geometry.width; }
 int KbPreviewFrame::getHeight() const { return geometry.height; }
 
 
+
+//writes text on the keys call only by paintevent
 void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShape& s, const QString& name)
 {
     int keyindex = keyboardLayout.findKey(name);
@@ -130,6 +132,7 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
 }
 
 
+//draws key shape on QFrame called only by paint event
 void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y, int i, const QString& name){
     painter.setPen(Qt::black);
     int cordi_count = s.getCordi_count();
@@ -228,6 +231,8 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y,
 
 }
 
+
+//event handling for tooltip
 bool KbPreviewFrame::event(QEvent* event){
 
     if (event->type() == QEvent::ToolTip) {
@@ -312,7 +317,7 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 
 }
 
-
+// this function draws the keyboard preview on a QFrame
 void KbPreviewFrame :: generateKeyboardLayout(const QString& layout, const QString& layoutVariant, const QString& model)
 {
 
@@ -322,6 +327,8 @@ void KbPreviewFrame :: generateKeyboardLayout(const QString& layout, const QStri
 
 }
 
+
+//this functions give the index of the tooltip over which mouse hovers
 int KbPreviewFrame::itemAt(const QPoint& pos){
     int distance =  10000;
     int closest = 0;

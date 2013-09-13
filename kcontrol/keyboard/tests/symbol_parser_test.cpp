@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2012 Shivam Makkar (amourphious1992@gmail.com)
+ *  Copyright (C) 2011 Andriy Rysin (rysin@kde.org), Shivam Makkar (amourphious1992@gmail.com)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,23 +15,41 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
 
-#ifndef KEYSYMBOLS_H
-#define KEYSYMBOLS_H
-
+#include <kdebug.h>
 #include <QtGui/QApplication>
-#include <QtCore/QList>
+#include <qtest_kde.h>
 
-class KeySymbols
+#include "symbol_parser.h"
+
+
+class SymbolParserTest : public QObject
 {
-public:
-	KeySymbols();
+    Q_OBJECT
 
-    QString keyname;
-    QList<QString> symbols;
+    KbLayout kblayout;
 
-    void setKey(const QString& opton);
+private Q_SLOTS:
+    void initTestCase() {
+    QString layout("us");
+    QString variant("basic");
+    kblayout = grammar::parseSymbols(layout, variant);
+    }
+
+    void cleanupTestCase() {
+//    	delete kblayout;
+    }
+
+    void testSymbolParser() {
+        QVERIFY( kblayout.getKeyCount() > 0 );
+        QVERIFY( !kblayout.getLayoutName().isEmpty() );
+        QCOMPARE( kblayout.country, QString("us") );
+    }
+
 };
 
-#endif // KEYSYMBOLS_H
+//TODO: something lighter than KDEMAIN ?
+QTEST_KDEMAIN( SymbolParserTest, NoGUI )
+
+#include "symbol_parser_test.moc"
+

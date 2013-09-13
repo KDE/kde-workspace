@@ -21,7 +21,6 @@
 #include "x11_helper.h"
 
 #include <QtCore/QString>
-#include <QtCore/QStringList>
 #include <QtCore/QDebug>
 #include <QFileDialog>
 #include <QFile>
@@ -476,7 +475,7 @@ template<typename Iterator>
             cy+=geom.sectionList[secn].rowList[rown].keyList[keyn].getOffset();
         geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyPosition(cx, cy);
         QString s = geom.sectionList[secn].rowList[rown].keyList[keyn].getShapeName();
-        if (s=="")
+        if ( s.isEmpty() )
             s = geom.getKeyShape();
         GShape t = geom.findShape(s);
         int a = t.size(vertical);
@@ -488,84 +487,108 @@ template<typename Iterator>
     }
 
 
-    QPair <QString, QString> mapModelToGeometry(QString model){
-        QStringList pcmodels;
-        QStringList msmodels;
-        QStringList nokiamodels;
-        QStringList pcgeometries;
-        QStringList macbooks;
-        QStringList applealu;
-        QStringList macs;
-        pcmodels << "pc101" << "pc102" << "pc104" << "pc105";
-        msmodels << "microsoft" << "microsoft4000" << "microsoft7000" << "microsoftpro" << "microsoftprousb" << "microsoftprose";
-        nokiamodels << "nokiasu8w" << "nokiarx44" << "nokiarx51";
-        pcgeometries << "latitude";
-        macbooks << "macbook78" << "macbook79";
-        applealu << "applealu_ansi" << "applealu_iso" << "applealu_jis";
-        macs << "macintosh" << "macintosh_old" << "ibook" << "powerbook" << "macbook78" << "macbook79";
+    QStringList ModelToGeometry :: pcmodels = QStringList() << "pc101" << "pc102" << "pc104" << "pc105" ;
+    QStringList ModelToGeometry :: msmodels = QStringList() << "microsoft"<< "microsoft4000"<< "microsoft7000"<< "microsoftpro"<< "microsoftprousb"<< "microsoftprose";
+    QStringList ModelToGeometry :: nokiamodels = QStringList() << "nokiasu8w" << "nokiarx44"<< "nokiarx51" ;
+    QStringList ModelToGeometry :: pcgeometries = QStringList() << "latitude" ;
+    QStringList ModelToGeometry :: macbooks = QStringList() << "macbook78" << "macbook79";
+    QStringList ModelToGeometry :: applealu = QStringList() << "applealu_ansi" << "applealu_iso" << "applealu_jis";
+    QStringList ModelToGeometry :: macs = QStringList() << "macintosh" << "macintosh_old" << "ibook" << "powerbook" << "macbook78" << "macbook79";
 
-        if (model == "thinkpad     us"){
-            return(QPair<QString, QString> ("thinkpad", "us"));
-        }
+    ModelToGeometry :: ModelToGeometry(QString model){
+
+        geometryFile = "pc";
+        geometryName = "pc104";
+        kbModel = model;
+
         if (model == "microsoftelite"){
-            return(QPair<QString, QString> ("microsoft", "elite"));
+            geometryFile = "microsoft";
+            geometryName = "elite";
         }
+
         if (msmodels.contains(model)){
-            return(QPair<QString, QString> ("microsoft", "natural"));
+            geometryFile = "microsoft";
+            geometryName = "natural";
         }
+
         if (model == "dell101"){
-            return(QPair<QString, QString> ("dell", "dell101"));
+            geometryFile = "dell";
+            geometryName = "dell101";
         }
+
         if (model == "dellm65"){
-            return(QPair<QString, QString> ("dell", "dellm65"));
+            geometryFile = "dell";
+            geometryName = "dellm65";
         }
         if (model == "latitude"){
-            return(QPair<QString, QString> ("dell", "latitude"));
+            geometryFile = "dell";
+            geometryName = "latitude";
         }
         if (model == "flexpro"){
-            return(QPair<QString, QString> ("keytronic", "FlexPro"));
+            geometryFile = "keytronic";
+            geometryName = "FlexPro";
         }
         if(model == "hp6000" || model == "hpmini110"){
-            return(QPair<QString, QString> ("hp", "mini110"));
+            geometryFile = "hp";
+            geometryName = "mini110";
         }
         if(model == "hpdv5"){
-            return(QPair<QString, QString> ("hp", "dv5"));
+            geometryFile = "hp";
+            geometryName = "dv5";
         }
         if(model == "omnikey101"){
-            return(QPair<QString, QString> ("northgate", "omnikey101"));
+            geometryFile = "northgate";
+            geometryName = "omnikey101";
         }
         if(model == "sanwaskbkg3"){
-            return(QPair<QString, QString> ("sanwa", "sanwaskbkg3"));
+            geometryFile = "sanwa";
+            geometryName = "sanwaskbkg3";
         }
         if(pcmodels.contains(model) || pcgeometries.contains(model)){
-            return(QPair<QString, QString> ("pc", model));
+            geometryFile = "pc";
+            geometryName = model;
         }
         if(model == "everex"){
-            return(QPair<QString, QString> ("everex", "STEPnote"));
+            geometryFile = "everex";
+            geometryName = "STEPnote";
         }
         if(model.contains("thinkpad")){
-            return(QPair<QString, QString> ("thinkpad", "60"));
+            geometryFile = "thinkpad";
+            geometryName = "60";
         }
         if(model == "winbook"){
-            return(QPair<QString, QString> ("winbook", "XP5"));
+            geometryFile = "winbook";
+            geometryName = "XP5";
         }
         if(model == "pc98"){
-            return(QPair<QString, QString> ("nec", "pc98"));
+            geometryFile = "nec";
+            geometryName = "pc98";
         }
         if(model == "hhk"){
-            return(QPair<QString, QString> ("hhk", "basic"));
+            geometryFile = "hhk";
+            geometryName = "basic";
         }
         if(model == "kinesis"){
-            return(QPair<QString, QString> ("kinesis", "model100"));
+            geometryFile = "kinesis";
+            geometryName = "model100";
         }
         if(nokiamodels.contains(model)){
-            return(QPair<QString, QString> ("nokia", "+model"));
+            geometryFile = "nokia";
+            geometryName = model;
         }
         if(macs.contains(model) || macbooks.contains(model) || applealu.contains(model)){
-            return(QPair<QString, QString> ("macintosh", "+model"));
+            geometryFile = "macintosh";
+            geometryName = model;
         }
 
-        return(QPair<QString, QString> ("pc", "pc104"));
+    }
+
+
+
+    ModelToGeometry :: ModelToGeometry(){
+        geometryFile = "pc";
+        geometryName = "pc104";
+        kbModel = "pc104";
     }
 
 
@@ -575,12 +598,13 @@ template<typename Iterator>
         typedef std::string::const_iterator iterator_type;
         typedef grammar::Geometry_parser<iterator_type> Geometry_parser;
         Geometry_parser g;
+        ModelToGeometry m2g = ModelToGeometry(model);
 
-        QPair<QString, QString> geometry = mapModelToGeometry(model);
         //qDebug()<<geometry;
-        QString geometryFile = geometry.first;
-        QString geometryName = geometry.second;
+        QString geometryFile = m2g.getGeometryFile();
+        QString geometryName = m2g.getGeometryName();
         //qDebug()<< geometryFile << geometryName;
+
         QString xkbParentDir = findGeometryBaseDir();
         geometryFile.prepend(xkbParentDir);
         QFile gfile(geometryFile);
@@ -588,11 +612,14 @@ template<typename Iterator>
              qDebug()<<"unable to open the file";
              return g.geom;
         }
+
         QString gcontent = gfile.readAll();
         gfile.close();
+
         QStringList gcontentList = gcontent.split("xkb_geometry");
+
         int i = 1;
-        while(g.geom.getName()!=geometryName){
+        while(g.geom.getName()!=geometryName && i < gcontentList.size() ){
             g.geom = Geometry();
             QString input = gcontentList.at(i);
             input.prepend("xkb_geometry");
