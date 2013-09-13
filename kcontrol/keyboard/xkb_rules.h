@@ -44,7 +44,7 @@ struct VariantInfo: public ConfigItem {
 	const bool fromExtras;
 
 	VariantInfo(bool fromExtras_):
-		fromExtras(fromExtras_) {}
+	fromExtras(fromExtras_) {}
 };
 
 struct LayoutInfo: public ConfigItem {
@@ -54,7 +54,7 @@ struct LayoutInfo: public ConfigItem {
 
 //	LayoutInfo() {}
 	LayoutInfo(bool fromExtras_):
-		fromExtras(fromExtras_) {}
+	fromExtras(fromExtras_) {}
 	~LayoutInfo() { foreach(VariantInfo* variantInfo, variantInfos) delete variantInfo; }
 
 	VariantInfo* getVariantInfo(const QString& variantName) const {

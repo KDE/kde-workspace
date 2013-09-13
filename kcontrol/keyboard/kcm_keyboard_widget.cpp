@@ -33,7 +33,9 @@
 #include <QtGui/QX11Info>
 
 #include "keyboard_config.h"
+#ifdef NEW_GEOMETRY
 #include "preview/keyboardpainter.h"
+#endif
 #include "xkb_rules.h"
 #include "flags.h"
 #include "x11_helper.h"
@@ -221,15 +223,15 @@ void KCMKeyboardWidget::initializeKeyboardModelUI()
 
 void KCMKeyboardWidget::addLayout()
 {
-	if( keyboardConfig->layouts.count() >= X11Helper::ARTIFICIAL_GROUP_LIMIT_COUNT ) { // artificial limit now
+	if( keyboardConfig->layouts.count() >= X11Helper::MAX_GROUP_COUNT * 2 ) { // artificial limit now
 		QMessageBox msgBox;
-		msgBox.setText(i18np("Only up to %1 keyboard layout is supported", "Only up to %1 keyboard layouts are supported", X11Helper::ARTIFICIAL_GROUP_LIMIT_COUNT));
+		msgBox.setText(i18np("Only up to %1 keyboard layout is supported", "Only up to %1 keyboard layouts are supported", X11Helper::MAX_GROUP_COUNT));
 		// more information https://bugs.freedesktop.org/show_bug.cgi?id=19501
 		msgBox.exec();
 		return;
 	}
 
-    AddLayoutDialog dialog(rules, keyboardConfig->isFlagShown() ? flags : NULL, keyboardConfig->isLabelShown(), this);
+    AddLayoutDialog dialog(rules, keyboardConfig->isFlagShown() ? flags : NULL, keyboardConfig->keyboardModel, keyboardConfig->isLabelShown(), this);
     dialog.setModal(true);
     if( dialog.exec() == QDialog::Accepted ) {
     	keyboardConfig->layouts.append( dialog.getSelectedLayoutUnit() );
@@ -336,7 +338,9 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->moveUpBtn, SIGNAL(clicked(bool)), this, SLOT(moveUp()));
 	connect(uiWidget->moveDownBtn, SIGNAL(clicked(bool)), this, SLOT(moveDown()));
 
-    connect(uiWidget->previewbutton,SIGNAL(clicked(bool)),this,SLOT(previewLayout()));
+#ifdef NEW_GEOMETRY
+    connect(uiWidget->previewButton, SIGNAL(clicked(bool)), this, SLOT(previewLayout()));
+#endif
 
 	connect(uiWidget->xkbGrpClearBtn, SIGNAL(clicked(bool)), this, SLOT(clearGroupShortcuts()));
 	connect(uiWidget->xkb3rdLevelClearBtn, SIGNAL(clicked(bool)), this, SLOT(clear3rdLevelShortcuts()));
@@ -363,35 +367,36 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	connect(uiWidget->layoutLoopCountSpinBox, SIGNAL(valueChanged(int)), this, SLOT(uiChanged()));
 }
 
+#ifdef NEW_GEOMETRY
 void KCMKeyboardWidget::previewLayout(){
-    QMessageBox q;
-    QModelIndex index = uiWidget->layoutsTableView->currentIndex() ;
+    QModelIndex index = uiWidget->layoutsTableView->currentIndex();
+    
     QModelIndex idcountry = index.sibling(index.row(),0) ;
     QString country=uiWidget->layoutsTableView->model()->data(idcountry).toString();
     QModelIndex idvariant = index.sibling(index.row(),2) ;
     QString variant=uiWidget->layoutsTableView->model()->data(idvariant).toString();
-    if(index.row()==-1 || index.column()==-1){
-        q.setText(i18n("No layout selected "));
-        q.exec();
-    }
-    else{
-        KeyboardPainter* layoutPreview = new KeyboardPainter();
-        const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
-        foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
-            if(variant==variantInfo->description){
-                variant=variantInfo->name;
-                break;
-            }
+    QString model = keyboardConfig->keyboardModel;
+
+    KeyboardPainter* layoutPreview = new KeyboardPainter();
+    const LayoutInfo* layoutInfo = rules->getLayoutInfo(country);
+    foreach(const VariantInfo* variantInfo, layoutInfo->variantInfos) {
+        if(variant==variantInfo->description){
+            variant=variantInfo->name;
+            break;
         }
-        layoutPreview->generateKeyboardLayout(country,variant);
-        layoutPreview->exec();
-        layoutPreview->setModal(true);
     }
+
+    QString title = Flags::getLongText( LayoutUnit(country, variant), rules );
+    layoutPreview->generateKeyboardLayout(country, variant, model, title);
+    layoutPreview->exec();
+    layoutPreview->setModal(true);
+    delete layoutPreview;
 }
+#endif
 
 void KCMKeyboardWidget::configureLayoutsChanged()
 {
-	if( uiWidget->layoutsGroupBox->isChecked()	&& keyboardConfig->layouts.isEmpty() ) {
+	if( uiWidget->layoutsGroupBox->isChecked() && keyboardConfig->layouts.isEmpty() ) {
 		populateWithCurrentLayouts();
 	}
 	uiChanged();
@@ -417,8 +422,14 @@ void KCMKeyboardWidget::layoutSelectionChanged()
 	uiWidget->removeLayoutBtn->setEnabled( ! selected.isEmpty() );
 	QPair<int, int> rowsRange( getSelectedRowRange(selected) );
 	uiWidget->moveUpBtn->setEnabled( ! selected.isEmpty() && rowsRange.first > 0);
-    uiWidget->previewbutton->setEnabled(! selected.isEmpty());
-	uiWidget->moveDownBtn->setEnabled( ! selected.isEmpty() && rowsRange.second < keyboardConfig->layouts.size()-1 );
+
+#ifdef NEW_GEOMETRY
+    uiWidget->previewButton->setEnabled( uiWidget->layoutsTableView->selectionModel()->selectedRows().size() == 1 );
+#else
+    uiWidget->previewButton->setVisible(false);
+#endif
+
+    uiWidget->moveDownBtn->setEnabled( ! selected.isEmpty() && rowsRange.second < keyboardConfig->layouts.size()-1 );
 }
 
 void KCMKeyboardWidget::removeLayout()

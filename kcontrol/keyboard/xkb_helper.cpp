@@ -30,6 +30,9 @@
 #include <kprocess.h>
 #include <kdebug.h>
 
+//#include <fixx11h.h>
+//#include <config-workspace.h>
+
 #include "keyboard_config.h"
 
 

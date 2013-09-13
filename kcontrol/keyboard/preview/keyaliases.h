@@ -23,10 +23,11 @@
 class Aliases
 {
 private:
-	QMap<QString,QString>qwerty;
+    QMap<QString,QString>qwerty;
     QMap<QString,QString>azerty;
     QMap<QString,QString>qwertz;
-	QString findaliasdir();
+    QString findaliasdir();
+
 public:
     Aliases();
     QString getAlias(const QString &type, const QString &name);

@@ -39,8 +39,8 @@
 #include <X11/Xatom.h>
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBrules.h>
-#include <fixx11h.h>
-#include <config-workspace.h>
+//#include <fixx11h.h>
+//#include <config-workspace.h>
 
 
 class RulesHandler : public QXmlDefaultHandler
@@ -147,36 +147,18 @@ QString Rules::getRulesName()
 
 static QString findXkbRulesFile()
 {
-	QString rulesFile;
-	QString rulesName = Rules::getRulesName();
-
-	if ( ! rulesName.isNull() ) {
-		QString xkbParentDir;
-
-		QString base(XLIBDIR);
-		if( base.count('/') >= 3 ) {
-			// .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
-			QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
-			QDir baseDir(base + delta);
-			if( baseDir.exists() ) {
-				xkbParentDir = baseDir.absolutePath();
-			}
-			else {
-				QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
-				if( baseDir.exists() ) {
-					xkbParentDir = baseDir.absolutePath();
-				}
-			}
-		}
-
-		if( xkbParentDir.isEmpty() ) {
-			xkbParentDir = "/usr/share/X11";
-		}
-
-		rulesFile = QString("%1/xkb/rules/%2.xml").arg(xkbParentDir, rulesName);
-	}
-
-	return rulesFile;
+    QString xkbDir;
+    
+    QString rulesName = Rules::getRulesName();
+    if ( ! rulesName.isNull() ) {
+	xkbDir = X11Helper::findXkbDir();
+    }
+    
+    if( xkbDir.isEmpty() )
+	return xkbDir;
+	
+    return QString("%1/rules/%2.xml").arg(xkbDir, rulesName);
+ 
 }
 
 static
