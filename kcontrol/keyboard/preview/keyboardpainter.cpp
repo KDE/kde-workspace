@@ -67,13 +67,22 @@ void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QStrin
     int level = kbframe->getLevel();
 
     if(level > 4){
+<<<<<<< HEAD
         levelBox->addItem( "Level 3, 4" );
         levelBox->addItem( "Level 5, 6" );
         if(level > 6)
             levelBox->addItem( "Level 7,8" );
+=======
+        levelBox->addItem( i18n("Level 3, 4") );
+        levelBox->addItem( i18n("Level 5, 6") );
+        if(level > 6) {
+            levelBox->addItem( i18n("Level 7, 8") );
+        }
+>>>>>>> fc995d16487f587ad00aa548badbab77af0493c7
     }
-    else
+    else {
         levelBox->setVisible(false);
+    }
 }
 
 void KeyboardPainter :: levelChanged(int l_id){
