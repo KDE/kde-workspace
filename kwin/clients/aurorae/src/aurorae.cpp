@@ -38,15 +38,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace Aurorae
 {
 
-AuroraeFactory::AuroraeFactory()
-        : QObject()
-        , KDecorationFactoryUnstable()
+AuroraeFactory::AuroraeFactory(QObject *parent)
+        : KDecorationFactory(parent)
         , m_theme(new AuroraeTheme(this))
         , m_engine(new QDeclarativeEngine(this))
         , m_component(new QDeclarativeComponent(m_engine, this))
         , m_engineType(AuroraeEngine)
 {
     init();
+    connect(options(), &KDecorationOptions::buttonsChanged, this, &AuroraeFactory::buttonsChanged);
+    connect(options(), &KDecorationOptions::fontsChanged, this, &AuroraeFactory::titleFontChanged);
+    connect(options(), &KDecorationOptions::configChanged, this, &AuroraeFactory::updateConfiguration);
 }
 
 void AuroraeFactory::init()
@@ -153,17 +155,8 @@ AuroraeFactory *AuroraeFactory::instance()
     return s_instance;
 }
 
-bool AuroraeFactory::reset(unsigned long changed)
+void AuroraeFactory::updateConfiguration()
 {
-    if (changed & SettingButtons) {
-        emit buttonsChanged();
-    }
-    if (changed & SettingFont){
-        emit titleFontChanged();
-    }
-    if (changed & SettingCompositing) {
-        return false;
-    }
     const KConfig conf(QStringLiteral("auroraerc"));
     const KConfigGroup group(&conf, "Engine");
     const QString themeName = group.readEntry("ThemeName", "example-deco");
@@ -172,15 +165,13 @@ bool AuroraeFactory::reset(unsigned long changed)
     if (themeName != m_themeName) {
         m_engine->clearComponentCache();
         init();
-        // recreate all decorations
-        return true;
+        emit recreateDecorations();
     }
     if (m_engineType == AuroraeEngine) {
         m_theme->setBorderSize((KDecorationDefines::BorderSize)themeGroup.readEntry<int>("BorderSize", KDecorationDefines::BorderNormal));
         m_theme->setButtonSize((KDecorationDefines::BorderSize)themeGroup.readEntry<int>("ButtonSize", KDecorationDefines::BorderNormal));
     }
     emit configChanged();
-    return false; // need hard reset
 }
 
 bool AuroraeFactory::supports(Ability ability) const
@@ -238,13 +229,11 @@ AuroraeFactory *AuroraeFactory::s_instance = NULL;
 * Client
 *******************************************************/
 AuroraeClient::AuroraeClient(KDecorationBridge *bridge, KDecorationFactory *factory)
-    : KDecorationUnstable(bridge, factory)
+    : KDecoration(bridge, factory)
     , m_view(NULL)
     , m_scene(new QGraphicsScene(this))
     , m_item(AuroraeFactory::instance()->createQmlDecoration(this))
 {
-    connect(this, SIGNAL(keepAboveChanged(bool)), SIGNAL(keepAboveChangedWrapper()));
-    connect(this, SIGNAL(keepBelowChanged(bool)), SIGNAL(keepBelowChangedWrapper()));
     connect(AuroraeFactory::instance(), SIGNAL(buttonsChanged()), SIGNAL(buttonsChanged()));
     connect(AuroraeFactory::instance(), SIGNAL(configChanged()), SIGNAL(configChanged()));
     connect(AuroraeFactory::instance(), SIGNAL(titleFontChanged()), SIGNAL(fontChanged()));
@@ -305,7 +294,7 @@ bool AuroraeClient::eventFilter(QObject *object, QEvent *event)
     // TODO: remove in KDE5
     // see BUG: 304248
     if (object != widget() || event->type() != QEvent::Wheel) {
-        return KDecorationUnstable::eventFilter(object, event);
+        return KDecoration::eventFilter(object, event);
     }
     QWheelEvent *wheel = static_cast<QWheelEvent*>(event);
     if (mousePosition(wheel->pos()) == PositionCenter) {
@@ -313,33 +302,6 @@ bool AuroraeClient::eventFilter(QObject *object, QEvent *event)
         return true;
     }
     return false;
-}
-
-void AuroraeClient::activeChange()
-{
-    emit activeChanged();
-}
-
-void AuroraeClient::captionChange()
-{
-    emit captionChanged();
-}
-
-void AuroraeClient::iconChange()
-{
-    emit iconChanged();
-}
-
-void AuroraeClient::desktopChange()
-{
-    emit desktopChanged();
-}
-
-void AuroraeClient::maximizeChange()
-{
-    if (!options()->moveResizeMaximizedWindows()) {
-        emit maximizeChanged();
-    }
 }
 
 void AuroraeClient::resize(const QSize &s)
@@ -353,20 +315,14 @@ void AuroraeClient::resize(const QSize &s)
     widget()->resize(s);
 }
 
-void AuroraeClient::shadeChange()
-{
-    emit shadeChanged();
-}
-
 void AuroraeClient::borders(int &left, int &right, int &top, int &bottom) const
 {
     if (!m_item) {
         left = right = top = bottom = 0;
         return;
     }
-    const bool maximized = maximizeMode() == MaximizeFull && !options()->moveResizeMaximizedWindows();
     QObject *borders = NULL;
-    if (maximized) {
+    if (maximizeMode() == MaximizeFull) {
         borders = m_item->findChild<QObject*>(QStringLiteral("maximizedBorders"));
     } else {
         borders = m_item->findChild<QObject*>(QStringLiteral("borders"));
@@ -380,7 +336,7 @@ void AuroraeClient::padding(int &left, int &right, int &top, int &bottom) const
         left = right = top = bottom = 0;
         return;
     }
-    if (maximizeMode() == MaximizeFull && !options()->moveResizeMaximizedWindows()) {
+    if (maximizeMode() == MaximizeFull) {
         left = right = top = bottom = 0;
         return;
     }
@@ -415,7 +371,7 @@ KDecorationDefines::Position AuroraeClient::mousePosition(const QPoint &point) c
     borders(borderLeft, borderRight, borderTop, borderBottom);
     int paddingLeft, paddingTop, paddingRight, paddingBottom;
     padding(paddingLeft, paddingRight, paddingTop, paddingBottom);
-    const bool maximized = maximizeMode() == MaximizeFull && !options()->moveResizeMaximizedWindows();
+    const bool maximized = maximizeMode() == MaximizeFull;
     int titleEdgeLeft, titleEdgeRight, titleEdgeTop, titleEdgeBottom;
     AuroraeFactory::instance()->theme()->titleEdges(titleEdgeLeft, titleEdgeTop, titleEdgeRight, titleEdgeBottom, maximized);
     switch (AuroraeFactory::instance()->theme()->decorationPosition()) {
@@ -449,11 +405,6 @@ KDecorationDefines::Position AuroraeClient::mousePosition(const QPoint &point) c
     return Position(pos);
 }
 
-void AuroraeClient::reset(long unsigned int changed)
-{
-    KDecoration::reset(changed);
-}
-
 void AuroraeClient::menuClicked()
 {
     showWindowMenu(QCursor::pos());
@@ -477,11 +428,6 @@ void AuroraeClient::toggleKeepAbove()
 void AuroraeClient::toggleKeepBelow()
 {
     setKeepBelow(!keepBelow());
-}
-
-bool AuroraeClient::isMaximized() const
-{
-    return maximizeMode()==KDecorationDefines::MaximizeFull && !options()->moveResizeMaximizedWindows();
 }
 
 void AuroraeClient::titlePressed(int button, int buttons)
@@ -551,12 +497,12 @@ int AuroraeClient::doubleClickInterval() const
 
 void AuroraeClient::closeWindow()
 {
-    QMetaObject::invokeMethod(qobject_cast< KDecorationUnstable* >(this), "doCloseWindow", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(qobject_cast< KDecoration* >(this), "doCloseWindow", Qt::QueuedConnection);
 }
 
 void AuroraeClient::doCloseWindow()
 {
-    KDecorationUnstable::closeWindow();
+    KDecoration::closeWindow();
 }
 
 void AuroraeClient::maximize(int button)
@@ -564,7 +510,7 @@ void AuroraeClient::maximize(int button)
     // a maximized window does not need to have a window decoration
     // in that case we need to delay handling by one cycle
     // BUG: 304870
-    QMetaObject::invokeMethod(qobject_cast< KDecorationUnstable* >(this),
+    QMetaObject::invokeMethod(qobject_cast< KDecoration* >(this),
                               "doMaximzie",
                               Qt::QueuedConnection,
                               Q_ARG(int, button));
@@ -572,19 +518,19 @@ void AuroraeClient::maximize(int button)
 
 void AuroraeClient::doMaximzie(int button)
 {
-    KDecorationUnstable::maximize(static_cast<Qt::MouseButton>(button));
+    KDecoration::maximize(static_cast<Qt::MouseButton>(button));
 }
 
 void AuroraeClient::titlebarDblClickOperation()
 {
     // the double click operation can result in a window being maximized
     // see maximize
-    QMetaObject::invokeMethod(qobject_cast< KDecorationUnstable* >(this), "doTitlebarDblClickOperation", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(qobject_cast< KDecoration* >(this), "doTitlebarDblClickOperation", Qt::QueuedConnection);
 }
 
 void AuroraeClient::doTitlebarDblClickOperation()
 {
-    KDecorationUnstable::titlebarDblClickOperation();
+    KDecoration::titlebarDblClickOperation();
 }
 
 QVariant AuroraeClient::readConfig(const QString &key, const QVariant &defaultValue)

@@ -51,6 +51,7 @@ public:
     static void sortFavorites(Qt::SortOrder order);
     Q_INVOKABLE static bool isFavorite(const QString& url);
 
+    using QAbstractItemModel::dropMimeData;
     Q_INVOKABLE virtual bool dropMimeData(const QString& text, const QVariantList& urls,
                                           int row, int column);
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

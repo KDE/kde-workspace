@@ -232,7 +232,7 @@ Workspace::Workspace(bool restore)
 
     m_compositor = Compositor::create(this);
     connect(this, SIGNAL(currentDesktopChanged(int,KWin::Client*)), m_compositor, SLOT(addRepaintFull()));
-    connect(m_compositor, SIGNAL(compositingToggled(bool)), decorationPlugin(), SLOT(resetCompositing()));
+    connect(m_compositor, &Compositor::compositingToggled, decorationPlugin(), &DecorationPlugin::compositingToggled);
 
     new DBusInterface(this);
 
@@ -804,30 +804,17 @@ void Workspace::slotReconfigure()
     bool borderlessMaximizedWindows = options->borderlessMaximizedWindows();
 
     KSharedConfig::openConfig()->reparseConfiguration();
-    unsigned long changed = options->updateSettings();
+    options->updateSettings();
 
     emit configChanged();
     m_userActionsMenu->discard();
     updateToolWindows(true);
 
     DecorationPlugin *deco = DecorationPlugin::self();
-    if (!deco->isDisabled() && deco->reset(changed)) {
-        // Decorations need to be recreated
-
-        // This actually seems to make things worse now
-        //QWidget curtain;
-        //curtain.setBackgroundMode( NoBackground );
-        //curtain.setGeometry( Kephal::ScreenUtils::desktopGeometry() );
-        //curtain.show();
-
-        for (ClientList::ConstIterator it = clients.constBegin(); it != clients.constEnd(); ++it)
-            (*it)->updateDecoration(true, true);
-        // If the new decoration doesn't supports tabs then ungroup clients
-        if (!decorationPlugin()->supportsTabbing()) {
-            foreach (Client * c, clients)
-                c->untab();
-        }
+    if (!deco->isDisabled() && deco->reset()) {
+        deco->recreateDecorations();
         deco->destroyPreviousPlugin();
+        connect(deco->factory(), &KDecorationFactory::recreateDecorations, deco, &DecorationPlugin::recreateDecorations);
     } else {
         forEachClient(CheckBorderSizesProcedure());
         foreach (Client * c, clients)

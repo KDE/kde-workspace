@@ -32,7 +32,7 @@
 #include "kcommondecoration_p.moc"
 
 KCommonDecorationWrapper::KCommonDecorationWrapper(KCommonDecoration* deco, KDecorationBridge* bridge, KDecorationFactory* factory)
-    : KDecorationUnstable(bridge, factory)
+    : KDecoration(bridge, factory)
     , decoration(deco)
 {
 }
@@ -68,36 +68,6 @@ QSize KCommonDecorationWrapper::minimumSize() const
     return decoration->minimumSize();
 }
 
-void KCommonDecorationWrapper::activeChange()
-{
-    return decoration->activeChange();
-}
-
-void KCommonDecorationWrapper::captionChange()
-{
-    return decoration->captionChange();
-}
-
-void KCommonDecorationWrapper::iconChange()
-{
-    return decoration->iconChange();
-}
-
-void KCommonDecorationWrapper::maximizeChange()
-{
-    return decoration->maximizeChange();
-}
-
-void KCommonDecorationWrapper::desktopChange()
-{
-    return decoration->desktopChange();
-}
-
-void KCommonDecorationWrapper::shadeChange()
-{
-    return decoration->shadeChange();
-}
-
 bool KCommonDecorationWrapper::drawbound(const QRect& geom, bool clear)
 {
     return decoration->drawbound(geom, clear);
@@ -106,11 +76,6 @@ bool KCommonDecorationWrapper::drawbound(const QRect& geom, bool clear)
 bool KCommonDecorationWrapper::windowDocked(Position side)
 {
     return decoration->windowDocked(side);
-}
-
-void KCommonDecorationWrapper::reset(unsigned long changed)
-{
-    return decoration->reset(changed);
 }
 
 void KCommonDecorationWrapper::padding(int &left, int &right, int &top, int &bottom) const

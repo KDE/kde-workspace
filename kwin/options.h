@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef KWIN_OPTIONS_H
 #define KWIN_OPTIONS_H
 
-#include <QObject>
 #include <kdecoration.h>
 
 #include "placement.h"
@@ -47,7 +46,7 @@ enum HiddenPreviews {
 
 class Settings;
 
-class Options : public QObject, public KDecorationOptions
+class Options : public KDecorationOptions
 {
     Q_OBJECT
     Q_ENUMS(FocusPolicy)
@@ -199,7 +198,7 @@ public:
     explicit Options(QObject *parent = NULL);
     ~Options();
 
-    virtual unsigned long updateSettings();
+    void updateSettings();
 
     /*!
       Different focus policies:
@@ -735,7 +734,7 @@ public:
     /**
      * Performs loading all settings except compositing related.
      **/
-    unsigned long loadConfig();
+    void loadConfig();
     /**
      * Performs loading of compositing settings which do not depend on OpenGL.
      **/

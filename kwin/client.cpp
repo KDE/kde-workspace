@@ -428,12 +428,13 @@ void Client::createDecoration(const QRect& oldgeom)
     } else {
         decoration = decorationPlugin()->createDecoration(bridge);
     }
-    connect(this, SIGNAL(shadeChanged()), decoration, SLOT(shadeChange()));
-    connect(this, SIGNAL(desktopChanged()), decoration, SLOT(desktopChange()));
-    connect(this, SIGNAL(captionChanged()), decoration, SLOT(captionChange()));
-    connect(this, SIGNAL(activeChanged()), decoration, SLOT(activeChange()));
-    connect(this, SIGNAL(clientMaximizedStateChanged(KWin::Client*,KDecorationDefines::MaximizeMode)),
-            decoration, SLOT(maximizeChange()));
+    connect(this, &Client::iconChanged, decoration, &KDecoration::iconChanged);
+    connect(this, &Client::shadeChanged, decoration, &KDecoration::shadeChanged);
+    connect(this, &Client::desktopChanged, decoration, &KDecoration::desktopChanged);
+    connect(this, &Client::captionChanged, decoration, &KDecoration::captionChanged);
+    connect(this, &Client::activeChanged, decoration, &KDecoration::activeChanged);
+    connect(this, static_cast<void (Client::*)(Client*, KDecorationDefines::MaximizeMode)>(&Client::clientMaximizedStateChanged),
+            decoration, &KDecoration::maximizeChanged);
     connect(this, SIGNAL(keepAboveChanged(bool)), decoration, SIGNAL(keepAboveChanged(bool)));
     connect(this, SIGNAL(keepBelowChanged(bool)), decoration, SIGNAL(keepBelowChanged(bool)));
 #ifdef KWIN_BUILD_KAPPMENU
@@ -449,8 +450,7 @@ void Client::createDecoration(const QRect& oldgeom)
     decoration->widget()->lower();
     decoration->borders(border_left, border_right, border_top, border_bottom);
     padding_left = padding_right = padding_top = padding_bottom = 0;
-    if (KDecorationUnstable *deco2 = dynamic_cast<KDecorationUnstable*>(decoration))
-        deco2->padding(padding_left, padding_right, padding_top, padding_bottom);
+    decoration->padding(padding_left, padding_right, padding_top, padding_bottom);
     Xcb::moveWindow(decoration->widget()->winId(), -padding_left, -padding_top);
     move(calculateGravitation(false));
     plainResize(sizeForClientSize(clientSize()), ForceGeometrySet);
@@ -488,8 +488,7 @@ bool Client::checkBorderSizes(bool also_resize)
         return false;
 
     int new_left = 0, new_right = 0, new_top = 0, new_bottom = 0;
-    if (KDecorationUnstable *deco2 = dynamic_cast<KDecorationUnstable*>(decoration))
-        deco2->padding(new_left, new_right, new_top, new_bottom);
+    decoration->padding(new_left, new_right, new_top, new_bottom);
     if (padding_left != new_left || padding_top != new_top)
         Xcb::moveWindow(decoration->widget()->winId(), -new_left, -new_top);
     padding_left = new_left;
@@ -648,6 +647,7 @@ void Client::resizeDecoration(const QSize& s)
     } else {
         triggerDecorationRepaint();
     }
+    Xcb::moveWindow(decoration->widget()->winId(), -padding_left, -padding_top);
     updateInputWindow();
 }
 
@@ -1993,7 +1993,7 @@ void Client::getMotifHints()
     if (isManaged())
         updateDecoration(true);   // Check if noborder state has changed
     if (decoration && closabilityChanged)
-        decoration->reset(KDecoration::SettingButtons);
+        emit decoration->decorationButtonsChanged();
 }
 
 void Client::readIcons(xcb_window_t win, QPixmap* icon, QPixmap* miniicon, QPixmap* bigicon, QPixmap* hugeicon)
@@ -2314,7 +2314,7 @@ void Client::updateAllowedActions(bool force)
     // ONLY if relevant features have changed (and the window didn't just get/loose moveresize for maximization state changes)
     const unsigned long relevant = ~(NET::ActionMove|NET::ActionResize);
     if (decoration && (allowed_actions & relevant) != (old_allowed_actions & relevant))
-        decoration->reset(KDecoration::SettingButtons);
+        emit decoration->decorationButtonsChanged();
 }
 
 void Client::autoRaise()

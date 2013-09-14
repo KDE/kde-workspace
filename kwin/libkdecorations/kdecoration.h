@@ -139,19 +139,7 @@ public:
         CloseTabGroupOp, // Close the group
         ActivateNextTabOp, // Move left in the group
         ActivatePreviousTabOp, // Move right in the group
-        ///< @deprecated, tiling got removed in 4.10
-        ToggleClientTiledStateOp, // put a floating client into tiling
         TabDragOp,
-
-        //BEGIN ABI stability stuff
-        // NOTICE for ABI stability
-        // TODO remove with mandatory version tagging fo 4.9.x or 4.10
-        /** @deprecated ABI compatibility only - don't use */
-        RemoveClientFromGroupOp = RemoveTabFromGroupOp, // Remove from group
-        CloseClientGroupOp = CloseTabGroupOp, // Close the group
-        MoveClientInGroupLeftOp = ActivateNextTabOp, // Move left in the group
-        MoveClientInGroupRightOp = ActivatePreviousTabOp // Move right in the group
-        //END ABI stability stuff
     };
     /**
      * Basic color types that should be recognized by all decoration styles.
@@ -166,20 +154,6 @@ public:
         ColorFrame,      ///< The color for the window frame (border)
         ColorHandle,     ///< The color for the resize handle
         NUM_COLORS       ///< @internal This value may change, do not use
-    };
-
-    /**
-     * These flags specify which settings changed when rereading settings.
-     * Each setting in class KDecorationOptions specifies its matching flag.
-     */
-    enum {
-        SettingDecoration  = 1 << 0, ///< The decoration was changed
-        SettingColors      = 1 << 1, ///< The color palette was changed
-        SettingFont        = 1 << 2, ///< The titlebar font was changed
-        SettingButtons     = 1 << 3, ///< The button layout was changed
-        SettingTooltips    = 1 << 4, ///< The tooltip setting was changed
-        SettingBorder      = 1 << 5, ///< The border size setting was changed
-        SettingCompositing = 1 << 6  ///< Compositing settings was changed
     };
 
     /**
@@ -206,7 +180,6 @@ public:
     enum Ability {
         // announce
         AbilityAnnounceButtons = 0, ///< decoration supports AbilityButton* values (always use)
-        AbilityAnnounceColors = 1, ///< decoration supports AbilityColor* values (always use), @deprecated @todo remove KDE5
         // buttons
         AbilityButtonMenu = 1000,   ///< decoration supports the window menu button
         AbilityButtonOnAllDesktops = 1001, ///< decoration supports the on all desktops button
@@ -220,16 +193,6 @@ public:
         AbilityButtonShade = 1009, ///< decoration supports a shade button
         AbilityButtonResize = 1010, ///< decoration supports a resize button
         AbilityButtonApplicationMenu = 1011,   ///< decoration supports the application menu button
-        // colors
-        AbilityColorTitleBack = 2000, ///< decoration supports titlebar background color, @deprecated @todo remove KDE5
-        ABILITYCOLOR_FIRST = AbilityColorTitleBack, ///< @internal, @deprecated @todo remove KDE5
-        AbilityColorTitleFore = 2001, ///< decoration supports titlebar foreground color, @deprecated @todo remove KDE5
-        AbilityColorTitleBlend = 2002, ///< decoration supports second titlebar background color, @deprecated @todo remove KDE5
-        AbilityColorFrame = 2010, ///< decoration supports frame color, @deprecated @todo remove KDE5
-        AbilityColorHandle = 2011, ///< decoration supports resize handle color, @deprecated @todo remove KDE5
-        AbilityColorButtonBack = 2020, ///< decoration supports button background color, @deprecated @todo remove KDE5
-        AbilityColorButtonFore = 2021, ///< decoration supports button foreground color, @deprecated @todo remove KDE5
-        ABILITYCOLOR_END, ///< @internal, @deprecated @todo remove KDE5
         // compositing
         AbilityProvidesShadow = 3000, ///< The decoration draws its own shadows.
         ///  @since 4.3
@@ -247,13 +210,6 @@ public:
         AbilityTabbing = 4000, ///< The decoration supports tabbing
         // TODO colors for individual button types
         ABILITY_DUMMY = 10000000,
-
-        //BEGIN ABI stability stuff
-        // NOTICE for ABI stability
-        // TODO remove with mandatory version tagging fo 4.9.x or 4.10
-        /** @deprecated ABI compatibility only - don't use */
-        AbilityClientGrouping = AbilityTabbing
-        //END ABI stability stuff
     };
 
     enum Requirement { REQUIREMENT_DUMMY = 1000000 };
@@ -282,38 +238,9 @@ public:
     /**
      * Returns the mimeType used to drag and drop clientGroupItems
      */
-    //BEGIN ABI stability stuff
-    // NOTICE for ABI stability
-    // TODO remove with mandatory version tagging fo 4.9.x or 4.10
-    /** @deprecated ABI compatibility only - don't use */
-    static QString clientGroupItemDragMimeType() { return tabDragMimeType(); }
-    //END ABI stability stuff
     static QString tabDragMimeType();
 
 };
-
-//BEGIN ABI stability stuff
-// NOTICE for ABI stability
-// TODO remove with mandatory version tagging fo 4.9.x or 4.10
-/** @deprecated ABI compatibility only - don't use */
-class KWIN_EXPORT ClientGroupItem
-{
-public:
-    ClientGroupItem(QString t, QIcon i) {
-        title_ = t;
-        icon_ = i;
-    }
-    inline QIcon icon() const {
-        return icon_;
-    }
-    inline QString title() const {
-        return title_;
-    }
-private:
-    QString title_;
-    QIcon icon_;
-};
-//END ABI stability stuff
 
 class KDecorationProvides
     : public KDecorationDefines
@@ -328,17 +255,12 @@ public:
  * It is accessible from the decorations either as KDecoration::options()
  * or KDecorationFactory::options().
  */
-class KWIN_EXPORT KDecorationOptions : public KDecorationDefines
+class KWIN_EXPORT KDecorationOptions : public QObject, public KDecorationDefines
 {
+    Q_OBJECT
 public:
-    KDecorationOptions();
+    KDecorationOptions(QObject *parent = nullptr);
     virtual ~KDecorationOptions();
-    /**
-     * Call to update settings when the config changes. Return value is
-     * a combination of Setting* (SettingColors, etc.) that have changed.
-     * @since 4.0.1
-     */
-    unsigned long updateSettings(KConfig* config);
     /**
      * Returns the color that should be used for the given part of the decoration.
      * The changed flags for this setting is SettingColors.
@@ -433,20 +355,103 @@ public:
     BorderSize preferredBorderSize(KDecorationFactory* factory) const;
 
     /**
-     * This functions returns false
-     * @deprecated
-    */
-    bool moveResizeMaximizedWindows() const;
-
-    /**
      * @internal
      */
     WindowOperation operationMaxButtonClick(Qt::MouseButtons button) const;
 
+    static KDecorationOptions *self();
+
+Q_SIGNALS:
     /**
-     * @internal
+     * @brief Emitted when at least one of the color settings changed.
+     *
+     * @see color
      */
-    virtual unsigned long updateSettings() = 0; // returns SettingXYZ mask
+    void colorsChanged();
+    /**
+     * @brief Emitted when the active font changed.
+     *
+     * @see font
+     */
+    void activeFontChanged();
+    /**
+     * @brief Emitted when the inactive font changed.
+     *
+     * @see font
+     */
+    void inactiveFontChanged();
+    /**
+     * @brief Emitted when the small active font changed
+     *
+     * @see font
+     */
+    void smallActiveFontChanged();
+    /**
+     * @brief Emitted when the small inactive font changed
+     *
+     * @see font
+     */
+    void smallInactiveFontChanged();
+    /**
+     * @brief Emitted if any of the fonts changed.
+     *
+     * @see activeFontChanged
+     * @see inactiveFontChanged
+     * @see smallInactiveFontChanged
+     * @see smallInactiveFontChanged
+     */
+    void fontsChanged();
+    /**
+     * @brief Emitted when the left title buttons changed.
+     *
+     * @see titleButtonsLeft
+     * @see defaultTitleButtonsLeft
+     */
+    void leftButtonsChanged();
+    /**
+     * @brief Emitted when the right title buttons changed.
+     *
+     * @see titleButtonsRight
+     * @see defaultTitleButtonsRight
+     */
+    void rightButtonsChanged();
+    /**
+     * @brief Emitted when the custom buttons position setting changed.
+     *
+     * @see customButtonPositions
+     */
+    void customButtonPositionsChanged();
+    /**
+     * @brief Emitted when one of the title buttons relevant settings changed.
+     *
+     * @see leftButtonsChanged
+     * @see rightButtonsChanged
+     * @see customButtonPositionsChanged
+     */
+    void buttonsChanged();
+    /**
+     * @brief Emitted when show tooltips setting changed.
+     *
+     * @see showTooltips
+     */
+    void showTooltipsChanged();
+    /**
+     * @brief Emitted when the border size setting changed.
+     *
+     * @see preferredBorderSize
+     */
+    void borderSizeChanged();
+    /**
+     * @brief This signal is emitted whenever the configuration changed.
+     *
+     * A decoration plugin should connect to this signal and evaluate whether
+     * some decoration specific settings need to be updated.
+     */
+    void configChanged();
+    /**
+     * @brief Emitted when the compositing state in KWin core changes.
+     */
+    void compositingChanged();
 
 protected:
     /** @internal */
@@ -463,11 +468,18 @@ protected:
     void setTitleButtonsLeft(const QString& b);
     /** @internal */
     void setTitleButtonsRight(const QString& b);
+    /**
+     * Call to update settings when the config changes.
+     * @since 4.0.1
+     * @internal
+     */
+    void updateSettings(KConfig* config);
 private:
     /**
      * @internal
      */
     KDecorationOptionsPrivate* d;
+    static KDecorationOptions *s_self;
 };
 
 
@@ -481,6 +493,15 @@ class KWIN_EXPORT KDecoration
     : public QObject, public KDecorationDefines
 {
     Q_OBJECT
+    Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
+    Q_PROPERTY(QString caption READ caption NOTIFY captionChanged)
+    Q_PROPERTY(int desktop READ desktop WRITE setDesktop NOTIFY desktopChanged)
+    Q_PROPERTY(bool onAllDesktops READ isOnAllDesktops NOTIFY desktopChanged)
+    Q_PROPERTY(bool setShade READ isSetShade NOTIFY shadeChanged)
+    Q_PROPERTY(QIcon icon READ icon NOTIFY iconChanged)
+    Q_PROPERTY(bool maximized READ isMaximized NOTIFY maximizeChanged)
+    Q_PROPERTY(bool keepAbove READ keepAbove WRITE setKeepAbove NOTIFY keepAboveChanged)
+    Q_PROPERTY(bool keepBelow READ keepBelow WRITE setKeepBelow NOTIFY keepBelowChanged)
 public:
     /**
      * Constructs a KDecoration object. Both the arguments are passed from
@@ -498,6 +519,8 @@ public:
     /**
      * Returns the KDecorationOptions object, which is used to access
      * configuration settings for the decoration.
+     *
+     * @deprecated use KDecorationOptions::self()
      */
     static const KDecorationOptions* options();
     /**
@@ -516,8 +539,18 @@ public:
      * Returns the current maximization mode of the decorated window.
      * Note that only fully maximized windows should be treated
      * as "maximized" (e.g. if the maximize button has only two states).
+     * @see isMaximized
      */
     MaximizeMode maximizeMode() const;
+    /**
+     * @brief Convenience method for the case that the decoration is
+     * only interested in whether the decoration is in fully maximized
+     * or restored state ignoring vertical and horizontal maximized modes.
+     *
+     * @return bool @c true if maximized fully, @c false otherwise
+     * @see maximizeMode
+     */
+    bool isMaximized() const;
     /**
      * Returns @a true if the decorated window can be minimized by the user.
      */
@@ -804,46 +837,63 @@ public:
      */
     virtual QSize minimumSize() const = 0;
 
-public Q_SLOTS:
+Q_SIGNALS:
     /**
-     * This function is called whenever the window either becomes or stops being active.
+     * This signal is emitted whenever the window either becomes or stops being active.
      * Use isActive() to find out the current state.
      */
-    virtual void activeChange() = 0;
+    void activeChanged();
     /**
-     * This function is called whenever the caption changes. Use caption() to get it.
+     * This signal is emitted whenever the caption changes. Use caption() to get it.
      */
-    virtual void captionChange() = 0;
+    void captionChanged();
     /**
-     * This function is called whenever the window icon changes. Use icon() to get it.
-     */
-    virtual void iconChange() = 0;
-    /**
-     * This function is called whenever the maximalization state of the window changes.
-     * Use maximizeMode() to get the current state.
-     */
-    virtual void maximizeChange() = 0;
-    /**
-     * This function is called whenever the desktop for the window changes. Use
+     * This signal is emitted whenever the desktop for the window changes. Use
      * desktop() or isOnAllDesktops() to find out the current desktop
      * on which the window is.
      */
-    virtual void desktopChange() = 0;
+    void desktopChanged();
     /**
-     * This function is called whenever the window is shaded or unshaded. Use
+     * This signal is emitted whenever the window is shaded or unshaded. Use
      * isShade() to get the current state.
      */
-    virtual void shadeChange() = 0;
-
-Q_SIGNALS:
+    void shadeChanged();
+    /**
+     * This signal is emitted whenever the window icon changes. Use icon() to get it.
+     */
+    void iconChanged();
+    /**
+     * This signal is emitted whenever the maximalization state of the window changes.
+     * Use maximizeMode() or isMaximized() to get the current state.
+     */
+    void maximizeChanged();
     /**
      * This signal is emitted whenever the window's keep-above state changes.
+     */
+    void keepAboveChanged();
+    /**
+     * This signal is emitted whenever the window's keep-below state changes.
+     */
+    void keepBelowChanged();
+    /**
+     * This signal is emitted whenever the window's keep-above state changes.
+     * @deprecated connect to signal without argument
      */
     void keepAboveChanged(bool);
     /**
      * This signal is emitted whenever the window's keep-below state changes.
+     * @deprecated connect to signal without argument
      */
     void keepBelowChanged(bool);
+    /**
+     * This signal is emitted whenever the decorated Client indicated that the
+     * available buttons should change (e.g. a closeable window becomes non
+     * closable).
+     *
+     * An implementing class should connect to this signal if it wants to update
+     * the buttons accordingly.
+     **/
+    void decorationButtonsChanged();
 
     /**
      * This signal is emitted whenever application menu is closed
@@ -876,29 +926,21 @@ Q_SIGNALS:
 
 public:
     /**
-     * This method is not any more invoked from KWin core since version 4.8.
-     * There is no need to implement it.
-     *
-     * @param geom  The geometry at this the bound should be drawn
-     * @param clear @a true if the bound should be cleared (when doing the usual XOR
-     *              painting this argument can be simply ignored)
-     *
-     * @see geometry()
-     * @deprecated
-     */
-    virtual bool drawbound(const QRect& geom, bool clear);
-    /**
      * @internal Reserved.
      */
     // TODO position will need also values for top+left+bottom etc. docking ?
     virtual bool windowDocked(Position side);
     /**
-     * This function is called to reset the decoration on settings changes.
-     * It is usually invoked by calling KDecorationFactory::resetDecorations().
+     * This function can return additional padding values that are added outside the
+     * borders of the window, and can be used by the decoration if it wants to paint
+     * outside the frame.
      *
-     * @param changed Specifies which settings were changed, given by the SettingXXX masks
+     * The typical use case is for drawing a drop shadow or glowing effect around the window.
+     *
+     * The area outside the frame cannot receive input, and when compositing is disabled,
+     * painting is clipped to the mask, or the window frame if no mask is defined.
      */
-    virtual void reset(unsigned long changed);
+    virtual void padding(int &left, int &right, int &top, int &bottom) const;
 
     // special
 
@@ -950,6 +992,77 @@ public:
      * Ungrabs X server (if the number of ungrab attempts matches the number of grab attempts).
      */
     void ungrabXServer();
+    /**
+     * Returns @a true if compositing--and therefore ARGB--is enabled.
+     */
+    bool compositingActive() const;
+    /**
+     * Determine which action the user has mapped \p button to. Useful for determining whether
+     * a button press was for window tab dragging or for displaying the client menu.
+     */
+    WindowOperation buttonToWindowOperation(Qt::MouseButtons button);
+
+
+    // Window tabbing
+
+    /**
+     * Returns whether or not this client group contains the active client.
+     */
+    bool isInActiveTabGroup();
+    /**
+     * Return the amount of tabs in this group
+     */
+    int tabCount() const;
+
+    /**
+     * Return the icon for the tab at index \p idx (\p idx must be smaller than tabCount())
+     */
+    QIcon icon(int idx) const;
+
+    /**
+     * Return the caption for the tab at index \p idx (\p idx must be smaller than tabCount())
+     */
+    QString caption(int idx) const;
+
+    /**
+     * Return the unique id for the tab at index \p idx (\p idx must be smaller than tabCount())
+     */
+    long tabId(int idx) const;
+    /**
+     * Returns the id of the currently active client in this group.
+     */
+    long currentTabId() const;
+    /**
+     * Activate tab for the window with the id  \p id.
+     */
+    void setCurrentTab(long id);
+
+    /**
+     * Entab windw with id \p A beFORE the window with the id \p B.
+     */
+    virtual void tab_A_before_B(long A, long B);
+    /**
+     * Entab windw with id \p A beHIND the window with the id \p B.
+     */
+    virtual void tab_A_behind_B(long A, long B);
+    /**
+     * Remove the window with the id \p id from its tabgroup and place it at \p newGeom
+     */
+    virtual void untab(long id, const QRect& newGeom);
+
+    /**
+     * Close the client with the id \p id.
+     */
+    void closeTab(long id);
+    /**
+     * Close all windows in this group.
+     */
+    void closeTabGroup();
+    /**
+     * Display the right-click client menu belonging to the client at index \p index at the
+     * global coordinates specified by \p pos.
+     */
+    void showWindowMenu(const QPoint& pos, long id);
 
 public: // invokables; runtime resolution
     /**
@@ -1023,16 +1136,6 @@ public Q_SLOTS:
      * @param set Whether to keep the window below others
      */
     void setKeepBelow(bool set);
-    /**
-     * @internal
-     * TODO KF5: remove me
-     */
-    void emitKeepAboveChanged(bool above);
-    /**
-     * @internal
-     * TODO KF5: remove me
-     */
-    void emitKeepBelowChanged(bool below);
 
 protected Q_SLOTS:
     /**
@@ -1058,114 +1161,8 @@ protected Q_SLOTS:
     QRegion region(KDecorationDefines::Region r);
 
 private:
-    KDecorationBridge* bridge_;
-    QWidget* w_;
-    KDecorationFactory* factory_;
-    friend class KDecorationOptions; // for options_
-    friend class KDecorationUnstable; // for bridge_
-    static KDecorationOptions* options_;
     KDecorationPrivate* d;
 
-};
-
-/**
- * @warning THIS CLASS IS UNSTABLE!
- */
-class KWIN_EXPORT KDecorationUnstable
-    : public KDecoration
-{
-    Q_OBJECT
-
-public:
-    KDecorationUnstable(KDecorationBridge* bridge, KDecorationFactory* factory);
-    virtual ~KDecorationUnstable();
-    /**
-     * This function can return additional padding values that are added outside the
-     * borders of the window, and can be used by the decoration if it wants to paint
-     * outside the frame.
-     *
-     * The typical use case is for drawing a drop shadow or glowing effect around the window.
-     *
-     * The area outside the frame cannot receive input, and when compositing is disabled,
-     * painting is clipped to the mask, or the window frame if no mask is defined.
-     */
-    virtual void padding(int &left, int &right, int &top, int &bottom) const;
-    /**
-     * Returns @a true if compositing--and therefore ARGB--is enabled.
-     */
-    bool compositingActive() const;
-
-    // Window tabbing
-
-    /**
-     * Returns whether or not this client group contains the active client.
-     */
-    bool isInActiveTabGroup();
-    /**
-     * Return the amount of tabs in this group
-     */
-    int tabCount() const;
-
-    /**
-     * Return the icon for the tab at index \p idx (\p idx must be smaller than tabCount())
-     */
-    QIcon icon(int idx) const;
-
-    /**
-     * Return the caption for the tab at index \p idx (\p idx must be smaller than tabCount())
-     */
-    QString caption(int idx) const;
-
-    /**
-     * Return the unique id for the tab at index \p idx (\p idx must be smaller than tabCount())
-     */
-    long tabId(int idx) const;
-    /**
-     * Returns the id of the currently active client in this group.
-     */
-    long currentTabId() const;
-    /**
-     * Activate tab for the window with the id  \p id.
-     */
-    void setCurrentTab(long id);
-
-    /**
-     * Entab windw with id \p A beFORE the window with the id \p B.
-     */
-    virtual void tab_A_before_B(long A, long B);
-    /**
-     * Entab windw with id \p A beHIND the window with the id \p B.
-     */
-    virtual void tab_A_behind_B(long A, long B);
-    /**
-     * Remove the window with the id \p id from its tabgroup and place it at \p newGeom
-     */
-    virtual void untab(long id, const QRect& newGeom);
-
-    /**
-     * Close the client with the id \p id.
-     */
-    void closeTab(long id);
-    /**
-     * Close all windows in this group.
-     */
-    void closeTabGroup();
-    /**
-     * Display the right-click client menu belonging to the client at index \p index at the
-     * global coordinates specified by \p pos.
-     */
-    void showWindowMenu(const QPoint& pos, long id);
-    /**
-     * unshadow virtuals
-     */
-    using KDecoration::caption;
-    using KDecoration::icon;
-    using KDecoration::showWindowMenu;
-    /**
-     * Determine which action the user has mapped \p button to. Useful for determining whether
-     * a button press was for window tab dragging or for displaying the client menu.
-     */
-    WindowOperation buttonToWindowOperation(Qt::MouseButtons button);
 };
 
 inline
@@ -1184,36 +1181,6 @@ inline
 KDecorationDefines::MaximizeMode operator|(KDecorationDefines::MaximizeMode m1, KDecorationDefines::MaximizeMode m2)
 {
     return KDecorationDefines::MaximizeMode(int(m1) | int(m2));
-}
-
-inline QWidget* KDecoration::widget()
-{
-    return w_;
-}
-
-inline const QWidget* KDecoration::widget() const
-{
-    return w_;
-}
-
-inline KDecorationFactory* KDecoration::factory() const
-{
-    return factory_;
-}
-
-inline bool KDecoration::isOnAllDesktops() const
-{
-    return desktop() == NET::OnAllDesktops;
-}
-
-inline int KDecoration::width() const
-{
-    return geometry().width();
-}
-
-inline int KDecoration::height() const
-{
-    return geometry().height();
 }
 
 /** @} */

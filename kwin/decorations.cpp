@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "decorations.h"
 #include "config-kwin.h"
+#include "client.h"
+#include "workspace.h"
 #include <kdecorationfactory.h>
 
 #include <KDE/KLocalizedString>
@@ -43,6 +45,8 @@ DecorationPlugin::DecorationPlugin(QObject *parent)
 #endif
 #ifdef KWIN_BUILD_DECORATIONS
     loadPlugin(QString());   // load the plugin specified in cfg file
+    connect(factory(), &KDecorationFactory::recreateDecorations, this, &DecorationPlugin::recreateDecorations);
+    connect(this, &DecorationPlugin::compositingToggled, options, &KDecorationOptions::compositingChanged);
 #else
     setDisabled(true);
 #endif
@@ -131,14 +135,6 @@ Qt::Corner DecorationPlugin::closeButtonCorner()
     return factory()->closeButtonCorner();
 }
 
-void DecorationPlugin::resetCompositing()
-{
-    if (m_disabled) {
-        return;
-    }
-    factory()->reset(SettingCompositing);
-}
-
 QString DecorationPlugin::supportInformation()
 {
     if (m_disabled) {
@@ -168,6 +164,23 @@ QString DecorationPlugin::supportInformation()
     support.append(supportsBlurBehind() ? QStringLiteral("yes\n") : QStringLiteral("no\n"));
     // TODO: Qt5 - read support information from Factory
     return support;
+}
+
+void DecorationPlugin::recreateDecorations()
+{
+    if (m_disabled) {
+        return;
+    }
+    // Decorations need to be recreated
+    workspace()->forEachClient([](Client *c) {
+        c->updateDecoration(true, true);
+    });
+    // If the new decoration doesn't supports tabs then ungroup clients
+    if (!supportsTabbing()) {
+        workspace()->forEachClient([](Client *c) {
+            c->untab();
+        });
+    }
 }
 
 } // namespace

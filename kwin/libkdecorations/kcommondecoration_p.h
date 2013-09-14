@@ -38,7 +38,7 @@ class KDecorationFactory;
 
 // wrapper all functionality that needs reimplementing in KDecoration and forward it to KCommonDecoration
 class KCommonDecorationWrapper
-    : public KDecorationUnstable
+    : public KDecoration
 {
     Q_OBJECT
 public:
@@ -49,15 +49,8 @@ public:
     virtual void borders(int& left, int& right, int& top, int& bottom) const;
     virtual void resize(const QSize& s);
     virtual QSize minimumSize() const;
-    virtual void activeChange();
-    virtual void captionChange();
-    virtual void iconChange();
-    virtual void maximizeChange();
-    virtual void desktopChange();
-    virtual void shadeChange();
     virtual bool drawbound(const QRect& geom, bool clear);
     virtual bool windowDocked(Position side);
-    virtual void reset(unsigned long changed);
 
     virtual void padding(int &left, int &right, int &top, int &bottom) const;
 

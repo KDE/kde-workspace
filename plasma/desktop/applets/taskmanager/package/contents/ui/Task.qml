@@ -95,7 +95,7 @@ MouseEventListener {
     }
 
     onClicked: {
-        if (!mouse.buttons & Qt.LeftButton) {
+        if (!mouse.button == Qt.LeftButton) {
             return;
         }
 

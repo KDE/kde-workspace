@@ -37,14 +37,13 @@ namespace Aurorae
 class AuroraeTheme;
 class AuroraeClient;
 
-class AuroraeFactory :  public QObject, public KDecorationFactoryUnstable
+class AuroraeFactory :  public KDecorationFactory
 {
     Q_OBJECT
 public:
     ~AuroraeFactory();
 
     static AuroraeFactory* instance();
-    bool reset(unsigned long changed);
     KDecoration *createDecoration(KDecorationBridge*);
     bool supports(Ability ability) const;
     virtual QList< BorderSize > borderSizes() const;
@@ -62,7 +61,7 @@ private:
         AuroraeEngine,
         QMLEngine
     };
-    AuroraeFactory();
+    explicit AuroraeFactory(QObject *parent = nullptr);
     void init();
     void initAurorae(KConfig &conf, KConfigGroup &group);
     void initQML(const KConfigGroup& group);
@@ -71,6 +70,9 @@ Q_SIGNALS:
     void buttonsChanged();
     void titleFontChanged();
     void configChanged();
+
+private Q_SLOTS:
+    void updateConfiguration();
 
 private:
     static AuroraeFactory *s_instance;
@@ -82,29 +84,19 @@ private:
     QString m_themeName;
 };
 
-class AuroraeClient : public KDecorationUnstable
+class AuroraeClient : public KDecoration
 {
     Q_OBJECT
-    Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
-    Q_PROPERTY(QString caption READ caption NOTIFY captionChanged)
-    Q_PROPERTY(int desktop READ desktop WRITE setDesktop NOTIFY desktopChanged)
     Q_PROPERTY(QRect geometry READ geometry)
     Q_PROPERTY(int height READ height)
-    Q_PROPERTY(QIcon icon READ icon NOTIFY iconChanged)
     Q_PROPERTY(bool closeable READ isCloseable CONSTANT)
     Q_PROPERTY(bool maximizeable READ isMaximizable CONSTANT)
     Q_PROPERTY(bool minimizeable READ isMinimizable CONSTANT)
     Q_PROPERTY(bool modal READ isModal)
     Q_PROPERTY(bool moveable READ isMovable CONSTANT)
-    Q_PROPERTY(bool onAllDesktops READ isOnAllDesktops NOTIFY desktopChanged)
     Q_PROPERTY(bool preview READ isPreview CONSTANT)
     Q_PROPERTY(bool resizeable READ isResizable CONSTANT)
-    Q_PROPERTY(bool setShade READ isSetShade NOTIFY shadeChanged)
-    Q_PROPERTY(bool shade READ isShade WRITE setShade NOTIFY shadeChanged)
     Q_PROPERTY(bool shadeable READ isShadeable)
-    Q_PROPERTY(bool keepAbove READ keepAbove WRITE setKeepAbove NOTIFY keepAboveChangedWrapper)
-    Q_PROPERTY(bool keepBelow READ keepBelow WRITE setKeepBelow NOTIFY keepBelowChangedWrapper)
-    Q_PROPERTY(bool maximized READ isMaximized NOTIFY maximizeChanged)
     Q_PROPERTY(bool providesContextHelp READ providesContextHelp)
     Q_PROPERTY(bool appMenu READ menuAvailable NOTIFY appMenuAvailableChanged)
     Q_PROPERTY(QRect transparentRect READ transparentRect)
@@ -117,21 +109,13 @@ public:
     AuroraeClient(KDecorationBridge* bridge, KDecorationFactory* factory);
     virtual ~AuroraeClient();
     virtual bool eventFilter(QObject *object, QEvent *event);
-    virtual void activeChange();
     virtual void borders(int& left, int& right, int& top, int& bottom) const;
-    virtual void captionChange();
-    virtual void desktopChange();
-    virtual void iconChange();
     virtual void init();
-    virtual void maximizeChange();
     virtual QSize minimumSize() const;
     virtual Position mousePosition(const QPoint& p) const;
     virtual void resize(const QSize& s);
-    virtual void shadeChange();
     // optional overrides
     virtual void padding(int &left, int &right, int &top, int &bottom) const;
-    virtual void reset(long unsigned int changed);
-    bool isMaximized() const;
     int doubleClickInterval() const;
 
     bool animationsSupported() const;
@@ -139,14 +123,6 @@ public:
     Q_INVOKABLE QVariant readConfig(const QString &key, const QVariant &defaultValue = QVariant());
 
 Q_SIGNALS:
-    void activeChanged();
-    void captionChanged();
-    void desktopChanged();
-    void iconChanged();
-    void maximizeChanged();
-    void shadeChanged();
-    void keepAboveChangedWrapper();
-    void keepBelowChangedWrapper();
     void buttonsChanged();
     /**
      * Signal emitted when the decoration's configuration might have changed.

@@ -35,14 +35,10 @@ class KDecorationBridge;
 class KDecorationFactoryPrivate;
 
 class KWIN_EXPORT KDecorationFactory
-    : public KDecorationDefines
+    : public QObject, public KDecorationDefines
 {
+    Q_OBJECT
 public:
-    /**
-     * Constructor. Called after loading the decoration plugin. All global
-     * initialization of the plugin should be done in the factory constructor.
-     */
-    KDecorationFactory();
     /**
      * Destructor. Called before unloading the decoration plugin. All global
      * cleanup of the plugin should be done in the factory destructor.
@@ -54,16 +50,6 @@ public:
      * KDecoration argument should be this factory object.
      */
     virtual KDecoration* createDecoration(KDecorationBridge* bridge) = 0;
-    /**
-     * This function is called when the configuration settings changed.
-     * The argument specifies what has changed, using the SettingXXX masks.
-     * It should be determined whether the decorations need to be completely
-     * remade, in which case true should be returned, or whether only e.g.
-     * a repaint will be sufficient, in which case false should be returned,
-     * and resetDecorations() can be called to reset all decoration objects.
-     * Note that true should be returned only when really necessary.
-     */
-    virtual bool reset(unsigned long changed);   // returns true if the decoration needs to be recreated
 
     /**
      * Reimplement this function if your decoration supports more border sizes than
@@ -76,11 +62,6 @@ public:
     virtual bool supports(Ability ability) const = 0;
 
     virtual void checkRequirements(KDecorationProvides* provides);
-    /**
-     * Returns the KDecorationOptions object, which is used to access
-     * configuration settings for the decoration.
-     */
-    const KDecorationOptions* options(); // convenience
     /**
      * Returns true if the given decoration object still exists. This is necessary
      * e.g. when calling KDecoration::showWindowMenu(), which may cause the decoration
@@ -111,12 +92,20 @@ public:
      * @internal
      */
     void removeDecoration(KDecoration*);
+
+Q_SIGNALS:
+    /**
+     * @brief An implementing class should emit this signal if it's decorations should
+     * be recreated. For example after a setting changed in a way that the only logical
+     * step is to recreate the decoration.
+     */
+    void recreateDecorations();
 protected:
     /**
-     * Convenience function that calls KDecoration::reset() for all decoration
-     * objects.
+     * Constructor. Called after loading the decoration plugin. All global
+     * initialization of the plugin should be done in the factory constructor.
      */
-    void resetDecorations(unsigned long changed);   // convenience
+    explicit KDecorationFactory(QObject *parent = nullptr);
     /**
      * This function has the same functionality like KDecoration::windowType().
      * It can be used in createDecoration() to return different KDecoration
@@ -125,24 +114,16 @@ protected:
      * is the one passed to createDecoration().
      */
     NET::WindowType windowType(unsigned long supported_types, KDecorationBridge* bridge) const;
+    /**
+     * Returns the KDecorationOptions object, which is used to access
+     * configuration settings for the decoration.
+     *
+     * @deprecated use KDecorationOptions::self()
+     */
+    const KDecorationOptions* options(); // convenience
 private:
-    QList< KDecoration* > _decorations;
     KDecorationFactoryPrivate* d;
 };
-
-/**
- * @warning THIS CLASS IS UNSTABLE!
- * Keep all decoration class names in sync. E.g. KDecorationFactory2 and KDecoration2.
- */
-class KWIN_EXPORT KDecorationFactoryUnstable
-    : public KDecorationFactory
-{
-};
-
-inline const KDecorationOptions* KDecorationFactory::options()
-{
-    return KDecoration::options();
-}
 
 /** @} */
 

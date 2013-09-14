@@ -252,21 +252,17 @@ public:
      * Handles widget and layout creation, call the base implementation when subclassing this member.
      */
     virtual void init();
-    /**
-     * Handles SettingButtons, call the base implementation when subclassing this member.
-     */
-    virtual void reset(unsigned long changed);
     virtual void borders(int& left, int& right, int& top, int& bottom) const;
     virtual void show();
     virtual void resize(const QSize& s);
     virtual QSize minimumSize() const;
-    virtual void maximizeChange();
+public Q_SLOTS:
+    virtual void activeChange();
+    virtual void captionChange();
     virtual void desktopChange();
     virtual void shadeChange();
     virtual void iconChange();
-    virtual void activeChange();
-    virtual void captionChange();
-public Q_SLOTS:
+    virtual void maximizeChange();
     void keepAboveChange(bool above);
     void keepBelowChange(bool below);
     void slotMaximize();
@@ -324,9 +320,37 @@ public:
     int width() const; // convenience
     int height() const;  // convenience
     void processMousePressEvent(QMouseEvent* e);
+
+    bool compositingActive() const;
+
+    // Window tabbing
+    QString caption(int idx) const;
+    void closeTab(long id);
+    void closeTabGroup();
+    long currentTabId() const;
+    QIcon icon(int idx) const;
+    void setCurrentTab(long id);
+    void showWindowMenu(const QPoint &, long id);
+    void tab_A_before_B(long A, long B);
+    void tab_A_behind_B(long A, long B);
+    int tabCount() const;
+    long tabId(int idx) const;
+    void untab(long id, const QRect& newGeom);
+
+    WindowOperation buttonToWindowOperation(Qt::MouseButtons button);
+
 Q_SIGNALS:
     void keepAboveChanged(bool);
     void keepBelowChanged(bool);
+    /**
+     * This signal is emitted whenever the decorated Client indicated that the
+     * available buttons should change (e.g. a closeable window becomes non
+     * closable).
+     *
+     * An implementing class should connect to this signal if it wants to update
+     * the buttons accordingly.
+     **/
+    void decorationButtonsChanged();
 public:
     void setMainWidget(QWidget*);
     void createMainWidget(Qt::WindowFlags flags = 0);
@@ -375,6 +399,7 @@ protected Q_SLOTS:
 private Q_SLOTS:
     /* look out for buttons that have been destroyed. */
     void objDestroyed(QObject *obj);
+    void buttonsChanged();
 
     /**
      * This slot can be reimplemented to return the regions defined
@@ -397,51 +422,11 @@ private:
     int buttonContainerWidth(const ButtonContainer &btnContainer, bool countHidden = false) const;
     void addButtons(ButtonContainer &btnContainer, const QString& buttons, bool isLeft);
 
-    KCommonDecorationButton *m_button[NumButtons];
-
-    ButtonContainer m_buttonsLeft;
-    ButtonContainer m_buttonsRight;
-
-    QWidget *m_previewWidget;
-
     // button hiding for small windows
     void calcHiddenButtons();
-    int btnHideMinWidth;
-    int btnHideLastWidth;
 
-    bool closing; // for menu doubleclick closing...
-
-    KCommonDecorationWrapper* wrapper;
-
-    KCommonDecorationPrivate *d;
-};
-
-class KWIN_EXPORT KCommonDecorationUnstable
-    : public KCommonDecoration
-{
-    Q_OBJECT
-public:
-    KCommonDecorationUnstable(KDecorationBridge* bridge, KDecorationFactory* factory);
-    virtual ~KCommonDecorationUnstable();
-    bool compositingActive() const;
-
-    // Window tabbing
-    using KCommonDecoration::caption;
-    QString caption(int idx) const;
-    void closeTab(long id);
-    void closeTabGroup();
-    long currentTabId() const;
-    QIcon icon(int idx = 0) const;
-    void setCurrentTab(long id);
-    void showWindowMenu(const QPoint &, long id);
-    void tab_A_before_B(long A, long B);
-    void tab_A_behind_B(long A, long B);
-    int tabCount() const;
-    long tabId(int idx) const;
-    void untab(long id, const QRect& newGeom);
-
-    WindowOperation buttonToWindowOperation(Qt::MouseButtons button);
-    virtual bool eventFilter(QObject* o, QEvent* e);
+    const QScopedPointer<KCommonDecorationPrivate> d;
+    friend class KCommonDecorationPrivate;
 };
 
 /**
@@ -502,9 +487,7 @@ public:
     /**
      * The mouse button that has been clicked last time.
      */
-    Qt::MouseButtons lastMousePress() const {
-        return m_lastMouse;
-    }
+    Qt::MouseButtons lastMousePress() const;
 
     QSize sizeHint() const;
 
@@ -516,15 +499,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e);
 
 private:
-    KCommonDecoration *m_decoration;
-    ButtonType m_type;
-    int m_realizeButtons;
-    QSize m_size;
-    Qt::MouseButtons m_lastMouse;
-
-    bool m_isLeft;
-
-    KCommonDecorationButtonPrivate *d;
+    const QScopedPointer<KCommonDecorationButtonPrivate> d;
 };
 
 /** @} */
