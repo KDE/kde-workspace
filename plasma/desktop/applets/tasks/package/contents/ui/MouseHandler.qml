@@ -45,7 +45,9 @@ Item {
             if (tasks.dragSource) {
                 if (tasks.dragSource != above && !tasks.dragSource.isLauncher
                     && !(above && "isLauncher" in above && above.isLauncher)) {
-                    itemMove(tasks.dragSource.itemId, TaskTools.insertionIndexAt(event.x, event.y));
+                    itemMove(tasks.dragSource.itemId,
+                        TaskTools.insertionIndexAt(tasks.dragSource.itemIndex,
+                            event.x, event.y));
                 }
             } else if (above && hoveredItem != above) {
                 hoveredItem = above;
