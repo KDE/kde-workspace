@@ -74,7 +74,7 @@ Item {
         anchors.fill : parent
         PlasmaCore.IconItem {
             id:icon
-            source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+            source: (dirModel.count > 0) ? i18n( "user-trash-full" ) : i18n ("user-trash")
             anchors{
                 left : parent.left
                 right : parent.right
@@ -85,7 +85,7 @@ Item {
         }
         Components.Label {
             id : text
-            text : (dirModel.count==0) ? " Trash\nEmpty":(dirModel.count==1)? " Trash\nOne item":" Trash\n"+ dirModel.count + "items"
+            text : (dirModel.count==0) ? i18n(" Trash\nEmpty") : (dirModel.count==1)? i18n(" Trash\nOne item") : i18n(" Trash\n"+ dirModel.count + "items")
             anchors {
                 left : parent.left
                 bottom : parent.bottom  
@@ -96,8 +96,8 @@ Item {
         }
         PlasmaCore.ToolTip {
             target : mouseArea
-            mainText :"Trash"
-            subText : (dirModel.count==0) ? "Trash \n Empty" :(dirModel.count==1) ? "Trash \n One item" : "Trash \n " + dirModel.count + "items"
+            mainText : i18n("Trash")
+            subText : (dirModel.count==0) ? i18n("Trash \n Empty") :(dirModel.count==1) ? i18n("Trash \n One item") : i18n("Trash \n " + dirModel.count + "items")
             image : (dirModel.count > 0) ? "user-trash-full" : "user-trash"
         }
     }
@@ -105,11 +105,12 @@ Item {
     Components.QueryDialog {
         id : queryDialog
         titleIcon : "user-trash"
-        titleText : "Empty Trash"
-        message : "Do you really want to empty the trash ? All the items will be deleted."
-        acceptButtonText : "Empty Trash"
-        rejectButtonText : "Cancel"
+        titleText : i18n("Empty Trash")
+        message : i18n("Do you really want to empty the trash ? All the items will be deleted.")
+        acceptButtonText : i18n("Empty Trash")
+        rejectButtonText : i18n("Cancel")
         onAccepted : plasmoid.runCommand("ktrash", ["--empty"]);
+        onRejected : queryDialog.close();
         visualParent : root
-    }
+        }
 }
