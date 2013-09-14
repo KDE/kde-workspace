@@ -70,7 +70,7 @@ Item {
     MouseArea {
         id : mouseArea
         hoverEnabled : true
-        onReleased : Qt.openUrlExternally("trash:/");
+        onClicked : Qt.openUrlExternally("trash:/");
         anchors.fill : parent
         PlasmaCore.IconItem {
             id:icon
