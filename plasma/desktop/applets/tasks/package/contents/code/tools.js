@@ -54,29 +54,17 @@ function activateNextPrevTask(parentItem, next) {
     activateItem(target, false);
 }
 
-function insertionIndexAt(x, y) {
+function insertionIndexAt(sourceIndex, x, y) {
     var above = target.childAt(x, y);
 
     if (above) {
-        var mapped = target.mapToItem(above, x, y);
+        var index = above.itemIndex;
 
-        if (y >= above.y && mapped.y <= above.height) {
-            var hMid = Math.round(above.width / 2);
-
-            if (mapped.x > hMid) {
-                return above.itemIndex + 1;
-            } else {
-                return above.itemIndex;
-            }
-        } else {
-            var vMid = Math.round(above.height / 2);
-
-            if (mapped.y > vMid) {
-                return above.itemIndex + 1;
-            } else {
-                return above.itemIndex;
-            }
+        if (index > sourceIndex) {
+            ++index;
         }
+
+        return index;
     } else {
         var distance = tasks.vertical ? x : y;
         var step = tasks.vertical ? Layout.taskWidth() : Layout.taskHeight();
