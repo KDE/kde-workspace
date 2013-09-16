@@ -40,7 +40,7 @@ Item {
     }
     PlasmaComponents.Label {
         id: textLabel
-        text:  (label != "") ? label : action.text.replace("&", "") // hack to get rid of keyboard accelerator hints
+        text:  (label != "") ? label : modelData.text.replace("&", "") // hack to get rid of keyboard accelerator hints
         //elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
@@ -49,10 +49,10 @@ Item {
         anchors.margins: -6
         hoverEnabled: true
         onClicked: {
-            if (typeof(index) == "undefined") {
+            if (typeof(modelData) == "undefined") {
                 triggered();
             } else {
-                trigger();
+                modelData.trigger();
             }
         }
         onPressed: PlasmaExtras.PressedAnimation { targetItem: toolBoxDelegate }

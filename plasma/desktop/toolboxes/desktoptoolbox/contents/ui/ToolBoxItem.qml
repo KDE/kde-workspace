@@ -26,7 +26,6 @@ import org.kde.qtextracomponents 2.0 as QtExtras
 Item {
     id: toolBoxItem
 
-    property QtObject proxy: plasmoid.toolBox
     property bool showing: state != "collapsed"
     property int expandedWidth: 240
     property int expandedHeight: 240
@@ -144,9 +143,9 @@ Item {
 
             Repeater {
                 id: unlockedList
-                model: proxy.actions
+                model: plasmoid.actions
                 delegate: ActionDelegate {
-                    actionIcon: icon
+                    actionIcon: modelData.icon
                     objectName: modelData.objectName
                 }
             }
