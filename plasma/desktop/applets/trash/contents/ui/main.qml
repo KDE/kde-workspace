@@ -55,7 +55,7 @@ MouseArea {
 
     PlasmaCore.IconItem {
         id:icon
-        source: (dirModel.count > 0) ? i18n( "user-trash-full" ) : i18n ("user-trash")
+        source: (dirModel.count > 0) ? "user-trash-full" : "user-trash"
         anchors{
             left : parent.left
             right : parent.right
