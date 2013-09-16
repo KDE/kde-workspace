@@ -65,7 +65,7 @@ MouseArea {
     }
     Components.Label {
         id : text
-        text : (dirModel.count==0) ? i18n("Trash\nEmpty") : i18np(("Trash\nOne item", "Trash\n %1 items", dirModel.count));//(dirModel.count==1) ? i18n("Trash\nOne item") : ("Trash\n %1 items", dirModel.count );
+        text : (dirModel.count==0) ? i18n("Trash\nEmpty") : i18np(("Trash\nOne item", "Trash\n %1 items", dirModel.count));
         anchors {
             left : parent.left
             bottom : parent.bottom  
@@ -77,7 +77,7 @@ MouseArea {
     PlasmaCore.ToolTip {
         target : root
         mainText : i18n("Trash")
-        subText : (dirModel.count==0) ? i18n("Trash \n Empty") : i18np(("Trash\nOne item", "Trash\n %1 items", dirModel.count ));//(dirModel.count==1) ? i18n("Trash\nOne item") : ("Trash\n %1 items",  dirModel.count)
+        subText : (dirModel.count==0) ? i18n("Trash \n Empty") : i18np(("Trash\nOne item", "Trash\n %1 items", dirModel.count ));
         image : (dirModel.count > 0) ? "user-trash-full" : "user-trash"
     }
 
