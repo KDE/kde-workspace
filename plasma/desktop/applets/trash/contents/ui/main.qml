@@ -22,32 +22,19 @@ import org.kde.dirmodel 2.0
 
 MouseArea {
     id:root
-    
-    property int minimumWidth//:formFactor == Horizontal ? height : 1
-    property int minimumHeight//:formFactor == Vertical ? width  : 1
-    property int formFactor: plasmoid.formFactor
-    property bool constrained: false//vertical is not referenced in plasma2 ..formFactor==Vertical||formFactor==Horizontal
 
-    hoverEnabled : true
-    onClicked : Qt.openUrlExternally("trash:/");
+    property int minimumWidth: formFactor == PlasmaCore.Types.Vertical ? height : 1
+    property int minimumHeight: formFactor == PlasmaCore.Types.Horizontal ? width  : 1
+    property int formFactor: plasmoid.formFactor
+    property bool constrained: formFactor==PlasmaCore.Types.Vertical||formFactor==PlasmaCore.Types.Horizontal
+    hoverEnabled: true
+    onClicked: Qt.openUrlExternally("trash:/");
     
     DirModel {
         id : dirModel
         url : "trash:/"
     }
     
-    Connections {
-        target : plasmoid
-        onFormFactorChanged : {
-            root.formFactor = plasmoid.formFactor
-            if(root.formFactor==Planar || root.formFactor == MediaCenter )
-            {
-               minimumWidth=root.width/3.5
-               minimumHeight=root.height/3.5
-            }
-        }
-    }
-
     function action_open() {
         Qt.openUrlExternally("trash:/");
     }
@@ -60,46 +47,10 @@ MouseArea {
         plasmoid.backgroundHints = 0;
 
         plasmoid.setAction("open", "Open","document-open");
-
         plasmoid.setAction("empty","Empty","trash-empty");
         plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
-<<<<<<< HEAD
-    
-    MouseArea {
-        id : mouseArea
-        hoverEnabled : true
-        onClicked : Qt.openUrlExternally("trash:/");
-        anchors.fill : parent
-        PlasmaCore.IconItem {
-            id:icon
-            source: (dirModel.count > 0) ? i18n( "user-trash-full" ) : i18n ("user-trash")
-            anchors{
-                left : parent.left
-                right : parent.right
-                top : parent.top
-                bottom : constrained ? parent.bottom : text.top
-            }
-            active: mouseArea.containsMouse
-        }
-        Components.Label {
-            id : text
-            text : (dirModel.count==0) ? i18n("Trash\nEmpty") : (dirModel.count==1)? i18n("Trash\nOne item") : i18n("Trash\n"+ dirModel.count + "items")
-            anchors {
-                left : parent.left
-                bottom : parent.bottom  
-                right : parent.right
-            }
-            horizontalAlignment : Text.AlignHCenter
-            opacity : constrained ? 0 : 1
-        }
-        PlasmaCore.ToolTip {
-            target : mouseArea
-            mainText : i18n("Trash")
-            subText : (dirModel.count==0) ? i18n("Trash \n Empty") :(dirModel.count==1) ? i18np(("Trash\nOne item", "Trash\n %1 items", dirModel.count ))
-            image : (dirModel.count > 0) ? "user-trash-full" : "user-trash"
-=======
 
 
     PlasmaCore.IconItem {
@@ -115,12 +66,11 @@ MouseArea {
     }
     Components.Label {
         id : text
-        text : (dirModel.count==0) ? i18n(" Trash\nEmpty") : (dirModel.count==1)? i18n(" Trash\nOne item") : i18n(" Trash\n"+ dirModel.count + "items")
+        text : (dirModel.count==0) ? i18n("Trash\nEmpty") :(dirModel.count==1) ? i18n("Trash\nOne item") : ("Trash\n %1 items", dirModel.count );
         anchors {
             left : parent.left
             bottom : parent.bottom  
             right : parent.right
->>>>>>> d223fe414efb0cab4d648c29cf593a0a56b2ec7e
         }
         horizontalAlignment : Text.AlignHCenter
         opacity : constrained ? 0 : 1
@@ -128,7 +78,7 @@ MouseArea {
     PlasmaCore.ToolTip {
         target : root
         mainText : i18n("Trash")
-        subText : (dirModel.count==0) ? i18n("Trash \n Empty") :(dirModel.count==1) ? i18n("Trash \n One item") : i18n("Trash \n " + dirModel.count + "items")
+        subText : (dirModel.count==0) ? i18n("Trash \n Empty") :(dirModel.count==1) ? i18n("Trash\nOne item") : ("Trash\n %1 items", dirModel.count)
         image : (dirModel.count > 0) ? "user-trash-full" : "user-trash"
     }
 
