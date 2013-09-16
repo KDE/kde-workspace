@@ -23,8 +23,8 @@ import org.kde.dirmodel 2.0
 MouseArea {
     id:root
 
-    property int minimumWidth: formFactor == PlasmaCore.Types.Vertical ? height : 1
-    property int minimumHeight: formFactor == PlasmaCore.Types.Horizontal ? width  : 1
+    property int minimumWidth: formFactor == PlasmaCore.Types.Vertical ? width : 1
+    property int minimumHeight: formFactor == PlasmaCore.Types.Horizontal ? height  : 1
     property int formFactor: plasmoid.formFactor
     property bool constrained: formFactor==PlasmaCore.Types.Vertical||formFactor==PlasmaCore.Types.Horizontal
     hoverEnabled: true
