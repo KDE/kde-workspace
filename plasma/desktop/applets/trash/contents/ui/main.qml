@@ -20,13 +20,16 @@ import org.kde.plasma.components 2.0 as Components
 import org.kde.qtextracomponents 2.0
 import org.kde.dirmodel 2.0
 
-Item {
+MouseArea {
     id:root
     
     property int minimumWidth//:formFactor == Horizontal ? height : 1
     property int minimumHeight//:formFactor == Vertical ? width  : 1
     property int formFactor: plasmoid.formFactor
     property bool constrained: false//vertical is not referenced in plasma2 ..formFactor==Vertical||formFactor==Horizontal
+
+    hoverEnabled : true
+    onClicked : Qt.openUrlExternally("trash:/");
     
     DirModel {
         id : dirModel
@@ -55,52 +58,44 @@ Item {
     
     Component.onCompleted: { 
         plasmoid.backgroundHints = 0;
-        plasmoid.action_open = function() {
-            Qt.openUrlExternally("trash:/");
-        }
+
         plasmoid.setAction("open", "Open","document-open");
-        plasmoid.action_empty=function() {
-            queryDialog.open();
-        }
+
         plasmoid.setAction("empty","Empty","trash-empty");
         plasmoid.popupIcon = QIcon("user-trash");
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
-    
-    MouseArea {
-        id : mouseArea
-        hoverEnabled : true
-        onClicked : Qt.openUrlExternally("trash:/");
-        anchors.fill : parent
-        PlasmaCore.IconItem {
-            id:icon
-            source: (dirModel.count > 0) ? i18n( "user-trash-full" ) : i18n ("user-trash")
-            anchors{
-                left : parent.left
-                right : parent.right
-                top : parent.top
-                bottom : constrained ? parent.bottom : text.top
-            }
-            active: mouseArea.containsMouse
+
+
+    PlasmaCore.IconItem {
+        id:icon
+        source: (dirModel.count > 0) ? i18n( "user-trash-full" ) : i18n ("user-trash")
+        anchors{
+            left : parent.left
+            right : parent.right
+            top : parent.top
+            bottom : constrained ? parent.bottom : text.top
         }
-        Components.Label {
-            id : text
-            text : (dirModel.count==0) ? i18n(" Trash\nEmpty") : (dirModel.count==1)? i18n(" Trash\nOne item") : i18n(" Trash\n"+ dirModel.count + "items")
-            anchors {
-                left : parent.left
-                bottom : parent.bottom  
-                right : parent.right
-            }
-            horizontalAlignment : Text.AlignHCenter
-            opacity : constrained ? 0 : 1
-        }
-        PlasmaCore.ToolTip {
-            target : mouseArea
-            mainText : i18n("Trash")
-            subText : (dirModel.count==0) ? i18n("Trash \n Empty") :(dirModel.count==1) ? i18n("Trash \n One item") : i18n("Trash \n " + dirModel.count + "items")
-            image : (dirModel.count > 0) ? "user-trash-full" : "user-trash"
-        }
+        active: root.containsMouse
     }
+    Components.Label {
+        id : text
+        text : (dirModel.count==0) ? i18n(" Trash\nEmpty") : (dirModel.count==1)? i18n(" Trash\nOne item") : i18n(" Trash\n"+ dirModel.count + "items")
+        anchors {
+            left : parent.left
+            bottom : parent.bottom  
+            right : parent.right
+        }
+        horizontalAlignment : Text.AlignHCenter
+        opacity : constrained ? 0 : 1
+    }
+    PlasmaCore.ToolTip {
+        target : root
+        mainText : i18n("Trash")
+        subText : (dirModel.count==0) ? i18n("Trash \n Empty") :(dirModel.count==1) ? i18n("Trash \n One item") : i18n("Trash \n " + dirModel.count + "items")
+        image : (dirModel.count > 0) ? "user-trash-full" : "user-trash"
+    }
+
 
     Components.QueryDialog {
         id : queryDialog
