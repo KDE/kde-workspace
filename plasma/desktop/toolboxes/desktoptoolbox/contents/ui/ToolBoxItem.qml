@@ -165,27 +165,6 @@ Item {
                 onTriggered: containmentSettings();
             }
             */
-            ActionDelegate {
-                label: i18n("Desktop Settings")
-                actionIcon: "configure"
-                objectName: "containment settings"
-                onTriggered: containmentSettings();
-            }
-
-            ActionDelegate {
-                label: plasmoid.immutable ? i18n("Unlock Widgets") : i18n("Lock Widgets")
-                actionIcon: plasmoid.immutable ? "object-unlocked" : "object-locked"
-                objectName: "lock widgets"
-                onTriggered: lockWidgets(!plasmoid.immutable);
-            }
-
-            ActionDelegate {
-                label: i18n("Add Widgets")
-                actionIcon: "list-add"
-                objectName: "lock screen"
-                visible: !plasmoid.immutable
-                onTriggered: showWidgetsExplorer();
-            }
 
             ActionDelegate {
                 label: i18n("Lock Screen")
