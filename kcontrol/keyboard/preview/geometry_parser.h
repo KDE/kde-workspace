@@ -147,7 +147,6 @@ namespace grammar{
     void setVerticalRow();
     void setVerticalSection();
     void setVerticalGeometry();
-		
   };
 
   class ModelToGeometry{
@@ -184,10 +183,7 @@ namespace grammar{
   };
   
   Geometry parseGeometry(QString model);
-
-
   QString findGeometryBaseDir();
-  
 }
 
 #endif //geometry_parser

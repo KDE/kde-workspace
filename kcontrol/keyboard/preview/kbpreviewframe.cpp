@@ -60,14 +60,12 @@ KbPreviewFrame::~KbPreviewFrame() {
 }
 
 
-
 int KbPreviewFrame::getWidth() const { return geometry.width; }
 int KbPreviewFrame::getHeight() const { return geometry.height; }
 
 
-
 //writes text on the keys call only by paintevent
-void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShape& s, const QString& name)
+void KbPreviewFrame::drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name)
 {
     int keyindex = keyboardLayout.findKey(name);
     int sz = 20;
@@ -111,7 +109,6 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter,QPoint temp[], const GShap
         tipPoint.append(tooltipPoint);
     }
     else{
-
         painter.setPen(Qt::black);
         painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*s.size(1)/2, name);
 
@@ -139,7 +136,6 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y,
 
     if(geometry.sectionList[i].getAngle()==0){
         if (cordi_count == 1){
-
             int width = s.getCordii(0).x();
             int height = s.getCordii(0).y();
 
@@ -153,11 +149,8 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y,
             temp[3]=QPoint(scaleFactor*(x), scaleFactor*(s.getCordii(0).y()+y));
 
             drawKeySymbols(painter, temp, s, name);
-
         }
-
         else{
-
             QPoint temp[cordi_count];
 
             for(int i=0;i<cordi_count;i++){
@@ -169,24 +162,18 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y,
             drawKeySymbols(painter, temp, s, name);
         }
     }
-
     else{
-
         QPoint temp[cordi_count == 1 ? 4 : cordi_count];
         int size;
 
         if(cordi_count== 1){
-
             temp[0]=QPoint(x, y);
             temp[1]=QPoint(s.getCordii(0).x()+x, y);
             temp[2]=QPoint(s.getCordii(0).x()+x, s.getCordii(0).y()+y);
             temp[3]=QPoint(x, s.getCordii(0).y()+y);
             size = 4;
-
         }
-
         else{
-
             size = cordi_count;
 
             for(int i=0;i<cordi_count;i++){
@@ -228,7 +215,6 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y,
         drawKeySymbols(painter, temp, s, name);
     }
 
-
 }
 
 
@@ -236,14 +222,12 @@ void KbPreviewFrame::drawShape(QPainter &painter, const GShape& s, int x, int y,
 bool KbPreviewFrame::event(QEvent* event){
 
     if (event->type() == QEvent::ToolTip) {
-
         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
         int index = itemAt(helpEvent->pos());
 
         if (index != -1) {
             QToolTip::showText(helpEvent->globalPos(), tooltip.at(index));
         }
-
         else {
              QToolTip::hideText();
              event->ignore();
@@ -318,13 +302,10 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 }
 
 // this function draws the keyboard preview on a QFrame
-void KbPreviewFrame :: generateKeyboardLayout(const QString& layout, const QString& layoutVariant, const QString& model)
+void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString& layoutVariant, const QString& model)
 {
-
-    geometry = grammar :: parseGeometry(model);
-    keyboardLayout = grammar :: parseSymbols(layout, layoutVariant);
-
-
+    geometry = grammar::parseGeometry(model);
+    keyboardLayout = grammar::parseSymbols(layout, layoutVariant);
 }
 
 

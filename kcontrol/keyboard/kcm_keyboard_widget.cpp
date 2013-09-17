@@ -231,7 +231,7 @@ void KCMKeyboardWidget::addLayout()
 		return;
 	}
 
-    AddLayoutDialog dialog(rules, keyboardConfig->isFlagShown() ? flags : NULL, keyboardConfig->isLabelShown(), this);
+    AddLayoutDialog dialog(rules, keyboardConfig->isFlagShown() ? flags : NULL, keyboardConfig->keyboardModel, keyboardConfig->isLabelShown(), this);
     dialog.setModal(true);
     if( dialog.exec() == QDialog::Accepted ) {
     	keyboardConfig->layouts.append( dialog.getSelectedLayoutUnit() );
@@ -386,7 +386,8 @@ void KCMKeyboardWidget::previewLayout(){
         }
     }
 
-    layoutPreview->generateKeyboardLayout(country,variant,model);
+    QString title = Flags::getLongText( LayoutUnit(country, variant), rules );
+    layoutPreview->generateKeyboardLayout(country, variant, model, title);
     layoutPreview->exec();
     layoutPreview->setModal(true);
     delete layoutPreview;
@@ -395,7 +396,7 @@ void KCMKeyboardWidget::previewLayout(){
 
 void KCMKeyboardWidget::configureLayoutsChanged()
 {
-	if( uiWidget->layoutsGroupBox->isChecked()	&& keyboardConfig->layouts.isEmpty() ) {
+	if( uiWidget->layoutsGroupBox->isChecked() && keyboardConfig->layouts.isEmpty() ) {
 		populateWithCurrentLayouts();
 	}
 	uiChanged();

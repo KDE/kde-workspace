@@ -89,7 +89,7 @@ Aliases::Aliases()
 
                 azerty[lat]=key;
             }
-      }
+        }
 
         if(temp.startsWith("qwertz")){
             for(int k=1;k<alskeys.size();k++){
@@ -109,17 +109,16 @@ Aliases::Aliases()
 }
 
 
-
 QString Aliases::getAlias(const QString& cname, const QString& name)
 {
     QMessageBox q;
     QString a = name;
 
     if(cname=="ma" || cname == "be" || cname == "fr"){
-        a=azerty.value(name);
+        a = azerty.value(name);
     }
     else{
-        a=qwerty.value(name);
+        a = qwerty.value(name);
     }
 
     return a;

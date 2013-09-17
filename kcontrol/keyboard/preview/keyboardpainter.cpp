@@ -18,6 +18,7 @@
 
 #include "keyboardpainter.h"
 #include "geometry_components.h"
+#include "../flags.h"
 
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
@@ -56,36 +57,28 @@ KeyboardPainter::KeyboardPainter():
 }
 
 
-void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model)
+void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model, const QString& title)
 {
     kbframe->generateKeyboardLayout(layout, variant, model);
     kbDialog->setFixedSize(getWidth(), getHeight());
     kbframe->setFixedSize(getWidth(), getHeight());
 
-    setWindowTitle(layout + ":" + variant);
+    setWindowTitle(title);
 
     int level = kbframe->getLevel();
 
     if(level > 4){
-<<<<<<< HEAD
-        levelBox->addItem( "Level 3, 4" );
-        levelBox->addItem( "Level 5, 6" );
-        if(level > 6)
-            levelBox->addItem( "Level 7,8" );
-=======
-        levelBox->addItem( i18n("Level 3, 4") );
-        levelBox->addItem( i18n("Level 5, 6") );
-        if(level > 6) {
-            levelBox->addItem( i18n("Level 7, 8") );
+        levelBox->addItem( i18nc("Keyboard layout levels", "Level %1, %2", 3, 4) );
+        for(int i=5; i <= level; i += 2) {
+            levelBox->addItem( i18nc("Keyboard layout levels", "Level %1, %2", i, i+1) );
         }
->>>>>>> fc995d16487f587ad00aa548badbab77af0493c7
     }
     else {
         levelBox->setVisible(false);
     }
 }
 
-void KeyboardPainter :: levelChanged(int l_id){
+void KeyboardPainter::levelChanged(int l_id){
     kbframe->setL_id(l_id);
 }
 

@@ -38,12 +38,11 @@
 #include "keyaliases.h"
 #include "x11_helper.h"
 
+
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 namespace phx = boost::phoenix;
 namespace iso = boost::spirit::iso8859_1;
-
-
 
 
 namespace grammar {
@@ -85,7 +84,6 @@ namespace grammar {
         void addKey();
         void setName(std::string n);
         void setLevel(int lvl);
-
     };
 
     KbLayout parseSymbols(const QString& layout, const QString& layoutVariant);

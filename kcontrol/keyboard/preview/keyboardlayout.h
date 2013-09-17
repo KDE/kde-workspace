@@ -26,9 +26,11 @@
 
 
 class KbKey{
+private:
     QList<QString> symbols;
     int symbolCount;
-public :
+    
+public:
     QString keyName;
 
     KbKey();
@@ -46,13 +48,12 @@ public :
 
 
 class KbLayout{
-
+private:
     QList<QString> include;
     QString name;
     int keyCount, includeCount, level;
 
 public:
-
     QList <KbKey> keyList;
     QString country;
 

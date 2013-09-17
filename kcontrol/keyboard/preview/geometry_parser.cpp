@@ -44,11 +44,7 @@ keywords::keywords(){
        ("//", 9)
        ("/*", 10)
        ;
-
 }
-
-
-
 
 
 template<typename Iterator>
@@ -210,8 +206,6 @@ Geometry_parser<Iterator>::Geometry_parser():Geometry_parser::base_type(start){
                  >>name[phx::bind(&Geometry_parser::getName,this,_1)]
                  >>info
                  >>';'>>*(comments||char_-lit("xkb_geometry"));
-
-
 }
 
 template<typename Iterator>
@@ -220,14 +214,10 @@ template<typename Iterator>
     }
 
 
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionShape(std::string n){
     geom.sectionList[geom.getSectionCount()].setShapeName( QString::fromUtf8(n.data(), n.size()));
 }
-
-
 
 
 template<typename Iterator>
@@ -236,15 +226,10 @@ template<typename Iterator>
 }
 
 
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::getDescription(std::string n){
         geom.setDescription( QString::fromUtf8(n.data(), n.size()));
 }
-
-
 
 
 template<typename Iterator>
@@ -253,14 +238,10 @@ template<typename Iterator>
 }
 
 
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setGeomShape(std::string n){
         geom.setKeyShape(QString::fromUtf8(n.data(), n.size()));
 }
-
-
 
 
 template<typename Iterator>
@@ -269,14 +250,10 @@ void Geometry_parser<Iterator>::setRowShape(std::string n){
 }
 
 
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setApprox(){
         geom.setShapeApprox(ax, ay);
 }
-
-
 
 
 template<typename Iterator>
@@ -285,15 +262,10 @@ template<typename Iterator>
 }
 
 
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectionName(std::string n){
         geom.sectionList[geom.getSectionCount()].setName(QString::fromUtf8(n.data(), n.size()));
 }
-
-
-
 
 
 template<typename Iterator>
@@ -307,9 +279,6 @@ template<typename Iterator>
     }
 
 
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::sectioninit(){
         geom.sectionList[geom.getSectionCount()].setTop(geom.sectionTop);
@@ -321,19 +290,11 @@ template<typename Iterator>
     }
 
 
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setRowTop(double a){
         geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].setTop(a + geom.sectionList[geom.getSectionCount()].getTop());
         cy = geom.sectionList[geom.getSectionCount()].rowList[geom.sectionList[geom.getSectionCount()].getRowCount()].getTop();
     }
-
-
-
-
-
 
 
 template<typename Iterator>
@@ -343,20 +304,12 @@ template<typename Iterator>
     }
 
 
-
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionTop(double a){
         //qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.getSectionCount()].setTop(a + geom.sectionTop);
         cy = geom.sectionList[geom.getSectionCount()].getTop();
     }
-
-
-
-
 
 
 template<typename Iterator>
@@ -368,20 +321,11 @@ template<typename Iterator>
     }
 
 
-
-
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setSectionAngle(double a){
         //qDebug()<<"\nsectionCount"<<geom.sectionCount;
         geom.sectionList[geom.getSectionCount()].setAngle(a);
     }
-
-
-
-
 
 
 template<typename Iterator>
@@ -390,24 +334,16 @@ template<typename Iterator>
     }
 
 
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setVerticalSection(){
         geom.sectionList[geom.getSectionCount()].setVertical(1);
     }
 
 
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setVerticalGeometry(){
         geom.setVertical(1);
     }
-
-
-
 
 
 template<typename Iterator>
@@ -420,10 +356,6 @@ template<typename Iterator>
      }
 
 
-
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyShape(std::string n){
         int secn = geom.getSectionCount();
@@ -434,9 +366,6 @@ template<typename Iterator>
     }
 
 
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyNameandShape(std::string n){
         int secn = geom.getSectionCount();
@@ -444,9 +373,6 @@ template<typename Iterator>
         setKeyName(n);
         setKeyShape(geom.sectionList[secn].rowList[rown].getShapeName().toUtf8().constData());
     }
-
-
-
 
 
 template<typename Iterator>
@@ -460,29 +386,32 @@ template<typename Iterator>
     }
 
 
-
-
-
 template<typename Iterator>
     void Geometry_parser<Iterator>::setKeyCordi(){
         int secn = geom.getSectionCount();
         int rown = geom.sectionList[secn].getRowCount();
         int keyn = geom.sectionList[secn].rowList[rown].getKeyCount();
         int vertical = geom.sectionList[secn].rowList[rown].getVertical();
+
         if(vertical == 0)
             cx+=geom.sectionList[secn].rowList[rown].keyList[keyn].getOffset();
         else
             cy+=geom.sectionList[secn].rowList[rown].keyList[keyn].getOffset();
+
         geom.sectionList[secn].rowList[rown].keyList[keyn].setKeyPosition(cx, cy);
+
         QString s = geom.sectionList[secn].rowList[rown].keyList[keyn].getShapeName();
         if ( s.isEmpty() )
             s = geom.getKeyShape();
+
         GShape t = geom.findShape(s);
         int a = t.size(vertical);
+
         if(vertical == 0)
             cx+=a+geom.keyGap;
         else
             cy+=a+geom.keyGap;
+
         geom.sectionList[secn].rowList[rown].addKey();
     }
 
@@ -584,14 +513,11 @@ template<typename Iterator>
     }
 
 
-
     ModelToGeometry :: ModelToGeometry(){
         geometryFile = "pc";
         geometryName = "pc104";
         kbModel = "pc104";
     }
-
-
 
     Geometry parseGeometry(QString model){
         using boost::spirit::iso8859_1::space;
@@ -645,7 +571,6 @@ template<typename Iterator>
         }
         //g.geom.display();
         return g.geom;
-
     }
 
     QString findGeometryBaseDir()

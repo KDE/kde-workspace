@@ -32,36 +32,32 @@ class Geometry;
 class GShape;
 
 
-
 class KbPreviewFrame : public QFrame
 {
     Q_OBJECT
     
 private:
+    static const int width = 1100, height = 490;
+
     KeySymHelper symbol;
     Aliases alias;
     QStringList tooltip;
     QList <QPoint> tipPoint;
-    static const int width = 1100, height = 490;
     int l_id;
-
     Geometry& geometry;
-    void drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name);
     float scaleFactor;
     KbLayout keyboardLayout;
+
+    void drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name);
     void drawShape(QPainter &painter, const GShape& s, int x, int y, int i, const QString& name);
 
-	
     int itemAt(const QPoint &pos);
 
 
 protected:
-
     bool event(QEvent *event);
 
-
 public:
-
     explicit KbPreviewFrame(QWidget *parent = 0);
     virtual ~KbPreviewFrame();
     void paintEvent(QPaintEvent * event);

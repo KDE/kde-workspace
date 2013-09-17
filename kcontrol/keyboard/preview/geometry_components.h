@@ -29,6 +29,7 @@ class GShape{
     QPoint approx;
     QList <QPoint> cordii;
     int cordi_count;
+
   public:
     GShape();
     void setCordinate(double a, double b);
@@ -55,7 +56,7 @@ class GShape{
 };
 
 class Key{
- private:
+private:
   QString name,shapeName;
   double offset;
   QPoint position;
@@ -154,7 +155,6 @@ private:
 
 public:
   QList <Row> rowList;
-  
   
   Section();
   void addRow();
@@ -291,7 +291,5 @@ public:
   void addSection();
   GShape findShape(QString name);
 };
-
-
 
 #endif //geometry_componets.h

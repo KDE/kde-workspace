@@ -44,7 +44,6 @@ void KbKey::addSymbol(QString n, int i){
 }
 
 
-
 QString KbKey::getSymbol(int i){
     if(i < symbolCount)
         return symbols[i];
@@ -83,7 +82,6 @@ void KbLayout::addInclude(QString n){
 }
 
 
-
 void KbLayout :: addKey(){
     keyCount++;
     keyList << KbKey();
@@ -98,7 +96,6 @@ QString KbLayout :: getInclude(int i){
 }
 
 
-
 int KbLayout :: findKey(QString n){
     for(int i = 0 ; i < keyCount ; i++){
         if(keyList[i].keyName == n){
@@ -109,13 +106,12 @@ int KbLayout :: findKey(QString n){
 }
 
 
-
 void KbLayout::display(){
-    qDebug()<< name <<"\n";
-    for(int i = 0; i<includeCount; i++){
-        qDebug()<<include[i];
-    }
-    for(int i = 0 ; i<keyCount; i++ ){
+//    qDebug() << name << "\n";
+//    for(int i = 0; i<includeCount; i++){
+//        qDebug() << include[i];
+//    }
+    for(int i = 0 ; i < keyCount; i++ ){
         keyList[i].display();
     }
 }

@@ -32,10 +32,9 @@ class KeyboardPainter : public QDialog
     Q_OBJECT
     
 public:
-
     explicit KeyboardPainter();
     ~KeyboardPainter();
-    void generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model);
+    void generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model, const QString& title);
     int getHeight();
     int getWidth();
 
@@ -43,7 +42,6 @@ public Q_SLOTS:
     void levelChanged(int l_id);
     
 private:
-
     QDialog *kbDialog;
     KbPreviewFrame *kbframe;
     QPushButton *exitButton;

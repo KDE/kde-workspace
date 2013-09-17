@@ -27,10 +27,11 @@
 #include "ui_kcm_add_layout_dialog.h"
 
 
-AddLayoutDialog::AddLayoutDialog(const Rules* rules_, Flags* flags_, bool showLabel, QWidget* parent):
+AddLayoutDialog::AddLayoutDialog(const Rules* rules_, Flags* flags_, const QString& model_, bool showLabel, QWidget* parent):
 		QDialog(parent),
 		rules(rules_),
 		flags(flags_),
+		model(model_),
 		selectedLanguage("no_language")
 {
     layoutDialogUi = new Ui_AddLayoutDialog();
@@ -166,7 +167,8 @@ void AddLayoutDialog::preview()
     QString variant = layoutDialogUi->variantComboBox->itemData(index).toString();
     KeyboardPainter* layoutPreview = new KeyboardPainter();
 
-    layoutPreview->generateKeyboardLayout(selectedLayout, variant,"pc104");
+    QString title = Flags::getLongText(LayoutUnit(selectedLayout, variant), rules);
+    layoutPreview->generateKeyboardLayout(selectedLayout, variant, model, title);
     layoutPreview->setModal(true);
     layoutPreview->exec();
 
