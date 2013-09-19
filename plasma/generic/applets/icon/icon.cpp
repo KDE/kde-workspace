@@ -51,25 +51,24 @@
 
 IconApplet::IconApplet(QObject *parent, const QVariantList &args)
     : Plasma::Applet(parent, args),
-      m_icon(new Plasma::IconWidget(this)),
       m_watcher(0),
       m_hasDesktopFile(false)
 {
-    setAcceptDrops(true);
+/*    setAcceptDrops(true);
     setBackgroundHints(NoBackground);
-    setHasConfigurationInterface(true);
+    setHasConfigurationInterface(true);*/
 
     if (!args.isEmpty()) {
         setUrl(args.value(0).toString());
     }
-
+/*
     resize(m_icon->sizeFromIconSize(IconSize(KIconLoader::Desktop)));
-    //qDebug() << "sized to:" << geometry();
+    //qDebug() << "sized to:" << geometry();*/
 }
 
 void IconApplet::init()
 {
-    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
+    /*QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
@@ -89,7 +88,21 @@ void IconApplet::init()
     setAspectRatioMode(Plasma::ConstrainedSquare);
 
     connect(KGlobalSettings::self(), SIGNAL(iconChanged(int)),
-        this, SLOT(iconSizeChanged(int)));
+        this, SLOT(iconSizeChanged(int)));*/
+
+    Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
+    Plasma::Package *package = new Plasma::Package(QString(), "org.kde.icon", structure);
+    const QString qmlFile = package->filePath("mainscript");
+    delete package;
+
+    m_declarativeWidget = new Plasma::DeclarativeWidget(this);
+
+    m_declarativeWidget->setQmlPath(qmlFile);
+
+    m_plasmoidLayout = new QGraphicsLinearLayout(this);
+    m_plasmoidLayout->addItem(m_declarativeWidget);
+
+    setLayout(m_plasmoidLayout);
 }
 
 IconApplet::~IconApplet()
@@ -102,18 +115,6 @@ void IconApplet::configChanged()
 {
     KConfigGroup cg = config();
     setUrl(cg.readEntry("Url", m_url));
-}
-
-void IconApplet::saveState(KConfigGroup &cg) const
-{
-    cg.writeEntry("Url", m_url);
-
-    Plasma::FormFactor f = formFactor();
-    if (f == Plasma::Vertical || f == Plasma::Horizontal) {
-        cg.readEntry("LastFreeSize", m_lastFreeSize);
-    } else {
-        cg.readEntry("LastFreeSize", size());
-    }
 }
 
 void IconApplet::checkService(const QStringList &changedResources)
@@ -186,7 +187,7 @@ void IconApplet::setUrl(const KUrl& url, bool fromConfigDialog)
         if (m_text.isNull()) {
             m_text = m_url.fileName();
         }
-        m_icon->setIcon(f.readIcon());
+        //m_icon->setIcon(f.readIcon());
 
         m_genericName = f.readGenericName();
 
@@ -199,7 +200,7 @@ void IconApplet::setUrl(const KUrl& url, bool fromConfigDialog)
 
         if (m_service) {
             m_text = m_service->name();
-            m_icon->setIcon(m_service->icon());
+            //m_icon->setIcon(m_service->icon());
         } else {
             if (m_text.isEmpty() && m_url.isLocalFile()) {
                 //handle special case like the / folder
@@ -219,18 +220,18 @@ void IconApplet::setUrl(const KUrl& url, bool fromConfigDialog)
         }
     }
 
-    if (m_icon->icon().isNull()) {
+/*    if (m_icon->icon().isNull()) {
         m_icon->setIcon("unknown");
-    }
+    }*/
 
     //Update the icon text (if the icon is not on a panel)
-    if (formFactor() == Plasma::Planar || formFactor() == Plasma::MediaCenter) {
-        m_icon->setText(m_text);
+/*    if (formFactor() == Plasma::Planar || formFactor() == Plasma::MediaCenter) {
+//         m_icon->setText(m_text);
     } else {
         //Update the tooltip (if the icon is on a panel)
         Plasma::ToolTipContent data(m_text, m_genericName, m_icon->icon());
         Plasma::ToolTipManager::self()->setContent(m_icon, data);
-    }
+    }*/
 
     //qDebug() << "url was" << url << "and is" << m_url;
 }
@@ -261,49 +262,6 @@ void IconApplet::openUrl()
     } else if (m_url.isValid()) {
         emit releaseVisualFocus();
         new KRun(m_url, 0);
-    }
-}
-
-void IconApplet::constraintsEvent(Plasma::Constraints constraints)
-{
-    setBackgroundHints(NoBackground);
-
-    if (constraints & Plasma::FormFactorConstraint) {
-        disconnect(m_icon, SIGNAL(activated()), this, SLOT(openUrl()));
-        disconnect(m_icon, SIGNAL(clicked()), this, SLOT(openUrl()));
-
-        if (formFactor() == Plasma::Planar || formFactor() == Plasma::MediaCenter) {
-            connect(m_icon, SIGNAL(activated()), this, SLOT(openUrl()));
-
-            if (!m_lastFreeSize.isEmpty()) {
-                resize(m_lastFreeSize);
-            }
-
-            m_icon->setText(m_text);
-            Plasma::ToolTipManager::self()->unregisterWidget(m_icon);
-            m_icon->setDrawBackground(true);
-        } else {
-            //in the panel the icon behaves like a button
-            connect(m_icon, SIGNAL(clicked()), this, SLOT(openUrl()));
-            m_icon->setText(QString());
-            Plasma::ToolTipContent data(m_text, m_genericName, m_icon->icon());
-            Plasma::ToolTipManager::self()->setContent(m_icon, data);
-            m_icon->setDrawBackground(false);
-
-            if (!m_lastFreeSize.isEmpty()) {
-                config().writeEntry("LastFreeSize", size().toSize());
-                emit configNeedsSaving();
-            }
-        }
-    }
-
-    if (constraints & Plasma::SizeConstraint && !m_lastFreeSize.isEmpty() &&
-        (formFactor() == Plasma::Planar || formFactor() == Plasma::MediaCenter)) {
-        m_lastFreeSize = size().toSize();
-    }
-
-    if (constraints & Plasma::StartupCompletedConstraint) {
-        m_lastFreeSize = config().readEntry("LastFreeSize", size().toSize());
     }
 }
 
@@ -382,25 +340,6 @@ QSizeF IconApplet::sizeHint(Qt::SizeHint which, const QSizeF & constraint) const
     return Plasma::Applet::sizeHint(which, constraint);
 }
 
-void IconApplet::setDisplayLines(int displayLines)
-{
-    if (m_icon) {
-        if (m_icon->numDisplayLines() == displayLines) {
-            return;
-        }
-        m_icon->setNumDisplayLines(displayLines);
-        update();
-    }
-}
-
-int IconApplet::displayLines()
-{
-    if (m_icon) {
-        return m_icon->numDisplayLines();
-    }
-    return 0;
-}
-
 void IconApplet::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
     if (!KUrl::List::canDecode(event->mimeData())) {
@@ -453,11 +392,6 @@ void IconApplet::dropEvent(QGraphicsSceneDragDropEvent *event)
     } else if (mimetype && mimetype->is("inode/directory")) {
         dropUrls(urls, m_url, event->modifiers());
     }
-}
-
-QPainterPath IconApplet::shape() const
-{
-    return m_icon->shape();
 }
 
 //dropUrls from DolphinDropController

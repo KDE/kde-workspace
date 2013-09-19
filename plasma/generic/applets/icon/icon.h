@@ -25,14 +25,15 @@
 #include <KDirWatch>
 #include <KService>
 
+#include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QGraphicsLinearLayout>
+
 #include <Plasma/Applet>
+#include <Plasma/DeclarativeWidget>
+#include <Plasma/Package>
 
 class KPropertiesDialog;
-
-namespace Plasma
-{
-    class IconWidget;
-}
 
 class IconApplet : public Plasma::Applet
 {
@@ -43,10 +44,6 @@ class IconApplet : public Plasma::Applet
 
         void init();
         void setUrl(const KUrl& url, bool fromConfigDialog = false);
-        void constraintsEvent(Plasma::Constraints constraints);
-        void setDisplayLines(int displayLines);
-        int displayLines();
-        QPainterPath shape() const;
 
     public Q_SLOTS:
         void openUrl();
@@ -55,7 +52,6 @@ class IconApplet : public Plasma::Applet
 
     protected:
         void dropEvent(QGraphicsSceneDragDropEvent *event);
-        void saveState(KConfigGroup &cg) const;
         void showConfigurationInterface();
         QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const;
 
@@ -83,6 +79,8 @@ class IconApplet : public Plasma::Applet
         QSize m_lastFreeSize;
         KService::Ptr m_service;
         bool m_hasDesktopFile;
+	QGraphicsLinearLayout *m_plasmoidLayout;
+	Plasma::DeclarativeWidget *m_declarativeWidget;
 };
 
 K_EXPORT_PLASMA_APPLET(icon, IconApplet)
