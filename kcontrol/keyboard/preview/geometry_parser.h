@@ -149,38 +149,7 @@ namespace grammar{
     void setVerticalGeometry();
   };
 
-  class ModelToGeometry{
 
-      static QStringList pcmodels;
-      static QStringList msmodels;
-      static QStringList nokiamodels;
-      static QStringList pcgeometries;
-      static QStringList macbooks;
-      static QStringList applealu;
-      static QStringList macs;
-
-      QString geometryName;
-      QString geometryFile;
-      QString kbModel;
-
-  public :
-
-      ModelToGeometry();
-      ModelToGeometry(QString model);
-
-      QString getGeometryFile(){
-          return geometryFile;
-      }
-
-      QString getGeometryName(){
-          return geometryName;
-      }
-
-      QString getModel(){
-          return kbModel;
-      }
-
-  };
   
   Geometry parseGeometry(QString model);
   QString findGeometryBaseDir();
