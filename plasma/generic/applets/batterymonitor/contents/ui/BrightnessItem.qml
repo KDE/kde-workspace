@@ -23,7 +23,7 @@ import org.kde.plasma.core 0.1 as PlasmaCore
 import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
 
-Item {
+FocusScope {
     id: brightnessItem
     clip: true
     width: parent.width
@@ -32,6 +32,7 @@ Item {
     property alias icon: brightnessIcon.icon
     property alias label: brightnessLabel.text
     property alias value: brightnessSlider.value
+    property int percentage: 0
 
     signal changed(int screenBrightness)
 
@@ -72,6 +73,7 @@ Item {
         minimumValue: 0
         maximumValue: 100
         stepSize: 10
+        focus: true
         onValueChanged: changed(value)
     }
 
@@ -83,7 +85,7 @@ Item {
             verticalCenter: brightnessSlider.verticalCenter
         }
         height: paintedHeight
-        text: i18nc("Placeholder is brightness percentage", "%1%", brightnessSlider.value)
+        text: i18nc("Placeholder is brightness percentage", "%1%", percentage)
     }
 }
 

@@ -42,6 +42,7 @@ Item {
     property bool showToolTip: true
     property bool highlightWindows: false
     property bool manualSorting: false
+
     property int activeWindowId: 0
 
     property int optimumCapacity: Layout.optimumCapacity()
@@ -52,12 +53,30 @@ Item {
     property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
     property int minimumHeight: tasks.horizontal ? 0 : Layout.preferredMinHeight()
 
+    property Item dragSource: null
+
     signal activateItem(int id, bool toggle)
     signal itemContextMenu(int id)
     signal itemHovered(int id, bool hovered)
     signal itemMove(int id, int newIndex)
     signal itemGeometryChanged(int id, int x, int y, int width, int height)
     signal itemNeedsAttention(bool needs)
+
+    onWidthChanged: {
+        taskList.width = Layout.layoutWidth();
+
+        if (tasks.forceStripes) {
+            taskList.height = Layout.layoutHeight();
+        }
+    }
+
+    onHeightChanged: {
+        if (tasks.forceStripes) {
+            taskList.width = Layout.layoutWidth();
+        }
+
+        taskList.height = Layout.layoutHeight();
+    }
 
     onActiveWindowIdChanged: {
         if (activeWindowId != groupDialog.windowId) {
@@ -135,8 +154,8 @@ Item {
             top: parent.top
         }
 
-        width: Layout.layoutWidth()
-        height: Layout.layoutHeight()
+        onWidthChanged: Layout.layout(taskRepeater)
+        onHeightChanged: Layout.layout(taskRepeater)
 
         flow: tasks.vertical ? Flow.TopToBottom : Flow.LeftToRight
 
@@ -146,8 +165,29 @@ Item {
             }
         }
 
-        Repeater { model: visualModel }
+        Repeater {
+            id: taskRepeater
+
+            model: visualModel
+
+            onCountChanged: {
+                if (tasks.forceStripes) {
+                    taskList.width = Layout.layoutWidth();
+                    taskList.height = Layout.layoutHeight();
+                }
+
+                Layout.layout(taskRepeater);
+            }
+        }
     }
 
     GroupDialog { id: groupDialog }
+
+    function resetDragSource() {
+        dragSource = null;
+    }
+
+    Component.onCompleted: {
+        dragHelper.dropped.connect(resetDragSource);
+    }
 }

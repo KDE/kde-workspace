@@ -33,6 +33,7 @@ namespace TaskManager
 {
 
 class GroupManager;
+class TaskGroup;
 class TasksModelPrivate;
 
 class TASKMANAGER_EXPORT TasksModel : public QAbstractItemModel
@@ -63,7 +64,9 @@ public:
         Active = Qt::UserRole + 17,
         DemandsAttention = Qt::UserRole + 18,
         LauncherUrl = Qt::UserRole + 19,
-        WindowList = Qt::UserRole + 20
+        WindowList = Qt::UserRole + 20,
+        MimeType = Qt::UserRole + 21,
+        MimeData = Qt::UserRole + 22
     };
 
     explicit TasksModel(GroupManager *groupManager, QObject *parent = 0);
@@ -77,7 +80,7 @@ public:
     Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
     Q_INVOKABLE int launcherCount() const;
 
-    Q_INVOKABLE int activeTaskId() const;
+    Q_INVOKABLE int activeTaskId(TaskGroup *group = 0) const;
     Q_INVOKABLE QVariant taskIdList(const QModelIndex &parent = QModelIndex(), bool recursive = true) const;
 
 signals:

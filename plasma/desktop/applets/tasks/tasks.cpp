@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "tasks.h"
+#include "support/draghelper.h"
 #include "support/textlabel.h"
 #include "support/tooltip.h"
 
@@ -95,6 +96,7 @@ void Tasks::init()
     qmlRegisterType<TextLabel>( "Tasks", 0, 1, "TextLabel" );
     qmlRegisterType<ToolTipProxy>( "Tasks", 0, 1, "ToolTip" );
     rootContext->setContextProperty("tasksModel", QVariant::fromValue(static_cast<QObject *>(m_tasksModel)));
+    rootContext->setContextProperty("dragHelper", QVariant::fromValue(static_cast<QObject *>(new DragHelper(this))));
 
     // NOTE: This can go away once Plasma::Location becomes available (i.e. once this is
     // a pure-QML applet.)
@@ -228,6 +230,9 @@ void Tasks::itemContextMenu(int id)
 
     TaskManager::BasicMenu* menu = 0;
 
+    Q_ASSERT(containment());
+    Q_ASSERT(containment()->corona());
+
     if (item->itemType() == TaskManager::TaskItemType && !item->isStartupItem()) {
         TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(item);
 /* FIXME (Un)collapse support is pending merge.
@@ -252,7 +257,8 @@ void Tasks::itemContextMenu(int id)
         }
         actionList.prepend(a);
 */
-        menu = new TaskManager::BasicMenu(0, taskGroup, m_groupManager, actionList);
+        const int maxWidth = 0.8 * containment()->corona()->screenGeometry(containment()->screen()).width();
+        menu = new TaskManager::BasicMenu(0, taskGroup, m_groupManager, actionList, QList <QAction*>(), maxWidth);
     } else if (item->itemType() == TaskManager::LauncherItemType) {
         menu = new TaskManager::BasicMenu(0, static_cast<TaskManager::LauncherItem*>(item),
             m_groupManager, actionList);
@@ -268,8 +274,6 @@ void Tasks::itemContextMenu(int id)
         menu->setMinimumWidth(declItem->implicitWidth());
     }
 
-    Q_ASSERT(containment());
-    Q_ASSERT(containment()->corona());
     menu->exec(containment()->corona()->popupPosition(declItem, menu->size()));
     menu->deleteLater();
 }
@@ -297,10 +301,16 @@ void Tasks::itemMove(int id, int newIndex)
 
 void Tasks::itemGeometryChanged(int id, int x, int y, int width, int height)
 {
-    TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(m_groupManager->rootGroup()->getMemberById(id));
+    TaskManager:: AbstractGroupableItem *item = m_groupManager->rootGroup()->getMemberById(id);
 
-    if (!taskItem || !taskItem->task() || !scene())
+    if (!item || item->itemType() != TaskManager::TaskItemType || !scene())
     {
+        return;
+    }
+
+    TaskManager::TaskItem *taskItem = static_cast<TaskManager::TaskItem *>(item);
+
+    if (!taskItem->task()) {
         return;
     }
 
@@ -395,6 +405,10 @@ void Tasks::configChanged()
                          static_cast<int>(TaskManager::GroupManager::ProgramGrouping))
         );
     if (groupingStrategy != m_groupManager->groupingStrategy()) {
+        // FIXME: Add back support for manual grouping.
+        if (groupingStrategy == TaskManager::GroupManager::ManualGrouping) {
+            groupingStrategy = TaskManager::GroupManager::ProgramGrouping;
+        }
         m_groupManager->setGroupingStrategy(groupingStrategy);
         changed = true;
     }
@@ -473,7 +487,8 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
     m_ui.fillRows->setChecked(m_declarativeWidget->rootObject()->property("forceStripes").toBool());
 
     m_ui.groupingStrategy->addItem(i18n("Do Not Group"),QVariant(TaskManager::GroupManager::NoGrouping));
-    m_ui.groupingStrategy->addItem(i18n("Manually"),QVariant(TaskManager::GroupManager::ManualGrouping));
+    // FIXME: Add back support for manual grouping.
+    // m_ui.groupingStrategy->addItem(i18n("Manually"),QVariant(TaskManager::GroupManager::ManualGrouping));
     m_ui.groupingStrategy->addItem(i18n("By Program Name"),QVariant(TaskManager::GroupManager::ProgramGrouping));
 
     connect(m_ui.groupingStrategy, SIGNAL(currentIndexChanged(int)), this, SLOT(dialogGroupingChanged(int)));
@@ -482,11 +497,13 @@ void Tasks::createConfigurationInterface(KConfigDialog *parent)
         case TaskManager::GroupManager::NoGrouping:
             m_ui.groupingStrategy->setCurrentIndex(0);
             break;
+/* FIXME: Add back support for manual grouping.
         case TaskManager::GroupManager::ManualGrouping:
             m_ui.groupingStrategy->setCurrentIndex(1);
             break;
+*/
         case TaskManager::GroupManager::ProgramGrouping:
-            m_ui.groupingStrategy->setCurrentIndex(2);
+            m_ui.groupingStrategy->setCurrentIndex(1);
             break;
         default:
              m_ui.groupingStrategy->setCurrentIndex(-1);

@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tasksmodel.h"
 
 #include <QMetaEnum>
+#include <QMimeData>
 
 #include <KDebug>
 
@@ -171,29 +172,47 @@ QVariant TasksModel::data(const QModelIndex &index, int role) const
         }
 
         return windows;
+    } else if (role == TasksModel::MimeType) {
+        if (item->itemType() == TaskItemType) {
+            return Task::mimetype();
+        } else if (item->itemType() == GroupItemType) {
+            return Task::groupMimetype();
+        }
+    } else if (role == TasksModel::MimeData) {
+        QMimeData mimeData;
+
+        item->addMimeData(&mimeData);
+
+        if (item->itemType() == TaskItemType) {
+            return QVariant::fromValue(mimeData.data(Task::mimetype()));
+        } else if (item->itemType() == GroupItemType) {
+            return QVariant::fromValue(mimeData.data(Task::groupMimetype()));
+        }
     }
 
     return QVariant();
 }
 
-int TasksModel::activeTaskId() const
+int TasksModel::activeTaskId(TaskGroup *group) const
 {
-    foreach (AbstractGroupableItem *item, d->rootGroup->members()) {
-        if (item->itemType() == TaskItemType && static_cast<TaskItem *>(item)->task()->isActive()) {
-            return item->id();
-        } else {
-            if (item->itemType() == GroupItemType)
-            {
-                foreach(AbstractGroupableItem *subItem, static_cast<TaskGroup *>(item)->members()) {
-                    if (subItem->itemType() == TaskItemType && static_cast<TaskItem *>(subItem)->task()->isActive()) {
-                        return subItem->id();
-                    }
-                }
+    group = group ? group : d->rootGroup;
+    int id = -1;
+
+    foreach (AbstractGroupableItem *item, group->members()) {
+        if (item->itemType() == TaskItemType) {
+            TaskItem *taskItem = static_cast<TaskItem *>(item);
+
+            if (taskItem && taskItem->task() && taskItem->task()->isActive()) {
+                id = item->id();
+
+                break;
             }
+        } else if (item->itemType() == GroupItemType) {
+            id = activeTaskId(static_cast<TaskGroup *>(item));
         }
     }
 
-    return -1;
+    return id;
 }
 
 QVariant TasksModel::taskIdList(const QModelIndex& parent, bool recursive) const
@@ -313,7 +332,19 @@ int TasksModel::rowCount(const QModelIndex &parent) const
 
 int TasksModel::launcherCount() const
 {
-    return d->groupManager.data()->launcherCount();
+    if (!d->rootGroup) {
+        return 0;
+    }
+
+    int launcherCount = 0;
+
+    foreach (AbstractGroupableItem *item, d->rootGroup->members()) {
+        if (item->itemType() == LauncherItemType) {
+            ++launcherCount;
+        }
+    }
+
+    return launcherCount;
 }
 
 TasksModelPrivate::TasksModelPrivate(TasksModel *model, GroupManager *gm)

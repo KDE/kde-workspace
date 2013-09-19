@@ -1,14 +1,19 @@
 [Desktop Entry]
 Name=paste.kde.org
+Name[bs]=paste.kde.org
 Name[ca]=paste.kde.org
 Name[cs]=paste.kde.org
+Name[da]=paste.kde.org
 Name[de]=paste.kde.org
 Name[es]=paste.kde.org
 Name[fi]=paste.kde.org
 Name[fr]=paste.kde.org
 Name[gl]=paste.kde.org
+Name[hu]=paste.kde.org
 Name[ia]=paste.kde.org
+Name[it]=paste.kde.org
 Name[kk]=paste.kde.org
+Name[ko]=paste.kde.org
 Name[lt]=paste.kde.org
 Name[mr]=paste.kde.org
 Name[nb]=paste.kde.org
@@ -28,6 +33,7 @@ Name[sv]=paste.kde.org
 Name[tr]=paste.kde.org
 Name[uk]=paste.kde.org
 Name[x-test]=xxpaste.kde.orgxx
+Name[zh_CN]=paste.kde.org
 Name[zh_TW]=paste.kde.org
 Comment=Allows text to be shared using the kde.org service
 Comment[ar]=يسمح للنصوص أن تُشارك بإستخدام خدمة kde.org

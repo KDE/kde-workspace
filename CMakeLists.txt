@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
 set(KDE4WORKSPACE_VERSION_MAJOR 4)
-set(KDE4WORKSPACE_VERSION_MINOR 10)
-set(KDE4WORKSPACE_VERSION_PATCH 80)
+set(KDE4WORKSPACE_VERSION_MINOR 11)
+set(KDE4WORKSPACE_VERSION_PATCH 1)
 set(KDE4WORKSPACE_VERSION ${KDE4WORKSPACE_VERSION_MAJOR}.${KDE4WORKSPACE_VERSION_MINOR}.${KDE4WORKSPACE_VERSION_PATCH} )
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
@@ -283,7 +283,7 @@ if(NOT WIN32)
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/startkde DESTINATION ${BIN_INSTALL_DIR})
 endif(NOT WIN32)
 
-feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
+feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 # make the libraries installed from kdebase/workspace available to other projects
 # by creating and installing a KDE4WorkspaceConfig.cmake file, which will

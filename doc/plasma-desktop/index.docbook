@@ -18,6 +18,7 @@
 </personname>
 <email>sebas@kde.org</email>
 </author>
+<author><firstname>Claus</firstname> <surname>Christensen</surname></author>
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
@@ -28,8 +29,8 @@
 
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2011-11-22</date>
-<releaseinfo>&kde; 4.8</releaseinfo>
+<date>2013-06-19</date>
+<releaseinfo>&kde; 4.11</releaseinfo>
 
 <abstract>
 <para>
@@ -69,11 +70,14 @@ most common questions.
 <chapter id="using-kapp">
 <title>Using &plasma;</title>
 
-<sect1 id="plasmoids-and-containments">
+<sect1 id="plasma-components">
+<title>&plasma; Components</title>
+
+<sect2 id="plasmoids-and-containments">
 <title>&plasma; Widgets and Containments</title>
 
 <para>
-The essence of Plasma revolves around two basic concepts:
+The essence of &plasma; revolves around two basic concepts:
 </para>
 
 <variablelist>
@@ -99,12 +103,68 @@ Applets that act as the container for the &plasma; widgets
 On a default desktop, there are two main elements: the Panel and the Desktop
 itself. Both are containments in the &plasma; sense.
 </para>
+
+</sect2>
+
+<sect2 id="default-plasma-desktop">
+<title>Default &plasma; Desktop</title>
+
+<para><note><para>The &plasma; Desktop can be configured in countless ways. The screenshot seen below shows a fairly standard desktop. Some distributions apply extensive customizations, so your desktop may look different.
+</para>
+<para>Similarly, the graphical appearance of the interface elements can be styled. These screenshots uses the &kde; default style, Oxygen.</para></note>
+</para>
+<para>
+<screenshot>
+<screeninfo>A fairly standard &plasma; Desktop</screeninfo>
+  <mediaobjectco>
+    <imageobjectco>
+      <areaspec units="other" otherunits="imagemap">
+        <area id="im1" linkends="panel-kickoff" coords="0,519,31,551"/> <!-- #1 kickoff launcher #-->
+        <area id="im2" linkends="panel-kickoff" coords="0,735,30,598"/><!-- #1 kickoff launcher icon -->
+        <!--area linkends="FIXME" coords="37,483,69,516"/--><!-- #2 panel icons # -->
+        <!--area linkends="FIXME" coords="23,558,83,597"/--><!-- #2 panel icons red box -->
+        <!--area linkends="FIXME" coords="97,666,137,707"/--><!-- #3 pager # -->
+        <!--area linkends="FIXME" coords="76,519,107,551"/--><!-- #3 pager plasmoid -->
+        <area id="im3" linkends="panel-taskbar" coords="288,519,320,551"/><!-- #4 task manager # -->
+        <area id="im4" linkends="panel-taskbar" coords="102,558,615,598"/><!-- #4 task manager red box -->
+        <area id="im5" linkends="panel-system-tray" coords="652,519,683,551"/><!-- #5 system tray # -->
+        <area id="im6" linkends="panel-system-tray" coords="618,557,728,598"/><!-- #5 system tray red box -->
+        <area id="im7" linkends="panel-digital-clock" coords="739,534,772,566"/><!-- #6 clock # -->
+        <area id="im8" linkends="panel-digital-clock" coords="729,573,781,598"/><!-- #6 clock plasmoid -->
+        <area id="im9" linkends="toolboxes" coords="750,477,782,508"/><!-- #7 panel cashew # -->
+        <area id="im10" linkends="toolboxes" coords="783,573,800,598"/><!-- #7 panel cashew icon --> 
+        <!--area linkends="FIXME" coords="733,11,765,44"/--><!-- #8 desktop cashew # -->
+        <!--area linkends="FIXME" coords="772,0,800,25"/--><!-- #8 desktop cashew icon -->
+        <!--area linkends="FIXME" coords="374,88,406,119"/--><!-- #9 folder view # -->
+        <!--area linkends="FIXME" coords="10,18,361,204"/--><!-- #9 folder view plasmoid -->
+       <area id = "im11" linkends="panel-kickoff" coords="0,665,40,707"/> <!-- #1 kickoff launcher #-->
+      </areaspec>
+    <imageobject>
+      <imagedata fileref="plasma-desktop-annotated.png" format="PNG"/>
+    </imageobject>
+    </imageobjectco>
+  </mediaobjectco>
+</screenshot>
+</para>
+<orderedlist>
+<listitem><para>The program starter. Usually this will be <link linkend="panel-kickoff">&kickoff;</link>.</para></listitem>
+<listitem><para>A couple of icons giving easy access to often used applications</para></listitem>
+<listitem><para>The Pager widget</para></listitem>
+<listitem><para>The <link linkend="panel-taskbar">Task Manager</link>, which shows the titles of windows belonging to the applications currently running. No application had opened a window, when the screenshot was taken</para></listitem>
+<listitem><para>The <link linkend="panel-system-tray">System Tray</link></para></listitem>
+<listitem><para>The <link linkend="panel-digital-clock">Digital Clock</link> widget</para></listitem>
+<listitem><para>The <link linkend="toolboxes">Panel Toolbox</link></para></listitem>
+<listitem><para>The Desktop Toolbox (previously known as a Cashew)</para></listitem>
+<listitem><para>A Folder View widget, showing the content of the Desktop folder</para></listitem>
+</orderedlist>
+
+</sect2>
 </sect1>
 
 <sect1 id="panel">
 <title>The Panel</title>
 
-<para>
+<para id="panel-kickoff">
 The default panel holds a few &plasma; widgets: starting from the left, there is the
 &kickoff; application launcher. You can use it to start applications, open recently
 opened files and the usual logout/shutdown options. There is also a structure
@@ -117,14 +177,14 @@ Once you have found out what your most frequently started applications are,
 <mousebutton>right</mousebutton> click on the items and select the
 <guimenuitem>Add to Favorites</guimenuitem> to add them to your
 <guilabel>Favorites</guilabel> (or directly into the panel or on the desktop.
-Note that you need to “unlock” Plasma by means of <mousebutton>right</mousebutton>
+Note that you need to <quote>unlock</quote> &plasma; by means of <mousebutton>right</mousebutton>
 clicking on the desktop for any kind of modification). If you prefer the
 traditional menu-style application launcher, change it by
 <mousebutton>right</mousebutton> clicking on the menu button and selecting
 <guimenuitem>Switch to Classic Menu Style</guimenuitem>.
 </para>
 
-<para>
+<para id="panel-taskbar">
 The taskbar is another widget on the panel. It shows an area for all open windows on
 all desktops by default. You can make it show all open windows on the current
 desktop only by checking <guimenuitem>Only show tasks from the
@@ -148,7 +208,7 @@ your taskbar.
 </screenshot>
 </para>
 
-<para>
+<para id="panel-system-tray">
 Another default panel item is the <application>System Tray</application>, which
 is used by traditional applications and widgets as a dock. Right clicking on the
 <application>System Tray</application> allows you to open the settings dialog,
@@ -216,7 +276,7 @@ to save space in the bar. To display these entries click on the small white tria
 </imageobject></inlinemediaobject>, then use
 the &LMB; to launch a widget or the &RMB; to open its settings dialog.</para>
 
-<para>
+<para id="panel-digital-clock">
 The right-most &plasma; widget in the default panel holds the <application>Digital
 Clock</application>.
 This clock can display the time in different timezones as well as have its size

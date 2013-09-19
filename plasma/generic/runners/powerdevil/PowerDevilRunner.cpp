@@ -34,7 +34,7 @@
 #include <Solid/PowerManagement>
 
 PowerDevilRunner::PowerDevilRunner(QObject *parent, const QVariantList &args)
-        : Plasma::AbstractRunner(parent),
+        : Plasma::AbstractRunner(parent, args),
           m_shortestCommand(1000)
 {
     Q_UNUSED(args)

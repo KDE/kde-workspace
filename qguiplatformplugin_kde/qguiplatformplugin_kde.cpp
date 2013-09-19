@@ -28,10 +28,13 @@
 #include <KDE/KFileDialog>
 #include <KDE/KColorDialog>
 #include <QtCore/QHash>
+#include <QtCore/QTimer>
 #include <QtGui/QFileDialog>
 #include <QtGui/QColorDialog>
 #include <QtGui/QApplication>
 #include <QtGui/QToolButton>
+#include <QtGui/QToolBar>
+#include <QtGui/QMainWindow>
 #include "qguiplatformplugin_p.h"
 
 #include <kdebug.h>
@@ -151,8 +154,7 @@ class KQGuiPlatformPlugin : public QGuiPlatformPlugin
 public:
     KQGuiPlatformPlugin()
     {
-        connect(KGlobalSettings::self(), SIGNAL(toolbarAppearanceChanged(int)), this, SLOT(updateToolbarStyle()));
-        connect(KGlobalSettings::self(), SIGNAL(kdisplayStyleChanged()), this, SLOT(updateWidgetStyle()));
+        QMetaObject::invokeMethod(this, "init", Qt::QueuedConnection);
     }
 
     virtual QStringList keys() const { return QStringList() << QLatin1String("kde"); }
@@ -337,6 +339,13 @@ public: // ColorDialog
     }
 
 private slots:
+    void init()
+    {
+        connect(KIconLoader::global(), SIGNAL(iconLoaderSettingsChanged()), this, SLOT(updateToolbarIcons()));
+        connect(KGlobalSettings::self(), SIGNAL(toolbarAppearanceChanged(int)), this, SLOT(updateToolbarStyle()));
+        connect(KGlobalSettings::self(), SIGNAL(kdisplayStyleChanged()), this, SLOT(updateWidgetStyle()));
+    }
+
     void updateToolbarStyle()
     {
         //from gtksymbol.cpp
@@ -344,6 +353,18 @@ private slots:
         for (int i = 0; i < widgets.size(); ++i) {
             QWidget *widget = widgets.at(i);
             if (qobject_cast<QToolButton*>(widget)) {
+                QEvent event(QEvent::StyleChange);
+                QApplication::sendEvent(widget, &event);
+            }
+        }
+    }
+
+    void updateToolbarIcons()
+    {
+        QWidgetList widgets = QApplication::allWidgets();
+        for (int i = 0; i < widgets.size(); ++i) {
+            QWidget *widget = widgets.at(i);
+            if (qobject_cast<QToolBar*>(widget) || qobject_cast<QMainWindow*>(widget)) {
                 QEvent event(QEvent::StyleChange);
                 QApplication::sendEvent(widget, &event);
             }

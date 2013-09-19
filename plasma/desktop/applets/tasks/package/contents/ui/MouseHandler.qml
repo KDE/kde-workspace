@@ -26,37 +26,40 @@ import "../code/layout.js" as Layout
 import "../code/tools.js" as TaskTools
 
 Item {
-    property variant target
+    property Item target
 
     DropArea {
         id: dropHandler
 
         anchors.fill: parent
 
-        property variant hoveredItem
-
-        enabled: !target.animating
+        property Item hoveredItem
 
         onDragMove: {
+            if (target.animating) {
+                return;
+            }
+
             var above = target.childAt(event.x, event.y);
 
-            if (event.mimeData.source) {
-                if (above != event.mimeData.source && !event.mimeData.source.isLauncher) {
-                    var targetIndex = TaskTools.insertionIndexAt(event.x, event.y);
-
-                    itemMove(event.mimeData.source.itemId, targetIndex);
+            if (tasks.dragSource) {
+                if (tasks.dragSource != above && !tasks.dragSource.isLauncher
+                    && !(above && "isLauncher" in above && above.isLauncher)) {
+                    itemMove(tasks.dragSource.itemId,
+                        TaskTools.insertionIndexAt(tasks.dragSource.itemIndex,
+                            event.x, event.y));
                 }
             } else if (above && hoveredItem != above) {
                 hoveredItem = above;
                 activationTimer.start();
             } else if (!above) {
-                hoveredItem = 0;
+                hoveredItem = null;
                 activationTimer.stop();
             }
         }
 
         onDragLeave: {
-            dragItem = 0;
+            hoveredItem = null;
             activationTimer.stop();
         }
 
@@ -70,7 +73,7 @@ Item {
                 if (parent.hoveredItem.isGroupParent) {
                     groupDialog.target = parent.hoveredItem;
                     groupDialog.visible = true;
-                } else {
+                } else if (!parent.hoveredItem.isLauncher) {
                     tasks.activateItem(parent.hoveredItem.itemId, false);
                 }
             }

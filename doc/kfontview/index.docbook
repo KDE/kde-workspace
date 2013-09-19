@@ -18,8 +18,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-07-20</date>
-<releaseinfo>&kde; 4.5</releaseinfo>
+<date>2013-06-19</date>
+<releaseinfo>1.1 (&kde; 4.11)</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -70,21 +70,23 @@ by selecting it from the context menu.</para>
 
 <para>
 &kfontview;'s <guilabel>Standard Preview</guilabel> displays your font in several 
-different sizes, so you can get a good idea of what it will look like. 
+different sizes using a pangram (a sentence using every letter of the alphabet at least once).
+So you can get a good idea of what it will look like. 
 From the drop down box in the toolbar you can choose additional preview types:
 <itemizedlist>
-<listitem><para>All Characters</para></listitem>
+<listitem><para><guilabel>All Characters</guilabel> displays all characters
+provided by the font in one size. </para></listitem>
 <listitem><para>Unicode Block: The Unicode standard arranges groups of characters 
 together in blocks</para></listitem>
 <listitem><para>Unicode Script: In Unicode, a script is a collection of letters 
 and other written signs used to represent textual information in one or more 
 writing systems</para></listitem>
-<listitem><para>Change Text: Using this button opens the <guilabel>Preview 
+<listitem><para><guibutton>Change Text</guibutton>: Using this button opens the <guilabel>Preview 
 String</guilabel> dialog where you can insert a user defined text. 
 This feature enables you to check that a font supports the characters you need.
 </para></listitem>
 </itemizedlist></para>
-
+<para>You can use the zoom buttons or the mousewheel to change the font size in all preview types.</para>
 <para>In <guilabel>Unicode Block</guilabel> and <guilabel>Unicode Script</guilabel> 
 preview mode additional tooltip info's are displayed hovering a character with the 
 mouse pointer: 
@@ -93,15 +95,19 @@ UCS-4</guilabel>, <guilabel>UTF-16</guilabel>, <guilabel>UTF-8</guilabel> and
 as <guilabel>XML Decimal Entity</guilabel>.</para>
 
 <para>
-To install a font you downloaded from the Internet, click the <guibutton>Install
-</guibutton> button in the lower-right corner. 
-<!--System / personal fonts?-->
+To install a font you downloaded from the Internet, click the 
+<guibutton>Install</guibutton> button in the lower-right corner.
 </para>
 
-<!-- para>
-zipped fonts and ark?
-</para-->
+<para>You can install the font for personal us only available to you or system-wide available
+for all users, the latter will require administrator privileges.</para>
 
+<para>Fonts are often provided in an archive format like <literal role="extension">zip</literal>.
+Open these archives with &ark; which provides a simple previewer for fonts. 
+To make use of the extended capabilities of &kfontview; extract the fonts and open them in 
+&kfontview;.
+
+</para><para>Applications need to be restarted to use of the newly installed fonts.</para>
 </article>
 
 <!--

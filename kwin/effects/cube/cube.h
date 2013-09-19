@@ -137,10 +137,9 @@ private slots:
     void slotTabBoxAdded(int mode);
     void slotTabBoxUpdated();
     void slotTabBoxClosed();
-    void slotMouseChanged(const QPoint& pos, const QPoint& oldpos, Qt::MouseButtons buttons,
-                              Qt::MouseButtons oldbuttons, Qt::KeyboardModifiers modifiers, Qt::KeyboardModifiers oldmodifiers);
     void slotCubeCapLoaded();
     void slotWallPaperLoaded();
+    void slotResetShaders();
 private:
     enum RotationDirection {
         Left,
@@ -171,7 +170,6 @@ private:
     QImage loadCubeCap(const QString &capPath);
     QImage loadWallPaper(const QString &file);
     bool activated;
-    bool mousePolling;
     bool cube_painting;
     bool keyboard_grab;
     bool schedule_close;

@@ -69,19 +69,33 @@ protected Q_SLOTS:
     void hiddenentrycb_clicked();
 
 protected:
+    /**
+     * @brief Initializes the general tab.
+     */
+    void initGeneralTab();
+
+    /**
+     * @brief Initializes the advanced tab.
+     */
+    void initAdvancedTab();
+
+    /**
+     * @brief Initializes connections.
+     */
+    void initConnections();
     void enableWidgets(bool isDF, bool isDeleted);
 
 protected:
     KLineEdit    *_nameEdit;
     KLineSpellChecking*_commentEdit;
     KLineSpellChecking   *_descriptionEdit;
-    KKeySequenceWidget *_keyEdit;
+    KKeySequenceWidget *_keyBindingEdit;
     KUrlRequester *_execEdit, *_pathEdit;
-    KLineEdit    *_termOptEdit, *_uidEdit;
-    QCheckBox    *_terminalCB, *_uidCB, *_launchCB, *_systrayCB, *_onlyShowInKdeCB, *_hiddenEntryCB;
+    KLineEdit    *_terminalOptionsEdit, *_userNameEdit;
+    QCheckBox    *_terminalCB, *_userCB, *_launchCB, *_systrayCB, *_onlyShowInKdeCB, *_hiddenEntryCB;
     KIconButton  *_iconButton;
-    QGroupBox    *_path_group, *_term_group, *_uid_group, *general_group_keybind;
-    QLabel *_termOptLabel, *_uidLabel, *_pathLabel, *_nameLabel, *_commentLabel, *_execLabel;
+    QGroupBox    *_workPathGroup, *_terminalGroup, *_userGroup, *_keyBindingGroup;
+    QLabel *_terminalOptionsLabel, *_userNameLabel, *_pathLabel, *_nameLabel, *_commentLabel, *_execLabel, *_keyBindingLabel;
     QLabel      *_descriptionLabel;
 
     MenuFolderInfo *_menuFolderInfo;

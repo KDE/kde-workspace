@@ -39,7 +39,8 @@ namespace SystemTray
 // class WidgetItem
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 WidgetItem::WidgetItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent)
+    : QDeclarativeItem(parent),
+      m_applet(0)
 {
     setClip(false);
     connect(this, SIGNAL(widthChanged()), this, SLOT(afterWidthChanged()), Qt::QueuedConnection);

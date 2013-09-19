@@ -415,7 +415,13 @@ ToggleLauncherActionImpl::ToggleLauncherActionImpl(QObject *parent, AbstractGrou
         setChecked(false);
     } else {
         m_url = m_abstractItem->launcherUrl();
-        connect(this, SIGNAL(triggered()), this, SLOT(toggleLauncher()));
+        // FIXME TODO: This signal delivery is queued to allow QGraphicsView to perform an ungrab
+        // on the launcher item after the popup menu closes before removing the launcher destroys
+        // the item, avoiding a crash. The trade-of is that it requires more care when using the
+        // TaskManager::BasicMenu class, since the menu can no longer be deleted directly after
+        // exec() returns. The QML 2 scene graph may be smarter than trying to perform an ungrab
+        // on a destroyed item, so reinvestigate whether this is chicanery is still needed.
+        connect(this, SIGNAL(triggered()), this, SLOT(toggleLauncher()), Qt::QueuedConnection);
 
         switch (m_abstractItem->itemType()) {
         case LauncherItemType:
@@ -576,13 +582,18 @@ GroupingStrategyMenu::GroupingStrategyMenu(QWidget *parent, AbstractGroupableIte
 }
 
 
-BasicMenu::BasicMenu(QWidget *parent, TaskItem* item, GroupManager *strategy, QList<QAction *> visualizationActions, QList <QAction*> appActions)
+BasicMenu::BasicMenu(QWidget *parent, TaskItem* item, GroupManager *strategy, QList<QAction *> visualizationActions, QList <QAction*> appActions, int maxWidth)
     : ToolTipMenu(parent)
 {
     Q_ASSERT(item);
     Q_ASSERT(strategy);
 
-    setTitle(item->name());
+    if (maxWidth) {
+        setTitle(fontMetrics().elidedText(item->name(), Qt::ElideRight, maxWidth));
+    } else {
+        setTitle(item->name());
+    }
+
     setIcon(item->icon());
     if (appActions.count()) {
         foreach (QAction * action, appActions) {
@@ -613,7 +624,7 @@ BasicMenu::BasicMenu(QWidget *parent, TaskItem* item, GroupManager *strategy, QL
     addAction(new CloseActionImpl(this, item));
 }
 
-BasicMenu::BasicMenu(QWidget *parent, TaskGroup* group, GroupManager *strategy, QList <QAction*> visualizationActions, QList <QAction*> appActions)
+BasicMenu::BasicMenu(QWidget *parent, TaskGroup* group, GroupManager *strategy, QList <QAction*> visualizationActions, QList <QAction*> appActions, int maxWidth)
     : ToolTipMenu(parent)
 {
     Q_ASSERT(group);
@@ -636,7 +647,7 @@ BasicMenu::BasicMenu(QWidget *parent, TaskGroup* group, GroupManager *strategy, 
         if (item->itemType() == GroupItemType) {
             addMenu(new BasicMenu(this, dynamic_cast<TaskGroup*>(item), strategy));
         } else {
-            addMenu(new BasicMenu(this, dynamic_cast<TaskItem*>(item), strategy));
+            addMenu(new BasicMenu(this, dynamic_cast<TaskItem*>(item), strategy, QList <QAction*>(), QList <QAction*>(), maxWidth));
         }
     }
     addSeparator();

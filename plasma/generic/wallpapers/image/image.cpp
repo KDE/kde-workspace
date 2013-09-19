@@ -368,7 +368,7 @@ void Image::addDir()
 {
     KUrl empty;
     KDirSelectDialog *dialog = new KDirSelectDialog(empty, true, m_configWidget);
-    connect(dialog, SIGNAL(finished()), this, SLOT(addDirFromSelectionDialog()));
+    connect(dialog, SIGNAL(accepted()), this, SLOT(addDirFromSelectionDialog()));
     dialog->show();
 }
 

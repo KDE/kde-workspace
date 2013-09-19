@@ -154,10 +154,6 @@ Workspace::Workspace(bool restore)
     // start the cursor support
     Cursor::create(this);
 
-    // get screen support
-    Screens *screens = Screens::create(this);
-    connect(screens, SIGNAL(changed()), SLOT(desktopResized()));
-
 #ifdef KWIN_BUILD_ACTIVITIES
     Activities *activities = Activities::create(this);
     connect(activities, SIGNAL(currentChanged(QString)), SLOT(updateCurrentActivity(QString)));
@@ -165,6 +161,11 @@ Workspace::Workspace(bool restore)
 
     // PluginMgr needs access to the config file, so we need to wait for it for finishing
     reparseConfigFuture.waitForFinished();
+
+    // get screen support
+    Screens *screens = Screens::create(this);
+    connect(screens, SIGNAL(changed()), SLOT(desktopResized()));
+
     options->loadConfig();
     options->loadCompositingConfig(false);
     DecorationPlugin::create(this);
@@ -419,8 +420,13 @@ Workspace::~Workspace()
     // TODO: grabXServer();
 
     // Use stacking_order, so that kwin --replace keeps stacking order
-    for (ToplevelList::iterator it = stacking_order.begin(), end = stacking_order.end(); it != end; ++it) {
-        Client *c = qobject_cast<Client*>(*it);
+    const ToplevelList stack = stacking_order;
+    // "mutex" the stackingorder, since anything trying to access it from now on will find
+    // many dangeling pointers and crash
+    stacking_order.clear();
+
+    for (ToplevelList::const_iterator it = stack.constBegin(), end = stack.constEnd(); it != end; ++it) {
+        Client *c = qobject_cast<Client*>(const_cast<Toplevel*>(*it));
         if (!c) {
             continue;
         }
@@ -594,10 +600,6 @@ void Workspace::removeClient(Client* c)
 
     updateStackingOrder(true);
 
-    if (m_compositor) {
-        m_compositor->updateCompositeBlocking();
-    }
-
 #ifdef KWIN_BUILD_TABBOX
     if (tabBox->isDisplayed())
         tabBox->reset(true);
@@ -641,6 +643,9 @@ void Workspace::removeDeleted(Deleted* c)
     unconstrained_stacking_order.removeAll(c);
     stacking_order.removeAll(c);
     x_stacking_dirty = true;
+    if (c->wasClient() && m_compositor) {
+        m_compositor->updateCompositeBlocking();
+    }
 }
 
 void Workspace::updateToolWindows(bool also_hide)
@@ -703,7 +708,7 @@ void Workspace::updateToolWindows(bool also_hide)
                 for (ClientList::ConstIterator it2 = mainclients.constBegin();
                         it2 != mainclients.constEnd();
                         ++it2) {
-                    if (c->isSpecialWindow())
+                    if ((*it2)->isSpecialWindow())
                         show = true;
                 }
                 if (!show)
@@ -1455,6 +1460,11 @@ QString Workspace::supportInformation() const
     } else {
         support.append("no\n");
     }
+    support.append("Active screen follows mouse: ");
+    if (screens()->isCurrentFollowsMouse())
+        support.append(" yes\n");
+    else
+        support.append(" no\n");
     support.append(QString("Number of Screens: %1\n").arg(screens()->count()));
     for (int i=0; i<screens()->count(); ++i) {
         const QRect geo = screens()->geometry(i);
@@ -1558,6 +1568,11 @@ QString Workspace::supportInformation() const
             } else {
                 support.append("OpenGL 2 Shaders are not used. Legacy OpenGL 1.x code path is used.\n");
             }
+            support.append("Painting blocks for vertical retrace: ");
+            if (m_compositor->scene()->blocksForRetrace())
+                support.append(" yes\n");
+            else
+                support.append(" no\n");
             break;
         }
         case XRenderCompositing:

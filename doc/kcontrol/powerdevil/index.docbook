@@ -12,8 +12,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2013-03-09</date>
-<releaseinfo>&kde; 4.10</releaseinfo>
+<date>2013-08-18</date>
+<releaseinfo>&kde; 4.11</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -36,12 +36,10 @@
 </para>
 
 <note><para>Note that PowerDevil does not poll your system. This means that it will not waste energy while trying to save it, as some other power managers do.</para></note>
-
 <sect2 id="energy-saving-setting">
 <title>Energy Saving Settings</title>
 <para>
-This page has three tabs with predefined settings for <guilabel>On AC Power</guilabel>, <guilabel>On Battery</guilabel> and 
-<guilabel>On Low Battery</guilabel> profiles.
+This page shows the actual energy saving settings. If a battery is detected you have three tabs with different settings for <guilabel>On AC Power</guilabel>, <guilabel>On Battery</guilabel> and <guilabel>On Low Battery</guilabel> profiles.
 </para>
 <para>
 <screenshot>
@@ -62,15 +60,15 @@ This page has three tabs with predefined settings for <guilabel>On AC Power</gui
 <para>
 There are a lot of options you can configure for each profile:
 </para>
-
+<!--FIXME in 4.11/master additional Keyboard Backlight ??-->
 <variablelist>
-<varlistentry><term><guilabel>Display Brightness</guilabel></term>
+<varlistentry><term><guilabel>Screen Brightness</guilabel></term>
 <listitem>
 <para>Sets the screen's brightness using a slider.</para>
 </listitem>
 </varlistentry>
 
-<varlistentry><term><guilabel>Dim Display</guilabel></term>
+<varlistentry><term><guilabel>Dim Screen</guilabel></term>
 <listitem>
 <para>If checked, the display will be progressively dimmed, until reaching 
 brightness 0, in the amount of time you specify in the spin box.
@@ -185,6 +183,11 @@ This option allows users to choose the detail power saving settings for a separa
 </screenshot>
 </para>
 <variablelist>
+<varlistentry><term><guilabel>Battery levels</guilabel></term>
+<listitem>
+<para>These items are only displayed if a battery is detected.
+</para>
+<variablelist>
 <varlistentry><term><guilabel>Battery is at low level at</guilabel></term>
 <listitem>
 <para>
@@ -206,6 +209,12 @@ Defines the action that will be done when battery reaches the critical level.
 </para>
 </listitem>
 </varlistentry>
+</variablelist>
+</listitem>
+</varlistentry>
+<varlistentry><term><guilabel>Events</guilabel></term>
+<listitem>
+<variablelist>
 <varlistentry><term><guilabel>Lock screen on resume</guilabel></term>
 <listitem>
 <para>
@@ -224,6 +233,9 @@ When this option is selected, applications will not be allowed to inhibit sleep 
 <para>
 If you want a deeper control over your notifications, you can refine them by clicking this button.
 </para>
+</listitem>
+</varlistentry>
+</variablelist>
 </listitem>
 </varlistentry>
 </variablelist>
@@ -249,6 +261,7 @@ You can manually choose a profile using this keyword. All available profiles wil
 </para>
 </listitem>
 </varlistentry>
+<!--no runner keyword  in 4.11 
 <varlistentry><term><guibutton>Power Scheme</guibutton></term>
 <listitem>
 <para>
@@ -256,6 +269,7 @@ Lets you manually set the system powersaving scheme. Available schemes will be s
 </para>
 </listitem>
 </varlistentry>
+-->
 <varlistentry><term><guibutton>Screen Brightness</guibutton></term>
 <listitem>
 <para>
@@ -274,6 +288,20 @@ You can suspend your pc through this keyword. Available suspend methods will be 
 </sect2>
 </sect1>
 </article>
+<!--FIXME in 4.11
+"Note this is a KRunner keyword"
+"power profile"
+"suspend"
+"sleep"
+"hibernate"
+"to disk"
+"to ram"
+"screen brightness"
+"dim screen"
+"power profile %1"
+"screen brightness %1"
+"dim screen %1"
+-->
 
 <!--
 Local Variables:

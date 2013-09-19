@@ -30,7 +30,7 @@ class QGraphicsObject;
 class QGraphicsWidget;
 class DeclarativeItemContainer;
 
-Q_DECLARE_METATYPE(WId);
+Q_DECLARE_METATYPE(WId)
 
 /**
  * QML wrapper for kdelibs Plasma::ToolTip

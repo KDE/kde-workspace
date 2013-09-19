@@ -62,6 +62,7 @@ PlasmaCore.Dialog {
         } else {
             groupRepeater.model = undefined;
             groupFilter.model = undefined;
+            groupFilter.rootIndex = undefined;
         }
     }
 
@@ -96,13 +97,19 @@ PlasmaCore.Dialog {
                 task.textWidthChanged.connect(updateSize);
             }
 
-            mainItem.width = maxWidth + Layout.horizontalMargins() + theme.smallIconSize + 6;
-            mainItem.height = groupRepeater.count * Layout.preferredMinHeight();
+            maxWidth += Layout.horizontalMargins() + theme.smallIconSize + 6;
+
+            // TODO: Properly derive limits from work area size (screen size sans struts).
+            mainItem.width = Math.min(maxWidth, (tasks.vertical ? 640 - tasks.width : Math.max(tasks.width, 640)) - 20);
+            mainItem.height = groupRepeater.count * (Layout.verticalMargins() + theme.smallIconSize);
         }
     }
 
     VisualDataModel {
         id: groupFilter
-        delegate: Task { inPopup: true }
+        delegate: Task {
+            visible: true
+            inPopup: true
+        }
     }
 }

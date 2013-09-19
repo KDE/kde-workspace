@@ -34,7 +34,6 @@ class TextLabel : public QDeclarativeItem
     Q_OBJECT
 
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled)
-    Q_PROPERTY(QString backgroundPrefix READ backgroundPrefix WRITE setBackgroundPrefix)
     Q_PROPERTY(QString text READ text WRITE setText)
     Q_PROPERTY(bool elide READ elide WRITE setElide)
 
@@ -44,9 +43,6 @@ class TextLabel : public QDeclarativeItem
 
         bool enabled() const;
         void setEnabled(bool enabled);
-
-        QString backgroundPrefix() const;
-        void setBackgroundPrefix(const QString& backgroundPrefix);
 
         QString text() const;
         void setText(const QString& text);
@@ -65,12 +61,11 @@ class TextLabel : public QDeclarativeItem
     private:
         void updateImplicitSize();
         QColor textColor() const;
-        QTextOption textOption() const;;
+        QTextOption textOption() const;
         void layoutText(QTextLayout &layout, const QString &text,  const QSize &constraints);
         void drawTextLayout(QPainter *painter, const QTextLayout &layout, const QRect &rect);
 
         bool m_enabled;
-        QString m_backgroundPrefix;
         QString m_text;
         bool m_elide;
         QTextLayout m_layout;

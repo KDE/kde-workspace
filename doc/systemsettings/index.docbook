@@ -383,7 +383,7 @@ Clicking this button will save all changes to &kde;. If you have changed anythin
 
 <note>
 <para>
-You must either &quot;Reset&quot; or &quot;Apply&quot; the any changes before changing to another module.
+You must either &quot;Reset&quot; or &quot;Apply&quot; the changes before changing to another module.
 </para>
 <para>
 If you try to change without saving or resetting your options, you will be asked if you want to save your changes, or discard them.

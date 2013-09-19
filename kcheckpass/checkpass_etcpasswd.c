@@ -35,6 +35,7 @@ AuthReturn Authenticate(const char *method,
 {
   struct passwd *pw;
   char *passwd;
+  char *crpt_passwd;
 
   if (strcmp(method, "classic"))
     return AuthError;
@@ -49,7 +50,7 @@ AuthReturn Authenticate(const char *method,
   if (!(passwd = conv(ConvGetHidden, 0)))
     return AuthAbort;
 
-  if (!strcmp(pw->pw_passwd, crypt(passwd, pw->pw_passwd))) {
+  if ((crpt_passwd = crypt(passwd, pw->pw_passwd)) && !strcmp(pw->pw_passwd, crpt_passwd)) {
     dispose(passwd);
     return AuthOk; /* Success */
   }

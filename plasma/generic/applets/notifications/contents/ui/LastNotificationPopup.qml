@@ -188,11 +188,12 @@ PlasmaCore.Dialog {
                     anchors {
                         left: appIconItem.y > y + height ? parent.left : appIconItem.right
                         right: parent.right
-                        rightMargin: closeButton.width
+                        rightMargin: settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
                         top: parent.top
                         topMargin: 6
                         leftMargin: 6
                     }
+                    onLinkActivated: plasmoid.openUrl(link)
                 }
 
                 QIconItem {
@@ -241,6 +242,7 @@ PlasmaCore.Dialog {
                         wrapMode: Text.Wrap
                         elide: Text.ElideRight
                         maximumLineCount: 4
+                        onLinkActivated: plasmoid.openUrl(link)
                     }
                 }
                 Column {
@@ -339,6 +341,7 @@ PlasmaCore.Dialog {
             onClicked: {
                 lastNotificationPopup.visible = false
                 lastNotificationTimer.running = false
+                closeNotification(notificationsModel.get((notificationsView.count-1)-notificationsView.currentIndex).source)
                 notificationsModel.remove((notificationsView.count-1)-notificationsView.currentIndex)
             }
         }

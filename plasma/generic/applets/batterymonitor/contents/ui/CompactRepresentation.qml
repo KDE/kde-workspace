@@ -65,6 +65,14 @@ ListView {
         property int percent: view.singleBattery ? batteries.cumulativePercent : model["Percent"]
         property bool pluggedIn: view.singleBattery ? pmSource.data["AC Adapter"]["Plugged in"] : pmSource.data["AC Adapter"]["Plugged in"] && model["Is Power Supply"]
 
+        // When there are multiple batteries, don't pulse when low for non-powersupply batteries
+        // A not properly disconnected Bluetooth mouse for example may still show up with 0%
+        // don't unneccessarily alarm the user.
+        // When we should show only a single battery (eg. constrained in tray) such batteries will
+        // only be shown when there are no primary batteries (eg. on a desktop) and there a potentially
+        // failing keyboard or mouse is an urgent situation
+        property bool animate: view.singleBattery ? batteries.cumulativePluggedin : model["Is Power Supply"]
+
         width: view.width/view.count
         height: view.height
 
@@ -80,6 +88,7 @@ ListView {
                 hasBattery: batteryContainer.hasBattery
                 percent: batteryContainer.percent
                 pluggedIn: batteryContainer.pluggedIn
+                animate: batteryContainer.animate
                 height: isConstrained() ? batteryContainer.iconSize : batteryContainer.iconSize - batteryLabel.height
                 width: height
             }

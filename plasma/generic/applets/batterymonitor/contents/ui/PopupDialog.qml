@@ -24,9 +24,10 @@ import org.kde.plasma.components 0.1 as Components
 import org.kde.qtextracomponents 0.1
 import "plasmapackage:/code/logic.js" as Logic
 
-Item {
+FocusScope {
     id: dialog
     property int actualHeight: batteryColumn.implicitHeight + settingsColumn.height + separator.height + 10 // 10 = separator margins
+    focus: true
 
     property alias model: batteryList.model
     property bool pluggedIn
@@ -38,9 +39,13 @@ Item {
 
     property bool isBrightnessAvailable
     property alias screenBrightness: brightnessSlider.value
+    property alias screenBrightnessPercentage: brightnessSlider.percentage
 
     property bool isKeyboardBrightnessAvailable
     property alias keyboardBrightness: keyboardBrightnessSlider.value
+    property alias keyboardBrightnessPercentage: keyboardBrightnessSlider.percentage
+
+    property int pmSwitchWidth: padding.margins.left + pmSwitch.implicitWidth + padding.margins.right
 
     signal brightnessChanged(int screenBrightness)
     signal keyboardBrightnessChanged(int keyboardBrightness)
@@ -66,7 +71,43 @@ Item {
 
         Repeater {
             id: batteryList
-            delegate: BatteryItem { showChargeAnimation: popupShown }
+
+            property int activeIndex
+
+            delegate: BatteryItem { }
+            KeyNavigation.tab: brightnessSlider
+            KeyNavigation.backtab: pmSwitch
+
+            function updateSelection(old,active) {
+                itemAt(old).updateSelection();
+                itemAt(active).updateSelection();
+            }
+
+            onFocusChanged: {
+                oldIndex = activeIndex;
+                activeIndex = 0;
+                updateSelection(oldIndex,activeIndex);
+            }
+            Keys.onDownPressed: {
+                oldIndex = activeIndex;
+                activeIndex++;
+                if (activeIndex >= model.count) {
+                    activeIndex = 0;
+                }
+                updateSelection(oldIndex,activeIndex);
+            }
+            Keys.onUpPressed: {
+                oldIndex = activeIndex;
+                activeIndex--;
+                if (activeIndex < 0) {
+                    activeIndex = model.count-1;
+                }
+                updateSelection(oldIndex,activeIndex);
+            }
+            Keys.onReturnPressed: itemAt(activeIndex).expanded = !itemAt(activeIndex).expanded
+            Keys.onSpacePressed: itemAt(activeIndex).expanded = !itemAt(activeIndex).expanded
+            Keys.onLeftPressed: itemAt(activeIndex).expanded = false
+            Keys.onRightPressed: itemAt(activeIndex).expanded = true
         }
     }
 
@@ -88,7 +129,9 @@ Item {
             label: i18n("Display Brightness")
             visible: isBrightnessAvailable
             onChanged: brightnessChanged(value)
-
+            KeyNavigation.tab: keyboardBrightnessSlider
+            KeyNavigation.backtab: batteryList
+            focus: true
         }
 
         BrightnessItem {
@@ -97,11 +140,15 @@ Item {
             label: i18n("Keyboard Brightness")
             visible: isKeyboardBrightnessAvailable
             onChanged: keyboardBrightnessChanged(value)
+            KeyNavigation.tab: pmSwitch
+            KeyNavigation.backtab: brightnessSlider
         }
 
         PowerManagementItem {
             id: pmSwitch
             onEnabledChanged: powermanagementChanged(enabled)
+            KeyNavigation.tab: batteryList
+            KeyNavigation.backtab: keyboardBrightnessSlider
         }
     }
 
@@ -114,6 +161,7 @@ Item {
         elementId: "horizontal-line"
         height: lineSvg.elementSize("horizontal-line").height
         width: parent.width
+        visible: model.count
         anchors {
             top: plasmoid.location == BottomEdge ? undefined : settingsColumn.bottom
             bottom: plasmoid.location == BottomEdge ? settingsColumn.top : undefined

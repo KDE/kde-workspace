@@ -196,6 +196,7 @@ public:
 
     enum IntUniform {
         AlphaToOne,     ///< @deprecated no longer used
+        ColorCorrectionLookupTextureUnit,
         IntUniformCount
     };
 
@@ -350,6 +351,12 @@ public:
      * @since 4.8
      **/
     void resetAllShaders();
+
+    /**
+     * Resets ShaderType @p type uniforms of a custom shader
+     * @since 4.11.1
+     */
+    void resetShader(GLShader *shader, ShaderType type);
 
     /**
      * Creates a GLShader with a built-in vertex shader and a custom fragment shader.
@@ -579,7 +586,6 @@ private:
     static bool sSupported;
     static bool s_blitSupported;
     static QStack<GLRenderTarget*> s_renderTargets;
-    static QSize s_oldViewport;
 
     GLTexture mTexture;
     bool mValid;

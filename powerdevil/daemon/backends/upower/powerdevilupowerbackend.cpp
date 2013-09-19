@@ -260,6 +260,9 @@ void PowerDevilUPowerBackend::onDeviceChanged(const UdevQt::Device &device)
     }
 
     int maxBrightness = device.sysfsProperty("max_brightness").toInt();
+    if (maxBrightness <= 0) {
+        return;
+    }
     float newBrightness = device.sysfsProperty("brightness").toInt() * 100 / maxBrightness;
 
     if (!qFuzzyCompare(newBrightness, m_cachedBrightnessMap[Screen])) {
@@ -362,7 +365,7 @@ bool PowerDevilUPowerBackend::setBrightness(float brightnessValue, PowerDevil::B
         success = true;
     } else if (type == Keyboard) {
         kDebug() << "set kbd backlight: " << brightnessValue;
-        m_kbdBacklight->SetBrightness(brightnessValue / 100 * m_kbdMaxBrightness);
+        m_kbdBacklight->SetBrightness(qRound(brightnessValue / 100 * m_kbdMaxBrightness));
         success = true;
     }
 
