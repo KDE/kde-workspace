@@ -436,6 +436,7 @@ template<typename Iterator>
 
 
 
+
     Geometry parseGeometry(QString model){
         using boost::spirit::iso8859_1::space;
         typedef std::string::const_iterator iterator_type;
@@ -490,12 +491,10 @@ template<typename Iterator>
 
         }
         //g.geom.display();
-
         if(geomertyParser.geom.getParsing())
             return geomertyParser.geom;
         else
             return parseGeometry("pc104");
-        return g.geom;
     }
 
     QString findGeometryBaseDir()
