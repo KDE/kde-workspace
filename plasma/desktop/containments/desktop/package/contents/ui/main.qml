@@ -116,8 +116,6 @@ DragDrop.DropArea {
                 LayoutManager.resetPositions()
                 for (var i=0; i<resultsFlow.children.length; ++i) {
                     var child = resultsFlow.children[i]
-                    print("BBBB"+child+child.applet.title+child.x+child.enabled)
-                    print("CCC"+LayoutManager.itemsConfig[child.category])
                     if (child.enabled) {
                         if (LayoutManager.itemsConfig[child.category]) {
                             var rect = LayoutManager.itemsConfig[child.category]
