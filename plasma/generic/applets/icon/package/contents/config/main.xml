@@ -6,11 +6,11 @@
   <kcfgfile name=""/>
 
   <group name="General">
-    <entry name="iconName" type="Text">
+    <entry name="iconName" type="String">
       <default>utilities-terminal</default>
     </entry>
-    <entry name="applicationName" type="Text">
-      <default>Konsole</default>
+    <entry name="applicationName" type="String">
+      <default>Dolphin</default>
     </entry>
   </group>
 

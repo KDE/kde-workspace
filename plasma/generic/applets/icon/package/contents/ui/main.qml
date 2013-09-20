@@ -9,26 +9,27 @@ Column {
 
     PlasmaCore.IconItem {
         id: icon
-        anchors.verticalCenter: parent
+        anchors.horizontalCenter: parent
         width: theme.hugeIconSize
         height: width
-        source: "utilities-terminal"
+        source: plasmoid.configuration.iconName
     }
 
     PlasmaComponents.Label {
-        id: messageText
-        anchors.verticalCenter: parent
+        id: label
+        anchors.horizontalCenter: parent
         width: parent.width - icon.width
         wrapMode: Text.Wrap
-        text: "Konsole"
+        text: plasmoid.configuration.applicationName
     }
-
-    Component.onCompleted: {
-	//plasmoid.setBackgroundHints("NoBackground");
-	print("************************************************************************************************");
-	print(plasmoid.configuration.iconName);
-	print(plasmoid.configuration.applicationName);
-	print("************************************************************************************************");
+    
+    Connections {
+	target: plasmoid
+	onExternalData: {
+	    print("************************************************************************************************");
+	    print(data);
+	    print("************************************************************************************************");
+	}
     }
 
 }
