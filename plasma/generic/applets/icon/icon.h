@@ -21,7 +21,7 @@
 #define ICON_APPLET_H
 
 #include <KMimeType>
-#include <KUrl>
+#include <QUrl>
 #include <KDirWatch>
 #include <KService>
 
@@ -30,7 +30,7 @@
 #include <QGraphicsLinearLayout>
 
 #include <Plasma/Applet>
-#include <Plasma/DeclarativeWidget>
+//#include <Plasma/DeclarativeWidget>
 #include <Plasma/Package>
 
 class KPropertiesDialog;
@@ -43,7 +43,7 @@ class IconApplet : public Plasma::Applet
         ~IconApplet();
 
         void init();
-        void setUrl(const KUrl& url, bool fromConfigDialog = false);
+        void setUrl(const QUrl& url, bool fromConfigDialog = false);
 
     public Q_SLOTS:
         void openUrl();
@@ -65,16 +65,15 @@ class IconApplet : public Plasma::Applet
 
     private:
         //dropUrls from DolphinDropController
-        void dropUrls(const KUrl::List& urls,
-                      const KUrl& destination,
+        void dropUrls(const QList<QUrl>& urls,
+                      const QUrl& destination,
                       Qt::KeyboardModifiers modifier);
 
-        Plasma::IconWidget* m_icon;
         QString m_text;
         QString m_genericName;
         QWeakPointer<KPropertiesDialog> m_dialog;
-        KUrl m_url;
-        KUrl m_configTarget;
+        QUrl m_url;
+        QUrl m_configTarget;
         KDirWatch *m_watcher;
         QSize m_lastFreeSize;
         KService::Ptr m_service;

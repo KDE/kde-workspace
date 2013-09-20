@@ -37,7 +37,8 @@
 #include <KSharedConfig>
 #include <KShell>
 #include <KSycoca>
-#include <KUrl>
+#include <QUrl>
+#include <kurlmimedata.h>
 #include <KWindowSystem>
 #include <KIO/Job>
 #include <KIO/CopyJob>
@@ -131,14 +132,14 @@ void IconApplet::iconSizeChanged(int group)
     }
 }
 
-void IconApplet::setUrl(const KUrl& url, bool fromConfigDialog)
+void IconApplet::setUrl(const QUrl& url, bool fromConfigDialog)
 {
     if (!fromConfigDialog) {
         delete m_dialog.data();
     }
 
     m_url = url;
-    if (!m_url.protocol().isEmpty()) {
+    if (!m_url.scheme().isEmpty()) {
         m_url = KIO::NetAccess::mostLocalUrl(url, 0);
     }
 
@@ -185,7 +186,7 @@ void IconApplet::setUrl(const KUrl& url, bool fromConfigDialog)
         m_text = f.readName();
         //corrupted desktop file?
         if (m_text.isNull()) {
-            m_text = m_url.fileName();
+            m_text = QFileInfo(m_url.toLocalFile()).fileName();
         }
         //m_icon->setIcon(f.readIcon());
 
@@ -205,18 +206,18 @@ void IconApplet::setUrl(const KUrl& url, bool fromConfigDialog)
             if (m_text.isEmpty() && m_url.isLocalFile()) {
                 //handle special case like the / folder
                 m_text = m_url.directory();
-            } else if (m_url.protocol().contains("http")) {
-                m_text = m_url.prettyUrl();
+            } else if (m_url.scheme().contains("http")) {
+                m_text = m_url.toString();
                 m_text.remove(QRegExp("http://(www.)*"));
             } else if (m_text.isEmpty()) {
-                m_text = m_url.prettyUrl();
+                m_text = m_url.toString();
 
                 if (m_text.endsWith(QLatin1String(":/"))) {
-                    m_text = m_url.protocol();
+                    m_text = m_url.scheme();
                 }
             }
 
-            m_icon->setIcon(KMimeType::iconNameForUrl(url));
+            //m_icon->setIcon(KMimeType::iconNameForUrl(url));
         }
     }
 
@@ -257,7 +258,7 @@ void IconApplet::openUrl()
 {
     if (m_service) {
         emit releaseVisualFocus();
-        KUrl::List urls;
+        QList<QUrl> urls;
         KRun::run(*m_service, urls, 0);
     } else if (m_url.isValid()) {
         emit releaseVisualFocus();
@@ -300,7 +301,7 @@ void IconApplet::acceptedPropertiesDialog()
         return;
     }
 
-    m_url = m_dialog.data()->kurl();
+    m_url = m_dialog.data()->QUrl();
 
     KConfigGroup cg = config();
     cg.writeEntry("Url", m_url);
@@ -342,11 +343,11 @@ QSizeF IconApplet::sizeHint(Qt::SizeHint which, const QSizeF & constraint) const
 
 void IconApplet::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
-    if (!KUrl::List::canDecode(event->mimeData())) {
+    if (event->mimeData()->hasUrls()) {
         return;
     }
 
-    KUrl::List urls = KUrl::List::fromMimeData(event->mimeData());
+    QList<QUrl> urls = KUrlMimeData::urlsFromMimeData(event->mimeData());
     if (urls.isEmpty()) {
         return;
     }
@@ -379,11 +380,11 @@ void IconApplet::dropEvent(QGraphicsSceneDragDropEvent *event)
 
         // Just exec the local executable
         QString params;
-        foreach (const KUrl &url, urls) {
+        foreach (const QUrl &url, urls) {
             if (url.isLocalFile()) {
                 params += ' ' + KShell::quoteArg(url.toLocalFile());
             } else {
-                params += ' ' + KShell::quoteArg(url.prettyUrl());
+                params += ' ' + KShell::quoteArg(url.toString());
             }
         }
 
@@ -395,8 +396,8 @@ void IconApplet::dropEvent(QGraphicsSceneDragDropEvent *event)
 }
 
 //dropUrls from DolphinDropController
-void IconApplet::dropUrls(const KUrl::List& urls,
-                          const KUrl& destination,
+void IconApplet::dropUrls(const QUrl::List& urls,
+                          const QUrl& destination,
                           Qt::KeyboardModifiers modifier)
 {
     qDebug() << "Source" << urls;

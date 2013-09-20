@@ -163,7 +163,6 @@ Comment[zh_TW]=一般圖示
 
 X-KDE-ServiceTypes=Plasma/Applet
 Type=Service
-NoDisplay=true
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/main.qml

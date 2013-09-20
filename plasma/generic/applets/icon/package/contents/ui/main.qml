@@ -1,34 +1,34 @@
-import QtQuick 1.0
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
-import org.kde.plasma.core 0.1 as PlasmaCore
- 
-Item {
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
-    width: 100
-    height: 100
-    
-    property string icon;
-    property string text;
+Column {
+    id: root
 
-    PlasmaWidgets.IconWidget {
+    clip: true
+
+    PlasmaCore.IconItem {
         id: icon
-        text: "Konsole"
-        Component.onCompleted: setIcon("utilities-terminal")
-        anchors.fill: parent
+        anchors.verticalCenter: parent
+        width: theme.hugeIconSize
+        height: width
+        source: "utilities-terminal"
     }
 
-/*    Text {
-	id: label
-	text: "Konsole"
-	anchors.left: parent.left
-	anchors.right: parent.right
-	anchors.bottom: parent.bottom
-	horizontalAlignment: Text.AlignHCenter
-    }*/
+    PlasmaComponents.Label {
+        id: messageText
+        anchors.verticalCenter: parent
+        width: parent.width - icon.width
+        wrapMode: Text.Wrap
+        text: "Konsole"
+    }
 
     Component.onCompleted: {
-	plasmoid.setBackgroundHints("NoBackground");
-	print(plasmoid.backgroundHints);
+	//plasmoid.setBackgroundHints("NoBackground");
+	print("************************************************************************************************");
+	print(plasmoid.configuration.iconName);
+	print(plasmoid.configuration.applicationName);
+	print("************************************************************************************************");
     }
 
 }
