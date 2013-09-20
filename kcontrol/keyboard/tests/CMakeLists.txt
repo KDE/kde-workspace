@@ -23,7 +23,7 @@ if(Boost_FOUND)
     ADD_DEFINITIONS(-DNEW_GEOMETRY=1)
     include_directories(..)
 
-    kde4_add_unit_test(geometry_parser_test TESTNAME geometry_parser NOGUI ../preview/geometry_parser.cpp ../preview/geometry_components.cpp geometry_parser_test.cpp ../x11_helper.cpp)
+    kde4_add_unit_test(geometry_parser_test TESTNAME geometry_parser NOGUI ../preview/geometry_parser.cpp ../preview/geometry_components.cpp geometry_parser_test.cpp ../x11_helper.cpp ../preview/model_to_geometry.cpp)
     
     kde4_add_unit_test(symbol_parser_test TESTNAME symbol_parser NOGUI ../preview/symbol_parser.cpp ../preview/keyboardlayout.cpp symbol_parser_test.cpp ../x11_helper.cpp ../preview/keyaliases.cpp)
     

@@ -66,7 +66,7 @@ Symbol_parser<Iterator>::Symbol_parser():Symbol_parser::base_type(start){
 
     group = lit("Group")>>int_;
 
-    comments =lexeme[ lit("//")>>*(char_-eol||skw-eol)>>eol||lit("/*")>>*(char_-lit("*/")||skw-lit("*/"))>>lit("*/") ];
+    comments =lexeme[ lit("//")>>*(char_-eol||symbolKeyword-eol)>>eol||lit("/*")>>*(char_-lit("*/")||symbolKeyword-lit("*/"))>>lit("*/") ];
 
     include = lit("include")>>name[phx::bind(&Symbol_parser::getInclude,this,_1)];
 
@@ -88,7 +88,7 @@ Symbol_parser<Iterator>::Symbol_parser():Symbol_parser::base_type(start){
        >>lit("};"))
        ||lit("key")>>lit(".")>>type>>lit(";");
 
-    ee = *(char_ - skw - '{')>>'{'>>*(char_-'}'-';')>>lit("};");
+    ee = *(char_ - symbolKeyword - '{')>>'{'>>*(char_-'}'-';')>>lit("};");
 
 
     start = *(char_ - lit("xkb_symbols")||comments)
@@ -98,7 +98,7 @@ Symbol_parser<Iterator>::Symbol_parser():Symbol_parser::base_type(start){
         >>*(key[phx::bind(&Symbol_parser::addKey,this)]
         ||include
         ||ee
-        ||char_-'}'-skw
+        ||char_-'}'-symbolKeyword
         ||comments)
         >>lit("};")
         >>*(comments||char_);
@@ -193,22 +193,22 @@ QString findLayout(const QString& layout, const QString& layoutVariant){
     }
 
     else{
-        int i = 1;
+        int current = 1;
 
-        while (layoutVariant != variant && i < scontentList.size()) {
-            input = scontentList.at(i);
+        while (layoutVariant != variant && current < scontentList.size()) {
+            input = scontentList.at(current);
 
-            QString h = scontentList.at(i);
+            QString symbolCont = scontentList.at(current);
 
-            int k = h.indexOf("\"");
-            h = h.mid(k);
-            k = h.indexOf("{");
-            h = h.left(k);
-            h = h.remove(" ");
-            variant = h.remove("\"");
+            int index = symbolCont.indexOf("\"");
+            symbolCont = symbolCont.mid(index);
+            index = symbolCont.indexOf("{");
+            symbolCont = symbolCont.left(index);
+            symbolCont = symbolCont.remove(" ");
+            variant = symbolCont.remove("\"");
 
             input.prepend("xkb_symbols");
-            i++;
+            current++;
         }
     }
 
@@ -221,17 +221,17 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
     typedef std::string::const_iterator iterator_type;
     typedef grammar::Symbol_parser<iterator_type> Symbol_parser;
 
-    Symbol_parser s;
+    Symbol_parser symbolParser;
 
-    s.layout.country = layout;
+    symbolParser.layout.country = layout;
     QString input = findLayout(layout, layoutVariant);
 
-    std::string xyz = input.toUtf8().constData();
+    std::string parserInput = input.toUtf8().constData();
 
-    std::string::const_iterator iter = xyz.begin();
-    std::string::const_iterator end = xyz.end();
+    std::string::const_iterator iter = parserInput.begin();
+    std::string::const_iterator end = parserInput.end();
 
-    bool r = phrase_parse(iter, end, s, space);
+    bool success = phrase_parse(iter, end, symbolParser, space);
 
     /*if (r && iter == end){
         std::cout << "-------------------------\n";
@@ -246,14 +246,14 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
     }*/
 
 
-    for(int j = 0; j < s.layout.getIncludeCount(); j++){
-        QString include = s.layout.getInclude(j);
+    for(int currentInclude = 0; currentInclude < symbolParser.layout.getIncludeCount(); currentInclude++){
+        QString include = symbolParser.layout.getInclude(currentInclude);
         QStringList includeFile = include.split("(");
         if(includeFile.size() == 2){
-            QString l = includeFile.at(0);
-            QString lv = includeFile.at(1);
-            lv.remove(")");
-            input = findLayout(l,lv);
+            QString file = includeFile.at(0);
+            QString layout = includeFile.at(1);
+            layout.remove(")");
+            input = findLayout(file, layout);
 
         }
 
@@ -263,12 +263,12 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
             input = findLayout(includeFile.at(0),a);
         }
 
-        xyz = input.toUtf8().constData();
+        parserInput = input.toUtf8().constData();
 
-        std::string::const_iterator iter = xyz.begin();
-        std::string::const_iterator end = xyz.end();
+        std::string::const_iterator iter = parserInput.begin();
+        std::string::const_iterator end = parserInput.end();
 
-        bool r = phrase_parse(iter, end, s, space);
+        bool success = phrase_parse(iter, end, symbolParser, space);
 
         /*if (r && iter == end){
             std::cout << "-------------------------\n";
@@ -285,7 +285,7 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
 
     //s.layout.display();
 
-    return s.layout;
+    return symbolParser.layout;
 }
 
 }

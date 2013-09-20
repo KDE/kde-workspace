@@ -41,7 +41,7 @@ KeyboardPainter::KeyboardPainter():
     levelBox->setFixedSize( 360, 30 );
 
     QVBoxLayout* vLayout = new QVBoxLayout( this );
-    QHBoxLayout* hLayout = new QHBoxLayout( this );
+    QHBoxLayout* hLayout = new QHBoxLayout();
 
     hLayout->addWidget(exitButton, 0, Qt::AlignLeft);
     hLayout->addWidget(levelBox, 0, Qt::AlignRight);

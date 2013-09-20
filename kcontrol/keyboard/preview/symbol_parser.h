@@ -74,7 +74,7 @@ namespace grammar {
 
         KbLayout layout;
         int keyIndex, newKey;
-        symbol_keywords skw;
+        symbol_keywords symbolKeyword;
         levels lvl;
         Aliases alias;
 

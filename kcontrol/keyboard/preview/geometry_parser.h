@@ -61,8 +61,7 @@ namespace grammar{
     //general non-temrminals
     qi::rule<Iterator, std::string(), iso::space_type>name;
     qi::rule<Iterator, std::string(), iso::space_type>description;
-    qi::rule<Iterator, std::string(), iso::space_type>in;
-    qi::rule<Iterator, std::string(), iso::space_type>info;
+    qi::rule<Iterator, std::string(), iso::space_type>input;
 
     //non-teminals for shape
     qi::rule<Iterator, int(), iso::space_type>shape;
@@ -107,8 +106,8 @@ namespace grammar{
 
     qi::rule<Iterator, iso::space_type>start;
     Geometry geom;
-    keywords kw;
-    double x, y, ax, ay, cx, cy, off;
+    keywords keyword;
+    double shapeLenX, shapeLenY, approxLenX, approxLenY, keyCordiX, keyCordiY, KeyOffset;
     Geometry_parser();
 
     //functions for shape

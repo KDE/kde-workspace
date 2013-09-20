@@ -36,14 +36,19 @@ class ModelGroup {
 
     void addGroupModel( QString model );
 
+    void setGroupName(QString name){
+        groupName = name;
+    }
+
     QString getGroupModel(int i);
 
-    int getmodelCount(){
+    int getModelCount(){
         return modelCount;
     }
 
-    int containsModel(QSting model);
+    int containsModel(QString model);
 
+    void display();
 };
 
 
@@ -98,6 +103,11 @@ public:
 
     QString getGeometryName(QString model);
     QString getGeometryFile(QString model);
+    void createTable();
+    void addEntry(ModelToGeometry currentEntry);
+    void display();
+    void createModelGroups(QString content);
+    void addModelGroup();
 
 };
 

@@ -23,6 +23,7 @@
 #include "geometry_components.h"
 #include "keyboardlayout.h"
 #include "symbol_parser.h"
+#include "model_to_geometry.h"
 
 #include <QtCore/QFile>
 #include <QtGui/QFont>
@@ -42,7 +43,7 @@ static const QColor unknownSymbolColor("#FF3300");
 static const int xOffset[] = {10, 10, -15, -15 };
 static const int yOffset[] = {5, -20, 5, -20 };
 static const QColor color[] = { lev12color, lev12color, lev34color, lev34color };
-static const int keyLevel[3][4] = { { 0, 1, 2, 3}, { 0, 1, 4, 5}, { 0, 1, 6, 7} };
+static const int keyLevel[3][4] = { { 1, 0, 2, 3}, { 1, 0, 4, 5}, { 1, 0, 6, 7} };
 
 
 KbPreviewFrame::KbPreviewFrame(QWidget *parent) :
