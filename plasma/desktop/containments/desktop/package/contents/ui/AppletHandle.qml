@@ -206,8 +206,8 @@ Item {
     ActionButton {
         width: handleWidth
         anchors {
-            bottom: appletItem.handleMerged ? parent.bottom : noBackgroundHandle.bottom
-            bottomMargin: appletItem.margins.bottom + 2
+            bottom: buttonsParent.bottom
+            bottomMargin: (handleMerged) ? appletItem.margins.bottom + 2 : noBackgroundHandle.margins.bottom + 2
             right: appletItem.handleMerged ? parent.right : noBackgroundHandle.right
             rightMargin: appletItem.handleMerged ? -buttonMargin : noBackgroundHandle.margins.right - buttonMargin
         }
