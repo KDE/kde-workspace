@@ -26,63 +26,56 @@ import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 Item {
     id: appletHandle
 
-    //z: dragMouseArea.z + 1
     opacity: appletItem.controlsOpacity
     width: appletItem.handleWidth
     height: appletItem.handleHeight
+    //z: dragMouseArea.z + 1
 
     property int buttonMargin: 6
     property int minimumHeight:  6 * (root.iconSize + buttonMargin)
+    property Item buttonsParent: appletHandle
 
     signal removeApplet
 
     function updateHeight() {
-        // Does the handle's height fit into the frame?
         var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
-        //print(" = == = = == updateHeight mini:" + mini)
         if (height > mini) {
             appletItem.handleMerged = true;
-//             print("merged handle");
             height = appletItem.handleMerged ? appletItem.height : minimumHeight
-            //print(" height: " + height);
-            buttonColumn.anchors.right = appletHandle.right;
-        } else {
+            buttonsParent = appletHandle;
+        } else if (appletItem.handleMerged) {
             appletItem.handleMerged = false;
-//             print("separate handle");
-            //appletHandle.anchors.right = appletHandle.parent.right;
-            buttonColumn.anchors.verticalCenter = appletItem.verticalCenter;
-            buttonColumn.anchors.top = noBackgroundHandle.top
-            buttonColumn.anchors.bottom = noBackgroundHandle.bottom
-            buttonColumn.anchors.right = noBackgroundHandle.right
+            buttonsParent = noBackgroundHandle;
         }
     }
     PlasmaCore.FrameSvgItem {
         id: noBackgroundHandle
 
         width: handleWidth + margins.left + margins.right - 4
-        height: handleMerged ? appletItem.handleHeight + noBackgroundHandle.margins.top + noBackgroundHandle.margins.bottom : appletItem.handleHeight
-        visible: opacity > 0
+        height: (backgroundHints != "NoBackground") ? appletItem.handleHeight : appletItem.handleHeight + noBackgroundHandle.margins.top + noBackgroundHandle.margins.bottom
+        visible: controlsOpacity > 0
         z: plasmoidBackground.z - 10
 
         anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.right
+            verticalCenter: buttonsParent.verticalCenter
+            left: buttonsParent.right
             leftMargin: handleMerged ? ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth * 2 + 2 : ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth
         }
-        opacity: (backgroundHints == "NoBackground" || !handleMerged) ? controlsOpacity : 0
         smooth: true
         imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
-        Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
+        //Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
     }
 
     Column {
         id: buttonColumn
         width: handleWidth
+        parent: buttonsParent
         anchors {
             top: parent.top
-            topMargin: (!appletItem.hasBackground) ? noBackgroundHandle.margins.top : appletItem.margins.top
-            bottomMargin: appletItem.margins.bottom
-            right: appletItem.handleMerged ? parent.right : noBackgroundHandle.right
+            topMargin: (!appletItem.hasBackground || !handleMerged) ? noBackgroundHandle.margins.top : appletItem.margins.top
+            bottom: parent.bottom
+            bottomMargin: (!appletItem.hasBackground && !handleMerged) ? noBackgroundHandle.margins.bottom : appletItem.margins.bottom
+            right: parent.right
             rightMargin: appletItem.handleMerged ? -buttonMargin : noBackgroundHandle.margins.right - buttonMargin
         }
         spacing: buttonMargin*2

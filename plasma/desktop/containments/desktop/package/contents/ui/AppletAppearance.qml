@@ -63,7 +63,8 @@ Item {
     visible: false
 
     onHeightChanged: {
-        if (appletHandle.source != "") {
+        if (appletHandle.source != "" && appletHandle.visible) {
+            print("updateHeight");
             appletHandle.item.updateHeight();
         }
         //print("handleMerged : " + appletItem.handleMerged + " min, height " + mini + ", " + appletHandle.height);
