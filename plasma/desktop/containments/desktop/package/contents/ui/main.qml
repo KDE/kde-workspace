@@ -73,7 +73,7 @@ DragDrop.DropArea {
         LayoutManager.itemGroups[container.category] = container;
         print("Applet " + container.category + applet.title + " added at" + container.x + " " + container.y);
 
-        if (x > 0 && y > 0) {
+        if (x >= 0 && y >= 0) {
             LayoutManager.positionItem(container);
         }
     }
@@ -116,8 +116,6 @@ DragDrop.DropArea {
                 LayoutManager.resetPositions()
                 for (var i=0; i<resultsFlow.children.length; ++i) {
                     var child = resultsFlow.children[i]
-                    print("BBBB"+child+child.applet.title+child.x+child.enabled)
-                    print("CCC"+LayoutManager.itemsConfig[child.category])
                     if (child.enabled) {
                         if (LayoutManager.itemsConfig[child.category]) {
                             var rect = LayoutManager.itemsConfig[child.category]
@@ -140,7 +138,6 @@ DragDrop.DropArea {
                 LayoutManager.save()
             }
         }
-        Component.onCompleted: LayoutManager.resultsFlow = resultsFlow
     }
 
     Item {
@@ -254,6 +251,7 @@ DragDrop.DropArea {
         placeHolderPaint.opacity = 0;
         placeHolderPaint.visible = true;
         print("Containment completed.");
+        LayoutManager.resultsFlow = resultsFlow
         LayoutManager.plasmoid = plasmoid
         updateGridSize()
         //plasmoid.containmentType = "DesktopContainment"
@@ -262,7 +260,8 @@ DragDrop.DropArea {
 
         for (var i = 0; i < plasmoid.applets.length; ++i) {
             var applet = plasmoid.applets[i]
-            addApplet(applet, 0, 0)
+            //FIXME: has to become prettier
+            addApplet(applet, LayoutManager.itemsConfig["Applet-"+applet.id].x, LayoutManager.itemsConfig["Applet-"+applet.id].y)
         }
     }
 }

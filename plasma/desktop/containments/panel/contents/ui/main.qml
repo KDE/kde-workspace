@@ -31,19 +31,69 @@ DragDrop.DropArea {
     width: 640
     height: 48
 
+//BEGIN properties
     property int minimumWidth: currentLayout.Layout.minimumWidth
     property int maximumWidth: currentLayout.Layout.maximumWidth
     implicitWidth: currentLayout.implicitWidth
 
-    
     property Item toolBox
 
     property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
+
+    property Item dragOverlay
+//END properties
+
+//BEGIN functions
+function addApplet(applet, x, y) {
+    var container = appletContainerComponent.createObject(root)
+    print("Applet added in test panel: " + applet + applet.title + " at: " + x + ", " + y);
+
+    if (applet.fillWidth) {
+        lastSpacer.parent = root;
+    }
+    applet.parent = container;
+    container.applet = applet;
+    applet.anchors.fill = container;
+    applet.visible = true;
+    container.visible = true;
+
+    //is there a DND placeholder? replace it!
+    if (dndSpacer.parent === currentLayout) {
+        LayoutManager.insertBefore(dndSpacer, container);
+        dndSpacer.parent = root;
+        return;
+
+    //if the provided position is valid, try it
+    } else if (x >= 0 && y >= 0) {
+        var index = LayoutManager.insertAtCoordinates(container, x, y);
+        print("Applet " + applet.id + " " + applet.title + " was added in position " + index)
+        container.intendedPos = index;
+
+    //give up: enqueue the applet after all the others
+    } else {
+        //if lastspacer is here, enqueue after it
+        if (lastSpacer.parent === currentLayout) {
+            LayoutManager.insertBefore(lastSpacer, container);
+        //else put it in last position
+        } else {
+            container.parent = currentLayout;
+        }
+    }
+}
+
+//END functions
+
+//BEGIN connections
+    Component.onCompleted: {
+        LayoutManager.plasmoid = plasmoid;
+        LayoutManager.root = root;
+        LayoutManager.layout = currentLayout;
+        LayoutManager.restore();
+    }
+
     onCurrentLayoutChanged: {
         LayoutManager.layout = currentLayout
     }
-
-    property Item dragOverlay
 
     onDragEnter: {
         LayoutManager.insertAtCoordinates(dndSpacer, event.x, event.y)
@@ -65,43 +115,8 @@ DragDrop.DropArea {
         target: plasmoid
 
         onAppletAdded: {
-            var container = appletContainerComponent.createObject(root)
-            print("Applet added in test panel: " + applet + " at: " + x + ", " + y);
-
-            if (applet.fillWidth) {
-                lastSpacer.parent = root;
-            }
-            applet.parent = container;
-            container.applet = applet;
-            applet.anchors.fill = container;
-            applet.visible = true;
-            container.visible = true;
-            container.intendedPos = LayoutManager.order[applet.id] !== undefined ? LayoutManager.order[applet.id] : -1;
-            //is not in the saved positions, try with applet coordinates
-            if (dndSpacer.parent === currentLayout) {
-                LayoutManager.insertBefore(dndSpacer, container);
-                dndSpacer.parent = root;
-                return;
-
-            } else if (container.intendedPos < 0) {
-                var index = LayoutManager.insertAtCoordinates(container, x, y);
-                print("Applet " + applet.id + " " + applet.title + " was added in position " + index)
-                container.intendedPos = index;
-
-            } else {
-                print("We want to insert the new applet " + applet.id + " " + applet.title + " in position " + container.intendedPos)
-
-                var position = 0;
-                for (var i = 0; i < currentLayout.children.length; ++i) {
-                    if (currentLayout.children[i].intendedPos !== undefined &&
-                        container.intendedPos <= currentLayout.children[i].intendedPos) {
-                        LayoutManager.insertBefore(currentLayout.children[i], container);
-                        return;
-                    }
-                }
-                //if not found, enqueue
-                LayoutManager.insertBefore(lastSpacer, container);
-            }
+            addApplet(applet, x, y);
+            LayoutManager.save();
         }
 
         onAppletRemoved: {
@@ -153,7 +168,9 @@ DragDrop.DropArea {
             }
         }
     }
+//END connections
 
+//BEGIN components
     Component {
         id: appletContainerComponent
         Item {
@@ -213,7 +230,9 @@ DragDrop.DropArea {
             }
         }
     }
+//END components
 
+//BEGIN UI elements
     Item {
         id: lastSpacer
         parent: currentLayout
@@ -242,13 +261,5 @@ DragDrop.DropArea {
             bottomMargin: toolBox ? toolBox.height : 0
         }
     }
-
-
-
-    Component.onCompleted: {
-        LayoutManager.plasmoid = plasmoid;
-        LayoutManager.root = root;
-        LayoutManager.layout = currentLayout;
-        LayoutManager.restore();
-    }
+//END UI elements
 }

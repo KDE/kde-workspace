@@ -26,7 +26,6 @@ import org.kde.qtextracomponents 2.0 as QtExtras
 Item {
     id: toolBoxItem
 
-    property QtObject proxy: plasmoid.toolBox
     property bool showing: state != "collapsed"
     property int expandedWidth: 240
     property int expandedHeight: 240
@@ -144,9 +143,9 @@ Item {
 
             Repeater {
                 id: unlockedList
-                model: proxy.actions
+                model: plasmoid.actions
                 delegate: ActionDelegate {
-                    actionIcon: icon
+                    actionIcon: modelData.icon
                     objectName: modelData.objectName
                 }
             }
@@ -166,27 +165,6 @@ Item {
                 onTriggered: containmentSettings();
             }
             */
-            ActionDelegate {
-                label: i18n("Desktop Settings")
-                actionIcon: "configure"
-                objectName: "containment settings"
-                onTriggered: containmentSettings();
-            }
-
-            ActionDelegate {
-                label: plasmoid.immutable ? i18n("Unlock Widgets") : i18n("Lock Widgets")
-                actionIcon: plasmoid.immutable ? "object-unlocked" : "object-locked"
-                objectName: "lock widgets"
-                onTriggered: lockWidgets(!plasmoid.immutable);
-            }
-
-            ActionDelegate {
-                label: i18n("Add Widgets")
-                actionIcon: "list-add"
-                objectName: "lock screen"
-                visible: !plasmoid.immutable
-                onTriggered: showWidgetsExplorer();
-            }
 
             ActionDelegate {
                 label: i18n("Lock Screen")

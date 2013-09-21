@@ -63,11 +63,11 @@ Item {
     visible: false
 
     onHeightChanged: {
-        if (appletHandle.source != "") {
+        if (appletHandle.source != "" && appletHandle.visible) {
             appletHandle.item.updateHeight();
         }
-        //print("handleMerged : " + appletItem.handleMerged + " min, height " + mini + ", " + appletHandle.height);
     }
+
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {
         id: appletTimer
