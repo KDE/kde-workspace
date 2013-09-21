@@ -24,8 +24,6 @@ import org.kde.plasma.icon 1.0
 Column {
     id: root
 
-    clip: true
-
     PlasmaCore.IconItem {
         id: icon
         anchors.horizontalCenter: parent
