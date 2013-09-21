@@ -27,6 +27,7 @@ Item {
     id: appletHandle
 
     opacity: appletItem.controlsOpacity
+    visible: opacity > 0
     width: appletItem.handleWidth
     height: appletItem.handleHeight
     //z: dragMouseArea.z + 1
