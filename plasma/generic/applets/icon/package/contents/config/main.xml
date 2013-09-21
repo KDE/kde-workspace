@@ -12,6 +12,8 @@
     </entry>
     <entry name="url" type="String">
     </entry>
+    <entry name="genericName" type="String">
+    </entry>
   </group>
 
 </kcfg>

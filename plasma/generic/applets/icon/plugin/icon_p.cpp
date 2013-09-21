@@ -52,3 +52,16 @@ QString IconPrivate::getIcon(const QUrl& url) const
     }
     return m_icon;
 }
+
+QString IconPrivate::getGenericName(const QUrl& url) const
+{
+    QString m_generic;
+    if(url.isLocalFile()) {
+	KFileItem fileItem(KFileItem::Unknown, KFileItem::Unknown, url);
+	if (fileItem.isDesktopFile()) {
+	    KDesktopFile f(url.toLocalFile());
+	    m_generic = f.readGenericName();
+	}
+    }
+    return m_generic;
+}

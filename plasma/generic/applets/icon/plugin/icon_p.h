@@ -28,7 +28,7 @@ class IconPrivate : public QObject
 public:
     Q_INVOKABLE QString getName(const QUrl& url) const;
     Q_INVOKABLE QString getIcon(const QUrl& url) const;
-
+    Q_INVOKABLE QString getGenericName(const QUrl& url) const;
 };
 
 #endif
