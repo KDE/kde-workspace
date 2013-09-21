@@ -1,5 +1,5 @@
 /*
- *  Copyright 2013 Sebastian Kügler <sebas@kde.org>
+ *  Copyright 2013 Heena Mahour <heena393@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,8 +21,6 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.qtextracomponents 2.0 as QtExtras
-
-// PlasmoidPage
 
 PlasmaComponents.Menu {
     id: testMenu

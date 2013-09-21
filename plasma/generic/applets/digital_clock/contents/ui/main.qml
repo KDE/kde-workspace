@@ -20,20 +20,18 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
     id: main
-    property int minimumWidth: units.gridUnit * 80
-    property int minimumHeight: units.gridUnit * 40
-    property int formFactor: plasmoid.formFactor
- //   property int minimumWidth
- //   property int minimumHeight
+    property int minimumWidth : units.gridUnit * 80
+    property int minimumHeight : units.gridUnit * 40
+    property int formFactor : plasmoid.formFactor
 
     PlasmaCore.DataSource {
-        id: dataSource
-        engine: "time"
-        connectedSources: ["Local"]
-        interval: 300000
+        id : dataSource
+        engine : "time"
+        connectedSources : ["Local"]
+        interval : 300000
     }
 
-    Component.onCompleted: {
+    Component.onCompleted : {
         var toolTipData = new Object;
         toolTipData["image"] = "preferences-system-time"; 
         toolTipData["mainText"] ="Current Time"
@@ -50,8 +48,8 @@ Item {
     }
 
     Connections {
-        target: plasmoid
-        onFormFactorChanged: {
+        target : plasmoid
+        onFormFactorChanged : {
             main.formFactor = plasmoid.formFactor
             if(main.formFactor==Planar || main.formFactor == MediaCenter ) {
                 minimumWidth=main.width/3.5
