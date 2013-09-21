@@ -157,6 +157,7 @@ Geometry::Geometry(){
     sectionList << Section();
     shapes << GShape();
     keyShape = QString("NORM");
+    parsedGeometry = true;
 }
 
 

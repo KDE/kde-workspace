@@ -177,7 +177,7 @@ QString findLayout(const QString& layout, const QString& layoutVariant){
     QFile sfile(symbolFile);
     if (!sfile.open(QIODevice::ReadOnly | QIODevice::Text)){
          //qDebug()<<"unable to open the file";
-         return QString();
+        return QString("I/O ERROR");
     }
 
     QString scontent = sfile.readAll();
@@ -226,6 +226,11 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
     symbolParser.layout.country = layout;
     QString input = findLayout(layout, layoutVariant);
 
+    if(input == "I/O ERROR"){
+        symbolParser.layout.setParsedSymbol(false);
+        return symbolParser.layout;
+    }
+
     std::string parserInput = input.toUtf8().constData();
 
     std::string::const_iterator iter = parserInput.begin();
@@ -233,17 +238,16 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
 
     bool success = phrase_parse(iter, end, symbolParser, space);
 
-    /*if (r && iter == end){
-        std::cout << "-------------------------\n";
-        std::cout << "Parsing succeeded\n";
-        std::cout << "\n-------------------------\n";
+    if (success && iter == end){
+        qDebug() << "Symbols Parsing succeeded";
+        symbolParser.layout.setParsedSymbol(true);
+
     }
     else{
-        std::cout << "-------------------------\n";
-        std::cout << "Parsing failed\n";
-        std::cout << "-------------------------\n";
+        qDebug() << "Symbols Parsing failed\n";
         qDebug()<<input;
-    }*/
+        symbolParser.layout.setParsedSymbol(false);
+    }
 
 
     for(int currentInclude = 0; currentInclude < symbolParser.layout.getIncludeCount(); currentInclude++){
@@ -268,24 +272,27 @@ KbLayout parseSymbols(const QString& layout, const QString& layoutVariant){
         std::string::const_iterator iter = parserInput.begin();
         std::string::const_iterator end = parserInput.end();
 
-        bool success = phrase_parse(iter, end, symbolParser, space);
+         success = phrase_parse(iter, end, symbolParser, space);
 
-        /*if (r && iter == end){
-            std::cout << "-------------------------\n";
-            std::cout << "Parsing succeeded\n";
-            std::cout << "\n-------------------------\n";
+
+        if (success && iter == end){
+            qDebug() << "Symbols Parsing succeeded";
+            symbolParser.layout.setParsedSymbol(true);
+
         }
         else{
-            std::cout << "-------------------------\n";
-            std::cout << "Parsing failed\n";
-            std::cout << "-------------------------\n";
+            qDebug() << "Symbols Parsing failed\n";
             qDebug()<<input;
-        }*/
+            symbolParser.layout.setParsedSymbol(false);
+        }
+
     }
 
     //s.layout.display();
-
-    return symbolParser.layout;
+    if(symbolParser.layout.getParsedSymbol())
+        return symbolParser.layout;
+    else
+        return parseSymbols("us", "basic");
 }
 
 }

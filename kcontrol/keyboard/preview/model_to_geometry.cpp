@@ -4,6 +4,7 @@
 
 #include <QFile>
 #include <QDebug>
+#include <QRegExp>
 
 ModelGroup :: ModelGroup(){
     modelCount = 0;
@@ -13,7 +14,7 @@ void ModelGroup :: addGroupModel(QString model){
     if( !groupModels.contains(model) ){
         groupModels << model;
         modelCount++;
-        qDebug()<<modelCount;
+        //qDebug()<<modelCount;
     }
 }
 
@@ -36,7 +37,7 @@ int ModelGroup :: containsModel(QString model){
 }
 
 void ModelGroup :: display(){
-    qDebug()<<groupName<<"\t"<<modelCount<<"\t"<<groupModels;
+    //qDebug()<<groupName<<"\t"<<modelCount<<"\t"<<groupModels;
 }
 
 ModelToGeometry :: ModelToGeometry(){
@@ -57,6 +58,9 @@ void ModelToGeometryTable :: addEntry(ModelToGeometry entry){
 
 QString ModelToGeometryTable :: getGeometryFile(QString model){
 
+    if( !parsing )
+        return "pc";
+
     for (int i = 0; i < entryCount ; i++){
 
         ModelToGeometry entry = table.at(i);
@@ -65,7 +69,7 @@ QString ModelToGeometryTable :: getGeometryFile(QString model){
         if(tempModel.startsWith('$')){
             for ( int j = 0; j < modelGroupCount; j++){
                 ModelGroup temp = modelGroups.at(j);
-                if (temp.groupName == tempModel && temp.containsModel(model) > -1){
+                if (temp.getGroupName() == tempModel && temp.containsModel(model) > -1){
                     return entry.getGeometryFile();
                 }
             }
@@ -82,6 +86,10 @@ QString ModelToGeometryTable :: getGeometryFile(QString model){
 
 
 QString ModelToGeometryTable :: getGeometryName(QString model){
+
+    if( !parsing )
+        return "pc104";
+
     for (int i = 0; i < entryCount ; i++){
 
         ModelToGeometry entry = table.at(i);
@@ -89,7 +97,7 @@ QString ModelToGeometryTable :: getGeometryName(QString model){
         if(tempModel.startsWith('$')){
             for ( int j = 0; j < modelGroupCount; j++){
                 ModelGroup temp = modelGroups.at(j);
-                if (temp.groupName == tempModel && temp.containsModel(model) > -1){
+                if (temp.getGroupName() == tempModel && temp.containsModel(model) > -1){
                     if(! (entry.getGeometryName() == "%m") ){
                         return entry.getGeometryName();
                     }
@@ -120,80 +128,97 @@ void ModelToGeometryTable :: createTable(){
     QFile baseFile(xkbRulesDir);
     if (!baseFile.open(QIODevice::ReadOnly | QIODevice::Text)){
         qDebug()<<"unable to open the file";
+        parsing = false;
     }
+    else{
+        QString baseContent = baseFile.readAll();
+        baseFile.close();
 
-    QString baseContent = baseFile.readAll();
-    baseFile.close();
+        QString tableStr = baseContent;
 
-    QString tableStr = baseContent;
-    int index = tableStr.indexOf("! model		=	geometry");
-    tableStr = tableStr.mid(index);
-    tableStr = tableStr.left(tableStr.indexOf("!",1));
-    QStringList entries = tableStr.split("\n");
+        QRegExp tableExp ("[!]\\s*\\b(model)\\b\\s*=\\s*\\b(geometry)\\b\\n*[^!]*");
+        QRegExp tableHeader ("[!]\\s*\\b(model)\\b\\s*=\\s*\\b(geometry)\\b\\n");
 
-    bool defaultEntry = false;
+        int index = tableExp.indexIn(tableStr);
+        int tableLength = tableExp.matchedLength();
+        tableStr = tableStr.mid(index, tableLength);
+        tableStr.remove(tableHeader);
+        //qDebug()<<tableStr;
+        QStringList entries = tableStr.split("\n");
 
-    for (int i = 1 ; i < entries.size() - 1; i++){
-        QString tupple = entries.at(i);
-        ModelToGeometry currentEntry;
-        tupple.remove(" ");
-        tupple.remove("\t");
-        QStringList tuppleElements = tupple.split("=");
-        if(tuppleElements.size() == 2){
-            QString kbModel = tuppleElements.at(0);
-            currentEntry.setKbModel(kbModel);
+        bool defaultEntry = false;
 
-            if( kbModel == "*"){
-                defaultEntry = true;
-                qDebug()<<"here";
-            }
-            if(kbModel.startsWith("$")){
-                modelGroups.at(modelGroupCount).setGroupName(kbModel);
-                addModelGroup();
-            }
+        for (int i = 1 ; i < entries.size() - 1; i++){
 
-            QString geomInfo = tuppleElements.at(1);
-            QStringList geometryFileinfo = geomInfo.split("(");
-            if(geometryFileinfo.size() == 2){
-                QString geometryFile = geometryFileinfo.at(0);
-                currentEntry.setGeometryFile(geometryFile);
-                QString geometryName = geometryFileinfo.at(1);
-                geometryName.remove(")");
-                if(geometryName == "intl")
-                    geometryName = "60";
-                currentEntry.setGeometryName(geometryName);
-                addEntry(currentEntry);
-                if(defaultEntry){
-                    defaultGeometryFile = geometryFile;
-                    defaultGeometryName = geometryName;
-                    defaultEntry = false;
+            QString tupple = entries.at(i);
+
+            ModelToGeometry currentEntry;
+            tupple.remove(" ");
+            tupple.remove("\t");
+            QStringList tuppleElements = tupple.split("=");
+            if(tuppleElements.size() == 2){
+                QString kbModel = tuppleElements.at(0);
+                currentEntry.setKbModel(kbModel);
+
+                if( kbModel == "*"){
+                    defaultEntry = true;
+                }
+                if(kbModel.startsWith("$")){
+                    modelGroups.at(modelGroupCount).setGroupName(kbModel);
+                    addModelGroup();
+                }
+
+                QString geomInfo = tuppleElements.at(1);
+                QStringList geometryFileinfo = geomInfo.split("(");
+                if(geometryFileinfo.size() == 2){
+                    QString geometryFile = geometryFileinfo.at(0);
+                    currentEntry.setGeometryFile(geometryFile);
+                    QString geometryName = geometryFileinfo.at(1);
+                    geometryName.remove(")");
+                    if(geometryName == "intl")
+                        geometryName = "60";
+                    currentEntry.setGeometryName(geometryName);
+                    addEntry(currentEntry);
+                    if(defaultEntry){
+                        defaultGeometryFile = geometryFile;
+                        defaultGeometryName = geometryName;
+                        defaultEntry = false;
+                        parsing = true;
+                    }
                 }
             }
         }
+        createModelGroups(baseContent);
+        //display();
     }
-    createModelGroups(baseContent);
-    //display();
 }
-
 void ModelToGeometryTable :: createModelGroups(QString content){
 
     QString groupStr = content;
 
     for(int i = 0 ; i < modelGroupCount; i++){
         QString input = groupStr;
-        QString gname = modelGroups.at(i).groupName;
-        int index = input.indexOf(gname);
-        input = input.mid(index);
-        input = input.left(input.indexOf("\n"));
+        QString gname = modelGroups.at(i).getGroupName();
+        gname.remove('$');
+        QRegExp variable("[!]\\s*[$]\\b(" + gname + ")\\b[^\\n]*");
+
+        int index = variable.indexIn(input);
+        int len = variable.matchedLength();
+        input = input.mid(index, len);
+
         //qDebug()<<"input: "<<input;
+
         QString modelList = input.split("=").at(1);
         QStringList models = modelList.split(" ");
+
         ModelGroup temp =  modelGroups.at(i);
+
         for(int j = 1; j < models.size(); j++){
-            qDebug()<<"model At"<<j<<":"<<models.at(j);
+            //qDebug()<<"model At"<<j<<":"<<models.at(j);
             QString model = models.at(j);
             temp.addGroupModel(model);
         }
+
         modelGroups.replace(i, temp);
 
     }

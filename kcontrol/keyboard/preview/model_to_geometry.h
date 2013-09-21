@@ -27,10 +27,11 @@ class ModelGroup {
 
     int modelCount;
     QStringList groupModels;
-
-  public:
-
     QString groupName;
+
+
+public:
+
 
     ModelGroup();
 
@@ -38,6 +39,10 @@ class ModelGroup {
 
     void setGroupName(QString name){
         groupName = name;
+    }
+
+    QString getGroupName(){
+        return groupName;
     }
 
     QString getGroupModel(int i);
@@ -94,6 +99,7 @@ class ModelToGeometryTable{
     int entryCount, modelGroupCount;
     QList <ModelGroup> modelGroups;
     QString defaultGeometryFile, defaultGeometryName;
+    bool parsing;
 
 public:
     QList <ModelToGeometry> table;

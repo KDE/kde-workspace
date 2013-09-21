@@ -27,8 +27,11 @@ if(Boost_FOUND)
     
     kde4_add_unit_test(symbol_parser_test TESTNAME symbol_parser NOGUI ../preview/symbol_parser.cpp ../preview/keyboardlayout.cpp symbol_parser_test.cpp ../x11_helper.cpp ../preview/keyaliases.cpp)
     
+    kde4_add_unit_test(base_parser_test TESTNAME base_parser NOGUI ../preview/model_to_geometry.cpp ../x11_helper.cpp base_file_parser_test.cpp )
+    
     target_link_libraries(geometry_parser_test ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${X11_LIBRARIES})
     target_link_libraries(symbol_parser_test ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${X11_LIBRARIES})
+    target_link_libraries(base_parser_test ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${X11_LIBRARIES})
     
 endif(Boost_FOUND)
 

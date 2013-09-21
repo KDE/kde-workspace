@@ -52,6 +52,7 @@ private:
     QList<QString> include;
     QString name;
     int keyCount, includeCount, level;
+    bool parsedSymbol;
 
 public:
     QList <KbKey> keyList;
@@ -83,6 +84,14 @@ public:
 
     QString getLayoutName() const {
         return name;
+    }
+
+    void setParsedSymbol(bool state){
+        parsedSymbol = state;
+    }
+
+    bool getParsedSymbol(){
+        return parsedSymbol;
     }
 
     void display();

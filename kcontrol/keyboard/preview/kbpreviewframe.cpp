@@ -30,6 +30,7 @@
 #include <QFileDialog>
 #include <QHelpEvent>
 #include <math.h>
+#include <QtGui/QMessageBox>
 
 #include <KApplication>
 #include <KLocale>
@@ -242,62 +243,67 @@ bool KbPreviewFrame::event(QEvent* event){
 
 void KbPreviewFrame::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
+    if( geometry.getParsing() && keyboardLayout.getParsedSymbol() ){
+        QPainter painter(this);
 
-    QFont kbfont;
-    kbfont.setPointSize(9);
+        QFont kbfont;
+        kbfont.setPointSize(9);
 
-    painter.setFont(kbfont);
-    painter.setBrush(QBrush("#C3C8CB"));
-    painter.setRenderHint(QPainter::Antialiasing);
+        painter.setFont(kbfont);
+        painter.setBrush(QBrush("#C3C8CB"));
+        painter.setRenderHint(QPainter::Antialiasing);
 
-    const int strtx=0, strty=0, endx=geometry.getWidth(), endy=geometry.getHeight();
-    //const int row1x=10,row1y=30,row2x=10,row2y=90,row5x=10,row5y=330,row3x=10,row3y=170,shifx=10,shify=60,row4x=10,row4y=250,row6x=110,row6y=410;
-    //const int shiftsz=155;
+        const int strtx=0, strty=0, endx=geometry.getWidth(), endy=geometry.getHeight();
 
-    painter.setPen("#EDEEF2");
 
-    //qDebug()<<"scaleFactor = "<<scaleFactor;
-    scaleFactor = 2.5;
+        painter.setPen("#EDEEF2");
 
-    painter.drawRect(strtx, strty, scaleFactor*endx+60, scaleFactor*endy+60);
+        scaleFactor = 2.5;
 
-    painter.setPen(Qt::black);
-    painter.setBrush(QBrush("#EDEEF2"));
-
-    for(int i=0;i<geometry.getSectionCount();i++){
+        painter.drawRect(strtx, strty, scaleFactor*endx+60, scaleFactor*endy+60);
 
         painter.setPen(Qt::black);
+        painter.setBrush(QBrush("#EDEEF2"));
 
-        for(int j=0;j<geometry.sectionList[i].getRowCount();j++){
+        for(int i=0;i<geometry.getSectionCount();i++){
 
-            int keyn = geometry.sectionList[i].rowList[j].getKeyCount();
+            painter.setPen(Qt::black);
 
-            for(int k=0;k<keyn;k++){
+            for(int j=0;j<geometry.sectionList[i].getRowCount();j++){
 
-                Key temp = geometry.sectionList[i].rowList[j].keyList[k];
+                int keyn = geometry.sectionList[i].rowList[j].getKeyCount();
 
-                int x = temp.getPosition().x();
-                int y = temp.getPosition().y();
+                for(int k=0;k<keyn;k++){
 
-                GShape s;
+                    Key temp = geometry.sectionList[i].rowList[j].keyList[k];
 
-                s = geometry.findShape(temp.getShapeName());
-                QString name = temp.getName();
+                    int x = temp.getPosition().x();
+                    int y = temp.getPosition().y();
 
-                drawShape(painter,s,x,y,i,name);
+                    GShape s;
 
+                    s = geometry.findShape(temp.getShapeName());
+                    QString name = temp.getName();
+
+                    drawShape(painter,s,x,y,i,name);
+
+                }
             }
         }
+
+        if( symbol.isFailed() ) {
+            painter.setPen(keyBorderColor);
+            painter.drawRect(strtx, strty, endx, endy);
+
+            const int midx=470, midy=240;
+            painter.setPen(lev12color);
+            painter.drawText(midx, midy, i18n("No preview found"));
+        }
     }
-
-    if( symbol.isFailed() ) {
-        painter.setPen(keyBorderColor);
-        painter.drawRect(strtx, strty, endx, endy);
-
-        const int midx=470, midy=240;
-        painter.setPen(lev12color);
-        painter.drawText(midx, midy, i18n("No preview found"));
+    else{
+        QMessageBox errorBox;
+        errorBox.setText("Unable to open Preview !");
+        errorBox.exec();
     }
 
 }

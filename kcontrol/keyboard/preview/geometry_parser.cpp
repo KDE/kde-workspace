@@ -310,7 +310,7 @@ template<typename Iterator>
         int secn = geom.getSectionCount();
         int rown = geom.sectionList[secn].getRowCount();
         double tempLeft = geom.sectionList[secn].getLeft();
-        geom.sectionList[secn].rowList[rown].setTop(a + tempLeft);
+        geom.sectionList[secn].rowList[rown].setLeft(a + tempLeft);
         keyCordiX = geom.sectionList[secn].rowList[rown].getLeft();
     }
 
@@ -454,6 +454,7 @@ template<typename Iterator>
         QFile gfile(geometryFile);
          if (!gfile.open(QIODevice::ReadOnly | QIODevice::Text)){
              qDebug()<<"unable to open the file";
+             geomertyParser.geom.setParsing(false);
              return geomertyParser.geom;
         }
 
@@ -473,22 +474,27 @@ template<typename Iterator>
             std::string::const_iterator iter = parserInput.begin();
             std::string::const_iterator end = parserInput.end();
 
-            bool r = phrase_parse(iter, end, geomertyParser, space);
-            /*if (r && iter == end){
-                std::cout << "-------------------------\n";
-                std::cout << "Parsing succeeded\n";
-                std::cout << "\n-------------------------\n";
+            bool success = phrase_parse(iter, end, geomertyParser, space);
+
+            if (success && iter == end){
+                qDebug() << "Geometry Parsing succeeded";
+                geomertyParser.geom.setParsing(true);
             }
             else{
-                std::cout << "-------------------------\n";
-                std::cout << "Parsing failed\n";
-                std::cout << "-------------------------\n";
-            }*/
+                qDebug() << "Geometry Parsing failed\n";
+                qDebug()<<input;
+                geomertyParser.geom.setParsing(false);
+
+            }
+
             current++;
 
         }
         //g.geom.display();
-        return geomertyParser.geom;
+        if(geomertyParser.geom.getParsing())
+            return geomertyParser.geom;
+        else
+            return parseGeometry("pc104");
     }
 
     QString findGeometryBaseDir()

@@ -65,6 +65,7 @@ KbLayout::KbLayout(){
     level = 4;
     keyList << KbKey();
     include << QString();
+    parsedSymbol = true;
 }
 
 

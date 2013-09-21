@@ -224,11 +224,15 @@ public:
   QList <GShape> shapes;
   QList <Section> sectionList;
   double width, height, sectionTop, sectionLeft, rowTop, rowLeft, keyGap;
-
+  bool parsedGeometry;
   Geometry();
 
   void setWidth(double a){
       width = a;
+  }
+
+  void setParsing(bool state){
+      parsedGeometry = state;
   }
 
   void setHeight(double a){
@@ -281,6 +285,10 @@ public:
 
   int getSectionCount(){
       return sectionCount;
+  }
+
+  bool getParsing(){
+      return parsedGeometry;
   }
 
   void setShapeName(QString n);
