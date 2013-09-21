@@ -104,8 +104,8 @@ void KeyboardDaemon::configureKeyboard()
 	XkbHelper::initializeKeyboardLayouts(keyboardConfig);
 	layoutMemory.configChanged();
 	
-	setupTrayIcon();
-	setupCursorLayoutIndicator();
+        setupTrayIcon();
+        updateCursorLayoutIndicator();
 
 	unregisterShortcut();
 	registerShortcut();
@@ -132,17 +132,18 @@ void KeyboardDaemon::setupTrayIcon()
 	}
 }
 
-void KeyboardDaemon::setupCursorLayoutIndicator()
-{    
-    if (keyboardConfig.showCursorLayoutIndicator == true) {
-        cursorLayoutIndicator = CursorLayoutIndicatorFactory::CreateCursorLayoutIndicator();
-    }
-}
-
 void KeyboardDaemon::updateCursorLayoutIndicator()
 {    
-    if (keyboardConfig.showCursorLayoutIndicator == true && cursorLayoutIndicator != NULL) {
-        cursorLayoutIndicator->setLayoutIndicator(CursorInfo::IBEAM, currentLayout, keyboardConfig);
+    if (keyboardConfig.showCursorLayoutIndicator == true) {
+        if (cursorLayoutIndicator == NULL) {
+            cursorLayoutIndicator = CursorLayoutIndicatorFactory::createCursorLayoutIndicator();
+        }
+        
+        if (cursorLayoutIndicator != NULL) {
+            cursorLayoutIndicator->setLayoutIndicator(CursorInfo::IBEAM, currentLayout, keyboardConfig);
+        }
+    } else {
+        delete cursorLayoutIndicator;
     }
 }
 

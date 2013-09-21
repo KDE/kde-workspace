@@ -1,5 +1,5 @@
 /*
- * Facatory class which provides API to create cursor layout indicator objects.
+ * Factory class which provides API to create cursor layout indicator objects.
  * Copyright 2013  Victor Polevoy <vityatheboss@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@ private:
     CursorLayoutIndicatorFactory();
     
 public:
-    static ICursorLayoutIndicator* CreateCursorLayoutIndicator();
+    static ICursorLayoutIndicator* createCursorLayoutIndicator();
 };
 
 #endif // CURSORLAYOUTINDICATORFACTORY_H

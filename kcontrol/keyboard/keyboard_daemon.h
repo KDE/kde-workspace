@@ -57,7 +57,6 @@ class KDE_EXPORT KeyboardDaemon : public KDEDModule
     void unregisterListeners();
     void unregisterShortcut();
     void setupTrayIcon();
-    void setupCursorLayoutIndicator();
     void updateCursorLayoutIndicator();
 
 private Q_SLOTS:

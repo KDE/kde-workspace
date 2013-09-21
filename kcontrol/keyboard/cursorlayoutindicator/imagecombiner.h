@@ -44,26 +44,24 @@ protected:
 public:
     ImageCombiner()
     {
-        this->imageBelow = new BelowImageType();
-        this->imageAbove = new AboveImageType();
+        imageBelow = new BelowImageType();
+        imageAbove = new AboveImageType();
     }
     
     virtual ~ImageCombiner()
     {   
-        delete this->imageBelow;
-        delete this->imageAbove;
+        delete imageBelow;
+        delete imageAbove;
         
-        delete this->combinedImage;
+        delete combinedImage;
     }
-    
-    virtual bool imagesBeenSet() = 0;
     
     virtual CombinedImageType getCombinedImage()
     {   
-        this->combineImages();
+        combineImages();
         
-        if (this->combinedImage != NULL) {
-            return *(this->combinedImage);
+        if (combinedImage != NULL) {
+            return *(combinedImage);
         }
         
         return CombinedImageType();
@@ -71,12 +69,12 @@ public:
     
     BelowImageType* getImageBelow()
     {
-        return this->imageBelow;
+        return imageBelow;
     }
     
     AboveImageType* getImageAbove()
     {
-        return this->imageAbove;
+        return imageAbove;
     }
     
     void setSourceImages(BelowImageType imageBelow, AboveImageType imageAbove)

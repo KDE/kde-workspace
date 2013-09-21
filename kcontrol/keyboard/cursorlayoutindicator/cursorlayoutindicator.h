@@ -48,50 +48,46 @@ protected:
 
     QString getCursorName(CursorInfo::CursorType cursorType) const 
     {
-        return this->cursorNames->value(cursorType);
+        return cursorNames->value(cursorType);
     }
     
     bool cachedImageExists(CursorInfo::CursorType cursorType, QString & layout) const 
     {
-        return this->cachedImages->contains(QPair<CursorInfo::CursorType, QString>(cursorType, layout));
+        return cachedImages->contains(QPair<CursorInfo::CursorType, QString>(cursorType, layout));
     }
     
     CursorImageType getCachedImage(CursorInfo::CursorType cursorType, QString & layout) const 
     {
-        return this->cachedImages->value(QPair<CursorInfo::CursorType, QString>(cursorType, layout));
+        return cachedImages->value(QPair<CursorInfo::CursorType, QString>(cursorType, layout));
     }
     
     void addCachedImage(CursorInfo::CursorType cursorType, QString & layout, CursorImageType cursorImage) const
     {
-        this->cachedImages->insert(QPair<CursorInfo::CursorType, QString>(cursorType, layout), cursorImage);
+        cachedImages->insert(QPair<CursorInfo::CursorType, QString>(cursorType, layout), cursorImage);
     }
-
-    virtual const CursorTheme* getCurrentCursorTheme() const = 0;
-    virtual CursorImageType getCursorImage(CursorInfo::CursorType) const = 0;
-    virtual void setCursorImage(CursorInfo::CursorType, CursorImageType) const = 0;
 
 public:
     CursorLayoutIndicator() 
     {
-        this->kcmInputKdeConfig = new KConfig("kcminputrc");
-        this->mouseConfigGroup  = new KConfigGroup(this->kcmInputKdeConfig, "Mouse");
+        kcmInputKdeConfig = new KConfig("kcminputrc");
+        mouseConfigGroup  = new KConfigGroup(kcmInputKdeConfig, "Mouse");
         
-        this->imageCombiner     = new ImageCombinerType();
+        imageCombiner     = new ImageCombinerType();
 
-        this->cachedImages      = new QHash<QPair<CursorInfo::CursorType, QString>, CursorImageType>();
+        cachedImages      = new QHash<QPair<CursorInfo::CursorType, QString>, CursorImageType>();
 
-        this->cursorNames       = new QHash<CursorInfo::CursorType, QString>();
+        cursorNames       = new QHash<CursorInfo::CursorType, QString>();
 
-        this->cursorNames->insert(CursorInfo::IBEAM, "ibeam");
+        cursorNames->insert(CursorInfo::IBEAM, "ibeam");
     }
 
     virtual ~CursorLayoutIndicator() 
     {
-        delete this->kcmInputKdeConfig;
-        delete this->mouseConfigGroup;
-        delete this->imageCombiner;
-        delete this->cursorNames;
-        delete this->cachedImages;
+        delete kcmInputKdeConfig;
+        delete mouseConfigGroup;
+        delete imageCombiner;
+        delete cursorNames;
+        delete cachedImages;
     }
 };
 

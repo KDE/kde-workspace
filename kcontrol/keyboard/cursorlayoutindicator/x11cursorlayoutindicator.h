@@ -39,11 +39,11 @@ private:
     
     static const int flagImageSize;
     
-    QImage getFlagImage(LayoutUnit &, KeyboardConfig &) const;
-    
-protected:    
     const CursorTheme* getCurrentCursorTheme() const;
+    
+    QImage getFlagImage(LayoutUnit &, KeyboardConfig &) const;
     QImage getCursorImage(CursorInfo::CursorType) const;
+    
     void setCursorImage(CursorInfo::CursorType, QImage) const;
     
 public:

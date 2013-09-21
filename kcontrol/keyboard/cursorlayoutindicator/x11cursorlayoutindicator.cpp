@@ -57,12 +57,12 @@ const int X11CursorLayoutIndicator::flagImageSize = 24;
 
 X11CursorLayoutIndicator::X11CursorLayoutIndicator()
 {
-    this->cursorThemeModel = new CursorThemeModel();
+    cursorThemeModel = new CursorThemeModel();
 }
 
 X11CursorLayoutIndicator::~X11CursorLayoutIndicator()
 {
-    delete this->cursorThemeModel;
+    delete cursorThemeModel;
 }
 
 QImage X11CursorLayoutIndicator::getFlagImage(LayoutUnit& currentLayout, KeyboardConfig& keyboardConfig) const
@@ -81,15 +81,15 @@ const CursorTheme* X11CursorLayoutIndicator::getCurrentCursorTheme() const
 {
     QString currentTheme = XcursorGetTheme(QX11Info().display());
 
-    currentTheme = this->mouseConfigGroup->readEntry("cursorTheme", currentTheme);
+    currentTheme = mouseConfigGroup->readEntry("cursorTheme", currentTheme);
 
-    return this->cursorThemeModel->theme(this->cursorThemeModel->findIndex(currentTheme));
+    return cursorThemeModel->theme(cursorThemeModel->findIndex(currentTheme));
 }
 
 QImage X11CursorLayoutIndicator::getCursorImage(CursorInfo::CursorType cursorType) const
 {
-    QString cursorName      	= this->getCursorName(cursorType);
-    QImage cursorDefaultImage   = this->getCurrentCursorTheme()->loadImage(cursorName, 0);
+    QString cursorName      	= getCursorName(cursorType);
+    QImage cursorDefaultImage   = getCurrentCursorTheme()->loadImage(cursorName, 0);
 
     if (cursorDefaultImage.isNull()) {
         kError() << "Error: cursor image is null";
@@ -107,7 +107,7 @@ void X11CursorLayoutIndicator::setCursorImage(CursorInfo::CursorType cursorType,
     KGlobalSettings::self()->emitChange(KGlobalSettings::CursorChanged);
     runRdb(0);
 
-    QString cursorName = this->getCursorName(cursorType);
+    QString cursorName = getCursorName(cursorType);
 
     QCursor cursor(QPixmap::fromImage(cursorImage));
 
@@ -121,21 +121,21 @@ void X11CursorLayoutIndicator::setCursorImage(CursorInfo::CursorType cursorType,
 void X11CursorLayoutIndicator::setLayoutIndicator(CursorInfo::CursorType cursorType, LayoutUnit& layoutUnit, KeyboardConfig& keyboardConfig) const
 {            
     if (!layoutUnit.layout.isEmpty()) {    
-        if (!this->cachedImageExists(cursorType, layoutUnit.layout)) {
-            QImage mouseCursorImage     	= this->getCursorImage(cursorType);
-            QImage flagImage        	= this->getFlagImage(layoutUnit, keyboardConfig);
+        if (!cachedImageExists(cursorType, layoutUnit.layout)) {
+            QImage mouseCursorImage     = getCursorImage(cursorType);
+            QImage flagImage        	= getFlagImage(layoutUnit, keyboardConfig);
 
             if (!mouseCursorImage.isNull() && !flagImage.isNull()) {
-                this->imageCombiner->setSourceImages(mouseCursorImage, flagImage);
+                imageCombiner->setSourceImages(mouseCursorImage, flagImage);
                 
-                QImage combinedImage = this->imageCombiner->getCombinedImage();
+                QImage combinedImage = imageCombiner->getCombinedImage();
 
-                this->setCursorImage(cursorType, combinedImage);
+                setCursorImage(cursorType, combinedImage);
 
-                this->addCachedImage(cursorType, layoutUnit.layout, combinedImage);
+                addCachedImage(cursorType, layoutUnit.layout, combinedImage);
             }
         } else {
-            this->setCursorImage(cursorType, this->getCachedImage(cursorType, layoutUnit.layout));
+            setCursorImage(cursorType, getCachedImage(cursorType, layoutUnit.layout));
         }
     }
 }

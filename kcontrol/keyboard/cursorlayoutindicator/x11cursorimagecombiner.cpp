@@ -29,8 +29,8 @@
 
 bool X11CursorImageCombiner::imagesBeenSet()
 {
-    QImage *imageBelow = this->getImageBelow();
-    QImage *imageAbove = this->getImageAbove();
+    QImage *imageBelow = getImageBelow();
+    QImage *imageAbove = getImageAbove();
     
     if (imageAbove == NULL || imageBelow == NULL
         || imageAbove->isNull() || imageBelow->isNull()) {
@@ -43,11 +43,11 @@ bool X11CursorImageCombiner::imagesBeenSet()
 /* Image below is cursor image, image above is country flag */
 void X11CursorImageCombiner::combineImages()
 {    
-    if (this->imagesBeenSet()) {
+    if (imagesBeenSet()) {
         kDebug() << "Images been set, combining";
         
-        QImage *imageBelow = this->getImageBelow();
-        QImage *imageAbove = this->getImageAbove();
+        QImage *imageBelow = getImageBelow();
+        QImage *imageAbove = getImageAbove();
         
         /* Cursor ibeam-image needs to be in the middle of the result icon to avoid visual issues */
         /* 4 is the margins before and after (2 || image || 2) */
@@ -64,7 +64,7 @@ void X11CursorImageCombiner::combineImages()
         painter.drawImage(resultImageWidth - imageAbove->width(), 0, *imageAbove);
         painter.end();
         
-        this->setResultImage(&cursorImage);
+        setResultImage(&cursorImage);
     } else {
         kError() << "Error: one or two images have not been set, can't combine.";
     }

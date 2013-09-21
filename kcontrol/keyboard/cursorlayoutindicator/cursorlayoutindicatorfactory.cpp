@@ -1,5 +1,5 @@
 /*
- * Facatory class which provides API to create cursor layout indicator objects.
+ * Factory class which provides API to create cursor layout indicator objects.
  * Copyright 2013  Victor Polevoy <vityatheboss@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@
 
 #include "cursorlayoutindicatorfactory.h"
 
-ICursorLayoutIndicator* CursorLayoutIndicatorFactory::CreateCursorLayoutIndicator()
+ICursorLayoutIndicator* CursorLayoutIndicatorFactory::createCursorLayoutIndicator()
 {    
     //#ifdef HAVE_XFIXES // Need to find proper definition, not HAVE_XFIXES, it should be like X11_FOUND
         return new X11CursorLayoutIndicator();
