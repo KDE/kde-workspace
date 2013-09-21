@@ -33,7 +33,6 @@ void ModelGroup :: addGroupModel(QString model){
     }
 }
 
-
 int ModelGroup :: containsModel(QString model){
     for(int i = 0 ; i < groupModels.size() ; i++){
         if (model == groupModels.at(i)){
