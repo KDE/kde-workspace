@@ -7,10 +7,10 @@
 
   <group name="General">
     <entry name="iconName" type="String">
-      <default>utilities-terminal</default>
     </entry>
     <entry name="applicationName" type="String">
-      <default>Dolphin</default>
+    </entry>
+    <entry name="url" type="String">
     </entry>
   </group>
 

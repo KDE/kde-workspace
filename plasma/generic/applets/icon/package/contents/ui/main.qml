@@ -49,8 +49,10 @@ Column {
 	onExternalData: {
 	    print("************************************************************************************************");
 	    print(data);
+	    plasmoid.configuration.url = data;
 	    plasmoid.configuration.applicationName = logic.getName(data);
 	    plasmoid.configuration.iconName = logic.getIcon(data);
+	    print(plasmoid.configuration.iconName);
 	    print("************************************************************************************************");
 	}
     }
