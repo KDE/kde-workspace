@@ -18,13 +18,6 @@ void ModelGroup :: addGroupModel(QString model){
     }
 }
 
-QString ModelGroup :: getGroupModel( int i ){
-    if(i < modelCount ){
-        return groupModels.at(i);
-    }
-    else
-        return QString();
-}
 
 
 int ModelGroup :: containsModel(QString model){

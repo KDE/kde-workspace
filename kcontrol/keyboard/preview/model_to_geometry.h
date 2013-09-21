@@ -45,7 +45,7 @@ public:
         return groupName;
     }
 
-    QString getGroupModel(int i);
+
 
     int getModelCount(){
         return modelCount;
