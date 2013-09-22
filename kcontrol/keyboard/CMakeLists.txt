@@ -117,7 +117,8 @@ if(Boost_FOUND)
     preview/keyboardlayout.cpp
     preview/keyboardpainter.cpp
     preview/keysymhelper.cpp
-    preview/keysym2ucs.cpp)
+    preview/keysym2ucs.cpp
+    preview/model_to_geometry.cpp)
   
 else(Boost_FOUND)
 

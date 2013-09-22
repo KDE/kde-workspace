@@ -25,7 +25,6 @@
 
 class ModelGroup {
 
-    int modelCount;
     QStringList groupModels;
     QString groupName;
 
@@ -43,12 +42,6 @@ public:
 
     QString getGroupName(){
         return groupName;
-    }
-
-
-
-    int getModelCount(){
-        return modelCount;
     }
 
     int containsModel(QString model);
