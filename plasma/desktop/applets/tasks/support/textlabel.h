@@ -61,7 +61,7 @@ class TextLabel : public QDeclarativeItem
     private:
         void updateImplicitSize();
         QColor textColor() const;
-        QTextOption textOption() const;;
+        QTextOption textOption() const;
         void layoutText(QTextLayout &layout, const QString &text,  const QSize &constraints);
         void drawTextLayout(QPainter *painter, const QTextLayout &layout, const QRect &rect);
 

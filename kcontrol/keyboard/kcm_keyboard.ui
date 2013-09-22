@@ -329,7 +329,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="previewbutton">
+          <widget class="QPushButton" name="previewButton">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -433,7 +433,7 @@
    <attribute name="title">
     <string>Advanced</string>
    </attribute>
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="gridLayout_7">
     <item row="0" column="0" colspan="2">
      <widget class="QCheckBox" name="configureKeyboardOptionsChk">
       <property name="text">

@@ -28,24 +28,23 @@
 #include <KLocale>
 #include <KStandardDirs>
 
-
-#define MF_MENU         "Menu"
-#define MF_PUBLIC_ID    "-//freedesktop//DTD Menu 1.0//EN"
-#define MF_SYSTEM_ID    "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd"
-#define MF_NAME         "Name"
-#define MF_INCLUDE      "Include"
-#define MF_EXCLUDE      "Exclude"
-#define MF_FILENAME     "Filename"
-#define MF_DELETED      "Deleted"
-#define MF_NOTDELETED   "NotDeleted"
-#define MF_MOVE         "Move"
-#define MF_OLD          "Old"
-#define MF_NEW          "New"
-#define MF_DIRECTORY    "Directory"
-#define MF_LAYOUT       "Layout"
-#define MF_MENUNAME     "Menuname"
-#define MF_SEPARATOR    "Separator"
-#define MF_MERGE        "Merge"
+const QString MenuFile::MF_MENU =          "Menu";
+const QString MenuFile::MF_PUBLIC_ID =     "-//freedesktop//DTD Menu 1.0//EN";
+const QString MenuFile::MF_SYSTEM_ID =     "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd";
+const QString MenuFile::MF_NAME =          "Name";
+const QString MenuFile::MF_INCLUDE =       "Include";
+const QString MenuFile::MF_EXCLUDE =       "Exclude";
+const QString MenuFile::MF_FILENAME =      "Filename";
+const QString MenuFile::MF_DELETED =       "Deleted";
+const QString MenuFile::MF_NOTDELETED =    "NotDeleted";
+const QString MenuFile::MF_MOVE =          "Move";
+const QString MenuFile::MF_OLD =           "Old";
+const QString MenuFile::MF_NEW =           "New";
+const QString MenuFile::MF_DIRECTORY =     "Directory";
+const QString MenuFile::MF_LAYOUT =        "Layout";
+const QString MenuFile::MF_MENUNAME =      "Menuname";
+const QString MenuFile::MF_SEPARATOR =     "Separator";
+const QString MenuFile::MF_MERGE =         "Merge";
 
 MenuFile::MenuFile(const QString &file)
  : m_fileName(file), m_bDirty(false)
@@ -214,8 +213,8 @@ static void purgeIncludesExcludes(QDomElement elem, const QString &appId, QDomEl
    while( !n.isNull() )
    {
       QDomElement e = n.toElement(); // try to convert the node to an element.
-      bool bIncludeNode = (e.tagName() == MF_INCLUDE);
-      bool bExcludeNode = (e.tagName() == MF_EXCLUDE);
+      bool bIncludeNode = (e.tagName() == MenuFile::MF_INCLUDE);
+      bool bExcludeNode = (e.tagName() == MenuFile::MF_EXCLUDE);
       if (bIncludeNode)
          includeNode = e;
       if (bExcludeNode)
@@ -227,7 +226,7 @@ static void purgeIncludesExcludes(QDomElement elem, const QString &appId, QDomEl
          {
             QDomNode next = n2.nextSibling();
             QDomElement e2 = n2.toElement();
-            if (!e2.isNull() && e2.tagName() == MF_FILENAME)
+            if (!e2.isNull() && e2.tagName() == MenuFile::MF_FILENAME)
             {
                if (e2.text() == appId)
                {
@@ -250,8 +249,8 @@ static void purgeDeleted(QDomElement elem)
    {
       QDomNode next = n.nextSibling();
       QDomElement e = n.toElement(); // try to convert the node to an element.
-      if ((e.tagName() == MF_DELETED) ||
-          (e.tagName() == MF_NOTDELETED))
+      if ((e.tagName() == MenuFile::MF_DELETED) ||
+          (e.tagName() == MenuFile::MF_NOTDELETED))
       {
          elem.removeChild(e);
       }
@@ -267,7 +266,7 @@ static void purgeLayout(QDomElement elem)
    {
       QDomNode next = n.nextSibling();
       QDomElement e = n.toElement(); // try to convert the node to an element.
-      if (e.tagName() == MF_LAYOUT)
+      if (e.tagName() == MenuFile::MF_LAYOUT)
       {
          elem.removeChild(e);
       }

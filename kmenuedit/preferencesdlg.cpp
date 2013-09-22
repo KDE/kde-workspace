@@ -21,10 +21,12 @@
 
 #include <QHBoxLayout>
 #include <QCheckBox>
+#include <QGroupBox>
 
 #include <KLocale>
 #include <KConfigGroup>
 #include <sonnet/configwidget.h>
+#include "configurationmanager.h"
 
 PreferencesDialog::PreferencesDialog( QWidget *parent )
     : KPageDialog( parent )
@@ -34,7 +36,7 @@ PreferencesDialog::PreferencesDialog( QWidget *parent )
     setDefaultButton( Ok );
 
     m_pageMisc = new MiscPage( this );
-    KPageWidgetItem *page = new KPageWidgetItem( m_pageMisc , i18n( "General" ) );
+    KPageWidgetItem *page = new KPageWidgetItem( m_pageMisc , i18n( "General options" ) );
     page->setIcon( KIcon( "kmenuedit" ) );
     addPage(page);
 
@@ -70,21 +72,24 @@ void SpellCheckingPage::saveOptions()
 MiscPage::MiscPage( QWidget *parent )
     : QWidget( parent )
 {
-    QVBoxLayout *lay = new QVBoxLayout( this );
-    m_showHiddenEntries = new QCheckBox( i18n( "Show hidden entries" ), this );
-    lay->addWidget( m_showHiddenEntries );
-    lay->addStretch();
-    setLayout( lay );
+    // general group
+    QGroupBox *generalGroup = new QGroupBox(i18n("General"));
+    QVBoxLayout *generalGroupLayout = new QVBoxLayout(generalGroup);
+    m_showHiddenEntries = new QCheckBox(i18n("Show hidden entries"));
+    generalGroupLayout->addWidget(m_showHiddenEntries);
 
-    KConfigGroup group( KGlobal::config(), "General" );
-    m_showHiddenEntries->setChecked(  group.readEntry( "ShowHidden", false ) );
+    // add groups
+    QVBoxLayout *pageLayout = new QVBoxLayout(this);
+    pageLayout->addWidget(generalGroup);
+    pageLayout->addStretch();
+
+    // update displayed config
+    m_showHiddenEntries->setChecked(ConfigurationManager::getInstance()->hiddenEntriesVisible());
 }
 
 void MiscPage::saveOptions()
 {
-    KConfigGroup group( KGlobal::config(), "General" );
-    group.writeEntry( "ShowHidden", m_showHiddenEntries->isChecked() );
-    group.sync();
+    ConfigurationManager::getInstance()->setHiddenEntriesVisible(m_showHiddenEntries->isChecked());
 }
 
 #include "preferencesdlg.moc"

@@ -40,6 +40,7 @@
 #include "basictab.h"
 #include "preferencesdlg.h"
 #include "kmenueditadaptor.h"
+#include "configurationmanager.h"
 
 #include "kmenuedit.moc"
 
@@ -54,8 +55,7 @@ KMenuEdit::KMenuEdit ()
     ( void )new KmenueditAdaptor(this);
     QDBusConnection::sessionBus().registerObject("/KMenuEdit", this);
 
-    KConfigGroup group( KGlobal::config(), "General" );
-    m_showHidden = group.readEntry("ShowHidden", false);
+    m_showHidden = ConfigurationManager::getInstance()->hiddenEntriesVisible();
 
     // setup GUI
     setupActions();
@@ -64,10 +64,7 @@ KMenuEdit::KMenuEdit ()
 
 KMenuEdit::~KMenuEdit()
 {
-    KConfigGroup group(KGlobal::config(), "General");
-    group.writeEntry("SplitterSizes", m_splitter->sizes());
-
-    group.sync();
+    ConfigurationManager::getInstance()->setSplitterSizes(m_splitter->sizes());
 }
 
 void KMenuEdit::setupActions()
@@ -131,8 +128,7 @@ void KMenuEdit::slotConfigure()
     PreferencesDialog dialog( this );
     if ( dialog.exec() )
     {
-        KConfigGroup group( KGlobal::config(), "General" );
-        bool newShowHiddenValue = group.readEntry("ShowHidden", false);
+        bool newShowHiddenValue = ConfigurationManager::getInstance()->hiddenEntriesVisible();
         if ( newShowHiddenValue != m_showHidden )
         {
             m_showHidden = newShowHiddenValue;
@@ -168,10 +164,7 @@ void KMenuEdit::setupView()
             m_tree, SLOT(findServiceShortcut(KShortcut,KService::Ptr&)));
 
     // restore splitter sizes
-    KSharedConfig::Ptr config = KGlobal::config();
-    KConfigGroup group(config, "General");
-    QList<int> sizes = group.readEntry("SplitterSizes",QList<int>());
-
+    QList<int> sizes = ConfigurationManager::getInstance()->getSplitterSizes();
     if (sizes.isEmpty()) {
         sizes << 1 << 3;
     }
