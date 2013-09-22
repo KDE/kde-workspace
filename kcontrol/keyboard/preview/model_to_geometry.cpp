@@ -170,7 +170,7 @@ void ModelToGeometryTable :: createTable(){
                     defaultEntry = true;
                 }
                 if(kbModel.startsWith("$")){
-                    modelGroups.at(modelGroupCount).setGroupName(kbModel);
+                    modelGroups[modelGroupCount].setGroupName(kbModel);
                     addModelGroup();
                 }
 
@@ -204,7 +204,7 @@ void ModelToGeometryTable :: createModelGroups(QString content){
 
     for(int i = 0 ; i < modelGroupCount; i++){
         QString input = groupStr;
-        QString gname = modelGroups.at(i).getGroupName();
+        QString gname = modelGroups[i].getGroupName();
         gname.remove('$');
         QRegExp variable("[!]\\s*[$]\\b(" + gname + ")\\b[^\\n]*");
 
