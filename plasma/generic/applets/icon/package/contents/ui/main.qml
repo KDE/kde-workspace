@@ -36,7 +36,7 @@ MouseArea {
     onClicked: Qt.openUrlExternally(plasmoid.configuration.url);
 
     Component.onCompleted: {
-        plasmoid.backgroundHints = 0;
+        plasmoid.backgroundHints = 2;
         plasmoid.popupIcon = plasmoid.configuration.iconName;
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
@@ -63,6 +63,8 @@ MouseArea {
         }
         horizontalAlignment : Text.AlignHCenter
         opacity : constrained ? 0 : 1
+        maximumLineCount: 2
+        wrapMode: Text.WordWrap
     }
 
     PlasmaCore.ToolTip {
