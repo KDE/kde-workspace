@@ -217,6 +217,16 @@ function addApplet(applet, x, y) {
                 oldX = x
                 oldY = y
             }
+            onYChanged: {
+                if (currentLayout.children.count < LayoutManager.order.length || parent !== currentLayout) {
+                    return;
+                }
+                translation.x = oldX - x
+                translation.y = oldY - y
+                translAnim.running = true
+                oldX = x
+                oldY = y
+            }
             transform: Translate {
                 id: translation
             }
