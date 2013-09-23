@@ -210,8 +210,8 @@ function positionItem(item)
 
         //print("response: forwardAvail: "+forwardAvail.width+"x"+forwardAvail.height+" minimumSize: "+item.minimumWidth+"x"+item.minimumHeight+"\n\n")
 
-        if (forwardAvail.width >= item.minimumWidth &&
-            forwardAvail.height >= item.minimumHeight) {
+        if (forwardAvail.width >= Math.max(item.minimumWidth, cellSize.width) &&
+            forwardAvail.height >= Math.max(item.minimumHeight, cellSize.height)) {
             x = forwardX
             y = forwardY
             avail = forwardAvail
@@ -240,8 +240,8 @@ function positionItem(item)
                                        Math.max(item.minimumHeight, item.height))
         //print("checking backwards "+backX/cellSize.width+" "+backY/cellSize.height+" "+backAvail.width/cellSize.width+" "+backAvail.height/cellSize.height)
 
-        if (backAvail.width >= item.minimumWidth &&
-            backAvail.height >= item.minimumHeight) {
+        if (backAvail.width >= Math.max(item.minimumWidth, cellSize.width) &&
+            backAvail.height >= Math.max(item.minimumHeight, cellSize.height)) {
             x = backX
             y = backY
             avail = backAvail
@@ -249,8 +249,7 @@ function positionItem(item)
         }
         backX -= cellSize.width
         if (backX < 0) {
-            print("RUN Warning: resultsFlow.width not taken into account due to crash"); // FIXME reenable
-            //backX = resultsFlow.width - item.width
+            backX = resultsFlow.width - item.width
             backY -= cellSize.height
         }
     }
