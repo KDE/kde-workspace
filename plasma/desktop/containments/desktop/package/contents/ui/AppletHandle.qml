@@ -65,7 +65,6 @@ Item {
         }
         smooth: true
         imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
-        //Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "orange"; opacity: 1; visible: debug; anchors.fill: parent; }
     }
 
     Column {
@@ -105,12 +104,7 @@ Item {
                 }
             }
             MouseArea {
-                id: resizeHandle
 
-//                 visible: !plasmoid.immutable
-//                 width:  handleWidth+appletItem.margins.right
-//                 height: width
-//                 z: dragMouseArea.z+1
                 anchors {
                     fill: parent
                     margins: -buttonMargin
@@ -152,8 +146,6 @@ Item {
                     var rot = startRotation%360;
                     var snap = 4;
                     var newRotation = pointAngle(centerRelativePos(mouse.x, mouse.y)) - startCenterRelativeAngle + startRotation;
-                    print(newRotation)
-                   // newRotation = 0;
 
                     if (newRotation < 0) {
                         newRotation = newRotation + 360;
