@@ -49,6 +49,7 @@ Item {
             buttonsParent = noBackgroundHandle;
         }
     }
+
     PlasmaCore.FrameSvgItem {
         id: noBackgroundHandle
 
@@ -93,10 +94,10 @@ Item {
             }
         }
         ActionButton {
+            id: rotateButton
             svg: configIconsSvg
             elementId: "rotate"
             iconSize: root.iconSize
-            visible: (action && typeof(action) != "undefined") ? action.enabled : false
             action: (applet) ? applet.action("rotate") : null
             Component.onCompleted: {
                 if (action && typeof(action) != "undefined") {
@@ -115,59 +116,61 @@ Item {
                     margins: -buttonMargin
                 }
 
-                property int startX
-                property int startY
                 property int startRotation
-                property int prevMove
-                property bool skipOne: false;
+                property real startCenterRelativeAngle;
+
+                function pointAngle(pos) {
+                    var r = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
+                    var cosine = pos.x / r;
+
+                    if (pos.y >= 0) {
+                        return Math.acos(cosine) * (180/Math.PI);
+                    } else {
+                        return -Math.acos(cosine) * (180/Math.PI);
+                    }
+                }
+
+                function centerRelativePos(x, y) {
+                    var mousePos = appletItem.parent.mapFromItem(rotateButton, x, y);
+                    var centerPos = appletItem.parent.mapFromItem(appletItem, appletItem.width/2, appletItem.height/2);
+
+                    mousePos.x -= centerPos.x;
+                    mousePos.y -= centerPos.y;
+                    return mousePos;
+                }
 
                 onPressed: {
                     mouse.accepted = true
                     animationsEnabled = false;
-                    startX = mouse.x;
-                    startY = mouse.y;
                     startRotation = appletItem.rotation;
-                    prevMove = 0;
-                    resizeHandle.rotation = -appletItem.rotation;
                     LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+
+                    startCenterRelativeAngle = pointAngle(centerRelativePos(mouse.x, mouse.y));
                 }
                 onPositionChanged: {
-                    if (skipOne) {
-                        skipOne = false;
-                        return;
-                    }
+
                     var rot = startRotation%360;
                     var snap = 4;
-                    var moved = Math.round(((startY - mouse.y)/1.5) % 360);// + startY - mouse.y;
-                    var newRotation = (rot - moved)%360;
+                    var newRotation = pointAngle(centerRelativePos(mouse.x, mouse.y)) - startCenterRelativeAngle + startRotation;
+                    print(newRotation)
+                   // newRotation = 0;
 
                     if (newRotation < 0) {
                         newRotation = newRotation + 360;
                     }
-                    if ((moved - prevMove) > 100) {
-                        //print("skipped: " + prevMove + " " + moved + " " + (moved - prevMove));
-                        skipOne = true;
-                        //prevMove = moved;
-                        return;
-                    }
-//                     if (Math.abs(appletItem.rotation - newRotation) > 20) {
-//                         print("skipped " + Math.abs(appletItem.rotation) + " newRotation " + newRotation );
-//                         return;
-//                     }
+
                     snapIt(0);
                     snapIt(90);
                     snapIt(180);
-                    snapIt(240);
+                    snapIt(270);
 
                     function snapIt(snapTo) {
                         if (newRotation > (snapTo - snap) && newRotation < (snapTo + snap)) {
                             newRotation = snapTo;
                         }
                     }
-                    print(" Moved :" + moved +" start: " + startRotation  + " new: " + newRotation);
+                    print("Start: " + startRotation  + " new: " + newRotation);
                     appletItem.rotation = newRotation;
-                    prevMove = moved;
-                    skipOne = true;
                 }
                 onReleased: {
                     // save rotation
