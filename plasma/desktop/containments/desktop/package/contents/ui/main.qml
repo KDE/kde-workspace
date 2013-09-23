@@ -66,7 +66,7 @@ DragDrop.DropArea {
         var config = LayoutManager.itemsConfig[container.category];
 
         //Not a valid size? reset
-        if (config.width === undefined || config.height === undefined ||
+        if (config === undefined || config.width === undefined || config.height === undefined ||
             config.width <= 0 || config.height <=0) {
             container.width = LayoutManager.cellSize.width*6;
             container.height = LayoutManager.cellSize.height*6;
@@ -80,14 +80,14 @@ DragDrop.DropArea {
             container.x = x;
             container.y = y;
         //coordinates stored?
-        } else if (config.x !== undefined && config.y !== undefined &&
+        } else if (config !== undefined && config.x !== undefined && config.y !== undefined &&
             config.x >= 0 && config.y >= 0) {
             container.x = config.x;
             container.y = config.y;
         }
 
         //rotation sotired and significative?
-        if (config.rotation !== undefined &&
+        if (config !== undefined && config.rotation !== undefined &&
             (config.rotation > 5 || config.rotation < -5)) {
             container.rotation = config.rotation;
         }
