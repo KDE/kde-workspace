@@ -52,6 +52,7 @@ plasma_add_plugin(plasma_applet_systemtray ${systemtray_SRCS})
 include_directories(${CMAKE_SOURCE_DIR})
 target_link_libraries(plasma_applet_systemtray
     Qt5::DBus
+    ${Qt5Quick_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KI18n_LIBRARIES}
     ${KConfigWidgets_LIBRARIES}
@@ -60,15 +61,13 @@ target_link_libraries(plasma_applet_systemtray
     ${KService_LIBRARIES}
     ${Solid_LIBRARIES}
     ${KDE4_KIO_LIBS}
-#    ${QT_LIBRARIES}
-#    ${KDE4_KDEUI_LIBS}
-#    ${KDE4_PLASMA_LIBS}
+    ${KDE4Attic_LIBRARIES}
+    ${KDE4Support_LIBRARIES}
     ${X11_LIBRARIES}
     ${X11_Xrender_LIB}
     ${X11_Xfixes_LIB}
     ${X11_Xdamage_LIB}
     ${X11_Xcomposite_LIB}
-#    ${KDE4_SOLID_LIBS}
 #    ${IDLE_DETECTION_LIB}
 )
 
