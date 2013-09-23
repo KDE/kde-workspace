@@ -50,8 +50,7 @@ DragDrop.DropArea {
         layoutTimer.restart()
     }
 
-    function addApplet(applet, x, y)
-    {
+    function addApplet(applet, x, y) {
         var component = Qt.createComponent("AppletAppearance.qml");
         var e = component.errorString();
         if (e != "") {
@@ -64,18 +63,43 @@ DragDrop.DropArea {
         applet.visible = true;
 
         container.category = "Applet-"+applet.id;
-        container.width = LayoutManager.cellSize.width*6;
-        container.height = LayoutManager.cellSize.height*6;
+        var config = LayoutManager.itemsConfig[container.category];
+
+        //Not a valid size? reset
+        if (config.width === undefined || config.height === undefined ||
+            config.width <= 0 || config.height <=0) {
+            container.width = LayoutManager.cellSize.width*6;
+            container.height = LayoutManager.cellSize.height*6;
+        } else {
+            container.width = config.width;
+            container.height = config.height;
+        }
         container.applet = applet;
-        container.x = x
-        container.y = y
+        //coordinated passed by param?
+        if ( x >= 0 && y >= 0) {
+            container.x = x;
+            container.y = y;
+        //coordinates stored?
+        } else if (config.x !== undefined && config.y !== undefined &&
+            config.x >= 0 && config.y >= 0) {
+            container.x = config.x;
+            container.y = config.y;
+        }
+
+        //rotation sotired and significative?
+        if (config.rotation !== undefined &&
+            (config.rotation > 5 || config.rotation < -5)) {
+            container.rotation = config.rotation;
+        }
 
         LayoutManager.itemGroups[container.category] = container;
         print("Applet " + container.category + applet.title + " added at" + container.x + " " + container.y);
 
-        if (x >= 0 && y >= 0) {
+        if (container.x >= 0 && container.y >= 0) {
             LayoutManager.positionItem(container);
         }
+
+        return container;
     }
 
     onDrop: {
@@ -226,27 +250,7 @@ DragDrop.DropArea {
             }
         }
     }
-    /*
-    ContainmentConfig {
-        anchors {
-            top: parent.top
-            left: parent.left
-        }
-    }
-    * /
-    PlasmaCore.IconItem {
-        width: 24
-        height: 24
-        source: "list-add"
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                print("Add widgets ...");
-                plasmoid.action("add widgets").trigger();
-            }
-        }
-    }
-    */
+
     Component.onCompleted: {
         placeHolderPaint.opacity = 0;
         placeHolderPaint.visible = true;
@@ -260,8 +264,7 @@ DragDrop.DropArea {
 
         for (var i = 0; i < plasmoid.applets.length; ++i) {
             var applet = plasmoid.applets[i]
-            //FIXME: has to become prettier
-            addApplet(applet, LayoutManager.itemsConfig["Applet-"+applet.id].x, LayoutManager.itemsConfig["Applet-"+applet.id].y)
+            addApplet(applet, -1, -1);
         }
     }
 }
