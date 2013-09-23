@@ -98,14 +98,27 @@ DragDrop.DropArea {
         if (container.x >= 0 && container.y >= 0) {
             LayoutManager.positionItem(container);
         }
-
-        return container;
     }
 
     onDrop: {
         plasmoid.processMimeData(event.mimeData, event.x, event.y);
     }
 
+
+    Connections {
+        target: plasmoid
+
+        onAppletAdded: {
+            addApplet(applet, x, y);
+            //clean any eventual invalid chunks in the config
+            LayoutManager.save();
+        }
+
+        onAppletRemoved: {
+            //clean any eventual invalid chunks in the config
+            LayoutManager.save();
+        }
+    }
 
     PlasmaCore.Svg {
         id: toolBoxSvg
@@ -259,12 +272,14 @@ DragDrop.DropArea {
         LayoutManager.plasmoid = plasmoid
         updateGridSize()
         //plasmoid.containmentType = "DesktopContainment"
-        plasmoid.appletAdded.connect(addApplet)
+
         LayoutManager.restore()
 
         for (var i = 0; i < plasmoid.applets.length; ++i) {
             var applet = plasmoid.applets[i]
             addApplet(applet, -1, -1);
         }
+        //clean any eventual invalid chunks in the config
+        LayoutManager.save();
     }
 }

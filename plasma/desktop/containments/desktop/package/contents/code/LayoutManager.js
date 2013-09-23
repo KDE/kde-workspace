@@ -34,7 +34,14 @@ var itemGroups = new Object()
 
 function restore()
 {
-    itemsConfig = new Object()
+    var appletsMap = new Object();
+    var applet;
+    for (var i = 0; i < plasmoid.applets.length; ++i) {
+        applet = plasmoid.applets[i];
+        appletsMap["Applet-"+applet.id] = applet;
+    }
+
+    itemsConfig = new Object();
     var configString = String(plasmoid.readConfig("ItemsGeometries"))
     print("COnfig read from configfile: " + configString);
     //array, a cell for encoded item geometry
@@ -43,7 +50,8 @@ function restore()
         //[id, encoded geometry]
         var idConfig = itemsStrings[i].split(":")
         idConfig[0] = idConfig[0].replace("%3A", ":")
-        if (idConfig.length < 2) {
+        //ignore if malformed or there isn't an applet with such id
+        if (idConfig.length < 2 || appletsMap[idConfig[0]] === undefined) {
             continue;
         }
 
@@ -74,7 +82,7 @@ function save()
         configString += _id.replace(":", "%3A") + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";"
     }
 
-    //print("saving "+configString)
+    print("saving "+configString)
     plasmoid.writeConfig("ItemsGeometries", configString)
 }
 
