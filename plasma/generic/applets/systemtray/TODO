@@ -1,3 +1,6 @@
+
+= The following is probably not entirely relevant for the Qt5 port =
+
 * Fix sizing on the desktop
 
 * Try overriding QPaintDevice to obtain the background pixmap

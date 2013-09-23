@@ -53,8 +53,8 @@ public:
     QWeakPointer<X11EmbedDelegate> widget;
 };
 
-FdoGraphicsWidget::FdoGraphicsWidget(WId winId, QGraphicsWidget *parent)
-    : QGraphicsWidget(parent),
+FdoGraphicsWidget::FdoGraphicsWidget(WId winId, QQuickItem *parent)
+    : QQuickItem(parent),
       d(new Private())
 {
     d->winId = winId;
@@ -79,7 +79,7 @@ FdoGraphicsWidget::~FdoGraphicsWidget()
 
 void FdoGraphicsWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *parentWidget)
 {
-    QGraphicsWidget::paint(painter, option, parentWidget);
+    QQuickItem::paint(painter, option, parentWidget);
 
     QGraphicsView *parentView = 0;
     foreach (QGraphicsView *view, scene()->views()) {

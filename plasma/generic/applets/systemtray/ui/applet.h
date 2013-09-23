@@ -24,7 +24,8 @@
 #ifndef APPLET_H
 #define APPLET_H
 
-#include <KDE/Plasma/Applet>
+#include <Plasma/Applet>
+#include <KConfigDialog>
 
 #include "ui_autohide.h"
 #include "ui_visibleitems.h"
@@ -64,22 +65,22 @@ public:
     // Form factor
     enum FormFactor
     {
-        Planar       = Plasma::Planar,
-        MediaCenter  = Plasma::MediaCenter,
-        Horizontal   = Plasma::Horizontal,
-        Vertical     = Plasma::Vertical
+        Planar       = Plasma::Types::Planar,
+        MediaCenter  = Plasma::Types::MediaCenter,
+        Horizontal   = Plasma::Types::Horizontal,
+        Vertical     = Plasma::Types::Vertical
     };
 
     // Location
     enum Location
     {
-        Floating    = Plasma::Floating,
-        Desktop     = Plasma::Desktop,
-        FullScreen  = Plasma::FullScreen,
-        TopEdge     = Plasma::TopEdge,
-        BottomEdge  = Plasma::BottomEdge,
-        LeftEdge    = Plasma::LeftEdge,
-        RightEdge   = Plasma::RightEdge
+        Floating    = Plasma::Types::Floating,
+        Desktop     = Plasma::Types::Desktop,
+        FullScreen  = Plasma::Types::FullScreen,
+        TopEdge     = Plasma::Types::TopEdge,
+        BottomEdge  = Plasma::Types::BottomEdge,
+        LeftEdge    = Plasma::Types::LeftEdge,
+        RightEdge   = Plasma::Types::RightEdge
     };
 
     /// User's preference of visibility of task
@@ -93,7 +94,7 @@ public:
     ~Applet();
 
     void init();
-    void constraintsEvent(Plasma::Constraints constraints);
+    void constraintsEvent(Plasma::Types::Constraints constraints);
     Manager *manager() const;
     QSet<Task::Category> shownCategories() const;
     bool isFirstRun();
@@ -105,16 +106,16 @@ public:
     Q_INVOKABLE void showMenu(QObject *menu, int x, int y, QObject *item) const;
     Q_INVOKABLE void hideFromTaskbar(qulonglong win_id) const;
     Q_INVOKABLE QString getUniqueId(QObject *obj) const;
-    Q_INVOKABLE QPoint popupPosition(QObject *item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
+//     Q_INVOKABLE QPoint popupPosition(QObject *item, QSize size = QSize(0, 0), int align = Qt::AlignLeft) const;
 
 protected:
     void createConfigurationInterface(KConfigDialog *parent);
     void configChanged();
 
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event); }
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event); }
-    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { Q_UNUSED(event); }
+    void mousePressEvent(QMouseEvent *event) { Q_UNUSED(event); }
+    void mouseReleaseEvent(QMouseEvent *event) { Q_UNUSED(event); }
+    void hoverEnterEvent(QHoverEvent *event) { Q_UNUSED(event); }
+    void hoverLeaveEvent(QHoverEvent *event) { Q_UNUSED(event); }
 
 Q_SIGNALS:
     void formFactorChanged();

@@ -22,7 +22,6 @@
 #include "dbussystemtraytask.h"
 #include "dbussystemtrayprotocol.h"
 
-#include <Plasma/DataEngineManager>
 
 
 namespace SystemTray
@@ -30,14 +29,16 @@ namespace SystemTray
 
 DBusSystemTrayProtocol::DBusSystemTrayProtocol(QObject *parent)
     : Protocol(parent),
-      m_dataEngine(Plasma::DataEngineManager::self()->loadEngine("statusnotifieritem")),
+      m_dataEngine(0),
+      m_dataEngineConsumer(new Plasma::DataEngineConsumer),
       m_tasks()
 {
+    m_dataEngine = m_dataEngineConsumer->dataEngine("statusnotifieritem");
 }
 
 DBusSystemTrayProtocol::~DBusSystemTrayProtocol()
 {
-    Plasma::DataEngineManager::self()->unloadEngine("statusnotifieritem");
+    delete m_dataEngineConsumer;
 }
 
 void DBusSystemTrayProtocol::init()

@@ -29,7 +29,7 @@
 // Includess
 #include "../core/task.h"
 
-#include <QtDeclarative/QDeclarativeItem>
+#include <QtQuick/QQuickItem>
 
 #include <KDE/Plasma/Applet>
 
@@ -41,14 +41,14 @@ namespace SystemTray
 /** @class WidgetItem
  * Represents declarative item containing an specified graphics widget.
  */
-class WidgetItem: public QDeclarativeItem
+class WidgetItem: public QQuickItem
 {
     Q_OBJECT
 
     Q_PROPERTY(QObject* applet READ applet WRITE setApplet) ///< host applet
     Q_PROPERTY(QObject* task READ task WRITE setTask NOTIFY changedTask) ///< task
 public:
-    explicit WidgetItem(QDeclarativeItem *parent = 0);
+    explicit WidgetItem(QQuickItem *parent = 0);
     virtual ~WidgetItem();
 
 public:

@@ -29,17 +29,17 @@
 #include "../core/task.h"
 
 #include <QtCore/QWeakPointer>
-#include <QtGui/QGraphicsWidget>
+#include <QtQuick/QQuickItem>
 
-#include <KDE/Plasma/Containment>
+#include <Plasma/Containment>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace SystemTray
 {
 // class WidgetItem
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-WidgetItem::WidgetItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent),
+WidgetItem::WidgetItem(QQuickItem *parent)
+    : QQuickItem(parent),
       m_applet(0)
 {
     setClip(false);
@@ -77,9 +77,9 @@ void WidgetItem::setApplet(QObject *a)
 void WidgetItem::unbind()
 {
     if (m_applet && m_task) {
-        QGraphicsWidget *widget = m_task.data()->widget(m_applet, false);
+        QQuickItem *widget = m_task.data()->widget(m_applet, false);
         if (widget && widget->parentItem() == this) {
-            widget->hide();
+            widget->setVisible(false);
             widget->setParentItem(0);
         }
     }
@@ -88,14 +88,16 @@ void WidgetItem::unbind()
 void WidgetItem::bind()
 {
     if (m_applet && m_task) {
-        QGraphicsWidget *widget = m_task.data()->widget(m_applet);
+        QQuickItem *widget = m_task.data()->widget(m_applet);
         if (widget) {
             widget->setParentItem(this);
-            widget->setPos(0, 0);
-            widget->setPreferredSize(width(), width());
-            widget->setMinimumSize(width(), width());
-            widget->setMaximumSize(width(), width());
-            widget->show();
+            widget->setX(0);
+            widget->setY(0);
+            //widget->setPreferredSize(width(), width());
+            widget->setImplicitWidth(width());
+            widget->setImplicitHeight(width());
+            //widget->setMaximumSize(width(), width());
+            widget->setVisible(true);
         }
     }
 }
@@ -107,12 +109,12 @@ void WidgetItem::afterWidthChanged()
         return;
     }
 
-    QGraphicsWidget *widget = m_task.data()->widget(m_applet);
+    QQuickItem *widget = m_task.data()->widget(m_applet);
     if (widget) {
-        widget->setPreferredSize(width(), width());
-        widget->setMinimumSize(width(), width());
-        widget->setMaximumSize(width(), width());
-        widget->show();
+        //widget->setPreferredSize(width(), width());
+        widget->setImplicitHeight(width());
+        widget->setImplicitWidth(width());
+        widget->setVisible(true);
     }
 }
 
@@ -122,12 +124,12 @@ void WidgetItem::afterHeightChanged()
         return;
     }
 
-    QGraphicsWidget *widget = m_task.data()->widget(m_applet);
+    QQuickItem *widget = m_task.data()->widget(m_applet);
     if (widget) {
-        widget->setPreferredSize(width(), width());
-        widget->setMinimumSize(width(), width());
-        widget->setMaximumSize(width(), width());
-        widget->show();
+        //widget->setPreferredSize(width(), width());
+        widget->setImplicitWidth(width());
+        widget->setImplicitHeight(width());
+        widget->setVisible(true);
     }
 }
 

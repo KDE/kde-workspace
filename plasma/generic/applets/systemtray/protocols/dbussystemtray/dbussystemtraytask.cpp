@@ -25,16 +25,19 @@
 #include <QtCore/QMetaEnum>
 #include <QtCore/QDir>
 #include <QtCore/QCoreApplication>
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 #include <QtGui/QIcon>
+#include <QDebug>
 
 #include <KDE/KJob>
 #include <KDE/KIcon>
 #include <KDE/KIconLoader>
 #include <KDE/KStandardDirs>
-#include <KDE/Plasma/ServiceJob>
-#include <KDE/Plasma/ToolTipManager>
-#include <KDE/Plasma/Applet>
+#include <KGlobal>
+
+#include <Plasma/ServiceJob>
+#include <Plasma/Applet>
+
 
 namespace SystemTray
 {
@@ -59,7 +62,7 @@ DBusSystemTrayTask::~DBusSystemTrayTask()
 {
 }
 
-QGraphicsWidget* DBusSystemTrayTask::createWidget(Plasma::Applet */*host*/)
+QQuickItem* DBusSystemTrayTask::createWidget(Plasma::Applet */*host*/)
 {
     return 0;  // d-bus tasks don't have widgets but provide info for GUI;
 }
@@ -99,23 +102,23 @@ QIcon DBusSystemTrayTask::icon() const
 
 void DBusSystemTrayTask::activate1(int x, int y) const
 {
-    KConfigGroup params;
+    QVariantMap params;
     if (m_isMenu) {
         params = m_service->operationDescription("ContextMenu");
     } else {
         params = m_service->operationDescription("Activate");
     }
-    params.writeEntry("x", x);
-    params.writeEntry("y", y);
+    params["x"] = x;
+    params["y"] = y;
     KJob *job = m_service->startOperationCall(params);
     connect(job, SIGNAL(result(KJob*)), this, SLOT(_onContextMenu(KJob*)));
 }
 
 void DBusSystemTrayTask::activate2(int x, int y) const
 {
-    KConfigGroup params = m_service->operationDescription("SecondaryActivate");
-    params.writeEntry("x", x);
-    params.writeEntry("y", y);
+    QVariantMap params = m_service->operationDescription("SecondaryActivate");
+    params["x"] = x;
+    params["y"] = y;
     m_service->startOperationCall(params);
 }
 
@@ -177,17 +180,17 @@ void DBusSystemTrayTask::activateVertScroll(int delta) const
 
 void DBusSystemTrayTask::_activateScroll(int delta, QString direction) const
 {
-    KConfigGroup params = m_service->operationDescription("Scroll");
-    params.writeEntry("delta", delta);
-    params.writeEntry("direction", direction);
+    QVariantMap params = m_service->operationDescription("Scroll");
+    params["delta"] = delta;
+    params["direction"] = direction;
     m_service->startOperationCall(params);
 }
 
 void DBusSystemTrayTask::activateContextMenu(int x, int y) const
 {
-    KConfigGroup params = m_service->operationDescription("ContextMenu");
-    params.writeEntry("x", x);
-    params.writeEntry("y", y);
+    QVariantMap params = m_service->operationDescription("ContextMenu");
+    params["x"] = x;
+    params["y"] = y;
     KJob *job = m_service->startOperationCall(params);
     connect(job, SIGNAL(result(KJob*)), this, SLOT(_onContextMenu(KJob*)));
 }
@@ -337,9 +340,9 @@ void DBusSystemTrayTask::syncIcons(const Plasma::DataEngine::Data &properties)
                 // adding all application dirs to KIconLoader::global(), to
                 // avoid potential icon name clashes between application
                 // icons
-                m_customIconLoader = new KIconLoader(appName, 0 /* dirs */, this);
+                m_customIconLoader = new KIconLoader(appName, QStringList() /* dirs */, this);
             } else {
-                kWarning() << "Wrong IconThemePath" << path << ": too short or does not end with 'icons'";
+                qWarning() << "Wrong IconThemePath" << path << ": too short or does not end with 'icons'";
             }
         }
 

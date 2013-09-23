@@ -47,7 +47,7 @@ Q_SIGNALS:
     void taskDeleted(WId winId);
 
 protected:
-    virtual QGraphicsWidget* createWidget(Plasma::Applet *applet);
+    virtual QQuickItem* createWidget(Plasma::Applet *applet);
 
 private:
     class Private;

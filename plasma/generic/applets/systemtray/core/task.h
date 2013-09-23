@@ -26,7 +26,7 @@
 
 #include <QtGui/QIcon>
 
-class QGraphicsWidget;
+class QQuickItem;
 
 namespace Plasma
 {
@@ -93,7 +93,7 @@ public:
      *
      * isEmbeddable() should be checked before creating a new widget.
      **/
-    QGraphicsWidget* widget(Plasma::Applet *host, bool createIfNecessary = true);
+    QQuickItem* widget(Plasma::Applet *host, bool createIfNecessary = true);
 
     /**
      * @return whether this task is embeddable; true if there is already a widget
@@ -209,8 +209,8 @@ Q_SIGNALS:
 
 protected:
     Task(QObject *parent = 0);
-    QHash<Plasma::Applet *, QGraphicsWidget *> widgetsByHost() const;
-    QGraphicsWidget *forget(Plasma::Applet *host);
+    QHash<Plasma::Applet *, QQuickItem *> widgetsByHost() const;
+    QQuickItem *forget(Plasma::Applet *host);
 
     /**
      * Called when a new widget is required
@@ -220,7 +220,7 @@ protected:
      * created widget is handled automatically so subclasses should not
      * delete the created widget.
      **/
-    virtual QGraphicsWidget* createWidget(Plasma::Applet *host) = 0;
+    virtual QQuickItem* createWidget(Plasma::Applet *host) = 0;
 
 private Q_SLOTS:
     void widgetDeleted();

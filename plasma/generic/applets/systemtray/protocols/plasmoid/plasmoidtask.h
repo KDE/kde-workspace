@@ -44,7 +44,7 @@ public:
     virtual bool isEmbeddable() const;
     virtual QString taskId() const;
     virtual QIcon icon() const;
-    void forwardConstraintsEvent(Plasma::Constraints constraints);
+    void forwardConstraintsEvent(Plasma::Types::Constraints constraints);
     int id() const;
     Plasma::Applet *host() const;
     virtual bool isWidget() const;
@@ -52,13 +52,13 @@ public:
 
 protected Q_SLOTS:
     void appletDestroyed(Plasma::Applet *object);
-    void newAppletStatus(Plasma::ItemStatus status);
+    void newAppletStatus(Plasma::Types::ItemStatus status);
 
 Q_SIGNALS:
     void taskDeleted(Plasma::Applet *host, const QString &taskId);
 
 protected:
-    virtual QGraphicsWidget* createWidget(Plasma::Applet *applet);
+    virtual QQuickItem* createWidget(Plasma::Applet *applet);
 
 private:
     void setupApplet(const QString &plugin, int id);

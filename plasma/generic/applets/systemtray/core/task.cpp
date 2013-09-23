@@ -21,7 +21,7 @@
 
 #include "task.h"
 
-#include <QtGui/QGraphicsWidget>
+#include <QtQuick/QQuickItem>
 #include <QtCore/QTimer>
 
 #include "../ui/applet.h"
@@ -39,7 +39,7 @@ public:
     {
     }
 
-    QHash<Plasma::Applet *, QGraphicsWidget *> widgetsByHost;
+    QHash<Plasma::Applet *, QQuickItem *> widgetsByHost;
     Task::Status status;
     Task::Category category;
     QString name;
@@ -55,7 +55,7 @@ Task::Task(QObject *parent)
 Task::~Task()
 {
     emit destroyed(this);
-    foreach (QGraphicsWidget * widget, d->widgetsByHost) {
+    foreach (QQuickItem * widget, d->widgetsByHost) {
         disconnect(widget, 0, this, 0);
         // sometimes it appears that the widget will get scheduled for a repaint
         // then it gets deleted here and QGraphicsScene doesn't get that straight
@@ -66,11 +66,11 @@ Task::~Task()
     delete d;
 }
 
-QGraphicsWidget *Task::widget(Plasma::Applet *host, bool createIfNecessary)
+QQuickItem *Task::widget(Plasma::Applet *host, bool createIfNecessary)
 {
     Q_ASSERT(host);
 
-    QGraphicsWidget *widget = d->widgetsByHost.value(host);
+    QQuickItem *widget = d->widgetsByHost.value(host);
 
     if (!widget && createIfNecessary) {
         widget = createWidget(host);
@@ -93,20 +93,20 @@ bool Task::isEmbeddable(SystemTray::Applet *host)
     return (d->widgetsByHost.value(host) || isEmbeddable()) && host->shownCategories().contains(category());
 }
 
-QHash<Plasma::Applet *, QGraphicsWidget *> Task::widgetsByHost() const
+QHash<Plasma::Applet *, QQuickItem *> Task::widgetsByHost() const
 {
     return d->widgetsByHost;
 }
 
 void Task::abandon(Plasma::Applet *host)
 {
-    QGraphicsWidget *widget = d->widgetsByHost.take(host);
+    QQuickItem *widget = d->widgetsByHost.take(host);
     if (widget) {
         widget->deleteLater();
     }
 }
 
-QGraphicsWidget *Task::forget(Plasma::Applet *host)
+QQuickItem *Task::forget(Plasma::Applet *host)
 {
     return d->widgetsByHost.take(host);
 }
@@ -115,8 +115,8 @@ void Task::widgetDeleted()
 {
     bool wasEmbeddable = isEmbeddable();
 
-    QGraphicsWidget *w = static_cast<QGraphicsWidget*>(sender());
-    QMutableHashIterator<Plasma::Applet *, QGraphicsWidget *> it(d->widgetsByHost);
+    QQuickItem *w = static_cast<QQuickItem*>(sender());
+    QMutableHashIterator<Plasma::Applet *, QQuickItem *> it(d->widgetsByHost);
     while (it.hasNext()) {
         it.next();
         if (it.value() == w) {

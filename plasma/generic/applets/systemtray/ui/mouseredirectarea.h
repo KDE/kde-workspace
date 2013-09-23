@@ -27,16 +27,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Includes
-#include <QtDeclarative/QDeclarativeItem>
+#include <QtQuick/QQuickItem>
 
 #include <KDE/Plasma/Applet>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Forward declarations
-class QGraphicsWidget;
-class QGraphicsSceneWheelEvent;
-class QGraphicsSceneContextMenuEvent;
+class QQuickItem;
+class QWheelEvent;
+class QContextMenuEvent;
 
 
 namespace SystemTray
@@ -47,14 +47,14 @@ class Task;
 /** @class MouseRedirectArea
  * This helper class is intended to handle and redirect some mouse events
  */
-class MouseRedirectArea: public QDeclarativeItem
+class MouseRedirectArea: public QQuickItem
 {
     Q_OBJECT
 
     Q_PROPERTY(QObject* target READ target WRITE setTarget)
     Q_PROPERTY(QObject* applet READ applet WRITE setApplet)
 public:
-    explicit MouseRedirectArea(QDeclarativeItem *parent = 0);
+    explicit MouseRedirectArea(QQuickItem *parent = 0);
 
     QObject* target() const { return m_target; }
     void setTarget(QObject* t);
@@ -71,13 +71,13 @@ Q_SIGNALS:
     void exited();
 
 private: //Events
-    virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
-    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
-    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
-    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+    virtual void wheelEvent(QWheelEvent *event);
+    virtual void contextMenuEvent(QContextMenuEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void hoverEnterEvent(QHoverEvent *event);
+    virtual void hoverLeaveEvent(QHoverEvent *event);
+    virtual void hoverMoveEvent(QHoverEvent *event);
 
     template<class T> void forwardEvent(T *event, bool is_context_menu = false);
 
@@ -85,7 +85,7 @@ private: // Methods
     void processTarget();
 
 private: //Variables
-    QGraphicsObject *m_widget;
+    QQuickItem *m_widget;
     Task *m_task;
     QObject *m_target;
     Plasma::Applet *m_applet;

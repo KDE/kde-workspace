@@ -23,6 +23,7 @@
 #include "../../core/protocol.h"
 
 #include <Plasma/DataEngine>
+#include <Plasma/DataEngineConsumer>
 
 #include <QHash>
 
@@ -54,6 +55,7 @@ private:
     void initedTask(DBusSystemTrayTask *task);
 
     Plasma::DataEngine *m_dataEngine;
+    Plasma::DataEngineConsumer *m_dataEngineConsumer;
     QHash<QString, DBusSystemTrayTask*> m_tasks;
 };
 

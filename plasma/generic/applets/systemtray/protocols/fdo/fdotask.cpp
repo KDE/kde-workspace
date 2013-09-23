@@ -97,7 +97,7 @@ void FdoTask::abandon(Plasma::Applet *host)
     }
 }
 
-QGraphicsWidget* FdoTask::createWidget(Plasma::Applet *applet)
+QQuickItem* FdoTask::createWidget(Plasma::Applet *applet)
 {
     if (!d->widget) {
         d->widget = new FdoGraphicsWidget(d->winId, applet);

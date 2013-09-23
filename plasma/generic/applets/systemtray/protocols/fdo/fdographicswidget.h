@@ -22,19 +22,19 @@
 #ifndef FDOGRAPHICSWIDGET_H
 #define FDOGRAPHICSWIDGET_H
 
-#include <QtGui/QGraphicsWidget>
+#include <QtQuick/QQuickItem>
 #include <QtGui/QX11EmbedContainer>
 
 
 namespace SystemTray
 {
 
-class FdoGraphicsWidget : public QGraphicsWidget
+class FdoGraphicsWidget : public QQuickItem
 {
     Q_OBJECT
 
 public:
-    FdoGraphicsWidget(WId winId, QGraphicsWidget *parent = 0);
+    FdoGraphicsWidget(WId winId, QQuickItem *parent = 0);
     ~FdoGraphicsWidget();
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
