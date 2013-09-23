@@ -160,21 +160,20 @@ Comment[wa]=Ene imådjete båzike
 Comment[x-test]=xxA generic iconxx
 Comment[zh_CN]=通用图标
 Comment[zh_TW]=一般圖示
-Type=Service
-X-KDE-ServiceTypes=Plasma/Applet
-NoDisplay=true
 
-X-KDE-Library=plasma_applet_icon
+X-KDE-ServiceTypes=Plasma/Applet
+Type=Service
+
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/main.qml
+X-Plasma-DefaultSize=64,64
+
 X-KDE-PluginInfo-Author=The Plasma Team
 X-KDE-PluginInfo-Email=plasma-devel@kde.org
-X-KDE-PluginInfo-Name=icon
+X-KDE-PluginInfo-Name=org.kde.icon
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-KDE-PluginInfo-Category=File System
 X-KDE-PluginInfo-Depends=
 X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-EnabledByDefault=true
-
-X-Plasma-Requires-FileDialog=Unused
-X-Plasma-Requires-LaunchApp=Required
-
