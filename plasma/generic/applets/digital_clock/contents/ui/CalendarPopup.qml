@@ -20,15 +20,15 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
-    id : root
-    width : parent.width
-    height : parent.height
+    id: root
+    width: parent.width
+    height: parent.height
     property string date ;
     property date showDate: new Date()
   
-    property alias calendarGrid : calendarGrid
-    property real cellWidth : root.width/7
-    property real cellHeight : root.height/7.5
+    property alias calendarGrid: calendarGrid
+    property real cellWidth: root.width/7
+    property real cellHeight: root.height/7.5
  
     property Item selectedItem
     property int week;
@@ -51,51 +51,51 @@ Item {
     }
 
     Calendar {
-        id : monthCalendar
-        days : 7
-        weeks : 6
-        startDay : 1
-        startDate : "2013-08-01"
-        onStartDateChanged : {
+        id: monthCalendar
+        days: 7
+        weeks: 6
+        startDay: 1
+        startDate: "2013-08-01"
+        onStartDateChanged: {
             month.text = monthName
             monthYear.text = year
         }
     }
 
     Column {
-        height : parent.height
-        width : parent.width 
+        height: parent.height
+        width: parent.width 
 
         Row {
-            id : calendarOperations
+            id: calendarOperations
             anchors {
-                left : parent.left
-                top : parent.top
-                right : parent.right
+                left: parent.left
+                top: parent.top
+                right: parent.right
             }
-            spacing : 4
+            spacing: 4
 
             Components.ToolButton {
-                id : monthright
-                flat : true;
-                text : "<";
-                width : height;
-                anchors.left : parent.left
-                anchors.rightMargin : 20
-                onClicked : {
+                id: monthright
+                flat: true;
+                text: "<";
+                width: height;
+                anchors.left: parent.left
+                anchors.rightMargin: 20
+                onClicked: {
                     monthCalendar.previousMonth()
                 }
             }
 
             Components.ToolButton {
-                id : month
-                anchors.left : monthright.right
-                anchors.right : monthYear.left
-                anchors.leftMargin : 20
+                id: month
+                anchors.left: monthright.right
+                anchors.right: monthYear.left
+                anchors.leftMargin: 20
                 Loader {
-                    id : menuLoader
+                    id: menuLoader
                 }
-                onClicked : {
+                onClicked: {
                     if (menuLoader.source == "") {
                         menuLoader.source = "MonthMenu.qml"
                     } else {
@@ -103,99 +103,99 @@ Item {
                     }
                     menuLoader.item.open(0, height);
                 }
-                text : monthCalendar.monthName
+                text: monthCalendar.monthName
             }
 
             Components.ToolButton {
-                id : monthYear
-                text : monthCalendar.year
-                anchors.leftMargin : 20
-                anchors.left : month.right
+                id: monthYear
+                text: monthCalendar.year
+                anchors.leftMargin: 20
+                anchors.left: month.right
                 Components.ToolButton {
-                    id : increase
-                    text : "^"
-                    width : 12
-                    height : 12
-                    anchors.left : monthYear.right
-                    onClicked : monthCalendar.nextYear()
+                    id: increase
+                    text: "^"
+                    width: 12
+                    height: 12
+                    anchors.left: monthYear.right
+                    onClicked: monthCalendar.nextYear()
                 }
                 Components.ToolButton {
-                    id : decrease
-                    text : "v"
-                    width : 12
-                    height : 12
-                    anchors.left : monthYear.right
-                    anchors.top : increase.bottom
-                    onClicked : monthCalendar.previousYear()
+                    id: decrease
+                    text: "v"
+                    width: 12
+                    height: 12
+                    anchors.left: monthYear.right
+                    anchors.top: increase.bottom
+                    onClicked: monthCalendar.previousYear()
                 }
             }
 
             Components.ToolButton {
-                id : previous
-                flat : true;
-                text : ">";
-                width : height;
-                anchors.right : parent.right
-                onClicked : {
+                id: previous
+                flat: true;
+                text: ">";
+                width: height;
+                anchors.right: parent.right
+                onClicked: {
                     monthCalendar.nextMonth()
                 }
             }
         }
 
         DaysCalendar {
-            id : calendarGrid
+            id: calendarGrid
             anchors {
-                left : parent.left
-                top : calendarOperations.bottom
-                right : parent.right
-                bottom : calendarToolbar.top
+                left: parent.left
+                top: calendarOperations.bottom
+                right: parent.right
+                bottom: calendarToolbar.top
             }
         }
 
         Item {
-            id : calendarToolbar
+            id: calendarToolbar
             anchors {
-                left : parent.left
-                right : parent.right
-                bottomMargin : 20
-                bottom : parent.bottom
+                left: parent.left
+                right: parent.right
+                bottomMargin: 20
+                bottom: parent.bottom
             }
 
             Components.ToolButton {
-                id : currentDate
-                iconSource : "view-pim-calendar"
-                width : height
-                onClicked : {
+                id: currentDate
+                iconSource: "view-pim-calendar"
+                width: height
+                onClicked: {
                     monthCalendar.startDate = isTodayMonth();
                 }
                 PlasmaCore.ToolTip {
-                    id : tool
-                    target : currentDate
-                    mainText : "Select Today"
+                    id: tool
+                    target: currentDate
+                    mainText: "Select Today"
                 }
                 anchors {
-                    left : parent.left
-                }
-            }
-
-            Components.TextField {
-                id : dateField
-                text : date == "" ? Qt.formatDateTime ( new Date(), "d/M/yyyy" ) : date
-                width : calendarOperations.width/3
-                anchors {
-                    leftMargin : 20
-                    rightMargin : 30
-                    left : currentDate.right
-                    right : weekField.left
+                    left: parent.left
                 }
             }
 
             Components.TextField {
-                id : weekField
-                text : week == 0 ? monthCalendar.currentWeek() : week
-                width : calendarOperations.width/10
+                id: dateField
+                text: date == "" ? Qt.formatDateTime ( new Date(), "d/M/yyyy" ): date
+                width: calendarOperations.width/3
                 anchors {
-                    right : parent.right
+                    leftMargin: 20
+                    rightMargin: 30
+                    left: currentDate.right
+                    right: weekField.left
+                }
+            }
+
+            Components.TextField {
+                id: weekField
+                text: week == 0 ? monthCalendar.currentWeek(): week
+                width: calendarOperations.width/10
+                anchors {
+                    right: parent.right
                 }
             }
         }

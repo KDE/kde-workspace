@@ -20,45 +20,45 @@ import org.kde.plasma.components 2.0 as Components
 import org.kde.locale 2.0
 
 Item {
-    id : main
+    id: main
     property int minimumWidth
     property int minimumHeight
     property int formFactor: plasmoid.formFactor
     property bool constrained:formFactor==Vertical||formFactor==Horizontal
 
     Locale {
-        id : locale
+        id: locale
     }
 
     PlasmaCore.DataSource {
-        id : dataSource
-        engine : "time"
-        connectedSources : ["Local"]
-        interval : 300000
+        id: dataSource
+        engine: "time"
+        connectedSources: ["Local"]
+        interval: 300000
     }
 
     Components.Label  {
-        id : time
-        font.pixelSize : Math.min(main.width/6, main.height)
-        width : Math.max(paintedWidth,time.paintedWidth)
-        text : locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds )
-        horizontalAlignment : main.AlignHCenter
+        id: time
+        font.pixelSize: Math.min(main.width/6, main.height)
+        width: Math.max(paintedWidth,time.paintedWidth)
+        text: locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds )
+        horizontalAlignment: main.AlignHCenter
         anchors {
-            centerIn : parent
+            centerIn: parent
         }
 
         MouseArea {
-            id : mouseArea
-            anchors.fill : parent
-            hoverEnabled : true
-            onClicked : plasmoid.expanded = !plasmoid.expanded;
+            id: mouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: plasmoid.expanded = !plasmoid.expanded;
 
             PlasmaCore.ToolTip {
-                id : tooltip
-                target : time
-                mainText : "Current Time"
-                subText : Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d yyyy" ) + "\n" + locale.formatLocaleTime(dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds)
-                image : "preferences-system-time"
+                id: tooltip
+                target: time
+                mainText: "Current Time"
+                subText: Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d yyyy" ) + "\n" + locale.formatLocaleTime(dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds)
+                image: "preferences-system-time"
             }
         }
     }
