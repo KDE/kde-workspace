@@ -67,7 +67,6 @@ function addApplet(applet, x, y) {
     } else if (x >= 0 && y >= 0) {
         var index = LayoutManager.insertAtCoordinates(container, x, y);
         print("Applet " + applet.id + " " + applet.title + " was added in position " + index)
-        container.intendedPos = index;
 
     //give up: enqueue the applet after all the others
     } else {
@@ -176,7 +175,6 @@ function addApplet(applet, x, y) {
         Item {
             id: container
             visible: false
-            property int intendedPos: 0
 
             Layout.fillWidth: applet && applet.fillWidth
             Layout.fillHeight: applet && applet.fillHeight
