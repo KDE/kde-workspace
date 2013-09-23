@@ -50,6 +50,7 @@ template<class T> void MouseRedirectArea::forwardEvent(T *event, bool is_context
     if (!target)
         return;
 
+    /* FIXME: needs rethinking
     QPointF delta = target->sceneBoundingRect().center() - event->scenePos();
     event->setScenePos(target->sceneBoundingRect().center());
     event->setScreenPos((event->screenPos() + delta).toPoint());
@@ -67,6 +68,7 @@ template<class T> void MouseRedirectArea::forwardEvent(T *event, bool is_context
         event->setPos(target->boundingRect().center());
         scene()->sendEvent(target, event);
     }
+    */
 }
 
 
@@ -183,3 +185,5 @@ void MouseRedirectArea::processTarget()
 
 
 } // namespace SystemTray
+
+#include "mouseredirectarea.moc"
