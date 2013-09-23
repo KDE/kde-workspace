@@ -25,8 +25,8 @@ import org.kde.plasma.icon 1.0
 MouseArea {
     id:root
 
-    height: 50
-    width: 50
+    height: 100
+    width: 100
 
     property int minimumWidth: formFactor == PlasmaCore.Types.Horizontal ? height : 1
     property int minimumHeight: formFactor == PlasmaCore.Types.Vertical ? width  : 1

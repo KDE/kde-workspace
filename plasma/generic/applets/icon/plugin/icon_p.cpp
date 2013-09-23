@@ -23,18 +23,24 @@
 
 #include <KFileItem>
 #include <KDesktopFile>
+#include <QMimeType>
+#include <QMimeDatabase>
 
 QString IconPrivate::getName(const QUrl& url) const
 {
     QString m_name;
     if(url.isLocalFile()) {
 	KFileItem fileItem(KFileItem::Unknown, KFileItem::Unknown, url);
+	QFileInfo fi(url.toLocalFile());
 	if (fileItem.isDesktopFile()) {
 	    KDesktopFile f(url.toLocalFile());
 	    m_name = f.readName();
 	    if(m_name.isNull()) {
 		m_name = QFileInfo(url.toLocalFile()).fileName();
 	    }
+	}
+	else if (!fi.isDir()) {
+	    m_name = fi.baseName();
 	}
     }
     return m_name;
@@ -43,11 +49,16 @@ QString IconPrivate::getName(const QUrl& url) const
 QString IconPrivate::getIcon(const QUrl& url) const
 {
     QString m_icon;
+    QMimeDatabase db;
     if(url.isLocalFile()) {
 	KFileItem fileItem(KFileItem::Unknown, KFileItem::Unknown, url);
+	QFileInfo fi(url.toLocalFile());
 	if (fileItem.isDesktopFile()) {
 	    KDesktopFile f(url.toLocalFile());
 	    m_icon = f.readIcon();	    
+	}
+	else if (!fi.isDir()) {
+	    m_icon = db.mimeTypeForUrl(url).iconName();
 	}
     }
     return m_icon;
@@ -58,9 +69,13 @@ QString IconPrivate::getGenericName(const QUrl& url) const
     QString m_generic;
     if(url.isLocalFile()) {
 	KFileItem fileItem(KFileItem::Unknown, KFileItem::Unknown, url);
+	QFileInfo fi(url.toLocalFile());
 	if (fileItem.isDesktopFile()) {
 	    KDesktopFile f(url.toLocalFile());
 	    m_generic = f.readGenericName();
+	}
+	else if (!fi.isDir()) {
+	    m_generic = fi.baseName();
 	}
     }
     return m_generic;
