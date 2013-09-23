@@ -19,11 +19,16 @@
 
 .pragma library
 
-var positions = new Array()
+var positions = new Array();
 
-var cellSize = new Object()
-cellSize.width = 24
-cellSize.height = 24
+var cellSize = new Object();
+cellSize.width = 24;
+cellSize.height = 24;
+
+var defaultAppletSize = new Object();
+defaultAppletSize.width = cellSize.width * 6;
+defaultAppletSize.height = cellSize.height * 6;
+
 
 var resultsFlow
 var plasmoid;

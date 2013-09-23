@@ -47,6 +47,8 @@ DragDrop.DropArea {
         print("Updategridsize");
         LayoutManager.cellSize.width = root.iconWidth + toolBoxSvg.elementSize("left").width + toolBoxSvg.elementSize("right").width
         LayoutManager.cellSize.height = root.iconHeight + toolBoxSvg.elementSize("top").height + toolBoxSvg.elementSize("bottom").height;
+        LayoutManager.defaultAppletSize.width = LayoutManager.cellSize.width * 6;
+        LayoutManager.defaultAppletSize.height = LayoutManager.cellSize.height * 6;
         layoutTimer.restart()
     }
 
@@ -68,8 +70,8 @@ DragDrop.DropArea {
         //Not a valid size? reset
         if (config === undefined || config.width === undefined || config.height === undefined ||
             config.width <= 0 || config.height <=0) {
-            container.width = LayoutManager.cellSize.width*6;
-            container.height = LayoutManager.cellSize.height*6;
+            container.width = LayoutManager.defaultAppletSize.width;
+            container.height = LayoutManager.defaultAppletSize.height;
         } else {
             container.width = config.width;
             container.height = config.height;
@@ -100,8 +102,33 @@ DragDrop.DropArea {
         }
     }
 
+    onDragEnter: {
+        placeHolder.width = LayoutManager.defaultAppletSize.width;
+        placeHolder.height = LayoutManager.defaultAppletSize.height;
+        placeHolder.x = event.x - placeHolder.width / 2;
+        placeHolder.y = event.y - placeHolder.width / 2;
+        LayoutManager.positionItem(placeHolder);
+        LayoutManager.setSpaceAvailable(placeHolder.x, placeHolder.y, placeHolder.width, placeHolder.height, true);
+        placeHolderPaint.opacity = root.haloOpacity;
+    }
+
+    onDragMove: {
+        placeHolder.width = LayoutManager.defaultAppletSize.width;
+        placeHolder.height = LayoutManager.defaultAppletSize.height;
+        placeHolder.x = event.x - placeHolder.width / 2;
+        placeHolder.y = event.y - placeHolder.width / 2;
+        LayoutManager.positionItem(placeHolder);
+        LayoutManager.setSpaceAvailable(placeHolder.x, placeHolder.y, placeHolder.width, placeHolder.height, true);
+        placeHolderPaint.opacity = root.haloOpacity;
+    }
+
+    onDragLeave: {
+        placeHolderPaint.opacity = 0;
+    }
+
     onDrop: {
-        plasmoid.processMimeData(event.mimeData, event.x, event.y);
+        placeHolderPaint.opacity = 0;
+        plasmoid.processMimeData(event.mimeData, event.x - placeHolder.width / 2, event.y - placeHolder.height / 2);
     }
 
 
