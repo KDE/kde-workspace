@@ -22,7 +22,7 @@
 #ifndef FDOSELECTIONMANAGER_H
 #define FDOSELECTIONMANAGER_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 namespace SystemTray
 {
@@ -30,6 +30,7 @@ namespace SystemTray
 class Notification;
 class Task;
 class X11EmbedPainter;
+class XEvent;
 class FdoSelectionManagerPrivate;
 
 class FdoSelectionManager : public QWidget

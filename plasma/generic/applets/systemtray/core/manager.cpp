@@ -30,7 +30,7 @@
 #include "protocol.h"
 #include "task.h"
 
-#include "../protocols/fdo/fdoprotocol.h"
+//#include "../protocols/fdo/fdoprotocol.h"
 #include "../protocols/plasmoid/plasmoidtaskprotocol.h"
 #include "../protocols/dbussystemtray/dbussystemtrayprotocol.h"
 
@@ -61,7 +61,7 @@ Manager::Manager()
 {
     d->plasmoidProtocol = new PlasmoidProtocol(this);
     d->setupProtocol(d->plasmoidProtocol);
-    d->setupProtocol(new SystemTray::FdoProtocol(this));
+    //d->setupProtocol(new SystemTray::FdoProtocol(this));
     d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
 }
 

@@ -13,12 +13,12 @@ set(systemtray_SRCS
     core/protocol.cpp
     core/task.cpp
 
-#     protocols/fdo/fdoprotocol.cpp
+#    protocols/fdo/fdoprotocol.cpp
 #     protocols/fdo/fdotask.cpp
 #     #FIXME: we should find another way to achieve that
 #     #protocols/fdo/fdonotification.cpp
 #     protocols/fdo/fdographicswidget.cpp
-#     protocols/fdo/fdoselectionmanager.cpp
+#    protocols/fdo/fdoselectionmanager.cpp
 #     protocols/fdo/x11embedcontainer.cpp
 #     protocols/fdo/x11embeddelegate.cpp
 #     protocols/fdo/x11embedpainter.cpp
@@ -51,7 +51,7 @@ ENDIF (HAVE_LIBXSS)
 plasma_add_plugin(plasma_applet_systemtray ${systemtray_SRCS})
 include_directories(${CMAKE_SOURCE_DIR})
 target_link_libraries(plasma_applet_systemtray
-    Qt5::DBus
+    ${Qt5DBus_LIBRARIES}
     ${Qt5Quick_LIBRARIES}
     ${Plasma_LIBRARIES}
     ${KI18n_LIBRARIES}
@@ -60,6 +60,7 @@ target_link_libraries(plasma_applet_systemtray
     ${KNotifications_LIBRARIES}
     ${KService_LIBRARIES}
     ${Solid_LIBRARIES}
+    ${KWindowSystem_LIBRARIES}
     ${KDE4_KIO_LIBS}
     ${KDE4Attic_LIBRARIES}
     ${KDE4Support_LIBRARIES}
