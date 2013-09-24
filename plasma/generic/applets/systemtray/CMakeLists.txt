@@ -72,6 +72,24 @@ target_link_libraries(plasma_applet_systemtray
 #    ${IDLE_DETECTION_LIB}
 )
 
-install(TARGETS plasma_applet_systemtray DESTINATION ${PLUGIN_INSTALL_DIR})
-install(DIRECTORY "package/" DESTINATION "${DATA_INSTALL_DIR}/${data_install_dir}")
-install(FILES plasma-applet-systemtray.desktop DESTINATION ${SERVICES_INSTALL_DIR})
+#install(TARGETS plasma_applet_systemtray DESTINATION ${PLUGIN_INSTALL_DIR})
+#install(DIRECTORY "package/" DESTINATION "${DATA_INSTALL_DIR}/${data_install_dir}")
+#install(FILES plasma-applet-systemtray.desktop DESTINATION ${SERVICES_INSTALL_DIR})
+
+set(systemtrayplugin_SRCS
+    core/systemtrayplugin.cpp
+    )
+
+add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
+
+target_link_libraries(systemtrayplugin
+    ${Qt5Quick_LIBRARIES}
+    ${Qt5Qml_LIBRARIES}
+    ${KCore_LIBRARIES}
+    ${KDECLARATIVE_LIBRARIES}
+    ${Plasma_LIBRARIES}
+    KF5::KWindowSystem
+    )
+
+install(TARGETS systemtrayplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/systemtray)
+#install(FILES qmldir ToolTip.qml DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/core)
