@@ -122,7 +122,7 @@ next start of &kmenuedit;.
 launcher menu are displayed.
 </para>
 <para>By default the menu is sorted alphabetically using the English names or descriptions. Using another language 
-than English some submenus and items therefort will appear in an unsorted order.
+than English some submenus and items therefore will appear in an unsorted order.
 </para>
 <para>Use the options in <menuchoice><guimenu>Edit</guimenu><guimenuitem>Sort</guimenuitem></menuchoice>
 to sort either by name or description. If you use the classic application launcher you have to select the 
