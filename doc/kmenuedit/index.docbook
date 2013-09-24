@@ -122,7 +122,7 @@ next start of &kmenuedit;.
 launcher menu are displayed.
 </para>
 <para>By default the menu is sorted alphabetically using the English names or descriptions. Using another language 
-than English some submenus and items therefor will appear in an unsorted order.
+than English some submenus and items therefort will appear in an unsorted order.
 </para>
 <para>Use the options in <menuchoice><guimenu>Edit</guimenu><guimenuitem>Sort</guimenuitem></menuchoice>
 to sort either by name or description. If you use the classic application launcher you have to select the 
@@ -130,7 +130,7 @@ corresponding <guilabel>Format</guilabel> option in the settings dialog. In the 
 <guilabel>Show applications by name</guilabel> if you sort them by name here.
 </para>
 <para>Grouping your frequently used submenus or items together &eg; at the top of the menu makes selecting them easier. 
-To change the order of single items or submenus in the tree use the <guibutton>Move Up</guibutton> or 
+To change the order of particular items or submenus in the tree use the <guibutton>Move Up</guibutton> or 
 <guibutton>Move Down</guibutton> button in the toolbar or these actions in the menu. 
 </para>
 <para>All application launchers will use the order of submenus defined in &kmenuedit;.
@@ -140,7 +140,7 @@ To change the order of single items or submenus in the tree use the <guibutton>M
 <sect3 id="use-cases-adapt-hide">
 <title>Remove Items from the Menu View</title> 
 
-<para>Having all applications installed on a computer may be confusing for some users so you may 
+<para>Having shown all applications installed on a computer may be confusing for some users so you may 
 want to hide some less frequently used items or submenus. There are two different ways to do that:
 </para>
 
@@ -149,11 +149,11 @@ want to hide some less frequently used items or submenus. There are two differen
 </para>
 <para>If you delete a submenu it will be really deleted with all its submenus and items. 
 To recreate them you can use <menuchoice><guimenu>Edit</guimenu><guimenuitem>Restore to System 
-Settings</guimenuitem></menuchoice>, but this will remove all your custom submenus and items
+Menu</guimenuitem></menuchoice>, but this will remove all your custom submenus and items
 and the corresponding <filename class="extension">.desktop</filename> files are deleted too. This action cannot be reverted.
 </para>
 
-<para>The preferred way to remove submenus and items in the menu of an application launcher is to check <guilabel>Hide 
+<para>The preferred way to remove submenus and items in the menu of an application launcher is to check <guilabel>Hidden 
 entry</guilabel> on the <guilabel>General</guilabel> tab and switch to the hidden view mode. 
 In this mode it is easy to revert changes without destroying the menu structure.
 The only drawback is that you have to hide all entries in a submenu manually to 
@@ -182,7 +182,7 @@ to the bottom of the tree to make it a top level entry.
 <para>There is no way to transfer menu settings using the &GUI;, you have to do that manually 
 and copy the following files to the target user:</para>
 <para>&kmenuedit; stores the menu hierarchy in 
-<filename class="directory">$<envar>HOME</envar>/.config/menus/applications-kmenuedit.menu</filename>
+<filename>$<envar>HOME</envar>/.config/menus/applications-kmenuedit.menu</filename>
 and <filename class="directory">$<envar>HOME</envar>/.local/share/desktop-directories</filename> 
 contains desktop files for submenus you created.
 In <filename class="directory">$<envar>HOME</envar>/.local/share/applications/</filename> you 
