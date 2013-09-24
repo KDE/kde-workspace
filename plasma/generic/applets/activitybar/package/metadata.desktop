@@ -143,10 +143,12 @@ Comment[zh_TW]=切換活動的分頁列
 Type=Service
 Icon=tab-new
 
-X-KDE-ServiceTypes=Plasma/Applet
-X-KDE-Library=plasma_applet_activitybar
-X-KDE-PluginInfo-Author=Marco Martin
-X-KDE-PluginInfo-Email=notmart@gmail.com
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/main.qml
+X-Plasma-DefaultSize=200,50
+
+X-KDE-PluginInfo-Author=Bhushan Shah
+X-KDE-PluginInfo-Email=bhush94@gmail.com
 X-KDE-PluginInfo-Name=activitybar
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://plasma.kde.org/
@@ -157,4 +159,3 @@ X-KDE-PluginInfo-EnabledByDefault=true
 
 X-Plasma-Requires-FileDialog=Unused
 X-Plasma-Requires-LaunchApp=Unused
-

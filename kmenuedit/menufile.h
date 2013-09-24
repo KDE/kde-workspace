@@ -27,6 +27,9 @@
 class MenuFile
 {
 public:
+   static const QString MF_MENU, MF_PUBLIC_ID, MF_SYSTEM_ID, MF_NAME, MF_INCLUDE, MF_EXCLUDE, MF_FILENAME, MF_DELETED, MF_NOTDELETED,
+                         MF_MOVE, MF_OLD, MF_NEW, MF_DIRECTORY, MF_LAYOUT, MF_MENUNAME, MF_SEPARATOR, MF_MERGE;
+
    MenuFile(const QString &file);
    ~MenuFile();
 

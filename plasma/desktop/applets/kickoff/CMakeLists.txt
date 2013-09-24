@@ -7,8 +7,6 @@ plasma_install_package(package org.kde.kickoff)
 #######################################################################################
 # Kickoff Library
 
-configure_file(core/config-kickoff-applets.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kickoff-applets.h)
-
 set(libkickoff_SRCS
     core/applicationmodel.cpp
     core/favoritesmodel.cpp
