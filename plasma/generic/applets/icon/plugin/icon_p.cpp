@@ -50,7 +50,7 @@ void IconPrivate::setUrl(QUrl& url) {
 	    if (m_name.isNull()) {
 		m_name = QFileInfo(m_url.toLocalFile()).fileName();
 	    }
-	} else if (!fi.isDir()) {
+	} else {
 	    QMimeDatabase db;
 	    m_name = fi.baseName();
 	    m_icon = db.mimeTypeForUrl(m_url).iconName();
