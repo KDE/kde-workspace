@@ -20,7 +20,7 @@ target_link_libraries(plasma_engine_soliddevice
   ${KDE4Attic_LIBRARIES}
 )
 
-install(TARGETS plasma_engine_soliddevice DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_soliddevice DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-soliddevice.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
 install(FILES soliddevice.operations DESTINATION ${DATA_INSTALL_DIR}/plasma/services )
 

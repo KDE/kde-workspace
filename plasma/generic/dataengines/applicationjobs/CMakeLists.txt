@@ -23,7 +23,7 @@ target_link_libraries(plasma_engine_applicationjobs
   ${KDE4Attic_LIBRARIES}
 )
 
-install(TARGETS plasma_engine_applicationjobs DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_applicationjobs DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-applicationjobs.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
 install(FILES applicationjobs.operations DESTINATION ${DATA_INSTALL_DIR}/plasma/services)
 

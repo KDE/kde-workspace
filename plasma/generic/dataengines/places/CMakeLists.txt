@@ -20,7 +20,7 @@ target_link_libraries(plasma_engine_places
 )
 
 install(TARGETS plasma_engine_places
-        DESTINATION ${PLUGIN_INSTALL_DIR})
+        DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-places.desktop
         DESTINATION ${SERVICES_INSTALL_DIR} )
 install(FILES org.kde.places.operations

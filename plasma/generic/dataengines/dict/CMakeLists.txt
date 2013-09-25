@@ -14,5 +14,5 @@ target_link_libraries (plasma_engine_dict
   ${QT_QTNETWORK_LIBRARY}
 )
 
-install(TARGETS plasma_engine_dict DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_dict DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-dict.desktop DESTINATION ${SERVICES_INSTALL_DIR})

@@ -38,7 +38,7 @@ target_link_libraries(plasma_engine_statusnotifieritem
   ${KIconThemes_LIBRARIES}
 )
 
-install(TARGETS plasma_engine_statusnotifieritem DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_statusnotifieritem DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-engine-statusnotifieritem.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 install(FILES statusnotifieritem.operations DESTINATION ${DATA_INSTALL_DIR}/plasma/services)
 

@@ -14,7 +14,7 @@ target_link_libraries(plasma_engine_metadata
 		      ${SOPRANO_LIBRARIES} )
                       
 install(TARGETS plasma_engine_metadata
-        DESTINATION ${PLUGIN_INSTALL_DIR})
+        DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
  
 install(FILES plasma-engine-metadata.desktop
         DESTINATION ${SERVICES_INSTALL_DIR})

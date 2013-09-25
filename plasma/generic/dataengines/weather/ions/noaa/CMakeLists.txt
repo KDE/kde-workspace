@@ -4,5 +4,5 @@ target_link_libraries (ion_noaa ${KDE4_SOLID_LIBS} weather_ion)
 
 INSTALL (FILES ion-noaa.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 
-INSTALL (TARGETS ion_noaa DESTINATION ${PLUGIN_INSTALL_DIR})
+INSTALL (TARGETS ion_noaa DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 
