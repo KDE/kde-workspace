@@ -60,8 +60,7 @@ void IconPrivate::setUrl(QUrl& url) {
 	}
     } else {
 	if (m_url.scheme().contains("http")) {
-	    m_name = m_url.toString();
-	    m_name.remove(QRegExp("http://(www.)*"));
+	    m_name = m_url.host();
 	} else if (m_name.isEmpty()) {
 	    m_name = m_url.toString();
 	    if (m_name.endsWith(QLatin1String(":/"))) {
