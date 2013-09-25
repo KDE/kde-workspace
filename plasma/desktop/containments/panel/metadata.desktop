@@ -2,6 +2,20 @@
 Encoding=UTF-8
 Keywords=
 Name=Panel
+Name[be]=Панель
+Name[bn]=প্যানেল
+Name[br]=Panell
+Name[cy]=Panel
+Name[de]=Kontrollleiste
+Name[en_GB]=Panel
+Name[fa]=تابلو
+Name[ga]=Painéal
+Name[ka]=პანელი
+Name[kn]=ಪುಟೀಪು (ಪಾನಲ್)
+Name[uz]=Panel
+Name[uz@cyrillic]=Панел
+Name[vi]=Bảng điều khiển
+Name[xh]=Iqela lenjongo ethile
 Type=Service
 
 X-KDE-ServiceTypes=Plasma/Applet,Plasma/Containment
