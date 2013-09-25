@@ -12,12 +12,12 @@ kservice_desktop_to_json(plasma-dataengine-soliddevice.desktop)
 plasma_add_plugin(plasma_engine_soliddevice ${soliddevice_engine_SRCS})
 
 target_link_libraries(plasma_engine_soliddevice
-  ${Plasma_LIBRARIES}
-  ${Solid_LIBRARIES}
-  ${QT_QTNETWORK_LIBRARY}
-  ${KI18n_LIBRARIES}
+  Qt5::Network
+  KF5::KI18n
+  KF5::KIOCore
+  KF5::plasma
+  KF5::Solid
   ${KDE4Attic_LIBRARIES}
-  ${KDE4_KIO_LIBS}
 )
 
 install(TARGETS plasma_engine_soliddevice DESTINATION ${PLUGIN_INSTALL_DIR})
