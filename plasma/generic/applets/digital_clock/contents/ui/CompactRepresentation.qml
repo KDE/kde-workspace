@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
@@ -24,7 +25,7 @@ Item {
     property int minimumWidth
     property int minimumHeight
     property int formFactor: plasmoid.formFactor
-    property bool constrained:formFactor==Vertical||formFactor==Horizontal
+    property bool constrained: formFactor == PlasmaCore.Types.Vertical || formFactor == PlasmaCore.Types.Horizontal
 
     Locale {
         id: locale
@@ -41,7 +42,13 @@ Item {
         id: time
         font.pixelSize: Math.min(main.width/6, main.height)
         width: Math.max(paintedWidth,time.paintedWidth)
-        text: locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds )
+        //FIXME: Fix enums in locale bindings.
+        text: {
+            if( plasmoid.configuration.showSeconds )
+                return locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithSeconds );
+            else
+                return locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds );
+        }
         horizontalAlignment: main.AlignHCenter
         anchors {
             centerIn: parent
