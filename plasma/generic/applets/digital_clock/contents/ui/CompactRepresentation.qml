@@ -40,6 +40,8 @@ Item {
 
     Components.Label  {
         id: time
+        font.bold: plasmoid.configuration.boldText
+        font.italic: plasmoid.configuration.italicText
         font.pixelSize: Math.min(main.width/6, main.height)
         width: Math.max(paintedWidth,time.paintedWidth)
         //FIXME: Fix enums in locale bindings.

@@ -20,17 +20,31 @@
 
 import QtQuick 2.0
 
-import org.kde.plasma.configuration 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
-ConfigModel {
-    ConfigCategory {
-         name: "General"
-         icon: "preferences-system-time"
-         source: "configGeneral.qml"
+Item {
+    id: appearancePage
+    width: childrenRect.width
+    height: childrenRect.height
+    implicitWidth: mainColumn.implicitWidth
+    implicitHeight: pageColumn.implicitHeight
+
+    property alias cfg_boldText: boldCheckBox.checked
+    property alias cfg_italicText: italicCheckBox.checked
+
+    Column {
+        PlasmaComponents.CheckBox {
+            id: boldCheckBox
+            text: i18n("Bold text")
+            checked: false
+        }
+
+        PlasmaComponents.CheckBox {
+            id: italicCheckBox
+            text: i18n("Italic text")
+            checked: false
+        }
     }
-    ConfigCategory {
-         name: "Appearance"
-         icon: "preferences-desktop-color"
-         source: "configAppearance.qml"
-    }
+
 }
