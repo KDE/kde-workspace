@@ -1,5 +1,15 @@
 [Desktop Entry]
 Name=trash(qml)
+Name[es]=Papelera (qml)
+Name[kk]=trash(qml)
+Name[nl]=trash(qml)
+Name[pt]=Lixo (QML)
+Name[pt_BR]=Lixeira (QML)
+Name[sk]=trash(qml)
+Name[sl]=smeti(qml)
+Name[sv]=Papperskorg (QML)
+Name[uk]=смітник(qml)
+Name[x-test]=xxtrash(qml)xx
 Type=Service
 Icon=user-trash
 X-KDE-ServiceTypes=Plasma/Applet

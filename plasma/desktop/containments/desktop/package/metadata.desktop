@@ -1,5 +1,15 @@
 [Desktop Entry]
 Name=Default Desktop
+Name[es]=Escritorio por omisión
+Name[kk]=Әдетті үстел
+Name[nl]=Standaard bureaublad
+Name[pt]=Ecrã por Omissão
+Name[pt_BR]=Área de trabalho padrão
+Name[sk]=Predvolená plocha
+Name[sl]=Privzeto namizje
+Name[sv]=Standardskrivbord
+Name[uk]=Типова стільниця
+Name[x-test]=xxDefault Desktopxx
 Comment=A clean and simple layout
 Comment[bs]=Čist i jednostavan Izgled
 Comment[ca]=Una disposició neta i senzilla

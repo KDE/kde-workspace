@@ -1,6 +1,26 @@
 [Desktop Entry]
 Name=Declarative Toolbox
+Name[es]=Caja de herramientas declarativa
+Name[kk]=Мәлімдеме құралдары
+Name[nl]=Gereedschapskist voor declaratie
+Name[pt]=Barra Declarativa
+Name[pt_BR]=Barra de ferramentas Declarativa
+Name[sk]=Deklaratívny nástroj
+Name[sl]=Deklarativna orodjarna
+Name[sv]=Deklarativ verktygslåda
+Name[uk]=Декларативний набір інструментів
+Name[x-test]=xxDeclarative Toolboxxx
 Comment=Manage Plasma
+Comment[es]=Gestión de Plasma
+Comment[kk]=Plasma басқаруы
+Comment[nl]=Plasma beheren
+Comment[pt]=Gerir o Plasma
+Comment[pt_BR]=Gerencia o Plasma
+Comment[sk]=Spravovať Plasmu
+Comment[sl]=Upravljanje Plasme
+Comment[sv]=Hantera Plasma
+Comment[uk]=Керування Плазмою
+Comment[x-test]=xxManage Plasmaxx
 Encoding=UTF-8
 
 Type=Service
