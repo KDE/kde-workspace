@@ -5,6 +5,7 @@ Name=Panel
 Name[be]=Панель
 Name[bn]=প্যানেল
 Name[br]=Panell
+Name[cs]=Panel
 Name[cy]=Panel
 Name[de]=Kontrollleiste
 Name[en_GB]=Panel
@@ -26,6 +27,7 @@ Name[uz@cyrillic]=Панел
 Name[vi]=Bảng điều khiển
 Name[xh]=Iqela lenjongo ethile
 Name[x-test]=xxPanelxx
+Name[zh_TW]=面板
 Type=Service
 
 X-KDE-ServiceTypes=Plasma/Applet,Plasma/Containment

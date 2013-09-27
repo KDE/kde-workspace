@@ -1,6 +1,7 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=Window list
+Name[cs]=Seznam oken
 Name[es]=Lista de ventanas
 Name[kk]=Терезе тізімі
 Name[nl]=Vensterlijst
@@ -11,6 +12,7 @@ Name[sl]=Seznam oken
 Name[sv]=Fönsterlista
 Name[uk]=Список вікон
 Name[x-test]=xxWindow listxx
+Name[zh_TW]=視窗列表
 Comment=Plasmoid to show list of opened windows.
 Comment[ar]=بلازمويد لعرض لائحة بالنوافذ المفتوحة
 Comment[ast]=Plasmoide qu'amuesa una llista de les ventanes abiertes.

@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Panel Toolbox
+Name[cs]=Nástroje panelu
 Name[es]=Caja de herramientas del panel
 Name[kk]=Панель құралдары
 Name[nl]=Paneelhulpmiddelen
@@ -10,6 +11,7 @@ Name[sl]=Orodjarna za pult
 Name[sv]=Panelverktygslåda
 Name[uk]=Набір інструментів панелі
 Name[x-test]=xxPanel Toolboxxx
+Name[zh_TW]=面板工具盒
 Comment=Manage Plasma panel
 Comment[es]=Gestión del panel de Plasma
 Comment[kk]=Plasma панелін басқару
@@ -21,6 +23,7 @@ Comment[sl]=Upravljanje pulta Plasme
 Comment[sv]=Hantera Plasma-panel
 Comment[uk]=Керування панеллю Плазми
 Comment[x-test]=xxManage Plasma panelxx
+Comment[zh_TW]=管理 Plasma 面板
 Encoding=UTF-8
 
 Type=Service

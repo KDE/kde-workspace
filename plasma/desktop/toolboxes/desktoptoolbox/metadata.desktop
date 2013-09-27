@@ -10,6 +10,7 @@ Name[sl]=Deklarativna orodjarna
 Name[sv]=Deklarativ verktygslåda
 Name[uk]=Декларативний набір інструментів
 Name[x-test]=xxDeclarative Toolboxxx
+Name[zh_TW]=宣告元件工具盒
 Comment=Manage Plasma
 Comment[es]=Gestión de Plasma
 Comment[kk]=Plasma басқаруы
@@ -21,6 +22,7 @@ Comment[sl]=Upravljanje Plasme
 Comment[sv]=Hantera Plasma
 Comment[uk]=Керування Плазмою
 Comment[x-test]=xxManage Plasmaxx
+Comment[zh_TW]=管理 Plasma
 Encoding=UTF-8
 
 Type=Service
