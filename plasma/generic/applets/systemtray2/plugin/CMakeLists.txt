@@ -1,5 +1,6 @@
 set(systemtrayplugin_SRCS
     systemtrayplugin.cpp
+    systemtraymanager.cpp
     )
 
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})

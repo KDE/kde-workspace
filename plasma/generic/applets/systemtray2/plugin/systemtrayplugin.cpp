@@ -19,13 +19,13 @@
  */
 
 #include "systemtrayplugin.h"
-//#include "systemtraymodel.h"
+#include "systemtraymanager.h"
 #include <QtQml>
 
 void SystemTrayPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QStringLiteral("private.org.kde.plasma.systemtray"));
-    //qmlRegisterType<SystemTrayModel>(uri, 1, 0,"SystemTrayModel");
+    qmlRegisterType<SystemtrayManager>(uri, 1, 0,"SystemtrayManager");
 }
 
 #include "systemtrayplugin.moc"
