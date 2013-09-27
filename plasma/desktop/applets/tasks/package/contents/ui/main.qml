@@ -45,7 +45,7 @@ Item {
 
     property int activeWindowId: 0
 
-    property int optimumCapacity: Layout.optimumCapacity()
+    property int optimumCapacity: Layout.optimumCapacity(width, height)
 
     property int preferredWidth: taskList.width
     property int preferredHeight: taskList.height

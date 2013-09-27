@@ -124,6 +124,9 @@ void Tasks::init()
     QDeclarativeProperty preferredHeight(m_declarativeWidget->rootObject(), "preferredHeight");
     preferredHeight.connectNotifySignal(this, SLOT(changeSizeHint()));
 
+    QDeclarativeProperty optimumCapacity(m_declarativeWidget->rootObject(), "optimumCapacity");
+    optimumCapacity.connectNotifySignal(this, SLOT(optimumCapacityChanged()));
+
     connect(m_declarativeWidget->rootObject(), SIGNAL(activateItem(int,bool)), this, SLOT(activateItem(int,bool)));
     connect(m_declarativeWidget->rootObject(), SIGNAL(itemContextMenu(int)), this, SLOT(itemContextMenu(int)));
     connect(m_declarativeWidget->rootObject(), SIGNAL(itemMove(int,int)), this, SLOT(itemMove(int,int)));
@@ -139,7 +142,6 @@ void Tasks::init()
 void Tasks::changeSizeHint()
 {
     emit sizeHintChanged(Qt::PreferredSize);
-    adjustGroupingStrategy();
 }
 
 QSizeF Tasks::sizeHint(Qt::SizeHint which, const QSizeF &constraint) const
@@ -170,16 +172,12 @@ void Tasks::constraintsEvent(Plasma::Constraints constraints)
         m_declarativeWidget->rootObject()->setProperty("location", location());
     }
 
-    if (constraints & Plasma::SizeConstraint) {
-        adjustGroupingStrategy();
-    }
-
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 }
 
-void Tasks::adjustGroupingStrategy()
+void Tasks::optimumCapacityChanged()
 {
-    m_groupManager->setFullLimit(m_declarativeWidget->rootObject()->property("optimumCapacity").toInt());
+    m_groupManager->setFullLimit(m_declarativeWidget->rootObject()->property("optimumCapacity").toInt() + 1);
 }
 
 void Tasks::activateItem(int id, bool toggle)
@@ -415,7 +413,6 @@ void Tasks::configChanged()
 
     const bool onlyGroupWhenFull = cg.readEntry("groupWhenFull", true);
     if (onlyGroupWhenFull != m_groupManager->onlyGroupWhenFull()) {
-        adjustGroupingStrategy();
         m_groupManager->setOnlyGroupWhenFull(onlyGroupWhenFull);
         changed = true;
     }

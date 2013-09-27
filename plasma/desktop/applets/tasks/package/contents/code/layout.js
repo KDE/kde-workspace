@@ -67,8 +67,8 @@ function full() {
     return (maxStripes() == calculateStripes());
 }
 
-function optimumCapacity() {
-    var length = tasks.vertical ? taskList.height : taskList.width;
+function optimumCapacity(width, height) {
+    var length = tasks.vertical ? height : width;
     var maximum = tasks.vertical ? preferredMaxHeight() : preferredMaxWidth();
 
     return Math.ceil(length / maximum) * maxStripes();

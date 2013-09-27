@@ -69,12 +69,11 @@ class Tasks : public Plasma::Applet
         void handleActiveWindowChanged(WId activeWindow);
 
         void changeSizeHint();
+        void optimumCapacityChanged();
         void configAccepted();
         void dialogGroupingChanged(int index);
 
     private:
-        void adjustGroupingStrategy();
-
         GroupManager *m_groupManager;
         TaskManager::TasksModel *m_tasksModel;
 
