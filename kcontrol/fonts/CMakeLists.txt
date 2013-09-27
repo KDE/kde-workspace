@@ -1,6 +1,3 @@
-
-KDE4_NO_ENABLE_FINAL(fonts)
-
 if(FONTCONFIG_FOUND)
     include_directories(${FONTCONFIG_INCLUDE_DIR})
 endif(FONTCONFIG_FOUND)
@@ -17,7 +14,7 @@ endif(Q_WS_X11)
 kde4_add_plugin(kcm_fonts ${kcm_fonts_PART_SRCS})
 
 
-target_link_libraries(kcm_fonts ${KDE4_KDEUI_LIBS} ${FREETYPE_LIBRARIES} ${QT_QTXML_LIBRARY})
+target_link_libraries(kcm_fonts Qt5::Xml KF5::KCMUtils KF5::KI18n ${KDE4Support_LIBRARIES} ${FREETYPE_LIBRARIES})
 
 if(Q_WS_X11)
     if(FONTCONFIG_FOUND)

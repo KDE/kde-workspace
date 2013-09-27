@@ -9,7 +9,6 @@
 #include <config-workspace.h>
 
 #include "fonts.h"
-#include "fonts.moc"
 
 #include <stdlib.h>
 
@@ -38,7 +37,7 @@
 #include <KConfig>
 #include <KStandardDirs>
 #include <KDebug>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KPluginFactory>
 
 #include "../krdb/krdb.h"
@@ -135,7 +134,6 @@ static const char* const * const aaPixmaps[]={ aa_rgb_xpm, aa_bgr_xpm, aa_vrgb_x
 
 /**** DLL Interface ****/
 K_PLUGIN_FACTORY(FontFactory, registerPlugin<KFonts>(); )
-K_EXPORT_PLUGIN(FontFactory("kcmfonts"))
 
 /**** FontUseItem ****/
 
@@ -170,7 +168,7 @@ void FontUseItem::readFont()
 
   bool deleteme = false;
   if (_rcfile.isEmpty())
-    config = KGlobal::config().data();
+    config = KSharedConfig::openConfig().data();
   else
   {
     config = new KConfig(_rcfile);
@@ -188,7 +186,7 @@ void FontUseItem::writeFont()
   KConfig *config;
 
   if (_rcfile.isEmpty()) {
-    config = KGlobal::config().data();
+    config = KSharedConfig::openConfig().data();
     KConfigGroup(config, _rcgroup).writeEntry(_rckey, font(), KConfig::Normal|KConfig::Global);
   } else {
     config = new KConfig(KStandardDirs::locateLocal("config", _rcfile));
@@ -498,7 +496,7 @@ int FontAASettings::exec()
 /**** KFonts ****/
 
 KFonts::KFonts(QWidget *parent, const QVariantList &args)
-    :   KCModule(FontFactory::componentData(), parent, args)
+    :   KCModule(parent, args)
 {
   QStringList nameGroupKeyRc;
 
@@ -748,7 +746,7 @@ void KFonts::save()
   for(; it!=end; ++it)
       (*it)->writeFont();
 
-  KGlobal::config()->sync();
+  KSharedConfig::openConfig()->sync();
 
   KConfig _cfgfonts( "kcmfonts" );
   KConfigGroup cfgfonts(&_cfgfonts, "General");
@@ -845,5 +843,7 @@ void KFonts::slotCfgAa()
   }
 #endif
 }
+
+#include "fonts.moc"
 
 // vim:ts=2:sw=2:tw=78

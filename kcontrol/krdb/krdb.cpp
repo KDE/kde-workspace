@@ -45,7 +45,7 @@
 #include <kprocess.h>
 #include <ksavefile.h>
 #include <ktemporaryfile.h>
-#include <klocale.h>
+#include <KLocalizedString>
 #include <kstyle.h>
 
 #include "krdb.h"
@@ -97,10 +97,13 @@ static void applyGtkStyles(bool active, int version)
    list.removeAll(gtkkde);
    list.append(gtkkde);
 
+#warning: needs porting
+#if 0
    // Pass env. var to kdeinit.
    QString name = gtkEnvVar(version);
    QString value = QFile::encodeName(list.join(":"));
    KToolInvocation::klauncher()->setLaunchEnv(name, value);
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -418,7 +421,6 @@ void runRdb( uint flags )
   if (exportColors)
   {
     KGlobal::dirs()->addResourceType("appdefaults", "data", "kdisplay/app-defaults/");
-    KGlobal::locale()->insertCatalog("krdb");
 
     QString preproc;
     QColor backCol = newPal.color( QPalette::Active, QPalette::Background );
