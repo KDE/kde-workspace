@@ -25,7 +25,7 @@
 
 #include <kaboutdata.h>
 #include <kglobal.h>
-#include <klocale.h>
+#include <KLocalizedString>
 #include <kdialog.h>
 
 #include <stdio.h>
@@ -37,18 +37,17 @@
 //---------------------------------------------------------------------------------------------
 
 K_PLUGIN_FACTORY(JoystickFactory, registerPlugin<Joystick>();)
-K_EXPORT_PLUGIN(JoystickFactory("joystick"))
 
 //---------------------------------------------------------------------------------------------
 
 Joystick::Joystick(QWidget *parent, const QVariantList &)
-  : KCModule(JoystickFactory::componentData(), parent)
+  : KCModule(parent)
 {
   setButtons(Help);
-  setAboutData(new KAboutData("kcmjoystick", 0, ki18n("KDE Joystick Control Module"), "1.0",
-                               ki18n("KDE System Settings Module to test Joysticks"),
-                               KAboutData::License_GPL, ki18n("(c) 2004, Martin Koller"),
-                               KLocalizedString(), "kollix@aon.at"));
+  setAboutData(new KAboutData("kcmjoystick", QString(), i18n("KDE Joystick Control Module"), "1.0",
+                               i18n("KDE System Settings Module to test Joysticks"),
+                               KAboutData::License_GPL, i18n("(c) 2004, Martin Koller"),
+                               QString(), "kollix@aon.at"));
 
   setQuickHelp( i18n("<h1>Joystick</h1>"
               "This module helps to check if your joystick is working correctly.<br />"

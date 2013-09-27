@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 joystick
+Exec=kcmshell5 joystick
 
 X-DocPath=kcontrol/joystick/index.html
 Terminal=false
