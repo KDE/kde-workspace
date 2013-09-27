@@ -248,7 +248,7 @@ add_subdirectory(libs)
 #
 # # system settings (kcontrol replacement)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-#    macro_optional_add_subdirectory( systemsettings )
+   ecm_optional_add_subdirectory( systemsettings )
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #
 # # core apps
