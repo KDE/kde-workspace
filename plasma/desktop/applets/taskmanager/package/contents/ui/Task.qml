@@ -25,8 +25,6 @@ import org.kde.qtextracomponents 2.0
 
 import org.kde.plasma.private.taskmanager 0.1 as TaskManager
 
-import org.kde.locale 2.0
-
 import "../code/layout.js" as Layout
 import "../code/tools.js" as TaskTools
 
@@ -204,7 +202,6 @@ MouseEventListener {
             }
         ]
     }
-Locale { id: foo }
 
     TaskManager.TextLabel {
         id: label
@@ -221,7 +218,7 @@ Locale { id: foo }
 
         enabled: !model.Minimized
 
-        text: foo.formatLocaleTime("15:00:34", Locale.TimeWithoutSeconds)
+        text: model.DisplayRole
         color: theme.textColor
         elide: !inPopup
     }
