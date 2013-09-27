@@ -1,0 +1,2 @@
+module private.org.kde.plasma.systemtray
+plugin systemtrayplugin
