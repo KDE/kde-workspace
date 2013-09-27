@@ -269,7 +269,7 @@ if(NOT WIN32)
 endif(NOT WIN32)
 #
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-#    macro_optional_add_subdirectory(kcontrol)
+   ecm_optional_add_subdirectory(kcontrol)
 #    macro_optional_add_subdirectory(klipper)
 #    macro_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)
