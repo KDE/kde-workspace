@@ -23,7 +23,7 @@
 #include <QDesktopWidget>
 
 #include <kcmoduleloader.h>
-#include <klocale.h>
+#include <KLocalizedString>
 #include <kdialog.h>
 
 #include "display.h"
@@ -33,10 +33,9 @@
 K_PLUGIN_FACTORY(DisplayFactory,
         registerPlugin<KCMDisplay>();
         )
-K_EXPORT_PLUGIN(DisplayFactory("display"))
 
 KCMDisplay::KCMDisplay( QWidget *parent, const QVariantList & )
-    : KCModule( DisplayFactory::componentData(), parent )
+    : KCModule( parent )
     , m_changed(false)
 {
   m_tabs = new QTabWidget( this );
