@@ -21,7 +21,7 @@
 #ifndef DBUSSYSTEMTRAYTASK_H
 #define DBUSSYSTEMTRAYTASK_H
 
-#include "../../core/task.h"
+#include "../../task.h"
 
 #include <Plasma/DataEngine>
 

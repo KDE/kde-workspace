@@ -19,7 +19,7 @@
  */
 
 #include "systemtrayplugin.h"
-#include "systemtraymanager.h"
+#include "host.h"
 #include "task.h"
 #include <QtQml>
 
@@ -27,8 +27,8 @@ void SystemTrayPlugin::registerTypes(const char *uri)
 {
     qDebug() << "################## LOADING PLUGIN.";
     Q_ASSERT(uri == QStringLiteral("org.kde.private.systemtray"));
-    qmlRegisterType<SystemtrayManager>(uri, 2, 0,"SystemtrayManager");
-    qmlRegisterUncreatableType<SystemTray::Task>(uri, 2, 0, "Task", "DragDropEvent cannot be created from QML.");
+    qmlRegisterType<SystemTray::Host>(uri, 2, 0,"Host");
+    qmlRegisterUncreatableType<SystemTray::Task>(uri, 2, 0, "Task", "Task cannot be created from QML.");
 }
 
 #include "systemtrayplugin.moc"

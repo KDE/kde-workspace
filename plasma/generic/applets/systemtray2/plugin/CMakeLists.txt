@@ -1,8 +1,14 @@
 set(systemtrayplugin_SRCS
     systemtrayplugin.cpp
-    systemtraymanager.cpp
+    host.cpp
+    manager.cpp
+    protocol.cpp
     task.cpp
-    )
+
+    protocols/dbussystemtray/dbussystemtraytask.cpp
+    protocols/dbussystemtray/dbussystemtrayprotocol.cpp
+
+)
 
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
 
@@ -13,6 +19,10 @@ target_link_libraries(systemtrayplugin
     ${KDECLARATIVE_LIBRARIES}
     ${Plasma_LIBRARIES}
     KF5::KWindowSystem
+    ${KIconThemes_LIBRARIES}
+
+    ${KDE4Attic_LIBRARIES}
+    ${KDE4Support_LIBRARIES}
     )
 
 set(plugin_install_path ${QML_INSTALL_DIR}/org/kde/private/systemtray)

@@ -31,6 +31,10 @@ Item {
 
     property int _h: 32
 
+    SystemTray.Host {
+        id: host
+    }
+
     Flow {
         spacing: 4
         anchors.fill: parent

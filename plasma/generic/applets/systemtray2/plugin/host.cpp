@@ -19,38 +19,50 @@
  ***************************************************************************/
 
 
-#ifndef SYSTEMTRAYMANAGER_H
-#define SYSTEMTRAYMANAGER_H
+#include "host.h"
+#include "manager.h"
 
-#include "task.h"
 
-#include <QObject>
+#include <QDebug>
+#include <QTimer>
+#include <QVariant>
 
-class SystemtrayManagerPrivate;
-
-class SystemtrayManager : public QObject
+namespace SystemTray
 {
-    Q_OBJECT
 
-    //Q_PROPERTY(QDeclarativeListProperty<Task> tasks READ tasks NOTIFY tasksChanged)
+Manager *SystemTray::Host::s_manager = 0;
+int SystemTray::Host::s_managerUsage = 0;
 
-    public:
-        SystemtrayManager(QObject* parent = 0);
-        virtual ~SystemtrayManager();
-
-
-        void init();
-    public Q_SLOTS:
-        //QDeclarativeListProperty<Task> tasks();
-
-
-    Q_SIGNALS:
-        void tasksChanged();
-
-
-    private:
-        SystemtrayManagerPrivate* d;
-
+class SystemtrayManagerPrivate {
+public:
+    Host *q;
+    QHash<QString, Task*> tasks;
 };
 
-#endif // SYSTEMTRAYMANAGER_H
+Host::Host(QObject* parent) :
+    QObject(parent)
+{
+    d = new SystemtrayManagerPrivate;
+    QTimer::singleShot(2000, this, SLOT(init()));
+}
+
+Host::~Host()
+{
+    delete d;
+}
+
+
+void Host::init()
+{
+    if (!s_manager) {
+        qDebug() << "ST Initialising manager";
+        s_manager = new SystemTray::Manager();
+    }
+
+    ++s_managerUsage;
+}
+
+
+} // namespace
+
+#include "host.moc"

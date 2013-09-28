@@ -31,8 +31,8 @@
 #include "task.h"
 
 //#include "../protocols/fdo/fdoprotocol.h"
-#include "../protocols/plasmoid/plasmoidtaskprotocol.h"
-#include "../protocols/dbussystemtray/dbussystemtrayprotocol.h"
+// #include "../protocols/plasmoid/plasmoidtaskprotocol.h"
+#include "protocols/dbussystemtray/dbussystemtrayprotocol.h"
 
 #include <QTimer>
 
@@ -43,8 +43,7 @@ class Manager::Private
 {
 public:
     Private(Manager *manager)
-        : q(manager),
-          plasmoidProtocol(0)
+        : q(manager)
     {
     }
 
@@ -52,16 +51,17 @@ public:
 
     Manager *q;
     QList<Task *> tasks;
-    PlasmoidProtocol *plasmoidProtocol;
+//     PlasmoidProtocol *plasmoidProtocol;
 };
 
 
 Manager::Manager()
     : d(new Private(this))
 {
-    d->plasmoidProtocol = new PlasmoidProtocol(this);
-    d->setupProtocol(d->plasmoidProtocol);
+//     d->plasmoidProtocol = new PlasmoidProtocol(this);
+//     d->setupProtocol(d->plasmoidProtocol);
     //d->setupProtocol(new SystemTray::FdoProtocol(this));
+    qDebug() << "ST new manager";
     d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
 }
 
@@ -94,30 +94,30 @@ void Manager::removeTask(Task *task)
     emit taskRemoved(task);
 }
 
-void Manager::forwardConstraintsEvent(Plasma::Types::Constraints constraints, Plasma::Applet *host)
-{
-    d->plasmoidProtocol->forwardConstraintsEvent(constraints, host);
-}
-
-void Manager::loadApplets(Plasma::Applet *parent)
-{
-    d->plasmoidProtocol->loadFromConfig(parent);
-}
-
-void Manager::addApplet(const QString appletName, Plasma::Applet *parent)
-{
-    d->plasmoidProtocol->addApplet(appletName, 0, parent);
-}
-
-void Manager::removeApplet(const QString appletName, Plasma::Applet *parent)
-{
-    d->plasmoidProtocol->removeApplet(appletName, parent);
-}
-
-QStringList Manager::applets(Plasma::Applet *parent) const
-{
-    return d->plasmoidProtocol->applets(parent);
-}
+// void Manager::forwardConstraintsEvent(Plasma::Types::Constraints constraints, Plasma::Applet *host)
+// {
+//     d->plasmoidProtocol->forwardConstraintsEvent(constraints, host);
+// }
+//
+// void Manager::loadApplets(Plasma::Applet *parent)
+// {
+//     d->plasmoidProtocol->loadFromConfig(parent);
+// }
+//
+// void Manager::addApplet(const QString appletName, Plasma::Applet *parent)
+// {
+//     d->plasmoidProtocol->addApplet(appletName, 0, parent);
+// }
+//
+// void Manager::removeApplet(const QString appletName, Plasma::Applet *parent)
+// {
+//     d->plasmoidProtocol->removeApplet(appletName, parent);
+// }
+//
+// QStringList Manager::applets(Plasma::Applet *parent) const
+// {
+//     return d->plasmoidProtocol->applets(parent);
+// }
 
 
 void Manager::Private::setupProtocol(Protocol *protocol)

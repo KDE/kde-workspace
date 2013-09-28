@@ -21,9 +21,9 @@ add_subdirectory(soliddevice)
 
 add_subdirectory(time)
 #add_subdirectory(weather)
-if (DBUSMENUQT_FOUND)
+#if (DBUSMENUQT_FOUND)
   add_subdirectory(statusnotifieritem)
-endif ()
+  #endif ()
 #add_subdirectory(share)
 
 if (NepomukCore_FOUND AND Soprano_FOUND)

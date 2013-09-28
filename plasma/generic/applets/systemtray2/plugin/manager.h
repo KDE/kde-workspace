@@ -29,15 +29,15 @@
 
 #include <plasma/plasma.h>
 
-namespace Plasma
-{
-class Applet;
-}
+// namespace Plasma
+// {
+// class Applet;
+// }
 
 namespace SystemTray
 {
 
-class Applet;
+// class Applet;
 class Notification;
 class Task;
 class Job;
@@ -59,15 +59,15 @@ public:
      **/
     QList<Task*> tasks() const;
 
-    void forwardConstraintsEvent(Plasma::Types::Constraints constraints, Plasma::Applet *host);
-
-    void loadApplets(Plasma::Applet *parent);
-
-    void addApplet(const QString appletName, Plasma::Applet *parent);
-
-    void removeApplet(const QString appletName, Plasma::Applet *parent);
-
-    QStringList applets(Plasma::Applet *parent) const;
+//     void forwardConstraintsEvent(Plasma::Types::Constraints constraints, Plasma::Applet *host);
+//
+//     void loadApplets(Plasma::Applet *parent);
+//
+//     void addApplet(const QString appletName, Plasma::Applet *parent);
+//
+//     void removeApplet(const QString appletName, Plasma::Applet *parent);
+//
+//     QStringList applets(Plasma::Applet *parent) const;
 
 Q_SIGNALS:
     /**
@@ -94,7 +94,7 @@ private:
     class Private;
     Private* const d;
 
-    friend class Applet;
+//     friend class Applet;
 };
 
 }

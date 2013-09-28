@@ -20,7 +20,7 @@
 #ifndef DBUSSYSTEMTRAYPROTOCOL_H
 #define DBUSSYSTEMTRAYPROTOCOL_H
 
-#include "../../core/protocol.h"
+#include "../../protocol.h"
 
 #include <Plasma/DataEngine>
 #include <Plasma/DataEngineConsumer>
