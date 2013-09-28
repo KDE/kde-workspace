@@ -85,6 +85,7 @@ void Manager::addTask(Task *task)
 
     d->tasks.append(task);
     emit taskAdded(task);
+    emit tasksChanged();
 }
 
 void Manager::removeTask(Task *task)
@@ -92,6 +93,7 @@ void Manager::removeTask(Task *task)
     d->tasks.removeAll(task);
     disconnect(task, 0, this, 0);
     emit taskRemoved(task);
+    emit tasksChanged();
 }
 
 // void Manager::forwardConstraintsEvent(Plasma::Types::Constraints constraints, Plasma::Applet *host)

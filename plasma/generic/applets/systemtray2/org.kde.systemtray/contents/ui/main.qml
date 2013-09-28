@@ -35,6 +35,40 @@ Item {
         id: host
     }
 
+    GridView {
+        id: gridView
+
+        anchors.fill: parent
+        //spacing: 4
+        //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
+
+        model: host.tasks
+        delegate: Component {
+            Item {
+                width: _h
+                height: _h
+                //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.4; }
+                PlasmaComponents.Label {
+                    anchors.fill: parent
+                    //text: "task"
+                }
+                PlasmaCore.IconItem {
+                    anchors.fill: parent
+                    source: icon
+                }
+                Component.onCompleted: {
+                    //print("YAY ST Created item");
+                }
+            }
+        }
+    }
+
+    PlasmaComponents.Label {
+        anchors { bottom: parent.bottom; right: parent.right }
+        text: "Items: "
+    }
+
+    /*
     Flow {
         spacing: 4
         anchors.fill: parent
@@ -65,4 +99,6 @@ Item {
             height: width
         }
     }
+    */
+
 }

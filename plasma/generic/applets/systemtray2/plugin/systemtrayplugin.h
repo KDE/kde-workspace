@@ -24,6 +24,8 @@
 #include <QQmlEngine>
 #include <QQmlExtensionPlugin>
 
+namespace SystemTray {
+
 class SystemTrayPlugin : public QQmlExtensionPlugin
 {
     Q_OBJECT
@@ -33,4 +35,5 @@ class SystemTrayPlugin : public QQmlExtensionPlugin
         virtual void registerTypes(const char *uri);
 };
 
+}
 #endif //SYSTEMTRAYPLUGIN_H

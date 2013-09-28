@@ -48,6 +48,10 @@ class Task : public QObject
 {
     Q_OBJECT
 
+    Q_ENUMS(Status)
+    Q_ENUMS(Category)
+    Q_ENUMS(TaskType)
+
     Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
@@ -61,7 +65,6 @@ public:
         Active = 2,
         NeedsAttention = 3
     };
-    Q_ENUMS(Status)
 
     enum Category {
         UnknownCategory = 0,
@@ -70,7 +73,6 @@ public:
         SystemServices = 3,
         Hardware = 4
     };
-    Q_ENUMS(Category)
 
     /**
      * Derived classes should provide its type. We assume that number of different types of tasks is
@@ -83,8 +85,8 @@ public:
         TypeStatusItem,
         TypeUserDefined
     };
-    Q_ENUMS(TaskType)
 
+    Task(QObject *parent = 0);
 
     virtual ~Task();
 
@@ -108,13 +110,13 @@ public:
      * a new widget can not be created. isEmbeddable() will return false
      * under these circumstances.
      **/
-    virtual bool isEmbeddable() const = 0;
+    virtual bool isEmbeddable() const;
 
     /**
      * Returns whether this task is represented as widget or it provides only information (icon, name, state, etc)
      * @return true if task is represented as widget.
      */
-    virtual bool isWidget() const = 0;
+    virtual bool isWidget() const;
 
     /**
      * Returns the name of this task that should be presented to the user
@@ -128,7 +130,7 @@ public:
      *
      * The identifier is valid between restarts and so is safe to save
      **/
-    virtual QString taskId() const = 0;
+    virtual QString taskId() const;
 
     /**
      * Returns an icon that can be associated with this task
@@ -136,7 +138,7 @@ public:
      * The icon returned is not necessarily the same icon that appears
      * in the tray icon itself.
      **/
-    virtual QIcon icon() const = 0;
+    virtual QIcon icon() const;
 
     /**
      * @return true if this task is current being used, e.g. it has created
@@ -171,7 +173,7 @@ public:
      * the same for each call of function.
      * @return a type of task.
      */
-    virtual TaskType type() const = 0;
+    virtual TaskType type() const;
 
 
     /**
@@ -208,7 +210,6 @@ Q_SIGNALS:
     void destroyed(SystemTray::Task *task);
 
 protected:
-    Task(QObject *parent = 0);
 //     QHash<Plasma::Applet *, QQuickItem *> widgetsByHost() const;
 //     QQuickItem *forget(Plasma::Applet *host);
 //

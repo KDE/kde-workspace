@@ -71,6 +71,10 @@ public:
 
 Q_SIGNALS:
     /**
+     * Emitted whenever the list of tasks has changed
+     **/
+    void tasksChanged();
+    /**
      * Emitted when a new task has been added
      **/
     void taskAdded(SystemTray::Task *task);

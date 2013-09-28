@@ -22,8 +22,7 @@
 #ifndef SYSTEMTRAYMANAGER__H
 #define SYSTEMTRAYMANAGER__H
 
-//#include "task.h"
-
+#include <QQmlListProperty>
 #include <QObject>
 
 namespace SystemTray {
@@ -39,27 +38,25 @@ class Host : public QObject
 {
     Q_OBJECT
 
-    //Q_PROPERTY(QDeclarativeListProperty<Task> tasks READ tasks NOTIFY tasksChanged)
+    Q_PROPERTY(QQmlListProperty<SystemTray::Task> tasks READ tasks NOTIFY tasksChanged)
 
 public:
     Host(QObject* parent = 0);
     virtual ~Host();
 
-    //QDeclarativeListProperty<Task> tasks();
 
 public Q_SLOTS:
-
+    QQmlListProperty<SystemTray::Task> tasks();
     void init();
 
 
 Q_SIGNALS:
     void tasksChanged();
 
-
 private:
     static SystemTray::Manager *s_manager;
     static int s_managerUsage;
-        SystemtrayManagerPrivate* d;
+    SystemtrayManagerPrivate* d;
 
 };
 

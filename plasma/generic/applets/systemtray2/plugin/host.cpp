@@ -21,7 +21,7 @@
 
 #include "host.h"
 #include "manager.h"
-
+#include "task.h"
 
 #include <QDebug>
 #include <QTimer>
@@ -36,14 +36,17 @@ int SystemTray::Host::s_managerUsage = 0;
 class SystemtrayManagerPrivate {
 public:
     Host *q;
-    QHash<QString, Task*> tasks;
+    //QHash<QString, Task*> tasks;
+    QList<SystemTray::Task*> tasks;
+    //QList<
 };
 
 Host::Host(QObject* parent) :
     QObject(parent)
 {
     d = new SystemtrayManagerPrivate;
-    QTimer::singleShot(2000, this, SLOT(init()));
+    //QTimer::singleShot(2000, this, SLOT(init()));
+    init();
 }
 
 Host::~Host()
@@ -57,11 +60,32 @@ void Host::init()
     if (!s_manager) {
         qDebug() << "ST Initialising manager";
         s_manager = new SystemTray::Manager();
+        connect(s_manager, SIGNAL(tasksChanged()), this, SIGNAL(tasksChanged()));
     }
 
     ++s_managerUsage;
+
+    emit tasksChanged();
 }
 
+QQmlListProperty<SystemTray::Task> Host::tasks()
+{
+    if (s_manager) {
+        qDebug() << "ST task begin";
+        d->tasks = s_manager->tasks();
+        //d->tasks.clear();
+        QQmlListProperty<SystemTray::Task> l(this, d->tasks);
+        //d->tasks = l;
+        //d->tasks <<  s_manager->tasks();
+        //Task* _t = s_manager->tasks().at(0);
+
+        //qDebug() << " ======> ST: tasks: " << d->tasks.count();
+        return l;
+    }
+    QQmlListProperty<SystemTray::Task> l;
+    qDebug() << "ST Empty list";
+    return l;
+}
 
 } // namespace
 

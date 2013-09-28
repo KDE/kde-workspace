@@ -23,12 +23,16 @@
 #include "task.h"
 #include <QtQml>
 
+namespace SystemTray {
+
 void SystemTrayPlugin::registerTypes(const char *uri)
 {
     qDebug() << "################## LOADING PLUGIN.";
     Q_ASSERT(uri == QStringLiteral("org.kde.private.systemtray"));
     qmlRegisterType<SystemTray::Host>(uri, 2, 0,"Host");
-    qmlRegisterUncreatableType<SystemTray::Task>(uri, 2, 0, "Task", "Task cannot be created from QML.");
+    qmlRegisterType<SystemTray::Task>(uri, 2, 0, "Task");
+
+}
 }
 
 #include "systemtrayplugin.moc"
