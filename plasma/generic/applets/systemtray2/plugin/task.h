@@ -93,13 +93,13 @@ public:
      *
      * isEmbeddable() should be checked before creating a new widget.
      **/
-    QQuickItem* widget(Plasma::Applet *host, bool createIfNecessary = true);
+//     QQuickItem* widget(Plasma::Applet *host, bool createIfNecessary = true);
 
     /**
      * @return whether this task is embeddable; true if there is already a widget
      * for this host.
      */
-    bool isEmbeddable(SystemTray::Applet *host);
+//     bool isEmbeddable(SystemTray::Applet *host);
 
     /**
      * Returns whether this task can be embeddable
@@ -142,7 +142,7 @@ public:
      * @return true if this task is current being used, e.g. it has created
      * widgets for one or more hosts
      */
-    bool isUsed() const;
+//     bool isUsed() const;
 
     /**
      * Sets the category of the task, UnknownCategory by default
@@ -178,7 +178,7 @@ public:
      * Can be used by the hostwhen they no longer wish to use the widget associated
      * with the host.
      */
-    virtual void abandon(Plasma::Applet *host);
+//     virtual void abandon(Plasma::Applet *host);
 
 Q_SIGNALS:
     /**
@@ -209,21 +209,21 @@ Q_SIGNALS:
 
 protected:
     Task(QObject *parent = 0);
-    QHash<Plasma::Applet *, QQuickItem *> widgetsByHost() const;
-    QQuickItem *forget(Plasma::Applet *host);
-
-    /**
-     * Called when a new widget is required
-     *
-     * Subclasses should implement this to return a graphics widget that
-     * handles all user interaction with the task. Ownership of the
-     * created widget is handled automatically so subclasses should not
-     * delete the created widget.
-     **/
-    virtual QQuickItem* createWidget(Plasma::Applet *host) = 0;
+//     QHash<Plasma::Applet *, QQuickItem *> widgetsByHost() const;
+//     QQuickItem *forget(Plasma::Applet *host);
+//
+//     /**
+//      * Called when a new widget is required
+//      *
+//      * Subclasses should implement this to return a graphics widget that
+//      * handles all user interaction with the task. Ownership of the
+//      * created widget is handled automatically so subclasses should not
+//      * delete the created widget.
+//      **/
+//     virtual QQuickItem* createWidget(Plasma::Applet *host) = 0;
 
 private Q_SLOTS:
-    void widgetDeleted();
+//     void widgetDeleted();
     void emitChanged();
 
 private:

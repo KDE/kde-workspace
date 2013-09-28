@@ -1,2 +1,2 @@
-module private.org.kde.plasma.systemtray
+module org.kde.private.systemtray
 plugin systemtrayplugin

@@ -22,7 +22,7 @@
 #ifndef SYSTEMTRAYMANAGER_H
 #define SYSTEMTRAYMANAGER_H
 
-//#include "task.h"
+#include "task.h"
 
 #include <QObject>
 
