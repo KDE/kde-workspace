@@ -299,7 +299,7 @@ QString LauncherItem::defaultApplication() const
         return browserApp;
     } else if (application.compare("terminal", Qt::CaseInsensitive) == 0) {
         KConfigGroup confGroup(KGlobal::config(), "General");
-        return confGroup.readPathEntry("TerminalApplication", QString::fromLatin1("konsole"));
+        return confGroup.readPathEntry("TerminalApplication", QString::fromLatin1("kwin"));
     } else if (application.compare("filemanager", Qt::CaseInsensitive) == 0) {
         KService::Ptr service = KMimeTypeTrader::self()->preferredService("inode/directory");
         if (service) {
