@@ -1,7 +1,6 @@
 
 set(kworkspace_LIB_SRCS kdisplaymanager.cpp
                         kwindowlistmenu.cpp
-                        #screenpreviewwidget.cpp
                         kworkspace.cpp
    )
 
