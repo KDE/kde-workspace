@@ -23,18 +23,9 @@
 
 #include <QWidget>
 
-#include "kworkspace_export.h"
-
-class Wallpaper;
-
 class ScreenPreviewWidgetPrivate;
 
-namespace Plasma
-{
-    class Wallpaper;
-}
-
-class KWORKSPACE_EXPORT ScreenPreviewWidget : public QWidget
+class ScreenPreviewWidget : public QWidget
 {
     Q_OBJECT
 
@@ -43,7 +34,6 @@ public:
     ~ScreenPreviewWidget();
 
     void setPreview(const QPixmap &preview);
-    void setPreview(Plasma::Wallpaper* wallpaper);
     const QPixmap preview() const;
     void setRatio(const qreal ratio);
     qreal ratio() const;
@@ -62,7 +52,6 @@ private:
     ScreenPreviewWidgetPrivate *const d;
 
     Q_PRIVATE_SLOT(d, void updateRect(const QRectF& rect))
-    Q_PRIVATE_SLOT(d, void wallpaperDeleted())
 };
 
 

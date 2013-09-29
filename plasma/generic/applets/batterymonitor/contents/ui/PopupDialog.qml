@@ -45,6 +45,8 @@ FocusScope {
     property alias keyboardBrightness: keyboardBrightnessSlider.value
     property alias keyboardBrightnessPercentage: keyboardBrightnessSlider.percentage
 
+    property int pmSwitchWidth: padding.margins.left + pmSwitch.implicitWidth + padding.margins.right
+
     signal brightnessChanged(int screenBrightness)
     signal keyboardBrightnessChanged(int keyboardBrightness)
     signal powermanagementChanged(bool checked)

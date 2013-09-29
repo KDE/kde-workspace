@@ -27,6 +27,8 @@
 #include <QMimeType>
 #include <QMimeDatabase>
 
+#include <kio/global.h>
+
 IconPrivate::IconPrivate() {
 }
 
@@ -50,12 +52,22 @@ void IconPrivate::setUrl(QUrl& url) {
 	    if (m_name.isNull()) {
 		m_name = QFileInfo(m_url.toLocalFile()).fileName();
 	    }
-	} else if (!fi.isDir()) {
+	} else {
 	    QMimeDatabase db;
 	    m_name = fi.baseName();
 	    m_icon = db.mimeTypeForUrl(m_url).iconName();
 	    m_genericName = fi.baseName();
 	}
+    } else {
+	if (m_url.scheme().contains("http")) {
+	    m_name = m_url.host();
+	} else if (m_name.isEmpty()) {
+	    m_name = m_url.toString();
+	    if (m_name.endsWith(QLatin1String(":/"))) {
+		m_name = m_url.scheme();
+	    }
+	}
+	m_icon = KIO::iconNameForUrl(url);
     }
 
     emit urlChanged(m_url);

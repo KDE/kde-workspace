@@ -378,13 +378,16 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
 {
     QSize borderSnapZone(options->borderSnapZone(), options->borderSnapZone());
     QRect maxRect;
+    int guideMaximized = MaximizeRestore;
     if (c->maximizeMode() != MaximizeRestore) {
-        maxRect = clientArea(MovementArea, pos + c->rect().center(), c->desktop());
+        maxRect = clientArea(MaximizeArea, pos + c->rect().center(), c->desktop());
         QRect geo = c->geometry();
         if (c->maximizeMode() & MaximizeHorizontal && (geo.x() == maxRect.left() || geo.right() == maxRect.right())) {
+            guideMaximized |= MaximizeHorizontal;
             borderSnapZone.setWidth(qMax(borderSnapZone.width() + 2, maxRect.width() / 16));
         }
         if (c->maximizeMode() & MaximizeVertical && (geo.y() == maxRect.top() || geo.bottom() == maxRect.bottom())) {
+            guideMaximized |= MaximizeVertical;
             borderSnapZone.setHeight(qMax(borderSnapZone.height() + 2, maxRect.height() / 16));
         }
     }
@@ -392,8 +395,9 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
     if (options->windowSnapZone() || !borderSnapZone.isNull() || options->centerSnapZone()) {
 
         const bool sOWO = options->isSnapOnlyWhenOverlapping();
+        const int screen = screens()->number(pos + c->rect().center());
         if (maxRect.isNull())
-            maxRect = clientArea(MovementArea, pos + c->rect().center(), c->desktop());
+            maxRect = clientArea(MovementArea, screen, c->desktop());
         const int xmin = maxRect.left();
         const int xmax = maxRect.right() + 1;             //desk size
         const int ymin = maxRect.top();
@@ -416,21 +420,25 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
         const int snapX = borderSnapZone.width() * snapAdjust; //snap trigger
         const int snapY = borderSnapZone.height() * snapAdjust;
         if (snapX || snapY) {
+            QRect geo = c->geometry();
             const QPoint cp = c->clientPos();
-            const QSize cs = c->geometry().size() - c->clientSize();
+            const QSize cs = geo.size() - c->clientSize();
             int padding[4] = { cp.x(), cs.width() - cp.x(), cp.y(), cs.height() - cp.y() };
 
-            // snap to titlebar
+            // snap to titlebar / snap to window borders on inner screen edges
             Position titlePos = c->titlebarPosition();
-            if (titlePos == PositionLeft || (c->maximizeMode() & MaximizeHorizontal))
+            if (padding[0] && (titlePos == PositionLeft || (c->maximizeMode() & MaximizeHorizontal) ||
+                               screens()->intersecting(geo.translated(maxRect.x() - (padding[0] + geo.x()), 0)) > 1))
                 padding[0] = 0;
-            if (titlePos == PositionRight || (c->maximizeMode() & MaximizeHorizontal))
+            if (padding[1] && (titlePos == PositionRight || (c->maximizeMode() & MaximizeHorizontal) ||
+                               screens()->intersecting(geo.translated(maxRect.right() + padding[1] - geo.right(), 0)) > 1))
                 padding[1] = 0;
-            if (titlePos == PositionTop || (c->maximizeMode() & MaximizeVertical))
+            if (padding[2] && (titlePos == PositionTop || (c->maximizeMode() & MaximizeVertical) ||
+                               screens()->intersecting(geo.translated(0, maxRect.y() - (padding[2] + geo.y()))) > 1))
                 padding[2] = 0;
-            if (titlePos == PositionBottom || (c->maximizeMode() & MaximizeVertical))
+            if (padding[3] && (titlePos == PositionBottom || (c->maximizeMode() & MaximizeVertical) ||
+                               screens()->intersecting(geo.translated(0, maxRect.bottom() + padding[3] - geo.bottom())) > 1))
                 padding[3] = 0;
-
             if ((sOWO ? (cx < xmin) : true) && (qAbs(xmin - cx) < snapX)) {
                 deltaX = xmin - cx;
                 nx = xmin - padding[0];
@@ -473,7 +481,8 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
                 lrx = lx + (*l)->width();
                 lry = ly + (*l)->height();
 
-                if (((cy <= lry) && (cy  >= ly))  || ((ry >= ly) && (ry  <= lry))  || ((cy <= ly) && (ry >= lry))) {
+                if (!(guideMaximized & MaximizeHorizontal) &&
+                    (((cy <= lry) && (cy  >= ly)) || ((ry >= ly) && (ry  <= lry)) || ((cy <= ly) && (ry >= lry)))) {
                     if ((sOWO ? (cx < lrx) : true) && (qAbs(lrx - cx) < snap) && (qAbs(lrx - cx) < deltaX)) {
                         deltaX = qAbs(lrx - cx);
                         nx = lrx;
@@ -484,7 +493,8 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
                     }
                 }
 
-                if (((cx <= lrx) && (cx  >= lx))  || ((rx >= lx) && (rx  <= lrx))  || ((cx <= lx) && (rx >= lrx))) {
+                if (!(guideMaximized & MaximizeVertical) &&
+                    (((cx <= lrx) && (cx  >= lx)) || ((rx >= lx) && (rx  <= lrx)) || ((cx <= lx) && (rx >= lrx)))) {
                     if ((sOWO ? (cy < lry) : true) && (qAbs(lry - cy) < snap) && (qAbs(lry - cy) < deltaY)) {
                         deltaY = qAbs(lry - cy);
                         ny = lry;
@@ -497,7 +507,7 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
                 }
 
                 // Corner snapping
-                if (nx == lrx || nx + cw == lx) {
+                if (!(guideMaximized & MaximizeVertical) && (nx == lrx || nx + cw == lx)) {
                     if ((sOWO ? (ry > lry) : true) && (qAbs(lry - ry) < snap) && (qAbs(lry - ry) < deltaY)) {
                         deltaY = qAbs(lry - ry);
                         ny = lry - ch;
@@ -507,7 +517,7 @@ QPoint Workspace::adjustClientPosition(Client* c, QPoint pos, bool unrestricted,
                         ny = ly;
                     }
                 }
-                if (ny == lry || ny + ch == ly) {
+                if (!(guideMaximized & MaximizeHorizontal) && (ny == lry || ny + ch == ly)) {
                     if ((sOWO ? (rx > lrx) : true) && (qAbs(lrx - rx) < snap) && (qAbs(lrx - rx) < deltaX)) {
                         deltaX = qAbs(lrx - rx);
                         nx = lrx - cw;
@@ -837,19 +847,19 @@ void Client::keepInArea(QRect area, bool partial)
         if (area.width() < width() || area.height() < height())
             resizeWithChecks(qMin(area.width(), width()), qMin(area.height(), height()));
     }
+    int tx = x(), ty = y();
     if (geometry().right() > area.right() && width() <= area.width())
-        move(area.right() - width() + 1, y());
+        tx = area.right() - width() + 1;
     if (geometry().bottom() > area.bottom() && height() <= area.height())
-        move(x(), area.bottom() - height() + 1);
+        ty = area.bottom() - height() + 1;
     if (!area.contains(geometry().topLeft())) {
-        int tx = x();
-        int ty = y();
         if (tx < area.x())
             tx = area.x();
         if (ty < area.y())
             ty = area.y();
-        move(tx, ty);
     }
+    if (tx != x() || ty != y())
+        move(tx, ty);
 }
 
 /*!
@@ -1475,16 +1485,16 @@ void Client::getWmNormalHints()
         // update to match restrictions
         QSize new_size = adjustedSize();
         if (new_size != size() && !isFullScreen()) {
-            QRect orig_geometry = geometry();
+            QRect origClientGeometry(pos() + clientPos(), clientSize());
             resizeWithChecks(new_size);
             if ((!isSpecialWindow() || isToolbar()) && !isFullScreen()) {
                 // try to keep the window in its xinerama screen if possible,
                 // if that fails at least keep it visible somewhere
                 QRect area = workspace()->clientArea(MovementArea, this);
-                if (area.contains(orig_geometry))
+                if (area.contains(origClientGeometry))
                     keepInArea(area);
                 area = workspace()->clientArea(WorkArea, this);
-                if (area.contains(orig_geometry))
+                if (area.contains(origClientGeometry))
                     keepInArea(area);
             }
         }
@@ -1666,7 +1676,7 @@ void Client::configureRequest(int value_mask, int rx, int ry, int rw, int rh, in
         if (newScreen != rules()->checkScreen(newScreen))
             return; // not allowed by rule
 
-        QRect orig_geometry = geometry();
+        QRect origClientGeometry(pos() + clientPos(), clientSize());
         GeometryUpdatesBlocker blocker(this);
         move(new_pos);
         plainResize(ns);
@@ -1674,7 +1684,7 @@ void Client::configureRequest(int value_mask, int rx, int ry, int rw, int rh, in
         updateFullScreenHack(QRect(new_pos, QSize(nw, nh)));
         QRect area = workspace()->clientArea(WorkArea, this);
         if (!from_tool && (!isSpecialWindow() || isToolbar()) && !isFullScreen()
-                && area.contains(orig_geometry))
+                && area.contains(origClientGeometry))
             keepInArea(area);
 
         // this is part of the kicker-xinerama-hack... it should be
@@ -1696,7 +1706,7 @@ void Client::configureRequest(int value_mask, int rx, int ry, int rw, int rh, in
         QSize ns = sizeForClientSize(QSize(nw, nh));
 
         if (ns != size()) { // don't restore if some app sets its own size again
-            QRect orig_geometry = geometry();
+            QRect origClientGeometry(pos() + clientPos(), clientSize());
             GeometryUpdatesBlocker blocker(this);
             int save_gravity = xSizeHint.win_gravity;
             xSizeHint.win_gravity = gravity;
@@ -1707,10 +1717,10 @@ void Client::configureRequest(int value_mask, int rx, int ry, int rw, int rh, in
                 // try to keep the window in its xinerama screen if possible,
                 // if that fails at least keep it visible somewhere
                 QRect area = workspace()->clientArea(MovementArea, this);
-                if (area.contains(orig_geometry))
+                if (area.contains(origClientGeometry))
                     keepInArea(area);
                 area = workspace()->clientArea(WorkArea, this);
-                if (area.contains(orig_geometry))
+                if (area.contains(origClientGeometry))
                     keepInArea(area);
             }
         }
@@ -2359,11 +2369,10 @@ bool Client::isFullScreenable(bool fullscreen_hack) const
         return false;
     if (fullscreen_hack)
         return isNormalWindow();
-    if (rules()->checkStrictGeometry(false)) {
-        // the app wouldn't fit exactly fullscreen geometry due to its strict geometry requirements
+    if (rules()->checkStrictGeometry(true)) { // allow rule to ignore geometry constraints
         QRect fsarea = workspace()->clientArea(FullScreenArea, this);
         if (sizeForClientSize(fsarea.size(), SizemodeAny, true) != fsarea.size())
-            return false;
+            return false; // the app wouldn't fit exactly fullscreen geometry due to its strict geometry requirements
     }
     // don't check size constrains - some apps request fullscreen despite requesting fixed size
     return !isSpecialWindow(); // also better disallow only weird types to go fullscreen
@@ -2375,9 +2384,7 @@ bool Client::userCanSetFullScreen() const
         return false;
     if (!isFullScreenable(false))
         return false;
-    // isMaximizable() returns false if fullscreen
-    TemporaryAssign< FullScreenMode > tmp(fullscreen_mode, FullScreenNone);
-    return isNormalWindow() && isMaximizable();
+    return isNormalWindow() || isDialog();
 }
 
 void Client::setFullScreen(bool set, bool user)

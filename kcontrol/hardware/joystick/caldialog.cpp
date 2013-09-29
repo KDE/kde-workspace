@@ -26,7 +26,7 @@
 #include <QTimer>
 #include <QApplication>
 
-#include <klocale.h>
+#include <KLocalizedString>
 #include <kmessagebox.h>
 #include <kdebug.h>
 #include <kvbox.h>

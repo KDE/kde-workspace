@@ -59,7 +59,7 @@ namespace Misc
     };
 
     extern KDE_EXPORT QString prettyUrl(const KUrl &url);
-    inline KDE_EXPORT bool    isHidden(const QString &f)    { return QChar('.')==f[0]; }
+    inline KDE_EXPORT bool    isHidden(const QString &f)    { return f.startsWith(QChar('.')); }
     inline KDE_EXPORT bool    isHidden(const KUrl &url)     { return isHidden(url.fileName()); }
     extern KDE_EXPORT bool    check(const QString &path, bool file, bool checkW=false);
     inline KDE_EXPORT bool    fExists(const QString &p)     { return check(p, true, false); }

@@ -34,9 +34,9 @@
 #include <KAboutData>
 #include <KStandardAction>
 #include <KFileItemDelegate>
+#include <KLocalizedString>
 
 K_PLUGIN_FACTORY( IconModeFactory, registerPlugin<IconMode>(); )
-K_EXPORT_PLUGIN( IconModeFactory( "icon_mode" ) )
 
 class IconMode::Private {
 public:
@@ -52,23 +52,23 @@ public:
     MenuProxyModel * proxyModel;
     KAboutData * aboutIcon;
     ModuleView * moduleView;
-    KAction * backAction;
+    QAction * backAction;
 };
 
 IconMode::IconMode( QObject *parent, const QVariantList& )
     : BaseMode( parent )
     , d( new Private() )
 {
-    d->aboutIcon = new KAboutData( "IconView", 0, ki18n( "Icon View" ),
-                                 "1.0", ki18n( "Provides a categorized icons view of control modules." ),
-                                 KAboutData::License_GPL, ki18n( "(c) 2009, Ben Cooksley" ) );
-    d->aboutIcon->addAuthor( ki18n( "Ben Cooksley" ), ki18n( "Author" ), "bcooksley@kde.org" );
-    d->aboutIcon->addAuthor( ki18n( "Mathias Soeken" ), ki18n( "Developer" ), "msoeken@informatik.uni-bremen.de" );
+    d->aboutIcon = new KAboutData( "IconView", 0, i18n( "Icon View" ),
+                                 "1.0", i18n( "Provides a categorized icons view of control modules." ),
+                                 KAboutData::License_GPL, i18n( "(c) 2009, Ben Cooksley" ) );
+    d->aboutIcon->addAuthor( i18n( "Ben Cooksley" ), i18n( "Author" ), "bcooksley@kde.org" );
+    d->aboutIcon->addAuthor( i18n( "Mathias Soeken" ), i18n( "Developer" ), "msoeken@informatik.uni-bremen.de" );
     d->aboutIcon->setProgramIconName( "view-list-icons" );
 
     d->backAction = KStandardAction::back( this, SLOT(backToOverview()), this );
     d->backAction->setText( i18n( "Overview" ) );
-    d->backAction->setToolTip( i18n("Keyboard Shortcut: %1", d->backAction->shortcut().primary().toString( QKeySequence::NativeText )) );
+    d->backAction->setToolTip( i18n("Keyboard Shortcut: %1", d->backAction->shortcut().toString( QKeySequence::NativeText )) );
     d->backAction->setEnabled( false );
     actionsList() << d->backAction;
 }

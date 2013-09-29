@@ -34,6 +34,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kwinglplatform.h>
 // Qt
 #include <QDebug>
+// system
+#include <unistd.h>
 
 namespace KWin
 {
@@ -154,7 +156,7 @@ bool GlxBackend::initRenderingContext()
         const int attribs_31_core_robustness[] = {
             GLX_CONTEXT_MAJOR_VERSION_ARB,               3,
             GLX_CONTEXT_MINOR_VERSION_ARB,               1,
-            GLX_CONTEXT_FLAGS_ARB,                       GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB | GLX_CONTEXT_ROBUST_ACCESS_BIT_ARB,
+            GLX_CONTEXT_FLAGS_ARB,                       GLX_CONTEXT_ROBUST_ACCESS_BIT_ARB,
             GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB, GLX_LOSE_CONTEXT_ON_RESET_ARB,
             0
         };
@@ -162,7 +164,6 @@ bool GlxBackend::initRenderingContext()
         const int attribs_31_core[] = {
             GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
             GLX_CONTEXT_MINOR_VERSION_ARB, 1,
-            GLX_CONTEXT_FLAGS_ARB,         GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
             0
         };
 
@@ -222,6 +223,10 @@ bool GlxBackend::initBuffer()
     if (overlayWindow()->create()) {
         // Try to create double-buffered window in the overlay
         XVisualInfo* visual = glXGetVisualFromFBConfig(display(), fbconfig);
+        if (!visual) {
+           qCritical() << "Failed to get visual from fbconfig";
+           return false;
+        }
         XSetWindowAttributes attrs;
         attrs.colormap = XCreateColormap(display(), rootWindow(), visual->visual, AllocNone);
         window = XCreateWindow(display(), overlayWindow()->window(), 0, 0, displayWidth(), displayHeight(),
@@ -420,6 +425,9 @@ void GlxBackend::present()
     if (lastDamage().isEmpty())
         return;
 
+    // a different context might have been current
+    glXMakeCurrent(display(), glxWindow, ctx);
+
     const QRegion displayRegion(0, 0, displayWidth(), displayHeight());
     const bool fullRepaint = (lastDamage() == displayRegion);
 
@@ -489,8 +497,18 @@ SceneOpenGL::TexturePrivate *GlxBackend::createBackendTexture(SceneOpenGL::Textu
 
 void GlxBackend::prepareRenderingFrame()
 {
+    if (gs_tripleBufferNeedsDetection) {
+        // the composite timer floors the repaint frequency. This can pollute our triple buffering
+        // detection because the glXSwapBuffers call for the new frame has to wait until the pending
+        // one scanned out.
+        // So we compensate for that by waiting an extra milisecond to give the driver the chance to
+        // fllush the buffer queue
+        usleep(1000);
+    }
     present();
     startRenderTimer();
+    // different context might have been bound as present() can block
+    glXMakeCurrent(display(), glxWindow, ctx);
     glXWaitX();
 }
 

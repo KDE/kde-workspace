@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kwinglplatform.h>
 // Qt
 #include <QDebug>
+// system
+#include <unistd.h>
 
 namespace KWin
 {
@@ -177,7 +179,6 @@ bool EglOnXBackend::initRenderingContext()
     const EGLint context_attribs_31_core[] = {
         EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
         EGL_CONTEXT_MINOR_VERSION_KHR, 1,
-        EGL_CONTEXT_FLAGS_KHR,         EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR,
         EGL_NONE
     };
 
@@ -266,6 +267,9 @@ void EglOnXBackend::present()
     if (lastDamage().isEmpty())
         return;
 
+    // a different context might have been current
+    eglMakeCurrent(dpy, surface, surface, ctx);
+
     const QRegion displayRegion(0, 0, displayWidth(), displayHeight());
     const bool fullRepaint = (lastDamage() == displayRegion);
 
@@ -321,7 +325,17 @@ SceneOpenGL::TexturePrivate *EglOnXBackend::createBackendTexture(SceneOpenGL::Te
 
 void EglOnXBackend::prepareRenderingFrame()
 {
+    if (gs_tripleBufferNeedsDetection) {
+        // the composite timer floors the repaint frequency. This can pollute our triple buffering
+        // detection because the glXSwapBuffers call for the new frame has to wait until the pending
+        // one scanned out.
+        // So we compensate for that by waiting an extra milisecond to give the driver the chance to
+        // fllush the buffer queue
+        usleep(1000);
+    }
     present();
+    // different context might have been bound as present() can block
+    eglMakeCurrent(dpy, surface, surface, ctx);
     startRenderTimer();
     eglWaitNative(EGL_CORE_NATIVE_ENGINE);
 }

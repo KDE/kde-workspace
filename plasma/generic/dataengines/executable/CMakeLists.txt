@@ -12,5 +12,5 @@ target_link_libraries(plasma_engine_executable
     KF5::KCoreAddons
 )
 
-install(TARGETS plasma_engine_executable DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_executable DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-executable.desktop DESTINATION ${SERVICES_INSTALL_DIR} )

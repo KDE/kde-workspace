@@ -33,9 +33,6 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property bool onlyGroupWhenFull: plasmoid.configuration.onlyGroupWhenFull
-    property int optimumCapacity
-
     property bool fillWidth: true
     property bool fillHeight:true
     property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
@@ -57,8 +54,6 @@ Item {
         if (plasmoid.configuration.forceStripes) {
             taskList.height = Layout.layoutHeight();
         }
-
-        optimumCapacity = Layout.optimumCapacity();
     }
 
     onHeightChanged: {
@@ -67,12 +62,6 @@ Item {
         }
 
         taskList.height = Layout.layoutHeight();
-
-        optimumCapacity = Layout.optimumCapacity();
-    }
-
-    onOnlyGroupWhenFullChanged: {
-        optimumCapacity = Layout.optimumCapacity();
     }
 
     TaskManager.Backend {
@@ -103,17 +92,10 @@ Item {
         value: plasmoid.configuration.onlyGroupWhenFull
     }
 
-    Connections {
-        target: plasmoid.configuration
-        onOnlyGroupWhenFullChanged: {
-            optimumCapacity = Layout.optimumCapacity();
-        }
-    }
-
     Binding {
         target: backend.groupManager
         property: "fullLimit"
-        value: optimumCapacity
+        value: Layout.optimumCapacity(width, height) + 1
     }
 
     Binding {

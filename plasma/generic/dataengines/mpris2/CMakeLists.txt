@@ -26,7 +26,7 @@ target_link_libraries(plasma_engine_mpris2
    ${KDE4_PLASMA_LIBS}
 )
 
-install(TARGETS plasma_engine_mpris2 DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_mpris2 DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-mpris2.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 install(FILES mpris2.operations DESTINATION ${DATA_INSTALL_DIR}/plasma/services)
 

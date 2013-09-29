@@ -22,6 +22,7 @@
 #include "MenuItem.h"
 
 #include <KConfigGroup>
+#include <KGlobal>
 
 class DataHelper {
 
@@ -64,7 +65,7 @@ void BaseData::setMenuItem( MenuItem * item )
 
 KConfigGroup BaseData::configGroup( const QString& pluginName )
 {
-    return KGlobal::config()->group( pluginName );
+    return KSharedConfig::openConfig()->group( pluginName );
 }
 
 #include "BaseData.moc"

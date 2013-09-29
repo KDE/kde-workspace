@@ -7,8 +7,6 @@ plasma_install_package(package org.kde.kickoff)
 #######################################################################################
 # Kickoff Library
 
-configure_file(core/config-kickoff-applets.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kickoff-applets.h)
-
 set(libkickoff_SRCS
     core/applicationmodel.cpp
     core/favoritesmodel.cpp
@@ -40,16 +38,17 @@ QT4_ADD_DBUS_INTERFACE(libkickoff_SRCS ${ksmserver_xml} ksmserver_interface)
 
 install(FILES core/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/kickoff)
 add_library(kickoffplugin SHARED ${libkickoff_SRCS})
-target_link_libraries(kickoffplugin ${QT_QTCORE_LIBRARY}
-                              ${Qt5Qml_LIBRARIES}
+target_link_libraries(kickoffplugin
+                              Qt5::Core
+                              Qt5::Qml
                               Qt5::DBus
-                              ${KDE4_KIO_LIBS}
+                              KF5::KI18n
+                              KF5::KIOCore
+                              KF5::plasma
+                              KF5::Solid
+                              KF5::KService
                               ${KDE4_KFILE_LIBS}
-                              ${KI18n_LIBRARIES}
-                              ${Plasma_LIBRARIES}
-                              ${KSERVICE_LIBRARIES}
                               ${KDE4Support_LIBRARIES}
-                              ${KDE4_SOLID_LIBS}
                               kworkspace)
 install(TARGETS kickoffplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/kickoff)
 

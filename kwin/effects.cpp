@@ -185,9 +185,8 @@ static QByteArray readWindowProperty(xcb_window_t win, xcb_atom_t atom, xcb_atom
             continue;
         }
         if (prop->type == type && prop->format == format) {
-            const int nitems = xcb_get_property_value_length(prop.data());
-            int bytelen = format == 8 ? nitems : format == 16 ? nitems * sizeof(short) : nitems * sizeof(long);
-            return QByteArray(reinterpret_cast< const char* >(xcb_get_property_value(prop.data())), bytelen);
+            return QByteArray(reinterpret_cast< const char* >(xcb_get_property_value(prop.data())),
+                              xcb_get_property_value_length(prop.data()));
         } else {
             return QByteArray();
         }
@@ -249,10 +248,10 @@ EffectsHandlerImpl::EffectsHandlerImpl(Compositor *compositor, Scene *scene)
 #endif
     connect(m_screenLockerWatcher, SIGNAL(locked(bool)), SIGNAL(screenLockingChanged(bool)));
     // connect all clients
-    foreach (Client *c, ws->clientList()) {
+    for (Client *c : ws->clientList()) {
         setupClientConnections(c);
     }
-    foreach (Unmanaged *u, ws->unmanagedList()) {
+    for (Unmanaged *u : ws->unmanagedList()) {
         setupUnmanagedConnections(u);
     }
     reconfigure();
@@ -262,8 +261,8 @@ EffectsHandlerImpl::~EffectsHandlerImpl()
 {
     if (keyboard_grab_effect != NULL)
         ungrabKeyboard();
-    foreach (const EffectPair & ep, loaded_effects)
-    unloadEffect(ep.first);
+    for (const EffectPair & ep : loaded_effects)
+        unloadEffect(ep.first);
 }
 
 void EffectsHandlerImpl::setupClientConnections(Client* c)
@@ -299,7 +298,6 @@ void EffectsHandlerImpl::reconfigure()
     QFutureWatcher<KService::List> *watcher = new QFutureWatcher<KService::List>(this);
     connect(watcher, SIGNAL(finished()), this, SLOT(slotEffectsQueried()));
     watcher->setFuture(QtConcurrent::run(KServiceTypeTrader::self(), &KServiceTypeTrader::query, QStringLiteral("KWin/Effect"), QString()));
-    watcher->waitForFinished(); // TODO: remove once KConfigGroup is thread safe, bug #321576
 }
 
 void EffectsHandlerImpl::slotEffectsQueried()
@@ -316,7 +314,7 @@ void EffectsHandlerImpl::slotEffectsQueried()
     KConfigGroup conf(KSharedConfig::openConfig(), "Plugins");
 
     // First unload necessary effects
-    foreach (const KService::Ptr & service, offers) {
+    for (const KService::Ptr & service : offers) {
         KPluginInfo plugininfo(service);
         plugininfo.load(conf);
 
@@ -335,13 +333,13 @@ void EffectsHandlerImpl::slotEffectsQueried()
     }
     QStringList newLoaded;
     // Then load those that should be loaded
-    foreach (const QString & effectName, effectsToBeLoaded) {
+    for (const QString & effectName : effectsToBeLoaded) {
         if (!isEffectLoaded(effectName)) {
             if (loadEffect(effectName, checkDefault.contains(effectName)))
                 newLoaded.append(effectName);
         }
     }
-    foreach (const EffectPair & ep, loaded_effects) {
+    for (const EffectPair & ep : loaded_effects) {
         if (!newLoaded.contains(ep.first))    // don't reconfigure newly loaded effects
             ep.second->reconfigure(Effect::ReconfigureAll);
     }
@@ -1023,7 +1021,7 @@ int EffectsHandlerImpl::displayWidth() const
 
 int EffectsHandlerImpl::displayHeight() const
 {
-    return KWin::displayWidth();
+    return KWin::displayHeight();
 }
 
 EffectWindow* EffectsHandlerImpl::findWindow(WId id) const
@@ -1039,7 +1037,7 @@ EffectWindowList EffectsHandlerImpl::stackingOrder() const
 {
     ToplevelList list = Workspace::self()->xStackingOrder();
     EffectWindowList ret;
-    foreach (Toplevel *t, list) {
+    for (Toplevel *t : list) {
         if (EffectWindow *w = effectWindow(t))
             ret.append(w);
     }
@@ -1079,7 +1077,7 @@ EffectWindowList EffectsHandlerImpl::currentTabBoxWindowList() const
     EffectWindowList ret;
     ClientList clients;
     clients = TabBox::TabBox::self()->currentClientList();
-    foreach (Client * c, clients)
+    for (Client * c : clients)
     ret.append(c->effectWindow());
     return ret;
 #else
@@ -1318,7 +1316,7 @@ QStringList EffectsHandlerImpl::listOfEffects() const
     KService::List offers = KServiceTypeTrader::self()->query(QStringLiteral("KWin/Effect"));
     QStringList listOfModules;
     // First unload necessary effects
-    foreach (const KService::Ptr & service, offers) {
+    for (const KService::Ptr & service : offers) {
         KPluginInfo plugininfo(service);
         listOfModules << plugininfo.pluginName();
     }
@@ -1423,7 +1421,7 @@ bool EffectsHandlerImpl::loadEffect(const QString& name, bool checkDefault)
     // TODO: detect circular deps
     KPluginInfo plugininfo(service);
     QStringList dependencies = plugininfo.dependencies();
-    foreach (const QString & depName, dependencies) {
+    for (const QString & depName : dependencies) {
         if (!loadEffect(depName)) {
             qCritical() << "EffectsHandler::loadEffect : Couldn't load dependencies for effect " << name << endl;
             library->unload();
@@ -1482,7 +1480,7 @@ void EffectsHandlerImpl::unloadEffect(const QString& name)
             stopMouseInterception(it.value().second);
             // remove support properties for the effect
             const QList<QByteArray> properties = m_propertiesForEffects.keys();
-            foreach (const QByteArray &property, properties) {
+            for (const QByteArray &property : properties) {
                 removeSupportProperty(property, it.value().second);
             }
             delete it.value().second;
@@ -1536,7 +1534,7 @@ void EffectsHandlerImpl::effectsChanged()
     loaded_effects.clear();
     m_activeEffects.clear(); // it's possible to have a reconfigure and a quad rebuild between two paint cycles - bug #308201
 //    qDebug() << "Recreating effects' list:";
-    foreach (const EffectPair & effect, effect_order) {
+    for (const EffectPair & effect : effect_order) {
 //        qDebug() << effect.first;
         loaded_effects.append(effect);
     }
@@ -1719,7 +1717,7 @@ EffectWindowList getMainWindows(Toplevel *toplevel)
     T *c = static_cast<T*>(toplevel);
     EffectWindowList ret;
     ClientList mainclients = c->mainClients();
-    foreach (Client * tmp, mainclients)
+    for (Client * tmp : mainclients)
         ret.append(tmp->effectWindow());
     return ret;
 }
@@ -1835,7 +1833,7 @@ void EffectWindowImpl::unreferencePreviousWindowPixmap()
 EffectWindowList EffectWindowGroupImpl::members() const
 {
     EffectWindowList ret;
-    foreach (Toplevel * c, group->members())
+    for (Toplevel * c : group->members())
     ret.append(c->effectWindow());
     return ret;
 }

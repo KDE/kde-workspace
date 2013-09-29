@@ -17,5 +17,5 @@ target_link_libraries(plasma_engine_devicenotifications
     #${KDE4_KIDLETIME_LIBRARY} 
 ) # todo: add kworkspace once ported
 
-install(TARGETS plasma_engine_devicenotifications DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_devicenotifications DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-devicenotifications.desktop DESTINATION ${SERVICES_INSTALL_DIR} )

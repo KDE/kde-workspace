@@ -23,7 +23,7 @@
 #include "poswidget.h"
 #include "caldialog.h"
 
-#include <QtGui/QTableWidget>
+#include <QTableWidget>
 #include <QLabel>
 #include <QCheckBox>
 #include <QTimer>
@@ -33,7 +33,7 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 
-#include <klocale.h>
+#include <KLocalizedString>
 #include <kdialog.h>
 #include <kmessagebox.h>
 #include <kiconloader.h>

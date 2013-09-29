@@ -34,6 +34,8 @@
 #include <KCModuleInfo>
 #include <KStandardDirs>
 #include <KGlobalSettings>
+#include <KIconLoader>
+#include <KUrl>
 
 static const char kcc_infotext[]= I18N_NOOP("System Settings");
 static const char title_infotext[]= I18N_NOOP("Configure your system");
@@ -58,6 +60,8 @@ CategoryList::CategoryList( QWidget *parent, QAbstractItemModel *model )
 
     // set what's this help
     this->setWhatsThis( i18n( intro_infotext ) );
+#warning KHTML does not want to link
+#if 0
     d->categoryView = new KHTMLPart( this );
     d->categoryView->view()->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
     d->categoryView->widget()->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Ignored );
@@ -66,6 +70,7 @@ CategoryList::CategoryList( QWidget *parent, QAbstractItemModel *model )
                                      const KParts::OpenUrlArguments&,
                                      const KParts::BrowserArguments& ) ),
              this, SLOT(slotModuleLinkClicked(KUrl)) );
+#endif
 }
 
 CategoryList::~CategoryList()
@@ -133,4 +138,4 @@ void CategoryList::slotModuleLinkClicked( const KUrl& moduleName )
     emit moduleSelected( module );
 }
 
-#include "CategoryList.moc"
+#include "moc_CategoryList.cpp"

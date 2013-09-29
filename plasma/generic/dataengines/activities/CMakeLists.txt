@@ -19,7 +19,7 @@ target_link_libraries(plasma_engine_activities
                       ${KACTIVITIES_LIBRARY})
 
 install(TARGETS plasma_engine_activities
-        DESTINATION ${PLUGIN_INSTALL_DIR})
+        DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 
 install(FILES plasma-engine-activities.desktop
         DESTINATION ${SERVICES_INSTALL_DIR})

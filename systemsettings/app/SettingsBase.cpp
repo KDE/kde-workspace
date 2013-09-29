@@ -28,7 +28,7 @@
 #include <KDebug>
 #include <KMenuBar>
 #include <KToolBar>
-#include <KAboutData>
+#include <k4aboutdata.h>
 #include <KMessageBox>
 #include <KConfigGroup>
 #include <KCModuleInfo>
@@ -36,6 +36,11 @@
 #include <KStandardAction>
 #include <KActionCollection>
 #include <KServiceTypeTrader>
+#include <KAction>
+#include <KComponentData>
+#include <KIcon>
+#include <KGlobal>
+#include <kwindowconfig.h>
 
 #include "BaseData.h"
 #include "ModuleView.h"
@@ -56,7 +61,7 @@ SettingsBase::SettingsBase( QWidget * parent )
     searchText = new KLineEdit( this );
     searchText->setClearButtonShown( true );
     searchText->setClickMessage( i18nc( "Search through a list of control modules", "Search" ) );
-    searchText->setCompletionMode( KGlobalSettings::CompletionPopup );
+    searchText->setCompletionMode( KCompletion::CompletionPopup );
 
     spacerWidget = new QWidget( this );
     spacerWidget->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Maximum );
@@ -126,7 +131,7 @@ void SettingsBase::initToolBar()
     quitAction = actionCollection()->addAction( KStandardAction::Quit, "quit_action", this, SLOT(close()) );
     // Configure goes at the end
     configureAction = actionCollection()->addAction( KStandardAction::Preferences, this, SLOT(configShow()) );
-    configureAction->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::Key_M)));
+    configureAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
     configureAction->setText( i18n("Configure") );
     // Help after it
     initHelpMenu();
@@ -137,7 +142,7 @@ void SettingsBase::initToolBar()
     // Finally the search line-edit
     searchAction = new KAction( this );
     searchAction->setDefaultWidget(searchText);
-    searchAction->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::Key_F)));
+    searchAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
     connect( searchAction, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)),
          searchText, SLOT(setFocus()));
     actionCollection()->addAction( "searchText", searchAction );
@@ -166,7 +171,7 @@ void SettingsBase::initConfig()
 {
     // Prepare dialog first
     configDialog = new KConfigDialog( this, "systemsettingsconfig", BaseConfig::self() );
-    configDialog->setButtons( KDialog::Ok | KDialog::Cancel );
+    configDialog->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     // Add our page
     QWidget * configPage = new QWidget( configDialog );
@@ -183,7 +188,7 @@ void SettingsBase::initConfig()
         viewSelection.addButton( radioButton, possibleViews.values().indexOf(mode) );
     }
     configWidget.GbViewStyle->setLayout( configLayout );
-    configDialog->restoreDialogSize( KGlobal::config()->group("ConfigDialog") );
+    KWindowConfig::restoreWindowSize(configDialog->windowHandle(), KSharedConfig::openConfig()->group("ConfigDialog"));
     connect(configDialog, SIGNAL(okClicked()), this, SLOT(configUpdated()));
 }
 
@@ -232,8 +237,8 @@ void SettingsBase::initMenuList(MenuItem * parent)
 
 void SettingsBase::configUpdated()
 {
-    KConfigGroup dialogConfig = KGlobal::config()->group("ConfigDialog");
-    configDialog->saveDialogSize( dialogConfig );
+    KConfigGroup dialogConfig = KSharedConfig::openConfig()->group("ConfigDialog");
+    KWindowConfig::saveWindowSize(configDialog->windowHandle(), dialogConfig);
     BaseConfig::setActiveView( possibleViews.keys().at(viewSelection.checkedId()) );
     BaseConfig::setShowToolTips( configWidget.ChTooltips->isChecked() );
     activeView->saveConfiguration();
@@ -289,7 +294,7 @@ void SettingsBase::about()
     }
 
     if( about ) {
-        aboutDialog = new KAboutApplicationDialog(about, 0);
+        aboutDialog = new KAboutApplicationDialog(*about, 0);
         aboutDialog->show();
     }
 }
@@ -381,14 +386,14 @@ void SettingsBase::changeToolBar( BaseMode::ToolBarItems toolbar )
     }
 }
 
-void SettingsBase::changeAboutMenu( const KAboutData * menuAbout, KAction * menuItem, QString fallback )
+void SettingsBase::changeAboutMenu( const KAboutData * menuAbout, QAction * menuItem, QString fallback )
 {
     if( !menuItem ) {
         return;
     }
 
     if( menuAbout ) {
-        menuItem->setText( i18n( "About %1", menuAbout->programName() ) );
+        menuItem->setText( i18n( "About %1", menuAbout->displayName() ) );
         menuItem->setIcon( KIcon( menuAbout->programIconName() ) );
         menuItem->setEnabled(true);
     } else {

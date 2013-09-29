@@ -41,7 +41,7 @@ find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
     KConfig KAuth KJS KWallet KDBusAddons Sonnet
     KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KStyle KCompletion KJobWidgets KTextWidgets XmlGui KCrash
-    KIO KUnitConversion KDE4Attic)
+    KIO KUnitConversion KDE4Attic KCMUtils)
 
 find_package(KBookmarks REQUIRED NO_MODULE)
 find_package(Plasma REQUIRED NO_MODULE)
@@ -248,7 +248,7 @@ add_subdirectory(libs)
 #
 # # system settings (kcontrol replacement)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-#    macro_optional_add_subdirectory( systemsettings )
+   ecm_optional_add_subdirectory( systemsettings )
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #
 # # core apps
@@ -269,7 +269,7 @@ if(NOT WIN32)
 endif(NOT WIN32)
 #
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-#    macro_optional_add_subdirectory(kcontrol)
+   ecm_optional_add_subdirectory(kcontrol)
 #    macro_optional_add_subdirectory(klipper)
 #    macro_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)

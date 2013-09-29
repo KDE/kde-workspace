@@ -23,6 +23,7 @@
 
 #include <klocale.h>
 #include <kdebug.h>
+#include <KLocalizedString>
 
 #include <sys/types.h>
 #include <sys/stat.h>

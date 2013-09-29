@@ -26,9 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <kwinglplatform.h>
 // KDE
 #include <KDE/KDebug>
-#include <KDE/KTemporaryFile>
 // Qt
 #include <QSocketNotifier>
+#include <QTemporaryFile>
 // xcb
 #include <xcb/xtest.h>
 // Wayland
@@ -398,7 +398,7 @@ ShmPool::ShmPool(wl_shm *shm)
     , m_pool(NULL)
     , m_poolData(NULL)
     , m_size(1024 * 1024) // TODO: useful size?
-    , m_tmpFile(new KTemporaryFile())
+    , m_tmpFile(new QTemporaryFile())
     , m_valid(createPool())
     , m_offset(0)
 {
@@ -801,6 +801,9 @@ void EglWaylandBackend::present()
     // need to dispatch pending events as eglSwapBuffers can block
     wl_display_dispatch_pending(m_wayland->display());
     wl_display_flush(m_wayland->display());
+
+    // a different context might have been current
+    eglMakeCurrent(m_display, m_surface, m_surface, m_context);
     eglSwapBuffers(m_display, m_surface);
 }
 
@@ -820,6 +823,8 @@ void EglWaylandBackend::prepareRenderingFrame()
 {
     if (!lastDamage().isEmpty())
         present();
+    // different context might have been bound as present() can block
+    eglMakeCurrent(m_display, m_surface, m_surface, m_context);
     eglWaitNative(EGL_CORE_NATIVE_ENGINE);
     startRenderTimer();
 }

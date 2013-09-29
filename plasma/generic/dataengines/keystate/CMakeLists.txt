@@ -14,7 +14,7 @@ target_link_libraries(plasma_engine_keystate
   ${KDE4_KIO_LIBS}
 )
 
-install(TARGETS plasma_engine_keystate DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_keystate DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-keystate.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
 install(FILES modifierkeystate.operations DESTINATION ${DATA_INSTALL_DIR}/plasma/services)
 

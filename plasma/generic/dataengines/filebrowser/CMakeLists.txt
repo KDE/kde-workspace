@@ -12,6 +12,6 @@ target_link_libraries(plasma_engine_filebrowser
     ${KDE4Support_LIBRARIES}
 )
 
-install(TARGETS plasma_engine_filebrowser DESTINATION ${PLUGIN_INSTALL_DIR})
+install(TARGETS plasma_engine_filebrowser DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-filebrowser.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
 

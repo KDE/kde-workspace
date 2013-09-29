@@ -49,14 +49,15 @@ public:
     explicit KWinScreenEdgesConfig(QWidget* parent, const QVariantList& args);
     ~KWinScreenEdgesConfig();
 
-public slots:
+public Q_SLOTS:
     virtual void groupChanged();
     virtual void save();
     virtual void load();
     virtual void defaults();
 protected:
     virtual void showEvent(QShowEvent* e);
-
+private Q_SLOTS:
+    void sanitizeCooldown();
 private:
     KWinScreenEdgesConfigForm* m_ui;
     KSharedConfigPtr m_config;

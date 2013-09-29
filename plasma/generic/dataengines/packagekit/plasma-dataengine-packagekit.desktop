@@ -1,7 +1,31 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=PackageKit
+Name[cs]=PackageKit
+Name[es]=PackageKit
+Name[kk]=PackageKit
+Name[nl]=PackageKit
+Name[pt]=PackageKit
+Name[pt_BR]=PackageKit
+Name[sk]=PackageKit
+Name[sl]=PackageKit
+Name[sv]=PackageKit
+Name[uk]=PackageKit
+Name[x-test]=xxPackageKitxx
+Name[zh_TW]=PackageKit
 Comment=PackageKit Data Engine
+Comment[cs]=Datový nástroj PackageKit
+Comment[es]=Motor de datos de PackageKit
+Comment[kk]=PackageKit деректер тетігі
+Comment[nl]=Pakketkit Gegevensengine
+Comment[pt]=Motor de Dados do PackageKit
+Comment[pt_BR]=Mecanismo de dados do PackageKit
+Comment[sk]=Dátový engine PackageKit
+Comment[sl]=Podatkovni pogon PackageKit
+Comment[sv]=PackageKit-datagränssnitt
+Comment[uk]=Рушій даних PackageKit
+Comment[x-test]=xxPackageKit Data Enginexx
+Comment[zh_TW]=PackageKit 資料引擎
 
 ServiceTypes=Plasma/DataEngine
 Type=Service

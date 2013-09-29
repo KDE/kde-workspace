@@ -16,7 +16,7 @@ target_link_libraries(plasma_engine_share
 )
 
 install(TARGETS plasma_engine_share
-        DESTINATION ${PLUGIN_INSTALL_DIR})
+        DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 
 install(FILES data/plasma-dataengine-share.desktop
         DESTINATION ${SERVICES_INSTALL_DIR})
@@ -40,6 +40,6 @@ target_link_libraries(plasma_packagestructure_share
         ${Plasma_LIBRARIES})
 
 install(TARGETS plasma_packagestructure_share
-                 DESTINATION ${PLUGIN_INSTALL_DIR})
+                 DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/packagestructure)
 install(FILES data/plasma-packagestructure-share.desktop
                DESTINATION ${SERVICES_INSTALL_DIR})

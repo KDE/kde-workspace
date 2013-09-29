@@ -35,6 +35,8 @@
 #include <KXmlGuiWindow>
 #include <KAboutApplicationDialog>
 
+class KAction;
+
 class SettingsBase : public KXmlGuiWindow
 {
     Q_OBJECT
@@ -47,7 +49,7 @@ public:
 protected:
     virtual QSize sizeHint() const;
 
-private slots:
+private Q_SLOTS:
     void initApplication();
     void initToolBar();
     void initHelpMenu();
@@ -60,7 +62,7 @@ private slots:
     void viewChange(bool state);
     void updateViewActions();
     void changeToolBar( BaseMode::ToolBarItems toolbar );
-    void changeAboutMenu( const KAboutData * menuAbout, KAction * menuItem, QString fallback );
+    void changeAboutMenu( const KAboutData * menuAbout, QAction * menuItem, QString fallback );
 
 private:
     // The plugins
@@ -73,11 +75,11 @@ private:
     // The toolbar
     KAction * searchAction;
     KAction * spacerAction;
-    KAction * configureAction;
-    KAction * quitAction;
+    QAction * configureAction;
+    QAction * quitAction;
     // The help menu
-    KAction * aboutViewAction;
-    KAction * aboutModuleAction;
+    QAction * aboutViewAction;
+    QAction * aboutModuleAction;
     KActionMenu * helpActionMenu;
     // The configuration
     KConfigDialog * configDialog;

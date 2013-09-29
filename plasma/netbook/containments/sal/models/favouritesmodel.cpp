@@ -64,6 +64,7 @@ void FavouritesModel::restore(KConfigGroup &cg)
 
     KConfigGroup stripGroup(&cg, "stripwidget");
 
+    clear();
     // get all the favourites
     QStringList groupNames(stripGroup.groupList());
     qSort(groupNames);

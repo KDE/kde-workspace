@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <kservicetypetrader.h>
 
+#include <KDE/KAboutData>
+#include <KDE/KConfigGroup>
 #include <KPluginFactory>
 #include <KPluginLoader>
 #include <QtDBus/QtDBus>
@@ -41,7 +43,7 @@ KWinScreenEdgesConfigForm::KWinScreenEdgesConfigForm(QWidget* parent)
 }
 
 KWinScreenEdgesConfig::KWinScreenEdgesConfig(QWidget* parent, const QVariantList& args)
-    : KCModule(KWinScreenEdgesConfigFactory::componentData(), parent, args)
+    : KCModule(parent, args)
     , m_config(KSharedConfig::openConfig("kwinrc"))
 {
     m_ui = new KWinScreenEdgesConfigForm(this);
@@ -53,6 +55,7 @@ KWinScreenEdgesConfig::KWinScreenEdgesConfig(QWidget* parent, const QVariantList
     connect(m_ui->monitor, SIGNAL(changed()), this, SLOT(changed()));
 
     connect(m_ui->desktopSwitchCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(changed()));
+    connect(m_ui->activationDelaySpin, SIGNAL(valueChanged(int)), this, SLOT(sanitizeCooldown()));
     connect(m_ui->activationDelaySpin, SIGNAL(valueChanged(int)), this, SLOT(changed()));
     connect(m_ui->triggerCooldownSpin, SIGNAL(valueChanged(int)), this, SLOT(changed()));
     connect(m_ui->quickMaximizeBox, SIGNAL(stateChanged(int)), this, SLOT(changed()));
@@ -65,6 +68,8 @@ KWinScreenEdgesConfig::KWinScreenEdgesConfig(QWidget* parent, const QVariantList
     connect(m_ui->quickTileBox, SIGNAL(stateChanged(int)), this, SLOT(groupChanged()));
 
     load();
+
+    sanitizeCooldown();
 }
 
 KWinScreenEdgesConfig::~KWinScreenEdgesConfig()
@@ -144,6 +149,11 @@ void KWinScreenEdgesConfig::showEvent(QShowEvent* e)
     KCModule::showEvent(e);
 
     monitorShowEvent();
+}
+
+void KWinScreenEdgesConfig::sanitizeCooldown()
+{
+    m_ui->triggerCooldownSpin->setMinimum(m_ui->activationDelaySpin->value() + 50);
 }
 
 // Copied from kcmkwin/kwincompositing/main.cpp

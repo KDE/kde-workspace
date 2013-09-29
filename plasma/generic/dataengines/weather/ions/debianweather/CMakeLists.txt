@@ -10,7 +10,7 @@ target_link_libraries(ion_debianweather weather_ion
                       ${QT_QTCORE_LIBRARY})
  
 install(TARGETS ion_debianweather
-       DESTINATION ${PLUGIN_INSTALL_DIR})
+       DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
  
 install(FILES ion-debianweather.desktop
         DESTINATION ${SERVICES_INSTALL_DIR})

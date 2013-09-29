@@ -124,7 +124,7 @@ QtControls.GroupBox {
 
                 QtControls.CheckBox {
                     id: showOnlyCurrentActivity
-                    text: i18n("Show only tasks from the current acticity")
+                    text: i18n("Show only tasks from the current activity")
                 }
 
                 QtControls.CheckBox {
