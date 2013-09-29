@@ -66,7 +66,6 @@ public:
     DBusSystemTrayTask(const QString &name, Plasma::DataEngine *service, QObject *parent);
     ~DBusSystemTrayTask();
 
-    QQuickItem* createWidget(Plasma::Applet *host);
     bool isValid() const;
     bool isEmbeddable() const;
     virtual QString taskId() const;

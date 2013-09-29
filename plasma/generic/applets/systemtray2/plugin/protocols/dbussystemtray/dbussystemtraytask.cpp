@@ -62,11 +62,6 @@ DBusSystemTrayTask::~DBusSystemTrayTask()
 {
 }
 
-QQuickItem* DBusSystemTrayTask::createWidget(Plasma::Applet */*host*/)
-{
-    return 0;  // d-bus tasks don't have widgets but provide info for GUI;
-}
-
 bool DBusSystemTrayTask::isValid() const
 {
     return m_valid;

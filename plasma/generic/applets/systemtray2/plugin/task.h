@@ -28,15 +28,8 @@
 
 class QQuickItem;
 
-namespace Plasma
-{
-    class Applet;
-} // namespace Plasma
-
 namespace SystemTray
 {
-
-    class Applet;
 
 /**
  * @short System tray task base class
@@ -89,19 +82,6 @@ public:
     Task(QObject *parent = 0);
 
     virtual ~Task();
-
-    /**
-     * Creates a new graphics widget for this task
-     *
-     * isEmbeddable() should be checked before creating a new widget.
-     **/
-//     QQuickItem* widget(Plasma::Applet *host, bool createIfNecessary = true);
-
-    /**
-     * @return whether this task is embeddable; true if there is already a widget
-     * for this host.
-     */
-//     bool isEmbeddable(SystemTray::Applet *host);
 
     /**
      * Returns whether this task can be embeddable
@@ -175,13 +155,6 @@ public:
      */
     virtual TaskType type() const = 0;
 
-
-    /**
-     * Can be used by the hostwhen they no longer wish to use the widget associated
-     * with the host.
-     */
-//     virtual void abandon(Plasma::Applet *host);
-
 Q_SIGNALS:
     /**
      * Emitted when something about the task has changed
@@ -209,22 +182,7 @@ Q_SIGNALS:
      **/
     void destroyed(SystemTray::Task *task);
 
-protected:
-//     QHash<Plasma::Applet *, QQuickItem *> widgetsByHost() const;
-//     QQuickItem *forget(Plasma::Applet *host);
-//
-//     /**
-//      * Called when a new widget is required
-//      *
-//      * Subclasses should implement this to return a graphics widget that
-//      * handles all user interaction with the task. Ownership of the
-//      * created widget is handled automatically so subclasses should not
-//      * delete the created widget.
-//      **/
-//     virtual QQuickItem* createWidget(Plasma::Applet *host) = 0;
-
 private Q_SLOTS:
-//     void widgetDeleted();
     void emitChanged();
 
 private:
