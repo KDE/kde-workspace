@@ -25,8 +25,7 @@
 #include <QtCore/QObject>
 
 #include <QtGui/QIcon>
-
-class QQuickItem;
+#include <QQuickItem>
 
 namespace SystemTray
 {
@@ -47,6 +46,7 @@ class Task : public QObject
 
     Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
+    Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
@@ -112,6 +112,8 @@ public:
      **/
     virtual QString taskId() const = 0;
 
+    virtual QQuickItem* taskItem() { return new QQuickItem(0); };
+
     /**
      * Returns an icon that can be associated with this task
      *
@@ -163,6 +165,7 @@ Q_SIGNALS:
     //      precisely (and therefore with greater efficiency)
     void changed(SystemTray::Task *task);
 
+    void taskItemChanged();
     /**
      * Special signal for changed status
      */

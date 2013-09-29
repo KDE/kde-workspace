@@ -31,7 +31,7 @@
 #include "task.h"
 
 //#include "../protocols/fdo/fdoprotocol.h"
-// #include "../protocols/plasmoid/plasmoidtaskprotocol.h"
+#include "protocols/plasmoid/plasmoidprotocol.h"
 #include "protocols/dbussystemtray/dbussystemtrayprotocol.h"
 
 #include <QTimer>
@@ -63,6 +63,7 @@ Manager::Manager()
     //d->setupProtocol(new SystemTray::FdoProtocol(this));
     qDebug() << "ST new manager";
     d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
+    d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
 }
 
 Manager::~Manager()

@@ -1,5 +1,4 @@
 /***************************************************************************
- *                                                                         *
  *   Copyright 2013 Sebastian Kügler <sebas@kde.org>                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,63 +17,68 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
+#ifndef PLASMOIDTASK_H
+#define PLASMOIDTASK_H
 
-#include "host.h"
-#include "manager.h"
-#include "task.h"
+#include "../../task.h"
 
-#include <QDebug>
-#include <QTimer>
-#include <QVariant>
+#include <Plasma/DataEngine>
+
+class KIconLoader;
+class KJob;
+
+namespace Plasma
+{
+
+class Service;
+
+}
 
 namespace SystemTray
 {
 
-Manager *SystemTray::Host::s_manager = 0;
-int SystemTray::Host::s_managerUsage = 0;
+class PlasmoidTaskPrivate;
 
-class SystemtrayManagerPrivate {
+class PlasmoidTask : public Task
+{
+    Q_OBJECT
+
+    Q_PROPERTY(QString shortcut READ shortcut NOTIFY changedShortcut)
+
+    friend class PlasmoidProtocol;
+
 public:
-    Host *q;
-    QList<SystemTray::Task*> tasks;
+    PlasmoidTask(const QString &packageName, QObject *parent);
+    ~PlasmoidTask();
+
+    bool isValid() const;
+    bool isEmbeddable() const;
+    virtual QString taskId() const;
+    virtual QQuickItem* taskItem() const;
+    virtual QIcon icon() const;
+    virtual bool isWidget() const;
+    virtual TaskType type() const { return TypePlasmoid; };
+
+    QString iconName() const { return m_iconName; }
+    QString shortcut() const { return m_shortcut; }
+    void    setShortcut(QString text);
+
+Q_SIGNALS:
+    void changedShortcut();
+
+private Q_SLOTS:
+    void syncStatus(QString status);
+
+private:
+    QString m_taskId;
+    QIcon m_icon;
+    QString m_iconName;
+    QString m_shortcut;
+
+    bool m_valid;
 };
 
-Host::Host(QObject* parent) :
-    QObject(parent)
-{
-    d = new SystemtrayManagerPrivate;
-    QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove
-    //init();
-}
-
-Host::~Host()
-{
-    delete d;
 }
 
 
-void Host::init()
-{
-    if (!s_manager) {
-        s_manager = new SystemTray::Manager();
-        connect(s_manager, SIGNAL(tasksChanged()), this, SIGNAL(tasksChanged()));
-    }
-    ++s_managerUsage;
-    emit tasksChanged();
-}
-
-QQmlListProperty<SystemTray::Task> Host::tasks()
-{
-    if (s_manager) {
-        // We need to keep a reference to the list we're passing to the runtime
-        d->tasks = s_manager->tasks();
-        QQmlListProperty<SystemTray::Task> l(this, d->tasks);
-        return l;
-    }
-    QQmlListProperty<SystemTray::Task> l;
-    return l;
-}
-
-} // namespace
-
-#include "host.moc"
+#endif

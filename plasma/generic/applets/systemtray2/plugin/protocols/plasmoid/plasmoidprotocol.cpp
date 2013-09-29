@@ -1,5 +1,4 @@
 /***************************************************************************
- *                                                                         *
  *   Copyright 2013 Sebastian Kügler <sebas@kde.org>                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,63 +17,59 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-
-#include "host.h"
-#include "manager.h"
-#include "task.h"
+#include "plasmoidtask.h"
+#include "plasmoidprotocol.h"
 
 #include <QDebug>
-#include <QTimer>
-#include <QVariant>
+
 
 namespace SystemTray
 {
 
-Manager *SystemTray::Host::s_manager = 0;
-int SystemTray::Host::s_managerUsage = 0;
-
-class SystemtrayManagerPrivate {
-public:
-    Host *q;
-    QList<SystemTray::Task*> tasks;
-};
-
-Host::Host(QObject* parent) :
-    QObject(parent)
+PlasmoidProtocol::PlasmoidProtocol(QObject *parent)
+    : Protocol(parent),
+      m_tasks()
 {
-    d = new SystemtrayManagerPrivate;
-    QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove
-    //init();
 }
 
-Host::~Host()
+PlasmoidProtocol::~PlasmoidProtocol()
 {
-    delete d;
 }
 
-
-void Host::init()
+void PlasmoidProtocol::init()
 {
-    if (!s_manager) {
-        s_manager = new SystemTray::Manager();
-        connect(s_manager, SIGNAL(tasksChanged()), this, SIGNAL(tasksChanged()));
+}
+
+void PlasmoidProtocol::newTask(const QString &service)
+{
+    qDebug() << "ST new task " << service;
+    if (m_tasks.contains(service)) {
+        return;
     }
-    ++s_managerUsage;
-    emit tasksChanged();
+
+    PlasmoidTask *task = new PlasmoidTask(service, this);
+
+    m_tasks[service] = task;
 }
 
-QQmlListProperty<SystemTray::Task> Host::tasks()
+void PlasmoidProtocol::cleanupTask(const QString &service)
 {
-    if (s_manager) {
-        // We need to keep a reference to the list we're passing to the runtime
-        d->tasks = s_manager->tasks();
-        QQmlListProperty<SystemTray::Task> l(this, d->tasks);
-        return l;
+    PlasmoidTask *task = m_tasks.value(service);
+
+    if (task) {
+        m_tasks.remove(service);
+        if (task->isValid()) {
+            emit task->destroyed(task);
+        }
+        task->deleteLater();
     }
-    QQmlListProperty<SystemTray::Task> l;
-    return l;
 }
 
-} // namespace
+void PlasmoidProtocol::initedTask(PlasmoidTask *task)
+{
+    emit taskCreated(task);
+}
 
-#include "host.moc"
+}
+
+#include "plasmoidprotocol.moc"

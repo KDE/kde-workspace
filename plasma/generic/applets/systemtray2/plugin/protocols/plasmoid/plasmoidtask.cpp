@@ -1,5 +1,4 @@
 /***************************************************************************
- *                                                                         *
  *   Copyright 2013 Sebastian Kügler <sebas@kde.org>                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,63 +17,78 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
+#include "plasmoidtask.h"
+#include "plasmoidprotocol.h"
 
-#include "host.h"
-#include "manager.h"
-#include "task.h"
-
+#include <QtCore/QMetaEnum>
 #include <QDebug>
-#include <QTimer>
-#include <QVariant>
 
 namespace SystemTray
 {
 
-Manager *SystemTray::Host::s_manager = 0;
-int SystemTray::Host::s_managerUsage = 0;
-
-class SystemtrayManagerPrivate {
-public:
-    Host *q;
-    QList<SystemTray::Task*> tasks;
-};
-
-Host::Host(QObject* parent) :
-    QObject(parent)
+PlasmoidTask::PlasmoidTask(const QString &packageName, QObject *parent)
+    : Task(parent),
+      m_taskId(packageName),
+      m_valid(false)
 {
-    d = new SystemtrayManagerPrivate;
-    QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove
-    //init();
+    qDebug();
 }
 
-Host::~Host()
+PlasmoidTask::~PlasmoidTask()
 {
-    delete d;
 }
 
-
-void Host::init()
+bool PlasmoidTask::isValid() const
 {
-    if (!s_manager) {
-        s_manager = new SystemTray::Manager();
-        connect(s_manager, SIGNAL(tasksChanged()), this, SIGNAL(tasksChanged()));
+    return m_valid;
+}
+
+bool PlasmoidTask::isEmbeddable() const
+{
+    return false; // this task cannot be embed because it only provides information to GUI part
+}
+
+bool PlasmoidTask::isWidget() const
+{
+    return false; // isn't a widget
+}
+
+void PlasmoidTask::setShortcut(QString text) {
+    if (m_shortcut != text) {
+        m_shortcut = text;
+        emit changedShortcut();
     }
-    ++s_managerUsage;
-    emit tasksChanged();
 }
 
-QQmlListProperty<SystemTray::Task> Host::tasks()
+
+QString PlasmoidTask::taskId() const
 {
-    if (s_manager) {
-        // We need to keep a reference to the list we're passing to the runtime
-        d->tasks = s_manager->tasks();
-        QQmlListProperty<SystemTray::Task> l(this, d->tasks);
-        return l;
-    }
-    QQmlListProperty<SystemTray::Task> l;
-    return l;
+    return m_taskId;
 }
 
-} // namespace
+QQuickItem* PlasmoidTask::taskItem() const
+{
+    return new QQuickItem(0);
+}
 
-#include "host.moc"
+
+QIcon PlasmoidTask::icon() const
+{
+    return m_icon;
+}
+//Status
+
+void PlasmoidTask::syncStatus(QString newStatus)
+{
+    Task::Status status = (Task::Status)metaObject()->enumerator(metaObject()->indexOfEnumerator("Status")).keyToValue(newStatus.toLatin1());
+
+    if (this->status() == status) {
+        return;
+    }
+
+    setStatus(status);
+}
+
+}
+
+#include "plasmoidtask.moc"
