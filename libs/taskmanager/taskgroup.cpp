@@ -210,11 +210,11 @@ void TaskGroup::add(AbstractGroupableItem *item, int insertIndex)
         if (d->groupManager->separateLaunchers()) {
             if (item->itemType() == LauncherItemType) {
                 KUrl lUrl = item->launcherUrl();
-                int urlIdx = d->groupManager->launcherIndex(lUrl);
 
-                int maxIndex = urlIdx;
-                if(maxIndex < 0) {
-                    maxIndex = d->members.count();
+                int maxIndex = d->groupManager->launcherIndex(lUrl);
+
+                if (maxIndex < 0 || maxIndex >= d->members.count()) {
+                    maxIndex = d->members.count() - 1;
                 }
 
                 for (index = 0; index < maxIndex; ++index) {
