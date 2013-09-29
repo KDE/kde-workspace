@@ -110,13 +110,13 @@ public:
      * a new widget can not be created. isEmbeddable() will return false
      * under these circumstances.
      **/
-    virtual bool isEmbeddable() const;
+    virtual bool isEmbeddable() const = 0;
 
     /**
      * Returns whether this task is represented as widget or it provides only information (icon, name, state, etc)
      * @return true if task is represented as widget.
      */
-    virtual bool isWidget() const;
+    virtual bool isWidget() const = 0;
 
     /**
      * Returns the name of this task that should be presented to the user
@@ -130,7 +130,7 @@ public:
      *
      * The identifier is valid between restarts and so is safe to save
      **/
-    virtual QString taskId() const;
+    virtual QString taskId() const = 0;
 
     /**
      * Returns an icon that can be associated with this task
@@ -138,7 +138,7 @@ public:
      * The icon returned is not necessarily the same icon that appears
      * in the tray icon itself.
      **/
-    virtual QIcon icon() const;
+    virtual QIcon icon() const = 0;
 
     /**
      * @return true if this task is current being used, e.g. it has created
@@ -173,7 +173,7 @@ public:
      * the same for each call of function.
      * @return a type of task.
      */
-    virtual TaskType type() const;
+    virtual TaskType type() const = 0;
 
 
     /**

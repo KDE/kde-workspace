@@ -190,35 +190,6 @@ void Task::setName(QString name)
     }
 }
 
-bool Task::isEmbeddable() const
-{
-    return false;
-}
-
-bool Task::isWidget() const
-{
-    return false;
-}
-
-QString Task::taskId() const
-{
-    return QStringLiteral("EmptyId");
-}
-
-QIcon Task::icon() const
-{
-    return QIcon();
-}
-
-Task::TaskType Task::type() const
-{
-    return TypeStatusItem;
-}
-
-
-
-
-
 }
 
 #include "task.moc"
