@@ -45,8 +45,8 @@ Host::Host(QObject* parent) :
     QObject(parent)
 {
     d = new SystemtrayManagerPrivate;
-    //QTimer::singleShot(2000, this, SLOT(init()));
-    init();
+    QTimer::singleShot(4000, this, SLOT(init()));
+    //init();
 }
 
 Host::~Host()

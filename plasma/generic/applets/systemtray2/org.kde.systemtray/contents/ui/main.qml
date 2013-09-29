@@ -26,8 +26,13 @@ import org.kde.private.systemtray 2.0 as SystemTray
 Item {
     id: root
 
-    width: 256
-    height: 32
+//     width: 256
+//     height: 32
+//     anchors {
+//         left: parent.left
+//         right: parent.right
+//         verticalCenter: parent.verticalCenter
+//     }
 
     property int _h: 32
 
@@ -35,14 +40,22 @@ Item {
         id: host
     }
 
-    GridView {
+    ListView {
         id: gridView
 
-        anchors.fill: parent
-        //spacing: 4
+        anchors {
+            left: parent.left
+            right: parent.right
+            //verticalCenter: parent.verticalCenter
+        }
+
+        orientation: Qt.Horizontal
+        interactive: false
+        spacing: 4
         //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
         model: host.tasks
+
         delegate: Component {
             Item {
                 width: _h
@@ -54,13 +67,16 @@ Item {
                 }
                 PlasmaCore.IconItem {
                     anchors.fill: parent
-                    source: icon
+                    source: iconName != "" ? iconName : icon
                 }
                 Component.onCompleted: {
                     //print("YAY ST Created item");
                 }
             }
+
         }
+
+        //delegate: StatusNotifierItem {}
     }
 
     PlasmaComponents.Label {

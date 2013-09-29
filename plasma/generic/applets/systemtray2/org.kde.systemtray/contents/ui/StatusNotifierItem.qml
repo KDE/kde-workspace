@@ -22,9 +22,9 @@
  **********************************************************************************************************************/
 
 import QtQuick 2.0
-import Private 0.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.qtextracomponents 2.0 as QtExtraComponents
+import org.kde.private.systemtray 2.0 as SystemTray
 
 
 Item {
@@ -36,11 +36,11 @@ Item {
     property bool     __has_task: task ? true : false
     property string   __icon_name:         __has_task ? task.iconName : ""
     property string   __att_icon_name:     __has_task ? task.attIconName : ""
-    property variant  __icon:              __has_task ? task.icon : QIcon("default")
+    property variant  __icon:              __has_task ? task.icon : "default"
     property variant  __att_icon:          __has_task ? task.attIcon : __getDefaultIcon()
     property string   __overlay_icon_name: __has_task ? task.overlayIconName : ""
     property string   __movie_path:        __has_task ? task.moviePath : ""
-    property int      __status:            __has_task ? task.status : UnknownStatus
+    property int      __status:            __has_task ? task.status : SystemTray.Task.UnknownStatus
 
     // Public functions ================================================================================================
     function click(buttons) {
@@ -58,7 +58,7 @@ Item {
     function getMouseArea() {
         return mouse_area
     }
-
+    /*
     Connections {
         target: task
 
@@ -73,7 +73,7 @@ Item {
 
         onShowContextMenu: plasmoid.showMenu(menu, x, y, root_item)
     }
-
+    */
     function __onActivatedShortcut() {
         __processClick(Qt.LeftButton, icon_widget)
     }
