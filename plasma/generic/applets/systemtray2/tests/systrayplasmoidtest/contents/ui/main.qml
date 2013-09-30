@@ -28,14 +28,14 @@ Item {
     width: 48
     height: 48
 
-    Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.4; }
+    Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
 
     PlasmaCore.IconItem {
         anchors.fill: parent
         source: "configure"
     }
     Component.onCompleted: {
-        print(" FAKE SYSTRAY PLASMOID LOADED.");
+        print("Loaded plasmoid's main.qml.");
     }
 }
 

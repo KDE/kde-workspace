@@ -74,11 +74,11 @@ Item {
                     source: iconName != "" ? iconName : icon
                 }
                 Component.onCompleted: {
-                    print(" taskitem: " + iconName + " " + taskItem);
+                    print(" taskitem: " + taskItem + " " + iconName);
                     if ((taskItem != undefined)) {
                         print( " TASK ITEM CHANGED"  + (taskItem != undefined));
                         taskItem.parent = taskItemContainer;
-                        taskItem.anchors.fill = parent;
+                        taskItem.anchors.fill = taskItemContainer;
                     }
                 }
             }

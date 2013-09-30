@@ -37,7 +37,8 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
       m_taskId(packageName),
       m_taskItem(0),
       m_rootItem(rootItem),
-      m_valid(false)
+      m_iconName("akonadi"),
+      m_valid(true)
 {
     //qDebug();
 #if 0
@@ -52,7 +53,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
         qDebug() << " :) Created: " << oname;
 #endif
     m_qmlObject = new QmlObject(rootItem);
-    qDebug() << " rootitem: " << rootItem->objectName();
+    //qDebug() << " rootitem: " << rootItem->objectName();
     m_qmlObject->setInitializationDelayed(true);
     //use our own custom network access manager that will access Plasma packages and to manage security (i.e. deny access to remote stuff when the proper extension isn't enabled
     QQmlEngine *engine = m_qmlObject->engine();
@@ -99,10 +100,10 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
     //initialProperties["height"] = height();
     m_qmlObject->completeInitialization(initialProperties);
 
-    qDebug() << " rootitem: " << rootItem->objectName();
     //m_qmlObject->rootObject()->setParent(rootItem);
     //m_taskItem->setProperty("parent", QVariant::fromValue(rootItem));
-    qDebug() << "ST m_rootItem :: " << m_rootItem->objectName() << m_qmlObject->rootObject();
+    qDebug() << "ST m_rootItem :: " << m_rootItem->objectName() << m_rootItem;
+    qDebug() << " Plasmoidobject: " << m_qmlObject->rootObject();
 
     //QObject *myObject = m_qmlObject->mainComponent()->create();
     m_taskItem = qobject_cast<QQuickItem*>(m_qmlObject->rootObject());

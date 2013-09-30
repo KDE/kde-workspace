@@ -45,6 +45,8 @@ class PlasmoidTask : public Task
     Q_OBJECT
 
     Q_PROPERTY(QString shortcut READ shortcut NOTIFY changedShortcut)
+    Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
+    Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
 
     friend class PlasmoidProtocol;
 
@@ -66,6 +68,8 @@ public:
 
 Q_SIGNALS:
     void changedShortcut();
+    void taskItemChanged();
+    void iconNameChanged();
 
 private Q_SLOTS:
     void syncStatus(QString status);

@@ -81,7 +81,8 @@ void PlasmoidProtocol::init()
     }
 
     foreach (const KPluginInfo &info, sortedApplets) {
-        qDebug() << " Adding applet: " << info.name();
+        //qDebug() << " Adding applet: " << info.name();
+        qDebug() << "\n\n ==========================================================================================";
         newTask(info.pluginName());
     }
 
@@ -98,15 +99,16 @@ void PlasmoidProtocol::newTask(const QString &service)
     Manager* m = qobject_cast<Manager*>(parent());
     QQuickItem* rootItem = m->rootItem();
 
-    if (rootItem) {
-        qDebug() << "Found rootItem: " << rootItem << rootItem->objectName();
-    } else {
-        qDebug() << "Could not find rootItem :(";
-    }
+//     if (rootItem) {
+//         qDebug() << "Found rootItem: " << rootItem << rootItem->objectName();
+//     } else {
+//         qDebug() << "Could not find rootItem :(";
+//     }
 
     PlasmoidTask *task = new PlasmoidTask(rootItem, service, this);
 
     m_tasks[service] = task;
+    emit taskCreated(task);
 }
 
 void PlasmoidProtocol::cleanupTask(const QString &service)
