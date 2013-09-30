@@ -32,7 +32,7 @@ namespace SystemTray {
 
 namespace SystemTray {
 
-class SystemtrayManagerPrivate;
+class HostPrivate;
 
 class Host : public QObject
 {
@@ -56,7 +56,7 @@ Q_SIGNALS:
 private:
     static SystemTray::Manager *s_manager;
     static int s_managerUsage;
-    SystemtrayManagerPrivate* d;
+    HostPrivate* d;
 
 };
 

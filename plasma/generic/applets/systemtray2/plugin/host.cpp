@@ -33,7 +33,7 @@ namespace SystemTray
 Manager *SystemTray::Host::s_manager = 0;
 int SystemTray::Host::s_managerUsage = 0;
 
-class SystemtrayManagerPrivate {
+class HostPrivate {
 public:
     Host *q;
     QList<SystemTray::Task*> tasks;
@@ -42,7 +42,7 @@ public:
 Host::Host(QObject* parent) :
     QObject(parent)
 {
-    d = new SystemtrayManagerPrivate;
+    d = new HostPrivate;
     QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove
     //init();
 }
