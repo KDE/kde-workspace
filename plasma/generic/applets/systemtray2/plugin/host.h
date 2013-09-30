@@ -25,6 +25,8 @@
 #include <QQmlListProperty>
 #include <QObject>
 
+class QQuickItem;
+
 namespace SystemTray {
     class Manager;
     class Task;
@@ -39,11 +41,12 @@ class Host : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QQmlListProperty<SystemTray::Task> tasks READ tasks NOTIFY tasksChanged)
+    Q_PROPERTY(QQuickItem* rootItem WRITE setRootItem)
 
 public:
     Host(QObject* parent = 0);
     virtual ~Host();
-
+    void setRootItem(QQuickItem* rootItem);
 
 public Q_SLOTS:
     QQmlListProperty<SystemTray::Task> tasks();

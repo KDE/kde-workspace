@@ -24,6 +24,7 @@
 #include "task.h"
 
 #include <QDebug>
+#include <QQuickItem>
 #include <QTimer>
 #include <QVariant>
 
@@ -37,6 +38,7 @@ class HostPrivate {
 public:
     Host *q;
     QList<SystemTray::Task*> tasks;
+    QQuickItem* rootItem = 0;
 };
 
 Host::Host(QObject* parent) :
@@ -62,6 +64,12 @@ void Host::init()
     ++s_managerUsage;
     emit tasksChanged();
 }
+
+void Host::setRootItem(QQuickItem* rootItem)
+{
+
+}
+
 
 QQmlListProperty<SystemTray::Task> Host::tasks()
 {
