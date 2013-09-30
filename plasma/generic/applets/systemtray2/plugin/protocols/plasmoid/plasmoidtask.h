@@ -26,6 +26,7 @@
 
 class KIconLoader;
 class KJob;
+class QmlObject;
 
 namespace Plasma
 {
@@ -73,6 +74,7 @@ private:
     QString m_taskId;
     QQuickItem* m_taskItem;
     QQuickItem* m_rootItem;
+    QmlObject* m_qmlObject;
     QIcon m_icon;
     QString m_iconName;
     QString m_shortcut;

@@ -22,7 +22,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
-    id: root
+    id: taskRoot
     objectName: "systemtrayplasmoid"
 
     width: 48

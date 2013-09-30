@@ -38,12 +38,13 @@ Item {
 
     SystemTray.Host {
         id: host
-        rootItem: root
+        rootItem: gridView
 
     }
 
     ListView {
         id: gridView
+        objectName: "gridView"
 
         anchors {
             left: parent.left
@@ -73,7 +74,8 @@ Item {
                     source: iconName != "" ? iconName : icon
                 }
                 Component.onCompleted: {
-                    if (taskItem) {
+                    print(" taskitem: " + iconName + " " + taskItem);
+                    if ((taskItem != undefined)) {
                         print( " TASK ITEM CHANGED"  + (taskItem != undefined));
                         taskItem.parent = taskItemContainer;
                         taskItem.anchors.fill = parent;
