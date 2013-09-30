@@ -20,6 +20,10 @@
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
 
+#include <Plasma/PluginLoader>
+
+#include <kplugintrader.h>
+
 #include <QDebug>
 
 
@@ -38,7 +42,48 @@ PlasmoidProtocol::~PlasmoidProtocol()
 
 void PlasmoidProtocol::init()
 {
+    //X-Plasma-NotificationArea
+    KPluginInfo::List applets = Plasma::PluginLoader::self()->listAppletInfo(QString());
+    const QString constraint = QString("[X-Plasma-NotificationArea] == 'true'");
+    //KPluginTrader::applyConstraints(applets, constraint);
+
+    QStringList ownApplets;
+
+    QMap<QString, KPluginInfo> sortedApplets;
+    foreach (const KPluginInfo &info, applets) {
+        KService::Ptr service = info.service();
+        if (service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
+            // if we already have a plugin with this exact name in it, then check if it is the
+            // same plugin and skip it if it is indeed already listed
+            if (sortedApplets.contains(info.name())) {
+
+                bool dupe = false;
+                // it is possible (though poor form) to have multiple applets
+                // with the same visible name but different plugins, so we hve to check all values
+                foreach (const KPluginInfo &existingInfo, sortedApplets.values(info.name())) {
+                    if (existingInfo.pluginName() == info.pluginName()) {
+                        dupe = true;
+                        break;
+                    }
+                }
+
+                if (dupe) {
+                    continue;
+                }
+            }
+
+            // insertMulti becase it is possible (though poor form) to have multiple applets
+            // with the same visible name but different plugins
+            sortedApplets.insertMulti(info.name(), info);
+        }
+    }
+
+    foreach (const KPluginInfo &info, sortedApplets) {
+        qDebug() << " Adding applet: " << info.name();
+    }
+
 }
+
 
 void PlasmoidProtocol::newTask(const QString &service)
 {

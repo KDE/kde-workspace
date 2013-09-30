@@ -20,6 +20,7 @@ target_link_libraries(systemtrayplugin
     ${KDECLARATIVE_LIBRARIES}
     ${Plasma_LIBRARIES}
     KF5::KWindowSystem
+    KF5::KService
     ${KIconThemes_LIBRARIES}
 
     ${KDE4Attic_LIBRARIES}

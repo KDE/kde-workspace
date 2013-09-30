@@ -52,7 +52,7 @@ DBusSystemTrayTask::DBusSystemTrayTask(const QString &serviceName, Plasma::DataE
       m_isMenu(false),
       m_valid(false)
 {
-    qDebug();
+    //qDebug();
     m_service->setParent(this);
 
     m_dataEngine->connectSource(serviceName, this);
