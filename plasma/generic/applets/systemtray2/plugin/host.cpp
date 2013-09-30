@@ -38,15 +38,13 @@ class HostPrivate {
 public:
     Host *q;
     QList<SystemTray::Task*> tasks;
-    QQuickItem* rootItem = 0;
 };
 
 Host::Host(QObject* parent) :
     QObject(parent)
 {
     d = new HostPrivate;
-    QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove
-    //init();
+    init();
 }
 
 Host::~Host()
@@ -67,7 +65,8 @@ void Host::init()
 
 void Host::setRootItem(QQuickItem* rootItem)
 {
-
+    qDebug() << "Set root item";
+    s_manager->setRootItem(rootItem);
 }
 
 

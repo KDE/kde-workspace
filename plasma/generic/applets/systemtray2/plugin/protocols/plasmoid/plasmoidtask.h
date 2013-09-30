@@ -48,13 +48,13 @@ class PlasmoidTask : public Task
     friend class PlasmoidProtocol;
 
 public:
-    PlasmoidTask(const QString &packageName, QObject *parent);
+    PlasmoidTask(QQuickItem *rootItem, const QString &packageName, QObject *parent);
     ~PlasmoidTask();
 
     bool isValid() const;
     bool isEmbeddable() const;
     virtual QString taskId() const;
-    virtual QQuickItem* taskItem() const;
+    virtual QQuickItem* taskItem();
     virtual QIcon icon() const;
     virtual bool isWidget() const;
     virtual TaskType type() const { return TypePlasmoid; };
@@ -71,6 +71,8 @@ private Q_SLOTS:
 
 private:
     QString m_taskId;
+    QQuickItem* m_taskItem;
+    QQuickItem* m_rootItem;
     QIcon m_icon;
     QString m_iconName;
     QString m_shortcut;

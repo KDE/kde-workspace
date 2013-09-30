@@ -23,7 +23,7 @@
 #ifndef SYSTEMTRAYMANAGER_H
 #define SYSTEMTRAYMANAGER_H
 
-#include <QtCore/QObject>
+#include <QQuickItem>
 
 #include <KConfigGroup>
 
@@ -59,15 +59,8 @@ public:
      **/
     QList<Task*> tasks() const;
 
-//     void forwardConstraintsEvent(Plasma::Types::Constraints constraints, Plasma::Applet *host);
-//
-//     void loadApplets(Plasma::Applet *parent);
-//
-//     void addApplet(const QString appletName, Plasma::Applet *parent);
-//
-//     void removeApplet(const QString appletName, Plasma::Applet *parent);
-//
-//     QStringList applets(Plasma::Applet *parent) const;
+    QQuickItem* rootItem() const;
+    void setRootItem(QQuickItem *item);
 
 Q_SIGNALS:
     /**
@@ -91,6 +84,7 @@ Q_SIGNALS:
     void taskRemoved(SystemTray::Task *task);
 
 private Q_SLOTS:
+    void init();
     void addTask(SystemTray::Task *task);
     void removeTask(SystemTray::Task *task);
 

@@ -25,7 +25,7 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 Item {
     id: root
-
+    objectName: "SystemTrayRootItem"
 //     width: 256
 //     height: 32
 //     anchors {
@@ -38,6 +38,8 @@ Item {
 
     SystemTray.Host {
         id: host
+        rootItem: root
+
     }
 
     ListView {
@@ -58,6 +60,7 @@ Item {
 
         delegate: Component {
             Item {
+                id: taskItemContainer
                 width: _h
                 height: _h
                 //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.4; }
@@ -70,7 +73,11 @@ Item {
                     source: iconName != "" ? iconName : icon
                 }
                 Component.onCompleted: {
-                    //print("YAY ST Created item");
+                    if (taskItem) {
+                        print( " TASK ITEM CHANGED"  + (taskItem != undefined));
+                        taskItem.parent = taskItemContainer;
+                        taskItem.anchors.fill = parent;
+                    }
                 }
             }
 

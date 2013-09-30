@@ -98,6 +98,11 @@ QString Task::name() const
     return d->name;
 }
 
+QQuickItem* Task::taskItem() const
+{
+    return 0;
+}
+
 
 void Task::setName(QString name)
 {

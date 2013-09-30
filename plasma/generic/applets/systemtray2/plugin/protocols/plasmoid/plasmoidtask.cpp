@@ -20,18 +20,23 @@
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
 
+#include <kdeclarative/qmlobject.h>
+
 #include <QtCore/QMetaEnum>
 #include <QDebug>
 
 namespace SystemTray
 {
 
-PlasmoidTask::PlasmoidTask(const QString &packageName, QObject *parent)
+PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
+      m_taskItem(0),
+      m_rootItem(rootItem),
       m_valid(false)
 {
     qDebug();
+    taskItem();
 }
 
 PlasmoidTask::~PlasmoidTask()
@@ -66,9 +71,19 @@ QString PlasmoidTask::taskId() const
     return m_taskId;
 }
 
-QQuickItem* PlasmoidTask::taskItem() const
+QQuickItem* PlasmoidTask::taskItem()
 {
-    return new QQuickItem(0);
+    if (!m_taskItem) {
+        QmlObject *qmlobject = new QmlObject(m_rootItem);
+        qmlobject->setInitializationDelayed(true);
+        qmlobject->setSource(QUrl("/home/sebas/kf5/install/share/plasma/plasmoids/org.kde.systrayplasmoidtest/contents/ui/main.qml"));
+        QObject *myObject = qmlobject->mainComponent()->create();
+        m_taskItem = qobject_cast<QQuickItem*>(myObject);
+        QString oname = m_taskItem->objectName();
+
+        qDebug() << " :) Created: " << oname;
+    }
+    return m_taskItem;
 }
 
 

@@ -20,6 +20,8 @@
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
 
+#include "../../manager.h"
+
 #include <Plasma/PluginLoader>
 
 #include <kplugintrader.h>
@@ -80,6 +82,7 @@ void PlasmoidProtocol::init()
 
     foreach (const KPluginInfo &info, sortedApplets) {
         qDebug() << " Adding applet: " << info.name();
+        newTask(info.pluginName());
     }
 
 }
@@ -92,7 +95,16 @@ void PlasmoidProtocol::newTask(const QString &service)
         return;
     }
 
-    PlasmoidTask *task = new PlasmoidTask(service, this);
+    Manager* m = qobject_cast<Manager*>(parent());
+    QQuickItem* rootItem = m->rootItem();
+
+    if (rootItem) {
+        qDebug() << "Found rootItem: " << rootItem << rootItem->objectName();
+    } else {
+        qDebug() << "Could not find rootItem :(";
+    }
+
+    PlasmoidTask *task = new PlasmoidTask(rootItem, service, this);
 
     m_tasks[service] = task;
 }

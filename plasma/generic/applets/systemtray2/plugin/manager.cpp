@@ -51,6 +51,7 @@ public:
 
     Manager *q;
     QList<Task *> tasks;
+    QQuickItem* rootItem;
 //     PlasmoidProtocol *plasmoidProtocol;
 };
 
@@ -62,6 +63,12 @@ Manager::Manager()
 //     d->setupProtocol(d->plasmoidProtocol);
     //d->setupProtocol(new SystemTray::FdoProtocol(this));
     //qDebug() << "ST new manager";
+    QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove
+
+}
+
+void Manager::init()
+{
     d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
     d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
 }
@@ -70,6 +77,18 @@ Manager::~Manager()
 {
     delete d;
 }
+
+QQuickItem* Manager::rootItem() const
+{
+    return d->rootItem;
+}
+
+
+void Manager::setRootItem(QQuickItem* item)
+{
+    d->rootItem = item;
+}
+
 
 
 QList<Task*> Manager::tasks() const
