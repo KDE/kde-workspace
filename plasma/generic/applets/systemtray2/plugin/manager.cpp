@@ -61,7 +61,7 @@ Manager::Manager()
 //     d->plasmoidProtocol = new PlasmoidProtocol(this);
 //     d->setupProtocol(d->plasmoidProtocol);
     //d->setupProtocol(new SystemTray::FdoProtocol(this));
-    qDebug() << "ST new manager";
+    //qDebug() << "ST new manager";
     d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
     d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
 }
@@ -82,7 +82,7 @@ void Manager::addTask(Task *task)
     connect(task, SIGNAL(destroyed(SystemTray::Task*)), this, SLOT(removeTask(SystemTray::Task*)));
     connect(task, SIGNAL(changedStatus()), this, SIGNAL(taskStatusChanged()));
 
-    qDebug() << task->name() << "(" << task->taskId() << ")";
+    //qDebug() << task->name() << "(" << task->taskId() << ")";
 
     d->tasks.append(task);
     emit taskAdded(task);
@@ -96,32 +96,6 @@ void Manager::removeTask(Task *task)
     emit taskRemoved(task);
     emit tasksChanged();
 }
-
-// void Manager::forwardConstraintsEvent(Plasma::Types::Constraints constraints, Plasma::Applet *host)
-// {
-//     d->plasmoidProtocol->forwardConstraintsEvent(constraints, host);
-// }
-//
-// void Manager::loadApplets(Plasma::Applet *parent)
-// {
-//     d->plasmoidProtocol->loadFromConfig(parent);
-// }
-//
-// void Manager::addApplet(const QString appletName, Plasma::Applet *parent)
-// {
-//     d->plasmoidProtocol->addApplet(appletName, 0, parent);
-// }
-//
-// void Manager::removeApplet(const QString appletName, Plasma::Applet *parent)
-// {
-//     d->plasmoidProtocol->removeApplet(appletName, parent);
-// }
-//
-// QStringList Manager::applets(Plasma::Applet *parent) const
-// {
-//     return d->plasmoidProtocol->applets(parent);
-// }
-
 
 void Manager::Private::setupProtocol(Protocol *protocol)
 {
