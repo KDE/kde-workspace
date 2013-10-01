@@ -7,9 +7,13 @@ set(systemtrayplugin_SRCS
 
     protocols/dbussystemtray/dbussystemtraytask.cpp
     protocols/dbussystemtray/dbussystemtrayprotocol.cpp
+
     protocols/plasmoid/plasmoidtask.cpp
     protocols/plasmoid/plasmoidprotocol.cpp
     protocols/plasmoid/plasmoidinterface.cpp
+    protocols/plasmoid/declarative/packageaccessmanager.cpp
+    protocols/plasmoid/declarative/packageaccessmanagerfactory.cpp
+    protocols/plasmoid/declarative/packageurlinterceptor.cpp
 )
 
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
@@ -25,6 +29,7 @@ target_link_libraries(systemtrayplugin
     KF5::KI18n
     ${KIconThemes_LIBRARIES}
 
+    ${KDE4_KIO_LIBS}
     ${KDE4Attic_LIBRARIES}
     ${KDE4Support_LIBRARIES}
     )
