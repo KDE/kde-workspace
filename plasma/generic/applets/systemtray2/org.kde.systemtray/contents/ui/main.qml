@@ -43,9 +43,14 @@ Item {
     }
 
     function loadNotificationsPlasmoid() {
-        print("Loading notifications plasmoid");
         var plugin = "org.kde.systrayplasmoidtest";
-        var notificationsPlasmoid = host.notificationsPlasmoid();
+        //plugin = "";
+        print("Loading notifications plasmoid: " + plugin);
+        var notificationsPlasmoid = host.notificationsPlasmoid(plugin);
+        if (notificationsPlasmoid == null) {
+            print("Bah. Failed to load " + plugin);
+            return;
+        }
         notificationsPlasmoid.parent = notificationsContainer;
         notificationsPlasmoid.anchors.fill = notificationsContainer;
     }
