@@ -13,6 +13,7 @@ install(FILES plugin/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/privat
 
 add_library(taskmanagerplugin SHARED ${taskmanagerplugin_SRCS})
 
+# FIXME TODO HACK: The last two are temp, see commend in Backend::activateItem().
 target_link_libraries(taskmanagerplugin
                       taskmanager
                       ${QT_QTCORE_LIBRARY}
@@ -20,6 +21,8 @@ target_link_libraries(taskmanagerplugin
                       ${Qt5Quick_LIBRARIES}
                       ${Qt5Widgets_LIBRARIES}
                       KF5::KIOCore
-                      KF5::KWindowSystem)
+                      KF5::KWindowSystem
+                      Qt5::X11Extras
+                      ${X11_LIBRARIES})
 
 install(TARGETS taskmanagerplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/taskmanager)
