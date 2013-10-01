@@ -28,14 +28,20 @@ Item {
     width: 48
     height: 48
 
-    Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
+    //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
 
     PlasmaCore.IconItem {
         anchors.fill: parent
-        source: "configure"
+        source: "akonadi"
     }
     Component.onCompleted: {
         print("Loaded plasmoid's main.qml.");
+    }
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            print(taskRoot.objectName + " has been clicked on.");
+        }
     }
 }
 

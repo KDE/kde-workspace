@@ -43,8 +43,6 @@ protected Q_SLOTS:
     void cleanupTask(const QString &taskId);
 
 private:
-    void initedTask(PlasmoidTask *task);
-
     QHash<QString, PlasmoidTask*> m_tasks;
 };
 

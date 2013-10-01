@@ -22,6 +22,8 @@
 #ifndef SYSTEMTRAYMANAGER__H
 #define SYSTEMTRAYMANAGER__H
 
+#include <kdeclarative/qmlobject.h>
+
 #include <QQmlListProperty>
 #include <QObject>
 
@@ -42,11 +44,16 @@ class Host : public QObject
 
     Q_PROPERTY(QQmlListProperty<SystemTray::Task> tasks READ tasks NOTIFY tasksChanged)
     Q_PROPERTY(QQuickItem* rootItem WRITE setRootItem)
+    Q_PROPERTY(QQuickItem* notificationsPlasmoid READ notificationsPlasmoid)
 
 public:
     Host(QObject* parent = 0);
     virtual ~Host();
     void setRootItem(QQuickItem* rootItem);
+
+    QQuickItem* notificationsPlasmoid();
+
+    static QmlObject* loadPlasmoid(const QString &plugin, const QVariantHash &args, QQuickItem* parent);
 
 public Q_SLOTS:
     QQmlListProperty<SystemTray::Task> tasks();

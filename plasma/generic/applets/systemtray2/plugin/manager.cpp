@@ -69,8 +69,8 @@ Manager::Manager()
 
 void Manager::init()
 {
-    d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
-    d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
+//     d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
+//     d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
 }
 
 Manager::~Manager()

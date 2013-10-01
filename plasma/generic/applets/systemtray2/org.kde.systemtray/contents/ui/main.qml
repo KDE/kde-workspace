@@ -42,12 +42,43 @@ Item {
 
     }
 
+    function loadNotificationsPlasmoid() {
+        print("Loading notifications plasmoid");
+        var notificationsPlasmoid = host.notificationsPlasmoid;
+        notificationsPlasmoid.parent = notificationsContainer;
+        notificationsPlasmoid.anchors.fill = notificationsContainer;
+    }
+
+    Item {
+        id: notificationsContainer
+
+        anchors {
+            top: parent.top
+            left: parent.left
+        }
+        height: _h
+        width: _h
+
+        Rectangle { anchors.fill: parent; border.width: 2; border.color: "black"; opacity: 0.8; }
+        Connections {
+            target: host
+            onNotificationsPlasmoidChanged: {
+            }
+        }
+
+        Timer {
+            interval: 2000
+            running: true
+            onTriggered: loadNotificationsPlasmoid()
+        }
+    }
+
     ListView {
         id: gridView
         objectName: "gridView"
 
         anchors {
-            left: parent.left
+            left: notificationsContainer.right
             right: parent.right
             //verticalCenter: parent.verticalCenter
         }

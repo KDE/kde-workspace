@@ -99,12 +99,6 @@ void PlasmoidProtocol::newTask(const QString &service)
     Manager* m = qobject_cast<Manager*>(parent());
     QQuickItem* rootItem = m->rootItem();
 
-//     if (rootItem) {
-//         qDebug() << "Found rootItem: " << rootItem << rootItem->objectName();
-//     } else {
-//         qDebug() << "Could not find rootItem :(";
-//     }
-
     PlasmoidTask *task = new PlasmoidTask(rootItem, service, this);
 
     m_tasks[service] = task;
@@ -122,11 +116,6 @@ void PlasmoidProtocol::cleanupTask(const QString &service)
         }
         task->deleteLater();
     }
-}
-
-void PlasmoidProtocol::initedTask(PlasmoidTask *task)
-{
-    emit taskCreated(task);
 }
 
 }
