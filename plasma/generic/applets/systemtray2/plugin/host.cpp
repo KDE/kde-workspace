@@ -60,10 +60,10 @@ Host::~Host()
 }
 
 
-QQuickItem* Host::notificationsPlasmoid()
+QQuickItem* Host::notificationsPlasmoid(const QString &plugin)
 {
     if (!d->notificationsPlasmoid) {
-        const QString plugin = QStringLiteral("org.kde.notifications");
+//         const QString plugin = QStringLiteral("org.kde.notifications");
         //const QString plugin = QStringLiteral("org.kde.systrayplasmoidtest");
         d->notificationsPlasmoid = PlasmoidProtocol::loadPlasmoid(plugin, QVariantHash(),
                                                       s_manager->rootItem());

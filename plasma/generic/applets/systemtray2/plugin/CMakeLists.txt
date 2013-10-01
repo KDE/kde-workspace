@@ -9,6 +9,7 @@ set(systemtrayplugin_SRCS
     protocols/dbussystemtray/dbussystemtrayprotocol.cpp
     protocols/plasmoid/plasmoidtask.cpp
     protocols/plasmoid/plasmoidprotocol.cpp
+    protocols/plasmoid/plasmoidinterface.cpp
 )
 
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})

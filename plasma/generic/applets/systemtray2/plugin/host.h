@@ -44,14 +44,14 @@ class Host : public QObject
 
     Q_PROPERTY(QQmlListProperty<SystemTray::Task> tasks READ tasks NOTIFY tasksChanged)
     Q_PROPERTY(QQuickItem* rootItem WRITE setRootItem)
-    Q_PROPERTY(QQuickItem* notificationsPlasmoid READ notificationsPlasmoid)
+    //Q_PROPERTY(QQuickItem* notificationsPlasmoid READ notificationsPlasmoid)
 
 public:
     Host(QObject* parent = 0);
     virtual ~Host();
     void setRootItem(QQuickItem* rootItem);
 
-    QQuickItem* notificationsPlasmoid();
+    Q_INVOKABLE QQuickItem* notificationsPlasmoid(const QString &plugin = QStringLiteral("org.kde.notifications"));
 
 
 public Q_SLOTS:

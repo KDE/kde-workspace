@@ -44,7 +44,8 @@ Item {
 
     function loadNotificationsPlasmoid() {
         print("Loading notifications plasmoid");
-        var notificationsPlasmoid = host.notificationsPlasmoid;
+        var plugin = "org.kde.systrayplasmoidtest";
+        var notificationsPlasmoid = host.notificationsPlasmoid();
         notificationsPlasmoid.parent = notificationsContainer;
         notificationsPlasmoid.anchors.fill = notificationsContainer;
     }
@@ -59,13 +60,13 @@ Item {
         height: _h
         width: _h
 
-        Rectangle { anchors.fill: parent; border.width: 2; border.color: "black"; opacity: 0.8; }
-        Connections {
-            target: host
-            onNotificationsPlasmoidChanged: {
-            }
+        Rectangle {
+            anchors.fill: parent;
+            border.width: 2;
+            border.color: "black";
+            color: Qt.transparent;
+            opacity: 0.8;
         }
-
         Timer {
             interval: 2000
             running: true

@@ -29,11 +29,19 @@ Item {
     height: 48
 
     //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
+    property Component compactRepresentation: Component {
+        PlasmaCore.IconItem {
+            //anchors.fill: parent
+            source: "preferences-desktop-notification"
+        }
+    }
+
 
     PlasmaCore.IconItem {
         anchors.fill: parent
-        source: "akonadi"
+        source: "preferences-desktop-notification"
     }
+
     Component.onCompleted: {
         print("Loaded plasmoid's main.qml.");
     }
@@ -41,6 +49,8 @@ Item {
         anchors.fill: parent
         onClicked: {
             print(taskRoot.objectName + " has been clicked on.");
+            print(" Is there a plasmoid? " + plasmoid != undefined);
+            print(" Plasmoid ID: " + plasmoid.id);
         }
     }
 }

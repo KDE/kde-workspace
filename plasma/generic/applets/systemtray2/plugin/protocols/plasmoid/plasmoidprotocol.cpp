@@ -19,6 +19,7 @@
 
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
+#include "plasmoidinterface.h"
 
 #include "../../manager.h"
 
@@ -94,11 +95,11 @@ void PlasmoidProtocol::init()
 QmlObject* PlasmoidProtocol::loadPlasmoid(const QString &plugin, const QVariantHash &args, QQuickItem* parent)
 {
     // Set up the runtime: security, url-based schemes, etc
-    QmlObject* m_qmlObject = new QmlObject(parent);
+    QmlObject* qmlObject = new QmlObject(parent);
     //qDebug() << " rootitem: " << rootItem->objectName();
-    m_qmlObject->setInitializationDelayed(true);
+    qmlObject->setInitializationDelayed(true);
     //use our own custom network access manager that will access Plasma packages and to manage security (i.e. deny access to remote stuff when the proper extension isn't enabled
-    QQmlEngine *engine = m_qmlObject->engine();
+    QQmlEngine *engine = qmlObject->engine();
 //         QQmlNetworkAccessManagerFactory *factory = engine->networkAccessManagerFactory();
 //         engine->setNetworkAccessManagerFactory(0);
 //         delete factory;
@@ -119,11 +120,13 @@ QmlObject* PlasmoidProtocol::loadPlasmoid(const QString &plugin, const QVariantH
 
     pkg.setPath(plugin);
     const QString mainScript = pkg.filePath("mainscript");
-    m_qmlObject->setSource(QUrl::fromLocalFile(mainScript));
+    qmlObject->setSource(QUrl::fromLocalFile(mainScript));
 
     KPluginInfo i = pkg.metadata();
     if (!i.isValid()) {
         qDebug() << (i18n("Error: Can't find plugin metadata: %1", plugin));
+        qmlObject->completeInitialization(args);
+        return qmlObject;
     }
     qDebug() << (i18n("Showing info for package: %1", plugin));
     qDebug() << (i18n("      Name : %1", i.name()));
@@ -136,42 +139,44 @@ QmlObject* PlasmoidProtocol::loadPlasmoid(const QString &plugin, const QVariantH
 
 
 
-    if (!m_qmlObject->engine() || !m_qmlObject->engine()->rootContext() || !m_qmlObject->engine()->rootContext()->isValid() || m_qmlObject->mainComponent()->isError()) {
+    if (!qmlObject->engine() || !qmlObject->engine()->rootContext() || !qmlObject->engine()->rootContext()->isValid() || qmlObject->mainComponent()->isError()) {
         QString reason;
-        foreach (QQmlError error, m_qmlObject->mainComponent()->errors()) {
+        foreach (QQmlError error, qmlObject->mainComponent()->errors()) {
             reason += error.toString()+'\n';
             qDebug() << error.toString();
         }
         reason = i18n("Error loading QML file: %1", reason);
 
         //m_qmlObject->setSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("appleterror")));
-        m_qmlObject->completeInitialization();
+        qmlObject->completeInitialization();
 
 
         //even the error message QML may fail
-        if (m_qmlObject->mainComponent()->isError()) {
+        if (qmlObject->mainComponent()->isError()) {
             return 0;
         } else {
-            m_qmlObject->rootObject()->setProperty("reason", reason);
+            qmlObject->rootObject()->setProperty("reason", reason);
         }
 
         //m_appletScriptEngine->setLaunchErrorMessage(reason);
         qDebug() << "ERROR: " << reason;
     }
 
-    //m_qmlObject->engine()->rootContext()->setContextProperty("plasmoid", this);
+    AppletInterface* plasmoid = new AppletInterface(parent, 0);
+    //AppletInterface* plasmoid = new AppletInterface(parent, qobject_cast<QQuickItem*>(qmlObject->rootObject()));
+    qmlObject->engine()->rootContext()->setContextProperty("plasmoid", plasmoid);
 
     //initialize size, so an useless resize less
     QVariantHash initialProperties;
     //initialProperties["width"] = width();
     //initialProperties["height"] = height();
-    m_qmlObject->completeInitialization(initialProperties);
+    qmlObject->completeInitialization(initialProperties);
 
     //m_qmlObject->rootObject()->setParent(rootItem);
     //m_taskItem->setProperty("parent", QVariant::fromValue(rootItem));
     qDebug() << " Parent object : " << parent->objectName() << parent;
-    qDebug() << " Plasmoidobject: " << m_qmlObject->rootObject();
-    return m_qmlObject;
+    qDebug() << " Plasmoidobject: " << qmlObject->rootObject();
+    return qmlObject;
 }
 
 
