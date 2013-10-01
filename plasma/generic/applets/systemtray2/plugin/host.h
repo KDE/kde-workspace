@@ -53,7 +53,6 @@ public:
 
     QQuickItem* notificationsPlasmoid();
 
-    static QmlObject* loadPlasmoid(const QString &plugin, const QVariantHash &args, QQuickItem* parent);
 
 public Q_SLOTS:
     QQmlListProperty<SystemTray::Task> tasks();

@@ -23,11 +23,14 @@
 #include "../../manager.h"
 
 #include <Plasma/PluginLoader>
-
+#include <kdeclarative/qmlobject.h>
+#include <klocalizedstring.h>
 #include <kplugintrader.h>
 
 #include <QDebug>
-
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QQuickItem>
 
 namespace SystemTray
 {
@@ -86,6 +89,89 @@ void PlasmoidProtocol::init()
         newTask(info.pluginName());
     }
 
+}
+
+QmlObject* PlasmoidProtocol::loadPlasmoid(const QString &plugin, const QVariantHash &args, QQuickItem* parent)
+{
+    // Set up the runtime: security, url-based schemes, etc
+    QmlObject* m_qmlObject = new QmlObject(parent);
+    //qDebug() << " rootitem: " << rootItem->objectName();
+    m_qmlObject->setInitializationDelayed(true);
+    //use our own custom network access manager that will access Plasma packages and to manage security (i.e. deny access to remote stuff when the proper extension isn't enabled
+    QQmlEngine *engine = m_qmlObject->engine();
+//         QQmlNetworkAccessManagerFactory *factory = engine->networkAccessManagerFactory();
+//         engine->setNetworkAccessManagerFactory(0);
+//         delete factory;
+//         engine->setNetworkAccessManagerFactory(new PackageAccessManagerFactory(m_appletScriptEngine->package()));
+
+    //Hook generic url resolution to the applet package as well
+    //TODO: same thing will have to be done for every qqmlengine: PackageUrlInterceptor is material for plasmaquick?
+//         engine->setUrlInterceptor(new PackageUrlInterceptor(engine, m_appletScriptEngine->package()));
+
+    // Load the package
+    //m_qmlObject->setSource(QUrl::fromLocalFile(m_appletScriptEngine->mainScript()));
+    //m_qmlObject->setSource(QUrl("/home/sebas/kf5/install/share/plasma/plasmoids/org.kde.systrayplasmoidtest/contents/ui/main.qml"));
+
+    Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+
+    //QString p = findPackageRoot("org.kde.microblog-qml", "plasma/plasmoids/");
+    //pkg.setDefaultPackageRoot(d->packageRoot);
+
+    pkg.setPath(plugin);
+    const QString mainScript = pkg.filePath("mainscript");
+    m_qmlObject->setSource(QUrl::fromLocalFile(mainScript));
+
+    KPluginInfo i = pkg.metadata();
+    if (!i.isValid()) {
+        qDebug() << (i18n("Error: Can't find plugin metadata: %1", plugin));
+    }
+    qDebug() << (i18n("Showing info for package: %1", plugin));
+    qDebug() << (i18n("      Name : %1", i.name()));
+    qDebug() << (i18n("   Comment : %1", i.comment()));
+    qDebug() << (i18n("    Plugin : %1", i.pluginName()));
+    qDebug() << (i18n("    Author : %1", i.author()));
+    qDebug() << (i18n("      Path : %1", pkg.path()));
+    qDebug() << "mainScript:" << mainScript;
+
+
+
+
+    if (!m_qmlObject->engine() || !m_qmlObject->engine()->rootContext() || !m_qmlObject->engine()->rootContext()->isValid() || m_qmlObject->mainComponent()->isError()) {
+        QString reason;
+        foreach (QQmlError error, m_qmlObject->mainComponent()->errors()) {
+            reason += error.toString()+'\n';
+            qDebug() << error.toString();
+        }
+        reason = i18n("Error loading QML file: %1", reason);
+
+        //m_qmlObject->setSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("appleterror")));
+        m_qmlObject->completeInitialization();
+
+
+        //even the error message QML may fail
+        if (m_qmlObject->mainComponent()->isError()) {
+            return 0;
+        } else {
+            m_qmlObject->rootObject()->setProperty("reason", reason);
+        }
+
+        //m_appletScriptEngine->setLaunchErrorMessage(reason);
+        qDebug() << "ERROR: " << reason;
+    }
+
+    //m_qmlObject->engine()->rootContext()->setContextProperty("plasmoid", this);
+
+    //initialize size, so an useless resize less
+    QVariantHash initialProperties;
+    //initialProperties["width"] = width();
+    //initialProperties["height"] = height();
+    m_qmlObject->completeInitialization(initialProperties);
+
+    //m_qmlObject->rootObject()->setParent(rootItem);
+    //m_taskItem->setProperty("parent", QVariant::fromValue(rootItem));
+    qDebug() << " Parent object : " << parent->objectName() << parent;
+    qDebug() << " Plasmoidobject: " << m_qmlObject->rootObject();
+    return m_qmlObject;
 }
 
 

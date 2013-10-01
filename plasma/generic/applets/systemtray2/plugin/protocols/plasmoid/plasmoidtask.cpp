@@ -36,7 +36,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
       m_rootItem(rootItem),
       m_valid(true)
 {
-    m_qmlObject = Host::loadPlasmoid(packageName, QVariantHash(), m_rootItem);
+    m_qmlObject = PlasmoidProtocol::loadPlasmoid(packageName, QVariantHash(), m_rootItem);
     if (!m_qmlObject) {
         m_valid = false;
         return;
