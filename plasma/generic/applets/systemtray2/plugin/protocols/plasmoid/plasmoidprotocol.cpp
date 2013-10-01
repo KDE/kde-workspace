@@ -20,6 +20,9 @@
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
 #include "plasmoidinterface.h"
+#include "declarative/packageaccessmanager.h"
+#include "declarative/packageurlinterceptor.h"
+
 
 #include "../../manager.h"
 
@@ -105,20 +108,25 @@ QmlObject* PlasmoidProtocol::loadPlasmoid(const QString &plugin, const QVariantH
 //         delete factory;
 //         engine->setNetworkAccessManagerFactory(new PackageAccessManagerFactory(m_appletScriptEngine->package()));
 
-    //Hook generic url resolution to the applet package as well
-    //TODO: same thing will have to be done for every qqmlengine: PackageUrlInterceptor is material for plasmaquick?
-//         engine->setUrlInterceptor(new PackageUrlInterceptor(engine, m_appletScriptEngine->package()));
 
     // Load the package
+    Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+    pkg.setPath(plugin);
     //m_qmlObject->setSource(QUrl::fromLocalFile(m_appletScriptEngine->mainScript()));
     //m_qmlObject->setSource(QUrl("/home/sebas/kf5/install/share/plasma/plasmoids/org.kde.systrayplasmoidtest/contents/ui/main.qml"));
 
-    Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+    //Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
 
     //QString p = findPackageRoot("org.kde.microblog-qml", "plasma/plasmoids/");
     //pkg.setDefaultPackageRoot(d->packageRoot);
 
-    pkg.setPath(plugin);
+    //pkg.setPath(plugin);
+
+    //Hook generic url resolution to the applet package as well
+    //TODO: same thing will have to be done for every qqmlengine: PackageUrlInterceptor is material for plasmaquick?
+    engine->setUrlInterceptor(new PackageUrlInterceptor(engine, pkg));
+
+
     const QString mainScript = pkg.filePath("mainscript");
     qmlObject->setSource(QUrl::fromLocalFile(mainScript));
 
