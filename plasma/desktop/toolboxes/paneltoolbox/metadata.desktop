@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Panel Toolbox
 Name[cs]=Nástroje panelu
+Name[de]=Werkzeugkasten für die Kontrollleiste
 Name[es]=Caja de herramientas del panel
 Name[kk]=Панель құралдары
 Name[nl]=Paneelhulpmiddelen
@@ -17,6 +18,7 @@ Name[uk]=Набір інструментів панелі
 Name[x-test]=xxPanel Toolboxxx
 Name[zh_TW]=面板工具盒
 Comment=Manage Plasma panel
+Comment[de]=Plasma-Kontrollleiste verwalten
 Comment[es]=Gestión del panel de Plasma
 Comment[kk]=Plasma панелін басқару
 Comment[nl]=Plasmapaneel beheren
