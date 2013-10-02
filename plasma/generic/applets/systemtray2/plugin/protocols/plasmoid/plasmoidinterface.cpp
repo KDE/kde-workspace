@@ -57,6 +57,7 @@ AppletInterface::AppletInterface(QObject *proxy, QQuickItem *parent)
 //       m_appletScriptEngine(script),
 //       m_actionSignals(0),
       m_backgroundHints(Plasma::Types::StandardBackground),
+      m_status(Plasma::Types::ActiveStatus),
       m_busy(false),
       m_expanded(false),
       m_isUserConfiguring(false)
@@ -613,13 +614,15 @@ QString AppletInterface::associatedApplication() const
 
 void AppletInterface::setStatus(const Plasma::Types::ItemStatus &status)
 {
-    //applet()->setStatus(status); // FIXME
+    if (m_status != status) {
+        m_status = status;
+        emit statusChanged();
+    }
 }
 
 Plasma::Types::ItemStatus AppletInterface::status() const
 {
-    return Plasma::Types::ActiveStatus; // FIXME
-    //return applet()->status();
+    return m_status;
 }
 
 int AppletInterface::screen() const

@@ -65,6 +65,7 @@ QNetworkReply *PackageAccessManager::createRequest(QNetworkAccessManager::Operat
         reqUrl.setScheme("file");
         reqUrl.setPath(m_package.filePath(0, reqUrl.path()));
         request.setUrl(reqUrl);
+        qDebug() << "Requesting URL: " << reqUrl;
         return QNetworkAccessManager::createRequest(op, request, outgoingData);
     } else if ((reqUrl.scheme() == "http") ||
                ((reqUrl.scheme() == "file" || reqUrl.scheme() == "desktop"))) {

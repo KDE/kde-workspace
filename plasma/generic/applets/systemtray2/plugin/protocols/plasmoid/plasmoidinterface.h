@@ -347,6 +347,7 @@ private:
 
     Plasma::Types::BackgroundHints m_backgroundHints;
     Plasma::Types::ImmutabilityType m_immutability;
+    Plasma::Types::ItemStatus m_status;
     bool m_busy : 1;
     bool m_expanded : 1;
     QString m_icon;

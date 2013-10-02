@@ -21,6 +21,7 @@
 #include "plasmoidprotocol.h"
 #include "plasmoidinterface.h"
 #include "declarative/packageaccessmanager.h"
+#include "declarative/packageaccessmanagerfactory.h"
 #include "declarative/packageurlinterceptor.h"
 
 
@@ -101,17 +102,20 @@ QmlObject* PlasmoidProtocol::loadPlasmoid(const QString &plugin, const QVariantH
     QmlObject* qmlObject = new QmlObject(parent);
     //qDebug() << " rootitem: " << rootItem->objectName();
     qmlObject->setInitializationDelayed(true);
-    //use our own custom network access manager that will access Plasma packages and to manage security (i.e. deny access to remote stuff when the proper extension isn't enabled
-    QQmlEngine *engine = qmlObject->engine();
-//         QQmlNetworkAccessManagerFactory *factory = engine->networkAccessManagerFactory();
-//         engine->setNetworkAccessManagerFactory(0);
-//         delete factory;
-//         engine->setNetworkAccessManagerFactory(new PackageAccessManagerFactory(m_appletScriptEngine->package()));
 
 
     // Load the package
     Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
     pkg.setPath(plugin);
+
+    //use our own custom network access manager that will access Plasma packages and to manage security (i.e. deny access to remote stuff when the proper extension isn't enabled
+    QQmlEngine *engine = qmlObject->engine();
+    QQmlNetworkAccessManagerFactory *factory = engine->networkAccessManagerFactory();
+    engine->setNetworkAccessManagerFactory(0);
+    delete factory;
+    engine->setNetworkAccessManagerFactory(new PackageAccessManagerFactory(pkg));
+
+
     //m_qmlObject->setSource(QUrl::fromLocalFile(m_appletScriptEngine->mainScript()));
     //m_qmlObject->setSource(QUrl("/home/sebas/kf5/install/share/plasma/plasmoids/org.kde.systrayplasmoidtest/contents/ui/main.qml"));
 
@@ -184,6 +188,14 @@ QmlObject* PlasmoidProtocol::loadPlasmoid(const QString &plugin, const QVariantH
     //m_taskItem->setProperty("parent", QVariant::fromValue(rootItem));
     qDebug() << " Parent object : " << parent->objectName() << parent;
     qDebug() << " Plasmoidobject: " << qmlObject->rootObject();
+    if (!qmlObject->rootObject()) {
+        qDebug() << " PROBLEM!";
+        foreach (QQmlError error, qmlObject->mainComponent()->errors()) {
+            //reason += error.toString()+'\n';
+            qDebug() << " ERROR: " << error.toString();
+        }
+
+    }
     return qmlObject;
 }
 

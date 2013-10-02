@@ -44,7 +44,7 @@ Item {
 
     function loadNotificationsPlasmoid() {
         var plugin = "org.kde.systrayplasmoidtest";
-        //plugin = "";
+        plugin = "org.kde.notifications";
         print("Loading notifications plasmoid: " + plugin);
         var notificationsPlasmoid = host.notificationsPlasmoid(plugin);
         if (notificationsPlasmoid == null) {
@@ -111,9 +111,9 @@ Item {
                     source: iconName != "" ? iconName : icon
                 }
                 Component.onCompleted: {
-                    print(" taskitem: " + taskItem + " " + iconName);
+                    //print(" taskitem: " + taskItem + " " + iconName);
                     if ((taskItem != undefined)) {
-                        print( " TASK ITEM CHANGED"  + (taskItem != undefined));
+                        //print( " TASK ITEM CHANGED"  + (taskItem != undefined));
                         taskItem.parent = taskItemContainer;
                         taskItem.anchors.fill = taskItemContainer;
                     }

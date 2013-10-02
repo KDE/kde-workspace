@@ -52,25 +52,20 @@ public:
     Manager *q;
     QList<Task *> tasks;
     QQuickItem* rootItem;
-//     PlasmoidProtocol *plasmoidProtocol;
 };
 
 
 Manager::Manager()
     : d(new Private(this))
 {
-//     d->plasmoidProtocol = new PlasmoidProtocol(this);
-//     d->setupProtocol(d->plasmoidProtocol);
-    //d->setupProtocol(new SystemTray::FdoProtocol(this));
-    //qDebug() << "ST new manager";
-    QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove
+    QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove timer
 
 }
 
 void Manager::init()
 {
-//     d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
-//     d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
+    d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
+    //d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
 }
 
 Manager::~Manager()

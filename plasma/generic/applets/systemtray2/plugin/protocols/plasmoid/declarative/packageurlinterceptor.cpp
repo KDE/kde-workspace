@@ -52,7 +52,7 @@ QUrl PackageUrlInterceptor::intercept(const QUrl &path, QQmlAbstractUrlIntercept
 
         //asked a file inside a package: let's rewrite the url!
         if (path.path().startsWith(m_package.path())) {
-            //qDebug() << "Found URL in package" << path;
+            if (path.path().endsWith(".js")) qDebug() << "Found URL in package" << path;
 
             //tries to isolate the relative path asked relative to the contentsPrefixPath: like ui/foo.qml
             QString relativePath;
@@ -83,7 +83,9 @@ QUrl PackageUrlInterceptor::intercept(const QUrl &path, QQmlAbstractUrlIntercept
                 //it's from an import, good
                 //TODO: implement imports whitelist?
                 if (path.path().startsWith(import)) {
-                    qDebug() << "Found import, access granted" << path;
+                    if (path.path().endsWith(".js")) qDebug() << "import package js " << path;
+
+                    //qDebug() << "Found import, access granted" << path;
 
                     //check if there is a platform specific file that overrides this import
                     foreach (const QString &platform, KDeclarative::runtimePlatform()) {
@@ -95,9 +97,12 @@ QUrl PackageUrlInterceptor::intercept(const QUrl &path, QQmlAbstractUrlIntercept
 
                         qDebug() << "Found a platform specific file:" << QUrl::fromLocalFile(platformPath)<<f.exists();
                         if (f.exists()) {
+                            qDebug() << "platformpath: " << platformPath;
                             return QUrl::fromLocalFile(platformPath);
                         }
                     }
+                    if (path.path().endsWith(".js")) qDebug() << "Path now: " << path;
+                    //qDebug() << "path: " << path;
                     return path;
                 }
             }
