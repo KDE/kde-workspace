@@ -793,8 +793,9 @@ void AppletInterface::compactRepresentationCheck()
         }
 
         const QUrl compactQml = QUrl::fromLocalFile("/home/sebas/kf5/src/plasma-framework/src/shell/qmlpackages/desktop/contents/applet/CompactApplet.qml"); // FIXME
+        const QUrl defaultCompactQml = QUrl::fromLocalFile("/home/sebas/kf5/src/plasma-framework/src/shell/qmlpackages/desktop/contents/applet/DefaultCompactRepresentation.qml"); // FIXME
         m_compactUiObject = m_qmlObject->createObjectFromSource(compactQml);
-        // FIXME : m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
+        // m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
 
         QObject *compactRepresentation = 0;
 
@@ -806,7 +807,7 @@ void AppletInterface::compactRepresentationCheck()
                 compactRepresentation = compactComponent->create(compactComponent->creationContext());
             } else {
                 //compactRepresentation = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("defaultcompactrepresentation")));
-                compactRepresentation = m_qmlObject->createObjectFromSource(compactQml);
+                compactRepresentation = m_qmlObject->createObjectFromSource(defaultCompactQml);
             }
 
             if (compactRepresentation && compactComponent) {

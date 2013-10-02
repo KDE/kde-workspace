@@ -139,7 +139,7 @@ class AppletInterface : public QQuickItem
     // Task Manager applet (for "Show only tasks from this screen") and no Qt API exposes
     // screen numbering. An alternate solution that doesn't extend the applet interface
     // would be preferrable if found.
-    Q_PROPERTY(int screen READ screen NOTIFY screenChanged)
+    //Q_PROPERTY(int screen READ screen NOTIFY screenChanged)
 
     //Size hints. Note that the containments may chose to not respect them.
     Q_PROPERTY(qreal minimumWidth READ minimumWidth NOTIFY minimumWidthChanged)

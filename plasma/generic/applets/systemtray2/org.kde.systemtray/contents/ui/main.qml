@@ -46,6 +46,7 @@ Item {
         var plugin = "org.kde.systrayplasmoidtest";
         plugin = "org.kde.notifications";
         print("Loading notifications plasmoid: " + plugin);
+        host.rootItem = gridView;
         var notificationsPlasmoid = host.notificationsPlasmoid(plugin);
         if (notificationsPlasmoid == null) {
             print("Bah. Failed to load " + plugin);
@@ -73,7 +74,7 @@ Item {
             opacity: 0;
         }
         Timer {
-            interval: 2000
+            interval: 1000
             running: true
             onTriggered: loadNotificationsPlasmoid()
         }
@@ -85,6 +86,7 @@ Item {
 
         anchors {
             left: notificationsContainer.right
+            leftMargin: spacing
             right: parent.right
             //verticalCenter: parent.verticalCenter
         }
@@ -99,6 +101,7 @@ Item {
         delegate: Component {
             Item {
                 id: taskItemContainer
+                objectName: "taskItemContainer"
                 width: _h
                 height: _h
                 //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.4; }
@@ -108,14 +111,16 @@ Item {
                 }
                 PlasmaCore.IconItem {
                     anchors.fill: parent
-                    source: iconName != "" ? iconName : icon
+                    //visible: source != ""
+                    source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
                 }
                 Component.onCompleted: {
+                    host.rootItem = gridView;
                     //print(" taskitem: " + taskItem + " " + iconName);
                     if ((taskItem != undefined)) {
                         print( " TASK ITEM CHANGED"  + (taskItem != undefined));
                         taskItem.parent = taskItemContainer;
-                        taskItem.anchors.fill = taskItemContainer;
+                        taskItem.anchors.fill = taskItem.parent;
                     }
                 }
             }
@@ -124,43 +129,4 @@ Item {
 
         //delegate: StatusNotifierItem {}
     }
-
-    PlasmaComponents.Label {
-        anchors { bottom: parent.bottom; right: parent.right }
-        text: "Items: "
-    }
-
-    /*
-    Flow {
-        spacing: 4
-        anchors.fill: parent
-
-        PlasmaCore.IconItem {
-            source: "configure"
-            width: _h
-            height: width
-        }
-        PlasmaCore.IconItem {
-            source: "dialog-ok"
-            width: _h
-            height: width
-        }
-        PlasmaCore.IconItem {
-            source: "resize-tr2bl"
-            width: _h
-            height: width
-        }
-        PlasmaCore.IconItem {
-            source: "akonadi"
-            width: _h
-            height: width
-        }
-        PlasmaCore.IconItem {
-            source: "clock"
-            width: _h
-            height: width
-        }
-    }
-    */
-
 }
