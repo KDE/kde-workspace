@@ -39,7 +39,7 @@ public:
     PlasmoidProtocol(QObject *parent);
     ~PlasmoidProtocol();
 
-    static QmlObject* loadPlasmoid(const QString &plugin, const QVariantHash &args, QQuickItem* parent);
+    //static QmlObject* loadPlasmoid(const QString &plugin, const QVariantHash &args, QQuickItem* parent);
 
     void init();
 

@@ -69,8 +69,8 @@ Item {
             anchors.fill: parent;
             border.width: 2;
             border.color: "black";
-            color: Qt.transparent;
-            opacity: 0.8;
+            color: "transparent";
+            opacity: 0;
         }
         Timer {
             interval: 2000
@@ -113,7 +113,7 @@ Item {
                 Component.onCompleted: {
                     //print(" taskitem: " + taskItem + " " + iconName);
                     if ((taskItem != undefined)) {
-                        //print( " TASK ITEM CHANGED"  + (taskItem != undefined));
+                        print( " TASK ITEM CHANGED"  + (taskItem != undefined));
                         taskItem.parent = taskItemContainer;
                         taskItem.anchors.fill = taskItemContainer;
                     }

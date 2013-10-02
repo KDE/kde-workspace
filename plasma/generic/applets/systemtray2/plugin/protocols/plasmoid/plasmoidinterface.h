@@ -147,8 +147,8 @@ class AppletInterface : public QQuickItem
     Q_PROPERTY(qreal maximumWidth READ maximumWidth NOTIFY maximumWidthChanged)
     Q_PROPERTY(qreal maximumHeight READ maximumHeight NOTIFY maximumHeightChanged)
     //FIXME?implicitWidth/height is already there
-    Q_PROPERTY(qreal implicitWidth READ implicitWidth NOTIFY implicitWidthChanged)
-    Q_PROPERTY(qreal implicitHeight READ implicitHeight NOTIFY implicitHeightChanged)
+//     Q_PROPERTY(qreal implicitWidth READ implicitWidth NOTIFY implicitWidthChanged)
+//     Q_PROPERTY(qreal implicitHeight READ implicitHeight NOTIFY implicitHeightChanged)
 
     /**
      * If the plasmoid is in a linear layout, such as a panel, it indicates to take as much horizontal space as possible
@@ -161,7 +161,7 @@ class AppletInterface : public QQuickItem
     Q_PROPERTY(bool fillHeight READ fillHeight NOTIFY fillHeightChanged)
 
 public:
-    AppletInterface(QObject *proxy, QQuickItem *parent = 0);
+    AppletInterface(const QString &plugin, QQuickItem *parent = 0);
     ~AppletInterface();
 
 // //API not intended for the QML part
@@ -308,8 +308,8 @@ Q_SIGNALS:
     void minimumHeightChanged();
     void maximumWidthChanged();
     void maximumHeightChanged();
-    void implicitWidthChanged();
-    void implicitHeightChanged();
+//     void implicitWidthChanged();
+//     void implicitHeightChanged();
     void fillWidthChanged();
     void fillHeightChanged();
     void userConfiguringChanged();
@@ -352,6 +352,7 @@ private:
     bool m_expanded : 1;
     QString m_icon;
     QString m_title;
+    QString m_plugin;
     bool m_isUserConfiguring;
     friend class ContainmentInterface;
 };

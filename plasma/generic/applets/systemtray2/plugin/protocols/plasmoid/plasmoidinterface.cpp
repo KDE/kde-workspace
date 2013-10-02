@@ -47,19 +47,21 @@
 
 #include <kdeclarative/configpropertymap.h>
 #include <kdeclarative/qmlobject.h>
-// #include "declarative/packageaccessmanagerfactory.h"
-// #include "declarative/packageurlinterceptor.h"
+#include "declarative/packageaccessmanagerfactory.h"
+#include "declarative/packageurlinterceptor.h"
 
 Q_DECLARE_METATYPE(AppletInterface*)
 
-AppletInterface::AppletInterface(QObject *proxy, QQuickItem *parent)
+AppletInterface::AppletInterface(const QString &plugin, QQuickItem *parent)
     : QQuickItem(parent),
 //       m_appletScriptEngine(script),
 //       m_actionSignals(0),
       m_backgroundHints(Plasma::Types::StandardBackground),
       m_status(Plasma::Types::ActiveStatus),
+      m_qmlObject(0),
       m_busy(false),
       m_expanded(false),
+      m_plugin(plugin),
       m_isUserConfiguring(false)
 {
     qmlRegisterType<AppletInterface>();
@@ -89,10 +91,11 @@ AppletInterface::AppletInterface(QObject *proxy, QQuickItem *parent)
 //
 //     m_qmlObject = new QmlObject(this);
 //     m_qmlObject->setInitializationDelayed(true);
-
+    //init();
     m_collapseTimer = new QTimer(this);
     m_collapseTimer->setSingleShot(true);
     connect(m_collapseTimer, &QTimer::timeout, this, &AppletInterface::compactRepresentationCheck);
+    m_collapseTimer->start(100);
 }
 
 AppletInterface::~AppletInterface()
@@ -102,8 +105,110 @@ AppletInterface::~AppletInterface()
 
 void AppletInterface::init()
 {
-    if (m_qmlObject->rootObject()) {
+    if (m_qmlObject && m_qmlObject->rootObject()) {
         return;
+    }
+    qDebug() << "INIT" << m_plugin;
+    // Set up the runtime: security, url-based schemes, etc
+    m_qmlObject = new QmlObject(parent());
+    //qDebug() << " rootitem: " << rootItem->objectName();
+    m_qmlObject->setInitializationDelayed(true);
+
+
+    // Load the package
+    Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+    pkg.setPath(m_plugin);
+
+    //use our own custom network access manager that will access Plasma packages and to manage security (i.e. deny access to remote stuff when the proper extension isn't enabled
+    QQmlEngine *engine = m_qmlObject->engine();
+    QQmlNetworkAccessManagerFactory *factory = engine->networkAccessManagerFactory();
+    engine->setNetworkAccessManagerFactory(0);
+    delete factory;
+    engine->setNetworkAccessManagerFactory(new PackageAccessManagerFactory(pkg));
+
+
+    //m_m_qmlObject->setSource(QUrl::fromLocalFile(m_appletScriptEngine->mainScript()));
+    //m_qmlObject->setSource(QUrl("/home/sebas/kf5/install/share/plasma/plasmoids/org.kde.systrayplasmoidtest/contents/ui/main.qml"));
+
+    //Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+
+    //QString p = findPackageRoot("org.kde.microblog-qml", "plasma/plasmoids/");
+    //pkg.setDefaultPackageRoot(d->packageRoot);
+
+    //pkg.setPath(plugin);
+
+    //Hook generic url resolution to the applet package as well
+    //TODO: same thing will have to be done for every qqmlengine: PackageUrlInterceptor is material for plasmaquick?
+    engine->setUrlInterceptor(new PackageUrlInterceptor(engine, pkg));
+
+    QVariantHash initialProperties;
+    initialProperties["width"] = width();
+    initialProperties["height"] = height();
+
+    const QString mainScript = pkg.filePath("mainscript");
+    m_qmlObject->setSource(QUrl::fromLocalFile(mainScript));
+
+    KPluginInfo i = pkg.metadata();
+    if (!i.isValid()) {
+        qDebug() << (i18n("Error: Can't find plugin metadata: %1", m_plugin));
+        m_qmlObject->completeInitialization(initialProperties);
+        return;
+    }
+    qDebug() << (i18n("Showing info for package: %1", m_plugin));
+    qDebug() << (i18n("      Name : %1", i.name()));
+    qDebug() << (i18n("   Comment : %1", i.comment()));
+    qDebug() << (i18n("    Plugin : %1", i.pluginName()));
+    qDebug() << (i18n("    Author : %1", i.author()));
+    qDebug() << (i18n("      Path : %1", pkg.path()));
+    qDebug() << "mainScript:" << mainScript;
+
+
+
+
+    if (!m_qmlObject->engine() || !m_qmlObject->engine()->rootContext() || !m_qmlObject->engine()->rootContext()->isValid() || m_qmlObject->mainComponent()->isError()) {
+        QString reason;
+        foreach (QQmlError error, m_qmlObject->mainComponent()->errors()) {
+            reason += error.toString()+'\n';
+            qDebug() << error.toString();
+        }
+        reason = i18n("Error loading QML file: %1", reason);
+
+        //m_qmlObject->setSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("appleterror")));
+        m_qmlObject->completeInitialization();
+
+
+        //even the error message QML may fail
+        if (m_qmlObject->mainComponent()->isError()) {
+            return;
+        } else {
+            m_qmlObject->rootObject()->setProperty("reason", reason);
+        }
+
+        //m_appletScriptEngine->setLaunchErrorMessage(reason);
+        qDebug() << "ERROR: " << reason;
+    }
+
+    //AppletInterface* plasmoid = new AppletInterface(parent, 0);
+    //AppletInterface* plasmoid = new AppletInterface(parent, qobject_cast<QQuickItem*>(m_qmlObject->rootObject()));
+    m_qmlObject->engine()->rootContext()->setContextProperty("plasmoid", this);
+
+    //initialize size, so an useless resize less
+    //QVariantHash initialProperties;
+    //initialProperties["width"] = width();
+    //initialProperties["height"] = height();
+    m_qmlObject->completeInitialization(initialProperties);
+
+    //m_qmlObject->rootObject()->setParent(rootItem);
+    //m_taskItem->setProperty("parent", QVariant::fromValue(rootItem));
+    qDebug() << " Parent object : " << parent()->objectName() << parent();
+    qDebug() << " Plasmoidobject: " << m_qmlObject->rootObject();
+    if (!m_qmlObject->rootObject()) {
+        qDebug() << " PROBLEM!";
+        foreach (QQmlError error, m_qmlObject->mainComponent()->errors()) {
+            //reason += error.toString()+'\n';
+            qDebug() << " ERROR: " << error.toString();
+        }
+
     }
 
 //     m_configuration = new ConfigPropertyMap(applet()->configScheme(), this);
@@ -188,16 +293,16 @@ void AppletInterface::init()
 //         }
 //     }
 //
-//     //set parent, both as object hyerarchy and visually
-//     if (m_qmlObject->rootObject()) {
-//         m_qmlObject->rootObject()->setProperty("parent", QVariant::fromValue(this));
-//
-//         //set anchors
-//         QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "parent");
-//         QQmlProperty prop(m_qmlObject->rootObject(), "anchors.fill");
-//         prop.write(expr.evaluate());
-//     }
-//     geometryChanged(QRectF(), QRectF(x(), y(), width(), height()));
+    //set parent, both as object hyerarchy and visually
+    if (m_qmlObject->rootObject()) {
+        m_qmlObject->rootObject()->setProperty("parent", QVariant::fromValue(this));
+
+        //set anchors
+        QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "parent");
+        QQmlProperty prop(m_qmlObject->rootObject(), "anchors.fill");
+        prop.write(expr.evaluate());
+    }
+    geometryChanged(QRectF(), QRectF(x(), y(), width(), height()));
 //     emit busyChanged();
 //
 //     applet()->updateConstraints(Plasma::Types::UiReadyConstraint);
@@ -663,6 +768,7 @@ void AppletInterface::geometryChanged(const QRectF &newGeometry, const QRectF &o
 
 void AppletInterface::compactRepresentationCheck()
 {
+    init();
     if (width() <= 0 || height() <= 0 || !m_qmlObject->rootObject()) {
         return;
     }
@@ -686,6 +792,8 @@ void AppletInterface::compactRepresentationCheck()
             return;
         }
 
+        const QUrl compactQml = QUrl::fromLocalFile("/home/sebas/kf5/src/plasma-framework/src/shell/qmlpackages/desktop/contents/applet/CompactApplet.qml"); // FIXME
+        m_compactUiObject = m_qmlObject->createObjectFromSource(compactQml);
         // FIXME : m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
 
         QObject *compactRepresentation = 0;
@@ -698,6 +806,7 @@ void AppletInterface::compactRepresentationCheck()
                 compactRepresentation = compactComponent->create(compactComponent->creationContext());
             } else {
                 //compactRepresentation = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("defaultcompactrepresentation")));
+                compactRepresentation = m_qmlObject->createObjectFromSource(compactQml);
             }
 
             if (compactRepresentation && compactComponent) {
@@ -739,7 +848,9 @@ void AppletInterface::compactRepresentationCheck()
 //
 //             m_qmlObject->rootObject()->setProperty("width", width);
 //             m_qmlObject->rootObject()->setProperty("height", height);
-//
+            m_qmlObject->rootObject()->setProperty("width", 400);
+            m_qmlObject->rootObject()->setProperty("height", 300);
+
             m_compactUiObject.data()->setProperty("applet", QVariant::fromValue(m_qmlObject->rootObject()));
 
             //hook m_compactUiObject size hints to this size hint

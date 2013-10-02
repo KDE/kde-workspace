@@ -19,6 +19,7 @@
 
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
+#include "plasmoidinterface.h"
 #include "../../host.h"
 
 #include <QtCore/QMetaEnum>
@@ -36,13 +37,9 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
       m_rootItem(rootItem),
       m_valid(true)
 {
-    m_qmlObject = PlasmoidProtocol::loadPlasmoid(packageName, QVariantHash(), m_rootItem);
-    if (!m_qmlObject) {
-        m_valid = false;
-        return;
-    }
-    m_taskItem = qobject_cast<QQuickItem*>(m_qmlObject->rootObject());
+    m_taskItem = new AppletInterface(packageName, m_rootItem);
     if (!m_taskItem) {
+        qDebug() << "Invalid taskitem";
         m_valid = false;
         return;
     }

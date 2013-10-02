@@ -27,6 +27,8 @@ Item {
 
     width: 48
     height: 48
+    property int minimumWidth: 64
+    property int minimumHeight: 64
 
     //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
     property Component compactRepresentation: Component {
@@ -39,7 +41,7 @@ Item {
 
     PlasmaCore.IconItem {
         anchors.fill: parent
-        source: "preferences-desktop-notification"
+        source: "preferences-system-windows-move"
     }
 
     Component.onCompleted: {

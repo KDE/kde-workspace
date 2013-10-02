@@ -22,7 +22,7 @@
 #include "host.h"
 #include "manager.h"
 #include "task.h"
-#include "protocols/plasmoid/plasmoidprotocol.h"
+#include "protocols/plasmoid/plasmoidinterface.h"
 
 #include <klocalizedstring.h>
 
@@ -44,7 +44,7 @@ class HostPrivate {
 public:
     Host *q;
     QList<SystemTray::Task*> tasks;
-    QmlObject* notificationsPlasmoid = 0;
+    AppletInterface* notificationsPlasmoid = 0;
 };
 
 Host::Host(QObject* parent) :
@@ -65,13 +65,13 @@ QQuickItem* Host::notificationsPlasmoid(const QString &plugin)
     if (!d->notificationsPlasmoid) {
 //         const QString plugin = QStringLiteral("org.kde.notifications");
         //const QString plugin = QStringLiteral("org.kde.systrayplasmoidtest");
-        d->notificationsPlasmoid = PlasmoidProtocol::loadPlasmoid(plugin, QVariantHash(),
-                                                      s_manager->rootItem());
+        d->notificationsPlasmoid = new AppletInterface(plugin, s_manager->rootItem());
         if (!d->notificationsPlasmoid) {
+            qDebug() << "Notifications failed to load.";
             return new QQuickItem(s_manager->rootItem());
         }
     }
-    return qobject_cast<QQuickItem*>(d->notificationsPlasmoid->rootObject());
+    return d->notificationsPlasmoid;
 }
 
 
