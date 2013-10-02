@@ -27,7 +27,6 @@ include(ECMOptionalAddSubdirectory)
 
 find_package(Qt5Core REQUIRED NO_MODULE)
 find_package(Qt5DBus REQUIRED NO_MODULE)
-find_package(Qt5Transitional MODULE)
 find_package(Qt5Quick REQUIRED NO_MODULE)
 find_package(Qt5Widgets REQUIRED NO_MODULE)
 find_package(Qt5X11Extras REQUIRED NO_MODULE)
@@ -51,6 +50,7 @@ find_package(KInterProcessWindowing REQUIRED NO_MODULE)
 # needed for set_package_properties macro
 find_package(KDELibs4 REQUIRED NO_MODULE)
 find_package(KDE4Support REQUIRED NO_MODULE)
+find_package(Qt5Transitional MODULE)
 
 
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
