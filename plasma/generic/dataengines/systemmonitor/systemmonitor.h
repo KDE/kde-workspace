@@ -57,7 +57,5 @@ class SystemMonitorEngine : public Plasma::DataEngine, public KSGRD::SensorClien
         int m_waitingFor;
 };
 
-K_EXPORT_PLASMA_DATAENGINE(systemmonitor, SystemMonitorEngine)
-
 #endif
 

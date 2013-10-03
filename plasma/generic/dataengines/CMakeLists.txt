@@ -40,7 +40,7 @@ endif(Boost_FOUND AND KdepimLibs_FOUND)
 
 if(NOT WIN32)
 	#   add_subdirectory(mouse)
-	#   add_subdirectory(systemmonitor)
+	  add_subdirectory(systemmonitor)
    if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
         add_subdirectory(tasks)
    endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")

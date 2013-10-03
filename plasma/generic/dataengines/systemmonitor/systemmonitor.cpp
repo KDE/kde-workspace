@@ -87,9 +87,6 @@ void SystemMonitorEngine::updateSensors()
 {
     DataEngine::SourceDict sources = containerDict();
     DataEngine::SourceDict::iterator it = sources.begin();
-    if (m_waitingFor != 0) {
-        scheduleSourcesUpdated();
-    }
 
     m_waitingFor = 0;
 
@@ -133,7 +130,6 @@ void SystemMonitorEngine::answerReceived(int id, const QList<QByteArray> &answer
             it.value()->setData("min", min);
             it.value()->setData("max", max);
             it.value()->setData("units", unit);
-            scheduleSourcesUpdated();
         }
 
         return;
@@ -196,15 +192,14 @@ void SystemMonitorEngine::answerReceived(int id, const QList<QByteArray> &answer
         it.value()->setData("value", reply);
     }
 
-    if (m_waitingFor == 0) {
-        scheduleSourcesUpdated();
-    }
 }
 
 void SystemMonitorEngine::sensorLost( int )
 {
     m_waitingFor--;
 }
+
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(systemmonitor, SystemMonitorEngine, "plasma-dataengine-systemmonitor.json")
 
 #include "systemmonitor.moc"
 
