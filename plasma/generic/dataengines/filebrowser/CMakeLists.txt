@@ -8,7 +8,7 @@ plasma_add_plugin(plasma_engine_filebrowser ${filebrowser_engine_SRCS})
 target_link_libraries(plasma_engine_filebrowser
     ${Plasma_LIBRARIES}
     ${KService_LIBRARIES}
-    ${KDE4_KIO_LIBS}
+    KF5::KIOCore
     ${KDE4Support_LIBRARIES}
 )
 

@@ -8,10 +8,10 @@ kservice_desktop_to_json(plasma-dataengine-keystate.desktop)
 plasma_add_plugin(plasma_engine_keystate ${keystate_engine_SRCS})
 
 target_link_libraries(plasma_engine_keystate
-  ${KGuiAddons_LIBRARIES}
-  ${Plasma_LIBRARIES}
-  ${KService_LIBRARIES}
-  ${KDE4_KIO_LIBS}
+    KF5::KGuiAddons
+    KF5::plasma
+    KF5::KService
+    KF5::KIOCore
 )
 
 install(TARGETS plasma_engine_keystate DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
