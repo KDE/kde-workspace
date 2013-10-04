@@ -297,7 +297,8 @@ int NotificationsEngine::createNotification(const QString &appName, const QStrin
 
 void NotificationsEngine::configureNotification(const QString &appName)
 {
-    KNotifyConfigWidget::configure(0, appName);
+#warning "reenable once KNotifyConfigWidget works again"
+//    KNotifyConfigWidget::configure(0, appName);
 }
 
 K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(notifications, NotificationsEngine, "plasma-dataengine-notifications.json")
