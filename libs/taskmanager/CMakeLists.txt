@@ -67,7 +67,7 @@ endif()
 #     target_link_libraries(taskmanager kephal)
 #  endif (NOT KDE_PLATFORM_FEATURE_BINARY_COMPATIBLE_FEATURE_REDUCTION)
 
-set_target_properties(taskmanager PROPERTIES VERSION 5.0.0 SOVERSION 5 )
+set_target_properties(taskmanager PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} )
 install(TARGETS taskmanager EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 install(FILES
