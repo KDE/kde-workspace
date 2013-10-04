@@ -11,8 +11,9 @@ plasma_add_plugin(plasma_engine_apps ${apps_engine_SRCS})
 
 target_link_libraries(plasma_engine_apps
     ${Plasma_LIBRARIES}
-    ${KService_LIBRARIES}
-    ${KDE4_KIO_LIBS} #FIXME WHEN KRUN MOVES TO KF5
+    KF5::KService
+    KF5::KIOCore
+    KF5::KIOWidgets
 )
 
 install(TARGETS plasma_engine_apps DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
