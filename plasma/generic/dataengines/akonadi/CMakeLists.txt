@@ -9,14 +9,14 @@ set(akonadi_engine_srcs
     akonadiengine.cpp
 )
 
-kde4_add_plugin(plasma_engine_akonadi ${akonadi_engine_srcs})
+plasma_add_plugin(plasma_engine_akonadi ${akonadi_engine_srcs})
 
 target_link_libraries(
     plasma_engine_akonadi
     ${KDE4_KPIMUTILS_LIBS}
-    ${KDE4_KDECORE_LIBS}
+    KF5::KCoreAddons
     ${KDE4_AKONADI_LIBS}
-    ${KDE4_PLASMA_LIBS}
+    KF5::plasma
     ${KDE4_KMIME_LIBS}
     ${KDE4_AKONADI_KMIME_LIBS}
     ${KDE4_KABC_LIBS}

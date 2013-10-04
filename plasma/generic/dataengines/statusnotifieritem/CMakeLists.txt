@@ -31,7 +31,7 @@ plasma_add_plugin(plasma_engine_statusnotifieritem ${statusnotifieritem_engine_S
 target_link_libraries(plasma_engine_statusnotifieritem
   ${Plasma_LIBRARIES}
   ${DBUSMENUQT_LIBRARIES}
-  ${KService_LIBRARIES}
+  KF5::KService
   ${Qt5DBus_LIBRARIES}
   ${KDE4_KIO_LIBS}
   ${KDE4Support_LIBRARIES}

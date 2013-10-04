@@ -18,13 +18,13 @@ if(Akonadi_FOUND)
     )
 endif(Akonadi_FOUND)
 
-kde4_add_plugin(plasma_engine_calendar ${calendar_engine_srcs})
+plasma_add_plugin(plasma_engine_calendar ${calendar_engine_srcs})
 
 target_link_libraries(
     plasma_engine_calendar
     ${KDEPIMLIBS_KHOLIDAYS_LIBRARY}
-    ${KDE4_KDECORE_LIBS}
-    ${KDE4_PLASMA_LIBS}
+    KF5::KCoreAddons
+    KF5::plasma
     ${KDE4_KMIME_LIBS}
     ${KDE4_KCALCORE_LIBS}
     ${KDE4_KCALUTILS_LIBS}

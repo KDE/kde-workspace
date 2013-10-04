@@ -12,10 +12,10 @@ qt4_add_dbus_interface(
    ActivityRankingInterface
    )
 
-kde4_add_plugin(plasma_engine_activities ${activity_engine_SRCS})
+plasma_add_plugin(plasma_engine_activities ${activity_engine_SRCS})
 target_link_libraries(plasma_engine_activities
-                      ${KDE4_KDECORE_LIBS}
-                      ${KDE4_PLASMA_LIBS}
+                      KF5::KCoreAddons
+                      KF5::plasma
                       ${KACTIVITIES_LIBRARY})
 
 install(TARGETS plasma_engine_activities

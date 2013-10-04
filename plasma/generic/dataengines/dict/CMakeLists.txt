@@ -10,7 +10,7 @@ plasma_add_plugin(plasma_engine_dict ${dict_engine_SRCS})
 
 target_link_libraries (plasma_engine_dict
   ${Plasma_LIBRARIES}
-  ${KService_LIBRARIES}
+  KF5::KService
   ${QT_QTNETWORK_LIBRARY}
 )
 

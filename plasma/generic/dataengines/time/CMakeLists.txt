@@ -10,7 +10,7 @@ kservice_desktop_to_json(plasma-dataengine-time.desktop)
 plasma_add_plugin(plasma_engine_time ${time_engine_SRCS})
 
 target_link_libraries(plasma_engine_time
-    ${Solid_LIBRARIES}
+    KF5::Solid
     ${Plasma_LIBRARIES}
     ${KDE4Attic_LIBRARIES}
     KF5::KI18n

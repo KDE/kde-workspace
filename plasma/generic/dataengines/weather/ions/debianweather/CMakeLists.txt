@@ -5,7 +5,7 @@ project(iondebianweather)
 set(karaboudjan_SRCS iondebianweather.cpp)
  
 # Now make sure all files get to the right place
-kde4_add_plugin(ion_debianweather ${karaboudjan_SRCS})
+plasma_add_plugin(ion_debianweather ${karaboudjan_SRCS})
 target_link_libraries(ion_debianweather weather_ion
                       ${QT_QTCORE_LIBRARY})
  

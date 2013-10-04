@@ -8,7 +8,7 @@ plasma_add_plugin(plasma_engine_executable ${executable_engine_SRCS})
 
 target_link_libraries(plasma_engine_executable
     ${Plasma_LIBRARIES}
-    ${KService_LIBRARIES}
+    KF5::KService
     KF5::KCoreAddons
 )
 
