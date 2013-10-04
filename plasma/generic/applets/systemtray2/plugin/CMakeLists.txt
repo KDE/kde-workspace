@@ -28,8 +28,8 @@ target_link_libraries(systemtrayplugin
     KF5::KService
     KF5::KI18n
     ${KIconThemes_LIBRARIES}
-
-    ${KDE4_KIO_LIBS}
+    KF5::KIOCore
+    KF5::KIOWidgets
     ${KDE4Attic_LIBRARIES}
     ${KDE4Support_LIBRARIES}
     )
