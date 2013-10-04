@@ -45,6 +45,7 @@ target_link_libraries(taskmanager
     KF5::KIconThemes
     KF5::KI18n
     KF5::KIOCore
+    KF5::KIOWidgets
     KF5::KService
     KF5::KWindowSystem
 )
