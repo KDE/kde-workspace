@@ -22,8 +22,8 @@ target_link_libraries(systemtrayplugin
     ${Qt5Quick_LIBRARIES}
     ${Qt5Qml_LIBRARIES}
     ${KCore_LIBRARIES}
-    ${KDECLARATIVE_LIBRARIES}
-    ${Plasma_LIBRARIES}
+    KF5::KDeclarative
+    KF5::plasma
     KF5::KWindowSystem
     KF5::KService
     KF5::KI18n
