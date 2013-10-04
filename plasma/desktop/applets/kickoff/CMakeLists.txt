@@ -44,6 +44,7 @@ target_link_libraries(kickoffplugin
                               Qt5::DBus
                               KF5::KI18n
                               KF5::KIOCore
+			      KF5::KIOWidgets
                               KF5::plasma
                               KF5::Solid
                               KF5::KService
