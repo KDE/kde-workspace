@@ -2,6 +2,7 @@
 Name=System Tray Plasmoid Test
 Name[cs]=Test Plasmoidu systémové části panelu
 Name[es]=Prueba de plasmoide de la bandeja del sistema
+Name[kk]=Плазмоид жүйелік сөре сынағы
 Name[nl]=Plasmoid test in systeemvak
 Name[pt]=Plasmóide de Testes da Bandeja do Sistema
 Name[pt_BR]=Plasmoide de teste da área de notificação
@@ -9,9 +10,11 @@ Name[sk]=Plazmoidový test systémovej lišty
 Name[sv]=Test av Plasmoid för systembricka
 Name[uk]=Перевірка плазмоїду системного лотка
 Name[x-test]=xxSystem Tray Plasmoid Testxx
+Name[zh_TW]=Plasmoid 測試系統匣
 Comment=Test the system tray
 Comment[de]=Test des Systemabschnitts der Kontrollleiste
 Comment[es]=Probar la bandeja del sistema
+Comment[kk]=Жүйелік сөре сынағы
 Comment[nl]=Test het systeemvak
 Comment[pt]=Testar a bandeja do sistema
 Comment[pt_BR]=Testar a área de notificação
@@ -19,6 +22,7 @@ Comment[sk]=Testovať systémovú lištu
 Comment[sv]=Testa systembrickan
 Comment[uk]=Перевірка системного лотка
 Comment[x-test]=xxTest the system trayxx
+Comment[zh_TW]=測試系統匣
 Icon=preferences-desktop-notification
 Type=Service
 
