@@ -40,6 +40,10 @@ class KDEBrowser : public QObject, public Browser
 public:
     explicit KDEBrowser(QObject *parent = 0);
     virtual QList<BookmarkMatch> match(const QString& term, bool addEverything);
+
+public Q_SLOTS:
+    virtual void teardown() {}
+
 private:
     KBookmarkManager * const m_bookmarkManager;
     Favicon * const m_favicon;

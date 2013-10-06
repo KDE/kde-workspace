@@ -57,7 +57,7 @@ void BookmarksRunner::prep()
 {
     m_browser = m_browserFactory->find(findBrowserName(), this);
     connect(this, SIGNAL(teardown()), dynamic_cast<QObject*>(m_browser), SLOT(teardown()));
-	m_browser->prepare();
+    m_browser->prepare();
 }
 
 
