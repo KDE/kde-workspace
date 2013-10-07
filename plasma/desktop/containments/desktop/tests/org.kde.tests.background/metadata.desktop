@@ -1,6 +1,7 @@
 [Desktop Entry]
 Comment=Testing background settings in Plasma Quick Containments
 Comment[es]=Prueba de las preferencias del fondo de los contenedores de Plasma Quick
+Comment[hu]=Háttérbeállítás tesztelése a Plasma gyors elhatárolásban
 Comment[kk]=Plasma шұғыл контейнерде аясының параметрлерін тексеру
 Comment[nl]=Achtergrondinstellingen testen in Plasma Quick Containments
 Comment[pt]=Configuração de testes do fundo dos contentores do Plasma Quick
@@ -22,6 +23,7 @@ Name=Background Test
 Name[de]=Hintergrundtest
 Name[es]=Prueba del fondo
 Name[fi]=Taustatesti
+Name[hu]=Háttér teszt
 Name[kk]=Аясын тексеру
 Name[nl]=Achtergrondtest
 Name[pt]=Teste de Fundo
