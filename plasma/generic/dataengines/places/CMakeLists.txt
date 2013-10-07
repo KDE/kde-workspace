@@ -13,8 +13,8 @@ plasma_add_plugin(plasma_engine_places ${places_engine_SRCS})
 
 target_link_libraries(plasma_engine_places
 	${Plasma_LIBRARIES}
-    ${KDE4_KFILE_LIBS}
     KF5::KIOCore
+    KF5::KIOFileWidgets
     KF5::Solid
     ${KDE4Support_LIBRARIES}
 )
