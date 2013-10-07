@@ -88,8 +88,6 @@ Trash::~Trash()
 
 void Trash::init()
 {
-    registerAsDragHandle(m_icon);
-
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
