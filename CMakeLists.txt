@@ -44,12 +44,14 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 # Load CMake, Compiler and InstallDirs settings from KF5 and the following are already somewhat "done" tier1/tier2 libs from kdelibs:
 find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
-    KConfig KAuth KJS KWallet KDBusAddons Sonnet
+    KConfig KIO KAuth KJS KWallet KDBusAddons Sonnet
     KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KStyle KCompletion KJobWidgets KTextWidgets XmlGui KCrash
     KBookmarks KUnitConversion KDE4Attic KCMUtils Kross)
 
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(KDeclarative REQUIRED NO_MODULE)
+
+find_package(KInit)
 
 # needed for set_package_properties macro
 find_package(KDELibs4 REQUIRED NO_MODULE)
