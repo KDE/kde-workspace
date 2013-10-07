@@ -58,7 +58,7 @@ qt4_add_dbus_interface( ksmserver_KDEINIT_SRCS ${kcminit_xml} kcminit_interface 
 
 qt4_add_dbus_adaptor( ksmserver_KDEINIT_SRCS org.kde.KSMServerInterface.xml server.h KSMServer )
 
-kde4_add_kdeinit_executable( ksmserver ${ksmserver_KDEINIT_SRCS})
+kf5_add_kdeinit_executable( ksmserver ${ksmserver_KDEINIT_SRCS})
 
 target_link_libraries(kdeinit_ksmserver ${SCREEN_LOCKER} ${KDE4_PLASMA_LIBS} kworkspace
    ${KDE4_KDEUI_LIBS} ${KDE4_KIO_LIBS} ${QIMAGEBLITZ_LIBRARIES} ${KDE4_SOLID_LIBS} ${X11_LIBRARIES} ${X11_Xrender_LIB}

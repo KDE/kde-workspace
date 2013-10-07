@@ -35,7 +35,7 @@ kde4_add_kcfg_files(libklipper_common_SRCS klippersettings.kcfgc)
 set(klipper_KDEINIT_SRCS ${libklipper_common_SRCS} main.cpp tray.cpp)
 
 
-kde4_add_kdeinit_executable(klipper ${klipper_KDEINIT_SRCS})
+kf5_add_kdeinit_executable(klipper ${klipper_KDEINIT_SRCS})
 
 target_link_libraries(kdeinit_klipper ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES} ${ZLIB_LIBRARY})
 if (X11_Xfixes_FOUND)
