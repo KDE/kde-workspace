@@ -25,7 +25,7 @@ target_link_libraries(plasma_engine_powermanagement
     kworkspace
 )
 
-install(TARGETS plasma_engine_powermanagement DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine/plasma/dataengine)
+install(TARGETS plasma_engine_powermanagement DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-powermanagement.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
 install(FILES powermanagementservice.operations DESTINATION ${DATA_INSTALL_DIR}/plasma/services)
 
