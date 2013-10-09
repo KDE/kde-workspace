@@ -146,6 +146,7 @@ Name[zh_TW]=連接埠
 Name=Serial Type
 Name[bs]=Tip serijskog porta
 Name[ca]=Tipus de sèrie
+Name[ca@valencia]=Tipus de sèrie
 Name[cs]=Typ sériového portu
 Name[da]=Serialtype
 Name[de]=Serieller Typ
