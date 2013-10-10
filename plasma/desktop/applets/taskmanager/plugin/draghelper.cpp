@@ -19,12 +19,12 @@
 
 #include "draghelper.h"
 
-#include <Plasma/Applet>
-
 #include <QApplication>
 #include <QDrag>
 #include <QMimeData>
 #include <QQuickItem>
+#include <QIcon>
+#include <QPixmap>
 
 DragHelper::DragHelper(QObject* parent) : QObject(parent)
 {
