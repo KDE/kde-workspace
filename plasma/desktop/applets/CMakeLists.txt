@@ -1,4 +1,4 @@
-#add_subdirectory(kickoff)
+add_subdirectory(kickoff)
 #add_subdirectory(showActivityManager)
 plasma_install_package(trash org.kde.trash plasma/plasmoids applet)
 
