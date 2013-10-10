@@ -8,18 +8,20 @@ set(image_SRCS
 )
 
 
-add_library(plasma_wallpaper_imageplugin SHARED ${image_SRCS})
+kde4_add_library(plasma_wallpaper_imageplugin SHARED ${image_SRCS})
 target_link_libraries(plasma_wallpaper_imageplugin
-	#         plasma
-	 ${Plasma_LIBRARIES}
-         ${Qt5Quick_LIBRARIES}
-         ${Qt5Qml_LIBRARIES}
-         ${KDE4_KIO_LIBS}
-         ${KDE4_KFILE_LIBS}
-         ${KDE4_KNEWSTUFF3_LIBS}
-         ${KDE4_THREADWEAVER_LIBRARY}
-         ${KDE4Support_LIBRARIES}
+	 Qt5::Core
+	 Qt5::Quick
+	 Qt5::Qml
+	 KF5::plasma
+         KF5::KIOCore
+	 KF5::KIOWidgets
+	 KF5::ThreadWeaver
          KF5::KI18n
+	 ${KDE4_KIO_LIBS}
+	 ${KDE4_KFILE_LIBS}
+	 ${KDE4_KNEWSTUFF3_LIBS}
+         ${KDE4Support_LIBRARIES}
          )
 
 install(TARGETS plasma_wallpaper_imageplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/image)
