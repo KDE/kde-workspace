@@ -50,6 +50,8 @@ find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
 
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(KDeclarative REQUIRED NO_MODULE)
+find_package(KBookmarks REQUIRED NO_MODULE)
+find_package(KIO REQUIRED NO_MODULE)
 
 find_package(KInit)
 
