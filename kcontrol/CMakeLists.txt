@@ -29,7 +29,7 @@ set(libkxftconfig_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/fonts/kxftconfig.cpp )
 # endif(NOT WIN32)
 
 # add_subdirectory( launch )
-# add_subdirectory( colors )
+add_subdirectory( colors )
 # add_subdirectory( krdb )
 # add_subdirectory( style )
 # add_subdirectory( desktoptheme )
