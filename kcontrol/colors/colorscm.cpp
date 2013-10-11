@@ -79,13 +79,13 @@ KColorCm::KColorCm(QWidget *parent, const QVariantList &)
       m_previousSchemeItem(0)
 {
     KAboutData* about = new KAboutData(
-        "kcmcolors", 0, ki18n("Colors"), 0, KLocalizedString(),
+        QStringLiteral("kcmcolors"), QString(), i18n("Colors"), QString(), QString(),
         KAboutData::License_GPL,
-        ki18n("(c) 2007 Matthew Woehlke")
+        i18n("(c) 2007 Matthew Woehlke")
     );
-    about->addAuthor( ki18n("Matthew Woehlke"), KLocalizedString(),
-                     "mw_triad@users.sourceforge.net" );
-    about->addAuthor( ki18n("Jeremy Whiting"), KLocalizedString(), "jpwhiting@kde.org");
+    about->addAuthor( i18n("Matthew Woehlke"), QString(),
+                     QStringLiteral("mw_triad@users.sourceforge.net") );
+    about->addAuthor( i18n("Jeremy Whiting"), QString(), QStringLiteral("jpwhiting@kde.org"));
     setAboutData( about );
 
     m_config = KSharedConfig::openConfig("kdeglobals");
