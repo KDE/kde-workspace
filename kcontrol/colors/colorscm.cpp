@@ -22,12 +22,12 @@
 
 #include "../krdb/krdb.h"
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QTimer>
-#include <QtGui/QHeaderView>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QPainter>
-#include <QtGui/QBitmap>
+#include <QFileInfo>
+#include <QTimer>
+#include <QHeaderView>
+#include <QStackedWidget>
+#include <QPainter>
+#include <QBitmap>
 #include <QtDBus/QtDBus>
 
 #include <KAboutData>

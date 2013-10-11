@@ -20,8 +20,8 @@
 #ifndef __SCHEMEPREVIEWSET_H__
 #define __SCHEMEPREVIEWSET_H__
 
-#include <QtGui/QFrame>
-#include <QtGui/QPalette>
+#include <QFrame>
+#include <QPalette>
 
 #include <KSharedConfig>
 #include <KColorScheme>
