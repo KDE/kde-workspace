@@ -309,7 +309,7 @@ void KColorCm::on_schemeRemoveButton_clicked()
         const QString path = KGlobal::dirs()->findResource("data",
             "color-schemes/" + schemeList->currentItem()->data(Qt::UserRole).toString() +
             ".colors");
-        if (KIO::NetAccess::del(path, this))
+        if (KIO::NetAccess::del(QUrl::fromLocalFile(path), this))
         {
             delete schemeList->takeItem(schemeList->currentRow());
         }
@@ -430,7 +430,7 @@ void KColorCm::on_schemeKnsUploadButton_clicked()
 
         // upload
         KNS3::UploadDialog dialog("colorschemes.knsrc", this);
-        dialog.setUploadFile(KUrl(path) );
+        dialog.setUploadFile(QUrl::fromLocalFile(path) );
         dialog.exec();
     }
 }
