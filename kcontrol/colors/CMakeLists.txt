@@ -4,7 +4,13 @@ set(kcm_colors_PART_SRCS ../krdb/krdb.cpp colorscm.cpp previewwidget.cpp setprev
 kde4_add_ui_files(kcm_colors_PART_SRCS colorsettings.ui preview.ui setpreview.ui)
 
 kde4_add_plugin(kcm_colors ${kcm_colors_PART_SRCS})
-target_link_libraries(kcm_colors ${KDE4_KIO_LIBS} ${KDE4_KNEWSTUFF3_LIBS} ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES})
+target_link_libraries(kcm_colors
+    KF5::KCMUtils
+    KF5::KGuiAddons
+    KF5::KI18n
+    ${KDE4_KNEWSTUFF3_LIBS}
+    ${KDE4Support_LIBRARIES}
+    ${X11_LIBRARIES})
 
 install(TARGETS kcm_colors  DESTINATION ${PLUGIN_INSTALL_DIR})
 install( FILES colors.desktop  DESTINATION  ${SERVICES_INSTALL_DIR} )
