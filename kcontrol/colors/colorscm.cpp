@@ -91,8 +91,8 @@ KColorCm::KColorCm(QWidget *parent, const QVariantList &)
     m_config = KSharedConfig::openConfig("kdeglobals");
 
     setupUi(this);
-    schemeKnsButton->setIcon( KIcon("get-hot-new-stuff") );
-    schemeKnsUploadButton->setIcon( KIcon("get-hot-new-stuff") );
+    schemeKnsButton->setIcon( QIcon::fromTheme("get-hot-new-stuff") );
+    schemeKnsUploadButton->setIcon( QIcon::fromTheme("get-hot-new-stuff") );
     connect(colorSet, SIGNAL(currentIndexChanged(int)), this, SLOT(updateColorTable()));
     connect(schemeList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(loadScheme(QListWidgetItem*,QListWidgetItem*)));
