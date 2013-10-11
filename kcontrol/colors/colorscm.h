@@ -52,7 +52,7 @@ public Q_SLOTS:
     /// sets the configuration to sensible default values.
     virtual void defaults();
 
-private slots:
+private Q_SLOTS:
 
     /** set the colortable color buttons up according to the current colorset */
     void updateColorTable();
