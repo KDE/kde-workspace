@@ -23,6 +23,7 @@
 #include "../krdb/krdb.h"
 
 #include <QFileInfo>
+#include <QFileDialog>
 #include <QTimer>
 #include <QHeaderView>
 #include <QStackedWidget>
@@ -323,7 +324,7 @@ void KColorCm::on_schemeRemoveButton_clicked()
 void KColorCm::on_schemeImportButton_clicked()
 {
     // get the path to the scheme to import
-    KUrl url = KFileDialog::getOpenUrl(KUrl(), QString(), this, i18n("Import Color Scheme"));
+    QUrl url = QUrl::fromLocalFile(QFileDialog::getOpenFileName(this, i18n("Import Color Scheme")));
 
     if(url.isValid())
     {
