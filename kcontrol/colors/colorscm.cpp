@@ -75,7 +75,7 @@ QColor KColorCm::WindecoColors::color(WindecoColors::Role role) const
 //END WindecoColors
 
 KColorCm::KColorCm(QWidget *parent, const QVariantList &)
-    : KCModule( KolorFactory::componentData(), parent ), m_disableUpdates(false),
+    : KCModule( parent ), m_disableUpdates(false),
       m_loadedSchemeHasUnsavedChanges(false), m_dontLoadSelectedScheme(false),
       m_previousSchemeItem(0)
 {
