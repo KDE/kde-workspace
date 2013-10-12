@@ -39,13 +39,12 @@ kde4_add_library(taskmanager SHARED ${taskmanager_LIB_SRCS})
 target_link_libraries(taskmanager
     processcore
     ${KDE4Support_LIBRARIES}
-    ${KDE4_KIO_LIBRARY} #KRun
     KF5::KConfigCore
     KF5::KConfigWidgets
     KF5::KIconThemes
     KF5::KI18n
     KF5::KIOCore
-    KF5::KIOWidgets
+    KF5::KIOWidgets # KRun
     KF5::KService
     KF5::KWindowSystem
 )
@@ -94,6 +93,6 @@ install(FILES
 #   )
 
 #kde4_add_executable(tasksmodeltest ${tasksmodel_SRCS})
-#target_link_libraries(tasksmodeltest ${KDE4_KDEUI_LIBS} ${KDE4_KIO_LIBS} ${X11_LIBRARIES} taskmanager kephal)
+#target_link_libraries(tasksmodeltest ${KDE4_KDEUI_LIBS} KF5::KIOCore KF5::KIOWidgets ${X11_LIBRARIES} taskmanager kephal)
 
 
