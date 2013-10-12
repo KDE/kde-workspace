@@ -1,13 +1,17 @@
 
-set(kcm_colors_PART_SRCS ../krdb/krdb.cpp colorscm.cpp previewwidget.cpp setpreviewwidget.cpp)
+set(kcm_colors_SRCS ../krdb/krdb.cpp colorscm.cpp previewwidget.cpp setpreviewwidget.cpp)
 
-kde4_add_ui_files(kcm_colors_PART_SRCS colorsettings.ui preview.ui setpreview.ui)
+set(klauncher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
+qt5_add_dbus_interface(kcm_colors_SRCS ${klauncher_xml} klauncher_iface)
 
-kde4_add_plugin(kcm_colors ${kcm_colors_PART_SRCS})
+kde4_add_ui_files(kcm_colors_SRCS colorsettings.ui preview.ui setpreview.ui)
+
+kde4_add_plugin(kcm_colors ${kcm_colors_SRCS})
 target_link_libraries(kcm_colors
     KF5::KCMUtils
     KF5::KGuiAddons
     KF5::KI18n
+    Qt5::DBus
     ${KDE4_KNEWSTUFF3_LIBS}
     ${KDE4Support_LIBRARIES}
     ${X11_LIBRARIES})

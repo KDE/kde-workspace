@@ -27,13 +27,12 @@
 #include <QtCore/QSettings>
 #include <QtCore/QTextCodec>
 #include <QToolTip>
-//Added by qt3to4:
+
 #include <QPixmap>
 #include <QByteArray>
 #include <QTextStream>
 #include <QDateTime>
 #include <QtDBus/QtDBus>
-#include <ktoolinvocation.h>
 #include <klauncher_iface.h>
 
 #include <kapplication.h>
@@ -97,13 +96,11 @@ static void applyGtkStyles(bool active, int version)
    list.removeAll(gtkkde);
    list.append(gtkkde);
 
-#warning: needs porting
-#if 0
    // Pass env. var to kdeinit.
    QString name = gtkEnvVar(version);
    QString value = QFile::encodeName(list.join(":"));
-   KToolInvocation::klauncher()->setLaunchEnv(name, value);
-#endif
+   org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher5"), QStringLiteral("/KLauncher"), QDBusConnection::sessionBus());
+   klauncher.setLaunchEnv(name, value);
 }
 
 // -----------------------------------------------------------------------------
