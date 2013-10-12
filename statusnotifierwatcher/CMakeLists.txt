@@ -17,7 +17,7 @@ QT4_ADD_DBUS_INTERFACE(kded_statusnotifierwatcher_SRCS ${statusnotifieritem_xml}
 kde4_add_plugin(kded_statusnotifierwatcher ${kded_statusnotifierwatcher_SRCS})
 
 
-target_link_libraries(kded_statusnotifierwatcher  ${KDE4_KIO_LIBS} )
+target_link_libraries(kded_statusnotifierwatcher  KF5::KIOCore KF5::KIOWidgets )
 
 install(TARGETS kded_statusnotifierwatcher  DESTINATION ${PLUGIN_INSTALL_DIR})
 

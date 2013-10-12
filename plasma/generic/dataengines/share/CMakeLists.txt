@@ -10,7 +10,7 @@ plasma_add_plugin(plasma_engine_share ${share_engine_SRCS})
 target_link_libraries(plasma_engine_share
                       ${KCore_LIBRARIES}
                       ${Plasma_LIBRARIES}
-                      ${KDE4_KIO_LIBS}
+                      KIOCore
                       ${KDE4_KROSSCORE_LIBS}
                       ${KDE4Support_LIBRARIES}
 )

@@ -9,7 +9,7 @@ set(kscreensaver_LIB_SRCS main.cpp kscreensaver.cpp)
 
 kde4_add_library(kscreensaver SHARED ${kscreensaver_LIB_SRCS})
 
-target_link_libraries(kscreensaver  ${KDE4_KIO_LIBS} ${X11_X11_LIB})
+target_link_libraries(kscreensaver  KF5::KIOCore KF5::KIOWidgets ${X11_X11_LIB})
 set_target_properties(kscreensaver PROPERTIES VERSION 5.0.0 SOVERSION 5 DEFINE_SYMBOL MAKE_KSCREENSAVER_LIB)
 
 install(TARGETS kscreensaver EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS})

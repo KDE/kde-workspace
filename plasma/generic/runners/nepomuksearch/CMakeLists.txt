@@ -16,7 +16,7 @@ kde4_add_plugin(krunner_nepomuksearchrunner ${nepomuksearchrunner_SRCS})
 target_link_libraries(krunner_nepomuksearchrunner
   ${KDE4_KDECORE_LIBS}
   ${KDE4_KDEUI_LIBS}
-  ${KDE4_KIO_LIBS}
+  KIOCore
   ${NEPOMUK_CORE_LIBRARY}
   ${QT_QTGUI_LIBRARY}
   ${SOPRANO_LIBRARIES}

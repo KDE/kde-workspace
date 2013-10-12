@@ -18,8 +18,8 @@ target_link_libraries(plasma_wallpaper_imageplugin
 	 KF5::KIOWidgets
 	 KF5::ThreadWeaver
          KF5::KI18n
-	 ${KDE4_KIO_LIBS}
-	 ${KDE4_KFILE_LIBS}
+    KF5::KIOCore
+    ${KDE4_KIO_LIBS} # KFileDialog
 	 ${KDE4_KNEWSTUFF3_LIBS}
          ${KDE4Support_LIBRARIES}
          )

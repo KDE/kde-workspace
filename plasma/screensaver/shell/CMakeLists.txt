@@ -28,7 +28,7 @@ qt4_add_dbus_adaptor(plasma-overlay_SRCS ${plasmaapp_dbusXML} plasmaapp.h Plasma
 
 kde4_add_executable(plasma-overlay ${plasma-overlay_SRCS})
 
-target_link_libraries(plasma-overlay ${KDE4_PLASMA_LIBS} kworkspace  ${KDE4_KIO_LIBS} ${KDE4_KFILE_LIBS}
+target_link_libraries(plasma-overlay ${KDE4_PLASMA_LIBS} kworkspace  KIOCore KF5::KIOFileWidgets
                                      ${X11_X11_LIB} plasmagenericshell ${QT_QTDECLARATIVE_LIBRARY} kdeclarative)
 if(X11_Xrender_FOUND)
   target_link_libraries(plasma-overlay ${X11_Xrender_LIB})

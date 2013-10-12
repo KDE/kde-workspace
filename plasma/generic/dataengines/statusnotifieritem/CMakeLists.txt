@@ -33,7 +33,7 @@ target_link_libraries(plasma_engine_statusnotifieritem
   ${DBUSMENUQT_LIBRARIES}
   KF5::KService
   ${Qt5DBus_LIBRARIES}
-  ${KDE4_KIO_LIBS}
+  KIOCore
   ${KDE4Support_LIBRARIES}
   ${KIconThemes_LIBRARIES}
 )

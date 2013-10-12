@@ -17,7 +17,7 @@ KDE4_ADD_UI_FILES(kcm_autostart_PART_SRCS autostartconfig.ui )
 
 KDE4_ADD_PLUGIN(kcm_autostart ${kcm_autostart_PART_SRCS})
 
-TARGET_LINK_LIBRARIES(kcm_autostart   ${KDE4_KIO_LIBS} )
+TARGET_LINK_LIBRARIES(kcm_autostart   KF5::KIOCore KF5::KIOWidgets )
 
 ########### install files ###############
 

@@ -7,7 +7,7 @@ plasma_add_plugin(plasma_engine_metadata ${metadata_engine_SRCS})
 include_directories(${SOPRANO_INCLUDE_DIR} ${NEPOMUK_CORE_INCLUDE_DIR})
 
 target_link_libraries(plasma_engine_metadata
-		      ${KDE4_KIO_LIBS}
+		      KIOCore
                       KF5::KCoreAddons
                       KF5::plasma
                       ${NEPOMUK_CORE_LIBRARY}

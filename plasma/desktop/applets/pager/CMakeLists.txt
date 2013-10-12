@@ -7,7 +7,7 @@ set(pager_SRCS
 kde4_add_ui_files(pager_SRCS pagerConfig.ui)
 kde4_add_plugin(plasma_applet_pager ${pager_SRCS})
 target_link_libraries(plasma_applet_pager
-                      ${KDE4_KIO_LIBS}
+                      KIOCore
                       ${KDE4_PLASMA_LIBS}
                       ${KDE4_KCMUTILS_LIBRARY}
                       ${KACTIVITIES_LIBRARY}

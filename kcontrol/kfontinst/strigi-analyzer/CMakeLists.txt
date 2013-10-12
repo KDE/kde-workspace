@@ -4,7 +4,7 @@ include_directories( ${KDEBASE_WORKSPACE_SOURCE_DIR}/kcontrol/kfontinst/lib/
 
 kde4_add_library(font MODULE FontThroughAnalyzer.cpp FontEngine.cpp )
 
-target_link_libraries(font ${STRIGI_STREAMANALYZER_LIBRARY} ${FREETYPE_LIBRARIES} ${FONTCONFIG_LIBRARIES} ${KDE4_KIO_LIBS} kfontinst )
+target_link_libraries(font ${STRIGI_STREAMANALYZER_LIBRARY} ${FREETYPE_LIBRARIES} ${FONTCONFIG_LIBRARIES} KF5::KIOCore KF5::KIOWidgets kfontinst )
 
 set_target_properties(font PROPERTIES  PREFIX strigita_)
 

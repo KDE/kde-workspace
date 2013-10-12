@@ -26,7 +26,7 @@ qt4_add_dbus_adaptor(kded_appmenu_SRCS org.kde.kded.appmenu.xml
 
 kde4_add_plugin(kded_appmenu ${kded_appmenu_SRCS})
 
-target_link_libraries(kded_appmenu ${KDE4_KIO_LIBS} ${X11_LIBRARIES} ${DBUSMENUQT_LIBRARIES} ${KDE4_PLASMA_LIBS})
+target_link_libraries(kded_appmenu KF5::KIOCore KF5::KIOWidgets ${X11_LIBRARIES} ${DBUSMENUQT_LIBRARIES} ${KDE4_PLASMA_LIBS})
 
 install(TARGETS kded_appmenu  DESTINATION ${PLUGIN_INSTALL_DIR} )
 

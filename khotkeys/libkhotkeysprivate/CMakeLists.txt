@@ -70,7 +70,7 @@ set(khotkeysprivate_SRCS
 )
 
 kde4_add_library(khotkeysprivate SHARED ${khotkeysprivate_SRCS})
-target_link_libraries(khotkeysprivate kworkspace ${KDE4_KIO_LIBS} ${X11_LIBRARIES})
+target_link_libraries(khotkeysprivate kworkspace KF5::KIOCore KF5::KIOWidgets ${X11_LIBRARIES})
 if(X11_XTest_FOUND)
   target_link_libraries(khotkeysprivate ${X11_XTest_LIB})
 endif(X11_XTest_FOUND)

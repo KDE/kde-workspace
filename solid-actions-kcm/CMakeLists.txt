@@ -36,8 +36,8 @@ KDE4_ADD_UI_FILES(kcm_solid_actions_srcs
 KDE4_ADD_PLUGIN(kcm_solid_actions ${kcm_solid_actions_srcs})
 KDE4_ADD_EXECUTABLE(solid-action-desktop-gen ${solid_action_desktop_gen_srcs})
 
-TARGET_LINK_LIBRARIES(kcm_solid_actions ${KDE4_KIO_LIBS} ${KDE4_SOLID_LIBS} )
-TARGET_LINK_LIBRARIES(solid-action-desktop-gen ${KDE4_SOLID_LIBS} ${KDE4_KIO_LIBS} )
+TARGET_LINK_LIBRARIES(kcm_solid_actions KF5::KIOCore KF5::KIOWidgets ${KDE4_SOLID_LIBS} )
+TARGET_LINK_LIBRARIES(solid-action-desktop-gen ${KDE4_SOLID_LIBS} KF5::KIOCore KF5::KIOWidgets )
 
 ########### install files ###############
 

@@ -128,7 +128,7 @@ kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.u
 kde4_add_plugin(kcm_keyboard ${kcm_keyboard_PART_SRCS})
 
 target_link_libraries(kcm_keyboard
-    ${KDE4_KIO_LIBS} ${X11_Xkbfile_LIB} ${X11_LIBRARIES}
+    KF5::KIOCore KF5::KIOWidgets ${X11_Xkbfile_LIB} ${X11_LIBRARIES}
     ${text_paint_LIB}
 )
 

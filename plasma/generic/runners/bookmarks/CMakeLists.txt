@@ -1,5 +1,5 @@
 ########### next target ###############
-set(EXTERNAL_LIBS ${KDE4_KIO_LIBS} ${QT_QTSCRIPT_LIBRARY} ${KDE4_PLASMA_LIBS} ${QT_QTSQL_LIBRARY})
+set(EXTERNAL_LIBS KIOCore ${QT_QTSCRIPT_LIBRARY} ${KDE4_PLASMA_LIBS} ${QT_QTSQL_LIBRARY})
 if(QJSON_FOUND)
     add_definitions(-DHAVE_QJSON=1)
     # Some distributions (e.g. Debian or Ubuntu 12.10) seem to install a QJSONConfig.cmake with lower-case variables,

@@ -9,7 +9,7 @@ set(kcm_access_PART_SRCS kcmaccess.cpp )
 kde4_add_plugin(kcm_access ${kcm_access_PART_SRCS})
 
 
-target_link_libraries(kcm_access  ${KDE4_KIO_LIBS} ${KDE4_PHONON_LIBS} ${KDE4_KNOTIFYCONFIG_LIBS} ${X11_LIBRARIES})
+target_link_libraries(kcm_access  KF5::KIOCore KF5::KIOWidgets ${KDE4_PHONON_LIBS} ${KDE4_KNOTIFYCONFIG_LIBS} ${X11_LIBRARIES})
 
 install(TARGETS kcm_access  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
