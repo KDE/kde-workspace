@@ -219,6 +219,7 @@ PlasmaComponents.ListItem {
                         font.underline: theme.defaultFont.underline
                         font.weight: theme.defaultFont.weight
                         font.wordSpacing: theme.defaultFont.wordSpacing
+                        renderType: Text.NativeRendering
                         selectByMouse: true
                         readOnly: true
                         wrapMode: Text.Wrap
