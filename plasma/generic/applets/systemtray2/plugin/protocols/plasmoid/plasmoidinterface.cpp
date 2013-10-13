@@ -96,6 +96,8 @@ AppletInterface::AppletInterface(const QString &plugin, QQuickItem *parent)
     m_collapseTimer->setSingleShot(true);
     connect(m_collapseTimer, &QTimer::timeout, this, &AppletInterface::compactRepresentationCheck);
     m_collapseTimer->start(100);
+
+    init();
 }
 
 AppletInterface::~AppletInterface()

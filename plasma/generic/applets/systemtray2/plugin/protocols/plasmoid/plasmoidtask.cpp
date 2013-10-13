@@ -37,24 +37,10 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
       m_rootItem(rootItem),
       m_valid(true)
 {
-    QQuickItem* _p = 0;
-
-    QObject* previousParent = parent;
-    while (!_p && previousParent) {
-        _p = qobject_cast<QQuickItem*>(previousParent->parent());
-        previousParent = previousParent->parent();
-        if (!previousParent) {
-            continue;
-        }
-    }
-    if (_p) {
-        qDebug() << "Found suitable parent: " << _p->objectName();
-    } else {
-        qDebug() << "no parent found. :(";
-    }
+    qDebug() << "Loading applet: " << packageName;
     m_taskItem = new AppletInterface(packageName, m_rootItem);
     if (!m_taskItem) {
-        qDebug() << "Invalid taskitem";
+        qDebug() << "Invalid applet taskitem";
         m_valid = false;
         return;
     }

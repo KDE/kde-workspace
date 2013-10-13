@@ -87,7 +87,7 @@ void Host::init()
 
 void Host::setRootItem(QQuickItem* rootItem)
 {
-    qDebug() << "Set root item";
+    //qDebug() << "Set root item";
     s_manager->setRootItem(rootItem);
 }
 
