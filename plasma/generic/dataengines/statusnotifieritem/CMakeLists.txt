@@ -1,7 +1,7 @@
 project(plasma-statusnotifieritem_engine)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/statusnotifierwatcher)
-include_directories(${DBUSMENUQT_INCLUDE_DIR} ${DBusMenuQt5_INCLUDES}) # none of these work?
+include_directories(${DBusMenuQt_INCLUDE_DIR})
 
 
 # We add our source code here
@@ -14,7 +14,7 @@ set(statusnotifieritem_engine_SRCS
 )
 
 set(statusnotifierwatcher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.StatusNotifierWatcher.xml)
-QT4_ADD_DBUS_INTERFACE(statusnotifieritem_engine_SRCS ${statusnotifierwatcher_xml} statusnotifierwatcher_interface)
+qt5_add_dbus_interface(statusnotifieritem_engine_SRCS ${statusnotifierwatcher_xml} statusnotifierwatcher_interface)
 
 set(statusnotifieritem_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.StatusNotifierItem.xml)
 
@@ -23,19 +23,18 @@ set_source_files_properties(${statusnotifieritem_xml} PROPERTIES
    INCLUDE "systemtraytypes.h"
    CLASSNAME OrgKdeStatusNotifierItem
 )
-QT4_ADD_DBUS_INTERFACE(statusnotifieritem_engine_SRCS ${statusnotifieritem_xml} statusnotifieritem_interface)
+qt5_add_dbus_interface(statusnotifieritem_engine_SRCS ${statusnotifieritem_xml} statusnotifieritem_interface)
 
 kservice_desktop_to_json(plasma-engine-statusnotifieritem.desktop)
 
 plasma_add_plugin(plasma_engine_statusnotifieritem ${statusnotifieritem_engine_SRCS})
 target_link_libraries(plasma_engine_statusnotifieritem
-  ${Plasma_LIBRARIES}
-  ${DBUSMENUQT_LIBRARIES}
-  KF5::KService
-  ${Qt5DBus_LIBRARIES}
-  KIOCore
-  ${KDE4Support_LIBRARIES}
-  ${KIconThemes_LIBRARIES}
+    Qt5::DBus
+    KF5::KService
+    KF5::plasma
+    KF5::KIconThemes
+    ${DBusMenuQt_LIBRARIES}
+    ${KDE4Support_LIBRARIES}
 )
 
 install(TARGETS plasma_engine_statusnotifieritem DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

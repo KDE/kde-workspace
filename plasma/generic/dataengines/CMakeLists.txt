@@ -21,7 +21,7 @@ add_subdirectory(soliddevice)
 
 add_subdirectory(time)
 #add_subdirectory(weather)
-if (DBUSMENUQT_FOUND)
+if (DBusMenuQt_FOUND)
   add_subdirectory(statusnotifieritem)
 endif ()
 #add_subdirectory(share)
