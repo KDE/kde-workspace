@@ -309,8 +309,8 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #
 if(NOT WIN32)
-#     # data
-#     macro_optional_add_subdirectory(cursors)
+    # data
+    ecm_optional_add_subdirectory(cursors)
 endif(NOT WIN32)
 #
 ecm_optional_add_subdirectory(plasma)
