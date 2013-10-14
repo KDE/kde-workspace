@@ -16,7 +16,6 @@ target_link_libraries(plasma_engine_places
     KF5::KIOCore
     KF5::KIOFileWidgets
     KF5::Solid
-    ${KDE4Support_LIBRARIES}
 )
 
 install(TARGETS plasma_engine_places

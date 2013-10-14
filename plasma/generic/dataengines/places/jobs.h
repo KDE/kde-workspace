@@ -19,8 +19,9 @@
 #ifndef JOBS_H
 #define JOBS_H
 
+#include <QUrl>
+
 #include "modeljob.h"
-#include <KUrl>
 
 class AddEditPlaceJob : public ModelJob
 {
@@ -46,7 +47,7 @@ public:
 
 private:
     QString m_text;
-    KUrl m_url;
+    QUrl m_url;
     QString m_icon;
 };
 
