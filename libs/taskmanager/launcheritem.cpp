@@ -71,7 +71,7 @@ LauncherItem::LauncherItem(QObject *parent, const KUrl &url)
       d(new LauncherItemPrivate(this))
 {
     if (url.isEmpty()) {
-        d->icon = KIcon("unknown");
+        d->icon = QIcon::fromTheme("unknown");
     } else {
         setLauncherUrl(url);
     }
@@ -355,7 +355,7 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
         KDesktopFile f(d->url.toLocalFile());
 
         if (f.tryExec()) {
-            d->icon = KIcon(f.readIcon());
+            d->icon = QIcon::fromTheme(f.readIcon());
             d->name = f.readName();
             d->genericName = f.readGenericName();
         } else {
@@ -375,7 +375,7 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
             KDesktopFile f(desktopFile);
             KConfigGroup cg(&f, "Desktop Entry");
 
-            d->icon = KIcon(f.readIcon());
+            d->icon = QIcon::fromTheme(f.readIcon());
             const QString exec = cg.readEntry("Exec", QString());
             d->name = cg.readEntry("Name", QString());
             if (d->name.isEmpty() && !exec.isEmpty()) {
@@ -389,7 +389,7 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
         }
     } else {
         const KFileItem fileItem(d->url);
-        d->icon = KIcon(fileItem.iconName());
+        d->icon = QIcon::fromTheme(fileItem.iconName());
     }
 
     if (d->name.isEmpty()) {
@@ -397,7 +397,7 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
     }
 
     if (d->icon.isNull()) {
-        d->icon = KIcon("unknown");
+        d->icon = QIcon::fromTheme("unknown");
     }
 }
 

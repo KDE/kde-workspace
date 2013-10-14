@@ -33,7 +33,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // KDE
 #include <KDE/KDebug>
-#include <KDE/KIcon>
 #include <ksharedptr.h>
 
 
@@ -47,7 +46,7 @@ class TaskGroup::Private
 public:
     Private(TaskGroup *group, GroupManager *manager)
         : q(group),
-          groupIcon(KIcon("xorg")),
+          groupIcon(QIcon::fromTheme("xorg")),
           groupManager(manager)
     {
     }

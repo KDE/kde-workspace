@@ -33,7 +33,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "abstractgroupingstrategy.h"
 
 // KDE
-#include <kicon.h>
 #include <KLocalizedString>
 #include <KDebug>
 #include <KService>
@@ -211,7 +210,7 @@ MoveActionImpl::MoveActionImpl(QObject *parent, TaskItem* item)
 {
     connect(this, SIGNAL(triggered()), item->task(), SLOT(move()));
     setText(i18n("&Move"));
-    setIcon(KIcon("transform-move"));
+    setIcon(QIcon::fromTheme("transform-move"));
     setEnabled(item->isActionSupported(NET::ActionMove));
 }
 
@@ -220,7 +219,7 @@ CloseActionImpl::CloseActionImpl(QObject *parent, AbstractGroupableItem *item)
 {
     connect(this, SIGNAL(triggered()), item, SLOT(close()));
     setText(i18n("&Close"));
-    setIcon(KIcon("window-close"));
+    setIcon(QIcon::fromTheme("window-close"));
     setEnabled(item->isActionSupported(NET::ActionClose));
 }
 
@@ -341,7 +340,7 @@ KeepAboveActionImpl::KeepAboveActionImpl(QObject *parent, AbstractGroupableItem 
 {
     connect(this, SIGNAL(triggered()), item, SLOT(toggleAlwaysOnTop()));
     setText(i18n("Keep &Above Others"));
-    setIcon(KIcon("go-up"));
+    setIcon(QIcon::fromTheme("go-up"));
     setCheckable(true);
     setChecked(item->isAlwaysOnTop());
 }
@@ -351,7 +350,7 @@ KeepBelowActionImpl::KeepBelowActionImpl(QObject *parent, AbstractGroupableItem 
 {
     connect(this, SIGNAL(triggered()), item, SLOT(toggleKeptBelowOthers()));
     setText(i18n("Keep &Below Others"));
-    setIcon(KIcon("go-down"));
+    setIcon(QIcon::fromTheme("go-down"));
     setCheckable(true);
     setChecked(item->isKeptBelowOthers());
 }
@@ -361,7 +360,7 @@ ViewFullscreenActionImpl::ViewFullscreenActionImpl(QObject *parent, AbstractGrou
 {
     connect(this, SIGNAL(triggered()), item, SLOT(toggleFullScreen()));
     setText(i18n("&Fullscreen"));
-    setIcon(KIcon("view-fullscreen"));
+    setIcon(QIcon::fromTheme("view-fullscreen"));
     setCheckable(true);
     setChecked(item->isFullScreen());
     setEnabled(item->isActionSupported(NET::ActionFullScreen));
@@ -398,7 +397,7 @@ LeaveGroupActionImpl::LeaveGroupActionImpl(QObject *parent, AbstractGroupableIte
     Q_ASSERT(strategy);
     connect(this, SIGNAL(triggered()), this, SLOT(leaveGroup()));
     setText(i18n("&Leave Group"));
-    setIcon(KIcon("window-close"));
+    setIcon(QIcon::fromTheme("window-close"));
     setEnabled(item->isGrouped());
 }
 
@@ -525,7 +524,7 @@ NewInstanceActionImpl::NewInstanceActionImpl(QObject *parent, AbstractGroupableI
     if (LauncherItemType == item->itemType()) {
         setVisible(false);
     } else {
-        setIcon(KIcon("system-run"));
+        setIcon(QIcon::fromTheme("system-run"));
         setText(i18n("Start New Instance"));
 
         connect(this, SIGNAL(triggered()), this, SLOT(launchNewInstance()));
@@ -551,7 +550,7 @@ EditGroupActionImpl::EditGroupActionImpl(QObject *parent, TaskGroup *group, Grou
     Q_ASSERT(groupManager);
     connect(this, SIGNAL(triggered()), group, SIGNAL(groupEditRequest()));
     setText(i18n("&Edit Group"));
-    //setIcon(KIcon("window-close"));
+    //setIcon(QIcon::fromTheme("window-close"));
     bool applicable = true;
     if (groupManager->groupingStrategy()) {
         applicable = groupManager->taskGrouper()->editableGroupProperties();

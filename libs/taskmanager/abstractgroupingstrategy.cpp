@@ -24,7 +24,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "abstractgroupingstrategy.h"
 
 #include <KDebug>
-#include <KIcon>
 
 #include <QtCore/QTimer>
 
@@ -265,7 +264,7 @@ bool AbstractGroupingStrategy::setIcon(const QIcon &icon, TaskGroup *group)
 QList <QIcon> AbstractGroupingStrategy::iconSuggestions(TaskGroup *)
 {
     QList <QIcon> iconList;
-    iconList.append(KIcon("xorg"));
+    iconList.append(QIcon::fromTheme("xorg"));
     return iconList;
 }
 

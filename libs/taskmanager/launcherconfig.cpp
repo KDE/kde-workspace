@@ -27,7 +27,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDE/KConfig>
 #include <KDE/KConfigDialog>
 #include <KDE/KConfigGroup>
-#include <KDE/KIcon>
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
 #include <KDE/KUrl>
@@ -46,9 +45,9 @@ LauncherConfig::LauncherConfig(KConfigDialog *parent)
     parent->addPage(this, i18n("Launcher Matching Rules"), "fork");
 
     ui.setupUi(this);
-    ui.add->setIcon(KIcon("list-add"));
-    ui.edit->setIcon(KIcon("document-edit"));
-    ui.remove->setIcon(KIcon("list-remove"));
+    ui.add->setIcon(QIcon::fromTheme("list-add"));
+    ui.edit->setIcon(QIcon::fromTheme("document-edit"));
+    ui.remove->setIcon(QIcon::fromTheme("list-remove"));
     ui.edit->setEnabled(false);
     ui.remove->setEnabled(false);
     connect(ui.add, SIGNAL(clicked(bool)), SLOT(add()));

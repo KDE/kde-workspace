@@ -28,9 +28,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Qt
 #include <QSet>
 
-// KDE
-#include <KIcon>
-
 // libtaskmanager
 #include "taskmanager.h"
 
@@ -87,7 +84,7 @@ QString Startup::bin() const
 QIcon Startup::icon() const
 {
     if (d->icon.isNull()) {
-        d->icon = KIcon(d->data.findIcon());
+        d->icon = QIcon::fromTheme(d->data.findIcon());
     }
 
     return d->icon;

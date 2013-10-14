@@ -25,7 +25,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDE/KOpenWithDialog>
 #include <KDE/KDebug>
 #include <KDE/KDesktopFile>
-#include <KDE/KIcon>
 #include <KDE/KLocale>
 #include <KDE/KUrl>
 #include <KDE/KWindowInfo>
@@ -51,7 +50,7 @@ LauncherProperties::LauncherProperties(QWidget *parent)
     setMainWidget(mainWidet);
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowModality(Qt::WindowModal);
-    ui.browse->setIcon(KIcon("document-open"));
+    ui.browse->setIcon(QIcon::fromTheme("document-open"));
     connect(ui.detect, SIGNAL(clicked(bool)), SLOT(detect()));
     connect(ui.browse, SIGNAL(clicked(bool)), SLOT(browse()));
     connect(ui.classClass, SIGNAL(textChanged(const QString &)), SLOT(check()));
