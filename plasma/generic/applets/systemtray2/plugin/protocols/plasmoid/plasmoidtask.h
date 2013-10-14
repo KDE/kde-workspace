@@ -26,7 +26,7 @@
 
 class KIconLoader;
 class KJob;
-class AppletInterface;
+class PlasmoidInterface;
 
 namespace Plasma
 {
@@ -78,7 +78,7 @@ private:
     QString m_taskId;
     QQuickItem* m_taskItem;
     QQuickItem* m_rootItem;
-    AppletInterface* m_qmlObject;
+    PlasmoidInterface* m_qmlObject;
     QIcon m_icon;
     QString m_iconName;
     QString m_shortcut;

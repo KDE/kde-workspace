@@ -38,7 +38,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
       m_valid(true)
 {
     qDebug() << "Loading applet: " << packageName;
-    m_taskItem = new AppletInterface(packageName, m_rootItem);
+    m_taskItem = new PlasmoidInterface(packageName, m_rootItem);
     if (!m_taskItem) {
         qDebug() << "Invalid applet taskitem";
         m_valid = false;

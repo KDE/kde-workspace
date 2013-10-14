@@ -44,7 +44,7 @@ class HostPrivate {
 public:
     Host *q;
     QList<SystemTray::Task*> tasks;
-    AppletInterface* notificationsPlasmoid = 0;
+    PlasmoidInterface* notificationsPlasmoid = 0;
 };
 
 Host::Host(QObject* parent) :
@@ -65,7 +65,7 @@ QQuickItem* Host::notificationsPlasmoid(const QString &plugin)
     if (!d->notificationsPlasmoid) {
 //         const QString plugin = QStringLiteral("org.kde.notifications");
         //const QString plugin = QStringLiteral("org.kde.systrayplasmoidtest");
-        d->notificationsPlasmoid = new AppletInterface(plugin, s_manager->rootItem());
+        d->notificationsPlasmoid = new PlasmoidInterface(plugin, s_manager->rootItem());
         if (!d->notificationsPlasmoid) {
             qDebug() << "Notifications failed to load.";
             return new QQuickItem(s_manager->rootItem());

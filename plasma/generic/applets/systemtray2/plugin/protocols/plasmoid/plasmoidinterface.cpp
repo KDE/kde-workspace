@@ -50,9 +50,9 @@
 #include "declarative/packageaccessmanagerfactory.h"
 #include "declarative/packageurlinterceptor.h"
 
-Q_DECLARE_METATYPE(AppletInterface*)
+Q_DECLARE_METATYPE(PlasmoidInterface*)
 
-AppletInterface::AppletInterface(const QString &plugin, QQuickItem *parent)
+PlasmoidInterface::PlasmoidInterface(const QString &plugin, QQuickItem *parent)
     : QQuickItem(parent),
 //       m_appletScriptEngine(script),
 //       m_actionSignals(0),
@@ -64,25 +64,25 @@ AppletInterface::AppletInterface(const QString &plugin, QQuickItem *parent)
       m_plugin(plugin),
       m_isUserConfiguring(false)
 {
-    qmlRegisterType<AppletInterface>();
+    qmlRegisterType<PlasmoidInterface>();
 //     qmlRegisterType<QAction>();
 
-//     connect(this, &AppletInterface::configNeedsSaving,
+//     connect(this, &PlasmoidInterface::configNeedsSaving,
 //             applet(), &Plasma::Applet::configNeedsSaving);
 //     connect(applet(), &Plasma::Applet::immutabilityChanged,
-//             this, &AppletInterface::immutableChanged);
+//             this, &PlasmoidInterface::immutableChanged);
 //     connect(applet(), &Plasma::Applet::userConfiguringChanged,
-//             this, &AppletInterface::userConfiguringChanged);
+//             this, &PlasmoidInterface::userConfiguringChanged);
 //
 //     connect(applet(), &Plasma::Applet::statusChanged,
-//             this, &AppletInterface::statusChanged);
+//             this, &PlasmoidInterface::statusChanged);
 //
 //     connect(m_appletScriptEngine, &DeclarativeAppletScript::formFactorChanged,
-//             this, &AppletInterface::formFactorChanged);
+//             this, &PlasmoidInterface::formFactorChanged);
 //     connect(m_appletScriptEngine, &DeclarativeAppletScript::locationChanged,
-//             this, &AppletInterface::locationChanged);
+//             this, &PlasmoidInterface::locationChanged);
 //     connect(m_appletScriptEngine, &DeclarativeAppletScript::contextChanged,
-//             this, &AppletInterface::contextChanged);
+//             this, &PlasmoidInterface::contextChanged);
 //
 //     if (applet()->containment()) {
 //         connect(applet()->containment(), &Plasma::Containment::screenChanged,
@@ -94,18 +94,18 @@ AppletInterface::AppletInterface(const QString &plugin, QQuickItem *parent)
     //init();
     m_collapseTimer = new QTimer(this);
     m_collapseTimer->setSingleShot(true);
-    connect(m_collapseTimer, &QTimer::timeout, this, &AppletInterface::compactRepresentationCheck);
+    connect(m_collapseTimer, &QTimer::timeout, this, &PlasmoidInterface::compactRepresentationCheck);
     m_collapseTimer->start(100);
 
     init();
 }
 
-AppletInterface::~AppletInterface()
+PlasmoidInterface::~PlasmoidInterface()
 {
     qDebug() << "!!! Plasmoid is gone";
 }
 
-void AppletInterface::init()
+void PlasmoidInterface::init()
 {
     if (m_qmlObject && m_qmlObject->rootObject()) {
         return;
@@ -190,8 +190,8 @@ void AppletInterface::init()
         qDebug() << "ERROR: " << reason;
     }
 
-    //AppletInterface* plasmoid = new AppletInterface(parent, 0);
-    //AppletInterface* plasmoid = new AppletInterface(parent, qobject_cast<QQuickItem*>(m_qmlObject->rootObject()));
+    //PlasmoidInterface* plasmoid = new PlasmoidInterface(parent, 0);
+    //PlasmoidInterface* plasmoid = new PlasmoidInterface(parent, qobject_cast<QQuickItem*>(m_qmlObject->rootObject()));
     m_qmlObject->engine()->rootContext()->setContextProperty("plasmoid", this);
 
     //initialize size, so an useless resize less
@@ -310,37 +310,37 @@ void AppletInterface::init()
 //     applet()->updateConstraints(Plasma::Types::UiReadyConstraint);
 }
 
-Plasma::Types::FormFactor AppletInterface::formFactor() const
+Plasma::Types::FormFactor PlasmoidInterface::formFactor() const
 {
     return Plasma::Types::Horizontal;
 }
 
-Plasma::Types::Location AppletInterface::location() const
+Plasma::Types::Location PlasmoidInterface::location() const
 {
     return Plasma::Types::BottomEdge;
 }
 
-QString AppletInterface::currentActivity() const
+QString PlasmoidInterface::currentActivity() const
 {
     return QString("CurrentActivity");
 }
 
-QObject* AppletInterface::configuration() const
+QObject* PlasmoidInterface::configuration() const
 {
     return m_configuration;
 }
 
-uint AppletInterface::id() const
+uint PlasmoidInterface::id() const
 {
     return 1337; // FIXME
 }
 
-QString AppletInterface::icon() const
+QString PlasmoidInterface::icon() const
 {
     return m_icon;
 }
 
-void AppletInterface::setIcon(const QString &icon)
+void PlasmoidInterface::setIcon(const QString &icon)
 {
     if (m_icon == icon) {
         return;
@@ -350,12 +350,12 @@ void AppletInterface::setIcon(const QString &icon)
     emit iconChanged();
 }
 
-QString AppletInterface::title() const
+QString PlasmoidInterface::title() const
 {
     return m_title;
 }
 
-void AppletInterface::setTitle(const QString &title)
+void PlasmoidInterface::setTitle(const QString &title)
 {
     if (m_title == title) {
         return;
@@ -365,12 +365,12 @@ void AppletInterface::setTitle(const QString &title)
     emit titleChanged();
 }
 
-bool AppletInterface::isBusy() const
+bool PlasmoidInterface::isBusy() const
 {
     return !m_qmlObject->rootObject() || m_busy;
 }
 
-void AppletInterface::setBusy(bool busy)
+void PlasmoidInterface::setBusy(bool busy)
 {
     if (m_busy == busy) {
         return;
@@ -380,12 +380,12 @@ void AppletInterface::setBusy(bool busy)
     emit busyChanged();
 }
 
-bool AppletInterface::isExpanded() const
+bool PlasmoidInterface::isExpanded() const
 {
     return m_expanded;
 }
 
-void AppletInterface::setExpanded(bool expanded)
+void PlasmoidInterface::setExpanded(bool expanded)
 {
     //if there is no compact representation it means it's always expanded
     //Containnments are always expanded
@@ -397,12 +397,12 @@ void AppletInterface::setExpanded(bool expanded)
     emit expandedChanged();
 }
 
-Plasma::Types::BackgroundHints AppletInterface::backgroundHints() const
+Plasma::Types::BackgroundHints PlasmoidInterface::backgroundHints() const
 {
     return m_backgroundHints;
 }
 
-void AppletInterface::setBackgroundHints(Plasma::Types::BackgroundHints hint)
+void PlasmoidInterface::setBackgroundHints(Plasma::Types::BackgroundHints hint)
 {
     if (m_backgroundHints == hint) {
         return;
@@ -412,17 +412,17 @@ void AppletInterface::setBackgroundHints(Plasma::Types::BackgroundHints hint)
     emit backgroundHintsChanged();
 }
 
-void AppletInterface::setConfigurationRequired(bool needsConfiguring, const QString &reason)
+void PlasmoidInterface::setConfigurationRequired(bool needsConfiguring, const QString &reason)
 {
     //m_appletScriptEngine->setConfigurationRequired(needsConfiguring, reason);
 }
 
-QString AppletInterface::activeConfig() const
+QString PlasmoidInterface::activeConfig() const
 {
     return m_currentConfig.isEmpty() ? "main"+id() : m_currentConfig;
 }
 
-void AppletInterface::setActiveConfig(const QString &name)
+void PlasmoidInterface::setActiveConfig(const QString &name)
 {
     if (name == "main") {
         m_currentConfig.clear();
@@ -449,7 +449,7 @@ void AppletInterface::setActiveConfig(const QString &name)
     m_currentConfig = name;
 }
 
-void AppletInterface::writeConfig(const QString &entry, const QVariant &value)
+void PlasmoidInterface::writeConfig(const QString &entry, const QVariant &value)
 {
     Plasma::ConfigLoader *config = 0;
     if (m_currentConfig.isEmpty()) {
@@ -471,7 +471,7 @@ void AppletInterface::writeConfig(const QString &entry, const QVariant &value)
         qWarning() << "Couldn't find a configuration entry";
 }
 
-QVariant AppletInterface::readConfig(const QString &entry) const
+QVariant PlasmoidInterface::readConfig(const QString &entry) const
 {
     Plasma::ConfigLoader *config = 0;
     QVariant result;
@@ -489,17 +489,17 @@ QVariant AppletInterface::readConfig(const QString &entry) const
     return result;
 }
 
-// QString AppletInterface::file(const QString &fileType)
+// QString PlasmoidInterface::file(const QString &fileType)
 // {
 //     return m_appletScriptEngine->filePath(fileType, QString());
 // }
 //
-// QString AppletInterface::file(const QString &fileType, const QString &filePath)
+// QString PlasmoidInterface::file(const QString &fileType, const QString &filePath)
 // {
 //     return m_appletScriptEngine->filePath(fileType, filePath);
 // }
 //
-// QList<QAction*> AppletInterface::contextualActions() const
+// QList<QAction*> PlasmoidInterface::contextualActions() const
 // {
 //     QList<QAction*> actions;
 //     Plasma::Applet *a = applet();
@@ -518,7 +518,7 @@ QVariant AppletInterface::readConfig(const QString &entry) const
 //     return actions;
 // }
 //
-// void AppletInterface::setActionSeparator(const QString &name)
+// void PlasmoidInterface::setActionSeparator(const QString &name)
 // {
 //     Plasma::Applet *a = applet();
 //     QAction *action = a->actions()->action(name);
@@ -533,7 +533,7 @@ QVariant AppletInterface::readConfig(const QString &entry) const
 //     }
 // }
 //
-// void AppletInterface::setAction(const QString &name, const QString &text, const QString &icon, const QString &shortcut)
+// void PlasmoidInterface::setAction(const QString &name, const QString &text, const QString &icon, const QString &shortcut)
 // {
 //     Plasma::Applet *a = applet();
 //     QAction *action = a->actions()->action(name);
@@ -568,7 +568,7 @@ QVariant AppletInterface::readConfig(const QString &entry) const
 //     action->setObjectName(name);
 // }
 //
-// void AppletInterface::removeAction(const QString &name)
+// void PlasmoidInterface::removeAction(const QString &name)
 // {
 //     Plasma::Applet *a = applet();
 //     QAction *action = a->actions()->action(name);
@@ -584,23 +584,23 @@ QVariant AppletInterface::readConfig(const QString &entry) const
 //     m_actions.removeAll(name);
 // }
 //
-// QAction *AppletInterface::action(QString name) const
+// QAction *PlasmoidInterface::action(QString name) const
 // {
 //     return applet()->actions()->action(name);
 // }
 
-bool AppletInterface::immutable() const
+bool PlasmoidInterface::immutable() const
 {
     //return m_immutability != Plasma::Types::Mutable; // FIXME
     return false;
 }
 
-bool AppletInterface::userConfiguring() const
+bool PlasmoidInterface::userConfiguring() const
 {
     return m_isUserConfiguring;
 }
 
-int AppletInterface::apiVersion() const
+int PlasmoidInterface::apiVersion() const
 {
     const QString constraint("[X-Plasma-API] == 'declarative' and 'Applet' in [X-Plasma-ComponentTypes]");
     KService::List offers = KServiceTypeTrader::self()->query("Plasma/ScriptEngine", constraint);
@@ -611,7 +611,7 @@ int AppletInterface::apiVersion() const
     return offers.first()->property("X-KDE-PluginInfo-Version", QVariant::Int).toInt();
 }
 
-bool AppletInterface::fillWidth() const
+bool PlasmoidInterface::fillWidth() const
 {
     if (!m_qmlObject->rootObject()) {
         return false;
@@ -633,7 +633,7 @@ bool AppletInterface::fillWidth() const
     }
 }
 
-bool AppletInterface::fillHeight() const
+bool PlasmoidInterface::fillHeight() const
 {
     if (!m_qmlObject->rootObject()) {
         return false;
@@ -656,7 +656,7 @@ bool AppletInterface::fillHeight() const
 }
 
 //private api, just an helper
-qreal AppletInterface::readGraphicsObjectSizeHint(const char *hint) const
+qreal PlasmoidInterface::readGraphicsObjectSizeHint(const char *hint) const
 {
     if (!m_qmlObject->rootObject()) {
         return -1;
@@ -678,48 +678,48 @@ qreal AppletInterface::readGraphicsObjectSizeHint(const char *hint) const
     }
 }
 
-qreal AppletInterface::minimumWidth() const
+qreal PlasmoidInterface::minimumWidth() const
 {
     return readGraphicsObjectSizeHint("minimumWidth");
 }
 
-qreal AppletInterface::minimumHeight() const
+qreal PlasmoidInterface::minimumHeight() const
 {
     return readGraphicsObjectSizeHint("minimumHeight");
 }
 
-qreal AppletInterface::maximumWidth() const
+qreal PlasmoidInterface::maximumWidth() const
 {
     return readGraphicsObjectSizeHint("maximumWidth");
 }
 
-qreal AppletInterface::maximumHeight() const
+qreal PlasmoidInterface::maximumHeight() const
 {
     return readGraphicsObjectSizeHint("maximumHeight");
 }
 
-qreal AppletInterface::implicitWidth() const
+qreal PlasmoidInterface::implicitWidth() const
 {
     return readGraphicsObjectSizeHint("implicitWidth");
 }
 
-qreal AppletInterface::implicitHeight() const
+qreal PlasmoidInterface::implicitHeight() const
 {
     return readGraphicsObjectSizeHint("implicitHeight");
 }
 
-void AppletInterface::setAssociatedApplication(const QString &string)
+void PlasmoidInterface::setAssociatedApplication(const QString &string)
 {
     //applet()->setAssociatedApplication(string);
 }
 
-QString AppletInterface::associatedApplication() const
+QString PlasmoidInterface::associatedApplication() const
 {
     return QString();
 //     return applet()->associatedApplication();
 }
 
-void AppletInterface::setStatus(const Plasma::Types::ItemStatus &status)
+void PlasmoidInterface::setStatus(const Plasma::Types::ItemStatus &status)
 {
     if (m_status != status) {
         m_status = status;
@@ -727,12 +727,12 @@ void AppletInterface::setStatus(const Plasma::Types::ItemStatus &status)
     }
 }
 
-Plasma::Types::ItemStatus AppletInterface::status() const
+Plasma::Types::ItemStatus PlasmoidInterface::status() const
 {
     return m_status;
 }
 
-int AppletInterface::screen() const
+int PlasmoidInterface::screen() const
 {
 //     if (applet()->containment()) {
 //         return applet()->containment()->screen();
@@ -741,7 +741,7 @@ int AppletInterface::screen() const
     return -1;
 }
 
-// QString AppletInterface::downloadPath(const QString &file)
+// QString PlasmoidInterface::downloadPath(const QString &file)
 // {
 //     const QString downloadDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/Plasma/" + applet()->pluginInfo().pluginName() + '/';
 //
@@ -753,14 +753,14 @@ int AppletInterface::screen() const
 //     return downloadDir;
 // }
 //
-// QStringList AppletInterface::downloadedFiles() const
+// QStringList PlasmoidInterface::downloadedFiles() const
 // {
 //     const QString downloadDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/Plasma/" + applet()->pluginInfo().pluginName() + '/';
 //     QDir dir(downloadDir);
 //     return dir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable);
 // }
 //
-void AppletInterface::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
+void PlasmoidInterface::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     Q_UNUSED(oldGeometry)
 
@@ -768,7 +768,7 @@ void AppletInterface::geometryChanged(const QRectF &newGeometry, const QRectF &o
     m_collapseTimer->start(100);
 }
 
-void AppletInterface::compactRepresentationCheck()
+void PlasmoidInterface::compactRepresentationCheck()
 {
     init();
     if (width() <= 0 || height() <= 0 || !m_qmlObject->rootObject()) {
@@ -974,7 +974,7 @@ void AppletInterface::compactRepresentationCheck()
     }
 }
 
-void AppletInterface::updatePopupSize()
+void PlasmoidInterface::updatePopupSize()
 {
 //     KConfigGroup cg = applet()->config();
 //     cg = KConfigGroup(&cg, "PopupApplet");
@@ -982,7 +982,7 @@ void AppletInterface::updatePopupSize()
 //     cg.writeEntry("DialogHeight", m_qmlObject->rootObject()->property("height").toInt());
 }
 
-void AppletInterface::itemChange(ItemChange change, const ItemChangeData &value)
+void PlasmoidInterface::itemChange(ItemChange change, const ItemChangeData &value)
 {
     if (change == QQuickItem::ItemSceneChange) {
         //we have a window: create the 
@@ -993,7 +993,7 @@ void AppletInterface::itemChange(ItemChange change, const ItemChangeData &value)
     QQuickItem::itemChange(change, value);
 }
 
-QmlObject *AppletInterface::qmlObject()
+QmlObject *PlasmoidInterface::qmlObject()
 {
     return m_qmlObject;
 }

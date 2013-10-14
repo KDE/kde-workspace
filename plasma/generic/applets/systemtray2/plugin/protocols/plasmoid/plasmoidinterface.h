@@ -44,7 +44,7 @@ namespace Plasma
     class ConfigLoader;
 } // namespace Plasma
 
-class AppletInterface : public QQuickItem
+class PlasmoidInterface : public QQuickItem
 {
     Q_OBJECT
 
@@ -161,8 +161,8 @@ class AppletInterface : public QQuickItem
     Q_PROPERTY(bool fillHeight READ fillHeight NOTIFY fillHeightChanged)
 
 public:
-    AppletInterface(const QString &plugin, QQuickItem *parent = 0);
-    ~AppletInterface();
+    PlasmoidInterface(const QString &plugin, QQuickItem *parent = 0);
+    ~PlasmoidInterface();
 
 // //API not intended for the QML part
     QmlObject *qmlObject();
