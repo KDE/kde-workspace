@@ -50,16 +50,16 @@ class KDE_EXPORT Voice  : public QObject
 		
 		bool doesVoiceCodeExists(const QString &s);
 
-    public slots:
+    public Q_SLOTS:
          void record_start();
          void record_stop();
 
-    private slots:
+    private Q_SLOTS:
 		void slot_sound_recorded( const Sound & );
 		void slot_key_pressed();
 		void slot_timeout();
 
-    signals:
+    Q_SIGNALS:
         void handle_voice( const QString &voice );
     private:
 
