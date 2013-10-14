@@ -20,16 +20,12 @@
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
 #include "plasmoidinterface.h"
-#include "declarative/packageaccessmanager.h"
-#include "declarative/packageaccessmanagerfactory.h"
-#include "declarative/packageurlinterceptor.h"
-
 
 #include "../../manager.h"
 
 #include <Plasma/PluginLoader>
 #include <kdeclarative/qmlobject.h>
-#include <klocalizedstring.h>
+#include <KLocalizedString>
 #include <kplugintrader.h>
 
 #include <QDebug>

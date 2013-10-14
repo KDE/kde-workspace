@@ -1,6 +1,7 @@
 /*
  *   Copyright 2008-2013 Aaron Seigo <aseigo@kde.org>
  *   Copyright 2010-2013 Marco Martin <mart@kde.org>
+ *   Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -47,14 +48,16 @@
 
 #include <kdeclarative/configpropertymap.h>
 #include <kdeclarative/qmlobject.h>
-#include "declarative/packageaccessmanagerfactory.h"
-#include "declarative/packageurlinterceptor.h"
+
+#include <plasmaquick/packageaccessmanagerfactory.h>
+#include <PlasmaQuick/PackageUrlInterceptor>
 
 Q_DECLARE_METATYPE(PlasmoidInterface*)
 
+#define DEFAULTITEMSIZE 22
+
 PlasmoidInterface::PlasmoidInterface(const QString &plugin, QQuickItem *parent)
     : QQuickItem(parent),
-//       m_appletScriptEngine(script),
 //       m_actionSignals(0),
       m_backgroundHints(Plasma::Types::StandardBackground),
       m_status(Plasma::Types::ActiveStatus),
@@ -144,8 +147,8 @@ void PlasmoidInterface::init()
     engine->setUrlInterceptor(new PackageUrlInterceptor(engine, pkg));
 
     QVariantHash initialProperties;
-    initialProperties["width"] = width();
-    initialProperties["height"] = height();
+    initialProperties["width"] = DEFAULTITEMSIZE;
+    initialProperties["height"] = DEFAULTITEMSIZE;
 
     const QString mainScript = pkg.filePath("mainscript");
     m_qmlObject->setSource(QUrl::fromLocalFile(mainScript));
@@ -190,8 +193,6 @@ void PlasmoidInterface::init()
         qDebug() << "ERROR: " << reason;
     }
 
-    //PlasmoidInterface* plasmoid = new PlasmoidInterface(parent, 0);
-    //PlasmoidInterface* plasmoid = new PlasmoidInterface(parent, qobject_cast<QQuickItem*>(m_qmlObject->rootObject()));
     m_qmlObject->engine()->rootContext()->setContextProperty("plasmoid", this);
 
     //initialize size, so an useless resize less

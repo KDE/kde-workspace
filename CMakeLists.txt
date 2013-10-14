@@ -49,6 +49,7 @@ find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KBookmarks KUnitConversion KDE4Attic KCMUtils Kross KIO)
 
 find_package(Plasma REQUIRED NO_MODULE)
+find_package(PlasmaQuick REQUIRED NO_MODULE)
 find_package(KDeclarative REQUIRED NO_MODULE)
 find_package(KIO REQUIRED NO_MODULE)
 

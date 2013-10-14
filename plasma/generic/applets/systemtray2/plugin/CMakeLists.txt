@@ -11,26 +11,23 @@ set(systemtrayplugin_SRCS
     protocols/plasmoid/plasmoidtask.cpp
     protocols/plasmoid/plasmoidprotocol.cpp
     protocols/plasmoid/plasmoidinterface.cpp
-    protocols/plasmoid/declarative/packageaccessmanager.cpp
-    protocols/plasmoid/declarative/packageaccessmanagerfactory.cpp
-    protocols/plasmoid/declarative/packageurlinterceptor.cpp
 )
 
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
 
 target_link_libraries(systemtrayplugin
-    ${Qt5Quick_LIBRARIES}
-    ${Qt5Qml_LIBRARIES}
-    ${KCore_LIBRARIES}
+    Qt5::Quick
+    Qt5::Qml
     KF5::KDeclarative
     KF5::plasma
+    KF5::PlasmaQuick
     KF5::KWindowSystem
     KF5::KService
     KF5::KI18n
-    ${KIconThemes_LIBRARIES}
+    KF5::KIconThemes
     KF5::KIOCore
     KF5::KIOWidgets
-    ${KDE4Attic_LIBRARIES}
+    KF5::KDE4Attic
     ${KDE4Support_LIBRARIES}
     )
 
