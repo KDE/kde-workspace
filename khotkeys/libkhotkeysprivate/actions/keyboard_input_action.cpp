@@ -29,7 +29,7 @@
 
 // #include <X11/X.h>
 #include <X11/Xlib.h>
-#include <QtGui/QX11Info>
+#include <QX11Info>
 
 /*
 */

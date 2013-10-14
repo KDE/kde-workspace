@@ -29,7 +29,7 @@
 #include <KDE/KMessageBox>
 #include <KDE/KStandardDirs>
 
-#include <QtGui/QApplication>
+#include <QApplication>
 
 namespace KHotKeys
 {

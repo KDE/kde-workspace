@@ -11,7 +11,7 @@
 #ifndef VOICES_H_
 #define VOICES_H_
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <kshortcut.h>
 
 class Sound;

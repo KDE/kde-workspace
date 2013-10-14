@@ -11,11 +11,11 @@
 #ifndef _GESTURES_H_
 #define _GESTURES_H_
 
-#include <QtCore/QTimer>
-#include <QtCore/QMap>
-#include <QtCore/QPointer>
-#include <QtGui/QWidget>
-#include <QtGui/qwindowdefs.h>
+#include <QTimer>
+#include <QMap>
+#include <QPointer>
+#include <QWidget>
+#include <qwindowdefs.h>
 
 #include "windows_handler.h"
 
