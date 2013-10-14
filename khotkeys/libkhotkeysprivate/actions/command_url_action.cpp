@@ -26,6 +26,7 @@
 #include <KDE/KRun>
 #include <KDE/KService>
 #include <KDE/KUriFilter>
+#include <KDE/KUrl>
 #include <kworkspace/kworkspace.h>
 
 

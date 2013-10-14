@@ -26,6 +26,7 @@
 
 #include <KDE/KConfig>
 #include <KDE/KDebug>
+#include <KDE/KGlobal>
 #include <KDE/KMessageBox>
 #include <KDE/KStandardDirs>
 

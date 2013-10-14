@@ -32,6 +32,7 @@
 
 #include <KDE/KAction>
 #include <KDE/KDebug>
+#include <KDE/KShortcut>
 
 #include <QtCore/QUuid>
 #include <kkeyserver.h>
