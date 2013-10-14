@@ -162,7 +162,7 @@ QString KHotKeysModule::register_menuentry_shortcut(
     // Check the service we got. If it is invalid there is no need to
     // continue.
     KService::Ptr wantedService = KService::serviceByStorageId(storageId);
-    if (wantedService.isNull())
+    if (!wantedService)
         {
         kError() << "Storage Id " << storageId << "not valid";
         return "";
