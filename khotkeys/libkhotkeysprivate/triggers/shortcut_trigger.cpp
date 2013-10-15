@@ -21,9 +21,11 @@
 #include "action_data/action_data.h"
 #include "windows_handler.h"
 
-#include <KDE/KAction>
 #include <KDE/KConfigGroup>
 #include <KDE/KDebug>
+#include <KGlobalAccel>
+
+#include <QAction>
 
 #include "shortcuts_handler.h"
 
@@ -47,7 +49,7 @@ ShortcutTrigger::ShortcutTrigger(
 
 ShortcutTrigger::~ShortcutTrigger()
     {
-    keyboard_handler->removeAction( _uuid );
+    keyboard_handler->removeAction( _uuid.toString() );
     }
 
 
@@ -90,7 +92,7 @@ void ShortcutTrigger::activate( bool newState )
         // FIXME: The following workaround tries to prevent having two actions with
         // the same uuid. That happens wile exporting/importing actions. The uuid
         // is exported too.
-        KAction *act = keyboard_handler->addAction( _uuid, name, _shortcut );
+        QAction *act = keyboard_handler->addAction( _uuid.toString(), name, _shortcut );
         // addAction can change the uuid. That's why we store the uuid from the
         // action
         _uuid = act->objectName();
@@ -106,21 +108,38 @@ void ShortcutTrigger::activate( bool newState )
     else
         {
         // Disable the trigger. Delete the action.
-        KAction *action = qobject_cast<KAction*>(keyboard_handler->getAction( _uuid ));
+        QAction *action = keyboard_handler->getAction( _uuid.toString() );
         if(action)
             {
             // In case the shortcut was changed from the kcm.
-            _shortcut = action->globalShortcut();
-            keyboard_handler->removeAction(_uuid);
+            auto shortcuts = KGlobalAccel::self()->shortcut(action);
+            if (!shortcuts.isEmpty()) {
+                _shortcut = KShortcut(shortcuts.first());
+            } else {
+                _shortcut = KShortcut();
+            }
+            keyboard_handler->removeAction(_uuid.toString());
             }
         }
     }
 
+QString ShortcutTrigger::shortcuts() const
+{
+    const auto shortcuts = shortcut();
+    QString shortcutString;
+    for (auto it = shortcuts.constBegin(); it != shortcuts.constEnd(); ++it ) {
+        if (it != shortcuts.constBegin()) {
+            shortcutString.append(QStringLiteral(";"));
+        }
+        shortcutString.append((*it).toString());
+    }
+    return shortcutString;
+}
 
 void ShortcutTrigger::cfg_write( KConfigGroup& cfg_P ) const
     {
     base::cfg_write( cfg_P );
-    cfg_P.writeEntry( "Key", shortcut().toString());
+    cfg_P.writeEntry( "Key", shortcuts());
     cfg_P.writeEntry( "Type", "SHORTCUT" ); // overwrites value set in base::cfg_write()
     cfg_P.writeEntry( "Uuid", _uuid.toString() );
     }
@@ -134,7 +153,7 @@ ShortcutTrigger* ShortcutTrigger::copy( ActionData* data_P ) const
 
 const QString ShortcutTrigger::description() const
     {
-    return i18n( "Shortcut trigger: " ) + shortcut().toString();
+    return i18n( "Shortcut trigger: " ) + shortcuts();
     }
 
 
@@ -143,16 +162,21 @@ void ShortcutTrigger::disable()
     activate(false);
 
     // Unregister the shortcut with kglobalaccel
-    KAction *action = qobject_cast<KAction*>(keyboard_handler->getAction( _uuid ));
+    QAction *action = keyboard_handler->getAction( _uuid.toString() );
     if(action)
         {
         // In case the shortcut was changed from the kcm.
-        _shortcut = action->globalShortcut();
+        auto shortcuts = KGlobalAccel::self()->shortcut(action);
+        if (!shortcuts.isEmpty()) {
+            _shortcut = KShortcut(shortcuts.first());
+        } else {
+            _shortcut = KShortcut();
+        }
 
 
         // Unregister the global shortcut.
-        action->forgetGlobalShortcut();
-        keyboard_handler->removeAction(_uuid);
+        KGlobalAccel::self()->removeAllShortcuts(action);
+        keyboard_handler->removeAction(_uuid.toString());
         }
     }
 
@@ -169,34 +193,42 @@ void ShortcutTrigger::enable()
 void ShortcutTrigger::set_key_sequence( const QKeySequence &seq )
     {
     // Get the action from the keyboard handler
-    KAction *action = qobject_cast<KAction*>(keyboard_handler->getAction( _uuid ));
+    QAction *action = keyboard_handler->getAction( _uuid.toString() );
     if (!action)
         {
         _shortcut.setPrimary(seq);
         }
     else
         {
-        action->setGlobalShortcut(
-            KShortcut(seq),
-            KAction::ActiveShortcut,
-            KAction::NoAutoloading );
+        KGlobalAccel::self()->setShortcut(action,
+                                          QList<QKeySequence>() << seq,
+                                          KGlobalAccel::KGlobalAccel::NoAutoloading);
         }
     }
 
 
-KShortcut ShortcutTrigger::shortcut() const
+QList<QKeySequence> ShortcutTrigger::shortcut() const
     {
     // Get the action from the keyboard handler
-    KAction *action = qobject_cast<KAction*>(keyboard_handler->getAction( _uuid ));
+    QAction *action = keyboard_handler->getAction( _uuid.toString() );
     if (!action)
         {
         // Not active!
         return _shortcut;
         }
 
-    return action->globalShortcut();
+    return KGlobalAccel::self()->shortcut(action);
     }
 
+QString ShortcutTrigger::primaryShortcut() const
+    {
+    const auto shortcuts = shortcut();
+    if (!shortcuts.isEmpty()) {
+        return shortcuts.first().toString();
+    } else {
+        return QString();
+    }
+    }
 
 void ShortcutTrigger::trigger()
     {

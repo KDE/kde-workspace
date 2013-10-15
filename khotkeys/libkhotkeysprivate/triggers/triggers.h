@@ -160,7 +160,7 @@ class KDE_EXPORT ShortcutTrigger
         virtual void cfg_write( KConfigGroup& cfg_P ) const;
         virtual ShortcutTrigger* copy( ActionData* data_P ) const;
         virtual const QString description() const;
-        KShortcut shortcut() const;
+        QList<QKeySequence> shortcut() const;
         virtual void activate( bool activate_P );
 
         void set_key_sequence( const QKeySequence &seq );
@@ -183,6 +183,8 @@ class KDE_EXPORT ShortcutTrigger
          */
         virtual void accept(TriggerVisitor&);
 
+        QString primaryShortcut() const;
+
     Q_SIGNALS:
 
         //! Emitted when the global shortcut is changed from somewhere else
@@ -194,6 +196,7 @@ class KDE_EXPORT ShortcutTrigger
         void trigger();
 
     private:
+        QString shortcuts() const;
 
         //! A persistent identifier for this shortcut
         QUuid _uuid;

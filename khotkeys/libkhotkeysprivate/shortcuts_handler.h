@@ -70,7 +70,7 @@ public:
      *
      * \see KAction::registerGlobalShortcut()
      */
-    KAction *addAction(
+    QAction *addAction(
         const QString &id,
         const QString &text,
         const KShortcut &shortcut );

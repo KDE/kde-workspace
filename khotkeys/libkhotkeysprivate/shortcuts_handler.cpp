@@ -30,10 +30,11 @@
 #include <QX11Info>
 #include <fixx11h.h>
 
-#include <KDE/KAction>
 #include <KDE/KDebug>
+#include <KDE/KGlobalAccel>
 #include <KDE/KShortcut>
 
+#include <QAction>
 #include <QtCore/QUuid>
 #include <kkeyserver.h>
 
@@ -43,9 +44,9 @@ namespace KHotKeys {
 ShortcutsHandler::ShortcutsHandler( HandlerType type, QObject *parent )
         : QObject(parent)
          ,_type(type)
-         ,_actions(new KActionCollection(this))
+         ,_actions(new KActionCollection(this, QStringLiteral("khotkeys")))
     {
-    _actions->setComponentData(KComponentData("khotkeys"));
+    connect(KGlobalAccel::self(), &KGlobalAccel::globalShortcutChanged, this, &ShortcutsHandler::shortcutChanged);
     }
 
 
@@ -56,7 +57,7 @@ ShortcutsHandler::~ShortcutsHandler()
     }
 
 
-KAction *ShortcutsHandler::addAction(
+QAction *ShortcutsHandler::addAction(
         const QString &id,
         const QString &text,
         const KShortcut &shortcut )
@@ -71,11 +72,11 @@ KAction *ShortcutsHandler::addAction(
     if (_actions->action(id))
         {
         qDebug() << id << " already present. Using new id!";
-        realId = QUuid::createUuid();
+        realId = QUuid::createUuid().toString();
         }
 
     // Create the action
-    KAction *newAction = _actions->addAction(realId);
+    QAction *newAction = _actions->addAction(realId);
     if (!newAction)
         {
         return 0;
@@ -88,9 +89,9 @@ KAction *ShortcutsHandler::addAction(
         newAction->setProperty("isConfigurationAction", QVariant(true));
         }
     newAction->setText(text);
-    newAction->setGlobalShortcut( shortcut, KAction::ActiveShortcut );
+    KGlobalAccel::self()->setDefaultShortcut(newAction, QList<QKeySequence>() << shortcut.primary());
     // Enable global shortcut. If that fails there is no sense in proceeding
-    if (!newAction->isGlobalShortcutEnabled())
+    if (!KGlobalAccel::self()->hasShortcut(newAction))
         {
         kWarning() << "Failed to enable global shortcut for '" 
                    << text << "' " << id;
@@ -98,10 +99,6 @@ KAction *ShortcutsHandler::addAction(
         return 0;
         }
     Q_ASSERT(newAction->isEnabled());
-
-    connect(
-        newAction, SIGNAL(globalShortcutChanged(QKeySequence)),
-        this, SIGNAL(shortcutChanged()));
 
     return newAction;
     }
