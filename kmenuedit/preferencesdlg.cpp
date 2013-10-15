@@ -32,8 +32,7 @@ PreferencesDialog::PreferencesDialog( QWidget *parent )
     : KPageDialog( parent )
 {
     setFaceType( List );
-    setButtons( Ok | Cancel );
-    setDefaultButton( Ok );
+    setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     m_pageMisc = new MiscPage( this );
     KPageWidgetItem *page = new KPageWidgetItem( m_pageMisc , i18n( "General options" ) );
