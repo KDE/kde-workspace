@@ -21,9 +21,11 @@
 
 #include <KUniqueApplication>
 #include <KLocale>
-#include <KCmdLineArgs>
 #include <KAboutData>
+#include <kdbusservice.h>
+#include <kdemacros.h>
 
+#include <QtCore/QCommandLineParser>
 #include "kmenuedit.h"
 #ifndef Q_WS_WIN
 #include "khotkeys.h"
@@ -43,16 +45,6 @@ public:
 #endif
    virtual int newInstance()
    {
-      KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-      if (args->count() > 0)
-      {
-          menuEdit->selectMenu(args->arg(0));
-          if (args->count() > 1)
-          {
-              menuEdit->selectMenuEntry(args->arg(1));
-          }
-      }
-      args->clear();
       return KUniqueApplication::newInstance();
    }
 };
@@ -68,20 +60,32 @@ extern "C" int KDE_EXPORT kdemain( int argc, char **argv )
     aboutData.addAuthor(i18n("Matthias Elter"), i18n("Original Author"), QStringLiteral("elter@kde.org"));
     aboutData.addAuthor(i18n("Montel Laurent"), QString(), QStringLiteral("montel@kde.org"));
 
-    KCmdLineArgs::init( argc, argv, &aboutData );
-    KUniqueApplication::addCmdLineOptions();
 
-    KCmdLineOptions options;
-    options.add("+[menu]", ki18n("Sub menu to pre-select"));
-    options.add("+[menu-id]", ki18n("Menu entry to pre-select"));
-    KCmdLineArgs::addCmdLineOptions( options );
 
     if (!KUniqueApplication::start())
         return 1;
+    QCommandLineParser parser;
+    parser.setApplicationDescription(i18n("KDE Menu Editor"));
+    parser.addVersionOption();
+    parser.addHelpOption();
+    parser.addPositionalArgument(QStringLiteral("menu"),
+                                 i18n("Sub menu to pre-select"),
+                                 QStringLiteral("[menu]"));
+    parser.addPositionalArgument(QStringLiteral("menu-id"),
+                                 i18n("Menu entry to pre-select"),
+                                 QStringLiteral("[menu-id]"));
 
     KMenuApplication app;
+    parser.process(app);
+    const auto args = parser.positionalArguments();
 
     menuEdit = new KMenuEdit();
+    if (!args.isEmpty()) {
+        menuEdit->selectMenu(args.at(0));
+        if (args.count() > 1) {
+            menuEdit->selectMenuEntry(args.at(1));
+        }
+    }
     menuEdit->show();
 
     return  app.exec();
