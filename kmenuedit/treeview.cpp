@@ -368,18 +368,17 @@ void TreeView::readMenuFolderInfo(MenuFolderInfo *folderInfo, KServiceGroup::Ptr
     folderInfo->id = id;
     folderInfo->fullId = prefix + id;
 
-    foreach(const KSycocaEntry::Ptr &e, folder->entries(true, !m_showHidden, true, m_detailedMenuEntries && !m_detailedEntriesNamesFirst))
+    for (const KSycocaEntry::Ptr &e : folder->entries(true, !m_showHidden, true, m_detailedMenuEntries && !m_detailedEntriesNamesFirst))
     {
         if (e->isType(KST_KServiceGroup))
         {
-            KServiceGroup::Ptr g(KServiceGroup::Ptr::staticCast(e));
             MenuFolderInfo *subFolderInfo = new MenuFolderInfo();
-            readMenuFolderInfo(subFolderInfo, g, folderInfo->fullId);
+            readMenuFolderInfo(subFolderInfo, KServiceGroup::Ptr(e), folderInfo->fullId);
             folderInfo->add(subFolderInfo, true);
         }
         else if (e->isType(KST_KService))
         {
-            folderInfo->add(new MenuEntryInfo(KService::Ptr::staticCast(e)), true);
+            folderInfo->add(new MenuEntryInfo(KService::Ptr(e)), true);
         }
         else if (e->isType(KST_KServiceSeparator))
         {
