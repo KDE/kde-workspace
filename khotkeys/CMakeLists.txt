@@ -5,6 +5,7 @@ include_directories(
     )
 
 add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1217)
+remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_STRICT_ITERATORS -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_KEYWORDS)
 
 # Convenience library
 add_subdirectory( libkhotkeysprivate )
