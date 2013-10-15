@@ -18,10 +18,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as Components
+import org.kde.qtextracomponents 2.0
+import org.kde.locale 2.0 as KLocale
 
 FocusScope {
     id: brightnessItem
@@ -30,7 +31,6 @@ FocusScope {
     height: Math.max(pmCheckBox.height, pmLabel.height) + padding.margins.top + padding.margins.bottom
 
     property bool enabled: pmCheckBox.checked
-    property int implicitWidth: theme.iconSizes.dialog + pmCheckBox.implicitWidth + 6 + pmLabel.paintedWidth
 
     Components.CheckBox {
         id: pmCheckBox

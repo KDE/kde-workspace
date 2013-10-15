@@ -19,15 +19,15 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: batterymonitor
-    property int minimumWidth: Math.max(theme.iconSizes.dialog * 9, dialogItem.pmSwitchWidth)
-    property int minimumHeight: dialogItem.actualHeight
-    property int maximumHeight: dialogItem.actualHeight
+    property int minimumWidth: theme.iconSizes.dialog * 9
+    property int minimumHeight: dialogItem.implicitHeight
+    property int maximumHeight: dialogItem.implicitHeight
 
     property bool show_remaining_time: false
 
@@ -35,7 +35,7 @@ Item {
     LayoutMirroring.childrenInherit: true
 
     Component.onCompleted: {
-        plasmoid.aspectRatioMode = IgnoreAspectRatio
+        //plasmoid.aspectRatioMode = PlasmaCore.Types.IgnoreAspectRatio
         updateLogic(true);
         plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);
@@ -61,12 +61,7 @@ Item {
         }
     }
 
-    property Component compactRepresentation: CompactRepresentation {
-        hasBattery: pmSource.data["Battery"]["Has Battery"]
-        pmSource: plasmoid.rootItem.pmSource
-        batteries: plasmoid.rootItem.batteries
-        singleBattery: isConstrained() || !hasBattery
-    }
+    property Component compactRepresentation: CompactRepresentation { }
 
     property QtObject pmSource: PlasmaCore.DataSource {
         id: pmSource
@@ -133,8 +128,8 @@ Item {
             if (disableBrightnessUpdate) {
                 return;
             }
-            service = pmSource.serviceForSource("PowerDevil");
-            operation = service.operationDescription("setBrightness");
+            var service = pmSource.serviceForSource("PowerDevil");
+            var operation = service.operationDescription("setBrightness");
             operation.brightness = screenBrightness;
             service.startOperationCall(operation);
         }
@@ -142,15 +137,15 @@ Item {
             if (disableBrightnessUpdate) {
                 return;
             }
-            service = pmSource.serviceForSource("PowerDevil");
-            operation = service.operationDescription("setKeyboardBrightness");
+            var service = pmSource.serviceForSource("PowerDevil");
+            var operation = service.operationDescription("setKeyboardBrightness");
             operation.brightness = keyboardBrightness;
             service.startOperationCall(operation);
         }
         property int cookie1: -1
         property int cookie2: -1
         onPowermanagementChanged: {
-            service = pmSource.serviceForSource("PowerDevil");
+            var service = pmSource.serviceForSource("PowerDevil");
             if (checked) {
                 var op1 = service.operationDescription("stopSuppressingSleep");
                 op1.cookie = cookie1;

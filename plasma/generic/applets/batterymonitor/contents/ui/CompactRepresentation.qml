@@ -19,23 +19,23 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as Components
 import "plasmapackage:/code/logic.js" as Logic
 
 ListView {
     id: view
 
-    property int minimumWidth
-    property int minimumHeight
+    property int minimumWidth: isConstrained() ? theme.iconSizes.dialog : 24 // NOTE: Keep in sync with systray
+    property int minimumHeight: isConstrained() ? minimumHeight * view.count : 24
 
-    property bool hasBattery
+    property bool hasBattery: pmSource.data["Battery"]["Has Battery"]
 
-    property QtObject pmSource
-    property QtObject batteries
+    /*property QtObject pmSource: batterymonitor.pmSource
+    property QtObject batteries: batterymonitor.batteries*/
 
-    property bool singleBattery
+    property bool singleBattery: isConstrained() || !hasBattery
 
     model: singleBattery ? 1 : batteries
 
@@ -44,18 +44,13 @@ ListView {
     interactive: false
 
     function isConstrained() {
-        return (plasmoid.formFactor == Vertical || plasmoid.formFactor == Horizontal);
+        // FIXME
+        return false;
+        //return (plasmoid.formFactor == PlasmaCore.Types.Vertical || plasmoid.formFactor == PlasmaCore.Types.Horizontal);
     }
 
     Component.onCompleted: {
-        if (!isConstrained()) {
-            minimumHeight = theme.iconSizes.dialog;
-            minimumWidth = minimumHeight * view.count;
-        } else {
-            // NOTE: Keep in sync with systray
-            minimumHeight = 24;
-            minimumWidth = 24;
-        }
+        print("JOOOOOO" + batteries);
     }
 
     delegate: Item {
@@ -98,9 +93,9 @@ ListView {
                 width: parent.width
                 height: paintedHeight
                 horizontalAlignment: Text.AlignHCenter
-                text: i18nc("battery percentage below battery icon", "%1%", percent)
+                text: percent + "%"// FIXME i18nc("battery percentage below battery icon", "%1%", percent)
                 font.pixelSize: Math.max(batteryContainer.iconSize/8, 10)
-                visible: !isConstrained()
+                visible: true//!isConstrained()
             }
         }
     }
@@ -109,7 +104,7 @@ ListView {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        onClicked: plasmoid.togglePopup()
+        onClicked: plasmoid.expanded = !plasmoid.expanded
 
         PlasmaCore.ToolTip {
             id: tooltip

@@ -18,10 +18,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as Components
+import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.locale 2.0 as KLocale
 
 FocusScope {
     id: brightnessItem
@@ -36,7 +37,7 @@ FocusScope {
 
     signal changed(int screenBrightness)
 
-    QIconItem {
+    QtExtras.QIconItem {
         id: brightnessIcon
         width: theme.iconSizes.dialog
         height: width

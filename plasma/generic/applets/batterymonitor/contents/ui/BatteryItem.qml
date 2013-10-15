@@ -18,11 +18,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
-import org.kde.qtextracomponents 0.1
-import org.kde.locale 0.1 as KLocale
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as Components
+import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.locale 2.0 as KLocale
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
@@ -41,8 +41,6 @@ Item {
     property bool isPresent: model["Plugged in"]
 
     property int remainingTime
-
-    KLocale.Locale { id: locale }
 
     function updateSelection() {
         var hasFocus = batteryList.activeFocus && batteryList.activeIndex == index;
@@ -77,7 +75,7 @@ Item {
         onEntered: updateSelection()
         onExited: updateSelection()
         onClicked: {
-            oldIndex = batteryList.activeIndex
+            var oldIndex = batteryList.activeIndex
             batteryList.forceActiveFocus()
             batteryList.activeIndex = index
             batteryList.updateSelection(oldIndex,index)
@@ -94,11 +92,11 @@ Item {
             topMargin: padding.margins.top
             left: parent.left
             leftMargin: padding.margins.left
-            right: parent.right
+              right: parent.right
             rightMargin: padding.margins.right
         }
 
-        QIconItem {
+        QtExtras.QIconItem {
             id: batteryIcon
             width: theme.iconSizes.dialog
             height: width
@@ -106,7 +104,7 @@ Item {
                 verticalCenter: parent.verticalCenter
                 left: parent.left
             }
-            icon: QIcon(Logic.iconForBattery(model,pluggedIn))
+            icon: Logic.iconForBattery(model,pluggedIn)
         }
 
         SequentialAnimation {
@@ -141,7 +139,7 @@ Item {
                 left: batteryIcon.right
                 leftMargin: 6
             }
-            height: paintedHeight
+            height: implicitHeight
             elide: Text.ElideRight
             text: model["Pretty Name"]
         }
@@ -154,7 +152,7 @@ Item {
                 leftMargin: 3
             }
             text: Logic.stringForBatteryState(model)
-            height: paintedHeight
+            height: implicitHeight
             visible: model["Is Power Supply"]
             color: "#77"+(theme.textColor.toString().substr(1))
         }
@@ -218,98 +216,53 @@ Item {
 
             Column {
                 id: labelsColumn
-                Components.Label {
-                    height: paintedHeight
-                    width: parent.width
-                    horizontalAlignment: Text.AlignRight
-                    onPaintedWidthChanged: {
-                        if (paintedWidth > parent.width) { parent.width = paintedWidth; }
-                    }
+
+                DetailsLabel {
                     // FIXME Bound to AC adapter plugged in, not battery charging, see below
                     text: pluggedIn ? i18n("Time To Full:") : i18n("Time To Empty:")
+                    horizontalAlignment: Text.AlignRight
                     visible: remainingTimeLabel.visible
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
                 }
-                Components.Label {
-                    height: paintedHeight
-                    width: parent.width
-                    horizontalAlignment: Text.AlignRight
-                    onPaintedWidthChanged: {
-                        if (paintedWidth > parent.width) { parent.width = paintedWidth; }
-                    }
+                DetailsLabel {
                     text: i18n("Capacity:")
+                    horizontalAlignment: Text.AlignRight
                     visible: capacityLabel.visible
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
                 }
-                Components.Label {
-                    height: paintedHeight
-                    width: parent.width
-                    horizontalAlignment: Text.AlignRight
-                    onPaintedWidthChanged: {
-                        if (paintedWidth > parent.width) { parent.width = paintedWidth; }
-                    }
+                DetailsLabel {
                     text: i18n("Vendor:")
-                    visible: vendorLabel.visible
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
-                }
-                Components.Label {
-                    height: paintedHeight
-                    width: parent.width
                     horizontalAlignment: Text.AlignRight
-                    onPaintedWidthChanged: {
-                        if (paintedWidth > parent.width) { parent.width = paintedWidth; }
-                    }
+                    visible: vendorLabel.visible
+                }
+                DetailsLabel {
                     text: i18n("Model:")
+                    horizontalAlignment: Text.AlignRight
                     visible: modelLabel.visible
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
                 }
             }
+
             Column {
                 width: parent.width - labelsColumn.width - parent.spacing * 2
-                Components.Label { // Remaining Time
+                DetailsLabel {
                     id: remainingTimeLabel
-                    height: paintedHeight
-                    width: parent.width
-                    elide: Text.ElideRight
                     // FIXME Uses overall remaining time, not bound to individual battery
                     text: locale.prettyFormatDuration(dialogItem.remainingTime)
-                    visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != "" && dialogItem.remainingTime > 0
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
+                    visible: model["Is Power Supply"] && model["State"] != "NoCharge" && text != ""
+                    //visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != "" && dialogItem.remainingTime > 0
                 }
-                Components.Label { // Capacity
+                DetailsLabel {
                     id: capacityLabel
-                    height: paintedHeight
-                    width: parent.width
-                    elide: Text.ElideRight
                     text: i18nc("Placeholder is battery capacity", "%1%", model["Capacity"])
-                    visible: model["Is Power Supply"] &&  model["Capacity"] != "" && typeof model["Capacity"] == 'number'
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
+                    visible: model["Is Power Supply"] &&  model["Capacity"] != "" && typeof model["Capacity"] == "number"
                 }
-                Components.Label { // Vendor
+                DetailsLabel {
                     id: vendorLabel
-                    height: paintedHeight
-                    width: parent.width
-                    elide: Text.ElideRight
                     text: model["Vendor"]
-                    visible: model["Vendor"] != "" && typeof model["Vendor"] == 'string'
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
+                    visible: model["Vendor"] != "" && typeof model["Vendor"] == "string"
                 }
-                Components.Label { // Model
+                DetailsLabel {
                     id: modelLabel
-                    height: paintedHeight
-                    width: parent.width
-                    elide: Text.ElideRight
                     text: model["Product"]
-                    visible: model["Product"] != "" && typeof model["Product"] == 'string'
-                    font.pointSize: theme.smallestFont.pointSize
-                    color: "#99"+(theme.textColor.toString().substr(1))
+                    visible: model["Product"] != "" && typeof model["Product"] == "string"
                 }
             }
         }

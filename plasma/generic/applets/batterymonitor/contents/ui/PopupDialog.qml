@@ -18,15 +18,16 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as Components
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as Components
+import org.kde.qtextracomponents 2.0
+import org.kde.locale 2.0 as KLocale
 import "plasmapackage:/code/logic.js" as Logic
 
 FocusScope {
     id: dialog
-    property int actualHeight: batteryColumn.implicitHeight + settingsColumn.height + separator.height + 10 // 10 = separator margins
+    property int implicitHeight: batteryColumn.implicitHeight + settingsColumn.height + separator.height + 10 // 10 = separator margins
     focus: true
 
     property alias model: batteryList.model
@@ -45,11 +46,11 @@ FocusScope {
     property alias keyboardBrightness: keyboardBrightnessSlider.value
     property alias keyboardBrightnessPercentage: keyboardBrightnessSlider.percentage
 
-    property int pmSwitchWidth: padding.margins.left + pmSwitch.implicitWidth + padding.margins.right
-
     signal brightnessChanged(int screenBrightness)
-    signal keyboardBrightnessChanged(int keyboardBrightness)
+//    signal keyboardBrightnessChanged(int keyboardBrightness)
     signal powermanagementChanged(bool checked)
+
+    KLocale.Locale { id: locale }
 
     PlasmaCore.FrameSvgItem {
         id: padding
@@ -65,8 +66,8 @@ FocusScope {
         anchors {
             left: parent.left
             right: parent.right
-            top: plasmoid.location == BottomEdge ? parent.top : undefined
-            bottom: plasmoid.location == BottomEdge ? undefined : parent.bottom
+            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? parent.top : undefined
+            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : parent.bottom
         }
 
         Repeater {
@@ -84,12 +85,12 @@ FocusScope {
             }
 
             onFocusChanged: {
-                oldIndex = activeIndex;
+                var oldIndex = activeIndex;
                 activeIndex = 0;
                 updateSelection(oldIndex,activeIndex);
             }
             Keys.onDownPressed: {
-                oldIndex = activeIndex;
+                var oldIndex = activeIndex;
                 activeIndex++;
                 if (activeIndex >= model.count) {
                     activeIndex = 0;
@@ -97,7 +98,7 @@ FocusScope {
                 updateSelection(oldIndex,activeIndex);
             }
             Keys.onUpPressed: {
-                oldIndex = activeIndex;
+                var oldIndex = activeIndex;
                 activeIndex--;
                 if (activeIndex < 0) {
                     activeIndex = model.count-1;
@@ -119,15 +120,15 @@ FocusScope {
         anchors {
             left: parent.left
             right: parent.right
-            top: plasmoid.location == BottomEdge ? undefined : parent.top
-            bottom: plasmoid.location == BottomEdge ? parent.bottom : undefined
+            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : parent.top
+            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? parent.bottom : undefined
         }
 
         BrightnessItem {
             id: brightnessSlider
-            icon: QIcon("video-display")
+            icon: "video-display"
             label: i18n("Display Brightness")
-            visible: isBrightnessAvailable
+            visible: true//isBrightnessAvailable
             onChanged: brightnessChanged(value)
             KeyNavigation.tab: keyboardBrightnessSlider
             KeyNavigation.backtab: batteryList
@@ -136,9 +137,9 @@ FocusScope {
 
         BrightnessItem {
             id: keyboardBrightnessSlider
-            icon: QIcon("input-keyboard")
+            icon: "input-keyboard"
             label: i18n("Keyboard Brightness")
-            visible: isKeyboardBrightnessAvailable
+            visible: true//isKeyboardBrightnessAvailable
             onChanged: keyboardBrightnessChanged(value)
             KeyNavigation.tab: pmSwitch
             KeyNavigation.backtab: brightnessSlider
@@ -163,8 +164,8 @@ FocusScope {
         width: parent.width
         visible: model.count
         anchors {
-            top: plasmoid.location == BottomEdge ? undefined : settingsColumn.bottom
-            bottom: plasmoid.location == BottomEdge ? settingsColumn.top : undefined
+            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : settingsColumn.bottom
+            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? settingsColumn.top : undefined
             leftMargin: padding.margins.left
             rightMargin: padding.margins.right
             topMargin: 5

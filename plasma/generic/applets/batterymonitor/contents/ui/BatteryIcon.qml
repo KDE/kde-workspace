@@ -18,8 +18,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
 
 Item {
     property bool hasBattery
@@ -77,7 +77,7 @@ Item {
         // If the Fill10 element is not found, it is likely that the theme doesn't support
         // that and we use the older method of obtaining the fill element.
         if (!svg.hasElement("Fill10")) {
-            debug("No Fill10 element found in your theme's battery.svg - Using legacy 20% steps for battery icon");
+            print("No Fill10 element found in your theme's battery.svg - Using legacy 20% steps for battery icon");
             if (p >= 90) {
                 return "Fill100";
             } else if (p >= 70) {

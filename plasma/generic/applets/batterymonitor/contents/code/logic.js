@@ -96,7 +96,7 @@ function lowestBattery() {
 function stringForBatteryState(batteryData) {
     if (batteryData["Plugged in"]) {
         switch(batteryData["State"]) {
-            case "NoCharge": return i18n("Not Charging");
+            case "NoCharge": return i18n("Fully Charged");//return i18n("Not Charging");
             case "Discharging": return i18n("Discharging");
             case "FullyCharged": return i18n("Fully Charged");
             default: return i18n("Charging");
@@ -119,7 +119,9 @@ function iconForBattery(batteryData,pluggedIn) {
         case "Phone":
             return "phone";
         default: // Primary and UPS
-            p = batteryData["Percent"];
+            var p = batteryData["Percent"];
+
+            var fill;
             if (p >= 90) {
                 fill = "100";
             } else if (p >= 70) {
