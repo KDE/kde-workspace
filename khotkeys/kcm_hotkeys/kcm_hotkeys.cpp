@@ -81,11 +81,6 @@ class KCMHotkeysPrivate : public Ui::KCMHotkeysWidget
         void applyCurrentItem();
 
         /**
-         * A Hotkey was changed. Update the treeview.
-         */
-        void _k_hotkeyChanged(KHotKeys::ActionDataBase*);
-
-        /**
          * Activate the current item. The method is needed because of qt bug
          */
         void _k_activateCurrentItem();
@@ -129,12 +124,15 @@ KCMHotkeys::KCMHotkeys( QWidget *parent, const QVariantList & /* args */ )
         d->global_settings, SIGNAL(changed(bool)),
         this, SIGNAL(changed(bool)) );
     // Update TreeView if hotkeys was changed
-    connect(
-        d->simple_action, SIGNAL(changed(KHotKeys::ActionDataBase*)),
-        this, SLOT(_k_hotkeyChanged(KHotKeys::ActionDataBase*)));
-    connect(
-        d->action_group, SIGNAL(changed(KHotKeys::ActionDataBase*)),
-        this, SLOT(_k_hotkeyChanged(KHotKeys::ActionDataBase*)));
+    auto emitModelChange = [this](KHotKeys::ActionDataBase *hotkey) {
+        d->model->emitChanged(hotkey);
+    };
+    connect(d->simple_action,
+            static_cast<void (HotkeysWidgetBase::*)(KHotKeys::ActionDataBase*)>(&HotkeysWidgetBase::changed),
+            emitModelChange);
+    connect(d->action_group,
+            static_cast<void (HotkeysWidgetBase::*)(KHotKeys::ActionDataBase*)>(&HotkeysWidgetBase::changed),
+            emitModelChange);
 
     // Show the context menu
     d->menu_button->setMenu(new HotkeysTreeViewContextMenu(d->tree_view));
@@ -417,12 +415,6 @@ void KCMHotkeysPrivate::applyCurrentItem()
         {
         current->apply();
         }
-    }
-
-
-void KCMHotkeysPrivate::_k_hotkeyChanged(KHotKeys::ActionDataBase* hotkey)
-    {
-    model->emitChanged(hotkey);
     }
 
 
