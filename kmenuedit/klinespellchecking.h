@@ -21,7 +21,7 @@
 
 #include <KLineEdit>
 
-class KAction;
+class QAction;
 
 class KLineSpellChecking : public KLineEdit
 {
@@ -43,7 +43,7 @@ private Q_SLOTS:
     void spellCheckerFinished();
 
 private:
-    KAction *m_spellAction;
+    QAction *m_spellAction;
 };
 
 

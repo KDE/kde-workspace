@@ -69,7 +69,7 @@ KMenuEdit::~KMenuEdit()
 
 void KMenuEdit::setupActions()
 {
-    KAction *action = 0;
+    QAction *action = 0;
 
     action = actionCollection()->addAction(NEW_SUBMENU_ACTION_NAME);
     action->setIcon(KIcon("menu_new"));

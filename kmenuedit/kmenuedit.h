@@ -23,7 +23,7 @@
 #include <KXmlGuiWindow>
 
 class QSplitter;
-class KAction;
+class QAction;
 class BasicTab;
 class TreeView;
 
@@ -57,7 +57,7 @@ protected:
     BasicTab           *m_basicTab;
     QSplitter          *m_splitter;
 
-    KAction *m_actionDelete;
+    QAction *m_actionDelete;
     bool m_showHidden;
 };
 
