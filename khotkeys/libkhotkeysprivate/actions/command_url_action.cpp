@@ -100,7 +100,7 @@ void CommandUrlAction::execute()
 //        cmd = command_url().left( space_pos ); // get first 'word'
     uri.setData( cmd );
     KUriFilter::self()->filterUri( uri );
-    if( uri.uri().isLocalFile() && !uri.uri().hasRef() )
+    if( uri.uri().isLocalFile() && !uri.uri().hasFragment() )
         cmd = uri.uri().toLocalFile();
     else
         cmd = uri.uri().url();
