@@ -26,10 +26,11 @@
 
 #include <KDE/KConfig>      // Needed because of some Qt Status redefinitions
 #include <KDE/KConfigGroup>      // Needed because of some Qt Status redefinitions
+#include <config-kwindowsystem.h> // Needed for HAVE_X11
 
 #include <kdemacros.h>
 
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
 #include <X11/Xlib.h>
 #include <fixx11h.h>
 #else
