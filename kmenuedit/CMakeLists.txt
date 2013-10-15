@@ -1,3 +1,4 @@
+remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_STRICT_ITERATORS -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_KEYWORDS)
 add_subdirectory( pixmaps ) 
 
 set(kmenueditcommon_STAT_SRCS preferencesdlg.cpp klinespellchecking.cpp basictab.cpp treeview.cpp kmenuedit.cpp menufile.cpp menuinfo.cpp configurationmanager.cpp )
@@ -19,7 +20,19 @@ set(kmenuedit_KDEINIT_SRCS main.cpp ${kmenueditcommon_STAT_SRCS})
 
 kf5_add_kdeinit_executable( kmenuedit ${kmenuedit_KDEINIT_SRCS})
 
-target_link_libraries(kdeinit_kmenuedit KF5::KIOCore KF5::KIOWidgets ${QT_QTXML_LIBRARY} ${QT_QTDBUS_LIBRARY})
+target_link_libraries(kdeinit_kmenuedit
+    Qt5::DBus
+    Qt5::Xml
+    KF5::KDBusAddons
+    KF5::KI18n
+    KF5::KIconThemes
+    KF5::KIOCore
+    KF5::KIOWidgets
+    KF5::SonnetCore
+    KF5::SonnetUi
+    KF5::XmlGui
+    ${KDE4Support_LIBRARIES}
+)
 
 install(TARGETS kdeinit_kmenuedit  DESTINATION ${LIB_INSTALL_DIR} )
 
