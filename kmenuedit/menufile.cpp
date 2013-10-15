@@ -25,7 +25,7 @@
 
 #include <KDebug>
 #include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KStandardDirs>
 
 const QString MenuFile::MF_MENU =          "Menu";

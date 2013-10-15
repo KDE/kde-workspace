@@ -23,7 +23,7 @@
 #include <QCheckBox>
 #include <QGroupBox>
 
-#include <KLocale>
+#include <KLocalizedString>
 #include <KConfigGroup>
 #include <sonnet/configwidget.h>
 #include "configurationmanager.h"

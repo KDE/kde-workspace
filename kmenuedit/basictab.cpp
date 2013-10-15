@@ -26,7 +26,7 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 
-#include <KLocale>
+#include <KLocalizedString>
 #include <KGlobal>
 #include <KDialog>
 #include <KKeySequenceWidget>

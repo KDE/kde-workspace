@@ -22,7 +22,7 @@
 #include "khotkeys_interface.h"
 
 #include <KDebug>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
 static bool khotkeys_present = false;

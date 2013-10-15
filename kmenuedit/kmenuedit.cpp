@@ -28,7 +28,7 @@
 #include <KDebug>
 #include <KGlobal>
 #include <KIcon>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 #include <KService>
 #include <KStandardAction>

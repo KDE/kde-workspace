@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #include <QDir>
+#include <QDrag>
 #include <QHeaderView>
 #include <QPainter>
 #include <QRegExp>
@@ -43,14 +44,15 @@
 #include <KGlobal>
 #include <KIconLoader>
 #include <KInputDialog>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 #include <KService>
 #include <KServiceGroup>
 #include <KConfig>
 #include <KConfigGroup>
 #include <KStandardDirs>
-#include <KIO/NetAccess>
+#include <kio/netaccess.h>
+#include <KUrl>
 
 #include "treeview.moc"
 #include "menufile.h"

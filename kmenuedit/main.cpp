@@ -19,7 +19,7 @@
  *
  */
 
-#include <KLocale>
+#include <KLocalizedString>
 #include <KAboutData>
 #include <kdbusservice.h>
 #include <kdemacros.h>
