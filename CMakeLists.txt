@@ -289,10 +289,10 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #    # data
 #    macro_optional_add_subdirectory(doc)
 #
-   if (Q_WS_X11)
-#       macro_optional_add_subdirectory(kinfocenter)
+   if (NOT WIN32)
+      ecm_optional_add_subdirectory(kinfocenter)
 #       macro_optional_add_subdirectory(ktouchpadenabler)
-   endif (Q_WS_X11)
+   endif ()
 
    if(NOT WIN32)
 #       macro_optional_add_subdirectory(kcminit)
