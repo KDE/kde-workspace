@@ -49,7 +49,6 @@
 #include <kdeclarative/configpropertymap.h>
 #include <kdeclarative/qmlobject.h>
 
-#include <plasmaquick/packageaccessmanagerfactory.h>
 #include <PlasmaQuick/PackageUrlInterceptor>
 
 Q_DECLARE_METATYPE(PlasmoidInterface*)
@@ -129,7 +128,7 @@ void PlasmoidInterface::init()
     QQmlNetworkAccessManagerFactory *factory = engine->networkAccessManagerFactory();
     engine->setNetworkAccessManagerFactory(0);
     delete factory;
-    engine->setNetworkAccessManagerFactory(new PackageAccessManagerFactory(pkg));
+    engine->setNetworkAccessManagerFactory(PackageUrlInterceptor::createPackageAccessManagerFactory(pkg));
 
 
     //m_m_qmlObject->setSource(QUrl::fromLocalFile(m_appletScriptEngine->mainScript()));
