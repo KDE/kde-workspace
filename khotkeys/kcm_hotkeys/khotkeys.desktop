@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 khotkeys
+Exec=kcmshell5 khotkeys
 Icon=preferences-desktop-keyboard-khotkeys
 Type=Service
 X-KDE-ServiceTypes=KCModule
