@@ -80,11 +80,6 @@ class KCMHotkeysPrivate : public Ui::KCMHotkeysWidget
          */
         void applyCurrentItem();
 
-        /**
-         * Activate the current item. The method is needed because of qt bug
-         */
-        void _k_activateCurrentItem();
-
         void load();
         void save();
     };
@@ -168,9 +163,6 @@ void KCMHotkeys::currentChanged( const QModelIndex &pCurrent, const QModelIndex 
         d->tree_view->selectionModel()->setCurrentIndex(
                 d->currentIndex,
                 QItemSelectionModel::SelectCurrent);
-
-        // See http://www.qtsoftware.com/developer/task-tracker/index_html?method=entry&id=132516
-        QTimer::singleShot(0, this, SLOT(_k_activateCurrentItem()));
         return;
         }
 
@@ -415,14 +407,6 @@ void KCMHotkeysPrivate::applyCurrentItem()
         {
         current->apply();
         }
-    }
-
-
-void KCMHotkeysPrivate::_k_activateCurrentItem()
-    {
-    tree_view->selectionModel()->setCurrentIndex(
-            tree_view->selectionModel()->currentIndex(),
-            QItemSelectionModel::SelectCurrent);
     }
 
 #include "kcm_hotkeys.moc"
