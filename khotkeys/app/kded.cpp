@@ -149,7 +149,7 @@ QString KHotKeysModule::get_menuentry_shortcut(const QString &storageId)
     Q_ASSERT(shortcutTrigger);
     if (shortcutTrigger == NULL) return "";
 
-    return shortcutTrigger->shortcut().primary();
+    return shortcutTrigger->primaryShortcut();
     }
 
 
@@ -197,7 +197,7 @@ QString KHotKeysModule::register_menuentry_shortcut(
         _settings.write();
 
         // Return the real shortcut
-        return newAction->trigger()->shortcut().primary();
+        return newAction->trigger()->primaryShortcut();
         }
     // We found a action
     else
@@ -224,7 +224,7 @@ QString KHotKeysModule::register_menuentry_shortcut(
             _settings.write();
 
             // Remove the resulting real shortcut
-            return shortcutTrigger->shortcut().primary();
+            return shortcutTrigger->primaryShortcut();
             }
         }
 
