@@ -12,19 +12,22 @@
 #define WINDOWSELECTOR_H
 
 #include <QWidget>
+#include <QAbstractNativeEventFilter>
 
 namespace KHotKeys
 {
 
-class WindowSelector : public QWidget
+class WindowSelector : public QWidget, public QAbstractNativeEventFilter
     {
     Q_OBJECT
 
     public:
         WindowSelector( QObject* receiver, const char* slot );
+        virtual ~WindowSelector();
         void select();
-    protected:
-        virtual bool x11Event( XEvent* e );
+
+        virtual bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) override;
+
     Q_SIGNALS:
         void selected_signal( WId w );
     private:

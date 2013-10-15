@@ -20,6 +20,7 @@
 #include <X11/Xlib.h>
 #include <QX11Info>
 #include <fixx11h.h>
+#include <xcb/xcb.h>
 
 namespace KHotKeys
 {
@@ -29,26 +30,37 @@ WindowSelector::WindowSelector( QObject* receiver_P, const char* slot_P )
     connect( this, SIGNAL(selected_signal(WId)), receiver_P, slot_P );
     }
 
+WindowSelector::~WindowSelector()
+{
+    kapp->desktop()->releaseMouse();
+    QApplication::instance()->removeNativeEventFilter(this);
+}
+
 void WindowSelector::select()
     {
     kapp->desktop()->grabMouse( QCursor( Qt::CrossCursor ));
-    kapp->installX11EventFilter( this );
+    QApplication::instance()->installNativeEventFilter(this);
     }
 
-bool WindowSelector::x11Event( XEvent* e )
-    {
-    if( e->type != ButtonPress )
+bool WindowSelector::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
+{
+    Q_UNUSED(result)
+    if (eventType != QByteArrayLiteral("xcb_generic_event_t")) {
         return false;
-    kapp->desktop()->releaseMouse();
-    if( e->xbutton.button == Button1 )
-        {
-        WId window = findRealWindow( e->xbutton.subwindow );
-        if( window )
-            selected_signal( window );
-        }
-    delete this;
-    return true;
     }
+    xcb_generic_event_t *event = reinterpret_cast<xcb_generic_event_t*>(message);
+    if ((event->response_type & ~0x80) == XCB_BUTTON_PRESS) {
+        xcb_button_press_event_t *e = reinterpret_cast<xcb_button_press_event_t*>(event);
+        if (e->detail == XCB_BUTTON_INDEX_1) {
+            if (WId window = findRealWindow(e->child)) {
+                emit selected_signal(window);
+            }
+            deleteLater();
+            return true;
+        }
+    }
+    return false;
+}
 
 WId WindowSelector::findRealWindow( WId w, int depth )
     {
