@@ -73,7 +73,7 @@ const KHotKeys::ShortcutTrigger *ShortcutTriggerWidget::trigger() const
 void ShortcutTriggerWidget::doCopyFromObject()
     {
     Q_ASSERT(trigger());
-    shortcut_trigger_ui.shortcut->setKeySequence( trigger()->shortcut().primary() );
+    shortcut_trigger_ui.shortcut->setKeySequence( trigger()->primaryShortcut() );
     }
 
 
@@ -87,7 +87,7 @@ void ShortcutTriggerWidget::doCopyToObject()
 bool ShortcutTriggerWidget::isChanged() const
     {
     Q_ASSERT(trigger());
-    return trigger()->shortcut().primary() != shortcut_trigger_ui.shortcut->keySequence();
+    return trigger()->primaryShortcut() != shortcut_trigger_ui.shortcut->keySequence();
     }
 
 
