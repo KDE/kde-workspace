@@ -46,6 +46,7 @@
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
 #include <KDE/KPluginLoader>
+#include <kdeversion.h>
 
 K_PLUGIN_FACTORY( KCMHotkeysFactory, registerPlugin<KCMHotkeys>(); )
 

@@ -18,7 +18,7 @@
 
 #include "condition_type_menu.h"
 
-#include <KDE/KLocale>
+#include <KDE/KLocalizedString>
 
 
 ConditionTypeMenu::ConditionTypeMenu(QWidget *parent)
