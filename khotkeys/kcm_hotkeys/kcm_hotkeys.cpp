@@ -95,16 +95,16 @@ KCMHotkeys::KCMHotkeys( QWidget *parent, const QVariantList & /* args */ )
     // Add the about data
     KAboutData *about = new KAboutData(
         "khotkeys",
-        0,
-        ki18n("KDE Hotkeys Configuration Module"),
+        QString(),
+        i18n("KDE Hotkeys Configuration Module"),
         KDE_VERSION_STRING,
-        KLocalizedString(),
+        QString(),
         KAboutData::License_GPL,
-        ki18n("Copyright 2008 (c) Michael Jansen")
+        i18n("Copyright 2008 (c) Michael Jansen")
         );
     about->addAuthor(
-        ki18n("Michael Jansen"),
-        ki18n("Maintainer"),
+        i18n("Michael Jansen"),
+        i18n("Maintainer"),
         "kde@michael-jansen.biz" );
     setAboutData(about);
 
