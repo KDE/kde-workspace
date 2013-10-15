@@ -22,10 +22,13 @@
 #include "hotkeys_model.h"
 #include "settings.h"
 
+#include <KConfigGroup>
 #include <KDebug>
 #include <KDesktopFile>
 #include <KGlobal>
 #include <KStandardDirs>
+
+#include <QStandardPaths>
 
 
 GlobalSettingsWidget::GlobalSettingsWidget( QWidget *parent )
@@ -40,7 +43,7 @@ GlobalSettingsWidget::GlobalSettingsWidget( QWidget *parent )
         _config = KSharedConfig::openConfig(
                 path,
                 KConfig::NoGlobals,
-                "services" );
+                QStandardPaths::GenericDataLocation );
         }
 
     connect(
