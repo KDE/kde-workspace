@@ -87,7 +87,12 @@ add_dependencies(kcm_hotkeys kded_khotkeys)
 target_link_libraries(
     kcm_hotkeys
     khotkeysprivate
-    KF5::KIOCore KF5::KIOWidgets
+    KF5::KCMUtils
+    KF5::KI18n
+    KF5::KIOCore
+    KF5::KIOWidgets
+    KF5::KTextWidgets
+    ${KDE4Support_LIBRARIES}
     ${QT_QTGUI_LIBRARY}
     ${X11_X11_LIB}
     )
