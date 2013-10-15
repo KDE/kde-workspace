@@ -405,11 +405,8 @@ QString TreeView::findName(KDesktopFile *df, bool deleted)
           name.clear();
        if (name.isEmpty())
        {
-          QString file = df->fileName();
-          QString res = df->resource();
-
           bool isLocal = true;
-          const QStringList files = KGlobal::dirs()->findAllResources(res.toLatin1(), file);
+          const QStringList files = QStandardPaths::locateAll(df->resource(), df->fileName(), QStandardPaths::LocateFile);
           for(QStringList::ConstIterator it = files.constBegin();
               it != files.constEnd();
               ++it)

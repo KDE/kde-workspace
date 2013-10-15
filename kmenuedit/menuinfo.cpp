@@ -197,12 +197,12 @@ void MenuFolderInfo::save(MenuFile *menuFile)
       KDesktopFile *df = 0;
       if (directoryFile != local)
       {
-         KDesktopFile orig("apps", directoryFile);
+         KDesktopFile orig(QStandardPaths::ApplicationsLocation, directoryFile);
          df = orig.copyTo(local);
       }
       else
       {
-         df = new KDesktopFile("apps", directoryFile);
+         df = new KDesktopFile(QStandardPaths::ApplicationsLocation, directoryFile);
       }
 
       KConfigGroup dg( df->desktopGroup() );
