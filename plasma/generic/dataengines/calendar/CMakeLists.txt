@@ -24,7 +24,7 @@ target_link_libraries(
     plasma_engine_calendar
     ${KDEPIMLIBS_KHOLIDAYS_LIBRARY}
     KF5::KCoreAddons
-    KF5::plasma
+    KF5::Plasma
     ${KDE4_KMIME_LIBS}
     ${KDE4_KCALCORE_LIBS}
     ${KDE4_KCALUTILS_LIBS}

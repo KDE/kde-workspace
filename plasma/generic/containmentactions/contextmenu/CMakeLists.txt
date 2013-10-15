@@ -17,7 +17,7 @@ kde4_add_plugin(plasma_containmentactions_contextmenu ${contextmenu_SRCS})
 target_link_libraries(plasma_containmentactions_contextmenu
                       Qt5::DBus
                       KF5::KI18n
-                      KF5::plasma
+                      KF5::Plasma
                       KF5::XmlGui
 		      KF5::KIOCore
                       kworkspace)

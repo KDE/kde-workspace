@@ -13,7 +13,7 @@ target_link_libraries(plasma_wallpaper_imageplugin
 	 Qt5::Core
 	 Qt5::Quick
 	 Qt5::Qml
-	 KF5::plasma
+	 KF5::Plasma
          KF5::KIOCore
 	 KF5::KIOWidgets
 	 KF5::ThreadWeaver

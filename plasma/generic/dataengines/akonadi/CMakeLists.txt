@@ -16,7 +16,7 @@ target_link_libraries(
     ${KDE4_KPIMUTILS_LIBS}
     KF5::KCoreAddons
     ${KDE4_AKONADI_LIBS}
-    KF5::plasma
+    KF5::Plasma
     ${KDE4_KMIME_LIBS}
     ${KDE4_AKONADI_KMIME_LIBS}
     ${KDE4_KABC_LIBS}

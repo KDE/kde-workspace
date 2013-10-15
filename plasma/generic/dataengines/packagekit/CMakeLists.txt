@@ -7,7 +7,7 @@ set(packagekit_engine_SRCS
 )
 
 plasma_add_plugin(plasma_engine_packagekit ${packagekit_engine_SRCS})
-target_link_libraries(plasma_engine_packagekit KF5::plasma KF5::KCoreAddons )
+target_link_libraries(plasma_engine_packagekit KF5::Plasma KF5::KCoreAddons )
 
 install(TARGETS plasma_engine_packagekit
     DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

@@ -23,7 +23,7 @@ qt4_add_dbus_interface(mpris2_engine_SRCS org.mpris.MediaPlayer2.xml mprisroot)
 
 plasma_add_plugin(plasma_engine_mpris2 ${mpris2_engine_SRCS})
 target_link_libraries(plasma_engine_mpris2
-   KF5::plasma
+   KF5::Plasma
 )
 
 install(TARGETS plasma_engine_mpris2 DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

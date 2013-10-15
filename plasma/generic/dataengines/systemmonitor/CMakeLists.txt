@@ -9,7 +9,7 @@ plasma_add_plugin(plasma_engine_systemmonitor ${systemmonitor_engine_SRCS})
 
 target_link_libraries(plasma_engine_systemmonitor
     Qt5::Network
-    KF5::plasma
+    KF5::Plasma
     KF5::KService
     ksgrd
 )

@@ -12,7 +12,7 @@ plasma_add_plugin(plasma_engine_devicenotifications ${device_notifications_engin
 target_link_libraries(plasma_engine_devicenotifications 
     Qt5::DBus
     KF5::KService
-    KF5::plasma
+    KF5::Plasma
 ) # todo: add kworkspace once ported
 
 install(TARGETS plasma_engine_devicenotifications DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

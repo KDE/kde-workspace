@@ -16,7 +16,7 @@ target_link_libraries(plasma_engine_notifications
     KF5::KIconThemes
     KF5::KIOCore
     KF5::KNotifications
-    KF5::plasma
+    KF5::Plasma
     KF5::KService
     #${KDE4_KNOTIFYCONFIG_LIBRARY}
 )

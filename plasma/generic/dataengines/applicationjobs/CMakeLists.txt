@@ -18,7 +18,7 @@ plasma_add_plugin(plasma_engine_applicationjobs ${kuiserver_engine_SRCS})
 target_link_libraries(plasma_engine_applicationjobs
   KF5::KI18n
   KF5::KIOCore
-  KF5::plasma
+  KF5::Plasma
   KF5::KService
   ${KDE4Attic_LIBRARIES}
 )

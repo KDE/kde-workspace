@@ -10,7 +10,7 @@ plasma_add_plugin(plasma_engine_hotplug ${hotplug_engine_SRCS})
 target_link_libraries(plasma_engine_hotplug
                 Qt5::DBus
 		KF5::KCoreAddons
-		KF5::plasma
+		KF5::Plasma
 		KF5::Solid
 		KF5::KService
 		KF5::KIOCore

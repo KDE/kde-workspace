@@ -19,7 +19,7 @@ target_link_libraries(systemtrayplugin
     Qt5::Quick
     Qt5::Qml
     KF5::KDeclarative
-    KF5::plasma
+    KF5::Plasma
     KF5::PlasmaQuick
     KF5::KWindowSystem
     KF5::KService

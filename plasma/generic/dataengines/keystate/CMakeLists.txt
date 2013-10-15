@@ -9,7 +9,7 @@ plasma_add_plugin(plasma_engine_keystate ${keystate_engine_SRCS})
 
 target_link_libraries(plasma_engine_keystate
     KF5::KGuiAddons
-    KF5::plasma
+    KF5::Plasma
     KF5::KService
     KF5::KIOCore
 )

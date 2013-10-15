@@ -9,7 +9,7 @@ kservice_desktop_to_json(plasma-containmentactions-paste.desktop)
 
 kde4_add_plugin(plasma_containmentactions_paste ${paste_SRCS})
 target_link_libraries(plasma_containmentactions_paste 
-	KF5::plasma 
+	KF5::Plasma 
 	KF5::KIOCore
 	)
 

@@ -15,7 +15,7 @@ qt4_add_dbus_interface(
 plasma_add_plugin(plasma_engine_activities ${activity_engine_SRCS})
 target_link_libraries(plasma_engine_activities
                       KF5::KCoreAddons
-                      KF5::plasma
+                      KF5::Plasma
                       ${KACTIVITIES_LIBRARY})
 
 install(TARGETS plasma_engine_activities

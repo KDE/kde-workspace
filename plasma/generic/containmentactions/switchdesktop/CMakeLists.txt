@@ -8,7 +8,7 @@ kservice_desktop_to_json(plasma-containmentactions-switchdesktop.desktop)
 
 kde4_add_plugin(plasma_containmentactions_switchdesktop ${switchdesktop_SRCS})
 target_link_libraries(plasma_containmentactions_switchdesktop
-                        KF5::plasma
+                        KF5::Plasma
                         KF5::KWindowSystem
                         KF5::KI18n
 			KF5::KIOCore

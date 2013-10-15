@@ -15,7 +15,7 @@ target_link_libraries(plasma_engine_soliddevice
   Qt5::Network
   KF5::KI18n
   KF5::KIOCore
-  KF5::plasma
+  KF5::Plasma
   KF5::Solid
   ${KDE4Attic_LIBRARIES}
 )

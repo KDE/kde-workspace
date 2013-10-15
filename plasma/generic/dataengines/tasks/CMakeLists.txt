@@ -14,7 +14,7 @@ target_link_libraries(plasma_engine_tasks
                       KF5::KCoreAddons
                       KF5::KService
                       KF5::KWindowSystem
-                      KF5::plasma
+                      KF5::Plasma
                       Qt5::DBus
                       taskmanager)
 

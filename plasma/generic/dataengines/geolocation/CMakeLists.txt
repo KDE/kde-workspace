@@ -4,9 +4,9 @@ project(geolocation)
 
 set(plasma_geolocation_interface_SRCS geolocationprovider.cpp)
 kde4_add_library(plasma-geolocation-interface SHARED ${plasma_geolocation_interface_SRCS})
-target_link_libraries(plasma-geolocation-interface KIOCore KF5::plasma)
+target_link_libraries(plasma-geolocation-interface KIOCore KF5::Plasma)
 target_link_libraries(plasma-geolocation-interface
-                      LINK_INTERFACE_LIBRARIES KIOCore KF5::plasma)
+                      LINK_INTERFACE_LIBRARIES KIOCore KF5::Plasma)
 set_target_properties(plasma-geolocation-interface PROPERTIES
    VERSION ${GENERIC_LIB_VERSION}
    SOVERSION ${GENERIC_LIB_SOVERSION}
@@ -26,7 +26,7 @@ set(plasma_dataengine_geolocation_SRCS geolocation.cpp)
 plasma_add_plugin(plasma_engine_geolocation ${plasma_dataengine_geolocation_SRCS})
 target_link_libraries(plasma_engine_geolocation
     plasma-geolocation-interface
-    KF5::plasma
+    KF5::Plasma
     KF5::KCoreAddons
     KIOCore
     KF5::Solid)
