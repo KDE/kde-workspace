@@ -21,7 +21,7 @@
 
 #include <KCModule>
 
-#include <QtCore/QModelIndex>
+#include <QModelIndex>
 
 class KCMHotkeysPrivate;
 class QWidget;

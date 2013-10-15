@@ -15,7 +15,7 @@
 #include <kdebug.h>
 #include <kapplication.h>
 
-#include <QtGui/QDesktopWidget>
+#include <QDesktopWidget>
 
 #include <X11/Xlib.h>
 #include <QX11Info>

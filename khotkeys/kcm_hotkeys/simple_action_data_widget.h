@@ -23,7 +23,7 @@
 
 #include "action_data/simple_action_data.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 
 /**

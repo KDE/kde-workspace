@@ -9,10 +9,10 @@
 
 ****************************************************************************/
 
-#include <QtCore/QEvent>
-#include <QtGui/QColor>
-#include <QtGui/QFrame>
-#include <QtGui/QMouseEvent>
+#include <QEvent>
+#include <QColor>
+#include <QFrame>
+#include <QMouseEvent>
 
 #include "gesture_recorder.h"
 

@@ -21,7 +21,7 @@
 #include "hotkeys_widget_iface.h"
 
 #include "qwindowdefs.h"
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <KDE/KDialog>
 
 

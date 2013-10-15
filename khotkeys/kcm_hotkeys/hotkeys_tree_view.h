@@ -24,8 +24,8 @@
 #include "triggers/triggers.h"
 #include "actions/actions.h"
 
-#include <QtGui/QMenu>
-#include <QtGui/QTreeView>
+#include <QMenu>
+#include <QTreeView>
 
 
 class QSignalMapper;

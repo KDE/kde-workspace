@@ -14,7 +14,7 @@
 
 #include "triggers/gestures.h"
 
-#include <QtGui/QFrame>
+#include <QFrame>
 
 class QMouseEvent;
 

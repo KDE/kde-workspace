@@ -22,8 +22,8 @@
 #include "libkhotkeysfwd.h"
 
 
-#include <QtCore/QSignalMapper>
-#include <QtGui/QWidget>
+#include <QSignalMapper>
+#include <QWidget>
 
 
 /**

@@ -21,7 +21,7 @@
 
 #include "ui_gesture_widget.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>

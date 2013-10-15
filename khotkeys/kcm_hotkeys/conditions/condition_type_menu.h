@@ -19,7 +19,7 @@
 */
 
 
-#include <QtGui/QMenu>
+#include <QMenu>
 
 
 /**

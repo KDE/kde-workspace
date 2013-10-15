@@ -18,8 +18,8 @@
    Boston, MA 02110-1301, USA.
 */
 
-#include <QtCore/QMap>
-#include <QtGui/QWidget>
+#include <QMap>
+#include <QWidget>
 
 
 #include "ui_conditions_widget.h"

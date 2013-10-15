@@ -21,7 +21,7 @@
 
 #include "libkhotkeysfwd.h"
 
-#include <QtGui/QSortFilterProxyModel>
+#include <QSortFilterProxyModel>
 
 
 

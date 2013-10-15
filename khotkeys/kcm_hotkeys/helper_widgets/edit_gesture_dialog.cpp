@@ -20,8 +20,8 @@
 
 #include <KDE/KLocale>
 
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
+#include <QLabel>
+#include <QLayout>
 
 
 EditGestureDialog::EditGestureDialog(const KHotKeys::StrokePoints &pointData, QWidget *parent)

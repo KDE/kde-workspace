@@ -24,7 +24,7 @@
 #include "kdialog.h"
 #include "kurl.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 
 /**

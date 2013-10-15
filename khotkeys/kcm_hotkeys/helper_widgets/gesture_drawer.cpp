@@ -10,11 +10,11 @@
 
 ****************************************************************************/
 
-#include <QtGui/QColor>
-#include <QtGui/QPainter>
-#include <QtGui/QFrame>
-#include <QtGui/QPaintEvent>
-#include <QtGui/QGradient>
+#include <QColor>
+#include <QPainter>
+#include <QFrame>
+#include <QPaintEvent>
+#include <QGradient>
 
 #include "gesture_drawer.h"
 
