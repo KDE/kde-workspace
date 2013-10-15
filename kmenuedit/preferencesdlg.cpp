@@ -59,7 +59,7 @@ SpellCheckingPage::SpellCheckingPage( QWidget *parent )
     : QWidget( parent )
 {
     QHBoxLayout *lay = new QHBoxLayout( this );
-    m_confPage = new Sonnet::ConfigWidget(&( *KGlobal::config() ), this );
+    m_confPage = new Sonnet::ConfigWidget( this );
     lay->addWidget( m_confPage );
     setLayout( lay );
 }
