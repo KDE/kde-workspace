@@ -1,7 +1,6 @@
 set(
     kcm_hotkeys_PART_SRCS
     kcm_hotkeys.cpp
-    kcm_module_factory.cpp
     global_settings_widget.cpp
     hotkeys_export_widget.cpp
     hotkeys_model.cpp

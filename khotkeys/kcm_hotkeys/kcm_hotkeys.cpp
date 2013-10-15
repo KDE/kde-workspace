@@ -21,7 +21,6 @@
 #include "kcm_hotkeys.h"
 #include "hotkeys_context_menu.h"
 #include "ui_kcm_hotkeys.h"
-#include "kcm_module_factory.h"
 
 #include <typeinfo>
 
@@ -48,7 +47,7 @@
 #include <KDE/KMessageBox>
 #include <KDE/KPluginLoader>
 
-
+K_PLUGIN_FACTORY( KCMHotkeysFactory, registerPlugin<KCMHotkeys>(); )
 
 class KCMHotkeysPrivate : public Ui::KCMHotkeysWidget
     {
@@ -433,4 +432,4 @@ void KCMHotkeysPrivate::_k_activateCurrentItem()
             QItemSelectionModel::SelectCurrent);
     }
 
-#include "moc_kcm_hotkeys.cpp"
+#include "kcm_hotkeys.moc"
