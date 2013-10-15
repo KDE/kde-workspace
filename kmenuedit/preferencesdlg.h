@@ -36,7 +36,7 @@ class PreferencesDialog : public KPageDialog
 public:
     PreferencesDialog( QWidget *parent );
 
-protected slots:
+protected Q_SLOTS:
     void slotSave();
 
 private:
