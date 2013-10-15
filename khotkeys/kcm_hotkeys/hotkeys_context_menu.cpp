@@ -28,12 +28,12 @@
 #include "action_data/simple_action_data.h"
 
 #include <KDE/KDebug>
-#include <KDE/KFileDialog>
 #include <KDE/KLocale>
 #include <KDE/KUrl>
 
 #include <QtCore/QSignalMapper>
 #include <QtGui/QContextMenuEvent>
+#include <QFileDialog>
 
 
 HotkeysTreeViewContextMenu::HotkeysTreeViewContextMenu( const QModelIndex &index, HotkeysTreeView *parent )
@@ -200,10 +200,10 @@ void HotkeysTreeViewContextMenu::createTriggerMenus(
 
 void HotkeysTreeViewContextMenu::importAction()
     {
-    KUrl url = KFileDialog::getOpenFileName(KUrl(), "*.khotkeys", this);
+    QUrl url = QFileDialog::getOpenFileUrl(this, QString(), QUrl(), QStringLiteral("*.khotkeys"));
     if (!url.isEmpty())
         {
-        KConfig config(url.path(), KConfig::SimpleConfig);
+        KConfig config(url.path(QUrl::FullyDecoded), KConfig::SimpleConfig);
         _view->model()->importInputActions(_index, config);
         }
     }
