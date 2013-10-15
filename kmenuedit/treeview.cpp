@@ -1910,9 +1910,9 @@ void TreeView::restoreMenuSystem()
     }
 
     QString xdgdir = KGlobal::dirs()->KStandardDirs::localxdgdatadir();
-    if ( !KIO::NetAccess::del( QString(xdgdir + "/applications") , this) )
+    if ( !KIO::NetAccess::del( QUrl::fromLocalFile(xdgdir + QStringLiteral("/applications")) , this) )
         qWarning()<<"Could not delete dir :"<<( xdgdir+"/applications" );
-    if ( !KIO::NetAccess::del( QString(xdgdir +"/desktop-directories") , this) )
+    if ( !KIO::NetAccess::del( QUrl::fromLocalFile(xdgdir + QStringLiteral("/desktop-directories")) , this) )
         qWarning()<<"Could not delete dir :"<<( xdgdir + "/desktop-directories");
 
     KBuildSycocaProgressDialog::rebuildKSycoca(this);
