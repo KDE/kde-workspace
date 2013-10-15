@@ -86,7 +86,7 @@ class KCMHotkeysPrivate : public Ui::KCMHotkeysWidget
 
 
 KCMHotkeys::KCMHotkeys( QWidget *parent, const QVariantList & /* args */ )
-    : KCModule( KCMModuleFactory::componentData(), parent )
+    : KCModule( parent )
      ,d( new KCMHotkeysPrivate(this) )
     {
     // Inform KCModule of the buttons we support
