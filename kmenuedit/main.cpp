@@ -19,12 +19,12 @@
  *
  */
 
-#include <KUniqueApplication>
 #include <KLocale>
 #include <KAboutData>
 #include <kdbusservice.h>
 #include <kdemacros.h>
 
+#include <QApplication>
 #include <QtCore/QCommandLineParser>
 #include "kmenuedit.h"
 #ifndef Q_WS_WIN
@@ -36,17 +36,20 @@ static const char version[] = "0.9";
 
 static KMenuEdit *menuEdit = 0;
 
-class KMenuApplication : public KUniqueApplication
+class KMenuApplication : public QApplication
 {
 public:
-   KMenuApplication() { }
+   KMenuApplication(int &argc, char **argv)
+    : QApplication(argc, argv)
+    {
+        QCoreApplication::setApplicationName(QStringLiteral("kmenuedit"));
+        QCoreApplication::setApplicationVersion(QString(version));
+        QCoreApplication::setOrganizationDomain(QStringLiteral("kde.org"));
+        QApplication::setApplicationDisplayName(i18n("KDE Menu Editor"));
+    }
 #ifndef Q_WS_WIN
    virtual ~KMenuApplication() { KHotKeys::cleanup(); }
 #endif
-   virtual int newInstance()
-   {
-      return KUniqueApplication::newInstance();
-   }
 };
 
 
@@ -60,10 +63,10 @@ extern "C" int KDE_EXPORT kdemain( int argc, char **argv )
     aboutData.addAuthor(i18n("Matthias Elter"), i18n("Original Author"), QStringLiteral("elter@kde.org"));
     aboutData.addAuthor(i18n("Montel Laurent"), QString(), QStringLiteral("montel@kde.org"));
 
+    KMenuApplication app(argc, argv);
 
+    KDBusService service(KDBusService::Unique);
 
-    if (!KUniqueApplication::start())
-        return 1;
     QCommandLineParser parser;
     parser.setApplicationDescription(i18n("KDE Menu Editor"));
     parser.addVersionOption();
@@ -75,7 +78,6 @@ extern "C" int KDE_EXPORT kdemain( int argc, char **argv )
                                  i18n("Menu entry to pre-select"),
                                  QStringLiteral("[menu-id]"));
 
-    KMenuApplication app;
     parser.process(app);
     const auto args = parser.positionalArguments();
 
