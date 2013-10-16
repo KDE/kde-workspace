@@ -1,5 +1,3 @@
-KDE4_NO_ENABLE_FINAL(styles)
-
 # needed for including kdecoration.h
 include_directories (
     ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/libkwineffects
