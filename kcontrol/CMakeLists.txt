@@ -33,7 +33,7 @@ add_subdirectory( colors )
 # add_subdirectory( krdb )
 add_subdirectory( style )
 # add_subdirectory( desktoptheme )
-# add_subdirectory( standard_actions )
+add_subdirectory( standard_actions )
 # add_subdirectory( keys )
 # add_subdirectory( workspaceoptions )
 
