@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 keys
+Exec=kcmshell5 keys
 Icon=preferences-desktop-keyboard-shortcut
 Type=Service
 X-KDE-ServiceTypes=KCModule
