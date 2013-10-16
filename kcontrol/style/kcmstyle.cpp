@@ -177,7 +177,7 @@ QString KCMStyle::defaultStyle()
 }
 
 KCMStyle::KCMStyle( QWidget* parent, const QVariantList& )
-    : KCModule( KCMStyleFactory::componentData(), parent ), appliedStyle(NULL)
+    : KCModule( parent ), appliedStyle(NULL)
 {
     setQuickHelp( i18n("<h1>Style</h1>"
             "This module allows you to modify the visual appearance "
@@ -313,7 +313,7 @@ void KCMStyle::styleSpecificConfig()
 {
     QString libname = styleEntries[currentStyle()]->configPage;
 
-    KLibrary library(libname, KCMStyleFactory::componentData());
+    KLibrary library(libname);
     if (!library.load()) {
         KMessageBox::detailedError(this,
             i18n("There was an error loading the configuration dialog for this style."),
@@ -445,7 +445,7 @@ void KCMStyle::save()
     if (previous == "InApplication" && style != "InApplication") {
         load = true;
         KNotification *notification = new KNotification("reload", 0);
-        notification->setComponentData(KComponentData("kcmstyle"));
+        notification->setComponentName(QStringLiteral("kcmstyle"));
         notification->setText(i18n("Settings changes will take effect only on application restart"));
         notification->sendEvent();
     }
