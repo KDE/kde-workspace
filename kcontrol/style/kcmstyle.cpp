@@ -27,7 +27,7 @@
 
 #include "kcmstyle.h"
 
-#ifdef Q_WS_X11
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include <config-X11.h>
 #endif
 
@@ -47,7 +47,7 @@
 #include <KColorScheme>
 #include <KStandardDirs>
 #include <knewstuff3/downloaddialog.h>
-#ifdef Q_WS_X11
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include <kdecoration.h>
 #endif
 
@@ -64,13 +64,13 @@
 #include <QtGui/QStyle>
 #include <QtDBus/QtDBus>
 
-#ifdef Q_WS_X11
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include <QX11Info>
 #endif
 
 #include "../krdb/krdb.h"
 
-#ifdef Q_WS_X11
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include <X11/Xlib.h>
 #endif
 
@@ -104,7 +104,7 @@ extern "C"
         runRdb( flags );
 
         // Write some Qt root property.
-#ifdef Q_WS_X11
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #ifndef __osf__      // this crashes under Tru64 randomly -- will fix later
         QByteArray properties;
         QDataStream d(&properties, QIODevice::WriteOnly);
@@ -438,7 +438,7 @@ void KCMStyle::save()
         notification->sendEvent();
     }
 
-#ifdef Q_WS_X11
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
     // If user select ButtonVertical, we add (if needed) a button to titlebar
     if (style == "ButtonVertical") {
         KConfig _kwinConfig("kwinrc", KConfig::NoGlobals);
@@ -503,7 +503,7 @@ void KCMStyle::save()
         // KApplication/KToolbar
         KGlobalSettings::self()->emitChange(KGlobalSettings::ToolbarStyleChanged);
 
-#ifdef Q_WS_X11
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
         // Send signal to all kwin instances
         QDBusMessage message =
         QDBusMessage::createSignal("/KWin", "org.kde.KWin", "reloadConfig");
