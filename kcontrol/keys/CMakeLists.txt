@@ -1,5 +1,3 @@
-kde4_no_enable_final(keys)
-
 ########### next target ###############
 
 set(kcm_keys_PART_SRCS
