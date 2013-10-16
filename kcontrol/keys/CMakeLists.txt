@@ -23,7 +23,15 @@ set_source_files_properties(${kglobalaccel_component_xml} PROPERTIES INCLUDE "kg
 qt4_add_dbus_interface(kdeui_LIB_SRCS ${kglobalaccel_component_xml} kglobalaccel_component_interface )
 
 kde4_add_plugin(kcm_keys ${kcm_keys_PART_SRCS})
-target_link_libraries(kcm_keys  ${KDE4_KDEUI_LIBS} KF5::KIOCore KF5::KIOWidgets ${X11_X11_LIB})
+target_link_libraries(kcm_keys
+    Qt5::DBus
+    KF5::KCMUtils
+    KF5::KI18n
+    KF5::KIconThemes
+    KF5::KIOWidgets
+    KF5::XmlGui
+    ${KDE4Support_LIBRARIES}
+)
 
 install(TARGETS kcm_keys  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
