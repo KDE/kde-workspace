@@ -60,7 +60,7 @@ static void dressUpAction(KAction *action, KStandardShortcut::StandardShortcut s
 StandardActionsModule::StandardActionsModule(
         QWidget *parent,
         const QVariantList &args )
-    : KCModule(StandardActionsModuleFactory::componentData(), parent, args )
+    : KCModule(parent, args )
       ,m_editor(NULL)
       ,m_actionCollection(NULL)
     {
@@ -102,7 +102,7 @@ void StandardActionsModule::load()
     // Create a collection to handle the shortcuts
     m_actionCollection = new KActionCollection(
             this,
-            StandardActionsModuleFactory::componentData());
+            QStringLiteral("kcm_standard_actions"));
 
     // Keeps track of which shortcut IDs have been added
     QSet<int> shortcutIdsAdded;
