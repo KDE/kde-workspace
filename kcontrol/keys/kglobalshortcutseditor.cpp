@@ -167,8 +167,8 @@ void KGlobalShortcutsEditor::KGlobalShortcutsEditorPrivate::initGUI()
 
     // Build the menu
     QMenu *menu = new QMenu(q);
-    menu->addAction( KIcon("document-import"), i18n("Import Scheme..."), q, SLOT(importScheme()));
-    menu->addAction( KIcon("document-export"), i18n("Export Scheme..."), q, SLOT(exportScheme()));
+    menu->addAction( QIcon::fromTheme("document-import"), i18n("Import Scheme..."), q, SLOT(importScheme()));
+    menu->addAction( QIcon::fromTheme("document-export"), i18n("Export Scheme..."), q, SLOT(exportScheme()));
     menu->addAction( i18n("Set All Shortcuts to None"), q, SLOT(clearConfiguration()));
     menu->addAction( KIcon("edit-delete"), i18n("Remove Component"), q, SLOT(removeComponent()));
 
