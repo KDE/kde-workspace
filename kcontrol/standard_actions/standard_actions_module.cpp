@@ -27,7 +27,7 @@
 #include <KShortcutsEditor>
 #include <KStandardAction>
 #include <KMessageBox>
-#include <KLocale>
+#include <KLocalizedString>
 
 #include <QVBoxLayout>
 #include <QSet>
