@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 style
+Exec=kcmshell5 style
 Icon=preferences-desktop-theme-style
 Type=Service
 X-KDE-ServiceTypes=KCModule,KCModuleInit
