@@ -21,7 +21,7 @@
 
 #include <KDE/KDebug>
 
-#include <QtGui/QCheckBox>
+#include <QCheckBox>
 
 
 ExportSchemeDialog::ExportSchemeDialog(QStringList components, QWidget *parent)

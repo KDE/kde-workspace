@@ -32,11 +32,11 @@
 #include <KDE/KShortcut>
 #include <KDE/KStringHandler>
 
-#include <QtGui/QStackedWidget>
-#include <QtGui/QMenu>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QStandardItemModel>
-#include <QtCore/QHash>
+#include <QStackedWidget>
+#include <QMenu>
+#include <QSortFilterProxyModel>
+#include <QStandardItemModel>
+#include <QHash>
 
 #include <QDBusConnection>
 #include <QDBusError>

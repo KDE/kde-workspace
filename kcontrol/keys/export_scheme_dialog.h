@@ -21,7 +21,7 @@
 
 #include "ui_export_scheme_dialog.h"
 
-#include <QtGui/QButtonGroup>
+#include <QButtonGroup>
 
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>

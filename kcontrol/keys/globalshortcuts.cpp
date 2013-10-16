@@ -26,7 +26,7 @@
 #include <KDE/KPluginFactory>
 
 
-#include <QtGui/QLayout>
+#include <QLayout>
 
 
 K_PLUGIN_FACTORY(GlobalShortcutsModuleFactory, registerPlugin<GlobalShortcutsModule>();)
