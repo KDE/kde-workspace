@@ -64,7 +64,7 @@ QStringList ExportSchemeDialog::selectedComponents() const
         if (button->isChecked())
             {
             // Remove the '&' added by KAcceleratorManager magically
-            rc.append(KGlobal::locale()->removeAcceleratorMarker(button->text()));
+            rc.append(KLocalizedString::removeAcceleratorMarker(button->text()));
             }
         }
     return rc;
