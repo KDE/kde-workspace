@@ -35,7 +35,7 @@
 K_PLUGIN_FACTORY(StandardActionsModuleFactory, registerPlugin<StandardActionsModule>();)
 K_EXPORT_PLUGIN(StandardActionsModuleFactory("kcm_standard_actions"))
 
-static void dressUpAction(KAction *action, KStandardShortcut::StandardShortcut shortcutId)
+static void dressUpAction(QAction *action, KStandardShortcut::StandardShortcut shortcutId)
     {
     // Remember the shortcutId so we know where to save changes.
     action->setData(shortcutId);
@@ -43,18 +43,13 @@ static void dressUpAction(KAction *action, KStandardShortcut::StandardShortcut s
     // hardcoded default and the user set shortcut. But action currently
     // only contain the active shortcuts as default shortcut. So we
     // have to fill it correctly
-    KShortcut hardcoded = KStandardShortcut::hardcodedDefaultShortcut(shortcutId);
-    KShortcut active    = KStandardShortcut::shortcut(shortcutId);
+    const auto hardcoded = KStandardShortcut::hardcodedDefaultShortcut(shortcutId);
+    const auto active    = KStandardShortcut::shortcut(shortcutId);
+
+    auto shortcuts = active;
+    shortcuts << hardcoded;
     // Set the hardcoded default shortcut as default shortcut
-    action->setShortcut(hardcoded, KAction::DefaultShortcut);
-    // Set the user defined values as active shortcuts. If the user only
-    // has overwritten the primary shortcut make sure the alternate one
-    // still get's shown
-    if (active.alternate()==QKeySequence())
-        {
-        active.setAlternate(hardcoded.alternate());
-        }
-    action->setShortcut(active, KAction::ActiveShortcut);
+    action->setShortcuts(shortcuts);
     }
 
 StandardActionsModule::StandardActionsModule(
@@ -118,7 +113,7 @@ void StandardActionsModule::load()
             continue;
             }
         // Create the action
-        KAction *action = KStandardAction::create(id, NULL, NULL, m_actionCollection);
+        QAction *action = KStandardAction::create(id, NULL, NULL, m_actionCollection);
         dressUpAction(action, shortcutId);
         shortcutIdsAdded << shortcutId;
         }
@@ -147,11 +142,9 @@ void StandardActionsModule::save()
 
     Q_FOREACH(QAction* action, m_actionCollection->actions())
         {
-        KAction *kaction = qobject_cast<KAction*>(action);
-
         KStandardShortcut::saveShortcut(
                 static_cast<KStandardShortcut::StandardShortcut>(action->data().toInt())
-                , kaction->shortcut());
+                , action->shortcuts());
         }
 
     KSharedConfig::openConfig()->sync();
