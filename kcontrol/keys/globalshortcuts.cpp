@@ -34,7 +34,7 @@ K_EXPORT_PLUGIN(GlobalShortcutsModuleFactory("kcmkeys"))
 
 
 GlobalShortcutsModule::GlobalShortcutsModule(QWidget *parent, const QVariantList &args)
- : KCModule(GlobalShortcutsModuleFactory::componentData(), parent, args),
+ : KCModule(parent, args),
    editor(0)
 {
     KCModule::setButtons(KCModule::Buttons(KCModule::Default | KCModule::Apply | KCModule::Help));

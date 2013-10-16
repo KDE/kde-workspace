@@ -609,7 +609,7 @@ bool KGlobalShortcutsEditor::KGlobalShortcutsEditorPrivate::loadComponent(const 
         // Create a action collection for our current component:context
         KActionCollection* col = new KActionCollection(
                 q,
-                KComponentData(componentContextId.toAscii()));
+                componentContextId);
 
         // Now add the shortcuts.
         Q_FOREACH (const KGlobalShortcutInfo &shortcut, shortcuts) {
