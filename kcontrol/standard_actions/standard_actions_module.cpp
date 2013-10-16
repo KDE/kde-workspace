@@ -154,8 +154,8 @@ void StandardActionsModule::save()
                 , kaction->shortcut());
         }
 
-    KGlobal::config()->sync();
-    KConfigGroup cg(KGlobal::config(), "Shortcuts");
+    KSharedConfig::openConfig()->sync();
+    KConfigGroup cg(KSharedConfig::openConfig(), "Shortcuts");
     cg.sync();
 
     QString title = i18n("Standard Actions successfully saved");
