@@ -149,8 +149,6 @@ private:
     KGlobalShortcutsEditorPrivate *const d;
 
     Q_DISABLE_COPY(KGlobalShortcutsEditor)
-
-    Q_PRIVATE_SLOT(d, void removeComponent())
 }; // class KGlobalShortcutsEditor
 
 #endif // KGLOBALSHORTCUTSEDITOR_H
