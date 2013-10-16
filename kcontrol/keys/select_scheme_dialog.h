@@ -34,7 +34,7 @@ public:
 
     KUrl selectedScheme() const;
 
-private slots:
+private Q_SLOTS:
     void schemeActivated(int index);
     void slotUrlChanged(const QString &);
 
