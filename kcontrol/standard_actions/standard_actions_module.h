@@ -35,7 +35,7 @@ public:
     /*reimp*/ void load();
     /*reimp*/ void defaults();
 
-private slots:
+private Q_SLOTS:
     void keyChanged();
 
 private:
