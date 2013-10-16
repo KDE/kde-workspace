@@ -64,7 +64,7 @@ SelectSchemeDialog::~SelectSchemeDialog()
 
 void SelectSchemeDialog::schemeActivated(int index)
 {
-    ui->m_url->setUrl(m_schemes[index]);
+    ui->m_url->setUrl(QUrl(m_schemes[index]));
 }
 
 
