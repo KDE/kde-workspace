@@ -16,8 +16,15 @@ kde4_add_ui_files(kcm_style_PART_SRCS stylepreview.ui finetuning.ui)
 
 kde4_add_plugin(kcm_style ${kcm_style_PART_SRCS})
 
-target_link_libraries(kcm_style KF5::KIOCore KF5::KIOWidgets ${X11_LIBRARIES}
-    ${KDE4_PLASMA_LIBS} ${KDE4_KNEWSTUFF3_LIBS})
+target_link_libraries(kcm_style
+    Qt5::DBus
+    KF5::KCMUtils
+    KF5::KCompletion
+    KF5::KI18n
+    KF5::KNotifications
+    KF5::Plasma
+    ${X11_LIBRARIES}
+    ${KDE4Support_LIBRARIES} ${KDE4_KNEWSTUFF3_LIBS})
 if(NOT WIN32)
     target_link_libraries(kcm_style kdecorations)
 endif(NOT WIN32)
