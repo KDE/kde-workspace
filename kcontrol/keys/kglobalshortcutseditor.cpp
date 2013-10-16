@@ -27,7 +27,6 @@
 #include <KDE/KActionCollection>
 #include <KDE/KConfig>
 #include <KDE/KDebug>
-#include <KDE/KFileDialog>
 #include <KDE/KGlobalAccel>
 #include <KDE/KIconLoader>
 #include <KDE/KMessageBox>
@@ -44,6 +43,7 @@
 #include <QDBusError>
 #include <QDBusReply>
 
+#include <QFileDialog>
 
 /*
  * README
@@ -358,7 +358,7 @@ void KGlobalShortcutsEditor::exportScheme()
         return;
     }
 
-    KUrl url = KFileDialog::getSaveFileName(KUrl(), "*.kksrc", this);
+    QUrl url = QFileDialog::getSaveFileUrl(this, QString(), QUrl(), QStringLiteral("*.kksrc"));
     if (!url.isEmpty()) {
         KConfig config(url.path(), KConfig::SimpleConfig);
         // TODO: Bug ossi to provide a method for this
