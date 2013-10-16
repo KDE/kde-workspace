@@ -609,7 +609,7 @@ bool KGlobalShortcutsEditor::KGlobalShortcutsEditorPrivate::loadComponent(const 
         Q_FOREACH (const KGlobalShortcutInfo &shortcut, shortcuts) {
 
             const QString &objectName = shortcut.uniqueName();
-            KAction *action = col->addAction(objectName);
+            QAction *action = col->addAction(objectName);
             action->setProperty("isConfigurationAction", QVariant(true)); // see KAction::~KAction
             action->setText(shortcut.friendlyName());
 
@@ -618,14 +618,14 @@ bool KGlobalShortcutsEditor::KGlobalShortcutsEditorPrivate::loadComponent(const 
             // Also actually loads the shortcut using the KAction::Autoloading mechanism.
             // Avoid setting the default shortcut; it would just be written to the global
             // configuration so we would not get the real one below.
-            action->setGlobalShortcut(KShortcut(), KAction::ActiveShortcut);
+            KGlobalAccel::self()->setShortcut(action, QList<QKeySequence>());
 
             // The default shortcut will never be loaded because it's pointless in a real
             // application. There are no scarce resources [i.e. physical keys] to manage
             // so applications can set them at will and there's no autoloading.
             QList<QKeySequence> sc = shortcut.defaultKeys();
             if (sc.count()>0) {
-                action->setGlobalShortcut(KShortcut(sc[0]), KAction::DefaultShortcut);
+                KGlobalAccel::self()->setDefaultShortcut(action, sc);
             }
         } // Q_FOREACH(shortcut)
 
