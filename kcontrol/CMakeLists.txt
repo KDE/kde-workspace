@@ -34,7 +34,7 @@ add_subdirectory( colors )
 add_subdirectory( style )
 # add_subdirectory( desktoptheme )
 add_subdirectory( standard_actions )
-# add_subdirectory( keys )
+add_subdirectory( keys )
 # add_subdirectory( workspaceoptions )
 
 # TODO needs porting
