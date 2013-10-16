@@ -64,6 +64,9 @@
 #include <QStyle>
 #include <QtDBus/QtDBus>
 
+#include <KDE/KGlobal>
+#include <KDE/KGlobalSettings>
+
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include <QX11Info>
 #endif
@@ -84,6 +87,7 @@
 
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
+#include <kdemacros.h>
 
 K_PLUGIN_FACTORY(KCMStyleFactory, registerPlugin<KCMStyle>();)
 K_EXPORT_PLUGIN(KCMStyleFactory("kcmstyle"))

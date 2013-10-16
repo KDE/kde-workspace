@@ -19,7 +19,7 @@
  */
 
 #include "styleconfdialog.h"
-#include <klocale.h>
+#include <KLocalizedString>
 
 StyleConfigDialog::StyleConfigDialog(QWidget* parent, QString styleName)
   : KDialog( parent )
