@@ -65,6 +65,8 @@ public:
     virtual void save();
     virtual void defaults();
 
+    static QString defaultStyle();
+
 protected:
     bool findStyle( const QString& str, int& combobox_item );
     void switchStyle(const QString& styleName, bool force = false);

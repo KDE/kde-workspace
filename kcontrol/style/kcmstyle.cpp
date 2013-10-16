@@ -163,6 +163,14 @@ public:
     }
 };
 
+QString KCMStyle::defaultStyle()
+{
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+    return QStringLiteral("oxygen");
+#else
+    return QString(); // native style
+#endif
+}
 
 KCMStyle::KCMStyle( QWidget* parent, const QVariantList& )
     : KCModule( KCMStyleFactory::componentData(), parent ), appliedStyle(NULL)
@@ -546,7 +554,7 @@ void KCMStyle::defaults()
     int item = 0;
     bool found;
 
-    found = findStyle( KStyle::defaultStyle(), item );
+    found = findStyle( defaultStyle(), item );
     if (!found)
         found = findStyle( "plastique", item );
     if (!found)
@@ -659,7 +667,7 @@ void KCMStyle::loadStyle( KConfig& config )
 
     // Find out which style is currently being used
     KConfigGroup configGroup = config.group( "General" );
-    QString defaultStyle = KStyle::defaultStyle();
+    QString defaultStyle = KCMStyle::defaultStyle();
     QString cfgStyle = configGroup.readEntry( "widgetStyle", defaultStyle );
 
     // Select the current style
