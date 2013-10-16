@@ -52,16 +52,16 @@
 #endif
 
 
-#include <QtCore/QFile>
-#include <QtCore/QSettings>
-#include <QtGui/QAbstractItemView>
-#include <QtGui/QLabel>
-#include <QtGui/QPainter>
-#include <QtGui/QPixmapCache>
-#include <QtGui/QStyleFactory>
-#include <QtGui/QFormLayout>
-#include <QtGui/QStandardItemModel>
-#include <QtGui/QStyle>
+#include <QFile>
+#include <QSettings>
+#include <QAbstractItemView>
+#include <QLabel>
+#include <QPainter>
+#include <QPixmapCache>
+#include <QStyleFactory>
+#include <QFormLayout>
+#include <QStandardItemModel>
+#include <QStyle>
 #include <QtDBus/QtDBus>
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
