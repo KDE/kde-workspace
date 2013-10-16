@@ -22,6 +22,8 @@
 #include "KDialog"
 #include "KStandardDirs"
 #include <KLineEdit>
+#include <KConfig>
+#include <KGlobal>
 
 SelectSchemeDialog::SelectSchemeDialog(QWidget *parent)
  : KDialog(parent),

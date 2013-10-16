@@ -25,9 +25,11 @@
 #include "kglobalaccel_component_interface.h"
 
 #include <KDE/KActionCollection>
+#include <KDE/KConfig>
 #include <KDE/KDebug>
 #include <KDE/KFileDialog>
 #include <KDE/KGlobalAccel>
+#include <KDE/KIconLoader>
 #include <KDE/KMessageBox>
 #include <KDE/KShortcut>
 #include <KDE/KStringHandler>
