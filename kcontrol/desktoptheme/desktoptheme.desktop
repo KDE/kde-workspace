@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 desktoptheme
+Exec=kcmshell5 desktoptheme
 Icon=preferences-desktop
 Type=Service
 
