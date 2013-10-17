@@ -43,7 +43,7 @@ K_EXPORT_PLUGIN(LaunchFactory("kcmlaunch"))
 
 
 LaunchConfig::LaunchConfig(QWidget * parent, const QVariantList &)
-  : KCModule(LaunchFactory::componentData(), parent)
+  : KCModule(parent)
 {
     QVBoxLayout* Form1Layout = new QVBoxLayout( this );
     Form1Layout->setMargin( 0 );
