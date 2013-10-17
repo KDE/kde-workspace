@@ -151,7 +151,7 @@
          <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="clickMessage">
+         <property name="placeholderText">
           <string>Search</string>
          </property>
         </widget>
