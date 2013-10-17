@@ -29,7 +29,7 @@ K_EXPORT_PLUGIN(CursorThemeConfigFactory("kcm_cursortheme", "kcminput"))
 
 
 CursorThemeConfig::CursorThemeConfig(QWidget *parent, const QVariantList &args)
-    : KCModule(CursorThemeConfigFactory::componentData(), parent, args)
+    : KCModule(parent, args)
 {
     QLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
