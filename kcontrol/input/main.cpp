@@ -26,6 +26,7 @@
 #include <klocale.h>
 #include <kglobal.h>
 #include <kconfig.h>
+#include <kdemacros.h>
 #include <QFile>
 
 #include "mouse.h"
