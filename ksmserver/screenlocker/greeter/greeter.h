@@ -51,9 +51,6 @@ public Q_SLOTS:
     void verify();
     void clear();
 
-private Q_SLOTS:
-    void themeChanged();
-
 Q_SIGNALS:
     void greeterFailed();
     void greeterReady();
@@ -75,9 +72,6 @@ class KeyboardItem : public QDeclarativeItem
 public:
     KeyboardItem(QDeclarativeItem *parent = NULL);
     virtual ~KeyboardItem();
-
-private Q_SLOTS:
-    void themeChanged();
 
 private:
     QWidget *m_widget;

@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KPluginFactory>
 #include <KDE/KPluginLoader>
 #include <KDE/KStandardDirs>
+#include <KDE/KLocalizedString>
 
 // Qt
 #include <QtCore/QFile>
@@ -38,8 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QTimer>
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeEngine>
-#include <QtGui/QGraphicsProxyWidget>
-#include <QtGui/QLineEdit>
+#include <QGraphicsProxyWidget>
+#include <QLineEdit>
 
 // kscreenlocker stuff
 #include <ctype.h>
@@ -82,8 +83,6 @@ void GreeterItem::init()
     }
     m_widget = m_unlocker->greeterWidget();
     
-    themeChanged();
-    connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()), this, SLOT(themeChanged()));
 #ifndef SHOW_GREETER_BACKGROUND
     m_widget->setAttribute(Qt::WA_TranslucentBackground);
 #endif
@@ -99,14 +98,6 @@ void GreeterItem::init()
     connect(m_unlocker, SIGNAL(greeterAccepted()), this, SIGNAL(greeterAccepted()));
     setWidth(m_proxy->size().width());
     setHeight(m_proxy->size().height());
-}
-
-void GreeterItem::themeChanged()
-{
-    QPalette p = m_widget->palette();
-    p.setColor(QPalette::WindowText,
-               Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor));
-    m_widget->setPalette(p);
 }
 
 void GreeterItem::verify()
@@ -142,8 +133,6 @@ KeyboardItem::KeyboardItem(QDeclarativeItem *parent)
         kDebug() << "can't load keyboard layout widget library";
     }
 
-    themeChanged();
-    connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()), this, SLOT(themeChanged()));
     m_proxy->setWidget(m_widget);
 
     setWidth(m_proxy->size().width());
@@ -152,14 +141,6 @@ KeyboardItem::KeyboardItem(QDeclarativeItem *parent)
 
 KeyboardItem::~KeyboardItem()
 {
-}
-
-void KeyboardItem::themeChanged()
-{
-    QPalette p = m_widget->palette();
-    p.setColor(QPalette::WindowText,
-               Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor));
-    m_widget->setPalette(p);
 }
 
 Greeter::Greeter(QObject *parent)
