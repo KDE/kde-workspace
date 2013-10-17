@@ -46,14 +46,14 @@ public:
 
     QStringList listPathName() const { return m_pathName;}
 
-public slots:
+public Q_SLOTS:
     void slotChangeStartup( ScriptStartItem* item, int index );
 
 protected:
     void addItem(DesktopStartItem *item, const QString& name, const QString& run, const QString& command, bool disabled );
     void addItem(ScriptStartItem *item, const QString& name, const QString& command, ScriptStartItem::ENV type );
 
-private slots:
+private Q_SLOTS:
     void slotAddProgram();
     void slotAddScript();
     void slotRemoveCMD();

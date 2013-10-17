@@ -61,10 +61,10 @@ public:
 
     void changeStartup( ScriptStartItem::ENV type );
 
-signals:
+Q_SIGNALS:
     void askChangeStartup(ScriptStartItem* item, int index);
 
-private slots:
+private Q_SLOTS:
 
     void slotStartupChanged(int index);
 

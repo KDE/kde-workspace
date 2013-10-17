@@ -38,14 +38,14 @@ public:
     KUrl importUrl() const;
     bool symLink() const;
 
-public slots:
+public Q_SLOTS:
     // reimplemented
     virtual void accept();
 
 protected:
     virtual bool doBasicSanityCheck();
 
-private slots:
+private Q_SLOTS:
     void textChanged(const QString &text);
 
 private:
