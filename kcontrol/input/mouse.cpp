@@ -375,16 +375,16 @@ MouseConfig::MouseConfig(QWidget *parent, const QVariantList &args)
 
 #endif
 
-  KAboutData* about = new KAboutData("kcmmouse", 0, ki18n("Mouse"), 0, KLocalizedString(),
-        KAboutData::License_GPL, ki18n("(c) 1997 - 2005 Mouse developers"));
-  about->addAuthor(ki18n("Patrick Dowler"));
-  about->addAuthor(ki18n("Dirk A. Mueller"));
-  about->addAuthor(ki18n("David Faure"));
-  about->addAuthor(ki18n("Bernd Gehrmann"));
-  about->addAuthor(ki18n("Rik Hemsley"));
-  about->addAuthor(ki18n("Brad Hughes"));
-  about->addAuthor(ki18n("Ralf Nolden"));
-  about->addAuthor(ki18n("Brad Hards"));
+  KAboutData* about = new KAboutData(QStringLiteral("kcmmouse"), QString(), i18n("Mouse"), QString(), QString(),
+        KAboutData::License_GPL, i18n("(c) 1997 - 2005 Mouse developers"));
+  about->addAuthor(i18n("Patrick Dowler"));
+  about->addAuthor(i18n("Dirk A. Mueller"));
+  about->addAuthor(i18n("David Faure"));
+  about->addAuthor(i18n("Bernd Gehrmann"));
+  about->addAuthor(i18n("Rik Hemsley"));
+  about->addAuthor(i18n("Brad Hughes"));
+  about->addAuthor(i18n("Ralf Nolden"));
+  about->addAuthor(i18n("Brad Hards"));
   setAboutData( about );
 }
 
