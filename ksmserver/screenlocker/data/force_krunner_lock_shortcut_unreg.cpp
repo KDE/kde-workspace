@@ -24,9 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main( int argc, char* argv[] )
 {
-    QDBusInterface accelIface("org.kde.kglobalaccel", "/kglobalaccel", "org.kde.KGlobalAccel");
+    QDBusInterface accelIface(QStringLiteral("org.kde.kglobalaccel"), QStringLiteral("/kglobalaccel"), QStringLiteral("org.kde.KGlobalAccel"));
     QStringList krunnerShortcutId;
-    krunnerShortcutId << QLatin1String("krunner") << QLatin1String("Lock Session") << "" << "";
+    krunnerShortcutId << QLatin1String("krunner") << QLatin1String("Lock Session") << QString() << QString();
     /*
     QDBusReply<QList<int> > reply = accelIface.call("shortcut", krunnerShortcutId);
     int shortcut = -1;
@@ -34,5 +34,5 @@ int main( int argc, char* argv[] )
         shortcut = reply.value().at(0);
     }
     */
-    accelIface.call(QDBus::NoBlock, "unRegister", krunnerShortcutId);
+    accelIface.call(QDBus::NoBlock, QStringLiteral("unRegister"), krunnerShortcutId);
 }
