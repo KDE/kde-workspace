@@ -16,9 +16,11 @@
 #include <QDir>
 #include <QTextStream>
 
+#include <KConfigGroup>
 #include <KDesktopFile>
 #include <KFileDialog>
 #include <KMessageBox>
+#include <KSharedConfig>
 #include <KStandardDirs>
 #include <KZip>
 #include <kio/netaccess.h>

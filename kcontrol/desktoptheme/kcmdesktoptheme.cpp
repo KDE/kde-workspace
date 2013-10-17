@@ -32,6 +32,7 @@
 
 #include <kaboutdata.h>
 #include <kautostart.h>
+#include <KGlobal>
 #include <KStandardDirs>
 #include <knewstuff3/downloaddialog.h>
 
