@@ -30,7 +30,7 @@ endif(NOT WIN32)
 
 # add_subdirectory( launch )
 add_subdirectory( colors )
-# add_subdirectory( krdb )
+add_subdirectory( krdb )
 add_subdirectory( style )
 # add_subdirectory( desktoptheme )
 add_subdirectory( standard_actions )

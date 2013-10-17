@@ -21,10 +21,10 @@
 
 */
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDir>
-#include <QtCore/QSettings>
-#include <QtCore/QStringList>
+#include <QCoreApplication>
+#include <QDir>
+#include <QSettings>
+#include <QStringList>
 #include <kcomponentdata.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
