@@ -32,7 +32,7 @@
 #define __MOUSECONFIG_H__
 
 #include <QLabel>
-#include <QtGui/QLCDNumber>
+#include <QLCDNumber>
 #include <QPushButton>
 #include <QRadioButton>
 
