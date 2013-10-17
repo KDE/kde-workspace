@@ -24,7 +24,7 @@ if(NOT WIN32)
 add_subdirectory( input )
 # add_subdirectory( access )
 # add_subdirectory( screensaver )
-# add_subdirectory( dateandtime )
+add_subdirectory( dateandtime )
 add_subdirectory( autostart )
 endif(NOT WIN32)
 
