@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 mouse
+Exec=kcmshell5 mouse
 Icon=preferences-desktop-mouse
 Type=Service
 X-KDE-ServiceTypes=KCModule,KCModuleInit
