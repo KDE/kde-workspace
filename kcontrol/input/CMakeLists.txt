@@ -36,6 +36,7 @@ else(X11_Xcursor_FOUND)
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/core/ )
 endif(X11_Xcursor_FOUND)
 
+set(klauncher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
 
 
 ########### next target ###############
@@ -60,6 +61,7 @@ set(kcm_input_PART_SRCS mouse.cpp main.cpp logitechmouse.cpp)
 
 
 kde4_add_ui_files(kcm_input_PART_SRCS kmousedlg.ui logitechmouse_base.ui )
+qt5_add_dbus_interface(kcm_input_PART_SRCS ${klauncher_xml} klauncher_iface)
 
 kde4_add_plugin(kcm_input ${kcm_input_PART_SRCS})
 

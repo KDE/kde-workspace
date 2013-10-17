@@ -32,7 +32,6 @@
 #include "mouse.h"
 #include <QX11Info>
 
-#include <ktoolinvocation.h>
 #include <klauncher_iface.h>
 
 #include <X11/Xlib.h>
@@ -78,10 +77,13 @@ extern "C"
 
     // Tell klauncher to set the XCURSOR_THEME and XCURSOR_SIZE environment
     // variables when launching applications.
+    OrgKdeKLauncherInterface klauncher(QStringLiteral("org.kde.KLauncher"),
+                                       QStringLiteral("/KLauncher"),
+                                       QDBusConnection::sessionBus());
     if(!theme.isEmpty())
-       KToolInvocation::klauncher()->setLaunchEnv("XCURSOR_THEME", theme);
+        klauncher.setLaunchEnv(QStringLiteral("XCURSOR_THEME"), theme);
     if( !size.isEmpty())
-       KToolInvocation::klauncher()->setLaunchEnv("XCURSOR_SIZE", size);
+        klauncher.setLaunchEnv(QStringLiteral("XCURSOR_SIZE"), size);
 
 #endif
 
