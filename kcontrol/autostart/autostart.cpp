@@ -49,7 +49,7 @@ K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
     K_EXPORT_PLUGIN(AutostartFactory( "kcmautostart", "kcm_autostart" ))
 
     Autostart::Autostart( QWidget* parent, const QVariantList& )
-        : KCModule( AutostartFactory::componentData(), parent )
+        : KCModule(parent )
 {
     widget = new Ui_AutostartConfig();
     widget->setupUi(this);
