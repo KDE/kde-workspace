@@ -48,13 +48,13 @@ KclockModule::KclockModule(QWidget *parent, const QVariantList &)
   : KCModule(parent/*, name*/)
 {
   KAboutData *about =
-  new KAboutData(I18N_NOOP("kcmclock"), 0, ki18n("KDE Clock Control Module"),
-                  0, KLocalizedString(), KAboutData::License_GPL,
-                  ki18n("(c) 1996 - 2001 Luca Montecchiani"));
+  new KAboutData(I18N_NOOP("kcmclock"), QString(), i18n("KDE Clock Control Module"),
+                  QString(), QString(), KAboutData::License_GPL,
+                  i18n("(c) 1996 - 2001 Luca Montecchiani"));
 
-  about->addAuthor(ki18n("Luca Montecchiani"), ki18n("Original author"), "m.luca@usa.net");
-  about->addAuthor(ki18n("Paul Campbell"), ki18n("Current Maintainer"), "paul@taniwha.com");
-  about->addAuthor(ki18n("Benjamin Meyer"), ki18n("Added NTP support"), "ben+kcmclock@meyerhome.net");
+  about->addAuthor(i18n("Luca Montecchiani"), i18n("Original author"), QStringLiteral("m.luca@usa.net"));
+  about->addAuthor(i18n("Paul Campbell"), i18n("Current Maintainer"), QStringLiteral("paul@taniwha.com"));
+  about->addAuthor(i18n("Benjamin Meyer"), i18n("Added NTP support"), QStringLiteral("ben+kcmclock@meyerhome.net"));
   setAboutData( about );
   setQuickHelp( i18n("<h1>Date & Time</h1> This control module can be used to set the system date and"
     " time. As these settings do not only affect you as a user, but rather the whole system, you"
