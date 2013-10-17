@@ -66,7 +66,15 @@ qt5_add_dbus_interface(kcm_input_PART_SRCS ${klauncher_xml} klauncher_iface)
 kde4_add_plugin(kcm_input ${kcm_input_PART_SRCS})
 
 
-target_link_libraries(kcm_input KF5::KIOCore KF5::KIOWidgets ${X11_LIBRARIES})
+target_link_libraries(kcm_input
+    Qt5::DBus
+    Qt5::X11Extras
+    KF5::KCMUtils
+    KF5::KI18n
+    KF5::KIOCore
+    KF5::KIOWidgets
+    ${KDE4Support_LIBRARIES}
+    ${X11_LIBRARIES})
 if (LIBUSB_FOUND)
    target_link_libraries(kcm_input ${LIBUSB_LIBRARIES})
 endif (LIBUSB_FOUND)
