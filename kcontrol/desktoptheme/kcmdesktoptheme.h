@@ -34,6 +34,11 @@
 
 class ThemeModel;
 
+namespace Plasma
+{
+    class Theme;
+}
+
 class KCMDesktopTheme : public KCModule, public Ui::DesktopTheme
 {
     Q_OBJECT
@@ -62,6 +67,7 @@ private:
     bool m_bDetailsDirty;
 
     ThemeModel* m_themeModel;
+    Plasma::Theme *m_defaultTheme;
 
     bool m_isNetbook;
 };

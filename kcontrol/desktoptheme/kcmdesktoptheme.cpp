@@ -49,6 +49,7 @@ K_EXPORT_PLUGIN(KCMDesktopThemeFactory("kcmdesktoptheme","kcm_desktopthemedetail
 
 KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
     : KCModule( parent )
+    , m_defaultTheme(new Plasma::Theme(this))
 {
     setQuickHelp( i18n("<h1>Desktop Theme</h1>"
             "This module allows you to modify the visual appearance "
@@ -121,7 +122,7 @@ void KCMDesktopTheme::save()
             KConfigGroup cg(KSharedConfig::openConfig("plasmarc"), "Theme-plasma-netbook");
             cg.writeEntry("name", theme);
         } else {
-            Plasma::Theme::defaultTheme()->setThemeName(theme);
+            m_defaultTheme->setThemeName(theme);
         }
     }
 
@@ -167,7 +168,7 @@ void KCMDesktopTheme::loadDesktopTheme()
         KConfigGroup cg(KSharedConfig::openConfig("plasmarc"), "Theme-plasma-netbook");
         themeName = cg.readEntry("name", "air-netbook");
     } else {
-        themeName = Plasma::Theme::defaultTheme()->themeName();
+        themeName = m_defaultTheme->themeName();
     }
     m_theme->setCurrentIndex(m_themeModel->indexOf(themeName));
     QApplication::restoreOverrideCursor();
