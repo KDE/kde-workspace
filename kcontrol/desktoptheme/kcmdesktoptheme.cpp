@@ -75,7 +75,7 @@ KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
     about->addAuthor(ki18n("Ralf Nolden"), KLocalizedString(), "nolden@kde.org");
     setAboutData( about );
 
-    m_newThemeButton->setIcon(KIcon("get-hot-new-stuff"));
+    m_newThemeButton->setIcon(QIcon::fromTheme("get-hot-new-stuff"));
 
     m_themeModel = new ThemeModel(this);
     m_theme->setModel(m_themeModel);

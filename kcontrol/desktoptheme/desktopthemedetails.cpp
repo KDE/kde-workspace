@@ -59,7 +59,7 @@ DesktopThemeDetails::DesktopThemeDetails(QWidget* parent)
       m_themeModel(0)
 
 {
-    setWindowIcon(KIcon("preferences-desktop"));
+    setWindowIcon(QIcon::fromTheme("preferences-desktop"));
     setupUi(this);
 
     QFont font = QFont();
@@ -385,7 +385,7 @@ void DesktopThemeDetails::loadThemeItems()
         i.next();
         displayedItem = displayedItemText(i.value());
         m_themeItemList->setItem(i.value(), 0, new QTableWidgetItem(displayedItem));
-        m_themeItemList->item(i.value(),0)->setIcon(KIcon(m_itemIcons[i.value()]));
+        m_themeItemList->item(i.value(),0)->setIcon(QIcon::fromTheme(m_itemIcons[i.value()]));
         m_themeItemList->setCellWidget(i.value(), 1, new QComboBox());
         updateReplaceItemList(i.value());
         m_themeItemList->resizeColumnToContents(1);
