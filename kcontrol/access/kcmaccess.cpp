@@ -166,11 +166,11 @@ KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
 {
 
   KAboutData *about =
-  new KAboutData(I18N_NOOP("kaccess"), 0, ki18n("KDE Accessibility Tool"),
-                 0, KLocalizedString(), KAboutData::License_GPL,
-                 ki18n("(c) 2000, Matthias Hoelzer-Kluepfel"));
+  new KAboutData(I18N_NOOP("kaccess"), QString(), i18n("KDE Accessibility Tool"),
+                 QString(), QString(), KAboutData::License_GPL,
+                 i18n("(c) 2000, Matthias Hoelzer-Kluepfel"));
 
-  about->addAuthor(ki18n("Matthias Hoelzer-Kluepfel"), ki18n("Author") , "hoelzer@kde.org");
+  about->addAuthor(i18n("Matthias Hoelzer-Kluepfel"), i18n("Author") , QStringLiteral("hoelzer@kde.org"));
 
   setAboutData( about );
 

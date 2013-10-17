@@ -1,13 +1,13 @@
 
 #include "kaccess.h"
 #include <kdebug.h>
-#include <kaboutdata.h>
+#include <k4aboutdata.h>
 #include <kcmdlineargs.h>
 #include <klocale.h>
 extern "C" KDE_EXPORT int kdemain(int argc, char * argv[] )
 {
-  KAboutData about(I18N_NOOP("kaccess"), 0, ki18n("KDE Accessibility Tool"),
-                  0, KLocalizedString(), KAboutData::License_GPL,
+  K4AboutData about(I18N_NOOP("kaccess"), 0, ki18n("KDE Accessibility Tool"),
+                  0, KLocalizedString(), K4AboutData::License_GPL,
                   ki18n("(c) 2000, Matthias Hoelzer-Kluepfel"));
 
   about.addAuthor(ki18n("Matthias Hoelzer-Kluepfel"), ki18n("Author") , "hoelzer@kde.org");
