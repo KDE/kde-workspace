@@ -5,6 +5,7 @@
  *
  */
 
+#include "kcmaccess.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -15,14 +16,15 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QRadioButton>
-#include <QtGui/QX11Info>
+#include <QX11Info>
 #include <QtDBus/QtDBus>
 
 //Added by qt3to4:
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
-#include <klocale.h>
+#include <QFileDialog>
+#include <KLocalizedString>
 
 #include <KPluginFactory>
 #include <kcombobox.h>
@@ -34,6 +36,9 @@
 #include <kshortcut.h>
 #include <knotifyconfigwidget.h>
 #include <kkeyserver.h>
+#include <kdemacros.h>
+#include <KConfigGroup>
+#include <KGlobal>
 
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
@@ -41,8 +46,6 @@
 #define XK_XKB_KEYS
 #include <X11/keysymdef.h>
 #include <ktoolinvocation.h>
-
-#include "kcmaccess.moc"
 
 K_PLUGIN_FACTORY(KAccessConfigFactory, registerPlugin<KAccessConfig>();)
 K_EXPORT_PLUGIN(KAccessConfigFactory("kcmaccess"))
@@ -779,4 +782,5 @@ extern "C"
   }
 }
 
+#include "kcmaccess.moc"
 

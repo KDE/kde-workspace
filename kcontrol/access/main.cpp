@@ -3,7 +3,10 @@
 #include <kdebug.h>
 #include <k4aboutdata.h>
 #include <kcmdlineargs.h>
-#include <klocale.h>
+#include <KLocalizedString>
+#include <kdemacros.h>
+#include <QX11Info>
+
 extern "C" KDE_EXPORT int kdemain(int argc, char * argv[] )
 {
   K4AboutData about(I18N_NOOP("kaccess"), 0, ki18n("KDE Accessibility Tool"),

@@ -1,11 +1,12 @@
 #include <unistd.h>
 
+#include "kaccess.h"
 
 #include <QTimer>
 #include <QPainter>
 
 #include <QLabel>
-#include <QtGui/QDesktopWidget>
+#include <QDesktopWidget>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -18,7 +19,7 @@
 #include <KNotification>
 #include <KConfig>
 #include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 #include <netwm.h>
 #include <KShortcut>
 #include <kwindowsystem.h>
@@ -29,8 +30,6 @@
 #define XK_XKB_KEYS
 #include <X11/keysymdef.h>
 
-
-#include "kaccess.moc"
 #include <QX11Info>
 #include <kvbox.h>
 
@@ -918,3 +917,5 @@ void KAccessApp::dialogClosed() {
 void KAccessApp::setXkbOpcode(int opcode) {
    xkb_opcode = opcode;
 }
+
+#include "kaccess.moc"

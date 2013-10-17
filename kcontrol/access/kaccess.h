@@ -18,6 +18,7 @@
 #define explicit int_explicit        // avoid compiler name clash in XKBlib.h
 #include <X11/XKBlib.h>
 #undef explicit
+#include <fixx11h.h>
 
 class KDialog;
 class QLabel;
