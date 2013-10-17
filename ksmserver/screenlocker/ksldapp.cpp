@@ -38,10 +38,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KProcess>
 #include <KDE/KStandardDirs>
 // Qt
-#include <QtCore/QTimer>
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QX11Info>
+#include <QTimer>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QProcess>
+// #include <QX11Info>
 // X11
 #include <X11/Xlib.h>
 // other
