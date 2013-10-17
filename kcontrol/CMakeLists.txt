@@ -20,7 +20,7 @@ set(libkxftconfig_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/fonts/kxftconfig.cpp )
 # endif(X11_Xkb_FOUND)
 
 if(NOT WIN32)
-# add_subdirectory( bell )
+add_subdirectory( bell )
 add_subdirectory( input )
 # add_subdirectory( access )
 # add_subdirectory( screensaver )
