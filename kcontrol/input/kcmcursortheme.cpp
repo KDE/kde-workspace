@@ -20,6 +20,7 @@
 
 #include <KDE/KAboutData>
 #include <KDE/KPluginFactory>
+#include <KDE/KLocalizedString>
 
 K_PLUGIN_FACTORY(CursorThemeConfigFactory,
     registerPlugin<CursorThemeConfig>();

@@ -21,7 +21,7 @@
 
 #include <QPushButton>
 #include <QWidget>
-#include <QtGui/QProgressBar>
+#include <QProgressBar>
 #include <QTimer>
 
 #include <kdebug.h>

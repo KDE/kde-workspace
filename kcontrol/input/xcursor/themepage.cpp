@@ -19,6 +19,7 @@
 #include <config-X11.h>
 
 #include <KConfig>
+#include <KConfigGroup>
 #include <KLocale>
 #include <KStandardDirs>
 
@@ -28,7 +29,7 @@
 #include <KUrlRequesterDialog>
 #include <KIO/Job>
 #include <KIO/DeleteJob>
-#include <KIO/NetAccess>
+#include <kio/netaccess.h>
 #include <knewstuff3/downloaddialog.h>
 
 
