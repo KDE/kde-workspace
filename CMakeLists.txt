@@ -277,7 +277,7 @@ endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 if(NOT WIN32)
    ecm_optional_add_subdirectory( kcheckpass )
   ecm_optional_add_subdirectory( kwin )
-#    macro_optional_add_subdirectory( ksmserver )
+  ecm_optional_add_subdirectory( ksmserver )
 #
    find_package(JPEG REQUIRED)
    find_package(PNG REQUIRED)
