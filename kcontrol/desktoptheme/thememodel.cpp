@@ -27,9 +27,9 @@
 
 #include "thememodel.h"
 
-#include <QtGui/QApplication>
-#include <QtCore/QFile>
-#include <QtGui/QPainter>
+#include <QApplication>
+#include <QFile>
+#include <QPainter>
 
 #include <KDesktopFile>
 #include <KColorScheme>

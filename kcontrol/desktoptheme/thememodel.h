@@ -28,7 +28,7 @@
 #ifndef THEMEMODEL_H
 #define THEMEMODEL_H
 
-#include <QtGui/QAbstractItemView>
+#include <QAbstractItemView>
 
 namespace Plasma
 {

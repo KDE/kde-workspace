@@ -13,7 +13,7 @@
 
 #include "ui_DesktopThemeDetails.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 class ThemeModel;
 

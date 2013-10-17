@@ -12,9 +12,9 @@
 
 #include "thememodel.h"
 
-#include <QtGui/QComboBox>
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
+#include <QComboBox>
+#include <QDir>
+#include <QTextStream>
 
 #include <KDesktopFile>
 #include <KFileDialog>
