@@ -35,16 +35,17 @@
 #include <kconfig.h>
 #include <kdialog.h>
 #include <knotification.h>
-#include <klocale.h>
+#include <KLocalizedString>
 #include <knuminput.h>
 
 #include "bell.h"
-#include "bell.moc"
 
 #include <X11/Xlib.h>
+#include <fixx11h.h>
 #include <QX11Info>
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
+#include <kdemacros.h>
 
 
 
@@ -251,3 +252,5 @@ void KBellConfig::useBell( bool on )
   m_testButton->setEnabled( on );
   changed();
 }
+
+#include "bell.moc"
