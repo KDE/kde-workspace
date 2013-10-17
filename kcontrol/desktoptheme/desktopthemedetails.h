@@ -26,7 +26,7 @@ public:
 
     void reloadConfig();
 
-public slots:
+public Q_SLOTS:
     void replacementItemChanged();
     void resetThemeDetails();
     void toggleAdvancedVisible();
@@ -46,7 +46,7 @@ private:
     void clearCustomized(const QString& themeRoot);
     void setDesktopTheme(QString themeRoot);
 
-private slots:
+private Q_SLOTS:
     void cleanup();
     void themeSelectionChanged(const QItemSelection newSelection, const QItemSelection oldSelection);
 
