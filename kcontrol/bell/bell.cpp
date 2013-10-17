@@ -83,6 +83,7 @@ KBellConfig::KBellConfig(QWidget *parent, const QVariantList &args):
 
   QGroupBox *box = new QGroupBox(i18n("Bell Settings"), this );
   QFormLayout *form = new QFormLayout();
+  form->setVerticalSpacing(0);
   box->setLayout(form);
   layout->addWidget(box);
 
