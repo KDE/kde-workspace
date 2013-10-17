@@ -95,7 +95,19 @@ set(kcm_cursortheme_PART_SRCS kcmcursortheme.cpp ${libnoinst_SRCS})
 kde4_add_plugin(kcm_cursortheme ${kcm_cursortheme_PART_SRCS})
 
 
-target_link_libraries(kcm_cursortheme KF5::KIOCore KF5::KIOWidgets ${KDE4_KNEWSTUFF3_LIBS} ${X11_LIBRARIES})
+target_link_libraries(kcm_cursortheme
+    Qt5::DBus
+    Qt5::X11Extras
+    KF5::KArchive
+    KF5::KCMUtils
+    KF5::KI18n
+    KF5::KIOCore
+    KF5::KIOWidgets
+    ${KDE4Support_LIBRARIES}
+    ${KDE4_KNEWSTUFF3_LIBS}
+    ${X11_LIBRARIES}
+    ${XCB_XCB_LIBRARY}
+)
 
 if (X11_Xcursor_FOUND)
    target_link_libraries(kcm_cursortheme ${X11_Xcursor_LIB})
