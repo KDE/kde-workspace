@@ -31,7 +31,9 @@ public:
 
   explicit KAccessApp(bool allowStyles=true, bool GUIenabled=true);
 
+#if 0
   bool x11EventFilter(XEvent *event);
+#endif
 
   int newInstance();
 

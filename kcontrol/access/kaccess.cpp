@@ -338,7 +338,8 @@ void KAccessApp::initMasks() {
    }
 }
 
-
+#warning x11EventFilter needs porting to QAbstractNativeEventFilter
+#if 0
 bool KAccessApp::x11EventFilter(XEvent *event)
 {
   // handle XKB events
@@ -363,6 +364,7 @@ bool KAccessApp::x11EventFilter(XEvent *event)
   // process other events as usual
   return KApplication::x11EventFilter(event);
 }
+#endif
 
 
 void VisualBell::paintEvent(QPaintEvent *event)
