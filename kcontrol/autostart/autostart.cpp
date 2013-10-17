@@ -308,9 +308,9 @@ void Autostart::slotAddScript()
     int result = addDialog->exec();
     if (result == QDialog::Accepted) {
         if (addDialog->symLink())
-            KIO::link(addDialog->importUrl(), m_paths[0]);
+            KIO::link(addDialog->importUrl(), QUrl(m_paths[0]));
         else
-            KIO::copy(addDialog->importUrl(), m_paths[0]);
+            KIO::copy(addDialog->importUrl(), QUrl(m_paths[0]));
 
         ScriptStartItem * item = new ScriptStartItem( m_paths[0] + addDialog->importUrl().fileName(), m_scriptItem,this );
         addItem( item,  addDialog->importUrl().fileName(), addDialog->importUrl().fileName(),ScriptStartItem::START );
@@ -327,7 +327,7 @@ void Autostart::slotRemoveCMD()
     if ( startItem )
     {
         m_programItem->takeChild( m_programItem->indexOfChild( startItem ) );
-        KIO::del(startItem->fileName().path() );
+        KIO::del(startItem->fileName());
         delete item;
     }
     else
@@ -336,7 +336,7 @@ void Autostart::slotRemoveCMD()
         if ( scriptItem )
         {
             m_scriptItem->takeChild( m_scriptItem->indexOfChild( scriptItem ) );
-            KIO::del(scriptItem->fileName().path() );
+            KIO::del(scriptItem->fileName());
             delete item;
         }
     }
