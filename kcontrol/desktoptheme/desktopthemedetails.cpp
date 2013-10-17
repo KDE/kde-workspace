@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include <QDir>
 #include <QTextStream>
+#include <QFileDialog>
 
 #include <KConfigGroup>
 #include <KDesktopFile>
@@ -23,6 +24,7 @@
 #include <KSharedConfig>
 #include <KStandardDirs>
 #include <KZip>
+#include <KUrl>
 #include <kio/netaccess.h>
 #include <kio/copyjob.h>
 #include <kio/deletejob.h>
@@ -283,7 +285,7 @@ void DesktopThemeDetails::exportTheme()
         KStandardDirs dirs;
         const QString themePath = dirs.findResource("data", "desktoptheme/" + themeStoragePath + "/metadata.desktop");
         if (!themePath.isEmpty()){
-            QString expFileName = KFileDialog::getSaveFileName(KUrl(), "*.zip", this, i18n("Export theme to file"));
+            QString expFileName = QFileDialog::getSaveFileName(this, i18n("Export theme to file"), QString(), i18n("Archive (*.zip)"));
             if (!expFileName.endsWith(".zip"))
                 expFileName = expFileName + ".zip";
             if (!expFileName.isEmpty()) {
@@ -441,7 +443,7 @@ void DesktopThemeDetails::replacementItemChanged()
             if (itemComboBox->currentText() == i18n("File...")) {
                 //Get the filename for the replacement item
                 QString translated_key = i18nc("plasma name", qPrintable( i.key() ) );
-                QString fileReplacement = KFileDialog::getOpenFileName(KUrl(), QString(), this, i18n("Select File to Use for %1",translated_key));
+                QString fileReplacement = QFileDialog::getOpenFileName(this, i18n("Select File to Use for %1",translated_key));
                 if (!fileReplacement.isEmpty()) {
                     m_itemFileReplacements[i.value()] = fileReplacement;
                     int index = itemComboBox->findText(fileReplacement);
