@@ -1,6 +1,5 @@
 
 add_subdirectory( pics )
-KDE4_NO_ENABLE_FINAL(input)
 
 macro_optional_find_package(USB)
 macro_bool_to_01(LIBUSB_FOUND HAVE_LIBUSB)
