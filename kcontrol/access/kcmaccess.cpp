@@ -162,7 +162,7 @@ QString mouseKeysShortcut (Display *display) {
 }
 
 KAccessConfig::KAccessConfig(QWidget *parent, const QVariantList& args)
-  : KCModule(KAccessConfigFactory::componentData(), parent, args)
+  : KCModule(parent, args)
 {
 
   KAboutData *about =
