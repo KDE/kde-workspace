@@ -1,7 +1,7 @@
 
 add_subdirectory( pics )
 
-macro_optional_find_package(USB)
+find_package(USB)
 macro_bool_to_01(LIBUSB_FOUND HAVE_LIBUSB)
 set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devices"
                        URL "http://libusb.sourceforge.net"
