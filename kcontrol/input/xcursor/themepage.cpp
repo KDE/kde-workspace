@@ -24,7 +24,6 @@
 #include <KStandardDirs>
 
 #include <KGlobalSettings>
-#include <KToolInvocation>
 #include <KMessageBox>
 #include <KUrlRequesterDialog>
 #include <KIO/Job>
@@ -266,7 +265,10 @@ bool ThemePage::applyTheme(const CursorTheme *theme, const int size)
     QByteArray themeName = QFile::encodeName(theme->name());
 
     // Set up the proper launch environment for newly started apps
-    KToolInvocation::klauncher()->setLaunchEnv("XCURSOR_THEME", themeName);
+    OrgKdeKLauncherInterface klauncher(QStringLiteral("org.kde.KLauncher"),
+                                       QStringLiteral("/KLauncher"),
+                                       QDBusConnection::sessionBus());
+    klauncher.setLaunchEnv(QStringLiteral("XCURSOR_THEME"), themeName);
 
     // Update the Xcursor X resources
     runRdb(0);

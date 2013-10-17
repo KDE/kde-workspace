@@ -37,6 +37,7 @@ else(X11_Xcursor_FOUND)
 endif(X11_Xcursor_FOUND)
 
 set(klauncher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
+qt5_add_dbus_interface(libnoinst_SRCS ${klauncher_xml} klauncher_iface)
 
 
 ########### next target ###############
