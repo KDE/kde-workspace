@@ -134,7 +134,7 @@ void DesktopThemeDetails::save()
         //Copy all files from the base theme
         QString baseSource = dirs.locate("data", "desktoptheme/" + m_baseTheme + "/metadata.desktop");
         baseSource = baseSource.left(baseSource.lastIndexOf('/', -1));
-        KIO::CopyJob *copyBaseTheme = KIO::copyAs(KUrl(baseSource), KUrl(dirs.locateLocal("data", "desktoptheme/" + themeRoot, true)), KIO::HideProgressInfo);
+        KIO::CopyJob *copyBaseTheme = KIO::copyAs(QUrl::fromLocalFile(baseSource), QUrl::fromLocalFile(dirs.locateLocal("data", "desktoptheme/" + themeRoot, true)), KIO::HideProgressInfo);
         KIO::NetAccess::synchronousRun(copyBaseTheme, this);
 
         //Prepare settings file for customized theme
@@ -177,7 +177,7 @@ void DesktopThemeDetails::save()
             const QStringList deleteFiles = dirs.findAllResources("data", "desktoptheme/" + themeRoot + '/' + m_itemPaths[i.key()] + '*',
                                             KStandardDirs::NoDuplicates);
             for (int j = 0; j < deleteFiles.size(); ++j) {
-                KIO::DeleteJob *dj = KIO::del(KUrl(deleteFiles.at(j)), KIO::HideProgressInfo);
+                KIO::DeleteJob *dj = KIO::del(QUrl::fromLocalFile(deleteFiles.at(j)), KIO::HideProgressInfo);
                 KIO::NetAccess::synchronousRun(dj, this);
             }
 
@@ -190,7 +190,7 @@ void DesktopThemeDetails::save()
                 copyFiles << source; //copy from file
             }
             for (int j = 0; j < copyFiles.size(); ++j) {
-                KIO::CopyJob *cj = KIO::copy(KUrl(copyFiles.at(j)), KUrl(dest), KIO::HideProgressInfo);
+                KIO::CopyJob *cj = KIO::copy(QUrl::fromLocalFile(copyFiles.at(j)), QUrl::fromLocalFile(dest), KIO::HideProgressInfo);
                 KIO::NetAccess::synchronousRun(cj, this);
             }
 
@@ -261,7 +261,7 @@ void DesktopThemeDetails::removeTheme()
             activeTheme = "default";
         }
         if (QDir(dirs.locateLocal("data", "desktoptheme/" + theme, false)).exists()) {
-            KIO::DeleteJob *deleteTheme = KIO::del(KUrl(dirs.locateLocal("data", "desktoptheme/" + theme, false)), KIO::HideProgressInfo);
+            KIO::DeleteJob *deleteTheme = KIO::del(QUrl::fromLocalFile(dirs.locateLocal("data", "desktoptheme/" + theme, false)), KIO::HideProgressInfo);
             KIO::NetAccess::synchronousRun(deleteTheme, this);
         }
     }
@@ -533,16 +533,16 @@ void DesktopThemeDetails::clearCustomized(const QString& themeRoot) {
     if ((isCustomized(themeRoot))) {
         // Remove both possible unnamed customized directories
         if (QDir(dirs.locateLocal("data", "desktoptheme/.customized", false)).exists()) {
-            KIO::DeleteJob *clearCustom = KIO::del(KUrl(dirs.locateLocal("data", "desktoptheme/.customized", false)), KIO::HideProgressInfo);
+            KIO::DeleteJob *clearCustom = KIO::del(QUrl::fromLocalFile(dirs.locateLocal("data", "desktoptheme/.customized", false)), KIO::HideProgressInfo);
             KIO::NetAccess::synchronousRun(clearCustom, this);
         }
         if (QDir(dirs.locateLocal("data", "desktoptheme/.customized1", false)).exists()) {
-            KIO::DeleteJob *clearCustom1 = KIO::del(KUrl(dirs.locateLocal("data", "desktoptheme/.customized1", false)), KIO::HideProgressInfo);
+            KIO::DeleteJob *clearCustom1 = KIO::del(QUrl::fromLocalFile(dirs.locateLocal("data", "desktoptheme/.customized1", false)), KIO::HideProgressInfo);
             KIO::NetAccess::synchronousRun(clearCustom1, this);
         }
     } else {
         if (QDir(dirs.locateLocal("data", "desktoptheme/" + themeRoot, false)).exists()) {
-            KIO::DeleteJob *clearCustom = KIO::del(KUrl(dirs.locateLocal("data", "desktoptheme/" + themeRoot, false)), KIO::HideProgressInfo);
+            KIO::DeleteJob *clearCustom = KIO::del(QUrl::fromLocalFile(dirs.locateLocal("data", "desktoptheme/" + themeRoot, false)), KIO::HideProgressInfo);
             KIO::NetAccess::synchronousRun(clearCustom, this);
         }
     }
