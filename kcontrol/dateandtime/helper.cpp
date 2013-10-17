@@ -236,10 +236,10 @@ ActionReply ClockHelper::save(const QVariantMap &args)
     ret |= tzreset();
 
   if (ret == 0) {
-    return ActionReply::SuccessReply;
+    return ActionReply::SuccessReply();
   } else {
-    ActionReply reply(ActionReply::HelperError);
-    reply.setErrorCode(ret);
+    ActionReply reply(ActionReply::HelperErrorReply());
+    reply.setErrorCode(static_cast<ActionReply::Error>(ret));
     return reply;
   }
 }

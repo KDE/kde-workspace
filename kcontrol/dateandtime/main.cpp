@@ -39,6 +39,7 @@
 #include "helper.h"
 
 #include <kauthaction.h>
+#include <kauthexecutejob.h>
 
 K_PLUGIN_FACTORY(KlockModuleFactory, registerPlugin<KclockModule>();)
 K_EXPORT_PLUGIN(KlockModuleFactory("kcmkclock"))
@@ -84,17 +85,13 @@ void KclockModule::save()
   QVariantMap helperargs;
   dtime->save( helperargs );
 
-  Action *action = authAction();
-  action->setArguments(helperargs);
+  Action action = authAction();
+  action.setArguments(helperargs);
 
-  ActionReply reply = action->execute();
+  ExecuteJob *job = action.execute();
 
-  if (reply.failed()) {
-    if (reply.type() == ActionReply::KAuthError) {
-          KMessageBox::error(this, i18n("Unable to authenticate/execute the action: %1, %2", reply.errorCode(), reply.errorDescription()));
-    } else {
-        dtime->processHelperErrors(reply.errorCode());
-    }
+  if (!job->exec()) {
+        KMessageBox::error(this, i18n("Unable to authenticate/execute the action: %1, %2", job->error(), job->errorString()));
   }
   else {
       QDBusMessage msg = QDBusMessage::createSignal("/org/kde/kcmshell_clock", "org.kde.kcmshell_clock", "clockUpdated");
