@@ -24,7 +24,6 @@
 
 #include <config-X11.h>
 
-#include <QX11Info>
 #include <stdlib.h>
 #include <ctype.h>
 #include <X11/Xlib.h>
@@ -34,8 +33,8 @@
 #endif
 
 static Display* dpy;
-Display* QX11Info::display() { return dpy; }
-Qt::HANDLE QX11Info::appRootWindow(int) { return DefaultRootWindow( dpy ); }
+Display* display() { return dpy; }
+Window appRootWindow() { return DefaultRootWindow( dpy ); }
 
 static bool isEmpty( const char* str )
     {
@@ -62,8 +61,8 @@ int main( int argc, char* argv[] )
 
     // use a default value for theme only if it's not configured at all, not even in X resources
     if( isEmpty( theme )
-        && isEmpty( XGetDefault( QX11Info::display(), "Xcursor", "theme" ))
-        && isEmpty( XcursorGetTheme( QX11Info::display())))
+        && isEmpty( XGetDefault( display(), "Xcursor", "theme" ))
+        && isEmpty( XcursorGetTheme( display())))
     {
         theme = "default";
         ret = 10; // means to switch to default
@@ -71,19 +70,17 @@ int main( int argc, char* argv[] )
 
      // Apply the KDE cursor theme to ourselves
     if( !isEmpty( theme ))
-        XcursorSetTheme(QX11Info::display(), theme );
+        XcursorSetTheme(display(), theme );
 
     if (!isEmpty( size ))
-    	XcursorSetDefaultSize(QX11Info::display(), atoi( size ));
+        XcursorSetDefaultSize(display(), atoi( size ));
 
     // Load the default cursor from the theme and apply it to the root window.
-    Cursor handle = XcursorLibraryLoadCursor(QX11Info::display(), "left_ptr");
-    XDefineCursor(QX11Info::display(), QX11Info::appRootWindow(), handle);
-    XFreeCursor(QX11Info::display(), handle); // Don't leak the cursor
+    Cursor handle = XcursorLibraryLoadCursor(display(), "left_ptr");
+    XDefineCursor(display(), appRootWindow(), handle);
+    XFreeCursor(display(), handle); // Don't leak the cursor
 
 #else
-    ( void ) QX11Info::display();
-    ( void ) QX11Info::appRootWindow();
     ( void ) argv;
 #endif
     XCloseDisplay( dpy );
