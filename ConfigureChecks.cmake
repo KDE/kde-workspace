@@ -1,3 +1,4 @@
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH} )
 include(UnixAuth)
 set_package_properties(PAM PROPERTIES DESCRIPTION "PAM Libraries"
                        URL "https://www.kernel.org/pub/linux/libs/pam/"

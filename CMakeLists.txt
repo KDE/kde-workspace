@@ -226,7 +226,7 @@ set_package_properties(KdepimLibs PROPERTIES DESCRIPTION "The KDEPIM libraries"
                       )
 
 
-#include(ConfigureChecks.cmake)
+include(ConfigureChecks.cmake)
 if(NOT WIN32)
   configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
   configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
