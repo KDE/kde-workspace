@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 bell
+Exec=kcmshell5 bell
 Icon=preferences-desktop-notification-bell
 Type=Service
 X-KDE-ServiceTypes=KCModule,KCModuleInit
