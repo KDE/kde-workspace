@@ -62,9 +62,9 @@ ThemePage::ThemePage(QWidget *parent)
     : QWidget(parent)
 {
     setupUi(this);
-    installKnsButton->setIcon(KIcon("get-hot-new-stuff"));
-    installButton->setIcon(KIcon("document-import"));
-    removeButton->setIcon(KIcon("edit-delete"));
+    installKnsButton->setIcon(QIcon::fromTheme("get-hot-new-stuff"));
+    installButton->setIcon(QIcon::fromTheme("document-import"));
+    removeButton->setIcon(QIcon::fromTheme("edit-delete"));
 
     model = new CursorThemeModel(this);
 
