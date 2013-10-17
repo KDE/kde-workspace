@@ -62,8 +62,6 @@ KclockModule::KclockModule(QWidget *parent, const QVariantList &)
     " the root password, but feel the system time should be corrected, please contact your system"
     " administrator."));
 
-  KGlobal::locale()->insertCatalog("timezones4"); // For time zone translations
-
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(KDialog::spacingHint());
