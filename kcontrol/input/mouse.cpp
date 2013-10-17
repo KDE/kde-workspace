@@ -84,7 +84,7 @@ K_PLUGIN_FACTORY(MouseConfigFactory,
 K_EXPORT_PLUGIN(MouseConfigFactory("kcminput"))
 
 MouseConfig::MouseConfig(QWidget *parent, const QVariantList &args)
-  : KCModule(MouseConfigFactory::componentData(), parent, args)
+  : KCModule(parent, args)
 {
 
 
