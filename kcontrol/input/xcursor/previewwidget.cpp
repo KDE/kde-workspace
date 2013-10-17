@@ -21,8 +21,10 @@
 
 #include "previewwidget.h"
 
+#include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xcursor/Xcursor.h>
+#include <xcb/xcb.h>
 
 #include "cursortheme.h"
 
@@ -60,22 +62,21 @@ class PreviewCursor
 {
     public:
         PreviewCursor( const CursorTheme *theme, const QString &name, int size );
-        ~PreviewCursor() {}
+        ~PreviewCursor();
 
         const QPixmap &pixmap() const { return m_pixmap; }
-        Cursor handle() const { return m_cursor.handle(); }
         int width() const { return m_pixmap.width(); }
         int height() const { return m_pixmap.height(); }
         inline QRect rect() const;
         void setPosition( const QPoint &p ) { m_pos = p; }
         void setPosition( int x, int y ) { m_pos = QPoint(x, y); }
         QPoint position() const { return m_pos; }
-        operator const QCursor& () const { return m_cursor; }
+        operator const uint32_t () const { return m_cursor; }
         operator const QPixmap& () const { return pixmap(); }
 
     private:
         QPixmap m_pixmap;
-        QCursor m_cursor;
+        uint32_t m_cursor;
         QPoint  m_pos;
 };
 
@@ -96,6 +97,12 @@ PreviewCursor::PreviewCursor(const CursorTheme *theme, const QString &name, int 
     //     replaced when a new theme is applied
 }
 
+PreviewCursor::~PreviewCursor()
+{
+    if (QX11Info::isPlatformX11() && m_cursor != XCB_CURSOR_NONE) {
+        xcb_free_cursor(QX11Info::connection(), m_cursor);
+    }
+}
 
 QRect PreviewCursor::rect() const
 {
@@ -209,7 +216,10 @@ void PreviewWidget::mouseMoveEvent(QMouseEvent *e)
         {
             if (c != current)
             {
-                setCursor(*c);
+                const uint32_t cursor = *c;
+                if (QX11Info::isPlatformX11() && (cursor != XCB_CURSOR_NONE)) {
+                    xcb_change_window_attributes(QX11Info::connection(), winId(), XCB_CW_CURSOR, &cursor);
+                }
                 current = c;
             }
             return;

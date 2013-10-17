@@ -298,8 +298,7 @@ bool ThemePage::applyTheme(const CursorTheme *theme, const int size)
 
     foreach (const QString &name, names)
     {
-        QCursor cursor = theme->loadCursor(name, size);
-        XFixesChangeCursorByName(x11Info().display(), cursor.handle(), QFile::encodeName(name));
+        XFixesChangeCursorByName(QX11Info::display(), theme->loadCursor(name, size), QFile::encodeName(name));
     }
 
     return true;
@@ -341,7 +340,7 @@ void ThemePage::load()
 {
     view->selectionModel()->clear();
     // Get the name of the theme libXcursor currently uses
-    QString currentTheme = XcursorGetTheme(x11Info().display());
+    QString currentTheme = XcursorGetTheme(QX11Info::display());
 
     // Get the name of the theme KDE is configured to use
     KConfig c("kcminputrc");

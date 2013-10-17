@@ -47,7 +47,7 @@ class XCursorTheme : public CursorTheme
 
         const QStringList inherits() const { return m_inherits; }
         QImage loadImage(const QString &name, int size = 0) const;
-        QCursor loadCursor(const QString &name, int size = 0) const;
+        qulonglong loadCursor(const QString &name, int size = 0) const;
 
     protected:
         XCursorTheme(const QString &title, const QString &desc)

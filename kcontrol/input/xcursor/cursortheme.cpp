@@ -140,14 +140,14 @@ QPixmap CursorTheme::createIcon(int size) const
 }
 
 
-void CursorTheme::setCursorName(QCursor &cursor, const QString &name) const
+void CursorTheme::setCursorName(qulonglong cursor, const QString &name) const
 {
 #ifdef HAVE_XFIXES
     static bool haveXfixes = ThemePage::haveXfixes();
 
     if (haveXfixes)
     {
-        XFixesSetCursorName(QX11Info::display(), cursor.handle(),
+        XFixesSetCursorName(QX11Info::display(), cursor,
                             QFile::encodeName(name));
     }
 #endif

@@ -179,8 +179,7 @@ int XCursorTheme::autodetectCursorSize() const
     return size;
 }
 
-
-QCursor XCursorTheme::loadCursor(const QString &name, int size) const
+qulonglong XCursorTheme::loadCursor(const QString &name, int size) const
 {
     if (size <= 0)
         size = autodetectCursorSize();
@@ -192,15 +191,14 @@ QCursor XCursorTheme::loadCursor(const QString &name, int size) const
         images = xcLoadImages(findAlternative(name), size);
 
     if (!images)
-        return QCursor();
+        return None;
 
     // Create the cursor
     Cursor handle = XcursorImagesLoadCursor(QX11Info::display(), images);
-    QCursor cursor = QCursor(Qt::HANDLE(handle)); // QCursor takes ownership of the handle
     XcursorImagesDestroy(images);
 
-    setCursorName(cursor, name);
-    return cursor;
+    setCursorName(handle, name);
+    return handle;
 }
 
 
