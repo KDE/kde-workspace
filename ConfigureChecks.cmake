@@ -7,9 +7,8 @@ set_package_properties(PAM PROPERTIES DESCRIPTION "PAM Libraries"
                       )
 include(CheckTypeSize)
 include(FindPkgConfig)
-include(MacroPushRequiredVars)
 
-find_package(XKB) # kxkb, kdm
+# find_package(XKB) # kxkb, kdm
 
 if (PAM_FOUND)
     set(KDE4_COMMON_PAM_SERVICE "kde" CACHE STRING "The PAM service to use unless overridden for a particular app.")
