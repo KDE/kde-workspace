@@ -16,7 +16,12 @@ QT4_ADD_DBUS_INTERFACE( kcm_launch_PART_SRCS ${kwin_xml} kwin_interface )
 kde4_add_plugin(kcm_launch ${kcm_launch_PART_SRCS})
 
 
-target_link_libraries(kcm_launch  ${KDE4_KDEUI_LIBS} ${QT_QTGUI_LIBRARY})
+target_link_libraries(kcm_launch
+    Qt5::DBus
+    KF5::KCMUtils
+    KF5::KI18n
+    ${KDE4Support_LIBRARIES}
+)
 
 install(TARGETS kcm_launch  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
