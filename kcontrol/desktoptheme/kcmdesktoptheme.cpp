@@ -48,7 +48,7 @@ K_EXPORT_PLUGIN(KCMDesktopThemeFactory("kcmdesktoptheme","kcm_desktopthemedetail
 
 
 KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
-    : KCModule( KCMDesktopThemeFactory::componentData(), parent )
+    : KCModule( parent )
 {
     setQuickHelp( i18n("<h1>Desktop Theme</h1>"
             "This module allows you to modify the visual appearance "
