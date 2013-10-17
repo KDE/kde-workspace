@@ -45,7 +45,7 @@ K_EXPORT_PLUGIN(KlockModuleFactory("kcmkclock"))
 
 
 KclockModule::KclockModule(QWidget *parent, const QVariantList &)
-  : KCModule(KlockModuleFactory::componentData(), parent/*, name*/)
+  : KCModule(parent/*, name*/)
 {
   KAboutData *about =
   new KAboutData(I18N_NOOP("kcmclock"), 0, ki18n("KDE Clock Control Module"),
