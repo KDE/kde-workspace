@@ -25,7 +25,7 @@
 #include <QGridLayout>
 
 #include <kapplication.h>
-#include <klocale.h>
+#include <KLocalizedString>
 #include <kconfig.h>
 #include <kdialog.h>
 #include <knuminput.h>
