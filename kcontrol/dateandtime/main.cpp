@@ -35,8 +35,6 @@
 #include <kmessagebox.h>
 #include <kstandarddirs.h>
 
-#include "main.moc"
-
 #include "dtime.h"
 #include "helper.h"
 
@@ -120,3 +118,5 @@ void KclockModule::load()
   dtime->load();
   setDisabled(false);
 }
+
+#include "main.moc"

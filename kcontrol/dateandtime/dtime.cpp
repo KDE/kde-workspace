@@ -31,7 +31,7 @@
 #include <sys/types.h>
 
 #include <QComboBox>
-#include <QtGui/QGroupBox>
+#include <QGroupBox>
 #include <QPushButton>
 #include <QPainter>
 #include <QTimeEdit>
@@ -51,6 +51,7 @@
 #include <kcolorscheme.h>
 #include <ksystemtimezone.h>
 #include <KTreeWidgetSearchLine>
+#include <KGlobal>
 
 #include <Plasma/Svg>
 
