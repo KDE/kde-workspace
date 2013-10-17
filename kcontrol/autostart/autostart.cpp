@@ -74,12 +74,14 @@ K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
     connect( widget->listCMD, SIGNAL(itemSelectionChanged()), SLOT(slotSelectionChanged()) );
 
 
-    KAboutData* about = new KAboutData("Autostart", 0, ki18n("KDE Autostart Manager"), "1.0",
-                                       ki18n("KDE Autostart Manager Control Panel Module"),
+    KAboutData* about = new KAboutData(QStringLiteral("Autostart"), QString(),
+                                       i18n("KDE Autostart Manager"),
+                                       QStringLiteral("1.0"),
+                                       i18n("KDE Autostart Manager Control Panel Module"),
                                        KAboutData::License_GPL,
-                                       ki18n("Copyright © 2006–2010 Autostart Manager team"));
-    about->addAuthor(ki18n("Stephen Leaf"), KLocalizedString(), "smileaf@gmail.com");
-    about->addAuthor(ki18n("Montel Laurent"), ki18n( "Maintainer" ), "montel@kde.org");
+                                       i18n("Copyright © 2006–2010 Autostart Manager team"));
+    about->addAuthor(i18n("Stephen Leaf"), QString(), QStringLiteral("smileaf@gmail.com"));
+    about->addAuthor(i18n("Montel Laurent"), i18n( "Maintainer" ), QStringLiteral("montel@kde.org"));
     setAboutData( about );
 
 }
