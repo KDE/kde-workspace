@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 autostart
+Exec=kcmshell5 autostart
 Icon=system-run
 Type=Service
 X-KDE-ServiceTypes=KCModule
