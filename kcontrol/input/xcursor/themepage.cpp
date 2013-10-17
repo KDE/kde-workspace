@@ -444,7 +444,7 @@ void ThemePage::getNewClicked()
 void ThemePage::installClicked()
 {
     // Get the URL for the theme we're going to install
-    KUrl url = KUrlRequesterDialog::getUrl(QString(), this, i18n("Drag or Type Theme URL"));
+    QUrl url = KUrlRequesterDialog::getUrl(QUrl(), this, i18n("Drag or Type Theme URL"));
 
     if (url.isEmpty())
         return;
@@ -456,11 +456,11 @@ void ThemePage::installClicked()
 
         if (url.isLocalFile())
             text = i18n("Unable to find the cursor theme archive %1.",
-                        url.prettyUrl());
+                        url.toDisplayString());
         else
             text = i18n("Unable to download the cursor theme archive; "
                         "please check that the address %1 is correct.",
-                        url.prettyUrl());
+                        url.toDisplayString());
 
         KMessageBox::sorry(this, text);
         return;
@@ -500,7 +500,7 @@ void ThemePage::removeClicked()
         return;
 
     // Delete the theme from the harddrive
-    KIO::del(KUrl(theme->path())); // async
+    KIO::del(QUrl::fromLocalFile(theme->path())); // async
 
     // Remove the theme from the model
     proxy->removeTheme(selectedIndex());
