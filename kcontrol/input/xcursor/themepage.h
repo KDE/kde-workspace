@@ -43,10 +43,10 @@ class ThemePage : public QWidget, private Ui::ThemePage
 
         static bool haveXfixes();
 
-    signals:
+    Q_SIGNALS:
         void changed(bool);
 
-    private slots:
+    private Q_SLOTS:
         void selectionChanged();
         /** Updates the preview. If the size has changed, it also emits changed() */
         void sizeChanged();
