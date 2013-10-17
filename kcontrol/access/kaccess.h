@@ -12,7 +12,7 @@
 #include <KUniqueApplication>
 #include <KUrl>
 
-#include <Phonon/MediaObject>
+#include <phonon/MediaObject>
 
 #include <X11/Xlib.h>
 #define explicit int_explicit        // avoid compiler name clash in XKBlib.h

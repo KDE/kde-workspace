@@ -2,6 +2,8 @@
 
 
 ########### next target ###############
+find_package(Phonon4Qt5 REQUIRED NO_MODULE)
+include_directories(${PHONON_INCLUDE_DIR})
 
 set(kcm_access_PART_SRCS kcmaccess.cpp )
 
