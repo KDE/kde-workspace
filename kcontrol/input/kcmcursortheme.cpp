@@ -38,9 +38,9 @@ CursorThemeConfig::CursorThemeConfig(QWidget *parent, const QVariantList &args)
     connect(themepage, SIGNAL(changed(bool)), SLOT(changed()));
     layout->addWidget(themepage);
 
-    KAboutData* aboutData = new KAboutData("kcm_cursortheme", 0, ki18n("Cursor Theme"),
-        0, KLocalizedString(), KAboutData::License_GPL, ki18n("(c) 2003-2007 Fredrik Höglund"));
-    aboutData->addAuthor(ki18n("Fredrik Höglund"));
+    KAboutData* aboutData = new KAboutData(QStringLiteral("kcm_cursortheme"), QString(), i18n("Cursor Theme"),
+        QString(), QString(), KAboutData::License_GPL, i18n("(c) 2003-2007 Fredrik Höglund"));
+    aboutData->addAuthor(i18n("Fredrik Höglund"));
     setAboutData(aboutData);
 }
 
