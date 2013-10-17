@@ -40,7 +40,7 @@
 #include <KMessageBox>
 #include <KAboutData>
 #include <KDebug>
-#include <KIO/NetAccess>
+#include <kio/netaccess.h>
 #include <KIO/DeleteJob>
 #include <KIO/CopyJob>
 

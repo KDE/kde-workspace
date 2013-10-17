@@ -22,7 +22,7 @@
 #include <QCheckBox>
 #include <QVBoxLayout>
 
-#include <KLocale>
+#include <KLocalizedString>
 
 AdvancedDialog::AdvancedDialog( QWidget *parent, bool status )
     :KDialog( parent )

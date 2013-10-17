@@ -23,6 +23,7 @@
 #define ADDSCRIPTDIALOG_H
 
 #include <KDialog>
+#include <KUrl>
 
 class KUrlRequester;
 class QCheckBox;

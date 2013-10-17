@@ -27,7 +27,7 @@
 #include <QFileInfo>
 
 #include <KLineEdit>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KUrlRequester>
 #include <KShell>
 #include <KMessageBox>
