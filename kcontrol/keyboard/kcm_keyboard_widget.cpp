@@ -24,6 +24,7 @@
 #include <kdebug.h>
 #include <klocale.h>
 #include <kglobalsettings.h>
+#include <KGlobalAccel>
 
 #include <QMessageBox>
 #include <QWidget>
@@ -632,8 +633,9 @@ void KCMKeyboardWidget::updateShortcutsUI()
 
 	delete actionCollection;
 	actionCollection = new KeyboardLayoutActionCollection(this, true);
-	KAction* toggleAction = actionCollection->getToggeAction();
-    uiWidget->kdeKeySequence->setKeySequence(toggleAction->globalShortcut().primary());
+	QAction* toggleAction = actionCollection->getToggeAction();
+    const auto shortcuts = KGlobalAccel::self()->shortcut(toggleAction);
+    uiWidget->kdeKeySequence->setKeySequence(shortcuts.isEmpty() ? QKeySequence() : shortcuts.first());
     actionCollection->loadLayoutShortcuts(keyboardConfig->layouts, rules);
 	layoutsTableModel->refresh();
 }

@@ -39,13 +39,14 @@ KeyboardLayoutActionCollection::KeyboardLayoutActionCollection(QObject* parent, 
 		KActionCollection(parent, COMPONENT_NAME),
 		configAction(configAction_)
 {
-	KAction* toggleAction = addAction( actionName );
+	QAction* toggleAction = addAction( actionName );
 	toggleAction->setText( i18n(actionName) );
-	toggleAction->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::Key_K));
+        KGlobalAccel::self()->setShortcut(toggleAction,
+                                          QList<QKeySequence>() << QKeySequence(Qt::ALT+Qt::CTRL+Qt::Key_K),
+                                          KGlobalAccel::NoAutoloading);
 	if( configAction ) {
 	    toggleAction->setProperty("isConfigurationAction", true);
 	}
-	kDebug() << "Keyboard layout toggle shortcut" << toggleAction->globalShortcut().toString();
 }
 
 KeyboardLayoutActionCollection::~KeyboardLayoutActionCollection()
@@ -53,34 +54,34 @@ KeyboardLayoutActionCollection::~KeyboardLayoutActionCollection()
     clear();
 }
 
-KAction* KeyboardLayoutActionCollection::getToggeAction()
+QAction* KeyboardLayoutActionCollection::getToggeAction()
 {
-	return static_cast<KAction*>(action(0));
+	return action(0);
 }
 
-KAction* KeyboardLayoutActionCollection::createLayoutShortcutActon(const LayoutUnit& layoutUnit, const Rules* rules, bool autoload)
+QAction* KeyboardLayoutActionCollection::createLayoutShortcutActon(const LayoutUnit& layoutUnit, const Rules* rules, bool autoload)
 {
 	QString longLayoutName = Flags::getLongText( layoutUnit, rules );
 	QString actionName = "Switch keyboard layout to ";
 	actionName += longLayoutName;
-	KAction* action = addAction( actionName );
+	QAction* action = addAction( actionName );
 	action->setText( i18n("Switch keyboard layout to %1", longLayoutName) );
-	KAction::GlobalShortcutLoading loading = autoload ? KAction::Autoloading : KAction::NoAutoloading;
-	KShortcut shortcut = autoload ? KShortcut() : KShortcut(layoutUnit.getShortcut());
-	action->setGlobalShortcut(shortcut, KAction::ShortcutTypes(KAction::ActiveShortcut /*| KAction::DefaultShortcut*/), loading);
+	KGlobalAccel::GlobalShortcutLoading loading = autoload ? KGlobalAccel::Autoloading : KGlobalAccel::NoAutoloading;
+        QList<QKeySequence> shortcuts;
+        if (!autoload) {
+            shortcuts << layoutUnit.getShortcut();
+        }
+        KGlobalAccel::self()->setShortcut(action, shortcuts, loading);
 	action->setData(layoutUnit.toString());
 	if( configAction ) {
 	    action->setProperty("isConfigurationAction", true);
 	}
-	kDebug() << "Registered layout shortcut" << action->globalShortcut(KAction::ActiveShortcut).primary().toString() << "for" << action->text() << "lu.shortcut" << layoutUnit.getShortcut().toString();
 	return action;
 }
 
 void KeyboardLayoutActionCollection::setToggleShortcut(const QKeySequence& keySequence)
 {
-    KShortcut shortcut(keySequence);
-    getToggeAction()->setGlobalShortcut(shortcut, KAction::ActiveShortcut, KAction::NoAutoloading);
-    kDebug() << "Saving keyboard layout KDE shortcut" << shortcut.toString();
+    KGlobalAccel::self()->setShortcut(getToggeAction(), QList<QKeySequence>() << keySequence, KGlobalAccel::NoAutoloading);
 }
 
 //KAction* KeyboardLayoutActionCollection::setShortcut(LayoutUnit& layoutUnit, const QKeySequence& keySequence, const Rules* rules)
@@ -115,11 +116,11 @@ void KeyboardLayoutActionCollection::loadLayoutShortcuts(QList<LayoutUnit>& layo
 {
 	for (QList<LayoutUnit>::iterator i = layoutUnits.begin(); i != layoutUnits.end(); ++i) {
 		LayoutUnit& layoutUnit = *i;
-		KAction* action = createLayoutShortcutActon(layoutUnit, rules, true);
-		QKeySequence shortcut = action->globalShortcut(KAction::ActiveShortcut).primary();	// shortcut was restored
+		QAction* action = createLayoutShortcutActon(layoutUnit, rules, true);
+                const auto shortcut = KGlobalAccel::self()->shortcut(action);
 		if( ! shortcut.isEmpty() ) {
-			kDebug() << "Restored shortcut for" << layoutUnit.toString() << shortcut;
-			layoutUnit.setShortcut(shortcut);
+			kDebug() << "Restored shortcut for" << layoutUnit.toString() << shortcut.first();
+			layoutUnit.setShortcut(shortcut.first());
 		}
 		else {
 			kDebug() << "Skipping empty shortcut for" << layoutUnit.toString();
@@ -141,6 +142,7 @@ void KeyboardLayoutActionCollection::loadLayoutShortcuts(QList<LayoutUnit>& layo
 void KeyboardLayoutActionCollection::resetLayoutShortcuts()
 {
 	for(int i=1; i<actions().size(); i++) {
-		static_cast<KAction*>(action(i))->setGlobalShortcut(KShortcut(), KAction::ShortcutTypes(KAction::ActiveShortcut | KAction::DefaultShortcut), KAction::NoAutoloading);
+            KGlobalAccel::self()->setShortcut(action(i), QList<QKeySequence>(), KGlobalAccel::NoAutoloading);
+            KGlobalAccel::self()->setDefaultShortcut(action(i), QList<QKeySequence>(), KGlobalAccel::NoAutoloading);
 	}
 }

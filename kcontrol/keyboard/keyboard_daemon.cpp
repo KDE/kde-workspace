@@ -132,7 +132,7 @@ void KeyboardDaemon::registerShortcut()
 	if( actionCollection == NULL ) {
 		actionCollection = new KeyboardLayoutActionCollection(this, false);
 
-		KAction* toggleLayoutAction = actionCollection->getToggeAction();
+		QAction* toggleLayoutAction = actionCollection->getToggeAction();
 		connect(toggleLayoutAction, SIGNAL(triggered()), this, SLOT(switchToNextLayout()));
 		actionCollection->loadLayoutShortcuts(keyboardConfig.layouts, rules);
 		connect(actionCollection, SIGNAL(actionTriggered(QAction*)), this, SLOT(setLayout(QAction*)));

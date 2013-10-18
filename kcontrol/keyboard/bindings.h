@@ -24,7 +24,6 @@
 
 
 //class QObject;
-class KAction;
 class Rules;
 class LayoutUnit;
 template <typename T> class QList;
@@ -35,9 +34,9 @@ public:
 	KeyboardLayoutActionCollection(QObject* parent, bool configAction);
 	virtual ~KeyboardLayoutActionCollection();
 
-	KAction* getToggeAction();
+	QAction* getToggeAction();
 //	KAction* getAction(const LayoutUnit& layoutUnit);
-	KAction* createLayoutShortcutActon(const LayoutUnit& layoutUnit, const Rules* rules, bool autoload);
+	QAction* createLayoutShortcutActon(const LayoutUnit& layoutUnit, const Rules* rules, bool autoload);
 //	KAction* setShortcut(LayoutUnit& layoutUnit, const QKeySequence& keySequence, const Rules* rules);
 	void setLayoutShortcuts(QList<LayoutUnit>& layoutUnits, const Rules* rules);
 	void setToggleShortcut(const QKeySequence& keySequence);
