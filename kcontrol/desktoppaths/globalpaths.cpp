@@ -73,6 +73,7 @@ DesktopPathConfig::DesktopPathConfig(QWidget *parent, const QVariantList &)
     : KCModule( parent )
 {
   QFormLayout *lay = new QFormLayout(this);
+  lay->setVerticalSpacing(0);
   lay->setMargin(0);
 
   setQuickHelp( i18n("<h1>Paths</h1>\n"
