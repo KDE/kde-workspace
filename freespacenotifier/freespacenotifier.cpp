@@ -19,10 +19,10 @@
 
 #include "freespacenotifier.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
+#include <QDir>
+#include <QFile>
+#include <QLabel>
+#include <QSpinBox>
 
 #include <QtDBus/QtDBus>
 
