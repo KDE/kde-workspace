@@ -84,7 +84,7 @@ void FreeSpaceNotifier::checkFreeDiskSpace()
         }
         if ( warn )
         {
-            notification = new KNotification( "freespacenotif", 0, KNotification::Persistent );
+            notification = new KNotification( QStringLiteral("freespacenotif"), 0, KNotification::Persistent );
 
             notification->setText( i18nc( "Warns the user that the system is running low on space on his home folder, indicating the percentage and absolute MiB size remaining, and asks if the user wants to do something about it", "You are running low on disk space on your home folder (currently %2%, %1 MiB free).\nWould you like to run a file manager to free some disk space?", avail, availpct ) );
             notification->setActions( QStringList() << i18nc( "Opens a file manager like dolphin", "Open File Manager" ) << i18nc( "Closes the notification", "Do Nothing" ) << i18nc( "Allows the user to configure the warning notification being shown", "Configure Warning" ) );
@@ -111,17 +111,18 @@ void FreeSpaceNotifier::showConfiguration()
 {
     cleanupNotification();
 
-    if ( KConfigDialog::showDialog( "settings" ) )  {
+    if ( KConfigDialog::showDialog( QStringLiteral("settings") ) )  {
         return;
     }
 
-    KConfigDialog *dialog = new KConfigDialog( 0, "settings", FreeSpaceNotifierSettings::self() );
+    KConfigDialog *dialog = new KConfigDialog( 0, QStringLiteral("settings"), FreeSpaceNotifierSettings::self() );
     QWidget *generalSettingsDlg = new QWidget();
 
     Ui::freespacenotifier_prefs_base preferences;
     preferences.setupUi( generalSettingsDlg );
 
-    dialog->addPage( generalSettingsDlg, i18nc( "The settings dialog main page name, as in 'general settings'", "General" ), "system-run" );
+    dialog->addPage( generalSettingsDlg, i18nc( "The settings dialog main page name, as in 'general settings'", "General" ),
+                     QStringLiteral("system-run") );
     connect( dialog, SIGNAL(finished()), this, SLOT(configDialogClosed()) );
     dialog->setAttribute( Qt::WA_DeleteOnClose );
     dialog->show();
@@ -158,15 +159,17 @@ void FreeSpaceNotifier::configDialogClosed()
  */
 void FreeSpaceNotifier::disableFSNotifier()
 {
-    QDBusInterface iface( "org.kde.kded", "/kded", "org.kde.kded" );
+    QDBusInterface iface( QStringLiteral("org.kde.kded"),
+                          QStringLiteral("/kded"),
+                          QStringLiteral("org.kde.kded") );
     if ( dbusError( iface ) ) return;
 
     // Disable current module autoload
-    iface.call( "setModuleAutoloading", "freespacenotifier", false );
+    iface.call( QStringLiteral("setModuleAutoloading"), QStringLiteral("freespacenotifier"), false );
     if ( dbusError( iface ) ) return;
 
     // Unload current module
-    iface.call( "unloadModule", "freespacenotifier" );
+    iface.call( QStringLiteral("unloadModule"), QStringLiteral("freespacenotifier") );
     if ( dbusError( iface ) ) return;
 }
 
