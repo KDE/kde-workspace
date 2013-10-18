@@ -104,7 +104,7 @@ void FreeSpaceNotifier::checkFreeDiskSpace()
 void FreeSpaceNotifier::openFileManager()
 {
     cleanupNotification();
-    new KRun( KUrl( QDir::homePath() ), 0 );
+    new KRun( QUrl::fromLocalFile( QDir::homePath() ), 0 );
 }
 
 void FreeSpaceNotifier::showConfiguration()
