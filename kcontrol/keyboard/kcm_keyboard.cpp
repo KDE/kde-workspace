@@ -23,6 +23,7 @@
 #include <kaboutdata.h>
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
+#include <KDialog>
 
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusConnection>
@@ -103,3 +104,5 @@ void KCMKeyboard::save()
 	QDBusMessage message = QDBusMessage::createSignal(KEYBOARD_DBUS_OBJECT_PATH, KEYBOARD_DBUS_SERVICE_NAME, KEYBOARD_DBUS_CONFIG_RELOAD_MESSAGE);
     QDBusConnection::sessionBus().send(message);
 }
+
+#include "kcm_keyboard.moc"

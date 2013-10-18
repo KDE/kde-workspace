@@ -22,7 +22,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
-#include <KLocale>
+#include <KLocalizedString>
 
 
 KeyboardPainter::KeyboardPainter():

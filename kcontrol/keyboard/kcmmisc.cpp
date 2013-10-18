@@ -35,6 +35,7 @@
 
 #include <klocale.h>
 #include <kconfig.h>
+#include <KConfigGroup>
 #include <knuminput.h>
 
 #include <X11/Xlib.h>

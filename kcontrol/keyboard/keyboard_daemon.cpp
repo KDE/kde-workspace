@@ -243,3 +243,5 @@ QStringList KeyboardDaemon::getLayoutsList()
 {
 	return X11Helper::getLayoutsListAsString( X11Helper::getLayoutsList() );
 }
+
+#include "keyboard_daemon.moc"

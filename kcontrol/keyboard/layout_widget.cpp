@@ -112,3 +112,4 @@ void LayoutWidget::layoutChanged()
 	}
 }
 
+#include "layout_widget.moc"

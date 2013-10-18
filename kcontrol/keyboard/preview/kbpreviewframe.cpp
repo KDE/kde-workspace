@@ -23,7 +23,7 @@
 #include <QFont>
 
 #include <KApplication>
-#include <KLocale>
+#include <KLocalizedString>
 
 
 static const QColor keyBorderColor("#d4d4d4");
