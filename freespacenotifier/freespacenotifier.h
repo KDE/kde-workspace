@@ -32,7 +32,7 @@ class FreeSpaceNotifier
     public:
         FreeSpaceNotifier( QObject* parent = NULL );
         virtual ~FreeSpaceNotifier();
-    private slots:
+    private Q_SLOTS:
         void checkFreeDiskSpace();
         void resetLastAvailable();
         void openFileManager();
