@@ -42,7 +42,7 @@ class KCMKeyboardWidget: public QTabWidget
 
 public:
 	KCMKeyboardWidget(Rules* rules, KeyboardConfig* keyboardConfig,
-			const KComponentData componentData, const QVariantList &args, QWidget* parent=0);
+                          const QVariantList &args, QWidget* parent=0);
 	virtual ~KCMKeyboardWidget();
 
 	void updateUI();
@@ -75,7 +75,6 @@ private:
     Flags *flags;
     Ui::TabWidget *uiWidget;
     KeyboardConfig *keyboardConfig;
-	const KComponentData componentData;
 	KeyboardLayoutActionCollection* actionCollection;
 	LayoutsTableModel* layoutsTableModel;
 	KCMiscKeyboardWidget* kcmMiscWidget;

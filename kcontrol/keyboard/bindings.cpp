@@ -36,7 +36,7 @@ static const char* COMPONENT_NAME = I18N_NOOP("KDE Keyboard Layout Switcher");
 
 
 KeyboardLayoutActionCollection::KeyboardLayoutActionCollection(QObject* parent, bool configAction_):
-		KActionCollection(parent, KComponentData(KAboutData(COMPONENT_NAME, 0, ki18n(COMPONENT_NAME), 0))),
+		KActionCollection(parent, COMPONENT_NAME),
 		configAction(configAction_)
 {
 	KAction* toggleAction = addAction( actionName );

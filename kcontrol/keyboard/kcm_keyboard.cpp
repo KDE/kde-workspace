@@ -44,7 +44,7 @@ K_PLUGIN_FACTORY(KeyboardModuleFactory, registerPlugin<KCMKeyboard>();)
 K_EXPORT_PLUGIN(KeyboardModuleFactory("kcmkeyboard"))
 
 KCMKeyboard::KCMKeyboard(QWidget *parent, const QVariantList &args)
-  : KCModule(KeyboardModuleFactory::componentData(), parent/*, name*/)
+  : KCModule(parent/*, name*/)
 {
   KAboutData *about =
 		  new KAboutData("kcmkeyboard", 0, ki18n("KDE Keyboard Control Module"),
@@ -64,7 +64,7 @@ KCMKeyboard::KCMKeyboard(QWidget *parent, const QVariantList &args)
   layout->setMargin(0);
   layout->setSpacing(KDialog::spacingHint());
 
-  widget = new KCMKeyboardWidget(rules, keyboardConfig, componentData(), args, parent);
+  widget = new KCMKeyboardWidget(rules, keyboardConfig, args, parent);
   layout->addWidget(widget);
 
   connect(widget, SIGNAL(changed(bool)), this, SIGNAL(changed(bool)));

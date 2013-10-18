@@ -58,9 +58,8 @@ static const int MIN_LOOPING_COUNT = 2;
 
 
 KCMKeyboardWidget::KCMKeyboardWidget(Rules* rules_, KeyboardConfig* keyboardConfig_,
-		const KComponentData componentData_, const QVariantList &args, QWidget* /*parent*/):
+                                     const QVariantList &args, QWidget* /*parent*/):
 	rules(rules_),
-	componentData(componentData_),
 	actionCollection(NULL),
 	uiUpdating(false)
 {

@@ -65,7 +65,7 @@ KeyboardDaemon::KeyboardDaemon(QObject *parent, const QList<QVariant>&)
 	registerListeners();
 
 	LayoutMemoryPersister layoutMemoryPersister(layoutMemory);
-	if( layoutMemoryPersister.restore(KGlobal::mainComponent().componentName()) ) {
+	if( layoutMemoryPersister.restore("kxkb") ) {
 		if( layoutMemoryPersister.getGlobalLayout().isValid() ) {
 			X11Helper::setLayout(layoutMemoryPersister.getGlobalLayout());
 		}
@@ -76,7 +76,7 @@ KeyboardDaemon::~KeyboardDaemon()
 {
 	LayoutMemoryPersister layoutMemoryPersister(layoutMemory);
 	layoutMemoryPersister.setGlobalLayout(X11Helper::getCurrentLayout());
-	layoutMemoryPersister.save(KGlobal::mainComponent().componentName());
+	layoutMemoryPersister.save("kxkb");
 
     QDBusConnection dbus = QDBusConnection::sessionBus();
     dbus.disconnect(QString(), KEYBOARD_DBUS_OBJECT_PATH, KEYBOARD_DBUS_SERVICE_NAME, KEYBOARD_DBUS_CONFIG_RELOAD_MESSAGE, this, SLOT(configureKeyboard()));
