@@ -76,12 +76,10 @@ bool XmlHandler::startElement(const QString &/*namespaceURI*/, const QString &/*
 IsoCodes::IsoCodes(const QString& isoCode, const QString& isoCodesXmlDir):
 	d(new IsoCodesPrivate(isoCode, isoCodesXmlDir))
 {
-	KGlobal::locale()->insertCatalog(QString("iso_")+d->isoCode);
 }
 
 IsoCodes::~IsoCodes()
 {
-	KGlobal::locale()->removeCatalog(QString("iso_")+d->isoCode);
 	delete d;
 }
 

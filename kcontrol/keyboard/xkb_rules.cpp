@@ -97,7 +97,6 @@ void postProcess(Rules* rules)
 	removeEmptyItems(rules->modelInfos);
 	removeEmptyItems(rules->optionGroupInfos);
 
-	KGlobal::locale()->insertCatalog("xkeyboard-config");
 //	setlocale(LC_ALL, "");
 //	bindtextdomain("xkeyboard-config", LOCALE_DIR);
 	foreach(ModelInfo* modelInfo, rules->modelInfos) {
@@ -121,7 +120,6 @@ void postProcess(Rules* rules)
 			optionInfo->description = translate_description(optionInfo);
 		}
 	}
-	KGlobal::locale()->removeCatalog("xkeyboard-config");
 }
 
 

@@ -46,9 +46,6 @@ K_EXPORT_PLUGIN(KeyboardModuleFactory("kcmkeyboard"))
 KCMKeyboard::KCMKeyboard(QWidget *parent, const QVariantList &args)
   : KCModule(KeyboardModuleFactory::componentData(), parent/*, name*/)
 {
-  KGlobal::locale()->insertCatalog("kxkb");
-  KGlobal::locale()->insertCatalog("kcmmisc");
-
   KAboutData *about =
 		  new KAboutData("kcmkeyboard", 0, ki18n("KDE Keyboard Control Module"),
                   0, KLocalizedString(), KAboutData::License_GPL,
