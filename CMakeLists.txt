@@ -287,7 +287,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #    macro_optional_add_subdirectory(kscreensaver)
 #
 #    # data
-#    macro_optional_add_subdirectory(doc)
+   ecm_optional_add_subdirectory(doc)
 #
    if (NOT WIN32)
       ecm_optional_add_subdirectory(kinfocenter)
