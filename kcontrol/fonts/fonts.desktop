@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=kcmshell4 fonts
+Exec=kcmshell5 fonts
 Icon=preferences-desktop-font
 Type=Service
 X-KDE-ServiceTypes=KCModule
