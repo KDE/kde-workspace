@@ -19,8 +19,8 @@
 
 #include "keysymbols.h"
 
-#include <QtGui/QApplication>
-#include <QtCore/QStringList>
+#include <QApplication>
+#include <QStringList>
 
 
 static const int MAX_GROUPS_SUPPORTED = 4;

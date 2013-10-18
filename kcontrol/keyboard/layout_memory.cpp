@@ -18,8 +18,8 @@
 
 #include "layout_memory.h"
 
-#include <QtCore/QSet>
-#include <QtGui/QX11Info>
+#include <QSet>
+#include <QX11Info>
 
 #include <kdebug.h>
 #include <kwindowsystem.h>

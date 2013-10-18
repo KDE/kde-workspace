@@ -17,13 +17,13 @@
  */
 
 #include "keyaliases.h"
-#include <QtCore/QString>
-#include <QtCore/QMap>
-#include <QtGui/QMessageBox>
-#include <QtCore/QFile>
-#include <QtCore/QDir>
+#include <QString>
+#include <QMap>
+#include <QMessageBox>
+#include <QFile>
+#include <QDir>
 
-#include <QtGui/QX11Info>
+#include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/XKBlib.h>

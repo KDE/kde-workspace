@@ -24,8 +24,8 @@
 #ifndef __KCMMISC_H__
 #define __KCMMISC_H__
 
-#include <QtCore/QString>
-#include <QtGui/QWidget>
+#include <QString>
+#include <QWidget>
 
 class Ui_KeyboardConfigWidget;
 

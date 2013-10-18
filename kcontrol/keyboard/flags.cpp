@@ -27,10 +27,10 @@
 #include <plasma/svg.h>
 #include <plasma/paintutils.h>
 
-#include <QtCore/QStringList>
-#include <QtGui/QPixmap>
-#include <QtGui/QPainter>
-#include <QtGui/QIcon>
+#include <QStringList>
+#include <QPixmap>
+#include <QPainter>
+#include <QIcon>
 
 #include <math.h>
 

@@ -22,8 +22,8 @@
 #include "keysymhelper.h"
 #include "keyaliases.h"
 
-#include <QtGui/QPainter>
-#include <QtGui/QFrame>
+#include <QPainter>
+#include <QFrame>
 
 class KbPreviewFrame : public QFrame
 {

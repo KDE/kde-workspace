@@ -20,8 +20,8 @@
 #include <kconfiggroup.h>
 #include <ksharedconfig.h>
 
-#include <QtGui/QX11Info>
-#include <QtGui/QCursor>	// WTF? - otherwise compiler complains
+#include <QX11Info>
+#include <QCursor>	// WTF? - otherwise compiler complains
 
 #include <X11/Xlib.h>
 

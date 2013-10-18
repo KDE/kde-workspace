@@ -23,8 +23,8 @@
 #include <klocalizedstring.h>
 #include <kdebug.h>
 
-#include <QtGui/QAction>
-#include <QtGui/QMenu>
+#include <QAction>
+#include <QMenu>
 
 #include "keyboard_config.h"
 #include "x11_helper.h"

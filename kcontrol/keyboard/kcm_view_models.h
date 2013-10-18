@@ -20,10 +20,10 @@
 #ifndef KCM_VIEW_MODELS_H_
 #define KCM_VIEW_MODELS_H_
 
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QAbstractTableModel>
-#include <QtCore/QSet>
-#include <QtGui/QStyledItemDelegate>
+#include <QAbstractItemModel>
+#include <QAbstractTableModel>
+#include <QSet>
+#include <QStyledItemDelegate>
 
 class QTreeView;
 class KeyboardConfig;

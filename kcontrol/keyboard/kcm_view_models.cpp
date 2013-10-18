@@ -21,11 +21,11 @@
 #include <klocalizedstring.h>
 #include <kkeysequencewidget.h>
 
-#include <QtGui/QTreeView>
-#include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPainter>
-#include <QtGui/QKeySequence>
+#include <QTreeView>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QPainter>
+#include <QKeySequence>
 
 #ifdef DRAG_ENABLED
 #include <QtCore/QMimeData>

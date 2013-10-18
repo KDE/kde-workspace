@@ -17,7 +17,7 @@
  */
 
 #include <kdebug.h>
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <qtest_kde.h>
 
 #include "../iso_codes.h"

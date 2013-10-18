@@ -22,7 +22,7 @@
 
 #include "kbpreviewframe.h"
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 class QPushButton;
 

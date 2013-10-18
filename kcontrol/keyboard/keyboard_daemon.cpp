@@ -18,9 +18,9 @@
 
 #include "keyboard_daemon.h"
 
-#include <QtGui/QX11Info>
+#include <QX11Info>
 #include <QtDBus/QtDBus>
-#include <QtCore/QProcess>
+#include <QProcess>
 
 #include <kdebug.h>
 #include <kpluginfactory.h>

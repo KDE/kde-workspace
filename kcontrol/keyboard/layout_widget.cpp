@@ -21,7 +21,7 @@
 //#include <kdebug.h>
 #include <kpluginfactory.h>
 
-#include <QtGui/QPushButton>
+#include <QPushButton>
 
 #include "xkb_rules.h"
 #include "x11_helper.h"

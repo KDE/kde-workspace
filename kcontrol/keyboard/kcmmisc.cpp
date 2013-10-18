@@ -29,9 +29,9 @@
 
 #include <math.h>
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QWhatsThis>
-#include <QtGui/QX11Info>
+#include <QCheckBox>
+#include <QWhatsThis>
+#include <QX11Info>
 
 #include <klocale.h>
 #include <kconfig.h>

@@ -23,7 +23,7 @@
 #include "ui_kcm_keyboard.h"
 
 #include <kcomponentdata.h>
-#include <QtGui/QTabWidget>
+#include <QTabWidget>
 
 class QWidget;
 class KeyboardConfig;

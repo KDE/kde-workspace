@@ -20,8 +20,8 @@
 #ifndef LAYOUT_WIDGET_H_
 #define LAYOUT_WIDGET_H_
 
-#include <QtCore/QVariant>
-#include <QtGui/QWidget>
+#include <QVariant>
+#include <QWidget>
 
 #include "flags.h"
 #include "x11_helper.h"

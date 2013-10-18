@@ -20,13 +20,13 @@
 
 #include <kdebug.h>
 #include <kglobal.h>
-#include <klocale.h>
+#include <KLocalizedString>
 
-#include <QtCore/QDir>
-#include <QtCore/QRegExp>
-#include <QtGui/QTextDocument> // for Qt::escape
-#include <QtXml/QXmlAttributes>
-#include <QtCore/QtConcurrentFilter>
+#include <QDir>
+#include <QRegExp>
+#include <QTextDocument> // for Qt::escape
+#include <QXmlAttributes>
+#include <QtConcurrentFilter>
 
 //#include <libintl.h>
 //#include <locale.h>
@@ -34,7 +34,7 @@
 #include "x11_helper.h"
 
 // for findXkbRuleFile
-#include <QtGui/QX11Info>
+#include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/XKBlib.h>

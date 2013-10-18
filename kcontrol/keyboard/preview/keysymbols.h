@@ -20,8 +20,8 @@
 #ifndef KEYSYMBOLS_H
 #define KEYSYMBOLS_H
 
-#include <QtGui/QApplication>
-#include <QtCore/QList>
+#include <QApplication>
+#include <QList>
 
 class KeySymbols
 {

@@ -19,8 +19,8 @@
 
 #include "kbpreviewframe.h"
 
-#include <QtCore/QFile>
-#include <QtGui/QFont>
+#include <QFile>
+#include <QFont>
 
 #include <KApplication>
 #include <KLocale>

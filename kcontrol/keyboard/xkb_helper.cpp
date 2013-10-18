@@ -18,12 +18,12 @@
 
 #include "xkb_helper.h"
 
-#include <QtCore/QFile>
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QTime>
-#include <QtGui/QX11Info>
+#include <QFile>
+#include <QDir>
+#include <QString>
+#include <QStringList>
+#include <QTime>
+#include <QX11Info>
 
 #include <kglobal.h>
 #include <kstandarddirs.h>

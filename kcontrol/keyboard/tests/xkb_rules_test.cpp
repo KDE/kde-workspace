@@ -17,13 +17,13 @@
  */
 
 #include <kdebug.h>
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <qtest_kde.h>
 
 #include "../xkb_rules.h"
 
-#include <QtXml/qdom.h>
-#include <QtXml/qxml.h>
+#include <qdom.h>
+#include <qxml.h>
 
 static const Rules::ExtrasFlag readExtras = Rules::NO_EXTRAS;
 

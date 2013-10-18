@@ -20,7 +20,7 @@
 #ifndef KCM_ADD_LAYOUT_DIALOG_H_
 #define KCM_ADD_LAYOUT_DIALOG_H_
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 #include "keyboard_config.h"
 #include "preview/keyboardpainter.h"

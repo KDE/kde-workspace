@@ -25,12 +25,12 @@
 #include <klocale.h>
 #include <kglobalsettings.h>
 
-#include <QtGui/QMessageBox>
-#include <QtGui/QWidget>
-#include <QtGui/QCheckBox>
-#include <QtGui/QPixmap>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QX11Info>
+#include <QMessageBox>
+#include <QWidget>
+#include <QCheckBox>
+#include <QPixmap>
+#include <QVBoxLayout>
+#include <QX11Info>
 
 #include "keyboard_config.h"
 #include "preview/keyboardpainter.h"

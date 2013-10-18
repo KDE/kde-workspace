@@ -22,7 +22,7 @@
 #include "keysymbols.h"
 #include "keyaliases.h"
 
-#include <QtGui/QApplication>
+#include <QApplication>
 
 class KeyboardLayout
 {
