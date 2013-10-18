@@ -57,7 +57,7 @@
 #include <kio/deletejob.h>
 #include <kio/job.h>
 #include <kio/jobuidelegate.h>
-#include <klocale.h>
+#include <KLocalizedString>
 #include <kmessagebox.h>
 #include <kmimetype.h>
 #include <kstandarddirs.h>
