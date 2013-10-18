@@ -70,7 +70,7 @@ K_PLUGIN_FACTORY(KcmDesktopPathsFactory, registerPlugin<DesktopPathConfig>();)
 //-----------------------------------------------------------------------------
 
 DesktopPathConfig::DesktopPathConfig(QWidget *parent, const QVariantList &)
-    : KCModule( KcmDesktopPaths::componentData(), parent )
+    : KCModule( parent )
 {
   QFormLayout *lay = new QFormLayout(this);
   lay->setMargin(0);
