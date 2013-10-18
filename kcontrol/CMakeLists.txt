@@ -15,9 +15,9 @@ set(libkxftconfig_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/fonts/kxftconfig.cpp )
 #    add_subdirectory( randr )
 # endif(X11_Xrandr_FOUND )
 
-# if(X11_Xkb_FOUND)
-#     add_subdirectory( keyboard )
-# endif(X11_Xkb_FOUND)
+if(X11_Xkb_FOUND)
+    add_subdirectory( keyboard )
+endif(X11_Xkb_FOUND)
 
 if(NOT WIN32)
 add_subdirectory( bell )
