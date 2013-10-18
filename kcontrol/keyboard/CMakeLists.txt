@@ -53,28 +53,28 @@ install( FILES keyboard.desktop DESTINATION ${SERVICES_INSTALL_DIR}/kded )
 
 
 ### plasma applet ###
-
-set( plasma_applet_keyboard_SRCS
-    keyboard_applet.cpp
-    flags.cpp
-    keyboard_config.cpp
-    xkb_rules.cpp
-    x11_helper.cpp
-    xkb_helper.cpp
-    layouts_menu.cpp
-)
-
-kde4_add_plugin(plasma_applet_keyboard ${plasma_applet_keyboard_SRCS})
-
-target_link_libraries(plasma_applet_keyboard
-     ${KDE4_PLASMA_LIBS} ${KDE4_KDEUI_LIBS} ${QT_QTXML_LIBRARY} ${X11_Xkbfile_LIB} ${X11_LIBRARIES}
-     ${text_paint_LIB}
-)
-
-install( TARGETS plasma_applet_keyboard DESTINATION ${PLUGIN_INSTALL_DIR} )
-install( FILES plasma_applet_keyboard.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
-
-
+#
+# set( plasma_applet_keyboard_SRCS
+#     keyboard_applet.cpp
+#     flags.cpp
+#     keyboard_config.cpp
+#     xkb_rules.cpp
+#     x11_helper.cpp
+#     xkb_helper.cpp
+#     layouts_menu.cpp
+# )
+#
+# kde4_add_plugin(plasma_applet_keyboard ${plasma_applet_keyboard_SRCS})
+#
+# target_link_libraries(plasma_applet_keyboard
+#      ${KDE4_PLASMA_LIBS} ${KDE4_KDEUI_LIBS} ${QT_QTXML_LIBRARY} ${X11_Xkbfile_LIB} ${X11_LIBRARIES}
+#      ${text_paint_LIB}
+# )
+#
+# install( TARGETS plasma_applet_keyboard DESTINATION ${PLUGIN_INSTALL_DIR} )
+# install( FILES plasma_applet_keyboard.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
+#
+#
 ### widget lib ###
 
 set( keyboard_layout_widget_SRCS
