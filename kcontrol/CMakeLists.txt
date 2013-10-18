@@ -41,7 +41,7 @@ add_subdirectory( keys )
 #add_subdirectory( smartcard )
 
 add_subdirectory( hardware )
-# add_subdirectory( desktoppaths )
+add_subdirectory( desktoppaths )
 
 #if( FREETYPE_FOUND )
 #    if( WIN32 OR FONTCONFIG_FOUND )
