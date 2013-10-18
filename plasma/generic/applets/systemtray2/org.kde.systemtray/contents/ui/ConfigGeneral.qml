@@ -1,5 +1,5 @@
 /*
- *  Copyright 2013 Marco Martin <mart@kde.org>
+ *  Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import QtQuick.Controls 1.0 as QtControls
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
 
@@ -31,8 +32,8 @@ Item {
     implicitWidth: mainColumn.implicitWidth
     implicitHeight: pageColumn.implicitHeight
 
-    property alias cfg_Test: testConfigField.text
-    property alias cfg_BoolTest: testBoolConfigField.checked
+//     property alias cfg_Test: testConfigField.text
+//     property alias cfg_BoolTest: testBoolConfigField.checked
 
     SystemTray.Host {
         id: host
@@ -41,27 +42,30 @@ Item {
     Column {
         id: pageColumn
         anchors.fill: parent
-        spacing: 4
-        Row {
-            QtControls.Label {
-                text: "Text Config value"
-            }
-            QtControls.TextField {
-                id: testConfigField
-            }
+        spacing: theme.defaultFont.pixelSize / 2
+        PlasmaExtras.Title {
+            text: i18n("SystemTray Settings")
         }
-        Row {
-            QtControls.Label {
-                text: "Bool Config value"
+        ListView {
+            model: host.categories
+            width: parent.width
+            height: theme.defaultFont.pixelSize * 10
+            delegate: Row {
+                height: implicitHeight
+                width: parent.width
+                QtControls.CheckBox {
+                    id: categoryCheck
+                    text: modelData
+                }
             }
-            QtControls.CheckBox {
-                id: testBoolConfigField
-            }
+
         }
         ListView {
             model: host.tasks
             width: parent.width
             height: 400
+
+            spacing: parent.spacing
 
             delegate: Row {
                 height: implicitHeight

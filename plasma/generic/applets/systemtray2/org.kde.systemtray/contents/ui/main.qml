@@ -98,34 +98,7 @@ Item {
 
         model: host.tasks
 
-        delegate: Component {
-            Item {
-                id: taskItemContainer
-                objectName: "taskItemContainer"
-                width: _h
-                height: _h
-                //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.4; }
-                PlasmaComponents.Label {
-                    anchors.fill: parent
-                    //text: "task"
-                }
-                PlasmaCore.IconItem {
-                    anchors.fill: parent
-                    //visible: source != ""
-                    source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
-                }
-                Component.onCompleted: {
-                    host.rootItem = gridView;
-                    //print(" taskitem: " + taskItem + " " + iconName);
-                    if ((taskItem != undefined)) {
-                        print( " TASK ITEM CHANGED"  + (taskItem != undefined));
-                        taskItem.parent = taskItemContainer;
-                        taskItem.anchors.fill = taskItem.parent;
-                    }
-                }
-            }
-
-        }
+        delegate: TaskDelegate {}
 
         //delegate: StatusNotifierItem {}
     }
