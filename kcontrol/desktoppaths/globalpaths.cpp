@@ -39,13 +39,13 @@
 #include "globalpaths.h"
 
 // Qt
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QFormLayout>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QApplication>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLabel>
+#include <QLayout>
+#include <QFormLayout>
+#include <QDesktopWidget>
+#include <QApplication>
 #include <QtDBus/QtDBus>
 
 // KDE
