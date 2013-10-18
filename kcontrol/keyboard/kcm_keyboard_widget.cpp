@@ -310,16 +310,16 @@ void KCMKeyboardWidget::initializeLayoutsUI()
 	uiWidget->layoutsTableView->setAcceptDrops(true);
 #endif
 
-	uiWidget->moveUpBtn->setIcon(KIcon("arrow-up"));
-    uiWidget->moveDownBtn->setIcon(KIcon("arrow-down"));
-	uiWidget->addLayoutBtn->setIcon(KIcon("list-add"));
-    uiWidget->removeLayoutBtn->setIcon(KIcon("list-remove"));
+	uiWidget->moveUpBtn->setIcon(QIcon::fromTheme("arrow-up"));
+    uiWidget->moveDownBtn->setIcon(QIcon::fromTheme("arrow-down"));
+	uiWidget->addLayoutBtn->setIcon(QIcon::fromTheme("list-add"));
+    uiWidget->removeLayoutBtn->setIcon(QIcon::fromTheme("list-remove"));
 
-    KIcon clearIcon = qApp->isLeftToRight() ? KIcon("edit-clear-locationbar-rtl") : KIcon("edit-clear-locationbar-ltr");
+    QIcon clearIcon = qApp->isLeftToRight() ? QIcon::fromTheme("edit-clear-locationbar-rtl") : QIcon::fromTheme("edit-clear-locationbar-ltr");
 	uiWidget->xkbGrpClearBtn->setIcon(clearIcon);
 	uiWidget->xkb3rdLevelClearBtn->setIcon(clearIcon);
 
-	KIcon configIcon = KIcon("configure");
+	QIcon configIcon = QIcon::fromTheme("configure");
 	uiWidget->xkbGrpShortcutBtn->setIcon(configIcon);
 	uiWidget->xkb3rdLevelShortcutBtn->setIcon(configIcon);
 
