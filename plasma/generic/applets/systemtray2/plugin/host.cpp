@@ -45,6 +45,7 @@ public:
     Host *q;
     QList<SystemTray::Task*> tasks;
     PlasmoidInterface* notificationsPlasmoid = 0;
+    QStringList categories;
 };
 
 Host::Host(QObject* parent) :
@@ -83,6 +84,7 @@ void Host::init()
     }
     ++s_managerUsage;
     emit tasksChanged();
+    emit categoriesChanged();
 }
 
 void Host::setRootItem(QQuickItem* rootItem)
@@ -91,6 +93,41 @@ void Host::setRootItem(QQuickItem* rootItem)
     s_manager->setRootItem(rootItem);
 }
 
+QQmlListProperty<SystemTray::Task> Host::hiddenTasks()
+{
+    QList<SystemTray::Task*> allTasks = s_manager->tasks();
+    QList<SystemTray::Task*> shownTasks;
+    foreach (SystemTray::Task *task, allTasks) {
+        if (!task->shown()) {
+            shownTasks.append(task);
+        }
+    }
+    QQmlListProperty<SystemTray::Task> l(this, shownTasks);
+    return l;
+}
+
+QQmlListProperty< Task > Host::shownTasks()
+{
+    QList<SystemTray::Task*> allTasks = s_manager->tasks();
+    QList<SystemTray::Task*> shownTasks;
+    foreach (SystemTray::Task *task, allTasks) {
+        if (task->shown()) {
+            shownTasks.append(task);
+        }
+    }
+    QQmlListProperty<SystemTray::Task> l(this, shownTasks);
+    return l;
+}
+
+QStringList Host::categories() const
+{
+    QList<SystemTray::Task*> allTasks = s_manager->tasks();
+    QStringList cats;
+    foreach (SystemTray::Task *task, allTasks) {
+        cats << QString(task->category());
+    }
+    return cats;
+}
 
 QQmlListProperty<SystemTray::Task> Host::tasks()
 {

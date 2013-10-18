@@ -40,6 +40,7 @@ public:
     Task::Status status;
     Task::Category category;
     QString name;
+    bool shown;
 };
 
 
@@ -97,6 +98,20 @@ QString Task::name() const
 {
     return d->name;
 }
+
+bool Task::shown() const
+{
+    return d->shown;
+}
+
+void Task::setShown(bool show)
+{
+    if (d->shown != show) {
+        d->shown = show;
+        emit shownChanged();
+    }
+}
+
 
 QQuickItem* Task::taskItem() const
 {

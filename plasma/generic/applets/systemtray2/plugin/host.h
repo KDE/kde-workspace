@@ -26,6 +26,7 @@
 
 #include <QQmlListProperty>
 #include <QObject>
+#include <qtextcodec.h>
 
 class QQuickItem;
 
@@ -43,6 +44,10 @@ class Host : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QQmlListProperty<SystemTray::Task> tasks READ tasks NOTIFY tasksChanged)
+    Q_PROPERTY(QQmlListProperty<SystemTray::Task> hiddenTasks READ hiddenTasks NOTIFY tasksChanged)
+    Q_PROPERTY(QQmlListProperty<SystemTray::Task> shownTasks READ shownTasks NOTIFY tasksChanged)
+    Q_PROPERTY(QStringList categories READ categories NOTIFY categoriesChanged)
+
     Q_PROPERTY(QQuickItem* rootItem WRITE setRootItem)
     //Q_PROPERTY(QQuickItem* notificationsPlasmoid READ notificationsPlasmoid)
 
@@ -56,11 +61,16 @@ public:
 
 public Q_SLOTS:
     QQmlListProperty<SystemTray::Task> tasks();
+    QQmlListProperty<SystemTray::Task> hiddenTasks();
+    QQmlListProperty<SystemTray::Task> shownTasks();
+    QStringList categories() const;
+
     void init();
 
 
 Q_SIGNALS:
     void tasksChanged();
+    void categoriesChanged();
 
 private:
     static SystemTray::Manager *s_manager;

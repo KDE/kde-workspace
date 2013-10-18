@@ -48,6 +48,7 @@ class Task : public QObject
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
     Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
+    Q_PROPERTY(bool shown READ shown NOTIFY shownChanged)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
 
@@ -104,6 +105,10 @@ public:
     QString name() const;
 
     void setName(QString name);
+
+    bool shown() const;
+
+    void setShown(bool show);
 
     /**
      * Returns a unique identifier for this task
@@ -164,6 +169,7 @@ Q_SIGNALS:
     //TODO: this should also state _what_ was changed so we can react more
     //      precisely (and therefore with greater efficiency)
     void changed(SystemTray::Task *task);
+    void shownChanged();
 
     void taskItemChanged();
     /**
