@@ -47,9 +47,9 @@ KCMKeyboard::KCMKeyboard(QWidget *parent, const QVariantList &args)
   : KCModule(parent/*, name*/)
 {
   KAboutData *about =
-		  new KAboutData("kcmkeyboard", 0, ki18n("KDE Keyboard Control Module"),
-                  0, KLocalizedString(), KAboutData::License_GPL,
-                  ki18n("(c) 2010 Andriy Rysin"));
+		  new KAboutData("kcmkeyboard", QString(), i18n("KDE Keyboard Control Module"),
+                  0, QString(), KAboutData::License_GPL,
+                  i18n("(c) 2010 Andriy Rysin"));
 
   setAboutData( about );
   setQuickHelp( i18n("<h1>Keyboard</h1> This control module can be used to configure keyboard"
