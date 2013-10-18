@@ -8,8 +8,6 @@ else( X11_Xinput_FOUND AND XiGetDevicePresenceNotifyEvent_EXISTS )
     MESSAGE(STATUS "_XiGetDevicePresenceNotifyEvent is not found, libXi version 1.2.0 or later is required to keep layouts with keyboard hotplugging")
 endif( X11_Xinput_FOUND AND XiGetDevicePresenceNotifyEvent_EXISTS )
 
-set ( text_paint_LIB ${KDE4_PLASMA_LIBS} )
-
 
 
 ### kded daemon ###
@@ -35,9 +33,22 @@ set( kded_keyboard_SRCS
 kde4_add_plugin(kded_keyboard ${kded_keyboard_SRCS})
 
 target_link_libraries(kded_keyboard
-    ${KDE4_KDECORE_LIBS}  ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES}
-    ${text_paint_LIB}
-    ${QT_QTXML_LIBRARY} ${X11_Xkbfile_LIB}
+    Qt5::Concurrent
+    Qt5::Widgets
+    Qt5::X11Extras
+    Qt5::Xml
+    KF5::KConfigCore
+    KF5::KCoreAddons
+    KF5::KDBusAddons
+    KF5::KI18n
+    KF5::KNotifications
+    KF5::KService
+    KF5::KWindowSystem
+    KF5::Plasma
+    KF5::XmlGui
+    ${KDE4Support_LIBRARIES}
+    ${X11_LIBRARIES}
+    ${X11_Xkbfile_LIB}
  )
 
 if(X11_XTest_FOUND)
@@ -89,9 +100,14 @@ set( keyboard_layout_widget_SRCS
 kde4_add_plugin(keyboard_layout_widget ${keyboard_layout_widget_SRCS})
 
 target_link_libraries(keyboard_layout_widget
-     ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES}
-     ${text_paint_LIB}
-     ${QT_QTXML_LIBRARY} ${X11_Xkbfile_LIB}
+    Qt5::X11Extras
+    Qt5::Xml
+    KF5::KI18n
+    KF5::KService
+    KF5::Plasma
+    ${KDE4Support_LIBRARIES}
+    ${X11_LIBRARIES}
+    ${X11_Xkbfile_LIB}
 )
 
 install( TARGETS keyboard_layout_widget DESTINATION ${PLUGIN_INSTALL_DIR} )
@@ -128,7 +144,20 @@ kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.u
 kde4_add_plugin(kcm_keyboard ${kcm_keyboard_PART_SRCS})
 
 target_link_libraries(kcm_keyboard
-    KF5::KIOCore KF5::KIOWidgets ${X11_Xkbfile_LIB} ${X11_LIBRARIES}
+    Qt5::Concurrent
+    Qt5::Widgets
+    Qt5::X11Extras
+    Qt5::Xml
+    KF5::KCMUtils
+    KF5::KI18n
+    KF5::KIOCore
+    KF5::KIOWidgets
+    KF5::KWindowSystem
+    KF5::Plasma
+    KF5::XmlGui
+    ${KDE4Support_LIBRARIES}
+    ${X11_Xkbfile_LIB}
+    ${X11_LIBRARIES}
     ${text_paint_LIB}
 )
 
