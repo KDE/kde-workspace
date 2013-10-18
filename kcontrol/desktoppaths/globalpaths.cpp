@@ -57,6 +57,7 @@
 #include <kio/deletejob.h>
 #include <kio/job.h>
 #include <kio/jobuidelegate.h>
+#include <kjobwidgets.h>
 #include <KLocalizedString>
 #include <kmessagebox.h>
 #include <kmimetype.h>
@@ -363,7 +364,7 @@ bool DesktopPathConfig::moveDir( const KUrl & src, const KUrl & dest, const QStr
             m_copyFromSrc = src;
             KIO::ListJob* job = KIO::listDir( src );
             job->setAutoDelete(false); // see <noautodelete> below
-            job->ui()->setWindow(this);
+            KJobWidgets::setWindow(job, this);
             job->ui()->setAutoErrorHandlingEnabled(true);
             connect(job, SIGNAL(entries(KIO::Job*,KIO::UDSEntryList)),
                     this, SLOT(slotEntries(KIO::Job*,KIO::UDSEntryList)));
@@ -378,7 +379,7 @@ bool DesktopPathConfig::moveDir( const KUrl & src, const KUrl & dest, const QStr
         {
             kDebug() << "Direct move from" << src << "to" << dest;
             KIO::Job * job = KIO::move( src, dest );
-            job->ui()->setWindow(this);
+            KJobWidgets::setWindow(job, this);
             connect(job, SIGNAL(result(KJob*)), this, SLOT(slotResult(KJob*)));
             job->exec();
         }
@@ -398,7 +399,7 @@ void DesktopPathConfig::slotEntries(KIO::Job*, const KIO::UDSEntryList& list)
         }
 
         KIO::Job * moveJob = KIO::move(file.url(), m_copyToDest);
-        moveJob->ui()->setWindow(this);
+        KJobWidgets::setWindow(moveJob, this);
         connect(moveJob, SIGNAL(result(KJob*)), this, SLOT(slotResult(KJob*)));
         moveJob->exec(); // sub-event loop here. <noautodelete>: the main job is not autodeleted because it would be deleted here
     }
