@@ -261,7 +261,7 @@ endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #
 # # core apps
 if(NOT WIN32)
-#    macro_optional_add_subdirectory( kcheckpass )
+   ecm_optional_add_subdirectory( kcheckpass )
   ecm_optional_add_subdirectory( kwin )
 #    macro_optional_add_subdirectory( ksmserver )
 #
