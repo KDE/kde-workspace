@@ -82,7 +82,7 @@ void LayoutTrayIcon::layoutMapChanged()
 {
 	flags->clearCache();
 
-	KMenu* menu = m_notifierItem->contextMenu();
+	QMenu* menu = m_notifierItem->contextMenu();
 	menu->clear();
 	QList<QAction*> actions = layoutsMenu->contextualActions();
 	menu->addActions(actions);
