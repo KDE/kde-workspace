@@ -61,13 +61,47 @@
 #include <KLocalizedString>
 #include <kmessagebox.h>
 #include <kmimetype.h>
-#include <kstandarddirs.h>
 #include <kurlrequester.h>
 #include <KPluginFactory>
 
 K_PLUGIN_FACTORY(KcmDesktopPathsFactory, registerPlugin<DesktopPathConfig>();)
 
 //-----------------------------------------------------------------------------
+
+static QUrl desktopLocation()
+{
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+}
+
+static QUrl autostartLocation()
+{
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QStringLiteral("/autostart"));
+}
+
+static QUrl documentsLocation()
+{
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+}
+
+static QUrl downloadLocation()
+{
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+}
+
+static QUrl moviesLocation()
+{
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::MoviesLocation));
+}
+
+static QUrl picturesLocation()
+{
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+}
+
+static QUrl musicLocation()
+{
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::MusicLocation));
+}
 
 DesktopPathConfig::DesktopPathConfig(QWidget *parent, const QVariantList &)
     : KCModule( parent )
@@ -129,26 +163,26 @@ KUrlRequester* DesktopPathConfig::addRow(QFormLayout *lay, const QString& label,
 void DesktopPathConfig::load()
 {
     // Desktop Paths
-    urDesktop->setUrl( KGlobalSettings::desktopPath() );
-    urAutostart->setUrl( KGlobalSettings::autostartPath() );
-    urDocument->setUrl( KGlobalSettings::documentPath() );
-    urDownload->setUrl( KGlobalSettings::downloadPath() );
-    urMovie->setUrl( KGlobalSettings::videosPath() );
-    urPicture->setUrl( KGlobalSettings::picturesPath() );
-    urMusic->setUrl( KGlobalSettings::musicPath() );
+    urDesktop->setUrl(desktopLocation());
+    urAutostart->setUrl(autostartLocation());
+    urDocument->setUrl(documentsLocation());
+    urDownload->setUrl(downloadLocation());
+    urMovie->setUrl(moviesLocation());
+    urPicture->setUrl(picturesLocation());
+    urMusic->setUrl(musicLocation());
     emit changed(false);
 }
 
 void DesktopPathConfig::defaults()
 {
     // Desktop Paths - keep defaults in sync with kglobalsettings.cpp
-    urDesktop->setUrl( QString(QDir::homePath() + "/Desktop") );
-    urAutostart->setUrl( QString(KGlobal::dirs()->localkdedir() + "Autostart/") );
-    urDocument->setUrl( QString(QDir::homePath() + "/Documents") );
-    urDownload->setUrl( QString(QDir::homePath() + "/Downloads") );
-    urMovie->setUrl( QString(QDir::homePath() + "/Movies") );
-    urPicture->setUrl( QString(QDir::homePath() + "/Pictures") );
-    urMusic->setUrl( QString(QDir::homePath() + "/Music") );
+    urDesktop->setUrl(QUrl::fromLocalFile(QDir::homePath() + QStringLiteral("/Desktop")));
+    urAutostart->setUrl(QUrl::fromLocalFile(QDir::homePath() + QStringLiteral("/.config/autostart")));
+    urDocument->setUrl(QUrl::fromLocalFile(QDir::homePath() + QStringLiteral("/Documents")));
+    urDownload->setUrl(QUrl::fromLocalFile(QDir::homePath() + QStringLiteral("/Downloads")));
+    urMovie->setUrl(QUrl::fromLocalFile(QDir::homePath() + QStringLiteral("/Movies")));
+    urPicture->setUrl(QUrl::fromLocalFile(QDir::homePath() + QStringLiteral("/Pictures")));
+    urMusic->setUrl(QUrl::fromLocalFile(QDir::homePath() + QStringLiteral("/Music")));
 }
 
 // the following method is copied from kdelibs/kdecore/config/kconfiggroup.cpp
@@ -198,18 +232,18 @@ static QString translatePath( QString path ) // krazy:exclude=passbyvalue
 
 void DesktopPathConfig::save()
 {
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
     KConfigGroup configGroup( config, "Paths" );
 
     bool pathChanged = false;
     bool autostartMoved = false;
 
-    KUrl desktopURL( KGlobalSettings::desktopPath() );
+    QUrl desktopURL(desktopLocation());
 
-    KUrl autostartURL( KGlobalSettings::autostartPath() );
-    KUrl newAutostartURL = urAutostart->url();
+    QUrl autostartURL(autostartLocation());
+    QUrl newAutostartURL = urAutostart->url();
 
-    if ( !urDesktop->url().equals( desktopURL, KUrl::CompareWithoutTrailingSlash ) )
+    if ( !urDesktop->url().matches( desktopURL, QUrl::StripTrailingSlash ) )
     {
         // Test which other paths were inside this one (as it is by default)
         // and for each, test where it should go.
@@ -226,29 +260,28 @@ void DesktopPathConfig::save()
             kDebug() << "Autostart is on the desktop";
 
             // Either the Autostart field wasn't changed (-> need to update it)
-            if ( newAutostartURL.equals( autostartURL, KUrl::CompareWithoutTrailingSlash ) )
+            if ( newAutostartURL.matches(autostartURL, QUrl::StripTrailingSlash) )
             {
                 // Hack. It could be in a subdir inside desktop. Hmmm... Argl.
-                urAutostart->setUrl( QString(urlDesktop + "Autostart/") );
+                urAutostart->setUrl(QUrl::fromLocalFile(urlDesktop + QStringLiteral("Autostart/")));
                 kDebug() << "Autostart is moved with the desktop";
                 autostartMoved = true;
             }
             // or it has been changed (->need to move it from here)
             else
             {
-                KUrl futureAutostartURL;
-                futureAutostartURL.setUrl( urlDesktop + "Autostart/" );
-                if ( newAutostartURL.equals( futureAutostartURL, KUrl::CompareWithoutTrailingSlash ) )
+                QUrl futureAutostartURL = QUrl::fromLocalFile(urlDesktop + QStringLiteral("Autostart/"));
+                if ( newAutostartURL.matches( futureAutostartURL, QUrl::StripTrailingSlash ) )
                     autostartMoved = true;
                 else
-                    autostartMoved = moveDir( KUrl( KGlobalSettings::autostartPath() ), KUrl( urAutostart->url() ), i18n("Autostart") );
+                    autostartMoved = moveDir( autostartLocation(), urAutostart->url(), i18n("Autostart") );
             }
         }
 
-        if ( moveDir( KUrl( KGlobalSettings::desktopPath() ), KUrl( urlDesktop ), i18n("Desktop") ) )
+        if ( moveDir( desktopLocation(), QUrl::fromLocalFile( urlDesktop ), i18n("Desktop") ) )
         {
             //save in XDG path
-            const QString userDirsFile(KGlobal::dirs()->localxdgconfdir() + QLatin1String("user-dirs.dirs"));
+            const QString userDirsFile(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/user-dirs.dirs"));
             KConfig xdgUserConf( userDirsFile, KConfig::SimpleConfig );
             KConfigGroup g( &xdgUserConf, "" );
             g.writeEntry( "XDG_DESKTOP_DIR", QString("\"" + translatePath( urlDesktop ) + "\"") );
@@ -256,10 +289,10 @@ void DesktopPathConfig::save()
         }
     }
 
-    if ( !newAutostartURL.equals( autostartURL, KUrl::CompareWithoutTrailingSlash ) )
+    if ( !newAutostartURL.matches( autostartURL, QUrl::StripTrailingSlash ) )
     {
         if (!autostartMoved)
-            autostartMoved = moveDir( KUrl( KGlobalSettings::autostartPath() ), KUrl( urAutostart->url() ), i18n("Autostart") );
+            autostartMoved = moveDir( autostartLocation(), urAutostart->url(), i18n("Autostart") );
         if (autostartMoved)
         {
             configGroup.writePathEntry( "Autostart", urAutostart->url().toLocalFile(), KConfigBase::Normal | KConfigBase::Global );
@@ -269,19 +302,19 @@ void DesktopPathConfig::save()
 
     config->sync();
 
-    if (xdgSavePath(urDocument, KGlobalSettings::documentPath(), "XDG_DOCUMENTS_DIR", i18n("Documents")))
+    if (xdgSavePath(urDocument, documentsLocation(), "XDG_DOCUMENTS_DIR", i18n("Documents")))
         pathChanged = true;
 
-    if (xdgSavePath(urDownload, KGlobalSettings::downloadPath(), "XDG_DOWNLOAD_DIR", i18n("Downloads")))
+    if (xdgSavePath(urDownload, downloadLocation(), "XDG_DOWNLOAD_DIR", i18n("Downloads")))
         pathChanged = true;
 
-    if (xdgSavePath(urMovie, KGlobalSettings::videosPath(), "XDG_VIDEOS_DIR", i18n("Movies")))
+    if (xdgSavePath(urMovie, moviesLocation(), "XDG_VIDEOS_DIR", i18n("Movies")))
         pathChanged = true;
 
-    if (xdgSavePath(urPicture, KGlobalSettings::picturesPath(), "XDG_PICTURES_DIR", i18n("Pictures")))
+    if (xdgSavePath(urPicture, picturesLocation(), "XDG_PICTURES_DIR", i18n("Pictures")))
         pathChanged = true;
 
-    if (xdgSavePath(urMusic, KGlobalSettings::musicPath(), "XDG_MUSIC_DIR", i18n("Music")))
+    if (xdgSavePath(urMusic, musicLocation(), "XDG_MUSIC_DIR", i18n("Music")))
         pathChanged = true;
 
     if (pathChanged) {
@@ -290,18 +323,18 @@ void DesktopPathConfig::save()
     }
 }
 
-bool DesktopPathConfig::xdgSavePath(KUrlRequester* ur, const KUrl& currentUrl, const char* xdgKey, const QString& type)
+bool DesktopPathConfig::xdgSavePath(KUrlRequester* ur, const QUrl& currentUrl, const char* xdgKey, const QString& type)
 {
-    KUrl newUrl = ur->url();
+    QUrl newUrl = ur->url();
     //url might be empty, use QDir::homePath (the default for xdg) then
     if (!newUrl.isValid()) {
-        newUrl = KUrl(QDir::homePath());
+        newUrl = QUrl(QUrl::fromLocalFile(QDir::homePath()));
     }
-    if (!newUrl.equals(currentUrl, KUrl::CompareWithoutTrailingSlash)) {
+    if (!newUrl.matches(currentUrl, QUrl::StripTrailingSlash)) {
         const QString path = newUrl.toLocalFile();
         if (!QDir(path).exists()) {
             // Check permissions
-            if (KStandardDirs::makeDir(path)) {
+            if (QDir().mkpath(path)) {
                 QDir().rmdir(path); // rmdir again, so that we get a fast rename
             } else {
                 KMessageBox::sorry(this, KIO::buildErrorString(KIO::ERR_COULD_NOT_MKDIR, path));
@@ -311,7 +344,7 @@ bool DesktopPathConfig::xdgSavePath(KUrlRequester* ur, const KUrl& currentUrl, c
         }
         if (moveDir(currentUrl, newUrl, type)) {
             //save in XDG user-dirs.dirs config file, this is where KGlobalSettings/QDesktopServices reads from.
-            const QString userDirsFile(KGlobal::dirs()->localxdgconfdir() + QLatin1String("user-dirs.dirs"));
+            const QString userDirsFile(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/user-dirs.dirs"));
             KConfig xdgUserConf(userDirsFile, KConfig::SimpleConfig);
             KConfigGroup g(&xdgUserConf, "");
             g.writeEntry(xdgKey, QString("\"" + translatePath(path) + "\""));
@@ -321,7 +354,7 @@ bool DesktopPathConfig::xdgSavePath(KUrlRequester* ur, const KUrl& currentUrl, c
     return false;
 }
 
-bool DesktopPathConfig::moveDir( const KUrl & src, const KUrl & dest, const QString & type )
+bool DesktopPathConfig::moveDir( const QUrl & src, const QUrl & dest, const QString & type )
 {
     if (!src.isLocalFile() || !dest.isLocalFile())
         return true;

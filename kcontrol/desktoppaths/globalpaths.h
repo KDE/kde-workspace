@@ -33,7 +33,7 @@
 #include <kcmodule.h>
 #include <kio/global.h>
 #include <kio/udsentry.h>
-#include <kurl.h>
+#include <QUrl>
 
 class QFormLayout;
 class KJob;
@@ -60,7 +60,7 @@ private Q_SLOTS:
 
 private:
     KUrlRequester* addRow(QFormLayout *lay, const QString& label, const QString& whatsThis);
-    bool xdgSavePath(KUrlRequester* ur, const KUrl& currentUrl, const char* xdgKey, const QString& type);
+    bool xdgSavePath(KUrlRequester* ur, const QUrl& currentUrl, const char* xdgKey, const QString& type);
 
     // Desktop Paths
     KUrlRequester *urDesktop;
@@ -71,10 +71,10 @@ private:
     KUrlRequester *urPicture;
     KUrlRequester *urMusic;
 
-    bool moveDir( const KUrl & src, const KUrl & dest, const QString & type );
+    bool moveDir( const QUrl & src, const QUrl & dest, const QString & type );
     bool m_ok;
-    KUrl m_copyToDest; // used when the destination directory already exists
-    KUrl m_copyFromSrc;
+    QUrl m_copyToDest; // used when the destination directory already exists
+    QUrl m_copyFromSrc;
 
 private Q_SLOTS:
     void slotResult( KJob * job );
