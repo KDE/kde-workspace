@@ -95,7 +95,7 @@ void FreeSpaceNotifier::checkFreeDiskSpace()
             connect( notification, SIGNAL(action3Activated()), SLOT(showConfiguration()) );
             connect( notification, SIGNAL(closed()),           SLOT(cleanupNotification()) );
 
-            notification->setComponentData( KComponentData( "freespacenotifier" ) );
+            notification->setComponentName( QStringLiteral( "freespacenotifier" ) );
             notification->sendEvent();
         }
     }
