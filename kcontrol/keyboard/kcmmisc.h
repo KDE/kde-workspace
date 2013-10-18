@@ -59,7 +59,7 @@ public:
 
   QString quickHelp() const;
 
-private slots:
+private Q_SLOTS:
   void changed();
 
   void delaySliderChanged (int value);
