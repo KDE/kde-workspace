@@ -64,6 +64,7 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, QQuickItem *parent)
       m_busy(false),
       m_expanded(false),
       m_plugin(plugin),
+      m_pluginInfo(KPluginInfo()),
       m_isUserConfiguring(false)
 {
     qmlRegisterType<PlasmoidInterface>();
@@ -106,6 +107,12 @@ PlasmoidInterface::~PlasmoidInterface()
 {
     qDebug() << "!!! Plasmoid is gone";
 }
+
+KPluginInfo PlasmoidInterface::pluginInfo() const
+{
+    return m_pluginInfo;
+}
+
 
 void PlasmoidInterface::init()
 {
@@ -158,6 +165,7 @@ void PlasmoidInterface::init()
         m_qmlObject->completeInitialization(initialProperties);
         return;
     }
+    m_pluginInfo = i;
     qDebug() << (i18n("Showing info for package: %1", m_plugin));
     qDebug() << (i18n("      Name : %1", i.name()));
     qDebug() << (i18n("   Comment : %1", i.comment()));

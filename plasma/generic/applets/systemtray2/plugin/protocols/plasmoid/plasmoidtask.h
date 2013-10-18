@@ -76,7 +76,7 @@ private Q_SLOTS:
 
 private:
     QString m_taskId;
-    QQuickItem* m_taskItem;
+    PlasmoidInterface* m_taskItem;
     QQuickItem* m_rootItem;
     PlasmoidInterface* m_qmlObject;
     QIcon m_icon;

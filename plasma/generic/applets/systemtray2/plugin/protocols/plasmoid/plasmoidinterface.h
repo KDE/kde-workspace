@@ -165,6 +165,8 @@ public:
     PlasmoidInterface(const QString &plugin, QQuickItem *parent = 0);
     ~PlasmoidInterface();
 
+    KPluginInfo pluginInfo() const;
+
 // //API not intended for the QML part
     QmlObject *qmlObject();
 //
@@ -354,6 +356,7 @@ private:
     QString m_icon;
     QString m_title;
     QString m_plugin;
+    KPluginInfo m_pluginInfo;
     bool m_isUserConfiguring;
     friend class ContainmentInterface;
 };

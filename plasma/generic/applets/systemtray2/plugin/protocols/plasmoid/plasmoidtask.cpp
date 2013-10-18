@@ -25,6 +25,8 @@
 #include <QtCore/QMetaEnum>
 #include <kdeclarative/qmlobject.h>
 
+#include <KPluginInfo>
+
 #include <QDebug>
 
 namespace SystemTray
@@ -44,6 +46,8 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
         m_valid = false;
         return;
     }
+    KPluginInfo info = m_taskItem->pluginInfo();
+    setName(info.name());
 }
 
 PlasmoidTask::~PlasmoidTask()

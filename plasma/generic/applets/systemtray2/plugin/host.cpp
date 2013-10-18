@@ -123,12 +123,36 @@ QStringList Host::categories() const
 {
     QList<SystemTray::Task*> allTasks = s_manager->tasks();
     QStringList cats;
+    QList<SystemTray::Task::Category> cnt;
     foreach (SystemTray::Task *task, allTasks) {
-        cats << QString(task->category());
+        const SystemTray::Task::Category c = task->category();
+        if (cnt.contains(c)) {
+            continue;
+        }
+        cnt.append(c);
+
+        if (c == SystemTray::Task::UnknownCategory) {
+            cats.append(i18n("Unknown Category"));
+        } else if (c == SystemTray::Task::ApplicationStatus) {
+            cats.append(i18n("Application Status"));
+        } else if (c == SystemTray::Task::Communications) {
+            cats.append(i18n("Communications"));
+        } else if (c == SystemTray::Task::SystemServices) {
+            cats.append(i18n("System Services"));
+        } else if (c == SystemTray::Task::Hardware) {
+            cats.append(i18n("Hardware"));
+        }
     }
+    qDebug() << "ST " << cats;
     return cats;
 }
-
+/*
+        UnknownCategory = 0,
+        ApplicationStatus = 1,
+        Communications = 2,
+        SystemServices = 3,
+        Hardware = 4
+*/
 QQmlListProperty<SystemTray::Task> Host::tasks()
 {
     if (s_manager) {
