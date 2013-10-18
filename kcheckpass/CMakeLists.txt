@@ -16,12 +16,12 @@ set(kcheckpass_SRCS
 kde4_add_executable(kcheckpass NOGUI ${kcheckpass_SRCS})
 
 if (KDE4_ENABLE_FPIE)
-	macro_add_compile_flags(kcheckpass ${KDE4_CXX_FPIE_FLAGS})
-	macro_add_link_flags(kcheckpass ${KDE4_PIE_LDFLAGS})
+    set_property(TARGET kcheckpass APPEND_STRING PROPERTY COMPILE_FLAGS " ${KDE4_CXX_FPIE_FLAGS}")
+    set_property(TARGET kcheckpass APPEND_STRING PROPERTY LINK_FLAGS " ${KDE4_PIE_LDFLAGS}")
 endif (KDE4_ENABLE_FPIE)
 
-macro_add_compile_flags(kcheckpass -U_REENTRANT)
-target_link_libraries(kcheckpass ${KDE4_KDEFAKES_LIBS} ${UNIXAUTH_LIBRARIES} ${SOCKET_LIBRARIES})
+set_property(TARGET kcheckpass APPEND_STRING PROPERTY COMPILE_FLAGS " -U_REENTRANT")
+target_link_libraries(kcheckpass ${UNIXAUTH_LIBRARIES} ${SOCKET_LIBRARIES})
 install(TARGETS kcheckpass DESTINATION ${LIBEXEC_INSTALL_DIR})
 install(CODE "
     set(KCP_PATH \"\$ENV{DESTDIR}${LIBEXEC_INSTALL_DIR}/kcheckpass\")
