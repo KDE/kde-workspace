@@ -280,6 +280,7 @@ bool X11Helper::getGroupNames(Display* display, XkbConfig* xkbConfig, FetchType 
 	return true;
 }
 
+#if 0
 XEventNotifier::XEventNotifier(QWidget* parent):
 		QWidget(parent),
 		xkbOpcode(-1)
@@ -370,6 +371,7 @@ int XEventNotifier::registerForXkbEvents(Display* display)
     }
     return true;
 }
+#endif
 
 
 static const char* LAYOUT_VARIANT_SEPARATOR_PREFIX = "(";

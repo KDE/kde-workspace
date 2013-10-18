@@ -29,6 +29,7 @@
 class QPushButton;
 class KeyboardConfig;
 class LayoutsMenu;
+class XEventNotifier;
 
 /**
  * Note: does not listen to configuration changes as currently we only use it in screen lock dialog
@@ -50,7 +51,7 @@ private:
 	void init();
 	void destroy();
 
-	XEventNotifier xEventNotifier;
+	XEventNotifier* xEventNotifier;
 	QPushButton* widget;
 	KeyboardConfig* keyboardConfig;
 	Flags* flags;

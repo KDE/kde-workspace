@@ -26,7 +26,8 @@
 #include <QWidget>
 #include <QX11Info>
 
-
+#warning XEventNotifier needs porting to QAbstractNativeEventFilter
+#if 0
 class XEventNotifier : public QWidget {
 	Q_OBJECT
 
@@ -54,6 +55,7 @@ private:
 
 	int xkbOpcode;
 };
+#endif
 
 struct XkbConfig {
 	QString keyboardModel;
