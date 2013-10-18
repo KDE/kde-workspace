@@ -1,6 +1,5 @@
 set(kcm_desktoppaths_PART_SRCS
    globalpaths.cpp
-   kcmdesktoppaths.cpp
 )
 
 kde4_add_plugin(kcm_desktoppaths ${kcm_desktoppaths_PART_SRCS})

@@ -6,7 +6,6 @@ Icon=system-file-manager
 Exec=kcmshell5 desktoppath
 
 X-KDE-Library=kcm_desktoppaths
-X-KDE-PluginKeyword=dpath
 X-KDE-ParentApp=kcontrol
 X-KDE-System-Settings-Parent-Category=account-details
 X-KDE-Weight=60

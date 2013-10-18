@@ -62,8 +62,9 @@
 #include <kmimetype.h>
 #include <kstandarddirs.h>
 #include <kurlrequester.h>
+#include <KPluginFactory>
 
-#include "kcmdesktoppaths.h"
+K_PLUGIN_FACTORY(KcmDesktopPathsFactory, registerPlugin<DesktopPathConfig>();)
 
 //-----------------------------------------------------------------------------
 
